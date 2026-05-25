@@ -17,6 +17,8 @@ const GOOGLE_IDENTITY_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
 
 const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
+const WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
+const WEB_SERVER_CODE_POPUP_POLL_INTERVAL_MS = 250;
 
 const GOOGLE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_TASKS_SCOPE] as const;
 const GOOGLE_SCOPE_PARAM = `openid email profile ${GOOGLE_SCOPES.join(" ")}`;
@@ -44,12 +46,6 @@ type GoogleTokenResponse = {
   token_type?: string;
 };
 
-type GoogleCodeResponse = {
-  code?: string;
-  error?: string;
-  error_description?: string;
-};
-
 type GoogleTokenClientOverrideConfig = {
   include_granted_scopes?: boolean;
   login_hint?: string;
@@ -67,31 +63,11 @@ type GoogleTokenClientConfig = GoogleTokenClientOverrideConfig & {
   error_callback?: (error: { type?: string; message?: string }) => void;
 };
 
-type GoogleCodeClientOverrideConfig = {
-  hint?: string;
-  prompt?: string;
-  scope?: string;
-};
-
-type GoogleCodeClient = {
-  requestCode: (overrideConfig?: GoogleCodeClientOverrideConfig) => void;
-};
-
-type GoogleCodeClientConfig = GoogleCodeClientOverrideConfig & {
-  redirect_uri?: string;
-  callback: (response: GoogleCodeResponse) => void;
-  client_id: string;
-  error_callback?: (error: { type?: string; message?: string }) => void;
-  include_granted_scopes?: boolean;
-  ux_mode: "popup";
-};
-
 declare global {
   interface Window {
     google?: {
       accounts?: {
         oauth2?: {
-          initCodeClient: (config: GoogleCodeClientConfig) => GoogleCodeClient;
           initTokenClient: (config: GoogleTokenClientConfig) => GoogleTokenClient;
         };
       };
@@ -230,11 +206,15 @@ const buildAuthorizeUrl = ({
   clientId,
   redirectUri,
   codeChallenge,
+  loginHint,
+  prompt = "consent select_account",
   state,
 }: {
   clientId: string;
   redirectUri: string;
-  codeChallenge: string;
+  codeChallenge?: string;
+  loginHint?: string;
+  prompt?: string;
   state: string;
 }) => {
   const params = new URLSearchParams({
@@ -244,11 +224,18 @@ const buildAuthorizeUrl = ({
     scope: GOOGLE_SCOPE_PARAM,
     state,
     include_granted_scopes: "true",
-    code_challenge: codeChallenge,
-    code_challenge_method: "S256",
     access_type: "offline",
-    prompt: "consent select_account",
+    prompt,
   });
+
+  if (codeChallenge) {
+    params.set("code_challenge", codeChallenge);
+    params.set("code_challenge_method", "S256");
+  }
+
+  if (loginHint) {
+    params.set("login_hint", loginHint);
+  }
 
   return `${GOOGLE_OAUTH_AUTHORIZE_ENDPOINT}?${params.toString()}`;
 };
@@ -299,6 +286,101 @@ const waitForDesktopCode = (state: string, redirectUri: string) => {
     });
   });
 };
+
+const getCenteredPopupFeatures = (width: number, height: number): string => {
+  const left = Math.round(window.screenX + Math.max(0, (window.outerWidth - width) / 2));
+  const top = Math.round(window.screenY + Math.max(0, (window.outerHeight - height) / 2));
+
+  return [
+    "popup=yes",
+    `width=${width}`,
+    `height=${height}`,
+    `left=${left}`,
+    `top=${top}`,
+    "noopener=no",
+    "noreferrer=no",
+  ].join(",");
+};
+
+const waitForWebPopupCode = (
+  popup: Window,
+  state: string,
+  redirectUri: string,
+): Promise<string> => new Promise((resolve, reject) => {
+  const expected = new URL(redirectUri);
+  let settled = false;
+  let pollTimer: number | undefined;
+
+  const cleanup = (): void => {
+    if (pollTimer !== undefined) window.clearInterval(pollTimer);
+    window.clearTimeout(timeoutTimer);
+
+    try {
+      if (!popup.closed) popup.close();
+    } catch {
+      // Cross-Origin-Opener-Policy により closed を読めない場合がある。
+    }
+  };
+
+  const finish = (callback: () => void): void => {
+    if (settled) return;
+    settled = true;
+    cleanup();
+    callback();
+  };
+
+  const timeoutTimer = window.setTimeout(() => {
+    finish(() => reject(new Error("OAuth timeout")));
+  }, WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS);
+
+  const poll = (): void => {
+    try {
+      if (popup.closed) {
+        finish(() => reject(new Error("Google OAuth popup was closed")));
+        return;
+      }
+    } catch {
+      // OAuth 中の cross-origin popup では closed/location を読めないことがある。
+    }
+
+    let url: URL;
+
+    try {
+      url = new URL(popup.location.href);
+    } catch {
+      return;
+    }
+
+    if (url.origin !== expected.origin || url.pathname !== expected.pathname) {
+      return;
+    }
+
+    const returnedState = url.searchParams.get("state");
+
+    if (returnedState !== state) {
+      return;
+    }
+
+    const error = url.searchParams.get("error");
+
+    if (error) {
+      finish(() => reject(new Error(url.searchParams.get("error_description") ?? error)));
+      return;
+    }
+
+    const code = url.searchParams.get("code");
+
+    if (!code) {
+      finish(() => reject(new Error("No authorization code")));
+      return;
+    }
+
+    finish(() => resolve(code));
+  };
+
+  pollTimer = window.setInterval(poll, WEB_SERVER_CODE_POPUP_POLL_INTERVAL_MS);
+  poll();
+});
 
 const requestDesktopToken = async () => {
   const clientId = getClientId();
@@ -424,12 +506,17 @@ const fetchGoogleUserInfo = async (accessToken: string) => {
 
 export const requestGoogleCalendarServerCode = async (
   auth: Auth,
-): Promise<{ code: string; redirectUri: string }> => {
-  await loadGoogleIdentityServices();
+): Promise<{ code: string; codeVerifier: string; redirectUri: string }> => {
+  if (typeof window === "undefined") {
+    throw new Error("Google OAuth popup is not available");
+  }
 
   const clientId = getWebClientId();
-  const hint = auth.currentUser?.email ?? readEmail() ?? undefined;
+  const loginHint = auth.currentUser?.email ?? readEmail() ?? undefined;
   const redirectUri = window.location.origin;
+  const state = randomBase64Url(16);
+  const codeVerifier = randomBase64Url(48);
+  const codeChallenge = await createCodeChallenge(codeVerifier);
 
   logOAuthConfig("web-code", {
     clientId,
@@ -437,40 +524,28 @@ export const requestGoogleCalendarServerCode = async (
     redirectUri,
   });
 
-  const response = await new Promise<GoogleCodeResponse>((resolve, reject) => {
-    const client = window.google!.accounts!.oauth2!.initCodeClient({
-      callback: resolve,
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      hint,
-      include_granted_scopes: true,
-      prompt: "consent select_account",
-      scope: GOOGLE_SCOPE_PARAM,
-      ux_mode: "popup",
-      error_callback: (error) => {
-        reject(new Error(error.message ?? error.type ?? "Google OAuth failed"));
-      },
-    });
-
-    client.requestCode({
-      hint,
-      prompt: "consent select_account",
-      scope: GOOGLE_SCOPE_PARAM,
-    });
+  const url = buildAuthorizeUrl({
+    clientId,
+    redirectUri,
+    codeChallenge,
+    loginHint,
+    state,
   });
+  const popup = window.open(url, "flashcard-master-google-oauth", getCenteredPopupFeatures(500, 720));
 
-  if (response.error) {
-    throw new Error(
-      response.error_description ?? response.error ?? "Google OAuth failed",
-    );
+  if (!popup) {
+    throw new Error("Google OAuth popup could not be opened");
   }
 
-  if (!response.code) {
-    throw new Error("No authorization code");
+  try {
+    popup.focus();
+  } catch {
+    // popup focus はブラウザ設定で失敗しても認可フロー自体は続行できる。
   }
 
   return {
-    code: response.code,
+    code: await waitForWebPopupCode(popup, state, redirectUri),
+    codeVerifier,
     redirectUri,
   };
 };
