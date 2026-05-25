@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { exportMfDeckBytes } from "@/features/deckFile/application/exportMfDeck";
 import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
-import { MfDeckExportError } from "@/features/deckFile/domain/mfDeckTypes";
+import { MfDeckExportError } from "@/features/deckFile/domain/mfDeck.types";
 import { downloadBytesAsMfDeck } from "@/features/deckFile/infra/web/downloadMfDeck";
 
 import { Button } from "@/components/ui/button";
