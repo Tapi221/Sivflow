@@ -1,8 +1,7 @@
 import { deleteDoc, doc } from "firebase/firestore";
 
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";
-import type {IntegrityIssue,
-  IntegrityReport,} from "@/services/dataIntegrityTypes";
+import type { IntegrityIssue, IntegrityReport } from "@/services/dataIntegrity.types";
 import { cardDocPathSegments } from "@/services/firestorePaths";
 import { getLocalDb } from "@/services/localDB";
 import type { SyncError } from "@/types";
