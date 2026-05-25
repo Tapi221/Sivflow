@@ -6,7 +6,7 @@ type TaskStatusDotProps = {
   className?: string;
 };
 
-export const TASK_STATUS_DOT_CLASS_NAME = "h-3.5 w-3.5 shrink-0";
+export const TASK_STATUS_DOT_CLASS_NAME = "h-4 w-4 shrink-0";
 
 export const TaskStatusDot = ({ color, className }: TaskStatusDotProps) => {
   return (
