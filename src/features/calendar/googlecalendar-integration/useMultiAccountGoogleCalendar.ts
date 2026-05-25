@@ -78,8 +78,10 @@ const useServerStoredTokens = isServerStoredGoogleOAuthEnabled();
 const CALENDAR_LIST_FOCUS_REFRESH_THROTTLE_MS = 10_000;
 export const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
 
+type GoogleOAuthCooldownReason = GoogleOAuthCallableErrorReason | "auto_recovery_pending" | "internal";
+
 type GoogleOAuthCooldownEntry = {
-  reason: GoogleOAuthCallableErrorReason;
+  reason: GoogleOAuthCooldownReason;
   message: string;
   until: number;
 };
@@ -198,12 +200,16 @@ export const toGoogleCalendarAuthErrorMessage = (error: unknown): string => {
 };
 
 export const shouldCooldownGoogleOAuthError = (error: unknown): boolean =>
-  isGoogleOAuthDeterministicErrorReason(getGoogleOAuthErrorReason(error));
+  isGoogleOAuthDeterministicErrorReason(getGoogleOAuthErrorReason(error)) ||
+  normalizeErrorCode(getErrorCode(error)) === "auto-recovery-pending" ||
+  normalizeErrorCode(getErrorCode(error)) === "internal";
 
 export const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry): Error => {
   const error = new Error(entry.message);
   (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason }).code = "google-oauth-deterministic-cooldown";
-  (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason }).googleOAuthReason = entry.reason;
+  if (entry.reason !== "auto_recovery_pending" && entry.reason !== "internal") {
+    (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason }).googleOAuthReason = entry.reason;
+  }
   return error;
 };
 
@@ -567,7 +573,10 @@ export const useMultiAccountGoogleCalendar = () => {
       oauthCooldownByAccountRef.current.delete(accountId);
       return result.accessToken;
     })().catch((error: unknown) => {
-      const reason = getGoogleOAuthErrorReason(error);
+      const reason =
+        getGoogleOAuthErrorReason(error) ??
+        (normalizeErrorCode(getErrorCode(error)) === "internal" ? "internal" : undefined) ??
+        (normalizeErrorCode(getErrorCode(error)) === "auto-recovery-pending" ? "auto_recovery_pending" : undefined);
 
       if (reason && shouldCooldownGoogleOAuthError(error)) {
         oauthCooldownByAccountRef.current.set(accountId, {
