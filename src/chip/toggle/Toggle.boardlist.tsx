@@ -17,7 +17,7 @@ const TOGGLE_MOTION_TRANSITION: Transition = {
 };
 const TOGGLE_ACTIVE_ICON_CLASS_NAME = "text-[#8c8c8c]";
 const TOGGLE_INACTIVE_ICON_CLASS_NAME = "text-[#b7b7b7]";
-const TOGGLE_ICON_STROKE_WIDTH = 1.65;
+const TOGGLE_ICON_STROKE_WIDTH = 1.5;
 
 const toggleItems = [
   {
