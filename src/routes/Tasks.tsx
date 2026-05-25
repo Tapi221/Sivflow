@@ -1,11 +1,7 @@
-import { ScheduleScreen } from "@/screens/ScheduleScreen.desktop";
+import { Navigate } from "react-router-dom";
 
 const Tasks = () => {
-  return (
-    <div className="h-full min-h-0 w-full">
-      <ScheduleScreen initialActiveMode="task" />
-    </div>
-  );
+  return <Navigate to="/schedule?mode=task" replace />;
 };
 
 export default Tasks;
