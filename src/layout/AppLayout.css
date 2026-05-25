@@ -190,6 +190,21 @@
   grid-row: 1;
 }
 
+.app-layout-route--schedule .workspace-shell {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.app-layout-route--schedule .workspace-shell__tabs,
+.app-layout-route--schedule .workspace-breadcrumb-bar {
+  display: none;
+}
+
+.app-layout-route--schedule .workspace-shell__main,
+.app-layout-route--schedule .app-layout__main {
+  grid-row: 1;
+  overflow: clip;
+}
+
 .workspace-breadcrumb-bar {
   display: flex;
   align-items: center;
