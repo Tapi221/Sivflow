@@ -6,12 +6,14 @@ import { createCalendarScrollBuffer, getCalendarScrollBufferExtendUnits } from "
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "month") return addMonths(current, 1);
   if (viewMode === "week") return addDays(current, 7);
+  if (viewMode === "threeDays") return addDays(current, 3);
   return addDays(current, 1);
 };
 
 const getPreviousDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "month") return subMonths(current, 1);
   if (viewMode === "week") return subDays(current, 7);
+  if (viewMode === "threeDays") return subDays(current, 3);
   return subDays(current, 1);
 };
 
