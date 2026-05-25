@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { TaskPriorityBadge } from "@/chip/budge/TaskPriorityBadge";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { TrashIcon } from "@/components/icons/icons.card";
@@ -12,6 +12,7 @@ type TaskListViewProps = {
   onRenameTask: (taskId: string, title: string) => void;
   onChangeTaskDueDate?: (taskId: string, dueDate: string | null) => void;
   onDeleteTask: (taskId: string) => void;
+  onTaskContextMenu?: (event: ReactMouseEvent<HTMLDivElement>, task: Task) => void;
 };
 
 type TaskGroup = {
@@ -45,6 +46,7 @@ export const TaskListView = ({
   onRenameTask,
   onChangeTaskDueDate,
   onDeleteTask,
+  onTaskContextMenu,
 }: TaskListViewProps) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
@@ -155,6 +157,7 @@ export const TaskListView = ({
                     <div
                       key={task.id}
                       className={`group/row grid grid-cols-[32px_minmax(260px,1fr)_96px_160px_150px_40px] border-b border-[#f5f5f5] transition-colors hover:bg-[#fafafa] ${isDone ? "opacity-50" : ""}`}
+                      onContextMenu={onTaskContextMenu ? (event) => onTaskContextMenu(event, task) : undefined}
                     >
                       <div className="flex items-center justify-center">
                         <button
