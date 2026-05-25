@@ -1,9 +1,4 @@
-import React, {useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,} from "react";
+import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { CARD_ROW_PX } from "@constants/shared/flashcard";
@@ -12,15 +7,10 @@ import { hasRuledLine } from "@/components/card/blocks/core/blockDisplayPolicy";
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
 import { BlockToolbar } from "@/components/card/blocks/core/BlockToolbar";
-import {createEditorBlock,
-  isEditorInsertableBlockType,} from "@/components/card/blocks/editor/blockEditorInsertPolicy";
-import {type CardBlockLayoutReplaceBlock,
-  type EditorProps,} from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
+import { createEditorBlock, isEditorInsertableBlockType } from "@/components/card/blocks/editor/blockEditorInsertPolicy";
+import { type CardBlockLayoutReplaceBlock, type EditorProps } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
 import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
-import {getNormalizedGridOffsetRows,
-  getNormalizedRowOffset,
-  isGridOffsetType,
-  isRowPositionableType,} from "@/components/card/frame/rowOffset";
+import { getNormalizedGridOffsetRows, getNormalizedRowOffset, isGridOffsetType, isRowPositionableType } from "@/components/card/frame/rowOffset";
 
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
