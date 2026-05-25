@@ -390,15 +390,13 @@ export const CalendarSidebar = ({
 
   return (
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-5 pl-0 pr-3 pt-2 text-[#2f2f2f]">
-      {!isTaskMode && (
-        <MiniCalendarSection
-          monthDate={monthDate}
-          selectedDate={selectedDate}
-          onSelectDate={handleMiniCalendarSelectDate}
-          onPreviousMonth={handleMiniCalendarPreviousMonth}
-          onNextMonth={handleMiniCalendarNextMonth}
-        />
-      )}
+      <MiniCalendarSection
+        monthDate={monthDate}
+        selectedDate={selectedDate}
+        onSelectDate={handleMiniCalendarSelectDate}
+        onPreviousMonth={handleMiniCalendarPreviousMonth}
+        onNextMonth={handleMiniCalendarNextMonth}
+      />
 
       <nav className="mt-2 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto pb-2">
         <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
