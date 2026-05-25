@@ -148,7 +148,7 @@ export const TaskTagStrip = () => {
           </button>
 
           <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex w-max items-center gap-2 px-1 py-0.5">
+            <div className="flex w-max items-center gap-1.5 px-1">
               {tags.map((tag) => {
                 const tagColorKey = getTagColorKey(tag.color);
 
@@ -168,7 +168,7 @@ export const TaskTagStrip = () => {
                     <TagChip
                       label={tag.name}
                       colorKey={tagColorKey}
-                      className="pointer-events-none h-6 min-w-0 max-w-full px-3 text-[11px] font-medium leading-[1.35] transition-[filter,box-shadow] duration-100 group-hover:brightness-[0.96] group-hover:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
+                      className="pointer-events-none h-[22px] min-w-0 max-w-full px-2 text-[11px] font-medium leading-[1.3] transition-[filter,box-shadow] duration-100 group-hover:brightness-[0.96] group-hover:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
                     />
                   </button>
                 );
