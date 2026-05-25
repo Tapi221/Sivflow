@@ -5,7 +5,6 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import { eventOverlapsRange } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
-import { cn } from "@/lib/utils";
 import type { TimelineColumn, TimelineUnitBuffer, TimelineViewMode } from "./TimelineDayView.shared";
 import { buildTimelineColumns, getTimelineColumnWidth } from "./TimelineDayView.shared";
 
@@ -291,7 +290,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                   {lane.label ? (
                     <>
                       <span className="h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_0_2px_rgba(255,255,255,0.95)]" style={{ backgroundColor: lane.color }} />
-                      <span className={cn("min-w-0 truncate text-[13px] font-semibold", lane.checked ? "text-[#3f4652]" : "text-[#b3b3b3]")}>{lane.label}</span>
+                      <span className="min-w-0 truncate text-[12px] font-medium text-[#b8b8b8]">{lane.label}</span>
                     </>
                   ) : null}
                 </div>
