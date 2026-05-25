@@ -249,6 +249,19 @@
     box-shadow: none !important;
   }
 
+  .explorer-workspace-tab-button,
+  .explorer-workspace-tab-close,
+  .explorer-workspace-tab-add {
+    pointer-events: auto !important;
+    -webkit-app-region: no-drag !important;
+  }
+
+  .explorer-workspace-tab-button *,
+  .explorer-workspace-tab-close *,
+  .explorer-workspace-tab-add * {
+    pointer-events: none;
+  }
+
   .explorer-workspace-tab-close {
     position: relative;
     z-index: 1;
