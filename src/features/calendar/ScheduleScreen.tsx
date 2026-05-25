@@ -440,7 +440,7 @@ export const ScheduleScreen = ({
           </h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="mr-10 flex items-center gap-2">
           <ViewModeDropdown
             value={selectedViewMode}
             onChange={handleSelectViewMode}
