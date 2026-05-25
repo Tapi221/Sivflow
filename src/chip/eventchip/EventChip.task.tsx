@@ -125,7 +125,7 @@ export const TaskEventChip = memo(({
         )}
       </div>
 
-      <div className="col-start-1 row-start-2 flex min-w-0 items-center gap-1 overflow-hidden text-[11px] font-semibold tabular-nums opacity-80">
+      <div className="col-start-1 row-start-2 flex min-w-0 items-center gap-1 overflow-hidden text-[11px] font-normal tabular-nums opacity-60">
         {formattedDate && (
           <span className="inline-flex min-w-0 max-w-[4.85rem] shrink-0 items-center gap-[3px] overflow-hidden">
             <ScheduleCalendarIcon className="h-3 w-3 shrink-0" />
@@ -139,7 +139,7 @@ export const TaskEventChip = memo(({
           {categoryLabel}
         </span>
 
-        <span className="shrink-0 opacity-80">
+        <span className="shrink-0">
           {priorityLabel}
         </span>
       </div>
