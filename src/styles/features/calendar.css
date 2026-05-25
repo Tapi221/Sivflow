@@ -3,6 +3,14 @@
     scrollbar-gutter: auto;
   }
 
+  header[class*="safe-area-inset-top"] > div:first-child {
+    justify-content: flex-end;
+  }
+
+  header[class*="safe-area-inset-top"] > div:first-child > .min-w-0 {
+    display: none;
+  }
+
   aside[class*="w-[220px]"] > nav.overflow-y-auto {
     scrollbar-width: none;
     -ms-overflow-style: none;
