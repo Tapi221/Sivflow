@@ -7,7 +7,7 @@ import {
   loadInkFromStorage,
   saveInkToStorage,
 } from "@/components/ink/inkStorage";
-import { createEmptyInkDocument } from "@/components/ink/inkTypes";
+import { createEmptyInkDocument } from "@/components/ink/ink.types";
 
 describe("inkStorage", () => {
   const cardId = "card-1";
