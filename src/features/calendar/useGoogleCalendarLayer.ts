@@ -1,3 +1,4 @@
+import { useCallback, useState } from "react";
 import type { GoogleAccountEntry } from "@/features/calendar/googlecalendar-integration/useMultiAccountGoogleCalendar";
 import { useMultiAccountGoogleCalendar } from "@/features/calendar/googlecalendar-integration/useMultiAccountGoogleCalendar";
 import type { GCalConnectionStatus } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
@@ -9,6 +10,11 @@ export type { GoogleAccountEntry };
 
 export const useGoogleCalendarLayer = () => {
   useServerStoredGoogleAccountBootstrap();
+  const [taskListRetryNonce, setTaskListRetryNonce] = useState(0);
+
+  const retryGoogleTaskLists = useCallback(() => {
+    setTaskListRetryNonce((value) => value + 1);
+  }, []);
 
   const {
     accounts,
@@ -25,10 +31,10 @@ export const useGoogleCalendarLayer = () => {
     isAnyConnecting,
   } = useMultiAccountGoogleCalendar();
 
-  const taskLists = useGoogleTaskLists(accounts, updateAccountToken);
+  const taskListsByAccount = useGoogleTaskLists(accounts, updateAccountToken, taskListRetryNonce);
   const googleTasks = useGoogleTasks(
     accounts,
-    taskLists.byAccount,
+    taskListsByAccount,
     updateAccountToken,
   );
 
@@ -56,10 +62,10 @@ export const useGoogleCalendarLayer = () => {
 
   return {
     googleAccounts: accounts,
-    taskListsByAccount: taskLists.byAccount,
+    taskListsByAccount,
     googleTasksByAccount: googleTasks.byAccount,
     refreshGoogleTasks: googleTasks.refreshAll,
-    retryGoogleTaskLists: taskLists.retryAll,
+    retryGoogleTaskLists,
     createGoogleTask: googleTasks.createTask,
     updateGoogleTask: googleTasks.updateTask,
     moveGoogleTaskList: googleTasks.moveTaskList,
