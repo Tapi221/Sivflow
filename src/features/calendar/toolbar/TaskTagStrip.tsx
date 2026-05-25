@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef, useState, type FormEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
 import { TagChip } from "@/components/tag/TagChip";
 import { TAG_COLOR_CONTEXT_MENU_HEIGHT, TAG_COLOR_CONTEXT_MENU_WIDTH, TagColorRightClickPanel } from "@/chip/rightclickpanel/TagColorRightClickPanel";
 import { RIGHT_CLICK_PANEL_NO_DRAG_STYLE, clampRightClickPanelPosition, useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPanelUtils";
@@ -18,6 +19,15 @@ type TagContextMenuTriggerEvent =
   | ReactPointerEvent<HTMLElement>;
 
 const TAG_COLOR_CONTEXT_PANEL_ID = "tag-color-context-menu";
+const TAG_PANEL_SIZE_TRANSITION = {
+  type: "spring",
+  stiffness: 520,
+  damping: 42,
+} as const;
+const TAG_PANEL_CONTENT_TRANSITION = {
+  duration: 0.16,
+  ease: "easeOut",
+} as const;
 
 /**
  * Render contract:
@@ -129,12 +139,16 @@ const TaskTagStripBase = () => {
 
   return (
     <>
-      <div
-        className={
-          isCollapsed
-            ? "flex h-8 w-[58px] min-w-0 shrink-0 items-center overflow-hidden rounded-xl border border-[#eeeeee] bg-white p-0.5 text-[#6d747f] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-            : "flex h-8 min-w-0 flex-1 items-center overflow-hidden rounded-xl border border-transparent bg-white p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-        }
+      <motion.div
+        initial={false}
+        animate={{
+          borderColor: isCollapsed ? "#eeeeee" : "rgba(0,0,0,0)",
+          flexBasis: isCollapsed ? 58 : 0,
+          flexGrow: isCollapsed ? 0 : 1,
+          flexShrink: isCollapsed ? 0 : 1,
+        }}
+        transition={TAG_PANEL_SIZE_TRANSITION}
+        className="flex h-8 min-w-0 items-center overflow-hidden rounded-xl border bg-white p-0.5 text-[#6d747f] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
       >
         <button
           type="button"
@@ -164,7 +178,15 @@ const TaskTagStripBase = () => {
               : "min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           }
         >
-          <div className="flex w-max items-center gap-1.5 px-1">
+          <motion.div
+            initial={false}
+            animate={{
+              opacity: isCollapsed ? 0 : 1,
+              x: isCollapsed ? -8 : 0,
+            }}
+            transition={TAG_PANEL_CONTENT_TRANSITION}
+            className="flex w-max items-center gap-1.5 px-1"
+          >
             {tags.map((tag) => {
               const tagColorKey = getTagColorKey(tag.color);
 
@@ -248,9 +270,9 @@ const TaskTagStripBase = () => {
                 <Plus className="h-4 w-4" />
               </button>
             )}
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {contextMenuElement ? createPortal(contextMenuElement, document.body) : null}
     </>
