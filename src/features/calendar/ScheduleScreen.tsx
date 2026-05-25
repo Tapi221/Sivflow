@@ -306,7 +306,6 @@ export const ScheduleScreen = ({
 
       return equalSet(ids, nextIds) ? ids : nextIds;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allTaskListIdsKey]);
 
   const handleToggleTaskList = useCallback((taskListId: string) => {
