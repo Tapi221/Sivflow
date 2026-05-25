@@ -2,7 +2,8 @@
   position: fixed;
   top: 0;
   right: 0;
-  z-index: 3000;
+  z-index: 2147483647;
+  isolation: isolate;
   display: flex;
   align-items: stretch;
   justify-content: flex-end;
@@ -33,6 +34,12 @@
   cursor: default;
   pointer-events: auto;
   user-select: none;
+  -webkit-app-region: no-drag;
+  -webkit-user-select: none;
+}
+
+.desktop-window-controls__button > * {
+  pointer-events: none;
 }
 
 .desktop-window-controls__button:hover,
