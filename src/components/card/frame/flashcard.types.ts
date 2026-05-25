@@ -1,4 +1,4 @@
-import type { InkDocument } from "@/components/ink/inkTypes";
+import type { InkDocument } from "@/components/ink/ink.types";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
