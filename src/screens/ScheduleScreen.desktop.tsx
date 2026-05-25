@@ -153,6 +153,7 @@ export const ScheduleScreen = ({
     reconnectGoogleAccount,
     toggleGoogleCalendar,
     refreshGoogleTasks,
+    retryGoogleTaskLists,
     createGoogleTask,
     updateGoogleTask,
     moveGoogleTaskList,
@@ -381,6 +382,7 @@ export const ScheduleScreen = ({
           onReconnectAccount={(accountId) => {
             void reconnectGoogleAccount(accountId);
           }}
+          onRetryTaskLists={retryGoogleTaskLists}
           onToggleCalendar={toggleGoogleCalendar}
           onToggleTaskList={handleToggleTaskList}
         />
