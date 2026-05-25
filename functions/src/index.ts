@@ -348,7 +348,7 @@ const runFirestoreOperation = async <T>(
 };
 
 const runGoogleCalendarCallable = async <T>(
-  context: "exchangeGoogleCalendarCode" | "getGoogleCalendarAccessToken",
+  context: "exchangeGoogleCalendarCode" | "getGoogleCalendarAccessToken" | "listGoogleCalendarAccounts",
   accountId: string | undefined,
   fn: () => Promise<T>,
 ): Promise<T> => {
@@ -467,6 +467,35 @@ export const exchangeGoogleCalendarCode = onCall(
       };
     });
   },
+);
+
+export const listGoogleCalendarAccounts = onCall(
+  { region: REGION },
+  async (request) =>
+    runGoogleCalendarCallable("listGoogleCalendarAccounts", undefined, async () => {
+      const uid = requireUid(request);
+      const db = await runFirestoreOperation("get db for account list", undefined, () => getDb());
+      const snap = await runFirestoreOperation("list accounts", undefined, () =>
+        db.collection(`users/${uid}/googleCalendarAccounts`).get(),
+      );
+
+      return {
+        accounts: snap.docs.flatMap((doc) => {
+          const data = doc.data() as Partial<StoredGoogleCalendarAccount>;
+
+          if (typeof data.encryptedRefreshToken !== "string" || data.encryptedRefreshToken.length === 0) {
+            return [];
+          }
+
+          return [{
+            accountId: doc.id,
+            email: data.email ?? doc.id,
+            name: data.name ?? null,
+            photoUrl: data.photoUrl ?? null,
+          }];
+        }),
+      };
+    }),
 );
 
 export const getGoogleCalendarAccessToken = onCall(
