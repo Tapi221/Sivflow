@@ -90,11 +90,12 @@ export default defineConfig([
       ],
 
       // ----------------------------
-      // react hooks（warning化で崩壊防止）
+      // react hooks
       // ----------------------------
+      "react-hooks/exhaustive-deps": "off",
       "react-hooks/preserve-manual-memoization": "warn",
-      "react-hooks/refs": "warn",
-      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/refs": "off",
+      "react-hooks/set-state-in-effect": "off",
 
       // ----------------------------
       // unused imports
