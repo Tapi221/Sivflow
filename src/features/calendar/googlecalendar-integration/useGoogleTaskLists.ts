@@ -242,8 +242,7 @@ export const useGoogleTaskLists = (
         refreshToken: account.refreshToken,
         connectionStatus: account.connectionStatus,
       })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [accountTokenKey],
+    [accounts, accountTokenKey],
   );
 
   useEffect(() => {
