@@ -30,6 +30,7 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
 const DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS =
   "absolute right-4 top-2 z-50 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg border border-transparent bg-transparent p-0 text-[#8c8c8c] shadow-none appearance-none select-none outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:text-[#8c8c8c] focus:outline-none focus:ring-0 focus-visible:outline-none motion-reduce:transition-none";
 
+const DAY_DETAIL_PANEL_AUTO_OPEN_MIN_WIDTH_PX = 1180;
 const VIEW_HEADER_CONTROLS_RIGHT_INSET_PX = 56;
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const APP_PROJECT_COLORS = [
@@ -43,6 +44,12 @@ const APP_PROJECT_COLORS = [
 ];
 
 type StoredAppCalendarItem = Partial<AppCalendarItem>;
+
+const getCanFitDayDetailPanel = (): boolean => {
+  if (typeof window === "undefined") return true;
+
+  return window.innerWidth >= DAY_DETAIL_PANEL_AUTO_OPEN_MIN_WIDTH_PX;
+};
 
 const createAppProjectId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -123,7 +130,12 @@ export const ScheduleScreen = ({
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
-  const [isDayDetailPanelOpen, setIsDayDetailPanelOpen] = useState(true);
+  const [canFitDayDetailPanel, setCanFitDayDetailPanel] = useState(
+    getCanFitDayDetailPanel,
+  );
+  const [isDayDetailPanelOpen, setIsDayDetailPanelOpen] = useState(
+    getCanFitDayDetailPanel,
+  );
   const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(
     readStoredAppProjects,
   );
@@ -182,6 +194,30 @@ export const ScheduleScreen = ({
     moveGoogleTaskList,
     deleteGoogleTask,
   } = pane;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia(
+      `(min-width: ${DAY_DETAIL_PANEL_AUTO_OPEN_MIN_WIDTH_PX}px)`,
+    );
+
+    const syncDayDetailPanelAvailability = (matches: boolean) => {
+      setCanFitDayDetailPanel(matches);
+      setIsDayDetailPanelOpen(matches);
+    };
+
+    const handleMediaQueryChange = (event: MediaQueryListEvent) => {
+      syncDayDetailPanelAvailability(event.matches);
+    };
+
+    syncDayDetailPanelAvailability(mediaQuery.matches);
+    mediaQuery.addEventListener("change", handleMediaQueryChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleMediaQueryChange);
+    };
+  }, []);
 
   useEffect(() => {
     persistAppProjects(appProjects);
@@ -285,7 +321,7 @@ export const ScheduleScreen = ({
   }, [activeMode, selectedDate, selectedViewMode]);
 
   const canShowDayDetailPanel =
-    activeMode === "calendar" && selectedViewMode === "month";
+    activeMode === "calendar" && selectedViewMode === "month" && canFitDayDetailPanel;
 
   const showDayDetailPanel =
     canShowDayDetailPanel && isDayDetailPanelOpen;
@@ -326,9 +362,12 @@ export const ScheduleScreen = ({
   const handleMonthCellSelectDateAndOpen = useCallback(
     (date: Date) => {
       handleMonthCellSelectDate(date);
-      setIsDayDetailPanelOpen(true);
+
+      if (canFitDayDetailPanel) {
+        setIsDayDetailPanelOpen(true);
+      }
     },
-    [handleMonthCellSelectDate],
+    [canFitDayDetailPanel, handleMonthCellSelectDate],
   );
 
   const renderViewHeader = (className: string) => {
