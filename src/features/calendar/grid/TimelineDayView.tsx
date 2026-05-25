@@ -1,14 +1,22 @@
 import type { CSSProperties, RefObject, UIEvent } from "react";
 import { Fragment, memo, useMemo } from "react";
 
-import {CalendarDateButton,
-  CalendarDateContent,} from "@/chip/button/GridHeader.scheduletimeline";
+import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
 import * as C from "@/features/calendar/calendar.constants.desktop";
+import { eventOverlapsRange } from "@/features/calendar/calendarEventRange";
+import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
+import { cn } from "@/lib/utils";
 
-import type {TimelineUnitBuffer,
-  TimelineViewMode,} from "./TimelineDayView.shared";
-import {buildTimelineColumns,
-  getTimelineColumnWidth,} from "./TimelineDayView.shared";
+import type { TimelineUnitBuffer, TimelineViewMode } from "./TimelineDayView.shared";
+import { buildTimelineColumns, getTimelineColumnWidth } from "./TimelineDayView.shared";
+
+const FALLBACK_LANE_COLOR = "#8f929c";
+const EVENT_TOP_INSET_PX = 8;
+const EVENT_HEIGHT_PX = 24;
+const EVENT_GAP_PX = 4;
+const EVENT_SIDE_INSET_PX = 6;
+const MIN_EVENT_WIDTH_PX = 16;
 
 type CalendarTimelineDayViewProps = {
   viewMode: TimelineViewMode;
@@ -18,9 +26,81 @@ type CalendarTimelineDayViewProps = {
   dayColumnWidth: number;
   laneLabelWidth?: number;
   rowCount?: number;
+  lanes?: TimelineLane[];
+  visibleEvents?: GoogleCalendarEvent[];
   scrollContainerRef?: RefObject<HTMLDivElement | null>;
   onScroll?: (event: UIEvent<HTMLDivElement>) => void;
   onSelectDate?: (date: Date) => void;
+};
+
+export type TimelineLane = {
+  id: string;
+  label: string;
+  color: string;
+  checked: boolean;
+  calendarIds?: string[];
+  projectIds?: string[];
+};
+
+type TimelineEventPlacement = {
+  event: GoogleCalendarEvent;
+  laneId: string;
+  laneIndex: number;
+  left: number;
+  width: number;
+  stackIndex: number;
+};
+
+const clamp = (value: number, min: number, max: number): number => {
+  return Math.max(min, Math.min(max, value));
+};
+
+const getLaneMatchesEvent = (lane: TimelineLane, event: GoogleCalendarEvent): boolean => {
+  const calendarIds = lane.calendarIds ?? [];
+  const projectIds = lane.projectIds ?? [];
+
+  return calendarIds.includes(event.calendarId) || Boolean(event.projectId && projectIds.includes(event.projectId));
+};
+
+const getRangeClippedEventPosition = (event: GoogleCalendarEvent, rangeStart: number, rangeEnd: number, gridWidth: number) => {
+  const eventStart = new Date(event.startsAt).getTime();
+  const eventEnd = new Date(event.endsAt).getTime();
+  const duration = Math.max(1, rangeEnd - rangeStart);
+  const clippedStart = clamp(eventStart, rangeStart, rangeEnd);
+  const clippedEnd = clamp(Math.max(eventEnd, eventStart + 1), rangeStart, rangeEnd);
+  const left = (clippedStart - rangeStart) / duration * gridWidth;
+  const width = Math.max(MIN_EVENT_WIDTH_PX, (clippedEnd - clippedStart) / duration * gridWidth);
+
+  return {
+    left,
+    width,
+  };
+};
+
+const findStackIndex = (stackEnds: number[], start: number, end: number): number => {
+  const availableIndex = stackEnds.findIndex((stackEnd) => stackEnd <= start);
+
+  if (availableIndex >= 0) {
+    stackEnds[availableIndex] = end;
+    return availableIndex;
+  }
+
+  stackEnds.push(end);
+  return stackEnds.length - 1;
+};
+
+const TimelineEventChip = ({ event }: { event: GoogleCalendarEvent }) => {
+  const tokens = generateColorTokens(event.accentColor || FALLBACK_LANE_COLOR);
+
+  return (
+    <div
+      className="flex h-full items-center gap-1 overflow-hidden rounded-md border-l-[3px] px-1.5 text-[11px] font-semibold leading-none shadow-[0_1px_2px_rgba(15,23,42,0.08)]"
+      style={{ background: tokens.bg, borderLeftColor: tokens.border, color: tokens.text }}
+      title={event.title || "Untitled"}
+    >
+      <span className="truncate">{event.title || "Untitled"}</span>
+    </div>
+  );
 };
 
 export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
@@ -31,6 +111,8 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
   dayColumnWidth,
   laneLabelWidth = C.TIMELINE_DEFAULT_LANE_LABEL_WIDTH,
   rowCount = C.TIMELINE_DEFAULT_ROW_COUNT,
+  lanes = [],
+  visibleEvents = [],
   scrollContainerRef,
   onScroll,
   onSelectDate,
@@ -43,46 +125,95 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
     return getTimelineColumnWidth(viewMode, dayColumnWidth);
   }, [dayColumnWidth, viewMode]);
 
-  const rowIndexes = useMemo(() => {
-    return Array.from({ length: rowCount }, (_, index) => index);
-  }, [rowCount]);
+  const fallbackLaneCount = Math.max(rowCount, C.TIMELINE_DEFAULT_ROW_COUNT);
+  const displayLanes = useMemo<TimelineLane[]>(() => {
+    if (lanes.length > 0) {
+      return lanes;
+    }
+
+    return Array.from({ length: fallbackLaneCount }, (_, index) => ({
+      id: `timeline-placeholder-${index}`,
+      label: "",
+      color: FALLBACK_LANE_COLOR,
+      checked: false,
+    }));
+  }, [fallbackLaneCount, lanes]);
 
   const selectedTime = selectedDate.getTime();
   const gridWidth = columns.length * columnWidth;
+  const rangeStart = columns[0]?.start.getTime() ?? anchorDate.getTime();
+  const rangeEnd = columns[columns.length - 1]?.end.getTime() ?? anchorDate.getTime();
 
-  const scrollSurfaceStyle = useMemo<CSSProperties>(
-    () => ({
-      overscrollBehaviorX: "contain",
-      willChange: "scroll-position",
-    }),
-    [],
-  );
+  const scrollSurfaceStyle = useMemo<CSSProperties>(() => ({
+    overscrollBehaviorX: "contain",
+    willChange: "scroll-position",
+  }), []);
 
-  const columnGridStyle = useMemo<CSSProperties>(
-    () => ({
-      gridTemplateColumns: `repeat(${columns.length}, ${columnWidth}px)`,
-      width: `${gridWidth}px`,
-    }),
-    [columnWidth, columns.length, gridWidth],
-  );
+  const columnGridStyle = useMemo<CSSProperties>(() => ({
+    gridTemplateColumns: `repeat(${columns.length}, ${columnWidth}px)`,
+    width: `${gridWidth}px`,
+  }), [columnWidth, columns.length, gridWidth]);
 
-  const timelineHeaderStyle = useMemo<CSSProperties>(
-    () => ({
-      ...columnGridStyle,
-      height: `${C.TIMELINE_HEADER_HEIGHT}px`,
-    }),
-    [columnGridStyle],
-  );
+  const timelineHeaderStyle = useMemo<CSSProperties>(() => ({
+    ...columnGridStyle,
+    height: `${C.TIMELINE_HEADER_HEIGHT}px`,
+  }), [columnGridStyle]);
 
-  const timelineRowStyle = useMemo<CSSProperties>(
-    () => ({
-      ...columnGridStyle,
-      contain: "layout paint",
-      height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px`,
-      transform: "translateZ(0)",
-    }),
-    [columnGridStyle],
-  );
+  const timelineRowStyle = useMemo<CSSProperties>(() => ({
+    ...columnGridStyle,
+    contain: "layout paint",
+    height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px`,
+    transform: "translateZ(0)",
+  }), [columnGridStyle]);
+
+  const timelineEventPlacements = useMemo(() => {
+    if (columns.length === 0 || gridWidth <= 0) return [];
+
+    const laneById = new Map(displayLanes.map((lane, index) => [lane.id, { lane, index }]));
+    const laneStackEnds = new Map<string, number[]>();
+
+    return visibleEvents
+      .filter((event) => eventOverlapsRange(event, new Date(rangeStart), new Date(rangeEnd)))
+      .flatMap((event): TimelineEventPlacement[] => {
+        const matchedLane = displayLanes.find((lane) => lane.checked && getLaneMatchesEvent(lane, event));
+        if (!matchedLane) return [];
+
+        const laneEntry = laneById.get(matchedLane.id);
+        if (!laneEntry) return [];
+
+        const start = new Date(event.startsAt).getTime();
+        const end = Math.max(new Date(event.endsAt).getTime(), start + 1);
+        const stackEnds = laneStackEnds.get(matchedLane.id) ?? [];
+        const stackIndex = findStackIndex(stackEnds, start, end);
+        laneStackEnds.set(matchedLane.id, stackEnds);
+        const position = getRangeClippedEventPosition(event, rangeStart, rangeEnd, gridWidth);
+
+        return [{
+          event,
+          laneId: matchedLane.id,
+          laneIndex: laneEntry.index,
+          left: position.left,
+          width: position.width,
+          stackIndex,
+        }];
+      });
+  }, [columns.length, displayLanes, gridWidth, rangeEnd, rangeStart, visibleEvents]);
+
+  const eventsByLaneId = useMemo(() => {
+    const groupedEvents = new Map<string, TimelineEventPlacement[]>();
+
+    timelineEventPlacements.forEach((placement) => {
+      const events = groupedEvents.get(placement.laneId);
+
+      if (events) {
+        events.push(placement);
+      } else {
+        groupedEvents.set(placement.laneId, [placement]);
+      }
+    });
+
+    return groupedEvents;
+  }, [timelineEventPlacements]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
@@ -99,14 +230,12 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
             minWidth: `${laneLabelWidth + gridWidth}px`,
           }}
         >
-          <div className="sticky left-0 top-0 z-20 border-b border-r border-[#eeeeee] bg-white" />
+          <div className="sticky left-0 top-0 z-30 border-b border-r border-[#eeeeee] bg-white" />
 
-          <div className="sticky top-0 z-10 border-b border-[#eeeeee] bg-white">
+          <div className="sticky top-0 z-20 border-b border-[#eeeeee] bg-white">
             <div className="grid" style={timelineHeaderStyle}>
               {columns.map((column) => {
-                const isSelected =
-                  selectedTime >= column.start.getTime() &&
-                  selectedTime <= column.end.getTime();
+                const isSelected = selectedTime >= column.start.getTime() && selectedTime <= column.end.getTime();
 
                 return (
                   <CalendarDateButton
@@ -142,26 +271,43 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
             </div>
           </div>
 
-          {rowIndexes.map((index) => (
-            <Fragment key={index}>
-              <div
-                className="sticky left-0 z-10 border-b border-r border-[#eeeeee] bg-white"
-                style={{ height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px` }}
-              />
+          {displayLanes.map((lane, laneIndex) => {
+            const laneEvents = eventsByLaneId.get(lane.id) ?? [];
 
-              <div
-                className="grid border-b border-[#eeeeee] bg-white"
-                style={timelineRowStyle}
-              >
-                {columns.map((column) => (
-                  <div
-                    key={column.id}
-                    className="border-r border-[#eeeeee] last:border-r-0"
-                  />
-                ))}
-              </div>
-            </Fragment>
-          ))}
+            return (
+              <Fragment key={lane.id}>
+                <div className="sticky left-0 z-10 flex items-start gap-2 border-b border-r border-[#eeeeee] bg-white px-3 py-3" style={{ height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px` }}>
+                  {lane.label ? (
+                    <>
+                      <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: lane.color }} />
+                      <span className={cn("min-w-0 truncate text-[12px] font-semibold", lane.checked ? "text-[#4c5361]" : "text-[#b3b3b3]")}>{lane.label}</span>
+                    </>
+                  ) : null}
+                </div>
+
+                <div className="relative grid border-b border-[#eeeeee] bg-white" style={timelineRowStyle}>
+                  {columns.map((column) => (
+                    <div key={column.id} className="border-r border-[#eeeeee] last:border-r-0" />
+                  ))}
+
+                  {laneEvents.map((placement) => (
+                    <div
+                      key={`${placement.event.id}-${laneIndex}`}
+                      className="absolute z-10"
+                      style={{
+                        left: placement.left + EVENT_SIDE_INSET_PX,
+                        top: EVENT_TOP_INSET_PX + placement.stackIndex * (EVENT_HEIGHT_PX + EVENT_GAP_PX),
+                        width: Math.max(MIN_EVENT_WIDTH_PX, placement.width - EVENT_SIDE_INSET_PX * 2),
+                        height: EVENT_HEIGHT_PX,
+                      }}
+                    >
+                      <TimelineEventChip event={placement.event} />
+                    </div>
+                  ))}
+                </div>
+              </Fragment>
+            );
+          })}
         </div>
       </div>
     </div>
