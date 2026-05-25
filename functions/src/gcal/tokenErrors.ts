@@ -18,6 +18,19 @@ export type ClassifiedGoogleTokenEndpointFailure = {
   };
 };
 
+export type GoogleOAuthServerErrorReason =
+  | GoogleOAuthTokenErrorReason
+  | "token_encryption_key_invalid"
+  | "stored_refresh_token_decrypt_failed"
+  | "stored_refresh_token_missing"
+  | "google_token_fetch_failed"
+  | "google_token_invalid_response"
+  | "google_userinfo_fetch_failed"
+  | "google_userinfo_invalid_response"
+  | "google_userinfo_failed"
+  | "firestore_access_failed"
+  | "unclassified_server_error";
+
 const OAUTH_CLIENT_NOT_FOUND_PATTERNS = [
   "oauth client was not found",
   "client was not found",

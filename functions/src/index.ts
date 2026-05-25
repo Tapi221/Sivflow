@@ -5,7 +5,7 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { getDb, serverTimestamp } from "./firebaseAdmin.js";
 import { renewExpiredWatchChannels } from "./gcal/renewWatchChannels.js";
-import { classifyGoogleTokenEndpointFailure } from "./gcal/tokenErrors.js";
+import { classifyGoogleTokenEndpointFailure, type GoogleOAuthServerErrorReason } from "./gcal/tokenErrors.js";
 
 const GOOGLE_OAUTH_WEB_CLIENT_ID = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_ID");
 const GOOGLE_OAUTH_WEB_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_SECRET");
@@ -39,18 +39,99 @@ const maskAccountId = (accountId?: string): string | undefined => {
   return `${localPart.slice(0, 2)}***@${domain}`;
 };
 
+const getErrorSummary = (error: unknown): Record<string, unknown> => {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  return {
+    type: typeof error,
+  };
+};
+
+const isHttpsError = (error: unknown): error is HttpsError =>
+  error instanceof HttpsError;
+
+const classifiedPrecondition = (
+  message: string,
+  details: {
+    reason: GoogleOAuthServerErrorReason;
+    reconnectRequired: boolean;
+    userAction?: "reconnect_google_account";
+    adminAction?: string;
+  },
+): HttpsError => new HttpsError("failed-precondition", message, details);
+
+const safeSecretValue = (
+  secret: { value: () => string },
+  name: string,
+  reason: "server_oauth_configuration" | "token_encryption_key_invalid",
+): string => {
+  try {
+    const value = secret.value();
+    if (!value) {
+      throw new Error(`${name} is empty`);
+    }
+    return value;
+  } catch (error) {
+    console.error("[GoogleCalendarOAuth] secret access failed", {
+      secretName: name,
+      reason,
+      error: getErrorSummary(error),
+    });
+    throw classifiedPrecondition(
+      `${name} is not configured or cannot be accessed by this function.`,
+      {
+        reason,
+        reconnectRequired: false,
+        adminAction:
+          reason === "server_oauth_configuration"
+            ? "check GOOGLE_OAUTH_WEB_CLIENT_ID / GOOGLE_OAUTH_WEB_CLIENT_SECRET and redeploy functions"
+            : "check GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY and redeploy functions",
+      },
+    );
+  }
+};
+
 const getKey = (): Buffer => {
-  const key = Buffer.from(GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY.value(), "base64");
-  if (key.length !== 32) {
-    throw new HttpsError(
-      "failed-precondition",
+  const rawKey = safeSecretValue(
+    GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY,
+    "GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY",
+    "token_encryption_key_invalid",
+  );
+
+  let key: Buffer;
+  try {
+    key = Buffer.from(rawKey, "base64");
+  } catch (error) {
+    console.error("[GoogleCalendarOAuth] token encryption key decode failed", {
+      error: getErrorSummary(error),
+    });
+    throw classifiedPrecondition(
       "GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY must be base64 encoded 32 bytes.",
       {
         reason: "token_encryption_key_invalid",
         reconnectRequired: false,
+        adminAction: "check GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY and redeploy functions",
       },
     );
   }
+
+  if (key.length !== 32) {
+    throw classifiedPrecondition(
+      "GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY must be base64 encoded 32 bytes.",
+      {
+        reason: "token_encryption_key_invalid",
+        reconnectRequired: false,
+        adminAction: "check GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY and redeploy functions",
+      },
+    );
+  }
+
   return key;
 };
 
@@ -67,7 +148,13 @@ const decryptRefreshToken = (payload: string): string => {
   try {
     const raw = Buffer.from(payload, "base64");
     if (raw.length < 29) {
-      throw new HttpsError("failed-precondition", "Stored refresh token payload is invalid.");
+      throw classifiedPrecondition(
+        "Stored refresh token payload is invalid.",
+        {
+          reason: "stored_refresh_token_decrypt_failed",
+          reconnectRequired: false,
+        },
+      );
     }
     const iv = raw.subarray(0, 12);
     const authTag = raw.subarray(12, 28);
@@ -76,13 +163,12 @@ const decryptRefreshToken = (payload: string): string => {
     decipher.setAuthTag(authTag);
     return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString("utf8");
   } catch (error) {
-    if (error instanceof HttpsError) throw error;
+    if (isHttpsError(error)) throw error;
 
     console.error("[GoogleCalendarOAuth] stored refresh token decrypt failed", {
       errorName: error instanceof Error ? error.name : typeof error,
     });
-    throw new HttpsError(
-      "failed-precondition",
+    throw classifiedPrecondition(
       "Stored refresh token is not readable by the current server key.",
       {
         reason: "stored_refresh_token_decrypt_failed",
@@ -96,12 +182,48 @@ const exchangeToken = async (
   params: URLSearchParams,
   context: "authorization_code" | "refresh_token",
 ) => {
-  const response = await fetch(GOOGLE_TOKEN_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: params,
-  });
-  const data = (await response.json()) as Record<string, unknown>;
+  let response: Response;
+  try {
+    response = await fetch(GOOGLE_TOKEN_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params,
+    });
+  } catch (error) {
+    console.error("[GoogleCalendarOAuth] token endpoint fetch failed", {
+      context,
+      error: getErrorSummary(error),
+    });
+    throw new HttpsError(
+      "unavailable",
+      "Google OAuth token endpoint could not be reached.",
+      {
+        reason: "google_token_fetch_failed",
+        reconnectRequired: false,
+      },
+    );
+  }
+
+  let data: Record<string, unknown>;
+  try {
+    data = (await response.json()) as Record<string, unknown>;
+  } catch (error) {
+    console.error("[GoogleCalendarOAuth] token endpoint returned invalid JSON", {
+      context,
+      status: response.status,
+      error: getErrorSummary(error),
+    });
+    throw new HttpsError(
+      response.ok ? "internal" : "unavailable",
+      "Google OAuth token endpoint returned an unreadable response.",
+      {
+        reason: "google_token_invalid_response",
+        reconnectRequired: false,
+        status: response.status,
+      },
+    );
+  }
+
   if (!response.ok) {
     const googleError = typeof data.error === "string" ? data.error : "unknown";
     const description =
@@ -126,12 +248,56 @@ const exchangeToken = async (
 };
 
 const fetchUserInfo = async (accessToken: string) => {
-  const response = await fetch(GOOGLE_USERINFO_ENDPOINT, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  const data = (await response.json()) as { email?: string; name?: string; picture?: string };
+  let response: Response;
+  try {
+    response = await fetch(GOOGLE_USERINFO_ENDPOINT, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  } catch (error) {
+    console.error("[GoogleCalendarOAuth] userinfo fetch failed", {
+      error: getErrorSummary(error),
+    });
+    throw new HttpsError(
+      "unavailable",
+      "Google userinfo endpoint could not be reached.",
+      {
+        reason: "google_userinfo_fetch_failed",
+        reconnectRequired: false,
+      },
+    );
+  }
+
+  let data: { email?: string; name?: string; picture?: string };
+  try {
+    data = (await response.json()) as { email?: string; name?: string; picture?: string };
+  } catch (error) {
+    console.error("[GoogleCalendarOAuth] userinfo returned invalid JSON", {
+      status: response.status,
+      error: getErrorSummary(error),
+    });
+    throw new HttpsError(
+      response.ok ? "internal" : "unavailable",
+      "Google userinfo endpoint returned an unreadable response.",
+      {
+        reason: "google_userinfo_invalid_response",
+        reconnectRequired: false,
+        status: response.status,
+      },
+    );
+  }
+
   if (!response.ok || !data.email) {
-    throw new HttpsError("failed-precondition", "Google account email is required but was not returned.");
+    console.error("[GoogleCalendarOAuth] userinfo failed", {
+      status: response.status,
+      hasEmail: Boolean(data.email),
+    });
+    throw classifiedPrecondition(
+      "Google account email is required but was not returned.",
+      {
+        reason: "google_userinfo_failed",
+        reconnectRequired: false,
+      },
+    );
   }
   return {
     accountEmail: data.email,
@@ -140,8 +306,83 @@ const fetchUserInfo = async (accessToken: string) => {
   };
 };
 
-const accountDoc = async (uid: string, accountId: string) =>
-  (await getDb()).doc(`users/${uid}/googleCalendarAccounts/${accountId}`);
+const accountDoc = async (uid: string, accountId: string) => {
+  try {
+    return (await getDb()).doc(`users/${uid}/googleCalendarAccounts/${accountId}`);
+  } catch (error) {
+    console.error("[GoogleCalendarOAuth] Firestore account doc access failed", {
+      accountId: maskAccountId(accountId),
+      error: getErrorSummary(error),
+    });
+    throw new HttpsError(
+      "unavailable",
+      "Google Calendar account storage is temporarily unavailable.",
+      {
+        reason: "firestore_access_failed",
+        reconnectRequired: false,
+      },
+    );
+  }
+};
+
+const runFirestoreOperation = async <T>(
+  operation: string,
+  accountId: string | undefined,
+  fn: () => Promise<T>,
+): Promise<T> => {
+  try {
+    return await fn();
+  } catch (error) {
+    console.error("[GoogleCalendarOAuth] Firestore operation failed", {
+      operation,
+      accountId: maskAccountId(accountId),
+      error: getErrorSummary(error),
+    });
+    throw new HttpsError(
+      "unavailable",
+      "Google Calendar account storage is temporarily unavailable.",
+      {
+        reason: "firestore_access_failed",
+        reconnectRequired: false,
+      },
+    );
+  }
+};
+
+const runGoogleCalendarCallable = async <T>(
+  context: "exchangeGoogleCalendarCode" | "getGoogleCalendarAccessToken",
+  accountId: string | undefined,
+  fn: () => Promise<T>,
+): Promise<T> => {
+  try {
+    return await fn();
+  } catch (error) {
+    if (isHttpsError(error)) {
+      console.error("[GoogleCalendarOAuth] callable failed", {
+        context,
+        accountId: maskAccountId(accountId),
+        code: error.code,
+        details: error.details,
+        message: error.message,
+      });
+      throw error;
+    }
+
+    console.error("[GoogleCalendarOAuth] unclassified callable failure", {
+      context,
+      accountId: maskAccountId(accountId),
+      error: getErrorSummary(error),
+    });
+    throw new HttpsError(
+      "internal",
+      "Google Calendar OAuth server operation failed.",
+      {
+        reason: "unclassified_server_error",
+        reconnectRequired: false,
+      },
+    );
+  }
+};
 
 export const exchangeGoogleCalendarCode = onCall(
   {
@@ -153,79 +394,80 @@ export const exchangeGoogleCalendarCode = onCall(
     ],
   },
   async (request) => {
-    const uid = requireUid(request);
     const { code, forceRefreshToken, redirectUri } = request.data as {
       code?: string;
       forceRefreshToken?: boolean;
       redirectUri?: string;
     };
-    if (!code || !redirectUri) throw new HttpsError("invalid-argument", "code and redirectUri are required.");
+    return runGoogleCalendarCallable("exchangeGoogleCalendarCode", undefined, async () => {
+      const uid = requireUid(request);
+      if (!code || !redirectUri) throw new HttpsError("invalid-argument", "code and redirectUri are required.");
 
-    const token = await exchangeToken(
-      new URLSearchParams({
-        client_id: GOOGLE_OAUTH_WEB_CLIENT_ID.value(),
-        client_secret: GOOGLE_OAUTH_WEB_CLIENT_SECRET.value(),
-        code,
-        grant_type: "authorization_code",
-        redirect_uri: redirectUri,
-      }),
-      "authorization_code",
-    );
-
-    const accessToken = typeof token.access_token === "string" ? token.access_token : null;
-    const refreshToken = typeof token.refresh_token === "string" ? token.refresh_token : null;
-    const expiresInSeconds = typeof token.expires_in === "number" ? token.expires_in : null;
-
-    if (!accessToken) throw new HttpsError("internal", "Google token response missing access_token.");
-
-    const profile = await fetchUserInfo(accessToken);
-    const accountId = profile.accountEmail;
-    const ref = await accountDoc(uid, accountId);
-    const existingSnap = await ref.get();
-    const existingData = existingSnap.data() as
-      | { encryptedRefreshToken?: string; createdAt?: unknown }
-      | undefined;
-
-    if (!refreshToken && (forceRefreshToken || !existingData?.encryptedRefreshToken)) {
-      console.error("[GoogleCalendarOAuth] refresh token missing with no stored fallback", {
-        forceRefreshToken: Boolean(forceRefreshToken),
-        accountId: maskAccountId(accountId),
-      });
-      throw new HttpsError(
-        "failed-precondition",
-        forceRefreshToken
-          ? "Google did not return a new refresh token. Revoke this app in Google Account permissions, then reconnect."
-          : "Google did not return a refresh token and no stored refresh token exists.",
-        {
-          reason: "stored_refresh_token_missing",
-          reconnectRequired: true,
-          userAction: "reconnect_google_account",
-        },
+      const token = await exchangeToken(
+        new URLSearchParams({
+          client_id: safeSecretValue(GOOGLE_OAUTH_WEB_CLIENT_ID, "GOOGLE_OAUTH_WEB_CLIENT_ID", "server_oauth_configuration"),
+          client_secret: safeSecretValue(GOOGLE_OAUTH_WEB_CLIENT_SECRET, "GOOGLE_OAUTH_WEB_CLIENT_SECRET", "server_oauth_configuration"),
+          code,
+          grant_type: "authorization_code",
+          redirect_uri: redirectUri,
+        }),
+        "authorization_code",
       );
-    }
 
-    const now = await serverTimestamp();
+      const accessToken = typeof token.access_token === "string" ? token.access_token : null;
+      const refreshToken = typeof token.refresh_token === "string" ? token.refresh_token : null;
+      const expiresInSeconds = typeof token.expires_in === "number" ? token.expires_in : null;
 
-    const payload: Partial<StoredGoogleCalendarAccount> = {
-      email: profile.accountEmail,
-      name: profile.accountName,
-      photoUrl: profile.accountPhotoUrl,
-      createdAt: existingData?.createdAt ?? now,
-      updatedAt: now,
-    };
+      if (!accessToken) throw new HttpsError("internal", "Google token response missing access_token.");
 
-    if (refreshToken) {
-      payload.encryptedRefreshToken = encryptRefreshToken(refreshToken);
-    }
+      const profile = await fetchUserInfo(accessToken);
+      const accountId = profile.accountEmail;
+      const ref = await accountDoc(uid, accountId);
+      const existingSnap = await runFirestoreOperation("get account", accountId, () => ref.get());
+      const existingData = existingSnap.data() as
+        | { encryptedRefreshToken?: string; createdAt?: unknown }
+        | undefined;
 
-    await ref.set(payload, { merge: true });
+      if (!refreshToken && (forceRefreshToken || !existingData?.encryptedRefreshToken)) {
+        console.error("[GoogleCalendarOAuth] refresh token missing with no stored fallback", {
+          forceRefreshToken: Boolean(forceRefreshToken),
+          accountId: maskAccountId(accountId),
+        });
+        throw classifiedPrecondition(
+          forceRefreshToken
+            ? "Google did not return a new refresh token. Revoke this app in Google Account permissions, then reconnect."
+            : "Google did not return a refresh token and no stored refresh token exists.",
+          {
+            reason: "stored_refresh_token_missing",
+            reconnectRequired: true,
+            userAction: "reconnect_google_account",
+          },
+        );
+      }
 
-    return {
-      accessToken,
-      expiresInSeconds,
-      ...profile,
-      refreshTokenStored: Boolean(refreshToken || existingData?.encryptedRefreshToken),
-    };
+      const now = await serverTimestamp();
+
+      const payload: Partial<StoredGoogleCalendarAccount> = {
+        email: profile.accountEmail,
+        name: profile.accountName,
+        photoUrl: profile.accountPhotoUrl,
+        createdAt: existingData?.createdAt ?? now,
+        updatedAt: now,
+      };
+
+      if (refreshToken) {
+        payload.encryptedRefreshToken = encryptRefreshToken(refreshToken);
+      }
+
+      await runFirestoreOperation("set account", accountId, () => ref.set(payload, { merge: true }));
+
+      return {
+        accessToken,
+        expiresInSeconds,
+        ...profile,
+        refreshTokenStored: Boolean(refreshToken || existingData?.encryptedRefreshToken),
+      };
+    });
   },
 );
 
@@ -239,54 +481,55 @@ export const getGoogleCalendarAccessToken = onCall(
     ],
   },
   async (request) => {
-    const uid = requireUid(request);
     const { accountId } = request.data as { accountId?: string };
-    if (!accountId) throw new HttpsError("invalid-argument", "accountId is required.");
+    return runGoogleCalendarCallable("getGoogleCalendarAccessToken", accountId, async () => {
+      const uid = requireUid(request);
+      if (!accountId) throw new HttpsError("invalid-argument", "accountId is required.");
 
-    const ref = await accountDoc(uid, accountId);
-    const snap = await ref.get();
-    if (!snap.exists) throw new HttpsError("not-found", "Google Calendar account not found.");
-    const data = snap.data() as { encryptedRefreshToken?: string; email?: string; name?: string | null; photoUrl?: string | null };
-    if (!data.encryptedRefreshToken) {
-      throw new HttpsError(
-        "failed-precondition",
-        "Stored refresh token is missing.",
-        {
-          reason: "stored_refresh_token_missing",
-          reconnectRequired: true,
-          userAction: "reconnect_google_account",
-        },
+      const ref = await accountDoc(uid, accountId);
+      const snap = await runFirestoreOperation("get account", accountId, () => ref.get());
+      if (!snap.exists) throw new HttpsError("not-found", "Google Calendar account not found.");
+      const data = snap.data() as { encryptedRefreshToken?: string; email?: string; name?: string | null; photoUrl?: string | null };
+      if (!data.encryptedRefreshToken) {
+        throw classifiedPrecondition(
+          "Stored refresh token is missing.",
+          {
+            reason: "stored_refresh_token_missing",
+            reconnectRequired: true,
+            userAction: "reconnect_google_account",
+          },
+        );
+      }
+
+      const token = await exchangeToken(
+        new URLSearchParams({
+          client_id: safeSecretValue(GOOGLE_OAUTH_WEB_CLIENT_ID, "GOOGLE_OAUTH_WEB_CLIENT_ID", "server_oauth_configuration"),
+          client_secret: safeSecretValue(GOOGLE_OAUTH_WEB_CLIENT_SECRET, "GOOGLE_OAUTH_WEB_CLIENT_SECRET", "server_oauth_configuration"),
+          grant_type: "refresh_token",
+          refresh_token: decryptRefreshToken(data.encryptedRefreshToken),
+        }),
+        "refresh_token",
       );
-    }
 
-    const token = await exchangeToken(
-      new URLSearchParams({
-        client_id: GOOGLE_OAUTH_WEB_CLIENT_ID.value(),
-        client_secret: GOOGLE_OAUTH_WEB_CLIENT_SECRET.value(),
-        grant_type: "refresh_token",
-        refresh_token: decryptRefreshToken(data.encryptedRefreshToken),
-      }),
-      "refresh_token",
-    );
+      const accessToken = typeof token.access_token === "string" ? token.access_token : null;
+      const expiresInSeconds = typeof token.expires_in === "number" ? token.expires_in : null;
+      const rotatedRefreshToken = typeof token.refresh_token === "string" ? token.refresh_token : null;
 
-    const accessToken = typeof token.access_token === "string" ? token.access_token : null;
-    const expiresInSeconds = typeof token.expires_in === "number" ? token.expires_in : null;
-    const rotatedRefreshToken = typeof token.refresh_token === "string" ? token.refresh_token : null;
+      if (!accessToken) throw new HttpsError("internal", "Google token response missing access_token.");
 
-    if (!accessToken) throw new HttpsError("internal", "Google token response missing access_token.");
+      const updates: Record<string, unknown> = { updatedAt: await serverTimestamp() };
+      if (rotatedRefreshToken) updates.encryptedRefreshToken = encryptRefreshToken(rotatedRefreshToken);
+      await runFirestoreOperation("set account token update", accountId, () => ref.set(updates, { merge: true }));
 
-    const updates: Record<string, unknown> = { updatedAt: await serverTimestamp() };
-    if (rotatedRefreshToken) updates.encryptedRefreshToken = encryptRefreshToken(rotatedRefreshToken);
-    await ref.set(updates, { merge: true });
-
-    return {
-      accessToken,
-      expiresInSeconds,
-      accountEmail: data.email ?? accountId,
-      accountName: data.name ?? null,
-      accountPhotoUrl: data.photoUrl ?? null,
-      refreshTokenStored: true,
-    };
+      return {
+        accessToken,
+        expiresInSeconds,
+        accountEmail: data.email ?? accountId,
+        accountName: data.name ?? null,
+        accountPhotoUrl: data.photoUrl ?? null,
+        refreshTokenStored: true,
+      };
+    });
   },
 );
 
