@@ -41,7 +41,7 @@ const toErrorMessage = (error: unknown) => {
   const status = (error as Error & { status?: number }).status;
 
   if (status === 401 || status === 403) {
-    return "Google ToDo リストの表示には再連携が必要です。";
+    return "Google ToDo リストを自動復旧中です。";
   }
 
   return error.message;
