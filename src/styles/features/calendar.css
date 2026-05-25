@@ -3,6 +3,50 @@
     scrollbar-gutter: auto;
   }
 
+  aside[class*="w-[220px]"] > nav.overflow-y-auto {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  aside[class*="w-[220px]"] > nav.overflow-y-auto::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  aside[class*="w-[220px]"] > nav.overflow-y-auto::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  aside[class*="w-[220px]"] > nav.overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  aside[class*="w-[220px]"] > nav.overflow-y-auto::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background-color: transparent;
+  }
+
+  aside[class*="w-[220px]"] > nav.overflow-y-auto:hover,
+  aside[class*="w-[220px]"] > nav.overflow-y-auto:focus-within {
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  }
+
+  aside[class*="w-[220px]"] > nav.overflow-y-auto:hover::-webkit-scrollbar,
+  aside[class*="w-[220px]"] > nav.overflow-y-auto:focus-within::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  aside[class*="w-[220px]"] > nav.overflow-y-auto:hover::-webkit-scrollbar-thumb,
+  aside[class*="w-[220px]"] > nav.overflow-y-auto:focus-within::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background-color: rgba(156, 163, 175, 0.5);
+  }
+
   .calendar-month-scroll,
   .calendar-timeline-scroll {
     scrollbar-gutter: auto;
