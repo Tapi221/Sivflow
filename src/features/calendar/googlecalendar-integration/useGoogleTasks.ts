@@ -346,8 +346,7 @@ export const useGoogleTasks = (
         connectionStatus: account.connectionStatus,
         taskLists: taskListsByAccount[account.id]?.taskLists ?? [],
       })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [accountTokenKey],
+    [accounts, accountTokenKey, taskListsByAccount],
   );
 
   const refreshAccount = useCallback(
