@@ -23,6 +23,12 @@ const getTaskDropPosition = (event: TaskDragEvent): VerticalDropPosition => {
   return activeCenterY > overCenterY ? "after" : "before";
 };
 
+const getSlotDropPosition = (
+  data: Record<string, unknown> | undefined,
+): VerticalDropPosition => {
+  return data?.position === "after" ? "after" : "before";
+};
+
 export const resolveDropTarget = (
   event: TaskDragEvent,
   _tasksByColumn: Record<string, Task[]>,
@@ -53,7 +59,7 @@ export const resolveDropTarget = (
     return {
       columnId: overColumnId,
       overTaskId: typeof overTaskId === "string" ? overTaskId : null,
-      position: "before",
+      position: getSlotDropPosition(over.data.current),
       insertIndex: typeof insertIndex === "number" ? insertIndex : undefined,
     };
   }
