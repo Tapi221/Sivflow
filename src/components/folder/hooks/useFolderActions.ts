@@ -1,9 +1,7 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import { useCallback, useRef } from "react";
 
-import {type FolderTreeNode,
-  getFolderId,
-  normalizeFolderId,} from "@/components/folder/explorer/model/utils";
+import { type FolderTreeNode, getFolderId, normalizeFolderId } from "@/components/folder/explorer/model/utils";
 
 import type { CardSet, SelectedExplorerItem } from "@/types";
 
