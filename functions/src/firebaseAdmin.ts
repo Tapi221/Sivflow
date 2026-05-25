@@ -1,18 +1,21 @@
+import type { App } from "firebase-admin/app";
 import type { FieldValue, Firestore } from "firebase-admin/firestore";
 
-let adminAppReady: Promise<void> | null = null;
+let adminAppPromise: Promise<App> | null = null;
 let firestoreModulePromise: Promise<typeof import("firebase-admin/firestore")> | null = null;
 
-export const ensureFirebaseAdmin = async (): Promise<void> => {
-  adminAppReady ??= (async () => {
-    const { getApps, initializeApp } = await import("firebase-admin/app");
+export const ensureFirebaseAdmin = async (): Promise<App> => {
+  adminAppPromise ??= (async () => {
+    const { getApp, getApps, initializeApp } = await import("firebase-admin/app");
 
     if (getApps().length === 0) {
-      initializeApp();
+      return initializeApp();
     }
+
+    return getApp();
   })();
 
-  await adminAppReady;
+  return await adminAppPromise;
 };
 
 const getFirestoreModule = async () => {
@@ -21,9 +24,9 @@ const getFirestoreModule = async () => {
 };
 
 export const getDb = async (): Promise<Firestore> => {
-  await ensureFirebaseAdmin();
+  const app = await ensureFirebaseAdmin();
   const { getFirestore } = await getFirestoreModule();
-  return getFirestore();
+  return getFirestore(app);
 };
 
 export const serverTimestamp = async (): Promise<FieldValue> => {
