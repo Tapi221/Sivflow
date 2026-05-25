@@ -24,6 +24,7 @@ const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,25
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-none";
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const DEFAULT_TIMELINE_CALENDAR_COLOR = "#74798b";
+const MOBILE_TIMELINE_LANE_LABEL_WIDTH = 92;
 const APP_PROJECT_COLORS = ["#34c759", "#ff3b30", "#4f8ce7", "#ffd166", "#9adfe7", "#66a77a", "#9ca3ff"];
 
 type StoredAppCalendarItem = Partial<AppCalendarItem>;
@@ -355,7 +356,7 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
         {renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}
         <div className={cn("mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border", activeMode === "timeline" ? IOS_CALENDAR_SURFACE_CLASS : IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}>
           {activeMode === "timeline" ? (
-            <CalendarTimelineDayView viewMode={selectedViewMode} anchorDate={currentDate} timelineUnitBuffer={timelineUnitBuffer} selectedDate={selectedDate} dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH} laneLabelWidth={132} rowCount={C.TIMELINE_SKELETON_ROW_COUNT} lanes={timelineLanes} visibleEvents={calendarEvents} scrollContainerRef={scrollContainerRef} onScroll={handleCalendarScroll} onSelectDate={handleTimelineSelectDate} />
+            <CalendarTimelineDayView viewMode={selectedViewMode} anchorDate={currentDate} timelineUnitBuffer={timelineUnitBuffer} selectedDate={selectedDate} dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH} laneLabelWidth={MOBILE_TIMELINE_LANE_LABEL_WIDTH} rowCount={C.TIMELINE_SKELETON_ROW_COUNT} lanes={timelineLanes} visibleEvents={calendarEvents} scrollContainerRef={scrollContainerRef} onScroll={handleCalendarScroll} onSelectDate={handleTimelineSelectDate} />
           ) : (
             <CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={calendarEvents} calendarDayColumnWidth={calendarDayColumnWidth} timelineGridStyle={timelineGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} />
           )}
