@@ -3,10 +3,13 @@ import { useMultiAccountGoogleCalendar } from "@/features/calendar/googlecalenda
 import type { GCalConnectionStatus } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { useGoogleTaskLists } from "@/features/calendar/googlecalendar-integration/useGoogleTaskLists";
 import { useGoogleTasks } from "@/features/calendar/googlecalendar-integration/useGoogleTasks";
+import { useServerStoredGoogleAccountBootstrap } from "@/features/calendar/googlecalendar-integration/useServerStoredGoogleAccountBootstrap";
 
 export type { GoogleAccountEntry };
 
 export const useGoogleCalendarLayer = () => {
+  useServerStoredGoogleAccountBootstrap();
+
   const {
     accounts,
     events,
