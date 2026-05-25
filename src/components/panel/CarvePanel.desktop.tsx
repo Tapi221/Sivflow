@@ -116,7 +116,15 @@ const CarvePanelBase = ({
   className,
 }: CarvePanelProps) => {
   return (
-    <div className={cn(CARVE_PANEL_LAYOUT_CLASS, className)}>
+    <div
+      className={cn(
+        CARVE_PANEL_LAYOUT_CLASS,
+        hasTrailingPanel
+          ? CARVE_PANEL_WITH_TRAILING_PANEL_CLASS
+          : CARVE_PANEL_STANDALONE_CLASS,
+        className,
+      )}
+    >
       <CarvePanelChrome hasTrailingPanel={hasTrailingPanel} />
 
       <div className={CARVE_PANEL_CONTENT_CLASS}>
