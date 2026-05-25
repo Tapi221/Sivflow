@@ -40,6 +40,7 @@ const toTaskCalendarEvent = (task: Task): GoogleCalendarEvent | null => {
     return {
       id: `task:${task.id}`,
       calendarId: TASK_CALENDAR_ID,
+      projectId: task.category,
       title: task.title,
       startsAt,
       endsAt,
@@ -56,6 +57,7 @@ const toTaskCalendarEvent = (task: Task): GoogleCalendarEvent | null => {
     return {
       id: `task:${task.id}`,
       calendarId: TASK_CALENDAR_ID,
+      projectId: task.category,
       title: task.title,
       startsAt,
       endsAt: addOneDay(startsAt),
