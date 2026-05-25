@@ -34,8 +34,8 @@ const getNearestSlotCollision = (
   slotContainers: CollisionDetectionArgs["droppableContainers"],
 ): CollisionDescriptor[] => {
   const activeRect = args.collisionRect;
-  const activeCenterX = activeRect.left + activeRect.width / 2;
-  const activeCenterY = activeRect.top + activeRect.height / 2;
+  const activeCenterX = args.pointerCoordinates?.x ?? activeRect.left + activeRect.width / 2;
+  const activeCenterY = args.pointerCoordinates?.y ?? activeRect.top + activeRect.height / 2;
   let nearestCollision: CollisionDescriptor | null = null;
 
   for (const container of slotContainers) {

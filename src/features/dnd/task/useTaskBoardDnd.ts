@@ -22,9 +22,39 @@ type UseTaskBoardDndArgs = {
 };
 
 const defaultGetPreviewTask = (task: Task) => task;
+const TASK_DND_ADJACENT_SLOT_SWITCH_THRESHOLD_PX = 12;
 
 const flushDragStateUpdate = (update: () => void) => {
   flushSync(update);
+};
+
+const shouldKeepPreviousAdjacentSlot = (
+  previousTarget: TaskDropTarget | null,
+  nextTarget: TaskDropTarget,
+  previousDeltaY: number | null,
+  nextDeltaY: number,
+) => {
+  if (
+    !previousTarget ||
+    previousDeltaY === null ||
+    previousTarget.columnId !== nextTarget.columnId ||
+    typeof previousTarget.insertIndex !== "number" ||
+    typeof nextTarget.insertIndex !== "number"
+  ) {
+    return false;
+  }
+
+  const isAdjacentSlot =
+    Math.abs(previousTarget.insertIndex - nextTarget.insertIndex) === 1;
+
+  if (!isAdjacentSlot) {
+    return false;
+  }
+
+  return (
+    Math.abs(nextDeltaY - previousDeltaY) <
+    TASK_DND_ADJACENT_SLOT_SWITCH_THRESHOLD_PX
+  );
 };
 
 export const useTaskBoardDnd = ({
@@ -36,6 +66,7 @@ export const useTaskBoardDnd = ({
   const [activeTaskWidth, setActiveTaskWidth] = useState<number | null>(null);
   const [activeDropTarget, setActiveDropTarget] = useState<TaskDropTarget | null>(null);
   const latestDropTargetRef = useRef<TaskDropTarget | null>(null);
+  const latestDropTargetDeltaYRef = useRef<number | null>(null);
   const visibleTasksByColumn = useMemo(() => {
     if (!activeTaskId || !activeDropTarget) {
       return tasksByColumn;
@@ -67,6 +98,7 @@ export const useTaskBoardDnd = ({
     setActiveTaskWidth(null);
     setActiveDropTarget(null);
     latestDropTargetRef.current = null;
+    latestDropTargetDeltaYRef.current = null;
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -76,6 +108,7 @@ export const useTaskBoardDnd = ({
       setActiveDropTarget(null);
     });
     latestDropTargetRef.current = null;
+    latestDropTargetDeltaYRef.current = 0;
   };
 
   const handleDragCancel = () => {
@@ -94,6 +127,7 @@ export const useTaskBoardDnd = ({
     if (!target) {
       if (latestDropTargetRef.current !== null) {
         latestDropTargetRef.current = null;
+        latestDropTargetDeltaYRef.current = event.delta.y;
         flushDragStateUpdate(() => {
           setActiveDropTarget(null);
         });
@@ -106,7 +140,19 @@ export const useTaskBoardDnd = ({
       return;
     }
 
+    if (
+      shouldKeepPreviousAdjacentSlot(
+        previousTarget,
+        target,
+        latestDropTargetDeltaYRef.current,
+        event.delta.y,
+      )
+    ) {
+      return;
+    }
+
     latestDropTargetRef.current = target;
+    latestDropTargetDeltaYRef.current = event.delta.y;
     flushDragStateUpdate(() => {
       setActiveDropTarget(target);
     });
