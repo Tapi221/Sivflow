@@ -265,6 +265,18 @@ export const useTaskStore = create<TaskStore>()(
     }),
     {
       name: "flashcard-master.tasks.v1",
+      merge: (persisted, current) => {
+        const persistedState = persisted as Partial<TaskStore> | undefined;
+        const persistedTasks = persistedState?.tasks;
+
+        return {
+          ...current,
+          ...persistedState,
+          tasks: Array.isArray(persistedTasks)
+            ? persistedTasks.map((task) => normalizeTask(task))
+            : current.tasks,
+        };
+      },
     },
   ),
 );
