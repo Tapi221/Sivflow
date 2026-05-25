@@ -38,6 +38,11 @@ export const useGoogleCalendarLayer = () => {
     updateAccountToken,
   );
 
+  const refreshGoogleTasks = useCallback(async () => {
+    retryGoogleTaskLists();
+    await googleTasks.refreshAll();
+  }, [googleTasks, retryGoogleTaskLists]);
+
   const connectionStatus: GCalConnectionStatus | "disconnected" = (() => {
     const hasConnectedAccount = accounts.some(
       (account) => account.connectionStatus === "connected",
@@ -64,7 +69,7 @@ export const useGoogleCalendarLayer = () => {
     googleAccounts: accounts,
     taskListsByAccount,
     googleTasksByAccount: googleTasks.byAccount,
-    refreshGoogleTasks: googleTasks.refreshAll,
+    refreshGoogleTasks,
     retryGoogleTaskLists,
     createGoogleTask: googleTasks.createTask,
     updateGoogleTask: googleTasks.updateTask,
