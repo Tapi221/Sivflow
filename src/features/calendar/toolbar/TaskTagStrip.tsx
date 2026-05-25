@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { memo, useEffect, useRef, useState, type FormEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
 import { TagChip } from "@/components/tag/TagChip";
 import { TAG_COLOR_CONTEXT_MENU_HEIGHT, TAG_COLOR_CONTEXT_MENU_WIDTH, TagColorRightClickPanel } from "@/chip/rightclickpanel/TagColorRightClickPanel";
@@ -19,7 +19,13 @@ type TagContextMenuTriggerEvent =
 
 const TAG_COLOR_CONTEXT_PANEL_ID = "tag-color-context-menu";
 
-export const TaskTagStrip = () => {
+/**
+ * Render contract:
+ * - Calendar / Timeline / Task の mode 切替では親起因で再レンダリングしない。
+ * - 更新してよい条件はタグ一覧・タグ色・折りたたみ・作成フォーム・右クリックメニューの変更だけ。
+ * - activeMode / viewMode / selectedDate を props に追加しない。
+ */
+const TaskTagStripBase = () => {
   const { addTag, availableColors, tags, updateTagColor } = useTags();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -236,3 +242,6 @@ export const TaskTagStrip = () => {
     </>
   );
 };
+
+export const TaskTagStrip = memo(TaskTagStripBase);
+TaskTagStrip.displayName = "TaskTagStrip";
