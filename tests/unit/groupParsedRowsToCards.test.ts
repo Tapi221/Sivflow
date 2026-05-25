@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { groupParsedRowsToCards } from "@/features/import/application/groupParsedRowsToCards";
-import type { ParsedImportRow } from "@/features/import/domain/importTypes";
+import type { ParsedImportRow } from "@/features/import/domain/import.types";
 
 describe("groupParsedRowsToCards", () => {
   it("同じ cardId を面ごとにまとめて blockOrder 順に並べる", () => {
