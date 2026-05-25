@@ -392,8 +392,9 @@ export const exchangeGoogleCalendarCode = onCall(
     ],
   },
   async (request) => {
-    const { code, forceRefreshToken, redirectUri } = request.data as {
+    const { code, codeVerifier, forceRefreshToken, redirectUri } = request.data as {
       code?: string;
+      codeVerifier?: string;
       forceRefreshToken?: boolean;
       redirectUri?: string;
     };
@@ -401,14 +402,20 @@ export const exchangeGoogleCalendarCode = onCall(
       const uid = requireUid(request);
       if (!code || !redirectUri) throw new HttpsError("invalid-argument", "code and redirectUri are required.");
 
+      const tokenParams = new URLSearchParams({
+        client_id: safeSecretValue(GOOGLE_OAUTH_WEB_CLIENT_ID, "GOOGLE_OAUTH_WEB_CLIENT_ID", "server_oauth_configuration"),
+        client_secret: safeSecretValue(GOOGLE_OAUTH_WEB_CLIENT_SECRET, "GOOGLE_OAUTH_WEB_CLIENT_SECRET", "server_oauth_configuration"),
+        code,
+        grant_type: "authorization_code",
+        redirect_uri: redirectUri,
+      });
+
+      if (codeVerifier) {
+        tokenParams.set("code_verifier", codeVerifier);
+      }
+
       const token = await exchangeToken(
-        new URLSearchParams({
-          client_id: safeSecretValue(GOOGLE_OAUTH_WEB_CLIENT_ID, "GOOGLE_OAUTH_WEB_CLIENT_ID", "server_oauth_configuration"),
-          client_secret: safeSecretValue(GOOGLE_OAUTH_WEB_CLIENT_SECRET, "GOOGLE_OAUTH_WEB_CLIENT_SECRET", "server_oauth_configuration"),
-          code,
-          grant_type: "authorization_code",
-          redirect_uri: redirectUri,
-        }),
+        tokenParams,
         "authorization_code",
       );
 
