@@ -158,7 +158,6 @@ const TaskTagStripBase = () => {
           }
           aria-label={isCollapsed ? "タグ一覧を開く" : "タグ一覧を閉じる"}
           aria-expanded={!isCollapsed}
-          title={isCollapsed ? "タグ一覧を開く" : "タグ一覧を閉じる"}
         >
           <Tag className="h-4 w-4 shrink-0" />
           {isCollapsed ? (
