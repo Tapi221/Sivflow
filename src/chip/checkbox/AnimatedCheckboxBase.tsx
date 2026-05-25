@@ -13,6 +13,9 @@ export type AnimatedCheckboxBaseProps = {
   indeterminate?: boolean;
 };
 
+const CALENDAR_CHECKBOX_SOFT_COLOR = "#8d8d8d";
+const CALENDAR_CHECKBOX_BORDER_COLOR = "#d7d7d7";
+
 export const AnimatedCheckboxBase = ({
   checked,
   color,
@@ -26,7 +29,8 @@ export const AnimatedCheckboxBase = ({
   let radiusClass = "rounded-full";
   if (shape === "square") radiusClass = "rounded-[4px]";
 
-  let strokeColor = color;
+  const resolvedColor = variant === "filled" ? CALENDAR_CHECKBOX_SOFT_COLOR : color;
+  let strokeColor = resolvedColor;
   if (variant === "filled") strokeColor = "white";
 
   let strokeDashoffset = 16;
@@ -35,10 +39,10 @@ export const AnimatedCheckboxBase = ({
   let showFill = active && variant === "filled";
   if (variant === "soft" && active) showFill = true;
 
-  let fillColor = color;
+  let fillColor = resolvedColor;
   if (variant === "soft") fillColor = "color-mix(in srgb, var(--checkbox-color) 16%, transparent)";
 
-  const rootStyle = { "--checkbox-color": color } as CSSProperties;
+  const rootStyle = { "--checkbox-color": resolvedColor } as CSSProperties;
 
   return (
     <span className={cn("relative h-3.5 w-3.5 shrink-0", className)} style={rootStyle}>
@@ -49,7 +53,7 @@ export const AnimatedCheckboxBase = ({
           active && variant === "filled" && "scale-75 opacity-0",
           (!active || variant !== "filled") && "scale-100 opacity-100",
         )}
-        style={{ borderColor: color }}
+        style={{ borderColor: active ? resolvedColor : CALENDAR_CHECKBOX_BORDER_COLOR }}
       />
 
       <span
@@ -72,7 +76,7 @@ export const AnimatedCheckboxBase = ({
             checked && "scale-100 opacity-100",
             !checked && "scale-0 opacity-0",
           )}
-          style={{ backgroundColor: color }}
+          style={{ backgroundColor: resolvedColor }}
         />
       )}
 
