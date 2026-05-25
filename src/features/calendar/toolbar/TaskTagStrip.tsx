@@ -19,11 +19,6 @@ type TagContextMenuTriggerEvent =
   | ReactPointerEvent<HTMLElement>;
 
 const TAG_COLOR_CONTEXT_PANEL_ID = "tag-color-context-menu";
-const TAG_PANEL_SPRING_CONFIG = {
-  tension: 260,
-  friction: 32,
-  clamp: true,
-};
 const TAG_PANEL_CONTENT_SPRING_CONFIG = {
   tension: 240,
   friction: 30,
@@ -138,10 +133,6 @@ const TaskTagStripBase = () => {
       />
     ) : null;
 
-  const panelSpring = useSpring({
-    flexGrow: isCollapsed ? 0 : 1,
-    config: TAG_PANEL_SPRING_CONFIG,
-  });
   const contentSpring = useSpring({
     opacity: isCollapsed ? 0 : 1,
     transform: isCollapsed ? "translateX(-4px)" : "translateX(0px)",
@@ -150,12 +141,11 @@ const TaskTagStripBase = () => {
 
   return (
     <>
-      <animated.div
-        style={panelSpring}
+      <div
         className={
           isCollapsed
             ? "flex h-8 min-w-0 shrink-0 items-center overflow-hidden rounded-xl border border-[#eeeeee] bg-white p-0.5 text-[#6d747f] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-            : "flex h-8 min-w-0 shrink-0 items-center overflow-hidden rounded-xl border border-transparent bg-white p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+            : "flex h-8 min-w-0 flex-1 items-center overflow-hidden rounded-xl border border-transparent bg-white p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
         }
       >
         <button
@@ -265,7 +255,7 @@ const TaskTagStripBase = () => {
             </div>
           </animated.div>
         ) : null}
-      </animated.div>
+      </div>
 
       {contextMenuElement ? createPortal(contextMenuElement, document.body) : null}
     </>
