@@ -43,6 +43,7 @@ export type Translations = {
   // ビューモード
   viewMonth: string;
   viewWeek: string;
+  viewThreeDays: string;
   viewDay: string;
   viewsLabel: string;
 
@@ -101,6 +102,7 @@ const ja: Translations = {
 
   viewMonth: "月",
   viewWeek: "週",
+  viewThreeDays: "3日",
   viewDay: "日",
   viewsLabel: "表示形式",
 
@@ -156,6 +158,7 @@ const en: Translations = {
 
   viewMonth: "Month",
   viewWeek: "Week",
+  viewThreeDays: "3 Days",
   viewDay: "Day",
   viewsLabel: "Views",
 
