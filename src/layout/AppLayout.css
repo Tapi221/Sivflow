@@ -176,15 +176,20 @@
   background: var(--app-active-tab-bg);
 }
 
+.app-layout--folders .workspace-shell--with-tabs,
 .app-layout-route--schedule .workspace-shell--with-tabs {
   grid-template-rows: minmax(0, 1fr);
 }
 
+.app-layout--folders .workspace-shell__tabs,
+.app-layout--folders .workspace-breadcrumb-bar,
 .app-layout-route--schedule .workspace-shell__tabs,
 .app-layout-route--schedule .workspace-breadcrumb-bar {
   display: none;
 }
 
+.app-layout--folders .workspace-shell__main,
+.app-layout--folders .app-layout__main,
 .app-layout-route--schedule .workspace-shell__main,
 .app-layout-route--schedule .app-layout__main {
   grid-row: 1;
