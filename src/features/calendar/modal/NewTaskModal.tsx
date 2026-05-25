@@ -2,9 +2,7 @@ import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import type { TaskCreateInput, TaskPriority, TaskStatus, TaskSubtask } from "../task/task.types";
-import {CATEGORY_CONFIG,
-  PRIORITY_CONFIG,
-  TASK_COLUMNS,} from "../task/task.types";
+import { CATEGORY_CONFIG, PRIORITY_CONFIG, TASK_COLUMNS } from "../task/task.types";
 
 type TaskCategoryOption = {
   id: string;
@@ -358,16 +356,20 @@ export const NewTaskModal = ({
         </div>
 
         <div className="px-7 pb-8 pt-3">
-          <input
-            autoFocus
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="タスクタイトル"
-            aria-label="タスクタイトル"
-            className="w-full border-0 bg-transparent px-0 text-[22px] font-semibold leading-tight tracking-[-0.035em] text-[#1f2328] outline-none placeholder:text-[#a1a1aa]"
-          />
+          <label className="block">
+            <span className="mb-1.5 block px-1 text-[11px] font-semibold text-[#8e8e93]">
+              タイトル
+            </span>
+            <input
+              autoFocus
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={handleKeyDown}
+              aria-label="タスクタイトル"
+              className="w-full rounded-[12px] border border-[#e3e3e8] bg-[#fbfbfd] px-3 py-2 text-[22px] font-semibold leading-tight tracking-[-0.035em] text-[#1f2328] outline-none transition-colors focus:border-[#7c83e6] focus:bg-white"
+            />
+          </label>
 
           <div className="mt-7 flex flex-wrap items-end gap-2">
             <IOSPicker
@@ -443,10 +445,9 @@ export const NewTaskModal = ({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="メモ、背景、完了条件など"
                 aria-label="タスク詳細"
                 rows={5}
-                className="min-h-[118px] w-full resize-none rounded-[12px] border border-[#e3e3e8] bg-[#fbfbfd] px-3 py-2.5 text-[13px] leading-5 text-[#2f3337] outline-none transition-colors placeholder:text-[#b3b3bb] focus:border-[#7c83e6] focus:bg-white"
+                className="min-h-[118px] w-full resize-none rounded-[12px] border border-[#e3e3e8] bg-[#fbfbfd] px-3 py-2.5 text-[13px] leading-5 text-[#2f3337] outline-none transition-colors focus:border-[#7c83e6] focus:bg-white"
               />
             </label>
 
@@ -476,7 +477,7 @@ export const NewTaskModal = ({
                         onChange={(e) => updateSubtaskTitle(subtask.id, e.target.value)}
                         onKeyDown={handleKeyDown}
                         aria-label="サブタスク名"
-                        className="min-w-0 flex-1 border-0 bg-transparent text-[12px] text-[#2f3337] outline-none placeholder:text-[#b3b3bb]"
+                        className="min-w-0 flex-1 border-0 bg-transparent text-[12px] text-[#2f3337] outline-none"
                       />
                       <button
                         type="button"
@@ -491,6 +492,9 @@ export const NewTaskModal = ({
                 </div>
 
                 <div className={subtasks.length > 0 ? "mt-2 flex items-center gap-2" : "flex items-center gap-2"}>
+                  <span className="shrink-0 pl-1 text-[11px] font-medium text-[#8e8e93]">
+                    追加
+                  </span>
                   <input
                     type="text"
                     value={subtaskDraft}
@@ -504,9 +508,8 @@ export const NewTaskModal = ({
 
                       handleKeyDown(e);
                     }}
-                    placeholder="サブタスクを追加"
                     aria-label="追加するサブタスク"
-                    className="h-8 min-w-0 flex-1 rounded-[9px] border border-[#e3e3e8] bg-white px-2.5 text-[12px] text-[#2f3337] outline-none transition-colors placeholder:text-[#b3b3bb] focus:border-[#7c83e6]"
+                    className="h-8 min-w-0 flex-1 rounded-[9px] border border-[#e3e3e8] bg-white px-2.5 text-[12px] text-[#2f3337] outline-none transition-colors focus:border-[#7c83e6]"
                   />
                   <button
                     type="button"
