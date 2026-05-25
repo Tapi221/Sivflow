@@ -1,9 +1,8 @@
 import React from "react";
 
 import { InkLayer, InkToolbar } from "@/components/ink/InkLayer";
-import type { InkDocument, InkEditTool } from "@/components/ink/inkTypes";
-import type {InkHistoryState,
-  InkLayerHandle,} from "@/components/ink/types";
+import type { InkDocument, InkEditTool } from "@/components/ink/ink.types";
+import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.types";
 
 interface FlashcardInkOverlayProps {
   extraHeaderRight?: React.ReactNode;
