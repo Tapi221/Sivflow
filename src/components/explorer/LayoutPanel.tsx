@@ -2,8 +2,7 @@ import { useMemo } from "react";
 
 import { SurfaceButton } from "@/components/ui/surface-button";
 
-import {type ExplorerLayoutMode,
-  useExplorerStore,} from "@/hooks/folder/useExplorerStore";
+import { type ExplorerLayoutMode, useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 
 const LayoutListIcon = () => (
