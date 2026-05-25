@@ -1,5 +1,4 @@
 import { ReactNode, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { CalendarIcon, ChevronDownIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "../../components/icons/icons.sidebar";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
@@ -10,7 +9,6 @@ import { cn } from "@/lib/utils";
 type SidebarNavItem = {
   id: string;
   label: string;
-  to?: string;
   icon: ReactNode;
   sectionKey?: "home" | "review" | "library" | "schedule" | "settings";
   onClick?: () => void;
@@ -22,21 +20,18 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "home",
     label: "Home",
-    to: "/library?home=1",
     icon: <HomeIcon className="sidebar-nav-icon" />,
     sectionKey: "home",
   },
   {
     id: "library",
     label: "Library",
-    to: "/library/pdf",
     icon: <LibraryIcon className="sidebar-nav-icon" />,
     sectionKey: "library",
   },
   {
     id: "calendar",
     label: "Schedule",
-    to: "/schedule",
     icon: <CalendarIcon className="sidebar-nav-icon" />,
     sectionKey: "schedule",
   },
@@ -54,20 +49,11 @@ export const SidebarMobile = ({
 }: {
   onOpenSettings?: () => void;
 }) => {
-  const navigate = useNavigate();
-  const { pathname, search } = useLocation();
-
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
+  const [selectedLibraryChild, setSelectedLibraryChild] = useState("pdf");
 
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
   const openSectionTab = useWorkspaceTabsStore((s) => s.openSectionTab);
-
-  const selectedLibraryChild =
-    pathname === "/library/flashcard"
-      ? "flashcards"
-      : pathname === "/library/pdf" || pathname === "/library"
-        ? "pdf"
-        : new URLSearchParams(search).get("libraryType");
 
   const handleClick = (item: SidebarNavItem) => {
     item.onClick?.();
@@ -83,21 +69,16 @@ export const SidebarMobile = ({
     if (item.sectionKey) {
       openSectionTab(item.sectionKey);
     }
-
-    if (item.to) {
-      navigate(item.to);
-    }
   };
 
   const openLibraryChild = (type: string) => {
+    setSelectedLibraryChild(type);
     openSectionTab("library");
-    navigate(type === "flashcards" ? "/library/flashcard" : "/library/pdf");
   };
 
   const openSettings = () => {
     onOpenSettings?.();
     openSectionTab("settings");
-    navigate("/settings");
   };
 
   return (
