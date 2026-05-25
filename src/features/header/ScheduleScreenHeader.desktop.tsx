@@ -46,22 +46,24 @@ export const ScheduleScreenHeaderDesktop = ({
         <h1 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
           {titleLabel}
         </h1>
+
+        <div className="flex shrink-0 items-center gap-2">
+          <ViewModeDropdown
+            value={selectedViewMode}
+            onChange={onSelectViewMode}
+            options={viewOptions}
+          />
+
+          <TodayBar
+            onPrevious={onPrevious}
+            onNext={onNext}
+            onToday={onToday}
+          />
+        </div>
       </div>
 
-      <div className="flex items-center gap-2 pr-20">
-        <ViewModeDropdown
-          value={selectedViewMode}
-          onChange={onSelectViewMode}
-          options={viewOptions}
-        />
-
-        <TodayBar
-          onPrevious={onPrevious}
-          onNext={onNext}
-          onToday={onToday}
-        />
-
-        {canShowDayDetailPanel ? (
+      {canShowDayDetailPanel ? (
+        <div className="flex flex-1 justify-end pr-20">
           <button
             type="button"
             className={DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS}
@@ -72,8 +74,8 @@ export const ScheduleScreenHeaderDesktop = ({
           >
             <SidebarPanelIcon className="h-4 w-4 -scale-x-100" />
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 };
