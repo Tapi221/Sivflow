@@ -1,4 +1,4 @@
-import { useMemo, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { TaskPriorityBadge } from "@/chip/budge/TaskPriorityBadge";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { TrashIcon } from "@/components/icons/icons.card";
@@ -22,11 +22,51 @@ type TaskGroup = {
   color?: string;
 };
 
+type ColId = "done" | "title" | "priority" | "category" | "dueDate" | "actions";
+
+type ColDef = {
+  id: ColId;
+  label: string;
+  width: number;
+  minWidth: number;
+  resizable: boolean;
+};
+
+const STORAGE_KEY = "calendar-task-list:col-widths:v1";
+
+const DEFAULT_COLS: ColDef[] = [
+  { id: "done", label: "", width: 32, minWidth: 32, resizable: false },
+  { id: "title", label: "タイトル", width: 520, minWidth: 160, resizable: true },
+  { id: "priority", label: "優先度", width: 96, minWidth: 72, resizable: true },
+  { id: "category", label: "カテゴリ", width: 160, minWidth: 100, resizable: true },
+  { id: "dueDate", label: "期日", width: 150, minWidth: 110, resizable: true },
+  { id: "actions", label: "", width: 40, minWidth: 40, resizable: false },
+];
+
 const STATUS_LABEL: Record<TaskStatus, string> = {
   not_started: "未着手",
   in_progress: "進行中",
   review: "レビュー",
   done: "完了",
+};
+
+const clamp = (value: number, min: number) => Math.max(value, min);
+
+const loadCols = (): ColDef[] => {
+  if (typeof window === "undefined") return DEFAULT_COLS;
+
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULT_COLS;
+
+    const stored = JSON.parse(raw) as Partial<Record<ColId, number>>;
+    return DEFAULT_COLS.map((col) => {
+      const width = stored[col.id];
+      return typeof width === "number" ? { ...col, width: clamp(width, col.minWidth) } : col;
+    });
+  } catch {
+    return DEFAULT_COLS;
+  }
 };
 
 const getCategoryConfig = (category: string) => {
@@ -39,6 +79,24 @@ const getCategoryConfig = (category: string) => {
   );
 };
 
+type ResizeHandleProps = {
+  colId: ColId;
+  onStart: (event: ReactPointerEvent<HTMLDivElement>, colId: ColId) => void;
+  onReset: (colId: ColId) => void;
+};
+
+const ResizeHandle = ({ colId, onStart, onReset }: ResizeHandleProps) => (
+  <div
+    role="separator"
+    aria-orientation="vertical"
+    className="absolute right-0 top-0 z-10 flex h-full w-3 cursor-col-resize touch-none select-none items-center justify-center group/resize-handle"
+    onDoubleClick={() => onReset(colId)}
+    onPointerDown={(event) => onStart(event, colId)}
+  >
+    <div className="h-4 w-px bg-[#e5e7eb] transition-colors group-hover/resize-handle:bg-[#b8bcc6]" />
+  </div>
+);
+
 export const TaskListView = ({
   tasks,
   groupMode,
@@ -48,8 +106,36 @@ export const TaskListView = ({
   onDeleteTask,
   onTaskContextMenu,
 }: TaskListViewProps) => {
+  const resizeCleanupRef = useRef<(() => void) | null>(null);
+  const [cols, setCols] = useState<ColDef[]>(loadCols);
+  const [isResizing, setIsResizing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const widthMap = Object.fromEntries(cols.map((col) => [col.id, col.width]));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(widthMap));
+  }, [cols]);
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const previousCursor = document.body.style.cursor;
+    const previousUserSelect = document.body.style.userSelect;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    return () => {
+      document.body.style.cursor = previousCursor;
+      document.body.style.userSelect = previousUserSelect;
+    };
+  }, [isResizing]);
+
+  useEffect(() => () => {
+    resizeCleanupRef.current?.();
+  }, []);
 
   const grouped = useMemo<TaskGroup[]>(() => {
     if (groupMode === "status") {
@@ -83,6 +169,49 @@ export const TaskListView = ({
     return Array.from(sectionGroups.values());
   }, [groupMode, tasks]);
 
+  const gridMinWidth = useMemo(() => cols.reduce((total, col) => total + col.width, 0), [cols]);
+  const gridTemplateColumns = useMemo(() => cols.map((col) => `${col.width}px`).join(" "), [cols]);
+  const gridStyle = useMemo<CSSProperties>(() => ({ gridTemplateColumns }), [gridTemplateColumns]);
+
+  const handleResizeStart = (event: ReactPointerEvent<HTMLDivElement>, colId: ColId) => {
+    const target = cols.find((col) => col.id === colId);
+    if (!target?.resizable) return;
+
+    resizeCleanupRef.current?.();
+    event.preventDefault();
+    event.stopPropagation();
+
+    const startX = event.clientX;
+    const startWidth = target.width;
+    setIsResizing(true);
+
+    const onMove = (pointerEvent: PointerEvent) => {
+      setCols((currentCols) => currentCols.map((col) => {
+        if (col.id !== colId) return col;
+        return { ...col, width: clamp(startWidth + pointerEvent.clientX - startX, col.minWidth) };
+      }));
+    };
+
+    const cleanup = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      setIsResizing(false);
+      resizeCleanupRef.current = null;
+    };
+
+    const onUp = () => cleanup();
+    resizeCleanupRef.current = cleanup;
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp, { once: true });
+  };
+
+  const handleResizeReset = (colId: ColId) => {
+    const defaultCol = DEFAULT_COLS.find((col) => col.id === colId);
+    if (!defaultCol) return;
+
+    setCols((currentCols) => currentCols.map((col) => (col.id === colId ? { ...col, width: defaultCol.width } : col)));
+  };
+
   const startEdit = (task: Task) => {
     setEditingId(task.id);
     setEditingTitle(task.title);
@@ -97,31 +226,33 @@ export const TaskListView = ({
     setEditingTitle("");
   };
 
+  const renderEmptyCells = () => cols.slice(2).map((col) => <div key={col.id} />);
+
   return (
     <div className="min-h-0 flex-1 overflow-auto bg-white">
-      <div className="sticky top-0 z-20 grid min-w-[900px] grid-cols-[32px_minmax(260px,1fr)_96px_160px_150px_40px] border-b border-[#eeeeee] bg-white text-[11px] font-semibold uppercase tracking-[0.04em] text-[#8f929c]">
-        <div className="h-8" />
-        <div className="flex h-8 items-center pr-3">タイトル</div>
-        <div className="flex h-8 items-center pr-3">優先度</div>
-        <div className="flex h-8 items-center pr-3">カテゴリ</div>
-        <div className="flex h-8 items-center pr-3">期日</div>
-        <div className="h-8" />
+      <div
+        className="sticky top-0 z-20 grid border-b border-[#eeeeee] bg-white text-[11px] font-semibold uppercase tracking-[0.04em] text-[#8f929c]"
+        style={{ ...gridStyle, minWidth: `${gridMinWidth}px` }}
+      >
+        {cols.map((col) => (
+          <div key={col.id} className="relative flex h-8 items-center pr-3">
+            {col.label}
+            {col.resizable && <ResizeHandle colId={col.id} onStart={handleResizeStart} onReset={handleResizeReset} />}
+          </div>
+        ))}
       </div>
 
-      <div className="min-w-[900px]">
+      <div style={{ minWidth: `${gridMinWidth}px` }}>
         {grouped.length === 0 ? (
-          <div className="grid grid-cols-[32px_minmax(260px,1fr)_96px_160px_150px_40px] border-b border-[#f5f5f5]">
+          <div className="grid border-b border-[#f5f5f5]" style={gridStyle}>
             <div />
             <div className="py-2 pr-3 text-[12px] italic text-[#c7c7cc]">タスクなし</div>
-            <div />
-            <div />
-            <div />
-            <div />
+            {renderEmptyCells()}
           </div>
         ) : (
           grouped.map((group) => (
             <section key={group.id}>
-              <div className="grid grid-cols-[32px_minmax(260px,1fr)_96px_160px_150px_40px] border-b border-[#f0f0f0] bg-white">
+              <div className="grid border-b border-[#f0f0f0] bg-white" style={gridStyle}>
                 <div />
                 <div className="flex items-center gap-2 py-2 pr-3 text-[12px] font-semibold text-[#8f929c]">
                   {groupMode === "section" && (
@@ -133,20 +264,14 @@ export const TaskListView = ({
                   {group.label}
                   <span className="text-[11px] font-medium text-[#b0b4be]">{group.tasks.length}</span>
                 </div>
-                <div />
-                <div />
-                <div />
-                <div />
+                {renderEmptyCells()}
               </div>
 
               {group.tasks.length === 0 ? (
-                <div className="grid grid-cols-[32px_minmax(260px,1fr)_96px_160px_150px_40px] border-b border-[#f5f5f5]">
+                <div className="grid border-b border-[#f5f5f5]" style={gridStyle}>
                   <div />
                   <div className="py-2 pr-3 text-[12px] italic text-[#c7c7cc]">タスクなし</div>
-                  <div />
-                  <div />
-                  <div />
-                  <div />
+                  {renderEmptyCells()}
                 </div>
               ) : (
                 group.tasks.map((task) => {
@@ -156,8 +281,9 @@ export const TaskListView = ({
                   return (
                     <div
                       key={task.id}
-                      className={`group/row grid grid-cols-[32px_minmax(260px,1fr)_96px_160px_150px_40px] border-b border-[#f5f5f5] transition-colors hover:bg-[#fafafa] ${isDone ? "opacity-50" : ""}`}
-                      onContextMenu={onTaskContextMenu ? (event) => onTaskContextMenu(event, task) : undefined}
+                      className={`group/row grid border-b border-[#f5f5f5] transition-colors hover:bg-[#fafafa] ${isDone ? "opacity-50" : ""}`}
+                      style={gridStyle}
+                      onContextMenu={onTaskContextMenu ? (contextMenuEvent) => onTaskContextMenu(contextMenuEvent, task) : undefined}
                     >
                       <div className="flex items-center justify-center">
                         <button
@@ -180,15 +306,15 @@ export const TaskListView = ({
                             autoFocus
                             type="text"
                             value={editingTitle}
-                            onChange={(event) => setEditingTitle(event.target.value)}
+                            onChange={(changeEvent) => setEditingTitle(changeEvent.target.value)}
                             onBlur={() => finishEdit(task)}
-                            onKeyDown={(event) => {
-                              if (event.key === "Enter") {
-                                event.preventDefault();
+                            onKeyDown={(keyboardEvent) => {
+                              if (keyboardEvent.key === "Enter") {
+                                keyboardEvent.preventDefault();
                                 finishEdit(task);
                               }
-                              if (event.key === "Escape") {
-                                event.preventDefault();
+                              if (keyboardEvent.key === "Escape") {
+                                keyboardEvent.preventDefault();
                                 setEditingId(null);
                                 setEditingTitle("");
                               }
@@ -223,8 +349,8 @@ export const TaskListView = ({
                         <input
                           type="date"
                           value={task.dueDate ?? ""}
-                          onChange={(event) => {
-                            onChangeTaskDueDate?.(task.id, event.target.value || null);
+                          onChange={(changeEvent) => {
+                            onChangeTaskDueDate?.(task.id, changeEvent.target.value || null);
                           }}
                           className="w-full rounded-md border border-transparent bg-transparent px-1 py-1 text-[12px] text-[#8f929c] outline-none hover:border-[#e5e7eb] hover:bg-white focus:border-[#007aff] focus:bg-white focus:text-[#1c1c1e]"
                         />
