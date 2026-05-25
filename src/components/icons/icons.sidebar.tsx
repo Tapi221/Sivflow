@@ -149,16 +149,23 @@ export const CalendarIcon = ({ className, ...props }: SidebarIconProps) => (
 export const LibraryIcon = ({ className, ...props }: SidebarIconProps) => (
   <IconShell className={className} {...props}>
     <path
-      d="M3.75 8.35C3.75 7.025 4.825 5.95 6.15 5.95H8.925C9.52 5.95 10.092 6.177 10.525 6.584L11.55 7.55C11.829 7.813 12.198 7.96 12.581 7.96H17.85C19.175 7.96 20.25 9.035 20.25 10.36V11.05"
+      d="M4 9.25V8.2C4 6.984 4.984 6 6.2 6H8.95C9.491 6 10.012 6.202 10.412 6.566L11.435 7.497C11.743 7.777 12.144 7.932 12.561 7.932H17.8C19.016 7.932 20 8.916 20 10.132V11.25"
       stroke="currentColor"
-      strokeWidth="1.5"
+      strokeWidth="1.55"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
-      d="M3.85 10.85H20.15C20.701 10.85 21.121 11.344 21.032 11.887L19.94 18.557C19.748 19.731 18.733 20.594 17.543 20.594H6.457C5.267 20.594 4.252 19.731 4.06 18.557L2.968 11.887C2.879 11.344 3.299 10.85 3.85 10.85Z"
+      d="M4.25 10.75H19.75C20.44 10.75 21 11.31 21 12V17.8C21 19.016 20.016 20 18.8 20H5.2C3.984 20 3 19.016 3 17.8V12C3 11.31 3.56 10.75 4.25 10.75Z"
       stroke="currentColor"
-      strokeWidth="1.5"
+      strokeWidth="1.55"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M7 14.75H17"
+      stroke="currentColor"
+      strokeWidth="1.55"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
