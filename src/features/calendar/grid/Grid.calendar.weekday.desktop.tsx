@@ -139,7 +139,7 @@ const CurrentTimeIndicator = ({
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 z-20"
+      className="pointer-events-none absolute inset-x-0 z-10"
       style={{
         top: `calc(${currentMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(--calendar-hour-row-height))`,
       }}
@@ -285,7 +285,7 @@ export const CalendarWeekDayGrid = ({
         onScroll={onScroll}
       >
         <div className="grid bg-white" style={timelineGridStyle}>
-          <div className="sticky left-0 z-20 border-r border-[#eeeeee] bg-white shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]">
+          <div className="sticky left-0 z-40 overflow-hidden border-r border-[#eeeeee] bg-white shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]">
             {HOURS.map((hour) => (
               <div
                 key={hour}
