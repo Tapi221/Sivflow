@@ -127,24 +127,24 @@ export const TaskTagStrip = () => {
         <button
           type="button"
           onClick={handleExpand}
-          className="flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-[#0078d4] bg-white px-2.5 text-[#1f1f1f] shadow-[0_1px_1px_rgba(0,0,0,0.04)] transition-[background-color,border-color,box-shadow] hover:border-[#006cbe] hover:bg-[#f3f9ff] hover:shadow-[0_0_0_1px_rgba(0,120,212,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0078d4]/25"
+          className="flex h-8 shrink-0 items-center gap-1.5 rounded-xl border border-[#eeeeee] bg-white px-2.5 text-[#6d747f] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#fafafa] hover:text-[#3f4652] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
           aria-label="タグ一覧を開く"
           title="タグ一覧を開く"
         >
-          <Tag className="h-4 w-4 text-[#0078d4]" />
-          <ChevronRight className="h-3.5 w-3.5 text-[#0078d4]" />
+          <Tag className="h-4 w-4" />
+          <ChevronRight className="h-3.5 w-3.5" />
         </button>
       ) : (
-        <div className="flex h-8 min-w-0 flex-1 items-center rounded-md border border-[#d0d0d0] bg-white p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+        <div className="flex h-8 min-w-0 flex-1 items-center rounded-xl bg-white p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
           <button
             type="button"
             onClick={handleCollapse}
-            className="mr-1 flex h-7 shrink-0 items-center gap-1 rounded-md border border-[#0078d4] bg-white px-2 text-[#1f1f1f] transition-[background-color,border-color,box-shadow] hover:border-[#006cbe] hover:bg-[#f3f9ff] hover:shadow-[0_0_0_1px_rgba(0,120,212,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0078d4]/25"
+            className="mr-1 flex h-7 shrink-0 items-center gap-1 rounded-lg px-2 text-[#6d747f] transition-colors hover:bg-[#f5f6f8] hover:text-[#3f4652] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
             aria-label="タグ一覧を閉じる"
             title="タグ一覧を閉じる"
           >
-            <Tag className="h-4 w-4 text-[#0078d4]" />
-            <ChevronLeft className="h-3.5 w-3.5 text-[#0078d4]" />
+            <Tag className="h-4 w-4" />
+            <ChevronLeft className="h-3.5 w-3.5" />
           </button>
 
           <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
@@ -156,7 +156,7 @@ export const TaskTagStrip = () => {
                   <button
                     key={tag.id}
                     type="button"
-                    className="group shrink-0 max-w-[180px] cursor-context-menu rounded-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0078d4]/25"
+                    className="group shrink-0 max-w-[180px] cursor-context-menu rounded-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
                     aria-label={`${tag.name}の色を変更`}
                     onClick={() => setContextMenu(null)}
                     onPointerDownCapture={(event) => {
@@ -176,7 +176,7 @@ export const TaskTagStrip = () => {
 
               {isCreating ? (
                 <form
-                  className="flex h-7 shrink-0 items-center gap-1 rounded-md border border-[#c8c8c8] bg-white px-2 shadow-[0_1px_1px_rgba(0,0,0,0.04)]"
+                  className="flex h-7 shrink-0 items-center gap-1 rounded-lg border border-[#eeeeee] bg-white px-2 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
                   onSubmit={(event) => {
                     void handleSubmit(event);
                   }}
@@ -192,13 +192,13 @@ export const TaskTagStrip = () => {
                     }}
                     disabled={isSaving}
                     placeholder="タグ名"
-                    className="h-full w-24 min-w-0 bg-transparent text-[12px] font-medium text-[#1f1f1f] outline-none placeholder:text-[#8f8f8f]"
+                    className="h-full w-24 min-w-0 bg-transparent text-[12px] font-medium text-[#3f4652] outline-none placeholder:text-[#a6adba]"
                   />
 
                   <button
                     type="submit"
                     disabled={!tagName.trim() || isSaving}
-                    className="grid h-5 w-5 place-items-center rounded-sm border border-[#0078d4] bg-white text-[#0078d4] transition-colors hover:bg-[#f3f9ff] disabled:cursor-default disabled:border-[#c8c8c8] disabled:text-[#9f9f9f] disabled:opacity-60"
+                    className="grid h-5 w-5 place-items-center rounded-full text-[#8c8c8c] transition-colors hover:bg-[#f2f2f2] disabled:cursor-default disabled:opacity-40"
                     aria-label="タグを追加"
                   >
                     <Plus className="h-3.5 w-3.5" />
@@ -208,7 +208,7 @@ export const TaskTagStrip = () => {
                     type="button"
                     onClick={handleCancelCreate}
                     disabled={isSaving}
-                    className="grid h-5 w-5 place-items-center rounded-sm border border-[#c8c8c8] bg-white text-[#1f1f1f] transition-colors hover:border-[#9f9f9f] hover:bg-[#f7f7f7] disabled:cursor-default disabled:opacity-50"
+                    className="grid h-5 w-5 place-items-center rounded-full text-[#a0a0a0] transition-colors hover:bg-[#f2f2f2] disabled:cursor-default disabled:opacity-40"
                     aria-label="タグ追加をキャンセル"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -221,7 +221,7 @@ export const TaskTagStrip = () => {
                     setContextMenu(null);
                     setIsCreating(true);
                   }}
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-md border border-[#c8c8c8] bg-white text-[#1f1f1f] shadow-[0_1px_1px_rgba(0,0,0,0.04)] transition-colors hover:border-[#9f9f9f] hover:bg-[#f7f7f7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0078d4]/25"
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-[#eeeeee] bg-white text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:text-[#5f656d]"
                   aria-label="タグを追加"
                 >
                   <Plus className="h-4 w-4" />
