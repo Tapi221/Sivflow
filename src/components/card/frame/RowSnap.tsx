@@ -88,6 +88,5 @@ export const RowSnap = ({
     };
   }, []);
 
-  // eslint-disable-next-line react-hooks/refs -- render prop receives callback only; ref.current is accessed inside effects/callbacks, not render.
   return <>{children({ snapPaddingBottomPx, snapRef: setSnapRef })}</>;
 };
