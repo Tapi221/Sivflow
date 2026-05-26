@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GoogleCalendarSyncEngine } from "../../../../src/features/calendar/googlecalendar-sync/GoogleCalendarSyncEngine";
-import type { GCalSilentReconnectResult, GCalSyncEngineOptions, GCalSyncStartContext, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "../../../../src/features/calendar/googlecalendar-integration/gcalSync.types";
+import { GoogleCalendarSyncEngine } from "@/features/calendar/googlecalendar-sync/GoogleCalendarSyncEngine";
+import type { GCalSilentReconnectResult, GCalSyncEngineOptions, GCalSyncStartContext, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 
 const CALENDAR_ID = "primary";
 const ACCENT_COLOR = "#4285f4";
