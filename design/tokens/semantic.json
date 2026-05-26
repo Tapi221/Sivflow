@@ -28,8 +28,7 @@
     "interactive": {
       "selectedSubtle": "#e7edf6",
       "selectedAccent": "{color.primary.700}",
-      "columnSelectedSubtle": "rgba(53, 80, 123, 0.14)",
-      "columnSelectedAccent": "{color.primary.800}"
+      "columnSelectedSubtle": "rgba(53, 80, 123, 0.14)"
     },
     "status": {
       "danger": "{color.status.danger}",
