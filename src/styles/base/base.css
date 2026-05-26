@@ -106,7 +106,7 @@
   ::-webkit-scrollbar-thumb {
     background: transparent;
     border-radius: 10px;
-    transition: background 0.16s ease;
+    transition: background 0ms ease;
   }
 
   :hover::-webkit-scrollbar-thumb,
