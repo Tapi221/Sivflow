@@ -1,5 +1,6 @@
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
+import { TogglePlanResult, type PlanResultMode } from "@/chip/toggle/Toggle.planresult";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
 type ScheduleScreenHeaderViewOption = {
@@ -11,7 +12,10 @@ type ScheduleScreenHeaderDesktopProps = {
   titleLabel: string;
   selectedViewMode: CalendarViewMode;
   viewOptions: readonly ScheduleScreenHeaderViewOption[];
+  planResultModes: readonly PlanResultMode[];
+  showPlanResultToggle: boolean;
   onSelectViewMode: (viewMode: CalendarViewMode) => void;
+  onChangePlanResultModes: (value: PlanResultMode[]) => void;
   onPrevious: () => void;
   onNext: () => void;
   onToday: () => void;
@@ -22,7 +26,10 @@ export const ScheduleScreenHeaderDesktop = ({
   titleLabel,
   selectedViewMode,
   viewOptions,
+  planResultModes,
+  showPlanResultToggle,
   onSelectViewMode,
+  onChangePlanResultModes,
   onPrevious,
   onNext,
   onToday,
@@ -47,6 +54,13 @@ export const ScheduleScreenHeaderDesktop = ({
             onNext={onNext}
             onToday={onToday}
           />
+
+          {showPlanResultToggle && (
+            <TogglePlanResult
+              value={planResultModes}
+              onChange={onChangePlanResultModes}
+            />
+          )}
         </div>
       </div>
     </div>
