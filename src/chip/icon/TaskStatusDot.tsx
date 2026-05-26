@@ -1,4 +1,4 @@
-import { CrownIcon } from "@/components/icons/icons.task";
+import { CrownIcon } from "@/chip/icons/icons.task";
 import { cn } from "@/lib/utils";
 
 type TaskStatusDotProps = {

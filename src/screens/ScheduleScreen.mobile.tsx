@@ -2,8 +2,8 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 import { format } from "date-fns";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
-import { SidebarPanelIcon } from "@/components/icons/icons.schedule";
-import { CalendarIcon } from "@/components/icons/icons.sidebar";
+import { SidebarPanelIcon } from "@/chip/icons/icons.schedule";
+import { CalendarIcon } from "@/chip/icons/icons.sidebar";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";

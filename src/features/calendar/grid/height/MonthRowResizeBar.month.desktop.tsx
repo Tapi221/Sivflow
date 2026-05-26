@@ -1,7 +1,7 @@
 import type { KeyboardEvent, PointerEvent } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
-import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
+import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 
 export type MonthRowResizeBarProps = {
   monthRowHeight: number;

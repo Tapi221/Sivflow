@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { TaskPriorityBadge } from "@/chip/budge/TaskPriorityBadge";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
-import { TrashIcon } from "@/components/icons/icons.card";
+import { TrashIcon } from "@/chip/icons/icons.card";
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "./task.types";
 import type { Task, TaskGroupMode, TaskStatus } from "./task.types";
 

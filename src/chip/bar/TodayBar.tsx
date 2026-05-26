@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
+import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { useDateFnsLocale, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";

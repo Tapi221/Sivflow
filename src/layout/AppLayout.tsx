@@ -1,6 +1,6 @@
 import { Suspense, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { SidebarOpenIcon } from "@/components/icons/icons.sidebar";
+import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { useScheduleScreenStore } from "@/features/calendar/header/useScheduleScreenStore";
 import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
 import { Sidebar } from "@/features/sidebar/Sidebar.desktop";

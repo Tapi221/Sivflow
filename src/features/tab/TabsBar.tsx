@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ComponentType, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
-import { PlusLineIcon } from "@/components/icons/icons.schedule";
-import { ClockIcon, HomeIcon, InboxIcon, LibraryIcon, SettingIcon } from "@/components/icons/icons.sidebar";
+import { PlusLineIcon } from "@/chip/icons/icons.schedule";
+import { ClockIcon, HomeIcon, InboxIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
 import { WorkspaceTabDndItem, WorkspaceTabDndList } from "@/features/dnd/tab/WorkspaceTabDnd";
 import { useWorkspaceTabDnd } from "@/features/dnd/tab/useWorkspaceTabDnd";
 import type { WorkspaceSidebarSection, WorkspaceTab } from "@/features/tab/Tab";

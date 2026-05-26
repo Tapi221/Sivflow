@@ -1,7 +1,7 @@
 import { type FormEvent, type KeyboardEvent, useCallback, useMemo, useRef, useState } from "react";
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { AddGoogleCalendarButton } from "@/chip/button/AddGoogleCalendarButton";
-import { CalendarIcon, TaskIcon } from "@/components/icons/icons.schedule";
+import { CalendarIcon, TaskIcon } from "@/chip/icons/icons.schedule";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
