@@ -17,7 +17,8 @@ import type { Card, CardSet, DocumentItem, SelectedExplorerItem } from "@/types"
 const LIBRARY_EXPANDED_FOLDERS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-folders";
 const LIBRARY_EXPANDED_CARD_SETS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-card-sets";
 const TREE_INDENT_PX = 16;
-const TREE_GUIDE_LEFT_OFFSET_PX = 10;
+const TREE_ROW_BASE_PADDING_LEFT_PX = 8;
+const TREE_GUIDE_LEFT_OFFSET_PX = TREE_ROW_BASE_PADDING_LEFT_PX + 8;
 const TREE_ROW_HEIGHT_CLASS_NAME = "h-7";
 const TREE_EMPTY_TEXT_CLASS_NAME = "px-3 py-2 text-[12px] font-medium leading-[1.45] tracking-normal text-[#b8b8b8]";
 
@@ -638,7 +639,7 @@ export const LibraryHierarchySidebar = () => {
                 ? "bg-[#f2f3f6] text-[#6d7380] shadow-[inset_0_0_0_1px_rgba(88,94,112,0.04)]"
                 : "text-[#8e949e] hover:bg-[#f7f7f7] hover:text-[#6d7380]",
             )}
-            style={{ paddingLeft: 2 + depth * TREE_INDENT_PX }}
+            style={{ paddingLeft: TREE_ROW_BASE_PADDING_LEFT_PX + depth * TREE_INDENT_PX }}
           >
             {isExpandable ? (
               <button
@@ -687,8 +688,8 @@ export const LibraryHierarchySidebar = () => {
   const isTrashSelected = activeLibrarySelection.selectedItem?.type === "trash";
 
   return (
-    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent px-2 pb-4 pt-2 font-sans text-[#2f2f2f] antialiased" aria-label="Library hierarchy explorer">
-      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-5 pl-0 pr-3 pt-2 font-sans text-[#2f2f2f] antialiased" aria-label="Library hierarchy explorer">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {isExplorerDataLoading ? (
           <div className="space-y-2 px-2 pt-1" aria-label="ライブラリを読み込み中">
             {Array.from({ length: 8 }, (_, index) => (
