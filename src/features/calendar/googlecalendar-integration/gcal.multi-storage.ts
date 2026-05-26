@@ -65,14 +65,17 @@ export const buildTokenExpiry = (expiresInSeconds?: number | null): number => {
   return Date.now() + Math.max(0, expiresInSeconds * 1000 - TOKEN_EXPIRY_SAFETY_MARGIN_MS);
 };
 
-const shouldStripLocalRefreshTokens = (): boolean => {
+const shouldStripLocalRefreshTokensOnRead = (): boolean => {
   return !isDesktopLikeRuntime();
 };
 
-const stripLocalRefreshTokensOutsideDesktop = (
+const shouldStripLocalRefreshTokensOnWrite = (): boolean => true;
+
+const stripLocalRefreshTokens = (
   accounts: StoredGoogleAccount[],
+  shouldStrip: boolean,
 ): StoredGoogleAccount[] => {
-  if (!shouldStripLocalRefreshTokens()) return accounts;
+  if (!shouldStrip) return accounts;
 
   return accounts.map((account) =>
     account.refreshToken === null ? account : { ...account, refreshToken: null },
@@ -97,9 +100,7 @@ const migrateFromLegacy = (): StoredGoogleAccount[] => {
     const accessToken = localStorage.getItem(LEGACY_ACCESS_TOKEN_KEY);
     const expiryRaw = localStorage.getItem(LEGACY_ACCESS_TOKEN_EXPIRY_KEY);
     const accessTokenExpiry = expiryRaw ? Number(expiryRaw) : null;
-    const refreshToken = shouldStripLocalRefreshTokens()
-      ? null
-      : localStorage.getItem(LEGACY_REFRESH_TOKEN_KEY);
+    const refreshToken = localStorage.getItem(LEGACY_REFRESH_TOKEN_KEY);
     const calIdsRaw = localStorage.getItem(LEGACY_CALENDAR_IDS_KEY);
     const selectedCalendarIds: string[] = calIdsRaw
       ? (JSON.parse(calIdsRaw) as string[])
@@ -118,7 +119,7 @@ const migrateFromLegacy = (): StoredGoogleAccount[] => {
       selectedCalendarIds,
     };
 
-    const accounts = stripLocalRefreshTokensOutsideDesktop([account]);
+    const accounts = [account];
 
     writeStoredAccounts(accounts);
     console.info(
@@ -142,9 +143,9 @@ export const readStoredAccounts = (): StoredGoogleAccount[] => {
     if (!Array.isArray(parsed)) return [];
 
     const accounts = parsed as StoredGoogleAccount[];
-    const sanitizedAccounts = stripLocalRefreshTokensOutsideDesktop(accounts);
+    const sanitizedAccounts = stripLocalRefreshTokens(accounts, shouldStripLocalRefreshTokensOnRead());
 
-    if (hasLocalRefreshToken(accounts) && shouldStripLocalRefreshTokens()) {
+    if (hasLocalRefreshToken(accounts) && shouldStripLocalRefreshTokensOnRead()) {
       writeStoredAccounts(sanitizedAccounts);
     }
 
@@ -158,7 +159,7 @@ export const writeStoredAccounts = (accounts: StoredGoogleAccount[]): void => {
   try {
     localStorage.setItem(
       MULTI_ACCOUNTS_KEY,
-      JSON.stringify(stripLocalRefreshTokensOutsideDesktop(accounts)),
+      JSON.stringify(stripLocalRefreshTokens(accounts, shouldStripLocalRefreshTokensOnWrite())),
     );
   } catch {
     // ignore quota errors

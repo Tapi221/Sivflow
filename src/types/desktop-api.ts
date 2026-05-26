@@ -18,6 +18,7 @@ export type DesktopOauthExchangeResult = {
   idToken?: string;
   // 初回認証時のみ返却されるリフレッシュトークン
   refreshToken?: string;
+  scope?: string;
 };
 
 export type DesktopImportFileOpenPayload = {
@@ -42,7 +43,10 @@ export interface DesktopOauthApi {
   refreshTokens(input: {
     clientId: string;
     refreshToken: string;
-  }): Promise<{ accessToken?: string; idToken?: string }>;
+  }): Promise<{ accessToken?: string; idToken?: string; scope?: string }>;
+  storeRefreshToken(input: { accountId: string; refreshToken: string }): Promise<void>;
+  readRefreshToken(accountId: string): Promise<string | null>;
+  deleteRefreshToken(accountId: string): Promise<void>;
   onCallback(
     handler: (payload: DesktopOauthCallbackPayload) => void,
   ): () => void;
@@ -50,6 +54,7 @@ export interface DesktopOauthApi {
 
 export interface DesktopFileApi {
   readImportFile(filePath: string): Promise<DesktopImportFileReadResult>;
+  selectImportFiles(): Promise<string[]>;
   onImportFileOpen(
     handler: (payload: DesktopImportFileOpenPayload) => void,
   ): () => void;

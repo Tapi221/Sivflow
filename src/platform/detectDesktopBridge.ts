@@ -26,6 +26,9 @@ export const hasDesktopBridge = (): boolean => {
     hasMethod(bridge.oauth?.exchangeIdToken) &&
     hasMethod(bridge.oauth?.exchangeTokens) &&
     hasMethod(bridge.oauth?.refreshTokens) &&
+    hasMethod(bridge.oauth?.storeRefreshToken) &&
+    hasMethod(bridge.oauth?.readRefreshToken) &&
+    hasMethod(bridge.oauth?.deleteRefreshToken) &&
     hasMethod(bridge.oauth?.onCallback) &&
     hasMethod(bridge.window?.minimize) &&
     hasMethod(bridge.window?.maximizeToggle) &&

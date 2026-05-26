@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as http from "node:http";
 import * as path from "node:path";
 import { fileURLToPath, URL } from "node:url";
-import { app, BrowserWindow, dialog, ipcMain, Menu, shell } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, Menu, safeStorage, shell } from "electron";
 import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI, DESKTOP_OAUTH_LOOPBACK, IPC_CHANNELS } from "../constants/electron/app";
 
 if (process.platform === "win32") {
@@ -36,6 +36,16 @@ type GoogleOauthTokenExchangeResult = {
   idToken?: string;
   // refresh_token は offline_access スコープ付きの初回認証時のみ返却される
   refreshToken?: string;
+  scope?: string;
+};
+
+type StoredRefreshTokenRecord = {
+  encryptedRefreshToken: string;
+  updatedAt: string;
+};
+
+type StoredRefreshTokenFile = {
+  records?: Record<string, StoredRefreshTokenRecord>;
 };
 
 app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
@@ -266,7 +276,11 @@ const startOauthLoopbackServer = (): Promise<void> =>
       );
       const fullUrl = requestUrl.toString();
 
-      console.info("[electron][oauth] callback received", { url: fullUrl });
+      console.info("[electron][oauth] callback received", {
+        pathname: requestUrl.pathname,
+        has_code: requestUrl.searchParams.has("code"),
+        has_error: requestUrl.searchParams.has("error"),
+      });
 
       if (
         req.method !== "GET" ||
@@ -329,6 +343,80 @@ const getDesktopOauthClientSecret = (): string | null => {
   return secret || null;
 };
 
+const getRefreshTokenStorePath = (): string => {
+  return path.join(app.getPath("userData"), "google-oauth-refresh-tokens.json");
+};
+
+const ensureSafeStorageAvailable = (): void => {
+  if (!safeStorage.isEncryptionAvailable()) {
+    throw new Error("Electron secure storage is not available for Google OAuth refresh tokens");
+  }
+};
+
+const readRefreshTokenStore = async (): Promise<StoredRefreshTokenFile> => {
+  try {
+    const raw = await fs.promises.readFile(getRefreshTokenStorePath(), "utf8");
+    const parsed = JSON.parse(raw) as StoredRefreshTokenFile;
+    return parsed && typeof parsed === "object" ? parsed : { records: {} };
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return { records: {} };
+    }
+    throw error;
+  }
+};
+
+const writeRefreshTokenStore = async (store: StoredRefreshTokenFile): Promise<void> => {
+  const storePath = getRefreshTokenStorePath();
+  await fs.promises.mkdir(path.dirname(storePath), { recursive: true });
+  await fs.promises.writeFile(storePath, JSON.stringify({ records: store.records ?? {} }, null, 2), "utf8");
+};
+
+const storeOauthRefreshToken = async ({
+  accountId,
+  refreshToken,
+}: {
+  accountId: string;
+  refreshToken: string;
+}): Promise<void> => {
+  ensureSafeStorageAvailable();
+
+  const store = await readRefreshTokenStore();
+  const records = store.records ?? {};
+
+  records[accountId] = {
+    encryptedRefreshToken: safeStorage.encryptString(refreshToken).toString("base64"),
+    updatedAt: new Date().toISOString(),
+  };
+
+  await writeRefreshTokenStore({ records });
+};
+
+const readOauthRefreshToken = async (accountId: string): Promise<string | null> => {
+  ensureSafeStorageAvailable();
+
+  const store = await readRefreshTokenStore();
+  const encryptedRefreshToken = store.records?.[accountId]?.encryptedRefreshToken;
+
+  if (!encryptedRefreshToken) {
+    return null;
+  }
+
+  return safeStorage.decryptString(Buffer.from(encryptedRefreshToken, "base64"));
+};
+
+const deleteOauthRefreshToken = async (accountId: string): Promise<void> => {
+  const store = await readRefreshTokenStore();
+  const records = store.records ?? {};
+
+  if (!(accountId in records)) {
+    return;
+  }
+
+  delete records[accountId];
+  await writeRefreshTokenStore({ records });
+};
+
 const exchangeGoogleOauthTokens = async (
   input: GoogleOauthTokenExchangeInput,
 ): Promise<GoogleOauthTokenExchangeResult> => {
@@ -369,6 +457,7 @@ const exchangeGoogleOauthTokens = async (
     error_description?: string;
     id_token?: string;
     refresh_token?: string;
+    scope?: string;
   } = {};
 
   try {
@@ -378,6 +467,7 @@ const exchangeGoogleOauthTokens = async (
       error_description?: string;
       id_token?: string;
       refresh_token?: string;
+      scope?: string;
     };
   } catch {
     payload = {};
@@ -404,6 +494,7 @@ const exchangeGoogleOauthTokens = async (
     idToken: payload.id_token,
     // Google は初回同意時のみ refresh_token を返す
     refreshToken: payload.refresh_token,
+    scope: payload.scope,
   };
 };
 
@@ -446,6 +537,7 @@ const refreshGoogleOauthAccessToken = async ({
   let payload: {
     access_token?: string;
     id_token?: string;
+    scope?: string;
     error?: string;
     error_description?: string;
   } = {};
@@ -474,6 +566,7 @@ const refreshGoogleOauthAccessToken = async ({
   return {
     accessToken: payload.access_token,
     idToken: payload.id_token,
+    scope: payload.scope,
   };
 };
 
@@ -688,6 +781,27 @@ const registerIpcHandlers = (): void => {
     IPC_CHANNELS.oauthRefreshTokens,
     async (_event, input: { clientId: string; refreshToken: string }) => {
       return refreshGoogleOauthAccessToken(input);
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.oauthStoreRefreshToken,
+    async (_event, input: { accountId: string; refreshToken: string }) => {
+      await storeOauthRefreshToken(input);
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.oauthReadRefreshToken,
+    async (_event, accountId: string) => {
+      return readOauthRefreshToken(accountId);
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.oauthDeleteRefreshToken,
+    async (_event, accountId: string) => {
+      await deleteOauthRefreshToken(accountId);
     },
   );
 
