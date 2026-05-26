@@ -301,25 +301,33 @@
     right: 0;
     z-index: 50;
     height: 10px;
-    cursor: default;
-    touch-action: none;
+    pointer-events: none;
     background: transparent;
   }
 
-  .calendar-month-row-boundary-resize-handle,
-  .calendar-month-row-boundary-resize-handle * {
-    cursor: default;
-  }
-
-  .calendar-month-row-boundary-resize-handle::before {
-    content: "↕";
-    position: absolute;
+  .calendar-month-row-boundary-resize-knob {
     left: 50%;
     top: 50%;
     z-index: 2;
-    display: flex;
     width: 22px;
     height: 16px;
+    pointer-events: auto;
+    cursor: row-resize;
+    touch-action: none;
+    transform: translate(-50%, -50%);
+  }
+
+  .calendar-month-row-boundary-resize-knob,
+  .calendar-month-row-boundary-resize-knob * {
+    cursor: row-resize;
+  }
+
+  .calendar-month-row-boundary-resize-knob::before {
+    content: "↕";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
     align-items: center;
     justify-content: center;
     border: 1px solid #d1d1d6;
@@ -332,36 +340,37 @@
     line-height: 1;
     opacity: 0;
     pointer-events: none;
-    transform: translate(-50%, -50%) scale(0.92);
+    transform: scale(0.92);
     transition: opacity 120ms ease, transform 120ms ease;
   }
 
-  .calendar-month-row-boundary-resize-handle:hover::before,
-  .calendar-month-row-boundary-resize-handle:focus-within::before,
-  .calendar-month-row-boundary-resize-handle.is-month-row-resize-active::before {
+  .calendar-month-row-boundary-resize-knob:hover::before,
+  .calendar-month-row-boundary-resize-knob:focus-within::before,
+  .calendar-month-row-boundary-resize-knob.is-month-row-resize-active::before {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: scale(1);
   }
 
-  .calendar-month-row-boundary-resize-handle::after {
+  .calendar-month-row-boundary-resize-knob::after {
     content: none;
   }
 
-  .calendar-month-row-boundary-resize-handle.is-month-row-resize-active::after {
+  .calendar-month-row-boundary-resize-knob.is-month-row-resize-active::after {
     content: "";
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 4px;
+    left: -9999px;
+    right: -9999px;
+    top: 50%;
     z-index: 1;
     height: 3px;
     background: #c7c7cc;
     border-radius: 0;
     opacity: 1;
     pointer-events: none;
+    transform: translateY(-50%);
   }
 
-  .calendar-month-row-boundary-resize-handle:focus-visible {
+  .calendar-month-row-boundary-resize-knob:focus-within {
     outline: none;
   }
 
