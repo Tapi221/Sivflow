@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type { CalendarToolbarMode, CalendarViewMode, GoogleAccountDisplay, TimelineGridStyle } from "./scheduleScreen.types";
-import type { GoogleCalendarEvent } from "./googlecalendar-integration/gcalSync.types";
+import type { GoogleCalendarEvent } from "../../integration/googlecalendar-integration/gcalSync.types";
 import type { buildTimelineColumns, TimelineUnitBuffer } from "./grid/TimelineDayView.shared";
 import { useCalendarLayout } from "./layout/calendar/useCalendarLayout.desktop";
 import { useCalendarNavigation } from "./useCalendarNavigation";

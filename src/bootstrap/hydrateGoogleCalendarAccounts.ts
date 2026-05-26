@@ -1,4 +1,4 @@
-import { hydrateServerStoredGoogleCalendarAccounts } from "@/features/calendar/googlecalendar-integration/gcal.server-account-list";
+import { hydrateServerStoredGoogleCalendarAccounts } from "@/integration/googlecalendar-integration/gcal.server-account-list";
 
 let started = false;
 

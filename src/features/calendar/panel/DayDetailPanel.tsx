@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { compareCalendarEvents, eventOverlapsDay } from "@/features/calendar/calendarEventRange";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
-import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import { cn } from "@/lib/utils";
 

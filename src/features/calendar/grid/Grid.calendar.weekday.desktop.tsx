@@ -7,7 +7,7 @@ import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.layout.weekday.desktop";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
-import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";

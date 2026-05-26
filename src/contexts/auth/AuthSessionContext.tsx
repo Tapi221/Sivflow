@@ -1,6 +1,6 @@
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
-import { hydrateServerStoredGoogleCalendarAccounts } from "@/features/calendar/googlecalendar-integration/gcal.server-account-list";
+import { hydrateServerStoredGoogleCalendarAccounts } from "@/integration/googlecalendar-integration/gcal.server-account-list";
 import { bootstrapUser } from "@/hooks/bootstrap/useUserBootstrap";
 import { auth } from "@/services/firebase";
 import { initializeDB, resetLocalDBForLogout } from "@/services/localDB";
