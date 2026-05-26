@@ -130,26 +130,26 @@ export const useCalendarNavigation = ({
     (next: CalendarViewMode) => {
       setSelectedViewMode(next);
 
-      // timeline中はtimeline、それ以外はcalendarへ
       setActiveMode((current) =>
-        current === "timeline" ? "timeline" : "calendar",
+        next === "pieChart" ? "calendar" : current === "timeline" ? "timeline" : "calendar",
       );
 
+      const anchorDate = next === "pieChart" ? selectedDate : currentDate;
       const normalized =
-        next === "week" ? normalizeWeek(currentDate) : currentDate;
+        next === "week" ? normalizeWeek(anchorDate) : anchorDate;
 
       setCurrentDate(normalized);
       setSelectedDate(normalized);
       setTimelineTitleDate(normalized);
+      setMonthTitleDate(startOfMonth(normalized));
 
       if (next === "month") {
-        setMonthTitleDate(startOfMonth(normalized));
         requestMonthScrollTarget();
       }
 
       resetTimelinePosition(next);
     },
-    [currentDate, requestMonthScrollTarget, resetTimelinePosition],
+    [currentDate, requestMonthScrollTarget, resetTimelinePosition, selectedDate],
   );
 
   const handleToday = useCallback(() => {
