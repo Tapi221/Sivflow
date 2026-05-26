@@ -3,6 +3,7 @@ import { buildExplorerTreeData, parseSelectedTreeId, toSelectedTreeId, type Expl
 import { getFolderId, getParentFolderId, normalizeFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExpandedFolders } from "@/components/folder/hooks/useExpandedFolders";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
+import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { toVirtualMfCardDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
 import { createDefaultExplorerRouteState, WORKSPACE_DEFAULT_EXPLORER_TAB_ID, type WorkspaceExplorerTab, type WorkspaceTab } from "@/features/tab/Tab";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
@@ -94,17 +95,15 @@ const getCardSetIdFromCard = (card: Card): string | null => {
 
 const getCardFolderId = (
   card: Card,
-  cardSetById: Map<string, CardSet>,
-): string | null => {
-  const directFolderId =
-    card.folderId ??
-    (card as unknown as { folder_id?: string | null }).folder_id ??
-    null;
-  if (directFolderId) return directFolderId;
-
-  const cardSetId = getCardSetIdFromCard(card);
-  return cardSetId ? (cardSetById.get(cardSetId)?.folderId ?? null) : null;
-};
+  cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>,
+): string | null =>
+  resolveCardFolderId(
+    {
+      ...card,
+      cardSetId: getCardSetIdFromCard(card),
+    },
+    cardSetById,
+  );
 
 const getCardTitle = (card: Card): string =>
   toVirtualMfCardDisplayName(
@@ -326,17 +325,17 @@ export const LibraryHierarchySidebar = () => {
 
   const applyExplorerSelection = useCallback(
     ({ selectedFolderId, selectedItem }: ExplorerSelectionPatch) => {
+      const defaultExplorerTab = tabs.find(
+        (tab): tab is WorkspaceExplorerTab =>
+          tab.kind === "explorer" &&
+          tab.id === WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
+      );
+      const firstExplorerTab = tabs.find(
+        (tab): tab is WorkspaceExplorerTab => tab.kind === "explorer",
+      );
       const explorerTab = isWorkspaceExplorerTab(activeTab)
         ? activeTab
-        : (tabs.find(
-            (tab): tab is WorkspaceExplorerTab =>
-              tab.kind === "explorer" &&
-              tab.id === WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
-          ) ??
-          tabs.find(
-            (tab): tab is WorkspaceExplorerTab => tab.kind === "explorer",
-          ) ??
-          null);
+        : defaultExplorerTab ?? firstExplorerTab ?? null;
       const baseState =
         explorerTab?.explorerState ?? createDefaultExplorerRouteState();
       const nextState = {
@@ -588,114 +587,105 @@ export const LibraryHierarchySidebar = () => {
     treeFolders,
   ]);
 
-  const renderTreeNode = useCallback(
-    (
-      node: ExplorerTreeNode,
-      depth: number,
-      branchMask: TreeBranchMask,
-      index: number,
-      siblingCount: number,
-    ) => {
-      const hasChildren = Boolean(node.children?.length);
-      const isOpen = hasChildren && isNodeOpen(node);
-      const isSelected = selectedTreeId === node.id;
-      const isLastSibling = index === siblingCount - 1;
-      const childBranchMask = [...branchMask, !isLastSibling];
+  function renderTreeNode(
+    node: ExplorerTreeNode,
+    depth: number,
+    branchMask: TreeBranchMask,
+    index: number,
+    siblingCount: number,
+  ) {
+    const hasChildren = Boolean(node.children?.length);
+    const isOpen = hasChildren && isNodeOpen(node);
+    const isSelected = selectedTreeId === node.id;
+    const isLastSibling = index === siblingCount - 1;
+    const childBranchMask = [...branchMask, !isLastSibling];
 
-      return (
-        <div key={node.id} className="relative">
-          <div className="relative">
-            {branchMask.map((shouldDrawGuide, guideIndex) =>
-              shouldDrawGuide ? (
-                <span
-                  key={`${node.id}:guide:${guideIndex}`}
-                  aria-hidden="true"
-                  className="pointer-events-none absolute bottom-0 top-0 w-px bg-[#e4e6eb]"
-                  style={{ left: TREE_GUIDE_LEFT_OFFSET_PX + guideIndex * TREE_INDENT_PX }}
-                />
-              ) : null,
-            )}
-            {depth > 0 ? (
+    return (
+      <div key={node.id} className="relative">
+        <div className="relative">
+          {branchMask.map((shouldDrawGuide, guideIndex) =>
+            shouldDrawGuide ? (
               <span
+                key={`${node.id}:guide:${guideIndex}`}
                 aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 h-px bg-[#e4e6eb]"
-                style={{
-                  left: TREE_GUIDE_LEFT_OFFSET_PX + (depth - 1) * TREE_INDENT_PX,
-                  width: TREE_INDENT_PX - 3,
-                }}
+                className="pointer-events-none absolute bottom-0 top-0 w-px bg-[#e4e6eb]"
+                style={{ left: TREE_GUIDE_LEFT_OFFSET_PX + guideIndex * TREE_INDENT_PX }}
               />
-            ) : null}
-
-            <div
-              role="treeitem"
-              tabIndex={0}
-              aria-level={depth + 1}
-              aria-setsize={siblingCount}
-              aria-posinset={index + 1}
-              aria-selected={isSelected}
-              aria-expanded={hasChildren ? isOpen : undefined}
-              onClick={() => handleSelectNode(node)}
-              onKeyDown={(event) => handleRowKeyDown(event, node)}
-              className={cn(
-                "group relative flex w-full cursor-default select-none items-center gap-1 rounded-[10px] pr-2 text-left text-[12px] font-medium leading-none tracking-normal outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#d9dee8]",
-                TREE_ROW_HEIGHT_CLASS_NAME,
-                isSelected
-                  ? "bg-[#f2f3f6] text-[#6d7380] shadow-[inset_0_0_0_1px_rgba(88,94,112,0.04)]"
-                  : "text-[#8e949e] hover:bg-[#f7f7f7] hover:text-[#6d7380]",
-              )}
-              style={{ paddingLeft: 2 + depth * TREE_INDENT_PX }}
-            >
-              {hasChildren ? (
-                <button
-                  type="button"
-                  aria-label={isOpen ? `${node.name} を閉じる` : `${node.name} を開く`}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleToggleNode(node);
-                  }}
-                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] text-[#aeb3bd] transition hover:bg-white hover:text-[#8e949e]"
-                >
-                  <ChevronRightGlyph
-                    className={cn(
-                      "h-3.5 w-3.5 transition-transform duration-150",
-                      isOpen && "rotate-90",
-                    )}
-                  />
-                </button>
-              ) : (
-                <span className="h-4 w-4 shrink-0" />
-              )}
-
-              {renderNodeIcon(node, depth)}
-
-              <span className="min-w-0 flex-1 truncate">{node.name}</span>
-            </div>
-          </div>
-
-          {isOpen && node.children?.length ? (
-            <div role="group">
-              {node.children.map((childNode, childIndex) =>
-                renderTreeNode(
-                  childNode,
-                  depth + 1,
-                  childBranchMask,
-                  childIndex,
-                  node.children?.length ?? 0,
-                ),
-              )}
-            </div>
+            ) : null,
+          )}
+          {depth > 0 ? (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 h-px bg-[#e4e6eb]"
+              style={{
+                left: TREE_GUIDE_LEFT_OFFSET_PX + (depth - 1) * TREE_INDENT_PX,
+                width: TREE_INDENT_PX - 3,
+              }}
+            />
           ) : null}
+
+          <div
+            role="treeitem"
+            tabIndex={0}
+            aria-level={depth + 1}
+            aria-setsize={siblingCount}
+            aria-posinset={index + 1}
+            aria-selected={isSelected}
+            aria-expanded={hasChildren ? isOpen : undefined}
+            onClick={() => handleSelectNode(node)}
+            onKeyDown={(event) => handleRowKeyDown(event, node)}
+            className={cn(
+              "group relative flex w-full cursor-default select-none items-center gap-1 rounded-[10px] pr-2 text-left text-[12px] font-medium leading-none tracking-normal outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#d9dee8]",
+              TREE_ROW_HEIGHT_CLASS_NAME,
+              isSelected
+                ? "bg-[#f2f3f6] text-[#6d7380] shadow-[inset_0_0_0_1px_rgba(88,94,112,0.04)]"
+                : "text-[#8e949e] hover:bg-[#f7f7f7] hover:text-[#6d7380]",
+            )}
+            style={{ paddingLeft: 2 + depth * TREE_INDENT_PX }}
+          >
+            {hasChildren ? (
+              <button
+                type="button"
+                aria-label={isOpen ? `${node.name} を閉じる` : `${node.name} を開く`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleToggleNode(node);
+                }}
+                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] text-[#aeb3bd] transition hover:bg-white hover:text-[#8e949e]"
+              >
+                <ChevronRightGlyph
+                  className={cn(
+                    "h-3.5 w-3.5 transition-transform duration-150",
+                    isOpen && "rotate-90",
+                  )}
+                />
+              </button>
+            ) : (
+              <span className="h-4 w-4 shrink-0" />
+            )}
+
+            {renderNodeIcon(node, depth)}
+
+            <span className="min-w-0 flex-1 truncate">{node.name}</span>
+          </div>
         </div>
-      );
-    },
-    [
-      handleRowKeyDown,
-      handleSelectNode,
-      handleToggleNode,
-      isNodeOpen,
-      selectedTreeId,
-    ],
-  );
+
+        {isOpen && node.children?.length ? (
+          <div role="group">
+            {node.children.map((childNode, childIndex) =>
+              renderTreeNode(
+                childNode,
+                depth + 1,
+                childBranchMask,
+                childIndex,
+                node.children?.length ?? 0,
+              ),
+            )}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
 
   const isTrashSelected = activeLibrarySelection.selectedItem?.type === "trash";
 
