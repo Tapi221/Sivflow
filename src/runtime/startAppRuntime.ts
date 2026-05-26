@@ -1,5 +1,5 @@
 import { initAppRuntime } from "./initAppRuntime";
-import { bootstrapPersistentQueue } from "@/platform/web/bootstrapPersistentQueue";
+import { initPersistentQueue } from "@/platform/web/initPersistentQueue";
 
 let started = false;
 
@@ -8,5 +8,5 @@ export const startAppRuntime = () => {
   started = true;
 
   initAppRuntime();
-  bootstrapPersistentQueue();
+  initPersistentQueue();
 };
