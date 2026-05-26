@@ -2,8 +2,8 @@ import { useCallback, useState } from "react";
 import type { GoogleAccountEntry } from "@/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
 import { useMultiAccountGoogleCalendar } from "@/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
 import type { GCalConnectionStatus } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { useGoogleTaskLists } from "@/integration/googlecalendar-integration/useGoogleTaskLists";
-import { useGoogleTasks } from "@/integration/googlecalendar-integration/useGoogleTasks";
+import { useGoogleTaskLists } from "@/integration/googletask-integration/useGoogleTaskLists";
+import { useGoogleTasks } from "@/integration/googletask-integration/useGoogleTasks";
 import { useServerStoredGoogleAccountBootstrap } from "@/integration/googlecalendar-integration/useServerStoredGoogleAccountBootstrap";
 
 export type { GoogleAccountEntry };
