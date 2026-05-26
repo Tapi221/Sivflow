@@ -689,7 +689,7 @@ export const LibraryHierarchySidebar = () => {
   const isTrashSelected = activeLibrarySelection.selectedItem?.type === "trash";
 
   return (
-    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-5 pl-0 pr-2 pt-2 font-sans text-[#2f2f2f] antialiased" aria-label="Library hierarchy explorer">
+    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-2 pl-0 pr-2 pt-2 font-sans text-[#2f2f2f] antialiased" aria-label="Library hierarchy explorer">
       <div className="min-h-0 flex-1 overflow-y-auto">
         {isExplorerDataLoading ? (
           <FadeSkeleton ariaLabel="ライブラリを読み込み中" />
