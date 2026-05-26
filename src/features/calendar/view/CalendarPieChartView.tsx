@@ -357,7 +357,6 @@ export const CalendarPieChartView = ({
 
         <div className="flex min-h-0 flex-1 items-center justify-center gap-12 overflow-hidden px-8 py-6 max-[1120px]:gap-6 max-[980px]:flex-col max-[980px]:overflow-y-auto">
           <DailyClockPie title="予定" totalMinutes={plannedMinutes} slices={plannedSlices} />
-          <div className="mb-6 shrink-0 text-[17px] font-semibold text-[#8e8e93] max-[980px]:mb-0">VS</div>
           <DailyClockPie title="実績" totalMinutes={0} slices={[]} isActual />
         </div>
       </main>
