@@ -2,7 +2,7 @@
 
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { GoogleAccountEntry } from "@/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
+import type { GoogleConnectedServiceAccountEntry } from "@/integration/google-integration/googleAccount.types";
 import { useGoogleTaskLists } from "@/integration/googletask-integration/useGoogleTaskLists";
 import { fetchGoogleTaskLists } from "@/integration/googletask-integration/gtask.api";
 import { requestGoogleConnectedServiceAccessToken } from "@/integration/google-integration/google.oauth";
@@ -25,7 +25,7 @@ vi.mock("@/services/firebase", () => ({
   auth: {},
 }));
 
-const createConnectedAccount = (): GoogleAccountEntry => ({
+const createConnectedAccount = (): GoogleConnectedServiceAccountEntry => ({
   id: "account-1",
   email: "akari@example.com",
   name: "Akari",
