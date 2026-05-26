@@ -3,6 +3,7 @@
   --app-sidebar-closed-width: 0px;
   --app-right-sidebar-width: 240px;
   --app-layout-padding-x: 0px;
+  --desktop-window-controls-width: 138px;
 
   --app-titlebar-bg: linear-gradient(
     90deg,
@@ -187,7 +188,7 @@
 
   transition: padding-left 180ms ease;
 
-  -webkit-app-region: drag;
+  -webkit-app-region: no-drag;
 }
 
 .app-layout--sidebar-closed .workspace-shell__tabs {
