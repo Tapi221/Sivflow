@@ -1,6 +1,7 @@
 import type { CSSProperties, RefObject, UIEvent } from "react";
 import type { CalendarToolbarMode, CalendarViewMode } from "@/features/calendar/calendar.types";
-import type { GCalConnectionStatus, GoogleCalendarEvent, GoogleCalendarListItem, GoogleTaskItem, GoogleTaskListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
+import type { GCalConnectionStatus, GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
+import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 
 export type { CalendarToolbarMode, CalendarViewMode };
 
