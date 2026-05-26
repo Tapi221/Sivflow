@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { CARD_LAYOUT_MODE_LABELS, type CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import { OverlayToolbar } from "@/components/overlay-toolbar/OverlayToolbar";
-import { OverlayToolbarButton } from "@/components/overlay-toolbar/OverlayToolbarButton";
-import { OverlayToolbarDivider } from "@/components/overlay-toolbar/OverlayToolbarDivider";
-import { FixedDisplayGlyph, FlipGlyph, FluidDisplayGlyph, SplitGlyph, StackGlyph } from "@/components/overlay-toolbar/OverlayToolbarGlyphs";
+import { OverlayToolbar } from "@/chip/overlay-toolbar/OverlayToolbar";
+import { OverlayToolbarButton } from "@/chip/overlay-toolbar/OverlayToolbarButton";
+import { OverlayToolbarDivider } from "@/chip/overlay-toolbar/OverlayToolbarDivider";
+import { FixedDisplayGlyph, FlipGlyph, FluidDisplayGlyph, SplitGlyph, StackGlyph } from "@/chip/overlay-toolbar/OverlayToolbarGlyphs";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type CardModeToolbarProps = {
