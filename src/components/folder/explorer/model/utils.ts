@@ -1,7 +1,10 @@
 import type { Card, DocumentItem } from "@/types";
 import { toMillis } from "@/utils/toMillis";
+import { isTypingTarget } from "@/features/hotkey/hotkeyGuards";
+import { hasOpenModalDialog } from "@/features/hotkey/modalGuards";
 
 export type { Card, DocumentItem };
+export { hasOpenModalDialog };
 
 export type FolderTreeNode = {
   id?: string;
@@ -59,12 +62,7 @@ export const buildStoragePath = (
   ext: "pdf",
 ): string => `users/${uid}/documents/${docId}/source.${ext}`;
 
-export const isTextInputTarget = (target: HTMLElement | null): boolean => {
-  if (!target) return false;
-  if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return true;
-  if (target.isContentEditable) return true;
-  return Boolean(target.closest("[contenteditable=\"true\"]"));
-};
+export const isTextInputTarget = (target: HTMLElement | null): boolean => isTypingTarget(target);
 
 export const isFileDragEvent = (
   event: React.DragEvent | DragEvent,
@@ -75,14 +73,6 @@ export const isFileDragEvent = (
   const types = Array.from(dataTransfer?.types ?? []);
   return types.includes("Files");
 };
-
-export const hasOpenModalDialog = (): boolean =>
-  Boolean(
-    document.querySelector("[role=\"dialog\"][data-state=\"open\"]") ||
-    document.querySelector("[role=\"dialog\"][aria-modal=\"true\"]") ||
-    document.querySelector("[role=\"alertdialog\"][data-state=\"open\"]") ||
-    document.querySelector("[role=\"alertdialog\"][aria-modal=\"true\"]"),
-  );
 
 export const extractPdfFiles = (fileList: FileList | null): File[] => {
   if (!fileList) return [];
