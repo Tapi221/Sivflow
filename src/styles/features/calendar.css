@@ -305,7 +305,7 @@
     background: transparent;
   }
 
-  .calendar-month-row-boundary-resize-knob {
+  .calendar-month-row-boundary-resize-knob-anchor {
     left: 50%;
     top: 50%;
     z-index: 2;
@@ -317,9 +317,14 @@
     transform: translate(-50%, -50%);
   }
 
-  .calendar-month-row-boundary-resize-knob,
-  .calendar-month-row-boundary-resize-knob * {
+  .calendar-month-row-boundary-resize-knob-anchor,
+  .calendar-month-row-boundary-resize-knob-anchor * {
     cursor: row-resize;
+  }
+
+  .calendar-month-row-boundary-resize-knob {
+    cursor: row-resize;
+    touch-action: none;
   }
 
   .calendar-month-row-boundary-resize-knob::before {
@@ -344,9 +349,9 @@
     transition: opacity 120ms ease, transform 120ms ease;
   }
 
-  .calendar-month-row-boundary-resize-knob:hover::before,
-  .calendar-month-row-boundary-resize-knob:focus-within::before,
-  .calendar-month-row-boundary-resize-knob.is-month-row-resize-active::before {
+  .calendar-month-row-boundary-resize-knob-anchor:hover .calendar-month-row-boundary-resize-knob::before,
+  .calendar-month-row-boundary-resize-knob-anchor:focus-within .calendar-month-row-boundary-resize-knob::before,
+  .calendar-month-row-boundary-resize-knob-anchor.is-month-row-resize-active .calendar-month-row-boundary-resize-knob::before {
     opacity: 1;
     transform: scale(1);
   }
@@ -355,7 +360,7 @@
     content: none;
   }
 
-  .calendar-month-row-boundary-resize-knob.is-month-row-resize-active::after {
+  .calendar-month-row-boundary-resize-knob-anchor.is-month-row-resize-active .calendar-month-row-boundary-resize-knob::after {
     content: "";
     position: absolute;
     left: -9999px;
@@ -370,7 +375,7 @@
     transform: translateY(-50%);
   }
 
-  .calendar-month-row-boundary-resize-knob:focus-within {
+  .calendar-month-row-boundary-resize-knob:focus-visible {
     outline: none;
   }
 
