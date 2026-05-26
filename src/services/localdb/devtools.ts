@@ -1,5 +1,5 @@
 import { getLocalDb, getLocalDbSync } from "./LocalDB";
-import { auditAndRepairTags } from "./audit/tags";
+import { auditAndRepairTags } from "@/services/localdb/audit/tags";
 import { auth } from "@/services/firebase";
 
 type WindowWithLocalDbDevtools = Window & {
