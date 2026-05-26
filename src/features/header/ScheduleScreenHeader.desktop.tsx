@@ -1,5 +1,5 @@
 import { TodayBar } from "@/chip/bar/TodayBar";
-import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
+import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
 type ScheduleScreenHeaderViewOption = {
