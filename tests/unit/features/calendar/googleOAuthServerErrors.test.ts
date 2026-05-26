@@ -50,4 +50,14 @@ describe("Google Calendar server OAuth callable errors", () => {
     expect(userError.message).toContain("復号できません");
     expect((userError as Error & { code?: string }).code).toBe("server-stored-token-decrypt-error");
   });
+
+  it("treats insufficient Calendar or Tasks scope as reconnect-required", () => {
+    const diagnosis = diagnoseGoogleOAuthReconnectCause(callableError("insufficient_google_scope"));
+    const userError = toUserTransparentAutoRecoveryError(callableError("insufficient_google_scope"));
+
+    expect(diagnosis.reconnectRequired).toBe(true);
+    expect(diagnosis.action).toContain("Calendar と Tasks");
+    expect(userError.message).toContain("権限が不足");
+    expect((userError as Error & { code?: string }).code).toBe("google-scope-insufficient");
+  });
 });
