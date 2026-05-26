@@ -4,6 +4,7 @@ export type TagColorKey = (typeof TAG_COLOR_KEYS)[number];
 
 export type TagColorPalette = {
   fg: string;
+  fgRgb: string;
   border: string;
   swatch: string;
 };
