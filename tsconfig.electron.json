@@ -9,8 +9,7 @@
     "skipLibCheck": true,
     "paths": {
       "@/*": ["src/*"],
-      "@constants/*": ["constants/*"],
-      "@config/*": ["config/*"]
+      "@constants/*": ["constants/*"]
     },
     "rootDir": ".",
     "outDir": "dist-electron",
