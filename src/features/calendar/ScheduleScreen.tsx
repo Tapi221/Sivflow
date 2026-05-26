@@ -205,29 +205,29 @@ export const ScheduleScreen = ({
     const bodyEl = viewportEl?.parentElement ?? null;
     if (!viewportEl || !bodyEl) return;
 
-    const getLeadingPanelWidth = () => {
-      const leadingPanelEl = viewportEl.previousElementSibling;
+    const getLeftPanelWidth = () => {
+      const leftPanelEl = viewportEl.previousElementSibling;
 
-      return leadingPanelEl instanceof HTMLElement
-        ? leadingPanelEl.getBoundingClientRect().width
+      return leftPanelEl instanceof HTMLElement
+        ? leftPanelEl.getBoundingClientRect().width
         : 0;
     };
 
     const updateAvailableCalendarBodyWidth = () => {
       const bodyWidth = bodyEl.getBoundingClientRect().width;
-      const leadingPanelWidth = getLeadingPanelWidth();
+      const leftPanelWidth = getLeftPanelWidth();
 
       setAvailableCalendarBodyWidth(
-        Math.max(0, bodyWidth - leadingPanelWidth),
+        Math.max(0, bodyWidth - leftPanelWidth),
       );
     };
 
     const resizeObserver = new ResizeObserver(updateAvailableCalendarBodyWidth);
-    const leadingPanelEl = viewportEl.previousElementSibling;
+    const leftPanelEl = viewportEl.previousElementSibling;
 
     resizeObserver.observe(bodyEl);
-    if (leadingPanelEl instanceof Element) {
-      resizeObserver.observe(leadingPanelEl);
+    if (leftPanelEl instanceof Element) {
+      resizeObserver.observe(leftPanelEl);
     }
 
     updateAvailableCalendarBodyWidth();
@@ -254,7 +254,9 @@ export const ScheduleScreen = ({
 
       if (duplicateProject) {
         return projects.map((project) =>
-          project.id === duplicateProject.id ? { ...project, checked: true } : project,
+          project.id === duplicateProject.id
+            ? { ...project, checked: true }
+            : project,
         );
       }
 
@@ -485,7 +487,7 @@ export const ScheduleScreen = ({
           </button>
         ) : null
       }
-      leadingPanel={(
+      leftPanel={(
         <CalendarSidebar
           monthDate={sidebarMonthDate}
           selectedDate={selectedDate}
@@ -508,7 +510,7 @@ export const ScheduleScreen = ({
           onToggleTaskList={handleToggleTaskList}
         />
       )}
-      trailingPanel={
+      rightPanel={
         showDayDetailPanel ? (
           <DayDetailPanel
             selectedDate={selectedDate}

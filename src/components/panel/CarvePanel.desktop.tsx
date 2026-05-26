@@ -17,10 +17,10 @@ type CarvePanelShellProps = {
   children: ReactNode;
   toolbar?: ReactNode;
   overlay?: ReactNode;
-  leadingPanel?: ReactNode;
-  trailingPanel?: ReactNode;
+  leftPanel?: ReactNode;
+  rightPanel?: ReactNode;
   reserveToolbar?: boolean;
-  reserveLeadingPanel?: boolean;
+  reserveLeftPanel?: boolean;
   hasTrailingPanel?: boolean;
   viewportRef?: Ref<HTMLDivElement>;
   className?: string;
@@ -37,7 +37,7 @@ const CARVE_PANEL_BODY_CLASS =
 const CARVE_PANEL_TOOLBAR_SPACER_CLASS =
   "h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 bg-white";
 
-const CARVE_PANEL_LEADING_SPACER_CLASS = "w-[220px] shrink-0";
+const CARVE_PANEL_LEFT_SPACER_CLASS = "w-[220px] shrink-0";
 
 const CARVE_PANEL_VIEWPORT_BASE_CLASS =
   "flex min-h-0 min-w-0 flex-1 flex-col bg-white";
@@ -109,10 +109,10 @@ export const CarvePanelShell = ({
   children,
   toolbar = null,
   overlay = null,
-  leadingPanel = null,
-  trailingPanel = null,
+  leftPanel = null,
+  rightPanel = null,
   reserveToolbar = false,
-  reserveLeadingPanel = false,
+  reserveLeftPanel = false,
   hasTrailingPanel = false,
   viewportRef,
   className,
@@ -123,8 +123,8 @@ export const CarvePanelShell = ({
     reserveToolbar ? <div aria-hidden="true" className={CARVE_PANEL_TOOLBAR_SPACER_CLASS} /> : null
   );
 
-  const leadingPanelNode = leadingPanel ?? (
-    reserveLeadingPanel ? <div aria-hidden="true" className={CARVE_PANEL_LEADING_SPACER_CLASS} /> : null
+  const leftPanelNode = leftPanel ?? (
+    reserveLeftPanel ? <div aria-hidden="true" className={CARVE_PANEL_LEFT_SPACER_CLASS} /> : null
   );
 
   return (
@@ -133,7 +133,7 @@ export const CarvePanelShell = ({
       {overlay}
 
       <div className={cn(CARVE_PANEL_BODY_CLASS, bodyClassName)}>
-        {leadingPanelNode}
+        {leftPanelNode}
 
         <CarvePanelViewport
           ref={viewportRef}
@@ -143,7 +143,7 @@ export const CarvePanelShell = ({
           {children}
         </CarvePanelViewport>
 
-        {trailingPanel}
+        {rightPanel}
       </div>
     </div>
   );
