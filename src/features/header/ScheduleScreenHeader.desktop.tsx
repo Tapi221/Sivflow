@@ -30,12 +30,12 @@ export const ScheduleScreenHeaderDesktop = ({
 }: ScheduleScreenHeaderDesktopProps) => {
   return (
     <div className={className}>
-      <div className="flex min-w-0 items-center gap-3">
-        <h1 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
+      <div className="flex min-w-0 items-center">
+        <h1 className="w-32 shrink-0 truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
           {titleLabel}
         </h1>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="ml-5 flex shrink-0 items-center gap-2">
           <ViewModeDropdown
             value={selectedViewMode}
             onChange={onSelectViewMode}
