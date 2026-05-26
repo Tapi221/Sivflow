@@ -74,7 +74,26 @@ export default defineConfig([
               ],
               message: "Use @/ alias for cross-folder imports inside src.",
             },
+            {
+              group: ["./*/**"],
+              message: "Use @/ alias for child-folder imports inside src. Same-directory imports may use ./.",
+            },
           ],
+        },
+      ],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "ImportDeclaration[source.value=/^\\.\\/[^/]+\\//]",
+          message: "Use @/ alias for child-folder imports inside src. Same-directory imports may use ./.",
+        },
+        {
+          selector: "ExportNamedDeclaration[source.value=/^\\.\\/[^/]+\\//]",
+          message: "Use @/ alias for child-folder exports inside src. Same-directory exports may use ./.",
+        },
+        {
+          selector: "ExportAllDeclaration[source.value=/^\\.\\/[^/]+\\//]",
+          message: "Use @/ alias for child-folder exports inside src. Same-directory exports may use ./.",
         },
       ],
       "react-hooks/exhaustive-deps": "off",
