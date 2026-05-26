@@ -2,12 +2,12 @@ import type { CSSProperties } from "react";
 import { TAG_COLOR_PALETTE } from "./tag.palette";
 import { getTagColorKey } from "./tag.parser";
 
-const TAG_BACKGROUND_TEXT_MIX_PERCENT = 9;
+const TAG_BACKGROUND_TEXT_ALPHA = 0.09;
 
 const getPalette = (input?: string) => TAG_COLOR_PALETTE[getTagColorKey(input)];
 
 const getTagBackgroundColor = (input?: string) =>
-  `color-mix(in srgb, ${getPalette(input).fg} ${TAG_BACKGROUND_TEXT_MIX_PERCENT}%, white)`;
+  `rgb(${getPalette(input).fgRgb} / ${TAG_BACKGROUND_TEXT_ALPHA})`;
 
 export const getTagColorStyle = (input?: string): CSSProperties => {
   const palette = getPalette(input);
