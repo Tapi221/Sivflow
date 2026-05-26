@@ -246,6 +246,7 @@
 .app-layout-route--schedule .app-layout__main {
   grid-row: 2;
   overflow: clip;
+  padding-left: 0;
 }
 
 .workspace-breadcrumb-bar {
