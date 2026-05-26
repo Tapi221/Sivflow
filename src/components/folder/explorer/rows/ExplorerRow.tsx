@@ -23,6 +23,7 @@ export const ExplorerRow = React.memo(function ExplorerRow({
     <div
       ref={rowRef}
       className={cn(EXPLORER_ROW_BASE_CLASS_NAME, className)}
+      data-depth={depth}
       data-selected={selected ? "true" : undefined}
       style={{
         ...(depth === undefined ? {} : getExplorerRowStyle(depth)),
