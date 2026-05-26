@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { addDays, differenceInMinutes, format, isAfter, isBefore, startOfDay } from "date-fns";
+import { ToggleTimePercentage } from "@/chip/toggle/Toggle.timepercentage";
 import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
@@ -392,10 +393,7 @@ export const CalendarPieChartView = ({
             <span className="text-[12px] text-[#b3b3b3]">ⓘ</span>
           </div>
 
-          <div className="mb-3 grid grid-cols-2 rounded-[10px] bg-[#f7f7f7] p-0.5 text-center text-[11px] font-semibold text-[#8e8e93]">
-            <span className="rounded-[8px] bg-white py-1 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">時間</span>
-            <span className="py-1">割合</span>
-          </div>
+          <ToggleTimePercentage value="time" className="mb-3" />
 
           <div className="grid grid-cols-[minmax(0,1fr)_64px_64px] items-center gap-x-2 gap-y-3 text-[11px]">
             <span />
