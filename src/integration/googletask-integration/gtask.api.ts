@@ -1,4 +1,4 @@
-import type { GoogleTaskItem, GoogleTaskStatus, GoogleTasksApiTaskListsResponse, GoogleTasksApiTasksResponse } from "@/sync/googletask-sync/gtaskSync.types";
+import type { GoogleTaskItem, GoogleTaskListItem, GoogleTaskStatus, GoogleTasksApiTaskListsResponse, GoogleTasksApiTasksResponse } from "@/sync/googletask-sync/gtaskSync.types";
 import { createGoogleApiError, withGoogleApiRetry } from "@/integration/googlecalendar-integration/googleApiRetry";
 
 const GOOGLE_TASKS_API_BASE = "https://tasks.googleapis.com/tasks/v1";
@@ -114,8 +114,8 @@ const toGoogleTaskItem = (
 
 export const fetchGoogleTaskLists = async (
   accessToken: string,
-): Promise<GoogleTaskItem[]> => {
-  const taskLists: GoogleTaskItem[] = [];
+): Promise<GoogleTaskListItem[]> => {
+  const taskLists: GoogleTaskListItem[] = [];
   let pageToken: string | undefined;
 
   do {
@@ -136,9 +136,7 @@ export const fetchGoogleTaskLists = async (
         .filter((item) => item.id)
         .map((item) => ({
           id: item.id!,
-          taskListId: item.id!,
           title: item.title?.trim() || "Google ToDo",
-          status: "needsAction" as const,
           updated: item.updated,
         })),
     );
