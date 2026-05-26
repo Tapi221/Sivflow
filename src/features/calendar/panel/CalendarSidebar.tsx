@@ -1,10 +1,12 @@
-import { type FormEvent, type KeyboardEvent, useCallback, useRef, useState } from "react";
+import { type FormEvent, type KeyboardEvent, useCallback, useMemo, useRef, useState } from "react";
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { AddGoogleCalendarButton } from "@/chip/button/AddGoogleCalendarButton";
 import { CalendarIcon, TaskIcon } from "@/components/icons/icons.schedule";
-import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay } from "../scheduleScreen.types";
-import { cn } from "@/lib/utils";
+import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { useT } from "@/i18n/useT";
+import { cn } from "@/lib/utils";
+import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay } from "../scheduleScreen.types";
+import { LibraryHierarchySidebar } from "./LibraryHierarchySidebar";
 import { MiniCalendarSection } from "./MiniCalendarSection";
 import { SelectableGoogleSourceRow } from "./SelectableGoogleSourceRow";
 
@@ -366,9 +368,16 @@ export const CalendarSidebar = ({
   onToggleTaskList,
 }: CalendarSidebarProps) => {
   const t = useT();
+  const tabs = useWorkspaceTabsStore((state) => state.tabs);
+  const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
+  const activeTab = useMemo(
+    () => tabs.find((tab) => tab.id === activeTabId) ?? null,
+    [activeTabId, tabs],
+  );
   const hasGoogleAccounts = googleAccounts.length > 0;
   const hasAppProjects = appProjects.length > 0;
   const isTaskMode = activeMode === "task";
+  const isLibrarySidebarActive = activeTab?.sectionKey === "library";
   const selectDateRef = useRef(onSelectDate);
   const previousMonthRef = useRef(onPreviousMonth);
   const nextMonthRef = useRef(onNextMonth);
@@ -393,6 +402,10 @@ export const CalendarSidebar = ({
   const handleStartAddingProject = useCallback(() => {
     setIsAddingProject(true);
   }, []);
+
+  if (isLibrarySidebarActive) {
+    return <LibraryHierarchySidebar />;
+  }
 
   return (
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-5 pl-0 pr-3 pt-2 text-[#2f2f2f]">
