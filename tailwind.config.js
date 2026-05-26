@@ -119,6 +119,10 @@ export default {
         "3xl": "var(--ds-radius-2xl)",
         "4xl": "var(--ds-radius-3xl)",
       },
+      transitionDuration: {
+        DEFAULT: "0ms",
+        150: "0ms",
+      },
       animation: {
         float: "float 3s ease-in-out infinite",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
