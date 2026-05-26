@@ -27,6 +27,9 @@ export const AppLayout = () => {
   useWorkspaceTabsRouteSync({ enabled: showWorkspaceTabs });
 
   useHotKeyDesktop({
+    onToggleSidebar: () => {
+      setIsSidebarClosed((current) => !current);
+    },
     onToggleRightSidebar: () => {
       setIsRightSidebarOpen((current) => !current);
     },
