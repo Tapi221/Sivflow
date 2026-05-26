@@ -11,8 +11,6 @@
     --color-primary-600: var(--ds-color-primary-600-rgb);
     --color-primary-600-hex: var(--ds-color-primary-600);
     --color-primary-700: var(--ds-color-primary-700);
-    --color-primary-800: var(--ds-color-primary-800);
-    --color-primary-900: var(--ds-color-primary-900);
 
     --card-base-width: calc(var(--ds-layout-card-base-width) * var(--ui-scale));
     --card-display-max-height: var(--ds-layout-card-display-max-height);
