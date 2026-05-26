@@ -2,31 +2,31 @@ import { motion, type Transition } from "framer-motion";
 import type { CalendarViewMode } from "@/features/calendar/calendar.types";
 import { cn } from "@/lib/utils";
 
-type ViewModeDropdownOption = {
+type CalendarViewModeOption = {
   value: CalendarViewMode;
   label: string;
 };
 
-type ViewModeDropdownProps = {
+type ToggleCalendarViewModeProps = {
   value: CalendarViewMode;
   onChange: (value: CalendarViewMode) => void;
-  options: readonly ViewModeDropdownOption[];
+  options: readonly CalendarViewModeOption[];
   className?: string;
 };
 
-const VIEW_MODE_INDICATOR_ID = "calendar-view-mode-indicator";
-const VIEW_MODE_MOTION_TRANSITION: Transition = {
+const CALENDAR_VIEW_MODE_INDICATOR_ID = "calendar-view-mode-indicator";
+const CALENDAR_VIEW_MODE_MOTION_TRANSITION: Transition = {
   type: "tween",
   duration: 0.3,
   ease: [0.22, 1, 0.36, 1],
 };
 
-export const ViewModeDropdown = ({
+export const ToggleCalendarViewMode = ({
   value,
   onChange,
   options,
   className,
-}: ViewModeDropdownProps) => {
+}: ToggleCalendarViewModeProps) => {
   return (
     <div
       role="group"
@@ -55,9 +55,9 @@ export const ViewModeDropdown = ({
           >
             {isActive && (
               <motion.span
-                layoutId={VIEW_MODE_INDICATOR_ID}
+                layoutId={CALENDAR_VIEW_MODE_INDICATOR_ID}
                 className="absolute inset-0 -z-10 rounded-[8px] border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
-                transition={VIEW_MODE_MOTION_TRANSITION}
+                transition={CALENDAR_VIEW_MODE_MOTION_TRANSITION}
               />
             )}
             <span className="relative z-10">{option.label}</span>
@@ -67,3 +67,5 @@ export const ViewModeDropdown = ({
     </div>
   );
 };
+
+export const ViewModeDropdown = ToggleCalendarViewMode;
