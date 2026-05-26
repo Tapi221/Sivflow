@@ -9,7 +9,7 @@ import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.week
 import { CalendarTimelineDayView, type TimelineLane } from "@/features/calendar/grid/TimelineDayView";
 import { useScheduleScreenStore } from "@/features/calendar/header/useScheduleScreenStore";
 import { CalendarSidebar } from "@/features/calendar/panel/CalendarSidebar";
-import { DayDetailPanel } from "@/features/calendar/panel/DayDetailPanel";
+import { DayDetailPanel } from "@/pane/rightpane/DayDetailPanel";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { TaskView } from "@/features/calendar/task/TaskView";
 import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCalendarEvents";

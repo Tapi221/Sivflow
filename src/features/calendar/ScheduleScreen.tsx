@@ -11,7 +11,7 @@ import { CalendarPieChartView } from "@/features/calendar/view/CalendarPieChartV
 import { TaskView } from "@/features/calendar/task/TaskView";
 import { CalendarTimelineDayView, type TimelineLane } from "@/features/calendar/grid/TimelineDayView";
 import { useScheduleScreen } from "./useScheduleScreen";
-import { DayDetailPanel } from "@/features/calendar/panel/DayDetailPanel";
+import { DayDetailPanel } from "@/pane/rightpane/DayDetailPanel";
 import { CalendarSidebar } from "@/features/calendar/panel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
 import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCalendarEvents";
