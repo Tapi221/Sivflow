@@ -1,6 +1,7 @@
 import { Suspense, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { SidebarOpenIcon } from "@/components/icons/icons.sidebar";
+import { useScheduleScreenStore } from "@/features/calendar/header/useScheduleScreenStore";
 import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
 import { Sidebar } from "@/features/sidebar/Sidebar.desktop";
 import { useWorkspaceTabsRouteSync } from "@/features/tab/hooks/useTabsRouteSync";
@@ -17,6 +18,9 @@ export const AppLayout = () => {
 
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const isDayDetailPanelOpen = useScheduleScreenStore((state) => state.isDayDetailPanelOpen);
+  const canToggleDayDetailPanel = useScheduleScreenStore((state) => state.canToggleDayDetailPanel);
+  const toggleDayDetailPanel = useScheduleScreenStore((state) => state.toggleDayDetailPanel);
 
   const mainRef = useRef<HTMLElement | null>(null);
 
@@ -31,6 +35,9 @@ export const AppLayout = () => {
   useResetWorkspaceScrollDesktop({ pathname, mainRef });
 
   const showScheduleRightSidebarPlaceholder = /^\/schedule(?:\/|$)/i.test(pathname);
+  const scheduleRightSidebarToggleLabel = isDayDetailPanelOpen
+    ? "日詳細パネルを閉じる"
+    : "日詳細パネルを開く";
 
   const className = [
     "app-layout",
@@ -50,9 +57,17 @@ export const AppLayout = () => {
       />
 
       {showScheduleRightSidebarPlaceholder ? (
-        <div className="app-layout__schedule-right-sidebar-placeholder" aria-hidden="true">
+        <button
+          type="button"
+          className="app-layout__schedule-right-sidebar-placeholder"
+          onClick={toggleDayDetailPanel}
+          disabled={!canToggleDayDetailPanel}
+          aria-label={scheduleRightSidebarToggleLabel}
+          aria-pressed={isDayDetailPanelOpen}
+          aria-expanded={isDayDetailPanelOpen}
+        >
           <SidebarOpenIcon className="app-layout__schedule-right-sidebar-placeholder-icon" />
-        </div>
+        </button>
       ) : null}
 
       <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
