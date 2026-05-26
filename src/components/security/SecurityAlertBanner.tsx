@@ -37,7 +37,7 @@ export const SecurityAlertBanner: React.FC = () => {
       )}
 
       {/* 個別のセキュリティアラート */}
-      {securityState.alerts.map((alert: unknown) => (
+      {securityState.alerts.map((alert) => (
         <div
           key={alert.id}
           style={{
@@ -65,7 +65,7 @@ export const SecurityAlertBanner: React.FC = () => {
             </span>
           </div>
           <button
-            onClick={() => dismissSecurityAlert(alert.id)}
+            onClick={() => void dismissSecurityAlert(alert.id)}
             className="p-1 hover:bg-orange-100 rounded-full transition-colors"
           >
             <X size={16} />
