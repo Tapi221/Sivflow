@@ -49,10 +49,6 @@ const applyTargetedLintFixes = (filePath, source) => {
     nextSource = nextSource.replace(/\bcalendarDayColumnWidth\b/g, "_calendarDayColumnWidth");
   }
 
-  if (relativePath === "src/integration/googlecalendar-integration/gcal.oauth.ts") {
-    nextSource = nextSource.replace(/\blet pollTimer\b/, "const pollTimer");
-  }
-
   if (relativePath === "src/features/dnd/task/taskDnd.components.tsx" && !nextSource.includes("react-refresh/only-export-components")) {
     nextSource = `/* eslint-disable react-refresh/only-export-components */\n${nextSource}`;
   }
