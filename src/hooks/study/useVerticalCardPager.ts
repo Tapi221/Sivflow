@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import { isTypingTarget } from "@/utils/isTypingTarget";
+import { useReviewCardPagerHotkeys } from "@/features/hotkey/useReviewCardPagerHotkeys";
 
 const SCROLL_IDLE_COMMIT_DELAY_MS = 110;
 
@@ -303,37 +303,11 @@ export const useVerticalCardPager = ({
     scrollContainerRef,
   ]);
 
-  // キーボード操作
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isTypingTarget(e.target)) return;
-      if (e.ctrlKey || e.metaKey) return;
-
-      switch (e.key) {
-        case " ":
-          if (e.shiftKey) return;
-          e.preventDefault();
-          onFlip?.();
-          break;
-        case "Enter":
-          onFlip?.();
-          break;
-        case "ArrowDown":
-          e.preventDefault();
-          goNext();
-          break;
-        case "ArrowUp":
-          e.preventDefault();
-          goPrev();
-          break;
-        default:
-          break;
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goNext, goPrev, onFlip]);
+  useReviewCardPagerHotkeys({
+    onFlip,
+    onNext: goNext,
+    onPrev: goPrev,
+  });
 
   return {
     itemRefs,
