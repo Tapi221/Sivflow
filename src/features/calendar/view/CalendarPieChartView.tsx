@@ -12,7 +12,19 @@ type CalendarPieChartViewProps = {
   className?: string;
 };
 
-type PieChartSegment = {
+type DailyPieSlice = {
+  id: string;
+  label: string;
+  color: string;
+  minutes: number;
+  eventCount: number;
+  percentage: number;
+  startMinute: number;
+  endMinute: number;
+  isGap: boolean;
+};
+
+type DailySummaryItem = {
   id: string;
   label: string;
   color: string;
@@ -21,15 +33,12 @@ type PieChartSegment = {
   percentage: number;
 };
 
-type DonutChartSegment = PieChartSegment & {
-  dashArray: string;
-  dashOffset: number;
-};
-
 const DEFAULT_SEGMENT_COLOR = "#8e8e93";
-const DONUT_RADIUS = 70;
-const DONUT_STROKE_WIDTH = 28;
-const DONUT_CIRCUMFERENCE = 2 * Math.PI * DONUT_RADIUS;
+const GAP_SEGMENT_COLOR = "#f7f7f8";
+const FULL_DAY_MINUTES = 24 * 60;
+const CHART_CENTER = 100;
+const CHART_RADIUS = 75;
+const CLOCK_HOURS = [0, 3, 6, 9, 12, 15, 18, 21];
 
 const formatDuration = (minutes: number): string => {
   const normalizedMinutes = Math.max(0, Math.round(minutes));
@@ -56,23 +65,27 @@ const createCalendarLabelMap = (googleAccounts: GoogleAccountDisplay[]) => {
   return labelByCalendarId;
 };
 
-const getEventOverlapMinutes = (
-  event: GoogleCalendarEvent,
-  selectedDate: Date,
-): number => {
-  if (event.isAllDay) return 0;
+const polarToCartesian = (minute: number, radius: number) => {
+  const angle = (minute / FULL_DAY_MINUTES) * 360 - 90;
+  const angleInRadians = (angle * Math.PI) / 180;
 
-  const dayStart = startOfDay(selectedDate);
-  const dayEnd = addDays(dayStart, 1);
+  return {
+    x: CHART_CENTER + radius * Math.cos(angleInRadians),
+    y: CHART_CENTER + radius * Math.sin(angleInRadians),
+  };
+};
 
-  if (!isBefore(event.startsAt, dayEnd) || !isAfter(event.endsAt, dayStart)) {
-    return 0;
-  }
+const buildWedgePath = (startMinute: number, endMinute: number): string => {
+  const start = polarToCartesian(startMinute, CHART_RADIUS);
+  const end = polarToCartesian(endMinute, CHART_RADIUS);
+  const largeArcFlag = endMinute - startMinute > FULL_DAY_MINUTES / 2 ? 1 : 0;
 
-  const startsAt = isBefore(event.startsAt, dayStart) ? dayStart : event.startsAt;
-  const endsAt = isAfter(event.endsAt, dayEnd) ? dayEnd : event.endsAt;
-
-  return Math.max(0, differenceInMinutes(endsAt, startsAt));
+  return [
+    `M ${CHART_CENTER} ${CHART_CENTER}`,
+    `L ${start.x} ${start.y}`,
+    `A ${CHART_RADIUS} ${CHART_RADIUS} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`,
+    "Z",
+  ].join(" ");
 };
 
 const resolveEventSegmentMeta = (
@@ -109,67 +122,210 @@ const resolveEventSegmentMeta = (
   };
 };
 
-const buildPieChartSegments = (
+const buildDailyPieSlices = (
   selectedDate: Date,
   events: GoogleCalendarEvent[],
   appProjects: AppCalendarItem[],
   googleAccounts: GoogleAccountDisplay[],
-): PieChartSegment[] => {
+): DailyPieSlice[] => {
+  const dayStart = startOfDay(selectedDate);
+  const dayEnd = addDays(dayStart, 1);
   const calendarLabelById = createCalendarLabelMap(googleAccounts);
-  const segmentById = new Map<string, PieChartSegment>();
+  const timedEvents = events.flatMap((event) => {
+    if (event.isAllDay) return [];
+    if (!isBefore(event.startsAt, dayEnd) || !isAfter(event.endsAt, dayStart)) return [];
 
-  events.forEach((event) => {
-    const minutes = getEventOverlapMinutes(event, selectedDate);
-    if (minutes <= 0) return;
+    const startsAt = isBefore(event.startsAt, dayStart) ? dayStart : event.startsAt;
+    const endsAt = isAfter(event.endsAt, dayEnd) ? dayEnd : event.endsAt;
+    const startMinute = Math.max(0, differenceInMinutes(startsAt, dayStart));
+    const endMinute = Math.min(FULL_DAY_MINUTES, differenceInMinutes(endsAt, dayStart));
 
-    const meta = resolveEventSegmentMeta(event, appProjects, calendarLabelById);
-    const current = segmentById.get(meta.id);
+    if (endMinute <= startMinute) return [];
+
+    return [
+      {
+        ...resolveEventSegmentMeta(event, appProjects, calendarLabelById),
+        sourceId: event.id,
+        startMinute,
+        endMinute,
+      },
+    ];
+  }).sort((a, b) => a.startMinute - b.startMinute || a.endMinute - b.endMinute);
+
+  const slices: DailyPieSlice[] = [];
+  let cursor = 0;
+
+  timedEvents.forEach((event) => {
+    const startMinute = Math.max(cursor, event.startMinute);
+    const endMinute = Math.max(startMinute, event.endMinute);
+
+    if (startMinute > cursor) {
+      slices.push({
+        id: `gap:${cursor}:${startMinute}`,
+        label: "未予定",
+        color: GAP_SEGMENT_COLOR,
+        minutes: startMinute - cursor,
+        eventCount: 0,
+        percentage: 0,
+        startMinute: cursor,
+        endMinute: startMinute,
+        isGap: true,
+      });
+    }
+
+    if (endMinute > startMinute) {
+      slices.push({
+        id: `${event.id}:${event.sourceId}:${startMinute}:${endMinute}`,
+        label: event.label,
+        color: event.color,
+        minutes: endMinute - startMinute,
+        eventCount: 1,
+        percentage: 0,
+        startMinute,
+        endMinute,
+        isGap: false,
+      });
+    }
+
+    cursor = Math.max(cursor, endMinute);
+  });
+
+  if (cursor < FULL_DAY_MINUTES) {
+    slices.push({
+      id: `gap:${cursor}:${FULL_DAY_MINUTES}`,
+      label: "未予定",
+      color: GAP_SEGMENT_COLOR,
+      minutes: FULL_DAY_MINUTES - cursor,
+      eventCount: 0,
+      percentage: 0,
+      startMinute: cursor,
+      endMinute: FULL_DAY_MINUTES,
+      isGap: true,
+    });
+  }
+
+  const scheduledMinutes = slices.reduce((sum, slice) => slice.isGap ? sum : sum + slice.minutes, 0);
+
+  return slices.map((slice) => ({
+    ...slice,
+    percentage: !slice.isGap && scheduledMinutes > 0 ? Math.round((slice.minutes / scheduledMinutes) * 100) : 0,
+  }));
+};
+
+const buildSummaryItems = (slices: DailyPieSlice[]): DailySummaryItem[] => {
+  const scheduledMinutes = slices.reduce((sum, slice) => slice.isGap ? sum : sum + slice.minutes, 0);
+  const summaryById = new Map<string, DailySummaryItem>();
+
+  slices.forEach((slice) => {
+    if (slice.isGap) return;
+
+    const summaryId = slice.id.split(":").slice(0, 2).join(":");
+    const current = summaryById.get(summaryId);
 
     if (current) {
-      current.minutes += minutes;
-      current.eventCount += 1;
+      current.minutes += slice.minutes;
+      current.eventCount += slice.eventCount;
       return;
     }
 
-    segmentById.set(meta.id, {
-      ...meta,
-      minutes,
-      eventCount: 1,
+    summaryById.set(summaryId, {
+      id: summaryId,
+      label: slice.label,
+      color: slice.color,
+      minutes: slice.minutes,
+      eventCount: slice.eventCount,
       percentage: 0,
     });
   });
 
-  const segments = Array.from(segmentById.values()).sort(
-    (a, b) => b.minutes - a.minutes,
-  );
-  const totalMinutes = segments.reduce((sum, segment) => sum + segment.minutes, 0);
-
-  return segments.map((segment) => ({
-    ...segment,
-    percentage: totalMinutes > 0 ? Math.round((segment.minutes / totalMinutes) * 100) : 0,
-  }));
+  return Array.from(summaryById.values())
+    .map((item) => ({
+      ...item,
+      percentage: scheduledMinutes > 0 ? Math.round((item.minutes / scheduledMinutes) * 100) : 0,
+    }))
+    .sort((a, b) => b.minutes - a.minutes);
 };
 
-const buildDonutChartSegments = (segments: PieChartSegment[]): DonutChartSegment[] => {
-  const totalMinutes = segments.reduce((sum, segment) => sum + segment.minutes, 0);
-  let consumedLength = 0;
+const truncateChartLabel = (label: string) => {
+  if (label.length <= 6) return label;
 
-  return segments.map((segment) => {
-    const rawLength = totalMinutes > 0
-      ? (segment.minutes / totalMinutes) * DONUT_CIRCUMFERENCE
-      : 0;
-    const gapLength = segments.length > 1 ? 1.25 : 0;
-    const visibleLength = Math.max(0, rawLength - gapLength);
-    const dashOffset = -consumedLength;
+  return `${label.slice(0, 5)}…`;
+};
 
-    consumedLength += rawLength;
+type DailyClockPieProps = {
+  title: string;
+  totalMinutes: number;
+  slices: DailyPieSlice[];
+  isActual?: boolean;
+};
 
-    return {
-      ...segment,
-      dashArray: `${visibleLength} ${DONUT_CIRCUMFERENCE - visibleLength}`,
-      dashOffset,
-    };
-  });
+const DailyClockPie = ({ title, totalMinutes, slices, isActual = false }: DailyClockPieProps) => {
+  const visibleSlices = slices.filter((slice) => slice.minutes > 0);
+  const hasTimedSlices = visibleSlices.some((slice) => !slice.isGap);
+
+  return (
+    <div className="flex min-w-0 flex-1 flex-col items-center">
+      <div className={cn(
+        "mb-1 rounded-[7px] px-9 py-1 text-center text-[15px] font-semibold tracking-[-0.02em]",
+        isActual ? "bg-[#dff6e8] text-[#26914f]" : "bg-[#eee9ff] text-[#7560d8]",
+      )}>
+        {title}
+      </div>
+      <p className="mb-6 text-[12px] font-semibold text-[#6e6e73]">計 {formatDuration(totalMinutes)}</p>
+
+      <div className="relative aspect-square w-full max-w-[430px] min-w-[300px]">
+        {hasTimedSlices ? (
+          <svg viewBox="0 0 200 200" role="img" aria-label={`${title} 計 ${formatDuration(totalMinutes)}`} className="h-full w-full overflow-visible">
+            {visibleSlices.map((slice) => (
+              slice.endMinute - slice.startMinute >= FULL_DAY_MINUTES ? (
+                <circle key={slice.id} cx={CHART_CENTER} cy={CHART_CENTER} r={CHART_RADIUS} fill={slice.color} />
+              ) : (
+                <path key={slice.id} d={buildWedgePath(slice.startMinute, slice.endMinute)} fill={slice.color} stroke="rgba(255,255,255,0.7)" strokeWidth={0.35}>
+                  <title>
+                    {slice.label}: {formatDuration(slice.minutes)}
+                  </title>
+                </path>
+              )
+            ))}
+
+            {CLOCK_HOURS.map((hour) => {
+              const minute = hour * 60;
+              const inner = polarToCartesian(minute, CHART_RADIUS - 5);
+              const outer = polarToCartesian(minute, CHART_RADIUS + 2);
+              const label = polarToCartesian(minute, CHART_RADIUS + 11);
+
+              return (
+                <g key={hour}>
+                  <line x1={inner.x} y1={inner.y} x2={outer.x} y2={outer.y} stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" />
+                  <text x={label.x} y={label.y + 3} textAnchor="middle" className="fill-[#8e8e93] text-[8px] font-medium">
+                    {hour}
+                  </text>
+                </g>
+              );
+            })}
+
+            {visibleSlices.filter((slice) => !slice.isGap && slice.minutes >= 30).map((slice) => {
+              const labelPosition = polarToCartesian((slice.startMinute + slice.endMinute) / 2, CHART_RADIUS * 0.58);
+
+              return (
+                <text key={`label:${slice.id}`} x={labelPosition.x} y={labelPosition.y} textAnchor="middle" className="pointer-events-none fill-white text-[8px] font-semibold drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]">
+                  <tspan x={labelPosition.x} dy="-0.2em">{truncateChartLabel(slice.label)}</tspan>
+                  <tspan x={labelPosition.x} dy="1.15em">{formatDuration(slice.minutes)}</tspan>
+                </text>
+              );
+            })}
+          </svg>
+        ) : (
+          <div className="flex h-full items-center justify-center rounded-full border border-dashed border-[#dedede] text-center">
+            <div>
+              <p className="text-[13px] font-semibold text-[#8e8e93]">時間指定なし</p>
+              <p className="mt-1 text-[11px] font-medium text-[#b3b3b3]">終日は集計外</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export const CalendarPieChartView = ({
@@ -179,137 +335,93 @@ export const CalendarPieChartView = ({
   googleAccounts,
   className,
 }: CalendarPieChartViewProps) => {
-  const segments = useMemo(
-    () => buildPieChartSegments(selectedDate, events, appProjects, googleAccounts),
+  const plannedSlices = useMemo(
+    () => buildDailyPieSlices(selectedDate, events, appProjects, googleAccounts),
     [appProjects, events, googleAccounts, selectedDate],
   );
-  const donutSegments = useMemo(() => buildDonutChartSegments(segments), [segments]);
-  const totalMinutes = segments.reduce((sum, segment) => sum + segment.minutes, 0);
-  const hasSegments = segments.length > 0;
+  const plannedSummaryItems = useMemo(() => buildSummaryItems(plannedSlices), [plannedSlices]);
+  const plannedMinutes = plannedSummaryItems.reduce((sum, item) => sum + item.minutes, 0);
+  const totalDiffMinutes = 0 - plannedMinutes;
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-white text-[#1c1c1e]", className)}>
-      <div className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-[#eeeeee] px-5">
-        <div className="min-w-0">
-          <h2 className="truncate text-[15px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
-            予定の円グラフ
-          </h2>
-          <p className="mt-0.5 text-[11px] font-semibold text-[#9a9a9a]">
-            {format(selectedDate, "yyyy年M月d日")}
-          </p>
+    <div className={cn("flex h-full min-h-0 bg-white text-[#1c1c1e]", className)}>
+      <main className="flex min-h-0 flex-1 flex-col">
+        <div className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-[#eeeeee] px-5">
+          <div className="min-w-0">
+            <h2 className="truncate text-[15px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
+              {format(selectedDate, "yyyy年M月d日")}
+            </h2>
+            <p className="mt-0.5 text-[11px] font-semibold text-[#9a9a9a]">円グラフ</p>
+          </div>
         </div>
-        <div className="shrink-0 text-right">
-          <p className="text-[11px] font-semibold text-[#9a9a9a]">合計</p>
-          <p className="mt-0.5 text-[15px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
-            {formatDuration(totalMinutes)}
-          </p>
-        </div>
-      </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_300px] max-[980px]:grid-cols-1">
-        <section className="flex min-h-0 flex-col bg-white px-5 py-4">
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <h3 className="text-[12px] font-semibold text-[#6e6e73]">カテゴリ別の時間</h3>
-            <span className="text-[11px] font-semibold text-[#9a9a9a]">
-              {segments.length}項目
-            </span>
+        <div className="flex min-h-0 flex-1 items-center justify-center gap-12 overflow-hidden px-8 py-6 max-[1120px]:gap-6 max-[980px]:flex-col max-[980px]:overflow-y-auto">
+          <DailyClockPie title="予定" totalMinutes={plannedMinutes} slices={plannedSlices} />
+          <div className="mb-6 shrink-0 text-[17px] font-semibold text-[#8e8e93] max-[980px]:mb-0">VS</div>
+          <DailyClockPie title="実績" totalMinutes={0} slices={[]} isActual />
+        </div>
+      </main>
+
+      <aside className="flex w-[292px] shrink-0 flex-col gap-4 border-l border-[#eeeeee] bg-white p-4 max-[980px]:hidden">
+        <section className="rounded-[18px] border border-[#eeeeee] bg-white p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-[13px] font-semibold text-[#3a3a3c]">差分サマリー</h3>
+            <span className="text-[12px] text-[#b3b3b3]">ⓘ</span>
           </div>
 
-          <div className="relative min-h-[360px] flex-1">
-            {hasSegments ? (
-              <div className="relative flex h-full min-h-[360px] items-center justify-center">
-                <svg
-                  viewBox="0 0 200 200"
-                  role="img"
-                  aria-label={`予定の円グラフ 合計 ${formatDuration(totalMinutes)}`}
-                  className="h-full max-h-[430px] w-full max-w-[430px]"
-                >
-                  <circle
-                    cx="100"
-                    cy="100"
-                    r={DONUT_RADIUS}
-                    fill="none"
-                    stroke="#f1f1f1"
-                    strokeWidth={DONUT_STROKE_WIDTH}
-                  />
-                  <g transform="rotate(-90 100 100)">
-                    {donutSegments.map((segment) => (
-                      <circle
-                        key={segment.id}
-                        cx="100"
-                        cy="100"
-                        r={DONUT_RADIUS}
-                        fill="none"
-                        stroke={segment.color}
-                        strokeWidth={DONUT_STROKE_WIDTH}
-                        strokeDasharray={segment.dashArray}
-                        strokeDashoffset={segment.dashOffset}
-                      >
-                        <title>
-                          {segment.label}: {formatDuration(segment.minutes)} / {segment.percentage}%
-                        </title>
-                      </circle>
-                    ))}
-                  </g>
-                </svg>
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <div className="rounded-full bg-white/90 px-5 py-4 text-center shadow-[0_1px_4px_rgba(15,23,42,0.08)] backdrop-blur">
-                    <p className="text-[11px] font-semibold text-[#9a9a9a]">合計</p>
-                    <p className="mt-1 text-[21px] font-semibold tracking-[-0.03em] text-[#1c1c1e]">
-                      {formatDuration(totalMinutes)}
-                    </p>
-                  </div>
+          <div className="space-y-3">
+            {plannedSummaryItems.slice(0, 8).map((item) => (
+              <div key={item.id} className="flex items-center justify-between gap-3 text-[12px]">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="truncate font-medium text-[#3a3a3c]">{item.label}</span>
                 </div>
+                <span className="shrink-0 font-semibold text-[#d9476e]">-{formatDuration(item.minutes)}</span>
               </div>
-            ) : (
-              <div className="flex h-full min-h-[360px] items-center justify-center text-center">
-                <div>
-                  <p className="text-[14px] font-semibold text-[#6e6e73]">この日の時間指定の予定はありません</p>
-                  <p className="mt-2 text-[12px] font-medium text-[#a1a1a6]">
-                    終日の予定は時間集計から除外しています。
-                  </p>
-                </div>
-              </div>
-            )}
+            ))}
+          </div>
+
+          <div className="mt-4 flex items-center justify-between border-t border-[#eeeeee] pt-3 text-[12px] font-semibold">
+            <span>合計</span>
+            <span className={totalDiffMinutes === 0 ? "text-[#1c1c1e]" : "text-[#d9476e]"}>{totalDiffMinutes === 0 ? "±" : "-"}{formatDuration(Math.abs(totalDiffMinutes))}</span>
           </div>
         </section>
 
-        <aside className="flex min-h-0 flex-col border-l border-[#eeeeee] bg-white px-4 py-4 max-[980px]:border-l-0 max-[980px]:border-t">
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <h3 className="text-[12px] font-semibold text-[#6e6e73]">内訳</h3>
-            <span className="text-[11px] font-semibold text-[#9a9a9a]">時間 / 割合</span>
+        <section className="rounded-[18px] border border-[#eeeeee] bg-white p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-[13px] font-semibold text-[#3a3a3c]">当日の比較</h3>
+            <span className="text-[12px] text-[#b3b3b3]">ⓘ</span>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            {hasSegments ? (
-              segments.map((segment) => (
-                <div key={segment.id} className="border-b border-[#f1f1f1] py-3 last:border-b-0">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: segment.color }} />
-                      <span className="truncate text-[12px] font-semibold text-[#3a3a3c]">{segment.label}</span>
-                    </div>
-                    <span className="shrink-0 text-[12px] font-semibold text-[#1c1c1e]">
-                      {formatDuration(segment.minutes)}
-                    </span>
-                  </div>
-                  <div className="mt-2 h-1 overflow-hidden rounded-full bg-[#eeeeee]">
-                    <div className="h-full rounded-full" style={{ width: `${segment.percentage}%`, backgroundColor: segment.color }} />
-                  </div>
-                  <div className="mt-1.5 flex items-center justify-between text-[11px] font-medium text-[#9a9a9a]">
-                    <span>{segment.eventCount}件</span>
-                    <span>{segment.percentage}%</span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="py-3 text-[12px] font-semibold text-[#9a9a9a]">
-                終日の予定は時間集計から除外しています。
-              </div>
-            )}
+          <div className="mb-3 grid grid-cols-2 rounded-[10px] bg-[#f7f7f7] p-0.5 text-center text-[11px] font-semibold text-[#8e8e93]">
+            <span className="rounded-[8px] bg-white py-1 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">時間</span>
+            <span className="py-1">割合</span>
           </div>
-        </aside>
-      </div>
+
+          <div className="grid grid-cols-[minmax(0,1fr)_64px_64px] items-center gap-x-2 gap-y-3 text-[11px]">
+            <span />
+            <span className="text-center font-semibold text-[#3a3a3c]">予定</span>
+            <span className="text-center font-semibold text-[#3a3a3c]">実績</span>
+            {plannedSummaryItems.slice(0, 6).map((item) => (
+              <div key={`compare:${item.id}`} className="contents">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="truncate font-medium text-[#3a3a3c]">{item.label}</span>
+                </div>
+                <span className="text-center font-semibold text-[#3a3a3c]">{formatDuration(item.minutes)}</span>
+                <span className="text-center font-semibold text-[#b3b3b3]">—</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 grid grid-cols-[minmax(0,1fr)_64px_64px] border-t border-[#eeeeee] pt-3 text-[12px] font-semibold">
+            <span>合計</span>
+            <span className="text-center">{formatDuration(plannedMinutes)}</span>
+            <span className="text-center text-[#b3b3b3]">—</span>
+          </div>
+          <p className="mt-3 text-[10px] leading-relaxed text-[#b3b3b3]">実績データの保存元がまだ無いため、実績側は未記録として表示しています。</p>
+        </section>
+      </aside>
     </div>
   );
 };
