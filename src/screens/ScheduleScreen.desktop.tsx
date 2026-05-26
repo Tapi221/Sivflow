@@ -1,5 +1,6 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, endOfDay, endOfMonth, endOfWeek, format, startOfDay, startOfMonth, startOfWeek } from "date-fns";
+import type { PlanResultMode } from "@/chip/toggle/Toggle.planresult";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import { useAuthSession } from "@/contexts/AuthContext";
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -31,6 +32,8 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const SELECTED_TASK_LISTS_STORAGE_KEY_PREFIX = "flashcard-master:schedule:selected-google-task-list-ids";
 const DEFAULT_TIMELINE_CALENDAR_COLOR = "#74798b";
+const DEFAULT_PLAN_RESULT_MODES: readonly PlanResultMode[] = ["plan", "actual"];
+const PLAN_RESULT_TOGGLE_VIEW_MODES = new Set(["threeDays", "days", "pieChart"]);
 const APP_PROJECT_COLORS = [
   "#34c759",
   "#ff3b30",
@@ -150,6 +153,9 @@ export const ScheduleScreen = ({
   const openDayDetailPanel = useScheduleScreenStore((state) => state.openDayDetailPanel);
   const setCanToggleDayDetailPanel = useScheduleScreenStore((state) => state.setCanToggleDayDetailPanel);
   const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(readStoredAppProjects);
+  const [planResultModes, setPlanResultModes] = useState<PlanResultMode[]>([
+    ...DEFAULT_PLAN_RESULT_MODES,
+  ]);
   const selectedTaskListsStorageKey = useMemo(
     () => getSelectedTaskListsStorageKey(currentUser?.uid ?? "anonymous"),
     [currentUser?.uid],
@@ -387,6 +393,9 @@ export const ScheduleScreen = ({
   const isPieChartCalendarView =
     activeMode === "calendar" && selectedViewMode === "pieChart";
 
+  const canShowPlanResultToggle =
+    activeMode === "calendar" && PLAN_RESULT_TOGGLE_VIEW_MODES.has(selectedViewMode);
+
   const hasTrailingPanel = isMonthCalendarView && !isDayDetailPanelCollapsed;
 
   const headerTitleDate =
@@ -475,7 +484,10 @@ export const ScheduleScreen = ({
             titleLabel={headerTitleLabel}
             selectedViewMode={selectedViewMode}
             viewOptions={viewOptions}
+            planResultModes={planResultModes}
+            showPlanResultToggle={canShowPlanResultToggle}
             onSelectViewMode={handleSelectViewMode}
+            onChangePlanResultModes={setPlanResultModes}
             onPrevious={handlePrevious}
             onNext={handleNext}
             onToday={handleToday}
