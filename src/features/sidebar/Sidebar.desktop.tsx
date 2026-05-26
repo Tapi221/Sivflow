@@ -5,6 +5,7 @@ import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
 import { ClockIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon, SidebarOpenIcon } from "../../components/icons/icons.sidebar";
 import "./sidebar.desktop.css";
+import "./sidebar.library-obsidian.css";
 
 // ── 型定義 ───────────────────────────────────────────────────
 
