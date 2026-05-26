@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { addDays, differenceInMinutes, format, isAfter, isBefore, startOfDay } from "date-fns";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
@@ -22,7 +21,15 @@ type PieChartSegment = {
   percentage: number;
 };
 
+type DonutChartSegment = PieChartSegment & {
+  dashArray: string;
+  dashOffset: number;
+};
+
 const DEFAULT_SEGMENT_COLOR = "#8e8e93";
+const DONUT_RADIUS = 70;
+const DONUT_STROKE_WIDTH = 28;
+const DONUT_CIRCUMFERENCE = 2 * Math.PI * DONUT_RADIUS;
 
 const formatDuration = (minutes: number): string => {
   const normalizedMinutes = Math.max(0, Math.round(minutes));
@@ -143,6 +150,28 @@ const buildPieChartSegments = (
   }));
 };
 
+const buildDonutChartSegments = (segments: PieChartSegment[]): DonutChartSegment[] => {
+  const totalMinutes = segments.reduce((sum, segment) => sum + segment.minutes, 0);
+  let consumedLength = 0;
+
+  return segments.map((segment) => {
+    const rawLength = totalMinutes > 0
+      ? (segment.minutes / totalMinutes) * DONUT_CIRCUMFERENCE
+      : 0;
+    const gapLength = segments.length > 1 ? 1.25 : 0;
+    const visibleLength = Math.max(0, rawLength - gapLength);
+    const dashOffset = -consumedLength;
+
+    consumedLength += rawLength;
+
+    return {
+      ...segment,
+      dashArray: `${visibleLength} ${DONUT_CIRCUMFERENCE - visibleLength}`,
+      dashOffset,
+    };
+  });
+};
+
 export const CalendarPieChartView = ({
   selectedDate,
   events,
@@ -154,6 +183,7 @@ export const CalendarPieChartView = ({
     () => buildPieChartSegments(selectedDate, events, appProjects, googleAccounts),
     [appProjects, events, googleAccounts, selectedDate],
   );
+  const donutSegments = useMemo(() => buildDonutChartSegments(segments), [segments]);
   const totalMinutes = segments.reduce((sum, segment) => sum + segment.minutes, 0);
   const hasSegments = segments.length > 0;
 
@@ -187,33 +217,41 @@ export const CalendarPieChartView = ({
 
           <div className="relative min-h-[360px] flex-1">
             {hasSegments ? (
-              <>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={segments}
-                      dataKey="minutes"
-                      nameKey="label"
-                      innerRadius="58%"
-                      outerRadius="84%"
-                      paddingAngle={1}
-                      strokeWidth={0}
-                    >
-                      {segments.map((segment) => (
-                        <Cell
-                          key={segment.id}
-                          fill={segment.color}
-                          stroke="rgba(255,255,255,0.94)"
-                          strokeWidth={2}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value, name) => [formatDuration(Number(value)), name]}
-                      contentStyle={{ borderRadius: 12, borderColor: "#eeeeee", boxShadow: "0 8px 20px rgba(15,23,42,0.08)" }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+              <div className="relative flex h-full min-h-[360px] items-center justify-center">
+                <svg
+                  viewBox="0 0 200 200"
+                  role="img"
+                  aria-label={`予定の円グラフ 合計 ${formatDuration(totalMinutes)}`}
+                  className="h-full max-h-[430px] w-full max-w-[430px]"
+                >
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r={DONUT_RADIUS}
+                    fill="none"
+                    stroke="#f1f1f1"
+                    strokeWidth={DONUT_STROKE_WIDTH}
+                  />
+                  <g transform="rotate(-90 100 100)">
+                    {donutSegments.map((segment) => (
+                      <circle
+                        key={segment.id}
+                        cx="100"
+                        cy="100"
+                        r={DONUT_RADIUS}
+                        fill="none"
+                        stroke={segment.color}
+                        strokeWidth={DONUT_STROKE_WIDTH}
+                        strokeDasharray={segment.dashArray}
+                        strokeDashoffset={segment.dashOffset}
+                      >
+                        <title>
+                          {segment.label}: {formatDuration(segment.minutes)} / {segment.percentage}%
+                        </title>
+                      </circle>
+                    ))}
+                  </g>
+                </svg>
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                   <div className="rounded-full bg-white/90 px-5 py-4 text-center shadow-[0_1px_4px_rgba(15,23,42,0.08)] backdrop-blur">
                     <p className="text-[11px] font-semibold text-[#9a9a9a]">合計</p>
@@ -222,7 +260,7 @@ export const CalendarPieChartView = ({
                     </p>
                   </div>
                 </div>
-              </>
+              </div>
             ) : (
               <div className="flex h-full min-h-[360px] items-center justify-center text-center">
                 <div>
