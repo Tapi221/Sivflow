@@ -51,6 +51,52 @@ const shouldKeepPreviousAdjacentSlot = (
   );
 };
 
+const resolveIndexedDropTarget = (
+  target: TaskDropTarget,
+  tasksByColumn: Record<string, Task[]>,
+  activeTaskId: string,
+): TaskDropTarget => {
+  if (typeof target.insertIndex !== "number") {
+    return target;
+  }
+
+  const targetTasks = (tasksByColumn[target.columnId] ?? []).filter(
+    (task) => task.id !== activeTaskId,
+  );
+  const insertIndex = Math.max(
+    0,
+    Math.min(target.insertIndex, targetTasks.length),
+  );
+  const previousTask = targetTasks[insertIndex - 1];
+
+  if (previousTask) {
+    return {
+      ...target,
+      insertIndex,
+      overTaskId: previousTask.id,
+      position: "after",
+    };
+  }
+
+  const nextTask = targetTasks[insertIndex];
+
+  if (nextTask) {
+    return {
+      ...target,
+      insertIndex,
+      overTaskId: nextTask.id,
+      position: "before",
+    };
+  }
+
+  return {
+    ...target,
+    insertIndex,
+    overTaskId: null,
+    position: "before",
+  };
+};
+
 export const useTaskBoardDnd = ({
   tasksByColumn,
   onReorderTask,
@@ -149,7 +195,7 @@ export const useTaskBoardDnd = ({
   const handleDragEnd = (event: DragEndEvent) => {
     const activeId = String(event.active.id);
     const latestDropTarget = latestDropTargetRef.current;
-    const target = latestDropTarget ?? (
+    const rawTarget = latestDropTarget ?? (
       event.over
         ? resolveDropTarget(
           event,
@@ -159,6 +205,9 @@ export const useTaskBoardDnd = ({
         )
         : null
     );
+    const target = rawTarget
+      ? resolveIndexedDropTarget(rawTarget, tasksByColumn, activeId)
+      : null;
 
     resetDragState();
 
