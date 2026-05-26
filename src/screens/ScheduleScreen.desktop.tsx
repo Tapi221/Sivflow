@@ -103,7 +103,6 @@ export const ScheduleScreen = ({
   const monthLabelFormat = useMonthLabelFormat();
   const isDayDetailPanelOpen = useScheduleScreenStore((state) => state.isDayDetailPanelOpen);
   const openDayDetailPanel = useScheduleScreenStore((state) => state.openDayDetailPanel);
-  const toggleDayDetailPanel = useScheduleScreenStore((state) => state.toggleDayDetailPanel);
   const setCanToggleDayDetailPanel = useScheduleScreenStore((state) => state.setCanToggleDayDetailPanel);
   const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(readStoredAppProjects);
   const [selectedTaskListIds, setSelectedTaskListIds] = useState<Set<string>>(
@@ -327,10 +326,6 @@ export const ScheduleScreen = ({
 
   const hasTrailingPanel = isMonthCalendarView && !isDayDetailPanelCollapsed;
 
-  const dayDetailToggleLabel = showDayDetailPanel
-    ? "日詳細パネルを閉じる"
-    : "日詳細パネルを開く";
-
   const headerTitleDate =
     selectedViewMode === "month" ? monthTitleDate : titleDate;
 
@@ -343,12 +338,6 @@ export const ScheduleScreen = ({
 
     return () => setCanToggleDayDetailPanel(false);
   }, [canShowDayDetailPanel, setCanToggleDayDetailPanel]);
-
-  const handleToggleDayDetailPanel = useCallback(() => {
-    if (!canShowDayDetailPanel) return;
-
-    toggleDayDetailPanel();
-  }, [canShowDayDetailPanel, toggleDayDetailPanel]);
 
   const handleSidebarSelectDateAndOpen = useCallback(
     (date: Date) => {
@@ -423,14 +412,10 @@ export const ScheduleScreen = ({
             titleLabel={headerTitleLabel}
             selectedViewMode={selectedViewMode}
             viewOptions={viewOptions}
-            canShowDayDetailPanel={canShowDayDetailPanel}
-            showDayDetailPanel={showDayDetailPanel}
-            dayDetailToggleLabel={dayDetailToggleLabel}
             onSelectViewMode={handleSelectViewMode}
             onPrevious={handlePrevious}
             onNext={handleNext}
             onToday={handleToday}
-            onToggleDayDetailPanel={handleToggleDayDetailPanel}
             className="mb-2 flex shrink-0 items-center justify-between px-5 pt-4"
           />
         )}
