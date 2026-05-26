@@ -29,6 +29,14 @@ const GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE = "failed-precondition";
 const GOOGLE_SCOPE_RECONNECT_MESSAGE =
   "Google Calendar と Google ToDo をまとめて連携するための権限が必要です。両方の権限を有効にして再連携してください。";
 
+let pendingGoogleCalendarServerCodeVerifier: string | null = null;
+
+export const consumeGoogleCalendarServerCodeVerifier = (): string | null => {
+  const verifier = pendingGoogleCalendarServerCodeVerifier;
+  pendingGoogleCalendarServerCodeVerifier = null;
+  return verifier;
+};
+
 const createGoogleCalendarReconnectRequiredError = (): Error => {
   const error = new Error("Google 連携の再認可が必要です");
 
@@ -562,7 +570,7 @@ const fetchGoogleUserInfo = async (accessToken: string) => {
 
 export const requestGoogleCalendarServerCode = async (
   auth: Auth,
-): Promise<{ code: string; redirectUri: string }> => {
+): Promise<{ code: string; codeVerifier: string; redirectUri: string }> => {
   if (typeof window === "undefined") {
     throw new Error("Google OAuth popup is not available");
   }
@@ -571,6 +579,8 @@ export const requestGoogleCalendarServerCode = async (
   const loginHint = auth.currentUser?.email ?? readEmail() ?? undefined;
   const redirectUri = window.location.origin;
   const state = randomBase64Url(16);
+  const codeVerifier = randomBase64Url(48);
+  const codeChallenge = await createCodeChallenge(codeVerifier);
 
   logOAuthConfig("web-code", {
     clientId,
@@ -581,6 +591,7 @@ export const requestGoogleCalendarServerCode = async (
   const url = buildAuthorizeUrl({
     clientId,
     redirectUri,
+    codeChallenge,
     loginHint,
     state,
   });
@@ -596,10 +607,19 @@ export const requestGoogleCalendarServerCode = async (
     // popup focus はブラウザ設定で失敗しても認可フロー自体は続行できる。
   }
 
-  return {
-    code: await waitForWebPopupCode(popup, state, redirectUri),
-    redirectUri,
-  };
+  try {
+    const code = await waitForWebPopupCode(popup, state, redirectUri);
+    pendingGoogleCalendarServerCodeVerifier = codeVerifier;
+
+    return {
+      code,
+      codeVerifier,
+      redirectUri,
+    };
+  } catch (error) {
+    pendingGoogleCalendarServerCodeVerifier = null;
+    throw error;
+  }
 };
 
 const requestWebGisToken = async (
