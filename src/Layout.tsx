@@ -94,18 +94,6 @@ const Layout = () => {
           void navigate("/gallery");
         },
       },
-      {
-        id: "action:directory",
-        value: "action:directory",
-        kind: "action",
-        iconKind: "directory",
-        title: "ディレクトリ",
-        keywords: ["ディレクトリ", "directory", "一覧", "list"],
-        priority: 92,
-        onSelect: () => {
-          void navigate("/directory");
-        },
-      },
     ],
     [navigate],
   );
