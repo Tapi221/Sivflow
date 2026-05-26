@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -11,10 +12,10 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 import type { CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
-import { CalendarEventChipWeekday } from "../../../chip/eventchip/EventChip.schedule.weekday";
+import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.schedule.weekday";
 import { cn } from "@/lib/utils";
 
-type CalendarEventPositionStyle = React.CSSProperties & {
+type CalendarEventPositionStyle = CSSProperties & {
   "--calendar-event-start-hour": number;
   "--calendar-event-duration-hours": number;
 };
@@ -158,8 +159,8 @@ const CurrentTimeIndicator = ({
 };
 
 export const CalendarWeekDayGrid = ({
-  headerScrollRef,
-  allDayScrollRef,
+  headerScrollRef: _headerScrollRef,
+  allDayScrollRef: _allDayScrollRef,
   scrollContainerRef,
   visibleDays,
   visibleEvents,
@@ -171,8 +172,6 @@ export const CalendarWeekDayGrid = ({
 }: CalendarWeekDayGridProps) => {
   const today = new Date();
   const currentMinutes = useCurrentTimeMinutes();
-  const fallbackAllDayScrollRef = React.useRef<HTMLDivElement | null>(null);
-  const resolvedAllDayScrollRef = allDayScrollRef ?? fallbackAllDayScrollRef;
 
   const isTodayVisible = visibleDays.some((d) => isSameDay(d, today));
   const todayColumnIndex = visibleDays.findIndex((d) => isSameDay(d, today));
@@ -190,31 +189,32 @@ export const CalendarWeekDayGrid = ({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-      <div className="flex shrink-0 border-b border-[#eeeeee] bg-white">
-        <div
-          className="shrink-0 border-r border-[#eeeeee] bg-white"
-          style={{ width: C.TIME_COLUMN_WIDTH }}
-        />
+      <div
+        ref={scrollContainerRef}
+        className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
+        onScroll={onScroll}
+      >
+        <div className="grid bg-white" style={timelineGridStyle}>
+          <div className="sticky left-0 top-0 z-[60] h-10 border-b border-r border-[#eeeeee] bg-white" />
 
-        <div ref={headerScrollRef} className="flex-1 overflow-hidden bg-white">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: `repeat(${visibleDays.length}, ${calendarDayColumnWidth}px)`,
-              minWidth: `${visibleDays.length * calendarDayColumnWidth}px`,
-            }}
-          >
-            {visibleDays.map((day) => {
-              const isDayToday = isSameDay(day, today);
-              const isDaySelected =
-                !!selectedDate && isSameDay(day, selectedDate);
+          {visibleDays.map((day, dayIndex) => {
+            const isDayToday = isSameDay(day, today);
+            const isDaySelected =
+              !!selectedDate && isSameDay(day, selectedDate);
 
-              return (
+            return (
+              <div
+                key={`weekday-header-${day.toISOString()}`}
+                className={cn(
+                  "sticky top-0 z-50 border-b border-r border-[#eeeeee] bg-white",
+                  dayIndex === visibleDays.length - 1 && "border-r-0",
+                )}
+              >
                 <CalendarDateButton
-                  key={day.toISOString()}
                   isToday={isDayToday}
                   isSelected={isDaySelected}
                   onClick={() => onSelectDate?.(day)}
+                  className="w-full"
                 >
                   <CalendarDateContent
                     dateLabel={format(day, GRID.WEEKDAY_DATE_FORMAT)}
@@ -226,66 +226,46 @@ export const CalendarWeekDayGrid = ({
                     layout="weekday-date"
                   />
                 </CalendarDateButton>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+              </div>
+            );
+          })}
 
-      <div className="flex shrink-0 border-b border-[#eeeeee] bg-white">
-        <div
-          className="flex shrink-0 justify-end border-r border-[#eeeeee] bg-white pr-2 pt-1 text-[10px] font-medium text-[rgba(60,60,67,0.45)]"
-          style={{ width: C.TIME_COLUMN_WIDTH }}
-        >
-          終日
-        </div>
-
-        <div
-          ref={resolvedAllDayScrollRef}
-          className="flex-1 overflow-x-auto overflow-y-hidden bg-white scrollbar-hidden"
-        >
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: `repeat(${visibleDays.length}, ${calendarDayColumnWidth}px)`,
-              minWidth: `${visibleDays.length * calendarDayColumnWidth}px`,
-            }}
+            className="sticky left-0 top-10 z-[60] flex min-h-7 justify-end border-b border-r border-[#eeeeee] bg-white pr-2 pt-1 text-[10px] font-medium text-[rgba(60,60,67,0.45)]"
+            style={{ width: C.TIME_COLUMN_WIDTH }}
           >
-            {visibleDays.map((day) => {
-              const events = allDayEventsByDay.get(day.toISOString()) ?? [];
-              const visibleChips = events.slice(0, MAX_ALL_DAY_VISIBLE_CHIPS);
-              const overflowCount = events.length - visibleChips.length;
-
-              return (
-                <div
-                  key={day.toISOString()}
-                  className="min-h-7 border-r border-[#eeeeee] px-1 py-1 last:border-r-0"
-                >
-                  <div className="flex flex-col gap-1">
-                    {visibleChips.map((event) => (
-                      <AllDayEventChip key={event.id} event={event} />
-                    ))}
-
-                    {overflowCount > 0 ? (
-                      <div className="text-[11px] font-medium text-[#8f929c]">
-                        +{overflowCount}件
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              );
-            })}
+            終日
           </div>
-        </div>
-      </div>
 
-      <div
-        ref={scrollContainerRef}
-        className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
-        onScroll={onScroll}
-      >
-        <div className="grid bg-white" style={timelineGridStyle}>
-          <div className="sticky left-0 z-40 overflow-hidden border-r border-[#eeeeee] bg-white shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]">
+          {visibleDays.map((day, dayIndex) => {
+            const events = allDayEventsByDay.get(day.toISOString()) ?? [];
+            const visibleChips = events.slice(0, MAX_ALL_DAY_VISIBLE_CHIPS);
+            const overflowCount = events.length - visibleChips.length;
+
+            return (
+              <div
+                key={`weekday-all-day-${day.toISOString()}`}
+                className={cn(
+                  "sticky top-10 z-40 min-h-7 border-b border-r border-[#eeeeee] bg-white px-1 py-1",
+                  dayIndex === visibleDays.length - 1 && "border-r-0",
+                )}
+              >
+                <div className="flex flex-col gap-1">
+                  {visibleChips.map((event) => (
+                    <AllDayEventChip key={event.id} event={event} />
+                  ))}
+
+                  {overflowCount > 0 ? (
+                    <div className="text-[11px] font-medium text-[#8f929c]">
+                      +{overflowCount}件
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            );
+          })}
+
+          <div className="sticky left-0 z-30 overflow-hidden border-r border-[#eeeeee] bg-white shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]">
             {HOURS.map((hour) => (
               <div
                 key={hour}
@@ -306,7 +286,7 @@ export const CalendarWeekDayGrid = ({
             <CurrentTimeLabel currentMinutes={currentMinutes} />
           </div>
 
-          {visibleDays.map((day) => {
+          {visibleDays.map((day, dayIndex) => {
             const isDayToday = isSameDay(day, today);
 
             const eventsForDay = visibleEvents
@@ -329,8 +309,11 @@ export const CalendarWeekDayGrid = ({
 
             return (
               <div
-                key={day.toISOString()}
-                className="relative border-r border-[#eeeeee] bg-white last:border-r-0"
+                key={`weekday-body-${day.toISOString()}`}
+                className={cn(
+                  "relative border-r border-[#eeeeee] bg-white",
+                  dayIndex === visibleDays.length - 1 && "border-r-0",
+                )}
               >
                 {HOURS.map((hour) => (
                   <div
