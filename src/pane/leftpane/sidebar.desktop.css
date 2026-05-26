@@ -75,7 +75,7 @@
   width: 100%;
   flex-shrink: 0;
   gap: 8px;
-  padding: 8px 0 0;
+  padding: 8px 4px 0;
 }
 
 .app-sidebar__toggle {
@@ -158,14 +158,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  align-self: flex-end;
-  width: calc(100% + 4px);
+  align-self: center;
+  width: calc(100% - 4px);
   min-width: 0;
   height: 32px;
   gap: 8px;
-  margin-right: -4px;
   padding: 0;
-  border-radius: 10px 0 0 10px;
+  border-radius: 10px 10px 0 0;
   background: transparent;
   color: var(--app-titlebar-text, var(--app-sidebar-text));
   font-size: var(--ds-typography-font-size-sm);
@@ -190,30 +189,6 @@
   background: var(--app-active-tab-bg, #ffffff);
   color: var(--app-titlebar-text-strong, var(--app-sidebar-text-hover));
   box-shadow: none;
-}
-
-.app-sidebar__nav-link.is-active::before,
-.app-sidebar__nav-link.is-active::after {
-  content: "";
-  position: absolute;
-  right: -1px;
-  z-index: -1;
-  width: 14px;
-  height: 14px;
-  background: var(--app-active-tab-bg, #ffffff);
-  pointer-events: none;
-}
-
-.app-sidebar__nav-link.is-active::before {
-  top: -14px;
-  -webkit-mask: radial-gradient(circle at 0 0, transparent 0 14px, #000 14.5px);
-  mask: radial-gradient(circle at 0 0, transparent 0 14px, #000 14.5px);
-}
-
-.app-sidebar__nav-link.is-active::after {
-  bottom: -14px;
-  -webkit-mask: radial-gradient(circle at 0 100%, transparent 0 14px, #000 14.5px);
-  mask: radial-gradient(circle at 0 100%, transparent 0 14px, #000 14.5px);
 }
 
 .app-sidebar__nav-link.is-active .app-sidebar__nav-icon,
