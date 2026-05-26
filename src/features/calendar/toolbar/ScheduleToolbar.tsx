@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { CalendarWorkspaceToolbarProps } from "../scheduleScreen.types";
 import { ToggleCalendarTimelineTask } from "../../../chip/toggle/Toggle.calendartimelinetask";
 import { ToggleFolderTag, type FolderTagTab, type FolderTagToggleValue } from "../../../chip/toggle/Toggle.foldertag";
+import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { useCalendarToolbar } from "./hooks/useScheduleToolbar";
 import { TaskTagStrip } from "./TaskTagStrip";
 
@@ -16,6 +17,12 @@ export const CalendarToolbar = ({
     onSelectTimeline,
     onSelectTask,
   });
+  const workspaceTabs = useWorkspaceTabsStore((state) => state.tabs);
+  const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
+  const activeWorkspaceSection = workspaceTabs.find(
+    (tab) => tab.id === activeTabId,
+  )?.sectionKey;
+  const shouldShowScheduleToggle = activeWorkspaceSection === "schedule";
   const [activeFolderTagMode, setActiveFolderTagMode] =
     useState<FolderTagToggleValue>("folder");
   const folderTagTabs = useMemo<FolderTagTab[]>(
@@ -37,8 +44,11 @@ export const CalendarToolbar = ({
   return (
     <div className="calendar-workspace-toolbar flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center justify-between overflow-visible bg-white pr-[var(--workspace-content-gutter)]">
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        <ToggleCalendarTimelineTask activeMode={activeMode} tabs={tabs} />
-        <ToggleFolderTag activeMode={activeFolderTagMode} tabs={folderTagTabs} />
+        {shouldShowScheduleToggle ? (
+          <ToggleCalendarTimelineTask activeMode={activeMode} tabs={tabs} />
+        ) : (
+          <ToggleFolderTag activeMode={activeFolderTagMode} tabs={folderTagTabs} />
+        )}
         <TaskTagStrip />
       </div>
     </div>
