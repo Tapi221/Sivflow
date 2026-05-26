@@ -1,6 +1,6 @@
 import { useMemo, useRef } from "react";
 import { Command as CommandPrimitive } from "cmdk";
-import { useGlobalSearchHotkey } from "@/features/global-search/hooks/useGlobalSearchHotkey";
+import { useGlobalSearchHotkey } from "@/features/hotkey/useGlobalSearchHotkey";
 import { rankGlobalSearchResults } from "@/features/global-search/lib/rankGlobalSearchResults";
 import type { GlobalSearchIconKind, GlobalSearchItem } from "@/features/global-search/model/globalSearchTypes";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
