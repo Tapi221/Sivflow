@@ -11,7 +11,7 @@ import { DayDetailPanel } from "@/features/calendar/panel/DayDetailPanel";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { TaskView } from "@/features/calendar/task/TaskView";
 import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCalendarEvents";
-import { CalendarWorkspaceToolbar } from "@/features/calendar/toolbar/ScheduleToolbar";
+import { CalendarWorkspaceToolbar } from "@/pane/sidebar/ScheduleToolbar";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
