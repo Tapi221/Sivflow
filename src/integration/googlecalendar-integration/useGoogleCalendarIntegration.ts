@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { GoogleCalendarSyncEngine } from "../../features/calendar/googlecalendar-sync/GoogleCalendarSyncEngine";
+import { GoogleCalendarSyncEngine } from "../../sync/googlecalendar-sync/GoogleCalendarSyncEngine";
 import { fetchCalendarList } from "./gcal.api";
 import { refreshCalendarAccessToken, requestCalendarAccessToken } from "./gcal.oauth";
 import { readCalendarIds, readEmail, readRefreshToken, readToken, readWasConnected, writeCalendarIds, writeEmail, writeRefreshToken, writeToken, writeWasConnected } from "./gcal.storage";
