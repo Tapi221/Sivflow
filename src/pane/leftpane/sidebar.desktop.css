@@ -22,7 +22,7 @@
   justify-content: space-between;
   box-sizing: border-box;
   width: var(--app-sidebar-rail-width, 48px);
-  min-width: 0;
+  min-width: var(--app-sidebar-rail-width, 48px);
   min-height: 0;
   height: 100dvh;
   overflow-y: auto;
@@ -45,6 +45,7 @@
   z-index: 1000;
   box-sizing: border-box;
   width: var(--app-sidebar-rail-width, 48px);
+  min-width: var(--app-sidebar-rail-width, 48px);
   height: 40px;
   overflow: visible;
   padding: 4px 0;
@@ -156,6 +157,10 @@
   min-width: 0;
   gap: 4px;
   padding: 0;
+}
+
+.app-sidebar__nav-tooltip {
+  justify-content: center;
 }
 
 .app-sidebar__nav-link {
