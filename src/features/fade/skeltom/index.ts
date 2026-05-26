@@ -1,0 +1,1 @@
+export { FadeSkeleton } from "./FadeSkeleton";
