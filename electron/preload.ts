@@ -42,6 +42,12 @@ const desktopApi: DesktopBridgeApi = {
     // refresh_token による silent トークン更新
     refreshTokens: (input: { clientId: string; refreshToken: string }) =>
       ipcRenderer.invoke(IPC_CHANNELS.oauthRefreshTokens, input),
+    storeRefreshToken: (input: { accountId: string; refreshToken: string }) =>
+      ipcRenderer.invoke(IPC_CHANNELS.oauthStoreRefreshToken, input),
+    readRefreshToken: (accountId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.oauthReadRefreshToken, accountId),
+    deleteRefreshToken: (accountId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.oauthDeleteRefreshToken, accountId),
     onCallback: (handler) => {
       const listener = (
         _event: Electron.IpcRendererEvent,

@@ -7,6 +7,8 @@ import { disconnectServerStoredGoogleCalendarAccount, exchangeGoogleCalendarCode
 import type { GoogleOAuthCallableErrorReason } from "./gcal.server-oauth";
 import type { GCalConnectionStatus, GCalForceSyncOptions, GCalSilentReconnectResult, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
 import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
+import { oauthBridge } from "@/platform/capabilities/oauthBridge";
+import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 export type GoogleAccountEntry = {
   id: string;
@@ -74,6 +76,7 @@ type EventsAction =
   | { type: "CLEAR_ACCOUNT"; accountId: string };
 
 const useServerStoredTokens = isServerStoredGoogleOAuthEnabled();
+const useDesktopSecureRefreshTokens = isDesktopLikeRuntime() && !useServerStoredTokens;
 const CALENDAR_LIST_FOCUS_REFRESH_THROTTLE_MS = 10_000;
 export const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
 
@@ -215,6 +218,24 @@ export const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry):
 const requestSilentAccessToken = async () => {
   const { auth } = await import("@/services/firebase");
   return requestCalendarAccessToken(auth, true);
+};
+
+const readDesktopRefreshToken = async (accountId: string): Promise<string | null> => {
+  if (!useDesktopSecureRefreshTokens) return null;
+  return oauthBridge.readRefreshToken(accountId);
+};
+
+const storeDesktopRefreshToken = async (
+  accountId: string,
+  refreshToken: string | null | undefined,
+): Promise<void> => {
+  if (!useDesktopSecureRefreshTokens || !refreshToken) return;
+  await oauthBridge.storeRefreshToken({ accountId, refreshToken });
+};
+
+const deleteDesktopRefreshToken = async (accountId: string): Promise<void> => {
+  if (!useDesktopSecureRefreshTokens) return;
+  await oauthBridge.deleteRefreshToken(accountId);
 };
 
 const logGoogleCalendarConnectionError = (
@@ -456,7 +477,7 @@ const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => {
     stored.selectedCalendarIds,
     calendars,
   );
-  const canReconnect = isStoredTokenValid(stored) || stored.refreshToken || useServerStoredTokens;
+  const canReconnect = isStoredTokenValid(stored) || stored.refreshToken || useServerStoredTokens || useDesktopSecureRefreshTokens;
 
   return {
     id: stored.id,
@@ -551,14 +572,18 @@ export const useMultiAccountGoogleCalendar = () => {
 
     const promise = (async (): Promise<string> => {
       const latestAccount = accountsRef.current.find((x) => x.id === accountId) ?? account;
+      const desktopRefreshToken = latestAccount.refreshToken ?? (await readDesktopRefreshToken(accountId));
       const result = useServerStoredTokens
         ? await getServerStoredGoogleCalendarAccessToken({ accountId })
-        : latestAccount.refreshToken
-          ? await refreshCalendarAccessToken({ refreshToken: latestAccount.refreshToken })
+        : desktopRefreshToken
+          ? await refreshCalendarAccessToken({ refreshToken: desktopRefreshToken })
           : await requestSilentAccessToken();
+      await storeDesktopRefreshToken(accountId, result.refreshToken);
       const refreshToken = useServerStoredTokens
         ? null
-        : result.refreshToken ?? latestAccount.refreshToken ?? null;
+        : useDesktopSecureRefreshTokens
+          ? null
+          : result.refreshToken ?? latestAccount.refreshToken ?? null;
 
       applyAccountToken({
         accountId,
@@ -773,6 +798,28 @@ export const useMultiAccountGoogleCalendar = () => {
   }, [applyCalendarList, getRecoverableAccessToken]);
 
   useEffect(() => {
+    if (!useDesktopSecureRefreshTokens) return;
+
+    const migrateDesktopRefreshTokens = async () => {
+      const storedAccounts = readStoredAccounts();
+
+      await Promise.all(
+        storedAccounts.map((stored) => storeDesktopRefreshToken(stored.id, stored.refreshToken)),
+      );
+
+      for (const stored of storedAccounts) {
+        if (stored.refreshToken !== null) {
+          upsertStoredAccount({ ...stored, refreshToken: null });
+        }
+      }
+    };
+
+    void migrateDesktopRefreshTokens().catch((error) => {
+      console.warn("[GoogleCalendar] desktop refresh token migration failed", error);
+    });
+  }, []);
+
+  useEffect(() => {
     const storedAccounts = readStoredAccounts();
 
     for (const stored of storedAccounts) {
@@ -785,7 +832,8 @@ export const useMultiAccountGoogleCalendar = () => {
         accountName?: string | null,
         accountPhotoUrl?: string | null,
       ) => {
-        const resolvedRefreshToken = refreshToken ?? stored.refreshToken;
+        await storeDesktopRefreshToken(accountId, refreshToken ?? stored.refreshToken);
+        const resolvedRefreshToken = useDesktopSecureRefreshTokens ? null : refreshToken ?? stored.refreshToken;
 
         upsertStoredAccount({
           ...stored,
@@ -1084,12 +1132,18 @@ export const useMultiAccountGoogleCalendar = () => {
           : (storedAccount?.selectedCalendarIds ?? []),
         list,
       );
+      const existingDesktopRefreshToken = useDesktopSecureRefreshTokens && !replaceAccountId
+        ? await readDesktopRefreshToken(accountId)
+        : null;
+      await storeDesktopRefreshToken(accountId, result.refreshToken);
       const refreshToken = useServerStoredTokens
         ? null
-        : result.refreshToken ??
+        : useDesktopSecureRefreshTokens
+          ? null
+          : result.refreshToken ??
           (replaceAccountId
             ? null
-            : existingAccount?.refreshToken ?? storedAccount?.refreshToken ?? null);
+            : existingAccount?.refreshToken ?? storedAccount?.refreshToken ?? existingDesktopRefreshToken);
       const entry: GoogleAccountEntry = {
         id: accountId,
         email: result.accountEmail ?? existingAccount?.email ?? null,
@@ -1124,6 +1178,7 @@ export const useMultiAccountGoogleCalendar = () => {
         dispatchAccounts({ type: "REMOVE", id: replaceAccountId });
         dispatchEvents({ type: "CLEAR_ACCOUNT", accountId: replaceAccountId });
         removeStoredAccount(replaceAccountId);
+        void deleteDesktopRefreshToken(replaceAccountId).catch(() => undefined);
       }
 
       upsertStoredAccount({
@@ -1167,6 +1222,7 @@ export const useMultiAccountGoogleCalendar = () => {
     dispatchAccounts({ type: "REMOVE", id: accountId });
     dispatchEvents({ type: "CLEAR_ACCOUNT", accountId });
     removeStoredAccount(accountId);
+    void deleteDesktopRefreshToken(accountId).catch(() => undefined);
 
     if (useServerStoredTokens) {
       void disconnectServerStoredGoogleCalendarAccount({ accountId }).catch(() => undefined);

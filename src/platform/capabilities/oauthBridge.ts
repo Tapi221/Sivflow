@@ -8,5 +8,8 @@ export const oauthBridge: OAuthBridgePort = {
   exchangeTokens: (input) => platform.oauth.exchangeTokens(input),
   // refresh_token を使った silent なトークン更新
   refreshTokens: (input) => platform.oauth.refreshTokens(input),
+  storeRefreshToken: (input) => platform.oauth.storeRefreshToken(input),
+  readRefreshToken: (accountId) => platform.oauth.readRefreshToken(accountId),
+  deleteRefreshToken: (accountId) => platform.oauth.deleteRefreshToken(accountId),
   onCallback: (handler) => platform.oauth.onCallback(handler),
 };

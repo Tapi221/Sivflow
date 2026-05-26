@@ -29,6 +29,13 @@ export const webPlatform: PlatformApi = {
     refreshTokens: async () => {
       throw new Error("OAuth desktop bridge is not available in web runtime");
     },
+    storeRefreshToken: async () => {
+      throw new Error("OAuth desktop bridge is not available in web runtime");
+    },
+    readRefreshToken: async () => {
+      throw new Error("OAuth desktop bridge is not available in web runtime");
+    },
+    deleteRefreshToken: async () => {},
     onCallback: () => () => {},
   },
 };

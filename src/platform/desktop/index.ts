@@ -28,6 +28,9 @@ export const desktopPlatform: PlatformApi = {
     exchangeIdToken: (input) => getDesktopBridge().oauth.exchangeIdToken(input),
     exchangeTokens: (input) => getDesktopBridge().oauth.exchangeTokens(input),
     refreshTokens: (input) => getDesktopBridge().oauth.refreshTokens(input),
+    storeRefreshToken: (input) => getDesktopBridge().oauth.storeRefreshToken(input),
+    readRefreshToken: (accountId) => getDesktopBridge().oauth.readRefreshToken(accountId),
+    deleteRefreshToken: (accountId) => getDesktopBridge().oauth.deleteRefreshToken(accountId),
     onCallback: (handler) => getDesktopBridge().oauth.onCallback(handler),
   },
 };
