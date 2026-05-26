@@ -1,5 +1,5 @@
 import type { RefObject, UIEvent } from "react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type { CalendarToolbarMode, CalendarViewMode, GoogleAccountDisplay, TimelineGridStyle } from "./scheduleScreen.types";
@@ -89,6 +89,36 @@ type UseScheduleScreenOptions = {
   initialActiveMode?: CalendarToolbarMode;
 };
 
+const getEventTime = (value: GoogleCalendarEvent["startsAt"]): number => {
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isFinite(date.getTime()) ? date.getTime() : Number.NaN;
+};
+
+const getGoogleCalendarEventDedupeKey = (event: GoogleCalendarEvent): string => {
+  return [
+    event.calendarId,
+    event.title.trim(),
+    getEventTime(event.startsAt),
+    getEventTime(event.endsAt),
+    event.isAllDay ? "all-day" : "timed",
+  ].join("\u001f");
+};
+
+const dedupeGoogleCalendarEvents = (
+  events: GoogleCalendarEvent[],
+): GoogleCalendarEvent[] => {
+  const seenKeys = new Set<string>();
+
+  return events.filter((event) => {
+    const key = getGoogleCalendarEventDedupeKey(event);
+
+    if (seenKeys.has(key)) return false;
+
+    seenKeys.add(key);
+    return true;
+  });
+};
+
 export const useScheduleScreen = ({
   initialActiveMode,
 }: UseScheduleScreenOptions = {}): UseScheduleScreenReturn => {
@@ -163,6 +193,10 @@ export const useScheduleScreen = ({
   });
 
   const google = useGoogleCalendarLayer();
+  const googleCalendarEvents = useMemo(
+    () => dedupeGoogleCalendarEvents(google.events),
+    [google.events],
+  );
 
   useCalendarEventSync({
     activeMode: navigation.activeMode,
@@ -236,7 +270,7 @@ export const useScheduleScreen = ({
     timelineGridStyle: layout.timelineGridStyle,
 
     googleAccounts,
-    googleCalendarEvents: google.events,
+    googleCalendarEvents,
     isAnyCalendarConnecting: google.isAnyConnecting,
 
     addGoogleCalendar: google.addAccount,
@@ -246,8 +280,8 @@ export const useScheduleScreen = ({
     retryGoogleTaskLists: google.retryGoogleTaskLists,
     createGoogleTask: google.createGoogleTask,
     updateGoogleTask: google.updateGoogleTask,
-    moveGoogleTaskList: google.moveGoogleTaskList,
-    deleteGoogleTask: google.deleteGoogleTask,
+    moveGoogleTaskList: google.moveTaskList,
+    deleteGoogleTask: google.removeTask,
 
     handleSelectViewMode: navigation.handleSelectViewMode,
     handleToday: navigation.handleToday,
