@@ -73,7 +73,9 @@ export const useExplorerDerivedData = ({
   isFiltering,
 }: Params) => {
   const cardSetById = useMemo(() => {
-    const activeCardSets = cardSets.filter((cardSet) => !cardSet.isDeleted);
+    const activeCardSets = cardSets.filter(
+      (cardSet) => !isSoftDeleted(withLegacy(cardSet)),
+    );
     return buildCardSetById(activeCardSets);
   }, [cardSets]);
 
@@ -297,7 +299,7 @@ export const useExplorerDerivedData = ({
   const cardSetsByFolderId = useMemo(() => {
     const map = new Map<string, CardSet[]>();
     for (const cs of cardSets) {
-      if ((cs as unknown as { isDeleted?: boolean }).isDeleted) continue;
+      if (isSoftDeleted(withLegacy(cs))) continue;
       const key = normalizeFolderId(cs.folderId);
       const list = map.get(key);
       if (list) list.push(cs);

@@ -370,7 +370,7 @@ export const ScheduleScreen = ({
           onSelectViewMode={handleSelectViewMode}
         />
       )}
-      leadingPanel={(
+      leftPanel={(
         <CalendarSidebar
           monthDate={sidebarMonthDate}
           selectedDate={selectedDate}
@@ -394,7 +394,7 @@ export const ScheduleScreen = ({
           onToggleTaskList={handleToggleTaskList}
         />
       )}
-      trailingPanel={
+      rightPanel={
         canShowDayDetailPanel ? (
           <DayDetailPanel
             selectedDate={selectedDate}
