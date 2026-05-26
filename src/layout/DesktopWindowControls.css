@@ -7,7 +7,7 @@
   display: flex;
   align-items: stretch;
   justify-content: flex-end;
-  width: 138px;
+  width: var(--desktop-window-controls-width, 138px);
   height: 38px;
   pointer-events: auto;
   -webkit-app-region: no-drag;
@@ -23,7 +23,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
+  width: calc(var(--desktop-window-controls-width, 138px) / 3);
   height: 38px;
   padding: 0;
   border: 0;
