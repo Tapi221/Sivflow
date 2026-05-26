@@ -13,6 +13,7 @@ const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT =
   "https://accounts.google.com/o/oauth2/v2/auth";
 
 const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+const GOOGLE_OAUTH_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 const GOOGLE_IDENTITY_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
 
@@ -27,6 +28,8 @@ export const GOOGLE_SERVER_CODE_REDIRECT_URI =
   typeof window === "undefined" ? "postmessage" : window.location.origin;
 
 const GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE = "failed-precondition";
+const GOOGLE_SCOPE_RECONNECT_MESSAGE =
+  "Google Calendar と Google Tasks の権限が必要です。両方の権限を有効にして再連携してください。";
 
 const createGoogleCalendarReconnectRequiredError = (): Error => {
   const error = new Error("Google Calendar の再連携が必要です");
@@ -35,6 +38,55 @@ const createGoogleCalendarReconnectRequiredError = (): Error => {
     GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE;
 
   return error;
+};
+
+const parseGrantedScopes = (scope: string | undefined | null): Set<string> => {
+  return new Set(
+    (scope ?? "")
+      .split(/\s+/)
+      .map((value) => value.trim())
+      .filter(Boolean),
+  );
+};
+
+const hasRequiredGoogleScopes = (scope: string | undefined | null): boolean => {
+  const scopes = parseGrantedScopes(scope);
+  return GOOGLE_SCOPES.every((requiredScope) => scopes.has(requiredScope));
+};
+
+const assertRequiredGoogleScopes = (scope: string | undefined | null): void => {
+  if (hasRequiredGoogleScopes(scope)) return;
+  throw new Error(GOOGLE_SCOPE_RECONNECT_MESSAGE);
+};
+
+const fetchGoogleTokenInfoScope = async (accessToken: string): Promise<string | null> => {
+  const response = await fetch(`${GOOGLE_OAUTH_TOKENINFO_ENDPOINT}?${new URLSearchParams({ access_token: accessToken })}`);
+
+  if (!response.ok) {
+    throw new Error(GOOGLE_SCOPE_RECONNECT_MESSAGE);
+  }
+
+  const json = (await response.json()) as { scope?: string };
+  return json.scope ?? null;
+};
+
+const validateGrantedGoogleScopes = async ({
+  accessToken,
+  scope,
+  allowTokenInfoFallback,
+}: {
+  accessToken: string;
+  scope?: string | null;
+  allowTokenInfoFallback: boolean;
+}): Promise<void> => {
+  if (scope) {
+    assertRequiredGoogleScopes(scope);
+    return;
+  }
+
+  if (!allowTokenInfoFallback) return;
+
+  assertRequiredGoogleScopes(await fetchGoogleTokenInfoScope(accessToken));
 };
 
 type GoogleTokenResponse = {
@@ -422,6 +474,12 @@ const requestDesktopToken = async () => {
     throw new Error("Google OAuth failed: accessToken is missing");
   }
 
+  await validateGrantedGoogleScopes({
+    accessToken: tokens.accessToken,
+    scope: tokens.scope,
+    allowTokenInfoFallback: false,
+  });
+
   const profile = getGoogleProfileFromIdToken(tokens.idToken);
 
   return {
@@ -596,6 +654,12 @@ const requestWebGisToken = async (
     throw new Error("No access token");
   }
 
+  await validateGrantedGoogleScopes({
+    accessToken: tokenResponse.access_token,
+    scope: tokenResponse.scope,
+    allowTokenInfoFallback: true,
+  });
+
   let profile = {
     accountEmail: auth.currentUser?.email ?? null,
     accountName: auth.currentUser?.displayName ?? null,
@@ -635,6 +699,12 @@ export const refreshCalendarAccessToken = async ({
       throw new Error("Missing refreshed access token");
     }
 
+    await validateGrantedGoogleScopes({
+      accessToken: tokens.accessToken,
+      scope: tokens.scope,
+      allowTokenInfoFallback: false,
+    });
+
     const profile = getGoogleProfileFromIdToken(tokens.idToken);
 
     return {
@@ -667,10 +737,15 @@ export const refreshCalendarAccessToken = async ({
     expires_in?: number;
     refresh_token?: string;
     id_token?: string;
+    scope?: string;
   };
 
   if (!json.access_token) {
     throw new Error("Missing refreshed access token");
+  }
+
+  if (json.scope) {
+    assertRequiredGoogleScopes(json.scope);
   }
 
   const profile = getGoogleProfileFromIdToken(json.id_token);
@@ -707,6 +782,11 @@ const requestWebTokenWithFirebase = async (auth: Auth, silent: boolean) => {
     throw new Error("No access token");
   }
 
+  await validateGrantedGoogleScopes({
+    accessToken: cred.accessToken,
+    allowTokenInfoFallback: true,
+  });
+
   return {
     accessToken: cred.accessToken,
     accountEmail: result.user.email,
@@ -726,10 +806,10 @@ const requestWebToken = async (
   return requestWebTokenWithFirebase(auth, silent);
 };
 
-export async function requestCalendarAccessToken(
+export const requestCalendarAccessToken = async (
   auth: Auth,
   silent = false,
-): Promise<GoogleCalendarAccess> {
+): Promise<GoogleCalendarAccess> => {
   if (isDesktopLikeRuntime()) {
     if (silent) {
       throw createGoogleCalendarReconnectRequiredError();
@@ -739,7 +819,7 @@ export async function requestCalendarAccessToken(
   }
 
   return requestWebToken(auth, silent);
-}
+};
 
 export const getStoredEmail = (): string | null => {
   return readEmail();
