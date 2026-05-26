@@ -1,4 +1,4 @@
-import { Reorder } from "framer-motion";
+import { Reorder, type Transition } from "framer-motion";
 import type { CSSProperties, HTMLAttributes, ReactNode, RefObject } from "react";
 import type { WorkspaceTab } from "@/features/tab/Tab";
 
@@ -24,7 +24,23 @@ type WorkspaceTabDndItemProps = Omit<
   children: ReactNode;
 };
 
-export const WorkspaceTabDndList = ({
+const REORDER_ITEM_TRANSITION: Transition = {
+  layout: {
+    type: "tween",
+    duration: 0.12,
+    ease: "easeOut",
+  },
+  x: {
+    type: "tween",
+    duration: 0,
+  },
+  y: {
+    type: "tween",
+    duration: 0,
+  },
+};
+
+const WorkspaceTabDndList = ({
   tabsListRef,
   orderedTabs,
   onReorderTabs,
@@ -47,7 +63,7 @@ export const WorkspaceTabDndList = ({
   );
 };
 
-export const WorkspaceTabDndItem = ({
+const WorkspaceTabDndItem = ({
   tab,
   canReorderTabs,
   tabsListRef,
@@ -66,11 +82,11 @@ export const WorkspaceTabDndItem = ({
       drag={canReorderTabs ? "x" : false}
       dragListener={canReorderTabs}
       dragConstraints={tabsListRef}
-      dragElastic={canReorderTabs ? 0.08 : 0}
+      dragElastic={0}
       dragMomentum={false}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      transition={{ type: "spring", stiffness: 520, damping: 42 }}
+      transition={REORDER_ITEM_TRANSITION}
       style={style}
       className={className}
       data-workspace-tab-kind={tab.kind}
@@ -79,3 +95,5 @@ export const WorkspaceTabDndItem = ({
     </Reorder.Item>
   );
 };
+
+export { WorkspaceTabDndItem, WorkspaceTabDndList };
