@@ -1,4 +1,4 @@
-import type { TagColorKey, TagColorPalette } from "./tag.types";
+import type { TagColorKey, TagColorPalette } from "../../features/tag/tag.types";
 
 export const TAG_COLOR_PALETTE: Record<TagColorKey, TagColorPalette> = {
   gray: {

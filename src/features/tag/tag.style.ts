@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { TAG_COLOR_PALETTE } from "./tag.palette";
+import { TAG_COLOR_PALETTE } from "../../styles/tokens/tag.palette";
 import { getTagColorKey } from "./tag.parser";
 
 const TAG_BACKGROUND_TEXT_ALPHA = 0.09;
