@@ -179,6 +179,12 @@
     font-family: var(--app-font-family-explorer) !important;
   }
 
+  .explorer-workspace-tab[data-workspace-tab-active="true"] {
+    z-index: 4;
+    color: var(--app-sidebar-text-strong, #2f3640) !important;
+    isolation: isolate;
+  }
+
   .explorer-workspace-tab--active {
     z-index: 4;
     border-radius: 12px 12px 0 0 !important;
@@ -248,7 +254,9 @@
   }
 
   .explorer-workspace-tab--active .explorer-workspace-tab-button,
-  .explorer-workspace-tab--active .explorer-workspace-tab-close {
+  .explorer-workspace-tab--active .explorer-workspace-tab-close,
+  .explorer-workspace-tab[data-workspace-tab-active="true"] .explorer-workspace-tab-button,
+  .explorer-workspace-tab[data-workspace-tab-active="true"] .explorer-workspace-tab-close {
     position: relative;
     z-index: 1;
     background: transparent !important;
@@ -289,7 +297,8 @@
     overflow: visible !important;
   }
 
-  .explorer-workspace-tab--active .explorer-workspace-tab-close {
+  .explorer-workspace-tab--active .explorer-workspace-tab-close,
+  .explorer-workspace-tab[data-workspace-tab-active="true"] .explorer-workspace-tab-close {
     color: #6f7681 !important;
   }
 
@@ -301,7 +310,8 @@
     color: var(--app-titlebar-text-strong, #ffffff) !important;
   }
 
-  .explorer-workspace-tab--active .explorer-workspace-tab-close:hover {
+  .explorer-workspace-tab--active .explorer-workspace-tab-close:hover,
+  .explorer-workspace-tab[data-workspace-tab-active="true"] .explorer-workspace-tab-close:hover {
     background: rgba(0, 0, 0, 0.05) !important;
     color: #2f3640 !important;
   }
