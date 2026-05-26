@@ -1,4 +1,3 @@
-import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { motion } from "framer-motion";
 import { useMemo, type MouseEvent as ReactMouseEvent } from "react";
 import { TaskStatusDot } from "@/chip/icon/TaskStatusDot";
@@ -6,12 +5,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { TASK_TYPO } from "@/styles/tokens/typography";
+import { TaskSortableContext, useTaskSortableCard } from "../../dnd/task/taskDnd.components";
 import { TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS, TASK_DND_LAYOUT_ANIMATION_DURATION_MS } from "../../dnd/task/taskDnd.config";
 import type { TaskDropTarget } from "../../dnd/task/taskDnd.types";
-import type { Task, TaskStatus } from "./task.types";
-import { TASK_COLUMNS } from "./task.types";
 import { TaskCard } from "./TaskCard";
 import { TaskInsertionSlot } from "./TaskInsertionSlot";
+import type { Task, TaskStatus } from "./task.types";
+import { TASK_COLUMNS } from "./task.types";
 
 type TaskColumnView = {
   id: string;
@@ -76,15 +76,7 @@ const SortableTaskCard = ({
     isDragging,
     listeners,
     setNodeRef,
-  } = useSortable({
-    id: task.id,
-    data: {
-      type: "task",
-      task,
-      columnId,
-      status: task.status,
-    },
-  });
+  } = useTaskSortableCard({ task, columnId });
   const isActivePreview = activeTaskId === task.id;
 
   return (
@@ -192,11 +184,7 @@ export const TaskColumn = ({
       </div>
 
       <ScrollArea className="-mr-3 min-h-0 flex-1 overscroll-contain">
-        <SortableContext
-          id={column.id}
-          items={taskIds}
-          strategy={verticalListSortingStrategy}
-        >
+        <TaskSortableContext columnId={column.id} taskIds={taskIds}>
           <div
             className={cn(
               "flex min-h-8 flex-col pr-3",
@@ -244,7 +232,7 @@ export const TaskColumn = ({
               );
             })}
           </div>
-        </SortableContext>
+        </TaskSortableContext>
       </ScrollArea>
     </div>
   );
