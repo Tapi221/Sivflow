@@ -13,7 +13,12 @@ const GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY = defineSecret(
 
 const REGION = "asia-northeast1";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+const GOOGLE_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
+const REQUIRED_GOOGLE_SCOPES = [
+  "https://www.googleapis.com/auth/calendar.readonly",
+  "https://www.googleapis.com/auth/tasks",
+] as const;
 
 type StoredGoogleCalendarAccount = {
   email: string;
@@ -245,6 +250,99 @@ const exchangeToken = async (
   return data;
 };
 
+const parseGrantedScopes = (scope: string | undefined | null): Set<string> => {
+  return new Set(
+    (scope ?? "")
+      .split(/\s+/)
+      .map((value) => value.trim())
+      .filter(Boolean),
+  );
+};
+
+const assertRequiredGoogleScopes = (scope: string | undefined | null): void => {
+  const grantedScopes = parseGrantedScopes(scope);
+  const missingScopes = REQUIRED_GOOGLE_SCOPES.filter((requiredScope) => !grantedScopes.has(requiredScope));
+
+  if (missingScopes.length === 0) return;
+
+  console.error("[GoogleCalendarOAuth] required Google scopes are missing", {
+    missingScopes,
+  });
+
+  throw classifiedPrecondition(
+    "Google Calendar and Google Tasks scopes are required.",
+    {
+      reason: "insufficient_google_scope",
+      reconnectRequired: true,
+      userAction: "reconnect_google_account",
+    },
+  );
+};
+
+const fetchGoogleTokenInfoScope = async (accessToken: string): Promise<string | null> => {
+  let response: Response;
+  try {
+    response = await fetch(`${GOOGLE_TOKENINFO_ENDPOINT}?${new URLSearchParams({ access_token: accessToken })}`);
+  } catch (error) {
+    console.error("[GoogleCalendarOAuth] tokeninfo fetch failed", {
+      error: getErrorSummary(error),
+    });
+    throw new HttpsError(
+      "unavailable",
+      "Google OAuth tokeninfo endpoint could not be reached.",
+      {
+        reason: "google_token_fetch_failed",
+        reconnectRequired: false,
+      },
+    );
+  }
+
+  let data: { scope?: string };
+  try {
+    data = (await response.json()) as { scope?: string };
+  } catch (error) {
+    console.error("[GoogleCalendarOAuth] tokeninfo returned invalid JSON", {
+      status: response.status,
+      error: getErrorSummary(error),
+    });
+    throw new HttpsError(
+      response.ok ? "internal" : "unavailable",
+      "Google OAuth tokeninfo endpoint returned an unreadable response.",
+      {
+        reason: "google_token_invalid_response",
+        reconnectRequired: false,
+        status: response.status,
+      },
+    );
+  }
+
+  if (!response.ok) {
+    console.error("[GoogleCalendarOAuth] tokeninfo failed", {
+      status: response.status,
+    });
+    throw new HttpsError(
+      "unavailable",
+      "Google OAuth tokeninfo endpoint rejected the access token.",
+      {
+        reason: "google_token_invalid_response",
+        reconnectRequired: false,
+        status: response.status,
+      },
+    );
+  }
+
+  return data.scope ?? null;
+};
+
+const validateGrantedGoogleScopes = async (accessToken: string, scope: string | undefined | null): Promise<void> => {
+  if (scope) {
+    assertRequiredGoogleScopes(scope);
+    return;
+  }
+
+  assertRequiredGoogleScopes(await fetchGoogleTokenInfoScope(accessToken));
+};
+
 const fetchUserInfo = async (accessToken: string) => {
   let response: Response;
   try {
@@ -422,8 +520,11 @@ export const exchangeGoogleCalendarCode = onCall(
       const accessToken = typeof token.access_token === "string" ? token.access_token : null;
       const refreshToken = typeof token.refresh_token === "string" ? token.refresh_token : null;
       const expiresInSeconds = typeof token.expires_in === "number" ? token.expires_in : null;
+      const scope = typeof token.scope === "string" ? token.scope : null;
 
       if (!accessToken) throw new HttpsError("internal", "Google token response missing access_token.");
+
+      await validateGrantedGoogleScopes(accessToken, scope);
 
       const profile = await fetchUserInfo(accessToken);
       const accountId = profile.accountEmail;
@@ -548,8 +649,11 @@ export const getGoogleCalendarAccessToken = onCall(
       const accessToken = typeof token.access_token === "string" ? token.access_token : null;
       const expiresInSeconds = typeof token.expires_in === "number" ? token.expires_in : null;
       const rotatedRefreshToken = typeof token.refresh_token === "string" ? token.refresh_token : null;
+      const scope = typeof token.scope === "string" ? token.scope : null;
 
       if (!accessToken) throw new HttpsError("internal", "Google token response missing access_token.");
+
+      await validateGrantedGoogleScopes(accessToken, scope);
 
       const updates: Record<string, unknown> = { updatedAt: await serverTimestamp() };
       if (rotatedRefreshToken) updates.encryptedRefreshToken = encryptRefreshToken(rotatedRefreshToken);
