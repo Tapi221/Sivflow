@@ -190,6 +190,9 @@ const renderNodeIcon = (node: ExplorerTreeNode, depth: number) => {
   return <CardGlyph className={className} />;
 };
 
+const isNodeExpandable = (node: ExplorerTreeNode): boolean =>
+  node.type === "folder" || node.type === "cardSet";
+
 export const LibraryHierarchySidebar = () => {
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
@@ -425,7 +428,7 @@ export const LibraryHierarchySidebar = () => {
       const parsed = parseSelectedTreeId(node.id);
       if (!parsed) return;
 
-      if ((parsed.type === "folder" || parsed.type === "cardSet") && node.children?.length) {
+      if (isNodeExpandable(node)) {
         setNodeOpen(node, true);
       }
 
@@ -492,7 +495,7 @@ export const LibraryHierarchySidebar = () => {
 
   const handleRowKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>, node: ExplorerTreeNode) => {
-      const hasChildren = Boolean(node.children?.length);
+      const isExpandable = isNodeExpandable(node);
 
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
@@ -500,13 +503,13 @@ export const LibraryHierarchySidebar = () => {
         return;
       }
 
-      if (event.key === "ArrowRight" && hasChildren && !isNodeOpen(node)) {
+      if (event.key === "ArrowRight" && isExpandable && !isNodeOpen(node)) {
         event.preventDefault();
         setNodeOpen(node, true);
         return;
       }
 
-      if (event.key === "ArrowLeft" && hasChildren && isNodeOpen(node)) {
+      if (event.key === "ArrowLeft" && isExpandable && isNodeOpen(node)) {
         event.preventDefault();
         setNodeOpen(node, false);
       }
@@ -588,7 +591,8 @@ export const LibraryHierarchySidebar = () => {
     siblingCount: number,
   ) {
     const hasChildren = Boolean(node.children?.length);
-    const isOpen = hasChildren && isNodeOpen(node);
+    const isExpandable = isNodeExpandable(node);
+    const isOpen = isExpandable && isNodeOpen(node);
     const isSelected = selectedTreeId === node.id;
     const isLastSibling = index === siblingCount - 1;
     const childBranchMask = [...branchMask, !isLastSibling];
@@ -624,7 +628,7 @@ export const LibraryHierarchySidebar = () => {
             aria-setsize={siblingCount}
             aria-posinset={index + 1}
             aria-selected={isSelected}
-            aria-expanded={hasChildren ? isOpen : undefined}
+            aria-expanded={isExpandable ? isOpen : undefined}
             onClick={() => handleSelectNode(node)}
             onKeyDown={(event) => handleRowKeyDown(event, node)}
             className={cn(
@@ -636,7 +640,7 @@ export const LibraryHierarchySidebar = () => {
             )}
             style={{ paddingLeft: 2 + depth * TREE_INDENT_PX }}
           >
-            {hasChildren ? (
+            {isExpandable ? (
               <button
                 type="button"
                 aria-label={isOpen ? `${node.name} を閉じる` : `${node.name} を開く`}
@@ -663,7 +667,7 @@ export const LibraryHierarchySidebar = () => {
           </div>
         </div>
 
-        {isOpen && node.children?.length ? (
+        {isOpen && hasChildren ? (
           <div role="group">
             {node.children.map((childNode, childIndex) =>
               renderTreeNode(
