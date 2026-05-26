@@ -92,7 +92,6 @@ export const useTreeViewDerivedState = ({
   }, [documentById, selectedDocumentId]);
 
   const mobileDetailTitle = useMemo(() => {
-    if (selectedItem?.type === "directory") return "ディレクトリ";
     if (selectedItem?.type === "gallery") return "ギャラリー";
     if (selectedItem?.type === "calendar") return "学習予定";
     if (selectedItem?.type === "settings") return "設定";
