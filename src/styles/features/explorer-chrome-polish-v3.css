@@ -182,12 +182,18 @@
   }
 
   .explorer-chrome-shell ::-webkit-scrollbar-track {
-    background: #f4f7fb;
+    background: transparent;
   }
 
   .explorer-chrome-shell ::-webkit-scrollbar-thumb {
-    background: #c9d4e1;
+    background: transparent;
     border-radius: 10px;
+  }
+
+  .explorer-chrome-shell:hover ::-webkit-scrollbar-thumb,
+  .explorer-chrome-shell:focus-within ::-webkit-scrollbar-thumb,
+  .explorer-chrome-shell:active ::-webkit-scrollbar-thumb {
+    background: #c9d4e1;
   }
 
   .explorer-chrome-shell ::-webkit-scrollbar-thumb:hover {
