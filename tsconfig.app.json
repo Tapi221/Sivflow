@@ -11,6 +11,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": false,
+    "baseUrl": ".",
     "paths": {
       "@/services/localDB": ["src/services/localdb/index.ts"],
       "@/services/firebase": ["src/infrastructure/firebase/client.ts"],
