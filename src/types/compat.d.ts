@@ -1,4 +1,4 @@
-import type { ComponentType, SVGProps } from "react";
+import type { ComponentType, CSSProperties, ReactElement, SVGProps } from "react";
 
 declare global {
   type IconProps = SVGProps<SVGSVGElement> & {
@@ -17,7 +17,7 @@ declare module "react-arborist" {
       toggle: () => void;
       [key: string]: unknown;
     };
-    style: React.CSSProperties;
+    style: CSSProperties;
     dragHandle?: (el: HTMLElement | null) => void;
   };
 
@@ -38,5 +38,5 @@ declare module "react-arborist" {
     [key: string]: unknown;
   };
 
-  export const Tree: <T>(props: TreeProps<T>) => JSX.Element;
+  export const Tree: <T>(props: TreeProps<T>) => ReactElement | null;
 }
