@@ -24,6 +24,11 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
       initialScreens: { before: 7, after: 7 },
       extendScreens: 14,
     },
+    threeDays: {
+      unitsPerScreen: 3,
+      initialScreens: { before: 2, after: 2 },
+      extendScreens: 4,
+    },
     week: {
       unitsPerScreen: 7,
       initialScreens: { before: 1, after: 1 },
@@ -37,6 +42,11 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
   },
   timeline: {
     days: {
+      unitsPerScreen: 1,
+      initialScreens: { before: 7, after: 14 },
+      extendScreens: 14,
+    },
+    threeDays: {
       unitsPerScreen: 1,
       initialScreens: { before: 7, after: 14 },
       extendScreens: 14,
