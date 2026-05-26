@@ -6,7 +6,7 @@ import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay } from "../scheduleScreen.types";
-import { SidebarLayeredDirectory } from "../../sidebar/Sidebar.LayeredDirectory";
+import { SidebarLayeredDirectory } from "../../../pane/sidebar/Sidebar.LayeredDirectory";
 import { MiniCalendarSection } from "./MiniCalendarSection";
 import { SelectableGoogleSourceRow } from "./SelectableGoogleSourceRow";
 
