@@ -1,3 +1,5 @@
+import type { IconProps } from "@/ui/icons";
+
 //Vuesax-Icons
 export const FlagIcon = ({
   className,
@@ -178,4 +180,3 @@ export const RoundedSquareIcon = ({
     />
   </svg>
 );
-
