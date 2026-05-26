@@ -1,10 +1,10 @@
 import type { CSSProperties, RefObject, UIEvent } from "react";
 import { Fragment, memo, useMemo } from "react";
 import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
+import { CalendarEventChipTimeline } from "@/chip/eventchip/EventChip.schedule.timeline";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { compareCalendarEvents, eventOverlapsRange } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { TimelineColumn, TimelineUnitBuffer, TimelineViewMode } from "./TimelineDayView.shared";
 import { buildTimelineColumns, getTimelineColumnWidth } from "./TimelineDayView.shared";
 
@@ -100,20 +100,6 @@ const findStackIndex = (stackEnds: number[], start: number, end: number): number
 
   stackEnds.push(end);
   return stackEnds.length - 1;
-};
-
-const TimelineEventChip = ({ event }: { event: GoogleCalendarEvent }) => {
-  const tokens = generateColorTokens(event.accentColor || FALLBACK_LANE_COLOR);
-
-  return (
-    <div
-      className="flex h-full items-center gap-1 overflow-hidden rounded-md border-l-[3px] px-1.5 text-[11px] font-semibold leading-none"
-      style={{ background: tokens.bg, borderLeftColor: tokens.border, color: tokens.text }}
-      title={event.title || "Untitled"}
-    >
-      <span className="truncate">{event.title || "Untitled"}</span>
-    </div>
-  );
 };
 
 export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
@@ -311,7 +297,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                         height: EVENT_HEIGHT_PX,
                       }}
                     >
-                      <TimelineEventChip event={placement.event} />
+                      <CalendarEventChipTimeline event={placement.event} />
                     </div>
                   ))}
                 </div>
