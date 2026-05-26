@@ -6,7 +6,7 @@ import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay } from "../scheduleScreen.types";
-import { LibraryHierarchySidebar } from "../../sidebar/LibraryHierarchySidebar";
+import { SidebarLayeredDirectory } from "../../sidebar/Sidebar.LayeredDirectory";
 import { MiniCalendarSection } from "./MiniCalendarSection";
 import { SelectableGoogleSourceRow } from "./SelectableGoogleSourceRow";
 
@@ -404,7 +404,7 @@ export const CalendarSidebar = ({
   }, []);
 
   if (isLibrarySidebarActive) {
-    return <LibraryHierarchySidebar />;
+    return <SidebarLayeredDirectory />;
   }
 
   return (
