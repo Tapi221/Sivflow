@@ -9,8 +9,6 @@ const generatedTargets = [
   "src/presentation/react/theme/design-tokens.css",
   "src/presentation/react/theme/design-tokens.ts",
   "src/presentation/react/theme/index.ts",
-  "ios/App/DesignSystem/Tokens/GeneratedDesignTokens.swift",
-  "android/app/src/main/java/com/akari221/flashcardmaster/designsystem/tokens/GeneratedDesignTokens.kt",
 ];
 
 const forbiddenCoreThemeLiterals = [
