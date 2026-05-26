@@ -4,13 +4,10 @@ import { readEmail } from "./gcal.storage";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { getRuntimeKind, isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
-const GOOGLE_CALENDAR_SCOPE =
-  "https://www.googleapis.com/auth/calendar.readonly";
-const GOOGLE_TASKS_SCOPE =
-  "https://www.googleapis.com/auth/tasks";
+const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
+const GOOGLE_TASKS_SCOPE = "https://www.googleapis.com/auth/tasks";
 
-const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT =
-  "https://accounts.google.com/o/oauth2/v2/auth";
+const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 
 const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_OAUTH_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
@@ -21,7 +18,8 @@ const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 const WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 const WEB_SERVER_CODE_POPUP_POLL_INTERVAL_MS = 250;
 
-const GOOGLE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_TASKS_SCOPE] as const;
+export const GOOGLE_CONNECTED_SERVICE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_TASKS_SCOPE] as const;
+const GOOGLE_SCOPES = GOOGLE_CONNECTED_SERVICE_SCOPES;
 const GOOGLE_SCOPE_PARAM = `openid email profile ${GOOGLE_SCOPES.join(" ")}`;
 
 export const GOOGLE_SERVER_CODE_REDIRECT_URI =
@@ -29,10 +27,10 @@ export const GOOGLE_SERVER_CODE_REDIRECT_URI =
 
 const GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE = "failed-precondition";
 const GOOGLE_SCOPE_RECONNECT_MESSAGE =
-  "Google Calendar と Google Tasks の権限が必要です。両方の権限を有効にして再連携してください。";
+  "Google Calendar と Google ToDo をまとめて連携するための権限が必要です。両方の権限を有効にして再連携してください。";
 
 const createGoogleCalendarReconnectRequiredError = (): Error => {
-  const error = new Error("Google Calendar の再連携が必要です");
+  const error = new Error("Google 連携の再認可が必要です");
 
   (error as Error & { code?: string }).code =
     GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE;
@@ -564,7 +562,7 @@ const fetchGoogleUserInfo = async (accessToken: string) => {
 
 export const requestGoogleCalendarServerCode = async (
   auth: Auth,
-): Promise<{ code: string; codeVerifier: string; redirectUri: string }> => {
+): Promise<{ code: string; redirectUri: string }> => {
   if (typeof window === "undefined") {
     throw new Error("Google OAuth popup is not available");
   }
@@ -573,8 +571,6 @@ export const requestGoogleCalendarServerCode = async (
   const loginHint = auth.currentUser?.email ?? readEmail() ?? undefined;
   const redirectUri = window.location.origin;
   const state = randomBase64Url(16);
-  const codeVerifier = randomBase64Url(48);
-  const codeChallenge = await createCodeChallenge(codeVerifier);
 
   logOAuthConfig("web-code", {
     clientId,
@@ -585,7 +581,6 @@ export const requestGoogleCalendarServerCode = async (
   const url = buildAuthorizeUrl({
     clientId,
     redirectUri,
-    codeChallenge,
     loginHint,
     state,
   });
@@ -603,7 +598,6 @@ export const requestGoogleCalendarServerCode = async (
 
   return {
     code: await waitForWebPopupCode(popup, state, redirectUri),
-    codeVerifier,
     redirectUri,
   };
 };
