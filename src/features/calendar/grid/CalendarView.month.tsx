@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { eventOverlapsRange } from "@/features/calendar/calendarEventRange";
-import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import { GridCalendarMonthDesktop } from "@/features/calendar/grid/Grid.calendar.month.desktop";
 import { useMonthInfiniteScroll } from "../../scroll/schedule/useInfiniteScroll.month.desktop";

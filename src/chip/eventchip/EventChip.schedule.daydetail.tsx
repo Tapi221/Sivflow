@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import { cn } from "@/lib/utils";
