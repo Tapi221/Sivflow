@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { format } from "date-fns";
-import { eventOverlapsDay } from "@/features/calendar/calendarEventRange";
+import { compareCalendarEvents, eventOverlapsDay } from "@/features/calendar/calendarEventRange";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
@@ -48,13 +48,13 @@ export const DayDetailPanel = ({
     el.scrollTop = DEFAULT_SCROLL_HOUR * HOUR_ROW_HEIGHT;
   }, [dateKey]);
 
-  const allDayEvents = events.filter(
-    (e) => e.isAllDay && eventOverlapsDay(e, selectedDate),
-  );
+  const allDayEvents = events
+    .filter((e) => e.isAllDay && eventOverlapsDay(e, selectedDate))
+    .sort(compareCalendarEvents);
 
-  const timedEvents = events.filter(
-    (e) => !e.isAllDay && eventOverlapsDay(e, selectedDate),
-  );
+  const timedEvents = events
+    .filter((e) => !e.isAllDay && eventOverlapsDay(e, selectedDate))
+    .sort(compareCalendarEvents);
 
   if (!isOpen) {
     return <aside className="w-0 shrink-0 overflow-hidden" aria-hidden="true" />;
