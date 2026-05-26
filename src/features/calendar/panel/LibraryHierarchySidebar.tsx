@@ -16,9 +16,8 @@ import type { Card, CardSet, DocumentItem, SelectedExplorerItem } from "@/types"
 
 const LIBRARY_EXPANDED_FOLDERS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-folders";
 const LIBRARY_EXPANDED_CARD_SETS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-card-sets";
-const TREE_INDENT_PX = 14;
-const TREE_GUIDE_LEFT_OFFSET_PX = 9;
-const TREE_BRANCH_WIDTH_PX = 7;
+const TREE_INDENT_PX = 16;
+const TREE_GUIDE_LEFT_OFFSET_PX = 10;
 const TREE_ROW_HEIGHT_CLASS_NAME = "h-7";
 const TREE_EMPTY_TEXT_CLASS_NAME = "px-3 py-2 text-[12px] font-medium leading-[1.45] tracking-normal text-[#b8b8b8]";
 
@@ -97,14 +96,7 @@ const getCardSetIdFromCard = (card: Card): string | null => {
 const getCardFolderId = (
   card: Card,
   cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>,
-): string | null =>
-  resolveCardFolderId(
-    {
-      ...card,
-      cardSetId: getCardSetIdFromCard(card),
-    },
-    cardSetById,
-  );
+): string | null => resolveCardFolderId(card, cardSetById);
 
 const getCardTitle = (card: Card): string =>
   toVirtualMfCardDisplayName(
@@ -391,29 +383,35 @@ export const LibraryHierarchySidebar = () => {
     [setExpandedCardSets],
   );
 
-  const isNodeOpen = useCallback((node: ExplorerTreeNode) => {
-    const parsed = parseSelectedTreeId(node.id);
-    if (!parsed) return false;
+  const isNodeOpen = useCallback(
+    (node: ExplorerTreeNode) => {
+      const parsed = parseSelectedTreeId(node.id);
+      if (!parsed) return false;
 
-    if (parsed.type === "folder") return expandedFolders.has(parsed.id);
-    if (parsed.type === "cardSet") return expandedCardSets.has(parsed.id);
+      if (parsed.type === "folder") return expandedFolders.has(parsed.id);
+      if (parsed.type === "cardSet") return expandedCardSets.has(parsed.id);
 
-    return false;
-  }, [expandedCardSets, expandedFolders]);
+      return false;
+    },
+    [expandedCardSets, expandedFolders],
+  );
 
-  const setNodeOpen = useCallback((node: ExplorerTreeNode, isOpen: boolean) => {
-    const parsed = parseSelectedTreeId(node.id);
-    if (!parsed) return;
+  const setNodeOpen = useCallback(
+    (node: ExplorerTreeNode, isOpen: boolean) => {
+      const parsed = parseSelectedTreeId(node.id);
+      if (!parsed) return;
 
-    if (parsed.type === "folder") {
-      setFolderNodeOpen(parsed.id, isOpen);
-      return;
-    }
+      if (parsed.type === "folder") {
+        setFolderNodeOpen(parsed.id, isOpen);
+        return;
+      }
 
-    if (parsed.type === "cardSet") {
-      setCardSetNodeOpen(parsed.id, isOpen);
-    }
-  }, [setCardSetNodeOpen, setFolderNodeOpen]);
+      if (parsed.type === "cardSet") {
+        setCardSetNodeOpen(parsed.id, isOpen);
+      }
+    },
+    [setCardSetNodeOpen, setFolderNodeOpen],
+  );
 
   const handleToggleNode = useCallback(
     (node: ExplorerTreeNode) => {
@@ -594,13 +592,12 @@ export const LibraryHierarchySidebar = () => {
     const isSelected = selectedTreeId === node.id;
     const isLastSibling = index === siblingCount - 1;
     const childBranchMask = [...branchMask, !isLastSibling];
-    const currentBranchLeft = TREE_GUIDE_LEFT_OFFSET_PX + (depth - 1) * TREE_INDENT_PX;
 
     return (
       <div key={node.id} className="relative">
         <div className="relative">
           {branchMask.map((shouldDrawGuide, guideIndex) =>
-            shouldDrawGuide && guideIndex < branchMask.length - 1 ? (
+            shouldDrawGuide ? (
               <span
                 key={`${node.id}:guide:${guideIndex}`}
                 aria-hidden="true"
@@ -610,24 +607,14 @@ export const LibraryHierarchySidebar = () => {
             ) : null,
           )}
           {depth > 0 ? (
-            <>
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute top-0 w-px bg-[#e4e6eb]"
-                style={{
-                  bottom: isLastSibling ? "50%" : 0,
-                  left: currentBranchLeft,
-                }}
-              />
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 h-px bg-[#e4e6eb]"
-                style={{
-                  left: currentBranchLeft,
-                  width: TREE_BRANCH_WIDTH_PX,
-                }}
-              />
-            </>
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 h-px bg-[#e4e6eb]"
+              style={{
+                left: TREE_GUIDE_LEFT_OFFSET_PX + (depth - 1) * TREE_INDENT_PX,
+                width: TREE_INDENT_PX - 3,
+              }}
+            />
           ) : null}
 
           <div
