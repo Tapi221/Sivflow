@@ -1,11 +1,11 @@
 import { memo, useCallback, useMemo, type CSSProperties, type MouseEvent as ReactMouseEvent, type WheelEvent } from "react";
-import { TaskDndContext, useTaskDroppableColumn } from "../../dnd/task/taskDnd.components";
-import type { TaskDropTarget, TaskInsertPosition } from "../../dnd/task/taskDnd.types";
-import { useTaskBoardDnd } from "../../dnd/task/useTaskBoardDnd";
-import { TaskCard } from "../task/TaskCard";
-import { TaskColumn } from "../task/TaskColumn";
-import { CATEGORY_CONFIG, TASK_COLUMNS } from "../task/task.types";
-import type { Task, TaskGroupMode, TaskStatus } from "../task/task.types";
+import { TaskDndContext, useTaskDroppableColumn } from "@/features/dnd/task/taskDnd.components";
+import type { TaskDropTarget, TaskInsertPosition } from "@/features/dnd/task/taskDnd.types";
+import { useTaskBoardDnd } from "@/features/dnd/task/useTaskBoardDnd";
+import { TaskCard } from "@/features/calendar/task/TaskCard";
+import { TaskColumn } from "@/features/calendar/task/TaskColumn";
+import { CATEGORY_CONFIG, TASK_COLUMNS } from "@/features/calendar/task/task.types";
+import type { Task, TaskGroupMode, TaskStatus } from "@/features/calendar/task/task.types";
 
 type TaskBoardViewProps = {
   tasks: Task[];
