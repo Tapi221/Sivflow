@@ -39,6 +39,11 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
       initialScreens: { before: 0, after: 0 },
       extendScreens: 0,
     },
+    pieChart: {
+      unitsPerScreen: 1,
+      initialScreens: { before: 0, after: 0 },
+      extendScreens: 0,
+    },
   },
   timeline: {
     days: {
@@ -60,6 +65,11 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
       unitsPerScreen: 1,
       initialScreens: { before: 3, after: 8 },
       extendScreens: 14,
+    },
+    pieChart: {
+      unitsPerScreen: 1,
+      initialScreens: { before: 0, after: 0 },
+      extendScreens: 0,
     },
   },
 } satisfies Record<
