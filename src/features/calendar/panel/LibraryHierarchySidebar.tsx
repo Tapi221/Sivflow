@@ -1,0 +1,750 @@
+import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef } from "react";
+import { buildExplorerTreeData, parseSelectedTreeId, toSelectedTreeId, type ExplorerTreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
+import { getFolderId, getParentFolderId, normalizeFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { useExpandedFolders } from "@/components/folder/hooks/useExpandedFolders";
+import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
+import { toVirtualMfCardDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
+import { createDefaultExplorerRouteState, WORKSPACE_DEFAULT_EXPLORER_TAB_ID, type WorkspaceExplorerTab, type WorkspaceTab } from "@/features/tab/Tab";
+import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
+import { useCardsRead } from "@/hooks/card/useCardsRead";
+import { useCardSets } from "@/hooks/cardSet/useCardSets";
+import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
+import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
+import { cn } from "@/lib/utils";
+import type { Card, CardSet, DocumentItem, SelectedExplorerItem } from "@/types";
+
+const LIBRARY_EXPANDED_FOLDERS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-folders";
+const LIBRARY_EXPANDED_CARD_SETS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-card-sets";
+const TREE_INDENT_PX = 16;
+const TREE_GUIDE_LEFT_OFFSET_PX = 10;
+const TREE_ROW_HEIGHT_CLASS_NAME = "h-[27px]";
+const TREE_EMPTY_TEXT_CLASS_NAME = "px-3 py-2 text-[12px] font-semibold text-[#a3a7af]";
+
+type ExplorerSelectionPatch = {
+  selectedFolderId: string | null;
+  selectedItem: SelectedExplorerItem;
+};
+
+type TreeBranchMask = boolean[];
+
+type NodeIconProps = {
+  className?: string;
+};
+
+const ChevronRightGlyph = ({ className }: NodeIconProps) => (
+  <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
+    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const FolderGlyph = ({ className }: NodeIconProps) => (
+  <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
+    <path d="M2.5 5.25C2.5 4.56 3.06 4 3.75 4H6.55C6.88 4 7.2 4.13 7.44 4.36L8.28 5.15C8.51 5.37 8.83 5.5 9.15 5.5H14.25C14.94 5.5 15.5 6.06 15.5 6.75V13.25C15.5 13.94 14.94 14.5 14.25 14.5H3.75C3.06 14.5 2.5 13.94 2.5 13.25V5.25Z" fill="currentColor" opacity="0.16" />
+    <path d="M2.5 5.25C2.5 4.56 3.06 4 3.75 4H6.55C6.88 4 7.2 4.13 7.44 4.36L8.28 5.15C8.51 5.37 8.83 5.5 9.15 5.5H14.25C14.94 5.5 15.5 6.06 15.5 6.75V13.25C15.5 13.94 14.94 14.5 14.25 14.5H3.75C3.06 14.5 2.5 13.94 2.5 13.25V5.25Z" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M3 7.25H15" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" opacity="0.45" />
+  </svg>
+);
+
+const DeckGlyph = ({ className }: NodeIconProps) => (
+  <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
+    <rect x="4.1" y="3.6" width="9.8" height="10.8" rx="2" fill="currentColor" opacity="0.12" />
+    <rect x="4.1" y="3.6" width="9.8" height="10.8" rx="2" stroke="currentColor" strokeWidth="1.25" />
+    <path d="M6.25 6.25H11.75M6.25 8.75H11.75M6.25 11.25H9.75" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" />
+  </svg>
+);
+
+const CardGlyph = ({ className }: NodeIconProps) => (
+  <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
+    <rect x="3" y="4.5" width="12" height="9" rx="2" fill="currentColor" opacity="0.12" />
+    <rect x="3" y="4.5" width="12" height="9" rx="2" stroke="currentColor" strokeWidth="1.25" />
+    <path d="M5.5 7.25H12.5M5.5 9.5H10.5" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" />
+  </svg>
+);
+
+const DocumentGlyph = ({ className }: NodeIconProps) => (
+  <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
+    <path d="M5 2.75H10.2L13.5 6.1V14.25C13.5 14.94 12.94 15.5 12.25 15.5H5.75C5.06 15.5 4.5 14.94 4.5 14.25V4.25C4.5 3.42 4.67 2.75 5 2.75Z" fill="currentColor" opacity="0.1" />
+    <path d="M5 2.75H10.2L13.5 6.1V14.25C13.5 14.94 12.94 15.5 12.25 15.5H5.75C5.06 15.5 4.5 14.94 4.5 14.25V4.25C4.5 3.42 4.67 2.75 5 2.75Z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" />
+    <path d="M10.2 2.9V5.65C10.2 6.05 10.52 6.38 10.92 6.38H13.35M6.75 9.5H11.25M6.75 11.75H10.25" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const TrashGlyph = ({ className }: NodeIconProps) => (
+  <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
+    <path d="M4.25 6H13.75M7 6V4.75C7 4.2 7.45 3.75 8 3.75H10C10.55 3.75 11 4.2 11 4.75V6M5.25 6.25L5.78 13.2C5.84 14.07 6.57 14.75 7.44 14.75H10.56C11.43 14.75 12.16 14.07 12.22 13.2L12.75 6.25" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const isWorkspaceExplorerTab = (tab: WorkspaceTab | null | undefined): tab is WorkspaceExplorerTab =>
+  tab?.kind === "explorer";
+
+const getActiveWorkspaceTab = (
+  tabs: WorkspaceTab[],
+  activeTabId: WorkspaceTab["id"] | null,
+): WorkspaceTab | null => {
+  if (!activeTabId) return null;
+
+  return tabs.find((tab) => tab.id === activeTabId) ?? null;
+};
+
+const getNodeEntityId = (node: ExplorerTreeNode): string | null =>
+  parseSelectedTreeId(node.id)?.id ?? null;
+
+const getCardSetIdFromCard = (card: Card): string | null => {
+  const legacyCardSetId = (card as unknown as { card_set_id?: string | null }).card_set_id;
+  return card.cardSetId ?? legacyCardSetId ?? null;
+};
+
+const getCardFolderId = (
+  card: Card,
+  cardSetById: Map<string, CardSet>,
+): string | null => {
+  const directFolderId =
+    card.folderId ??
+    (card as unknown as { folder_id?: string | null }).folder_id ??
+    null;
+  if (directFolderId) return directFolderId;
+
+  const cardSetId = getCardSetIdFromCard(card);
+  return cardSetId ? (cardSetById.get(cardSetId)?.folderId ?? null) : null;
+};
+
+const getCardTitle = (card: Card): string =>
+  toVirtualMfCardDisplayName(
+    card.title?.trim() ||
+      card.questionNumber?.trim() ||
+      "無題のカード",
+  );
+
+const getDocumentTitle = (document: DocumentItem): string =>
+  document.title?.trim() ||
+  document.fileName?.trim() ||
+  "無題の文書";
+
+const getFolderAncestorIds = (
+  folderId: string | null | undefined,
+  folders: FolderTreeNode[],
+): string[] => {
+  const folderById = new Map<string, FolderTreeNode>();
+
+  for (const folder of folders) {
+    const id = getFolderId(folder);
+    if (id) folderById.set(id, folder);
+  }
+
+  const ancestorIds: string[] = [];
+  const visitedIds = new Set<string>();
+  let currentId = folderId ? normalizeFolderId(folderId) : null;
+
+  while (currentId && !visitedIds.has(currentId)) {
+    const folder = folderById.get(currentId);
+    if (!folder) break;
+
+    ancestorIds.push(currentId);
+    visitedIds.add(currentId);
+
+    const parentId = normalizeFolderId(getParentFolderId(folder));
+    if (!parentId || parentId === currentId) break;
+    currentId = parentId;
+  }
+
+  return ancestorIds;
+};
+
+const addIdsToSet = (
+  ids: string[],
+  setState: (updater: (prev: Set<string>) => Set<string>) => void,
+) => {
+  if (ids.length === 0) return;
+
+  setState((prev) => {
+    let didChange = false;
+    const next = new Set(prev);
+
+    for (const id of ids) {
+      if (!next.has(id)) {
+        next.add(id);
+        didChange = true;
+      }
+    }
+
+    return didChange ? next : prev;
+  });
+};
+
+const getNodeIconClassName = (node: ExplorerTreeNode, depth: number): string => {
+  if (node.type === "folder") {
+    const folderToneClassNames = [
+      "text-[#6b8ed6]",
+      "text-[#e0a13d]",
+      "text-[#9b78db]",
+      "text-[#5ab489]",
+      "text-[#da6b6b]",
+      "text-[#58a7c8]",
+    ];
+    const hash = Array.from(node.id).reduce((sum, char) => sum + char.charCodeAt(0), depth);
+    return folderToneClassNames[hash % folderToneClassNames.length];
+  }
+
+  if (node.type === "cardSet") return "text-[#7f88a4]";
+  if (node.type === "document") return "text-[#9aa0aa]";
+  return "text-[#8d96aa]";
+};
+
+const renderNodeIcon = (node: ExplorerTreeNode, depth: number) => {
+  const className = cn("h-[17px] w-[17px] shrink-0", getNodeIconClassName(node, depth));
+
+  if (node.type === "folder") return <FolderGlyph className={className} />;
+  if (node.type === "cardSet") return <DeckGlyph className={className} />;
+  if (node.type === "document") return <DocumentGlyph className={className} />;
+
+  return <CardGlyph className={className} />;
+};
+
+export const LibraryHierarchySidebar = () => {
+  const tabs = useWorkspaceTabsStore((state) => state.tabs);
+  const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
+  const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
+  const openDocumentTab = useWorkspaceTabsStore((state) => state.openDocumentTab);
+  const openCardTab = useWorkspaceTabsStore((state) => state.openCardTab);
+  const selectTab = useWorkspaceTabsStore((state) => state.selectTab);
+  const updateExplorerTabState = useWorkspaceTabsStore((state) => state.updateExplorerTabState);
+  const { folders, loading: foldersLoading } = useFoldersRead();
+  const { cards, loading: cardsLoading } = useCardsRead();
+  const { cardSets, loading: cardSetsLoading } = useCardSets();
+  const { documents, loading: documentsLoading } = useDocumentsRead();
+  const { expandedFolders, setExpandedFolders } = useExpandedFolders(LIBRARY_EXPANDED_FOLDERS_STORAGE_KEY);
+  const { expandedFolders: expandedCardSets, setExpandedFolders: setExpandedCardSets } = useExpandedFolders(LIBRARY_EXPANDED_CARD_SETS_STORAGE_KEY);
+  const didSeedInitialOpenStateRef = useRef(false);
+
+  const activeTab = useMemo(() => getActiveWorkspaceTab(tabs, activeTabId), [activeTabId, tabs]);
+
+  const activeLibrarySelection = useMemo(() => {
+    if (activeTab?.sectionKey !== "library") {
+      return {
+        selectedFolderId: null,
+        selectedItem: null,
+      };
+    }
+
+    if (activeTab.kind === "explorer") {
+      return {
+        selectedFolderId: activeTab.explorerState.selectedFolderId,
+        selectedItem: activeTab.explorerState.selectedItem,
+      };
+    }
+
+    if (activeTab.kind === "document") {
+      return {
+        selectedFolderId: activeTab.folderId,
+        selectedItem: { type: "document" as const, id: activeTab.documentId },
+      };
+    }
+
+    if (activeTab.kind === "card") {
+      return {
+        selectedFolderId: activeTab.folderId,
+        selectedItem: { type: "card" as const, id: activeTab.cardId },
+      };
+    }
+
+    return {
+      selectedFolderId: null,
+      selectedItem: null,
+    };
+  }, [activeTab]);
+
+  const treeFolders = useMemo(
+    () => folders as unknown as FolderTreeNode[],
+    [folders],
+  );
+
+  const cardById = useMemo(
+    () => new Map(cards.map((card) => [card.id, card])),
+    [cards],
+  );
+
+  const cardSetById = useMemo(
+    () => new Map(cardSets.map((cardSet) => [cardSet.id, cardSet])),
+    [cardSets],
+  );
+
+  const documentById = useMemo(
+    () => new Map(documents.map((document) => [document.id, document])),
+    [documents],
+  );
+
+  const {
+    rootFolders,
+    getChildFolders,
+    getFolderItems,
+    getCardSets,
+    getCardSetItems,
+    matchCountMap,
+  } = useExplorerDerivedData({
+    treeFolders,
+    treeCards: cards,
+    cardSets,
+    documents,
+    isFiltering: false,
+  });
+
+  const rootItems = useMemo(() => getFolderItems(null), [getFolderItems]);
+
+  const treeData = useMemo(
+    () =>
+      buildExplorerTreeData({
+        rootFolders,
+        rootItems,
+        getChildFolders,
+        getFolderItems,
+        getCardSets,
+        getCardSetItems,
+        isFiltering: false,
+        matchCountMap,
+        getFolderId,
+      }),
+    [
+      rootFolders,
+      rootItems,
+      getChildFolders,
+      getFolderItems,
+      getCardSets,
+      getCardSetItems,
+      matchCountMap,
+    ],
+  );
+
+  const selectedTreeId = useMemo(
+    () =>
+      toSelectedTreeId(
+        activeLibrarySelection.selectedFolderId,
+        activeLibrarySelection.selectedItem,
+      ),
+    [activeLibrarySelection.selectedFolderId, activeLibrarySelection.selectedItem],
+  );
+
+  const isExplorerDataLoading =
+    foldersLoading || cardsLoading || cardSetsLoading || documentsLoading;
+
+  const applyExplorerSelection = useCallback(
+    ({ selectedFolderId, selectedItem }: ExplorerSelectionPatch) => {
+      const explorerTab = isWorkspaceExplorerTab(activeTab)
+        ? activeTab
+        : (tabs.find(
+            (tab): tab is WorkspaceExplorerTab =>
+              tab.kind === "explorer" &&
+              tab.id === WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
+          ) ??
+          tabs.find(
+            (tab): tab is WorkspaceExplorerTab => tab.kind === "explorer",
+          ) ??
+          null);
+      const baseState =
+        explorerTab?.explorerState ?? createDefaultExplorerRouteState();
+      const nextState = {
+        ...baseState,
+        selectedFolderId,
+        selectedItem,
+      };
+
+      if (explorerTab) {
+        updateExplorerTabState(explorerTab.id, nextState);
+        selectTab(explorerTab.id);
+        return;
+      }
+
+      openExplorerTab({
+        id: WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
+        title: "Library",
+        explorerState: nextState,
+        isClosable: true,
+      });
+    },
+    [
+      activeTab,
+      openExplorerTab,
+      selectTab,
+      tabs,
+      updateExplorerTabState,
+    ],
+  );
+
+  const setFolderNodeOpen = useCallback(
+    (folderId: string, isOpen: boolean) => {
+      setExpandedFolders((prev) => {
+        const next = new Set(prev);
+        if (isOpen) next.add(folderId);
+        else next.delete(folderId);
+        return next;
+      });
+    },
+    [setExpandedFolders],
+  );
+
+  const setCardSetNodeOpen = useCallback(
+    (cardSetId: string, isOpen: boolean) => {
+      setExpandedCardSets((prev) => {
+        const next = new Set(prev);
+        if (isOpen) next.add(cardSetId);
+        else next.delete(cardSetId);
+        return next;
+      });
+    },
+    [setExpandedCardSets],
+  );
+
+  const isNodeOpen = useCallback(
+    (node: ExplorerTreeNode) => {
+      const parsed = parseSelectedTreeId(node.id);
+      if (!parsed) return false;
+
+      if (parsed.type === "folder") return expandedFolders.has(parsed.id);
+      if (parsed.type === "cardSet") return expandedCardSets.has(parsed.id);
+
+      return false;
+    },
+    [expandedCardSets, expandedFolders],
+  );
+
+  const setNodeOpen = useCallback(
+    (node: ExplorerTreeNode, isOpen: boolean) => {
+      const parsed = parseSelectedTreeId(node.id);
+      if (!parsed) return;
+
+      if (parsed.type === "folder") {
+        setFolderNodeOpen(parsed.id, isOpen);
+        return;
+      }
+
+      if (parsed.type === "cardSet") {
+        setCardSetNodeOpen(parsed.id, isOpen);
+      }
+    },
+    [setCardSetNodeOpen, setFolderNodeOpen],
+  );
+
+  const handleToggleNode = useCallback(
+    (node: ExplorerTreeNode) => {
+      setNodeOpen(node, !isNodeOpen(node));
+    },
+    [isNodeOpen, setNodeOpen],
+  );
+
+  const handleSelectNode = useCallback(
+    (node: ExplorerTreeNode) => {
+      const parsed = parseSelectedTreeId(node.id);
+      if (!parsed) return;
+
+      if ((parsed.type === "folder" || parsed.type === "cardSet") && node.children?.length) {
+        setNodeOpen(node, true);
+      }
+
+      if (parsed.type === "folder") {
+        applyExplorerSelection({
+          selectedFolderId: parsed.id,
+          selectedItem: null,
+        });
+        return;
+      }
+
+      if (parsed.type === "cardSet") {
+        const cardSet = cardSetById.get(parsed.id);
+        applyExplorerSelection({
+          selectedFolderId: cardSet?.folderId ?? node.folderId ?? null,
+          selectedItem: { type: "cardSet", id: parsed.id },
+        });
+        return;
+      }
+
+      if (parsed.type === "document") {
+        const document = documentById.get(parsed.id);
+        if (!document) {
+          applyExplorerSelection({
+            selectedFolderId: null,
+            selectedItem: { type: "document", id: parsed.id },
+          });
+          return;
+        }
+
+        openDocumentTab({
+          documentId: document.id,
+          title: getDocumentTitle(document),
+          folderId: document.folderId ?? null,
+        });
+        return;
+      }
+
+      const card = cardById.get(parsed.id);
+      if (!card) {
+        applyExplorerSelection({
+          selectedFolderId: null,
+          selectedItem: { type: "card", id: parsed.id },
+        });
+        return;
+      }
+
+      openCardTab({
+        cardId: card.id,
+        title: getCardTitle(card),
+        folderId: getCardFolderId(card, cardSetById),
+      });
+    },
+    [
+      applyExplorerSelection,
+      cardById,
+      cardSetById,
+      documentById,
+      openCardTab,
+      openDocumentTab,
+      setNodeOpen,
+    ],
+  );
+
+  const handleRowKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>, node: ExplorerTreeNode) => {
+      const hasChildren = Boolean(node.children?.length);
+
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        handleSelectNode(node);
+        return;
+      }
+
+      if (event.key === "ArrowRight" && hasChildren && !isNodeOpen(node)) {
+        event.preventDefault();
+        setNodeOpen(node, true);
+        return;
+      }
+
+      if (event.key === "ArrowLeft" && hasChildren && isNodeOpen(node)) {
+        event.preventDefault();
+        setNodeOpen(node, false);
+      }
+    },
+    [handleSelectNode, isNodeOpen, setNodeOpen],
+  );
+
+  const handleSelectTrash = useCallback(() => {
+    applyExplorerSelection({
+      selectedFolderId: null,
+      selectedItem: { type: "trash" },
+    });
+  }, [applyExplorerSelection]);
+
+  useEffect(() => {
+    if (didSeedInitialOpenStateRef.current || isExplorerDataLoading || rootFolders.length === 0) {
+      return;
+    }
+
+    didSeedInitialOpenStateRef.current = true;
+
+    setExpandedFolders((prev) => {
+      if (prev.size > 0) return prev;
+
+      const rootFolderIds = rootFolders
+        .map((folder) => getFolderId(folder))
+        .filter((folderId): folderId is string => Boolean(folderId));
+
+      return new Set(rootFolderIds);
+    });
+  }, [isExplorerDataLoading, rootFolders, setExpandedFolders]);
+
+  useEffect(() => {
+    const selectedItem = activeLibrarySelection.selectedItem;
+    const selectedFolderId = activeLibrarySelection.selectedFolderId;
+    const selectedCard =
+      selectedItem?.type === "card" ? cardById.get(selectedItem.id) : null;
+    const selectedCardSet =
+      selectedItem?.type === "cardSet" ? cardSetById.get(selectedItem.id) : null;
+    const selectedDocument =
+      selectedItem?.type === "document" ? documentById.get(selectedItem.id) : null;
+    const cardFolderId = selectedCard
+      ? getCardFolderId(selectedCard, cardSetById)
+      : null;
+    const targetFolderId =
+      selectedFolderId ??
+      cardFolderId ??
+      selectedCardSet?.folderId ??
+      selectedDocument?.folderId ??
+      null;
+    const ancestorIds = getFolderAncestorIds(targetFolderId, treeFolders);
+
+    addIdsToSet(ancestorIds, setExpandedFolders);
+
+    if (selectedItem?.type === "card") {
+      const cardSetId = selectedCard ? getCardSetIdFromCard(selectedCard) : null;
+      if (cardSetId) addIdsToSet([cardSetId], setExpandedCardSets);
+    }
+
+    if (selectedItem?.type === "cardSet") {
+      addIdsToSet([selectedItem.id], setExpandedCardSets);
+    }
+  }, [
+    activeLibrarySelection.selectedFolderId,
+    activeLibrarySelection.selectedItem,
+    cardById,
+    cardSetById,
+    documentById,
+    setExpandedCardSets,
+    setExpandedFolders,
+    treeFolders,
+  ]);
+
+  const renderTreeNode = useCallback(
+    (
+      node: ExplorerTreeNode,
+      depth: number,
+      branchMask: TreeBranchMask,
+      index: number,
+      siblingCount: number,
+    ) => {
+      const hasChildren = Boolean(node.children?.length);
+      const isOpen = hasChildren && isNodeOpen(node);
+      const isSelected = selectedTreeId === node.id;
+      const isLastSibling = index === siblingCount - 1;
+      const childBranchMask = [...branchMask, !isLastSibling];
+
+      return (
+        <div key={node.id} className="relative">
+          <div className="relative">
+            {branchMask.map((shouldDrawGuide, guideIndex) =>
+              shouldDrawGuide ? (
+                <span
+                  key={`${node.id}:guide:${guideIndex}`}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute bottom-0 top-0 w-px bg-[#e3e5ea]"
+                  style={{ left: TREE_GUIDE_LEFT_OFFSET_PX + guideIndex * TREE_INDENT_PX }}
+                />
+              ) : null,
+            )}
+            {depth > 0 ? (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute top-1/2 h-px bg-[#e3e5ea]"
+                style={{
+                  left: TREE_GUIDE_LEFT_OFFSET_PX + (depth - 1) * TREE_INDENT_PX,
+                  width: TREE_INDENT_PX - 3,
+                }}
+              />
+            ) : null}
+
+            <div
+              role="treeitem"
+              tabIndex={0}
+              aria-level={depth + 1}
+              aria-setsize={siblingCount}
+              aria-posinset={index + 1}
+              aria-selected={isSelected}
+              aria-expanded={hasChildren ? isOpen : undefined}
+              onClick={() => handleSelectNode(node)}
+              onKeyDown={(event) => handleRowKeyDown(event, node)}
+              className={cn(
+                "group relative flex w-full cursor-default select-none items-center gap-1 rounded-[7px] pr-2 text-left text-[13px] font-semibold tracking-[-0.01em] outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#d9dee8]",
+                TREE_ROW_HEIGHT_CLASS_NAME,
+                isSelected
+                  ? "bg-[#eef0f6] text-[#2f3540] shadow-[inset_0_0_0_1px_rgba(88,94,112,0.05)]"
+                  : "text-[#606672] hover:bg-[#f5f6f8]",
+              )}
+              style={{ paddingLeft: 2 + depth * TREE_INDENT_PX }}
+            >
+              {hasChildren ? (
+                <button
+                  type="button"
+                  aria-label={isOpen ? `${node.name} を閉じる` : `${node.name} を開く`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleToggleNode(node);
+                  }}
+                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] text-[#a7adb7] transition hover:bg-white hover:text-[#6f7684]"
+                >
+                  <ChevronRightGlyph
+                    className={cn(
+                      "h-3.5 w-3.5 transition-transform duration-150",
+                      isOpen && "rotate-90",
+                    )}
+                  />
+                </button>
+              ) : (
+                <span className="h-4 w-4 shrink-0" />
+              )}
+
+              {renderNodeIcon(node, depth)}
+
+              <span className="min-w-0 flex-1 truncate">{node.name}</span>
+            </div>
+          </div>
+
+          {isOpen && node.children?.length ? (
+            <div role="group">
+              {node.children.map((childNode, childIndex) =>
+                renderTreeNode(
+                  childNode,
+                  depth + 1,
+                  childBranchMask,
+                  childIndex,
+                  node.children?.length ?? 0,
+                ),
+              )}
+            </div>
+          ) : null}
+        </div>
+      );
+    },
+    [
+      handleRowKeyDown,
+      handleSelectNode,
+      handleToggleNode,
+      isNodeOpen,
+      selectedTreeId,
+    ],
+  );
+
+  const isTrashSelected = activeLibrarySelection.selectedItem?.type === "trash";
+
+  return (
+    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent px-2 pb-4 pt-2 text-[#2f2f2f]" aria-label="Library hierarchy explorer">
+      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+        {isExplorerDataLoading ? (
+          <div className="space-y-2 px-2 pt-1" aria-label="ライブラリを読み込み中">
+            {Array.from({ length: 8 }, (_, index) => (
+              <div
+                key={index}
+                className="h-[18px] rounded-full bg-[#eef0f3]"
+                style={{ marginLeft: (index % 4) * 14, width: `${80 - (index % 3) * 10}%` }}
+              />
+            ))}
+          </div>
+        ) : treeData.length > 0 ? (
+          <div role="tree" aria-label="ライブラリ" className="space-y-[1px]">
+            {treeData.map((node, index) =>
+              renderTreeNode(node, 0, [], index, treeData.length),
+            )}
+          </div>
+        ) : (
+          <p className={TREE_EMPTY_TEXT_CLASS_NAME}>
+            ライブラリに表示できる項目がありません
+          </p>
+        )}
+      </div>
+
+      <div className="mt-auto shrink-0 pt-2">
+        <div className="mb-1 h-px w-full bg-[#eceef2]" />
+        <button
+          type="button"
+          onClick={handleSelectTrash}
+          aria-pressed={isTrashSelected}
+          className={cn(
+            "flex h-8 w-full items-center gap-2 rounded-[9px] px-2 text-left text-[13px] font-semibold tracking-[-0.01em] transition-colors",
+            isTrashSelected
+              ? "bg-[#eef0f6] text-[#2f3540]"
+              : "text-[#8e949e] hover:bg-[#f5f6f8] hover:text-[#606672]",
+          )}
+        >
+          <TrashGlyph className="h-[17px] w-[17px] shrink-0" />
+          <span className="truncate">ごみ箱</span>
+        </button>
+      </div>
+    </aside>
+  );
+};
