@@ -23,6 +23,7 @@ export type GoogleOAuthServerErrorReason =
   | "token_encryption_key_invalid"
   | "stored_refresh_token_decrypt_failed"
   | "stored_refresh_token_missing"
+  | "insufficient_google_scope"
   | "google_token_fetch_failed"
   | "google_token_invalid_response"
   | "google_userinfo_fetch_failed"
