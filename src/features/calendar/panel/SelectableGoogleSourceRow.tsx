@@ -2,7 +2,7 @@ import { AnimatedCircleCheckbox } from "@/chip/checkbox/AnimatedCircleCheckbox";
 import { cn } from "@/lib/utils";
 
 export const GOOGLE_SOURCE_ROW_CLASS_NAME =
-  "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-5 text-left";
+  "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
 
 const ASSERTIVE_SOURCE_CHECK_CLASS_NAME = "saturate-[0.68] brightness-[1.08]";
 const ASSERTIVE_SOURCE_MIN_SATURATION = 0.45;
