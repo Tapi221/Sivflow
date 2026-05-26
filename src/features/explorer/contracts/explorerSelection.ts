@@ -12,5 +12,5 @@ export type DocumentSelectedItem = Extract<
 
 export type RootSelectedItem = Extract<
   import("@/types").SelectedExplorerItem,
-  { type: "directory" | "gallery" | "calendar" | "trash" }
+  { type: "gallery" | "calendar" | "trash" }
 >;
