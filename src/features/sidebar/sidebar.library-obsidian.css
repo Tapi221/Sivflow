@@ -1,0 +1,127 @@
+aside[aria-label="Library hierarchy explorer"] {
+  width: 326px !important;
+  background: var(--app-sidebar-bg, #f6f6f6) !important;
+  color: #5f5f5f !important;
+  font-family: var(--app-font-family-sidebar) !important;
+  font-feature-settings: "palt" 1, "lnum" 1, "tnum" 1;
+}
+
+aside[aria-label="Library hierarchy explorer"] > div:first-child {
+  padding: 2px 0 6px !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="tree"] {
+  gap: 0 !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] {
+  height: 30px !important;
+  min-height: 30px !important;
+  gap: 0 !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  color: #5f5f5f !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 30px !important;
+  letter-spacing: 0 !important;
+  box-shadow: none !important;
+  transition: none !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"]:hover {
+  background: rgba(0, 0, 0, 0.045) !important;
+  color: #4f4f4f !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-selected="true"] {
+  background: rgba(0, 0, 0, 0.07) !important;
+  color: #3f3f3f !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button {
+  width: 22px !important;
+  height: 30px !important;
+  margin: 0 1px 0 0 !important;
+  padding: 0 !important;
+  border-radius: 4px !important;
+  background: transparent !important;
+  color: #9a9a9a !important;
+  transition: none !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button:hover {
+  background: transparent !important;
+  color: #777777 !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > span.h-4.w-4.shrink-0 {
+  width: 23px !important;
+  height: 30px !important;
+  flex: 0 0 23px !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > svg {
+  display: none !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > span:last-child {
+  min-width: 0 !important;
+  padding-left: 0 !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button svg,
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button svg * {
+  color: currentColor !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button svg path {
+  stroke-width: 1.8 !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] span[aria-hidden="true"] {
+  background: rgba(0, 0, 0, 0.12) !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] span[aria-hidden="true"].h-px {
+  height: 0 !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] button[aria-pressed] {
+  height: 34px !important;
+  min-height: 34px !important;
+  gap: 12px !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #5f5f5f !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 34px !important;
+  box-shadow: none !important;
+  transition: none !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] button[aria-pressed]:hover,
+aside[aria-label="Library hierarchy explorer"] button[aria-pressed="true"] {
+  background: rgba(0, 0, 0, 0.045) !important;
+  color: #4f4f4f !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] button[aria-pressed] svg,
+aside[aria-label="Library hierarchy explorer"] button[aria-pressed] svg * {
+  color: #8a8a8a !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] .mt-auto .h-px {
+  background: rgba(0, 0, 0, 0.12) !important;
+}
