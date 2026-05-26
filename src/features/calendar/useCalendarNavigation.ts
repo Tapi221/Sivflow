@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { addDays, addMonths, startOfDay, startOfMonth, startOfWeek, subDays, subMonths } from "date-fns";
 import type { CalendarToolbarMode, CalendarViewMode } from "./scheduleScreen.types";
-import { createCalendarScrollBuffer, getCalendarScrollBufferExtendUnits } from "@/features/scroll/schedule/calendarScrollBuffer";
+import { createCalendarScrollBuffer, extendCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "month") return addMonths(current, 1);
@@ -90,38 +90,38 @@ export const useCalendarNavigation = ({
   }, []);
 
   const extendCalendarBufferLeft = useCallback(() => {
-    setCalendarBuffer((prev) => ({
-      ...prev,
-      before:
-        prev.before +
-        getCalendarScrollBufferExtendUnits("calendar", selectedViewMode),
+    setCalendarBuffer((prev) => extendCalendarScrollBuffer({
+      surface: "calendar",
+      viewMode: selectedViewMode,
+      buffer: prev,
+      direction: "left",
     }));
   }, [selectedViewMode]);
 
   const extendCalendarBufferRight = useCallback(() => {
-    setCalendarBuffer((prev) => ({
-      ...prev,
-      after:
-        prev.after +
-        getCalendarScrollBufferExtendUnits("calendar", selectedViewMode),
+    setCalendarBuffer((prev) => extendCalendarScrollBuffer({
+      surface: "calendar",
+      viewMode: selectedViewMode,
+      buffer: prev,
+      direction: "right",
     }));
   }, [selectedViewMode]);
 
   const extendTimelineUnitBufferLeft = useCallback(() => {
-    setTimelineUnitBuffer((prev) => ({
-      ...prev,
-      before:
-        prev.before +
-        getCalendarScrollBufferExtendUnits("timeline", selectedViewMode),
+    setTimelineUnitBuffer((prev) => extendCalendarScrollBuffer({
+      surface: "timeline",
+      viewMode: selectedViewMode,
+      buffer: prev,
+      direction: "left",
     }));
   }, [selectedViewMode]);
 
   const extendTimelineUnitBufferRight = useCallback(() => {
-    setTimelineUnitBuffer((prev) => ({
-      ...prev,
-      after:
-        prev.after +
-        getCalendarScrollBufferExtendUnits("timeline", selectedViewMode),
+    setTimelineUnitBuffer((prev) => extendCalendarScrollBuffer({
+      surface: "timeline",
+      viewMode: selectedViewMode,
+      buffer: prev,
+      direction: "right",
     }));
   }, [selectedViewMode]);
 
