@@ -276,7 +276,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                   {lane.label ? (
                     <>
                       <span className="h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_0_2px_rgba(255,255,255,0.95)]" style={{ backgroundColor: lane.color }} />
-                      <span className="min-w-0 truncate text-[12px] font-medium text-[#b8b8b8]">{lane.label}</span>
+                      <span className="min-w-0 truncate text-[12px] font-medium text-[#a8a8a8]">{lane.label}</span>
                     </>
                   ) : null}
                 </div>
