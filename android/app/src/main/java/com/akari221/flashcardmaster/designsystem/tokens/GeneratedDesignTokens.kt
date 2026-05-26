@@ -12,8 +12,6 @@ object DesignTokens {
             const val Value500 = "#5d7fb6"
             const val Value600 = "#45679d"
             const val Value700 = "#35507b"
-            const val Value800 = "#25395a"
-            const val Value900 = "#17253d"
         }
         object Neutral {
             const val Value0 = "#ffffff"
@@ -247,24 +245,12 @@ object DesignTokens {
                 const val SelectedSubtle = "#e7edf6"
                 const val SelectedAccent = "#35507b"
                 const val ColumnSelectedSubtle = "rgba(53, 80, 123, 0.14)"
-                const val ColumnSelectedAccent = "#25395a"
             }
             object Status {
                 const val Danger = "#e11d48"
                 const val Warning = "#f59e0b"
                 const val Success = "#10b981"
                 const val Info = "#00a3ff"
-            }
-            object Chrome {
-                const val TitlebarStart = "#08111f"
-                const val TitlebarAccent = "#0c1d42"
-                const val TitlebarEnd = "#050812"
-                const val TitlebarText = "rgba(255, 255, 255, 0.92)"
-                const val TitlebarTextStrong = "#ffffff"
-                const val TitlebarIcon = "rgba(255, 255, 255, 0.78)"
-                const val TitlebarDivider = "rgba(255, 255, 255, 0.16)"
-                const val TitlebarSurface = "rgba(255, 255, 255, 0.08)"
-                const val TitlebarSurfaceHover = "rgba(255, 255, 255, 0.14)"
             }
         }
         object Spacing {
