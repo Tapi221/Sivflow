@@ -1,5 +1,5 @@
 .app-layout {
-  --app-sidebar-rail-width: 40px;
+  --app-sidebar-rail-width: 44px;
   --app-sidebar-closed-width: 0px;
   --app-right-sidebar-width: 240px;
   --app-layout-padding-x: 0px;
@@ -111,7 +111,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: calc(var(--app-sidebar-rail-width, 40px) - 8px);
+  width: calc(var(--app-sidebar-rail-width, 44px) - 8px);
   height: 32px;
   margin: 0;
   padding: 0;
@@ -192,7 +192,7 @@
 }
 
 .app-layout--sidebar-closed .workspace-shell__tabs {
-  padding-left: var(--app-sidebar-rail-width, 40px);
+  padding-left: var(--app-sidebar-rail-width, 44px);
 }
 
 .app-layout--sidebar-closed .calendar-workspace-toolbar {
