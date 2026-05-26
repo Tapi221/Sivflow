@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { addDays, addMonths, startOfDay, startOfMonth, startOfWeek, subDays, subMonths } from "date-fns";
 import type { CalendarToolbarMode, CalendarViewMode } from "./scheduleScreen.types";
-import { createCalendarScrollBuffer, getCalendarScrollBufferExtendUnits } from "../scroll/schedule/calendarScrollBuffer";
+import { createCalendarScrollBuffer, getCalendarScrollBufferExtendUnits } from "@/features/scroll/schedule/calendarScrollBuffer";
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "month") return addMonths(current, 1);

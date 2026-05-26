@@ -1,4 +1,4 @@
-import type { Task } from "../../calendar/task/task.types";
+import type { Task } from "@/features/calendar/task/task.types";
 import type { TaskDropTarget } from "./taskDnd.types";
 
 export const findTask = (

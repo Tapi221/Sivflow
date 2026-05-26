@@ -164,7 +164,7 @@ export const CalendarWeekDayGrid = ({
   scrollContainerRef,
   visibleDays,
   visibleEvents,
-  calendarDayColumnWidth,
+  _calendarDayColumnWidth,
   timelineGridStyle,
   onScroll,
   selectedDate,

@@ -1,8 +1,8 @@
 import { nanoid } from "nanoid";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
-import { CURRENT_TAG_STORE } from "./localdb/tagStoreNames";
-import type { LocalDBTableMap, SyncableEntityTable, TagRecord } from "./localdb/types";
+import { CURRENT_TAG_STORE } from "@/services/localdb/tagStoreNames";
+import type { LocalDBTableMap, SyncableEntityTable, TagRecord } from "@/services/localdb/types";
 import { createDeleteQueueItem, createUpsertQueueItem } from "@/application/usecases/syncQueueItemFactory";
 import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
 import type { AssetRecord, Card, CardSet, DocumentItem, Folder, SyncConflict, SyncError, SyncHistory, SyncMetadata, SyncQueueItem, SyncSettings, UploadedImage, UserSettings, UserStats } from "@/types";

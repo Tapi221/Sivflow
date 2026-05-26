@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
-import { useTaskDroppableSlot } from "../../dnd/task/taskDnd.components";
-import type { TaskInsertPosition } from "../../dnd/task/taskDnd.types";
+import { useTaskDroppableSlot } from "@/features/dnd/task/taskDnd.components";
+import type { TaskInsertPosition } from "@/features/dnd/task/taskDnd.types";
 
 type TaskInsertionSlotProps = {
   columnId: string;

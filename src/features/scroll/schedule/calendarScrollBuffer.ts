@@ -1,4 +1,4 @@
-import type { CalendarViewMode } from "../../calendar/scheduleScreen.types";
+import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
 type CalendarScrollBufferSurface = "calendar" | "timeline";
 

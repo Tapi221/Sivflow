@@ -1,4 +1,4 @@
-import { GoogleCalendarSyncEngine } from "../../sync/googlecalendar-sync/GoogleCalendarSyncEngine";
+import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
 import type { GCalForceSyncOptions, GoogleCalendarListItem } from "./gcalSync.types";
 
 type EngineContext = {

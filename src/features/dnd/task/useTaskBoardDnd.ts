@@ -1,7 +1,7 @@
 import { type DragEndEvent, type DragOverEvent, type DragStartEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useMemo, useRef, useState } from "react";
-import type { Task } from "../../calendar/task/task.types";
+import type { Task } from "@/features/calendar/task/task.types";
 import { TASK_DND_DROP_ANIMATION, TASK_DND_MEASURING_CONFIG, TASK_DND_POINTER_ACTIVATION_DISTANCE } from "./taskDnd.config";
 import { taskBoardCollisionDetection } from "./taskDnd.collision";
 import { resolveDropTarget } from "./taskDnd.dropTarget";

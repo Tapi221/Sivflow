@@ -4,8 +4,8 @@ import { eventOverlapsRange } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import { GridCalendarMonthDesktop } from "@/features/calendar/grid/Grid.calendar.month.desktop";
-import { useMonthInfiniteScroll } from "../../scroll/schedule/useInfiniteScroll.month.desktop";
-import { useMonthRowResize } from "./height/useRowResize.month.desktop";
+import { useMonthInfiniteScroll } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
+import { useMonthRowResize } from "@/features/calendar/grid/height/useRowResize.month.desktop";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MONTH_WEEKDAY_COUNT = 7;
