@@ -5,19 +5,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GoogleAccountEntry } from "@/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
 import { useGoogleTaskLists } from "@/integration/googletask-integration/useGoogleTaskLists";
 import { fetchGoogleTaskLists } from "@/integration/googletask-integration/gtask.api";
-import { requestCalendarAccessToken } from "@/integration/google-integration/google.oauth";
+import { requestGoogleConnectedServiceAccessToken } from "@/integration/google-integration/google.oauth";
 
 vi.mock("@/integration/googletask-integration/gtask.api", () => ({
   fetchGoogleTaskLists: vi.fn(),
 }));
 
 vi.mock("@/integration/google-integration/google.oauth", () => ({
-  refreshCalendarAccessToken: vi.fn(),
-  requestCalendarAccessToken: vi.fn(),
+  refreshGoogleConnectedServiceAccessToken: vi.fn(),
+  requestGoogleConnectedServiceAccessToken: vi.fn(),
 }));
 
 vi.mock("@/integration/google-integration/google.server-oauth", () => ({
-  getServerStoredGoogleCalendarAccessToken: vi.fn(),
+  getServerStoredGoogleConnectedServiceAccessToken: vi.fn(),
   isServerStoredGoogleOAuthEnabled: vi.fn(() => false),
 }));
 
@@ -69,7 +69,7 @@ describe("useGoogleTaskLists", () => {
   });
 
   it("recovers Google Tasks list loading with a silent access token when no refresh token is stored", async () => {
-    vi.mocked(requestCalendarAccessToken).mockResolvedValue({
+    vi.mocked(requestGoogleConnectedServiceAccessToken).mockResolvedValue({
       accessToken: "silent-access-token",
       accountEmail: "akari@example.com",
       accountName: "Akari",
@@ -98,7 +98,7 @@ describe("useGoogleTaskLists", () => {
       ]);
     });
 
-    expect(requestCalendarAccessToken).toHaveBeenCalledWith({}, true);
+    expect(requestGoogleConnectedServiceAccessToken).toHaveBeenCalledWith({}, true);
     expect(fetchGoogleTaskLists).toHaveBeenCalledWith("silent-access-token");
     expect(onAccessTokenRecovered).toHaveBeenCalledWith({
       accountId: "account-1",
