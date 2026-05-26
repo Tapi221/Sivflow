@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { addDays, differenceInMinutes, format, isAfter, isBefore, startOfDay } from "date-fns";
-import { ToggleTimePercentage } from "@/chip/toggle/Toggle.timepercentage";
 import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
@@ -25,13 +24,11 @@ type DailyPieSlice = {
   isGap: boolean;
 };
 
-type DailySummaryItem = {
-  id: string;
-  label: string;
-  color: string;
-  minutes: number;
-  eventCount: number;
-  percentage: number;
+type DailyClockPieProps = {
+  title: string;
+  totalMinutes: number;
+  slices: DailyPieSlice[];
+  isActual?: boolean;
 };
 
 const DEFAULT_SEGMENT_COLOR = "#8e8e93";
@@ -213,51 +210,10 @@ const buildDailyPieSlices = (
   }));
 };
 
-const buildSummaryItems = (slices: DailyPieSlice[]): DailySummaryItem[] => {
-  const scheduledMinutes = slices.reduce((sum, slice) => slice.isGap ? sum : sum + slice.minutes, 0);
-  const summaryById = new Map<string, DailySummaryItem>();
-
-  slices.forEach((slice) => {
-    if (slice.isGap) return;
-
-    const summaryId = slice.id.split(":").slice(0, 2).join(":");
-    const current = summaryById.get(summaryId);
-
-    if (current) {
-      current.minutes += slice.minutes;
-      current.eventCount += slice.eventCount;
-      return;
-    }
-
-    summaryById.set(summaryId, {
-      id: summaryId,
-      label: slice.label,
-      color: slice.color,
-      minutes: slice.minutes,
-      eventCount: slice.eventCount,
-      percentage: 0,
-    });
-  });
-
-  return Array.from(summaryById.values())
-    .map((item) => ({
-      ...item,
-      percentage: scheduledMinutes > 0 ? Math.round((item.minutes / scheduledMinutes) * 100) : 0,
-    }))
-    .sort((a, b) => b.minutes - a.minutes);
-};
-
 const truncateChartLabel = (label: string) => {
   if (label.length <= 6) return label;
 
   return `${label.slice(0, 5)}…`;
-};
-
-type DailyClockPieProps = {
-  title: string;
-  totalMinutes: number;
-  slices: DailyPieSlice[];
-  isActual?: boolean;
 };
 
 const DailyClockPie = ({ title, totalMinutes, slices, isActual = false }: DailyClockPieProps) => {
@@ -329,7 +285,7 @@ const DailyClockPie = ({ title, totalMinutes, slices, isActual = false }: DailyC
   );
 };
 
-export const CalendarPieChartView = ({
+const CalendarPieChartView = ({
   selectedDate,
   events,
   appProjects,
@@ -340,9 +296,7 @@ export const CalendarPieChartView = ({
     () => buildDailyPieSlices(selectedDate, events, appProjects, googleAccounts),
     [appProjects, events, googleAccounts, selectedDate],
   );
-  const plannedSummaryItems = useMemo(() => buildSummaryItems(plannedSlices), [plannedSlices]);
-  const plannedMinutes = plannedSummaryItems.reduce((sum, item) => sum + item.minutes, 0);
-  const totalDiffMinutes = 0 - plannedMinutes;
+  const plannedMinutes = plannedSlices.reduce((sum, slice) => slice.isGap ? sum : sum + slice.minutes, 0);
 
   return (
     <div className={cn("flex h-full min-h-0 bg-white text-[#1c1c1e]", className)}>
@@ -361,64 +315,8 @@ export const CalendarPieChartView = ({
           <DailyClockPie title="実績" totalMinutes={0} slices={[]} isActual />
         </div>
       </main>
-
-      <aside className="flex w-[292px] shrink-0 flex-col gap-4 border-l border-[#eeeeee] bg-white p-4 max-[980px]:hidden">
-        <section className="rounded-[18px] border border-[#eeeeee] bg-white p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-[13px] font-semibold text-[#3a3a3c]">差分サマリー</h3>
-            <span className="text-[12px] text-[#b3b3b3]">ⓘ</span>
-          </div>
-
-          <div className="space-y-3">
-            {plannedSummaryItems.slice(0, 8).map((item) => (
-              <div key={item.id} className="flex items-center justify-between gap-3 text-[12px]">
-                <div className="flex min-w-0 items-center gap-2">
-                  <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="truncate font-medium text-[#3a3a3c]">{item.label}</span>
-                </div>
-                <span className="shrink-0 font-semibold text-[#d9476e]">-{formatDuration(item.minutes)}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-4 flex items-center justify-between border-t border-[#eeeeee] pt-3 text-[12px] font-semibold">
-            <span>合計</span>
-            <span className={totalDiffMinutes === 0 ? "text-[#1c1c1e]" : "text-[#d9476e]"}>{totalDiffMinutes === 0 ? "±" : "-"}{formatDuration(Math.abs(totalDiffMinutes))}</span>
-          </div>
-        </section>
-
-        <section className="rounded-[18px] border border-[#eeeeee] bg-white p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-[13px] font-semibold text-[#3a3a3c]">当日の比較</h3>
-            <span className="text-[12px] text-[#b3b3b3]">ⓘ</span>
-          </div>
-
-          <ToggleTimePercentage value="time" className="mb-3" />
-
-          <div className="grid grid-cols-[minmax(0,1fr)_64px_64px] items-center gap-x-2 gap-y-3 text-[11px]">
-            <span />
-            <span className="text-center font-semibold text-[#3a3a3c]">予定</span>
-            <span className="text-center font-semibold text-[#3a3a3c]">実績</span>
-            {plannedSummaryItems.slice(0, 6).map((item) => (
-              <div key={`compare:${item.id}`} className="contents">
-                <div className="flex min-w-0 items-center gap-2">
-                  <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="truncate font-medium text-[#3a3a3c]">{item.label}</span>
-                </div>
-                <span className="text-center font-semibold text-[#3a3a3c]">{formatDuration(item.minutes)}</span>
-                <span className="text-center font-semibold text-[#b3b3b3]">—</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-4 grid grid-cols-[minmax(0,1fr)_64px_64px] border-t border-[#eeeeee] pt-3 text-[12px] font-semibold">
-            <span>合計</span>
-            <span className="text-center">{formatDuration(plannedMinutes)}</span>
-            <span className="text-center text-[#b3b3b3]">—</span>
-          </div>
-          <p className="mt-3 text-[10px] leading-relaxed text-[#b3b3b3]">実績データの保存元がまだ無いため、実績側は未記録として表示しています。</p>
-        </section>
-      </aside>
     </div>
   );
 };
+
+export { CalendarPieChartView };
