@@ -726,10 +726,10 @@ const requestWebToken = async (
   return requestWebTokenWithFirebase(auth, silent);
 };
 
-export const requestCalendarAccessToken = async (
+export async function requestCalendarAccessToken(
   auth: Auth,
   silent = false,
-): Promise<GoogleCalendarAccess> => {
+): Promise<GoogleCalendarAccess> {
   if (isDesktopLikeRuntime()) {
     if (silent) {
       throw createGoogleCalendarReconnectRequiredError();
@@ -739,7 +739,7 @@ export const requestCalendarAccessToken = async (
   }
 
   return requestWebToken(auth, silent);
-};
+}
 
 export const getStoredEmail = (): string | null => {
   return readEmail();
