@@ -1,7 +1,7 @@
 import { memo, useMemo } from "react";
 import { addDays, format, isSameDay, startOfDay, startOfMonth, startOfWeek } from "date-fns";
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
-import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
+import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";

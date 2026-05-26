@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns";
-import { SidebarOpenIcon } from "@/components/icons/icons.sidebar";
+import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";

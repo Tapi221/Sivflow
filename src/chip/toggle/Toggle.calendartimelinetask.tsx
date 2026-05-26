@@ -1,6 +1,6 @@
 import { motion, type Transition } from "framer-motion";
-import { CalendarIcon } from "@/components/icons/icons.sidebar";
-import { TaskIcon, TimelineToolbarIcon } from "@/components/icons/icons.schedule";
+import { CalendarIcon } from "@/chip/icons/icons.sidebar";
+import { TaskIcon, TimelineToolbarIcon } from "@/chip/icons/icons.schedule";
 import { cn } from "@/lib/utils";
 import type { CalendarWorkspaceToolbarProps } from "@/features/calendar/scheduleScreen.types";
 

@@ -1,8 +1,8 @@
 import { memo } from "react";
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
-import { TrashIcon } from "@/components/icons/icons.card";
-import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/icons.schedule";
+import { TrashIcon } from "@/chip/icons/icons.card";
+import { CalendarIcon as ScheduleCalendarIcon } from "@/chip/icons/icons.schedule";
 import type { CalendarColorTokens } from "@/features/calendar/schedule.color-tokens";
 import { cn } from "@/lib/utils";
 

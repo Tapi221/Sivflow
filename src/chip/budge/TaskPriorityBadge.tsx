@@ -1,4 +1,4 @@
-import { FlagIcon } from "@/components/icons/icons.card";
+import { FlagIcon } from "@/chip/icons/icons.card";
 import { PRIORITY_CONFIG } from "@/features/calendar/task/task.types";
 import type { TaskPriority } from "@/features/calendar/task/task.types";
 
