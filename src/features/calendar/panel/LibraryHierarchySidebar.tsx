@@ -1,4 +1,4 @@
-import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef } from "react";
+import { type Dispatch, type KeyboardEvent, type SetStateAction, useCallback, useEffect, useMemo, useRef } from "react";
 import { buildExplorerTreeData, parseSelectedTreeId, toSelectedTreeId, type ExplorerTreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
 import { getFolderId, getParentFolderId, normalizeFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExpandedFolders } from "@/components/folder/hooks/useExpandedFolders";
@@ -87,9 +87,6 @@ const getActiveWorkspaceTab = (
   return tabs.find((tab) => tab.id === activeTabId) ?? null;
 };
 
-const getNodeEntityId = (node: ExplorerTreeNode): string | null =>
-  parseSelectedTreeId(node.id)?.id ?? null;
-
 const getCardSetIdFromCard = (card: Card): string | null => {
   const legacyCardSetId = (card as unknown as { card_set_id?: string | null }).card_set_id;
   return card.cardSetId ?? legacyCardSetId ?? null;
@@ -153,7 +150,7 @@ const getFolderAncestorIds = (
 
 const addIdsToSet = (
   ids: string[],
-  setState: (updater: (prev: Set<string>) => Set<string>) => void,
+  setState: Dispatch<SetStateAction<Set<string>>>,
 ) => {
   if (ids.length === 0) return;
 
@@ -219,7 +216,7 @@ export const LibraryHierarchySidebar = () => {
 
   const activeTab = useMemo(() => getActiveWorkspaceTab(tabs, activeTabId), [activeTabId, tabs]);
 
-  const activeLibrarySelection = useMemo(() => {
+  const activeLibrarySelection = useMemo<ExplorerSelectionPatch>(() => {
     if (activeTab?.sectionKey !== "library") {
       return {
         selectedFolderId: null,
@@ -260,17 +257,17 @@ export const LibraryHierarchySidebar = () => {
   );
 
   const cardById = useMemo(
-    () => new Map(cards.map((card) => [card.id, card])),
+    () => new Map<string, Card>(cards.map((card) => [card.id, card])),
     [cards],
   );
 
   const cardSetById = useMemo(
-    () => new Map(cardSets.map((cardSet) => [cardSet.id, cardSet])),
+    () => new Map<string, CardSet>(cardSets.map((cardSet) => [cardSet.id, cardSet])),
     [cardSets],
   );
 
   const documentById = useMemo(
-    () => new Map(documents.map((document) => [document.id, document])),
+    () => new Map<string, DocumentItem>(documents.map((document) => [document.id, document])),
     [documents],
   );
 
