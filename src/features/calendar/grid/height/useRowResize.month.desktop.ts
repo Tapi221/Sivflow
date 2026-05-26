@@ -166,6 +166,26 @@ export const useMonthRowResize = ({
     [monthWeeks, scrollContainerRef],
   );
 
+  const getBoundaryPointerAnchor = useCallback(
+    (
+      anchor: MonthRowResizeAnchor | null,
+      clientY: number,
+    ): MonthRowResizeAnchor | null => {
+      if (!anchor || anchor.kind !== "boundary") return anchor;
+
+      const scroller = scrollContainerRef.current;
+      if (!scroller) return anchor;
+
+      const scrollerRect = scroller.getBoundingClientRect();
+
+      return {
+        ...anchor,
+        pointerOffsetTop: clientY - scrollerRect.top,
+      };
+    },
+    [scrollContainerRef],
+  );
+
   const preserveAnchor = useCallback(
     (anchor: MonthRowResizeAnchor | null, nextHeight: number) => {
       if (!anchor) return;
@@ -216,7 +236,13 @@ export const useMonthRowResize = ({
   );
 
   const scheduleVariable = useCallback((height: number) => {
-    pendingMonthRowHeightRef.current = C.clampMonthRowHeight(height);
+    const nextHeight = C.normalizeStoredMonthRowHeight(
+      C.clampMonthRowHeight(height),
+    );
+
+    if (pendingMonthRowHeightRef.current === nextHeight) return;
+
+    pendingMonthRowHeightRef.current = nextHeight;
     if (rafRef.current !== null) return;
     rafRef.current = window.requestAnimationFrame(() => {
       rafRef.current = null;
@@ -317,13 +343,29 @@ export const useMonthRowResize = ({
       const onMove = (e: PointerEvent) => {
         const s = resizeStateRef.current;
         if (!s) return;
+
+        resizeStateRef.current = {
+          ...s,
+          anchor: getBoundaryPointerAnchor(s.anchor, e.clientY),
+        };
         scheduleVariable(s.startHeight + e.clientY - s.startY);
       };
 
-      const onUp = () => {
+      const onUp = (e: PointerEvent) => {
+        const s = resizeStateRef.current;
+        const finalHeight = s
+          ? s.startHeight + e.clientY - s.startY
+          : pendingMonthRowHeightRef.current;
+        const finalAnchor = s
+          ? getBoundaryPointerAnchor(s.anchor, e.clientY)
+          : null;
+
+        pendingMonthRowHeightRef.current = C.normalizeStoredMonthRowHeight(
+          C.clampMonthRowHeight(finalHeight),
+        );
         commitHeight(
           pendingMonthRowHeightRef.current,
-          resizeStateRef.current?.anchor ?? null,
+          finalAnchor,
           resizeSessionId,
         );
         cleanup();
@@ -360,6 +402,7 @@ export const useMonthRowResize = ({
       acquireResizeLock,
       commitHeight,
       getBoundaryAnchor,
+      getBoundaryPointerAnchor,
       scheduleVariable,
     ],
   );
