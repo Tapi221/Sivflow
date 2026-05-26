@@ -2,7 +2,7 @@ import type { CSSProperties, RefObject, UIEvent } from "react";
 import { Fragment, memo, useMemo } from "react";
 import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import { eventOverlapsRange } from "@/features/calendar/calendarEventRange";
+import { compareCalendarEvents, eventOverlapsRange } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { TimelineColumn, TimelineUnitBuffer, TimelineViewMode } from "./TimelineDayView.shared";
@@ -186,7 +186,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
 
     return visibleEvents
       .filter((event) => eventOverlapsRange(event, new Date(rangeStart), new Date(rangeEnd)))
-      .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime())
+      .sort(compareCalendarEvents)
       .flatMap((event): TimelineEventPlacement[] => {
         const matchedLane = displayLanes.find((lane) => lane.checked && getLaneMatchesEvent(lane, event));
         if (!matchedLane) return [];
