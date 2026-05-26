@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { compareCalendarEvents } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { toDateKey } from "./calendarKey";
 
@@ -22,7 +23,7 @@ export const useCalendarEventMap = (
     }
 
     for (const arr of map.values()) {
-      arr.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+      arr.sort(compareCalendarEvents);
     }
 
     return map;
