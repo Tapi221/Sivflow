@@ -42,6 +42,11 @@ const TABS_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "drag",
 };
 
+const TABS_DRAG_SPACER_STYLE: AppRegionStyle = {
+  ...TABS_DRAG_STYLE,
+  marginRight: "var(--desktop-window-controls-width, 138px)",
+};
+
 const ACTIVE_TAB_SURFACE_STYLE: CSSProperties = {
   background: "var(--app-active-tab-bg, #ffffff)",
 };
@@ -384,7 +389,7 @@ export const TabsBar = ({
       <div
         style={{
           ...tabsSurfaceStyle,
-          ...TABS_DRAG_STYLE,
+          ...TABS_NO_DRAG_STYLE,
         }}
         className={cn(
           "explorer-chrome-font explorer-tab-bar explorer-workspace-tabs-bar relative z-30 flex shrink-0 items-end gap-0 overflow-visible border-b-0",
@@ -406,8 +411,7 @@ export const TabsBar = ({
             const Icon = resolveTabIcon(tab);
             const inactiveTextClassName =
               resolveInactiveTabTextClassName(isTitlebar);
-            const inactiveIconClassName =
-              resolveInactiveTabIconClassName(isTitlebar);
+            const inactiveIconClassName = resolveInactiveTabIconClassName(isTitlebar);
 
             let tabStateClassName = cn(
               "explorer-workspace-tab--inactive",
@@ -557,7 +561,11 @@ export const TabsBar = ({
           <PlusLineIcon className="h-4 w-4" />
         </button>
 
-        <div className="h-full min-w-0 flex-1" />
+        <div
+          className="h-full min-w-0 flex-1"
+          style={TABS_DRAG_SPACER_STYLE}
+          aria-hidden="true"
+        />
       </div>
 
       {contextMenuElement ? createPortal(contextMenuElement, document.body) : null}
