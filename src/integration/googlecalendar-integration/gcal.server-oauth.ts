@@ -1,7 +1,7 @@
 import { httpsCallable } from "firebase/functions";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { auth, functionsClient } from "@/services/firebase";
-import type { GoogleCalendarAccess } from "./gcal.oauth";
+import { consumeGoogleCalendarServerCodeVerifier, type GoogleCalendarAccess } from "./gcal.oauth";
 
 type ServerGoogleCalendarAccess = GoogleCalendarAccess & {
   accessToken: string;
@@ -395,7 +395,10 @@ export const exchangeGoogleCalendarCode = async (
 
     // 初回接続/明示再接続では必ずサーバーに refresh token を保存させる。
     // ここで access token だけにフォールバックすると、期限切れ後に再連携が必要になる。
-    const result = await exchangeGoogleCalendarCodeCallable(input);
+    const result = await exchangeGoogleCalendarCodeCallable({
+      ...input,
+      codeVerifier: input.codeVerifier ?? consumeGoogleCalendarServerCodeVerifier() ?? undefined,
+    });
     return result.data;
   } catch (error) {
     logGoogleOAuthReconnectCause({
