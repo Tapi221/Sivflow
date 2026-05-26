@@ -222,8 +222,6 @@
 
   .calendar-month-week-row {
     contain: layout style;
-    content-visibility: visible !important;
-    contain-intrinsic-size: none !important;
     background: #ffffff;
   }
 

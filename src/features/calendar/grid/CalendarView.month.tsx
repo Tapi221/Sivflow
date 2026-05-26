@@ -47,6 +47,9 @@ export const CalendarMonthView = ({
   const monthRowHeightRef = useRef(C.readStoredMonthRowHeight());
   const pointerPositionRef = useRef<{ x: number; y: number } | null>(null);
   const scrollHoverRafRef = useRef<number | null>(null);
+  // スクロール中のホバー更新を抑制するためのフラグとタイマー
+  const isScrollingRef = useRef(false);
+  const scrollIdleTimerRef = useRef<number | null>(null);
   const [scrollHoverDayKey, setScrollHoverDayKey] = useState<string | null>(null);
 
   const clearScrollHoverDay = useCallback(() => {
@@ -93,7 +96,9 @@ export const CalendarMonthView = ({
   const updateScrollHoverDay = useCallback(() => {
     scrollHoverRafRef.current = null;
 
-    if (isResizingRef.current) {
+    // リサイズ中またはスクロール中はホバー更新をスキップ
+    if (isResizingRef.current || isScrollingRef.current) {
+      if (isScrollingRef.current) return;
       setScrollHoverDayKey(null);
       return;
     }
@@ -165,7 +170,23 @@ export const CalendarMonthView = ({
   }, [clearScrollHoverDay]);
 
   const handleMonthScroll = useCallback(() => {
-    requestScrollHoverUpdate();
+    // スクロール開始時にホバーをクリア（state更新は1回のみ）
+    if (!isScrollingRef.current) {
+      isScrollingRef.current = true;
+      setScrollHoverDayKey(null);
+    }
+
+    // スクロール停止検出タイマーをリセット
+    if (scrollIdleTimerRef.current !== null) {
+      window.clearTimeout(scrollIdleTimerRef.current);
+    }
+
+    scrollIdleTimerRef.current = window.setTimeout(() => {
+      scrollIdleTimerRef.current = null;
+      isScrollingRef.current = false;
+      // スクロール停止後にポインター位置でホバーを再計算
+      requestScrollHoverUpdate();
+    }, 120);
   }, [requestScrollHoverUpdate]);
 
   const renderedRange = useMemo<CalendarDateRange | null>(() => {
@@ -179,6 +200,15 @@ export const CalendarMonthView = ({
       end: getDayEnd(lastWeek.days[lastWeek.days.length - 1].date),
     };
   }, [scroll.monthWeeks]);
+
+  // スクロール停止検出タイマーのクリーンアップ
+  useEffect(() => {
+    return () => {
+      if (scrollIdleTimerRef.current !== null) {
+        window.clearTimeout(scrollIdleTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!renderedRange) return;
