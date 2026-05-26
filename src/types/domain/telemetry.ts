@@ -1,4 +1,12 @@
-export type SecurityEventType = import("@security-contract").SecurityEventType;
+export type SecurityEventType =
+  | "login"
+  | "logout"
+  | "sync"
+  | "permission_denied"
+  | "suspicious_activity"
+  | "data_access"
+  | "data_update"
+  | "unknown";
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
