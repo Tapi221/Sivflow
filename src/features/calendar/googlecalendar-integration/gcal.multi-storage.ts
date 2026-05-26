@@ -24,6 +24,8 @@ const LEGACY_EMAIL_KEY = "flashcard-master.gcal.account_email";
 const LEGACY_CALENDAR_IDS_KEY = "flashcard-master.gcal.selected_calendar_ids";
 const LEGACY_WAS_CONNECTED_KEY = "flashcard-master.gcal.was_connected";
 
+const pendingLegacyDesktopRefreshTokens = new Map<string, string>();
+
 // ─────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────
@@ -86,6 +88,19 @@ const hasLocalRefreshToken = (accounts: StoredGoogleAccount[]): boolean => {
   return accounts.some((account) => account.refreshToken !== null);
 };
 
+const hydratePendingLegacyDesktopRefreshTokens = (
+  accounts: StoredGoogleAccount[],
+): StoredGoogleAccount[] => {
+  if (!isDesktopLikeRuntime()) return accounts;
+
+  return accounts.map((account) => {
+    if (account.refreshToken !== null) return account;
+
+    const refreshToken = pendingLegacyDesktopRefreshTokens.get(account.id);
+    return refreshToken ? { ...account, refreshToken } : account;
+  });
+};
+
 // ─────────────────────────────────────────────────────────────
 // Legacy migration
 // ─────────────────────────────────────────────────────────────
@@ -121,6 +136,11 @@ const migrateFromLegacy = (): StoredGoogleAccount[] => {
 
     const accounts = [account];
 
+    if (isDesktopLikeRuntime() && refreshToken) {
+      pendingLegacyDesktopRefreshTokens.set(account.id, refreshToken);
+      localStorage.removeItem(LEGACY_REFRESH_TOKEN_KEY);
+    }
+
     writeStoredAccounts(accounts);
     console.info(
       "[gcal.multi-storage] Migrated single account to multi format",
@@ -149,7 +169,7 @@ export const readStoredAccounts = (): StoredGoogleAccount[] => {
       writeStoredAccounts(sanitizedAccounts);
     }
 
-    return sanitizedAccounts;
+    return hydratePendingLegacyDesktopRefreshTokens(sanitizedAccounts);
   } catch {
     return [];
   }
