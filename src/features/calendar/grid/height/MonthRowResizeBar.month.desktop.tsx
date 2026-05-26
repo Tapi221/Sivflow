@@ -23,7 +23,7 @@ export const MonthRowResizeBar = ({
         side="top"
         offset={8}
         size="compact"
-        className="calendar-month-row-boundary-resize-knob !absolute"
+        className="calendar-month-row-boundary-resize-knob-anchor !absolute"
       >
         <div
           role="separator"
@@ -33,7 +33,7 @@ export const MonthRowResizeBar = ({
           aria-valuemax={C.MAX_MONTH_ROW_HEIGHT}
           aria-valuenow={Number(monthRowHeight)}
           tabIndex={0}
-          className="h-full w-full rounded-full"
+          className="calendar-month-row-boundary-resize-knob h-full w-full rounded-full"
           onClick={(event) => event.stopPropagation()}
           onDoubleClick={onResizeReset}
           onKeyDown={onResizeKeyDown}
