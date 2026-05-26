@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { useScheduleScreenStore } from "@/features/calendar/header/useScheduleScreenStore";
 import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
-import { Sidebar } from "@/features/sidebar/Sidebar.desktop";
+import { Sidebar } from "@/pane/sidebar/Sidebar.desktop";
 import { useWorkspaceTabsRouteSync } from "@/features/tab/hooks/useTabsRouteSync";
 import { isDesktopRuntime } from "@/platform/runtime";
 import "./AppLayout.css";
