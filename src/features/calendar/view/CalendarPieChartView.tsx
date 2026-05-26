@@ -156,29 +156,29 @@ export const CalendarPieChartView = ({
   const hasSegments = segments.length > 0;
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-white px-6 pb-6 pt-5 text-[#1c1c1e]", className)}>
-      <div className="mb-5 flex shrink-0 items-start justify-between gap-4">
+    <div className={cn("flex h-full min-h-0 flex-col bg-white text-[#1c1c1e]", className)}>
+      <div className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-[#eeeeee] px-5">
         <div className="min-w-0">
-          <p className="text-[12px] font-semibold text-[#8e8e93]">
-            {format(selectedDate, "yyyy年M月d日")}
-          </p>
-          <h2 className="mt-1 truncate text-[22px] font-bold tracking-[-0.03em] text-[#1c1c1e]">
+          <h2 className="truncate text-[15px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
             予定の円グラフ
           </h2>
+          <p className="mt-0.5 text-[11px] font-semibold text-[#9a9a9a]">
+            {format(selectedDate, "yyyy年M月d日")}
+          </p>
         </div>
-        <div className="shrink-0 rounded-2xl border border-[#eeeeee] bg-white px-4 py-3 text-right shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
+        <div className="shrink-0 text-right">
           <p className="text-[11px] font-semibold text-[#9a9a9a]">合計</p>
-          <p className="mt-1 text-[18px] font-bold tracking-[-0.02em] text-[#1c1c1e]">
+          <p className="mt-0.5 text-[15px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
             {formatDuration(totalMinutes)}
           </p>
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_320px] gap-5 max-[980px]:grid-cols-1">
-        <section className="flex min-h-0 flex-col rounded-[28px] border border-[#eeeeee] bg-white p-5 shadow-[0_14px_34px_rgba(15,23,42,0.05)]">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h3 className="text-[13px] font-bold text-[#3a3a3c]">カテゴリ別の時間</h3>
-            <span className="rounded-full border border-[#eeeeee] bg-white px-3 py-1 text-[11px] font-semibold text-[#8e8e93]">
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_300px] max-[980px]:grid-cols-1">
+        <section className="flex min-h-0 flex-col bg-white px-5 py-4">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <h3 className="text-[12px] font-semibold text-[#6e6e73]">カテゴリ別の時間</h3>
+            <span className="text-[11px] font-semibold text-[#9a9a9a]">
               {segments.length}項目
             </span>
           </div>
@@ -193,7 +193,7 @@ export const CalendarPieChartView = ({
                       dataKey="minutes"
                       nameKey="label"
                       innerRadius="58%"
-                      outerRadius="86%"
+                      outerRadius="84%"
                       paddingAngle={1}
                       strokeWidth={0}
                     >
@@ -208,23 +208,23 @@ export const CalendarPieChartView = ({
                     </Pie>
                     <Tooltip
                       formatter={(value, name) => [formatDuration(Number(value)), name]}
-                      contentStyle={{ borderRadius: 14, borderColor: "#eeeeee", boxShadow: "0 12px 28px rgba(15,23,42,0.12)" }}
+                      contentStyle={{ borderRadius: 12, borderColor: "#eeeeee", boxShadow: "0 8px 20px rgba(15,23,42,0.08)" }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <div className="rounded-full bg-white/88 px-6 py-5 text-center shadow-[0_10px_28px_rgba(15,23,42,0.08)] backdrop-blur">
+                  <div className="rounded-full bg-white/90 px-5 py-4 text-center shadow-[0_1px_4px_rgba(15,23,42,0.08)] backdrop-blur">
                     <p className="text-[11px] font-semibold text-[#9a9a9a]">合計</p>
-                    <p className="mt-1 text-[24px] font-bold tracking-[-0.04em] text-[#1c1c1e]">
+                    <p className="mt-1 text-[21px] font-semibold tracking-[-0.03em] text-[#1c1c1e]">
                       {formatDuration(totalMinutes)}
                     </p>
                   </div>
                 </div>
               </>
             ) : (
-              <div className="flex h-full min-h-[360px] items-center justify-center rounded-[24px] border border-dashed border-[#dedede] bg-white text-center">
+              <div className="flex h-full min-h-[360px] items-center justify-center text-center">
                 <div>
-                  <p className="text-[15px] font-bold text-[#6e6e73]">この日の予定はありません</p>
+                  <p className="text-[14px] font-semibold text-[#6e6e73]">この日の予定はありません</p>
                   <p className="mt-2 text-[12px] font-medium text-[#a1a1a6]">
                     Google カレンダーまたはタスクの予定が入ると円グラフに表示されます。
                   </p>
@@ -234,36 +234,36 @@ export const CalendarPieChartView = ({
           </div>
         </section>
 
-        <aside className="flex min-h-0 flex-col rounded-[28px] border border-[#eeeeee] bg-white p-5 shadow-[0_14px_34px_rgba(15,23,42,0.05)]">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <h3 className="text-[13px] font-bold text-[#3a3a3c]">内訳</h3>
+        <aside className="flex min-h-0 flex-col border-l border-[#eeeeee] bg-white px-4 py-4 max-[980px]:border-l-0 max-[980px]:border-t">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <h3 className="text-[12px] font-semibold text-[#6e6e73]">内訳</h3>
             <span className="text-[11px] font-semibold text-[#9a9a9a]">時間 / 割合</span>
           </div>
 
-          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+          <div className="min-h-0 flex-1 overflow-y-auto">
             {hasSegments ? (
               segments.map((segment) => (
-                <div key={segment.id} className="rounded-2xl border border-[#f0f0f0] bg-white p-3">
+                <div key={segment.id} className="border-b border-[#f1f1f1] py-3 last:border-b-0">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-2">
                       <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: segment.color }} />
-                      <span className="truncate text-[13px] font-bold text-[#3a3a3c]">{segment.label}</span>
+                      <span className="truncate text-[12px] font-semibold text-[#3a3a3c]">{segment.label}</span>
                     </div>
-                    <span className="shrink-0 text-[12px] font-bold text-[#1c1c1e]">
+                    <span className="shrink-0 text-[12px] font-semibold text-[#1c1c1e]">
                       {formatDuration(segment.minutes)}
                     </span>
                   </div>
-                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#ebebee]">
+                  <div className="mt-2 h-1 overflow-hidden rounded-full bg-[#eeeeee]">
                     <div className="h-full rounded-full" style={{ width: `${segment.percentage}%`, backgroundColor: segment.color }} />
                   </div>
-                  <div className="mt-2 flex items-center justify-between text-[11px] font-semibold text-[#9a9a9a]">
+                  <div className="mt-1.5 flex items-center justify-between text-[11px] font-medium text-[#9a9a9a]">
                     <span>{segment.eventCount}件</span>
                     <span>{segment.percentage}%</span>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="rounded-2xl border border-[#eeeeee] bg-white p-4 text-[12px] font-semibold text-[#9a9a9a]">
+              <div className="py-3 text-[12px] font-semibold text-[#9a9a9a]">
                 表示できる予定がありません。
               </div>
             )}
