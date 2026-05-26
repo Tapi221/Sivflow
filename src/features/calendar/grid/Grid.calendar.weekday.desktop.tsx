@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import { clipEventToDay, eventOverlapsDay } from "@/features/calendar/calendarEventRange";
+import { clipEventToDay, compareCalendarEvents, eventOverlapsDay } from "@/features/calendar/calendarEventRange";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.layout.weekday.desktop";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
@@ -181,9 +181,9 @@ export const CalendarWeekDayGrid = ({
     return new Map(
       visibleDays.map((day) => [
         day.toISOString(),
-        visibleEvents.filter(
-          (event) => event.isAllDay && eventOverlapsDay(event, day),
-        ),
+        visibleEvents
+          .filter((event) => event.isAllDay && eventOverlapsDay(event, day))
+          .sort(compareCalendarEvents),
       ]),
     );
   }, [visibleDays, visibleEvents]);
@@ -314,7 +314,8 @@ export const CalendarWeekDayGrid = ({
                 (event) => !event.isAllDay && eventOverlapsDay(event, day),
               )
               .map((event) => clipEventToDay(event, day))
-              .filter((event): event is GoogleCalendarEvent => Boolean(event));
+              .filter((event): event is GoogleCalendarEvent => Boolean(event))
+              .sort(compareCalendarEvents);
 
             const layout = computeEventLayout(
               eventsForDay.map((event) =>
