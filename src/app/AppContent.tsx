@@ -1,5 +1,4 @@
 import { AccountLockedScreen } from "@/components/security/AccountLockedScreen";
-import { SyncProgressToast } from "@/components/sync/SyncProgressToast";
 import { LoadingFallback } from "@/components/common/LoadingFallback";
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
 import { LoginPage } from "@/features/auth/LoginPage";
@@ -32,7 +31,6 @@ export const AppContent = () => {
     <>
       <AccountLockedScreen />
       <AppRoutes />
-      <SyncProgressToast />
     </>
   );
 };
