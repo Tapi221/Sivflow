@@ -7,6 +7,7 @@ import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
 import type { AppCalendarItem, ScheduleScreenProps } from "./scheduleScreen.types";
 import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
+import { CalendarPieChartView } from "./view/CalendarPieChartView";
 import { TaskView } from "./task/TaskView";
 import { CalendarTimelineDayView, type TimelineLane } from "./grid/TimelineDayView";
 import { useScheduleScreen } from "./useScheduleScreen";
@@ -154,8 +155,9 @@ export const ScheduleScreen = ({
       { value: "month", label: t.viewMonth },
       { value: "week", label: t.viewWeek },
       { value: "days", label: t.viewDay },
+      { value: "pieChart", label: t.viewPieChart },
     ] as const,
-    [t.viewDay, t.viewMonth, t.viewWeek],
+    [t.viewDay, t.viewMonth, t.viewPieChart, t.viewWeek],
   );
 
   const {
@@ -392,6 +394,9 @@ export const ScheduleScreen = ({
   const isMonthCalendarView =
     activeMode === "calendar" && selectedViewMode === "month";
 
+  const isPieChartCalendarView =
+    activeMode === "calendar" && selectedViewMode === "pieChart";
+
   const hasTrailingPanel = showDayDetailPanel;
 
   const viewHeaderRightPaddingPx = canShowDayDetailPanel && canFitDayDetailPanel
@@ -533,6 +538,21 @@ export const ScheduleScreen = ({
             onMoveGoogleTaskList={moveGoogleTaskList}
             onDeleteGoogleTask={deleteGoogleTask}
           />
+        </CarvePanel>
+      ) : isPieChartCalendarView ? (
+        <CarvePanel>
+          {renderViewHeader(
+            "mb-2 flex shrink-0 items-center justify-start gap-3 px-5 pt-4",
+          )}
+
+          <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[22px] border border-[#eeeeee] bg-white">
+            <CalendarPieChartView
+              selectedDate={selectedDate}
+              events={calendarEvents}
+              appProjects={appProjects}
+              googleAccounts={googleAccounts}
+            />
+          </div>
         </CarvePanel>
       ) : isMonthCalendarView ? (
         <CarvePanel hasTrailingPanel={hasTrailingPanel}>
