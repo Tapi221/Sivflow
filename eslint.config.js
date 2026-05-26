@@ -84,27 +84,27 @@ export default defineConfig([
       "no-restricted-syntax": [
         "error",
         {
-          selector: "ImportDeclaration[source.value=/^\\.\\.\\//]",
+          selector: "ImportDeclaration[source.value=/^\.\.\//]",
           message: "Use @/ alias for cross-folder imports inside src.",
         },
         {
-          selector: "ExportNamedDeclaration[source.value=/^\\.\\.\\//]",
+          selector: "ExportNamedDeclaration[source.value=/^\.\.\//]",
           message: "Use @/ alias for cross-folder exports inside src.",
         },
         {
-          selector: "ExportAllDeclaration[source.value=/^\\.\\.\\//]",
+          selector: "ExportAllDeclaration[source.value=/^\.\.\//]",
           message: "Use @/ alias for cross-folder exports inside src.",
         },
         {
-          selector: "ImportDeclaration[source.value=/^\\.\\/[^/]+\\//]",
+          selector: "ImportDeclaration[source.value=/^\.\/[^/]+\//]",
           message: "Use @/ alias for child-folder imports inside src. Same-directory imports may use ./.",
         },
         {
-          selector: "ExportNamedDeclaration[source.value=/^\\.\\/[^/]+\\//]",
+          selector: "ExportNamedDeclaration[source.value=/^\.\/[^/]+\//]",
           message: "Use @/ alias for child-folder exports inside src. Same-directory exports may use ./.",
         },
         {
-          selector: "ExportAllDeclaration[source.value=/^\\.\\/[^/]+\\//]",
+          selector: "ExportAllDeclaration[source.value=/^\.\/[^/]+\//]",
           message: "Use @/ alias for child-folder exports inside src. Same-directory exports may use ./.",
         },
       ],
@@ -137,7 +137,11 @@ export default defineConfig([
   },
 
   {
-    files: ["src/features/calendar/googlecalendar-integration/gcal.oauth.ts"],
+    files: [
+      "src/features/calendar/googlecalendar-integration/gcal.oauth.ts",
+      "src/integration/google-integration/google.oauth.ts",
+      "src/integration/googlecalendar-integration/gcal.oauth.ts",
+    ],
     rules: {
       "prefer-const": "off",
     },
