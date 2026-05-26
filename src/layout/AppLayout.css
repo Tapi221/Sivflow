@@ -249,6 +249,18 @@
   padding-left: 0;
 }
 
+.app-layout-route--schedule .workspace-shell__main aside.w-\[220px\].pl-0,
+.app-layout-route--schedule .app-layout__main aside.w-\[220px\].pl-0 {
+  width: 230px;
+  padding-left: var(--workspace-content-gutter);
+}
+
+.app-layout-route--schedule .workspace-shell__main aside.w-\[220px\].px-2,
+.app-layout-route--schedule .app-layout__main aside.w-\[220px\].px-2 {
+  width: 230px;
+  padding-left: calc(var(--workspace-content-gutter) + 0.5rem);
+}
+
 .workspace-breadcrumb-bar {
   display: flex;
   align-items: center;
