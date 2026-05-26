@@ -57,8 +57,6 @@ export default {
           500: "rgb(var(--ds-color-primary-500-rgb) / <alpha-value>)",
           600: "rgb(var(--ds-color-primary-600-rgb) / <alpha-value>)",
           700: "rgb(var(--ds-color-primary-700-rgb) / <alpha-value>)",
-          800: "rgb(var(--ds-color-primary-800-rgb) / <alpha-value>)",
-          900: "rgb(var(--ds-color-primary-900-rgb) / <alpha-value>)",
         },
         neutral: {
           DEFAULT: "rgb(var(--ds-color-neutral-500-rgb) / <alpha-value>)",
