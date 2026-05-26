@@ -8,6 +8,7 @@
 @import "../presentation/menu-surfaces.css";
 @import "../presentation/navigation-surfaces.css";
 @import "../presentation/editor-pane.css";
+@import "../presentation/settings-panel.css";
 @import "../presentation/tag-and-status.css";
 @import "./tokens/tokens.css";
 @import "./base/base.css";
@@ -42,6 +43,17 @@
 *:focus-within,
 *:active {
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+button:hover,
+a:hover,
+[role="button"]:hover,
+[role="menuitem"]:hover,
+[role="tab"]:hover,
+[class*="hover:"]:hover,
+.group:hover * {
+  transition-delay: 0ms;
+  transition-duration: 0ms;
 }
 
 *::-webkit-scrollbar {
