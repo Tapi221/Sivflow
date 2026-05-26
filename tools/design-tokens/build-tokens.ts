@@ -1,9 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { generateComposeTheme } from "./generate-compose-theme";
 import { generateReactTheme } from "./generate-react-theme";
-import { generateSwiftTokens } from "./generate-swift-tokens";
 
 type JsonValue =
   | boolean
@@ -120,8 +118,6 @@ const writeOutput = async (targetPath: string, contents: string) => {
 const main = async () => {
   const tokens = await loadTokens();
   const react = generateReactTheme(tokens);
-  const swift = generateSwiftTokens(tokens);
-  const compose = generateComposeTheme(tokens);
 
   await Promise.all([
     writeOutput(
@@ -149,34 +145,6 @@ const main = async () => {
     writeOutput(
       path.join(repoRoot, "src", "presentation", "react", "theme", "index.ts"),
       react.index,
-    ),
-    writeOutput(
-      path.join(
-        repoRoot,
-        "ios",
-        "App",
-        "DesignSystem",
-        "Tokens",
-        "GeneratedDesignTokens.swift",
-      ),
-      swift,
-    ),
-    writeOutput(
-      path.join(
-        repoRoot,
-        "android",
-        "app",
-        "src",
-        "main",
-        "java",
-        "com",
-        "akari221",
-        "flashcardmaster",
-        "designsystem",
-        "tokens",
-        "GeneratedDesignTokens.kt",
-      ),
-      compose,
     ),
   ]);
 };
