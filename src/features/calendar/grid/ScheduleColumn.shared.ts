@@ -43,6 +43,7 @@ export const getScheduleViewDayCount = (
 ) => {
   if (viewMode === "month") return getDaysInMonth(anchorDate);
   if (viewMode === "week") return 7;
+  if (viewMode === "threeDays") return 3;
   return 1;
 };
 
