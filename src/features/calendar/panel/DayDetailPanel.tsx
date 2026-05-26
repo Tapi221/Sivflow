@@ -64,8 +64,13 @@ export const DayDetailPanel = ({
     <aside className="-ml-[9px] flex w-[269px] shrink-0 flex-col overflow-hidden bg-transparent">
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         <div className="flex min-h-[48px] border-b border-[#f5f5f5]">
-          <div className="flex w-12 shrink-0 justify-end pr-2 pt-[12px]">
-            <span className="text-[10px] font-medium tracking-[-0.01em] text-[rgba(60,60,67,0.45)]">終日</span>
+          <div className="relative w-12 shrink-0 bg-transparent">
+            <span
+              className="absolute right-2 top-1/2 flex h-5 -translate-y-1/2 select-none items-center justify-end rounded-md bg-transparent px-1 text-[11px] font-medium leading-[1.3] tracking-[-0.01em]"
+              style={{ color: "#b3b3b3" }}
+            >
+              終日
+            </span>
           </div>
 
           <div className="flex-1 px-2 py-2">
