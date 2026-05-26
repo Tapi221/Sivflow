@@ -73,10 +73,6 @@ export default defineConfig(({ command }) => ({
         find: "@constants",
         replacement: path.resolve(__dirname, "./constants"),
       },
-      {
-        find: "@config",
-        replacement: path.resolve(__dirname, "./config"),
-      },
     ],
   },
   server: {
