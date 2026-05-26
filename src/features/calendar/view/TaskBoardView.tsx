@@ -1,12 +1,11 @@
-import { DndContext, DragOverlay, useDroppable } from "@dnd-kit/core";
 import { memo, useCallback, useMemo, type CSSProperties, type MouseEvent as ReactMouseEvent, type WheelEvent } from "react";
-import { createPortal } from "react-dom";
-import { CATEGORY_CONFIG, TASK_COLUMNS } from "../task/task.types";
-import type { Task, TaskGroupMode, TaskStatus } from "../task/task.types";
-import { useTaskBoardDnd } from "../../dnd/task/useTaskBoardDnd";
+import { TaskDndContext, useTaskDroppableColumn } from "../../dnd/task/taskDnd.components";
 import type { TaskDropTarget, TaskInsertPosition } from "../../dnd/task/taskDnd.types";
+import { useTaskBoardDnd } from "../../dnd/task/useTaskBoardDnd";
 import { TaskCard } from "../task/TaskCard";
 import { TaskColumn } from "../task/TaskColumn";
+import { CATEGORY_CONFIG, TASK_COLUMNS } from "../task/task.types";
+import type { Task, TaskGroupMode, TaskStatus } from "../task/task.types";
 
 type TaskBoardViewProps = {
   tasks: Task[];
@@ -122,13 +121,7 @@ const DroppableTaskColumn = memo(({
   onTaskContextMenu,
   translateStatusLabel = false,
 }: DroppableTaskColumnProps) => {
-  const { setNodeRef } = useDroppable({
-    id: column.id,
-    data: {
-      type: "column",
-      columnId: column.id,
-    },
-  });
+  const { setNodeRef } = useTaskDroppableColumn({ columnId: column.id });
 
   return (
     <div
@@ -341,20 +334,16 @@ export const TaskBoardView = ({
     ? { width: activeTaskWidth }
     : undefined;
 
-  const dragOverlay = (
-    <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
-      {activeTask ? (
-        <div className={TASK_CARD_OVERLAY_CLASS_NAME} style={overlayStyle}>
-          <TaskCard
-            task={activeTask}
-            accountName={accountName}
-            accountPhotoUrl={accountPhotoUrl}
-            isDragging
-          />
-        </div>
-      ) : null}
-    </DragOverlay>
-  );
+  const dragOverlay = activeTask ? (
+    <div className={TASK_CARD_OVERLAY_CLASS_NAME} style={overlayStyle}>
+      <TaskCard
+        task={activeTask}
+        accountName={accountName}
+        accountPhotoUrl={accountPhotoUrl}
+        isDragging
+      />
+    </div>
+  ) : null;
 
   const boardContent = (
     <div
@@ -396,20 +385,18 @@ export const TaskBoardView = ({
   );
 
   return (
-    <DndContext
+    <TaskDndContext
       sensors={sensors}
       collisionDetection={collisionDetection}
       measuring={measuring}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDragCancel={handleDragCancel}
-      onDragEnd={handleDragEnd}
+      dropAnimation={dropAnimation}
+      overlay={dragOverlay}
+      handleDragStart={handleDragStart}
+      handleDragOver={handleDragOver}
+      handleDragCancel={handleDragCancel}
+      handleDragEnd={handleDragEnd}
     >
       {boardContent}
-
-      {typeof document === "undefined"
-        ? dragOverlay
-        : createPortal(dragOverlay, document.body)}
-    </DndContext>
+    </TaskDndContext>
   );
 };
