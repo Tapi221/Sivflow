@@ -3,7 +3,7 @@ import { ErrorDialog } from "./ErrorDialog";
 import { InfoToast } from "./InfoToast";
 import { WarningDialog } from "./WarningDialog";
 import { notificationService } from "@/services/NotificationService";
-import type { Notification } from "@/types/domain/notification";
+import type { Notification } from "@/types/notification";
 
 /**
  * 通知プロバイダー
@@ -19,7 +19,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     // 通知サービスを購読
     const unsubscribe = notificationService.subscribe((notification) => {
-      const isDismissEvent = !notification.level;
+      const isDismissEvent = notification.title === "" && notification.message === "";
 
       if (isDismissEvent) {
         // 削除通知
