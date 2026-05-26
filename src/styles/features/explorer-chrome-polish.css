@@ -121,10 +121,15 @@
 
   .explorer-workspace-tab-slot {
     position: relative;
+    z-index: 1;
     flex: 1 1 150px;
     min-width: 92px;
     max-width: 180px;
     overflow: visible !important;
+  }
+
+  .explorer-workspace-tab-slot[data-workspace-tab-slot-active="true"] {
+    z-index: 20;
   }
 
   .explorer-workspace-tab-slot::before {
