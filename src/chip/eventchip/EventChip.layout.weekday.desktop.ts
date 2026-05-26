@@ -9,10 +9,22 @@ export type LayoutResult = {
   width: number;
 };
 
+const compareLayoutEvents = (a: LayoutEvent, b: LayoutEvent): number => {
+  const startDiff = a.startMinutes - b.startMinutes;
+
+  if (startDiff !== 0) return startDiff;
+
+  const endDiff = b.endMinutes - a.endMinutes;
+
+  if (endDiff !== 0) return endDiff;
+
+  return a.id.localeCompare(b.id);
+};
+
 const buildClusters = (events: LayoutEvent[]): LayoutEvent[][] => {
   if (events.length === 0) return [];
 
-  const sorted = [...events].sort((a, b) => a.startMinutes - b.startMinutes);
+  const sorted = [...events].sort(compareLayoutEvents);
 
   const clusters: LayoutEvent[][] = [];
   let currentCluster: LayoutEvent[] = [sorted[0]];
