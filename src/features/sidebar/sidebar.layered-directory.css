@@ -1,0 +1,102 @@
+/* Layered directory sidebar overrides.
+   Keep the original width, background, font, and text sizing from the component. */
+
+aside[aria-label="Library hierarchy explorer"] [role="tree"] {
+  gap: 0 !important;
+}
+
+/* Scroller: hide until hover/focus, without changing layout size. */
+aside[aria-label="Library hierarchy explorer"] > div:first-child {
+  scrollbar-gutter: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background-color: transparent;
+}
+
+aside[aria-label="Library hierarchy explorer"] > div:first-child:hover,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within {
+  scrollbar-width: thin;
+  -ms-overflow-style: auto;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-thumb,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background-color: rgba(156, 163, 175, 0.5);
+}
+
+/* Tree rows: keep original typography while flattening the layered directory look. */
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] {
+  gap: 0 !important;
+  box-shadow: none !important;
+  transition: none !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button {
+  background: transparent !important;
+  transition: none !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button:hover {
+  background: transparent !important;
+}
+
+/* Hide file/folder glyphs; keep only disclosure chevrons and text. */
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > svg {
+  display: none !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button svg,
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button svg * {
+  fill: none !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button svg path {
+  stroke-width: 1.8 !important;
+}
+
+/* Keep vertical guides; suppress horizontal connectors. */
+aside[aria-label="Library hierarchy explorer"] span[aria-hidden="true"].h-px {
+  height: 0 !important;
+}
+
+/* Footer row. */
+aside[aria-label="Library hierarchy explorer"] button[aria-pressed] {
+  box-shadow: none !important;
+  transition: none !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] button[aria-pressed] svg,
+aside[aria-label="Library hierarchy explorer"] button[aria-pressed] svg * {
+  fill: none !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
