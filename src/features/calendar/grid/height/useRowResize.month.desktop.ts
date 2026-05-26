@@ -46,6 +46,10 @@ export type MonthViewStyle = CSSProperties & {
   "--calendar-month-row-height": string;
 };
 
+type ApplyVariableOptions = {
+  syncState?: boolean;
+};
+
 // ── 公開型
 
 type UseMonthRowResizeOptions = {
@@ -249,13 +253,24 @@ export const useMonthRowResize = ({
   // ── CSS 変数の適用
 
   const applyVariable = useCallback(
-    (height: number, anchor: MonthRowResizeAnchor | null = null) => {
+    (
+      height: number,
+      anchor: MonthRowResizeAnchor | null = null,
+      options: ApplyVariableOptions = {},
+    ) => {
+      monthRowHeightRef.current = height;
       rootRef.current?.style.setProperty(
         "--calendar-month-row-height",
         `${height}px`,
       );
       preserveAnchor(anchor, height);
       onLiveResize?.(height);
+
+      if (options.syncState) {
+        setMonthRowHeight((currentHeight) =>
+          currentHeight === height ? currentHeight : height,
+        );
+      }
     },
     [preserveAnchor, onLiveResize],
   );
@@ -274,6 +289,9 @@ export const useMonthRowResize = ({
       applyVariable(
         pendingMonthRowHeightRef.current,
         resizeStateRef.current?.anchor ?? null,
+        {
+          syncState: true,
+        },
       );
     });
   }, [applyVariable]);
@@ -296,7 +314,6 @@ export const useMonthRowResize = ({
     }
 
     cancelPendingAfterCommit();
-    monthRowHeightRef.current = committed;
     pendingMonthRowHeightRef.current = committed;
     applyVariable(committed, scrollAnchor);
     C.writeStoredMonthRowHeight(committed);
@@ -323,6 +340,9 @@ export const useMonthRowResize = ({
   useEffect(() => {
     monthRowHeightRef.current = monthRowHeight;
     pendingMonthRowHeightRef.current = monthRowHeight;
+
+    if (resizeStateRef.current) return;
+
     applyVariable(monthRowHeight);
   }, [applyVariable, monthRowHeight]);
 
@@ -387,27 +407,7 @@ export const useMonthRowResize = ({
         scheduleVariable(s.startHeight + e.clientY - s.startY);
       };
 
-      const onUp = (e: PointerEvent) => {
-        const s = resizeStateRef.current;
-        const finalHeight = s
-          ? s.startHeight + e.clientY - s.startY
-          : pendingMonthRowHeightRef.current;
-        const finalAnchor = s
-          ? getBoundaryPointerAnchor(s.anchor, e.clientY)
-          : null;
-
-        pendingMonthRowHeightRef.current = C.normalizeStoredMonthRowHeight(
-          C.clampMonthRowHeight(finalHeight),
-        );
-        commitHeight(
-          pendingMonthRowHeightRef.current,
-          finalAnchor,
-          resizeSessionId,
-        );
-        cleanup();
-      };
-
-      const onCancel = () => {
+      const onUp = () => {
         commitHeight(
           pendingMonthRowHeightRef.current,
           resizeStateRef.current?.anchor ?? null,
@@ -433,7 +433,7 @@ export const useMonthRowResize = ({
         }
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
-        window.removeEventListener("pointercancel", onCancel);
+        window.removeEventListener("pointercancel", onUp);
 
         if (activePointerCleanupRef.current === cleanup) {
           activePointerCleanupRef.current = null;
@@ -444,7 +444,7 @@ export const useMonthRowResize = ({
 
       window.addEventListener("pointermove", onMove);
       window.addEventListener("pointerup", onUp);
-      window.addEventListener("pointercancel", onCancel);
+      window.addEventListener("pointercancel", onUp);
     },
     [
       acquireResizeLock,
