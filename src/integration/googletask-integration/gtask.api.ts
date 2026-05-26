@@ -1,5 +1,5 @@
 import type { GoogleTaskItem, GoogleTaskListItem, GoogleTaskStatus, GoogleTasksApiTaskListsResponse, GoogleTasksApiTasksResponse } from "@/sync/googletask-sync/gtaskSync.types";
-import { createGoogleApiError, withGoogleApiRetry } from "@/integration/googlecalendar-integration/googleApiRetry";
+import { createGoogleApiError, withGoogleApiRetry } from "@/integration/google-integration/googleApiRetry";
 
 const GOOGLE_TASKS_API_BASE = "https://tasks.googleapis.com/tasks/v1";
 
