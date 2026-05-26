@@ -1,6 +1,7 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, endOfDay, endOfMonth, endOfWeek, format, startOfDay, startOfMonth, startOfWeek } from "date-fns";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
+import { useAuthSession } from "@/contexts/AuthContext";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
@@ -14,9 +15,9 @@ import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCal
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { CalendarPieChartView } from "@/features/calendar/view/CalendarPieChartView";
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
-import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
+import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
 
 const IOS_CALENDAR_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
@@ -28,7 +29,7 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
 
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
-const SELECTED_TASK_LISTS_STORAGE_KEY = "flashcard-master:schedule:selected-google-task-list-ids";
+const SELECTED_TASK_LISTS_STORAGE_KEY_PREFIX = "flashcard-master:schedule:selected-google-task-list-ids";
 const DEFAULT_TIMELINE_CALENDAR_COLOR = "#74798b";
 const APP_PROJECT_COLORS = [
   "#34c759",
@@ -94,11 +95,14 @@ const persistAppProjects = (projects: AppCalendarItem[]) => {
   }
 };
 
-const readStoredSelectedTaskListIds = (): Set<string> | null => {
+const getSelectedTaskListsStorageKey = (userId: string): string =>
+  `${SELECTED_TASK_LISTS_STORAGE_KEY_PREFIX}:${userId}`;
+
+const readStoredSelectedTaskListIds = (storageKey: string): Set<string> | null => {
   if (typeof window === "undefined") return null;
 
   try {
-    const raw = window.localStorage.getItem(SELECTED_TASK_LISTS_STORAGE_KEY);
+    const raw = window.localStorage.getItem(storageKey);
     if (raw === null) return null;
 
     const parsed = JSON.parse(raw) as unknown;
@@ -114,12 +118,12 @@ const readStoredSelectedTaskListIds = (): Set<string> | null => {
   }
 };
 
-const persistSelectedTaskListIds = (ids: Set<string>) => {
+const persistSelectedTaskListIds = (storageKey: string, ids: Set<string>) => {
   if (typeof window === "undefined") return;
 
   try {
     window.localStorage.setItem(
-      SELECTED_TASK_LISTS_STORAGE_KEY,
+      storageKey,
       JSON.stringify(Array.from(ids)),
     );
   } catch {
@@ -137,6 +141,7 @@ export const ScheduleScreen = ({
   onClose: _onClose,
 }: ScheduleScreenProps) => {
   const pane = useScheduleScreen({ initialActiveMode });
+  const { currentUser } = useAuthSession();
   const taskCalendarEvents = useTaskCalendarEvents();
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
@@ -145,12 +150,15 @@ export const ScheduleScreen = ({
   const openDayDetailPanel = useScheduleScreenStore((state) => state.openDayDetailPanel);
   const setCanToggleDayDetailPanel = useScheduleScreenStore((state) => state.setCanToggleDayDetailPanel);
   const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(readStoredAppProjects);
-  const storedSelectedTaskListIds = useMemo(() => readStoredSelectedTaskListIds(), []);
+  const selectedTaskListsStorageKey = useMemo(
+    () => getSelectedTaskListsStorageKey(currentUser?.uid ?? "anonymous"),
+    [currentUser?.uid],
+  );
   const [selectedTaskListIds, setSelectedTaskListIds] = useState<Set<string>>(
-    () => storedSelectedTaskListIds ?? new Set(),
+    () => readStoredSelectedTaskListIds(getSelectedTaskListsStorageKey("anonymous")) ?? new Set(),
   );
   const deferredSelectedTaskListIds = useDeferredValue(selectedTaskListIds);
-  const selectedTaskListInitializedRef = useRef(storedSelectedTaskListIds !== null);
+  const selectedTaskListInitializedRef = useRef(false);
 
   const viewOptions = useMemo(
     () => [
@@ -211,9 +219,15 @@ export const ScheduleScreen = ({
   }, [appProjects]);
 
   useEffect(() => {
+    const storedIds = readStoredSelectedTaskListIds(selectedTaskListsStorageKey);
+    selectedTaskListInitializedRef.current = storedIds !== null;
+    setSelectedTaskListIds(storedIds ?? new Set());
+  }, [selectedTaskListsStorageKey]);
+
+  useEffect(() => {
     if (!selectedTaskListInitializedRef.current) return;
-    persistSelectedTaskListIds(selectedTaskListIds);
-  }, [selectedTaskListIds]);
+    persistSelectedTaskListIds(selectedTaskListsStorageKey, selectedTaskListIds);
+  }, [selectedTaskListIds, selectedTaskListsStorageKey]);
 
   const handleAddAppProject = useCallback((projectName: string) => {
     const trimmedProjectName = projectName.trim();
@@ -280,7 +294,7 @@ export const ScheduleScreen = ({
     });
     // allTaskListIdsKey でリストの実質的な変化だけを検知する。
     // 配列参照そのものを依存に入れると、チェック操作ごとに不要な再評価が走りやすい。
-  }, [allTaskListIdsKey]);
+  }, [allTaskListIdsKey, selectedTaskListsStorageKey]);
 
   const handleToggleTaskList = useCallback((taskListId: string) => {
     setSelectedTaskListIds((ids) => {
