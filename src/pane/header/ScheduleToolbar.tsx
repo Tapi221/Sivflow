@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
-import type { CalendarWorkspaceToolbarProps } from "../../features/calendar/scheduleScreen.types";
-import { ToggleCalendarTimelineTask } from "../../chip/toggle/Toggle.calendartimelinetask";
-import { ToggleFolderTag, type FolderTagTab, type FolderTagToggleValue } from "../../chip/toggle/Toggle.foldertag";
+import { ToggleCalendarTimelineTask } from "@/chip/toggle/Toggle.calendartimelinetask";
+import { ToggleFolderTag, type FolderTagTab, type FolderTagToggleValue } from "@/chip/toggle/Toggle.foldertag";
+import type { CalendarWorkspaceToolbarProps } from "@/features/calendar/scheduleScreen.types";
+import { TaskTagStrip } from "@/features/calendar/toolbar/TaskTagStrip";
+import { useCalendarToolbar } from "@/features/calendar/toolbar/hooks/useScheduleToolbar";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
-import { useCalendarToolbar } from "../../features/calendar/toolbar/hooks/useScheduleToolbar";
-import { TaskTagStrip } from "../../features/calendar/toolbar/TaskTagStrip";
 
 export const CalendarToolbar = ({
   activeMode,
