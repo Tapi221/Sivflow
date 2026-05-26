@@ -5,6 +5,7 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import { CalendarTimelineDayView, type TimelineLane } from "@/features/calendar/grid/TimelineDayView";
+import { useScheduleScreenStore } from "@/features/calendar/header/useScheduleScreenStore";
 import { CalendarSidebar } from "@/features/calendar/panel/CalendarSidebar";
 import { DayDetailPanel } from "@/features/calendar/panel/DayDetailPanel";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
@@ -100,7 +101,10 @@ export const ScheduleScreen = ({
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
-  const [isDayDetailPanelOpen, setIsDayDetailPanelOpen] = useState(true);
+  const isDayDetailPanelOpen = useScheduleScreenStore((state) => state.isDayDetailPanelOpen);
+  const openDayDetailPanel = useScheduleScreenStore((state) => state.openDayDetailPanel);
+  const toggleDayDetailPanel = useScheduleScreenStore((state) => state.toggleDayDetailPanel);
+  const setCanToggleDayDetailPanel = useScheduleScreenStore((state) => state.setCanToggleDayDetailPanel);
   const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(readStoredAppProjects);
   const [selectedTaskListIds, setSelectedTaskListIds] = useState<Set<string>>(
     () => new Set(),
@@ -334,29 +338,35 @@ export const ScheduleScreen = ({
     locale: dateFnsLocale,
   });
 
+  useEffect(() => {
+    setCanToggleDayDetailPanel(canShowDayDetailPanel);
+
+    return () => setCanToggleDayDetailPanel(false);
+  }, [canShowDayDetailPanel, setCanToggleDayDetailPanel]);
+
   const handleToggleDayDetailPanel = useCallback(() => {
     if (!canShowDayDetailPanel) return;
 
-    setIsDayDetailPanelOpen((isOpen) => !isOpen);
-  }, [canShowDayDetailPanel]);
+    toggleDayDetailPanel();
+  }, [canShowDayDetailPanel, toggleDayDetailPanel]);
 
   const handleSidebarSelectDateAndOpen = useCallback(
     (date: Date) => {
       handleSidebarSelectDate(date);
 
       if (canShowDayDetailPanel) {
-        setIsDayDetailPanelOpen(true);
+        openDayDetailPanel();
       }
     },
-    [canShowDayDetailPanel, handleSidebarSelectDate],
+    [canShowDayDetailPanel, handleSidebarSelectDate, openDayDetailPanel],
   );
 
   const handleMonthCellSelectDateAndOpen = useCallback(
     (date: Date) => {
       handleMonthCellSelectDate(date);
-      setIsDayDetailPanelOpen(true);
+      openDayDetailPanel();
     },
-    [handleMonthCellSelectDate],
+    [handleMonthCellSelectDate, openDayDetailPanel],
   );
 
   return (
