@@ -59,6 +59,26 @@ export const useCalendarNavigation = ({
 
   const [viewportWidth, setViewportWidth] = useState(0);
 
+  const getProjectedViewportWidth = useCallback((includeTrailingPanel: boolean) => {
+    const viewportEl = contentViewportRef.current;
+    const bodyEl = viewportEl?.parentElement ?? null;
+
+    if (!viewportEl || !bodyEl) return 0;
+
+    const bodyWidth = bodyEl.getBoundingClientRect().width;
+    const leftPanelEl = viewportEl.previousElementSibling;
+    const rightPanelEl = viewportEl.nextElementSibling;
+    const leftPanelWidth = leftPanelEl instanceof HTMLElement
+      ? leftPanelEl.getBoundingClientRect().width
+      : 0;
+    const trailingPanelWidth = includeTrailingPanel && rightPanelEl instanceof HTMLElement
+      ? rightPanelEl.getBoundingClientRect().width
+      : 0;
+    const projectedWidth = bodyWidth - leftPanelWidth - trailingPanelWidth;
+
+    return Number.isFinite(projectedWidth) ? Math.max(0, projectedWidth) : 0;
+  }, []);
+
   const requestMonthScrollTarget = useCallback(() => {
     setMonthScrollTargetToken((n) => n + 1);
   }, []);
@@ -128,6 +148,14 @@ export const useCalendarNavigation = ({
 
   const handleSelectViewMode = useCallback(
     (next: CalendarViewMode) => {
+      if (next !== "month") {
+        const projectedViewportWidth = getProjectedViewportWidth(false);
+
+        if (projectedViewportWidth > 0) {
+          setViewportWidth(projectedViewportWidth);
+        }
+      }
+
       setSelectedViewMode(next);
 
       setActiveMode((current) =>
@@ -149,7 +177,7 @@ export const useCalendarNavigation = ({
 
       resetTimelinePosition(next);
     },
-    [currentDate, requestMonthScrollTarget, resetTimelinePosition, selectedDate],
+    [currentDate, getProjectedViewportWidth, requestMonthScrollTarget, resetTimelinePosition, selectedDate],
   );
 
   const handleToday = useCallback(() => {
