@@ -105,6 +105,30 @@ export const buildExplorerTreeData = ({
   matchCountMap,
   getFolderId,
 }: BuildExplorerTreeDataParams): ExplorerTreeNode[] => {
+  const buildCardSetNode = (
+    cardSet: CardSet,
+    folderId: string | null,
+  ): ExplorerTreeNode | null => {
+    const children = getCardSetItems(cardSet.id)
+      .map(getItemNode)
+      .filter((node): node is ExplorerTreeNode => node !== null);
+
+    if (isFiltering && children.length === 0) {
+      return null;
+    }
+
+    return {
+      id: toTreeId("cardSet", cardSet.id),
+      rawId: cardSet.id,
+      type: "cardSet",
+      kind: "cardSet",
+      name: toVirtualMfDeckDisplayName(cardSet.name?.trim() || "無題のセット"),
+      folderId,
+      data: cardSet,
+      children,
+    };
+  };
+
   const buildFolderNode = (folder: unknown): ExplorerTreeNode | null => {
     const folderId = getFolderId(folder);
     if (!folderId) return null;
@@ -117,18 +141,9 @@ export const buildExplorerTreeData = ({
       .map(buildFolderNode)
       .filter((node): node is ExplorerTreeNode => node !== null);
 
-    const cardSetNodes: ExplorerTreeNode[] = getCardSets(folderId).map((cardSet) => ({
-      id: toTreeId("cardSet", cardSet.id),
-      rawId: cardSet.id,
-      type: "cardSet",
-      kind: "cardSet",
-      name: toVirtualMfDeckDisplayName(cardSet.name?.trim() || "無題のセット"),
-      folderId,
-      data: cardSet,
-      children: getCardSetItems(cardSet.id)
-        .map(getItemNode)
-        .filter((node): node is ExplorerTreeNode => node !== null),
-    }));
+    const cardSetNodes = getCardSets(folderId)
+      .map((cardSet) => buildCardSetNode(cardSet, folderId))
+      .filter((node): node is ExplorerTreeNode => node !== null);
 
     const itemNodes = getFolderItems(folderId)
       .map(getItemNode)
@@ -150,18 +165,9 @@ export const buildExplorerTreeData = ({
     .map(buildFolderNode)
     .filter((node): node is ExplorerTreeNode => node !== null);
 
-  const rootCardSetNodes: ExplorerTreeNode[] = getCardSets(null).map((cardSet) => ({
-    id: toTreeId("cardSet", cardSet.id),
-    rawId: cardSet.id,
-    type: "cardSet",
-    kind: "cardSet",
-    name: toVirtualMfDeckDisplayName(cardSet.name?.trim() || "無題のセット"),
-    folderId: null,
-    data: cardSet,
-    children: getCardSetItems(cardSet.id)
-      .map(getItemNode)
-      .filter((node): node is ExplorerTreeNode => node !== null),
-  }));
+  const rootCardSetNodes = getCardSets(null)
+    .map((cardSet) => buildCardSetNode(cardSet, null))
+    .filter((node): node is ExplorerTreeNode => node !== null);
 
   const rootItemNodes = rootItems
     .map(getItemNode)
