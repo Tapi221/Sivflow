@@ -1,1 +1,1 @@
-export { LibraryHierarchySidebar, LibraryHierarchySidebar as SidebarLayeredDirectory } from "./LibraryHierarchySidebar";
+export { LibraryHierarchySidebar, LibraryHierarchySidebar as SidebarLayeredDirectory } from "./LayeredDirectorySidebar";
