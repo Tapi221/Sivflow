@@ -30,7 +30,7 @@ const getCalendarScrollLeft = ({
 >) => {
   const anchorOffset = calendarBufferBefore * calendarDayColumnWidth;
 
-  if (selectedViewMode === "week") {
+  if (selectedViewMode === "week" || selectedViewMode === "threeDays") {
     return anchorOffset;
   }
 
