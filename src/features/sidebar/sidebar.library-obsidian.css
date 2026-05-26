@@ -1,7 +1,3 @@
-aside[aria-label="Library hierarchy explorer"] {
-  background: var(--app-sidebar-bg, #f6f6f6) !important;
-}
-
 aside[aria-label="Library hierarchy explorer"] [role="tree"] {
   gap: 0 !important;
 }
