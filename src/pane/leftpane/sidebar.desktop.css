@@ -20,13 +20,14 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-sizing: border-box;
   width: var(--app-sidebar-rail-width, 48px);
   min-width: 0;
   min-height: 0;
   height: 100dvh;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 4px 4px 12px;
+  padding: 4px 0 12px;
   border-top-right-radius: 10px;
   background: var(--app-sidebar-bg) !important;
   background-clip: padding-box;
@@ -42,10 +43,11 @@
   top: 0;
   left: 0;
   z-index: 1000;
+  box-sizing: border-box;
   width: var(--app-sidebar-rail-width, 48px);
   height: 40px;
   overflow: visible;
-  padding: 4px;
+  padding: 4px 0;
   pointer-events: none;
   background: var(--app-sidebar-bg) !important;
 }
@@ -64,6 +66,7 @@
 .app-sidebar__top {
   display: flex;
   flex-direction: column;
+  align-items: center;
   width: 100%;
   min-width: 0;
   gap: 8px;
@@ -72,10 +75,11 @@
 .app-sidebar__bottom {
   display: flex;
   flex-direction: column;
+  align-items: center;
   width: 100%;
   flex-shrink: 0;
   gap: 8px;
-  padding: 8px 4px 0;
+  padding: 8px 0 0;
 }
 
 .app-sidebar__toggle {
@@ -85,11 +89,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  width: 32px;
+  min-width: 32px;
   height: 32px;
   padding: 0;
   border: 0;
-  border-radius: 4px;
+  border-radius: 999px;
   background: transparent;
   color: var(--app-sidebar-icon);
   outline: none;
@@ -117,11 +122,12 @@
 .app-sidebar--closed .app-sidebar__toggle {
   position: relative;
   z-index: 1;
-  width: 40px;
+  width: 32px;
+  min-width: 32px;
   height: 32px;
   padding: 0;
   pointer-events: auto;
-  border-radius: 4px;
+  border-radius: 999px;
   background: transparent;
   color: var(--app-sidebar-icon);
 }
@@ -145,6 +151,7 @@
 .app-sidebar__nav {
   display: flex;
   flex-direction: column;
+  align-items: center;
   width: 100%;
   min-width: 0;
   gap: 4px;
