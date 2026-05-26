@@ -1,4 +1,4 @@
-import { designTokens } from "@/presentation/react/theme/design-tokens";
+import { designTokens } from "@/presentation/theme/design-tokens";
 
 export const UI_TYPO = "font-sans";
 export const CONTENT_TYPO = "font-serif";
