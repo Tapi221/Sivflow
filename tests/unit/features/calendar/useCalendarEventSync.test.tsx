@@ -1,8 +1,8 @@
 import { addDays, endOfDay, startOfDay, subDays } from "date-fns";
 import { describe, expect, it } from "vitest";
-import { buildCalendarEventSyncRange } from "../../../../src/features/calendar/googlecalendar-sync/calendarEventSyncRange";
-import * as C from "../../../../src/features/calendar/calendar.constants.desktop";
-import type { CalendarDateRange } from "../../../../src/features/calendar/calendarRange.types";
+import * as C from "@/features/calendar/calendar.constants.desktop";
+import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
+import { buildCalendarEventSyncRange } from "@/features/calendar/googlecalendar-sync/calendarEventSyncRange";
 
 const expectSameTime = (actual: Date | undefined, expected: Date) => {
   expect(actual?.getTime()).toBe(expected.getTime());
