@@ -12,8 +12,9 @@ import { CalendarTimelineDayView, type TimelineLane } from "@/features/calendar/
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { TaskView } from "@/features/calendar/task/TaskView";
 import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCalendarEvents";
-import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
+import { CalendarPieChartView } from "@/features/calendar/view/CalendarPieChartView";
+import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
@@ -173,8 +174,9 @@ export const ScheduleScreen = ({
       { value: "week", label: t.viewWeek },
       { value: "threeDays", label: t.viewThreeDays },
       { value: "days", label: t.viewDay },
+      { value: "pieChart", label: t.viewPieChart },
     ] as const,
-    [t.viewDay, t.viewMonth, t.viewThreeDays, t.viewWeek],
+    [t.viewDay, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewWeek],
   );
 
   useEffect(() => {
@@ -246,6 +248,8 @@ export const ScheduleScreen = ({
 
   const isMonthCalendarView =
     activeMode === "calendar" && selectedViewMode === "month";
+  const isPieChartCalendarView =
+    activeMode === "calendar" && selectedViewMode === "pieChart";
   const headerTitleDate =
     selectedViewMode === "month" ? monthTitleDate : titleDate;
 
@@ -326,6 +330,23 @@ export const ScheduleScreen = ({
             onMoveGoogleTaskList={moveGoogleTaskList}
             onDeleteGoogleTask={deleteGoogleTask}
           />
+        </CarvePanel>
+      );
+    }
+
+    if (isPieChartCalendarView) {
+      return (
+        <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">
+          {renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}
+          <div className="mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border border-[#eeeeee] bg-white">
+            <CalendarPieChartView
+              selectedDate={selectedDate}
+              events={calendarEvents}
+              appProjects={appProjects}
+              googleAccounts={googleAccounts}
+              className="px-4 pb-4 pt-4"
+            />
+          </div>
         </CarvePanel>
       );
     }
