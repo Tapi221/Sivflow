@@ -89,6 +89,7 @@ export const useMonthRowResize = ({
   const pendingMonthRowHeightRef = useRef(C.DEFAULT_MONTH_ROW_HEIGHT);
   const resizeStateRef = useRef<MonthRowResizeState | null>(null);
   const rafRef = useRef<number | null>(null);
+  const afterCommitRafRef = useRef<number | null>(null);
   const releaseResizeLockRafRef = useRef<number | null>(null);
   const activePointerCleanupRef = useRef<(() => void) | null>(null);
   const resizeSessionIdRef = useRef(0);
@@ -96,6 +97,13 @@ export const useMonthRowResize = ({
   const [monthRowHeight, setMonthRowHeight] = useState(
     C.readStoredMonthRowHeight,
   );
+
+  const cancelPendingAfterCommit = useCallback(() => {
+    if (afterCommitRafRef.current === null) return;
+
+    window.cancelAnimationFrame(afterCommitRafRef.current);
+    afterCommitRafRef.current = null;
+  }, []);
 
   const cancelPendingResizeLockRelease = useCallback(() => {
     if (releaseResizeLockRafRef.current === null) return;
@@ -105,6 +113,7 @@ export const useMonthRowResize = ({
   }, []);
 
   const acquireResizeLock = useCallback(() => {
+    cancelPendingAfterCommit();
     cancelPendingResizeLockRelease();
     onResizeStart?.();
 
@@ -114,7 +123,7 @@ export const useMonthRowResize = ({
     rootRef.current?.classList.add(MONTH_ROW_RESIZING_CLASS);
 
     return sessionId;
-  }, [cancelPendingResizeLockRelease, isResizingRef, onResizeStart]);
+  }, [cancelPendingAfterCommit, cancelPendingResizeLockRelease, isResizingRef, onResizeStart]);
 
   const releaseResizeLockAfterLayout = useCallback(
     (sessionId: number) => {
@@ -286,19 +295,24 @@ export const useMonthRowResize = ({
       rafRef.current = null;
     }
 
+    cancelPendingAfterCommit();
     monthRowHeightRef.current = committed;
     pendingMonthRowHeightRef.current = committed;
     applyVariable(committed, scrollAnchor);
     C.writeStoredMonthRowHeight(committed);
     setMonthRowHeight(committed);
 
-    window.requestAnimationFrame(() => {
+    afterCommitRafRef.current = window.requestAnimationFrame(() => {
+      afterCommitRafRef.current = null;
+      if (resizeSessionIdRef.current !== resizeSessionId) return;
+
       onAfterCommit?.();
       releaseResizeLockAfterLayout(resizeSessionId);
     });
   }, [
     acquireResizeLock,
     applyVariable,
+    cancelPendingAfterCommit,
     getScrollAnchor,
     onAfterCommit,
     releaseResizeLockAfterLayout,
@@ -316,11 +330,12 @@ export const useMonthRowResize = ({
     return () => {
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
       activePointerCleanupRef.current?.();
+      cancelPendingAfterCommit();
       cancelPendingResizeLockRelease();
       isResizingRef.current = false;
       rootRef.current?.classList.remove(MONTH_ROW_RESIZING_CLASS);
     };
-  }, [cancelPendingResizeLockRelease, isResizingRef]);
+  }, [cancelPendingAfterCommit, cancelPendingResizeLockRelease, isResizingRef]);
 
   // ── イベントハンドラ
 
@@ -392,6 +407,15 @@ export const useMonthRowResize = ({
         cleanup();
       };
 
+      const onCancel = () => {
+        commitHeight(
+          pendingMonthRowHeightRef.current,
+          resizeStateRef.current?.anchor ?? null,
+          resizeSessionId,
+        );
+        cleanup();
+      };
+
       const cleanup = () => {
         resizeStateRef.current = null;
         resizeHandle?.classList.remove(MONTH_ROW_RESIZE_ACTIVE_CLASS);
@@ -409,7 +433,7 @@ export const useMonthRowResize = ({
         }
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
-        window.removeEventListener("pointercancel", onUp);
+        window.removeEventListener("pointercancel", onCancel);
 
         if (activePointerCleanupRef.current === cleanup) {
           activePointerCleanupRef.current = null;
@@ -420,7 +444,7 @@ export const useMonthRowResize = ({
 
       window.addEventListener("pointermove", onMove);
       window.addEventListener("pointerup", onUp);
-      window.addEventListener("pointercancel", onUp);
+      window.addEventListener("pointercancel", onCancel);
     },
     [
       acquireResizeLock,
