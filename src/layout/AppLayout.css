@@ -1,5 +1,5 @@
 .app-layout {
-  --app-sidebar-rail-width: 48px;
+  --app-sidebar-rail-width: 40px;
   --app-sidebar-closed-width: 0px;
   --app-right-sidebar-width: 240px;
   --app-layout-padding-x: 0px;
@@ -111,7 +111,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: calc(var(--app-sidebar-rail-width, 48px) - 8px);
+  width: calc(var(--app-sidebar-rail-width, 40px) - 8px);
   height: 32px;
   margin: 0;
   padding: 0;
@@ -192,7 +192,7 @@
 }
 
 .app-layout--sidebar-closed .workspace-shell__tabs {
-  padding-left: var(--app-sidebar-rail-width, 48px);
+  padding-left: var(--app-sidebar-rail-width, 40px);
 }
 
 .app-layout--sidebar-closed .calendar-workspace-toolbar {
@@ -217,211 +217,4 @@
   padding: 0 0 0 var(--workspace-content-gutter);
 
   background: var(--app-active-tab-bg);
-}
-
-.app-layout--folders .workspace-shell--with-tabs {
-  grid-template-rows: minmax(0, 1fr);
-}
-
-.app-layout--folders .workspace-shell__tabs,
-.app-layout--folders .workspace-breadcrumb-bar {
-  display: none;
-}
-
-.app-layout--folders .workspace-shell__main,
-.app-layout--folders .app-layout__main {
-  grid-row: 1;
-}
-
-.app-layout-route--schedule .workspace-shell {
-  grid-template-rows:
-    auto
-    minmax(0, 1fr);
-}
-
-.app-layout-route--schedule .workspace-breadcrumb-bar {
-  display: none;
-}
-
-.app-layout-route--schedule .workspace-shell__main,
-.app-layout-route--schedule .app-layout__main {
-  grid-row: 2;
-  overflow: clip;
-  padding-left: 0;
-}
-
-.app-layout-route--schedule .workspace-shell__main aside.w-\[220px\].pl-0,
-.app-layout-route--schedule .app-layout__main aside.w-\[220px\].pl-0 {
-  width: 230px;
-  padding-left: var(--workspace-content-gutter);
-}
-
-.app-layout-route--schedule .workspace-shell__main aside.w-\[220px\].px-2,
-.app-layout-route--schedule .app-layout__main aside.w-\[220px\].px-2 {
-  width: 230px;
-  padding-left: calc(var(--workspace-content-gutter) + 0.5rem);
-}
-
-.workspace-breadcrumb-bar {
-  display: flex;
-  align-items: center;
-
-  min-width: 0;
-
-  height: var(--ds-semantic-breadcrumb-height);
-
-  flex-shrink: 0;
-
-  overflow: hidden;
-
-  padding: 0 0 0 var(--workspace-content-gutter);
-
-  background: var(--app-active-tab-bg);
-
-  color: var(--app-sidebar-icon, #ababab);
-
-  font-family: var(--app-font-family-explorer);
-
-  -webkit-app-region: drag;
-}
-
-.workspace-breadcrumb-bar--collapsed {
-  height: 0;
-  padding: 0;
-}
-
-.workspace-breadcrumb-bar__list {
-  display: flex;
-  align-items: center;
-
-  flex: 1;
-
-  min-width: 0;
-  max-width: 100%;
-
-  gap: var(--ds-semantic-breadcrumb-gap);
-
-  margin: 0;
-  padding: 0;
-
-  list-style: none;
-
-  font-size: var(--ds-layout-font-size-meta);
-  font-weight: var(--ds-typography-font-weight-medium);
-
-  letter-spacing: normal;
-  line-height: normal;
-}
-
-.workspace-breadcrumb-bar__action {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-
-  margin-left: auto;
-
-  flex-shrink: 0;
-}
-
-.workspace-breadcrumb-bar__item {
-  display: flex;
-  align-items: center;
-
-  min-width: 0;
-}
-
-.workspace-breadcrumb-bar__button,
-.workspace-breadcrumb-bar__label {
-  min-width: 0;
-
-  max-width: var(--ds-semantic-breadcrumb-item-max-width);
-
-  overflow: hidden;
-
-  padding: 2px 0;
-
-  border: 0;
-
-  background: transparent;
-
-  color: inherit;
-
-  font: inherit;
-
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  outline: none;
-
-  transition: color var(--ds-semantic-motion-interactive);
-
-  -webkit-app-region: no-drag;
-}
-
-.workspace-breadcrumb-bar__button {
-  cursor: pointer;
-}
-
-.workspace-breadcrumb-bar__button:hover,
-.workspace-breadcrumb-bar__button:focus-visible {
-  color: var(--app-sidebar-text, #5b5b5b);
-}
-
-.workspace-breadcrumb-bar__label--current {
-  color: var(--app-sidebar-text-strong, #000000);
-}
-
-.workspace-breadcrumb-bar__separator {
-  flex-shrink: 0;
-
-  color: var(--ds-semantic-breadcrumb-separator-color);
-
-  font-weight: var(--ds-typography-font-weight-semibold);
-
-  user-select: none;
-}
-
-.app-layout__main--locked {
-  overflow: clip;
-}
-
-.workspace-shell
-  .explorer-chrome-body
-  [data-explorer-sidebar-shell="true"]
-  ~ * {
-  padding-top: 0 !important;
-}
-
-@media (max-width: 767px) {
-  .app-layout,
-  .app-layout--sidebar-closed,
-  .app-layout--right-sidebar-open,
-  .app-layout--sidebar-closed.app-layout--right-sidebar-open {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .app-layout__schedule-right-sidebar-placeholder {
-    display: none;
-  }
-
-  .workspace-shell,
-  .app-layout__content {
-    grid-column: 1;
-  }
-
-  .app-layout--sidebar-closed .workspace-shell__tabs,
-  .app-layout--sidebar-closed .calendar-workspace-toolbar {
-    padding-left: 0;
-  }
-
-  .app-layout-route--schedule header {
-    height: 0;
-    min-height: 0;
-    max-height: 0;
-    overflow: hidden;
-    padding: 0;
-    border: 0;
-    box-shadow: none;
-  }
 }
