@@ -9,7 +9,6 @@ import { ProtectedRoute } from "./ProtectedRoute";
 const CardEdit = lazy(() => import("@/routes/CardEdit"));
 const CardSetView = lazy(() => import("@/routes/CardSetView"));
 const StudyMode = lazy(() => import("@/routes/StudyMode"));
-const Directory = lazy(() => import("@/routes/Directory"));
 const Schedule = lazy(() => import("@/routes/Schedule"));
 const Tasks = lazy(() => import("@/routes/Tasks"));
 const SettingScreen = lazy(() => import("@/routes/SettingScreen"));
@@ -48,8 +47,6 @@ export const AppRoutes = () => {
         <Route path="CardView" element={<Navigate to="/CardSetView" replace />} />
         <Route path="study" element={withRouteFallback(<StudyMode />)} />
         <Route path="sandbox/blocknote" element={<BlockNoteSandboxPage />} />
-
-        <Route path="directory" element={withRouteFallback(<Directory />)} />
 
         {getDevRouteElements()}
       </Route>
