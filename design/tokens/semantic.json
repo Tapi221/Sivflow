@@ -35,17 +35,6 @@
       "warning": "{color.status.warning}",
       "success": "{color.status.success}",
       "info": "{color.status.info}"
-    },
-    "chrome": {
-      "titlebarStart": "#08111f",
-      "titlebarAccent": "#0c1d42",
-      "titlebarEnd": "#050812",
-      "titlebarText": "rgba(255, 255, 255, 0.92)",
-      "titlebarTextStrong": "{color.neutral.0}",
-      "titlebarIcon": "rgba(255, 255, 255, 0.78)",
-      "titlebarDivider": "rgba(255, 255, 255, 0.16)",
-      "titlebarSurface": "rgba(255, 255, 255, 0.08)",
-      "titlebarSurfaceHover": "rgba(255, 255, 255, 0.14)"
     }
   },
   "spacing": {
