@@ -64,7 +64,7 @@ type BoardColumnItem = {
 const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-white";
 const TASK_CARD_OVERLAY_CLASS_NAME = "max-w-[calc(100vw-2rem)] will-change-transform";
 const TASK_COLUMN_DIVIDER_CLASS_NAME = "border-l border-[#eeeeee]";
-const TASK_BOARD_SCROLL_CLASS_NAME = `min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-2 pt-4 pb-0 ${CALENDAR_PANEL_BACKGROUND_CLASS_NAME}`;
+const TASK_BOARD_SCROLL_CLASS_NAME = `min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-0 pt-4 pb-0 ${CALENDAR_PANEL_BACKGROUND_CLASS_NAME}`;
 const TASK_BOARD_GRID_BASE_CLASS_NAME = "grid h-full min-h-0 w-full min-w-[960px] gap-0";
 
 const getCategoryConfig = (category: string) => {
