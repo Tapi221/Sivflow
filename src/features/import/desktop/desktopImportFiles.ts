@@ -30,7 +30,8 @@ const cloneArrayBuffer = (buffer: ArrayBuffer): ArrayBuffer => {
 };
 
 const copyViewToArrayBuffer = (view: ArrayBufferView): ArrayBuffer => {
-  return view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength);
+  const bytes = new Uint8Array(view.buffer, view.byteOffset, view.byteLength);
+  return Uint8Array.from(bytes).buffer;
 };
 
 const normalizeDesktopFileData = (
@@ -66,7 +67,12 @@ export const subscribeDesktopImportFileOpen = (
     return () => {};
   }
 
-  return window.desktop.files.onImportFileOpen((payload) => {
+  const filesApi = window.desktop?.files;
+  if (!filesApi?.onImportFileOpen) {
+    return () => {};
+  }
+
+  return filesApi.onImportFileOpen((payload) => {
     void handler(payload);
   });
 };
@@ -78,7 +84,12 @@ export const readDesktopImportFile = async (
     throw new Error("Desktop import file bridge is unavailable");
   }
 
-  const result = await window.desktop.files.readImportFile(filePath);
+  const filesApi = window.desktop?.files;
+  if (!filesApi?.readImportFile) {
+    throw new Error("Desktop import file bridge is unavailable");
+  }
+
+  const result = await filesApi.readImportFile(filePath);
   const data = normalizeDesktopFileData(result.data);
 
   return new File([data], result.name, {
