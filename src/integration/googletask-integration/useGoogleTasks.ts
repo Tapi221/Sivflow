@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer } from "react";
-import { refreshCalendarAccessToken, requestCalendarAccessToken } from "@/integration/google-integration/google.oauth";
-import { getServerStoredGoogleCalendarAccessToken, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
+import { refreshGoogleConnectedServiceAccessToken, requestGoogleConnectedServiceAccessToken } from "@/integration/google-integration/google.oauth";
+import { getServerStoredGoogleConnectedServiceAccessToken, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
 import { createGoogleTask, deleteGoogleTask, fetchGoogleTasks, moveGoogleTask, patchGoogleTask } from "./gtask.api";
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 import type { GoogleAccountEntry, GoogleAccountTokenUpdate } from "@/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
@@ -75,7 +75,7 @@ const getRecoverableAccessToken = async (
   account: AccountTokenSnapshot,
   onAccessTokenRecovered?: (update: GoogleAccountTokenUpdate) => void,
 ): Promise<string | null> => {
-  const applyRecoveredToken = (result: Awaited<ReturnType<typeof requestCalendarAccessToken>>) => {
+  const applyRecoveredToken = (result: Awaited<ReturnType<typeof requestGoogleConnectedServiceAccessToken>>) => {
     onAccessTokenRecovered?.({
       accountId: account.accountId,
       accessToken: result.accessToken,
@@ -89,7 +89,7 @@ const getRecoverableAccessToken = async (
   };
 
   if (isServerStoredGoogleOAuthEnabled()) {
-    const result = await getServerStoredGoogleCalendarAccessToken({
+    const result = await getServerStoredGoogleConnectedServiceAccessToken({
       accountId: account.accountId,
     });
 
@@ -107,11 +107,11 @@ const getRecoverableAccessToken = async (
 
   if (!account.refreshToken) {
     const { auth } = await import("@/services/firebase");
-    const result = await requestCalendarAccessToken(auth, true);
+    const result = await requestGoogleConnectedServiceAccessToken(auth, true);
     return applyRecoveredToken(result);
   }
 
-  const result = await refreshCalendarAccessToken({
+  const result = await refreshGoogleConnectedServiceAccessToken({
     refreshToken: account.refreshToken,
   });
 
