@@ -1,8 +1,7 @@
 import { PdfPane } from "@/features/pdf/PdfPane";
 import { FolderDashboard } from "@/components/folder/components/views/FolderDashboard";
 import { CardPane } from "@/components/folder/panes/CardPane";
-import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagramPane";
-import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+import type { Card, DocumentItem, SelectedExplorerItem } from "@/types";
 
 type PdfPaneUpdateHandler = NonNullable<
   React.ComponentProps<typeof PdfPane>["onDocumentUpdate"]
@@ -15,9 +14,6 @@ interface RightPaneProps {
   selectedDocument: DocumentItem | null;
   selectedFolderId: string | null;
   selectedFolderName: string;
-  folders: Folder[];
-  cards: Card[];
-  documents: DocumentItem[];
   folderCards: Card[];
   onCardUpdated: () => void;
   onDocumentUpdated?: (
@@ -55,9 +51,6 @@ export const RightPane = ({
   selectedDocument,
   selectedFolderId,
   selectedFolderName,
-  folders,
-  cards,
-  documents,
   folderCards,
   onCardUpdated,
   onDocumentUpdated,
@@ -65,15 +58,6 @@ export const RightPane = ({
   handlers,
   folderSelectionNonce,
 }: RightPaneProps) => {
-  if (selectedItem?.type === "directory") {
-    return (
-      <DirectoryDiagramPane
-        folders={folders}
-        cards={cards}
-        documents={documents}
-      />
-    );
-  }
   if (selectedItem?.type === "trash") {
     return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
   }
