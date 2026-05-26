@@ -30,6 +30,7 @@ const SECTION_LABELS: Record<WorkspaceSidebarSection, string> = {
   library: "ライブラリ",
   schedule: "スケジュール",
   tasks: "タスク",
+  settings: "設定",
 };
 
 const LIBRARY_TYPE_LABELS: Record<string, string> = {
@@ -63,6 +64,7 @@ const resolveSectionKeyForTarget = (
   if (normalizedPathname === "/study") return "review";
   if (normalizedPathname === "/schedule") return "schedule";
   if (normalizedPathname === "/tasks") return "tasks";
+  if (normalizedPathname === "/settings") return "settings";
 
   return null;
 };
@@ -103,7 +105,6 @@ const resolveActiveCrumbs = ({
 
     if (
       activeTab.kind === "document" ||
-      activeTab.kind === "cardSet" ||
       activeTab.kind === "card"
     ) {
       return [baseCrumb, libraryTypeCrumb, { label: activeTab.title }];
@@ -118,7 +119,6 @@ const resolveActiveCrumbs = ({
 
   if (
     activeTab.kind === "document" ||
-    activeTab.kind === "cardSet" ||
     activeTab.kind === "card"
   ) {
     return [baseCrumb, { label: activeTab.title }];
@@ -181,7 +181,9 @@ export const useBreadcrumbs = (): UseBreadcrumbsReturn => {
   const handleCrumbNavigate = useCallback(
     (target: string) => {
       const sectionKey = resolveSectionKeyForTarget(target);
-      if (sectionKey) openSectionTab(sectionKey);
+      if (sectionKey) {
+        openSectionTab(sectionKey);
+      }
       navigate(target);
     },
     [navigate, openSectionTab],
@@ -189,8 +191,8 @@ export const useBreadcrumbs = (): UseBreadcrumbsReturn => {
 
   return {
     crumbs,
-    shouldHideBreadcrumb: shouldHideBreadcrumb ?? false,
-    hasNoActiveTab: activeTab === null,
+    shouldHideBreadcrumb,
+    hasNoActiveTab: !activeTab,
     action,
     handleCrumbNavigate,
   };
