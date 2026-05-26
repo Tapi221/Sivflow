@@ -49,6 +49,17 @@ export const CalendarMonthView = ({
   const scrollHoverRafRef = useRef<number | null>(null);
   const [scrollHoverDayKey, setScrollHoverDayKey] = useState<string | null>(null);
 
+  const clearScrollHoverDay = useCallback(() => {
+    pointerPositionRef.current = null;
+
+    if (scrollHoverRafRef.current !== null) {
+      cancelAnimationFrame(scrollHoverRafRef.current);
+      scrollHoverRafRef.current = null;
+    }
+
+    setScrollHoverDayKey(null);
+  }, []);
+
   const scroll = useMonthInfiniteScroll({
     currentDate,
     scrollTargetToken,
@@ -69,7 +80,10 @@ export const CalendarMonthView = ({
     weekRowRefsMap: scroll.weekRowRefsMap,
     monthWeeks: scroll.monthWeeks,
     isResizingRef,
-    onResizeStart: scroll.cancelVisibleMonthSync,
+    onResizeStart: () => {
+      clearScrollHoverDay();
+      scroll.cancelVisibleMonthSync();
+    },
     onAfterCommit: scroll.syncVisibleMonth,
     onLiveResize: (height) => {
       monthRowHeightRef.current = height;
@@ -78,6 +92,11 @@ export const CalendarMonthView = ({
 
   const updateScrollHoverDay = useCallback(() => {
     scrollHoverRafRef.current = null;
+
+    if (isResizingRef.current) {
+      setScrollHoverDayKey(null);
+      return;
+    }
 
     const pointerPosition = pointerPositionRef.current;
     const scroller = scroll.scrollContainerRef.current;
@@ -122,29 +141,28 @@ export const CalendarMonthView = ({
   }, [monthRowHeight, scroll.monthWeeks, scroll.scrollContainerRef]);
 
   const requestScrollHoverUpdate = useCallback(() => {
+    if (isResizingRef.current) return;
     if (scrollHoverRafRef.current !== null) return;
 
     scrollHoverRafRef.current = requestAnimationFrame(updateScrollHoverDay);
   }, [updateScrollHoverDay]);
 
   const handlePointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (isResizingRef.current) {
+      clearScrollHoverDay();
+      return;
+    }
+
     pointerPositionRef.current = {
       x: event.clientX,
       y: event.clientY,
     };
     requestScrollHoverUpdate();
-  }, [requestScrollHoverUpdate]);
+  }, [clearScrollHoverDay, requestScrollHoverUpdate]);
 
   const handlePointerLeave = useCallback(() => {
-    pointerPositionRef.current = null;
-
-    if (scrollHoverRafRef.current !== null) {
-      cancelAnimationFrame(scrollHoverRafRef.current);
-      scrollHoverRafRef.current = null;
-    }
-
-    setScrollHoverDayKey(null);
-  }, []);
+    clearScrollHoverDay();
+  }, [clearScrollHoverDay]);
 
   const handleMonthScroll = useCallback(() => {
     requestScrollHoverUpdate();
