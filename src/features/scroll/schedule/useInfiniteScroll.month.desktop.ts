@@ -45,7 +45,6 @@ export const useMonthInfiniteScroll = ({
 }: UseMonthInfiniteScrollOptions): UseMonthInfiniteScrollReturn => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const weekRowRefsMap = useRef<Map<string, HTMLElement>>(new Map());
-  const prependScrollHeightRef = useRef<number | null>(null);
   const rangeAnchorRef = useRef<MonthRangeAnchor | null>(null);
   const isExtendingBeforeRef = useRef(false);
   const isExtendingAfterRef = useRef(false);
@@ -200,20 +199,23 @@ export const useMonthInfiniteScroll = ({
         !isExtendingBeforeRef.current
       ) {
         isExtendingBeforeRef.current = true;
-        prependScrollHeightRef.current = scroller.scrollHeight;
-        rangeAnchorRef.current = null;
+        rangeAnchorRef.current = getCurrentRangeAnchor(scroller);
 
         startTransition(() => {
-          setMonthOffsetRange((currentRange) => ({
-            startOffset: currentRange.startOffset - C.MONTH_EXTEND_COUNT,
-            endOffset:
+          setMonthOffsetRange((currentRange) => {
+            const shouldTrimAfter =
               currentRange.endOffset - currentRange.startOffset +
                 1 +
                 C.MONTH_EXTEND_COUNT >
-              C.MONTH_MAX_RENDERED_MONTHS
-                ? currentRange.endOffset
+              C.MONTH_MAX_RENDERED_MONTHS;
+
+            return {
+              startOffset: currentRange.startOffset - C.MONTH_EXTEND_COUNT,
+              endOffset: shouldTrimAfter
+                ? currentRange.endOffset - C.MONTH_EXTEND_COUNT
                 : currentRange.endOffset,
-          }));
+            };
+          });
         });
       }
 
@@ -254,7 +256,6 @@ export const useMonthInfiniteScroll = ({
     visibleMonthKeyRef.current = getCalendarMonthKey(currentDate);
     pendingScrollWeekKeyRef.current = getCalendarWeekKey(currentDate);
 
-    prependScrollHeightRef.current = null;
     rangeAnchorRef.current = null;
     isExtendingBeforeRef.current = false;
     isExtendingAfterRef.current = false;
@@ -305,25 +306,14 @@ export const useMonthInfiniteScroll = ({
   }, [getMonthRowHeight, getWeekOffsetTop, monthWeeks, syncVisibleMonth]);
 
   useLayoutEffect(() => {
-    const prevHeight = prependScrollHeightRef.current;
-    if (prevHeight === null) return;
-
-    const scroller = scrollContainerRef.current;
-    if (!scroller) {
-      prependScrollHeightRef.current = null;
-      isExtendingBeforeRef.current = false;
+    const rangeAnchor = rangeAnchorRef.current;
+    if (!rangeAnchor) {
+      if (isExtendingBeforeRef.current || isExtendingAfterRef.current) {
+        isExtendingBeforeRef.current = false;
+        isExtendingAfterRef.current = false;
+      }
       return;
     }
-
-    scroller.scrollTop += scroller.scrollHeight - prevHeight;
-
-    prependScrollHeightRef.current = null;
-    isExtendingBeforeRef.current = false;
-  }, [monthWeeks.length]);
-
-  useLayoutEffect(() => {
-    const rangeAnchor = rangeAnchorRef.current;
-    if (!rangeAnchor) return;
 
     const scroller = scrollContainerRef.current;
     const anchorWeekIndex = monthWeeks.findIndex(
@@ -332,6 +322,7 @@ export const useMonthInfiniteScroll = ({
 
     if (!scroller || anchorWeekIndex === -1) {
       rangeAnchorRef.current = null;
+      isExtendingBeforeRef.current = false;
       isExtendingAfterRef.current = false;
       return;
     }
@@ -339,6 +330,7 @@ export const useMonthInfiniteScroll = ({
     scroller.scrollTop = getWeekOffsetTop(anchorWeekIndex) - rangeAnchor.offsetTop;
 
     rangeAnchorRef.current = null;
+    isExtendingBeforeRef.current = false;
     isExtendingAfterRef.current = false;
   }, [getWeekOffsetTop, monthWeeks]);
 
@@ -356,10 +348,6 @@ export const useMonthInfiniteScroll = ({
       scroller.removeEventListener("scroll", handlePassiveScroll);
     };
   }, [handleScroll]);
-
-  useEffect(() => {
-    isExtendingAfterRef.current = false;
-  }, [monthOffsetRange.endOffset]);
 
   useEffect(() => cancelVisibleMonthSync, [cancelVisibleMonthSync]);
 
