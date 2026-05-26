@@ -22,7 +22,7 @@ export const CalendarToolbar = ({
   const activeWorkspaceSection = workspaceTabs.find(
     (tab) => tab.id === activeTabId,
   )?.sectionKey;
-  const shouldShowScheduleToggle = activeWorkspaceSection === "schedule";
+  const shouldShowFolderTagToggle = activeWorkspaceSection === "library";
   const [activeFolderTagMode, setActiveFolderTagMode] =
     useState<FolderTagToggleValue>("folder");
   const folderTagTabs = useMemo<FolderTagTab[]>(
@@ -44,10 +44,10 @@ export const CalendarToolbar = ({
   return (
     <div className="calendar-workspace-toolbar flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center justify-between overflow-visible bg-white pr-[var(--workspace-content-gutter)]">
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        {shouldShowScheduleToggle ? (
-          <ToggleCalendarTimelineTask activeMode={activeMode} tabs={tabs} />
-        ) : (
+        {shouldShowFolderTagToggle ? (
           <ToggleFolderTag activeMode={activeFolderTagMode} tabs={folderTagTabs} />
+        ) : (
+          <ToggleCalendarTimelineTask activeMode={activeMode} tabs={tabs} />
         )}
         <TaskTagStrip />
       </div>
