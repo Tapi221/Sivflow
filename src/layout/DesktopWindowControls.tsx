@@ -1,4 +1,4 @@
-import { type CSSProperties, type MouseEvent, type PointerEvent, useEffect, useState } from "react";
+import { type CSSProperties, type MouseEvent, useEffect, useState } from "react";
 import { windowControls } from "@/platform/capabilities/windowControls";
 import { hasDesktopBridge } from "@/platform/runtime";
 import "./DesktopWindowControls.css";
@@ -19,30 +19,12 @@ const runWindowAction = (action: WindowControlAction) => {
   });
 };
 
-const handlePointerWindowAction = (
-  event: PointerEvent<HTMLButtonElement>,
-  action: WindowControlAction,
-) => {
-  if (event.button !== 0) {
-    return;
-  }
-
-  event.preventDefault();
-  event.stopPropagation();
-  runWindowAction(action);
-};
-
 const handleClickWindowAction = (
   event: MouseEvent<HTMLButtonElement>,
   action: WindowControlAction,
 ) => {
+  event.preventDefault();
   event.stopPropagation();
-
-  if (event.detail !== 0) {
-    event.preventDefault();
-    return;
-  }
-
   runWindowAction(action);
 };
 
@@ -86,9 +68,6 @@ export const DesktopWindowControls = () => {
         className="desktop-window-controls__button"
         aria-label="Minimize window"
         title="Minimize"
-        onPointerDown={(event) =>
-          handlePointerWindowAction(event, windowControls.minimize)
-        }
         onClick={(event) =>
           handleClickWindowAction(event, windowControls.minimize)
         }
@@ -101,9 +80,6 @@ export const DesktopWindowControls = () => {
         className="desktop-window-controls__button"
         aria-label={isMaximized ? "Restore window" : "Maximize window"}
         title={isMaximized ? "Restore" : "Maximize"}
-        onPointerDown={(event) =>
-          handlePointerWindowAction(event, windowControls.maximizeToggle)
-        }
         onClick={(event) =>
           handleClickWindowAction(event, windowControls.maximizeToggle)
         }
@@ -123,9 +99,6 @@ export const DesktopWindowControls = () => {
         className="desktop-window-controls__button desktop-window-controls__button--close"
         aria-label="Close window"
         title="Close"
-        onPointerDown={(event) =>
-          handlePointerWindowAction(event, windowControls.close)
-        }
         onClick={(event) =>
           handleClickWindowAction(event, windowControls.close)
         }
