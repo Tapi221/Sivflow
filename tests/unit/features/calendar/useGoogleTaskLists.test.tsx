@@ -2,26 +2,26 @@
 
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { GoogleAccountEntry } from "../../../../src/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
-import { useGoogleTaskLists } from "../../../../src/integration/googletask-integration/useGoogleTaskLists";
-import { fetchGoogleTaskLists } from "../../../../src/integration/googletask-integration/gtask.api";
-import { requestCalendarAccessToken } from "../../../../src/integration/google-integration/google.oauth";
+import type { GoogleAccountEntry } from "@/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
+import { useGoogleTaskLists } from "@/integration/googletask-integration/useGoogleTaskLists";
+import { fetchGoogleTaskLists } from "@/integration/googletask-integration/gtask.api";
+import { requestCalendarAccessToken } from "@/integration/google-integration/google.oauth";
 
-vi.mock("../../../../src/integration/googletask-integration/gtask.api", () => ({
+vi.mock("@/integration/googletask-integration/gtask.api", () => ({
   fetchGoogleTaskLists: vi.fn(),
 }));
 
-vi.mock("../../../../src/integration/google-integration/google.oauth", () => ({
+vi.mock("@/integration/google-integration/google.oauth", () => ({
   refreshCalendarAccessToken: vi.fn(),
   requestCalendarAccessToken: vi.fn(),
 }));
 
-vi.mock("../../../../src/integration/google-integration/google.server-oauth", () => ({
+vi.mock("@/integration/google-integration/google.server-oauth", () => ({
   getServerStoredGoogleCalendarAccessToken: vi.fn(),
   isServerStoredGoogleOAuthEnabled: vi.fn(() => false),
 }));
 
-vi.mock("../../../../src/services/firebase", () => ({
+vi.mock("@/services/firebase", () => ({
   auth: {},
 }));
 
