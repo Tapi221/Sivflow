@@ -10,7 +10,6 @@
     "isolatedModules": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
     "types": ["vitest/globals", "node", "vite/client"],
     "paths": {
       "@/services/localDB": ["src/services/localdb/index.ts"],
