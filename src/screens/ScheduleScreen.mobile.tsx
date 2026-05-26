@@ -1,5 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns";
+import { addDays, endOfDay, endOfMonth, endOfWeek, format, startOfDay, startOfMonth, startOfWeek } from "date-fns";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
 import { SidebarPanelIcon } from "@/components/icons/icons.schedule";
@@ -186,9 +186,10 @@ export const ScheduleScreen = ({
     () => [
       { value: "month", label: t.viewMonth },
       { value: "week", label: t.viewWeek },
+      { value: "threeDays", label: t.viewThreeDays },
       { value: "days", label: t.viewDay },
     ] as const,
-    [t.viewDay, t.viewMonth, t.viewWeek],
+    [t.viewDay, t.viewMonth, t.viewThreeDays, t.viewWeek],
   );
 
   useEffect(() => {
@@ -323,6 +324,13 @@ export const ScheduleScreen = ({
       return {
         start: startOfWeek(selectedDate, { weekStartsOn: C.WEEK_STARTS_ON_MONDAY }),
         end: endOfWeek(selectedDate, { weekStartsOn: C.WEEK_STARTS_ON_MONDAY }),
+      };
+    }
+
+    if (selectedViewMode === "threeDays") {
+      return {
+        start: startOfDay(selectedDate),
+        end: endOfDay(addDays(selectedDate, 2)),
       };
     }
 
