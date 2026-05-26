@@ -3,6 +3,7 @@ import type { CardSet } from "@/types";
 type CardLike = {
   id?: string;
   cardSetId?: string | null;
+  card_set_id?: string | null;
   folderId?: string | null;
 };
 type CardSetLike = Pick<CardSet, "id" | "folderId">;
@@ -15,6 +16,11 @@ const normalizeFolderId = (folderId: string | null | undefined) => {
   if (typeof folderId !== "string") return null;
   const trimmed = folderId.trim();
   return trimmed.length > 0 ? trimmed : null;
+};
+
+const getCardLikeCardSetId = (card: CardLike) => {
+  const cardSetId = card.cardSetId ?? card.card_set_id ?? null;
+  return typeof cardSetId === "string" ? cardSetId.trim() : "";
 };
 
 const recordLegacyFallbackUsage = (
@@ -35,9 +41,10 @@ const recordLegacyFallbackUsage = (
   if (warnedFallbackCardKeys.has(cardKey)) return;
   warnedFallbackCardKeys.add(cardKey);
 
+  const cardSetId = getCardLikeCardSetId(card);
   console.warn("[cardFolder] legacy card.folderId fallback used", {
     cardId: card.id ?? null,
-    cardSetId: card.cardSetId ?? null,
+    cardSetId: cardSetId || null,
     fallbackReason: reason,
   });
 };
@@ -55,7 +62,7 @@ export const resolveCardFolderIdStrict = (
   card: CardLike,
   cardSetById: ReadonlyMap<string, CardSetLike>,
 ) => {
-  const cardSetId = typeof card.cardSetId === "string" ? card.cardSetId : "";
+  const cardSetId = getCardLikeCardSetId(card);
   if (!cardSetId) return null;
   const cardSet = cardSetById.get(cardSetId);
   if (!cardSet) return null;
@@ -66,7 +73,7 @@ export const didUseLegacyFolderFallback = (
   card: CardLike,
   cardSetById: ReadonlyMap<string, CardSetLike>,
 ) => {
-  const cardSetId = typeof card.cardSetId === "string" ? card.cardSetId : "";
+  const cardSetId = getCardLikeCardSetId(card);
   if (!cardSetId) return normalizeFolderId(card.folderId) !== null;
   return (
     !cardSetById.has(cardSetId) && normalizeFolderId(card.folderId) !== null
@@ -87,7 +94,7 @@ export const resolveCardFolderId = (
   if (legacyFolderId === null) return null;
 
   const reason: LegacyFallbackReason =
-    typeof card.cardSetId === "string" && card.cardSetId.trim().length > 0
+    getCardLikeCardSetId(card).length > 0
       ? "unresolved-card-set-id"
       : "missing-card-set-id";
   recordLegacyFallbackUsage(card, reason);
