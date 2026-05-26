@@ -45,6 +45,11 @@
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
+.ds-settings-panel__choice-card,
+.ds-settings-panel__segmented-button {
+  transition-duration: 0ms;
+}
+
 *::-webkit-scrollbar {
   width: var(--scrollbar-size);
   height: var(--scrollbar-size);
