@@ -1,8 +1,7 @@
-import type { GoogleCalendarApiEventsResponse, GoogleCalendarApiListResponse, GoogleCalendarEvent, GoogleCalendarListItem, GoogleTaskListItem, GoogleTasksApiTaskListsResponse } from "./gcalSync.types";
-import { createGoogleApiError, withGoogleApiRetry } from "./googleApiRetry";
+import type { GoogleCalendarApiEventsResponse, GoogleCalendarApiListResponse, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
+import { createGoogleApiError } from "./googleApiRetry";
 
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
-const GOOGLE_TASKS_API_BASE = "https://tasks.googleapis.com/tasks/v1";
 
 const getJsonOnce = async <T>(accessToken: string, url: string, errorPrefix = "Google API failed"): Promise<T> => {
   const res = await fetch(url, {
@@ -20,12 +19,6 @@ const getJsonOnce = async <T>(accessToken: string, url: string, errorPrefix = "G
 
 const getJson = async <T>(accessToken: string, url: string): Promise<T> =>
   getJsonOnce<T>(accessToken, url);
-
-const getGoogleTasksJson = async <T>(accessToken: string, url: string, operation: string): Promise<T> =>
-  withGoogleApiRetry(
-    () => getJsonOnce<T>(accessToken, url),
-    { service: "google_tasks", operation },
-  );
 
 const parseGoogleDate = (raw: string): Date => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
@@ -88,41 +81,6 @@ export const fetchCalendarList = async (
   } while (pageToken);
 
   return calendars;
-};
-
-export const fetchGoogleTaskLists = async (
-  accessToken: string,
-): Promise<GoogleTaskListItem[]> => {
-  const taskLists: GoogleTaskListItem[] = [];
-  let pageToken: string | undefined;
-
-  do {
-    const params = new URLSearchParams({ maxResults: "1000" });
-
-    if (pageToken) {
-      params.set("pageToken", pageToken);
-    }
-
-    const data = await getGoogleTasksJson<GoogleTasksApiTaskListsResponse>(
-      accessToken,
-      `${GOOGLE_TASKS_API_BASE}/users/@me/lists?${params}`,
-      "fetch_task_lists",
-    );
-
-    taskLists.push(
-      ...(data.items ?? [])
-        .filter((item) => item.id)
-        .map((item) => ({
-          id: item.id!,
-          title: item.title?.trim() || "Google ToDo",
-          updated: item.updated,
-        })),
-    );
-
-    pageToken = data.nextPageToken;
-  } while (pageToken);
-
-  return taskLists;
 };
 
 export const fetchEventsForCalendar = async ({
