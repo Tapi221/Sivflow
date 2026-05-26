@@ -1,5 +1,6 @@
 import { Suspense, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
+import { SidebarOpenIcon } from "@/components/icons/icons.sidebar";
 import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
 import { Sidebar } from "@/features/sidebar/Sidebar.desktop";
 import { useWorkspaceTabsRouteSync } from "@/features/tab/hooks/useTabsRouteSync";
@@ -29,6 +30,8 @@ export const AppLayout = () => {
 
   useResetWorkspaceScrollDesktop({ pathname, mainRef });
 
+  const showScheduleRightSidebarPlaceholder = /^\/schedule(?:\/|$)/i.test(pathname);
+
   const className = [
     "app-layout",
     isFoldersRoute ? "app-layout--folders" : "",
@@ -45,6 +48,12 @@ export const AppLayout = () => {
         isClosed={isSidebarClosed}
         onToggleClosed={() => setIsSidebarClosed((current) => !current)}
       />
+
+      {showScheduleRightSidebarPlaceholder ? (
+        <div className="app-layout__schedule-right-sidebar-placeholder" aria-hidden="true">
+          <SidebarOpenIcon className="app-layout__schedule-right-sidebar-placeholder-icon" />
+        </div>
+      ) : null}
 
       <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
         <Suspense fallback={null}>
