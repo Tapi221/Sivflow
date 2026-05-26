@@ -1,5 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns";
+import { addDays, endOfDay, endOfMonth, endOfWeek, format, startOfDay, startOfMonth, startOfWeek } from "date-fns";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
@@ -112,9 +112,10 @@ export const ScheduleScreen = ({
     () => [
       { value: "month", label: t.viewMonth },
       { value: "week", label: t.viewWeek },
+      { value: "threeDays", label: t.viewThreeDays },
       { value: "days", label: t.viewDay },
     ] as const,
-    [t.viewDay, t.viewMonth, t.viewWeek],
+    [t.viewDay, t.viewMonth, t.viewThreeDays, t.viewWeek],
   );
 
   const {
@@ -288,6 +289,13 @@ export const ScheduleScreen = ({
       return {
         start: startOfWeek(selectedDate, { weekStartsOn: C.WEEK_STARTS_ON_MONDAY }),
         end: endOfWeek(selectedDate, { weekStartsOn: C.WEEK_STARTS_ON_MONDAY }),
+      };
+    }
+
+    if (selectedViewMode === "threeDays") {
+      return {
+        start: startOfDay(selectedDate),
+        end: endOfDay(addDays(selectedDate, 2)),
       };
     }
 
