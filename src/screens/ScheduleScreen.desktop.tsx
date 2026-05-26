@@ -27,6 +27,7 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
 
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
+const SELECTED_TASK_LISTS_STORAGE_KEY = "flashcard-master:schedule:selected-google-task-list-ids";
 const DEFAULT_TIMELINE_CALENDAR_COLOR = "#74798b";
 const APP_PROJECT_COLORS = [
   "#34c759",
@@ -92,6 +93,44 @@ const persistAppProjects = (projects: AppCalendarItem[]) => {
   }
 };
 
+const readStoredSelectedTaskListIds = (): Set<string> | null => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.localStorage.getItem(SELECTED_TASK_LISTS_STORAGE_KEY);
+    if (raw === null) return null;
+
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return new Set();
+
+    return new Set(
+      parsed.filter(
+        (id): id is string => typeof id === "string" && id.trim().length > 0,
+      ),
+    );
+  } catch {
+    return null;
+  }
+};
+
+const persistSelectedTaskListIds = (ids: Set<string>) => {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(
+      SELECTED_TASK_LISTS_STORAGE_KEY,
+      JSON.stringify(Array.from(ids)),
+    );
+  } catch {
+    // localStorage が利用できない環境でも、画面上の選択状態は維持する。
+  }
+};
+
+const hasEqualSetValues = (a: Set<string>, b: Set<string>): boolean => {
+  if (a.size !== b.size) return false;
+  return Array.from(a).every((value) => b.has(value));
+};
+
 export const ScheduleScreen = ({
   initialActiveMode,
   onClose: _onClose,
@@ -105,11 +144,12 @@ export const ScheduleScreen = ({
   const openDayDetailPanel = useScheduleScreenStore((state) => state.openDayDetailPanel);
   const setCanToggleDayDetailPanel = useScheduleScreenStore((state) => state.setCanToggleDayDetailPanel);
   const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(readStoredAppProjects);
+  const storedSelectedTaskListIds = useMemo(() => readStoredSelectedTaskListIds(), []);
   const [selectedTaskListIds, setSelectedTaskListIds] = useState<Set<string>>(
-    () => new Set(),
+    () => storedSelectedTaskListIds ?? new Set(),
   );
   const deferredSelectedTaskListIds = useDeferredValue(selectedTaskListIds);
-  const selectedTaskListInitializedRef = useRef(false);
+  const selectedTaskListInitializedRef = useRef(storedSelectedTaskListIds !== null);
 
   const viewOptions = useMemo(
     () => [
@@ -168,6 +208,11 @@ export const ScheduleScreen = ({
     persistAppProjects(appProjects);
   }, [appProjects]);
 
+  useEffect(() => {
+    if (!selectedTaskListInitializedRef.current) return;
+    persistSelectedTaskListIds(selectedTaskListIds);
+  }, [selectedTaskListIds]);
+
   const handleAddAppProject = useCallback((projectName: string) => {
     const trimmedProjectName = projectName.trim();
     if (!trimmedProjectName) return;
@@ -212,7 +257,6 @@ export const ScheduleScreen = ({
   useEffect(() => {
     setSelectedTaskListIds((ids) => {
       if (allTaskListIds.length === 0) {
-        selectedTaskListInitializedRef.current = false;
         return ids.size === 0 ? ids : new Set();
       }
 
@@ -230,7 +274,7 @@ export const ScheduleScreen = ({
         }
       }
 
-      return nextIds.size === ids.size ? ids : nextIds;
+      return hasEqualSetValues(ids, nextIds) ? ids : nextIds;
     });
     // allTaskListIdsKey でリストの実質的な変化だけを検知する。
     // 配列参照そのものを依存に入れると、チェック操作ごとに不要な再評価が走りやすい。
