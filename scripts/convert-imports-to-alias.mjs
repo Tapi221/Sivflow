@@ -1,68 +1,127 @@
+import fs from "node:fs";
 import path from "node:path";
 import fg from "fast-glob";
-import { Project } from "ts-morph";
 
 const projectRoot = process.cwd();
-const srcRoot = path.join(projectRoot, "src");
-const sourceFileExtensions = /\.(?:c|m)?(?:j|t)sx?$/;
+const sourceExtensions = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"];
+const resolvableExtensions = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json", ".css", ".scss", ".sass", ".less"];
+const importPatterns = [
+  /(from\s+["'])(\.{1,2}\/[^"']+)(["'])/g,
+  /(import\s+["'])(\.{1,2}\/[^"']+)(["'])/g,
+  /(import\s*\(\s*["'])(\.{1,2}\/[^"']+)(["']\s*\))/g,
+];
 
-const project = new Project({ tsConfigFilePath: path.join(projectRoot, "tsconfig.app.json") });
+const aliasRoots = [
+  { dir: path.join(projectRoot, "src"), prefix: "@" },
+  { dir: path.join(projectRoot, "constants"), prefix: "@constants" },
+];
 
-const files = fg.sync(["src/**/*.{ts,tsx,js,jsx}"], { cwd: projectRoot, absolute: true, ignore: ["**/*.d.ts"] });
+const files = fg.sync(["**/*.{ts,tsx,js,jsx,mjs,cjs}"], {
+  cwd: projectRoot,
+  absolute: true,
+  ignore: [
+    "**/*.d.ts",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/dist-electron/**",
+    "**/build/**",
+    "**/lib/**",
+    "**/coverage/**",
+    "**/.firebase/**",
+    "**/.git/**",
+  ],
+});
 
 const normalizePath = (filePath) => filePath.replace(/\\/g, "/");
 
 const isInsideDir = (filePath, dirPath) => {
   const relativePath = path.relative(dirPath, filePath);
-  return Boolean(relativePath) && !relativePath.startsWith("..") && !path.isAbsolute(relativePath);
+  return relativePath === "" || (!relativePath.startsWith("..") && !path.isAbsolute(relativePath));
 };
 
-const stripSourceExtension = (filePath) => filePath.replace(sourceFileExtensions, "");
+const hasKnownSourceExtension = (modulePath) => sourceExtensions.some((extension) => modulePath.endsWith(extension));
+
+const stripKnownSourceExtension = (modulePath) => {
+  for (const extension of sourceExtensions) {
+    if (modulePath.endsWith(extension)) return modulePath.slice(0, -extension.length);
+  }
+  return modulePath;
+};
 
 const stripTrailingIndex = (modulePath) => modulePath.endsWith("/index") ? modulePath.slice(0, -"/index".length) : modulePath;
 
-const toSrcAlias = (targetFilePath) => {
-  const relativeFromSrc = normalizePath(path.relative(srcRoot, targetFilePath));
-  return `@/${stripTrailingIndex(stripSourceExtension(relativeFromSrc))}`;
+const fileExists = (filePath) => {
+  try {
+    return fs.statSync(filePath).isFile();
+  } catch {
+    return false;
+  }
 };
 
-const toSameDirRelative = (importerDir, targetFilePath) => {
-  const relativeFromImporter = normalizePath(path.relative(importerDir, targetFilePath));
-  const modulePath = stripTrailingIndex(stripSourceExtension(relativeFromImporter));
-  return modulePath.startsWith(".") ? modulePath : `./${modulePath}`;
-};
+const resolveExistingModulePath = (importerDir, spec) => {
+  const basePath = path.resolve(importerDir, spec);
 
-const getFallbackTargetPath = (importerDir, spec) => {
-  if (spec.startsWith("@/")) return path.join(srcRoot, spec.slice(2));
-  if (spec.startsWith(".")) return path.resolve(importerDir, spec);
+  if (fileExists(basePath)) return basePath;
+
+  for (const extension of resolvableExtensions) {
+    if (fileExists(`${basePath}${extension}`)) return `${basePath}${extension}`;
+  }
+
+  for (const extension of resolvableExtensions) {
+    const indexPath = path.join(basePath, `index${extension}`);
+    if (fileExists(indexPath)) return indexPath;
+  }
+
   return null;
 };
 
-const updateModuleSpecifier = (decl, importerDir) => {
-  const spec = decl.getModuleSpecifierValue();
-  if (!spec.startsWith(".") && !spec.startsWith("@/")) return false;
+const findAliasRoot = (targetFilePath) => aliasRoots.find(({ dir }) => isInsideDir(targetFilePath, dir));
 
-  const sourceFile = decl.getModuleSpecifierSourceFile();
-  const targetPath = sourceFile?.getFilePath() ?? getFallbackTargetPath(importerDir, spec);
-  if (!targetPath || !isInsideDir(targetPath, srcRoot)) return false;
-
-  const targetDir = path.dirname(targetPath);
-  const nextSpec = targetDir === importerDir ? toSameDirRelative(importerDir, targetPath) : toSrcAlias(targetPath);
-  if (nextSpec === spec) return false;
-
-  decl.setModuleSpecifier(nextSpec);
-  return true;
+const toSameDirRelative = (importerDir, targetFilePath, originalSpec) => {
+  const originalHadSourceExtension = hasKnownSourceExtension(originalSpec);
+  const relativeFromImporter = normalizePath(path.relative(importerDir, targetFilePath));
+  const modulePath = originalHadSourceExtension ? relativeFromImporter : stripTrailingIndex(stripKnownSourceExtension(relativeFromImporter));
+  return modulePath.startsWith(".") ? modulePath : `./${modulePath}`;
 };
 
+const toAliasPath = (targetFilePath, aliasRoot, originalSpec) => {
+  const originalHadSourceExtension = hasKnownSourceExtension(originalSpec);
+  const relativeFromRoot = normalizePath(path.relative(aliasRoot.dir, targetFilePath));
+  const modulePath = originalHadSourceExtension ? relativeFromRoot : stripTrailingIndex(stripKnownSourceExtension(relativeFromRoot));
+  return `${aliasRoot.prefix}/${modulePath}`;
+};
+
+const normalizeSpecifier = (importerDir, spec) => {
+  const targetFilePath = resolveExistingModulePath(importerDir, spec);
+  if (!targetFilePath) return spec;
+
+  const targetDir = path.dirname(targetFilePath);
+  if (targetDir === importerDir) return toSameDirRelative(importerDir, targetFilePath, spec);
+
+  const aliasRoot = findAliasRoot(targetFilePath);
+  if (!aliasRoot) return spec;
+
+  return toAliasPath(targetFilePath, aliasRoot, spec);
+};
+
+let changedFileCount = 0;
+
 for (const filePath of files) {
-  const sourceFile = project.getSourceFile(filePath) ?? project.addSourceFileAtPath(filePath);
   const importerDir = path.dirname(filePath);
-  let changed = false;
+  const originalContent = fs.readFileSync(filePath, "utf8");
+  let nextContent = originalContent;
 
-  for (const decl of sourceFile.getImportDeclarations()) changed = updateModuleSpecifier(decl, importerDir) || changed;
-  for (const decl of sourceFile.getExportDeclarations()) changed = updateModuleSpecifier(decl, importerDir) || changed;
+  for (const pattern of importPatterns) {
+    nextContent = nextContent.replace(pattern, (match, prefix, spec, suffix) => {
+      const nextSpec = normalizeSpecifier(importerDir, spec);
+      return nextSpec === spec ? match : `${prefix}${nextSpec}${suffix}`;
+    });
+  }
 
-  if (changed) await sourceFile.save();
+  if (nextContent !== originalContent) {
+    fs.writeFileSync(filePath, nextContent);
+    changedFileCount += 1;
+  }
 }
 
-console.log("Done: normalized src import paths. Same directory uses ./, cross-directory uses @/.");
+console.log(`Done: normalized import paths in ${changedFileCount} file(s). Same-directory imports use ./, cross-directory imports use aliases.`);
