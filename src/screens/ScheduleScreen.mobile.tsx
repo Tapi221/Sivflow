@@ -1,7 +1,7 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
 import { TodayBar } from "@/chip/bar/TodayBar";
-import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
+import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
 import { SidebarPanelIcon } from "@/chip/icons/icons.schedule";
 import { CalendarIcon } from "@/chip/icons/icons.sidebar";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
