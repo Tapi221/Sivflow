@@ -1,6 +1,6 @@
 import type { RefObject, UIEvent } from "react";
 import { useCallback, useState } from "react";
-import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
+import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type { CalendarToolbarMode, CalendarViewMode, GoogleAccountDisplay, TimelineGridStyle } from "./scheduleScreen.types";
 import type { GoogleCalendarEvent } from "../../integration/googlecalendar-integration/gcalSync.types";
