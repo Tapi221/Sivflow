@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, type UIEvent } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import type { CalendarViewMode } from "../../../calendar/scheduleScreen.types";
+import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 import { useScrollEdgeDetector } from "./useScrollEdgeDetector";
 import { usePreserveScrollOnPrepend } from "./usePreserveScrollOnPrepend";
 import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync.fixed";
