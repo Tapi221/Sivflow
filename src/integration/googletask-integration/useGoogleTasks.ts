@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useReducer } from "react";
 import { refreshGoogleConnectedServiceAccessToken, requestGoogleConnectedServiceAccessToken } from "@/integration/google-integration/google.oauth";
 import { getServerStoredGoogleConnectedServiceAccessToken, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
 import { createGoogleTask, deleteGoogleTask, fetchGoogleTasks, moveGoogleTask, patchGoogleTask } from "./gtask.api";
+import type { GoogleConnectedServiceAccountEntry, GoogleConnectedServiceAccountTokenUpdate } from "@/integration/google-integration/googleAccount.types";
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
-import type { GoogleAccountEntry, GoogleAccountTokenUpdate } from "@/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
 import type { GoogleTaskListAccountState } from "./useGoogleTaskLists";
 
 export type GoogleTasksAccountState = {
@@ -42,7 +42,7 @@ type AccountTokenSnapshot = {
   accountId: string;
   accessToken: string | null;
   refreshToken: string | null;
-  connectionStatus: GoogleAccountEntry["connectionStatus"];
+  connectionStatus: GoogleConnectedServiceAccountEntry["connectionStatus"];
   taskLists: GoogleTaskListItem[];
 };
 
@@ -73,7 +73,7 @@ const isUnauthorizedError = (error: unknown): boolean =>
 
 const getRecoverableAccessToken = async (
   account: AccountTokenSnapshot,
-  onAccessTokenRecovered?: (update: GoogleAccountTokenUpdate) => void,
+  onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,
 ): Promise<string | null> => {
   const applyRecoveredToken = (result: Awaited<ReturnType<typeof requestGoogleConnectedServiceAccessToken>>) => {
     onAccessTokenRecovered?.({
@@ -129,7 +129,7 @@ const getRecoverableAccessToken = async (
 
 const getAccessTokenWithRecovery = async (
   account: AccountTokenSnapshot,
-  onAccessTokenRecovered?: (update: GoogleAccountTokenUpdate) => void,
+  onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,
 ): Promise<string | null> => {
   if (account.accessToken) return account.accessToken;
   return getRecoverableAccessToken(account, onAccessTokenRecovered);
@@ -138,7 +138,7 @@ const getAccessTokenWithRecovery = async (
 const withRecoveredToken = async <T,>(
   account: AccountTokenSnapshot,
   action: (accessToken: string) => Promise<T>,
-  onAccessTokenRecovered?: (update: GoogleAccountTokenUpdate) => void,
+  onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,
 ): Promise<T> => {
   const accessToken = await getAccessTokenWithRecovery(
     account,
@@ -167,7 +167,7 @@ const withRecoveredToken = async <T,>(
 
 const fetchGoogleTasksWithRecovery = async (
   account: AccountTokenSnapshot,
-  onAccessTokenRecovered?: (update: GoogleAccountTokenUpdate) => void,
+  onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,
 ): Promise<GoogleTaskItem[]> => {
   return withRecoveredToken(account, async (accessToken) => {
     const results = await Promise.all(
@@ -311,7 +311,7 @@ const reduceGoogleTasks = (
 };
 
 const buildAccountTokenKey = (
-  accounts: GoogleAccountEntry[],
+  accounts: GoogleConnectedServiceAccountEntry[],
   taskListsByAccount: Record<string, GoogleTaskListAccountState>,
 ) =>
   accounts
@@ -329,9 +329,9 @@ const buildAccountTokenKey = (
     .join("\n");
 
 export const useGoogleTasks = (
-  accounts: GoogleAccountEntry[],
+  accounts: GoogleConnectedServiceAccountEntry[],
   taskListsByAccount: Record<string, GoogleTaskListAccountState>,
-  onAccessTokenRecovered?: (update: GoogleAccountTokenUpdate) => void,
+  onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,
 ) => {
   const [state, dispatch] = useReducer(reduceGoogleTasks, {});
 
