@@ -16,14 +16,12 @@
       "@/services/localDB": ["src/services/localdb/index.ts"],
       "@/services/firebase": ["src/infrastructure/firebase/client.ts"],
       "@/*": ["src/*"],
-      "@constants/*": ["constants/*"],
-      "@config/*": ["config/*"]
+      "@constants/*": ["constants/*"]
     }
   },
   "include": [
     "src",
-    "constants",
-    "config"
+    "constants"
   ],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "tests/**"]
 }
