@@ -134,7 +134,7 @@ const CalendarMonthDayCell = memo(({
           focus-visible:z-10
           focus-visible:ring-2
           focus-visible:ring-inset
-          focus-visible:ring-ring
+          focus-visible:ring-[#c7c7cc]
         "
         onClick={() =>
           onSelectDate(day.date)
