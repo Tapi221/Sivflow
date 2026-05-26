@@ -88,3 +88,8 @@
   width: 0;
   height: 0;
 }
+
+[aria-label="Library hierarchy explorer"] [role="tree"],
+[aria-label="Library hierarchy explorer"] [role="treeitem"] {
+  overflow-anchor: none;
+}
