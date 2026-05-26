@@ -10,7 +10,7 @@ export type CalendarDayNumberCircleProps = {
 };
 
 const CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME =
-  "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[12px] font-medium tabular-nums transition-all duration-150";
+  "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[12px] font-[450] tabular-nums transition-all duration-150";
 
 const getCalendarDayNumberCircleClassName = ({
   isToday = false,
