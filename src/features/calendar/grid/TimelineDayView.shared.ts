@@ -1,7 +1,7 @@
 import type { ScheduleColumn, ScheduleColumnBuffer } from "./ScheduleColumn.shared";
 import { buildScheduleTimelineColumns } from "./ScheduleColumn.shared";
 
-export type TimelineViewMode = "month" | "week" | "days";
+export type TimelineViewMode = "month" | "week" | "threeDays" | "days";
 
 export type TimelineUnitBuffer = ScheduleColumnBuffer;
 
