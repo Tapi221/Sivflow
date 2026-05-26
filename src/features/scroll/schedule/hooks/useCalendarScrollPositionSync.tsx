@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import type { CalendarViewMode } from "../../../calendar/scheduleScreen.types";
+import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
 type Params = {
   activeMode: "timeline" | "calendar" | string;
