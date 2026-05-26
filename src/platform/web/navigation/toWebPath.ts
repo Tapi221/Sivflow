@@ -1,4 +1,4 @@
-import { type AppDestination, type AppScreen, resolveAppDestination } from "@/navigation/destination";
+import { type AppDestination, type AppScreen, resolveAppDestination } from "@/navigation/core/destination";
 
 const WEB_SCREEN_PATHS: Record<AppScreen, string> = {
   folders: "/library",
@@ -35,4 +35,4 @@ export const createPageUrl = (page: string | AppDestination): string => {
   );
 };
 
-export { createAppDestination } from "@/navigation/destination";
+export { createAppDestination } from "@/navigation/core/destination";
