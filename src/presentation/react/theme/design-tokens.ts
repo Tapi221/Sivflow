@@ -9,9 +9,7 @@ export const designTokens = {
       "400": "#7f9ecb",
       "500": "#5d7fb6",
       "600": "#45679d",
-      "700": "#35507b",
-      "800": "#25395a",
-      "900": "#17253d"
+      "700": "#35507b"
     },
     "neutral": {
       "0": "#ffffff",
@@ -244,25 +242,13 @@ export const designTokens = {
       "interactive": {
         "selectedSubtle": "#e7edf6",
         "selectedAccent": "#35507b",
-        "columnSelectedSubtle": "rgba(53, 80, 123, 0.14)",
-        "columnSelectedAccent": "#25395a"
+        "columnSelectedSubtle": "rgba(53, 80, 123, 0.14)"
       },
       "status": {
         "danger": "#e11d48",
         "warning": "#f59e0b",
         "success": "#10b981",
         "info": "#00a3ff"
-      },
-      "chrome": {
-        "titlebarStart": "#08111f",
-        "titlebarAccent": "#0c1d42",
-        "titlebarEnd": "#050812",
-        "titlebarText": "rgba(255, 255, 255, 0.92)",
-        "titlebarTextStrong": "#ffffff",
-        "titlebarIcon": "rgba(255, 255, 255, 0.78)",
-        "titlebarDivider": "rgba(255, 255, 255, 0.16)",
-        "titlebarSurface": "rgba(255, 255, 255, 0.08)",
-        "titlebarSurfaceHover": "rgba(255, 255, 255, 0.14)"
       }
     },
     "spacing": {
