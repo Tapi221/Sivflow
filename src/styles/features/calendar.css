@@ -301,14 +301,14 @@
     right: 0;
     z-index: 50;
     height: 10px;
-    cursor: row-resize;
+    cursor: default;
     touch-action: none;
     background: transparent;
   }
 
   .calendar-month-row-boundary-resize-handle,
   .calendar-month-row-boundary-resize-handle * {
-    cursor: row-resize;
+    cursor: default;
   }
 
   .calendar-month-row-boundary-resize-handle::before {
