@@ -1,9 +1,9 @@
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getCardImages } from "@/domain/card/content";
-import { storage } from "./firebase";
+import { storage } from "@/services/firebase";
 import type { LocalDBLike } from "./localDB";
-import type { UploadedImage } from "@/types";
 import { createStorageUrl } from "@/types/core/branded";
+import type { UploadedImage } from "@/types";
 
 const MAX_QUOTA = 500 * 1024 * 1024; // 500MB
 const MAX_RETRIES = 5;
@@ -12,6 +12,7 @@ export class ImageSyncService {
   private localDB: LocalDBLike;
 
   constructor(userId: string, localDB: LocalDBLike) {
+    void userId;
     this.localDB = localDB;
   }
 
@@ -149,6 +150,9 @@ export class ImageSyncService {
     images: UploadedImage[],
     onProgress?: (msg: string) => void,
   ): Promise<UploadedImage[] | null> {
+    void entityId;
+    void table;
+    void fieldName;
     if (!images || images.length === 0) return null;
     let changed = false;
     const newImages = [...images];
