@@ -53,6 +53,8 @@ const getEventOverlapMinutes = (
   event: GoogleCalendarEvent,
   selectedDate: Date,
 ): number => {
+  if (event.isAllDay) return 0;
+
   const dayStart = startOfDay(selectedDate);
   const dayEnd = addDays(dayStart, 1);
 
@@ -224,9 +226,9 @@ export const CalendarPieChartView = ({
             ) : (
               <div className="flex h-full min-h-[360px] items-center justify-center text-center">
                 <div>
-                  <p className="text-[14px] font-semibold text-[#6e6e73]">この日の予定はありません</p>
+                  <p className="text-[14px] font-semibold text-[#6e6e73]">この日の時間指定の予定はありません</p>
                   <p className="mt-2 text-[12px] font-medium text-[#a1a1a6]">
-                    Google カレンダーまたはタスクの予定が入ると円グラフに表示されます。
+                    終日の予定は時間集計から除外しています。
                   </p>
                 </div>
               </div>
@@ -264,7 +266,7 @@ export const CalendarPieChartView = ({
               ))
             ) : (
               <div className="py-3 text-[12px] font-semibold text-[#9a9a9a]">
-                表示できる予定がありません。
+                終日の予定は時間集計から除外しています。
               </div>
             )}
           </div>
