@@ -2,7 +2,7 @@ import { memo, useMemo } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
-import { getEventDateKeys } from "@/features/calendar/calendarEventRange";
+import { compareCalendarEvents, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as T from "@/features/calendar/calendar.text";
 import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.schedule.month";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
@@ -382,11 +382,7 @@ export const GridCalendarMonthDesktop = ({
     }
 
     for (const dayEvents of groupedEvents.values()) {
-      dayEvents.sort(
-        (a, b) =>
-          new Date(a.startsAt).getTime() -
-          new Date(b.startsAt).getTime(),
-      );
+      dayEvents.sort(compareCalendarEvents);
     }
 
     return groupedEvents;
