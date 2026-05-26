@@ -100,18 +100,21 @@ const IconPlus = ({ className }: { className?: string }) => (
 
 type AppProjectsSectionProps = {
   projects: AppCalendarItem[];
+  isAdding: boolean;
   onAddProject: (projectName: string) => void;
   onToggleProject: (projectId: string) => void;
+  onAddingChange: (isAdding: boolean) => void;
 };
 
 const AppProjectsSection = ({
   projects,
+  isAdding,
   onAddProject,
   onToggleProject,
+  onAddingChange,
 }: AppProjectsSectionProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [projectName, setProjectName] = useState("");
-  const [isAdding, setIsAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
 
   const handleAddProject = () => {
@@ -126,7 +129,7 @@ const AppProjectsSection = ({
     onAddProject(trimmedProjectName);
     setProjectName("");
     setAddError(null);
-    setIsAdding(false);
+    onAddingChange(false);
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -139,11 +142,6 @@ const AppProjectsSection = ({
 
     event.preventDefault();
     handleAddProject();
-  };
-
-  const handleStartAdding = () => {
-    setIsAdding(true);
-    setAddError(null);
   };
 
   return (
@@ -159,8 +157,8 @@ const AppProjectsSection = ({
         />
       ))}
 
-      {isAdding ? (
-        <div className="mx-2 ml-5 mt-1 flex flex-col gap-1">
+      {isAdding && (
+        <div className="mx-2 ml-2 mt-1 flex flex-col gap-1">
           <form
             className="flex h-7 items-center gap-1.5"
             onSubmit={handleSubmit}
@@ -199,17 +197,6 @@ const AppProjectsSection = ({
             </p>
           )}
         </div>
-      ) : (
-        <button
-          type="button"
-          className="mx-2 ml-5 mt-1 flex h-7 items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium text-[#8c8c8c] transition hover:bg-[#f7f7f7] hover:text-[#5f6574] active:bg-[#f1f1f1]"
-          onClick={handleStartAdding}
-        >
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f4f4f4] text-[#8c8c8c]">
-            <IconPlus className="h-3.5 w-3.5" />
-          </span>
-          <span>プロジェクトを追加</span>
-        </button>
       )}
     </div>
   );
@@ -385,6 +372,7 @@ export const CalendarSidebar = ({
   const selectDateRef = useRef(onSelectDate);
   const previousMonthRef = useRef(onPreviousMonth);
   const nextMonthRef = useRef(onNextMonth);
+  const [isAddingProject, setIsAddingProject] = useState(false);
 
   selectDateRef.current = onSelectDate;
   previousMonthRef.current = onPreviousMonth;
@@ -400,6 +388,10 @@ export const CalendarSidebar = ({
 
   const handleMiniCalendarNextMonth = useCallback(() => {
     nextMonthRef.current();
+  }, []);
+
+  const handleStartAddingProject = useCallback(() => {
+    setIsAddingProject(true);
   }, []);
 
   return (
@@ -424,13 +416,25 @@ export const CalendarSidebar = ({
           <span className="text-[11px] font-bold uppercase tracking-[0.04em] text-[#9a9a9a]">
             {isTaskMode ? "MY TODO LISTS" : t.myProjects}
           </span>
+          {!isTaskMode && (
+            <button
+              type="button"
+              className="ml-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#f4f4f4] text-[#8c8c8c] transition hover:bg-[#ececec] hover:text-[#5f6574] active:scale-[0.94]"
+              onClick={handleStartAddingProject}
+              aria-label="プロジェクトを追加"
+            >
+              <IconPlus className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
 
         {!isTaskMode && (
           <AppProjectsSection
             projects={appProjects}
+            isAdding={isAddingProject}
             onAddProject={onAddProject}
             onToggleProject={onToggleProject}
+            onAddingChange={setIsAddingProject}
           />
         )}
 
