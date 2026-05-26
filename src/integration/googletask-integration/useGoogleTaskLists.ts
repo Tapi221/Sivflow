@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useReducer } from "react";
 import { fetchGoogleTaskLists } from "./gtask.api";
-import { refreshCalendarAccessToken, requestCalendarAccessToken } from "@/integration/googlecalendar-integration/gcal.oauth";
-import { getServerStoredGoogleCalendarAccessToken, isServerStoredGoogleOAuthEnabled } from "@/integration/googlecalendar-integration/gcal.server-oauth";
+import { refreshCalendarAccessToken, requestCalendarAccessToken } from "@/integration/google-integration/google.oauth";
+import { getServerStoredGoogleCalendarAccessToken, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
 import type { GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 import type { GoogleAccountEntry, GoogleAccountTokenUpdate } from "@/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
 
