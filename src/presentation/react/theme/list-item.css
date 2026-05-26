@@ -5,6 +5,26 @@
     transition: none;
   }
 
+  .folder-panel-list,
+  [role="tree"] {
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  .folder-panel-list .sidebar-row,
+  [role="tree"] .sidebar-row {
+    contain: layout paint style;
+    contain-intrinsic-size: 30px;
+    content-visibility: auto;
+  }
+
+  .folder-panel-list .sidebar-row[data-selected="true"],
+  .folder-panel-list .sidebar-row:focus-within,
+  [role="tree"] .sidebar-row[data-selected="true"],
+  [role="tree"] .sidebar-row:focus-within {
+    content-visibility: visible;
+  }
+
   .ds-list-item--interactive:hover {
     background: var(
       --sidebar-hover-bg,
