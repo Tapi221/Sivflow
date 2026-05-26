@@ -71,10 +71,12 @@ export const getLocalDBRuntimeStatus = () => {
 
 export const subscribeLocalDBRuntimeStatus = (
   listener: (status: LocalDBRuntimeStatus) => void,
-) => {
+): (() => void) => {
   listeners.add(listener);
   listener(getLocalDBRuntimeStatus());
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 };
 
 export const updateLocalDBRuntimeStatus = (
@@ -138,12 +140,12 @@ const toShortReason = (value: string | null): string => {
   return compact.length > 120 ? `${compact.slice(0, 120)}...` : compact;
 };
 
-export const getLocalDBTelemetrySnapshot = () => {
+export const getLocalDBTelemetrySnapshot = (): LocalDBTelemetrySnapshot => {
   return {
     localdb_mode: currentStatus.mode,
     localdb_reason_code: currentStatus.fallbackReasonCode,
     localdb_fallback_reason: toShortReason(currentStatus.fallbackReason),
     localdb_generation_bumped: currentStatus.generationBumped,
-    localdb_reset_failed: !!currentStatus.resetFailedReason,
+    localdb_reset_failed: Boolean(currentStatus.resetFailedReason),
   };
 };
