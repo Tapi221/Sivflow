@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 
-const loadFromStorage = (storageKey: string) => {
+const loadFromStorage = (storageKey: string): Set<string> => {
   if (typeof window === "undefined") {
     return new Set<string>();
   }
 
   try {
     const saved = window.localStorage.getItem(storageKey);
-    return saved ? new Set<string>(JSON.parse(saved) as string[]) : new Set();
+    return saved ? new Set<string>(JSON.parse(saved) as string[]) : new Set<string>();
   } catch {
-    return new Set();
+    return new Set<string>();
   }
 };
 
