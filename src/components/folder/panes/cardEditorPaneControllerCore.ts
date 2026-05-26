@@ -1,6 +1,7 @@
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 import type { CardSetViewEditingDraftPatch } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { createLatestReviewLogPatch, createReviewPatchFromRating } from "@/services/reviewAlgorithm";
+import type { ReviewLog } from "@/types/domain/base";
 import type { Card, UserSettings } from "@/types";
 
 export const META_PANEL_OPEN_STORAGE_KEY =
@@ -94,6 +95,14 @@ type CreateMetaPanelActionsArgs = {
   handleUpdateTitle: (nextTitle: string) => Promise<void>;
 };
 
+const normalizeReviewRating = (rating: number): ReviewLog["rating"] => {
+  if (rating === 1 || rating === 2 || rating === 3 || rating === 4) {
+    return rating;
+  }
+
+  throw new Error("学習評価は 1〜4 の範囲で指定してください");
+};
+
 export const createMetaPanelActions = ({
   selectedCard,
   settings,
@@ -118,7 +127,7 @@ export const createMetaPanelActions = ({
 
     const { patch } = createReviewPatchFromRating({
       card: selectedCard,
-      rating,
+      rating: normalizeReviewRating(rating),
       now: new Date(reviewedAt),
       delayBonusEnabled: settings?.delayBonusEnabled ?? false,
       durationMinutes,
@@ -146,7 +155,7 @@ export const createMetaPanelActions = ({
       action: "update",
       card: selectedCard,
       delayBonusEnabled: settings?.delayBonusEnabled ?? false,
-      rating,
+      rating: normalizeReviewRating(rating),
       reviewedAt: new Date(reviewedAt),
       reviewLogs,
       reviewStartNextDay: settings?.reviewStartNextDay ?? true,
@@ -189,7 +198,7 @@ export const createMetaPanelActions = ({
   }) => {
     if (!selectedCard?.id) return Promise.resolve();
 
-    const nextReviewLogs = reviewLogs.map((log, index) =>
+    const nextReviewLogs = (reviewLogs ?? []).map((log, index) =>
       index === logIndex ? { ...log, durationMinutes } : log,
     );
 

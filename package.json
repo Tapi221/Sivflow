@@ -8,8 +8,7 @@
   },
   "scripts": {
     "dev": "npm run dev:web",
-    "dev:web": "npm run design-tokens:build && vite",
-    "design-tokens:build": "npm exec tsx -- tools/design-tokens/build-tokens.ts",
+    "dev:web": "vite",
     "dev:electron": "concurrently -k \"npm run dev:web\" \"npm run electron:watch\" \"npm run electron:dev\"",
     "electron:build:main": "npm exec tsc -- -p tsconfig.electron.json",
     "electron:build:preload": "node scripts/electron/bundle-preload.mjs",
@@ -21,7 +20,7 @@
     "electron:watch:preload": "node scripts/electron/bundle-preload.mjs --watch",
     "generate:icons:stratis": "node scripts/generate-stratis-icons.mjs",
     "build": "npm run build:web",
-    "build:web": "npm run design-tokens:build && node scripts/copy-pdfjs-assets.mjs && vite build",
+    "build:web": "node scripts/copy-pdfjs-assets.mjs && vite build",
     "build:electron": "npm run build:web && npm run electron:build",
     "electron:build": "npm run electron:build:main && npm run electron:build:preload && npm run electron:prepare-dist",
     "electron:start": "node scripts/electron/run-electron.cjs dist-electron/electron/main.js",

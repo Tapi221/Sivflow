@@ -11,6 +11,14 @@ type UseCardSetsOptions = {
   enabled?: boolean;
 };
 
+type LegacyDeletedEntity = {
+  isDeleted?: boolean;
+  is_deleted?: boolean;
+};
+
+const isDeletedEntity = (entity: LegacyDeletedEntity) =>
+  Boolean(entity.isDeleted ?? entity.is_deleted);
+
 export const useCardSets = (
   folderId?: string | null,
   options?: UseCardSetsOptions,
@@ -35,7 +43,7 @@ export const useCardSets = (
   const cardSets = useMemo(() => {
     if (!rawSets) return [];
 
-    let sets = rawSets.filter((s) => !s.isDeleted);
+    let sets = rawSets.filter((s) => !isDeletedEntity(s));
 
     if (folderId !== undefined) {
       sets = sets.filter((s) => s.folderId === (folderId ?? null));
@@ -77,7 +85,7 @@ export const useCardSets = (
       .toArray();
 
     const siblingSets = existingSets.filter(
-      (s) => !s.isDeleted && s.folderId === targetFolderId,
+      (s) => !isDeletedEntity(s) && s.folderId === targetFolderId,
     );
 
     const now = new Date();
@@ -143,7 +151,7 @@ export const useCardSets = (
     const db = await getLocalDb(currentUser.uid);
 
     const siblingSets = (rawSets ?? []).filter(
-      (s) => !s.isDeleted && s.folderId === targetFolderId,
+      (s) => !isDeletedEntity(s) && s.folderId === targetFolderId,
     );
 
     const maxOrder = siblingSets.reduce(

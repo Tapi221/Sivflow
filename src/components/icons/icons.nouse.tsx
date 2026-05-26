@@ -1,3 +1,5 @@
+import type { IconProps } from "@/ui/icons";
+
 //Vuesax-Icons
 export const PlusIcon = ({
   className,
@@ -24,7 +26,6 @@ export const PlusIcon = ({
     />
   </svg>
 );
-
 
 //Vuesax-Icons
 export const IosIcon = ({

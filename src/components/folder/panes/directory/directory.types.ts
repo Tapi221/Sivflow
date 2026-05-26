@@ -20,7 +20,7 @@ export type DirectoryBadgeVisibility = {
 
 export type DirectoryMindMapChip = {
   id: string;
-  kind: "card" | "pdf";
+  kind: DirectoryTreeNode["kind"];
   label: string;
   sourceCardId?: string;
   tags: string[];

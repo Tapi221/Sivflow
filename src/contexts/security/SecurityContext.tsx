@@ -1,6 +1,6 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
-import type { SecurityState } from "@/services/logic/SecurityMonitor";
+import type { SecurityState } from "@/services/interfaces/ISyncService";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 
 interface SecurityContextType {
