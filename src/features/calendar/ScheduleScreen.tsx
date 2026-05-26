@@ -12,7 +12,7 @@ import { CalendarTimelineDayView, type TimelineLane } from "./grid/TimelineDayVi
 import { useScheduleScreen } from "./useScheduleScreen";
 import { DayDetailPanel } from "./panel/DayDetailPanel";
 import { CalendarSidebar } from "./panel/CalendarSidebar";
-import { CalendarWorkspaceToolbar } from "../../pane/sidebar/ScheduleToolbar";
+import { CalendarWorkspaceToolbar } from "../../pane/header/ScheduleToolbar";
 import { useTaskCalendarEvents } from "./task/hooks/useTaskCalendarEvents";
 import { CarvePanel, CarvePanelShell } from "../../components/panel/CarvePanel.desktop";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
