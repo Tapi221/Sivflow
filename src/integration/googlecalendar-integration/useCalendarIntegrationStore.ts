@@ -1,10 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// ─────────────────────────────────────────────
-// 型
-// ─────────────────────────────────────────────
-
 type CalendarIntegrationPersistedState = {
   wasConnected: boolean;
   accountEmail: string | null;
