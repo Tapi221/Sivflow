@@ -84,6 +84,18 @@ export default defineConfig([
       "no-restricted-syntax": [
         "error",
         {
+          selector: "ImportDeclaration[source.value=/^\\.\\.\\//]",
+          message: "Use @/ alias for cross-folder imports inside src.",
+        },
+        {
+          selector: "ExportNamedDeclaration[source.value=/^\\.\\.\\//]",
+          message: "Use @/ alias for cross-folder exports inside src.",
+        },
+        {
+          selector: "ExportAllDeclaration[source.value=/^\\.\\.\\//]",
+          message: "Use @/ alias for cross-folder exports inside src.",
+        },
+        {
           selector: "ImportDeclaration[source.value=/^\\.\\/[^/]+\\//]",
           message: "Use @/ alias for child-folder imports inside src. Same-directory imports may use ./.",
         },
