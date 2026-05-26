@@ -8,6 +8,20 @@ import type { CalendarMonthWeek } from "@/features/calendar/model/calendarMonth.
 const MONTH_ROW_RESIZING_CLASS = "is-month-row-resizing";
 const MONTH_ROW_RESIZE_ACTIVE_CLASS = "is-month-row-resize-active";
 
+const setScrollTopImmediately = (
+  scroller: HTMLDivElement,
+  scrollTop: number,
+) => {
+  const nextScrollTop = Math.max(0, Math.round(scrollTop));
+
+  if (Math.abs(scroller.scrollTop - nextScrollTop) < 1) return;
+
+  const previousScrollBehavior = scroller.style.scrollBehavior;
+  scroller.style.scrollBehavior = "auto";
+  scroller.scrollTop = nextScrollTop;
+  scroller.style.scrollBehavior = previousScrollBehavior;
+};
+
 type MonthScrollAnchor = {
   kind: "scroll";
   scrollTop: number;
@@ -107,12 +121,14 @@ export const useMonthRowResize = ({
       cancelPendingResizeLockRelease();
 
       releaseResizeLockRafRef.current = window.requestAnimationFrame(() => {
-        releaseResizeLockRafRef.current = null;
+        releaseResizeLockRafRef.current = window.requestAnimationFrame(() => {
+          releaseResizeLockRafRef.current = null;
 
-        if (resizeSessionIdRef.current !== sessionId) return;
+          if (resizeSessionIdRef.current !== sessionId) return;
 
-        isResizingRef.current = false;
-        rootRef.current?.classList.remove(MONTH_ROW_RESIZING_CLASS);
+          isResizingRef.current = false;
+          rootRef.current?.classList.remove(MONTH_ROW_RESIZING_CLASS);
+        });
       });
     },
     [cancelPendingResizeLockRelease, isResizingRef],
@@ -198,9 +214,9 @@ export const useMonthRowResize = ({
       if (anchor.kind === "boundary") {
         const boundaryTop =
           firstWeekTop + (anchor.weekIndex + 1) * nextHeight;
-        scroller.scrollTop = Math.max(
-          0,
-          Math.round(boundaryTop - anchor.pointerOffsetTop),
+        setScrollTopImmediately(
+          scroller,
+          boundaryTop - anchor.pointerOffsetTop,
         );
         return;
       }
@@ -208,7 +224,7 @@ export const useMonthRowResize = ({
       if (anchor.rowHeight <= 0) return;
 
       if (anchor.scrollTop <= firstWeekTop) {
-        scroller.scrollTop = anchor.scrollTop;
+        setScrollTopImmediately(scroller, anchor.scrollTop);
         return;
       }
 
@@ -216,7 +232,7 @@ export const useMonthRowResize = ({
       const nextScrollTop =
         firstWeekTop + (rowOffset / anchor.rowHeight) * nextHeight;
 
-      scroller.scrollTop = Math.max(0, Math.round(nextScrollTop));
+      setScrollTopImmediately(scroller, nextScrollTop);
     },
     [scrollContainerRef],
   );
@@ -318,7 +334,12 @@ export const useMonthRowResize = ({
 
       const handleElement = event.currentTarget;
       const resizeHandle = handleElement.parentElement;
+      const resizeScroller = scrollContainerRef.current;
+      const prevScrollBehavior = resizeScroller?.style.scrollBehavior ?? null;
       resizeHandle?.classList.add(MONTH_ROW_RESIZE_ACTIVE_CLASS);
+      if (resizeScroller) {
+        resizeScroller.style.scrollBehavior = "auto";
+      }
 
       try {
         handleElement.setPointerCapture(event.pointerId);
@@ -374,6 +395,9 @@ export const useMonthRowResize = ({
       const cleanup = () => {
         resizeStateRef.current = null;
         resizeHandle?.classList.remove(MONTH_ROW_RESIZE_ACTIVE_CLASS);
+        if (resizeScroller && prevScrollBehavior !== null) {
+          resizeScroller.style.scrollBehavior = prevScrollBehavior;
+        }
         document.body.style.cursor = prevCursor;
         document.body.style.userSelect = prevSelect;
         try {
@@ -404,6 +428,7 @@ export const useMonthRowResize = ({
       getBoundaryAnchor,
       getBoundaryPointerAnchor,
       scheduleVariable,
+      scrollContainerRef,
     ],
   );
 
