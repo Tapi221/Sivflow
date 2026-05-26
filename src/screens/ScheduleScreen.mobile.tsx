@@ -1,5 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { addDays, endOfDay, endOfMonth, endOfWeek, format, startOfDay, startOfMonth, startOfWeek } from "date-fns";
+import { format } from "date-fns";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
 import { SidebarPanelIcon } from "@/components/icons/icons.schedule";
@@ -9,7 +9,6 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import { CalendarTimelineDayView, type TimelineLane } from "@/features/calendar/grid/TimelineDayView";
-import { CalendarSidebar } from "@/features/calendar/panel/CalendarSidebar";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { TaskView } from "@/features/calendar/task/TaskView";
 import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCalendarEvents";
@@ -38,12 +37,6 @@ const APP_PROJECT_COLORS = [
   "#66a77a",
   "#9ca3ff",
 ];
-
-const MOBILE_SOURCES_PANEL_CLASS =
-  "mx-3 mb-5 overflow-hidden rounded-[24px] border border-[#eeeeee] bg-white shadow-[0_18px_48px_rgba(15,23,42,0.08)] " +
-  "[&>aside]:h-auto [&>aside]:w-full [&>aside]:overflow-visible [&>aside]:pb-3 [&>aside]:pl-0 [&>aside]:pr-0 [&>aside]:pt-0 " +
-  "[&>aside>section:first-child]:hidden [&>aside>div:first-of-type]:hidden [&>aside>nav]:max-h-[360px] " +
-  "[&>aside>nav]:overflow-y-auto [&>aside>nav]:px-2 [&>aside>nav]:pb-3 [&>aside>nav]:pt-3";
 
 const MOBILE_SCHEDULE_STYLE = `
   @media (max-width: 767px) {
@@ -131,9 +124,7 @@ export const ScheduleScreen = ({
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
   const selectedTaskListInitializedRef = useRef(false);
-  const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(
-    readStoredAppProjects,
-  );
+  const [appProjects] = useState<AppCalendarItem[]>(readStoredAppProjects);
   const [selectedTaskListIds, setSelectedTaskListIds] = useState<Set<string>>(
     () => new Set(),
   );
@@ -151,7 +142,6 @@ export const ScheduleScreen = ({
     visibleDays,
     googleCalendarEvents,
     googleAccounts,
-    isAnyCalendarConnecting,
     calendarDayColumnWidth,
     timelineGridStyle,
     headerScrollRef,
@@ -163,8 +153,6 @@ export const ScheduleScreen = ({
     handleSelectViewMode,
     handleSidebarSelectDate,
     handleTimelineSelectDate,
-    handleSidebarPreviousMonth,
-    handleSidebarNextMonth,
     handleVisibleMonthChange,
     handlePrevious,
     handleNext,
@@ -172,10 +160,7 @@ export const ScheduleScreen = ({
     handleMonthCellSelectDate,
     handleMonthRenderedRangeChange,
     addGoogleCalendar,
-    reconnectGoogleAccount,
-    toggleGoogleCalendar,
     refreshGoogleTasks,
-    retryGoogleTaskLists,
     createGoogleTask,
     updateGoogleTask,
     moveGoogleTaskList,
@@ -195,47 +180,6 @@ export const ScheduleScreen = ({
   useEffect(() => {
     persistAppProjects(appProjects);
   }, [appProjects]);
-
-  const handleAddAppProject = useCallback((projectName: string) => {
-    const trimmedProjectName = projectName.trim();
-    if (!trimmedProjectName) return;
-
-    setAppProjects((projects) => {
-      const duplicateProject = projects.find(
-        (project) =>
-          project.label.trim().toLowerCase() ===
-          trimmedProjectName.toLowerCase(),
-      );
-
-      if (duplicateProject) {
-        return projects.map((project) =>
-          project.id === duplicateProject.id
-            ? { ...project, checked: true }
-            : project,
-        );
-      }
-
-      return [
-        ...projects,
-        {
-          id: createAppProjectId(),
-          label: trimmedProjectName,
-          color: APP_PROJECT_COLORS[projects.length % APP_PROJECT_COLORS.length],
-          checked: true,
-        },
-      ];
-    });
-  }, []);
-
-  const handleToggleAppProject = useCallback((projectId: string) => {
-    setAppProjects((projects) =>
-      projects.map((project) =>
-        project.id === projectId
-          ? { ...project, checked: !project.checked }
-          : project,
-      ),
-    );
-  }, []);
 
   const allTaskListIds = useMemo(
     () =>
@@ -268,20 +212,6 @@ export const ScheduleScreen = ({
     // allTaskListIdsKey でリストの実質的な変化だけを検知する。
   }, [allTaskListIds, allTaskListIdsKey]);
 
-  const handleToggleTaskList = useCallback((taskListId: string) => {
-    setSelectedTaskListIds((ids) => {
-      const next = new Set(ids);
-
-      if (next.has(taskListId)) {
-        next.delete(taskListId);
-      } else {
-        next.add(taskListId);
-      }
-
-      return next;
-    });
-  }, []);
-
   const calendarEvents = useMemo(() => {
     return [...googleCalendarEvents, ...taskCalendarEvents];
   }, [googleCalendarEvents, taskCalendarEvents]);
@@ -313,36 +243,6 @@ export const ScheduleScreen = ({
 
     return [...appProjectLanes, ...googleCalendarLanes];
   }, [appProjects, googleAccounts]);
-
-  const sidebarMonthDate =
-    selectedViewMode === "month" ? monthTitleDate : titleDate;
-
-  const sidebarSelectedRange = useMemo(() => {
-    if (activeMode !== "timeline") return null;
-
-    if (selectedViewMode === "week") {
-      return {
-        start: startOfWeek(selectedDate, { weekStartsOn: C.WEEK_STARTS_ON_MONDAY }),
-        end: endOfWeek(selectedDate, { weekStartsOn: C.WEEK_STARTS_ON_MONDAY }),
-      };
-    }
-
-    if (selectedViewMode === "threeDays") {
-      return {
-        start: startOfDay(selectedDate),
-        end: endOfDay(addDays(selectedDate, 2)),
-      };
-    }
-
-    if (selectedViewMode === "month") {
-      return {
-        start: startOfMonth(selectedDate),
-        end: endOfMonth(selectedDate),
-      };
-    }
-
-    return null;
-  }, [activeMode, selectedDate, selectedViewMode]);
 
   const isMonthCalendarView =
     activeMode === "calendar" && selectedViewMode === "month";
@@ -558,34 +458,7 @@ export const ScheduleScreen = ({
       </div>
 
       <main className="min-h-0 flex-1 overflow-y-auto bg-white pb-[calc(env(safe-area-inset-bottom)+16px)] pt-3">
-        <div className="flex flex-col gap-4">
-          {renderCalendarContent()}
-
-          <section className={MOBILE_SOURCES_PANEL_CLASS}>
-            <CalendarSidebar
-              monthDate={sidebarMonthDate}
-              selectedDate={selectedDate}
-              selectedRange={sidebarSelectedRange}
-              activeMode={activeMode}
-              appProjects={appProjects}
-              googleAccounts={googleAccounts}
-              isAnyCalendarConnecting={isAnyCalendarConnecting}
-              selectedTaskListIds={selectedTaskListIds}
-              onSelectDate={handleSelectDate}
-              onPreviousMonth={handleSidebarPreviousMonth}
-              onNextMonth={handleSidebarNextMonth}
-              onAddCalendar={addGoogleCalendar}
-              onAddProject={handleAddAppProject}
-              onToggleProject={handleToggleAppProject}
-              onReconnectAccount={(accountId) => {
-                void reconnectGoogleAccount(accountId);
-              }}
-              onRetryTaskLists={retryGoogleTaskLists}
-              onToggleCalendar={toggleGoogleCalendar}
-              onToggleTaskList={handleToggleTaskList}
-            />
-          </section>
-        </div>
+        {renderCalendarContent()}
       </main>
     </div>
   );
