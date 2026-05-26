@@ -1,13 +1,57 @@
 import { useLayoutEffect, useRef } from "react";
 import { format } from "date-fns";
-import { compareCalendarEvents, eventOverlapsDay } from "@/features/calendar/calendarEventRange";
+import { clipEventToDay, compareCalendarEvents, eventOverlapsDay } from "@/features/calendar/calendarEventRange";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import { cn } from "@/lib/utils";
 
+type ScrollTarget = {
+  hour: number;
+  key: string;
+};
+
+export type DayDetailPanelProps = {
+  selectedDate: Date;
+  events: GoogleCalendarEvent[];
+  isOpen: boolean;
+};
+
 const DEFAULT_SCROLL_HOUR = 0;
+const FIRST_EVENT_SCROLL_PADDING_HOURS = 1;
+const MAX_SCROLL_HOUR = 23;
+
+const createEventScrollKey = (event: GoogleCalendarEvent): string =>
+  `${event.calendarId}:${event.id}:${event.startsAt.getTime()}:${event.endsAt.getTime()}`;
+
+const getScrollHourForEvent = (event: GoogleCalendarEvent): number => {
+  const startHour = event.startsAt.getHours();
+
+  return Math.max(
+    DEFAULT_SCROLL_HOUR,
+    Math.min(MAX_SCROLL_HOUR, startHour - FIRST_EVENT_SCROLL_PADDING_HOURS),
+  );
+};
+
+const getScrollTarget = (
+  events: GoogleCalendarEvent[],
+  selectedDate: Date,
+): ScrollTarget => {
+  const firstTimedEvent = events
+    .map((event) => clipEventToDay(event, selectedDate))
+    .filter((event): event is GoogleCalendarEvent => Boolean(event))
+    .sort(compareCalendarEvents)[0];
+
+  if (!firstTimedEvent) {
+    return { hour: DEFAULT_SCROLL_HOUR, key: "none" };
+  }
+
+  return {
+    hour: getScrollHourForEvent(firstTimedEvent),
+    key: createEventScrollKey(firstTimedEvent),
+  };
+};
 
 const AllDayChip = ({ event }: { event: GoogleCalendarEvent }) => {
   const tokens = generateColorTokens(event.accentColor);
@@ -22,39 +66,33 @@ const AllDayChip = ({ event }: { event: GoogleCalendarEvent }) => {
   );
 };
 
-export type DayDetailPanelProps = {
-  selectedDate: Date;
-  events: GoogleCalendarEvent[];
-  isOpen: boolean;
-};
-
 export const DayDetailPanel = ({
   selectedDate,
   events,
   isOpen,
 }: DayDetailPanelProps) => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const prevDateKeyRef = useRef("");
+  const prevScrollTargetKeyRef = useRef("");
   const dateKey = format(selectedDate, "yyyy-MM-dd");
-
-  useLayoutEffect(() => {
-    if (prevDateKeyRef.current === dateKey) return;
-
-    prevDateKeyRef.current = dateKey;
-    const el = scrollRef.current;
-
-    if (!el) return;
-
-    el.scrollTop = DEFAULT_SCROLL_HOUR * HOUR_ROW_HEIGHT;
-  }, [dateKey]);
-
   const allDayEvents = events
     .filter((e) => e.isAllDay && eventOverlapsDay(e, selectedDate))
     .sort(compareCalendarEvents);
-
   const timedEvents = events
     .filter((e) => !e.isAllDay && eventOverlapsDay(e, selectedDate))
     .sort(compareCalendarEvents);
+  const scrollTarget = getScrollTarget(timedEvents, selectedDate);
+  const scrollTargetKey = `${dateKey}:${scrollTarget.key}`;
+
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+
+    const el = scrollRef.current;
+
+    if (!el || prevScrollTargetKeyRef.current === scrollTargetKey) return;
+
+    prevScrollTargetKeyRef.current = scrollTargetKey;
+    el.scrollTop = scrollTarget.hour * HOUR_ROW_HEIGHT;
+  }, [isOpen, scrollTarget.hour, scrollTargetKey]);
 
   if (!isOpen) {
     return <aside className="w-0 shrink-0 overflow-hidden" aria-hidden="true" />;
