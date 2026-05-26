@@ -31,7 +31,7 @@ export const CalendarEventChipWeekday = ({
   return (
     <div
       className={[
-        "flex w-full flex-col rounded-md px-1.5 py-1 text-left",
+        "flex h-full min-h-0 w-full flex-col overflow-hidden rounded-md px-1.5 py-1 text-left",
         compact ? "gap-0.5" : "gap-1",
       ].join(" ")}
       style={{
