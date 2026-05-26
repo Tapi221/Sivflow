@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { CODE_BLOCK_MAX_RECENT_LANGUAGES, CODE_BLOCK_RECENT_LANGUAGE_STORAGE_KEY, CODE_BLOCK_SUPPORTED_LANGUAGE_VALUES, CODE_BLOCK_SUPPORTED_LANGUAGES } from "@constants/web/flashcard";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { CodeBlockContent } from "./CodeBlockContent";
 import { normalizeEditorLanguage } from "./codeBlockLanguage";
 import type { CodeBlockData } from "@/types/core/code-block";
@@ -177,15 +178,13 @@ export const CodeBlockEditor = ({
 
   return (
     <CodeBlockContent
-      mode="editor"
-      code={code}
-      language={normalizedLanguage}
-      onCodeChange={(nextCode) =>
-        onChange({ language: normalizedLanguage, code: nextCode })
-      }
-      headerLeft={languageSelector}
+      value={{ language: normalizedLanguage, code }}
+      onChange={(nextCode) => {
+        onChange({ language: normalizedLanguage, code: nextCode });
+      }}
       className={className}
       zoom={zoom}
+      languageSelector={languageSelector}
     />
   );
 };
