@@ -1,4 +1,4 @@
-import type { GoogleCalendarEvent, GoogleCalendarListItem } from "../gcalSync.types";
+import type { GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 export type GoogleCalendarEventsState = Map<string, Map<string, GoogleCalendarEvent>>;
 

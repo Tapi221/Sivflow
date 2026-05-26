@@ -1,5 +1,5 @@
 import { addDays, format, startOfDay } from "date-fns";
-import type { GoogleCalendarEvent } from "../../integration/googlecalendar-integration/gcalSync.types";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 const toDate = (value: Date): Date | null => {
   const date = value instanceof Date ? value : new Date(value);

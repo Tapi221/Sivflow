@@ -1,8 +1,9 @@
+/* eslint-disable react-refresh/only-export-components */
 import { DndContext, DragOverlay, useDroppable } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
-import type { Task } from "../../calendar/task/task.types";
+import type { Task } from "@/features/calendar/task/task.types";
 import { useTaskBoardDnd } from "./useTaskBoardDnd";
 
 type TaskBoardDndState = ReturnType<typeof useTaskBoardDnd>;

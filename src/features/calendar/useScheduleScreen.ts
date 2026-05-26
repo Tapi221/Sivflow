@@ -3,14 +3,14 @@ import { useCallback, useState } from "react";
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type { CalendarToolbarMode, CalendarViewMode, GoogleAccountDisplay, TimelineGridStyle } from "./scheduleScreen.types";
-import type { GoogleCalendarEvent } from "../../integration/googlecalendar-integration/gcalSync.types";
-import type { buildTimelineColumns, TimelineUnitBuffer } from "./grid/TimelineDayView.shared";
-import { useCalendarLayout } from "./layout/calendar/useCalendarLayout.desktop";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+import type { buildTimelineColumns, TimelineUnitBuffer } from "@/features/calendar/grid/TimelineDayView.shared";
+import { useCalendarLayout } from "@/features/calendar/layout/calendar/useCalendarLayout.desktop";
 import { useCalendarNavigation } from "./useCalendarNavigation";
-import { useCalendarScrollController } from "../scroll/schedule/hooks/useCalendarScrollController";
+import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
-import { useTimelineGrid } from "./grid/useTimelineGrid";
+import { useTimelineGrid } from "@/features/calendar/grid/useTimelineGrid";
 
 export type UseScheduleScreenReturn = {
   contentViewportRef: RefObject<HTMLDivElement | null>;

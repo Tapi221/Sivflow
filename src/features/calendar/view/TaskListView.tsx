@@ -4,8 +4,8 @@ import { TaskPriorityBadge } from "@/chip/budge/TaskPriorityBadge";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { TaskStatusDot } from "@/chip/icon/TaskStatusDot";
 import { cn } from "@/lib/utils";
-import { TASK_COLUMNS, CATEGORY_CONFIG } from "../task/task.types";
-import type { Task, TaskStatus } from "../task/task.types";
+import { TASK_COLUMNS, CATEGORY_CONFIG } from "@/features/calendar/task/task.types";
+import type { Task, TaskStatus } from "@/features/calendar/task/task.types";
 
 type TaskListViewProps = {
   tasks: Task[];

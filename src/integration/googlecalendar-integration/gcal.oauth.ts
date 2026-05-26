@@ -367,7 +367,7 @@ const waitForWebPopupCode = (
 ): Promise<string> => new Promise((resolve, reject) => {
   const expected = new URL(redirectUri);
   let settled = false;
-  let pollTimer: number | undefined;
+  const pollTimer: number | undefined;
 
   const cleanup = (): void => {
     if (pollTimer !== undefined) window.clearInterval(pollTimer);

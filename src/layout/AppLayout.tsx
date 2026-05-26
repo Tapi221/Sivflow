@@ -7,8 +7,8 @@ import { Sidebar } from "@/pane/leftpane/Sidebar.desktop";
 import { useWorkspaceTabsRouteSync } from "@/features/tab/hooks/useTabsRouteSync";
 import { isDesktopRuntime } from "@/platform/runtime";
 import "./AppLayout.css";
-import { useLayoutRouteStateDesktop } from "./hooks/useLayoutRouteState.desktop";
-import { useResetWorkspaceScrollDesktop } from "./hooks/useResetWorkspaceScroll.desktop";
+import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
+import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
 import { WorkspaceShell } from "./WorkspaceShell";
 
 export const AppLayout = () => {

@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { format } from "date-fns";
-import { CATEGORY_CONFIG, PRIORITY_CONFIG } from "../task.types";
-import type { Task } from "../task.types";
+import { CATEGORY_CONFIG, PRIORITY_CONFIG } from "@/features/calendar/task/task.types";
+import type { Task } from "@/features/calendar/task/task.types";
 
 type UseTaskCardParams = {
   task: Task;

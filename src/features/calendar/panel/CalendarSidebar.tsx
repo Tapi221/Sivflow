@@ -5,8 +5,8 @@ import { CalendarIcon, TaskIcon } from "@/chip/icons/icons.schedule";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
-import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay } from "../scheduleScreen.types";
-import { SidebarLayeredDirectory } from "../../../pane/leftpane/Sidebar.LayeredDirectory";
+import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
+import { SidebarLayeredDirectory } from "@/pane/leftpane/Sidebar.LayeredDirectory";
 import { MiniCalendarSection } from "./MiniCalendarSection";
 import { SelectableGoogleSourceRow } from "./SelectableGoogleSourceRow";
 

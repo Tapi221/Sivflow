@@ -1,4 +1,4 @@
-import type { Task } from "../../calendar/task/task.types";
+import type { Task } from "@/features/calendar/task/task.types";
 import type { TaskDragEvent, TaskDropTarget, VerticalDropPosition } from "./taskDnd.types";
 
 const toColumnId = (value: unknown): string | null => {

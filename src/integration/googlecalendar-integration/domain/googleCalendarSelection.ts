@@ -1,4 +1,4 @@
-import type { GoogleCalendarListItem } from "../gcalSync.types";
+import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 export type CachedGoogleCalendar = {
   id: string;

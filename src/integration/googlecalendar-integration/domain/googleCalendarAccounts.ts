@@ -1,4 +1,4 @@
-import type { GCalConnectionStatus, GCalSyncState, GoogleCalendarListItem } from "../gcalSync.types";
+import type { GCalConnectionStatus, GCalSyncState, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 export type GoogleAccountEntry = {
   id: string;

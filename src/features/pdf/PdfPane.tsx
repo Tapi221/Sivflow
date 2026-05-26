@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import * as C from "@/features/pdf/pdf.constants.desktop";
-import { usePdfWorkspace } from "./hooks/usePdfWorkspace";
+import { usePdfWorkspace } from "@/features/pdf/hooks/usePdfWorkspace";
 import { PdfOverlayToolbar } from "./PdfToolbar";
 import { PdfThumbnailSidePanel } from "./PdfThumbnailSidePanel";
 import type { PdfViewerHandle } from "./PdfViewer";

@@ -1,8 +1,8 @@
 import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import type { TaskCreateInput, TaskPriority, TaskStatus, TaskSubtask } from "../../features/calendar/task/task.types";
-import { CATEGORY_CONFIG, PRIORITY_CONFIG, TASK_COLUMNS } from "../../features/calendar/task/task.types";
+import type { TaskCreateInput, TaskPriority, TaskStatus, TaskSubtask } from "@/features/calendar/task/task.types";
+import { CATEGORY_CONFIG, PRIORITY_CONFIG, TASK_COLUMNS } from "@/features/calendar/task/task.types";
 
 type TaskCategoryOption = {
   id: string;
