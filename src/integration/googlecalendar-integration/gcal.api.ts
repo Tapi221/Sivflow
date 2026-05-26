@@ -1,5 +1,5 @@
 import type { GoogleCalendarApiEventsResponse, GoogleCalendarApiListResponse, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
-import { createGoogleApiError } from "./googleApiRetry";
+import { createGoogleApiError } from "@/integration/google-integration/googleApiRetry";
 
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
 
