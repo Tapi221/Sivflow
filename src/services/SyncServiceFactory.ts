@@ -1,10 +1,10 @@
-import type { ISyncService } from "./interfaces/ISyncService";
+import type { ISyncService } from "@/services/interfaces/ISyncService";
 import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from "./localDB";
-import { CloudSyncAdapter } from "./logic/CloudSyncAdapter";
-import { DiffEngine } from "./logic/DiffEngine";
-import { NetworkMonitor } from "./logic/NetworkMonitor";
-import { QueueManager } from "./logic/QueueManager";
-import { TelemetryService } from "./logic/TelemetryService";
+import { CloudSyncAdapter } from "@/services/logic/CloudSyncAdapter";
+import { DiffEngine } from "@/services/logic/DiffEngine";
+import { NetworkMonitor } from "@/services/logic/NetworkMonitor";
+import { QueueManager } from "@/services/logic/QueueManager";
+import { TelemetryService } from "@/services/logic/TelemetryService";
 import { SyncServiceV2 } from "./SyncServiceV2";
 import type { SyncContextSource } from "@/types/domain/telemetry";
 
