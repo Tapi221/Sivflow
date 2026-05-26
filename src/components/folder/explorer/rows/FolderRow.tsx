@@ -197,39 +197,41 @@ export const FolderRow: React.FC<FolderRowProps> = ({
         )}
         contentClassName={EXPLORER_ROW_CONTENT_CLASS}
         leading={
-          hasExpandableContent ? (
-            <button
-              type="button"
-              className="grid h-4 w-4 place-items-center"
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggle();
-              }}
-              aria-label={
-                isExpanded ? "フォルダを折りたたむ" : "フォルダを展開する"
-              }
-            >
-              {isExpanded ? (
-                <ChevronDown
-                  className={cn(
-                    "sidebar-icon ds-list-item__icon",
-                    FOLDER_ROW_ICON_SIZE_CLASS,
-                    FOLDER_ROW_ICON_MUTED_CLASS,
-                    isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
-                  )}
-                />
-              ) : (
-                <ChevronRight
-                  className={cn(
-                    "sidebar-icon ds-list-item__icon",
-                    FOLDER_ROW_ICON_SIZE_CLASS,
-                    FOLDER_ROW_ICON_MUTED_CLASS,
-                    isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
-                  )}
-                />
-              )}
-            </button>
-          ) : null
+          <button
+            type="button"
+            className="grid h-4 w-4 place-items-center"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
+            aria-label={
+              isExpanded
+                ? "フォルダを折りたたむ"
+                : hasExpandableContent
+                  ? "フォルダを展開する"
+                  : "空のフォルダを展開する"
+            }
+          >
+            {isExpanded ? (
+              <ChevronDown
+                className={cn(
+                  "sidebar-icon ds-list-item__icon",
+                  FOLDER_ROW_ICON_SIZE_CLASS,
+                  FOLDER_ROW_ICON_MUTED_CLASS,
+                  isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
+                )}
+              />
+            ) : (
+              <ChevronRight
+                className={cn(
+                  "sidebar-icon ds-list-item__icon",
+                  FOLDER_ROW_ICON_SIZE_CLASS,
+                  FOLDER_ROW_ICON_MUTED_CLASS,
+                  isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
+                )}
+              />
+            )}
+          </button>
         }
         leadingClassName={EXPLORER_ROW_LEADING_SLOT_CLASS}
         leadingStyle={nestedToggleOffsetStyle}
