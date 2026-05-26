@@ -156,7 +156,7 @@ export const CalendarPieChartView = ({
   const hasSegments = segments.length > 0;
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-[#fbfbfd] px-6 pb-6 pt-5 text-[#1c1c1e]", className)}>
+    <div className={cn("flex h-full min-h-0 flex-col bg-white px-6 pb-6 pt-5 text-[#1c1c1e]", className)}>
       <div className="mb-5 flex shrink-0 items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-[12px] font-semibold text-[#8e8e93]">
@@ -178,7 +178,7 @@ export const CalendarPieChartView = ({
         <section className="flex min-h-0 flex-col rounded-[28px] border border-[#eeeeee] bg-white p-5 shadow-[0_14px_34px_rgba(15,23,42,0.05)]">
           <div className="mb-3 flex items-center justify-between gap-3">
             <h3 className="text-[13px] font-bold text-[#3a3a3c]">カテゴリ別の時間</h3>
-            <span className="rounded-full bg-[#f6f6f7] px-3 py-1 text-[11px] font-semibold text-[#8e8e93]">
+            <span className="rounded-full border border-[#eeeeee] bg-white px-3 py-1 text-[11px] font-semibold text-[#8e8e93]">
               {segments.length}項目
             </span>
           </div>
@@ -222,7 +222,7 @@ export const CalendarPieChartView = ({
                 </div>
               </>
             ) : (
-              <div className="flex h-full min-h-[360px] items-center justify-center rounded-[24px] border border-dashed border-[#dedede] bg-[#fbfbfd] text-center">
+              <div className="flex h-full min-h-[360px] items-center justify-center rounded-[24px] border border-dashed border-[#dedede] bg-white text-center">
                 <div>
                   <p className="text-[15px] font-bold text-[#6e6e73]">この日の予定はありません</p>
                   <p className="mt-2 text-[12px] font-medium text-[#a1a1a6]">
@@ -243,7 +243,7 @@ export const CalendarPieChartView = ({
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
             {hasSegments ? (
               segments.map((segment) => (
-                <div key={segment.id} className="rounded-2xl border border-[#f0f0f0] bg-[#fbfbfd] p-3">
+                <div key={segment.id} className="rounded-2xl border border-[#f0f0f0] bg-white p-3">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-2">
                       <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: segment.color }} />
@@ -263,7 +263,7 @@ export const CalendarPieChartView = ({
                 </div>
               ))
             ) : (
-              <div className="rounded-2xl bg-[#fbfbfd] p-4 text-[12px] font-semibold text-[#9a9a9a]">
+              <div className="rounded-2xl border border-[#eeeeee] bg-white p-4 text-[12px] font-semibold text-[#9a9a9a]">
                 表示できる予定がありません。
               </div>
             )}
