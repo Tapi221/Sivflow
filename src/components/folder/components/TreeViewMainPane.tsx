@@ -1,6 +1,6 @@
 import { RightPane } from "@/components/folder/panes/RightPane";
 import { cn } from "@/lib/utils";
-import type { Card, DocumentItem, SelectedExplorerItem } from "@/types";
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 interface TreeViewMainPaneProps {
   showMobileDetail: boolean;
@@ -10,6 +10,9 @@ interface TreeViewMainPaneProps {
   selectedDocument: DocumentItem | null;
   selectedFolderId: string | null;
   selectedFolderName: string;
+  folders: Folder[];
+  cards: Card[];
+  documents: DocumentItem[];
   folderCards: Card[];
   onCardUpdated: () => void;
   onDocumentUpdated: (
