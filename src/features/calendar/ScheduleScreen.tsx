@@ -30,7 +30,7 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
 const DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS =
   "absolute right-4 top-2 z-50 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg border border-transparent bg-transparent p-0 text-[#8c8c8c] shadow-none appearance-none select-none outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:text-[#8c8c8c] focus:outline-none focus:ring-0 focus-visible:outline-none motion-reduce:transition-none";
 
-const DAY_DETAIL_PANEL_WIDTH_PX = 260;
+const DAY_DETAIL_PANEL_WIDTH_PX = 269;
 const DAY_DETAIL_PANEL_MIN_CALENDAR_WIDTH_PX = 720;
 const DAY_DETAIL_PANEL_AUTO_OPEN_MIN_BODY_WIDTH_PX =
   DAY_DETAIL_PANEL_WIDTH_PX + DAY_DETAIL_PANEL_MIN_CALENDAR_WIDTH_PX;
