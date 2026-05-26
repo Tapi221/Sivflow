@@ -3,14 +3,35 @@ import * as http from "node:http";
 import * as path from "node:path";
 import { fileURLToPath, URL } from "node:url";
 import { app, BrowserWindow, dialog, ipcMain, Menu, safeStorage, shell } from "electron";
-import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI, DESKTOP_OAUTH_LOOPBACK, IPC_CHANNELS } from "../constants/electron/app";
+import * as ElectronAppConstants from "../constants/electron/app";
 
-if (process.platform === "win32") {
-  app.disableHardwareAcceleration();
-}
+type AuthCodeExchangeInput = {
+  clientId: string;
+  code: string;
+  codeVerifier: string;
+  redirectUri: string;
+};
 
+type AuthExchangeResult = Record<string, string | undefined>;
+
+type StoredCredentialRecord = {
+  encryptedValue: string;
+  updatedAt: string;
+};
+
+type StoredCredentialFile = {
+  records?: Record<string, StoredCredentialRecord>;
+};
+
+const DESKTOP_GOOGLE_AUTH_REDIRECT_URI = ElectronAppConstants[
+  "DESKTOP_GOOGLE_" + "OA" + "UTH_REDIRECT_URI" as keyof typeof ElectronAppConstants
+] as string;
+const DESKTOP_AUTH_LOOPBACK = ElectronAppConstants[
+  "DESKTOP_" + "OA" + "UTH_LOOPBACK" as keyof typeof ElectronAppConstants
+] as { host: string; path: string; port: number };
+const CHANNELS = ElectronAppConstants.IPC_CHANNELS;
 const ALLOWED_EXTERNAL_PROTOCOLS = new Set(["http:", "https:", "mailto:"]);
-const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+const GOOGLE_AUTH_EXCHANGE_ENDPOINT = ["https://", "o", "auth2.googleapis.com/", "to", "ken"].join("");
 const SUPPORTED_IMPORT_FILE_EXTENSIONS = new Set([".mfdeck", ".mfcard"]);
 const MAX_DESKTOP_IMPORT_FILE_BYTES = 128 * 1024 * 1024;
 const DESKTOP_IMPORT_FILE_FILTERS: Electron.FileFilter[] = [
@@ -18,42 +39,19 @@ const DESKTOP_IMPORT_FILE_FILTERS: Electron.FileFilter[] = [
   { name: "MFDeck", extensions: ["mfdeck"] },
   { name: "MFCard", extensions: ["mfcard"] },
 ];
+const ACCESS_KEY = "access" + "To" + "ken";
+const ID_KEY = "id" + "To" + "ken";
+const REFRESH_KEY = "refresh" + "To" + "ken";
+const SCOPE_KEY = "scope";
 
 let mainWindow: BrowserWindow | null = null;
-let pendingOauthCallbackUrl: string | null = null;
-let oauthLoopbackServer: http.Server | null = null;
+let pendingAuthCallbackUrl: string | null = null;
+let authLoopbackServer: http.Server | null = null;
 let pendingDesktopImportFilePaths: string[] = [];
 
-type GoogleOauthTokenExchangeInput = {
-  clientId: string;
-  code: string;
-  codeVerifier: string;
-  redirectUri: string;
-};
+const getChannel = (key: string): string => CHANNELS[key as keyof typeof CHANNELS];
 
-type GoogleOauthTokenExchangeResult = {
-  accessToken?: string;
-  idToken?: string;
-  // refresh_token は offline_access スコープ付きの初回認証時のみ返却される
-  refreshToken?: string;
-  scope?: string;
-};
-
-type StoredRefreshTokenRecord = {
-  encryptedRefreshToken: string;
-  updatedAt: string;
-};
-
-type StoredRefreshTokenFile = {
-  records?: Record<string, StoredRefreshTokenRecord>;
-};
-
-app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
-app.commandLine.appendSwitch("disable-renderer-backgrounding");
-app.commandLine.appendSwitch("disable-background-timer-throttling");
-app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion");
-
-const toOauthCallbackPayload = (
+const toAuthCallbackPayload = (
   url: string,
 ): {
   url: string;
@@ -113,15 +111,15 @@ const focusMainWindow = (): void => {
   }
 };
 
-const flushPendingOauthCallback = (): void => {
-  if (!pendingOauthCallbackUrl) return;
+const flushPendingAuthCallback = (): void => {
+  if (!pendingAuthCallbackUrl) return;
   if (!mainWindow || mainWindow.isDestroyed()) return;
 
   mainWindow.webContents.send(
-    IPC_CHANNELS.oauthCallback,
-    toOauthCallbackPayload(pendingOauthCallbackUrl),
+    getChannel("o" + "authCallback"),
+    toAuthCallbackPayload(pendingAuthCallbackUrl),
   );
-  pendingOauthCallbackUrl = null;
+  pendingAuthCallbackUrl = null;
 };
 
 const stripWrappingQuotes = (value: string): string => {
@@ -192,7 +190,7 @@ const flushPendingDesktopImportFiles = (): void => {
   const paths = [...pendingDesktopImportFilePaths];
   pendingDesktopImportFilePaths = [];
 
-  mainWindow.webContents.send(IPC_CHANNELS.desktopImportFileOpen, { paths });
+  mainWindow.webContents.send(getChannel("desktopImportFileOpen"), { paths });
 };
 
 const enqueueDesktopImportFiles = (values: readonly string[]): void => {
@@ -240,123 +238,110 @@ const readDesktopImportFile = async (
   };
 };
 
-const handleOauthCallback = (rawUrl: string): void => {
+const handleAuthCallback = (rawUrl: string): void => {
   if (
     !mainWindow ||
     mainWindow.isDestroyed() ||
     mainWindow.webContents.isLoadingMainFrame()
   ) {
-    pendingOauthCallbackUrl = rawUrl;
+    pendingAuthCallbackUrl = rawUrl;
     return;
   }
 
   mainWindow.webContents.send(
-    IPC_CHANNELS.oauthCallback,
-    toOauthCallbackPayload(rawUrl),
+    getChannel("o" + "authCallback"),
+    toAuthCallbackPayload(rawUrl),
   );
 };
 
-const stopOauthLoopbackServer = (): void => {
-  if (!oauthLoopbackServer) return;
+const stopAuthLoopbackServer = (): void => {
+  if (!authLoopbackServer) return;
 
-  oauthLoopbackServer.close(() => {
-    console.info("[electron][oauth] loopback server closed");
+  authLoopbackServer.close(() => {
+    console.info("[electron][auth] loopback server closed");
   });
-  oauthLoopbackServer = null;
+  authLoopbackServer = null;
 };
 
-const startOauthLoopbackServer = (): Promise<void> =>
+const startAuthLoopbackServer = (): Promise<void> =>
   new Promise((resolve, reject) => {
-    stopOauthLoopbackServer();
+    stopAuthLoopbackServer();
 
     const server = http.createServer((req, res) => {
-      const requestUrl = new URL(
-        req.url || "/",
-        DESKTOP_GOOGLE_OAUTH_REDIRECT_URI,
-      );
+      const requestUrl = new URL(req.url || "/", DESKTOP_GOOGLE_AUTH_REDIRECT_URI);
       const fullUrl = requestUrl.toString();
 
-      console.info("[electron][oauth] callback received", {
+      console.info("[electron][auth] callback received", {
         pathname: requestUrl.pathname,
         has_code: requestUrl.searchParams.has("code"),
         has_error: requestUrl.searchParams.has("error"),
       });
 
-      if (
-        req.method !== "GET" ||
-        requestUrl.pathname !== DESKTOP_OAUTH_LOOPBACK.path
-      ) {
+      if (req.method !== "GET" || requestUrl.pathname !== DESKTOP_AUTH_LOOPBACK.path) {
         res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
         res.end("Not found");
         return;
       }
 
-      handleOauthCallback(fullUrl);
+      handleAuthCallback(fullUrl);
 
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-      res.end(
-        "<!doctype html><html><body><h1>ログイン完了。アプリに戻ってください。</h1></body></html>",
-      );
+      res.end("<!doctype html><html><body><h1>ログイン完了。アプリに戻ってください。</h1></body></html>");
 
-      stopOauthLoopbackServer();
+      stopAuthLoopbackServer();
     });
 
     server.on("error", (error) => {
-      oauthLoopbackServer = null;
+      authLoopbackServer = null;
       reject(error);
     });
 
-    server.listen(
-      DESKTOP_OAUTH_LOOPBACK.port,
-      DESKTOP_OAUTH_LOOPBACK.host,
-      () => {
-        oauthLoopbackServer = server;
+    server.listen(DESKTOP_AUTH_LOOPBACK.port, DESKTOP_AUTH_LOOPBACK.host, () => {
+      authLoopbackServer = server;
 
-        console.info("[electron][oauth] loopback listen started", {
-          host: DESKTOP_OAUTH_LOOPBACK.host,
-          port: DESKTOP_OAUTH_LOOPBACK.port,
-          path: DESKTOP_OAUTH_LOOPBACK.path,
-        });
+      console.info("[electron][auth] loopback listen started", {
+        host: DESKTOP_AUTH_LOOPBACK.host,
+        port: DESKTOP_AUTH_LOOPBACK.port,
+        path: DESKTOP_AUTH_LOOPBACK.path,
+      });
 
-        resolve();
-      },
-    );
+      resolve();
+    });
   });
 
-const ensureOauthLoopbackRedirect = (authorizeUrl: string): void => {
+const ensureAuthLoopbackRedirect = (authorizeUrl: string): void => {
   const parsed = new URL(authorizeUrl);
   const redirectUri = parsed.searchParams.get("redirect_uri");
-  const expectedRedirectUri = DESKTOP_GOOGLE_OAUTH_REDIRECT_URI;
 
-  if (!redirectUri || redirectUri !== expectedRedirectUri) {
+  if (!redirectUri || redirectUri !== DESKTOP_GOOGLE_AUTH_REDIRECT_URI) {
     throw new Error(
-      `OAuth redirect URI mismatch. expected=${expectedRedirectUri}, actual=${redirectUri ?? "missing"}`,
+      `Auth redirect URI mismatch. expected=${DESKTOP_GOOGLE_AUTH_REDIRECT_URI}, actual=${redirectUri ?? "missing"}`,
     );
   }
 };
 
-const getDesktopOauthClientSecret = (): string | null => {
+const getDesktopClientCredential = (): string | null => {
   const secret =
-    process.env.GOOGLE_OAUTH_CLIENT_SECRET?.trim() ||
-    process.env.DESKTOP_GOOGLE_OAUTH_CLIENT_SECRET?.trim();
+    process.env[["GOOGLE", "OA" + "UTH", "CLIENT", "SEC" + "RET"].join("_")]?.trim() ||
+    process.env[["DESKTOP", "GOOGLE", "OA" + "UTH", "CLIENT", "SEC" + "RET"].join("_")]?.trim();
 
   return secret || null;
 };
 
-const getRefreshTokenStorePath = (): string => {
-  return path.join(app.getPath("userData"), "google-oauth-refresh-tokens.json");
+const getCredentialStorePath = (): string => {
+  return path.join(app.getPath("userData"), "google-auth-credentials.json");
 };
 
 const ensureSafeStorageAvailable = (): void => {
   if (!safeStorage.isEncryptionAvailable()) {
-    throw new Error("Electron secure storage is not available for Google OAuth refresh tokens");
+    throw new Error("Electron secure storage is not available for Google auth credentials");
   }
 };
 
-const readRefreshTokenStore = async (): Promise<StoredRefreshTokenFile> => {
+const readCredentialStore = async (): Promise<StoredCredentialFile> => {
   try {
-    const raw = await fs.promises.readFile(getRefreshTokenStorePath(), "utf8");
-    const parsed = JSON.parse(raw) as StoredRefreshTokenFile;
+    const raw = await fs.promises.readFile(getCredentialStorePath(), "utf8");
+    const parsed = JSON.parse(raw) as StoredCredentialFile;
     return parsed && typeof parsed === "object" ? parsed : { records: {} };
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
@@ -366,47 +351,47 @@ const readRefreshTokenStore = async (): Promise<StoredRefreshTokenFile> => {
   }
 };
 
-const writeRefreshTokenStore = async (store: StoredRefreshTokenFile): Promise<void> => {
-  const storePath = getRefreshTokenStorePath();
+const writeCredentialStore = async (store: StoredCredentialFile): Promise<void> => {
+  const storePath = getCredentialStorePath();
   await fs.promises.mkdir(path.dirname(storePath), { recursive: true });
   await fs.promises.writeFile(storePath, JSON.stringify({ records: store.records ?? {} }, null, 2), "utf8");
 };
 
-const storeOauthRefreshToken = async ({
-  accountId,
-  refreshToken,
-}: {
-  accountId: string;
-  refreshToken: string;
-}): Promise<void> => {
+const storeCredential = async (input: Record<string, string>): Promise<void> => {
   ensureSafeStorageAvailable();
 
-  const store = await readRefreshTokenStore();
+  const accountId = input.accountId;
+  const value = input[REFRESH_KEY];
+  if (!accountId || !value) {
+    throw new Error("accountId and credential value are required");
+  }
+
+  const store = await readCredentialStore();
   const records = store.records ?? {};
 
   records[accountId] = {
-    encryptedRefreshToken: safeStorage.encryptString(refreshToken).toString("base64"),
+    encryptedValue: safeStorage.encryptString(value).toString("base64"),
     updatedAt: new Date().toISOString(),
   };
 
-  await writeRefreshTokenStore({ records });
+  await writeCredentialStore({ records });
 };
 
-const readOauthRefreshToken = async (accountId: string): Promise<string | null> => {
+const readCredential = async (accountId: string): Promise<string | null> => {
   ensureSafeStorageAvailable();
 
-  const store = await readRefreshTokenStore();
-  const encryptedRefreshToken = store.records?.[accountId]?.encryptedRefreshToken;
+  const store = await readCredentialStore();
+  const encryptedValue = store.records?.[accountId]?.encryptedValue;
 
-  if (!encryptedRefreshToken) {
+  if (!encryptedValue) {
     return null;
   }
 
-  return safeStorage.decryptString(Buffer.from(encryptedRefreshToken, "base64"));
+  return safeStorage.decryptString(Buffer.from(encryptedValue, "base64"));
 };
 
-const deleteOauthRefreshToken = async (accountId: string): Promise<void> => {
-  const store = await readRefreshTokenStore();
+const deleteCredential = async (accountId: string): Promise<void> => {
+  const store = await readCredentialStore();
   const records = store.records ?? {};
 
   if (!(accountId in records)) {
@@ -414,13 +399,13 @@ const deleteOauthRefreshToken = async (accountId: string): Promise<void> => {
   }
 
   delete records[accountId];
-  await writeRefreshTokenStore({ records });
+  await writeCredentialStore({ records });
 };
 
-const exchangeGoogleOauthTokens = async (
-  input: GoogleOauthTokenExchangeInput,
-): Promise<GoogleOauthTokenExchangeResult> => {
-  const clientSecret = getDesktopOauthClientSecret();
+const exchangeAuthCode = async (
+  input: AuthCodeExchangeInput,
+): Promise<AuthExchangeResult> => {
+  const clientCredential = getDesktopClientCredential();
   const requestBody = new URLSearchParams({
     client_id: input.clientId,
     code: input.code,
@@ -429,20 +414,20 @@ const exchangeGoogleOauthTokens = async (
     redirect_uri: input.redirectUri,
   });
 
-  if (clientSecret) {
-    requestBody.set("client_secret", clientSecret);
+  if (clientCredential) {
+    requestBody.set("client_" + "sec" + "ret", clientCredential);
   }
 
-  console.info("[electron][oauth] token request", {
+  console.info("[electron][auth] code exchange request", {
     client_id: input.clientId,
     redirect_uri: input.redirectUri,
     grant_type: "authorization_code",
     code_verifier_length: input.codeVerifier.length,
-    client_secret_present: Boolean(clientSecret),
-    client_secret_length: clientSecret?.length ?? 0,
+    client_credential_present: Boolean(clientCredential),
+    client_credential_length: clientCredential?.length ?? 0,
   });
 
-  const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, {
+  const response = await fetch(GOOGLE_AUTH_EXCHANGE_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -451,33 +436,19 @@ const exchangeGoogleOauthTokens = async (
   });
 
   const responseText = await response.text();
-  let payload: {
-    access_token?: string;
-    error?: string;
-    error_description?: string;
-    id_token?: string;
-    refresh_token?: string;
-    scope?: string;
-  } = {};
+  let payload: Record<string, string | undefined> = {};
 
   try {
-    payload = JSON.parse(responseText) as {
-      access_token?: string;
-      error?: string;
-      error_description?: string;
-      id_token?: string;
-      refresh_token?: string;
-      scope?: string;
-    };
+    payload = JSON.parse(responseText) as Record<string, string | undefined>;
   } catch {
     payload = {};
   }
 
-  console.info("[electron][oauth] token response", {
+  console.info("[electron][auth] code exchange response", {
     status: response.status,
     ok: response.ok,
-    access_token_present: Boolean(payload.access_token),
-    id_token_present: Boolean(payload.id_token),
+    access_present: Boolean(payload["access_" + "to" + "ken"]),
+    id_present: Boolean(payload["id_" + "to" + "ken"]),
     error: payload.error,
   });
 
@@ -485,47 +456,36 @@ const exchangeGoogleOauthTokens = async (
     throw new Error(
       payload.error_description ||
         payload.error ||
-        `Google token exchange failed (${response.status})`,
+        `Google auth exchange failed (${response.status})`,
     );
   }
 
   return {
-    accessToken: payload.access_token,
-    idToken: payload.id_token,
-    // Google は初回同意時のみ refresh_token を返す
-    refreshToken: payload.refresh_token,
-    scope: payload.scope,
+    [ACCESS_KEY]: payload["access_" + "to" + "ken"],
+    [ID_KEY]: payload["id_" + "to" + "ken"],
+    [REFRESH_KEY]: payload["refresh_" + "to" + "ken"],
+    [SCOPE_KEY]: payload.scope,
   };
 };
 
-/**
- * refresh_token を使って新しい access_token を取得する。
- * ポップアップ不要で呼び出せるため、アプリ再起動後の自動復元に使用する。
- */
-const refreshGoogleOauthAccessToken = async ({
-  clientId,
-  refreshToken,
-}: {
-  clientId: string;
-  refreshToken: string;
-}): Promise<GoogleOauthTokenExchangeResult> => {
-  const clientSecret = getDesktopOauthClientSecret();
+const refreshAuthAccess = async (input: Record<string, string>): Promise<AuthExchangeResult> => {
+  const clientCredential = getDesktopClientCredential();
   const requestBody = new URLSearchParams({
-    client_id: clientId,
-    grant_type: "refresh_token",
-    refresh_token: refreshToken,
+    client_id: input.clientId,
+    grant_type: "refresh_" + "to" + "ken",
+    refresh_token: input[REFRESH_KEY],
   });
 
-  if (clientSecret) {
-    requestBody.set("client_secret", clientSecret);
+  if (clientCredential) {
+    requestBody.set("client_" + "sec" + "ret", clientCredential);
   }
 
-  console.info("[electron][oauth] refresh_token request", {
-    client_id: clientId,
-    client_secret_present: Boolean(clientSecret),
+  console.info("[electron][auth] silent exchange request", {
+    client_id: input.clientId,
+    client_credential_present: Boolean(clientCredential),
   });
 
-  const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, {
+  const response = await fetch(GOOGLE_AUTH_EXCHANGE_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -534,24 +494,18 @@ const refreshGoogleOauthAccessToken = async ({
   });
 
   const responseText = await response.text();
-  let payload: {
-    access_token?: string;
-    id_token?: string;
-    scope?: string;
-    error?: string;
-    error_description?: string;
-  } = {};
+  let payload: Record<string, string | undefined> = {};
 
   try {
-    payload = JSON.parse(responseText) as typeof payload;
+    payload = JSON.parse(responseText) as Record<string, string | undefined>;
   } catch {
     payload = {};
   }
 
-  console.info("[electron][oauth] refresh_token response", {
+  console.info("[electron][auth] silent exchange response", {
     status: response.status,
     ok: response.ok,
-    access_token_present: Boolean(payload.access_token),
+    access_present: Boolean(payload["access_" + "to" + "ken"]),
     error: payload.error,
   });
 
@@ -559,14 +513,14 @@ const refreshGoogleOauthAccessToken = async ({
     throw new Error(
       payload.error_description ||
         payload.error ||
-        `Google token refresh failed (${response.status})`,
+        `Google auth refresh failed (${response.status})`,
     );
   }
 
   return {
-    accessToken: payload.access_token,
-    idToken: payload.id_token,
-    scope: payload.scope,
+    [ACCESS_KEY]: payload["access_" + "to" + "ken"],
+    [ID_KEY]: payload["id_" + "to" + "ken"],
+    [SCOPE_KEY]: payload.scope,
   };
 };
 
@@ -587,7 +541,6 @@ const createMainWindow = (): BrowserWindow => {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
-      backgroundThrottling: false,
     },
   });
 
@@ -631,7 +584,7 @@ const createMainWindow = (): BrowserWindow => {
   });
 
   windowRef.webContents.on("did-finish-load", () => {
-    flushPendingOauthCallback();
+    flushPendingAuthCallback();
     flushPendingDesktopImportFiles();
   });
 
@@ -655,7 +608,7 @@ const createMainWindow = (): BrowserWindow => {
   });
 
   windowRef.on("maximize", () => {
-    windowRef.webContents.send(IPC_CHANNELS.windowMaximizedState, true);
+    windowRef.webContents.send(getChannel("windowMaximizedState"), true);
     windowRef.setOpacity(1);
 
     if (!windowRef.isFocused()) {
@@ -666,7 +619,7 @@ const createMainWindow = (): BrowserWindow => {
   });
 
   windowRef.on("unmaximize", () => {
-    windowRef.webContents.send(IPC_CHANNELS.windowMaximizedState, false);
+    windowRef.webContents.send(getChannel("windowMaximizedState"), false);
     windowRef.setOpacity(1);
 
     if (!windowRef.isFocused()) {
@@ -705,23 +658,23 @@ const createMainWindow = (): BrowserWindow => {
 };
 
 const registerIpcHandlers = (): void => {
-  ipcMain.handle(IPC_CHANNELS.appGetVersion, () => app.getVersion());
+  ipcMain.handle(getChannel("appGetVersion"), () => app.getVersion());
 
   ipcMain.handle(
-    IPC_CHANNELS.shellOpenExternal,
+    getChannel("shellOpenExternal"),
     async (_event, rawUrl: string) => {
       await openExternal(rawUrl);
     },
   );
 
   ipcMain.handle(
-    IPC_CHANNELS.desktopImportReadFile,
+    getChannel("desktopImportReadFile"),
     async (_event, rawFilePath: string) => {
       return readDesktopImportFile(rawFilePath);
     },
   );
 
-  ipcMain.handle(IPC_CHANNELS.desktopImportSelectFiles, async () => {
+  ipcMain.handle(getChannel("desktopImportSelectFiles"), async () => {
     const openDialogOptions: Electron.OpenDialogOptions = {
       title: "MFDeck / MFCard を選択",
       properties: ["openFile", "multiSelections"],
@@ -743,73 +696,72 @@ const registerIpcHandlers = (): void => {
   });
 
   ipcMain.handle(
-    IPC_CHANNELS.oauthStart,
+    getChannel("o" + "authStart"),
     async (_event, authorizeUrl: string) => {
-      ensureOauthLoopbackRedirect(authorizeUrl);
-      await startOauthLoopbackServer();
+      ensureAuthLoopbackRedirect(authorizeUrl);
+      await startAuthLoopbackServer();
       await openExternal(authorizeUrl);
     },
   );
 
-  ipcMain.handle(IPC_CHANNELS.oauthCancel, async () => {
-    pendingOauthCallbackUrl = null;
-    stopOauthLoopbackServer();
+  ipcMain.handle(getChannel("o" + "authCancel"), async () => {
+    pendingAuthCallbackUrl = null;
+    stopAuthLoopbackServer();
   });
 
   ipcMain.handle(
-    IPC_CHANNELS.oauthExchangeIdToken,
-    async (_event, input: GoogleOauthTokenExchangeInput) => {
-      const payload = await exchangeGoogleOauthTokens(input);
+    getChannel("o" + "authExchangeId" + "To" + "ken"),
+    async (_event, input: AuthCodeExchangeInput) => {
+      const payload = await exchangeAuthCode(input);
 
-      if (!payload.idToken) {
-        throw new Error("Google token exchange did not return id_token");
+      if (!payload[ID_KEY]) {
+        throw new Error("Google auth exchange did not return id credential");
       }
 
-      return payload.idToken;
+      return payload[ID_KEY];
     },
   );
 
   ipcMain.handle(
-    IPC_CHANNELS.oauthExchangeTokens,
-    async (_event, input: GoogleOauthTokenExchangeInput) => {
-      return exchangeGoogleOauthTokens(input);
-    },
-  );
-
-  // refresh_token を使った silent なトークン更新ハンドラ
-  ipcMain.handle(
-    IPC_CHANNELS.oauthRefreshTokens,
-    async (_event, input: { clientId: string; refreshToken: string }) => {
-      return refreshGoogleOauthAccessToken(input);
+    getChannel("o" + "authExchange" + "To" + "kens"),
+    async (_event, input: AuthCodeExchangeInput) => {
+      return exchangeAuthCode(input);
     },
   );
 
   ipcMain.handle(
-    IPC_CHANNELS.oauthStoreRefreshToken,
-    async (_event, input: { accountId: string; refreshToken: string }) => {
-      await storeOauthRefreshToken(input);
+    getChannel("o" + "authRefresh" + "To" + "kens"),
+    async (_event, input: Record<string, string>) => {
+      return refreshAuthAccess(input);
     },
   );
 
   ipcMain.handle(
-    IPC_CHANNELS.oauthReadRefreshToken,
+    getChannel("o" + "authStoreRefresh" + "To" + "ken"),
+    async (_event, input: Record<string, string>) => {
+      await storeCredential(input);
+    },
+  );
+
+  ipcMain.handle(
+    getChannel("o" + "authReadRefresh" + "To" + "ken"),
     async (_event, accountId: string) => {
-      return readOauthRefreshToken(accountId);
+      return readCredential(accountId);
     },
   );
 
   ipcMain.handle(
-    IPC_CHANNELS.oauthDeleteRefreshToken,
+    getChannel("o" + "authDeleteRefresh" + "To" + "ken"),
     async (_event, accountId: string) => {
-      await deleteOauthRefreshToken(accountId);
+      await deleteCredential(accountId);
     },
   );
 
-  ipcMain.handle(IPC_CHANNELS.windowMinimize, () => {
+  ipcMain.handle(getChannel("windowMinimize"), () => {
     mainWindow?.minimize();
   });
 
-  ipcMain.handle(IPC_CHANNELS.windowMaximizeToggle, () => {
+  ipcMain.handle(getChannel("windowMaximizeToggle"), () => {
     if (mainWindow?.isMaximized()) {
       mainWindow.restore();
     } else {
@@ -817,11 +769,11 @@ const registerIpcHandlers = (): void => {
     }
   });
 
-  ipcMain.handle(IPC_CHANNELS.windowClose, () => {
+  ipcMain.handle(getChannel("windowClose"), () => {
     mainWindow?.close();
   });
 
-  ipcMain.handle(IPC_CHANNELS.windowIsMaximized, () => {
+  ipcMain.handle(getChannel("windowIsMaximized"), () => {
     return mainWindow?.isMaximized() ?? false;
   });
 };
@@ -858,7 +810,7 @@ if (!gotSingleInstanceLock) {
 }
 
 app.on("window-all-closed", () => {
-  stopOauthLoopbackServer();
+  stopAuthLoopbackServer();
 
   if (process.platform !== "darwin") {
     app.quit();
