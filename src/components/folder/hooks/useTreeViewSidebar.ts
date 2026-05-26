@@ -1,6 +1,7 @@
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useRef, useState } from "react";
 import { SIDEBAR_WIDTH_LIMITS } from "@constants/web/app";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
+import { useTreeViewSidebarHotkey } from "@/features/hotkey/useTreeViewSidebarHotkey";
 
 export const TREE_VIEW_SIDEBAR_TOGGLE_EVENT =
   "manifolia:treeview-sidebar-toggle";
@@ -83,6 +84,17 @@ export const useTreeViewSidebar = () => {
     element.style.minWidth = cssWidth;
   }, []);
 
+  const toggleSidebarOpen = useCallback(() => {
+    setIsSidebarOpen((previousOpen) => {
+      const nextOpen = !previousOpen;
+      window.localStorage.setItem(
+        WEB_STORAGE_KEYS.sidebarOpen,
+        String(nextOpen),
+      );
+      return nextOpen;
+    });
+  }, []);
+
   const getCurrentSidebarWidth = useCallback(() => {
     const domWidth = sidebarRef.current?.getBoundingClientRect().width;
     const baseWidth =
@@ -151,62 +163,20 @@ export const useTreeViewSidebar = () => {
   }, [applyRenderedSidebarWidthToDom, isMobile, isSidebarOpen, sidebarWidth]);
 
   useEffect(() => {
-    const handleSidebarToggleEvent = () => {
-      setIsSidebarOpen((previousOpen) => {
-        const nextOpen = !previousOpen;
-        window.localStorage.setItem(
-          WEB_STORAGE_KEYS.sidebarOpen,
-          String(nextOpen),
-        );
-        return nextOpen;
-      });
-    };
-
     window.addEventListener(
       TREE_VIEW_SIDEBAR_TOGGLE_EVENT,
-      handleSidebarToggleEvent,
+      toggleSidebarOpen,
     );
 
     return () => {
       window.removeEventListener(
         TREE_VIEW_SIDEBAR_TOGGLE_EVENT,
-        handleSidebarToggleEvent,
+        toggleSidebarOpen,
       );
     };
-  }, []);
+  }, [toggleSidebarOpen]);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "b") {
-        const target = event.target as HTMLElement;
-
-        if (
-          target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
-          target.isContentEditable
-        ) {
-          return;
-        }
-
-        event.preventDefault();
-
-        setIsSidebarOpen((previousOpen) => {
-          const nextOpen = !previousOpen;
-          window.localStorage.setItem(
-            WEB_STORAGE_KEYS.sidebarOpen,
-            String(nextOpen),
-          );
-          return nextOpen;
-        });
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+  useTreeViewSidebarHotkey({ onToggle: toggleSidebarOpen });
 
   const startResizing = useCallback(
     (event: ReactPointerEvent) => {
