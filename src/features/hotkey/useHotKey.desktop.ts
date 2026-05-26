@@ -1,28 +1,27 @@
 import { useEffect } from "react";
+import { isTypingTarget } from "@/features/hotkey/hotkeyGuards";
 
 type UseHotKeyParams = {
   onToggleSidebar?: () => void;
   onToggleRightSidebar?: () => void;
 };
 
-const isEditableElement = (target: EventTarget | null) => {
-  if (!(target instanceof HTMLElement)) {
-    return false;
-  }
-
-  return (
-    target.isContentEditable ||
-    target.tagName === "INPUT" ||
-    target.tagName === "TEXTAREA" ||
-    target.tagName === "SELECT"
-  );
-};
-
-export const useHotKeyDesktop = (_params: UseHotKeyParams) => {
+export const useHotKeyDesktop = ({ onToggleRightSidebar, onToggleSidebar }: UseHotKeyParams) => {
   useEffect(() => {
-    const handleKeyDown = (_event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      if (isTypingTarget(event.target)) return;
 
-      if (isEditableElement(_event.target)) return;
+      if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "b") {
+        event.preventDefault();
+        onToggleSidebar?.();
+        return;
+      }
+
+      if ((event.ctrlKey || event.metaKey) && !event.altKey && event.shiftKey && event.key.toLowerCase() === "b") {
+        event.preventDefault();
+        onToggleRightSidebar?.();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -30,5 +29,5 @@ export const useHotKeyDesktop = (_params: UseHotKeyParams) => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [onToggleRightSidebar, onToggleSidebar]);
 };
