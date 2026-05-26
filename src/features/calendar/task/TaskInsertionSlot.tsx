@@ -1,5 +1,5 @@
-import { useDroppable } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
+import { useTaskDroppableSlot } from "../../dnd/task/taskDnd.components";
 import type { TaskInsertPosition } from "../../dnd/task/taskDnd.types";
 
 type TaskInsertionSlotProps = {
@@ -23,15 +23,11 @@ export const TaskInsertionSlot = ({
   isActive = false,
   isDragActive = false,
 }: TaskInsertionSlotProps) => {
-  const { setNodeRef } = useDroppable({
-    id: `task-slot:${columnId}:${insertIndex}`,
-    data: {
-      type: "task-slot",
-      columnId,
-      insertIndex,
-      overTaskId,
-      position,
-    },
+  const { setNodeRef } = useTaskDroppableSlot({
+    columnId,
+    insertIndex,
+    overTaskId,
+    position,
   });
 
   return (
