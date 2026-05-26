@@ -55,6 +55,7 @@ export type SyncableEntityTable = keyof LocalDBTableMap;
 export type QueryableKeyPath = string | readonly string[];
 
 export interface QueryableCollection<T extends object, TKey = string> {
+  equals(value: unknown): QueryableCollection<T, TKey>;
   and(predicate: (item: T) => boolean): QueryableCollection<T, TKey>;
   filter(predicate: (item: T) => boolean): QueryableCollection<T, TKey>;
   reverse(): QueryableCollection<T, TKey>;
@@ -200,6 +201,7 @@ export interface LocalDBSyncStore extends LocalDBSyncApi {
   userSettings: QueryableTable<UserSettings, string>;
   userStats: QueryableTable<UserStats, string>;
   levelHistories: QueryableTable<Record<string, unknown>, string>;
+  cardRelations: QueryableTable<CardRelation, string>;
   deviceMeta: QueryableTable<Record<string, unknown>, string>;
   syncErrors: QueryableTable<SyncError, string>;
   syncHistory: QueryableTable<SyncHistory, string>;
