@@ -7,6 +7,15 @@ const toDate = (value: Date): Date | null => {
   return Number.isFinite(date.getTime()) ? date : null;
 };
 
+const getEventTime = (value: Date): number =>
+  toDate(value)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+
+const compareText = (a: string, b: string): number => {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+};
+
 export const getCalendarDateKey = (date: Date): string =>
   format(date, "yyyy-MM-dd");
 
@@ -17,6 +26,29 @@ export const getDayRange = (date: Date): { start: Date; end: Date } => {
     start,
     end: addDays(start, 1),
   };
+};
+
+export const compareCalendarEvents = (
+  a: GoogleCalendarEvent,
+  b: GoogleCalendarEvent,
+): number => {
+  const startDiff = getEventTime(a.startsAt) - getEventTime(b.startsAt);
+
+  if (startDiff !== 0) return startDiff;
+
+  const endDiff = getEventTime(b.endsAt) - getEventTime(a.endsAt);
+
+  if (endDiff !== 0) return endDiff;
+
+  const allDayDiff = Number(b.isAllDay) - Number(a.isAllDay);
+
+  if (allDayDiff !== 0) return allDayDiff;
+
+  const titleDiff = compareText(a.title, b.title);
+
+  if (titleDiff !== 0) return titleDiff;
+
+  return compareText(`${a.calendarId}:${a.id}`, `${b.calendarId}:${b.id}`);
 };
 
 export const eventOverlapsRange = (
