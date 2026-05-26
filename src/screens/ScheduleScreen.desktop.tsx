@@ -11,9 +11,10 @@ import { DayDetailPanel } from "@/features/calendar/panel/DayDetailPanel";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { TaskView } from "@/features/calendar/task/TaskView";
 import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCalendarEvents";
-import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
+import { CalendarPieChartView } from "@/features/calendar/view/CalendarPieChartView";
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
+import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
@@ -157,8 +158,9 @@ export const ScheduleScreen = ({
       { value: "week", label: t.viewWeek },
       { value: "threeDays", label: t.viewThreeDays },
       { value: "days", label: t.viewDay },
+      { value: "pieChart", label: t.viewPieChart },
     ] as const,
-    [t.viewDay, t.viewMonth, t.viewThreeDays, t.viewWeek],
+    [t.viewDay, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewWeek],
   );
 
   const {
@@ -368,6 +370,9 @@ export const ScheduleScreen = ({
   const isMonthCalendarView =
     activeMode === "calendar" && selectedViewMode === "month";
 
+  const isPieChartCalendarView =
+    activeMode === "calendar" && selectedViewMode === "pieChart";
+
   const hasTrailingPanel = isMonthCalendarView && !isDayDetailPanelCollapsed;
 
   const headerTitleDate =
@@ -474,6 +479,15 @@ export const ScheduleScreen = ({
               onUpdateGoogleTask={updateGoogleTask}
               onMoveGoogleTaskList={moveGoogleTaskList}
               onDeleteGoogleTask={deleteGoogleTask}
+            />
+          </div>
+        ) : isPieChartCalendarView ? (
+          <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[22px] border border-[#eeeeee] bg-white">
+            <CalendarPieChartView
+              selectedDate={selectedDate}
+              events={calendarEvents}
+              appProjects={appProjects}
+              googleAccounts={googleAccounts}
             />
           </div>
         ) : isMonthCalendarView ? (
