@@ -42,7 +42,7 @@ export const CalendarToolbar = ({
   );
 
   return (
-    <div className="calendar-workspace-toolbar flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center justify-between overflow-visible bg-white pr-[var(--workspace-content-gutter)]">
+    <div className="calendar-workspace-toolbar flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center justify-between overflow-visible bg-white pl-[var(--workspace-content-gutter)] pr-[var(--workspace-content-gutter)]">
       <div className="flex min-w-0 flex-1 items-center gap-3">
         {shouldShowFolderTagToggle ? (
           <ToggleFolderTag activeMode={activeFolderTagMode} tabs={folderTagTabs} />
