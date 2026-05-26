@@ -1,4 +1,4 @@
-import { type CSSProperties, useEffect, useState } from "react";
+import { type CSSProperties, type MouseEvent, type PointerEvent, useEffect, useState } from "react";
 import { windowControls } from "@/platform/capabilities/windowControls";
 import { hasDesktopBridge } from "@/platform/runtime";
 import "./DesktopWindowControls.css";
@@ -7,12 +7,43 @@ type AppRegionStyle = CSSProperties & {
   WebkitAppRegion?: "no-drag";
 };
 
+type WindowControlAction = () => Promise<void>;
+
 const NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
 };
 
-const runWindowAction = (action: () => Promise<void>) => {
-  void action();
+const runWindowAction = (action: WindowControlAction) => {
+  void action().catch((error) => {
+    console.error("[desktop-window-controls] window action failed", error);
+  });
+};
+
+const handlePointerWindowAction = (
+  event: PointerEvent<HTMLButtonElement>,
+  action: WindowControlAction,
+) => {
+  if (event.button !== 0) {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+  runWindowAction(action);
+};
+
+const handleClickWindowAction = (
+  event: MouseEvent<HTMLButtonElement>,
+  action: WindowControlAction,
+) => {
+  event.stopPropagation();
+
+  if (event.detail !== 0) {
+    event.preventDefault();
+    return;
+  }
+
+  runWindowAction(action);
 };
 
 export const DesktopWindowControls = () => {
@@ -55,7 +86,12 @@ export const DesktopWindowControls = () => {
         className="desktop-window-controls__button"
         aria-label="Minimize window"
         title="Minimize"
-        onClick={() => runWindowAction(windowControls.minimize)}
+        onPointerDown={(event) =>
+          handlePointerWindowAction(event, windowControls.minimize)
+        }
+        onClick={(event) =>
+          handleClickWindowAction(event, windowControls.minimize)
+        }
       >
         <span className="desktop-window-controls__minimize" aria-hidden />
       </button>
@@ -65,7 +101,12 @@ export const DesktopWindowControls = () => {
         className="desktop-window-controls__button"
         aria-label={isMaximized ? "Restore window" : "Maximize window"}
         title={isMaximized ? "Restore" : "Maximize"}
-        onClick={() => runWindowAction(windowControls.maximizeToggle)}
+        onPointerDown={(event) =>
+          handlePointerWindowAction(event, windowControls.maximizeToggle)
+        }
+        onClick={(event) =>
+          handleClickWindowAction(event, windowControls.maximizeToggle)
+        }
       >
         <span
           className={
@@ -82,7 +123,12 @@ export const DesktopWindowControls = () => {
         className="desktop-window-controls__button desktop-window-controls__button--close"
         aria-label="Close window"
         title="Close"
-        onClick={() => runWindowAction(windowControls.close)}
+        onPointerDown={(event) =>
+          handlePointerWindowAction(event, windowControls.close)
+        }
+        onClick={(event) =>
+          handleClickWindowAction(event, windowControls.close)
+        }
       >
         <span className="desktop-window-controls__close" aria-hidden />
       </button>
