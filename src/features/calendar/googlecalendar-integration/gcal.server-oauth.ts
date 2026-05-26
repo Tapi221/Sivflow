@@ -39,6 +39,7 @@ export type GoogleOAuthCallableErrorReason =
   | "token_encryption_key_invalid"
   | "stored_refresh_token_decrypt_failed"
   | "stored_refresh_token_missing"
+  | "insufficient_google_scope"
   | "token_endpoint_failed";
 
 type CallableErrorDetails = {
@@ -58,6 +59,8 @@ const SERVER_OAUTH_CONFIGURATION_ERROR_CODE = "server-oauth-configuration-error"
 const SERVER_OAUTH_CONFIGURATION_ERROR_MESSAGE = "Google OAuth のサーバー設定に問題があります。管理者は Firebase Functions secrets の GOOGLE_OAUTH_WEB_CLIENT_ID / GOOGLE_OAUTH_WEB_CLIENT_SECRET を、Google Cloud Console に存在する有効なウェブアプリ OAuth クライアントの値に更新して、Functions を再デプロイしてください。";
 const INVALID_REFRESH_TOKEN_ERROR_CODE = "google-refresh-token-invalid";
 const INVALID_REFRESH_TOKEN_MESSAGE = "Google 連携トークンが無効です。Google アカウントのサードパーティ連携からこのアプリを削除してから、アプリで再連携してください。";
+const INSUFFICIENT_GOOGLE_SCOPE_ERROR_CODE = "google-scope-insufficient";
+const INSUFFICIENT_GOOGLE_SCOPE_MESSAGE = "Google Calendar と Google Tasks の権限が不足しています。Google アカウントのサードパーティ連携からこのアプリを削除してから、アプリで再連携してください。";
 const SERVER_TOKEN_DECRYPT_ERROR_CODE = "server-stored-token-decrypt-error";
 const SERVER_TOKEN_DECRYPT_ERROR_MESSAGE = "保存済み Google 連携トークンを復号できません。管理者が暗号化キーと保存データを確認してください。";
 const SERVER_TOKEN_RETRY_DELAYS_MS = [500, 1_500] as const;
@@ -159,6 +162,14 @@ export const diagnoseGoogleOAuthReconnectCause = (
       cause: "保存済み refresh token が欠落しています。",
       reconnectRequired: true,
       action: "Google アカウントのサードパーティ連携からこのアプリを削除してから、アプリで再連携してください。",
+    };
+  }
+
+  if (reason === "insufficient_google_scope") {
+    return {
+      cause: "保存済み Google OAuth トークンに Calendar と Tasks の両方の権限がありません。",
+      reconnectRequired: true,
+      action: "Google アカウントのサードパーティ連携からこのアプリを削除してから、Calendar と Tasks の両方を許可して再連携してください。",
     };
   }
 
@@ -295,6 +306,7 @@ const isServerInfrastructureError = (error: unknown): boolean => {
 export const isGoogleOAuthDeterministicErrorReason = (reason: string | undefined): boolean =>
   reason === "invalid_grant" ||
   reason === "stored_refresh_token_missing" ||
+  reason === "insufficient_google_scope" ||
   reason === "server_oauth_configuration" ||
   reason === "token_encryption_key_invalid" ||
   reason === "stored_refresh_token_decrypt_failed";
@@ -321,6 +333,12 @@ export const toUserTransparentAutoRecoveryError = (sourceError: unknown): Error 
   if (reason === "token_encryption_key_invalid" || reason === "stored_refresh_token_decrypt_failed") {
     const error = new Error(SERVER_TOKEN_DECRYPT_ERROR_MESSAGE);
     (error as Error & { code?: string }).code = SERVER_TOKEN_DECRYPT_ERROR_CODE;
+    return attachGoogleOAuthReason(error, reason);
+  }
+
+  if (reason === "insufficient_google_scope") {
+    const error = new Error(INSUFFICIENT_GOOGLE_SCOPE_MESSAGE);
+    (error as Error & { code?: string }).code = INSUFFICIENT_GOOGLE_SCOPE_ERROR_CODE;
     return attachGoogleOAuthReason(error, reason);
   }
 
