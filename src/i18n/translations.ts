@@ -45,6 +45,7 @@ export type Translations = {
   viewWeek: string;
   viewThreeDays: string;
   viewDay: string;
+  viewPieChart: string;
   viewsLabel: string;
 
   // ナビゲーション
@@ -104,6 +105,7 @@ const ja: Translations = {
   viewWeek: "週",
   viewThreeDays: "3日",
   viewDay: "日",
+  viewPieChart: "円グラフ",
   viewsLabel: "表示形式",
 
   todayButton: "今日",
@@ -160,6 +162,7 @@ const en: Translations = {
   viewWeek: "Week",
   viewThreeDays: "3 Days",
   viewDay: "Day",
+  viewPieChart: "Pie",
   viewsLabel: "Views",
 
   todayButton: "Today",
