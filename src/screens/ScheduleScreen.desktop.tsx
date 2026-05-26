@@ -426,7 +426,7 @@ export const ScheduleScreen = ({
         )}
 
         {activeMode === "task" ? (
-          <div className="-ml-10 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border-0 bg-white">
+          <div className="ml-0 mr-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border-0 bg-white">
             <TaskView
               googleAccounts={googleAccounts}
               selectedTaskListIds={deferredSelectedTaskListIds}
