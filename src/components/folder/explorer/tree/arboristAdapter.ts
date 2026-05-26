@@ -9,21 +9,21 @@ export interface ExplorerTreeNode {
   type: ExplorerTreeNodeType;
   kind: ExplorerTreeNodeType;
   name: string;
-  children?: ExplorerTreeNode[];
+  children: ExplorerTreeNode[];
   folderId?: string | null;
   data?: unknown;
 }
 
-interface BuildExplorerTreeDataParams {
-  rootFolders: unknown[];
+interface BuildExplorerTreeDataParams<TFolder> {
+  rootFolders: TFolder[];
   rootItems: ExplorerItem[];
-  getChildFolders: (folderId: string) => unknown[];
+  getChildFolders: (folderId: string) => TFolder[];
   getFolderItems: (folderId: string | null) => ExplorerItem[];
   getCardSets: (folderId: string | null) => CardSet[];
   getCardSetItems: (cardSetId: string) => ExplorerItem[];
   isFiltering: boolean;
   matchCountMap: Map<string, number>;
-  getFolderId: (folder: unknown) => string | null;
+  getFolderId: (folder: TFolder) => string | null;
 }
 
 export const toTreeId = (type: ExplorerTreeNodeType, id: string): string =>
@@ -77,6 +77,7 @@ const getItemNode = (item: ExplorerItem): ExplorerTreeNode | null => {
       kind: "document",
       name: document.title?.trim() || document.fileName?.trim() || "無題の文書",
       data: document,
+      children: [],
     };
   }
 
@@ -91,10 +92,11 @@ const getItemNode = (item: ExplorerItem): ExplorerTreeNode | null => {
       card.title?.trim() || card.questionNumber?.trim() || "無題のカード",
     ),
     data: card,
+    children: [],
   };
 };
 
-export const buildExplorerTreeData = ({
+export const buildExplorerTreeData = <TFolder,>({
   rootFolders,
   rootItems,
   getChildFolders,
@@ -104,7 +106,7 @@ export const buildExplorerTreeData = ({
   isFiltering,
   matchCountMap,
   getFolderId,
-}: BuildExplorerTreeDataParams): ExplorerTreeNode[] => {
+}: BuildExplorerTreeDataParams<TFolder>): ExplorerTreeNode[] => {
   const buildCardSetNode = (
     cardSet: CardSet,
     folderId: string | null,
@@ -129,7 +131,7 @@ export const buildExplorerTreeData = ({
     };
   };
 
-  const buildFolderNode = (folder: unknown): ExplorerTreeNode | null => {
+  const buildFolderNode = (folder: TFolder): ExplorerTreeNode | null => {
     const folderId = getFolderId(folder);
     if (!folderId) return null;
 
