@@ -86,7 +86,7 @@ const SidebarNavLink = ({
   };
 
   return (
-    <HoverTooltip label={item.label} side="right" className="w-full">
+    <HoverTooltip label={item.label} side="right" className="app-sidebar__nav-tooltip w-full">
       <button
         type="button"
         onClick={handleClick}
