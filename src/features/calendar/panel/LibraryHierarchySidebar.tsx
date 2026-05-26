@@ -17,8 +17,8 @@ const LIBRARY_EXPANDED_FOLDERS_STORAGE_KEY = "flashcard-master:calendar-sidebar:
 const LIBRARY_EXPANDED_CARD_SETS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-card-sets";
 const TREE_INDENT_PX = 16;
 const TREE_GUIDE_LEFT_OFFSET_PX = 10;
-const TREE_ROW_HEIGHT_CLASS_NAME = "h-[27px]";
-const TREE_EMPTY_TEXT_CLASS_NAME = "px-3 py-2 text-[12px] font-semibold text-[#a3a7af]";
+const TREE_ROW_HEIGHT_CLASS_NAME = "h-7";
+const TREE_EMPTY_TEXT_CLASS_NAME = "px-3 py-2 text-[12px] font-medium leading-[1.45] tracking-normal text-[#b8b8b8]";
 
 type ExplorerSelectionPatch = {
   selectedFolderId: string | null;
@@ -33,45 +33,45 @@ type NodeIconProps = {
 
 const ChevronRightGlyph = ({ className }: NodeIconProps) => (
   <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
-    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const FolderGlyph = ({ className }: NodeIconProps) => (
   <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
-    <path d="M2.5 5.25C2.5 4.56 3.06 4 3.75 4H6.55C6.88 4 7.2 4.13 7.44 4.36L8.28 5.15C8.51 5.37 8.83 5.5 9.15 5.5H14.25C14.94 5.5 15.5 6.06 15.5 6.75V13.25C15.5 13.94 14.94 14.5 14.25 14.5H3.75C3.06 14.5 2.5 13.94 2.5 13.25V5.25Z" fill="currentColor" opacity="0.16" />
+    <path d="M2.5 5.25C2.5 4.56 3.06 4 3.75 4H6.55C6.88 4 7.2 4.13 7.44 4.36L8.28 5.15C8.51 5.37 8.83 5.5 9.15 5.5H14.25C14.94 5.5 15.5 6.06 15.5 6.75V13.25C15.5 13.94 14.94 14.5 14.25 14.5H3.75C3.06 14.5 2.5 13.94 2.5 13.25V5.25Z" fill="currentColor" opacity="0.12" />
     <path d="M2.5 5.25C2.5 4.56 3.06 4 3.75 4H6.55C6.88 4 7.2 4.13 7.44 4.36L8.28 5.15C8.51 5.37 8.83 5.5 9.15 5.5H14.25C14.94 5.5 15.5 6.06 15.5 6.75V13.25C15.5 13.94 14.94 14.5 14.25 14.5H3.75C3.06 14.5 2.5 13.94 2.5 13.25V5.25Z" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M3 7.25H15" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" opacity="0.45" />
+    <path d="M3 7.25H15" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" opacity="0.36" />
   </svg>
 );
 
 const DeckGlyph = ({ className }: NodeIconProps) => (
   <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
-    <rect x="4.1" y="3.6" width="9.8" height="10.8" rx="2" fill="currentColor" opacity="0.12" />
-    <rect x="4.1" y="3.6" width="9.8" height="10.8" rx="2" stroke="currentColor" strokeWidth="1.25" />
-    <path d="M6.25 6.25H11.75M6.25 8.75H11.75M6.25 11.25H9.75" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" />
+    <rect x="4.1" y="3.6" width="9.8" height="10.8" rx="2" fill="currentColor" opacity="0.1" />
+    <rect x="4.1" y="3.6" width="9.8" height="10.8" rx="2" stroke="currentColor" strokeWidth="1.2" />
+    <path d="M6.25 6.25H11.75M6.25 8.75H11.75M6.25 11.25H9.75" stroke="currentColor" strokeWidth="1.05" strokeLinecap="round" />
   </svg>
 );
 
 const CardGlyph = ({ className }: NodeIconProps) => (
   <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
-    <rect x="3" y="4.5" width="12" height="9" rx="2" fill="currentColor" opacity="0.12" />
-    <rect x="3" y="4.5" width="12" height="9" rx="2" stroke="currentColor" strokeWidth="1.25" />
-    <path d="M5.5 7.25H12.5M5.5 9.5H10.5" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" />
+    <rect x="3" y="4.5" width="12" height="9" rx="2" fill="currentColor" opacity="0.1" />
+    <rect x="3" y="4.5" width="12" height="9" rx="2" stroke="currentColor" strokeWidth="1.2" />
+    <path d="M5.5 7.25H12.5M5.5 9.5H10.5" stroke="currentColor" strokeWidth="1.05" strokeLinecap="round" />
   </svg>
 );
 
 const DocumentGlyph = ({ className }: NodeIconProps) => (
   <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
-    <path d="M5 2.75H10.2L13.5 6.1V14.25C13.5 14.94 12.94 15.5 12.25 15.5H5.75C5.06 15.5 4.5 14.94 4.5 14.25V4.25C4.5 3.42 4.67 2.75 5 2.75Z" fill="currentColor" opacity="0.1" />
-    <path d="M5 2.75H10.2L13.5 6.1V14.25C13.5 14.94 12.94 15.5 12.25 15.5H5.75C5.06 15.5 4.5 14.94 4.5 14.25V4.25C4.5 3.42 4.67 2.75 5 2.75Z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" />
-    <path d="M10.2 2.9V5.65C10.2 6.05 10.52 6.38 10.92 6.38H13.35M6.75 9.5H11.25M6.75 11.75H10.25" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M5 2.75H10.2L13.5 6.1V14.25C13.5 14.94 12.94 15.5 12.25 15.5H5.75C5.06 15.5 4.5 14.94 4.5 14.25V4.25C4.5 3.42 4.67 2.75 5 2.75Z" fill="currentColor" opacity="0.08" />
+    <path d="M5 2.75H10.2L13.5 6.1V14.25C13.5 14.94 12.94 15.5 12.25 15.5H5.75C5.06 15.5 4.5 14.94 4.5 14.25V4.25C4.5 3.42 4.67 2.75 5 2.75Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+    <path d="M10.2 2.9V5.65C10.2 6.05 10.52 6.38 10.92 6.38H13.35M6.75 9.5H11.25M6.75 11.75H10.25" stroke="currentColor" strokeWidth="1.05" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const TrashGlyph = ({ className }: NodeIconProps) => (
   <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
-    <path d="M4.25 6H13.75M7 6V4.75C7 4.2 7.45 3.75 8 3.75H10C10.55 3.75 11 4.2 11 4.75V6M5.25 6.25L5.78 13.2C5.84 14.07 6.57 14.75 7.44 14.75H10.56C11.43 14.75 12.16 14.07 12.22 13.2L12.75 6.25" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M4.25 6H13.75M7 6V4.75C7 4.2 7.45 3.75 8 3.75H10C10.55 3.75 11 4.2 11 4.75V6M5.25 6.25L5.78 13.2C5.84 14.07 6.57 14.75 7.44 14.75H10.56C11.43 14.75 12.16 14.07 12.22 13.2L12.75 6.25" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -172,24 +172,24 @@ const addIdsToSet = (
 const getNodeIconClassName = (node: ExplorerTreeNode, depth: number): string => {
   if (node.type === "folder") {
     const folderToneClassNames = [
-      "text-[#6b8ed6]",
-      "text-[#e0a13d]",
-      "text-[#9b78db]",
-      "text-[#5ab489]",
-      "text-[#da6b6b]",
-      "text-[#58a7c8]",
+      "text-[#7d98d1]",
+      "text-[#dea64f]",
+      "text-[#a58ad6]",
+      "text-[#65b98f]",
+      "text-[#d77a7a]",
+      "text-[#63abc8]",
     ];
     const hash = Array.from(node.id).reduce((sum, char) => sum + char.charCodeAt(0), depth);
     return folderToneClassNames[hash % folderToneClassNames.length];
   }
 
-  if (node.type === "cardSet") return "text-[#7f88a4]";
-  if (node.type === "document") return "text-[#9aa0aa]";
-  return "text-[#8d96aa]";
+  if (node.type === "cardSet") return "text-[#8f96a8]";
+  if (node.type === "document") return "text-[#a0a5ad]";
+  return "text-[#98a0ae]";
 };
 
 const renderNodeIcon = (node: ExplorerTreeNode, depth: number) => {
-  const className = cn("h-[17px] w-[17px] shrink-0", getNodeIconClassName(node, depth));
+  const className = cn("h-4 w-4 shrink-0", getNodeIconClassName(node, depth));
 
   if (node.type === "folder") return <FolderGlyph className={className} />;
   if (node.type === "cardSet") return <DeckGlyph className={className} />;
@@ -610,7 +610,7 @@ export const LibraryHierarchySidebar = () => {
                 <span
                   key={`${node.id}:guide:${guideIndex}`}
                   aria-hidden="true"
-                  className="pointer-events-none absolute bottom-0 top-0 w-px bg-[#e3e5ea]"
+                  className="pointer-events-none absolute bottom-0 top-0 w-px bg-[#e4e6eb]"
                   style={{ left: TREE_GUIDE_LEFT_OFFSET_PX + guideIndex * TREE_INDENT_PX }}
                 />
               ) : null,
@@ -618,7 +618,7 @@ export const LibraryHierarchySidebar = () => {
             {depth > 0 ? (
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 h-px bg-[#e3e5ea]"
+                className="pointer-events-none absolute top-1/2 h-px bg-[#e4e6eb]"
                 style={{
                   left: TREE_GUIDE_LEFT_OFFSET_PX + (depth - 1) * TREE_INDENT_PX,
                   width: TREE_INDENT_PX - 3,
@@ -637,11 +637,11 @@ export const LibraryHierarchySidebar = () => {
               onClick={() => handleSelectNode(node)}
               onKeyDown={(event) => handleRowKeyDown(event, node)}
               className={cn(
-                "group relative flex w-full cursor-default select-none items-center gap-1 rounded-[7px] pr-2 text-left text-[13px] font-semibold tracking-[-0.01em] outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#d9dee8]",
+                "group relative flex w-full cursor-default select-none items-center gap-1 rounded-[10px] pr-2 text-left text-[12px] font-medium leading-none tracking-normal outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#d9dee8]",
                 TREE_ROW_HEIGHT_CLASS_NAME,
                 isSelected
-                  ? "bg-[#eef0f6] text-[#2f3540] shadow-[inset_0_0_0_1px_rgba(88,94,112,0.05)]"
-                  : "text-[#606672] hover:bg-[#f5f6f8]",
+                  ? "bg-[#f2f3f6] text-[#6d7380] shadow-[inset_0_0_0_1px_rgba(88,94,112,0.04)]"
+                  : "text-[#8e949e] hover:bg-[#f7f7f7] hover:text-[#6d7380]",
               )}
               style={{ paddingLeft: 2 + depth * TREE_INDENT_PX }}
             >
@@ -653,7 +653,7 @@ export const LibraryHierarchySidebar = () => {
                     event.stopPropagation();
                     handleToggleNode(node);
                   }}
-                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] text-[#a7adb7] transition hover:bg-white hover:text-[#6f7684]"
+                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] text-[#aeb3bd] transition hover:bg-white hover:text-[#8e949e]"
                 >
                   <ChevronRightGlyph
                     className={cn(
@@ -700,7 +700,7 @@ export const LibraryHierarchySidebar = () => {
   const isTrashSelected = activeLibrarySelection.selectedItem?.type === "trash";
 
   return (
-    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent px-2 pb-4 pt-2 text-[#2f2f2f]" aria-label="Library hierarchy explorer">
+    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent px-2 pb-4 pt-2 font-sans text-[#2f2f2f] antialiased" aria-label="Library hierarchy explorer">
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
         {isExplorerDataLoading ? (
           <div className="space-y-2 px-2 pt-1" aria-label="ライブラリを読み込み中">
@@ -732,13 +732,13 @@ export const LibraryHierarchySidebar = () => {
           onClick={handleSelectTrash}
           aria-pressed={isTrashSelected}
           className={cn(
-            "flex h-8 w-full items-center gap-2 rounded-[9px] px-2 text-left text-[13px] font-semibold tracking-[-0.01em] transition-colors",
+            "flex h-8 w-full items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium leading-none tracking-normal transition-colors",
             isTrashSelected
-              ? "bg-[#eef0f6] text-[#2f3540]"
-              : "text-[#8e949e] hover:bg-[#f5f6f8] hover:text-[#606672]",
+              ? "bg-[#f2f3f6] text-[#6d7380]"
+              : "text-[#8e949e] hover:bg-[#f7f7f7] hover:text-[#6d7380]",
           )}
         >
-          <TrashGlyph className="h-[17px] w-[17px] shrink-0" />
+          <TrashGlyph className="h-4 w-4 shrink-0" />
           <span className="truncate">ごみ箱</span>
         </button>
       </div>
