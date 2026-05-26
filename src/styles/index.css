@@ -47,6 +47,7 @@
 
 button:hover,
 a:hover,
+[class][class]:hover,
 [role="button"]:hover,
 [role="menuitem"]:hover,
 [role="tab"]:hover,
