@@ -56,11 +56,28 @@ export default defineConfig(({ command }) => ({
     }),
   ],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@constants": path.resolve(__dirname, "./constants"),
-      "@config": path.resolve(__dirname, "./config"),
-    },
+    alias: [
+      {
+        find: /^@\/services\/localDB$/,
+        replacement: path.resolve(__dirname, "./src/services/localdb/index.ts"),
+      },
+      {
+        find: /^@\/services\/firebase$/,
+        replacement: path.resolve(__dirname, "./src/infrastructure/firebase/client.ts"),
+      },
+      {
+        find: "@",
+        replacement: path.resolve(__dirname, "./src"),
+      },
+      {
+        find: "@constants",
+        replacement: path.resolve(__dirname, "./constants"),
+      },
+      {
+        find: "@config",
+        replacement: path.resolve(__dirname, "./config"),
+      },
+    ],
   },
   server: {
     port: 5173,
