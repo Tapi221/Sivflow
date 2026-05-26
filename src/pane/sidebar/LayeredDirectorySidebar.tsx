@@ -4,6 +4,7 @@ import { getFolderId, getParentFolderId, normalizeFolderId, type FolderTreeNode 
 import { useExpandedFolders } from "@/components/folder/hooks/useExpandedFolders";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
+import { FadeSkeleton } from "@/features/fade/skeltom";
 import { toVirtualMfCardDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
 import { createDefaultExplorerRouteState, WORKSPACE_DEFAULT_EXPLORER_TAB_ID, type WorkspaceExplorerTab, type WorkspaceTab } from "@/features/tab/Tab";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
@@ -691,15 +692,7 @@ export const LibraryHierarchySidebar = () => {
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-5 pl-0 pr-3 pt-2 font-sans text-[#2f2f2f] antialiased" aria-label="Library hierarchy explorer">
       <div className="min-h-0 flex-1 overflow-y-auto">
         {isExplorerDataLoading ? (
-          <div className="space-y-2 px-2 pt-1" aria-label="ライブラリを読み込み中">
-            {Array.from({ length: 8 }, (_, index) => (
-              <div
-                key={index}
-                className="h-[18px] rounded-full bg-[#eef0f3]"
-                style={{ marginLeft: (index % 4) * 14, width: `${80 - (index % 3) * 10}%` }}
-              />
-            ))}
-          </div>
+          <FadeSkeleton ariaLabel="ライブラリを読み込み中" />
         ) : treeData.length > 0 ? (
           <div role="tree" aria-label="ライブラリ" className="space-y-[1px]">
             {treeData.map((node, index) =>
