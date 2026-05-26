@@ -1,4 +1,4 @@
-import { clipEventToDay } from "@/features/calendar/calendarEventRange";
+import { clipEventToDay, compareCalendarEvents } from "@/features/calendar/calendarEventRange";
 import { EventChipDayDetail } from "@/chip/eventchip/EventChip.schedule.daydetail";
 import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.layout.weekday.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
@@ -59,7 +59,8 @@ export const GridCalendarDayDetailDesktop = ({ date, events }: Props) => {
   const gridHeight = timelineHeight + TIMELINE_TOP_PADDING_PX;
   const clippedEvents = events
     .map((event) => clipEventToDay(event, date))
-    .filter((event): event is GoogleCalendarEvent => Boolean(event));
+    .filter((event): event is GoogleCalendarEvent => Boolean(event))
+    .sort(compareCalendarEvents);
 
   const layout = computeEventLayout(
     clippedEvents.map((event) =>
