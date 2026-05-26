@@ -5,7 +5,7 @@ import { CATEGORY_CONFIG, TASK_COLUMNS } from "./task.types";
 import type { Task, TaskCreateInput, TaskGroupMode, TaskStatus } from "./task.types";
 import type { GoogleAccountDisplay } from "../scheduleScreen.types";
 import { useTaskStore } from "./hooks/useTaskStore";
-import { NewTaskModal } from "../modal/NewTaskModal";
+import { NewTaskModal } from "../../../chip/modal/NewTaskModal";
 import { type BoardListViewMode } from "../../../chip/toggle/Toggle.boardlist";
 import { TaskToolbar } from "../toolbar/TaskToolbar";
 import { TaskBoardView } from "../view/TaskBoardView";
