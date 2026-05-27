@@ -280,8 +280,8 @@ export const useScheduleScreen = ({
     retryGoogleTaskLists: google.retryGoogleTaskLists,
     createGoogleTask: google.createGoogleTask,
     updateGoogleTask: google.updateGoogleTask,
-    moveGoogleTaskList: google.moveTaskList,
-    deleteGoogleTask: google.removeTask,
+    moveGoogleTaskList: google.moveGoogleTaskList,
+    deleteGoogleTask: google.deleteGoogleTask,
 
     handleSelectViewMode: navigation.handleSelectViewMode,
     handleToday: navigation.handleToday,
