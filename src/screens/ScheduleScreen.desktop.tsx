@@ -136,6 +136,7 @@ export const ScheduleScreen = ({
     handleSidebarSelectDate,
     handleSidebarPreviousMonth,
     handleSidebarNextMonth,
+    handleVisibleDateChange,
     handleVisibleMonthChange,
     handlePrevious,
     handleNext,
@@ -290,20 +291,30 @@ export const ScheduleScreen = ({
             </div>
             <div className="min-h-0 min-w-0 overflow-hidden">
               <CalendarPieChartView
+                days={visibleDays}
                 selectedDate={selectedDate}
                 events={deferredCalendarEvents}
                 appProjects={appProjects}
                 googleAccounts={googleAccounts}
+                onSelectDate={handleSidebarSelectDate}
+                onReachStart={handleListReachStart}
+                onReachEnd={handleListReachEnd}
+                onVisibleDateChange={handleVisibleDateChange}
               />
             </div>
           </div>
         ) : isPieChartCalendarView ? (
           <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
             <CalendarPieChartView
+              days={visibleDays}
               selectedDate={selectedDate}
               events={deferredCalendarEvents}
               appProjects={appProjects}
               googleAccounts={googleAccounts}
+              onSelectDate={handleSidebarSelectDate}
+              onReachStart={handleListReachStart}
+              onReachEnd={handleListReachEnd}
+              onVisibleDateChange={handleVisibleDateChange}
             />
           </div>
         ) : isListCalendarView ? (
