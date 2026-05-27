@@ -1,9 +1,10 @@
 import type { CSSProperties } from "react";
 import { memo, useMemo } from "react";
 import { format } from "date-fns";
-import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
+import { HoverMonthEventTooltip } from "@/chip/toolchip/HoverMonthEventTooltip";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
 type CalendarEventChipMonthProps = {
@@ -29,42 +30,50 @@ const CalendarEventChipMonth = memo(({
       : format(event.startsAt, "H:mm");
   }, [event.isAllDay, event.startsAt]);
 
-  return (
-    <div
-      className={cn(
-        eventChipAllDayClass,
-        `
-          flex
-          items-center
-          gap-1
-        `,
-      )}
-      style={{
-        background: tokens.bg,
-        borderLeft: event.isAllDay
-          ? undefined
-          : `3px solid ${tokens.border}`,
-        color: tokens.text,
-      }}
-      title={`${timeLabel} ${event.title}`}
-    >
-      <span
-        className="
-          shrink-0
-          tabular-nums
-          opacity-80
-        "
-      >
-        {timeLabel}
-      </span>
+  const titleLabel = event.title || "Untitled";
 
-      <span
-        className="min-w-0 flex-1 overflow-hidden whitespace-nowrap"
-        style={CHIP_TEXT_FADE_STYLE}
+  return (
+    <HoverMonthEventTooltip
+      title={titleLabel}
+      timeLabel={timeLabel}
+      accentColor={tokens.border}
+      className="w-full min-w-0"
+    >
+      <div
+        className={cn(
+          eventChipAllDayClass,
+          `
+            flex
+            items-center
+            gap-1
+          `,
+        )}
+        style={{
+          background: tokens.bg,
+          borderLeft: event.isAllDay
+            ? undefined
+            : `3px solid ${tokens.border}`,
+          color: tokens.text,
+        }}
       >
-        {event.title}
-      </span>
-    </div>
+        <span
+          className="
+            shrink-0
+            tabular-nums
+            opacity-80
+          "
+        >
+          {timeLabel}
+        </span>
+
+        <span
+          className="min-w-0 flex-1 overflow-hidden whitespace-nowrap"
+          style={CHIP_TEXT_FADE_STYLE}
+        >
+          {titleLabel}
+        </span>
+      </div>
+    </HoverMonthEventTooltip>
   );
 });
 
