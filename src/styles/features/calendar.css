@@ -66,8 +66,15 @@
     scrollbar-gutter: auto;
   }
 
+  .calendar-year-view {
+    scrollbar-gutter: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
   .calendar-month-scroll::-webkit-scrollbar,
-  .calendar-timeline-scroll::-webkit-scrollbar {
+  .calendar-timeline-scroll::-webkit-scrollbar,
+  .calendar-year-view::-webkit-scrollbar {
     width: 0;
     height: 0;
   }
@@ -75,7 +82,9 @@
   .calendar-month-scroll::-webkit-scrollbar-thumb,
   .calendar-month-scroll::-webkit-scrollbar-track,
   .calendar-timeline-scroll::-webkit-scrollbar-thumb,
-  .calendar-timeline-scroll::-webkit-scrollbar-track {
+  .calendar-timeline-scroll::-webkit-scrollbar-track,
+  .calendar-year-view::-webkit-scrollbar-thumb,
+  .calendar-year-view::-webkit-scrollbar-track {
     display: none;
   }
 
