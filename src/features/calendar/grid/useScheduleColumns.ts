@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 import type { ScheduleColumnBuffer } from "./ScheduleColumn.shared";
-import { buildScheduleDisplayDays, buildScheduleInteractionDays, buildScheduleTimelineColumns } from "./ScheduleColumn.shared";
+import { buildScheduleDisplayDays, buildScheduleInteractionDays } from "./ScheduleColumn.shared";
 
 type UseScheduleDaysParams = {
   anchorDate: Date;
@@ -31,21 +31,4 @@ export const useScheduleDays = ({
       },
     };
   }, [anchorDate, buffer, viewMode]);
-};
-
-type UseScheduleTimelineColumnsParams = {
-  anchorDate: Date;
-  viewMode: CalendarViewMode;
-  buffer: ScheduleColumnBuffer;
-};
-
-export const useScheduleTimelineColumns = ({
-  anchorDate,
-  viewMode,
-  buffer,
-}: UseScheduleTimelineColumnsParams) => {
-  return useMemo(
-    () => buildScheduleTimelineColumns(viewMode, anchorDate, buffer),
-    [anchorDate, buffer, viewMode],
-  );
 };
