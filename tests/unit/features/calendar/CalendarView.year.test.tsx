@@ -1,0 +1,46 @@
+// @vitest-environment jsdom
+
+import { fireEvent, render, waitFor } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
+
+const setReadonlyNumber = (element: Element, property: string, value: number) => {
+  Object.defineProperty(element, property, {
+    configurable: true,
+    value,
+  });
+};
+
+describe("CalendarYearView", () => {
+  it("上下端の検知範囲が重なる位置でもスクロール方向の年範囲だけを拡張する", async () => {
+    const onRenderedRangeChange = vi.fn();
+
+    const { container } = render(
+      <CalendarYearView
+        yearDate={new Date(2026, 0, 1)}
+        selectedDate={new Date(2026, 0, 1)}
+        visibleEvents={[]}
+        onSelectDate={vi.fn()}
+        onRenderedRangeChange={onRenderedRangeChange}
+      />,
+    );
+
+    const scroller = container.querySelector(".calendar-year-view");
+    expect(scroller).toBeInstanceOf(HTMLElement);
+
+    setReadonlyNumber(scroller!, "clientHeight", 1000);
+    setReadonlyNumber(scroller!, "scrollHeight", 5000);
+    setReadonlyNumber(scroller!, "scrollTop", 1900);
+
+    fireEvent.scroll(scroller!);
+
+    await waitFor(() => {
+      const latestRange = onRenderedRangeChange.mock.calls.at(-1)?.[0] as
+        | { start: Date; end: Date }
+        | undefined;
+
+      expect(latestRange?.start.getFullYear()).toBe(2023);
+      expect(latestRange?.end.getFullYear()).toBe(2033);
+    });
+  });
+});

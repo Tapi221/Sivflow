@@ -163,6 +163,7 @@ const CalendarYearViewComponent = ({
   const rangeAnchorRef = useRef<YearRangeAnchor | null>(null);
   const isExtendingBeforeRef = useRef(false);
   const isExtendingAfterRef = useRef(false);
+  const lastScrollTopRef = useRef(0);
   const requestedYearKeyRef = useRef(format(startOfYear(yearDate), "yyyy"));
   const pendingScrollYearKeyRef = useRef<string | null>(
     format(startOfYear(yearDate), "yyyy"),
@@ -288,6 +289,7 @@ const CalendarYearViewComponent = ({
     if (!scroller || !targetSection) return;
 
     scroller.scrollTop = Math.max(0, targetSection.offsetTop);
+    lastScrollTopRef.current = scroller.scrollTop;
     pendingScrollYearKeyRef.current = null;
   }, [years]);
 
@@ -310,6 +312,7 @@ const CalendarYearViewComponent = ({
     }
 
     scroller.scrollTop = anchorSection.offsetTop - rangeAnchor.offsetTop;
+    lastScrollTopRef.current = scroller.scrollTop;
     rangeAnchorRef.current = null;
     isExtendingBeforeRef.current = false;
     isExtendingAfterRef.current = false;
@@ -320,7 +323,17 @@ const CalendarYearViewComponent = ({
     if (!scroller) return;
 
     const handleScroll = () => {
-      if (scroller.scrollTop < YEAR_SCROLL_EDGE_THRESHOLD_PX && !isExtendingBeforeRef.current) {
+      const previousScrollTop = lastScrollTopRef.current;
+      const currentScrollTop = scroller.scrollTop;
+      const isScrollingUp = currentScrollTop < previousScrollTop;
+      const isScrollingDown = currentScrollTop > previousScrollTop;
+      lastScrollTopRef.current = currentScrollTop;
+
+      if (
+        isScrollingUp &&
+        currentScrollTop < YEAR_SCROLL_EDGE_THRESHOLD_PX &&
+        !isExtendingBeforeRef.current
+      ) {
         isExtendingBeforeRef.current = true;
         rangeAnchorRef.current = getCurrentRangeAnchor(scroller);
 
@@ -338,9 +351,13 @@ const CalendarYearViewComponent = ({
         });
       }
 
-      const distToBottom = scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
+      const distToBottom = scroller.scrollHeight - scroller.clientHeight - currentScrollTop;
 
-      if (distToBottom < YEAR_SCROLL_EDGE_THRESHOLD_PX && !isExtendingAfterRef.current) {
+      if (
+        isScrollingDown &&
+        distToBottom < YEAR_SCROLL_EDGE_THRESHOLD_PX &&
+        !isExtendingAfterRef.current
+      ) {
         isExtendingAfterRef.current = true;
         rangeAnchorRef.current = getCurrentRangeAnchor(scroller);
 
