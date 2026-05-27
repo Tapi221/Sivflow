@@ -39,6 +39,29 @@ const getPrimaryViewMode = (
   selection: CalendarViewModeSelection,
 ): CalendarViewMode => Array.isArray(selection) ? selection[0] : selection;
 
+const resolveNextViewModeSelection = (
+  currentSelection: CalendarViewModeSelection,
+  primaryViewMode: CalendarViewMode,
+  next: CalendarViewMode,
+): CalendarViewModeSelection => {
+  if (!isListPieChartViewMode(next)) return next;
+
+  if (Array.isArray(currentSelection)) {
+    if (currentSelection.includes(next)) {
+      const remainingSelection = currentSelection.filter((viewMode) => viewMode !== next);
+      return remainingSelection[0] ?? next;
+    }
+
+    return LIST_PIE_CHART_VIEW_MODES;
+  }
+
+  if (isListPieChartViewMode(primaryViewMode) && primaryViewMode !== next) {
+    return LIST_PIE_CHART_VIEW_MODES;
+  }
+
+  return next;
+};
+
 export const useCalendarNavigation = () => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -135,11 +158,7 @@ export const useCalendarNavigation = () => {
         }
       }
 
-      const resolvedNext: CalendarViewModeSelection = isListPieChartViewMode(next)
-        ? Array.isArray(selectedViewMode) || isListPieChartViewMode(primaryViewMode)
-          ? LIST_PIE_CHART_VIEW_MODES
-          : next
-        : next;
+      const resolvedNext = resolveNextViewModeSelection(selectedViewMode, primaryViewMode, next);
       const primaryNext = getPrimaryViewMode(resolvedNext);
 
       setSelectedViewMode(resolvedNext);
