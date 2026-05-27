@@ -11,15 +11,21 @@ export type AnimatedCheckboxBaseProps = {
   shape?: AnimatedCheckboxShape;
   variant?: AnimatedCheckboxVariant;
   indeterminate?: boolean;
+  strokeWidth?: number;
+  borderWidth?: number;
 };
 
-export const AnimatedCheckboxBase = ({
+const DEFAULT_CHECKBOX_STROKE_WIDTH = 1.4;
+
+const AnimatedCheckboxBase = ({
   checked,
   color,
   className,
   shape = "circle",
   variant = "filled",
   indeterminate = false,
+  strokeWidth = DEFAULT_CHECKBOX_STROKE_WIDTH,
+  borderWidth,
 }: AnimatedCheckboxBaseProps) => {
   const active = checked || indeterminate;
 
@@ -49,7 +55,7 @@ export const AnimatedCheckboxBase = ({
           active && variant === "filled" && "scale-75 opacity-0",
           (!active || variant !== "filled") && "scale-100 opacity-100",
         )}
-        style={{ borderColor: color }}
+        style={{ borderColor: color, borderWidth }}
       />
 
       <span
@@ -91,7 +97,7 @@ export const AnimatedCheckboxBase = ({
               d="M5.5 10H14.5"
               fill="none"
               stroke={strokeColor}
-              strokeWidth="1.4"
+              strokeWidth={strokeWidth}
               strokeLinecap="round"
               style={{
                 strokeDasharray: 10,
@@ -104,7 +110,7 @@ export const AnimatedCheckboxBase = ({
               d="M5.25 10.4L8.4 13.55L14.75 7.2"
               fill="none"
               stroke={strokeColor}
-              strokeWidth="1.4"
+              strokeWidth={strokeWidth}
               strokeLinecap="round"
               strokeLinejoin="round"
               style={{
@@ -119,3 +125,5 @@ export const AnimatedCheckboxBase = ({
     </span>
   );
 };
+
+export { AnimatedCheckboxBase };
