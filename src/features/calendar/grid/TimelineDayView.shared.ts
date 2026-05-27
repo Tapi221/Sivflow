@@ -1,7 +1,8 @@
 import type { ScheduleColumn, ScheduleColumnBuffer } from "./ScheduleColumn.shared";
 import { buildScheduleTimelineColumns } from "./ScheduleColumn.shared";
+import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
-export type TimelineViewMode = "month" | "week" | "threeDays" | "days";
+export type TimelineViewMode = CalendarViewMode;
 
 export type TimelineUnitBuffer = ScheduleColumnBuffer;
 
@@ -13,6 +14,10 @@ export const getTimelineColumnWidth = (
   viewMode: TimelineViewMode,
   dayColumnWidth: number,
 ) => {
+  if (viewMode === "year") {
+    return Math.max(220, Math.round(dayColumnWidth * 2));
+  }
+
   if (viewMode === "month") {
     return Math.max(168, Math.round(dayColumnWidth * 1.6));
   }
