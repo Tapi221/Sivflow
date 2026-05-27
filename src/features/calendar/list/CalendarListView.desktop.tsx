@@ -180,14 +180,14 @@ const CalendarListEventRow = ({ dateKey, event }: CalendarListEventRowProps) => 
 
 const EmptyDayCard = ({ isMonthEmpty }: { isMonthEmpty: boolean }) => (
   <div className="grid min-h-[38px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch">
-    <div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[rgba(60,60,67,0.34)]">
+    <div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[#b3b3b3]">
       —
     </div>
     <div className="relative flex justify-center">
-      <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#eef1f4]" aria-hidden="true" />
-      <span className="relative mt-[8px] h-2 w-2 rounded-full border border-[#d9dee6] bg-white" aria-hidden="true" />
+      <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#dedede]" aria-hidden="true" />
+      <span className="relative mt-[8px] h-2 w-2 rounded-full border border-[#dedede] bg-white" aria-hidden="true" />
     </div>
-    <div className="flex min-h-[34px] items-center rounded-[10px] border border-dashed border-[#e3e6eb] bg-[#fbfcfd] px-3 text-[12px] font-medium text-[#a1a5ad]">
+    <div className="flex min-h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">
       {isMonthEmpty ? EMPTY_MONTH_LABEL : EMPTY_DAY_LABEL}
     </div>
   </div>
