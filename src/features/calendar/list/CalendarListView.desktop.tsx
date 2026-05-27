@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, type UIEvent } from "react";
 import { addDays, format, getDaysInMonth, isSameDay, startOfMonth } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.schedule.list";
@@ -11,6 +11,9 @@ type CalendarListViewProps = {
   events: GoogleCalendarEvent[];
   selectedDate: Date;
   onSelectDate?: (date: Date) => void;
+  onReachStart?: () => void;
+  onReachEnd?: () => void;
+  onVisibleMonthChange?: (date: Date) => void;
   className?: string;
 };
 
@@ -31,6 +34,8 @@ type CalendarListDaySectionProps = {
 const EMPTY_DAY_LABEL = "予定なし";
 const EMPTY_MONTH_LABEL = "この期間の予定はありません";
 const SELECTED_DAY_SCROLL_BLOCK: ScrollLogicalPosition = "nearest";
+const LIST_SCROLL_EDGE_THRESHOLD_PX = 280;
+const LIST_VISIBLE_MONTH_ANCHOR_PX = 160;
 
 const buildMonthDays = (date: Date): Date[] => {
   const monthStart = startOfMonth(date);
@@ -99,6 +104,24 @@ const buildListDays = (
   });
 };
 
+const getVisibleMonthAnchorDate = (scrollElement: HTMLDivElement): Date | null => {
+  const containerRect = scrollElement.getBoundingClientRect();
+  const anchorY = containerRect.top + Math.min(LIST_VISIBLE_MONTH_ANCHOR_PX, containerRect.height / 2);
+  const daySections = Array.from(
+    scrollElement.querySelectorAll<HTMLElement>("[data-calendar-list-day-time]"),
+  );
+  const anchoredSection = daySections.findLast((section) => {
+    const sectionRect = section.getBoundingClientRect();
+
+    return sectionRect.top <= anchorY;
+  }) ?? daySections[0];
+  const dayTime = Number(anchoredSection?.dataset.calendarListDayTime);
+
+  if (!Number.isFinite(dayTime)) return null;
+
+  return new Date(dayTime);
+};
+
 const EmptyDayCard = ({ isMonthEmpty }: { isMonthEmpty: boolean }) => (
   <div className="grid min-h-[38px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch">
     <div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[#b3b3b3]">
@@ -124,6 +147,7 @@ const CalendarListDaySection = ({
       ref={day.isSelected ? selectedDayRef : undefined}
       className="grid grid-cols-[58px_minmax(0,1fr)] gap-2"
       aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}
+      data-calendar-list-day-time={day.date.getTime()}
     >
       <button
         type="button"
@@ -159,22 +183,87 @@ const CalendarListViewComponent = ({
   events,
   selectedDate,
   onSelectDate,
+  onReachStart,
+  onReachEnd,
+  onVisibleMonthChange,
   className,
 }: CalendarListViewProps) => {
+  const scrollViewportRef = useRef<HTMLDivElement | null>(null);
   const selectedDayElementRef = useRef<HTMLElement | null>(null);
+  const previousFirstDayKeyRef = useRef<string | null>(null);
+  const previousScrollHeightRef = useRef(0);
+  const lastSelectedDateTimeRef = useRef<number | null>(null);
+  const lastVisibleMonthTimeRef = useRef<number | null>(null);
   const listDays = useMemo(
     () => buildListDays(days, events, selectedDate),
     [days, events, selectedDate],
   );
   const isMonthEmpty = listDays.every((day) => day.events.length === 0);
 
+  const updateVisibleMonth = useCallback((scrollElement: HTMLDivElement | null) => {
+    if (!scrollElement || !onVisibleMonthChange) return;
+
+    const anchorDate = getVisibleMonthAnchorDate(scrollElement);
+    if (!anchorDate) return;
+
+    const visibleMonth = startOfMonth(anchorDate);
+    const visibleMonthTime = visibleMonth.getTime();
+    if (lastVisibleMonthTimeRef.current === visibleMonthTime) return;
+
+    lastVisibleMonthTimeRef.current = visibleMonthTime;
+    onVisibleMonthChange(visibleMonth);
+  }, [onVisibleMonthChange]);
+
+  const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
+    const scrollElement = event.currentTarget;
+    const remainingScrollBottom = scrollElement.scrollHeight - scrollElement.clientHeight - scrollElement.scrollTop;
+
+    updateVisibleMonth(scrollElement);
+
+    if (scrollElement.scrollTop <= LIST_SCROLL_EDGE_THRESHOLD_PX) {
+      onReachStart?.();
+    }
+
+    if (remainingScrollBottom <= LIST_SCROLL_EDGE_THRESHOLD_PX) {
+      onReachEnd?.();
+    }
+  }, [onReachEnd, onReachStart, updateVisibleMonth]);
+
+  useLayoutEffect(() => {
+    const scrollElement = scrollViewportRef.current;
+    const firstDayKey = listDays[0]?.dateKey ?? null;
+    const previousFirstDayKey = previousFirstDayKeyRef.current;
+    const previousScrollHeight = previousScrollHeightRef.current;
+
+    if (
+      scrollElement &&
+      previousFirstDayKey &&
+      firstDayKey &&
+      previousFirstDayKey !== firstDayKey &&
+      listDays.some((day) => day.dateKey === previousFirstDayKey)
+    ) {
+      const scrollHeightDelta = scrollElement.scrollHeight - previousScrollHeight;
+      if (scrollHeightDelta > 0) {
+        scrollElement.scrollTop += scrollHeightDelta;
+      }
+    }
+
+    previousFirstDayKeyRef.current = firstDayKey;
+    previousScrollHeightRef.current = scrollElement?.scrollHeight ?? 0;
+    updateVisibleMonth(scrollElement);
+  }, [listDays, updateVisibleMonth]);
+
   useEffect(() => {
+    const selectedDateTime = selectedDate.getTime();
+    if (lastSelectedDateTimeRef.current === selectedDateTime) return;
+
+    lastSelectedDateTimeRef.current = selectedDateTime;
     selectedDayElementRef.current?.scrollIntoView({ block: SELECTED_DAY_SCROLL_BLOCK });
-  }, [selectedDate, listDays]);
+  }, [selectedDate]);
 
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}>
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden">
+      <div ref={scrollViewportRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden" onScroll={handleScroll}>
         <div className="mx-auto flex w-full max-w-[940px] flex-col gap-2">
           {listDays.map((day) => (
             <CalendarListDaySection
