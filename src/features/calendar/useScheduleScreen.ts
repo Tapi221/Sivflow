@@ -1,16 +1,14 @@
 import type { RefObject, UIEvent } from "react";
 import { useCallback, useMemo, useState } from "react";
+import { useCalendarLayout } from "@/features/calendar/layout/calendar/useCalendarLayout.desktop";
+import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type { CalendarToolbarMode, CalendarViewMode, GoogleAccountDisplay, TimelineGridStyle } from "./scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import type { buildTimelineColumns, TimelineUnitBuffer } from "@/features/calendar/grid/TimelineDayView.shared";
-import { useCalendarLayout } from "@/features/calendar/layout/calendar/useCalendarLayout.desktop";
 import { useCalendarNavigation } from "./useCalendarNavigation";
-import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
-import { useTimelineGrid } from "@/features/calendar/grid/useTimelineGrid";
 
 export type UseScheduleScreenReturn = {
   contentViewportRef: RefObject<HTMLDivElement | null>;
@@ -21,10 +19,8 @@ export type UseScheduleScreenReturn = {
 
   currentDate: Date;
   selectedDate: Date;
-  timelineTitleDate: Date;
   monthTitleDate: Date;
   monthScrollTargetToken: number;
-  timelineUnitBuffer: TimelineUnitBuffer;
 
   selectedViewMode: CalendarViewMode;
   activeMode: CalendarToolbarMode;
@@ -32,10 +28,6 @@ export type UseScheduleScreenReturn = {
 
   visibleDays: Date[];
   displayDays: Date[];
-
-  timelineColumns: ReturnType<typeof buildTimelineColumns>;
-  timelineColumnWidth: number;
-  timelineAnchorColumnIndex: number;
 
   titleDate: Date;
   monthLabel: string | null;
@@ -77,7 +69,6 @@ export type UseScheduleScreenReturn = {
   handleSidebarPreviousMonth: () => void;
   handleSidebarNextMonth: () => void;
   handleSidebarSelectDate: (date: Date) => void;
-  handleTimelineSelectDate: (date: Date) => void;
   handleVisibleMonthChange: (date: Date) => void;
   handleMonthCellSelectDate: (date: Date) => void;
   handleMonthRenderedRangeChange: (range: CalendarDateRange) => void;
@@ -166,35 +157,15 @@ export const useScheduleScreen = ({
     calendarBuffer: navigation.calendarBuffer,
   });
 
-  const timeline = useTimelineGrid({
-    currentDate: navigation.currentDate,
-    selectedViewMode: navigation.selectedViewMode,
-    timelineUnitBuffer: navigation.timelineUnitBuffer,
-  });
-
-  const extendScrollLeft =
-    navigation.activeMode === "timeline"
-      ? navigation.extendTimelineUnitBufferLeft
-      : navigation.extendCalendarBufferLeft;
-  const extendScrollRight =
-    navigation.activeMode === "timeline"
-      ? navigation.extendTimelineUnitBufferRight
-      : navigation.extendCalendarBufferRight;
-
   const scroll = useCalendarScrollController({
     activeMode: navigation.activeMode,
     selectedViewMode: navigation.selectedViewMode,
     visibleDays,
-    timelineColumns: timeline.timelineColumns,
-    timelineColumnWidth: timeline.timelineColumnWidth,
-    timelineAnchorColumnIndex: timeline.timelineAnchorColumnIndex,
-    timelineUnitBuffer: navigation.timelineUnitBuffer,
     calendarBuffer: navigation.calendarBuffer,
     viewportWidth: navigation.viewportWidth,
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
-    onExtendLeft: extendScrollLeft,
-    onExtendRight: extendScrollRight,
-    onTimelineVisibleDateChange: navigation.handleTimelineVisibleDateChange,
+    onExtendLeft: navigation.extendCalendarBufferLeft,
+    onExtendRight: navigation.extendCalendarBufferRight,
     scrollTargetToken: navigation.calendarScrollToken,
   });
 
@@ -205,13 +176,11 @@ export const useScheduleScreen = ({
   );
 
   useCalendarEventSync({
-    activeMode: navigation.activeMode,
     selectedViewMode: navigation.selectedViewMode,
     visibleDays,
     monthTitleDate: navigation.monthTitleDate,
     monthRenderedRange,
     yearRenderedRange,
-    timelineColumns: timeline.timelineColumns,
     googleCalendar: {
       selectedCalendarIds: google.selectedCalendarIds,
       forceSyncRange: google.forceSyncRange,
@@ -251,10 +220,8 @@ export const useScheduleScreen = ({
 
     currentDate: navigation.currentDate,
     selectedDate: navigation.selectedDate,
-    timelineTitleDate: navigation.timelineTitleDate,
     monthTitleDate: navigation.monthTitleDate,
     monthScrollTargetToken: navigation.monthScrollTargetToken,
-    timelineUnitBuffer: navigation.timelineUnitBuffer,
 
     selectedViewMode: navigation.selectedViewMode,
     activeMode: navigation.activeMode,
@@ -263,14 +230,7 @@ export const useScheduleScreen = ({
     visibleDays,
     displayDays,
 
-    timelineColumns: timeline.timelineColumns,
-    timelineColumnWidth: timeline.timelineColumnWidth,
-    timelineAnchorColumnIndex: timeline.timelineAnchorColumnIndex,
-
-    titleDate:
-      navigation.activeMode === "timeline"
-        ? navigation.timelineTitleDate
-        : layout.titleDate,
+    titleDate: layout.titleDate,
     monthLabel: layout.monthLabel,
 
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
@@ -298,7 +258,6 @@ export const useScheduleScreen = ({
     handleSidebarPreviousMonth: navigation.handleSidebarPreviousMonth,
     handleSidebarNextMonth: navigation.handleSidebarNextMonth,
     handleSidebarSelectDate: navigation.handleSidebarSelectDate,
-    handleTimelineSelectDate: navigation.handleTimelineSelectDate,
     handleVisibleMonthChange: navigation.handleVisibleMonthChange,
     handleMonthCellSelectDate: navigation.handleMonthCellSelectDate,
     handleMonthRenderedRangeChange,
