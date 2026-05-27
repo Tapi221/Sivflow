@@ -42,28 +42,22 @@ const CARVE_PANEL_LEFT_SPACER_CLASS = "w-[220px] shrink-0";
 const CARVE_PANEL_VIEWPORT_BASE_CLASS =
   "flex min-h-0 min-w-0 flex-1 flex-col bg-white";
 
-const CARVE_PANEL_VIEWPORT_STANDALONE_CLASS = "pl-0 pr-0 pt-0 pb-0";
-
-const CARVE_PANEL_VIEWPORT_WITH_TRAILING_PANEL_CLASS = "pl-0 pr-4 pt-0 pb-0";
+const CARVE_PANEL_VIEWPORT_CLASS = "pl-0 pr-0 pt-0 pb-0";
 
 const CARVE_PANEL_BASE_CLASS =
   "flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-[#eeeeee] bg-white backdrop-blur-xl shadow-[0_18px_48px_rgba(15,23,42,0.10),0_1px_0_rgba(255,255,255,0.85)_inset]";
 
-const CARVE_PANEL_STANDALONE_CLASS =
+const CARVE_PANEL_CLASS =
   "rounded-tl-[28px] rounded-tr-none border-r-0";
 
-const CARVE_PANEL_WITH_TRAILING_PANEL_CLASS = "rounded-t-[28px]";
-
 const CarvePanelViewportBase = forwardRef<HTMLDivElement, CarvePanelViewportProps>(
-  ({ children, hasTrailingPanel = false, className }, ref) => {
+  ({ children, className }, ref) => {
     return (
       <div
         ref={ref}
         className={cn(
           CARVE_PANEL_VIEWPORT_BASE_CLASS,
-          hasTrailingPanel
-            ? CARVE_PANEL_VIEWPORT_WITH_TRAILING_PANEL_CLASS
-            : CARVE_PANEL_VIEWPORT_STANDALONE_CLASS,
+          CARVE_PANEL_VIEWPORT_CLASS,
           className,
         )}
       >
@@ -75,22 +69,19 @@ const CarvePanelViewportBase = forwardRef<HTMLDivElement, CarvePanelViewportProp
 
 CarvePanelViewportBase.displayName = "CarvePanelViewportBase";
 
-export const CarvePanelViewport = memo(CarvePanelViewportBase);
+const CarvePanelViewport = memo(CarvePanelViewportBase);
 
 CarvePanelViewport.displayName = "CarvePanelViewport";
 
 const CarvePanelBase = ({
   children,
-  hasTrailingPanel = false,
   className,
 }: CarvePanelProps) => {
   return (
     <div
       className={cn(
         CARVE_PANEL_BASE_CLASS,
-        hasTrailingPanel
-          ? CARVE_PANEL_WITH_TRAILING_PANEL_CLASS
-          : CARVE_PANEL_STANDALONE_CLASS,
+        CARVE_PANEL_CLASS,
         className,
       )}
     >
@@ -101,19 +92,17 @@ const CarvePanelBase = ({
 
 CarvePanelBase.displayName = "CarvePanelBase";
 
-export const CarvePanel = memo(CarvePanelBase);
+const CarvePanel = memo(CarvePanelBase);
 
 CarvePanel.displayName = "CarvePanel";
 
-export const CarvePanelShell = ({
+const CarvePanelShell = ({
   children,
   toolbar = null,
   overlay = null,
   leftPanel = null,
-  rightPanel = null,
   reserveToolbar = false,
   reserveLeftPanel = false,
-  hasTrailingPanel = false,
   viewportRef,
   className,
   bodyClassName,
@@ -137,14 +126,13 @@ export const CarvePanelShell = ({
 
         <CarvePanelViewport
           ref={viewportRef}
-          hasTrailingPanel={hasTrailingPanel}
           className={viewportClassName}
         >
           {children}
         </CarvePanelViewport>
-
-        {rightPanel}
       </div>
     </div>
   );
 };
+
+export { CarvePanel, CarvePanelShell, CarvePanelViewport };
