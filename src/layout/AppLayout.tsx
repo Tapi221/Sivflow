@@ -1,10 +1,11 @@
 import { Suspense, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
+import { useWorkspaceTabsRouteSync } from "@/features/tab/hooks/useTabsRouteSync";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
 import { Sidebar } from "@/pane/leftpane/Sidebar.desktop";
-import { useWorkspaceTabsRouteSync } from "@/features/tab/hooks/useTabsRouteSync";
+import { NavigationBarMobile } from "@/pane/nabigationbar.mobile";
 import { isDesktopRuntime } from "@/platform/runtime";
 import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
@@ -51,6 +52,8 @@ export const AppLayout = () => {
           <Outlet />
         </Suspense>
       </WorkspaceShell>
+
+      <NavigationBarMobile />
     </div>
   );
 };
