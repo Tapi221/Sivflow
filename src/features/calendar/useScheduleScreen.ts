@@ -81,6 +81,7 @@ export type UseScheduleScreenReturn = {
   handleVisibleMonthChange: (date: Date) => void;
   handleMonthCellSelectDate: (date: Date) => void;
   handleMonthRenderedRangeChange: (range: CalendarDateRange) => void;
+  handleYearRenderedRangeChange: (range: CalendarDateRange) => void;
 
   setMonthTitleDate: (date: Date) => void;
 };
@@ -112,10 +113,28 @@ export const useScheduleScreen = ({
   const navigation = useCalendarNavigation({ initialActiveMode });
   const [monthRenderedRange, setMonthRenderedRange] =
     useState<CalendarDateRange | null>(null);
+  const [yearRenderedRange, setYearRenderedRange] =
+    useState<CalendarDateRange | null>(null);
 
   const handleMonthRenderedRangeChange = useCallback(
     (range: CalendarDateRange) => {
       setMonthRenderedRange((prev) => {
+        if (
+          prev?.start.getTime() === range.start.getTime() &&
+          prev.end.getTime() === range.end.getTime()
+        ) {
+          return prev;
+        }
+
+        return range;
+      });
+    },
+    [],
+  );
+
+  const handleYearRenderedRangeChange = useCallback(
+    (range: CalendarDateRange) => {
+      setYearRenderedRange((prev) => {
         if (
           prev?.start.getTime() === range.start.getTime() &&
           prev.end.getTime() === range.end.getTime()
@@ -191,6 +210,7 @@ export const useScheduleScreen = ({
     visibleDays,
     monthTitleDate: navigation.monthTitleDate,
     monthRenderedRange,
+    yearRenderedRange,
     timelineColumns: timeline.timelineColumns,
     googleCalendar: {
       selectedCalendarIds: google.selectedCalendarIds,
@@ -282,6 +302,7 @@ export const useScheduleScreen = ({
     handleVisibleMonthChange: navigation.handleVisibleMonthChange,
     handleMonthCellSelectDate: navigation.handleMonthCellSelectDate,
     handleMonthRenderedRangeChange,
+    handleYearRenderedRangeChange,
 
     setMonthTitleDate: navigation.setMonthTitleDate,
   };

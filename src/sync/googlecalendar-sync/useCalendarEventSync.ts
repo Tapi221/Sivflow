@@ -45,6 +45,7 @@ export const useCalendarEventSync = ({
   visibleDays,
   monthTitleDate,
   monthRenderedRange,
+  yearRenderedRange,
   googleCalendar,
   timelineColumns = [],
 }: UseCalendarEventSyncOptions): void => {
@@ -70,8 +71,9 @@ export const useCalendarEventSync = ({
       visibleDays,
       monthTitleDate,
       monthRenderedRange,
+      yearRenderedRange,
     });
-  }, [activeMode, monthRenderedRange, monthTitleDate, selectedViewMode, timelineColumns, visibleDays]);
+  }, [activeMode, monthRenderedRange, monthTitleDate, selectedViewMode, timelineColumns, visibleDays, yearRenderedRange]);
 
   const syncRangeKey = useMemo(
     () => `${syncRange.rangeStart.toISOString()}|${syncRange.rangeEnd.toISOString()}`,
