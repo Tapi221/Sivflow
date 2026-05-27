@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { TodayBar } from "@/chip/bar/TodayBar";
-import { CalendarIcon } from "@/chip/icons/icons.sidebar";
-import { SidebarPanelIcon } from "@/chip/icons/icons.schedule";
 import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
@@ -97,9 +95,7 @@ const persistAppProjects = (projects: AppCalendarItem[]) => {
   }
 };
 
-export const ScheduleScreen = ({
-  onClose,
-}: ScheduleScreenProps) => {
+export const ScheduleScreen = (_props: ScheduleScreenProps) => {
   const pane = useScheduleScreen();
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
@@ -134,7 +130,6 @@ export const ScheduleScreen = ({
     handleMonthRenderedRangeChange,
     handleListReachStart,
     handleListReachEnd,
-    addGoogleCalendar,
   } = pane;
 
   const viewOptions = useMemo(
@@ -294,47 +289,7 @@ export const ScheduleScreen = ({
     >
       <style>{MOBILE_SCHEDULE_STYLE}</style>
 
-      <header className="shrink-0 bg-[linear-gradient(180deg,#08111f_0%,#0b1a3a_58%,#071124_100%)] px-4 pb-4 pt-[calc(env(safe-area-inset-top)+14px)] text-white shadow-[0_12px_28px_rgba(4,10,24,0.22)]">
-        <div className="flex h-11 items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <button
-              type="button"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/82 transition hover:bg-white/10"
-              aria-label="メニュー"
-            >
-              <SidebarPanelIcon className="h-5 w-5" />
-            </button>
-            <CalendarIcon className="h-5 w-5 shrink-0 text-white/82" />
-            <h1 className="truncate text-[20px] font-bold tracking-[-0.03em]">
-              スケジュール
-            </h1>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-2">
-            {onClose ? (
-              <button
-                type="button"
-                className="rounded-full border border-white/15 px-3 py-1.5 text-[12px] font-semibold text-white/86"
-                onClick={onClose}
-              >
-                Close
-              </button>
-            ) : null}
-            <button
-              type="button"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-[13px] font-bold text-white/86"
-              onClick={() => {
-                void addGoogleCalendar();
-              }}
-              aria-label={t.addGoogleCalendar}
-            >
-              A
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <div className="shrink-0 rounded-t-[22px] border-b border-[#eeeeee] bg-white px-3 py-2 shadow-[0_-1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(15,23,42,0.07)] [&_.calendar-workspace-toolbar]:h-11 [&_.calendar-workspace-toolbar]:overflow-visible [&_.calendar-workspace-toolbar]:bg-transparent [&_.calendar-workspace-toolbar]:pr-0">
+      <div className="shrink-0 border-b border-[#eeeeee] bg-white px-3 py-2 [&_.calendar-workspace-toolbar]:h-11 [&_.calendar-workspace-toolbar]:overflow-visible [&_.calendar-workspace-toolbar]:bg-transparent [&_.calendar-workspace-toolbar]:pr-0">
         <CalendarWorkspaceToolbar
           viewMode={selectedViewMode}
           onSelectViewMode={handleSelectViewMode}
