@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { addDays, differenceInMinutes, isAfter, isBefore, startOfDay } from "date-fns";
 import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
+import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +17,8 @@ type DailyPieSlice = {
   id: string;
   label: string;
   color: string;
+  borderColor: string;
+  labelColor: string;
   minutes: number;
   eventCount: number;
   percentage: number;
@@ -28,11 +31,21 @@ type DailyClockPieProps = {
   slices: DailyPieSlice[];
 };
 
+type EventSegmentMeta = {
+  id: string;
+  label: string;
+  color: string;
+  borderColor: string;
+  labelColor: string;
+};
+
 const DEFAULT_SEGMENT_COLOR = "#8e8e93";
 const GAP_SEGMENT_COLOR = "#f7f7f8";
+const GAP_SEGMENT_BORDER_COLOR = "rgba(255,255,255,0.7)";
+const GAP_SEGMENT_LABEL_COLOR = "#8e8e93";
 const FULL_DAY_MINUTES = 24 * 60;
 const CHART_CENTER = 100;
-const CHART_RADIUS = 75;
+const CHART_RADIUS = 82;
 const CLOCK_HOURS = [0, 3, 6, 9, 12, 15, 18, 21];
 
 const formatDuration = (minutes: number): string => {
@@ -58,6 +71,16 @@ const createCalendarLabelMap = (googleAccounts: GoogleAccountDisplay[]) => {
   });
 
   return labelByCalendarId;
+};
+
+const createEventChipColorMeta = (accentColor: string) => {
+  const tokens = generateColorTokens(accentColor || DEFAULT_SEGMENT_COLOR);
+
+  return {
+    color: tokens.bg,
+    borderColor: tokens.border,
+    labelColor: tokens.text,
+  };
 };
 
 const polarToCartesian = (minute: number, radius: number) => {
@@ -87,7 +110,8 @@ const resolveEventSegmentMeta = (
   event: GoogleCalendarEvent,
   appProjects: AppCalendarItem[],
   calendarLabelById: Map<string, string>,
-) => {
+): EventSegmentMeta => {
+  const colorMeta = createEventChipColorMeta(event.accentColor);
   const project = appProjects.find(
     (item) => item.id === event.projectId || item.label === event.projectId,
   );
@@ -96,7 +120,7 @@ const resolveEventSegmentMeta = (
     return {
       id: `project:${project.id}`,
       label: project.label,
-      color: project.color,
+      ...colorMeta,
     };
   }
 
@@ -104,7 +128,7 @@ const resolveEventSegmentMeta = (
     return {
       id: `project:${event.projectId}`,
       label: event.projectId,
-      color: event.accentColor || DEFAULT_SEGMENT_COLOR,
+      ...colorMeta,
     };
   }
 
@@ -113,7 +137,7 @@ const resolveEventSegmentMeta = (
   return {
     id: `calendar:${event.calendarId}`,
     label: calendarLabel ?? event.title,
-    color: event.accentColor || DEFAULT_SEGMENT_COLOR,
+    ...colorMeta,
   };
 };
 
@@ -159,6 +183,8 @@ const buildDailyPieSlices = (
         id: `gap:${cursor}:${startMinute}`,
         label: "未予定",
         color: GAP_SEGMENT_COLOR,
+        borderColor: GAP_SEGMENT_BORDER_COLOR,
+        labelColor: GAP_SEGMENT_LABEL_COLOR,
         minutes: startMinute - cursor,
         eventCount: 0,
         percentage: 0,
@@ -173,6 +199,8 @@ const buildDailyPieSlices = (
         id: `${event.id}:${event.sourceId}:${startMinute}:${endMinute}`,
         label: event.label,
         color: event.color,
+        borderColor: event.borderColor,
+        labelColor: event.labelColor,
         minutes: endMinute - startMinute,
         eventCount: 1,
         percentage: 0,
@@ -190,6 +218,8 @@ const buildDailyPieSlices = (
       id: `gap:${cursor}:${FULL_DAY_MINUTES}`,
       label: "未予定",
       color: GAP_SEGMENT_COLOR,
+      borderColor: GAP_SEGMENT_BORDER_COLOR,
+      labelColor: GAP_SEGMENT_LABEL_COLOR,
       minutes: FULL_DAY_MINUTES - cursor,
       eventCount: 0,
       percentage: 0,
@@ -218,15 +248,15 @@ const DailyClockPie = ({ slices }: DailyClockPieProps) => {
   const hasTimedSlices = visibleSlices.some((slice) => !slice.isGap);
 
   return (
-    <div className="flex min-w-0 items-center justify-center">
-      <div className="relative aspect-square w-full max-w-[520px] min-w-[300px]">
+    <div className="flex h-full w-full min-w-0 items-center justify-center">
+      <div className="relative aspect-square w-[min(100%,72vh)] max-w-[720px] min-w-0">
         {hasTimedSlices ? (
           <svg viewBox="0 0 200 200" role="img" aria-label="予定の円グラフ" className="h-full w-full overflow-visible">
             {visibleSlices.map((slice) => (
               slice.endMinute - slice.startMinute >= FULL_DAY_MINUTES ? (
-                <circle key={slice.id} cx={CHART_CENTER} cy={CHART_CENTER} r={CHART_RADIUS} fill={slice.color} />
+                <circle key={slice.id} cx={CHART_CENTER} cy={CHART_CENTER} r={CHART_RADIUS} fill={slice.color} stroke={slice.borderColor} strokeWidth={0.45} />
               ) : (
-                <path key={slice.id} d={buildWedgePath(slice.startMinute, slice.endMinute)} fill={slice.color} stroke="rgba(255,255,255,0.7)" strokeWidth={0.35}>
+                <path key={slice.id} d={buildWedgePath(slice.startMinute, slice.endMinute)} fill={slice.color} stroke={slice.borderColor} strokeWidth={0.45}>
                   <title>
                     {slice.label}: {formatDuration(slice.minutes)}
                   </title>
@@ -254,7 +284,7 @@ const DailyClockPie = ({ slices }: DailyClockPieProps) => {
               const labelPosition = polarToCartesian((slice.startMinute + slice.endMinute) / 2, CHART_RADIUS * 0.58);
 
               return (
-                <text key={`label:${slice.id}`} x={labelPosition.x} y={labelPosition.y} textAnchor="middle" className="pointer-events-none fill-white text-[8px] font-semibold drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]">
+                <text key={`label:${slice.id}`} x={labelPosition.x} y={labelPosition.y} textAnchor="middle" fill={slice.labelColor} className="pointer-events-none text-[8px] font-semibold drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]">
                   <tspan x={labelPosition.x} dy="-0.2em">{truncateChartLabel(slice.label)}</tspan>
                   <tspan x={labelPosition.x} dy="1.15em">{formatDuration(slice.minutes)}</tspan>
                 </text>
@@ -289,7 +319,7 @@ const CalendarPieChartView = ({
   return (
     <div className={cn("flex h-full min-h-0 bg-white text-[#1c1c1e]", className)}>
       <main className="flex min-h-0 flex-1 flex-col">
-        <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-8 py-6">
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-4 py-4 sm:px-6 sm:py-6">
           <DailyClockPie slices={plannedSlices} />
         </div>
       </main>
