@@ -10,7 +10,6 @@ export type WorkspaceSidebarSection =
   | "review"
   | "library"
   | "schedule"
-  | "tasks"
   | "settings";
 
 /**
@@ -20,7 +19,6 @@ export type WorkspaceRouteTabId =
   | "route:home"
   | "route:review"
   | "route:schedule"
-  | "route:tasks"
   | "route:settings";
 
 /**
@@ -119,14 +117,6 @@ export const WORKSPACE_ROUTE_TABS = [
     routePath: "/schedule",
     isClosable: true,
     sectionKey: "schedule",
-  },
-  {
-    id: "route:tasks",
-    kind: "route",
-    title: "Tasks",
-    routePath: "/tasks",
-    isClosable: true,
-    sectionKey: "tasks",
   },
   {
     id: "route:settings",
