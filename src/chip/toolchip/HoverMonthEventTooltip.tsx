@@ -28,7 +28,8 @@ type HoverMonthEventTooltipProps = {
   disabled?: boolean;
 };
 
-const TOOLTIP_SURFACE_CLASS_NAME = "relative flex max-w-[240px] flex-col overflow-visible rounded-[16px] border border-[#dceefa]/80 bg-[#f8fcff]/90 px-3 py-2 text-[#48616f] shadow-[0_12px_30px_rgba(92,128,154,0.14),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-2xl";
+const TOOLTIP_SURFACE_CLASS_NAME = "relative flex w-[min(320px,calc(100vw-24px))] flex-col overflow-visible rounded-[16px] border border-[#dceefa]/80 bg-[#f8fcff]/90 px-3 py-2 text-[#48616f] shadow-[0_12px_30px_rgba(92,128,154,0.14),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-2xl";
+const TOOLTIP_TITLE_CLASS_NAME = "block whitespace-pre-wrap break-all text-[12px] font-semibold leading-snug tracking-[-0.01em] text-[#3f5968]";
 const TOOLTIP_ARROW_CLASS_NAME = "absolute h-2.5 w-2.5 rotate-45 border-[#dceefa]/80 bg-[#f8fcff]/90 backdrop-blur-2xl";
 const TOOLTIP_VIEWPORT_MARGIN = 12;
 const TOOLTIP_BOUNDARY_GAP = 8;
@@ -241,7 +242,7 @@ const HoverMonthEventTooltip = ({
               />
 
               {tooltipTitle && (
-                <span className="block break-words text-[12px] font-semibold leading-snug tracking-[-0.01em] text-[#3f5968]">
+                <span className={TOOLTIP_TITLE_CLASS_NAME}>
                   {tooltipTitle}
                 </span>
               )}
