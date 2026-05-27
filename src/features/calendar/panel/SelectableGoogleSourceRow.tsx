@@ -1,21 +1,30 @@
 import { AnimatedCircleCheckbox } from "@/chip/checkbox/AnimatedCircleCheckbox";
 import { cn } from "@/lib/utils";
 
-export const GOOGLE_SOURCE_ROW_CLASS_NAME =
-  "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
-
-const ASSERTIVE_SOURCE_CHECK_CLASS_NAME = "saturate-[0.68] brightness-[1.08]";
-const ASSERTIVE_SOURCE_MIN_SATURATION = 0.45;
-const ASSERTIVE_BLUE_HUE_MIN = 200;
-const ASSERTIVE_BLUE_HUE_MAX = 230;
-const ASSERTIVE_RED_HUE_MAX = 16;
-const ASSERTIVE_RED_HUE_MIN = 344;
-
 type RgbColor = {
   r: number;
   g: number;
   b: number;
 };
+
+type SelectableGoogleSourceRowProps = {
+  id: string;
+  label: string;
+  checked: boolean;
+  color: string;
+  onToggle: (id: string) => void;
+};
+
+const GOOGLE_SOURCE_ROW_CLASS_NAME =
+  "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
+const ASSERTIVE_SOURCE_CHECK_CLASS_NAME = "saturate-[0.68] brightness-[1.08]";
+const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#2c2c2e]";
+const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#b8b8bd]";
+const ASSERTIVE_SOURCE_MIN_SATURATION = 0.45;
+const ASSERTIVE_BLUE_HUE_MIN = 200;
+const ASSERTIVE_BLUE_HUE_MAX = 230;
+const ASSERTIVE_RED_HUE_MAX = 16;
+const ASSERTIVE_RED_HUE_MIN = 344;
 
 const parseHexRgb = (color: string): RgbColor | null => {
   const hex = color.trim().replace(/^#/, "");
@@ -68,15 +77,7 @@ const shouldMuteSourceCheckColor = (color: string): boolean => {
   return isAssertiveBlue || isAssertiveRed;
 };
 
-type SelectableGoogleSourceRowProps = {
-  id: string;
-  label: string;
-  checked: boolean;
-  color: string;
-  onToggle: (id: string) => void;
-};
-
-export const SelectableGoogleSourceRow = ({
+const SelectableGoogleSourceRow = ({
   id,
   label,
   checked,
@@ -99,9 +100,16 @@ export const SelectableGoogleSourceRow = ({
         className={shouldMuteSourceCheckColor(color) ? ASSERTIVE_SOURCE_CHECK_CLASS_NAME : undefined}
       />
 
-      <span className="truncate text-[12px] font-medium text-[#a8a8a8]">
+      <span
+        className={cn(
+          "truncate text-[12px] font-medium",
+          checked ? SOURCE_ROW_CHECKED_TEXT_CLASS_NAME : SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME,
+        )}
+      >
         {label}
       </span>
     </button>
   );
 };
+
+export { GOOGLE_SOURCE_ROW_CLASS_NAME, SelectableGoogleSourceRow };
