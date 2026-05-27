@@ -172,7 +172,9 @@ export const useMonthInfiniteScroll = ({
     if (nextKey === visibleMonthKeyRef.current) return;
 
     visibleMonthKeyRef.current = nextKey;
-    onVisibleMonthChange(visibleWeek.visibleMonthDate);
+    startTransition(() => {
+      onVisibleMonthChange(visibleWeek.visibleMonthDate);
+    });
   }, [getWeekIndexFromScrollTop, onVisibleMonthChange]);
 
   const scheduleVisibleMonthSync = useCallback(() => {
