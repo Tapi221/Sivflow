@@ -1,24 +1,36 @@
 import { useLayoutEffect, useRef } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarToolbarMode, CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
 type Params = {
-  activeMode: "timeline" | "calendar" | string;
+  activeMode: CalendarToolbarMode;
   selectedViewMode: CalendarViewMode;
-
   calendarBufferBefore: number;
   calendarDayColumnWidth: number;
-
   viewportWidth: number;
-
-  timelineAnchorColumnIndex: number;
-  timelineColumnWidth: number;
-
   scrollTargetToken?: number;
-
   scrollRef: React.RefObject<HTMLDivElement | null>;
   headerRef?: React.RefObject<HTMLDivElement | null>;
   headerRefs?: React.RefObject<HTMLDivElement | null>[];
+};
+
+const getCalendarScrollLeft = ({
+  selectedViewMode,
+  calendarBufferBefore,
+  calendarDayColumnWidth,
+  viewportWidth,
+}: Pick<Params, "selectedViewMode" | "calendarBufferBefore" | "calendarDayColumnWidth" | "viewportWidth">) => {
+  const anchorOffset = calendarBufferBefore * calendarDayColumnWidth;
+
+  if (selectedViewMode === "week" || selectedViewMode === "threeDays") {
+    return anchorOffset;
+  }
+
+  const viewportInlineInset = selectedViewMode === "month" ? 0 : C.WEEKDAY_SURFACE_LEFT_INSET_PX;
+  const availableWidth = Math.max(0, viewportWidth - viewportInlineInset - C.TIME_COLUMN_WIDTH);
+  const centerOffset = selectedViewMode === "days" ? 0 : Math.max(0, (availableWidth - calendarDayColumnWidth) / 2);
+
+  return Math.max(0, anchorOffset - centerOffset);
 };
 
 export const useCalendarScrollPositionSync = ({
@@ -27,8 +39,6 @@ export const useCalendarScrollPositionSync = ({
   calendarBufferBefore,
   calendarDayColumnWidth,
   viewportWidth,
-  timelineAnchorColumnIndex,
-  timelineColumnWidth,
   scrollTargetToken,
   scrollRef,
   headerRef,
@@ -37,45 +47,39 @@ export const useCalendarScrollPositionSync = ({
   const lastRef = useRef<{
     token: number | null;
     viewportWidth: number;
+    activeMode: CalendarToolbarMode | null;
+    selectedViewMode: CalendarViewMode | null;
   }>({
     token: null,
     viewportWidth: 0,
+    activeMode: null,
+    selectedViewMode: null,
   });
 
   useLayoutEffect(() => {
+    if (activeMode !== "calendar") return;
+
     const scroller = scrollRef.current;
     if (!scroller) return;
     if (viewportWidth <= 0) return;
 
     const currentToken = scrollTargetToken ?? 0;
-
-    const { token, viewportWidth: prevWidth } = lastRef.current;
-
+    const { token, viewportWidth: prevWidth, activeMode: prevActiveMode, selectedViewMode: prevSelectedViewMode } = lastRef.current;
     const tokenChanged = token !== currentToken;
-    const viewportChanged =
-      token === currentToken && prevWidth !== viewportWidth;
+    const viewportChanged = token === currentToken && prevWidth !== viewportWidth;
+    const modeChanged = prevActiveMode !== activeMode;
+    const viewModeChanged = prevSelectedViewMode !== selectedViewMode;
 
-    if (!tokenChanged && !viewportChanged) return;
-
-    let nextScrollLeft = 0;
-
-    if (activeMode === "timeline") {
-      nextScrollLeft = timelineAnchorColumnIndex * timelineColumnWidth;
-    } else {
-      const anchorOffset = calendarBufferBefore * calendarDayColumnWidth;
-      const viewportInlineInset =
-        selectedViewMode === "month" ? 0 : C.WEEKDAY_SURFACE_LEFT_INSET_PX;
-      const availableWidth = Math.max(
-        0,
-        viewportWidth - viewportInlineInset - C.TIME_COLUMN_WIDTH,
-      );
-      const centerOffset =
-        selectedViewMode === "days"
-          ? 0
-          : Math.max(0, (availableWidth - calendarDayColumnWidth) / 2);
-
-      nextScrollLeft = Math.max(0, anchorOffset - centerOffset);
+    if (!tokenChanged && !viewportChanged && !modeChanged && !viewModeChanged) {
+      return;
     }
+
+    const nextScrollLeft = getCalendarScrollLeft({
+      selectedViewMode,
+      calendarBufferBefore,
+      calendarDayColumnWidth,
+      viewportWidth,
+    });
 
     scroller.scrollLeft = nextScrollLeft;
 
@@ -90,18 +94,8 @@ export const useCalendarScrollPositionSync = ({
     lastRef.current = {
       token: currentToken,
       viewportWidth,
+      activeMode,
+      selectedViewMode,
     };
-  }, [
-    activeMode,
-    selectedViewMode,
-    calendarBufferBefore,
-    calendarDayColumnWidth,
-    viewportWidth,
-    timelineAnchorColumnIndex,
-    timelineColumnWidth,
-    scrollTargetToken,
-    scrollRef,
-    headerRef,
-    headerRefs,
-  ]);
+  }, [activeMode, selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs]);
 };
