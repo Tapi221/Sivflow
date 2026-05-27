@@ -6,6 +6,7 @@ import { useAuthSession } from "@/contexts/AuthContext";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
+import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
 import { CalendarSidebar } from "@/features/calendar/panel/CalendarSidebar";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { TaskView } from "@/features/calendar/task/TaskView";
@@ -164,9 +165,10 @@ export const ScheduleScreen = ({
       { value: "week", label: t.viewWeek },
       { value: "threeDays", label: t.viewThreeDays },
       { value: "days", label: t.viewDay },
+      { value: "list", label: t.viewList },
       { value: "pieChart", label: t.viewPieChart },
     ] as const,
-    [t.viewDay, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewWeek, t.viewYear],
+    [t.viewDay, t.viewList, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewWeek, t.viewYear],
   );
 
   const {
@@ -310,8 +312,11 @@ export const ScheduleScreen = ({
   }, [googleCalendarEvents, taskCalendarEvents]);
   const deferredCalendarEvents = useDeferredValue(calendarEvents);
 
+  const isListCalendarView =
+    activeMode === "calendar" && selectedViewMode === "list";
+
   const sidebarMonthDate =
-    selectedViewMode === "month" ? monthTitleDate : titleDate;
+    selectedViewMode === "month" || selectedViewMode === "list" ? monthTitleDate : titleDate;
 
   const isYearCalendarView =
     activeMode === "calendar" && selectedViewMode === "year";
@@ -326,7 +331,7 @@ export const ScheduleScreen = ({
     activeMode === "calendar" && PLAN_RESULT_TOGGLE_VIEW_MODES.has(selectedViewMode);
 
   const headerTitleDate =
-    selectedViewMode === "month"
+    selectedViewMode === "month" || selectedViewMode === "list"
       ? monthTitleDate
       : isPieChartCalendarView
         ? selectedDate
@@ -419,6 +424,15 @@ export const ScheduleScreen = ({
               events={deferredCalendarEvents}
               appProjects={appProjects}
               googleAccounts={googleAccounts}
+            />
+          </div>
+        ) : isListCalendarView ? (
+          <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border-0 bg-white">
+            <CalendarListView
+              days={visibleDays}
+              events={deferredCalendarEvents}
+              selectedDate={selectedDate}
+              onSelectDate={handleSidebarSelectDate}
             />
           </div>
         ) : isMonthCalendarView ? (
