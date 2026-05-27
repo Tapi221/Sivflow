@@ -32,15 +32,15 @@ const TREE_INDENT_PX = 16;
 const TREE_ROW_BASE_PADDING_LEFT_PX = 8;
 const TREE_GUIDE_LEFT_OFFSET_PX = TREE_ROW_BASE_PADDING_LEFT_PX + 8;
 const TREE_ROW_HEIGHT_CLASS_NAME = "h-7";
-const TREE_EMPTY_TEXT_CLASS_NAME = "px-3 py-2 text-[12px] font-medium leading-[1.45] tracking-normal text-[#a6adba]";
+const TREE_EMPTY_TEXT_CLASS_NAME = "px-3 py-2 text-[12px] font-medium leading-[1.45] tracking-normal text-[#c7c7cc]";
 const TREE_GUIDE_CLASS_NAME = "pointer-events-none absolute bg-[#eeeeee]";
-const TREE_ROW_BASE_CLASS_NAME = "group relative flex w-full cursor-default select-none items-center gap-1 rounded-[10px] pr-2 text-left text-[12px] font-medium leading-none tracking-normal outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
-const TREE_ROW_SELECTED_CLASS_NAME = "bg-[#f7f7f8] text-[#3f4652] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.03)]";
-const TREE_ROW_IDLE_CLASS_NAME = "text-[#6d747f] hover:bg-[#fafafa] hover:text-[#3f4652]";
-const TREE_TOGGLE_CLASS_NAME = "flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] text-[#8f94d6] transition hover:bg-[#f7f7f8] hover:text-[#7379c8]";
-const TREE_FOLDER_ICON_CLASS_NAME = "text-[#8f94d6]";
-const TREE_ITEM_ICON_CLASS_NAME = "text-[#8e8e93]";
-const TREE_TRASH_BUTTON_BASE_CLASS_NAME = "flex h-8 w-full items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium leading-none tracking-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
+const TREE_ROW_BASE_CLASS_NAME = "group relative flex w-full cursor-default select-none items-center gap-1 rounded-[10px] pr-2 text-left text-[12px] font-medium leading-none tracking-normal outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
+const TREE_ROW_SELECTED_CLASS_NAME = "bg-white text-[#6d747f] shadow-[0_1px_3px_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(0,0,0,0.06)]";
+const TREE_ROW_IDLE_CLASS_NAME = "text-[#8e8e93] hover:bg-[#f7f7f8] hover:text-[#6d747f]";
+const TREE_TOGGLE_CLASS_NAME = "flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] text-[#c7c7cc] transition hover:bg-white hover:text-[#8e8e93]";
+const TREE_FOLDER_ICON_CLASS_NAME = "text-[#c7c7cc]";
+const TREE_ITEM_ICON_CLASS_NAME = "text-[#c7c7cc]";
+const TREE_TRASH_BUTTON_BASE_CLASS_NAME = "flex h-8 w-full items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium leading-none tracking-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
 
 const ChevronRightGlyph = ({ className }: NodeIconProps) => (
   <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
@@ -709,7 +709,7 @@ const LibraryHierarchySidebar = () => {
             isTrashSelected ? TREE_ROW_SELECTED_CLASS_NAME : TREE_ROW_IDLE_CLASS_NAME,
           )}
         >
-          <TrashGlyph className="h-4 w-4 shrink-0 text-[#8f94d6]" />
+          <TrashGlyph className="h-4 w-4 shrink-0 text-[#8e8e93]" />
           <span className="truncate">ごみ箱</span>
         </button>
       </div>
