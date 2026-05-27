@@ -41,13 +41,13 @@ export const CalendarEventChipWeekday = ({
       }}
       title={`${titleLabel} ${timeLabel}`}
     >
-      <span className="truncate text-[12px] font-medium leading-snug">
+      <span className="overflow-hidden whitespace-nowrap text-[12px] font-medium leading-snug">
         {titleLabel}
       </span>
 
       {!compact && (
         <span
-          className="truncate text-[11px] font-semibold tabular-nums opacity-80"
+          className="overflow-hidden whitespace-nowrap text-[11px] font-semibold tabular-nums opacity-80"
         >
           {timeLabel}
         </span>
