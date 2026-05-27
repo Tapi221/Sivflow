@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import { format } from "date-fns";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
@@ -6,11 +5,6 @@ import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 type CalendarEventChipWeekdayProps = {
   event: GoogleCalendarEvent;
   compact?: boolean;
-};
-
-const CHIP_TEXT_FADE_STYLE: CSSProperties = {
-  WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 8px), transparent 100%)",
-  maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 8px), transparent 100%)",
 };
 
 export const CalendarEventChipWeekday = ({
@@ -47,18 +41,12 @@ export const CalendarEventChipWeekday = ({
       }}
       title={`${titleLabel} ${timeLabel}`}
     >
-      <span
-        className="overflow-hidden whitespace-nowrap text-[12px] font-medium leading-snug"
-        style={CHIP_TEXT_FADE_STYLE}
-      >
+      <span className="overflow-hidden whitespace-nowrap text-[12px] font-medium leading-snug">
         {titleLabel}
       </span>
 
       {!compact && (
-        <span
-          className="overflow-hidden whitespace-nowrap text-[11px] font-semibold tabular-nums opacity-80"
-          style={CHIP_TEXT_FADE_STYLE}
-        >
+        <span className="overflow-hidden whitespace-nowrap text-[11px] font-semibold tabular-nums opacity-80">
           {timeLabel}
         </span>
       )}
