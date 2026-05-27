@@ -10,9 +10,6 @@ export type CalendarScrollBuffer = {
 };
 
 type CalendarScrollBufferConfig = {
-  /**
-   * 1画面ぶんを何カラムとして数えるか。
-   */
   unitsPerScreen: number;
   initialScreens: CalendarScrollBuffer;
   extendScreens: number;
@@ -58,6 +55,12 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
       extendScreens: 0,
       maxUnits: { before: 0, after: 0 },
     },
+    list: {
+      unitsPerScreen: 1,
+      initialScreens: { before: 0, after: 0 },
+      extendScreens: 0,
+      maxUnits: { before: 0, after: 0 },
+    },
     pieChart: {
       unitsPerScreen: 1,
       initialScreens: { before: 0, after: 0 },
@@ -65,10 +68,7 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
       maxUnits: { before: 0, after: 0 },
     },
   },
-} satisfies Record<
-  CalendarScrollBufferSurface,
-  Record<CalendarViewMode, CalendarScrollBufferConfig>
->;
+} satisfies Record<CalendarScrollBufferSurface, Record<CalendarViewMode, CalendarScrollBufferConfig>>;
 
 const toUnitCount = (screenCount: number, unitsPerScreen: number) =>
   Math.max(0, Math.round(screenCount * unitsPerScreen));
