@@ -44,6 +44,8 @@ const CalendarEventChipMonth = memo(({
           eventChipAllDayClass,
           `
             flex
+            w-full
+            min-w-0
             items-center
             gap-1
           `,
