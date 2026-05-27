@@ -6,6 +6,11 @@ import { normalizeDate } from "@/shared/codec/date";
 
 type CalendarArrowKey = keyof typeof CALENDAR_ARROW_DIFF_MAP;
 
+const DEFAULT_TODAY_DESCRIPTION_LABELS: Pick<Translations, "todayDescriptionEmpty" | "todayDescriptionDue"> = {
+  todayDescriptionEmpty: "今日の復習はありません",
+  todayDescriptionDue: "今日の復習があります",
+};
+
 export const toDate = (value: CalendarTimestampLike): Date | null => {
   return normalizeDate(value);
 };
@@ -37,13 +42,9 @@ export const getCalendarIntensity = (count: number) => {
   return Math.min(5, Math.ceil(count / 5));
 };
 
-/**
- * 今日の復習説明文を返す。
- * t（翻訳辞書）を受け取ることでロケール対応する。
- */
 export const getTodayDescription = (
   todayDueCount: number,
-  t: Pick<Translations, "todayDescriptionEmpty" | "todayDescriptionDue">,
+  t: Pick<Translations, "todayDescriptionEmpty" | "todayDescriptionDue"> = DEFAULT_TODAY_DESCRIPTION_LABELS,
 ) => {
   return todayDueCount === 0 ? t.todayDescriptionEmpty : t.todayDescriptionDue;
 };
