@@ -58,6 +58,7 @@ type GoogleTaskListMeta = {
   id: string;
   label: string;
   category: string;
+  color: string;
 };
 
 type ParsedGoogleTaskId = {
@@ -70,6 +71,7 @@ const GOOGLE_TASK_STATUS_OVERRIDES_METADATA_KEY =
   "google-task-status-overrides:v1";
 const LEGACY_GOOGLE_TASK_STATUS_OVERRIDES_STORAGE_KEY =
   "flashcard-master.google-task-status-overrides.v1";
+const DEFAULT_TASK_LIST_COLOR = "#7c8cf8";
 
 type GoogleTaskStatusOverrides = Partial<Record<string, TaskStatus>>;
 
@@ -164,6 +166,51 @@ const findCategoryByTaskListTitle = (taskListTitle: string): string | null => {
       return candidates.includes(normalizedTaskListTitle);
     })?.[0] ?? null
   );
+};
+
+const getTaskCalendarCandidates = (taskListTitle: string): string[] => {
+  const normalizedTitle = normalizeTaskListLabel(taskListTitle);
+  const candidates = new Set([
+    normalizedTitle,
+    normalizeTaskListLabel(`${taskListTitle} Tasks`),
+    normalizeTaskListLabel(`${taskListTitle} ToDo`),
+    normalizeTaskListLabel(`${taskListTitle} Todo`),
+    normalizeTaskListLabel(`${taskListTitle} タスク`),
+    normalizeTaskListLabel(`${taskListTitle} ToDo リスト`),
+    normalizeTaskListLabel(`${taskListTitle} ToDoリスト`),
+  ]);
+
+  if (normalizedTitle === "mytasks" || normalizedTitle === "マイタスク") {
+    candidates.add("tasks");
+    candidates.add("todo");
+    candidates.add("todos");
+    candidates.add("googleasks");
+    candidates.add("googletasks");
+    candidates.add("task");
+    candidates.add("todoリスト");
+    candidates.add("todolist");
+  }
+
+  return Array.from(candidates).filter(Boolean);
+};
+
+const resolveGoogleTaskListColor = (
+  account: GoogleAccountDisplay,
+  taskListTitle: string,
+): string => {
+  const taskCalendarCandidates = getTaskCalendarCandidates(taskListTitle);
+  const matchingCalendar = account.calendars.find((calendar) => {
+    const labels = [
+      calendar.summary,
+      calendar.summaryOverride,
+      calendar.description,
+      calendar.id,
+    ].map((value) => normalizeTaskListLabel(value ?? ""));
+
+    return labels.some((label) => taskCalendarCandidates.includes(label));
+  });
+
+  return matchingCalendar?.backgroundColor ?? DEFAULT_TASK_LIST_COLOR;
 };
 
 const toDateOnly = (value?: string): string | null => {
@@ -311,7 +358,8 @@ export const TaskView = ({
       account.taskLists.forEach((taskList) => {
         const category = findCategoryByTaskListTitle(taskList.title) ?? taskList.title;
         const label = CATEGORY_CONFIG[category]?.label ?? taskList.title;
-        meta.set(taskList.id, { id: taskList.id, label, category });
+        const color = resolveGoogleTaskListColor(account, taskList.title);
+        meta.set(taskList.id, { id: taskList.id, label, category, color });
       });
     });
 
@@ -382,6 +430,7 @@ export const TaskView = ({
             dueDate: toDateOnly(googleTask.due),
             assignee: account.email ? account.email.slice(0, 1).toUpperCase() : "G",
             createdAt: toGoogleTaskCreatedAt(googleTask.updated, index),
+            taskListColor: taskListMeta?.color ?? DEFAULT_TASK_LIST_COLOR,
             scheduledStart: null,
             scheduledEnd: null,
             googleCalendarId: null,
