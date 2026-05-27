@@ -176,12 +176,12 @@
   .calendar-month-view {
     --calendar-month-row-height: 112px;
     overflow-anchor: none;
-    background: #f3f3f3;
+    background: #f2f2f7;
   }
 
   .calendar-month-scroll {
     overflow-anchor: none;
-    background: #f3f3f3;
+    background: #f2f2f7;
   }
 
   .calendar-month-weekday-header {
