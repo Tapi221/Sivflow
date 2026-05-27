@@ -7,7 +7,7 @@ import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
-import { CalendarSidebar } from "@/features/calendar/panel/CalendarSidebar";
+import { CalendarSidebar } from "@/pane/leftpane/CalendarSidebar";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { CalendarPieChartView } from "@/features/calendar/view/CalendarPieChartView";
