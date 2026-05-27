@@ -1,9 +1,36 @@
 import type { AssetRecord } from "@/types";
 import type { SnapshotAsset } from "@/types/domain/snapshot";
 
+type FirestoreTimestampLike = {
+  toDate: () => Date;
+};
+
+type SnapshotAssetSource = {
+  id: string;
+  remoteKey?: string | null;
+  mime?: string | null;
+  width?: number | null;
+  height?: number | null;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+};
+
+const isFirestoreTimestampLike = (value: unknown): value is FirestoreTimestampLike => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "toDate" in value &&
+    typeof (value as { toDate?: unknown }).toDate === "function"
+  );
+};
+
 const toValidDate = (value: unknown): Date => {
   if (value instanceof Date && Number.isFinite(value.getTime())) {
     return value;
+  }
+
+  if (isFirestoreTimestampLike(value)) {
+    return toValidDate(value.toDate());
   }
 
   const parsed = new Date(String(value ?? ""));
@@ -18,15 +45,7 @@ const toNullableFiniteNumber = (value: unknown): number | null => {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 };
 
-export const toSnapshotAsset = (row: {
-  id: string;
-  remoteKey?: string | null;
-  mime?: string | null;
-  width?: number | null;
-  height?: number | null;
-  createdAt?: Date | string | null;
-  updatedAt?: Date | string | null;
-}): SnapshotAsset | null => {
+export const toSnapshotAsset = (row: SnapshotAssetSource): SnapshotAsset | null => {
   const assetId = typeof row.id === "string" ? row.id.trim() : "";
   const storagePath =
     typeof row.remoteKey === "string" ? row.remoteKey.trim() : "";
