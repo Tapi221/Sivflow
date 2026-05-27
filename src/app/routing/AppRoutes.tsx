@@ -35,7 +35,6 @@ export const AppRoutes = () => {
 
         <Route path="schedule" element={withRouteFallback(<Schedule />)} />
         <Route path="calendar" element={<Navigate to="/schedule" replace />} />
-        <Route path="tasks" element={<Navigate to="/schedule" replace />} />
         <Route path="settings" element={withRouteFallback(<SettingScreen />)} />
 
         <Route path="CardEdit" element={withRouteFallback(<CardEdit />)} />
