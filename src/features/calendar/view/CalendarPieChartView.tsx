@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type UIEvent } from "react";
-import { addDays, differenceInMinutes, format, isAfter, isBefore, isSameDay, startOfDay, startOfMonth } from "date-fns";
+import { addDays, differenceInMinutes, format, isAfter, isBefore, isSameDay, startOfDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
@@ -23,13 +23,11 @@ type CalendarPieChartDay = {
   date: Date;
   dateKey: string;
   slices: DailyPieSlice[];
-  scheduledMinutes: number;
-  eventCount: number;
   isSelected: boolean;
   isToday: boolean;
 };
 
-type CalendarPieChartDayCardProps = {
+type CalendarPieChartDaySectionProps = {
   day: CalendarPieChartDay;
   selectedDayRef?: (node: HTMLElement | null) => void;
   onSelectDate?: (date: Date) => void;
@@ -83,14 +81,14 @@ const CHART_LABEL_RADIUS = CHART_RADIUS * 0.58;
 const CHART_CLOCK_LABEL_RADIUS = CHART_RADIUS + 11;
 const CHART_EVENT_BORDER_STROKE_WIDTH = 3;
 const CLOCK_HOURS = [0, 3, 6, 9, 12, 15, 18, 21];
-const PIE_CHART_DAY_CARD_HEIGHT_PX = 520;
-const PIE_CHART_DAY_GAP_PX = 18;
+const PIE_CHART_DAY_SECTION_HEIGHT_PX = 430;
+const PIE_CHART_DAY_GAP_PX = 8;
 const PIE_CHART_SCROLL_EDGE_THRESHOLD_PX = 220;
 const PIE_CHART_SCROLL_EDGE_RESET_PX = 520;
 const PIE_CHART_SCROLL_IDLE_DELAY_MS = 120;
-const PIE_CHART_VISIBLE_DATE_ANCHOR_PX = 180;
+const PIE_CHART_VISIBLE_DATE_ANCHOR_PX = 160;
 const PIE_CHART_VIRTUAL_OVERSCAN_PX = 1100;
-const SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX = 16;
+const SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX = 8;
 
 const formatDuration = (minutes: number): string => {
   const normalizedMinutes = Math.max(0, Math.round(minutes));
@@ -299,26 +297,20 @@ const buildPieChartDays = (
   const today = new Date();
   const calendarLabelById = createCalendarLabelMap(googleAccounts);
 
-  return days.map((date) => {
-    const slices = buildDailyPieSlices(date, events, appProjects, calendarLabelById);
-
-    return {
-      date,
-      dateKey: getDateKey(date),
-      slices,
-      scheduledMinutes: slices.reduce((sum, slice) => slice.isGap ? sum : sum + slice.minutes, 0),
-      eventCount: slices.reduce((sum, slice) => slice.isGap ? sum : sum + slice.eventCount, 0),
-      isSelected: isSameDay(date, selectedDate),
-      isToday: isSameDay(date, today),
-    };
-  });
+  return days.map((date) => ({
+    date,
+    dateKey: getDateKey(date),
+    slices: buildDailyPieSlices(date, events, appProjects, calendarLabelById),
+    isSelected: isSameDay(date, selectedDate),
+    isToday: isSameDay(date, today),
+  }));
 };
 
 const buildVirtualMetrics = (days: CalendarPieChartDay[]): PieChartVirtualMetrics => {
   let totalHeight = 0;
   const offsets: number[] = [];
   const heights = days.map((_, index) => {
-    const height = PIE_CHART_DAY_CARD_HEIGHT_PX + (index < days.length - 1 ? PIE_CHART_DAY_GAP_PX : 0);
+    const height = PIE_CHART_DAY_SECTION_HEIGHT_PX + (index < days.length - 1 ? PIE_CHART_DAY_GAP_PX : 0);
 
     offsets.push(totalHeight);
     totalHeight += height;
@@ -399,7 +391,7 @@ const DailyClockPieComponent = ({ slices }: DailyClockPieProps) => {
 
   return (
     <div className="flex h-full w-full min-w-0 items-center justify-center">
-      <div className="relative aspect-square w-[min(100%,350px)] min-w-0">
+      <div className="relative aspect-square w-[min(100%,72vh)] max-w-[720px] min-w-0">
         {hasTimedSlices ? (
           <>
             <svg viewBox="0 0 200 200" role="img" aria-label="予定の円グラフ" className="h-full w-full overflow-visible">
@@ -442,7 +434,7 @@ const DailyClockPieComponent = ({ slices }: DailyClockPieProps) => {
 
             <div className="pointer-events-none absolute inset-0 overflow-visible">
               {CLOCK_HOURS.map((hour) => (
-                <span key={hour} className="absolute -translate-x-1/2 -translate-y-1/2 text-[clamp(11px,2.1vw,16px)] font-medium leading-none text-[#8e8e93]" style={getChartOverlayStyle(hour * 60, CHART_CLOCK_LABEL_RADIUS)}>
+                <span key={hour} className="absolute -translate-x-1/2 -translate-y-1/2 text-[clamp(11px,2.1vw,18px)] font-medium leading-none text-[#8e8e93]" style={getChartOverlayStyle(hour * 60, CHART_CLOCK_LABEL_RADIUS)}>
                   {hour}
                 </span>
               ))}
@@ -451,7 +443,7 @@ const DailyClockPieComponent = ({ slices }: DailyClockPieProps) => {
                 const labelMinute = (slice.startMinute + slice.endMinute) / 2;
 
                 return (
-                  <span key={`label:${slice.id}`} className="absolute -translate-x-1/2 -translate-y-1/2 text-center text-[clamp(9px,1.75vw,13px)] font-semibold leading-[1.05] drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]" style={{ ...getChartOverlayStyle(labelMinute, CHART_LABEL_RADIUS), color: slice.labelColor }}>
+                  <span key={`label:${slice.id}`} className="absolute -translate-x-1/2 -translate-y-1/2 text-center text-[clamp(9px,1.75vw,15px)] font-semibold leading-[1.05] drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]" style={{ ...getChartOverlayStyle(labelMinute, CHART_LABEL_RADIUS), color: slice.labelColor }}>
                     <span className="block max-w-[5.5em] truncate">{truncateChartLabel(slice.label)}</span>
                     <span className="block">{formatDuration(slice.minutes)}</span>
                   </span>
@@ -472,42 +464,31 @@ const DailyClockPieComponent = ({ slices }: DailyClockPieProps) => {
   );
 };
 
-const CalendarPieChartDayCardComponent = ({
+const CalendarPieChartDaySectionComponent = ({
   day,
   selectedDayRef,
   onSelectDate,
-}: CalendarPieChartDayCardProps) => {
+}: CalendarPieChartDaySectionProps) => {
   return (
     <section
       ref={day.isSelected ? selectedDayRef : undefined}
-      className={cn(
-        "flex h-[520px] flex-col rounded-[28px] border bg-white px-5 pb-6 pt-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition",
-        day.isSelected ? "border-[#0a84ff]/35 ring-4 ring-[#0a84ff]/10" : "border-[#eeeeee]",
-      )}
+      className="grid h-[430px] grid-cols-[58px_minmax(0,1fr)] gap-2"
       aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}
     >
-      <div className="flex shrink-0 items-start justify-between gap-4">
-        <button
-          type="button"
-          className="min-w-0 rounded-[16px] text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25"
-          onClick={() => onSelectDate?.(day.date)}
-        >
-          <div className="flex items-baseline gap-2">
-            <span className={cn("text-[28px] font-bold leading-none tracking-[-0.04em]", day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]")}>{format(day.date, "d")}</span>
-            <span className="text-[13px] font-semibold text-[rgba(60,60,67,0.58)]">{format(day.date, "EEE", { locale: ja })}</span>
-            {day.isToday ? <span className="rounded-full bg-[#0a84ff]/10 px-2 py-0.5 text-[11px] font-bold text-[#0a84ff]">今日</span> : null}
-          </div>
-          <p className="mt-1 text-[12px] font-medium text-[#8e8e93]">{format(day.date, "yyyy年M月d日", { locale: ja })}</p>
-        </button>
+      <button
+        type="button"
+        className={cn(
+          "group mt-0.5 flex h-8 items-baseline justify-end gap-1 rounded-[10px] pr-0.5 text-right transition",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25",
+          day.isSelected && "text-[#1c1c1e]",
+        )}
+        onClick={() => onSelectDate?.(day.date)}
+      >
+        <span className={cn("text-[16px] font-bold leading-none tracking-[-0.03em]", day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]")}>{format(day.date, "d")}</span>
+        <span className="text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]">{format(day.date, "EEE", { locale: ja })}</span>
+      </button>
 
-        <div className="shrink-0 text-right">
-          <p className="text-[12px] font-semibold text-[#8e8e93]">予定時間</p>
-          <p className="mt-1 text-[18px] font-bold tracking-[-0.03em] text-[#1c1c1e]">{formatDuration(day.scheduledMinutes)}</p>
-          <p className="mt-0.5 text-[11px] font-medium text-[#b3b3b3]">{day.eventCount}件</p>
-        </div>
-      </div>
-
-      <div className="min-h-0 flex-1 px-2 py-5">
+      <div className="min-h-0 min-w-0">
         <DailyClockPie slices={day.slices} />
       </div>
     </section>
@@ -680,6 +661,12 @@ const CalendarPieChartViewComponent = ({
     if (lastSelectedDateKeyRef.current === selectedDateKey || !scrollElement || selectedDayIndex < 0) return;
 
     lastSelectedDateKeyRef.current = selectedDateKey;
+
+    if (lastVisibleDateKeyRef.current === selectedDateKey) {
+      updateVirtualRange(scrollElement);
+      return;
+    }
+
     scrollElement.scrollTop = Math.max(0, virtualMetrics.offsets[selectedDayIndex] - SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX);
     updateVirtualRange(scrollElement);
   }, [selectedDateKey, selectedDayIndex, updateVirtualRange, virtualMetrics]);
@@ -697,8 +684,8 @@ const CalendarPieChartViewComponent = ({
   return (
     <div className={cn("flex h-full min-h-0 bg-white text-[#1c1c1e]", className)}>
       <main className="flex min-h-0 flex-1 flex-col">
-        <div ref={scrollViewportRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-8 pt-4 scrollbar-hidden sm:px-6 sm:pb-10 sm:pt-6" onScroll={handleScroll}>
-          <div className="mx-auto w-full max-w-[760px]">
+        <div ref={scrollViewportRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden" onScroll={handleScroll}>
+          <div className="mx-auto w-full max-w-[940px]">
             <div className="relative w-full" style={{ height: virtualMetrics.totalHeight }}>
               {renderedDays.map((day, index) => {
                 const dayIndex = virtualRange.start + index;
@@ -709,7 +696,7 @@ const CalendarPieChartViewComponent = ({
                     className="absolute left-0 right-0"
                     style={{ top: virtualMetrics.offsets[dayIndex], height: virtualMetrics.heights[dayIndex] }}
                   >
-                    <CalendarPieChartDayCard
+                    <CalendarPieChartDaySection
                       day={day}
                       selectedDayRef={day.isSelected ? (node) => {
                         selectedDayElementRef.current = node;
@@ -731,9 +718,9 @@ const DailyClockPie = memo(DailyClockPieComponent);
 
 DailyClockPie.displayName = "DailyClockPie";
 
-const CalendarPieChartDayCard = memo(CalendarPieChartDayCardComponent);
+const CalendarPieChartDaySection = memo(CalendarPieChartDaySectionComponent);
 
-CalendarPieChartDayCard.displayName = "CalendarPieChartDayCard";
+CalendarPieChartDaySection.displayName = "CalendarPieChartDaySection";
 
 const CalendarPieChartView = memo(CalendarPieChartViewComponent);
 
