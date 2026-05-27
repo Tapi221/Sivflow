@@ -13,6 +13,8 @@ const GOOGLE_SOURCE_ROW_CLASS_NAME =
   "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
 const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#2c2c2e]";
 const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#b8b8bd]";
+const SOURCE_ROW_CHECKBOX_STROKE_WIDTH = 1.8;
+const SOURCE_ROW_CHECKBOX_BORDER_WIDTH = 1.4;
 
 const SelectableGoogleSourceRow = ({
   id,
@@ -35,6 +37,8 @@ const SelectableGoogleSourceRow = ({
         checked={checked}
         color={color}
         variant="soft"
+        strokeWidth={SOURCE_ROW_CHECKBOX_STROKE_WIDTH}
+        borderWidth={SOURCE_ROW_CHECKBOX_BORDER_WIDTH}
       />
 
       <span
