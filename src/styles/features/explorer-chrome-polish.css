@@ -222,18 +222,55 @@
   }
 
   .explorer-workspace-tab--inactive {
+    --mf-explorer-workspace-tab-hover-bg: var(
+      --app-titlebar-surface,
+      rgba(255, 255, 255, 0.08)
+    );
+
     height: 32px !important;
     border-radius: 10px 10px 0 0 !important;
     background: transparent !important;
     color: var(--app-titlebar-text, rgba(255, 255, 255, 0.92)) !important;
   }
 
+  .explorer-workspace-tab--inactive::before,
+  .explorer-workspace-tab--inactive::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    z-index: 0;
+    width: 16px;
+    height: 17px;
+    pointer-events: none;
+    background: var(--mf-explorer-workspace-tab-hover-bg);
+    opacity: 0;
+  }
+
+  .explorer-workspace-tab--inactive::before {
+    left: -16px;
+    -webkit-mask: radial-gradient(circle at 0 0, transparent 0 16px, #000 16px);
+    mask: radial-gradient(circle at 0 0, transparent 0 16px, #000 16px);
+  }
+
+  .explorer-workspace-tab--inactive::after {
+    right: -16px;
+    -webkit-mask: radial-gradient(
+      circle at 100% 0,
+      transparent 0 16px,
+      #000 16px
+    );
+    mask: radial-gradient(circle at 100% 0, transparent 0 16px, #000 16px);
+  }
+
   .explorer-workspace-tab--inactive:hover {
-    background: var(
-      --app-titlebar-surface,
-      rgba(255, 255, 255, 0.08)
-    ) !important;
+    z-index: 2;
+    background: var(--mf-explorer-workspace-tab-hover-bg) !important;
     color: var(--app-titlebar-text-strong, #ffffff) !important;
+  }
+
+  .explorer-workspace-tab--inactive:hover::before,
+  .explorer-workspace-tab--inactive:hover::after {
+    opacity: 1;
   }
 
   .explorer-workspace-tab-button {
