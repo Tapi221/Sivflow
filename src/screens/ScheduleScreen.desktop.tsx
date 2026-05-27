@@ -463,7 +463,7 @@ export const ScheduleScreen = ({
             />
           </div>
         ) : isYearCalendarView ? (
-          <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[22px] border border-[#eeeeee] bg-white">
+          <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
             <CalendarYearView
               yearDate={currentDate}
               selectedDate={selectedDate}
@@ -473,7 +473,7 @@ export const ScheduleScreen = ({
             />
           </div>
         ) : isPieChartCalendarView ? (
-          <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[22px] border border-[#eeeeee] bg-white">
+          <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
             <CalendarPieChartView
               selectedDate={selectedDate}
               events={deferredCalendarEvents}
