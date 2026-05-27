@@ -77,6 +77,7 @@ try {
 }
 
 export const firestoreDb: Firestore | null = firestoreDbInternal;
+export const db: Firestore | null = firestoreDbInternal;
 
 export const requireFirestoreDb = (): Firestore => {
   if (firestoreDb) {
