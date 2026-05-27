@@ -9,7 +9,7 @@ import { useFlashcardDualDerived } from "@/components/card/frame/useFlashcardDua
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-export interface DesktopCardSurfaceProps {
+interface DesktopCardSurfaceProps {
   card: Card;
   isActive: boolean;
   isGlobalEditing: boolean;
@@ -25,6 +25,40 @@ export interface DesktopCardSurfaceProps {
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
 }
+
+const areDesktopCardSurfacePropsEqual = (
+  prev: DesktopCardSurfaceProps,
+  next: DesktopCardSurfaceProps,
+) => {
+  if (prev.card !== next.card) return false;
+  if (prev.isActive !== next.isActive) return false;
+  if (prev.isGlobalEditing !== next.isGlobalEditing) return false;
+  if (prev.settings !== next.settings) return false;
+  if (prev.currentDisplayMode !== next.currentDisplayMode) return false;
+  if (prev.currentCardLayoutMode !== next.currentCardLayoutMode) return false;
+  if (prev.viewZoomScale !== next.viewZoomScale) return false;
+  if (prev.folderId !== next.folderId) return false;
+  if (prev.cardSetId !== next.cardSetId) return false;
+  if (prev.onFlip !== next.onFlip) return false;
+  if (prev.onToggleUncertainty !== next.onToggleUncertainty) return false;
+  if (prev.onToggleBookmark !== next.onToggleBookmark) {
+    return false;
+  }
+
+  const prevNeedsFlip =
+    !prev.isGlobalEditing &&
+    prev.isActive &&
+    prev.currentCardLayoutMode === "flip";
+  const nextNeedsFlip =
+    !next.isGlobalEditing &&
+    next.isActive &&
+    next.currentCardLayoutMode === "flip";
+
+  if (prevNeedsFlip !== nextNeedsFlip) return false;
+  if (nextNeedsFlip && prev.isFlipped !== next.isFlipped) return false;
+
+  return true;
+};
 
 const DesktopCardSurfaceInner = ({
   card,
@@ -201,45 +235,12 @@ const DesktopCardSurfaceInner = ({
   );
 };
 
-const areDesktopCardSurfacePropsEqual = (
-  prev: DesktopCardSurfaceProps,
-  next: DesktopCardSurfaceProps,
-) => {
-  if (prev.card !== next.card) return false;
-  if (prev.isActive !== next.isActive) return false;
-  if (prev.isGlobalEditing !== next.isGlobalEditing) return false;
-  if (prev.settings !== next.settings) return false;
-  if (prev.currentDisplayMode !== next.currentDisplayMode) return false;
-  if (prev.currentCardLayoutMode !== next.currentCardLayoutMode) return false;
-  if (prev.viewZoomScale !== next.viewZoomScale) return false;
-  if (prev.folderId !== next.folderId) return false;
-  if (prev.cardSetId !== next.cardSetId) return false;
-  if (prev.onFlip !== next.onFlip) return false;
-  if (prev.onToggleUncertainty !== next.onToggleUncertainty) return false;
-  if (prev.onToggleBookmark !== next.onToggleBookmark) return false;
-
-  if (next.isGlobalEditing && prev.cardsOverride !== next.cardsOverride) {
-    return false;
-  }
-
-  const prevNeedsFlip =
-    !prev.isGlobalEditing &&
-    prev.isActive &&
-    prev.currentCardLayoutMode === "flip";
-  const nextNeedsFlip =
-    !next.isGlobalEditing &&
-    next.isActive &&
-    next.currentCardLayoutMode === "flip";
-
-  if (prevNeedsFlip !== nextNeedsFlip) return false;
-  if (nextNeedsFlip && prev.isFlipped !== next.isFlipped) return false;
-
-  return true;
-};
-
-export const DesktopCardSurface = React.memo(
+const DesktopCardSurface = React.memo(
   DesktopCardSurfaceInner,
   areDesktopCardSurfacePropsEqual,
 );
 
 DesktopCardSurface.displayName = "DesktopCardSurface";
+
+export { DesktopCardSurface };
+export type { DesktopCardSurfaceProps };
