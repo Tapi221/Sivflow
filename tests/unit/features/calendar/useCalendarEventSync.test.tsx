@@ -2,7 +2,7 @@ import { addDays, endOfDay, endOfYear, startOfDay, startOfYear, subDays } from "
 import { describe, expect, it } from "vitest";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
-import { buildCalendarEventSyncRange } from "@/features/calendar/googlecalendar-sync/calendarEventSyncRange";
+import { buildCalendarEventSyncRange } from "@/sync/googlecalendar-sync/calendarEventSyncRange";
 
 const expectSameTime = (actual: Date | undefined, expected: Date) => {
   expect(actual?.getTime()).toBe(expected.getTime());
