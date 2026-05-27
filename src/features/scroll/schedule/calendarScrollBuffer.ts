@@ -56,10 +56,10 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
       maxUnits: { before: 0, after: 0 },
     },
     list: {
-      unitsPerScreen: 1,
-      initialScreens: { before: 0, after: 0 },
-      extendScreens: 0,
-      maxUnits: { before: 0, after: 0 },
+      unitsPerScreen: 31,
+      initialScreens: { before: 1, after: 1 },
+      extendScreens: 1,
+      maxUnits: { before: 3650, after: 3650 },
     },
     pieChart: {
       unitsPerScreen: 1,
