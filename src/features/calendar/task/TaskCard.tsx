@@ -1,4 +1,4 @@
-import { useMemo, type MouseEvent as ReactMouseEvent } from "react";
+import { memo, useMemo, type MouseEvent as ReactMouseEvent } from "react";
 import { TaskEventChip } from "@/chip/eventchip/EventChip.task";
 import { useTaskCard } from "@/features/calendar/task/hooks/useTaskCard";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
@@ -14,7 +14,39 @@ type TaskCardProps = {
   onContextMenu?: (event: ReactMouseEvent<HTMLDivElement>, task: Task) => void;
 };
 
-export const TaskCard = ({
+const areTaskCardPropsEqual = (
+  previousProps: TaskCardProps,
+  nextProps: TaskCardProps,
+) => {
+  const previousTask = previousProps.task;
+  const nextTask = nextProps.task;
+
+  return (
+    previousTask.id === nextTask.id &&
+    previousTask.title === nextTask.title &&
+    previousTask.description === nextTask.description &&
+    previousTask.subtasks === nextTask.subtasks &&
+    previousTask.status === nextTask.status &&
+    previousTask.priority === nextTask.priority &&
+    previousTask.category === nextTask.category &&
+    previousTask.dueDate === nextTask.dueDate &&
+    previousTask.assignee === nextTask.assignee &&
+    previousTask.createdAt === nextTask.createdAt &&
+    previousTask.taskListColor === nextTask.taskListColor &&
+    previousTask.scheduledStart === nextTask.scheduledStart &&
+    previousTask.scheduledEnd === nextTask.scheduledEnd &&
+    previousTask.googleCalendarId === nextTask.googleCalendarId &&
+    previousTask.googleEventId === nextTask.googleEventId &&
+    previousProps.accountName === nextProps.accountName &&
+    previousProps.accountPhotoUrl === nextProps.accountPhotoUrl &&
+    previousProps.isDragging === nextProps.isDragging &&
+    previousProps.onDelete === nextProps.onDelete &&
+    previousProps.onToggleDone === nextProps.onToggleDone &&
+    previousProps.onContextMenu === nextProps.onContextMenu
+  );
+};
+
+const TaskCardComponent = ({
   task,
   accountName,
   accountPhotoUrl,
@@ -66,3 +98,9 @@ export const TaskCard = ({
     </div>
   );
 };
+
+const TaskCard = memo(TaskCardComponent, areTaskCardPropsEqual);
+
+TaskCard.displayName = "TaskCard";
+
+export { TaskCard };
