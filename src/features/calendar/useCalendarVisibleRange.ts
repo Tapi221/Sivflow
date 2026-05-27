@@ -1,4 +1,4 @@
-import type { CalendarViewMode, TimelineBufferDays } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarBufferDays, CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 import { useScheduleDays } from "@/features/calendar/grid/useScheduleColumns";
 
 export const useCalendarVisibleRange = ({
@@ -8,7 +8,7 @@ export const useCalendarVisibleRange = ({
 }: {
   currentDate: Date;
   selectedViewMode: CalendarViewMode;
-  calendarBuffer: TimelineBufferDays;
+  calendarBuffer: CalendarBufferDays;
 }) => {
   return useScheduleDays({
     anchorDate: currentDate,
