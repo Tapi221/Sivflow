@@ -291,7 +291,7 @@ const CalendarListViewComponent = ({
   const lastReachStartKeyRef = useRef<string | null>(null);
   const lastReachEndKeyRef = useRef<string | null>(null);
   const lastSelectedDateTimeRef = useRef<number | null>(null);
-  const lastVisibleMonthTimeRef = useRef<number | null>(null);
+  const lastVisibleDateKeyRef = useRef<string | null>(null);
   const scrollFrameRef = useRef<number | null>(null);
   const edgeExtendTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingScrollElementRef = useRef<HTMLDivElement | null>(null);
@@ -323,12 +323,11 @@ const CalendarListViewComponent = ({
     const anchorDate = getVisibleMonthAnchorDate(listDays, virtualMetrics, anchorOffset);
     if (!anchorDate) return;
 
-    const visibleMonth = startOfMonth(anchorDate);
-    const visibleMonthTime = visibleMonth.getTime();
-    if (lastVisibleMonthTimeRef.current === visibleMonthTime) return;
+    const visibleDateKey = getCalendarDateKey(anchorDate);
+    if (lastVisibleDateKeyRef.current === visibleDateKey) return;
 
-    lastVisibleMonthTimeRef.current = visibleMonthTime;
-    onVisibleMonthChange(visibleMonth);
+    lastVisibleDateKeyRef.current = visibleDateKey;
+    onVisibleMonthChange(anchorDate);
   }, [listDays, onVisibleMonthChange, virtualMetrics]);
 
   const clearEdgeExtendTimer = useCallback(() => {
