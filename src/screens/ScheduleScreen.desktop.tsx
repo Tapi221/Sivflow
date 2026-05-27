@@ -115,6 +115,7 @@ export const ScheduleScreen = ({
 
   const {
     selectedViewMode,
+    primaryViewMode,
     currentDate,
     selectedDate,
     titleDate,
@@ -189,28 +190,33 @@ export const ScheduleScreen = ({
   }, []);
 
   const deferredCalendarEvents = useDeferredValue(googleCalendarEvents);
+  const selectedViewModes = Array.isArray(selectedViewMode) ? selectedViewMode : [selectedViewMode];
 
-  const isListCalendarView = selectedViewMode === "list";
+  const isListCalendarView = selectedViewModes.includes("list");
+  const isPieChartCalendarView = selectedViewModes.includes("pieChart");
+  const isListPieChartSplitView = isListCalendarView && isPieChartCalendarView;
 
   const sidebarMonthDate =
-    selectedViewMode === "month" || selectedViewMode === "list" ? monthTitleDate : titleDate;
+    primaryViewMode === "month" || isListCalendarView ? monthTitleDate : titleDate;
 
-  const isYearCalendarView = selectedViewMode === "year";
+  const isYearCalendarView = primaryViewMode === "year";
 
-  const isMonthCalendarView = selectedViewMode === "month";
+  const isMonthCalendarView = primaryViewMode === "month";
 
-  const isPieChartCalendarView = selectedViewMode === "pieChart";
-
-  const canShowPlanResultToggle = PLAN_RESULT_TOGGLE_VIEW_MODES.has(selectedViewMode);
+  const canShowPlanResultToggle = selectedViewModes.some((mode) =>
+    PLAN_RESULT_TOGGLE_VIEW_MODES.has(mode),
+  );
 
   const headerTitleDate =
-    selectedViewMode === "month" || selectedViewMode === "list"
-      ? monthTitleDate
-      : isPieChartCalendarView
-        ? selectedDate
-        : titleDate;
+    isListPieChartSplitView
+      ? selectedDate
+      : primaryViewMode === "month" || isListCalendarView
+        ? monthTitleDate
+        : isPieChartCalendarView
+          ? selectedDate
+          : titleDate;
 
-  const headerTitleLabel = selectedViewMode === "year"
+  const headerTitleLabel = primaryViewMode === "year"
     ? format(headerTitleDate, "yyyy年", { locale: dateFnsLocale })
     : format(headerTitleDate, isPieChartCalendarView ? "yyyy年M月d日" : monthLabelFormat, { locale: dateFnsLocale });
 
@@ -268,6 +274,28 @@ export const ScheduleScreen = ({
               onSelectDate={handleMonthCellSelectDate}
               onRenderedRangeChange={handleYearRenderedRangeChange}
             />
+          </div>
+        ) : isListPieChartSplitView ? (
+          <div className="ml-4 mr-4 grid min-h-0 flex-1 grid-cols-2 overflow-hidden bg-white">
+            <div className="min-h-0 min-w-0 overflow-hidden border-r border-[#eeeeee]">
+              <CalendarListView
+                days={visibleDays}
+                events={deferredCalendarEvents}
+                selectedDate={selectedDate}
+                onSelectDate={handleSidebarSelectDate}
+                onReachStart={handleListReachStart}
+                onReachEnd={handleListReachEnd}
+                onVisibleMonthChange={handleVisibleMonthChange}
+              />
+            </div>
+            <div className="min-h-0 min-w-0 overflow-hidden">
+              <CalendarPieChartView
+                selectedDate={selectedDate}
+                events={deferredCalendarEvents}
+                appProjects={appProjects}
+                googleAccounts={googleAccounts}
+              />
+            </div>
           </div>
         ) : isPieChartCalendarView ? (
           <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white">

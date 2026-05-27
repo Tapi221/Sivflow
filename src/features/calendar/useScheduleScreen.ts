@@ -4,7 +4,7 @@ import { useCalendarLayout } from "@/features/calendar/layout/calendar/useCalend
 import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
-import type { CalendarGridStyle, CalendarViewMode, GoogleAccountDisplay } from "./scheduleScreen.types";
+import type { CalendarGridStyle, CalendarViewMode, CalendarViewModeSelection, GoogleAccountDisplay } from "./scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useCalendarNavigation } from "./useCalendarNavigation";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
@@ -22,7 +22,8 @@ export type UseScheduleScreenReturn = {
   monthTitleDate: Date;
   monthScrollTargetToken: number;
 
-  selectedViewMode: CalendarViewMode;
+  selectedViewMode: CalendarViewModeSelection;
+  primaryViewMode: CalendarViewMode;
 
   visibleDays: Date[];
   displayDays: Date[];
@@ -129,7 +130,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
 
   const visibleRange = useCalendarVisibleRange({
     currentDate: navigation.currentDate,
-    selectedViewMode: navigation.selectedViewMode,
+    selectedViewMode: navigation.primaryViewMode,
     calendarBuffer: navigation.calendarBuffer,
   });
 
@@ -140,13 +141,13 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     viewportWidth: navigation.viewportWidth,
     visibleDays,
     displayDays,
-    selectedViewMode: navigation.selectedViewMode,
+    selectedViewMode: navigation.primaryViewMode,
     currentDate: navigation.currentDate,
     calendarBuffer: navigation.calendarBuffer,
   });
 
   const scroll = useCalendarScrollController({
-    selectedViewMode: navigation.selectedViewMode,
+    selectedViewMode: navigation.primaryViewMode,
     visibleDays,
     calendarBuffer: navigation.calendarBuffer,
     viewportWidth: navigation.viewportWidth,
@@ -163,7 +164,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
   );
 
   useCalendarEventSync({
-    selectedViewMode: navigation.selectedViewMode,
+    selectedViewMode: navigation.primaryViewMode,
     visibleDays,
     monthTitleDate: navigation.monthTitleDate,
     monthRenderedRange,
@@ -211,6 +212,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     monthScrollTargetToken: navigation.monthScrollTargetToken,
 
     selectedViewMode: navigation.selectedViewMode,
+    primaryViewMode: navigation.primaryViewMode,
 
     visibleDays,
     displayDays,
