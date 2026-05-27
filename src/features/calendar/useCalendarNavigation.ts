@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { addDays, addMonths, startOfDay, startOfMonth, startOfWeek, subDays, subMonths } from "date-fns";
+import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays, subMonths, subYears } from "date-fns";
 import type { CalendarToolbarMode, CalendarViewMode } from "./scheduleScreen.types";
 import { createCalendarScrollBuffer, extendCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
+  if (viewMode === "year") return addYears(current, 1);
   if (viewMode === "month") return addMonths(current, 1);
   if (viewMode === "week") return addDays(current, 7);
   if (viewMode === "threeDays") return addDays(current, 3);
@@ -11,6 +12,7 @@ const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
 };
 
 const getPreviousDate = (current: Date, viewMode: CalendarViewMode) => {
+  if (viewMode === "year") return subYears(current, 1);
   if (viewMode === "month") return subMonths(current, 1);
   if (viewMode === "week") return subDays(current, 7);
   if (viewMode === "threeDays") return subDays(current, 3);
@@ -18,6 +20,12 @@ const getPreviousDate = (current: Date, viewMode: CalendarViewMode) => {
 };
 
 const normalizeWeek = (date: Date) => startOfWeek(date, { weekStartsOn: 1 });
+
+const normalizeViewDate = (date: Date, viewMode: CalendarViewMode) => {
+  if (viewMode === "year") return startOfYear(date);
+  if (viewMode === "week") return normalizeWeek(date);
+  return date;
+};
 
 const isSameTimelineTitleDate = (a: Date, b: Date) =>
   startOfDay(a).getTime() === startOfDay(b).getTime();
@@ -159,12 +167,11 @@ export const useCalendarNavigation = ({
       setSelectedViewMode(next);
 
       setActiveMode((current) =>
-        next === "pieChart" ? "calendar" : current === "timeline" ? "timeline" : "calendar",
+        next === "pieChart" || next === "year" ? "calendar" : current === "timeline" ? "timeline" : "calendar",
       );
 
       const anchorDate = next === "pieChart" ? selectedDate : currentDate;
-      const normalized =
-        next === "week" ? normalizeWeek(anchorDate) : anchorDate;
+      const normalized = normalizeViewDate(anchorDate, next);
 
       setCurrentDate(normalized);
       setSelectedDate(normalized);
@@ -182,7 +189,7 @@ export const useCalendarNavigation = ({
 
   const handleToday = useCallback(() => {
     const now = new Date();
-    const normalized = selectedViewMode === "week" ? normalizeWeek(now) : now;
+    const normalized = normalizeViewDate(now, selectedViewMode);
 
     setCurrentDate(normalized);
     setSelectedDate(normalized);
@@ -195,11 +202,7 @@ export const useCalendarNavigation = ({
 
   const handlePrevious = useCallback(() => {
     setCurrentDate((c) => {
-      let next = getPreviousDate(c, selectedViewMode);
-
-      if (selectedViewMode === "week") {
-        next = normalizeWeek(next);
-      }
+      const next = normalizeViewDate(getPreviousDate(c, selectedViewMode), selectedViewMode);
 
       setSelectedDate(next);
       setTimelineTitleDate(next);
@@ -214,11 +217,7 @@ export const useCalendarNavigation = ({
 
   const handleNext = useCallback(() => {
     setCurrentDate((c) => {
-      let next = getNextDate(c, selectedViewMode);
-
-      if (selectedViewMode === "week") {
-        next = normalizeWeek(next);
-      }
+      const next = normalizeViewDate(getNextDate(c, selectedViewMode), selectedViewMode);
 
       setSelectedDate(next);
       setTimelineTitleDate(next);
