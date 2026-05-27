@@ -208,7 +208,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
   scrollContainerRef,
   visibleDays,
   visibleEvents,
-  calendarDayColumnWidth: _calendarDayColumnWidth,
+  _calendarDayColumnWidth: _calendarDayColumnWidth,
   calendarGridStyle,
   onScroll,
   selectedDate,
@@ -449,7 +449,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
   return (
     previous.scrollContainerRef === next.scrollContainerRef &&
     previous.visibleEvents === next.visibleEvents &&
-    previous.calendarDayColumnWidth === next.calendarDayColumnWidth &&
+    previous._calendarDayColumnWidth === next._calendarDayColumnWidth &&
     previous.calendarGridStyle === next.calendarGridStyle &&
     previous.onScroll === next.onScroll &&
     previous.onSelectDate === next.onSelectDate &&
