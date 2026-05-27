@@ -25,6 +25,19 @@ interface QuestionBlockProps {
   zoom?: number;
 }
 
+const areQuestionBlockPropsEqual = (
+  prev: QuestionBlockProps,
+  next: QuestionBlockProps,
+) =>
+  prev.block === next.block &&
+  prev.dragEnabled === next.dragEnabled &&
+  prev.dragHandleClassName === next.dragHandleClassName &&
+  prev.accentColor === next.accentColor &&
+  prev.isBlockSelected === next.isBlockSelected &&
+  prev.canMoveUp === next.canMoveUp &&
+  prev.canMoveDown === next.canMoveDown &&
+  prev.zoom === next.zoom;
+
 const QuestionBlockInner: React.FC<QuestionBlockProps> = ({
   block,
   onUpdateBlock,
@@ -102,22 +115,11 @@ const QuestionBlockInner: React.FC<QuestionBlockProps> = ({
   );
 };
 
-const areQuestionBlockPropsEqual = (
-  prev: QuestionBlockProps,
-  next: QuestionBlockProps,
-) =>
-  prev.block === next.block &&
-  prev.dragEnabled === next.dragEnabled &&
-  prev.dragHandleClassName === next.dragHandleClassName &&
-  prev.accentColor === next.accentColor &&
-  prev.isBlockSelected === next.isBlockSelected &&
-  prev.canMoveUp === next.canMoveUp &&
-  prev.canMoveDown === next.canMoveDown &&
-  prev.zoom === next.zoom;
-
-export const QuestionBlock = React.memo(
+const QuestionBlock = React.memo(
   QuestionBlockInner,
   areQuestionBlockPropsEqual,
 );
 
 QuestionBlock.displayName = "QuestionBlock";
+
+export { QuestionBlock };
