@@ -112,18 +112,13 @@ export type CalendarScreenViewModel = {
 //ScheduleScreen.tsx
 export type CalendarViewMode = "year" | "month" | "week" | "threeDays" | "days" | "pieChart";
 
-export type CalendarToolbarMode = "calendar" | "timeline" | "task";
+export type CalendarToolbarMode = "calendar" | "task";
 
 export type CalendarDemoEvent = {
   id: string;
   title: string;
   startsAt: Date;
   minutes: number;
-};
-
-export type TimelineBufferDays = {
-  before: number;
-  after: number;
 };
 
 export type MiniCalendarDay = {
