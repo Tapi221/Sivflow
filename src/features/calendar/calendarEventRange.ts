@@ -32,6 +32,10 @@ export const compareCalendarEvents = (
   a: GoogleCalendarEvent,
   b: GoogleCalendarEvent,
 ): number => {
+  const allDayDiff = Number(b.isAllDay) - Number(a.isAllDay);
+
+  if (allDayDiff !== 0) return allDayDiff;
+
   const startDiff = getEventTime(a.startsAt) - getEventTime(b.startsAt);
 
   if (startDiff !== 0) return startDiff;
@@ -39,10 +43,6 @@ export const compareCalendarEvents = (
   const endDiff = getEventTime(b.endsAt) - getEventTime(a.endsAt);
 
   if (endDiff !== 0) return endDiff;
-
-  const allDayDiff = Number(b.isAllDay) - Number(a.isAllDay);
-
-  if (allDayDiff !== 0) return allDayDiff;
 
   const titleDiff = compareText(a.title, b.title);
 
