@@ -1,6 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
-import type { CalendarToolbarMode } from "@/features/calendar/scheduleScreen.types";
+import { useEffect, useState } from "react";
 import { ScheduleScreen as DesktopScheduleScreen } from "@/screens/ScheduleScreen.desktop";
 import { ScheduleScreen as MobileScheduleScreen } from "@/screens/ScheduleScreen.mobile";
 
@@ -29,22 +27,11 @@ const useIsMobileSchedule = () => {
 
 const Calendar = () => {
   const isMobile = useIsMobileSchedule();
-  const { search } = useLocation();
   const ActiveScheduleScreen = isMobile ? MobileScheduleScreen : DesktopScheduleScreen;
-
-  const initialActiveMode = useMemo<CalendarToolbarMode | undefined>(() => {
-    const mode = new URLSearchParams(search).get("mode");
-
-    if (mode === "calendar" || mode === "task") {
-      return mode;
-    }
-
-    return undefined;
-  }, [search]);
 
   return (
     <div className="h-full min-h-0 w-full">
-      <ActiveScheduleScreen initialActiveMode={initialActiveMode} />
+      <ActiveScheduleScreen />
     </div>
   );
 };
