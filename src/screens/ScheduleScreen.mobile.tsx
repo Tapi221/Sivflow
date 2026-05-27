@@ -125,12 +125,15 @@ export const ScheduleScreen = ({
     handleCalendarScroll,
     handleSelectViewMode,
     handleSidebarSelectDate,
+    handleVisibleDateChange,
     handleVisibleMonthChange,
     handlePrevious,
     handleNext,
     handleToday,
     handleMonthCellSelectDate,
     handleMonthRenderedRangeChange,
+    handleListReachStart,
+    handleListReachEnd,
     addGoogleCalendar,
   } = pane;
 
@@ -219,11 +222,15 @@ export const ScheduleScreen = ({
           {renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}
           <div className="mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border border-[#eeeeee] bg-white">
             <CalendarPieChartView
+              days={visibleDays}
               selectedDate={selectedDate}
               events={googleCalendarEvents}
               appProjects={appProjects}
               googleAccounts={googleAccounts}
-              className="px-4 pb-4 pt-4"
+              onSelectDate={handleSidebarSelectDate}
+              onReachStart={handleListReachStart}
+              onReachEnd={handleListReachEnd}
+              onVisibleDateChange={handleVisibleDateChange}
             />
           </div>
         </CarvePanel>
