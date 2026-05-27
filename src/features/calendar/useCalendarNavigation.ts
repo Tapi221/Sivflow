@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays, subMonths, subYears } from "date-fns";
+import { addDays, addMonths, addYears, startOfMonth, startOfWeek, startOfYear, subDays, subMonths, subYears } from "date-fns";
 import { createCalendarScrollBuffer, extendCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
 import type { CalendarViewMode } from "./scheduleScreen.types";
 
