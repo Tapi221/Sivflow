@@ -113,3 +113,13 @@ a:hover,
 [aria-label="Library hierarchy explorer"] [role="treeitem"] {
   overflow-anchor: none;
 }
+
+[aria-label="Library hierarchy explorer"] [role="treeitem"] > span.truncate,
+[aria-label="Library hierarchy explorer"] button[aria-pressed] > span.truncate {
+  color: #111827;
+  font-family: var(--app-font-family-ui);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.5;
+}
