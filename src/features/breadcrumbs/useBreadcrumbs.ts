@@ -29,7 +29,6 @@ const SECTION_LABELS: Record<WorkspaceSidebarSection, string> = {
   review: "復習",
   library: "ライブラリ",
   schedule: "スケジュール",
-  tasks: "タスク",
   settings: "設定",
 };
 
@@ -63,7 +62,6 @@ const resolveSectionKeyForTarget = (
   if (normalizedPathname === "/gallery") return "review";
   if (normalizedPathname === "/study") return "review";
   if (normalizedPathname === "/schedule") return "schedule";
-  if (normalizedPathname === "/tasks") return "tasks";
   if (normalizedPathname === "/settings") return "settings";
 
   return null;
@@ -165,8 +163,7 @@ export const useBreadcrumbs = (): UseBreadcrumbsReturn => {
 
   const shouldHideBreadcrumb =
     activeTab?.kind === "document" ||
-    activeTab?.sectionKey === "schedule" ||
-    activeTab?.sectionKey === "tasks";
+    activeTab?.sectionKey === "schedule";
 
   const crumbs = useMemo(
     () =>
