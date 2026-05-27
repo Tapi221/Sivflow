@@ -3,13 +3,11 @@ import { cn } from "@/lib/utils";
 
 type CarvePanelProps = {
   children: ReactNode;
-  hasTrailingPanel?: boolean;
   className?: string;
 };
 
 type CarvePanelViewportProps = {
   children: ReactNode;
-  hasTrailingPanel?: boolean;
   className?: string;
 };
 
@@ -18,10 +16,8 @@ type CarvePanelShellProps = {
   toolbar?: ReactNode;
   overlay?: ReactNode;
   leftPanel?: ReactNode;
-  rightPanel?: ReactNode;
   reserveToolbar?: boolean;
   reserveLeftPanel?: boolean;
-  hasTrailingPanel?: boolean;
   viewportRef?: Ref<HTMLDivElement>;
   className?: string;
   bodyClassName?: string;
