@@ -1,10 +1,12 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type UIEvent } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject, type UIEvent } from "react";
 import { addDays, format, getDaysInMonth, isSameDay, startOfMonth } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.schedule.list";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
+
+type CalendarDayHeightMap = Record<string, number>;
 
 type CalendarListViewProps = {
   days: Date[];
@@ -14,6 +16,9 @@ type CalendarListViewProps = {
   onReachStart?: () => void;
   onReachEnd?: () => void;
   onVisibleMonthChange?: (date: Date) => void;
+  dayHeights?: CalendarDayHeightMap;
+  scrollViewportRef?: MutableRefObject<HTMLDivElement | null>;
+  onScrollTopChange?: (scrollTop: number) => void;
   className?: string;
 };
 
@@ -128,11 +133,19 @@ const getListDayEstimatedHeight = (day: CalendarListDay): number => {
   return day.events.length * LIST_EVENT_ROW_HEIGHT_PX + Math.max(0, day.events.length - 1) * LIST_EVENT_ROW_GAP_PX;
 };
 
-const buildVirtualMetrics = (listDays: CalendarListDay[]): CalendarListVirtualMetrics => {
+const getAlignedDayHeight = (
+  dayHeights: CalendarDayHeightMap | undefined,
+  day: CalendarListDay,
+): number => dayHeights?.[day.dateKey] ?? getListDayEstimatedHeight(day);
+
+const buildVirtualMetrics = (
+  listDays: CalendarListDay[],
+  dayHeights?: CalendarDayHeightMap,
+): CalendarListVirtualMetrics => {
   let totalHeight = 0;
   const offsets: number[] = [];
   const heights = listDays.map((day, index) => {
-    const dayHeight = getListDayEstimatedHeight(day);
+    const dayHeight = getAlignedDayHeight(dayHeights, day);
     const height = dayHeight + (index < listDays.length - 1 ? LIST_DAY_GAP_PX : 0);
 
     offsets.push(totalHeight);
@@ -265,9 +278,13 @@ const CalendarListViewComponent = ({
   onReachStart,
   onReachEnd,
   onVisibleMonthChange,
+  dayHeights,
+  scrollViewportRef: externalScrollViewportRef,
+  onScrollTopChange,
   className,
 }: CalendarListViewProps) => {
-  const scrollViewportRef = useRef<HTMLDivElement | null>(null);
+  const localScrollViewportRef = useRef<HTMLDivElement | null>(null);
+  const scrollViewportRef = externalScrollViewportRef ?? localScrollViewportRef;
   const selectedDayElementRef = useRef<HTMLElement | null>(null);
   const previousFirstDayKeyRef = useRef<string | null>(null);
   const previousScrollHeightRef = useRef(0);
@@ -284,7 +301,7 @@ const CalendarListViewComponent = ({
     () => buildListDays(days, events, selectedDate),
     [days, events, selectedDate],
   );
-  const virtualMetrics = useMemo(() => buildVirtualMetrics(listDays), [listDays]);
+  const virtualMetrics = useMemo(() => buildVirtualMetrics(listDays, dayHeights), [dayHeights, listDays]);
   const isMonthEmpty = listDays.every((day) => day.events.length === 0);
   const firstDayKey = listDays[0]?.dateKey ?? null;
   const lastDayKey = listDays.at(-1)?.dateKey ?? null;
@@ -392,7 +409,8 @@ const CalendarListViewComponent = ({
 
   const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
     requestScrollProcessing(event.currentTarget);
-  }, [requestScrollProcessing]);
+    onScrollTopChange?.(event.currentTarget.scrollTop);
+  }, [onScrollTopChange, requestScrollProcessing]);
 
   useLayoutEffect(() => {
     const scrollElement = scrollViewportRef.current;
@@ -415,7 +433,7 @@ const CalendarListViewComponent = ({
     previousFirstDayKeyRef.current = firstDayKey;
     previousScrollHeightRef.current = scrollElement?.scrollHeight ?? 0;
     updateVirtualRange(scrollElement);
-  }, [firstDayKey, listDays, updateVirtualRange]);
+  }, [firstDayKey, listDays, scrollViewportRef, updateVirtualRange]);
 
   useEffect(() => {
     const selectedDateTime = selectedDate.getTime();
@@ -425,7 +443,7 @@ const CalendarListViewComponent = ({
     lastSelectedDateTimeRef.current = selectedDateTime;
     scrollElement.scrollTop = Math.max(0, virtualMetrics.offsets[selectedDayIndex] - SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX);
     updateVirtualRange(scrollElement);
-  }, [selectedDate, selectedDayIndex, updateVirtualRange, virtualMetrics]);
+  }, [scrollViewportRef, selectedDate, selectedDayIndex, updateVirtualRange, virtualMetrics]);
 
   useEffect(() => {
     return () => {
