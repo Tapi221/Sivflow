@@ -23,7 +23,7 @@ type TaskEventChipProps = {
   onToggleDone?: () => void;
 };
 
-export const TaskEventChip = memo(({
+const TaskEventChipComponent = ({
   title,
   categoryLabel,
   priorityLabel,
@@ -66,12 +66,9 @@ export const TaskEventChip = memo(({
           text-left
         `,
         "text-[11px] font-medium leading-[1.3]",
-        "transition-[filter,box-shadow,opacity] duration-100",
-        "hover:brightness-[0.98] hover:shadow-[0_1px_4px_rgba(15,23,42,0.08)]",
+        "transition-opacity duration-100",
         isDone && "opacity-65",
-        isDragging
-          ? "cursor-grabbing shadow-[0_8px_20px_rgba(15,23,42,0.12)]"
-          : "cursor-grab",
+        isDragging ? "cursor-grabbing" : "cursor-grab",
       )}
       style={{
         background: tokens.bg,
@@ -83,7 +80,7 @@ export const TaskEventChip = memo(({
       <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-1">
         <button
           type="button"
-          className="flex h-3 w-3 shrink-0 items-center justify-center transition-transform active:scale-90"
+          className="flex h-3 w-3 shrink-0 items-center justify-center"
           aria-label={checkboxLabel}
           title={checkboxLabel}
           onPointerDown={(event) => event.stopPropagation()}
@@ -111,7 +108,7 @@ export const TaskEventChip = memo(({
         {onDelete && (
           <button
             type="button"
-            className="-mr-0.5 flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded text-current opacity-0 transition-[background-color,opacity] duration-100 hover:bg-white/55 active:scale-95 group-hover:opacity-70 focus-visible:opacity-70"
+            className="-mr-0.5 flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded text-current opacity-0 transition-opacity duration-100 hover:bg-white/55 group-hover:opacity-70 focus-visible:opacity-70"
             aria-label="タスクを削除"
             title="タスクを削除"
             onPointerDown={(event) => event.stopPropagation()}
@@ -151,6 +148,10 @@ export const TaskEventChip = memo(({
       )}
     </div>
   );
-});
+};
+
+const TaskEventChip = memo(TaskEventChipComponent);
 
 TaskEventChip.displayName = "TaskEventChip";
+
+export { TaskEventChip };
