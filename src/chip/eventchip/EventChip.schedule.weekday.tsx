@@ -9,8 +9,8 @@ type CalendarEventChipWeekdayProps = {
 };
 
 const CHIP_TEXT_FADE_STYLE: CSSProperties = {
-  WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
-  maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
+  WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 8px), transparent 100%)",
+  maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 8px), transparent 100%)",
 };
 
 export const CalendarEventChipWeekday = ({
