@@ -8,7 +8,6 @@ const WEB_SCREEN_PATHS: Record<AppScreen, string> = {
   uncertainMode: "/uncertain",
   bookmarkMode: "/bookmark",
   calendar: "/schedule",
-  tasks: "/tasks",
   gallery: "/gallery",
   statistics: "/statistics",
   trash: "/trash",
