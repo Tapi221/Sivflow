@@ -272,7 +272,7 @@ export const CalendarSidebar = ({
   }
 
   return (
-    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-5 pl-0 pr-3 pt-2 text-[#2f2f2f]">
+    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-0 pl-0 pr-3 pt-2 text-[#2f2f2f]">
       <MiniCalendarSection
         monthDate={monthDate}
         selectedDate={selectedDate}
@@ -281,7 +281,7 @@ export const CalendarSidebar = ({
         onNextMonth={handleMiniCalendarNextMonth}
       />
 
-      <nav className="mt-2 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto pb-2">
+      <nav className="mt-2 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto pb-0">
         <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
           <CalendarIcon className="h-3.5 w-3.5 text-[#9a9a9a]" />
           <span className="text-[11px] font-bold uppercase tracking-[0.04em] text-[#9a9a9a]">
