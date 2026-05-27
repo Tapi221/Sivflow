@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, type UIEvent } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type UIEvent } from "react";
 import { addDays, format, getDaysInMonth, isSameDay, startOfMonth } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.schedule.list";
@@ -31,15 +31,29 @@ type CalendarListDaySectionProps = {
   onSelectDate?: (date: Date) => void;
 };
 
+type CalendarListVirtualMetrics = {
+  heights: number[];
+  offsets: number[];
+  totalHeight: number;
+};
+
+type CalendarListVirtualRange = {
+  start: number;
+  end: number;
+};
+
 const EMPTY_DAY_LABEL = "予定なし";
 const EMPTY_MONTH_LABEL = "この期間の予定はありません";
-const SELECTED_DAY_SCROLL_BLOCK: ScrollLogicalPosition = "nearest";
+const SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX = 8;
 const LIST_SCROLL_EDGE_THRESHOLD_PX = 180;
 const LIST_SCROLL_EDGE_RESET_PX = 420;
 const LIST_SCROLL_IDLE_DELAY_MS = 120;
 const LIST_VISIBLE_MONTH_ANCHOR_PX = 160;
-const LIST_DAY_DATA_ATTRIBUTE = "data-calendar-list-day-time";
-const LIST_DAY_SELECTOR = `[${LIST_DAY_DATA_ATTRIBUTE}]`;
+const LIST_VIRTUAL_OVERSCAN_PX = 900;
+const LIST_DAY_GAP_PX = 8;
+const LIST_EMPTY_DAY_HEIGHT_PX = 38;
+const LIST_EVENT_ROW_HEIGHT_PX = 50;
+const LIST_EVENT_ROW_GAP_PX = 6;
 
 const buildMonthDays = (date: Date): Date[] => {
   const monthStart = startOfMonth(date);
@@ -108,24 +122,85 @@ const buildListDays = (
   });
 };
 
-const getListDayTime = (element: HTMLElement | null): number | null => {
-  const dayTime = Number(element?.dataset.calendarListDayTime);
+const getListDayEstimatedHeight = (day: CalendarListDay): number => {
+  if (day.events.length === 0) return LIST_EMPTY_DAY_HEIGHT_PX;
 
-  return Number.isFinite(dayTime) ? dayTime : null;
+  return day.events.length * LIST_EVENT_ROW_HEIGHT_PX +
+    Math.max(0, day.events.length - 1) * LIST_EVENT_ROW_GAP_PX;
 };
 
-const getVisibleMonthAnchorDate = (scrollElement: HTMLDivElement): Date | null => {
-  const containerRect = scrollElement.getBoundingClientRect();
-  const anchorX = containerRect.left + containerRect.width / 2;
-  const anchorY = containerRect.top + Math.min(LIST_VISIBLE_MONTH_ANCHOR_PX, containerRect.height / 2);
-  const targetElement = document.elementFromPoint(anchorX, anchorY);
-  const anchorSection = targetElement instanceof HTMLElement
-    ? targetElement.closest<HTMLElement>(LIST_DAY_SELECTOR)
-    : null;
-  const fallbackSection = anchorSection ?? scrollElement.querySelector<HTMLElement>(LIST_DAY_SELECTOR);
-  const dayTime = getListDayTime(fallbackSection);
+const buildVirtualMetrics = (listDays: CalendarListDay[]): CalendarListVirtualMetrics => {
+  let totalHeight = 0;
+  const offsets: number[] = [];
+  const heights = listDays.map((day, index) => {
+    const dayHeight = getListDayEstimatedHeight(day);
+    const height = dayHeight + (index < listDays.length - 1 ? LIST_DAY_GAP_PX : 0);
 
-  return dayTime == null ? null : new Date(dayTime);
+    offsets.push(totalHeight);
+    totalHeight += height;
+
+    return height;
+  });
+
+  return { heights, offsets, totalHeight };
+};
+
+const findVirtualIndex = (offsets: number[], targetOffset: number): number => {
+  if (offsets.length === 0) return 0;
+
+  let low = 0;
+  let high = offsets.length - 1;
+  let result = 0;
+
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2);
+
+    if (offsets[middle] <= targetOffset) {
+      result = middle;
+      low = middle + 1;
+    } else {
+      high = middle - 1;
+    }
+  }
+
+  return result;
+};
+
+const getVirtualRange = (
+  metrics: CalendarListVirtualMetrics,
+  scrollTop: number,
+  viewportHeight: number,
+): CalendarListVirtualRange => {
+  if (metrics.heights.length === 0) return { start: 0, end: 0 };
+
+  const rangeStartOffset = Math.max(0, scrollTop - LIST_VIRTUAL_OVERSCAN_PX);
+  const rangeEndOffset = scrollTop + viewportHeight + LIST_VIRTUAL_OVERSCAN_PX;
+  const start = findVirtualIndex(metrics.offsets, rangeStartOffset);
+  let end = start;
+
+  while (end < metrics.heights.length && metrics.offsets[end] < rangeEndOffset) {
+    end += 1;
+  }
+
+  return {
+    start,
+    end: Math.min(metrics.heights.length, end + 1),
+  };
+};
+
+const areVirtualRangesEqual = (
+  left: CalendarListVirtualRange,
+  right: CalendarListVirtualRange,
+): boolean => left.start === right.start && left.end === right.end;
+
+const getVisibleMonthAnchorDate = (
+  listDays: CalendarListDay[],
+  metrics: CalendarListVirtualMetrics,
+  targetOffset: number,
+): Date | null => {
+  const index = findVirtualIndex(metrics.offsets, targetOffset);
+
+  return listDays[index]?.date ?? null;
 };
 
 const EmptyDayCard = ({ isMonthEmpty }: { isMonthEmpty: boolean }) => (
@@ -153,7 +228,6 @@ const CalendarListDaySection = ({
       ref={day.isSelected ? selectedDayRef : undefined}
       className="grid grid-cols-[58px_minmax(0,1fr)] gap-2"
       aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}
-      data-calendar-list-day-time={day.date.getTime()}
     >
       <button
         type="button"
@@ -206,18 +280,31 @@ const CalendarListViewComponent = ({
   const edgeExtendTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingScrollElementRef = useRef<HTMLDivElement | null>(null);
   const pendingEdgeDirectionRef = useRef<"start" | "end" | null>(null);
+  const [virtualRange, setVirtualRange] = useState<CalendarListVirtualRange>({ start: 0, end: 0 });
   const listDays = useMemo(
     () => buildListDays(days, events, selectedDate),
     [days, events, selectedDate],
   );
+  const virtualMetrics = useMemo(() => buildVirtualMetrics(listDays), [listDays]);
   const isMonthEmpty = listDays.every((day) => day.events.length === 0);
   const firstDayKey = listDays[0]?.dateKey ?? null;
   const lastDayKey = listDays.at(-1)?.dateKey ?? null;
+  const renderedDays = listDays.slice(virtualRange.start, virtualRange.end);
+  const selectedDayIndex = listDays.findIndex((day) => isSameDay(day.date, selectedDate));
+
+  const updateVirtualRange = useCallback((scrollElement: HTMLDivElement | null) => {
+    const nextRange = scrollElement
+      ? getVirtualRange(virtualMetrics, scrollElement.scrollTop, scrollElement.clientHeight)
+      : getVirtualRange(virtualMetrics, 0, 0);
+
+    setVirtualRange((currentRange) => areVirtualRangesEqual(currentRange, nextRange) ? currentRange : nextRange);
+  }, [virtualMetrics]);
 
   const updateVisibleMonth = useCallback((scrollElement: HTMLDivElement | null) => {
     if (!scrollElement || !onVisibleMonthChange) return;
 
-    const anchorDate = getVisibleMonthAnchorDate(scrollElement);
+    const anchorOffset = scrollElement.scrollTop + Math.min(LIST_VISIBLE_MONTH_ANCHOR_PX, scrollElement.clientHeight / 2);
+    const anchorDate = getVisibleMonthAnchorDate(listDays, virtualMetrics, anchorOffset);
     if (!anchorDate) return;
 
     const visibleMonth = startOfMonth(anchorDate);
@@ -226,7 +313,7 @@ const CalendarListViewComponent = ({
 
     lastVisibleMonthTimeRef.current = visibleMonthTime;
     onVisibleMonthChange(visibleMonth);
-  }, [onVisibleMonthChange]);
+  }, [listDays, onVisibleMonthChange, virtualMetrics]);
 
   const clearEdgeExtendTimer = useCallback(() => {
     if (!edgeExtendTimerRef.current) return;
@@ -258,6 +345,7 @@ const CalendarListViewComponent = ({
   const processScroll = useCallback((scrollElement: HTMLDivElement) => {
     const remainingScrollBottom = scrollElement.scrollHeight - scrollElement.clientHeight - scrollElement.scrollTop;
 
+    updateVirtualRange(scrollElement);
     updateVisibleMonth(scrollElement);
 
     if (scrollElement.scrollTop <= LIST_SCROLL_EDGE_THRESHOLD_PX) {
@@ -285,7 +373,7 @@ const CalendarListViewComponent = ({
         clearEdgeExtendTimer();
       }
     }
-  }, [clearEdgeExtendTimer, firstDayKey, lastDayKey, requestEdgeExtension, updateVisibleMonth]);
+  }, [clearEdgeExtendTimer, firstDayKey, lastDayKey, requestEdgeExtension, updateVirtualRange, updateVisibleMonth]);
 
   const requestScrollProcessing = useCallback((scrollElement: HTMLDivElement) => {
     pendingScrollElementRef.current = scrollElement;
@@ -327,15 +415,18 @@ const CalendarListViewComponent = ({
 
     previousFirstDayKeyRef.current = firstDayKey;
     previousScrollHeightRef.current = scrollElement?.scrollHeight ?? 0;
-  }, [firstDayKey, listDays]);
+    updateVirtualRange(scrollElement);
+  }, [firstDayKey, listDays, updateVirtualRange]);
 
   useEffect(() => {
     const selectedDateTime = selectedDate.getTime();
-    if (lastSelectedDateTimeRef.current === selectedDateTime) return;
+    const scrollElement = scrollViewportRef.current;
+    if (lastSelectedDateTimeRef.current === selectedDateTime || !scrollElement || selectedDayIndex < 0) return;
 
     lastSelectedDateTimeRef.current = selectedDateTime;
-    selectedDayElementRef.current?.scrollIntoView({ block: SELECTED_DAY_SCROLL_BLOCK });
-  }, [selectedDate]);
+    scrollElement.scrollTop = Math.max(0, virtualMetrics.offsets[selectedDayIndex] - SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX);
+    updateVirtualRange(scrollElement);
+  }, [selectedDate, selectedDayIndex, updateVirtualRange, virtualMetrics]);
 
   useEffect(() => {
     return () => {
@@ -350,17 +441,28 @@ const CalendarListViewComponent = ({
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}>
       <div ref={scrollViewportRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden" onScroll={handleScroll}>
-        <div className="mx-auto flex w-full max-w-[940px] flex-col gap-2">
-          {listDays.map((day) => (
-            <CalendarListDaySection
-              key={day.dateKey}
-              day={day}
-              selectedDayRef={day.isSelected ? (node) => {
-                selectedDayElementRef.current = node;
-              } : undefined}
-              onSelectDate={onSelectDate}
-            />
-          ))}
+        <div className="mx-auto w-full max-w-[940px]">
+          <div className="relative w-full" style={{ height: virtualMetrics.totalHeight }}>
+            {renderedDays.map((day, index) => {
+              const dayIndex = virtualRange.start + index;
+
+              return (
+                <div
+                  key={day.dateKey}
+                  className="absolute left-0 right-0"
+                  style={{ top: virtualMetrics.offsets[dayIndex], height: virtualMetrics.heights[dayIndex] }}
+                >
+                  <CalendarListDaySection
+                    day={day}
+                    selectedDayRef={day.isSelected ? (node) => {
+                      selectedDayElementRef.current = node;
+                    } : undefined}
+                    onSelectDate={onSelectDate}
+                  />
+                </div>
+              );
+            })}
+          </div>
 
           {listDays.length === 0 ? (
             <EmptyDayCard isMonthEmpty={isMonthEmpty} />
