@@ -116,10 +116,6 @@ export const useCalendarScrollController = ({
     syncKey: `${activeMode}:${selectedViewMode}`,
   });
 
-  useEffect(() => {
-    resetEdge();
-  }, [resetEdge, scrollExtentTrigger]);
-
   const syncTimelineVisibleDate = useCallback((scroller: HTMLDivElement) => {
     if (!onTimelineVisibleDateChange || timelineColumns.length === 0) return;
 
