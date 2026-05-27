@@ -103,46 +103,6 @@
   grid-row: 1;
 }
 
-.app-layout__schedule-right-sidebar-placeholder {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: calc(var(--app-sidebar-rail-width, 44px) - 8px);
-  height: 32px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--app-sidebar-icon);
-  cursor: pointer;
-  outline: none;
-  user-select: none;
-  -webkit-app-region: no-drag;
-}
-
-.app-layout__schedule-right-sidebar-placeholder:hover,
-.app-layout__schedule-right-sidebar-placeholder:focus-visible {
-  color: var(--app-sidebar-icon-active);
-}
-
-.app-layout__schedule-right-sidebar-placeholder:disabled {
-  cursor: default;
-  opacity: 0.42;
-}
-
-.app-layout__schedule-right-sidebar-placeholder-icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  color: currentColor;
-  transform: scaleX(-1);
-}
-
 .workspace-shell,
 .app-layout__content {
   --workspace-content-gutter: 10px;
