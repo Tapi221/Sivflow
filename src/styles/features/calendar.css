@@ -220,6 +220,12 @@
     background: #ffffff;
   }
 
+  .calendar-year-section {
+    contain: layout paint style;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 1040px;
+  }
+
   .calendar-month-week-row {
     contain: layout paint style;
     content-visibility: auto;

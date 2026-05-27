@@ -279,6 +279,10 @@ export const useCalendarNavigation = ({
     setMonthTitleDate(startOfMonth(date));
   }, []);
 
+  const handleVisibleYearChange = useCallback((date: Date) => {
+    setCurrentDate(startOfYear(date));
+  }, []);
+
   const handleMonthCellSelectDate = useCallback((date: Date) => {
     setSelectedDate(date);
     setCurrentDate(date);
@@ -317,6 +321,7 @@ export const useCalendarNavigation = ({
     handleSidebarSelectDate,
     handleTimelineSelectDate,
     handleVisibleMonthChange,
+    handleVisibleYearChange,
     handleMonthCellSelectDate,
     handleTimelineVisibleDateChange,
 

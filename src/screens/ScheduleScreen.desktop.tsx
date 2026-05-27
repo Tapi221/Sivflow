@@ -207,6 +207,7 @@ export const ScheduleScreen = ({
     handleSidebarPreviousMonth,
     handleSidebarNextMonth,
     handleVisibleMonthChange,
+    handleVisibleYearChange,
     handlePrevious,
     handleNext,
     handleToday,
@@ -519,6 +520,7 @@ export const ScheduleScreen = ({
               selectedDate={selectedDate}
               visibleEvents={deferredCalendarEvents}
               onSelectDate={handleMonthCellSelectDate}
+              onVisibleYearChange={handleVisibleYearChange}
             />
           </div>
         ) : isPieChartCalendarView ? (
