@@ -23,13 +23,37 @@
       "problemMatcher": "$tsc"
     },
     {
-      "label": "TypeScript: check all",
+      "label": "TypeScript: check tests",
+      "type": "shell",
+      "command": "npm exec tsc -- -p tsconfig.test.json --noEmit --pretty false",
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "TypeScript: check mobile",
+      "type": "shell",
+      "command": "npm --prefix apps/mobile run typecheck",
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "ESLint: lint workspace",
+      "type": "shell",
+      "command": "npm exec eslint -- .",
+      "group": "build",
+      "problemMatcher": "$eslint-stylish"
+    },
+    {
+      "label": "Problems: check workspace",
       "dependsOn": [
         "TypeScript: check app",
         "TypeScript: check node",
-        "TypeScript: check electron"
+        "TypeScript: check electron",
+        "TypeScript: check tests",
+        "TypeScript: check mobile",
+        "ESLint: lint workspace"
       ],
-      "dependsOrder": "sequence",
+      "dependsOrder": "parallel",
       "group": {
         "kind": "build",
         "isDefault": true
