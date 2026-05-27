@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { memo, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type UIEvent } from "react";
+import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type UIEvent } from "react";
 import { TaskStatusDot } from "@/chip/icon/TaskStatusDot";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TaskSortableContext, useTaskSortableCard } from "@/features/dnd/task/taskDnd.components";
@@ -51,7 +51,6 @@ type VirtualTaskWindow = {
   endIndex: number;
   beforeHeight: number;
   afterHeight: number;
-  totalHeight: number;
 };
 
 const taskColumnBackground = "#ffffff";
@@ -95,6 +94,8 @@ const useVirtualTaskWindow = (
   isDragActive: boolean,
 ) => {
   const viewportRef = useRef<HTMLDivElement | null>(null);
+  const scrollRafRef = useRef<number | null>(null);
+  const latestScrollTopRef = useRef(0);
   const [scrollTop, setScrollTop] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(TASK_VIRTUAL_INITIAL_VIEWPORT_HEIGHT);
   const enabled = !isDragActive && tasksLength > TASK_VIRTUAL_MIN_ITEMS;
@@ -121,6 +122,7 @@ const useVirtualTaskWindow = (
 
   useLayoutEffect(() => {
     if (!enabled) {
+      latestScrollTopRef.current = 0;
       setScrollTop(0);
       return;
     }
@@ -128,16 +130,33 @@ const useVirtualTaskWindow = (
     const viewport = viewportRef.current;
     if (!viewport) return;
 
+    latestScrollTopRef.current = viewport.scrollTop;
     setScrollTop(viewport.scrollTop);
   }, [enabled, tasksLength]);
 
-  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
+  useLayoutEffect(() => {
+    return () => {
+      if (scrollRafRef.current === null) return;
+
+      window.cancelAnimationFrame(scrollRafRef.current);
+      scrollRafRef.current = null;
+    };
+  }, []);
+
+  const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
     if (!enabled) return;
 
-    setScrollTop(event.currentTarget.scrollTop);
-  };
+    latestScrollTopRef.current = event.currentTarget.scrollTop;
 
-  const window = useMemo<VirtualTaskWindow>(() => {
+    if (scrollRafRef.current !== null) return;
+
+    scrollRafRef.current = window.requestAnimationFrame(() => {
+      scrollRafRef.current = null;
+      setScrollTop(latestScrollTopRef.current);
+    });
+  }, [enabled]);
+
+  const virtualWindow = useMemo<VirtualTaskWindow>(() => {
     if (!enabled) {
       return {
         enabled: false,
@@ -145,7 +164,6 @@ const useVirtualTaskWindow = (
         endIndex: tasksLength,
         beforeHeight: 0,
         afterHeight: 0,
-        totalHeight: 0,
       };
     }
 
@@ -162,14 +180,13 @@ const useVirtualTaskWindow = (
       endIndex,
       beforeHeight,
       afterHeight,
-      totalHeight: tasksLength * TASK_VIRTUAL_ROW_HEIGHT,
     };
   }, [enabled, scrollTop, tasksLength, viewportHeight]);
 
   return {
     handleScroll,
     viewportRef,
-    window,
+    virtualWindow,
   };
 };
 
@@ -223,9 +240,7 @@ const SortableTaskCardComponent = ({
   );
 };
 
-const SortableTaskCard = memo(SortableTaskCardComponent, areSortableTaskCardPropsEqual);
-
-export const TaskColumn = ({
+const TaskColumnComponent = ({
   column,
   tasks,
   activeDropTarget,
@@ -260,19 +275,18 @@ export const TaskColumn = ({
   }, [nonActiveTasks]);
   const activeInsertIndex =
     activeDropTarget?.columnId === column.id ? activeDropTarget.insertIndex : null;
-  const { handleScroll, viewportRef, window } = useVirtualTaskWindow(tasks.length, isDragActive);
-  const visibleTasks = window.enabled
-    ? tasks.slice(window.startIndex, window.endIndex)
+  const { handleScroll, viewportRef, virtualWindow } = useVirtualTaskWindow(tasks.length, isDragActive);
+  const visibleTasks = virtualWindow.enabled
+    ? tasks.slice(virtualWindow.startIndex, virtualWindow.endIndex)
     : tasks;
   const spacerStyle = useMemo<CSSProperties>(() => {
-    if (!window.enabled) return {};
+    if (!virtualWindow.enabled) return {};
 
     return {
-      minHeight: window.totalHeight,
-      paddingTop: window.beforeHeight,
-      paddingBottom: window.afterHeight,
+      paddingTop: virtualWindow.beforeHeight,
+      paddingBottom: virtualWindow.afterHeight,
     };
-  }, [window.afterHeight, window.beforeHeight, window.enabled, window.totalHeight]);
+  }, [virtualWindow.afterHeight, virtualWindow.beforeHeight, virtualWindow.enabled]);
 
   return (
     <div
@@ -373,4 +387,9 @@ export const TaskColumn = ({
   );
 };
 
+const SortableTaskCard = memo(SortableTaskCardComponent, areSortableTaskCardPropsEqual);
+const TaskColumn = TaskColumnComponent;
+
 SortableTaskCard.displayName = "SortableTaskCard";
+
+export { TaskColumn };
