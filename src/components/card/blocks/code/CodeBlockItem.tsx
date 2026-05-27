@@ -1,8 +1,8 @@
 import React from "react";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
+import { cn } from "@/lib/utils";
 import { Code } from "@/ui/icons";
 import { CodeBlockEditor } from "./CodeBlockEditor";
-import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
 
 interface CodeBlockItemProps {
@@ -24,6 +24,20 @@ interface CodeBlockItemProps {
   onMoveDragEnd?: () => void;
   zoom?: number;
 }
+
+const areCodeBlockItemPropsEqual = (
+  prev: CodeBlockItemProps,
+  next: CodeBlockItemProps,
+) =>
+  prev.data === next.data &&
+  prev.dragEnabled === next.dragEnabled &&
+  prev.dragHandleClassName === next.dragHandleClassName &&
+  prev.accentColor === next.accentColor &&
+  prev.isBlockSelected === next.isBlockSelected &&
+  prev.showDelete === next.showDelete &&
+  prev.canMoveUp === next.canMoveUp &&
+  prev.canMoveDown === next.canMoveDown &&
+  prev.zoom === next.zoom;
 
 const CodeBlockItemInner = ({
   data,
@@ -77,22 +91,11 @@ const CodeBlockItemInner = ({
   );
 };
 
-const areCodeBlockItemPropsEqual = (
-  prev: CodeBlockItemProps,
-  next: CodeBlockItemProps,
-) =>
-  prev.data === next.data &&
-  prev.dragEnabled === next.dragEnabled &&
-  prev.dragHandleClassName === next.dragHandleClassName &&
-  prev.accentColor === next.accentColor &&
-  prev.isBlockSelected === next.isBlockSelected &&
-  prev.showDelete === next.showDelete &&
-  prev.canMoveUp === next.canMoveUp &&
-  prev.canMoveDown === next.canMoveDown &&
-  prev.zoom === next.zoom;
-
-export const CodeBlockItem = React.memo(
+const CodeBlockItem = React.memo(
   CodeBlockItemInner,
   areCodeBlockItemPropsEqual,
 );
+
 CodeBlockItem.displayName = "CodeBlockItem";
+
+export { CodeBlockItem };
