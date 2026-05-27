@@ -57,6 +57,11 @@ export const useMonthInfiniteScroll = ({
   const lastScrollTargetTokenRef = useRef(scrollTargetToken);
   const visibleMonthKeyRef = useRef(getCalendarMonthKey(currentDate));
 
+  // 最新の monthWeeks・コールバックを ref で保持し、scroll リスナーを再登録しないようにする
+  const monthWeeksRef = useRef<ReturnType<typeof buildCalendarMonthWeeks>>([]);
+  const getCurrentRangeAnchorRef = useRef<((scroller: HTMLDivElement) => MonthRangeAnchor | null) | null>(null);
+  const scheduleVisibleMonthSyncRef = useRef<(() => void) | null>(null);
+
   const [anchorMonth, setAnchorMonth] = useState(() => currentDate);
   const [monthOffsetRange, setMonthOffsetRange] = useState(
     C.createInitialMonthOffsetRange,
@@ -71,6 +76,9 @@ export const useMonthInfiniteScroll = ({
       }),
     [anchorMonth, monthOffsetRange.endOffset, monthOffsetRange.startOffset],
   );
+
+  // monthWeeks の最新値を ref に同期（スクロールハンドラ再登録を防ぐため）
+  monthWeeksRef.current = monthWeeks;
 
   const setWeekRowRef = useCallback(
     (weekKey: string, node: HTMLElement | null) => {
@@ -94,14 +102,15 @@ export const useMonthInfiniteScroll = ({
       return cachedHeight;
     }
 
-    const firstWeek = monthWeeks[0];
+    const weeks = monthWeeksRef.current;
+    const firstWeek = weeks[0];
     const firstRow = firstWeek
       ? weekRowRefsMap.current.get(firstWeek.key)
       : null;
     const measuredHeight = firstRow?.offsetHeight ?? 0;
 
     return measuredHeight > 0 ? measuredHeight : C.DEFAULT_MONTH_ROW_HEIGHT;
-  }, [monthRowHeightRef, monthWeeks]);
+  }, [monthRowHeightRef]);
 
   const getWeekIndexFromScrollTop = useCallback(
     (scrollTop: number) => {
@@ -111,11 +120,11 @@ export const useMonthInfiniteScroll = ({
       );
 
       return Math.min(
-        monthWeeks.length - 1,
+        monthWeeksRef.current.length - 1,
         Math.max(0, rawWeekIndex),
       );
     },
-    [getMonthRowHeight, monthWeeks.length],
+    [getMonthRowHeight],
   );
 
   const getWeekOffsetTop = useCallback(
@@ -126,10 +135,11 @@ export const useMonthInfiniteScroll = ({
 
   const getCurrentRangeAnchor = useCallback(
     (scroller: HTMLDivElement): MonthRangeAnchor | null => {
-      if (monthWeeks.length === 0) return null;
+      const weeks = monthWeeksRef.current;
+      if (weeks.length === 0) return null;
 
       const weekIndex = getWeekIndexFromScrollTop(scroller.scrollTop);
-      const anchorWeek = monthWeeks[weekIndex];
+      const anchorWeek = weeks[weekIndex];
 
       if (!anchorWeek) return null;
 
@@ -138,19 +148,23 @@ export const useMonthInfiniteScroll = ({
         offsetTop: getWeekOffsetTop(weekIndex) - scroller.scrollTop,
       };
     },
-    [getWeekIndexFromScrollTop, getWeekOffsetTop, monthWeeks],
+    [getWeekIndexFromScrollTop, getWeekOffsetTop],
   );
+
+  // getCurrentRangeAnchor の最新値を ref に同期
+  getCurrentRangeAnchorRef.current = getCurrentRangeAnchor;
 
   const syncVisibleMonth = useCallback(() => {
     const scroller = scrollContainerRef.current;
+    const weeks = monthWeeksRef.current;
 
-    if (!scroller || monthWeeks.length === 0 || !onVisibleMonthChange) return;
+    if (!scroller || weeks.length === 0 || !onVisibleMonthChange) return;
 
     const sampleOffsetTop =
       scroller.scrollTop + C.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
 
     const weekIndex = getWeekIndexFromScrollTop(sampleOffsetTop);
-    const visibleWeek = monthWeeks[weekIndex];
+    const visibleWeek = weeks[weekIndex];
 
     if (!visibleWeek) return;
 
@@ -159,7 +173,7 @@ export const useMonthInfiniteScroll = ({
 
     visibleMonthKeyRef.current = nextKey;
     onVisibleMonthChange(visibleWeek.visibleMonthDate);
-  }, [getWeekIndexFromScrollTop, monthWeeks, onVisibleMonthChange]);
+  }, [getWeekIndexFromScrollTop, onVisibleMonthChange]);
 
   const scheduleVisibleMonthSync = useCallback(() => {
     if (visibleMonthSyncTimeoutRef.current !== null) {
@@ -178,6 +192,9 @@ export const useMonthInfiniteScroll = ({
     }, VISIBLE_MONTH_SYNC_DELAY_MS);
   }, [syncVisibleMonth]);
 
+  // scheduleVisibleMonthSync の最新値を ref に同期
+  scheduleVisibleMonthSyncRef.current = scheduleVisibleMonthSync;
+
   const cancelVisibleMonthSync = useCallback(() => {
     if (visibleMonthSyncTimeoutRef.current !== null) {
       window.clearTimeout(visibleMonthSyncTimeoutRef.current);
@@ -190,6 +207,7 @@ export const useMonthInfiniteScroll = ({
     visibleMonthSyncRafRef.current = null;
   }, []);
 
+  // スクロールハンドラは一度だけ登録する。最新の monthWeeks 等は ref 経由で参照。
   const handleScroll = useCallback(
     (scroller: HTMLDivElement) => {
       if (isResizingRef.current) return;
@@ -199,7 +217,7 @@ export const useMonthInfiniteScroll = ({
         !isExtendingBeforeRef.current
       ) {
         isExtendingBeforeRef.current = true;
-        rangeAnchorRef.current = getCurrentRangeAnchor(scroller);
+        rangeAnchorRef.current = getCurrentRangeAnchorRef.current?.(scroller) ?? null;
 
         startTransition(() => {
           setMonthOffsetRange((currentRange) => {
@@ -227,7 +245,7 @@ export const useMonthInfiniteScroll = ({
         !isExtendingAfterRef.current
       ) {
         isExtendingAfterRef.current = true;
-        rangeAnchorRef.current = getCurrentRangeAnchor(scroller);
+        rangeAnchorRef.current = getCurrentRangeAnchorRef.current?.(scroller) ?? null;
 
         startTransition(() => {
           setMonthOffsetRange((currentRange) => ({
@@ -243,9 +261,11 @@ export const useMonthInfiniteScroll = ({
         });
       }
 
-      scheduleVisibleMonthSync();
+      // ref 経由で最新のコールバックを呼ぶ
+      scheduleVisibleMonthSyncRef.current?.();
     },
-    [getCurrentRangeAnchor, isResizingRef, scheduleVisibleMonthSync],
+    // 依存配列から getCurrentRangeAnchor / scheduleVisibleMonthSync を除外: ref 経由なので安全
+    [isResizingRef],
   );
 
   useLayoutEffect(() => {
@@ -334,6 +354,7 @@ export const useMonthInfiniteScroll = ({
     isExtendingAfterRef.current = false;
   }, [getWeekOffsetTop, monthWeeks]);
 
+  // handleScroll を依存から外したことで、スクロールリスナーは一度だけ登録される
   useEffect(() => {
     const scroller = scrollContainerRef.current;
     if (!scroller) return;

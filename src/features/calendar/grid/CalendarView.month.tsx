@@ -153,8 +153,9 @@ export const CalendarMonthView = ({
   }, [updateScrollHoverDay]);
 
   const handlePointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
-    if (isResizingRef.current) {
-      clearScrollHoverDay();
+    // リサイズ中またはスクロール中はホバー追跡をスキップ（RAF の無駄な発行を防ぐ）
+    if (isResizingRef.current || isScrollingRef.current) {
+      if (isResizingRef.current) clearScrollHoverDay();
       return;
     }
 

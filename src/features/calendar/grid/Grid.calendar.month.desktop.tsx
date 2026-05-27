@@ -263,8 +263,6 @@ const CalendarMonthWeekRow = memo(({
         relative
         grid
         grid-cols-7
-        [contain-intrinsic-size:0_var(--calendar-month-row-height)]
-        [content-visibility:auto]
       "
     >
       {week.days.map((day) => {
