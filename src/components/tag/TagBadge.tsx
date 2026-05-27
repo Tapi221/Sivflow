@@ -1,4 +1,5 @@
-import React from "react";
+import type { CSSProperties, SVGProps } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getTagColorStyle, type TagColorKey } from "@/features/tag/tagColor";
 import { X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
@@ -14,12 +15,54 @@ interface TagBadgeProps {
   removeAriaLabel?: string;
 }
 
-const TAG_TEXT_FADE_STYLE: React.CSSProperties = {
+const TAG_TEXT_FADE_STYLE: CSSProperties = {
   WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
   maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
 };
 
-const TagHashIcon = ({ className }: React.SVGProps<SVGSVGElement>) => (
+const OVERFLOW_THRESHOLD = 1;
+
+const isElementTextOverflowing = (element: HTMLElement | null) => {
+  return Boolean(element && element.scrollWidth > element.clientWidth + OVERFLOW_THRESHOLD);
+};
+
+const useTextOverflow = (value: string) => {
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
+  const updateIsOverflowing = useCallback(() => {
+    setIsOverflowing(isElementTextOverflowing(textRef.current));
+  }, []);
+
+  useEffect(() => {
+    const element = textRef.current;
+
+    updateIsOverflowing();
+
+    if (!element) {
+      return undefined;
+    }
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateIsOverflowing);
+
+      return () => {
+        window.removeEventListener("resize", updateIsOverflowing);
+      };
+    }
+
+    const resizeObserver = new ResizeObserver(updateIsOverflowing);
+    resizeObserver.observe(element);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [updateIsOverflowing, value]);
+
+  return { isOverflowing, textRef };
+};
+
+const TagHashIcon = ({ className }: SVGProps<SVGSVGElement>) => (
   <svg
     aria-hidden="true"
     viewBox="0 0 12 12"
@@ -50,13 +93,15 @@ export const TagBadge = ({
 
   const textLabel = label.startsWith("#") ? label.slice(1) : label;
   const displayLabel = `#${textLabel}`;
+  const { isOverflowing, textRef } = useTextOverflow(textLabel);
 
   const content = (
     <>
       <TagHashIcon className="h-[0.82em] w-[0.82em] shrink-0 opacity-70" />
       <span
+        ref={textRef}
         className={cn("min-w-0 overflow-hidden whitespace-nowrap opacity-70", textClassName)}
-        style={TAG_TEXT_FADE_STYLE}
+        style={isOverflowing ? TAG_TEXT_FADE_STYLE : undefined}
       >
         {textLabel}
       </span>
