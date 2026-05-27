@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
@@ -7,6 +7,14 @@ type TooltipSide = "top" | "bottom";
 type TooltipPosition = {
   x: number;
   y: number;
+  side: TooltipSide;
+  arrowX: number;
+  measured: boolean;
+};
+
+type TooltipBoundary = {
+  top: number;
+  bottom: number;
 };
 
 type HoverEventTooltipProps = {
@@ -22,48 +30,123 @@ type HoverEventTooltipProps = {
 
 const TOOLTIP_SURFACE_CLASS_NAME = "relative flex max-w-[260px] flex-col gap-1.5 overflow-visible rounded-[14px] border border-white/70 bg-[rgba(255,255,255,0.84)] px-3 py-2.5 text-[#46515f] shadow-[0_14px_34px_rgba(74,90,110,0.16),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-2xl";
 const TOOLTIP_ARROW_CLASS_NAME = "absolute h-2.5 w-2.5 rotate-45 border-white/70 bg-[rgba(255,255,255,0.84)] backdrop-blur-2xl";
+const TOOLTIP_VIEWPORT_MARGIN = 12;
+const TOOLTIP_BOUNDARY_GAP = 8;
+const TOOLTIP_ARROW_MARGIN = 18;
 
-const getPosition = (
-  rect: DOMRect,
-  side: TooltipSide,
-  offset: number,
-): TooltipPosition => {
-  if (side === "bottom") {
-    return {
-      x: rect.left + rect.width / 2,
-      y: rect.bottom + offset,
-    };
+const clampNumber = (value: number, min: number, max: number) => {
+  if (max < min) return min;
+
+  return Math.min(Math.max(value, min), max);
+};
+
+const getScrollBoundary = (element: HTMLElement): TooltipBoundary => {
+  let current = element.parentElement;
+
+  while (current && current !== document.body) {
+    const style = window.getComputedStyle(current);
+    const overflow = `${style.overflow}${style.overflowX}${style.overflowY}`;
+
+    if (/(auto|scroll|overlay)/.test(overflow)) {
+      const rect = current.getBoundingClientRect();
+
+      return {
+        top: Math.max(TOOLTIP_VIEWPORT_MARGIN, rect.top + TOOLTIP_BOUNDARY_GAP),
+        bottom: Math.min(
+          window.innerHeight - TOOLTIP_VIEWPORT_MARGIN,
+          rect.bottom - TOOLTIP_BOUNDARY_GAP,
+        ),
+      };
+    }
+
+    current = current.parentElement;
   }
 
   return {
-    x: rect.left + rect.width / 2,
-    y: rect.top - offset,
+    top: TOOLTIP_VIEWPORT_MARGIN,
+    bottom: window.innerHeight - TOOLTIP_VIEWPORT_MARGIN,
   };
 };
 
-const getTransform = (side: TooltipSide) => {
-  if (side === "bottom") return "translate(-50%, 0)";
+const resolveSide = (
+  preferredSide: TooltipSide,
+  anchorRect: DOMRect,
+  tooltipHeight: number,
+  offset: number,
+  boundary: TooltipBoundary,
+) => {
+  const neededSpace = tooltipHeight + offset;
+  const spaceAbove = anchorRect.top - boundary.top;
+  const spaceBelow = boundary.bottom - anchorRect.bottom;
 
-  return "translate(-50%, -100%)";
+  if (preferredSide === "top") {
+    if (spaceAbove >= neededSpace || spaceAbove >= spaceBelow) return "top";
+
+    return "bottom";
+  }
+
+  if (spaceBelow >= neededSpace || spaceBelow >= spaceAbove) return "bottom";
+
+  return "top";
+};
+
+const resolvePosition = (
+  anchorRect: DOMRect,
+  tooltipRect: DOMRect,
+  preferredSide: TooltipSide,
+  offset: number,
+  boundary: TooltipBoundary,
+): TooltipPosition => {
+  const side = resolveSide(preferredSide, anchorRect, tooltipRect.height, offset, boundary);
+  const anchorCenterX = anchorRect.left + anchorRect.width / 2;
+  const x = clampNumber(
+    anchorCenterX - tooltipRect.width / 2,
+    TOOLTIP_VIEWPORT_MARGIN,
+    window.innerWidth - tooltipRect.width - TOOLTIP_VIEWPORT_MARGIN,
+  );
+  const preferredY =
+    side === "top"
+      ? anchorRect.top - tooltipRect.height - offset
+      : anchorRect.bottom + offset;
+  const y = clampNumber(preferredY, boundary.top, boundary.bottom - tooltipRect.height);
+  const arrowX = clampNumber(
+    anchorCenterX - x,
+    TOOLTIP_ARROW_MARGIN,
+    tooltipRect.width - TOOLTIP_ARROW_MARGIN,
+  );
+
+  return { x, y, side, arrowX, measured: true };
+};
+
+const getInitialPosition = (
+  anchorRect: DOMRect,
+  preferredSide: TooltipSide,
+  offset: number,
+): TooltipPosition => {
+  const x = anchorRect.left + anchorRect.width / 2;
+  const y = preferredSide === "top" ? anchorRect.top - offset : anchorRect.bottom + offset;
+
+  return { x, y, side: preferredSide, arrowX: 0, measured: false };
 };
 
 const getArrowClassName = (side: TooltipSide) => {
-  if (side === "bottom") return "top-[-4px] left-1/2 -translate-x-1/2 border-l border-t";
+  if (side === "bottom") return "top-[-4px] -translate-x-1/2 border-l border-t";
 
-  return "bottom-[-4px] left-1/2 -translate-x-1/2 border-b border-r";
+  return "bottom-[-4px] -translate-x-1/2 border-b border-r";
 };
 
 const HoverEventTooltip = ({
   title,
   subtitle,
   children,
-  side = "top",
+  side = "bottom",
   offset = 10,
   className,
   accentColor = "#8db9ff",
   disabled = false,
 }: HoverEventTooltipProps) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [position, setPosition] = useState<TooltipPosition | null>(null);
 
   const tooltipTitle = title.trim();
@@ -74,12 +157,35 @@ const HoverEventTooltip = ({
     if (disabled || !hasContent || !anchorRef.current) return;
 
     const rect = anchorRef.current.getBoundingClientRect();
-    setPosition(getPosition(rect, side, offset));
+    setPosition(getInitialPosition(rect, side, offset));
   };
 
   const hideTooltip = () => {
     setPosition(null);
   };
+
+  useLayoutEffect(() => {
+    if (!position || !anchorRef.current || !tooltipRef.current) return;
+
+    const anchorRect = anchorRef.current.getBoundingClientRect();
+    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+    const boundary = getScrollBoundary(anchorRef.current);
+    const nextPosition = resolvePosition(anchorRect, tooltipRect, side, offset, boundary);
+
+    setPosition((currentPosition) => {
+      if (
+        currentPosition?.measured &&
+        currentPosition.x === nextPosition.x &&
+        currentPosition.y === nextPosition.y &&
+        currentPosition.side === nextPosition.side &&
+        currentPosition.arrowX === nextPosition.arrowX
+      ) {
+        return currentPosition;
+      }
+
+      return nextPosition;
+    });
+  }, [offset, position, side]);
 
   useEffect(() => {
     if (!position) return;
@@ -113,16 +219,19 @@ const HoverEventTooltip = ({
         typeof document !== "undefined" &&
         createPortal(
           <div
+            ref={tooltipRef}
             role="tooltip"
             style={{
               position: "fixed",
               left: position.x,
               top: position.y,
-              transform: getTransform(side),
               zIndex: 9999,
               pointerEvents: "none",
             }}
-            className="animate-in fade-in-0 zoom-in-[0.98] duration-150 ease-out"
+            className={cn(
+              "animate-in fade-in-0 zoom-in-[0.98] duration-150 ease-out",
+              !position.measured && "opacity-0",
+            )}
           >
             <div className={TOOLTIP_SURFACE_CLASS_NAME}>
               <div className="flex min-w-0 items-start gap-2">
@@ -147,7 +256,10 @@ const HoverEventTooltip = ({
                 </span>
               </div>
 
-              <span className={cn(TOOLTIP_ARROW_CLASS_NAME, getArrowClassName(side))} />
+              <span
+                className={cn(TOOLTIP_ARROW_CLASS_NAME, getArrowClassName(position.side))}
+                style={{ left: position.arrowX }}
+              />
             </div>
           </div>,
           document.body,
