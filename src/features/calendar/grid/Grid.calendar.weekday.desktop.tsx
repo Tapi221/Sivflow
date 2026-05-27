@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
@@ -25,10 +25,16 @@ type WeekdayDayEvents = {
   timedEvents: GoogleCalendarEvent[];
 };
 
+type WeekdayVirtualDayRange = {
+  start: number;
+  end: number;
+};
+
 const HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, index) => index);
 const HOUR_BOUNDARY_LABELS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, index) => index + 1);
 const MAX_ALL_DAY_VISIBLE_CHIPS = 3;
 const BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT = 32;
+const HORIZONTAL_DAY_OVERSCAN = 4;
 
 const EMPTY_WEEKDAY_DAY_EVENTS: WeekdayDayEvents = {
   allDayEvents: [],
@@ -208,7 +214,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
   scrollContainerRef,
   visibleDays,
   visibleEvents,
-  _calendarDayColumnWidth: _calendarDayColumnWidth,
+  calendarDayColumnWidth,
   calendarGridStyle,
   onScroll,
   selectedDate,
@@ -216,6 +222,79 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
 }: CalendarWeekDayGridProps) {
   const today = new Date();
   const currentMinutes = useCurrentTimeMinutes();
+  const [virtualDayRange, setVirtualDayRange] = useState<WeekdayVirtualDayRange>(() => ({
+    start: 0,
+    end: visibleDays.length,
+  }));
+
+  const updateVirtualDayRange = useCallback(() => {
+    const scroller = scrollContainerRef.current;
+
+    if (!scroller || calendarDayColumnWidth <= 0 || visibleDays.length === 0) {
+      setVirtualDayRange({ start: 0, end: visibleDays.length });
+      return;
+    }
+
+    const scrollableLeft = Math.max(0, scroller.scrollLeft - C.TIME_COLUMN_WIDTH);
+    const visibleRight = Math.max(0, scroller.scrollLeft + scroller.clientWidth - C.TIME_COLUMN_WIDTH);
+    const start = Math.max(
+      0,
+      Math.floor(scrollableLeft / calendarDayColumnWidth) - HORIZONTAL_DAY_OVERSCAN,
+    );
+    const end = Math.min(
+      visibleDays.length,
+      Math.ceil(visibleRight / calendarDayColumnWidth) + HORIZONTAL_DAY_OVERSCAN,
+    );
+
+    setVirtualDayRange((previous) =>
+      previous.start === start && previous.end === end
+        ? previous
+        : { start, end },
+    );
+  }, [calendarDayColumnWidth, scrollContainerRef, visibleDays.length]);
+
+  useLayoutEffect(() => {
+    updateVirtualDayRange();
+  }, [updateVirtualDayRange]);
+
+  useEffect(() => {
+    const scroller = scrollContainerRef.current;
+    if (!scroller) return;
+
+    let rafId: number | null = null;
+
+    const scheduleUpdate = () => {
+      if (rafId !== null) return;
+
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        updateVirtualDayRange();
+      });
+    };
+
+    scroller.addEventListener("scroll", scheduleUpdate, { passive: true });
+    const initialFrameId = window.requestAnimationFrame(updateVirtualDayRange);
+
+    return () => {
+      scroller.removeEventListener("scroll", scheduleUpdate);
+      window.cancelAnimationFrame(initialFrameId);
+
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+    };
+  }, [scrollContainerRef, updateVirtualDayRange]);
+
+  const renderedDayEntries = useMemo(
+    () =>
+      visibleDays
+        .slice(virtualDayRange.start, virtualDayRange.end)
+        .map((day, offset) => ({
+          day,
+          dayIndex: virtualDayRange.start + offset,
+        })),
+    [virtualDayRange.end, virtualDayRange.start, visibleDays],
+  );
 
   const isTodayVisible = visibleDays.some((d) => isSameDay(d, today));
   const todayColumnIndex = visibleDays.findIndex((d) => isSameDay(d, today));
@@ -223,7 +302,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
   const eventsByDay = useMemo(() => {
     const map = new Map<string, WeekdayDayEvents>();
     const visibleDayByKey = new Map(
-      visibleDays.map((day) => {
+      renderedDayEntries.map(({ day }) => {
         const key = getCalendarDateKey(day);
         map.set(key, {
           allDayEvents: [],
@@ -259,7 +338,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
     }
 
     return map;
-  }, [visibleDays, visibleEvents]);
+  }, [renderedDayEntries, visibleEvents]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
@@ -271,7 +350,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
         <div className="grid bg-white" style={calendarGridStyle}>
           <div className="sticky left-0 top-0 z-[60] h-10 border-b border-r border-[#eeeeee] bg-white" />
 
-          {visibleDays.map((day, dayIndex) => {
+          {renderedDayEntries.map(({ day, dayIndex }) => {
             const isDayToday = isSameDay(day, today);
             const isDaySelected =
               !!selectedDate && isSameDay(day, selectedDate);
@@ -283,6 +362,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
                   "sticky top-0 z-50 border-b border-r border-[#eeeeee] bg-white",
                   dayIndex === visibleDays.length - 1 && "border-r-0",
                 )}
+                style={{ gridColumn: dayIndex + 2, gridRow: 1 }}
               >
                 <CalendarDateButton
                   isToday={isDayToday}
@@ -311,7 +391,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
             終日
           </div>
 
-          {visibleDays.map((day, dayIndex) => {
+          {renderedDayEntries.map(({ day, dayIndex }) => {
             const dayEvents =
               eventsByDay.get(getCalendarDateKey(day)) ?? EMPTY_WEEKDAY_DAY_EVENTS;
             const events = dayEvents.allDayEvents;
@@ -325,6 +405,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
                   "sticky top-10 z-40 min-h-7 border-b border-r border-[#eeeeee] bg-white px-1 py-1",
                   dayIndex === visibleDays.length - 1 && "border-r-0",
                 )}
+                style={{ gridColumn: dayIndex + 2, gridRow: 2 }}
               >
                 <div className="flex flex-col gap-1">
                   {visibleChips.map((event) => (
@@ -374,7 +455,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
             <CurrentTimeLabel currentMinutes={currentMinutes} />
           </div>
 
-          {visibleDays.map((day, dayIndex) => {
+          {renderedDayEntries.map(({ day, dayIndex }) => {
             const isDayToday = isSameDay(day, today);
             const dayEvents =
               eventsByDay.get(getCalendarDateKey(day)) ?? EMPTY_WEEKDAY_DAY_EVENTS;
@@ -397,6 +478,11 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
                   "relative border-r border-[#eeeeee] bg-white",
                   dayIndex === visibleDays.length - 1 && "border-r-0",
                 )}
+                style={{
+                  contain: "layout paint style",
+                  gridColumn: dayIndex + 2,
+                  gridRow: 3,
+                }}
               >
                 {HOURS.map((hour) => (
                   <div
@@ -449,7 +535,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
   return (
     previous.scrollContainerRef === next.scrollContainerRef &&
     previous.visibleEvents === next.visibleEvents &&
-    previous._calendarDayColumnWidth === next._calendarDayColumnWidth &&
+    previous.calendarDayColumnWidth === next.calendarDayColumnWidth &&
     previous.calendarGridStyle === next.calendarGridStyle &&
     previous.onScroll === next.onScroll &&
     previous.onSelectDate === next.onSelectDate &&
