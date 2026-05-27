@@ -8,7 +8,6 @@ import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import { CalendarTimelineDayView, type TimelineLane } from "@/features/calendar/grid/TimelineDayView";
-import { useScheduleScreenStore } from "@/features/calendar/header/useScheduleScreenStore";
 import { CalendarSidebar } from "@/features/calendar/panel/CalendarSidebar";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { TaskView } from "@/features/calendar/task/TaskView";
@@ -17,9 +16,8 @@ import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { CalendarPieChartView } from "@/features/calendar/view/CalendarPieChartView";
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
-import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
-import { DayDetailPanel } from "@/pane/rightpane/DayDetailPanel";
 import { cn } from "@/lib/utils";
+import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
 
 type StoredAppCalendarItem = Partial<AppCalendarItem>;
 
@@ -151,9 +149,6 @@ export const ScheduleScreen = ({
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
-  const isDayDetailPanelOpen = useScheduleScreenStore((state) => state.isDayDetailPanelOpen);
-  const openDayDetailPanel = useScheduleScreenStore((state) => state.openDayDetailPanel);
-  const setCanToggleDayDetailPanel = useScheduleScreenStore((state) => state.setCanToggleDayDetailPanel);
   const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(readStoredAppProjects);
   const [planResultModes, setPlanResultModes] = useState<PlanResultMode[]>([
     ...DEFAULT_PLAN_RESULT_MODES,
@@ -380,15 +375,6 @@ export const ScheduleScreen = ({
     return null;
   }, [activeMode, selectedDate, selectedViewMode]);
 
-  const canShowDayDetailPanel =
-    activeMode === "calendar" && selectedViewMode === "month";
-
-  const showDayDetailPanel =
-    canShowDayDetailPanel && isDayDetailPanelOpen;
-
-  const isDayDetailPanelCollapsed =
-    canShowDayDetailPanel && !showDayDetailPanel;
-
   const isYearCalendarView =
     activeMode === "calendar" && selectedViewMode === "year";
 
@@ -401,39 +387,12 @@ export const ScheduleScreen = ({
   const canShowPlanResultToggle =
     activeMode === "calendar" && PLAN_RESULT_TOGGLE_VIEW_MODES.has(selectedViewMode);
 
-  const hasTrailingPanel = isMonthCalendarView && !isDayDetailPanelCollapsed;
-
   const headerTitleDate =
     selectedViewMode === "month" ? monthTitleDate : titleDate;
 
   const headerTitleLabel = selectedViewMode === "year"
     ? format(headerTitleDate, "yyyy年", { locale: dateFnsLocale })
     : format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale });
-
-  useEffect(() => {
-    setCanToggleDayDetailPanel(canShowDayDetailPanel);
-
-    return () => setCanToggleDayDetailPanel(false);
-  }, [canShowDayDetailPanel, setCanToggleDayDetailPanel]);
-
-  const handleSidebarSelectDateAndOpen = useCallback(
-    (date: Date) => {
-      handleSidebarSelectDate(date);
-
-      if (canShowDayDetailPanel) {
-        openDayDetailPanel();
-      }
-    },
-    [canShowDayDetailPanel, handleSidebarSelectDate, openDayDetailPanel],
-  );
-
-  const handleMonthCellSelectDateAndOpen = useCallback(
-    (date: Date) => {
-      handleMonthCellSelectDate(date);
-      openDayDetailPanel();
-    },
-    [handleMonthCellSelectDate, openDayDetailPanel],
-  );
 
   return (
     <CarvePanelShell
@@ -457,7 +416,7 @@ export const ScheduleScreen = ({
           googleAccounts={googleAccounts}
           isAnyCalendarConnecting={isAnyCalendarConnecting}
           selectedTaskListIds={selectedTaskListIds}
-          onSelectDate={handleSidebarSelectDateAndOpen}
+          onSelectDate={handleSidebarSelectDate}
           onPreviousMonth={handleSidebarPreviousMonth}
           onNextMonth={handleSidebarNextMonth}
           onAddCalendar={addGoogleCalendar}
@@ -471,19 +430,9 @@ export const ScheduleScreen = ({
           onToggleTaskList={handleToggleTaskList}
         />
       )}
-      rightPanel={
-        canShowDayDetailPanel ? (
-          <DayDetailPanel
-            selectedDate={selectedDate}
-            events={calendarEvents}
-            isOpen={showDayDetailPanel}
-          />
-        ) : null
-      }
-      hasTrailingPanel={hasTrailingPanel}
       viewportRef={contentViewportRef}
     >
-      <CarvePanel hasTrailingPanel={hasTrailingPanel}>
+      <CarvePanel>
         {activeMode !== "task" && (
           <ScheduleScreenHeaderDesktop
             titleLabel={headerTitleLabel}
@@ -533,11 +482,8 @@ export const ScheduleScreen = ({
         ) : isMonthCalendarView ? (
           <div
             className={cn(
-              "ml-4 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0",
+              "ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border border-b-0 border-r-0",
               IOS_CALENDAR_MONTH_SURFACE_CLASS,
-              isDayDetailPanelCollapsed
-                ? "mr-0 rounded-tl-[22px] rounded-tr-none border-r-0"
-                : "mr-4 rounded-t-[22px]",
             )}
           >
             <CalendarMonthView
@@ -545,7 +491,7 @@ export const ScheduleScreen = ({
               selectedDate={selectedDate}
               scrollTargetToken={monthScrollTargetToken}
               visibleEvents={deferredCalendarEvents}
-              onSelectDate={handleMonthCellSelectDateAndOpen}
+              onSelectDate={handleMonthCellSelectDate}
               onVisibleMonthChange={handleVisibleMonthChange}
               onRenderedRangeChange={handleMonthRenderedRangeChange}
             />
