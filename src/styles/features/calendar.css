@@ -173,8 +173,6 @@
   .calendar-month-scroll {
     overflow-anchor: none;
     background: #f2f2f7;
-    /* GPU コンポジタレイヤーに昇格させてスクロール中の描画コストを削減 */
-    will-change: transform;
   }
 
   .calendar-month-weekday-header {
@@ -224,10 +222,6 @@
 
   .calendar-month-week-row {
     contain: layout style;
-    /* TSX側の [content-visibility:auto] と連動して viewport 外行をスキップ */
-    content-visibility: auto;
-    /* contain-intrinsic-block-size でスクロールバー高さを安定させる */
-    contain-intrinsic-block-size: var(--calendar-month-row-height, 112px);
     background: #ffffff;
   }
 

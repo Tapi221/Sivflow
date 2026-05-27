@@ -190,6 +190,19 @@ export const CalendarMonthView = ({
     }, 120);
   }, [requestScrollHoverUpdate]);
 
+  useEffect(() => {
+    const scroller = scroll.scrollContainerRef.current;
+    if (!scroller) return;
+
+    scroller.addEventListener("scroll", handleMonthScroll, {
+      passive: true,
+    });
+
+    return () => {
+      scroller.removeEventListener("scroll", handleMonthScroll);
+    };
+  }, [handleMonthScroll, scroll.scrollContainerRef]);
+
   const renderedRange = useMemo<CalendarDateRange | null>(() => {
     const firstWeek = scroll.monthWeeks[0];
     const lastWeek = scroll.monthWeeks[scroll.monthWeeks.length - 1];
@@ -245,7 +258,6 @@ export const CalendarMonthView = ({
         className="calendar-month-scroll min-h-0 flex-1 overflow-y-auto bg-white"
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
-        onScroll={handleMonthScroll}
       >
         <GridCalendarMonthDesktop
           today={today}
