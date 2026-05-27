@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns";
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -319,6 +319,7 @@ export const ScheduleScreen = ({
   const calendarEvents = useMemo(() => {
     return [...googleCalendarEvents, ...taskCalendarEvents];
   }, [googleCalendarEvents, taskCalendarEvents]);
+  const deferredCalendarEvents = useDeferredValue(calendarEvents);
 
   const timelineLanes = useMemo<TimelineLane[]>(() => {
     const appProjectLanes = appProjects.map((project) => ({
@@ -548,7 +549,7 @@ export const ScheduleScreen = ({
           <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[22px] border border-[#eeeeee] bg-white">
             <CalendarPieChartView
               selectedDate={selectedDate}
-              events={calendarEvents}
+              events={deferredCalendarEvents}
               appProjects={appProjects}
               googleAccounts={googleAccounts}
             />
@@ -573,7 +574,7 @@ export const ScheduleScreen = ({
               currentDate={currentDate}
               selectedDate={selectedDate}
               scrollTargetToken={monthScrollTargetToken}
-              visibleEvents={calendarEvents}
+              visibleEvents={deferredCalendarEvents}
               onSelectDate={handleMonthCellSelectDateAndOpen}
               onVisibleMonthChange={handleVisibleMonthChange}
               onRenderedRangeChange={handleMonthRenderedRangeChange}
@@ -604,7 +605,7 @@ export const ScheduleScreen = ({
                 laneLabelWidth={C.TIMELINE_LANE_LABEL_WIDTH}
                 rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
                 lanes={timelineLanes}
-                visibleEvents={calendarEvents}
+                visibleEvents={deferredCalendarEvents}
                 scrollContainerRef={scrollContainerRef}
                 onScroll={handleCalendarScroll}
                 onSelectDate={handleTimelineSelectDate}
@@ -615,7 +616,7 @@ export const ScheduleScreen = ({
                 allDayScrollRef={allDayScrollRef}
                 scrollContainerRef={scrollContainerRef}
                 visibleDays={visibleDays}
-                visibleEvents={calendarEvents}
+                visibleEvents={deferredCalendarEvents}
                 calendarDayColumnWidth={calendarDayColumnWidth}
                 timelineGridStyle={timelineGridStyle}
                 onScroll={handleCalendarScroll}

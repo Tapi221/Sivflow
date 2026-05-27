@@ -47,25 +47,63 @@ type TimelineEventPlacement = {
   stackIndex: number;
 };
 
+type TimelineLaneLookup = {
+  byCalendarId: Map<string, TimelineLane>;
+  byProjectKey: Map<string, TimelineLane>;
+  checkedLanes: TimelineLane[];
+};
+
 const normalizeProjectKey = (value: string): string =>
   value.trim().toLowerCase().replace(/[\s\-_]+/g, "");
 
-const getLaneMatchesEvent = (lane: TimelineLane, event: GoogleCalendarEvent): boolean => {
-  const calendarIds = lane.calendarIds ?? [];
-  const projectIds = lane.projectIds ?? [];
-  const matchesCalendar = calendarIds.some((calendarId) =>
-    event.calendarId === calendarId ||
-    event.calendarId.endsWith(`:${calendarId}`) ||
-    lane.id.endsWith(`:${event.calendarId}`),
-  );
+const buildLaneLookup = (lanes: TimelineLane[]): TimelineLaneLookup => {
+  const byCalendarId = new Map<string, TimelineLane>();
+  const byProjectKey = new Map<string, TimelineLane>();
+  const checkedLanes = lanes.filter((lane) => lane.checked);
 
-  if (matchesCalendar) return true;
-  if (!event.projectId) return false;
+  for (const lane of checkedLanes) {
+    for (const calendarId of lane.calendarIds ?? []) {
+      byCalendarId.set(calendarId, lane);
+      byCalendarId.set(`${lane.id}:${calendarId}`, lane);
+    }
 
-  const eventProjectKey = normalizeProjectKey(event.projectId);
-  const projectCandidates = [lane.id, lane.label, ...projectIds].map(normalizeProjectKey);
+    for (const projectKey of [
+      lane.id,
+      lane.label,
+      ...(lane.projectIds ?? []),
+    ].map(normalizeProjectKey)) {
+      if (projectKey) {
+        byProjectKey.set(projectKey, lane);
+      }
+    }
+  }
 
-  return projectCandidates.includes(eventProjectKey);
+  return {
+    byCalendarId,
+    byProjectKey,
+    checkedLanes,
+  };
+};
+
+const getEventLane = (
+  lookup: TimelineLaneLookup,
+  event: GoogleCalendarEvent,
+): TimelineLane | null => {
+  const directCalendarLane = lookup.byCalendarId.get(event.calendarId);
+  if (directCalendarLane) return directCalendarLane;
+
+  for (const [calendarId, lane] of lookup.byCalendarId) {
+    if (
+      event.calendarId.endsWith(`:${calendarId}`) ||
+      lane.id.endsWith(`:${event.calendarId}`)
+    ) {
+      return lane;
+    }
+  }
+
+  if (!event.projectId) return null;
+
+  return lookup.byProjectKey.get(normalizeProjectKey(event.projectId)) ?? null;
 };
 
 const getColumnClippedEventPosition = (event: GoogleCalendarEvent, columns: TimelineColumn[], columnWidth: number) => {
@@ -165,8 +203,19 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
     transform: "translateZ(0)",
   }), [columnGridStyle]);
 
+  const laneLookup = useMemo(
+    () => buildLaneLookup(displayLanes),
+    [displayLanes],
+  );
+
   const timelineEventPlacements = useMemo(() => {
-    if (columns.length === 0 || gridWidth <= 0) return [];
+    if (
+      columns.length === 0 ||
+      gridWidth <= 0 ||
+      laneLookup.checkedLanes.length === 0
+    ) {
+      return [];
+    }
 
     const laneStackEnds = new Map<string, number[]>();
 
@@ -174,7 +223,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
       .filter((event) => eventOverlapsRange(event, new Date(rangeStart), new Date(rangeEnd)))
       .sort(compareCalendarEvents)
       .flatMap((event): TimelineEventPlacement[] => {
-        const matchedLane = displayLanes.find((lane) => lane.checked && getLaneMatchesEvent(lane, event));
+        const matchedLane = getEventLane(laneLookup, event);
         if (!matchedLane) return [];
 
         const start = new Date(event.startsAt).getTime();
@@ -193,7 +242,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
           stackIndex,
         }];
       });
-  }, [columnWidth, columns, displayLanes, gridWidth, rangeEnd, rangeStart, visibleEvents]);
+  }, [columnWidth, columns, gridWidth, laneLookup, rangeEnd, rangeStart, visibleEvents]);
 
   const eventsByLaneId = useMemo(() => {
     const groupedEvents = new Map<string, TimelineEventPlacement[]>();
