@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
 import { fetchCalendarList } from "./gcal.api";
 import { buildTokenExpiry, isStoredTokenValid, readStoredAccounts, removeStoredAccount, type StoredGoogleAccount, updateStoredAccountCalendarIds, updateStoredAccountToken, upsertStoredAccount } from "./gcal.multi-storage";
-import { refreshCalendarAccessToken, requestCalendarAccessToken, requestGoogleCalendarServerCode } from "./gcal.oauth";
-import { disconnectServerStoredGoogleCalendarAccount, exchangeGoogleCalendarCode, getGoogleOAuthCallableErrorReason, getServerStoredGoogleCalendarAccessToken, isGoogleOAuthDeterministicErrorReason, isServerStoredGoogleOAuthEnabled } from "./gcal.server-oauth";
-import type { GoogleOAuthCallableErrorReason } from "./gcal.server-oauth";
+import { refreshCalendarAccessToken, requestCalendarAccessToken, requestGoogleCalendarServerCode } from "@/integration/google-integration/google.oauth";
+import { disconnectServerStoredGoogleCalendarAccount, exchangeGoogleCalendarCode, getGoogleOAuthCallableErrorReason, getServerStoredGoogleCalendarAccessToken, isGoogleOAuthDeterministicErrorReason, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
+import type { GoogleOAuthCallableErrorReason } from "@/integration/google-integration/google.server-oauth";
 import type { GCalConnectionStatus, GCalForceSyncOptions, GCalSilentReconnectResult, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
 import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
@@ -209,9 +209,11 @@ export const shouldCooldownGoogleOAuthError = (error: unknown): boolean =>
 export const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry): Error => {
   const error = new Error(entry.message);
   (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason }).code = "google-oauth-deterministic-cooldown";
+
   if (entry.reason !== "auto_recovery_pending" && entry.reason !== "internal") {
     (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason }).googleOAuthReason = entry.reason;
   }
+
   return error;
 };
 
@@ -578,7 +580,9 @@ export const useMultiAccountGoogleCalendar = () => {
         : desktopRefreshToken
           ? await refreshCalendarAccessToken({ refreshToken: desktopRefreshToken })
           : await requestSilentAccessToken();
+
       await storeDesktopRefreshToken(accountId, result.refreshToken);
+
       const refreshToken = useServerStoredTokens
         ? null
         : useDesktopSecureRefreshTokens
@@ -833,6 +837,7 @@ export const useMultiAccountGoogleCalendar = () => {
         accountPhotoUrl?: string | null,
       ) => {
         await storeDesktopRefreshToken(accountId, refreshToken ?? stored.refreshToken);
+
         const resolvedRefreshToken = useDesktopSecureRefreshTokens ? null : refreshToken ?? stored.refreshToken;
 
         upsertStoredAccount({
@@ -1098,6 +1103,7 @@ export const useMultiAccountGoogleCalendar = () => {
           });
         })()
         : await requestCalendarAccessToken(auth);
+
       const list = await fetchCalendarList(result.accessToken);
 
       if (list.length === 0) {
@@ -1118,6 +1124,7 @@ export const useMultiAccountGoogleCalendar = () => {
       }): boolean =>
         account.id === accountId ||
         (result.accountEmail !== null && account.email === result.accountEmail);
+
       const storedAccount = readStoredAccounts().find(matchesResolvedAccount);
       const existingAccount =
         replacingAccount ?? accountsRef.current.find(matchesResolvedAccount);
@@ -1135,7 +1142,9 @@ export const useMultiAccountGoogleCalendar = () => {
       const existingDesktopRefreshToken = useDesktopSecureRefreshTokens && !replaceAccountId
         ? await readDesktopRefreshToken(accountId)
         : null;
+
       await storeDesktopRefreshToken(accountId, result.refreshToken);
+
       const refreshToken = useServerStoredTokens
         ? null
         : useDesktopSecureRefreshTokens
@@ -1144,6 +1153,7 @@ export const useMultiAccountGoogleCalendar = () => {
           (replaceAccountId
             ? null
             : existingAccount?.refreshToken ?? storedAccount?.refreshToken ?? existingDesktopRefreshToken);
+
       const entry: GoogleAccountEntry = {
         id: accountId,
         email: result.accountEmail ?? existingAccount?.email ?? null,
