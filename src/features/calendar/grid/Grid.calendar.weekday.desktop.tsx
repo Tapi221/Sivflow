@@ -26,9 +26,10 @@ type WeekdayDayEvents = {
 };
 
 const HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, index) => index);
-const HOUR_BOUNDARY_LABELS = Array.from({ length: GRID.WEEKDAY_HOURS + 1 }, (_, index) => index);
+const HOUR_BOUNDARY_LABELS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, index) => index + 1);
 const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
 const MAX_ALL_DAY_VISIBLE_CHIPS = 3;
+const BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT = 32;
 
 const EMPTY_WEEKDAY_DAY_EVENTS: WeekdayDayEvents = {
   allDayEvents: [],
@@ -46,8 +47,7 @@ const createMinuteLabel = (totalMinutes: number) => {
 };
 
 const getHourBoundaryLabelOffsetClass = (hour: number) => {
-  if (hour === 0) return "translate-y-0";
-  if (hour === GRID.WEEKDAY_HOURS) return "-translate-y-full";
+  if (hour === GRID.WEEKDAY_HOURS) return "translate-y-1";
 
   return "-translate-y-1/2";
 };
@@ -136,7 +136,7 @@ const CurrentTimeLabel = ({ currentMinutes }: CurrentTimeLabelProps) => {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute right-0 z-30 flex h-9 w-full -translate-y-1/2 select-none items-center justify-end bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,white_32%,white_68%,rgba(255,255,255,0)_100%)] pr-2 text-[12px] font-semibold leading-none tabular-nums text-[#3f7fc5]"
+      className="pointer-events-none absolute right-0 z-30 flex h-6 w-full -translate-y-1/2 select-none items-center justify-end bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,white_32%,white_68%,rgba(255,255,255,0)_100%)] pr-2 text-[12px] font-semibold leading-none tabular-nums text-[#3f7fc5]"
       style={{
         top: `calc(${currentMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(--calendar-hour-row-height))`,
       }}
@@ -351,6 +351,12 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
               />
             ))}
 
+            <div
+              aria-hidden="true"
+              className="bg-white"
+              style={{ height: BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT }}
+            />
+
             {HOUR_BOUNDARY_LABELS.map((hour) => (
               <span
                 key={`weekday-hour-label-${hour}`}
@@ -400,6 +406,12 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
                     style={{ height: "var(--calendar-hour-row-height)" }}
                   />
                 ))}
+
+                <div
+                  aria-hidden="true"
+                  className="bg-white"
+                  style={{ height: BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT }}
+                />
 
                 {(isTodayVisible
                   ? isDayToday || todayColumnIndex !== -1
