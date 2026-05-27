@@ -1,5 +1,5 @@
 import type { RefObject, UIEvent } from "react";
-import { useCallback, useMemo, useState } from "react";
+import { startTransition, useCallback, useMemo, useState } from "react";
 import { useCalendarLayout } from "@/features/calendar/layout/calendar/useCalendarLayout.desktop";
 import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
@@ -115,6 +115,18 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     [],
   );
 
+  const handleListReachStart = useCallback(() => {
+    startTransition(() => {
+      navigation.extendCalendarBufferLeft();
+    });
+  }, [navigation]);
+
+  const handleListReachEnd = useCallback(() => {
+    startTransition(() => {
+      navigation.extendCalendarBufferRight();
+    });
+  }, [navigation]);
+
   const visibleRange = useCalendarVisibleRange({
     currentDate: navigation.currentDate,
     selectedViewMode: navigation.selectedViewMode,
@@ -229,8 +241,8 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     handleMonthCellSelectDate: navigation.handleMonthCellSelectDate,
     handleMonthRenderedRangeChange,
     handleYearRenderedRangeChange,
-    handleListReachStart: navigation.extendCalendarBufferLeft,
-    handleListReachEnd: navigation.extendCalendarBufferRight,
+    handleListReachStart,
+    handleListReachEnd,
 
     setMonthTitleDate: navigation.setMonthTitleDate,
   };
