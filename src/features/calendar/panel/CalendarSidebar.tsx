@@ -1,6 +1,5 @@
 import { type FormEvent, type KeyboardEvent, useCallback, useMemo, useRef, useState } from "react";
-import { GoogleIcon } from "@/chip/icons/icons.nouse";
-import { CalendarIcon } from "@/chip/icons/icons.schedule";
+import { CalendarIcon, GoogleIcon } from "@/chip/icons/icons.schedule";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
