@@ -1,4 +1,4 @@
-import { addDays, endOfDay, startOfDay, subDays } from "date-fns";
+import { addDays, endOfDay, endOfYear, startOfDay, startOfYear, subDays } from "date-fns";
 import { describe, expect, it } from "vitest";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
@@ -9,6 +9,23 @@ const expectSameTime = (actual: Date | undefined, expected: Date) => {
 };
 
 describe("buildCalendarEventSyncRange", () => {
+  it("年表示ではレンダー済み年範囲を同期する", () => {
+    const yearRenderedRange: CalendarDateRange = {
+      start: new Date(2023, 0, 1),
+      end: endOfDay(new Date(2027, 11, 31)),
+    };
+
+    const range = buildCalendarEventSyncRange({
+      selectedViewMode: "year",
+      visibleDays: [],
+      monthTitleDate: new Date(2025, 0, 1),
+      yearRenderedRange,
+    });
+
+    expectSameTime(range.rangeStart, startOfDay(startOfYear(yearRenderedRange.start)));
+    expectSameTime(range.rangeEnd, endOfDay(endOfYear(yearRenderedRange.end)));
+  });
+
   it("月表示ではレンダー済み範囲を優先して前後 buffer を付けて同期する", () => {
     const monthRenderedRange: CalendarDateRange = {
       start: new Date(2026, 2, 1),

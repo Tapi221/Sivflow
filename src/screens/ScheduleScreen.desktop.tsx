@@ -212,6 +212,7 @@ export const ScheduleScreen = ({
     handleToday,
     handleMonthCellSelectDate,
     handleMonthRenderedRangeChange,
+    handleYearRenderedRangeChange,
     addGoogleCalendar,
     reconnectGoogleAccount,
     toggleGoogleCalendar,
@@ -519,6 +520,7 @@ export const ScheduleScreen = ({
               selectedDate={selectedDate}
               visibleEvents={deferredCalendarEvents}
               onSelectDate={handleMonthCellSelectDate}
+              onRenderedRangeChange={handleYearRenderedRangeChange}
             />
           </div>
         ) : isPieChartCalendarView ? (

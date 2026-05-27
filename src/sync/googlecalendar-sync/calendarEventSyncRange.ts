@@ -13,6 +13,7 @@ export type BuildCalendarEventSyncRangeOptions = {
   visibleDays: Date[];
   monthTitleDate: Date;
   monthRenderedRange?: CalendarDateRange | null;
+  yearRenderedRange?: CalendarDateRange | null;
 };
 
 export const buildCalendarEventSyncRange = ({
@@ -20,8 +21,16 @@ export const buildCalendarEventSyncRange = ({
   visibleDays,
   monthTitleDate,
   monthRenderedRange,
+  yearRenderedRange,
 }: BuildCalendarEventSyncRangeOptions): CalendarEventSyncRange => {
   if (selectedViewMode === "year") {
+    if (yearRenderedRange) {
+      return {
+        rangeStart: startOfDay(startOfYear(yearRenderedRange.start)),
+        rangeEnd: endOfDay(endOfYear(yearRenderedRange.end)),
+      };
+    }
+
     const fallbackDayTime = monthTitleDate.getTime();
     const firstVisibleDay = new Date(visibleDays[0]?.getTime() ?? fallbackDayTime);
 
