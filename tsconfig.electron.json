@@ -7,7 +7,6 @@
     "types": ["node", "electron"],
     "strict": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
       "@constants/*": ["constants/*"]
