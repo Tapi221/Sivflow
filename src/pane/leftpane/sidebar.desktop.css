@@ -184,7 +184,7 @@
   padding: 0;
   border-radius: 999px;
   background: transparent;
-  color: #d5d5d5;
+  color: #b7b7b7;
   font-size: var(--ds-typography-font-size-sm);
   font-weight: 542;
   line-height: 17px;
@@ -228,14 +228,14 @@
 .app-sidebar__nav-link--disabled:hover,
 .app-sidebar__nav-link:disabled:hover {
   background: transparent;
-  color: #d5d5d5;
+  color: #b7b7b7;
 }
 
 .app-sidebar__nav-link--disabled .app-sidebar__nav-icon,
 .app-sidebar__nav-link--disabled .app-sidebar__nav-chevron,
 .app-sidebar__nav-link:disabled .app-sidebar__nav-icon,
 .app-sidebar__nav-link:disabled .app-sidebar__nav-chevron {
-  color: #d5d5d5;
+  color: #b7b7b7;
 }
 
 .app-sidebar__nav-link--nested {
@@ -257,7 +257,7 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  color: #d5d5d5;
+  color: #b7b7b7;
   transition: color 160ms ease;
 }
 
@@ -271,7 +271,7 @@
 .app-sidebar__nav-chevron {
   width: 16px;
   height: 16px;
-  color: #d5d5d5;
+  color: #b7b7b7;
   transition: color 160ms ease, transform 160ms ease;
 }
 
