@@ -1,4 +1,4 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { CalendarIcon } from "@/chip/icons/icons.sidebar";
@@ -8,8 +8,6 @@ import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
-import { TaskView } from "@/features/calendar/task/TaskView";
-import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCalendarEvents";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { CalendarPieChartView } from "@/features/calendar/view/CalendarPieChartView";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
@@ -99,34 +97,16 @@ const persistAppProjects = (projects: AppCalendarItem[]) => {
   }
 };
 
-const equalSet = (a: Set<string>, b: Set<string>): boolean => {
-  if (a.size !== b.size) return false;
-
-  for (const value of a) {
-    if (!b.has(value)) return false;
-  }
-
-  return true;
-};
-
 export const ScheduleScreen = ({
-  initialActiveMode,
   onClose,
 }: ScheduleScreenProps) => {
-  const pane = useScheduleScreen({ initialActiveMode });
-  const taskCalendarEvents = useTaskCalendarEvents();
+  const pane = useScheduleScreen();
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
-  const selectedTaskListInitializedRef = useRef(false);
   const [appProjects] = useState<AppCalendarItem[]>(readStoredAppProjects);
-  const [selectedTaskListIds, setSelectedTaskListIds] = useState<Set<string>>(
-    () => new Set(),
-  );
-  const deferredSelectedTaskListIds = useDeferredValue(selectedTaskListIds);
 
   const {
-    activeMode,
     selectedViewMode,
     currentDate,
     selectedDate,
@@ -143,7 +123,6 @@ export const ScheduleScreen = ({
     scrollContainerRef,
     contentViewportRef,
     handleCalendarScroll,
-    setActiveMode,
     handleSelectViewMode,
     handleSidebarSelectDate,
     handleVisibleMonthChange,
@@ -153,11 +132,6 @@ export const ScheduleScreen = ({
     handleMonthCellSelectDate,
     handleMonthRenderedRangeChange,
     addGoogleCalendar,
-    refreshGoogleTasks,
-    createGoogleTask,
-    updateGoogleTask,
-    moveGoogleTaskList,
-    deleteGoogleTask,
   } = pane;
 
   const viewOptions = useMemo(
@@ -175,45 +149,8 @@ export const ScheduleScreen = ({
     persistAppProjects(appProjects);
   }, [appProjects]);
 
-  const allTaskListIds = useMemo(
-    () =>
-      googleAccounts.flatMap((account) =>
-        account.taskLists.map((taskList) => taskList.id),
-      ),
-    [googleAccounts],
-  );
-  const allTaskListIdsKey = allTaskListIds.join("\t");
-
-  useEffect(() => {
-    const availableTaskListIds = new Set(allTaskListIds);
-
-    setSelectedTaskListIds((ids) => {
-      if (availableTaskListIds.size === 0) {
-        selectedTaskListInitializedRef.current = false;
-        return ids.size === 0 ? ids : new Set();
-      }
-
-      if (!selectedTaskListInitializedRef.current) {
-        selectedTaskListInitializedRef.current = true;
-        return availableTaskListIds;
-      }
-
-      const nextIds = new Set(
-        Array.from(ids).filter((id) => availableTaskListIds.has(id)),
-      );
-      return equalSet(ids, nextIds) ? ids : nextIds;
-    });
-    // allTaskListIdsKey でリストの実質的な変化だけを検知する。
-  }, [allTaskListIds, allTaskListIdsKey]);
-
-  const calendarEvents = useMemo(() => {
-    return [...googleCalendarEvents, ...taskCalendarEvents];
-  }, [googleCalendarEvents, taskCalendarEvents]);
-
-  const isMonthCalendarView =
-    activeMode === "calendar" && selectedViewMode === "month";
-  const isPieChartCalendarView =
-    activeMode === "calendar" && selectedViewMode === "pieChart";
+  const isMonthCalendarView = selectedViewMode === "month";
+  const isPieChartCalendarView = selectedViewMode === "pieChart";
   const headerTitleDate =
     selectedViewMode === "month"
       ? monthTitleDate
@@ -276,22 +213,6 @@ export const ScheduleScreen = ({
   };
 
   const renderCalendarContent = () => {
-    if (activeMode === "task") {
-      return (
-        <CarvePanel className="mx-3 min-h-[calc(100dvh-250px)] rounded-[24px] border-[#eeeeee]">
-          <TaskView
-            googleAccounts={googleAccounts}
-            selectedTaskListIds={deferredSelectedTaskListIds}
-            onRefreshGoogleTasks={refreshGoogleTasks}
-            onCreateGoogleTask={createGoogleTask}
-            onUpdateGoogleTask={updateGoogleTask}
-            onMoveGoogleTaskList={moveGoogleTaskList}
-            onDeleteGoogleTask={deleteGoogleTask}
-          />
-        </CarvePanel>
-      );
-    }
-
     if (isPieChartCalendarView) {
       return (
         <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">
@@ -299,7 +220,7 @@ export const ScheduleScreen = ({
           <div className="mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border border-[#eeeeee] bg-white">
             <CalendarPieChartView
               selectedDate={selectedDate}
-              events={calendarEvents}
+              events={googleCalendarEvents}
               appProjects={appProjects}
               googleAccounts={googleAccounts}
               className="px-4 pb-4 pt-4"
@@ -323,7 +244,7 @@ export const ScheduleScreen = ({
               currentDate={currentDate}
               selectedDate={selectedDate}
               scrollTargetToken={monthScrollTargetToken}
-              visibleEvents={calendarEvents}
+              visibleEvents={googleCalendarEvents}
               onSelectDate={handleSelectDate}
               onVisibleMonthChange={handleVisibleMonthChange}
               onRenderedRangeChange={handleMonthRenderedRangeChange}
@@ -347,7 +268,7 @@ export const ScheduleScreen = ({
             allDayScrollRef={allDayScrollRef}
             scrollContainerRef={scrollContainerRef}
             visibleDays={visibleDays}
-            visibleEvents={calendarEvents}
+            visibleEvents={googleCalendarEvents}
             calendarDayColumnWidth={calendarDayColumnWidth}
             calendarGridStyle={calendarGridStyle}
             onScroll={handleCalendarScroll}
@@ -408,10 +329,7 @@ export const ScheduleScreen = ({
 
       <div className="shrink-0 rounded-t-[22px] border-b border-[#eeeeee] bg-white px-3 py-2 shadow-[0_-1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(15,23,42,0.07)] [&_.calendar-workspace-toolbar]:h-11 [&_.calendar-workspace-toolbar]:overflow-visible [&_.calendar-workspace-toolbar]:bg-transparent [&_.calendar-workspace-toolbar]:pr-0">
         <CalendarWorkspaceToolbar
-          activeMode={activeMode}
           viewMode={selectedViewMode}
-          onSelectCalendar={() => setActiveMode("calendar")}
-          onSelectTask={() => setActiveMode("task")}
           onSelectViewMode={handleSelectViewMode}
         />
       </div>
