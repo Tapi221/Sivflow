@@ -1,10 +1,12 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type UIEvent } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject, type UIEvent } from "react";
 import { addDays, differenceInMinutes, format, isAfter, isBefore, isSameDay, startOfDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
+
+type CalendarDayHeightMap = Record<string, number>;
 
 type CalendarPieChartViewProps = {
   days: Date[];
@@ -16,6 +18,9 @@ type CalendarPieChartViewProps = {
   onReachStart?: () => void;
   onReachEnd?: () => void;
   onVisibleDateChange?: (date: Date) => void;
+  dayHeights?: CalendarDayHeightMap;
+  scrollViewportRef?: MutableRefObject<HTMLDivElement | null>;
+  onScrollTopChange?: (scrollTop: number) => void;
   className?: string;
 };
 
@@ -29,6 +34,7 @@ type CalendarPieChartDay = {
 
 type CalendarPieChartDaySectionProps = {
   day: CalendarPieChartDay;
+  height: number;
   selectedDayRef?: (node: HTMLElement | null) => void;
   onSelectDate?: (date: Date) => void;
 };
@@ -91,7 +97,6 @@ const PIE_CHART_VISIBLE_DATE_ANCHOR_PX = 160;
 const PIE_CHART_VIRTUAL_OVERSCAN_PX = 1100;
 const SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX = 8;
 const CHART_CONTAINER_STYLE = { width: `min(100%, 72vh, ${PIE_CHART_CONTAINER_MAX_SIZE_PX}px)` };
-const DAY_SECTION_STYLE = { height: PIE_CHART_DAY_SECTION_HEIGHT_PX };
 
 const formatDuration = (minutes: number): string => {
   const normalizedMinutes = Math.max(0, Math.round(minutes));
@@ -309,11 +314,19 @@ const buildPieChartDays = (
   }));
 };
 
-const buildVirtualMetrics = (days: CalendarPieChartDay[]): PieChartVirtualMetrics => {
+const getAlignedDayHeight = (
+  dayHeights: CalendarDayHeightMap | undefined,
+  day: CalendarPieChartDay,
+): number => dayHeights?.[day.dateKey] ?? PIE_CHART_DAY_SECTION_HEIGHT_PX;
+
+const buildVirtualMetrics = (
+  days: CalendarPieChartDay[],
+  dayHeights?: CalendarDayHeightMap,
+): PieChartVirtualMetrics => {
   let totalHeight = 0;
   const offsets: number[] = [];
-  const heights = days.map((_, index) => {
-    const height = PIE_CHART_DAY_SECTION_HEIGHT_PX + (index < days.length - 1 ? PIE_CHART_DAY_GAP_PX : 0);
+  const heights = days.map((day, index) => {
+    const height = getAlignedDayHeight(dayHeights, day) + (index < days.length - 1 ? PIE_CHART_DAY_GAP_PX : 0);
 
     offsets.push(totalHeight);
     totalHeight += height;
@@ -469,6 +482,7 @@ const DailyClockPieComponent = ({ slices }: DailyClockPieProps) => {
 
 const CalendarPieChartDaySectionComponent = ({
   day,
+  height,
   selectedDayRef,
   onSelectDate,
 }: CalendarPieChartDaySectionProps) => {
@@ -476,7 +490,7 @@ const CalendarPieChartDaySectionComponent = ({
     <section
       ref={day.isSelected ? selectedDayRef : undefined}
       className="grid grid-cols-[58px_minmax(0,1fr)] gap-2"
-      style={DAY_SECTION_STYLE}
+      style={{ height }}
       aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}
     >
       <button
@@ -509,9 +523,13 @@ const CalendarPieChartViewComponent = ({
   onReachStart,
   onReachEnd,
   onVisibleDateChange,
+  dayHeights,
+  scrollViewportRef: externalScrollViewportRef,
+  onScrollTopChange,
   className,
 }: CalendarPieChartViewProps) => {
-  const scrollViewportRef = useRef<HTMLDivElement | null>(null);
+  const localScrollViewportRef = useRef<HTMLDivElement | null>(null);
+  const scrollViewportRef = externalScrollViewportRef ?? localScrollViewportRef;
   const selectedDayElementRef = useRef<HTMLElement | null>(null);
   const previousFirstDayKeyRef = useRef<string | null>(null);
   const previousScrollHeightRef = useRef(0);
@@ -528,7 +546,7 @@ const CalendarPieChartViewComponent = ({
     () => buildPieChartDays(days, selectedDate, events, appProjects, googleAccounts),
     [appProjects, days, events, googleAccounts, selectedDate],
   );
-  const virtualMetrics = useMemo(() => buildVirtualMetrics(pieChartDays), [pieChartDays]);
+  const virtualMetrics = useMemo(() => buildVirtualMetrics(pieChartDays, dayHeights), [dayHeights, pieChartDays]);
   const firstDayKey = pieChartDays[0]?.dateKey ?? null;
   const lastDayKey = pieChartDays.at(-1)?.dateKey ?? null;
   const renderedDays = pieChartDays.slice(virtualRange.start, virtualRange.end);
@@ -635,7 +653,8 @@ const CalendarPieChartViewComponent = ({
 
   const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
     requestScrollProcessing(event.currentTarget);
-  }, [requestScrollProcessing]);
+    onScrollTopChange?.(event.currentTarget.scrollTop);
+  }, [onScrollTopChange, requestScrollProcessing]);
 
   useLayoutEffect(() => {
     const scrollElement = scrollViewportRef.current;
@@ -658,7 +677,7 @@ const CalendarPieChartViewComponent = ({
     previousFirstDayKeyRef.current = firstDayKey;
     previousScrollHeightRef.current = scrollElement?.scrollHeight ?? 0;
     updateVirtualRange(scrollElement);
-  }, [firstDayKey, pieChartDays, updateVirtualRange]);
+  }, [firstDayKey, pieChartDays, scrollViewportRef, updateVirtualRange]);
 
   useEffect(() => {
     const scrollElement = scrollViewportRef.current;
@@ -673,7 +692,7 @@ const CalendarPieChartViewComponent = ({
 
     scrollElement.scrollTop = Math.max(0, virtualMetrics.offsets[selectedDayIndex] - SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX);
     updateVirtualRange(scrollElement);
-  }, [selectedDateKey, selectedDayIndex, updateVirtualRange, virtualMetrics]);
+  }, [scrollViewportRef, selectedDateKey, selectedDayIndex, updateVirtualRange, virtualMetrics]);
 
   useEffect(() => {
     return () => {
@@ -693,6 +712,7 @@ const CalendarPieChartViewComponent = ({
             <div className="relative w-full" style={{ height: virtualMetrics.totalHeight }}>
               {renderedDays.map((day, index) => {
                 const dayIndex = virtualRange.start + index;
+                const sectionHeight = Math.max(0, virtualMetrics.heights[dayIndex] - (dayIndex < pieChartDays.length - 1 ? PIE_CHART_DAY_GAP_PX : 0));
 
                 return (
                   <div
@@ -702,6 +722,7 @@ const CalendarPieChartViewComponent = ({
                   >
                     <CalendarPieChartDaySection
                       day={day}
+                      height={sectionHeight}
                       selectedDayRef={day.isSelected ? (node) => {
                         selectedDayElementRef.current = node;
                       } : undefined}
