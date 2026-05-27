@@ -16,11 +16,12 @@ export const useCalendarLayout = ({
   currentDate: Date;
   calendarBuffer: { before: number; after: number };
 }) => {
+  const isMonthLikeView = selectedViewMode === "month" || selectedViewMode === "list";
   const viewportDayCount =
-    selectedViewMode === "month" ? 7 : displayDays.length;
+    isMonthLikeView ? 7 : displayDays.length;
 
   const viewportInlineInset =
-    selectedViewMode === "month" ? 0 : C.WEEKDAY_SURFACE_LEFT_INSET_PX;
+    isMonthLikeView ? 0 : C.WEEKDAY_SURFACE_LEFT_INSET_PX;
 
   const calendarDayColumnWidth =
     viewportWidth > C.TIME_COLUMN_WIDTH + viewportInlineInset
@@ -32,13 +33,13 @@ export const useCalendarLayout = ({
       : C.DAY_COLUMN_MIN_WIDTH;
 
   const renderDayCount =
-    selectedViewMode === "month" ? displayDays.length : visibleDays.length;
+    isMonthLikeView ? displayDays.length : visibleDays.length;
 
   const gridWidth =
     C.TIME_COLUMN_WIDTH + renderDayCount * calendarDayColumnWidth;
 
   const titleDate =
-    selectedViewMode === "month" ? new Date(currentDate) : currentDate;
+    isMonthLikeView ? new Date(currentDate) : currentDate;
 
   const monthLabel = null;
 
