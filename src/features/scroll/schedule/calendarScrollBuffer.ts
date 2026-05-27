@@ -1,6 +1,6 @@
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
-type CalendarScrollBufferSurface = "calendar" | "timeline";
+type CalendarScrollBufferSurface = "calendar";
 
 type CalendarScrollBufferDirection = "left" | "right";
 
@@ -12,7 +12,6 @@ export type CalendarScrollBuffer = {
 type CalendarScrollBufferConfig = {
   /**
    * 1画面ぶんを何カラムとして数えるか。
-   * calendar の週表示は 1画面 = 7日、timeline は 1画面 = 1カラムとして扱う。
    */
   unitsPerScreen: number;
   initialScreens: CalendarScrollBuffer;
@@ -58,44 +57,6 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
       initialScreens: { before: 0, after: 0 },
       extendScreens: 0,
       maxUnits: { before: 0, after: 0 },
-    },
-    pieChart: {
-      unitsPerScreen: 1,
-      initialScreens: { before: 0, after: 0 },
-      extendScreens: 0,
-      maxUnits: { before: 0, after: 0 },
-    },
-  },
-  timeline: {
-    year: {
-      unitsPerScreen: 1,
-      initialScreens: { before: 2, after: 3 },
-      extendScreens: 4,
-      maxUnits: { before: 40, after: 40 },
-    },
-    days: {
-      unitsPerScreen: 1,
-      initialScreens: { before: 4, after: 8 },
-      extendScreens: 14,
-      maxUnits: { before: 365, after: 365 },
-    },
-    threeDays: {
-      unitsPerScreen: 1,
-      initialScreens: { before: 4, after: 8 },
-      extendScreens: 14,
-      maxUnits: { before: 365, after: 365 },
-    },
-    week: {
-      unitsPerScreen: 1,
-      initialScreens: { before: 4, after: 8 },
-      extendScreens: 8,
-      maxUnits: { before: 156, after: 156 },
-    },
-    month: {
-      unitsPerScreen: 1,
-      initialScreens: { before: 4, after: 8 },
-      extendScreens: 8,
-      maxUnits: { before: 120, after: 120 },
     },
     pieChart: {
       unitsPerScreen: 1,
