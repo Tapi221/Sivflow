@@ -10,10 +10,13 @@
     "typecheck": "tsc --noEmit --pretty false"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~55.0.6",
     "expo": "~55.0.6",
     "expo-status-bar": "~55.0.6",
     "react": "19.2.0",
-    "react-native": "0.83.6"
+    "react-dom": "19.2.0",
+    "react-native": "0.83.6",
+    "react-native-web": "~0.21.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.14",
