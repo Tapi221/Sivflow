@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -168,7 +168,34 @@ const CurrentTimeIndicator = ({
   );
 };
 
-export const CalendarWeekDayGrid = ({
+const areSameVisibleDays = (previous: Date[], next: Date[]) => {
+  if (previous.length !== next.length) return false;
+
+  return previous.every((day, index) => day.getTime() === next[index]?.getTime());
+};
+
+const isSelectionEquivalentForVisibleDays = (
+  previousSelectedDate: Date,
+  nextSelectedDate: Date,
+  previousVisibleDays: Date[],
+  nextVisibleDays: Date[],
+) => {
+  const previousSelectedKey = getCalendarDateKey(previousSelectedDate);
+  const nextSelectedKey = getCalendarDateKey(nextSelectedDate);
+
+  if (previousSelectedKey === nextSelectedKey) return true;
+
+  const previousSelectionWasVisible = previousVisibleDays.some(
+    (day) => getCalendarDateKey(day) === previousSelectedKey,
+  );
+  const nextSelectionIsVisible = nextVisibleDays.some(
+    (day) => getCalendarDateKey(day) === nextSelectedKey,
+  );
+
+  return !previousSelectionWasVisible && !nextSelectionIsVisible;
+};
+
+export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
   headerScrollRef: _headerScrollRef,
   allDayScrollRef: _allDayScrollRef,
   scrollContainerRef,
@@ -179,7 +206,7 @@ export const CalendarWeekDayGrid = ({
   onScroll,
   selectedDate,
   onSelectDate,
-}: CalendarWeekDayGridProps) => {
+}: CalendarWeekDayGridProps) {
   const today = new Date();
   const currentMinutes = useCurrentTimeMinutes();
 
@@ -393,4 +420,20 @@ export const CalendarWeekDayGrid = ({
       </div>
     </div>
   );
-};
+}, (previous, next) => {
+  return (
+    previous.scrollContainerRef === next.scrollContainerRef &&
+    previous.visibleEvents === next.visibleEvents &&
+    previous.calendarDayColumnWidth === next.calendarDayColumnWidth &&
+    previous.timelineGridStyle === next.timelineGridStyle &&
+    previous.onScroll === next.onScroll &&
+    previous.onSelectDate === next.onSelectDate &&
+    areSameVisibleDays(previous.visibleDays, next.visibleDays) &&
+    isSelectionEquivalentForVisibleDays(
+      previous.selectedDate,
+      next.selectedDate,
+      previous.visibleDays,
+      next.visibleDays,
+    )
+  );
+});
