@@ -15,14 +15,6 @@ import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, SelectedExplorerItem } from "@/types";
 
-const LIBRARY_EXPANDED_FOLDERS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-folders";
-const LIBRARY_EXPANDED_CARD_SETS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-card-sets";
-const TREE_INDENT_PX = 16;
-const TREE_ROW_BASE_PADDING_LEFT_PX = 8;
-const TREE_GUIDE_LEFT_OFFSET_PX = TREE_ROW_BASE_PADDING_LEFT_PX + 8;
-const TREE_ROW_HEIGHT_CLASS_NAME = "h-7";
-const TREE_EMPTY_TEXT_CLASS_NAME = "px-3 py-2 text-[12px] font-medium leading-[1.45] tracking-normal text-[#b8b8b8]";
-
 type ExplorerSelectionPatch = {
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
@@ -33,6 +25,22 @@ type TreeBranchMask = boolean[];
 type NodeIconProps = {
   className?: string;
 };
+
+const LIBRARY_EXPANDED_FOLDERS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-folders";
+const LIBRARY_EXPANDED_CARD_SETS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-card-sets";
+const TREE_INDENT_PX = 16;
+const TREE_ROW_BASE_PADDING_LEFT_PX = 8;
+const TREE_GUIDE_LEFT_OFFSET_PX = TREE_ROW_BASE_PADDING_LEFT_PX + 8;
+const TREE_ROW_HEIGHT_CLASS_NAME = "h-7";
+const TREE_EMPTY_TEXT_CLASS_NAME = "px-3 py-2 text-[12px] font-medium leading-[1.45] tracking-normal text-[#a6adba]";
+const TREE_GUIDE_CLASS_NAME = "pointer-events-none absolute bg-[#eeeeee]";
+const TREE_ROW_BASE_CLASS_NAME = "group relative flex w-full cursor-default select-none items-center gap-1 rounded-[10px] pr-2 text-left text-[12px] font-medium leading-none tracking-normal outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
+const TREE_ROW_SELECTED_CLASS_NAME = "bg-[#f7f7f8] text-[#3f4652] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.03)]";
+const TREE_ROW_IDLE_CLASS_NAME = "text-[#6d747f] hover:bg-[#fafafa] hover:text-[#3f4652]";
+const TREE_TOGGLE_CLASS_NAME = "flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] text-[#8f94d6] transition hover:bg-[#f7f7f8] hover:text-[#7379c8]";
+const TREE_FOLDER_ICON_CLASS_NAME = "text-[#8f94d6]";
+const TREE_ITEM_ICON_CLASS_NAME = "text-[#8e8e93]";
+const TREE_TRASH_BUTTON_BASE_CLASS_NAME = "flex h-8 w-full items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium leading-none tracking-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
 
 const ChevronRightGlyph = ({ className }: NodeIconProps) => (
   <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
@@ -163,27 +171,13 @@ const addIdsToSet = (
   });
 };
 
-const getNodeIconClassName = (node: ExplorerTreeNode, depth: number): string => {
-  if (node.type === "folder") {
-    const folderToneClassNames = [
-      "text-[#7d98d1]",
-      "text-[#dea64f]",
-      "text-[#a58ad6]",
-      "text-[#65b98f]",
-      "text-[#d77a7a]",
-      "text-[#63abc8]",
-    ];
-    const hash = Array.from(node.id).reduce((sum, char) => sum + char.charCodeAt(0), depth);
-    return folderToneClassNames[hash % folderToneClassNames.length];
-  }
-
-  if (node.type === "cardSet") return "text-[#8f96a8]";
-  if (node.type === "document") return "text-[#a0a5ad]";
-  return "text-[#98a0ae]";
+const getNodeIconClassName = (node: ExplorerTreeNode): string => {
+  if (node.type === "folder") return TREE_FOLDER_ICON_CLASS_NAME;
+  return TREE_ITEM_ICON_CLASS_NAME;
 };
 
-const renderNodeIcon = (node: ExplorerTreeNode, depth: number) => {
-  const className = cn("h-4 w-4 shrink-0", getNodeIconClassName(node, depth));
+const renderNodeIcon = (node: ExplorerTreeNode) => {
+  const className = cn("h-4 w-4 shrink-0", getNodeIconClassName(node));
 
   if (node.type === "folder") return <FolderGlyph className={className} />;
   if (node.type === "cardSet") return <DeckGlyph className={className} />;
@@ -195,7 +189,7 @@ const renderNodeIcon = (node: ExplorerTreeNode, depth: number) => {
 const isNodeExpandable = (node: ExplorerTreeNode): boolean =>
   node.type === "folder" || node.type === "cardSet";
 
-export const LibraryHierarchySidebar = () => {
+const LibraryHierarchySidebar = () => {
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
@@ -607,7 +601,7 @@ export const LibraryHierarchySidebar = () => {
               <span
                 key={`${node.id}:guide:${guideIndex}`}
                 aria-hidden="true"
-                className="pointer-events-none absolute bottom-0 top-0 w-px bg-[#e4e6eb]"
+                className={cn(TREE_GUIDE_CLASS_NAME, "bottom-0 top-0 w-px")}
                 style={{ left: TREE_GUIDE_LEFT_OFFSET_PX + guideIndex * TREE_INDENT_PX }}
               />
             ) : null,
@@ -615,7 +609,7 @@ export const LibraryHierarchySidebar = () => {
           {depth > 0 ? (
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute top-1/2 h-px bg-[#e4e6eb]"
+              className={cn(TREE_GUIDE_CLASS_NAME, "top-1/2 h-px")}
               style={{
                 left: TREE_GUIDE_LEFT_OFFSET_PX + (depth - 1) * TREE_INDENT_PX,
                 width: TREE_INDENT_PX - 3,
@@ -634,11 +628,9 @@ export const LibraryHierarchySidebar = () => {
             onClick={() => handleSelectNode(node)}
             onKeyDown={(event) => handleRowKeyDown(event, node)}
             className={cn(
-              "group relative flex w-full cursor-default select-none items-center gap-1 rounded-[10px] pr-2 text-left text-[12px] font-medium leading-none tracking-normal outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#d9dee8]",
+              TREE_ROW_BASE_CLASS_NAME,
               TREE_ROW_HEIGHT_CLASS_NAME,
-              isSelected
-                ? "bg-[#f2f3f6] text-[#6d7380] shadow-[inset_0_0_0_1px_rgba(88,94,112,0.04)]"
-                : "text-[#8e949e] hover:bg-[#f7f7f7] hover:text-[#6d7380]",
+              isSelected ? TREE_ROW_SELECTED_CLASS_NAME : TREE_ROW_IDLE_CLASS_NAME,
             )}
             style={{ paddingLeft: TREE_ROW_BASE_PADDING_LEFT_PX + depth * TREE_INDENT_PX }}
           >
@@ -650,7 +642,7 @@ export const LibraryHierarchySidebar = () => {
                   event.stopPropagation();
                   handleToggleNode(node);
                 }}
-                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] text-[#aeb3bd] transition hover:bg-white hover:text-[#8e949e]"
+                className={TREE_TOGGLE_CLASS_NAME}
               >
                 <ChevronRightGlyph
                   className={cn(
@@ -663,7 +655,7 @@ export const LibraryHierarchySidebar = () => {
               <span className="h-4 w-4 shrink-0" />
             )}
 
-            {renderNodeIcon(node, depth)}
+            {renderNodeIcon(node)}
 
             <span className="min-w-0 flex-1 truncate">{node.name}</span>
           </div>
@@ -689,7 +681,7 @@ export const LibraryHierarchySidebar = () => {
   const isTrashSelected = activeLibrarySelection.selectedItem?.type === "trash";
 
   return (
-    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-2 pl-0 pr-2 pt-2 font-sans text-[#2f2f2f] antialiased" aria-label="Library hierarchy explorer">
+    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-2 pl-0 pr-2 pt-2 font-sans text-[#3f4652] antialiased" aria-label="Library hierarchy explorer">
       <div className="min-h-0 flex-1 overflow-y-auto">
         {isExplorerDataLoading ? (
           <FadeSkeleton ariaLabel="ライブラリを読み込み中" />
@@ -707,22 +699,22 @@ export const LibraryHierarchySidebar = () => {
       </div>
 
       <div className="mt-auto shrink-0 pt-2">
-        <div className="mb-1 h-px w-full bg-[#eceef2]" />
+        <div className="mb-1 h-px w-full bg-[#eeeeee]" />
         <button
           type="button"
           onClick={handleSelectTrash}
           aria-pressed={isTrashSelected}
           className={cn(
-            "flex h-8 w-full items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium leading-none tracking-normal transition-colors",
-            isTrashSelected
-              ? "bg-[#f2f3f6] text-[#6d7380]"
-              : "text-[#8e949e] hover:bg-[#f7f7f7] hover:text-[#6d7380]",
+            TREE_TRASH_BUTTON_BASE_CLASS_NAME,
+            isTrashSelected ? TREE_ROW_SELECTED_CLASS_NAME : TREE_ROW_IDLE_CLASS_NAME,
           )}
         >
-          <TrashGlyph className="h-4 w-4 shrink-0" />
+          <TrashGlyph className="h-4 w-4 shrink-0 text-[#8f94d6]" />
           <span className="truncate">ごみ箱</span>
         </button>
       </div>
     </aside>
   );
 };
+
+export { LibraryHierarchySidebar };
