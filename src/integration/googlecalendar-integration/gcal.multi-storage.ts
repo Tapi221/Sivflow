@@ -88,6 +88,65 @@ const hasLocalRefreshToken = (accounts: StoredGoogleAccount[]): boolean => {
   return accounts.some((account) => account.refreshToken !== null);
 };
 
+const normalizeStoredEmail = (email: string | null | undefined): string | null => {
+  const normalized = email?.trim().toLowerCase();
+  return normalized ? normalized : null;
+};
+
+const getStoredAccountMatchIndex = (
+  accounts: StoredGoogleAccount[],
+  account: Pick<StoredGoogleAccount, "id" | "email">,
+): number => {
+  const email = normalizeStoredEmail(account.email);
+
+  return accounts.findIndex((stored) => {
+    if (stored.id === account.id) return true;
+    if (!email) return false;
+    return normalizeStoredEmail(stored.email) === email;
+  });
+};
+
+const mergeStoredAccounts = (
+  current: StoredGoogleAccount,
+  incoming: StoredGoogleAccount,
+): StoredGoogleAccount => {
+  const selectedCalendarIds = incoming.selectedCalendarIds.length > 0
+    ? incoming.selectedCalendarIds
+    : current.selectedCalendarIds;
+
+  return {
+    ...current,
+    ...incoming,
+    email: incoming.email ?? current.email,
+    name: incoming.name ?? current.name ?? null,
+    photoUrl: incoming.photoUrl ?? current.photoUrl ?? null,
+    accessToken: incoming.accessToken ?? current.accessToken,
+    accessTokenExpiry: incoming.accessTokenExpiry ?? current.accessTokenExpiry,
+    refreshToken: incoming.refreshToken ?? current.refreshToken,
+    selectedCalendarIds: Array.from(new Set(selectedCalendarIds)),
+    cachedCalendars: incoming.cachedCalendars ?? current.cachedCalendars,
+  };
+};
+
+const dedupeStoredAccounts = (
+  accounts: StoredGoogleAccount[],
+): StoredGoogleAccount[] => {
+  const deduped: StoredGoogleAccount[] = [];
+
+  for (const account of accounts) {
+    const existingIndex = getStoredAccountMatchIndex(deduped, account);
+
+    if (existingIndex >= 0) {
+      deduped[existingIndex] = mergeStoredAccounts(deduped[existingIndex], account);
+      continue;
+    }
+
+    deduped.push(account);
+  }
+
+  return deduped;
+};
+
 const hydratePendingLegacyDesktopRefreshTokens = (
   accounts: StoredGoogleAccount[],
 ): StoredGoogleAccount[] => {
@@ -164,12 +223,15 @@ export const readStoredAccounts = (): StoredGoogleAccount[] => {
 
     const accounts = parsed as StoredGoogleAccount[];
     const sanitizedAccounts = stripLocalRefreshTokens(accounts, shouldStripLocalRefreshTokensOnRead());
+    const dedupedAccounts = dedupeStoredAccounts(sanitizedAccounts);
+    const shouldPersistSanitizedAccounts = hasLocalRefreshToken(accounts) && shouldStripLocalRefreshTokensOnRead();
+    const shouldPersistDedupedAccounts = dedupedAccounts.length !== sanitizedAccounts.length;
 
-    if (hasLocalRefreshToken(accounts) && shouldStripLocalRefreshTokensOnRead()) {
-      writeStoredAccounts(sanitizedAccounts);
+    if (shouldPersistSanitizedAccounts || shouldPersistDedupedAccounts) {
+      writeStoredAccounts(dedupedAccounts);
     }
 
-    return hydratePendingLegacyDesktopRefreshTokens(sanitizedAccounts);
+    return hydratePendingLegacyDesktopRefreshTokens(dedupedAccounts);
   } catch {
     return [];
   }
@@ -179,7 +241,7 @@ export const writeStoredAccounts = (accounts: StoredGoogleAccount[]): void => {
   try {
     localStorage.setItem(
       MULTI_ACCOUNTS_KEY,
-      JSON.stringify(stripLocalRefreshTokens(accounts, shouldStripLocalRefreshTokensOnWrite())),
+      JSON.stringify(stripLocalRefreshTokens(dedupeStoredAccounts(accounts), shouldStripLocalRefreshTokensOnWrite())),
     );
   } catch {
     // ignore quota errors
@@ -188,9 +250,9 @@ export const writeStoredAccounts = (accounts: StoredGoogleAccount[]): void => {
 
 export const upsertStoredAccount = (account: StoredGoogleAccount): void => {
   const accounts = readStoredAccounts();
-  const idx = accounts.findIndex((a) => a.id === account.id);
+  const idx = getStoredAccountMatchIndex(accounts, account);
   if (idx >= 0) {
-    accounts[idx] = account;
+    accounts[idx] = mergeStoredAccounts(accounts[idx], account);
   } else {
     accounts.push(account);
   }
