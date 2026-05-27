@@ -89,20 +89,7 @@ type UseScheduleScreenOptions = {
   initialActiveMode?: CalendarToolbarMode;
 };
 
-const getEventTime = (value: GoogleCalendarEvent["startsAt"]): number => {
-  const date = value instanceof Date ? value : new Date(value);
-  return Number.isFinite(date.getTime()) ? date.getTime() : Number.NaN;
-};
-
-const getGoogleCalendarEventDedupeKey = (event: GoogleCalendarEvent): string => {
-  return [
-    event.calendarId,
-    event.title.trim(),
-    getEventTime(event.startsAt),
-    getEventTime(event.endsAt),
-    event.isAllDay ? "all-day" : "timed",
-  ].join("\u001f");
-};
+const getGoogleCalendarEventDedupeKey = (event: GoogleCalendarEvent): string => event.id;
 
 const dedupeGoogleCalendarEvents = (
   events: GoogleCalendarEvent[],
