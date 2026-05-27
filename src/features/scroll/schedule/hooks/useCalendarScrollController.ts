@@ -181,6 +181,10 @@ export const useCalendarScrollController = ({
     resetPrepend();
   }, [resetEdge, resetPrepend]);
 
+  useEffect(() => {
+    resetEdge();
+  }, [resetEdge, scrollExtentTrigger]);
+
   return {
     scrollContainerRef,
     headerScrollRef,
