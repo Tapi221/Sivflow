@@ -127,6 +127,7 @@ const getDayButtonStyle = (day: CalendarYearDay, selected: boolean): CSSProperti
 
   return {
     backgroundColor: colorToRgba(day.events.color, EVENT_DAY_BACKGROUND_ALPHA),
+    transition: "none",
   };
 };
 
