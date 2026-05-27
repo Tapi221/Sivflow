@@ -18,6 +18,8 @@ type CalendarMonthDayEvents = {
   totalCount: number;
 };
 
+type CalendarMonthEventIndex = Map<string, GoogleCalendarEvent[]>;
+
 const EMPTY_DAY_EVENTS: CalendarMonthDayEvents = {
   visibleEvents: [],
   totalCount: 0,
@@ -339,7 +341,7 @@ const CalendarMonthWeekRow = memo(({
 
 CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 
-export const GridCalendarMonthDesktop = ({
+const GridCalendarMonthDesktopComponent = ({
   today,
   selectedDate,
   visibleEvents,
@@ -361,6 +363,24 @@ export const GridCalendarMonthDesktop = ({
     () => getDayKey(today),
     [today],
   );
+
+  const eventsByDayKey = useMemo<CalendarMonthEventIndex>(() => {
+    const eventIndex = new Map<string, GoogleCalendarEvent[]>();
+
+    for (const event of visibleEvents) {
+      for (const dayKey of getEventDateKeys(event)) {
+        const dayEvents = eventIndex.get(dayKey);
+
+        if (dayEvents) {
+          dayEvents.push(event);
+        } else {
+          eventIndex.set(dayKey, [event]);
+        }
+      }
+    }
+
+    return eventIndex;
+  }, [visibleEvents]);
 
   const eventsByDay = useMemo(() => {
     const groupedEvents = new Map<string, CalendarMonthDayEvents>();
@@ -389,22 +409,22 @@ export const GridCalendarMonthDesktop = ({
       }
     };
 
-    for (const event of visibleEvents) {
-      for (const dayKey of getEventDateKeys(event)) {
-        const dayEvents = groupedEvents.get(dayKey);
+    for (const week of monthWeeks) {
+      for (const day of week.days) {
+        const sourceEvents = eventsByDayKey.get(day.key);
 
-        if (dayEvents) {
-          dayEvents.totalCount += 1;
+        if (!sourceEvents?.length) continue;
+
+        const dayEvents: CalendarMonthDayEvents = {
+          visibleEvents: [],
+          totalCount: sourceEvents.length,
+        };
+
+        for (const event of sourceEvents) {
           insertVisibleEvent(dayEvents, event);
-        } else {
-          const nextDayEvents: CalendarMonthDayEvents = {
-            visibleEvents: [],
-            totalCount: 1,
-          };
-
-          insertVisibleEvent(nextDayEvents, event);
-          groupedEvents.set(dayKey, nextDayEvents);
         }
+
+        groupedEvents.set(day.key, dayEvents);
       }
     }
 
@@ -420,7 +440,7 @@ export const GridCalendarMonthDesktop = ({
     }
 
     return groupedEvents;
-  }, [monthRowHeight, visibleEvents]);
+  }, [eventsByDayKey, monthRowHeight, monthWeeks]);
 
   return (
     <>
@@ -475,3 +495,7 @@ export const GridCalendarMonthDesktop = ({
     </>
   );
 };
+
+GridCalendarMonthDesktopComponent.displayName = "GridCalendarMonthDesktop";
+
+export const GridCalendarMonthDesktop = memo(GridCalendarMonthDesktopComponent);
