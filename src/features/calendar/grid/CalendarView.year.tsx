@@ -1,4 +1,4 @@
-import { memo, startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { addDays, addYears, eachMonthOfInterval, endOfYear, format, isSameDay, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import { getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
@@ -11,7 +11,6 @@ type CalendarYearViewProps = {
   selectedDate: Date;
   visibleEvents?: GoogleCalendarEvent[];
   onSelectDate: (date: Date) => void;
-  onVisibleYearChange?: (date: Date) => void;
 };
 
 type CalendarYearDayEvents = {
@@ -47,11 +46,10 @@ type YearRangeAnchor = {
 };
 
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
-const INITIAL_YEAR_BUFFER = 1;
+const INITIAL_YEAR_BUFFER = 2;
 const YEAR_EXTEND_COUNT = 1;
-const YEAR_MAX_RENDERED_YEARS = 3;
-const YEAR_SCROLL_EDGE_THRESHOLD_PX = 900;
-const VISIBLE_YEAR_SYNC_DELAY_MS = 96;
+const YEAR_MAX_RENDERED_YEARS = 5;
+const YEAR_SCROLL_EDGE_THRESHOLD_PX = 1200;
 const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
 
 const createDayAriaLabel = (date: Date, eventCount: number): string => {
@@ -154,7 +152,6 @@ const CalendarYearViewComponent = ({
   selectedDate,
   visibleEvents = [],
   onSelectDate,
-  onVisibleYearChange,
 }: CalendarYearViewProps) => {
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
@@ -164,10 +161,7 @@ const CalendarYearViewComponent = ({
   const rangeAnchorRef = useRef<YearRangeAnchor | null>(null);
   const isExtendingBeforeRef = useRef(false);
   const isExtendingAfterRef = useRef(false);
-  const visibleYearSyncRafRef = useRef<number | null>(null);
-  const visibleYearSyncTimeoutRef = useRef<number | null>(null);
   const requestedYearKeyRef = useRef(format(startOfYear(yearDate), "yyyy"));
-  const visibleYearKeyRef = useRef(format(startOfYear(yearDate), "yyyy"));
   const pendingScrollYearKeyRef = useRef<string | null>(
     format(startOfYear(yearDate), "yyyy"),
   );
@@ -248,55 +242,12 @@ const CalendarYearViewComponent = ({
     };
   }, [years]);
 
-  const syncVisibleYear = useCallback(() => {
-    const scroller = scrollContainerRef.current;
-    if (!scroller || !onVisibleYearChange) return;
-
-    const sampleTop = scroller.scrollTop + 80;
-    let visibleYear = years[0] ?? null;
-
-    for (const year of years) {
-      const section = yearSectionRefsMap.current.get(year.key);
-      if (!section) continue;
-      if (section.offsetTop <= sampleTop) {
-        visibleYear = year;
-      }
-    }
-
-    if (!visibleYear || visibleYear.key === visibleYearKeyRef.current) return;
-
-    visibleYearKeyRef.current = visibleYear.key;
-    startTransition(() => {
-      onVisibleYearChange(visibleYear.date);
-    });
-  }, [onVisibleYearChange, years]);
-
-  const scheduleVisibleYearSync = useCallback(() => {
-    if (visibleYearSyncTimeoutRef.current !== null) {
-      window.clearTimeout(visibleYearSyncTimeoutRef.current);
-    }
-
-    visibleYearSyncTimeoutRef.current = window.setTimeout(() => {
-      visibleYearSyncTimeoutRef.current = null;
-
-      if (visibleYearSyncRafRef.current !== null) return;
-
-      visibleYearSyncRafRef.current = requestAnimationFrame(() => {
-        visibleYearSyncRafRef.current = null;
-        syncVisibleYear();
-      });
-    }, VISIBLE_YEAR_SYNC_DELAY_MS);
-  }, [syncVisibleYear]);
-
   useEffect(() => {
     const nextRequestedYearKey = format(startOfYear(yearDate), "yyyy");
 
     if (requestedYearKeyRef.current === nextRequestedYearKey) return;
 
     requestedYearKeyRef.current = nextRequestedYearKey;
-    if (visibleYearKeyRef.current === nextRequestedYearKey) return;
-
-    visibleYearKeyRef.current = nextRequestedYearKey;
     pendingScrollYearKeyRef.current = nextRequestedYearKey;
     rangeAnchorRef.current = null;
     isExtendingBeforeRef.current = false;
@@ -318,8 +269,7 @@ const CalendarYearViewComponent = ({
 
     scroller.scrollTop = Math.max(0, targetSection.offsetTop);
     pendingScrollYearKeyRef.current = null;
-    syncVisibleYear();
-  }, [syncVisibleYear, years]);
+  }, [years]);
 
   useLayoutEffect(() => {
     const rangeAnchor = rangeAnchorRef.current;
@@ -384,7 +334,6 @@ const CalendarYearViewComponent = ({
         }));
       }
 
-      scheduleVisibleYearSync();
     };
 
     scroller.addEventListener("scroll", handleScroll, { passive: true });
@@ -392,19 +341,7 @@ const CalendarYearViewComponent = ({
     return () => {
       scroller.removeEventListener("scroll", handleScroll);
     };
-  }, [getCurrentRangeAnchor, scheduleVisibleYearSync]);
-
-  useEffect(() => {
-    return () => {
-      if (visibleYearSyncTimeoutRef.current !== null) {
-        window.clearTimeout(visibleYearSyncTimeoutRef.current);
-      }
-
-      if (visibleYearSyncRafRef.current !== null) {
-        cancelAnimationFrame(visibleYearSyncRafRef.current);
-      }
-    };
-  }, []);
+  }, [getCurrentRangeAnchor]);
 
   return (
     <div
