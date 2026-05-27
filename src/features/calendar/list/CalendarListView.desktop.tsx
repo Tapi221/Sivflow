@@ -52,7 +52,7 @@ const LIST_VISIBLE_MONTH_ANCHOR_PX = 160;
 const LIST_VIRTUAL_OVERSCAN_PX = 900;
 const LIST_DAY_GAP_PX = 8;
 const LIST_EMPTY_DAY_HEIGHT_PX = 38;
-const LIST_EVENT_ROW_HEIGHT_PX = 50;
+const LIST_EVENT_ROW_HEIGHT_PX = 58;
 const LIST_EVENT_ROW_GAP_PX = 6;
 
 const buildMonthDays = (date: Date): Date[] => {
@@ -125,8 +125,7 @@ const buildListDays = (
 const getListDayEstimatedHeight = (day: CalendarListDay): number => {
   if (day.events.length === 0) return LIST_EMPTY_DAY_HEIGHT_PX;
 
-  return day.events.length * LIST_EVENT_ROW_HEIGHT_PX +
-    Math.max(0, day.events.length - 1) * LIST_EVENT_ROW_GAP_PX;
+  return day.events.length * LIST_EVENT_ROW_HEIGHT_PX + Math.max(0, day.events.length - 1) * LIST_EVENT_ROW_GAP_PX;
 };
 
 const buildVirtualMetrics = (listDays: CalendarListDay[]): CalendarListVirtualMetrics => {
@@ -204,7 +203,7 @@ const getVisibleMonthAnchorDate = (
 };
 
 const EmptyDayCard = ({ isMonthEmpty }: { isMonthEmpty: boolean }) => (
-  <div className="grid min-h-[38px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch">
+  <div className="grid h-[38px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch">
     <div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[#b3b3b3]">
       —
     </div>
@@ -212,7 +211,7 @@ const EmptyDayCard = ({ isMonthEmpty }: { isMonthEmpty: boolean }) => (
       <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#dedede]" aria-hidden="true" />
       <span className="relative mt-[8px] h-2 w-2 rounded-full border border-[#dedede] bg-white" aria-hidden="true" />
     </div>
-    <div className="flex min-h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">
+    <div className="flex h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">
       {isMonthEmpty ? EMPTY_MONTH_LABEL : EMPTY_DAY_LABEL}
     </div>
   </div>
