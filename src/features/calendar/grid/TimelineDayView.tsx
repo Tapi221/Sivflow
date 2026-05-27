@@ -8,13 +8,6 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 import type { TimelineColumn, TimelineUnitBuffer, TimelineViewMode } from "./TimelineDayView.shared";
 import { buildTimelineColumns, getTimelineColumnWidth } from "./TimelineDayView.shared";
 
-const FALLBACK_LANE_COLOR = "#8f929c";
-const EVENT_TOP_INSET_PX = 8;
-const EVENT_HEIGHT_PX = 24;
-const EVENT_GAP_PX = 4;
-const EVENT_SIDE_INSET_PX = 6;
-const MIN_EVENT_WIDTH_PX = 32;
-
 type CalendarTimelineDayViewProps = {
   viewMode: TimelineViewMode;
   anchorDate: Date;
@@ -52,6 +45,13 @@ type TimelineLaneLookup = {
   byProjectKey: Map<string, TimelineLane>;
   checkedLanes: TimelineLane[];
 };
+
+const FALLBACK_LANE_COLOR = "#8f929c";
+const EVENT_TOP_INSET_PX = 8;
+const EVENT_HEIGHT_PX = 24;
+const EVENT_GAP_PX = 4;
+const EVENT_SIDE_INSET_PX = 6;
+const MIN_EVENT_WIDTH_PX = 32;
 
 const normalizeProjectKey = (value: string): string =>
   value.trim().toLowerCase().replace(/[\s\-_]+/g, "");
@@ -140,7 +140,18 @@ const findStackIndex = (stackEnds: number[], start: number, end: number): number
   return stackEnds.length - 1;
 };
 
-export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
+const getLaneRowHeight = (placements: TimelineEventPlacement[]) => {
+  const maxStackIndex = placements.reduce((max, placement) => Math.max(max, placement.stackIndex), -1);
+
+  if (maxStackIndex < 0) return C.TIMELINE_DEFAULT_ROW_HEIGHT;
+
+  const stackCount = maxStackIndex + 1;
+  const requiredHeight = EVENT_TOP_INSET_PX * 2 + stackCount * EVENT_HEIGHT_PX + Math.max(0, stackCount - 1) * EVENT_GAP_PX;
+
+  return Math.max(C.TIMELINE_DEFAULT_ROW_HEIGHT, requiredHeight);
+};
+
+const CalendarTimelineDayViewComponent = ({
   viewMode,
   anchorDate,
   timelineUnitBuffer,
@@ -153,7 +164,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
   scrollContainerRef,
   onScroll,
   onSelectDate,
-}: CalendarTimelineDayViewProps) {
+}: CalendarTimelineDayViewProps) => {
   const columns = useMemo(() => {
     return buildTimelineColumns(viewMode, anchorDate, timelineUnitBuffer);
   }, [anchorDate, timelineUnitBuffer, viewMode]);
@@ -199,7 +210,6 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
   const timelineRowStyle = useMemo<CSSProperties>(() => ({
     ...columnGridStyle,
     contain: "layout paint",
-    height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px`,
     transform: "translateZ(0)",
   }), [columnGridStyle]);
 
@@ -226,13 +236,12 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
         const matchedLane = getEventLane(laneLookup, event);
         if (!matchedLane) return [];
 
-        const start = new Date(event.startsAt).getTime();
-        const end = Math.max(new Date(event.endsAt).getTime(), start + 1);
-        const stackEnds = laneStackEnds.get(matchedLane.id) ?? [];
-        const stackIndex = findStackIndex(stackEnds, start, end);
-        laneStackEnds.set(matchedLane.id, stackEnds);
         const position = getColumnClippedEventPosition(event, columns, columnWidth);
         if (!position) return [];
+
+        const stackEnds = laneStackEnds.get(matchedLane.id) ?? [];
+        const stackIndex = findStackIndex(stackEnds, position.left, position.left + position.width);
+        laneStackEnds.set(matchedLane.id, stackEnds);
 
         return [{
           event,
@@ -318,10 +327,11 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
 
           {displayLanes.map((lane) => {
             const laneEvents = eventsByLaneId.get(lane.id) ?? [];
+            const laneRowHeight = getLaneRowHeight(laneEvents);
 
             return (
               <Fragment key={lane.id}>
-                <div className="sticky left-0 z-20 flex items-center gap-2 border-b border-r border-[#eeeeee] bg-white px-4" style={{ height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px` }}>
+                <div className="sticky left-0 z-20 flex items-center gap-2 border-b border-r border-[#eeeeee] bg-white px-4" style={{ height: `${laneRowHeight}px` }}>
                   {lane.label ? (
                     <>
                       <span className="h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_0_2px_rgba(255,255,255,0.95)]" style={{ backgroundColor: lane.color }} />
@@ -330,7 +340,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                   ) : null}
                 </div>
 
-                <div className="relative grid border-b border-[#eeeeee] bg-white" style={timelineRowStyle}>
+                <div className="relative grid border-b border-[#eeeeee] bg-white" style={{ ...timelineRowStyle, height: `${laneRowHeight}px` }}>
                   {columns.map((column) => (
                     <div key={column.id} className="border-r border-[#eeeeee] last:border-r-0" />
                   ))}
@@ -357,4 +367,10 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
       </div>
     </div>
   );
-});
+};
+
+const CalendarTimelineDayView = memo(CalendarTimelineDayViewComponent);
+
+CalendarTimelineDayView.displayName = "CalendarTimelineDayView";
+
+export { CalendarTimelineDayView };
