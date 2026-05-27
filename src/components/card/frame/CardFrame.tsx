@@ -33,7 +33,7 @@ export interface CardFrameProps extends Omit<
   topAttachment?: React.ReactNode;
 }
 
-export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
+const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
   (
     {
       children,
@@ -150,3 +150,5 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
 );
 
 CardFrame.displayName = "CardFrame";
+
+export { CardFrame };
