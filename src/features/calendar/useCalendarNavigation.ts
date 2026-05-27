@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { addDays, addMonths, addYears, startOfMonth, startOfWeek, startOfYear, subDays, subMonths, subYears } from "date-fns";
+import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays, subMonths, subYears } from "date-fns";
 import { createCalendarScrollBuffer, extendCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
 import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
 
@@ -30,6 +30,7 @@ const normalizeWeek = (date: Date) => startOfWeek(date, { weekStartsOn: 1 });
 const normalizeViewDate = (date: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return startOfYear(date);
   if (viewMode === "list") return startOfMonth(date);
+  if (viewMode === "pieChart") return startOfDay(date);
   if (viewMode === "week") return normalizeWeek(date);
   return date;
 };
@@ -173,7 +174,7 @@ export const useCalendarNavigation = () => {
 
   const handlePrevious = useCallback(() => {
     setCurrentDate((c) => {
-      const next = normalizeViewDate(getPreviousDate(c, primaryViewMode), primaryViewMode);
+      const next = normalizeViewDate(getPreviousDate(primaryViewMode === "pieChart" ? selectedDate : c, primaryViewMode), primaryViewMode);
 
       setSelectedDate(next);
       setMonthTitleDate(startOfMonth(next));
@@ -183,11 +184,11 @@ export const useCalendarNavigation = () => {
 
     requestMonthScrollTarget();
     resetCalendarPosition(primaryViewMode);
-  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition]);
+  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, selectedDate]);
 
   const handleNext = useCallback(() => {
     setCurrentDate((c) => {
-      const next = normalizeViewDate(getNextDate(c, primaryViewMode), primaryViewMode);
+      const next = normalizeViewDate(getNextDate(primaryViewMode === "pieChart" ? selectedDate : c, primaryViewMode), primaryViewMode);
 
       setSelectedDate(next);
       setMonthTitleDate(startOfMonth(next));
@@ -197,7 +198,7 @@ export const useCalendarNavigation = () => {
 
     requestMonthScrollTarget();
     resetCalendarPosition(primaryViewMode);
-  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition]);
+  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, selectedDate]);
 
   const handleSidebarPreviousMonth = useCallback(() => {
     setCurrentDate((c) => {
@@ -225,7 +226,7 @@ export const useCalendarNavigation = () => {
 
   const handleSidebarSelectDate = useCallback(
     (date: Date) => {
-      setCurrentDate(primaryViewMode === "list" ? startOfMonth(date) : date);
+      setCurrentDate(primaryViewMode === "list" ? startOfMonth(date) : normalizeViewDate(date, primaryViewMode));
       setSelectedDate(date);
       setMonthTitleDate(startOfMonth(date));
 
@@ -234,6 +235,13 @@ export const useCalendarNavigation = () => {
     },
     [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition],
   );
+
+  const handleVisibleDateChange = useCallback((date: Date) => {
+    const normalizedDate = startOfDay(date);
+
+    setSelectedDate(normalizedDate);
+    setMonthTitleDate(startOfMonth(normalizedDate));
+  }, []);
 
   const handleVisibleMonthChange = useCallback((date: Date) => {
     setMonthTitleDate(startOfMonth(date));
@@ -271,6 +279,7 @@ export const useCalendarNavigation = () => {
     handleSidebarPreviousMonth,
     handleSidebarNextMonth,
     handleSidebarSelectDate,
+    handleVisibleDateChange,
     handleVisibleMonthChange,
     handleMonthCellSelectDate,
 
