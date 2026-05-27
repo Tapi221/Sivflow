@@ -5,7 +5,7 @@ import { useWorkspaceTabsRouteSync } from "@/features/tab/hooks/useTabsRouteSync
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
 import { Sidebar } from "@/pane/leftpane/Sidebar.desktop";
-import { NavigationBarMobile } from "@/pane/nabigationbar.mobile";
+import { NavigationBarMobile } from "@/pane/nabigationbar.mobile/nabigationbar.mobile";
 import { isDesktopRuntime } from "@/platform/runtime";
 import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
