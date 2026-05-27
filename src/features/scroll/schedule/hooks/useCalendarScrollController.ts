@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import type { CalendarToolbarMode, CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync.fixed";
 import { usePreserveScrollOnPrepend } from "./usePreserveScrollOnPrepend";
 import { useScrollEdgeDetector } from "./useScrollEdgeDetector";
@@ -11,7 +11,6 @@ type CalendarBuffer = {
 };
 
 type Props = {
-  activeMode: CalendarToolbarMode;
   selectedViewMode: CalendarViewMode;
   visibleDays: Date[];
   calendarBuffer: CalendarBuffer;
@@ -23,7 +22,6 @@ type Props = {
 };
 
 export const useCalendarScrollController = ({
-  activeMode,
   selectedViewMode,
   visibleDays,
   calendarBuffer,
@@ -57,7 +55,6 @@ export const useCalendarScrollController = ({
   });
 
   useCalendarScrollPositionSync({
-    activeMode,
     selectedViewMode,
     calendarBufferBefore: calendarBuffer.before,
     calendarDayColumnWidth,
@@ -70,14 +67,12 @@ export const useCalendarScrollController = ({
   useSyncedHorizontalScroll({
     primaryRef: scrollContainerRef,
     syncedRefs: fixedRowScrollRefs,
-    syncKey: `${activeMode}:${selectedViewMode}`,
+    syncKey: selectedViewMode,
   });
 
   const runScrollWork = useCallback((scroller: HTMLDivElement) => {
-    if (activeMode !== "calendar") return;
-
     handleEdgeScroll(scroller);
-  }, [activeMode, handleEdgeScroll]);
+  }, [handleEdgeScroll]);
 
   const scheduleScrollWork = useCallback((scroller: HTMLDivElement) => {
     latestScrollerRef.current = scroller;
