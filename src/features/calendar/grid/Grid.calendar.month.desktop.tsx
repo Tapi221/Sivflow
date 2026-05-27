@@ -11,7 +11,17 @@ import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
 import { getVisibleMonthEventChipCount } from "@/features/calendar/grid/monthEventChipCount";
 import { cn } from "@/lib/utils";
 
-const EMPTY_EVENTS: GoogleCalendarEvent[] = [];
+export { getVisibleMonthEventChipCount } from "@/features/calendar/grid/monthEventChipCount";
+
+type CalendarMonthDayEvents = {
+  visibleEvents: GoogleCalendarEvent[];
+  totalCount: number;
+};
+
+const EMPTY_DAY_EVENTS: CalendarMonthDayEvents = {
+  visibleEvents: [],
+  totalCount: 0,
+};
 
 const getDayKey = (date: Date): string => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -72,37 +82,26 @@ type GridCalendarMonthDesktopProps = {
 
 type CalendarMonthDayCellProps = {
   day: CalendarMonthGridDay;
-  events: GoogleCalendarEvent[];
+  dayEvents: CalendarMonthDayEvents;
   isToday: boolean;
   selected: boolean;
   isScrollHovered: boolean;
-  monthRowHeight: number;
   onSelectDate: (date: Date) => void;
 };
 
 const CalendarMonthDayCell = memo(({
   day,
-  events,
+  dayEvents,
   isToday,
   selected,
   isScrollHovered,
-  monthRowHeight,
   onSelectDate,
 }: CalendarMonthDayCellProps) => {
   const monthAnnotation = getMonthAnnotation(day.date);
-
-  const visibleChipCount = getVisibleMonthEventChipCount(
-    events.length,
-    monthRowHeight,
-  );
-
-  const visibleChips = events.slice(
-    0,
-    visibleChipCount,
-  );
+  const { visibleEvents, totalCount } = dayEvents;
 
   const overflowCount =
-    events.length - visibleChips.length;
+    totalCount - visibleEvents.length;
 
   return (
     <div
@@ -163,7 +162,7 @@ const CalendarMonthDayCell = memo(({
         )}
 
         {/* イベント */}
-        {events.length > 0 && (
+        {totalCount > 0 && (
           <div
             className={cn(
               "absolute flex flex-col",
@@ -171,7 +170,7 @@ const CalendarMonthDayCell = memo(({
               GD.MONTH_GRID_EVENTS_GAP_CLASS,
             )}
           >
-            {visibleChips.map((event) => (
+            {visibleEvents.map((event) => (
               <CalendarEventChipMonth
                 key={event.id}
                 event={event}
@@ -199,7 +198,7 @@ CalendarMonthDayCell.displayName = "CalendarMonthDayCell";
 
 type CalendarMonthWeekRowProps = {
   week: CalendarMonthGridWeek;
-  eventsByDay: Map<string, GoogleCalendarEvent[]>;
+  eventsByDay: Map<string, CalendarMonthDayEvents>;
   selectedDayKey: string;
   todayDayKey: string;
   scrollHoverDayKey: string | null;
@@ -274,11 +273,10 @@ const CalendarMonthWeekRow = memo(({
           <CalendarMonthDayCell
             key={day.key}
             day={day}
-            events={eventsByDay.get(day.key) ?? EMPTY_EVENTS}
+            dayEvents={eventsByDay.get(day.key) ?? EMPTY_DAY_EVENTS}
             isToday={isToday}
             selected={selected}
             isScrollHovered={isScrollHovered}
-            monthRowHeight={monthRowHeight}
             onSelectDate={onSelectDate}
           />
         );
@@ -365,26 +363,64 @@ export const GridCalendarMonthDesktop = ({
   );
 
   const eventsByDay = useMemo(() => {
-    const groupedEvents = new Map<string, GoogleCalendarEvent[]>();
+    const groupedEvents = new Map<string, CalendarMonthDayEvents>();
+    const maxVisibleEventCandidates =
+      getVisibleMonthEventChipCount(Number.MAX_SAFE_INTEGER, monthRowHeight) + 1;
+
+    const insertVisibleEvent = (
+      dayEvents: CalendarMonthDayEvents,
+      event: GoogleCalendarEvent,
+    ) => {
+      if (maxVisibleEventCandidates <= 0) return;
+
+      const visibleEvents = dayEvents.visibleEvents;
+      const insertAt = visibleEvents.findIndex(
+        (visibleEvent) => compareCalendarEvents(event, visibleEvent) < 0,
+      );
+      const boundedInsertAt =
+        insertAt === -1 ? visibleEvents.length : insertAt;
+
+      if (boundedInsertAt >= maxVisibleEventCandidates) return;
+
+      visibleEvents.splice(boundedInsertAt, 0, event);
+
+      if (visibleEvents.length > maxVisibleEventCandidates) {
+        visibleEvents.length = maxVisibleEventCandidates;
+      }
+    };
 
     for (const event of visibleEvents) {
       for (const dayKey of getEventDateKeys(event)) {
         const dayEvents = groupedEvents.get(dayKey);
 
         if (dayEvents) {
-          dayEvents.push(event);
+          dayEvents.totalCount += 1;
+          insertVisibleEvent(dayEvents, event);
         } else {
-          groupedEvents.set(dayKey, [event]);
+          const nextDayEvents: CalendarMonthDayEvents = {
+            visibleEvents: [],
+            totalCount: 1,
+          };
+
+          insertVisibleEvent(nextDayEvents, event);
+          groupedEvents.set(dayKey, nextDayEvents);
         }
       }
     }
 
     for (const dayEvents of groupedEvents.values()) {
-      dayEvents.sort(compareCalendarEvents);
+      const visibleChipCount = getVisibleMonthEventChipCount(
+        dayEvents.totalCount,
+        monthRowHeight,
+      );
+
+      if (dayEvents.visibleEvents.length > visibleChipCount) {
+        dayEvents.visibleEvents.length = visibleChipCount;
+      }
     }
 
     return groupedEvents;
-  }, [visibleEvents]);
+  }, [monthRowHeight, visibleEvents]);
 
   return (
     <>
