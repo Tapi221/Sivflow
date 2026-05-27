@@ -128,7 +128,7 @@ const CurrentTimeLabel = ({ currentMinutes }: CurrentTimeLabelProps) => {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute right-1 z-30 flex -translate-y-1/2 select-none items-center rounded-md bg-white px-1 text-[12px] font-semibold tabular-nums text-[#3f7fc5]"
+      className="pointer-events-none absolute right-0 z-30 flex h-9 w-full -translate-y-1/2 select-none items-center justify-end bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,white_32%,white_68%,rgba(255,255,255,0)_100%)] pr-1 text-[12px] font-semibold leading-none tabular-nums text-[#3f7fc5]"
       style={{
         top: `calc(${currentMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(--calendar-hour-row-height))`,
       }}
