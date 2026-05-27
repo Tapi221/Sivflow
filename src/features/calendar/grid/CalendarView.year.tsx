@@ -168,7 +168,7 @@ const CalendarYearViewComponent = ({
         {months.map((month) => (
           <section
             key={month.key}
-            className="min-w-0 rounded-[18px] border border-[#eeeeee] bg-white px-4 pb-3 pt-3 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]"
+            className="min-w-0 bg-white px-4 pb-3 pt-3"
             aria-label={month.label}
           >
             <h2 className="mb-3 text-[15px] font-semibold leading-none tracking-[-0.01em] text-[#1c1c1e]">
