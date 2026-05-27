@@ -1,6 +1,5 @@
 import { type FormEvent, type KeyboardEvent, useCallback, useMemo, useRef, useState } from "react";
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
-import { AddGoogleCalendarButton } from "@/chip/button/AddGoogleCalendarButton";
 import { CalendarIcon, TaskIcon } from "@/chip/icons/icons.schedule";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { useT } from "@/i18n/useT";
@@ -12,7 +11,6 @@ import { SelectableGoogleSourceRow } from "./SelectableGoogleSourceRow";
 
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 const DEFAULT_TASK_LIST_COLOR = "#7c8cf8";
-const SIDEBAR_DIVIDER_CLASS = "h-px w-full shrink-0 bg-[#eeeeee]";
 const GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME = "px-5";
 const ADD_PROJECT_EMPTY_MESSAGE = "プロジェクト名を入力してください";
 
@@ -354,12 +352,10 @@ export const CalendarSidebar = ({
   activeMode,
   appProjects,
   googleAccounts,
-  isAnyCalendarConnecting,
   selectedTaskListIds,
   onSelectDate,
   onPreviousMonth,
   onNextMonth,
-  onAddCalendar,
   onAddProject,
   onToggleProject,
   onReconnectAccount,
@@ -374,8 +370,6 @@ export const CalendarSidebar = ({
     () => tabs.find((tab) => tab.id === activeTabId) ?? null,
     [activeTabId, tabs],
   );
-  const hasGoogleAccounts = googleAccounts.length > 0;
-  const hasAppProjects = appProjects.length > 0;
   const isTaskMode = activeMode === "task";
   const isLibrarySidebarActive = activeTab?.sectionKey === "library";
   const selectDateRef = useRef(onSelectDate);
@@ -466,18 +460,6 @@ export const CalendarSidebar = ({
           />
         ))}
       </nav>
-
-      <div className="mt-auto w-full shrink-0">
-        {(hasGoogleAccounts || hasAppProjects) && (
-          <div className={cn("mt-2", SIDEBAR_DIVIDER_CLASS)} />
-        )}
-
-        <AddGoogleCalendarButton
-          hasGoogleAccounts={hasGoogleAccounts}
-          isConnecting={isAnyCalendarConnecting}
-          onAddCalendar={onAddCalendar}
-        />
-      </div>
     </aside>
   );
 };
