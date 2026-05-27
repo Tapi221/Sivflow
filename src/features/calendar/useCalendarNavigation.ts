@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays, subMonths, subYears } from "date-fns";
 import { createCalendarScrollBuffer, extendCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
-import type { CalendarToolbarMode, CalendarViewMode } from "./scheduleScreen.types";
+import type { CalendarViewMode } from "./scheduleScreen.types";
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return addYears(current, 1);
@@ -28,13 +28,7 @@ const normalizeViewDate = (date: Date, viewMode: CalendarViewMode) => {
   return date;
 };
 
-type UseCalendarNavigationOptions = {
-  initialActiveMode?: CalendarToolbarMode;
-};
-
-export const useCalendarNavigation = ({
-  initialActiveMode = "calendar",
-}: UseCalendarNavigationOptions = {}) => {
+export const useCalendarNavigation = () => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
@@ -50,9 +44,6 @@ export const useCalendarNavigation = ({
 
   const [selectedViewMode, setSelectedViewMode] =
     useState<CalendarViewMode>("days");
-
-  const [activeMode, setActiveMode] =
-    useState<CalendarToolbarMode>(initialActiveMode);
 
   const [calendarBuffer, setCalendarBuffer] = useState(() =>
     createCalendarScrollBuffer("calendar", "days"),
@@ -133,7 +124,6 @@ export const useCalendarNavigation = ({
       }
 
       setSelectedViewMode(next);
-      setActiveMode("calendar");
 
       const anchorDate = next === "pieChart" || next === "list" ? selectedDate : currentDate;
       const normalized = normalizeViewDate(anchorDate, next);
@@ -250,8 +240,6 @@ export const useCalendarNavigation = ({
     calendarScrollToken,
 
     selectedViewMode,
-    activeMode,
-    setActiveMode,
 
     calendarBuffer,
     viewportWidth,
