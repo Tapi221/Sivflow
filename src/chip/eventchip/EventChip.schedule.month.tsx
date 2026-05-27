@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { memo, useMemo } from "react";
 import { format } from "date-fns";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -9,7 +10,12 @@ type CalendarEventChipMonthProps = {
   event: GoogleCalendarEvent;
 };
 
-export const CalendarEventChipMonth = memo(({
+const CHIP_TEXT_FADE_STYLE: CSSProperties = {
+  WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
+  maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
+};
+
+const CalendarEventChipMonth = memo(({
   event,
 }: CalendarEventChipMonthProps) => {
   const tokens = useMemo(
@@ -31,7 +37,6 @@ export const CalendarEventChipMonth = memo(({
           flex
           items-center
           gap-1
-          truncate
         `,
       )}
       style={{
@@ -53,7 +58,10 @@ export const CalendarEventChipMonth = memo(({
         {timeLabel}
       </span>
 
-      <span className="truncate">
+      <span
+        className="min-w-0 flex-1 overflow-hidden whitespace-nowrap"
+        style={CHIP_TEXT_FADE_STYLE}
+      >
         {event.title}
       </span>
     </div>
@@ -61,3 +69,5 @@ export const CalendarEventChipMonth = memo(({
 });
 
 CalendarEventChipMonth.displayName = "CalendarEventChipMonth";
+
+export { CalendarEventChipMonth };
