@@ -12,9 +12,9 @@ type CalendarDayNumberCircleProps = {
 const CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME =
   "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[12px] font-[450] tabular-nums transition-all duration-150";
 const CALENDAR_DAY_NUMBER_CIRCLE_TODAY_CLASS_NAME =
-  "bg-[var(--ds-color-tag-blue-bg)] !text-[var(--ds-color-tag-blue-fg)] shadow-[0_5px_12px_rgba(12,68,124,0.14)]";
+  "bg-[#eeeeee] !text-[#3f3f3f] shadow-none ring-1 ring-[#dedede]";
 const CALENDAR_DAY_NUMBER_CIRCLE_SELECTED_CLASS_NAME =
-  "bg-[var(--ds-color-tag-blue-bg)] !text-[var(--ds-color-tag-blue-fg)] shadow-[0_4px_10px_rgba(12,68,124,0.12)]";
+  "bg-[#eeeeee] !text-[#3f3f3f] shadow-none ring-1 ring-[#dedede]";
 
 const getCalendarDayNumberCircleClassName = ({
   isToday = false,
