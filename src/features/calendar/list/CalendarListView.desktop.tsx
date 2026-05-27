@@ -25,7 +25,7 @@ type CalendarListDay = {
 
 type CalendarListDaySectionProps = {
   day: CalendarListDay;
-  selectedDayRef?: (node: HTMLDivElement | null) => void;
+  selectedDayRef?: (node: HTMLElement | null) => void;
   onSelectDate?: (date: Date) => void;
 };
 
@@ -143,7 +143,9 @@ const getVisibleListDays = (days: CalendarListDay[]): CalendarListDay[] => {
   const hasEvents = days.some((day) => day.events.length > 0);
 
   if (!hasEvents) {
-    return days.filter((day) => day.isSelected).slice(0, 1) || days.slice(0, 1);
+    const selectedDays = days.filter((day) => day.isSelected);
+
+    return selectedDays.length > 0 ? selectedDays.slice(0, 1) : days.slice(0, 1);
   }
 
   return days.filter((day) => day.events.length > 0 || day.isSelected);
@@ -208,8 +210,6 @@ const CalendarListDaySection = ({
   selectedDayRef,
   onSelectDate,
 }: CalendarListDaySectionProps) => {
-  const isMonthEmpty = day.events.length === 0;
-
   return (
     <section
       ref={day.isSelected ? selectedDayRef : undefined}
@@ -239,7 +239,7 @@ const CalendarListDaySection = ({
             />
           ))
         ) : (
-          <EmptyDayCard isMonthEmpty={isMonthEmpty} />
+          <EmptyDayCard isMonthEmpty={false} />
         )}
       </div>
     </section>
@@ -253,7 +253,7 @@ const CalendarListViewComponent = ({
   onSelectDate,
   className,
 }: CalendarListViewProps) => {
-  const selectedDayElementRef = useRef<HTMLDivElement | null>(null);
+  const selectedDayElementRef = useRef<HTMLElement | null>(null);
   const listDays = useMemo(
     () => buildListDays(days, events, selectedDate),
     [days, events, selectedDate],
