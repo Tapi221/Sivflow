@@ -11,6 +11,7 @@ type CalendarYearViewProps = {
   selectedDate: Date;
   visibleEvents?: GoogleCalendarEvent[];
   onSelectDate: (date: Date) => void;
+  onRenderedRangeChange?: (range: { start: Date; end: Date }) => void;
 };
 
 type CalendarYearDayEvents = {
@@ -152,6 +153,7 @@ const CalendarYearViewComponent = ({
   selectedDate,
   visibleEvents = [],
   onSelectDate,
+  onRenderedRangeChange,
 }: CalendarYearViewProps) => {
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
@@ -209,6 +211,24 @@ const CalendarYearViewComponent = ({
       };
     });
   }, [anchorYear, buildYearMonths, dateFnsLocale, yearOffsetRange.endOffset, yearOffsetRange.startOffset]);
+
+  const renderedRange = useMemo(() => {
+    const firstYear = years[0];
+    const lastYear = years[years.length - 1];
+
+    if (!firstYear || !lastYear) return null;
+
+    return {
+      start: startOfYear(firstYear.date),
+      end: endOfYear(lastYear.date),
+    };
+  }, [years]);
+
+  useEffect(() => {
+    if (!renderedRange) return;
+
+    onRenderedRangeChange?.(renderedRange);
+  }, [onRenderedRangeChange, renderedRange]);
 
   const setYearSectionRef = useCallback((yearKey: string, node: HTMLElement | null) => {
     if (node) {
