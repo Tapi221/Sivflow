@@ -26,6 +26,7 @@ type WeekdayDayEvents = {
 };
 
 const HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, index) => index);
+const HOUR_BOUNDARY_LABELS = Array.from({ length: GRID.WEEKDAY_HOURS + 1 }, (_, index) => index);
 const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
 const MAX_ALL_DAY_VISIBLE_CHIPS = 3;
 
@@ -42,6 +43,13 @@ const createMinuteLabel = (totalMinutes: number) => {
   const minutes = totalMinutes % GRID.WEEKDAY_MINUTES_PER_HOUR;
 
   return `${String(hour).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+};
+
+const getHourBoundaryLabelOffsetClass = (hour: number) => {
+  if (hour === 0) return "translate-y-0";
+  if (hour === GRID.WEEKDAY_HOURS) return "-translate-y-full";
+
+  return "-translate-y-1/2";
 };
 
 const getEventDurationMinutes = (event: GoogleCalendarEvent): number => {
@@ -338,18 +346,24 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
             {HOURS.map((hour) => (
               <div
                 key={hour}
-                className="relative bg-white"
+                className="bg-white"
                 style={{ height: "var(--calendar-hour-row-height)" }}
+              />
+            ))}
+
+            {HOUR_BOUNDARY_LABELS.map((hour) => (
+              <span
+                key={`weekday-hour-label-${hour}`}
+                className={cn(
+                  "absolute right-1 z-10 flex h-6 select-none items-center justify-end rounded-md bg-white px-1 text-[12px] font-medium tabular-nums text-[#b3b3b3]",
+                  getHourBoundaryLabelOffsetClass(hour),
+                )}
+                style={{
+                  top: `calc(${hour} * var(--calendar-hour-row-height))`,
+                }}
               >
-                <span
-                  className={cn(
-                    "absolute bottom-0 right-1 z-10 flex h-6 translate-y-1/2 select-none items-center justify-end rounded-md bg-white px-1 text-[12px] font-medium tabular-nums",
-                    "text-[#b3b3b3]",
-                  )}
-                >
-                  {createHourLabel(hour)}
-                </span>
-              </div>
+                {createHourLabel(hour)}
+              </span>
             ))}
 
             <CurrentTimeLabel currentMinutes={currentMinutes} />
