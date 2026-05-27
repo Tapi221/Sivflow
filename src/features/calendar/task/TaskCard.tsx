@@ -1,8 +1,8 @@
 import { useMemo, type MouseEvent as ReactMouseEvent } from "react";
 import { TaskEventChip } from "@/chip/eventchip/EventChip.task";
+import { useTaskCard } from "@/features/calendar/task/hooks/useTaskCard";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { Task } from "./task.types";
-import { useTaskCard } from "@/features/calendar/task/hooks/useTaskCard";
 
 type TaskCardProps = {
   task: Task;
@@ -39,9 +39,10 @@ export const TaskCard = ({
     onToggleDone,
   });
 
+  const chipColor = task.taskListColor ?? category.text;
   const tokens = useMemo(
-    () => generateColorTokens(category.text),
-    [category.text],
+    () => generateColorTokens(chipColor),
+    [chipColor],
   );
 
   return (
