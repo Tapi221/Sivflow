@@ -66,10 +66,7 @@ const createCalendarLabelMap = (googleAccounts: GoogleAccountDisplay[]) => {
 
   googleAccounts.forEach((account) => {
     account.calendars.forEach((calendar) => {
-      labelByCalendarId.set(
-        calendar.id,
-        calendar.summaryOverride ?? calendar.summary,
-      );
+      labelByCalendarId.set(calendar.id, calendar.summaryOverride ?? calendar.summary);
     });
   });
 
@@ -101,12 +98,15 @@ const buildWedgePath = (startMinute: number, endMinute: number): string => {
   const end = polarToCartesian(endMinute, CHART_RADIUS);
   const largeArcFlag = endMinute - startMinute > FULL_DAY_MINUTES / 2 ? 1 : 0;
 
-  return [
-    `M ${CHART_CENTER} ${CHART_CENTER}`,
-    `L ${start.x} ${start.y}`,
-    `A ${CHART_RADIUS} ${CHART_RADIUS} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`,
-    "Z",
-  ].join(" ");
+  return [`M ${CHART_CENTER} ${CHART_CENTER}`, `L ${start.x} ${start.y}`, `A ${CHART_RADIUS} ${CHART_RADIUS} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`, "Z"].join(" ");
+};
+
+const buildArcPath = (startMinute: number, endMinute: number, radius: number): string => {
+  const start = polarToCartesian(startMinute, radius);
+  const end = polarToCartesian(endMinute, radius);
+  const largeArcFlag = endMinute - startMinute > FULL_DAY_MINUTES / 2 ? 1 : 0;
+
+  return [`M ${start.x} ${start.y}`, `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`].join(" ");
 };
 
 const getChartOverlayStyle = (minute: number, radius: number) => {
@@ -118,26 +118,13 @@ const getChartOverlayStyle = (minute: number, radius: number) => {
   };
 };
 
-const getEventChipAccentLine = (minute: number) => {
-  const end = polarToCartesian(minute, CHART_RADIUS);
-
-  return {
-    x1: CHART_CENTER,
-    y1: CHART_CENTER,
-    x2: end.x,
-    y2: end.y,
-  };
-};
-
 const resolveEventSegmentMeta = (
   event: GoogleCalendarEvent,
   appProjects: AppCalendarItem[],
   calendarLabelById: Map<string, string>,
 ): EventSegmentMeta => {
   const colorMeta = createEventChipColorMeta(event.accentColor);
-  const project = appProjects.find(
-    (item) => item.id === event.projectId || item.label === event.projectId,
-  );
+  const project = appProjects.find((item) => item.id === event.projectId || item.label === event.projectId);
 
   if (project) {
     return {
@@ -292,13 +279,13 @@ const DailyClockPie = ({ slices }: DailyClockPieProps) => {
                 )
               ))}
 
-              {visibleSlices.filter((slice) => !slice.isGap).map((slice) => {
-                const line = getEventChipAccentLine(slice.startMinute);
-
-                return (
-                  <line key={`accent:${slice.id}`} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} stroke={slice.borderColor} strokeWidth={CHART_EVENT_BORDER_STROKE_WIDTH} strokeLinecap="butt" vectorEffect="non-scaling-stroke" />
-                );
-              })}
+              {visibleSlices.filter((slice) => !slice.isGap).map((slice) => (
+                slice.endMinute - slice.startMinute >= FULL_DAY_MINUTES ? (
+                  <circle key={`accent:${slice.id}`} cx={CHART_CENTER} cy={CHART_CENTER} r={CHART_RADIUS} fill="none" stroke={slice.borderColor} strokeWidth={CHART_EVENT_BORDER_STROKE_WIDTH} vectorEffect="non-scaling-stroke" />
+                ) : (
+                  <path key={`accent:${slice.id}`} d={buildArcPath(slice.startMinute, slice.endMinute, CHART_RADIUS)} fill="none" stroke={slice.borderColor} strokeWidth={CHART_EVENT_BORDER_STROKE_WIDTH} strokeLinecap="butt" vectorEffect="non-scaling-stroke" />
+                )
+              ))}
 
               {CLOCK_HOURS.map((hour) => {
                 const minute = hour * 60;
