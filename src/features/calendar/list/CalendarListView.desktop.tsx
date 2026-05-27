@@ -36,6 +36,7 @@ const EMPTY_MONTH_LABEL = "この期間の予定はありません";
 const SELECTED_DAY_SCROLL_BLOCK: ScrollLogicalPosition = "nearest";
 const LIST_SCROLL_EDGE_THRESHOLD_PX = 180;
 const LIST_SCROLL_EDGE_RESET_PX = 420;
+const LIST_SCROLL_IDLE_DELAY_MS = 120;
 const LIST_VISIBLE_MONTH_ANCHOR_PX = 160;
 const LIST_DAY_DATA_ATTRIBUTE = "data-calendar-list-day-time";
 const LIST_DAY_SELECTOR = `[${LIST_DAY_DATA_ATTRIBUTE}]`;
@@ -202,7 +203,9 @@ const CalendarListViewComponent = ({
   const lastSelectedDateTimeRef = useRef<number | null>(null);
   const lastVisibleMonthTimeRef = useRef<number | null>(null);
   const scrollFrameRef = useRef<number | null>(null);
+  const edgeExtendTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingScrollElementRef = useRef<HTMLDivElement | null>(null);
+  const pendingEdgeDirectionRef = useRef<"start" | "end" | null>(null);
   const listDays = useMemo(
     () => buildListDays(days, events, selectedDate),
     [days, events, selectedDate],
@@ -225,6 +228,33 @@ const CalendarListViewComponent = ({
     onVisibleMonthChange(visibleMonth);
   }, [onVisibleMonthChange]);
 
+  const clearEdgeExtendTimer = useCallback(() => {
+    if (!edgeExtendTimerRef.current) return;
+
+    clearTimeout(edgeExtendTimerRef.current);
+    edgeExtendTimerRef.current = null;
+  }, []);
+
+  const requestEdgeExtension = useCallback((direction: "start" | "end") => {
+    pendingEdgeDirectionRef.current = direction;
+    clearEdgeExtendTimer();
+
+    edgeExtendTimerRef.current = setTimeout(() => {
+      edgeExtendTimerRef.current = null;
+      const pendingDirection = pendingEdgeDirectionRef.current;
+      pendingEdgeDirectionRef.current = null;
+
+      if (pendingDirection === "start") {
+        onReachStart?.();
+        return;
+      }
+
+      if (pendingDirection === "end") {
+        onReachEnd?.();
+      }
+    }, LIST_SCROLL_IDLE_DELAY_MS);
+  }, [clearEdgeExtendTimer, onReachEnd, onReachStart]);
+
   const processScroll = useCallback((scrollElement: HTMLDivElement) => {
     const remainingScrollBottom = scrollElement.scrollHeight - scrollElement.clientHeight - scrollElement.scrollTop;
 
@@ -233,21 +263,29 @@ const CalendarListViewComponent = ({
     if (scrollElement.scrollTop <= LIST_SCROLL_EDGE_THRESHOLD_PX) {
       if (firstDayKey && lastReachStartKeyRef.current !== firstDayKey) {
         lastReachStartKeyRef.current = firstDayKey;
-        onReachStart?.();
+        requestEdgeExtension("start");
       }
     } else if (scrollElement.scrollTop >= LIST_SCROLL_EDGE_RESET_PX) {
       lastReachStartKeyRef.current = null;
+      if (pendingEdgeDirectionRef.current === "start") {
+        pendingEdgeDirectionRef.current = null;
+        clearEdgeExtendTimer();
+      }
     }
 
     if (remainingScrollBottom <= LIST_SCROLL_EDGE_THRESHOLD_PX) {
       if (lastDayKey && lastReachEndKeyRef.current !== lastDayKey) {
         lastReachEndKeyRef.current = lastDayKey;
-        onReachEnd?.();
+        requestEdgeExtension("end");
       }
     } else if (remainingScrollBottom >= LIST_SCROLL_EDGE_RESET_PX) {
       lastReachEndKeyRef.current = null;
+      if (pendingEdgeDirectionRef.current === "end") {
+        pendingEdgeDirectionRef.current = null;
+        clearEdgeExtendTimer();
+      }
     }
-  }, [firstDayKey, lastDayKey, onReachEnd, onReachStart, updateVisibleMonth]);
+  }, [clearEdgeExtendTimer, firstDayKey, lastDayKey, requestEdgeExtension, updateVisibleMonth]);
 
   const requestScrollProcessing = useCallback((scrollElement: HTMLDivElement) => {
     pendingScrollElementRef.current = scrollElement;
@@ -304,8 +342,10 @@ const CalendarListViewComponent = ({
       if (scrollFrameRef.current != null) {
         window.cancelAnimationFrame(scrollFrameRef.current);
       }
+
+      clearEdgeExtendTimer();
     };
-  }, []);
+  }, [clearEdgeExtendTimer]);
 
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}>
