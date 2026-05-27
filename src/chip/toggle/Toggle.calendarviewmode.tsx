@@ -16,6 +16,9 @@ type ToggleCalendarViewModeProps = {
 };
 
 const CALENDAR_VIEW_MODE_INDICATOR_ID = "calendar-view-mode-indicator";
+const CALENDAR_VIEW_MODE_ACTIVE_TEXT_CLASS = "text-[#8c8c8c]";
+const CALENDAR_VIEW_MODE_INACTIVE_TEXT_CLASS = "text-[#d5d5d5]";
+const CALENDAR_VIEW_MODE_HOVER_TEXT_CLASS = "hover:text-[#8c8c8c]";
 const CALENDAR_VIEW_MODE_MOTION_TRANSITION: Transition = {
   type: "tween",
   duration: 0.3,
@@ -67,7 +70,9 @@ export const ToggleCalendarViewMode = ({
                 "appearance-none select-none text-[11px] font-semibold leading-none tracking-[-0.01em]",
                 "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
                 "focus:outline-none focus:ring-0 focus-visible:outline-none",
-                isActive ? "text-[#8c8c8c]" : "text-[#b3b3b3] hover:text-[#8c8c8c]",
+                isActive
+                  ? CALENDAR_VIEW_MODE_ACTIVE_TEXT_CLASS
+                  : `${CALENDAR_VIEW_MODE_INACTIVE_TEXT_CLASS} ${CALENDAR_VIEW_MODE_HOVER_TEXT_CLASS}`,
               )}
             >
               {isActive && (
