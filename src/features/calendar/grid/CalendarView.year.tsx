@@ -394,7 +394,7 @@ const CalendarYearViewComponent = ({
                           aria-pressed={selected}
                           title={eventCount > 0 ? `${eventCount}件` : undefined}
                           className={cn(
-                            "mx-auto flex h-6 w-8 items-center justify-center rounded-[4px] font-medium transition-colors duration-150 ease-out",
+                            "mx-auto flex h-6 w-6 items-center justify-center rounded-full font-medium transition-colors duration-150 ease-out",
                             "appearance-none select-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]",
                             selected
                               ? "bg-[#3478f6] text-white shadow-[0_1px_2px_rgba(52,120,246,0.25)]"
