@@ -389,11 +389,15 @@ export const ScheduleScreen = ({
     activeMode === "calendar" && PLAN_RESULT_TOGGLE_VIEW_MODES.has(selectedViewMode);
 
   const headerTitleDate =
-    selectedViewMode === "month" ? monthTitleDate : titleDate;
+    selectedViewMode === "month"
+      ? monthTitleDate
+      : isPieChartCalendarView
+        ? selectedDate
+        : titleDate;
 
   const headerTitleLabel = selectedViewMode === "year"
     ? format(headerTitleDate, "yyyy年", { locale: dateFnsLocale })
-    : format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale });
+    : format(headerTitleDate, isPieChartCalendarView ? "yyyy年M月d日" : monthLabelFormat, { locale: dateFnsLocale });
 
   return (
     <CarvePanelShell
