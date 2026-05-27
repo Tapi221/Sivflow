@@ -29,6 +29,12 @@ type ExtendCalendarScrollBufferOptions = {
 
 const CALENDAR_SCROLL_BUFFER_CONFIG = {
   calendar: {
+    year: {
+      unitsPerScreen: 1,
+      initialScreens: { before: 0, after: 0 },
+      extendScreens: 0,
+      maxUnits: { before: 0, after: 0 },
+    },
     days: {
       unitsPerScreen: 1,
       initialScreens: { before: 7, after: 14 },
@@ -61,6 +67,12 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
     },
   },
   timeline: {
+    year: {
+      unitsPerScreen: 1,
+      initialScreens: { before: 2, after: 3 },
+      extendScreens: 4,
+      maxUnits: { before: 40, after: 40 },
+    },
     days: {
       unitsPerScreen: 1,
       initialScreens: { before: 4, after: 8 },
