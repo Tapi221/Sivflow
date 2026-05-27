@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, type UIEvent } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 import { useScrollEdgeDetector } from "./useScrollEdgeDetector";
@@ -64,6 +64,8 @@ export const useCalendarScrollController = ({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);
+  const visibleTimelineColumnIdRef = useRef<string | null>(null);
+  const timelineVisibleDateRafRef = useRef<number | null>(null);
   const fixedRowScrollRefs = useMemo(
     () => [headerScrollRef, allDayScrollRef],
     [],
@@ -114,7 +116,7 @@ export const useCalendarScrollController = ({
     syncKey: `${activeMode}:${selectedViewMode}`,
   });
 
-  const handleTimelineVisibleDate = useCallback((scroller: HTMLDivElement) => {
+  const syncTimelineVisibleDate = useCallback((scroller: HTMLDivElement) => {
     if (!onTimelineVisibleDateChange || timelineColumns.length === 0) return;
 
     const visibleX = Math.max(
@@ -127,20 +129,49 @@ export const useCalendarScrollController = ({
     );
     const visibleColumn = timelineColumns[visibleIndex];
 
-    if (visibleColumn) {
-      onTimelineVisibleDateChange(visibleColumn.start);
+    if (visibleColumn && visibleColumn.id !== visibleTimelineColumnIdRef.current) {
+      visibleTimelineColumnIdRef.current = visibleColumn.id;
+      startTransition(() => {
+        onTimelineVisibleDateChange(visibleColumn.start);
+      });
     }
   }, [onTimelineVisibleDateChange, timelineColumnWidth, timelineColumns]);
 
-  const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
-    const scroller = event.currentTarget;
+  const scheduleTimelineVisibleDate = useCallback((scroller: HTMLDivElement) => {
+    if (timelineVisibleDateRafRef.current !== null) return;
 
+    timelineVisibleDateRafRef.current = window.requestAnimationFrame(() => {
+      timelineVisibleDateRafRef.current = null;
+      syncTimelineVisibleDate(scroller);
+    });
+  }, [syncTimelineVisibleDate]);
+
+  const handlePassiveScroll = useCallback((scroller: HTMLDivElement) => {
     handleEdgeScroll(scroller);
-
     if (activeMode === "timeline") {
-      handleTimelineVisibleDate(scroller);
+      scheduleTimelineVisibleDate(scroller);
     }
-  }, [activeMode, handleEdgeScroll, handleTimelineVisibleDate]);
+  }, [activeMode, handleEdgeScroll, scheduleTimelineVisibleDate]);
+
+  useEffect(() => {
+    const scroller = scrollContainerRef.current;
+    if (!scroller) return;
+
+    const handleScroll = () => handlePassiveScroll(scroller);
+
+    scroller.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      scroller.removeEventListener("scroll", handleScroll);
+
+      if (timelineVisibleDateRafRef.current !== null) {
+        window.cancelAnimationFrame(timelineVisibleDateRafRef.current);
+        timelineVisibleDateRafRef.current = null;
+      }
+    };
+  }, [handlePassiveScroll]);
 
   /**
    * buffer変化などでのリセット統合
@@ -154,7 +185,7 @@ export const useCalendarScrollController = ({
     scrollContainerRef,
     headerScrollRef,
     allDayScrollRef,
-    handleScroll,
+    handleScroll: undefined,
     resetAll,
   };
 };

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import { clipEventToDay, compareCalendarEvents, eventOverlapsDay } from "@/features/calendar/calendarEventRange";
+import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.layout.weekday.desktop";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
@@ -23,6 +23,16 @@ type CalendarEventPositionStyle = CSSProperties & {
 const HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, index) => index);
 const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
 const MAX_ALL_DAY_VISIBLE_CHIPS = 3;
+
+type WeekdayDayEvents = {
+  allDayEvents: GoogleCalendarEvent[];
+  timedEvents: GoogleCalendarEvent[];
+};
+
+const EMPTY_WEEKDAY_DAY_EVENTS: WeekdayDayEvents = {
+  allDayEvents: [],
+  timedEvents: [],
+};
 
 const createHourLabel = (hour: number) =>
   `${String(hour).padStart(2, "0")}:00`;
@@ -176,15 +186,45 @@ export const CalendarWeekDayGrid = ({
   const isTodayVisible = visibleDays.some((d) => isSameDay(d, today));
   const todayColumnIndex = visibleDays.findIndex((d) => isSameDay(d, today));
 
-  const allDayEventsByDay = useMemo(() => {
-    return new Map(
-      visibleDays.map((day) => [
-        day.toISOString(),
-        visibleEvents
-          .filter((event) => event.isAllDay && eventOverlapsDay(event, day))
-          .sort(compareCalendarEvents),
-      ]),
+  const eventsByDay = useMemo(() => {
+    const map = new Map<string, WeekdayDayEvents>();
+    const visibleDayByKey = new Map(
+      visibleDays.map((day) => {
+        const key = getCalendarDateKey(day);
+        map.set(key, {
+          allDayEvents: [],
+          timedEvents: [],
+        });
+
+        return [key, day] as const;
+      }),
     );
+
+    for (const event of visibleEvents) {
+      for (const dayKey of getEventDateKeys(event)) {
+        const day = visibleDayByKey.get(dayKey);
+        const dayEvents = map.get(dayKey);
+
+        if (!day || !dayEvents) continue;
+
+        if (event.isAllDay) {
+          dayEvents.allDayEvents.push(event);
+          continue;
+        }
+
+        const clippedEvent = clipEventToDay(event, day);
+        if (clippedEvent) {
+          dayEvents.timedEvents.push(clippedEvent);
+        }
+      }
+    }
+
+    for (const dayEvents of map.values()) {
+      dayEvents.allDayEvents.sort(compareCalendarEvents);
+      dayEvents.timedEvents.sort(compareCalendarEvents);
+    }
+
+    return map;
   }, [visibleDays, visibleEvents]);
 
   return (
@@ -238,7 +278,9 @@ export const CalendarWeekDayGrid = ({
           </div>
 
           {visibleDays.map((day, dayIndex) => {
-            const events = allDayEventsByDay.get(day.toISOString()) ?? [];
+            const dayEvents =
+              eventsByDay.get(getCalendarDateKey(day)) ?? EMPTY_WEEKDAY_DAY_EVENTS;
+            const events = dayEvents.allDayEvents;
             const visibleChips = events.slice(0, MAX_ALL_DAY_VISIBLE_CHIPS);
             const overflowCount = events.length - visibleChips.length;
 
@@ -288,14 +330,9 @@ export const CalendarWeekDayGrid = ({
 
           {visibleDays.map((day, dayIndex) => {
             const isDayToday = isSameDay(day, today);
-
-            const eventsForDay = visibleEvents
-              .filter(
-                (event) => !event.isAllDay && eventOverlapsDay(event, day),
-              )
-              .map((event) => clipEventToDay(event, day))
-              .filter((event): event is GoogleCalendarEvent => Boolean(event))
-              .sort(compareCalendarEvents);
+            const dayEvents =
+              eventsByDay.get(getCalendarDateKey(day)) ?? EMPTY_WEEKDAY_DAY_EVENTS;
+            const eventsForDay = dayEvents.timedEvents;
 
             const layout = computeEventLayout(
               eventsForDay.map((event) =>

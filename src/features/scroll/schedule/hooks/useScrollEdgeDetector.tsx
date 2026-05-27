@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { startTransition, useCallback, useRef } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 
 type Params = {
@@ -26,12 +26,12 @@ export const useScrollEdgeDetector = ({ onExtendLeft, onExtendRight }: Params) =
 
       if (leftDistance < C.TIMELINE_EDGE_THRESHOLD_PX && !leftPendingRef.current) {
         leftPendingRef.current = true;
-        onExtendLeft();
+        startTransition(onExtendLeft);
       }
 
       if (rightDistance < C.TIMELINE_EDGE_THRESHOLD_PX && !rightPendingRef.current) {
         rightPendingRef.current = true;
-        onExtendRight();
+        startTransition(onExtendRight);
       }
     },
     [onExtendLeft, onExtendRight],

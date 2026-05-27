@@ -17,7 +17,7 @@ export type UseScheduleScreenReturn = {
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   headerScrollRef: RefObject<HTMLDivElement | null>;
   allDayScrollRef: RefObject<HTMLDivElement | null>;
-  handleCalendarScroll: (event: UIEvent<HTMLDivElement>) => void;
+  handleCalendarScroll?: (event: UIEvent<HTMLDivElement>) => void;
 
   currentDate: Date;
   selectedDate: Date;
