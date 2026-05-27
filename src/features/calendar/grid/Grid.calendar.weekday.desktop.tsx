@@ -47,7 +47,7 @@ const createMinuteLabel = (totalMinutes: number) => {
 };
 
 const getHourBoundaryLabelOffsetClass = (hour: number) => {
-  if (hour === GRID.WEEKDAY_HOURS) return "translate-y-1";
+  if (hour === GRID.WEEKDAY_HOURS) return "-translate-y-1/2";
 
   return "-translate-y-1/2";
 };
