@@ -6,6 +6,7 @@ import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
 import type { AppCalendarItem, ScheduleScreenProps } from "./scheduleScreen.types";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
+import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import { CalendarPieChartView } from "@/features/calendar/view/CalendarPieChartView";
 import { TaskView } from "@/features/calendar/task/TaskView";
@@ -18,6 +19,8 @@ import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCal
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
+
+type StoredAppCalendarItem = Partial<AppCalendarItem>;
 
 const IOS_CALENDAR_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
@@ -47,8 +50,6 @@ const APP_PROJECT_COLORS = [
   "#66a77a",
   "#9ca3ff",
 ];
-
-type StoredAppCalendarItem = Partial<AppCalendarItem>;
 
 const getInitialCanFitDayDetailPanel = (): boolean => {
   if (typeof window === "undefined") return true;
@@ -152,12 +153,13 @@ export const ScheduleScreen = ({
 
   const viewOptions = useMemo(
     () => [
+      { value: "year", label: t.viewYear },
       { value: "month", label: t.viewMonth },
       { value: "week", label: t.viewWeek },
       { value: "days", label: t.viewDay },
       { value: "pieChart", label: t.viewPieChart },
     ] as const,
-    [t.viewDay, t.viewMonth, t.viewPieChart, t.viewWeek],
+    [t.viewDay, t.viewMonth, t.viewPieChart, t.viewWeek, t.viewYear],
   );
 
   const {
@@ -392,6 +394,9 @@ export const ScheduleScreen = ({
   const isDayDetailPanelCollapsed =
     canShowDayDetailPanel && !showDayDetailPanel;
 
+  const isYearCalendarView =
+    activeMode === "calendar" && selectedViewMode === "year";
+
   const isMonthCalendarView =
     activeMode === "calendar" && selectedViewMode === "month";
 
@@ -439,6 +444,9 @@ export const ScheduleScreen = ({
   const renderViewHeader = (className: string) => {
     const headerTitleDate =
       selectedViewMode === "month" ? monthTitleDate : titleDate;
+    const headerLabel = selectedViewMode === "year"
+      ? format(headerTitleDate, "yyyy年", { locale: dateFnsLocale })
+      : format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale });
     const headerClassName = className.replace(
       "justify-between",
       "justify-start gap-3",
@@ -447,7 +455,7 @@ export const ScheduleScreen = ({
     return (
       <div className={headerClassName} style={{ paddingRight: viewHeaderRightPaddingPx }}>
         <h1 className="shrink-0 truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
-          {format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale })}
+          {headerLabel}
         </h1>
 
         <div className="flex shrink-0 items-center gap-2">
@@ -539,6 +547,21 @@ export const ScheduleScreen = ({
             onMoveGoogleTaskList={moveGoogleTaskList}
             onDeleteGoogleTask={deleteGoogleTask}
           />
+        </CarvePanel>
+      ) : isYearCalendarView ? (
+        <CarvePanel>
+          {renderViewHeader(
+            "mb-2 flex shrink-0 items-center justify-start gap-3 px-5 pt-4",
+          )}
+
+          <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[22px] border border-[#eeeeee] bg-white">
+            <CalendarYearView
+              yearDate={currentDate}
+              selectedDate={selectedDate}
+              visibleEvents={deferredCalendarEvents}
+              onSelectDate={handleMonthCellSelectDate}
+            />
+          </div>
         </CarvePanel>
       ) : isPieChartCalendarView ? (
         <CarvePanel>
