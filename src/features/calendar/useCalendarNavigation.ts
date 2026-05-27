@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays, subMonths, subYears } from "date-fns";
-import type { CalendarToolbarMode, CalendarViewMode } from "./scheduleScreen.types";
 import { createCalendarScrollBuffer, extendCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
+import type { CalendarToolbarMode, CalendarViewMode } from "./scheduleScreen.types";
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return addYears(current, 1);
@@ -27,15 +27,12 @@ const normalizeViewDate = (date: Date, viewMode: CalendarViewMode) => {
   return date;
 };
 
-const isSameTimelineTitleDate = (a: Date, b: Date) =>
-  startOfDay(a).getTime() === startOfDay(b).getTime();
-
 type UseCalendarNavigationOptions = {
   initialActiveMode?: CalendarToolbarMode;
 };
 
 export const useCalendarNavigation = ({
-  initialActiveMode = "timeline",
+  initialActiveMode = "calendar",
 }: UseCalendarNavigationOptions = {}) => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -43,7 +40,6 @@ export const useCalendarNavigation = ({
 
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const [timelineTitleDate, setTimelineTitleDate] = useState(() => new Date());
   const [monthTitleDate, setMonthTitleDate] = useState(() =>
     startOfMonth(new Date()),
   );
@@ -59,10 +55,6 @@ export const useCalendarNavigation = ({
 
   const [calendarBuffer, setCalendarBuffer] = useState(() =>
     createCalendarScrollBuffer("calendar", "days"),
-  );
-
-  const [timelineUnitBuffer, setTimelineUnitBuffer] = useState(() =>
-    createCalendarScrollBuffer("timeline", "days"),
   );
 
   const [viewportWidth, setViewportWidth] = useState(0);
@@ -91,9 +83,8 @@ export const useCalendarNavigation = ({
     setMonthScrollTargetToken((n) => n + 1);
   }, []);
 
-  const resetTimelinePosition = useCallback((viewMode: CalendarViewMode) => {
+  const resetCalendarPosition = useCallback((viewMode: CalendarViewMode) => {
     setCalendarBuffer(createCalendarScrollBuffer("calendar", viewMode));
-    setTimelineUnitBuffer(createCalendarScrollBuffer("timeline", viewMode));
     setCalendarScrollToken((n) => n + 1);
   }, []);
 
@@ -114,30 +105,6 @@ export const useCalendarNavigation = ({
       direction: "right",
     }));
   }, [selectedViewMode]);
-
-  const extendTimelineUnitBufferLeft = useCallback(() => {
-    setTimelineUnitBuffer((prev) => extendCalendarScrollBuffer({
-      surface: "timeline",
-      viewMode: selectedViewMode,
-      buffer: prev,
-      direction: "left",
-    }));
-  }, [selectedViewMode]);
-
-  const extendTimelineUnitBufferRight = useCallback(() => {
-    setTimelineUnitBuffer((prev) => extendCalendarScrollBuffer({
-      surface: "timeline",
-      viewMode: selectedViewMode,
-      buffer: prev,
-      direction: "right",
-    }));
-  }, [selectedViewMode]);
-
-  const handleTimelineVisibleDateChange = useCallback((date: Date) => {
-    setTimelineTitleDate((prev) =>
-      isSameTimelineTitleDate(prev, date) ? prev : date,
-    );
-  }, []);
 
   useEffect(() => {
     const el = contentViewportRef.current;
@@ -165,26 +132,22 @@ export const useCalendarNavigation = ({
       }
 
       setSelectedViewMode(next);
-
-      setActiveMode((current) =>
-        next === "pieChart" || next === "year" ? "calendar" : current === "timeline" ? "timeline" : "calendar",
-      );
+      setActiveMode("calendar");
 
       const anchorDate = next === "pieChart" ? selectedDate : currentDate;
       const normalized = normalizeViewDate(anchorDate, next);
 
       setCurrentDate(normalized);
       setSelectedDate(normalized);
-      setTimelineTitleDate(normalized);
       setMonthTitleDate(startOfMonth(normalized));
 
       if (next === "month") {
         requestMonthScrollTarget();
       }
 
-      resetTimelinePosition(next);
+      resetCalendarPosition(next);
     },
-    [currentDate, getProjectedViewportWidth, requestMonthScrollTarget, resetTimelinePosition, selectedDate],
+    [currentDate, getProjectedViewportWidth, requestMonthScrollTarget, resetCalendarPosition, selectedDate],
   );
 
   const handleToday = useCallback(() => {
@@ -193,87 +156,75 @@ export const useCalendarNavigation = ({
 
     setCurrentDate(normalized);
     setSelectedDate(normalized);
-    setTimelineTitleDate(normalized);
     setMonthTitleDate(startOfMonth(normalized));
 
     requestMonthScrollTarget();
-    resetTimelinePosition(selectedViewMode);
-  }, [selectedViewMode, requestMonthScrollTarget, resetTimelinePosition]);
+    resetCalendarPosition(selectedViewMode);
+  }, [selectedViewMode, requestMonthScrollTarget, resetCalendarPosition]);
 
   const handlePrevious = useCallback(() => {
     setCurrentDate((c) => {
       const next = normalizeViewDate(getPreviousDate(c, selectedViewMode), selectedViewMode);
 
       setSelectedDate(next);
-      setTimelineTitleDate(next);
       setMonthTitleDate(startOfMonth(next));
 
       return next;
     });
 
     requestMonthScrollTarget();
-    resetTimelinePosition(selectedViewMode);
-  }, [selectedViewMode, requestMonthScrollTarget, resetTimelinePosition]);
+    resetCalendarPosition(selectedViewMode);
+  }, [selectedViewMode, requestMonthScrollTarget, resetCalendarPosition]);
 
   const handleNext = useCallback(() => {
     setCurrentDate((c) => {
       const next = normalizeViewDate(getNextDate(c, selectedViewMode), selectedViewMode);
 
       setSelectedDate(next);
-      setTimelineTitleDate(next);
       setMonthTitleDate(startOfMonth(next));
 
       return next;
     });
 
     requestMonthScrollTarget();
-    resetTimelinePosition(selectedViewMode);
-  }, [selectedViewMode, requestMonthScrollTarget, resetTimelinePosition]);
+    resetCalendarPosition(selectedViewMode);
+  }, [selectedViewMode, requestMonthScrollTarget, resetCalendarPosition]);
 
   const handleSidebarPreviousMonth = useCallback(() => {
     setCurrentDate((c) => {
       const next = subMonths(c, 1);
       setSelectedDate(next);
-      setTimelineTitleDate(next);
       setMonthTitleDate(startOfMonth(next));
       return next;
     });
 
     requestMonthScrollTarget();
-    resetTimelinePosition(selectedViewMode);
-  }, [selectedViewMode, requestMonthScrollTarget, resetTimelinePosition]);
+    resetCalendarPosition(selectedViewMode);
+  }, [selectedViewMode, requestMonthScrollTarget, resetCalendarPosition]);
 
   const handleSidebarNextMonth = useCallback(() => {
     setCurrentDate((c) => {
       const next = addMonths(c, 1);
       setSelectedDate(next);
-      setTimelineTitleDate(next);
       setMonthTitleDate(startOfMonth(next));
       return next;
     });
 
     requestMonthScrollTarget();
-    resetTimelinePosition(selectedViewMode);
-  }, [selectedViewMode, requestMonthScrollTarget, resetTimelinePosition]);
+    resetCalendarPosition(selectedViewMode);
+  }, [selectedViewMode, requestMonthScrollTarget, resetCalendarPosition]);
 
   const handleSidebarSelectDate = useCallback(
     (date: Date) => {
       setCurrentDate(date);
       setSelectedDate(date);
-      setTimelineTitleDate(date);
       setMonthTitleDate(startOfMonth(date));
 
       requestMonthScrollTarget();
-      resetTimelinePosition(selectedViewMode);
+      resetCalendarPosition(selectedViewMode);
     },
-    [selectedViewMode, requestMonthScrollTarget, resetTimelinePosition],
+    [selectedViewMode, requestMonthScrollTarget, resetCalendarPosition],
   );
-
-  const handleTimelineSelectDate = useCallback((date: Date) => {
-    setSelectedDate(date);
-    setTimelineTitleDate(date);
-    setMonthTitleDate(startOfMonth(date));
-  }, []);
 
   const handleVisibleMonthChange = useCallback((date: Date) => {
     setMonthTitleDate(startOfMonth(date));
@@ -282,7 +233,6 @@ export const useCalendarNavigation = ({
   const handleMonthCellSelectDate = useCallback((date: Date) => {
     setSelectedDate(date);
     setCurrentDate(date);
-    setTimelineTitleDate(date);
   }, []);
 
   return {
@@ -292,7 +242,6 @@ export const useCalendarNavigation = ({
 
     currentDate,
     selectedDate,
-    timelineTitleDate,
     monthTitleDate,
     setMonthTitleDate,
 
@@ -304,7 +253,6 @@ export const useCalendarNavigation = ({
     setActiveMode,
 
     calendarBuffer,
-    timelineUnitBuffer,
     viewportWidth,
     setViewportWidth,
 
@@ -315,16 +263,12 @@ export const useCalendarNavigation = ({
     handleSidebarPreviousMonth,
     handleSidebarNextMonth,
     handleSidebarSelectDate,
-    handleTimelineSelectDate,
     handleVisibleMonthChange,
     handleMonthCellSelectDate,
-    handleTimelineVisibleDateChange,
 
-    resetTimelinePosition,
+    resetCalendarPosition,
 
     extendCalendarBufferLeft,
     extendCalendarBufferRight,
-    extendTimelineUnitBufferLeft,
-    extendTimelineUnitBufferRight,
   };
 };
