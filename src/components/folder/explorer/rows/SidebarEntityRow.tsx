@@ -141,4 +141,8 @@ const SidebarEntityRowBase = ({
   );
 };
 
-export const SidebarEntityRow = React.memo(SidebarEntityRowBase);
+const SidebarEntityRow = React.memo(SidebarEntityRowBase);
+
+SidebarEntityRow.displayName = "SidebarEntityRow";
+
+export { SidebarEntityRow };
