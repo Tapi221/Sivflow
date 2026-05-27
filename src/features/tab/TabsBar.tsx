@@ -67,6 +67,12 @@ const ACTIVE_TAB_RIGHT_CURVE_STYLE: CSSProperties = {
   mask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
 };
 
+const INACTIVE_TAB_TEXT_CLASS_NAME = "text-[#d5d5d5] hover:text-[#8c8c8c]";
+
+const INACTIVE_TAB_ICON_CLASS_NAME = "text-[#d5d5d5] group-hover/tab:text-[#8c8c8c]";
+
+const INACTIVE_TAB_CLOSE_BUTTON_CLASS_NAME = "opacity-100 !text-[#d5d5d5] hover:!text-[#8c8c8c]";
+
 const TAB_OPEN_ANIMATION_MS = 280;
 
 const TAB_OPEN_ANIMATION_STYLE = `
@@ -100,16 +106,6 @@ const resolveTabsSurfaceStyle = (isTitlebar: boolean): CSSProperties => ({
     ? "var(--app-titlebar-bg, var(--app-sidebar-bg))"
     : "var(--app-sidebar-bg)",
 });
-
-const resolveInactiveTabTextClassName = (isTitlebar: boolean): string =>
-  isTitlebar
-    ? "text-[var(--app-titlebar-text)] hover:text-[var(--app-titlebar-text-strong)]"
-    : "text-[var(--app-sidebar-text)] hover:text-[var(--app-sidebar-text-strong)]";
-
-const resolveInactiveTabIconClassName = (isTitlebar: boolean): string =>
-  isTitlebar
-    ? "text-[var(--app-titlebar-icon)]"
-    : "text-[var(--app-sidebar-icon)]";
 
 const resolveCloseButtonClassName = (isTitlebar: boolean): string => {
   if (isTitlebar) {
@@ -409,16 +405,13 @@ export const TabsBar = ({
             const selected = tab.id === activeTabId;
             const isOpening = tab.id === openingTabId;
             const Icon = resolveTabIcon(tab);
-            const inactiveTextClassName =
-              resolveInactiveTabTextClassName(isTitlebar);
-            const inactiveIconClassName = resolveInactiveTabIconClassName(isTitlebar);
 
             let tabStateClassName = cn(
               "explorer-workspace-tab--inactive",
-              inactiveTextClassName,
+              INACTIVE_TAB_TEXT_CLASS_NAME,
             );
-            let iconStateClassName = inactiveIconClassName;
-            let closeButtonStateClassName = "opacity-80 hover:opacity-100";
+            let iconStateClassName = INACTIVE_TAB_ICON_CLASS_NAME;
+            let closeButtonStateClassName = INACTIVE_TAB_CLOSE_BUTTON_CLASS_NAME;
 
             if (selected) {
               tabStateClassName =
