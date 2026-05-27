@@ -110,7 +110,7 @@ export type CalendarScreenViewModel = {
 };
 
 //ScheduleScreen.tsx
-export type CalendarViewMode = "year" | "month" | "week" | "threeDays" | "days" | "pieChart";
+export type CalendarViewMode = "year" | "month" | "week" | "threeDays" | "days" | "list" | "pieChart";
 
 export type CalendarToolbarMode = "calendar" | "task";
 
