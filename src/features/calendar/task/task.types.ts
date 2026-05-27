@@ -19,6 +19,7 @@ export type Task = {
   dueDate: string | null;
   assignee: string | null;
   createdAt: number;
+  taskListColor?: string | null;
 
   scheduledStart: string | null;
   scheduledEnd: string | null;
@@ -35,6 +36,7 @@ export type TaskCreateInput = {
   category: string;
   dueDate: string | null;
   assignee: string | null;
+  taskListColor?: string | null;
   scheduledStart?: string | null;
   scheduledEnd?: string | null;
   googleCalendarId?: string | null;
