@@ -2,7 +2,7 @@
   "name": "flashcard-master-mobile",
   "private": true,
   "version": "0.0.0",
-  "main": "src/App.tsx",
+  "main": "index.ts",
   "scripts": {
     "start": "expo start",
     "ios": "expo start --ios",
