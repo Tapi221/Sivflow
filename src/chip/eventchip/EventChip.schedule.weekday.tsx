@@ -13,7 +13,7 @@ const CHIP_TEXT_FADE_STYLE: CSSProperties = {
   maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 8px), transparent 100%)",
 };
 
-export const CalendarEventChipWeekday = ({
+const CalendarEventChipWeekday = ({
   event,
   compact = false,
 }: CalendarEventChipWeekdayProps) => {
@@ -47,10 +47,7 @@ export const CalendarEventChipWeekday = ({
       }}
       title={`${titleLabel} ${timeLabel}`}
     >
-      <span
-        className="overflow-hidden whitespace-nowrap text-[12px] font-medium leading-snug"
-        style={CHIP_TEXT_FADE_STYLE}
-      >
+      <span className="overflow-hidden whitespace-normal break-words text-[12px] font-medium leading-snug">
         {titleLabel}
       </span>
 
@@ -65,3 +62,7 @@ export const CalendarEventChipWeekday = ({
     </div>
   );
 };
+
+CalendarEventChipWeekday.displayName = "CalendarEventChipWeekday";
+
+export { CalendarEventChipWeekday };
