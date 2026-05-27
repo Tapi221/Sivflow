@@ -164,7 +164,7 @@ const MiniCalendarSectionBase = ({
                   isSelected={day.isSelected}
                   isCurrentMonth={day.isCurrentMonth}
                   className={cn(
-                    "relative z-10 font-semibold",
+                    "relative z-10",
                     day.isCurrentMonth && !isActive && "text-[#5f6673]",
                     !day.isCurrentMonth && !isActive && "text-[#b7b7b7]",
                   )}
