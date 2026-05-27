@@ -46,9 +46,11 @@ const createDayAriaLabel = (date: Date, eventCount: number): string => {
 
 const normalizeColor = (color: string): string => {
   if (/^#[0-9a-f]{3}$/i.test(color)) {
-    const [, r, g, b] = color;
+    const red = color.charAt(1);
+    const green = color.charAt(2);
+    const blue = color.charAt(3);
 
-    return `#${r}${r}${g}${g}${b}${b}`;
+    return `#${red}${red}${green}${green}${blue}${blue}`;
   }
 
   return color;
@@ -153,11 +155,11 @@ const CalendarYearViewComponent = ({
       return {
         key: format(monthDate, "yyyy-MM"),
         date: monthDate,
-        label: format(monthDate, "M月", { locale: dateFnsLocale }),
+        label: format(monthDate, t.dateFnsLocaleKey === "ja" ? "M月" : "MMM", { locale: dateFnsLocale }),
         weeks: chunkMonthWeeks(days),
       };
     });
-  }, [dateFnsLocale, eventsByDay, yearDate]);
+  }, [dateFnsLocale, eventsByDay, t.dateFnsLocaleKey, yearDate]);
 
   return (
     <div className="calendar-year-view min-h-0 flex-1 overflow-y-auto bg-[rgba(255,255,255,0.92)] px-4 pb-5 pt-4">
@@ -219,6 +221,8 @@ const CalendarYearViewComponent = ({
   );
 };
 
-CalendarYearViewComponent.displayName = "CalendarYearView";
+const CalendarYearView = memo(CalendarYearViewComponent);
 
-export const CalendarYearView = memo(CalendarYearViewComponent);
+CalendarYearView.displayName = "CalendarYearView";
+
+export { CalendarYearView };
