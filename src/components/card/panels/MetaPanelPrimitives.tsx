@@ -5,6 +5,63 @@ import { cn } from "@/lib/utils";
 
 type MetaPanelActionRowAlign = "start" | "between" | "end";
 
+type MetaPanelActionRowProps = {
+  children: React.ReactNode;
+  className?: string;
+  align?: MetaPanelActionRowAlign;
+};
+
+type MetaPanelSectionHeaderProps = {
+  title: React.ReactNode;
+  action?: React.ReactNode;
+  className?: string;
+  titleClassName?: string;
+  actionClassName?: string;
+};
+
+type MetaPanelInfoRowProps = {
+  label: React.ReactNode;
+  value: React.ReactNode;
+  className?: string;
+  valueClassName?: string;
+};
+
+type MetaPanelSurfaceFieldProps = {
+  children: React.ReactNode;
+  className?: string;
+  muted?: boolean;
+};
+
+type MetaPanelSwitchRowProps = {
+  label: React.ReactNode;
+  checked: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+  disabled?: boolean;
+  className?: string;
+  labelClassName?: string;
+  switchAriaLabel?: string;
+};
+
+type MetaPanelSectionTitleProps = {
+  children: React.ReactNode;
+  className?: string;
+};
+
+type MetaPanelMutedSurfaceProps = {
+  children: React.ReactNode;
+  className?: string;
+};
+
+type MetaPanelSwitchProps = {
+  checked: boolean;
+  label: React.ReactNode;
+  onCheckedChange?: (checked: boolean) => void;
+  disabled?: boolean;
+  className?: string;
+  labelClassName?: string;
+  switchAriaLabel?: string;
+};
+
 const META_PANEL_ACTION_ROW_ALIGN_CLASS: Record<
   MetaPanelActionRowAlign,
   string
@@ -14,13 +71,7 @@ const META_PANEL_ACTION_ROW_ALIGN_CLASS: Record<
   end: "ds-editor-pane__action-row--end",
 };
 
-type MetaPanelActionRowProps = {
-  children: React.ReactNode;
-  className?: string;
-  align?: MetaPanelActionRowAlign;
-};
-
-export const MetaPanelActionRow = ({
+const MetaPanelActionRow = ({
   children,
   className,
   align = "start",
@@ -38,15 +89,7 @@ export const MetaPanelActionRow = ({
   );
 };
 
-type MetaPanelSectionHeaderProps = {
-  title: React.ReactNode;
-  action?: React.ReactNode;
-  className?: string;
-  titleClassName?: string;
-  actionClassName?: string;
-};
-
-export const MetaPanelSectionHeader = ({
+const MetaPanelSectionHeader = ({
   title,
   action,
   className,
@@ -65,14 +108,7 @@ export const MetaPanelSectionHeader = ({
   );
 };
 
-type MetaPanelInfoRowProps = {
-  label: React.ReactNode;
-  value: React.ReactNode;
-  className?: string;
-  valueClassName?: string;
-};
-
-export const MetaPanelInfoRow = ({
+const MetaPanelInfoRow = ({
   label,
   value,
   className,
@@ -88,13 +124,7 @@ export const MetaPanelInfoRow = ({
   );
 };
 
-type MetaPanelSurfaceFieldProps = {
-  children: React.ReactNode;
-  className?: string;
-  muted?: boolean;
-};
-
-export const MetaPanelSurfaceField = ({
+const MetaPanelSurfaceField = ({
   children,
   className,
   muted = false,
@@ -112,7 +142,7 @@ export const MetaPanelSurfaceField = ({
   );
 };
 
-export const MetaPanelInput = React.forwardRef<
+const MetaPanelInput = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement>
 >(({ className, ...props }, ref) => {
@@ -125,9 +155,7 @@ export const MetaPanelInput = React.forwardRef<
   );
 });
 
-MetaPanelInput.displayName = "MetaPanelInput";
-
-export const MetaPanelSectionActionButton = React.forwardRef<
+const MetaPanelSectionActionButton = React.forwardRef<
   HTMLButtonElement,
   SurfaceButtonProps
 >(({ className, surface = "convex", size = "xs", ...props }, ref) => {
@@ -142,19 +170,7 @@ export const MetaPanelSectionActionButton = React.forwardRef<
   );
 });
 
-MetaPanelSectionActionButton.displayName = "MetaPanelSectionActionButton";
-
-type MetaPanelSwitchRowProps = {
-  label: React.ReactNode;
-  checked: boolean;
-  onCheckedChange?: (checked: boolean) => void;
-  disabled?: boolean;
-  className?: string;
-  labelClassName?: string;
-  switchAriaLabel?: string;
-};
-
-export const MetaPanelSwitchRow = ({
+const MetaPanelSwitchRow = ({
   label,
   checked,
   onCheckedChange,
@@ -183,12 +199,7 @@ export const MetaPanelSwitchRow = ({
   );
 };
 
-type MetaPanelSectionTitleProps = {
-  children: React.ReactNode;
-  className?: string;
-};
-
-export const MetaPanelSectionTitle = ({
+const MetaPanelSectionTitle = ({
   children,
   className,
 }: MetaPanelSectionTitleProps) => {
@@ -199,12 +210,7 @@ export const MetaPanelSectionTitle = ({
   );
 };
 
-type MetaPanelMutedSurfaceProps = {
-  children: React.ReactNode;
-  className?: string;
-};
-
-export const MetaPanelMutedSurface = ({
+const MetaPanelMutedSurface = ({
   children,
   className,
 }: MetaPanelMutedSurfaceProps) => {
@@ -220,17 +226,7 @@ export const MetaPanelMutedSurface = ({
   );
 };
 
-type MetaPanelSwitchProps = {
-  checked: boolean;
-  label: React.ReactNode;
-  onCheckedChange?: (checked: boolean) => void;
-  disabled?: boolean;
-  className?: string;
-  labelClassName?: string;
-  switchAriaLabel?: string;
-};
-
-export const MetaPanelSwitch = ({
+const MetaPanelSwitch = ({
   checked,
   label,
   onCheckedChange,
@@ -273,3 +269,8 @@ export const MetaPanelSwitch = ({
     </MetaPanelActionRow>
   );
 };
+
+MetaPanelInput.displayName = "MetaPanelInput";
+MetaPanelSectionActionButton.displayName = "MetaPanelSectionActionButton";
+
+export { MetaPanelActionRow, MetaPanelInfoRow, MetaPanelInput, MetaPanelMutedSurface, MetaPanelSectionActionButton, MetaPanelSectionHeader, MetaPanelSectionTitle, MetaPanelSurfaceField, MetaPanelSwitch, MetaPanelSwitchRow };
