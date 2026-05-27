@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { HoverEventTooltip } from "@/chip/toolchip/HoverEventTooltip";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 
@@ -28,19 +29,25 @@ const CalendarEventChipWeekday = ({
   const titleLabel = event.title || "Untitled";
 
   return (
-    <div
-      className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-md py-1 pl-1.5 pr-0 text-left"
-      style={{
-        background: tokens.bg,
-        borderLeft: `3px solid ${tokens.border}`,
-        color: tokens.text,
-      }}
-      title={`${titleLabel} ${timeLabel}`}
+    <HoverEventTooltip
+      title={titleLabel}
+      subtitle={timeLabel}
+      accentColor={tokens.border}
+      className="h-full min-h-0 w-full"
     >
-      <span className="overflow-hidden whitespace-normal break-words text-[12px] font-medium leading-snug">
-        {titleLabel}
-      </span>
-    </div>
+      <div
+        className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-md py-1 pl-1.5 pr-0 text-left"
+        style={{
+          background: tokens.bg,
+          borderLeft: `3px solid ${tokens.border}`,
+          color: tokens.text,
+        }}
+      >
+        <span className="overflow-hidden whitespace-normal break-words text-[12px] font-medium leading-snug">
+          {titleLabel}
+        </span>
+      </div>
+    </HoverEventTooltip>
   );
 };
 
