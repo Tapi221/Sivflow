@@ -84,27 +84,27 @@ export default defineConfig([
       "no-restricted-syntax": [
         "error",
         {
-          selector: "ImportDeclaration[source.value=/^\.\.\//]",
+          selector: String.raw`ImportDeclaration[source.value=/^\.\.\//]`,
           message: "Use @/ alias for cross-folder imports inside src.",
         },
         {
-          selector: "ExportNamedDeclaration[source.value=/^\.\.\//]",
+          selector: String.raw`ExportNamedDeclaration[source.value=/^\.\.\//]`,
           message: "Use @/ alias for cross-folder exports inside src.",
         },
         {
-          selector: "ExportAllDeclaration[source.value=/^\.\.\//]",
+          selector: String.raw`ExportAllDeclaration[source.value=/^\.\.\//]`,
           message: "Use @/ alias for cross-folder exports inside src.",
         },
         {
-          selector: "ImportDeclaration[source.value=/^\.\/[^/]+\//]",
+          selector: String.raw`ImportDeclaration[source.value=/^\.\/[^/]+\//]`,
           message: "Use @/ alias for child-folder imports inside src. Same-directory imports may use ./.",
         },
         {
-          selector: "ExportNamedDeclaration[source.value=/^\.\/[^/]+\//]",
+          selector: String.raw`ExportNamedDeclaration[source.value=/^\.\/[^/]+\//]`,
           message: "Use @/ alias for child-folder exports inside src. Same-directory exports may use ./.",
         },
         {
-          selector: "ExportAllDeclaration[source.value=/^\.\/[^/]+\//]",
+          selector: String.raw`ExportAllDeclaration[source.value=/^\.\/[^/]+\//]`,
           message: "Use @/ alias for child-folder exports inside src. Same-directory exports may use ./.",
         },
       ],
