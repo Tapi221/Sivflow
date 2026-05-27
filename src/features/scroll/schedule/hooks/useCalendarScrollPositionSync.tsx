@@ -1,9 +1,8 @@
 import { useLayoutEffect, useRef } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import type { CalendarToolbarMode, CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
 type Params = {
-  activeMode: CalendarToolbarMode;
   selectedViewMode: CalendarViewMode;
   calendarBufferBefore: number;
   calendarDayColumnWidth: number;
@@ -34,7 +33,6 @@ const getCalendarScrollLeft = ({
 };
 
 export const useCalendarScrollPositionSync = ({
-  activeMode,
   selectedViewMode,
   calendarBufferBefore,
   calendarDayColumnWidth,
@@ -47,30 +45,25 @@ export const useCalendarScrollPositionSync = ({
   const lastRef = useRef<{
     token: number | null;
     viewportWidth: number;
-    activeMode: CalendarToolbarMode | null;
     selectedViewMode: CalendarViewMode | null;
   }>({
     token: null,
     viewportWidth: 0,
-    activeMode: null,
     selectedViewMode: null,
   });
 
   useLayoutEffect(() => {
-    if (activeMode !== "calendar") return;
-
     const scroller = scrollRef.current;
     if (!scroller) return;
     if (viewportWidth <= 0) return;
 
     const currentToken = scrollTargetToken ?? 0;
-    const { token, viewportWidth: prevWidth, activeMode: prevActiveMode, selectedViewMode: prevSelectedViewMode } = lastRef.current;
+    const { token, viewportWidth: prevWidth, selectedViewMode: prevSelectedViewMode } = lastRef.current;
     const tokenChanged = token !== currentToken;
     const viewportChanged = token === currentToken && prevWidth !== viewportWidth;
-    const modeChanged = prevActiveMode !== activeMode;
     const viewModeChanged = prevSelectedViewMode !== selectedViewMode;
 
-    if (!tokenChanged && !viewportChanged && !modeChanged && !viewModeChanged) {
+    if (!tokenChanged && !viewportChanged && !viewModeChanged) {
       return;
     }
 
@@ -94,8 +87,7 @@ export const useCalendarScrollPositionSync = ({
     lastRef.current = {
       token: currentToken,
       viewportWidth,
-      activeMode,
       selectedViewMode,
     };
-  }, [activeMode, selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs]);
+  }, [selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs]);
 };
