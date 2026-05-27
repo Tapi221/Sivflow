@@ -42,7 +42,7 @@ export const useCalendarLayout = ({
 
   const monthLabel = null;
 
-  const timelineGridStyle = {
+  const calendarGridStyle = {
     "--calendar-hour-row-height": `${C.DEFAULT_HOUR_ROW_HEIGHT}px`,
     gridTemplateColumns: `${C.TIME_COLUMN_WIDTH}px repeat(${renderDayCount}, ${calendarDayColumnWidth}px)`,
     minWidth: `${gridWidth}px`,
@@ -50,7 +50,7 @@ export const useCalendarLayout = ({
 
   return {
     calendarDayColumnWidth,
-    timelineGridStyle,
+    calendarGridStyle,
     titleDate,
     monthLabel,
   };
