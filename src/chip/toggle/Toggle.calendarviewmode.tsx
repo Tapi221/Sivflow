@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { motion, type Transition } from "framer-motion";
 import type { CalendarViewMode } from "@/features/calendar/calendar.types";
 import { cn } from "@/lib/utils";
@@ -55,10 +56,9 @@ export const ToggleCalendarViewMode = ({
         const isActive = value === option.value;
 
         return (
-          <>
+          <Fragment key={option.value}>
             {option.value === "pieChart" && renderListPlaceholderButton()}
             <button
-              key={option.value}
               type="button"
               aria-pressed={isActive}
               onClick={() => onChange(option.value)}
@@ -79,7 +79,7 @@ export const ToggleCalendarViewMode = ({
               )}
               <span className="relative z-10">{option.label}</span>
             </button>
-          </>
+          </Fragment>
         );
       })}
     </div>
