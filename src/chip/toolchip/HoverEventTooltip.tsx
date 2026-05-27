@@ -139,7 +139,7 @@ const HoverEventTooltip = ({
   title,
   subtitle,
   children,
-  side = "bottom",
+  side = "top",
   offset = 10,
   className,
   accentColor = "#8db9ff",
