@@ -221,21 +221,19 @@ export const useMonthInfiniteScroll = ({
         isExtendingBeforeRef.current = true;
         rangeAnchorRef.current = getCurrentRangeAnchorRef.current?.(scroller) ?? null;
 
-        startTransition(() => {
-          setMonthOffsetRange((currentRange) => {
-            const shouldTrimAfter =
-              currentRange.endOffset - currentRange.startOffset +
-                1 +
-                C.MONTH_EXTEND_COUNT >
-              C.MONTH_MAX_RENDERED_MONTHS;
+        setMonthOffsetRange((currentRange) => {
+          const shouldTrimAfter =
+            currentRange.endOffset - currentRange.startOffset +
+              1 +
+              C.MONTH_EXTEND_COUNT >
+            C.MONTH_MAX_RENDERED_MONTHS;
 
-            return {
-              startOffset: currentRange.startOffset - C.MONTH_EXTEND_COUNT,
-              endOffset: shouldTrimAfter
-                ? currentRange.endOffset - C.MONTH_EXTEND_COUNT
-                : currentRange.endOffset,
-            };
-          });
+          return {
+            startOffset: currentRange.startOffset - C.MONTH_EXTEND_COUNT,
+            endOffset: shouldTrimAfter
+              ? currentRange.endOffset - C.MONTH_EXTEND_COUNT
+              : currentRange.endOffset,
+          };
         });
       }
 
@@ -249,18 +247,16 @@ export const useMonthInfiniteScroll = ({
         isExtendingAfterRef.current = true;
         rangeAnchorRef.current = getCurrentRangeAnchorRef.current?.(scroller) ?? null;
 
-        startTransition(() => {
-          setMonthOffsetRange((currentRange) => ({
-            startOffset:
-              currentRange.endOffset - currentRange.startOffset +
-                1 +
-                C.MONTH_EXTEND_COUNT >
-              C.MONTH_MAX_RENDERED_MONTHS
-                ? currentRange.startOffset + C.MONTH_EXTEND_COUNT
-                : currentRange.startOffset,
-            endOffset: currentRange.endOffset + C.MONTH_EXTEND_COUNT,
-          }));
-        });
+        setMonthOffsetRange((currentRange) => ({
+          startOffset:
+            currentRange.endOffset - currentRange.startOffset +
+              1 +
+              C.MONTH_EXTEND_COUNT >
+            C.MONTH_MAX_RENDERED_MONTHS
+              ? currentRange.startOffset + C.MONTH_EXTEND_COUNT
+              : currentRange.startOffset,
+          endOffset: currentRange.endOffset + C.MONTH_EXTEND_COUNT,
+        }));
       }
 
       // ref 経由で最新のコールバックを呼ぶ
