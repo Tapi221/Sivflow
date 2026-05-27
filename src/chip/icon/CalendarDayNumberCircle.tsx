@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export type CalendarDayNumberCircleProps = {
+type CalendarDayNumberCircleProps = {
   children: ReactNode;
   isToday?: boolean;
   isSelected?: boolean;
@@ -11,6 +11,10 @@ export type CalendarDayNumberCircleProps = {
 
 const CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME =
   "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[12px] font-[450] tabular-nums transition-all duration-150";
+const CALENDAR_DAY_NUMBER_CIRCLE_TODAY_CLASS_NAME =
+  "bg-[var(--ds-color-tag-blue-bg)] !text-[var(--ds-color-tag-blue-fg)] shadow-[0_5px_12px_rgba(12,68,124,0.14)]";
+const CALENDAR_DAY_NUMBER_CIRCLE_SELECTED_CLASS_NAME =
+  "bg-[var(--ds-color-tag-blue-bg)] !text-[var(--ds-color-tag-blue-fg)] shadow-[0_4px_10px_rgba(12,68,124,0.12)]";
 
 const getCalendarDayNumberCircleClassName = ({
   isToday = false,
@@ -21,16 +25,16 @@ const getCalendarDayNumberCircleClassName = ({
   cn(
     CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME,
     isToday
-      ? "bg-[#6d7380] !text-white shadow-[0_5px_12px_rgba(0,0,0,0.12)]"
+      ? CALENDAR_DAY_NUMBER_CIRCLE_TODAY_CLASS_NAME
       : isSelected
-        ? "bg-[#74798b] !text-white shadow-[0_4px_10px_rgba(0,0,0,0.10)]"
+        ? CALENDAR_DAY_NUMBER_CIRCLE_SELECTED_CLASS_NAME
         : isCurrentMonth
           ? "!text-[#666666]"
           : "!text-[#b8b8b8]",
     className,
   );
 
-export const CalendarDayNumberCircle = ({
+const CalendarDayNumberCircle = ({
   children,
   isToday = false,
   isSelected = false,
@@ -50,3 +54,6 @@ export const CalendarDayNumberCircle = ({
     </span>
   );
 };
+
+export { CalendarDayNumberCircle };
+export type { CalendarDayNumberCircleProps };
