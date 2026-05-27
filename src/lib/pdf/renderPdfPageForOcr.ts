@@ -15,7 +15,8 @@ export interface PdfOcrRenderProfile {
   maxDeskewAngle?: number;
 }
 
-const OCR_DEFAULT_TARGET_PIXELS = 4_000_000;
+const OCR_DEFAULT_TARGET_PIXELS = 3_200_000;
+const OCR_MAX_TARGET_PIXELS = 3_200_000;
 const OCR_DEFAULT_MIN_SCALE = 1.6;
 const OCR_DEFAULT_MAX_SCALE = 3.2;
 const OCR_TRIM_THRESHOLD = 246;
@@ -25,6 +26,22 @@ const OCR_DESKEW_ANGLE_STEP = 0.4;
 
 const clamp = (value: number, min: number, max: number) => {
   return Math.min(max, Math.max(min, value));
+};
+
+const releaseCanvas = (canvas: HTMLCanvasElement) => {
+  canvas.width = 0;
+  canvas.height = 0;
+};
+
+const replaceCanvas = (
+  previousCanvas: HTMLCanvasElement,
+  nextCanvas: HTMLCanvasElement,
+) => {
+  if (nextCanvas !== previousCanvas) {
+    releaseCanvas(previousCanvas);
+  }
+
+  return nextCanvas;
 };
 
 const inferScaleFromViewport = ({
@@ -351,10 +368,18 @@ const estimateDeskewAngle = ({
       degrees: angle,
     });
     const score = getProjectionScore(rotatedCanvas);
+    if (rotatedCanvas !== probeCanvas) {
+      releaseCanvas(rotatedCanvas);
+    }
+
     if (score > bestScore) {
       bestScore = score;
       bestAngle = angle;
     }
+  }
+
+  if (probeCanvas !== canvas) {
+    releaseCanvas(probeCanvas);
   }
 
   if (Math.abs(bestAngle) < 0.15) {
@@ -421,22 +446,28 @@ const applyPreprocessMode = ({
       maxAngle: maxDeskewAngle,
     });
     if (Math.abs(deskewAngle) >= 0.15) {
-      nextCanvas = rotateCanvas({
-        canvas: nextCanvas,
-        degrees: deskewAngle,
-      });
+      nextCanvas = replaceCanvas(
+        nextCanvas,
+        rotateCanvas({
+          canvas: nextCanvas,
+          degrees: deskewAngle,
+        }),
+      );
     }
   }
 
   if (rotationDegrees !== 0) {
-    nextCanvas = rotateCanvas({
-      canvas: nextCanvas,
-      degrees: rotationDegrees,
-    });
+    nextCanvas = replaceCanvas(
+      nextCanvas,
+      rotateCanvas({
+        canvas: nextCanvas,
+        degrees: rotationDegrees,
+      }),
+    );
   }
 
   if (trimWhitespace) {
-    nextCanvas = trimWhitespaceCanvas(nextCanvas);
+    nextCanvas = replaceCanvas(nextCanvas, trimWhitespaceCanvas(nextCanvas));
   }
 
   return {
@@ -458,9 +489,15 @@ export const renderPdfPageForOcr = async ({
   const pageLease = await acquirePage(pageNumber);
 
   try {
-    const targetPixels = Math.max(
+    const requestedTargetPixels =
+      typeof profile?.targetPixels === "number" &&
+      Number.isFinite(profile.targetPixels)
+        ? Math.trunc(profile.targetPixels)
+        : OCR_DEFAULT_TARGET_PIXELS;
+    const targetPixels = clamp(
+      requestedTargetPixels,
       800_000,
-      Math.trunc(profile?.targetPixels ?? OCR_DEFAULT_TARGET_PIXELS),
+      OCR_MAX_TARGET_PIXELS,
     );
     const minScale = Math.max(0.8, profile?.minScale ?? OCR_DEFAULT_MIN_SCALE);
     const maxScale = Math.max(
