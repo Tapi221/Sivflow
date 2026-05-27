@@ -1,12 +1,11 @@
 import { motion, type Transition } from "framer-motion";
 import { CalendarIcon } from "@/chip/icons/icons.sidebar";
-import { TaskIcon, TimelineToolbarIcon } from "@/chip/icons/icons.schedule";
-import { cn } from "@/lib/utils";
+import { TaskIcon } from "@/chip/icons/icons.schedule";
 import type { CalendarWorkspaceToolbarProps } from "@/features/calendar/scheduleScreen.types";
+import { cn } from "@/lib/utils";
 
 const TAB_ICON_MAP = {
   calendar: CalendarIcon,
-  timeline: TimelineToolbarIcon,
   task: TaskIcon,
 } as const;
 
@@ -65,7 +64,6 @@ export const ToggleCalendarTimelineTask = ({
               className={cn(
                 "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
                 isActive ? "text-[#8c8c8c]" : "text-[#b7b7b7]",
-                tab.value === "timeline" ? "[&>path]:fill-current" : null,
               )}
             />
           </button>
