@@ -1,12 +1,8 @@
+import { refreshCalendarAccessToken } from "@/integration/google-integration/google.oauth";
 import { fetchCalendarList } from "./gcal.api";
 import { readStoredAccounts, type StoredGoogleAccount, updateStoredAccountCalendarIds, updateStoredAccountToken } from "./gcal.multi-storage";
-import { refreshCalendarAccessToken } from "./gcal.oauth";
 import type { GoogleCalendarListItem } from "./gcalSync.types";
 
-/**
- * OAuth再接続 + 状態更新
- * ただし「同期処理は呼ばない」
- */
 export async function silentReconnect(accountId: string): Promise<{
   accessToken: string;
   calendars: GoogleCalendarListItem[];
