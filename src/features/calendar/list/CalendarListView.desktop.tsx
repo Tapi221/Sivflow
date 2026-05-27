@@ -30,7 +30,6 @@ type CalendarListDaySectionProps = {
 };
 
 type CalendarListEventRowProps = {
-  dateKey: string;
   event: GoogleCalendarEvent;
 };
 
@@ -139,7 +138,7 @@ const buildListDays = (
   });
 };
 
-const CalendarListEventRow = ({ dateKey, event }: CalendarListEventRowProps) => {
+const CalendarListEventRow = ({ event }: CalendarListEventRowProps) => {
   const tokens = generateColorTokens(event.accentColor);
   const title = getEventTitle(event);
   const startLabel = getEventStartTimeLabel(event);
@@ -222,7 +221,6 @@ const CalendarListDaySection = ({
           day.events.map((event) => (
             <CalendarListEventRow
               key={getEventInstanceKey(day.dateKey, event)}
-              dateKey={day.dateKey}
               event={event}
             />
           ))

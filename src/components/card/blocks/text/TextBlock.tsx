@@ -1,8 +1,8 @@
 import React from "react";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent";
-import { Type } from "@/ui/icons";
 import { cn } from "@/lib/utils";
+import { Type } from "@/ui/icons";
 
 interface TextBlockProps {
   content: string;
@@ -25,6 +25,19 @@ interface TextBlockProps {
   onMoveDragEnd?: () => void;
   zoom?: number;
 }
+
+const areTextBlockPropsEqual = (prev: TextBlockProps, next: TextBlockProps) =>
+  prev.content === next.content &&
+  prev.dragEnabled === next.dragEnabled &&
+  prev.dragHandleClassName === next.dragHandleClassName &&
+  prev.accentColor === next.accentColor &&
+  prev.autoFocus === next.autoFocus &&
+  prev.placeholder === next.placeholder &&
+  prev.isBlockSelected === next.isBlockSelected &&
+  prev.showDelete === next.showDelete &&
+  prev.canMoveUp === next.canMoveUp &&
+  prev.canMoveDown === next.canMoveDown &&
+  prev.zoom === next.zoom;
 
 const TextBlockInner = ({
   content,
@@ -83,18 +96,8 @@ const TextBlockInner = ({
   );
 };
 
-const areTextBlockPropsEqual = (prev: TextBlockProps, next: TextBlockProps) =>
-  prev.content === next.content &&
-  prev.dragEnabled === next.dragEnabled &&
-  prev.dragHandleClassName === next.dragHandleClassName &&
-  prev.accentColor === next.accentColor &&
-  prev.autoFocus === next.autoFocus &&
-  prev.placeholder === next.placeholder &&
-  prev.isBlockSelected === next.isBlockSelected &&
-  prev.showDelete === next.showDelete &&
-  prev.canMoveUp === next.canMoveUp &&
-  prev.canMoveDown === next.canMoveDown &&
-  prev.zoom === next.zoom;
+const TextBlock = React.memo(TextBlockInner, areTextBlockPropsEqual);
 
-export const TextBlock = React.memo(TextBlockInner, areTextBlockPropsEqual);
 TextBlock.displayName = "TextBlock";
+
+export { TextBlock };
