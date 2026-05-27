@@ -142,7 +142,14 @@
   }
 
   .ds-tag-input__trigger {
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
     color: var(--ds-semantic-color-text-placeholder);
+    -webkit-appearance: none;
+    appearance: none;
     transition: color var(--ds-semantic-motion-interactive);
   }
 
