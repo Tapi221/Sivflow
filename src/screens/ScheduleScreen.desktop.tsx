@@ -1,13 +1,11 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { addDays, endOfDay, endOfMonth, endOfWeek, format, startOfDay, startOfMonth, startOfWeek } from "date-fns";
+import { format } from "date-fns";
 import type { PlanResultMode } from "@/chip/toggle/Toggle.planresult";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import { useAuthSession } from "@/contexts/AuthContext";
-import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
-import { CalendarTimelineDayView, type TimelineLane } from "@/features/calendar/grid/TimelineDayView";
 import { CalendarSidebar } from "@/features/calendar/panel/CalendarSidebar";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { TaskView } from "@/features/calendar/task/TaskView";
@@ -21,9 +19,6 @@ import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
 
 type StoredAppCalendarItem = Partial<AppCalendarItem>;
 
-const IOS_CALENDAR_SURFACE_CLASS =
-  "border-transparent bg-white shadow-none";
-
 const IOS_CALENDAR_MONTH_SURFACE_CLASS =
   "border-transparent bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 
@@ -32,7 +27,6 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
 
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const SELECTED_TASK_LISTS_STORAGE_KEY_PREFIX = "flashcard-master:schedule:selected-google-task-list-ids";
-const DEFAULT_TIMELINE_CALENDAR_COLOR = "#74798b";
 const DEFAULT_PLAN_RESULT_MODES: readonly PlanResultMode[] = ["plan", "actual"];
 const PLAN_RESULT_TOGGLE_VIEW_MODES = new Set(["threeDays", "days", "pieChart"]);
 const APP_PROJECT_COLORS = [
@@ -183,7 +177,6 @@ export const ScheduleScreen = ({
     titleDate,
     monthTitleDate,
     monthScrollTargetToken,
-    timelineUnitBuffer,
     visibleDays,
     googleCalendarEvents,
     googleAccounts,
@@ -198,7 +191,6 @@ export const ScheduleScreen = ({
     setActiveMode,
     handleSelectViewMode,
     handleSidebarSelectDate,
-    handleTimelineSelectDate,
     handleSidebarPreviousMonth,
     handleSidebarNextMonth,
     handleVisibleMonthChange,
@@ -318,63 +310,8 @@ export const ScheduleScreen = ({
   }, [googleCalendarEvents, taskCalendarEvents]);
   const deferredCalendarEvents = useDeferredValue(calendarEvents);
 
-  const timelineLanes = useMemo<TimelineLane[]>(() => {
-    const appProjectLanes = appProjects.map((project) => ({
-      id: project.id,
-      label: project.label,
-      color: project.color,
-      checked: project.checked,
-      projectIds: [project.label],
-    }));
-
-    const googleCalendarLanes = googleAccounts.flatMap((account) =>
-      account.calendars.map((calendar) => ({
-        id: `${account.accountId}:${calendar.id}`,
-        label: calendar.summaryOverride ?? calendar.summary,
-        color: calendar.backgroundColor ?? DEFAULT_TIMELINE_CALENDAR_COLOR,
-        checked: account.selectedCalendarIds.has(calendar.id),
-        calendarIds: [calendar.id],
-        projectIds: [
-          calendar.id,
-          calendar.summary,
-          calendar.summaryOverride,
-          calendar.description,
-        ].filter((value): value is string => Boolean(value)),
-      })),
-    );
-
-    return [...appProjectLanes, ...googleCalendarLanes];
-  }, [appProjects, googleAccounts]);
-
   const sidebarMonthDate =
     selectedViewMode === "month" ? monthTitleDate : titleDate;
-
-  const sidebarSelectedRange = useMemo(() => {
-    if (activeMode !== "timeline") return null;
-
-    if (selectedViewMode === "week") {
-      return {
-        start: startOfWeek(selectedDate, { weekStartsOn: C.WEEK_STARTS_ON_MONDAY }),
-        end: endOfWeek(selectedDate, { weekStartsOn: C.WEEK_STARTS_ON_MONDAY }),
-      };
-    }
-
-    if (selectedViewMode === "threeDays") {
-      return {
-        start: startOfDay(selectedDate),
-        end: endOfDay(addDays(selectedDate, 2)),
-      };
-    }
-
-    if (selectedViewMode === "month") {
-      return {
-        start: startOfMonth(selectedDate),
-        end: endOfMonth(selectedDate),
-      };
-    }
-
-    return null;
-  }, [activeMode, selectedDate, selectedViewMode]);
 
   const isYearCalendarView =
     activeMode === "calendar" && selectedViewMode === "year";
@@ -406,7 +343,6 @@ export const ScheduleScreen = ({
           activeMode={activeMode}
           viewMode={selectedViewMode}
           onSelectCalendar={() => setActiveMode("calendar")}
-          onSelectTimeline={() => setActiveMode("timeline")}
           onSelectTask={() => setActiveMode("task")}
           onSelectViewMode={handleSelectViewMode}
         />
@@ -415,7 +351,7 @@ export const ScheduleScreen = ({
         <CalendarSidebar
           monthDate={sidebarMonthDate}
           selectedDate={selectedDate}
-          selectedRange={sidebarSelectedRange}
+          selectedRange={null}
           activeMode={activeMode}
           appProjects={appProjects}
           googleAccounts={googleAccounts}
@@ -506,40 +442,21 @@ export const ScheduleScreen = ({
           <div
             className={cn(
               "ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border-0",
-              activeMode === "timeline"
-                ? IOS_CALENDAR_SURFACE_CLASS
-                : IOS_CALENDAR_WEEKDAY_SURFACE_CLASS,
+              IOS_CALENDAR_WEEKDAY_SURFACE_CLASS,
             )}
           >
-            {activeMode === "timeline" ? (
-              <CalendarTimelineDayView
-                viewMode={selectedViewMode}
-                anchorDate={currentDate}
-                timelineUnitBuffer={timelineUnitBuffer}
-                selectedDate={selectedDate}
-                dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
-                laneLabelWidth={C.TIMELINE_LANE_LABEL_WIDTH}
-                rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
-                lanes={timelineLanes}
-                visibleEvents={deferredCalendarEvents}
-                scrollContainerRef={scrollContainerRef}
-                onScroll={handleCalendarScroll}
-                onSelectDate={handleTimelineSelectDate}
-              />
-            ) : (
-              <CalendarWeekDayGrid
-                headerScrollRef={headerScrollRef}
-                allDayScrollRef={allDayScrollRef}
-                scrollContainerRef={scrollContainerRef}
-                visibleDays={visibleDays}
-                visibleEvents={deferredCalendarEvents}
-                calendarDayColumnWidth={calendarDayColumnWidth}
-                timelineGridStyle={timelineGridStyle}
-                onScroll={handleCalendarScroll}
-                selectedDate={selectedDate}
-                onSelectDate={handleSidebarSelectDate}
-              />
-            )}
+            <CalendarWeekDayGrid
+              headerScrollRef={headerScrollRef}
+              allDayScrollRef={allDayScrollRef}
+              scrollContainerRef={scrollContainerRef}
+              visibleDays={visibleDays}
+              visibleEvents={deferredCalendarEvents}
+              calendarDayColumnWidth={calendarDayColumnWidth}
+              timelineGridStyle={timelineGridStyle}
+              onScroll={handleCalendarScroll}
+              selectedDate={selectedDate}
+              onSelectDate={handleSidebarSelectDate}
+            />
           </div>
         )}
       </CarvePanel>
