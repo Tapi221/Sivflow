@@ -41,6 +41,7 @@ export type Translations = {
   fieldsAction: string;
 
   // ビューモード
+  viewYear: string;
   viewMonth: string;
   viewWeek: string;
   viewThreeDays: string;
@@ -101,6 +102,7 @@ const ja: Translations = {
   sortAction: "並び替え",
   fieldsAction: "フィールド",
 
+  viewYear: "年",
   viewMonth: "月",
   viewWeek: "週",
   viewThreeDays: "3日",
@@ -158,6 +160,7 @@ const en: Translations = {
   sortAction: "Sort",
   fieldsAction: "Fields",
 
+  viewYear: "Year",
   viewMonth: "Month",
   viewWeek: "Week",
   viewThreeDays: "3 Days",
