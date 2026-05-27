@@ -136,7 +136,7 @@ const CurrentTimeLabel = ({ currentMinutes }: CurrentTimeLabelProps) => {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute right-0 z-30 flex h-6 w-full -translate-y-1/2 select-none items-center justify-end bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,white_32%,white_68%,rgba(255,255,255,0)_100%)] pr-2 text-[12px] font-semibold leading-none tabular-nums text-[#3f7fc5]"
+      className="pointer-events-none absolute right-0 z-[80] flex h-6 w-full -translate-y-1/2 select-none items-center justify-end bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,white_32%,white_68%,rgba(255,255,255,0)_100%)] pr-2 text-[12px] font-semibold leading-none tabular-nums text-[#3f7fc5]"
       style={{
         top: `calc(${currentMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(--calendar-hour-row-height))`,
       }}
@@ -342,35 +342,37 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
             );
           })}
 
-          <div className="sticky left-0 z-30 overflow-hidden border-r border-[#eeeeee] bg-white shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]">
-            {HOURS.map((hour) => (
+          <div className="sticky left-0 overflow-visible">
+            <div className="relative z-30 overflow-hidden border-r border-[#eeeeee] bg-white shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]">
+              {HOURS.map((hour) => (
+                <div
+                  key={hour}
+                  className="bg-white"
+                  style={{ height: "var(--calendar-hour-row-height)" }}
+                />
+              ))}
+
               <div
-                key={hour}
+                aria-hidden="true"
                 className="bg-white"
-                style={{ height: "var(--calendar-hour-row-height)" }}
+                style={{ height: BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT }}
               />
-            ))}
 
-            <div
-              aria-hidden="true"
-              className="bg-white"
-              style={{ height: BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT }}
-            />
-
-            {HOUR_BOUNDARY_LABELS.map((hour) => (
-              <span
-                key={`weekday-hour-label-${hour}`}
-                className={cn(
-                  "absolute right-1 z-10 flex h-6 select-none items-center justify-end rounded-md bg-white px-1 text-[12px] font-medium tabular-nums text-[#b3b3b3]",
-                  getHourBoundaryLabelOffsetClass(hour),
-                )}
-                style={{
-                  top: `calc(${hour} * var(--calendar-hour-row-height))`,
-                }}
-              >
-                {createHourLabel(hour)}
-              </span>
-            ))}
+              {HOUR_BOUNDARY_LABELS.map((hour) => (
+                <span
+                  key={`weekday-hour-label-${hour}`}
+                  className={cn(
+                    "absolute right-1 z-10 flex h-6 select-none items-center justify-end rounded-md bg-white px-1 text-[12px] font-medium tabular-nums text-[#b3b3b3]",
+                    getHourBoundaryLabelOffsetClass(hour),
+                  )}
+                  style={{
+                    top: `calc(${hour} * var(--calendar-hour-row-height))`,
+                  }}
+                >
+                  {createHourLabel(hour)}
+                </span>
+              ))}
+            </div>
 
             <CurrentTimeLabel currentMinutes={currentMinutes} />
           </div>
