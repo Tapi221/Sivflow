@@ -17,7 +17,7 @@ export type ScrollBarProps = {
   thumbClassName?: string;
 };
 
-export const ScrollBar = React.forwardRef<HTMLInputElement, ScrollBarProps>(
+const ScrollBar = React.forwardRef<HTMLInputElement, ScrollBarProps>(
   (
     {
       value,
@@ -57,3 +57,5 @@ export const ScrollBar = React.forwardRef<HTMLInputElement, ScrollBarProps>(
 );
 
 ScrollBar.displayName = "ScrollBar";
+
+export { ScrollBar };
