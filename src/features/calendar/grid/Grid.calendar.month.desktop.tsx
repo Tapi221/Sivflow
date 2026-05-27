@@ -339,7 +339,7 @@ const CalendarMonthWeekRow = memo(({
 
 CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 
-const GridCalendarMonthDesktopComponent = ({
+const GridCalendarMonthDesktop = ({
   today,
   selectedDate,
   visibleEvents,
@@ -494,6 +494,6 @@ const GridCalendarMonthDesktopComponent = ({
   );
 };
 
-GridCalendarMonthDesktopComponent.displayName = "GridCalendarMonthDesktop";
+GridCalendarMonthDesktop.displayName = "GridCalendarMonthDesktop";
 
-export const GridCalendarMonthDesktop = memo(GridCalendarMonthDesktopComponent);
+export { GridCalendarMonthDesktop };
