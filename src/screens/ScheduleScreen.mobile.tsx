@@ -1,24 +1,20 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
 import { TodayBar } from "@/chip/bar/TodayBar";
-import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
-import { SidebarPanelIcon } from "@/chip/icons/icons.schedule";
 import { CalendarIcon } from "@/chip/icons/icons.sidebar";
+import { SidebarPanelIcon } from "@/chip/icons/icons.schedule";
+import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
-import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
-import { CalendarTimelineDayView, type TimelineLane } from "@/features/calendar/grid/TimelineDayView";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { TaskView } from "@/features/calendar/task/TaskView";
 import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCalendarEvents";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { CalendarPieChartView } from "@/features/calendar/view/CalendarPieChartView";
-import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
-
-const IOS_CALENDAR_SURFACE_CLASS = "border-transparent bg-white shadow-none";
+import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
 
 const IOS_CALENDAR_MONTH_SURFACE_CLASS =
   "border-transparent bg-[rgba(255,255,255,0.94)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
@@ -27,8 +23,6 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
 
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
-const DEFAULT_TIMELINE_CALENDAR_COLOR = "#74798b";
-const MOBILE_TIMELINE_LANE_LABEL_WIDTH = 92;
 const APP_PROJECT_COLORS = [
   "#34c759",
   "#ff3b30",
@@ -139,7 +133,6 @@ export const ScheduleScreen = ({
     titleDate,
     monthTitleDate,
     monthScrollTargetToken,
-    timelineUnitBuffer,
     visibleDays,
     googleCalendarEvents,
     googleAccounts,
@@ -153,7 +146,6 @@ export const ScheduleScreen = ({
     setActiveMode,
     handleSelectViewMode,
     handleSidebarSelectDate,
-    handleTimelineSelectDate,
     handleVisibleMonthChange,
     handlePrevious,
     handleNext,
@@ -218,34 +210,6 @@ export const ScheduleScreen = ({
     return [...googleCalendarEvents, ...taskCalendarEvents];
   }, [googleCalendarEvents, taskCalendarEvents]);
 
-  const timelineLanes = useMemo<TimelineLane[]>(() => {
-    const appProjectLanes = appProjects.map((project) => ({
-      id: project.id,
-      label: project.label,
-      color: project.color,
-      checked: project.checked,
-      projectIds: [project.label],
-    }));
-
-    const googleCalendarLanes = googleAccounts.flatMap((account) =>
-      account.calendars.map((calendar) => ({
-        id: `${account.accountId}:${calendar.id}`,
-        label: calendar.summaryOverride ?? calendar.summary,
-        color: calendar.backgroundColor ?? DEFAULT_TIMELINE_CALENDAR_COLOR,
-        checked: account.selectedCalendarIds.has(calendar.id),
-        calendarIds: [calendar.id],
-        projectIds: [
-          calendar.id,
-          calendar.summary,
-          calendar.summaryOverride,
-          calendar.description,
-        ].filter((value): value is string => Boolean(value)),
-      })),
-    );
-
-    return [...appProjectLanes, ...googleCalendarLanes];
-  }, [appProjects, googleAccounts]);
-
   const isMonthCalendarView =
     activeMode === "calendar" && selectedViewMode === "month";
   const isPieChartCalendarView =
@@ -260,11 +224,6 @@ export const ScheduleScreen = ({
 
   const handleSelectDate = useCallback(
     (date: Date) => {
-      if (activeMode === "timeline") {
-        handleTimelineSelectDate(date);
-        return;
-      }
-
       if (selectedViewMode === "month") {
         handleMonthCellSelectDate(date);
         return;
@@ -272,13 +231,7 @@ export const ScheduleScreen = ({
 
       handleSidebarSelectDate(date);
     },
-    [
-      activeMode,
-      handleMonthCellSelectDate,
-      handleSidebarSelectDate,
-      handleTimelineSelectDate,
-      selectedViewMode,
-    ],
+    [handleMonthCellSelectDate, handleSidebarSelectDate, selectedViewMode],
   );
 
   const renderViewHeader = (className: string) => {
@@ -386,40 +339,21 @@ export const ScheduleScreen = ({
         <div
           className={cn(
             "mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border",
-            activeMode === "timeline"
-              ? IOS_CALENDAR_SURFACE_CLASS
-              : IOS_CALENDAR_WEEKDAY_SURFACE_CLASS,
+            IOS_CALENDAR_WEEKDAY_SURFACE_CLASS,
           )}
         >
-          {activeMode === "timeline" ? (
-            <CalendarTimelineDayView
-              viewMode={selectedViewMode}
-              anchorDate={currentDate}
-              timelineUnitBuffer={timelineUnitBuffer}
-              selectedDate={selectedDate}
-              dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
-              laneLabelWidth={MOBILE_TIMELINE_LANE_LABEL_WIDTH}
-              rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
-              lanes={timelineLanes}
-              visibleEvents={calendarEvents}
-              scrollContainerRef={scrollContainerRef}
-              onScroll={handleCalendarScroll}
-              onSelectDate={handleTimelineSelectDate}
-            />
-          ) : (
-            <CalendarWeekDayGrid
-              headerScrollRef={headerScrollRef}
-              allDayScrollRef={allDayScrollRef}
-              scrollContainerRef={scrollContainerRef}
-              visibleDays={visibleDays}
-              visibleEvents={calendarEvents}
-              calendarDayColumnWidth={calendarDayColumnWidth}
-              timelineGridStyle={timelineGridStyle}
-              onScroll={handleCalendarScroll}
-              selectedDate={selectedDate}
-              onSelectDate={handleSidebarSelectDate}
-            />
-          )}
+          <CalendarWeekDayGrid
+            headerScrollRef={headerScrollRef}
+            allDayScrollRef={allDayScrollRef}
+            scrollContainerRef={scrollContainerRef}
+            visibleDays={visibleDays}
+            visibleEvents={calendarEvents}
+            calendarDayColumnWidth={calendarDayColumnWidth}
+            timelineGridStyle={timelineGridStyle}
+            onScroll={handleCalendarScroll}
+            selectedDate={selectedDate}
+            onSelectDate={handleSidebarSelectDate}
+          />
         </div>
       </CarvePanel>
     );
@@ -477,7 +411,6 @@ export const ScheduleScreen = ({
           activeMode={activeMode}
           viewMode={selectedViewMode}
           onSelectCalendar={() => setActiveMode("calendar")}
-          onSelectTimeline={() => setActiveMode("timeline")}
           onSelectTask={() => setActiveMode("task")}
           onSelectViewMode={handleSelectViewMode}
         />
