@@ -6,8 +6,6 @@ import { SharedCardViewScene } from "./SharedCardViewScene";
 import { cn } from "@/lib/utils";
 import { CONTENT_TYPO } from "@/styles/tokens/typography";
 
-export type { SharedCardContentProps } from "./SharedCardContent.types";
-
 type SharedCardContentRootProps = Readonly<{
   className?: string;
   children: React.ReactNode;
@@ -59,3 +57,4 @@ SharedCardContentScene.displayName = "SharedCardContentScene";
 SharedCardContent.displayName = "SharedCardContent";
 
 export { SharedCardContent };
+export type { SharedCardContentProps };
