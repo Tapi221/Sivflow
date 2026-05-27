@@ -28,12 +28,14 @@ type HoverMonthEventTooltipProps = {
   disabled?: boolean;
 };
 
-const TOOLTIP_SURFACE_CLASS_NAME = "relative flex w-[min(320px,calc(100vw-24px))] flex-col overflow-visible rounded-[16px] border border-[#dceefa]/80 bg-[#f8fcff]/90 px-3 py-2 text-[#48616f] shadow-[0_12px_30px_rgba(92,128,154,0.14),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-2xl";
-const TOOLTIP_TITLE_CLASS_NAME = "block whitespace-pre-wrap break-all text-[12px] font-semibold leading-snug tracking-[-0.01em] text-[#3f5968]";
-const TOOLTIP_ARROW_CLASS_NAME = "absolute h-2.5 w-2.5 rotate-45 border-[#dceefa]/80 bg-[#f8fcff]/90 backdrop-blur-2xl";
+const TOOLTIP_SURFACE_CLASS_NAME = "relative flex w-fit max-w-[220px] flex-col overflow-visible rounded-[10px] border border-[#dceefa]/80 bg-[#f8fcff]/95 px-2.5 py-1.5 text-[#48616f] shadow-[0_8px_18px_rgba(92,128,154,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl";
+const TOOLTIP_TITLE_ROW_CLASS_NAME = "flex min-w-0 items-center gap-1.5";
+const TOOLTIP_ACCENT_DOT_CLASS_NAME = "h-1.5 w-1.5 shrink-0 rounded-full";
+const TOOLTIP_TITLE_CLASS_NAME = "block min-w-0 whitespace-normal break-words text-[11px] font-semibold leading-snug tracking-[-0.01em] text-[#3f5968]";
+const TOOLTIP_ARROW_CLASS_NAME = "absolute h-2 w-2 rotate-45 border-[#dceefa]/80 bg-[#f8fcff]/95 backdrop-blur-xl";
 const TOOLTIP_VIEWPORT_MARGIN = 12;
 const TOOLTIP_BOUNDARY_GAP = 8;
-const TOOLTIP_ARROW_MARGIN = 18;
+const TOOLTIP_ARROW_MARGIN = 12;
 
 const clampNumber = (value: number, min: number, max: number) => {
   if (max < min) return min;
@@ -131,9 +133,9 @@ const getInitialPosition = (
 };
 
 const getArrowClassName = (side: TooltipSide) => {
-  if (side === "bottom") return "top-[-4px] -translate-x-1/2 border-l border-t";
+  if (side === "bottom") return "top-[-3px] -translate-x-1/2 border-l border-t";
 
-  return "bottom-[-4px] -translate-x-1/2 border-b border-r";
+  return "bottom-[-3px] -translate-x-1/2 border-b border-r";
 };
 
 const HoverMonthEventTooltip = ({
@@ -235,20 +237,22 @@ const HoverMonthEventTooltip = ({
             )}
           >
             <div className={TOOLTIP_SURFACE_CLASS_NAME}>
-              <span
-                aria-hidden="true"
-                className="mb-2 h-1 w-12 rounded-full"
-                style={{ background: accentColor }}
-              />
-
               {tooltipTitle && (
-                <span className={TOOLTIP_TITLE_CLASS_NAME}>
-                  {tooltipTitle}
+                <span className={TOOLTIP_TITLE_ROW_CLASS_NAME}>
+                  <span
+                    aria-hidden="true"
+                    className={TOOLTIP_ACCENT_DOT_CLASS_NAME}
+                    style={{ backgroundColor: accentColor }}
+                  />
+
+                  <span className={TOOLTIP_TITLE_CLASS_NAME}>
+                    {tooltipTitle}
+                  </span>
                 </span>
               )}
 
               {tooltipTimeLabel && (
-                <span className="mt-1.5 inline-flex w-fit rounded-full border border-white/80 bg-white/70 px-2 py-0.5 text-[10px] font-semibold leading-none tabular-nums text-[#6d8998] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
+                <span className="mt-1 inline-flex w-fit rounded-full border border-white/80 bg-white/75 px-1.5 py-[2px] text-[9px] font-semibold leading-none tabular-nums text-[#6d8998] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
                   {tooltipTimeLabel}
                 </span>
               )}
