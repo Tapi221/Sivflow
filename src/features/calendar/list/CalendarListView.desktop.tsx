@@ -39,7 +39,7 @@ type CalendarListEventCardStyle = CSSProperties & {
 };
 
 const ALL_DAY_LABEL = "終日";
-const EMPTY_DAY_LABEL = "この日の予定はありません";
+const EMPTY_DAY_LABEL = "予定なし";
 const EMPTY_MONTH_LABEL = "この期間の予定はありません";
 const SELECTED_DAY_SCROLL_BLOCK: ScrollLogicalPosition = "nearest";
 
@@ -139,18 +139,6 @@ const buildListDays = (
   });
 };
 
-const getVisibleListDays = (days: CalendarListDay[]): CalendarListDay[] => {
-  const hasEvents = days.some((day) => day.events.length > 0);
-
-  if (!hasEvents) {
-    const selectedDays = days.filter((day) => day.isSelected);
-
-    return selectedDays.length > 0 ? selectedDays.slice(0, 1) : days.slice(0, 1);
-  }
-
-  return days.filter((day) => day.events.length > 0 || day.isSelected);
-};
-
 const CalendarListEventRow = ({ dateKey, event }: CalendarListEventRowProps) => {
   const tokens = generateColorTokens(event.accentColor);
   const title = getEventTitle(event);
@@ -191,15 +179,15 @@ const CalendarListEventRow = ({ dateKey, event }: CalendarListEventRowProps) => 
 };
 
 const EmptyDayCard = ({ isMonthEmpty }: { isMonthEmpty: boolean }) => (
-  <div className="grid min-h-[50px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch">
-    <div className="pt-3 text-right text-[12px] font-medium leading-none text-[rgba(60,60,67,0.34)]">
+  <div className="grid min-h-[38px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch">
+    <div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[rgba(60,60,67,0.34)]">
       —
     </div>
     <div className="relative flex justify-center">
       <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#eef1f4]" aria-hidden="true" />
-      <span className="relative mt-[9px] h-2.5 w-2.5 rounded-full border-2 border-[#d9dee6] bg-white" aria-hidden="true" />
+      <span className="relative mt-[8px] h-2 w-2 rounded-full border border-[#d9dee6] bg-white" aria-hidden="true" />
     </div>
-    <div className="flex min-h-[46px] items-center rounded-[11px] border border-dashed border-[#dfe3e8] bg-[#fbfcfd] px-3 text-[12px] font-medium text-[#8f929c]">
+    <div className="flex min-h-[34px] items-center rounded-[10px] border border-dashed border-[#e3e6eb] bg-[#fbfcfd] px-3 text-[12px] font-medium text-[#a1a5ad]">
       {isMonthEmpty ? EMPTY_MONTH_LABEL : EMPTY_DAY_LABEL}
     </div>
   </div>
@@ -258,18 +246,17 @@ const CalendarListViewComponent = ({
     () => buildListDays(days, events, selectedDate),
     [days, events, selectedDate],
   );
-  const visibleDays = useMemo(() => getVisibleListDays(listDays), [listDays]);
   const isMonthEmpty = listDays.every((day) => day.events.length === 0);
 
   useEffect(() => {
     selectedDayElementRef.current?.scrollIntoView({ block: SELECTED_DAY_SCROLL_BLOCK });
-  }, [selectedDate, visibleDays]);
+  }, [selectedDate, listDays]);
 
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}>
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden">
-        <div className="mx-auto flex w-full max-w-[940px] flex-col gap-5">
-          {visibleDays.map((day) => (
+        <div className="mx-auto flex w-full max-w-[940px] flex-col gap-2">
+          {listDays.map((day) => (
             <CalendarListDaySection
               key={day.dateKey}
               day={day}
@@ -280,7 +267,7 @@ const CalendarListViewComponent = ({
             />
           ))}
 
-          {visibleDays.length === 0 ? (
+          {listDays.length === 0 ? (
             <EmptyDayCard isMonthEmpty={isMonthEmpty} />
           ) : null}
         </div>
