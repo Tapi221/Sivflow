@@ -1,7 +1,7 @@
-const noop = () => undefined;
-
 type ConsoleMethodName = "debug" | "log" | "info" | "warn" | "error";
 type ConsoleMethod = (...data: unknown[]) => void;
+
+const noop = () => undefined;
 
 const JAPANESE_CONSOLE_LABELS_INSTALLED_KEY = "__flashcardMasterJapaneseConsoleLabelsInstalled";
 
