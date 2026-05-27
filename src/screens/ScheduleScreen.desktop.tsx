@@ -5,11 +5,11 @@ import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.deskt
 import { useAuthSession } from "@/contexts/AuthContext";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
+import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import { CalendarTimelineDayView, type TimelineLane } from "@/features/calendar/grid/TimelineDayView";
 import { useScheduleScreenStore } from "@/features/calendar/header/useScheduleScreenStore";
 import { CalendarSidebar } from "@/features/calendar/panel/CalendarSidebar";
-import { DayDetailPanel } from "@/pane/rightpane/DayDetailPanel";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { TaskView } from "@/features/calendar/task/TaskView";
 import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCalendarEvents";
@@ -17,8 +17,11 @@ import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { CalendarPieChartView } from "@/features/calendar/view/CalendarPieChartView";
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
-import { cn } from "@/lib/utils";
 import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
+import { DayDetailPanel } from "@/pane/rightpane/DayDetailPanel";
+import { cn } from "@/lib/utils";
+
+type StoredAppCalendarItem = Partial<AppCalendarItem>;
 
 const IOS_CALENDAR_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
@@ -43,8 +46,6 @@ const APP_PROJECT_COLORS = [
   "#66a77a",
   "#9ca3ff",
 ];
-
-type StoredAppCalendarItem = Partial<AppCalendarItem>;
 
 const createAppProjectId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -136,6 +137,7 @@ const persistSelectedTaskListIds = (storageKey: string, ids: Set<string>) => {
 
 const hasEqualSetValues = (a: Set<string>, b: Set<string>): boolean => {
   if (a.size !== b.size) return false;
+
   return Array.from(a).every((value) => b.has(value));
 };
 
@@ -168,13 +170,14 @@ export const ScheduleScreen = ({
 
   const viewOptions = useMemo(
     () => [
+      { value: "year", label: t.viewYear },
       { value: "month", label: t.viewMonth },
       { value: "week", label: t.viewWeek },
       { value: "threeDays", label: t.viewThreeDays },
       { value: "days", label: t.viewDay },
       { value: "pieChart", label: t.viewPieChart },
     ] as const,
-    [t.viewDay, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewWeek],
+    [t.viewDay, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewWeek, t.viewYear],
   );
 
   const {
@@ -298,9 +301,7 @@ export const ScheduleScreen = ({
 
       return hasEqualSetValues(ids, nextIds) ? ids : nextIds;
     });
-    // allTaskListIdsKey でリストの実質的な変化だけを検知する。
-    // 配列参照そのものを依存に入れると、チェック操作ごとに不要な再評価が走りやすい。
-  }, [allTaskListIdsKey, selectedTaskListsStorageKey]);
+  }, [allTaskListIds, allTaskListIdsKey, selectedTaskListsStorageKey]);
 
   const handleToggleTaskList = useCallback((taskListId: string) => {
     setSelectedTaskListIds((ids) => {
@@ -388,6 +389,9 @@ export const ScheduleScreen = ({
   const isDayDetailPanelCollapsed =
     canShowDayDetailPanel && !showDayDetailPanel;
 
+  const isYearCalendarView =
+    activeMode === "calendar" && selectedViewMode === "year";
+
   const isMonthCalendarView =
     activeMode === "calendar" && selectedViewMode === "month";
 
@@ -402,9 +406,9 @@ export const ScheduleScreen = ({
   const headerTitleDate =
     selectedViewMode === "month" ? monthTitleDate : titleDate;
 
-  const headerTitleLabel = format(headerTitleDate, monthLabelFormat, {
-    locale: dateFnsLocale,
-  });
+  const headerTitleLabel = selectedViewMode === "year"
+    ? format(headerTitleDate, "yyyy年", { locale: dateFnsLocale })
+    : format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale });
 
   useEffect(() => {
     setCanToggleDayDetailPanel(canShowDayDetailPanel);
@@ -506,6 +510,15 @@ export const ScheduleScreen = ({
               onUpdateGoogleTask={updateGoogleTask}
               onMoveGoogleTaskList={moveGoogleTaskList}
               onDeleteGoogleTask={deleteGoogleTask}
+            />
+          </div>
+        ) : isYearCalendarView ? (
+          <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[22px] border border-[#eeeeee] bg-white">
+            <CalendarYearView
+              yearDate={currentDate}
+              selectedDate={selectedDate}
+              visibleEvents={deferredCalendarEvents}
+              onSelectDate={handleMonthCellSelectDate}
             />
           </div>
         ) : isPieChartCalendarView ? (
