@@ -63,9 +63,9 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
     },
     pieChart: {
       unitsPerScreen: 1,
-      initialScreens: { before: 0, after: 0 },
-      extendScreens: 0,
-      maxUnits: { before: 0, after: 0 },
+      initialScreens: { before: 14, after: 14 },
+      extendScreens: 14,
+      maxUnits: { before: 3650, after: 3650 },
     },
   },
 } satisfies Record<CalendarScrollBufferSurface, Record<CalendarViewMode, CalendarScrollBufferConfig>>;
