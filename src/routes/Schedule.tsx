@@ -35,7 +35,7 @@ const Calendar = () => {
   const initialActiveMode = useMemo<CalendarToolbarMode | undefined>(() => {
     const mode = new URLSearchParams(search).get("mode");
 
-    if (mode === "calendar" || mode === "timeline" || mode === "task") {
+    if (mode === "calendar" || mode === "task") {
       return mode;
     }
 
