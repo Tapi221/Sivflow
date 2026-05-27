@@ -110,7 +110,7 @@ const CommandItem = React.forwardRef<
 
 CommandItem.displayName = CommandPrimitive.Item.displayName;
 
-const CommandShortcut = ({ className, ...props }) => {
+const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span
       className={cn(
@@ -123,4 +123,4 @@ const CommandShortcut = ({ className, ...props }) => {
 };
 CommandShortcut.displayName = "CommandShortcut";
 
-export { Command, CommandGroup, CommandInput, CommandItem,CommandList };
+export { Command, CommandGroup, CommandInput, CommandItem, CommandList };
