@@ -343,7 +343,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
               >
                 <span
                   className={cn(
-                    "absolute bottom-0 right-1 z-10 flex h-6 translate-y-1/2 select-none items-center justify-end rounded-md bg-white px-1 text-[12px] font-semibold tabular-nums",
+                    "absolute bottom-0 right-1 z-10 flex h-6 translate-y-1/2 select-none items-center justify-end rounded-md bg-white px-1 text-[12px] font-medium tabular-nums",
                     "text-[#b3b3b3]",
                   )}
                 >

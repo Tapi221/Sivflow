@@ -1,5 +1,5 @@
 import { clipEventToDay, compareCalendarEvents } from "@/features/calendar/calendarEventRange";
-import { EventChipDayDetail } from "@/chip/eventchip/EventChip.schedule.daydetail";
+import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.schedule.weekday";
 import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.layout.weekday.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
@@ -202,7 +202,7 @@ export const GridCalendarDayDetailDesktop = ({ date, events }: Props) => {
                 width: `calc(${position.width * 100}% - ${leftInset + rightInset}px)`,
               }}
             >
-              <EventChipDayDetail
+              <CalendarEventChipWeekday
                 event={ev}
                 compact={height < COMPACT_EVENT_HEIGHT_PX || position.width < 0.5}
               />
