@@ -11,41 +11,12 @@ import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
 import { getVisibleMonthEventChipCount } from "@/features/calendar/grid/monthEventChipCount";
 import { cn } from "@/lib/utils";
 
-export { getVisibleMonthEventChipCount } from "@/features/calendar/grid/monthEventChipCount";
-
 type CalendarMonthDayEvents = {
   visibleEvents: GoogleCalendarEvent[];
   totalCount: number;
 };
 
 type CalendarMonthEventIndex = Map<string, GoogleCalendarEvent[]>;
-
-const EMPTY_DAY_EVENTS: CalendarMonthDayEvents = {
-  visibleEvents: [],
-  totalCount: 0,
-};
-
-const getDayKey = (date: Date): string => {
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${date.getFullYear()}-${month}-${day}`;
-};
-
-const getDayAriaLabel = (date: Date): string => {
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-};
-
-const getMonthAnnotation = (
-  date: Date,
-): string | null => {
-  if (date.getDate() !== 1)
-    return null;
-
-  return format(date, "M月", {
-    locale: ja,
-  });
-};
 
 type CalendarMonthGridDay = {
   date: Date;
@@ -89,6 +60,75 @@ type CalendarMonthDayCellProps = {
   selected: boolean;
   isScrollHovered: boolean;
   onSelectDate: (date: Date) => void;
+};
+
+type CalendarMonthWeekRowProps = {
+  week: CalendarMonthGridWeek;
+  eventsByDay: Map<string, CalendarMonthDayEvents>;
+  selectedDayKey: string;
+  todayDayKey: string;
+  scrollHoverDayKey: string | null;
+  monthRowHeight: number;
+  setWeekRowRef: (
+    key: string,
+    node: HTMLDivElement | null,
+  ) => void;
+  onSelectDate: (
+    date: Date,
+  ) => void;
+  handleResizeReset: () => void;
+  handleResizeKeyDown: (
+    event: React.KeyboardEvent<HTMLDivElement>,
+  ) => void;
+  handleResizePointerDown: (
+    event: React.PointerEvent<HTMLDivElement>,
+  ) => void;
+};
+
+const EMPTY_DAY_EVENTS: CalendarMonthDayEvents = {
+  visibleEvents: [],
+  totalCount: 0,
+};
+
+const getDayKey = (date: Date): string => {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${date.getFullYear()}-${month}-${day}`;
+};
+
+const getDayAriaLabel = (date: Date): string => {
+  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+};
+
+const getMonthAnnotation = (
+  date: Date,
+): string | null => {
+  if (date.getDate() !== 1)
+    return null;
+
+  return format(date, "M月", {
+    locale: ja,
+  });
+};
+
+const weekContainsDayKey = (
+  week: CalendarMonthGridWeek,
+  dayKey: string | null,
+) => (
+  dayKey !== null && week.days.some((day) => day.key === dayKey)
+);
+
+const isWeekAffectedByDayKeyChange = (
+  week: CalendarMonthGridWeek,
+  previousDayKey: string | null,
+  nextDayKey: string | null,
+) => {
+  return (
+    previousDayKey !== nextDayKey &&
+    (weekContainsDayKey(week, previousDayKey) ||
+      weekContainsDayKey(week, nextDayKey))
+  );
 };
 
 const CalendarMonthDayCell = memo(({
@@ -197,48 +237,6 @@ const CalendarMonthDayCell = memo(({
 });
 
 CalendarMonthDayCell.displayName = "CalendarMonthDayCell";
-
-type CalendarMonthWeekRowProps = {
-  week: CalendarMonthGridWeek;
-  eventsByDay: Map<string, CalendarMonthDayEvents>;
-  selectedDayKey: string;
-  todayDayKey: string;
-  scrollHoverDayKey: string | null;
-  monthRowHeight: number;
-  setWeekRowRef: (
-    key: string,
-    node: HTMLDivElement | null,
-  ) => void;
-  onSelectDate: (
-    date: Date,
-  ) => void;
-  handleResizeReset: () => void;
-  handleResizeKeyDown: (
-    event: React.KeyboardEvent<HTMLDivElement>,
-  ) => void;
-  handleResizePointerDown: (
-    event: React.PointerEvent<HTMLDivElement>,
-  ) => void;
-};
-
-const weekContainsDayKey = (
-  week: CalendarMonthGridWeek,
-  dayKey: string | null,
-) => (
-  dayKey !== null && week.days.some((day) => day.key === dayKey)
-);
-
-const isWeekAffectedByDayKeyChange = (
-  week: CalendarMonthGridWeek,
-  previousDayKey: string | null,
-  nextDayKey: string | null,
-) => {
-  return (
-    previousDayKey !== nextDayKey &&
-    (weekContainsDayKey(week, previousDayKey) ||
-      weekContainsDayKey(week, nextDayKey))
-  );
-};
 
 const CalendarMonthWeekRow = memo(({
   week,
