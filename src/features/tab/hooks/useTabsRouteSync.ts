@@ -59,16 +59,6 @@ export const useWorkspaceTabsRouteSync = ({
       return;
     }
 
-    if (pathname === "/tasks") {
-      const nextTabId = openSectionTab("tasks");
-
-      if (activeTabId !== nextTabId) {
-        selectTab(nextTabId);
-      }
-
-      return;
-    }
-
     if (pathname === "/settings") {
       const nextTabId = openSectionTab("settings");
 
