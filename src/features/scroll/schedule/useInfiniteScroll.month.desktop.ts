@@ -33,7 +33,6 @@ type MonthRangeAnchor = {
 
 const MONTH_GRID_FIRST_WEEK_OFFSET_PX = C.CALENDAR_WEEKDAY_HEADER_HEIGHT;
 const VISIBLE_MONTH_SYNC_DELAY_MS = 96;
-const MONTH_RANGE_EXTENSION_DELAY_MS = 120;
 
 // ── フック本体
 
@@ -51,7 +50,6 @@ export const useMonthInfiniteScroll = ({
   const isExtendingAfterRef = useRef(false);
   const visibleMonthSyncRafRef = useRef<number | null>(null);
   const visibleMonthSyncTimeoutRef = useRef<number | null>(null);
-  const monthRangeExtensionTimeoutRef = useRef<number | null>(null);
   const pendingScrollWeekKeyRef = useRef<string | null>(
     getCalendarWeekKey(currentDate),
   );
@@ -211,64 +209,43 @@ export const useMonthInfiniteScroll = ({
     visibleMonthSyncRafRef.current = null;
   }, []);
 
-  const cancelMonthRangeExtension = useCallback(() => {
-    if (monthRangeExtensionTimeoutRef.current === null) return;
+  // スクロールハンドラは一度だけ登録する。最新の monthWeeks 等は ref 経由で参照。
+  const handleScroll = useCallback(
+    (scroller: HTMLDivElement) => {
+      if (isResizingRef.current) return;
 
-    window.clearTimeout(monthRangeExtensionTimeoutRef.current);
-    monthRangeExtensionTimeoutRef.current = null;
-  }, []);
+      if (
+        scroller.scrollTop < C.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
+        !isExtendingBeforeRef.current
+      ) {
+        isExtendingBeforeRef.current = true;
+        rangeAnchorRef.current = getCurrentRangeAnchorRef.current?.(scroller) ?? null;
 
-  const scheduleMonthRangeExtension = useCallback(
-    (direction: "before" | "after") => {
-      if (monthRangeExtensionTimeoutRef.current !== null) return;
+        startTransition(() => {
+          setMonthOffsetRange((currentRange) => {
+            const shouldTrimAfter =
+              currentRange.endOffset - currentRange.startOffset +
+                1 +
+                C.MONTH_EXTEND_COUNT >
+              C.MONTH_MAX_RENDERED_MONTHS;
 
-      monthRangeExtensionTimeoutRef.current = window.setTimeout(() => {
-        monthRangeExtensionTimeoutRef.current = null;
-
-        const scroller = scrollContainerRef.current;
-        if (!scroller || isResizingRef.current) return;
-
-        if (direction === "before") {
-          if (
-            scroller.scrollTop >= C.MONTH_SCROLL_EDGE_THRESHOLD_PX ||
-            isExtendingBeforeRef.current
-          ) {
-            return;
-          }
-
-          isExtendingBeforeRef.current = true;
-          rangeAnchorRef.current = getCurrentRangeAnchorRef.current?.(scroller) ?? null;
-
-          startTransition(() => {
-            setMonthOffsetRange((currentRange) => {
-              const shouldTrimAfter =
-                currentRange.endOffset - currentRange.startOffset +
-                  1 +
-                  C.MONTH_EXTEND_COUNT >
-                C.MONTH_MAX_RENDERED_MONTHS;
-
-              return {
-                startOffset: currentRange.startOffset - C.MONTH_EXTEND_COUNT,
-                endOffset: shouldTrimAfter
-                  ? currentRange.endOffset - C.MONTH_EXTEND_COUNT
-                  : currentRange.endOffset,
-              };
-            });
+            return {
+              startOffset: currentRange.startOffset - C.MONTH_EXTEND_COUNT,
+              endOffset: shouldTrimAfter
+                ? currentRange.endOffset - C.MONTH_EXTEND_COUNT
+                : currentRange.endOffset,
+            };
           });
+        });
+      }
 
-          return;
-        }
+      const distToBottom =
+        scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
 
-        const distToBottom =
-          scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
-
-        if (
-          distToBottom >= C.MONTH_SCROLL_EDGE_THRESHOLD_PX ||
-          isExtendingAfterRef.current
-        ) {
-          return;
-        }
-
+      if (
+        distToBottom < C.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
+        !isExtendingAfterRef.current
+      ) {
         isExtendingAfterRef.current = true;
         rangeAnchorRef.current = getCurrentRangeAnchorRef.current?.(scroller) ?? null;
 
@@ -284,38 +261,13 @@ export const useMonthInfiniteScroll = ({
             endOffset: currentRange.endOffset + C.MONTH_EXTEND_COUNT,
           }));
         });
-      }, MONTH_RANGE_EXTENSION_DELAY_MS);
-    },
-    [isResizingRef],
-  );
-
-  // スクロールハンドラは一度だけ登録する。最新の monthWeeks 等は ref 経由で参照。
-  const handleScroll = useCallback(
-    (scroller: HTMLDivElement) => {
-      if (isResizingRef.current) return;
-
-      if (
-        scroller.scrollTop < C.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
-        !isExtendingBeforeRef.current
-      ) {
-        scheduleMonthRangeExtension("before");
-      }
-
-      const distToBottom =
-        scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
-
-      if (
-        distToBottom < C.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
-        !isExtendingAfterRef.current
-      ) {
-        scheduleMonthRangeExtension("after");
       }
 
       // ref 経由で最新のコールバックを呼ぶ
       scheduleVisibleMonthSyncRef.current?.();
     },
     // 依存配列から getCurrentRangeAnchor / scheduleVisibleMonthSync を除外: ref 経由なので安全
-    [isResizingRef, scheduleMonthRangeExtension],
+    [isResizingRef],
   );
 
   useLayoutEffect(() => {
@@ -330,11 +282,10 @@ export const useMonthInfiniteScroll = ({
     isExtendingBeforeRef.current = false;
     isExtendingAfterRef.current = false;
     cancelVisibleMonthSync();
-    cancelMonthRangeExtension();
 
     setAnchorMonth(currentDate);
     setMonthOffsetRange(C.createInitialMonthOffsetRange());
-  }, [cancelMonthRangeExtension, cancelVisibleMonthSync, currentDate, scrollTargetToken]);
+  }, [cancelVisibleMonthSync, currentDate, scrollTargetToken]);
 
   useLayoutEffect(() => {
     const targetWeekKey = pendingScrollWeekKeyRef.current;
@@ -421,10 +372,7 @@ export const useMonthInfiniteScroll = ({
     };
   }, [handleScroll]);
 
-  useEffect(() => () => {
-    cancelVisibleMonthSync();
-    cancelMonthRangeExtension();
-  }, [cancelMonthRangeExtension, cancelVisibleMonthSync]);
+  useEffect(() => cancelVisibleMonthSync, [cancelVisibleMonthSync]);
 
   return {
     monthWeeks,
