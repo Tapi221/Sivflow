@@ -17,7 +17,7 @@ const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isScheduleRoute = /^\/(?:schedule|calendar|tasks)(?:\/|$)/i.test(
+  const isScheduleRoute = /^\/(?:schedule|calendar)(?:\/|$)/i.test(
     location.pathname,
   );
   const presentationTarget = usePresentationTarget();
@@ -68,18 +68,6 @@ const Layout = () => {
         priority: 96,
         onSelect: () => {
           void navigate("/schedule");
-        },
-      },
-      {
-        id: "action:tasks",
-        value: "action:tasks",
-        kind: "action",
-        iconKind: "directory",
-        title: "タスク",
-        keywords: ["タスク", "tasks", "task", "todo", "to-do"],
-        priority: 95,
-        onSelect: () => {
-          void navigate("/tasks");
         },
       },
       {
