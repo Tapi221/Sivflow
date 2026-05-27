@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Command as CommandPrimitive } from "cmdk";
-import { Search } from "@/ui/icons";
 import { cn } from "@/lib/utils";
+import { Search } from "@/ui/icons";
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -16,7 +16,6 @@ const Command = React.forwardRef<
     {...props}
   />
 ));
-Command.displayName = CommandPrimitive.displayName;
 
 const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
@@ -38,8 +37,6 @@ const CommandInput = React.forwardRef<
   </div>
 ));
 
-CommandInput.displayName = CommandPrimitive.Input.displayName;
-
 const CommandList = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>
@@ -51,8 +48,6 @@ const CommandList = React.forwardRef<
   />
 ));
 
-CommandList.displayName = CommandPrimitive.List.displayName;
-
 const CommandEmpty = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Empty>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Empty>
@@ -63,8 +58,6 @@ const CommandEmpty = React.forwardRef<
     {...props}
   />
 ));
-
-CommandEmpty.displayName = CommandPrimitive.Empty.displayName;
 
 const CommandGroup = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Group>,
@@ -80,8 +73,6 @@ const CommandGroup = React.forwardRef<
   />
 ));
 
-CommandGroup.displayName = CommandPrimitive.Group.displayName;
-
 const CommandSeparator = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Separator>
@@ -92,7 +83,6 @@ const CommandSeparator = React.forwardRef<
     {...props}
   />
 ));
-CommandSeparator.displayName = CommandPrimitive.Separator.displayName;
 
 const CommandItem = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Item>,
@@ -108,8 +98,6 @@ const CommandItem = React.forwardRef<
   />
 ));
 
-CommandItem.displayName = CommandPrimitive.Item.displayName;
-
 const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span
@@ -121,6 +109,14 @@ const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanE
     />
   );
 };
+
+Command.displayName = CommandPrimitive.displayName;
+CommandInput.displayName = CommandPrimitive.Input.displayName;
+CommandList.displayName = CommandPrimitive.List.displayName;
+CommandEmpty.displayName = CommandPrimitive.Empty.displayName;
+CommandGroup.displayName = CommandPrimitive.Group.displayName;
+CommandSeparator.displayName = CommandPrimitive.Separator.displayName;
+CommandItem.displayName = CommandPrimitive.Item.displayName;
 CommandShortcut.displayName = "CommandShortcut";
 
 export { Command, CommandGroup, CommandInput, CommandItem, CommandList };
