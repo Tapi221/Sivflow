@@ -424,7 +424,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
   return (
     previous.scrollContainerRef === next.scrollContainerRef &&
     previous.visibleEvents === next.visibleEvents &&
-    previous.calendarDayColumnWidth === next.calendarDayColumnWidth &&
+    previous._calendarDayColumnWidth === next._calendarDayColumnWidth &&
     previous.timelineGridStyle === next.timelineGridStyle &&
     previous.onScroll === next.onScroll &&
     previous.onSelectDate === next.onSelectDate &&
