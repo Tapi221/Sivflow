@@ -137,7 +137,7 @@ export const ScheduleScreen = ({
     googleCalendarEvents,
     googleAccounts,
     calendarDayColumnWidth,
-    timelineGridStyle,
+    calendarGridStyle,
     headerScrollRef,
     allDayScrollRef,
     scrollContainerRef,
@@ -349,7 +349,7 @@ export const ScheduleScreen = ({
             visibleDays={visibleDays}
             visibleEvents={calendarEvents}
             calendarDayColumnWidth={calendarDayColumnWidth}
-            timelineGridStyle={timelineGridStyle}
+            calendarGridStyle={calendarGridStyle}
             onScroll={handleCalendarScroll}
             selectedDate={selectedDate}
             onSelectDate={handleSidebarSelectDate}
