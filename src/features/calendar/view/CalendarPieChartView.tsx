@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { addDays, differenceInMinutes, format, isAfter, isBefore, startOfDay } from "date-fns";
+import { addDays, differenceInMinutes, isAfter, isBefore, startOfDay } from "date-fns";
 import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
@@ -301,15 +301,6 @@ const CalendarPieChartView = ({
   return (
     <div className={cn("flex h-full min-h-0 bg-white text-[#1c1c1e]", className)}>
       <main className="flex min-h-0 flex-1 flex-col">
-        <div className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-[#eeeeee] px-5">
-          <div className="min-w-0">
-            <h2 className="truncate text-[15px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
-              {format(selectedDate, "yyyy年M月d日")}
-            </h2>
-            <p className="mt-0.5 text-[11px] font-semibold text-[#9a9a9a]">円グラフ</p>
-          </div>
-        </div>
-
         <div className="flex min-h-0 flex-1 items-center justify-center gap-12 overflow-hidden px-8 py-6 max-[1120px]:gap-6 max-[980px]:flex-col max-[980px]:overflow-y-auto">
           <DailyClockPie title="予定" totalMinutes={plannedMinutes} slices={plannedSlices} />
           <DailyClockPie title="実績" totalMinutes={0} slices={[]} isActual />
