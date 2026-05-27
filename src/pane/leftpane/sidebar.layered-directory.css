@@ -5,82 +5,85 @@ aside[aria-label="Library hierarchy explorer"] [role="tree"] {
   gap: 0 !important;
 }
 
-/* Scroller: hide until pointer hover, without changing layout size. */
+/* Scroller: keep scrolling active, but hide the native scrollbar surface entirely. */
 aside[aria-label="Library hierarchy explorer"] > div:first-child {
   scrollbar-gutter: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
-aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+aside[aria-label="Library hierarchy explorer"] > div:first-child:hover,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:active {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  scrollbar-color: transparent transparent !important;
+}
+
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:active::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
 }
 
 aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-button,
 aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-button:single-button,
-aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-button:vertical:decrement,
-aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-button:vertical:increment,
-aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-button:vertical:start:decrement,
-aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-button:vertical:end:increment,
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-button:vertical,
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-button:horizontal,
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-button:start,
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-button:end,
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-button:increment,
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-button:decrement,
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-track,
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-track-piece,
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-thumb,
+aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-corner,
 aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-button,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-button:single-button,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-button:vertical:decrement,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-button:vertical:increment,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-button:vertical:start:decrement,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-button:vertical:end:increment,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-track,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-track-piece,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-thumb,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-corner,
 aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-button,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-button:single-button,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-button:vertical:decrement,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-button:vertical:increment,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-button:vertical:start:decrement,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-button:vertical:end:increment {
+aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-track,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-track-piece,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-thumb,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-corner,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:active::-webkit-scrollbar-button,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:active::-webkit-scrollbar-track,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:active::-webkit-scrollbar-track-piece,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:active::-webkit-scrollbar-thumb,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:active::-webkit-scrollbar-corner {
   display: none !important;
+  visibility: hidden !important;
   width: 0 !important;
   min-width: 0 !important;
+  max-width: 0 !important;
   height: 0 !important;
   min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
   border: 0 !important;
+  color: transparent !important;
   background: transparent !important;
+  background-color: transparent !important;
   background-image: none !important;
-  -webkit-appearance: none;
-}
-
-aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-track-piece,
-aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-track-piece:start,
-aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-track-piece:end,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-track-piece,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-track-piece:start,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-track-piece:end,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-track-piece,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-track-piece:start,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-track-piece:end {
-  background: transparent !important;
-}
-
-aside[aria-label="Library hierarchy explorer"] > div:first-child::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background-color: transparent;
-}
-
-aside[aria-label="Library hierarchy explorer"] > div:first-child:hover {
-  scrollbar-width: thin;
-  -ms-overflow-style: auto;
-  scrollbar-color: #eeeeee transparent;
-}
-
-aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background-color: #eeeeee;
+  border-image: none !important;
+  box-shadow: none !important;
+  opacity: 0 !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
 
 /* Tree rows: keep original typography while flattening the layered directory look. */
