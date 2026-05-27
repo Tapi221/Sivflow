@@ -251,7 +251,12 @@ export const ScheduleScreen = ({
   const isPieChartCalendarView =
     activeMode === "calendar" && selectedViewMode === "pieChart";
   const headerTitleDate =
-    selectedViewMode === "month" ? monthTitleDate : titleDate;
+    selectedViewMode === "month"
+      ? monthTitleDate
+      : isPieChartCalendarView
+        ? selectedDate
+        : titleDate;
+  const headerTitleFormat = isPieChartCalendarView ? "yyyy年M月d日" : monthLabelFormat;
 
   const handleSelectDate = useCallback(
     (date: Date) => {
@@ -289,7 +294,7 @@ export const ScheduleScreen = ({
             ‹
           </button>
           <h1 className="truncate text-[19px] font-bold tracking-[-0.03em] text-[#1c1c1e]">
-            {format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale })}
+            {format(headerTitleDate, headerTitleFormat, { locale: dateFnsLocale })}
           </h1>
           <button
             type="button"
