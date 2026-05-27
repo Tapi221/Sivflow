@@ -53,6 +53,8 @@ export type UseScheduleScreenReturn = {
   handleMonthCellSelectDate: (date: Date) => void;
   handleMonthRenderedRangeChange: (range: CalendarDateRange) => void;
   handleYearRenderedRangeChange: (range: CalendarDateRange) => void;
+  handleListReachStart: () => void;
+  handleListReachEnd: () => void;
 
   setMonthTitleDate: (date: Date) => void;
 };
@@ -227,6 +229,8 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     handleMonthCellSelectDate: navigation.handleMonthCellSelectDate,
     handleMonthRenderedRangeChange,
     handleYearRenderedRangeChange,
+    handleListReachStart: navigation.extendCalendarBufferLeft,
+    handleListReachEnd: navigation.extendCalendarBufferRight,
 
     setMonthTitleDate: navigation.setMonthTitleDate,
   };
