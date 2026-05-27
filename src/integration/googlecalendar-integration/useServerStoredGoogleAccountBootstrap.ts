@@ -1,7 +1,7 @@
 import { useEffect } from "react";
+import { isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
 import { readStoredAccounts, upsertStoredAccount, type StoredGoogleAccount } from "./gcal.multi-storage";
 import { listServerStoredGoogleCalendarAccounts } from "./gcal.server-accounts";
-import { isServerStoredGoogleOAuthEnabled } from "./gcal.server-oauth";
 
 export const useServerStoredGoogleAccountBootstrap = (): void => {
   useEffect(() => {
