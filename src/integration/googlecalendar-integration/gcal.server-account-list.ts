@@ -1,7 +1,7 @@
 import { httpsCallable } from "firebase/functions";
+import { isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
 import { auth, functionsClient } from "@/services/firebase";
 import { readStoredAccounts, type StoredGoogleAccount, writeStoredAccounts } from "./gcal.multi-storage";
-import { isServerStoredGoogleOAuthEnabled } from "./gcal.server-oauth";
 
 export type ServerStoredGoogleCalendarAccount = {
   accountId: string;
