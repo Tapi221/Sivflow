@@ -250,7 +250,7 @@ const TaskTagStripBase = () => {
                   setContextMenu(null);
                   setIsCreating(true);
                 }}
-                className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-[#eeeeee] bg-white text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:text-[#5f656d]"
+                className="grid h-7 w-7 min-h-0 min-w-0 shrink-0 place-items-center rounded-full border border-[#eeeeee] bg-white text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:text-[#5f656d]"
                 aria-label="タグを追加"
               >
                 <Plus className="h-4 w-4" />
