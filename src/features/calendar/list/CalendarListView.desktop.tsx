@@ -34,8 +34,11 @@ type CalendarListDaySectionProps = {
 const EMPTY_DAY_LABEL = "予定なし";
 const EMPTY_MONTH_LABEL = "この期間の予定はありません";
 const SELECTED_DAY_SCROLL_BLOCK: ScrollLogicalPosition = "nearest";
-const LIST_SCROLL_EDGE_THRESHOLD_PX = 280;
+const LIST_SCROLL_EDGE_THRESHOLD_PX = 180;
+const LIST_SCROLL_EDGE_RESET_PX = 420;
 const LIST_VISIBLE_MONTH_ANCHOR_PX = 160;
+const LIST_DAY_DATA_ATTRIBUTE = "data-calendar-list-day-time";
+const LIST_DAY_SELECTOR = `[${LIST_DAY_DATA_ATTRIBUTE}]`;
 
 const buildMonthDays = (date: Date): Date[] => {
   const monthStart = startOfMonth(date);
@@ -104,22 +107,24 @@ const buildListDays = (
   });
 };
 
+const getListDayTime = (element: HTMLElement | null): number | null => {
+  const dayTime = Number(element?.dataset.calendarListDayTime);
+
+  return Number.isFinite(dayTime) ? dayTime : null;
+};
+
 const getVisibleMonthAnchorDate = (scrollElement: HTMLDivElement): Date | null => {
   const containerRect = scrollElement.getBoundingClientRect();
+  const anchorX = containerRect.left + containerRect.width / 2;
   const anchorY = containerRect.top + Math.min(LIST_VISIBLE_MONTH_ANCHOR_PX, containerRect.height / 2);
-  const daySections = Array.from(
-    scrollElement.querySelectorAll<HTMLElement>("[data-calendar-list-day-time]"),
-  );
-  const anchoredSection = daySections.findLast((section) => {
-    const sectionRect = section.getBoundingClientRect();
+  const targetElement = document.elementFromPoint(anchorX, anchorY);
+  const anchorSection = targetElement instanceof HTMLElement
+    ? targetElement.closest<HTMLElement>(LIST_DAY_SELECTOR)
+    : null;
+  const fallbackSection = anchorSection ?? scrollElement.querySelector<HTMLElement>(LIST_DAY_SELECTOR);
+  const dayTime = getListDayTime(fallbackSection);
 
-    return sectionRect.top <= anchorY;
-  }) ?? daySections[0];
-  const dayTime = Number(anchoredSection?.dataset.calendarListDayTime);
-
-  if (!Number.isFinite(dayTime)) return null;
-
-  return new Date(dayTime);
+  return dayTime == null ? null : new Date(dayTime);
 };
 
 const EmptyDayCard = ({ isMonthEmpty }: { isMonthEmpty: boolean }) => (
@@ -192,13 +197,19 @@ const CalendarListViewComponent = ({
   const selectedDayElementRef = useRef<HTMLElement | null>(null);
   const previousFirstDayKeyRef = useRef<string | null>(null);
   const previousScrollHeightRef = useRef(0);
+  const lastReachStartKeyRef = useRef<string | null>(null);
+  const lastReachEndKeyRef = useRef<string | null>(null);
   const lastSelectedDateTimeRef = useRef<number | null>(null);
   const lastVisibleMonthTimeRef = useRef<number | null>(null);
+  const scrollFrameRef = useRef<number | null>(null);
+  const pendingScrollElementRef = useRef<HTMLDivElement | null>(null);
   const listDays = useMemo(
     () => buildListDays(days, events, selectedDate),
     [days, events, selectedDate],
   );
   const isMonthEmpty = listDays.every((day) => day.events.length === 0);
+  const firstDayKey = listDays[0]?.dateKey ?? null;
+  const lastDayKey = listDays.at(-1)?.dateKey ?? null;
 
   const updateVisibleMonth = useCallback((scrollElement: HTMLDivElement | null) => {
     if (!scrollElement || !onVisibleMonthChange) return;
@@ -214,24 +225,52 @@ const CalendarListViewComponent = ({
     onVisibleMonthChange(visibleMonth);
   }, [onVisibleMonthChange]);
 
-  const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
-    const scrollElement = event.currentTarget;
+  const processScroll = useCallback((scrollElement: HTMLDivElement) => {
     const remainingScrollBottom = scrollElement.scrollHeight - scrollElement.clientHeight - scrollElement.scrollTop;
 
     updateVisibleMonth(scrollElement);
 
     if (scrollElement.scrollTop <= LIST_SCROLL_EDGE_THRESHOLD_PX) {
-      onReachStart?.();
+      if (firstDayKey && lastReachStartKeyRef.current !== firstDayKey) {
+        lastReachStartKeyRef.current = firstDayKey;
+        onReachStart?.();
+      }
+    } else if (scrollElement.scrollTop >= LIST_SCROLL_EDGE_RESET_PX) {
+      lastReachStartKeyRef.current = null;
     }
 
     if (remainingScrollBottom <= LIST_SCROLL_EDGE_THRESHOLD_PX) {
-      onReachEnd?.();
+      if (lastDayKey && lastReachEndKeyRef.current !== lastDayKey) {
+        lastReachEndKeyRef.current = lastDayKey;
+        onReachEnd?.();
+      }
+    } else if (remainingScrollBottom >= LIST_SCROLL_EDGE_RESET_PX) {
+      lastReachEndKeyRef.current = null;
     }
-  }, [onReachEnd, onReachStart, updateVisibleMonth]);
+  }, [firstDayKey, lastDayKey, onReachEnd, onReachStart, updateVisibleMonth]);
+
+  const requestScrollProcessing = useCallback((scrollElement: HTMLDivElement) => {
+    pendingScrollElementRef.current = scrollElement;
+
+    if (scrollFrameRef.current != null) return;
+
+    scrollFrameRef.current = window.requestAnimationFrame(() => {
+      scrollFrameRef.current = null;
+      const pendingScrollElement = pendingScrollElementRef.current;
+      pendingScrollElementRef.current = null;
+
+      if (pendingScrollElement) {
+        processScroll(pendingScrollElement);
+      }
+    });
+  }, [processScroll]);
+
+  const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
+    requestScrollProcessing(event.currentTarget);
+  }, [requestScrollProcessing]);
 
   useLayoutEffect(() => {
     const scrollElement = scrollViewportRef.current;
-    const firstDayKey = listDays[0]?.dateKey ?? null;
     const previousFirstDayKey = previousFirstDayKeyRef.current;
     const previousScrollHeight = previousScrollHeightRef.current;
 
@@ -250,8 +289,7 @@ const CalendarListViewComponent = ({
 
     previousFirstDayKeyRef.current = firstDayKey;
     previousScrollHeightRef.current = scrollElement?.scrollHeight ?? 0;
-    updateVisibleMonth(scrollElement);
-  }, [listDays, updateVisibleMonth]);
+  }, [firstDayKey, listDays]);
 
   useEffect(() => {
     const selectedDateTime = selectedDate.getTime();
@@ -260,6 +298,14 @@ const CalendarListViewComponent = ({
     lastSelectedDateTimeRef.current = selectedDateTime;
     selectedDayElementRef.current?.scrollIntoView({ block: SELECTED_DAY_SCROLL_BLOCK });
   }, [selectedDate]);
+
+  useEffect(() => {
+    return () => {
+      if (scrollFrameRef.current != null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}>
