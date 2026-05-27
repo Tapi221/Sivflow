@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "npm run dev:web",
     "dev:web": "vite",
+    "dev:mobile": "npm --prefix apps/mobile start",
     "dev:electron": "concurrently -k \"npm run dev:web\" \"npm run electron:watch\" \"npm run electron:dev\"",
     "electron:build:main": "npm exec tsc -- -p tsconfig.electron.json",
     "electron:build:preload": "node scripts/electron/bundle-preload.mjs",
@@ -24,6 +25,9 @@
     "build:electron": "npm run build:web && npm run electron:build",
     "electron:build": "npm run electron:build:main && npm run electron:build:preload && npm run electron:prepare-dist",
     "electron:start": "node scripts/electron/run-electron.cjs dist-electron/electron/main.js",
+    "mobile:ios": "npm --prefix apps/mobile run ios",
+    "mobile:android": "npm --prefix apps/mobile run android",
+    "mobile:typecheck": "npm --prefix apps/mobile run typecheck",
     "verify:icons": "node scripts/verify-icons-entry.mjs",
     "verify:sw": "node scripts/verify/verify-sw.mjs",
     "sync:firebase-emulators": "npm exec tsx -- tools/firebase/sync-firebase-emulators.ts",
