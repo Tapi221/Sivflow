@@ -272,7 +272,7 @@ export const CalendarSidebar = ({
   }
 
   return (
-    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-[#f3f3f3] pb-0 pl-0 pr-3 pt-2 text-[#2f2f2f]">
+    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-0 pl-0 pr-3 pt-2 text-[#2f2f2f]">
       <MiniCalendarSection
         monthDate={monthDate}
         selectedDate={selectedDate}
