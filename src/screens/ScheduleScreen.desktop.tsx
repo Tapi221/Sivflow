@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-test
-=======
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
 import type { PlanResultMode } from "@/chip/toggle/Toggle.planresult";
@@ -112,7 +109,7 @@ const buildSplitDayHeightMap = (days: Date[], events: GoogleCalendarEvent[]): Ca
   }, {});
 };
 
-export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
+const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const pane = useScheduleScreen();
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
@@ -241,4 +238,5 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     </CarvePanelShell>
   );
 };
->>>>>>> 0b0bb7ff52d52320abcdb9bc71b75766ace3aafb
+
+export { ScheduleScreen };
