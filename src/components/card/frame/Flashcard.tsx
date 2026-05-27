@@ -16,8 +16,6 @@ import { useFlashcardMediaState } from "./useFlashcardMediaState";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-export type { FlashcardCardLike } from "./flashcard.types";
-
 interface FlashcardProps {
   card: FlashcardCardLike | null | undefined;
   isFlipped?: boolean;
@@ -52,6 +50,62 @@ interface FlashcardProps {
   contentZoom?: number;
   headerIconVisualScale?: number;
 }
+
+const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
+  if (prev.card !== next.card) return false;
+  if (prev.previewMode !== next.previewMode) return false;
+
+  const previewOnly = Boolean(prev.previewMode && next.previewMode);
+
+  if (previewOnly) {
+    return (
+      prev.isFlipped === next.isFlipped &&
+      prev.className === next.className &&
+      prev.displayMode === next.displayMode &&
+      prev.showInkLayer === next.showInkLayer &&
+      prev.drawMode === next.drawMode &&
+      prev.inkEditingEnabled === next.inkEditingEnabled &&
+      prev.allowUpscale === next.allowUpscale &&
+      prev.maxScale === next.maxScale &&
+      prev.scaleMultiplier === next.scaleMultiplier &&
+      prev.fixedScale === next.fixedScale &&
+      prev.contentPaddingPx === next.contentPaddingPx &&
+      prev.cardShellClassName === next.cardShellClassName &&
+      prev.contentZoom === next.contentZoom &&
+      prev.headerIconVisualScale === next.headerIconVisualScale
+    );
+  }
+
+  return (
+    prev.isFlipped === next.isFlipped &&
+    prev.onFlip === next.onFlip &&
+    prev.onToggleUncertainty === next.onToggleUncertainty &&
+    prev.onToggleBookmark === next.onToggleBookmark &&
+    prev.className === next.className &&
+    prev.onNext === next.onNext &&
+    prev.onPrev === next.onPrev &&
+    prev.hasNext === next.hasNext &&
+    prev.hasPrev === next.hasPrev &&
+    prev.currentIndex === next.currentIndex &&
+    prev.totalCards === next.totalCards &&
+    prev.extraHeaderLeft === next.extraHeaderLeft &&
+    prev.extraHeaderRight === next.extraHeaderRight &&
+    prev.extraFooter === next.extraFooter &&
+    prev.displayMode === next.displayMode &&
+    prev.showInkLayer === next.showInkLayer &&
+    prev.drawMode === next.drawMode &&
+    prev.inkEditingEnabled === next.inkEditingEnabled &&
+    prev.onInkDocumentChange === next.onInkDocumentChange &&
+    prev.allowUpscale === next.allowUpscale &&
+    prev.maxScale === next.maxScale &&
+    prev.scaleMultiplier === next.scaleMultiplier &&
+    prev.fixedScale === next.fixedScale &&
+    prev.contentPaddingPx === next.contentPaddingPx &&
+    prev.cardShellClassName === next.cardShellClassName &&
+    prev.contentZoom === next.contentZoom &&
+    prev.headerIconVisualScale === next.headerIconVisualScale
+  );
+};
 
 const FlashcardInner = ({
   card,
@@ -247,7 +301,7 @@ const FlashcardInner = ({
               previewInkHistory={ink.previewInkHistory}
               onInkDocumentChange={ink.handleInkDocumentChange}
               setPreviewInkTool={ink.setPreviewInkTool}
-              setPreviewInkHistory={ink.setPreviewInkHistory}
+              setPreviewInkHistory={setPreviewInkHistory}
             />
           }
         >
@@ -282,61 +336,9 @@ const FlashcardInner = ({
   );
 };
 
-const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
-  if (prev.card !== next.card) return false;
-  if (prev.previewMode !== next.previewMode) return false;
+const Flashcard = React.memo(FlashcardInner, areFlashcardPropsEqual);
 
-  const previewOnly = Boolean(prev.previewMode && next.previewMode);
-
-  if (previewOnly) {
-    return (
-      prev.isFlipped === next.isFlipped &&
-      prev.className === next.className &&
-      prev.displayMode === next.displayMode &&
-      prev.showInkLayer === next.showInkLayer &&
-      prev.drawMode === next.drawMode &&
-      prev.inkEditingEnabled === next.inkEditingEnabled &&
-      prev.allowUpscale === next.allowUpscale &&
-      prev.maxScale === next.maxScale &&
-      prev.scaleMultiplier === next.scaleMultiplier &&
-      prev.fixedScale === next.fixedScale &&
-      prev.contentPaddingPx === next.contentPaddingPx &&
-      prev.cardShellClassName === next.cardShellClassName &&
-      prev.contentZoom === next.contentZoom &&
-      prev.headerIconVisualScale === next.headerIconVisualScale
-    );
-  }
-
-  return (
-    prev.isFlipped === next.isFlipped &&
-    prev.onFlip === next.onFlip &&
-    prev.onToggleUncertainty === next.onToggleUncertainty &&
-    prev.onToggleBookmark === next.onToggleBookmark &&
-    prev.className === next.className &&
-    prev.onNext === next.onNext &&
-    prev.onPrev === next.onPrev &&
-    prev.hasNext === next.hasNext &&
-    prev.hasPrev === next.hasPrev &&
-    prev.currentIndex === next.currentIndex &&
-    prev.totalCards === next.totalCards &&
-    prev.extraHeaderLeft === next.extraHeaderLeft &&
-    prev.extraHeaderRight === next.extraHeaderRight &&
-    prev.extraFooter === next.extraFooter &&
-    prev.displayMode === next.displayMode &&
-    prev.showInkLayer === next.showInkLayer &&
-    prev.drawMode === next.drawMode &&
-    prev.inkEditingEnabled === next.inkEditingEnabled &&
-    prev.onInkDocumentChange === next.onInkDocumentChange &&
-    prev.allowUpscale === next.allowUpscale &&
-    prev.maxScale === next.maxScale &&
-    prev.scaleMultiplier === next.scaleMultiplier &&
-    prev.fixedScale === next.fixedScale &&
-    prev.contentPaddingPx === next.contentPaddingPx &&
-    prev.cardShellClassName === next.cardShellClassName &&
-    prev.contentZoom === next.contentZoom &&
-    prev.headerIconVisualScale === next.headerIconVisualScale
-  );
-};
-
-export const Flashcard = React.memo(FlashcardInner, areFlashcardPropsEqual);
 Flashcard.displayName = "Flashcard";
+
+export { Flashcard };
+export type { FlashcardCardLike };
