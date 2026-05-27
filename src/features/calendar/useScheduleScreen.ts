@@ -50,6 +50,7 @@ export type UseScheduleScreenReturn = {
   handleSidebarPreviousMonth: () => void;
   handleSidebarNextMonth: () => void;
   handleSidebarSelectDate: (date: Date) => void;
+  handleVisibleDateChange: (date: Date) => void;
   handleVisibleMonthChange: (date: Date) => void;
   handleMonthCellSelectDate: (date: Date) => void;
   handleMonthRenderedRangeChange: (range: CalendarDateRange) => void;
@@ -239,6 +240,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     handleSidebarPreviousMonth: navigation.handleSidebarPreviousMonth,
     handleSidebarNextMonth: navigation.handleSidebarNextMonth,
     handleSidebarSelectDate: navigation.handleSidebarSelectDate,
+    handleVisibleDateChange: navigation.handleVisibleDateChange,
     handleVisibleMonthChange: navigation.handleVisibleMonthChange,
     handleMonthCellSelectDate: navigation.handleMonthCellSelectDate,
     handleMonthRenderedRangeChange,
