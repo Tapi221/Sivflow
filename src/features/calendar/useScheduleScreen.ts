@@ -4,7 +4,7 @@ import { useCalendarLayout } from "@/features/calendar/layout/calendar/useCalend
 import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
-import type { CalendarGridStyle, CalendarToolbarMode, CalendarViewMode, GoogleAccountDisplay } from "./scheduleScreen.types";
+import type { CalendarGridStyle, CalendarViewMode, GoogleAccountDisplay } from "./scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useCalendarNavigation } from "./useCalendarNavigation";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
@@ -23,8 +23,6 @@ export type UseScheduleScreenReturn = {
   monthScrollTargetToken: number;
 
   selectedViewMode: CalendarViewMode;
-  activeMode: CalendarToolbarMode;
-  setActiveMode: (mode: CalendarToolbarMode) => void;
 
   visibleDays: Date[];
   displayDays: Date[];
@@ -43,24 +41,6 @@ export type UseScheduleScreenReturn = {
   reconnectGoogleAccount: (accountId: string) => Promise<void>;
   toggleGoogleCalendar: (accountId: string, calendarId: string) => void;
 
-  refreshGoogleTasks: () => Promise<void>;
-  retryGoogleTaskLists: () => void;
-  createGoogleTask: (taskListId: string, input: {
-    title: string;
-    notes?: string | null;
-    due?: string | null;
-    status?: "needsAction" | "completed";
-  }) => Promise<unknown>;
-  updateGoogleTask: (taskListId: string, taskId: string, patch: {
-    title?: string;
-    notes?: string | null;
-    due?: string | null;
-    status?: "needsAction" | "completed";
-    completed?: string | null;
-  }) => Promise<unknown>;
-  moveGoogleTaskList: (taskListId: string, taskId: string, destinationTaskListId: string) => Promise<unknown>;
-  deleteGoogleTask: (taskListId: string, taskId: string) => Promise<void>;
-
   handleSelectViewMode: (viewMode: CalendarViewMode) => void;
   handleToday: () => void;
   handlePrevious: () => void;
@@ -75,10 +55,6 @@ export type UseScheduleScreenReturn = {
   handleYearRenderedRangeChange: (range: CalendarDateRange) => void;
 
   setMonthTitleDate: (date: Date) => void;
-};
-
-type UseScheduleScreenOptions = {
-  initialActiveMode?: CalendarToolbarMode;
 };
 
 const getGoogleCalendarEventDedupeKey = (event: GoogleCalendarEvent): string => event.id;
@@ -98,10 +74,8 @@ const dedupeGoogleCalendarEvents = (
   });
 };
 
-export const useScheduleScreen = ({
-  initialActiveMode,
-}: UseScheduleScreenOptions = {}): UseScheduleScreenReturn => {
-  const navigation = useCalendarNavigation({ initialActiveMode });
+export const useScheduleScreen = (): UseScheduleScreenReturn => {
+  const navigation = useCalendarNavigation();
   const [monthRenderedRange, setMonthRenderedRange] =
     useState<CalendarDateRange | null>(null);
   const [yearRenderedRange, setYearRenderedRange] =
@@ -158,7 +132,6 @@ export const useScheduleScreen = ({
   });
 
   const scroll = useCalendarScrollController({
-    activeMode: navigation.activeMode,
     selectedViewMode: navigation.selectedViewMode,
     visibleDays,
     calendarBuffer: navigation.calendarBuffer,
@@ -224,8 +197,6 @@ export const useScheduleScreen = ({
     monthScrollTargetToken: navigation.monthScrollTargetToken,
 
     selectedViewMode: navigation.selectedViewMode,
-    activeMode: navigation.activeMode,
-    setActiveMode: navigation.setActiveMode,
 
     visibleDays,
     displayDays,
@@ -243,12 +214,6 @@ export const useScheduleScreen = ({
     addGoogleCalendar: google.addAccount,
     reconnectGoogleAccount: google.reconnectAccount,
     toggleGoogleCalendar: google.toggleCalendar,
-    refreshGoogleTasks: google.refreshGoogleTasks,
-    retryGoogleTaskLists: google.retryGoogleTaskLists,
-    createGoogleTask: google.createGoogleTask,
-    updateGoogleTask: google.updateGoogleTask,
-    moveGoogleTaskList: google.moveGoogleTaskList,
-    deleteGoogleTask: google.deleteGoogleTask,
 
     handleSelectViewMode: navigation.handleSelectViewMode,
     handleToday: navigation.handleToday,
