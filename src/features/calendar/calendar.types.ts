@@ -111,6 +111,7 @@ export type CalendarScreenViewModel = {
 
 //ScheduleScreen.tsx
 export type CalendarViewMode = "year" | "month" | "week" | "threeDays" | "days" | "list" | "pieChart";
+export type CalendarViewModeSelection = CalendarViewMode | readonly CalendarViewMode[];
 
 export type CalendarToolbarMode = "calendar" | "task";
 
