@@ -4,7 +4,7 @@ import { useCalendarLayout } from "@/features/calendar/layout/calendar/useCalend
 import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
-import type { CalendarToolbarMode, CalendarViewMode, GoogleAccountDisplay, TimelineGridStyle } from "./scheduleScreen.types";
+import type { CalendarGridStyle, CalendarToolbarMode, CalendarViewMode, GoogleAccountDisplay } from "./scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useCalendarNavigation } from "./useCalendarNavigation";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
@@ -33,7 +33,7 @@ export type UseScheduleScreenReturn = {
   monthLabel: string | null;
 
   calendarDayColumnWidth: number;
-  timelineGridStyle: TimelineGridStyle;
+  calendarGridStyle: CalendarGridStyle;
 
   googleAccounts: GoogleAccountDisplay[];
   googleCalendarEvents: GoogleCalendarEvent[];
@@ -234,7 +234,7 @@ export const useScheduleScreen = ({
     monthLabel: layout.monthLabel,
 
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
-    timelineGridStyle: layout.timelineGridStyle,
+    calendarGridStyle: layout.calendarGridStyle,
 
     googleAccounts,
     googleCalendarEvents,
@@ -244,7 +244,7 @@ export const useScheduleScreen = ({
     reconnectGoogleAccount: google.reconnectAccount,
     toggleGoogleCalendar: google.toggleCalendar,
     refreshGoogleTasks: google.refreshGoogleTasks,
-    retryGoogleTaskLists: google.retryGoogleTaskLists,
+    retryGoogleTaskLists: google.retryGoogleTasks,
     createGoogleTask: google.createGoogleTask,
     updateGoogleTask: google.updateGoogleTask,
     moveGoogleTaskList: google.moveGoogleTaskList,
