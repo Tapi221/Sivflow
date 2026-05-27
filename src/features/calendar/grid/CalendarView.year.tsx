@@ -46,10 +46,10 @@ type YearRangeAnchor = {
 };
 
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
-const INITIAL_YEAR_BUFFER = 2;
-const YEAR_EXTEND_COUNT = 1;
-const YEAR_MAX_RENDERED_YEARS = 5;
-const YEAR_SCROLL_EDGE_THRESHOLD_PX = 1200;
+const INITIAL_YEAR_BUFFER = 5;
+const YEAR_EXTEND_COUNT = 2;
+const YEAR_MAX_RENDERED_YEARS = 11;
+const YEAR_SCROLL_EDGE_THRESHOLD_PX = 2400;
 const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
 
 const createDayAriaLabel = (date: Date, eventCount: number): string => {
