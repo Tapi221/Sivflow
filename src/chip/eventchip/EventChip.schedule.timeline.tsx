@@ -2,13 +2,13 @@ import { memo, useMemo } from "react";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 
-const FALLBACK_TIMELINE_EVENT_COLOR = "#8f929c";
-
 type CalendarEventChipTimelineProps = {
   event: GoogleCalendarEvent;
 };
 
-export const CalendarEventChipTimeline = memo(({
+const FALLBACK_TIMELINE_EVENT_COLOR = "#8f929c";
+
+const CalendarEventChipTimelineComponent = ({
   event,
 }: CalendarEventChipTimelineProps) => {
   const tokens = useMemo(
@@ -19,13 +19,17 @@ export const CalendarEventChipTimeline = memo(({
 
   return (
     <div
-      className="flex h-full items-center gap-1 overflow-hidden rounded-md border-l-[3px] px-1.5 text-[11px] font-semibold leading-none"
-      style={{ background: tokens.bg, borderLeftColor: tokens.border, color: tokens.text }}
+      className="flex h-full min-h-0 w-full min-w-0 items-center gap-1 overflow-hidden rounded-md px-1.5 text-left text-[12px] font-medium leading-snug"
+      style={{ background: tokens.bg, borderLeft: `3px solid ${tokens.border}`, color: tokens.text }}
       title={title}
     >
-      <span className="truncate">{title}</span>
+      <span className="min-w-0 flex-1 truncate">{title}</span>
     </div>
   );
-});
+};
+
+const CalendarEventChipTimeline = memo(CalendarEventChipTimelineComponent);
 
 CalendarEventChipTimeline.displayName = "CalendarEventChipTimeline";
+
+export { CalendarEventChipTimeline };
