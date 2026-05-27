@@ -2,14 +2,12 @@ export type CalendarViewMode = "month" | "week" | "days";
 
 type Params = {
   onSelectCalendar: () => void;
-  onSelectTimeline: () => void;
   onSelectTask: () => void;
   onSelectViewMode?: (mode: CalendarViewMode) => void;
 };
 
 export const useCalendarToolbar = ({
   onSelectCalendar,
-  onSelectTimeline,
   onSelectTask,
   onSelectViewMode,
 }: Params) => {
@@ -18,11 +16,6 @@ export const useCalendarToolbar = ({
       value: "calendar" as const,
       label: "Calendar",
       onClick: onSelectCalendar,
-    },
-    {
-      value: "timeline" as const,
-      label: "Timeline",
-      onClick: onSelectTimeline,
     },
     {
       value: "task" as const,
