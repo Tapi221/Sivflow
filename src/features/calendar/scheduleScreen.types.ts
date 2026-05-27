@@ -1,9 +1,9 @@
 import type { CSSProperties, RefObject, UIEvent } from "react";
-import type { CalendarToolbarMode, CalendarViewMode } from "@/features/calendar/calendar.types";
+import type { CalendarViewMode } from "@/features/calendar/calendar.types";
 import type { GCalConnectionStatus, GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 
-export type { CalendarToolbarMode, CalendarViewMode };
+export type { CalendarViewMode };
 
 export type CalendarBufferDays = {
   before: number;
@@ -26,7 +26,6 @@ export type CalendarEventLabelStyle = CSSProperties & {
 
 export type ScheduleScreenProps = {
   onClose?: () => void;
-  initialActiveMode?: CalendarToolbarMode;
 };
 
 export type AppCalendarItem = {
@@ -36,11 +35,6 @@ export type AppCalendarItem = {
   checked: boolean;
 };
 
-// ─────────────────────────────────────────────────────────────
-// マルチアカウント対応の型
-// ─────────────────────────────────────────────────────────────
-
-/** サイドバーに表示するための Google アカウント情報 */
 export type GoogleAccountDisplay = {
   accountId: string;
   email: string | null;
@@ -67,17 +61,9 @@ export type CalendarSidebarProps = {
   monthDate: Date;
   selectedDate: Date;
   selectedRange?: CalendarSelectionRange | null;
-  activeMode: CalendarToolbarMode;
-
-  // アプリ内プロジェクト
   appProjects: AppCalendarItem[];
-
-  // マルチアカウント
   googleAccounts: GoogleAccountDisplay[];
   isAnyCalendarConnecting: boolean;
-
-  selectedTaskListIds?: Set<string>;
-
   onSelectDate: (date: Date) => void;
   onPreviousMonth: () => void;
   onNextMonth: () => void;
@@ -85,16 +71,11 @@ export type CalendarSidebarProps = {
   onAddProject: (projectName: string) => void;
   onToggleProject: (projectId: string) => void;
   onReconnectAccount: (accountId: string) => void;
-  onRetryTaskLists?: () => void;
   onToggleCalendar: (accountId: string, calendarId: string) => void;
-  onToggleTaskList?: (taskListId: string) => void;
 };
 
 export type CalendarWorkspaceToolbarProps = {
-  activeMode: CalendarToolbarMode;
   viewMode?: CalendarViewMode;
-  onSelectCalendar: () => void;
-  onSelectTask: () => void;
   onSelectViewMode?: (viewMode: CalendarViewMode) => void;
 };
 
