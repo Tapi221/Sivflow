@@ -6,6 +6,13 @@ import { CodeBlockContent } from "./CodeBlockContent";
 import { normalizeEditorLanguage } from "./codeBlockLanguage";
 import type { CodeBlockData } from "@/types/core/code-block";
 
+interface CodeBlockEditorProps {
+  value?: CodeBlockData;
+  onChange: (value: CodeBlockData) => void;
+  className?: string;
+  zoom?: number;
+}
+
 const canUseLocalStorage = () => {
   try {
     return (
@@ -59,13 +66,6 @@ const pushRecentLang = (lang: string) => {
     // noop
   }
 };
-
-interface CodeBlockEditorProps {
-  value?: CodeBlockData;
-  onChange: (value: CodeBlockData) => void;
-  className?: string;
-  zoom?: number;
-}
 
 export const CodeBlockEditor = ({
   value,
@@ -178,13 +178,15 @@ export const CodeBlockEditor = ({
 
   return (
     <CodeBlockContent
-      value={{ language: normalizedLanguage, code }}
-      onChange={(nextCode) => {
+      mode="editor"
+      code={code}
+      language={normalizedLanguage}
+      onCodeChange={(nextCode: string) => {
         onChange({ language: normalizedLanguage, code: nextCode });
       }}
       className={className}
       zoom={zoom}
-      languageSelector={languageSelector}
+      headerLeft={languageSelector}
     />
   );
 };
