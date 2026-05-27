@@ -10,7 +10,7 @@ export type CalendarBufferDays = {
   after: number;
 };
 
-export type TimelineGridStyle = CSSProperties & {
+export type CalendarGridStyle = CSSProperties & {
   "--calendar-hour-row-height": string;
 };
 
@@ -105,7 +105,7 @@ export type CalendarWeekDayGridProps = {
   visibleDays: Date[];
   visibleEvents: GoogleCalendarEvent[];
   calendarDayColumnWidth: number;
-  timelineGridStyle: TimelineGridStyle;
+  calendarGridStyle: CalendarGridStyle;
   onScroll?: (event: UIEvent<HTMLDivElement>) => void;
   selectedDate: Date;
   onSelectDate?: (date: Date) => void;
