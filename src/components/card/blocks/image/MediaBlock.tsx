@@ -2,8 +2,8 @@ import React from "react";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
 import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
-import { Image as ImageIcon } from "@/ui/icons";
 import { cn } from "@/lib/utils";
+import { Image as ImageIcon } from "@/ui/icons";
 import type { UploadedImage } from "@/types/domain/assets";
 
 interface MediaBlockProps {
@@ -28,6 +28,21 @@ interface MediaBlockProps {
   displayMode?: "fixed" | "fluid";
   zoom?: number;
 }
+
+const areMediaBlockPropsEqual = (
+  prev: MediaBlockProps,
+  next: MediaBlockProps,
+) =>
+  prev.data === next.data &&
+  prev.dragHandleClassName === next.dragHandleClassName &&
+  prev.accentColor === next.accentColor &&
+  prev.initialFile === next.initialFile &&
+  prev.isBlockSelected === next.isBlockSelected &&
+  prev.showDelete === next.showDelete &&
+  prev.canMoveUp === next.canMoveUp &&
+  prev.canMoveDown === next.canMoveDown &&
+  prev.displayMode === next.displayMode &&
+  prev.zoom === next.zoom;
 
 const MediaBlockInner = ({
   data,
@@ -91,20 +106,8 @@ const MediaBlockInner = ({
   );
 };
 
-const areMediaBlockPropsEqual = (
-  prev: MediaBlockProps,
-  next: MediaBlockProps,
-) =>
-  prev.data === next.data &&
-  prev.dragHandleClassName === next.dragHandleClassName &&
-  prev.accentColor === next.accentColor &&
-  prev.initialFile === next.initialFile &&
-  prev.isBlockSelected === next.isBlockSelected &&
-  prev.showDelete === next.showDelete &&
-  prev.canMoveUp === next.canMoveUp &&
-  prev.canMoveDown === next.canMoveDown &&
-  prev.displayMode === next.displayMode &&
-  prev.zoom === next.zoom;
+const MediaBlock = React.memo(MediaBlockInner, areMediaBlockPropsEqual);
 
-export const MediaBlock = React.memo(MediaBlockInner, areMediaBlockPropsEqual);
 MediaBlock.displayName = "MediaBlock";
+
+export { MediaBlock };
