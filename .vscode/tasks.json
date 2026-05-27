@@ -1,0 +1,40 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "TypeScript: check app",
+      "type": "shell",
+      "command": "npm exec tsc -- -p tsconfig.app.json --noEmit --pretty false",
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "TypeScript: check node",
+      "type": "shell",
+      "command": "npm exec tsc -- -p tsconfig.node.json --noEmit --pretty false",
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "TypeScript: check electron",
+      "type": "shell",
+      "command": "npm exec tsc -- -p tsconfig.electron.json --noEmit --pretty false",
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "TypeScript: check all",
+      "dependsOn": [
+        "TypeScript: check app",
+        "TypeScript: check node",
+        "TypeScript: check electron"
+      ],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}
