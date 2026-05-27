@@ -82,6 +82,7 @@ const CHART_CLOCK_LABEL_RADIUS = CHART_RADIUS + 11;
 const CHART_EVENT_BORDER_STROKE_WIDTH = 3;
 const CLOCK_HOURS = [0, 3, 6, 9, 12, 15, 18, 21];
 const PIE_CHART_DAY_SECTION_HEIGHT_PX = 430;
+const PIE_CHART_CONTAINER_MAX_SIZE_PX = PIE_CHART_DAY_SECTION_HEIGHT_PX - 30;
 const PIE_CHART_DAY_GAP_PX = 8;
 const PIE_CHART_SCROLL_EDGE_THRESHOLD_PX = 220;
 const PIE_CHART_SCROLL_EDGE_RESET_PX = 520;
@@ -89,6 +90,8 @@ const PIE_CHART_SCROLL_IDLE_DELAY_MS = 120;
 const PIE_CHART_VISIBLE_DATE_ANCHOR_PX = 160;
 const PIE_CHART_VIRTUAL_OVERSCAN_PX = 1100;
 const SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX = 8;
+const CHART_CONTAINER_STYLE = { width: `min(100%, 72vh, ${PIE_CHART_CONTAINER_MAX_SIZE_PX}px)` };
+const DAY_SECTION_STYLE = { height: PIE_CHART_DAY_SECTION_HEIGHT_PX };
 
 const formatDuration = (minutes: number): string => {
   const normalizedMinutes = Math.max(0, Math.round(minutes));
@@ -391,7 +394,7 @@ const DailyClockPieComponent = ({ slices }: DailyClockPieProps) => {
 
   return (
     <div className="flex h-full w-full min-w-0 items-center justify-center">
-      <div className="relative aspect-square w-[min(100%,72vh)] max-w-[720px] min-w-0">
+      <div className="relative aspect-square min-w-0" style={CHART_CONTAINER_STYLE}>
         {hasTimedSlices ? (
           <>
             <svg viewBox="0 0 200 200" role="img" aria-label="予定の円グラフ" className="h-full w-full overflow-visible">
@@ -472,7 +475,8 @@ const CalendarPieChartDaySectionComponent = ({
   return (
     <section
       ref={day.isSelected ? selectedDayRef : undefined}
-      className="grid h-[430px] grid-cols-[58px_minmax(0,1fr)] gap-2"
+      className="grid grid-cols-[58px_minmax(0,1fr)] gap-2"
+      style={DAY_SECTION_STYLE}
       aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}
     >
       <button
