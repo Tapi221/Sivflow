@@ -80,7 +80,7 @@ const createEventCardStyle = (event: GoogleCalendarEvent): CalendarListEventCard
   const tokens = generateColorTokens(event.accentColor);
 
   return {
-    background: `linear-gradient(90deg, ${tokens.bg} 0%, rgba(255, 255, 255, 0.88) 100%)`,
+    background: `linear-gradient(90deg, ${tokens.bg} 0%, rgba(255, 255, 255, 0.9) 100%)`,
     borderColor: tokens.bg,
     borderLeftColor: tokens.border,
     color: tokens.text,
@@ -159,29 +159,29 @@ const CalendarListEventRow = ({ dateKey, event }: CalendarListEventRowProps) => 
   const cardStyle = createEventCardStyle(event);
 
   return (
-    <div className="grid min-h-[70px] grid-cols-[72px_34px_minmax(0,1fr)] items-stretch">
-      <div className="pt-4 text-right text-[13px] font-medium leading-none tabular-nums text-[rgba(60,60,67,0.68)]">
+    <div className="grid min-h-[50px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch">
+      <div className="pt-3 text-right text-[12px] font-medium leading-none tabular-nums text-[rgba(60,60,67,0.62)]">
         {startLabel}
       </div>
 
       <div className="relative flex justify-center">
         <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#eceff3]" aria-hidden="true" />
         <span
-          className="relative mt-[14px] h-3.5 w-3.5 rounded-full border-2 bg-white shadow-[0_2px_8px_rgba(15,23,42,0.08)]"
-          style={{ borderColor: tokens.border, boxShadow: `0 0 0 4px ${tokens.bg}` }}
+          className="relative mt-[9px] h-2.5 w-2.5 rounded-full border-2 bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)]"
+          style={{ borderColor: tokens.border, boxShadow: `0 0 0 3px ${tokens.bg}` }}
           aria-hidden="true"
         />
       </div>
 
-      <HoverEventTooltip title={title} subtitle={timeRangeLabel} accentColor={tokens.border} className="min-w-0 pb-2">
+      <HoverEventTooltip title={title} subtitle={timeRangeLabel} accentColor={tokens.border} className="min-w-0 pb-1.5">
         <div
-          className="min-h-[66px] w-full rounded-[14px] border border-l-[3px] px-4 py-3 text-left shadow-[0_1px_2px_rgba(15,23,42,0.03),0_10px_28px_rgba(15,23,42,0.04)] transition duration-200 ease-out hover:-translate-y-[1px] hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_16px_36px_rgba(15,23,42,0.07)]"
+          className="min-h-[46px] w-full rounded-[11px] border border-l-[3px] px-3 py-2 text-left shadow-[0_1px_2px_rgba(15,23,42,0.025),0_8px_18px_rgba(15,23,42,0.035)] transition duration-200 ease-out hover:-translate-y-[1px] hover:shadow-[0_1px_2px_rgba(15,23,42,0.035),0_12px_24px_rgba(15,23,42,0.055)]"
           style={cardStyle}
         >
-          <div className="text-[12px] font-semibold leading-none tabular-nums">
+          <div className="text-[11px] font-semibold leading-none tabular-nums">
             {timeRangeLabel}
           </div>
-          <div className="mt-2 line-clamp-2 text-[14px] font-semibold leading-snug tracking-[-0.01em] text-[#1c1c1e]">
+          <div className="mt-1.5 line-clamp-2 text-[13px] font-semibold leading-snug tracking-[-0.01em] text-[#1c1c1e]">
             {title}
           </div>
         </div>
@@ -191,15 +191,15 @@ const CalendarListEventRow = ({ dateKey, event }: CalendarListEventRowProps) => 
 };
 
 const EmptyDayCard = ({ isMonthEmpty }: { isMonthEmpty: boolean }) => (
-  <div className="grid min-h-[70px] grid-cols-[72px_34px_minmax(0,1fr)] items-stretch">
-    <div className="pt-4 text-right text-[13px] font-medium leading-none text-[rgba(60,60,67,0.38)]">
+  <div className="grid min-h-[50px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch">
+    <div className="pt-3 text-right text-[12px] font-medium leading-none text-[rgba(60,60,67,0.34)]">
       —
     </div>
     <div className="relative flex justify-center">
       <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#eef1f4]" aria-hidden="true" />
-      <span className="relative mt-[14px] h-3.5 w-3.5 rounded-full border-2 border-[#d9dee6] bg-white" aria-hidden="true" />
+      <span className="relative mt-[9px] h-2.5 w-2.5 rounded-full border-2 border-[#d9dee6] bg-white" aria-hidden="true" />
     </div>
-    <div className="flex min-h-[66px] items-center rounded-[14px] border border-dashed border-[#dfe3e8] bg-[#fbfcfd] px-4 text-[13px] font-medium text-[#8f929c]">
+    <div className="flex min-h-[46px] items-center rounded-[11px] border border-dashed border-[#dfe3e8] bg-[#fbfcfd] px-3 text-[12px] font-medium text-[#8f929c]">
       {isMonthEmpty ? EMPTY_MONTH_LABEL : EMPTY_DAY_LABEL}
     </div>
   </div>
@@ -213,23 +213,23 @@ const CalendarListDaySection = ({
   return (
     <section
       ref={day.isSelected ? selectedDayRef : undefined}
-      className="grid grid-cols-[78px_minmax(0,1fr)] gap-3"
+      className="grid grid-cols-[58px_minmax(0,1fr)] gap-2"
       aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}
     >
       <button
         type="button"
         className={cn(
-          "group mt-1 flex h-10 items-baseline justify-end gap-1 rounded-[12px] pr-1 text-right transition",
+          "group mt-0.5 flex h-8 items-baseline justify-end gap-1 rounded-[10px] pr-0.5 text-right transition",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25",
           day.isSelected && "text-[#1c1c1e]",
         )}
         onClick={() => onSelectDate?.(day.date)}
       >
-        <span className={cn("text-[19px] font-bold leading-none tracking-[-0.03em]", day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]")}>{format(day.date, "d")}</span>
-        <span className="text-[12px] font-semibold leading-none text-[rgba(60,60,67,0.58)]">{format(day.date, "EEE", { locale: ja })}</span>
+        <span className={cn("text-[16px] font-bold leading-none tracking-[-0.03em]", day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]")}>{format(day.date, "d")}</span>
+        <span className="text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]">{format(day.date, "EEE", { locale: ja })}</span>
       </button>
 
-      <div className="space-y-2.5">
+      <div className="space-y-1.5">
         {day.events.length > 0 ? (
           day.events.map((event) => (
             <CalendarListEventRow
@@ -267,8 +267,8 @@ const CalendarListViewComponent = ({
 
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}>
-      <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-8 pt-4 scrollbar-hidden">
-        <div className="mx-auto flex w-full max-w-[1040px] flex-col gap-8">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden">
+        <div className="mx-auto flex w-full max-w-[940px] flex-col gap-5">
           {visibleDays.map((day) => (
             <CalendarListDaySection
               key={day.dateKey}
