@@ -20,12 +20,15 @@ export const AddGoogleCalendarButton = ({
   onAddCalendar,
 }: AddGoogleCalendarButtonProps) => {
   const t = useT();
-  const label = hasGoogleAccounts ? t.addAnotherGoogleAccount : t.addGoogleCalendar;
+
+  if (hasGoogleAccounts) return null;
+
+  const label = t.addGoogleCalendar;
 
   return (
     <button
       type="button"
-      className={cn(BUTTON_CLASS_NAME, hasGoogleAccounts && "mt-2")}
+      className={cn(BUTTON_CLASS_NAME)}
       onClick={onAddCalendar}
       disabled={isConnecting}
       title={label}
