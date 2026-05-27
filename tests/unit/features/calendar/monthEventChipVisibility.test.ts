@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_MONTH_ROW_HEIGHT } from "@/features/calendar/calendar.constants.desktop";
-import { getVisibleMonthEventChipCount } from "@/features/calendar/grid/Grid.calendar.month.desktop";
+import { getVisibleMonthEventChipCount } from "@/features/calendar/grid/monthEventChipCount";
 
 describe("month event chip visibility", () => {
   it("デフォルト行高で3件と省略表示を表示できる", () => {
