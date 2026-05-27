@@ -50,7 +50,7 @@ export const fetchCalendarList = async (
     const params = new URLSearchParams({
       minAccessRole: "reader",
       showDeleted: "false",
-      showHidden: "false",
+      showHidden: "true",
     });
 
     if (pageToken) {
