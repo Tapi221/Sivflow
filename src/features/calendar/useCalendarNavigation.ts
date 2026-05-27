@@ -5,7 +5,7 @@ import type { CalendarToolbarMode, CalendarViewMode } from "./scheduleScreen.typ
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return addYears(current, 1);
-  if (viewMode === "month") return addMonths(current, 1);
+  if (viewMode === "month" || viewMode === "list") return addMonths(current, 1);
   if (viewMode === "week") return addDays(current, 7);
   if (viewMode === "threeDays") return addDays(current, 3);
   return addDays(current, 1);
@@ -13,7 +13,7 @@ const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
 
 const getPreviousDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return subYears(current, 1);
-  if (viewMode === "month") return subMonths(current, 1);
+  if (viewMode === "month" || viewMode === "list") return subMonths(current, 1);
   if (viewMode === "week") return subDays(current, 7);
   if (viewMode === "threeDays") return subDays(current, 3);
   return subDays(current, 1);
@@ -23,6 +23,7 @@ const normalizeWeek = (date: Date) => startOfWeek(date, { weekStartsOn: 1 });
 
 const normalizeViewDate = (date: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return startOfYear(date);
+  if (viewMode === "list") return startOfMonth(date);
   if (viewMode === "week") return normalizeWeek(date);
   return date;
 };
@@ -134,11 +135,11 @@ export const useCalendarNavigation = ({
       setSelectedViewMode(next);
       setActiveMode("calendar");
 
-      const anchorDate = next === "pieChart" ? selectedDate : currentDate;
+      const anchorDate = next === "pieChart" || next === "list" ? selectedDate : currentDate;
       const normalized = normalizeViewDate(anchorDate, next);
 
       setCurrentDate(normalized);
-      setSelectedDate(normalized);
+      setSelectedDate(next === "list" ? anchorDate : normalized);
       setMonthTitleDate(startOfMonth(normalized));
 
       if (next === "month") {
@@ -155,7 +156,7 @@ export const useCalendarNavigation = ({
     const normalized = normalizeViewDate(now, selectedViewMode);
 
     setCurrentDate(normalized);
-    setSelectedDate(normalized);
+    setSelectedDate(selectedViewMode === "list" ? now : normalized);
     setMonthTitleDate(startOfMonth(normalized));
 
     requestMonthScrollTarget();
@@ -216,7 +217,7 @@ export const useCalendarNavigation = ({
 
   const handleSidebarSelectDate = useCallback(
     (date: Date) => {
-      setCurrentDate(date);
+      setCurrentDate(selectedViewMode === "list" ? startOfMonth(date) : date);
       setSelectedDate(date);
       setMonthTitleDate(startOfMonth(date));
 
