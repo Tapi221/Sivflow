@@ -14,7 +14,7 @@ export const getScheduleViewStart = (
   const normalized = startOfDay(anchorDate);
 
   if (viewMode === "year") return startOfYear(normalized);
-  if (viewMode === "month") return startOfMonth(normalized);
+  if (viewMode === "month" || viewMode === "list") return startOfMonth(normalized);
 
   if (viewMode === "week") {
     return startOfWeek(normalized, {
@@ -36,7 +36,7 @@ export const getScheduleViewDayCount = (
     return Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
   }
 
-  if (viewMode === "month") return getDaysInMonth(anchorDate);
+  if (viewMode === "month" || viewMode === "list") return getDaysInMonth(anchorDate);
   if (viewMode === "week") return 7;
   if (viewMode === "threeDays") return 3;
   return 1;
