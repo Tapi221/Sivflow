@@ -21,7 +21,7 @@ type SharedSceneProps = Readonly<{
   getRowContainerProps?: GetRowContainerProps;
 }>;
 
-export type CardBlocksSceneResolvedProps =
+type CardBlocksSceneResolvedProps =
   | Readonly<{
     mode: "view";
     viewerProps: ViewerProps;
@@ -31,7 +31,7 @@ export type CardBlocksSceneResolvedProps =
     editorProps: EditorProps;
   }>;
 
-export type CardBlocksSceneProps = SharedSceneProps &
+type CardBlocksSceneProps = SharedSceneProps &
   Readonly<{
     resolveSceneProps: (
       block: CardBlock,
@@ -66,5 +66,9 @@ const CardBlocksSceneInner = ({
   );
 };
 
-export const CardBlocksScene = React.memo(CardBlocksSceneInner);
+const CardBlocksScene = React.memo(CardBlocksSceneInner);
+
 CardBlocksScene.displayName = "CardBlocksScene";
+
+export { CardBlocksScene };
+export type { CardBlocksSceneProps, CardBlocksSceneResolvedProps };
