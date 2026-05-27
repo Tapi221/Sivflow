@@ -193,7 +193,7 @@ const TaskTagStripBase = () => {
                   <TagChip
                     label={tag.name}
                     colorKey={tagColorKey}
-                    className="pointer-events-none h-[22px] min-w-0 max-w-full px-2 text-[11px] font-medium leading-[1.3] transition-[filter,box-shadow] duration-100 group-hover:brightness-[0.96] group-hover:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
+                    className="pointer-events-none h-[20px] min-w-0 max-w-full gap-1 px-1.5 text-[10px] font-medium leading-[1.2] transition-[filter,box-shadow] duration-100 group-hover:brightness-[0.96] group-hover:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
                   />
                 </button>
               );
