@@ -24,9 +24,15 @@ const maybeUpdateFirestoreDeletedState = async ({
   pathSegments: string[];
   isDeleted: boolean;
 }): Promise<void> => {
-  if (!firestoreDb) return;
+  if (!firestoreDb || pathSegments.length === 0) return;
 
-  const targetRef = doc(firestoreDb, ...pathSegments);
+  const [collectionPath, documentPath, ...nestedPathSegments] = pathSegments;
+  const targetRef = doc(
+    firestoreDb,
+    collectionPath,
+    documentPath,
+    ...nestedPathSegments,
+  );
 
   await updateDoc(targetRef, {
     isDeleted,
@@ -38,9 +44,15 @@ const maybeUpdateFirestoreDeletedState = async ({
 const maybeDeleteFirestoreDoc = async (
   pathSegments: string[],
 ): Promise<void> => {
-  if (!firestoreDb) return;
+  if (!firestoreDb || pathSegments.length === 0) return;
 
-  const targetRef = doc(firestoreDb, ...pathSegments);
+  const [collectionPath, documentPath, ...nestedPathSegments] = pathSegments;
+  const targetRef = doc(
+    firestoreDb,
+    collectionPath,
+    documentPath,
+    ...nestedPathSegments,
+  );
   await deleteDoc(targetRef);
 };
 
