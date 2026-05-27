@@ -48,6 +48,7 @@ const CHART_CENTER = 100;
 const CHART_RADIUS = 82;
 const CHART_LABEL_RADIUS = CHART_RADIUS * 0.58;
 const CHART_CLOCK_LABEL_RADIUS = CHART_RADIUS + 11;
+const CHART_EVENT_BORDER_STROKE_WIDTH = 3;
 const CLOCK_HOURS = [0, 3, 6, 9, 12, 15, 18, 21];
 
 const formatDuration = (minutes: number): string => {
@@ -114,6 +115,17 @@ const getChartOverlayStyle = (minute: number, radius: number) => {
   return {
     left: `${(point.x / (CHART_CENTER * 2)) * 100}%`,
     top: `${(point.y / (CHART_CENTER * 2)) * 100}%`,
+  };
+};
+
+const getEventChipAccentLine = (minute: number) => {
+  const end = polarToCartesian(minute, CHART_RADIUS);
+
+  return {
+    x1: CHART_CENTER,
+    y1: CHART_CENTER,
+    x2: end.x,
+    y2: end.y,
   };
 };
 
@@ -266,15 +278,27 @@ const DailyClockPie = ({ slices }: DailyClockPieProps) => {
             <svg viewBox="0 0 200 200" role="img" aria-label="予定の円グラフ" className="h-full w-full overflow-visible">
               {visibleSlices.map((slice) => (
                 slice.endMinute - slice.startMinute >= FULL_DAY_MINUTES ? (
-                  <circle key={slice.id} cx={CHART_CENTER} cy={CHART_CENTER} r={CHART_RADIUS} fill={slice.color} stroke={slice.borderColor} strokeWidth={0.45} />
+                  <circle key={slice.id} cx={CHART_CENTER} cy={CHART_CENTER} r={CHART_RADIUS} fill={slice.color}>
+                    <title>
+                      {slice.label}: {formatDuration(slice.minutes)}
+                    </title>
+                  </circle>
                 ) : (
-                  <path key={slice.id} d={buildWedgePath(slice.startMinute, slice.endMinute)} fill={slice.color} stroke={slice.borderColor} strokeWidth={0.45}>
+                  <path key={slice.id} d={buildWedgePath(slice.startMinute, slice.endMinute)} fill={slice.color}>
                     <title>
                       {slice.label}: {formatDuration(slice.minutes)}
                     </title>
                   </path>
                 )
               ))}
+
+              {visibleSlices.filter((slice) => !slice.isGap).map((slice) => {
+                const line = getEventChipAccentLine(slice.startMinute);
+
+                return (
+                  <line key={`accent:${slice.id}`} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} stroke={slice.borderColor} strokeWidth={CHART_EVENT_BORDER_STROKE_WIDTH} strokeLinecap="butt" vectorEffect="non-scaling-stroke" />
+                );
+              })}
 
               {CLOCK_HOURS.map((hour) => {
                 const minute = hour * 60;
