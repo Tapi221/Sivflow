@@ -1,9 +1,8 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import type { CalendarToolbarMode } from "@/features/calendar/scheduleScreen.types";
-
-const DesktopScheduleScreen = lazy(() => import("@/screens/ScheduleScreen.desktop").then((module) => ({ default: module.ScheduleScreen })));
-const MobileScheduleScreen = lazy(() => import("@/screens/ScheduleScreen.mobile").then((module) => ({ default: module.ScheduleScreen })));
+import { ScheduleScreen as DesktopScheduleScreen } from "@/screens/ScheduleScreen.desktop";
+import { ScheduleScreen as MobileScheduleScreen } from "@/screens/ScheduleScreen.mobile";
 
 const MOBILE_SCHEDULE_MEDIA_QUERY = "(max-width: 767px)";
 
@@ -31,7 +30,7 @@ const useIsMobileSchedule = () => {
 const Calendar = () => {
   const isMobile = useIsMobileSchedule();
   const { search } = useLocation();
-  const ScheduleScreen = isMobile ? MobileScheduleScreen : DesktopScheduleScreen;
+  const ActiveScheduleScreen = isMobile ? MobileScheduleScreen : DesktopScheduleScreen;
 
   const initialActiveMode = useMemo<CalendarToolbarMode | undefined>(() => {
     const mode = new URLSearchParams(search).get("mode");
@@ -45,9 +44,7 @@ const Calendar = () => {
 
   return (
     <div className="h-full min-h-0 w-full">
-      <Suspense fallback={null}>
-        <ScheduleScreen initialActiveMode={initialActiveMode} />
-      </Suspense>
+      <ActiveScheduleScreen initialActiveMode={initialActiveMode} />
     </div>
   );
 };
