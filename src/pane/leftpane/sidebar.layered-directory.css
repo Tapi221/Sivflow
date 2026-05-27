@@ -71,7 +71,7 @@ aside[aria-label="Library hierarchy explorer"] > div:first-child:hover,
 aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within {
   scrollbar-width: thin;
   -ms-overflow-style: auto;
-  scrollbar-color: rgba(226, 232, 240, 0.92) transparent;
+  scrollbar-color: #d5d5d5 transparent;
 }
 
 aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar,
@@ -83,7 +83,7 @@ aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-
 aside[aria-label="Library hierarchy explorer"] > div:first-child:hover::-webkit-scrollbar-thumb,
 aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background-color: rgba(226, 232, 240, 0.92);
+  background-color: #d5d5d5;
 }
 
 /* Tree rows: keep original typography while flattening the layered directory look. */
