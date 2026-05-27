@@ -6,42 +6,41 @@ import { SharedCardViewScene } from "./SharedCardViewScene";
 import { cn } from "@/lib/utils";
 import { CONTENT_TYPO } from "@/styles/tokens/typography";
 
-const SHARED_CARD_CONTENT_ROOT_CLASS_NAME =
-  "card-content-root flex min-h-0 flex-1 w-full max-w-full flex-col overflow-x-clip overflow-y-visible";
+export type { SharedCardContentProps } from "./SharedCardContent.types";
 
 type SharedCardContentRootProps = Readonly<{
   className?: string;
   children: React.ReactNode;
 }>;
 
-const SharedCardContentRoot = React.memo(
-  ({ className, children }: SharedCardContentRootProps) => (
-    <div
-      className={cn(
-        SHARED_CARD_CONTENT_ROOT_CLASS_NAME,
-        CONTENT_TYPO,
-        className,
-      )}
-      style={{
-        paddingTop: `var(--card-content-padding-top, ${CARD_CONTENT_TOP_PX}px)`,
-      }}
-    >
-      {children}
-    </div>
-  ),
+const SHARED_CARD_CONTENT_ROOT_CLASS_NAME =
+  "card-content-root flex min-h-0 flex-1 w-full max-w-full flex-col overflow-x-clip overflow-y-visible";
+
+const SharedCardContentRootComponent = ({
+  className,
+  children,
+}: SharedCardContentRootProps) => (
+  <div
+    className={cn(
+      SHARED_CARD_CONTENT_ROOT_CLASS_NAME,
+      CONTENT_TYPO,
+      className,
+    )}
+    style={{
+      paddingTop: `var(--card-content-padding-top, ${CARD_CONTENT_TOP_PX}px)`,
+    }}
+  >
+    {children}
+  </div>
 );
 
-SharedCardContentRoot.displayName = "SharedCardContentRoot";
-
-const SharedCardContentScene = React.memo((props: SharedCardContentProps) => {
+const SharedCardContentSceneComponent = (props: SharedCardContentProps) => {
   return props.mode === "view" ? (
     <SharedCardViewScene {...props} />
   ) : (
     <SharedCardEditScene {...props} />
   );
-});
-
-SharedCardContentScene.displayName = "SharedCardContentScene";
+};
 
 const SharedCardContentInner = (props: SharedCardContentProps) => {
   return (
@@ -51,7 +50,12 @@ const SharedCardContentInner = (props: SharedCardContentProps) => {
   );
 };
 
-export const SharedCardContent = React.memo(SharedCardContentInner);
+const SharedCardContentRoot = React.memo(SharedCardContentRootComponent);
+const SharedCardContentScene = React.memo(SharedCardContentSceneComponent);
+const SharedCardContent = React.memo(SharedCardContentInner);
+
+SharedCardContentRoot.displayName = "SharedCardContentRoot";
+SharedCardContentScene.displayName = "SharedCardContentScene";
 SharedCardContent.displayName = "SharedCardContent";
 
-export type { SharedCardContentProps } from "./SharedCardContent.types";
+export { SharedCardContent };
