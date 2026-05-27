@@ -2,17 +2,17 @@ import type { CSSProperties } from "react";
 import { memo, useEffect, useMemo, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import * as C from "@/features/calendar/calendar.constants.desktop";
-import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.layout.weekday.desktop";
+import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.schedule.weekday";
+import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
+import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
+import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
-import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import type { CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
-import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
-import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.schedule.weekday";
+import type { CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
 type CalendarEventPositionStyle = CSSProperties & {
@@ -201,8 +201,8 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
   scrollContainerRef,
   visibleDays,
   visibleEvents,
-  _calendarDayColumnWidth,
-  timelineGridStyle,
+  calendarDayColumnWidth: _calendarDayColumnWidth,
+  calendarGridStyle,
   onScroll,
   selectedDate,
   onSelectDate,
@@ -261,7 +261,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
         className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
         onScroll={onScroll}
       >
-        <div className="grid bg-white" style={timelineGridStyle}>
+        <div className="grid bg-white" style={calendarGridStyle}>
           <div className="sticky left-0 top-0 z-[60] h-10 border-b border-r border-[#eeeeee] bg-white" />
 
           {visibleDays.map((day, dayIndex) => {
@@ -424,8 +424,8 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
   return (
     previous.scrollContainerRef === next.scrollContainerRef &&
     previous.visibleEvents === next.visibleEvents &&
-    previous._calendarDayColumnWidth === next._calendarDayColumnWidth &&
-    previous.timelineGridStyle === next.timelineGridStyle &&
+    previous.calendarDayColumnWidth === next.calendarDayColumnWidth &&
+    previous.calendarGridStyle === next.calendarGridStyle &&
     previous.onScroll === next.onScroll &&
     previous.onSelectDate === next.onSelectDate &&
     areSameVisibleDays(previous.visibleDays, next.visibleDays) &&
