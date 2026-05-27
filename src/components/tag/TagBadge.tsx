@@ -14,6 +14,11 @@ interface TagBadgeProps {
   removeAriaLabel?: string;
 }
 
+const TAG_TEXT_FADE_STYLE: React.CSSProperties = {
+  WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
+  maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
+};
+
 const TagHashIcon = ({ className }: React.SVGProps<SVGSVGElement>) => (
   <svg
     aria-hidden="true"
@@ -49,7 +54,12 @@ export const TagBadge = ({
   const content = (
     <>
       <TagHashIcon className="h-[0.82em] w-[0.82em] shrink-0 opacity-70" />
-      <span className={cn("min-w-0 truncate opacity-70", textClassName)}>{textLabel}</span>
+      <span
+        className={cn("min-w-0 overflow-hidden whitespace-nowrap opacity-70", textClassName)}
+        style={TAG_TEXT_FADE_STYLE}
+      >
+        {textLabel}
+      </span>
       {onRemove && (
         <button
           type="button"
