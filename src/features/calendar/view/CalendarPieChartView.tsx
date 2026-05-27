@@ -25,10 +25,7 @@ type DailyPieSlice = {
 };
 
 type DailyClockPieProps = {
-  title: string;
-  totalMinutes: number;
   slices: DailyPieSlice[];
-  isActual?: boolean;
 };
 
 const DEFAULT_SEGMENT_COLOR = "#8e8e93";
@@ -216,23 +213,15 @@ const truncateChartLabel = (label: string) => {
   return `${label.slice(0, 5)}…`;
 };
 
-const DailyClockPie = ({ title, totalMinutes, slices, isActual = false }: DailyClockPieProps) => {
+const DailyClockPie = ({ slices }: DailyClockPieProps) => {
   const visibleSlices = slices.filter((slice) => slice.minutes > 0);
   const hasTimedSlices = visibleSlices.some((slice) => !slice.isGap);
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col items-center">
-      <div className={cn(
-        "mb-1 rounded-[7px] px-9 py-1 text-center text-[15px] font-semibold tracking-[-0.02em]",
-        isActual ? "bg-[#dff6e8] text-[#26914f]" : "bg-[#eee9ff] text-[#7560d8]",
-      )}>
-        {title}
-      </div>
-      <p className="mb-6 text-[12px] font-semibold text-[#6e6e73]">計 {formatDuration(totalMinutes)}</p>
-
-      <div className="relative aspect-square w-full max-w-[430px] min-w-[300px]">
+    <div className="flex min-w-0 items-center justify-center">
+      <div className="relative aspect-square w-full max-w-[520px] min-w-[300px]">
         {hasTimedSlices ? (
-          <svg viewBox="0 0 200 200" role="img" aria-label={`${title} 計 ${formatDuration(totalMinutes)}`} className="h-full w-full overflow-visible">
+          <svg viewBox="0 0 200 200" role="img" aria-label="予定の円グラフ" className="h-full w-full overflow-visible">
             {visibleSlices.map((slice) => (
               slice.endMinute - slice.startMinute >= FULL_DAY_MINUTES ? (
                 <circle key={slice.id} cx={CHART_CENTER} cy={CHART_CENTER} r={CHART_RADIUS} fill={slice.color} />
@@ -296,14 +285,12 @@ const CalendarPieChartView = ({
     () => buildDailyPieSlices(selectedDate, events, appProjects, googleAccounts),
     [appProjects, events, googleAccounts, selectedDate],
   );
-  const plannedMinutes = plannedSlices.reduce((sum, slice) => slice.isGap ? sum : sum + slice.minutes, 0);
 
   return (
     <div className={cn("flex h-full min-h-0 bg-white text-[#1c1c1e]", className)}>
       <main className="flex min-h-0 flex-1 flex-col">
-        <div className="flex min-h-0 flex-1 items-center justify-center gap-12 overflow-hidden px-8 py-6 max-[1120px]:gap-6 max-[980px]:flex-col max-[980px]:overflow-y-auto">
-          <DailyClockPie title="予定" totalMinutes={plannedMinutes} slices={plannedSlices} />
-          <DailyClockPie title="実績" totalMinutes={0} slices={[]} isActual />
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-8 py-6">
+          <DailyClockPie slices={plannedSlices} />
         </div>
       </main>
     </div>
