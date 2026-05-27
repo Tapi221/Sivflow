@@ -1,9 +1,9 @@
 import type { CSSProperties, RefObject, UIEvent } from "react";
-import type { CalendarViewMode } from "@/features/calendar/calendar.types";
+import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/calendar.types";
 import type { GCalConnectionStatus, GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 
-export type { CalendarViewMode };
+export type { CalendarViewMode, CalendarViewModeSelection };
 
 export type CalendarBufferDays = {
   before: number;
@@ -75,7 +75,7 @@ export type CalendarSidebarProps = {
 };
 
 export type CalendarWorkspaceToolbarProps = {
-  viewMode?: CalendarViewMode;
+  viewMode?: CalendarViewModeSelection;
   onSelectViewMode?: (viewMode: CalendarViewMode) => void;
 };
 

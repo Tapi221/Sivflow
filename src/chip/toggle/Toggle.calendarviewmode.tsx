@@ -1,5 +1,5 @@
 import { motion, type Transition } from "framer-motion";
-import type { CalendarViewMode } from "@/features/calendar/calendar.types";
+import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/calendar.types";
 import { cn } from "@/lib/utils";
 
 type CalendarViewModeOption = {
@@ -8,7 +8,7 @@ type CalendarViewModeOption = {
 };
 
 type ToggleCalendarViewModeProps = {
-  value: CalendarViewMode;
+  value: CalendarViewModeSelection;
   onChange: (value: CalendarViewMode) => void;
   options: readonly CalendarViewModeOption[];
   className?: string;
@@ -23,6 +23,11 @@ const CALENDAR_VIEW_MODE_MOTION_TRANSITION: Transition = {
   duration: 0.3,
   ease: [0.22, 1, 0.36, 1],
 };
+
+const isSelectedViewMode = (
+  value: CalendarViewModeSelection,
+  optionValue: CalendarViewMode,
+) => Array.isArray(value) ? value.includes(optionValue) : value === optionValue;
 
 export const ToggleCalendarViewMode = ({
   value,
@@ -40,7 +45,7 @@ export const ToggleCalendarViewMode = ({
       )}
     >
       {options.map((option) => {
-        const isActive = value === option.value;
+        const isActive = isSelectedViewMode(value, option.value);
 
         return (
           <button
@@ -60,7 +65,7 @@ export const ToggleCalendarViewMode = ({
           >
             {isActive && (
               <motion.span
-                layoutId={CALENDAR_VIEW_MODE_INDICATOR_ID}
+                layoutId={`${CALENDAR_VIEW_MODE_INDICATOR_ID}:${option.value}`}
                 className="absolute inset-0 -z-10 rounded-[8px] border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
                 transition={CALENDAR_VIEW_MODE_MOTION_TRANSITION}
               />
