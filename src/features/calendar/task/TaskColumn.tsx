@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
-import { useMemo, type MouseEvent as ReactMouseEvent } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type UIEvent } from "react";
 import { TaskStatusDot } from "@/chip/icon/TaskStatusDot";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useT } from "@/i18n/useT";
-import { cn } from "@/lib/utils";
-import { TASK_TYPO } from "@/styles/tokens/typography";
 import { TaskSortableContext, useTaskSortableCard } from "@/features/dnd/task/taskDnd.components";
 import { TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS, TASK_DND_LAYOUT_ANIMATION_DURATION_MS } from "@/features/dnd/task/taskDnd.config";
 import type { TaskDropTarget } from "@/features/dnd/task/taskDnd.types";
+import { useT } from "@/i18n/useT";
+import { cn } from "@/lib/utils";
+import { TASK_TYPO } from "@/styles/tokens/typography";
 import { TaskCard } from "./TaskCard";
 import { TaskInsertionSlot } from "./TaskInsertionSlot";
 import type { Task, TaskStatus } from "./task.types";
@@ -45,6 +45,15 @@ type SortableTaskCardProps = {
   onTaskContextMenu?: (event: ReactMouseEvent<HTMLDivElement>, task: Task) => void;
 };
 
+type VirtualTaskWindow = {
+  enabled: boolean;
+  startIndex: number;
+  endIndex: number;
+  beforeHeight: number;
+  afterHeight: number;
+  totalHeight: number;
+};
+
 const taskColumnBackground = "#ffffff";
 const TASK_LAYOUT_MOTION_EASING = [0.16, 1, 0.3, 1] as const;
 const TASK_LAYOUT_MOTION_TRANSITION = {
@@ -55,12 +64,116 @@ const TASK_DRAG_LAYOUT_MOTION_TRANSITION = {
   duration: TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS / 1000,
   ease: TASK_LAYOUT_MOTION_EASING,
 };
+const TASK_VIRTUAL_ROW_HEIGHT = 64;
+const TASK_VIRTUAL_OVERSCAN = 6;
+const TASK_VIRTUAL_MIN_ITEMS = 28;
+const TASK_VIRTUAL_INITIAL_VIEWPORT_HEIGHT = 640;
 
 const isTaskStatus = (value: string): value is TaskStatus => {
   return TASK_COLUMNS.some((column) => column.id === value);
 };
 
-const SortableTaskCard = ({
+const areSortableTaskCardPropsEqual = (
+  previousProps: SortableTaskCardProps,
+  nextProps: SortableTaskCardProps,
+) => {
+  return (
+    previousProps.task === nextProps.task &&
+    previousProps.columnId === nextProps.columnId &&
+    previousProps.activeTaskId === nextProps.activeTaskId &&
+    previousProps.isDragActive === nextProps.isDragActive &&
+    previousProps.accountName === nextProps.accountName &&
+    previousProps.accountPhotoUrl === nextProps.accountPhotoUrl &&
+    previousProps.onDeleteTask === nextProps.onDeleteTask &&
+    previousProps.onToggleTaskDone === nextProps.onToggleTaskDone &&
+    previousProps.onTaskContextMenu === nextProps.onTaskContextMenu
+  );
+};
+
+const useVirtualTaskWindow = (
+  tasksLength: number,
+  isDragActive: boolean,
+) => {
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(TASK_VIRTUAL_INITIAL_VIEWPORT_HEIGHT);
+  const enabled = !isDragActive && tasksLength > TASK_VIRTUAL_MIN_ITEMS;
+
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const updateViewportHeight = () => {
+      setViewportHeight(viewport.clientHeight || TASK_VIRTUAL_INITIAL_VIEWPORT_HEIGHT);
+    };
+
+    updateViewportHeight();
+
+    if (typeof ResizeObserver === "undefined") return;
+
+    const resizeObserver = new ResizeObserver(updateViewportHeight);
+    resizeObserver.observe(viewport);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!enabled) {
+      setScrollTop(0);
+      return;
+    }
+
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    setScrollTop(viewport.scrollTop);
+  }, [enabled, tasksLength]);
+
+  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
+    if (!enabled) return;
+
+    setScrollTop(event.currentTarget.scrollTop);
+  };
+
+  const window = useMemo<VirtualTaskWindow>(() => {
+    if (!enabled) {
+      return {
+        enabled: false,
+        startIndex: 0,
+        endIndex: tasksLength,
+        beforeHeight: 0,
+        afterHeight: 0,
+        totalHeight: 0,
+      };
+    }
+
+    const rawStartIndex = Math.floor(scrollTop / TASK_VIRTUAL_ROW_HEIGHT) - TASK_VIRTUAL_OVERSCAN;
+    const startIndex = Math.max(0, Math.min(tasksLength - 1, rawStartIndex));
+    const visibleCount = Math.ceil(viewportHeight / TASK_VIRTUAL_ROW_HEIGHT) + TASK_VIRTUAL_OVERSCAN * 2;
+    const endIndex = Math.min(tasksLength, startIndex + visibleCount);
+    const beforeHeight = startIndex * TASK_VIRTUAL_ROW_HEIGHT;
+    const afterHeight = Math.max(0, (tasksLength - endIndex) * TASK_VIRTUAL_ROW_HEIGHT);
+
+    return {
+      enabled: true,
+      startIndex,
+      endIndex,
+      beforeHeight,
+      afterHeight,
+      totalHeight: tasksLength * TASK_VIRTUAL_ROW_HEIGHT,
+    };
+  }, [enabled, scrollTop, tasksLength, viewportHeight]);
+
+  return {
+    handleScroll,
+    viewportRef,
+    window,
+  };
+};
+
+const SortableTaskCardComponent = ({
   task,
   columnId,
   activeTaskId,
@@ -82,7 +195,7 @@ const SortableTaskCard = ({
   return (
     <motion.div
       ref={setNodeRef}
-      layout="position"
+      layout={isDragActive ? "position" : false}
       transition={
         isDragActive
           ? TASK_DRAG_LAYOUT_MOTION_TRANSITION
@@ -109,6 +222,8 @@ const SortableTaskCard = ({
     </motion.div>
   );
 };
+
+const SortableTaskCard = memo(SortableTaskCardComponent, areSortableTaskCardPropsEqual);
 
 export const TaskColumn = ({
   column,
@@ -145,6 +260,19 @@ export const TaskColumn = ({
   }, [nonActiveTasks]);
   const activeInsertIndex =
     activeDropTarget?.columnId === column.id ? activeDropTarget.insertIndex : null;
+  const { handleScroll, viewportRef, window } = useVirtualTaskWindow(tasks.length, isDragActive);
+  const visibleTasks = window.enabled
+    ? tasks.slice(window.startIndex, window.endIndex)
+    : tasks;
+  const spacerStyle = useMemo<CSSProperties>(() => {
+    if (!window.enabled) return {};
+
+    return {
+      minHeight: window.totalHeight,
+      paddingTop: window.beforeHeight,
+      paddingBottom: window.afterHeight,
+    };
+  }, [window.afterHeight, window.beforeHeight, window.enabled, window.totalHeight]);
 
   return (
     <div
@@ -183,13 +311,18 @@ export const TaskColumn = ({
         ) : null}
       </div>
 
-      <ScrollArea className="-mr-3 min-h-0 flex-1 overscroll-contain">
+      <ScrollArea
+        className="-mr-3 min-h-0 flex-1 overscroll-contain"
+        viewportRef={viewportRef}
+        viewportProps={{ onScroll: handleScroll }}
+      >
         <TaskSortableContext columnId={column.id} taskIds={taskIds}>
           <div
             className={cn(
               "flex min-h-8 flex-col pr-3",
               "transition-[padding,border-color,background-color] duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
             )}
+            style={spacerStyle}
           >
             <TaskInsertionSlot
               columnId={column.id}
@@ -197,8 +330,9 @@ export const TaskColumn = ({
               overTaskId={nonActiveTasks[0]?.id ?? null}
               isActive={activeInsertIndex === 0}
               isFirst
+              isDragActive={isDragActive}
             />
-            {tasks.map((task) => {
+            {visibleTasks.map((task) => {
               const isActiveTask = task.id === activeTaskId;
               const insertIndex = isActiveTask
                 ? -1
@@ -226,6 +360,7 @@ export const TaskColumn = ({
                       position="after"
                       isActive={activeInsertIndex === insertIndex}
                       isLast={isLastTask}
+                      isDragActive={isDragActive}
                     />
                   )}
                 </div>
@@ -237,3 +372,5 @@ export const TaskColumn = ({
     </div>
   );
 };
+
+SortableTaskCard.displayName = "SortableTaskCard";
