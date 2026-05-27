@@ -25,6 +25,7 @@
     "build:electron": "npm run build:web && npm run electron:build",
     "electron:build": "npm run electron:build:main && npm run electron:build:preload && npm run electron:prepare-dist",
     "electron:start": "node scripts/electron/run-electron.cjs dist-electron/electron/main.js",
+    "mobile:install": "npm --prefix apps/mobile install",
     "mobile:ios": "npm --prefix apps/mobile run ios",
     "mobile:android": "npm --prefix apps/mobile run android",
     "mobile:typecheck": "npm --prefix apps/mobile run typecheck",
