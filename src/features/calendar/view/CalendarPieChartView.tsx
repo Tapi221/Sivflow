@@ -46,6 +46,8 @@ const GAP_SEGMENT_LABEL_COLOR = "#8e8e93";
 const FULL_DAY_MINUTES = 24 * 60;
 const CHART_CENTER = 100;
 const CHART_RADIUS = 82;
+const CHART_LABEL_RADIUS = CHART_RADIUS * 0.58;
+const CHART_CLOCK_LABEL_RADIUS = CHART_RADIUS + 11;
 const CLOCK_HOURS = [0, 3, 6, 9, 12, 15, 18, 21];
 
 const formatDuration = (minutes: number): string => {
@@ -104,6 +106,15 @@ const buildWedgePath = (startMinute: number, endMinute: number): string => {
     `A ${CHART_RADIUS} ${CHART_RADIUS} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`,
     "Z",
   ].join(" ");
+};
+
+const getChartOverlayStyle = (minute: number, radius: number) => {
+  const point = polarToCartesian(minute, radius);
+
+  return {
+    left: `${(point.x / (CHART_CENTER * 2)) * 100}%`,
+    top: `${(point.y / (CHART_CENTER * 2)) * 100}%`,
+  };
 };
 
 const resolveEventSegmentMeta = (
@@ -251,46 +262,52 @@ const DailyClockPie = ({ slices }: DailyClockPieProps) => {
     <div className="flex h-full w-full min-w-0 items-center justify-center">
       <div className="relative aspect-square w-[min(100%,72vh)] max-w-[720px] min-w-0">
         {hasTimedSlices ? (
-          <svg viewBox="0 0 200 200" role="img" aria-label="予定の円グラフ" className="h-full w-full overflow-visible">
-            {visibleSlices.map((slice) => (
-              slice.endMinute - slice.startMinute >= FULL_DAY_MINUTES ? (
-                <circle key={slice.id} cx={CHART_CENTER} cy={CHART_CENTER} r={CHART_RADIUS} fill={slice.color} stroke={slice.borderColor} strokeWidth={0.45} />
-              ) : (
-                <path key={slice.id} d={buildWedgePath(slice.startMinute, slice.endMinute)} fill={slice.color} stroke={slice.borderColor} strokeWidth={0.45}>
-                  <title>
-                    {slice.label}: {formatDuration(slice.minutes)}
-                  </title>
-                </path>
-              )
-            ))}
+          <>
+            <svg viewBox="0 0 200 200" role="img" aria-label="予定の円グラフ" className="h-full w-full overflow-visible">
+              {visibleSlices.map((slice) => (
+                slice.endMinute - slice.startMinute >= FULL_DAY_MINUTES ? (
+                  <circle key={slice.id} cx={CHART_CENTER} cy={CHART_CENTER} r={CHART_RADIUS} fill={slice.color} stroke={slice.borderColor} strokeWidth={0.45} />
+                ) : (
+                  <path key={slice.id} d={buildWedgePath(slice.startMinute, slice.endMinute)} fill={slice.color} stroke={slice.borderColor} strokeWidth={0.45}>
+                    <title>
+                      {slice.label}: {formatDuration(slice.minutes)}
+                    </title>
+                  </path>
+                )
+              ))}
 
-            {CLOCK_HOURS.map((hour) => {
-              const minute = hour * 60;
-              const inner = polarToCartesian(minute, CHART_RADIUS - 5);
-              const outer = polarToCartesian(minute, CHART_RADIUS + 2);
-              const label = polarToCartesian(minute, CHART_RADIUS + 11);
+              {CLOCK_HOURS.map((hour) => {
+                const minute = hour * 60;
+                const inner = polarToCartesian(minute, CHART_RADIUS - 5);
+                const outer = polarToCartesian(minute, CHART_RADIUS + 2);
 
-              return (
-                <g key={hour}>
-                  <line x1={inner.x} y1={inner.y} x2={outer.x} y2={outer.y} stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" />
-                  <text x={label.x} y={label.y + 3} textAnchor="middle" className="fill-[#8e8e93] text-[8px] font-medium">
-                    {hour}
-                  </text>
-                </g>
-              );
-            })}
+                return (
+                  <g key={hour}>
+                    <line x1={inner.x} y1={inner.y} x2={outer.x} y2={outer.y} stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" />
+                  </g>
+                );
+              })}
+            </svg>
 
-            {visibleSlices.filter((slice) => !slice.isGap && slice.minutes >= 30).map((slice) => {
-              const labelPosition = polarToCartesian((slice.startMinute + slice.endMinute) / 2, CHART_RADIUS * 0.58);
+            <div className="pointer-events-none absolute inset-0 overflow-visible">
+              {CLOCK_HOURS.map((hour) => (
+                <span key={hour} className="absolute -translate-x-1/2 -translate-y-1/2 text-[clamp(11px,2.1vw,18px)] font-medium leading-none text-[#8e8e93]" style={getChartOverlayStyle(hour * 60, CHART_CLOCK_LABEL_RADIUS)}>
+                  {hour}
+                </span>
+              ))}
 
-              return (
-                <text key={`label:${slice.id}`} x={labelPosition.x} y={labelPosition.y} textAnchor="middle" fill={slice.labelColor} className="pointer-events-none text-[8px] font-semibold drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]">
-                  <tspan x={labelPosition.x} dy="-0.2em">{truncateChartLabel(slice.label)}</tspan>
-                  <tspan x={labelPosition.x} dy="1.15em">{formatDuration(slice.minutes)}</tspan>
-                </text>
-              );
-            })}
-          </svg>
+              {visibleSlices.filter((slice) => !slice.isGap && slice.minutes >= 30).map((slice) => {
+                const labelMinute = (slice.startMinute + slice.endMinute) / 2;
+
+                return (
+                  <span key={`label:${slice.id}`} className="absolute -translate-x-1/2 -translate-y-1/2 text-center text-[clamp(9px,1.75vw,15px)] font-semibold leading-[1.05] drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]" style={{ ...getChartOverlayStyle(labelMinute, CHART_LABEL_RADIUS), color: slice.labelColor }}>
+                    <span className="block max-w-[5.5em] truncate">{truncateChartLabel(slice.label)}</span>
+                    <span className="block">{formatDuration(slice.minutes)}</span>
+                  </span>
+                );
+              })}
+            </div>
+          </>
         ) : (
           <div className="flex h-full items-center justify-center rounded-full border border-dashed border-[#dedede] text-center">
             <div>
