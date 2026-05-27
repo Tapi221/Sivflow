@@ -1,13 +1,12 @@
-import { startTransition, useEffect, useMemo, useRef } from "react";
+import { startTransition, useDeferredValue, useEffect, useMemo, useRef } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import { eventOverlapsRange } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import { GridCalendarMonthDesktop } from "@/features/calendar/grid/Grid.calendar.month.desktop";
 import { useMonthInfiniteScroll } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
 import { useMonthRowResize } from "@/features/calendar/grid/height/useRowResize.month.desktop";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+const RENDERED_RANGE_NOTIFY_DELAY_MS = 180;
 
 type CalendarMonthViewProps = {
   currentDate: Date;
@@ -41,9 +40,11 @@ export const CalendarMonthView = ({
   onRenderedRangeChange,
 }: CalendarMonthViewProps) => {
   const today = useMemo(() => new Date(), []);
+  const deferredVisibleEvents = useDeferredValue(visibleEvents);
 
   const isResizingRef = useRef(false);
   const monthRowHeightRef = useRef(C.readStoredMonthRowHeight());
+  const renderedRangeNotifyTimeoutRef = useRef<number | null>(null);
 
   const scroll = useMonthInfiniteScroll({
     currentDate,
@@ -89,27 +90,25 @@ export const CalendarMonthView = ({
   useEffect(() => {
     if (!renderedRange) return;
 
-    startTransition(() => {
-      onRenderedRangeChange?.(renderedRange);
-    });
+    if (renderedRangeNotifyTimeoutRef.current !== null) {
+      window.clearTimeout(renderedRangeNotifyTimeoutRef.current);
+    }
+
+    renderedRangeNotifyTimeoutRef.current = window.setTimeout(() => {
+      renderedRangeNotifyTimeoutRef.current = null;
+
+      startTransition(() => {
+        onRenderedRangeChange?.(renderedRange);
+      });
+    }, RENDERED_RANGE_NOTIFY_DELAY_MS);
+
+    return () => {
+      if (renderedRangeNotifyTimeoutRef.current === null) return;
+
+      window.clearTimeout(renderedRangeNotifyTimeoutRef.current);
+      renderedRangeNotifyTimeoutRef.current = null;
+    };
   }, [onRenderedRangeChange, renderedRange]);
-
-  const renderedEvents = useMemo(() => {
-    if (!renderedRange) return visibleEvents;
-
-    const rangeStart = new Date(
-      renderedRange.start.getTime() -
-        C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS * DAY_MS,
-    );
-    const rangeEnd = new Date(
-      renderedRange.end.getTime() +
-        C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS * DAY_MS,
-    );
-
-    return visibleEvents.filter((event) =>
-      eventOverlapsRange(event, rangeStart, rangeEnd),
-    );
-  }, [renderedRange, visibleEvents]);
 
   return (
     <div
@@ -124,7 +123,7 @@ export const CalendarMonthView = ({
         <GridCalendarMonthDesktop
           today={today}
           selectedDate={selectedDate}
-          visibleEvents={renderedEvents}
+          visibleEvents={deferredVisibleEvents}
           monthWeeks={scroll.monthWeeks}
           monthRowHeight={monthRowHeight}
           scrollHoverDayKey={null}
