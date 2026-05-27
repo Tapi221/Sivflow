@@ -142,6 +142,8 @@ export const ScheduleScreen = ({
     handleMonthCellSelectDate,
     handleMonthRenderedRangeChange,
     handleYearRenderedRangeChange,
+    handleListReachStart,
+    handleListReachEnd,
     addGoogleCalendar,
     reconnectGoogleAccount,
     toggleGoogleCalendar,
@@ -283,6 +285,9 @@ export const ScheduleScreen = ({
               events={deferredCalendarEvents}
               selectedDate={selectedDate}
               onSelectDate={handleSidebarSelectDate}
+              onReachStart={handleListReachStart}
+              onReachEnd={handleListReachEnd}
+              onVisibleMonthChange={handleVisibleMonthChange}
             />
           </div>
         ) : isMonthCalendarView ? (
