@@ -1,8 +1,8 @@
 import React from "react";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { MarkdownBlockContent, type MarkdownReplaceBlock, type MarkdownReplaceFocus } from "@/components/card/blocks/markdown/MarkdownBlockContent";
-import { NotebookPen } from "@/ui/icons";
 import { cn } from "@/lib/utils";
+import { NotebookPen } from "@/ui/icons";
 
 interface MarkdownBlockProps {
   markdown: string;
@@ -26,6 +26,19 @@ interface MarkdownBlockProps {
   ) => void;
   zoom?: number;
 }
+
+const areMarkdownBlockPropsEqual = (
+  prev: MarkdownBlockProps,
+  next: MarkdownBlockProps,
+) =>
+  prev.markdown === next.markdown &&
+  prev.dragHandleClassName === next.dragHandleClassName &&
+  prev.accentColor === next.accentColor &&
+  prev.isBlockSelected === next.isBlockSelected &&
+  prev.showDelete === next.showDelete &&
+  prev.canMoveUp === next.canMoveUp &&
+  prev.canMoveDown === next.canMoveDown &&
+  prev.zoom === next.zoom;
 
 const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
   markdown,
@@ -83,22 +96,11 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
   );
 };
 
-const areMarkdownBlockPropsEqual = (
-  prev: MarkdownBlockProps,
-  next: MarkdownBlockProps,
-) =>
-  prev.markdown === next.markdown &&
-  prev.dragHandleClassName === next.dragHandleClassName &&
-  prev.accentColor === next.accentColor &&
-  prev.isBlockSelected === next.isBlockSelected &&
-  prev.showDelete === next.showDelete &&
-  prev.canMoveUp === next.canMoveUp &&
-  prev.canMoveDown === next.canMoveDown &&
-  prev.zoom === next.zoom;
-
-export const MarkdownBlock = React.memo(
+const MarkdownBlock = React.memo(
   MarkdownBlockInner,
   areMarkdownBlockPropsEqual,
 );
 
 MarkdownBlock.displayName = "MarkdownBlock";
+
+export { MarkdownBlock };
