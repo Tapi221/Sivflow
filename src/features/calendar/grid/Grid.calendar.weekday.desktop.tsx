@@ -20,14 +20,14 @@ type CalendarEventPositionStyle = CSSProperties & {
   "--calendar-event-duration-hours": number;
 };
 
-const HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, index) => index);
-const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
-const MAX_ALL_DAY_VISIBLE_CHIPS = 3;
-
 type WeekdayDayEvents = {
   allDayEvents: GoogleCalendarEvent[];
   timedEvents: GoogleCalendarEvent[];
 };
+
+const HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, index) => index);
+const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
+const MAX_ALL_DAY_VISIBLE_CHIPS = 3;
 
 const EMPTY_WEEKDAY_DAY_EVENTS: WeekdayDayEvents = {
   allDayEvents: [],
@@ -57,7 +57,7 @@ const calculateEventPositionStyle = (
   const startsAt = new Date(event.startsAt);
   const startHour =
     startsAt.getHours() + startsAt.getMinutes() / GRID.WEEKDAY_MINUTES_PER_HOUR;
-  const durationMinutes = getEventDurationMinutes(event);
+  const durationMinutes = Math.max(getEventDurationMinutes(event), MIN_LAYOUT_MINUTES);
 
   return {
     [GRID.WEEKDAY_CSS_VAR_EVENT_START_HOUR]: Math.max(0, startHour),
