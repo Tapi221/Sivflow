@@ -27,7 +27,6 @@ type WeekdayDayEvents = {
 
 const HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, index) => index);
 const HOUR_BOUNDARY_LABELS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, index) => index + 1);
-const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
 const MAX_ALL_DAY_VISIBLE_CHIPS = 3;
 const BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT = 32;
 
@@ -65,14 +64,14 @@ const calculateEventPositionStyle = (
   const startsAt = new Date(event.startsAt);
   const startHour =
     startsAt.getHours() + startsAt.getMinutes() / GRID.WEEKDAY_MINUTES_PER_HOUR;
-  const durationMinutes = Math.max(getEventDurationMinutes(event), MIN_LAYOUT_MINUTES);
+  const durationMinutes = getEventDurationMinutes(event);
 
   return {
     [GRID.WEEKDAY_CSS_VAR_EVENT_START_HOUR]: Math.max(0, startHour),
     [GRID.WEEKDAY_CSS_VAR_EVENT_DURATION_HOURS]:
       durationMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR,
     top: `calc(var(${GRID.WEEKDAY_CSS_VAR_EVENT_START_HOUR}) * var(--calendar-hour-row-height))`,
-    height: `calc(var(${GRID.WEEKDAY_CSS_VAR_EVENT_DURATION_HOURS}) * var(--calendar-hour-row-height) - 2px)`,
+    height: `max(1px, calc(var(${GRID.WEEKDAY_CSS_VAR_EVENT_DURATION_HOURS}) * var(--calendar-hour-row-height) - 2px))`,
   } as CalendarEventPositionStyle;
 };
 
@@ -386,7 +385,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
                 toLayoutEvent(
                   event.id,
                   new Date(event.startsAt),
-                  Math.max(getEventDurationMinutes(event), MIN_LAYOUT_MINUTES),
+                  getEventDurationMinutes(event),
                 ),
               ),
             );
