@@ -301,7 +301,7 @@ const FlashcardInner = ({
               previewInkHistory={ink.previewInkHistory}
               onInkDocumentChange={ink.handleInkDocumentChange}
               setPreviewInkTool={ink.setPreviewInkTool}
-              setPreviewInkHistory={setPreviewInkHistory}
+              setPreviewInkHistory={ink.setPreviewInkHistory}
             />
           }
         >
