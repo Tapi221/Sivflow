@@ -1,12 +1,10 @@
 import React, { useCallback, useState } from "react";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
+import { cn } from "@/lib/utils";
 import { Sigma } from "@/ui/icons";
 import { MathEditorDialog } from "./MathEditorDialog";
-import { cn } from "@/lib/utils";
 import type { MathBlockData } from "@/types";
-
-const MAX_LATEX_LENGTH = 10000;
 
 interface MathBlockProps {
   data: MathBlockData;
@@ -26,6 +24,18 @@ interface MathBlockProps {
   onMoveDragEnd?: () => void;
   zoom?: number;
 }
+
+const MAX_LATEX_LENGTH = 10000;
+
+const areMathBlockPropsEqual = (prev: MathBlockProps, next: MathBlockProps) =>
+  prev.data === next.data &&
+  prev.dragHandleClassName === next.dragHandleClassName &&
+  prev.accentColor === next.accentColor &&
+  prev.isBlockSelected === next.isBlockSelected &&
+  prev.showDelete === next.showDelete &&
+  prev.canMoveUp === next.canMoveUp &&
+  prev.canMoveDown === next.canMoveDown &&
+  prev.zoom === next.zoom;
 
 const MathBlockInner: React.FC<MathBlockProps> = ({
   data,
@@ -111,15 +121,8 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
   );
 };
 
-const areMathBlockPropsEqual = (prev: MathBlockProps, next: MathBlockProps) =>
-  prev.data === next.data &&
-  prev.dragHandleClassName === next.dragHandleClassName &&
-  prev.accentColor === next.accentColor &&
-  prev.isBlockSelected === next.isBlockSelected &&
-  prev.showDelete === next.showDelete &&
-  prev.canMoveUp === next.canMoveUp &&
-  prev.canMoveDown === next.canMoveDown &&
-  prev.zoom === next.zoom;
+const MathBlock = React.memo(MathBlockInner, areMathBlockPropsEqual);
 
-export const MathBlock = React.memo(MathBlockInner, areMathBlockPropsEqual);
 MathBlock.displayName = "MathBlock";
+
+export { MathBlock };
