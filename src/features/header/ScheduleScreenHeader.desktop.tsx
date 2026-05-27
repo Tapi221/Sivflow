@@ -1,7 +1,7 @@
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
 import { TogglePlanResult, type PlanResultMode } from "@/chip/toggle/Toggle.planresult";
-import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/scheduleScreen.types";
 
 type ScheduleScreenHeaderViewOption = {
   value: CalendarViewMode;
@@ -10,7 +10,7 @@ type ScheduleScreenHeaderViewOption = {
 
 type ScheduleScreenHeaderDesktopProps = {
   titleLabel: string;
-  selectedViewMode: CalendarViewMode;
+  selectedViewMode: CalendarViewModeSelection;
   viewOptions: readonly ScheduleScreenHeaderViewOption[];
   planResultModes: readonly PlanResultMode[];
   showPlanResultToggle: boolean;
