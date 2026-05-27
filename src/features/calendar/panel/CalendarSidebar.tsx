@@ -1,5 +1,5 @@
 import { type FormEvent, type KeyboardEvent, useCallback, useMemo, useRef, useState } from "react";
-import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
+import { GoogleIcon } from "@/chip/icons/icons.nouse";
 import { CalendarIcon } from "@/chip/icons/icons.schedule";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { useT } from "@/i18n/useT";
@@ -171,7 +171,7 @@ const GoogleAccountSection = ({
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
       >
-        <GoogleAccountChip name={accountName} photoUrl={account.photoUrl} />
+        <GoogleIcon className="size-[16px] shrink-0 text-[#5f6368]" label={accountName} />
 
         {account.email && (
           <span className="truncate text-[11px] font-semibold tracking-wider text-[#9a9a9a]">
