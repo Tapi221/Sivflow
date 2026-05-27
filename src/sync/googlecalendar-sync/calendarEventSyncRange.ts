@@ -1,4 +1,4 @@
-import { addDays, endOfDay, endOfMonth, endOfWeek, startOfDay, startOfMonth, startOfWeek, subDays } from "date-fns";
+import { addDays, endOfDay, endOfMonth, endOfWeek, endOfYear, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays } from "date-fns";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarViewMode } from "@/features/calendar/calendar.types";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
@@ -21,6 +21,16 @@ export const buildCalendarEventSyncRange = ({
   monthTitleDate,
   monthRenderedRange,
 }: BuildCalendarEventSyncRangeOptions): CalendarEventSyncRange => {
+  if (selectedViewMode === "year") {
+    const fallbackDayTime = monthTitleDate.getTime();
+    const firstVisibleDay = new Date(visibleDays[0]?.getTime() ?? fallbackDayTime);
+
+    return {
+      rangeStart: startOfDay(startOfYear(firstVisibleDay)),
+      rangeEnd: endOfDay(endOfYear(firstVisibleDay)),
+    };
+  }
+
   if (selectedViewMode === "month") {
     if (monthRenderedRange) {
       return {
