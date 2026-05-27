@@ -5,7 +5,7 @@ import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/
 
 export type { CalendarToolbarMode, CalendarViewMode };
 
-export type TimelineBufferDays = {
+export type CalendarBufferDays = {
   before: number;
   after: number;
 };
@@ -94,7 +94,6 @@ export type CalendarWorkspaceToolbarProps = {
   activeMode: CalendarToolbarMode;
   viewMode?: CalendarViewMode;
   onSelectCalendar: () => void;
-  onSelectTimeline: () => void;
   onSelectTask: () => void;
   onSelectViewMode?: (viewMode: CalendarViewMode) => void;
 };
