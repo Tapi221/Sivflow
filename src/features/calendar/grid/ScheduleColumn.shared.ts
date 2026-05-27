@@ -1,4 +1,4 @@
-import { addDays, addMonths, endOfDay, endOfMonth, endOfWeek, format, getDaysInMonth, isSameDay, isSameMonth, startOfDay, startOfMonth, startOfWeek, subDays } from "date-fns";
+import { addDays, addMonths, addYears, endOfDay, endOfMonth, endOfWeek, endOfYear, format, getDaysInMonth, isSameDay, isSameMonth, isSameYear, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays } from "date-fns";
 import { ja } from "date-fns/locale";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
@@ -8,7 +8,7 @@ export type ScheduleColumnBuffer = {
   after: number;
 };
 
-export type ScheduleColumnKind = "month" | "week" | "day";
+export type ScheduleColumnKind = "year" | "month" | "week" | "day";
 
 export type ScheduleColumn = {
   id: string;
@@ -26,6 +26,7 @@ export const getScheduleViewStart = (
 ) => {
   const normalized = startOfDay(anchorDate);
 
+  if (viewMode === "year") return startOfYear(normalized);
   if (viewMode === "month") return startOfMonth(normalized);
 
   if (viewMode === "week") {
@@ -41,6 +42,13 @@ export const getScheduleViewDayCount = (
   anchorDate: Date,
   viewMode: CalendarViewMode,
 ) => {
+  if (viewMode === "year") {
+    const start = startOfYear(anchorDate);
+    const end = endOfYear(anchorDate);
+
+    return Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
+  }
+
   if (viewMode === "month") return getDaysInMonth(anchorDate);
   if (viewMode === "week") return 7;
   if (viewMode === "threeDays") return 3;
@@ -72,6 +80,32 @@ export const buildScheduleInteractionDays = (
   return Array.from({ length: interactionCount }, (_, index) =>
     addDays(interactionStart, index),
   );
+};
+
+const buildYearTimelineColumns = (
+  anchorDate: Date,
+  buffer: ScheduleColumnBuffer,
+) => {
+  const columns: ScheduleColumn[] = [];
+  const anchorStart = startOfYear(anchorDate);
+  const today = new Date();
+
+  for (let offset = -buffer.before; offset <= buffer.after; offset += 1) {
+    const start = addYears(anchorStart, offset);
+    const end = endOfYear(start);
+
+    columns.push({
+      id: `year-${start.toISOString()}`,
+      start,
+      end,
+      topLabel: format(start, "yyyy", { locale: ja }),
+      bottomLabel: "年",
+      isToday: isSameYear(start, today),
+      kind: "year",
+    });
+  }
+
+  return columns;
 };
 
 const buildMonthTimelineColumns = (
@@ -160,6 +194,7 @@ export const buildScheduleTimelineColumns = (
   anchorDate: Date,
   buffer: ScheduleColumnBuffer,
 ) => {
+  if (viewMode === "year") return buildYearTimelineColumns(anchorDate, buffer);
   if (viewMode === "month") return buildMonthTimelineColumns(anchorDate, buffer);
   if (viewMode === "week") return buildWeekTimelineColumns(anchorDate, buffer);
   return buildDayTimelineColumns(anchorDate, buffer);
