@@ -3,8 +3,21 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { type FloatingSurfaceVariantProps, floatingSurfaceVariants } from "@/components/ui/floating-surface";
-import { X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
+import { X } from "@/ui/icons";
+
+type DialogContentProps = React.ComponentPropsWithoutRef<
+  typeof DialogPrimitive.Content
+> & {
+  nonModal?: boolean;
+  overlayClassName?: string;
+  contentWrapperClassName?: string;
+  showCloseButton?: boolean;
+  closeButtonClassName?: string;
+  closeLabel?: string;
+  accessibleTitle?: React.ReactNode;
+  accessibleDescription?: React.ReactNode;
+} & FloatingSurfaceVariantProps;
 
 const Dialog = DialogPrimitive.Root;
 
@@ -23,20 +36,6 @@ const DialogOverlay = React.forwardRef<
     {...props}
   />
 ));
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
-
-type DialogContentProps = React.ComponentPropsWithoutRef<
-  typeof DialogPrimitive.Content
-> & {
-  nonModal?: boolean;
-  overlayClassName?: string;
-  contentWrapperClassName?: string;
-  showCloseButton?: boolean;
-  closeButtonClassName?: string;
-  closeLabel?: string;
-  accessibleTitle?: React.ReactNode;
-  accessibleDescription?: React.ReactNode;
-} & FloatingSurfaceVariantProps;
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
@@ -104,7 +103,6 @@ const DialogContent = React.forwardRef<
     </DialogPortal>
   ),
 );
-DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({
   className,
@@ -118,7 +116,6 @@ const DialogHeader = ({
     {...props}
   />
 );
-DialogHeader.displayName = "DialogHeader";
 
 const DialogFooter = ({
   className,
@@ -132,7 +129,6 @@ const DialogFooter = ({
     {...props}
   />
 );
-DialogFooter.displayName = "DialogFooter";
 
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
@@ -147,7 +143,6 @@ const DialogTitle = React.forwardRef<
     {...props}
   />
 ));
-DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
@@ -159,6 +154,12 @@ const DialogDescription = React.forwardRef<
     {...props}
   />
 ));
+
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
+DialogContent.displayName = DialogPrimitive.Content.displayName;
+DialogHeader.displayName = "DialogHeader";
+DialogFooter.displayName = "DialogFooter";
+DialogTitle.displayName = DialogPrimitive.Title.displayName;
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
 export { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle };
