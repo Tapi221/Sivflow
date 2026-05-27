@@ -1,5 +1,6 @@
 import { memo, useMemo } from "react";
 import { addDays, format, isSameDay, startOfDay, startOfMonth, startOfWeek } from "date-fns";
+import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { useT } from "@/i18n/useT";
@@ -14,9 +15,8 @@ type MiniCalendarSectionProps = {
 };
 
 const MINI_CALENDAR_DIVIDER_CLASS_NAME = "mt-2 h-px w-full shrink-0 bg-[#eeeeee]";
-const MINI_CALENDAR_WEEKDAY_CLASS_NAME = "flex h-7 items-center justify-center text-[13px] font-extrabold text-[#858a93]";
-const MINI_CALENDAR_DAY_BUTTON_CLASS_NAME = "group flex h-8 w-full items-center justify-center rounded-full transition-all duration-150 active:scale-[0.94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dde5ea]";
-const MINI_CALENDAR_DAY_BADGE_CLASS_NAME = "flex h-8 w-8 items-center justify-center rounded-full text-[18px] font-medium leading-none tabular-nums transition-all duration-150";
+const MINI_CALENDAR_WEEKDAY_CLASS_NAME = "flex h-6 items-center justify-center text-[11px] font-semibold leading-none tracking-[0.03em] text-[#8e8e93]";
+const MINI_CALENDAR_DAY_BUTTON_CLASS_NAME = "relative flex h-7 w-full items-center justify-center transition-all duration-150 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
 
 const buildMiniCalendarDays = (
   monthDate: Date,
@@ -75,7 +75,7 @@ const MiniCalendarSectionBase = ({
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-y-1 px-0.5">
+        <div className="grid grid-cols-7 gap-y-0.5 px-0.5">
           {miniCalendarDays.map((day) => {
             const isActive = day.isToday || day.isSelected;
 
@@ -84,19 +84,19 @@ const MiniCalendarSectionBase = ({
                 key={day.date.toISOString()}
                 type="button"
                 onClick={() => onSelectDate(day.date)}
-                className={MINI_CALENDAR_DAY_BUTTON_CLASS_NAME}
+                className={cn(
+                  MINI_CALENDAR_DAY_BUTTON_CLASS_NAME,
+                  !isActive && "rounded-full hover:bg-[#f7f7f7]",
+                )}
               >
-                <span
-                  className={cn(
-                    MINI_CALENDAR_DAY_BADGE_CLASS_NAME,
-                    day.isToday && "bg-[#fde5e1] text-[#2f343b]",
-                    day.isSelected && !day.isToday && "bg-[#ecebfb] text-[#2f343b]",
-                    day.isCurrentMonth && !isActive && "bg-[#edf8fa] text-[#2f343b] group-hover:bg-[#e6f3f5]",
-                    !day.isCurrentMonth && !isActive && "text-[#b8bec6] group-hover:bg-[#f4fafb]",
-                  )}
+                <CalendarDayNumberCircle
+                  isToday={day.isToday}
+                  isSelected={day.isSelected}
+                  isCurrentMonth={day.isCurrentMonth}
+                  className="relative z-10"
                 >
                   {day.dayNumber}
-                </span>
+                </CalendarDayNumberCircle>
               </button>
             );
           })}
