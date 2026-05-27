@@ -244,7 +244,7 @@ export const useScheduleScreen = ({
     reconnectGoogleAccount: google.reconnectAccount,
     toggleGoogleCalendar: google.toggleCalendar,
     refreshGoogleTasks: google.refreshGoogleTasks,
-    retryGoogleTaskLists: google.retryGoogleTasks,
+    retryGoogleTaskLists: google.retryGoogleTaskLists,
     createGoogleTask: google.createGoogleTask,
     updateGoogleTask: google.updateGoogleTask,
     moveGoogleTaskList: google.moveGoogleTaskList,
