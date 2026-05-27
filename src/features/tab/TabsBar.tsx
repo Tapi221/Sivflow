@@ -67,11 +67,11 @@ const ACTIVE_TAB_RIGHT_CURVE_STYLE: CSSProperties = {
   mask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
 };
 
-const INACTIVE_TAB_TEXT_CLASS_NAME = "text-[#d5d5d5] hover:text-[#8c8c8c]";
+const INACTIVE_TAB_TEXT_CLASS_NAME = "text-[#b7b7b7] hover:text-[#8c8c8c]";
 
-const INACTIVE_TAB_ICON_CLASS_NAME = "text-[#d5d5d5] group-hover/tab:text-[#8c8c8c]";
+const INACTIVE_TAB_ICON_CLASS_NAME = "text-[#b7b7b7] group-hover/tab:text-[#8c8c8c]";
 
-const INACTIVE_TAB_CLOSE_BUTTON_CLASS_NAME = "opacity-100 !text-[#d5d5d5] hover:!text-[#8c8c8c]";
+const INACTIVE_TAB_CLOSE_BUTTON_CLASS_NAME = "opacity-100 !text-[#b7b7b7] hover:!text-[#8c8c8c]";
 
 const TAB_OPEN_ANIMATION_MS = 280;
 
