@@ -10,7 +10,6 @@ const CardEdit = lazy(() => import("@/routes/CardEdit"));
 const CardSetView = lazy(() => import("@/routes/CardSetView"));
 const StudyMode = lazy(() => import("@/routes/StudyMode"));
 const Schedule = lazy(() => import("@/routes/Schedule"));
-const Tasks = lazy(() => import("@/routes/Tasks"));
 const SettingScreen = lazy(() => import("@/routes/SettingScreen"));
 
 const withRouteFallback = (element: ReactNode) => {
@@ -36,7 +35,7 @@ export const AppRoutes = () => {
 
         <Route path="schedule" element={withRouteFallback(<Schedule />)} />
         <Route path="calendar" element={<Navigate to="/schedule" replace />} />
-        <Route path="tasks" element={withRouteFallback(<Tasks />)} />
+        <Route path="tasks" element={<Navigate to="/schedule" replace />} />
         <Route path="settings" element={withRouteFallback(<SettingScreen />)} />
 
         <Route path="CardEdit" element={withRouteFallback(<CardEdit />)} />
