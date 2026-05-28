@@ -46,7 +46,7 @@ type CalendarListVirtualRange = {
 const EMPTY_DAY_LABEL = "予定なし";
 const SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX = 8;
 const LIST_VISIBLE_MONTH_ANCHOR_PX = 160;
-const LIST_VIRTUAL_OVERSCAN_PX = 3_000;
+const LIST_VIRTUAL_OVERSCAN_PX = 5_000;
 const LIST_DAY_GAP_PX = 8;
 const LIST_EMPTY_DAY_HEIGHT_PX = 38;
 const LIST_EVENT_ROW_HEIGHT_PX = 58;
@@ -218,13 +218,7 @@ const CalendarListViewComponent = ({
     onVisibleMonthChange(anchorDate);
   }, [onVisibleMonthChange, resolvedRail, totalDayCount]);
 
-  const processScroll = useCallback((scrollElement: HTMLDivElement) => {
-    updateVirtualRange(scrollElement);
-    updateVisibleMonth(scrollElement);
-    onScrollTopChange?.(scrollElement.scrollTop);
-  }, [onScrollTopChange, updateVirtualRange, updateVisibleMonth]);
-
-  const requestScrollProcessing = useCallback((scrollElement: HTMLDivElement) => {
+  const scheduleDeferredScrollWork = useCallback((scrollElement: HTMLDivElement) => {
     pendingScrollElementRef.current = scrollElement;
 
     if (scrollFrameRef.current != null) return;
@@ -234,15 +228,19 @@ const CalendarListViewComponent = ({
       const pendingScrollElement = pendingScrollElementRef.current;
       pendingScrollElementRef.current = null;
 
-      if (pendingScrollElement) {
-        processScroll(pendingScrollElement);
-      }
+      if (!pendingScrollElement) return;
+
+      updateVisibleMonth(pendingScrollElement);
+      onScrollTopChange?.(pendingScrollElement.scrollTop);
     });
-  }, [processScroll]);
+  }, [onScrollTopChange, updateVisibleMonth]);
 
   const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
-    requestScrollProcessing(event.currentTarget);
-  }, [requestScrollProcessing]);
+    const scrollElement = event.currentTarget;
+
+    updateVirtualRange(scrollElement);
+    scheduleDeferredScrollWork(scrollElement);
+  }, [scheduleDeferredScrollWork, updateVirtualRange]);
 
   useLayoutEffect(() => {
     updateVirtualRange(scrollViewportRef.current);
