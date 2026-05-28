@@ -1,10 +1,9 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
-import type { ISyncService } from "@/services/interfaces/ISyncService";
+import type { ISyncService, SyncConflict, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
 import { getLocalDb } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-import type { SyncConflict } from "@/types";
-import type { SyncSettings } from "@/types/domain/sync";
+import { DEFAULT_SYNC_SETTINGS, type SyncSettings } from "@/types/domain/sync";
 
 type SyncStatus = "idle" | "syncing" | "success" | "error";
 type SyncNotice = "none" | "wifi_wait";
@@ -42,6 +41,21 @@ const defaultSyncContext: SyncContextType = {
 };
 
 const SyncContext = createContext<SyncContextType>(defaultSyncContext);
+
+const isSyncIntervalMinutes = (value: unknown): value is SyncSettings["intervalMinutes"] => {
+  return value === 5 || value === 15 || value === 30 || value === 60;
+};
+
+const normalizeSyncSettings = (snapshot: UserSettingsSnapshot): SyncSettings => {
+  const data = snapshot.data;
+  return {
+    id: typeof data.id === "string" ? data.id : DEFAULT_SYNC_SETTINGS.id,
+    autoSync: typeof data.autoSync === "boolean" ? data.autoSync : DEFAULT_SYNC_SETTINGS.autoSync,
+    intervalMinutes: isSyncIntervalMinutes(data.intervalMinutes) ? data.intervalMinutes : DEFAULT_SYNC_SETTINGS.intervalMinutes,
+    wifiOnly: typeof data.wifiOnly === "boolean" ? data.wifiOnly : DEFAULT_SYNC_SETTINGS.wifiOnly,
+    autoCleanupDevices: typeof data.autoCleanupDevices === "boolean" ? data.autoCleanupDevices : DEFAULT_SYNC_SETTINGS.autoCleanupDevices,
+  };
+};
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useSyncContext = () => {
@@ -139,7 +153,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
         ((await SyncServiceFactory.getInstance(userId)) as LegacySyncService);
       syncServiceRef.current = service;
 
-      const settings = await service.loadSettings();
+      const settings = normalizeSyncSettings(await service.loadSettings());
       syncSettingsRef.current = settings;
       configureAutoSync(service, settings);
     } catch (error) {
@@ -238,7 +252,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
 
         syncServiceRef.current = service;
 
-        const settings = await service.loadSettings();
+        const settings = normalizeSyncSettings(await service.loadSettings());
         if (disposed) return;
         syncSettingsRef.current = settings;
 
