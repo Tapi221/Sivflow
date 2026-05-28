@@ -20,11 +20,8 @@ export type CardBlock = {
   orderIndex: number;
   rowOffset?: number;
   offsetRows?: number;
-  /** 疑問ブロック内の子ブロックが持つ。null または未定義ならトップレベル */
   parentBlockId?: string | null;
-  /** type === "question" 専用: 疑問文（Q） */
   questionTitle?: string;
-  /** type === "question" 専用: 回答（A） */
   questionAnswer?: string;
   content?: string;
   code?: CodeBlockData;
@@ -55,9 +52,7 @@ export type CardFace = {
 };
 
 export type Card = BaseEntity & {
-  /** CardSet への参照（必須）。移行前データは空文字で残る場合がある */
   cardSetId: string;
-  /** @deprecated folderId は CardSet.folderId から辿る。後方互換のため残す */
   folderId?: string;
   orderIndex: number;
   questionNumber: string;
@@ -75,8 +70,8 @@ export type Card = BaseEntity & {
   deletedAt?: Date | Timestamp | null;
   memoryStability: number;
   difficulty?: number;
-  nextReviewDate: Date | Timestamp;
-  lastReviewAt?: Date | Timestamp;
+  nextReviewDate: Date | Timestamp | null;
+  lastReviewAt?: Date | Timestamp | null;
   state?: CardState;
   lastSubjectiveScore?: SubjectiveScoreValue;
   recoveryRemaining?: number;
@@ -86,25 +81,10 @@ export type Card = BaseEntity & {
   reviewCount?: number;
   reviewLogs?: ReviewLog[];
   cardId?: string;
-  uncertaintyMarkedDate?: Date | Timestamp;
-  completedDate?: Date | Timestamp;
-  /**
-   * このデバイスで、そのカードの同期が最後に完了した時刻。
-   * ローカル専用メタデータであり、クラウドへは送らない。
-   */
+  uncertaintyMarkedDate?: Date | Timestamp | null;
+  completedDate?: Date | Timestamp | null;
   lastSyncedAt?: Date | Timestamp | null;
-  /**
-   * このデバイスにおけるカードの同期状態。
-   * pending: ローカル変更あり / 未反映
-   * synced: 同期済み
-   * error: 同期失敗
-   * conflict: 競合あり
-   */
   syncState?: "pending" | "synced" | "error" | "conflict";
-  /**
-   * lastSyncedAt を記録したデバイスID。
-   * ローカル専用メタデータであり、クラウドへは送らない。
-   */
   lastSyncedByDeviceId?: string | null;
   _rescueRaw?: unknown;
 };
