@@ -1,5 +1,5 @@
-import type { PdfOcrPageKind } from "@/lib/pdf/pdfOcrPageClassification";
-import type { PdfOcrTextSource } from "@/lib/pdf/pdfTextExtraction";
+import type { PdfOcrPageKind } from "./pdfOcrPageClassification";
+import type { PdfOcrTextSource } from "./pdfTextExtraction";
 
 export interface PdfOcrBenchmarkSample {
   pageNumber: number;

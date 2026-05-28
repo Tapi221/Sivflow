@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { CardPane } from "@/components/folder/panes/CardPane";
 import { PdfPane } from "@/features/pdf/PdfPane";
 import { PdfWorkspaceProvider } from "@/features/pdf/PdfWorkspaceProvider";
-import type { WorkspaceEntityTab } from "@/pane.desktop/tab.desktopnative/Tab";
+import type { WorkspaceEntityTab } from "./Tab";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import type { Card, DocumentItem } from "@/types";
 

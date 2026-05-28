@@ -1,7 +1,7 @@
 import React from "react";
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
 import { BlockList } from "@/components/card/blocks/core/BlockList";
-import { CardBlockLayoutRenderer, type EditorProps, type ViewerProps } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
+import { CardBlockLayoutRenderer, type EditorProps, type ViewerProps } from "./CardBlockLayoutRenderer";
 import type { CardBlock } from "@/types/domain/card";
 
 type RowContainerProps = Readonly<Record<string, unknown>>;

@@ -2,8 +2,8 @@ import React, { useEffect, useRef } from "react";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { getFolderId } from "@/components/folder/explorer/model/utils";
 import type { CardSet, DocumentItem, ExplorerItem, SelectedExplorerItem } from "@/types";
-import { isPrimaryShiftShortcut, isTypingTarget } from "@/features/hotkey/hotkeyGuards";
-import { hasOpenModalDialog } from "@/features/hotkey/modalGuards";
+import { isPrimaryShiftShortcut, isTypingTarget } from "./hotkeyGuards";
+import { hasOpenModalDialog } from "./modalGuards";
 
 interface UseExplorerKeyboardNavigationParams {
   selectedFolderId: string | null;

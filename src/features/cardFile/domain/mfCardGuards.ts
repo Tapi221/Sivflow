@@ -1,4 +1,4 @@
-import { MF_CARD_FORMAT, MF_CARD_VERSION, type MfCardFileV1, type MfCardIssue, type MfCardValidationResult } from "@/features/cardFile/domain/mfCard.types";
+import { MF_CARD_FORMAT, MF_CARD_VERSION, type MfCardFileV1, type MfCardIssue, type MfCardValidationResult } from "./mfCard.types";
 import { isMfDeckCardsJsonV1 } from "@/features/deckFile/domain/mfDeckGuards";
 import { MF_DECK_VERSION } from "@/features/deckFile/domain/mfDeck.types";
 

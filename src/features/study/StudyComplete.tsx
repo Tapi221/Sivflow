@@ -1,5 +1,5 @@
 import React from "react";
-import { RatingCountTiles } from "@/features/study/RatingCountTiles";
+import { RatingCountTiles } from "./RatingCountTiles";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { PracticeFilterRating } from "@/hooks/study/usePracticeMode";

@@ -1,4 +1,4 @@
-import * as C from "@/features/pdf/pdf.constants.desktop";
+import * as C from "./pdf.constants.desktop";
 
 const clampRange = (value: number, min: number, max: number) => {
   const lower = Math.min(min, max);

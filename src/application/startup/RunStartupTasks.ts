@@ -61,7 +61,7 @@ export const runStartupTasks = async ({
 }: RunStartupTasksParams): Promise<void> => {
   try {
     const { migrateLegacyImagesToAssets } =
-      await import("@/application/startup/MigrateLegacyImagesToAssets");
+      await import("./MigrateLegacyImagesToAssets");
 
     const migrationSummary = await migrateLegacyImagesToAssets({ userId });
 

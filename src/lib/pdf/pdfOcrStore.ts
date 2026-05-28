@@ -1,6 +1,6 @@
-import type { PdfOcrPageKind } from "@/lib/pdf/pdfOcrPageClassification";
-import { buildPdfTextSelection, normalizePdfExtractedText, type PdfOcrLineRecord, type PdfOcrRecordStatus, type PdfOcrTextSource, splitPdfTextIntoLines } from "@/lib/pdf/pdfTextExtraction";
-import type { PdfOcrPreprocessMode } from "@/lib/pdf/renderPdfPageForOcr";
+import type { PdfOcrPageKind } from "./pdfOcrPageClassification";
+import { buildPdfTextSelection, normalizePdfExtractedText, type PdfOcrLineRecord, type PdfOcrRecordStatus, type PdfOcrTextSource, splitPdfTextIntoLines } from "./pdfTextExtraction";
+import type { PdfOcrPreprocessMode } from "./renderPdfPageForOcr";
 
 export interface PdfOcrAttemptRecord {
   attemptIndex: number;

@@ -3,7 +3,7 @@ import { useLocation, useSearchParams } from "react-router-dom";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
 import { CardSetLibraryDashboard } from "@/features/library-cardset/components/CardSetLibraryDashboard";
 import { PdfLibraryDashboard } from "@/features/library-pdf/components/PdfLibraryDashboard";
-import { SectionListBlankPane } from "@/components/folder/components/SectionListBlankPane";
+import { SectionListBlankPane } from "./SectionListBlankPane";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 

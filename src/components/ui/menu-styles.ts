@@ -1,4 +1,4 @@
-import type { FloatingSurfaceVariantProps } from "@/components/ui/floating-surface";
+import type { FloatingSurfaceVariantProps } from "./floating-surface";
 
 type FloatingSurface = NonNullable<FloatingSurfaceVariantProps["surface"]>;
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
+import { CardFaceScene } from "./CardFaceScene";
 import type { FlashcardCardLike } from "@/components/card/frame/Flashcard";
 import { useFlashcardCornerControls } from "@/components/card/frame/FlashcardCornerControls";
 import { FlashcardInkOverlay } from "@/components/card/frame/FlashcardInkOverlay";

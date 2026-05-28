@@ -1,6 +1,6 @@
 import React from "react";
-import { detectCssZoomSupport, resolveCardScaleRenderingStrategy } from "@/components/card/frame/cardScaleRenderingStrategy";
-import { observeElementRect } from "@/components/card/frame/elementRectObserver";
+import { detectCssZoomSupport, resolveCardScaleRenderingStrategy } from "./cardScaleRenderingStrategy";
+import { observeElementRect } from "./elementRectObserver";
 import { cn } from "@/lib/utils";
 
 export interface ScaleToFitFrameProps {

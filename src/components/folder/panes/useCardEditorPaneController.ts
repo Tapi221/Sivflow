@@ -5,7 +5,7 @@ import { type CardSetViewEditingDraftPatch, subscribeCardSetViewWindowEvent } fr
 import { useCardEditorContentController } from "@/components/card/editor/useCardEditorContentController";
 import { useCardEditorSession } from "@/components/card/editor/useCardEditorSession";
 import { useLayoutRowsController } from "@/components/card/editor/useLayoutRowsController";
-import { applyEditingDraftPatch, buildCardsById, createMetaPanelActions, resolveSelectedCardSnapshot } from "@/components/folder/panes/cardEditorPaneControllerCore";
+import { applyEditingDraftPatch, buildCardsById, createMetaPanelActions, resolveSelectedCardSnapshot } from "./cardEditorPaneControllerCore";
 import { useToast } from "@/contexts/ToastContext";
 import { useCards } from "@/components/card/hooks/useCards";
 import { useTags } from "@/features/settings/hooks/useTags";

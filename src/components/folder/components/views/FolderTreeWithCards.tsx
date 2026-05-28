@@ -5,7 +5,7 @@ import { ExplorerEmptyState } from "@/components/folder/components/ExplorerEmpty
 import { ExplorerNoResultsState } from "@/components/folder/components/ExplorerNoResultsState";
 import { ExplorerTreeNodeRenderer } from "@/components/folder/components/ExplorerTreeNode";
 import { RootFolderPanelList } from "@/components/folder/components/RootFolderPanelList";
-import { shouldDisableExplorerDrop } from "@/components/folder/components/views/explorerDropRules";
+import { shouldDisableExplorerDrop } from "./explorerDropRules";
 import { type FolderTreeNode, getFolderId } from "@/components/folder/explorer/model/utils";
 import { buildExplorerTreeData, type ExplorerTreeNode, parseSelectedTreeId, toExpandedTreeIds, toSelectedTreeId } from "@/components/folder/explorer/tree/arboristAdapter";
 import { useEnsureAncestorFoldersExpanded } from "@/components/folder/hooks/useEnsureAncestorFoldersExpanded";

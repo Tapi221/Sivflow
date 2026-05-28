@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { resetStartupTasks, runStartupTasks } from "@/application/startup/RunStartupTasks";
+import { resetStartupTasks, runStartupTasks } from "./RunStartupTasks";
 
 export const useStartupTasks = (userId?: string | null) => {
   const startedUserIdRef = useRef<string | null>(null);

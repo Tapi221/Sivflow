@@ -1,5 +1,5 @@
 import { toVirtualMfCardDisplayName, toVirtualMfDeckDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
-import { type FolderTreeNode, getEntityTime, getFolderId, getParentFolderId, normalizeFolderId } from "@/components/folder/explorer/model/utils";
+import { type FolderTreeNode, getEntityTime, getFolderId, getParentFolderId, normalizeFolderId } from "./utils";
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem, SyncEntity } from "@/types";
 
 export type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";

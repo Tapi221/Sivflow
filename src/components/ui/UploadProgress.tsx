@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Button } from "./button";
+import { Progress } from "./progress";
 import { CheckCircle2, FileText, Loader2, X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 

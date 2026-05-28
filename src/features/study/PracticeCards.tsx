@@ -1,5 +1,5 @@
 import React from "react";
-import StudyCard from "@/features/study/StudyCard";
+import StudyCard from "./StudyCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { PracticeFilterRating, PracticeSessionState } from "@/hooks/study/usePracticeMode";
