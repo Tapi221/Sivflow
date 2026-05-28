@@ -21,6 +21,8 @@ type ProjectCalendarLinksMenuProps = {
 export const PROJECT_CALENDAR_LINKS_MENU_PANEL_ID = "project-calendar-links-context-menu";
 
 const PROJECT_CALENDAR_LINKS_MENU_LABELS = [
+  "Googleカレンダーとして扱う",
+  "同名Googleカレンダーがありません",
   "Google連携を解除",
   "Apple連携を解除",
   "iCloud連携を解除",
