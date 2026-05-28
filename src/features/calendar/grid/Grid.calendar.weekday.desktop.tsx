@@ -136,6 +136,17 @@ const areCalendarWeekDayGridPropsEqual = (previous: CalendarWeekDayGridProps, ne
   );
 };
 
+const createInitialVirtualDayRange = (totalDayCount: number, visibleDayCount: number, anchorIndex: number): WeekdayVirtualDayRange => {
+  if (totalDayCount <= 0) return { start: 0, end: 0 };
+
+  const visibleCount = Math.max(1, visibleDayCount);
+  const boundedAnchorIndex = Math.max(0, Math.min(anchorIndex, totalDayCount - 1));
+  const start = Math.max(0, boundedAnchorIndex - HORIZONTAL_DAY_OVERSCAN);
+  const end = Math.min(totalDayCount, boundedAnchorIndex + visibleCount + HORIZONTAL_DAY_OVERSCAN);
+
+  return { start, end: Math.max(start, end) };
+};
+
 const AllDayEventChip = ({ event }: { event: GoogleCalendarEvent }) => {
   const tokens = generateColorTokens(event.accentColor);
 
@@ -209,6 +220,21 @@ const areVirtualRangesEqual = (previous: WeekdayVirtualDayRange, next: WeekdayVi
 
 const buildFallbackRenderedEntries = (visibleDays: Date[]): WeekdayRenderedDayEntry[] => visibleDays.map((day, dayIndex) => ({ day, dayIndex }));
 
+const getRenderedDayGridColumn = (dayIndex: number, virtualDayRange: WeekdayVirtualDayRange, hasVirtualRail: boolean) => hasVirtualRail ? dayIndex - virtualDayRange.start + 3 : dayIndex + 2;
+
+const buildVirtualizedGridStyle = (calendarGridStyle: CSSProperties, virtualDayRange: WeekdayVirtualDayRange, totalDayCount: number, calendarDayColumnWidth: number): CSSProperties => {
+  const renderedDayCount = Math.max(0, virtualDayRange.end - virtualDayRange.start);
+  const renderedDayColumns = renderedDayCount > 0 ? `repeat(${renderedDayCount}, ${calendarDayColumnWidth}px)` : "0px";
+  const leftSpacerWidth = Math.max(0, virtualDayRange.start * calendarDayColumnWidth);
+  const rightSpacerWidth = Math.max(0, (totalDayCount - virtualDayRange.end) * calendarDayColumnWidth);
+
+  return {
+    ...calendarGridStyle,
+    gridTemplateColumns: `${C.TIME_COLUMN_WIDTH}px ${leftSpacerWidth}px ${renderedDayColumns} ${rightSpacerWidth}px`,
+    minWidth: `${C.TIME_COLUMN_WIDTH + totalDayCount * calendarDayColumnWidth}px`,
+  };
+};
+
 const CalendarWeekDayGridComponent = ({
   headerScrollRef: _headerScrollRef,
   allDayScrollRef: _allDayScrollRef,
@@ -225,7 +251,7 @@ const CalendarWeekDayGridComponent = ({
   const today = new Date();
   const currentMinutes = useCurrentTimeMinutes();
   const totalDayCount = virtualRail?.totalDayCount ?? visibleDays.length;
-  const [virtualDayRange, setVirtualDayRange] = useState<WeekdayVirtualDayRange>(() => ({ start: 0, end: Math.min(totalDayCount, Math.max(1, visibleDays.length)) }));
+  const [virtualDayRange, setVirtualDayRange] = useState<WeekdayVirtualDayRange>(() => createInitialVirtualDayRange(totalDayCount, visibleDays.length, virtualRail?.anchorIndex ?? 0));
 
   const updateVirtualDayRange = useCallback(() => {
     const scroller = scrollContainerRef.current;
@@ -283,16 +309,13 @@ const CalendarWeekDayGridComponent = ({
 
   const selectedDayKey = getCalendarDateKey(selectedDate);
   const todayDayKey = getCalendarDateKey(today);
+  const hasVirtualRail = Boolean(virtualRail);
   const isTodayVisible = renderedDayEntries.some(({ day }) => getCalendarDateKey(day) === todayDayKey);
   const gridStyle = useMemo(() => {
     if (!virtualRail) return calendarGridStyle;
 
-    return {
-      ...calendarGridStyle,
-      gridTemplateColumns: `${C.TIME_COLUMN_WIDTH}px repeat(${virtualRail.totalDayCount}, ${_calendarDayColumnWidth}px)`,
-      minWidth: `${C.TIME_COLUMN_WIDTH + virtualRail.totalDayCount * _calendarDayColumnWidth}px`,
-    };
-  }, [_calendarDayColumnWidth, calendarGridStyle, virtualRail]);
+    return buildVirtualizedGridStyle(calendarGridStyle, virtualDayRange, virtualRail.totalDayCount, _calendarDayColumnWidth);
+  }, [_calendarDayColumnWidth, calendarGridStyle, virtualDayRange, virtualRail]);
 
   const eventsByDay = useMemo(() => {
     const map = new Map<string, WeekdayDayEvents>();
@@ -342,9 +365,10 @@ const CalendarWeekDayGridComponent = ({
             const dayKey = getCalendarDateKey(day);
             const isDayToday = dayKey === todayDayKey;
             const isDaySelected = dayKey === selectedDayKey;
+            const gridColumn = getRenderedDayGridColumn(dayIndex, virtualDayRange, hasVirtualRail);
 
             return (
-              <div key={`weekday-header-${dayKey}`} className="sticky top-0 z-50 border-b border-[#eeeeee] bg-white" style={{ gridColumn: dayIndex + 2, gridRow: 1 }}>
+              <div key={`weekday-header-${dayKey}`} className="sticky top-0 z-50 border-b border-[#eeeeee] bg-white" style={{ gridColumn, gridRow: 1 }}>
                 <CalendarDateButton isToday={isDayToday} isSelected={isDaySelected} onClick={() => onSelectDate?.(day)} className="w-full">
                   <CalendarDateContent dateLabel={format(day, GRID.WEEKDAY_DATE_FORMAT)} weekdayLabel={format(day, GRID.WEEKDAY_DAY_FORMAT, { locale: ja })} isToday={isDayToday} isSelected={isDaySelected} layout="weekday-date" />
                 </CalendarDateButton>
@@ -362,9 +386,10 @@ const CalendarWeekDayGridComponent = ({
             const events = dayEvents.allDayEvents;
             const visibleChips = events.slice(0, MAX_ALL_DAY_VISIBLE_CHIPS);
             const overflowCount = events.length - visibleChips.length;
+            const gridColumn = getRenderedDayGridColumn(dayIndex, virtualDayRange, hasVirtualRail);
 
             return (
-              <div key={`weekday-all-day-${dayKey}`} className={cn("sticky top-10 z-40 min-h-7 border-b border-r border-t border-[#eeeeee] bg-white px-1 py-1", dayIndex === totalDayCount - 1 && "border-r-0")} style={{ gridColumn: dayIndex + 2, gridRow: 2 }}>
+              <div key={`weekday-all-day-${dayKey}`} className={cn("sticky top-10 z-40 min-h-7 border-b border-r border-t border-[#eeeeee] bg-white px-1 py-1", dayIndex === totalDayCount - 1 && "border-r-0")} style={{ gridColumn, gridRow: 2 }}>
                 <div className="flex flex-col gap-1">
                   {visibleChips.map((event) => <AllDayEventChip key={event.id} event={event} />)}
 
@@ -397,9 +422,10 @@ const CalendarWeekDayGridComponent = ({
             const dayEvents = eventsByDay.get(dayKey) ?? EMPTY_WEEKDAY_DAY_EVENTS;
             const eventsForDay = dayEvents.timedEvents;
             const layout = computeEventLayout(eventsForDay.map((event) => toLayoutEvent(event.id, new Date(event.startsAt), getEventDurationMinutes(event), C.MIN_LAYOUT_MINUTES)));
+            const gridColumn = getRenderedDayGridColumn(dayIndex, virtualDayRange, hasVirtualRail);
 
             return (
-              <div key={`weekday-body-${dayKey}`} className={cn("relative border-r border-[#eeeeee] bg-white", dayIndex === totalDayCount - 1 && "border-r-0")} style={{ contain: "layout paint style", gridColumn: dayIndex + 2, gridRow: 3 }}>
+              <div key={`weekday-body-${dayKey}`} className={cn("relative border-r border-[#eeeeee] bg-white", dayIndex === totalDayCount - 1 && "border-r-0")} style={{ contain: "layout paint style", gridColumn, gridRow: 3 }}>
                 {HOURS.map((hour) => <div key={`${dayKey}-${hour}`} className="border-b border-[#eeeeee] bg-white" style={{ height: "var(--calendar-hour-row-height)" }} />)}
                 <div aria-hidden="true" className="bg-white" style={{ height: BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT }} />
 
