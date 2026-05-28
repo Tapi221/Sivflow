@@ -1,6 +1,6 @@
-import type { CSSProperties } from "react";
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
-import { format, isSameDay } from "date-fns";
+import type { CSSProperties, UIEvent } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
@@ -51,6 +51,8 @@ const MAX_ALL_DAY_VISIBLE_CHIPS = 3;
 const BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT = 32;
 const HORIZONTAL_DAY_OVERSCAN = 4;
 const WEEKDAY_HEADER_ROW_HEIGHT = 40;
+const WEEKDAY_SCROLL_SNAP_DELAY_MS = 120;
+const WEEKDAY_SCROLL_SNAP_EPSILON_PX = 1;
 
 const EMPTY_WEEKDAY_DAY_EVENTS: WeekdayDayEvents = {
   allDayEvents: [],
@@ -101,6 +103,16 @@ const getEventDurationMinutes = (event: GoogleCalendarEvent): number => {
 };
 
 const getVisualDurationMinutes = (durationMinutes: number) => Math.max(durationMinutes, C.MIN_LAYOUT_MINUTES);
+
+const clampScrollLeft = (scrollLeft: number, maxScrollLeft: number) => Math.min(Math.max(scrollLeft, 0), Math.max(maxScrollLeft, 0));
+
+const getSnappedWeekdayScrollLeft = (scrollLeft: number, columnWidth: number, maxScrollLeft: number) => {
+  if (columnWidth <= 0) return scrollLeft;
+
+  const snappedDayIndex = Math.max(0, Math.round(scrollLeft / columnWidth));
+
+  return clampScrollLeft(snappedDayIndex * columnWidth, maxScrollLeft);
+};
 
 const calculateEventPositionStyle = (event: GoogleCalendarEvent): CalendarEventPositionStyle => {
   const startsAt = new Date(event.startsAt);
@@ -251,6 +263,7 @@ const CalendarWeekDayGridComponent = ({
   const today = new Date();
   const currentMinutes = useCurrentTimeMinutes();
   const totalDayCount = virtualRail?.totalDayCount ?? visibleDays.length;
+  const scrollSnapTimeoutRef = useRef<number | null>(null);
   const [virtualDayRange, setVirtualDayRange] = useState<WeekdayVirtualDayRange>(() => createInitialVirtualDayRange(totalDayCount, visibleDays.length, virtualRail?.anchorIndex ?? 0));
 
   const updateVirtualDayRange = useCallback(() => {
@@ -265,6 +278,32 @@ const CalendarWeekDayGridComponent = ({
 
     setVirtualDayRange((previous) => areVirtualRangesEqual(previous, nextRange) ? previous : nextRange);
   }, [_calendarDayColumnWidth, scrollContainerRef, totalDayCount]);
+
+  const scheduleWeekdayScrollSnap = useCallback(() => {
+    const scroller = scrollContainerRef.current;
+
+    if (!scroller || _calendarDayColumnWidth <= 0) return;
+
+    if (scrollSnapTimeoutRef.current !== null) {
+      window.clearTimeout(scrollSnapTimeoutRef.current);
+    }
+
+    scrollSnapTimeoutRef.current = window.setTimeout(() => {
+      scrollSnapTimeoutRef.current = null;
+
+      const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
+      const snappedLeft = getSnappedWeekdayScrollLeft(scroller.scrollLeft, _calendarDayColumnWidth, maxScrollLeft);
+
+      if (Math.abs(scroller.scrollLeft - snappedLeft) <= WEEKDAY_SCROLL_SNAP_EPSILON_PX) return;
+
+      scroller.scrollTo({ left: snappedLeft, top: scroller.scrollTop, behavior: "smooth" });
+    }, WEEKDAY_SCROLL_SNAP_DELAY_MS);
+  }, [_calendarDayColumnWidth, scrollContainerRef]);
+
+  const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
+    onScroll?.(event);
+    scheduleWeekdayScrollSnap();
+  }, [onScroll, scheduleWeekdayScrollSnap]);
 
   useLayoutEffect(() => {
     updateVirtualDayRange();
@@ -297,6 +336,14 @@ const CalendarWeekDayGridComponent = ({
       }
     };
   }, [scrollContainerRef, updateVirtualDayRange]);
+
+  useEffect(() => {
+    return () => {
+      if (scrollSnapTimeoutRef.current !== null) {
+        window.clearTimeout(scrollSnapTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const renderedDayEntries = useMemo<WeekdayRenderedDayEntry[]>(() => {
     if (!virtualRail) return buildFallbackRenderedEntries(visibleDays);
@@ -357,7 +404,7 @@ const CalendarWeekDayGridComponent = ({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-      <div ref={scrollContainerRef} className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden" onScroll={onScroll}>
+      <div ref={scrollContainerRef} className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden" onScroll={handleScroll}>
         <div className="grid bg-white" style={gridStyle}>
           <div className="z-[60] h-10 border-b border-[#eeeeee] bg-white" style={WEEKDAY_HEADER_CORNER_STYLE} />
 
