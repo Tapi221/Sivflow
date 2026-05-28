@@ -13,7 +13,7 @@ const HEADER_ROW = [
   "image",
   "title",
   "note",
-] as const;
+];
 
 const SAMPLE_ROWS = [
   [
@@ -40,12 +40,12 @@ const SAMPLE_ROWS = [
   ],
   ["card-002", "front", "1", "markdown", "# 見出し", "", "", "カードB", ""],
   ["card-002", "back", "1", "math", "\\int_0^1 x^2 dx", "", "", "カードB", ""],
-] as const;
+];
 
 const buildWorkbook = () => {
   const workbook = XLSX.utils.book_new();
 
-  const rows = [HEADER_ROW, ...SAMPLE_ROWS];
+  const rows: string[][] = [HEADER_ROW, ...SAMPLE_ROWS];
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
 
   worksheet["!cols"] = [
