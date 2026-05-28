@@ -344,6 +344,7 @@ const ScheduleScreen = ({
               visibleDays={visibleDays}
               visibleEvents={deferredCalendarEvents}
               calendarDayColumnWidth={calendarDayColumnWidth}
+              _calendarDayColumnWidth={calendarDayColumnWidth}
               calendarGridStyle={calendarGridStyle}
               onScroll={handleCalendarScroll}
               selectedDate={selectedDate}
