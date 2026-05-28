@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type NavigationItemId = "explore" | "library" | "home" | "schedule" | "settings";
 
-type NavigationBarMobileProps = {
+type NavigationBarProps = {
   activeItemId: NavigationItemId;
   onSelectItem: (itemId: NavigationItemId) => void;
 };
@@ -42,7 +42,7 @@ const renderIcon = (itemId: NavigationItemId, isActive: boolean): ReactNode => {
   );
 };
 
-const NavigationBarMobileComponent = ({ activeItemId, onSelectItem }: NavigationBarMobileProps) => {
+const NavigationBarComponent = ({ activeItemId, onSelectItem }: NavigationBarProps) => {
   return (
     <View style={styles.root} pointerEvents="box-none">
       <View style={styles.surface}>
@@ -125,9 +125,9 @@ const styles = StyleSheet.create({
   },
 });
 
-const NavigationBarMobile = memo(NavigationBarMobileComponent);
+const NavigationBar = memo(NavigationBarComponent);
 
-NavigationBarMobile.displayName = "NavigationBarMobile";
+NavigationBar.displayName = "NavigationBar";
 
-export { NavigationBarMobile };
-export type { NavigationItemId, NavigationBarMobileProps };
+export { NavigationBar };
+export type { NavigationItemId, NavigationBarProps };
