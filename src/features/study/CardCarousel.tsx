@@ -8,6 +8,9 @@ import type { Card } from "@/types";
 
 type StudyCardProps = ComponentProps<typeof StudyCard>;
 
+type ReviewResultHandler = Extract<StudyCardProps, { mode: "review" }>["onResult"];
+type PracticeResultHandler = Extract<StudyCardProps, { mode: "practice" }>["onResult"];
+
 const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
 
 type BaseCardCarouselProps = {
@@ -22,12 +25,12 @@ type BaseCardCarouselProps = {
 
 type ReviewCardCarouselProps = BaseCardCarouselProps & {
   mode?: "review";
-  onResult: Extract<StudyCardProps, { mode?: "review" }>["onResult"];
+  onResult: ReviewResultHandler;
 };
 
 type PracticeCardCarouselProps = BaseCardCarouselProps & {
   mode: "practice";
-  onResult: Extract<StudyCardProps, { mode: "practice" }>["onResult"];
+  onResult: PracticeResultHandler;
 };
 
 type CardCarouselProps = ReviewCardCarouselProps | PracticeCardCarouselProps;
@@ -48,16 +51,29 @@ export const CardCarousel = ({
       cards={cards}
       syncIndex={sessionCurrentIndex}
       renderCenter={(card) => (
-        <StudyCard
-          mode={mode}
-          card={card}
-          onResult={onResult}
-          onToggleUncertainty={onToggleUncertainty}
-          onToggleBookmark={onToggleBookmark}
-          onEdit={onEdit}
-          showHard={showHard}
-          showEasy={showEasy}
-        />
+        mode === "practice" ? (
+          <StudyCard
+            mode="practice"
+            card={card}
+            onResult={onResult as PracticeResultHandler}
+            onToggleUncertainty={onToggleUncertainty}
+            onToggleBookmark={onToggleBookmark}
+            onEdit={onEdit}
+            showHard={showHard}
+            showEasy={showEasy}
+          />
+        ) : (
+          <StudyCard
+            mode="review"
+            card={card}
+            onResult={onResult as ReviewResultHandler}
+            onToggleUncertainty={onToggleUncertainty}
+            onToggleBookmark={onToggleBookmark}
+            onEdit={onEdit}
+            showHard={showHard}
+            showEasy={showEasy}
+          />
+        )
       )}
       renderPreview={(card) => (
         <MobileScalableCard
