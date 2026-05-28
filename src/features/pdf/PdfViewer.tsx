@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import { type PdfDocumentController, usePdfDocument } from "@/features/pdf/hooks/usePdfDocument";
 import { usePdfSearch } from "@/features/pdf/hooks/usePdfSearch";
-import { usePdfZoom } from "@/features/pdf/hooks/usePdfZoom";
 import { buildPdfPageLayoutMetrics, getPdfPageSizeOrFallback, normalizePdfPageOrder } from "@/features/scroll/pdf/pdfScrollLayout";
 import { EMPTY_PDF_RENDER_PAGE_NUMBERS, buildPdfPrefetchPageNumbers, buildPdfRenderedPageNumbers } from "@/features/scroll/pdf/pdfScrollRenderWindow";
 import { usePdfCurrentPage } from "@/features/scroll/pdf/usePdfCurrentPage";
+import { usePdfZoom } from "@/features/scroll/pdf/usePdfZoom";
 import { PdfPage } from "./PdfPage";
 import type { PageSize, PdfScaleChangeSource, PdfViewerHandle, PdfViewerOptions, PdfViewerSourceMeta, SourceLoadErrorKind } from "./pdfViewer.types";
 import { cn } from "@/lib/utils";
