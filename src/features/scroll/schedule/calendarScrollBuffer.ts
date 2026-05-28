@@ -49,6 +49,12 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
       extendScreens: 4,
       maxUnits: { before: 365, after: 365 },
     },
+    timetable: {
+      unitsPerScreen: 7,
+      initialScreens: { before: 0, after: 0 },
+      extendScreens: 0,
+      maxUnits: { before: 0, after: 0 },
+    },
     month: {
       unitsPerScreen: 1,
       initialScreens: { before: 0, after: 0 },
