@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
-import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.schedule.month";
+import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
 import { compareCalendarEvents, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
 import { getVisibleMonthEventChipCount } from "@/features/calendar/grid/monthEventChipCount";

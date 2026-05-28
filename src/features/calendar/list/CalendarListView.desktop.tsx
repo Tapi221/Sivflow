@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject, type UIEvent } from "react";
 import { addDays, format, getDaysInMonth, isSameDay, startOfMonth } from "date-fns";
 import { ja } from "date-fns/locale";
-import { CalendarEventChipList } from "@/chip/eventchip/EventChip.schedule.list";
+import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
