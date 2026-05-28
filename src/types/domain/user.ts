@@ -36,6 +36,7 @@ export interface UserSettings extends BaseEntity {
   autoResetDaysThreshold: number;
   completionLevelThreshold: number;
   swipeLoopMode: boolean;
+  accentColor?: string;
   showReviewHard?: boolean;
   showReviewEasy?: boolean;
   autoCarryOver?: boolean;
