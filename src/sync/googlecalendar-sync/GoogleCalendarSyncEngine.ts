@@ -1,6 +1,7 @@
 import { addDays, subDays } from "date-fns";
+import { deleteGoogleCalendarEvent, createGoogleCalendarEvent, updateGoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcal.api";
 import { deleteCachedGoogleCalendarEvent, readCachedGoogleCalendarEvents, replaceCachedGoogleCalendarRange, upsertCachedGoogleCalendarEvent } from "@/integration/googlecalendar-integration/googleCalendarEventCache";
-import type { GCalEventsListResponse, GCalForceSyncOptions, GCalRawIncrementalEvent, GCalSyncEngineOptions, GCalSyncRange, GCalSyncStartContext, GCalSyncState, GCalSyncTokenMap, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+import type { GCalEventsListResponse, GCalForceSyncOptions, GCalRawIncrementalEvent, GCalSyncEngineOptions, GCalSyncRange, GCalSyncStartContext, GCalSyncState, GCalSyncTokenMap, GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
 const SYNC_TOKENS_STORAGE_KEY = "flashcard-master.gcal.sync_tokens";
@@ -148,6 +149,7 @@ const toCalendarEvent = (
 
   return {
     id: buildCompositeEventId(accountId, calendarId, raw.id),
+    externalId: raw.id,
     accountId,
     calendarId,
     accentColor,
@@ -160,20 +162,35 @@ const toCalendarEvent = (
   };
 };
 
+const resolveExternalEventId = (accountId: string | undefined, calendarId: string, eventId: string): string => {
+  const accountPrefix = accountId ? `${accountId}:${calendarId}:` : null;
+  const calendarPrefix = `${calendarId}:`;
+
+  if (accountPrefix && eventId.startsWith(accountPrefix)) return eventId.slice(accountPrefix.length);
+  if (eventId.startsWith(calendarPrefix)) return eventId.slice(calendarPrefix.length);
+
+  return eventId;
+};
+
 export class GoogleCalendarSyncEngine {
   private readonly options: Required<Pick<GCalSyncEngineOptions, "pollIntervalMs" | "fullSyncPastDays" | "fullSyncFutureDays">> & GCalSyncEngineOptions;
 
   private context: GCalSyncStartContext | null = null;
 
   private syncState: GCalSyncState = "idle";
+
   private lastSyncedAt: Date | null = null;
 
   private syncTokenMap: GCalSyncTokenMap = {};
 
   private isRunning = false;
+
   private isSyncing = false;
+
   private hasPendingSync = false;
+
   private pendingSyncRange: GCalSyncRange | null = null;
+
   private pendingSyncResolvers: Array<() => void> = [];
 
   private currentBackoffMs = INITIAL_BACKOFF_MS;
@@ -256,6 +273,101 @@ export class GoogleCalendarSyncEngine {
   clearAllSyncTokens(): void {
     this.syncTokenMap = {};
     writeSyncTokens(this.syncTokenMap);
+  }
+
+  async createEvent(event: GCalWritableEventInput): Promise<GoogleCalendarEvent | null> {
+    const context = this.context;
+    if (!context) return null;
+
+    const accentColor = this.getCalendarAccentColor(event.calendarId);
+    const token = await this.getWritableAccessToken();
+    if (!token) return null;
+
+    const created = await this.runWritableOperation(() => createGoogleCalendarEvent({ accessToken: token, accountId: this.options.accountId, accentColor, event }));
+    if (!created) return null;
+
+    this.options.onEventAdded(created);
+    void upsertCachedGoogleCalendarEvent(this.options.accountId, created).catch((error) => {
+      console.warn("[GCalSyncEngine] cache event create failed", error);
+    });
+
+    return created;
+  }
+
+  async updateEvent(event: GCalWritableEventUpdateInput): Promise<GoogleCalendarEvent | null> {
+    const context = this.context;
+    if (!context) return null;
+
+    const accentColor = this.getCalendarAccentColor(event.calendarId);
+    const token = await this.getWritableAccessToken();
+    if (!token) return null;
+
+    const externalEventId = resolveExternalEventId(this.options.accountId, event.calendarId, event.eventId);
+    const updated = await this.runWritableOperation(() => updateGoogleCalendarEvent({ accessToken: token, accountId: this.options.accountId, accentColor, event: { ...event, eventId: externalEventId } }));
+    if (!updated) return null;
+
+    this.options.onEventUpdated(updated);
+    void upsertCachedGoogleCalendarEvent(this.options.accountId, updated).catch((error) => {
+      console.warn("[GCalSyncEngine] cache event update failed", error);
+    });
+
+    return updated;
+  }
+
+  async deleteEvent(event: GCalWritableEventDeleteInput): Promise<void> {
+    const context = this.context;
+    if (!context) return;
+
+    const token = await this.getWritableAccessToken();
+    if (!token) return;
+
+    const externalEventId = resolveExternalEventId(this.options.accountId, event.calendarId, event.eventId);
+    await this.runWritableOperation(async () => {
+      await deleteGoogleCalendarEvent({ accessToken: token, event: { ...event, eventId: externalEventId } });
+      return null;
+    });
+
+    const compositeId = buildCompositeEventId(this.options.accountId, event.calendarId, externalEventId);
+    this.options.onEventDeleted(compositeId);
+    void deleteCachedGoogleCalendarEvent(this.options.accountId, event.calendarId, compositeId).catch((error) => {
+      console.warn("[GCalSyncEngine] cache event delete failed", error);
+    });
+  }
+
+  private async runWritableOperation<T>(operation: () => Promise<T>): Promise<T | null> {
+    try {
+      return await operation();
+    } catch (error) {
+      if (!isRecoverableAuthError(error)) {
+        this.options.onError(error instanceof Error ? error : new Error(String(error)));
+        throw error;
+      }
+
+      const reconnectResult = await this.options.silentReconnect();
+      const reconnected = reconnectResult === true || reconnectResult === "reconnected";
+
+      if (!reconnected) {
+        this.setSyncState(reconnectResult === "needsReconnect" ? "needsReconnect" : "error");
+        return null;
+      }
+
+      return operation();
+    }
+  }
+
+  private async getWritableAccessToken(): Promise<string | null> {
+    const token = this.options.getAccessToken?.() ?? this.context?.accessToken ?? null;
+    if (token) return token;
+
+    const reconnectResult = await this.options.silentReconnect();
+    const reconnected = reconnectResult === true || reconnectResult === "reconnected";
+    if (!reconnected) return null;
+
+    return this.options.getAccessToken?.() ?? this.context?.accessToken ?? null;
+  }
+
+  private getCalendarAccentColor(calendarId: string): string {
+    return this.context?.calendars.find((calendar) => calendar.id === calendarId)?.backgroundColor ?? "#185FA5";
   }
 
   private setSyncState(state: GCalSyncState): void {
