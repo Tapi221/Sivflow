@@ -6,7 +6,7 @@ type CardLike = {
   card_set_id?: string | null;
   folderId?: string | null;
 };
-type CardSetLike = Pick<CardSet, "id"> & { folderId?: string | null };
+type CardSetLike = Pick<CardSet, "id" | "name"> & { folderId?: string | null };
 type LegacyFallbackReason = "missing-card-set-id" | "unresolved-card-set-id";
 
 const legacyFallbackCounters = new Map<LegacyFallbackReason, number>();
