@@ -46,11 +46,11 @@ const INITIAL_YEAR_BUFFER = 1;
 const YEAR_EXTEND_COUNT = 1;
 const YEAR_MAX_RENDERED_YEARS = 5;
 const YEAR_SCROLL_EDGE_THRESHOLD_PX = 900;
-const EVENT_DAY_BACKGROUND_ALPHA = 0.18;
+const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
 const MONTH_COLUMNS = 3;
 const MONTH_CELL_SIZE = 24;
-const MONTH_WEEKDAY_HEIGHT = 18;
-const YEAR_SECTION_GAP = 28;
+const MONTH_WEEKDAY_HEIGHT = 20;
+const YEAR_SECTION_GAP = 32;
 
 const normalizeColor = (color: string): string => {
   if (/^#[0-9a-f]{3}$/i.test(color)) {
@@ -141,7 +141,7 @@ const getYearRange = (anchorYear: Date, startOffset: number, endOffset: number):
 });
 
 const getMonthItemStyle = (monthIndex: number): ViewStyle => ({
-  marginTop: monthIndex < MONTH_COLUMNS ? 0 : 26,
+  marginTop: monthIndex < MONTH_COLUMNS ? 0 : 16,
   width: `${100 / MONTH_COLUMNS}%`,
 });
 
@@ -157,7 +157,7 @@ const ScheduleYearMobileNativeComponent = ({ yearDate, selectedDate, visibleEven
 
   const eventsByDay = useMemo(() => buildEventsByDay(visibleEvents), [visibleEvents]);
 
-  const years = useMemo<ScheduleYearBlock[]>(() => {
+  const years = useMemo<ScheduleYearBlock[]>((() => {
     const yearCount = Math.max(0, yearOffsetRange.endOffset - yearOffsetRange.startOffset + 1);
 
     return Array.from({ length: yearCount }, (_, index) => {
@@ -179,11 +179,11 @@ const ScheduleYearMobileNativeComponent = ({ yearDate, selectedDate, visibleEven
       return {
         key: format(date, "yyyy"),
         date,
-        label: format(date, "yyyy", { locale: dateFnsLocale }),
+        label: format(date, "yyyy年", { locale: dateFnsLocale }),
         months,
       };
     });
-  }, [anchorYear, dateFnsLocale, eventsByDay, t.dateFnsLocaleKey, yearOffsetRange.endOffset, yearOffsetRange.startOffset]);
+  }), [anchorYear, dateFnsLocale, eventsByDay, t.dateFnsLocaleKey, yearOffsetRange.endOffset, yearOffsetRange.startOffset]);
 
   const renderedRange = useMemo(() => getYearRange(anchorYear, yearOffsetRange.startOffset, yearOffsetRange.endOffset), [anchorYear, yearOffsetRange.endOffset, yearOffsetRange.startOffset]);
 
@@ -278,9 +278,9 @@ const ScheduleYearMobileNativeComponent = ({ yearDate, selectedDate, visibleEven
 const styles = StyleSheet.create({
   content: {
     gap: YEAR_SECTION_GAP,
-    paddingBottom: 36,
-    paddingHorizontal: 26,
-    paddingTop: 22,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   dayButton: {
     alignItems: "center",
@@ -290,10 +290,9 @@ const styles = StyleSheet.create({
     width: MONTH_CELL_SIZE,
   },
   dayText: {
-    color: "#33343A",
+    color: "#2c2c2e",
     fontSize: 12,
     fontWeight: "500",
-    letterSpacing: -0.2,
     lineHeight: 16,
   },
   daysGrid: {
@@ -307,43 +306,43 @@ const styles = StyleSheet.create({
   monthGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginHorizontal: -6,
+    marginHorizontal: -16,
   },
   monthItem: {
     alignItems: "center",
-    paddingHorizontal: 6,
+    backgroundColor: "#ffffff",
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+    paddingTop: 12,
   },
   monthLabel: {
     alignSelf: "flex-start",
-    color: "#222329",
-    fontSize: 28,
-    fontWeight: "800",
-    letterSpacing: -0.8,
-    lineHeight: 34,
+    color: "#1c1c1e",
+    fontSize: 15,
+    fontWeight: "600",
+    letterSpacing: -0.15,
+    lineHeight: 18,
     marginBottom: 12,
-    paddingLeft: 1,
   },
   outsideMonthDayText: {
-    color: "#C7C8CE",
+    color: "#b8b8bd",
   },
   root: {
-    backgroundColor: "#F7F6FA",
+    backgroundColor: "rgba(255, 255, 255, 0.92)",
     flex: 1,
   },
   selectedDayButton: {
-    backgroundColor: "#8A7DDB",
-    shadowColor: "#8174D7",
-    shadowOffset: { height: 6, width: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
+    backgroundColor: "#3478f6",
+    shadowColor: "#3478f6",
+    shadowOffset: { height: 1, width: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
   },
   selectedDayText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
+    color: "#ffffff",
   },
   todayDayText: {
-    color: "#7F72D6",
-    fontWeight: "700",
+    color: "#3478f6",
   },
   weekdayRow: {
     flexDirection: "row",
@@ -351,25 +350,25 @@ const styles = StyleSheet.create({
     width: MONTH_CELL_SIZE * 7,
   },
   weekdayText: {
-    color: "#7F818A",
+    color: "#8e8e93",
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "600",
     lineHeight: MONTH_WEEKDAY_HEIGHT,
     textAlign: "center",
     width: MONTH_CELL_SIZE,
   },
   yearLabel: {
-    color: "#202126",
-    fontSize: 52,
-    fontWeight: "900",
-    letterSpacing: -2,
-    lineHeight: 58,
-    marginBottom: 22,
+    color: "#1c1c1e",
+    fontSize: 17,
+    fontWeight: "600",
+    letterSpacing: -0.17,
+    lineHeight: 20,
+    marginBottom: 16,
+    paddingHorizontal: 4,
   },
   yearSection: {
-    borderBottomColor: "rgba(142, 144, 152, 0.22)",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    paddingBottom: 24,
+    backgroundColor: "#ffffff",
+    minWidth: 0,
   },
 });
 
