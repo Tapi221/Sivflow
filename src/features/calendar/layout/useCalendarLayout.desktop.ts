@@ -7,13 +7,19 @@ const WEEKDAY_BODY_ROW_BOTTOM_SPACER_HEIGHT_PX = 32;
 const WEEKDAY_BODY_ROW_HEIGHT = `calc(${GRID.WEEKDAY_HOURS} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}) + ${WEEKDAY_BODY_ROW_BOTTOM_SPACER_HEIGHT_PX}px)`;
 const WEEKDAY_GRID_TEMPLATE_ROWS = `${WEEKDAY_HEADER_ROW_HEIGHT_PX}px auto ${WEEKDAY_BODY_ROW_HEIGHT}`;
 
+const isWeekdayRailView = (viewMode: CalendarViewMode) =>
+  viewMode === "days" ||
+  viewMode === "threeDays" ||
+  viewMode === "week" ||
+  viewMode === "timetable";
+
 export const useCalendarLayout = ({
   viewportWidth,
   visibleDays,
   displayDays,
   selectedViewMode,
   currentDate,
-  calendarBuffer: _calendarBuffer,
+  calendarBuffer,
 }: {
   viewportWidth: number;
   visibleDays: Date[];
@@ -38,8 +44,11 @@ export const useCalendarLayout = ({
       )
       : C.DAY_COLUMN_MIN_WIDTH;
 
-  const renderDayCount =
-    isMonthLikeView ? displayDays.length : visibleDays.length;
+  const renderDayCount = isWeekdayRailView(selectedViewMode)
+    ? calendarBuffer.before + displayDays.length + calendarBuffer.after
+    : isMonthLikeView
+      ? displayDays.length
+      : visibleDays.length;
 
   const gridWidth =
     C.TIME_COLUMN_WIDTH + renderDayCount * calendarDayColumnWidth;
