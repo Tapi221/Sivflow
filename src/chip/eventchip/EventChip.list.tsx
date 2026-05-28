@@ -1,6 +1,6 @@
 import { memo, useMemo, type CSSProperties } from "react";
 import { format } from "date-fns";
-import { LIST_EVENT_ROW_HEIGHT_PX } from "./EventChip.list.placement";
+import { LIST_EVENT_CHIP_HEIGHT_PX, LIST_EVENT_ROW_HEIGHT_PX } from "./EventChip.list.placement";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
@@ -14,7 +14,8 @@ const LIST_EVENT_ROW_STYLE: CSSProperties = { height: LIST_EVENT_ROW_HEIGHT_PX }
 const LIST_EVENT_START_TIME_CLASS_NAME = "pt-3 text-right text-[12px] font-medium leading-none tabular-nums text-[rgba(60,60,67,0.62)]";
 const LIST_EVENT_LINE_CLASS_NAME = "absolute top-0 -bottom-2 left-1/2 w-px -translate-x-1/2 bg-[#eceff3]";
 const LIST_EVENT_DOT_CLASS_NAME = "relative mt-[9px] h-2.5 w-2.5 rounded-full border-2 bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)]";
-const LIST_EVENT_CHIP_CLASS_NAME = "h-[52px] w-full overflow-hidden rounded-md py-1 pl-1.5 pr-2 text-left";
+const LIST_EVENT_CHIP_CLASS_NAME = "w-full overflow-hidden rounded-md py-1 pl-1.5 pr-2 text-left";
+const LIST_EVENT_CHIP_STYLE: CSSProperties = { height: LIST_EVENT_CHIP_HEIGHT_PX };
 const LIST_EVENT_TIME_CLASS_NAME = "overflow-hidden whitespace-nowrap text-[11px] font-semibold tabular-nums opacity-80";
 const LIST_EVENT_TITLE_CLASS_NAME = "mt-1 line-clamp-2 overflow-hidden whitespace-normal break-words text-[13px] font-semibold leading-snug tracking-[-0.01em]";
 const MINUTE_IN_MS = 60_000;
@@ -52,6 +53,7 @@ const getEventTimeRangeLabel = (event: GoogleCalendarEvent): string => {
 const createEventChipStyle = (
   tokens: ReturnType<typeof generateColorTokens>,
 ): CSSProperties => ({
+  ...LIST_EVENT_CHIP_STYLE,
   background: tokens.bg,
   borderLeft: `3px solid ${tokens.border}`,
   color: tokens.text,
