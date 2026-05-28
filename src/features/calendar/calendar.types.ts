@@ -109,9 +109,8 @@ export type CalendarScreenViewModel = {
   selectedDateLabel: string;
 };
 
-//ScheduleScreen.tsx
 export type CalendarViewMode = "year" | "month" | "week" | "threeDays" | "days" | "timetable" | "list" | "pieChart";
-export type CalendarViewModeSelection = CalendarViewMode | CalendarViewMode[];
+export type CalendarViewModeSelection = CalendarViewMode | readonly CalendarViewMode[];
 
 export type CalendarToolbarMode = "calendar" | "task";
 
