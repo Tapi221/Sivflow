@@ -13,7 +13,7 @@ type ImageRecordLike =
     storagePath?: string | null;
     localBlobId?: string | null;
     localFileId?: string | null;
-    remoteStatus?: "pending" | "uploading" | "ready" | "failed" | null;
+    remoteStatus?: "none" | "pending" | "uploading" | "ready" | "failed" | null;
     status?: "pending" | "uploading" | "ready" | "failed" | null;
   }
   | undefined;
