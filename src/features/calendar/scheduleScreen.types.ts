@@ -86,6 +86,7 @@ export type CalendarWeekDayGridProps = {
   visibleDays: Date[];
   visibleEvents: GoogleCalendarEvent[];
   calendarDayColumnWidth: number;
+  _calendarDayColumnWidth?: number;
   calendarGridStyle: CalendarGridStyle;
   onScroll?: (event: UIEvent<HTMLDivElement>) => void;
   selectedDate: Date;
