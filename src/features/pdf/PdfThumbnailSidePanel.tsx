@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PdfDocumentController } from "@/features/pdf/hooks/usePdfDocument";
-import { PdfPage } from "@/features/pdf/PdfPage";
+import { PdfPage } from "./PdfPage";
 import { cn } from "@/lib/utils";
 
 interface PdfThumbnailSidePanelProps {

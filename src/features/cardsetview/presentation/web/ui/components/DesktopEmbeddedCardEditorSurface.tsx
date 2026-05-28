@@ -3,9 +3,9 @@ import { CANONICAL_CARD_WIDTH, CARD_ROW_PX, layoutRowsToCardHeightPx } from "@co
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import { resolveEditorCardFitScale } from "@/domain/card/resolveEditorCardFitScale";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
-import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
-import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
+import { CardFaceScene } from "./CardFaceScene";
+import { CardSurfaceLayout } from "./CardSurfaceLayout";
+import { buildCardSurfaceMetrics } from "./cardSurfacePresentation";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";
 import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";

@@ -1,5 +1,5 @@
 import { CardSetViewDesktop } from "@/features/cardsetview/presentation/web/ui/CardSetViewDesktop";
-import type { CardSetViewContentProps } from "@/features/cardsetview/presentation/web/ui/components/cardSetViewContentProps";
+import type { CardSetViewContentProps } from "./cardSetViewContentProps";
 
 export const CardSetViewDesktopContent = ({
   controller,

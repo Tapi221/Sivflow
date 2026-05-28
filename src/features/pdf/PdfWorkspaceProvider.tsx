@@ -1,14 +1,14 @@
 import { type PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { defaultPdfViewerOptions } from "@/features/pdf/defaultPdfViewerOptions";
+import { defaultPdfViewerOptions } from "./defaultPdfViewerOptions";
 import { usePdfContainerWidth } from "@/features/pdf/hooks/usePdfContainerWidth";
 import { usePdfDocument } from "@/features/pdf/hooks/usePdfDocument";
 import { usePdfSourceResolver } from "@/features/pdf/hooks/usePdfSourceResolver";
 import { usePdfViewerPersistence } from "@/features/pdf/hooks/usePdfViewerPersistence";
-import * as C from "@/features/pdf/pdf.constants.desktop";
-import type { PdfViewerHandle } from "@/features/pdf/PdfViewer";
+import * as C from "./pdf.constants.desktop";
+import type { PdfViewerHandle } from "./PdfViewer";
 // ★ 修正: clampScale と getViewerStateFromSession のインポートを追加
-import { clampScale, getViewerStateFromSession } from "@/features/pdf/pdfViewerStateStorage";
-import { PdfWorkspaceContext, type PdfWorkspaceContextValue, PdfWorkspaceDocumentContext, type PdfWorkspaceDocumentContextValue, PdfWorkspaceNavigationContext, type PdfWorkspaceNavigationContextValue } from "@/features/pdf/PdfWorkspaceContexts";
+import { clampScale, getViewerStateFromSession } from "./pdfViewerStateStorage";
+import { PdfWorkspaceContext, type PdfWorkspaceContextValue, PdfWorkspaceDocumentContext, type PdfWorkspaceDocumentContextValue, PdfWorkspaceNavigationContext, type PdfWorkspaceNavigationContextValue } from "./PdfWorkspaceContexts";
 import { useAuthSession } from "@/contexts/AuthContext";
 import type { DocumentItem, PdfPageLayoutMode, PdfSidePanelTab, PdfViewerState } from "@/types";
 

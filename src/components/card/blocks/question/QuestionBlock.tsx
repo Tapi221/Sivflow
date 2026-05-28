@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from "react";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
-import { QuestionBlockContent } from "@/components/card/blocks/question/QuestionBlockContent";
+import { QuestionBlockContent } from "./QuestionBlockContent";
 import { HelpCircle } from "@/ui/icons";
 import type { CardBlock } from "@/types/domain/card";
 

@@ -6,7 +6,7 @@ import { WORKSPACE_TAB_CONTEXT_MENU_HEIGHT, WORKSPACE_TAB_CONTEXT_MENU_MARGIN, W
 import { useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPanel.utils";
 import { WorkspaceTabDndItem, WorkspaceTabDndList } from "@/features/dnd/tab/WorkspaceTabDnd";
 import { useWorkspaceTabDnd } from "@/features/dnd/tab/useWorkspaceTabDnd";
-import type { WorkspaceSidebarSection, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
+import type { WorkspaceSidebarSection, WorkspaceTab } from "./Tab";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
 import { FileText, Layers, X } from "@/ui/icons";

@@ -1,5 +1,5 @@
-import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
-import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
+import { useFolderCommands } from "./useFolderCommands";
+import { useFoldersRead } from "./useFoldersRead";
 
 export const useFolders = () => {
   const readState = useFoldersRead();

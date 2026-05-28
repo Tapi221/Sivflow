@@ -6,7 +6,7 @@ import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay, Proje
 import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
-import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
+import { SidebarLayeredDirectory } from "./Sidebar.LayeredDirectory";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 
 const DEFAULT_CALENDAR_COLOR = "#74798b";

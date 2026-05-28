@@ -1,5 +1,5 @@
-import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
-import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
+import { useDocumentCommands } from "./useDocumentCommands";
+import { useDocumentsRead } from "./useDocumentsRead";
 
 export const useDocuments = (folderId?: string) => {
   const readState = useDocumentsRead(folderId);

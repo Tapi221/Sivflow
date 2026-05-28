@@ -1,6 +1,6 @@
 import React from "react";
-import { formatLastSyncedAt } from "@/components/card/shell/formatLastSyncedAt";
-import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
+import { formatLastSyncedAt } from "./formatLastSyncedAt";
+import { overlayGlassPillClassName } from "./overlaySurfaceClassNames";
 import { RefreshCw } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 

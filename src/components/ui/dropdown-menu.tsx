@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import { type FloatingSurfaceVariantProps, floatingSurfaceVariants } from "@/components/ui/floating-surface";
+import { type FloatingSurfaceVariantProps, floatingSurfaceVariants } from "./floating-surface";
 import { cn } from "@/lib/utils";
 import { Check, Circle } from "@/ui/icons";
 

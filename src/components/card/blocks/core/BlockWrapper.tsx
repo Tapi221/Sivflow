@@ -1,6 +1,6 @@
 import React from "react";
-import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
-import { BlockFrame } from "@/components/card/blocks/core/BlockFrame";
+import { BlockEditModeContext } from "./BlockEditModeContext";
+import { BlockFrame } from "./BlockFrame";
 import { Copy, GripVertical, Trash2 } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 

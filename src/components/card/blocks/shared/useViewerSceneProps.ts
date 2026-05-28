@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import type { ViewerProps } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
+import type { ViewerProps } from "./CardBlockLayoutRenderer";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 

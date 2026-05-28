@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { getTagColorKey } from "@/chip/tag/tagColor";
-import { TagBadge } from "@/components/tag/TagBadge";
+import { TagBadge } from "./TagBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tag as TagIcon } from "@/ui/icons";

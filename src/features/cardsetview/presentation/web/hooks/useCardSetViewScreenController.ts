@@ -3,12 +3,12 @@ import { CARD_PANE_WIDTH_STEP_PX, CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT, CARD_VIEW
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
 import { CARD_LAYOUT_MODE_LABELS, type CardLayoutMode, type CardSetInteractionMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { clampCardIndex } from "@/features/cardsetview/domain/cardSetViewState";
-import { useCardSetViewData } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewData";
-import { useCardSetViewPaneWidth } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewPaneWidth";
-import { useCardSetViewState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewState";
-import { useCardSetViewWindowEvents } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewWindowEvents";
-import { useCardSetViewZoom } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoom";
-import { useCardSetViewZoomInput } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoomInput";
+import { useCardSetViewData } from "./useCardSetViewData";
+import { useCardSetViewPaneWidth } from "./useCardSetViewPaneWidth";
+import { useCardSetViewState } from "./useCardSetViewState";
+import { useCardSetViewWindowEvents } from "./useCardSetViewWindowEvents";
+import { useCardSetViewZoom } from "./useCardSetViewZoom";
+import { useCardSetViewZoomInput } from "./useCardSetViewZoomInput";
 import { useCardSetViewBreadcrumbs } from "@/features/cardsetview/presentation/web/infra/useCardSetViewBreadcrumbs";
 import { useCardSetViewParams } from "@/features/cardsetview/presentation/web/infra/useCardSetViewParams";
 import { buildWidthControl } from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";

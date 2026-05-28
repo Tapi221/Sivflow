@@ -1,1 +1,1 @@
-export * from "@/services/localdb/index";
+export * from "@/services/localdb";

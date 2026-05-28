@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { type FloatingSurfaceVariantProps, floatingSurfaceVariants } from "@/components/ui/floating-surface";
+import { type FloatingSurfaceVariantProps, floatingSurfaceVariants } from "./floating-surface";
 import { cn } from "@/lib/utils";
 import { X } from "@/ui/icons";
 

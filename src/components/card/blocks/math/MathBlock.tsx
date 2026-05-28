@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
-import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
+import { MathBlockPreviewPane } from "./MathBlockPreviewPane";
 import { cn } from "@/lib/utils";
 import { Sigma } from "@/ui/icons";
 import { MathEditorDialog } from "./MathEditorDialog";

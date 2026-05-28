@@ -1,5 +1,5 @@
-import { useCardSetViewActions } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewActions";
-import { useCardSetViewViewState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewViewState";
+import { useCardSetViewActions } from "./useCardSetViewActions";
+import { useCardSetViewViewState } from "./useCardSetViewViewState";
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
