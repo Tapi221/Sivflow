@@ -4,7 +4,6 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent, ViewStyle } from "react-native";
 import { getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { useDateFnsLocale, useT } from "@/i18n/useT";
 
 type ScheduleYearMobileNativeProps = {
   yearDate: Date;
@@ -45,12 +44,15 @@ const YEAR_MONTH_GRID_DAY_COUNT = 42;
 const INITIAL_YEAR_BUFFER = 1;
 const YEAR_EXTEND_COUNT = 1;
 const YEAR_MAX_RENDERED_YEARS = 5;
-const YEAR_SCROLL_EDGE_THRESHOLD_PX = 900;
+const YEAR_SCROLL_EDGE_THRESHOLD_PX = 240;
 const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
 const MONTH_COLUMNS = 3;
 const MONTH_CELL_SIZE = 24;
 const MONTH_WEEKDAY_HEIGHT = 20;
 const YEAR_SECTION_GAP = 32;
+const MINI_CALENDAR_WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"] as const;
+const MONTH_LABEL_FORMAT = "M月";
+const YEAR_LABEL_FORMAT = "yyyy年";
 
 const normalizeColor = (color: string): string => {
   if (/^#[0-9a-f]{3}$/i.test(color)) {
@@ -146,8 +148,6 @@ const getMonthItemStyle = (monthIndex: number): ViewStyle => ({
 });
 
 const ScheduleYearMobileNativeComponent = ({ yearDate, selectedDate, visibleEvents = [], onSelectDate, onRenderedRangeChange }: ScheduleYearMobileNativeProps) => {
-  const t = useT();
-  const dateFnsLocale = useDateFnsLocale();
   const today = useMemo(() => new Date(), []);
   const [anchorYear, setAnchorYear] = useState(() => startOfYear(yearDate));
   const [yearOffsetRange, setYearOffsetRange] = useState(() => ({
@@ -171,7 +171,7 @@ const ScheduleYearMobileNativeComponent = ({ yearDate, selectedDate, visibleEven
         return {
           key: format(monthDate, "yyyy-MM"),
           date: monthDate,
-          label: format(monthDate, t.dateFnsLocaleKey === "ja" ? "M月" : "MMM", { locale: dateFnsLocale }),
+          label: format(monthDate, MONTH_LABEL_FORMAT),
           weeks: chunkMonthWeeks(days),
         };
       });
@@ -179,11 +179,11 @@ const ScheduleYearMobileNativeComponent = ({ yearDate, selectedDate, visibleEven
       return {
         key: format(date, "yyyy"),
         date,
-        label: format(date, "yyyy年", { locale: dateFnsLocale }),
+        label: format(date, YEAR_LABEL_FORMAT),
         months,
       };
     });
-  }), [anchorYear, dateFnsLocale, eventsByDay, t.dateFnsLocaleKey, yearOffsetRange.endOffset, yearOffsetRange.startOffset]);
+  }), [anchorYear, eventsByDay, yearOffsetRange.endOffset, yearOffsetRange.startOffset]);
 
   const renderedRange = useMemo(() => getYearRange(anchorYear, yearOffsetRange.startOffset, yearOffsetRange.endOffset), [anchorYear, yearOffsetRange.endOffset, yearOffsetRange.startOffset]);
 
@@ -225,12 +225,14 @@ const ScheduleYearMobileNativeComponent = ({ yearDate, selectedDate, visibleEven
     const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
     const distanceToBottom = contentSize.height - layoutMeasurement.height - contentOffset.y;
 
-    if (contentOffset.y < YEAR_SCROLL_EDGE_THRESHOLD_PX) {
+    if (contentSize.height <= layoutMeasurement.height) return;
+
+    if (contentOffset.y > 0 && contentOffset.y < YEAR_SCROLL_EDGE_THRESHOLD_PX) {
       extendBefore();
       return;
     }
 
-    if (distanceToBottom < YEAR_SCROLL_EDGE_THRESHOLD_PX) {
+    if (distanceToBottom > 0 && distanceToBottom < YEAR_SCROLL_EDGE_THRESHOLD_PX) {
       extendAfter();
     }
   }, [extendAfter, extendBefore]);
@@ -245,7 +247,7 @@ const ScheduleYearMobileNativeComponent = ({ yearDate, selectedDate, visibleEven
               <View key={month.key} accessibilityLabel={month.label} style={[styles.monthItem, getMonthItemStyle(monthIndex)]}>
                 <Text style={styles.monthLabel}>{month.label}</Text>
                 <View style={styles.weekdayRow}>
-                  {t.miniCalendarWeekdays.map((weekday, index) => (
+                  {MINI_CALENDAR_WEEKDAYS.map((weekday, index) => (
                     <Text key={`${month.key}-${weekday}-${index}`} style={styles.weekdayText}>
                       {weekday}
                     </Text>
