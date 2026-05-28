@@ -1,4 +1,4 @@
-import { MF_CARD_FILE_EXTENSION, MF_CARD_MIME_TYPE } from "@/features/cardFile/domain/mfCardTypes";
+import { MF_CARD_FILE_EXTENSION, MF_CARD_MIME_TYPE } from "@/features/cardFile/domain/mfCard.types";
 
 const sanitizeFileName = (name: string) => {
   const trimmed = name.trim() || "manifolia-card";
