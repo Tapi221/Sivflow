@@ -95,7 +95,7 @@ const buildDefaultCalendarEventSyncRange = (
   const fallbackDayTime = monthTitleDate.getTime();
   const firstVisibleDay = new Date(visibleDays[0]?.getTime() ?? fallbackDayTime);
   const lastVisibleDay = new Date(visibleDays.at(-1)?.getTime() ?? fallbackDayTime);
-  const bufferDays = selectedViewMode === "week" ? 3 : 2;
+  const bufferDays = selectedViewMode === "week" || selectedViewMode === "timetable" ? 3 : 2;
 
   return {
     rangeStart: startOfDay(subDays(firstVisibleDay, bufferDays)),
