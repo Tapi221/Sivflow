@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { GlobalSearchDialog } from "@/features/global-search/components/GlobalSearchDialog";
-import type { GlobalSearchItem } from "@/features/global-search/model/globalSearchTypes";
-import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
+import { SearchDialog } from "@/features/search/components/SearchDialog";
+import type { SearchItem } from "@/features/search/model/searchTypes";
+import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { LocalDBStatusBanner } from "@/components/security/LocalDBStatusBanner";
 import { SecurityAlertBanner } from "@/components/security/SecurityAlertBanner";
 import { AppLayout } from "@/layout/AppLayout";
@@ -23,8 +23,8 @@ const Layout = () => {
   const presentationTarget = usePresentationTarget();
   const isDesktopPresentation = presentationTarget === "desktop";
   const appTopInsetPx = getAppTopInsetPx({ presentationTarget });
-  const registerSource = useGlobalSearchStore((state) => state.registerSource);
-  const unregisterSource = useGlobalSearchStore(
+  const registerSource = useSearchStore((state) => state.registerSource);
+  const unregisterSource = useSearchStore(
     (state) => state.unregisterSource,
   );
 
@@ -36,7 +36,7 @@ const Layout = () => {
 
   useKatexLoader();
 
-  const navigationItems = useMemo<GlobalSearchItem[]>(
+  const navigationItems = useMemo<SearchItem[]>(
     () => [
       {
         id: "action:library",
@@ -128,7 +128,7 @@ const Layout = () => {
         } as React.CSSProperties
       }
     >
-      <GlobalSearchDialog />
+      <SearchDialog />
 
       <LocalDBStatusBanner />
       <SecurityAlertBanner />
