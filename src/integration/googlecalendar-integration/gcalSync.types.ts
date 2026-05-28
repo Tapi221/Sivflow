@@ -2,6 +2,7 @@ import type { Auth } from "firebase/auth";
 
 export type GoogleCalendarEvent = {
   id: string;
+  accountId?: string;
   calendarId: string;
   projectId?: string;
   title: string;
