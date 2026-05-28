@@ -16,6 +16,24 @@ export type BuildCalendarEventSyncRangeOptions = {
   yearRenderedRange?: CalendarDateRange | null;
 };
 
+const buildMiniCalendarMonthRange = (monthTitleDate: Date): CalendarEventSyncRange => {
+  const gridStart = startOfWeek(startOfMonth(monthTitleDate), { weekStartsOn: 0 });
+  const gridEnd = endOfWeek(endOfMonth(monthTitleDate), { weekStartsOn: 0 });
+
+  return {
+    rangeStart: startOfDay(gridStart),
+    rangeEnd: endOfDay(gridEnd),
+  };
+};
+
+const mergeCalendarEventSyncRanges = (
+  left: CalendarEventSyncRange,
+  right: CalendarEventSyncRange,
+): CalendarEventSyncRange => ({
+  rangeStart: new Date(Math.min(left.rangeStart.getTime(), right.rangeStart.getTime())),
+  rangeEnd: new Date(Math.max(left.rangeEnd.getTime(), right.rangeEnd.getTime())),
+});
+
 export const buildCalendarEventSyncRange = ({
   selectedViewMode,
   visibleDays,
@@ -73,9 +91,13 @@ export const buildCalendarEventSyncRange = ({
   const firstVisibleDay = new Date(visibleDays[0]?.getTime() ?? fallbackDayTime);
   const lastVisibleDay = new Date(visibleDays.at(-1)?.getTime() ?? fallbackDayTime);
   const bufferDays = selectedViewMode === "week" ? 3 : 2;
-
-  return {
+  const visibleRange = {
     rangeStart: startOfDay(subDays(firstVisibleDay, bufferDays)),
     rangeEnd: endOfDay(addDays(lastVisibleDay, bufferDays)),
   };
+
+  return mergeCalendarEventSyncRanges(
+    visibleRange,
+    buildMiniCalendarMonthRange(monthTitleDate),
+  );
 };
