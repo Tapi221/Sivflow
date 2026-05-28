@@ -1,5 +1,5 @@
-import { getGoogleOAuthCallableErrorReason, isGoogleOAuthDeterministicErrorReason } from "@/integration/googlecalendar-integration/gcal.server-oauth";
-import type { GoogleOAuthCallableErrorReason } from "@/integration/googlecalendar-integration/gcal.server-oauth";
+import { getGoogleOAuthCallableErrorReason, isGoogleOAuthDeterministicErrorReason } from "@/integration/google-integration/google.server-oauth";
+import type { GoogleOAuthCallableErrorReason } from "@/integration/google-integration/google.server-oauth";
 
 export const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
 
