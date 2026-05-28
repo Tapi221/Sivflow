@@ -2,8 +2,8 @@ import { memo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { initialWindowMetrics, SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { ScheduleYearMobileNative } from "@mobile/pane/schedule/schedule.year.mobilenative";
-import { NavigationBarMobile, type NavigationItemId } from "./pane/navigationbar/NavigationBarMobile";
+import { ScheduleYear } from "./pane/schedule/ScheduleYear";
+import { NavigationBar, type NavigationItemId } from "./pane/navigationbar/NavigationBar";
 
 const AppContent = () => {
   const insets = useSafeAreaInsets();
@@ -18,9 +18,9 @@ const AppContent = () => {
         <Text style={styles.title}>Schedule</Text>
       </View>
       <View style={styles.content}>
-        <ScheduleYearMobileNative selectedDate={selectedDate} yearDate={selectedDate} onSelectDate={setSelectedDate} />
+        <ScheduleYear selectedDate={selectedDate} yearDate={selectedDate} onSelectDate={setSelectedDate} />
       </View>
-      <NavigationBarMobile activeItemId={activeItemId} onSelectItem={setActiveItemId} />
+      <NavigationBar activeItemId={activeItemId} onSelectItem={setActiveItemId} />
     </View>
   );
 };
