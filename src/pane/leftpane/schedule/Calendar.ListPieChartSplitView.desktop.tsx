@@ -1,8 +1,9 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type UIEvent } from "react";
-import { addDays, differenceInMinutes, format, getDaysInMonth, isAfter, isBefore, isSameDay, startOfDay, startOfMonth } from "date-fns";
+import { addDays, differenceInMinutes, format, isAfter, isBefore, startOfDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
-import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
+import { areListVirtualRangesEqual, buildListPlacementDays, buildListVirtualMetrics, getEventInstanceKey, getListVirtualRange, getListVisibleDate, LIST_DAY_GAP_PX, LIST_DAY_SECTION_MIN_HEIGHT_PX, LIST_EMPTY_DAY_HEIGHT_PX, type CalendarListPlacementDay, type CalendarListVirtualRange } from "@/chip/eventchip/EventChip.list.placement";
+import { getCalendarDateKey } from "@/features/calendar/calendarEventRange";
 import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -44,13 +45,8 @@ type EventSegmentMeta = {
   labelColor: string;
 };
 
-type CalendarSplitDay = {
-  date: Date;
-  dateKey: string;
-  events: GoogleCalendarEvent[];
+type CalendarSplitDay = CalendarListPlacementDay & {
   slices: DailyPieSlice[];
-  isSelected: boolean;
-  isToday: boolean;
 };
 
 type DailyClockPieProps = {
@@ -61,17 +57,6 @@ type CalendarSplitDaySectionProps = {
   day: CalendarSplitDay;
   height: number;
   onSelectDate?: (date: Date) => void;
-};
-
-type CalendarSplitVirtualMetrics = {
-  heights: number[];
-  offsets: number[];
-  totalHeight: number;
-};
-
-type CalendarSplitVirtualRange = {
-  start: number;
-  end: number;
 };
 
 const EMPTY_DAY_LABEL = "予定なし";
@@ -87,27 +72,13 @@ const CHART_LABEL_RADIUS = CHART_RADIUS * 0.58;
 const CHART_CLOCK_LABEL_RADIUS = CHART_RADIUS + 11;
 const CHART_EVENT_BORDER_STROKE_WIDTH = 3;
 const CLOCK_HOURS = [0, 3, 6, 9, 12, 15, 18, 21];
-const SPLIT_DAY_SECTION_MIN_HEIGHT_PX = 430;
-const SPLIT_CHART_CONTAINER_MAX_SIZE_PX = SPLIT_DAY_SECTION_MIN_HEIGHT_PX - 30;
-const SPLIT_DAY_GAP_PX = 8;
-const SPLIT_LIST_EMPTY_DAY_HEIGHT_PX = 38;
-const SPLIT_LIST_EVENT_ROW_HEIGHT_PX = 58;
-const SPLIT_LIST_EVENT_ROW_GAP_PX = 6;
+const SPLIT_CHART_CONTAINER_MAX_SIZE_PX = LIST_DAY_SECTION_MIN_HEIGHT_PX - 30;
 const SPLIT_SCROLL_EDGE_THRESHOLD_PX = 220;
 const SPLIT_SCROLL_EDGE_RESET_PX = 520;
 const SPLIT_SCROLL_IDLE_DELAY_MS = 120;
 const SPLIT_VISIBLE_DATE_ANCHOR_PX = 160;
-const SPLIT_VIRTUAL_OVERSCAN_PX = 2400;
 const SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX = 8;
 const CHART_CONTAINER_STYLE = { width: `min(100%, 72vh, ${SPLIT_CHART_CONTAINER_MAX_SIZE_PX}px)` };
-
-const buildMonthDays = (date: Date): Date[] => {
-  const monthStart = startOfMonth(date);
-
-  return Array.from({ length: getDaysInMonth(monthStart) }, (_, index) =>
-    addDays(monthStart, index),
-  );
-};
 
 const formatDuration = (minutes: number): string => {
   const normalizedMinutes = Math.max(0, Math.round(minutes));
@@ -304,13 +275,6 @@ const buildDailyPieSlices = (
   }));
 };
 
-const getEventInstanceKey = (dateKey: string, event: GoogleCalendarEvent): string => {
-  const startsAt = new Date(event.startsAt).getTime();
-  const endsAt = new Date(event.endsAt).getTime();
-
-  return `${dateKey}:${event.id}:${startsAt}:${endsAt}`;
-};
-
 const buildSplitDays = (
   days: Date[],
   events: GoogleCalendarEvent[],
@@ -318,134 +282,17 @@ const buildSplitDays = (
   appProjects: AppCalendarItem[],
   googleAccounts: GoogleAccountDisplay[],
 ): CalendarSplitDay[] => {
-  const resolvedDays = days.length > 0 ? days : buildMonthDays(selectedDate);
-  const today = new Date();
-  const eventsByDay = new Map<string, GoogleCalendarEvent[]>();
-  const dayByKey = new Map<string, Date>();
   const calendarLabelById = createCalendarLabelMap(googleAccounts);
-
-  resolvedDays.forEach((day) => {
-    const dayKey = getCalendarDateKey(day);
-
-    dayByKey.set(dayKey, day);
-    eventsByDay.set(dayKey, []);
+  const listDays = buildListPlacementDays({
+    days,
+    events,
+    selectedDate,
   });
 
-  events.forEach((event) => {
-    getEventDateKeys(event).forEach((dayKey) => {
-      const day = dayByKey.get(dayKey);
-      const dayEvents = eventsByDay.get(dayKey);
-
-      if (!day || !dayEvents) return;
-
-      if (event.isAllDay) {
-        dayEvents.push(event);
-        return;
-      }
-
-      const clippedEvent = clipEventToDay(event, day);
-      if (clippedEvent) {
-        dayEvents.push(clippedEvent);
-      }
-    });
-  });
-
-  return resolvedDays.map((date) => {
-    const dateKey = getCalendarDateKey(date);
-    const dayEvents = eventsByDay.get(dateKey) ?? [];
-
-    dayEvents.sort(compareCalendarEvents);
-
-    return {
-      date,
-      dateKey,
-      events: dayEvents,
-      slices: buildDailyPieSlices(date, events, appProjects, calendarLabelById),
-      isSelected: isSameDay(date, selectedDate),
-      isToday: isSameDay(date, today),
-    };
-  });
-};
-
-const getListDayEstimatedHeight = (day: CalendarSplitDay): number => {
-  if (day.events.length === 0) return SPLIT_LIST_EMPTY_DAY_HEIGHT_PX;
-
-  return day.events.length * SPLIT_LIST_EVENT_ROW_HEIGHT_PX + Math.max(0, day.events.length - 1) * SPLIT_LIST_EVENT_ROW_GAP_PX;
-};
-
-const getSplitDayHeight = (day: CalendarSplitDay): number => Math.max(getListDayEstimatedHeight(day), SPLIT_DAY_SECTION_MIN_HEIGHT_PX);
-
-const buildVirtualMetrics = (days: CalendarSplitDay[]): CalendarSplitVirtualMetrics => {
-  let totalHeight = 0;
-  const offsets: number[] = [];
-  const heights = days.map((day, index) => {
-    const height = getSplitDayHeight(day) + (index < days.length - 1 ? SPLIT_DAY_GAP_PX : 0);
-
-    offsets.push(totalHeight);
-    totalHeight += height;
-
-    return height;
-  });
-
-  return { heights, offsets, totalHeight };
-};
-
-const findVirtualIndex = (offsets: number[], targetOffset: number): number => {
-  if (offsets.length === 0) return 0;
-
-  let low = 0;
-  let high = offsets.length - 1;
-  let result = 0;
-
-  while (low <= high) {
-    const middle = Math.floor((low + high) / 2);
-
-    if (offsets[middle] <= targetOffset) {
-      result = middle;
-      low = middle + 1;
-    } else {
-      high = middle - 1;
-    }
-  }
-
-  return result;
-};
-
-const getVirtualRange = (
-  metrics: CalendarSplitVirtualMetrics,
-  scrollTop: number,
-  viewportHeight: number,
-): CalendarSplitVirtualRange => {
-  if (metrics.heights.length === 0) return { start: 0, end: 0 };
-
-  const rangeStartOffset = Math.max(0, scrollTop - SPLIT_VIRTUAL_OVERSCAN_PX);
-  const rangeEndOffset = scrollTop + viewportHeight + SPLIT_VIRTUAL_OVERSCAN_PX;
-  const start = findVirtualIndex(metrics.offsets, rangeStartOffset);
-  let end = start;
-
-  while (end < metrics.heights.length && metrics.offsets[end] < rangeEndOffset) {
-    end += 1;
-  }
-
-  return {
-    start,
-    end: Math.min(metrics.heights.length, end + 1),
-  };
-};
-
-const areVirtualRangesEqual = (
-  left: CalendarSplitVirtualRange,
-  right: CalendarSplitVirtualRange,
-): boolean => left.start === right.start && left.end === right.end;
-
-const getVisibleDate = (
-  days: CalendarSplitDay[],
-  metrics: CalendarSplitVirtualMetrics,
-  targetOffset: number,
-): Date | null => {
-  const index = findVirtualIndex(metrics.offsets, targetOffset);
-
-  return days[index]?.date ?? null;
+  return listDays.map((day) => ({
+    ...day,
+    slices: buildDailyPieSlices(day.date, events, appProjects, calendarLabelById),
+  }));
 };
 
 const truncateChartLabel = (label: string) => {
@@ -455,7 +302,7 @@ const truncateChartLabel = (label: string) => {
 };
 
 const EmptyDayCard = ({ isMonthEmpty }: { isMonthEmpty: boolean }) => (
-  <div className="grid h-[38px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch">
+  <div className="grid grid-cols-[54px_26px_minmax(0,1fr)] items-stretch" style={{ height: LIST_EMPTY_DAY_HEIGHT_PX }}>
     <div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[#b3b3b3]">
       —
     </div>
@@ -637,12 +484,12 @@ const CalendarListPieChartSplitViewComponent = ({
   const edgeExtendTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingScrollElementRef = useRef<HTMLDivElement | null>(null);
   const pendingEdgeDirectionRef = useRef<"start" | "end" | null>(null);
-  const [virtualRange, setVirtualRange] = useState<CalendarSplitVirtualRange>({ start: 0, end: 0 });
+  const [virtualRange, setVirtualRange] = useState<CalendarListVirtualRange>({ start: 0, end: 0 });
   const splitDays = useMemo(
     () => buildSplitDays(days, events, selectedDate, appProjects, googleAccounts),
     [appProjects, days, events, googleAccounts, selectedDate],
   );
-  const virtualMetrics = useMemo(() => buildVirtualMetrics(splitDays), [splitDays]);
+  const virtualMetrics = useMemo(() => buildListVirtualMetrics(splitDays), [splitDays]);
   const isMonthEmpty = splitDays.every((day) => day.events.length === 0);
   const firstDayKey = splitDays[0]?.dateKey ?? null;
   const lastDayKey = splitDays.at(-1)?.dateKey ?? null;
@@ -652,17 +499,17 @@ const CalendarListPieChartSplitViewComponent = ({
 
   const updateVirtualRange = useCallback((scrollElement: HTMLDivElement | null) => {
     const nextRange = scrollElement
-      ? getVirtualRange(virtualMetrics, scrollElement.scrollTop, scrollElement.clientHeight)
-      : getVirtualRange(virtualMetrics, 0, 0);
+      ? getListVirtualRange(virtualMetrics, scrollElement.scrollTop, scrollElement.clientHeight)
+      : getListVirtualRange(virtualMetrics, 0, 0);
 
-    setVirtualRange((currentRange) => areVirtualRangesEqual(currentRange, nextRange) ? currentRange : nextRange);
+    setVirtualRange((currentRange) => areListVirtualRangesEqual(currentRange, nextRange) ? currentRange : nextRange);
   }, [virtualMetrics]);
 
   const updateVisibleDate = useCallback((scrollElement: HTMLDivElement | null) => {
     if (!scrollElement) return;
 
     const anchorOffset = scrollElement.scrollTop + Math.min(SPLIT_VISIBLE_DATE_ANCHOR_PX, scrollElement.clientHeight / 2);
-    const visibleDate = getVisibleDate(splitDays, virtualMetrics, anchorOffset);
+    const visibleDate = getListVisibleDate(splitDays, virtualMetrics, anchorOffset);
     if (!visibleDate) return;
 
     const visibleDateKey = getCalendarDateKey(visibleDate);
@@ -802,7 +649,7 @@ const CalendarListPieChartSplitViewComponent = ({
         <div className="relative w-full" style={{ height: virtualMetrics.totalHeight }}>
           {renderedDays.map((day, index) => {
             const dayIndex = virtualRange.start + index;
-            const sectionHeight = Math.max(0, virtualMetrics.heights[dayIndex] - (dayIndex < splitDays.length - 1 ? SPLIT_DAY_GAP_PX : 0));
+            const sectionHeight = Math.max(0, virtualMetrics.heights[dayIndex] - (dayIndex < splitDays.length - 1 ? LIST_DAY_GAP_PX : 0));
 
             return (
               <div
