@@ -8,6 +8,7 @@ type CalendarDayNumberCircleProps = {
   isCurrentMonth?: boolean;
   className?: string;
   style?: CSSProperties;
+  allowsCustomBackground?: boolean;
 };
 
 const CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME =
@@ -22,7 +23,7 @@ const getCalendarDayNumberCircleClassName = ({
   isSelected = false,
   isCurrentMonth = true,
   className,
-}: Omit<CalendarDayNumberCircleProps, "children" | "style">) =>
+}: Omit<CalendarDayNumberCircleProps, "children" | "style" | "allowsCustomBackground">) =>
   cn(
     CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME,
     isSelected
@@ -37,8 +38,10 @@ const getCalendarDayNumberCircleClassName = ({
 
 const getCalendarDayNumberCircleStyle = (
   style?: CSSProperties,
+  allowsCustomBackground = false,
 ): CSSProperties | undefined => {
   if (!style) return undefined;
+  if (allowsCustomBackground) return style;
 
   const circleStyle = { ...style };
   delete circleStyle.backgroundColor;
@@ -53,6 +56,7 @@ const CalendarDayNumberCircle = ({
   isCurrentMonth = true,
   className,
   style,
+  allowsCustomBackground = false,
 }: CalendarDayNumberCircleProps) => {
   return (
     <span
@@ -62,7 +66,7 @@ const CalendarDayNumberCircle = ({
         isCurrentMonth,
         className,
       })}
-      style={getCalendarDayNumberCircleStyle(style)}
+      style={getCalendarDayNumberCircleStyle(style, allowsCustomBackground)}
     >
       {children}
     </span>
