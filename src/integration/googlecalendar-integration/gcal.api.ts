@@ -85,12 +85,14 @@ export const fetchCalendarList = async (
 
 export const fetchEventsForCalendar = async ({
   accessToken,
+  accountId,
   calendarId,
   accentColor,
   rangeStart,
   rangeEnd,
 }: {
   accessToken: string;
+  accountId?: string;
   calendarId: string;
   accentColor: string;
   rangeStart: Date;
@@ -133,7 +135,8 @@ export const fetchEventsForCalendar = async ({
       if (!startsAt || !endsAt) return null;
 
       return {
-        id: `${calendarId}:${event.id}`,
+        id: accountId ? `${accountId}:${calendarId}:${event.id}` : `${calendarId}:${event.id}`,
+        accountId,
         calendarId,
         accentColor,
         title: event.summary || "(No title)",
