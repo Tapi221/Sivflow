@@ -2,10 +2,10 @@ import type { CSSProperties } from "react";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
-import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.weekday.placement";
-import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
+import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
+import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
+import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.weekday.placement";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
@@ -29,6 +29,11 @@ type WeekdayDayEvents = {
 type WeekdayVirtualDayRange = {
   start: number;
   end: number;
+};
+
+type WeekdayRenderedDayEntry = {
+  day: Date;
+  dayIndex: number;
 };
 
 type CurrentTimeLabelProps = {
@@ -87,8 +92,6 @@ const createMinuteLabel = (totalMinutes: number) => {
   return `${String(hour).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 };
 
-const getHourBoundaryLabelOffsetClass = (_hour: number) => "-translate-y-1/2";
-
 const getEventDurationMinutes = (event: GoogleCalendarEvent): number => {
   const start = new Date(event.startsAt).getTime();
   const end = new Date(event.endsAt).getTime();
@@ -99,19 +102,15 @@ const getEventDurationMinutes = (event: GoogleCalendarEvent): number => {
 
 const getVisualDurationMinutes = (durationMinutes: number) => Math.max(durationMinutes, C.MIN_LAYOUT_MINUTES);
 
-const calculateEventPositionStyle = (
-  event: GoogleCalendarEvent,
-): CalendarEventPositionStyle => {
+const calculateEventPositionStyle = (event: GoogleCalendarEvent): CalendarEventPositionStyle => {
   const startsAt = new Date(event.startsAt);
-  const startHour =
-    startsAt.getHours() + startsAt.getMinutes() / GRID.WEEKDAY_MINUTES_PER_HOUR;
+  const startHour = startsAt.getHours() + startsAt.getMinutes() / GRID.WEEKDAY_MINUTES_PER_HOUR;
   const durationMinutes = getEventDurationMinutes(event);
   const visualDurationMinutes = getVisualDurationMinutes(durationMinutes);
 
   return {
     [GRID.WEEKDAY_CSS_VAR_EVENT_START_HOUR]: Math.max(0, startHour),
-    [GRID.WEEKDAY_CSS_VAR_EVENT_DURATION_HOURS]:
-      visualDurationMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR,
+    [GRID.WEEKDAY_CSS_VAR_EVENT_DURATION_HOURS]: visualDurationMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR,
     top: `calc(var(${GRID.WEEKDAY_CSS_VAR_EVENT_START_HOUR}) * var(--calendar-hour-row-height))`,
     height: `max(1px, calc(var(${GRID.WEEKDAY_CSS_VAR_EVENT_DURATION_HOURS}) * var(--calendar-hour-row-height) - 2px))`,
   } as CalendarEventPositionStyle;
@@ -123,31 +122,7 @@ const areSameVisibleDays = (previous: Date[], next: Date[]) => {
   return previous.every((day, index) => day.getTime() === next[index]?.getTime());
 };
 
-const isSelectionEquivalentForVisibleDays = (
-  previousSelectedDate: Date,
-  nextSelectedDate: Date,
-  previousVisibleDays: Date[],
-  nextVisibleDays: Date[],
-) => {
-  const previousSelectedKey = getCalendarDateKey(previousSelectedDate);
-  const nextSelectedKey = getCalendarDateKey(nextSelectedDate);
-
-  if (previousSelectedKey === nextSelectedKey) return true;
-
-  const previousSelectionWasVisible = previousVisibleDays.some(
-    (day) => getCalendarDateKey(day) === previousSelectedKey,
-  );
-  const nextSelectionIsVisible = nextVisibleDays.some(
-    (day) => getCalendarDateKey(day) === nextSelectedKey,
-  );
-
-  return !previousSelectionWasVisible && !nextSelectionIsVisible;
-};
-
-const areCalendarWeekDayGridPropsEqual = (
-  previous: CalendarWeekDayGridProps,
-  next: CalendarWeekDayGridProps,
-) => {
+const areCalendarWeekDayGridPropsEqual = (previous: CalendarWeekDayGridProps, next: CalendarWeekDayGridProps) => {
   return (
     previous.scrollContainerRef === next.scrollContainerRef &&
     previous.virtualRail === next.virtualRail &&
@@ -156,13 +131,8 @@ const areCalendarWeekDayGridPropsEqual = (
     previous.calendarGridStyle === next.calendarGridStyle &&
     previous.onScroll === next.onScroll &&
     previous.onSelectDate === next.onSelectDate &&
-    areSameVisibleDays(previous.visibleDays, next.visibleDays) &&
-    isSelectionEquivalentForVisibleDays(
-      previous.selectedDate,
-      next.selectedDate,
-      previous.visibleDays,
-      next.visibleDays,
-    )
+    previous.selectedDate.getTime() === next.selectedDate.getTime() &&
+    areSameVisibleDays(previous.visibleDays, next.visibleDays)
   );
 };
 
@@ -170,11 +140,7 @@ const AllDayEventChip = ({ event }: { event: GoogleCalendarEvent }) => {
   const tokens = generateColorTokens(event.accentColor);
 
   return (
-    <div
-      className={cn(eventChipAllDayClass, "truncate")}
-      style={{ background: tokens.bg, color: tokens.text }}
-      title={event.title || "Untitled"}
-    >
+    <div className={cn(eventChipAllDayClass, "truncate")} style={{ background: tokens.bg, color: tokens.text }} title={event.title || "Untitled"}>
       {event.title || "Untitled"}
     </div>
   );
@@ -191,12 +157,7 @@ const useCurrentTimeMinutes = (): number => {
 
   useEffect(() => {
     const now = new Date();
-
-    const msUntilNextMinute =
-      (GRID.WEEKDAY_SECONDS_PER_MINUTE - now.getSeconds()) *
-        GRID.WEEKDAY_MS_PER_SECOND -
-      now.getMilliseconds();
-
+    const msUntilNextMinute = (GRID.WEEKDAY_SECONDS_PER_MINUTE - now.getSeconds()) * GRID.WEEKDAY_MS_PER_SECOND - now.getMilliseconds();
     let intervalId: number | null = null;
 
     const timeoutId = window.setTimeout(() => {
@@ -221,42 +182,32 @@ const useCurrentTimeMinutes = (): number => {
 
 const CurrentTimeLabel = ({ currentMinutes }: CurrentTimeLabelProps) => {
   return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 z-30 flex h-6 -translate-y-1/2 select-none items-center justify-end bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,white_32%,white_68%,rgba(255,255,255,0)_100%)] pr-2 text-[12px] font-semibold leading-none tabular-nums text-[#3f7fc5]"
-      style={{
-        top: `calc(${currentMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(--calendar-hour-row-height))`,
-      }}
-    >
+    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 z-30 flex h-6 -translate-y-1/2 select-none items-center justify-end bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,white_32%,white_68%,rgba(255,255,255,0)_100%)] pr-2 text-[12px] font-semibold leading-none tabular-nums text-[#3f7fc5]" style={{ top: `calc(${currentMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(--calendar-hour-row-height))` }}>
       {createMinuteLabel(currentMinutes)}
     </div>
   );
 };
 
-const CurrentTimeIndicator = ({
-  isToday,
-  currentMinutes,
-}: CurrentTimeIndicatorProps) => {
+const CurrentTimeIndicator = ({ isToday, currentMinutes }: CurrentTimeIndicatorProps) => {
   return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 z-10"
-      style={{
-        top: `calc(${currentMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(--calendar-hour-row-height))`,
-      }}
-    >
-      <div
-        style={{
-          height: GRID.WEEKDAY_CURRENT_TIME_INDICATOR_HEIGHT,
-          background: isToday ? COLOR.WEEKDAY_COLOR_PRIMARY : "transparent",
-          borderTop: isToday
-            ? "none"
-            : `${GRID.WEEKDAY_CURRENT_TIME_INDICATOR_HEIGHT}px ${GRID.WEEKDAY_CURRENT_TIME_DASHED_STYLE} ${COLOR.WEEKDAY_COLOR_PRIMARY_SOFT}`,
-        }}
-      />
+    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 z-10" style={{ top: `calc(${currentMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(--calendar-hour-row-height))` }}>
+      <div style={{ height: GRID.WEEKDAY_CURRENT_TIME_INDICATOR_HEIGHT, background: isToday ? COLOR.WEEKDAY_COLOR_PRIMARY : "transparent", borderTop: isToday ? "none" : `${GRID.WEEKDAY_CURRENT_TIME_INDICATOR_HEIGHT}px ${GRID.WEEKDAY_CURRENT_TIME_DASHED_STYLE} ${COLOR.WEEKDAY_COLOR_PRIMARY_SOFT}` }} />
     </div>
   );
 };
+
+const getVirtualRange = (scrollLeft: number, clientWidth: number, columnWidth: number, totalDayCount: number): WeekdayVirtualDayRange => {
+  const scrollableLeft = Math.max(0, scrollLeft - C.TIME_COLUMN_WIDTH);
+  const visibleRight = Math.max(0, scrollLeft + clientWidth - C.TIME_COLUMN_WIDTH);
+  const start = Math.max(0, Math.floor(scrollableLeft / columnWidth) - HORIZONTAL_DAY_OVERSCAN);
+  const end = Math.min(totalDayCount, Math.ceil(visibleRight / columnWidth) + HORIZONTAL_DAY_OVERSCAN);
+
+  return { start, end: Math.max(start, end) };
+};
+
+const areVirtualRangesEqual = (previous: WeekdayVirtualDayRange, next: WeekdayVirtualDayRange) => previous.start === next.start && previous.end === next.end;
+
+const buildFallbackRenderedEntries = (visibleDays: Date[]): WeekdayRenderedDayEntry[] => visibleDays.map((day, dayIndex) => ({ day, dayIndex }));
 
 const CalendarWeekDayGridComponent = ({
   headerScrollRef: _headerScrollRef,
@@ -274,36 +225,20 @@ const CalendarWeekDayGridComponent = ({
   const today = new Date();
   const currentMinutes = useCurrentTimeMinutes();
   const totalDayCount = virtualRail?.totalDayCount ?? visibleDays.length;
-  const [virtualDayRange, setVirtualDayRange] = useState<WeekdayVirtualDayRange>(() => ({
-    start: 0,
-    end: Math.min(totalDayCount, visibleDays.length),
-  }));
+  const [virtualDayRange, setVirtualDayRange] = useState<WeekdayVirtualDayRange>(() => ({ start: 0, end: Math.min(totalDayCount, Math.max(1, visibleDays.length)) }));
 
   const updateVirtualDayRange = useCallback(() => {
     const scroller = scrollContainerRef.current;
 
     if (!scroller || _calendarDayColumnWidth <= 0 || totalDayCount === 0) {
-      setVirtualDayRange({ start: 0, end: Math.min(totalDayCount, visibleDays.length) });
+      setVirtualDayRange({ start: 0, end: totalDayCount });
       return;
     }
 
-    const scrollableLeft = Math.max(0, scroller.scrollLeft - C.TIME_COLUMN_WIDTH);
-    const visibleRight = Math.max(0, scroller.scrollLeft + scroller.clientWidth - C.TIME_COLUMN_WIDTH);
-    const start = Math.max(
-      0,
-      Math.floor(scrollableLeft / _calendarDayColumnWidth) - HORIZONTAL_DAY_OVERSCAN,
-    );
-    const end = Math.min(
-      totalDayCount,
-      Math.ceil(visibleRight / _calendarDayColumnWidth) + HORIZONTAL_DAY_OVERSCAN,
-    );
+    const nextRange = getVirtualRange(scroller.scrollLeft, scroller.clientWidth, _calendarDayColumnWidth, totalDayCount);
 
-    setVirtualDayRange((previous) =>
-      previous.start === start && previous.end === end
-        ? previous
-        : { start, end },
-    );
-  }, [_calendarDayColumnWidth, scrollContainerRef, totalDayCount, visibleDays.length]);
+    setVirtualDayRange((previous) => areVirtualRangesEqual(previous, nextRange) ? previous : nextRange);
+  }, [_calendarDayColumnWidth, scrollContainerRef, totalDayCount]);
 
   useLayoutEffect(() => {
     updateVirtualDayRange();
@@ -337,32 +272,34 @@ const CalendarWeekDayGridComponent = ({
     };
   }, [scrollContainerRef, updateVirtualDayRange]);
 
-  const renderedDayEntries = useMemo(
-    () => {
-      const days = virtualRail
-        ? buildScheduleVirtualRailDays(virtualRail, virtualDayRange.start, virtualDayRange.end)
-        : visibleDays.slice(virtualDayRange.start, virtualDayRange.end);
+  const renderedDayEntries = useMemo<WeekdayRenderedDayEntry[]>(() => {
+    if (!virtualRail) return buildFallbackRenderedEntries(visibleDays);
 
-      return days.map((day, offset) => ({
-        day,
-        dayIndex: virtualDayRange.start + offset,
-      }));
-    },
-    [virtualDayRange.end, virtualDayRange.start, virtualRail, visibleDays],
-  );
+    return buildScheduleVirtualRailDays(virtualRail, virtualDayRange.start, virtualDayRange.end).map((day, offset) => ({
+      day,
+      dayIndex: virtualDayRange.start + offset,
+    }));
+  }, [virtualDayRange.end, virtualDayRange.start, virtualRail, visibleDays]);
 
-  const isTodayVisible = renderedDayEntries.some(({ day }) => isSameDay(day, today));
-  const todayColumnIndex = renderedDayEntries.find((entry) => isSameDay(entry.day, today))?.dayIndex ?? -1;
+  const selectedDayKey = getCalendarDateKey(selectedDate);
+  const todayDayKey = getCalendarDateKey(today);
+  const isTodayVisible = renderedDayEntries.some(({ day }) => getCalendarDateKey(day) === todayDayKey);
+  const gridStyle = useMemo(() => {
+    if (!virtualRail) return calendarGridStyle;
+
+    return {
+      ...calendarGridStyle,
+      gridTemplateColumns: `${C.TIME_COLUMN_WIDTH}px repeat(${virtualRail.totalDayCount}, ${_calendarDayColumnWidth}px)`,
+      minWidth: `${C.TIME_COLUMN_WIDTH + virtualRail.totalDayCount * _calendarDayColumnWidth}px`,
+    };
+  }, [_calendarDayColumnWidth, calendarGridStyle, virtualRail]);
 
   const eventsByDay = useMemo(() => {
     const map = new Map<string, WeekdayDayEvents>();
     const visibleDayByKey = new Map(
       renderedDayEntries.map(({ day }) => {
         const key = getCalendarDateKey(day);
-        map.set(key, {
-          allDayEvents: [],
-          timedEvents: [],
-        });
+        map.set(key, { allDayEvents: [], timedEvents: [] });
 
         return [key, day] as const;
       }),
@@ -397,75 +334,39 @@ const CalendarWeekDayGridComponent = ({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-      <div
-        ref={scrollContainerRef}
-        className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
-        onScroll={onScroll}
-      >
-        <div className="grid bg-white" style={calendarGridStyle}>
-          <div
-            className="z-[60] h-10 border-b border-[#eeeeee] bg-white"
-            style={WEEKDAY_HEADER_CORNER_STYLE}
-          />
+      <div ref={scrollContainerRef} className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden" onScroll={onScroll}>
+        <div className="grid bg-white" style={gridStyle}>
+          <div className="z-[60] h-10 border-b border-[#eeeeee] bg-white" style={WEEKDAY_HEADER_CORNER_STYLE} />
 
           {renderedDayEntries.map(({ day, dayIndex }) => {
-            const isDayToday = isSameDay(day, today);
-            const isDaySelected =
-              !!selectedDate && isSameDay(day, selectedDate);
+            const dayKey = getCalendarDateKey(day);
+            const isDayToday = dayKey === todayDayKey;
+            const isDaySelected = dayKey === selectedDayKey;
 
             return (
-              <div
-                key={`weekday-header-${day.toISOString()}`}
-                className="sticky top-0 z-50 border-b border-[#eeeeee] bg-white"
-                style={{ gridColumn: dayIndex + 2, gridRow: 1 }}
-              >
-                <CalendarDateButton
-                  isToday={isDayToday}
-                  isSelected={isDaySelected}
-                  onClick={() => onSelectDate?.(day)}
-                  className="w-full"
-                >
-                  <CalendarDateContent
-                    dateLabel={format(day, GRID.WEEKDAY_DATE_FORMAT)}
-                    weekdayLabel={format(day, GRID.WEEKDAY_DAY_FORMAT, {
-                      locale: ja,
-                    })}
-                    isToday={isDayToday}
-                    isSelected={isDaySelected}
-                    layout="weekday-date"
-                  />
+              <div key={`weekday-header-${dayKey}`} className="sticky top-0 z-50 border-b border-[#eeeeee] bg-white" style={{ gridColumn: dayIndex + 2, gridRow: 1 }}>
+                <CalendarDateButton isToday={isDayToday} isSelected={isDaySelected} onClick={() => onSelectDate?.(day)} className="w-full">
+                  <CalendarDateContent dateLabel={format(day, GRID.WEEKDAY_DATE_FORMAT)} weekdayLabel={format(day, GRID.WEEKDAY_DAY_FORMAT, { locale: ja })} isToday={isDayToday} isSelected={isDaySelected} layout="weekday-date" />
                 </CalendarDateButton>
               </div>
             );
           })}
 
-          <div
-            className="z-[60] flex min-h-7 justify-end border-b border-r border-t border-[#eeeeee] bg-white pr-2 pt-1 text-[10px] font-medium text-[rgba(60,60,67,0.45)]"
-            style={WEEKDAY_ALL_DAY_LABEL_STYLE}
-          >
+          <div className="z-[60] flex min-h-7 justify-end border-b border-r border-t border-[#eeeeee] bg-white pr-2 pt-1 text-[10px] font-medium text-[rgba(60,60,67,0.45)]" style={WEEKDAY_ALL_DAY_LABEL_STYLE}>
             終日
           </div>
 
           {renderedDayEntries.map(({ day, dayIndex }) => {
-            const dayEvents =
-              eventsByDay.get(getCalendarDateKey(day)) ?? EMPTY_WEEKDAY_DAY_EVENTS;
+            const dayKey = getCalendarDateKey(day);
+            const dayEvents = eventsByDay.get(dayKey) ?? EMPTY_WEEKDAY_DAY_EVENTS;
             const events = dayEvents.allDayEvents;
             const visibleChips = events.slice(0, MAX_ALL_DAY_VISIBLE_CHIPS);
             const overflowCount = events.length - visibleChips.length;
 
             return (
-              <div
-                key={`weekday-all-day-${day.toISOString()}`}
-                className={cn(
-                  "sticky top-10 z-40 min-h-7 border-b border-r border-t border-[#eeeeee] bg-white px-1 py-1",
-                  dayIndex === totalDayCount - 1 && "border-r-0",
-                )}
-                style={{ gridColumn: dayIndex + 2, gridRow: 2 }}
-              >
+              <div key={`weekday-all-day-${dayKey}`} className={cn("sticky top-10 z-40 min-h-7 border-b border-r border-t border-[#eeeeee] bg-white px-1 py-1", dayIndex === totalDayCount - 1 && "border-r-0")} style={{ gridColumn: dayIndex + 2, gridRow: 2 }}>
                 <div className="flex flex-col gap-1">
-                  {visibleChips.map((event) => (
-                    <AllDayEventChip key={event.id} event={event} />
-                  ))}
+                  {visibleChips.map((event) => <AllDayEventChip key={event.id} event={event} />)}
 
                   {overflowCount > 0 ? (
                     <div className="text-[11px] font-medium text-[#8f929c]">
@@ -477,35 +378,12 @@ const CalendarWeekDayGridComponent = ({
             );
           })}
 
-          <div
-            className="z-30 overflow-visible border-r border-[#eeeeee] bg-white shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]"
-            style={WEEKDAY_TIME_COLUMN_STYLE}
-          >
-            {HOURS.map((hour) => (
-              <div
-                key={hour}
-                className="bg-white"
-                style={{ height: "var(--calendar-hour-row-height)" }}
-              />
-            ))}
-
-            <div
-              aria-hidden="true"
-              className="bg-white"
-              style={{ height: BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT }}
-            />
+          <div className="z-30 overflow-visible border-r border-[#eeeeee] bg-white shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]" style={WEEKDAY_TIME_COLUMN_STYLE}>
+            {HOURS.map((hour) => <div key={hour} className="bg-white" style={{ height: "var(--calendar-hour-row-height)" }} />)}
+            <div aria-hidden="true" className="bg-white" style={{ height: BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT }} />
 
             {HOUR_BOUNDARY_LABELS.map((hour) => (
-              <span
-                key={`weekday-hour-label-${hour}`}
-                className={cn(
-                  "pointer-events-none absolute inset-x-0 z-20 flex h-6 select-none items-center justify-end rounded-md bg-white px-1 text-[12px] font-medium tabular-nums text-[#8f929c]",
-                  getHourBoundaryLabelOffsetClass(hour),
-                )}
-                style={{
-                  top: `calc(${hour} * var(--calendar-hour-row-height))`,
-                }}
-              >
+              <span key={`weekday-hour-label-${hour}`} className="pointer-events-none absolute inset-x-0 z-20 flex h-6 -translate-y-1/2 select-none items-center justify-end rounded-md bg-white px-1 text-[12px] font-medium tabular-nums text-[#8f929c]" style={{ top: `calc(${hour} * var(--calendar-hour-row-height))` }}>
                 {createHourLabel(hour)}
               </span>
             ))}
@@ -514,71 +392,24 @@ const CalendarWeekDayGridComponent = ({
           </div>
 
           {renderedDayEntries.map(({ day, dayIndex }) => {
-            const isDayToday = isSameDay(day, today);
-            const dayEvents =
-              eventsByDay.get(getCalendarDateKey(day)) ?? EMPTY_WEEKDAY_DAY_EVENTS;
+            const dayKey = getCalendarDateKey(day);
+            const isDayToday = dayKey === todayDayKey;
+            const dayEvents = eventsByDay.get(dayKey) ?? EMPTY_WEEKDAY_DAY_EVENTS;
             const eventsForDay = dayEvents.timedEvents;
-
-            const layout = computeEventLayout(
-              eventsForDay.map((event) =>
-                toLayoutEvent(
-                  event.id,
-                  new Date(event.startsAt),
-                  getEventDurationMinutes(event),
-                  C.MIN_LAYOUT_MINUTES,
-                ),
-              ),
-            );
+            const layout = computeEventLayout(eventsForDay.map((event) => toLayoutEvent(event.id, new Date(event.startsAt), getEventDurationMinutes(event), C.MIN_LAYOUT_MINUTES)));
 
             return (
-              <div
-                key={`weekday-body-${day.toISOString()}`}
-                className={cn(
-                  "relative border-r border-[#eeeeee] bg-white",
-                  dayIndex === totalDayCount - 1 && "border-r-0",
-                )}
-                style={{
-                  contain: "layout paint style",
-                  gridColumn: dayIndex + 2,
-                  gridRow: 3,
-                }}
-              >
-                {HOURS.map((hour) => (
-                  <div
-                    key={`${day.toISOString()}-${hour}`}
-                    className="border-b border-[#eeeeee] bg-white"
-                    style={{ height: "var(--calendar-hour-row-height)" }}
-                  />
-                ))}
+              <div key={`weekday-body-${dayKey}`} className={cn("relative border-r border-[#eeeeee] bg-white", dayIndex === totalDayCount - 1 && "border-r-0")} style={{ contain: "layout paint style", gridColumn: dayIndex + 2, gridRow: 3 }}>
+                {HOURS.map((hour) => <div key={`${dayKey}-${hour}`} className="border-b border-[#eeeeee] bg-white" style={{ height: "var(--calendar-hour-row-height)" }} />)}
+                <div aria-hidden="true" className="bg-white" style={{ height: BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT }} />
 
-                <div
-                  aria-hidden="true"
-                  className="bg-white"
-                  style={{ height: BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT }}
-                />
-
-                {(isTodayVisible
-                  ? isDayToday || dayIndex === todayColumnIndex
-                  : true) && (
-                  <CurrentTimeIndicator
-                    isToday={isDayToday}
-                    currentMinutes={currentMinutes}
-                  />
-                )}
+                {(isTodayVisible ? isDayToday : true) && <CurrentTimeIndicator isToday={isDayToday} currentMinutes={currentMinutes} />}
 
                 {eventsForDay.map((event) => {
                   const pos = layout.get(event.id) ?? { left: 0, width: 1 };
 
                   return (
-                    <div
-                      key={event.id}
-                      className="absolute px-[2px]"
-                      style={{
-                        ...calculateEventPositionStyle(event),
-                        left: `${pos.left * 100}%`,
-                        width: `${pos.width * 100}%`,
-                      }}
-                    >
+                    <div key={event.id} className="absolute px-[2px]" style={{ ...calculateEventPositionStyle(event), left: `${pos.left * 100}%`, width: `${pos.width * 100}%` }}>
                       <CalendarEventChipWeekday event={event} />
                     </div>
                   );
