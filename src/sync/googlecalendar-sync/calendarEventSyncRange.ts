@@ -16,6 +16,9 @@ export type BuildCalendarEventSyncRangeOptions = {
   yearRenderedRange?: CalendarDateRange | null;
 };
 
+const LIST_AND_PIE_CHART_SYNC_BUFFER_DAYS = 45;
+const WEEKDAY_SYNC_BUFFER_DAYS = 21;
+
 const buildMiniCalendarMonthRange = (monthTitleDate: Date): CalendarEventSyncRange => {
   const gridStart = startOfWeek(startOfMonth(monthTitleDate), { weekStartsOn: 0 });
   const gridEnd = endOfWeek(endOfMonth(monthTitleDate), { weekStartsOn: 0 });
@@ -87,11 +90,32 @@ const buildMonthCalendarEventSyncRange = (
   };
 };
 
+const buildAnchoredCalendarEventSyncRange = (
+  monthTitleDate: Date,
+  bufferDays: number,
+): CalendarEventSyncRange => ({
+  rangeStart: startOfDay(subDays(monthTitleDate, bufferDays)),
+  rangeEnd: endOfDay(addDays(monthTitleDate, bufferDays)),
+});
+
 const buildDefaultCalendarEventSyncRange = (
   selectedViewMode: CalendarViewMode,
   visibleDays: Date[],
   monthTitleDate: Date,
 ): CalendarEventSyncRange => {
+  if (selectedViewMode === "list" || selectedViewMode === "pieChart") {
+    return buildAnchoredCalendarEventSyncRange(monthTitleDate, LIST_AND_PIE_CHART_SYNC_BUFFER_DAYS);
+  }
+
+  if (
+    selectedViewMode === "days" ||
+    selectedViewMode === "threeDays" ||
+    selectedViewMode === "week" ||
+    selectedViewMode === "timetable"
+  ) {
+    return buildAnchoredCalendarEventSyncRange(monthTitleDate, WEEKDAY_SYNC_BUFFER_DAYS);
+  }
+
   const fallbackDayTime = monthTitleDate.getTime();
   const firstVisibleDay = new Date(visibleDays[0]?.getTime() ?? fallbackDayTime);
   const lastVisibleDay = new Date(visibleDays.at(-1)?.getTime() ?? fallbackDayTime);
