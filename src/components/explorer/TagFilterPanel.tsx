@@ -1,5 +1,5 @@
 import { type KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
-import { getTagColorKey, type TagColorKey } from "@/features/tag/tagColor";
+import { getTagColorKey, type TagColorKey } from "@/chip/tag/tagColor";
 import { FilterPanelShell } from "@/components/panel/FilterPanelShell";
 import { PanelEmptyState } from "@/components/panel/PanelEmptyState";
 import { SegmentedControlGroup, type SegmentedOption } from "@/components/panel/SegmentedControlGroup";

@@ -1,5 +1,5 @@
 import { type CSSProperties, type RefObject } from "react";
-import { getTagColorSwatchStyle, type TagColorKey } from "@/features/tag/tagColor";
+import { getTagColorSwatchStyle, type TagColorKey } from "@/chip/tag/tagColor";
 import { cn } from "@/lib/utils";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanelUtils";

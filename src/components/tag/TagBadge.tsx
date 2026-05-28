@@ -1,6 +1,6 @@
 import type { CSSProperties, SVGProps } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getTagColorStyle, type TagColorKey } from "@/features/tag/tagColor";
+import { getTagColorStyle, type TagColorKey } from "@/chip/tag/tagColor";
 import { X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getTagColorKey } from "@/features/tag/tagColor";
+import { getTagColorKey } from "@/chip/tag/tagColor";
 import { TagBadge } from "@/components/tag/TagBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
