@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { AlertCircle, ChevronDown } from "@/ui/icons";
+import { AlertCircle, ChevronDown, X } from "@/ui/icons";
 import type { Notification } from "@/types/notification";
 
 interface ErrorDialogProps {
   notification: Notification;
+  onDismiss?: () => void;
 }
 
 /**
@@ -12,9 +13,9 @@ interface ErrorDialogProps {
  * 特徴:
  * - 明確なアクション必須
  * - 続行不可
- * - 閉じられない
+ * - closeable の場合のみ閉じられる
  */
-export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification }) => {
+export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismiss }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   return (
@@ -30,6 +31,14 @@ export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification }) => {
               {notification.title}
             </h3>
           </div>
+          {notification.closeable && onDismiss ? (
+            <button
+              onClick={onDismiss}
+              className="flex-shrink-0 text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          ) : null}
         </div>
 
         {/* コンテンツ */}
@@ -66,7 +75,9 @@ export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification }) => {
               key={index}
               onClick={() => {
                 action.onClick();
-                // ERROR は閉じられないので、アクション後も残る
+                if (notification.closeable) {
+                  onDismiss?.();
+                }
               }}
               className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
                 action.primary
