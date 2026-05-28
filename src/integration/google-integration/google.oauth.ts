@@ -4,7 +4,8 @@ import { readEmail } from "@/integration/googlecalendar-integration/gcal.storage
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
-const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
+const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
+const GOOGLE_CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
 const GOOGLE_CALENDAR_APP_CREATED_SCOPE = "https://www.googleapis.com/auth/calendar.app.created";
 const GOOGLE_TASKS_SCOPE = "https://www.googleapis.com/auth/tasks";
 const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -14,7 +15,7 @@ const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userin
 const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 const WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 
-export const GOOGLE_CONNECTED_SERVICE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_CALENDAR_APP_CREATED_SCOPE, GOOGLE_TASKS_SCOPE] as const;
+export const GOOGLE_CONNECTED_SERVICE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_CALENDAR_READONLY_SCOPE, GOOGLE_CALENDAR_APP_CREATED_SCOPE, GOOGLE_TASKS_SCOPE] as const;
 export const GOOGLE_SERVER_CODE_REDIRECT_URI = typeof window === "undefined" ? "postmessage" : window.location.origin;
 
 const GOOGLE_SCOPES = GOOGLE_CONNECTED_SERVICE_SCOPES;
@@ -266,48 +267,28 @@ export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<{ cod
   }
 };
 
-export const requestGoogleConnectedServiceServerCode = requestGoogleCalendarServerCode;
-
-const requestWebTokenWithFirebase = async (auth: Auth, silent: boolean): Promise<GoogleCalendarAccess> => {
-  if (silent) throw createGoogleCalendarReconnectRequiredError();
-  const provider = new GoogleAuthProvider();
-  for (const scope of GOOGLE_SCOPES) provider.addScope(scope);
-  provider.setCustomParameters({ include_granted_scopes: "true", prompt: "consent" });
-  const result = await signInWithPopup(auth, provider);
-  const cred = GoogleAuthProvider.credentialFromResult(result);
-  if (!cred?.accessToken) throw new Error("No access token");
-  await validateGrantedGoogleScopes({ accessToken: cred.accessToken, allowTokenInfoFallback: true });
-  return { accessToken: cred.accessToken, accountEmail: result.user.email, accountName: result.user.displayName, accountPhotoUrl: result.user.photoURL };
-};
-
-const requestWebToken = async (auth: Auth, silent: boolean): Promise<GoogleCalendarAccess> => requestWebTokenWithFirebase(auth, silent);
-
 export const requestCalendarAccessToken = async (auth: Auth, silent = false): Promise<GoogleCalendarAccess> => {
-  if (isDesktopLikeRuntime()) {
-    if (silent) throw createGoogleCalendarReconnectRequiredError();
-    return requestDesktopToken();
-  }
-  return requestWebToken(auth, silent);
+  if (isDesktopLikeRuntime()) return requestDesktopToken();
+  const provider = new GoogleAuthProvider();
+  GOOGLE_SCOPES.forEach((scope) => provider.addScope(scope));
+  if (silent) provider.setCustomParameters({ prompt: "none" });
+  const result = await signInWithPopup(auth, provider);
+  const credential = GoogleAuthProvider.credentialFromResult(result);
+  if (!credential?.accessToken) throw createGoogleCalendarReconnectRequiredError();
+  await validateGrantedGoogleScopes({ accessToken: credential.accessToken, scope: undefined, allowTokenInfoFallback: true });
+  const profile = await fetchGoogleUserInfo(credential.accessToken).catch(() => ({ accountEmail: result.user.email, accountName: result.user.displayName, accountPhotoUrl: result.user.photoURL }));
+  return { accessToken: credential.accessToken, ...profile };
 };
 
-export const requestGoogleConnectedServiceAccessToken = requestCalendarAccessToken;
+export const requestConnectedServiceAccessToken = requestCalendarAccessToken;
 
 export const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: string }): Promise<GoogleCalendarAccess> => {
-  if (isDesktopLikeRuntime()) {
-    const clientId = getClientId();
-    const tokens = await oauthBridge.refreshTokens({ clientId, refreshToken });
-    if (!tokens.accessToken) throw new Error("Missing refreshed access token");
-    await validateGrantedGoogleScopes({ accessToken: tokens.accessToken, scope: tokens.scope, allowTokenInfoFallback: false });
-    return { accessToken: tokens.accessToken, refreshToken, ...getGoogleProfileFromIdToken(tokens.idToken) };
-  }
-  const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: getWebClientId(), grant_type: "refresh_token", refresh_token: refreshToken }) });
-  if (!response.ok) throw new Error("Failed to refresh Google token");
-  const json = (await response.json()) as { access_token?: string; expires_in?: number; refresh_token?: string; id_token?: string; scope?: string };
-  if (!json.access_token) throw new Error("Missing refreshed access token");
-  if (json.scope) assertRequiredGoogleScopes(json.scope);
-  return { accessToken: json.access_token, expiresInSeconds: json.expires_in ?? null, refreshToken: json.refresh_token ?? refreshToken, ...getGoogleProfileFromIdToken(json.id_token) };
+  const clientId = getClientId();
+  const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: clientId, refresh_token: refreshToken, grant_type: "refresh_token" }) });
+  const json = (await response.json()) as { access_token?: string; expires_in?: number; refresh_token?: string; scope?: string; id_token?: string; error?: string; error_description?: string };
+  if (!response.ok || !json.access_token) throw new Error(json.error_description ?? json.error ?? "Google token refresh failed");
+  await validateGrantedGoogleScopes({ accessToken: json.access_token, scope: json.scope, allowTokenInfoFallback: true });
+  return { accessToken: json.access_token, refreshToken: json.refresh_token, expiresInSeconds: json.expires_in, ...getGoogleProfileFromIdToken(json.id_token) };
 };
 
-export const refreshGoogleConnectedServiceAccessToken = refreshCalendarAccessToken;
-
-export const getStoredEmail = (): string | null => readEmail();
+export const refreshConnectedServiceAccessToken = refreshCalendarAccessToken;
