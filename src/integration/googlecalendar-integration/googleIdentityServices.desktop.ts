@@ -86,8 +86,15 @@ export const requestWebAccessTokenViaGis = async ({
   await loadGisScript();
 
   return new Promise<string>((resolve, reject) => {
+    const googleAccounts = window.google?.accounts;
+
+    if (!googleAccounts) {
+      reject(new Error("Google Identity Services is not available"));
+      return;
+    }
+
     // GIS Token Client を初期化
-    const client = window.google!.accounts.oauth2.initTokenClient({
+    const client = googleAccounts.oauth2.initTokenClient({
       client_id: clientId,
       scope,
       // サイレントモード: 空文字 = ブラウザのセッションを利用してポップアップなしで取得
@@ -100,6 +107,12 @@ export const requestWebAccessTokenViaGis = async ({
           reject(new Error(response.error_description ?? response.error));
           return;
         }
+
+        if (!response.access_token) {
+          reject(new Error("GIS token response did not include access_token"));
+          return;
+        }
+
         resolve(response.access_token);
       },
 
@@ -113,24 +126,6 @@ export const requestWebAccessTokenViaGis = async ({
       },
     });
 
-    // サイレントの場合は prompt:'none' ではなく prompt:'' を使う
-    // prompt:'none' は UX が壊れる場合があるため非推奨
-    client.requestAccessToken(
-      silent
-        ? {
-          // ヒント: 直前に接続したアカウントのメールを渡すとサイレント成功率が上がる
-          hint: (() => {
-            try {
-              return (
-                localStorage.getItem("flashcard-master.gcal.account_email") ??
-                  undefined
-              );
-            } catch {
-              return undefined;
-            }
-          })(),
-        }
-        : undefined,
-    );
+    client.requestAccessToken();
   });
 };
