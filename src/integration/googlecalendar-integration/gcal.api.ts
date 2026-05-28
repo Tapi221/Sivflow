@@ -1,4 +1,4 @@
-import type { GoogleCalendarApiCalendarResponse, GoogleCalendarApiEventsResponse, GoogleCalendarApiListResponse, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
+import type { GCalRawIncrementalEvent, GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarApiCalendarResponse, GoogleCalendarApiEventsResponse, GoogleCalendarApiListResponse, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
 import { createGoogleApiError } from "@/integration/google-integration/googleApiRetry";
 
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
@@ -36,6 +36,36 @@ const postJson = async <T>(accessToken: string, url: string, body: unknown, erro
   return (await res.json()) as T;
 };
 
+const patchJson = async <T>(accessToken: string, url: string, body: unknown, errorPrefix = "Google API failed"): Promise<T> => {
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw await createGoogleApiError(res, errorPrefix);
+  }
+
+  return (await res.json()) as T;
+};
+
+const deleteJson = async (accessToken: string, url: string, errorPrefix = "Google API failed"): Promise<void> => {
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!res.ok && res.status !== 410) {
+    throw await createGoogleApiError(res, errorPrefix);
+  }
+};
+
 const parseGoogleDate = (raw: string): Date => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
 
@@ -56,6 +86,16 @@ const parseEventDate = (value?: {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const formatGoogleDateOnly = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const buildCompositeEventId = (accountId: string | undefined, calendarId: string, eventId: string): string => accountId ? `${accountId}:${calendarId}:${eventId}` : `${calendarId}:${eventId}`;
+
 const toGoogleCalendarListItem = (calendar: GoogleCalendarApiCalendarResponse): GoogleCalendarListItem => ({
   id: calendar.id!,
   summary: calendar.summary!,
@@ -63,6 +103,53 @@ const toGoogleCalendarListItem = (calendar: GoogleCalendarApiCalendarResponse): 
   backgroundColor: "#4f7cff",
   selected: true,
 });
+
+const toGoogleCalendarEvent = ({ raw, accountId, calendarId, accentColor, projectId }: { raw: GCalRawIncrementalEvent; accountId?: string; calendarId: string; accentColor: string; projectId?: string }): GoogleCalendarEvent | null => {
+  if (!raw.id) return null;
+  if (raw.status === "cancelled") return null;
+
+  const startsAt = parseEventDate(raw.start);
+  const endsAt = parseEventDate(raw.end);
+
+  if (!startsAt || !endsAt) return null;
+
+  return {
+    id: buildCompositeEventId(accountId, calendarId, raw.id),
+    externalId: raw.id,
+    accountId,
+    calendarId,
+    ...(projectId ? { projectId } : {}),
+    accentColor,
+    title: raw.summary || "(No title)",
+    description: raw.description,
+    location: raw.location,
+    startsAt,
+    endsAt,
+    isAllDay: Boolean(raw.start?.date && !raw.start?.dateTime),
+  };
+};
+
+const toGoogleEventPayload = (event: Partial<GCalWritableEventInput>): Record<string, unknown> => {
+  const payload: Record<string, unknown> = {};
+
+  if (event.title !== undefined) payload.summary = event.title.trim() || "(No title)";
+  if (event.description !== undefined) payload.description = event.description;
+  if (event.location !== undefined) payload.location = event.location;
+
+  if (event.startsAt && event.isAllDay !== true) {
+    payload.start = { dateTime: event.startsAt.toISOString() };
+  } else if (event.startsAt) {
+    payload.start = { date: formatGoogleDateOnly(event.startsAt) };
+  }
+
+  if (event.endsAt && event.isAllDay !== true) {
+    payload.end = { dateTime: event.endsAt.toISOString() };
+  } else if (event.endsAt) {
+    payload.end = { date: formatGoogleDateOnly(event.endsAt) };
+  }
+
+  return payload;
+};
 
 export const fetchCalendarList = async (accessToken: string): Promise<GoogleCalendarListItem[]> => {
   const calendars: GoogleCalendarListItem[] = [];
@@ -160,27 +247,36 @@ export const fetchEventsForCalendar = async ({
   } while (pageToken);
 
   return rawEvents
-    .map((event) => {
-      if (!event.id) return null;
-      if (event.status === "cancelled") return null;
-
-      const startsAt = parseEventDate(event.start);
-      const endsAt = parseEventDate(event.end);
-
-      if (!startsAt || !endsAt) return null;
-
-      return {
-        id: accountId ? `${accountId}:${calendarId}:${event.id}` : `${calendarId}:${event.id}`,
-        accountId,
-        calendarId,
-        accentColor,
-        title: event.summary || "(No title)",
-        description: event.description,
-        location: event.location,
-        startsAt,
-        endsAt,
-        isAllDay: Boolean(event.start?.date && !event.start?.dateTime),
-      } satisfies GoogleCalendarEvent;
-    })
+    .map((event) => toGoogleCalendarEvent({ raw: event, accountId, calendarId, accentColor }))
     .filter(Boolean) as GoogleCalendarEvent[];
+};
+
+export const createGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, event }: { accessToken: string; accountId?: string; accentColor: string; event: GCalWritableEventInput }): Promise<GoogleCalendarEvent> => {
+  const raw = await postJson<GCalRawIncrementalEvent>(
+    accessToken,
+    `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(event.calendarId)}/events`,
+    toGoogleEventPayload(event),
+    "Google Calendar event creation failed",
+  );
+  const created = toGoogleCalendarEvent({ raw, accountId, calendarId: event.calendarId, accentColor, projectId: event.projectId });
+
+  if (!created) throw new Error("Google Calendar event creation response was invalid");
+  return created;
+};
+
+export const updateGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, event }: { accessToken: string; accountId?: string; accentColor: string; event: GCalWritableEventUpdateInput }): Promise<GoogleCalendarEvent> => {
+  const raw = await patchJson<GCalRawIncrementalEvent>(
+    accessToken,
+    `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(event.calendarId)}/events/${encodeURIComponent(event.eventId)}`,
+    toGoogleEventPayload(event),
+    "Google Calendar event update failed",
+  );
+  const updated = toGoogleCalendarEvent({ raw, accountId, calendarId: event.calendarId, accentColor, projectId: event.projectId });
+
+  if (!updated) throw new Error("Google Calendar event update response was invalid");
+  return updated;
+};
+
+export const deleteGoogleCalendarEvent = async ({ accessToken, event }: { accessToken: string; event: GCalWritableEventDeleteInput }): Promise<void> => {
+  await deleteJson(accessToken, `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(event.calendarId)}/events/${encodeURIComponent(event.eventId)}`, "Google Calendar event deletion failed");
 };
