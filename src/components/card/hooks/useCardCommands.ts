@@ -8,9 +8,15 @@ import type { Card, CardPatch } from "@/types";
 
 type TimestampLike = { toDate?: () => Date; seconds?: number; nanoseconds?: number };
 
-const toDateMillis = (value: Date | TimestampLike | undefined | null): number => {
+type SortableTimestamp = Date | TimestampLike | string | number | undefined | null;
+
+const toDateMillis = (value: SortableTimestamp): number => {
   if (!value) return 0;
   if (value instanceof Date) return value.getTime();
+  if (typeof value === "string" || typeof value === "number") {
+    const millis = new Date(value).getTime();
+    return Number.isFinite(millis) ? millis : 0;
+  }
   if (typeof value.toDate === "function") return value.toDate().getTime();
   if (typeof value.seconds === "number") return value.seconds * 1000 + Math.floor((value.nanoseconds ?? 0) / 1_000_000);
   return 0;
@@ -341,14 +347,14 @@ export const useCardCommands = (folderId?: string) => {
       );
     }
 
-    const updates = cardIds.map((cardId, index) =>
-      db.updateItem("cards", cardId, {
-        orderIndex: index,
-        updatedAt: new Date(),
-      }),
+    await Promise.all(
+      cardIds.map((cardId, index) =>
+        db.updateItem("cards", cardId, {
+          orderIndex: index,
+          updatedAt: new Date(),
+        }),
+      ),
     );
-
-    await Promise.all(updates);
   };
 
   return {
