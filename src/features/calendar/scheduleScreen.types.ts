@@ -71,6 +71,7 @@ export type GoogleAccountDisplay = {
   email: string | null;
   name: string | null;
   photoUrl: string | null;
+  accessToken: string | null;
   calendars: GoogleCalendarListItem[];
   taskLists: GoogleTaskListItem[];
   taskListsError: string | null;
@@ -106,6 +107,7 @@ export type CalendarSidebarProps = {
   onToggleProject: (projectId: string) => void;
   onLinkGoogleCalendarAsProject: (accountId: string, calendarId: string) => void;
   onLinkProjectToGoogleCalendar: (projectId: string, accountId: string, calendarId: string) => void;
+  onCreateProjectGoogleCalendar: (projectId: string, accountId: string) => void;
   onUnlinkProjectCalendar: (linkId: string) => void;
   onChangeGoogleCalendarColor: (accountId: string, calendarId: string, color: string) => void;
   onReconnectAccount: (accountId: string) => void;
