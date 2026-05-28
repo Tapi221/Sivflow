@@ -164,3 +164,10 @@ a:hover,
   -webkit-mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%);
   mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%);
 }
+
+.text-\[clamp\(11px\,2\.1vw\,18px\)\] {
+  color: rgba(60, 60, 67, 0.62);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
