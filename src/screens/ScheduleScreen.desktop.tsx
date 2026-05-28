@@ -1,30 +1,20 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import type { PlanResultMode } from "@/chip/toggle/Toggle.planresult";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
-import { clipEventToDay, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
-import { CalendarSidebar } from "@/pane/leftpane/CalendarSidebar";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
+import { CalendarListPieChartSplitView } from "@/features/calendar/view/CalendarListPieChartSplitView.desktop";
 import { CalendarPieChartView } from "@/features/calendar/view/CalendarPieChartView";
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
-import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
+import { CalendarSidebar } from "@/pane/leftpane/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
-
-type CalendarDayHeightMap = Record<string, number>;
-
-type SplitScrollSource = "list" | "pieChart";
-
-type SplitScrollRequest = {
-  source: SplitScrollSource;
-  scrollTop: number;
-};
 
 type StoredAppCalendarItem = Partial<AppCalendarItem>;
 
@@ -37,10 +27,6 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const DEFAULT_PLAN_RESULT_MODES: readonly PlanResultMode[] = ["plan", "actual"];
 const PLAN_RESULT_TOGGLE_VIEW_MODES = new Set(["threeDays", "days", "pieChart"]);
-const SPLIT_PIE_CHART_DAY_SECTION_HEIGHT_PX = 430;
-const SPLIT_LIST_EMPTY_DAY_HEIGHT_PX = 38;
-const SPLIT_LIST_EVENT_ROW_HEIGHT_PX = 58;
-const SPLIT_LIST_EVENT_ROW_GAP_PX = 6;
 const APP_PROJECT_COLORS = [
   "#34c759",
   "#ff3b30",
@@ -103,46 +89,6 @@ const persistAppProjects = (projects: AppCalendarItem[]) => {
   }
 };
 
-const getSplitListDayHeight = (eventCount: number): number => {
-  if (eventCount <= 0) return SPLIT_LIST_EMPTY_DAY_HEIGHT_PX;
-
-  return eventCount * SPLIT_LIST_EVENT_ROW_HEIGHT_PX + Math.max(0, eventCount - 1) * SPLIT_LIST_EVENT_ROW_GAP_PX;
-};
-
-const buildSplitDayHeightMap = (
-  days: Date[],
-  events: GoogleCalendarEvent[],
-): CalendarDayHeightMap => {
-  const eventCountByDayKey = new Map<string, number>();
-  const dayByKey = new Map<string, Date>();
-
-  days.forEach((day) => {
-    const dayKey = getCalendarDateKey(day);
-
-    eventCountByDayKey.set(dayKey, 0);
-    dayByKey.set(dayKey, day);
-  });
-
-  events.forEach((event) => {
-    getEventDateKeys(event).forEach((dayKey) => {
-      const day = dayByKey.get(dayKey);
-      if (!day) return;
-      if (!event.isAllDay && !clipEventToDay(event, day)) return;
-
-      eventCountByDayKey.set(dayKey, (eventCountByDayKey.get(dayKey) ?? 0) + 1);
-    });
-  });
-
-  return days.reduce<CalendarDayHeightMap>((heightByDayKey, day) => {
-    const dayKey = getCalendarDateKey(day);
-    const listDayHeight = getSplitListDayHeight(eventCountByDayKey.get(dayKey) ?? 0);
-
-    heightByDayKey[dayKey] = Math.max(listDayHeight, SPLIT_PIE_CHART_DAY_SECTION_HEIGHT_PX);
-
-    return heightByDayKey;
-  }, {});
-};
-
 const ScheduleScreen = ({
   onClose: _onClose,
 }: ScheduleScreenProps) => {
@@ -150,12 +96,6 @@ const ScheduleScreen = ({
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
-  const listScrollViewportRef = useRef<HTMLDivElement | null>(null);
-  const pieChartScrollViewportRef = useRef<HTMLDivElement | null>(null);
-  const splitScrollSourceRef = useRef<SplitScrollSource | null>(null);
-  const pendingSplitScrollRef = useRef<SplitScrollRequest | null>(null);
-  const splitScrollSyncFrameRef = useRef<number | null>(null);
-  const splitScrollReleaseFrameRef = useRef<number | null>(null);
   const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(readStoredAppProjects);
   const [planResultModes, setPlanResultModes] = useState<PlanResultMode[]>([
     ...DEFAULT_PLAN_RESULT_MODES,
@@ -216,18 +156,6 @@ const ScheduleScreen = ({
     persistAppProjects(appProjects);
   }, [appProjects]);
 
-  useEffect(() => {
-    return () => {
-      if (splitScrollSyncFrameRef.current != null) {
-        window.cancelAnimationFrame(splitScrollSyncFrameRef.current);
-      }
-
-      if (splitScrollReleaseFrameRef.current != null) {
-        window.cancelAnimationFrame(splitScrollReleaseFrameRef.current);
-      }
-    };
-  }, []);
-
   const handleAddAppProject = useCallback((projectName: string) => {
     const trimmedProjectName = projectName.trim();
     if (!trimmedProjectName) return;
@@ -279,12 +207,6 @@ const ScheduleScreen = ({
   const canShowPlanResultToggle = selectedViewModes.some((mode) =>
     PLAN_RESULT_TOGGLE_VIEW_MODES.has(mode),
   );
-  const splitDayHeights = useMemo(
-    () => isListPieChartSplitView
-      ? buildSplitDayHeightMap(visibleDays, deferredCalendarEvents)
-      : undefined,
-    [deferredCalendarEvents, isListPieChartSplitView, visibleDays],
-  );
   const headerTitleDate =
     isListPieChartSplitView
       ? selectedDate
@@ -296,53 +218,6 @@ const ScheduleScreen = ({
   const headerTitleLabel = primaryViewMode === "year"
     ? format(headerTitleDate, "yyyy年", { locale: dateFnsLocale })
     : format(headerTitleDate, isPieChartCalendarView ? "yyyy年M月d日" : monthLabelFormat, { locale: dateFnsLocale });
-
-  const handleSplitScrollTopChange = useCallback((source: SplitScrollSource, scrollTop: number) => {
-    if (splitScrollSourceRef.current && splitScrollSourceRef.current !== source) return;
-
-    pendingSplitScrollRef.current = { source, scrollTop };
-
-    if (splitScrollSyncFrameRef.current != null) return;
-
-    splitScrollSyncFrameRef.current = window.requestAnimationFrame(() => {
-      splitScrollSyncFrameRef.current = null;
-      const pendingSplitScroll = pendingSplitScrollRef.current;
-      pendingSplitScrollRef.current = null;
-      if (!pendingSplitScroll) return;
-
-      const targetScrollElement = pendingSplitScroll.source === "list"
-        ? pieChartScrollViewportRef.current
-        : listScrollViewportRef.current;
-      if (
-        !targetScrollElement ||
-        Math.abs(targetScrollElement.scrollTop - pendingSplitScroll.scrollTop) < 1
-      ) {
-        return;
-      }
-
-      splitScrollSourceRef.current = pendingSplitScroll.source;
-      targetScrollElement.scrollTop = pendingSplitScroll.scrollTop;
-
-      if (splitScrollReleaseFrameRef.current != null) {
-        window.cancelAnimationFrame(splitScrollReleaseFrameRef.current);
-      }
-
-      splitScrollReleaseFrameRef.current = window.requestAnimationFrame(() => {
-        splitScrollReleaseFrameRef.current = null;
-        if (splitScrollSourceRef.current === pendingSplitScroll.source) {
-          splitScrollSourceRef.current = null;
-        }
-      });
-    });
-  }, []);
-
-  const handleListSplitScrollTopChange = useCallback((scrollTop: number) => {
-    handleSplitScrollTopChange("list", scrollTop);
-  }, [handleSplitScrollTopChange]);
-
-  const handlePieChartSplitScrollTopChange = useCallback((scrollTop: number) => {
-    handleSplitScrollTopChange("pieChart", scrollTop);
-  }, [handleSplitScrollTopChange]);
 
   return (
     <CarvePanelShell
@@ -400,36 +275,18 @@ const ScheduleScreen = ({
             />
           </div>
         ) : isListPieChartSplitView ? (
-          <div className="ml-4 mr-4 grid min-h-0 flex-1 grid-cols-2 overflow-hidden bg-white">
-            <div className="min-h-0 min-w-0 overflow-hidden border-r border-[#eeeeee]">
-              <CalendarListView
-                days={visibleDays}
-                events={deferredCalendarEvents}
-                selectedDate={selectedDate}
-                dayHeights={splitDayHeights}
-                scrollViewportRef={listScrollViewportRef}
-                onSelectDate={handleSidebarSelectDate}
-                onReachStart={handleListReachStart}
-                onReachEnd={handleListReachEnd}
-                onVisibleMonthChange={handleVisibleMonthChange}
-                onScrollTopChange={handleListSplitScrollTopChange}
-              />
-            </div>
-            <div className="min-h-0 min-w-0 overflow-hidden">
-              <CalendarPieChartView
-                days={visibleDays}
-                selectedDate={selectedDate}
-                events={deferredCalendarEvents}
-                appProjects={appProjects}
-                googleAccounts={googleAccounts}
-                dayHeights={splitDayHeights}
-                scrollViewportRef={pieChartScrollViewportRef}
-                onSelectDate={handleSidebarSelectDate}
-                onVisibleDateChange={handleVisibleDateChange}
-                onScrollTopChange={handlePieChartSplitScrollTopChange}
-              />
-            </div>
-          </div>
+          <CalendarListPieChartSplitView
+            days={visibleDays}
+            events={deferredCalendarEvents}
+            selectedDate={selectedDate}
+            appProjects={appProjects}
+            googleAccounts={googleAccounts}
+            onSelectDate={handleSidebarSelectDate}
+            onReachStart={handleListReachStart}
+            onReachEnd={handleListReachEnd}
+            onVisibleMonthChange={handleVisibleMonthChange}
+            onVisibleDateChange={handleVisibleDateChange}
+          />
         ) : isPieChartCalendarView ? (
           <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
             <CalendarPieChartView
