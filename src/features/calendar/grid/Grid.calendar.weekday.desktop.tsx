@@ -438,7 +438,7 @@ const CalendarWeekDayGridComponent = ({
           })}
 
           <div
-            className="z-[60] flex min-h-7 justify-end border-b border-r border-[#eeeeee] bg-white pr-2 pt-1 text-[10px] font-medium text-[rgba(60,60,67,0.45)]"
+            className="z-[60] flex min-h-7 justify-end border-b border-r border-t border-[#eeeeee] bg-white pr-2 pt-1 text-[10px] font-medium text-[rgba(60,60,67,0.45)]"
             style={WEEKDAY_ALL_DAY_LABEL_STYLE}
           >
             終日
@@ -455,7 +455,7 @@ const CalendarWeekDayGridComponent = ({
               <div
                 key={`weekday-all-day-${day.toISOString()}`}
                 className={cn(
-                  "sticky top-10 z-40 min-h-7 border-b border-r border-[#eeeeee] bg-white px-1 py-1",
+                  "sticky top-10 z-40 min-h-7 border-b border-r border-t border-[#eeeeee] bg-white px-1 py-1",
                   dayIndex === visibleDays.length - 1 && "border-r-0",
                 )}
                 style={{ gridColumn: dayIndex + 2, gridRow: 2 }}
