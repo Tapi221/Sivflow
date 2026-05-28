@@ -6,6 +6,7 @@ import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.d
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
 import { Sidebar } from "@/pane.desktop/leftpane/Sidebar.desktop";
 import { isDesktopRuntime } from "@/platform/runtime";
+import "@/styles/backpane.css";
 import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
 
