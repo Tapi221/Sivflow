@@ -28,6 +28,7 @@ export interface ExplorerState {
   contentTypeFilter: ContentTypeFilter[];
   directoryBadgeVisibility: DirectoryBadgeVisibility;
   explorerLayoutMode: ExplorerLayoutMode;
+  pinnedFolderIds: string[];
   setTagFilter: (tags: string[]) => void;
   toggleTag: (tag: string) => void;
   clearTagFilter: () => void;
@@ -39,6 +40,7 @@ export interface ExplorerState {
   toggleContentType: (kind: ContentTypeFilter) => void;
   toggleDirectoryBadgeVisibility: (key: DirectoryBadgeVisibilityKey) => void;
   setExplorerLayoutMode: (mode: ExplorerLayoutMode) => void;
+  togglePinnedFolder: (folderId: string) => void;
 }
 
 const DEFAULT_CONTENT_TYPE_FILTER: ContentTypeFilter[] = ["card", "pdf"];
@@ -51,6 +53,11 @@ const DEFAULT_DIRECTORY_BADGE_VISIBILITY: DirectoryBadgeVisibility = {
 };
 
 const normalizeTagFilter = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === "string");
+};
+
+const normalizePinnedFolderIds = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
   return value.filter((entry): entry is string => typeof entry === "string");
 };
@@ -122,6 +129,7 @@ const createDefaultState = (): Pick<
   | "contentTypeFilter"
   | "directoryBadgeVisibility"
   | "explorerLayoutMode"
+  | "pinnedFolderIds"
 > => ({
   tagFilter: [],
   tagMatchMode: "any",
@@ -131,6 +139,7 @@ const createDefaultState = (): Pick<
   contentTypeFilter: [...DEFAULT_CONTENT_TYPE_FILTER],
   directoryBadgeVisibility: { ...DEFAULT_DIRECTORY_BADGE_VISIBILITY },
   explorerLayoutMode: DEFAULT_EXPLORER_LAYOUT_MODE,
+  pinnedFolderIds: [],
 });
 
 export const useExplorerStore = create<ExplorerState>()(
@@ -186,6 +195,12 @@ export const useExplorerStore = create<ExplorerState>()(
           },
         })),
       setExplorerLayoutMode: (mode) => set({ explorerLayoutMode: mode }),
+      togglePinnedFolder: (folderId) =>
+        set((state) => ({
+          pinnedFolderIds: state.pinnedFolderIds.includes(folderId)
+            ? state.pinnedFolderIds.filter((currentId) => currentId !== folderId)
+            : [...state.pinnedFolderIds, folderId],
+        })),
     }),
     {
       name: "explorer-storage",
@@ -198,6 +213,7 @@ export const useExplorerStore = create<ExplorerState>()(
         contentTypeFilter: state.contentTypeFilter,
         directoryBadgeVisibility: state.directoryBadgeVisibility,
         explorerLayoutMode: state.explorerLayoutMode,
+        pinnedFolderIds: state.pinnedFolderIds,
       }),
       migrate: (persistedState: unknown) => {
         if (!persistedState || typeof persistedState !== "object") {
@@ -222,13 +238,13 @@ export const useExplorerStore = create<ExplorerState>()(
         next.explorerLayoutMode = normalizeExplorerLayoutMode(
           next.explorerLayoutMode,
         );
+        next.pinnedFolderIds = normalizePinnedFolderIds(next.pinnedFolderIds);
 
         delete next.recent;
         delete next.explorerTab;
         delete next.activeTab;
         delete next.favorites;
         delete next.pinnedItems;
-        delete next.pinnedFolderIds;
         delete next.isPinnedFolderSectionCollapsed;
         delete next.isFolderListSectionCollapsed;
         delete next.isTagSectionCollapsed;
