@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
