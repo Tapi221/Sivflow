@@ -390,14 +390,14 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
             <CalendarYearView yearDate={currentDate} selectedDate={selectedDate} visibleEvents={deferredCalendarEvents} onSelectDate={handleMonthCellSelectDate} onRenderedRangeChange={handleYearRenderedRangeChange} />
           </div>
         ) : isListPieChartSplitView ? (
-          <CalendarListPieChartSplitView days={visibleDays} events={deferredCalendarEvents} selectedDate={selectedDate} appProjects={appProjects} googleAccounts={googleAccountsWithColorOverrides} onSelectDate={handleSidebarSelectDate} onReachStart={handleListReachStart} onReachEnd={handleListReachEnd} onVisibleMonthChange={handleVisibleMonthChange} onVisibleDateChange={handleVisibleDateChange} />
+          <CalendarListPieChartSplitView days={visibleDays} virtualRail={virtualRail} events={deferredCalendarEvents} selectedDate={selectedDate} appProjects={appProjects} googleAccounts={googleAccountsWithColorOverrides} onSelectDate={handleSidebarSelectDate} onReachStart={handleListReachStart} onReachEnd={handleListReachEnd} onVisibleMonthChange={handleVisibleMonthChange} onVisibleDateChange={handleVisibleDateChange} />
         ) : isPieChartCalendarView ? (
           <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-            <CalendarPieChartView days={visibleDays} selectedDate={selectedDate} events={deferredCalendarEvents} appProjects={appProjects} googleAccounts={googleAccountsWithColorOverrides} onSelectDate={handleSidebarSelectDate} onReachStart={handleListReachStart} onReachEnd={handleListReachEnd} onVisibleDateChange={handleVisibleDateChange} />
+            <CalendarPieChartView days={visibleDays} virtualRail={virtualRail} selectedDate={selectedDate} events={deferredCalendarEvents} appProjects={appProjects} googleAccounts={googleAccountsWithColorOverrides} onSelectDate={handleSidebarSelectDate} onReachStart={handleListReachStart} onReachEnd={handleListReachEnd} onVisibleDateChange={handleVisibleDateChange} />
           </div>
         ) : isListCalendarView ? (
           <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border-0 bg-white">
-            <CalendarListView days={visibleDays} events={deferredCalendarEvents} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onReachStart={handleListReachStart} onReachEnd={handleListReachEnd} onVisibleMonthChange={handleVisibleMonthChange} />
+            <CalendarListView days={visibleDays} virtualRail={virtualRail} events={deferredCalendarEvents} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onReachStart={handleListReachStart} onReachEnd={handleListReachEnd} onVisibleMonthChange={handleVisibleMonthChange} />
           </div>
         ) : isMonthCalendarView ? (
           <div className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border border-b-0 border-r-0", IOS_CALENDAR_MONTH_SURFACE_CLASS)}>
