@@ -4,7 +4,7 @@ import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.weekday.placement";
-import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.schedule.weekday";
+import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
