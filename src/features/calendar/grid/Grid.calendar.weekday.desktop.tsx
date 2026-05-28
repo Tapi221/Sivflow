@@ -101,6 +101,8 @@ const getEventDurationMinutes = (event: GoogleCalendarEvent): number => {
   return diff > 0 ? diff / 60000 : 30;
 };
 
+const getVisualDurationMinutes = (durationMinutes: number) => Math.max(durationMinutes, C.MIN_LAYOUT_MINUTES);
+
 const calculateEventPositionStyle = (
   event: GoogleCalendarEvent,
 ): CalendarEventPositionStyle => {
@@ -108,11 +110,12 @@ const calculateEventPositionStyle = (
   const startHour =
     startsAt.getHours() + startsAt.getMinutes() / GRID.WEEKDAY_MINUTES_PER_HOUR;
   const durationMinutes = getEventDurationMinutes(event);
+  const visualDurationMinutes = getVisualDurationMinutes(durationMinutes);
 
   return {
     [GRID.WEEKDAY_CSS_VAR_EVENT_START_HOUR]: Math.max(0, startHour),
     [GRID.WEEKDAY_CSS_VAR_EVENT_DURATION_HOURS]:
-      durationMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR,
+      visualDurationMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR,
     top: `calc(var(${GRID.WEEKDAY_CSS_VAR_EVENT_START_HOUR}) * var(--calendar-hour-row-height))`,
     height: `max(1px, calc(var(${GRID.WEEKDAY_CSS_VAR_EVENT_DURATION_HOURS}) * var(--calendar-hour-row-height) - 2px))`,
   } as CalendarEventPositionStyle;
@@ -523,6 +526,7 @@ const CalendarWeekDayGridComponent = ({
                   event.id,
                   new Date(event.startsAt),
                   getEventDurationMinutes(event),
+                  C.MIN_LAYOUT_MINUTES,
                 ),
               ),
             );
