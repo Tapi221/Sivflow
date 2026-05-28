@@ -71,7 +71,6 @@ const CardLayoutConsistencyTest = () => {
                   onChange={setEditBlocks}
                   prefix="question"
                   label="問題"
-                  droppableId="layout-test-question-blocks"
                   hideToolbar
                 />
               </CardFrame>
