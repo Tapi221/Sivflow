@@ -8,8 +8,8 @@ import { useLayoutRowsController } from "@/components/card/editor/useLayoutRowsC
 import { applyEditingDraftPatch, buildCardsById, createMetaPanelActions, resolveSelectedCardSnapshot } from "@/components/folder/panes/cardEditorPaneControllerCore";
 import { useToast } from "@/contexts/ToastContext";
 import { useCards } from "@/hooks/card/useCards";
-import { useTags } from "@/hooks/settings/useTags";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { useTags } from "@/features/settings/hooks/useTags";
+import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { Card, CardPatch, UserSettings } from "@/types";
 
 type UseCardsResult = {

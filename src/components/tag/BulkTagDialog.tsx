@@ -4,7 +4,7 @@ import { TagBadge } from "@/components/tag/TagBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tag as TagIcon } from "@/ui/icons";
-import { useTags } from "@/hooks/settings/useTags";
+import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 
 interface BulkTagDialogProps {

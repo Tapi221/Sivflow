@@ -7,7 +7,7 @@ import { TagFilterPopover } from "@/chip/popover/TagFilterPopover";
 import { floatingPanelPresets } from "@/components/ui/menu-styles";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
-import { useTags } from "@/hooks/settings/useTags";
+import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 
 type ExplorerToolbarButtonProps = {

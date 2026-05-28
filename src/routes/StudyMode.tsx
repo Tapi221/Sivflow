@@ -15,7 +15,7 @@ import { useAuthSession } from "@/contexts/AuthContext";
 import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFolders } from "@/hooks/folder/useFolders";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { PracticeFilterRating } from "@/hooks/study/usePracticeMode";
 import { usePracticeMode } from "@/hooks/study/usePracticeMode";
 import { useStudyCards } from "@/hooks/study/useStudyCards";

@@ -3,7 +3,7 @@ import { LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
 import { waitForDraftImageUploads } from "@/components/card/editor/cardImageUploadSaveBarrier";
 import { type EditorDraft, makeEmptyCardFaceAttachments, normalizeOrderIndex, sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
-import { resolveCardTagNames } from "@/hooks/settings/useTags";
+import { resolveCardTagNames } from "@/features/settings/hooks/useTags";
 export { toDateOrNull } from "@/utils/toMillis";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { Card, CardBlock, CardFaceAttachments, CardPatch } from "@/types/domain/card";

@@ -1,7 +1,7 @@
 import React from "react";
 import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
 import { MarkdownEditorDialog } from "@/components/card/blocks/markdown/MarkdownEditorDialog";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownInsertionText, resolveMarkdownTabKeyText } from "@/utils/markdownWhitespace";
 
 export type MarkdownReplaceBlock =

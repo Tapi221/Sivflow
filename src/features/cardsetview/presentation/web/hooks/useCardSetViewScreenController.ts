@@ -14,7 +14,7 @@ import { useCardSetViewParams } from "@/features/cardsetview/presentation/web/in
 import { buildWidthControl } from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
 import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import { useToast } from "@/contexts/ToastContext";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutFallbackPreferences";
 

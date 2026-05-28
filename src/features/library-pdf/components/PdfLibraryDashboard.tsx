@@ -3,7 +3,7 @@ import { PdfLibraryWorkspaceToolbar } from "@/features/library-pdf/components/Pd
 import { PdfLibraryContinueSection } from "@/features/library-pdf/components/sections/PdfLibraryContinueSection";
 import { buildPdfDashboardRows, type PdfDashboardRow } from "@/features/library-pdf/model/pdfLibraryRow";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
-import { useTags } from "@/hooks/settings/useTags";
+import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 import type { DocumentItem, Folder } from "@/types";
 
