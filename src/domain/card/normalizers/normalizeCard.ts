@@ -8,9 +8,23 @@ import { normalizeDate } from "@/shared/codec/date";
 import { toArrayOr, toBoolOr, toFiniteNumber, toStringOr } from "@/shared/codec/primitives";
 import { makeFallbackId } from "@/shared/lib/fallbackId";
 import { asRecord, pick, type UnknownRecord } from "@/shared/lib/records";
+import type { SubjectiveScoreValue } from "@/types/domain/base";
 import type { Card, CardBlock } from "@/types/domain/card";
 
 type GridBlockType = Parameters<typeof isGridOffsetType>[0];
+
+const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
+  "text",
+  "question",
+  "code",
+  "image",
+  "audio",
+  "reference",
+  "math",
+  "markdown",
+]);
+
+const SUBJECTIVE_SCORE_VALUES = new Set<SubjectiveScoreValue>([0, 1, 2, 3, "ok", "anxious"]);
 
 const isGridBlockType = (value: unknown): value is GridBlockType => {
   return (
@@ -24,22 +38,25 @@ const isGridBlockType = (value: unknown): value is GridBlockType => {
   );
 };
 
-const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
-  "text",
-  "question",
-  "code",
-  "image",
-  "audio",
-  "reference",
-  "math",
-  "markdown",
-]);
-
 const isCardBlockType = (value: unknown): value is CardBlock["type"] => {
   return (
     typeof value === "string" &&
     CARD_BLOCK_TYPES.has(value as CardBlock["type"])
   );
+};
+
+const normalizeOptionalNumber = (value: unknown): number | undefined => {
+  if (value === undefined || value === null) return undefined;
+  const normalized = toFiniteNumber(value, Number.NaN);
+  return Number.isFinite(normalized) ? normalized : undefined;
+};
+
+const normalizeSubjectiveScore = (value: unknown): SubjectiveScoreValue | undefined => {
+  if (SUBJECTIVE_SCORE_VALUES.has(value as SubjectiveScoreValue)) {
+    return value as SubjectiveScoreValue;
+  }
+
+  return undefined;
 };
 
 const resolveFallbackTextContent = (block: UnknownRecord): string => {
@@ -150,25 +167,19 @@ const normalizeCardBlock = (
       break;
     }
     case "image": {
-      const images = normalizeUploadedImages(block.images ?? []) as NonNullable<
-        CardBlock["images"]
-      >;
+      const images = normalizeUploadedImages(block.images ?? []) as NonNullable<CardBlock["images"]>;
       if (images.length === 0) return null;
       normalized.images = images;
       break;
     }
     case "audio": {
-      const audios = toArrayOr(block.audios, []).filter(
-        asRecord,
-      ) as NonNullable<CardBlock["audios"]>;
+      const audios = toArrayOr(block.audios, []).filter(asRecord) as NonNullable<CardBlock["audios"]>;
       if (audios.length === 0) return null;
       normalized.audios = audios;
       break;
     }
     case "reference": {
-      const references = toArrayOr(block.references, []).filter(
-        asRecord,
-      ) as NonNullable<CardBlock["references"]>;
+      const references = toArrayOr(block.references, []).filter(asRecord) as NonNullable<CardBlock["references"]>;
       if (references.length === 0) return null;
       normalized.references = references;
       break;
@@ -277,9 +288,7 @@ export const normalizeCard = (raw: unknown): Card => {
       fallbackBlocks.push({
         id: `${side === "question" ? "q" : "a"}-img-${id}`,
         type: "image",
-        images: normalizeUploadedImages(images) as NonNullable<
-          CardBlock["images"]
-        >,
+        images: normalizeUploadedImages(images) as NonNullable<CardBlock["images"]>,
         orderIndex: index++,
       });
     }
@@ -459,23 +468,20 @@ export const normalizeCard = (raw: unknown): Card => {
     lastReviewAt: normalizeDate(
       pick(record.lastReviewAt, record.last_review_at),
     ),
-    lastSubjectiveScore: pick(
-      record.lastSubjectiveScore,
-      record.last_subjective_score,
+    lastSubjectiveScore: normalizeSubjectiveScore(
+      pick(record.lastSubjectiveScore, record.last_subjective_score),
     ),
-    recoveryRemaining: pick(
-      record.recoveryRemaining,
-      record.recovery_remaining,
+    recoveryRemaining: normalizeOptionalNumber(
+      pick(record.recoveryRemaining, record.recovery_remaining),
     ),
-    lastReviewDelayDays: pick(
-      record.lastReviewDelayDays,
-      record.last_review_delay_days,
+    lastReviewDelayDays: normalizeOptionalNumber(
+      pick(record.lastReviewDelayDays, record.last_review_delay_days),
     ),
     createdAt:
       normalizeDate(pick(record.createdAt, record.created_at)) ?? new Date(),
     updatedAt:
       normalizeDate(pick(record.updatedAt, record.updated_at)) ?? new Date(),
-    responseTimeMs: pick(record.responseTimeMs, record.response_time_ms),
+    responseTimeMs: normalizeOptionalNumber(pick(record.responseTimeMs, record.response_time_ms)),
     uncertaintyMarkedDate: normalizeDate(
       pick(record.uncertaintyMarkedDate, record.uncertainty_marked_date),
     ),
