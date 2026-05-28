@@ -3,7 +3,6 @@ import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { PracticeFilterRating } from "@/hooks/study/usePracticeMode";
-import { createPageUrl } from "@/platform/web/navigation/toWebPath";
 
 type Tile = { rating: PracticeFilterRating; score: number; Icon: unknown };
 
@@ -14,7 +13,7 @@ type Props = {
   results: Record<string | number, number>;
   ratingLabels: Record<PracticeFilterRating, string>;
   handleStartPractice: (rating: PracticeFilterRating) => void;
-  navigate: (path: string) => void;
+  onBackToSchedule: () => void;
   compact?: boolean;
 };
 
@@ -25,7 +24,7 @@ export const StudyComplete = ({
   results,
   ratingLabels,
   handleStartPractice,
-  navigate,
+  onBackToSchedule,
   compact = false,
 }: Props) => {
   const faceDesign = {
@@ -173,10 +172,10 @@ export const StudyComplete = ({
             <div className="flex flex-wrap justify-center gap-3">
               <Button
                 variant="outline"
-                onClick={() => navigate(createPageUrl("Dashboard"))}
+                onClick={onBackToSchedule}
                 className="rounded-xl px-8 h-12 border-slate-200 hover:bg-slate-50 text-[#64748b] text-base"
               >
-                ダッシュボードに戻る
+                スケジュールに戻る
               </Button>
             </div>
           </div>
