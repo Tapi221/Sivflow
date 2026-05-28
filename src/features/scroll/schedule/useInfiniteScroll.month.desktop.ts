@@ -48,6 +48,7 @@ export const useMonthInfiniteScroll = ({
   const rangeAnchorRef = useRef<MonthRangeAnchor | null>(null);
   const isExtendingBeforeRef = useRef(false);
   const isExtendingAfterRef = useRef(false);
+  const lastScrollTopRef = useRef(0);
   const visibleMonthSyncRafRef = useRef<number | null>(null);
   const visibleMonthSyncTimeoutRef = useRef<number | null>(null);
   const pendingScrollWeekKeyRef = useRef<string | null>(
@@ -212,10 +213,19 @@ export const useMonthInfiniteScroll = ({
   // スクロールハンドラは一度だけ登録する。最新の monthWeeks 等は ref 経由で参照。
   const handleScroll = useCallback(
     (scroller: HTMLDivElement) => {
+      const previousScrollTop = lastScrollTopRef.current;
+      const currentScrollTop = scroller.scrollTop;
+
+      lastScrollTopRef.current = currentScrollTop;
+
       if (isResizingRef.current) return;
 
+      const isScrollingUp = currentScrollTop < previousScrollTop;
+      const isScrollingDown = currentScrollTop > previousScrollTop;
+
       if (
-        scroller.scrollTop < C.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
+        isScrollingUp &&
+        currentScrollTop < C.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
         !isExtendingBeforeRef.current
       ) {
         isExtendingBeforeRef.current = true;
@@ -238,9 +248,10 @@ export const useMonthInfiniteScroll = ({
       }
 
       const distToBottom =
-        scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
+        scroller.scrollHeight - scroller.clientHeight - currentScrollTop;
 
       if (
+        isScrollingDown &&
         distToBottom < C.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
         !isExtendingAfterRef.current
       ) {
@@ -301,6 +312,7 @@ export const useMonthInfiniteScroll = ({
       const viewCenter = scroller.clientHeight / 2;
 
       scroller.scrollTop = Math.max(0, rowCenter - viewCenter);
+      lastScrollTopRef.current = scroller.scrollTop;
 
       pendingScrollWeekKeyRef.current = null;
       syncVisibleMonth();
@@ -346,6 +358,7 @@ export const useMonthInfiniteScroll = ({
     }
 
     scroller.scrollTop = getWeekOffsetTop(anchorWeekIndex) - rangeAnchor.offsetTop;
+    lastScrollTopRef.current = scroller.scrollTop;
 
     rangeAnchorRef.current = null;
     isExtendingBeforeRef.current = false;
@@ -356,6 +369,8 @@ export const useMonthInfiniteScroll = ({
   useEffect(() => {
     const scroller = scrollContainerRef.current;
     if (!scroller) return;
+
+    lastScrollTopRef.current = scroller.scrollTop;
 
     const handlePassiveScroll = () => handleScroll(scroller);
 
