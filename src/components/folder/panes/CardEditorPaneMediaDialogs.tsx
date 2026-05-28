@@ -5,8 +5,10 @@ import MediaUploader from "@/components/card/media/MediaUploader";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { UploadedImage } from "@/types";
 import type { ReferenceBlockData } from "@/types/domain/base";
+import type { CardFaceAttachmentAudio } from "@/types/domain/card";
 
 type Side = "question" | "answer";
+type DialogAudioItem = string | CardFaceAttachmentAudio;
 
 interface MediaDialogProps {
   title: string;
@@ -15,6 +17,31 @@ interface MediaDialogProps {
   maxWidth?: string;
   children: React.ReactNode;
 }
+
+interface CardEditorPaneMediaDialogsProps {
+  imageDialogSide: Side | null;
+  setImageDialogSide: (side: Side | null) => void;
+  audioDialogSide: Side | null;
+  setAudioDialogSide: (side: Side | null) => void;
+  linkDialogSide: Side | null;
+  setLinkDialogSide: (side: Side | null) => void;
+  getDialogImages: (side: Side) => UploadedImage[];
+  setDialogImages: (side: Side, next: UploadedImage[]) => void;
+  getDialogAudios: (side: Side) => DialogAudioItem[];
+  setDialogAudios: (side: Side, next: DialogAudioItem[]) => void;
+  getReferenceItems: (side: Side) => ReferenceBlockData[];
+  setReferenceItems: (side: Side, next: ReferenceBlockData[]) => void;
+}
+
+const toAudioUrl = (item: DialogAudioItem): string => {
+  return typeof item === "string" ? item : item.url;
+};
+
+const toDialogAudio = (url: string, index: number): CardFaceAttachmentAudio => ({
+  url,
+  filename: `audio-${index + 1}`,
+  order: index,
+});
 
 const MediaDialog = ({
   title,
@@ -34,21 +61,6 @@ const MediaDialog = ({
     </Dialog>
   );
 };
-
-interface CardEditorPaneMediaDialogsProps {
-  imageDialogSide: Side | null;
-  setImageDialogSide: (side: Side | null) => void;
-  audioDialogSide: Side | null;
-  setAudioDialogSide: (side: Side | null) => void;
-  linkDialogSide: Side | null;
-  setLinkDialogSide: (side: Side | null) => void;
-  getDialogImages: (side: Side) => UploadedImage[];
-  setDialogImages: (side: Side, next: UploadedImage[]) => void;
-  getDialogAudios: (side: Side) => string[];
-  setDialogAudios: (side: Side, next: string[]) => void;
-  getReferenceItems: (side: Side) => ReferenceBlockData[];
-  setReferenceItems: (side: Side, next: ReferenceBlockData[]) => void;
-}
 
 const CardEditorPaneMediaDialogsInner = ({
   imageDialogSide,
@@ -90,8 +102,10 @@ const CardEditorPaneMediaDialogsInner = ({
         {audioDialogSide && (
           <MediaUploader
             type="audio"
-            urls={getDialogAudios(audioDialogSide)}
-            onChange={(next) => setDialogAudios(audioDialogSide, next)}
+            urls={getDialogAudios(audioDialogSide).map(toAudioUrl)}
+            onChange={(next) =>
+              setDialogAudios(audioDialogSide, next.map(toDialogAudio))
+            }
             maxFiles={10}
           />
         )}
