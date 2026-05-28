@@ -217,15 +217,13 @@ const getTimedMinutes = (event: GoogleCalendarEvent) => {
   return Math.max(0, differenceInMinutes(new Date(event.endsAt), new Date(event.startsAt)));
 };
 
-const buildSegments = (date: Date, events: GoogleCalendarEvent[], appProjects: AppCalendarItem[], googleAccounts: GoogleAccountDisplay[]) => {
-  const labels = getCalendarLabelMap(googleAccounts);
+const buildSegments = (events: GoogleCalendarEvent[], appProjects: AppCalendarItem[], calendarLabels: Map<string, string>) => {
   const segments = new Map<string, PieSegment>();
 
   events.forEach((event) => {
-    const clipped = clipEventToDay(event, date);
-    if (!clipped || clipped.isAllDay) return;
+    if (event.isAllDay) return;
 
-    const minutes = getTimedMinutes(clipped);
+    const minutes = getTimedMinutes(event);
     if (minutes <= 0) return;
 
     const id = event.projectId ?? event.calendarId ?? event.id;
@@ -236,7 +234,7 @@ const buildSegments = (date: Date, events: GoogleCalendarEvent[], appProjects: A
       return;
     }
 
-    segments.set(id, { id, label: getSegmentLabel(event, appProjects, labels), color: generateColorTokens(event.accentColor || DEFAULT_COLOR).bg, minutes });
+    segments.set(id, { id, label: getSegmentLabel(event, appProjects, calendarLabels), color: generateColorTokens(event.accentColor || DEFAULT_COLOR).bg, minutes });
   });
 
   return Array.from(segments.values());
@@ -246,6 +244,7 @@ const buildDays = (dates: Date[], events: GoogleCalendarEvent[], selectedDate: D
   const today = new Date();
   const eventsByDay = new Map<string, GoogleCalendarEvent[]>();
   const dayByKey = new Map<string, Date>();
+  const calendarLabels = getCalendarLabelMap(googleAccounts);
 
   dates.forEach((date) => {
     const key = getCalendarDateKey(date);
@@ -268,7 +267,7 @@ const buildDays = (dates: Date[], events: GoogleCalendarEvent[], selectedDate: D
   return dates.map((date) => {
     const key = getCalendarDateKey(date);
     const dayEvents = eventsByDay.get(key) ?? [];
-    const segments = buildSegments(date, events, appProjects, googleAccounts);
+    const segments = buildSegments(dayEvents, appProjects, calendarLabels);
     dayEvents.sort(compareCalendarEvents);
     return { date, key, events: dayEvents, segments, minutes: segments.reduce((sum, segment) => sum + segment.minutes, 0), isSelected: isSameDay(date, selectedDate), isToday: isSameDay(date, today) };
   });
