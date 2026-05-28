@@ -103,6 +103,10 @@ const focusMainWindow = (): void => {
     mainWindow.restore();
   }
 
+  if (!mainWindow.isVisible()) {
+    mainWindow.show();
+  }
+
   mainWindow.setOpacity(1);
   mainWindow.focus();
 
@@ -586,21 +590,11 @@ const createMainWindow = (): BrowserWindow => {
   windowRef.webContents.on("did-finish-load", () => {
     flushPendingAuthCallback();
     flushPendingDesktopImportFiles();
+    focusMainWindow();
   });
 
   windowRef.once("ready-to-show", () => {
-    if (!windowRef.isDestroyed()) {
-      windowRef.setOpacity(1);
-      windowRef.show();
-
-      if (!windowRef.isFocused()) {
-        windowRef.focus();
-      }
-
-      if (!windowRef.webContents.isDestroyed()) {
-        windowRef.webContents.invalidate();
-      }
-    }
+    focusMainWindow();
   });
 
   windowRef.on("closed", () => {
