@@ -22,6 +22,11 @@ type ZoomPreferenceState = {
   preferredPercent: number | null;
 };
 
+type LegacyZoomMigrationHint = Pick<
+  CardSetViewZoomPreferenceScope,
+  "displayMode" | "interactionMode" | "cardLayoutMode"
+>;
+
 const DEFAULT_SOURCE_KEY = "__cardsetview_zoom_default__";
 
 export const clampZoomPercent = (value: number) => clampZoomPercentRange(value);
@@ -46,7 +51,7 @@ const buildLegacyZoomMigrationHint = ({
   displayMode: CardDisplayMode;
   interactionMode: CardSetInteractionMode;
   cardLayoutMode: CardLayoutMode;
-}): CardSetViewZoomPreferenceScope => ({
+}): LegacyZoomMigrationHint => ({
   displayMode,
   interactionMode,
   cardLayoutMode,
