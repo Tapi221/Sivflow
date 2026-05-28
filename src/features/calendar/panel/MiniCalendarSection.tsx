@@ -28,6 +28,7 @@ const MINI_CALENDAR_WEEKDAY_CLASS_NAME = "flex h-6 items-center justify-center t
 const MINI_CALENDAR_DAY_BUTTON_CLASS_NAME = "relative mx-auto flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
 const MINI_CALENDAR_EVENT_DOTS_CLASS_NAME = "pointer-events-none absolute bottom-[2px] left-1/2 z-20 flex -translate-x-1/2 items-center justify-center gap-[2px]";
 const MINI_CALENDAR_EVENT_DOT_CLASS_NAME = "h-[3px] w-[3px] rounded-full";
+const MINI_CALENDAR_EVENT_DOT_MAX_COUNT = 4;
 const EMPTY_VISIBLE_EVENTS: readonly GoogleCalendarEvent[] = [];
 const EMPTY_EVENT_COLORS: readonly string[] = [];
 
@@ -76,7 +77,10 @@ const addMiniCalendarDayEventColor = (
   const colors = dayColors.get(dayKey);
 
   if (colors) {
-    colors.push(color);
+    if (colors.length < MINI_CALENDAR_EVENT_DOT_MAX_COUNT) {
+      colors.push(color);
+    }
+
     return;
   }
 
