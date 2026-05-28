@@ -3,7 +3,7 @@ import { addDays, format, isSameDay, startOfDay, startOfMonth, startOfWeek } fro
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
-import { useT } from "@/i18n/useT";
+import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
 type MiniCalendarSectionProps = {
@@ -15,6 +15,7 @@ type MiniCalendarSectionProps = {
 };
 
 const MINI_CALENDAR_DIVIDER_CLASS_NAME = "mt-2 h-px w-full shrink-0 bg-[#eeeeee]";
+const MINI_CALENDAR_MONTH_LABEL_CLASS_NAME = "mb-1 flex h-7 items-center justify-center px-0.5 text-[14px] font-semibold leading-none tracking-[-0.01em] text-[#2f2f2f]";
 const MINI_CALENDAR_WEEKDAY_CLASS_NAME = "flex h-6 items-center justify-center text-[11px] font-semibold leading-none tracking-[0.03em] text-[#8e8e93]";
 const MINI_CALENDAR_DAY_BUTTON_CLASS_NAME = "relative flex h-7 w-full items-center justify-center transition-all duration-150 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
 
@@ -56,6 +57,12 @@ const MiniCalendarSectionBase = ({
   onSelectDate,
 }: MiniCalendarSectionProps) => {
   const t = useT();
+  const dateFnsLocale = useDateFnsLocale();
+  const monthLabelFormat = useMonthLabelFormat();
+  const monthLabel = useMemo(
+    () => format(monthDate, monthLabelFormat, { locale: dateFnsLocale }),
+    [dateFnsLocale, monthDate, monthLabelFormat],
+  );
   const miniCalendarDays = useMemo(
     () => buildMiniCalendarDays(monthDate, selectedDate),
     [monthDate, selectedDate],
@@ -64,6 +71,10 @@ const MiniCalendarSectionBase = ({
   return (
     <>
       <section className="flex w-full shrink-0 flex-col pb-2.5 pl-0 pr-2.5 pt-2.5">
+        <div className={MINI_CALENDAR_MONTH_LABEL_CLASS_NAME} aria-live="polite">
+          {monthLabel}
+        </div>
+
         <div className="grid grid-cols-7 px-0.5">
           {t.miniCalendarWeekdays.map((weekday, index) => (
             <span
