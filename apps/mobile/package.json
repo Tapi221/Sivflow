@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "main": "index.ts",
   "scripts": {
-    "start": "expo start",
-    "ios": "expo start --ios",
-    "android": "expo start --android",
+    "start": "expo start --offline",
+    "ios": "expo start --offline --ios",
+    "android": "expo start --offline --android",
     "typecheck": "tsc --noEmit --pretty false"
   },
   "dependencies": {
