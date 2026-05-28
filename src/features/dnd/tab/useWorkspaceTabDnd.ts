@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { WorkspaceTab } from "@/features/tab/Tab";
-import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
+import { useWorkspaceTabsStore } from "@/pane/tab.desktopnative/hooks/useTabsStore";
 
 type UseWorkspaceTabDndArgs = {
   tabs: WorkspaceTab[];

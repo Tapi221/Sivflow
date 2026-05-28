@@ -1,12 +1,12 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 
 const DesktopScheduleScreen = lazy(async () => {
-  const module = await import("@/pane/view/ScheduleScreen.desktop");
+  const module = await import("@/pane/curvepanel/view/ScheduleScreen.desktop");
 
   return { default: module.ScheduleScreen };
 });
 const MobileScheduleScreen = lazy(async () => {
-  const module = await import("@/pane/view/ScheduleScreen.mobile");
+  const module = await import("@/pane/curvepanel/view/ScheduleScreen.mobile");
 
   return { default: module.ScheduleScreen };
 });

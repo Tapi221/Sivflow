@@ -7,7 +7,7 @@ import { useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPane
 import { WorkspaceTabDndItem, WorkspaceTabDndList } from "@/features/dnd/tab/WorkspaceTabDnd";
 import { useWorkspaceTabDnd } from "@/features/dnd/tab/useWorkspaceTabDnd";
 import type { WorkspaceSidebarSection, WorkspaceTab } from "@/features/tab/Tab";
-import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
+import { useWorkspaceTabsStore } from "@/pane/tab.desktopnative/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
 import { FileText, Layers, X } from "@/ui/icons";
 
