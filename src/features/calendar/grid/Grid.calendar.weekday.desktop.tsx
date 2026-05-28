@@ -402,7 +402,7 @@ const CalendarWeekDayGridComponent = ({
       >
         <div className="grid bg-white" style={calendarGridStyle}>
           <div
-            className="z-[60] h-10 border-b border-r border-[#eeeeee] bg-white"
+            className="z-[60] h-10 border-b border-[#eeeeee] bg-white"
             style={WEEKDAY_HEADER_CORNER_STYLE}
           />
 
@@ -414,10 +414,7 @@ const CalendarWeekDayGridComponent = ({
             return (
               <div
                 key={`weekday-header-${day.toISOString()}`}
-                className={cn(
-                  "sticky top-0 z-50 border-b border-r border-[#eeeeee] bg-white",
-                  dayIndex === visibleDays.length - 1 && "border-r-0",
-                )}
+                className="sticky top-0 z-50 border-b border-[#eeeeee] bg-white"
                 style={{ gridColumn: dayIndex + 2, gridRow: 1 }}
               >
                 <CalendarDateButton
