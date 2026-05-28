@@ -2,23 +2,15 @@ import { memo, useMemo } from "react";
 import type { CSSProperties } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
-import { compareCalendarEvents, getEventDateKeys } from "@/features/calendar/calendarEventRange";
-import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
-import { getVisibleMonthEventChipCount } from "@/features/calendar/grid/monthEventChipCount";
-import { MonthRowResizeBar } from "@/features/calendar/grid/height/MonthRowResizeBar.month.desktop";
+import { computeMonthEventsByDay, EMPTY_MONTH_DAY_EVENTS } from "@/chip/eventchip/EventChip.month.placement";
+import type { CalendarMonthDayEvents } from "@/chip/eventchip/EventChip.month.placement";
+import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import * as T from "@/features/calendar/calendar.text";
+import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
+import { MonthRowResizeBar } from "@/features/calendar/grid/height/MonthRowResizeBar.month.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
-
-type CalendarMonthDayEvents = {
-  visibleEvents: GoogleCalendarEvent[];
-  totalCount: number;
-  color: string | null;
-};
-
-type CalendarMonthEventIndex = Map<string, GoogleCalendarEvent[]>;
 
 type CalendarMonthGridDay = {
   date: Date;
@@ -85,12 +77,6 @@ type CalendarMonthWeekRowProps = {
   handleResizePointerDown: (
     event: React.PointerEvent<HTMLDivElement>,
   ) => void;
-};
-
-const EMPTY_DAY_EVENTS: CalendarMonthDayEvents = {
-  visibleEvents: [],
-  totalCount: 0,
-  color: null,
 };
 
 const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
@@ -317,7 +303,7 @@ const CalendarMonthWeekRow = memo(({
           <CalendarMonthDayCell
             key={day.key}
             day={day}
-            dayEvents={eventsByDay.get(day.key) ?? EMPTY_DAY_EVENTS}
+            dayEvents={eventsByDay.get(day.key) ?? EMPTY_MONTH_DAY_EVENTS}
             isToday={isToday}
             selected={selected}
             isScrollHovered={isScrollHovered}
@@ -406,84 +392,14 @@ const GridCalendarMonthDesktop = ({
     [today],
   );
 
-  const eventsByDayKey = useMemo<CalendarMonthEventIndex>(() => {
-    const eventIndex = new Map<string, GoogleCalendarEvent[]>();
-
-    for (const event of visibleEvents) {
-      for (const dayKey of getEventDateKeys(event)) {
-        const dayEvents = eventIndex.get(dayKey);
-
-        if (dayEvents) {
-          dayEvents.push(event);
-        } else {
-          eventIndex.set(dayKey, [event]);
-        }
-      }
-    }
-
-    return eventIndex;
-  }, [visibleEvents]);
-
-  const eventsByDay = useMemo(() => {
-    const groupedEvents = new Map<string, CalendarMonthDayEvents>();
-    const maxVisibleEventCandidates =
-      getVisibleMonthEventChipCount(Number.MAX_SAFE_INTEGER, monthRowHeight) + 1;
-
-    const insertVisibleEvent = (
-      dayEvents: CalendarMonthDayEvents,
-      event: GoogleCalendarEvent,
-    ) => {
-      if (maxVisibleEventCandidates <= 0) return;
-
-      const visibleEvents = dayEvents.visibleEvents;
-      const insertAt = visibleEvents.findIndex(
-        (visibleEvent) => compareCalendarEvents(event, visibleEvent) < 0,
-      );
-      const boundedInsertAt =
-        insertAt === -1 ? visibleEvents.length : insertAt;
-
-      if (boundedInsertAt >= maxVisibleEventCandidates) return;
-
-      visibleEvents.splice(boundedInsertAt, 0, event);
-
-      if (visibleEvents.length > maxVisibleEventCandidates) {
-        visibleEvents.length = maxVisibleEventCandidates;
-      }
-    };
-
-    for (const week of monthWeeks) {
-      for (const day of week.days) {
-        const sourceEvents = eventsByDayKey.get(day.key);
-
-        if (!sourceEvents?.length) continue;
-
-        const dayEvents: CalendarMonthDayEvents = {
-          visibleEvents: [],
-          totalCount: sourceEvents.length,
-          color: sourceEvents[0]?.accentColor ?? null,
-        };
-
-        for (const event of sourceEvents) {
-          insertVisibleEvent(dayEvents, event);
-        }
-
-        groupedEvents.set(day.key, dayEvents);
-      }
-    }
-
-    for (const dayEvents of groupedEvents.values()) {
-      const visibleChipCount = getVisibleMonthEventChipCount(
-        dayEvents.totalCount,
-        monthRowHeight,
-      );
-
-      if (dayEvents.visibleEvents.length > visibleChipCount) {
-        dayEvents.visibleEvents.length = visibleChipCount;
-      }
-    }
-
-    return groupedEvents;
-  }, [eventsByDayKey, monthRowHeight, monthWeeks]);
+  const eventsByDay = useMemo(
+    () => computeMonthEventsByDay({
+      visibleEvents,
+      monthWeeks,
+      monthRowHeight,
+    }),
+    [monthRowHeight, monthWeeks, visibleEvents],
+  );
 
   return (
     <>
