@@ -105,6 +105,22 @@ const findProjectByLabel = (projects: AppCalendarItem[], label: string): AppCale
   return projects.find((project) => normalizeProjectLabel(project.label) === normalizedLabel) ?? null;
 };
 
+const resolveProjectForExternalCalendarLabel = (
+  projects: AppCalendarItem[],
+  label: string,
+): { project: AppCalendarItem; shouldCreate: boolean } => {
+  const existingProject = findProjectByLabel(projects, label);
+
+  if (existingProject) {
+    return { project: { ...existingProject, checked: true }, shouldCreate: false };
+  }
+
+  return {
+    project: createAppProjectFromName(label, projects.length),
+    shouldCreate: true,
+  };
+};
+
 const resolveGoogleEventProjectId = (
   event: GoogleCalendarEvent,
   links: ProjectCalendarLink[],
@@ -250,27 +266,28 @@ const ScheduleScreen = ({
     if (!account || !calendar) return;
 
     const calendarLabel = calendar.summaryOverride ?? calendar.summary;
-    let projectId: string | null = null;
+    const resolved = resolveProjectForExternalCalendarLabel(appProjects, calendarLabel);
 
     setAppProjects((projects) => {
-      const existingProject = findProjectByLabel(projects, calendarLabel);
-
-      if (existingProject) {
-        projectId = existingProject.id;
+      if (projects.some((project) => project.id === resolved.project.id)) {
         return projects.map((project) =>
-          project.id === existingProject.id ? { ...project, checked: true } : project,
+          project.id === resolved.project.id ? { ...project, checked: true } : project,
         );
       }
 
-      const project = createAppProjectFromName(calendarLabel, projects.length);
-      projectId = project.id;
-      return [...projects, project];
+      const latestDuplicate = findProjectByLabel(projects, resolved.project.label);
+
+      if (latestDuplicate) {
+        return projects.map((project) =>
+          project.id === latestDuplicate.id ? { ...project, checked: true } : project,
+        );
+      }
+
+      return [...projects, resolved.project];
     });
 
-    if (!projectId) return;
-
     const link = createProjectCalendarLink({
-      projectId,
+      projectId: resolved.project.id,
       provider: "google",
       accountId,
       externalCalendarId: calendar.id,
@@ -292,7 +309,7 @@ const ScheduleScreen = ({
     if (!account.selectedCalendarIds.has(calendar.id)) {
       toggleGoogleCalendar(accountId, calendar.id);
     }
-  }, [googleAccounts, toggleGoogleCalendar]);
+  }, [appProjects, googleAccounts, toggleGoogleCalendar]);
 
   const handleUnlinkProjectCalendar = useCallback((linkId: string) => {
     setProjectCalendarLinks((links) => links.filter((link) => link.id !== linkId));
