@@ -276,7 +276,7 @@ export const TabsBar = ({
     };
     const closeMenu = () => setContextMenu(null);
 
-    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("pointerdown", handlePointerDown, { capture: true });
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("resize", closeMenu, { once: true });
     window.addEventListener("scroll", closeMenu, {
@@ -285,7 +285,7 @@ export const TabsBar = ({
     });
 
     return () => {
-      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("pointerdown", handlePointerDown, { capture: true });
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("resize", closeMenu);
       window.removeEventListener("scroll", closeMenu, { capture: true });
