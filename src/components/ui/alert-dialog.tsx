@@ -121,13 +121,4 @@ AlertDialogDescription.displayName = AlertDialogPrimitive.Description.displayNam
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
 
-export {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-};
+export { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle };
