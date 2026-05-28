@@ -10,13 +10,15 @@
     "typecheck": "tsc --noEmit --pretty false"
   },
   "dependencies": {
-    "@expo/metro-runtime": "~55.0.0",
-    "expo": "~55.0.0",
-    "expo-status-bar": "~55.0.4",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "react-native": "0.83.6",
-    "react-native-web": "~0.21.0"
+    "@expo/metro-runtime": "~6.1.2",
+    "date-fns": "^4.1.0",
+    "expo": "~54.0.0",
+    "expo-status-bar": "~3.0.9",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-web": "~0.21.0",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@types/react": "^19.2.14",
