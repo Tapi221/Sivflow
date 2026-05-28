@@ -335,12 +335,8 @@ export const useCalendarNavigation = () => {
   const handleVisibleMonthChange = useCallback((date: Date) => {
     const normalizedDate = startOfDay(date);
 
-    if (primaryViewMode === "list") {
-      setSelectedDate(normalizedDate);
-    }
-
     setMonthTitleDate(startOfMonth(normalizedDate));
-  }, [primaryViewMode]);
+  }, []);
 
   const handleMonthCellSelectDate = useCallback((date: Date) => {
     setSelectedDate(date);
