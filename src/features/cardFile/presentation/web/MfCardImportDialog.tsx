@@ -1,6 +1,6 @@
 import { type ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { importMfCardFile } from "@/features/cardFile/application/importMfCard";
-import { MF_CARD_MIME_TYPE } from "@/features/cardFile/domain/mfCardTypes";
+import { MF_CARD_MIME_TYPE } from "@/features/cardFile/domain/mfCard.types";
 import { type LoadMfCardFileResult, readMfCardFile } from "@/features/cardFile/infra/web/readMfCardFile";
 import type { CreateMfDeckCard, CreateMfDeckCardSet, EnsureMfDeckTagByName, UpdateMfDeckCardSet } from "@/features/deckFile/application/importMfDeck";
 import { Button } from "@/components/ui/button";
