@@ -10,7 +10,8 @@ import { createProjectCalendarLink, persistProjectCalendarLinks, readStoredProje
 import type { AppCalendarItem, CalendarViewMode, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
-import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+import { createGoogleCalendar } from "@/integration/googlecalendar-integration/gcal.api";
+import type { GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { CalendarSidebar } from "@/pane.desktop/leftpane/CalendarSidebar";
@@ -31,6 +32,14 @@ type CalendarEventDisplayRangeOptions = {
   selectedDate: Date;
   monthTitleDate: Date;
   visibleDays: Date[];
+};
+
+type CreateGoogleProjectCalendarLinkInput = {
+  project: AppCalendarItem;
+  accountId: string;
+  calendar: GoogleCalendarListItem;
+  color: string;
+  createdByApp: boolean;
 };
 
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
@@ -253,6 +262,24 @@ const filterEventsByDisplayRange = (
   range: CalendarEventDisplayRange,
 ): GoogleCalendarEvent[] => events.filter((event) => eventOverlapsDisplayRange(event, range));
 
+const createGoogleProjectCalendarLink = ({
+  project,
+  accountId,
+  calendar,
+  color,
+  createdByApp,
+}: CreateGoogleProjectCalendarLinkInput): ProjectCalendarLink => createProjectCalendarLink({
+  projectId: project.id,
+  provider: "google",
+  accountId,
+  externalCalendarId: calendar.id,
+  externalCalendarName: calendar.summaryOverride ?? calendar.summary,
+  syncDirection: "importOnly",
+  createdByApp,
+  color,
+  lastSyncedAt: new Date().toISOString(),
+});
+
 const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const pane = useScheduleScreen();
   const t = useT();
@@ -343,25 +370,9 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     setAppProjects((projects) => projects.map((project) => project.id === projectId ? { ...project, checked: !project.checked } : project));
   }, []);
 
-  const handleLinkProjectToGoogleCalendar = useCallback((projectId: string, accountId: string, calendarId: string) => {
-    const project = appProjects.find((item) => item.id === projectId);
-    const account = googleAccounts.find((item) => item.accountId === accountId);
-    const calendar = account?.calendars.find((item) => item.id === calendarId);
-    if (!project || !account || !calendar) return;
-
-    const calendarLabel = calendar.summaryOverride ?? calendar.summary;
-    const color = googleCalendarColorOverrides[createGoogleCalendarColorOverrideKey(accountId, calendar.id)] ?? calendar.backgroundColor ?? project.color;
-    const link = createProjectCalendarLink({
-      projectId: project.id,
-      provider: "google",
-      accountId,
-      externalCalendarId: calendar.id,
-      externalCalendarName: calendarLabel,
-      syncDirection: "importOnly",
-      createdByApp: false,
-      color,
-      lastSyncedAt: new Date().toISOString(),
-    });
+  const linkProjectToGoogleCalendar = useCallback((project: AppCalendarItem, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem, createdByApp: boolean) => {
+    const color = googleCalendarColorOverrides[createGoogleCalendarColorOverrideKey(account.accountId, calendar.id)] ?? calendar.backgroundColor ?? project.color;
+    const link = createGoogleProjectCalendarLink({ project, accountId: account.accountId, calendar, color, createdByApp });
 
     setAppProjects((projects) => projects.map((item) => item.id === project.id ? { ...item, checked: true, color } : item));
     setProjectCalendarLinks((links) => {
@@ -373,9 +384,36 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     });
 
     if (!account.selectedCalendarIds.has(calendar.id)) {
-      toggleGoogleCalendar(accountId, calendar.id);
+      toggleGoogleCalendar(account.accountId, calendar.id);
     }
-  }, [appProjects, googleAccounts, googleCalendarColorOverrides, toggleGoogleCalendar]);
+  }, [googleCalendarColorOverrides, toggleGoogleCalendar]);
+
+  const handleLinkProjectToGoogleCalendar = useCallback((projectId: string, accountId: string, calendarId: string) => {
+    const project = appProjects.find((item) => item.id === projectId);
+    const account = googleAccounts.find((item) => item.accountId === accountId);
+    const calendar = account?.calendars.find((item) => item.id === calendarId);
+    if (!project || !account || !calendar) return;
+
+    linkProjectToGoogleCalendar(project, account, calendar, false);
+  }, [appProjects, googleAccounts, linkProjectToGoogleCalendar]);
+
+  const handleCreateProjectGoogleCalendar = useCallback((projectId: string, accountId: string) => {
+    void (async () => {
+      const project = appProjects.find((item) => item.id === projectId);
+      const account = googleAccounts.find((item) => item.accountId === accountId);
+      if (!project || !account) return;
+
+      if (!account.accessToken) {
+        void reconnectGoogleAccount(accountId);
+        return;
+      }
+
+      const calendar = await createGoogleCalendar({ accessToken: account.accessToken, summary: project.label });
+      linkProjectToGoogleCalendar(project, { ...account, calendars: [...account.calendars, calendar] }, calendar, true);
+    })().catch((error) => {
+      console.warn("[ScheduleScreen] Google Calendar creation failed", error);
+    });
+  }, [appProjects, googleAccounts, linkProjectToGoogleCalendar, reconnectGoogleAccount]);
 
   const handleLinkGoogleCalendarAsProject = useCallback((accountId: string, calendarId: string) => {
     const account = googleAccounts.find((item) => item.accountId === accountId);
@@ -384,7 +422,6 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
 
     const calendarLabel = calendar.summaryOverride ?? calendar.summary;
     const resolved = resolveProjectForExternalCalendarLabel(appProjects, calendarLabel);
-    const color = googleCalendarColorOverrides[createGoogleCalendarColorOverrideKey(accountId, calendar.id)] ?? calendar.backgroundColor;
 
     setAppProjects((projects) => {
       if (projects.some((project) => project.id === resolved.project.id)) {
@@ -397,33 +434,11 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
         return projects.map((project) => project.id === latestDuplicate.id ? { ...project, checked: true } : project);
       }
 
-      return [...projects, { ...resolved.project, color: color ?? resolved.project.color }];
+      return [...projects, resolved.project];
     });
 
-    const link = createProjectCalendarLink({
-      projectId: resolved.project.id,
-      provider: "google",
-      accountId,
-      externalCalendarId: calendar.id,
-      externalCalendarName: calendarLabel,
-      syncDirection: "importOnly",
-      createdByApp: false,
-      color,
-      lastSyncedAt: new Date().toISOString(),
-    });
-
-    setProjectCalendarLinks((links) => {
-      if (links.some((item) => item.id === link.id)) {
-        return links.map((item) => item.id === link.id ? { ...item, ...link } : item);
-      }
-
-      return [...links, link];
-    });
-
-    if (!account.selectedCalendarIds.has(calendar.id)) {
-      toggleGoogleCalendar(accountId, calendar.id);
-    }
-  }, [appProjects, googleAccounts, googleCalendarColorOverrides, toggleGoogleCalendar]);
+    linkProjectToGoogleCalendar(resolved.project, account, calendar, false);
+  }, [appProjects, googleAccounts, linkProjectToGoogleCalendar]);
 
   const handleUnlinkProjectCalendar = useCallback((linkId: string) => {
     setProjectCalendarLinks((links) => links.filter((link) => link.id !== linkId));
@@ -488,6 +503,7 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
           onToggleProject={handleToggleAppProject}
           onLinkGoogleCalendarAsProject={handleLinkGoogleCalendarAsProject}
           onLinkProjectToGoogleCalendar={handleLinkProjectToGoogleCalendar}
+          onCreateProjectGoogleCalendar={handleCreateProjectGoogleCalendar}
           onUnlinkProjectCalendar={handleUnlinkProjectCalendar}
           onChangeGoogleCalendarColor={handleChangeGoogleCalendarColor}
           onReconnectAccount={(accountId) => {
