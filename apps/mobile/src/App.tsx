@@ -2,8 +2,8 @@ import { memo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { initialWindowMetrics, SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { ScheduleYearMobileNative } from "@/pane.mobilenative/schedule/schedule.year.mobilenative";
-import { NavigationBarMobile, type NavigationItemId } from "./NavigationBarMobile";
+import { ScheduleYearMobileNative } from "@mobile/pane/schedule/schedule.year.mobilenative";
+import { NavigationBarMobile, type NavigationItemId } from "./pane/navigationbar/NavigationBarMobile";
 
 const AppContent = () => {
   const insets = useSafeAreaInsets();
