@@ -6,7 +6,7 @@ import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/us
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
 import type { CalendarDateRange } from "./calendarRange.types";
 import type { CalendarGridStyle, CalendarViewMode, CalendarViewModeSelection, GoogleAccountDisplay } from "./scheduleScreen.types";
-import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+import type { GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useCalendarNavigation } from "./useCalendarNavigation";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
@@ -43,6 +43,9 @@ export type UseScheduleScreenReturn = {
   addGoogleCalendar: () => Promise<void>;
   reconnectGoogleAccount: (accountId: string) => Promise<void>;
   toggleGoogleCalendar: (accountId: string, calendarId: string) => void;
+  createGoogleCalendarEvent: (accountId: string, event: GCalWritableEventInput) => Promise<GoogleCalendarEvent>;
+  updateGoogleCalendarEvent: (accountId: string, event: GCalWritableEventUpdateInput) => Promise<GoogleCalendarEvent>;
+  deleteGoogleCalendarEvent: (accountId: string, event: GCalWritableEventDeleteInput) => Promise<void>;
 
   handleSelectViewMode: (viewMode: CalendarViewMode) => void;
   handleToday: () => void;
@@ -206,6 +209,9 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     addGoogleCalendar: google.addAccount,
     reconnectGoogleAccount: google.reconnectAccount,
     toggleGoogleCalendar: google.toggleCalendar,
+    createGoogleCalendarEvent: google.createCalendarEvent,
+    updateGoogleCalendarEvent: google.updateCalendarEvent,
+    deleteGoogleCalendarEvent: google.deleteCalendarEvent,
     handleSelectViewMode: navigation.handleSelectViewMode,
     handleToday: navigation.handleToday,
     handlePrevious: navigation.handlePrevious,
