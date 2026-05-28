@@ -15,6 +15,7 @@ const LIST_EVENT_DOT_CLASS_NAME = "relative mt-[9px] h-2.5 w-2.5 rounded-full bo
 const LIST_EVENT_CHIP_CLASS_NAME = "h-[52px] w-full overflow-hidden rounded-md py-1 pl-1.5 pr-2 text-left";
 const LIST_EVENT_TIME_CLASS_NAME = "overflow-hidden whitespace-nowrap text-[11px] font-semibold tabular-nums opacity-80";
 const LIST_EVENT_TITLE_CLASS_NAME = "mt-1 line-clamp-2 overflow-hidden whitespace-normal break-words text-[13px] font-semibold leading-snug tracking-[-0.01em]";
+const MINUTE_IN_MS = 60_000;
 
 const getEventTitle = (event: GoogleCalendarEvent): string =>
   event.title.trim() || "Untitled";
@@ -25,13 +26,25 @@ const getEventStartTimeLabel = (event: GoogleCalendarEvent): string => {
   return format(new Date(event.startsAt), "H:mm");
 };
 
+const getEventDurationLabel = (startsAt: Date, endsAt: Date): string => {
+  const totalMinutes = Math.max(0, Math.round((endsAt.getTime() - startsAt.getTime()) / MINUTE_IN_MS));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours === 0) return `${minutes}分`;
+  if (minutes === 0) return `${hours}時間`;
+
+  return `${hours}時間${minutes}分`;
+};
+
 const getEventTimeRangeLabel = (event: GoogleCalendarEvent): string => {
   if (event.isAllDay) return ALL_DAY_LABEL;
 
   const startsAt = new Date(event.startsAt);
   const endsAt = new Date(event.endsAt ?? event.startsAt);
+  const durationLabel = getEventDurationLabel(startsAt, endsAt);
 
-  return `${format(startsAt, "H:mm")} - ${format(endsAt, "H:mm")}`;
+  return `${format(startsAt, "H:mm")} - ${format(endsAt, "H:mm")}（${durationLabel}）`;
 };
 
 const createEventChipStyle = (
