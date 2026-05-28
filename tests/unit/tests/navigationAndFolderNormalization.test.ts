@@ -1,42 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
-import { createAppDestination, resolveAppDestination } from "@/navigation/core/destination";
-import { createPageUrl, toWebPath } from "@/platform/web/navigation/toWebPath";
-
-describe("navigation adapters", () => {
-  it("preserves legacy createPageUrl behavior through destination resolution", () => {
-    const destination = resolveAppDestination("CardSetView?folderId=folder-1");
-
-    expect(destination).toEqual({
-      kind: "screen",
-      screen: "cardSetView",
-      params: { folderId: "folder-1" },
-      sourceName: "CardSetView",
-    });
-    expect(toWebPath(destination)).toBe("/CardSetView?folderId=folder-1");
-    expect(createPageUrl("CardSetView?folderId=folder-1")).toBe(
-      "/CardSetView?folderId=folder-1",
-    );
-  });
-
-  it("serializes platform-agnostic destinations with params", () => {
-    expect(
-      createPageUrl(
-        createAppDestination("cardEdit", {
-          folderId: "folder-1",
-          returnTo: "calendar",
-        }),
-      ),
-    ).toBe("/CardEdit?folderId=folder-1&returnTo=calendar");
-  });
-
-  it("keeps unknown page fallback behavior", () => {
-    expect(createPageUrl("CustomScreen")).toBe("/customscreen");
-    expect(createPageUrl("CustomScreen?mode=debug")).toBe(
-      "/CustomScreen?mode=debug",
-    );
-  });
-});
 
 describe("normalizeFolderWithSilent", () => {
   it("maps legacy silent into isSilent and synthesizes deletedAt", () => {
