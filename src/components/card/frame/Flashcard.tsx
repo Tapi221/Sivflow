@@ -22,6 +22,7 @@ interface FlashcardProps {
   onFlip?: () => void;
   onToggleUncertainty?: (card: FlashcardCardLike) => void;
   onToggleBookmark?: (card: FlashcardCardLike) => void;
+  onEdit?: (card: FlashcardCardLike) => void;
   className?: string;
   onNext?: () => void;
   onPrev?: () => void;
@@ -81,6 +82,7 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
     prev.onFlip === next.onFlip &&
     prev.onToggleUncertainty === next.onToggleUncertainty &&
     prev.onToggleBookmark === next.onToggleBookmark &&
+    prev.onEdit === next.onEdit &&
     prev.className === next.className &&
     prev.onNext === next.onNext &&
     prev.onPrev === next.onPrev &&
@@ -113,6 +115,7 @@ const FlashcardInner = ({
   onFlip,
   onToggleUncertainty,
   onToggleBookmark,
+  onEdit: _onEdit,
   className,
   onNext,
   onPrev,
