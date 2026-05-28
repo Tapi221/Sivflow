@@ -1,6 +1,8 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject, type UIEvent } from "react";
-import { addDays, differenceInMinutes, format, isAfter, isBefore, isSameDay, startOfDay } from "date-fns";
+import { addDays, differenceInCalendarDays, differenceInMinutes, format, getDaysInMonth, isAfter, isBefore, isSameDay, startOfDay, startOfMonth, subDays } from "date-fns";
 import { ja } from "date-fns/locale";
+import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
+import { buildScheduleVirtualRailDays, getScheduleVirtualRailDate } from "@/features/calendar/grid/ScheduleColumn.shared";
 import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -10,6 +12,7 @@ type CalendarDayHeightMap = Record<string, number>;
 
 type CalendarPieChartViewProps = {
   days: Date[];
+  virtualRail?: ScheduleVirtualRail;
   selectedDate: Date;
   events: GoogleCalendarEvent[];
   appProjects: AppCalendarItem[];
@@ -35,7 +38,6 @@ type CalendarPieChartDay = {
 type CalendarPieChartDaySectionProps = {
   day: CalendarPieChartDay;
   height: number;
-  selectedDayRef?: (node: HTMLElement | null) => void;
   onSelectDate?: (date: Date) => void;
 };
 
@@ -65,12 +67,6 @@ type EventSegmentMeta = {
   labelColor: string;
 };
 
-type PieChartVirtualMetrics = {
-  heights: number[];
-  offsets: number[];
-  totalHeight: number;
-};
-
 type PieChartVirtualRange = {
   start: number;
   end: number;
@@ -90,13 +86,17 @@ const CLOCK_HOURS = [0, 3, 6, 9, 12, 15, 18, 21];
 const PIE_CHART_DAY_SECTION_HEIGHT_PX = 430;
 const PIE_CHART_CONTAINER_MAX_SIZE_PX = PIE_CHART_DAY_SECTION_HEIGHT_PX - 30;
 const PIE_CHART_DAY_GAP_PX = 8;
-const PIE_CHART_SCROLL_EDGE_THRESHOLD_PX = 220;
-const PIE_CHART_SCROLL_EDGE_RESET_PX = 520;
-const PIE_CHART_SCROLL_IDLE_DELAY_MS = 120;
 const PIE_CHART_VISIBLE_DATE_ANCHOR_PX = 160;
 const PIE_CHART_VIRTUAL_OVERSCAN_PX = 1100;
 const SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX = 8;
+const PIE_LOCAL_RAIL_DAYS = 3650;
 const CHART_CONTAINER_STYLE = { width: `min(100%, 72vh, ${PIE_CHART_CONTAINER_MAX_SIZE_PX}px)` };
+
+const createLocalVirtualRail = (selectedDate: Date): ScheduleVirtualRail => ({
+  startDate: subDays(startOfMonth(selectedDate), PIE_LOCAL_RAIL_DAYS),
+  anchorIndex: PIE_LOCAL_RAIL_DAYS,
+  totalDayCount: PIE_LOCAL_RAIL_DAYS * 2 + getDaysInMonth(selectedDate),
+});
 
 const formatDuration = (minutes: number): string => {
   const normalizedMinutes = Math.max(0, Math.round(minutes));
@@ -167,11 +167,7 @@ const getChartOverlayStyle = (minute: number, radius: number) => {
   };
 };
 
-const resolveEventSegmentMeta = (
-  event: GoogleCalendarEvent,
-  appProjects: AppCalendarItem[],
-  calendarLabelById: Map<string, string>,
-): EventSegmentMeta => {
+const resolveEventSegmentMeta = (event: GoogleCalendarEvent, appProjects: AppCalendarItem[], calendarLabelById: Map<string, string>): EventSegmentMeta => {
   const colorMeta = createEventChipColorMeta(event.accentColor);
   const project = appProjects.find((item) => item.id === event.projectId || item.label === event.projectId);
 
@@ -200,12 +196,7 @@ const resolveEventSegmentMeta = (
   };
 };
 
-const buildDailyPieSlices = (
-  date: Date,
-  events: GoogleCalendarEvent[],
-  appProjects: AppCalendarItem[],
-  calendarLabelById: Map<string, string>,
-): DailyPieSlice[] => {
+const buildDailyPieSlices = (date: Date, events: GoogleCalendarEvent[], appProjects: AppCalendarItem[], calendarLabelById: Map<string, string>): DailyPieSlice[] => {
   const dayStart = startOfDay(date);
   const dayEnd = addDays(dayStart, 1);
   const timedEvents = events.flatMap((event) => {
@@ -219,14 +210,7 @@ const buildDailyPieSlices = (
 
     if (endMinute <= startMinute) return [];
 
-    return [
-      {
-        ...resolveEventSegmentMeta(event, appProjects, calendarLabelById),
-        sourceId: event.id,
-        startMinute,
-        endMinute,
-      },
-    ];
+    return [{ ...resolveEventSegmentMeta(event, appProjects, calendarLabelById), sourceId: event.id, startMinute, endMinute }];
   }).sort((a, b) => a.startMinute - b.startMinute || a.endMinute - b.endMinute);
 
   const slices: DailyPieSlice[] = [];
@@ -237,54 +221,18 @@ const buildDailyPieSlices = (
     const endMinute = Math.max(startMinute, event.endMinute);
 
     if (startMinute > cursor) {
-      slices.push({
-        id: `gap:${getDateKey(date)}:${cursor}:${startMinute}`,
-        label: "未予定",
-        color: GAP_SEGMENT_COLOR,
-        borderColor: GAP_SEGMENT_BORDER_COLOR,
-        labelColor: GAP_SEGMENT_LABEL_COLOR,
-        minutes: startMinute - cursor,
-        eventCount: 0,
-        percentage: 0,
-        startMinute: cursor,
-        endMinute: startMinute,
-        isGap: true,
-      });
+      slices.push({ id: `gap:${getDateKey(date)}:${cursor}:${startMinute}`, label: "未予定", color: GAP_SEGMENT_COLOR, borderColor: GAP_SEGMENT_BORDER_COLOR, labelColor: GAP_SEGMENT_LABEL_COLOR, minutes: startMinute - cursor, eventCount: 0, percentage: 0, startMinute: cursor, endMinute: startMinute, isGap: true });
     }
 
     if (endMinute > startMinute) {
-      slices.push({
-        id: `${event.id}:${event.sourceId}:${getDateKey(date)}:${startMinute}:${endMinute}`,
-        label: event.label,
-        color: event.color,
-        borderColor: event.borderColor,
-        labelColor: event.labelColor,
-        minutes: endMinute - startMinute,
-        eventCount: 1,
-        percentage: 0,
-        startMinute,
-        endMinute,
-        isGap: false,
-      });
+      slices.push({ id: `${event.id}:${event.sourceId}:${getDateKey(date)}:${startMinute}:${endMinute}`, label: event.label, color: event.color, borderColor: event.borderColor, labelColor: event.labelColor, minutes: endMinute - startMinute, eventCount: 1, percentage: 0, startMinute, endMinute, isGap: false });
     }
 
     cursor = Math.max(cursor, endMinute);
   });
 
   if (cursor < FULL_DAY_MINUTES) {
-    slices.push({
-      id: `gap:${getDateKey(date)}:${cursor}:${FULL_DAY_MINUTES}`,
-      label: "未予定",
-      color: GAP_SEGMENT_COLOR,
-      borderColor: GAP_SEGMENT_BORDER_COLOR,
-      labelColor: GAP_SEGMENT_LABEL_COLOR,
-      minutes: FULL_DAY_MINUTES - cursor,
-      eventCount: 0,
-      percentage: 0,
-      startMinute: cursor,
-      endMinute: FULL_DAY_MINUTES,
-      isGap: true,
-    });
+    slices.push({ id: `gap:${getDateKey(date)}:${cursor}:${FULL_DAY_MINUTES}`, label: "未予定", color: GAP_SEGMENT_COLOR, borderColor: GAP_SEGMENT_BORDER_COLOR, labelColor: GAP_SEGMENT_LABEL_COLOR, minutes: FULL_DAY_MINUTES - cursor, eventCount: 0, percentage: 0, startMinute: cursor, endMinute: FULL_DAY_MINUTES, isGap: true });
   }
 
   const scheduledMinutes = slices.reduce((sum, slice) => slice.isGap ? sum : sum + slice.minutes, 0);
@@ -295,13 +243,7 @@ const buildDailyPieSlices = (
   }));
 };
 
-const buildPieChartDays = (
-  days: Date[],
-  selectedDate: Date,
-  events: GoogleCalendarEvent[],
-  appProjects: AppCalendarItem[],
-  googleAccounts: GoogleAccountDisplay[],
-): CalendarPieChartDay[] => {
+const buildPieChartDays = (days: Date[], selectedDate: Date, events: GoogleCalendarEvent[], appProjects: AppCalendarItem[], googleAccounts: GoogleAccountDisplay[]): CalendarPieChartDay[] => {
   const today = new Date();
   const calendarLabelById = createCalendarLabelMap(googleAccounts);
 
@@ -314,86 +256,21 @@ const buildPieChartDays = (
   }));
 };
 
-const getAlignedDayHeight = (
-  dayHeights: CalendarDayHeightMap | undefined,
-  day: CalendarPieChartDay,
-): number => dayHeights?.[day.dateKey] ?? PIE_CHART_DAY_SECTION_HEIGHT_PX;
+const getRailDayBlockHeight = () => PIE_CHART_DAY_SECTION_HEIGHT_PX + PIE_CHART_DAY_GAP_PX;
 
-const buildVirtualMetrics = (
-  days: CalendarPieChartDay[],
-  dayHeights?: CalendarDayHeightMap,
-): PieChartVirtualMetrics => {
-  let totalHeight = 0;
-  const offsets: number[] = [];
-  const heights = days.map((day, index) => {
-    const height = getAlignedDayHeight(dayHeights, day) + (index < days.length - 1 ? PIE_CHART_DAY_GAP_PX : 0);
+const getVirtualRange = (scrollTop: number, viewportHeight: number, totalDayCount: number): PieChartVirtualRange => {
+  if (totalDayCount <= 0) return { start: 0, end: 0 };
 
-    offsets.push(totalHeight);
-    totalHeight += height;
+  const blockHeight = getRailDayBlockHeight();
+  const start = Math.max(0, Math.floor(Math.max(0, scrollTop - PIE_CHART_VIRTUAL_OVERSCAN_PX) / blockHeight));
+  const end = Math.min(totalDayCount, Math.ceil((scrollTop + viewportHeight + PIE_CHART_VIRTUAL_OVERSCAN_PX) / blockHeight) + 1);
 
-    return height;
-  });
-
-  return { heights, offsets, totalHeight };
+  return { start, end: Math.max(start, end) };
 };
 
-const findVirtualIndex = (offsets: number[], targetOffset: number): number => {
-  if (offsets.length === 0) return 0;
+const areVirtualRangesEqual = (left: PieChartVirtualRange, right: PieChartVirtualRange): boolean => left.start === right.start && left.end === right.end;
 
-  let low = 0;
-  let high = offsets.length - 1;
-  let result = 0;
-
-  while (low <= high) {
-    const middle = Math.floor((low + high) / 2);
-
-    if (offsets[middle] <= targetOffset) {
-      result = middle;
-      low = middle + 1;
-    } else {
-      high = middle - 1;
-    }
-  }
-
-  return result;
-};
-
-const getVirtualRange = (
-  metrics: PieChartVirtualMetrics,
-  scrollTop: number,
-  viewportHeight: number,
-): PieChartVirtualRange => {
-  if (metrics.heights.length === 0) return { start: 0, end: 0 };
-
-  const rangeStartOffset = Math.max(0, scrollTop - PIE_CHART_VIRTUAL_OVERSCAN_PX);
-  const rangeEndOffset = scrollTop + viewportHeight + PIE_CHART_VIRTUAL_OVERSCAN_PX;
-  const start = findVirtualIndex(metrics.offsets, rangeStartOffset);
-  let end = start;
-
-  while (end < metrics.heights.length && metrics.offsets[end] < rangeEndOffset) {
-    end += 1;
-  }
-
-  return {
-    start,
-    end: Math.min(metrics.heights.length, end + 1),
-  };
-};
-
-const areVirtualRangesEqual = (
-  left: PieChartVirtualRange,
-  right: PieChartVirtualRange,
-): boolean => left.start === right.start && left.end === right.end;
-
-const getVisibleDate = (
-  days: CalendarPieChartDay[],
-  metrics: PieChartVirtualMetrics,
-  targetOffset: number,
-): Date | null => {
-  const index = findVirtualIndex(metrics.offsets, targetOffset);
-
-  return days[index]?.date ?? null;
-};
+const getRailIndexForDate = (rail: ScheduleVirtualRail, date: Date): number => differenceInCalendarDays(date, rail.startDate);
 
 const truncateChartLabel = (label: string) => {
   if (label.length <= 6) return label;
@@ -411,161 +288,82 @@ const DailyClockPieComponent = ({ slices }: DailyClockPieProps) => {
         {hasTimedSlices ? (
           <>
             <svg viewBox="0 0 200 200" role="img" aria-label="予定の円グラフ" className="h-full w-full overflow-visible">
-              {visibleSlices.map((slice) => (
-                slice.endMinute - slice.startMinute >= FULL_DAY_MINUTES ? (
-                  <circle key={slice.id} cx={CHART_CENTER} cy={CHART_CENTER} r={CHART_RADIUS} fill={slice.color}>
-                    <title>
-                      {slice.label}: {formatDuration(slice.minutes)}
-                    </title>
-                  </circle>
-                ) : (
-                  <path key={slice.id} d={buildWedgePath(slice.startMinute, slice.endMinute)} fill={slice.color}>
-                    <title>
-                      {slice.label}: {formatDuration(slice.minutes)}
-                    </title>
-                  </path>
-                )
-              ))}
-
-              {visibleSlices.filter((slice) => !slice.isGap).map((slice) => (
-                slice.endMinute - slice.startMinute >= FULL_DAY_MINUTES ? (
-                  <circle key={`accent:${slice.id}`} cx={CHART_CENTER} cy={CHART_CENTER} r={CHART_RADIUS} fill="none" stroke={slice.borderColor} strokeWidth={CHART_EVENT_BORDER_STROKE_WIDTH} vectorEffect="non-scaling-stroke" />
-                ) : (
-                  <path key={`accent:${slice.id}`} d={buildArcPath(slice.startMinute, slice.endMinute, CHART_RADIUS)} fill="none" stroke={slice.borderColor} strokeWidth={CHART_EVENT_BORDER_STROKE_WIDTH} strokeLinecap="butt" vectorEffect="non-scaling-stroke" />
-                )
-              ))}
-
+              {visibleSlices.map((slice) => slice.endMinute - slice.startMinute >= FULL_DAY_MINUTES ? <circle key={slice.id} cx={CHART_CENTER} cy={CHART_CENTER} r={CHART_RADIUS} fill={slice.color}><title>{slice.label}: {formatDuration(slice.minutes)}</title></circle> : <path key={slice.id} d={buildWedgePath(slice.startMinute, slice.endMinute)} fill={slice.color}><title>{slice.label}: {formatDuration(slice.minutes)}</title></path>)}
+              {visibleSlices.filter((slice) => !slice.isGap).map((slice) => slice.endMinute - slice.startMinute >= FULL_DAY_MINUTES ? <circle key={`accent:${slice.id}`} cx={CHART_CENTER} cy={CHART_CENTER} r={CHART_RADIUS} fill="none" stroke={slice.borderColor} strokeWidth={CHART_EVENT_BORDER_STROKE_WIDTH} vectorEffect="non-scaling-stroke" /> : <path key={`accent:${slice.id}`} d={buildArcPath(slice.startMinute, slice.endMinute, CHART_RADIUS)} fill="none" stroke={slice.borderColor} strokeWidth={CHART_EVENT_BORDER_STROKE_WIDTH} strokeLinecap="butt" vectorEffect="non-scaling-stroke" />)}
               {CLOCK_HOURS.map((hour) => {
                 const minute = hour * 60;
                 const inner = polarToCartesian(minute, CHART_RADIUS - 5);
                 const outer = polarToCartesian(minute, CHART_RADIUS + 2);
 
-                return (
-                  <g key={hour}>
-                    <line x1={inner.x} y1={inner.y} x2={outer.x} y2={outer.y} stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" />
-                  </g>
-                );
+                return <g key={hour}><line x1={inner.x} y1={inner.y} x2={outer.x} y2={outer.y} stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" /></g>;
               })}
             </svg>
-
             <div className="pointer-events-none absolute inset-0 overflow-visible">
-              {CLOCK_HOURS.map((hour) => (
-                <span key={hour} className="absolute -translate-x-1/2 -translate-y-1/2 text-[clamp(11px,2.1vw,18px)] font-medium leading-none text-[#8e8e93]" style={getChartOverlayStyle(hour * 60, CHART_CLOCK_LABEL_RADIUS)}>
-                  {hour}
-                </span>
-              ))}
-
+              {CLOCK_HOURS.map((hour) => <span key={hour} className="absolute -translate-x-1/2 -translate-y-1/2 text-[clamp(11px,2.1vw,18px)] font-medium leading-none text-[#8e8e93]" style={getChartOverlayStyle(hour * 60, CHART_CLOCK_LABEL_RADIUS)}>{hour}</span>)}
               {visibleSlices.filter((slice) => !slice.isGap && slice.minutes >= 30).map((slice) => {
                 const labelMinute = (slice.startMinute + slice.endMinute) / 2;
 
-                return (
-                  <span key={`label:${slice.id}`} className="absolute -translate-x-1/2 -translate-y-1/2 text-center text-[clamp(9px,1.75vw,15px)] font-semibold leading-[1.05] drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]" style={{ ...getChartOverlayStyle(labelMinute, CHART_LABEL_RADIUS), color: slice.labelColor }}>
-                    <span className="block max-w-[5.5em] truncate">{truncateChartLabel(slice.label)}</span>
-                    <span className="block">{formatDuration(slice.minutes)}</span>
-                  </span>
-                );
+                return <span key={`label:${slice.id}`} className="absolute -translate-x-1/2 -translate-y-1/2 text-center text-[clamp(9px,1.75vw,15px)] font-semibold leading-[1.05] drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]" style={{ ...getChartOverlayStyle(labelMinute, CHART_LABEL_RADIUS), color: slice.labelColor }}><span className="block max-w-[5.5em] truncate">{truncateChartLabel(slice.label)}</span><span className="block">{formatDuration(slice.minutes)}</span></span>;
               })}
             </div>
           </>
         ) : (
-          <div className="flex h-full items-center justify-center rounded-full border border-dashed border-[#dedede] text-center">
-            <div>
-              <p className="text-[13px] font-semibold text-[#8e8e93]">時間指定なし</p>
-              <p className="mt-1 text-[11px] font-medium text-[#b3b3b3]">終日は集計外</p>
-            </div>
-          </div>
+          <div className="flex h-full items-center justify-center rounded-full border border-dashed border-[#dedede] text-center"><div><p className="text-[13px] font-semibold text-[#8e8e93]">時間指定なし</p><p className="mt-1 text-[11px] font-medium text-[#b3b3b3]">終日は集計外</p></div></div>
         )}
       </div>
     </div>
   );
 };
 
-const CalendarPieChartDaySectionComponent = ({
-  day,
-  height,
-  selectedDayRef,
-  onSelectDate,
-}: CalendarPieChartDaySectionProps) => {
+const CalendarPieChartDaySectionComponent = ({ day, height, onSelectDate }: CalendarPieChartDaySectionProps) => {
   return (
-    <section
-      ref={day.isSelected ? selectedDayRef : undefined}
-      className="grid grid-cols-[58px_minmax(0,1fr)] gap-2"
-      style={{ height }}
-      aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}
-    >
-      <button
-        type="button"
-        className={cn(
-          "group mt-0.5 flex h-8 items-baseline justify-end gap-1 rounded-[10px] pr-0.5 text-right transition",
-          "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25",
-          day.isSelected && "text-[#1c1c1e]",
-        )}
-        onClick={() => onSelectDate?.(day.date)}
-      >
+    <section className="grid grid-cols-[58px_minmax(0,1fr)] gap-2" style={{ height }} aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}>
+      <button type="button" className={cn("group mt-0.5 flex h-8 items-baseline justify-end gap-1 rounded-[10px] pr-0.5 text-right transition", "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25", day.isSelected && "text-[#1c1c1e]")} onClick={() => onSelectDate?.(day.date)}>
         <span className={cn("text-[16px] font-bold leading-none tracking-[-0.03em]", day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]")}>{format(day.date, "d")}</span>
         <span className="text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]">{format(day.date, "EEE", { locale: ja })}</span>
       </button>
-
-      <div className="min-h-0 min-w-0">
-        <DailyClockPie slices={day.slices} />
-      </div>
+      <div className="min-h-0 min-w-0"><DailyClockPie slices={day.slices} /></div>
     </section>
   );
 };
 
 const CalendarPieChartViewComponent = ({
-  days,
+  virtualRail,
   selectedDate,
   events,
   appProjects,
   googleAccounts,
   onSelectDate,
-  onReachStart,
-  onReachEnd,
   onVisibleDateChange,
-  dayHeights,
   scrollViewportRef: externalScrollViewportRef,
   onScrollTopChange,
   className,
 }: CalendarPieChartViewProps) => {
   const localScrollViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollViewportRef = externalScrollViewportRef ?? localScrollViewportRef;
-  const selectedDayElementRef = useRef<HTMLElement | null>(null);
-  const previousFirstDayKeyRef = useRef<string | null>(null);
-  const previousScrollHeightRef = useRef(0);
-  const lastReachStartKeyRef = useRef<string | null>(null);
-  const lastReachEndKeyRef = useRef<string | null>(null);
   const lastSelectedDateKeyRef = useRef<string | null>(null);
   const lastVisibleDateKeyRef = useRef<string | null>(null);
   const scrollFrameRef = useRef<number | null>(null);
-  const edgeExtendTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingScrollElementRef = useRef<HTMLDivElement | null>(null);
-  const pendingEdgeDirectionRef = useRef<"start" | "end" | null>(null);
-  const [virtualRange, setVirtualRange] = useState<PieChartVirtualRange>({ start: 0, end: 0 });
-  const pieChartDays = useMemo(
-    () => buildPieChartDays(days, selectedDate, events, appProjects, googleAccounts),
-    [appProjects, days, events, googleAccounts, selectedDate],
-  );
-  const virtualMetrics = useMemo(() => buildVirtualMetrics(pieChartDays, dayHeights), [dayHeights, pieChartDays]);
-  const firstDayKey = pieChartDays[0]?.dateKey ?? null;
-  const lastDayKey = pieChartDays.at(-1)?.dateKey ?? null;
-  const renderedDays = pieChartDays.slice(virtualRange.start, virtualRange.end);
-  const selectedDateKey = getDateKey(selectedDate);
-  const selectedDayIndex = pieChartDays.findIndex((day) => day.dateKey === selectedDateKey);
+  const resolvedRail = useMemo(() => virtualRail ?? createLocalVirtualRail(selectedDate), [selectedDate, virtualRail]);
+  const totalDayCount = resolvedRail.totalDayCount;
+  const [virtualRange, setVirtualRange] = useState<PieChartVirtualRange>({ start: 0, end: 1 });
+  const renderedDates = useMemo(() => buildScheduleVirtualRailDays(resolvedRail, virtualRange.start, virtualRange.end), [resolvedRail, virtualRange.end, virtualRange.start]);
+  const renderedDays = useMemo(() => buildPieChartDays(renderedDates, selectedDate, events, appProjects, googleAccounts), [appProjects, events, googleAccounts, renderedDates, selectedDate]);
+  const totalHeight = Math.max(0, totalDayCount * getRailDayBlockHeight() - PIE_CHART_DAY_GAP_PX);
 
   const updateVirtualRange = useCallback((scrollElement: HTMLDivElement | null) => {
-    const nextRange = scrollElement
-      ? getVirtualRange(virtualMetrics, scrollElement.scrollTop, scrollElement.clientHeight)
-      : getVirtualRange(virtualMetrics, 0, 0);
+    const nextRange = scrollElement ? getVirtualRange(scrollElement.scrollTop, scrollElement.clientHeight, totalDayCount) : getVirtualRange(0, 0, totalDayCount);
 
     setVirtualRange((currentRange) => areVirtualRangesEqual(currentRange, nextRange) ? currentRange : nextRange);
-  }, [virtualMetrics]);
+  }, [totalDayCount]);
 
   const updateVisibleDate = useCallback((scrollElement: HTMLDivElement | null) => {
     if (!scrollElement || !onVisibleDateChange) return;
 
     const anchorOffset = scrollElement.scrollTop + Math.min(PIE_CHART_VISIBLE_DATE_ANCHOR_PX, scrollElement.clientHeight / 2);
-    const visibleDate = getVisibleDate(pieChartDays, virtualMetrics, anchorOffset);
+    const anchorIndex = Math.max(0, Math.min(totalDayCount - 1, Math.floor(anchorOffset / getRailDayBlockHeight())));
+    const visibleDate = getScheduleVirtualRailDate(resolvedRail, anchorIndex);
     if (!visibleDate) return;
 
     const visibleDateKey = getDateKey(visibleDate);
@@ -573,67 +371,13 @@ const CalendarPieChartViewComponent = ({
 
     lastVisibleDateKeyRef.current = visibleDateKey;
     onVisibleDateChange(visibleDate);
-  }, [onVisibleDateChange, pieChartDays, virtualMetrics]);
-
-  const clearEdgeExtendTimer = useCallback(() => {
-    if (!edgeExtendTimerRef.current) return;
-
-    clearTimeout(edgeExtendTimerRef.current);
-    edgeExtendTimerRef.current = null;
-  }, []);
-
-  const requestEdgeExtension = useCallback((direction: "start" | "end") => {
-    pendingEdgeDirectionRef.current = direction;
-    clearEdgeExtendTimer();
-
-    edgeExtendTimerRef.current = setTimeout(() => {
-      edgeExtendTimerRef.current = null;
-      const pendingDirection = pendingEdgeDirectionRef.current;
-      pendingEdgeDirectionRef.current = null;
-
-      if (pendingDirection === "start") {
-        onReachStart?.();
-        return;
-      }
-
-      if (pendingDirection === "end") {
-        onReachEnd?.();
-      }
-    }, PIE_CHART_SCROLL_IDLE_DELAY_MS);
-  }, [clearEdgeExtendTimer, onReachEnd, onReachStart]);
+  }, [onVisibleDateChange, resolvedRail, totalDayCount]);
 
   const processScroll = useCallback((scrollElement: HTMLDivElement) => {
-    const remainingScrollBottom = scrollElement.scrollHeight - scrollElement.clientHeight - scrollElement.scrollTop;
-
     updateVirtualRange(scrollElement);
     updateVisibleDate(scrollElement);
-
-    if (scrollElement.scrollTop <= PIE_CHART_SCROLL_EDGE_THRESHOLD_PX) {
-      if (firstDayKey && lastReachStartKeyRef.current !== firstDayKey) {
-        lastReachStartKeyRef.current = firstDayKey;
-        requestEdgeExtension("start");
-      }
-    } else if (scrollElement.scrollTop >= PIE_CHART_SCROLL_EDGE_RESET_PX) {
-      lastReachStartKeyRef.current = null;
-      if (pendingEdgeDirectionRef.current === "start") {
-        pendingEdgeDirectionRef.current = null;
-        clearEdgeExtendTimer();
-      }
-    }
-
-    if (remainingScrollBottom <= PIE_CHART_SCROLL_EDGE_THRESHOLD_PX) {
-      if (lastDayKey && lastReachEndKeyRef.current !== lastDayKey) {
-        lastReachEndKeyRef.current = lastDayKey;
-        requestEdgeExtension("end");
-      }
-    } else if (remainingScrollBottom >= PIE_CHART_SCROLL_EDGE_RESET_PX) {
-      lastReachEndKeyRef.current = null;
-      if (pendingEdgeDirectionRef.current === "end") {
-        pendingEdgeDirectionRef.current = null;
-        clearEdgeExtendTimer();
-      }
-    }
-  }, [clearEdgeExtendTimer, firstDayKey, lastDayKey, requestEdgeExtension, updateVirtualRange, updateVisibleDate]);
+    onScrollTopChange?.(scrollElement.scrollTop);
+  }, [onScrollTopChange, updateVirtualRange, updateVisibleDate]);
 
   const requestScrollProcessing = useCallback((scrollElement: HTMLDivElement) => {
     pendingScrollElementRef.current = scrollElement;
@@ -653,88 +397,48 @@ const CalendarPieChartViewComponent = ({
 
   const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
     requestScrollProcessing(event.currentTarget);
-    onScrollTopChange?.(event.currentTarget.scrollTop);
-  }, [onScrollTopChange, requestScrollProcessing]);
+  }, [requestScrollProcessing]);
 
   useLayoutEffect(() => {
-    const scrollElement = scrollViewportRef.current;
-    const previousFirstDayKey = previousFirstDayKeyRef.current;
-    const previousScrollHeight = previousScrollHeightRef.current;
-
-    if (
-      scrollElement &&
-      previousFirstDayKey &&
-      firstDayKey &&
-      previousFirstDayKey !== firstDayKey &&
-      pieChartDays.some((day) => day.dateKey === previousFirstDayKey)
-    ) {
-      const scrollHeightDelta = scrollElement.scrollHeight - previousScrollHeight;
-      if (scrollHeightDelta > 0) {
-        scrollElement.scrollTop += scrollHeightDelta;
-      }
-    }
-
-    previousFirstDayKeyRef.current = firstDayKey;
-    previousScrollHeightRef.current = scrollElement?.scrollHeight ?? 0;
-    updateVirtualRange(scrollElement);
-  }, [firstDayKey, pieChartDays, scrollViewportRef, updateVirtualRange]);
+    updateVirtualRange(scrollViewportRef.current);
+  }, [scrollViewportRef, updateVirtualRange]);
 
   useEffect(() => {
+    const selectedDateKey = getDateKey(selectedDate);
     const scrollElement = scrollViewportRef.current;
-    if (lastSelectedDateKeyRef.current === selectedDateKey || !scrollElement || selectedDayIndex < 0) return;
+    const selectedDayIndex = getRailIndexForDate(resolvedRail, selectedDate);
+    if (lastSelectedDateKeyRef.current === selectedDateKey || !scrollElement || selectedDayIndex < 0 || selectedDayIndex >= totalDayCount) return;
 
     lastSelectedDateKeyRef.current = selectedDateKey;
-
-    if (lastVisibleDateKeyRef.current === selectedDateKey) {
-      updateVirtualRange(scrollElement);
-      return;
-    }
-
-    scrollElement.scrollTop = Math.max(0, virtualMetrics.offsets[selectedDayIndex] - SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX);
+    scrollElement.scrollTop = Math.max(0, selectedDayIndex * getRailDayBlockHeight() - SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX);
     updateVirtualRange(scrollElement);
-  }, [scrollViewportRef, selectedDateKey, selectedDayIndex, updateVirtualRange, virtualMetrics]);
+  }, [resolvedRail, scrollViewportRef, selectedDate, totalDayCount, updateVirtualRange]);
 
   useEffect(() => {
     return () => {
       if (scrollFrameRef.current != null) {
         window.cancelAnimationFrame(scrollFrameRef.current);
       }
-
-      clearEdgeExtendTimer();
     };
-  }, [clearEdgeExtendTimer]);
+  }, []);
 
   return (
-    <div className={cn("flex h-full min-h-0 bg-white text-[#1c1c1e]", className)}>
-      <main className="flex min-h-0 flex-1 flex-col">
-        <div ref={scrollViewportRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden" onScroll={handleScroll}>
-          <div className="mx-auto w-full max-w-[940px]">
-            <div className="relative w-full" style={{ height: virtualMetrics.totalHeight }}>
-              {renderedDays.map((day, index) => {
-                const dayIndex = virtualRange.start + index;
-                const sectionHeight = Math.max(0, virtualMetrics.heights[dayIndex] - (dayIndex < pieChartDays.length - 1 ? PIE_CHART_DAY_GAP_PX : 0));
+    <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}>
+      <div ref={scrollViewportRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden" onScroll={handleScroll}>
+        <div className="mx-auto w-full max-w-[940px]">
+          <div className="relative w-full" style={{ height: totalHeight }}>
+            {renderedDays.map((day, index) => {
+              const dayIndex = virtualRange.start + index;
 
-                return (
-                  <div
-                    key={day.dateKey}
-                    className="absolute left-0 right-0"
-                    style={{ top: virtualMetrics.offsets[dayIndex], height: virtualMetrics.heights[dayIndex] }}
-                  >
-                    <CalendarPieChartDaySection
-                      day={day}
-                      height={sectionHeight}
-                      selectedDayRef={day.isSelected ? (node) => {
-                        selectedDayElementRef.current = node;
-                      } : undefined}
-                      onSelectDate={onSelectDate}
-                    />
-                  </div>
-                );
-              })}
-            </div>
+              return (
+                <div key={day.dateKey} className="absolute left-0 right-0" style={{ contain: "layout paint style", top: dayIndex * getRailDayBlockHeight(), height: PIE_CHART_DAY_SECTION_HEIGHT_PX }}>
+                  <CalendarPieChartDaySection day={day} height={PIE_CHART_DAY_SECTION_HEIGHT_PX} onSelectDate={onSelectDate} />
+                </div>
+              );
+            })}
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };
