@@ -1,8 +1,8 @@
 import { type ChangeEvent, type CSSProperties, type FormEvent, type KeyboardEvent, type MouseEvent as ReactMouseEvent, useCallback, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { CalendarIcon, GoogleIcon } from "@/chip/icons/icons.schedule";
-import { CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_MARGIN, CALENDAR_LIST_MENU_WIDTH, CALENDAR_LIST_MENU_PANEL_ID, CalendarListMenu, type CalendarListMenuAction } from "@/chip/rightclickpanel/CalendarListMenu.desktop";
-import { RIGHT_CLICK_PANEL_NO_DRAG_STYLE, clampRightClickPanelPosition, useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPanel.utils";
+import { CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_MARGIN, CALENDAR_LIST_MENU_WIDTH, CALENDAR_LIST_MENU_PANEL_ID, CalendarListMenu, type CalendarListMenuAction } from "@/chip/rightclickpanel.desktop/CalendarListMenu.desktop";
+import { RIGHT_CLICK_PANEL_NO_DRAG_STYLE, clampRightClickPanelPosition, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { MiniCalendarSection } from "@/features/calendar/panel/MiniCalendarSection";
 import { SelectableGoogleSourceRow } from "@/features/calendar/panel/SelectableGoogleSourceRow";
 import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
