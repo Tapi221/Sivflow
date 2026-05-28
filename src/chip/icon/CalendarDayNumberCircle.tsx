@@ -14,7 +14,7 @@ type CalendarDayNumberCircleProps = {
 const CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME =
   "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[12px] font-[450] tabular-nums transition-all duration-150";
 const CALENDAR_DAY_NUMBER_CIRCLE_TODAY_CLASS_NAME =
-  "bg-[#eeeeee] !text-[#3f3f3f] shadow-none ring-1 ring-[#dedede]";
+  "bg-[#f7f7f7] !text-[#3f3f3f] shadow-none ring-1 ring-[#e8e8e8]";
 const CALENDAR_DAY_NUMBER_CIRCLE_SELECTED_CLASS_NAME =
   "bg-[#3a77b2] !text-white shadow-none ring-1 ring-[#3a77b2]";
 
