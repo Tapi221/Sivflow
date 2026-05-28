@@ -46,6 +46,7 @@ export type Translations = {
   viewWeek: string;
   viewThreeDays: string;
   viewDay: string;
+  viewTimetable: string;
   viewList: string;
   viewPieChart: string;
   viewsLabel: string;
@@ -108,6 +109,7 @@ const ja: Translations = {
   viewWeek: "週",
   viewThreeDays: "3日",
   viewDay: "日",
+  viewTimetable: "時間割",
   viewList: "リスト",
   viewPieChart: "円グラフ",
   viewsLabel: "表示形式",
@@ -167,6 +169,7 @@ const en: Translations = {
   viewWeek: "Week",
   viewThreeDays: "3 Days",
   viewDay: "Day",
+  viewTimetable: "Timetable",
   viewList: "List",
   viewPieChart: "Pie",
   viewsLabel: "Views",
