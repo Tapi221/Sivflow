@@ -6,7 +6,6 @@ import { getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
-import type { CalendarColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
@@ -20,13 +19,14 @@ type MiniCalendarSectionProps = {
   onNextMonth: () => void;
 };
 
-type MiniCalendarDayEventTokens = Map<string, CalendarColorTokens>;
+type MiniCalendarDayEventColors = Map<string, string>;
 
 const MINI_CALENDAR_DIVIDER_CLASS_NAME = "mt-2 h-px w-full shrink-0 bg-[#eeeeee]";
 const MINI_CALENDAR_MONTH_LABEL_CLASS_NAME = "mb-1 flex h-7 max-w-full items-center justify-start overflow-hidden pl-2.5 pr-0.5 text-left text-[14px] font-semibold leading-none tracking-[-0.01em] text-[#2f2f2f]";
 const MINI_CALENDAR_MONTH_LABEL_TEXT_CLASS_NAME = "block min-w-0 truncate";
 const MINI_CALENDAR_WEEKDAY_CLASS_NAME = "flex h-6 items-center justify-center text-[11px] font-semibold leading-none tracking-[0.03em] text-[#8e8e93]";
 const MINI_CALENDAR_DAY_BUTTON_CLASS_NAME = "relative mx-auto flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
+const MINI_CALENDAR_EVENT_DOT_CLASS_NAME = "pointer-events-none absolute bottom-[2px] left-1/2 z-20 h-[4px] w-[4px] -translate-x-1/2 rounded-full";
 const EMPTY_VISIBLE_EVENTS: readonly GoogleCalendarEvent[] = [];
 
 const getMiniCalendarVisibleEvents = (
@@ -66,40 +66,32 @@ const buildMiniCalendarDays = (
   });
 };
 
-const buildMiniCalendarDayEventTokens = (
+const buildMiniCalendarDayEventColors = (
   visibleEvents: readonly GoogleCalendarEvent[],
-): MiniCalendarDayEventTokens => {
-  const dayTokens: MiniCalendarDayEventTokens = new Map();
+): MiniCalendarDayEventColors => {
+  const dayColors: MiniCalendarDayEventColors = new Map();
 
   for (const event of visibleEvents) {
     for (const dayKey of getEventDateKeys(event)) {
-      if (!dayTokens.has(dayKey)) {
-        dayTokens.set(dayKey, generateColorTokens(event.accentColor));
+      if (!dayColors.has(dayKey)) {
+        dayColors.set(dayKey, generateColorTokens(event.accentColor).border);
       }
     }
   }
 
-  return dayTokens;
+  return dayColors;
 };
 
-const getMiniCalendarDayEventTokens = (
+const getMiniCalendarDayEventColor = (
   day: MiniCalendarDay,
-  dayEventTokens: MiniCalendarDayEventTokens,
-): CalendarColorTokens | undefined => {
-  return dayEventTokens.get(getMiniCalendarDayKey(day.date));
+  dayEventColors: MiniCalendarDayEventColors,
+): string | undefined => {
+  return dayEventColors.get(getMiniCalendarDayKey(day.date));
 };
 
-const getMiniCalendarDayButtonStyle = (
-  day: MiniCalendarDay,
-  tokens?: CalendarColorTokens,
-): CSSProperties | undefined => {
-  if (day.isSelected || !tokens) return undefined;
-
-  return {
-    backgroundColor: tokens.bg,
-    transition: "none",
-  };
-};
+const getMiniCalendarEventDotStyle = (color: string): CSSProperties => ({
+  backgroundColor: color,
+});
 
 const isSameDayValue = (left: Date, right: Date): boolean => {
   return startOfDay(left).getTime() === startOfDay(right).getTime();
@@ -130,8 +122,8 @@ const MiniCalendarSectionBase = ({
     () => getMiniCalendarVisibleEvents(visibleEvents),
     [visibleEvents],
   );
-  const dayEventTokens = useMemo(
-    () => buildMiniCalendarDayEventTokens(miniCalendarVisibleEvents),
+  const dayEventColors = useMemo(
+    () => buildMiniCalendarDayEventColors(miniCalendarVisibleEvents),
     [miniCalendarVisibleEvents],
   );
 
@@ -155,20 +147,15 @@ const MiniCalendarSectionBase = ({
 
         <div className="grid grid-cols-7 gap-y-0.5 px-0.5">
           {miniCalendarDays.map((day) => {
-            const eventTokens = getMiniCalendarDayEventTokens(day, dayEventTokens);
-            const buttonStyle = getMiniCalendarDayButtonStyle(day, eventTokens);
+            const eventColor = getMiniCalendarDayEventColor(day, dayEventColors);
 
             return (
               <button
                 key={day.date.toISOString()}
                 type="button"
                 onClick={() => onSelectDate(day.date)}
-                className={cn(
-                  MINI_CALENDAR_DAY_BUTTON_CLASS_NAME,
-                  !eventTokens && "hover:bg-[#f7f7f7]",
-                )}
-                style={buttonStyle}
-                data-mini-calendar-event-day={eventTokens ? "true" : undefined}
+                className={cn(MINI_CALENDAR_DAY_BUTTON_CLASS_NAME, "hover:bg-[#f7f7f7]")}
+                data-mini-calendar-event-day={eventColor ? "true" : undefined}
               >
                 <CalendarDayNumberCircle
                   isToday={day.isToday}
@@ -178,6 +165,14 @@ const MiniCalendarSectionBase = ({
                 >
                   {day.dayNumber}
                 </CalendarDayNumberCircle>
+
+                {eventColor && (
+                  <span
+                    aria-hidden="true"
+                    className={MINI_CALENDAR_EVENT_DOT_CLASS_NAME}
+                    style={getMiniCalendarEventDotStyle(eventColor)}
+                  />
+                )}
               </button>
             );
           })}
