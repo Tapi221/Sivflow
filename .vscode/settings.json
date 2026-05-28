@@ -11,4 +11,8 @@
   "eslint.workingDirectories": [{ "mode": "auto" }],
   "eslint.probe": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "prettier.enable": false
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> eeed526e0059bc860b62c582678e5bfeb517ff4f
