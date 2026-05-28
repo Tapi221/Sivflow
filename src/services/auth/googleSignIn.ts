@@ -5,9 +5,9 @@ import { googleAuthWebAdapter } from "@/infrastructure/auth/google/GoogleAuthWeb
 import { selectGoogleAuthPort } from "@/infrastructure/auth/google/selectGoogleAuthPort";
 import { getRuntimeKind } from "@/platform/runtimeKind";
 
-export { selectGoogleAuthPort } from "@/infrastructure/auth/google/selectGoogleAuthPort";
+let pendingSignInWithGoogle: Promise<void> | null = null;
 
-export const signInWithGoogle = async (): Promise<void> => {
+const executeSignInWithGoogle = async (): Promise<void> => {
   const auth: GoogleAuthPort = selectGoogleAuthPort({
     webAuth: googleAuthWebAdapter,
     desktopAuth: googleAuthDesktopAdapter,
@@ -18,3 +18,15 @@ export const signInWithGoogle = async (): Promise<void> => {
   const signInWithGoogleUseCase = createSignInWithGoogleUseCase({ auth });
   await signInWithGoogleUseCase.execute();
 };
+
+const signInWithGoogle = async (): Promise<void> => {
+  if (pendingSignInWithGoogle) return pendingSignInWithGoogle;
+
+  pendingSignInWithGoogle = executeSignInWithGoogle().finally(() => {
+    pendingSignInWithGoogle = null;
+  });
+
+  return pendingSignInWithGoogle;
+};
+
+export { selectGoogleAuthPort, signInWithGoogle };
