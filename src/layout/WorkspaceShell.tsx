@@ -10,7 +10,7 @@ type WorkspaceShellProps = {
 };
 
 const tabsBackgroundStyle: CSSProperties = {
-  background: "var(--app-sidebar-bg)",
+  background: "var(--backpane-bg)",
 };
 
 export const WorkspaceShell = ({
