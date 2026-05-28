@@ -63,6 +63,7 @@ export type Card = BaseEntity & {
   questionNumber: string;
   title?: string;
   tagIds?: string[];
+  tags?: string[];
   front: CardFace;
   back: CardFace;
   layoutRows?: number;
