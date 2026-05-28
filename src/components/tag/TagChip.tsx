@@ -1,5 +1,5 @@
 import React from "react";
-import type { TagColorKey } from "@/features/tag/tagColor";
+import type { TagColorKey } from "@/chip/tag/tagColor";
 import { TagBadge } from "@/components/tag/TagBadge";
 import { cn } from "@/lib/utils";
 

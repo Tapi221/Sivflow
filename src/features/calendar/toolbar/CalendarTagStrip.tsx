@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { TagChip } from "@/components/tag/TagChip";
 import { TAG_COLOR_CONTEXT_MENU_HEIGHT, TAG_COLOR_CONTEXT_MENU_WIDTH, TagColorRightClickPanel } from "@/chip/rightclickpanel/TagColorRightClickPanel";
 import { RIGHT_CLICK_PANEL_NO_DRAG_STYLE, clampRightClickPanelPosition, useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPanelUtils";
-import { getTagColorKey, type TagColorKey } from "@/features/tag/tagColor";
+import { getTagColorKey, type TagColorKey } from "@/chip/tag/tagColor";
 import { useTags } from "@/hooks/settings/useTags";
 import { ChevronLeft, ChevronRight, Plus, Tag, X } from "@/ui/icons";
 

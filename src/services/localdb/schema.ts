@@ -1,4 +1,4 @@
-import { getTagColorKey } from "@/features/tag/tagColor";
+import { getTagColorKey } from "@/chip/tag/tagColor";
 import type { LocalDB } from "./LocalDB";
 
 export const defineSchema = (db: LocalDB): void => {
