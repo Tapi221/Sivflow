@@ -26,8 +26,8 @@ const MINI_CALENDAR_DIVIDER_CLASS_NAME = "mt-2 h-px w-full shrink-0 bg-[#eeeeee]
 const MINI_CALENDAR_MONTH_LABEL_CLASS_NAME = "mb-1 flex h-7 max-w-full items-center justify-start overflow-hidden pl-2.5 pr-0.5 text-left text-[14px] font-semibold leading-none tracking-[-0.01em] text-[#2f2f2f]";
 const MINI_CALENDAR_MONTH_LABEL_TEXT_CLASS_NAME = "block min-w-0 truncate";
 const MINI_CALENDAR_WEEKDAY_CLASS_NAME = "flex h-6 items-center justify-center text-[11px] font-semibold leading-none tracking-[0.03em] text-[#8e8e93]";
-const MINI_CALENDAR_DAY_BUTTON_CLASS_NAME = "relative flex h-7 w-full items-center justify-center transition-all duration-150 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
-const MINI_CALENDAR_EVENT_MARKER_CLASS_NAME = "pointer-events-none absolute bottom-[3px] left-1/2 z-20 h-[5px] w-[5px] -translate-x-1/2 rounded-full border border-white shadow-[0_0_0_1px_rgba(255,255,255,0.75)]";
+const MINI_CALENDAR_DAY_BUTTON_CLASS_NAME = "relative mx-auto flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
+const MINI_CALENDAR_EVENT_MARKER_CLASS_NAME = "pointer-events-none absolute bottom-[2px] left-1/2 z-20 h-[5px] w-[5px] -translate-x-1/2 rounded-full border border-white shadow-[0_0_0_1px_rgba(255,255,255,0.75)]";
 const EMPTY_VISIBLE_EVENTS: readonly GoogleCalendarEvent[] = [];
 
 const getMiniCalendarVisibleEvents = (
@@ -90,7 +90,7 @@ const getMiniCalendarDayEventTokens = (
   return dayEventTokens.get(getMiniCalendarDayKey(day.date));
 };
 
-const getMiniCalendarDayEventStyle = (
+const getMiniCalendarDayButtonStyle = (
   day: MiniCalendarDay,
   tokens?: CalendarColorTokens,
 ): CSSProperties | undefined => {
@@ -98,8 +98,7 @@ const getMiniCalendarDayEventStyle = (
 
   if (day.isSelected || day.isToday) {
     return {
-      outline: `2px solid ${tokens.border}`,
-      outlineOffset: "2px",
+      boxShadow: `0 0 0 2px ${tokens.border}`,
       transition: "none",
     };
   }
@@ -171,9 +170,8 @@ const MiniCalendarSectionBase = ({
 
         <div className="grid grid-cols-7 gap-y-0.5 px-0.5">
           {miniCalendarDays.map((day) => {
-            const isActive = day.isToday || day.isSelected;
             const eventTokens = getMiniCalendarDayEventTokens(day, dayEventTokens);
-            const eventStyle = getMiniCalendarDayEventStyle(day, eventTokens);
+            const buttonStyle = getMiniCalendarDayButtonStyle(day, eventTokens);
 
             return (
               <button
@@ -182,16 +180,16 @@ const MiniCalendarSectionBase = ({
                 onClick={() => onSelectDate(day.date)}
                 className={cn(
                   MINI_CALENDAR_DAY_BUTTON_CLASS_NAME,
-                  !isActive && "rounded-full hover:bg-[#f7f7f7]",
+                  !eventTokens && "hover:bg-[#f7f7f7]",
                 )}
+                style={buttonStyle}
+                data-mini-calendar-event-day={eventTokens ? "true" : undefined}
               >
                 <CalendarDayNumberCircle
                   isToday={day.isToday}
                   isSelected={day.isSelected}
                   isCurrentMonth={day.isCurrentMonth}
                   className="relative z-10"
-                  style={eventStyle}
-                  allowsCustomBackground
                 >
                   {day.dayNumber}
                 </CalendarDayNumberCircle>
