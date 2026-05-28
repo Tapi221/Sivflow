@@ -5,9 +5,11 @@ import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScre
 
 const LIST_PIE_CHART_VIEW_MODES = ["list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 
+const isViewModeSelectionArray = (selection: CalendarViewModeSelection): selection is readonly CalendarViewMode[] => Array.isArray(selection);
+
 const isListPieChartViewMode = (viewMode: CalendarViewMode) => viewMode === "list" || viewMode === "pieChart";
 
-const isListPieChartViewModeSelection = (selection: CalendarViewModeSelection): boolean => Array.isArray(selection) && selection.includes("list") && selection.includes("pieChart");
+const isListPieChartViewModeSelection = (selection: CalendarViewModeSelection): boolean => isViewModeSelectionArray(selection) && selection.includes("list") && selection.includes("pieChart");
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return addYears(current, 1);
@@ -45,12 +47,12 @@ const normalizeCurrentDateForSelectedDate = (date: Date, viewMode: CalendarViewM
 
 const getSelectedDateStepViewMode = (selection: CalendarViewModeSelection, primaryViewMode: CalendarViewMode): CalendarViewMode => isListPieChartViewModeSelection(selection) ? "pieChart" : primaryViewMode;
 
-const getPrimaryViewMode = (selection: CalendarViewModeSelection): CalendarViewMode => Array.isArray(selection) ? selection[0] : selection;
+const getPrimaryViewMode = (selection: CalendarViewModeSelection): CalendarViewMode => isViewModeSelectionArray(selection) ? selection[0] : selection;
 
 const resolveNextViewModeSelection = (currentSelection: CalendarViewModeSelection, primaryViewMode: CalendarViewMode, next: CalendarViewMode): CalendarViewModeSelection => {
   if (!isListPieChartViewMode(next)) return next;
 
-  if (Array.isArray(currentSelection)) {
+  if (isViewModeSelectionArray(currentSelection)) {
     if (currentSelection.includes(next)) {
       const remainingSelection = currentSelection.filter((viewMode) => viewMode !== next);
       return remainingSelection[0] ?? next;
