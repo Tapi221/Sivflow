@@ -180,7 +180,6 @@ export const useRightClickPanelDismiss = (
     if (!isOpen) return;
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (event.defaultPrevented) return;
       if (panelRef.current?.contains(event.target as Node)) return;
       onClose();
     };
@@ -197,7 +196,7 @@ export const useRightClickPanelDismiss = (
       }
     };
 
-    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("pointerdown", handlePointerDown, { capture: true });
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener(RIGHT_CLICK_PANEL_OPEN_EVENT, handleOtherPanelOpen);
     window.addEventListener("resize", onClose, { once: true });
@@ -207,7 +206,7 @@ export const useRightClickPanelDismiss = (
     });
 
     return () => {
-      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("pointerdown", handlePointerDown, { capture: true });
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener(RIGHT_CLICK_PANEL_OPEN_EVENT, handleOtherPanelOpen);
       window.removeEventListener("resize", onClose);
