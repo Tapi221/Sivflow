@@ -155,7 +155,7 @@ const areCalendarWeekDayGridPropsEqual = (
   return (
     previous.scrollContainerRef === next.scrollContainerRef &&
     previous.visibleEvents === next.visibleEvents &&
-    previous.calendarDayColumnWidth === next.calendarDayColumnWidth &&
+    previous._calendarDayColumnWidth === next._calendarDayColumnWidth &&
     previous.calendarGridStyle === next.calendarGridStyle &&
     previous.onScroll === next.onScroll &&
     previous.onSelectDate === next.onSelectDate &&
@@ -267,7 +267,7 @@ const CalendarWeekDayGridComponent = ({
   scrollContainerRef,
   visibleDays,
   visibleEvents,
-  calendarDayColumnWidth,
+  _calendarDayColumnWidth,
   calendarGridStyle,
   onScroll,
   selectedDate,
@@ -283,7 +283,7 @@ const CalendarWeekDayGridComponent = ({
   const updateVirtualDayRange = useCallback(() => {
     const scroller = scrollContainerRef.current;
 
-    if (!scroller || calendarDayColumnWidth <= 0 || visibleDays.length === 0) {
+    if (!scroller || _calendarDayColumnWidth <= 0 || visibleDays.length === 0) {
       setVirtualDayRange({ start: 0, end: visibleDays.length });
       return;
     }
@@ -292,11 +292,11 @@ const CalendarWeekDayGridComponent = ({
     const visibleRight = Math.max(0, scroller.scrollLeft + scroller.clientWidth - C.TIME_COLUMN_WIDTH);
     const start = Math.max(
       0,
-      Math.floor(scrollableLeft / calendarDayColumnWidth) - HORIZONTAL_DAY_OVERSCAN,
+      Math.floor(scrollableLeft / _calendarDayColumnWidth) - HORIZONTAL_DAY_OVERSCAN,
     );
     const end = Math.min(
       visibleDays.length,
-      Math.ceil(visibleRight / calendarDayColumnWidth) + HORIZONTAL_DAY_OVERSCAN,
+      Math.ceil(visibleRight / _calendarDayColumnWidth) + HORIZONTAL_DAY_OVERSCAN,
     );
 
     setVirtualDayRange((previous) =>
@@ -304,7 +304,7 @@ const CalendarWeekDayGridComponent = ({
         ? previous
         : { start, end },
     );
-  }, [calendarDayColumnWidth, scrollContainerRef, visibleDays.length]);
+  }, [_calendarDayColumnWidth, scrollContainerRef, visibleDays.length]);
 
   useLayoutEffect(() => {
     updateVirtualDayRange();
