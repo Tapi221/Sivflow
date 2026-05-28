@@ -1,5 +1,5 @@
-import { Reorder, type Transition } from "framer-motion";
-import type { CSSProperties, HTMLAttributes, ReactNode, RefObject } from "react";
+import { Reorder, type HTMLMotionProps, type Transition } from "framer-motion";
+import type { CSSProperties, ReactNode, RefObject } from "react";
 import type { WorkspaceTab } from "@/features/tab/Tab";
 
 type WorkspaceTabDndListProps = {
@@ -12,8 +12,8 @@ type WorkspaceTabDndListProps = {
 };
 
 type WorkspaceTabDndItemProps = Omit<
-  HTMLAttributes<HTMLDivElement>,
-  "children" | "onDragEnd" | "onDragStart" | "style"
+  HTMLMotionProps<"div">,
+  "children" | "layout" | "onDragEnd" | "onDragStart" | "style" | "value"
 > & {
   tab: WorkspaceTab;
   canReorderTabs: boolean;
