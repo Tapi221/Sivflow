@@ -25,8 +25,8 @@ const MINI_CALENDAR_DIVIDER_CLASS_NAME = "mt-2 h-px w-full shrink-0 bg-[#eeeeee]
 const MINI_CALENDAR_MONTH_LABEL_CLASS_NAME = "mb-1 flex h-7 max-w-full items-center justify-start overflow-hidden pl-2.5 pr-0.5 text-left text-[14px] font-semibold leading-none tracking-[-0.01em] text-[#2f2f2f]";
 const MINI_CALENDAR_MONTH_LABEL_TEXT_CLASS_NAME = "block min-w-0 truncate";
 const MINI_CALENDAR_WEEKDAY_CLASS_NAME = "flex h-6 items-center justify-center text-[11px] font-semibold leading-none tracking-[0.03em] text-[#8e8e93]";
-const MINI_CALENDAR_DAY_BUTTON_CLASS_NAME = "relative mx-auto flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
-const MINI_CALENDAR_EVENT_DOTS_CLASS_NAME = "pointer-events-none absolute bottom-[2px] left-1/2 z-20 flex -translate-x-1/2 items-center justify-center gap-[2px]";
+const MINI_CALENDAR_DAY_BUTTON_CLASS_NAME = "relative mx-auto flex h-8 w-7 items-start justify-center rounded-full pt-[1px] transition-all duration-150 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
+const MINI_CALENDAR_EVENT_DOTS_CLASS_NAME = "pointer-events-none absolute bottom-[1px] left-1/2 z-20 flex -translate-x-1/2 items-center justify-center gap-[2px]";
 const MINI_CALENDAR_EVENT_DOT_CLASS_NAME = "h-[3px] w-[3px] rounded-full";
 const MINI_CALENDAR_EVENT_DOT_MAX_COUNT = 4;
 const EMPTY_VISIBLE_EVENTS: readonly GoogleCalendarEvent[] = [];
@@ -166,7 +166,7 @@ const MiniCalendarSectionBase = ({
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-y-0.5 px-0.5">
+        <div className="grid grid-cols-7 gap-y-0 px-0.5">
           {miniCalendarDays.map((day) => {
             const eventColors = getMiniCalendarDayEventColors(day, dayEventColors);
             const hasEvents = eventColors.length > 0;
