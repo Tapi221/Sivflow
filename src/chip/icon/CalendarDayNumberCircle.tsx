@@ -35,6 +35,17 @@ const getCalendarDayNumberCircleClassName = ({
     className,
   );
 
+const getCalendarDayNumberCircleStyle = (
+  style?: CSSProperties,
+): CSSProperties | undefined => {
+  if (!style) return undefined;
+
+  const circleStyle = { ...style };
+  delete circleStyle.backgroundColor;
+
+  return circleStyle;
+};
+
 const CalendarDayNumberCircle = ({
   children,
   isToday = false,
@@ -51,7 +62,7 @@ const CalendarDayNumberCircle = ({
         isCurrentMonth,
         className,
       })}
-      style={style}
+      style={getCalendarDayNumberCircleStyle(style)}
     >
       {children}
     </span>
