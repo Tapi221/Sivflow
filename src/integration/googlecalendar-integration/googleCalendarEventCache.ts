@@ -98,6 +98,28 @@ const chunk = <T>(items: readonly T[], size: number): T[][] => {
   return chunks;
 };
 
+const readRowsForAccountCalendar = async ({
+  table,
+  accountId,
+  calendarId,
+  rangeStartMs,
+  rangeEndMs,
+}: {
+  table: Dexie.Table<GoogleCalendarEventCacheRow, string>;
+  accountId: string;
+  calendarId: string;
+  rangeStartMs: number;
+  rangeEndMs: number;
+}) => {
+  const upperStartBound = Number.isFinite(rangeEndMs) ? rangeEndMs : Dexie.maxKey;
+  const rows = await table
+    .where("[accountId+calendarId+startsAt]")
+    .between([accountId, calendarId, Dexie.minKey], [accountId, calendarId, upperStartBound], true, false)
+    .toArray();
+
+  return rows.filter((row) => overlapsRange(row, rangeStartMs, rangeEndMs));
+};
+
 export const readCachedGoogleCalendarEvents = async ({
   accountIds,
   calendarIds,
@@ -107,12 +129,32 @@ export const readCachedGoogleCalendarEvents = async ({
   const db = getCacheDb();
   if (!db) return [];
 
-  const accountIdSet = accountIds && accountIds.length > 0 ? new Set(accountIds.map(getResolvedAccountId)) : null;
-  const calendarIdSet = calendarIds && calendarIds.length > 0 ? new Set(calendarIds) : null;
+  const resolvedAccountIds = accountIds && accountIds.length > 0 ? accountIds.map(getResolvedAccountId) : null;
+  const resolvedCalendarIds = calendarIds && calendarIds.length > 0 ? calendarIds : null;
   const rangeStartMs = rangeStart?.getTime() ?? Number.NEGATIVE_INFINITY;
   const rangeEndMs = rangeEnd?.getTime() ?? Number.POSITIVE_INFINITY;
+  const table = db.googleCalendarEvents;
 
-  const rows = await db.googleCalendarEvents.toArray();
+  if (resolvedAccountIds && resolvedCalendarIds) {
+    const rowsByPair = await Promise.all(
+      resolvedAccountIds.flatMap((accountId) =>
+        resolvedCalendarIds.map((calendarId) =>
+          readRowsForAccountCalendar({ table, accountId, calendarId, rangeStartMs, rangeEndMs }),
+        ),
+      ),
+    );
+
+    return rowsByPair.flat().map(toCalendarEvent);
+  }
+
+  const rows = resolvedAccountIds
+    ? (await Promise.all(resolvedAccountIds.map((accountId) => table.where("accountId").equals(accountId).toArray()))).flat()
+    : resolvedCalendarIds
+      ? (await Promise.all(resolvedCalendarIds.map((calendarId) => table.where("calendarId").equals(calendarId).toArray()))).flat()
+      : await table.toArray();
+
+  const accountIdSet = resolvedAccountIds ? new Set(resolvedAccountIds) : null;
+  const calendarIdSet = resolvedCalendarIds ? new Set(resolvedCalendarIds) : null;
 
   return rows
     .filter((row) => {
@@ -154,13 +196,8 @@ export const replaceCachedGoogleCalendarRange = async ({
   const table = db.googleCalendarEvents;
 
   await db.transaction("rw", table, async () => {
-    const candidateRows = await table
-      .where("[accountId+calendarId+startsAt]")
-      .between([resolvedAccountId, calendarId, Dexie.minKey], [resolvedAccountId, calendarId, rangeEndMs], true, false)
-      .toArray();
-    const deleteIds = candidateRows
-      .filter((row) => overlapsRange(row, rangeStartMs, rangeEndMs))
-      .map((row) => row.id);
+    const candidateRows = await readRowsForAccountCalendar({ table, accountId: resolvedAccountId, calendarId, rangeStartMs, rangeEndMs });
+    const deleteIds = candidateRows.map((row) => row.id);
 
     for (const ids of chunk(deleteIds, GOOGLE_CALENDAR_EVENT_CACHE_CHUNK_SIZE)) {
       await table.bulkDelete(ids);
