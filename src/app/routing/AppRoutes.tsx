@@ -14,9 +14,7 @@ const REDIRECT_TO_SCHEDULE_ROUTES = [
   "CardView/*",
   "study/*",
   "library/*",
-  "gallery/*",
   "statistics/*",
-  "uncertain/*",
   "sandbox/blocknote/*",
 ] as const;
 
