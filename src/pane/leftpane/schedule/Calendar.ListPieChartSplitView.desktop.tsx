@@ -71,7 +71,7 @@ const CHART_RADIUS = 82;
 const CHART_LABEL_RADIUS = CHART_RADIUS * 0.58;
 const CHART_CLOCK_LABEL_RADIUS = CHART_RADIUS + 11;
 const CHART_EVENT_BORDER_STROKE_WIDTH = 3;
-const CLOCK_HOURS = Array.from({ length: 25 }, (_, index) => index);
+const CLOCK_HOURS = Array.from({ length: 24 }, (_, index) => index);
 const SPLIT_CHART_CONTAINER_MAX_SIZE_PX = LIST_DAY_SECTION_MIN_HEIGHT_PX - 30;
 const SPLIT_SCROLL_EDGE_THRESHOLD_PX = 220;
 const SPLIT_SCROLL_EDGE_RESET_PX = 520;
@@ -147,7 +147,7 @@ const getChartOverlayStyle = (minute: number, radius: number) => {
   };
 };
 
-const getClockLabelOverlayStyle = (hour: number) => getChartOverlayStyle(hour * 60, hour === 24 ? CHART_CLOCK_LABEL_RADIUS + 7 : CHART_CLOCK_LABEL_RADIUS);
+const getClockLabelOverlayStyle = (hour: number) => getChartOverlayStyle(hour * 60, CHART_CLOCK_LABEL_RADIUS);
 
 const resolveEventSegmentMeta = (
   event: GoogleCalendarEvent,
