@@ -12,6 +12,8 @@ export type WorkspaceSidebarSection =
   | "schedule"
   | "settings";
 
+export type WorkspaceRouteSection = Exclude<WorkspaceSidebarSection, "library">;
+
 /**
  * ルートタブID（固定ページ）
  */
@@ -38,10 +40,11 @@ type WorkspaceTabBase = {
 /**
  * ルートタブ（画面遷移系）
  */
-export type WorkspaceRouteTab = WorkspaceTabBase & {
+export type WorkspaceRouteTab = Omit<WorkspaceTabBase, "sectionKey"> & {
   id: WorkspaceRouteTabId;
   kind: "route";
   routePath: string;
+  sectionKey: WorkspaceRouteSection;
 };
 
 /**
@@ -142,7 +145,7 @@ export const createDefaultExplorerRouteState = (): ExplorerRouteState => ({
  * section → routeタブ解決
  */
 export const resolveRouteTabBySection = (
-  sectionKey: Exclude<WorkspaceSidebarSection, "library">,
+  sectionKey: WorkspaceRouteSection,
 ): WorkspaceRouteTab => {
   const matchedTab = WORKSPACE_ROUTE_TABS.find(
     (tab) => tab.sectionKey === sectionKey,
