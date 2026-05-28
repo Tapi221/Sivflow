@@ -1,7 +1,7 @@
 import { AccountLockedScreen } from "@/components/security/AccountLockedScreen";
 import { LoadingFallback } from "@/components/common/LoadingFallback";
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
-import { LoginPage } from "@/page/LoginPage";
+import { LoginPage } from "@/pane.desktop/page/LoginPage";
 import { useStartupTasks } from "@/application/startup/useStartupTasks";
 import { AppRoutes } from "@/app/routing/AppRoutes";
 import { getDevStandaloneRouteElement } from "@/app/routing/DevRoutes";

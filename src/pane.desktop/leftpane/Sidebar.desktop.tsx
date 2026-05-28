@@ -1,7 +1,7 @@
 import { type MouseEvent, type ReactNode } from "react";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
-import { useWorkspaceTabsStore } from "@/pane/tab.desktopnative/hooks/useTabsStore";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
 import { ClockIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import "./sidebar.desktop.css";

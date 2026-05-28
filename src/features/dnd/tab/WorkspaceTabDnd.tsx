@@ -1,6 +1,6 @@
 import { Reorder, type HTMLMotionProps, type Transition } from "framer-motion";
 import type { CSSProperties, ReactNode, RefObject } from "react";
-import type { WorkspaceTab } from "@/features/tab/Tab";
+import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 
 type WorkspaceTabDndListProps = {
   tabsListRef: RefObject<HTMLDivElement | null>;

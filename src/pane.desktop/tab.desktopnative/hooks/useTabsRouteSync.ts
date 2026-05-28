@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useWorkspaceTabsStore } from "@/pane/tab.desktopnative/hooks/useTabsStore";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 
 const SETTINGS_ROUTE_TAB_ID = "route:settings" as const;
 

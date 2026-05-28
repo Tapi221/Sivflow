@@ -16,8 +16,8 @@
 import { useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
-import { useWorkspaceTabsStore } from "@/pane/tab.desktopnative/hooks/useTabsStore";
-import type { WorkspaceSidebarSection, WorkspaceTab } from "@/features/tab/Tab";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+import type { WorkspaceSidebarSection, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import { useBreadcrumbAction, useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 
 // ─────────────────────────────────────────

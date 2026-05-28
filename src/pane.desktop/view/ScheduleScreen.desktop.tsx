@@ -11,10 +11,10 @@ import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
-import { CalendarSidebar } from "@/pane/leftpane/CalendarSidebar";
-import { CalendarListPieChartSplitView } from "@/pane/leftpane/schedule/Calendar.ListPieChartSplitView.desktop";
-import { CalendarPieChartView } from "@/pane/leftpane/schedule/Calendar.PieChartView";
-import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
+import { CalendarSidebar } from "@/pane.desktop/leftpane/CalendarSidebar";
+import { CalendarListPieChartSplitView } from "@/pane.desktop/leftpane/schedule/Calendar.ListPieChartSplitView.desktop";
+import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
+import { CalendarWorkspaceToolbar } from "@/pane.desktop/header/ScheduleToolbar";
 
 type StoredAppCalendarItem = Partial<AppCalendarItem>;
 
