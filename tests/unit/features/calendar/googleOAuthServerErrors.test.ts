@@ -16,7 +16,7 @@ vi.mock("firebase/functions", () => ({
   httpsCallable: () => vi.fn(),
 }));
 
-import { diagnoseGoogleOAuthReconnectCause, toUserTransparentAutoRecoveryError } from "@/features/calendar/googlecalendar-integration/gcal.server-oauth";
+import { diagnoseGoogleOAuthReconnectCause, toUserTransparentAutoRecoveryError } from "@/integration/google-integration/google.server-oauth";
 
 const callableError = (reason: string, code = "functions/failed-precondition") => {
   const error = new Error("callable failed") as Error & { code?: string; details?: unknown };
