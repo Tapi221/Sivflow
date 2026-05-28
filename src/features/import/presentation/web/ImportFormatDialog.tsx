@@ -1,2 +1,2 @@
-export { ImportFormatDialog } from "@/chip/dialog/ImportFormatDialog";
-export type { ImportFormat } from "@/chip/dialog/ImportFormatDialog";
+export { ImportFormatDialog } from "@/chip/dialog.desktop/Dialog.ImportFormat";
+export type { ImportFormat } from "@/chip/dialog.desktop/Dialog.ImportFormat";
