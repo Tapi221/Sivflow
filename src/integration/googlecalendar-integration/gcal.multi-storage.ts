@@ -1,3 +1,4 @@
+import { clearCachedGoogleCalendarAccount } from "./googleCalendarEventCache";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 /**
@@ -261,6 +262,9 @@ export const upsertStoredAccount = (account: StoredGoogleAccount): void => {
 
 export const removeStoredAccount = (accountId: string): void => {
   writeStoredAccounts(readStoredAccounts().filter((a) => a.id !== accountId));
+  void clearCachedGoogleCalendarAccount(accountId).catch((error) => {
+    console.warn("[gcal.multi-storage] failed to clear cached calendar events", error);
+  });
 };
 
 export const updateStoredAccountToken = (
