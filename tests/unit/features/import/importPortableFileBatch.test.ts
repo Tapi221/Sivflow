@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { MfCardFileV1 } from "@/features/cardFile/domain/mfCardTypes";
-import { MF_CARD_FORMAT, MF_CARD_VERSION } from "@/features/cardFile/domain/mfCardTypes";
+import type { MfCardFileV1 } from "@/features/cardFile/domain/mfCard.types";
+import { MF_CARD_FORMAT, MF_CARD_VERSION } from "@/features/cardFile/domain/mfCard.types";
 import { encodeMfCardFile } from "@/features/cardFile/infra/web/mfCardJsonCodec";
 import { buildPortableImportBatchItems, formatPortableImportBatchItemSubtitle, importPortableFileBatch } from "@/features/import/application/importPortableFileBatch";
 import type { Card, CardSet } from "@/types";
