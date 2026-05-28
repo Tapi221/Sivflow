@@ -44,7 +44,7 @@
     --explorer-chrome-pdf-accent: currentColor;
     position: relative;
     padding: 6px 10px 12px;
-    background: var(--app-sidebar-bg, #f6f6f6);
+    background: var(--backpane-bg);
     color: var(--app-sidebar-text);
   }
 
