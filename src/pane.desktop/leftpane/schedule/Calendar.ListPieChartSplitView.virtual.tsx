@@ -2,6 +2,7 @@ import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useStat
 import { differenceInCalendarDays, differenceInMinutes, format, getDaysInMonth, isSameDay, startOfMonth, subDays } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
+import { LIST_DAY_GAP_PX, LIST_DAY_SECTION_MIN_HEIGHT_PX, LIST_EMPTY_DAY_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@/chip/eventchip/EventChip.list.placement";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { buildScheduleVirtualRailDays, getScheduleVirtualRailDate } from "@/features/calendar/grid/ScheduleColumn.shared";
@@ -10,19 +11,62 @@ import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
-type CalendarListPieChartSplitViewProps = { days: Date[]; virtualRail?: ScheduleVirtualRail; selectedDate: Date; events: GoogleCalendarEvent[]; appProjects: AppCalendarItem[]; googleAccounts: GoogleAccountDisplay[]; onSelectDate?: (date: Date) => void; onReachStart?: () => void; onReachEnd?: () => void; onVisibleMonthChange?: (date: Date) => void; onVisibleDateChange?: (date: Date) => void; className?: string };
+type CalendarListPieChartSplitViewProps = {
+  days: Date[];
+  virtualRail?: ScheduleVirtualRail;
+  selectedDate: Date;
+  events: GoogleCalendarEvent[];
+  appProjects: AppCalendarItem[];
+  googleAccounts: GoogleAccountDisplay[];
+  onSelectDate?: (date: Date) => void;
+  onReachStart?: () => void;
+  onReachEnd?: () => void;
+  onVisibleMonthChange?: (date: Date) => void;
+  onVisibleDateChange?: (date: Date) => void;
+  className?: string;
+};
 
-type VirtualRange = { start: number; end: number };
+type VirtualRange = {
+  start: number;
+  end: number;
+};
 
-type PieSegment = { id: string; label: string; color: string; minutes: number };
+type PieSegment = {
+  id: string;
+  label: string;
+  color: string;
+  minutes: number;
+};
 
-type SplitDay = { date: Date; key: string; events: GoogleCalendarEvent[]; segments: PieSegment[]; minutes: number; isSelected: boolean; isToday: boolean };
+type SplitDay = {
+  date: Date;
+  key: string;
+  events: GoogleCalendarEvent[];
+  segments: PieSegment[];
+  minutes: number;
+  isSelected: boolean;
+  isToday: boolean;
+};
 
-type SplitDaySectionProps = { day: SplitDay; onSelectDate?: (date: Date) => void };
+type SplitDaySectionProps = {
+  day: SplitDay;
+  onSelectDate?: (date: Date) => void;
+};
 
-const DAY_HEIGHT = 430;
-const DAY_GAP = 8;
-const DAY_BLOCK = DAY_HEIGHT + DAY_GAP;
+type SplitVirtualDynamicHeightEntry = {
+  index: number;
+  extraHeight: number;
+  accumulatedExtraHeight: number;
+};
+
+type SplitVirtualMetrics = {
+  dynamicHeightEntries: SplitVirtualDynamicHeightEntry[];
+  totalHeight: number;
+};
+
+const SPLIT_DAY_MIN_HEIGHT_PX = LIST_DAY_SECTION_MIN_HEIGHT_PX;
+const SPLIT_DAY_GAP_PX = LIST_DAY_GAP_PX;
+const SPLIT_DAY_BLOCK_BASE_HEIGHT_PX = SPLIT_DAY_MIN_HEIGHT_PX + SPLIT_DAY_GAP_PX;
 const LOCAL_DAYS = 3650;
 const OVERSCAN = 5000;
 const ANCHOR_OFFSET = 160;
@@ -30,19 +74,130 @@ const SELECTED_OFFSET = 8;
 const EMPTY_DAY_LABEL = "予定なし";
 const DEFAULT_COLOR = "#8e8e93";
 const GAP_COLOR = "#f2f2f7";
+const DATE_KEY_PART_COUNT = 3;
 
 const createRail = (selectedDate: Date): ScheduleVirtualRail => ({ startDate: subDays(startOfMonth(selectedDate), LOCAL_DAYS), anchorIndex: LOCAL_DAYS, totalDayCount: LOCAL_DAYS * 2 + getDaysInMonth(selectedDate) });
 
-const getRange = (scrollTop: number, viewportHeight: number, totalDayCount: number): VirtualRange => {
+const getIndexForDate = (rail: ScheduleVirtualRail, date: Date) => differenceInCalendarDays(date, rail.startDate);
+
+const parseCalendarDateKey = (dateKey: string): Date | null => {
+  const parts = dateKey.split("-");
+  if (parts.length !== DATE_KEY_PART_COUNT) return null;
+
+  const [year, month, day] = parts.map((part) => Number.parseInt(part, 10));
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return null;
+
+  const date = new Date(year, month - 1, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+
+  return date;
+};
+
+const getSplitDayEstimatedListHeightFromEventCount = (eventCount: number): number => {
+  if (eventCount === 0) return LIST_EMPTY_DAY_HEIGHT_PX;
+
+  return eventCount * LIST_EVENT_ROW_HEIGHT_PX + Math.max(0, eventCount - 1) * LIST_EVENT_ROW_GAP_PX;
+};
+
+const getSplitDayHeightFromEventCount = (eventCount: number): number => Math.max(SPLIT_DAY_MIN_HEIGHT_PX, getSplitDayEstimatedListHeightFromEventCount(eventCount));
+
+const getSplitDayHeight = (day: SplitDay): number => getSplitDayHeightFromEventCount(day.events.length);
+
+const addExtraHeightForDateKey = (extraHeightByIndex: Map<number, number>, rail: ScheduleVirtualRail, totalDayCount: number, dateKey: string, height: number) => {
+  const date = parseCalendarDateKey(dateKey);
+  if (!date) return;
+
+  const index = getIndexForDate(rail, date);
+  if (index < 0 || index >= totalDayCount) return;
+
+  const extraHeight = Math.max(0, height - SPLIT_DAY_MIN_HEIGHT_PX);
+  if (extraHeight <= 0) return;
+
+  extraHeightByIndex.set(index, Math.max(extraHeightByIndex.get(index) ?? 0, extraHeight));
+};
+
+const buildSplitVirtualMetrics = (rail: ScheduleVirtualRail, totalDayCount: number, events: GoogleCalendarEvent[]): SplitVirtualMetrics => {
+  if (totalDayCount <= 0) return { dynamicHeightEntries: [], totalHeight: 0 };
+
+  const eventCountByDateKey = new Map<string, number>();
+  const extraHeightByIndex = new Map<number, number>();
+
+  events.forEach((event) => {
+    getEventDateKeys(event).forEach((dateKey) => {
+      eventCountByDateKey.set(dateKey, (eventCountByDateKey.get(dateKey) ?? 0) + 1);
+    });
+  });
+
+  eventCountByDateKey.forEach((eventCount, dateKey) => {
+    addExtraHeightForDateKey(extraHeightByIndex, rail, totalDayCount, dateKey, getSplitDayHeightFromEventCount(eventCount));
+  });
+
+  let accumulatedExtraHeight = 0;
+  const dynamicHeightEntries = Array.from(extraHeightByIndex.entries()).sort(([leftIndex], [rightIndex]) => leftIndex - rightIndex).map(([index, extraHeight]) => {
+    accumulatedExtraHeight += extraHeight;
+
+    return { index, extraHeight, accumulatedExtraHeight };
+  });
+  const baseHeight = totalDayCount * SPLIT_DAY_BLOCK_BASE_HEIGHT_PX - SPLIT_DAY_GAP_PX;
+
+  return { dynamicHeightEntries, totalHeight: Math.max(0, baseHeight + accumulatedExtraHeight) };
+};
+
+const getAccumulatedExtraHeightBeforeIndex = (metrics: SplitVirtualMetrics, dayIndex: number): number => {
+  let low = 0;
+  let high = metrics.dynamicHeightEntries.length - 1;
+  let accumulatedExtraHeight = 0;
+
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2);
+    const entry = metrics.dynamicHeightEntries[middle];
+
+    if (entry.index < dayIndex) {
+      accumulatedExtraHeight = entry.accumulatedExtraHeight;
+      low = middle + 1;
+    } else {
+      high = middle - 1;
+    }
+  }
+
+  return accumulatedExtraHeight;
+};
+
+const getDayTop = (metrics: SplitVirtualMetrics, dayIndex: number): number => dayIndex * SPLIT_DAY_BLOCK_BASE_HEIGHT_PX + getAccumulatedExtraHeightBeforeIndex(metrics, dayIndex);
+
+const getDayIndexAtOffset = (metrics: SplitVirtualMetrics, totalDayCount: number, offset: number): number => {
+  if (totalDayCount <= 0) return 0;
+
+  let low = 0;
+  let high = totalDayCount - 1;
+  let result = 0;
+  const normalizedOffset = Math.max(0, offset);
+
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2);
+    const dayTop = getDayTop(metrics, middle);
+
+    if (dayTop <= normalizedOffset) {
+      result = middle;
+      low = middle + 1;
+    } else {
+      high = middle - 1;
+    }
+  }
+
+  return result;
+};
+
+const getRange = (metrics: SplitVirtualMetrics, scrollTop: number, viewportHeight: number, totalDayCount: number): VirtualRange => {
   if (totalDayCount <= 0) return { start: 0, end: 0 };
-  const start = Math.max(0, Math.floor(Math.max(0, scrollTop - OVERSCAN) / DAY_BLOCK));
-  const end = Math.min(totalDayCount, Math.ceil((scrollTop + viewportHeight + OVERSCAN) / DAY_BLOCK) + 1);
+
+  const start = getDayIndexAtOffset(metrics, totalDayCount, scrollTop - OVERSCAN);
+  const end = Math.min(totalDayCount, getDayIndexAtOffset(metrics, totalDayCount, scrollTop + viewportHeight + OVERSCAN) + 2);
+
   return { start, end: Math.max(start, end) };
 };
 
 const sameRange = (left: VirtualRange, right: VirtualRange) => left.start === right.start && left.end === right.end;
-
-const getIndexForDate = (rail: ScheduleVirtualRail, date: Date) => differenceInCalendarDays(date, rail.startDate);
 
 const getEventInstanceKey = (dateKey: string, event: GoogleCalendarEvent): string => `${dateKey}:${event.id}:${new Date(event.startsAt).getTime()}:${new Date(event.endsAt).getTime()}`;
 
@@ -135,10 +290,48 @@ const buildConicGradient = (segments: PieSegment[]) => {
 
 const EmptyDayCard = () => <div className="flex h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">{EMPTY_DAY_LABEL}</div>;
 
-const SplitDaySection = memo(({ day, onSelectDate }: SplitDaySectionProps) => {
+const SplitDaySectionComponent = ({ day, onSelectDate }: SplitDaySectionProps) => {
   const hours = Math.round(day.minutes / 60 * 10) / 10;
-  return <section className="grid h-full grid-cols-2" aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}><div className="min-h-0 min-w-0 border-r border-[#eeeeee] px-4"><div className="grid grid-cols-[58px_minmax(0,1fr)] gap-2"><button type="button" className={cn("mt-0.5 flex h-8 items-baseline justify-end gap-1 rounded-[10px] pr-0.5", day.isSelected && "text-[#1c1c1e]")} onClick={() => onSelectDate?.(day.date)}><span className={cn("text-[16px] font-bold leading-none", day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]")}>{format(day.date, "d")}</span><span className="text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]">{format(day.date, "EEE", { locale: ja })}</span></button><div className="space-y-1.5 overflow-hidden">{day.events.length > 0 ? day.events.map((event) => <CalendarEventChipList key={getEventInstanceKey(day.key, event)} event={event} />) : <EmptyDayCard />}</div></div></div><div className="grid min-h-0 min-w-0 grid-cols-[58px_minmax(0,1fr)] gap-2 px-4"><button type="button" className={cn("mt-0.5 flex h-8 items-baseline justify-end gap-1 rounded-[10px] pr-0.5", day.isSelected && "text-[#1c1c1e]")} onClick={() => onSelectDate?.(day.date)}><span className={cn("text-[16px] font-bold leading-none", day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]")}>{format(day.date, "d")}</span><span className="text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]">{format(day.date, "EEE", { locale: ja })}</span></button><div className="grid min-h-0 grid-cols-[minmax(0,1fr)_180px] items-center gap-4"><div className="min-w-0 space-y-1.5 overflow-hidden">{day.segments.slice(0, 6).map((segment) => <div key={segment.id} className="flex items-center gap-2 text-[12px] font-medium text-[#3a3a3c]"><span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: segment.color }} /><span className="truncate">{segment.label}</span><span className="ml-auto shrink-0 tabular-nums text-[#8e8e93]">{Math.round(segment.minutes / 60 * 10) / 10}h</span></div>)}{day.segments.length === 0 ? <div className="text-[13px] font-semibold text-[#8e8e93]">時間指定なし</div> : null}</div><div className="mx-auto flex aspect-square w-full max-w-[180px] items-center justify-center rounded-full border border-[#eeeeee]" style={{ background: buildConicGradient(day.segments) }}><div className="flex h-[44%] w-[44%] items-center justify-center rounded-full bg-white text-[12px] font-semibold text-[#3a3a3c] shadow-sm">{hours}h</div></div></div></div></section>;
-});
+
+  return (
+    <section className="grid h-full grid-cols-2" aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}>
+      <div className="h-full min-h-0 min-w-0 border-r border-[#eeeeee] px-4">
+        <div className="grid grid-cols-[58px_minmax(0,1fr)] gap-2">
+          <button type="button" className={cn("mt-0.5 flex h-8 items-baseline justify-end gap-1 rounded-[10px] pr-0.5", day.isSelected && "text-[#1c1c1e]")} onClick={() => onSelectDate?.(day.date)}>
+            <span className={cn("text-[16px] font-bold leading-none", day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]")}>{format(day.date, "d")}</span>
+            <span className="text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]">{format(day.date, "EEE", { locale: ja })}</span>
+          </button>
+          <div className="space-y-1.5 overflow-hidden">
+            {day.events.length > 0 ? day.events.map((event) => <CalendarEventChipList key={getEventInstanceKey(day.key, event)} event={event} />) : <EmptyDayCard />}
+          </div>
+        </div>
+      </div>
+      <div className="grid h-full min-h-0 min-w-0 grid-cols-[58px_minmax(0,1fr)] gap-2 px-4">
+        <button type="button" className={cn("mt-0.5 flex h-8 items-baseline justify-end gap-1 rounded-[10px] pr-0.5", day.isSelected && "text-[#1c1c1e]")} onClick={() => onSelectDate?.(day.date)}>
+          <span className={cn("text-[16px] font-bold leading-none", day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]")}>{format(day.date, "d")}</span>
+          <span className="text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]">{format(day.date, "EEE", { locale: ja })}</span>
+        </button>
+        <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_180px] items-start gap-4">
+          <div className="min-w-0 space-y-1.5 overflow-hidden">
+            {day.segments.slice(0, 6).map((segment) => (
+              <div key={segment.id} className="flex items-center gap-2 text-[12px] font-medium text-[#3a3a3c]">
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: segment.color }} />
+                <span className="truncate">{segment.label}</span>
+                <span className="ml-auto shrink-0 tabular-nums text-[#8e8e93]">{Math.round(segment.minutes / 60 * 10) / 10}h</span>
+              </div>
+            ))}
+            {day.segments.length === 0 ? <div className="text-[13px] font-semibold text-[#8e8e93]">時間指定なし</div> : null}
+          </div>
+          <div className="mx-auto flex aspect-square w-full max-w-[180px] items-center justify-center rounded-full border border-[#eeeeee]" style={{ background: buildConicGradient(day.segments) }}>
+            <div className="flex h-[44%] w-[44%] items-center justify-center rounded-full bg-white text-[12px] font-semibold text-[#3a3a3c] shadow-sm">{hours}h</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const SplitDaySection = memo(SplitDaySectionComponent);
 
 SplitDaySection.displayName = "SplitDaySection";
 
@@ -149,19 +342,20 @@ const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, eve
   const frameRef = useRef<number | null>(null);
   const pendingRef = useRef<HTMLDivElement | null>(null);
   const rail = useMemo(() => virtualRail ?? createRail(selectedDate), [selectedDate, virtualRail]);
+  const metrics = useMemo(() => buildSplitVirtualMetrics(rail, rail.totalDayCount, events), [events, rail]);
   const [range, setRange] = useState<VirtualRange>({ start: 0, end: 1 });
   const dates = useMemo(() => buildScheduleVirtualRailDays(rail, range.start, range.end), [rail, range.end, range.start]);
   const days = useMemo(() => buildDays(dates, events, selectedDate, appProjects, googleAccounts), [appProjects, dates, events, googleAccounts, selectedDate]);
-  const totalHeight = Math.max(0, rail.totalDayCount * DAY_BLOCK - DAY_GAP);
+  const totalHeight = metrics.totalHeight;
 
   const updateRange = useCallback((element: HTMLDivElement | null) => {
-    const next = element ? getRange(element.scrollTop, element.clientHeight, rail.totalDayCount) : getRange(0, 0, rail.totalDayCount);
+    const next = element ? getRange(metrics, element.scrollTop, element.clientHeight, rail.totalDayCount) : getRange(metrics, 0, 0, rail.totalDayCount);
     setRange((current) => sameRange(current, next) ? current : next);
-  }, [rail.totalDayCount]);
+  }, [metrics, rail.totalDayCount]);
 
   const updateVisibleDate = useCallback((element: HTMLDivElement | null) => {
     if (!element) return;
-    const index = Math.max(0, Math.min(rail.totalDayCount - 1, Math.floor((element.scrollTop + Math.min(ANCHOR_OFFSET, element.clientHeight / 2)) / DAY_BLOCK)));
+    const index = getDayIndexAtOffset(metrics, rail.totalDayCount, element.scrollTop + Math.min(ANCHOR_OFFSET, element.clientHeight / 2));
     const date = getScheduleVirtualRailDate(rail, index);
     if (!date) return;
     const key = getCalendarDateKey(date);
@@ -169,7 +363,7 @@ const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, eve
     lastVisibleKeyRef.current = key;
     onVisibleMonthChange?.(date);
     onVisibleDateChange?.(date);
-  }, [onVisibleDateChange, onVisibleMonthChange, rail]);
+  }, [metrics, onVisibleDateChange, onVisibleMonthChange, rail]);
 
   const scheduleDeferred = useCallback((element: HTMLDivElement) => {
     pendingRef.current = element;
@@ -195,13 +389,30 @@ const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, eve
     const index = getIndexForDate(rail, selectedDate);
     if (lastSelectedKeyRef.current === key || !element || index < 0 || index >= rail.totalDayCount) return;
     lastSelectedKeyRef.current = key;
-    element.scrollTop = Math.max(0, index * DAY_BLOCK - SELECTED_OFFSET);
+    element.scrollTop = Math.max(0, getDayTop(metrics, index) - SELECTED_OFFSET);
     updateRange(element);
-  }, [rail, selectedDate, updateRange]);
+  }, [metrics, rail, selectedDate, updateRange]);
 
   useEffect(() => () => { if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current); }, []);
 
-  return <div className={cn("ml-4 mr-4 flex min-h-0 flex-1 overflow-hidden bg-white", className)}><div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto pb-6 pt-2 scrollbar-hidden" onScroll={handleScroll}><div className="relative min-w-0" style={{ height: totalHeight }}>{days.map((day, offset) => <div key={day.key} className="absolute left-0 right-0" style={{ contain: "layout style", top: (range.start + offset) * DAY_BLOCK, height: DAY_HEIGHT }}><SplitDaySection day={day} onSelectDate={onSelectDate} /></div>)}</div></div></div>;
+  return (
+    <div className={cn("ml-4 mr-4 flex min-h-0 flex-1 overflow-hidden bg-white", className)}>
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto pb-6 pt-2 scrollbar-hidden" onScroll={handleScroll}>
+        <div className="relative min-w-0" style={{ height: totalHeight }}>
+          {days.map((day, offset) => {
+            const dayIndex = range.start + offset;
+            const height = getSplitDayHeight(day);
+
+            return (
+              <div key={day.key} className="absolute left-0 right-0" style={{ contain: "layout style", top: getDayTop(metrics, dayIndex), height }}>
+                <SplitDaySection day={day} onSelectDate={onSelectDate} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const CalendarListPieChartSplitView = memo(CalendarListPieChartSplitViewComponent);
