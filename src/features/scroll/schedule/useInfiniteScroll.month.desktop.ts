@@ -31,8 +31,12 @@ type MonthRangeAnchor = {
   offsetTop: number;
 };
 
+type MonthOffsetRange = ReturnType<typeof C.createInitialMonthOffsetRange>;
+
 const MONTH_GRID_FIRST_WEEK_OFFSET_PX = C.CALENDAR_WEEKDAY_HEADER_HEIGHT;
 const VISIBLE_MONTH_SYNC_DELAY_MS = 96;
+
+const getRenderedMonthCount = (range: MonthOffsetRange) => range.endOffset - range.startOffset + 1;
 
 // ── フック本体
 
@@ -231,19 +235,19 @@ export const useMonthInfiniteScroll = ({
         isExtendingBeforeRef.current = true;
         rangeAnchorRef.current = getCurrentRangeAnchorRef.current?.(scroller) ?? null;
 
-        setMonthOffsetRange((currentRange) => {
-          const shouldTrimAfter =
-            currentRange.endOffset - currentRange.startOffset +
-              1 +
-              C.MONTH_EXTEND_COUNT >
-            C.MONTH_MAX_RENDERED_MONTHS;
+        startTransition(() => {
+          setMonthOffsetRange((currentRange) => {
+            const shouldTrimAfter =
+              getRenderedMonthCount(currentRange) + C.MONTH_EXTEND_COUNT >
+              C.MONTH_MAX_RENDERED_MONTHS;
 
-          return {
-            startOffset: currentRange.startOffset - C.MONTH_EXTEND_COUNT,
-            endOffset: shouldTrimAfter
-              ? currentRange.endOffset - C.MONTH_EXTEND_COUNT
-              : currentRange.endOffset,
-          };
+            return {
+              startOffset: currentRange.startOffset - C.MONTH_EXTEND_COUNT,
+              endOffset: shouldTrimAfter
+                ? currentRange.endOffset - C.MONTH_EXTEND_COUNT
+                : currentRange.endOffset,
+            };
+          });
         });
       }
 
@@ -256,18 +260,25 @@ export const useMonthInfiniteScroll = ({
         !isExtendingAfterRef.current
       ) {
         isExtendingAfterRef.current = true;
-        rangeAnchorRef.current = getCurrentRangeAnchorRef.current?.(scroller) ?? null;
 
-        setMonthOffsetRange((currentRange) => ({
-          startOffset:
-            currentRange.endOffset - currentRange.startOffset +
-              1 +
-              C.MONTH_EXTEND_COUNT >
-            C.MONTH_MAX_RENDERED_MONTHS
-              ? currentRange.startOffset + C.MONTH_EXTEND_COUNT
-              : currentRange.startOffset,
-          endOffset: currentRange.endOffset + C.MONTH_EXTEND_COUNT,
-        }));
+        startTransition(() => {
+          setMonthOffsetRange((currentRange) => {
+            const shouldTrimBefore =
+              getRenderedMonthCount(currentRange) + C.MONTH_EXTEND_COUNT >
+              C.MONTH_MAX_RENDERED_MONTHS;
+
+            rangeAnchorRef.current = shouldTrimBefore
+              ? getCurrentRangeAnchorRef.current?.(scroller) ?? null
+              : null;
+
+            return {
+              startOffset: shouldTrimBefore
+                ? currentRange.startOffset + C.MONTH_EXTEND_COUNT
+                : currentRange.startOffset,
+              endOffset: currentRange.endOffset + C.MONTH_EXTEND_COUNT,
+            };
+          });
+        });
       }
 
       // ref 経由で最新のコールバックを呼ぶ
