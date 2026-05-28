@@ -70,11 +70,7 @@ const toBase64Url = (bytes: Uint8Array): string => {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 };
 
-const randomBase64Url = (length: number): string => {
-  const bytes = new Uint8Array(length);
-  crypto.getRandomValues(bytes);
-  return toBase64Url(bytes);
-};
+const randomBase64Url = (length: number): string => toBase64Url(crypto.getRandomValues(new Uint8Array(length)));
 
 const createCodeChallenge = async (verifier: string): Promise<string> => {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
