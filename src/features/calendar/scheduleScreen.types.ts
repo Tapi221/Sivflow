@@ -61,6 +61,7 @@ export type CalendarSidebarProps = {
   monthDate: Date;
   selectedDate: Date;
   selectedRange?: CalendarSelectionRange | null;
+  visibleEvents: GoogleCalendarEvent[];
   appProjects: AppCalendarItem[];
   googleAccounts: GoogleAccountDisplay[];
   isAnyCalendarConnecting: boolean;
