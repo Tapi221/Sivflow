@@ -12,7 +12,7 @@ interface CardSetViewMobileProps {
   safeCurrentIndex: number;
   isFlipped: boolean;
   currentDisplayMode: CardDisplayMode;
-  settings: UserSettings | undefined;
+  settings: Partial<UserSettings> | null | undefined;
   onIndexChange: (idx: number) => void;
   onFlip: () => void;
   onEdit: () => void;
