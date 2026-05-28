@@ -70,18 +70,6 @@ const Layout = () => {
           void navigate("/schedule");
         },
       },
-      {
-        id: "action:gallery",
-        value: "action:gallery",
-        kind: "action",
-        iconKind: "gallery",
-        title: "ギャラリー",
-        keywords: ["ギャラリー", "gallery", "images", "画像"],
-        priority: 94,
-        onSelect: () => {
-          void navigate("/gallery");
-        },
-      },
     ],
     [navigate],
   );
