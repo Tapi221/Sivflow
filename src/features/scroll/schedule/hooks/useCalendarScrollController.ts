@@ -43,10 +43,9 @@ const clampScrollLeft = (scrollLeft: number, maxScrollLeft: number) => Math.min(
 const getSnappedDayScrollLeft = (scrollLeft: number, calendarDayColumnWidth: number, maxScrollLeft: number) => {
   if (calendarDayColumnWidth <= 0) return scrollLeft;
 
-  const contentLeft = Math.max(0, scrollLeft - C.TIME_COLUMN_WIDTH);
-  const snappedDayIndex = Math.max(0, Math.round(contentLeft / calendarDayColumnWidth));
+  const snappedDayIndex = Math.max(0, Math.round(scrollLeft / calendarDayColumnWidth));
 
-  return clampScrollLeft(C.TIME_COLUMN_WIDTH + snappedDayIndex * calendarDayColumnWidth, maxScrollLeft);
+  return clampScrollLeft(snappedDayIndex * calendarDayColumnWidth, maxScrollLeft);
 };
 
 const syncFixedRowsScrollLeft = (fixedRowScrollRefs: React.RefObject<HTMLDivElement | null>[], scrollLeft: number) => {
