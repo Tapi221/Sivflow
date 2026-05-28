@@ -2,6 +2,7 @@ import type { Auth } from "firebase/auth";
 
 export type GoogleCalendarEvent = {
   id: string;
+  externalId?: string;
   accountId?: string;
   calendarId: string;
   projectId?: string;
@@ -47,6 +48,27 @@ export type GCalSyncRange = {
 export type GCalForceSyncOptions = Partial<GCalSyncRange>;
 
 export type GCalSyncTokenMap = Record<string, string>;
+
+export type GCalWritableEventInput = {
+  calendarId: string;
+  title: string;
+  description?: string;
+  location?: string;
+  startsAt: Date;
+  endsAt: Date;
+  isAllDay?: boolean;
+  projectId?: string;
+};
+
+export type GCalWritableEventUpdateInput = Partial<Omit<GCalWritableEventInput, "calendarId">> & {
+  calendarId: string;
+  eventId: string;
+};
+
+export type GCalWritableEventDeleteInput = {
+  calendarId: string;
+  eventId: string;
+};
 
 export type GCalRawIncrementalEvent = {
   id?: string;
