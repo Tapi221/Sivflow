@@ -23,6 +23,8 @@ type ExtendCalendarScrollBufferOptions = {
   direction: CalendarScrollBufferDirection;
 };
 
+const FIXED_VIRTUAL_RAIL_DAYS = 3650;
+
 const CALENDAR_SCROLL_BUFFER_CONFIG = {
   calendar: {
     year: {
@@ -33,27 +35,27 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
     },
     days: {
       unitsPerScreen: 1,
-      initialScreens: { before: 90, after: 180 },
-      extendScreens: 90,
-      maxUnits: { before: 3650, after: 3650 },
+      initialScreens: { before: FIXED_VIRTUAL_RAIL_DAYS, after: FIXED_VIRTUAL_RAIL_DAYS },
+      extendScreens: 0,
+      maxUnits: { before: FIXED_VIRTUAL_RAIL_DAYS, after: FIXED_VIRTUAL_RAIL_DAYS },
     },
     threeDays: {
-      unitsPerScreen: 3,
-      initialScreens: { before: 30, after: 60 },
-      extendScreens: 30,
-      maxUnits: { before: 3650, after: 3650 },
+      unitsPerScreen: 1,
+      initialScreens: { before: FIXED_VIRTUAL_RAIL_DAYS, after: FIXED_VIRTUAL_RAIL_DAYS },
+      extendScreens: 0,
+      maxUnits: { before: FIXED_VIRTUAL_RAIL_DAYS, after: FIXED_VIRTUAL_RAIL_DAYS },
     },
     week: {
-      unitsPerScreen: 7,
-      initialScreens: { before: 12, after: 24 },
-      extendScreens: 12,
-      maxUnits: { before: 3650, after: 3650 },
+      unitsPerScreen: 1,
+      initialScreens: { before: FIXED_VIRTUAL_RAIL_DAYS, after: FIXED_VIRTUAL_RAIL_DAYS },
+      extendScreens: 0,
+      maxUnits: { before: FIXED_VIRTUAL_RAIL_DAYS, after: FIXED_VIRTUAL_RAIL_DAYS },
     },
     timetable: {
-      unitsPerScreen: 7,
-      initialScreens: { before: 12, after: 24 },
-      extendScreens: 12,
-      maxUnits: { before: 3650, after: 3650 },
+      unitsPerScreen: 1,
+      initialScreens: { before: FIXED_VIRTUAL_RAIL_DAYS, after: FIXED_VIRTUAL_RAIL_DAYS },
+      extendScreens: 0,
+      maxUnits: { before: FIXED_VIRTUAL_RAIL_DAYS, after: FIXED_VIRTUAL_RAIL_DAYS },
     },
     month: {
       unitsPerScreen: 1,
@@ -62,16 +64,16 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
       maxUnits: { before: 0, after: 0 },
     },
     list: {
-      unitsPerScreen: 31,
-      initialScreens: { before: 12, after: 12 },
-      extendScreens: 6,
-      maxUnits: { before: 3650, after: 3650 },
+      unitsPerScreen: 1,
+      initialScreens: { before: FIXED_VIRTUAL_RAIL_DAYS, after: FIXED_VIRTUAL_RAIL_DAYS },
+      extendScreens: 0,
+      maxUnits: { before: FIXED_VIRTUAL_RAIL_DAYS, after: FIXED_VIRTUAL_RAIL_DAYS },
     },
     pieChart: {
-      unitsPerScreen: 31,
-      initialScreens: { before: 12, after: 12 },
-      extendScreens: 6,
-      maxUnits: { before: 3650, after: 3650 },
+      unitsPerScreen: 1,
+      initialScreens: { before: FIXED_VIRTUAL_RAIL_DAYS, after: FIXED_VIRTUAL_RAIL_DAYS },
+      extendScreens: 0,
+      maxUnits: { before: FIXED_VIRTUAL_RAIL_DAYS, after: FIXED_VIRTUAL_RAIL_DAYS },
     },
   },
 } satisfies Record<CalendarScrollBufferSurface, Record<CalendarViewMode, CalendarScrollBufferConfig>>;
