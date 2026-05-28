@@ -9,6 +9,8 @@ export type CalendarProvider = "local" | "google" | "appleEventKit" | "appleCalD
 
 export type ProjectCalendarSyncDirection = "importOnly" | "exportOnly" | "twoWay";
 
+export type GoogleCalendarColorOverrideMap = Record<string, string>;
+
 export type CalendarBufferDays = {
   before: number;
   after: number;
@@ -92,6 +94,7 @@ export type CalendarSidebarProps = {
   visibleEvents: GoogleCalendarEvent[];
   appProjects: AppCalendarItem[];
   projectCalendarLinks: ProjectCalendarLink[];
+  googleCalendarColorOverrides: GoogleCalendarColorOverrideMap;
   googleAccounts: GoogleAccountDisplay[];
   isAnyCalendarConnecting: boolean;
   onSelectDate: (date: Date) => void;
@@ -102,6 +105,7 @@ export type CalendarSidebarProps = {
   onToggleProject: (projectId: string) => void;
   onLinkGoogleCalendarAsProject: (accountId: string, calendarId: string) => void;
   onUnlinkProjectCalendar: (linkId: string) => void;
+  onChangeGoogleCalendarColor: (accountId: string, calendarId: string, color: string) => void;
   onReconnectAccount: (accountId: string) => void;
   onToggleCalendar: (accountId: string, calendarId: string) => void;
 };
