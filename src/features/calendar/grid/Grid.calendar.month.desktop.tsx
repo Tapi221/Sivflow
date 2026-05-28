@@ -30,6 +30,8 @@ type GridCalendarMonthDesktopProps = {
   visibleEvents: GoogleCalendarEvent[];
   monthWeeks: CalendarMonthGridWeek[];
   monthRowHeight: number;
+  topSpacerHeight: number;
+  bottomSpacerHeight: number;
   scrollHoverDayKey: string | null;
   setWeekRowRef: (
     key: string,
@@ -375,6 +377,8 @@ const GridCalendarMonthDesktop = ({
   visibleEvents,
   monthWeeks,
   monthRowHeight,
+  topSpacerHeight,
+  bottomSpacerHeight,
   scrollHoverDayKey,
   setWeekRowRef,
   onSelectDate,
@@ -434,6 +438,8 @@ const GridCalendarMonthDesktop = ({
 
       {/* 月グリッド */}
       <div className="calendar-month-grid bg-white">
+        <div aria-hidden="true" style={{ height: topSpacerHeight }} />
+
         {monthWeeks.map((week) => (
           <CalendarMonthWeekRow
             key={week.key}
@@ -450,6 +456,8 @@ const GridCalendarMonthDesktop = ({
             handleResizePointerDown={handleResizePointerDown}
           />
         ))}
+
+        <div aria-hidden="true" style={{ height: bottomSpacerHeight }} />
       </div>
     </>
   );
