@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react";
-import { PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT, PDF_PAGE_PREFETCH_EXTRA_PAGES, PDF_PAGE_RENDER_OVERSCAN_VIEWPORTS } from "@/features/pdf";
 import { type PdfDocumentController, usePdfDocument } from "@/features/pdf/hooks/usePdfDocument";
 import { usePdfSearch } from "@/features/pdf/hooks/usePdfSearch";
 import { usePdfZoom } from "@/features/pdf/hooks/usePdfZoom";
+import { buildPdfPageLayoutMetrics, getPdfPageSizeOrFallback, normalizePdfPageOrder } from "@/features/scroll/pdf/pdfScrollLayout";
+import { EMPTY_PDF_RENDER_PAGE_NUMBERS, buildPdfPrefetchPageNumbers, buildPdfRenderedPageNumbers } from "@/features/scroll/pdf/pdfScrollRenderWindow";
 import { usePdfCurrentPage } from "@/features/scroll/pdf/usePdfCurrentPage";
 import { PdfPage } from "./PdfPage";
 import type { PageSize, PdfScaleChangeSource, PdfViewerHandle, PdfViewerOptions, PdfViewerSourceMeta, SourceLoadErrorKind } from "./pdfViewer.types";
@@ -64,217 +65,9 @@ interface PdfViewerDocumentControllerProps extends PdfViewerCommonProps {
 
 type PdfViewerProps = PdfViewerSourceProps | PdfViewerDocumentControllerProps;
 
-type PageLayoutMetrics = {
-  visualPageNumbers: number[];
-  visualPageAnchorPageNumbers: number[];
-  visualPageTopOffsets: number[];
-  visualPageBottomOffsets: number[];
-  pageScrollTopsByPageNumber: Record<number, number>;
-  pageRowIndexesByPageNumber: Record<number, number>;
-  rowTopOffsets: number[];
-  rowBottomOffsets: number[];
-  rowHeights: number[];
-  rowPageNumbers: number[][];
-  totalContentHeight: number;
-};
-
 interface PdfViewerInnerProps extends PdfViewerCommonProps {
   documentController: PdfDocumentController;
 }
-
-const EMPTY_PAGE_NUMBERS: number[] = [];
-
-const normalizePageOrder = (
-  pageOrder: number[] | undefined,
-  numPages: number,
-): number[] => {
-  if (numPages <= 0) {
-    return EMPTY_PAGE_NUMBERS;
-  }
-
-  if (!pageOrder || pageOrder.length === 0) {
-    return Array.from({ length: numPages }, (_, index) => index + 1);
-  }
-
-  const seen = new Set<number>();
-  const normalized: number[] = [];
-
-  for (const value of pageOrder) {
-    if (!Number.isInteger(value) || value < 1 || value > numPages) {
-      continue;
-    }
-
-    if (seen.has(value)) {
-      continue;
-    }
-
-    seen.add(value);
-    normalized.push(value);
-  }
-
-  for (let pageNumber = 1; pageNumber <= numPages; pageNumber += 1) {
-    if (!seen.has(pageNumber)) {
-      normalized.push(pageNumber);
-    }
-  }
-
-  return normalized;
-};
-
-const getPageSizeOrFallback = (
-  pageSizes: Record<number, PageSize>,
-  pageNumber: number,
-): PageSize =>
-  pageSizes[pageNumber] ?? {
-    width: 1,
-    height: PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT,
-  };
-
-const buildPageLayoutMetrics = ({
-  orderedPageNumbers,
-  pageSizes,
-  scale,
-  pageGap,
-  pageLayoutMode,
-}: {
-  orderedPageNumbers: number[];
-  pageSizes: Record<number, PageSize>;
-  scale: number;
-  pageGap: number;
-  pageLayoutMode: PdfPageLayoutMode;
-}): PageLayoutMetrics => {
-  const rows: number[][] = [];
-
-  if (pageLayoutMode === "double") {
-    for (let index = 0; index < orderedPageNumbers.length; index += 2) {
-      rows.push(orderedPageNumbers.slice(index, index + 2));
-    }
-  } else {
-    orderedPageNumbers.forEach((pageNumber) => rows.push([pageNumber]));
-  }
-
-  const visualPageNumbers: number[] = [];
-  const visualPageAnchorPageNumbers: number[] = [];
-  const visualPageTopOffsets: number[] = [];
-  const visualPageBottomOffsets: number[] = [];
-  const pageScrollTopsByPageNumber: Record<number, number> = {};
-  const pageRowIndexesByPageNumber: Record<number, number> = {};
-  const rowTopOffsets: number[] = [];
-  const rowBottomOffsets: number[] = [];
-  const rowHeights: number[] = [];
-
-  let top = 0;
-
-  rows.forEach((row, rowIndex) => {
-    const rowHeight = row.reduce((maxHeight, pageNumber) => {
-      const pageSize = getPageSizeOrFallback(pageSizes, pageNumber);
-      return Math.max(maxHeight, pageSize.height * scale);
-    }, 0);
-
-    rowTopOffsets.push(top);
-    rowBottomOffsets.push(top + rowHeight);
-    rowHeights.push(rowHeight);
-
-    row.forEach((pageNumber) => {
-      visualPageNumbers.push(pageNumber);
-      visualPageAnchorPageNumbers.push(pageNumber);
-      visualPageTopOffsets.push(top);
-      visualPageBottomOffsets.push(top + rowHeight);
-      pageScrollTopsByPageNumber[pageNumber] = top;
-      pageRowIndexesByPageNumber[pageNumber] = rowIndex;
-    });
-
-    top += rowHeight + pageGap;
-  });
-
-  return {
-    visualPageNumbers,
-    visualPageAnchorPageNumbers,
-    visualPageTopOffsets,
-    visualPageBottomOffsets,
-    pageScrollTopsByPageNumber,
-    pageRowIndexesByPageNumber,
-    rowTopOffsets,
-    rowBottomOffsets,
-    rowHeights,
-    rowPageNumbers: rows,
-    totalContentHeight: Math.max(0, top - pageGap),
-  };
-};
-
-const buildRenderedPageNumbers = ({
-  currentPage,
-  activeMatchPageNumber,
-  numPages,
-  pageTopOffsets,
-  pageBottomOffsets,
-  visualPageNumbers,
-  scrollTop,
-  viewportHeight,
-}: {
-  currentPage: number;
-  activeMatchPageNumber: number | null;
-  numPages: number;
-  pageTopOffsets: number[];
-  pageBottomOffsets: number[];
-  visualPageNumbers: number[];
-  scrollTop: number;
-  viewportHeight: number;
-}) => {
-  if (numPages <= 0) {
-    return EMPTY_PAGE_NUMBERS;
-  }
-
-  const minTop = scrollTop - viewportHeight * PDF_PAGE_RENDER_OVERSCAN_VIEWPORTS;
-  const maxBottom = scrollTop + viewportHeight * (1 + PDF_PAGE_RENDER_OVERSCAN_VIEWPORTS);
-  const pages = new Set<number>([currentPage]);
-
-  if (activeMatchPageNumber !== null) {
-    pages.add(activeMatchPageNumber);
-  }
-
-  visualPageNumbers.forEach((pageNumber, index) => {
-    const top = pageTopOffsets[index] ?? 0;
-    const bottom = pageBottomOffsets[index] ?? top;
-
-    if (bottom >= minTop && top <= maxBottom) {
-      pages.add(pageNumber);
-    }
-  });
-
-  return Array.from(pages).filter(
-    (pageNumber) => pageNumber >= 1 && pageNumber <= numPages,
-  );
-};
-
-const buildPrefetchPageNumbers = ({
-  renderedPageNumbers,
-  numPages,
-}: {
-  renderedPageNumbers: number[];
-  numPages: number;
-}) => {
-  if (numPages <= 0 || renderedPageNumbers.length === 0) {
-    return EMPTY_PAGE_NUMBERS;
-  }
-
-  const pages = new Set<number>();
-
-  renderedPageNumbers.forEach((pageNumber) => {
-    for (
-      let offset = -PDF_PAGE_PREFETCH_EXTRA_PAGES;
-      offset <= PDF_PAGE_PREFETCH_EXTRA_PAGES;
-      offset += 1
-    ) {
-      const candidate = pageNumber + offset;
-      if (candidate >= 1 && candidate <= numPages) {
-        pages.add(candidate);
-      }
-    }
-  });
-
-  return Array.from(pages).sort((left, right) => left - right);
-};
 
 const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
   (
@@ -313,13 +106,13 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
     } = documentController;
 
     const orderedPageNumbers = useMemo(
-      () => normalizePageOrder(pageOrder, numPages),
+      () => normalizePdfPageOrder(pageOrder, numPages),
       [numPages, pageOrder],
     );
 
     const pageLayoutMetrics = useMemo(
       () =>
-        buildPageLayoutMetrics({
+        buildPdfPageLayoutMetrics({
           orderedPageNumbers,
           pageSizes,
           scale,
@@ -373,7 +166,7 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
     const prioritizedSearchPageNumbers = useMemo(
       () =>
         searchQuery.trim().length > 0
-          ? buildRenderedPageNumbers({
+          ? buildPdfRenderedPageNumbers({
             currentPage,
             activeMatchPageNumber: null,
             numPages,
@@ -383,7 +176,7 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
             scrollTop: scrollViewport.scrollTop,
             viewportHeight: scrollViewport.clientHeight,
           })
-          : EMPTY_PAGE_NUMBERS,
+          : EMPTY_PDF_RENDER_PAGE_NUMBERS,
       [
         currentPage,
         numPages,
@@ -436,8 +229,8 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
     }, [documentKey, resetNavigation]);
 
     useEffect(() => {
-      const prefetch = buildPrefetchPageNumbers({
-        renderedPageNumbers: buildRenderedPageNumbers({
+      const prefetch = buildPdfPrefetchPageNumbers({
+        renderedPageNumbers: buildPdfRenderedPageNumbers({
           currentPage,
           activeMatchPageNumber,
           numPages,
@@ -473,7 +266,7 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
       [getScrollDiagnostics, logScrollDiagnostics, scrollToPage],
     );
 
-    const renderedPageNumbers = buildRenderedPageNumbers({
+    const renderedPageNumbers = buildPdfRenderedPageNumbers({
       currentPage,
       activeMatchPageNumber,
       numPages,
@@ -524,7 +317,7 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
                   }}
                 >
                   {rowPageNumbers.map((pageNumber) => {
-                    const pageSize = getPageSizeOrFallback(pageSizes, pageNumber);
+                    const pageSize = getPdfPageSizeOrFallback(pageSizes, pageNumber);
                     const isRendered = renderedPageNumbers.includes(pageNumber);
                     const pageMatches = matches.filter(
                       (match) => match.pageNumber === pageNumber,
