@@ -1,4 +1,4 @@
-import type { GoogleCalendarApiEventsResponse, GoogleCalendarApiListResponse, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
+import type { GoogleCalendarApiCalendarResponse, GoogleCalendarApiEventsResponse, GoogleCalendarApiListResponse, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
 import { createGoogleApiError } from "@/integration/google-integration/googleApiRetry";
 
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
@@ -17,8 +17,24 @@ const getJsonOnce = async <T>(accessToken: string, url: string, errorPrefix = "G
   return (await res.json()) as T;
 };
 
-const getJson = async <T>(accessToken: string, url: string): Promise<T> =>
-  getJsonOnce<T>(accessToken, url);
+const getJson = async <T>(accessToken: string, url: string): Promise<T> => getJsonOnce<T>(accessToken, url);
+
+const postJson = async <T>(accessToken: string, url: string, body: unknown, errorPrefix = "Google API failed"): Promise<T> => {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw await createGoogleApiError(res, errorPrefix);
+  }
+
+  return (await res.json()) as T;
+};
 
 const parseGoogleDate = (raw: string): Date => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
@@ -40,9 +56,15 @@ const parseEventDate = (value?: {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-export const fetchCalendarList = async (
-  accessToken: string,
-): Promise<GoogleCalendarListItem[]> => {
+const toGoogleCalendarListItem = (calendar: GoogleCalendarApiCalendarResponse): GoogleCalendarListItem => ({
+  id: calendar.id!,
+  summary: calendar.summary!,
+  description: calendar.description,
+  backgroundColor: "#4f7cff",
+  selected: true,
+});
+
+export const fetchCalendarList = async (accessToken: string): Promise<GoogleCalendarListItem[]> => {
   const calendars: GoogleCalendarListItem[] = [];
   let pageToken: string | undefined;
 
@@ -57,10 +79,7 @@ export const fetchCalendarList = async (
       params.set("pageToken", pageToken);
     }
 
-    const data = await getJson<GoogleCalendarApiListResponse>(
-      accessToken,
-      `${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList?${params}`,
-    );
+    const data = await getJson<GoogleCalendarApiListResponse>(accessToken, `${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList?${params}`);
 
     calendars.push(
       ...(data.items ?? [])
@@ -81,6 +100,27 @@ export const fetchCalendarList = async (
   } while (pageToken);
 
   return calendars;
+};
+
+export const createGoogleCalendar = async ({ accessToken, summary, description }: { accessToken: string; summary: string; description?: string }): Promise<GoogleCalendarListItem> => {
+  const trimmedSummary = summary.trim();
+  if (!trimmedSummary) throw new Error("Google Calendar name is required");
+
+  const calendar = await postJson<GoogleCalendarApiCalendarResponse>(
+    accessToken,
+    `${GOOGLE_CALENDAR_API_BASE}/calendars`,
+    {
+      summary: trimmedSummary,
+      ...(description ? { description } : {}),
+    },
+    "Google Calendar creation failed",
+  );
+
+  if (!calendar.id || !calendar.summary) {
+    throw new Error("Google Calendar creation response was invalid");
+  }
+
+  return toGoogleCalendarListItem(calendar);
 };
 
 export const fetchEventsForCalendar = async ({
@@ -113,12 +153,7 @@ export const fetchEventsForCalendar = async ({
       params.set("pageToken", pageToken);
     }
 
-    const data = await getJson<GoogleCalendarApiEventsResponse>(
-      accessToken,
-      `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(
-        calendarId,
-      )}/events?${params}`,
-    );
+    const data = await getJson<GoogleCalendarApiEventsResponse>(accessToken, `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(calendarId)}/events?${params}`);
 
     rawEvents.push(...(data.items ?? []));
     pageToken = data.nextPageToken;
