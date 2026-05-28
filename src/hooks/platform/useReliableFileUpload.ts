@@ -4,6 +4,7 @@ import { useAuthSession } from "@/contexts/AuthContext";
 import { auth, storage } from "@/services/firebase";
 import { imageDB } from "@/services/ImageDatabaseWriter";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
+import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 import type { UploadedImage, UploadFallbackReason, UploadMetadata, UploadSource } from "@/types";
 import { generateSafeStoragePath } from "@/utils/fileUtils";
 
@@ -31,7 +32,7 @@ interface UseReliableFileUploadReturn {
   reset: () => void;
 }
 
-type UploadKind = "card_image" | "card_audio" | "pdf" | string;
+type UploadKind = "card_image" | "card_audio" | "pdf";
 
 type UploadValidationRule = {
   label: string;
@@ -44,7 +45,7 @@ type UploadValidationRule = {
 const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024;
 const DOCUMENT_MAX_FILE_SIZE = 50 * 1024 * 1024;
 
-const UPLOAD_VALIDATION_RULES: Record<string, UploadValidationRule> = {
+const UPLOAD_VALIDATION_RULES: Record<UploadKind, UploadValidationRule> = {
   card_image: {
     label: "画像",
     allowedMimeTypes: [
@@ -95,10 +96,15 @@ const isContextObject = (
 ): value is Extract<UploadMetadata["context"], { type: string }> =>
   typeof value === "object" && value !== null && "type" in value;
 
+const toUploadKind = (value: string): UploadKind => {
+  if (value === "card_audio" || value === "pdf") return value;
+  return "card_image";
+};
+
 const resolveUploadType = (context?: UploadMetadata["context"]): UploadKind => {
   if (!context) return "card_image";
-  if (typeof context === "string") return context;
-  if (isContextObject(context)) return context.type;
+  if (typeof context === "string") return toUploadKind(context);
+  if (isContextObject(context)) return toUploadKind(context.type);
   return "card_image";
 };
 
@@ -128,8 +134,8 @@ const matchesMimeType = (
   return fileType === allowedMimeType;
 };
 
-const getValidationRule = (type: UploadKind): UploadValidationRule | null =>
-  UPLOAD_VALIDATION_RULES[type] ?? null;
+const getValidationRule = (type: UploadKind): UploadValidationRule =>
+  UPLOAD_VALIDATION_RULES[type];
 
 const getSafeErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof Error && error.message) return error.message;
@@ -147,8 +153,11 @@ const getSafeErrorMessage = (error: unknown, fallback: string): string => {
 const normalizeMimeType = (file: File, type: UploadKind): string => {
   const trimmed = file.type.trim();
   if (trimmed) return trimmed;
-  return getValidationRule(type)?.defaultMimeType ?? "application/octet-stream";
+  return getValidationRule(type).defaultMimeType ?? "application/octet-stream";
 };
+
+const toBlobUrl = (url: string): BlobUrl => url as BlobUrl;
+const toStorageUrl = (url: string): StorageUrl => url as StorageUrl;
 
 const performFirebaseUpload = async (
   file: File,
@@ -156,6 +165,7 @@ const performFirebaseUpload = async (
 ): Promise<UploadedImage> => {
   const user = auth.currentUser;
   if (!user) throw new Error("Unauthenticated during background upload");
+  if (!image.storagePath) throw new Error("Storage path is missing");
 
   const storageRef = ref(storage, image.storagePath);
   const uploadTask = uploadBytesResumable(storageRef, file);
@@ -172,7 +182,7 @@ const performFirebaseUpload = async (
           const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
           resolve({
             ...image,
-            remoteUrl: downloadUrl as unknown,
+            remoteUrl: toStorageUrl(downloadUrl),
             status: "ready",
           });
         } catch (error) {
@@ -201,10 +211,6 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
     (file: File, context?: UploadMetadata["context"]) => {
       const type = resolveUploadType(context);
       const rule = getValidationRule(type);
-
-      if (!rule) {
-        throw new Error("このアップロード種別は現在サポートしていません");
-      }
 
       if (file.size > rule.maxFileSize) {
         const maxMb = Math.floor(rule.maxFileSize / 1024 / 1024);
@@ -282,7 +288,7 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
 
         const storableImage: UploadedImage = {
           id,
-          localUrl: URL.createObjectURL(file) as unknown,
+          localUrl: toBlobUrl(URL.createObjectURL(file)),
           remoteUrl: null,
           status: "uploading",
           source: "local_fallback",
