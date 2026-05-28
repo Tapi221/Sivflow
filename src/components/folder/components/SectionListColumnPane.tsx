@@ -301,18 +301,17 @@ const SectionListColumnPane = ({
 
   const buildFolderCrumbs = useCallback(
     (folderIds: string[]): BreadcrumbCrumb[] => {
-      return folderIds
-        .map((folderId) => {
-          const folder = folderById.get(folderId);
-          if (!folder) return null;
+      return folderIds.reduce<BreadcrumbCrumb[]>((crumbs, folderId) => {
+        const folder = folderById.get(folderId);
+        if (!folder) return crumbs;
 
-          return {
-            label: getFolderLabel(folder),
-            to: buildFolderRoute(folderId),
-            folderId,
-          } satisfies BreadcrumbCrumb;
-        })
-        .filter((crumb): crumb is BreadcrumbCrumb => crumb !== null);
+        crumbs.push({
+          label: getFolderLabel(folder),
+          to: buildFolderRoute(folderId),
+          folderId,
+        });
+        return crumbs;
+      }, []);
     },
     [folderById],
   );
