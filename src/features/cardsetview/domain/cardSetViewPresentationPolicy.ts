@@ -15,7 +15,7 @@ const clampZoomPercentRange = (value: number) => {
   return Math.max(0, Math.min(100, safeValue));
 };
 
-const resolveSafeStepPercent = (stepPercent: number) => {
+const resolveSafeStepPercent = (stepPercent: number): number => {
   if (!Number.isFinite(stepPercent) || stepPercent <= 0) {
     return CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT;
   }
@@ -23,7 +23,7 @@ const resolveSafeStepPercent = (stepPercent: number) => {
   return stepPercent;
 };
 
-const roundToStep = (value: number, stepPercent: number) => {
+const roundToStep = (value: number, stepPercent: number): number => {
   const safeValue = clampZoomPercentRange(value);
   const safeStepPercent = resolveSafeStepPercent(stepPercent);
   const roundedValue =
@@ -34,7 +34,7 @@ const roundToStep = (value: number, stepPercent: number) => {
 
 export const clampNormalizedZoomPercent = (
   value: number,
-  stepPercent = CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT,
+  stepPercent: number = CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT,
 ) => roundToStep(value, stepPercent);
 
 export const resolveZoomMinBaseWidthPx = ({
