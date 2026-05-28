@@ -7,7 +7,7 @@ import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.schedule.mont
 import { compareCalendarEvents, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
 import { getVisibleMonthEventChipCount } from "@/features/calendar/grid/monthEventChipCount";
-import { MonthRowResizeBar } from "./height/MonthRowResizeBar.month.desktop";
+import { MonthRowResizeBar } from "@/features/calendar/grid/height/MonthRowResizeBar.month.desktop";
 import * as T from "@/features/calendar/calendar.text";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
