@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type CalendarDayNumberCircleProps = {
@@ -7,6 +7,7 @@ type CalendarDayNumberCircleProps = {
   isSelected?: boolean;
   isCurrentMonth?: boolean;
   className?: string;
+  style?: CSSProperties;
 };
 
 const CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME =
@@ -21,7 +22,7 @@ const getCalendarDayNumberCircleClassName = ({
   isSelected = false,
   isCurrentMonth = true,
   className,
-}: Omit<CalendarDayNumberCircleProps, "children">) =>
+}: Omit<CalendarDayNumberCircleProps, "children" | "style">) =>
   cn(
     CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME,
     isSelected
@@ -40,6 +41,7 @@ const CalendarDayNumberCircle = ({
   isSelected = false,
   isCurrentMonth = true,
   className,
+  style,
 }: CalendarDayNumberCircleProps) => {
   return (
     <span
@@ -49,6 +51,7 @@ const CalendarDayNumberCircle = ({
         isCurrentMonth,
         className,
       })}
+      style={style}
     >
       {children}
     </span>
