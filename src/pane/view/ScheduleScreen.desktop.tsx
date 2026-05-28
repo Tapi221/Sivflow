@@ -8,12 +8,12 @@ import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.week
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
-import { CalendarListPieChartSplitView } from "@/pane/view/schedule/Calendar.ListPieChartSplitView.desktop";
-import { CalendarPieChartView } from "@/pane/view/schedule/Calendar.PieChartView";
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { CalendarSidebar } from "@/pane/leftpane/CalendarSidebar";
+import { CalendarListPieChartSplitView } from "@/pane/leftpane/schedule/Calendar.ListPieChartSplitView.desktop";
+import { CalendarPieChartView } from "@/pane/leftpane/schedule/Calendar.PieChartView";
 import { CalendarWorkspaceToolbar } from "@/pane/header/ScheduleToolbar";
 
 type StoredAppCalendarItem = Partial<AppCalendarItem>;
