@@ -1,4 +1,5 @@
 import type { OAuthBridgePort } from "@/application/ports/OAuthBridgePort";
+import { mirrorDesktopGoogleRefreshTokenToServer } from "@/integration/google-integration/google.desktop-server-mirror";
 import platform from "@/platform";
 
 export const oauthBridge: OAuthBridgePort = {
@@ -8,7 +9,12 @@ export const oauthBridge: OAuthBridgePort = {
   exchangeTokens: (input) => platform.oauth.exchangeTokens(input),
   // refresh_token を使った silent なトークン更新
   refreshTokens: (input) => platform.oauth.refreshTokens(input),
-  storeRefreshToken: (input) => platform.oauth.storeRefreshToken(input),
+  storeRefreshToken: async (input) => {
+    await platform.oauth.storeRefreshToken(input);
+    void mirrorDesktopGoogleRefreshTokenToServer(input.refreshToken).catch((error) => {
+      console.warn("[GoogleCalendarOAuth] desktop refresh token server mirror failed", error);
+    });
+  },
   readRefreshToken: (accountId) => platform.oauth.readRefreshToken(accountId),
   deleteRefreshToken: (accountId) => platform.oauth.deleteRefreshToken(accountId),
   onCallback: (handler) => platform.oauth.onCallback(handler),
