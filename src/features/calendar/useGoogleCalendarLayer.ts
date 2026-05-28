@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import type { GoogleAccountEntry } from "@/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
-import { useMultiAccountGoogleCalendar } from "@/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
+import { usePersistentMultiAccountGoogleCalendar } from "@/integration/googlecalendar-integration/usePersistentMultiAccountGoogleCalendar";
 import type { GCalConnectionStatus } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useGoogleTaskLists } from "@/integration/googletask-integration/useGoogleTaskLists";
 import { useGoogleTasks } from "@/integration/googletask-integration/useGoogleTasks";
@@ -29,7 +29,7 @@ export const useGoogleCalendarLayer = () => {
     reconnectAccount,
     updateAccountToken,
     isAnyConnecting,
-  } = useMultiAccountGoogleCalendar();
+  } = usePersistentMultiAccountGoogleCalendar();
 
   const taskListsByAccount = useGoogleTaskLists(accounts, updateAccountToken, taskListRetryNonce);
   const googleTasks = useGoogleTasks(
