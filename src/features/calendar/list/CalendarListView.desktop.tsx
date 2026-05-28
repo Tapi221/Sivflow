@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject, type UIEvent } from "react";
-import { addDays, differenceInCalendarDays, format, getDaysInMonth, isSameDay, startOfMonth } from "date-fns";
+import { addDays, differenceInCalendarDays, format, getDaysInMonth, isSameDay, startOfMonth, subDays } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
@@ -44,7 +44,6 @@ type CalendarListVirtualRange = {
 };
 
 const EMPTY_DAY_LABEL = "予定なし";
-const EMPTY_MONTH_LABEL = "この期間の予定はありません";
 const SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX = 8;
 const LIST_VISIBLE_MONTH_ANCHOR_PX = 160;
 const LIST_VIRTUAL_OVERSCAN_PX = 3_000;
@@ -53,12 +52,13 @@ const LIST_EMPTY_DAY_HEIGHT_PX = 38;
 const LIST_EVENT_ROW_HEIGHT_PX = 58;
 const LIST_EVENT_ROW_GAP_PX = 6;
 const LIST_RAIL_DAY_HEIGHT_PX = 430;
+const LIST_LOCAL_RAIL_DAYS = 3650;
 
-const buildMonthDays = (date: Date): Date[] => {
-  const monthStart = startOfMonth(date);
-
-  return Array.from({ length: getDaysInMonth(monthStart) }, (_, index) => addDays(monthStart, index));
-};
+const createLocalVirtualRail = (selectedDate: Date): ScheduleVirtualRail => ({
+  startDate: subDays(startOfMonth(selectedDate), LIST_LOCAL_RAIL_DAYS),
+  anchorIndex: LIST_LOCAL_RAIL_DAYS,
+  totalDayCount: LIST_LOCAL_RAIL_DAYS * 2 + getDaysInMonth(selectedDate),
+});
 
 const getEventInstanceKey = (dateKey: string, event: GoogleCalendarEvent): string => {
   const startsAt = new Date(event.startsAt).getTime();
@@ -68,12 +68,11 @@ const getEventInstanceKey = (dateKey: string, event: GoogleCalendarEvent): strin
 };
 
 const buildListDays = (days: Date[], events: GoogleCalendarEvent[], selectedDate: Date): CalendarListDay[] => {
-  const resolvedDays = days.length > 0 ? days : buildMonthDays(selectedDate);
   const today = new Date();
   const eventsByDay = new Map<string, GoogleCalendarEvent[]>();
   const dayByKey = new Map<string, Date>();
 
-  resolvedDays.forEach((day) => {
+  days.forEach((day) => {
     const dayKey = getCalendarDateKey(day);
 
     dayByKey.set(dayKey, day);
@@ -99,7 +98,7 @@ const buildListDays = (days: Date[], events: GoogleCalendarEvent[], selectedDate
     });
   });
 
-  return resolvedDays.map((date) => {
+  return days.map((date) => {
     const dateKey = getCalendarDateKey(date);
     const dayEvents = eventsByDay.get(dateKey) ?? [];
 
@@ -137,13 +136,9 @@ const getVirtualRange = (scrollTop: number, viewportHeight: number, totalDayCoun
 
 const areVirtualRangesEqual = (left: CalendarListVirtualRange, right: CalendarListVirtualRange): boolean => left.start === right.start && left.end === right.end;
 
-const getFallbackTotalHeight = (days: CalendarListDay[], dayHeights?: CalendarDayHeightMap): number => days.reduce((total, day, index) => total + getRenderedDayHeight(dayHeights, day) + (index < days.length - 1 ? LIST_DAY_GAP_PX : 0), 0);
+const getRailIndexForDate = (rail: ScheduleVirtualRail, date: Date): number => differenceInCalendarDays(date, rail.startDate);
 
-const getFallbackOffset = (days: CalendarListDay[], index: number, dayHeights?: CalendarDayHeightMap): number => days.slice(0, index).reduce((total, day) => total + getRenderedDayHeight(dayHeights, day) + LIST_DAY_GAP_PX, 0);
-
-const getRailIndexForDate = (virtualRail: ScheduleVirtualRail, date: Date): number => differenceInCalendarDays(date, virtualRail.startDate);
-
-const EmptyDayCard = ({ isMonthEmpty }: { isMonthEmpty: boolean }) => (
+const EmptyDayCard = () => (
   <div className="grid h-full min-h-[38px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch">
     <div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[#b3b3b3]">—</div>
     <div className="relative flex justify-center">
@@ -151,7 +146,7 @@ const EmptyDayCard = ({ isMonthEmpty }: { isMonthEmpty: boolean }) => (
       <span className="relative mt-[8px] h-2 w-2 rounded-full border border-[#dedede] bg-white" aria-hidden="true" />
     </div>
     <div className="flex h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">
-      {isMonthEmpty ? EMPTY_MONTH_LABEL : EMPTY_DAY_LABEL}
+      {EMPTY_DAY_LABEL}
     </div>
   </div>
 );
@@ -165,18 +160,13 @@ const CalendarListDaySectionComponent = ({ day, onSelectDate }: CalendarListDayS
       </button>
 
       <div className="h-full space-y-1.5 overflow-hidden">
-        {day.events.length > 0 ? (
-          day.events.map((event) => <CalendarEventChipList key={getEventInstanceKey(day.dateKey, event)} event={event} />)
-        ) : (
-          <EmptyDayCard isMonthEmpty={false} />
-        )}
+        {day.events.length > 0 ? day.events.map((event) => <CalendarEventChipList key={getEventInstanceKey(day.dateKey, event)} event={event} />) : <EmptyDayCard />}
       </div>
     </section>
   );
 };
 
 const CalendarListViewComponent = ({
-  days,
   virtualRail,
   events,
   selectedDate,
@@ -193,17 +183,15 @@ const CalendarListViewComponent = ({
   const lastVisibleDateKeyRef = useRef<string | null>(null);
   const scrollFrameRef = useRef<number | null>(null);
   const pendingScrollElementRef = useRef<HTMLDivElement | null>(null);
-  const totalDayCount = virtualRail?.totalDayCount ?? days.length;
-  const [virtualRange, setVirtualRange] = useState<CalendarListVirtualRange>(() => ({ start: 0, end: Math.min(totalDayCount, 1) }));
-
-  const fallbackListDays = useMemo(() => buildListDays(days, events, selectedDate), [days, events, selectedDate]);
-  const renderedDates = useMemo(() => virtualRail ? buildScheduleVirtualRailDays(virtualRail, virtualRange.start, virtualRange.end) : days.slice(virtualRange.start, virtualRange.end), [days, virtualRail, virtualRange.end, virtualRange.start]);
+  const resolvedRail = useMemo(() => virtualRail ?? createLocalVirtualRail(selectedDate), [selectedDate, virtualRail]);
+  const totalDayCount = resolvedRail.totalDayCount;
+  const [virtualRange, setVirtualRange] = useState<CalendarListVirtualRange>(() => ({ start: 0, end: 1 }));
+  const renderedDates = useMemo(() => buildScheduleVirtualRailDays(resolvedRail, virtualRange.start, virtualRange.end), [resolvedRail, virtualRange.end, virtualRange.start]);
   const renderedDays = useMemo(() => buildListDays(renderedDates, events, selectedDate), [events, renderedDates, selectedDate]);
-  const totalHeight = virtualRail ? Math.max(0, virtualRail.totalDayCount * getRailDayBlockHeight() - LIST_DAY_GAP_PX) : getFallbackTotalHeight(fallbackListDays, dayHeights);
-  const isMonthEmpty = renderedDays.length > 0 && renderedDays.every((day) => day.events.length === 0);
+  const totalHeight = Math.max(0, totalDayCount * getRailDayBlockHeight() - LIST_DAY_GAP_PX);
 
-  const getDayTop = useCallback((dayIndex: number) => virtualRail ? dayIndex * getRailDayBlockHeight() : getFallbackOffset(fallbackListDays, dayIndex, dayHeights), [dayHeights, fallbackListDays, virtualRail]);
-  const getDayHeight = useCallback((day: CalendarListDay) => virtualRail ? LIST_RAIL_DAY_HEIGHT_PX : getRenderedDayHeight(dayHeights, day), [dayHeights, virtualRail]);
+  const getDayTop = useCallback((dayIndex: number) => dayIndex * getRailDayBlockHeight(), []);
+  const getDayHeight = useCallback((day: CalendarListDay) => getRenderedDayHeight(dayHeights, day), [dayHeights]);
 
   const updateVirtualRange = useCallback((scrollElement: HTMLDivElement | null) => {
     const nextRange = scrollElement ? getVirtualRange(scrollElement.scrollTop, scrollElement.clientHeight, totalDayCount) : getVirtualRange(0, 0, totalDayCount);
@@ -216,7 +204,7 @@ const CalendarListViewComponent = ({
 
     const anchorOffset = scrollElement.scrollTop + Math.min(LIST_VISIBLE_MONTH_ANCHOR_PX, scrollElement.clientHeight / 2);
     const anchorIndex = Math.max(0, Math.min(totalDayCount - 1, Math.floor(anchorOffset / getRailDayBlockHeight())));
-    const anchorDate = virtualRail ? getScheduleVirtualRailDate(virtualRail, anchorIndex) : fallbackListDays[anchorIndex]?.date;
+    const anchorDate = getScheduleVirtualRailDate(resolvedRail, anchorIndex);
     if (!anchorDate) return;
 
     const visibleDateKey = getCalendarDateKey(anchorDate);
@@ -224,7 +212,7 @@ const CalendarListViewComponent = ({
 
     lastVisibleDateKeyRef.current = visibleDateKey;
     onVisibleMonthChange(anchorDate);
-  }, [fallbackListDays, onVisibleMonthChange, totalDayCount, virtualRail]);
+  }, [onVisibleMonthChange, resolvedRail, totalDayCount]);
 
   const processScroll = useCallback((scrollElement: HTMLDivElement) => {
     updateVirtualRange(scrollElement);
@@ -259,13 +247,13 @@ const CalendarListViewComponent = ({
   useEffect(() => {
     const selectedDateTime = selectedDate.getTime();
     const scrollElement = scrollViewportRef.current;
-    const selectedDayIndex = virtualRail ? getRailIndexForDate(virtualRail, selectedDate) : fallbackListDays.findIndex((day) => isSameDay(day.date, selectedDate));
+    const selectedDayIndex = getRailIndexForDate(resolvedRail, selectedDate);
     if (lastSelectedDateTimeRef.current === selectedDateTime || !scrollElement || selectedDayIndex < 0 || selectedDayIndex >= totalDayCount) return;
 
     lastSelectedDateTimeRef.current = selectedDateTime;
     scrollElement.scrollTop = Math.max(0, getDayTop(selectedDayIndex) - SELECTED_DAY_SCROLL_BLOCK_OFFSET_PX);
     updateVirtualRange(scrollElement);
-  }, [fallbackListDays, getDayTop, scrollViewportRef, selectedDate, totalDayCount, updateVirtualRange, virtualRail]);
+  }, [getDayTop, resolvedRail, scrollViewportRef, selectedDate, totalDayCount, updateVirtualRange]);
 
   useEffect(() => {
     return () => {
@@ -291,8 +279,6 @@ const CalendarListViewComponent = ({
               );
             })}
           </div>
-
-          {totalDayCount === 0 ? <EmptyDayCard isMonthEmpty={isMonthEmpty} /> : null}
         </div>
       </div>
     </div>
