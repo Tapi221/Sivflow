@@ -4,7 +4,7 @@ import { usePdfSearch } from "@/features/pdf/hooks/usePdfSearch";
 import { buildPdfPageLayoutMetrics, getPdfPageSizeOrFallback, normalizePdfPageOrder } from "@/features/scroll/pdf/pdfScrollLayout";
 import { EMPTY_PDF_RENDER_PAGE_NUMBERS, buildPdfPrefetchPageNumbers, buildPdfRenderedPageNumbers } from "@/features/scroll/pdf/pdfScrollRenderWindow";
 import { usePdfCurrentPage } from "@/features/scroll/pdf/usePdfCurrentPage";
-import { usePdfZoom } from "@/features/scroll/pdf/usePdfZoom";
+import { usePdfZoom } from "@/features/zoom/pdf/usePdfZoom";
 import { PdfPage } from "./PdfPage";
 import type { PageSize, PdfScaleChangeSource, PdfViewerHandle, PdfViewerOptions, PdfViewerSourceMeta, SourceLoadErrorKind } from "./pdfViewer.types";
 import { cn } from "@/lib/utils";
