@@ -52,6 +52,17 @@ export type ProjectCalendarLink = {
   lastSyncedAt?: string;
 };
 
+export type ProjectEventLink = {
+  id: string;
+  projectEventId: string;
+  provider: CalendarProvider;
+  accountId: string;
+  externalCalendarId: string;
+  externalEventId: string;
+  lastSyncedAt: string;
+  lastKnownExternalUpdatedAt?: string;
+};
+
 export type GoogleAccountDisplay = {
   accountId: string;
   email: string | null;
