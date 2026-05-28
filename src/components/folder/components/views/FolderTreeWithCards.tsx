@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { NodeApi } from "react-arborist";
 import { toVirtualMfCardDisplayName, toVirtualMfDeckDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
 import { ExplorerEmptyState } from "@/components/folder/components/ExplorerEmptyState";
 import { ExplorerNoResultsState } from "@/components/folder/components/ExplorerNoResultsState";
@@ -19,6 +18,10 @@ import { FolderTreeArborist } from "@/components/sidebar/FolderTreeArborist";
 import BulkTagDialog from "@/components/tag/BulkTagDialog";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, ExplorerItem, SelectedExplorerItem } from "@/types";
+
+type ExplorerNodeApi<T> = {
+  data?: T;
+};
 
 interface FolderTreeWithCardsProps {
   sidebarDisplayMode?: "tree" | "navigation";
@@ -1007,7 +1010,7 @@ export const FolderTreeWithCards = ({
   );
 
   const arboristDisableDrag = useCallback(
-    (node: NodeApi<ExplorerTreeNode>) => !node.data?.kind,
+    (node: ExplorerNodeApi<ExplorerTreeNode>) => !node.data?.kind,
     [],
   );
 
@@ -1016,8 +1019,8 @@ export const FolderTreeWithCards = ({
       parentNode,
       dragNodes,
     }: {
-      parentNode: NodeApi<ExplorerTreeNode>;
-      dragNodes: NodeApi<ExplorerTreeNode>[];
+      parentNode: ExplorerNodeApi<ExplorerTreeNode>;
+      dragNodes: ExplorerNodeApi<ExplorerTreeNode>[];
       index: number;
     }) => shouldDisableExplorerDrop({ parentNode, dragNodes }),
     [],
@@ -1125,91 +1128,49 @@ export const FolderTreeWithCards = ({
     [setExpandedFolders, setExpandedCardSets],
   );
 
-  const hasRootContent =
-    navigationEntries.length > 0 ||
-    rootFolderPanels.length > 0 ||
-    rootItems.length > 0 ||
-    explorerTreeData.length > 0;
-
   return (
-    <div ref={treeRootRef} className={cn("h-full w-full", className)}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept={currentFileAccept}
-        className="hidden"
-        multiple
-        onChange={handleToolbarFileInputChange}
-      />
-
-      {!hasRootContent ? (
-        <ExplorerEmptyState />
-      ) : isFiltering && !hasFilterMatches ? (
+    <div
+      ref={treeRootRef}
+      className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", className)}
+    >
+      {effectiveSidebarDisplayMode === "navigation" ? (
+        <RootFolderPanelList
+          entries={navigationEntries}
+          emptyMessage={navigationEmptyMessage}
+          onFolderOpen={(folderId) => {
+            setNavigationParentFolderId(folderId);
+            onFolderSelect(folderId);
+          }}
+          onCardSetOpen={(cardSetId) => onItemSelect({ type: "cardSet", id: cardSetId })}
+          onDocumentOpen={(documentId) => onItemSelect({ type: "document", id: documentId })}
+          onCardOpen={(cardId) => onItemSelect({ type: "card", id: cardId })}
+        />
+      ) : !hasFilterMatches ? (
         <ExplorerNoResultsState />
+      ) : rootFolders.length === 0 && rootItems.length === 0 ? (
+        <ExplorerEmptyState />
       ) : (
-        <div className="h-full min-h-0">
-          {effectiveSidebarDisplayMode === "tree" ? (
-            <FolderTreeArborist
-              data={explorerTreeData}
-              selectedId={selectedTreeId}
-              expandedIds={toExpandedTreeIds(expandedFolders, expandedCardSets)}
-              onSelect={handleTreeSelect}
-              onToggleExpand={onToggleExpand}
-              renderNode={renderTreeNode}
-              onMove={handleArboristMove}
-              disableDrag={arboristDisableDrag}
-              disableDrop={arboristDisableDrop}
-            />
-          ) : (
-            <RootFolderPanelList
-              entries={navigationEntries}
-              selectedFolderId={selectedFolderId}
-              selectedItem={selectedItem}
-              selectedCardSetId={selectedCardSetId}
-              openRowMenuId={dialogs.openRowMenuId}
-              setOpenRowMenuId={dialogs.setOpenRowMenuId}
-              emptyMessage={navigationEmptyMessage}
-              setRowRef={setRowRef}
-              onSelectFolder={(id) => {
-                if (!id) return;
-                setNavigationParentFolderId(id);
-                onFolderSelect(id);
-              }}
-              onItemSelect={onItemSelect}
-              canCreateFolder={canCreateFolder}
-              canCreateCardSet={canCreateCardSet}
-              canRenameFolder={canRenameFolder}
-              canDeleteFolder={canDeleteFolder}
-              canRenameCardSet={canRenameCardSet}
-              canDeleteCardSet={canDeleteCardSet}
-              canRenameDocument={canRenameDocument}
-              canDeleteDocument={canDeleteDocument}
-              handleCreateFolderAction={actions.handleCreateFolderAction}
-              handleCreateCardSetAction={handleCreateCardSetFromRootPanel}
-              handleDelete={(id, type) => {
-                void actions.handleDelete({ id, type });
-              }}
-              setEditingId={dialogs.setEditingId}
-              setEditingName={dialogs.setEditingName}
-              renameCancelledRef={dialogs.renameCancelledRef}
-              editingId={dialogs.editingId}
-              editingName={dialogs.editingName}
-              editingNameRef={dialogs.editingNameRef}
-              handleRenameConfirm={actions.handleRenameConfirm}
-            />
-          )}
-        </div>
+        <FolderTreeArborist
+          data={explorerTreeData}
+          selectedId={selectedTreeId}
+          expandedIds={toExpandedTreeIds(expandedFolders, expandedCardSets)}
+          onSelect={handleTreeSelect}
+          onMove={handleArboristMove}
+          disableDrag={arboristDisableDrag}
+          disableDrop={arboristDisableDrop}
+          onToggle={onToggleExpand}
+        >
+          {renderTreeNode}
+        </FolderTreeArborist>
       )}
 
-      {dialogs.bulkTagFolderId && (
+      {dialogs.bulkTagFolderId ? (
         <BulkTagDialog
-          open={Boolean(dialogs.bulkTagFolderId)}
-          onOpenChange={(open) => {
-            if (!open) dialogs.setBulkTagFolderId(null);
-          }}
+          isOpen={Boolean(dialogs.bulkTagFolderId)}
+          onClose={() => dialogs.setBulkTagFolderId(null)}
           folderId={dialogs.bulkTagFolderId}
         />
-      )}
+      ) : null}
     </div>
   );
 };
