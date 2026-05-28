@@ -1,6 +1,6 @@
 import type { RefObject, UIEvent } from "react";
 import { startTransition, useCallback, useMemo, useState } from "react";
-import { useCalendarLayout } from "@/features/calendar/layout/calendar/useCalendarLayout.desktop";
+import { useCalendarLayout } from "@/features/calendar/layout/useCalendarLayout.desktop";
 import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
