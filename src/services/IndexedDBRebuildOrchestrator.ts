@@ -16,6 +16,7 @@ const REBUILD_TABLE_BY_TYPE = {
 } as const;
 
 type RebuildSupportedType = keyof typeof REBUILD_TABLE_BY_TYPE;
+type RebuildTableName = (typeof REBUILD_TABLE_BY_TYPE)[RebuildSupportedType];
 
 type PullChange = {
   type?: unknown;
@@ -69,13 +70,13 @@ const toNonEmptyString = (value: unknown): string | null => {
 export class IndexedDBRebuildOrchestrator {
   private static isRebuilding = false;
 
-  static readonly isSupportedType = (type: string): boolean => {
+  static readonly isSupportedType = (type: string): type is RebuildSupportedType => {
     return isRebuildSupportedType(type);
   };
 
   private static readonly tableFromType = (
     type: RebuildSupportedType,
-  ): string => {
+  ): RebuildTableName => {
     return REBUILD_TABLE_BY_TYPE[type];
   };
 
@@ -180,14 +181,7 @@ export class IndexedDBRebuildOrchestrator {
 
           try {
             await newDb.upsert(
-              table as
-                | "cards"
-                | "folders"
-                | "cardSets"
-                | "documents"
-                | "tagRecords"
-                | "images"
-                | "userSettings",
+              table,
               normalizeRebuildRecord(userId, {
                 type: changeType,
                 id: toNonEmptyString(change.id) ?? undefined,
@@ -238,21 +232,15 @@ export class IndexedDBRebuildOrchestrator {
         console.warn("[Rebuild] Failed to mark clean state", error);
       }
 
-      console.log(
-        `[Rebuild:${userId}] Rebuild complete with ${insertedCount}/${changes.length} items.`,
-      );
-      onProgress?.("再構築が完了しました");
+      LocalDBClass.clearInstance();
 
+      onProgress?.("復元が完了しました。");
       return {
-        success: true,
+        success: failures.length === 0,
         degraded: failures.length > 0,
         failures,
         insertedCount,
       };
-    } catch (error) {
-      console.error(`[Rebuild:${userId}] Rebuild failed:`, error);
-      onProgress?.("再構築に失敗しました。");
-      throw error;
     } finally {
       this.isRebuilding = false;
     }
