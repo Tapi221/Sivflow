@@ -2,15 +2,13 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trophy } from "@/ui/icons";
-import { createPageUrl } from "@/platform/web/navigation/toWebPath";
 
 type Props = {
   folderId: string | null;
-  navigate: (to: string) => void;
   handleBack: () => void;
 };
 
-export const StudyEmpty = ({ folderId, navigate, handleBack }: Props) => {
+export const StudyEmpty = ({ folderId, handleBack }: Props) => {
   return (
     <Card className="max-w-xl mx-auto mt-16 border border-slate-200/80 bg-white rounded-2xl shadow-[0_12px_40px_-24px_rgba(15,23,42,0.35)] animate-in fade-in slide-in-from-bottom-2 duration-300">
       <CardContent className="py-12 px-8 text-center">
@@ -26,24 +24,10 @@ export const StudyEmpty = ({ folderId, navigate, handleBack }: Props) => {
             : "今日復習するカードはありません"}
         </p>
         <div className="flex flex-wrap justify-center gap-3">
-          {folderId && (
-            <Button
-              onClick={() =>
-                navigate(createPageUrl(`CardEdit?folderId=${folderId}`))
-              }
-              className="bg-primary-600 hover:bg-primary-700 text-white rounded-xl px-6 h-11"
-            >
-              カードを追加
-            </Button>
-          )}
           <Button
             onClick={handleBack}
-            variant={folderId ? "outline" : "default"}
-            className={
-              folderId
-                ? "rounded-xl px-6 h-11 border-slate-200 hover:bg-slate-50 text-slate-700"
-                : "bg-primary-600 hover:bg-primary-700 text-white rounded-xl px-6 h-11"
-            }
+            variant="default"
+            className="bg-primary-600 hover:bg-primary-700 text-white rounded-xl px-6 h-11"
           >
             戻る
           </Button>
