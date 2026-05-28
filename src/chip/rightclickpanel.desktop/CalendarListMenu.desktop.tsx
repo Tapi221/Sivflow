@@ -1,6 +1,6 @@
 import { type CSSProperties, type RefObject } from "react";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
-import { RIGHT_CLICK_PANEL_MARGIN, resolveRightClickPanelTextWidth, type RightClickPanelId } from "../rightclickpanel/rightClickPanel.utils";
+import { RIGHT_CLICK_PANEL_MARGIN, resolveRightClickPanelTextWidth, type RightClickPanelId } from "@/chip/rightclickpanel/rightClickPanel.utils";
 
 export type CalendarListMenuAction = {
   id: "add-project" | "change-color";
