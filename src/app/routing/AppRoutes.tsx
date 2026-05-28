@@ -6,9 +6,9 @@ import { getDevRouteElements } from "./DevRoutes";
 import { ProtectedRoute } from "./ProtectedRoute";
 
 const Schedule = lazy(() => import("@/routes/Schedule"));
-const Settings = lazy(() => import("@/routes/Settings"));
 const REDIRECT_TO_SCHEDULE_ROUTES = [
   "calendar/*",
+  "settings/*",
   "CardEdit/*",
   "CardSetView/*",
   "CardView/*",
@@ -39,7 +39,6 @@ export const AppRoutes = () => {
       >
         <Route index element={<DefaultRedirect />} />
         <Route path="schedule" element={withRouteFallback(<Schedule />)} />
-        <Route path="settings/*" element={withRouteFallback(<Settings />)} />
         {REDIRECT_TO_SCHEDULE_ROUTES.map((path) => (
           <Route key={path} path={path} element={<DefaultRedirect />} />
         ))}
