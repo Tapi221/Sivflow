@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject, type UIEvent } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { differenceInCalendarDays, differenceInMinutes, format, getDaysInMonth, isAfter, isBefore, isSameDay, startOfDay, startOfMonth, subDays } from "date-fns";
 import { ja } from "date-fns/locale";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
@@ -17,7 +17,8 @@ const DAY_HEIGHT = 430;
 const DAY_GAP = 8;
 const DAY_BLOCK = DAY_HEIGHT + DAY_GAP;
 const LOCAL_DAYS = 3650;
-const OVERSCAN = 5000;
+const MATERIALIZE_OVERSCAN = 20_000;
+const RANGE_UPDATE_GUARD = 8_000;
 const ANCHOR_OFFSET = 160;
 const SELECTED_OFFSET = 8;
 
@@ -27,12 +28,19 @@ const getKey = (date: Date) => format(date, "yyyy-MM-dd");
 
 const getRange = (scrollTop: number, viewportHeight: number, totalDayCount: number): VirtualRange => {
   if (totalDayCount <= 0) return { start: 0, end: 0 };
-  const start = Math.max(0, Math.floor(Math.max(0, scrollTop - OVERSCAN) / DAY_BLOCK));
-  const end = Math.min(totalDayCount, Math.ceil((scrollTop + viewportHeight + OVERSCAN) / DAY_BLOCK) + 1);
+  const start = Math.max(0, Math.floor(Math.max(0, scrollTop - MATERIALIZE_OVERSCAN) / DAY_BLOCK));
+  const end = Math.min(totalDayCount, Math.ceil((scrollTop + viewportHeight + MATERIALIZE_OVERSCAN) / DAY_BLOCK) + 1);
   return { start, end: Math.max(start, end) };
 };
 
 const sameRange = (a: VirtualRange, b: VirtualRange) => a.start === b.start && a.end === b.end;
+
+const shouldRefreshRange = (element: HTMLDivElement, range: VirtualRange): boolean => {
+  if (range.end <= range.start) return true;
+  const visibleTop = element.scrollTop;
+  const visibleBottom = element.scrollTop + element.clientHeight;
+  return visibleTop < range.start * DAY_BLOCK + RANGE_UPDATE_GUARD || visibleBottom > range.end * DAY_BLOCK - RANGE_UPDATE_GUARD;
+};
 
 const getIndexForDate = (rail: ScheduleVirtualRail, date: Date) => differenceInCalendarDays(date, rail.startDate);
 
@@ -72,20 +80,22 @@ const CalendarPieChartViewComponent = ({ virtualRail, selectedDate, events, onSe
   const pendingRef = useRef<HTMLDivElement | null>(null);
   const rail = useMemo(() => virtualRail ?? createRail(selectedDate), [selectedDate, virtualRail]);
   const [range, setRange] = useState<VirtualRange>({ start: 0, end: 1 });
+  const rangeRef = useRef(range);
   const dates = useMemo(() => buildScheduleVirtualRailDays(rail, range.start, range.end), [rail, range.end, range.start]);
   const days = useMemo(() => buildSummaries(dates, events, selectedDate), [dates, events, selectedDate]);
   const totalHeight = Math.max(0, rail.totalDayCount * DAY_BLOCK - DAY_GAP);
 
-  const updateRange = useCallback((element: HTMLDivElement | null) => { const next = element ? getRange(element.scrollTop, element.clientHeight, rail.totalDayCount) : getRange(0, 0, rail.totalDayCount); setRange((current) => sameRange(current, next) ? current : next); }, [rail.totalDayCount]);
+  const setRangeIfChanged = useCallback((next: VirtualRange) => { if (sameRange(rangeRef.current, next)) return; rangeRef.current = next; setRange(next); }, []);
+  const updateRange = useCallback((element: HTMLDivElement | null, force = false) => { if (!element) return; if (!force && !shouldRefreshRange(element, rangeRef.current)) return; setRangeIfChanged(getRange(element.scrollTop, element.clientHeight, rail.totalDayCount)); }, [rail.totalDayCount, setRangeIfChanged]);
   const updateVisibleDate = useCallback((element: HTMLDivElement | null) => { if (!element || !onVisibleDateChange) return; const index = Math.max(0, Math.min(rail.totalDayCount - 1, Math.floor((element.scrollTop + Math.min(ANCHOR_OFFSET, element.clientHeight / 2)) / DAY_BLOCK))); const date = getScheduleVirtualRailDate(rail, index); if (!date) return; const key = getKey(date); if (lastVisibleKeyRef.current === key) return; lastVisibleKeyRef.current = key; onVisibleDateChange(date); }, [onVisibleDateChange, rail]);
-  const scheduleDeferred = useCallback((element: HTMLDivElement) => { pendingRef.current = element; if (frameRef.current !== null) return; frameRef.current = window.requestAnimationFrame(() => { frameRef.current = null; const pending = pendingRef.current; pendingRef.current = null; if (!pending) return; updateVisibleDate(pending); onScrollTopChange?.(pending.scrollTop); }); }, [onScrollTopChange, updateVisibleDate]);
-  const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => { updateRange(event.currentTarget); scheduleDeferred(event.currentTarget); }, [scheduleDeferred, updateRange]);
+  const scheduleScrollWork = useCallback((element: HTMLDivElement) => { pendingRef.current = element; if (frameRef.current !== null) return; frameRef.current = window.requestAnimationFrame(() => { frameRef.current = null; const pending = pendingRef.current; pendingRef.current = null; if (!pending) return; updateRange(pending); updateVisibleDate(pending); onScrollTopChange?.(pending.scrollTop); }); }, [onScrollTopChange, updateRange, updateVisibleDate]);
 
-  useLayoutEffect(() => { updateRange(scrollRef.current); }, [scrollRef, updateRange]);
-  useEffect(() => { const element = scrollRef.current; const key = getKey(selectedDate); const index = getIndexForDate(rail, selectedDate); if (lastSelectedKeyRef.current === key || !element || index < 0 || index >= rail.totalDayCount) return; lastSelectedKeyRef.current = key; element.scrollTop = Math.max(0, index * DAY_BLOCK - SELECTED_OFFSET); updateRange(element); }, [rail, scrollRef, selectedDate, updateRange]);
+  useLayoutEffect(() => { updateRange(scrollRef.current, true); }, [scrollRef, updateRange]);
+  useEffect(() => { const element = scrollRef.current; if (!element) return; const handleScroll = () => scheduleScrollWork(element); element.addEventListener("scroll", handleScroll, { passive: true }); return () => element.removeEventListener("scroll", handleScroll); }, [scheduleScrollWork, scrollRef]);
+  useEffect(() => { const element = scrollRef.current; const key = getKey(selectedDate); const index = getIndexForDate(rail, selectedDate); if (lastSelectedKeyRef.current === key || !element || index < 0 || index >= rail.totalDayCount) return; lastSelectedKeyRef.current = key; element.scrollTop = Math.max(0, index * DAY_BLOCK - SELECTED_OFFSET); updateRange(element, true); }, [rail, scrollRef, selectedDate, updateRange]);
   useEffect(() => () => { if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current); }, []);
 
-  return <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}><div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden" onScroll={handleScroll}><div className="mx-auto w-full max-w-[940px]"><div className="relative w-full" style={{ height: totalHeight }}>{days.map((day, offset) => <div key={day.key} className="absolute left-0 right-0" style={{ contain: "layout style", top: (range.start + offset) * DAY_BLOCK, height: DAY_HEIGHT }}><DayRow day={day} onSelectDate={onSelectDate} /></div>)}</div></div></div></div>;
+  return <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}><div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden"><div className="mx-auto w-full max-w-[940px]"><div className="relative w-full" style={{ height: totalHeight }}>{days.map((day, offset) => <div key={day.key} className="absolute left-0 right-0" style={{ contain: "layout style", top: (range.start + offset) * DAY_BLOCK, height: DAY_HEIGHT }}><DayRow day={day} onSelectDate={onSelectDate} /></div>)}</div></div></div></div>;
 };
 
 const CalendarPieChartView = memo(CalendarPieChartViewComponent);
