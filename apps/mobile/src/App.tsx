@@ -1,6 +1,7 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { NavigationBarMobile, type NavigationItemId } from "./NavigationBarMobile";
 
 const onboardingSteps = [
   "既存 Web / Electron 版はそのまま維持",
@@ -9,6 +10,8 @@ const onboardingSteps = [
 ] as const;
 
 const App = () => {
+  const [activeItemId, setActiveItemId] = useState<NavigationItemId>("home");
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
@@ -31,6 +34,8 @@ const App = () => {
           ))}
         </View>
       </ScrollView>
+
+      <NavigationBarMobile activeItemId={activeItemId} onSelectItem={setActiveItemId} />
     </SafeAreaView>
   );
 };
@@ -52,6 +57,7 @@ const styles = StyleSheet.create({
   content: {
     gap: 24,
     padding: 24,
+    paddingBottom: 112,
   },
   description: {
     color: "#4A5872",
