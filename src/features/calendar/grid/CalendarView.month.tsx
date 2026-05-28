@@ -1,10 +1,10 @@
 import { startTransition, useDeferredValue, useEffect, useMemo, useRef } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import { GridCalendarMonthDesktop } from "@/features/calendar/grid/Grid.calendar.month.desktop";
-import { useMonthInfiniteScroll } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
 import { useMonthRowResize } from "@/features/calendar/grid/height/useRowResize.month.desktop";
+import { useMonthInfiniteScroll } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 const RENDERED_RANGE_NOTIFY_DELAY_MS = 180;
 
@@ -126,6 +126,8 @@ export const CalendarMonthView = ({
           visibleEvents={deferredVisibleEvents}
           monthWeeks={scroll.monthWeeks}
           monthRowHeight={monthRowHeight}
+          topSpacerHeight={scroll.topSpacerHeight}
+          bottomSpacerHeight={scroll.bottomSpacerHeight}
           scrollHoverDayKey={null}
           setWeekRowRef={scroll.setWeekRowRef}
           onSelectDate={onSelectDate}
