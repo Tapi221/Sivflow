@@ -1,5 +1,5 @@
 import { useLayoutEffect, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
-import { RIGHT_CLICK_PANEL_OPEN_EVENT, RIGHT_CLICK_PANEL_STYLE, announceRightClickPanelOpen, type RightClickPanelId } from "./rightClickPanelUtils";
+import { RIGHT_CLICK_PANEL_OPEN_EVENT, RIGHT_CLICK_PANEL_STYLE, announceRightClickPanelOpen, type RightClickPanelId } from "./rightClickPanel.utils";
 
 type RightClickPanelSurfaceProps = {
   x: number;
