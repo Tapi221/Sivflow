@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer } from "react";
-import { refreshGoogleConnectedServiceAccessToken, requestGoogleConnectedServiceAccessToken } from "@/integration/google-integration/google.oauth";
-import { getServerStoredGoogleConnectedServiceAccessToken, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
 import { createGoogleTask, deleteGoogleTask, fetchGoogleTasks, moveGoogleTask, patchGoogleTask } from "./gtask.api";
+import { refreshConnectedServiceAccessToken, requestConnectedServiceAccessToken } from "@/integration/google-integration/google.oauth";
+import { getServerStoredGoogleConnectedServiceAccessToken, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
 import type { GoogleConnectedServiceAccountEntry, GoogleConnectedServiceAccountTokenUpdate } from "@/integration/google-integration/googleAccount.types";
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 import type { GoogleTaskListAccountState } from "./useGoogleTaskLists";
@@ -75,7 +75,7 @@ const getRecoverableAccessToken = async (
   account: AccountTokenSnapshot,
   onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,
 ): Promise<string | null> => {
-  const applyRecoveredToken = (result: Awaited<ReturnType<typeof requestGoogleConnectedServiceAccessToken>>) => {
+  const applyRecoveredToken = (result: Awaited<ReturnType<typeof requestConnectedServiceAccessToken>>) => {
     onAccessTokenRecovered?.({
       accountId: account.accountId,
       accessToken: result.accessToken,
@@ -107,11 +107,11 @@ const getRecoverableAccessToken = async (
 
   if (!account.refreshToken) {
     const { auth } = await import("@/services/firebase");
-    const result = await requestGoogleConnectedServiceAccessToken(auth, true);
+    const result = await requestConnectedServiceAccessToken(auth, true);
     return applyRecoveredToken(result);
   }
 
-  const result = await refreshGoogleConnectedServiceAccessToken({
+  const result = await refreshConnectedServiceAccessToken({
     refreshToken: account.refreshToken,
   });
 
