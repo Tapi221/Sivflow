@@ -4,9 +4,9 @@ import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay } from
 import { MiniCalendarSection } from "@/features/calendar/panel/MiniCalendarSection";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
-import { SidebarLayeredDirectory } from "@/pane/leftpane/Sidebar.LayeredDirectory";
+import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import { SelectableGoogleSourceRow } from "@/features/calendar/panel/SelectableGoogleSourceRow";
-import { useWorkspaceTabsStore } from "@/pane/tab.desktopnative/hooks/useTabsStore";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 const ADD_PROJECT_EMPTY_MESSAGE = "プロジェクト名を入力してください";

@@ -6,8 +6,8 @@ import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDer
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { FadeSkeleton } from "@/features/fade/skeltom";
 import { toVirtualMfCardDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
-import { createDefaultExplorerRouteState, WORKSPACE_DEFAULT_EXPLORER_TAB_ID, type WorkspaceExplorerTab, type WorkspaceTab } from "@/features/tab/Tab";
-import { useWorkspaceTabsStore } from "@/pane/tab.desktopnative/hooks/useTabsStore";
+import { createDefaultExplorerRouteState, WORKSPACE_DEFAULT_EXPLORER_TAB_ID, type WorkspaceExplorerTab, type WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { useCardsRead } from "@/components/card/hooks/useCardsRead";
 import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";

@@ -1,4 +1,4 @@
-import type { WorkspaceTab } from "@/features/tab/Tab";
+import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 
 export const resolveWorkspaceTabRoute = (tab: WorkspaceTab): string => {
   switch (tab.kind) {

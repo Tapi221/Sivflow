@@ -1,10 +1,10 @@
 import { Suspense, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
-import { useWorkspaceTabsRouteSync } from "@/pane/tab.desktopnative/hooks/useTabsRouteSync";
+import { useWorkspaceTabsRouteSync } from "@/pane.desktop/tab.desktopnative/hooks/useTabsRouteSync";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
-import { Sidebar } from "@/pane/leftpane/Sidebar.desktop";
+import { Sidebar } from "@/pane.desktop/leftpane/Sidebar.desktop";
 import { isDesktopRuntime } from "@/platform/runtime";
 import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
