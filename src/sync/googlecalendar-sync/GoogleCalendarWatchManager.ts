@@ -1,16 +1,5 @@
 import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "@/services/firebase";
-
-const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
-
-const WATCH_TTL_MS = 6 * 24 * 60 * 60 * 1000;
-const RENEWAL_THRESHOLD_MS = 24 * 60 * 60 * 1000;
-
-const WEBHOOK_URL = import.meta.env.VITE_GCAL_WEBHOOK_URL as string;
-
-// ─────────────────────────────────────────────
-// 型
-// ─────────────────────────────────────────────
+import { requireFirestoreDb } from "@/services/firebase";
 
 export type WatchChannel = {
   channelId: string;
@@ -19,6 +8,13 @@ export type WatchChannel = {
   expiration: number;
   userId: string;
 };
+
+const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
+
+const WATCH_TTL_MS = 6 * 24 * 60 * 60 * 1000;
+const RENEWAL_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+
+const WEBHOOK_URL = import.meta.env.VITE_GCAL_WEBHOOK_URL as string;
 
 // ─────────────────────────────────────────────
 // WatchManager
@@ -195,8 +191,10 @@ export class GoogleCalendarWatchManager {
   // ─────────────────────────────
 
   private getRef(calendarId: string) {
+    const firestoreDb = requireFirestoreDb();
+
     return doc(
-      db,
+      firestoreDb,
       "gcal_watch_channels",
       this.userId,
       "calendars",
