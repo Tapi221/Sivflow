@@ -267,6 +267,40 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     setAppProjects((projects) => projects.map((project) => project.id === projectId ? { ...project, checked: !project.checked } : project));
   }, []);
 
+  const handleLinkProjectToGoogleCalendar = useCallback((projectId: string, accountId: string, calendarId: string) => {
+    const project = appProjects.find((item) => item.id === projectId);
+    const account = googleAccounts.find((item) => item.accountId === accountId);
+    const calendar = account?.calendars.find((item) => item.id === calendarId);
+    if (!project || !account || !calendar) return;
+
+    const calendarLabel = calendar.summaryOverride ?? calendar.summary;
+    const color = googleCalendarColorOverrides[createGoogleCalendarColorOverrideKey(accountId, calendar.id)] ?? calendar.backgroundColor ?? project.color;
+    const link = createProjectCalendarLink({
+      projectId: project.id,
+      provider: "google",
+      accountId,
+      externalCalendarId: calendar.id,
+      externalCalendarName: calendarLabel,
+      syncDirection: "importOnly",
+      createdByApp: false,
+      color,
+      lastSyncedAt: new Date().toISOString(),
+    });
+
+    setAppProjects((projects) => projects.map((item) => item.id === project.id ? { ...item, checked: true, color } : item));
+    setProjectCalendarLinks((links) => {
+      if (links.some((item) => item.id === link.id)) {
+        return links.map((item) => item.id === link.id ? { ...item, ...link, projectId: project.id } : item);
+      }
+
+      return [...links, link];
+    });
+
+    if (!account.selectedCalendarIds.has(calendar.id)) {
+      toggleGoogleCalendar(accountId, calendar.id);
+    }
+  }, [appProjects, googleAccounts, googleCalendarColorOverrides, toggleGoogleCalendar]);
+
   const handleLinkGoogleCalendarAsProject = useCallback((accountId: string, calendarId: string) => {
     const account = googleAccounts.find((item) => item.accountId === accountId);
     const calendar = account?.calendars.find((item) => item.id === calendarId);
@@ -372,6 +406,7 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
           onAddProject={handleAddAppProject}
           onToggleProject={handleToggleAppProject}
           onLinkGoogleCalendarAsProject={handleLinkGoogleCalendarAsProject}
+          onLinkProjectToGoogleCalendar={handleLinkProjectToGoogleCalendar}
           onUnlinkProjectCalendar={handleUnlinkProjectCalendar}
           onChangeGoogleCalendarColor={handleChangeGoogleCalendarColor}
           onReconnectAccount={(accountId) => {
