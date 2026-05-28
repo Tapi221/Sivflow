@@ -5,7 +5,10 @@ import { useWorkspaceTabsRouteSync } from "@/features/tab/hooks/useTabsRouteSync
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
 import { Sidebar } from "@/pane/leftpane/Sidebar.desktop";
+<<<<<<< HEAD
 import { NavigationBarMobile } from "@/pane/nabigationbar.mobilenative/nabigationbar.mobile";
+=======
+>>>>>>> e5991e4840209ebf65cd3dad6750416cb05f20f5
 import { isDesktopRuntime } from "@/platform/runtime";
 import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
@@ -52,8 +55,6 @@ export const AppLayout = () => {
           <Outlet />
         </Suspense>
       </WorkspaceShell>
-
-      <NavigationBarMobile />
     </div>
   );
 };
