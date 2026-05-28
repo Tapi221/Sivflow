@@ -58,6 +58,9 @@ FlashCard-Master/
 serviceAccountKey.json
 secrets/
 
+# Expo local state
+.expo/
+
 # Functions build output
 functions/lib/
 functions/functions.yaml
