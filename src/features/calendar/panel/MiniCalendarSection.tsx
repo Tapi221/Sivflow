@@ -15,7 +15,8 @@ type MiniCalendarSectionProps = {
 };
 
 const MINI_CALENDAR_DIVIDER_CLASS_NAME = "mt-2 h-px w-full shrink-0 bg-[#eeeeee]";
-const MINI_CALENDAR_MONTH_LABEL_CLASS_NAME = "mb-1 flex h-7 items-center justify-start px-0.5 text-left text-[14px] font-semibold leading-none tracking-[-0.01em] text-[#2f2f2f]";
+const MINI_CALENDAR_MONTH_LABEL_CLASS_NAME = "mb-1 flex h-7 max-w-full items-center justify-start overflow-hidden pl-2.5 pr-0.5 text-left text-[14px] font-semibold leading-none tracking-[-0.01em] text-[#2f2f2f]";
+const MINI_CALENDAR_MONTH_LABEL_TEXT_CLASS_NAME = "block min-w-0 truncate";
 const MINI_CALENDAR_WEEKDAY_CLASS_NAME = "flex h-6 items-center justify-center text-[11px] font-semibold leading-none tracking-[0.03em] text-[#8e8e93]";
 const MINI_CALENDAR_DAY_BUTTON_CLASS_NAME = "relative flex h-7 w-full items-center justify-center transition-all duration-150 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
 
@@ -70,9 +71,9 @@ const MiniCalendarSectionBase = ({
 
   return (
     <>
-      <section className="flex w-full shrink-0 flex-col pb-2.5 pl-0 pr-2.5 pt-2.5">
+      <section className="flex w-full shrink-0 flex-col overflow-hidden pb-2.5 pl-0 pr-2.5 pt-2.5">
         <div className={MINI_CALENDAR_MONTH_LABEL_CLASS_NAME} aria-live="polite">
-          {monthLabel}
+          <span className={MINI_CALENDAR_MONTH_LABEL_TEXT_CLASS_NAME}>{monthLabel}</span>
         </div>
 
         <div className="grid grid-cols-7 px-0.5">
