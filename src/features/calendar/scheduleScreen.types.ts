@@ -105,6 +105,7 @@ export type CalendarSidebarProps = {
   onAddProject: (projectName: string) => void;
   onToggleProject: (projectId: string) => void;
   onLinkGoogleCalendarAsProject: (accountId: string, calendarId: string) => void;
+  onLinkProjectToGoogleCalendar: (projectId: string, accountId: string, calendarId: string) => void;
   onUnlinkProjectCalendar: (linkId: string) => void;
   onChangeGoogleCalendarColor: (accountId: string, calendarId: string, color: string) => void;
   onReconnectAccount: (accountId: string) => void;
