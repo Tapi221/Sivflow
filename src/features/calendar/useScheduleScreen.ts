@@ -153,6 +153,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
   const scroll = useCalendarScrollController({
     selectedViewMode: navigation.primaryViewMode,
     visibleDays,
+    virtualRail,
     calendarBuffer: navigation.calendarBuffer,
     viewportWidth: navigation.viewportWidth,
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
