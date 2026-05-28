@@ -3,7 +3,7 @@ import { CalendarIcon } from "@/chip/icons/icons.sidebar";
 import { ToggleFolderTag, type FolderTagTab, type FolderTagToggleValue } from "@/chip/toggle/Toggle.foldertag";
 import { CalendarTagStrip } from "@/features/calendar/toolbar/CalendarTagStrip";
 import type { CalendarWorkspaceToolbarProps } from "@/features/calendar/scheduleScreen.types";
-import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
+import { useWorkspaceTabsStore } from "@/pane/tab.desktopnative/hooks/useTabsStore";
 
 export const CalendarToolbar = ({
   viewMode: _viewMode,

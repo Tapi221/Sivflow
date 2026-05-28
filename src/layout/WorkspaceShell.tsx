@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode, RefObject } from "react";
-import { TabsBar } from "@/features/tab/TabsBar";
+import { TabsBar } from "@/pane/tab.desktopnative/TabsBar";
 import { isDesktopRuntime } from "@/platform/runtime";
 import { WorkspaceBreadcrumbBar } from "./WorkspaceBreadcrumbBar";
 

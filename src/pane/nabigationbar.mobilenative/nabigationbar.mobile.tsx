@@ -2,7 +2,7 @@ import { memo, useCallback, useEffect, useMemo, useState, type CSSProperties, ty
 import { CalendarIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import type { WorkspaceSidebarSection } from "@/features/tab/Tab";
-import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
+import { useWorkspaceTabsStore } from "@/pane/tab.desktopnative/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
 import "./nabigationbar.mobile.css";
 

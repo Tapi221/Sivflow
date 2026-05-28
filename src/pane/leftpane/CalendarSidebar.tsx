@@ -1,6 +1,6 @@
 import { type FormEvent, type KeyboardEvent, useCallback, useMemo, useRef, useState } from "react";
 import { CalendarIcon, GoogleIcon } from "@/chip/icons/icons.schedule";
-import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
+import { useWorkspaceTabsStore } from "@/pane/tab.desktopnative/hooks/useTabsStore";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
