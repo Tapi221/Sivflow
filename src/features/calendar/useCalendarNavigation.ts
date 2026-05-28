@@ -328,7 +328,6 @@ export const useCalendarNavigation = () => {
   const handleVisibleDateChange = useCallback((date: Date) => {
     const normalizedDate = startOfDay(date);
 
-    setSelectedDate(normalizedDate);
     setMonthTitleDate(startOfMonth(normalizedDate));
   }, []);
 
