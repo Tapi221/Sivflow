@@ -1,12 +1,10 @@
-import type { CardSet } from "@/types";
-
 type CardLike = {
   id?: string;
   cardSetId?: string | null;
   card_set_id?: string | null;
   folderId?: string | null;
 };
-type CardSetLike = Pick<CardSet, "id" | "name"> & { folderId?: string | null };
+type CardSetLike = { id: string; folderId?: string | null };
 type LegacyFallbackReason = "missing-card-set-id" | "unresolved-card-set-id";
 
 const legacyFallbackCounters = new Map<LegacyFallbackReason, number>();
@@ -49,8 +47,10 @@ const recordLegacyFallbackUsage = (
   });
 };
 
-export const buildCardSetById = (cardSets: readonly CardSetLike[]) => {
-  const map = new Map<string, CardSetLike>();
+export const buildCardSetById = <TCardSet extends CardSetLike>(
+  cardSets: readonly TCardSet[],
+) => {
+  const map = new Map<string, TCardSet>();
   for (const cardSet of cardSets) {
     if (!cardSet?.id) continue;
     map.set(cardSet.id, cardSet);
