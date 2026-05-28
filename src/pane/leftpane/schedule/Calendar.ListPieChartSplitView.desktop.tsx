@@ -71,7 +71,7 @@ const CHART_RADIUS = 82;
 const CHART_LABEL_RADIUS = CHART_RADIUS * 0.58;
 const CHART_CLOCK_LABEL_RADIUS = CHART_RADIUS + 11;
 const CHART_EVENT_BORDER_STROKE_WIDTH = 3;
-const CLOCK_HOURS = [0, 3, 6, 9, 12, 15, 18, 21];
+const CLOCK_HOURS = Array.from({ length: 25 }, (_, index) => index);
 const SPLIT_CHART_CONTAINER_MAX_SIZE_PX = LIST_DAY_SECTION_MIN_HEIGHT_PX - 30;
 const SPLIT_SCROLL_EDGE_THRESHOLD_PX = 220;
 const SPLIT_SCROLL_EDGE_RESET_PX = 520;
@@ -146,6 +146,8 @@ const getChartOverlayStyle = (minute: number, radius: number) => {
     top: `${(point.y / (CHART_CENTER * 2)) * 100}%`,
   };
 };
+
+const getClockLabelOverlayStyle = (hour: number) => getChartOverlayStyle(hour * 60, hour === 24 ? CHART_CLOCK_LABEL_RADIUS + 7 : CHART_CLOCK_LABEL_RADIUS);
 
 const resolveEventSegmentMeta = (
   event: GoogleCalendarEvent,
@@ -365,7 +367,7 @@ const DailyClockPieComponent = ({ slices }: DailyClockPieProps) => {
 
             <div className="pointer-events-none absolute inset-0 overflow-visible">
               {CLOCK_HOURS.map((hour) => (
-                <span key={hour} className="absolute -translate-x-1/2 -translate-y-1/2 text-[clamp(11px,2.1vw,18px)] font-medium leading-none text-[#8e8e93]" style={getChartOverlayStyle(hour * 60, CHART_CLOCK_LABEL_RADIUS)}>
+                <span key={hour} className="absolute -translate-x-1/2 -translate-y-1/2 text-[12px] font-medium leading-none tabular-nums text-[rgba(60,60,67,0.62)]" style={getClockLabelOverlayStyle(hour)}>
                   {hour}
                 </span>
               ))}
@@ -374,7 +376,7 @@ const DailyClockPieComponent = ({ slices }: DailyClockPieProps) => {
                 const labelMinute = (slice.startMinute + slice.endMinute) / 2;
 
                 return (
-                  <span key={`label:${slice.id}`} className="absolute -translate-x-1/2 -translate-y-1/2 text-center text-[clamp(9px,1.75vw,15px)] font-semibold leading-[1.05] drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]" style={{ ...getChartOverlayStyle(labelMinute, CHART_LABEL_RADIUS), color: slice.labelColor }}>
+                  <span key={`label:${slice.id}`} className="absolute -translate-x-1/2 -translate-y-1/2 text-center text-[12px] font-medium leading-none tabular-nums text-[rgba(60,60,67,0.62)]" style={getChartOverlayStyle(labelMinute, CHART_LABEL_RADIUS)}>
                     <span className="block max-w-[5.5em] truncate">{truncateChartLabel(slice.label)}</span>
                     <span className="block">{formatDuration(slice.minutes)}</span>
                   </span>
