@@ -78,7 +78,6 @@ export type GoogleAccountDisplay = {
   isTaskListsLoading: boolean;
   googleTasks: GoogleTaskItem[];
   googleTasksError: string | null;
-  isGoogleTasksLoading: boolean;
   selectedCalendarIds: Set<string>;
   connectionStatus: GCalConnectionStatus;
   error: string | null;
@@ -127,7 +126,7 @@ export type CalendarWeekDayGridProps = {
   virtualRail?: ScheduleVirtualRail;
   visibleEvents: GoogleCalendarEvent[];
   calendarDayColumnWidth: number;
-  _calendarDayColumnWidth?: number;
+  _calendarDayColumnWidth: number;
   calendarGridStyle: CalendarGridStyle;
   onScroll?: (event: UIEvent<HTMLDivElement>) => void;
   selectedDate: Date;
