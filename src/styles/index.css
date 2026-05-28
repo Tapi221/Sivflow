@@ -191,3 +191,12 @@ svg[aria-label="予定の円グラフ"] + .pointer-events-none::before {
 svg[aria-label="予定の円グラフ"] + .pointer-events-none .text-\[clamp\(11px\,2\.1vw\,18px\)\] {
   display: none;
 }
+
+svg[aria-label="予定の円グラフ"] + .pointer-events-none .text-\[clamp\(9px\,1\.75vw\,15px\)\] {
+  color: rgba(60, 60, 67, 0.62) !important;
+  filter: none;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  line-height: 1;
+}

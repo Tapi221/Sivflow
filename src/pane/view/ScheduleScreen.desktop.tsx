@@ -232,6 +232,7 @@ const ScheduleScreen = ({
           monthDate={sidebarMonthDate}
           selectedDate={selectedDate}
           selectedRange={null}
+          visibleEvents={deferredCalendarEvents}
           appProjects={appProjects}
           googleAccounts={googleAccounts}
           isAnyCalendarConnecting={isAnyCalendarConnecting}
