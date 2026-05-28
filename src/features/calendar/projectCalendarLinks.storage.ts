@@ -46,14 +46,13 @@ const normalizeProvider = (value: unknown): CalendarProvider | null => {
 const normalizeSyncDirection = (value: unknown): ProjectCalendarSyncDirection => {
   if (typeof value !== "string") return DEFAULT_SYNC_DIRECTION;
   if (!SUPPORTED_SYNC_DIRECTIONS.has(value as ProjectCalendarSyncDirection)) return DEFAULT_SYNC_DIRECTION;
-  if (value === "importOnly") return DEFAULT_SYNC_DIRECTION;
 
   return value as ProjectCalendarSyncDirection;
 };
 
 const normalizeCreatedLinkSyncDirection = (
   value: ProjectCalendarSyncDirection | undefined,
-): ProjectCalendarSyncDirection => value === "importOnly" || value === undefined ? DEFAULT_SYNC_DIRECTION : value;
+): ProjectCalendarSyncDirection => value ?? DEFAULT_SYNC_DIRECTION;
 
 const normalizeStoredProjectCalendarLink = (item: unknown): ProjectCalendarLink | null => {
   if (typeof item !== "object" || item === null) return null;
