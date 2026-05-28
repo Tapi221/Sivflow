@@ -51,7 +51,7 @@ export default defineConfig([
         },
       ],
       "no-restricted-imports": [
-        "warn",
+        "error",
         {
           paths: [
             {
@@ -82,7 +82,7 @@ export default defineConfig([
         },
       ],
       "no-restricted-syntax": [
-        "warn",
+        "error",
         {
           selector: String.raw`ImportDeclaration[source.value=/^\.\.\//]`,
           message: "Use @/ alias for cross-folder imports inside src.",
@@ -114,7 +114,7 @@ export default defineConfig([
       "react-hooks/set-state-in-effect": "off",
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "off",
-      "unused-imports/no-unused-imports": "warn",
+      "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [
         "warn",
         {
@@ -178,7 +178,7 @@ export default defineConfig([
     ],
     rules: {
       "no-restricted-imports": [
-        "warn",
+        "error",
         {
           patterns: [
             {
@@ -199,7 +199,7 @@ export default defineConfig([
     files: ["src/application/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
-        "warn",
+        "error",
         {
           patterns: [
             {
@@ -237,7 +237,7 @@ export default defineConfig([
     rules: {
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "off",
-      "unused-imports/no-unused-imports": "warn",
+      "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [
         "warn",
         {
