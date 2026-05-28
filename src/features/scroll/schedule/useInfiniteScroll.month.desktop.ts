@@ -103,8 +103,6 @@ export const useMonthInfiniteScroll = ({
   const baseWeekStartRef = useRef(getWeekStart(currentDate));
   const visibleMonthSyncRafRef = useRef<number | null>(null);
   const visibleMonthSyncTimeoutRef = useRef<number | null>(null);
-  const scrollRafRef = useRef<number | null>(null);
-  const latestScrollerRef = useRef<HTMLDivElement | null>(null);
   const pendingScrollWeekOffsetRef = useRef<number | null>(0);
 
   const lastScrollTargetTokenRef = useRef(scrollTargetToken);
@@ -136,18 +134,12 @@ export const useMonthInfiniteScroll = ({
   const getMonthRowHeight = useCallback(() => {
     const cachedHeight = monthRowHeightRef?.current;
 
-    if (
-      typeof cachedHeight === "number" &&
-      Number.isFinite(cachedHeight) &&
-      cachedHeight > 0
-    ) {
+    if (typeof cachedHeight === "number" && Number.isFinite(cachedHeight) && cachedHeight > 0) {
       return cachedHeight;
     }
 
     const firstWeek = monthWeeksRef.current[0];
-    const firstRow = firstWeek
-      ? weekRowRefsMap.current.get(firstWeek.key)
-      : null;
+    const firstRow = firstWeek ? weekRowRefsMap.current.get(firstWeek.key) : null;
     const measuredHeight = firstRow?.offsetHeight ?? 0;
 
     return measuredHeight > 0 ? measuredHeight : C.DEFAULT_MONTH_ROW_HEIGHT;
@@ -240,26 +232,6 @@ export const useMonthInfiniteScroll = ({
     [isResizingRef, updateVirtualWindowForScroll],
   );
 
-  const scheduleScrollWork = useCallback(
-    (scroller: HTMLDivElement) => {
-      latestScrollerRef.current = scroller;
-
-      if (scrollRafRef.current !== null) return;
-
-      scrollRafRef.current = window.requestAnimationFrame(() => {
-        const latestScroller = latestScrollerRef.current;
-
-        scrollRafRef.current = null;
-        latestScrollerRef.current = null;
-
-        if (!latestScroller) return;
-
-        handleScroll(latestScroller);
-      });
-    },
-    [handleScroll],
-  );
-
   useLayoutEffect(() => {
     if (lastScrollTargetTokenRef.current === scrollTargetToken) return;
 
@@ -309,23 +281,14 @@ export const useMonthInfiniteScroll = ({
     const scroller = scrollContainerRef.current;
     if (!scroller) return;
 
-    const handlePassiveScroll = () => scheduleScrollWork(scroller);
+    const handlePassiveScroll = () => handleScroll(scroller);
 
-    scroller.addEventListener("scroll", handlePassiveScroll, {
-      passive: true,
-    });
+    scroller.addEventListener("scroll", handlePassiveScroll, { passive: true });
 
     return () => {
       scroller.removeEventListener("scroll", handlePassiveScroll);
-
-      if (scrollRafRef.current !== null) {
-        window.cancelAnimationFrame(scrollRafRef.current);
-        scrollRafRef.current = null;
-      }
-
-      latestScrollerRef.current = null;
     };
-  }, [scheduleScrollWork]);
+  }, [handleScroll]);
 
   useEffect(() => cancelVisibleMonthSync, [cancelVisibleMonthSync]);
 
