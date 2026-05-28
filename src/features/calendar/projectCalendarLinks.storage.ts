@@ -16,7 +16,7 @@ type StoredProjectCalendarLink = Partial<ProjectCalendarLink>;
 
 export const PROJECT_CALENDAR_LINKS_STORAGE_KEY = "flashcard-master:schedule:project-calendar-links";
 
-const DEFAULT_SYNC_DIRECTION: ProjectCalendarSyncDirection = "importOnly";
+const DEFAULT_SYNC_DIRECTION: ProjectCalendarSyncDirection = "twoWay";
 const SUPPORTED_CALENDAR_PROVIDERS = new Set<CalendarProvider>(["local", "google", "appleEventKit", "appleCalDav"]);
 const SUPPORTED_SYNC_DIRECTIONS = new Set<ProjectCalendarSyncDirection>(["importOnly", "exportOnly", "twoWay"]);
 
@@ -46,9 +46,14 @@ const normalizeProvider = (value: unknown): CalendarProvider | null => {
 const normalizeSyncDirection = (value: unknown): ProjectCalendarSyncDirection => {
   if (typeof value !== "string") return DEFAULT_SYNC_DIRECTION;
   if (!SUPPORTED_SYNC_DIRECTIONS.has(value as ProjectCalendarSyncDirection)) return DEFAULT_SYNC_DIRECTION;
+  if (value === "importOnly") return DEFAULT_SYNC_DIRECTION;
 
   return value as ProjectCalendarSyncDirection;
 };
+
+const normalizeCreatedLinkSyncDirection = (
+  value: ProjectCalendarSyncDirection | undefined,
+): ProjectCalendarSyncDirection => value === "importOnly" || value === undefined ? DEFAULT_SYNC_DIRECTION : value;
 
 const normalizeStoredProjectCalendarLink = (item: unknown): ProjectCalendarLink | null => {
   if (typeof item !== "object" || item === null) return null;
@@ -86,7 +91,7 @@ export const createProjectCalendarLink = ({
   accountId,
   externalCalendarId,
   externalCalendarName,
-  syncDirection = DEFAULT_SYNC_DIRECTION,
+  syncDirection,
   createdByApp,
   color,
   lastSyncedAt,
@@ -97,7 +102,7 @@ export const createProjectCalendarLink = ({
   accountId,
   externalCalendarId,
   externalCalendarName,
-  syncDirection,
+  syncDirection: normalizeCreatedLinkSyncDirection(syncDirection),
   createdByApp,
   color,
   lastSyncedAt,
