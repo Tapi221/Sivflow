@@ -1,1 +1,1 @@
-export { CalendarListPieChartSplitView } from "./Calendar.ListPieChartSplitView.virtual";
+export { CalendarListPieChartSplitView } from "./Calendar.ListPieChartSplitView.smooth";
