@@ -1,7 +1,7 @@
 import { httpsCallable } from "firebase/functions";
-import { isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
+import { getServerStoredGoogleCalendarAccessToken } from "@/integration/google-integration/google.server-oauth";
 import { auth, functionsClient } from "@/services/firebase";
-import { readStoredAccounts, type StoredGoogleAccount, writeStoredAccounts } from "./gcal.multi-storage";
+import { buildTokenExpiry, readStoredAccounts, type StoredGoogleAccount, writeStoredAccounts } from "./gcal.multi-storage";
 
 export type ServerStoredGoogleCalendarAccount = {
   accountId: string;
@@ -24,21 +24,23 @@ const waitForCallableAuth = async (): Promise<void> => {
   }
 };
 
-export const listServerStoredGoogleCalendarAccounts = async (): Promise<ServerStoredGoogleCalendarAccount[]> => {
-  await waitForCallableAuth();
-  const result = await listGoogleCalendarAccountsCallable();
-  return result.data.accounts;
-};
-
-export const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<number> => {
-  if (!isServerStoredGoogleOAuthEnabled()) return 0;
-
-  const localAccounts = readStoredAccounts();
-  const knownAccountIds = new Set(localAccounts.map((account) => account.id));
-  const remoteAccounts = await listServerStoredGoogleCalendarAccounts();
-  const hydratedAccounts: StoredGoogleAccount[] = remoteAccounts
-    .filter((account) => !knownAccountIds.has(account.accountId))
-    .map((account) => ({
+const hydrateServerAccount = async (account: ServerStoredGoogleCalendarAccount): Promise<StoredGoogleAccount> => {
+  try {
+    const token = await getServerStoredGoogleCalendarAccessToken({ accountId: account.accountId });
+    return {
+      id: account.accountId,
+      email: account.email,
+      name: token.accountName ?? account.name,
+      photoUrl: token.accountPhotoUrl ?? account.photoUrl,
+      accessToken: token.accessToken,
+      accessTokenExpiry: buildTokenExpiry(token.expiresInSeconds),
+      refreshToken: null,
+      selectedCalendarIds: [],
+      cachedCalendars: [],
+    };
+  } catch (error) {
+    console.warn("[GoogleCalendar] server account access-token hydration failed", error);
+    return {
       id: account.accountId,
       email: account.email,
       name: account.name,
@@ -48,10 +50,25 @@ export const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<numbe
       refreshToken: null,
       selectedCalendarIds: [],
       cachedCalendars: [],
-    }));
+    };
+  }
+};
 
-  if (hydratedAccounts.length === 0) return 0;
+export const listServerStoredGoogleCalendarAccounts = async (): Promise<ServerStoredGoogleCalendarAccount[]> => {
+  await waitForCallableAuth();
+  const result = await listGoogleCalendarAccountsCallable();
+  return result.data.accounts;
+};
 
+export const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<number> => {
+  const localAccounts = readStoredAccounts();
+  const knownAccountIds = new Set(localAccounts.map((account) => account.id));
+  const remoteAccounts = await listServerStoredGoogleCalendarAccounts();
+  const missingAccounts = remoteAccounts.filter((account) => !knownAccountIds.has(account.accountId));
+
+  if (missingAccounts.length === 0) return 0;
+
+  const hydratedAccounts = await Promise.all(missingAccounts.map(hydrateServerAccount));
   writeStoredAccounts([...localAccounts, ...hydratedAccounts]);
   return hydratedAccounts.length;
 };
