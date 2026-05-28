@@ -1,19 +1,20 @@
 import { memo, useMemo } from "react";
+import type { CSSProperties } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
-import { compareCalendarEvents, getEventDateKeys } from "@/features/calendar/calendarEventRange";
-import * as T from "@/features/calendar/calendar.text";
 import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.schedule.month";
-import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { MonthRowResizeBar } from "@/features/calendar/grid/height/MonthRowResizeBar.month.desktop";
+import { compareCalendarEvents, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
 import { getVisibleMonthEventChipCount } from "@/features/calendar/grid/monthEventChipCount";
+import * as T from "@/features/calendar/calendar.text";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
 type CalendarMonthDayEvents = {
   visibleEvents: GoogleCalendarEvent[];
   totalCount: number;
+  color: string | null;
 };
 
 type CalendarMonthEventIndex = Map<string, GoogleCalendarEvent[]>;
@@ -88,6 +89,47 @@ type CalendarMonthWeekRowProps = {
 const EMPTY_DAY_EVENTS: CalendarMonthDayEvents = {
   visibleEvents: [],
   totalCount: 0,
+  color: null,
+};
+
+const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
+
+const normalizeColor = (color: string): string => {
+  if (/^#[0-9a-f]{3}$/i.test(color)) {
+    const red = color.charAt(1);
+    const green = color.charAt(2);
+    const blue = color.charAt(3);
+
+    return `#${red}${red}${green}${green}${blue}${blue}`;
+  }
+
+  return color;
+};
+
+const colorToRgba = (color: string, alpha: number): string => {
+  const normalized = normalizeColor(color);
+  const match = /^#([0-9a-f]{6})$/i.exec(normalized);
+
+  if (!match) return color;
+
+  const value = match[1];
+  const red = Number.parseInt(value.slice(0, 2), 16);
+  const green = Number.parseInt(value.slice(2, 4), 16);
+  const blue = Number.parseInt(value.slice(4, 6), 16);
+
+  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+};
+
+const getDayNumberStyle = (
+  dayEvents: CalendarMonthDayEvents,
+  selected: boolean,
+): CSSProperties | undefined => {
+  if (selected || !dayEvents.color) return undefined;
+
+  return {
+    backgroundColor: colorToRgba(dayEvents.color, EVENT_DAY_BACKGROUND_ALPHA),
+    transition: "none",
+  };
 };
 
 const getDayKey = (date: Date): string => {
@@ -187,6 +229,7 @@ const CalendarMonthDayCell = memo(({
           isSelected={selected}
           isCurrentMonth={day.isCurrentMonth}
           className={cn("absolute", GD.MONTH_GRID_DAY_NUMBER_POSITION_CLASS)}
+          style={getDayNumberStyle(dayEvents, selected)}
         >
           {day.dayOfMonth}
         </CalendarDayNumberCircle>
@@ -416,6 +459,7 @@ const GridCalendarMonthDesktop = ({
         const dayEvents: CalendarMonthDayEvents = {
           visibleEvents: [],
           totalCount: sourceEvents.length,
+          color: sourceEvents[0]?.accentColor ?? null,
         };
 
         for (const event of sourceEvents) {
