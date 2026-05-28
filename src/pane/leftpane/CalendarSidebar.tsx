@@ -1,12 +1,12 @@
 import { type FormEvent, type KeyboardEvent, useCallback, useMemo, useRef, useState } from "react";
 import { CalendarIcon, GoogleIcon } from "@/chip/icons/icons.schedule";
-import { useWorkspaceTabsStore } from "@/pane/tab.desktopnative/hooks/useTabsStore";
+import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
+import { MiniCalendarSection } from "@/features/calendar/panel/MiniCalendarSection";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
-import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import { SidebarLayeredDirectory } from "@/pane/leftpane/Sidebar.LayeredDirectory";
-import { MiniCalendarSection } from "@/features/calendar/panel/MiniCalendarSection";
 import { SelectableGoogleSourceRow } from "@/features/calendar/panel/SelectableGoogleSourceRow";
+import { useWorkspaceTabsStore } from "@/pane/tab.desktopnative/hooks/useTabsStore";
 
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 const ADD_PROJECT_EMPTY_MESSAGE = "プロジェクト名を入力してください";
@@ -50,6 +50,12 @@ type AppProjectsSectionProps = {
   onAddProject: (projectName: string) => void;
   onToggleProject: (projectId: string) => void;
   onAddingChange: (isAdding: boolean) => void;
+};
+
+type GoogleAccountSectionProps = {
+  account: GoogleAccountDisplay;
+  onToggleCalendar: (calendarId: string) => void;
+  onReconnect: () => void;
 };
 
 const AppProjectsSection = ({
@@ -148,12 +154,6 @@ const AppProjectsSection = ({
   );
 };
 
-type GoogleAccountSectionProps = {
-  account: GoogleAccountDisplay;
-  onToggleCalendar: (calendarId: string) => void;
-  onReconnect: () => void;
-};
-
 const GoogleAccountSection = ({
   account,
   onToggleCalendar,
@@ -223,6 +223,7 @@ const GoogleAccountSection = ({
 export const CalendarSidebar = ({
   monthDate,
   selectedDate,
+  visibleEvents,
   appProjects,
   googleAccounts,
   onSelectDate,
@@ -275,6 +276,7 @@ export const CalendarSidebar = ({
       <MiniCalendarSection
         monthDate={monthDate}
         selectedDate={selectedDate}
+        visibleEvents={visibleEvents}
         onSelectDate={handleMiniCalendarSelectDate}
         onPreviousMonth={handleMiniCalendarPreviousMonth}
         onNextMonth={handleMiniCalendarNextMonth}
