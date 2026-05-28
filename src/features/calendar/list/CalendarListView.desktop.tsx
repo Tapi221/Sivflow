@@ -54,7 +54,7 @@ const LIST_SCROLL_EDGE_THRESHOLD_PX = 180;
 const LIST_SCROLL_EDGE_RESET_PX = 420;
 const LIST_SCROLL_IDLE_DELAY_MS = 120;
 const LIST_VISIBLE_MONTH_ANCHOR_PX = 160;
-const LIST_VIRTUAL_OVERSCAN_PX = 900;
+const LIST_VIRTUAL_OVERSCAN_PX = 2_400;
 const LIST_DAY_GAP_PX = 8;
 const LIST_EMPTY_DAY_HEIGHT_PX = 38;
 const LIST_EVENT_ROW_HEIGHT_PX = 58;
@@ -407,9 +407,10 @@ const CalendarListViewComponent = ({
   }, [processScroll]);
 
   const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
+    updateVirtualRange(event.currentTarget);
     requestScrollProcessing(event.currentTarget);
     onScrollTopChange?.(event.currentTarget.scrollTop);
-  }, [onScrollTopChange, requestScrollProcessing]);
+  }, [onScrollTopChange, requestScrollProcessing, updateVirtualRange]);
 
   useLayoutEffect(() => {
     const scrollElement = scrollViewportRef.current;
@@ -466,7 +467,11 @@ const CalendarListViewComponent = ({
                 <div
                   key={day.dateKey}
                   className="absolute left-0 right-0"
-                  style={{ top: virtualMetrics.offsets[dayIndex], height: virtualMetrics.heights[dayIndex] }}
+                  style={{
+                    contain: "layout paint style",
+                    top: virtualMetrics.offsets[dayIndex],
+                    height: virtualMetrics.heights[dayIndex],
+                  }}
                 >
                   <CalendarListDaySection
                     day={day}
