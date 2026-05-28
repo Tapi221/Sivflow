@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { getCalendarDateKey } from "@/features/calendar/calendarEventRange";
+import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
+import { getScheduleVirtualRailDate } from "@/features/calendar/grid/ScheduleColumn.shared";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync.fixed";
 import { usePreserveScrollOnPrepend } from "./usePreserveScrollOnPrepend";
@@ -15,6 +17,7 @@ type CalendarBuffer = {
 type Props = {
   selectedViewMode: CalendarViewMode;
   visibleDays: Date[];
+  virtualRail?: ScheduleVirtualRail;
   calendarBuffer: CalendarBuffer;
   viewportWidth: number;
   calendarDayColumnWidth: number;
@@ -33,6 +36,7 @@ const isWeekdayHorizontalViewMode = (viewMode: CalendarViewMode) =>
 export const useCalendarScrollController = ({
   selectedViewMode,
   visibleDays,
+  virtualRail,
   calendarBuffer,
   viewportWidth,
   calendarDayColumnWidth,
@@ -85,8 +89,7 @@ export const useCalendarScrollController = ({
     if (
       !onVisibleDateChange ||
       !isWeekdayHorizontalViewMode(selectedViewMode) ||
-      calendarDayColumnWidth <= 0 ||
-      visibleDays.length === 0
+      calendarDayColumnWidth <= 0
     ) {
       return;
     }
@@ -95,11 +98,10 @@ export const useCalendarScrollController = ({
       0,
       scroller.scrollLeft + scroller.clientWidth / 2 - C.TIME_COLUMN_WIDTH,
     );
-    const visibleIndex = Math.min(
-      visibleDays.length - 1,
-      Math.max(0, Math.floor(anchorLeft / calendarDayColumnWidth)),
-    );
-    const visibleDate = visibleDays[visibleIndex];
+    const visibleIndex = Math.max(0, Math.floor(anchorLeft / calendarDayColumnWidth));
+    const visibleDate = virtualRail
+      ? getScheduleVirtualRailDate(virtualRail, visibleIndex)
+      : visibleDays[Math.min(visibleDays.length - 1, visibleIndex)];
 
     if (!visibleDate) return;
 
@@ -108,7 +110,7 @@ export const useCalendarScrollController = ({
 
     lastVisibleDateKeyRef.current = visibleDateKey;
     onVisibleDateChange(visibleDate);
-  }, [calendarDayColumnWidth, onVisibleDateChange, selectedViewMode, visibleDays]);
+  }, [calendarDayColumnWidth, onVisibleDateChange, selectedViewMode, virtualRail, visibleDays]);
 
   const runScrollWork = useCallback((scroller: HTMLDivElement) => {
     handleEdgeScroll(scroller);
