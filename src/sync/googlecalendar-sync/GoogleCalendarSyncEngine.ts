@@ -1,4 +1,5 @@
 import { addDays, subDays } from "date-fns";
+import { deleteCachedGoogleCalendarEvent, readCachedGoogleCalendarEvents, replaceCachedGoogleCalendarRange, upsertCachedGoogleCalendarEvent } from "@/integration/googlecalendar-integration/googleCalendarEventCache";
 import type { GCalEventsListResponse, GCalForceSyncOptions, GCalRawIncrementalEvent, GCalSyncEngineOptions, GCalSyncRange, GCalSyncStartContext, GCalSyncState, GCalSyncTokenMap, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
@@ -7,7 +8,6 @@ const DEFAULT_POLL_INTERVAL_MS = 60_000;
 const MAX_BACKOFF_MS = 10 * 60 * 1000;
 const INITIAL_BACKOFF_MS = 60_000;
 
-// UI依存を完全排除した固定範囲
 const DEFAULT_FULL_SYNC_PAST_DAYS = 365;
 const DEFAULT_FULL_SYNC_FUTURE_DAYS = 365;
 
@@ -152,6 +152,8 @@ const toCalendarEvent = (
     calendarId,
     accentColor,
     title: raw.summary || "(No title)",
+    description: raw.description,
+    location: raw.location,
     startsAt,
     endsAt,
     isAllDay: Boolean(raw.start?.date && !raw.start?.dateTime),
@@ -180,7 +182,6 @@ export class GoogleCalendarSyncEngine {
 
   private visibilityChangeListener: (() => void) | null = null;
 
-  // 起動直後は必ず全選択カレンダーをフル同期して、React state にイベント本体を復元する
   private isFullSyncAllowed = true;
 
   constructor(options: GCalSyncEngineOptions) {
@@ -206,6 +207,7 @@ export class GoogleCalendarSyncEngine {
     this.visibilityChangeListener = this.handleVisibilityChange.bind(this);
     document.addEventListener("visibilitychange", this.visibilityChangeListener);
 
+    void this.restoreCachedEvents();
     void this.runSync();
   }
 
@@ -285,7 +287,6 @@ export class GoogleCalendarSyncEngine {
     if (document.visibilityState === "visible") {
       this.clearPollTimer();
 
-      // フォーカス復帰は軽い同期のみ
       this.isFullSyncAllowed = false;
 
       void this.runSync();
@@ -315,6 +316,37 @@ export class GoogleCalendarSyncEngine {
       rangeStart: subDays(now, this.options.fullSyncPastDays),
       rangeEnd: addDays(now, this.options.fullSyncFutureDays),
     };
+  }
+
+  private async restoreCachedEvents(): Promise<void> {
+    const context = this.context;
+    const onEventsRangeReplaced = this.options.onEventsRangeReplaced;
+
+    if (!context || !onEventsRangeReplaced) return;
+
+    const range = this.getDefaultFullSyncRange();
+
+    await Promise.all(
+      Array.from(context.selectedCalendarIds).map(async (calendarId) => {
+        const events = await readCachedGoogleCalendarEvents({
+          accountIds: this.options.accountId ? [this.options.accountId] : undefined,
+          calendarIds: [calendarId],
+          rangeStart: range.rangeStart,
+          rangeEnd: range.rangeEnd,
+        });
+
+        if (!this.isRunning || events.length === 0) return;
+
+        onEventsRangeReplaced({
+          calendarId,
+          rangeStart: range.rangeStart,
+          rangeEnd: range.rangeEnd,
+          events,
+        });
+      }),
+    ).catch((error) => {
+      console.warn("[GCalSyncEngine] restore cached events failed", error);
+    });
   }
 
   private async runSync(range: GCalSyncRange | null = null): Promise<void> {
@@ -503,13 +535,22 @@ export class GoogleCalendarSyncEngine {
         rangeEnd: range.rangeEnd,
         events,
       });
-      return;
+    } else {
+      for (const event of events) {
+        if (!this.isRunning) return;
+        this.options.onEventAdded(event);
+      }
     }
 
-    for (const event of events) {
-      if (!this.isRunning) return;
-      this.options.onEventAdded(event);
-    }
+    void replaceCachedGoogleCalendarRange({
+      accountId: this.options.accountId,
+      calendarId,
+      rangeStart: range.rangeStart,
+      rangeEnd: range.rangeEnd,
+      events,
+    }).catch((error) => {
+      console.warn("[GCalSyncEngine] cache range replace failed", error);
+    });
   }
 
   private async doIncrementalSync(
@@ -583,6 +624,9 @@ export class GoogleCalendarSyncEngine {
 
       if (raw.status === "cancelled") {
         this.options.onEventDeleted(compositeId);
+        void deleteCachedGoogleCalendarEvent(this.options.accountId, calendarId, compositeId).catch((error) => {
+          console.warn("[GCalSyncEngine] cache event delete failed", error);
+        });
         continue;
       }
 
@@ -590,6 +634,9 @@ export class GoogleCalendarSyncEngine {
       if (!event) continue;
 
       this.options.onEventUpdated(event);
+      void upsertCachedGoogleCalendarEvent(this.options.accountId, event).catch((error) => {
+        console.warn("[GCalSyncEngine] cache event upsert failed", error);
+      });
     }
   }
 }
