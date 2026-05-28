@@ -5,15 +5,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GoogleConnectedServiceAccountEntry } from "@/integration/google-integration/googleAccount.types";
 import { useGoogleTaskLists } from "@/integration/googletask-integration/useGoogleTaskLists";
 import { fetchGoogleTaskLists } from "@/integration/googletask-integration/gtask.api";
-import { requestGoogleConnectedServiceAccessToken } from "@/integration/google-integration/google.oauth";
+import { requestConnectedServiceAccessToken } from "@/integration/google-integration/google.oauth";
 
 vi.mock("@/integration/googletask-integration/gtask.api", () => ({
   fetchGoogleTaskLists: vi.fn(),
 }));
 
 vi.mock("@/integration/google-integration/google.oauth", () => ({
-  refreshGoogleConnectedServiceAccessToken: vi.fn(),
-  requestGoogleConnectedServiceAccessToken: vi.fn(),
+  refreshConnectedServiceAccessToken: vi.fn(),
+  requestConnectedServiceAccessToken: vi.fn(),
 }));
 
 vi.mock("@/integration/google-integration/google.server-oauth", () => ({
@@ -69,7 +69,7 @@ describe("useGoogleTaskLists", () => {
   });
 
   it("recovers Google Tasks list loading with a silent access token when no refresh token is stored", async () => {
-    vi.mocked(requestGoogleConnectedServiceAccessToken).mockResolvedValue({
+    vi.mocked(requestConnectedServiceAccessToken).mockResolvedValue({
       accessToken: "silent-access-token",
       accountEmail: "akari@example.com",
       accountName: "Akari",
@@ -98,7 +98,7 @@ describe("useGoogleTaskLists", () => {
       ]);
     });
 
-    expect(requestGoogleConnectedServiceAccessToken).toHaveBeenCalledWith({}, true);
+    expect(requestConnectedServiceAccessToken).toHaveBeenCalledWith({}, true);
     expect(fetchGoogleTaskLists).toHaveBeenCalledWith("silent-access-token");
     expect(onAccessTokenRecovered).toHaveBeenCalledWith({
       accountId: "account-1",
