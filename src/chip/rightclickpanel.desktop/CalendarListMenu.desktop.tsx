@@ -1,52 +1,50 @@
 import { type CSSProperties, type RefObject } from "react";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
-import { RIGHT_CLICK_PANEL_MARGIN, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
+import { RIGHT_CLICK_PANEL_MARGIN, resolveRightClickPanelTextWidth, type RightClickPanelId } from "../rightclickpanel/rightClickPanel.utils";
 
-type TabContextMenuAction = {
-  id: string;
+export type CalendarListMenuAction = {
+  id: "add-project" | "change-color";
   label: string;
   disabled?: boolean;
   onSelect: () => void;
 };
 
-type TabContextMenuProps = {
+type CalendarListMenuProps = {
   x: number;
   y: number;
-  actions: TabContextMenuAction[];
+  actions: CalendarListMenuAction[];
   menuRef: RefObject<HTMLDivElement | null>;
   noDragStyle: CSSProperties;
   panelId?: RightClickPanelId;
 };
 
-export const WORKSPACE_TAB_CONTEXT_PANEL_ID = "workspace-tab-context-menu";
+export const CALENDAR_LIST_MENU_PANEL_ID = "calendar-list-context-menu";
 
-const WORKSPACE_TAB_CONTEXT_MENU_LABELS = [
-  "閉じる",
-  "他を閉じる",
-  "このタブ以降を閉じる",
-  "すべてを閉じる",
+const CALENDAR_LIST_MENU_LABELS = [
+  "プロジェクトに追加",
+  "色を変更",
 ];
 
-export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = resolveRightClickPanelTextWidth(WORKSPACE_TAB_CONTEXT_MENU_LABELS);
-export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 120;
-export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
+export const CALENDAR_LIST_MENU_WIDTH = resolveRightClickPanelTextWidth(CALENDAR_LIST_MENU_LABELS);
+export const CALENDAR_LIST_MENU_HEIGHT = 64;
+export const CALENDAR_LIST_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
-export const WorkspaceTabContextMenu = ({
+export const CalendarListMenu = ({
   x,
   y,
   actions,
   menuRef,
   noDragStyle,
-  panelId = WORKSPACE_TAB_CONTEXT_PANEL_ID,
-}: TabContextMenuProps) => {
+  panelId = CALENDAR_LIST_MENU_PANEL_ID,
+}: CalendarListMenuProps) => {
   return (
     <RightClickPanelSurface
       x={x}
       y={y}
-      width={WORKSPACE_TAB_CONTEXT_MENU_WIDTH}
+      width={CALENDAR_LIST_MENU_WIDTH}
       panelRef={menuRef}
       noDragStyle={noDragStyle}
-      ariaLabel="tab context menu"
+      ariaLabel="calendar list context menu"
       panelId={panelId}
     >
       {actions.map((action) => (
