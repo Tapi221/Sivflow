@@ -6,8 +6,13 @@ import { buildCardSetById, filterCardsByFolderId } from "@/domain/card/selectors
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
 import type { Card } from "@/types";
-import type { CardSet } from "@/types/domain/cardSet";
 import { toMillis } from "@/utils/toMillis";
+
+type UseCardsReadOptions = {
+  enabled?: boolean;
+};
+
+type CardSetById = ReturnType<typeof buildCardSetById>;
 
 const isCardDeleted = (
   card: Partial<Card> & {
@@ -29,10 +34,6 @@ const isCardDeleted = (
     (card as unknown as { deleted?: boolean }).deleted ??
     deletedAt,
   );
-};
-
-type UseCardsReadOptions = {
-  enabled?: boolean;
 };
 
 const normalizeFolderId = (value: string | null | undefined) => {
@@ -82,7 +83,7 @@ const resolveVisibleCards = ({
   rawCards: readonly unknown[];
   folderId?: string;
   cardSetId?: string;
-  cardSetById: Map<string, Pick<CardSet, "id" | "folderId">>;
+  cardSetById: CardSetById;
 }): Card[] => {
   let normalized = rawCards
     .map((rawCard) => normalizeCard(rawCard))
@@ -182,9 +183,9 @@ export const useCardsRead = (
     [],
   );
 
-  const cardSetById = useMemo(() => {
+  const cardSetById = useMemo((): CardSetById => {
     if (!shouldReadCardSets) {
-      return new Map<string, Pick<CardSet, "id" | "folderId">>();
+      return buildCardSetById([]);
     }
 
     const activeSets = (rawCardSets ?? []).filter((set) => !set.isDeleted);
