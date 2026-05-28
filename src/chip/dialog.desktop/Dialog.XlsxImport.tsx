@@ -374,11 +374,11 @@ export const XlsxImportDialog = ({
                   <div className="space-y-2">
                     {state.result.issues.map((issue, index) => (
                       <div
-                        key={`${issue.sheet}-${issue.row}-${issue.column ?? "col"}-${index}`}
+                        key={`${issue.sheetName}-${issue.rowNumber ?? "row"}-${issue.columnKey ?? "col"}-${index}`}
                         className="rounded-lg border border-slate-200 p-3 text-xs"
                       >
                         <p className="font-medium text-slate-800">
-                          {issue.level.toUpperCase()} / {issue.sheet} / {" "}
+                          {issue.level.toUpperCase()} / {issue.sheetName} /{" "}
                           {formatImportCellLabel(issue)}
                         </p>
                         <p className="mt-1 text-slate-600">{issue.message}</p>
