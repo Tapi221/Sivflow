@@ -53,6 +53,11 @@ type SplitDaySectionProps = {
   onSelectDate?: (date: Date) => void;
 };
 
+type SplitDayDateButtonProps = {
+  day: SplitDay;
+  onSelectDate?: (date: Date) => void;
+};
+
 type SplitVirtualDynamicHeightEntry = {
   index: number;
   extraHeight: number;
@@ -75,6 +80,8 @@ const EMPTY_DAY_LABEL = "予定なし";
 const DEFAULT_COLOR = "#8e8e93";
 const GAP_COLOR = "#f2f2f7";
 const DATE_KEY_PART_COUNT = 3;
+const DAY_DATE_NUMBER_CLASS_NAME = "flex h-8 w-8 items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-all duration-150";
+const DAY_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 
 const createRail = (selectedDate: Date): ScheduleVirtualRail => ({ startDate: subDays(startOfMonth(selectedDate), LOCAL_DAYS), anchorIndex: LOCAL_DAYS, totalDayCount: LOCAL_DAYS * 2 + getDaysInMonth(selectedDate) });
 
@@ -287,7 +294,16 @@ const buildConicGradient = (segments: PieSegment[]) => {
   return `conic-gradient(${stops.join(", ")})`;
 };
 
+const getSplitDayDateNumberClassName = (day: SplitDay): string => cn(DAY_DATE_NUMBER_CLASS_NAME, day.isSelected ? "bg-[#3a77b2] text-white ring-1 ring-[#3a77b2]" : day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
+
 const EmptyDayCard = () => <div className="flex h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">{EMPTY_DAY_LABEL}</div>;
+
+const SplitDayDateButton = ({ day, onSelectDate }: SplitDayDateButtonProps) => (
+  <button type="button" className="mt-0.5 flex h-8 items-center justify-end gap-1 rounded-[10px] pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25" onClick={() => onSelectDate?.(day.date)}>
+    <span className={getSplitDayDateNumberClassName(day)}>{format(day.date, "d")}</span>
+    <span className={DAY_WEEKDAY_CLASS_NAME}>{format(day.date, "EEE", { locale: ja })}</span>
+  </button>
+);
 
 const SplitDaySectionComponent = ({ day, onSelectDate }: SplitDaySectionProps) => {
   const hours = Math.round(day.minutes / 60 * 10) / 10;
@@ -296,20 +312,14 @@ const SplitDaySectionComponent = ({ day, onSelectDate }: SplitDaySectionProps) =
     <section className="grid h-full grid-cols-2" aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}>
       <div className="h-full min-h-0 min-w-0 border-r border-[#eeeeee] px-4">
         <div className="grid grid-cols-[58px_minmax(0,1fr)] gap-2">
-          <button type="button" className={cn("mt-0.5 flex h-8 items-baseline justify-end gap-1 rounded-[10px] pr-0.5", day.isSelected && "text-[#1c1c1e]")} onClick={() => onSelectDate?.(day.date)}>
-            <span className={cn("text-[16px] font-bold leading-none", day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]")}>{format(day.date, "d")}</span>
-            <span className="text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]">{format(day.date, "EEE", { locale: ja })}</span>
-          </button>
+          <SplitDayDateButton day={day} onSelectDate={onSelectDate} />
           <div className="space-y-1.5 overflow-hidden">
             {day.events.length > 0 ? day.events.map((event) => <CalendarEventChipList key={getEventInstanceKey(day.key, event)} event={event} />) : <EmptyDayCard />}
           </div>
         </div>
       </div>
       <div className="grid h-full min-h-0 min-w-0 grid-cols-[58px_minmax(0,1fr)] gap-2 px-4">
-        <button type="button" className={cn("mt-0.5 flex h-8 items-baseline justify-end gap-1 rounded-[10px] pr-0.5", day.isSelected && "text-[#1c1c1e]")} onClick={() => onSelectDate?.(day.date)}>
-          <span className={cn("text-[16px] font-bold leading-none", day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]")}>{format(day.date, "d")}</span>
-          <span className="text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]">{format(day.date, "EEE", { locale: ja })}</span>
-        </button>
+        <SplitDayDateButton day={day} onSelectDate={onSelectDate} />
         <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_180px] items-start gap-4">
           <div className="min-w-0 space-y-1.5 overflow-hidden">
             {day.segments.slice(0, 6).map((segment) => (
