@@ -127,4 +127,5 @@ export type CalendarWeekDayGridProps = {
   onScroll?: (event: UIEvent<HTMLDivElement>) => void;
   selectedDate: Date;
   onSelectDate?: (date: Date) => void;
+  onVisibleDateChange?: (date: Date) => void;
 };
