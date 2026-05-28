@@ -30,15 +30,51 @@ type WeekdayVirtualDayRange = {
   end: number;
 };
 
+type CurrentTimeLabelProps = {
+  currentMinutes: number;
+};
+
+type CurrentTimeIndicatorProps = {
+  isToday: boolean;
+  currentMinutes: number;
+};
+
 const HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, index) => index);
 const HOUR_BOUNDARY_LABELS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, index) => index + 1);
 const MAX_ALL_DAY_VISIBLE_CHIPS = 3;
 const BOTTOM_BOUNDARY_LABEL_SPACER_HEIGHT = 32;
 const HORIZONTAL_DAY_OVERSCAN = 4;
+const WEEKDAY_HEADER_ROW_HEIGHT = 40;
 
 const EMPTY_WEEKDAY_DAY_EVENTS: WeekdayDayEvents = {
   allDayEvents: [],
   timedEvents: [],
+};
+
+const WEEKDAY_HEADER_CORNER_STYLE: CSSProperties = {
+  gridColumn: 1,
+  gridRow: 1,
+  left: 0,
+  position: "sticky",
+  top: 0,
+  width: C.TIME_COLUMN_WIDTH,
+};
+
+const WEEKDAY_ALL_DAY_LABEL_STYLE: CSSProperties = {
+  gridColumn: 1,
+  gridRow: 2,
+  left: 0,
+  position: "sticky",
+  top: WEEKDAY_HEADER_ROW_HEIGHT,
+  width: C.TIME_COLUMN_WIDTH,
+};
+
+const WEEKDAY_TIME_COLUMN_STYLE: CSSProperties = {
+  gridColumn: 1,
+  gridRow: 3,
+  left: 0,
+  position: "sticky",
+  width: C.TIME_COLUMN_WIDTH,
 };
 
 const createHourLabel = (hour: number) =>
@@ -61,6 +97,7 @@ const getEventDurationMinutes = (event: GoogleCalendarEvent): number => {
   const start = new Date(event.startsAt).getTime();
   const end = new Date(event.endsAt).getTime();
   const diff = end - start;
+
   return diff > 0 ? diff / 60000 : 30;
 };
 
@@ -81,6 +118,54 @@ const calculateEventPositionStyle = (
   } as CalendarEventPositionStyle;
 };
 
+const areSameVisibleDays = (previous: Date[], next: Date[]) => {
+  if (previous.length !== next.length) return false;
+
+  return previous.every((day, index) => day.getTime() === next[index]?.getTime());
+};
+
+const isSelectionEquivalentForVisibleDays = (
+  previousSelectedDate: Date,
+  nextSelectedDate: Date,
+  previousVisibleDays: Date[],
+  nextVisibleDays: Date[],
+) => {
+  const previousSelectedKey = getCalendarDateKey(previousSelectedDate);
+  const nextSelectedKey = getCalendarDateKey(nextSelectedDate);
+
+  if (previousSelectedKey === nextSelectedKey) return true;
+
+  const previousSelectionWasVisible = previousVisibleDays.some(
+    (day) => getCalendarDateKey(day) === previousSelectedKey,
+  );
+  const nextSelectionIsVisible = nextVisibleDays.some(
+    (day) => getCalendarDateKey(day) === nextSelectedKey,
+  );
+
+  return !previousSelectionWasVisible && !nextSelectionIsVisible;
+};
+
+const areCalendarWeekDayGridPropsEqual = (
+  previous: CalendarWeekDayGridProps,
+  next: CalendarWeekDayGridProps,
+) => {
+  return (
+    previous.scrollContainerRef === next.scrollContainerRef &&
+    previous.visibleEvents === next.visibleEvents &&
+    previous.calendarDayColumnWidth === next.calendarDayColumnWidth &&
+    previous.calendarGridStyle === next.calendarGridStyle &&
+    previous.onScroll === next.onScroll &&
+    previous.onSelectDate === next.onSelectDate &&
+    areSameVisibleDays(previous.visibleDays, next.visibleDays) &&
+    isSelectionEquivalentForVisibleDays(
+      previous.selectedDate,
+      next.selectedDate,
+      previous.visibleDays,
+      next.visibleDays,
+    )
+  );
+};
+
 const AllDayEventChip = ({ event }: { event: GoogleCalendarEvent }) => {
   const tokens = generateColorTokens(event.accentColor);
 
@@ -98,6 +183,7 @@ const AllDayEventChip = ({ event }: { event: GoogleCalendarEvent }) => {
 const useCurrentTimeMinutes = (): number => {
   const getNow = () => {
     const d = new Date();
+
     return d.getHours() * GRID.WEEKDAY_MINUTES_PER_HOUR + d.getMinutes();
   };
 
@@ -133,15 +219,11 @@ const useCurrentTimeMinutes = (): number => {
   return minutes;
 };
 
-type CurrentTimeLabelProps = {
-  currentMinutes: number;
-};
-
 const CurrentTimeLabel = ({ currentMinutes }: CurrentTimeLabelProps) => {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute right-0 z-30 flex h-6 w-full -translate-y-1/2 select-none items-center justify-end bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,white_32%,white_68%,rgba(255,255,255,0)_100%)] pr-2 text-[12px] font-semibold leading-none tabular-nums text-[#3f7fc5]"
+      className="pointer-events-none absolute inset-x-0 z-30 flex h-6 -translate-y-1/2 select-none items-center justify-end bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,white_32%,white_68%,rgba(255,255,255,0)_100%)] pr-2 text-[12px] font-semibold leading-none tabular-nums text-[#3f7fc5]"
       style={{
         top: `calc(${currentMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(--calendar-hour-row-height))`,
       }}
@@ -149,11 +231,6 @@ const CurrentTimeLabel = ({ currentMinutes }: CurrentTimeLabelProps) => {
       {createMinuteLabel(currentMinutes)}
     </div>
   );
-};
-
-type CurrentTimeIndicatorProps = {
-  isToday: boolean;
-  currentMinutes: number;
 };
 
 const CurrentTimeIndicator = ({
@@ -181,45 +258,18 @@ const CurrentTimeIndicator = ({
   );
 };
 
-const areSameVisibleDays = (previous: Date[], next: Date[]) => {
-  if (previous.length !== next.length) return false;
-
-  return previous.every((day, index) => day.getTime() === next[index]?.getTime());
-};
-
-const isSelectionEquivalentForVisibleDays = (
-  previousSelectedDate: Date,
-  nextSelectedDate: Date,
-  previousVisibleDays: Date[],
-  nextVisibleDays: Date[],
-) => {
-  const previousSelectedKey = getCalendarDateKey(previousSelectedDate);
-  const nextSelectedKey = getCalendarDateKey(nextSelectedDate);
-
-  if (previousSelectedKey === nextSelectedKey) return true;
-
-  const previousSelectionWasVisible = previousVisibleDays.some(
-    (day) => getCalendarDateKey(day) === previousSelectedKey,
-  );
-  const nextSelectionIsVisible = nextVisibleDays.some(
-    (day) => getCalendarDateKey(day) === nextSelectedKey,
-  );
-
-  return !previousSelectionWasVisible && !nextSelectionIsVisible;
-};
-
-export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
+const CalendarWeekDayGridComponent = ({
   headerScrollRef: _headerScrollRef,
   allDayScrollRef: _allDayScrollRef,
   scrollContainerRef,
   visibleDays,
   visibleEvents,
-  _calendarDayColumnWidth,
+  calendarDayColumnWidth,
   calendarGridStyle,
   onScroll,
   selectedDate,
   onSelectDate,
-}: CalendarWeekDayGridProps) {
+}: CalendarWeekDayGridProps) => {
   const today = new Date();
   const currentMinutes = useCurrentTimeMinutes();
   const [virtualDayRange, setVirtualDayRange] = useState<WeekdayVirtualDayRange>(() => ({
@@ -230,7 +280,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
   const updateVirtualDayRange = useCallback(() => {
     const scroller = scrollContainerRef.current;
 
-    if (!scroller || _calendarDayColumnWidth <= 0 || visibleDays.length === 0) {
+    if (!scroller || calendarDayColumnWidth <= 0 || visibleDays.length === 0) {
       setVirtualDayRange({ start: 0, end: visibleDays.length });
       return;
     }
@@ -239,11 +289,11 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
     const visibleRight = Math.max(0, scroller.scrollLeft + scroller.clientWidth - C.TIME_COLUMN_WIDTH);
     const start = Math.max(
       0,
-      Math.floor(scrollableLeft / _calendarDayColumnWidth) - HORIZONTAL_DAY_OVERSCAN,
+      Math.floor(scrollableLeft / calendarDayColumnWidth) - HORIZONTAL_DAY_OVERSCAN,
     );
     const end = Math.min(
       visibleDays.length,
-      Math.ceil(visibleRight / _calendarDayColumnWidth) + HORIZONTAL_DAY_OVERSCAN,
+      Math.ceil(visibleRight / calendarDayColumnWidth) + HORIZONTAL_DAY_OVERSCAN,
     );
 
     setVirtualDayRange((previous) =>
@@ -251,7 +301,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
         ? previous
         : { start, end },
     );
-  }, [_calendarDayColumnWidth, scrollContainerRef, visibleDays.length]);
+  }, [calendarDayColumnWidth, scrollContainerRef, visibleDays.length]);
 
   useLayoutEffect(() => {
     updateVirtualDayRange();
@@ -348,7 +398,10 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
         onScroll={onScroll}
       >
         <div className="grid bg-white" style={calendarGridStyle}>
-          <div className="sticky left-0 top-0 z-[60] h-10 border-b border-r border-[#eeeeee] bg-white" />
+          <div
+            className="z-[60] h-10 border-b border-r border-[#eeeeee] bg-white"
+            style={WEEKDAY_HEADER_CORNER_STYLE}
+          />
 
           {renderedDayEntries.map(({ day, dayIndex }) => {
             const isDayToday = isSameDay(day, today);
@@ -385,8 +438,8 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
           })}
 
           <div
-            className="sticky left-0 top-10 z-[60] flex min-h-7 justify-end border-b border-r border-[#eeeeee] bg-white pr-2 pt-1 text-[10px] font-medium text-[rgba(60,60,67,0.45)]"
-            style={{ width: C.TIME_COLUMN_WIDTH }}
+            className="z-[60] flex min-h-7 justify-end border-b border-r border-[#eeeeee] bg-white pr-2 pt-1 text-[10px] font-medium text-[rgba(60,60,67,0.45)]"
+            style={WEEKDAY_ALL_DAY_LABEL_STYLE}
           >
             終日
           </div>
@@ -422,7 +475,10 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
             );
           })}
 
-          <div className="sticky left-0 z-30 overflow-hidden border-r border-[#eeeeee] bg-white shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]">
+          <div
+            className="z-30 overflow-visible border-r border-[#eeeeee] bg-white shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]"
+            style={WEEKDAY_TIME_COLUMN_STYLE}
+          >
             {HOURS.map((hour) => (
               <div
                 key={hour}
@@ -441,7 +497,7 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
               <span
                 key={`weekday-hour-label-${hour}`}
                 className={cn(
-                  "absolute right-1 z-10 flex h-6 select-none items-center justify-end rounded-md bg-white px-1 text-[12px] font-medium tabular-nums text-[#b3b3b3]",
+                  "pointer-events-none absolute inset-x-0 z-20 flex h-6 select-none items-center justify-end rounded-md bg-white px-1 text-[12px] font-medium tabular-nums text-[#8f929c]",
                   getHourBoundaryLabelOffsetClass(hour),
                 )}
                 style={{
@@ -531,20 +587,10 @@ export const CalendarWeekDayGrid = memo(function CalendarWeekDayGrid({
       </div>
     </div>
   );
-}, (previous, next) => {
-  return (
-    previous.scrollContainerRef === next.scrollContainerRef &&
-    previous.visibleEvents === next.visibleEvents &&
-    previous._calendarDayColumnWidth === next._calendarDayColumnWidth &&
-    previous.calendarGridStyle === next.calendarGridStyle &&
-    previous.onScroll === next.onScroll &&
-    previous.onSelectDate === next.onSelectDate &&
-    areSameVisibleDays(previous.visibleDays, next.visibleDays) &&
-    isSelectionEquivalentForVisibleDays(
-      previous.selectedDate,
-      next.selectedDate,
-      previous.visibleDays,
-      next.visibleDays,
-    )
-  );
-});
+};
+
+const CalendarWeekDayGrid = memo(CalendarWeekDayGridComponent, areCalendarWeekDayGridPropsEqual);
+
+CalendarWeekDayGrid.displayName = "CalendarWeekDayGrid";
+
+export { CalendarWeekDayGrid };
