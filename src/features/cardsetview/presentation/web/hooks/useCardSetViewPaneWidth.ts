@@ -7,7 +7,7 @@ import type { UserSettings } from "@/types";
 interface UseCardSetViewPaneWidthOptions {
   isGlobalEditing: boolean;
   isDesktop: boolean;
-  settings: UserSettings | undefined;
+  settings: Partial<UserSettings> | null | undefined;
   cardSetId?: string | null;
 }
 
