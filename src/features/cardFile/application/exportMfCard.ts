@@ -1,4 +1,4 @@
-import { MF_CARD_FORMAT, MF_CARD_VERSION, MfCardExportError, type MfCardFileV1 } from "@/features/cardFile/domain/mfCardTypes";
+import { MF_CARD_FORMAT, MF_CARD_VERSION, MfCardExportError, type MfCardFileV1 } from "@/features/cardFile/domain/mfCard.types";
 import { encodeMfCardFile } from "@/features/cardFile/infra/web/mfCardJsonCodec";
 import { collectMfDeckExportIssues, mapCardToMfDeckCard } from "@/features/deckFile/application/mapCardToMfDeck";
 import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
