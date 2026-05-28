@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { useAuthSession } from "@/contexts/AuthContext";
-import { useCards } from "@/hooks/card/useCards";
+import { useCards } from "@/components/card/hooks/useCards";
 import { getLocalDb } from "@/services/localDB";
 import type { Card } from "@/types";
 

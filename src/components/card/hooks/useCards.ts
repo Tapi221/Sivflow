@@ -1,5 +1,5 @@
-import { useCardCommands } from "@/hooks/card/useCardCommands";
-import { useCardsRead, type UseCardsReadOptions } from "@/hooks/card/useCardsRead";
+import { useCardCommands } from "@/components/card/hooks/useCardCommands";
+import { useCardsRead, type UseCardsReadOptions } from "@/components/card/hooks/useCardsRead";
 
 export const useCards = (
   folderId?: string,

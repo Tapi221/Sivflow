@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
-import { useCards } from "@/hooks/card/useCards";
-import { useCardSetById } from "@/hooks/cardSet/useCardSetById";
+import { useCards } from "@/components/card/hooks/useCards";
+import { useCardSetById } from "@/components/card/hooks/useCardSetById";
 import { useFolderLineage } from "@/hooks/folder/useFolderLineage";
 import type { Card, Folder } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";

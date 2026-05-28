@@ -16,9 +16,9 @@ import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions
 import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
 import { useTreeViewFilters } from "@/components/folder/hooks/useTreeViewFilters";
 import { useToast } from "@/contexts/ToastContext";
-import { useCardCommands } from "@/hooks/card/useCardCommands";
-import { useCardsRead } from "@/hooks/card/useCardsRead";
-import { useCardSets } from "@/hooks/cardSet/useCardSets";
+import { useCardCommands } from "@/components/card/hooks/useCardCommands";
+import { useCardsRead } from "@/components/card/hooks/useCardsRead";
+import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";

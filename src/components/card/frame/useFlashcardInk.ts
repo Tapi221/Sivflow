@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.types";
 import { INK_DOCUMENT_VERSION, type InkDocument, type InkEditTool } from "@/components/ink/ink.types";
-import { useCards } from "@/hooks/card/useCards";
+import { useCards } from "@/components/card/hooks/useCards";
 
 interface UseFlashcardInkOptions {
   cardId: string | null;
