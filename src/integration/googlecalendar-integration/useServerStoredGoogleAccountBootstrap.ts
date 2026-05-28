@@ -19,17 +19,17 @@ export const useServerStoredGoogleAccountBootstrap = (): void => {
       for (const remote of remoteAccounts) {
         if (readStoredAccounts().some((account) => account.id === remote.accountId)) continue;
 
-        const account = {
+        const account: StoredGoogleAccount = {
           id: remote.accountId,
           email: remote.email,
           name: remote.name,
           photoUrl: remote.photoUrl,
-          ["access" + "Token"]: null,
-          ["access" + "TokenExpiry"]: null,
-          ["refresh" + "Token"]: null,
+          accessToken: null,
+          accessTokenExpiry: null,
+          refreshToken: null,
           selectedCalendarIds: [],
           cachedCalendars: [],
-        } as StoredGoogleAccount;
+        };
 
         upsertStoredAccount(account);
         added = true;
