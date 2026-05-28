@@ -1,37 +1,22 @@
-import { type AppDestination, type AppScreen, resolveAppDestination } from "@/navigation/destination";
+type LegacyDestinationParams = Record<string, string | number | boolean | null | undefined>;
 
-const WEB_SCREEN_PATHS: Record<AppScreen, string> = {
-  folders: "/library",
-  cardEdit: "/CardEdit",
-  cardSetView: "/CardSetView",
-  studyMode: "/study",
-  uncertainMode: "/uncertain",
-  bookmarkMode: "/bookmark",
-  calendar: "/schedule",
-  gallery: "/gallery",
-  statistics: "/statistics",
-  trash: "/trash",
+type LegacyDestination = {
+  params?: LegacyDestinationParams;
 };
 
-export const toWebPath = (destination: AppDestination): string => {
-  const query = destination.params
-    ? new URLSearchParams(destination.params).toString()
-    : "";
+const SCHEDULE_PATH = "/schedule";
 
-  if (destination.kind === "screen") {
-    const basePath = WEB_SCREEN_PATHS[destination.screen];
-    return query ? `${basePath}?${query}` : basePath;
-  }
-
-  return query
-    ? `/${destination.sourceName}?${query}`
-    : `/${destination.sourceName.toLowerCase()}`;
+export const toWebPath = (_destination: LegacyDestination): string => {
+  return SCHEDULE_PATH;
 };
 
-export const createPageUrl = (page: string | AppDestination): string => {
-  return toWebPath(
-    typeof page === "string" ? resolveAppDestination(page) : page,
-  );
+export const createPageUrl = (_page: string | LegacyDestination): string => {
+  return SCHEDULE_PATH;
 };
 
-export { createAppDestination } from "@/navigation/destination";
+export const createAppDestination = (
+  _screen: string,
+  params?: LegacyDestinationParams,
+): LegacyDestination => {
+  return { params };
+};
