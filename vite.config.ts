@@ -67,7 +67,7 @@ export default defineConfig(({ command }) => ({
       },
       {
         find: /^@\/features\/tab\/Tab$/,
-        replacement: path.resolve(__dirname, "./src/pane/tab.desktopnative/Tab.ts"),
+        replacement: path.resolve(__dirname, "./src/pane.desktop/tab.desktopnative/Tab.ts"),
       },
       {
         find: "@",
