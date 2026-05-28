@@ -192,30 +192,6 @@
     box-shadow: none;
   }
 
-  .calendar-month-weekday-header::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background-image:
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee);
-    background-repeat: no-repeat;
-    background-size: 1px 100%;
-    background-position:
-      14.2857142857% 0,
-      28.5714285714% 0,
-      42.8571428571% 0,
-      57.1428571429% 0,
-      71.4285714286% 0,
-      85.7142857% 0;
-  }
-
   .calendar-month-weekday-cell {
     border-right: 0 !important;
     background: #ffffff !important;
