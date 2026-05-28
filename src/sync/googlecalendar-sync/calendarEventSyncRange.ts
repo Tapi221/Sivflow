@@ -18,6 +18,7 @@ export type BuildCalendarEventSyncRangeOptions = {
 
 const LIST_AND_PIE_CHART_SYNC_BUFFER_DAYS = 45;
 const WEEKDAY_SYNC_BUFFER_DAYS = 21;
+const DEFAULT_VISIBLE_DAY_BUFFER_DAYS = 2;
 
 const buildMiniCalendarMonthRange = (monthTitleDate: Date): CalendarEventSyncRange => {
   const gridStart = startOfWeek(startOfMonth(monthTitleDate), { weekStartsOn: 0 });
@@ -119,11 +120,10 @@ const buildDefaultCalendarEventSyncRange = (
   const fallbackDayTime = monthTitleDate.getTime();
   const firstVisibleDay = new Date(visibleDays[0]?.getTime() ?? fallbackDayTime);
   const lastVisibleDay = new Date(visibleDays.at(-1)?.getTime() ?? fallbackDayTime);
-  const bufferDays = selectedViewMode === "week" || selectedViewMode === "timetable" ? 3 : 2;
 
   return {
-    rangeStart: startOfDay(subDays(firstVisibleDay, bufferDays)),
-    rangeEnd: endOfDay(addDays(lastVisibleDay, bufferDays)),
+    rangeStart: startOfDay(subDays(firstVisibleDay, DEFAULT_VISIBLE_DAY_BUFFER_DAYS)),
+    rangeEnd: endOfDay(addDays(lastVisibleDay, DEFAULT_VISIBLE_DAY_BUFFER_DAYS)),
   };
 };
 
