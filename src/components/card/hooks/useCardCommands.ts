@@ -6,6 +6,16 @@ import { DEFAULT_SETTINGS, useUserSettings } from "@/features/settings/hooks/use
 import { getLocalDb } from "@/services/localDB";
 import type { Card, CardPatch } from "@/types";
 
+type TimestampLike = { toDate?: () => Date; seconds?: number; nanoseconds?: number };
+
+const toDateMillis = (value: Date | TimestampLike | undefined | null): number => {
+  if (!value) return 0;
+  if (value instanceof Date) return value.getTime();
+  if (typeof value.toDate === "function") return value.toDate().getTime();
+  if (typeof value.seconds === "number") return value.seconds * 1000 + Math.floor((value.nanoseconds ?? 0) / 1_000_000);
+  return 0;
+};
+
 export const useCardCommands = (folderId?: string) => {
   const { currentUser } = useAuthSession();
   const { settings } = useUserSettings();
@@ -54,10 +64,7 @@ export const useCardCommands = (folderId?: string) => {
           const orderLeft = left.orderIndex ?? 0;
           const orderRight = right.orderIndex ?? 0;
           if (orderLeft !== orderRight) return orderLeft - orderRight;
-          return (
-            new Date(left.createdAt ?? 0).getTime() -
-            new Date(right.createdAt ?? 0).getTime()
-          );
+          return toDateMillis(left.createdAt) - toDateMillis(right.createdAt);
         });
 
       const reusableSet = siblingSets[0];
@@ -118,9 +125,7 @@ export const useCardCommands = (folderId?: string) => {
 
     const normalizedReviewLogs = Array.isArray(cardData.reviewLogs)
       ? [...cardData.reviewLogs].sort(
-        (left, right) =>
-          new Date(left.reviewedAt).getTime() -
-            new Date(right.reviewedAt).getTime(),
+        (left, right) => toDateMillis(left.reviewedAt) - toDateMillis(right.reviewedAt),
       )
       : [];
 
@@ -181,7 +186,7 @@ export const useCardCommands = (folderId?: string) => {
           DEFAULT_LAYOUT_ROWS,
       ),
       memoryStability: 0,
-      currentLevel: cardData.currentLevel ?? null,
+      ...(cardData.currentLevel != null ? { currentLevel: cardData.currentLevel } : {}),
       nextReviewDate,
       createdAt: now,
       updatedAt: now,
@@ -253,9 +258,7 @@ export const useCardCommands = (folderId?: string) => {
 
     if (Array.isArray(patch.reviewLogs)) {
       patch.reviewLogs = [...patch.reviewLogs].sort(
-        (left, right) =>
-          new Date(left.reviewedAt).getTime() -
-          new Date(right.reviewedAt).getTime(),
+        (left, right) => toDateMillis(left.reviewedAt) - toDateMillis(right.reviewedAt),
       );
     }
 
