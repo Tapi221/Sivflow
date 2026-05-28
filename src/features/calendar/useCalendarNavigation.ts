@@ -62,10 +62,45 @@ const resolveNextViewModeSelection = (
   return next;
 };
 
+const normalizeTodayCurrentComparisonDate = (date: Date, viewMode: CalendarViewMode): Date => {
+  if (viewMode === "year") return startOfYear(date);
+  if (viewMode === "list") return startOfMonth(date);
+  if (viewMode === "week") return normalizeWeek(date);
+  return startOfDay(date);
+};
+
+const normalizeTodaySelectedComparisonDate = (date: Date, viewMode: CalendarViewMode): Date => {
+  if (viewMode === "year") return startOfYear(date);
+  if (viewMode === "week") return normalizeWeek(date);
+  return startOfDay(date);
+};
+
+const getTodayNavigationKey = (date: Date, viewMode: CalendarViewMode): string => [
+  viewMode,
+  normalizeTodayCurrentComparisonDate(date, viewMode).getTime(),
+  normalizeTodaySelectedComparisonDate(date, viewMode).getTime(),
+].join(":");
+
+const isTodayNavigationSettled = (
+  currentDate: Date,
+  selectedDate: Date,
+  viewMode: CalendarViewMode,
+  today: Date,
+): boolean => {
+  const currentTarget = normalizeTodayCurrentComparisonDate(today, viewMode).getTime();
+  const selectedTarget = normalizeTodaySelectedComparisonDate(today, viewMode).getTime();
+
+  return (
+    normalizeTodayCurrentComparisonDate(currentDate, viewMode).getTime() === currentTarget &&
+    normalizeTodaySelectedComparisonDate(selectedDate, viewMode).getTime() === selectedTarget
+  );
+};
+
 export const useCalendarNavigation = () => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
+  const todayNavigationKeyRef = useRef<string | null>(null);
 
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => new Date());
@@ -148,6 +183,10 @@ export const useCalendarNavigation = () => {
     return () => ro.disconnect();
   }, []);
 
+  useEffect(() => {
+    todayNavigationKeyRef.current = null;
+  }, [currentDate, primaryViewMode, selectedDate]);
+
   const handleSelectViewMode = useCallback(
     (next: CalendarViewMode) => {
       if (next !== "month") {
@@ -181,6 +220,17 @@ export const useCalendarNavigation = () => {
 
   const handleToday = useCallback(() => {
     const now = new Date();
+    const todayNavigationKey = getTodayNavigationKey(now, primaryViewMode);
+
+    if (
+      todayNavigationKeyRef.current === todayNavigationKey ||
+      isTodayNavigationSettled(currentDate, selectedDate, primaryViewMode, now)
+    ) {
+      return;
+    }
+
+    todayNavigationKeyRef.current = todayNavigationKey;
+
     const normalized = normalizeViewDate(now, primaryViewMode);
 
     setCurrentDate(normalized);
@@ -189,7 +239,7 @@ export const useCalendarNavigation = () => {
 
     requestMonthScrollTarget();
     resetCalendarPosition(primaryViewMode);
-  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition]);
+  }, [currentDate, primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, selectedDate]);
 
   const handlePrevious = useCallback(() => {
     setCurrentDate((c) => {
