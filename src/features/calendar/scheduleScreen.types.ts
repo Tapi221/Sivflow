@@ -1,4 +1,5 @@
 import type { CSSProperties, RefObject, UIEvent } from "react";
+import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import type { CalendarViewMode, CalendarViewModeSelection } from "./calendar.types";
 import type { GCalConnectionStatus, GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
@@ -120,6 +121,7 @@ export type CalendarWeekDayGridProps = {
   allDayScrollRef?: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   visibleDays: Date[];
+  virtualRail?: ScheduleVirtualRail;
   visibleEvents: GoogleCalendarEvent[];
   calendarDayColumnWidth: number;
   _calendarDayColumnWidth?: number;
