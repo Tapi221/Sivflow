@@ -1,2 +1,2 @@
-export { PortableImportBatchDialog } from "@/chip/dialog/PortableImportBatchDialog";
-export type { PortableImportBatchCompletedPayload } from "@/chip/dialog/PortableImportBatchDialog";
+export { PortableImportBatchDialog } from "@/chip/dialog.desktop/Dialog.PortableImportBatch";
+export type { PortableImportBatchCompletedPayload } from "@/chip/dialog.desktop/Dialog.PortableImportBatch";

@@ -1,2 +1,2 @@
-export { XlsxImportDialog } from "@/chip/dialog/XlsxImportDialog";
-export type { XlsxImportCompletedPayload } from "@/chip/dialog/XlsxImportDialog";
+export { XlsxImportDialog } from "@/chip/dialog.desktop/Dialog.XlsxImport";
+export type { XlsxImportCompletedPayload } from "@/chip/dialog.desktop/Dialog.XlsxImport";
