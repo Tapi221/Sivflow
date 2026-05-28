@@ -1,9 +1,9 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
-import type { ISyncService, SyncConflict, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
+import type { ISyncService, SyncConflict as ServiceSyncConflict, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
 import { getLocalDb } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-import { DEFAULT_SYNC_SETTINGS, type SyncSettings } from "@/types/domain/sync";
+import { DEFAULT_SYNC_SETTINGS, type SyncConflict, type SyncEntity, type SyncSettings } from "@/types/domain/sync";
 
 type SyncStatus = "idle" | "syncing" | "success" | "error";
 type SyncNotice = "none" | "wifi_wait";
@@ -21,8 +21,8 @@ interface SyncContextType {
   clearSyncErrors: () => Promise<void>;
 }
 
-type LegacySyncService = ISyncService & {
-  getUnresolvedConflicts(): Promise<SyncConflict[]>;
+type LegacySyncService = Omit<ISyncService, "getUnresolvedConflicts"> & {
+  getUnresolvedConflicts(): Promise<ServiceSyncConflict[]>;
   resolveConflict(conflictId: string, resolvedData: unknown): Promise<void>;
   clearAllErrors(): Promise<void>;
 };
@@ -46,6 +46,10 @@ const isSyncIntervalMinutes = (value: unknown): value is SyncSettings["intervalM
   return value === 5 || value === 15 || value === 30 || value === 60;
 };
 
+const isSyncEntity = (value: unknown): value is SyncEntity => {
+  return value === "card" || value === "folder" || value === "cardSet" || value === "document" || value === "tag" || value === "userSetting" || value === "asset";
+};
+
 const normalizeSyncSettings = (snapshot: UserSettingsSnapshot): SyncSettings => {
   const data = snapshot.data;
   return {
@@ -56,6 +60,20 @@ const normalizeSyncSettings = (snapshot: UserSettingsSnapshot): SyncSettings => 
     autoCleanupDevices: typeof data.autoCleanupDevices === "boolean" ? data.autoCleanupDevices : DEFAULT_SYNC_SETTINGS.autoCleanupDevices,
   };
 };
+
+const normalizeServiceConflict = (conflict: ServiceSyncConflict): SyncConflict => ({
+  id: conflict.id,
+  entityId: conflict.targetId,
+  entityType: isSyncEntity(conflict.entity) ? conflict.entity : "card",
+  autoMerged: false,
+  conflicts: {
+    value: {
+      local: conflict.local,
+      remote: conflict.remote,
+    },
+  },
+  detectedAt: conflict.createdAt,
+});
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useSyncContext = () => {
@@ -210,7 +228,8 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
       return [];
     }
 
-    return syncServiceRef.current.getUnresolvedConflicts();
+    const conflicts = await syncServiceRef.current.getUnresolvedConflicts();
+    return conflicts.map(normalizeServiceConflict);
   }, []);
 
   const resolveConflict = useCallback(
