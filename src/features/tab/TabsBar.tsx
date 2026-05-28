@@ -2,11 +2,12 @@ import { useEffect, useRef, useState, type ComponentType, type CSSProperties, ty
 import { createPortal } from "react-dom";
 import { PlusLineIcon } from "@/chip/icons/icons.schedule";
 import { ClockIcon, HomeIcon, InboxIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
+import { WORKSPACE_TAB_CONTEXT_MENU_HEIGHT, WORKSPACE_TAB_CONTEXT_MENU_MARGIN, WORKSPACE_TAB_CONTEXT_MENU_WIDTH, WORKSPACE_TAB_CONTEXT_PANEL_ID, WorkspaceTabContextMenu } from "@/chip/rightclickpanel/TabContextMenu";
+import { useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPanelUtils";
 import { WorkspaceTabDndItem, WorkspaceTabDndList } from "@/features/dnd/tab/WorkspaceTabDnd";
 import { useWorkspaceTabDnd } from "@/features/dnd/tab/useWorkspaceTabDnd";
 import type { WorkspaceSidebarSection, WorkspaceTab } from "@/features/tab/Tab";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
-import { WORKSPACE_TAB_CONTEXT_MENU_HEIGHT, WORKSPACE_TAB_CONTEXT_MENU_MARGIN, WORKSPACE_TAB_CONTEXT_MENU_WIDTH, WorkspaceTabContextMenu } from "@/chip/rightclickpanel/TabContextMenu";
 import { cn } from "@/lib/utils";
 import { FileText, Layers, X } from "@/ui/icons";
 
@@ -262,35 +263,12 @@ export const TabsBar = ({
     };
   }, [lastOpenedTabId]);
 
-  useEffect(() => {
-    if (!contextMenu) return;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (contextMenuRef.current?.contains(event.target as Node)) return;
-      setContextMenu(null);
-    };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setContextMenu(null);
-      }
-    };
-    const closeMenu = () => setContextMenu(null);
-
-    window.addEventListener("pointerdown", handlePointerDown, { capture: true });
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("resize", closeMenu, { once: true });
-    window.addEventListener("scroll", closeMenu, {
-      capture: true,
-      once: true,
-    });
-
-    return () => {
-      window.removeEventListener("pointerdown", handlePointerDown, { capture: true });
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("resize", closeMenu);
-      window.removeEventListener("scroll", closeMenu, { capture: true });
-    };
-  }, [contextMenu]);
+  useRightClickPanelDismiss(
+    WORKSPACE_TAB_CONTEXT_PANEL_ID,
+    contextMenu !== null,
+    contextMenuRef,
+    () => setContextMenu(null),
+  );
 
   const closeWorkspaceTabs = (tabsToClose: WorkspaceTab[]) => {
     tabsToClose.forEach((tab) => closeTab(tab.id));
