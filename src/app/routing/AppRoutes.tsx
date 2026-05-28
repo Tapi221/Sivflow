@@ -8,7 +8,6 @@ import { ProtectedRoute } from "./ProtectedRoute";
 const Schedule = lazy(() => import("@/routes/Schedule"));
 const REDIRECT_TO_SCHEDULE_ROUTES = [
   "calendar/*",
-  "settings/*",
   "CardEdit/*",
   "CardSetView/*",
   "CardView/*",
