@@ -1,5 +1,6 @@
 import { memo, useState } from "react";
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { initialWindowMetrics, SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { ScheduleYearMobileNative } from "@/pane.mobilenative/schedule/schedule.year.mobilenative";
 import { NavigationBarMobile, type NavigationItemId } from "./NavigationBarMobile";
@@ -9,17 +10,19 @@ const App = () => {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" />
-      <View style={styles.header}>
-        <Text style={styles.eyebrow}>Mobile Native</Text>
-        <Text style={styles.title}>Schedule</Text>
-      </View>
-      <View style={styles.content}>
-        <ScheduleYearMobileNative selectedDate={selectedDate} yearDate={selectedDate} onSelectDate={setSelectedDate} />
-      </View>
-      <NavigationBarMobile activeItemId={activeItemId} onSelectItem={setActiveItemId} />
-    </SafeAreaView>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar style="dark" />
+        <View style={styles.header}>
+          <Text style={styles.eyebrow}>Mobile Native</Text>
+          <Text style={styles.title}>Schedule</Text>
+        </View>
+        <View style={styles.content}>
+          <ScheduleYearMobileNative selectedDate={selectedDate} yearDate={selectedDate} onSelectDate={setSelectedDate} />
+        </View>
+        <NavigationBarMobile activeItemId={activeItemId} onSelectItem={setActiveItemId} />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
