@@ -24,17 +24,15 @@ export type CalendarListVirtualRange = {
 export const LIST_DAY_SECTION_MIN_HEIGHT_PX = 430;
 export const LIST_DAY_GAP_PX = 8;
 export const LIST_EMPTY_DAY_HEIGHT_PX = 38;
-export const LIST_EVENT_ROW_HEIGHT_PX = 58;
-export const LIST_EVENT_CHIP_HEIGHT_PX = 52;
-export const LIST_EVENT_ROW_GAP_PX = 6;
+export const LIST_EVENT_ROW_HEIGHT_PX = 52;
+export const LIST_EVENT_CHIP_HEIGHT_PX = 46;
+export const LIST_EVENT_ROW_GAP_PX = 5;
 export const LIST_VIRTUAL_OVERSCAN_PX = 2400;
 
 const buildMonthDays = (date: Date): Date[] => {
   const monthStart = startOfMonth(date);
 
-  return Array.from({ length: getDaysInMonth(monthStart) }, (_, index) =>
-    addDays(monthStart, index),
-  );
+  return Array.from({ length: getDaysInMonth(monthStart) }, (_, index) => addDays(monthStart, index));
 };
 
 const findVirtualIndex = (offsets: number[], targetOffset: number): number => {
