@@ -31,77 +31,114 @@ export type NavigationListEntry =
 
 export interface RootFolderPanelListProps {
   entries: NavigationListEntry[];
-  selectedFolderId: string | null;
-  selectedItem: SelectedExplorerItem;
+  selectedFolderId?: string | null;
+  selectedItem?: SelectedExplorerItem;
   selectedCardSetId?: string | null;
-  openRowMenuId: string | null;
+  openRowMenuId?: string | null;
   emptyMessage?: string | null;
-  setRowRef: (id: string, node: HTMLElement | null) => void;
-  setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
-  onSelectFolder: (folderId: string | null) => void;
-  onItemSelect: (item: {
+  setRowRef?: (id: string, node: HTMLElement | null) => void;
+  setOpenRowMenuId?: React.Dispatch<React.SetStateAction<string | null>>;
+  onSelectFolder?: (folderId: string | null) => void;
+  onFolderOpen?: (folderId: string) => void;
+  onCardSetOpen?: (cardSetId: string) => void;
+  onDocumentOpen?: (documentId: string) => void;
+  onCardOpen?: (cardId: string) => void;
+  onItemSelect?: (item: {
     type: "card" | "cardSet" | "document";
     id: string;
   }) => void;
-  canCreateFolder: boolean;
-  canCreateCardSet: boolean;
-  canRenameFolder: boolean;
-  canDeleteFolder: boolean;
-  canRenameCardSet: boolean;
-  canDeleteCardSet: boolean;
-  canRenameDocument: boolean;
-  canDeleteDocument: boolean;
-  handleCreateFolderAction: (parentId: string | null) => string;
-  handleCreateCardSetAction: (folderId: string | null) => string | null;
-  handleDelete: (
+  canCreateFolder?: boolean;
+  canCreateCardSet?: boolean;
+  canRenameFolder?: boolean;
+  canDeleteFolder?: boolean;
+  canRenameCardSet?: boolean;
+  canDeleteCardSet?: boolean;
+  canRenameDocument?: boolean;
+  canDeleteDocument?: boolean;
+  handleCreateFolderAction?: (parentId: string | null) => string;
+  handleCreateCardSetAction?: (folderId: string | null) => string | null;
+  handleDelete?: (
     id: string,
     type: "folder" | "cardSet" | "card" | "document",
   ) => void;
-  setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
-  setEditingName: React.Dispatch<React.SetStateAction<string>>;
-  renameCancelledRef: React.MutableRefObject<boolean>;
-  editingId: string | null;
-  editingName: string;
-  editingNameRef: React.MutableRefObject<string>;
-  handleRenameConfirm: (target?: RenameTarget) => Promise<void>;
+  setEditingId?: React.Dispatch<React.SetStateAction<string | null>>;
+  setEditingName?: React.Dispatch<React.SetStateAction<string>>;
+  renameCancelledRef?: React.MutableRefObject<boolean>;
+  editingId?: string | null;
+  editingName?: string;
+  editingNameRef?: React.MutableRefObject<string>;
+  handleRenameConfirm?: (target?: RenameTarget) => Promise<void>;
   className?: string;
 }
+
+const noopSetRowRef = () => undefined;
+const noopSetOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>> = () => undefined;
+const noopSetEditingId: React.Dispatch<React.SetStateAction<string | null>> = () => undefined;
+const noopSetEditingName: React.Dispatch<React.SetStateAction<string>> = () => undefined;
 
 /**
  * ルートフォルダ（セクションリスト）を表示するパネルリスト
  */
 export const RootFolderPanelList = ({
   entries,
-  selectedFolderId,
-  selectedItem,
+  selectedFolderId = null,
+  selectedItem = null,
   selectedCardSetId = null,
-  openRowMenuId,
+  openRowMenuId = null,
   emptyMessage = null,
-  setRowRef,
-  setOpenRowMenuId,
+  setRowRef = noopSetRowRef,
+  setOpenRowMenuId = noopSetOpenRowMenuId,
   onSelectFolder,
+  onFolderOpen,
+  onCardSetOpen,
+  onDocumentOpen,
+  onCardOpen,
   onItemSelect,
-  canCreateFolder,
-  canCreateCardSet,
-  canRenameFolder,
-  canDeleteFolder,
-  canRenameCardSet,
-  canDeleteCardSet,
-  canRenameDocument,
-  canDeleteDocument,
-  handleCreateFolderAction,
-  handleCreateCardSetAction,
-  handleDelete,
-  setEditingId,
-  setEditingName,
+  canCreateFolder = false,
+  canCreateCardSet = false,
+  canRenameFolder = false,
+  canDeleteFolder = false,
+  canRenameCardSet = false,
+  canDeleteCardSet = false,
+  canRenameDocument = false,
+  canDeleteDocument = false,
+  handleCreateFolderAction = () => "",
+  handleCreateCardSetAction = () => null,
+  handleDelete = () => undefined,
+  setEditingId = noopSetEditingId,
+  setEditingName = noopSetEditingName,
   renameCancelledRef,
-  editingId,
-  editingName,
+  editingId = null,
+  editingName = "",
   editingNameRef,
-  handleRenameConfirm,
+  handleRenameConfirm = async () => undefined,
   className,
 }: RootFolderPanelListProps) => {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const fallbackRenameCancelledRef = React.useRef(false);
+  const fallbackEditingNameRef = React.useRef("");
+  const resolvedRenameCancelledRef = renameCancelledRef ?? fallbackRenameCancelledRef;
+  const resolvedEditingNameRef = editingNameRef ?? fallbackEditingNameRef;
+
+  const handleSelectFolder = React.useCallback(
+    (folderId: string | null) => {
+      if (folderId) {
+        onFolderOpen?.(folderId);
+      }
+      onSelectFolder?.(folderId);
+    },
+    [onFolderOpen, onSelectFolder],
+  );
+
+  const handleItemSelect = React.useCallback(
+    (item: { type: "card" | "cardSet" | "document"; id: string }) => {
+      if (item.type === "cardSet") onCardSetOpen?.(item.id);
+      if (item.type === "document") onDocumentOpen?.(item.id);
+      if (item.type === "card") onCardOpen?.(item.id);
+      onItemSelect?.(item);
+    },
+    [onCardOpen, onCardSetOpen, onDocumentOpen, onItemSelect],
+  );
 
   const attachInputRef = React.useCallback(
     (node: HTMLInputElement | null) => {
@@ -132,8 +169,8 @@ export const RootFolderPanelList = ({
           openRowMenuId={openRowMenuId}
           setRowRef={setRowRef}
           setOpenRowMenuId={setOpenRowMenuId}
-          onSelectFolder={onSelectFolder}
-          onItemSelect={onItemSelect}
+          onSelectFolder={handleSelectFolder}
+          onItemSelect={handleItemSelect}
           canCreateFolder={canCreateFolder}
           canCreateCardSet={canCreateCardSet}
           canRenameFolder={canRenameFolder}
@@ -147,10 +184,10 @@ export const RootFolderPanelList = ({
           handleDelete={handleDelete}
           setEditingId={setEditingId}
           setEditingName={setEditingName}
-          renameCancelledRef={renameCancelledRef}
+          renameCancelledRef={resolvedRenameCancelledRef}
           editingId={editingId}
           editingName={editingName}
-          editingNameRef={editingNameRef}
+          editingNameRef={resolvedEditingNameRef}
           handleRenameConfirm={handleRenameConfirm}
           attachInputRef={attachInputRef}
         />
