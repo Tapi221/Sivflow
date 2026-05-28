@@ -5,6 +5,10 @@ import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/
 
 export type { CalendarViewMode, CalendarViewModeSelection };
 
+export type CalendarProvider = "local" | "google" | "appleEventKit" | "appleCalDav";
+
+export type ProjectCalendarSyncDirection = "importOnly" | "exportOnly" | "twoWay";
+
 export type CalendarBufferDays = {
   before: number;
   after: number;
@@ -35,6 +39,19 @@ export type AppCalendarItem = {
   checked: boolean;
 };
 
+export type ProjectCalendarLink = {
+  id: string;
+  projectId: string;
+  provider: CalendarProvider;
+  accountId: string;
+  externalCalendarId: string;
+  externalCalendarName: string;
+  syncDirection: ProjectCalendarSyncDirection;
+  createdByApp: boolean;
+  color?: string;
+  lastSyncedAt?: string;
+};
+
 export type GoogleAccountDisplay = {
   accountId: string;
   email: string | null;
@@ -63,6 +80,7 @@ export type CalendarSidebarProps = {
   selectedRange?: CalendarSelectionRange | null;
   visibleEvents: GoogleCalendarEvent[];
   appProjects: AppCalendarItem[];
+  projectCalendarLinks: ProjectCalendarLink[];
   googleAccounts: GoogleAccountDisplay[];
   isAnyCalendarConnecting: boolean;
   onSelectDate: (date: Date) => void;
@@ -71,6 +89,8 @@ export type CalendarSidebarProps = {
   onAddCalendar: () => void;
   onAddProject: (projectName: string) => void;
   onToggleProject: (projectId: string) => void;
+  onLinkGoogleCalendarAsProject: (accountId: string, calendarId: string) => void;
+  onUnlinkProjectCalendar: (linkId: string) => void;
   onReconnectAccount: (accountId: string) => void;
   onToggleCalendar: (accountId: string, calendarId: string) => void;
 };
