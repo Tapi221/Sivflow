@@ -1,6 +1,6 @@
 import { type MouseEvent, type ReactNode } from "react";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
-import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
+import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
 import { ClockIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
@@ -114,7 +114,7 @@ const Sidebar = ({
   onToggleClosed,
   onOpenSettings,
 }: SidebarProps) => {
-  const openGlobalSearch = useGlobalSearchStore((s) => s.open);
+  const openSearch = useSearchStore((s) => s.open);
 
   const mainNavItemsWithActions = mainNavItems.map((item) => ({
     ...item,
@@ -122,7 +122,7 @@ const Sidebar = ({
       item.onClick?.();
 
       if (item.id === "explore") {
-        openGlobalSearch();
+        openSearch();
       }
     },
   }));
