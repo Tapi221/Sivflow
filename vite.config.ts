@@ -66,6 +66,10 @@ export default defineConfig(({ command }) => ({
         replacement: path.resolve(__dirname, "./src/infrastructure/firebase/client.ts"),
       },
       {
+        find: /^@\/features\/tab\/Tab$/,
+        replacement: path.resolve(__dirname, "./src/pane/tab.desktopnative/Tab.ts"),
+      },
+      {
         find: "@",
         replacement: path.resolve(__dirname, "./src"),
       },
