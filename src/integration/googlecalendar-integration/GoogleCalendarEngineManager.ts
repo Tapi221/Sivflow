@@ -1,5 +1,5 @@
 import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
-import type { GCalForceSyncOptions, GoogleCalendarListItem } from "./gcalSync.types";
+import type { GCalForceSyncOptions, GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
 
 type EngineContext = {
   accessToken: string;
@@ -129,6 +129,18 @@ export class GoogleCalendarEngineManager {
         this.appliedPendingForceSyncKeys.set(accountId, pendingKey);
       }),
     );
+  }
+
+  async createEvent(accountId: string, event: GCalWritableEventInput): Promise<GoogleCalendarEvent | null> {
+    return this.engines.get(accountId)?.createEvent(event) ?? null;
+  }
+
+  async updateEvent(accountId: string, event: GCalWritableEventUpdateInput): Promise<GoogleCalendarEvent | null> {
+    return this.engines.get(accountId)?.updateEvent(event) ?? null;
+  }
+
+  async deleteEvent(accountId: string, event: GCalWritableEventDeleteInput): Promise<void> {
+    await this.engines.get(accountId)?.deleteEvent(event);
   }
 
   getActiveIds(): string[] {
