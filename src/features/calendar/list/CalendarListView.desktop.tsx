@@ -216,7 +216,7 @@ const getVisibleMonthAnchorDate = (
 };
 
 const EmptyDayCard = ({ isMonthEmpty }: { isMonthEmpty: boolean }) => (
-  <div className="grid h-[38px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch">
+  <div className="grid h-full min-h-[38px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch">
     <div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[#b3b3b3]">
       —
     </div>
@@ -238,7 +238,7 @@ const CalendarListDaySection = ({
   return (
     <section
       ref={day.isSelected ? selectedDayRef : undefined}
-      className="grid grid-cols-[58px_minmax(0,1fr)] gap-2"
+      className="grid h-full grid-cols-[58px_minmax(0,1fr)] gap-2"
       aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}
     >
       <button
@@ -254,7 +254,7 @@ const CalendarListDaySection = ({
         <span className="text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]">{format(day.date, "EEE", { locale: ja })}</span>
       </button>
 
-      <div className="space-y-1.5">
+      <div className="h-full space-y-1.5">
         {day.events.length > 0 ? (
           day.events.map((event) => (
             <CalendarEventChipList
