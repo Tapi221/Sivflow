@@ -53,6 +53,7 @@ const LIST_EVENT_ROW_HEIGHT_PX = 58;
 const LIST_EVENT_ROW_GAP_PX = 6;
 const LIST_RAIL_DAY_HEIGHT_PX = 430;
 const LIST_LOCAL_RAIL_DAYS = 3650;
+const LIST_DAY_RAIL_CLASS_NAME = "pointer-events-none absolute -bottom-2 left-[67px] top-0 w-px -translate-x-1/2 bg-[#eceff3]";
 
 const createLocalVirtualRail = (selectedDate: Date): ScheduleVirtualRail => ({
   startDate: subDays(startOfMonth(selectedDate), LIST_LOCAL_RAIL_DAYS),
@@ -159,8 +160,11 @@ const CalendarListDaySectionComponent = ({ day, onSelectDate }: CalendarListDayS
         <span className="text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]">{format(day.date, "EEE", { locale: ja })}</span>
       </button>
 
-      <div className="h-full space-y-1.5 overflow-hidden">
-        {day.events.length > 0 ? day.events.map((event) => <CalendarEventChipList key={getEventInstanceKey(day.dateKey, event)} event={event} />) : <EmptyDayCard />}
+      <div className="relative h-full overflow-visible">
+        <span className={LIST_DAY_RAIL_CLASS_NAME} aria-hidden="true" />
+        <div className="relative h-full space-y-1.5 overflow-hidden">
+          {day.events.length > 0 ? day.events.map((event) => <CalendarEventChipList key={getEventInstanceKey(day.dateKey, event)} event={event} />) : <EmptyDayCard />}
+        </div>
       </div>
     </section>
   );
@@ -273,7 +277,7 @@ const CalendarListViewComponent = ({
               const height = getDayHeight(day);
 
               return (
-                <div key={day.dateKey} className="absolute left-0 right-0" style={{ contain: "layout paint style", top: getDayTop(dayIndex), height }}>
+                <div key={day.dateKey} className="absolute left-0 right-0" style={{ contain: "layout style", top: getDayTop(dayIndex), height }}>
                   <CalendarListDaySection day={day} onSelectDate={onSelectDate} />
                 </div>
               );
