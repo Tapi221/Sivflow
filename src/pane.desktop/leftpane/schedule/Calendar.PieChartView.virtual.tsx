@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
-import { differenceInCalendarDays, differenceInMinutes, format, getDaysInMonth, isAfter, isBefore, isSameDay, startOfDay, startOfMonth, subDays } from "date-fns";
+import { differenceInCalendarDays, differenceInMinutes, format, getDaysInMonth, isSameDay, startOfMonth, subDays } from "date-fns";
 import { ja } from "date-fns/locale";
+import { clipEventToDay, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { buildScheduleVirtualRailDays, getScheduleVirtualRailDate } from "@/features/calendar/grid/ScheduleColumn.shared";
 import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
@@ -24,7 +25,7 @@ const SELECTED_OFFSET = 8;
 
 const createRail = (selectedDate: Date): ScheduleVirtualRail => ({ startDate: subDays(startOfMonth(selectedDate), LOCAL_DAYS), anchorIndex: LOCAL_DAYS, totalDayCount: LOCAL_DAYS * 2 + getDaysInMonth(selectedDate) });
 
-const getKey = (date: Date) => format(date, "yyyy-MM-dd");
+const getKey = (date: Date) => getCalendarDateKey(date);
 
 const getRange = (scrollTop: number, viewportHeight: number, totalDayCount: number): VirtualRange => {
   if (totalDayCount <= 0) return { start: 0, end: 0 };
@@ -44,21 +45,45 @@ const shouldRefreshRange = (element: HTMLDivElement, range: VirtualRange): boole
 
 const getIndexForDate = (rail: ScheduleVirtualRail, date: Date) => differenceInCalendarDays(date, rail.startDate);
 
-const getEventMinutes = (event: GoogleCalendarEvent, date: Date) => {
+const getEventMinutes = (event: GoogleCalendarEvent) => {
   if (event.isAllDay) return 0;
-  const start = startOfDay(date);
-  const end = new Date(start.getTime() + 86_400_000);
-  if (!isBefore(event.startsAt, end) || !isAfter(event.endsAt, start)) return 0;
-  const clippedStart = isBefore(event.startsAt, start) ? start : event.startsAt;
-  const clippedEnd = isAfter(event.endsAt, end) ? end : event.endsAt;
-  return Math.max(0, differenceInMinutes(clippedEnd, clippedStart));
+  return Math.max(0, differenceInMinutes(new Date(event.endsAt), new Date(event.startsAt)));
+};
+
+const createDayEventIndex = (dates: Date[], events: GoogleCalendarEvent[]): Map<string, GoogleCalendarEvent[]> => {
+  const eventsByDay = new Map<string, GoogleCalendarEvent[]>();
+  const dateByKey = new Map<string, Date>();
+
+  dates.forEach((date) => {
+    const key = getKey(date);
+    eventsByDay.set(key, []);
+    dateByKey.set(key, date);
+  });
+
+  events.forEach((event) => getEventDateKeys(event).forEach((key) => {
+    const date = dateByKey.get(key);
+    const dayEvents = eventsByDay.get(key);
+    if (!date || !dayEvents) return;
+
+    const clipped = clipEventToDay(event, date);
+    if (clipped && !clipped.isAllDay && getEventMinutes(clipped) > 0) {
+      dayEvents.push(clipped);
+    }
+  }));
+
+  return eventsByDay;
 };
 
 const buildSummaries = (dates: Date[], events: GoogleCalendarEvent[], selectedDate: Date): DaySummary[] => {
   const today = new Date();
+  const eventsByDay = createDayEventIndex(dates, events);
+
   return dates.map((date) => {
-    const dayEvents = events.map((event) => getEventMinutes(event, date)).filter((minutes) => minutes > 0);
-    return { date, key: getKey(date), minutes: dayEvents.reduce((sum, minutes) => sum + minutes, 0), count: dayEvents.length, isSelected: isSameDay(date, selectedDate), isToday: isSameDay(date, today) };
+    const key = getKey(date);
+    const dayEvents = eventsByDay.get(key) ?? [];
+    const minutes = dayEvents.reduce((sum, event) => sum + getEventMinutes(event), 0);
+
+    return { date, key, minutes, count: dayEvents.length, isSelected: isSameDay(date, selectedDate), isToday: isSameDay(date, today) };
   });
 };
 
