@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { CalendarIcon, ChevronDownIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
-import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
+import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
 
@@ -52,7 +52,7 @@ export const SidebarMobile = ({
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
   const [selectedLibraryChild, setSelectedLibraryChild] = useState("pdf");
 
-  const openGlobalSearch = useGlobalSearchStore((s) => s.open);
+  const openSearch = useSearchStore((s) => s.open);
   const openSectionTab = useWorkspaceTabsStore((s) => s.openSectionTab);
 
   const handleClick = (item: SidebarNavItem) => {
@@ -63,7 +63,7 @@ export const SidebarMobile = ({
     }
 
     if (item.id === "explore") {
-      openGlobalSearch();
+      openSearch();
     }
 
     if (item.sectionKey) {
