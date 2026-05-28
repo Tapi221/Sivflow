@@ -1,1 +1,1 @@
-export * from "./globalSearch.types";
+export type { GlobalSearchIconKind, GlobalSearchItem, GlobalSearchItemKind, GlobalSearchSource } from "./globalSearch.types";
