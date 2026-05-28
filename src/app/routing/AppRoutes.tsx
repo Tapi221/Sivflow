@@ -16,9 +16,7 @@ const REDIRECT_TO_SCHEDULE_ROUTES = [
   "library/*",
   "gallery/*",
   "statistics/*",
-  "trash/*",
   "uncertain/*",
-  "bookmark/*",
   "sandbox/blocknote/*",
 ] as const;
 
