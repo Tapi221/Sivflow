@@ -6,9 +6,11 @@ import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
-import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
+import { createProjectCalendarLink, persistProjectCalendarLinks, readStoredProjectCalendarLinks } from "@/features/calendar/projectCalendarLinks.storage";
+import type { AppCalendarItem, ProjectCalendarLink, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { CalendarSidebar } from "@/pane.desktop/leftpane/CalendarSidebar";
@@ -89,6 +91,59 @@ const persistAppProjects = (projects: AppCalendarItem[]) => {
   }
 };
 
+const normalizeProjectLabel = (label: string): string => label.trim().toLowerCase();
+
+const createAppProjectFromName = (projectName: string, colorIndex: number): AppCalendarItem => ({
+  id: createAppProjectId(),
+  label: projectName.trim(),
+  color: APP_PROJECT_COLORS[colorIndex % APP_PROJECT_COLORS.length],
+  checked: true,
+});
+
+const findProjectByLabel = (projects: AppCalendarItem[], label: string): AppCalendarItem | null => {
+  const normalizedLabel = normalizeProjectLabel(label);
+  return projects.find((project) => normalizeProjectLabel(project.label) === normalizedLabel) ?? null;
+};
+
+const resolveGoogleEventProjectId = (
+  event: GoogleCalendarEvent,
+  links: ProjectCalendarLink[],
+): string | undefined => {
+  const exactLink = links.find(
+    (link) =>
+      link.provider === "google" &&
+      link.externalCalendarId === event.calendarId &&
+      (!event.accountId || link.accountId === event.accountId),
+  );
+
+  return exactLink?.projectId ?? event.projectId;
+};
+
+const attachProjectIdsToGoogleEvents = (
+  events: GoogleCalendarEvent[],
+  links: ProjectCalendarLink[],
+): GoogleCalendarEvent[] => events.map((event) => {
+  const projectId = resolveGoogleEventProjectId(event, links);
+
+  return projectId
+    ? { ...event, projectId }
+    : event;
+});
+
+const filterEventsByProjectVisibility = (
+  events: GoogleCalendarEvent[],
+  projects: AppCalendarItem[],
+): GoogleCalendarEvent[] => {
+  const checkedByProjectId = new Map(projects.map((project) => [project.id, project.checked]));
+
+  return events.filter((event) => {
+    if (!event.projectId) return true;
+
+    const checked = checkedByProjectId.get(event.projectId);
+    return checked !== false;
+  });
+};
+
 const ScheduleScreen = ({
   onClose: _onClose,
 }: ScheduleScreenProps) => {
@@ -97,6 +152,7 @@ const ScheduleScreen = ({
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
   const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(readStoredAppProjects);
+  const [projectCalendarLinks, setProjectCalendarLinks] = useState<ProjectCalendarLink[]>(readStoredProjectCalendarLinks);
   const [planResultModes, setPlanResultModes] = useState<PlanResultMode[]>([
     ...DEFAULT_PLAN_RESULT_MODES,
   ]);
@@ -156,14 +212,16 @@ const ScheduleScreen = ({
     persistAppProjects(appProjects);
   }, [appProjects]);
 
+  useEffect(() => {
+    persistProjectCalendarLinks(projectCalendarLinks);
+  }, [projectCalendarLinks]);
+
   const handleAddAppProject = useCallback((projectName: string) => {
     const trimmedProjectName = projectName.trim();
     if (!trimmedProjectName) return;
 
     setAppProjects((projects) => {
-      const duplicateProject = projects.find(
-        (project) => project.label.trim().toLowerCase() === trimmedProjectName.toLowerCase(),
-      );
+      const duplicateProject = findProjectByLabel(projects, trimmedProjectName);
 
       if (duplicateProject) {
         return projects.map((project) =>
@@ -173,12 +231,7 @@ const ScheduleScreen = ({
 
       return [
         ...projects,
-        {
-          id: createAppProjectId(),
-          label: trimmedProjectName,
-          color: APP_PROJECT_COLORS[projects.length % APP_PROJECT_COLORS.length],
-          checked: true,
-        },
+        createAppProjectFromName(trimmedProjectName, projects.length),
       ];
     });
   }, []);
@@ -191,7 +244,69 @@ const ScheduleScreen = ({
     );
   }, []);
 
-  const deferredCalendarEvents = useDeferredValue(googleCalendarEvents);
+  const handleLinkGoogleCalendarAsProject = useCallback((accountId: string, calendarId: string) => {
+    const account = googleAccounts.find((item) => item.accountId === accountId);
+    const calendar = account?.calendars.find((item) => item.id === calendarId);
+    if (!account || !calendar) return;
+
+    const calendarLabel = calendar.summaryOverride ?? calendar.summary;
+    let projectId: string | null = null;
+
+    setAppProjects((projects) => {
+      const existingProject = findProjectByLabel(projects, calendarLabel);
+
+      if (existingProject) {
+        projectId = existingProject.id;
+        return projects.map((project) =>
+          project.id === existingProject.id ? { ...project, checked: true } : project,
+        );
+      }
+
+      const project = createAppProjectFromName(calendarLabel, projects.length);
+      projectId = project.id;
+      return [...projects, project];
+    });
+
+    if (!projectId) return;
+
+    const link = createProjectCalendarLink({
+      projectId,
+      provider: "google",
+      accountId,
+      externalCalendarId: calendar.id,
+      externalCalendarName: calendarLabel,
+      syncDirection: "importOnly",
+      createdByApp: false,
+      color: calendar.backgroundColor,
+      lastSyncedAt: new Date().toISOString(),
+    });
+
+    setProjectCalendarLinks((links) => {
+      if (links.some((item) => item.id === link.id)) {
+        return links.map((item) => item.id === link.id ? { ...item, ...link } : item);
+      }
+
+      return [...links, link];
+    });
+
+    if (!account.selectedCalendarIds.has(calendar.id)) {
+      toggleGoogleCalendar(accountId, calendar.id);
+    }
+  }, [googleAccounts, toggleGoogleCalendar]);
+
+  const handleUnlinkProjectCalendar = useCallback((linkId: string) => {
+    setProjectCalendarLinks((links) => links.filter((link) => link.id !== linkId));
+  }, []);
+
+  const linkedGoogleCalendarEvents = useMemo(
+    () => attachProjectIdsToGoogleEvents(googleCalendarEvents, projectCalendarLinks),
+    [googleCalendarEvents, projectCalendarLinks],
+  );
+  const visibleGoogleCalendarEvents = useMemo(
+    () => filterEventsByProjectVisibility(linkedGoogleCalendarEvents, appProjects),
+    [appProjects, linkedGoogleCalendarEvents],
+  );
+  const deferredCalendarEvents = useDeferredValue(visibleGoogleCalendarEvents);
   const selectedViewModes = useMemo(
     () => Array.isArray(selectedViewMode) ? selectedViewMode : [selectedViewMode],
     [selectedViewMode],
@@ -234,6 +349,7 @@ const ScheduleScreen = ({
           selectedRange={null}
           visibleEvents={deferredCalendarEvents}
           appProjects={appProjects}
+          projectCalendarLinks={projectCalendarLinks}
           googleAccounts={googleAccounts}
           isAnyCalendarConnecting={isAnyCalendarConnecting}
           onSelectDate={handleSidebarSelectDate}
@@ -242,6 +358,8 @@ const ScheduleScreen = ({
           onAddCalendar={addGoogleCalendar}
           onAddProject={handleAddAppProject}
           onToggleProject={handleToggleAppProject}
+          onLinkGoogleCalendarAsProject={handleLinkGoogleCalendarAsProject}
+          onUnlinkProjectCalendar={handleUnlinkProjectCalendar}
           onReconnectAccount={(accountId) => {
             void reconnectGoogleAccount(accountId);
           }}
