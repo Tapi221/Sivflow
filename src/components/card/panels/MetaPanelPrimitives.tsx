@@ -273,15 +273,4 @@ const MetaPanelSwitch = ({
 MetaPanelInput.displayName = "MetaPanelInput";
 MetaPanelSectionActionButton.displayName = "MetaPanelSectionActionButton";
 
-export {
-  MetaPanelActionRow,
-  MetaPanelInfoRow,
-  MetaPanelInput,
-  MetaPanelMutedSurface,
-  MetaPanelSectionActionButton,
-  MetaPanelSectionHeader,
-  MetaPanelSectionTitle,
-  MetaPanelSurfaceField,
-  MetaPanelSwitch,
-  MetaPanelSwitchRow,
-};
+export { MetaPanelActionRow, MetaPanelInfoRow, MetaPanelInput, MetaPanelMutedSurface, MetaPanelSectionActionButton, MetaPanelSectionHeader, MetaPanelSectionTitle, MetaPanelSurfaceField, MetaPanelSwitch, MetaPanelSwitchRow };
