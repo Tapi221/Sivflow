@@ -8,12 +8,13 @@ import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import * as COLOR from "./grid.color.constants.desktop";
-import * as GRID from "./grid.layout.constants.desktop";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
+import { buildScheduleVirtualRailDays } from "./ScheduleColumn.shared";
+import * as COLOR from "./grid.color.constants.desktop";
+import * as GRID from "./grid.layout.constants.desktop";
 
 type CalendarEventPositionStyle = CSSProperties & {
   "--calendar-event-start-hour": number;
@@ -77,8 +78,7 @@ const WEEKDAY_TIME_COLUMN_STYLE: CSSProperties = {
   width: C.TIME_COLUMN_WIDTH,
 };
 
-const createHourLabel = (hour: number) =>
-  `${String(hour).padStart(2, "0")}:00`;
+const createHourLabel = (hour: number) => `${String(hour).padStart(2, "0")}:00`;
 
 const createMinuteLabel = (totalMinutes: number) => {
   const hour = Math.floor(totalMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR);
@@ -87,11 +87,7 @@ const createMinuteLabel = (totalMinutes: number) => {
   return `${String(hour).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 };
 
-const getHourBoundaryLabelOffsetClass = (hour: number) => {
-  if (hour === GRID.WEEKDAY_HOURS) return "-translate-y-1/2";
-
-  return "-translate-y-1/2";
-};
+const getHourBoundaryLabelOffsetClass = (_hour: number) => "-translate-y-1/2";
 
 const getEventDurationMinutes = (event: GoogleCalendarEvent): number => {
   const start = new Date(event.startsAt).getTime();
@@ -154,6 +150,7 @@ const areCalendarWeekDayGridPropsEqual = (
 ) => {
   return (
     previous.scrollContainerRef === next.scrollContainerRef &&
+    previous.virtualRail === next.virtualRail &&
     previous.visibleEvents === next.visibleEvents &&
     previous._calendarDayColumnWidth === next._calendarDayColumnWidth &&
     previous.calendarGridStyle === next.calendarGridStyle &&
@@ -266,6 +263,7 @@ const CalendarWeekDayGridComponent = ({
   allDayScrollRef: _allDayScrollRef,
   scrollContainerRef,
   visibleDays,
+  virtualRail,
   visibleEvents,
   _calendarDayColumnWidth,
   calendarGridStyle,
@@ -275,16 +273,17 @@ const CalendarWeekDayGridComponent = ({
 }: CalendarWeekDayGridProps) => {
   const today = new Date();
   const currentMinutes = useCurrentTimeMinutes();
+  const totalDayCount = virtualRail?.totalDayCount ?? visibleDays.length;
   const [virtualDayRange, setVirtualDayRange] = useState<WeekdayVirtualDayRange>(() => ({
     start: 0,
-    end: visibleDays.length,
+    end: Math.min(totalDayCount, visibleDays.length),
   }));
 
   const updateVirtualDayRange = useCallback(() => {
     const scroller = scrollContainerRef.current;
 
-    if (!scroller || _calendarDayColumnWidth <= 0 || visibleDays.length === 0) {
-      setVirtualDayRange({ start: 0, end: visibleDays.length });
+    if (!scroller || _calendarDayColumnWidth <= 0 || totalDayCount === 0) {
+      setVirtualDayRange({ start: 0, end: Math.min(totalDayCount, visibleDays.length) });
       return;
     }
 
@@ -295,7 +294,7 @@ const CalendarWeekDayGridComponent = ({
       Math.floor(scrollableLeft / _calendarDayColumnWidth) - HORIZONTAL_DAY_OVERSCAN,
     );
     const end = Math.min(
-      visibleDays.length,
+      totalDayCount,
       Math.ceil(visibleRight / _calendarDayColumnWidth) + HORIZONTAL_DAY_OVERSCAN,
     );
 
@@ -304,7 +303,7 @@ const CalendarWeekDayGridComponent = ({
         ? previous
         : { start, end },
     );
-  }, [_calendarDayColumnWidth, scrollContainerRef, visibleDays.length]);
+  }, [_calendarDayColumnWidth, scrollContainerRef, totalDayCount, visibleDays.length]);
 
   useLayoutEffect(() => {
     updateVirtualDayRange();
@@ -339,18 +338,21 @@ const CalendarWeekDayGridComponent = ({
   }, [scrollContainerRef, updateVirtualDayRange]);
 
   const renderedDayEntries = useMemo(
-    () =>
-      visibleDays
-        .slice(virtualDayRange.start, virtualDayRange.end)
-        .map((day, offset) => ({
-          day,
-          dayIndex: virtualDayRange.start + offset,
-        })),
-    [virtualDayRange.end, virtualDayRange.start, visibleDays],
+    () => {
+      const days = virtualRail
+        ? buildScheduleVirtualRailDays(virtualRail, virtualDayRange.start, virtualDayRange.end)
+        : visibleDays.slice(virtualDayRange.start, virtualDayRange.end);
+
+      return days.map((day, offset) => ({
+        day,
+        dayIndex: virtualDayRange.start + offset,
+      }));
+    },
+    [virtualDayRange.end, virtualDayRange.start, virtualRail, visibleDays],
   );
 
-  const isTodayVisible = visibleDays.some((d) => isSameDay(d, today));
-  const todayColumnIndex = visibleDays.findIndex((d) => isSameDay(d, today));
+  const isTodayVisible = renderedDayEntries.some(({ day }) => isSameDay(day, today));
+  const todayColumnIndex = renderedDayEntries.find((entry) => isSameDay(entry.day, today))?.dayIndex ?? -1;
 
   const eventsByDay = useMemo(() => {
     const map = new Map<string, WeekdayDayEvents>();
@@ -456,7 +458,7 @@ const CalendarWeekDayGridComponent = ({
                 key={`weekday-all-day-${day.toISOString()}`}
                 className={cn(
                   "sticky top-10 z-40 min-h-7 border-b border-r border-t border-[#eeeeee] bg-white px-1 py-1",
-                  dayIndex === visibleDays.length - 1 && "border-r-0",
+                  dayIndex === totalDayCount - 1 && "border-r-0",
                 )}
                 style={{ gridColumn: dayIndex + 2, gridRow: 2 }}
               >
@@ -533,7 +535,7 @@ const CalendarWeekDayGridComponent = ({
                 key={`weekday-body-${day.toISOString()}`}
                 className={cn(
                   "relative border-r border-[#eeeeee] bg-white",
-                  dayIndex === visibleDays.length - 1 && "border-r-0",
+                  dayIndex === totalDayCount - 1 && "border-r-0",
                 )}
                 style={{
                   contain: "layout paint style",
@@ -556,7 +558,7 @@ const CalendarWeekDayGridComponent = ({
                 />
 
                 {(isTodayVisible
-                  ? isDayToday || todayColumnIndex !== -1
+                  ? isDayToday || dayIndex === todayColumnIndex
                   : true) && (
                   <CurrentTimeIndicator
                     isToday={isDayToday}
