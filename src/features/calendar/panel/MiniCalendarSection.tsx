@@ -27,7 +27,6 @@ const MINI_CALENDAR_MONTH_LABEL_CLASS_NAME = "mb-1 flex h-7 max-w-full items-cen
 const MINI_CALENDAR_MONTH_LABEL_TEXT_CLASS_NAME = "block min-w-0 truncate";
 const MINI_CALENDAR_WEEKDAY_CLASS_NAME = "flex h-6 items-center justify-center text-[11px] font-semibold leading-none tracking-[0.03em] text-[#8e8e93]";
 const MINI_CALENDAR_DAY_BUTTON_CLASS_NAME = "relative mx-auto flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
-const MINI_CALENDAR_EVENT_MARKER_CLASS_NAME = "pointer-events-none absolute bottom-[2px] left-1/2 z-20 h-[5px] w-[5px] -translate-x-1/2 rounded-full border border-white shadow-[0_0_0_1px_rgba(255,255,255,0.75)]";
 const EMPTY_VISIBLE_EVENTS: readonly GoogleCalendarEvent[] = [];
 
 const getMiniCalendarVisibleEvents = (
@@ -94,27 +93,13 @@ const getMiniCalendarDayButtonStyle = (
   day: MiniCalendarDay,
   tokens?: CalendarColorTokens,
 ): CSSProperties | undefined => {
-  if (!tokens) return undefined;
-
-  if (day.isSelected || day.isToday) {
-    return {
-      boxShadow: `0 0 0 2px ${tokens.border}`,
-      transition: "none",
-    };
-  }
+  if (day.isSelected || !tokens) return undefined;
 
   return {
     backgroundColor: tokens.bg,
-    boxShadow: `inset 0 0 0 1px ${tokens.border}`,
     transition: "none",
   };
 };
-
-const getMiniCalendarEventMarkerStyle = (
-  tokens: CalendarColorTokens,
-): CSSProperties => ({
-  backgroundColor: tokens.border,
-});
 
 const isSameDayValue = (left: Date, right: Date): boolean => {
   return startOfDay(left).getTime() === startOfDay(right).getTime();
@@ -193,14 +178,6 @@ const MiniCalendarSectionBase = ({
                 >
                   {day.dayNumber}
                 </CalendarDayNumberCircle>
-
-                {eventTokens && (
-                  <span
-                    aria-hidden="true"
-                    className={MINI_CALENDAR_EVENT_MARKER_CLASS_NAME}
-                    style={getMiniCalendarEventMarkerStyle(eventTokens)}
-                  />
-                )}
               </button>
             );
           })}
