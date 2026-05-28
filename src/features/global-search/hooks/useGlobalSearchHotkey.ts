@@ -1,1 +1,1 @@
-export { useGlobalSearchHotkey } from "@/features/hotkey/useGlobalSearchHotkey";
+export { useSearchHotkey as useGlobalSearchHotkey } from "@/features/search/hooks/useSearchHotkey";
