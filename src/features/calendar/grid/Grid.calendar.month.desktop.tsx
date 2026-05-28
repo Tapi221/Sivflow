@@ -406,7 +406,7 @@ const GridCalendarMonthDesktop = ({
       {/* 曜日ヘッダー */}
       <div
         className={cn(
-          "calendar-month-weekday-header sticky top-0 z-20 grid grid-cols-7 border-b border-[#eeeeee]",
+          "sticky top-0 z-30 grid grid-cols-7 overflow-hidden border-b border-[#eeeeee] bg-white shadow-none",
           GD.MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS,
         )}
       >
