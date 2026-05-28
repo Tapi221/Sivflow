@@ -4,6 +4,24 @@ import { makeFallbackId } from "@/shared/lib/fallbackId";
 import { asRecord, pick } from "@/shared/lib/records";
 import type { Folder } from "@/types/domain/folder";
 
+type NotePdf = NonNullable<Folder["notePdfs"]>[number];
+
+const isNotePdf = (value: unknown): value is NotePdf => {
+  const record = asRecord(value);
+  if (!record) return false;
+
+  return (
+    typeof record.id === "string" &&
+    typeof record.name === "string" &&
+    typeof record.remoteUrl === "string" &&
+    typeof record.storagePath === "string"
+  );
+};
+
+const normalizeNotePdfs = (raw: unknown): NotePdf[] => {
+  return toArrayOr(raw, []).filter(isNotePdf);
+};
+
 export const normalizeFolder = (raw: unknown): Folder => {
   const record = asRecord(raw) ?? {};
   const id =
@@ -54,7 +72,7 @@ export const normalizeFolder = (raw: unknown): Folder => {
     deletedAt,
     isHidden: toBoolOr(pick(record.isHidden, record.is_hidden), false),
     isSilent: toBoolOr(pick(record.isSilent, record.is_silent), false),
-    notePdfs: toArrayOr(pick(record.notePdfs, record.note_pdfs), []),
+    notePdfs: normalizeNotePdfs(pick(record.notePdfs, record.note_pdfs)),
     lastAccessAt: normalizeDate(
       pick(record.lastAccessAt, record.last_access_at),
     ),
