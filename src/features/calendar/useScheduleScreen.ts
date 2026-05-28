@@ -1,5 +1,6 @@
 import type { RefObject, UIEvent } from "react";
 import { startTransition, useCallback, useMemo, useState } from "react";
+import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { useCalendarLayout } from "@/features/calendar/layout/useCalendarLayout.desktop";
 import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
@@ -27,6 +28,7 @@ export type UseScheduleScreenReturn = {
 
   visibleDays: Date[];
   displayDays: Date[];
+  virtualRail: ScheduleVirtualRail;
 
   titleDate: Date;
   monthLabel: string | null;
@@ -137,6 +139,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
 
   const visibleDays = visibleRange.interactionDays;
   const displayDays = visibleRange.displayDays;
+  const virtualRail = visibleRange.virtualRail;
 
   const layout = useCalendarLayout({
     viewportWidth: navigation.viewportWidth,
@@ -218,6 +221,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
 
     visibleDays,
     displayDays,
+    virtualRail,
 
     titleDate: layout.titleDate,
     monthLabel: layout.monthLabel,
