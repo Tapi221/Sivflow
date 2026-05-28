@@ -348,10 +348,10 @@ const reduceAccounts = (
         account.id === action.id
           ? {
             ...account,
-            accessToken: null,
             connectionStatus: "needsReconnect",
             syncState: "needsReconnect",
-            error: action.error ?? "Google Calendar の再連携が必要です",
+            isConnecting: false,
+            error: action.error ?? account.error,
           }
           : account,
       );
@@ -361,11 +361,10 @@ const reduceAccounts = (
         account.id === action.id
           ? {
             ...account,
+            connectionStatus: action.error ? "error" : account.connectionStatus,
+            syncState: action.error ? "error" : account.syncState,
+            isConnecting: false,
             error: action.error,
-            connectionStatus:
-                action.error && account.syncState !== "needsReconnect"
-                  ? "error"
-                  : account.connectionStatus,
           }
           : account,
       );
@@ -375,45 +374,31 @@ const reduceAccounts = (
   }
 };
 
-const reduceEvents = (
-  state: EventsState,
-  action: EventsAction,
-): EventsState => {
+const reduceEvents = (state: EventsState, action: EventsAction): EventsState => {
   switch (action.type) {
     case "UPSERT": {
       const next = new Map(state);
-      const bucket = new Map(next.get(action.accountId) ?? []);
-
+      const bucket = new Map(next.get(action.accountId) ?? new Map<string, GoogleCalendarEvent>());
       bucket.set(action.event.id, action.event);
       next.set(action.accountId, bucket);
-
       return next;
     }
 
     case "DELETE": {
       const next = new Map(state);
-      const bucket = next.get(action.accountId);
-
-      if (!bucket?.has(action.eventId)) return next;
-
-      const newBucket = new Map(bucket);
-
-      newBucket.delete(action.eventId);
-      next.set(action.accountId, newBucket);
-
+      const bucket = new Map(next.get(action.accountId) ?? new Map<string, GoogleCalendarEvent>());
+      bucket.delete(action.eventId);
+      next.set(action.accountId, bucket);
       return next;
     }
 
     case "REPLACE_RANGE": {
       const next = new Map(state);
-      const bucket = new Map(next.get(action.accountId) ?? []);
+      const bucket = new Map(next.get(action.accountId) ?? new Map<string, GoogleCalendarEvent>());
 
-      for (const [eventId, event] of bucket) {
-        if (
-          event.calendarId === action.calendarId &&
-          overlapsRange(event, action.rangeStart, action.rangeEnd)
-        ) {
-          bucket.delete(eventId);
+      for (const [id, event] of bucket) {
+        if (event.calendarId === action.calendarId && overlapsRange(event, action.rangeStart, action.rangeEnd)) {
+          bucket.delete(id);
         }
       }
 
@@ -422,49 +407,35 @@ const reduceEvents = (
       }
 
       next.set(action.accountId, bucket);
-
       return next;
     }
 
     case "APPLY_CALENDAR_COLORS": {
-      const bucket = state.get(action.accountId);
+      const next = new Map(state);
+      const bucket = next.get(action.accountId);
+
       if (!bucket) return state;
 
-      const colorByCalendarId = new Map(
-        action.calendars
-          .filter((calendar) => Boolean(calendar.backgroundColor))
-          .map((calendar) => [calendar.id, calendar.backgroundColor!]),
+      const colors = new Map(
+        action.calendars.map((calendar) => [calendar.id, calendar.backgroundColor]),
       );
+      const updated = new Map<string, GoogleCalendarEvent>();
 
-      if (colorByCalendarId.size === 0) return state;
-
-      const newBucket = new Map<string, GoogleCalendarEvent>();
-      let hasChanged = false;
-
-      for (const [eventId, event] of bucket) {
-        const color = colorByCalendarId.get(event.calendarId);
-
-        if (color && color !== event.accentColor) {
-          newBucket.set(eventId, { ...event, accentColor: color });
-          hasChanged = true;
-          continue;
-        }
-
-        newBucket.set(eventId, event);
+      for (const [id, event] of bucket) {
+        updated.set(id, {
+          ...event,
+          accentColor: colors.get(event.calendarId) ?? event.accentColor,
+        });
       }
 
-      if (!hasChanged) return state;
-
-      const next = new Map(state);
-      next.set(action.accountId, newBucket);
+      next.set(action.accountId, updated);
       return next;
     }
 
     case "CLEAR_ACCOUNT": {
+      if (!state.has(action.accountId)) return state;
       const next = new Map(state);
-
       next.delete(action.accountId);
-
       return next;
     }
 
@@ -473,30 +444,21 @@ const reduceEvents = (
   }
 };
 
-const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => {
-  const calendars = stored.cachedCalendars ?? [];
-  const selectedCalendarIds = resolveSelectedCalendarIds(
-    stored.selectedCalendarIds,
-    calendars,
-  );
-  const canReconnect = isStoredTokenValid(stored) || stored.refreshToken || useServerStoredTokens || useDesktopSecureRefreshTokens;
-
-  return {
-    id: stored.id,
-    email: stored.email,
-    name: stored.name ?? null,
-    photoUrl: stored.photoUrl ?? null,
-    accessToken: isStoredTokenValid(stored) ? stored.accessToken : null,
-    refreshToken: stored.refreshToken,
-    calendars,
-    selectedCalendarIds: new Set(selectedCalendarIds),
-    syncState: canReconnect ? "idle" : "needsReconnect",
-    connectionStatus: canReconnect ? "connected" : "needsReconnect",
-    lastSyncedAt: null,
-    isConnecting: false,
-    error: canReconnect ? null : "Google Calendar の再連携が必要です",
-  };
-};
+const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => ({
+  id: stored.id,
+  email: stored.email,
+  name: stored.name ?? null,
+  photoUrl: stored.photoUrl ?? null,
+  accessToken: stored.accessToken,
+  refreshToken: stored.refreshToken,
+  calendars: stored.cachedCalendars ?? [],
+  selectedCalendarIds: new Set(stored.selectedCalendarIds),
+  syncState: stored.accessToken ? "idle" : "needsReconnect",
+  connectionStatus: stored.accessToken ? "connected" : "needsReconnect",
+  lastSyncedAt: null,
+  isConnecting: false,
+  error: null,
+});
 
 export const useMultiAccountGoogleCalendar = () => {
   const [accounts, dispatchAccounts] = useReducer(
@@ -514,6 +476,7 @@ export const useMultiAccountGoogleCalendar = () => {
   const lastCalendarListRefreshAtRef = useRef(0);
   const serverTokenInflightByAccountRef = useRef(new Map<string, Promise<string>>());
   const oauthCooldownByAccountRef = useRef(new Map<string, GoogleOAuthCooldownEntry>());
+  const accountConnectionPromiseRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
     accountsRef.current = accounts;
@@ -1061,164 +1024,173 @@ export const useMultiAccountGoogleCalendar = () => {
   }, [accounts]);
 
   const connectAccount = useCallback(async (replaceAccountId?: string) => {
-    const { auth } = await import("@/services/firebase");
-    const tempId = `connecting-${Date.now()}`;
-    const replacingAccount = replaceAccountId
-      ? accountsRef.current.find((account) => account.id === replaceAccountId)
-      : null;
+    if (accountConnectionPromiseRef.current) return accountConnectionPromiseRef.current;
 
-    if (replaceAccountId) {
-      oauthCooldownByAccountRef.current.delete(replaceAccountId);
-      serverTokenInflightByAccountRef.current.delete(replaceAccountId);
-      dispatchAccounts({ type: "SET_CONNECTING", id: replaceAccountId, value: true });
-    } else {
-      dispatchAccounts({
-        type: "ADD",
-        account: {
-          id: tempId,
-          email: null,
-          name: null,
-          photoUrl: null,
-          accessToken: null,
-          refreshToken: null,
-          calendars: [],
-          selectedCalendarIds: new Set(),
+    const promise = (async (): Promise<void> => {
+      const { auth } = await import("@/services/firebase");
+      const tempId = `connecting-${Date.now()}`;
+      const replacingAccount = replaceAccountId
+        ? accountsRef.current.find((account) => account.id === replaceAccountId)
+        : null;
+
+      if (replaceAccountId) {
+        oauthCooldownByAccountRef.current.delete(replaceAccountId);
+        serverTokenInflightByAccountRef.current.delete(replaceAccountId);
+        dispatchAccounts({ type: "SET_CONNECTING", id: replaceAccountId, value: true });
+      } else {
+        dispatchAccounts({
+          type: "ADD",
+          account: {
+            id: tempId,
+            email: null,
+            name: null,
+            photoUrl: null,
+            accessToken: null,
+            refreshToken: null,
+            calendars: [],
+            selectedCalendarIds: new Set(),
+            syncState: "idle",
+            connectionStatus: "connected",
+            lastSyncedAt: null,
+            isConnecting: true,
+            error: null,
+          },
+        });
+      }
+
+      try {
+        const result = useServerStoredTokens
+          ? await (async () => {
+            const { code, redirectUri } = await requestGoogleCalendarServerCode(auth);
+            return exchangeGoogleCalendarCode({
+              code,
+              forceRefreshToken: Boolean(replaceAccountId),
+              redirectUri,
+            });
+          })()
+          : await requestCalendarAccessToken(auth);
+
+        const list = await fetchCalendarList(result.accessToken);
+
+        if (list.length === 0) {
+          console.warn("[GoogleCalendar] connected account has no visible calendars", {
+            accountEmail: result.accountEmail,
+          });
+        }
+
+        const accountId =
+          result.accountEmail ??
+          replacingAccount?.email ??
+          replaceAccountId ??
+          `account-${Date.now()}`;
+
+        const matchesResolvedAccount = (account: {
+          id: string;
+          email: string | null;
+        }): boolean =>
+          account.id === accountId ||
+          (result.accountEmail !== null && account.email === result.accountEmail);
+
+        const storedAccount = readStoredAccounts().find(matchesResolvedAccount);
+        const existingAccount =
+          replacingAccount ?? accountsRef.current.find(matchesResolvedAccount);
+
+        if (!replaceAccountId) {
+          dispatchAccounts({ type: "REMOVE", id: tempId });
+        }
+
+        const defaultIds = resolveSelectedCalendarIds(
+          existingAccount
+            ? Array.from(existingAccount.selectedCalendarIds)
+            : (storedAccount?.selectedCalendarIds ?? []),
+          list,
+        );
+        const existingDesktopRefreshToken = useDesktopSecureRefreshTokens && !replaceAccountId
+          ? await readDesktopRefreshToken(accountId)
+          : null;
+
+        await storeDesktopRefreshToken(accountId, result.refreshToken);
+
+        const refreshToken = useServerStoredTokens
+          ? null
+          : useDesktopSecureRefreshTokens
+            ? null
+            : result.refreshToken ??
+            (replaceAccountId
+              ? null
+              : existingAccount?.refreshToken ?? storedAccount?.refreshToken ?? existingDesktopRefreshToken);
+
+        const entry: GoogleAccountEntry = {
+          id: accountId,
+          email: result.accountEmail ?? existingAccount?.email ?? null,
+          name: result.accountName ?? existingAccount?.name ?? null,
+          photoUrl: result.accountPhotoUrl ?? existingAccount?.photoUrl ?? null,
+          accessToken: result.accessToken,
+          refreshToken,
+          calendars: list,
+          selectedCalendarIds: new Set(defaultIds),
           syncState: "idle",
           connectionStatus: "connected",
           lastSyncedAt: null,
-          isConnecting: true,
+          isConnecting: false,
           error: null,
-        },
-      });
-    }
+        };
 
-    try {
-      const result = useServerStoredTokens
-        ? await (async () => {
-          const { code, redirectUri } = await requestGoogleCalendarServerCode(auth);
-          return exchangeGoogleCalendarCode({
-            code,
-            forceRefreshToken: Boolean(replaceAccountId),
-            redirectUri,
+        oauthCooldownByAccountRef.current.delete(accountId);
+        serverTokenInflightByAccountRef.current.delete(accountId);
+
+        accountsRef.current = accountsRef.current
+          .filter((account) => account.id !== tempId)
+          .map((account) => (account.id === accountId ? entry : account));
+
+        if (!accountsRef.current.some((account) => account.id === accountId)) {
+          accountsRef.current = [...accountsRef.current, entry];
+        }
+
+        dispatchAccounts({ type: "ADD", account: entry });
+
+        if (replaceAccountId && replaceAccountId !== accountId) {
+          managerRef.current?.stop(replaceAccountId);
+          dispatchAccounts({ type: "REMOVE", id: replaceAccountId });
+          dispatchEvents({ type: "CLEAR_ACCOUNT", accountId: replaceAccountId });
+          removeStoredAccount(replaceAccountId);
+          void deleteDesktopRefreshToken(replaceAccountId).catch(() => undefined);
+        }
+
+        upsertStoredAccount({
+          id: accountId,
+          email: result.accountEmail ?? existingAccount?.email ?? null,
+          name: result.accountName ?? existingAccount?.name ?? null,
+          photoUrl: result.accountPhotoUrl ?? existingAccount?.photoUrl ?? null,
+          accessToken: result.accessToken,
+          accessTokenExpiry: buildTokenExpiry(result.expiresInSeconds),
+          refreshToken,
+          selectedCalendarIds: defaultIds,
+          cachedCalendars: toCachedCalendars(list),
+        });
+      } catch (error) {
+        logGoogleCalendarConnectionError(
+          replaceAccountId ? "reconnect failed" : "connect failed",
+          error,
+        );
+
+        if (replaceAccountId) {
+          dispatchAccounts({ type: "SET_CONNECTING", id: replaceAccountId, value: false });
+          dispatchAccounts({
+            type: "SET_ERROR",
+            id: replaceAccountId,
+            error: toErrorMessage(error),
           });
-        })()
-        : await requestCalendarAccessToken(auth);
-
-      const list = await fetchCalendarList(result.accessToken);
-
-      if (list.length === 0) {
-        console.warn("[GoogleCalendar] connected account has no visible calendars", {
-          accountEmail: result.accountEmail,
-        });
+        } else {
+          dispatchAccounts({ type: "REMOVE", id: tempId });
+        }
       }
+    })().finally(() => {
+      accountConnectionPromiseRef.current = null;
+    });
 
-      const accountId =
-        result.accountEmail ??
-        replacingAccount?.email ??
-        replaceAccountId ??
-        `account-${Date.now()}`;
-
-      const matchesResolvedAccount = (account: {
-        id: string;
-        email: string | null;
-      }): boolean =>
-        account.id === accountId ||
-        (result.accountEmail !== null && account.email === result.accountEmail);
-
-      const storedAccount = readStoredAccounts().find(matchesResolvedAccount);
-      const existingAccount =
-        replacingAccount ?? accountsRef.current.find(matchesResolvedAccount);
-
-      if (!replaceAccountId) {
-        dispatchAccounts({ type: "REMOVE", id: tempId });
-      }
-
-      const defaultIds = resolveSelectedCalendarIds(
-        existingAccount
-          ? Array.from(existingAccount.selectedCalendarIds)
-          : (storedAccount?.selectedCalendarIds ?? []),
-        list,
-      );
-      const existingDesktopRefreshToken = useDesktopSecureRefreshTokens && !replaceAccountId
-        ? await readDesktopRefreshToken(accountId)
-        : null;
-
-      await storeDesktopRefreshToken(accountId, result.refreshToken);
-
-      const refreshToken = useServerStoredTokens
-        ? null
-        : useDesktopSecureRefreshTokens
-          ? null
-          : result.refreshToken ??
-          (replaceAccountId
-            ? null
-            : existingAccount?.refreshToken ?? storedAccount?.refreshToken ?? existingDesktopRefreshToken);
-
-      const entry: GoogleAccountEntry = {
-        id: accountId,
-        email: result.accountEmail ?? existingAccount?.email ?? null,
-        name: result.accountName ?? existingAccount?.name ?? null,
-        photoUrl: result.accountPhotoUrl ?? existingAccount?.photoUrl ?? null,
-        accessToken: result.accessToken,
-        refreshToken,
-        calendars: list,
-        selectedCalendarIds: new Set(defaultIds),
-        syncState: "idle",
-        connectionStatus: "connected",
-        lastSyncedAt: null,
-        isConnecting: false,
-        error: null,
-      };
-
-      oauthCooldownByAccountRef.current.delete(accountId);
-      serverTokenInflightByAccountRef.current.delete(accountId);
-
-      accountsRef.current = accountsRef.current
-        .filter((account) => account.id !== tempId)
-        .map((account) => (account.id === accountId ? entry : account));
-
-      if (!accountsRef.current.some((account) => account.id === accountId)) {
-        accountsRef.current = [...accountsRef.current, entry];
-      }
-
-      dispatchAccounts({ type: "ADD", account: entry });
-
-      if (replaceAccountId && replaceAccountId !== accountId) {
-        managerRef.current?.stop(replaceAccountId);
-        dispatchAccounts({ type: "REMOVE", id: replaceAccountId });
-        dispatchEvents({ type: "CLEAR_ACCOUNT", accountId: replaceAccountId });
-        removeStoredAccount(replaceAccountId);
-        void deleteDesktopRefreshToken(replaceAccountId).catch(() => undefined);
-      }
-
-      upsertStoredAccount({
-        id: accountId,
-        email: result.accountEmail ?? existingAccount?.email ?? null,
-        name: result.accountName ?? existingAccount?.name ?? null,
-        photoUrl: result.accountPhotoUrl ?? existingAccount?.photoUrl ?? null,
-        accessToken: result.accessToken,
-        accessTokenExpiry: buildTokenExpiry(result.expiresInSeconds),
-        refreshToken,
-        selectedCalendarIds: defaultIds,
-        cachedCalendars: toCachedCalendars(list),
-      });
-    } catch (error) {
-      logGoogleCalendarConnectionError(
-        replaceAccountId ? "reconnect failed" : "connect failed",
-        error,
-      );
-
-      if (replaceAccountId) {
-        dispatchAccounts({ type: "SET_CONNECTING", id: replaceAccountId, value: false });
-        dispatchAccounts({
-          type: "SET_ERROR",
-          id: replaceAccountId,
-          error: toErrorMessage(error),
-        });
-      } else {
-        dispatchAccounts({ type: "REMOVE", id: tempId });
-      }
-    }
+    accountConnectionPromiseRef.current = promise;
+    return promise;
   }, []);
 
   const addAccount = useCallback(async () => {
