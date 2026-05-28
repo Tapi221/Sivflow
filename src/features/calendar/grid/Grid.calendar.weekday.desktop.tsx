@@ -3,10 +3,10 @@ import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
-import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.layout.weekday.desktop";
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.schedule.weekday";
 import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
+import { computeEventLayout, toLayoutEvent } from "@/features/calendar/grid/Grid.event-layout.weekday.desktop";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
