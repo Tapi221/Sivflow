@@ -2,7 +2,6 @@ import "@/runtime/installProductionConsoleFilter";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClientProvider } from "@tanstack/react-query";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "katex/dist/katex.min.css";
 import "@/styles/index.css";
 import "@/features/scroll/schedule/weekdayHeaderScrollBridge";
