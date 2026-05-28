@@ -11,12 +11,20 @@ interface CardCornerActionsProps {
   disabled?: boolean;
   className?: string;
   visualScale?: number;
+  iconPx?: number;
 }
 
 const resolveSafeVisualScale = (value?: number) => {
   if (typeof value !== "number") return 1;
   if (!Number.isFinite(value)) return 1;
   if (value <= 0) return 1;
+  return value;
+};
+
+const resolveSafeIconPx = (value?: number) => {
+  if (typeof value !== "number") return null;
+  if (!Number.isFinite(value)) return null;
+  if (value <= 0) return null;
   return value;
 };
 
@@ -28,6 +36,7 @@ export const CardCornerActions = ({
   disabled = false,
   className,
   visualScale = 1,
+  iconPx,
 }: CardCornerActionsProps) => {
   const stop = useCallback((event: React.SyntheticEvent) => {
     event.stopPropagation();
@@ -36,8 +45,9 @@ export const CardCornerActions = ({
   if (!onHelp && !onStar) return null;
 
   const safeVisualScale = resolveSafeVisualScale(visualScale);
-  const resolvedButtonPx = 28 / safeVisualScale;
-  const resolvedIconPx = 14 / safeVisualScale;
+  const explicitIconPx = resolveSafeIconPx(iconPx);
+  const resolvedIconPx = explicitIconPx ?? 14 / safeVisualScale;
+  const resolvedButtonPx = explicitIconPx ? resolvedIconPx * 2 : 28 / safeVisualScale;
 
   const buttonBaseClass =
     "rounded-full min-h-0 min-w-0 flex items-center justify-center bg-transparent hover:bg-transparent " +
