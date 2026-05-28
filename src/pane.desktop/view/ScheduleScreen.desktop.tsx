@@ -1,5 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
+import { addDays, endOfDay, endOfMonth, endOfWeek, endOfYear, format, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays } from "date-fns";
 import type { PlanResultMode } from "@/chip/toggle/Toggle.planresult";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
@@ -7,7 +7,7 @@ import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
 import { createProjectCalendarLink, persistProjectCalendarLinks, readStoredProjectCalendarLinks } from "@/features/calendar/projectCalendarLinks.storage";
-import type { AppCalendarItem, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
+import type { AppCalendarItem, CalendarViewMode, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -20,6 +20,19 @@ import { CalendarWorkspaceToolbar } from "@/pane.desktop/header/ScheduleToolbar"
 
 type StoredAppCalendarItem = Partial<AppCalendarItem>;
 
+type CalendarEventDisplayRange = {
+  start: Date;
+  end: Date;
+};
+
+type CalendarEventDisplayRangeOptions = {
+  primaryViewMode: CalendarViewMode;
+  currentDate: Date;
+  selectedDate: Date;
+  monthTitleDate: Date;
+  visibleDays: Date[];
+};
+
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-none";
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
@@ -27,6 +40,9 @@ const GOOGLE_CALENDAR_COLOR_OVERRIDES_STORAGE_KEY = "flashcard-master:schedule:g
 const DEFAULT_PLAN_RESULT_MODES: readonly PlanResultMode[] = ["plan", "actual"];
 const PLAN_RESULT_TOGGLE_VIEW_MODES = new Set(["threeDays", "days", "pieChart"]);
 const APP_PROJECT_COLORS = ["#34c759", "#ff3b30", "#4f8ce7", "#ffd166", "#9adfe7", "#66a77a", "#9ca3ff"];
+const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
+const WEEKDAY_EVENT_BUFFER_DAYS = 21;
+const MONTH_EVENT_BUFFER_DAYS = 14;
 
 const createAppProjectId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -176,6 +192,66 @@ const filterEventsByProjectVisibility = (events: GoogleCalendarEvent[], projects
     return checked !== false;
   });
 };
+
+const mergeDisplayRanges = (
+  left: CalendarEventDisplayRange,
+  right: CalendarEventDisplayRange,
+): CalendarEventDisplayRange => ({
+  start: new Date(Math.min(left.start.getTime(), right.start.getTime())),
+  end: new Date(Math.max(left.end.getTime(), right.end.getTime())),
+});
+
+const buildMiniCalendarDisplayRange = (monthDate: Date): CalendarEventDisplayRange => ({
+  start: startOfDay(startOfWeek(startOfMonth(monthDate), { weekStartsOn: 0 })),
+  end: endOfDay(endOfWeek(endOfMonth(monthDate), { weekStartsOn: 0 })),
+});
+
+const buildDaysDisplayRange = (days: Date[], fallbackDate: Date, bufferDays: number): CalendarEventDisplayRange => {
+  const first = days[0] ?? fallbackDate;
+  const last = days.at(-1) ?? fallbackDate;
+
+  return {
+    start: startOfDay(subDays(first, bufferDays)),
+    end: endOfDay(addDays(last, bufferDays)),
+  };
+};
+
+const getScheduleEventDisplayRange = ({
+  primaryViewMode,
+  currentDate,
+  selectedDate,
+  monthTitleDate,
+  visibleDays,
+}: CalendarEventDisplayRangeOptions): CalendarEventDisplayRange => {
+  const miniCalendarRange = buildMiniCalendarDisplayRange(monthTitleDate);
+
+  if (primaryViewMode === "year") {
+    return mergeDisplayRanges(miniCalendarRange, {
+      start: startOfDay(startOfYear(currentDate)),
+      end: endOfDay(endOfYear(currentDate)),
+    });
+  }
+
+  if (primaryViewMode === "month") {
+    return mergeDisplayRanges(miniCalendarRange, buildDaysDisplayRange(visibleDays, currentDate, MONTH_EVENT_BUFFER_DAYS));
+  }
+
+  if (primaryViewMode === "list" || primaryViewMode === "pieChart") {
+    return mergeDisplayRanges(miniCalendarRange, buildDaysDisplayRange(visibleDays, selectedDate, LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS));
+  }
+
+  return mergeDisplayRanges(miniCalendarRange, buildDaysDisplayRange(visibleDays, selectedDate, WEEKDAY_EVENT_BUFFER_DAYS));
+};
+
+const eventOverlapsDisplayRange = (
+  event: GoogleCalendarEvent,
+  range: CalendarEventDisplayRange,
+): boolean => event.startsAt <= range.end && event.endsAt >= range.start;
+
+const filterEventsByDisplayRange = (
+  events: GoogleCalendarEvent[],
+  range: CalendarEventDisplayRange,
+): GoogleCalendarEvent[] => events.filter((event) => eventOverlapsDisplayRange(event, range));
 
 const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const pane = useScheduleScreen();
@@ -372,8 +448,13 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const linkedGoogleCalendarEvents = useMemo(() => attachProjectIdsToGoogleEvents(googleCalendarEvents, projectCalendarLinks, googleCalendarColorOverrides), [googleCalendarEvents, googleCalendarColorOverrides, projectCalendarLinks]);
   const visibleGoogleCalendarEvents = useMemo(() => filterEventsByProjectVisibility(linkedGoogleCalendarEvents, appProjects), [appProjects, linkedGoogleCalendarEvents]);
   const googleAccountsWithColorOverrides = useMemo(() => applyGoogleCalendarColorOverridesToAccounts(googleAccounts, googleCalendarColorOverrides), [googleAccounts, googleCalendarColorOverrides]);
-  const deferredCalendarEvents = useDeferredValue(visibleGoogleCalendarEvents);
   const selectedViewModes = useMemo(() => Array.isArray(selectedViewMode) ? selectedViewMode : [selectedViewMode], [selectedViewMode]);
+  const mainDisplayRange = useMemo(() => getScheduleEventDisplayRange({ primaryViewMode, currentDate, selectedDate, monthTitleDate, visibleDays }), [currentDate, monthTitleDate, primaryViewMode, selectedDate, visibleDays]);
+  const sidebarDisplayRange = useMemo(() => buildMiniCalendarDisplayRange(primaryViewMode === "month" || selectedViewModes.includes("list") ? monthTitleDate : titleDate), [monthTitleDate, primaryViewMode, selectedViewModes, titleDate]);
+  const mainCalendarEvents = useMemo(() => filterEventsByDisplayRange(visibleGoogleCalendarEvents, mainDisplayRange), [mainDisplayRange, visibleGoogleCalendarEvents]);
+  const sidebarCalendarEvents = useMemo(() => filterEventsByDisplayRange(visibleGoogleCalendarEvents, sidebarDisplayRange), [sidebarDisplayRange, visibleGoogleCalendarEvents]);
+  const deferredCalendarEvents = useDeferredValue(mainCalendarEvents);
+  const deferredSidebarEvents = useDeferredValue(sidebarCalendarEvents);
 
   const isListCalendarView = selectedViewModes.includes("list");
   const isPieChartCalendarView = selectedViewModes.includes("pieChart");
@@ -393,7 +474,7 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
           monthDate={sidebarMonthDate}
           selectedDate={selectedDate}
           selectedRange={null}
-          visibleEvents={deferredCalendarEvents}
+          visibleEvents={deferredSidebarEvents}
           appProjects={appProjects}
           projectCalendarLinks={projectCalendarLinks}
           googleCalendarColorOverrides={googleCalendarColorOverrides}
