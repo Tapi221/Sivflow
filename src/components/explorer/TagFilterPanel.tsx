@@ -8,7 +8,7 @@ import { SurfaceButton } from "@/components/ui/surface-button";
 import { Switch } from "@/components/ui/switch";
 import { Tag } from "@/ui/icons";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
-import { useTags } from "@/hooks/settings/useTags";
+import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 
 type ContentTypeFilter = "card" | "pdf";

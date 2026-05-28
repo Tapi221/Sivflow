@@ -8,7 +8,7 @@ import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@
 import { PlaceholderText } from "@/components/ui/placeholder-text";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Check, Palette, Plus, Tag as TagIcon } from "@/ui/icons";
-import { useTags } from "@/hooks/settings/useTags";
+import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 
 interface TagInputProps {

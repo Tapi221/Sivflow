@@ -5,7 +5,7 @@ import { TAG_COLOR_CONTEXT_MENU_HEIGHT, TAG_COLOR_CONTEXT_MENU_WIDTH, TagColorRi
 import { RIGHT_CLICK_PANEL_NO_DRAG_STYLE, clampRightClickPanelPosition, useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPanel.utils";
 import { getTagColorKey, type TagColorKey } from "@/chip/tag/tagColor";
 import { TagChip } from "@/components/tag/TagChip";
-import { useTags } from "@/hooks/settings/useTags";
+import { useTags } from "@/features/settings/hooks/useTags";
 import { ChevronLeft, ChevronRight, Plus, Tag, X } from "@/ui/icons";
 
 type TagContextMenuState = {
