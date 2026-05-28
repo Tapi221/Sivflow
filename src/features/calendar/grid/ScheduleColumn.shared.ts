@@ -16,7 +16,7 @@ export const getScheduleViewStart = (
   if (viewMode === "year") return startOfYear(normalized);
   if (viewMode === "month" || viewMode === "list") return startOfMonth(normalized);
 
-  if (viewMode === "week") {
+  if (viewMode === "week" || viewMode === "timetable") {
     return startOfWeek(normalized, {
       weekStartsOn: C.WEEK_STARTS_ON_MONDAY,
     });
@@ -37,7 +37,7 @@ export const getScheduleViewDayCount = (
   }
 
   if (viewMode === "month" || viewMode === "list") return getDaysInMonth(anchorDate);
-  if (viewMode === "week") return 7;
+  if (viewMode === "week" || viewMode === "timetable") return 7;
   if (viewMode === "threeDays") return 3;
   return 1;
 };
