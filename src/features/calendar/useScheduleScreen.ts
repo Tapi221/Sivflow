@@ -65,9 +65,7 @@ export type UseScheduleScreenReturn = {
 
 const getGoogleCalendarEventDedupeKey = (event: GoogleCalendarEvent): string => event.id;
 
-const dedupeGoogleCalendarEvents = (
-  events: GoogleCalendarEvent[],
-): GoogleCalendarEvent[] => {
+const dedupeGoogleCalendarEvents = (events: GoogleCalendarEvent[]): GoogleCalendarEvent[] => {
   const seenKeys = new Set<string>();
 
   return events.filter((event) => {
@@ -82,42 +80,28 @@ const dedupeGoogleCalendarEvents = (
 
 export const useScheduleScreen = (): UseScheduleScreenReturn => {
   const navigation = useCalendarNavigation();
-  const [monthRenderedRange, setMonthRenderedRange] =
-    useState<CalendarDateRange | null>(null);
-  const [yearRenderedRange, setYearRenderedRange] =
-    useState<CalendarDateRange | null>(null);
+  const [monthRenderedRange, setMonthRenderedRange] = useState<CalendarDateRange | null>(null);
+  const [yearRenderedRange, setYearRenderedRange] = useState<CalendarDateRange | null>(null);
 
-  const handleMonthRenderedRangeChange = useCallback(
-    (range: CalendarDateRange) => {
-      setMonthRenderedRange((prev) => {
-        if (
-          prev?.start.getTime() === range.start.getTime() &&
-          prev.end.getTime() === range.end.getTime()
-        ) {
-          return prev;
-        }
+  const handleMonthRenderedRangeChange = useCallback((range: CalendarDateRange) => {
+    setMonthRenderedRange((prev) => {
+      if (prev?.start.getTime() === range.start.getTime() && prev.end.getTime() === range.end.getTime()) {
+        return prev;
+      }
 
-        return range;
-      });
-    },
-    [],
-  );
+      return range;
+    });
+  }, []);
 
-  const handleYearRenderedRangeChange = useCallback(
-    (range: CalendarDateRange) => {
-      setYearRenderedRange((prev) => {
-        if (
-          prev?.start.getTime() === range.start.getTime() &&
-          prev.end.getTime() === range.end.getTime()
-        ) {
-          return prev;
-        }
+  const handleYearRenderedRangeChange = useCallback((range: CalendarDateRange) => {
+    setYearRenderedRange((prev) => {
+      if (prev?.start.getTime() === range.start.getTime() && prev.end.getTime() === range.end.getTime()) {
+        return prev;
+      }
 
-        return range;
-      });
-    },
-    [],
-  );
+      return range;
+    });
+  }, []);
 
   const handleListReachStart = useCallback(() => {
     startTransition(() => {
@@ -136,11 +120,9 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     selectedViewMode: navigation.primaryViewMode,
     calendarBuffer: navigation.calendarBuffer,
   });
-
   const visibleDays = visibleRange.interactionDays;
   const displayDays = visibleRange.displayDays;
   const virtualRail = visibleRange.virtualRail;
-
   const layout = useCalendarLayout({
     viewportWidth: navigation.viewportWidth,
     visibleDays,
@@ -149,7 +131,6 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     currentDate: navigation.currentDate,
     calendarBuffer: navigation.calendarBuffer,
   });
-
   const scroll = useCalendarScrollController({
     selectedViewMode: navigation.primaryViewMode,
     visibleDays,
@@ -162,12 +143,8 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     onVisibleDateChange: navigation.handleVisibleDateChange,
     scrollTargetToken: navigation.calendarScrollToken,
   });
-
   const google = useGoogleCalendarLayer();
-  const googleCalendarEvents = useMemo(
-    () => dedupeGoogleCalendarEvents(google.events),
-    [google.events],
-  );
+  const googleCalendarEvents = useMemo(() => dedupeGoogleCalendarEvents(google.events), [google.events]);
 
   useCalendarEventSync({
     selectedViewMode: navigation.primaryViewMode,
@@ -181,29 +158,28 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     },
   });
 
-  const googleAccounts: GoogleAccountDisplay[] = google.googleAccounts.map(
-    (account) => {
-      const taskListState = google.taskListsByAccount[account.id];
-      const googleTasksState = google.googleTasksByAccount[account.id];
+  const googleAccounts: GoogleAccountDisplay[] = google.googleAccounts.map((account) => {
+    const taskListState = google.taskListsByAccount[account.id];
+    const googleTasksState = google.googleTasksByAccount[account.id];
 
-      return {
-        accountId: account.id,
-        email: account.email,
-        name: account.name,
-        photoUrl: account.photoUrl,
-        calendars: account.calendars,
-        taskLists: taskListState?.taskLists ?? [],
-        taskListsError: taskListState?.error ?? null,
-        isTaskListsLoading: taskListState?.isLoading ?? false,
-        googleTasks: googleTasksState?.tasks ?? [],
-        googleTasksError: googleTasksState?.error ?? null,
-        isGoogleTasksLoading: googleTasksState?.isLoading ?? false,
-        selectedCalendarIds: account.selectedCalendarIds,
-        connectionStatus: account.connectionStatus,
-        error: account.error,
-      };
-    },
-  );
+    return {
+      accountId: account.id,
+      email: account.email,
+      name: account.name,
+      photoUrl: account.photoUrl,
+      accessToken: account.accessToken,
+      calendars: account.calendars,
+      taskLists: taskListState?.taskLists ?? [],
+      taskListsError: taskListState?.error ?? null,
+      isTaskListsLoading: taskListState?.isLoading ?? false,
+      googleTasks: googleTasksState?.tasks ?? [],
+      googleTasksError: googleTasksState?.error ?? null,
+      isGoogleTasksLoading: googleTasksState?.isLoading ?? false,
+      selectedCalendarIds: account.selectedCalendarIds,
+      connectionStatus: account.connectionStatus,
+      error: account.error,
+    };
+  });
 
   return {
     contentViewportRef: navigation.contentViewportRef,
@@ -211,38 +187,29 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     headerScrollRef: scroll.headerScrollRef,
     allDayScrollRef: scroll.allDayScrollRef,
     handleCalendarScroll: scroll.handleScroll,
-
     currentDate: navigation.currentDate,
     selectedDate: navigation.selectedDate,
     monthTitleDate: navigation.monthTitleDate,
     monthScrollTargetToken: navigation.monthScrollTargetToken,
-
     selectedViewMode: navigation.selectedViewMode,
     primaryViewMode: navigation.primaryViewMode,
-
     visibleDays,
     displayDays,
     virtualRail,
-
     titleDate: layout.titleDate,
     monthLabel: layout.monthLabel,
-
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
     calendarGridStyle: layout.calendarGridStyle,
-
     googleAccounts,
     googleCalendarEvents,
     isAnyCalendarConnecting: google.isAnyConnecting,
-
     addGoogleCalendar: google.addAccount,
     reconnectGoogleAccount: google.reconnectAccount,
     toggleGoogleCalendar: google.toggleCalendar,
-
     handleSelectViewMode: navigation.handleSelectViewMode,
     handleToday: navigation.handleToday,
     handlePrevious: navigation.handlePrevious,
     handleNext: navigation.handleNext,
-
     handleSidebarPreviousMonth: navigation.handleSidebarPreviousMonth,
     handleSidebarNextMonth: navigation.handleSidebarNextMonth,
     handleSidebarSelectDate: navigation.handleSidebarSelectDate,
@@ -253,7 +220,6 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     handleYearRenderedRangeChange,
     handleListReachStart,
     handleListReachEnd,
-
     setMonthTitleDate: navigation.setMonthTitleDate,
   };
 };
