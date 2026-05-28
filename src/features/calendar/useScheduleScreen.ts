@@ -155,6 +155,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
     onExtendLeft: navigation.extendCalendarBufferLeft,
     onExtendRight: navigation.extendCalendarBufferRight,
+    onVisibleDateChange: navigation.handleVisibleDateChange,
     scrollTargetToken: navigation.calendarScrollToken,
   });
 
