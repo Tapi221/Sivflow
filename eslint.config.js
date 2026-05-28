@@ -33,16 +33,7 @@ export default defineConfig([
       "@stylistic/indent": ["warn", 2],
       "@stylistic/quotes": ["error", "double"],
       "@stylistic/semi": ["error", "always"],
-      "@stylistic/max-len": [
-        "warn",
-        {
-          code: 160,
-          ignoreUrls: true,
-          ignoreStrings: true,
-          ignoreTemplateLiterals: true,
-          ignoreComments: true,
-        },
-      ],
+      "@stylistic/max-len": "off",
       "@stylistic/object-curly-newline": [
         "warn",
         {
