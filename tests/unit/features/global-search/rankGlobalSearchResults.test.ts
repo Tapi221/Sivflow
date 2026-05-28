@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { rankGlobalSearchResults } from "@/features/global-search/lib/rankGlobalSearchResults";
-import type { GlobalSearchItem } from "@/features/global-search/model/globalSearchTypes";
+import { rankSearchResults } from "@/features/search/lib/rankSearchResults";
+import type { SearchItem } from "@/features/search/model/searchTypes";
 
 const createSearchItem = (
-  overrides: Partial<GlobalSearchItem>,
-): GlobalSearchItem => {
+  overrides: Partial<SearchItem>,
+): SearchItem => {
   return {
     id: overrides.id ?? "item",
     value: overrides.value ?? "item",
@@ -19,7 +19,7 @@ const createSearchItem = (
   };
 };
 
-describe("rankGlobalSearchResults", () => {
+describe("rankSearchResults", () => {
   it("returns recent items first when query is empty", () => {
     const recent = createSearchItem({
       id: "recent",
@@ -34,7 +34,7 @@ describe("rankGlobalSearchResults", () => {
       timestampValue: Date.now() - 10 * 24 * 60 * 60 * 1000,
     });
 
-    const results = rankGlobalSearchResults({
+    const results = rankSearchResults({
       items: [older, recent],
       query: "",
       limit: 10,
@@ -63,7 +63,7 @@ describe("rankGlobalSearchResults", () => {
       keywords: ["flashcard master"],
     });
 
-    const results = rankGlobalSearchResults({
+    const results = rankSearchResults({
       items: [keywordOnly, prefix, exact],
       query: "flashcard master",
       limit: 10,
