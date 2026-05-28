@@ -5,6 +5,8 @@ import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import { getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
+import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
+import type { CalendarColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
@@ -18,41 +20,14 @@ type MiniCalendarSectionProps = {
   onNextMonth: () => void;
 };
 
-type MiniCalendarDayEventColors = Map<string, string>;
+type MiniCalendarDayEventTokens = Map<string, CalendarColorTokens>;
 
 const MINI_CALENDAR_DIVIDER_CLASS_NAME = "mt-2 h-px w-full shrink-0 bg-[#eeeeee]";
 const MINI_CALENDAR_MONTH_LABEL_CLASS_NAME = "mb-1 flex h-7 max-w-full items-center justify-start overflow-hidden pl-2.5 pr-0.5 text-left text-[14px] font-semibold leading-none tracking-[-0.01em] text-[#2f2f2f]";
 const MINI_CALENDAR_MONTH_LABEL_TEXT_CLASS_NAME = "block min-w-0 truncate";
 const MINI_CALENDAR_WEEKDAY_CLASS_NAME = "flex h-6 items-center justify-center text-[11px] font-semibold leading-none tracking-[0.03em] text-[#8e8e93]";
 const MINI_CALENDAR_DAY_BUTTON_CLASS_NAME = "relative flex h-7 w-full items-center justify-center transition-all duration-150 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
-const MINI_CALENDAR_EVENT_DAY_BACKGROUND_ALPHA = 0.16;
 const EMPTY_VISIBLE_EVENTS: readonly GoogleCalendarEvent[] = [];
-
-const normalizeColor = (color: string): string => {
-  if (/^#[0-9a-f]{3}$/i.test(color)) {
-    const red = color.charAt(1);
-    const green = color.charAt(2);
-    const blue = color.charAt(3);
-
-    return `#${red}${red}${green}${green}${blue}${blue}`;
-  }
-
-  return color;
-};
-
-const colorToRgba = (color: string, alpha: number): string => {
-  const normalized = normalizeColor(color);
-  const match = /^#([0-9a-f]{6})$/i.exec(normalized);
-
-  if (!match) return color;
-
-  const value = match[1];
-  const red = Number.parseInt(value.slice(0, 2), 16);
-  const green = Number.parseInt(value.slice(2, 4), 16);
-  const blue = Number.parseInt(value.slice(4, 6), 16);
-
-  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
-};
 
 const getMiniCalendarVisibleEvents = (
   visibleEvents: unknown,
@@ -91,33 +66,40 @@ const buildMiniCalendarDays = (
   });
 };
 
-const buildMiniCalendarDayEventColors = (
+const buildMiniCalendarDayEventTokens = (
   visibleEvents: readonly GoogleCalendarEvent[],
-): MiniCalendarDayEventColors => {
-  const dayColors: MiniCalendarDayEventColors = new Map();
+): MiniCalendarDayEventTokens => {
+  const dayTokens: MiniCalendarDayEventTokens = new Map();
 
   for (const event of visibleEvents) {
     for (const dayKey of getEventDateKeys(event)) {
-      if (!dayColors.has(dayKey)) {
-        dayColors.set(dayKey, event.accentColor);
+      if (!dayTokens.has(dayKey)) {
+        dayTokens.set(dayKey, generateColorTokens(event.accentColor));
       }
     }
   }
 
-  return dayColors;
+  return dayTokens;
 };
 
 const getMiniCalendarDayEventStyle = (
   day: MiniCalendarDay,
-  dayEventColors: MiniCalendarDayEventColors,
+  dayEventTokens: MiniCalendarDayEventTokens,
 ): CSSProperties | undefined => {
-  if (day.isSelected || day.isToday) return undefined;
+  const tokens = dayEventTokens.get(getMiniCalendarDayKey(day.date));
+  if (!tokens) return undefined;
 
-  const color = dayEventColors.get(getMiniCalendarDayKey(day.date));
-  if (!color) return undefined;
+  if (day.isSelected || day.isToday) {
+    return {
+      outline: `2px solid ${tokens.border}`,
+      outlineOffset: "2px",
+      transition: "none",
+    };
+  }
 
   return {
-    backgroundColor: colorToRgba(color, MINI_CALENDAR_EVENT_DAY_BACKGROUND_ALPHA),
+    backgroundColor: tokens.bg,
+    boxShadow: `inset 0 0 0 1px ${tokens.border}`,
     transition: "none",
   };
 };
@@ -151,8 +133,8 @@ const MiniCalendarSectionBase = ({
     () => getMiniCalendarVisibleEvents(visibleEvents),
     [visibleEvents],
   );
-  const dayEventColors = useMemo(
-    () => buildMiniCalendarDayEventColors(miniCalendarVisibleEvents),
+  const dayEventTokens = useMemo(
+    () => buildMiniCalendarDayEventTokens(miniCalendarVisibleEvents),
     [miniCalendarVisibleEvents],
   );
 
@@ -177,7 +159,7 @@ const MiniCalendarSectionBase = ({
         <div className="grid grid-cols-7 gap-y-0.5 px-0.5">
           {miniCalendarDays.map((day) => {
             const isActive = day.isToday || day.isSelected;
-            const eventStyle = getMiniCalendarDayEventStyle(day, dayEventColors);
+            const eventStyle = getMiniCalendarDayEventStyle(day, dayEventTokens);
 
             return (
               <button
