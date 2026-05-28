@@ -27,11 +27,37 @@ type Props = {
   scrollTargetToken?: number;
 };
 
+const WEEKDAY_SCROLL_SNAP_DELAY_MS = 120;
+const WEEKDAY_SCROLL_SNAP_EPSILON_PX = 1;
+
 const isWeekdayHorizontalViewMode = (viewMode: CalendarViewMode) =>
   viewMode === "days" ||
   viewMode === "threeDays" ||
   viewMode === "week" ||
   viewMode === "timetable";
+
+const isDaySnapViewMode = (viewMode: CalendarViewMode) => viewMode === "days";
+
+const clampScrollLeft = (scrollLeft: number, maxScrollLeft: number) => Math.min(Math.max(scrollLeft, 0), Math.max(maxScrollLeft, 0));
+
+const getSnappedDayScrollLeft = (scrollLeft: number, calendarDayColumnWidth: number, maxScrollLeft: number) => {
+  if (calendarDayColumnWidth <= 0) return scrollLeft;
+
+  const contentLeft = Math.max(0, scrollLeft - C.TIME_COLUMN_WIDTH);
+  const snappedDayIndex = Math.max(0, Math.round(contentLeft / calendarDayColumnWidth));
+
+  return clampScrollLeft(C.TIME_COLUMN_WIDTH + snappedDayIndex * calendarDayColumnWidth, maxScrollLeft);
+};
+
+const syncFixedRowsScrollLeft = (fixedRowScrollRefs: React.RefObject<HTMLDivElement | null>[], scrollLeft: number) => {
+  fixedRowScrollRefs.forEach((ref) => {
+    const fixedRow = ref.current;
+
+    if (fixedRow && fixedRow.scrollLeft !== scrollLeft) {
+      fixedRow.scrollLeft = scrollLeft;
+    }
+  });
+};
 
 export const useCalendarScrollController = ({
   selectedViewMode,
@@ -49,6 +75,7 @@ export const useCalendarScrollController = ({
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);
   const scrollRafRef = useRef<number | null>(null);
+  const snapTimeoutRef = useRef<number | null>(null);
   const latestScrollerRef = useRef<HTMLDivElement | null>(null);
   const lastVisibleDateKeyRef = useRef<string | null>(null);
   const fixedRowScrollRefs = useMemo(
@@ -112,10 +139,31 @@ export const useCalendarScrollController = ({
     onVisibleDateChange(visibleDate);
   }, [calendarDayColumnWidth, onVisibleDateChange, selectedViewMode, virtualRail, visibleDays]);
 
+  const snapDayScroll = useCallback((scroller: HTMLDivElement) => {
+    if (!isDaySnapViewMode(selectedViewMode) || calendarDayColumnWidth <= 0) return;
+
+    if (snapTimeoutRef.current !== null) {
+      window.clearTimeout(snapTimeoutRef.current);
+    }
+
+    snapTimeoutRef.current = window.setTimeout(() => {
+      snapTimeoutRef.current = null;
+
+      const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
+      const nextScrollLeft = getSnappedDayScrollLeft(scroller.scrollLeft, calendarDayColumnWidth, maxScrollLeft);
+
+      if (Math.abs(scroller.scrollLeft - nextScrollLeft) <= WEEKDAY_SCROLL_SNAP_EPSILON_PX) return;
+
+      scroller.scrollTo({ left: nextScrollLeft, top: scroller.scrollTop, behavior: "smooth" });
+      syncFixedRowsScrollLeft(fixedRowScrollRefs, nextScrollLeft);
+    }, WEEKDAY_SCROLL_SNAP_DELAY_MS);
+  }, [calendarDayColumnWidth, fixedRowScrollRefs, selectedViewMode]);
+
   const runScrollWork = useCallback((scroller: HTMLDivElement) => {
     handleEdgeScroll(scroller);
     syncVisibleDate(scroller);
-  }, [handleEdgeScroll, syncVisibleDate]);
+    snapDayScroll(scroller);
+  }, [handleEdgeScroll, snapDayScroll, syncVisibleDate]);
 
   const scheduleScrollWork = useCallback((scroller: HTMLDivElement) => {
     latestScrollerRef.current = scroller;
@@ -157,6 +205,11 @@ export const useCalendarScrollController = ({
         scrollRafRef.current = null;
       }
 
+      if (snapTimeoutRef.current !== null) {
+        window.clearTimeout(snapTimeoutRef.current);
+        snapTimeoutRef.current = null;
+      }
+
       latestScrollerRef.current = null;
     };
   }, [scheduleScrollWork, syncVisibleDate]);
@@ -165,6 +218,11 @@ export const useCalendarScrollController = ({
     resetEdge();
     resetPrepend();
     lastVisibleDateKeyRef.current = null;
+
+    if (snapTimeoutRef.current !== null) {
+      window.clearTimeout(snapTimeoutRef.current);
+      snapTimeoutRef.current = null;
+    }
   }, [resetEdge, resetPrepend]);
 
   useEffect(() => {
@@ -173,6 +231,11 @@ export const useCalendarScrollController = ({
 
   useEffect(() => {
     lastVisibleDateKeyRef.current = null;
+
+    if (snapTimeoutRef.current !== null) {
+      window.clearTimeout(snapTimeoutRef.current);
+      snapTimeoutRef.current = null;
+    }
   }, [selectedViewMode, scrollTargetToken]);
 
   return {
