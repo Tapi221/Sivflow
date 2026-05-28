@@ -84,6 +84,12 @@ export type GoogleCalendarApiListResponse = {
   nextPageToken?: string;
 };
 
+export type GoogleCalendarApiCalendarResponse = {
+  id?: string;
+  summary?: string;
+  description?: string;
+};
+
 export type GoogleCalendarApiEventsResponse = {
   items?: GCalRawIncrementalEvent[];
   nextPageToken?: string;
