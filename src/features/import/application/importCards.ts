@@ -136,12 +136,7 @@ export const importCardsFromPayload = async ({
       back: {
         blocks: backBlocks,
       },
-      layoutRows: {
-        top: 4,
-        bottom: 4,
-        left: 0,
-        right: 0,
-      },
+      layoutRows: 8,
       frontRows: 0,
       backRows: 0,
       tags: [],
@@ -155,9 +150,8 @@ export const importCardsFromPayload = async ({
   }
 
   return {
-    createdCardSetId: resolvedDestination.id,
-    createdCardSetName: resolvedDestination.name || "",
-    folderId,
+    cardSetId: resolvedDestination.id,
+    cardSetName: resolvedDestination.name,
     createdCount,
   };
 };
