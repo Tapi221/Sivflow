@@ -26,6 +26,7 @@ const MINI_CALENDAR_MONTH_LABEL_TEXT_CLASS_NAME = "block min-w-0 truncate";
 const MINI_CALENDAR_WEEKDAY_CLASS_NAME = "flex h-6 items-center justify-center text-[11px] font-semibold leading-none tracking-[0.03em] text-[#8e8e93]";
 const MINI_CALENDAR_DAY_BUTTON_CLASS_NAME = "relative flex h-7 w-full items-center justify-center transition-all duration-150 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]";
 const MINI_CALENDAR_EVENT_DAY_BACKGROUND_ALPHA = 0.16;
+const EMPTY_VISIBLE_EVENTS: readonly GoogleCalendarEvent[] = [];
 
 const normalizeColor = (color: string): string => {
   if (/^#[0-9a-f]{3}$/i.test(color)) {
@@ -51,6 +52,12 @@ const colorToRgba = (color: string, alpha: number): string => {
   const blue = Number.parseInt(value.slice(4, 6), 16);
 
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+};
+
+const getMiniCalendarVisibleEvents = (
+  visibleEvents: unknown,
+): readonly GoogleCalendarEvent[] => {
+  return Array.isArray(visibleEvents) ? visibleEvents : EMPTY_VISIBLE_EVENTS;
 };
 
 const getMiniCalendarDayKey = (date: Date): string => {
@@ -85,7 +92,7 @@ const buildMiniCalendarDays = (
 };
 
 const buildMiniCalendarDayEventColors = (
-  visibleEvents: GoogleCalendarEvent[],
+  visibleEvents: readonly GoogleCalendarEvent[],
 ): MiniCalendarDayEventColors => {
   const dayColors: MiniCalendarDayEventColors = new Map();
 
@@ -140,9 +147,13 @@ const MiniCalendarSectionBase = ({
     () => buildMiniCalendarDays(monthDate, selectedDate),
     [monthDate, selectedDate],
   );
-  const dayEventColors = useMemo(
-    () => buildMiniCalendarDayEventColors(visibleEvents),
+  const miniCalendarVisibleEvents = useMemo(
+    () => getMiniCalendarVisibleEvents(visibleEvents),
     [visibleEvents],
+  );
+  const dayEventColors = useMemo(
+    () => buildMiniCalendarDayEventColors(miniCalendarVisibleEvents),
+    [miniCalendarVisibleEvents],
   );
 
   return (
