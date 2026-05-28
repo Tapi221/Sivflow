@@ -8,15 +8,19 @@ import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 
 interface BulkTagDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open?: boolean;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onClose?: () => void;
   folderId: string;
   folderName?: string;
 }
 
 const BulkTagDialog = ({
   open,
+  isOpen,
   onOpenChange,
+  onClose,
   folderId,
   folderName,
 }: BulkTagDialogProps) => {
@@ -25,6 +29,7 @@ const BulkTagDialog = ({
   const [includeSubfolders, setIncludeSubfolders] = useState(false);
   const [isWorking, setIsWorking] = useState(false);
   const [result, setResult] = useState<number | null>(null);
+  const resolvedOpen = open ?? isOpen ?? false;
 
   const handleApply = async () => {
     if (!selectedTagId) return;
@@ -46,11 +51,12 @@ const BulkTagDialog = ({
     setSelectedTagId(null);
     setIncludeSubfolders(false);
     setResult(null);
-    onOpenChange(false);
+    onOpenChange?.(false);
+    onClose?.();
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={resolvedOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
         <DialogTitle className="text-lg font-bold text-slate-800 flex items-center gap-2">
           <TagIcon className="w-5 h-5 text-primary-500" />
@@ -81,15 +87,13 @@ const BulkTagDialog = ({
                   }
                   className={cn(
                     "rounded-full transition-all",
-                    selectedTagId === tag.id
-                      ? "ring-2 ring-offset-1 ring-primary-500 scale-105"
-                      : "opacity-70 hover:opacity-100",
+                    selectedTagId === tag.id &&
+                      "ring-2 ring-primary-400 ring-offset-2",
                   )}
                 >
                   <TagBadge
                     label={tag.name}
                     colorKey={getTagColorKey(tag.color)}
-                    className="pointer-events-none"
                   />
                 </button>
               ))}
@@ -97,31 +101,27 @@ const BulkTagDialog = ({
           )}
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer select-none">
+        <label className="mt-3 flex items-center gap-2 text-sm text-slate-600">
           <input
             type="checkbox"
             checked={includeSubfolders}
-            onChange={(e) => setIncludeSubfolders(e.target.checked)}
-            className="rounded"
+            onChange={(event) => setIncludeSubfolders(event.target.checked)}
           />
           サブフォルダも含める
         </label>
 
         {result !== null && (
-          <p className="text-sm text-emerald-600 font-medium">
-            {result} 件のカードにタグを付与しました
+          <p className="text-sm text-emerald-600">
+            {result}枚のカードにタグを付与しました。
           </p>
         )}
 
-        <div className="flex justify-end gap-2 mt-2">
-          <Button variant="outline" onClick={handleClose} disabled={isWorking}>
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="ghost" onClick={handleClose} disabled={isWorking}>
             閉じる
           </Button>
-          <Button
-            onClick={() => void handleApply()}
-            disabled={!selectedTagId || isWorking}
-          >
-            {isWorking ? "処理中..." : "付与する"}
+          <Button onClick={handleApply} disabled={!selectedTagId || isWorking}>
+            {isWorking ? "適用中..." : "適用"}
           </Button>
         </div>
       </DialogContent>
