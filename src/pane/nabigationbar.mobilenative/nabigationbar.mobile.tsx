@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useState, type CSSProperties, type ReactNode, type SVGProps } from "react";
 import { CalendarIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
-import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
+import { useSearchStore } from "@/features/search/store/useSearchStore";
 import type { WorkspaceSidebarSection } from "@/features/tab/Tab";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
@@ -76,7 +76,7 @@ const NavigationBarMobileComponent = ({ activeItemId, className, onItemSelect, o
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
-  const openGlobalSearch = useGlobalSearchStore((state) => state.open);
+  const openSearch = useSearchStore((state) => state.open);
 
   const activeTabSectionKey = useMemo(() => {
     if (activeTabId === null) return null;
@@ -113,7 +113,7 @@ const NavigationBarMobileComponent = ({ activeItemId, className, onItemSelect, o
     onItemSelect?.(item.id);
 
     if (item.id === "explore") {
-      openGlobalSearch();
+      openSearch();
       return;
     }
 
@@ -124,7 +124,7 @@ const NavigationBarMobileComponent = ({ activeItemId, className, onItemSelect, o
     if (item.sectionKey) {
       openSectionTab(item.sectionKey);
     }
-  }, [onItemSelect, onOpenSettings, openGlobalSearch, openSectionTab]);
+  }, [onItemSelect, onOpenSettings, openSearch, openSectionTab]);
 
   return (
     <nav className={cn("mobile-navigation-bar", className)} aria-label="モバイルナビゲーション">
