@@ -161,9 +161,9 @@ export const XlsxImportDialog = ({
       );
       handleClose(false);
       onImported?.({
-        cardSetId: imported.createdCardSetId,
-        cardSetName: imported.createdCardSetName,
-        folderId: imported.folderId,
+        cardSetId: imported.cardSetId,
+        cardSetName: imported.cardSetName,
+        folderId: folderId ?? "",
         createdCount: imported.createdCount,
       });
     } catch (error) {
@@ -370,24 +370,23 @@ export const XlsxImportDialog = ({
                 Issues
               </div>
               <div className="max-h-72 overflow-auto px-4 py-3">
-                {(state.result?.issues ?? []).length === 0 ? (
-                  <p className="text-sm text-slate-500">issue はありません。</p>
-                ) : (
+                {state.result?.issues.length ? (
                   <div className="space-y-2">
-                    {state.result?.issues.map((issue, index) => (
+                    {state.result.issues.map((issue, index) => (
                       <div
-                        key={`${issue.code}-${issue.rowNumber ?? "header"}-${index}`}
-                        className="rounded-lg border border-slate-200 p-3"
+                        key={`${issue.sheet}-${issue.row}-${issue.column ?? "col"}-${index}`}
+                        className="rounded-lg border border-slate-200 p-3 text-xs"
                       >
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                          {issue.level} · {formatImportCellLabel(issue)}
+                        <p className="font-medium text-slate-800">
+                          {issue.level.toUpperCase()} / {issue.sheet} / {" "}
+                          {formatImportCellLabel(issue)}
                         </p>
-                        <p className="mt-1 text-sm text-slate-800">
-                          {issue.message}
-                        </p>
+                        <p className="mt-1 text-slate-600">{issue.message}</p>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <p className="text-sm text-slate-500">Issue はありません。</p>
                 )}
               </div>
             </div>
@@ -395,24 +394,26 @@ export const XlsxImportDialog = ({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => handleClose(false)}>
-            閉じる
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handleClose(false)}
+            disabled={isImporting}
+          >
+            キャンセル
           </Button>
           <Button
+            type="button"
             onClick={handleImport}
             disabled={
               isParsing ||
               isImporting ||
+              !state.file ||
               !state.result?.payload ||
-              (destinationMode === "new" && newCardSetName.trim() === "") ||
               hasImportBlockingError(state.result)
             }
           >
-            {isImporting
-              ? "インポート中..."
-              : destinationMode === "existing"
-                ? "既存セットへ追加する"
-                : "インポートする"}
+            {isImporting ? "インポート中…" : "インポート"}
           </Button>
         </DialogFooter>
       </DialogContent>
