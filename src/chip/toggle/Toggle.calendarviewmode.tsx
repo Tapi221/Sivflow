@@ -27,6 +27,8 @@ const CALENDAR_VIEW_MODE_MOTION_TRANSITION: Transition = {
   ease: "easeOut",
 };
 
+const isViewModeSelectionArray = (value: CalendarViewModeSelection): value is readonly CalendarViewMode[] => Array.isArray(value);
+
 const isListPieChartViewMode = (viewMode: CalendarViewMode) => (
   viewMode === "list" || viewMode === "pieChart"
 );
@@ -34,11 +36,11 @@ const isListPieChartViewMode = (viewMode: CalendarViewMode) => (
 const isSelectedViewMode = (
   value: CalendarViewModeSelection,
   optionValue: CalendarViewMode,
-) => Array.isArray(value) ? value.includes(optionValue) : value === optionValue;
+) => isViewModeSelectionArray(value) ? value.includes(optionValue) : value === optionValue;
 
 const hasMultipleSelectedViewModes = (
   value: CalendarViewModeSelection,
-) => Array.isArray(value) && value.length > 1;
+) => isViewModeSelectionArray(value) && value.length > 1;
 
 const resolveOptimisticViewMode = (
   currentValue: CalendarViewModeSelection,
@@ -46,7 +48,7 @@ const resolveOptimisticViewMode = (
 ): CalendarViewModeSelection => {
   if (!isListPieChartViewMode(nextValue)) return nextValue;
 
-  if (Array.isArray(currentValue)) {
+  if (isViewModeSelectionArray(currentValue)) {
     if (currentValue.includes(nextValue)) {
       const remainingSelection = currentValue.filter((viewMode) => viewMode !== nextValue);
       return remainingSelection[0] ?? nextValue;
