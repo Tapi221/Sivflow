@@ -7,6 +7,12 @@ export type ScheduleColumnBuffer = {
   after: number;
 };
 
+export type ScheduleVirtualRail = {
+  startDate: Date;
+  anchorIndex: number;
+  totalDayCount: number;
+};
+
 export const getScheduleViewStart = (
   anchorDate: Date,
   viewMode: CalendarViewMode,
@@ -67,4 +73,41 @@ export const buildScheduleInteractionDays = (
   return Array.from({ length: interactionCount }, (_, index) =>
     addDays(interactionStart, index),
   );
+};
+
+export const buildScheduleVirtualRail = (
+  anchorDate: Date,
+  viewMode: CalendarViewMode,
+  buffer: ScheduleColumnBuffer,
+): ScheduleVirtualRail => {
+  const displayDays = buildScheduleDisplayDays(anchorDate, viewMode);
+  const baseStart = displayDays[0] ?? getScheduleViewStart(anchorDate, viewMode);
+
+  return {
+    startDate: subDays(baseStart, buffer.before),
+    anchorIndex: buffer.before,
+    totalDayCount: buffer.before + displayDays.length + buffer.after,
+  };
+};
+
+export const buildScheduleVirtualRailDays = (
+  rail: ScheduleVirtualRail,
+  startIndex: number,
+  endIndex: number,
+): Date[] => {
+  const start = Math.max(0, Math.min(rail.totalDayCount, startIndex));
+  const end = Math.max(start, Math.min(rail.totalDayCount, endIndex));
+
+  return Array.from({ length: end - start }, (_, index) =>
+    addDays(rail.startDate, start + index),
+  );
+};
+
+export const getScheduleVirtualRailDate = (
+  rail: ScheduleVirtualRail,
+  index: number,
+): Date | null => {
+  if (index < 0 || index >= rail.totalDayCount) return null;
+
+  return addDays(rail.startDate, index);
 };
