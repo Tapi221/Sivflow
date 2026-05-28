@@ -12,7 +12,7 @@ const isListPieChartViewModeSelection = (selection: CalendarViewModeSelection): 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return addYears(current, 1);
   if (viewMode === "month" || viewMode === "list") return addMonths(current, 1);
-  if (viewMode === "week") return addDays(current, 7);
+  if (viewMode === "week" || viewMode === "timetable") return addDays(current, 7);
   if (viewMode === "threeDays") return addDays(current, 3);
   return addDays(current, 1);
 };
@@ -20,7 +20,7 @@ const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
 const getPreviousDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return subYears(current, 1);
   if (viewMode === "month" || viewMode === "list") return subMonths(current, 1);
-  if (viewMode === "week") return subDays(current, 7);
+  if (viewMode === "week" || viewMode === "timetable") return subDays(current, 7);
   if (viewMode === "threeDays") return subDays(current, 3);
   return subDays(current, 1);
 };
@@ -31,7 +31,7 @@ const normalizeViewDate = (date: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return startOfYear(date);
   if (viewMode === "list") return startOfMonth(date);
   if (viewMode === "pieChart") return startOfDay(date);
-  if (viewMode === "week") return normalizeWeek(date);
+  if (viewMode === "week" || viewMode === "timetable") return normalizeWeek(date);
   return date;
 };
 
@@ -61,13 +61,13 @@ const resolveNextViewModeSelection = (currentSelection: CalendarViewModeSelectio
 const normalizeTodayCurrentComparisonDate = (date: Date, viewMode: CalendarViewMode): Date => {
   if (viewMode === "year") return startOfYear(date);
   if (viewMode === "list") return startOfMonth(date);
-  if (viewMode === "week") return normalizeWeek(date);
+  if (viewMode === "week" || viewMode === "timetable") return normalizeWeek(date);
   return startOfDay(date);
 };
 
 const normalizeTodaySelectedComparisonDate = (date: Date, viewMode: CalendarViewMode): Date => {
   if (viewMode === "year") return startOfYear(date);
-  if (viewMode === "week") return normalizeWeek(date);
+  if (viewMode === "week" || viewMode === "timetable") return normalizeWeek(date);
   return startOfDay(date);
 };
 
