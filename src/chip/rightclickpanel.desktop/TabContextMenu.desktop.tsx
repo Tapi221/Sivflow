@@ -1,5 +1,5 @@
 import { type CSSProperties, type RefObject } from "react";
-import { RightClickPanelSurface } from "@/chip/rightclickpanel/rightClickPanelCommon";
+import { RightClickPanelSurface } from "./rightClickPanelCommon";
 import { RIGHT_CLICK_PANEL_MARGIN, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
 
 type TabContextMenuAction = {
