@@ -2,17 +2,18 @@ import React from "react";
 import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import type { PracticeFilterRating } from "@/hooks/study/usePracticeMode";
 import { createPageUrl } from "@/platform/web/navigation/toWebPath";
 
-type Tile = { rating: string; score: number; Icon: unknown };
+type Tile = { rating: PracticeFilterRating; score: number; Icon: unknown };
 
 type Props = {
   ratingTiles: Tile[];
-  ratingCounts: Record<string, number>;
+  ratingCounts: Record<PracticeFilterRating, number>;
   isPracticeFeatureEnabled: boolean;
   results: Record<string | number, number>;
-  ratingLabels: Record<string, string>;
-  handleStartPractice: (rating: string) => void;
+  ratingLabels: Record<PracticeFilterRating, string>;
+  handleStartPractice: (rating: PracticeFilterRating) => void;
   navigate: (path: string) => void;
   compact?: boolean;
 };
@@ -104,7 +105,7 @@ export const StudyComplete = ({
               {ratingTiles.map(({ rating }) => {
                 const count = ratingCounts[rating] ?? 0;
                 const canPractice = isPracticeFeatureEnabled && count > 0;
-                const design = faceDesign[rating as keyof typeof faceDesign];
+                const design = faceDesign[rating];
 
                 if (!isPracticeFeatureEnabled) return null;
 
