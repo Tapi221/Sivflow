@@ -192,6 +192,17 @@
     box-shadow: none;
   }
 
+  .calendar-month-weekday-header::before {
+    content: none !important;
+    background-image: none !important;
+  }
+
+  .calendar-month-weekday-header > .calendar-month-weekday-cell {
+    border-left: 0 !important;
+    border-right: 0 !important;
+    box-shadow: none !important;
+  }
+
   .calendar-month-weekday-cell {
     border-right: 0 !important;
     background: #ffffff !important;
