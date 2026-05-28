@@ -1,11 +1,12 @@
 import { type FormEvent, type KeyboardEvent, useCallback, useMemo, useRef, useState } from "react";
 import { CalendarIcon, GoogleIcon } from "@/chip/icons/icons.schedule";
-import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import { MiniCalendarSection } from "@/features/calendar/panel/MiniCalendarSection";
+import { SelectableGoogleSourceRow } from "@/features/calendar/panel/SelectableGoogleSourceRow";
+import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
+import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
-import { SelectableGoogleSourceRow } from "@/features/calendar/panel/SelectableGoogleSourceRow";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 
 const DEFAULT_CALENDAR_COLOR = "#74798b";
@@ -46,23 +47,126 @@ const IconPlus = ({ className }: { className?: string }) => (
 
 type AppProjectsSectionProps = {
   projects: AppCalendarItem[];
+  projectCalendarLinks: ProjectCalendarLink[];
   isAdding: boolean;
   onAddProject: (projectName: string) => void;
   onToggleProject: (projectId: string) => void;
+  onUnlinkProjectCalendar: (linkId: string) => void;
   onAddingChange: (isAdding: boolean) => void;
+};
+
+type ProjectLinkBadgesProps = {
+  links: ProjectCalendarLink[];
+  onUnlinkProjectCalendar: (linkId: string) => void;
+};
+
+type GoogleCalendarProjectActionProps = {
+  accountId: string;
+  calendar: GoogleCalendarListItem;
+  projectCalendarLinks: ProjectCalendarLink[];
+  onLinkGoogleCalendarAsProject: (accountId: string, calendarId: string) => void;
 };
 
 type GoogleAccountSectionProps = {
   account: GoogleAccountDisplay;
+  projectCalendarLinks: ProjectCalendarLink[];
   onToggleCalendar: (calendarId: string) => void;
+  onLinkGoogleCalendarAsProject: (accountId: string, calendarId: string) => void;
   onReconnect: () => void;
+};
+
+const getProjectLinks = (projectId: string, links: ProjectCalendarLink[]): ProjectCalendarLink[] => links.filter((link) => link.projectId === projectId);
+
+const getLinkedGoogleCalendarLink = (accountId: string, calendarId: string, links: ProjectCalendarLink[]): ProjectCalendarLink | null => links.find(
+  (link) =>
+    link.provider === "google" &&
+    link.accountId === accountId &&
+    link.externalCalendarId === calendarId,
+) ?? null;
+
+const getProjectLinkProviderLabel = (link: ProjectCalendarLink): string => {
+  switch (link.provider) {
+    case "google":
+      return "Google";
+    case "appleEventKit":
+      return "Apple";
+    case "appleCalDav":
+      return "iCloud";
+    case "local":
+    default:
+      return "Local";
+  }
+};
+
+const ProjectLinkBadges = ({
+  links,
+  onUnlinkProjectCalendar,
+}: ProjectLinkBadgesProps) => {
+  if (links.length === 0) return null;
+
+  return (
+    <div className="ml-8 mt-0.5 flex flex-wrap gap-1 pr-2">
+      {links.map((link) => (
+        <span
+          key={link.id}
+          className="inline-flex max-w-full items-center gap-1 rounded-full bg-[#f3f5f8] px-2 py-0.5 text-[10px] font-semibold text-[#6d7380]"
+          title={`${getProjectLinkProviderLabel(link)}: ${link.externalCalendarName}`}
+        >
+          <span className="truncate">
+            {getProjectLinkProviderLabel(link)}
+          </span>
+          <button
+            type="button"
+            className="rounded-full px-0.5 text-[#a0a5af] transition hover:bg-white hover:text-[#6d7380]"
+            onClick={(event) => {
+              event.stopPropagation();
+              onUnlinkProjectCalendar(link.id);
+            }}
+            aria-label={`${link.externalCalendarName} の同期リンクを解除`}
+          >
+            ×
+          </button>
+        </span>
+      ))}
+    </div>
+  );
+};
+
+const GoogleCalendarProjectAction = ({
+  accountId,
+  calendar,
+  projectCalendarLinks,
+  onLinkGoogleCalendarAsProject,
+}: GoogleCalendarProjectActionProps) => {
+  const linkedProject = getLinkedGoogleCalendarLink(accountId, calendar.id, projectCalendarLinks);
+
+  if (linkedProject) {
+    return (
+      <span className="mr-1 shrink-0 rounded-full bg-[#eef6ef] px-2 py-0.5 text-[10px] font-bold text-[#5f8f63]">
+        Project
+      </span>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className="mr-1 shrink-0 rounded-full bg-[#f4f4f4] px-2 py-0.5 text-[10px] font-bold text-[#8c8c8c] transition hover:bg-[#ececec] hover:text-[#5f6574] active:scale-[0.97]"
+      onClick={() => onLinkGoogleCalendarAsProject(accountId, calendar.id)}
+      aria-label={`${calendar.summaryOverride ?? calendar.summary} をプロジェクトとして使用`}
+    >
+      Use
+    </button>
+  );
 };
 
 const AppProjectsSection = ({
   projects,
+  projectCalendarLinks,
   isAdding,
   onAddProject,
   onToggleProject,
+  onUnlinkProjectCalendar,
   onAddingChange,
 }: AppProjectsSectionProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -99,14 +203,19 @@ const AppProjectsSection = ({
   return (
     <div className="mt-0.5 flex flex-col gap-0.5">
       {projects.map((project) => (
-        <SelectableGoogleSourceRow
-          key={project.id}
-          id={project.id}
-          label={project.label}
-          checked={project.checked}
-          color={project.color}
-          onToggle={onToggleProject}
-        />
+        <div key={project.id}>
+          <SelectableGoogleSourceRow
+            id={project.id}
+            label={project.label}
+            checked={project.checked}
+            color={project.color}
+            onToggle={onToggleProject}
+          />
+          <ProjectLinkBadges
+            links={getProjectLinks(project.id, projectCalendarLinks)}
+            onUnlinkProjectCalendar={onUnlinkProjectCalendar}
+          />
+        </div>
       ))}
 
       {isAdding && (
@@ -156,7 +265,9 @@ const AppProjectsSection = ({
 
 const GoogleAccountSection = ({
   account,
+  projectCalendarLinks,
   onToggleCalendar,
+  onLinkGoogleCalendarAsProject,
   onReconnect,
 }: GoogleAccountSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
@@ -191,14 +302,23 @@ const GoogleAccountSection = ({
       {isOpen && (
         <div className="mt-0.5 flex flex-col gap-0.5">
           {account.calendars.map((calendar) => (
-            <SelectableGoogleSourceRow
-              key={calendar.id}
-              id={calendar.id}
-              label={calendar.summary}
-              checked={account.selectedCalendarIds.has(calendar.id)}
-              color={calendar.backgroundColor ?? DEFAULT_CALENDAR_COLOR}
-              onToggle={onToggleCalendar}
-            />
+            <div key={calendar.id} className="flex items-center gap-1">
+              <div className="min-w-0 flex-1">
+                <SelectableGoogleSourceRow
+                  id={calendar.id}
+                  label={calendar.summary}
+                  checked={account.selectedCalendarIds.has(calendar.id)}
+                  color={calendar.backgroundColor ?? DEFAULT_CALENDAR_COLOR}
+                  onToggle={onToggleCalendar}
+                />
+              </div>
+              <GoogleCalendarProjectAction
+                accountId={account.accountId}
+                calendar={calendar}
+                projectCalendarLinks={projectCalendarLinks}
+                onLinkGoogleCalendarAsProject={onLinkGoogleCalendarAsProject}
+              />
+            </div>
           ))}
 
           {account.error && (
@@ -225,12 +345,15 @@ export const CalendarSidebar = ({
   selectedDate,
   visibleEvents,
   appProjects,
+  projectCalendarLinks,
   googleAccounts,
   onSelectDate,
   onPreviousMonth,
   onNextMonth,
   onAddProject,
   onToggleProject,
+  onLinkGoogleCalendarAsProject,
+  onUnlinkProjectCalendar,
   onReconnectAccount,
   onToggleCalendar,
 }: CalendarSidebarProps) => {
@@ -300,9 +423,11 @@ export const CalendarSidebar = ({
 
         <AppProjectsSection
           projects={appProjects}
+          projectCalendarLinks={projectCalendarLinks}
           isAdding={isAddingProject}
           onAddProject={onAddProject}
           onToggleProject={onToggleProject}
+          onUnlinkProjectCalendar={onUnlinkProjectCalendar}
           onAddingChange={setIsAddingProject}
         />
 
@@ -310,9 +435,11 @@ export const CalendarSidebar = ({
           <GoogleAccountSection
             key={account.accountId}
             account={account}
+            projectCalendarLinks={projectCalendarLinks}
             onToggleCalendar={(calendarId) =>
               onToggleCalendar(account.accountId, calendarId)
             }
+            onLinkGoogleCalendarAsProject={onLinkGoogleCalendarAsProject}
             onReconnect={() => onReconnectAccount(account.accountId)}
           />
         ))}
