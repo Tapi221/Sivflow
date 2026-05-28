@@ -302,7 +302,7 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
               </div>
             ) : null}
 
-            {pageLayoutMetrics.rowPageNumbers.map((rowPageNumbers, rowIndex) => {
+            {doc ? pageLayoutMetrics.rowPageNumbers.map((rowPageNumbers, rowIndex) => {
               const top = pageLayoutMetrics.rowTopOffsets[rowIndex] ?? 0;
               const rowHeight = pageLayoutMetrics.rowHeights[rowIndex] ?? 0;
 
@@ -331,25 +331,27 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
                       <PdfPage
                         key={`${documentKey}-${pageNumber}`}
                         documentKey={documentKey}
+                        pdf={doc}
                         pageNumber={pageNumber}
-                        pageSize={pageSize}
+                        baseSize={pageSize}
                         scale={scale}
-                        visible={isRendered}
-                        acquirePage={acquirePage}
-                        setPageSize={setPageSize}
-                        searchMatches={pageMatches}
-                        activeSearchMatch={
-                          activeMatch?.pageNumber === pageNumber
-                            ? activeMatch
-                            : null
-                        }
                         opaqueCanvas={opaqueCanvas}
+                        renderTextLayer={isRendered}
+                        acquirePage={acquirePage}
+                        getPageTextContent={getPageTextContent}
+                        onPageSize={setPageSize}
+                        searchMatches={pageMatches}
+                        activeSearchMatchIndex={
+                          activeMatch?.pageNumber === pageNumber
+                            ? activeMatch.globalIndex
+                            : undefined
+                        }
                       />
                     );
                   })}
                 </div>
               );
-            })}
+            }) : null}
           </div>
         </div>
       </div>
