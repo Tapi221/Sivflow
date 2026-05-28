@@ -107,12 +107,14 @@ export const toLayoutEvent = (
   id: string,
   startsAt: Date,
   minutes: number,
-): LayoutEvent => ({
-  id,
-  startMinutes:
-    startsAt.getHours() * 60 + startsAt.getMinutes(),
-  endMinutes:
-    startsAt.getHours() * 60 +
-    startsAt.getMinutes() +
-    minutes,
-});
+  minimumDurationMinutes = 0,
+): LayoutEvent => {
+  const startMinutes = startsAt.getHours() * 60 + startsAt.getMinutes();
+  const layoutDurationMinutes = Math.max(minutes, minimumDurationMinutes);
+
+  return {
+    id,
+    startMinutes,
+    endMinutes: startMinutes + layoutDurationMinutes,
+  };
+};
