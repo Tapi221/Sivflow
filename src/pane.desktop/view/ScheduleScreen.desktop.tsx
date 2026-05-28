@@ -206,6 +206,7 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     monthTitleDate,
     monthScrollTargetToken,
     visibleDays,
+    virtualRail,
     googleCalendarEvents,
     googleAccounts,
     isAnyCalendarConnecting,
@@ -404,7 +405,7 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
           </div>
         ) : (
           <div className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border-0", IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}>
-            <CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={deferredCalendarEvents} calendarDayColumnWidth={calendarDayColumnWidth} _calendarDayColumnWidth={calendarDayColumnWidth} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} />
+            <CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} virtualRail={virtualRail} visibleEvents={deferredCalendarEvents} calendarDayColumnWidth={calendarDayColumnWidth} _calendarDayColumnWidth={calendarDayColumnWidth} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} />
           </div>
         )}
       </CarvePanel>
