@@ -1,7 +1,7 @@
 [package]
-name = "manifolia"
+name = "sivflow"
 version = "0.0.0"
-description = "Manifolia desktop app"
+description = "Sivflow desktop app"
 authors = ["akari221"]
 edition = "2021"
 
