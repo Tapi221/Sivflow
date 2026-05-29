@@ -108,7 +108,7 @@ const CalendarTimetableViewComponent = ({
 
   return (
     <div className={cn("flex h-full min-h-0 min-w-0 flex-col bg-white text-[#1c1c1e]", className)}>
-      <div className={cn("flex shrink-0 flex-wrap items-center justify-between gap-3 pb-3 pt-1", isCompact ? "px-3" : "px-5")}>
+      <div className={cn("flex shrink-0 flex-wrap items-center justify-between gap-3 pb-3 pt-1", isCompact ? "px-4" : "px-5")}>
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <span className={cn("rounded-full border border-[#eeeeee] bg-[#f8f8f9] font-semibold tabular-nums text-[#6e6e73]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{weekRangeLabel}</span>
           <span className={cn("rounded-full border border-[#eeeeee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>平日5日 / 7限</span>
@@ -124,7 +124,7 @@ const CalendarTimetableViewComponent = ({
         </div>
       </div>
 
-      <div className={cn("min-h-0 flex-1 text-center scrollbar-hidden", isCompact ? "overflow-y-auto overflow-x-hidden px-2 pb-3" : "overflow-auto px-5 pb-5")}>
+      <div className={cn("min-h-0 flex-1 text-center scrollbar-hidden", isCompact ? "overflow-y-auto overflow-x-hidden px-4 pb-3" : "overflow-auto px-5 pb-5")}>
         <div className={cn("gap-y-2 text-left", isCompact ? "grid w-full min-w-0 gap-x-1" : "inline-grid w-max gap-x-2")} style={{ gridTemplateColumns: getTimetableGridTemplateColumns(density) }}>
           <div aria-hidden="true" className={isCompact ? "h-7" : "h-8"} />
 
