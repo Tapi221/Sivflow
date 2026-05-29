@@ -1,4 +1,4 @@
-export const CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY = "manifolia_preload_debug";
+export const CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY = "sivflow_preload_debug";
 
 export const CARD_IMAGE_PRELOAD = {
   eagerRadiusFallback: 8,
