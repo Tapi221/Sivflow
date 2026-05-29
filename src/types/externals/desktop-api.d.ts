@@ -96,6 +96,7 @@ export interface DesktopBridgeApi extends PlatformApi {
 
 declare global {
   interface Window {
+    __TAURI_INTERNALS__?: unknown;
     desktop?: DesktopBridgeApi;
   }
 }
