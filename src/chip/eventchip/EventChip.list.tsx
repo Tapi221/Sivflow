@@ -10,6 +10,7 @@ type CalendarEventChipListProps = {
   event: GoogleCalendarEvent;
 };
 
+const ALL_DAY_LABEL = "終日";
 const LIST_EVENT_ROW_CLASS_NAME = "grid grid-cols-[54px_26px_minmax(0,1fr)] items-stretch";
 const LIST_EVENT_START_TIME_CLASS_NAME = "pt-2.5 text-right text-[11px] font-medium leading-none tabular-nums text-[rgba(60,60,67,0.62)]";
 const LIST_EVENT_LINE_CLASS_NAME = "absolute top-0 -bottom-1.5 left-1/2 w-px -translate-x-1/2 bg-[#eceff3]";
@@ -24,7 +25,7 @@ const MINUTE_IN_MS = 60_000;
 const getEventTitle = (event: GoogleCalendarEvent): string => event.title.trim() || "Untitled";
 
 const getEventStartTimeLabel = (event: GoogleCalendarEvent): string => {
-  if (event.isAllDay) return "";
+  if (event.isAllDay) return ALL_DAY_LABEL;
 
   return format(new Date(event.startsAt), "H:mm");
 };
