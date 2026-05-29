@@ -1,4 +1,5 @@
-import { memo, useMemo, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
+import { memo, useMemo } from "react";
 import { format } from "date-fns";
 import { LIST_EVENT_CHIP_HEIGHT_PX, LIST_EVENT_ROW_HEIGHT_PX } from "./EventChip.list.placement";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
@@ -49,10 +50,10 @@ const getEventTimeRangeLabel = (event: GoogleCalendarEvent): string => {
   return `${format(startsAt, "H:mm")} - ${format(endsAt, "H:mm")}（${durationLabel}）`;
 };
 
-const createEventChipStyle = (tokens: ReturnType<typeof generateColorTokens>): CSSProperties => ({
+const createEventChipStyle = (tokens: ReturnType<typeof generateColorTokens>, isAllDay: boolean): CSSProperties => ({
   ...LIST_EVENT_CHIP_STYLE,
   background: tokens.bg,
-  borderLeft: `3px solid ${tokens.border}`,
+  borderLeft: isAllDay ? undefined : `3px solid ${tokens.border}`,
   color: tokens.text,
 });
 
@@ -61,7 +62,7 @@ const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) =
   const title = getEventTitle(event);
   const startLabel = getEventStartTimeLabel(event);
   const timeRangeLabel = getEventTimeRangeLabel(event);
-  const chipStyle = useMemo(() => createEventChipStyle(tokens), [tokens]);
+  const chipStyle = useMemo(() => createEventChipStyle(tokens, event.isAllDay), [event.isAllDay, tokens]);
 
   return (
     <div className={LIST_EVENT_ROW_CLASS_NAME} style={LIST_EVENT_ROW_STYLE}>
