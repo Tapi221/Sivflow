@@ -3,8 +3,8 @@ import type { CSSProperties } from "react";
 import { addDays, addYears, eachMonthOfInterval, endOfYear, format, isSameDay, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import { getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { useDateFnsLocale, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
+import { useDateFnsLocale, useT } from "@shared/i18n/useT";
 
 type CalendarYearViewProps = {
   yearDate: Date;
@@ -370,7 +370,6 @@ const CalendarYearViewComponent = ({
           endOffset: currentRange.endOffset + YEAR_EXTEND_COUNT,
         }));
       }
-
     };
 
     scroller.addEventListener("scroll", handleScroll, { passive: true });
