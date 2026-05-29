@@ -164,3 +164,58 @@ a:hover,
   -webkit-mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%);
   mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%);
 }
+
+[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 1) {
+  --sidebar-folder-mark-color: #6baa7e;
+}
+
+[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 2) {
+  --sidebar-folder-mark-color: #ffd678;
+}
+
+[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 3) {
+  --sidebar-folder-mark-color: #6499ea;
+}
+
+[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 4) {
+  --sidebar-folder-mark-color: #9ce0e7;
+}
+
+[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 5) {
+  --sidebar-folder-mark-color: #4dce6e;
+}
+
+[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 6) {
+  --sidebar-folder-mark-color: #ff7c7c;
+}
+
+[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 7) {
+  --sidebar-folder-mark-color: #6499ea;
+}
+
+[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n) {
+  --sidebar-folder-mark-color: #4dce6e;
+}
+
+[aria-label="Library hierarchy explorer"] [role="treeitem"]:has(> button + svg path[d^="M2.5 5.25"]) > button + svg {
+  color: var(--sidebar-folder-mark-color, currentColor);
+  overflow: visible;
+  border-radius: 9999px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 18 18' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.6 9.2 7.6 11.2 12.4 6.4' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 18px 18px;
+}
+
+[aria-label="Library hierarchy explorer"] [role="treeitem"]:has(> button + svg path[d^="M2.5 5.25"]) > button + svg > * {
+  display: none;
+}
+
+[aria-label="Library hierarchy explorer"] [role="treeitem"]:has(> button + svg path[d^="M2.5 5.25"]) > button + svg::before {
+  content: "";
+}
+
+[aria-label="Library hierarchy explorer"] [role="treeitem"]:has(> button + svg path[d^="M2.5 5.25"]) > button + svg {
+  background-color: currentColor;
+  box-shadow: inset 0 0 0 2px currentColor;
+}
