@@ -1,13 +1,18 @@
-import { type CSSProperties, type Dispatch, type KeyboardEvent, type SetStateAction, useCallback, useEffect, useMemo, useRef } from "react";
+import { type ChangeEvent, type CSSProperties, type Dispatch, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useCardsRead } from "@/components/card/hooks/useCardsRead";
 import { useCardSets } from "@/components/card/hooks/useCardSets";
-import { getFolderId, getParentFolderId, normalizeFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { DEFAULT_NEW_CARD_SET_NAME, DEFAULT_NEW_FOLDER_NAME, getFolderId, getParentFolderId, normalizeFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { buildExplorerTreeData, parseSelectedTreeId, toSelectedTreeId, type ExplorerTreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
 import { useExpandedFolders } from "@/components/folder/hooks/useExpandedFolders";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
+import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+import { LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LayeredProjectMenu, type LayeredProjectMenuAction } from "@/chip/rightclickpanel.desktop/LayeredProjectMenu";
+import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { FadeSkeleton } from "@/features/fade/skeltom";
 import { toVirtualMfCardDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
+import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { cn } from "@/lib/utils";
@@ -26,6 +31,14 @@ type NodeIconProps = {
   className?: string;
 };
 
+type LayeredProjectContextMenuState = {
+  folderId: string;
+  folderName: string;
+  folderColor: string | null;
+  x: number;
+  y: number;
+};
+
 const LIBRARY_EXPANDED_FOLDERS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-folders";
 const LIBRARY_EXPANDED_CARD_SETS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-card-sets";
 const TREE_INDENT_PX = 16;
@@ -42,6 +55,8 @@ const TREE_ROW_IDLE_CLASS_NAME = "text-[#5f6672] hover:bg-[#f7f7f8] hover:text-[
 const TREE_NODE_MARKER_CLASS_NAME = "library-tree-marker h-4 w-4 shrink-0 rounded-full";
 const TREE_NODE_MARKER_BUTTON_CLASS_NAME = "library-tree-marker h-4 w-4 shrink-0 rounded-full transition hover:opacity-85";
 const TREE_TRASH_BUTTON_BASE_CLASS_NAME = "flex h-8 w-full items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium leading-none tracking-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
+const LAYERED_PROJECT_MENU_DIMENSIONS = { width: LAYERED_PROJECT_MENU_WIDTH, height: LAYERED_PROJECT_MENU_HEIGHT };
+const HIDDEN_INPUT_STYLE: CSSProperties = { position: "fixed", left: -9999, top: -9999, width: 1, height: 1, opacity: 0, pointerEvents: "none" };
 
 const TrashGlyph = ({ className }: NodeIconProps) => (
   <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
@@ -49,8 +64,7 @@ const TrashGlyph = ({ className }: NodeIconProps) => (
   </svg>
 );
 
-const isWorkspaceExplorerTab = (tab: WorkspaceTab | null | undefined): tab is WorkspaceExplorerTab =>
-  tab?.kind === "explorer";
+const isWorkspaceExplorerTab = (tab: WorkspaceTab | null | undefined): tab is WorkspaceExplorerTab => tab?.kind === "explorer";
 
 const getActiveWorkspaceTab = (
   tabs: WorkspaceTab[],
@@ -134,8 +148,19 @@ const addIdsToSet = (
   });
 };
 
-const isNodeExpandable = (node: ExplorerTreeNode): boolean =>
-  node.type === "folder" || node.type === "cardSet";
+const isNodeExpandable = (node: ExplorerTreeNode): boolean => node.type === "folder" || node.type === "cardSet";
+
+const getFolderColorFromNode = (node: ExplorerTreeNode): string | null => {
+  if (node.type !== "folder") return null;
+
+  const folder = node.data as { folderColor?: string | null; folder_color?: string | null } | null | undefined;
+  return folder?.folderColor ?? folder?.folder_color ?? null;
+};
+
+const getNodeMarkerStyle = (node: ExplorerTreeNode): CSSProperties | undefined => {
+  const folderColor = getFolderColorFromNode(node);
+  return folderColor ? { backgroundColor: folderColor } : undefined;
+};
 
 const LibraryHierarchySidebar = () => {
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
@@ -147,11 +172,16 @@ const LibraryHierarchySidebar = () => {
   const updateExplorerTabState = useWorkspaceTabsStore((state) => state.updateExplorerTabState);
   const { folders, loading: foldersLoading } = useFoldersRead();
   const { cards, loading: cardsLoading } = useCardsRead();
-  const { cardSets, loading: cardSetsLoading } = useCardSets();
+  const { cardSets, loading: cardSetsLoading, createCardSet } = useCardSets();
   const { documents, loading: documentsLoading } = useDocumentsRead();
+  const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
   const { expandedFolders, setExpandedFolders } = useExpandedFolders(LIBRARY_EXPANDED_FOLDERS_STORAGE_KEY);
   const { expandedFolders: expandedCardSets, setExpandedFolders: setExpandedCardSets } = useExpandedFolders(LIBRARY_EXPANDED_CARD_SETS_STORAGE_KEY);
   const didSeedInitialOpenStateRef = useRef(false);
+  const layeredProjectMenuRef = useRef<HTMLDivElement | null>(null);
+  const folderColorInputRef = useRef<HTMLInputElement | null>(null);
+  const [layeredProjectMenu, setLayeredProjectMenu] = useState<LayeredProjectContextMenuState | null>(null);
+  const [folderColorInputTargetId, setFolderColorInputTargetId] = useState<string | null>(null);
 
   const activeTab = useMemo(() => getActiveWorkspaceTab(tabs, activeTabId), [activeTabId, tabs]);
 
@@ -216,6 +246,7 @@ const LibraryHierarchySidebar = () => {
     getFolderItems,
     getCardSets,
     getCardSetItems,
+    getNextOrderIndex,
     matchCountMap,
   } = useExplorerDerivedData({
     treeFolders,
@@ -260,8 +291,20 @@ const LibraryHierarchySidebar = () => {
     [activeLibrarySelection.selectedFolderId, activeLibrarySelection.selectedItem],
   );
 
-  const isExplorerDataLoading =
-    foldersLoading || cardsLoading || cardSetsLoading || documentsLoading;
+  const isExplorerDataLoading = foldersLoading || cardsLoading || cardSetsLoading || documentsLoading;
+
+  const {
+    fileInputRef,
+    handleToolbarAddDocument,
+    currentFileAccept,
+    handleToolbarFileInputChange,
+  } = useFolderDocumentUpload({
+    actionFolderId: layeredProjectMenu?.folderId ?? null,
+    getNextOrderIndex,
+    setExpandedFolders,
+  });
+
+  useRightClickPanelDismiss(LAYERED_PROJECT_MENU_PANEL_ID, layeredProjectMenu !== null, layeredProjectMenuRef, () => setLayeredProjectMenu(null));
 
   const applyExplorerSelection = useCallback(
     ({ selectedFolderId, selectedItem }: ExplorerSelectionPatch) => {
@@ -276,8 +319,7 @@ const LibraryHierarchySidebar = () => {
       const explorerTab = isWorkspaceExplorerTab(activeTab)
         ? activeTab
         : defaultExplorerTab ?? firstExplorerTab ?? null;
-      const baseState =
-        explorerTab?.explorerState ?? createDefaultExplorerRouteState();
+      const baseState = explorerTab?.explorerState ?? createDefaultExplorerRouteState();
       const nextState = {
         ...baseState,
         selectedFolderId,
@@ -305,6 +347,101 @@ const LibraryHierarchySidebar = () => {
       updateExplorerTabState,
     ],
   );
+
+  const closeLayeredProjectMenu = useCallback(() => {
+    setLayeredProjectMenu(null);
+  }, []);
+
+  const handleOpenLayeredProjectMenu = useCallback((event: ReactMouseEvent<HTMLElement>, node: ExplorerTreeNode, depth: number) => {
+    if (depth !== 0 || node.type !== "folder") return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const { x, y } = clampRightClickPanelPosition(event.clientX, event.clientY, LAYERED_PROJECT_MENU_DIMENSIONS);
+
+    setLayeredProjectMenu({
+      folderId: node.rawId,
+      folderName: node.name,
+      folderColor: getFolderColorFromNode(node),
+      x,
+      y,
+    });
+  }, []);
+
+  const handleChangeFolderColor = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const folderId = folderColorInputTargetId;
+    if (!folderId) return;
+
+    const folderColor = event.target.value;
+    setFolderColorInputTargetId(null);
+    void updateFolder(folderId, { folderColor });
+  }, [folderColorInputTargetId, updateFolder]);
+
+  const layeredProjectMenuActions = useMemo<LayeredProjectMenuAction[]>(() => {
+    if (!layeredProjectMenu) return [];
+
+    const { folderId, folderName, folderColor } = layeredProjectMenu;
+
+    return [
+      {
+        id: "change-color",
+        onSelect: () => {
+          setFolderColorInputTargetId(folderId);
+          window.setTimeout(() => {
+            if (!folderColorInputRef.current) return;
+            if (folderColor) folderColorInputRef.current.value = folderColor;
+            folderColorInputRef.current.click();
+          }, 0);
+          closeLayeredProjectMenu();
+        },
+      },
+      {
+        id: "rename",
+        onSelect: () => {
+          const nextName = window.prompt("フォルダ名を変更", folderName)?.trim();
+          closeLayeredProjectMenu();
+          if (!nextName || nextName === folderName) return;
+          void updateFolder(folderId, { folderName: nextName, name: nextName });
+        },
+      },
+      {
+        id: "create-card-set",
+        onSelect: () => {
+          closeLayeredProjectMenu();
+          void createCardSet(DEFAULT_NEW_CARD_SET_NAME, folderId);
+        },
+      },
+      {
+        id: "create-folder",
+        onSelect: () => {
+          closeLayeredProjectMenu();
+          void createFolder(DEFAULT_NEW_FOLDER_NAME, folderId);
+        },
+      },
+      {
+        id: "import-pdf",
+        onSelect: () => {
+          handleToolbarAddDocument();
+          closeLayeredProjectMenu();
+        },
+      },
+      {
+        id: "hide",
+        onSelect: () => {
+          closeLayeredProjectMenu();
+          void updateFolder(folderId, { isHidden: true });
+        },
+      },
+      {
+        id: "delete",
+        onSelect: () => {
+          closeLayeredProjectMenu();
+          void deleteFolder(folderId);
+        },
+      },
+    ];
+  }, [closeLayeredProjectMenu, createCardSet, createFolder, deleteFolder, handleToolbarAddDocument, layeredProjectMenu, updateFolder]);
 
   const setFolderNodeOpen = useCallback(
     (folderId: string, isOpen: boolean) => {
@@ -489,21 +626,11 @@ const LibraryHierarchySidebar = () => {
   useEffect(() => {
     const selectedItem = activeLibrarySelection.selectedItem;
     const selectedFolderId = activeLibrarySelection.selectedFolderId;
-    const selectedCard =
-      selectedItem?.type === "card" ? cardById.get(selectedItem.id) : null;
-    const selectedCardSet =
-      selectedItem?.type === "cardSet" ? cardSetById.get(selectedItem.id) : null;
-    const selectedDocument =
-      selectedItem?.type === "document" ? documentById.get(selectedItem.id) : null;
-    const cardFolderId = selectedCard
-      ? getCardFolderId(selectedCard, cardSetById)
-      : null;
-    const targetFolderId =
-      selectedFolderId ??
-      cardFolderId ??
-      selectedCardSet?.folderId ??
-      selectedDocument?.folderId ??
-      null;
+    const selectedCard = selectedItem?.type === "card" ? cardById.get(selectedItem.id) : null;
+    const selectedCardSet = selectedItem?.type === "cardSet" ? cardSetById.get(selectedItem.id) : null;
+    const selectedDocument = selectedItem?.type === "document" ? documentById.get(selectedItem.id) : null;
+    const cardFolderId = selectedCard ? getCardFolderId(selectedCard, cardSetById) : null;
+    const targetFolderId = selectedFolderId ?? cardFolderId ?? selectedCardSet?.folderId ?? selectedDocument?.folderId ?? null;
     const ancestorIds = getFolderAncestorIds(targetFolderId, treeFolders);
 
     addIdsToSet(ancestorIds, setExpandedFolders);
@@ -542,6 +669,7 @@ const LibraryHierarchySidebar = () => {
     const ancestorBranchMask = branchMask.slice(0, -1);
     const shouldContinueCurrentBranch = branchMask[branchMask.length - 1] ?? false;
     const rowStyle: CSSProperties = { paddingLeft: TREE_ROW_BASE_PADDING_LEFT_PX + depth * TREE_INDENT_PX };
+    const markerStyle = getNodeMarkerStyle(node);
 
     return (
       <div key={node.id} className="relative">
@@ -589,6 +717,7 @@ const LibraryHierarchySidebar = () => {
             aria-selected={isSelected}
             aria-expanded={isExpandable ? isOpen : undefined}
             onClick={() => handleSelectNode(node)}
+            onContextMenu={(event) => handleOpenLayeredProjectMenu(event, node, depth)}
             onKeyDown={(event) => handleRowKeyDown(event, node)}
             className={cn(
               TREE_ROW_BASE_CLASS_NAME,
@@ -606,9 +735,10 @@ const LibraryHierarchySidebar = () => {
                   handleToggleNode(node);
                 }}
                 className={TREE_NODE_MARKER_BUTTON_CLASS_NAME}
+                style={markerStyle}
               />
             ) : (
-              <span className={TREE_NODE_MARKER_CLASS_NAME} aria-hidden="true" />
+              <span className={TREE_NODE_MARKER_CLASS_NAME} style={markerStyle} aria-hidden="true" />
             )}
 
             <span className="min-w-0 flex-1 truncate">{node.name}</span>
@@ -633,6 +763,15 @@ const LibraryHierarchySidebar = () => {
   }
 
   const isTrashSelected = activeLibrarySelection.selectedItem?.type === "trash";
+  const layeredProjectMenuElement = layeredProjectMenu ? (
+    <LayeredProjectMenu
+      x={layeredProjectMenu.x}
+      y={layeredProjectMenu.y}
+      actions={layeredProjectMenuActions}
+      menuRef={layeredProjectMenuRef}
+      noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE}
+    />
+  ) : null;
 
   return (
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-2 pl-0 pr-2 pt-2 font-sans text-[#5f6672] antialiased" aria-label="Library hierarchy explorer">
@@ -667,6 +806,10 @@ const LibraryHierarchySidebar = () => {
           <span className="truncate">ごみ箱</span>
         </button>
       </div>
+
+      <input ref={folderColorInputRef} type="color" aria-label="フォルダ色" style={HIDDEN_INPUT_STYLE} onChange={handleChangeFolderColor} onBlur={() => setFolderColorInputTargetId(null)} />
+      <input ref={fileInputRef} type="file" accept={currentFileAccept} multiple style={HIDDEN_INPUT_STYLE} onChange={handleToolbarFileInputChange} />
+      {layeredProjectMenuElement ? createPortal(layeredProjectMenuElement, document.body) : null}
     </aside>
   );
 };
