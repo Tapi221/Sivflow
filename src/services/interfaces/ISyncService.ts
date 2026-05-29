@@ -1,5 +1,7 @@
-import type { SyncResult } from "@/types/domain/sync";
+import type { SyncConflict as DomainSyncConflict, SyncEntity, SyncResult } from "@/types/domain/sync";
 import type { NetworkStatus, SyncContextSource } from "@/types/domain/telemetry";
+
+export type { SyncEntity };
 
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonObject | JsonArray;
@@ -7,17 +9,16 @@ export type JsonObject = { [key: string]: JsonValue };
 export type JsonArray = JsonValue[];
 
 export type SyncTaskType = "upload" | "download";
-export type SyncEntity =
-  | "card"
-  | "folder"
-  | "cardSet"
-  | "document"
-  | "tag"
-  | "userSetting"
-  | "asset";
 export type SyncPriority = "critical" | "high" | "medium" | "low";
 export type SyncOperationType = "create" | "update" | "delete";
 export type MergeStrategy = "server_wins" | "client_wins" | "manual";
+export type SyncConflict = Pick<DomainSyncConflict, "id"> & {
+  entity: DomainSyncConflict["entityType"];
+  targetId: DomainSyncConflict["entityId"];
+  local: unknown;
+  remote: unknown;
+  createdAt: DomainSyncConflict["detectedAt"];
+};
 
 export interface SyncTask<TPayload = unknown> {
   id: string;
@@ -97,16 +98,6 @@ export interface SyncStats {
   avgDurationMs?: number;
   recentSuccessRate?: number;
   queueDepth?: number;
-}
-
-export interface SyncConflict {
-  id: string;
-  entity: SyncEntity;
-  targetId: string;
-  local: unknown;
-  remote: unknown;
-  createdAt: number;
-  updatedAt?: number;
 }
 
 export interface UserSettingsSnapshot {
