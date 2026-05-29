@@ -23,7 +23,6 @@ import { cn } from "@/lib/utils";
 import { createDefaultExplorerRouteState, WORKSPACE_DEFAULT_EXPLORER_TAB_ID, type WorkspaceExplorerTab, type WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { Card, CardSet, DocumentItem, SelectedExplorerItem } from "@/types";
-import { Tag as TagIcon } from "@/ui/icons";
 
 type ExplorerSelectionPatch = {
   selectedFolderId: string | null;
@@ -63,7 +62,7 @@ const TREE_ROW_BASE_CLASS_NAME = "group relative flex w-full cursor-default sele
 const TREE_ROW_SELECTED_CLASS_NAME = "bg-white text-[#5f6672] shadow-[0_1px_3px_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(0,0,0,0.06)]";
 const TREE_ROW_IDLE_CLASS_NAME = "text-[#5f6672] hover:bg-[#f7f7f8] hover:text-[#5f6672]";
 const TREE_NODE_MARKER_CLASS_NAME = "library-tree-marker h-4 w-4 shrink-0 rounded-full";
-const TREE_TAG_MARKER_CLASS_NAME = "library-tree-marker flex h-4 w-4 shrink-0 items-center justify-center rounded-full border";
+const TREE_TAG_MARKER_CLASS_NAME = "library-tree-marker flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold leading-none";
 const TREE_TOGGLE_BUTTON_CLASS_NAME = "flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[#a7abb3] transition hover:bg-white hover:text-[#6f7580] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
 const TREE_TOGGLE_ICON_CLASS_NAME = "h-3 w-3 transition-transform duration-150";
 const TREE_TOGGLE_SPACER_CLASS_NAME = "h-4 w-4 shrink-0";
@@ -762,9 +761,7 @@ const LibraryHierarchySidebar = () => {
           style={rowStyle}
         >
           <span className={TREE_TOGGLE_SPACER_CLASS_NAME} aria-hidden="true" />
-          <span className={TREE_TAG_MARKER_CLASS_NAME} style={getTagColorSwatchStyle(tag.color)} aria-hidden="true">
-            <TagIcon size={9} strokeWidth={2} />
-          </span>
+          <span className={TREE_TAG_MARKER_CLASS_NAME} style={getTagColorSwatchStyle(tag.color)} aria-hidden="true">#</span>
           <span className="min-w-0 flex-1 truncate">{tag.name}</span>
         </div>
 
