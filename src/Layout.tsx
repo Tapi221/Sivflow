@@ -11,7 +11,7 @@ import { useKatexLoader } from "@/hooks/platform/useKatexLoader";
 import { cn } from "@/lib/utils";
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
-import { UI_TYPO } from "@shared/styles/tokens/typography";
+import { UI_TYPO } from "@shared/design-tokens/typography";
 
 const Layout = () => {
   const location = useLocation();
