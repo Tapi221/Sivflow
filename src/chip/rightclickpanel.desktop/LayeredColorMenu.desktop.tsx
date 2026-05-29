@@ -1,0 +1,158 @@
+import { memo, type CSSProperties, type RefObject } from "react";
+import { RightClickPanelSurface } from "./rightClickPanelCommon";
+import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
+
+export type LayeredColorMenuOption = {
+  id: string;
+  label: string;
+  value: string;
+};
+
+type LayeredColorMenuProps = {
+  x: number;
+  y: number;
+  options?: readonly LayeredColorMenuOption[];
+  currentColor?: string | null;
+  menuRef: RefObject<HTMLDivElement | null>;
+  noDragStyle: CSSProperties;
+  panelId?: RightClickPanelId;
+  panelGroupId?: RightClickPanelId;
+  onSelectColor: (color: string) => void;
+};
+
+export const LAYERED_COLOR_MENU_PANEL_ID = "layered-color-submenu";
+export const LAYERED_COLOR_MENU_OPTIONS: readonly LayeredColorMenuOption[] = [
+  { id: "slate", label: "スレート", value: "#64748b" },
+  { id: "red", label: "レッド", value: "#ef4444" },
+  { id: "orange", label: "オレンジ", value: "#f97316" },
+  { id: "amber", label: "アンバー", value: "#f59e0b" },
+  { id: "yellow", label: "イエロー", value: "#eab308" },
+  { id: "green", label: "グリーン", value: "#22c55e" },
+  { id: "teal", label: "ティール", value: "#14b8a6" },
+  { id: "sky", label: "スカイ", value: "#0ea5e9" },
+  { id: "blue", label: "ブルー", value: "#3b82f6" },
+  { id: "purple", label: "パープル", value: "#8b5cf6" },
+];
+
+const LAYERED_COLOR_MENU_TITLE = "色を変更";
+const LAYERED_COLOR_MENU_GRID_COLUMNS = 5;
+const LAYERED_COLOR_MENU_SWATCH_SIZE = 20;
+const LAYERED_COLOR_MENU_GRID_GAP = 6;
+const LAYERED_COLOR_MENU_GRID_HORIZONTAL_PADDING = 8;
+const LAYERED_COLOR_MENU_GRID_TOP_PADDING = 4;
+const LAYERED_COLOR_MENU_GRID_BOTTOM_PADDING = 8;
+const LAYERED_COLOR_MENU_GRID_WIDTH = LAYERED_COLOR_MENU_GRID_COLUMNS * LAYERED_COLOR_MENU_SWATCH_SIZE + (LAYERED_COLOR_MENU_GRID_COLUMNS - 1) * LAYERED_COLOR_MENU_GRID_GAP + LAYERED_COLOR_MENU_GRID_HORIZONTAL_PADDING * 2;
+
+export const LAYERED_COLOR_MENU_WIDTH = Math.ceil(Math.max(resolveRightClickPanelTextWidth([LAYERED_COLOR_MENU_TITLE]), LAYERED_COLOR_MENU_GRID_WIDTH + RIGHT_CLICK_PANEL_SURFACE_PADDING * 2));
+export const LAYERED_COLOR_MENU_HEIGHT = 92;
+export const LAYERED_COLOR_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
+
+const LAYERED_COLOR_MENU_STYLE = `
+.layered-color-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(${LAYERED_COLOR_MENU_GRID_COLUMNS}, ${LAYERED_COLOR_MENU_SWATCH_SIZE}px);
+  justify-content: start;
+  gap: ${LAYERED_COLOR_MENU_GRID_GAP}px;
+  padding: ${LAYERED_COLOR_MENU_GRID_TOP_PADDING}px ${LAYERED_COLOR_MENU_GRID_HORIZONTAL_PADDING}px ${LAYERED_COLOR_MENU_GRID_BOTTOM_PADDING}px;
+}
+
+.layered-color-menu-swatch {
+  display: grid;
+  place-items: center;
+  width: ${LAYERED_COLOR_MENU_SWATCH_SIZE}px;
+  height: ${LAYERED_COLOR_MENU_SWATCH_SIZE}px;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 9999px;
+  background: transparent;
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.38);
+}
+
+.layered-color-menu-swatch:not(:disabled) {
+  cursor: default;
+}
+
+.layered-color-menu-swatch:not(:disabled):hover,
+.layered-color-menu-swatch:not(:disabled):focus-visible {
+  outline: 2px solid rgba(0, 0, 0, 0.12);
+  outline-offset: 1px;
+}
+
+.layered-color-menu-swatch--selected {
+  outline: 2px solid rgba(59, 130, 246, 0.42);
+  outline-offset: 1px;
+}
+
+.layered-color-menu-swatch-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: currentColor;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.16);
+}
+`;
+
+const normalizeColorValue = (color?: string | null): string | null => color?.trim().toLowerCase() ?? null;
+
+const LayeredColorMenuBase = ({
+  x,
+  y,
+  options = LAYERED_COLOR_MENU_OPTIONS,
+  currentColor,
+  menuRef,
+  noDragStyle,
+  panelId = LAYERED_COLOR_MENU_PANEL_ID,
+  panelGroupId,
+  onSelectColor,
+}: LayeredColorMenuProps) => {
+  const normalizedCurrentColor = normalizeColorValue(currentColor);
+
+  return (
+    <>
+      <style>{LAYERED_COLOR_MENU_STYLE}</style>
+      <RightClickPanelSurface
+        x={x}
+        y={y}
+        width={LAYERED_COLOR_MENU_WIDTH}
+        panelRef={menuRef}
+        noDragStyle={noDragStyle}
+        ariaLabel="color submenu"
+        panelId={panelId}
+        panelGroupId={panelGroupId}
+      >
+        <div className="right-click-panel-title">{LAYERED_COLOR_MENU_TITLE}</div>
+        <div className="layered-color-menu-grid">
+          {options.map((option) => {
+            const isSelected = normalizeColorValue(option.value) === normalizedCurrentColor;
+
+            return (
+              <button
+                key={option.id}
+                type="button"
+                aria-label={`色を${option.label}に変更`}
+                aria-pressed={isSelected}
+                title={option.label}
+                className={["layered-color-menu-swatch", isSelected ? "layered-color-menu-swatch--selected" : null].filter(Boolean).join(" ")}
+                style={{ backgroundColor: option.value }}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onSelectColor(option.value);
+                }}
+              >
+                {isSelected ? <span className="layered-color-menu-swatch-dot" /> : null}
+              </button>
+            );
+          })}
+        </div>
+      </RightClickPanelSurface>
+    </>
+  );
+};
+
+const LayeredColorMenu = memo(LayeredColorMenuBase);
+
+LayeredColorMenu.displayName = "LayeredColorMenu";
+
+export { LayeredColorMenu };
