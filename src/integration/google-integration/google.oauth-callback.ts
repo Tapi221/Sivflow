@@ -47,6 +47,15 @@ const renderMessage = (): void => {
   root.replaceChildren(main);
 };
 
+const postCallbackPayloadToOpener = (payload: GoogleOAuthCallbackPayload): void => {
+  try {
+    if (!window.opener) return;
+    window.opener.postMessage(payload, window.location.origin);
+  } catch {
+    // opener がない環境では BroadcastChannel / storage で通知する。
+  }
+};
+
 const broadcastCallbackPayload = (payload: GoogleOAuthCallbackPayload): void => {
   if (typeof BroadcastChannel === "undefined") return;
   const channel = new BroadcastChannel(GOOGLE_OAUTH_CALLBACK_CHANNEL);
@@ -63,9 +72,20 @@ const storeCallbackPayload = (payload: GoogleOAuthCallbackPayload): void => {
   }
 };
 
+const closeCallbackWindow = (): void => {
+  try {
+    if (!window.opener) return;
+    window.setTimeout(() => window.close(), 300);
+  } catch {
+    // 自動クローズできないブラウザではメッセージ表示を残す。
+  }
+};
+
 const notifyCallbackPayload = (payload: GoogleOAuthCallbackPayload): void => {
+  postCallbackPayloadToOpener(payload);
   broadcastCallbackPayload(payload);
   storeCallbackPayload(payload);
+  closeCallbackWindow();
 };
 
 export const createGoogleOAuthCallbackPayload = (url: URL): GoogleOAuthCallbackPayload | null => {
