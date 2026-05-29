@@ -26,7 +26,7 @@ export const CalendarDateButton = ({
         "appearance-none border-0 p-0 transition-colors hover:bg-[#f4f5f7]",
         "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
         isToday && "bg-[#f0f6ff]",
-        !isToday && isSelected && "bg-[#f4f5f7]",
+        !isToday && isSelected && "bg-[rgb(var(--ds-color-tag-sky-bg-rgb)/0.38)]",
         className,
       )}
       aria-pressed={isSelected}
