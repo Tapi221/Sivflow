@@ -5,30 +5,13 @@
  */
 
 import type { Auth } from "firebase/auth";
+import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
 
 // ─────────────────────────────────────────────────────────────
 // カレンダーイベント
 // ─────────────────────────────────────────────────────────────
 
-export interface GoogleCalendarEvent {
-  id: string;
-
-  calendarId: string;
-
-  title: string;
-
-  description?: string;
-
-  location?: string;
-
-  startsAt: Date;
-
-  endsAt: Date;
-
-  isAllDay: boolean;
-
-  accentColor: string;
-}
+export type GoogleCalendarEvent = CalendarEvent;
 
 // ─────────────────────────────────────────────────────────────
 // カレンダー一覧
