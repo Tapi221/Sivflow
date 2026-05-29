@@ -179,7 +179,7 @@ const CalendarWeekDayGridComponent = ({
                   {events.map((event) => {
                     const tokens = generateColorTokens(event.accentColor);
                     return (
-                      <div key={createEventKey(event)} className={eventChipAllDayClass} style={{ background: tokens.bg, color: tokens.text, borderLeft: `3px solid ${tokens.border}` }} title={event.title}>
+                      <div key={createEventKey(event)} className={eventChipAllDayClass} style={{ background: tokens.bg, color: tokens.text }} title={event.title}>
                         {event.title || "Untitled"}
                       </div>
                     );
