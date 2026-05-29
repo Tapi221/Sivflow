@@ -14,7 +14,7 @@ const CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME =
 const CALENDAR_DAY_NUMBER_CIRCLE_TODAY_CLASS_NAME =
   "bg-[#eeeeee] !text-[#3f3f3f] shadow-none ring-1 ring-[#dedede]";
 const CALENDAR_DAY_NUMBER_CIRCLE_SELECTED_CLASS_NAME =
-  "bg-[#e8f3ff] !text-[#4f7fae] shadow-[0_1px_4px_rgba(72,120,168,0.12)] ring-1 ring-inset ring-[#cfe3f5]";
+  "border border-[#cfe8d7] bg-[#f3fbf6] !text-[#5f7f6b] shadow-[0_1px_3px_rgba(70,118,82,0.10),inset_0_0_0_1px_rgba(255,255,255,0.70)]";
 
 const getCalendarDayNumberCircleClassName = ({
   isToday = false,
