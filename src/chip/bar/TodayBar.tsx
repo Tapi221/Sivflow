@@ -1,8 +1,8 @@
 import { format } from "date-fns";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
-import { useDateFnsLocale, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
+import { useDateFnsLocale, useT } from "@shared/i18n/useT";
 
 type Props = {
   onPrevious: () => void;
