@@ -35,8 +35,8 @@ const TREE_ROW_HEIGHT_CLASS_NAME = "h-7";
 const TREE_EMPTY_TEXT_CLASS_NAME = "px-3 py-2 text-[12px] font-medium leading-[1.45] tracking-normal text-[#c7c7cc]";
 const TREE_GUIDE_CLASS_NAME = "pointer-events-none absolute bg-[#eeeeee]";
 const TREE_ROW_BASE_CLASS_NAME = "group relative flex w-full cursor-default select-none items-center gap-1 rounded-[10px] pr-2 text-left text-[12px] font-medium leading-none tracking-normal outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
-const TREE_ROW_SELECTED_CLASS_NAME = "bg-white text-[#6d747f] shadow-[0_1px_3px_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(0,0,0,0.06)]";
-const TREE_ROW_IDLE_CLASS_NAME = "text-[#8e8e93] hover:bg-[#f7f7f8] hover:text-[#6d747f]";
+const TREE_ROW_SELECTED_CLASS_NAME = "bg-white text-[#5f6672] shadow-[0_1px_3px_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(0,0,0,0.06)]";
+const TREE_ROW_IDLE_CLASS_NAME = "text-[#5f6672] hover:bg-[#f7f7f8] hover:text-[#5f6672]";
 const TREE_NODE_MARKER_CLASS_NAME = "library-tree-marker h-4 w-4 shrink-0 rounded-full";
 const TREE_NODE_MARKER_BUTTON_CLASS_NAME = "library-tree-marker h-4 w-4 shrink-0 rounded-full transition hover:opacity-85";
 const TREE_TRASH_BUTTON_BASE_CLASS_NAME = "flex h-8 w-full items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium leading-none tracking-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
@@ -532,19 +532,18 @@ const LibraryHierarchySidebar = () => {
     index: number,
     siblingCount: number,
   ) {
-    const childCount = node.children?.length ?? 0;
-    const hasChildren = childCount > 0;
+    const hasChildren = Boolean(node.children?.length);
     const isExpandable = isNodeExpandable(node);
     const isOpen = isExpandable && isNodeOpen(node);
     const isSelected = selectedTreeId === node.id;
-    const ancestorBranchMask = branchMask.slice(0, -1);
-    const shouldContinueCurrentBranch = branchMask[branchMask.length - 1] ?? false;
+    const isLastSibling = index === siblingCount - 1;
+    const childBranchMask = [...branchMask, !isLastSibling];
     const rowStyle: CSSProperties = { paddingLeft: TREE_ROW_BASE_PADDING_LEFT_PX + depth * TREE_INDENT_PX };
 
     return (
       <div key={node.id} className="relative">
         <div className="relative">
-          {ancestorBranchMask.map((shouldDrawGuide, guideIndex) =>
+          {branchMask.map((shouldDrawGuide, guideIndex) =>
             shouldDrawGuide ? (
               <span
                 key={`${node.id}:guide:${guideIndex}`}
@@ -554,16 +553,6 @@ const LibraryHierarchySidebar = () => {
               />
             ) : null,
           )}
-          {depth > 0 ? (
-            <span
-              aria-hidden="true"
-              className={cn(
-                TREE_GUIDE_CLASS_NAME,
-                shouldContinueCurrentBranch ? "bottom-0 top-0 w-px" : "top-0 h-1/2 w-px",
-              )}
-              style={{ left: TREE_GUIDE_LEFT_OFFSET_PX + (depth - 1) * TREE_INDENT_PX }}
-            />
-          ) : null}
           {depth > 0 ? (
             <span
               aria-hidden="true"
@@ -616,9 +605,9 @@ const LibraryHierarchySidebar = () => {
               renderTreeNode(
                 childNode,
                 depth + 1,
-                [...branchMask, childIndex < childCount - 1],
+                childBranchMask,
                 childIndex,
-                childCount,
+                node.children?.length ?? 0,
               ),
             )}
           </div>
@@ -630,7 +619,7 @@ const LibraryHierarchySidebar = () => {
   const isTrashSelected = activeLibrarySelection.selectedItem?.type === "trash";
 
   return (
-    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-2 pl-0 pr-2 pt-2 font-sans text-[#3f4652] antialiased" aria-label="Library hierarchy explorer">
+    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-2 pl-0 pr-2 pt-2 font-sans text-[#5f6672] antialiased" aria-label="Library hierarchy explorer">
       <div className="min-h-0 flex-1 overflow-y-auto">
         {isExplorerDataLoading ? (
           <FadeSkeleton ariaLabel="ライブラリを読み込み中" />
