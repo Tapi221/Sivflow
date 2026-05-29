@@ -8,10 +8,10 @@ import { MiniCalendarSection } from "@/features/calendar/panel/MiniCalendarSecti
 import { GOOGLE_SOURCE_ROW_CLASS_NAME, SelectableGoogleSourceRow } from "@/features/calendar/panel/SelectableGoogleSourceRow";
 import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
-import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+import { useT } from "@shared/i18n/useT";
 
 type CalendarContextMenuState = { accountId: string; calendarId: string; calendarName: string; color: string; x: number; y: number };
 
