@@ -1,12 +1,12 @@
 import type { RefObject, UIEvent } from "react";
-import { startTransition, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { useCalendarLayout } from "@/features/calendar/layout/useCalendarLayout.desktop";
 import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
+import type { GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
 import type { CalendarDateRange } from "./calendarRange.types";
 import type { CalendarGridStyle, CalendarViewMode, CalendarViewModeSelection, GoogleAccountDisplay } from "./scheduleScreen.types";
-import type { GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useCalendarNavigation } from "./useCalendarNavigation";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
@@ -60,8 +60,6 @@ export type UseScheduleScreenReturn = {
   handleMonthCellSelectDate: (date: Date) => void;
   handleMonthRenderedRangeChange: (range: CalendarDateRange) => void;
   handleYearRenderedRangeChange: (range: CalendarDateRange) => void;
-  handleListReachStart: () => void;
-  handleListReachEnd: () => void;
 
   setMonthTitleDate: (date: Date) => void;
 };
@@ -106,18 +104,6 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     });
   }, []);
 
-  const handleListReachStart = useCallback(() => {
-    startTransition(() => {
-      navigation.extendCalendarBufferLeft();
-    });
-  }, [navigation]);
-
-  const handleListReachEnd = useCallback(() => {
-    startTransition(() => {
-      navigation.extendCalendarBufferRight();
-    });
-  }, [navigation]);
-
   const visibleRange = useCalendarVisibleRange({
     currentDate: navigation.currentDate,
     selectedViewMode: navigation.primaryViewMode,
@@ -141,8 +127,6 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     calendarBuffer: navigation.calendarBuffer,
     viewportWidth: navigation.viewportWidth,
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
-    onExtendLeft: navigation.extendCalendarBufferLeft,
-    onExtendRight: navigation.extendCalendarBufferRight,
     onVisibleDateChange: navigation.handleVisibleDateChange,
     scrollTargetToken: navigation.calendarScrollToken,
   });
@@ -224,8 +208,6 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     handleMonthCellSelectDate: navigation.handleMonthCellSelectDate,
     handleMonthRenderedRangeChange,
     handleYearRenderedRangeChange,
-    handleListReachStart,
-    handleListReachEnd,
     setMonthTitleDate: navigation.setMonthTitleDate,
   };
 };
