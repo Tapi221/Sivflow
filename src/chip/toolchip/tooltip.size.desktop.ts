@@ -1,6 +1,6 @@
 const TOOLTIP_RIGHT_CLICK_PANEL_SURFACE_CLASS_NAMES = {
   tooltip: "border border-[rgba(0,0,0,0.12)] bg-white text-[#4a4a4a] font-normal tracking-normal shadow-[0_6px_20px_rgba(0,0,0,0.14),0_1px_6px_rgba(0,0,0,0.08)] antialiased",
-  arrow: "border border-[rgba(0,0,0,0.12)] bg-white",
+  arrow: "bg-white",
 } as const;
 
 export const TOOLTIP_SIZE_CLASS_NAMES = {
