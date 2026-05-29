@@ -34,7 +34,7 @@ const canDeleteDocumentBlob = async (
 ) => {
   if (!blobId) return false;
   const sharedRef = await documents
-    .filter((doc: unknown) => {
+    .filter((doc: DocumentRecord) => {
       if (!doc || doc.id === excludeDocumentId) return false;
       const refId = doc.localFileId ?? doc.id ?? null;
       if (!refId || refId !== blobId) return false;
