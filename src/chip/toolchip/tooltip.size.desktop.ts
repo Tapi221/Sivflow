@@ -1,20 +1,20 @@
 const TOOLTIP_SURFACE_CLASS_NAMES = {
-  tooltip: "border border-[#d9d9df] bg-[#f5f5f7] text-[#5a5a63] shadow-[0_8px_22px_rgba(24,24,27,0.18),inset_0_1px_0_rgba(255,255,255,0.9)]",
-  arrow: "border border-[#d9d9df] bg-[#f5f5f7]",
+  tooltip: "border border-[#ececf0] bg-white text-[#60636b] shadow-[0_6px_16px_rgba(35,36,40,0.12)]",
+  arrow: "hidden",
 } as const;
 
 export const TOOLTIP_SIZE_CLASS_NAMES = {
   default: {
-    tooltip: "min-h-[26px] rounded-[13px] px-3 py-1.5 text-[12px] leading-none",
-    arrow: "h-2.5 w-2.5",
+    tooltip: "min-h-[22px] rounded-[8px] px-2.5 py-1 text-[12px] leading-none",
+    arrow: "h-0 w-0",
   },
   compact: {
-    tooltip: "min-h-[22px] rounded-[11px] px-2.5 py-1 text-[11px] leading-none",
-    arrow: "h-2 w-2",
+    tooltip: "min-h-[20px] rounded-[7px] px-2 py-0.5 text-[10px] leading-none",
+    arrow: "h-0 w-0",
   },
   segmented: {
-    tooltip: "min-h-[26px] rounded-[13px] px-3 py-1.5 text-[12px] leading-none",
-    arrow: "h-2.5 w-2.5",
+    tooltip: "min-h-[22px] rounded-[8px] px-2.5 py-1 text-[12px] leading-none",
+    arrow: "h-0 w-0",
   },
 } as const;
 
