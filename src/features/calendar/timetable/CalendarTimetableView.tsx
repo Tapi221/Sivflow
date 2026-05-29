@@ -169,9 +169,9 @@ const CalendarTimetableViewComponent = ({
                   <button key={`${day.toISOString()}-${period.label}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-h-[94px] rounded-[16px] text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", entry ? "border px-4 py-3" : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.accentColor) : undefined}>
                     {entry ? (
                       <span className="flex h-full min-h-[68px] flex-col items-center justify-center text-center">
-                        <span className="max-w-full truncate text-[16px] font-bold leading-snug tracking-[-0.025em] text-inherit">{entry.title}</span>
-                        <span className="mt-1 max-w-full truncate text-[14px] font-semibold leading-snug text-[rgba(28,28,30,0.78)]">{entry.room}</span>
-                        {entry.note ? <span className="mt-2 max-w-full truncate text-[11px] font-semibold text-[rgba(28,28,30,0.48)]">{entry.note}</span> : null}
+                        <span className="max-w-full truncate text-[11px] font-semibold leading-snug tracking-[-0.01em] text-inherit">{entry.title}</span>
+                        <span className="mt-1 max-w-full truncate text-[11px] font-semibold leading-snug text-[rgba(28,28,30,0.78)]">{entry.room}</span>
+                        {entry.note ? <span className="mt-2 max-w-full truncate text-[11px] font-semibold leading-snug text-[rgba(28,28,30,0.48)]">{entry.note}</span> : null}
                       </span>
                     ) : (
                       <span className="flex h-full min-h-[68px] items-center justify-center">
