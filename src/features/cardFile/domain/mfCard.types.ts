@@ -12,7 +12,7 @@ export type MfCardFileV1 = {
   version: typeof MF_CARD_VERSION;
   exportedAt: string;
   app: {
-    name: "Solifa";
+    name: "Manifolia";
     version?: string;
   };
   card: MfDeckCardV1;
@@ -25,14 +25,14 @@ export type MfCardFileV1 = {
 
 export type MfCardValidationResult =
   | {
-    ok: true;
-    value: MfCardFileV1;
-    issues: MfCardIssue[];
-  }
+      ok: true;
+      value: MfCardFileV1;
+      issues: MfCardIssue[];
+    }
   | {
-    ok: false;
-    issues: MfCardIssue[];
-  };
+      ok: false;
+      issues: MfCardIssue[];
+    };
 
 export class MfCardValidationError extends Error {
   readonly issues: MfCardIssue[];

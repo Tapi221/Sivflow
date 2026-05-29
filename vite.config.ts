@@ -27,8 +27,8 @@ export default defineConfig(({ command }) => ({
         type: "module",
       },
       manifest: {
-        name: "Solifa",
-        short_name: "Solifa",
+        name: "Manifolia",
+        short_name: "Manifolia",
         description: "Advanced learning app for serious learners",
         theme_color: "#35507b",
         background_color: "#F8FAFB",
