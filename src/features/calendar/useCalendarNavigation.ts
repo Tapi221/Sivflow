@@ -12,7 +12,7 @@ const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SEL
 
 const isMultiSelectViewModeSelection = (selection: CalendarViewModeSelection): boolean => isViewModeSelectionArray(selection) && selection.length > 1;
 
-const sortMultiSelectViewModes = (viewModes: readonly CalendarViewMode[]): CalendarViewMode[] => MULTI_SELECT_VIEW_MODES.filter((viewMode) => viewModes.includes(viewMode));
+const appendMultiSelectViewMode = (currentSelection: readonly CalendarViewMode[], next: CalendarViewMode): CalendarViewMode[] => [...currentSelection.filter(isMultiSelectViewMode), next].slice(-2);
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return addYears(current, 1);
@@ -61,10 +61,10 @@ const resolveNextViewModeSelection = (currentSelection: CalendarViewModeSelectio
       return remainingSelection[0] ?? next;
     }
 
-    return sortMultiSelectViewModes([...currentSelection.filter(isMultiSelectViewMode), next].slice(-2));
+    return appendMultiSelectViewMode(currentSelection, next);
   }
 
-  if (isMultiSelectViewMode(primaryViewMode) && primaryViewMode !== next) return sortMultiSelectViewModes([primaryViewMode, next]);
+  if (isMultiSelectViewMode(primaryViewMode) && primaryViewMode !== next) return [primaryViewMode, next];
 
   return next;
 };
