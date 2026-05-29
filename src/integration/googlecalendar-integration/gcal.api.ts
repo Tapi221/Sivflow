@@ -152,41 +152,55 @@ const toGoogleEventPayload = (event: Partial<GCalWritableEventInput>): Record<st
 };
 
 export const fetchCalendarList = async (accessToken: string): Promise<GoogleCalendarListItem[]> => {
-  const calendars: GoogleCalendarListItem[] = [];
-  let pageToken: string | undefined;
+  console.info("[GoogleCalendarAPI] calendar list fetch started");
 
-  do {
-    const params = new URLSearchParams({
-      minAccessRole: "reader",
-      showDeleted: "false",
-      showHidden: "true",
+  try {
+    const calendars: GoogleCalendarListItem[] = [];
+    let pageToken: string | undefined;
+
+    do {
+      const params = new URLSearchParams({
+        minAccessRole: "reader",
+        showDeleted: "false",
+        showHidden: "true",
+      });
+
+      if (pageToken) {
+        params.set("pageToken", pageToken);
+      }
+
+      const data = await getJson<GoogleCalendarApiListResponse>(accessToken, `${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList?${params}`);
+
+      calendars.push(
+        ...(data.items ?? [])
+          .filter((i) => i.id && i.summary)
+          .map((i) => ({
+            id: i.id!,
+            summary: i.summary!,
+            summaryOverride: i.summaryOverride,
+            description: i.description,
+            backgroundColor: i.backgroundColor ?? "#4f7cff",
+            foregroundColor: i.foregroundColor,
+            primary: i.primary ?? false,
+            selected: i.selected ?? true,
+          })),
+      );
+
+      pageToken = data.nextPageToken;
+    } while (pageToken);
+
+    console.info("[GoogleCalendarAPI] calendar list fetch completed", {
+      calendarCount: calendars.length,
+      calendarIds: calendars.map((calendar) => calendar.id),
+      defaultSelectedCalendarIds: calendars.filter((calendar) => calendar.primary || calendar.selected).map((calendar) => calendar.id),
+      primaryCalendarIds: calendars.filter((calendar) => calendar.primary).map((calendar) => calendar.id),
     });
 
-    if (pageToken) {
-      params.set("pageToken", pageToken);
-    }
-
-    const data = await getJson<GoogleCalendarApiListResponse>(accessToken, `${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList?${params}`);
-
-    calendars.push(
-      ...(data.items ?? [])
-        .filter((i) => i.id && i.summary)
-        .map((i) => ({
-          id: i.id!,
-          summary: i.summary!,
-          summaryOverride: i.summaryOverride,
-          description: i.description,
-          backgroundColor: i.backgroundColor ?? "#4f7cff",
-          foregroundColor: i.foregroundColor,
-          primary: i.primary ?? false,
-          selected: i.selected ?? true,
-        })),
-    );
-
-    pageToken = data.nextPageToken;
-  } while (pageToken);
-
-  return calendars;
+    return calendars;
+  } catch (error) {
+    console.error("[GoogleCalendarAPI] calendar list fetch failed", error);
+    throw error;
+  }
 };
 
 export const createGoogleCalendar = async ({ accessToken, summary, description }: { accessToken: string; summary: string; description?: string }): Promise<GoogleCalendarListItem> => {
@@ -225,30 +239,59 @@ export const fetchEventsForCalendar = async ({
   rangeStart: Date;
   rangeEnd: Date;
 }): Promise<GoogleCalendarEvent[]> => {
-  const rawEvents: NonNullable<GoogleCalendarApiEventsResponse["items"]> = [];
-  let pageToken: string | undefined;
+  console.info("[GoogleCalendarAPI] events fetch started", {
+    accountId,
+    calendarId,
+    rangeEnd: rangeEnd.toISOString(),
+    rangeStart: rangeStart.toISOString(),
+  });
 
-  do {
-    const params = new URLSearchParams({
-      singleEvents: "true",
-      orderBy: "startTime",
-      timeMin: rangeStart.toISOString(),
-      timeMax: rangeEnd.toISOString(),
+  try {
+    const rawEvents: NonNullable<GoogleCalendarApiEventsResponse["items"]> = [];
+    let pageToken: string | undefined;
+
+    do {
+      const params = new URLSearchParams({
+        singleEvents: "true",
+        orderBy: "startTime",
+        timeMin: rangeStart.toISOString(),
+        timeMax: rangeEnd.toISOString(),
+      });
+
+      if (pageToken) {
+        params.set("pageToken", pageToken);
+      }
+
+      const data = await getJson<GoogleCalendarApiEventsResponse>(accessToken, `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(calendarId)}/events?${params}`);
+
+      rawEvents.push(...(data.items ?? []));
+      pageToken = data.nextPageToken;
+    } while (pageToken);
+
+    const events = rawEvents
+      .map((event) => toGoogleCalendarEvent({ raw: event, accountId, calendarId, accentColor }))
+      .filter(Boolean) as GoogleCalendarEvent[];
+
+    console.info("[GoogleCalendarAPI] events fetch completed", {
+      accountId,
+      calendarId,
+      parsedEventCount: events.length,
+      rangeEnd: rangeEnd.toISOString(),
+      rangeStart: rangeStart.toISOString(),
+      rawEventCount: rawEvents.length,
     });
 
-    if (pageToken) {
-      params.set("pageToken", pageToken);
-    }
-
-    const data = await getJson<GoogleCalendarApiEventsResponse>(accessToken, `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(calendarId)}/events?${params}`);
-
-    rawEvents.push(...(data.items ?? []));
-    pageToken = data.nextPageToken;
-  } while (pageToken);
-
-  return rawEvents
-    .map((event) => toGoogleCalendarEvent({ raw: event, accountId, calendarId, accentColor }))
-    .filter(Boolean) as GoogleCalendarEvent[];
+    return events;
+  } catch (error) {
+    console.error("[GoogleCalendarAPI] events fetch failed", {
+      accountId,
+      calendarId,
+      error,
+      rangeEnd: rangeEnd.toISOString(),
+      rangeStart: rangeStart.toISOString(),
+    });
+    throw error;
+  }
 };
 
 export const createGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, event }: { accessToken: string; accountId?: string; accentColor: string; event: GCalWritableEventInput }): Promise<GoogleCalendarEvent> => {
