@@ -26,6 +26,7 @@ type HoverTooltipProps = {
 };
 
 const TOOLTIP_ARROW_BORDER_CLASS_NAME = "border-[rgba(0,0,0,0.12)]";
+const TOOLTIP_ARROW_SURFACE_CLASS_NAME = "absolute -z-10 rotate-45 rounded-[2px]";
 
 const getTransform = (side: TooltipSide, align: TooltipAlign) => {
   if (side === "top") {
@@ -107,7 +108,7 @@ const getPosition = (
 const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
   if (side === "top") {
     return cn(
-      "bottom-[-4px] border-b border-r",
+      "bottom-[-5px] border-b border-r",
       TOOLTIP_ARROW_BORDER_CLASS_NAME,
       align === "start"
         ? "left-4"
@@ -119,7 +120,7 @@ const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
 
   if (side === "bottom") {
     return cn(
-      "top-[-4px] border-l border-t",
+      "top-[-5px] border-l border-t",
       TOOLTIP_ARROW_BORDER_CLASS_NAME,
       align === "start"
         ? "left-4"
@@ -131,7 +132,7 @@ const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
 
   if (side === "left") {
     return cn(
-      "right-[-4px] border-r border-t",
+      "right-[-5px] border-r border-t",
       TOOLTIP_ARROW_BORDER_CLASS_NAME,
       align === "start"
         ? "top-4"
@@ -142,7 +143,7 @@ const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
   }
 
   return cn(
-    "left-[-4px] border-b border-l",
+    "left-[-5px] border-b border-l",
     TOOLTIP_ARROW_BORDER_CLASS_NAME,
     align === "start"
       ? "top-4"
@@ -228,7 +229,7 @@ export const HoverTooltip = ({
           >
             <div
               className={cn(
-                "relative inline-flex items-center overflow-visible whitespace-nowrap font-medium tracking-[-0.01em]",
+                "relative isolate inline-flex items-center overflow-visible whitespace-nowrap font-medium tracking-[-0.01em]",
                 presetClassNames.tooltip,
                 tooltipClassName,
               )}
@@ -239,7 +240,7 @@ export const HoverTooltip = ({
 
               <span
                 className={cn(
-                  "absolute z-[1] rotate-45",
+                  TOOLTIP_ARROW_SURFACE_CLASS_NAME,
                   presetClassNames.arrow,
                   getArrowClassName(side, align),
                   arrowClassName,
