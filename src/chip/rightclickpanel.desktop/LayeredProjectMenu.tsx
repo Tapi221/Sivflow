@@ -56,6 +56,7 @@ export const LAYERED_PROJECT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
 const LAYERED_PROJECT_MENU_STYLE = `
 .right-click-panel.layered-project-menu-panel {
+  contain: none;
   overflow: visible;
 }
 
