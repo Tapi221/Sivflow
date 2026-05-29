@@ -57,6 +57,8 @@ const getCurrentTimeTopStyle = (now: Date): CSSProperties => ({
   top: `calc(${(now.getHours() * GRID.WEEKDAY_MINUTES_PER_HOUR + now.getMinutes()) / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
 });
 
+const getHourLabelClassName = (hour: number): string => cn("absolute right-2 text-[11px] font-medium tabular-nums text-[#b8bcc5]", hour === 0 ? "top-1 translate-y-0" : "top-0 -translate-y-1/2");
+
 const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]) => {
   const dayKeys = new Set(days.map(getCalendarDateKey));
   const allDayEvents = new Map<string, GoogleCalendarEvent[]>();
@@ -182,7 +184,7 @@ const CalendarWeekDayGridComponent = ({
           <div className="relative border-r bg-white" style={{ borderColor: COLOR.WEEKDAY_COLOR_BORDER_MAIN, zIndex: GRID.WEEKDAY_GRID_TIME_COLUMN_Z_INDEX }}>
             {WEEKDAY_HOURS.map((hour) => (
               <div key={hour} className="relative border-b" style={{ height: `var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})`, borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }}>
-                <span className="absolute right-2 top-0 -translate-y-1/2 text-[11px] font-medium tabular-nums text-[#b8bcc5]">{format(new Date(2000, 0, 1, hour), GRID.WEEKDAY_HOUR_LABEL_FORMAT)}</span>
+                <span className={getHourLabelClassName(hour)}>{format(new Date(2000, 0, 1, hour), GRID.WEEKDAY_HOUR_LABEL_FORMAT)}</span>
               </div>
             ))}
           </div>
