@@ -11,7 +11,7 @@ import { deleteImageBlob, getImageBlob, putImageBlob } from "@/services/imageFil
 import { getLocalDb } from "@/services/localDB";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import type { AssetRecord, UploadedImage } from "@/types";
-import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize";
+import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize.utils";
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
