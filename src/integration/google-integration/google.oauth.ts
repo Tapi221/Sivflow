@@ -3,7 +3,7 @@ import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/electron/app";
 import { readEmail } from "@/integration/googlecalendar-integration/gcal.storage";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
-import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoogleOAuthCallbackPayload } from "./google.oauth-callback";
+import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoogleOAuthCallbackPayload, type GoogleOAuthCallbackPayload } from "./google.oauth-callback";
 
 export type GoogleCalendarAccess = {
   accessToken: string;
@@ -26,7 +26,9 @@ const GOOGLE_OAUTH_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
 const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 const WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
+const WEB_SERVER_CODE_CALLBACK_POLL_MS = 250;
 const WEB_AUTH_WINDOW_TARGET = "flashcard-master-google-oauth";
+const WEB_AUTH_WINDOW_FEATURES = "popup=yes,width=520,height=720";
 const GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE = "failed-precondition";
 const GOOGLE_SCOPE_RECONNECT_MESSAGE = "Google Calendar と Google ToDo をまとめて連携するための権限が必要です。両方の権限を有効にして再連携してください。";
 
@@ -153,15 +155,31 @@ const waitForDesktopCode = (state: string, redirectUri: string): Promise<string>
   });
 });
 
+const parseStoredGoogleOAuthCallbackPayload = (): GoogleOAuthCallbackPayload | null => {
+  try {
+    const raw = localStorage.getItem(GOOGLE_OAUTH_CALLBACK_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as unknown;
+    return isGoogleOAuthCallbackPayload(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
 const waitForWebCode = (state: string, redirectUri: string): Promise<string> => new Promise((resolve, reject) => {
   const expected = new URL(redirectUri);
   let settled = false;
   let timeoutTimer: number | null = null;
+  let pollTimer: number | null = null;
   let broadcastChannel: BroadcastChannel | null = null;
 
   const cleanup = (): void => {
     if (timeoutTimer !== null) window.clearTimeout(timeoutTimer);
+    if (pollTimer !== null) window.clearInterval(pollTimer);
+    window.removeEventListener("message", handleMessage);
     window.removeEventListener("storage", handleStorage);
+    window.removeEventListener("focus", handleStoredCallbackPayload);
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
     broadcastChannel?.close();
     try {
       localStorage.removeItem(GOOGLE_OAUTH_CALLBACK_STORAGE_KEY);
@@ -215,6 +233,11 @@ const waitForWebCode = (state: string, redirectUri: string): Promise<string> => 
     });
   };
 
+  function handleMessage(event: MessageEvent<unknown>): void {
+    if (event.origin !== expected.origin) return;
+    handleCallbackPayload(event.data);
+  }
+
   function handleStorage(event: StorageEvent): void {
     if (event.key !== GOOGLE_OAUTH_CALLBACK_STORAGE_KEY || !event.newValue) return;
     try {
@@ -224,14 +247,28 @@ const waitForWebCode = (state: string, redirectUri: string): Promise<string> => 
     }
   }
 
+  function handleStoredCallbackPayload(): void {
+    handleCallbackPayload(parseStoredGoogleOAuthCallbackPayload());
+  }
+
+  function handleVisibilityChange(): void {
+    if (document.visibilityState === "visible") handleStoredCallbackPayload();
+  }
+
   timeoutTimer = window.setTimeout(() => {
+    handleStoredCallbackPayload();
     finish(() => reject(new Error("OAuth timeout")));
   }, WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS);
+  pollTimer = window.setInterval(handleStoredCallbackPayload, WEB_SERVER_CODE_CALLBACK_POLL_MS);
+  window.addEventListener("message", handleMessage);
   window.addEventListener("storage", handleStorage);
+  window.addEventListener("focus", handleStoredCallbackPayload);
+  document.addEventListener("visibilitychange", handleVisibilityChange);
   if (typeof BroadcastChannel !== "undefined") {
     broadcastChannel = new BroadcastChannel(GOOGLE_OAUTH_CALLBACK_CHANNEL);
     broadcastChannel.onmessage = (event: MessageEvent<unknown>) => handleCallbackPayload(event.data);
   }
+  handleStoredCallbackPayload();
 });
 
 const requestDesktopToken = async (): Promise<GoogleCalendarAccess> => {
@@ -272,13 +309,13 @@ export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<{ cod
   const state = randomBase64Url(16);
   const codeVerifier = randomBase64Url(48);
   const codeChallenge = await createCodeChallenge(codeVerifier);
-  const codePromise = waitForWebCode(state, redirectUri);
   try {
     localStorage.removeItem(GOOGLE_OAUTH_CALLBACK_STORAGE_KEY);
   } catch {
-    // storage が使えない環境では BroadcastChannel のみで受け取る。
+    // storage が使えない環境では BroadcastChannel / postMessage で受け取る。
   }
-  const authWindow = window.open(buildAuthorizeUrl({ clientId, redirectUri, codeChallenge, loginHint, state }), WEB_AUTH_WINDOW_TARGET, "noopener,noreferrer");
+  const codePromise = waitForWebCode(state, redirectUri);
+  const authWindow = window.open(buildAuthorizeUrl({ clientId, redirectUri, codeChallenge, loginHint, state }), WEB_AUTH_WINDOW_TARGET, WEB_AUTH_WINDOW_FEATURES);
   if (!authWindow) throw new Error("Google OAuth window could not be opened");
   const code = await codePromise;
   pendingGoogleCalendarServerCodeVerifier = codeVerifier;
