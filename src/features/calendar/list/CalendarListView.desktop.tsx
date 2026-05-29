@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { differenceInCalendarDays, format, getDaysInMonth, isSameDay, startOfMonth, subDays } from "date-fns";
 import { ja } from "date-fns/locale";
-import { CalendarEventChipListContent } from "@/chip/eventchip/EventChip.list";
+import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
 import { LIST_DAY_GAP_PX, LIST_EMPTY_DAY_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@/chip/eventchip/EventChip.list.placement";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
@@ -64,8 +64,7 @@ const LIST_MAX_MATERIALIZE_OVERSCAN_PX = 20_000;
 const LIST_MATERIALIZE_OVERSCAN_STEP_PX = 2_500;
 const LIST_MAX_RANGE_UPDATE_GUARD_PX = 8_000;
 const DATE_KEY_PART_COUNT = 3;
-const LIST_DAY_RAIL_CLASS_NAME = "pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#eceff3]";
-const LIST_DAY_DOT_CLASS_NAME = "relative mt-2 h-2 w-2 rounded-full border border-[#dedede] bg-white";
+const LIST_DAY_RAIL_CLASS_NAME = "pointer-events-none absolute -bottom-2 left-[67px] top-0 w-px -translate-x-1/2 bg-[#eceff3]";
 const DAY_DATE_NUMBER_CLASS_NAME = "flex h-8 w-8 items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-all duration-150";
 const DAY_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 
@@ -206,6 +205,8 @@ const shouldRefreshRange = (element: HTMLDivElement, metrics: CalendarListVirtua
   return visibleTop < getDayTop(metrics, range.start) + guard || visibleBottom > getDayTop(metrics, range.end) - guard;
 };
 
+const getEventInstanceKey = (dateKey: string, event: GoogleCalendarEvent): string => `${dateKey}:${event.id}:${new Date(event.startsAt).getTime()}:${new Date(event.endsAt).getTime()}`;
+
 const buildListDays = (days: Date[], events: GoogleCalendarEvent[], selectedDate: Date): CalendarListDay[] => {
   const today = new Date();
   const eventsByDay = new Map<string, GoogleCalendarEvent[]>();
@@ -239,11 +240,9 @@ const buildListDays = (days: Date[], events: GoogleCalendarEvent[], selectedDate
 
 const getDayDateNumberClassName = (day: CalendarListDay): string => cn(DAY_DATE_NUMBER_CLASS_NAME, day.isSelected ? "bg-[#3a77b2] text-white ring-1 ring-[#3a77b2]" : day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
 
-const getCalendarListDayEventKey = (dateKey: string, event: GoogleCalendarEvent): string => `${dateKey}:${event.id}:${new Date(event.startsAt).getTime()}:${new Date(event.endsAt).getTime()}`;
+const EmptyDayCard = () => <div className="grid h-full min-h-[38px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch"><div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[#b3b3b3]">—</div><div className="relative flex justify-center"><span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#dedede]" aria-hidden="true" /><span className="relative mt-[8px] h-2 w-2 rounded-full border border-[#dedede] bg-white" aria-hidden="true" /></div><div className="flex h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">{EMPTY_DAY_LABEL}</div></div>;
 
-const EmptyDayCard = () => <div className="flex h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">{EMPTY_DAY_LABEL}</div>;
-
-const CalendarListDaySectionComponent = ({ day, onSelectDate }: CalendarListDaySectionProps) => <section className="grid h-full grid-cols-[108px_26px_minmax(0,1fr)] items-start gap-2" aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}><button type="button" className="group mt-0.5 flex h-8 items-center justify-end gap-1 rounded-[10px] pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25" onClick={() => onSelectDate?.(day.date)}><span className={getDayDateNumberClassName(day)}>{format(day.date, "d")}</span><span className={DAY_WEEKDAY_CLASS_NAME}>{format(day.date, "EEE", { locale: ja })}</span></button><div className="relative flex h-full justify-center"><span className={LIST_DAY_RAIL_CLASS_NAME} aria-hidden="true" /><span className={LIST_DAY_DOT_CLASS_NAME} aria-hidden="true" /></div><div className="min-w-0 space-y-1.5 overflow-hidden">{day.events.length > 0 ? day.events.map((event) => <CalendarEventChipListContent key={getCalendarListDayEventKey(day.dateKey, event)} event={event} />) : <EmptyDayCard />}</div></section>;
+const CalendarListDaySectionComponent = ({ day, onSelectDate }: CalendarListDaySectionProps) => <section className="grid h-full grid-cols-[108px_minmax(0,1fr)] gap-2" aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}><button type="button" className="group mt-0.5 flex h-8 items-center justify-end gap-1 rounded-[10px] pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25" onClick={() => onSelectDate?.(day.date)}><span className={getDayDateNumberClassName(day)}>{format(day.date, "d")}</span><span className={DAY_WEEKDAY_CLASS_NAME}>{format(day.date, "EEE", { locale: ja })}</span></button><div className="relative h-full overflow-visible"><span className={LIST_DAY_RAIL_CLASS_NAME} aria-hidden="true" /><div className="relative h-full space-y-1.5 overflow-hidden">{day.events.length > 0 ? day.events.map((event) => <CalendarEventChipList key={getEventInstanceKey(day.dateKey, event)} event={event} />) : <EmptyDayCard />}</div></div></section>;
 
 const CalendarListDaySection = memo(CalendarListDaySectionComponent);
 
