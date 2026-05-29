@@ -2,7 +2,7 @@ import { memo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { initialWindowMetrics, SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { ScheduleYear } from "./pane/schedule/ScheduleYear";
+import { IosCalendarScheduleYear } from "./integration/ioscalendar/IosCalendarScheduleYear";
 import { NavigationBar, type NavigationItemId } from "./pane/navigationbar/NavigationBar";
 
 const AppContent = () => {
@@ -18,7 +18,7 @@ const AppContent = () => {
         <Text style={styles.title}>Schedule</Text>
       </View>
       <View style={styles.content}>
-        <ScheduleYear selectedDate={selectedDate} yearDate={selectedDate} onSelectDate={setSelectedDate} />
+        <IosCalendarScheduleYear selectedDate={selectedDate} yearDate={selectedDate} onSelectDate={setSelectedDate} />
       </View>
       <NavigationBar activeItemId={activeItemId} onSelectItem={setActiveItemId} />
     </View>
