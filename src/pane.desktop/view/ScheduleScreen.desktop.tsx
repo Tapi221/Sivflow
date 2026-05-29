@@ -14,12 +14,12 @@ import { clearLegacyStoredAppProjects, normalizeRootFolderProjectLabel, readLega
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
 import { createGoogleCalendar } from "@/integration/googlecalendar-integration/gcal.api";
 import type { GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { CalendarWorkspaceToolbar } from "@/pane.desktop/header/ScheduleToolbar";
 import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
 import { CalendarSelectedViewsSplitView } from "@/pane.desktop/leftpane/schedule/Calendar.SelectedViewsSplitView.desktop";
+import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 
 type CalendarEventDisplayRange = { start: Date; end: Date };
 
