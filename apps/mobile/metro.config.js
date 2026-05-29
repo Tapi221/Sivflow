@@ -16,6 +16,7 @@ config.resolver.nodeModulesPaths = [projectNodeModules, workspaceNodeModules];
 config.resolver.extraNodeModules = {
   "@": path.resolve(workspaceRoot, "src"),
   "@constants": path.resolve(workspaceRoot, "constants"),
+  "@core": path.resolve(workspaceRoot, "packages/core/src"),
   "@mobile": path.resolve(projectRoot, "src"),
   "@mobile-renderer": path.resolve(workspaceRoot, "packages/mobile-renderer/src"),
   "@shared": path.resolve(workspaceRoot, "shared"),
