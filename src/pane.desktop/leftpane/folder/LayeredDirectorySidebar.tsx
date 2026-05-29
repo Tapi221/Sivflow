@@ -240,6 +240,17 @@ const LibraryHierarchySidebar = () => {
     [documents],
   );
 
+  const folderById = useMemo(() => {
+    const map = new Map<string, FolderTreeNode>();
+
+    for (const folder of treeFolders) {
+      const folderId = getFolderId(folder);
+      if (folderId) map.set(folderId, folder);
+    }
+
+    return map;
+  }, [treeFolders]);
+
   const {
     rootFolders,
     getChildFolders,
@@ -626,11 +637,13 @@ const LibraryHierarchySidebar = () => {
   useEffect(() => {
     const selectedItem = activeLibrarySelection.selectedItem;
     const selectedFolderId = activeLibrarySelection.selectedFolderId;
+    const selectedFolder = selectedFolderId ? folderById.get(selectedFolderId) : null;
     const selectedCard = selectedItem?.type === "card" ? cardById.get(selectedItem.id) : null;
     const selectedCardSet = selectedItem?.type === "cardSet" ? cardSetById.get(selectedItem.id) : null;
     const selectedDocument = selectedItem?.type === "document" ? documentById.get(selectedItem.id) : null;
+    const selectedFolderParentId = selectedFolder ? getParentFolderId(selectedFolder) : null;
     const cardFolderId = selectedCard ? getCardFolderId(selectedCard, cardSetById) : null;
-    const targetFolderId = selectedFolderId ?? cardFolderId ?? selectedCardSet?.folderId ?? selectedDocument?.folderId ?? null;
+    const targetFolderId = selectedItem?.type === "card" ? cardFolderId : selectedItem?.type === "cardSet" ? selectedCardSet?.folderId ?? null : selectedItem?.type === "document" ? selectedDocument?.folderId ?? null : selectedFolderParentId;
     const ancestorIds = getFolderAncestorIds(targetFolderId, treeFolders);
 
     addIdsToSet(ancestorIds, setExpandedFolders);
@@ -639,16 +652,13 @@ const LibraryHierarchySidebar = () => {
       const cardSetId = selectedCard ? getCardSetIdFromCard(selectedCard) : null;
       if (cardSetId) addIdsToSet([cardSetId], setExpandedCardSets);
     }
-
-    if (selectedItem?.type === "cardSet") {
-      addIdsToSet([selectedItem.id], setExpandedCardSets);
-    }
   }, [
     activeLibrarySelection.selectedFolderId,
     activeLibrarySelection.selectedItem,
     cardById,
     cardSetById,
     documentById,
+    folderById,
     setExpandedCardSets,
     setExpandedFolders,
     treeFolders,
