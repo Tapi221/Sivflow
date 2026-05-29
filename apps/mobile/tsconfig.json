@@ -5,6 +5,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["../../src/*"],
+      "@core/*": ["../../packages/core/src/*"],
       "@mobile/*": ["src/*"],
       "@mobile-renderer/*": ["../../packages/mobile-renderer/src/*"],
       "@constants/*": ["../../constants/*"],
@@ -14,9 +15,9 @@
   "include": [
     "index.ts",
     "src",
+    "../../packages/core/src",
     "../../packages/mobile-renderer/src",
     "../../src/pane.mobilenative",
-    "../../src/features/calendar/calendarEventRange.ts",
     "../../src/integration/googlecalendar-integration/gcalSync.types.ts",
     "../../shared/i18n",
     "app.json"
