@@ -3,13 +3,16 @@ import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, st
 import { createCalendarScrollBuffer, extendCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
 import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
 
-const LIST_PIE_CHART_VIEW_MODES = ["list", "pieChart"] as const satisfies readonly CalendarViewMode[];
+const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
+const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
 
 const isViewModeSelectionArray = (selection: CalendarViewModeSelection): selection is readonly CalendarViewMode[] => Array.isArray(selection);
 
-const isListPieChartViewMode = (viewMode: CalendarViewMode) => viewMode === "list" || viewMode === "pieChart";
+const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SELECT_VIEW_MODE_SET.has(viewMode);
 
-const isListPieChartViewModeSelection = (selection: CalendarViewModeSelection): boolean => isViewModeSelectionArray(selection) && selection.includes("list") && selection.includes("pieChart");
+const isMultiSelectViewModeSelection = (selection: CalendarViewModeSelection): boolean => isViewModeSelectionArray(selection) && selection.length > 1;
+
+const sortMultiSelectViewModes = (viewModes: readonly CalendarViewMode[]): CalendarViewMode[] => MULTI_SELECT_VIEW_MODES.filter((viewMode) => viewModes.includes(viewMode));
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return addYears(current, 1);
@@ -45,12 +48,12 @@ const normalizeCurrentDateForSelectedDate = (date: Date, viewMode: CalendarViewM
   return normalizeViewDate(date, viewMode);
 };
 
-const getSelectedDateStepViewMode = (selection: CalendarViewModeSelection, primaryViewMode: CalendarViewMode): CalendarViewMode => isListPieChartViewModeSelection(selection) ? "pieChart" : primaryViewMode;
+const getSelectedDateStepViewMode = (selection: CalendarViewModeSelection, primaryViewMode: CalendarViewMode): CalendarViewMode => isMultiSelectViewModeSelection(selection) ? "pieChart" : primaryViewMode;
 
 const getPrimaryViewMode = (selection: CalendarViewModeSelection): CalendarViewMode => isViewModeSelectionArray(selection) ? selection[0] : selection;
 
 const resolveNextViewModeSelection = (currentSelection: CalendarViewModeSelection, primaryViewMode: CalendarViewMode, next: CalendarViewMode): CalendarViewModeSelection => {
-  if (!isListPieChartViewMode(next)) return next;
+  if (!isMultiSelectViewMode(next)) return next;
 
   if (isViewModeSelectionArray(currentSelection)) {
     if (currentSelection.includes(next)) {
@@ -58,10 +61,10 @@ const resolveNextViewModeSelection = (currentSelection: CalendarViewModeSelectio
       return remainingSelection[0] ?? next;
     }
 
-    return LIST_PIE_CHART_VIEW_MODES;
+    return sortMultiSelectViewModes([...currentSelection.filter(isMultiSelectViewMode), next].slice(-2));
   }
 
-  if (isListPieChartViewMode(primaryViewMode) && primaryViewMode !== next) return LIST_PIE_CHART_VIEW_MODES;
+  if (isMultiSelectViewMode(primaryViewMode) && primaryViewMode !== next) return sortMultiSelectViewModes([primaryViewMode, next]);
 
   return next;
 };
