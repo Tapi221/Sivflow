@@ -209,7 +209,7 @@ const CalendarWeekDayGridComponent = ({
             const events = createTimedLayoutEvents(timedEvents.get(dayKey) ?? []);
             const isToday = dayKey === currentDayKey;
             return (
-              <div key={dayKey} className={cn("relative", isToday && "bg-[#f8fbff]")}>
+              <div key={dayKey} className="relative bg-white">
                 {WEEKDAY_HOURS.map((hour) => (
                   <div key={hour} className="border-b" style={{ height: `var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})`, borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }} />
                 ))}
