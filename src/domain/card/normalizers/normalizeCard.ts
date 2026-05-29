@@ -377,16 +377,32 @@ export const normalizeCard = (raw: unknown): Card => {
   );
 
   const normalized: Card & {
+    question: string;
+    answer: string;
     questionBlocks: CardBlock[];
     answerBlocks: CardBlock[];
+    level: number;
+    lastReviewedAt: Date | null;
+    subjectiveScore?: SubjectiveScoreValue;
+    learningStartedAt?: Date;
   } = {
     id,
     userId: toStringOr(pick(record.userId, record.user_id), ""),
     deviceId: toStringOr(pick(record.deviceId, record.device_id), ""),
     folderId: toStringOr(pick(record.folderId, record.folder_id), ""),
     cardSetId: toStringOr(pick(record.cardSetId, record.card_set_id), ""),
+    orderIndex: Math.max(0, Math.round(toFiniteNumber(pick(record.orderIndex, record.order_index), 0))),
+    questionNumber: toStringOr(pick(record.questionNumber, record.question_number), ""),
     question: frontText,
     answer: backText,
+    front: {
+      blocks: frontBlocks,
+      ink: normalizeInkDocument(pick(frontFace?.ink, record.questionInk, record.question_ink)) ?? null,
+    },
+    back: {
+      blocks: backBlocks,
+      ink: normalizeInkDocument(pick(backFace?.ink, record.answerInk, record.answer_ink)) ?? null,
+    },
     questionBlocks: frontBlocks,
     answerBlocks: backBlocks,
     currentLevel: Math.max(0, Math.round(levelNum)),
@@ -400,6 +416,10 @@ export const normalizeCard = (raw: unknown): Card => {
     createdAt: normalizeDate(pick(record.createdAt, record.created_at)) ?? new Date(),
     updatedAt: normalizeDate(pick(record.updatedAt, record.updated_at)) ?? new Date(),
     isDeleted: toBoolOr(pick(record.isDeleted, record.is_deleted), false),
+    isDraft: toBoolOr(pick(record.isDraft, record.is_draft), false),
+    hasUncertainty: toBoolOr(pick(record.hasUncertainty, record.has_uncertainty), false),
+    isCompleted: toBoolOr(pick(record.isCompleted, record.is_completed), false),
+    isSilent: toBoolOr(pick(record.isSilent, record.is_silent), false),
     reviewLogs: normalizeReviewLogs(pick(record.reviewLogs, record.review_logs)),
   };
 
