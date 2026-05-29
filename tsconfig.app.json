@@ -16,6 +16,7 @@
       "@/services/localDB": ["src/services/localdb/index.ts"],
       "@/services/firebase": ["src/infrastructure/firebase/client.ts"],
       "@/features/tab/Tab": ["src/pane.desktop/tab.desktopnative/Tab.ts"],
+      "@platform/*": ["packages/platform/src/*"],
       "@web-renderer/*": ["packages/web-renderer/src/*"],
       "@/*": ["src/*"],
       "@constants/*": ["constants/*"],
