@@ -1,12 +1,13 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import type { FormEvent } from "react";
+import { memo } from "react";
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ja } from "date-fns/locale";
+import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import { cn } from "@/lib/utils";
 
 type TimetablePeriod = {
   label: string;
-  time: string;
+  startTime: string;
+  endTime: string;
 };
 
 type TimetableEntry = {
@@ -15,14 +16,9 @@ type TimetableEntry = {
   periodIndex: number;
   title: string;
   room: string;
-  memo: string;
-  color: string;
-  updatedAt: string;
+  accentColor: string;
+  note?: string;
 };
-
-type StoredTimetableEntry = Partial<TimetableEntry>;
-
-type TimetableDraft = Pick<TimetableEntry, "title" | "room" | "memo" | "color">;
 
 type TimetableSlot = {
   dayIndex: number;
@@ -34,377 +30,160 @@ type CalendarTimetableViewProps = {
   className?: string;
 };
 
-const TIMETABLE_STORAGE_KEY = "flashcard-master:schedule:timetable";
-const TIMETABLE_DAY_COUNT = 7;
-const TIMETABLE_GRID_TEMPLATE_COLUMNS = "86px repeat(7, minmax(118px, 1fr))";
+const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金"] as const;
+const TIMETABLE_GRID_TEMPLATE_COLUMNS = "76px repeat(5, minmax(156px, 1fr))";
 const TIMETABLE_PERIODS: readonly TimetablePeriod[] = [
-  { label: "1", time: "08:50-10:20" },
-  { label: "2", time: "10:30-12:00" },
-  { label: "3", time: "13:00-14:30" },
-  { label: "4", time: "14:40-16:10" },
-  { label: "5", time: "16:20-17:50" },
-  { label: "6", time: "18:00-19:30" },
-  { label: "7", time: "19:40-21:10" },
+  { label: "1", startTime: "8:50", endTime: "10:20" },
+  { label: "2", startTime: "10:30", endTime: "12:00" },
+  { label: "3", startTime: "13:00", endTime: "14:30" },
+  { label: "4", startTime: "14:40", endTime: "16:10" },
+  { label: "5", startTime: "16:20", endTime: "17:50" },
+  { label: "6", startTime: "18:00", endTime: "19:30" },
+  { label: "7", startTime: "19:40", endTime: "21:10" },
 ];
-const TIMETABLE_COLORS = [
-  "#dbeafe",
-  "#dcfce7",
-  "#fee2e2",
-  "#fef3c7",
-  "#e0e7ff",
-  "#ccfbf1",
-  "#fce7f3",
-  "#ede9fe",
-] as const;
-const EMPTY_TIMETABLE_DRAFT: TimetableDraft = {
-  title: "",
-  room: "",
-  memo: "",
-  color: TIMETABLE_COLORS[0],
-};
-
-const createTimetableEntryId = (): string => {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return `timetable:${crypto.randomUUID()}`;
-  }
-
-  return `timetable:${Date.now().toString(36)}:${Math.random().toString(36).slice(2)}`;
-};
+const TIMETABLE_ENTRIES: readonly TimetableEntry[] = [
+  { id: "materials-mon-1", dayIndex: 0, periodIndex: 0, title: "材料力学", room: "5N-301", accentColor: "#46D6DB" },
+  { id: "fluid-engineering-mon-2", dayIndex: 0, periodIndex: 1, title: "流体工学", room: "L301", accentColor: "#5484ED" },
+  { id: "linear-algebra-mon-3", dayIndex: 0, periodIndex: 2, title: "線形代数", room: "B202", accentColor: "#A47AE2" },
+  { id: "elasticity-mon-4", dayIndex: 0, periodIndex: 3, title: "弾性力学", room: "L401", accentColor: "#FBD75B" },
+  { id: "heat-transfer-mon-5", dayIndex: 0, periodIndex: 4, title: "伝熱工学", room: "5N-201", accentColor: "#DC2127" },
+  { id: "complex-tue-1", dayIndex: 1, periodIndex: 0, title: "複素解析", room: "L401", accentColor: "#A47AE2" },
+  { id: "complex-tue-2", dayIndex: 1, periodIndex: 1, title: "複素解析", room: "L401", accentColor: "#A47AE2" },
+  { id: "fluid-engineering-tue-3", dayIndex: 1, periodIndex: 2, title: "流体工学", room: "L301", accentColor: "#5484ED" },
+  { id: "elasticity-tue-4", dayIndex: 1, periodIndex: 3, title: "弾性力学", room: "L401", accentColor: "#FBD75B" },
+  { id: "thermo-wed-1", dayIndex: 2, periodIndex: 0, title: "熱力学", room: "L402", accentColor: "#DBADFF" },
+  { id: "thermo-wed-2", dayIndex: 2, periodIndex: 1, title: "熱力学", room: "L402", accentColor: "#DBADFF" },
+  { id: "materials-wed-3", dayIndex: 2, periodIndex: 2, title: "材料力学", room: "5N-301", accentColor: "#46D6DB" },
+  { id: "statistics-wed-5", dayIndex: 2, periodIndex: 4, title: "統計学", room: "B203", accentColor: "#A47AE2" },
+  { id: "fluid-thu-1", dayIndex: 3, periodIndex: 0, title: "流体力学", room: "L301", accentColor: "#5484ED" },
+  { id: "mechanics-thu-2", dayIndex: 3, periodIndex: 1, title: "機械力学", room: "3S-301", accentColor: "#FBD75B" },
+  { id: "info-thu-3", dayIndex: 3, periodIndex: 2, title: "情報科学", room: "B303", accentColor: "#8E8E93" },
+  { id: "material-science-thu-4", dayIndex: 3, periodIndex: 3, title: "材料科学", room: "3N-301", accentColor: "#51B749" },
+  { id: "material-science-thu-5", dayIndex: 3, periodIndex: 4, title: "材料科学", room: "3N-301", accentColor: "#51B749" },
+  { id: "mechanics-fri-1", dayIndex: 4, periodIndex: 0, title: "機械力学", room: "3S-301", accentColor: "#FBD75B" },
+  { id: "fluid-fri-2", dayIndex: 4, periodIndex: 1, title: "流体力学", room: "L301", accentColor: "#5484ED" },
+  { id: "heat-transfer-fri-3", dayIndex: 4, periodIndex: 2, title: "伝熱工学", room: "5N-201", accentColor: "#DC2127" },
+  { id: "design-fri-4", dayIndex: 4, periodIndex: 3, title: "設計演習", room: "CAD室", accentColor: "#8E8E93" },
+];
 
 const createTimetableSlotKey = ({ dayIndex, periodIndex }: TimetableSlot): string => `${dayIndex}:${periodIndex}`;
-
-const isValidTimetableIndex = (value: unknown, max: number): value is number => (
-  typeof value === "number" && Number.isInteger(value) && value >= 0 && value < max
-);
-
-const normalizeStoredTimetableEntry = (
-  item: unknown,
-  index: number,
-): TimetableEntry | null => {
-  const entry = item as StoredTimetableEntry;
-  const title = typeof entry.title === "string" ? entry.title.trim() : "";
-
-  if (!title) return null;
-  if (!isValidTimetableIndex(entry.dayIndex, TIMETABLE_DAY_COUNT)) return null;
-  if (!isValidTimetableIndex(entry.periodIndex, TIMETABLE_PERIODS.length)) return null;
-
-  return {
-    id: typeof entry.id === "string" ? entry.id : createTimetableEntryId(),
-    dayIndex: entry.dayIndex,
-    periodIndex: entry.periodIndex,
-    title,
-    room: typeof entry.room === "string" ? entry.room : "",
-    memo: typeof entry.memo === "string" ? entry.memo : "",
-    color: typeof entry.color === "string" && entry.color ? entry.color : TIMETABLE_COLORS[index % TIMETABLE_COLORS.length],
-    updatedAt: typeof entry.updatedAt === "string" ? entry.updatedAt : new Date().toISOString(),
-  };
-};
-
-const readStoredTimetableEntries = (): TimetableEntry[] => {
-  if (typeof window === "undefined") return [];
-
-  try {
-    const raw = window.localStorage.getItem(TIMETABLE_STORAGE_KEY);
-    if (!raw) return [];
-
-    const parsed = JSON.parse(raw) as unknown;
-    if (!Array.isArray(parsed)) return [];
-
-    return parsed.flatMap((item, index): TimetableEntry[] => {
-      const entry = normalizeStoredTimetableEntry(item, index);
-
-      return entry ? [entry] : [];
-    });
-  } catch {
-    return [];
-  }
-};
-
-const persistTimetableEntries = (entries: TimetableEntry[]) => {
-  if (typeof window === "undefined") return;
-
-  try {
-    window.localStorage.setItem(TIMETABLE_STORAGE_KEY, JSON.stringify(entries));
-  } catch {
-    // localStorage が利用できない環境では画面上の編集状態だけを維持する。
-  }
-};
 
 const buildTimetableWeekDays = (weekDate: Date): Date[] => {
   const weekStart = startOfWeek(weekDate, { weekStartsOn: 1 });
 
-  return Array.from({ length: TIMETABLE_DAY_COUNT }, (_, index) => addDays(weekStart, index));
+  return Array.from({ length: TIMETABLE_DAY_LABELS.length }, (_, index) => addDays(weekStart, index));
 };
 
-const createInitialTimetableSlot = (weekDate: Date): TimetableSlot => {
-  const todayTime = new Date().getTime();
-  const todayIndex = buildTimetableWeekDays(weekDate).findIndex((day) => isSameDay(day, todayTime));
+const createTimetableEntryMap = () => {
+  const map = new Map<string, TimetableEntry>();
+
+  TIMETABLE_ENTRIES.forEach((entry) => {
+    map.set(createTimetableSlotKey(entry), entry);
+  });
+
+  return map;
+};
+
+const formatTimetableWeekRange = (weekDays: Date[]): string => `${format(weekDays[0], "M/d", { locale: ja })} - ${format(weekDays[weekDays.length - 1], "M/d", { locale: ja })}`;
+
+const getTimetableEntryStyle = (accentColor: string) => {
+  const tokens = generateColorTokens(accentColor);
 
   return {
-    dayIndex: todayIndex >= 0 ? todayIndex : 0,
-    periodIndex: 0,
+    background: `linear-gradient(135deg, rgba(255,255,255,0.56), ${tokens.bg})`,
+    borderColor: tokens.border,
+    color: tokens.text,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72), 0 12px 30px rgba(15,23,42,0.035)",
   };
 };
 
-const createEmptyDraftForSlot = ({ dayIndex, periodIndex }: TimetableSlot): TimetableDraft => ({
-  ...EMPTY_TIMETABLE_DRAFT,
-  color: TIMETABLE_COLORS[(dayIndex + periodIndex) % TIMETABLE_COLORS.length],
-});
-
-const createDraftFromEntry = (entry: TimetableEntry | null, slot: TimetableSlot): TimetableDraft => {
-  if (!entry) return createEmptyDraftForSlot(slot);
-
-  return {
-    title: entry.title,
-    room: entry.room,
-    memo: entry.memo,
-    color: entry.color,
-  };
-};
-
-const getEntryCountLabel = (count: number): string => `${count}コマ登録済み`;
+const TIMETABLE_ENTRY_MAP = createTimetableEntryMap();
 
 const CalendarTimetableViewComponent = ({
   weekDate,
   className,
 }: CalendarTimetableViewProps) => {
-  const [entries, setEntries] = useState<TimetableEntry[]>(readStoredTimetableEntries);
-  const [selectedSlot, setSelectedSlot] = useState<TimetableSlot>(() => createInitialTimetableSlot(weekDate));
-  const [draft, setDraft] = useState<TimetableDraft>(() => createEmptyDraftForSlot(createInitialTimetableSlot(weekDate)));
-
-  const weekDays = useMemo(() => buildTimetableWeekDays(weekDate), [weekDate]);
-  const entriesBySlot = useMemo(() => {
-    const map = new Map<string, TimetableEntry>();
-
-    entries.forEach((entry) => {
-      map.set(createTimetableSlotKey(entry), entry);
-    });
-
-    return map;
-  }, [entries]);
-  const selectedEntry = entriesBySlot.get(createTimetableSlotKey(selectedSlot)) ?? null;
-  const selectedDay = weekDays[selectedSlot.dayIndex] ?? weekDays[0];
-  const selectedPeriod = TIMETABLE_PERIODS[selectedSlot.periodIndex] ?? TIMETABLE_PERIODS[0];
-  const selectedSlotLabel = `${format(selectedDay, "M/d EEE", { locale: ja })} ${selectedPeriod.label}限`;
-  const weekRangeLabel = `${format(weekDays[0], "M/d", { locale: ja })} - ${format(weekDays[weekDays.length - 1], "M/d", { locale: ja })}`;
-
-  useEffect(() => {
-    persistTimetableEntries(entries);
-  }, [entries]);
-
-  const handleSelectSlot = useCallback(
-    (slot: TimetableSlot) => {
-      const entry = entriesBySlot.get(createTimetableSlotKey(slot)) ?? null;
-
-      setSelectedSlot(slot);
-      setDraft(createDraftFromEntry(entry, slot));
-    },
-    [entriesBySlot],
-  );
-
-  const handleChangeDraft = useCallback((field: keyof TimetableDraft, value: string) => {
-    setDraft((current) => ({
-      ...current,
-      [field]: value,
-    }));
-  }, []);
-
-  const handleSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-
-      const title = draft.title.trim();
-      if (!title) return;
-
-      const slotKey = createTimetableSlotKey(selectedSlot);
-      const now = new Date().toISOString();
-
-      setEntries((currentEntries) => {
-        const existingEntry = currentEntries.find((entry) => createTimetableSlotKey(entry) === slotKey);
-        const nextEntry: TimetableEntry = {
-          id: existingEntry?.id ?? createTimetableEntryId(),
-          dayIndex: selectedSlot.dayIndex,
-          periodIndex: selectedSlot.periodIndex,
-          title,
-          room: draft.room.trim(),
-          memo: draft.memo.trim(),
-          color: draft.color,
-          updatedAt: now,
-        };
-
-        if (existingEntry) {
-          return currentEntries.map((entry) => createTimetableSlotKey(entry) === slotKey ? nextEntry : entry);
-        }
-
-        return [...currentEntries, nextEntry];
-      });
-    },
-    [draft, selectedSlot],
-  );
-
-  const handleDelete = useCallback(() => {
-    const slotKey = createTimetableSlotKey(selectedSlot);
-
-    setEntries((currentEntries) => currentEntries.filter((entry) => createTimetableSlotKey(entry) !== slotKey));
-    setDraft(createEmptyDraftForSlot(selectedSlot));
-  }, [selectedSlot]);
+  const weekDays = buildTimetableWeekDays(weekDate);
+  const weekRangeLabel = formatTimetableWeekRange(weekDays);
+  const registeredCountLabel = `${TIMETABLE_ENTRIES.length}コマ`;
 
   return (
     <div className={cn("flex h-full min-h-0 flex-col bg-white text-[#1c1c1e]", className)}>
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-[#eeeeee] px-4 py-3">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8f929c]">Timetable</p>
-          <h2 className="truncate text-[18px] font-bold tracking-[-0.03em] text-[#1c1c1e]">時間割</h2>
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 px-5 pb-4 pt-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <span className="rounded-full border border-[#eeeeee] bg-[#f8f8f9] px-3 py-1.5 text-[12px] font-semibold tabular-nums text-[#6e6e73]">
+            {weekRangeLabel}
+          </span>
+          <span className="rounded-full border border-[#eeeeee] bg-white px-3 py-1.5 text-[12px] font-semibold text-[#8f929c]">
+            平日5日 / 7限
+          </span>
+          <span className="rounded-full border border-[#eeeeee] bg-white px-3 py-1.5 text-[12px] font-semibold text-[#8f929c]">
+            {registeredCountLabel}配置済み
+          </span>
         </div>
 
-        <div className="flex items-center gap-2 rounded-full bg-[#f7f7f7] px-3 py-1 text-[12px] font-semibold text-[#6e6e73]">
-          <span>{weekRangeLabel}</span>
-          <span className="h-1 w-1 rounded-full bg-[#c7c7cc]" />
-          <span>{getEntryCountLabel(entries.length)}</span>
+        <div className="flex shrink-0 items-center gap-2">
+          <button type="button" className="inline-flex h-9 items-center justify-center rounded-[14px] border border-[#e5e5ea] bg-white px-4 text-[13px] font-bold tracking-[-0.01em] text-[#1c1c1e] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]">
+            <span className="mr-1.5 text-[16px] leading-none text-[#6e6e73]">＋</span>
+            授業を追加
+          </button>
+          <button type="button" aria-label="時間割設定" className="flex h-9 w-9 items-center justify-center rounded-[14px] border border-[#e5e5ea] bg-white text-[15px] text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]">
+            ⚙︎
+          </button>
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-hidden p-3 xl:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="min-h-[420px] overflow-auto rounded-[24px] border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] scrollbar-hidden">
-          <div className="grid min-w-[912px]" style={{ gridTemplateColumns: TIMETABLE_GRID_TEMPLATE_COLUMNS }}>
-            <div className="sticky left-0 top-0 z-30 border-b border-r border-[#eeeeee] bg-white" />
+      <div className="min-h-0 flex-1 overflow-auto px-5 pb-5 scrollbar-hidden">
+        <div className="grid min-w-[980px] gap-x-3 gap-y-3" style={{ gridTemplateColumns: TIMETABLE_GRID_TEMPLATE_COLUMNS }}>
+          <div aria-hidden="true" className="h-10" />
 
-            {weekDays.map((day, dayIndex) => {
-              const isToday = isSameDay(day, new Date());
+          {weekDays.map((day, dayIndex) => {
+            const isToday = isSameDay(day, new Date());
 
-              return (
-                <div
-                  key={day.toISOString()}
-                  className={cn(
-                    "sticky top-0 z-20 border-b border-r border-[#eeeeee] bg-white px-3 py-2 text-center",
-                    dayIndex === weekDays.length - 1 && "border-r-0",
-                  )}
-                >
-                  <div className={cn("text-[12px] font-semibold text-[#6e6e73]", isToday && "text-[#007aff]")}>{format(day, "EEE", { locale: ja })}</div>
-                  <div className={cn("mx-auto mt-1 flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-bold", isToday ? "bg-[#007aff] text-white" : "text-[#1c1c1e]")}>{format(day, "d")}</div>
-                </div>
-              );
-            })}
-
-            {TIMETABLE_PERIODS.map((period, periodIndex) => (
-              <div key={period.label} className="contents">
-                <div className="sticky left-0 z-10 flex min-h-[92px] flex-col items-end justify-center border-b border-r border-[#eeeeee] bg-white px-3 text-right">
-                  <div className="text-[16px] font-bold text-[#1c1c1e]">{period.label}限</div>
-                  <div className="mt-1 text-[10px] font-medium tabular-nums text-[#8f929c]">{period.time}</div>
-                </div>
-
-                {weekDays.map((day, dayIndex) => {
-                  const slot = { dayIndex, periodIndex } satisfies TimetableSlot;
-                  const entry = entriesBySlot.get(createTimetableSlotKey(slot)) ?? null;
-                  const isSelected = selectedSlot.dayIndex === dayIndex && selectedSlot.periodIndex === periodIndex;
-
-                  return (
-                    <button
-                      key={`${day.toISOString()}-${period.label}`}
-                      type="button"
-                      className={cn(
-                        "min-h-[92px] border-b border-r border-[#eeeeee] bg-white p-1.5 text-left outline-none transition hover:bg-[#f8f8f8] focus-visible:ring-2 focus-visible:ring-[#007aff]",
-                        dayIndex === weekDays.length - 1 && "border-r-0",
-                        isSelected && "bg-[#f5f9ff] ring-2 ring-inset ring-[#007aff]",
-                      )}
-                      onClick={() => handleSelectSlot(slot)}
-                      aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限を編集`}
-                    >
-                      {entry ? (
-                        <div className="flex h-full min-h-[76px] flex-col rounded-[14px] px-3 py-2 shadow-[0_1px_2px_rgba(0,0,0,0.05)]" style={{ backgroundColor: entry.color }}>
-                          <span className="truncate text-[13px] font-bold tracking-[-0.01em] text-[#1c1c1e]">{entry.title}</span>
-                          {entry.room && <span className="mt-1 truncate text-[11px] font-semibold text-[rgba(28,28,30,0.62)]">{entry.room}</span>}
-                          {entry.memo && <span className="mt-auto line-clamp-2 text-[10px] font-medium leading-snug text-[rgba(28,28,30,0.52)]">{entry.memo}</span>}
-                        </div>
-                      ) : (
-                        <div className="flex h-full min-h-[76px] items-center justify-center rounded-[14px] border border-dashed border-[#d9d9df] text-[12px] font-semibold text-[#c7c7cc]">
-                          追加
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
+            return (
+              <div key={day.toISOString()} className="flex h-10 items-center justify-center gap-2 text-center">
+                <span className={cn("text-[14px] font-bold tracking-[-0.02em]", isToday ? "text-[#007aff]" : "text-[#1c1c1e]")}>{TIMETABLE_DAY_LABELS[dayIndex]}</span>
+                <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums", isToday ? "bg-[#e8f2ff] text-[#007aff]" : "bg-[#f7f7f8] text-[#8f929c]")}>{format(day, "M/d", { locale: ja })}</span>
               </div>
-            ))}
-          </div>
-        </div>
+            );
+          })}
 
-        <form className="flex min-h-0 flex-col rounded-[24px] border border-[#eeeeee] bg-[#fbfbfd] p-4" onSubmit={handleSubmit}>
-          <div className="shrink-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8f929c]">Edit</p>
-            <h3 className="mt-1 text-[16px] font-bold tracking-[-0.02em] text-[#1c1c1e]">{selectedSlotLabel}</h3>
-          </div>
+          {TIMETABLE_PERIODS.map((period, periodIndex) => (
+            <div key={period.label} className="contents">
+              <div className="flex min-h-[94px] items-center justify-end pr-1">
+                <div className="flex items-center justify-end gap-3 text-right">
+                  <div className="text-[24px] font-bold leading-none tracking-[-0.04em] text-[#111111]">{period.label}</div>
+                  <div className="flex flex-col items-center text-[11px] font-medium leading-none tabular-nums text-[#8f929c]">
+                    <span>{period.startTime}</span>
+                    <span aria-hidden="true" className="my-1 h-3 w-px bg-[#d8d8df]" />
+                    <span>{period.endTime}</span>
+                  </div>
+                </div>
+              </div>
 
-          <label className="mt-4 block text-[12px] font-semibold text-[#6e6e73]">
-            科目
-            <input
-              value={draft.title}
-              onChange={(event) => handleChangeDraft("title", event.target.value)}
-              className="mt-1 h-10 w-full rounded-[14px] border border-[#e5e5ea] bg-white px-3 text-[14px] font-semibold text-[#1c1c1e] outline-none transition focus:border-[#007aff]"
-              placeholder="例: 英語、数学、物理"
-              maxLength={40}
-            />
-          </label>
+              {weekDays.map((day, dayIndex) => {
+                const slot = { dayIndex, periodIndex } satisfies TimetableSlot;
+                const entry = TIMETABLE_ENTRY_MAP.get(createTimetableSlotKey(slot)) ?? null;
 
-          <label className="mt-3 block text-[12px] font-semibold text-[#6e6e73]">
-            教室 / 場所
-            <input
-              value={draft.room}
-              onChange={(event) => handleChangeDraft("room", event.target.value)}
-              className="mt-1 h-10 w-full rounded-[14px] border border-[#e5e5ea] bg-white px-3 text-[14px] font-medium text-[#1c1c1e] outline-none transition focus:border-[#007aff]"
-              placeholder="例: 2-1、図書室、オンライン"
-              maxLength={40}
-            />
-          </label>
-
-          <label className="mt-3 block text-[12px] font-semibold text-[#6e6e73]">
-            メモ
-            <textarea
-              value={draft.memo}
-              onChange={(event) => handleChangeDraft("memo", event.target.value)}
-              className="mt-1 min-h-[92px] w-full resize-none rounded-[14px] border border-[#e5e5ea] bg-white px-3 py-2 text-[13px] font-medium leading-relaxed text-[#1c1c1e] outline-none transition focus:border-[#007aff]"
-              placeholder="課題、持ち物、範囲など"
-              maxLength={120}
-            />
-          </label>
-
-          <div className="mt-3">
-            <p className="text-[12px] font-semibold text-[#6e6e73]">色</p>
-            <div className="mt-2 grid grid-cols-4 gap-2">
-              {TIMETABLE_COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  className={cn(
-                    "h-9 rounded-[12px] border border-[#e5e5ea] outline-none transition focus-visible:ring-2 focus-visible:ring-[#007aff]",
-                    draft.color === color && "ring-2 ring-[#007aff] ring-offset-2",
-                  )}
-                  style={{ backgroundColor: color }}
-                  onClick={() => handleChangeDraft("color", color)}
-                  aria-label={`${color}を選択`}
-                />
-              ))}
+                return (
+                  <button key={`${day.toISOString()}-${period.label}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("group relative min-h-[94px] rounded-[16px] text-left outline-none transition focus-visible:ring-2 focus-visible:ring-[#007aff]", entry ? "border px-4 py-3 hover:-translate-y-0.5" : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.accentColor) : undefined}>
+                    {entry ? (
+                      <span className="flex h-full min-h-[68px] flex-col items-center justify-center text-center">
+                        <span className="max-w-full truncate text-[16px] font-bold leading-snug tracking-[-0.025em] text-inherit">{entry.title}</span>
+                        <span className="mt-1 max-w-full truncate text-[14px] font-semibold leading-snug text-[rgba(28,28,30,0.78)]">{entry.room}</span>
+                        {entry.note ? <span className="mt-2 max-w-full truncate text-[11px] font-semibold text-[rgba(28,28,30,0.48)]">{entry.note}</span> : null}
+                      </span>
+                    ) : (
+                      <span className="flex h-full min-h-[68px] items-center justify-center">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[18px] font-light leading-none text-[#8f929c] shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition group-hover:border-[#c7c7cc] group-hover:text-[#6e6e73]">＋</span>
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-          </div>
-
-          <div className="mt-auto flex shrink-0 gap-2 pt-4">
-            <button
-              type="submit"
-              disabled={!draft.title.trim()}
-              className="h-10 flex-1 rounded-[14px] bg-[#007aff] px-4 text-[13px] font-bold text-white transition hover:bg-[#006fe6] disabled:cursor-not-allowed disabled:bg-[#c7c7cc]"
-            >
-              保存
-            </button>
-            <button
-              type="button"
-              disabled={!selectedEntry}
-              onClick={handleDelete}
-              className="h-10 rounded-[14px] border border-[#ffd1cc] bg-white px-4 text-[13px] font-bold text-[#ff3b30] transition hover:bg-[#fff4f2] disabled:cursor-not-allowed disabled:border-[#eeeeee] disabled:text-[#c7c7cc]"
-            >
-              削除
-            </button>
-          </div>
-        </form>
+          ))}
+        </div>
       </div>
     </div>
   );
