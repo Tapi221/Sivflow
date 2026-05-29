@@ -173,7 +173,7 @@ export const buildMfDeckArchive = async ({
       version: MF_DECK_VERSION,
       exportedAt: toIsoString(new Date()),
       app: {
-        name: "Manifolia",
+        name: "Solifa",
         ...(appVersion ? { version: appVersion } : {}),
       },
       deck: {
