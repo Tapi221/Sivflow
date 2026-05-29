@@ -195,6 +195,17 @@ a:hover,
   display: none;
 }
 
+[aria-label="Library hierarchy explorer"] > div.mt-auto button {
+  width: 2rem;
+  justify-content: center;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+[aria-label="Library hierarchy explorer"] > div.mt-auto button > span {
+  display: none;
+}
+
 [aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 1) {
   --sidebar-folder-mark-color: #6baa7e;
 }
