@@ -15,8 +15,6 @@ type CalendarListViewProps = {
   events: GoogleCalendarEvent[];
   selectedDate: Date;
   onSelectDate?: (date: Date) => void;
-  onReachStart?: () => void;
-  onReachEnd?: () => void;
   onVisibleMonthChange?: (date: Date) => void;
   dayHeights?: Record<string, number>;
   scrollViewportRef?: MutableRefObject<HTMLDivElement | null>;
