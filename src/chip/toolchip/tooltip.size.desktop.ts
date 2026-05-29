@@ -1,20 +1,20 @@
 const TOOLTIP_RIGHT_CLICK_PANEL_SURFACE_CLASS_NAMES = {
   tooltip: "border border-[rgba(0,0,0,0.12)] bg-white text-[#4a4a4a] font-normal tracking-normal shadow-[0_6px_20px_rgba(0,0,0,0.14),0_1px_6px_rgba(0,0,0,0.08)] antialiased",
-  arrow: "hidden",
+  arrow: "border border-[rgba(0,0,0,0.12)] bg-white",
 } as const;
 
 export const TOOLTIP_SIZE_CLASS_NAMES = {
   default: {
-    tooltip: "min-h-[28px] rounded-[8px] px-2.5 py-0 text-[13px] leading-[15px]",
-    arrow: "h-0 w-0",
+    tooltip: "min-h-[26px] rounded-[13px] px-3 py-1.5 text-[12px] leading-none",
+    arrow: "h-2.5 w-2.5",
   },
   compact: {
-    tooltip: "min-h-[24px] rounded-[8px] px-2 py-0 text-[12px] leading-[14px]",
-    arrow: "h-0 w-0",
+    tooltip: "min-h-[22px] rounded-[11px] px-2.5 py-1 text-[11px] leading-none",
+    arrow: "h-2 w-2",
   },
   segmented: {
-    tooltip: "min-h-[28px] rounded-[8px] px-2.5 py-0 text-[13px] leading-[15px]",
-    arrow: "h-0 w-0",
+    tooltip: "min-h-[26px] rounded-[13px] px-3 py-1.5 text-[12px] leading-none",
+    arrow: "h-2.5 w-2.5",
   },
 } as const;
 
