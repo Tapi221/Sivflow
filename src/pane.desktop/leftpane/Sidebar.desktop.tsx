@@ -1,6 +1,7 @@
 import { signOut } from "firebase/auth";
 import { type MouseEvent, type ReactNode } from "react";
-import { ClockIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
+import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
+import { ClockIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { cn } from "@/lib/utils";
@@ -34,7 +35,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "library",
     label: "Library",
-    icon: <LibraryIcon className="app-sidebar__nav-icon" />,
+    icon: <ExplorerChromeFolderIcon className="app-sidebar__nav-icon" />,
     sectionKey: "library",
   },
   {
