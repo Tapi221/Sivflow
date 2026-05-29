@@ -183,6 +183,10 @@ a:hover,
   appearance: none;
 }
 
+[aria-label="Library hierarchy explorer"] [role="treeitem"] > button + .library-tree-marker {
+  display: none;
+}
+
 [aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .library-tree-marker {
   padding: 5.5px;
 }
