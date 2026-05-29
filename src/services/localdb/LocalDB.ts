@@ -22,13 +22,7 @@ import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueu
 import type { AssetRecord, Card, CardSet, Document, Folder, SyncConflict, SyncError, SyncHistory, SyncMetadata, SyncQueueItem, SyncSettings, UploadedImage, User, UserSettings, UserStats } from "@/types";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 
-export type {CardRelation,
-  LocalDBInstance,
-  LocalDBLike,
-  LocalDBTableMap,
-  ProjectMap,
-  SyncableEntityTable,
-  TagRecord,} from "./types";
+export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "./types";
 
 declare global {
   interface GlobalThis {
@@ -46,6 +40,7 @@ const getLocalDbGlobal = (): LocalDbGlobal => {
 
 type SyncDirection = "upload" | "download";
 type SyncQueuePayload = SyncQueueItem["payload"];
+type CrudPayload = Record<string, unknown>;
 
 const syncableTables = [
   "cards",
@@ -79,124 +74,66 @@ const getPayloadId = (payload: unknown) => {
   return typeof id === "string" && id.length > 0 ? id : null;
 };
 
-const asArray = <T>(v: unknown): T[] => {
-  return Array.isArray(v) ? (v as T[]) : [];
+const toCrudPayload = (value: unknown): CrudPayload => {
+  return value && typeof value === "object" ? { ...(value as Record<string, unknown>) } : {};
 };
 
-/**
- * Dexie.js を使用したローカルデータベースの実装。
- * 設計思想に基づき、すべてのユーザーデータをクライアントサイドで管理します。
- */
 export class LocalDB extends Dexie {
+  users!: Dexie.Table<User, string>;
   folders!: Dexie.Table<Folder, string>;
   cardSets!: Dexie.Table<CardSet, string>;
   cards!: Dexie.Table<Card, string>;
-  // ✅ PDF/Document テーブル（テーブル名は documents で統一）
   documents!: Dexie.Table<Document, string>;
-  users!: Dexie.Table<User, string>;
   userSettings!: Dexie.Table<UserSettings, string>;
   userStats!: Dexie.Table<UserStats, string>;
   syncMetadata!: Dexie.Table<SyncMetadata, string>;
-
-  levelHistories!: Dexie.Table<Record<string, unknown>, string>;
-  deviceMeta!: Dexie.Table<Record<string, unknown>, string>;
-
   syncErrors!: Dexie.Table<SyncError, string>;
   syncHistory!: Dexie.Table<SyncHistory, string>;
   syncSettings!: Dexie.Table<SyncSettings, string>;
   syncQueue!: Dexie.Table<SyncQueueItem, string>;
   conflicts!: Dexie.Table<SyncConflict, string>;
-
   metadata!: Dexie.Table<Record<string, unknown>, string>;
   images!: Dexie.Table<AssetRecord | UploadedImage, string>;
-
-  // Phase 3: Map Feature（削除済みだが旧DB互換のため残す）
+  levelHistories!: Dexie.Table<Record<string, unknown>, string>;
+  deviceMeta!: Dexie.Table<Record<string, unknown>, string>;
   cardRelations!: Dexie.Table<Record<string, unknown>, string>;
   projectMaps!: Dexie.Table<Record<string, unknown>, string>;
+  studyLogs!: Dexie.Table<Record<string, unknown>, string>;
 
-  public userId?: string;
+  private syncTrigger: (() => void) | null = null;
+
+  constructor(userId?: string) {
+    const global = getLocalDbGlobal();
+    if (!global.__ALLOW_LOCAL_DB_CONSTRUCTION) {
+      throw new Error("LocalDB must be constructed through LocalDB.getInstance() or initializeDB().");
+    }
+
+    super(_getDatabaseNameForUser(userId));
+    defineSchema(this);
+    attachHooks(this);
+  }
 
   get tagRecords(): Dexie.Table<TagRecord, string> {
     return this.table(CURRENT_TAG_STORE) as Dexie.Table<TagRecord, string>;
   }
 
-  private constructor(userId?: string) {
-    // Prevent direct construction from browser code; enforce using LocalDB.getInstance()
-    if (typeof window !== "undefined") {
-      try {
-        const globalRef = getLocalDbGlobal();
-        const allow = globalRef.__ALLOW_LOCAL_DB_CONSTRUCTION === true;
-        if (!allow) {
-          console.error(
-            "[LocalDB] Direct construction forbidden in browser. Use LocalDB.getInstance() instead.",
-          );
-          throw new Error(
-            "Direct LocalDB construction forbidden in browser. Use LocalDB.getInstance() instead.",
-          );
-        }
-      } finally {
-        try {
-          const globalRef = getLocalDbGlobal();
-          delete globalRef.__ALLOW_LOCAL_DB_CONSTRUCTION;
-        } catch {
-          // ignore
-        }
-      }
-    }
-
-    super(LocalDB.getDatabaseNameForUser(userId ?? "anonymous"));
-    this.userId = userId;
-    this.syncTrigger = null;
-
-    try {
-      console.log("[LocalDB] constructor created", {
-        name: this.name,
-        userId: this.userId,
-      });
-      console.debug(
-        "[LocalDB] constructor stack (info only):",
-        new Error().stack,
-      );
-    } catch {
-      // swallow logging errors to avoid interfering with initialization
-    }
-
-    defineSchema(this);
-    attachHooks(this);
-  }
-
-  /** instanceManager.ts 専用: private ctor を通すための内部ファクトリ */
-  static __createInternal(userId?: string): LocalDB {
-    return new LocalDB(userId);
-  }
-
-  async normalizeDocumentBlobUrlsForSession(): Promise<void> {
-    return queries.normalizeDocumentBlobUrlsForSession(this);
+  setSyncTrigger(trigger: () => void): void {
+    this.syncTrigger = trigger;
   }
 
   async getItem<TTable extends SyncableEntityTable>(
     table: TTable,
     id: string,
   ): Promise<LocalDBTableMap[TTable] | undefined>;
-  async getItem(table: string, id: string): Promise<unknown> {
-    return queries.getItem(this, table, id);
+  async getItem(table: string, id: string): Promise<unknown | undefined> {
+    return queries.getItem(this, table as SyncableEntityTable, id);
   }
 
   async getAllItems<TTable extends SyncableEntityTable>(
     table: TTable,
   ): Promise<Array<LocalDBTableMap[TTable]>>;
   async getAllItems(table: string): Promise<unknown[]> {
-    return queries.getAllItems(this, table);
-  }
-
-  async getAllCards(): Promise<Card[]> {
-    const rows = await queries.getAllCards(this);
-    return asArray<Card>(rows);
-  }
-
-  async getAllFolders(): Promise<Folder[]> {
-    const rows = await queries.getAllFolders(this);
-    return asArray<Folder>(rows);
+    return queries.getAllItems(this, table as SyncableEntityTable);
   }
 
   async getDirtyItems<TTable extends SyncableEntityTable>(
@@ -209,7 +146,7 @@ export class LocalDB extends Dexie {
     userId: string,
     lastSyncTime: Date,
   ): Promise<unknown[]> {
-    return queries.getDirtyItems(this, table, userId, lastSyncTime);
+    return queries.getDirtyItems(this, table as SyncableEntityTable, userId, lastSyncTime);
   }
 
   async getUpdatedCards(
@@ -242,10 +179,9 @@ export class LocalDB extends Dexie {
     return crud.addItem(
       this,
       table,
-      item,
+      toCrudPayload(item),
       skipSync,
-      (t: string, type: SyncDirection, p: SyncQueuePayload) =>
-        this.enqueueSync(t, type, p),
+      (t: string, type: SyncDirection, p: unknown) => this.enqueueSync(t, type, p),
     );
   }
 
@@ -261,8 +197,7 @@ export class LocalDB extends Dexie {
       id,
       changes,
       skipSync,
-      (t: string, type: SyncDirection, p: SyncQueuePayload) =>
-        this.enqueueSync(t, type, p),
+      (t: string, type: SyncDirection, p: unknown) => this.enqueueSync(t, type, p),
     );
   }
 
@@ -300,10 +235,9 @@ export class LocalDB extends Dexie {
     return crud.bulkUpsert(
       this,
       table,
-      items,
+      items.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object"),
       skipSync,
-      (t: string, type: SyncDirection, p: SyncQueuePayload) =>
-        this.enqueueSync(t, type, p),
+      (t: string, type: SyncDirection, p: unknown) => this.enqueueSync(t, type, p),
     );
   }
 
@@ -320,10 +254,9 @@ export class LocalDB extends Dexie {
     return crud.upsert(
       this,
       tableName,
-      data,
+      toCrudPayload(data),
       skipSync,
-      (t: string, type: SyncDirection, p: SyncQueuePayload) =>
-        this.enqueueSync(t, type, p),
+      (t: string, type: SyncDirection, p: unknown) => this.enqueueSync(t, type, p),
     );
   }
 
@@ -339,304 +272,140 @@ export class LocalDB extends Dexie {
     return maintenance.cleanupSyncHistory(this);
   }
 
-  async cleanupSyncErrors(): Promise<void> {
-    return maintenance.cleanupSyncErrors(this);
+  async getAllCards(): Promise<Card[]> {
+    return queries.getAllCards(this);
   }
 
-  async getDeviceMeta(
-    userId: string,
-  ): Promise<Record<string, unknown> | undefined> {
-    const v = await maintenance.getDeviceMeta(this, userId);
-    if (v && typeof v === "object") return v as Record<string, unknown>;
-    return undefined;
+  async getAllFolders(): Promise<Folder[]> {
+    return queries.getAllFolders(this);
   }
 
-  async upsertDeviceMeta(meta: Record<string, unknown>): Promise<void> {
-    return maintenance.upsertDeviceMeta(this, meta);
+  async listCardsByUser(userId: string): Promise<Card[]> {
+    return queries.listCardsByUser(this, userId);
   }
 
-  async getSyncEnabledFolders(userId: string): Promise<unknown[]> {
-    return maintenance.getSyncEnabledFolders(this, userId);
+  async listFoldersByUser(userId: string): Promise<Folder[]> {
+    return queries.listFoldersByUser(this, userId);
   }
 
-  // --- 同期支援機能 ---
-  private syncTrigger: (() => void) | null = null;
-
-  setSyncTrigger(callback: () => void): void {
-    this.syncTrigger = callback;
+  async listCardSetsByUser(userId: string): Promise<CardSet[]> {
+    return queries.listCardSetsByUser(this, userId);
   }
 
   async getSyncSettings(id: string): Promise<SyncSettings | undefined> {
-    return this.syncSettings.get(id);
+    return queries.getSyncSettings(this, id);
   }
 
   async putSyncSettings(settings: SyncSettings): Promise<void> {
-    await this.syncSettings.put(settings);
+    return queries.putSyncSettings(this, settings);
   }
 
   async getSyncError(id: string): Promise<SyncError | undefined> {
-    return this.syncErrors.get(id);
+    return queries.getSyncError(this, id);
   }
 
   async putSyncError(error: SyncError): Promise<void> {
-    await this.syncErrors.put(error);
+    return queries.putSyncError(this, error);
   }
 
   async clearSyncErrors(): Promise<void> {
-    await this.syncErrors.clear();
+    return queries.clearSyncErrors(this);
   }
 
   async getRetryableSyncErrors(): Promise<SyncError[]> {
-    return this.syncErrors.where("retryable").equals(1).toArray();
+    return queries.getRetryableSyncErrors(this);
   }
 
-  async findQueueProcessingErrorsByTargetId(
-    targetId: string,
-  ): Promise<SyncError[]> {
-    const errors = await this.syncErrors.toArray();
-
-    return errors.filter((error) => {
-      return (
-        typeof error.message === "string" &&
-        error.message.startsWith("Queue processing failed") &&
-        error.message.includes(targetId)
-      );
-    });
+  async findQueueProcessingErrorsByTargetId(targetId: string): Promise<SyncError[]> {
+    return queries.findQueueProcessingErrorsByTargetId(this, targetId);
   }
 
   async putSyncHistory(history: SyncHistory): Promise<void> {
-    await this.syncHistory.put(history);
+    return queries.putSyncHistory(this, history);
   }
 
-  async getRecentSyncHistory(limit: number = 30): Promise<SyncHistory[]> {
-    return this.syncHistory
-      .orderBy("finishedAt")
-      .reverse()
-      .limit(limit)
-      .toArray();
+  async getRecentSyncHistory(limit?: number): Promise<SyncHistory[]> {
+    return queries.getRecentSyncHistory(this, limit);
   }
 
-  async getSyncStatsSince(timestamp: number): Promise<{
-    histories: SyncHistory[];
-    errors: SyncError[];
-  }> {
-    const [histories, errors] = await Promise.all([
-      this.syncHistory.where("finishedAt").above(timestamp).toArray(),
-      this.syncErrors.where("occurredAt").above(timestamp).toArray(),
-    ]);
-    return { histories, errors };
+  async getSyncStatsSince(timestamp: number): Promise<{ histories: SyncHistory[]; errors: SyncError[] }> {
+    return queries.getSyncStatsSince(this, timestamp);
   }
 
   async getSyncQueueCount(): Promise<number> {
-    return this.syncQueue.count();
+    return queries.getSyncQueueCount(this);
   }
 
   async getQueuedItemsOldestFirst(): Promise<SyncQueueItem[]> {
-    const items = await this.syncQueue.toArray();
-
-    const getCreatedAt = (item: SyncQueueItem): number =>
-      typeof item.createdAt === "number" && Number.isFinite(item.createdAt)
-        ? item.createdAt
-        : 0;
-
-    const getUpdatedAt = (item: SyncQueueItem): number =>
-      typeof item.updatedAt === "number" && Number.isFinite(item.updatedAt)
-        ? item.updatedAt
-        : 0;
-
-    return items.sort((left, right) => {
-      const createdAtDiff = getCreatedAt(left) - getCreatedAt(right);
-      if (createdAtDiff !== 0) return createdAtDiff;
-      return getUpdatedAt(left) - getUpdatedAt(right);
-    });
+    return queries.getQueuedItemsOldestFirst(this);
   }
 
   async trimSyncQueueToLimit(limit: number): Promise<void> {
-    const count = await this.syncQueue.count();
-    if (count <= limit) return;
-
-    const oldest = await this.getQueuedItemsOldestFirst();
-    const deleteTargets = oldest.slice(0, count - limit);
-
-    await this.syncQueue.bulkDelete(deleteTargets.map((item) => item.id));
+    return queries.trimSyncQueueToLimit(this, limit);
   }
 
   async putSyncQueueItem(item: SyncQueueItem): Promise<void> {
-    await this.syncQueue.put(item);
+    return queries.putSyncQueueItem(this, item);
   }
 
   async removeSyncQueueItem(id: string): Promise<void> {
-    await this.syncQueue.delete(id);
+    return queries.removeSyncQueueItem(this, id);
   }
 
   async putConflict(conflict: SyncConflict): Promise<void> {
-    await this.conflicts.put(conflict);
+    return queries.putConflict(this, conflict);
   }
 
   async getConflict(id: string): Promise<SyncConflict | undefined> {
-    return this.conflicts.get(id);
+    return queries.getConflict(this, id);
   }
 
   async getConflicts(): Promise<SyncConflict[]> {
-    return this.conflicts.toArray();
+    return queries.getConflicts(this);
   }
 
   async removeConflict(id: string): Promise<void> {
-    await this.conflicts.delete(id);
+    return queries.removeConflict(this, id);
   }
 
-  async getImageRecord(
-    id: string,
-  ): Promise<AssetRecord | UploadedImage | undefined> {
-    return this.images.get(id);
+  async getImageRecord(id: string): Promise<AssetRecord | UploadedImage | undefined> {
+    return queries.getImageRecord(this, id);
   }
 
   async putImageRecord(record: AssetRecord | UploadedImage): Promise<void> {
-    await this.images.put(record);
+    return queries.putImageRecord(this, record);
   }
 
   async updateImageRecord(
     id: string,
     changes: Partial<AssetRecord & UploadedImage>,
   ): Promise<number> {
-    return this.images.update(id, changes);
+    return queries.updateImageRecord(this, id, changes);
   }
 
-  async listCardsByUser(userId: string): Promise<Card[]> {
-    return this.cards.where("userId").equals(userId).toArray();
-  }
-
-  async listFoldersByUser(userId: string): Promise<Folder[]> {
-    return this.folders.where("userId").equals(userId).toArray();
-  }
-
-  async listCardSetsByUser(userId: string): Promise<CardSet[]> {
-    return this.cardSets.where("userId").equals(userId).toArray();
-  }
-
-  async addCardSet(cardSet: CardSet): Promise<void> {
-    await this.cardSets.add(cardSet);
-  }
-
-  async updateCardById(id: string, changes: Partial<Card>): Promise<number> {
-    return this.cards.update(id, changes);
-  }
-
-  async runSyncTransaction<T>(scope: () => Promise<T>): Promise<T> {
-    return this.transaction(
-      "rw",
-      [
-        this.folders,
-        this.cardSets,
-        this.cards,
-        this.documents,
-        this.tagRecords,
-        this.userSettings,
-        this.syncQueue,
-        this.images,
-      ],
-      async () => scope(),
-    ) as Promise<T>;
-  }
-
-  async clearSyncTables(tables: readonly SyncableEntityTable[]): Promise<void> {
-    await Promise.all(tables.map((table) => this.table(table).clear()));
-  }
-
-  async putSyncRecord<TTable extends SyncableEntityTable>(
-    table: TTable,
-    data: LocalDBTableMap[TTable],
-  ): Promise<void> {
-    await this.table(table).put(data as never);
-  }
-
-  public queueUpsertSync = async <TEntity extends UpsertEntity>({
-    entity,
-    operationType,
-    payload,
-    priority = "high",
-  }: {
-    entity: TEntity;
-    operationType: "create" | "update";
-    payload: SyncPayloadByEntity[TEntity];
-    priority?: SyncPriority;
-  }): Promise<void> => {
-    const item = createUpsertQueueItem({
-      entity,
-      operationType,
-      payload,
-      priority,
-    });
-
-    await this.syncQueue.put(item);
-
-    if (this.syncTrigger) {
-      setTimeout(() => {
-        this.syncTrigger?.();
-      }, 0);
-    }
-  };
-
-  public queueDeleteSync = async ({
-    entity,
-    targetId,
-    priority = "high",
-  }: {
-    entity: DeleteEntity;
-    targetId: string;
-    priority?: SyncPriority;
-  }): Promise<void> => {
-    const item = createDeleteQueueItem({
-      entity,
-      targetId,
-      priority,
-    });
-
-    await this.syncQueue.put(item);
-
-    if (this.syncTrigger) {
-      setTimeout(() => {
-        this.syncTrigger?.();
-      }, 0);
-    }
-  };
-
-  private async enqueueSync(
+  async enqueueSync(
     tableName: string,
     type: SyncDirection,
-    payload: SyncQueuePayload,
+    payload: unknown,
   ): Promise<void> {
     if (!isSyncableTableName(tableName)) return;
 
-    const payloadId = getPayloadId(payload);
-    if (!payloadId) {
-      console.warn(
-        "[LocalDB] enqueueSync skipped: payload.id is missing or invalid",
-        { tableName, type, payload },
-      );
-      return;
-    }
+    const entity = entityNameMap[tableName];
+    const payloadId = getPayloadId(payload) ?? nanoid();
+    const task =
+      type === "upload"
+        ? createUpsertQueueItem({
+            entity: entity as UpsertEntity,
+            operationType: "update",
+            payload: payload as never,
+            priority: "high",
+          })
+        : createDeleteQueueItem({
+            entity: entity as DeleteEntity,
+            targetId: payloadId,
+            priority: "high",
+          });
 
-    const now = Date.now();
-
-    const task: SyncQueueItem = {
-      id: nanoid(),
-      idempotencyKey: nanoid(),
-      targetId: payloadId,
-      type,
-      entity: entityNameMap[tableName],
-      operationType: type === "upload" ? "update" : "create",
-      payload,
-      priority: "high",
-      createdAt: now,
-      updatedAt: now,
-      status: "pending",
-      retryCount: 0,
-    } as SyncQueueItem;
-
-    console.log(
-      `[Diagnostic] enqueueSync -> pushing to syncQueue table. targetId=${task.targetId}, action=${task.type}, entity=${task.entity}`,
-    );
     console.log(
       `[LocalDB] enqueueSync -> table=${tableName} type=${type} targetId=${task.targetId} id=${task.id}`,
     );
@@ -688,20 +457,4 @@ export class LocalDB extends Dexie {
  * LocalDB インスタンスを生成する内部ファクトリ関数。
  * instanceManager.ts から使用される。constructor ガード (__ALLOW_LOCAL_DB_CONSTRUCTION) を経由。
  */
-export const createLocalDBInternal = (userId?: string) => {
-  try {
-    const globalRef = getLocalDbGlobal();
-    globalRef.__ALLOW_LOCAL_DB_CONSTRUCTION = true;
-    return LocalDB.__createInternal(userId);
-  } finally {
-    try {
-      const globalRef = getLocalDbGlobal();
-      delete globalRef.__ALLOW_LOCAL_DB_CONSTRUCTION;
-    } catch {
-      // ignore
-    }
-  }
-};
-
-// devtools.ts が './LocalDB' から import するため、instanceManager の関数を re-export する
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };
