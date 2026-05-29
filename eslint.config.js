@@ -236,7 +236,6 @@ export default defineConfig([
     files: [
       "tests/**/*.{ts,tsx}",
       "scripts/**/*.{ts,tsx}",
-      "electron/**/*.{ts,tsx}",
       "functions/**/*.{ts,tsx}",
     ],
     extends: [js.configs.recommended, tseslint.configs.recommended],
