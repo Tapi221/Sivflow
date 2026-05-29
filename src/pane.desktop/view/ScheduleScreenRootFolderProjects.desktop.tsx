@@ -1,1 +1,1 @@
-export { ScheduleScreen } from "./ScheduleScreen.desktop";
+export {};
