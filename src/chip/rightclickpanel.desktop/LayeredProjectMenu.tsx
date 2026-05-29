@@ -148,7 +148,12 @@ const LayeredProjectMenuBase = ({
 
                 if (isDisabled) return;
                 if (item.submenu) {
-                  onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index));
+                  if (onOpenSubmenu) {
+                    onOpenSubmenu(item.id, getLayeredProjectMenuSubmenuAnchor(index));
+                    return;
+                  }
+
+                  action?.onSelect();
                   return;
                 }
 
