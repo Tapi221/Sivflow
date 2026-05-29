@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { FIREBASE_EMULATORS } from "../../constants/shared/firebase";
+import { FIREBASE_EMULATORS } from "@constants/shared/firebase";
 
 type FirebaseEmulatorNode = {
   host?: string;

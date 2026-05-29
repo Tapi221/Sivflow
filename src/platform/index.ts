@@ -1,6 +1,6 @@
-import { desktopPlatform } from "./desktop";
+import { desktopPlatform } from "@/platform/desktop";
 import { hasDesktopBridge } from "./runtime";
-import { webPlatform } from "./web";
+import { webPlatform } from "@/platform/web";
 import type { PlatformApi } from "@/types/externals/desktop-api";
 
 export const platform: PlatformApi = hasDesktopBridge()
