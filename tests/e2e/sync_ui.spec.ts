@@ -24,7 +24,7 @@ test.describe("Sync UI Verification", () => {
       .waitFor({ state: "visible", timeout: 60000 });
 
     // Explicitly wait for the React component to mount and render the tab
-    const tabSelector = 'button[role="tab"]:has-text("同期診断")';
+    const tabSelector = "button[role=\"tab\"]:has-text(\"同期診断\")";
     await page.waitForSelector(tabSelector, {
       state: "visible",
       timeout: 30000,
