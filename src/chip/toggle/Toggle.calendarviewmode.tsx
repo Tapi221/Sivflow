@@ -21,7 +21,8 @@ const CALENDAR_VIEW_MODE_ACTIVE_TEXT_CLASS = "text-[#8c8c8c]";
 const CALENDAR_VIEW_MODE_INACTIVE_TEXT_CLASS = "text-[#d5d5d5]";
 const CALENDAR_VIEW_MODE_HOVER_TEXT_CLASS = "hover:text-[#8c8c8c]";
 const CALENDAR_VIEW_MODE_INDICATOR_CLASS = "pointer-events-none absolute inset-0 z-0 rounded-[8px] border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]";
-const LIST_PIE_CHART_VIEW_MODES = ["list", "pieChart"] as const satisfies readonly CalendarViewMode[];
+const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
+const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
 const STATIC_TIMETABLE_VIEW_MODE = "timetable" satisfies CalendarViewMode;
 const CALENDAR_VIEW_MODE_MOTION_TRANSITION: Transition = {
   type: "tween",
@@ -31,9 +32,31 @@ const CALENDAR_VIEW_MODE_MOTION_TRANSITION: Transition = {
 
 const isViewModeSelectionArray = (value: CalendarViewModeSelection): value is readonly CalendarViewMode[] => Array.isArray(value);
 
-const isListPieChartViewMode = (viewMode: CalendarViewMode) => (
-  viewMode === "list" || viewMode === "pieChart"
-);
+const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SELECT_VIEW_MODE_SET.has(viewMode);
+
+const sortMultiSelectViewModes = (viewModes: readonly CalendarViewMode[]): CalendarViewMode[] => MULTI_SELECT_VIEW_MODES.filter((viewMode) => viewModes.includes(viewMode));
+
+const resolveOptimisticViewMode = (
+  currentValue: CalendarViewModeSelection,
+  nextValue: CalendarViewMode,
+): CalendarViewModeSelection => {
+  if (!isMultiSelectViewMode(nextValue)) return nextValue;
+
+  if (isViewModeSelectionArray(currentValue)) {
+    if (currentValue.includes(nextValue)) {
+      const remainingSelection = currentValue.filter((viewMode) => viewMode !== nextValue);
+      return remainingSelection[0] ?? nextValue;
+    }
+
+    return sortMultiSelectViewModes([...currentValue.filter(isMultiSelectViewMode), nextValue].slice(-2));
+  }
+
+  if (isMultiSelectViewMode(currentValue) && currentValue !== nextValue) {
+    return sortMultiSelectViewModes([currentValue, nextValue]);
+  }
+
+  return nextValue;
+};
 
 const isSelectedViewMode = (
   value: CalendarViewModeSelection,
@@ -43,28 +66,6 @@ const isSelectedViewMode = (
 const hasMultipleSelectedViewModes = (
   value: CalendarViewModeSelection,
 ) => isViewModeSelectionArray(value) && value.length > 1;
-
-const resolveOptimisticViewMode = (
-  currentValue: CalendarViewModeSelection,
-  nextValue: CalendarViewMode,
-): CalendarViewModeSelection => {
-  if (!isListPieChartViewMode(nextValue)) return nextValue;
-
-  if (isViewModeSelectionArray(currentValue)) {
-    if (currentValue.includes(nextValue)) {
-      const remainingSelection = currentValue.filter((viewMode) => viewMode !== nextValue);
-      return remainingSelection[0] ?? nextValue;
-    }
-
-    return LIST_PIE_CHART_VIEW_MODES;
-  }
-
-  if (isListPieChartViewMode(currentValue) && currentValue !== nextValue) {
-    return LIST_PIE_CHART_VIEW_MODES;
-  }
-
-  return nextValue;
-};
 
 const ToggleCalendarViewMode = ({
   value,
