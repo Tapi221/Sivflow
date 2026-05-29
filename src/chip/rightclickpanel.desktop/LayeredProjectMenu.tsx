@@ -1,6 +1,6 @@
 import { memo, type CSSProperties, type RefObject } from "react";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
-import { RIGHT_CLICK_PANEL_MARGIN, resolveRightClickPanelTextWidth, type RightClickPanelId, type RightClickPanelSubmenuAnchor } from "./rightClickPanel.utils";
+import { RIGHT_CLICK_PANEL_MARGIN, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
 
 type LayeredProjectMenuItemDefinition = {
   id: LayeredProjectMenuActionId;
@@ -17,6 +17,10 @@ export type LayeredProjectMenuAction = {
   onSelect: () => void;
 };
 
+export type LayeredProjectMenuSubmenuAnchor = {
+  itemOffsetY: number;
+};
+
 type LayeredProjectMenuProps = {
   x: number;
   y: number;
@@ -25,7 +29,7 @@ type LayeredProjectMenuProps = {
   noDragStyle: CSSProperties;
   panelId?: RightClickPanelId;
   openSubmenuId?: LayeredProjectMenuActionId | null;
-  onOpenSubmenu?: (id: LayeredProjectMenuActionId, anchor: RightClickPanelSubmenuAnchor) => void;
+  onOpenSubmenu?: (id: LayeredProjectMenuActionId, anchor: LayeredProjectMenuSubmenuAnchor) => void;
   onCloseSubmenu?: () => void;
 };
 
@@ -80,7 +84,7 @@ const LAYERED_PROJECT_MENU_STYLE = `
 
 const getLayeredProjectMenuAction = (actions: LayeredProjectMenuAction[], id: LayeredProjectMenuActionId) => actions.find((action) => action.id === id);
 
-const getLayeredProjectMenuSubmenuAnchor = (index: number): RightClickPanelSubmenuAnchor => ({ itemOffsetY: 3 + index * LAYERED_PROJECT_MENU_ITEM_HEIGHT });
+const getLayeredProjectMenuSubmenuAnchor = (index: number): LayeredProjectMenuSubmenuAnchor => ({ itemOffsetY: 3 + index * LAYERED_PROJECT_MENU_ITEM_HEIGHT });
 
 const LayeredProjectMenuBase = ({
   x,
