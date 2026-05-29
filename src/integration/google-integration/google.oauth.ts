@@ -1,5 +1,5 @@
 import { type Auth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/electron/app";
+import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/desktop/app";
 import { readEmail } from "@/integration/googlecalendar-integration/gcal.storage";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
