@@ -7,19 +7,23 @@ import { buildExplorerTreeData, parseSelectedTreeId, toSelectedTreeId, type Expl
 import { useExpandedFolders } from "@/components/folder/hooks/useExpandedFolders";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+import { getTagColorSwatchStyle } from "@/chip/tag/tagColor";
 import { LAYERED_COLOR_MENU_HEIGHT, LAYERED_COLOR_MENU_WIDTH, LayeredColorMenu } from "@/chip/rightclickpanel.desktop/LayeredColorMenu.desktop";
 import { LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LayeredProjectMenu, type LayeredProjectMenuAction, type LayeredProjectMenuActionId, type LayeredProjectMenuSubmenuAnchor } from "@/chip/rightclickpanel.desktop/LayeredProjectMenu";
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { FadeSkeleton } from "@/features/fade/skeltom";
 import { toVirtualMfCardDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
+import { useTags, type Tag as TagRecordView } from "@/features/settings/hooks/useTags";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
+import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { cn } from "@/lib/utils";
 import { createDefaultExplorerRouteState, WORKSPACE_DEFAULT_EXPLORER_TAB_ID, type WorkspaceExplorerTab, type WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { Card, CardSet, DocumentItem, SelectedExplorerItem } from "@/types";
+import { Tag as TagIcon } from "@/ui/icons";
 
 type ExplorerSelectionPatch = {
   selectedFolderId: string | null;
@@ -59,6 +63,7 @@ const TREE_ROW_BASE_CLASS_NAME = "group relative flex w-full cursor-default sele
 const TREE_ROW_SELECTED_CLASS_NAME = "bg-white text-[#5f6672] shadow-[0_1px_3px_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(0,0,0,0.06)]";
 const TREE_ROW_IDLE_CLASS_NAME = "text-[#5f6672] hover:bg-[#f7f7f8] hover:text-[#5f6672]";
 const TREE_NODE_MARKER_CLASS_NAME = "library-tree-marker h-4 w-4 shrink-0 rounded-full";
+const TREE_TAG_MARKER_CLASS_NAME = "library-tree-marker flex h-4 w-4 shrink-0 items-center justify-center rounded-full border";
 const TREE_TOGGLE_BUTTON_CLASS_NAME = "flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[#a7abb3] transition hover:bg-white hover:text-[#6f7580] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
 const TREE_TOGGLE_ICON_CLASS_NAME = "h-3 w-3 transition-transform duration-150";
 const TREE_TOGGLE_SPACER_CLASS_NAME = "h-4 w-4 shrink-0";
@@ -177,6 +182,23 @@ const getNodeMarkerStyle = (node: ExplorerTreeNode): CSSProperties | undefined =
   return folderColor ? { backgroundColor: folderColor } : undefined;
 };
 
+const compareTagByName = (left: TagRecordView, right: TagRecordView): number => left.name.localeCompare(right.name, "ja");
+
+const getTagChildrenByParentId = (tags: TagRecordView[]): Map<string | null, TagRecordView[]> => {
+  const tagById = new Map(tags.map((tag) => [tag.id, tag]));
+  const childrenByParentId = new Map<string | null, TagRecordView[]>();
+
+  for (const tag of tags) {
+    const parentId = tag.parentId && tagById.has(tag.parentId) ? tag.parentId : null;
+    const siblings = childrenByParentId.get(parentId) ?? [];
+    siblings.push(tag);
+    childrenByParentId.set(parentId, siblings);
+  }
+
+  childrenByParentId.forEach((siblings) => siblings.sort(compareTagByName));
+  return childrenByParentId;
+};
+
 const getLayeredProjectColorMenuPosition = (
   menu: LayeredProjectContextMenuState,
   anchor: LayeredProjectMenuSubmenuAnchor,
@@ -190,6 +212,7 @@ const getLayeredProjectColorMenuPosition = (
 };
 
 const LibraryHierarchySidebar = () => {
+  const folderTagMode = useFolderTagModeStore((state) => state.folderTagMode);
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
@@ -202,6 +225,7 @@ const LibraryHierarchySidebar = () => {
   const { cardSets, loading: cardSetsLoading, createCardSet } = useCardSets();
   const { documents, loading: documentsLoading } = useDocumentsRead();
   const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
+  const { tags } = useTags();
   const { expandedFolders, setExpandedFolders } = useExpandedFolders(LIBRARY_EXPANDED_FOLDERS_STORAGE_KEY);
   const { expandedFolders: expandedCardSets, setExpandedFolders: setExpandedCardSets } = useExpandedFolders(LIBRARY_EXPANDED_CARD_SETS_STORAGE_KEY);
   const didSeedInitialOpenStateRef = useRef(false);
@@ -279,6 +303,10 @@ const LibraryHierarchySidebar = () => {
 
     return map;
   }, [treeFolders]);
+
+  const tagChildrenByParentId = useMemo(() => getTagChildrenByParentId(tags), [tags]);
+
+  const rootTags = useMemo(() => tagChildrenByParentId.get(null) ?? [], [tagChildrenByParentId]);
 
   const {
     rootFolders,
@@ -713,6 +741,44 @@ const LibraryHierarchySidebar = () => {
     treeFolders,
   ]);
 
+  function renderTagTreeNode(
+    tag: TagRecordView,
+    depth: number,
+    index: number,
+    siblingCount: number,
+  ) {
+    const childTags = tagChildrenByParentId.get(tag.id) ?? [];
+    const rowStyle: CSSProperties = { paddingLeft: TREE_ROW_BASE_PADDING_LEFT_PX + depth * TREE_INDENT_PX };
+
+    return (
+      <div key={tag.id} className="relative">
+        <div
+          role="treeitem"
+          tabIndex={0}
+          aria-level={depth + 1}
+          aria-setsize={siblingCount}
+          aria-posinset={index + 1}
+          className={cn(TREE_ROW_BASE_CLASS_NAME, TREE_ROW_HEIGHT_CLASS_NAME, TREE_ROW_IDLE_CLASS_NAME)}
+          style={rowStyle}
+        >
+          <span className={TREE_TOGGLE_SPACER_CLASS_NAME} aria-hidden="true" />
+          <span className={TREE_TAG_MARKER_CLASS_NAME} style={getTagColorSwatchStyle(tag.color)} aria-hidden="true">
+            <TagIcon size={9} strokeWidth={2} />
+          </span>
+          <span className="min-w-0 flex-1 truncate">{tag.name}</span>
+        </div>
+
+        {childTags.length > 0 ? (
+          <div role="group">
+            {childTags.map((childTag, childIndex) =>
+              renderTagTreeNode(childTag, depth + 1, childIndex, childTags.length),
+            )}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   function renderTreeNode(
     node: ExplorerTreeNode,
     depth: number,
@@ -848,6 +914,22 @@ const LibraryHierarchySidebar = () => {
       onCloseSubmenu={handleCloseLayeredProjectSubmenu}
     />
   ) : null;
+
+  if (folderTagMode === "tag") {
+    return (
+      <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-2 pl-0 pr-2 pt-2 font-sans text-[#5f6672] antialiased" aria-label="Tag hierarchy explorer">
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {rootTags.length > 0 ? (
+            <div role="tree" aria-label="タグ一覧" className="space-y-[1px]">
+              {rootTags.map((tag, index) => renderTagTreeNode(tag, 0, index, rootTags.length))}
+            </div>
+          ) : (
+            <p className={TREE_EMPTY_TEXT_CLASS_NAME}>表示できるタグがありません</p>
+          )}
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-2 pl-0 pr-2 pt-2 font-sans text-[#5f6672] antialiased" aria-label="Library hierarchy explorer">
