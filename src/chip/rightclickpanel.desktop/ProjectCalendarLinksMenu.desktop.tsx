@@ -1,6 +1,6 @@
 import { type CSSProperties, type RefObject } from "react";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
-import { RIGHT_CLICK_PANEL_MARGIN, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
+import { resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
 
 export type ProjectCalendarLinksMenuAction = {
   id: string;
@@ -32,11 +32,10 @@ const PROJECT_CALENDAR_LINKS_MENU_LABELS = [
 const PROJECT_CALENDAR_LINKS_MENU_ITEM_HEIGHT = 30;
 
 export const PROJECT_CALENDAR_LINKS_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_CALENDAR_LINKS_MENU_LABELS);
-export const PROJECT_CALENDAR_LINKS_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
 export const getProjectCalendarLinksMenuHeight = (actionCount: number): number => Math.max(PROJECT_CALENDAR_LINKS_MENU_ITEM_HEIGHT, actionCount * PROJECT_CALENDAR_LINKS_MENU_ITEM_HEIGHT);
 
-export const ProjectCalendarLinksMenu = ({
+const ProjectCalendarLinksMenu = ({
   x,
   y,
   actions,
@@ -76,3 +75,5 @@ export const ProjectCalendarLinksMenu = ({
     </RightClickPanelSurface>
   );
 };
+
+export { ProjectCalendarLinksMenu };
