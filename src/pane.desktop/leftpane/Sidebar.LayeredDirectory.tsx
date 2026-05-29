@@ -35,12 +35,6 @@ const getRootProjectTreeItem = (target: EventTarget | null): HTMLElement | null 
 
 const getTreeItemLabel = (treeItem: HTMLElement): string => treeItem.textContent?.trim() ?? "";
 
-const openRootProjectIfNeeded = (treeItem: HTMLElement) => {
-  if (treeItem.getAttribute("aria-expanded") !== "false") return;
-
-  treeItem.querySelector<HTMLButtonElement>('button[type="button"]')?.click();
-};
-
 const applyFocusedProjectVisibility = (container: HTMLDivElement | null, focusedProjectIndex: number | null) => {
   const rootProjectElements = getRootProjectElements(container);
   const shouldShowAll = focusedProjectIndex === null || focusedProjectIndex < 0 || focusedProjectIndex >= rootProjectElements.length;
@@ -80,8 +74,9 @@ const SidebarLayeredDirectory = () => {
     const focusedProjectIndex = rootProjectElements.findIndex((element) => element.contains(treeItem));
     if (focusedProjectIndex === -1) return;
 
+    event.preventDefault();
+    event.stopPropagation();
     setFocusedProject({ index: focusedProjectIndex, label: getTreeItemLabel(treeItem) });
-    window.setTimeout(() => openRootProjectIfNeeded(treeItem), 0);
   }, [folderTagMode]);
 
   useEffect(() => {
