@@ -132,8 +132,8 @@ const CalendarTimetableViewComponent = ({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto px-5 pb-5 scrollbar-hidden">
-        <div className="inline-grid w-max gap-x-1.5 gap-y-1.5" style={{ gridTemplateColumns: TIMETABLE_GRID_TEMPLATE_COLUMNS }}>
+      <div className="min-h-0 flex-1 overflow-auto px-5 pb-5 text-center scrollbar-hidden">
+        <div className="inline-grid w-max gap-x-1.5 gap-y-1.5 text-left" style={{ gridTemplateColumns: TIMETABLE_GRID_TEMPLATE_COLUMNS }}>
           <div aria-hidden="true" className="h-8" />
 
           {weekDays.map((day, dayIndex) => {
