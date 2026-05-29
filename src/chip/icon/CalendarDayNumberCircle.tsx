@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type CalendarDayNumberCircleProps = {
@@ -7,8 +7,6 @@ type CalendarDayNumberCircleProps = {
   isSelected?: boolean;
   isCurrentMonth?: boolean;
   className?: string;
-  style?: CSSProperties;
-  allowsCustomBackground?: boolean;
 };
 
 const CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME =
@@ -23,7 +21,7 @@ const getCalendarDayNumberCircleClassName = ({
   isSelected = false,
   isCurrentMonth = true,
   className,
-}: Omit<CalendarDayNumberCircleProps, "children" | "style" | "allowsCustomBackground">) =>
+}: Omit<CalendarDayNumberCircleProps, "children">) =>
   cn(
     CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME,
     isSelected
@@ -36,27 +34,12 @@ const getCalendarDayNumberCircleClassName = ({
     className,
   );
 
-const getCalendarDayNumberCircleStyle = (
-  style?: CSSProperties,
-  allowsCustomBackground = false,
-): CSSProperties | undefined => {
-  if (!style) return undefined;
-  if (allowsCustomBackground) return style;
-
-  const circleStyle = { ...style };
-  delete circleStyle.backgroundColor;
-
-  return circleStyle;
-};
-
 const CalendarDayNumberCircle = ({
   children,
   isToday = false,
   isSelected = false,
   isCurrentMonth = true,
   className,
-  style,
-  allowsCustomBackground = true,
 }: CalendarDayNumberCircleProps) => {
   return (
     <span
@@ -66,7 +49,6 @@ const CalendarDayNumberCircle = ({
         isCurrentMonth,
         className,
       })}
-      style={getCalendarDayNumberCircleStyle(style, allowsCustomBackground)}
     >
       {children}
     </span>
