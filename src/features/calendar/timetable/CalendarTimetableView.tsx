@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ja } from "date-fns/locale";
-import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
+import { getTagColorStyle, type TagColorKey } from "@/chip/tag/tagColor";
 import { cn } from "@/lib/utils";
 
 type TimetablePeriod = {
@@ -16,7 +16,7 @@ type TimetableEntry = {
   periodIndex: number;
   title: string;
   room: string;
-  accentColor: string;
+  colorKey: TagColorKey;
   note?: string;
 };
 
@@ -42,28 +42,28 @@ const TIMETABLE_PERIODS: readonly TimetablePeriod[] = [
   { label: "7", startTime: "19:40", endTime: "21:10" },
 ];
 const TIMETABLE_ENTRIES: readonly TimetableEntry[] = [
-  { id: "materials-mon-1", dayIndex: 0, periodIndex: 0, title: "材料力学", room: "5N-301", accentColor: "#46D6DB" },
-  { id: "fluid-engineering-mon-2", dayIndex: 0, periodIndex: 1, title: "流体工学", room: "L301", accentColor: "#5484ED" },
-  { id: "linear-algebra-mon-3", dayIndex: 0, periodIndex: 2, title: "線形代数", room: "B202", accentColor: "#A47AE2" },
-  { id: "elasticity-mon-4", dayIndex: 0, periodIndex: 3, title: "弾性力学", room: "L401", accentColor: "#FBD75B" },
-  { id: "heat-transfer-mon-5", dayIndex: 0, periodIndex: 4, title: "伝熱工学", room: "5N-201", accentColor: "#DC2127" },
-  { id: "complex-tue-1", dayIndex: 1, periodIndex: 0, title: "複素解析", room: "L401", accentColor: "#A47AE2" },
-  { id: "complex-tue-2", dayIndex: 1, periodIndex: 1, title: "複素解析", room: "L401", accentColor: "#A47AE2" },
-  { id: "fluid-engineering-tue-3", dayIndex: 1, periodIndex: 2, title: "流体工学", room: "L301", accentColor: "#5484ED" },
-  { id: "elasticity-tue-4", dayIndex: 1, periodIndex: 3, title: "弾性力学", room: "L401", accentColor: "#FBD75B" },
-  { id: "thermo-wed-1", dayIndex: 2, periodIndex: 0, title: "熱力学", room: "L402", accentColor: "#DBADFF" },
-  { id: "thermo-wed-2", dayIndex: 2, periodIndex: 1, title: "熱力学", room: "L402", accentColor: "#DBADFF" },
-  { id: "materials-wed-3", dayIndex: 2, periodIndex: 2, title: "材料力学", room: "5N-301", accentColor: "#46D6DB" },
-  { id: "statistics-wed-5", dayIndex: 2, periodIndex: 4, title: "統計学", room: "B203", accentColor: "#A47AE2" },
-  { id: "fluid-thu-1", dayIndex: 3, periodIndex: 0, title: "流体力学", room: "L301", accentColor: "#5484ED" },
-  { id: "mechanics-thu-2", dayIndex: 3, periodIndex: 1, title: "機械力学", room: "3S-301", accentColor: "#FBD75B" },
-  { id: "info-thu-3", dayIndex: 3, periodIndex: 2, title: "情報科学", room: "B303", accentColor: "#8E8E93" },
-  { id: "material-science-thu-4", dayIndex: 3, periodIndex: 3, title: "材料科学", room: "3N-301", accentColor: "#51B749" },
-  { id: "material-science-thu-5", dayIndex: 3, periodIndex: 4, title: "材料科学", room: "3N-301", accentColor: "#51B749" },
-  { id: "mechanics-fri-1", dayIndex: 4, periodIndex: 0, title: "機械力学", room: "3S-301", accentColor: "#FBD75B" },
-  { id: "fluid-fri-2", dayIndex: 4, periodIndex: 1, title: "流体力学", room: "L301", accentColor: "#5484ED" },
-  { id: "heat-transfer-fri-3", dayIndex: 4, periodIndex: 2, title: "伝熱工学", room: "5N-201", accentColor: "#DC2127" },
-  { id: "design-fri-4", dayIndex: 4, periodIndex: 3, title: "設計演習", room: "CAD室", accentColor: "#8E8E93" },
+  { id: "materials-mon-1", dayIndex: 0, periodIndex: 0, title: "材料力学", room: "5N-301", colorKey: "teal" },
+  { id: "fluid-engineering-mon-2", dayIndex: 0, periodIndex: 1, title: "流体工学", room: "L301", colorKey: "blue" },
+  { id: "linear-algebra-mon-3", dayIndex: 0, periodIndex: 2, title: "線形代数", room: "B202", colorKey: "purple" },
+  { id: "elasticity-mon-4", dayIndex: 0, periodIndex: 3, title: "弾性力学", room: "L401", colorKey: "amber" },
+  { id: "heat-transfer-mon-5", dayIndex: 0, periodIndex: 4, title: "伝熱工学", room: "5N-201", colorKey: "red" },
+  { id: "complex-tue-1", dayIndex: 1, periodIndex: 0, title: "複素解析", room: "L401", colorKey: "purple" },
+  { id: "complex-tue-2", dayIndex: 1, periodIndex: 1, title: "複素解析", room: "L401", colorKey: "purple" },
+  { id: "fluid-engineering-tue-3", dayIndex: 1, periodIndex: 2, title: "流体工学", room: "L301", colorKey: "blue" },
+  { id: "elasticity-tue-4", dayIndex: 1, periodIndex: 3, title: "弾性力学", room: "L401", colorKey: "amber" },
+  { id: "thermo-wed-1", dayIndex: 2, periodIndex: 0, title: "熱力学", room: "L402", colorKey: "pink" },
+  { id: "thermo-wed-2", dayIndex: 2, periodIndex: 1, title: "熱力学", room: "L402", colorKey: "pink" },
+  { id: "materials-wed-3", dayIndex: 2, periodIndex: 2, title: "材料力学", room: "5N-301", colorKey: "teal" },
+  { id: "statistics-wed-5", dayIndex: 2, periodIndex: 4, title: "統計学", room: "B203", colorKey: "purple" },
+  { id: "fluid-thu-1", dayIndex: 3, periodIndex: 0, title: "流体力学", room: "L301", colorKey: "blue" },
+  { id: "mechanics-thu-2", dayIndex: 3, periodIndex: 1, title: "機械力学", room: "3S-301", colorKey: "amber" },
+  { id: "info-thu-3", dayIndex: 3, periodIndex: 2, title: "情報科学", room: "B303", colorKey: "gray" },
+  { id: "material-science-thu-4", dayIndex: 3, periodIndex: 3, title: "材料科学", room: "3N-301", colorKey: "green" },
+  { id: "material-science-thu-5", dayIndex: 3, periodIndex: 4, title: "材料科学", room: "3N-301", colorKey: "green" },
+  { id: "mechanics-fri-1", dayIndex: 4, periodIndex: 0, title: "機械力学", room: "3S-301", colorKey: "amber" },
+  { id: "fluid-fri-2", dayIndex: 4, periodIndex: 1, title: "流体力学", room: "L301", colorKey: "blue" },
+  { id: "heat-transfer-fri-3", dayIndex: 4, periodIndex: 2, title: "伝熱工学", room: "5N-201", colorKey: "red" },
+  { id: "design-fri-4", dayIndex: 4, periodIndex: 3, title: "設計演習", room: "CAD室", colorKey: "gray" },
 ];
 
 const createTimetableSlotKey = ({ dayIndex, periodIndex }: TimetableSlot): string => `${dayIndex}:${periodIndex}`;
@@ -86,15 +86,7 @@ const createTimetableEntryMap = () => {
 
 const formatTimetableWeekRange = (weekDays: Date[]): string => `${format(weekDays[0], "M/d", { locale: ja })} - ${format(weekDays[weekDays.length - 1], "M/d", { locale: ja })}`;
 
-const getTimetableEntryStyle = (accentColor: string) => {
-  const tokens = generateColorTokens(accentColor);
-
-  return {
-    background: tokens.bg,
-    borderColor: tokens.border,
-    color: tokens.text,
-  };
-};
+const getTimetableEntryStyle = (colorKey: TagColorKey) => getTagColorStyle(colorKey);
 
 const TIMETABLE_ENTRY_MAP = createTimetableEntryMap();
 
@@ -165,12 +157,12 @@ const CalendarTimetableViewComponent = ({
                 const entry = TIMETABLE_ENTRY_MAP.get(createTimetableSlotKey(slot)) ?? null;
 
                 return (
-                  <button key={`${day.toISOString()}-${period.label}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-h-[52px] rounded-[18px] text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", entry ? "border px-2.5 py-1" : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.accentColor) : undefined}>
+                  <button key={`${day.toISOString()}-${period.label}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-h-[52px] rounded-[18px] text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", entry ? "border px-2.5 py-1" : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.colorKey) : undefined}>
                     {entry ? (
                       <span className="flex h-full min-h-[40px] flex-col items-center justify-center text-center">
                         <span className="max-w-full truncate text-[11px] font-semibold leading-snug tracking-[-0.01em] text-inherit">{entry.title}</span>
-                        <span className="mt-0.5 max-w-full truncate text-[11px] font-semibold leading-snug text-[rgba(28,28,30,0.78)]">{entry.room}</span>
-                        {entry.note ? <span className="mt-0.5 max-w-full truncate text-[11px] font-semibold leading-snug text-[rgba(28,28,30,0.48)]">{entry.note}</span> : null}
+                        <span className="mt-0.5 max-w-full truncate text-[11px] font-semibold leading-snug opacity-80">{entry.room}</span>
+                        {entry.note ? <span className="mt-0.5 max-w-full truncate text-[11px] font-semibold leading-snug opacity-60">{entry.note}</span> : null}
                       </span>
                     ) : (
                       <span className="flex h-full min-h-[40px] items-center justify-center">
