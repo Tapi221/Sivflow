@@ -187,12 +187,19 @@ a:hover,
   display: none;
 }
 
+[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] {
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 9999px;
+  padding-right: 9px;
+  background-color: var(--sidebar-folder-label-bg, rgba(107, 170, 126, 0.14));
+}
+
 [aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .truncate {
   flex: 0 1 auto;
   max-width: 100%;
-  border-radius: 9999px;
-  padding: 2px 7px;
-  background-color: var(--sidebar-folder-label-bg, rgba(107, 170, 126, 0.14));
+  padding: 0;
+  background-color: transparent;
 }
 
 [aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .library-tree-marker {
