@@ -52,7 +52,7 @@ export type LocalDBTableMap = {
 };
 
 export type SyncableEntityTable = keyof LocalDBTableMap;
-export type QueryableKeyPath = string | readonly string[];
+export type QueryableKeyPath = string | string[];
 
 export interface QueryableCollection<T extends object, TKey = string> {
   equals(value: unknown): QueryableCollection<T, TKey>;
@@ -92,6 +92,12 @@ export interface QueryableWhereClause<T extends object, TKey = string> {
   anyOf(values: readonly unknown[]): QueryableCollection<T, TKey>;
 }
 
+export type QueryableWhereFunction<T extends object, TKey = string> = {
+  (criteria: { [key: string]: unknown }): QueryableCollection<T, TKey>;
+  (index: QueryableKeyPath): QueryableWhereClause<T, TKey>;
+  equals(value: unknown): QueryableCollection<T, TKey>;
+};
+
 export interface QueryableTable<T extends object, TKey = string> {
   count(): Promise<number>;
   get(key: unknown): Promise<T | undefined>;
@@ -107,8 +113,7 @@ export interface QueryableTable<T extends object, TKey = string> {
   delete(key: unknown): Promise<void>;
   clear(): Promise<void>;
   toArray(): Promise<T[]>;
-  where(index: QueryableKeyPath): QueryableWhereClause<T, TKey>;
-  where(criteria: { [key: string]: unknown }): QueryableCollection<T, TKey>;
+  where: QueryableWhereFunction<T, TKey>;
   filter(predicate: (item: T) => boolean): QueryableCollection<T, TKey>;
   orderBy(index: QueryableKeyPath): QueryableCollection<T, TKey>;
   toCollection(): QueryableCollection<T, TKey>;
