@@ -1,0 +1,10 @@
+{
+  "name": "manifolia-desktop",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build"
+  }
+}
