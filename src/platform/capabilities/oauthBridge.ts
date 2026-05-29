@@ -11,7 +11,7 @@ export const oauthBridge: OAuthBridgePort = {
   refreshTokens: (input) => platform.oauth.refreshTokens(input),
   storeRefreshToken: async (input) => {
     await platform.oauth.storeRefreshToken(input);
-    void mirrorDesktopGoogleRefreshTokenToServer(input.refreshToken).catch((error) => {
+    await mirrorDesktopGoogleRefreshTokenToServer(input.refreshToken).catch((error) => {
       console.warn("[GoogleCalendarOAuth] desktop refresh token server mirror failed", error);
     });
   },
