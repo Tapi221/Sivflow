@@ -155,7 +155,7 @@ const CalendarWeekDayGridComponent = ({
 
       <div ref={allDayScrollRef} className="shrink-0 overflow-hidden border-b" style={{ borderColor: COLOR.WEEKDAY_COLOR_BORDER_MAIN }}>
         <div className="grid" style={{ gridTemplateColumns, minWidth: contentMinWidth }}>
-          <div className="flex min-h-10 items-start justify-end px-2 py-2 text-[11px] font-semibold text-slate-400">終日</div>
+          <div className="flex min-h-10 items-start justify-end px-2 py-2 text-[11px] font-semibold text-[#b8bcc5]">終日</div>
           {visibleDays.map((day) => {
             const dayKey = getCalendarDateKey(day);
             const events = allDayEvents.get(dayKey) ?? [];
@@ -182,7 +182,7 @@ const CalendarWeekDayGridComponent = ({
           <div className="relative border-r bg-white" style={{ borderColor: COLOR.WEEKDAY_COLOR_BORDER_MAIN, zIndex: GRID.WEEKDAY_GRID_TIME_COLUMN_Z_INDEX }}>
             {WEEKDAY_HOURS.map((hour) => (
               <div key={hour} className="relative border-b" style={{ height: `var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})`, borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }}>
-                <span className="absolute right-2 top-0 -translate-y-1/2 text-[11px] font-medium tabular-nums text-slate-400">{format(new Date(2000, 0, 1, hour), GRID.WEEKDAY_HOUR_LABEL_FORMAT)}</span>
+                <span className="absolute right-2 top-0 -translate-y-1/2 text-[11px] font-medium tabular-nums text-[#b8bcc5]">{format(new Date(2000, 0, 1, hour), GRID.WEEKDAY_HOUR_LABEL_FORMAT)}</span>
               </div>
             ))}
           </div>
