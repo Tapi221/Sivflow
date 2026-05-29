@@ -16,13 +16,6 @@
       "problemMatcher": "$tsc"
     },
     {
-      "label": "TypeScript: check electron",
-      "type": "shell",
-      "command": "npm exec tsc -- -p tsconfig.electron.json --noEmit --pretty false",
-      "group": "build",
-      "problemMatcher": "$tsc"
-    },
-    {
       "label": "TypeScript: check tests",
       "type": "shell",
       "command": "npm exec tsc -- -p tsconfig.test.json --noEmit --pretty false",
@@ -73,36 +66,22 @@
       ]
     },
     {
-      "label": "Build: electron",
+      "label": "Build: tauri",
       "type": "shell",
-      "command": "npm run electron:build",
+      "command": "npm run tauri:build",
       "group": "build",
-      "problemMatcher": [
-        "$tsc",
-        {
-          "owner": "esbuild",
-          "fileLocation": ["relative", "${workspaceFolder}"],
-          "pattern": {
-            "regexp": "^\\s*(.+):(\\d+):(\\d+):\\s*(?:ERROR|error):\\s*(.*)$",
-            "file": 1,
-            "line": 2,
-            "column": 3,
-            "message": 4
-          }
-        }
-      ]
+      "problemMatcher": ["$tsc"]
     },
     {
       "label": "Problems: check workspace",
       "dependsOn": [
         "TypeScript: check app",
         "TypeScript: check node",
-        "TypeScript: check electron",
         "TypeScript: check tests",
         "TypeScript: check mobile",
         "ESLint: lint workspace",
         "Build: web",
-        "Build: electron"
+        "Build: tauri"
       ],
       "dependsOrder": "parallel",
       "group": {
