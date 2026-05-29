@@ -2,7 +2,7 @@ import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
 import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from "./textBlockStyles";
 import { buildTypographyStyle, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
-import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/styles/tokens/typography";
+import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/typography";
 
 const normalizeTextBlockContent = (content: string) =>
   String(content ?? "").replace(/\r\n/g, "\n");
