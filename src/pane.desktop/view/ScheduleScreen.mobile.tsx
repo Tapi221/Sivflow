@@ -7,10 +7,10 @@ import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
-import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { CalendarWorkspaceToolbar } from "@/pane.desktop/header/ScheduleToolbar";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
+import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 
 const IOS_CALENDAR_MONTH_SURFACE_CLASS =
   "border-transparent bg-[rgba(255,255,255,0.94)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
