@@ -16,17 +16,20 @@
       "@/services/localDB": ["src/services/localdb/index.ts"],
       "@/services/firebase": ["src/infrastructure/firebase/client.ts"],
       "@/features/tab/Tab": ["src/pane.desktop/tab.desktopnative/Tab.ts"],
+      "@web-renderer/*": ["packages/web-renderer/src/*"],
       "@/*": ["src/*"],
       "@constants/*": ["constants/*"],
       "@shared/*": ["shared/*"]
     }
   },
   "include": [
+    "apps/web/src",
+    "packages/web-renderer/src",
+    "packages/core/src",
+    "packages/platform/src",
     "src",
     "constants",
-    "shared",
-    "apps/mobile/src/pane/schedule/schedule.year.mobilenative.tsx",
-    "apps/mobile/src/pane/navigationbar/navigationbar.tsx"
+    "shared"
   ],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "tests/**"]
 }
