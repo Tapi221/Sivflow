@@ -3,6 +3,7 @@ import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/electron/app";
 import { readEmail } from "@/integration/googlecalendar-integration/gcal.storage";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
+import { isGoogleOAuthPopupCallbackPayload } from "./google.oauth-popup-callback";
 
 const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 const GOOGLE_CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
@@ -161,24 +162,67 @@ const getCenteredPopupFeatures = (width: number, height: number): string => {
 const waitForWebPopupCode = (popup: Window, state: string, redirectUri: string): Promise<string> => new Promise((resolve, reject) => {
   const expected = new URL(redirectUri);
   let settled = false;
-  const timeoutTimer = window.setTimeout(() => {
-    finish(() => reject(new Error("OAuth timeout")));
-  }, WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS);
+  let pollTimer: number | null = null;
+  let timeoutTimer: number | null = null;
+
   const cleanup = (): void => {
-    window.clearInterval(pollTimer);
-    window.clearTimeout(timeoutTimer);
+    if (pollTimer !== null) window.clearInterval(pollTimer);
+    if (timeoutTimer !== null) window.clearTimeout(timeoutTimer);
+    window.removeEventListener("message", handleMessage);
     try {
       if (!popup.closed) popup.close();
     } catch {
       // Cross-Origin-Opener-Policy により closed を読めない場合がある。
     }
   };
+
   const finish = (callback: () => void): void => {
     if (settled) return;
     settled = true;
     cleanup();
     callback();
   };
+
+  const handleCallbackUrl = ({ rawUrl, callbackState, callbackCode, callbackError, errorDescription }: { rawUrl: string; callbackState?: string | null; callbackCode?: string | null; callbackError?: string | null; errorDescription?: string | null }): void => {
+    let url: URL;
+    try {
+      url = new URL(rawUrl);
+    } catch {
+      return;
+    }
+
+    if (url.origin !== expected.origin) return;
+    const returnedState = callbackState ?? url.searchParams.get("state");
+    if (returnedState !== state) return;
+    const error = callbackError ?? url.searchParams.get("error");
+
+    if (error) {
+      finish(() => reject(new Error(errorDescription ?? url.searchParams.get("error_description") ?? error)));
+      return;
+    }
+
+    const code = callbackCode ?? url.searchParams.get("code");
+    if (!code) {
+      finish(() => reject(new Error("No authorization code")));
+      return;
+    }
+
+    finish(() => resolve(code));
+  };
+
+  function handleMessage(event: MessageEvent<unknown>): void {
+    if (event.source !== popup) return;
+    if (event.origin !== expected.origin) return;
+    if (!isGoogleOAuthPopupCallbackPayload(event.data)) return;
+    handleCallbackUrl({
+      rawUrl: event.data.url,
+      callbackState: event.data.state,
+      callbackCode: event.data.code,
+      callbackError: event.data.error,
+      errorDescription: event.data.errorDescription,
+    });
+  }
+
   const poll = (): void => {
     try {
       if (popup.closed) {
@@ -194,21 +238,14 @@ const waitForWebPopupCode = (popup: Window, state: string, redirectUri: string):
     } catch {
       return;
     }
-    if (url.origin !== expected.origin || url.pathname !== expected.pathname) return;
-    if (url.searchParams.get("state") !== state) return;
-    const error = url.searchParams.get("error");
-    if (error) {
-      finish(() => reject(new Error(url.searchParams.get("error_description") ?? error)));
-      return;
-    }
-    const code = url.searchParams.get("code");
-    if (!code) {
-      finish(() => reject(new Error("No authorization code")));
-      return;
-    }
-    finish(() => resolve(code));
+    handleCallbackUrl({ rawUrl: url.href });
   };
-  const pollTimer = window.setInterval(poll, 250);
+
+  timeoutTimer = window.setTimeout(() => {
+    finish(() => reject(new Error("OAuth timeout")));
+  }, WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS);
+  window.addEventListener("message", handleMessage);
+  pollTimer = window.setInterval(poll, 250);
   poll();
 });
 
