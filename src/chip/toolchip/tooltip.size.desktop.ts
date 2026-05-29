@@ -1,40 +1,35 @@
-const TOOLTIP_DARK_SURFACE_CLASS_NAME = "bg-[#1c1c1e]/95 backdrop-blur-md";
-
-const TOOLTIP_LIGHT_SURFACE_CLASS_NAMES = {
-  tooltip: "border border-[#eeeeee] bg-white text-[#8c8c8c]",
-  arrow: "border-b border-r border-[#eeeeee] bg-white",
+const TOOLTIP_GLASS_SURFACE_CLASS_NAMES = {
+  tooltip: "border border-white/70 bg-[rgba(255,255,255,0.82)] text-[#3c3c43]/80 shadow-[0_10px_30px_rgba(60,60,67,0.15),inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-2xl",
+  arrow: "border-white/70 bg-[rgba(255,255,255,0.82)] backdrop-blur-2xl",
 } as const;
 
 export const TOOLTIP_SIZE_CLASS_NAMES = {
   default: {
-    tooltip:
-      "min-h-[26px] rounded-[9px] px-2.5 py-1 text-[12px] leading-[1.2] shadow-[0_8px_20px_rgba(0,0,0,0.2)]",
-    arrow: "h-2 w-2",
+    tooltip: "min-h-[26px] rounded-[13px] px-3 py-1.5 text-[12px] leading-none",
+    arrow: "h-2.5 w-2.5",
   },
   compact: {
-    tooltip:
-      "min-h-[20px] rounded-[7px] px-2 py-0.5 text-[10px] leading-[1.15] shadow-[0_4px_12px_rgba(0,0,0,0.16)]",
-    arrow: "h-1.5 w-1.5",
+    tooltip: "min-h-[22px] rounded-[11px] px-2.5 py-1 text-[11px] leading-none",
+    arrow: "h-2 w-2",
   },
   segmented: {
-    tooltip:
-      "min-h-[26px] rounded-lg px-2.5 py-[5px] text-[12px] leading-[1.2] shadow-[0_8px_18px_rgba(0,0,0,0.08)]",
-    arrow: "h-2 w-2",
+    tooltip: "min-h-[26px] rounded-[13px] px-3 py-1.5 text-[12px] leading-none",
+    arrow: "h-2.5 w-2.5",
   },
 } as const;
 
 export const TOOLTIP_PRESET_CLASS_NAMES = {
   default: {
-    tooltip: `${TOOLTIP_SIZE_CLASS_NAMES.default.tooltip} ${TOOLTIP_DARK_SURFACE_CLASS_NAME} text-white`,
-    arrow: `${TOOLTIP_SIZE_CLASS_NAMES.default.arrow} ${TOOLTIP_DARK_SURFACE_CLASS_NAME}`,
+    tooltip: `${TOOLTIP_SIZE_CLASS_NAMES.default.tooltip} ${TOOLTIP_GLASS_SURFACE_CLASS_NAMES.tooltip}`,
+    arrow: `${TOOLTIP_SIZE_CLASS_NAMES.default.arrow} ${TOOLTIP_GLASS_SURFACE_CLASS_NAMES.arrow}`,
   },
   compact: {
-    tooltip: `${TOOLTIP_SIZE_CLASS_NAMES.compact.tooltip} ${TOOLTIP_DARK_SURFACE_CLASS_NAME} text-white`,
-    arrow: `${TOOLTIP_SIZE_CLASS_NAMES.compact.arrow} ${TOOLTIP_DARK_SURFACE_CLASS_NAME}`,
+    tooltip: `${TOOLTIP_SIZE_CLASS_NAMES.compact.tooltip} ${TOOLTIP_GLASS_SURFACE_CLASS_NAMES.tooltip}`,
+    arrow: `${TOOLTIP_SIZE_CLASS_NAMES.compact.arrow} ${TOOLTIP_GLASS_SURFACE_CLASS_NAMES.arrow}`,
   },
   segmented: {
-    tooltip: `${TOOLTIP_SIZE_CLASS_NAMES.segmented.tooltip} ${TOOLTIP_LIGHT_SURFACE_CLASS_NAMES.tooltip}`,
-    arrow: `${TOOLTIP_SIZE_CLASS_NAMES.segmented.arrow} ${TOOLTIP_LIGHT_SURFACE_CLASS_NAMES.arrow}`,
+    tooltip: `${TOOLTIP_SIZE_CLASS_NAMES.segmented.tooltip} ${TOOLTIP_GLASS_SURFACE_CLASS_NAMES.tooltip}`,
+    arrow: `${TOOLTIP_SIZE_CLASS_NAMES.segmented.arrow} ${TOOLTIP_GLASS_SURFACE_CLASS_NAMES.arrow}`,
   },
 } as const;
 
