@@ -1,22 +1,22 @@
 {
   "expo": {
-    "name": "Manifolia",
-    "slug": "manifolia-mobile",
+    "name": "Sivflow",
+    "slug": "sivflow-mobile",
     "version": "0.0.0",
     "orientation": "portrait",
-    "scheme": "manifolia",
+    "scheme": "sivflow",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.manifolia.mobile",
+      "bundleIdentifier": "com.sivflow.mobile",
       "infoPlist": {
-        "NSCalendarsUsageDescription": "Manifolia uses calendar access to show and sync your schedule.",
-        "NSCalendarsFullAccessUsageDescription": "Manifolia uses calendar access to show and sync your schedule."
+        "NSCalendarsUsageDescription": "Sivflow uses calendar access to show and sync your schedule.",
+        "NSCalendarsFullAccessUsageDescription": "Sivflow uses calendar access to show and sync your schedule."
       }
     },
     "android": {
-      "package": "com.manifolia.mobile",
+      "package": "com.sivflow.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#F8FAFB"
       }
