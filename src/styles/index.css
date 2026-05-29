@@ -174,13 +174,21 @@ a:hover,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6.25px;
+  padding: 0;
   border: 0;
-  background-color: var(--sidebar-folder-mark-color, #6baa7e);
-  background-clip: content-box;
+  background-color: var(--sidebar-folder-soft-color, rgba(107, 170, 126, 0.12));
+  background-clip: border-box;
   box-shadow: none;
   -webkit-appearance: none;
   appearance: none;
+}
+
+[aria-label="Library hierarchy explorer"] [role="treeitem"] > .library-tree-marker::after {
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background-color: var(--sidebar-folder-mark-color, #6baa7e);
+  content: "";
 }
 
 [aria-label="Library hierarchy explorer"] [role="treeitem"] > button + .library-tree-marker {
@@ -192,7 +200,7 @@ a:hover,
   max-width: 100%;
   border-radius: 9999px;
   padding-right: 9px;
-  background-color: var(--sidebar-folder-label-bg, rgba(107, 170, 126, 0.14));
+  background-color: var(--sidebar-folder-soft-color, rgba(107, 170, 126, 0.12));
 }
 
 [aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .truncate {
@@ -203,45 +211,45 @@ a:hover,
 }
 
 [aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .library-tree-marker {
-  padding: 5.5px;
+  padding: 0;
 }
 
 [aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 1) {
   --sidebar-folder-mark-color: #6baa7e;
-  --sidebar-folder-label-bg: rgba(107, 170, 126, 0.14);
+  --sidebar-folder-soft-color: rgba(107, 170, 126, 0.12);
 }
 
 [aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 2) {
   --sidebar-folder-mark-color: #ffd678;
-  --sidebar-folder-label-bg: rgba(255, 214, 120, 0.22);
+  --sidebar-folder-soft-color: rgba(255, 214, 120, 0.12);
 }
 
 [aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 3) {
   --sidebar-folder-mark-color: #6499ea;
-  --sidebar-folder-label-bg: rgba(100, 153, 234, 0.16);
+  --sidebar-folder-soft-color: rgba(100, 153, 234, 0.12);
 }
 
 [aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 4) {
   --sidebar-folder-mark-color: #9ce0e7;
-  --sidebar-folder-label-bg: rgba(156, 224, 231, 0.2);
+  --sidebar-folder-soft-color: rgba(156, 224, 231, 0.12);
 }
 
 [aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 5) {
   --sidebar-folder-mark-color: #4dce6e;
-  --sidebar-folder-label-bg: rgba(77, 206, 110, 0.14);
+  --sidebar-folder-soft-color: rgba(77, 206, 110, 0.12);
 }
 
 [aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 6) {
   --sidebar-folder-mark-color: #ff7c7c;
-  --sidebar-folder-label-bg: rgba(255, 124, 124, 0.16);
+  --sidebar-folder-soft-color: rgba(255, 124, 124, 0.12);
 }
 
 [aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 7) {
   --sidebar-folder-mark-color: #6499ea;
-  --sidebar-folder-label-bg: rgba(100, 153, 234, 0.16);
+  --sidebar-folder-soft-color: rgba(100, 153, 234, 0.12);
 }
 
 [aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n) {
   --sidebar-folder-mark-color: #4dce6e;
-  --sidebar-folder-label-bg: rgba(77, 206, 110, 0.14);
+  --sidebar-folder-soft-color: rgba(77, 206, 110, 0.12);
 }
