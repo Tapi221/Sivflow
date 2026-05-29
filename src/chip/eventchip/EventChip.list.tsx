@@ -56,23 +56,12 @@ const createEventChipStyle = (tokens: ReturnType<typeof generateColorTokens>): C
   color: tokens.text,
 });
 
-const CalendarEventChipListContentComponent = ({ event }: CalendarEventChipListProps) => {
-  const tokens = useMemo(() => generateColorTokens(event.accentColor), [event.accentColor]);
-  const title = getEventTitle(event);
-  const timeRangeLabel = getEventTimeRangeLabel(event);
-  const chipStyle = useMemo(() => createEventChipStyle(tokens), [tokens]);
-
-  return (
-    <div className={LIST_EVENT_CHIP_CLASS_NAME} style={chipStyle}>
-      <div className={LIST_EVENT_TIME_CLASS_NAME}>{timeRangeLabel}</div>
-      <div className={LIST_EVENT_TITLE_CLASS_NAME}>{title}</div>
-    </div>
-  );
-};
-
 const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) => {
   const tokens = useMemo(() => generateColorTokens(event.accentColor), [event.accentColor]);
+  const title = getEventTitle(event);
   const startLabel = getEventStartTimeLabel(event);
+  const timeRangeLabel = getEventTimeRangeLabel(event);
+  const chipStyle = useMemo(() => createEventChipStyle(tokens), [tokens]);
 
   return (
     <div className={LIST_EVENT_ROW_CLASS_NAME} style={LIST_EVENT_ROW_STYLE}>
@@ -83,15 +72,16 @@ const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) =
         <span className={LIST_EVENT_DOT_CLASS_NAME} style={{ borderColor: tokens.border, boxShadow: `0 0 0 3px ${tokens.bg}` }} aria-hidden="true" />
       </div>
 
-      <CalendarEventChipListContentComponent event={event} />
+      <div className={LIST_EVENT_CHIP_CLASS_NAME} style={chipStyle}>
+        <div className={LIST_EVENT_TIME_CLASS_NAME}>{timeRangeLabel}</div>
+        <div className={LIST_EVENT_TITLE_CLASS_NAME}>{title}</div>
+      </div>
     </div>
   );
 };
 
 const CalendarEventChipList = memo(CalendarEventChipListComponent);
-const CalendarEventChipListContent = memo(CalendarEventChipListContentComponent);
 
 CalendarEventChipList.displayName = "CalendarEventChipList";
-CalendarEventChipListContent.displayName = "CalendarEventChipListContent";
 
-export { CalendarEventChipList, CalendarEventChipListContent };
+export { CalendarEventChipList };
