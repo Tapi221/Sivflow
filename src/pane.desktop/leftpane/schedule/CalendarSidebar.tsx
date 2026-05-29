@@ -11,7 +11,7 @@ import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integr
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { SidebarLayeredDirectory } from "../Sidebar.LayeredDirectory";
+import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 
 type CalendarContextMenuState = { accountId: string; calendarId: string; calendarName: string; color: string; x: number; y: number };
 
