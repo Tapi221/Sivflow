@@ -1,6 +1,6 @@
 export type PlatformRuntimeKind =
   | "web"
-  | "electron"
+  | "tauri"
   | "ios-native"
   | "android-native"
   | "unknown";
@@ -25,8 +25,8 @@ export const WEB_PLATFORM_CAPABILITIES: PlatformCapabilities = {
   canUseSystemClipboard: true,
 };
 
-export const ELECTRON_PLATFORM_CAPABILITIES: PlatformCapabilities = {
-  runtimeKind: "electron",
+export const TAURI_PLATFORM_CAPABILITIES: PlatformCapabilities = {
+  runtimeKind: "tauri",
   canOpenExternalUrl: true,
   canControlWindow: true,
   canUseNativeShare: false,
