@@ -17,23 +17,12 @@ const ExplorerChromeFolderIconSmall = ({
     viewBox="0 0 20 20"
     fill="none"
     aria-hidden="true"
-    className={cn("explorer-folder-color-mark shrink-0", className)}
+    className={cn("shrink-0", className)}
     {...props}
   >
-    <circle
-      cx="10"
-      cy="10"
-      r="8.2"
-      fill="var(--explorer-folder-mark-fill, #f8fffb)"
-      stroke="var(--explorer-folder-mark-color, #6baa7e)"
-      strokeWidth="2"
-    />
     <path
-      d="M6.4 10.1L8.7 12.4L13.8 7.4"
-      stroke="var(--explorer-folder-mark-color, #6baa7e)"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      d="M3.75 3C3.28587 3 2.84075 3.18437 2.51256 3.51256C2.18437 3.84075 2 4.28587 2 4.75V8.01C2.52239 7.67577 3.12984 7.49875 3.75 7.5H16.25C16.894 7.5 17.495 7.688 18 8.01V6.75C18 6.28587 17.8156 5.84075 17.4874 5.51256C17.1592 5.18437 16.7141 5 16.25 5H11.414C11.3811 5.00006 11.3486 4.99364 11.3182 4.98112C11.2879 4.96859 11.2603 4.9502 11.237 4.927L9.823 3.513C9.49499 3.18476 9.05004 3.00023 8.586 3H3.75ZM3.75 9C3.28587 9 2.84075 9.18437 2.51256 9.51256C2.18437 9.84075 2 10.2859 2 10.75V15.25C2 16.216 2.784 17 3.75 17H16.25C16.7141 17 17.1592 16.8156 17.4874 16.4874C17.8156 16.1592 18 15.7141 18 15.25V10.75C18 10.2859 17.8156 9.84075 17.4874 9.51256C17.1592 9.18437 16.7141 9 16.25 9H3.75Z"
+      fill="var(--app-sidebar-icon, #ababab)"
     />
   </svg>
 );
