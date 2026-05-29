@@ -16,8 +16,8 @@ type SourceRowMarkerProps = {
 
 const GOOGLE_SOURCE_ROW_CLASS_NAME =
   "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
-const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#2c2c2e]";
-const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#b8b8bd]";
+const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#5f6672]";
+const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#b3b7be]";
 const SOURCE_ROW_MARKER_CLASS_NAME = "relative h-3.5 w-3.5 shrink-0 rounded-full";
 const SOURCE_ROW_MARKER_DOT_CLASS_NAME = "absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full";
 const SOURCE_ROW_UNCHECKED_MARKER_COLOR = "#c7c7cc";
