@@ -76,7 +76,7 @@ export type MfDeckManifestV1 = {
   version: typeof MF_DECK_VERSION;
   exportedAt: string;
   app: {
-    name: "Manifolia";
+    name: "Solifa";
     version?: string;
   };
   deck: {
