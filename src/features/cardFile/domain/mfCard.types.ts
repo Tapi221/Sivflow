@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/indent */
 import type { MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
 
 export const MF_CARD_FORMAT = "manifolia.card" as const;
