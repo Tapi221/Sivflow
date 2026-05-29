@@ -69,7 +69,7 @@ fn generate_icon_bytes() -> Vec<u8> {
         }
     }
 
-    buffer.extend(std::iter::repeat_n(0, and_mask_bytes));
+    buffer.extend(std::iter::repeat(0).take(and_mask_bytes));
     buffer
 }
 
