@@ -1,4 +1,4 @@
-import { getLocalDb } from "@/services/localdb/instanceManager";
+import { getInstance } from "@/services/localdb/instanceManager";
 
 type CardTagFields = {
   tagIds?: unknown;
@@ -23,7 +23,7 @@ const asStringArray = (value: unknown): string[] => {
 export const auditAndRepairTags = async (
   userId: string,
 ): Promise<TagRepairSummary> => {
-  const db = await getLocalDb(userId);
+  const db = await getInstance(userId);
   const tagIdsByNameLower = new Map<string, string[]>();
   const knownTagIds = new Set<string>();
   let removedOrphanTagRefs = 0;
