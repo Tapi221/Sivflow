@@ -6,7 +6,7 @@ import "@mantine/core/styles.css";
 import { NotificationProvider } from "@/components/notifications/NotificationProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
-import { ToastProvider } from "@/contexts/ToastContext";
+import { ToastProvider } from "../contexts/ToastContext";
 
 type AppProvidersProps = {
   children: ReactNode;
