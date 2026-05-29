@@ -5,7 +5,7 @@ export type NormalizedReviewLog = {
   reviewedAt: string;
   rating: 1 | 2 | 3 | 4;
   resistanceScore: number;
-  durationMinutes?: number | null;
+  durationMinutes: number | null;
 };
 
 const pickNumber = (value: unknown): number | null => {
@@ -39,7 +39,7 @@ export const normalizeReviewLogs = (
   if (!Array.isArray(rawLogs)) return [];
 
   return rawLogs
-    .map((item) => {
+    .map((item): NormalizedReviewLog | null => {
       const log = asRecord(item);
       if (!log) return null;
 
