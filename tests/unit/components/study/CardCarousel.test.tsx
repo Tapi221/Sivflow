@@ -116,17 +116,17 @@ describe("CardCarousel", () => {
       <CardCarousel cards={cards} sessionCurrentIndex={1} onResult={vi.fn()} />,
     );
     const center = el.querySelector(
-      '[data-testid="study-card"]',
+      "[data-testid=\"study-card\"]",
     ) as HTMLElement;
     expect(center.dataset.cardId).toBe("b");
   });
 
-  it('左右プレビューパネルに aria-hidden="true" が設定されている', () => {
+  it("左右プレビューパネルに aria-hidden=\"true\" が設定されている", () => {
     const cards = [makeCard("a"), makeCard("b"), makeCard("c")];
     const el = setup(
       <CardCarousel cards={cards} sessionCurrentIndex={1} onResult={vi.fn()} />,
     );
-    const hidden = el.querySelectorAll('[aria-hidden="true"]');
+    const hidden = el.querySelectorAll("[aria-hidden=\"true\"]");
     expect(hidden.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -137,7 +137,7 @@ describe("CardCarousel", () => {
     );
 
     const wrapper = container.querySelector(
-      'button[aria-label="次のカード"]',
+      "button[aria-label=\"次のカード\"]",
     ) as HTMLButtonElement;
     expect(wrapper.disabled).toBe(false);
   });
@@ -149,7 +149,7 @@ describe("CardCarousel", () => {
     );
 
     const wrapper = container.querySelector(
-      'button[aria-label="前のカード"]',
+      "button[aria-label=\"前のカード\"]",
     ) as HTMLButtonElement;
     expect(wrapper.disabled).toBe(false);
   });
@@ -169,7 +169,7 @@ describe("CardCarousel", () => {
     });
 
     expect(
-      (el.querySelector('[data-testid="study-card"]') as HTMLElement).dataset
+      (el.querySelector("[data-testid=\"study-card\"]") as HTMLElement).dataset
         .cardId,
     ).toBe("a");
   });
@@ -189,7 +189,7 @@ describe("CardCarousel", () => {
     });
 
     expect(
-      (el.querySelector('[data-testid="study-card"]') as HTMLElement).dataset
+      (el.querySelector("[data-testid=\"study-card\"]") as HTMLElement).dataset
         .cardId,
     ).toBe("b");
   });
@@ -201,7 +201,7 @@ describe("CardCarousel", () => {
     );
 
     expect(
-      (el.querySelector('[data-testid="study-card"]') as HTMLElement).dataset
+      (el.querySelector("[data-testid=\"study-card\"]") as HTMLElement).dataset
         .cardId,
     ).toBe("a");
 
@@ -210,7 +210,7 @@ describe("CardCarousel", () => {
     );
 
     expect(
-      (el.querySelector('[data-testid="study-card"]') as HTMLElement).dataset
+      (el.querySelector("[data-testid=\"study-card\"]") as HTMLElement).dataset
         .cardId,
     ).toBe("c");
   });
