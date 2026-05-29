@@ -48,6 +48,7 @@ const TREE_TOGGLE_CLASS_NAME = "flex h-4 w-4 shrink-0 items-center justify-cente
 const TREE_FOLDER_ICON_CLASS_NAME = "text-[#c7c7cc]";
 const TREE_ITEM_ICON_CLASS_NAME = "text-[#c7c7cc]";
 const TREE_TRASH_BUTTON_BASE_CLASS_NAME = "flex h-8 w-full items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium leading-none tracking-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
+const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 
 const ChevronRightGlyph = ({ className }: NodeIconProps) => (
   <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
@@ -193,7 +194,7 @@ const getFolderColorValue = (node: ExplorerTreeNode): string | null => {
   return color ? color : null;
 };
 
-const getTopLevelFolderColorStyle = (
+const getTopLevelFolderIconStyle = (
   node: ExplorerTreeNode,
   depth: number,
 ): CSSProperties | undefined => {
@@ -202,18 +203,13 @@ const getTopLevelFolderColorStyle = (
   const color = getFolderColorValue(node);
   if (!color) return undefined;
 
-  const colorStyle = getTagColorStyle(color);
-  const borderColor = typeof colorStyle.borderColor === "string" ? colorStyle.borderColor : null;
+  if (HEX_COLOR_PATTERN.test(color)) return { color };
 
-  return {
-    backgroundColor: colorStyle.backgroundColor,
-    color: colorStyle.color,
-    ...(borderColor ? { boxShadow: `inset 0 0 0 1px ${borderColor}` } : {}),
-  };
+  return { color: getTagColorStyle(color).color };
 };
 
-const renderNodeIcon = (node: ExplorerTreeNode, inheritsRowColor = false) => {
-  const className = cn("h-4 w-4 shrink-0", !inheritsRowColor && getNodeIconClassName(node));
+const renderNodeIcon = (node: ExplorerTreeNode, inheritsColor = false) => {
+  const className = cn("h-4 w-4 shrink-0", !inheritsColor && getNodeIconClassName(node));
 
   if (node.type === "folder") return <FolderGlyph className={className} />;
   if (node.type === "cardSet") return <DeckGlyph className={className} />;
@@ -628,15 +624,8 @@ const LibraryHierarchySidebar = () => {
     const isSelected = selectedTreeId === node.id;
     const isLastSibling = index === siblingCount - 1;
     const childBranchMask = [...branchMask, !isLastSibling];
-    const topLevelFolderColorStyle = getTopLevelFolderColorStyle(node, depth);
-    const isTopLevelFolderColorized = Boolean(topLevelFolderColorStyle);
-    const rowStyle: CSSProperties = {
-      paddingLeft: TREE_ROW_BASE_PADDING_LEFT_PX + depth * TREE_INDENT_PX,
-      ...topLevelFolderColorStyle,
-    };
-    const colorizedToggleStyle: CSSProperties | undefined = topLevelFolderColorStyle
-      ? { color: topLevelFolderColorStyle.color }
-      : undefined;
+    const topLevelFolderIconStyle = getTopLevelFolderIconStyle(node, depth);
+    const rowStyle: CSSProperties = { paddingLeft: TREE_ROW_BASE_PADDING_LEFT_PX + depth * TREE_INDENT_PX };
 
     return (
       <div key={node.id} className="relative">
@@ -688,7 +677,6 @@ const LibraryHierarchySidebar = () => {
                   handleToggleNode(node);
                 }}
                 className={TREE_TOGGLE_CLASS_NAME}
-                style={colorizedToggleStyle}
               >
                 <ChevronRightGlyph
                   className={cn(
@@ -701,7 +689,13 @@ const LibraryHierarchySidebar = () => {
               <span className="h-4 w-4 shrink-0" />
             )}
 
-            {renderNodeIcon(node, isTopLevelFolderColorized)}
+            {topLevelFolderIconStyle ? (
+              <span className="flex h-4 w-4 shrink-0 items-center justify-center" style={topLevelFolderIconStyle}>
+                {renderNodeIcon(node, true)}
+              </span>
+            ) : (
+              renderNodeIcon(node)
+            )}
 
             <span className="min-w-0 flex-1 truncate">{node.name}</span>
           </div>
