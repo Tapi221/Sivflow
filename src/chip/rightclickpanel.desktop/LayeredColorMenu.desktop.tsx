@@ -1,6 +1,6 @@
 import { memo, type CSSProperties, type RefObject } from "react";
 import { getTagColorSwatchStyle, TAG_COLOR_KEYS, type TagColorKey } from "@/chip/tag/tagColor";
-import { TAG_COLOR_PALETTE } from "@shared/styles/tokens/tag.palette";
+import { TAG_COLOR_PALETTE } from "@shared/design-tokens/tag.palette";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, type RightClickPanelId } from "./rightClickPanel.utils";
 
@@ -113,34 +113,17 @@ const LayeredColorMenuBase = ({
   return (
     <>
       <style>{LAYERED_COLOR_MENU_STYLE}</style>
-      <RightClickPanelSurface
-        x={x}
-        y={y}
-        width={LAYERED_COLOR_MENU_WIDTH}
-        panelRef={menuRef}
-        noDragStyle={noDragStyle}
-        ariaLabel="color submenu"
-        panelId={panelId}
-      >
+      <RightClickPanelSurface x={x} y={y} width={LAYERED_COLOR_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} ariaLabel="color submenu" panelId={panelId}>
         <div className="layered-color-menu-grid">
           {options.map((option) => {
             const isSelected = normalizeColorValue(option.value) === normalizedCurrentColor;
 
             return (
-              <button
-                key={option.id}
-                type="button"
-                aria-label={`色を${option.label}に変更`}
-                aria-pressed={isSelected}
-                title={option.label}
-                className={["layered-color-menu-swatch", isSelected ? "layered-color-menu-swatch--selected" : null].filter(Boolean).join(" ")}
-                style={getTagColorSwatchStyle(option.id)}
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  onSelectColor(option.value);
-                }}
-              >
+              <button key={option.id} type="button" aria-label={`色を${option.label}に変更`} aria-pressed={isSelected} title={option.label} className={["layered-color-menu-swatch", isSelected ? "layered-color-menu-swatch--selected" : null].filter(Boolean).join(" ")} style={getTagColorSwatchStyle(option.id)} onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onSelectColor(option.value);
+              }}>
                 <span className="layered-color-menu-swatch-core" />
               </button>
             );
