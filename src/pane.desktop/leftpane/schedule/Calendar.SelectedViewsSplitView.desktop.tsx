@@ -35,20 +35,20 @@ type CalendarSelectedViewPanelProps = CalendarSelectedViewsSplitViewProps & {
   viewMode: CalendarViewMode;
 };
 
-const SELECTED_VIEW_PANEL_CLASS_NAME = "min-h-0 min-w-0 overflow-hidden border-r border-[#eeeeee] last:border-r-0";
+const SELECTED_VIEW_PANEL_CLASS_NAME = "flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-r border-[#eeeeee] last:border-r-0";
 const WEEKDAY_SURFACE_CLASS_NAME = "flex h-full min-h-0 flex-col overflow-hidden bg-white";
 
 const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, visibleDays, virtualRail, events, appProjects, googleAccounts, headerScrollRef, allDayScrollRef, scrollContainerRef, calendarDayColumnWidth, calendarGridStyle, onCalendarScroll, onSelectDate, onReachStart, onReachEnd, onVisibleMonthChange, onVisibleDateChange }: CalendarSelectedViewPanelProps): ReactNode => {
   if (viewMode === "list") {
-    return <CalendarListView days={visibleDays} virtualRail={virtualRail} events={events} selectedDate={selectedDate} onSelectDate={onSelectDate} onReachStart={onReachStart} onReachEnd={onReachEnd} onVisibleMonthChange={onVisibleMonthChange} />;
+    return <CalendarListView days={visibleDays} virtualRail={virtualRail} events={events} selectedDate={selectedDate} onSelectDate={onSelectDate} onReachStart={onReachStart} onReachEnd={onReachEnd} onVisibleMonthChange={onVisibleMonthChange} className="h-full" />;
   }
 
   if (viewMode === "pieChart") {
-    return <CalendarPieChartView days={visibleDays} virtualRail={virtualRail} selectedDate={selectedDate} events={events} appProjects={appProjects} googleAccounts={googleAccounts} onSelectDate={onSelectDate} onReachStart={onReachStart} onReachEnd={onReachEnd} onVisibleDateChange={onVisibleDateChange} />;
+    return <CalendarPieChartView days={visibleDays} virtualRail={virtualRail} selectedDate={selectedDate} events={events} appProjects={appProjects} googleAccounts={googleAccounts} onSelectDate={onSelectDate} onReachStart={onReachStart} onReachEnd={onReachEnd} onVisibleDateChange={onVisibleDateChange} className="h-full" />;
   }
 
   if (viewMode === "timetable") {
-    return <CalendarTimetableView weekDate={currentDate} density="compact" />;
+    return <CalendarTimetableView weekDate={currentDate} density="compact" className="h-full" />;
   }
 
   return <div className={WEEKDAY_SURFACE_CLASS_NAME}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} virtualRail={virtualRail} visibleEvents={events} calendarDayColumnWidth={calendarDayColumnWidth} _calendarDayColumnWidth={calendarDayColumnWidth} calendarGridStyle={calendarGridStyle} onScroll={onCalendarScroll} selectedDate={selectedDate} onSelectDate={onSelectDate} /></div>;
