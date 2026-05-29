@@ -1,18 +1,19 @@
-import { type Dispatch, type KeyboardEvent, type SetStateAction, useCallback, useEffect, useMemo, useRef } from "react";
-import { buildExplorerTreeData, parseSelectedTreeId, toSelectedTreeId, type ExplorerTreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
+import { type CSSProperties, type Dispatch, type KeyboardEvent, type SetStateAction, useCallback, useEffect, useMemo, useRef } from "react";
+import { getTagColorStyle } from "@/chip/tag/tagColor";
+import { useCardsRead } from "@/components/card/hooks/useCardsRead";
+import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { getFolderId, getParentFolderId, normalizeFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { buildExplorerTreeData, parseSelectedTreeId, toSelectedTreeId, type ExplorerTreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
 import { useExpandedFolders } from "@/components/folder/hooks/useExpandedFolders";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { FadeSkeleton } from "@/features/fade/skeltom";
 import { toVirtualMfCardDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
-import { createDefaultExplorerRouteState, WORKSPACE_DEFAULT_EXPLORER_TAB_ID, type WorkspaceExplorerTab, type WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
-import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { useCardsRead } from "@/components/card/hooks/useCardsRead";
-import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { cn } from "@/lib/utils";
+import { createDefaultExplorerRouteState, WORKSPACE_DEFAULT_EXPLORER_TAB_ID, type WorkspaceExplorerTab, type WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { Card, CardSet, DocumentItem, SelectedExplorerItem } from "@/types";
 
 type ExplorerSelectionPatch = {
@@ -24,6 +25,12 @@ type TreeBranchMask = boolean[];
 
 type NodeIconProps = {
   className?: string;
+};
+
+type FolderColorFields = {
+  folderColor?: unknown;
+  folder_color?: unknown;
+  color?: unknown;
 };
 
 const LIBRARY_EXPANDED_FOLDERS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-folders";
@@ -176,8 +183,37 @@ const getNodeIconClassName = (node: ExplorerTreeNode): string => {
   return TREE_ITEM_ICON_CLASS_NAME;
 };
 
-const renderNodeIcon = (node: ExplorerTreeNode) => {
-  const className = cn("h-4 w-4 shrink-0", getNodeIconClassName(node));
+const getFolderColorValue = (node: ExplorerTreeNode): string | null => {
+  const folder = node.data as FolderColorFields | null | undefined;
+  const rawColor = folder?.folderColor ?? folder?.folder_color ?? folder?.color;
+
+  if (typeof rawColor !== "string") return null;
+
+  const color = rawColor.trim();
+  return color ? color : null;
+};
+
+const getTopLevelFolderColorStyle = (
+  node: ExplorerTreeNode,
+  depth: number,
+): CSSProperties | undefined => {
+  if (depth !== 0 || node.type !== "folder") return undefined;
+
+  const color = getFolderColorValue(node);
+  if (!color) return undefined;
+
+  const colorStyle = getTagColorStyle(color);
+  const borderColor = typeof colorStyle.borderColor === "string" ? colorStyle.borderColor : null;
+
+  return {
+    backgroundColor: colorStyle.backgroundColor,
+    color: colorStyle.color,
+    ...(borderColor ? { boxShadow: `inset 0 0 0 1px ${borderColor}` } : {}),
+  };
+};
+
+const renderNodeIcon = (node: ExplorerTreeNode, inheritsRowColor = false) => {
+  const className = cn("h-4 w-4 shrink-0", !inheritsRowColor && getNodeIconClassName(node));
 
   if (node.type === "folder") return <FolderGlyph className={className} />;
   if (node.type === "cardSet") return <DeckGlyph className={className} />;
@@ -592,6 +628,15 @@ const LibraryHierarchySidebar = () => {
     const isSelected = selectedTreeId === node.id;
     const isLastSibling = index === siblingCount - 1;
     const childBranchMask = [...branchMask, !isLastSibling];
+    const topLevelFolderColorStyle = getTopLevelFolderColorStyle(node, depth);
+    const isTopLevelFolderColorized = Boolean(topLevelFolderColorStyle);
+    const rowStyle: CSSProperties = {
+      paddingLeft: TREE_ROW_BASE_PADDING_LEFT_PX + depth * TREE_INDENT_PX,
+      ...topLevelFolderColorStyle,
+    };
+    const colorizedToggleStyle: CSSProperties | undefined = topLevelFolderColorStyle
+      ? { color: topLevelFolderColorStyle.color }
+      : undefined;
 
     return (
       <div key={node.id} className="relative">
@@ -632,7 +677,7 @@ const LibraryHierarchySidebar = () => {
               TREE_ROW_HEIGHT_CLASS_NAME,
               isSelected ? TREE_ROW_SELECTED_CLASS_NAME : TREE_ROW_IDLE_CLASS_NAME,
             )}
-            style={{ paddingLeft: TREE_ROW_BASE_PADDING_LEFT_PX + depth * TREE_INDENT_PX }}
+            style={rowStyle}
           >
             {isExpandable ? (
               <button
@@ -643,6 +688,7 @@ const LibraryHierarchySidebar = () => {
                   handleToggleNode(node);
                 }}
                 className={TREE_TOGGLE_CLASS_NAME}
+                style={colorizedToggleStyle}
               >
                 <ChevronRightGlyph
                   className={cn(
@@ -655,7 +701,7 @@ const LibraryHierarchySidebar = () => {
               <span className="h-4 w-4 shrink-0" />
             )}
 
-            {renderNodeIcon(node)}
+            {renderNodeIcon(node, isTopLevelFolderColorized)}
 
             <span className="min-w-0 flex-1 truncate">{node.name}</span>
           </div>
