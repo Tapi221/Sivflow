@@ -128,6 +128,20 @@ export default defineConfig([
   },
 
   {
+    files: ["src/chip/rightclickpanel.desktop/ProjectCalendarLinksMenu.desktop.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
+
+  {
+    files: ["src/features/calendar/grid/Grid.calendar.weekday.desktop.tsx"],
+    rules: {
+      "unused-imports/no-unused-imports": "warn",
+    },
+  },
+
+  {
     files: [
       "src/features/calendar/googlecalendar-integration/gcal.oauth.ts",
       "src/integration/google-integration/google.oauth.ts",
@@ -218,28 +232,16 @@ export default defineConfig([
     ],
     extends: [js.configs.recommended, tseslint.configs.recommended],
     plugins: {
+      "@stylistic": stylistic,
       "unused-imports": unusedImports,
-      "simple-import-sort": simpleImportSort,
-    },
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.node,
     },
     rules: {
+      "@stylistic/quotes": ["error", "double"],
+      "@stylistic/semi": ["error", "always"],
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "unused-imports/no-unused-imports": "error",
-      "unused-imports/no-unused-vars": [
-        "warn",
-        {
-          vars: "all",
-          varsIgnorePattern: "^_",
-          args: "after-used",
-          argsIgnorePattern: "^_",
-        },
-      ],
-      "simple-import-sort/imports": "off",
-      "simple-import-sort/exports": "off",
+      "unused-imports/no-unused-vars": ["warn", { vars: "all", varsIgnorePattern: "^_", args: "after-used", argsIgnorePattern: "^_" }],
     },
   },
 ]);
