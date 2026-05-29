@@ -7,6 +7,9 @@ export type GoogleOAuthPopupCallbackPayload = {
   errorDescription: string | null;
 };
 
+export const GOOGLE_OAUTH_POPUP_CALLBACK_CHANNEL = "flashcard-master:google-oauth-popup-callback";
+export const GOOGLE_OAUTH_POPUP_CALLBACK_STORAGE_KEY = "flashcard-master.google-oauth-popup-callback";
+
 const GOOGLE_OAUTH_POPUP_CALLBACK_MESSAGE_TYPE = "flashcard-master:google-oauth-popup-callback";
 const GOOGLE_OAUTH_POPUP_CALLBACK_TITLE = "Google 連携を完了しています";
 const GOOGLE_OAUTH_POPUP_CALLBACK_DESCRIPTION = "元の画面で処理を続行します。";
@@ -50,6 +53,24 @@ const postCallbackPayloadToOpener = (payload: GoogleOAuthPopupCallbackPayload): 
   window.opener.postMessage(payload, window.location.origin);
 };
 
+const broadcastCallbackPayload = (payload: GoogleOAuthPopupCallbackPayload): void => {
+  if (typeof BroadcastChannel === "undefined") return;
+  const channel = new BroadcastChannel(GOOGLE_OAUTH_POPUP_CALLBACK_CHANNEL);
+  channel.postMessage(payload);
+  channel.close();
+};
+
+const storeCallbackPayload = (payload: GoogleOAuthPopupCallbackPayload): void => {
+  localStorage.removeItem(GOOGLE_OAUTH_POPUP_CALLBACK_STORAGE_KEY);
+  localStorage.setItem(GOOGLE_OAUTH_POPUP_CALLBACK_STORAGE_KEY, JSON.stringify(payload));
+};
+
+const notifyCallbackPayload = (payload: GoogleOAuthPopupCallbackPayload): void => {
+  postCallbackPayloadToOpener(payload);
+  broadcastCallbackPayload(payload);
+  storeCallbackPayload(payload);
+};
+
 export const createGoogleOAuthPopupCallbackPayload = (url: URL): GoogleOAuthPopupCallbackPayload | null => {
   if (!hasGoogleOAuthCallbackResult(url)) return null;
   return {
@@ -73,6 +94,6 @@ export const renderGoogleOAuthPopupCallback = (): boolean => {
   if (!payload) return false;
   document.title = GOOGLE_OAUTH_POPUP_CALLBACK_TITLE;
   renderMessage();
-  postCallbackPayloadToOpener(payload);
+  notifyCallbackPayload(payload);
   return true;
 };
