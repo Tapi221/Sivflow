@@ -6,12 +6,15 @@
     "paths": {
       "@/*": ["../../src/*"],
       "@mobile/*": ["src/*"],
+      "@mobile-renderer/*": ["../../packages/mobile-renderer/src/*"],
       "@constants/*": ["../../constants/*"],
       "@shared/*": ["../../shared/*"]
     }
   },
   "include": [
+    "index.ts",
     "src",
+    "../../packages/mobile-renderer/src",
     "../../src/pane.mobilenative",
     "../../src/features/calendar/calendarEventRange.ts",
     "../../src/integration/googlecalendar-integration/gcalSync.types.ts",
