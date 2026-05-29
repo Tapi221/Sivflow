@@ -1,6 +1,6 @@
 {
-  "name": "Solifa",
-  "short_name": "Solifa",
+  "name": "Manifolia",
+  "short_name": "Manifolia",
   "description": "Advanced learning app for serious learners",
   "start_url": "/",
   "display": "standalone",
