@@ -1,8 +1,7 @@
-import { memo, useState } from "react";
+import { type ComponentType, memo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { initialWindowMetrics, SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { IosCalendarScheduleYear } from "@mobile/integration/ioscalendar/IosCalendarScheduleYear";
 
 type NavigationItemId = "explore" | "library" | "home" | "schedule" | "settings";
 
@@ -16,6 +15,18 @@ type NavigationBarProps = {
   onSelectItem: (itemId: NavigationItemId) => void;
 };
 
+type ScheduleYearContentProps = {
+  yearDate: Date;
+  selectedDate: Date;
+  onSelectDate: (date: Date) => void;
+};
+
+type AppContentProps = {
+  ScheduleYearComponent: ComponentType<ScheduleYearContentProps>;
+};
+
+type AppProps = Partial<AppContentProps>;
+
 const NAVIGATION_ITEMS: readonly NavigationItem[] = [
   { id: "explore", label: "Explore" },
   { id: "library", label: "Library" },
@@ -23,6 +34,12 @@ const NAVIGATION_ITEMS: readonly NavigationItem[] = [
   { id: "schedule", label: "Schedule" },
   { id: "settings", label: "Settings" },
 ];
+
+const DefaultScheduleYear = () => (
+  <View style={styles.emptySchedule}>
+    <Text style={styles.emptyScheduleText}>Schedule renderer is not configured.</Text>
+  </View>
+);
 
 const NavigationBar = ({ activeItemId, onSelectItem }: NavigationBarProps) => (
   <View accessibilityLabel="Mobile navigation" style={styles.navigationBar}>
@@ -38,7 +55,7 @@ const NavigationBar = ({ activeItemId, onSelectItem }: NavigationBarProps) => (
   </View>
 );
 
-const AppContent = () => {
+const AppContent = ({ ScheduleYearComponent }: AppContentProps) => {
   const insets = useSafeAreaInsets();
   const [activeItemId, setActiveItemId] = useState<NavigationItemId>("schedule");
   const [selectedDate, setSelectedDate] = useState(() => new Date());
@@ -51,16 +68,16 @@ const AppContent = () => {
         <Text style={styles.title}>Schedule</Text>
       </View>
       <View style={styles.content}>
-        <IosCalendarScheduleYear selectedDate={selectedDate} yearDate={selectedDate} onSelectDate={setSelectedDate} />
+        <ScheduleYearComponent selectedDate={selectedDate} yearDate={selectedDate} onSelectDate={setSelectedDate} />
       </View>
       <NavigationBar activeItemId={activeItemId} onSelectItem={setActiveItemId} />
     </View>
   );
 };
 
-const App = () => (
+const App = ({ ScheduleYearComponent = DefaultScheduleYear }: AppProps) => (
   <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-    <AppContent />
+    <AppContent ScheduleYearComponent={ScheduleYearComponent} />
   </SafeAreaProvider>
 );
 
@@ -68,6 +85,18 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     minHeight: 0,
+  },
+  emptySchedule: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    padding: 24,
+  },
+  emptyScheduleText: {
+    color: "#6b7280",
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
   },
   eyebrow: {
     color: "#6b7280",
@@ -127,3 +156,4 @@ const MemoizedApp = memo(App);
 MemoizedApp.displayName = "App";
 
 export default MemoizedApp;
+export type { AppProps, ScheduleYearContentProps };
