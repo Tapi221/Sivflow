@@ -187,6 +187,10 @@ a:hover,
   display: none;
 }
 
+[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] {
+  color: var(--sidebar-folder-mark-color, #6baa7e);
+}
+
 [aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .library-tree-marker {
   padding: 5.5px;
 }
