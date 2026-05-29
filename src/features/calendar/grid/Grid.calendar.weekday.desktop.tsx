@@ -222,16 +222,16 @@ const buildFallbackRenderedEntries = (visibleDays: Date[]): WeekdayRenderedDayEn
 
 const getRenderedDayGridColumn = (dayIndex: number, virtualDayRange: WeekdayVirtualDayRange, hasVirtualRail: boolean) => hasVirtualRail ? dayIndex - virtualDayRange.start + 3 : dayIndex + 2;
 
-const buildVirtualizedGridStyle = (calendarGridStyle: CSSProperties, virtualDayRange: WeekdayVirtualDayRange, totalDayCount: number, calendarDayColumnWidth: number): CSSProperties => {
+const buildVirtualizedGridStyle = (calendarGridStyle: CSSProperties, virtualDayRange: WeekdayVirtualDayRange, totalDayCount: number, _calendarDayColumnWidth: number): CSSProperties => {
   const renderedDayCount = Math.max(0, virtualDayRange.end - virtualDayRange.start);
-  const renderedDayColumns = renderedDayCount > 0 ? `repeat(${renderedDayCount}, ${calendarDayColumnWidth}px)` : "0px";
-  const leftSpacerWidth = Math.max(0, virtualDayRange.start * calendarDayColumnWidth);
-  const rightSpacerWidth = Math.max(0, (totalDayCount - virtualDayRange.end) * calendarDayColumnWidth);
+  const renderedDayColumns = renderedDayCount > 0 ? `repeat(${renderedDayCount}, ${_calendarDayColumnWidth}px)` : "0px";
+  const leftSpacerWidth = Math.max(0, virtualDayRange.start * _calendarDayColumnWidth);
+  const rightSpacerWidth = Math.max(0, (totalDayCount - virtualDayRange.end) * _calendarDayColumnWidth);
 
   return {
     ...calendarGridStyle,
     gridTemplateColumns: `${C.TIME_COLUMN_WIDTH}px ${leftSpacerWidth}px ${renderedDayColumns} ${rightSpacerWidth}px`,
-    minWidth: `${C.TIME_COLUMN_WIDTH + totalDayCount * calendarDayColumnWidth}px`,
+    minWidth: `${C.TIME_COLUMN_WIDTH + totalDayCount * _calendarDayColumnWidth}px`,
   };
 };
 
