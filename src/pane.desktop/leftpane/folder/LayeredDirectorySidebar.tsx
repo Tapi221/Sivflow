@@ -32,6 +32,8 @@ const TREE_INDENT_PX = 16;
 const TREE_ROW_BASE_PADDING_LEFT_PX = 8;
 const TREE_GUIDE_LEFT_OFFSET_PX = TREE_ROW_BASE_PADDING_LEFT_PX + 8;
 const TREE_ROW_HEIGHT_CLASS_NAME = "h-7";
+const TREE_ROW_HEIGHT_PX = 28;
+const TREE_TERMINAL_GUIDE_HEIGHT_PX = TREE_ROW_HEIGHT_PX / 2;
 const TREE_EMPTY_TEXT_CLASS_NAME = "px-3 py-2 text-[12px] font-medium leading-[1.45] tracking-normal text-[#c7c7cc]";
 const TREE_GUIDE_CLASS_NAME = "pointer-events-none absolute bg-[#eeeeee]";
 const TREE_ROW_BASE_CLASS_NAME = "group relative flex w-full cursor-default select-none items-center gap-1 rounded-[10px] pr-2 text-left text-[12px] font-medium leading-none tracking-normal outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
@@ -532,18 +534,19 @@ const LibraryHierarchySidebar = () => {
     index: number,
     siblingCount: number,
   ) {
-    const hasChildren = Boolean(node.children?.length);
+    const childCount = node.children?.length ?? 0;
+    const hasChildren = childCount > 0;
     const isExpandable = isNodeExpandable(node);
     const isOpen = isExpandable && isNodeOpen(node);
     const isSelected = selectedTreeId === node.id;
-    const isLastSibling = index === siblingCount - 1;
-    const childBranchMask = [...branchMask, !isLastSibling];
+    const ancestorBranchMask = branchMask.slice(0, -1);
+    const shouldContinueCurrentBranch = branchMask[branchMask.length - 1] ?? false;
     const rowStyle: CSSProperties = { paddingLeft: TREE_ROW_BASE_PADDING_LEFT_PX + depth * TREE_INDENT_PX };
 
     return (
       <div key={node.id} className="relative">
         <div className="relative">
-          {branchMask.map((shouldDrawGuide, guideIndex) =>
+          {ancestorBranchMask.map((shouldDrawGuide, guideIndex) =>
             shouldDrawGuide ? (
               <span
                 key={`${node.id}:guide:${guideIndex}`}
@@ -553,6 +556,19 @@ const LibraryHierarchySidebar = () => {
               />
             ) : null,
           )}
+          {depth > 0 ? (
+            <span
+              aria-hidden="true"
+              className={cn(
+                TREE_GUIDE_CLASS_NAME,
+                shouldContinueCurrentBranch ? "bottom-0 top-0 w-px" : "top-0 w-px",
+              )}
+              style={{
+                left: TREE_GUIDE_LEFT_OFFSET_PX + (depth - 1) * TREE_INDENT_PX,
+                height: shouldContinueCurrentBranch ? undefined : TREE_TERMINAL_GUIDE_HEIGHT_PX,
+              }}
+            />
+          ) : null}
           {depth > 0 ? (
             <span
               aria-hidden="true"
@@ -605,9 +621,9 @@ const LibraryHierarchySidebar = () => {
               renderTreeNode(
                 childNode,
                 depth + 1,
-                childBranchMask,
+                [...branchMask, childIndex < childCount - 1],
                 childIndex,
-                node.children?.length ?? 0,
+                childCount,
               ),
             )}
           </div>
