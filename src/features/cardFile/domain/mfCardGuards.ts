@@ -29,7 +29,7 @@ export const isMfCardFileV1 = (value: unknown): value is MfCardFileV1 => {
   if (value.version !== MF_CARD_VERSION) return false;
   if (!isIsoLikeString(value.exportedAt)) return false;
   if (!isRecord(value.app)) return false;
-  if (value.app.name !== "Manifolia") return false;
+  if (value.app.name !== "Solifa") return false;
   if (
     value.app.version !== undefined &&
     typeof value.app.version !== "string"
