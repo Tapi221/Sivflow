@@ -1,4 +1,4 @@
-import { memo, type CSSProperties, type RefObject } from "react";
+import { memo, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 import { RIGHT_CLICK_PANEL_MARGIN, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
 
@@ -29,6 +29,7 @@ type LayeredProjectMenuProps = {
   noDragStyle: CSSProperties;
   panelId?: RightClickPanelId;
   openSubmenuId?: LayeredProjectMenuActionId | null;
+  submenuElement?: ReactNode;
   onOpenSubmenu?: (id: LayeredProjectMenuActionId, anchor: LayeredProjectMenuSubmenuAnchor) => void;
   onCloseSubmenu?: () => void;
 };
@@ -54,6 +55,10 @@ export const LAYERED_PROJECT_MENU_HEIGHT = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS
 export const LAYERED_PROJECT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
 const LAYERED_PROJECT_MENU_STYLE = `
+.right-click-panel.layered-project-menu-panel {
+  overflow: visible;
+}
+
 .layered-project-menu-item {
   justify-content: space-between;
   gap: 16px;
@@ -94,6 +99,7 @@ const LayeredProjectMenuBase = ({
   noDragStyle,
   panelId = LAYERED_PROJECT_MENU_PANEL_ID,
   openSubmenuId,
+  submenuElement,
   onOpenSubmenu,
   onCloseSubmenu,
 }: LayeredProjectMenuProps) => {
@@ -106,6 +112,7 @@ const LayeredProjectMenuBase = ({
         width={LAYERED_PROJECT_MENU_WIDTH}
         panelRef={menuRef}
         noDragStyle={noDragStyle}
+        className="layered-project-menu-panel"
         ariaLabel="layered project context menu"
         panelId={panelId}
       >
@@ -157,6 +164,7 @@ const LayeredProjectMenuBase = ({
             </button>
           );
         })}
+        {submenuElement}
       </RightClickPanelSurface>
     </>
   );
