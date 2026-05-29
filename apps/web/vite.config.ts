@@ -15,7 +15,7 @@ export default defineConfig(({ command }) => ({
     react(),
     VitePWA({
       strategies: "injectManifest",
-      srcDir: resolveFromRoot("src"),
+      srcDir: resolveFromRoot("apps/web/src"),
       filename: "sw.ts",
       registerType: "autoUpdate",
       injectRegister: false,
