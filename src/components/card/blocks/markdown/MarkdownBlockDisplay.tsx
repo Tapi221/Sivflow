@@ -2,7 +2,7 @@ import type { CSSProperties, KeyboardEventHandler, MouseEventHandler } from "rea
 import { MarkdownBlockView } from "./MarkdownBlockPreview";
 import { TEXT_BLOCK_CONTENT_CLASS } from "@/components/card/blocks/text/textBlockStyles";
 import { buildTypographyStyle, mergeStyles } from "@/components/card/common/cardSetViewZoom";
-import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/styles/tokens/typography";
+import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/typography";
 import { cn } from "@/lib/utils";
 
 type MarkdownBlockDisplayProps = {
@@ -58,37 +58,13 @@ export const MarkdownBlockDisplay = ({
 
   return (
     <div className={cn("px-0 py-0", className)}>
-      <div
-        className={cn(
-          "markdownBlockPreview bg-transparent border-0 rounded-lg overflow-visible p-0",
-          interactive && "cursor-text",
-          previewClassName,
-        )}
-        data-testid={dataTestId}
-        tabIndex={tabIndex}
-        role={role}
-        aria-label={ariaLabel}
-        onClick={onClick}
-        onKeyDown={onKeyDown}
-      >
+      <div className={cn("markdownBlockPreview bg-transparent border-0 rounded-lg overflow-visible p-0", interactive && "cursor-text", previewClassName)} data-testid={dataTestId} tabIndex={tabIndex} role={role} aria-label={ariaLabel} onClick={onClick} onKeyDown={onKeyDown}>
         {isEmpty ? (
-          <div
-            className={cn(
-              TEXT_BLOCK_CONTENT_CLASS,
-              "min-h-[24px] text-slate-300",
-            )}
-            style={emptyStyle}
-          >
+          <div className={cn(TEXT_BLOCK_CONTENT_CLASS, "min-h-[24px] text-slate-300")} style={emptyStyle}>
             {emptyPlaceholder}
           </div>
         ) : (
-          <MarkdownBlockView
-            md={normalizedMarkdown}
-            className="markdownBlockCardView"
-            bleedX={bleedX}
-            style={style}
-            zoom={zoom}
-          />
+          <MarkdownBlockView md={normalizedMarkdown} className="markdownBlockCardView" bleedX={bleedX} style={style} zoom={zoom} />
         )}
       </div>
     </div>
