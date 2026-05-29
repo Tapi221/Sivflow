@@ -106,19 +106,19 @@ const isEqual = (left: unknown, right: unknown): boolean => {
 };
 
 const parseIndexKeys = (index: KeyPath): string[] => {
-  if (Array.isArray(index)) {
-    return index.map((entry) => entry.trim()).filter(Boolean);
+  if (typeof index === "string") {
+    if (index.startsWith("[") && index.endsWith("]")) {
+      return index
+        .slice(1, -1)
+        .split("+")
+        .map((entry) => entry.trim())
+        .filter(Boolean);
+    }
+
+    return [index];
   }
 
-  if (index.startsWith("[") && index.endsWith("]")) {
-    return index
-      .slice(1, -1)
-      .split("+")
-      .map((entry: string) => entry.trim())
-      .filter(Boolean);
-  }
-
-  return [index];
+  return index.map((entry) => entry.trim()).filter(Boolean);
 };
 
 const serializeKey = (key: unknown): string => {
@@ -221,37 +221,23 @@ class InMemoryCollection<T extends object, TKey = string> {
   };
 
   public readonly equals = (value: unknown): InMemoryCollection<T, TKey> => {
-    return this.withIndexPredicate((indexedValue) =>
-      isEqual(indexedValue, value),
-    );
+    return this.withIndexPredicate((indexedValue) => isEqual(indexedValue, value));
   };
 
   public readonly above = (value: unknown): InMemoryCollection<T, TKey> => {
-    return this.withIndexPredicate(
-      (indexedValue) => compareValues(indexedValue, value) > 0,
-    );
+    return this.withIndexPredicate((indexedValue) => compareValues(indexedValue, value) > 0);
   };
 
-  public readonly aboveOrEqual = (
-    value: unknown,
-  ): InMemoryCollection<T, TKey> => {
-    return this.withIndexPredicate(
-      (indexedValue) => compareValues(indexedValue, value) >= 0,
-    );
+  public readonly aboveOrEqual = (value: unknown): InMemoryCollection<T, TKey> => {
+    return this.withIndexPredicate((indexedValue) => compareValues(indexedValue, value) >= 0);
   };
 
   public readonly below = (value: unknown): InMemoryCollection<T, TKey> => {
-    return this.withIndexPredicate(
-      (indexedValue) => compareValues(indexedValue, value) < 0,
-    );
+    return this.withIndexPredicate((indexedValue) => compareValues(indexedValue, value) < 0);
   };
 
-  public readonly belowOrEqual = (
-    value: unknown,
-  ): InMemoryCollection<T, TKey> => {
-    return this.withIndexPredicate(
-      (indexedValue) => compareValues(indexedValue, value) <= 0,
-    );
+  public readonly belowOrEqual = (value: unknown): InMemoryCollection<T, TKey> => {
+    return this.withIndexPredicate((indexedValue) => compareValues(indexedValue, value) <= 0);
   };
 
   public readonly between = (
@@ -261,46 +247,26 @@ class InMemoryCollection<T extends object, TKey = string> {
     includeUpper = true,
   ): InMemoryCollection<T, TKey> => {
     return this.withIndexPredicate((indexedValue) => {
-      const lowerOk = includeLower
-        ? compareValues(indexedValue, lowerValue) >= 0
-        : compareValues(indexedValue, lowerValue) > 0;
-      const upperOk = includeUpper
-        ? compareValues(indexedValue, upperValue) <= 0
-        : compareValues(indexedValue, upperValue) < 0;
+      const lowerOk = includeLower ? compareValues(indexedValue, lowerValue) >= 0 : compareValues(indexedValue, lowerValue) > 0;
+      const upperOk = includeUpper ? compareValues(indexedValue, upperValue) <= 0 : compareValues(indexedValue, upperValue) < 0;
 
       return lowerOk && upperOk;
     });
   };
 
-  public readonly startsWith = (
-    prefix: string,
-  ): InMemoryCollection<T, TKey> => {
-    return this.withIndexPredicate((indexedValue) => {
-      return typeof indexedValue === "string"
-        ? indexedValue.startsWith(prefix)
-        : false;
-    });
+  public readonly startsWith = (prefix: string): InMemoryCollection<T, TKey> => {
+    return this.withIndexPredicate((indexedValue) => typeof indexedValue === "string" ? indexedValue.startsWith(prefix) : false);
   };
 
-  public readonly anyOf = (
-    values: readonly unknown[],
-  ): InMemoryCollection<T, TKey> => {
-    return this.withIndexPredicate((indexedValue) =>
-      values.some((value) => isEqual(indexedValue, value)),
-    );
+  public readonly anyOf = (values: readonly unknown[]): InMemoryCollection<T, TKey> => {
+    return this.withIndexPredicate((indexedValue) => values.some((value) => isEqual(indexedValue, value)));
   };
 
-  public readonly and = (
-    predicate: Predicate<T>,
-  ): InMemoryCollection<T, TKey> => {
-    return this.clone({
-      predicates: [...this.predicates, predicate],
-    });
+  public readonly and = (predicate: Predicate<T>): InMemoryCollection<T, TKey> => {
+    return this.clone({ predicates: [...this.predicates, predicate] });
   };
 
-  public readonly filter = (
-    predicate: Predicate<T>,
-  ): InMemoryCollection<T, TKey> => {
+  public readonly filter = (predicate: Predicate<T>): InMemoryCollection<T, TKey> => {
     return this.and(predicate);
   };
 
@@ -333,9 +299,7 @@ class InMemoryCollection<T extends object, TKey = string> {
     return entries.length;
   };
 
-  public readonly modify = async (
-    changes: Partial<T> | ModifyCallback<T, TKey>,
-  ): Promise<number> => {
+  public readonly modify = async (changes: Partial<T> | ModifyCallback<T, TKey>): Promise<number> => {
     const entries = this.resolveEntries();
 
     for (const { key, value } of entries) {
@@ -358,24 +322,15 @@ class InMemoryCollection<T extends object, TKey = string> {
 
   public readonly sortBy = async (field: keyof T | string): Promise<T[]> => {
     const rows = await this.toArray();
-    rows.sort((left, right) =>
-      compareValues(
-        readField(left, String(field)),
-        readField(right, String(field)),
-      ),
-    );
+    rows.sort((left, right) => compareValues(readField(left, String(field)), readField(right, String(field))));
     return rows;
   };
 
   public readonly primaryKeys = async (): Promise<TKey[]> => {
-    return this.resolveEntries().map(({ key }) =>
-      this.tableRef.deserializeSerializedKey(key),
-    );
+    return this.resolveEntries().map(({ key }) => this.tableRef.deserializeSerializedKey(key));
   };
 
-  public readonly each = async (
-    callback: (item: T, cursor?: { primaryKey: TKey }) => void | Promise<void>,
-  ): Promise<void> => {
+  public readonly each = async (callback: (item: T, cursor?: { primaryKey: TKey }) => void | Promise<void>): Promise<void> => {
     for (const { key, value } of this.resolveEntries()) {
       await callback(ensureObject(value), {
         primaryKey: this.tableRef.deserializeSerializedKey(key),
@@ -384,27 +339,19 @@ class InMemoryCollection<T extends object, TKey = string> {
   };
 
   public readonly offset = (): never => {
-    throw new Error(
-      "[InMemoryLocalDB] Unsupported Dexie API: Collection.offset()",
-    );
+    throw new Error("[InMemoryLocalDB] Unsupported Dexie API: Collection.offset()");
   };
 
   public readonly until = (): never => {
-    throw new Error(
-      "[InMemoryLocalDB] Unsupported Dexie API: Collection.until()",
-    );
+    throw new Error("[InMemoryLocalDB] Unsupported Dexie API: Collection.until()");
   };
 
   public readonly startsWithIgnoreCase = (): never => {
-    throw new Error(
-      "[InMemoryLocalDB] Unsupported Dexie API: Collection.startsWithIgnoreCase()",
-    );
+    throw new Error("[InMemoryLocalDB] Unsupported Dexie API: Collection.startsWithIgnoreCase()");
   };
 
   public readonly equalsIgnoreCase = (): never => {
-    throw new Error(
-      "[InMemoryLocalDB] Unsupported Dexie API: Collection.equalsIgnoreCase()",
-    );
+    throw new Error("[InMemoryLocalDB] Unsupported Dexie API: Collection.equalsIgnoreCase()");
   };
 
   public readonly or = (): never => {
@@ -412,64 +359,21 @@ class InMemoryCollection<T extends object, TKey = string> {
   };
 
   public readonly keys = (): never => {
-    throw new Error(
-      "[InMemoryLocalDB] Unsupported Dexie API: Collection.keys()",
-    );
+    throw new Error("[InMemoryLocalDB] Unsupported Dexie API: Collection.keys()");
   };
 }
 
 class InMemoryWhereClause<T extends object, TKey = string> {
   constructor(private readonly collection: InMemoryCollection<T, TKey>) {}
 
-  public readonly equals = (value: unknown): InMemoryCollection<T, TKey> => {
-    return this.collection.equals(value);
-  };
-
-  public readonly above = (value: unknown): InMemoryCollection<T, TKey> => {
-    return this.collection.above(value);
-  };
-
-  public readonly aboveOrEqual = (
-    value: unknown,
-  ): InMemoryCollection<T, TKey> => {
-    return this.collection.aboveOrEqual(value);
-  };
-
-  public readonly below = (value: unknown): InMemoryCollection<T, TKey> => {
-    return this.collection.below(value);
-  };
-
-  public readonly belowOrEqual = (
-    value: unknown,
-  ): InMemoryCollection<T, TKey> => {
-    return this.collection.belowOrEqual(value);
-  };
-
-  public readonly between = (
-    lowerValue: unknown,
-    upperValue: unknown,
-    includeLower = true,
-    includeUpper = true,
-  ): InMemoryCollection<T, TKey> => {
-    return this.collection.between(
-      lowerValue,
-      upperValue,
-      includeLower,
-      includeUpper,
-    );
-  };
-
-  public readonly startsWith = (
-    prefix: string,
-  ): InMemoryCollection<T, TKey> => {
-    return this.collection.startsWith(prefix);
-  };
-
-  public readonly anyOf = (
-    values: readonly unknown[],
-  ): InMemoryCollection<T, TKey> => {
-    return this.collection.anyOf(values);
-  };
+  public readonly equals = (value: unknown): InMemoryCollection<T, TKey> => this.collection.equals(value);
+  public readonly above = (value: unknown): InMemoryCollection<T, TKey> => this.collection.above(value);
+  public readonly aboveOrEqual = (value: unknown): InMemoryCollection<T, TKey> => this.collection.aboveOrEqual(value);
+  public readonly below = (value: unknown): InMemoryCollection<T, TKey> => this.collection.below(value);
+  public readonly belowOrEqual = (value: unknown): InMemoryCollection<T, TKey> => this.collection.belowOrEqual(value);
+  public readonly between = (lowerValue: unknown, upperValue: unknown, includeLower = true, includeUpper = true): InMemoryCollection<T, TKey> => this.collection.between(lowerValue, upperValue, includeLower, includeUpper);
+  public readonly startsWith = (prefix: string): InMemoryCollection<T, TKey> => this.collection.startsWith(prefix);
+  public readonly anyOf = (values: readonly unknown[]): InMemoryCollection<T, TKey> => this.collection.anyOf(values);
 }
 
 class InMemoryTable<T extends object, TKey = string> {
@@ -497,30 +401,18 @@ class InMemoryTable<T extends object, TKey = string> {
       return currentKey;
     }
 
-    if (
-      currentKey !== undefined &&
-      currentKey !== null &&
-      String(currentKey).trim().length > 0
-    ) {
+    if (currentKey !== undefined && currentKey !== null && String(currentKey).trim().length > 0) {
       return currentKey;
     }
 
-    const nextKey =
-      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-        ? crypto.randomUUID()
-        : nanoid();
+    const nextKey = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : nanoid();
 
     asRecord(record)[this.keyPathKeys[0]] = nextKey;
     return nextKey;
   };
 
-  private readonly serializeRecord = (record: T): string => {
-    return serializeKey(this.ensureRecordKey(record));
-  };
-
-  private readonly serializeInputKey = (key: unknown): string => {
-    return serializeKey(key);
-  };
+  private readonly serializeRecord = (record: T): string => serializeKey(this.ensureRecordKey(record));
+  private readonly serializeInputKey = (key: unknown): string => serializeKey(key);
 
   public readonly deserializeSerializedKey = (serializedKey: string): TKey => {
     try {
@@ -530,34 +422,20 @@ class InMemoryTable<T extends object, TKey = string> {
     }
   };
 
-  public readonly entries = (): Array<{ key: string; value: T }> => {
-    return Array.from(this.rows.entries()).map(([key, value]) => ({
-      key,
-      value,
-    }));
-  };
-
+  public readonly entries = (): Array<{ key: string; value: T }> => Array.from(this.rows.entries()).map(([key, value]) => ({ key, value }));
   public readonly deleteBySerializedKey = (serializedKey: string): void => {
     this.rows.delete(serializedKey);
   };
-
-  public readonly replaceBySerializedKey = (
-    oldSerializedKey: string,
-    value: T,
-  ): void => {
+  public readonly replaceBySerializedKey = (oldSerializedKey: string, value: T): void => {
     const nextSerializedKey = this.serializeRecord(value);
-    if (nextSerializedKey !== oldSerializedKey) {
-      this.rows.delete(oldSerializedKey);
-    }
+    if (nextSerializedKey !== oldSerializedKey) this.rows.delete(oldSerializedKey);
     this.rows.set(nextSerializedKey, value);
   };
 
   public readonly add = async (record: T): Promise<TKey> => {
     const value = ensureObject(record);
     const serializedKey = this.serializeRecord(value);
-    if (this.rows.has(serializedKey)) {
-      throw new Error(`[InMemoryLocalDB] Duplicate key on add: ${this.name}`);
-    }
+    if (this.rows.has(serializedKey)) throw new Error(`[InMemoryLocalDB] Duplicate key on add: ${this.name}`);
     this.rows.set(serializedKey, value);
     return this.deserializeSerializedKey(serializedKey);
   };
@@ -570,135 +448,61 @@ class InMemoryTable<T extends object, TKey = string> {
   };
 
   public readonly bulkPut = async (records: readonly T[]): Promise<void> => {
-    for (const record of records) {
-      await this.put(record);
-    }
+    for (const record of records) await this.put(record);
   };
-
   public readonly bulkAdd = async (records: readonly T[]): Promise<void> => {
-    for (const record of records) {
-      await this.add(record);
-    }
+    for (const record of records) await this.add(record);
   };
-
-  public readonly bulkGet = async (
-    keys: readonly unknown[],
-  ): Promise<Array<T | undefined>> => {
-    return Promise.all(keys.map((key) => this.get(key)));
-  };
-
+  public readonly bulkGet = async (keys: readonly unknown[]): Promise<Array<T | undefined>> => Promise.all(keys.map((key) => this.get(key)));
   public readonly get = async (key: unknown): Promise<T | undefined> => {
     const found = this.rows.get(this.serializeInputKey(key));
     return found ? ensureObject(found) : undefined;
   };
-
-  public readonly update = async (
-    key: unknown,
-    changes: Partial<T> | Record<string, unknown> | ModifyCallback<T, TKey>,
-  ): Promise<number> => {
+  public readonly update = async (key: unknown, changes: Partial<T> | Record<string, unknown> | ModifyCallback<T, TKey>): Promise<number> => {
     const serializedKey = this.serializeInputKey(key);
     const current = this.rows.get(serializedKey);
     if (!current) return 0;
 
     const next = ensureObject(current);
-
     if (typeof changes === "function") {
-      changes(next, {
-        value: next,
-        primKey: this.deserializeSerializedKey(serializedKey),
-      });
+      changes(next, { value: next, primKey: this.deserializeSerializedKey(serializedKey) });
     } else {
       Object.assign(next, changes);
     }
-
     this.replaceBySerializedKey(serializedKey, next);
     return 1;
   };
-
   public readonly delete = async (key: unknown): Promise<void> => {
     this.rows.delete(this.serializeInputKey(key));
   };
-
-  public readonly bulkDelete = async (
-    keys: readonly unknown[],
-  ): Promise<void> => {
-    for (const key of keys) {
-      this.rows.delete(this.serializeInputKey(key));
-    }
+  public readonly bulkDelete = async (keys: readonly unknown[]): Promise<void> => {
+    for (const key of keys) this.rows.delete(this.serializeInputKey(key));
   };
-
   public readonly clear = async (): Promise<void> => {
     this.rows.clear();
   };
-
-  public readonly count = async (): Promise<number> => {
-    return this.rows.size;
-  };
-
-  public readonly toArray = async (): Promise<T[]> => {
-    return Array.from(this.rows.values()).map((value) => ensureObject(value));
-  };
+  public readonly count = async (): Promise<number> => this.rows.size;
+  public readonly toArray = async (): Promise<T[]> => Array.from(this.rows.values()).map((value) => ensureObject(value));
 
   public where(index: KeyPath): InMemoryWhereClause<T, TKey>;
-  public where(criteria: {
-    [key: string]: unknown;
-  }): InMemoryCollection<T, TKey>;
-  public where(
-    input: KeyPath | { [key: string]: unknown },
-  ): InMemoryWhereClause<T, TKey> | InMemoryCollection<T, TKey> {
+  public where(criteria: { [key: string]: unknown }): InMemoryCollection<T, TKey>;
+  public where(input: KeyPath | { [key: string]: unknown }): InMemoryWhereClause<T, TKey> | InMemoryCollection<T, TKey> {
     if (typeof input === "string" || Array.isArray(input)) {
-      return new InMemoryWhereClause(
-        new InMemoryCollection<T, TKey>(
-          this,
-          [],
-          parseIndexKeys(input),
-          null,
-          false,
-          null,
-        ),
-      );
+      return new InMemoryWhereClause(new InMemoryCollection<T, TKey>(this, [], parseIndexKeys(input), null, false, null));
     }
 
     return Object.entries(input).reduce<InMemoryCollection<T, TKey>>(
-      (collection, [key, value]) =>
-        collection.and((item) => isEqual(readField(item, key), value)),
+      (collection, [key, value]) => collection.and((item) => isEqual(readField(item, key), value)),
       new InMemoryCollection<T, TKey>(this),
     );
   }
 
-  public readonly filter = (
-    predicate: Predicate<T>,
-  ): InMemoryCollection<T, TKey> => {
-    return new InMemoryCollection<T, TKey>(this).filter(predicate);
-  };
-
-  public readonly orderBy = (
-    index: KeyPath,
-  ): InMemoryCollection<T, TKey> => {
-    return new InMemoryCollection<T, TKey>(
-      this,
-      [],
-      null,
-      parseIndexKeys(index),
-      false,
-      null,
-    );
-  };
-
-  public readonly toCollection = (): InMemoryCollection<T, TKey> => {
-    return new InMemoryCollection<T, TKey>(this);
-  };
+  public readonly filter = (predicate: Predicate<T>): InMemoryCollection<T, TKey> => new InMemoryCollection<T, TKey>(this).filter(predicate);
+  public readonly orderBy = (index: KeyPath): InMemoryCollection<T, TKey> => new InMemoryCollection<T, TKey>(this, [], null, parseIndexKeys(index), false, null);
+  public readonly toCollection = (): InMemoryCollection<T, TKey> => new InMemoryCollection<T, TKey>(this);
 }
 
-const SYNCABLE_TABLES = new Set([
-  "cards",
-  "folders",
-  "cardSets",
-  "documents",
-  CURRENT_TAG_STORE,
-  "images",
-  "userSettings",
-] as const);
+const SYNCABLE_TABLES = new Set(["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "images", "userSettings"] as const);
 
 const ENTITY_BY_TABLE: Record<string, QueueEntity> = {
   cards: "card",
@@ -710,33 +514,19 @@ const ENTITY_BY_TABLE: Record<string, QueueEntity> = {
   userSettings: "userSetting",
 };
 
-const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>([
-  "card",
-  "folder",
-  "cardSet",
-  "document",
-  "tag",
-  "asset",
-]);
+const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>(["card", "folder", "cardSet", "document", "tag", "asset"]);
 
 const createPayloadId = (payload: object): string => {
   const record = asRecord(payload);
   const current = record.id;
-  if (typeof current === "string" && current.trim().length > 0) {
-    return current;
-  }
+  if (typeof current === "string" && current.trim().length > 0) return current;
 
-  const next =
-    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-      ? crypto.randomUUID()
-      : nanoid();
+  const next = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : nanoid();
   record.id = next;
   return next;
 };
 
-const getQueueEntityForTable = (tableName: string): QueueEntity | null => {
-  return ENTITY_BY_TABLE[tableName] ?? null;
-};
+const getQueueEntityForTable = (tableName: string): QueueEntity | null => ENTITY_BY_TABLE[tableName] ?? null;
 
 export class InMemoryLocalDB {
   public readonly name: string;
@@ -785,64 +575,33 @@ export class InMemoryLocalDB {
     this.users = this.registerTable<Record<string, unknown>>("users", "id");
     this.userSettings = this.registerTable<UserSettings>("userSettings", "id");
     this.userStats = this.registerTable<UserStats>("userStats", "id");
-    this.syncMetadata = this.registerTable<SyncMetadata>(
-      "syncMetadata",
-      "userId",
-    );
-    this.levelHistories = this.registerTable<Record<string, unknown>>(
-      "levelHistories",
-      "id",
-    );
-    this.deviceMeta = this.registerTable<Record<string, unknown>>(
-      "deviceMeta",
-      "deviceId",
-    );
+    this.syncMetadata = this.registerTable<SyncMetadata>("syncMetadata", "userId");
+    this.levelHistories = this.registerTable<Record<string, unknown>>("levelHistories", "id");
+    this.deviceMeta = this.registerTable<Record<string, unknown>>("deviceMeta", "deviceId");
     this.syncErrors = this.registerTable<SyncError>("syncErrors", "id");
     this.syncHistory = this.registerTable<SyncHistory>("syncHistory", "id");
     this.syncSettings = this.registerTable<SyncSettings>("syncSettings", "id");
     this.syncQueue = this.registerTable<SyncQueueItem>("syncQueue", "id");
     this.conflicts = this.registerTable<SyncConflict>("conflicts", "id");
-    this.metadata = this.registerTable<Record<string, unknown>>(
-      "metadata",
-      "key",
-    );
-    this.images = this.registerTable<AssetRecord | UploadedImage>(
-      "images",
-      "id",
-    );
-    this.cardRelations = this.registerTable<Record<string, unknown>>(
-      "cardRelations",
-      "id",
-    );
-    this.projectMaps = this.registerTable<Record<string, unknown>>(
-      "projectMaps",
-      "id",
-    );
-    this.studyLogs = this.registerTable<Record<string, unknown>>(
-      "studyLogs",
-      "id",
-    );
+    this.metadata = this.registerTable<Record<string, unknown>>("metadata", "key");
+    this.images = this.registerTable<AssetRecord | UploadedImage>("images", "id");
+    this.cardRelations = this.registerTable<Record<string, unknown>>("cardRelations", "id");
+    this.projectMaps = this.registerTable<Record<string, unknown>>("projectMaps", "id");
+    this.studyLogs = this.registerTable<Record<string, unknown>>("studyLogs", "id");
     this.registerTable<TagRecord>(CURRENT_TAG_STORE, "id");
     this.registerTable<Record<string, unknown>>("documentFiles", "id");
   }
 
-  private readonly registerTable = <T extends object, TKey = string>(
-    name: string,
-    keyPath: KeyPath,
-  ): InMemoryTable<T, TKey> => {
+  private readonly registerTable = <T extends object, TKey = string>(name: string, keyPath: KeyPath): InMemoryTable<T, TKey> => {
     const table = new InMemoryTable<T, TKey>(name, keyPath);
     this.tableMap.set(name, table);
     this.tables.push({ name, clear: () => table.clear() });
     return table;
   };
 
-  public readonly table = <T extends object, TKey = string>(
-    name: string,
-  ): InMemoryTable<T, TKey> => {
+  public readonly table = <T extends object, TKey = string>(name: string): InMemoryTable<T, TKey> => {
     const table = this.tableMap.get(name);
-    if (!table) {
-      throw new Error(`[InMemoryLocalDB] Unknown table requested: ${name}`);
-    }
+    if (!table) throw new Error(`[InMemoryLocalDB] Unknown table requested: ${name}`);
     return table as InMemoryTable<T, TKey>;
   };
 
@@ -850,367 +609,172 @@ export class InMemoryLocalDB {
     this.opened = true;
     return this;
   };
-
-  public readonly isOpen = (): boolean => {
-    return this.opened;
-  };
-
+  public readonly isOpen = (): boolean => this.opened;
   public readonly close = (): void => {
     this.opened = false;
   };
-
   public readonly delete = async (): Promise<void> => {
     this.version = 0;
     await Promise.all(this.tables.map((table) => table.clear()));
     this.opened = false;
   };
-
-  public readonly transaction = async <T>(
-    _mode: string,
-    first: unknown,
-    ...rest: unknown[]
-  ): Promise<T> => {
-    const scope =
-      typeof first === "function"
-        ? (first as () => Promise<T> | T)
-        : (rest.at(-1) as (() => Promise<T> | T) | undefined);
-
-    if (!scope) {
-      throw new Error("[InMemoryLocalDB] transaction scope is required");
-    }
-
+  public readonly transaction = async <T>(_mode: string, first: unknown, ...rest: unknown[]): Promise<T> => {
+    const scope = typeof first === "function" ? (first as () => Promise<T> | T) : (rest.at(-1) as (() => Promise<T> | T) | undefined);
+    if (!scope) throw new Error("[InMemoryLocalDB] transaction scope is required");
     return await scope();
   };
+  public readonly runSyncTransaction = async <T>(scope: () => Promise<T>): Promise<T> => await scope();
 
   private readonly emitSyncTrigger = (): void => {
     if (!this.syncTrigger) return;
-
-    setTimeout(() => {
-      this.syncTrigger?.();
-    }, 0);
+    setTimeout(() => this.syncTrigger?.(), 0);
   };
 
-  public readonly queueUpsertSync = async <TEntity extends UpsertEntity>({
-    entity,
-    operationType,
-    payload,
-    priority = "high",
-  }: {
-    entity: TEntity;
-    operationType: "create" | "update";
-    payload: SyncPayloadByEntity[TEntity];
-    priority?: SyncPriority;
-  }): Promise<void> => {
-    const item = createUpsertQueueItem({
-      entity,
-      operationType,
-      payload,
-      priority,
-    });
-
-    await this.syncQueue.put(item);
+  public readonly queueUpsertSync = async <TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high" }: { entity: TEntity; operationType: "create" | "update"; payload: SyncPayloadByEntity[TEntity]; priority?: SyncPriority }): Promise<void> => {
+    await this.syncQueue.put(createUpsertQueueItem({ entity, operationType, payload, priority }));
     this.emitSyncTrigger();
   };
 
-  public readonly queueDeleteSync = async ({
-    entity,
-    targetId,
-    priority = "high",
-  }: {
-    entity: DeleteEntity;
-    targetId: string;
-    priority?: SyncPriority;
-  }): Promise<void> => {
-    const item = createDeleteQueueItem({
-      entity,
-      targetId,
-      priority,
-    });
-
-    await this.syncQueue.put(item);
+  public readonly queueDeleteSync = async ({ entity, targetId, priority = "high" }: { entity: DeleteEntity; targetId: string; priority?: SyncPriority }): Promise<void> => {
+    await this.syncQueue.put(createDeleteQueueItem({ entity, targetId, priority }));
     this.emitSyncTrigger();
   };
 
-  private readonly enqueueSyncForTable = async (
-    tableName: string,
-    payload: object,
-    operationType: "create" | "update",
-  ): Promise<void> => {
-    if (
-      !SYNCABLE_TABLES.has(
-        tableName as typeof SYNCABLE_TABLES extends Set<infer V> ? V : never,
-      )
-    ) {
-      return;
-    }
-
+  private readonly enqueueSyncForTable = async (tableName: string, payload: object, operationType: "create" | "update"): Promise<void> => {
+    if (!SYNCABLE_TABLES.has(tableName as typeof SYNCABLE_TABLES extends Set<infer V> ? V : never)) return;
     const entity = getQueueEntityForTable(tableName);
     if (!entity) return;
 
     const payloadId = createPayloadId(payload);
     const record = asRecord(payload);
-
-    if (
-      record.isDeleted === true &&
-      DELETE_CAPABLE_ENTITIES.has(entity as DeleteEntity)
-    ) {
-      await this.queueDeleteSync({
-        entity: entity as DeleteEntity,
-        targetId: payloadId,
-        priority: "high",
-      });
+    if (record.isDeleted === true && DELETE_CAPABLE_ENTITIES.has(entity as DeleteEntity)) {
+      await this.queueDeleteSync({ entity: entity as DeleteEntity, targetId: payloadId, priority: "high" });
       return;
     }
 
-    await this.queueUpsertSync({
-      entity: entity as UpsertEntity,
-      operationType,
-      payload: payload as never,
-      priority: "high",
-    });
+    await this.queueUpsertSync({ entity: entity as UpsertEntity, operationType, payload: payload as never, priority: "high" });
   };
 
-  public readonly getItem = async <TTable extends SyncableEntityTable>(
-    tableName: TTable,
-    id: string,
-  ): Promise<LocalDBTableMap[TTable] | undefined> => {
+  public readonly getItem = async <TTable extends SyncableEntityTable>(tableName: TTable, id: string): Promise<LocalDBTableMap[TTable] | undefined> => {
     const item = await this.table<LocalDBTableMap[TTable]>(tableName).get(id);
     if (!item) return undefined;
-
-    if (tableName === "cards") {
-      return normalizeCard(item) as LocalDBTableMap[TTable];
-    }
-
-    if (tableName === "folders") {
-      return normalizeFolderWithSilent(item) as LocalDBTableMap[TTable];
-    }
-
+    if (tableName === "cards") return normalizeCard(item) as LocalDBTableMap[TTable];
+    if (tableName === "folders") return normalizeFolderWithSilent(item) as LocalDBTableMap[TTable];
     return item;
   };
 
-  public readonly getAllItems = async <TTable extends SyncableEntityTable>(
-    tableName: TTable,
-  ): Promise<Array<LocalDBTableMap[TTable]>> => {
-    const items =
-      await this.table<LocalDBTableMap[TTable]>(tableName).toArray();
-
-    if (tableName === "cards") {
-      return items.map((item) => normalizeCard(item)) as Array<
-        LocalDBTableMap[TTable]
-      >;
-    }
-
-    if (tableName === "folders") {
-      return items.map((item) =>
-        normalizeFolderWithSilent(item),
-      ) as Array<LocalDBTableMap[TTable]>;
-    }
-
+  public readonly getAllItems = async <TTable extends SyncableEntityTable>(tableName: TTable): Promise<Array<LocalDBTableMap[TTable]>> => {
+    const items = await this.table<LocalDBTableMap[TTable]>(tableName).toArray();
+    if (tableName === "cards") return items.map((item) => normalizeCard(item)) as Array<LocalDBTableMap[TTable]>;
+    if (tableName === "folders") return items.map((item) => normalizeFolderWithSilent(item)) as Array<LocalDBTableMap[TTable]>;
     return items;
   };
 
-  public readonly addItem = async (
-    tableName: string,
-    item: unknown,
-    skipSync = false,
-  ): Promise<string> => {
+  public readonly addItem = async (tableName: string, item: unknown, skipSync = false): Promise<string> => {
     const payload = ensureObject((isRecord(item) ? item : {}) as ObjectRecord);
     const id = createPayloadId(payload);
     await this.table<ObjectRecord, string>(tableName).add(payload);
-
-    if (!skipSync) {
-      await this.enqueueSyncForTable(tableName, payload, "create");
-    }
-
+    if (!skipSync) await this.enqueueSyncForTable(tableName, payload, "create");
     return id;
   };
 
-  public readonly updateItem = async (
-    tableName: string,
-    id: string,
-    changes: Record<string, unknown>,
-    skipSync = false,
-  ): Promise<number> => {
-    const result = await this.table<Record<string, unknown>, string>(
-      tableName,
-    ).update(id, changes);
-
+  public readonly updateItem = async (tableName: string, id: string, changes: Record<string, unknown>, skipSync = false): Promise<number> => {
+    const result = await this.table<Record<string, unknown>, string>(tableName).update(id, changes);
     if (!skipSync && result > 0) {
-      const fullItem = await this.table<Record<string, unknown>, string>(
-        tableName,
-      ).get(id);
-
-      if (fullItem) {
-        await this.enqueueSyncForTable(tableName, fullItem, "update");
-      }
+      const fullItem = await this.table<Record<string, unknown>, string>(tableName).get(id);
+      if (fullItem) await this.enqueueSyncForTable(tableName, fullItem, "update");
     }
-
     return result;
   };
 
-  public readonly deleteItem = async (
-    tableName: string,
-    id: string,
-  ): Promise<void> => {
+  public readonly deleteItem = async (tableName: string, id: string): Promise<void> => {
     await this.table(tableName).delete(id);
   };
-
-  public readonly softDelete = async (
-    tableName: string,
-    id: string,
-  ): Promise<number> => {
-    return this.updateItem(tableName, id, {
-      isDeleted: true,
-      deletedAt: new Date(),
-      updatedAt: new Date(),
-    });
-  };
-
-  public readonly restore = async (
-    tableName: string,
-    id: string,
-  ): Promise<number> => {
-    return this.updateItem(tableName, id, {
-      isDeleted: false,
-      deletedAt: null,
-      updatedAt: new Date(),
-    });
-  };
-
-  public readonly purge = async (
-    tableName: string,
-    id: string,
-  ): Promise<void> => {
-    await this.deleteItem(tableName, id);
-  };
-
-  public readonly bulkUpsert = async (
-    tableName: string,
-    items: unknown[],
-    skipSync = false,
-  ): Promise<void> => {
+  public readonly softDelete = async (tableName: string, id: string): Promise<number> => this.updateItem(tableName, id, { isDeleted: true, deletedAt: new Date(), updatedAt: new Date() });
+  public readonly restore = async (tableName: string, id: string): Promise<number> => this.updateItem(tableName, id, { isDeleted: false, deletedAt: null, updatedAt: new Date() });
+  public readonly purge = async (tableName: string, id: string): Promise<void> => await this.deleteItem(tableName, id);
+  public readonly bulkUpsert = async (tableName: string, items: unknown[], skipSync = false): Promise<void> => {
     const payload = items.filter(isRecord).map((item) => ensureObject(item));
-
     if (payload.length === 0) return;
-
     await this.table<ObjectRecord, string>(tableName).bulkPut(payload);
-
     if (!skipSync) {
-      for (const item of payload) {
-        await this.enqueueSyncForTable(tableName, item, "update");
-      }
+      for (const item of payload) await this.enqueueSyncForTable(tableName, item, "update");
     }
   };
-
-  public readonly clearTable = async (tableName: string): Promise<void> => {
-    await this.table(tableName).clear();
+  public readonly upsert = async <TTable extends SyncableEntityTable>(tableName: TTable, data: LocalDBTableMap[TTable], skipSync = false): Promise<void> => {
+    await this.table<LocalDBTableMap[TTable], string>(tableName).put(data);
+    if (!skipSync) await this.enqueueSyncForTable(tableName, data, "update");
   };
-
-  public readonly getAllCards = async (): Promise<Card[]> => {
-    const cards = await this.cards.toArray();
-    return cards.map((card) => normalizeCard(card)) as Card[];
+  public readonly clearTable = async (tableName: string): Promise<void> => await this.table(tableName).clear();
+  public readonly clearAllData = async (): Promise<void> => await Promise.all(this.tables.map((table) => table.clear())).then(() => undefined);
+  public readonly clearSyncTables = async (tables: readonly SyncableEntityTable[]): Promise<void> => {
+    for (const table of tables) await this.table(table).clear();
   };
+  public readonly putSyncRecord = async <TTable extends SyncableEntityTable>(table: TTable, data: LocalDBTableMap[TTable]): Promise<void> => await this.upsert(table, data, true);
 
-  public readonly getAllFolders = async (): Promise<Folder[]> => {
-    const folders = await this.folders.toArray();
-    return folders.map((folder) =>
-      normalizeFolderWithSilent(folder),
-    ) as Folder[];
+  public readonly getAllCards = async (): Promise<Card[]> => (await this.cards.toArray()).map((card) => normalizeCard(card)) as Card[];
+  public readonly getAllFolders = async (): Promise<Folder[]> => (await this.folders.toArray()).map((folder) => normalizeFolderWithSilent(folder)) as Folder[];
+  public readonly listCardsByUser = async (userId: string): Promise<Card[]> => (await this.cards.where("userId").equals(userId).toArray()).map((card) => normalizeCard(card)) as Card[];
+  public readonly listFoldersByUser = async (userId: string): Promise<Folder[]> => (await this.folders.where("userId").equals(userId).toArray()).map((folder) => normalizeFolderWithSilent(folder)) as Folder[];
+  public readonly listCardSetsByUser = async (userId: string): Promise<CardSet[]> => await this.cardSets.where("userId").equals(userId).toArray();
+  public readonly addCardSet = async (cardSet: CardSet): Promise<void> => {
+    await this.cardSets.put(cardSet);
   };
+  public readonly updateCardById = async (id: string, changes: Partial<Card>): Promise<number> => await this.cards.update(id, changes);
 
-  public readonly getLastSyncTime = async (
-    userId: string,
-  ): Promise<Date | null> => {
+  public readonly getLastSyncTime = async (userId: string): Promise<Date | null> => {
     const meta = await this.syncMetadata.get(userId);
     if (!meta?.lastSyncTime) return null;
     return toDateOrNull(meta.lastSyncTime);
   };
-
-  public readonly updateLastSyncTime = async (
-    userId: string,
-    syncTime: Date,
-  ): Promise<void> => {
-    await this.syncMetadata.put({
-      userId,
-      deviceId: getOrCreateDeviceId(),
-      deviceName: getDeviceName(),
-      lastSyncTime: syncTime,
-      lastHighResSync: null,
-      isActive: true,
-    });
+  public readonly updateLastSyncTime = async (userId: string, syncTime: Date): Promise<void> => {
+    await this.syncMetadata.put({ userId, deviceId: getOrCreateDeviceId(), deviceName: getDeviceName(), lastSyncTime: syncTime, lastHighResSync: null, isActive: true });
   };
-
-  public readonly getDirtyItems = async <TTable extends SyncableEntityTable>(
-    tableName: TTable,
-    userId: string,
-    lastSyncTime: Date,
-  ): Promise<Array<LocalDBTableMap[TTable]>> => {
-    const rows = await this.table<LocalDBTableMap[TTable], string>(
-      tableName,
-    ).toArray();
+  public readonly getDirtyItems = async <TTable extends SyncableEntityTable>(tableName: TTable, userId: string, lastSyncTime: Date): Promise<Array<LocalDBTableMap[TTable]>> => {
+    const rows = await this.table<LocalDBTableMap[TTable], string>(tableName).toArray();
     const threshold = toTimestamp(lastSyncTime);
-
     return rows.filter((row) => {
       const record = asRecord(row);
-      return (
-        typeof record.userId === "string" &&
-        record.userId === userId &&
-        toTimestamp(record.updatedAt) >= threshold
-      );
+      return typeof record.userId === "string" && record.userId === userId && toTimestamp(record.updatedAt) >= threshold;
     });
-  };
-
-  public readonly clearAllData = async (): Promise<void> => {
-    await Promise.all(this.tables.map((table) => table.clear()));
   };
 
   public readonly cleanupSyncHistory = async (): Promise<void> => {
     const now = Date.now();
     const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-
-    await this.syncHistory
-      .where("finishedAt")
-      .below(now - thirtyDays)
-      .delete();
-
+    await this.syncHistory.where("finishedAt").below(now - thirtyDays).delete();
     const all = await this.syncHistory.orderBy("finishedAt").toArray();
-    if (all.length > 100) {
-      await this.syncHistory.bulkDelete(
-        all.slice(0, all.length - 100).map((item) => item.id),
-      );
-    }
+    if (all.length > 100) await this.syncHistory.bulkDelete(all.slice(0, all.length - 100).map((item) => item.id));
   };
-
-  public readonly listCardsByUser = async (userId: string): Promise<Card[]> => {
-    const cards = await this.cards
-      .where("userId")
-      .equals(userId)
-      .toArray();
-    return cards.map((card) => normalizeCard(card)) as Card[];
+  public readonly cleanupSyncErrors = async (): Promise<void> => await this.syncErrors.clear();
+  public readonly getSyncSettings = async (id: string): Promise<SyncSettings | undefined> => await this.syncSettings.get(id);
+  public readonly putSyncSettings = async (settings: SyncSettings): Promise<void> => await this.syncSettings.put(settings).then(() => undefined);
+  public readonly getSyncError = async (id: string): Promise<SyncError | undefined> => await this.syncErrors.get(id);
+  public readonly putSyncError = async (error: SyncError): Promise<void> => await this.syncErrors.put(error).then(() => undefined);
+  public readonly clearSyncErrors = async (): Promise<void> => await this.syncErrors.clear();
+  public readonly getRetryableSyncErrors = async (): Promise<SyncError[]> => await this.syncErrors.toArray();
+  public readonly findQueueProcessingErrorsByTargetId = async (targetId: string): Promise<SyncError[]> => await this.syncErrors.where("targetId").equals(targetId).toArray();
+  public readonly putSyncHistory = async (history: SyncHistory): Promise<void> => await this.syncHistory.put(history).then(() => undefined);
+  public readonly getRecentSyncHistory = async (limit = 50): Promise<SyncHistory[]> => await this.syncHistory.orderBy("startedAt").reverse().limit(limit).toArray();
+  public readonly getSyncStatsSince = async (timestamp: number): Promise<{ histories: SyncHistory[]; errors: SyncError[] }> => ({ histories: await this.syncHistory.where("startedAt").aboveOrEqual(timestamp).toArray(), errors: await this.syncErrors.toArray() });
+  public readonly getSyncQueueCount = async (): Promise<number> => await this.syncQueue.count();
+  public readonly getQueuedItemsOldestFirst = async (): Promise<SyncQueueItem[]> => await this.syncQueue.orderBy("createdAt").toArray();
+  public readonly trimSyncQueueToLimit = async (limit: number): Promise<void> => {
+    const all = await this.getQueuedItemsOldestFirst();
+    if (all.length > limit) await this.syncQueue.bulkDelete(all.slice(0, all.length - limit).map((item) => item.id));
   };
-
-  public readonly listFoldersByUser = async (
-    userId: string,
-  ): Promise<Folder[]> => {
-    const folders = await this.folders
-      .where("userId")
-      .equals(userId)
-      .toArray();
-    return folders.map((folder) => normalizeFolderWithSilent(folder)) as Folder[];
-  };
-
-  public readonly listCardSetsByUser = async (
-    userId: string,
-  ): Promise<CardSet[]> => {
-    return this.cardSets.where("userId").equals(userId).toArray();
-  };
-
+  public readonly putSyncQueueItem = async (item: SyncQueueItem): Promise<void> => await this.syncQueue.put(item).then(() => undefined);
+  public readonly removeSyncQueueItem = async (id: string): Promise<void> => await this.syncQueue.delete(id);
+  public readonly putConflict = async (conflict: SyncConflict): Promise<void> => await this.conflicts.put(conflict).then(() => undefined);
+  public readonly getConflict = async (id: string): Promise<SyncConflict | undefined> => await this.conflicts.get(id);
+  public readonly getConflicts = async (): Promise<SyncConflict[]> => await this.conflicts.toArray();
+  public readonly removeConflict = async (id: string): Promise<void> => await this.conflicts.delete(id);
+  public readonly getImageRecord = async (id: string): Promise<AssetRecord | UploadedImage | undefined> => await this.images.get(id);
+  public readonly putImageRecord = async (record: AssetRecord | UploadedImage): Promise<void> => await this.images.put(record).then(() => undefined);
+  public readonly updateImageRecord = async (id: string, changes: Partial<AssetRecord & UploadedImage>): Promise<number> => await this.images.update(id, changes);
   public readonly setSyncTrigger = (trigger: () => void): void => {
     this.syncTrigger = trigger;
   };
 }
 
-export const createInMemoryLocalDB = (
-  userId?: string,
-  name?: string,
-): InMemoryLocalDB => new InMemoryLocalDB(userId, name);
+export const createInMemoryLocalDB = (userId?: string, name?: string): InMemoryLocalDB => new InMemoryLocalDB(userId, name);
