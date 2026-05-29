@@ -23,7 +23,7 @@ describe("cardSetViewFlippedFacePreferences", () => {
     expect(currentKey).toBe(
       `${SHARED_STORAGE_KEYS.cardSetViewFlippedFacePrefix}::desktop::set-1`,
     );
-    expect(window.localStorage.getItem(currentKey)).toBe('["card-a"]');
+    expect(window.localStorage.getItem(currentKey)).toBe(JSON.stringify(["card-a"]));
   });
 
   it("persists flipped ids in localStorage", () => {
