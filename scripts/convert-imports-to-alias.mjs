@@ -23,7 +23,6 @@ const files = fg.sync(["**/*.{ts,tsx,js,jsx,mjs,cjs}"], {
     "**/*.d.ts",
     "**/node_modules/**",
     "**/dist/**",
-    "**/dist-electron/**",
     "**/build/**",
     "**/lib/**",
     "**/coverage/**",
