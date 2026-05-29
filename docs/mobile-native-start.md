@@ -2,7 +2,7 @@
 
 ## 結論
 
-Solifa の native mobile は、既存の Vite / React / Electron 画面をそのまま React Native に流用するのではなく、`apps/mobile` に Expo / React Native アプリを追加し、ドメインロジック・型・ユースケースを段階的に共有していく。
+Manifolia の native mobile は、既存の Vite / React / Electron 画面をそのまま React Native に流用するのではなく、`apps/mobile` に Expo / React Native アプリを追加し、ドメインロジック・型・ユースケースを段階的に共有していく。
 
 理由は、現行アプリが DOM / CSS / Electron / web storage 前提のコンポーネントを多く持つため。最初から画面コンポーネントを共通化しようとすると、React Native 側で `<div>` / CSS / browser API / Electron API の差分に詰まりやすい。
 
@@ -106,7 +106,7 @@ packages/
       feature-flags/
 ```
 
-Web 側は `@/` import を保ったまま、native と共有したいものだけ `@solifa/core` のような workspace package に移す。
+Web 側は `@/` import を保ったまま、native と共有したいものだけ `@manifolia/core` のような workspace package に移す。
 
 ## 判断基準
 
