@@ -25,6 +25,8 @@ type HoverTooltipProps = {
   disabled?: boolean;
 };
 
+const TOOLTIP_ARROW_BORDER_CLASS_NAME = "border-[rgba(0,0,0,0.12)]";
+
 const getTransform = (side: TooltipSide, align: TooltipAlign) => {
   if (side === "top") {
     if (align === "start") return "translate(0, -100%)";
@@ -105,7 +107,8 @@ const getPosition = (
 const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
   if (side === "top") {
     return cn(
-      "bottom-[-3px]",
+      "bottom-[-4px] border-b border-r",
+      TOOLTIP_ARROW_BORDER_CLASS_NAME,
       align === "start"
         ? "left-4"
         : align === "end"
@@ -116,7 +119,8 @@ const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
 
   if (side === "bottom") {
     return cn(
-      "top-[-3px]",
+      "top-[-4px] border-l border-t",
+      TOOLTIP_ARROW_BORDER_CLASS_NAME,
       align === "start"
         ? "left-4"
         : align === "end"
@@ -127,7 +131,8 @@ const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
 
   if (side === "left") {
     return cn(
-      "right-[-3px]",
+      "right-[-4px] border-r border-t",
+      TOOLTIP_ARROW_BORDER_CLASS_NAME,
       align === "start"
         ? "top-4"
         : align === "end"
@@ -137,7 +142,8 @@ const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
   }
 
   return cn(
-    "left-[-3px]",
+    "left-[-4px] border-b border-l",
+    TOOLTIP_ARROW_BORDER_CLASS_NAME,
     align === "start"
       ? "top-4"
       : align === "end"
@@ -233,7 +239,7 @@ export const HoverTooltip = ({
 
               <span
                 className={cn(
-                  "absolute rotate-45",
+                  "absolute z-[1] rotate-45",
                   presetClassNames.arrow,
                   getArrowClassName(side, align),
                   arrowClassName,
