@@ -1,3 +1,3 @@
-export * as shared from "./shared";
-export * as web from "./web";
-export * as desktop from "./desktop";
+export * as shared from "@constants/shared";
+export * as web from "@constants/web";
+export * as desktop from "@constants/desktop";
