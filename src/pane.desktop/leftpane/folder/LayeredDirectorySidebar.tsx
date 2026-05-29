@@ -969,7 +969,7 @@ const LibraryHierarchySidebar = () => {
           )}
         >
           <TrashGlyph className="h-4 w-4 shrink-0 text-[#8e8e93]" />
-          <span className="truncate">ごみ箱</span>
+          
         </button>
       </div>
 

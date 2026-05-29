@@ -2,7 +2,7 @@ import { useCallback, useLayoutEffect, useRef, useState, type MouseEvent as Reac
 import { DEFAULT_NEW_FOLDER_NAME } from "@/components/folder/explorer/model/utils";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
-import { LibraryHierarchySidebar } from "./folder/LayeredDirectorySidebar";
+import { LibraryHierarchySidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
 
 type FocusedProjectState = {
   index: number;
