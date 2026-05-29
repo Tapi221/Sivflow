@@ -1,6 +1,6 @@
-const TOOLTIP_GLASS_SURFACE_CLASS_NAMES = {
-  tooltip: "border border-white/70 bg-[rgba(255,255,255,0.82)] text-[#3c3c43]/80 shadow-[0_10px_30px_rgba(60,60,67,0.15),inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-2xl",
-  arrow: "border-white/70 bg-[rgba(255,255,255,0.82)] backdrop-blur-2xl",
+const TOOLTIP_SURFACE_CLASS_NAMES = {
+  tooltip: "border border-[#d9d9df] bg-[#f5f5f7] text-[#5a5a63] shadow-[0_8px_22px_rgba(24,24,27,0.18),inset_0_1px_0_rgba(255,255,255,0.9)]",
+  arrow: "border border-[#d9d9df] bg-[#f5f5f7]",
 } as const;
 
 export const TOOLTIP_SIZE_CLASS_NAMES = {
@@ -20,16 +20,16 @@ export const TOOLTIP_SIZE_CLASS_NAMES = {
 
 export const TOOLTIP_PRESET_CLASS_NAMES = {
   default: {
-    tooltip: `${TOOLTIP_SIZE_CLASS_NAMES.default.tooltip} ${TOOLTIP_GLASS_SURFACE_CLASS_NAMES.tooltip}`,
-    arrow: `${TOOLTIP_SIZE_CLASS_NAMES.default.arrow} ${TOOLTIP_GLASS_SURFACE_CLASS_NAMES.arrow}`,
+    tooltip: `${TOOLTIP_SIZE_CLASS_NAMES.default.tooltip} ${TOOLTIP_SURFACE_CLASS_NAMES.tooltip}`,
+    arrow: `${TOOLTIP_SIZE_CLASS_NAMES.default.arrow} ${TOOLTIP_SURFACE_CLASS_NAMES.arrow}`,
   },
   compact: {
-    tooltip: `${TOOLTIP_SIZE_CLASS_NAMES.compact.tooltip} ${TOOLTIP_GLASS_SURFACE_CLASS_NAMES.tooltip}`,
-    arrow: `${TOOLTIP_SIZE_CLASS_NAMES.compact.arrow} ${TOOLTIP_GLASS_SURFACE_CLASS_NAMES.arrow}`,
+    tooltip: `${TOOLTIP_SIZE_CLASS_NAMES.compact.tooltip} ${TOOLTIP_SURFACE_CLASS_NAMES.tooltip}`,
+    arrow: `${TOOLTIP_SIZE_CLASS_NAMES.compact.arrow} ${TOOLTIP_SURFACE_CLASS_NAMES.arrow}`,
   },
   segmented: {
-    tooltip: `${TOOLTIP_SIZE_CLASS_NAMES.segmented.tooltip} ${TOOLTIP_GLASS_SURFACE_CLASS_NAMES.tooltip}`,
-    arrow: `${TOOLTIP_SIZE_CLASS_NAMES.segmented.arrow} ${TOOLTIP_GLASS_SURFACE_CLASS_NAMES.arrow}`,
+    tooltip: `${TOOLTIP_SIZE_CLASS_NAMES.segmented.tooltip} ${TOOLTIP_SURFACE_CLASS_NAMES.tooltip}`,
+    arrow: `${TOOLTIP_SIZE_CLASS_NAMES.segmented.arrow} ${TOOLTIP_SURFACE_CLASS_NAMES.arrow}`,
   },
 } as const;
 
