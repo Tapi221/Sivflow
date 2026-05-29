@@ -4,7 +4,7 @@ import type { SharedCardContentProps } from "./SharedCardContent.types";
 import { SharedCardEditScene } from "./SharedCardEditScene";
 import { SharedCardViewScene } from "./SharedCardViewScene";
 import { cn } from "@/lib/utils";
-import { CONTENT_TYPO } from "@/styles/tokens/typography";
+import { CONTENT_TYPO } from "@shared/styles/tokens/typography";
 
 type SharedCardContentRootProps = Readonly<{
   className?: string;

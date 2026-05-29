@@ -1,6 +1,6 @@
 import { memo, type CSSProperties, type RefObject } from "react";
 import { getTagColorSwatchStyle, TAG_COLOR_KEYS, type TagColorKey } from "@/chip/tag/tagColor";
-import { TAG_COLOR_PALETTE } from "@/styles/tokens/tag.palette";
+import { TAG_COLOR_PALETTE } from "@shared/styles/tokens/tag.palette";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, type RightClickPanelId } from "./rightClickPanel.utils";
 

@@ -26,7 +26,7 @@ import { CodeBlockFrame } from "./CodeBlockFrame";
 import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "./codeBlockLanguage";
 import { cn } from "@/lib/utils";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
-import { codeTheme } from "@/styles/tokens/codeTheme";
+import { codeTheme } from "@shared/styles/tokens/codeTheme";
 
 type CodeBlockContentProps =
   | {
