@@ -24,8 +24,6 @@ type CalendarSelectedViewsSplitViewProps = {
   calendarGridStyle: CalendarGridStyle;
   onCalendarScroll?: (event: UIEvent<HTMLDivElement>) => void;
   onSelectDate?: (date: Date) => void;
-  onReachStart?: () => void;
-  onReachEnd?: () => void;
   onVisibleMonthChange?: (date: Date) => void;
   onVisibleDateChange?: (date: Date) => void;
   className?: string;
@@ -51,13 +49,13 @@ const getSelectedViewPanelDayColumnWidth = (viewMode: CalendarViewMode, calendar
   return calendarDayColumnWidth;
 };
 
-const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, visibleDays, virtualRail, events, appProjects, googleAccounts, headerScrollRef, allDayScrollRef, scrollContainerRef, calendarDayColumnWidth, calendarGridStyle, onCalendarScroll, onSelectDate, onReachStart, onReachEnd, onVisibleMonthChange, onVisibleDateChange }: CalendarSelectedViewPanelProps): ReactNode => {
+const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, visibleDays, virtualRail, events, appProjects, googleAccounts, headerScrollRef, allDayScrollRef, scrollContainerRef, calendarDayColumnWidth, calendarGridStyle, onCalendarScroll, onSelectDate, onVisibleMonthChange, onVisibleDateChange }: CalendarSelectedViewPanelProps): ReactNode => {
   if (viewMode === "list") {
-    return <CalendarListView days={visibleDays} virtualRail={virtualRail} events={events} selectedDate={selectedDate} onSelectDate={onSelectDate} onReachStart={onReachStart} onReachEnd={onReachEnd} onVisibleMonthChange={onVisibleMonthChange} className="h-full" />;
+    return <CalendarListView days={visibleDays} virtualRail={virtualRail} events={events} selectedDate={selectedDate} onSelectDate={onSelectDate} onVisibleMonthChange={onVisibleMonthChange} className="h-full" />;
   }
 
   if (viewMode === "pieChart") {
-    return <CalendarPieChartView days={visibleDays} virtualRail={virtualRail} selectedDate={selectedDate} events={events} appProjects={appProjects} googleAccounts={googleAccounts} onSelectDate={onSelectDate} onReachStart={onReachStart} onReachEnd={onReachEnd} onVisibleDateChange={onVisibleDateChange} className="h-full" />;
+    return <CalendarPieChartView days={visibleDays} virtualRail={virtualRail} selectedDate={selectedDate} events={events} appProjects={appProjects} googleAccounts={googleAccounts} onSelectDate={onSelectDate} onVisibleDateChange={onVisibleDateChange} className="h-full" />;
   }
 
   if (viewMode === "timetable") {
