@@ -30,6 +30,7 @@ const activateFallback = (userId: string, error: unknown): LocalDBInstance => {
 
   const fallbackInstance = asLocalDBInstance(fallback);
   instance = fallbackInstance;
+  cachedInstance = fallbackInstance;
   currentUserId = userId;
 
   updateLocalDBRuntimeStatus({
@@ -84,11 +85,14 @@ export const getInstance = async (userId?: string) => {
   }
 
   if (instance && currentUserId === nextUserId) {
+    cachedInstance = instance;
     return instance;
   }
 
   if (openingPromise && openingUserId === nextUserId) {
-    return await openingPromise;
+    const openedInstance = await openingPromise;
+    cachedInstance = openedInstance;
+    return openedInstance;
   }
 
   if (openingPromise && openingUserId !== nextUserId) {
@@ -96,6 +100,7 @@ export const getInstance = async (userId?: string) => {
       // previous open failure is handled below
     });
     if (instance && currentUserId === nextUserId) {
+      cachedInstance = instance;
       return instance;
     }
   }
@@ -115,6 +120,7 @@ export const getInstance = async (userId?: string) => {
       } finally {
         instance = null;
         currentUserId = null;
+        cachedInstance = null;
       }
     }
 
@@ -134,6 +140,7 @@ export const getInstance = async (userId?: string) => {
       }
       const persistentInstance = asLocalDBInstance(persistentDb);
       instance = persistentInstance;
+      cachedInstance = persistentInstance;
       currentUserId = nextUserId;
       persistentOpenDisabled = false;
 
@@ -185,13 +192,56 @@ export const getInstance = async (userId?: string) => {
   openingUserId = nextUserId;
 
   try {
-    return await openPromise;
+    const openedInstance = await openPromise;
+    cachedInstance = openedInstance;
+    return openedInstance;
   } finally {
     if (openingPromise === openPromise) {
       openingPromise = null;
       openingUserId = null;
     }
   }
+};
+
+export const initializeDB = async (userId?: string) => {
+  return getInstance(userId);
+};
+
+export const getLocalDb = async (userId?: string) => {
+  return getInstance(userId);
+};
+
+export const getLocalDbSync = () => {
+  const activeInstance = instance ?? cachedInstance;
+  if (!activeInstance) {
+    throw new Error("LocalDB has not been initialized.");
+  }
+
+  return activeInstance;
+};
+
+export const clearInstance = () => {
+  const activeInstance = instance;
+
+  if (activeInstance) {
+    try {
+      if (activeInstance.isOpen()) {
+        activeInstance.close();
+      }
+    } catch (error) {
+      warnOncePerSession(
+        "localdb:clear-instance-close-failed",
+        "[LocalDB] Failed to close active local database while clearing instance.",
+        error,
+      );
+    }
+  }
+
+  instance = null;
+  currentUserId = null;
+  openingPromise = null;
+  openingUserId = null;
+  cachedInstance = null;
 };
 
 export const resetForLogout = async (userId?: string) => {
@@ -283,6 +333,10 @@ export const resetForLogout = async (userId?: string) => {
   } finally {
     resettingPromise = null;
   }
+};
+
+export const resetLocalDBForLogout = async (userId?: string) => {
+  return resetForLogout(userId);
 };
 
 export const getCachedInstance = () => cachedInstance;
