@@ -196,11 +196,29 @@ a:hover,
 }
 
 [aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] {
+  position: relative;
   width: fit-content;
   max-width: 100%;
-  border-radius: 9999px;
   padding-right: 9px;
+  background-color: transparent;
+}
+
+[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"]::before {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  z-index: 0;
+  height: 18px;
+  border-radius: 9999px;
   background-color: var(--sidebar-folder-soft-color, rgba(107, 170, 126, 0.12));
+  content: "";
+  transform: translateY(-50%);
+}
+
+[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > * {
+  position: relative;
+  z-index: 1;
 }
 
 [aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .truncate {
