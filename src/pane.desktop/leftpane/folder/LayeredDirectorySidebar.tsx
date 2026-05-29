@@ -7,7 +7,8 @@ import { buildExplorerTreeData, parseSelectedTreeId, toSelectedTreeId, type Expl
 import { useExpandedFolders } from "@/components/folder/hooks/useExpandedFolders";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
-import { LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LayeredProjectMenu, type LayeredProjectMenuAction } from "@/chip/rightclickpanel.desktop/LayeredProjectMenu";
+import { LAYERED_COLOR_MENU_HEIGHT, LAYERED_COLOR_MENU_WIDTH, LayeredColorMenu } from "@/chip/rightclickpanel.desktop/LayeredColorMenu.desktop";
+import { LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LayeredProjectMenu, type LayeredProjectMenuAction, type LayeredProjectMenuActionId, type LayeredProjectMenuSubmenuAnchor } from "@/chip/rightclickpanel.desktop/LayeredProjectMenu";
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { FadeSkeleton } from "@/features/fade/skeltom";
@@ -39,6 +40,11 @@ type LayeredProjectContextMenuState = {
   y: number;
 };
 
+type LayeredProjectColorMenuState = {
+  x: number;
+  y: number;
+};
+
 const LIBRARY_EXPANDED_FOLDERS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-folders";
 const LIBRARY_EXPANDED_CARD_SETS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-card-sets";
 const TREE_INDENT_PX = 16;
@@ -58,6 +64,7 @@ const TREE_TOGGLE_ICON_CLASS_NAME = "h-3 w-3 transition-transform duration-150";
 const TREE_TOGGLE_SPACER_CLASS_NAME = "h-4 w-4 shrink-0";
 const TREE_TRASH_BUTTON_BASE_CLASS_NAME = "flex h-8 w-full items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium leading-none tracking-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
 const LAYERED_PROJECT_MENU_DIMENSIONS = { width: LAYERED_PROJECT_MENU_WIDTH, height: LAYERED_PROJECT_MENU_HEIGHT };
+const LAYERED_PROJECT_SUBMENU_OVERLAP_PX = 6;
 const HIDDEN_INPUT_STYLE: CSSProperties = { position: "fixed", left: -9999, top: -9999, width: 1, height: 1, opacity: 0, pointerEvents: "none" };
 
 const TrashGlyph = ({ className }: NodeIconProps) => (
@@ -170,6 +177,18 @@ const getNodeMarkerStyle = (node: ExplorerTreeNode): CSSProperties | undefined =
   return folderColor ? { backgroundColor: folderColor } : undefined;
 };
 
+const getLayeredProjectColorMenuPosition = (
+  menu: LayeredProjectContextMenuState,
+  anchor: LayeredProjectMenuSubmenuAnchor,
+): LayeredProjectColorMenuState => {
+  const rightX = menu.x + LAYERED_PROJECT_MENU_WIDTH - LAYERED_PROJECT_SUBMENU_OVERLAP_PX;
+  const leftX = menu.x - LAYERED_COLOR_MENU_WIDTH + LAYERED_PROJECT_SUBMENU_OVERLAP_PX;
+  const rawX = rightX + LAYERED_COLOR_MENU_WIDTH + LAYERED_PROJECT_SUBMENU_OVERLAP_PX <= window.innerWidth ? rightX : leftX;
+  const rawY = menu.y + anchor.itemOffsetY;
+
+  return clampRightClickPanelPosition(rawX, rawY, { width: LAYERED_COLOR_MENU_WIDTH, height: LAYERED_COLOR_MENU_HEIGHT });
+};
+
 const LibraryHierarchySidebar = () => {
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
@@ -187,8 +206,10 @@ const LibraryHierarchySidebar = () => {
   const { expandedFolders: expandedCardSets, setExpandedFolders: setExpandedCardSets } = useExpandedFolders(LIBRARY_EXPANDED_CARD_SETS_STORAGE_KEY);
   const didSeedInitialOpenStateRef = useRef(false);
   const layeredProjectMenuRef = useRef<HTMLDivElement | null>(null);
+  const layeredProjectColorMenuRef = useRef<HTMLDivElement | null>(null);
   const folderColorInputRef = useRef<HTMLInputElement | null>(null);
   const [layeredProjectMenu, setLayeredProjectMenu] = useState<LayeredProjectContextMenuState | null>(null);
+  const [layeredProjectColorMenu, setLayeredProjectColorMenu] = useState<LayeredProjectColorMenuState | null>(null);
   const [folderColorInputTargetId, setFolderColorInputTargetId] = useState<string | null>(null);
 
   const activeTab = useMemo(() => getActiveWorkspaceTab(tabs, activeTabId), [activeTabId, tabs]);
@@ -368,6 +389,7 @@ const LibraryHierarchySidebar = () => {
   );
 
   const closeLayeredProjectMenu = useCallback(() => {
+    setLayeredProjectColorMenu(null);
     setLayeredProjectMenu(null);
   }, []);
 
@@ -379,6 +401,7 @@ const LibraryHierarchySidebar = () => {
 
     const { x, y } = clampRightClickPanelPosition(event.clientX, event.clientY, LAYERED_PROJECT_MENU_DIMENSIONS);
 
+    setLayeredProjectColorMenu(null);
     setLayeredProjectMenu({
       folderId: node.rawId,
       folderName: node.name,
@@ -396,6 +419,23 @@ const LibraryHierarchySidebar = () => {
     setFolderColorInputTargetId(null);
     void updateFolder(folderId, { folderColor });
   }, [folderColorInputTargetId, updateFolder]);
+
+  const handleOpenLayeredProjectSubmenu = useCallback((id: LayeredProjectMenuActionId, anchor: LayeredProjectMenuSubmenuAnchor) => {
+    if (!layeredProjectMenu || id !== "change-color") return;
+
+    setLayeredProjectColorMenu(getLayeredProjectColorMenuPosition(layeredProjectMenu, anchor));
+  }, [layeredProjectMenu]);
+
+  const handleCloseLayeredProjectSubmenu = useCallback(() => {
+    setLayeredProjectColorMenu(null);
+  }, []);
+
+  const handleSelectLayeredProjectColor = useCallback((folderColor: string) => {
+    if (!layeredProjectMenu) return;
+
+    void updateFolder(layeredProjectMenu.folderId, { folderColor });
+    closeLayeredProjectMenu();
+  }, [closeLayeredProjectMenu, layeredProjectMenu, updateFolder]);
 
   const layeredProjectMenuActions = useMemo<LayeredProjectMenuAction[]>(() => {
     if (!layeredProjectMenu) return [];
@@ -784,6 +824,17 @@ const LibraryHierarchySidebar = () => {
   }
 
   const isTrashSelected = activeLibrarySelection.selectedItem?.type === "trash";
+  const layeredProjectColorMenuElement = layeredProjectMenu && layeredProjectColorMenu ? (
+    <LayeredColorMenu
+      x={layeredProjectColorMenu.x}
+      y={layeredProjectColorMenu.y}
+      currentColor={layeredProjectMenu.folderColor}
+      menuRef={layeredProjectColorMenuRef}
+      noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE}
+      panelId={LAYERED_PROJECT_MENU_PANEL_ID}
+      onSelectColor={handleSelectLayeredProjectColor}
+    />
+  ) : null;
   const layeredProjectMenuElement = layeredProjectMenu ? (
     <LayeredProjectMenu
       x={layeredProjectMenu.x}
@@ -791,6 +842,10 @@ const LibraryHierarchySidebar = () => {
       actions={layeredProjectMenuActions}
       menuRef={layeredProjectMenuRef}
       noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE}
+      openSubmenuId={layeredProjectColorMenu ? "change-color" : null}
+      submenuElement={layeredProjectColorMenuElement}
+      onOpenSubmenu={handleOpenLayeredProjectSubmenu}
+      onCloseSubmenu={handleCloseLayeredProjectSubmenu}
     />
   ) : null;
 
