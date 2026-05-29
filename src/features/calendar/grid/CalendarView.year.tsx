@@ -419,7 +419,7 @@ const CalendarYearViewComponent = ({
 
                   <div className="mt-1 grid grid-cols-7 gap-y-1 text-center text-[12px] leading-none">
                     {month.weeks.flat().map((day) => {
-                      const selected = isSameDay(day.date, selectedDate);
+                      const selected = day.isCurrentMonth && isSameDay(day.date, selectedDate);
                       const isToday = isSameDay(day.date, today);
                       const eventCount = day.events?.count ?? 0;
 
