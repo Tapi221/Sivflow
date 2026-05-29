@@ -24,7 +24,7 @@ const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "markdown",
 ]);
 
-const SUBJECTIVE_SCORE_VALUES = new Set<SubjectiveScoreValue>([0, 1, 2, 3, "ok", "anxious"]);
+const SUBJECTIVE_SCORE_VALUES = new Set<SubjectiveScoreValue>([0, 1, 2, 3]);
 
 const isGridBlockType = (value: unknown): value is GridBlockType => {
   return (
@@ -385,125 +385,40 @@ export const normalizeCard = (raw: unknown): Card => {
     deviceId: toStringOr(pick(record.deviceId, record.device_id), ""),
     folderId: toStringOr(pick(record.folderId, record.folder_id), ""),
     cardSetId: toStringOr(pick(record.cardSetId, record.card_set_id), ""),
-    orderIndex: toFiniteNumber(pick(record.orderIndex, record.order_index), 0),
-    questionNumber: toStringOr(
-      pick(record.questionNumber, record.question_number),
-      "",
-    ),
-    title: toStringOr(record.title, ""),
-    isDraft: toBoolOr(pick(record.isDraft, record.is_draft), false),
-    hasUncertainty: toBoolOr(
-      pick(record.hasUncertainty, record.has_uncertainty),
-      false,
-    ),
-    isBookmarked: toBoolOr(
-      pick(record.isBookmarked, record.is_bookmarked),
-      false,
-    ),
-    isCompleted: toBoolOr(pick(record.isCompleted, record.is_completed), false),
-    isSilent: toBoolOr(pick(record.isSilent, record.is_silent), false),
-    isDeleted: toBoolOr(pick(record.isDeleted, record.is_deleted), false),
-    deletedAt: (() => {
-      const rawDeletedAt = pick(record.deletedAt, record.deleted_at);
-      if (rawDeletedAt) return normalizeDate(rawDeletedAt);
-
-      if (toBoolOr(pick(record.isDeleted, record.is_deleted), false)) {
-        return (
-          normalizeDate(
-            pick(
-              record.updatedAt,
-              record.updated_at,
-              record.createdAt,
-              record.created_at,
-            ),
-          ) ?? new Date(0)
-        );
-      }
-
-      return null;
-    })(),
-    front: {
-      blocks: frontBlocks,
-      ink: (() => {
-        const ink = normalizeInkDocument(
-          pick(
-            record.inkQuestion,
-            record.ink_question,
-            asRecord(record.front)?.ink,
-            null,
-          ),
-        );
-        return ink.strokes.length > 0 ? ink : null;
-      })(),
-      extraRows: legacyQuestionExtraRows,
-    },
-    back: {
-      blocks: backBlocks,
-      ink: (() => {
-        const ink = normalizeInkDocument(
-          pick(
-            record.inkAnswer,
-            record.ink_answer,
-            asRecord(record.back)?.ink,
-            null,
-          ),
-        );
-        return ink.strokes.length > 0 ? ink : null;
-      })(),
-      extraRows: legacyAnswerExtraRows,
-    },
+    question: frontText,
+    answer: backText,
     questionBlocks: frontBlocks,
     answerBlocks: backBlocks,
+    currentLevel: Math.max(0, Math.round(levelNum)),
+    level: Math.max(0, Math.round(levelNum)),
     layoutRows: normalizeLayoutRows(
-      toFiniteNumber(
-        pick(record.layoutRows, record.layout_rows),
-        migratedLayoutRows,
-      ),
+      pick(record.layoutRows, record.layout_rows, migratedLayoutRows),
     ),
-    memoryStability: normalizeMemoryStability(finiteMemoryStability, levelNum),
-    currentLevel: levelNum,
-    nextReviewDate: normalizeDate(
-      pick(record.nextReviewDate, record.next_review_date),
-    ),
-    lastReviewAt: normalizeDate(
-      pick(record.lastReviewAt, record.last_review_at),
-    ),
-    lastSubjectiveScore: normalizeSubjectiveScore(
-      pick(record.lastSubjectiveScore, record.last_subjective_score),
-    ),
-    recoveryRemaining: normalizeOptionalNumber(
-      pick(record.recoveryRemaining, record.recovery_remaining),
-    ),
-    lastReviewDelayDays: normalizeOptionalNumber(
-      pick(record.lastReviewDelayDays, record.last_review_delay_days),
-    ),
-    createdAt:
-      normalizeDate(pick(record.createdAt, record.created_at)) ?? new Date(),
-    updatedAt:
-      normalizeDate(pick(record.updatedAt, record.updated_at)) ?? new Date(),
-    responseTimeMs: normalizeOptionalNumber(pick(record.responseTimeMs, record.response_time_ms)),
-    uncertaintyMarkedDate: normalizeDate(
-      pick(record.uncertaintyMarkedDate, record.uncertainty_marked_date),
-    ),
-    completedDate: normalizeDate(
-      pick(record.completedDate, record.completed_date),
-    ),
-    ...(Array.isArray(record.tagIds)
-      ? {
-        tagIds: record.tagIds.filter(
-          (value: unknown): value is string => typeof value === "string",
-        ),
-      }
-      : {}),
-    reviewCount: toFiniteNumber(
-      pick(record.reviewCount, record.review_count),
-      0,
-    ),
-    reviewLogs: normalizeReviewLogs(
-      pick(record.reviewLogs, record.review_logs, []),
-    ),
-    _rescueRaw: pick(record._rescueRaw, undefined),
+    memoryStability: normalizeMemoryStability(finiteMemoryStability),
+    lastReviewedAt: normalizeDate(pick(record.lastReviewedAt, record.last_reviewed_at)),
+    nextReviewDate: normalizeDate(pick(record.nextReviewDate, record.next_review_date)),
+    createdAt: normalizeDate(pick(record.createdAt, record.created_at)) ?? new Date(),
+    updatedAt: normalizeDate(pick(record.updatedAt, record.updated_at)) ?? new Date(),
+    isDeleted: toBoolOr(pick(record.isDeleted, record.is_deleted), false),
+    reviewLogs: normalizeReviewLogs(pick(record.reviewLogs, record.review_logs)),
   };
+
+  const subjectiveScore = normalizeSubjectiveScore(
+    pick(record.subjectiveScore, record.subjective_score),
+  );
+  if (subjectiveScore !== undefined) normalized.subjectiveScore = subjectiveScore;
+
+  const reviewCount = normalizeOptionalNumber(pick(record.reviewCount, record.review_count));
+  if (reviewCount !== undefined) normalized.reviewCount = reviewCount;
+
+  const recoveryRemaining = normalizeOptionalNumber(pick(record.recoveryRemaining, record.recovery_remaining));
+  if (recoveryRemaining !== undefined) normalized.recoveryRemaining = recoveryRemaining;
+
+  const learningStartedAt = normalizeDate(pick(record.learningStartedAt, record.learning_started_at));
+  if (learningStartedAt !== null) normalized.learningStartedAt = learningStartedAt;
+
+  const inkDocument = normalizeInkDocument(pick(record.inkDocument, record.ink_document));
+  if (inkDocument !== undefined) normalized.inkDocument = inkDocument;
 
   return normalized;
 };
