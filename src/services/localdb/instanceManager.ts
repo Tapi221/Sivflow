@@ -1,284 +1,149 @@
-import { Dexie } from "dexie";
-import { classifyFallbackReasonCode, isBackingStoreOpenError, safeStringifyError } from "./errors";
-import { bumpGenerationForUser as _bumpGenerationForUser, deleteUserPersistentDatabases, getFallbackDatabaseNameForUser } from "./generation";
-import type { LocalDB } from "./LocalDB";
-import { createLocalDBInternal } from "./LocalDB";
-import type { LocalDBInstance } from "./types";
-import { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
-import { getStoredLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "@/services/localDBRuntimeState";
+import { deleteUserPersistentDatabases, getDatabaseNameForUser } from "./generation";
+import { createInMemoryLocalDB, type InMemoryLocalDB } from "../InMemoryLocalDB";
+import { LocalDB } from "./LocalDB";
+import { clearLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "../localDBRuntimeState";
+import type { LocalDBSyncStore } from "./types";
 
-let instance: LocalDBInstance | null = null;
+let instance: LocalDB | null = null;
+let cachedInstance: LocalDB | InMemoryLocalDB | null = null;
 let currentUserId: string | null = null;
-let openingPromise: Promise<LocalDBInstance> | null = null;
-let openingUserId: string | null = null;
-let resettingPromise: Promise<void> | null = null;
 let persistentOpenDisabled = false;
+let resettingPromise: Promise<void> | null = null;
+
 const fallbackInstances = new Map<string, InMemoryLocalDB>();
-let cachedInstance: LocalDBInstance | null = null;
+const generationBumps = new Map<string, number>();
 
-const asLocalDBInstance = (value: LocalDB | InMemoryLocalDB): LocalDBInstance => value as unknown as LocalDBInstance;
-
-const activateFallback = (userId: string, error: unknown): LocalDBInstance => {
-  let fallback = fallbackInstances.get(userId);
-  if (!fallback) {
-    fallback = new InMemoryLocalDB(
-      userId,
-      getFallbackDatabaseNameForUser(userId),
-    );
-    fallbackInstances.set(userId, fallback);
+const safeStringifyError = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.stack || error.message;
   }
 
-  const fallbackInstance = asLocalDBInstance(fallback);
-  instance = fallbackInstance;
-  cachedInstance = fallbackInstance;
-  currentUserId = userId;
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
+  }
+};
+
+const getFallbackKey = (userId?: string): string => userId ?? "anonymous";
+
+const bumpGenerationForUser = (userId: string): void => {
+  generationBumps.set(userId, (generationBumps.get(userId) ?? 0) + 1);
+};
+
+const getFallbackInstance = async (userId?: string, reason?: unknown): Promise<InMemoryLocalDB> => {
+  const key = getFallbackKey(userId);
+  const existing = fallbackInstances.get(key);
+  if (existing) return existing;
+
+  const db = createInMemoryLocalDB(userId, `${getDatabaseNameForUser(userId)}_fallback`);
+  fallbackInstances.set(key, db);
+  cachedInstance = db;
 
   updateLocalDBRuntimeStatus({
     mode: "fallback",
-    userId,
-    dbName: fallback.name,
-    fallbackReason: safeStringifyError(error),
-    fallbackReasonCode: classifyFallbackReasonCode(error),
-    resetFailedReason: getStoredLocalDBResetFailureReason(),
+    userId: userId ?? null,
+    dbName: db.name,
+    fallbackReason: reason === undefined ? null : safeStringifyError(reason),
+    fallbackReasonCode: "unknown",
   });
 
-  warnOncePerSession(
-    "localdb:fallback-mode",
-    "[LocalDB] Running in fallback mode (non-persistent). Recovery guide: https://support.google.com/chrome/answer/2392709",
-  );
-
-  return fallbackInstance;
+  return db;
 };
 
-const openPersistentDbWithRetry = async (db: LocalDB) => {
-  let attempt = 0;
-  const maxAttempts = 2;
-  let lastError: unknown = null;
+export const getLocalDb = (): LocalDB | InMemoryLocalDB | null => cachedInstance;
 
-  while (attempt < maxAttempts) {
-    try {
-      await db.open();
-      return;
-    } catch (error) {
-      lastError = error;
-      const fatalBackingStore = isBackingStoreOpenError(error);
-      if (fatalBackingStore || attempt >= maxAttempts - 1) break;
-      await new Promise((resolve) => setTimeout(resolve, 150 * (attempt + 1)));
-    }
-    attempt += 1;
-  }
+export const getLocalDbSync = (): LocalDBSyncStore | null => cachedInstance as LocalDBSyncStore | null;
 
-  throw lastError;
-};
+export const getInstanceUserId = (): string | null => currentUserId;
 
-export const getInstanceUserId = () => {
-  return currentUserId;
-};
-
-export const getInstance = async (userId?: string) => {
-  const nextUserId = userId || "anonymous";
+export const getInstance = async (userId?: string): Promise<LocalDB | InMemoryLocalDB> => {
+  const targetUserId = userId ?? "anonymous";
 
   if (resettingPromise) {
-    await resettingPromise.catch(() => {
-      // reset failure is handled in resetForLogout()
-    });
+    await resettingPromise;
   }
 
-  if (instance && currentUserId === nextUserId) {
-    cachedInstance = instance;
-    return instance;
+  if (cachedInstance && currentUserId === targetUserId) {
+    return cachedInstance;
   }
 
-  if (openingPromise && openingUserId === nextUserId) {
-    const openedInstance = await openingPromise;
-    cachedInstance = openedInstance;
-    return openedInstance;
+  if (persistentOpenDisabled) {
+    currentUserId = targetUserId;
+    return getFallbackInstance(targetUserId, "persistent-open-disabled");
   }
-
-  if (openingPromise && openingUserId !== nextUserId) {
-    await openingPromise.catch(() => {
-      // previous open failure is handled below
-    });
-    if (instance && currentUserId === nextUserId) {
-      cachedInstance = instance;
-      return instance;
-    }
-  }
-
-  const openPromise = (async (): Promise<LocalDBInstance> => {
-    if (instance && currentUserId !== nextUserId) {
-      try {
-        if (instance.isOpen()) {
-          instance.close();
-        }
-      } catch (closeError) {
-        warnOncePerSession(
-          "localdb:switch-close-failed",
-          "[LocalDB] Failed to close previous instance while switching user.",
-          closeError,
-        );
-      } finally {
-        instance = null;
-        currentUserId = null;
-        cachedInstance = null;
-      }
-    }
-
-    if (persistentOpenDisabled) {
-      return activateFallback(
-        nextUserId,
-        new Error("Persistent IndexedDB is disabled in this session."),
-      );
-    }
-
-    const persistentDb = createLocalDBInternal(nextUserId);
-
-    try {
-      await openPersistentDbWithRetry(persistentDb);
-      if (persistentDb.isOpen()) {
-        void persistentDb.normalizeDocumentBlobUrlsForSession();
-      }
-      const persistentInstance = asLocalDBInstance(persistentDb);
-      instance = persistentInstance;
-      cachedInstance = persistentInstance;
-      currentUserId = nextUserId;
-      persistentOpenDisabled = false;
-
-      updateLocalDBRuntimeStatus({
-        mode: "persistent",
-        userId: nextUserId,
-        dbName: persistentDb.name,
-        fallbackReason: null,
-        fallbackReasonCode: "none",
-        resetFailedReason: getStoredLocalDBResetFailureReason(),
-      });
-
-      return persistentInstance;
-    } catch (error) {
-      try {
-        if (persistentDb.isOpen()) {
-          persistentDb.close();
-        }
-      } catch {
-        // ignore close failures
-      }
-
-      const isFatal = isBackingStoreOpenError(error);
-      if (isFatal) {
-        _bumpGenerationForUser(nextUserId);
-        markLocalDBGenerationBumped();
-        saveLocalDBResetFailureReason(
-          `IndexedDB backing store open failed: ${safeStringifyError(error)}`,
-        );
-        warnOncePerSession(
-          "localdb:backing-store-open-error",
-          "[LocalDB] Fatal IndexedDB backing store error detected. Persistent mode disabled for this session. Recovery guide: https://support.google.com/chrome/answer/2392709",
-          error,
-        );
-      } else {
-        warnOncePerSession(
-          "localdb:open-failed",
-          "[LocalDB] IndexedDB open failed. Falling back to in-memory mode for this session.",
-          error,
-        );
-      }
-
-      persistentOpenDisabled = true;
-      return activateFallback(nextUserId, error);
-    }
-  })();
-
-  openingPromise = openPromise;
-  openingUserId = nextUserId;
 
   try {
-    const openedInstance = await openPromise;
-    cachedInstance = openedInstance;
-    return openedInstance;
+    clearLocalDBResetFailureReason();
+    globalThis.__ALLOW_LOCAL_DB_CONSTRUCTION = true;
+    const db = new LocalDB(targetUserId);
+    await db.open();
+    instance = db;
+    cachedInstance = db;
+    currentUserId = targetUserId;
+    updateLocalDBRuntimeStatus({
+      mode: "persistent",
+      userId: targetUserId,
+      dbName: db.name,
+      fallbackReason: null,
+      fallbackReasonCode: "none",
+      resetFailedReason: null,
+    });
+    return db;
+  } catch (error) {
+    warnOncePerSession(
+      "localdb:persistent-open-failed",
+      "[LocalDB] Failed to open persistent local database. Falling back to in-memory database.",
+      error,
+    );
+    currentUserId = targetUserId;
+    return getFallbackInstance(targetUserId, error);
   } finally {
-    if (openingPromise === openPromise) {
-      openingPromise = null;
-      openingUserId = null;
-    }
+    globalThis.__ALLOW_LOCAL_DB_CONSTRUCTION = false;
   }
 };
 
-export const initializeDB = async (userId?: string) => {
+export const initializeDB = async (userId?: string): Promise<LocalDB | InMemoryLocalDB> => {
   return getInstance(userId);
 };
 
-export const getLocalDb = async (userId?: string) => {
-  return getInstance(userId);
-};
-
-export const getLocalDbSync = () => {
-  const activeInstance = instance ?? cachedInstance;
-  if (!activeInstance) {
-    throw new Error("LocalDB has not been initialized.");
-  }
-
-  return activeInstance;
-};
-
-export const clearInstance = () => {
-  const activeInstance = instance;
-
-  if (activeInstance) {
+export const clearInstance = (): void => {
+  if (instance) {
     try {
-      if (activeInstance.isOpen()) {
-        activeInstance.close();
-      }
-    } catch (error) {
-      warnOncePerSession(
-        "localdb:clear-instance-close-failed",
-        "[LocalDB] Failed to close active local database while clearing instance.",
-        error,
-      );
+      instance.close();
+    } catch {
+      // ignore close failure
     }
   }
 
   instance = null;
-  currentUserId = null;
-  openingPromise = null;
-  openingUserId = null;
   cachedInstance = null;
+  currentUserId = null;
 };
 
-export const resetForLogout = async (userId?: string) => {
-  if (resettingPromise) {
-    return resettingPromise;
-  }
+const resetForLogout = async (userId?: string): Promise<void> => {
+  const targetUserId = userId ?? currentUserId ?? "anonymous";
 
-  const targetUserId = userId || currentUserId || "anonymous";
+  if (resettingPromise) {
+    await resettingPromise;
+    return;
+  }
 
   resettingPromise = (async () => {
     let resetFailureReason: string | null = null;
 
-    if (openingPromise) {
-      await openingPromise.catch(() => {
-        // best-effort reset continues
-      });
-    }
-
-    const activeInstance = instance;
-
-    if (activeInstance) {
+    if (instance) {
       try {
-        await activeInstance.clearAllData();
+        instance.close();
       } catch (error) {
         resetFailureReason = safeStringifyError(error);
         warnOncePerSession(
-          "localdb:clear-failed",
-          "[LocalDB] Failed to clear active local database during logout.",
+          "localdb:persistent-close-failed",
+          "[LocalDB] Failed to close persistent local database during logout.",
           error,
         );
       }
-
-      try {
-        if (activeInstance.isOpen()) activeInstance.close();
-      } catch {
-        // ignore close failure after clear attempt
-      }
+      instance = null;
     }
 
     const fallback = fallbackInstances.get(targetUserId);
@@ -300,7 +165,7 @@ export const resetForLogout = async (userId?: string) => {
     try {
       await deleteUserPersistentDatabases(targetUserId);
       persistentOpenDisabled = false;
-      _bumpGenerationForUser(targetUserId);
+      bumpGenerationForUser(targetUserId);
       markLocalDBGenerationBumped();
     } catch (error) {
       resetFailureReason = safeStringifyError(error);
@@ -318,7 +183,7 @@ export const resetForLogout = async (userId?: string) => {
       }
       cachedInstance = null;
       updateLocalDBRuntimeStatus({
-        mode: resetFailureReason ? "fallback" : "uninitialized",
+        mode: resetFailureReason ? "fallback" : "persistent",
         userId: null,
         dbName: null,
         fallbackReason: resetFailureReason,
@@ -337,18 +202,4 @@ export const resetForLogout = async (userId?: string) => {
 
 export const resetLocalDBForLogout = async (userId?: string) => {
   return resetForLogout(userId);
-};
-
-export const getCachedInstance = () => cachedInstance;
-
-export const setCachedInstance = (nextInstance: LocalDBInstance | null) => {
-  cachedInstance = nextInstance;
-};
-
-export const deleteAllLocalDatabases = async () => {
-  await Dexie.delete("flashcard-master");
-  fallbackInstances.clear();
-  instance = null;
-  currentUserId = null;
-  cachedInstance = null;
 };
