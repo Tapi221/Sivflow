@@ -1,31 +1,10 @@
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
+import { SyncContext, type SyncContextType, type SyncNotice, type SyncProviderProps, type SyncStatus, type SyncTableName } from "./SyncContextCore";
 import type { ISyncService, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
 import { getLocalDb } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import { DEFAULT_SYNC_SETTINGS, type SyncConflict, type SyncEntity, type SyncSettings } from "@/types/domain/sync";
-
-
-type SyncStatus = "idle" | "syncing" | "success" | "error";
-type SyncNotice = "none" | "wifi_wait";
-type SyncTableName = "cards" | "folders" | "cardSets" | "documents" | "tagRecords" | "userSettings" | "images";
-
-interface SyncContextType {
-  syncStatus: SyncStatus;
-  syncNotice: SyncNotice;
-  lastSyncTime: Date | null;
-  queueCount: number;
-  conflictCount: number;
-  triggerSync: () => Promise<void>;
-  reloadSyncSettings: () => Promise<void>;
-  getUnresolvedConflicts: () => Promise<SyncConflict[]>;
-  resolveConflict: (conflictId: string, resolvedData: unknown) => Promise<void>;
-  clearSyncErrors: () => Promise<void>;
-}
-
-interface SyncProviderProps {
-  children: ReactNode;
-}
 
 const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncTableName> = {
   card: "cards",
@@ -36,21 +15,6 @@ const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncTableName> = {
   userSetting: "userSettings",
   asset: "images",
 };
-
-const defaultSyncContext: SyncContextType = {
-  syncStatus: "idle",
-  syncNotice: "none",
-  lastSyncTime: null,
-  queueCount: 0,
-  conflictCount: 0,
-  triggerSync: async () => {},
-  reloadSyncSettings: async () => {},
-  getUnresolvedConflicts: async () => [],
-  resolveConflict: async () => {},
-  clearSyncErrors: async () => {},
-};
-
-const SyncContext = createContext<SyncContextType>(defaultSyncContext);
 
 const isSyncIntervalMinutes = (value: unknown): value is SyncSettings["intervalMinutes"] => {
   return value === 5 || value === 15 || value === 30 || value === 60;
@@ -77,10 +41,6 @@ const buildResolvedConflictRecord = (conflict: SyncConflict, resolvedData: unkno
     ...(isRecord(base) ? base : {}),
     id: conflict.entityId,
   };
-};
-
-export const useSyncContext = () => {
-  return useContext(SyncContext);
 };
 
 export const SyncProvider = ({ children }: SyncProviderProps) => {
