@@ -31,7 +31,7 @@ type CalendarTimetableViewProps = {
 };
 
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金"] as const;
-const TIMETABLE_GRID_TEMPLATE_COLUMNS = "76px repeat(5, minmax(156px, 1fr))";
+const TIMETABLE_GRID_TEMPLATE_COLUMNS = "64px repeat(5, minmax(132px, 1fr))";
 const TIMETABLE_PERIODS: readonly TimetablePeriod[] = [
   { label: "1", startTime: "8:50", endTime: "10:20" },
   { label: "2", startTime: "10:30", endTime: "12:00" },
@@ -108,7 +108,7 @@ const CalendarTimetableViewComponent = ({
 
   return (
     <div className={cn("flex h-full min-h-0 flex-col bg-white text-[#1c1c1e]", className)}>
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 px-5 pb-4 pt-2">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 px-5 pb-3 pt-1">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <span className="rounded-full border border-[#eeeeee] bg-[#f8f8f9] px-3 py-1.5 text-[12px] font-semibold tabular-nums text-[#6e6e73]">
             {weekRangeLabel}
@@ -133,28 +133,28 @@ const CalendarTimetableViewComponent = ({
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto px-5 pb-5 scrollbar-hidden">
-        <div className="grid min-w-[980px] gap-x-3 gap-y-3" style={{ gridTemplateColumns: TIMETABLE_GRID_TEMPLATE_COLUMNS }}>
-          <div aria-hidden="true" className="h-10" />
+        <div className="grid min-w-[760px] gap-x-1.5 gap-y-1.5" style={{ gridTemplateColumns: TIMETABLE_GRID_TEMPLATE_COLUMNS }}>
+          <div aria-hidden="true" className="h-8" />
 
           {weekDays.map((day, dayIndex) => {
             const isToday = isSameDay(day, new Date());
 
             return (
-              <div key={day.toISOString()} className="flex h-10 items-center justify-center gap-2 text-center">
-                <span className={cn("text-[14px] font-bold tracking-[-0.02em]", isToday ? "text-[#007aff]" : "text-[#1c1c1e]")}>{TIMETABLE_DAY_LABELS[dayIndex]}</span>
-                <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums", isToday ? "bg-[#e8f2ff] text-[#007aff]" : "bg-[#f7f7f8] text-[#8f929c]")}>{format(day, "M/d", { locale: ja })}</span>
+              <div key={day.toISOString()} className="flex h-8 items-center justify-center gap-1.5 text-center">
+                <span className={cn("text-[13px] font-bold tracking-[-0.02em]", isToday ? "text-[#007aff]" : "text-[#1c1c1e]")}>{TIMETABLE_DAY_LABELS[dayIndex]}</span>
+                <span className={cn("rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums", isToday ? "bg-[#e8f2ff] text-[#007aff]" : "bg-[#f7f7f8] text-[#8f929c]")}>{format(day, "M/d", { locale: ja })}</span>
               </div>
             );
           })}
 
           {TIMETABLE_PERIODS.map((period, periodIndex) => (
             <div key={period.label} className="contents">
-              <div className="flex min-h-[94px] items-center justify-end pr-1">
-                <div className="flex items-center justify-end gap-3 text-right">
-                  <div className="text-[24px] font-bold leading-none tracking-[-0.04em] text-[#111111]">{period.label}</div>
-                  <div className="flex flex-col items-center text-[11px] font-medium leading-none tabular-nums text-[#8f929c]">
+              <div className="flex min-h-[52px] items-center justify-end pr-1">
+                <div className="flex items-center justify-end gap-2 text-right">
+                  <div className="text-[20px] font-bold leading-none tracking-[-0.04em] text-[#111111]">{period.label}</div>
+                  <div className="flex flex-col items-center text-[10px] font-medium leading-none tabular-nums text-[#8f929c]">
                     <span>{period.startTime}</span>
-                    <span aria-hidden="true" className="my-1 h-3 w-px bg-[#d8d8df]" />
+                    <span aria-hidden="true" className="my-0.5 h-2 w-px bg-[#d8d8df]" />
                     <span>{period.endTime}</span>
                   </div>
                 </div>
@@ -165,16 +165,16 @@ const CalendarTimetableViewComponent = ({
                 const entry = TIMETABLE_ENTRY_MAP.get(createTimetableSlotKey(slot)) ?? null;
 
                 return (
-                  <button key={`${day.toISOString()}-${period.label}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-h-[94px] rounded-[16px] text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", entry ? "border px-4 py-3" : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.accentColor) : undefined}>
+                  <button key={`${day.toISOString()}-${period.label}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-h-[52px] rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", entry ? "border px-2 py-1" : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.accentColor) : undefined}>
                     {entry ? (
-                      <span className="flex h-full min-h-[68px] flex-col items-center justify-center text-center">
+                      <span className="flex h-full min-h-[40px] flex-col items-center justify-center text-center">
                         <span className="max-w-full truncate text-[11px] font-semibold leading-snug tracking-[-0.01em] text-inherit">{entry.title}</span>
-                        <span className="mt-1 max-w-full truncate text-[11px] font-semibold leading-snug text-[rgba(28,28,30,0.78)]">{entry.room}</span>
-                        {entry.note ? <span className="mt-2 max-w-full truncate text-[11px] font-semibold leading-snug text-[rgba(28,28,30,0.48)]">{entry.note}</span> : null}
+                        <span className="mt-0.5 max-w-full truncate text-[11px] font-semibold leading-snug text-[rgba(28,28,30,0.78)]">{entry.room}</span>
+                        {entry.note ? <span className="mt-0.5 max-w-full truncate text-[11px] font-semibold leading-snug text-[rgba(28,28,30,0.48)]">{entry.note}</span> : null}
                       </span>
                     ) : (
-                      <span className="flex h-full min-h-[68px] items-center justify-center">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[18px] font-light leading-none text-[#8f929c] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">＋</span>
+                      <span className="flex h-full min-h-[40px] items-center justify-center">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[14px] font-light leading-none text-[#8f929c]">＋</span>
                       </span>
                     )}
                   </button>
