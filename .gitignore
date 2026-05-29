@@ -19,6 +19,7 @@ last_part_index.txt
 .tmp-*.txt
 *_tmp.txt
 *.bak
+src-tauri/target/
 
 # Logs
 logs/
