@@ -45,6 +45,11 @@ const renderMessage = (): void => {
   root.replaceChildren(main);
 };
 
+const postCallbackPayloadToOpener = (payload: GoogleOAuthPopupCallbackPayload): void => {
+  if (!window.opener) return;
+  window.opener.postMessage(payload, window.location.origin);
+};
+
 export const createGoogleOAuthPopupCallbackPayload = (url: URL): GoogleOAuthPopupCallbackPayload | null => {
   if (!hasGoogleOAuthCallbackResult(url)) return null;
   return {
@@ -63,11 +68,11 @@ export const isGoogleOAuthPopupCallbackPayload = (value: unknown): value is Goog
 };
 
 export const renderGoogleOAuthPopupCallback = (): boolean => {
-  if (typeof window === "undefined" || !window.opener) return false;
+  if (typeof window === "undefined") return false;
   const payload = createGoogleOAuthPopupCallbackPayload(new URL(window.location.href));
   if (!payload) return false;
   document.title = GOOGLE_OAUTH_POPUP_CALLBACK_TITLE;
   renderMessage();
-  window.opener.postMessage(payload, window.location.origin);
+  postCallbackPayloadToOpener(payload);
   return true;
 };
