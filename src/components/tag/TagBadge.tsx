@@ -1,5 +1,6 @@
-import type { CSSProperties, SVGProps } from "react";
+import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatedCircleCheckbox } from "@/chip/checkbox/AnimatedCircleCheckbox";
 import { getTagColorStyle, type TagColorKey } from "@/chip/tag/tagColor";
 import { X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,8 @@ const TAG_TEXT_FADE_STYLE: CSSProperties = {
 };
 
 const OVERFLOW_THRESHOLD = 1;
+const TAG_MARK_STROKE_WIDTH = 1.8;
+const TAG_MARK_BORDER_WIDTH = 1.8;
 
 const isElementTextOverflowing = (element: HTMLElement | null) => {
   return Boolean(element && element.scrollWidth > element.clientWidth + OVERFLOW_THRESHOLD);
@@ -62,24 +65,7 @@ const useTextOverflow = (value: string) => {
   return { isOverflowing, textRef };
 };
 
-const TagHashIcon = ({ className }: SVGProps<SVGSVGElement>) => (
-  <svg
-    aria-hidden="true"
-    viewBox="0 0 12 12"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.6"
-    strokeLinecap="round"
-    className={className}
-  >
-    <path d="M4.4 2.2 3.6 9.8" />
-    <path d="M8.4 2.2 7.6 9.8" />
-    <path d="M2.4 4.6h7.2" />
-    <path d="M2 7.4h7.2" />
-  </svg>
-);
-
-export const TagBadge = ({
+const TagBadge = ({
   label,
   colorKey,
   selected = false,
@@ -92,15 +78,21 @@ export const TagBadge = ({
   const resolvedColorStyle = getTagColorStyle(colorKey);
 
   const textLabel = label.startsWith("#") ? label.slice(1) : label;
-  const displayLabel = `#${textLabel}`;
   const { isOverflowing, textRef } = useTextOverflow(textLabel);
 
   const content = (
     <>
-      <TagHashIcon className="h-[0.82em] w-[0.82em] shrink-0 opacity-70" />
+      <AnimatedCircleCheckbox
+        checked
+        color="currentColor"
+        variant="outline"
+        strokeWidth={TAG_MARK_STROKE_WIDTH}
+        borderWidth={TAG_MARK_BORDER_WIDTH}
+        className="ds-tag-badge__mark h-[1.16em] w-[1.16em] opacity-80"
+      />
       <span
         ref={textRef}
-        className={cn("min-w-0 overflow-hidden whitespace-nowrap opacity-70", textClassName)}
+        className={cn("ds-tag-badge__text min-w-0 overflow-hidden whitespace-nowrap opacity-70", textClassName)}
         style={isOverflowing ? TAG_TEXT_FADE_STYLE : undefined}
       >
         {textLabel}
@@ -108,7 +100,7 @@ export const TagBadge = ({
       {onRemove && (
         <button
           type="button"
-          aria-label={removeAriaLabel ?? `${displayLabel}を削除`}
+          aria-label={removeAriaLabel ?? `${textLabel}を削除`}
           onClick={(event) => {
             event.stopPropagation();
             onRemove();
@@ -152,3 +144,5 @@ export const TagBadge = ({
     </span>
   );
 };
+
+export { TagBadge };
