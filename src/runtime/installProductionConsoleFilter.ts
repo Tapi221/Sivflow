@@ -90,7 +90,7 @@ const getLocalizedErrorMessage = (message: string): string => {
   }
 
   if (normalizedMessage.includes("cross-origin-opener-policy")) {
-    return "ブラウザの Cross-Origin-Opener-Policy により popup/window の closed 確認が制限されました。Google の popup 認証では表示されることがあります。";
+    return "ブラウザの Cross-Origin-Opener-Policy により OAuth 連携ウィンドウの状態確認が制限されました。";
   }
 
   return message;
@@ -221,31 +221,26 @@ const installJapaneseConsoleLabels = (): void => {
   };
 
   if (globalConsoleState[JAPANESE_CONSOLE_LABELS_INSTALLED_KEY]) return;
-
   globalConsoleState[JAPANESE_CONSOLE_LABELS_INSTALLED_KEY] = true;
 
-  wrapConsoleMethod("debug");
-  wrapConsoleMethod("log");
-  wrapConsoleMethod("info");
   wrapConsoleMethod("warn");
   wrapConsoleMethod("error");
 };
 
-const shouldSuppressVerboseConsole = (): boolean => {
-  if (!import.meta.env.PROD) return false;
+if (import.meta.env.PROD) {
+  const originalDebug = console.debug.bind(console);
+  const originalInfo = console.info.bind(console);
+  const originalLog = console.log.bind(console);
 
-  // 本番で一時的に詳細ログを確認したい場合だけ有効化する。
-  return import.meta.env.VITE_ENABLE_PRODUCTION_VERBOSE_CONSOLE !== "true";
-};
+  console.debug = noop as Console["debug"];
+  console.info = noop as Console["info"];
+  console.log = noop as Console["log"];
 
-export const installProductionConsoleFilter = (): void => {
   installJapaneseConsoleLabels();
 
-  if (!shouldSuppressVerboseConsole()) return;
-
-  console.debug = noop;
-  console.log = noop;
-  console.info = noop;
-};
-
-installProductionConsoleFilter();
+  if (import.meta.env.VITE_BUILD_VERSION === "debug") {
+    console.debug = originalDebug as Console["debug"];
+    console.info = originalInfo as Console["info"];
+    console.log = originalLog as Console["log"];
+  }
+}
