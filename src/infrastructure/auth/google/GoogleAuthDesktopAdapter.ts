@@ -1,4 +1,4 @@
-import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/electron/app";
+import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/desktop/app";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
 import { auth } from "@/infrastructure/firebase/client";
