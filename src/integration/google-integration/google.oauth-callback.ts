@@ -81,12 +81,13 @@ const clearSensitiveCallbackUrl = (): void => {
 };
 
 const closeCallbackWindow = (): void => {
-  try {
-    if (!window.opener) return;
-    window.setTimeout(() => window.close(), 300);
-  } catch {
-    // 自動クローズできないブラウザではメッセージ表示を残す。
-  }
+  window.setTimeout(() => {
+    try {
+      window.close();
+    } catch {
+      // 自動クローズできないブラウザではメッセージ表示を残す。
+    }
+  }, 300);
 };
 
 const notifyCallbackPayload = (payload: GoogleOAuthCallbackPayload): void => {
