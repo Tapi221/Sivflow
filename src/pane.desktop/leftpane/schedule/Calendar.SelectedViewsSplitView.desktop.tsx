@@ -2,7 +2,7 @@ import type { ReactNode, RefObject, UIEvent } from "react";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
-import type { CalendarGridStyle, CalendarViewMode, GoogleAccountDisplay, AppCalendarItem } from "@/features/calendar/scheduleScreen.types";
+import type { AppCalendarItem, CalendarGridStyle, CalendarViewMode, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import { CalendarTimetableView } from "@/features/calendar/timetable/CalendarTimetableView";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
@@ -48,7 +48,7 @@ const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, v
   }
 
   if (viewMode === "timetable") {
-    return <CalendarTimetableView weekDate={currentDate} />;
+    return <CalendarTimetableView weekDate={currentDate} density="compact" />;
   }
 
   return <div className={WEEKDAY_SURFACE_CLASS_NAME}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} virtualRail={virtualRail} visibleEvents={events} calendarDayColumnWidth={calendarDayColumnWidth} _calendarDayColumnWidth={calendarDayColumnWidth} calendarGridStyle={calendarGridStyle} onScroll={onCalendarScroll} selectedDate={selectedDate} onSelectDate={onSelectDate} /></div>;
