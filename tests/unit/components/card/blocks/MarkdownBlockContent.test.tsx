@@ -67,7 +67,7 @@ describe("MarkdownBlockContent", () => {
     ) as HTMLElement | null;
 
     const paragraphs =
-      root?.querySelectorAll('p[data-markdown-paragraph="true"]') ?? [];
+      root?.querySelectorAll("p[data-markdown-paragraph=\"true\"]") ?? [];
 
     expect(paragraphs).toHaveLength(3);
     expect(paragraphs[1]?.getAttribute("aria-hidden")).toBe("true");
@@ -79,7 +79,7 @@ describe("MarkdownBlockContent", () => {
     );
 
     const paragraph = container.querySelector(
-      'p[data-markdown-paragraph="true"]',
+      "p[data-markdown-paragraph=\"true\"]",
     ) as HTMLElement | null;
 
     expect(paragraph).toBeTruthy();
@@ -91,7 +91,7 @@ describe("MarkdownBlockContent", () => {
     );
 
     const paragraph = container.querySelector(
-      'blockquote > p[data-markdown-paragraph="true"]',
+      "blockquote > p[data-markdown-paragraph=\"true\"]",
     ) as HTMLElement | null;
 
     expect(paragraph).toBeTruthy();
@@ -105,17 +105,17 @@ describe("MarkdownBlockContent", () => {
     );
 
     const directParagraphs = container.querySelectorAll(
-      'blockquote > p[data-markdown-paragraph="true"]',
+      "blockquote > p[data-markdown-paragraph=\"true\"]",
     );
     const nestedListParagraph = container.querySelector(
-      'blockquote li p[data-markdown-paragraph="true"]',
+      "blockquote li p[data-markdown-paragraph=\"true\"]",
     );
 
     expect(directParagraphs).toHaveLength(1);
     expect(nestedListParagraph).toBeTruthy();
 
     const selectorMatchesNested = nestedListParagraph?.matches(
-      '.markdownBlockCardView > blockquote > p[data-markdown-paragraph="true"]',
+      ".markdownBlockCardView > blockquote > p[data-markdown-paragraph=\"true\"]",
     );
 
     expect(selectorMatchesNested).toBe(false);
