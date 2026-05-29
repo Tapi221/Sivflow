@@ -20,6 +20,7 @@ const CALENDAR_VIEW_MODE_INDICATOR_ID = "calendar-view-mode-indicator";
 const CALENDAR_VIEW_MODE_ACTIVE_TEXT_CLASS = "text-[#8c8c8c]";
 const CALENDAR_VIEW_MODE_INACTIVE_TEXT_CLASS = "text-[#d5d5d5]";
 const CALENDAR_VIEW_MODE_HOVER_TEXT_CLASS = "hover:text-[#8c8c8c]";
+const CALENDAR_VIEW_MODE_DISABLED_TEXT_CLASS = "cursor-not-allowed text-[#e4e4e4]";
 const CALENDAR_VIEW_MODE_INDICATOR_CLASS = "pointer-events-none absolute inset-0 z-0 rounded-[8px] border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]";
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
@@ -66,6 +67,11 @@ const isSelectedViewMode = (
 const hasMultipleSelectedViewModes = (
   value: CalendarViewModeSelection,
 ) => isViewModeSelectionArray(value) && value.length > 1;
+
+const isDisabledViewModeOption = (
+  value: CalendarViewModeSelection,
+  optionValue: CalendarViewMode,
+) => hasMultipleSelectedViewModes(value) && !isSelectedViewMode(value, optionValue);
 
 const ToggleCalendarViewMode = ({
   value,
@@ -115,21 +121,26 @@ const ToggleCalendarViewMode = ({
 
   const renderedOptions = useMemo(() => options.map((option) => {
     const isActive = isSelectedViewMode(displayedValue, option.value);
+    const isDisabled = isDisabledViewModeOption(displayedValue, option.value);
 
     return (
       <button
         key={option.value}
         type="button"
         aria-pressed={isActive}
+        aria-disabled={isDisabled}
+        disabled={isDisabled}
         onClick={() => handleChange(option.value)}
         className={cn(
           "relative isolate z-10 flex h-6 min-w-7 items-center justify-center rounded-[8px] px-1.5",
           "appearance-none select-none text-[11px] font-semibold leading-none tracking-[-0.01em]",
           "outline-none ring-0 transition-colors duration-100 ease-out motion-reduce:transition-none",
           "focus:outline-none focus:ring-0 focus-visible:outline-none",
-          isActive
-            ? CALENDAR_VIEW_MODE_ACTIVE_TEXT_CLASS
-            : `${CALENDAR_VIEW_MODE_INACTIVE_TEXT_CLASS} ${CALENDAR_VIEW_MODE_HOVER_TEXT_CLASS}`,
+          isDisabled
+            ? CALENDAR_VIEW_MODE_DISABLED_TEXT_CLASS
+            : isActive
+              ? CALENDAR_VIEW_MODE_ACTIVE_TEXT_CLASS
+              : `${CALENDAR_VIEW_MODE_INACTIVE_TEXT_CLASS} ${CALENDAR_VIEW_MODE_HOVER_TEXT_CLASS}`,
         )}
       >
         {isActive && (
