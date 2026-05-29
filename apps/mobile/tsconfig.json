@@ -6,7 +6,8 @@
     "paths": {
       "@/*": ["../../src/*"],
       "@mobile/*": ["src/*"],
-      "@constants/*": ["../../constants/*"]
+      "@constants/*": ["../../constants/*"],
+      "@shared/*": ["../../shared/*"]
     }
   },
   "include": [
@@ -14,9 +15,7 @@
     "../../src/pane.mobilenative",
     "../../src/features/calendar/calendarEventRange.ts",
     "../../src/integration/googlecalendar-integration/gcalSync.types.ts",
-    "../../src/i18n/useT.ts",
-    "../../src/i18n/locale.store.ts",
-    "../../src/i18n/translations.ts",
+    "../../shared/i18n",
     "app.json"
   ]
 }
