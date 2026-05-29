@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchIosCalendars, fetchIosEvents, getIosCalendarPermissionStatus, isIosCalendarSupported, requestIosCalendarPermission } from "./iosCalendar.api";
+import type { GoogleCalendarEvent } from "@core/calendar/calendarEvent.types";
 import type { IosCalendarConnectionStatus, IosCalendarListItem, IosCalendarPermissionStatus, IosCalendarRange } from "./iosCalendar.types";
-import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 type LoadEventsInput = {
   calendarIds: string[];
