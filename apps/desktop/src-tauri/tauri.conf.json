@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "identifier": "app.manifolia.desktop",
   "build": {
-    "beforeDevCommand": "npm run dev:web",
-    "beforeBuildCommand": "npm run build:web",
+    "beforeDevCommand": "npm --prefix ../.. run dev:web",
+    "beforeBuildCommand": "npm --prefix ../.. run build:web",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../../../dist"
   },
