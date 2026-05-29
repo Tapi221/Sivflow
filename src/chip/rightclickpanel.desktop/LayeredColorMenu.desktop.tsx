@@ -40,6 +40,7 @@ export const LAYERED_COLOR_MENU_OPTIONS: readonly LayeredColorMenuOption[] = TAG
 const LAYERED_COLOR_MENU_TITLE = "色を変更";
 const LAYERED_COLOR_MENU_GRID_COLUMNS = 5;
 const LAYERED_COLOR_MENU_SWATCH_SIZE = 20;
+const LAYERED_COLOR_MENU_CORE_SIZE = 9;
 const LAYERED_COLOR_MENU_GRID_GAP = 6;
 const LAYERED_COLOR_MENU_GRID_HORIZONTAL_PADDING = 8;
 const LAYERED_COLOR_MENU_GRID_TOP_PADDING = 4;
@@ -86,12 +87,12 @@ const LAYERED_COLOR_MENU_STYLE = `
   outline-offset: 1px;
 }
 
-.layered-color-menu-swatch-dot {
-  width: 6px;
-  height: 6px;
+.layered-color-menu-swatch-core {
+  width: ${LAYERED_COLOR_MENU_CORE_SIZE}px;
+  height: ${LAYERED_COLOR_MENU_CORE_SIZE}px;
   border-radius: 9999px;
   background: currentColor;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.64), 0 0 0 2px rgba(0, 0, 0, 0.08);
 }
 `;
 
@@ -141,7 +142,7 @@ const LayeredColorMenuBase = ({
                   onSelectColor(option.value);
                 }}
               >
-                {isSelected ? <span className="layered-color-menu-swatch-dot" /> : null}
+                <span className="layered-color-menu-swatch-core" />
               </button>
             );
           })}
