@@ -151,7 +151,7 @@ const CalendarWeekDayGridComponent = ({
             const isToday = isSameCalendarDate(day, now);
 
             return (
-              <div key={dayKey} className="flex h-12 items-center justify-center border-l px-2" style={{ borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }}>
+              <div key={dayKey} className="flex h-12 items-center justify-center px-2">
                 <button type="button" className="flex h-12 w-full items-center justify-center gap-1 bg-transparent p-0 text-center outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25" aria-pressed={isSelected} onClick={() => onSelectDate?.(day)}>
                   <span className={getHeaderDateNumberClassName(isSelected, isToday)}>{format(day, "d", { locale: ja })}</span>
                   <span className={WEEKDAY_HEADER_WEEKDAY_CLASS_NAME}>{format(day, "EEE", { locale: ja })}</span>
@@ -169,7 +169,7 @@ const CalendarWeekDayGridComponent = ({
             const dayKey = getCalendarDateKey(day);
             const events = allDayEvents.get(dayKey) ?? [];
             return (
-              <div key={dayKey} className="min-h-10 border-l px-1 py-1" style={{ borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }}>
+              <div key={dayKey} className="min-h-10 px-1 py-1">
                 <div className="flex flex-col gap-1">
                   {events.map((event) => {
                     const tokens = generateColorTokens(event.accentColor);
@@ -188,7 +188,7 @@ const CalendarWeekDayGridComponent = ({
 
       <div ref={scrollContainerRef} className="calendar-timeline-scroll scrollbar-hidden min-h-0 flex-1 overflow-auto" onScroll={onScroll}>
         <div className="grid" style={{ ...calendarGridStyle, gridTemplateColumns, minWidth: contentMinWidth }}>
-          <div className="relative border-r bg-white" style={{ borderColor: COLOR.WEEKDAY_COLOR_BORDER_MAIN, zIndex: GRID.WEEKDAY_GRID_TIME_COLUMN_Z_INDEX }}>
+          <div className="relative bg-white" style={{ zIndex: GRID.WEEKDAY_GRID_TIME_COLUMN_Z_INDEX }}>
             {WEEKDAY_HOURS.map((hour) => (
               <div key={hour} className="relative border-b" style={{ height: `var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})`, borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }}>
                 <span className={getHourLabelClassName(hour)}>{format(new Date(2000, 0, 1, hour), GRID.WEEKDAY_HOUR_LABEL_FORMAT)}</span>
@@ -201,7 +201,7 @@ const CalendarWeekDayGridComponent = ({
             const events = createTimedLayoutEvents(timedEvents.get(dayKey) ?? []);
             const isToday = dayKey === currentDayKey;
             return (
-              <div key={dayKey} className={cn("relative border-l", isToday && "bg-[#f8fbff]")} style={{ borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }}>
+              <div key={dayKey} className={cn("relative", isToday && "bg-[#f8fbff]")}>
                 {WEEKDAY_HOURS.map((hour) => (
                   <div key={hour} className="border-b" style={{ height: `var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})`, borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }} />
                 ))}
