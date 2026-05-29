@@ -1,17 +1,50 @@
 import { memo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { initialWindowMetrics, SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { IosCalendarScheduleYear } from "@mobile/integration/ioscalendar/IosCalendarScheduleYear";
-import { NavigationBarMobile, type NavigationBarItemId } from "@mobile/pane/navigationbar/navigationbar";
+
+type NavigationItemId = "explore" | "library" | "home" | "schedule" | "settings";
+
+type NavigationItem = {
+  id: NavigationItemId;
+  label: string;
+};
+
+type NavigationBarProps = {
+  activeItemId: NavigationItemId;
+  onSelectItem: (itemId: NavigationItemId) => void;
+};
+
+const NAVIGATION_ITEMS: readonly NavigationItem[] = [
+  { id: "explore", label: "Explore" },
+  { id: "library", label: "Library" },
+  { id: "home", label: "Home" },
+  { id: "schedule", label: "Schedule" },
+  { id: "settings", label: "Settings" },
+];
+
+const NavigationBar = ({ activeItemId, onSelectItem }: NavigationBarProps) => (
+  <View accessibilityLabel="Mobile navigation" style={styles.navigationBar}>
+    {NAVIGATION_ITEMS.map((item) => {
+      const isActive = item.id === activeItemId;
+
+      return (
+        <Pressable key={item.id} accessibilityRole="button" accessibilityState={{ selected: isActive }} onPress={() => onSelectItem(item.id)} style={[styles.navigationItem, isActive && styles.navigationItemActive]}>
+          <Text style={[styles.navigationItemLabel, isActive && styles.navigationItemLabelActive]}>{item.label}</Text>
+        </Pressable>
+      );
+    })}
+  </View>
+);
 
 const AppContent = () => {
   const insets = useSafeAreaInsets();
-  const [activeItemId, setActiveItemId] = useState<NavigationBarItemId>("schedule");
+  const [activeItemId, setActiveItemId] = useState<NavigationItemId>("schedule");
   const [selectedDate, setSelectedDate] = useState(() => new Date());
 
   return (
-    <View style={[styles.safeArea, { paddingBottom: insets.bottom, paddingTop: insets.top }]}> 
+    <View style={[styles.safeArea, { paddingBottom: insets.bottom, paddingTop: insets.top }]}>
       <StatusBar style="dark" />
       <View style={styles.header}>
         <Text style={styles.eyebrow}>Mobile Native</Text>
@@ -20,7 +53,7 @@ const AppContent = () => {
       <View style={styles.content}>
         <IosCalendarScheduleYear selectedDate={selectedDate} yearDate={selectedDate} onSelectDate={setSelectedDate} />
       </View>
-      <NavigationBarMobile activeItemId={activeItemId} onItemSelect={setActiveItemId} />
+      <NavigationBar activeItemId={activeItemId} onSelectItem={setActiveItemId} />
     </View>
   );
 };
@@ -49,6 +82,32 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     paddingHorizontal: 20,
     paddingTop: 16,
+  },
+  navigationBar: {
+    backgroundColor: "#ffffff",
+    borderTopColor: "#e5e7eb",
+    borderTopWidth: 1,
+    flexDirection: "row",
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+  },
+  navigationItem: {
+    alignItems: "center",
+    borderRadius: 14,
+    flex: 1,
+    justifyContent: "center",
+    paddingVertical: 10,
+  },
+  navigationItemActive: {
+    backgroundColor: "#eef2ff",
+  },
+  navigationItemLabel: {
+    color: "#6b7280",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  navigationItemLabelActive: {
+    color: "#2563eb",
   },
   safeArea: {
     backgroundColor: "#ffffff",
