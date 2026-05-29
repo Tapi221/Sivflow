@@ -50,6 +50,7 @@ export default defineConfig(({ command }) => ({
       { find: /^@\/services\/localDB$/, replacement: resolveFromRoot("src/services/localdb/index.ts") },
       { find: /^@\/services\/firebase$/, replacement: resolveFromRoot("src/infrastructure/firebase/client.ts") },
       { find: /^@\/features\/tab\/Tab$/, replacement: resolveFromRoot("src/pane.desktop/tab.desktopnative/Tab.ts") },
+      { find: "@core", replacement: resolveFromRoot("packages/core/src") },
       { find: "@platform", replacement: resolveFromRoot("packages/platform/src") },
       { find: "@web-renderer", replacement: resolveFromRoot("packages/web-renderer/src") },
       { find: "@shared", replacement: resolveFromRoot("shared") },
