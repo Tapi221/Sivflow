@@ -144,10 +144,13 @@ const CalendarWeekDayGridComponent = ({
           <div className="h-12" />
           {visibleDays.map((day) => {
             const dayKey = getCalendarDateKey(day);
+            const isSelected = isSameCalendarDate(day, selectedDate);
+            const isToday = isSameCalendarDate(day, now);
+
             return (
               <div key={dayKey} className="flex h-12 items-center justify-center border-l px-2" style={{ borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }}>
-                <CalendarDateButton selected={isSameCalendarDate(day, selectedDate)} today={isSameCalendarDate(day, now)} onClick={() => onSelectDate?.(day)}>
-                  <CalendarDateContent dayLabel={format(day, GRID.WEEKDAY_DAY_FORMAT, { locale: ja })} dateLabel={format(day, GRID.WEEKDAY_DATE_FORMAT, { locale: ja })} />
+                <CalendarDateButton isSelected={isSelected} isToday={isToday} onClick={() => onSelectDate?.(day)}>
+                  <CalendarDateContent dateLabel={format(day, "d", { locale: ja })} weekdayLabel={format(day, "EEE", { locale: ja })} isSelected={isSelected} isToday={isToday} layout="date-weekday" />
                 </CalendarDateButton>
               </div>
             );
