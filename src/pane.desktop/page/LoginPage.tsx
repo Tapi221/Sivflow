@@ -41,7 +41,7 @@ export const LoginPage = () => {
             <div className="inline-flex items-center gap-2 rounded-full border border-[#5d7fb6]/25 bg-[#5d7fb6]/10 px-3 py-1">
               <span className="h-2 w-2 rounded-full bg-[#45679d]" />
               <span className="text-[10px] font-bold tracking-[0.22em] text-[#35507b]">
-                SOLIFA
+                MANIFOLIA
               </span>
             </div>
             <h1 className="mt-6 text-3xl font-black leading-tight text-slate-800 md:text-5xl">
