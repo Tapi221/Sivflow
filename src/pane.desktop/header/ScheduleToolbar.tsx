@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { CalendarIcon } from "@/chip/icons/icons.sidebar";
 import { ToggleFolderTag, type FolderTagTab } from "@/chip/toggle/Toggle.foldertag";
-import { CalendarTagStrip } from "@/features/calendar/toolbar/CalendarTagStrip";
+import { CalendarTagStrip } from "@/pane.desktop/header/CalendarTagStrip";
 import type { CalendarWorkspaceToolbarProps } from "@/features/calendar/scheduleScreen.types";
 import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
