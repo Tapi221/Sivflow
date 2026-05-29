@@ -7,8 +7,8 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
+import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 
 type MiniCalendarSectionProps = {
   monthDate: Date;
