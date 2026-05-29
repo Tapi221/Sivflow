@@ -1,13 +1,13 @@
+import { signOut } from "firebase/auth";
 import { type MouseEvent, type ReactNode } from "react";
+import { ClockIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
-import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
-import { ClockIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+import { auth } from "@/services/firebase";
 import "./sidebar.desktop.css";
 import "./sidebar.layered-directory.css";
-
-// ── 型定義 ───────────────────────────────────────────────────
 
 type SidebarNavItem = {
   id: string;
@@ -23,8 +23,6 @@ type SidebarProps = {
   onToggleClosed?: () => void;
   onOpenSettings?: () => void;
 };
-
-// ── ナビゲーション定義 ──────────────────────────────────────
 
 const mainNavItems: SidebarNavItem[] = [
   {
@@ -52,7 +50,13 @@ const mainNavItems: SidebarNavItem[] = [
   },
 ];
 
-// ── ナビリンク（レール: アイコン＋aria-label） ───────────────
+const handleDevLogout = async () => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error("[Sidebar] Logout failed:", error);
+  }
+};
 
 const SidebarNavLink = ({
   item,
@@ -107,8 +111,6 @@ const SidebarNavLink = ({
   );
 };
 
-// ── Sidebar本体 ──────────────────────────────────────────────
-
 const Sidebar = ({
   isClosed = false,
   onToggleClosed,
@@ -162,6 +164,17 @@ const Sidebar = ({
       </div>
 
       <div className="app-sidebar__bottom">
+        <HoverTooltip label="ログアウト" side="right" className="app-sidebar__nav-tooltip w-full">
+          <button
+            type="button"
+            className="app-sidebar__dev-logout"
+            onClick={handleDevLogout}
+            aria-label="ログアウト"
+          >
+            ろ
+          </button>
+        </HoverTooltip>
+
         <nav className="app-sidebar__nav" aria-label="フッターナビゲーション">
           {footerItems.map((item) => (
             <SidebarNavLink key={item.id} item={item} />
