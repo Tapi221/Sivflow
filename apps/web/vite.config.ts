@@ -38,52 +38,22 @@ export default defineConfig(({ command }) => ({
         display: "standalone",
         orientation: "portrait",
         icons: [
-          {
-            src: "icon-192.png",
-            sizes: "192x192",
-            type: "image/png",
-          },
-          {
-            src: "icon-512.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-          {
-            src: "icon-512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any maskable",
-          },
+          { src: "icon-192.png", sizes: "192x192", type: "image/png" },
+          { src: "icon-512.png", sizes: "512x512", type: "image/png" },
+          { src: "icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
         ],
       },
     }),
   ],
   resolve: {
     alias: [
-      {
-        find: /^@\/services\/localDB$/,
-        replacement: resolveFromRoot("src/services/localdb/index.ts"),
-      },
-      {
-        find: /^@\/services\/firebase$/,
-        replacement: resolveFromRoot("src/infrastructure/firebase/client.ts"),
-      },
-      {
-        find: /^@\/features\/tab\/Tab$/,
-        replacement: resolveFromRoot("src/pane.desktop/tab.desktopnative/Tab.ts"),
-      },
-      {
-        find: "@shared",
-        replacement: resolveFromRoot("shared"),
-      },
-      {
-        find: "@",
-        replacement: resolveFromRoot("src"),
-      },
-      {
-        find: "@constants",
-        replacement: resolveFromRoot("constants"),
-      },
+      { find: /^@\/services\/localDB$/, replacement: resolveFromRoot("src/services/localdb/index.ts") },
+      { find: /^@\/services\/firebase$/, replacement: resolveFromRoot("src/infrastructure/firebase/client.ts") },
+      { find: /^@\/features\/tab\/Tab$/, replacement: resolveFromRoot("src/pane.desktop/tab.desktopnative/Tab.ts") },
+      { find: "@web-renderer", replacement: resolveFromRoot("packages/web-renderer/src") },
+      { find: "@shared", replacement: resolveFromRoot("shared") },
+      { find: "@", replacement: resolveFromRoot("src") },
+      { find: "@constants", replacement: resolveFromRoot("constants") },
     ],
   },
   server: {
@@ -95,20 +65,13 @@ export default defineConfig(({ command }) => ({
       "Cross-Origin-Embedder-Policy": "unsafe-none",
     },
   },
-  esbuild:
-    command === "build"
-      ? {
-          drop: ["console", "debugger"],
-        }
-      : undefined,
+  esbuild: command === "build" ? { drop: ["console", "debugger"] } : undefined,
   build: {
     outDir: resolveFromRoot("dist"),
     emptyOutDir: true,
     sourcemap: true,
     chunkSizeWarningLimit: 1000,
-    rollupOptions: {
-      output: {},
-    },
+    rollupOptions: { output: {} },
   },
   define: {
     "process.env.FORCE_COLOR": true,
