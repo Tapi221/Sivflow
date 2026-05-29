@@ -1,13 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from "vitest";
 
-const defineNavigatorUserAgent = (userAgent: string) => {
-  Object.defineProperty(window.navigator, "userAgent", {
-    value: userAgent,
-    configurable: true,
-  });
-};
-
 const createDesktopBridgeStub = () => ({
   app: {
     getVersion: vi.fn(() => "desktop-version"),
@@ -15,10 +8,20 @@ const createDesktopBridgeStub = () => ({
   shell: {
     openExternal: vi.fn(async () => {}),
   },
+  files: {
+    readImportFile: vi.fn(async () => ({ path: "", name: "", size: 0, data: [] })),
+    selectImportFiles: vi.fn(async () => []),
+    onImportFileOpen: vi.fn(() => () => {}),
+  },
   oauth: {
     start: vi.fn(() => "started"),
     cancel: vi.fn(() => {}),
-    exchangeIdToken: vi.fn(async () => ({ idToken: "id-token" })),
+    exchangeIdToken: vi.fn(async () => "id-token"),
+    exchangeTokens: vi.fn(async () => ({})),
+    refreshTokens: vi.fn(async () => ({})),
+    storeRefreshToken: vi.fn(async () => {}),
+    readRefreshToken: vi.fn(async () => null),
+    deleteRefreshToken: vi.fn(async () => {}),
     onCallback: vi.fn(() => () => {}),
   },
   window: {
@@ -33,7 +36,6 @@ const createDesktopBridgeStub = () => ({
 describe("platform/index", () => {
   it("uses web platform when desktop bridge is not available", async () => {
     const win = window as Window & { desktop?: unknown };
-    defineNavigatorUserAgent("Mozilla/5.0");
     delete win.desktop;
 
     vi.resetModules();
@@ -44,9 +46,7 @@ describe("platform/index", () => {
     );
   });
 
-  it("uses desktop platform when desktop bridge is available even without Electron in userAgent", async () => {
-    defineNavigatorUserAgent("Mozilla/5.0");
-
+  it("uses desktop platform when desktop bridge is available", async () => {
     const bridge = createDesktopBridgeStub();
     Object.defineProperty(window, "desktop", {
       value: bridge,
