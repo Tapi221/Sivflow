@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "identifier": "app.sivflow.desktop",
   "build": {
-    "beforeDevCommand": "npm --prefix ../.. run dev:web",
+    "beforeDevCommand": "npm --prefix ../.. run dev:web:desktop",
     "beforeBuildCommand": "npm --prefix ../.. run build:web",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../../../dist"
