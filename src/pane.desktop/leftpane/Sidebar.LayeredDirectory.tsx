@@ -42,11 +42,21 @@ const getRootProjectTreeItem = (target: EventTarget | null): HTMLElement | null 
 
 const getTreeItemLabel = (treeItem: HTMLElement): string => treeItem.textContent?.trim() ?? "";
 
+const hideRootProjectChildGroups = (rootProjectElement: HTMLElement) => {
+  Array.from(rootProjectElement.children).forEach((childElement) => {
+    if (!(childElement instanceof HTMLElement) || childElement.getAttribute("role") !== "group") return;
+
+    childElement.setAttribute("hidden", "");
+  });
+};
+
 const applyFocusedProjectVisibility = (container: HTMLDivElement | null, focusedProjectIndex: number | null) => {
   const rootProjectElements = getRootProjectElements(container);
   const shouldShowAll = focusedProjectIndex === null || focusedProjectIndex < 0 || focusedProjectIndex >= rootProjectElements.length;
 
   rootProjectElements.forEach((element, index) => {
+    hideRootProjectChildGroups(element);
+
     if (shouldShowAll || index === focusedProjectIndex) {
       element.removeAttribute("hidden");
       return;
@@ -92,13 +102,13 @@ const SidebarLayeredDirectory = () => {
 
     applyFocusedProjectVisibility(container, focusedProjectIndex);
 
-    if (focusedProjectIndex === null || typeof MutationObserver === "undefined") return;
+    if (folderTagMode === "tag" || typeof MutationObserver === "undefined") return;
 
     const libraryTreeElement = getLibraryTreeElement(container);
     if (!libraryTreeElement) return;
 
     const observer = new MutationObserver(() => applyFocusedProjectVisibility(container, focusedProjectIndex));
-    observer.observe(libraryTreeElement, { childList: true });
+    observer.observe(libraryTreeElement, { childList: true, subtree: true });
 
     return () => observer.disconnect();
   }, [focusedProject, folderTagMode]);
