@@ -72,6 +72,14 @@ const storeCallbackPayload = (payload: GoogleOAuthCallbackPayload): void => {
   }
 };
 
+const clearSensitiveCallbackUrl = (): void => {
+  try {
+    window.history.replaceState(null, document.title, `${window.location.origin}${window.location.pathname}`);
+  } catch {
+    // history を更新できない環境では表示中の URL をそのままにする。
+  }
+};
+
 const closeCallbackWindow = (): void => {
   try {
     if (!window.opener) return;
@@ -85,6 +93,7 @@ const notifyCallbackPayload = (payload: GoogleOAuthCallbackPayload): void => {
   postCallbackPayloadToOpener(payload);
   broadcastCallbackPayload(payload);
   storeCallbackPayload(payload);
+  clearSensitiveCallbackUrl();
   closeCallbackWindow();
 };
 
