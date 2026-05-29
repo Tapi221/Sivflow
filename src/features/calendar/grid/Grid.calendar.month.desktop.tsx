@@ -1,5 +1,4 @@
 import { memo, useMemo } from "react";
-import type { CSSProperties } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
@@ -79,46 +78,6 @@ type CalendarMonthWeekRowProps = {
   handleResizePointerDown: (
     event: React.PointerEvent<HTMLDivElement>,
   ) => void;
-};
-
-const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
-
-const normalizeColor = (color: string): string => {
-  if (/^#[0-9a-f]{3}$/i.test(color)) {
-    const red = color.charAt(1);
-    const green = color.charAt(2);
-    const blue = color.charAt(3);
-
-    return `#${red}${red}${green}${green}${blue}${blue}`;
-  }
-
-  return color;
-};
-
-const colorToRgba = (color: string, alpha: number): string => {
-  const normalized = normalizeColor(color);
-  const match = /^#([0-9a-f]{6})$/i.exec(normalized);
-
-  if (!match) return color;
-
-  const value = match[1];
-  const red = Number.parseInt(value.slice(0, 2), 16);
-  const green = Number.parseInt(value.slice(2, 4), 16);
-  const blue = Number.parseInt(value.slice(4, 6), 16);
-
-  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
-};
-
-const getDayNumberStyle = (
-  dayEvents: CalendarMonthDayEvents,
-  selected: boolean,
-): CSSProperties | undefined => {
-  if (selected || !dayEvents.color) return undefined;
-
-  return {
-    backgroundColor: colorToRgba(dayEvents.color, EVENT_DAY_BACKGROUND_ALPHA),
-    transition: "none",
-  };
 };
 
 const getDayKey = (date: Date): string => {
@@ -218,7 +177,6 @@ const CalendarMonthDayCell = memo(({
           isSelected={selected}
           isCurrentMonth={day.isCurrentMonth}
           className={cn("absolute", GD.MONTH_GRID_DAY_NUMBER_POSITION_CLASS)}
-          style={getDayNumberStyle(dayEvents, selected)}
         >
           {day.dayOfMonth}
         </CalendarDayNumberCircle>
