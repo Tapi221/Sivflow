@@ -13,21 +13,26 @@ type Params = {
   headerRefs?: React.RefObject<HTMLDivElement | null>[];
 };
 
+const isViewportRenderedWeekdayViewMode = (viewMode: CalendarViewMode): boolean =>
+  viewMode === "days" ||
+  viewMode === "threeDays" ||
+  viewMode === "week" ||
+  viewMode === "timetable";
+
 const getCalendarScrollLeft = ({
   selectedViewMode,
   calendarBufferBefore,
   calendarDayColumnWidth,
   viewportWidth,
 }: Pick<Params, "selectedViewMode" | "calendarBufferBefore" | "calendarDayColumnWidth" | "viewportWidth">) => {
-  const anchorOffset = calendarBufferBefore * calendarDayColumnWidth;
-
-  if (selectedViewMode === "week" || selectedViewMode === "threeDays") {
-    return anchorOffset;
+  if (isViewportRenderedWeekdayViewMode(selectedViewMode)) {
+    return 0;
   }
 
+  const anchorOffset = calendarBufferBefore * calendarDayColumnWidth;
   const viewportInlineInset = selectedViewMode === "month" ? 0 : C.WEEKDAY_SURFACE_LEFT_INSET_PX;
   const availableWidth = Math.max(0, viewportWidth - viewportInlineInset - C.TIME_COLUMN_WIDTH);
-  const centerOffset = selectedViewMode === "days" ? 0 : Math.max(0, (availableWidth - calendarDayColumnWidth) / 2);
+  const centerOffset = Math.max(0, (availableWidth - calendarDayColumnWidth) / 2);
 
   return Math.max(0, anchorOffset - centerOffset);
 };
