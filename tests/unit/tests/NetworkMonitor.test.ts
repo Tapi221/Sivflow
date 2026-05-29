@@ -15,13 +15,13 @@ describe("NetworkMonitor", () => {
   });
 
   describe("Initial State", () => {
-    it('should start with "good" status', () => {
+    it("should start with good status", () => {
       expect(monitor.status).toBe("good");
     });
   });
 
   describe("State Transitions (Hysteresis)", () => {
-    it('should degrade to "poor" immediately upon failure threshold', () => {
+    it("should degrade to poor immediately upon failure threshold", () => {
       monitor.reportResult(false, 100);
       expect(monitor.status).toBe("good");
 
@@ -29,12 +29,12 @@ describe("NetworkMonitor", () => {
       expect(monitor.status).toBe("poor");
     });
 
-    it('should degrade to "poor" immediately upon slow RTT', () => {
+    it("should degrade to poor immediately upon slow RTT", () => {
       monitor.reportResult(true, 5000);
       expect(monitor.status).toBe("poor");
     });
 
-    it('should require multiple successes to recover from "poor" to "good"', () => {
+    it("should require multiple successes to recover from poor to good", () => {
       monitor.reportResult(false, 100);
       monitor.reportResult(false, 100);
       expect(monitor.status).toBe("poor");
@@ -49,7 +49,7 @@ describe("NetworkMonitor", () => {
       expect(monitor.status).toBe("good");
     });
 
-    it('should require strict conditions to reach "excellent"', () => {
+    it("should require strict conditions to reach excellent", () => {
       expect(monitor.status).toBe("good");
 
       for (let i = 0; i < 4; i++) {
@@ -92,7 +92,7 @@ describe("NetworkMonitor", () => {
       });
     });
 
-    it("should give limited resources for background sync (based on Good status)", () => {
+    it("should give limited resources for background sync based on Good status", () => {
       const constraint = monitor.getBatchConstraint("background");
       expect(constraint.maxSize).toBe(20);
       expect(constraint.concurrency).toBe(1);
