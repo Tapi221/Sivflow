@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "Solifa",
-    "slug": "solifa-mobile",
+    "name": "Manifolia",
+    "slug": "manifolia-mobile",
     "version": "0.0.0",
     "orientation": "portrait",
-    "scheme": "solifa",
+    "scheme": "manifolia",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.solifa.mobile"
+      "bundleIdentifier": "com.manifolia.mobile"
     },
     "android": {
-      "package": "com.solifa.mobile",
+      "package": "com.manifolia.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#F8FAFB"
       }
