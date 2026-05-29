@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/indent */
 import type { CardBlock } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
