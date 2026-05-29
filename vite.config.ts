@@ -70,6 +70,10 @@ export default defineConfig(({ command }) => ({
         replacement: path.resolve(__dirname, "./src/pane.desktop/tab.desktopnative/Tab.ts"),
       },
       {
+        find: "@shared",
+        replacement: path.resolve(__dirname, "./shared"),
+      },
+      {
         find: "@",
         replacement: path.resolve(__dirname, "./src"),
       },
