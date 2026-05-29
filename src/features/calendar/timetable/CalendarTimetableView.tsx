@@ -123,11 +123,11 @@ const CalendarTimetableViewComponent = ({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <button type="button" className="inline-flex h-9 items-center justify-center rounded-[14px] border border-[#e5e5ea] bg-white px-4 text-[13px] font-bold tracking-[-0.01em] text-[#1c1c1e] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]">
+          <button type="button" className="inline-flex h-9 items-center justify-center rounded-[14px] border border-[#e5e5ea] bg-white px-4 text-[13px] font-bold tracking-[-0.01em] text-[#1c1c1e] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]">
             <span className="mr-1.5 text-[16px] leading-none text-[#6e6e73]">＋</span>
             授業を追加
           </button>
-          <button type="button" aria-label="時間割設定" className="flex h-9 w-9 items-center justify-center rounded-[14px] border border-[#e5e5ea] bg-white text-[15px] text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]">
+          <button type="button" aria-label="時間割設定" className="flex h-9 w-9 items-center justify-center rounded-[14px] border border-[#e5e5ea] bg-white text-[15px] text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]">
             ⚙︎
           </button>
         </div>
@@ -166,7 +166,7 @@ const CalendarTimetableViewComponent = ({
                 const entry = TIMETABLE_ENTRY_MAP.get(createTimetableSlotKey(slot)) ?? null;
 
                 return (
-                  <button key={`${day.toISOString()}-${period.label}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("group relative min-h-[94px] rounded-[16px] text-left outline-none transition focus-visible:ring-2 focus-visible:ring-[#007aff]", entry ? "border px-4 py-3 hover:-translate-y-0.5" : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.accentColor) : undefined}>
+                  <button key={`${day.toISOString()}-${period.label}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-h-[94px] rounded-[16px] text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", entry ? "border px-4 py-3" : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.accentColor) : undefined}>
                     {entry ? (
                       <span className="flex h-full min-h-[68px] flex-col items-center justify-center text-center">
                         <span className="max-w-full truncate text-[16px] font-bold leading-snug tracking-[-0.025em] text-inherit">{entry.title}</span>
@@ -175,7 +175,7 @@ const CalendarTimetableViewComponent = ({
                       </span>
                     ) : (
                       <span className="flex h-full min-h-[68px] items-center justify-center">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[18px] font-light leading-none text-[#8f929c] shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition group-hover:border-[#c7c7cc] group-hover:text-[#6e6e73]">＋</span>
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[18px] font-light leading-none text-[#8f929c] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">＋</span>
                       </span>
                     )}
                   </button>
