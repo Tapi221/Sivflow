@@ -1,5 +1,3 @@
-const ELECTRON_USER_AGENT_PATTERN = /\bElectron\/\d+(?:\.\d+){0,2}\b/;
-
 const hasMethod = (value: unknown): value is (...args: unknown[]) => unknown =>
   typeof value === "function";
 
@@ -8,10 +6,6 @@ const hasTauriInternals = (): boolean =>
 
 export const hasWindowDesktopBridge = (): boolean =>
   typeof window !== "undefined" && typeof window.desktop !== "undefined";
-
-export const hasElectronUserAgent = (): boolean =>
-  typeof navigator !== "undefined" &&
-  ELECTRON_USER_AGENT_PATTERN.test(navigator.userAgent);
 
 export const hasDesktopBridge = (): boolean => {
   if (!hasWindowDesktopBridge()) {
@@ -42,4 +36,4 @@ export const hasDesktopBridge = (): boolean => {
 };
 
 export const hasDesktopRuntime = (): boolean =>
-  hasDesktopBridge() || hasElectronUserAgent() || hasTauriInternals();
+  hasDesktopBridge() || hasTauriInternals();
