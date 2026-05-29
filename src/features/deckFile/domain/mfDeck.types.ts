@@ -76,7 +76,7 @@ export type MfDeckManifestV1 = {
   version: typeof MF_DECK_VERSION;
   exportedAt: string;
   app: {
-    name: "Solifa";
+    name: "Manifolia";
     version?: string;
   };
   deck: {
@@ -134,14 +134,14 @@ export type MfDeckArchiveV1 = {
 
 export type MfDeckValidationResult =
   | {
-    ok: true;
-    value: MfDeckArchiveV1;
-    issues: MfDeckIssue[];
-  }
+      ok: true;
+      value: MfDeckArchiveV1;
+      issues: MfDeckIssue[];
+    }
   | {
-    ok: false;
-    issues: MfDeckIssue[];
-  };
+      ok: false;
+      issues: MfDeckIssue[];
+    };
 
 export class MfDeckValidationError extends Error {
   readonly issues: MfDeckIssue[];
