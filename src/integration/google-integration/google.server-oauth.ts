@@ -362,7 +362,11 @@ export const isServerStoredGoogleOAuthEnabled = (): boolean => {
     return false;
   }
 
-  return import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true";
+  if (import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "false") {
+    return false;
+  }
+
+  return import.meta.env.PROD || import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true";
 };
 
 export const exchangeGoogleCalendarCode = async (
