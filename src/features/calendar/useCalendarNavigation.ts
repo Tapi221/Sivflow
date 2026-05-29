@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays, subMonths, subYears } from "date-fns";
-import { createCalendarScrollBuffer, extendCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
+import { createCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
 import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
 
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
@@ -126,14 +126,6 @@ export const useCalendarNavigation = () => {
     setCalendarBuffer(createCalendarScrollBuffer("calendar", viewMode));
     setCalendarScrollToken((n) => n + 1);
   }, []);
-
-  const extendCalendarBufferLeft = useCallback(() => {
-    setCalendarBuffer((prev) => extendCalendarScrollBuffer({ surface: "calendar", viewMode: primaryViewMode, buffer: prev, direction: "left" }));
-  }, [primaryViewMode]);
-
-  const extendCalendarBufferRight = useCallback(() => {
-    setCalendarBuffer((prev) => extendCalendarScrollBuffer({ surface: "calendar", viewMode: primaryViewMode, buffer: prev, direction: "right" }));
-  }, [primaryViewMode]);
 
   useEffect(() => {
     const el = contentViewportRef.current;
@@ -272,7 +264,5 @@ export const useCalendarNavigation = () => {
     handleVisibleMonthChange,
     handleMonthCellSelectDate,
     resetCalendarPosition,
-    extendCalendarBufferLeft,
-    extendCalendarBufferRight,
   };
 };
