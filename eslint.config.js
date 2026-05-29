@@ -31,7 +31,7 @@ export default defineConfig([
     },
     rules: {
       "@stylistic/indent": ["warn", 2],
-      "@stylistic/quotes": ["error", "double"],
+      "@stylistic/quotes": ["error", "double", { avoidEscape: true }],
       "@stylistic/semi": ["error", "always"],
       "@stylistic/max-len": "off",
       "@stylistic/object-curly-newline": [
@@ -236,7 +236,7 @@ export default defineConfig([
       "unused-imports": unusedImports,
     },
     rules: {
-      "@stylistic/quotes": ["error", "double"],
+      "@stylistic/quotes": ["error", "double", { avoidEscape: true }],
       "@stylistic/semi": ["error", "always"],
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "off",
