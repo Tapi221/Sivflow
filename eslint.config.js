@@ -124,6 +124,15 @@ export default defineConfig([
     files: ["src/components/folder/components/views/FolderTreeWithCards.tsx"],
     rules: {
       "react-hooks/immutability": "off",
+      "unused-imports/no-unused-vars": [
+        "warn",
+        {
+          vars: "all",
+          varsIgnorePattern: "^(?:_|fileInputRef|currentFileAccept|handleToolbarFileInputChange|handleCreateCardSetFromRootPanel)$",
+          args: "after-used",
+          argsIgnorePattern: "^_",
+        },
+      ],
     },
   },
 
