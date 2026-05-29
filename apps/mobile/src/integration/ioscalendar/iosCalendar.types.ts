@@ -1,4 +1,4 @@
-import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+import type { GoogleCalendarEvent } from "@core/calendar/calendarEvent.types";
 
 export type IosCalendarPermissionStatus = "undetermined" | "granted" | "denied";
 
