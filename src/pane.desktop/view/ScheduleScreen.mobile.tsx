@@ -171,38 +171,20 @@ export const ScheduleScreen = (_props: ScheduleScreenProps) => {
     return (
       <div className={className}>
         <div className="flex min-w-0 items-center gap-2">
-          <button
-            type="button"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]"
-            onClick={handlePrevious}
-            aria-label={t.previousLabel}
-          >
+          <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]" onClick={handlePrevious} aria-label={t.previousLabel}>
             ‹
           </button>
           <h1 className="truncate text-[19px] font-bold tracking-[-0.03em] text-[#1c1c1e]">
             {format(headerTitleDate, headerTitleFormat, { locale: dateFnsLocale })}
           </h1>
-          <button
-            type="button"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]"
-            onClick={handleNext}
-            aria-label={t.nextLabel}
-          >
+          <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]" onClick={handleNext} aria-label={t.nextLabel}>
             ›
           </button>
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <ViewModeDropdown
-            value={selectedViewMode}
-            onChange={handleSelectViewMode}
-            options={viewOptions}
-          />
-          <TodayBar
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            onToday={handleToday}
-          />
+          <ViewModeDropdown value={selectedViewMode} onChange={handleSelectViewMode} options={viewOptions} />
+          <TodayBar onPrevious={handlePrevious} onNext={handleNext} onToday={handleToday} />
         </div>
       </div>
     );
@@ -214,15 +196,7 @@ export const ScheduleScreen = (_props: ScheduleScreenProps) => {
         <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">
           {renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}
           <div className="mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border border-[#eeeeee] bg-white">
-            <CalendarPieChartView
-              days={visibleDays}
-              selectedDate={selectedDate}
-              events={googleCalendarEvents}
-              appProjects={appProjects}
-              googleAccounts={googleAccounts}
-              onSelectDate={handleSidebarSelectDate}
-              onVisibleDateChange={handleVisibleDateChange}
-            />
+            <CalendarPieChartView days={visibleDays} selectedDate={selectedDate} events={googleCalendarEvents} appProjects={appProjects} googleAccounts={googleAccounts} onSelectDate={handleSidebarSelectDate} onVisibleDateChange={handleVisibleDateChange} />
           </div>
         </CarvePanel>
       );
@@ -232,21 +206,8 @@ export const ScheduleScreen = (_props: ScheduleScreenProps) => {
       return (
         <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">
           {renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}
-          <div
-            className={cn(
-              "schedule-mobile-month-surface mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border",
-              IOS_CALENDAR_MONTH_SURFACE_CLASS,
-            )}
-          >
-            <CalendarMonthView
-              currentDate={currentDate}
-              selectedDate={selectedDate}
-              scrollTargetToken={monthScrollTargetToken}
-              visibleEvents={googleCalendarEvents}
-              onSelectDate={handleSelectDate}
-              onVisibleMonthChange={handleVisibleMonthChange}
-              onRenderedRangeChange={handleMonthRenderedRangeChange}
-            />
+          <div className={cn("schedule-mobile-month-surface mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border", IOS_CALENDAR_MONTH_SURFACE_CLASS)}>
+            <CalendarMonthView currentDate={currentDate} selectedDate={selectedDate} scrollTargetToken={monthScrollTargetToken} visibleEvents={googleCalendarEvents} onSelectDate={handleSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onRenderedRangeChange={handleMonthRenderedRangeChange} />
           </div>
         </CarvePanel>
       );
@@ -255,41 +216,19 @@ export const ScheduleScreen = (_props: ScheduleScreenProps) => {
     return (
       <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">
         {renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}
-        <div
-          className={cn(
-            "mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border",
-            IOS_CALENDAR_WEEKDAY_SURFACE_CLASS,
-          )}
-        >
-          <CalendarWeekDayGrid
-            headerScrollRef={headerScrollRef}
-            allDayScrollRef={allDayScrollRef}
-            scrollContainerRef={scrollContainerRef}
-            visibleDays={visibleDays}
-            visibleEvents={googleCalendarEvents}
-            calendarDayColumnWidth={calendarDayColumnWidth}
-            calendarGridStyle={calendarGridStyle}
-            onScroll={handleCalendarScroll}
-            selectedDate={selectedDate}
-            onSelectDate={handleSidebarSelectDate}
-          />
+        <div className={cn("mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border", IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}>
+          <CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={googleCalendarEvents} calendarDayColumnWidth={calendarDayColumnWidth} _calendarDayColumnWidth={calendarDayColumnWidth} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} />
         </div>
       </CarvePanel>
     );
   };
 
   return (
-    <div
-      ref={contentViewportRef}
-      className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]"
-    >
+    <div ref={contentViewportRef} className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]">
       <style>{MOBILE_SCHEDULE_STYLE}</style>
 
       <div className="shrink-0 border-b border-[#eeeeee] bg-white px-3 py-2 [&_.calendar-workspace-toolbar]:h-11 [&_.calendar-workspace-toolbar]:overflow-visible [&_.calendar-workspace-toolbar]:bg-transparent [&_.calendar-workspace-toolbar]:pr-0">
-        <CalendarWorkspaceToolbar
-          viewMode={selectedViewMode}
-          onSelectViewMode={handleSelectViewMode}
-        />
+        <CalendarWorkspaceToolbar viewMode={selectedViewMode} onSelectViewMode={handleSelectViewMode} />
       </div>
 
       <main className="min-h-0 flex-1 overflow-y-auto bg-white pb-[calc(env(safe-area-inset-bottom)+16px)] pt-3">
