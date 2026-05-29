@@ -165,6 +165,38 @@ a:hover,
   mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%);
 }
 
+[aria-label="Library hierarchy explorer"] [role="treeitem"] > .library-tree-marker {
+  background: transparent;
+}
+
+[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .library-tree-marker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .library-tree-marker::before,
+[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .library-tree-marker::after {
+  content: "";
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .library-tree-marker::before {
+  position: absolute;
+  inset: 0;
+  background: var(--sidebar-folder-mark-color, #6baa7e);
+  opacity: 0.16;
+}
+
+[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .library-tree-marker::after {
+  position: relative;
+  width: 5px;
+  height: 5px;
+  background: var(--sidebar-folder-mark-color, #6baa7e);
+}
+
 [aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 1) {
   --sidebar-folder-mark-color: #6baa7e;
 }
