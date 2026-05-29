@@ -31,7 +31,7 @@ type CalendarTimetableViewProps = {
 };
 
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金"] as const;
-const TIMETABLE_GRID_TEMPLATE_COLUMNS = "64px repeat(5, minmax(132px, 1fr))";
+const TIMETABLE_GRID_TEMPLATE_COLUMNS = "56px repeat(5, 112px)";
 const TIMETABLE_PERIODS: readonly TimetablePeriod[] = [
   { label: "1", startTime: "8:50", endTime: "10:20" },
   { label: "2", startTime: "10:30", endTime: "12:00" },
@@ -133,7 +133,7 @@ const CalendarTimetableViewComponent = ({
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto px-5 pb-5 scrollbar-hidden">
-        <div className="grid min-w-[760px] gap-x-1.5 gap-y-1.5" style={{ gridTemplateColumns: TIMETABLE_GRID_TEMPLATE_COLUMNS }}>
+        <div className="inline-grid w-max gap-x-1.5 gap-y-1.5" style={{ gridTemplateColumns: TIMETABLE_GRID_TEMPLATE_COLUMNS }}>
           <div aria-hidden="true" className="h-8" />
 
           {weekDays.map((day, dayIndex) => {
