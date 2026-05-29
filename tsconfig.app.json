@@ -17,12 +17,16 @@
       "@/services/firebase": ["src/infrastructure/firebase/client.ts"],
       "@/features/tab/Tab": ["src/pane.desktop/tab.desktopnative/Tab.ts"],
       "@/*": ["src/*"],
-      "@constants/*": ["constants/*"]
+      "@constants/*": ["constants/*"],
+      "@shared/*": ["shared/*"]
     }
   },
   "include": [
     "src",
-    "constants"
-, "apps/mobile/src/pane/schedule/schedule.year.mobilenative.tsx", "apps/mobile/src/pane/navigationbar/navigationbar.tsx", "shared/i18n"  ],
+    "constants",
+    "shared",
+    "apps/mobile/src/pane/schedule/schedule.year.mobilenative.tsx",
+    "apps/mobile/src/pane/navigationbar/navigationbar.tsx"
+  ],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "tests/**"]
 }
