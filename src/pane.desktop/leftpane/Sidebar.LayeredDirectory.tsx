@@ -1,8 +1,8 @@
 import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
 import { LibraryHierarchySidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
 
-const PROJECT_SECTION_LABEL = "MYPROJECTS";
-const TAG_SECTION_LABEL = "MYTAGTREE";
+const PROJECT_SECTION_LABEL = "MY PROJECTS";
+const TAG_SECTION_LABEL = "MY TAG TREE";
 
 const SidebarLayeredDirectory = () => {
   const folderTagMode = useFolderTagModeStore((state) => state.folderTagMode);
