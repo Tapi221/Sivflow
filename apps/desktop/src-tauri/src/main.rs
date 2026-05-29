@@ -215,7 +215,7 @@ fn ensure_auth_loopback_redirect(authorize_url: &str) -> Result<(), String> {
 
     if redirect_uri != DESKTOP_GOOGLE_OAUTH_REDIRECT_URI {
         return Err(format!(
-            "Auth redirect URI mismatch. expected={}, actual= {}",
+            "Auth redirect URI mismatch. expected={}, actual={}",
             DESKTOP_GOOGLE_OAUTH_REDIRECT_URI, redirect_uri,
         ));
     }
