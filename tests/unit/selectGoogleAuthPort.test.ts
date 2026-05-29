@@ -1,43 +1,31 @@
 import { describe, expect, it, vi } from "vitest";
 import { selectGoogleAuthPort } from "@/services/auth/googleSignIn";
 
+const createAuthPort = () => ({ signIn: vi.fn() });
+
 describe("selectGoogleAuthPort", () => {
   it("selects desktopAuth when desktop runtime", () => {
-    const webAuth = { signIn: vi.fn() };
-    const desktopAuth = { signIn: vi.fn() };
+    const webAuth = createAuthPort();
+    const desktopAuth = createAuthPort();
 
     const selected = selectGoogleAuthPort({
       webAuth,
       desktopAuth,
-      isDesktop: true,
+      runtimeKind: "desktop",
       userAgent: "",
     });
 
     expect(selected).toBe(desktopAuth);
   });
 
-  it("selects desktopAuth when Electron renderer user agent", () => {
-    const webAuth = { signIn: vi.fn() };
-    const desktopAuth = { signIn: vi.fn() };
-
-    const selected = selectGoogleAuthPort({
-      webAuth,
-      desktopAuth,
-      isDesktop: false,
-      userAgent: "Mozilla/5.0 Electron/30.0.0",
-    });
-
-    expect(selected).toBe(desktopAuth);
-  });
-
   it("selects webAuth otherwise", () => {
-    const webAuth = { signIn: vi.fn() };
-    const desktopAuth = { signIn: vi.fn() };
+    const webAuth = createAuthPort();
+    const desktopAuth = createAuthPort();
 
     const selected = selectGoogleAuthPort({
       webAuth,
       desktopAuth,
-      isDesktop: false,
+      runtimeKind: "web",
       userAgent: "Mozilla/5.0",
     });
 
