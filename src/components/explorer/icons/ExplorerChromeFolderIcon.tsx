@@ -18,7 +18,7 @@ const ExplorerChromeFolderIconSmall = ({
     height={size}
     viewBox="0 0 24 24"
     fill="none"
-    stroke="var(--explorer-chrome-folder-stroke, var(--app-sidebar-icon, currentColor))"
+    stroke="var(--explorer-chrome-folder-stroke, currentColor)"
     aria-hidden="true"
     className={cn("shrink-0", className)}
     {...props}
@@ -42,7 +42,7 @@ const ExplorerChromeFolderIconLarge = ({
     height={size}
     viewBox="0 0 24 24"
     fill="none"
-    stroke="var(--explorer-chrome-folder-stroke, #8b8a84)"
+    stroke="var(--explorer-chrome-folder-stroke, currentColor)"
     aria-hidden="true"
     className={cn("shrink-0", className)}
     {...props}
