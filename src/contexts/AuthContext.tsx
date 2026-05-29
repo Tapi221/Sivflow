@@ -2,9 +2,10 @@
 import { type ReactNode, useMemo } from "react";
 import { AuthSessionProvider, useAuthSession } from "@/contexts/auth/AuthSessionContext";
 import { SecurityProvider, useSecurity } from "@/contexts/security/SecurityContext";
-import { SyncProvider, useSyncContext } from "@/contexts/sync/SyncContext";
+import { SyncProvider } from "@/contexts/sync/SyncContext";
+import { useSyncContext } from "@/contexts/sync/useSyncContext";
 
-export { useAuthSession, useSecurity,useSyncContext };
+export { useAuthSession, useSecurity, useSyncContext };
 
 interface AuthProviderProps {
   children: ReactNode;
