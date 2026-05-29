@@ -1,6 +1,6 @@
 export type PlatformRuntimeKind =
   | "web"
-  | "tauri"
+  | "desktop"
   | "ios-native"
   | "android-native"
   | "unknown";
@@ -25,8 +25,8 @@ export const WEB_PLATFORM_CAPABILITIES: PlatformCapabilities = {
   canUseSystemClipboard: true,
 };
 
-export const TAURI_PLATFORM_CAPABILITIES: PlatformCapabilities = {
-  runtimeKind: "tauri",
+export const DESKTOP_PLATFORM_CAPABILITIES: PlatformCapabilities = {
+  runtimeKind: "desktop",
   canOpenExternalUrl: true,
   canControlWindow: true,
   canUseNativeShare: false,
