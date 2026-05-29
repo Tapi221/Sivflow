@@ -16,7 +16,6 @@ type LayeredColorMenuProps = {
   menuRef: RefObject<HTMLDivElement | null>;
   noDragStyle: CSSProperties;
   panelId?: RightClickPanelId;
-  panelGroupId?: RightClickPanelId;
   onSelectColor: (color: string) => void;
 };
 
@@ -103,7 +102,6 @@ const LayeredColorMenuBase = ({
   menuRef,
   noDragStyle,
   panelId = LAYERED_COLOR_MENU_PANEL_ID,
-  panelGroupId,
   onSelectColor,
 }: LayeredColorMenuProps) => {
   const normalizedCurrentColor = normalizeColorValue(currentColor);
@@ -119,7 +117,6 @@ const LayeredColorMenuBase = ({
         noDragStyle={noDragStyle}
         ariaLabel="color submenu"
         panelId={panelId}
-        panelGroupId={panelGroupId}
       >
         <div className="right-click-panel-title">{LAYERED_COLOR_MENU_TITLE}</div>
         <div className="layered-color-menu-grid">
