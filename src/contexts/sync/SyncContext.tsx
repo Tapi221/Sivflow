@@ -1,12 +1,14 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
-import type { ISyncService, SyncConflict as ServiceSyncConflict, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
+import type { ISyncService, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
 import { getLocalDb } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import { DEFAULT_SYNC_SETTINGS, type SyncConflict, type SyncEntity, type SyncSettings } from "@/types/domain/sync";
 
+
 type SyncStatus = "idle" | "syncing" | "success" | "error";
 type SyncNotice = "none" | "wifi_wait";
+type SyncTableName = "cards" | "folders" | "cardSets" | "documents" | "tagRecords" | "userSettings" | "images";
 
 interface SyncContextType {
   syncStatus: SyncStatus;
@@ -21,10 +23,18 @@ interface SyncContextType {
   clearSyncErrors: () => Promise<void>;
 }
 
-type LegacySyncService = Omit<ISyncService, "getUnresolvedConflicts"> & {
-  getUnresolvedConflicts(): Promise<ServiceSyncConflict[]>;
-  resolveConflict(conflictId: string, resolvedData: unknown): Promise<void>;
-  clearAllErrors(): Promise<void>;
+interface SyncProviderProps {
+  children: ReactNode;
+}
+
+const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncTableName> = {
+  card: "cards",
+  folder: "folders",
+  cardSet: "cardSets",
+  document: "documents",
+  tag: "tagRecords",
+  userSetting: "userSettings",
+  asset: "images",
 };
 
 const defaultSyncContext: SyncContextType = {
@@ -46,10 +56,6 @@ const isSyncIntervalMinutes = (value: unknown): value is SyncSettings["intervalM
   return value === 5 || value === 15 || value === 30 || value === 60;
 };
 
-const isSyncEntity = (value: unknown): value is SyncEntity => {
-  return value === "card" || value === "folder" || value === "cardSet" || value === "document" || value === "tag" || value === "userSetting" || value === "asset";
-};
-
 const normalizeSyncSettings = (snapshot: UserSettingsSnapshot): SyncSettings => {
   const data = snapshot.data;
   return {
@@ -61,28 +67,21 @@ const normalizeSyncSettings = (snapshot: UserSettingsSnapshot): SyncSettings => 
   };
 };
 
-const normalizeServiceConflict = (conflict: ServiceSyncConflict): SyncConflict => ({
-  id: conflict.id,
-  entityId: conflict.targetId,
-  entityType: isSyncEntity(conflict.entity) ? conflict.entity : "card",
-  autoMerged: false,
-  conflicts: {
-    value: {
-      local: conflict.local,
-      remote: conflict.remote,
-    },
-  },
-  detectedAt: conflict.createdAt,
-});
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return value !== null && typeof value === "object";
+};
 
-// eslint-disable-next-line react-refresh/only-export-components
+const buildResolvedConflictRecord = (conflict: SyncConflict, resolvedData: unknown): Record<string, unknown> => {
+  const base = isRecord(resolvedData) ? resolvedData : conflict.autoMerged;
+  return {
+    ...(isRecord(base) ? base : {}),
+    id: conflict.entityId,
+  };
+};
+
 export const useSyncContext = () => {
   return useContext(SyncContext);
 };
-
-interface SyncProviderProps {
-  children: ReactNode;
-}
 
 export const SyncProvider = ({ children }: SyncProviderProps) => {
   const { currentUser } = useAuthSession();
@@ -95,7 +94,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
   const syncIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const syncSettingsRef = useRef<SyncSettings | null>(null);
   const syncStatusRef = useRef<SyncStatus>("idle");
-  const syncServiceRef = useRef<LegacySyncService | null>(null);
+  const syncServiceRef = useRef<ISyncService | null>(null);
 
   useEffect(() => {
     syncStatusRef.current = syncStatus;
@@ -108,67 +107,50 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
     }
   }, []);
 
-  const updateCounts = useCallback(
-    async (service?: LegacySyncService | null) => {
-      const activeService = service ?? syncServiceRef.current;
-      if (!activeService) return;
+  const updateCounts = useCallback(async (service?: ISyncService | null) => {
+    const activeService = service ?? syncServiceRef.current;
+    if (!activeService) return;
+
+    try {
+      const { pending: queue } = await activeService.getQueueStatus();
+      const db = await getLocalDb(userId ?? undefined);
+      const conflicts = await db.getConflicts();
+      setQueueCount(queue);
+      setConflictCount(conflicts.length);
+    } catch (error) {
+      console.error("[Sync] Failed to update counts:", error);
+    }
+  }, [userId]);
+
+  const configureAutoSync = useCallback((service: ISyncService, settings: SyncSettings) => {
+    clearSyncInterval();
+
+    if (!settings.autoSync || !navigator.onLine) return;
+
+    const intervalMs = settings.intervalMinutes * 60 * 1000;
+    console.log(`[Sync] Setting up auto-sync interval: ${settings.intervalMinutes} minutes`);
+
+    syncIntervalRef.current = setInterval(async () => {
+      if (!navigator.onLine || syncStatusRef.current === "syncing" || !userId) return;
 
       try {
-        const { pending: queue } = await activeService.getQueueStatus();
-        const conflicts = await activeService.getUnresolvedConflicts();
-        setQueueCount(queue);
-        setConflictCount(conflicts.length);
+        console.log("[Sync] Running background sync...");
+        await service.synchronize();
+        const db = await getLocalDb(userId);
+        const currentLastSync = await db.getLastSyncTime(userId);
+        setLastSyncTime(currentLastSync);
+        await updateCounts(service);
       } catch (error) {
-        console.error("[Sync] Failed to update counts:", error);
+        console.error("[Sync] Background sync failed:", error);
       }
-    },
-    [],
-  );
-
-  const configureAutoSync = useCallback(
-    (service: LegacySyncService, settings: SyncSettings) => {
-      clearSyncInterval();
-
-      if (!settings.autoSync || !navigator.onLine) {
-        return;
-      }
-
-      const intervalMs = settings.intervalMinutes * 60 * 1000;
-      console.log(
-        `[Sync] Setting up auto-sync interval: ${settings.intervalMinutes} minutes`,
-      );
-
-      syncIntervalRef.current = setInterval(async () => {
-        if (
-          !navigator.onLine ||
-          syncStatusRef.current === "syncing" ||
-          !userId
-        ) {
-          return;
-        }
-
-        try {
-          console.log("[Sync] Running background sync...");
-          await service.synchronize();
-          const db = await getLocalDb();
-          const currentLastSync = await db.getLastSyncTime(userId);
-          setLastSyncTime(currentLastSync);
-          await updateCounts(service);
-        } catch (error) {
-          console.error("[Sync] Background sync failed:", error);
-        }
-      }, intervalMs);
-    },
-    [clearSyncInterval, updateCounts, userId],
-  );
+    }, intervalMs);
+  }, [clearSyncInterval, updateCounts, userId]);
 
   const reloadSyncSettings = useCallback(async () => {
     if (!userId) return;
 
     try {
-      const service =
-        syncServiceRef.current ??
-        ((await SyncServiceFactory.getInstance(userId)) as LegacySyncService);
+      const service = syncServiceRef.current ?? await SyncServiceFactory.getInstance(userId);
       syncServiceRef.current = service;
 
       const settings = normalizeSyncSettings(await service.loadSettings());
@@ -190,13 +172,11 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
 
     try {
       const result = await syncServiceRef.current.synchronize();
-      const db = await getLocalDb();
+      const db = await getLocalDb(userId);
       const currentLastSync = await db.getLastSyncTime(userId);
       setLastSyncTime(currentLastSync);
 
-      const skippedByPolicy = result.errors.some((message) =>
-        message.includes("WiFi限定モードのためスキップ"),
-      );
+      const skippedByPolicy = result.errors.some((message) => message.includes("WiFi限定モードのためスキップ"));
       if (skippedByPolicy) {
         setSyncStatus(currentLastSync ? "success" : "idle");
         setSyncNotice("wifi_wait");
@@ -224,33 +204,25 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
   }, [updateCounts, userId]);
 
   const getUnresolvedConflicts = useCallback(async () => {
-    if (!syncServiceRef.current) {
-      return [];
-    }
+    const db = await getLocalDb(userId ?? undefined);
+    return db.getConflicts();
+  }, [userId]);
 
-    const conflicts = await syncServiceRef.current.getUnresolvedConflicts();
-    return conflicts.map(normalizeServiceConflict);
-  }, []);
+  const resolveConflict = useCallback(async (conflictId: string, resolvedData: unknown) => {
+    const db = await getLocalDb(userId ?? undefined);
+    const conflict = await db.getConflict(conflictId);
+    if (!conflict) return;
 
-  const resolveConflict = useCallback(
-    async (conflictId: string, resolvedData: unknown) => {
-      if (!syncServiceRef.current) {
-        return;
-      }
-
-      await syncServiceRef.current.resolveConflict(conflictId, resolvedData);
-      await updateCounts(syncServiceRef.current);
-    },
-    [updateCounts],
-  );
+    const tableName = SYNC_TABLE_BY_ENTITY[conflict.entityType];
+    await db.upsert(tableName, buildResolvedConflictRecord(conflict, resolvedData) as never, true);
+    await db.removeConflict(conflictId);
+    await updateCounts(syncServiceRef.current);
+  }, [updateCounts, userId]);
 
   const clearSyncErrors = useCallback(async () => {
-    if (!syncServiceRef.current) {
-      return;
-    }
-
-    await syncServiceRef.current.clearAllErrors();
-  }, []);
+    const db = await getLocalDb(userId ?? undefined);
+    await db.clearSyncErrors();
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) {
@@ -264,9 +236,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
 
     const initializeSync = async () => {
       try {
-        const service = (await SyncServiceFactory.getInstance(
-          userId,
-        )) as LegacySyncService;
+        const service = await SyncServiceFactory.getInstance(userId);
         if (disposed) return;
 
         syncServiceRef.current = service;
@@ -275,7 +245,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
         if (disposed) return;
         syncSettingsRef.current = settings;
 
-        const db = await getLocalDb();
+        const db = await getLocalDb(userId);
         const lastSync = await db.getLastSyncTime(userId);
 
         setSyncStatus("syncing");
@@ -284,21 +254,15 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
         try {
           let skippedByPolicy = false;
           if (lastSync) {
-            console.log(
-              "[Sync] Existing user detected. Performing delta sync.",
-            );
+            console.log("[Sync] Existing user detected. Performing delta sync.");
             const result = await service.synchronize();
-            skippedByPolicy = result.errors.some((message) =>
-              message.includes("WiFi限定モードのためスキップ"),
-            );
+            skippedByPolicy = result.errors.some((message) => message.includes("WiFi限定モードのためスキップ"));
             if (skippedByPolicy) {
               console.log("[Sync] Initial sync skipped by policy:", result);
               setSyncNotice("wifi_wait");
             }
           } else {
-            console.log(
-              "[Sync] New user or device detected. Performing full sync.",
-            );
+            console.log("[Sync] New user or device detected. Performing full sync.");
             await service.performFullSync();
           }
 
@@ -307,9 +271,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
 
           setLastSyncTime(currentLastSync);
           setSyncStatus(currentLastSync ? "success" : "idle");
-          if (!skippedByPolicy) {
-            setSyncNotice("none");
-          }
+          if (!skippedByPolicy) setSyncNotice("none");
 
           await updateCounts(service);
         } catch (error) {
@@ -322,9 +284,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
           setSyncNotice("none");
         }
 
-        if (!disposed) {
-          configureAutoSync(service, settings);
-        }
+        if (!disposed) configureAutoSync(service, settings);
       } catch (error) {
         if (disposed) return;
         console.error("[Sync] Fatal setup error:", error);
@@ -333,7 +293,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
       }
     };
 
-    initializeSync();
+    void initializeSync();
 
     return () => {
       disposed = true;
@@ -343,17 +303,9 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
 
   useEffect(() => {
     const handleOnline = async () => {
-      if (
-        !userId ||
-        syncStatusRef.current === "syncing" ||
-        !syncServiceRef.current
-      ) {
-        return;
-      }
+      if (!userId || syncStatusRef.current === "syncing" || !syncServiceRef.current) return;
 
-      console.log(
-        "[Sync] Network reconnected. Processing queue and syncing...",
-      );
+      console.log("[Sync] Network reconnected. Processing queue and syncing...");
 
       const queueResult = await syncServiceRef.current.processQueue();
       console.log(`[Sync] Queue processed: ${queueResult.processed} items`);
@@ -379,32 +331,29 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
   const resolvedQueueCount = userId ? queueCount : 0;
   const resolvedConflictCount = userId ? conflictCount : 0;
 
-  const value = useMemo<SyncContextType>(
-    () => ({
-      syncStatus: resolvedSyncStatus,
-      syncNotice: resolvedSyncNotice,
-      lastSyncTime: resolvedLastSyncTime,
-      queueCount: resolvedQueueCount,
-      conflictCount: resolvedConflictCount,
-      triggerSync,
-      reloadSyncSettings,
-      getUnresolvedConflicts,
-      resolveConflict,
-      clearSyncErrors,
-    }),
-    [
-      clearSyncErrors,
-      getUnresolvedConflicts,
-      reloadSyncSettings,
-      resolvedConflictCount,
-      resolvedLastSyncTime,
-      resolvedQueueCount,
-      resolvedSyncNotice,
-      resolvedSyncStatus,
-      resolveConflict,
-      triggerSync,
-    ],
-  );
+  const value = useMemo<SyncContextType>(() => ({
+    syncStatus: resolvedSyncStatus,
+    syncNotice: resolvedSyncNotice,
+    lastSyncTime: resolvedLastSyncTime,
+    queueCount: resolvedQueueCount,
+    conflictCount: resolvedConflictCount,
+    triggerSync,
+    reloadSyncSettings,
+    getUnresolvedConflicts,
+    resolveConflict,
+    clearSyncErrors,
+  }), [
+    clearSyncErrors,
+    getUnresolvedConflicts,
+    reloadSyncSettings,
+    resolvedConflictCount,
+    resolvedLastSyncTime,
+    resolvedQueueCount,
+    resolvedSyncNotice,
+    resolvedSyncStatus,
+    resolveConflict,
+    triggerSync,
+  ]);
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
 };
