@@ -133,7 +133,7 @@ const CalendarWeekDayGridComponent = ({
   scrollContainerRef,
   visibleDays,
   visibleEvents,
-  calendarDayColumnWidth,
+  _calendarDayColumnWidth,
   calendarGridStyle,
   onScroll,
   selectedDate,
@@ -141,8 +141,8 @@ const CalendarWeekDayGridComponent = ({
 }: CalendarWeekDayGridProps) => {
   const now = useCurrentTime();
   const { allDayEvents, timedEvents } = useMemo(() => groupEventsByDay(visibleEvents, visibleDays), [visibleEvents, visibleDays]);
-  const gridTemplateColumns = `${C.TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, minmax(${calendarDayColumnWidth}px, 1fr))`;
-  const contentMinWidth = C.TIME_COLUMN_WIDTH + visibleDays.length * calendarDayColumnWidth;
+  const gridTemplateColumns = `${C.TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, minmax(${_calendarDayColumnWidth}px, 1fr))`;
+  const contentMinWidth = C.TIME_COLUMN_WIDTH + visibleDays.length * _calendarDayColumnWidth;
   const currentDayKey = getCalendarDateKey(now);
 
   return (
