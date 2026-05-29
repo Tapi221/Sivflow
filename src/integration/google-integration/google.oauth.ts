@@ -3,28 +3,7 @@ import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/electron/app";
 import { readEmail } from "@/integration/googlecalendar-integration/gcal.storage";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
-import { GOOGLE_OAUTH_POPUP_CALLBACK_CHANNEL, GOOGLE_OAUTH_POPUP_CALLBACK_STORAGE_KEY, isGoogleOAuthPopupCallbackPayload } from "./google.oauth-popup-callback";
-
-const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
-const GOOGLE_CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
-const GOOGLE_CALENDAR_APP_CREATED_SCOPE = "https://www.googleapis.com/auth/calendar.app.created";
-const GOOGLE_TASKS_SCOPE = "https://www.googleapis.com/auth/tasks";
-const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
-const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
-const GOOGLE_OAUTH_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
-const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
-const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
-const WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
-
-export const GOOGLE_CONNECTED_SERVICE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_CALENDAR_READONLY_SCOPE, GOOGLE_CALENDAR_APP_CREATED_SCOPE, GOOGLE_TASKS_SCOPE] as const;
-export const GOOGLE_SERVER_CODE_REDIRECT_URI = typeof window === "undefined" ? "postmessage" : window.location.origin;
-
-const GOOGLE_SCOPES = GOOGLE_CONNECTED_SERVICE_SCOPES;
-const GOOGLE_SCOPE_PARAM = `openid email profile ${GOOGLE_SCOPES.join(" ")}`;
-const GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE = "failed-precondition";
-const GOOGLE_SCOPE_RECONNECT_MESSAGE = "Google Calendar と Google ToDo をまとめて連携するための権限が必要です。両方の権限を有効にして再連携してください。";
-
-let pendingGoogleCalendarServerCodeVerifier: string | null = null;
+import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoogleOAuthCallbackPayload } from "./google.oauth-callback";
 
 export type GoogleCalendarAccess = {
   accessToken: string;
@@ -36,6 +15,27 @@ export type GoogleCalendarAccess = {
 };
 
 export type GoogleConnectedServiceAccess = GoogleCalendarAccess;
+
+const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
+const GOOGLE_CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
+const GOOGLE_CALENDAR_APP_CREATED_SCOPE = "https://www.googleapis.com/auth/calendar.app.created";
+const GOOGLE_TASKS_SCOPE = "https://www.googleapis.com/auth/tasks";
+const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
+const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+const GOOGLE_OAUTH_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
+const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
+const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
+const WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
+const WEB_AUTH_WINDOW_TARGET = "flashcard-master-google-oauth";
+const GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE = "failed-precondition";
+const GOOGLE_SCOPE_RECONNECT_MESSAGE = "Google Calendar と Google ToDo をまとめて連携するための権限が必要です。両方の権限を有効にして再連携してください。";
+
+export const GOOGLE_CONNECTED_SERVICE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_CALENDAR_READONLY_SCOPE, GOOGLE_CALENDAR_APP_CREATED_SCOPE, GOOGLE_TASKS_SCOPE] as const;
+
+const GOOGLE_SCOPES = GOOGLE_CONNECTED_SERVICE_SCOPES;
+const GOOGLE_SCOPE_PARAM = `openid email profile ${GOOGLE_SCOPES.join(" ")}`;
+
+let pendingGoogleCalendarServerCodeVerifier: string | null = null;
 
 const createGoogleCalendarReconnectRequiredError = (): Error => {
   const error = new Error("Google 連携の再認可が必要です");
@@ -153,30 +153,20 @@ const waitForDesktopCode = (state: string, redirectUri: string): Promise<string>
   });
 });
 
-const getCenteredPopupFeatures = (width: number, height: number): string => {
-  const left = Math.round(window.screenX + Math.max(0, (window.outerWidth - width) / 2));
-  const top = Math.round(window.screenY + Math.max(0, (window.outerHeight - height) / 2));
-  return ["popup=yes", `width=${width}`, `height=${height}`, `left=${left}`, `top=${top}`, "noopener=no", "noreferrer=no"].join(",");
-};
-
-const waitForWebPopupCode = (popup: Window, state: string, redirectUri: string): Promise<string> => new Promise((resolve, reject) => {
+const waitForWebCode = (state: string, redirectUri: string): Promise<string> => new Promise((resolve, reject) => {
   const expected = new URL(redirectUri);
   let settled = false;
-  let pollTimer: number | null = null;
   let timeoutTimer: number | null = null;
   let broadcastChannel: BroadcastChannel | null = null;
 
   const cleanup = (): void => {
-    if (pollTimer !== null) window.clearInterval(pollTimer);
     if (timeoutTimer !== null) window.clearTimeout(timeoutTimer);
-    window.removeEventListener("message", handleMessage);
     window.removeEventListener("storage", handleStorage);
     broadcastChannel?.close();
-    localStorage.removeItem(GOOGLE_OAUTH_POPUP_CALLBACK_STORAGE_KEY);
     try {
-      if (!popup.closed) popup.close();
+      localStorage.removeItem(GOOGLE_OAUTH_CALLBACK_STORAGE_KEY);
     } catch {
-      // Cross-Origin-Opener-Policy により closed を読めない場合がある。
+      // storage が使えない環境では無視する。
     }
   };
 
@@ -215,7 +205,7 @@ const waitForWebPopupCode = (popup: Window, state: string, redirectUri: string):
   };
 
   const handleCallbackPayload = (payload: unknown): void => {
-    if (!isGoogleOAuthPopupCallbackPayload(payload)) return;
+    if (!isGoogleOAuthCallbackPayload(payload)) return;
     handleCallbackUrl({
       rawUrl: payload.url,
       callbackState: payload.state,
@@ -225,13 +215,8 @@ const waitForWebPopupCode = (popup: Window, state: string, redirectUri: string):
     });
   };
 
-  function handleMessage(event: MessageEvent<unknown>): void {
-    if (event.origin !== expected.origin) return;
-    handleCallbackPayload(event.data);
-  }
-
   function handleStorage(event: StorageEvent): void {
-    if (event.key !== GOOGLE_OAUTH_POPUP_CALLBACK_STORAGE_KEY || !event.newValue) return;
+    if (event.key !== GOOGLE_OAUTH_CALLBACK_STORAGE_KEY || !event.newValue) return;
     try {
       handleCallbackPayload(JSON.parse(event.newValue));
     } catch {
@@ -239,35 +224,14 @@ const waitForWebPopupCode = (popup: Window, state: string, redirectUri: string):
     }
   }
 
-  const poll = (): void => {
-    try {
-      if (popup.closed) {
-        finish(() => reject(new Error("Google OAuth popup was closed")));
-        return;
-      }
-    } catch {
-      // OAuth 中の cross-origin popup では closed/location を読めないことがある。
-    }
-    let url: URL;
-    try {
-      url = new URL(popup.location.href);
-    } catch {
-      return;
-    }
-    handleCallbackUrl({ rawUrl: url.href });
-  };
-
   timeoutTimer = window.setTimeout(() => {
     finish(() => reject(new Error("OAuth timeout")));
   }, WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS);
-  window.addEventListener("message", handleMessage);
   window.addEventListener("storage", handleStorage);
   if (typeof BroadcastChannel !== "undefined") {
-    broadcastChannel = new BroadcastChannel(GOOGLE_OAUTH_POPUP_CALLBACK_CHANNEL);
+    broadcastChannel = new BroadcastChannel(GOOGLE_OAUTH_CALLBACK_CHANNEL);
     broadcastChannel.onmessage = (event: MessageEvent<unknown>) => handleCallbackPayload(event.data);
   }
-  pollTimer = window.setInterval(poll, 250);
-  poll();
 });
 
 const requestDesktopToken = async (): Promise<GoogleCalendarAccess> => {
@@ -301,29 +265,24 @@ export const consumeGoogleCalendarServerCodeVerifier = (): string | null => {
 export const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCalendarServerCodeVerifier;
 
 export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<{ code: string; codeVerifier: string; redirectUri: string }> => {
-  if (typeof window === "undefined") throw new Error("Google OAuth popup is not available");
+  if (typeof window === "undefined") throw new Error("Google OAuth is not available");
   const clientId = getWebClientId();
   const redirectUri = window.location.origin;
   const loginHint = auth.currentUser?.email ?? readEmail() ?? undefined;
   const state = randomBase64Url(16);
   const codeVerifier = randomBase64Url(48);
   const codeChallenge = await createCodeChallenge(codeVerifier);
-  localStorage.removeItem(GOOGLE_OAUTH_POPUP_CALLBACK_STORAGE_KEY);
-  const popup = window.open(buildAuthorizeUrl({ clientId, redirectUri, codeChallenge, loginHint, state }), "flashcard-master-google-oauth", getCenteredPopupFeatures(500, 720));
-  if (!popup) throw new Error("Google OAuth popup could not be opened");
+  const codePromise = waitForWebCode(state, redirectUri);
   try {
-    popup.focus();
+    localStorage.removeItem(GOOGLE_OAUTH_CALLBACK_STORAGE_KEY);
   } catch {
-    // popup focus はブラウザ設定で失敗しても認可フロー自体は続行できる。
+    // storage が使えない環境では BroadcastChannel のみで受け取る。
   }
-  try {
-    const code = await waitForWebPopupCode(popup, state, redirectUri);
-    pendingGoogleCalendarServerCodeVerifier = codeVerifier;
-    return { code, codeVerifier, redirectUri };
-  } catch (error) {
-    pendingGoogleCalendarServerCodeVerifier = null;
-    throw error;
-  }
+  const authWindow = window.open(buildAuthorizeUrl({ clientId, redirectUri, codeChallenge, loginHint, state }), WEB_AUTH_WINDOW_TARGET, "noopener,noreferrer");
+  if (!authWindow) throw new Error("Google OAuth window could not be opened");
+  const code = await codePromise;
+  pendingGoogleCalendarServerCodeVerifier = codeVerifier;
+  return { code, codeVerifier, redirectUri };
 };
 
 export const requestCalendarAccessToken = async (auth: Auth, silent = false): Promise<GoogleCalendarAccess> => {
