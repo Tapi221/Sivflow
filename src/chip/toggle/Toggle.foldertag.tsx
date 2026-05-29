@@ -1,9 +1,10 @@
 import { motion, type Transition } from "framer-motion";
+import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { cn } from "@/lib/utils";
-import { FolderIcon, Tag } from "@/ui/icons";
+import { Tag } from "@/ui/icons";
 
 const TAB_ICON_MAP = {
-  folder: FolderIcon,
+  folder: ExplorerChromeFolderIcon,
   tag: Tag,
 } as const;
 
