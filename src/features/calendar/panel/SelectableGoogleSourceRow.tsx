@@ -15,6 +15,7 @@ const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#2c2c2e]";
 const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#b8b8bd]";
 const SOURCE_ROW_CHECKBOX_STROKE_WIDTH = 1.8;
 const SOURCE_ROW_CHECKBOX_BORDER_WIDTH = 0;
+const SOURCE_ROW_UNCHECKED_MARKER_CLASS_NAME = "h-3.5 w-3.5 shrink-0 rounded-full bg-[#d8d8dd]";
 
 const SelectableGoogleSourceRow = ({
   id,
@@ -33,13 +34,17 @@ const SelectableGoogleSourceRow = ({
       onClick={() => onToggle(id)}
       aria-pressed={checked}
     >
-      <AnimatedCircleCheckbox
-        checked={checked}
-        color={color}
-        variant="soft"
-        strokeWidth={SOURCE_ROW_CHECKBOX_STROKE_WIDTH}
-        borderWidth={SOURCE_ROW_CHECKBOX_BORDER_WIDTH}
-      />
+      {checked ? (
+        <AnimatedCircleCheckbox
+          checked={checked}
+          color={color}
+          variant="soft"
+          strokeWidth={SOURCE_ROW_CHECKBOX_STROKE_WIDTH}
+          borderWidth={SOURCE_ROW_CHECKBOX_BORDER_WIDTH}
+        />
+      ) : (
+        <span className={SOURCE_ROW_UNCHECKED_MARKER_CLASS_NAME} aria-hidden="true" />
+      )}
 
       <span
         className={cn(
