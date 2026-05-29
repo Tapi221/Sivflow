@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { useCallback, useLayoutEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { DEFAULT_NEW_FOLDER_NAME } from "@/components/folder/explorer/model/utils";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
@@ -114,19 +114,16 @@ const SidebarLayeredDirectory = () => {
     window.setTimeout(() => openRootProjectIfNeeded(treeItem), 0);
   }, [folderTagMode]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = sidebarRef.current;
     const focusedProjectIndex = folderTagMode === "tag" ? null : focusedProject?.index ?? null;
 
     applyFocusedProjectVisibility(container, focusedProjectIndex);
 
-    if (folderTagMode === "tag" || typeof MutationObserver === "undefined") return;
-
-    const libraryTreeElement = getLibraryTreeElement(container);
-    if (!libraryTreeElement) return;
+    if (!container || folderTagMode === "tag" || typeof MutationObserver === "undefined") return;
 
     const observer = new MutationObserver(() => applyFocusedProjectVisibility(container, focusedProjectIndex));
-    observer.observe(libraryTreeElement, { childList: true, subtree: true });
+    observer.observe(container, { childList: true, subtree: true });
 
     return () => observer.disconnect();
   }, [focusedProject, folderTagMode]);
