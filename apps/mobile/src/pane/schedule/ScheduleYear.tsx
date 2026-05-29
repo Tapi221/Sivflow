@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     width: MONTH_CELL_SIZE,
   },
   dayText: {
-    color: "#2c2c2e",
+    color: "#5f6672",
     fontSize: 12,
     fontWeight: "500",
     lineHeight: 16,
