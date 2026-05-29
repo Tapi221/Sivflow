@@ -9,7 +9,11 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.manifolia.mobile"
+      "bundleIdentifier": "com.manifolia.mobile",
+      "infoPlist": {
+        "NSCalendarsUsageDescription": "Manifolia uses calendar access to show and sync your schedule.",
+        "NSCalendarsFullAccessUsageDescription": "Manifolia uses calendar access to show and sync your schedule."
+      }
     },
     "android": {
       "package": "com.manifolia.mobile",
