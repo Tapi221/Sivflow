@@ -25,13 +25,17 @@ type TimetableSlot = {
   periodIndex: number;
 };
 
+type CalendarTimetableDensity = "default" | "compact";
+
 type CalendarTimetableViewProps = {
   weekDate: Date;
+  density?: CalendarTimetableDensity;
   className?: string;
 };
 
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金"] as const;
 const TIMETABLE_GRID_TEMPLATE_COLUMNS = "56px repeat(5, 112px)";
+const TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS = "34px repeat(5, minmax(0, 1fr))";
 const TIMETABLE_PERIODS: readonly TimetablePeriod[] = [
   { label: "1", startTime: "8:50", endTime: "10:20" },
   { label: "2", startTime: "10:30", endTime: "12:00" },
@@ -88,63 +92,59 @@ const formatTimetableWeekRange = (weekDays: Date[]): string => `${format(weekDay
 
 const getTimetableEntryStyle = (colorKey: TagColorKey) => getTagColorStyle(colorKey);
 
+const getTimetableGridTemplateColumns = (density: CalendarTimetableDensity): string => density === "compact" ? TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS : TIMETABLE_GRID_TEMPLATE_COLUMNS;
+
 const TIMETABLE_ENTRY_MAP = createTimetableEntryMap();
 
 const CalendarTimetableViewComponent = ({
   weekDate,
+  density = "default",
   className,
 }: CalendarTimetableViewProps) => {
   const weekDays = buildTimetableWeekDays(weekDate);
   const weekRangeLabel = formatTimetableWeekRange(weekDays);
   const registeredCountLabel = `${TIMETABLE_ENTRIES.length}コマ`;
+  const isCompact = density === "compact";
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-white text-[#1c1c1e]", className)}>
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 px-5 pb-3 pt-1">
+    <div className={cn("flex h-full min-h-0 min-w-0 flex-col bg-white text-[#1c1c1e]", className)}>
+      <div className={cn("flex shrink-0 flex-wrap items-center justify-between gap-3 pb-3 pt-1", isCompact ? "px-3" : "px-5")}>
         <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <span className="rounded-full border border-[#eeeeee] bg-[#f8f8f9] px-3 py-1.5 text-[12px] font-semibold tabular-nums text-[#6e6e73]">
-            {weekRangeLabel}
-          </span>
-          <span className="rounded-full border border-[#eeeeee] bg-white px-3 py-1.5 text-[12px] font-semibold text-[#8f929c]">
-            平日5日 / 7限
-          </span>
-          <span className="rounded-full border border-[#eeeeee] bg-white px-3 py-1.5 text-[12px] font-semibold text-[#8f929c]">
-            {registeredCountLabel}配置済み
-          </span>
+          <span className={cn("rounded-full border border-[#eeeeee] bg-[#f8f8f9] font-semibold tabular-nums text-[#6e6e73]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{weekRangeLabel}</span>
+          <span className={cn("rounded-full border border-[#eeeeee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>平日5日 / 7限</span>
+          <span className={cn("rounded-full border border-[#eeeeee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{registeredCountLabel}配置済み</span>
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <button type="button" className="inline-flex h-9 items-center justify-center rounded-full border border-[#e5e5ea] bg-white px-4 text-[13px] font-bold tracking-[-0.01em] text-[#1c1c1e] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]">
+          <button type="button" className={cn("inline-flex items-center justify-center rounded-full border border-[#e5e5ea] bg-white font-bold tracking-[-0.01em] text-[#1c1c1e] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 px-3 text-[12px]" : "h-9 px-4 text-[13px]")}>
             <span className="mr-1.5 text-[16px] leading-none text-[#6e6e73]">＋</span>
             授業を追加
           </button>
-          <button type="button" aria-label="時間割設定" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[15px] text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]">
-            ⚙︎
-          </button>
+          <button type="button" aria-label="時間割設定" className={cn("flex items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 w-8 text-[14px]" : "h-9 w-9 text-[15px]")}>⚙︎</button>
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto px-5 pb-5 text-center scrollbar-hidden">
-        <div className="inline-grid w-max gap-x-2 gap-y-2 text-left" style={{ gridTemplateColumns: TIMETABLE_GRID_TEMPLATE_COLUMNS }}>
-          <div aria-hidden="true" className="h-8" />
+      <div className={cn("min-h-0 flex-1 text-center scrollbar-hidden", isCompact ? "overflow-y-auto overflow-x-hidden px-2 pb-3" : "overflow-auto px-5 pb-5")}>
+        <div className={cn("gap-y-2 text-left", isCompact ? "grid w-full min-w-0 gap-x-1" : "inline-grid w-max gap-x-2")} style={{ gridTemplateColumns: getTimetableGridTemplateColumns(density) }}>
+          <div aria-hidden="true" className={isCompact ? "h-7" : "h-8"} />
 
           {weekDays.map((day, dayIndex) => {
             const isToday = isSameDay(day, new Date());
 
             return (
-              <div key={day.toISOString()} className="flex h-8 items-center justify-center gap-1.5 text-center">
-                <span className={cn("text-[13px] font-bold tracking-[-0.02em]", isToday ? "text-[#007aff]" : "text-[#1c1c1e]")}>{TIMETABLE_DAY_LABELS[dayIndex]}</span>
-                <span className={cn("rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums", isToday ? "bg-[#e8f2ff] text-[#007aff]" : "bg-[#f7f7f8] text-[#8f929c]")}>{format(day, "M/d", { locale: ja })}</span>
+              <div key={day.toISOString()} className={cn("flex min-w-0 items-center justify-center text-center", isCompact ? "h-7 gap-1" : "h-8 gap-1.5")}>
+                <span className={cn("font-bold tracking-[-0.02em]", isCompact ? "text-[11px]" : "text-[13px]", isToday ? "text-[#007aff]" : "text-[#1c1c1e]")}>{TIMETABLE_DAY_LABELS[dayIndex]}</span>
+                <span className={cn("rounded-full font-semibold tabular-nums", isCompact ? "px-1 py-0.5 text-[9px]" : "px-1.5 py-0.5 text-[10px]", isToday ? "bg-[#e8f2ff] text-[#007aff]" : "bg-[#f7f7f8] text-[#8f929c]")}>{format(day, "M/d", { locale: ja })}</span>
               </div>
             );
           })}
 
           {TIMETABLE_PERIODS.map((period, periodIndex) => (
             <div key={period.label} className="contents">
-              <div className="flex min-h-[52px] items-center justify-end pr-1">
-                <div className="flex items-center justify-end gap-2 text-right">
-                  <div className="text-[20px] font-bold leading-none tracking-[-0.04em] text-[#111111]">{period.label}</div>
-                  <div className="flex flex-col items-center text-[10px] font-medium leading-none tabular-nums text-[#8f929c]">
+              <div className={cn("flex items-center justify-end pr-1", isCompact ? "min-h-[48px]" : "min-h-[52px]")}>
+                <div className={cn("flex items-center justify-end text-right", isCompact ? "gap-1" : "gap-2")}>
+                  <div className={cn("font-bold leading-none tracking-[-0.04em] text-[#111111]", isCompact ? "text-[17px]" : "text-[20px]")}>{period.label}</div>
+                  <div className={cn("flex flex-col items-center font-medium leading-none tabular-nums text-[#8f929c]", isCompact ? "text-[8px]" : "text-[10px]")}>
                     <span>{period.startTime}</span>
                     <span aria-hidden="true" className="my-0.5 h-2 w-px bg-[#d8d8df]" />
                     <span>{period.endTime}</span>
@@ -157,15 +157,15 @@ const CalendarTimetableViewComponent = ({
                 const entry = TIMETABLE_ENTRY_MAP.get(createTimetableSlotKey(slot)) ?? null;
 
                 return (
-                  <button key={`${day.toISOString()}-${period.label}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-h-[52px] rounded-[18px] text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", entry ? "border px-2.5 py-1" : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.colorKey) : undefined}>
+                  <button key={`${day.toISOString()}-${period.label}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "min-h-[48px] rounded-[14px]" : "min-h-[52px] rounded-[18px]", entry ? (isCompact ? "border px-1.5 py-1" : "border px-2.5 py-1") : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.colorKey) : undefined}>
                     {entry ? (
-                      <span className="flex h-full min-h-[40px] flex-col items-center justify-center text-center">
-                        <span className="max-w-full truncate text-[11px] font-semibold leading-snug tracking-[-0.01em] text-inherit">{entry.title}</span>
-                        <span className="mt-0.5 max-w-full truncate text-[11px] font-semibold leading-snug opacity-80">{entry.room}</span>
-                        {entry.note ? <span className="mt-0.5 max-w-full truncate text-[11px] font-semibold leading-snug opacity-60">{entry.note}</span> : null}
+                      <span className={cn("flex h-full flex-col items-center justify-center text-center", isCompact ? "min-h-[36px]" : "min-h-[40px]")}>
+                        <span className={cn("max-w-full truncate font-semibold leading-snug tracking-[-0.01em] text-inherit", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.title}</span>
+                        <span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-80", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.room}</span>
+                        {entry.note ? <span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-60", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.note}</span> : null}
                       </span>
                     ) : (
-                      <span className="flex h-full min-h-[40px] items-center justify-center">
+                      <span className={cn("flex h-full items-center justify-center", isCompact ? "min-h-[36px]" : "min-h-[40px]")}>
                         <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[14px] font-light leading-none text-[#8f929c]">＋</span>
                       </span>
                     )}
