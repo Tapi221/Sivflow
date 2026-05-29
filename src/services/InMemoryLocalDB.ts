@@ -105,7 +105,7 @@ const isEqual = (left: unknown, right: unknown): boolean => {
   return compareValues(left, right) === 0;
 };
 
-const parseIndexKeys = (index: string | readonly string[]): string[] => {
+const parseIndexKeys = (index: KeyPath): string[] => {
   if (Array.isArray(index)) {
     return index.map((entry) => entry.trim()).filter(Boolean);
   }
@@ -114,7 +114,7 @@ const parseIndexKeys = (index: string | readonly string[]): string[] => {
     return index
       .slice(1, -1)
       .split("+")
-      .map((entry) => entry.trim())
+      .map((entry: string) => entry.trim())
       .filter(Boolean);
   }
 
@@ -474,23 +474,26 @@ class InMemoryWhereClause<T extends object, TKey = string> {
 
 class InMemoryTable<T extends object, TKey = string> {
   private readonly rows = new Map<string, T>();
+  private readonly keyPathKeys: string[];
 
   constructor(
     public readonly name: string,
     private readonly keyPath: KeyPath = "id",
-  ) {}
+  ) {
+    this.keyPathKeys = parseIndexKeys(keyPath);
+  }
 
   private readonly deriveKeyFromRecord = (record: T): unknown => {
-    if (Array.isArray(this.keyPath)) {
-      return this.keyPath.map((path) => readField(record, path));
+    if (this.keyPathKeys.length > 1) {
+      return this.keyPathKeys.map((path) => readField(record, path));
     }
-    return readField(record, this.keyPath);
+    return readField(record, this.keyPathKeys[0]);
   };
 
   private readonly ensureRecordKey = (record: T): unknown => {
     const currentKey = this.deriveKeyFromRecord(record);
 
-    if (Array.isArray(this.keyPath)) {
+    if (this.keyPathKeys.length > 1) {
       return currentKey;
     }
 
@@ -507,7 +510,7 @@ class InMemoryTable<T extends object, TKey = string> {
         ? crypto.randomUUID()
         : nanoid();
 
-    asRecord(record)[this.keyPath] = nextKey;
+    asRecord(record)[this.keyPathKeys[0]] = nextKey;
     return nextKey;
   };
 
@@ -636,12 +639,12 @@ class InMemoryTable<T extends object, TKey = string> {
     return Array.from(this.rows.values()).map((value) => ensureObject(value));
   };
 
-  public where(index: string | readonly string[]): InMemoryWhereClause<T, TKey>;
+  public where(index: KeyPath): InMemoryWhereClause<T, TKey>;
   public where(criteria: {
     [key: string]: unknown;
   }): InMemoryCollection<T, TKey>;
   public where(
-    input: string | readonly string[] | { [key: string]: unknown },
+    input: KeyPath | { [key: string]: unknown },
   ): InMemoryWhereClause<T, TKey> | InMemoryCollection<T, TKey> {
     if (typeof input === "string" || Array.isArray(input)) {
       return new InMemoryWhereClause(
@@ -670,7 +673,7 @@ class InMemoryTable<T extends object, TKey = string> {
   };
 
   public readonly orderBy = (
-    index: string | readonly string[],
+    index: KeyPath,
   ): InMemoryCollection<T, TKey> => {
     return new InMemoryCollection<T, TKey>(
       this,
@@ -998,9 +1001,9 @@ export class InMemoryLocalDB {
     }
 
     if (tableName === "folders") {
-      return items.map((item) => normalizeFolderWithSilent(item)) as Array<
-        LocalDBTableMap[TTable]
-      >;
+      return items.map((item) =>
+        normalizeFolderWithSilent(item),
+      ) as Array<LocalDBTableMap[TTable]>;
     }
 
     return items;
@@ -1178,240 +1181,22 @@ export class InMemoryLocalDB {
     }
   };
 
-  public readonly cleanupSyncErrors = async (): Promise<void> => {
-    const now = Date.now();
-    const sevenDays = 7 * 24 * 60 * 60 * 1000;
-
-    const oldErrors = await this.syncErrors
-      .where("occurredAt")
-      .below(now - sevenDays)
-      .and((item) => item.retryable !== true)
-      .toArray();
-
-    await this.syncErrors.bulkDelete(oldErrors.map((item) => item.id));
-  };
-
-  public readonly getDeviceMeta = async (
-    userId: string,
-  ): Promise<Record<string, unknown> | undefined> => {
-    return this.deviceMeta.where("userId").equals(userId).first();
-  };
-
-  public readonly upsertDeviceMeta = async (
-    meta: Record<string, unknown>,
-  ): Promise<void> => {
-    await this.deviceMeta.put(meta);
-  };
-
-  public readonly getSyncEnabledFolders = async (
-    userId: string,
-  ): Promise<Folder[]> => {
-    return this.folders
+  public readonly listCardsByUser = async (userId: string): Promise<Card[]> => {
+    const cards = await this.cards
       .where("userId")
       .equals(userId)
-      .and((folder) => folder.cloudSyncEnabled === true)
       .toArray();
-  };
-
-  public readonly getUpdatedCards = async (
-    folderId: string,
-    lastSyncTime: Date,
-  ): Promise<Card[]> => {
-    const threshold = toTimestamp(lastSyncTime);
-
-    return this.cards
-      .where("folderId")
-      .equals(folderId)
-      .and((card) => toTimestamp(card.updatedAt) > threshold)
-      .toArray();
-  };
-
-  public readonly upsert = async <TTable extends SyncableEntityTable>(
-    tableName: TTable,
-    data: LocalDBTableMap[TTable],
-    skipSync = false,
-  ): Promise<void> => {
-    await this.table<LocalDBTableMap[TTable], string>(tableName).put(data);
-
-    if (!skipSync) {
-      await this.enqueueSyncForTable(tableName, data, "update");
-    }
-  };
-
-  public readonly getSyncSettings = async (
-    id: string,
-  ): Promise<SyncSettings | undefined> => {
-    return this.syncSettings.get(id);
-  };
-
-  public readonly putSyncSettings = async (
-    settings: SyncSettings,
-  ): Promise<void> => {
-    await this.syncSettings.put(settings);
-  };
-
-  public readonly getSyncError = async (
-    id: string,
-  ): Promise<SyncError | undefined> => {
-    return this.syncErrors.get(id);
-  };
-
-  public readonly putSyncError = async (error: SyncError): Promise<void> => {
-    await this.syncErrors.put(error);
-  };
-
-  public readonly clearSyncErrors = async (): Promise<void> => {
-    await this.syncErrors.clear();
-  };
-
-  public readonly getRetryableSyncErrors = async (): Promise<SyncError[]> => {
-    return this.syncErrors.where("retryable").equals(true).toArray();
-  };
-
-  public readonly findQueueProcessingErrorsByTargetId = async (
-    targetId: string,
-  ): Promise<SyncError[]> => {
-    const errors = await this.syncErrors
-      .where("message")
-      .startsWith("Queue processing failed")
-      .toArray();
-
-    return errors.filter((error) => error.message.includes(targetId));
-  };
-
-  public readonly putSyncHistory = async (
-    history: SyncHistory,
-  ): Promise<void> => {
-    await this.syncHistory.put(history);
-  };
-
-  public readonly getRecentSyncHistory = async (
-    limit = 30,
-  ): Promise<SyncHistory[]> => {
-    return this.syncHistory
-      .orderBy("finishedAt")
-      .reverse()
-      .limit(limit)
-      .toArray();
-  };
-
-  public readonly getSyncStatsSince = async (
-    timestamp: number,
-  ): Promise<{
-    histories: SyncHistory[];
-    errors: SyncError[];
-  }> => {
-    const histories = await this.syncHistory
-      .where("finishedAt")
-      .above(timestamp)
-      .toArray();
-    const errors = await this.syncErrors
-      .where("occurredAt")
-      .above(timestamp)
-      .toArray();
-
-    return { histories, errors };
-  };
-
-  public readonly getSyncQueueCount = async (): Promise<number> => {
-    return this.syncQueue.count();
-  };
-
-  public readonly getQueuedItemsOldestFirst = async (): Promise<
-    SyncQueueItem[]
-  > => {
-    const items = await this.syncQueue.toArray();
-
-    const getCreatedAt = (item: SyncQueueItem): number => {
-      return typeof item.createdAt === "number" &&
-        Number.isFinite(item.createdAt)
-        ? item.createdAt
-        : 0;
-    };
-
-    const getUpdatedAt = (item: SyncQueueItem): number => {
-      return typeof item.updatedAt === "number" &&
-        Number.isFinite(item.updatedAt)
-        ? item.updatedAt
-        : 0;
-    };
-
-    return items.sort((left, right) => {
-      const createdAtDiff = getCreatedAt(left) - getCreatedAt(right);
-      if (createdAtDiff !== 0) return createdAtDiff;
-      return getUpdatedAt(left) - getUpdatedAt(right);
-    });
-  };
-
-  public readonly trimSyncQueueToLimit = async (
-    limit: number,
-  ): Promise<void> => {
-    const count = await this.syncQueue.count();
-    if (count <= limit) return;
-
-    const oldest = await this.getQueuedItemsOldestFirst();
-    await this.syncQueue.bulkDelete(
-      oldest.slice(0, count - limit).map((item) => item.id),
-    );
-  };
-
-  public readonly putSyncQueueItem = async (
-    item: SyncQueueItem,
-  ): Promise<void> => {
-    await this.syncQueue.put(item);
-  };
-
-  public readonly removeSyncQueueItem = async (id: string): Promise<void> => {
-    await this.syncQueue.delete(id);
-  };
-
-  public readonly putConflict = async (
-    conflict: SyncConflict,
-  ): Promise<void> => {
-    await this.conflicts.put(conflict);
-  };
-
-  public readonly getConflict = async (
-    id: string,
-  ): Promise<SyncConflict | undefined> => {
-    return this.conflicts.get(id);
-  };
-
-  public readonly getConflicts = async (): Promise<SyncConflict[]> => {
-    return this.conflicts.toArray();
-  };
-
-  public readonly removeConflict = async (id: string): Promise<void> => {
-    await this.conflicts.delete(id);
-  };
-
-  public readonly getImageRecord = async (
-    id: string,
-  ): Promise<AssetRecord | UploadedImage | undefined> => {
-    return this.images.get(id);
-  };
-
-  public readonly putImageRecord = async (
-    record: AssetRecord | UploadedImage,
-  ): Promise<void> => {
-    await this.images.put(record);
-  };
-
-  public readonly updateImageRecord = async (
-    id: string,
-    changes: Partial<AssetRecord & UploadedImage>,
-  ): Promise<number> => {
-    return this.images.update(id, changes);
-  };
-
-  public readonly listCardsByUser = async (userId: string): Promise<Card[]> => {
-    return this.cards.where("userId").equals(userId).toArray();
+    return cards.map((card) => normalizeCard(card)) as Card[];
   };
 
   public readonly listFoldersByUser = async (
     userId: string,
   ): Promise<Folder[]> => {
-    return this.folders.where("userId").equals(userId).toArray();
+    const folders = await this.folders
+      .where("userId")
+      .equals(userId)
+      .toArray();
+    return folders.map((folder) => normalizeFolderWithSilent(folder)) as Folder[];
   };
 
   public readonly listCardSetsByUser = async (
@@ -1420,37 +1205,12 @@ export class InMemoryLocalDB {
     return this.cardSets.where("userId").equals(userId).toArray();
   };
 
-  public readonly addCardSet = async (cardSet: CardSet): Promise<void> => {
-    await this.cardSets.add(cardSet);
-  };
-
-  public readonly updateCardById = async (
-    id: string,
-    changes: Partial<Card>,
-  ): Promise<number> => {
-    return this.cards.update(id, changes);
-  };
-
-  public readonly runSyncTransaction = async <T>(
-    scope: () => Promise<T>,
-  ): Promise<T> => {
-    return scope();
-  };
-
-  public readonly clearSyncTables = async (
-    tables: readonly SyncableEntityTable[],
-  ): Promise<void> => {
-    await Promise.all(tables.map((tableName) => this.table(tableName).clear()));
-  };
-
-  public readonly putSyncRecord = async <TTable extends SyncableEntityTable>(
-    tableName: TTable,
-    data: LocalDBTableMap[TTable],
-  ): Promise<void> => {
-    await this.table<LocalDBTableMap[TTable], string>(tableName).put(data);
-  };
-
-  public readonly setSyncTrigger = (callback: () => void): void => {
-    this.syncTrigger = callback;
+  public readonly setSyncTrigger = (trigger: () => void): void => {
+    this.syncTrigger = trigger;
   };
 }
+
+export const createInMemoryLocalDB = (
+  userId?: string,
+  name?: string,
+): InMemoryLocalDB => new InMemoryLocalDB(userId, name);
