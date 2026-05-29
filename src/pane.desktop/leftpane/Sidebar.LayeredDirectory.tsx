@@ -9,13 +9,17 @@ type FocusedProjectState = {
   label: string;
 };
 
+type IconProps = {
+  className?: string;
+};
+
 const PROJECT_SECTION_LABEL = "MY PROJECTS";
 const TAG_SECTION_LABEL = "MY TAG TREE";
 const ADD_PROJECT_ARIA_LABEL = "プロジェクトを追加";
 const LIBRARY_TREE_SELECTOR = '[role="tree"][aria-label="ライブラリ"]';
 const ROOT_PROJECT_TREE_ITEM_SELECTOR = '[role="treeitem"][aria-level="1"]';
 
-const IconPlus = ({ className }: { className?: string }) => (<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
+const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 
 const getLibraryTreeElement = (container: HTMLDivElement | null): HTMLElement | null => container?.querySelector<HTMLElement>(LIBRARY_TREE_SELECTOR) ?? null;
 
@@ -37,12 +41,23 @@ const getRootProjectTreeItem = (target: EventTarget | null): HTMLElement | null 
 
 const getTreeItemLabel = (treeItem: HTMLElement): string => treeItem.textContent?.trim() ?? "";
 
-const hideRootProjectChildGroups = (rootProjectElement: HTMLElement) => {
+const setRootProjectChildGroupsHidden = (rootProjectElement: HTMLElement, isHidden: boolean) => {
   Array.from(rootProjectElement.children).forEach((childElement) => {
     if (!(childElement instanceof HTMLElement) || childElement.getAttribute("role") !== "group") return;
 
-    childElement.setAttribute("hidden", "");
+    if (isHidden) {
+      childElement.setAttribute("hidden", "");
+      return;
+    }
+
+    childElement.removeAttribute("hidden");
   });
+};
+
+const openRootProjectIfNeeded = (treeItem: HTMLElement) => {
+  if (treeItem.getAttribute("aria-expanded") !== "false") return;
+
+  treeItem.querySelector<HTMLButtonElement>('button[type="button"]')?.click();
 };
 
 const applyFocusedProjectVisibility = (container: HTMLDivElement | null, focusedProjectIndex: number | null) => {
@@ -50,9 +65,16 @@ const applyFocusedProjectVisibility = (container: HTMLDivElement | null, focused
   const shouldShowAll = focusedProjectIndex === null || focusedProjectIndex < 0 || focusedProjectIndex >= rootProjectElements.length;
 
   rootProjectElements.forEach((element, index) => {
-    hideRootProjectChildGroups(element);
+    if (shouldShowAll) {
+      setRootProjectChildGroupsHidden(element, true);
+      element.removeAttribute("hidden");
+      return;
+    }
 
-    if (shouldShowAll || index === focusedProjectIndex) {
+    const isFocusedProject = index === focusedProjectIndex;
+    setRootProjectChildGroupsHidden(element, !isFocusedProject);
+
+    if (isFocusedProject) {
       element.removeAttribute("hidden");
       return;
     }
@@ -89,6 +111,7 @@ const SidebarLayeredDirectory = () => {
     event.preventDefault();
     event.stopPropagation();
     setFocusedProject({ index: focusedProjectIndex, label: getTreeItemLabel(treeItem) });
+    window.setTimeout(() => openRootProjectIfNeeded(treeItem), 0);
   }, [folderTagMode]);
 
   useEffect(() => {
