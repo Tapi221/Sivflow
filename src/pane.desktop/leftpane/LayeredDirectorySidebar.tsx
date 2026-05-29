@@ -1,5 +1,4 @@
 import { type CSSProperties, type Dispatch, type KeyboardEvent, type SetStateAction, useCallback, useEffect, useMemo, useRef } from "react";
-import { getTagColorStyle } from "@/chip/tag/tagColor";
 import { useCardsRead } from "@/components/card/hooks/useCardsRead";
 import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { getFolderId, getParentFolderId, normalizeFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
@@ -27,12 +26,6 @@ type NodeIconProps = {
   className?: string;
 };
 
-type FolderColorFields = {
-  folderColor?: unknown;
-  folder_color?: unknown;
-  color?: unknown;
-};
-
 const LIBRARY_EXPANDED_FOLDERS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-folders";
 const LIBRARY_EXPANDED_CARD_SETS_STORAGE_KEY = "flashcard-master:calendar-sidebar:library-expanded-card-sets";
 const TREE_INDENT_PX = 16;
@@ -44,49 +37,9 @@ const TREE_GUIDE_CLASS_NAME = "pointer-events-none absolute bg-[#eeeeee]";
 const TREE_ROW_BASE_CLASS_NAME = "group relative flex w-full cursor-default select-none items-center gap-1 rounded-[10px] pr-2 text-left text-[12px] font-medium leading-none tracking-normal outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
 const TREE_ROW_SELECTED_CLASS_NAME = "bg-white text-[#6d747f] shadow-[0_1px_3px_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(0,0,0,0.06)]";
 const TREE_ROW_IDLE_CLASS_NAME = "text-[#8e8e93] hover:bg-[#f7f7f8] hover:text-[#6d747f]";
-const TREE_TOGGLE_CLASS_NAME = "flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] text-[#c7c7cc] transition hover:bg-white hover:text-[#8e8e93]";
-const TREE_FOLDER_ICON_CLASS_NAME = "text-[#c7c7cc]";
-const TREE_ITEM_ICON_CLASS_NAME = "text-[#c7c7cc]";
+const TREE_NODE_MARKER_CLASS_NAME = "library-tree-marker h-4 w-4 shrink-0 rounded-full";
+const TREE_NODE_MARKER_BUTTON_CLASS_NAME = "library-tree-marker h-4 w-4 shrink-0 rounded-full transition hover:opacity-85";
 const TREE_TRASH_BUTTON_BASE_CLASS_NAME = "flex h-8 w-full items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium leading-none tracking-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
-const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
-
-const ChevronRightGlyph = ({ className }: NodeIconProps) => (
-  <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
-    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const FolderGlyph = ({ className }: NodeIconProps) => (
-  <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
-    <path d="M2.5 5.25C2.5 4.56 3.06 4 3.75 4H6.55C6.88 4 7.2 4.13 7.44 4.36L8.28 5.15C8.51 5.37 8.83 5.5 9.15 5.5H14.25C14.94 5.5 15.5 6.06 15.5 6.75V13.25C15.5 13.94 14.94 14.5 14.25 14.5H3.75C3.06 14.5 2.5 13.94 2.5 13.25V5.25Z" fill="currentColor" opacity="0.12" />
-    <path d="M2.5 5.25C2.5 4.56 3.06 4 3.75 4H6.55C6.88 4 7.2 4.13 7.44 4.36L8.28 5.15C8.51 5.37 8.83 5.5 9.15 5.5H14.25C14.94 5.5 15.5 6.06 15.5 6.75V13.25C15.5 13.94 14.94 14.5 14.25 14.5H3.75C3.06 14.5 2.5 13.94 2.5 13.25V5.25Z" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M3 7.25H15" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" opacity="0.36" />
-  </svg>
-);
-
-const DeckGlyph = ({ className }: NodeIconProps) => (
-  <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
-    <rect x="4.1" y="3.6" width="9.8" height="10.8" rx="2" fill="currentColor" opacity="0.1" />
-    <rect x="4.1" y="3.6" width="9.8" height="10.8" rx="2" stroke="currentColor" strokeWidth="1.2" />
-    <path d="M6.25 6.25H11.75M6.25 8.75H11.75M6.25 11.25H9.75" stroke="currentColor" strokeWidth="1.05" strokeLinecap="round" />
-  </svg>
-);
-
-const CardGlyph = ({ className }: NodeIconProps) => (
-  <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
-    <rect x="3" y="4.5" width="12" height="9" rx="2" fill="currentColor" opacity="0.1" />
-    <rect x="3" y="4.5" width="12" height="9" rx="2" stroke="currentColor" strokeWidth="1.2" />
-    <path d="M5.5 7.25H12.5M5.5 9.5H10.5" stroke="currentColor" strokeWidth="1.05" strokeLinecap="round" />
-  </svg>
-);
-
-const DocumentGlyph = ({ className }: NodeIconProps) => (
-  <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
-    <path d="M5 2.75H10.2L13.5 6.1V14.25C13.5 14.94 12.94 15.5 12.25 15.5H5.75C5.06 15.5 4.5 14.94 4.5 14.25V4.25C4.5 3.42 4.67 2.75 5 2.75Z" fill="currentColor" opacity="0.08" />
-    <path d="M5 2.75H10.2L13.5 6.1V14.25C13.5 14.94 12.94 15.5 12.25 15.5H5.75C5.06 15.5 4.5 14.94 4.5 14.25V4.25C4.5 3.42 4.67 2.75 5 2.75Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-    <path d="M10.2 2.9V5.65C10.2 6.05 10.52 6.38 10.92 6.38H13.35M6.75 9.5H11.25M6.75 11.75H10.25" stroke="currentColor" strokeWidth="1.05" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
 
 const TrashGlyph = ({ className }: NodeIconProps) => (
   <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
@@ -177,45 +130,6 @@ const addIdsToSet = (
 
     return didChange ? next : prev;
   });
-};
-
-const getNodeIconClassName = (node: ExplorerTreeNode): string => {
-  if (node.type === "folder") return TREE_FOLDER_ICON_CLASS_NAME;
-  return TREE_ITEM_ICON_CLASS_NAME;
-};
-
-const getFolderColorValue = (node: ExplorerTreeNode): string | null => {
-  const folder = node.data as FolderColorFields | null | undefined;
-  const rawColor = folder?.folderColor ?? folder?.folder_color ?? folder?.color;
-
-  if (typeof rawColor !== "string") return null;
-
-  const color = rawColor.trim();
-  return color ? color : null;
-};
-
-const getTopLevelFolderIconStyle = (
-  node: ExplorerTreeNode,
-  depth: number,
-): CSSProperties | undefined => {
-  if (depth !== 0 || node.type !== "folder") return undefined;
-
-  const color = getFolderColorValue(node);
-  if (!color) return undefined;
-
-  if (HEX_COLOR_PATTERN.test(color)) return { color };
-
-  return { color: getTagColorStyle(color).color };
-};
-
-const renderNodeIcon = (node: ExplorerTreeNode, inheritsColor = false) => {
-  const className = cn("h-4 w-4 shrink-0", !inheritsColor && getNodeIconClassName(node));
-
-  if (node.type === "folder") return <FolderGlyph className={className} />;
-  if (node.type === "cardSet") return <DeckGlyph className={className} />;
-  if (node.type === "document") return <DocumentGlyph className={className} />;
-
-  return <CardGlyph className={className} />;
 };
 
 const isNodeExpandable = (node: ExplorerTreeNode): boolean =>
@@ -624,7 +538,6 @@ const LibraryHierarchySidebar = () => {
     const isSelected = selectedTreeId === node.id;
     const isLastSibling = index === siblingCount - 1;
     const childBranchMask = [...branchMask, !isLastSibling];
-    const topLevelFolderIconStyle = getTopLevelFolderIconStyle(node, depth);
     const rowStyle: CSSProperties = { paddingLeft: TREE_ROW_BASE_PADDING_LEFT_PX + depth * TREE_INDENT_PX };
 
     return (
@@ -676,25 +589,10 @@ const LibraryHierarchySidebar = () => {
                   event.stopPropagation();
                   handleToggleNode(node);
                 }}
-                className={TREE_TOGGLE_CLASS_NAME}
-              >
-                <ChevronRightGlyph
-                  className={cn(
-                    "h-3.5 w-3.5 transition-transform duration-150",
-                    isOpen && "rotate-90",
-                  )}
-                />
-              </button>
+                className={TREE_NODE_MARKER_BUTTON_CLASS_NAME}
+              />
             ) : (
-              <span className="h-4 w-4 shrink-0" />
-            )}
-
-            {topLevelFolderIconStyle ? (
-              <span className="flex h-4 w-4 shrink-0 items-center justify-center" style={topLevelFolderIconStyle}>
-                {renderNodeIcon(node, true)}
-              </span>
-            ) : (
-              renderNodeIcon(node)
+              <span className={TREE_NODE_MARKER_CLASS_NAME} aria-hidden="true" />
             )}
 
             <span className="min-w-0 flex-1 truncate">{node.name}</span>
