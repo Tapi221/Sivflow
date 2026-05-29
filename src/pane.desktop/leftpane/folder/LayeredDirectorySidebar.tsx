@@ -521,7 +521,7 @@ const LibraryHierarchySidebar = () => {
       if (!parsed) return;
 
       if (isNodeExpandable(node)) {
-        setNodeOpen(node, true);
+        setNodeOpen(node, !isNodeOpen(node));
       }
 
       if (parsed.type === "folder") {
@@ -579,6 +579,7 @@ const LibraryHierarchySidebar = () => {
       cardById,
       cardSetById,
       documentById,
+      isNodeOpen,
       openCardTab,
       openDocumentTab,
       setNodeOpen,
