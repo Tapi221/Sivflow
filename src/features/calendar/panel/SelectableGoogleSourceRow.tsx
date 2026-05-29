@@ -1,5 +1,4 @@
 import type { CSSProperties } from "react";
-import { AnimatedCircleCheckbox } from "@/chip/checkbox/AnimatedCircleCheckbox";
 import { cn } from "@/lib/utils";
 
 type SelectableGoogleSourceRowProps = {
@@ -10,22 +9,40 @@ type SelectableGoogleSourceRowProps = {
   onToggle: (id: string) => void;
 };
 
+type SourceRowMarkerProps = {
+  checked: boolean;
+  color: string;
+};
+
 const GOOGLE_SOURCE_ROW_CLASS_NAME =
   "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
 const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#2c2c2e]";
 const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#b8b8bd]";
-const SOURCE_ROW_CHECKBOX_STROKE_WIDTH = 1.8;
-const SOURCE_ROW_CHECKBOX_BORDER_WIDTH = 0;
-const SOURCE_ROW_UNCHECKED_MARKER_CLASS_NAME = "relative h-3.5 w-3.5 shrink-0 rounded-full";
-const SOURCE_ROW_UNCHECKED_MARKER_DOT_CLASS_NAME = "absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full";
+const SOURCE_ROW_MARKER_CLASS_NAME = "relative h-3.5 w-3.5 shrink-0 rounded-full";
+const SOURCE_ROW_MARKER_DOT_CLASS_NAME = "absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full";
+const SOURCE_ROW_UNCHECKED_MARKER_COLOR = "#c7c7cc";
 
-const createUncheckedMarkerStyle = (color: string): CSSProperties => ({
-  "--source-row-marker-color": color,
-  backgroundColor: "color-mix(in srgb, var(--source-row-marker-color) 13%, white 87%)",
+const createSourceRowMarkerStyle = (color: string, checked: boolean): CSSProperties => ({
+  "--source-row-marker-color": checked ? color : SOURCE_ROW_UNCHECKED_MARKER_COLOR,
+  backgroundColor: checked
+    ? "color-mix(in srgb, var(--source-row-marker-color) 15%, white 85%)"
+    : "color-mix(in srgb, var(--source-row-marker-color) 10%, white 90%)",
 } as CSSProperties);
 
-const UNCHECKED_MARKER_DOT_STYLE: CSSProperties = {
-  backgroundColor: "color-mix(in srgb, var(--source-row-marker-color) 32%, transparent)",
+const SOURCE_ROW_MARKER_DOT_STYLE: CSSProperties = {
+  backgroundColor: "color-mix(in srgb, var(--source-row-marker-color) 34%, transparent)",
+};
+
+const SourceRowMarker = ({ checked, color }: SourceRowMarkerProps) => {
+  return (
+    <span
+      className={cn(SOURCE_ROW_MARKER_CLASS_NAME, !checked && "opacity-80")}
+      style={createSourceRowMarkerStyle(color, checked)}
+      aria-hidden="true"
+    >
+      <span className={SOURCE_ROW_MARKER_DOT_CLASS_NAME} style={SOURCE_ROW_MARKER_DOT_STYLE} />
+    </span>
+  );
 };
 
 const SelectableGoogleSourceRow = ({
@@ -45,23 +62,7 @@ const SelectableGoogleSourceRow = ({
       onClick={() => onToggle(id)}
       aria-pressed={checked}
     >
-      {checked ? (
-        <AnimatedCircleCheckbox
-          checked={checked}
-          color={color}
-          variant="soft"
-          strokeWidth={SOURCE_ROW_CHECKBOX_STROKE_WIDTH}
-          borderWidth={SOURCE_ROW_CHECKBOX_BORDER_WIDTH}
-        />
-      ) : (
-        <span
-          className={SOURCE_ROW_UNCHECKED_MARKER_CLASS_NAME}
-          style={createUncheckedMarkerStyle(color)}
-          aria-hidden="true"
-        >
-          <span className={SOURCE_ROW_UNCHECKED_MARKER_DOT_CLASS_NAME} style={UNCHECKED_MARKER_DOT_STYLE} />
-        </span>
-      )}
+      <SourceRowMarker checked={checked} color={color} />
 
       <span
         className={cn(
