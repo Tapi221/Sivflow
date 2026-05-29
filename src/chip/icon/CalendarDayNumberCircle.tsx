@@ -56,7 +56,7 @@ const CalendarDayNumberCircle = ({
   isCurrentMonth = true,
   className,
   style,
-  allowsCustomBackground = false,
+  allowsCustomBackground = true,
 }: CalendarDayNumberCircleProps) => {
   return (
     <span
