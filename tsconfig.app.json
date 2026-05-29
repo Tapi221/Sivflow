@@ -23,6 +23,6 @@
   "include": [
     "src",
     "constants"
-, "apps/mobile/src/pane/schedule/schedule.year.mobilenative.tsx", "apps/mobile/src/pane/navigationbar/navigationbar.tsx"  ],
+, "apps/mobile/src/pane/schedule/schedule.year.mobilenative.tsx", "apps/mobile/src/pane/navigationbar/navigationbar.tsx", "shared/i18n"  ],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "tests/**"]
 }
