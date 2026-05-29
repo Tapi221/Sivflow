@@ -1,7 +1,7 @@
 {
-  "name": "Flashcard Master",
-  "short_name": "Flashcard",
-  "description": "Advanced flashcard app for serious learners",
+  "name": "Solifa",
+  "short_name": "Solifa",
+  "description": "Advanced learning app for serious learners",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
