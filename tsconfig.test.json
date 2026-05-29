@@ -14,6 +14,7 @@
     "paths": {
       "@/services/localDB": ["src/services/localdb/index.ts"],
       "@/services/firebase": ["src/infrastructure/firebase/client.ts"],
+      "@platform/*": ["packages/platform/src/*"],
       "@/*": ["src/*"],
       "@constants/*": ["constants/*"],
       "@shared/*": ["shared/*"],
@@ -27,6 +28,7 @@
     "tests/**/*.tsx",
     "functions/src/**/*.ts",
     "constants/**/*.ts",
-    "shared/**/*.ts"
+    "shared/**/*.ts",
+    "packages/platform/src/**/*.ts"
   ]
 }
