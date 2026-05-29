@@ -1,43 +1,44 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { CalendarIcon } from "@/chip/icons/icons.sidebar";
-import { ToggleFolderTag, type FolderTagTab, type FolderTagToggleValue } from "@/chip/toggle/Toggle.foldertag";
+import { ToggleFolderTag, type FolderTagTab } from "@/chip/toggle/Toggle.foldertag";
 import { CalendarTagStrip } from "@/features/calendar/toolbar/CalendarTagStrip";
 import type { CalendarWorkspaceToolbarProps } from "@/features/calendar/scheduleScreen.types";
+import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 
 export const CalendarToolbar = ({
   viewMode: _viewMode,
   onSelectViewMode: _onSelectViewMode,
 }: CalendarWorkspaceToolbarProps) => {
+  const folderTagMode = useFolderTagModeStore((state) => state.folderTagMode);
+  const setFolderTagMode = useFolderTagModeStore((state) => state.setFolderTagMode);
   const workspaceTabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const activeWorkspaceSection = workspaceTabs.find(
     (tab) => tab.id === activeTabId,
   )?.sectionKey;
   const shouldShowFolderTagToggle = activeWorkspaceSection === "library";
-  const [activeFolderTagMode, setActiveFolderTagMode] =
-    useState<FolderTagToggleValue>("folder");
   const folderTagTabs = useMemo<FolderTagTab[]>(
     () => [
       {
         value: "folder",
         label: "Folder",
-        onClick: () => setActiveFolderTagMode("folder"),
+        onClick: () => setFolderTagMode("folder"),
       },
       {
         value: "tag",
         label: "Tag",
-        onClick: () => setActiveFolderTagMode("tag"),
+        onClick: () => setFolderTagMode("tag"),
       },
     ],
-    [],
+    [setFolderTagMode],
   );
 
   return (
     <div className="calendar-workspace-toolbar flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center justify-between overflow-visible bg-white pl-[var(--workspace-content-gutter)] pr-[var(--workspace-content-gutter)]">
       <div className="flex min-w-0 flex-1 items-center gap-3">
         {shouldShowFolderTagToggle ? (
-          <ToggleFolderTag activeMode={activeFolderTagMode} tabs={folderTagTabs} />
+          <ToggleFolderTag activeMode={folderTagMode} tabs={folderTagTabs} />
         ) : (
           <>
             <div className="relative inline-grid h-8 w-max grid-flow-col items-center rounded-xl bg-[#f7f7f7] p-0.5" aria-label="Calendar">
