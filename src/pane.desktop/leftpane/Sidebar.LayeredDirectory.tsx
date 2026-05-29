@@ -15,13 +15,6 @@ const ADD_PROJECT_ARIA_LABEL = "プロジェクトを追加";
 const LIBRARY_TREE_SELECTOR = '[role="tree"][aria-label="ライブラリ"]';
 const ROOT_PROJECT_TREE_ITEM_SELECTOR = '[role="treeitem"][aria-level="1"]';
 
-const PlusGlyph = () => (
-  <span className="relative block h-3.5 w-3.5" aria-hidden="true">
-    <span className="absolute left-1/2 top-[2px] h-[10px] w-[1.6px] -translate-x-1/2 rounded-full bg-current" />
-    <span className="absolute left-[2px] top-1/2 h-[1.6px] w-[10px] -translate-y-1/2 rounded-full bg-current" />
-  </span>
-);
-
 const getLibraryTreeElement = (container: HTMLDivElement | null): HTMLElement | null => container?.querySelector<HTMLElement>(LIBRARY_TREE_SELECTOR) ?? null;
 
 const getRootProjectElements = (container: HTMLDivElement | null): HTMLElement[] => {
@@ -127,8 +120,8 @@ const SidebarLayeredDirectory = () => {
             )}
           </div>
           {folderTagMode !== "tag" ? (
-            <button type="button" onClick={handleCreateRootFolder} aria-label={ADD_PROJECT_ARIA_LABEL} title={ADD_PROJECT_ARIA_LABEL} className="ml-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#f4f4f4] text-[#8c8c8c] transition hover:bg-[#ececec] hover:text-[#5f6574] active:scale-[0.94]">
-              <PlusGlyph />
+            <button type="button" onClick={handleCreateRootFolder} aria-label={ADD_PROJECT_ARIA_LABEL} title={ADD_PROJECT_ARIA_LABEL} className="ml-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#f4f4f4] text-[18px] font-semibold leading-none text-[#8c8c8c] transition hover:bg-[#ececec] hover:text-[#5f6574] active:scale-[0.94]">
+              <span className="block -translate-y-px" aria-hidden="true">+</span>
             </button>
           ) : null}
         </div>
