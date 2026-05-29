@@ -1,11 +1,11 @@
 import { normalizeDate } from "@/shared/codec/date";
 import { asRecord, pick } from "@/shared/lib/records";
 
-type NormalizedReviewLog = {
+export type NormalizedReviewLog = {
   reviewedAt: string;
   rating: 1 | 2 | 3 | 4;
   resistanceScore: number;
-  durationMinutes: number | null;
+  durationMinutes?: number | null;
 };
 
 const pickNumber = (value: unknown): number | null => {
