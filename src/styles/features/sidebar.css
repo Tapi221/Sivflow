@@ -132,3 +132,37 @@
     line-height: var(--row-height-dense, 28px);
   }
 }
+
+html body [aria-label="Library hierarchy explorer"][aria-label="Library hierarchy explorer"] [role="treeitem"][role="treeitem"] > button:first-child,
+html body [aria-label="Library hierarchy explorer"][aria-label="Library hierarchy explorer"] [role="treeitem"][role="treeitem"] > span:first-child {
+  position: relative !important;
+  width: 16px !important;
+  height: 16px !important;
+  border: 0 !important;
+  border-radius: 9999px !important;
+  color: var(--sidebar-folder-mark-color, #c7c7cc) !important;
+  background: color-mix(in srgb, currentColor 13%, white 87%) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html body [aria-label="Library hierarchy explorer"][aria-label="Library hierarchy explorer"] [role="treeitem"][role="treeitem"] > button:first-child::after,
+html body [aria-label="Library hierarchy explorer"][aria-label="Library hierarchy explorer"] [role="treeitem"][role="treeitem"] > span:first-child::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, currentColor 34%, transparent);
+  transform: translate(-50%, -50%);
+}
+
+html body [aria-label="Library hierarchy explorer"][aria-label="Library hierarchy explorer"] [role="treeitem"][role="treeitem"] > button:first-child > svg {
+  opacity: 0 !important;
+}
+
+html body [aria-label="Library hierarchy explorer"][aria-label="Library hierarchy explorer"] [role="treeitem"][role="treeitem"] > button:first-child + svg {
+  display: none !important;
+}
