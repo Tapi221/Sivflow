@@ -40,6 +40,7 @@ const EVENT_COLUMN_INSET_PX = 3;
 const CURRENT_TIME_TICK_MS = GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS;
 const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
 const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
+const WEEKDAY_TIME_LABEL_CLASS_NAME = "text-[11px] font-medium tabular-nums text-[#b8bcc5]";
 
 const createEventKey = (event: GoogleCalendarEvent): string => `${event.accountId ?? ""}:${event.calendarId}:${event.id}`;
 
@@ -58,7 +59,7 @@ const getCurrentTimeTopStyle = (now: Date): CSSProperties => ({
   top: `calc(${(now.getHours() * GRID.WEEKDAY_MINUTES_PER_HOUR + now.getMinutes()) / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
 });
 
-const getHourLabelClassName = (hour: number): string => cn("absolute right-2 text-[11px] font-medium tabular-nums text-[#b8bcc5]", hour === 0 ? "top-1 translate-y-0" : "top-0 -translate-y-1/2");
+const getHourLabelClassName = (hour: number): string => cn("absolute right-2", WEEKDAY_TIME_LABEL_CLASS_NAME, hour === 0 ? "top-1 translate-y-0" : "top-0 -translate-y-1/2");
 
 const getHeaderDateNumberClassName = (isSelected: boolean, isToday: boolean): string => cn(WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME, isSelected ? "border-0 bg-[var(--ds-color-tag-sky-bg)] text-[var(--ds-color-tag-sky-fg)] shadow-none ring-0" : isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
 
@@ -162,9 +163,9 @@ const CalendarWeekDayGridComponent = ({
         </div>
       </div>
 
-      <div ref={allDayScrollRef} className="shrink-0 overflow-hidden border-b" style={{ borderColor: COLOR.WEEKDAY_COLOR_BORDER_MAIN }}>
+      <div ref={allDayScrollRef} className="shrink-0 overflow-hidden border-b" style={{ borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }}>
         <div className="grid" style={{ gridTemplateColumns, minWidth: contentMinWidth }}>
-          <div className="flex min-h-10 items-start justify-end px-2 py-2 text-[11px] font-semibold text-[#b8bcc5]">終日</div>
+          <div className={cn("flex min-h-10 items-start justify-end px-2 py-2", WEEKDAY_TIME_LABEL_CLASS_NAME)}>終日</div>
           {visibleDays.map((day) => {
             const dayKey = getCalendarDateKey(day);
             const events = allDayEvents.get(dayKey) ?? [];
