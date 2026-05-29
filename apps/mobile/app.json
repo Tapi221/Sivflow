@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "FlashCard Master",
-    "slug": "flashcard-master-mobile",
+    "name": "Solifa",
+    "slug": "solifa-mobile",
     "version": "0.0.0",
     "orientation": "portrait",
-    "scheme": "flashcardmaster",
+    "scheme": "solifa",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.flashcardmaster.mobile"
+      "bundleIdentifier": "com.solifa.mobile"
     },
     "android": {
-      "package": "com.flashcardmaster.mobile",
+      "package": "com.solifa.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#F8FAFB"
       }
