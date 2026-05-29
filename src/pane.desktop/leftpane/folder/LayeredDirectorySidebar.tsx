@@ -53,7 +53,9 @@ const TREE_ROW_BASE_CLASS_NAME = "group relative flex w-full cursor-default sele
 const TREE_ROW_SELECTED_CLASS_NAME = "bg-white text-[#5f6672] shadow-[0_1px_3px_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(0,0,0,0.06)]";
 const TREE_ROW_IDLE_CLASS_NAME = "text-[#5f6672] hover:bg-[#f7f7f8] hover:text-[#5f6672]";
 const TREE_NODE_MARKER_CLASS_NAME = "library-tree-marker h-4 w-4 shrink-0 rounded-full";
-const TREE_NODE_MARKER_BUTTON_CLASS_NAME = "library-tree-marker h-4 w-4 shrink-0 rounded-full transition hover:opacity-85";
+const TREE_TOGGLE_BUTTON_CLASS_NAME = "flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[#a7abb3] transition hover:bg-white hover:text-[#6f7580] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
+const TREE_TOGGLE_ICON_CLASS_NAME = "h-3 w-3 transition-transform duration-150";
+const TREE_TOGGLE_SPACER_CLASS_NAME = "h-4 w-4 shrink-0";
 const TREE_TRASH_BUTTON_BASE_CLASS_NAME = "flex h-8 w-full items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium leading-none tracking-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9d9de]";
 const LAYERED_PROJECT_MENU_DIMENSIONS = { width: LAYERED_PROJECT_MENU_WIDTH, height: LAYERED_PROJECT_MENU_HEIGHT };
 const HIDDEN_INPUT_STYLE: CSSProperties = { position: "fixed", left: -9999, top: -9999, width: 1, height: 1, opacity: 0, pointerEvents: "none" };
@@ -61,6 +63,12 @@ const HIDDEN_INPUT_STYLE: CSSProperties = { position: "fixed", left: -9999, top:
 const TrashGlyph = ({ className }: NodeIconProps) => (
   <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className={className}>
     <path d="M4.25 6H13.75M7 6V4.75C7 4.2 7.45 3.75 8 3.75H10C10.55 3.75 11 4.2 11 4.75V6M5.25 6.25L5.78 13.2C5.84 14.07 6.57 14.75 7.44 14.75H10.56C11.43 14.75 12.16 14.07 12.22 13.2L12.75 6.25" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const ToggleGlyph = ({ className }: NodeIconProps) => (
+  <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
+    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -745,13 +753,15 @@ const LibraryHierarchySidebar = () => {
                   event.stopPropagation();
                   handleToggleNode(node);
                 }}
-                className={TREE_NODE_MARKER_BUTTON_CLASS_NAME}
-                style={markerStyle}
-              />
+                className={TREE_TOGGLE_BUTTON_CLASS_NAME}
+              >
+                <ToggleGlyph className={cn(TREE_TOGGLE_ICON_CLASS_NAME, isOpen ? "rotate-90" : "rotate-0")} />
+              </button>
             ) : (
-              <span className={TREE_NODE_MARKER_CLASS_NAME} style={markerStyle} aria-hidden="true" />
+              <span className={TREE_TOGGLE_SPACER_CLASS_NAME} aria-hidden="true" />
             )}
 
+            <span className={TREE_NODE_MARKER_CLASS_NAME} style={markerStyle} aria-hidden="true" />
             <span className="min-w-0 flex-1 truncate">{node.name}</span>
           </div>
         </div>
