@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager, State};
 use url::Url;
@@ -163,7 +163,7 @@ fn parse_callback_payload(raw_url: &str) -> Result<DesktopOauthCallbackPayload, 
     })
 }
 
-fn handle_loopback_client(mut stream: TcpStream, app_handle: AppHandle, state: State<AuthLoopbackState>) -> Result<(), String> {
+fn handle_loopback_client(mut stream: TcpStream, app_handle: AppHandle) -> Result<(), String> {
     let mut buffer = [0; 2048];
     let size = stream.read(&mut buffer).map_err(|error| error.to_string())?;
     let request = String::from_utf8_lossy(&buffer[..size]);
@@ -186,6 +186,7 @@ fn handle_loopback_client(mut stream: TcpStream, app_handle: AppHandle, state: S
     }
 
     {
+        let state = app_handle.state::<AuthLoopbackState>();
         let mut pending_url = state.pending_url.lock().map_err(|_| "OAuth state lock failed".to_string())?;
         *pending_url = Some(raw_url.clone());
     }
@@ -360,14 +361,14 @@ fn desktop_import_select_files() -> Vec<String> {
 }
 
 #[tauri::command]
-fn oauth_start(authorize_url: String, app_handle: AppHandle, state: State<AuthLoopbackState>) -> Result<(), String> {
+fn oauth_start(authorize_url: String, app_handle: AppHandle) -> Result<(), String> {
     ensure_auth_loopback_redirect(&authorize_url)?;
     let listener = TcpListener::bind((DESKTOP_OAUTH_HOST, DESKTOP_OAUTH_PORT)).map_err(|error| error.to_string())?;
     let app_handle_for_thread = app_handle.clone();
 
     std::thread::spawn(move || {
         if let Ok((stream, _)) = listener.accept() {
-            let _ = handle_loopback_client(stream, app_handle_for_thread, state);
+            let _ = handle_loopback_client(stream, app_handle_for_thread);
         }
     });
 
