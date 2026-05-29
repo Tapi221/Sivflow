@@ -80,7 +80,7 @@ const LayeredProjectMenuBase = ({
       >
         {LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.map((item) => {
           const action = getLayeredProjectMenuAction(actions, item.id);
-          const isDisabled = action?.disabled ?? true;
+          const isDisabled = action?.disabled ?? false;
 
           return (
             <button
