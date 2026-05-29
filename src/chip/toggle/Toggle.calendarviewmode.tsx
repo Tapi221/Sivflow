@@ -1,8 +1,8 @@
 import { motion, type Transition } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/calendar.types";
-import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
+import { useT } from "@shared/i18n/useT";
 
 type CalendarViewModeOption = {
   value: CalendarViewMode;
