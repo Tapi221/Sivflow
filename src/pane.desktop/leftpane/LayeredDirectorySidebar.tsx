@@ -537,13 +537,15 @@ const LibraryHierarchySidebar = () => {
     const isOpen = isExpandable && isNodeOpen(node);
     const isSelected = selectedTreeId === node.id;
     const isLastSibling = index === siblingCount - 1;
+    const ancestorBranchMask = branchMask.slice(0, -1);
+    const shouldContinueCurrentBranch = branchMask[branchMask.length - 1] ?? false;
     const childBranchMask = [...branchMask, !isLastSibling];
     const rowStyle: CSSProperties = { paddingLeft: TREE_ROW_BASE_PADDING_LEFT_PX + depth * TREE_INDENT_PX };
 
     return (
       <div key={node.id} className="relative">
         <div className="relative">
-          {branchMask.map((shouldDrawGuide, guideIndex) =>
+          {ancestorBranchMask.map((shouldDrawGuide, guideIndex) =>
             shouldDrawGuide ? (
               <span
                 key={`${node.id}:guide:${guideIndex}`}
@@ -553,6 +555,16 @@ const LibraryHierarchySidebar = () => {
               />
             ) : null,
           )}
+          {depth > 0 ? (
+            <span
+              aria-hidden="true"
+              className={cn(
+                TREE_GUIDE_CLASS_NAME,
+                shouldContinueCurrentBranch ? "bottom-0 top-0 w-px" : "top-0 h-1/2 w-px",
+              )}
+              style={{ left: TREE_GUIDE_LEFT_OFFSET_PX + (depth - 1) * TREE_INDENT_PX }}
+            />
+          ) : null}
           {depth > 0 ? (
             <span
               aria-hidden="true"
