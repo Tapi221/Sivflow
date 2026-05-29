@@ -17,6 +17,8 @@ config.resolver.extraNodeModules = {
   "@": path.resolve(workspaceRoot, "src"),
   "@constants": path.resolve(workspaceRoot, "constants"),
   "@mobile": path.resolve(projectRoot, "src"),
+  "@mobile-renderer": path.resolve(workspaceRoot, "packages/mobile-renderer/src"),
+  "@shared": path.resolve(workspaceRoot, "shared"),
   react: resolveFromProject("react"),
   "react-dom": resolveFromProject("react-dom"),
   "react-native": resolveFromProject("react-native"),
