@@ -1,5 +1,5 @@
 export const APP_CHROME = {
-  brandLabel: "Manifolia",
+  brandLabel: "Sivflow",
   desktopTitleBar: {
     showBrandLabel: false,
   },
