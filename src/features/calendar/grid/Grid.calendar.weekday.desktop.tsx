@@ -38,7 +38,7 @@ const WEEKDAY_HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, hour) => ho
 const EVENT_COLUMN_GAP_PX = 4;
 const EVENT_COLUMN_INSET_PX = 3;
 const CURRENT_TIME_TICK_MS = GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS;
-const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
+const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
 const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 
 const createEventKey = (event: GoogleCalendarEvent): string => `${event.accountId ?? ""}:${event.calendarId}:${event.id}`;
@@ -60,7 +60,7 @@ const getCurrentTimeTopStyle = (now: Date): CSSProperties => ({
 
 const getHourLabelClassName = (hour: number): string => cn("absolute right-2 text-[11px] font-medium tabular-nums text-[#b8bcc5]", hour === 0 ? "top-1 translate-y-0" : "top-0 -translate-y-1/2");
 
-const getHeaderDateNumberClassName = (isSelected: boolean, isToday: boolean): string => cn(WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME, isSelected ? "text-[#3a77b2]" : isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
+const getHeaderDateNumberClassName = (isSelected: boolean, isToday: boolean): string => cn(WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME, isSelected ? "border-0 bg-[var(--ds-color-tag-sky-bg)] text-[var(--ds-color-tag-sky-fg)] shadow-none ring-0" : isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
 
 const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]) => {
   const dayKeys = new Set(days.map(getCalendarDateKey));
