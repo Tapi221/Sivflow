@@ -1,4 +1,5 @@
 import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
+import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { requireFirestoreDb } from "@/services/firebase";
 
 export type WatchChannel = {
@@ -9,12 +10,65 @@ export type WatchChannel = {
   userId: string;
 };
 
-const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
+type GoogleWatchResponse = {
+  id?: string;
+  resourceId?: string;
+  expiration?: string | number;
+};
 
+const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
 const WATCH_TTL_MS = 6 * 24 * 60 * 60 * 1000;
 const RENEWAL_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 
-const WEBHOOK_URL = import.meta.env.VITE_GCAL_WEBHOOK_URL as string;
+const isLoopbackHost = (hostname: string): boolean => {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname.endsWith(".localhost");
+};
+
+const isPrivateIpv4Host = (hostname: string): boolean => {
+  const parts = hostname.split(".").map((part) => Number(part));
+  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return false;
+
+  const [first, second] = parts;
+  return first === 10 || (first === 172 && second >= 16 && second <= 31) || (first === 192 && second === 168);
+};
+
+const isPublicHttpsWebhookUrl = (value: string | undefined): value is string => {
+  const trimmed = value?.trim();
+  if (!trimmed) return false;
+
+  try {
+    const url = new URL(trimmed);
+    return url.protocol === "https:" && !isLoopbackHost(url.hostname) && !isPrivateIpv4Host(url.hostname);
+  } catch {
+    return false;
+  }
+};
+
+const getWebhookUrl = (): string | null => {
+  if (isDesktopLikeRuntime()) return null;
+
+  const webhookUrl = import.meta.env.VITE_GCAL_WEBHOOK_URL as string | undefined;
+  return isPublicHttpsWebhookUrl(webhookUrl) ? webhookUrl.trim() : null;
+};
+
+const toWatchChannel = (data: GoogleWatchResponse, calendarId: string, userId: string): WatchChannel => {
+  if (!data.id || !data.resourceId || !data.expiration) {
+    throw new Error("watch failed: Google Calendar response is incomplete");
+  }
+
+  const expiration = Number(data.expiration);
+  if (!Number.isFinite(expiration)) {
+    throw new Error("watch failed: Google Calendar response has invalid expiration");
+  }
+
+  return {
+    channelId: data.id,
+    resourceId: data.resourceId,
+    calendarId,
+    expiration,
+    userId,
+  };
+};
 
 // ─────────────────────────────────────────────
 // WatchManager
@@ -34,7 +88,7 @@ export class GoogleCalendarWatchManager {
   // ─────────────────────────────
 
   async registerWatch(calendarId: string, accessToken: string): Promise<void> {
-    if (!WEBHOOK_URL) return;
+    if (!getWebhookUrl()) return;
 
     const existing = await this.loadChannel(calendarId);
 
@@ -45,6 +99,10 @@ export class GoogleCalendarWatchManager {
     }
 
     await this.createWatch(calendarId, accessToken);
+
+    if (existing) {
+      await this.stopRemoteChannel(existing, accessToken);
+    }
   }
 
   // ─────────────────────────────
@@ -55,25 +113,9 @@ export class GoogleCalendarWatchManager {
     const channel = this.channels.get(calendarId);
     if (!channel) return;
 
-    try {
-      await fetch(`${GCAL_API_BASE}/channels/stop`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: channel.channelId,
-          resourceId: channel.resourceId,
-        }),
-      });
-    } catch {
-      // ignore
-    }
-
-    this.channels.delete(calendarId);
+    await this.stopRemoteChannel(channel, accessToken);
     this.clearTimer(calendarId);
-    await this.deleteChannel(calendarId);
+    await this.deleteChannelIfCurrent(channel);
   }
 
   // ─────────────────────────────
@@ -81,11 +123,7 @@ export class GoogleCalendarWatchManager {
   // ─────────────────────────────
 
   async stopAll(accessToken: string): Promise<void> {
-    await Promise.allSettled(
-      Array.from(this.channels.keys()).map((id) =>
-        this.stopWatch(id, accessToken),
-      ),
-    );
+    await Promise.allSettled(Array.from(this.channels.keys()).map((id) => this.stopWatch(id, accessToken)));
 
     this.channels.clear();
     this.renewalTimers.forEach(clearTimeout);
@@ -100,6 +138,9 @@ export class GoogleCalendarWatchManager {
     calendarId: string,
     accessToken: string,
   ): Promise<void> {
+    const webhookUrl = getWebhookUrl();
+    if (!webhookUrl) return;
+
     const channelId = crypto.randomUUID();
     const expiration = Date.now() + WATCH_TTL_MS;
 
@@ -114,7 +155,7 @@ export class GoogleCalendarWatchManager {
         body: JSON.stringify({
           id: channelId,
           type: "web_hook",
-          address: WEBHOOK_URL,
+          address: webhookUrl,
           token: `${this.userId}:${calendarId}`,
           expiration: String(expiration),
         }),
@@ -125,15 +166,7 @@ export class GoogleCalendarWatchManager {
       throw new Error(`watch failed: ${response.status}`);
     }
 
-    const data = await response.json();
-
-    const channel: WatchChannel = {
-      channelId: data.id,
-      resourceId: data.resourceId,
-      calendarId,
-      expiration: Number(data.expiration),
-      userId: this.userId,
-    };
+    const channel = toWatchChannel((await response.json()) as GoogleWatchResponse, calendarId, this.userId);
 
     this.channels.set(calendarId, channel);
     await this.saveChannel(channel);
@@ -168,13 +201,35 @@ export class GoogleCalendarWatchManager {
     calendarId: string,
     accessToken: string,
   ): Promise<void> {
-    await this.stopWatch(calendarId, accessToken);
+    const previous = this.channels.get(calendarId) ?? await this.loadChannel(calendarId).catch(() => null);
     await this.createWatch(calendarId, accessToken);
+
+    if (previous) {
+      await this.stopRemoteChannel(previous, accessToken);
+    }
   }
 
   // ─────────────────────────────
   // helpers
   // ─────────────────────────────
+
+  private async stopRemoteChannel(channel: WatchChannel, accessToken: string): Promise<void> {
+    try {
+      await fetch(`${GCAL_API_BASE}/channels/stop`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: channel.channelId,
+          resourceId: channel.resourceId,
+        }),
+      });
+    } catch {
+      // best-effort cleanup
+    }
+  }
 
   private isValid(channel: WatchChannel): boolean {
     return channel.expiration > Date.now() + RENEWAL_THRESHOLD_MS;
@@ -212,7 +267,11 @@ export class GoogleCalendarWatchManager {
     await setDoc(this.getRef(channel.calendarId), channel);
   }
 
-  private async deleteChannel(calendarId: string) {
-    await deleteDoc(this.getRef(calendarId));
+  private async deleteChannelIfCurrent(channel: WatchChannel) {
+    const current = this.channels.get(channel.calendarId);
+    if (current?.channelId !== channel.channelId) return;
+
+    this.channels.delete(channel.calendarId);
+    await deleteDoc(this.getRef(channel.calendarId));
   }
 }
