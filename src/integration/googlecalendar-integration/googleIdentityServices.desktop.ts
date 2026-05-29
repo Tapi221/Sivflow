@@ -9,32 +9,19 @@
  * 参考: https://developers.google.com/identity/oauth2/web/guides/use-token-model
  */
 
-// GIS スクリプトの URL
 const GIS_SCRIPT_URL = "https://accounts.google.com/gsi/client";
 
-// GIS スクリプトのロード済みフラグ
 let _gisLoaded = false;
 
-/**
- * GIS スクリプトを動的にロードする。
- * 複数回呼ばれても 1 回だけロードする。
- */
 const loadGisScript = (): Promise<void> => {
   return new Promise((resolve, reject) => {
-    // 既にロード済みの場合はスキップ
-    if (
-      _gisLoaded ||
-      (typeof window !== "undefined" && window.google?.accounts)
-    ) {
+    if (_gisLoaded || (typeof window !== "undefined" && window.google?.accounts)) {
       _gisLoaded = true;
       resolve();
       return;
     }
 
-    // すでに script タグが挿入されている場合はロード完了を待つ
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[src="${GIS_SCRIPT_URL}"]`,
-    );
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${GIS_SCRIPT_URL}"]`);
     if (existing) {
       existing.addEventListener("load", () => {
         _gisLoaded = true;
@@ -44,7 +31,6 @@ const loadGisScript = (): Promise<void> => {
       return;
     }
 
-    // 新しく script タグを挿入
     const script = document.createElement("script");
     script.src = GIS_SCRIPT_URL;
     script.async = true;
@@ -63,26 +49,22 @@ const loadGisScript = (): Promise<void> => {
   });
 };
 
-/**
- * GIS Token Client を使って Google Calendar の access_token を取得する。
- *
- * @param clientId - Web OAuth クライアント ID (VITE_WEB_GOOGLE_OAUTH_CLIENT_ID)
- * @param scope    - 要求するスコープ
- * @param silent   - true の場合 prompt:'' でサイレント取得を試みる
- *                   false の場合 prompt:'consent select_account' で同意画面を表示
- * @returns        - access_token 文字列
- * @throws         - サイレント取得失敗時または明示的拒否時
- */
+const normalizeLoginHint = (loginHint: string | null | undefined): string | undefined => {
+  const normalized = loginHint?.trim();
+  return normalized ? normalized : undefined;
+};
+
 export const requestWebAccessTokenViaGis = async ({
   clientId,
   scope,
   silent = false,
+  loginHint,
 }: {
   clientId: string;
   scope: string;
   silent?: boolean;
+  loginHint?: string | null;
 }): Promise<string> => {
-  // GIS スクリプトをロード（初回のみ）
   await loadGisScript();
 
   return new Promise<string>((resolve, reject) => {
@@ -93,17 +75,15 @@ export const requestWebAccessTokenViaGis = async ({
       return;
     }
 
-    // GIS Token Client を初期化
+    const prompt = silent ? "" : "consent select_account";
+    const normalizedLoginHint = normalizeLoginHint(loginHint);
+    const overrideConfig = normalizedLoginHint ? { login_hint: normalizedLoginHint, prompt } : { prompt };
     const client = googleAccounts.oauth2.initTokenClient({
       client_id: clientId,
       scope,
-      // サイレントモード: 空文字 = ブラウザのセッションを利用してポップアップなしで取得
-      // 明示モード: 'consent select_account' = 同意画面を表示
-      prompt: silent ? "" : "consent select_account",
-
+      prompt,
       callback: (response) => {
         if (response.error) {
-          // サイレント失敗（login_required, interaction_required 等）
           reject(new Error(response.error_description ?? response.error));
           return;
         }
@@ -115,17 +95,11 @@ export const requestWebAccessTokenViaGis = async ({
 
         resolve(response.access_token);
       },
-
       error_callback: (error) => {
-        reject(
-          new Error(
-            (error as { message?: string }).message ??
-              "GIS token request failed",
-          ),
-        );
+        reject(new Error((error as { message?: string }).message ?? "GIS token request failed"));
       },
     });
 
-    client.requestAccessToken();
+    client.requestAccessToken(overrideConfig);
   });
 };
