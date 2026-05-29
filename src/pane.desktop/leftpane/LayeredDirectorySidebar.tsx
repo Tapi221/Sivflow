@@ -532,14 +532,13 @@ const LibraryHierarchySidebar = () => {
     index: number,
     siblingCount: number,
   ) {
-    const hasChildren = Boolean(node.children?.length);
+    const childCount = node.children?.length ?? 0;
+    const hasChildren = childCount > 0;
     const isExpandable = isNodeExpandable(node);
     const isOpen = isExpandable && isNodeOpen(node);
     const isSelected = selectedTreeId === node.id;
-    const isLastSibling = index === siblingCount - 1;
     const ancestorBranchMask = branchMask.slice(0, -1);
     const shouldContinueCurrentBranch = branchMask[branchMask.length - 1] ?? false;
-    const childBranchMask = [...branchMask, !isLastSibling];
     const rowStyle: CSSProperties = { paddingLeft: TREE_ROW_BASE_PADDING_LEFT_PX + depth * TREE_INDENT_PX };
 
     return (
@@ -617,9 +616,9 @@ const LibraryHierarchySidebar = () => {
               renderTreeNode(
                 childNode,
                 depth + 1,
-                childBranchMask,
+                [...branchMask, childIndex < childCount - 1],
                 childIndex,
-                node.children?.length ?? 0,
+                childCount,
               ),
             )}
           </div>
