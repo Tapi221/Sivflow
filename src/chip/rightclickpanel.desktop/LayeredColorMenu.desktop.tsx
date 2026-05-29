@@ -1,9 +1,11 @@
 import { memo, type CSSProperties, type RefObject } from "react";
+import { getTagColorSwatchStyle, TAG_COLOR_KEYS, type TagColorKey } from "@/chip/tag/tagColor";
+import { TAG_COLOR_PALETTE } from "@/styles/tokens/tag.palette";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
 
 export type LayeredColorMenuOption = {
-  id: string;
+  id: TagColorKey;
   label: string;
   value: string;
 };
@@ -19,19 +21,21 @@ type LayeredColorMenuProps = {
   onSelectColor: (color: string) => void;
 };
 
+const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
+  gray: "グレー",
+  purple: "パープル",
+  teal: "ティール",
+  pink: "ピンク",
+  amber: "アンバー",
+  blue: "ブルー",
+  green: "グリーン",
+  red: "レッド",
+  coral: "コーラル",
+  sky: "スカイ",
+};
+
 export const LAYERED_COLOR_MENU_PANEL_ID = "layered-color-submenu";
-export const LAYERED_COLOR_MENU_OPTIONS: readonly LayeredColorMenuOption[] = [
-  { id: "slate", label: "スレート", value: "#64748b" },
-  { id: "red", label: "レッド", value: "#ef4444" },
-  { id: "orange", label: "オレンジ", value: "#f97316" },
-  { id: "amber", label: "アンバー", value: "#f59e0b" },
-  { id: "yellow", label: "イエロー", value: "#eab308" },
-  { id: "green", label: "グリーン", value: "#22c55e" },
-  { id: "teal", label: "ティール", value: "#14b8a6" },
-  { id: "sky", label: "スカイ", value: "#0ea5e9" },
-  { id: "blue", label: "ブルー", value: "#3b82f6" },
-  { id: "purple", label: "パープル", value: "#8b5cf6" },
-];
+export const LAYERED_COLOR_MENU_OPTIONS: readonly LayeredColorMenuOption[] = TAG_COLOR_KEYS.map((colorKey) => ({ id: colorKey, label: TAG_COLOR_LABELS[colorKey], value: TAG_COLOR_PALETTE[colorKey].swatch }));
 
 const LAYERED_COLOR_MENU_TITLE = "色を変更";
 const LAYERED_COLOR_MENU_GRID_COLUMNS = 5;
@@ -64,7 +68,6 @@ const LAYERED_COLOR_MENU_STYLE = `
   border: 1px solid rgba(0, 0, 0, 0.16);
   border-radius: 9999px;
   background: transparent;
-  color: #ffffff;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.38);
 }
 
@@ -131,7 +134,7 @@ const LayeredColorMenuBase = ({
                 aria-pressed={isSelected}
                 title={option.label}
                 className={["layered-color-menu-swatch", isSelected ? "layered-color-menu-swatch--selected" : null].filter(Boolean).join(" ")}
-                style={{ backgroundColor: option.value }}
+                style={getTagColorSwatchStyle(option.id)}
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
