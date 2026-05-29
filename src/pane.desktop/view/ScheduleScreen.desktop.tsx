@@ -17,7 +17,7 @@ import type { GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { CalendarWorkspaceToolbar } from "@/pane.desktop/header/ScheduleToolbar";
-import { CalendarSidebar } from "@/pane.desktop/leftpane/CalendarSidebar";
+import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
 import { CalendarSelectedViewsSplitView } from "@/pane.desktop/leftpane/schedule/Calendar.SelectedViewsSplitView.desktop";
 
