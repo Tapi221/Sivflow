@@ -1,6 +1,7 @@
 import { motion, type Transition } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/calendar.types";
+import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
 type CalendarViewModeOption = {
@@ -21,6 +22,7 @@ const CALENDAR_VIEW_MODE_INACTIVE_TEXT_CLASS = "text-[#d5d5d5]";
 const CALENDAR_VIEW_MODE_HOVER_TEXT_CLASS = "hover:text-[#8c8c8c]";
 const CALENDAR_VIEW_MODE_INDICATOR_CLASS = "pointer-events-none absolute inset-0 z-0 rounded-[8px] border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]";
 const LIST_PIE_CHART_VIEW_MODES = ["list", "pieChart"] as const satisfies readonly CalendarViewMode[];
+const STATIC_TIMETABLE_VIEW_MODE = "timetable" satisfies CalendarViewMode;
 const CALENDAR_VIEW_MODE_MOTION_TRANSITION: Transition = {
   type: "tween",
   duration: 0.12,
@@ -70,10 +72,12 @@ const ToggleCalendarViewMode = ({
   options,
   className,
 }: ToggleCalendarViewModeProps) => {
+  const t = useT();
   const changeFrameRef = useRef<number | null>(null);
   const [optimisticValue, setOptimisticValue] = useState<CalendarViewModeSelection>(value);
   const displayedValue = optimisticValue;
   const shouldRenderStaticIndicators = hasMultipleSelectedViewModes(displayedValue);
+  const shouldRenderStaticTimetableOption = options.every((option) => option.value !== STATIC_TIMETABLE_VIEW_MODE);
 
   const handleChange = useCallback(
     (nextValue: CalendarViewMode) => {
@@ -155,6 +159,21 @@ const ToggleCalendarViewMode = ({
       )}
     >
       {renderedOptions}
+      {shouldRenderStaticTimetableOption && (
+        <button
+          type="button"
+          aria-disabled={true}
+          tabIndex={-1}
+          className={cn(
+            "relative isolate z-10 flex h-6 min-w-7 cursor-default items-center justify-center rounded-[8px] px-1.5",
+            "appearance-none select-none text-[11px] font-semibold leading-none tracking-[-0.01em]",
+            "outline-none ring-0",
+            CALENDAR_VIEW_MODE_INACTIVE_TEXT_CLASS,
+          )}
+        >
+          <span className="relative z-10">{t.viewTimetable}</span>
+        </button>
+      )}
     </div>
   );
 };
