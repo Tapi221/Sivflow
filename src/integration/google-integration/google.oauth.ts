@@ -3,7 +3,7 @@ import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/electron/app";
 import { readEmail } from "@/integration/googlecalendar-integration/gcal.storage";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
-import { isGoogleOAuthPopupCallbackPayload } from "./google.oauth-popup-callback";
+import { GOOGLE_OAUTH_POPUP_CALLBACK_CHANNEL, GOOGLE_OAUTH_POPUP_CALLBACK_STORAGE_KEY, isGoogleOAuthPopupCallbackPayload } from "./google.oauth-popup-callback";
 
 const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 const GOOGLE_CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
@@ -164,11 +164,15 @@ const waitForWebPopupCode = (popup: Window, state: string, redirectUri: string):
   let settled = false;
   let pollTimer: number | null = null;
   let timeoutTimer: number | null = null;
+  let broadcastChannel: BroadcastChannel | null = null;
 
   const cleanup = (): void => {
     if (pollTimer !== null) window.clearInterval(pollTimer);
     if (timeoutTimer !== null) window.clearTimeout(timeoutTimer);
     window.removeEventListener("message", handleMessage);
+    window.removeEventListener("storage", handleStorage);
+    broadcastChannel?.close();
+    localStorage.removeItem(GOOGLE_OAUTH_POPUP_CALLBACK_STORAGE_KEY);
     try {
       if (!popup.closed) popup.close();
     } catch {
@@ -210,17 +214,29 @@ const waitForWebPopupCode = (popup: Window, state: string, redirectUri: string):
     finish(() => resolve(code));
   };
 
-  function handleMessage(event: MessageEvent<unknown>): void {
-    if (event.source !== popup) return;
-    if (event.origin !== expected.origin) return;
-    if (!isGoogleOAuthPopupCallbackPayload(event.data)) return;
+  const handleCallbackPayload = (payload: unknown): void => {
+    if (!isGoogleOAuthPopupCallbackPayload(payload)) return;
     handleCallbackUrl({
-      rawUrl: event.data.url,
-      callbackState: event.data.state,
-      callbackCode: event.data.code,
-      callbackError: event.data.error,
-      errorDescription: event.data.errorDescription,
+      rawUrl: payload.url,
+      callbackState: payload.state,
+      callbackCode: payload.code,
+      callbackError: payload.error,
+      errorDescription: payload.errorDescription,
     });
+  };
+
+  function handleMessage(event: MessageEvent<unknown>): void {
+    if (event.origin !== expected.origin) return;
+    handleCallbackPayload(event.data);
+  }
+
+  function handleStorage(event: StorageEvent): void {
+    if (event.key !== GOOGLE_OAUTH_POPUP_CALLBACK_STORAGE_KEY || !event.newValue) return;
+    try {
+      handleCallbackPayload(JSON.parse(event.newValue));
+    } catch {
+      // 他の値は無視する。
+    }
   }
 
   const poll = (): void => {
@@ -245,6 +261,11 @@ const waitForWebPopupCode = (popup: Window, state: string, redirectUri: string):
     finish(() => reject(new Error("OAuth timeout")));
   }, WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS);
   window.addEventListener("message", handleMessage);
+  window.addEventListener("storage", handleStorage);
+  if (typeof BroadcastChannel !== "undefined") {
+    broadcastChannel = new BroadcastChannel(GOOGLE_OAUTH_POPUP_CALLBACK_CHANNEL);
+    broadcastChannel.onmessage = (event: MessageEvent<unknown>) => handleCallbackPayload(event.data);
+  }
   pollTimer = window.setInterval(poll, 250);
   poll();
 });
@@ -287,6 +308,7 @@ export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<{ cod
   const state = randomBase64Url(16);
   const codeVerifier = randomBase64Url(48);
   const codeChallenge = await createCodeChallenge(codeVerifier);
+  localStorage.removeItem(GOOGLE_OAUTH_POPUP_CALLBACK_STORAGE_KEY);
   const popup = window.open(buildAuthorizeUrl({ clientId, redirectUri, codeChallenge, loginHint, state }), "flashcard-master-google-oauth", getCenteredPopupFeatures(500, 720));
   if (!popup) throw new Error("Google OAuth popup could not be opened");
   try {
