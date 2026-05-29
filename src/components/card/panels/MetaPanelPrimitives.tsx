@@ -62,10 +62,7 @@ type MetaPanelSwitchProps = {
   switchAriaLabel?: string;
 };
 
-const META_PANEL_ACTION_ROW_ALIGN_CLASS: Record<
-  MetaPanelActionRowAlign,
-  string
-> = {
+const META_PANEL_ACTION_ROW_ALIGN_CLASS: Record<MetaPanelActionRowAlign, string> = {
   start: "ds-editor-pane__action-row--start",
   between: "ds-editor-pane__action-row--between",
   end: "ds-editor-pane__action-row--end",
@@ -273,15 +270,4 @@ const MetaPanelSwitch = ({
 MetaPanelInput.displayName = "MetaPanelInput";
 MetaPanelSectionActionButton.displayName = "MetaPanelSectionActionButton";
 
-export {
-  MetaPanelActionRow,
-  MetaPanelInfoRow,
-  MetaPanelInput,
-  MetaPanelMutedSurface,
-  MetaPanelSectionActionButton,
-  MetaPanelSectionHeader,
-  MetaPanelSectionTitle,
-  MetaPanelSurfaceField,
-  MetaPanelSwitch,
-  MetaPanelSwitchRow,
-};
+export { MetaPanelActionRow, MetaPanelInfoRow, MetaPanelInput, MetaPanelMutedSurface, MetaPanelSectionActionButton, MetaPanelSectionHeader, MetaPanelSectionTitle, MetaPanelSurfaceField, MetaPanelSwitch, MetaPanelSwitchRow };
