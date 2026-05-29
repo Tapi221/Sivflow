@@ -126,7 +126,7 @@ export type CalendarWeekDayGridProps = {
   virtualRail?: ScheduleVirtualRail;
   visibleEvents: GoogleCalendarEvent[];
   calendarDayColumnWidth: number;
-  _calendarDayColumnWidth?: number;
+  _calendarDayColumnWidth: number;
   calendarGridStyle: CalendarGridStyle;
   onScroll?: (event: UIEvent<HTMLDivElement>) => void;
   selectedDate: Date;
