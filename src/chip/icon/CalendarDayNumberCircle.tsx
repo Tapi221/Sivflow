@@ -14,7 +14,7 @@ const CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME =
 const CALENDAR_DAY_NUMBER_CIRCLE_TODAY_CLASS_NAME =
   "bg-[#eeeeee] !text-[#3f3f3f] shadow-none ring-1 ring-[#dedede]";
 const CALENDAR_DAY_NUMBER_CIRCLE_SELECTED_CLASS_NAME =
-  "bg-[#eff0f3] !text-[#4f5663] shadow-none ring-0";
+  "border-0 bg-[var(--ds-color-tag-pink-bg)] !text-[var(--ds-color-tag-pink-fg)] shadow-none ring-0";
 
 const getCalendarDayNumberCircleClassName = ({
   isToday = false,
