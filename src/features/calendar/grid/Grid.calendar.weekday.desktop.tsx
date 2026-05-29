@@ -2,7 +2,6 @@ import type { CSSProperties } from "react";
 import { memo, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.weekday.placement";
@@ -39,6 +38,8 @@ const WEEKDAY_HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, hour) => ho
 const EVENT_COLUMN_GAP_PX = 4;
 const EVENT_COLUMN_INSET_PX = 3;
 const CURRENT_TIME_TICK_MS = GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS;
+const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
+const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 
 const createEventKey = (event: GoogleCalendarEvent): string => `${event.accountId ?? ""}:${event.calendarId}:${event.id}`;
 
@@ -58,6 +59,8 @@ const getCurrentTimeTopStyle = (now: Date): CSSProperties => ({
 });
 
 const getHourLabelClassName = (hour: number): string => cn("absolute right-2 text-[11px] font-medium tabular-nums text-[#b8bcc5]", hour === 0 ? "top-1 translate-y-0" : "top-0 -translate-y-1/2");
+
+const getHeaderDateNumberClassName = (isSelected: boolean, isToday: boolean): string => cn(WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME, isSelected ? "text-[#3a77b2]" : isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
 
 const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]) => {
   const dayKeys = new Set(days.map(getCalendarDateKey));
@@ -149,9 +152,10 @@ const CalendarWeekDayGridComponent = ({
 
             return (
               <div key={dayKey} className="flex h-12 items-center justify-center border-l px-2" style={{ borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }}>
-                <CalendarDateButton isSelected={isSelected} isToday={isToday} onClick={() => onSelectDate?.(day)}>
-                  <CalendarDateContent dateLabel={format(day, "d", { locale: ja })} weekdayLabel={format(day, "EEE", { locale: ja })} isSelected={isSelected} isToday={isToday} layout="date-weekday" />
-                </CalendarDateButton>
+                <button type="button" className="flex h-12 w-full items-center justify-center gap-1 bg-transparent p-0 text-center outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25" aria-pressed={isSelected} onClick={() => onSelectDate?.(day)}>
+                  <span className={getHeaderDateNumberClassName(isSelected, isToday)}>{format(day, "d", { locale: ja })}</span>
+                  <span className={WEEKDAY_HEADER_WEEKDAY_CLASS_NAME}>{format(day, "EEE", { locale: ja })}</span>
+                </button>
               </div>
             );
           })}
