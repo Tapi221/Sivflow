@@ -4,7 +4,7 @@ import { getCalendarDateKey } from "@/features/calendar/calendarEventRange";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { getScheduleVirtualRailDate } from "@/features/calendar/grid/ScheduleColumn.shared";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
-import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync.fixed";
+import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync";
 import { useSyncedHorizontalScroll } from "./useSyncedHorizontalScroll";
 
 type CalendarBuffer = {
