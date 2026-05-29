@@ -8,7 +8,7 @@ import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
-type CalendarPieChartViewProps = { days: Date[]; virtualRail?: ScheduleVirtualRail; selectedDate: Date; events: GoogleCalendarEvent[]; appProjects: AppCalendarItem[]; googleAccounts: GoogleAccountDisplay[]; onSelectDate?: (date: Date) => void; onReachStart?: () => void; onReachEnd?: () => void; onVisibleDateChange?: (date: Date) => void; dayHeights?: Record<string, number>; scrollViewportRef?: MutableRefObject<HTMLDivElement | null>; onScrollTopChange?: (scrollTop: number) => void; className?: string };
+type CalendarPieChartViewProps = { days: Date[]; virtualRail?: ScheduleVirtualRail; selectedDate: Date; events: GoogleCalendarEvent[]; appProjects: AppCalendarItem[]; googleAccounts: GoogleAccountDisplay[]; onSelectDate?: (date: Date) => void; onVisibleDateChange?: (date: Date) => void; dayHeights?: Record<string, number>; scrollViewportRef?: MutableRefObject<HTMLDivElement | null>; onScrollTopChange?: (scrollTop: number) => void; className?: string };
 
 type VirtualRange = { start: number; end: number };
 
