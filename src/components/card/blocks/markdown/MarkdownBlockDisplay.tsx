@@ -2,7 +2,7 @@ import type { CSSProperties, KeyboardEventHandler, MouseEventHandler } from "rea
 import { MarkdownBlockView } from "./MarkdownBlockPreview";
 import { TEXT_BLOCK_CONTENT_CLASS } from "@/components/card/blocks/text/textBlockStyles";
 import { buildTypographyStyle, mergeStyles } from "@/components/card/common/cardSetViewZoom";
-import { TYPOGRAPHY_FONT_SIZE_PX } from "@/styles/tokens/typography";
+import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/styles/tokens/typography";
 import { cn } from "@/lib/utils";
 
 type MarkdownBlockDisplayProps = {

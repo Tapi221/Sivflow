@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
-import { getTextColorDerivedBackgroundColor } from "@/styles/tokens/color-scheme";
-import { TAG_COLOR_PALETTE } from "@/styles/tokens/tag.palette";
+import { getTextColorDerivedBackgroundColor } from "@shared/styles/tokens/color-scheme";
+import { TAG_COLOR_PALETTE } from "@shared/styles/tokens/tag.palette";
 import { getTagColorKey } from "./tag.parser";
 
 const getPalette = (input?: string) => TAG_COLOR_PALETTE[getTagColorKey(input)];
