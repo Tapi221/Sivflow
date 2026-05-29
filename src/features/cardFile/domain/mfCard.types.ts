@@ -12,7 +12,7 @@ export type MfCardFileV1 = {
   version: typeof MF_CARD_VERSION;
   exportedAt: string;
   app: {
-    name: "Manifolia";
+    name: "Solifa";
     version?: string;
   };
   card: MfDeckCardV1;
