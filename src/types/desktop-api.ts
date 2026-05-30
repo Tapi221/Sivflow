@@ -35,6 +35,7 @@ export type DesktopImportFileReadResult = {
 export interface DesktopOauthApi {
   start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
+  takePendingCallback(): Promise<DesktopOauthCallbackPayload | null>;
   exchangeIdToken(input: DesktopOauthExchangeInput): Promise<string>;
   exchangeTokens(
     input: DesktopOauthExchangeInput,
