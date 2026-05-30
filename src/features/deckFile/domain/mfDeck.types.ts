@@ -2,14 +2,14 @@
 import type { CardBlock } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-export const MF_DECK_FORMAT = "manifolia.deck" as const;
+export const MF_DECK_FORMAT = "sivflow.deck" as const;
 export const MF_DECK_VERSION = 1 as const;
 export const MF_DECK_MANIFEST_PATH = "manifest.json" as const;
 export const MF_DECK_CARDS_PATH = "cards.json" as const;
 export const MF_DECK_MEDIA_DIRECTORY = "media/" as const;
 export const MF_DECK_MEDIA_MANIFEST_PATH = "media/manifest.json" as const;
 export const MF_DECK_FILE_EXTENSION = ".mfdeck" as const;
-export const MF_DECK_MIME_TYPE = "application/vnd.manifolia.deck+zip" as const;
+export const MF_DECK_MIME_TYPE = "application/vnd.sivflow.deck+zip" as const;
 export const MF_DECK_MEDIA_URI_PREFIX = "mfdeck://media/" as const;
 export const MF_DECK_MAX_CARDS = 50000 as const;
 export const MF_DECK_MAX_BLOCKS_PER_FACE = 1000 as const;
@@ -67,7 +67,7 @@ export type MfDeckMediaEntryV1 = {
 };
 
 export type MfDeckMediaManifestV1 = {
-  format: "manifolia.deck.media";
+  format: "sivflow.deck.media";
   version: typeof MF_DECK_VERSION;
   media: MfDeckMediaEntryV1[];
 };
@@ -77,7 +77,7 @@ export type MfDeckManifestV1 = {
   version: typeof MF_DECK_VERSION;
   exportedAt: string;
   app: {
-    name: "Manifolia";
+    name: "Sivflow";
     version?: string;
   };
   deck: {
@@ -121,7 +121,7 @@ export type MfDeckCardV1 = {
 };
 
 export type MfDeckCardsJsonV1 = {
-  format: "manifolia.deck.cards";
+  format: "sivflow.deck.cards";
   version: typeof MF_DECK_VERSION;
   cards: MfDeckCardV1[];
 };
