@@ -1,10 +1,10 @@
-import { startTransition, useDeferredValue, useEffect, useMemo, useRef } from "react";
+import { startTransition, useDeferredValue, useEffect, useRef } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
-import { GridCalendarMonthDesktop } from "./Grid.calendar.month.desktop";
 import { useMonthRowResize } from "@/features/calendar/grid/height/useRowResize.month.desktop";
 import { useMonthInfiniteScroll } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+import { GridCalendarMonthDesktop } from "./Grid.calendar.month.desktop";
 
 const RENDERED_RANGE_NOTIFY_DELAY_MS = 180;
 
@@ -18,18 +18,6 @@ type CalendarMonthViewProps = {
   onRenderedRangeChange?: (range: CalendarDateRange) => void;
 };
 
-const getDayStart = (date: Date): Date => {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
-};
-
-const getDayEnd = (date: Date): Date => {
-  const d = new Date(date);
-  d.setHours(23, 59, 59, 999);
-  return d;
-};
-
 export const CalendarMonthView = ({
   currentDate,
   selectedDate,
@@ -39,7 +27,7 @@ export const CalendarMonthView = ({
   onVisibleMonthChange,
   onRenderedRangeChange,
 }: CalendarMonthViewProps) => {
-  const today = useMemo(() => new Date(), []);
+  const todayRef = useRef(new Date());
   const deferredVisibleEvents = useDeferredValue(visibleEvents);
 
   const isResizingRef = useRef(false);
@@ -75,21 +63,7 @@ export const CalendarMonthView = ({
     },
   });
 
-  const renderedRange = useMemo<CalendarDateRange | null>(() => {
-    const firstWeek = scroll.monthWeeks[0];
-    const lastWeek = scroll.monthWeeks[scroll.monthWeeks.length - 1];
-
-    if (!firstWeek || !lastWeek) return null;
-
-    return {
-      start: getDayStart(firstWeek.days[0].date),
-      end: getDayEnd(lastWeek.days[lastWeek.days.length - 1].date),
-    };
-  }, [scroll.monthWeeks]);
-
   useEffect(() => {
-    if (!renderedRange) return;
-
     if (renderedRangeNotifyTimeoutRef.current !== null) {
       window.clearTimeout(renderedRangeNotifyTimeoutRef.current);
     }
@@ -98,7 +72,7 @@ export const CalendarMonthView = ({
       renderedRangeNotifyTimeoutRef.current = null;
 
       startTransition(() => {
-        onRenderedRangeChange?.(renderedRange);
+        onRenderedRangeChange?.(scroll.visibleWeekRange);
       });
     }, RENDERED_RANGE_NOTIFY_DELAY_MS);
 
@@ -108,7 +82,7 @@ export const CalendarMonthView = ({
       window.clearTimeout(renderedRangeNotifyTimeoutRef.current);
       renderedRangeNotifyTimeoutRef.current = null;
     };
-  }, [onRenderedRangeChange, renderedRange]);
+  }, [onRenderedRangeChange, scroll.visibleWeekRange]);
 
   return (
     <div
@@ -121,7 +95,7 @@ export const CalendarMonthView = ({
         className="calendar-month-scroll min-h-0 flex-1 overflow-y-auto bg-white"
       >
         <GridCalendarMonthDesktop
-          today={today}
+          today={todayRef.current}
           selectedDate={selectedDate}
           visibleEvents={deferredVisibleEvents}
           monthWeeks={scroll.monthWeeks}
