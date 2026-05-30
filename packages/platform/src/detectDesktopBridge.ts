@@ -20,7 +20,6 @@ export const hasDesktopBridge = (): boolean => {
     hasMethod(bridge.shell?.openExternal) &&
     hasMethod(bridge.oauth?.start) &&
     hasMethod(bridge.oauth?.cancel) &&
-    hasMethod(bridge.oauth?.exchangeIdToken) &&
     hasMethod(bridge.oauth?.storeRefreshToken) &&
     hasMethod(bridge.oauth?.readRefreshToken) &&
     hasMethod(bridge.oauth?.deleteRefreshToken) &&
