@@ -2,8 +2,8 @@ import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/desktop/app";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
 import { auth } from "@/infrastructure/firebase/client";
-import { oauthBridge } from "@/platform/capabilities/oauthBridge";
-import type { DesktopOauthCallbackPayload } from "@platform/desktopApi";
+import platform from "../../index";
+import type { DesktopOauthCallbackPayload } from "../../desktopApi";
 
 const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT =
   "https://accounts.google.com/o/oauth2/v2/auth";
@@ -217,7 +217,7 @@ const exchangeCodeForIdToken = async ({
   codeVerifier: string;
   redirectUri: string;
 }): Promise<string> => {
-  return await oauthBridge.exchangeIdToken({
+  return await platform.oauth.exchangeIdToken({
     clientId,
     code,
     codeVerifier,
@@ -241,7 +241,7 @@ const signIn: GoogleAuthPort["signIn"] = async () => {
   const codePromise = waitForDesktopOAuthCode(state, redirectUri);
 
   try {
-    await oauthBridge.start(authorizeUrl);
+    await platform.oauth.start(authorizeUrl);
     const code = await codePromise;
 
     const idToken = await exchangeCodeForIdToken({
@@ -254,7 +254,7 @@ const signIn: GoogleAuthPort["signIn"] = async () => {
     const credential = GoogleAuthProvider.credential(idToken);
     await signInWithCredential(auth, credential);
   } catch (error) {
-    await oauthBridge.cancel().catch(() => undefined);
+    await platform.oauth.cancel().catch(() => undefined);
     throw error;
   }
 };
