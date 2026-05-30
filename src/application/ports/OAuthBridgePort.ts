@@ -24,6 +24,7 @@ export interface OAuthBridgeTokenExchangeResult {
 export interface OAuthBridgePort {
   start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
+  takePendingCallback(): Promise<OAuthBridgeCallbackPayload | null>;
   exchangeIdToken(input: OAuthBridgeTokenExchangeInput): Promise<string>;
   exchangeTokens(
     input: OAuthBridgeTokenExchangeInput,
