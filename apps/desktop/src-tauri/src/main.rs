@@ -1,6 +1,4 @@
-use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::fs;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
@@ -13,37 +11,12 @@ const DESKTOP_OAUTH_HOST: &str = "127.0.0.1";
 const DESKTOP_OAUTH_PORT: u16 = 42813;
 const DESKTOP_OAUTH_PATH: &str = "/";
 const DESKTOP_GOOGLE_OAUTH_REDIRECT_URI: &str = "http://127.0.0.1:42813";
-const GOOGLE_AUTH_EXCHANGE_ENDPOINT: &str = "https://oauth2.googleapis.com/token";
 const MAX_DESKTOP_IMPORT_FILE_BYTES: u64 = 128 * 1024 * 1024;
 const SUPPORTED_IMPORT_FILE_EXTENSIONS: [&str; 2] = ["mfdeck", "mfcard"];
 
 #[derive(Default)]
 struct AuthLoopbackState {
     pending_url: Mutex<Option<String>>,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct AuthCodeExchangeInput {
-    client_id: String,
-    code: String,
-    code_verifier: String,
-    redirect_uri: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct StoreRefreshTokenInput {
-    account_id: String,
-    refresh_token: String,
-}
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct AuthExchangeResult {
-    access_token: Option<String>,
-    id_token: Option<String>,
-    scope: Option<String>,
 }
 
 #[derive(Serialize, Clone)]
@@ -68,15 +41,6 @@ struct DesktopImportFileReadResult {
 #[derive(Serialize, Clone)]
 struct DesktopImportFileOpenPayload {
     paths: Vec<String>,
-}
-
-#[derive(Deserialize)]
-struct GoogleTokenResponse {
-    access_token: Option<String>,
-    id_token: Option<String>,
-    scope: Option<String>,
-    error: Option<String>,
-    error_description: Option<String>,
 }
 
 fn can_open_external(raw_url: &str) -> bool {
@@ -185,12 +149,8 @@ fn handle_loopback_client(mut stream: TcpStream, app_handle: AppHandle) -> Resul
     let payload = parse_callback_payload(&raw_url)?;
     app_handle.emit("oauth:callback", payload).map_err(|error| error.to_string())?;
 
-    let body = "<!doctype html><html><body><h1>ログイン完了。アプリに戻ってください。</h1></body></html>";
-    let response = format!(
-        "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\n\r\n{}",
-        body.as_bytes().len(),
-        body,
-    );
+    let body = "<!doctype html><html><body><h1>Done</h1></body></html>";
+    let response = format!("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\n\r\n{}", body.as_bytes().len(), body);
     stream.write_all(response.as_bytes()).map_err(|error| error.to_string())?;
 
     Ok(())
@@ -205,47 +165,10 @@ fn ensure_auth_loopback_redirect(authorize_url: &str) -> Result<(), String> {
         .ok_or_else(|| "Auth redirect URI is missing".to_string())?;
 
     if redirect_uri != DESKTOP_GOOGLE_OAUTH_REDIRECT_URI {
-        return Err(format!(
-            "Auth redirect URI mismatch. expected={}, actual={}",
-            DESKTOP_GOOGLE_OAUTH_REDIRECT_URI, redirect_uri,
-        ));
+        return Err(format!("Auth redirect URI mismatch. expected={}, actual={}", DESKTOP_GOOGLE_OAUTH_REDIRECT_URI, redirect_uri));
     }
 
     Ok(())
-}
-
-fn credential_entry(account_id: &str) -> Result<keyring::Entry, String> {
-    keyring::Entry::new("sivflow-google-oauth", account_id).map_err(|error| error.to_string())
-}
-
-async fn exchange_auth_code(input: AuthCodeExchangeInput) -> Result<AuthExchangeResult, String> {
-    let request_body = HashMap::from([
-        ("client_id".to_string(), input.client_id),
-        ("code".to_string(), input.code),
-        ("code_verifier".to_string(), input.code_verifier),
-        ("grant_type".to_string(), "authorization_code".to_string()),
-        ("redirect_uri".to_string(), input.redirect_uri),
-    ]);
-
-    let payload = Client::new()
-        .post(GOOGLE_AUTH_EXCHANGE_ENDPOINT)
-        .form(&request_body)
-        .send()
-        .await
-        .map_err(|error| error.to_string())?
-        .json::<GoogleTokenResponse>()
-        .await
-        .map_err(|error| error.to_string())?;
-
-    if let Some(error) = payload.error {
-        return Err(payload.error_description.unwrap_or(error));
-    }
-
-    Ok(AuthExchangeResult {
-        access_token: payload.access_token,
-        id_token: payload.id_token,
-        scope: payload.scope,
-    })
 }
 
 #[tauri::command]
@@ -297,12 +220,7 @@ fn desktop_import_select_files() -> Vec<String> {
         .pick_files()
         .unwrap_or_default();
 
-    collect_desktop_import_file_paths(
-        files
-            .into_iter()
-            .map(|path| path.to_string_lossy().to_string())
-            .collect(),
-    )
+    collect_desktop_import_file_paths(files.into_iter().map(|path| path.to_string_lossy().to_string()).collect())
 }
 
 #[tauri::command]
@@ -328,31 +246,11 @@ fn oauth_cancel(state: State<AuthLoopbackState>) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn oauth_exchange_id_token(input: AuthCodeExchangeInput) -> Result<String, String> {
-    let payload = exchange_auth_code(input).await?;
-    payload.id_token.ok_or_else(|| "Google auth exchange did not return id credential".to_string())
-}
-
-#[tauri::command]
-fn oauth_store_refresh_token(input: StoreRefreshTokenInput) -> Result<(), String> {
-    credential_entry(&input.account_id)?.set_password(&input.refresh_token).map_err(|error| error.to_string())
-}
-
-#[tauri::command]
-fn oauth_read_refresh_token(account_id: String) -> Result<Option<String>, String> {
-    match credential_entry(&account_id)?.get_password() {
-        Ok(value) => Ok(Some(value)),
-        Err(keyring::Error::NoEntry) => Ok(None),
-        Err(error) => Err(error.to_string()),
-    }
-}
-
-#[tauri::command]
-fn oauth_delete_refresh_token(account_id: String) -> Result<(), String> {
-    match credential_entry(&account_id)?.delete_credential() {
-        Ok(()) => Ok(()),
-        Err(keyring::Error::NoEntry) => Ok(()),
-        Err(error) => Err(error.to_string()),
+fn oauth_take_pending_callback(state: State<AuthLoopbackState>) -> Result<Option<DesktopOauthCallbackPayload>, String> {
+    let mut pending_url = state.pending_url.lock().map_err(|_| "OAuth state lock failed".to_string())?;
+    match pending_url.take() {
+        Some(url) => parse_callback_payload(&url).map(Some),
+        None => Ok(None),
     }
 }
 
@@ -391,12 +289,9 @@ fn window_is_maximized(app_handle: AppHandle) -> Result<bool, String> {
 
 fn emit_desktop_import_files(app_handle: &AppHandle, values: Vec<String>) {
     let paths = collect_desktop_import_file_paths(values);
-
-    if paths.is_empty() {
-        return;
+    if !paths.is_empty() {
+        let _ = app_handle.emit("desktop:importFile:open", DesktopImportFileOpenPayload { paths });
     }
-
-    let _ = app_handle.emit("desktop:importFile:open", DesktopImportFileOpenPayload { paths });
 }
 
 fn main() {
@@ -414,10 +309,7 @@ fn main() {
             desktop_import_select_files,
             oauth_start,
             oauth_cancel,
-            oauth_exchange_id_token,
-            oauth_store_refresh_token,
-            oauth_read_refresh_token,
-            oauth_delete_refresh_token,
+            oauth_take_pending_callback,
             window_minimize,
             window_maximize_toggle,
             window_close,
