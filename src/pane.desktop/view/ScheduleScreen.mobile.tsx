@@ -112,7 +112,6 @@ export const ScheduleScreen = (_props: ScheduleScreenProps) => {
     visibleDays,
     googleCalendarEvents,
     googleAccounts,
-    calendarDayColumnWidth,
     calendarGridStyle,
     headerScrollRef,
     allDayScrollRef,
@@ -217,7 +216,7 @@ export const ScheduleScreen = (_props: ScheduleScreenProps) => {
       <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">
         {renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}
         <div className={cn("mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border", IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}>
-          <CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={googleCalendarEvents} calendarDayColumnWidth={calendarDayColumnWidth} _calendarDayColumnWidth={calendarDayColumnWidth} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} />
+          <CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={googleCalendarEvents} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} />
         </div>
       </CarvePanel>
     );
