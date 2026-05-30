@@ -1,10 +1,10 @@
 /* eslint-disable @stylistic/indent */
 import type { MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
 
-export const MF_CARD_FORMAT = "manifolia.card" as const;
+export const MF_CARD_FORMAT = "sivflow.card" as const;
 export const MF_CARD_VERSION = 1 as const;
 export const MF_CARD_FILE_EXTENSION = ".mfcard" as const;
-export const MF_CARD_MIME_TYPE = "application/vnd.manifolia.card+json" as const;
+export const MF_CARD_MIME_TYPE = "application/vnd.sivflow.card+json" as const;
 
 export type MfCardIssue = MfDeckIssue;
 
@@ -13,7 +13,7 @@ export type MfCardFileV1 = {
   version: typeof MF_CARD_VERSION;
   exportedAt: string;
   app: {
-    name: "Manifolia";
+    name: "Sivflow";
     version?: string;
   };
   card: MfDeckCardV1;
