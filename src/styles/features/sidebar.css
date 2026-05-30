@@ -134,7 +134,7 @@
 }
 
 html body [aria-label="Library hierarchy explorer"][aria-label="Library hierarchy explorer"] [role="treeitem"][role="treeitem"] {
-  gap: 10px !important;
+  gap: 4px !important;
 }
 
 html body [aria-label="Library hierarchy explorer"][aria-label="Library hierarchy explorer"] [role="treeitem"][role="treeitem"] > button:first-child,
