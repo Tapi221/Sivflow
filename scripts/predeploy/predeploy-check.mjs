@@ -6,6 +6,7 @@ import { execFileSync } from "node:child_process";
 
 const cwd = process.cwd();
 const firebasercPath = path.join(cwd, ".firebaserc");
+const productionEnvPath = path.join(cwd, ".env.production");
 
 const ALLOW_SAME_PROJECT_ALIAS = process.env.ALLOW_SAME_PROJECT_ALIAS === "1";
 
@@ -44,6 +45,37 @@ const loadFirebaseRc = () => {
       : {};
   } catch (error) {
     fail(`Failed to parse .firebaserc: ${String(error)}`);
+  }
+};
+
+const loadDotEnvFile = (filePath) => {
+  if (!fs.existsSync(filePath)) return {};
+
+  const values = {};
+  const lines = fs.readFileSync(filePath, "utf8").split(/\r?\n/);
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+
+    const separatorIndex = trimmed.indexOf("=");
+    if (separatorIndex <= 0) continue;
+
+    const key = trimmed.slice(0, separatorIndex).trim();
+    const rawValue = trimmed.slice(separatorIndex + 1).trim();
+    values[key] = rawValue.replace(/^["']|["']$/g, "");
+  }
+
+  return values;
+};
+
+const requireEnvValue = (key, fileValues) => {
+  const value = process.env[key] ?? fileValues[key];
+
+  if (!value || value === "__REPLACE_ME__" || value.startsWith("__REPLACE_")) {
+    fail(
+      `${key} is required for production Google Calendar OAuth. Set it in the deploy environment or .env.production.`,
+    );
   }
 };
 
@@ -120,4 +152,11 @@ if (
 info(
   `Active project: ${activeProjectId}${activeAlias ? ` (alias: ${activeAlias})` : ""}`,
 );
+
+if (activeAlias === "prod" || activeProjectId === prodProjectId) {
+  const productionEnv = loadDotEnvFile(productionEnvPath);
+  requireEnvValue("VITE_WEB_GOOGLE_OAUTH_CLIENT_ID", productionEnv);
+  requireEnvValue("VITE_GOOGLE_OAUTH_SERVER_TOKENS", productionEnv);
+}
+
 info("predeploy-check passed.");
