@@ -1,4 +1,4 @@
-import { cloneInkDocument, createEmptyInkDocument, type InkDocument, type InkSide, normalizeInkDocument } from "./ink.types";
+import { cloneInkDocument, createEmptyInkDocument, type InkDocument, type InkSide, normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 
 const INK_STORAGE_PREFIX = "ink:";
 
