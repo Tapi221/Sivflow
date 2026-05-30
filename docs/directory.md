@@ -1,4 +1,3 @@
-
 ```text
 apps/
   web/
@@ -14,6 +13,7 @@ apps/
       tauri.conf.json
       src/
         main.rs
+        handwriting_session.rs
 
   mobile/
     app.json
@@ -24,7 +24,11 @@ apps/
     ios/
       Manifolia/
         NativeModules/
+          InkDocumentExporter.swift
+          InkSessionBridge.swift
         NativeViews/
+          InkCanvasView.swift
+          InkCanvasViewManager.swift
         Assets.xcassets/
     android/
 
@@ -34,17 +38,36 @@ packages/
       AppShell.tsx
       routes/
       features/
+        card/
+          ink/
+            FlashcardInkOverlay.tsx
+            useFlashcardInk.ts
+            useRemoteInkSession.ts
       components/
+        ink/
+          InkLayer.tsx
+          InkToolbar.tsx
+          inkLayer.types.ts
 
   mobile-renderer/
     src/
       AppShell.tsx
       screens/
+        handwriting/
+          HandwritingModeScreen.tsx
+          HandwritingSessionListScreen.tsx
       components/
+        ink/
+          MobileInkCanvasHost.tsx
+          MobileInkToolbar.tsx
 
   core/
     src/
       domain/
+        card/
+          ink/
+            inkDocument.ts
+            inkDocument.test.ts
       usecases/
       models/
       validation/
@@ -56,6 +79,11 @@ packages/
       calendar/
       files/
       shell/
+      handwriting/
+        handwritingSession.types.ts
+        handwritingSessionClient.ts
+        handwritingSessionDesktopAdapter.ts
+        handwritingSessionMobileAdapter.ts
 
 shared/
   assets/
@@ -65,6 +93,8 @@ shared/
   schemas/
     card.schema.json
     deck.schema.json
+    ink.schema.json
+    handwriting-session.schema.json
 
   design-tokens/
     colors.json
