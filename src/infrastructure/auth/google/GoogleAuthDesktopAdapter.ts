@@ -153,12 +153,14 @@ const waitForDesktopOAuthCode = (
           return;
         }
 
-        if (!parsed.code) {
+        const code = parsed.code;
+
+        if (!code) {
           reject(new Error("Google OAuth callback does not include auth code"));
           return;
         }
 
-        resolve(parsed.code);
+        resolve(code);
       },
     );
   });
