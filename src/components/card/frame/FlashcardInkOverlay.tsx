@@ -1,6 +1,6 @@
 import React from "react";
 import { InkLayer, InkToolbar } from "@/components/ink/InkLayer";
-import type { InkDocument, InkEditTool } from "@/components/ink/ink.types";
+import type { InkDocument, InkEditTool } from "@core/domain/card/ink/inkDocument";
 import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.types";
 
 interface FlashcardInkOverlayProps {
@@ -11,9 +11,7 @@ interface FlashcardInkOverlayProps {
   inkEditingEnabled: boolean;
   cardId: string | null;
   activeInkSide: "question" | "answer";
-  activeInkDocument: ReturnType<
-    typeof import("@/components/ink/inkStorage").resolveInkDocument
-  >;
+  activeInkDocument: ReturnType<typeof import("@/components/ink/inkStorage").resolveInkDocument>;
   layoutStable: boolean;
   shouldMountInkLayer: boolean;
   previewInkRef: React.RefObject<InkLayerHandle | null>;
@@ -45,9 +43,7 @@ export const FlashcardInkOverlay = ({
   const hasInkContent = (activeInkDocument.strokes?.length ?? 0) > 0;
   const hasHeaderOverlay = Boolean(extraHeaderRight && !previewMode);
   const hasFooterOverlay = Boolean(extraFooter);
-  const hasInkOverlay = Boolean(
-    showInkLayer && cardId && (hasInkContent || inkEditingEnabled),
-  );
+  const hasInkOverlay = Boolean(showInkLayer && cardId && (hasInkContent || inkEditingEnabled));
 
   if (!hasHeaderOverlay && !hasFooterOverlay && !hasInkOverlay) return null;
 
@@ -55,23 +51,13 @@ export const FlashcardInkOverlay = ({
     <>
       {hasHeaderOverlay && (
         <div className="absolute right-2 top-2 z-30 pointer-events-none">
-          <div
-            className="pointer-events-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {extraHeaderRight}
-          </div>
+          <div className="pointer-events-auto" onClick={(e) => e.stopPropagation()}>{extraHeaderRight}</div>
         </div>
       )}
 
       {hasFooterOverlay && (
         <div className="absolute inset-x-0 bottom-2 z-30 pointer-events-none">
-          <div
-            className="flex justify-center pointer-events-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {extraFooter}
-          </div>
+          <div className="flex justify-center pointer-events-auto" onClick={(e) => e.stopPropagation()}>{extraFooter}</div>
         </div>
       )}
 
