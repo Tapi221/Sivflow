@@ -141,10 +141,12 @@ export const diagnoseGoogleOAuthReconnectCause = (error: unknown): GoogleOAuthRe
 export const isGoogleOAuthDeterministicErrorReason = (reason: string | undefined): boolean => reason === "invalid_grant" || reason === "stored_refresh_token_missing" || reason === "insufficient_google_scope" || reason === "server_oauth_configuration" || reason === "token_encryption_key_invalid" || reason === "stored_refresh_token_decrypt_failed";
 
 export const toUserTransparentAutoRecoveryError = (sourceError: unknown): Error => {
+  const code = normalizeCallableErrorCode(sourceError);
   const reason = getGoogleOAuthCallableErrorReason(sourceError);
   if (reason === "server_oauth_configuration" || isOAuthClientConfigurationError(sourceError)) return createGoogleOAuthError(SERVER_OAUTH_CONFIGURATION_ERROR_MESSAGE, SERVER_OAUTH_CONFIGURATION_ERROR_CODE, reason ?? "server_oauth_configuration");
   if (reason === "token_encryption_key_invalid" || reason === "stored_refresh_token_decrypt_failed") return createGoogleOAuthError(SERVER_TOKEN_DECRYPT_ERROR_MESSAGE, SERVER_TOKEN_DECRYPT_ERROR_CODE, reason);
   if (reason === "insufficient_google_scope") return createGoogleOAuthError(INSUFFICIENT_GOOGLE_SCOPE_MESSAGE, INSUFFICIENT_GOOGLE_SCOPE_ERROR_CODE, reason);
+  if (code === "not-found") return createGoogleOAuthError(INVALID_REFRESH_TOKEN_MESSAGE, INVALID_REFRESH_TOKEN_ERROR_CODE, "stored_refresh_token_missing");
   if (reason === "invalid_grant" || reason === "stored_refresh_token_missing" || isInvalidRefreshTokenError(sourceError)) return createGoogleOAuthError(INVALID_REFRESH_TOKEN_MESSAGE, INVALID_REFRESH_TOKEN_ERROR_CODE, reason ?? "invalid_grant");
   return createGoogleOAuthError(AUTO_RECOVERY_PENDING_MESSAGE, AUTO_RECOVERY_PENDING_ERROR_CODE, reason);
 };
