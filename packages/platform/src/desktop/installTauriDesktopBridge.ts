@@ -58,6 +58,7 @@ const desktopApi: DesktopBridgeApi = {
   oauth: {
     start: (authorizeUrl: string) => invoke<void>("oauth_start", { authorizeUrl }),
     cancel: () => invoke<void>("oauth_cancel"),
+    takePendingCallback: async () => null,
     exchangeIdToken: (input) => invoke<string>("oauth_exchange_id_token", { input }),
     exchangeTokens: (input) => invoke("oauth_exchange_tokens", { input }),
     refreshTokens: (input) => invoke("oauth_refresh_tokens", { input }),
