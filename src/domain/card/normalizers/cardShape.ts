@@ -1,5 +1,5 @@
 import { normalizeExtraRows } from "@/domain/card/extraRows";
-import { type InkDocument, normalizeInkDocument } from "@/domain/card/inkDocument";
+import { type InkDocument, normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 
 type CardLike = Partial<Record<string, unknown>>;
 type CardFaceSide = "question" | "answer";
