@@ -23,6 +23,41 @@ const KnowledgeSandboxPage = DEV_MODE
       })),
     )
   : null;
+const AnkiFsrsSandboxPage = DEV_MODE
+  ? lazy(() =>
+      import("@/sandbox/anki-fsrs").then(({ AnkiFsrsSandboxPage }) => ({
+        default: AnkiFsrsSandboxPage,
+      })),
+    )
+  : null;
+const ExcalidrawSandboxPage = DEV_MODE
+  ? lazy(() =>
+      import("@/sandbox/excalidraw").then(({ ExcalidrawSandboxPage }) => ({
+        default: ExcalidrawSandboxPage,
+      })),
+    )
+  : null;
+const EditorEnginesSandboxPage = DEV_MODE
+  ? lazy(() =>
+      import("@/sandbox/editor-engines").then(({ EditorEnginesSandboxPage }) => ({
+        default: EditorEnginesSandboxPage,
+      })),
+    )
+  : null;
+const PdfOcrSandboxPage = DEV_MODE
+  ? lazy(() =>
+      import("@/sandbox/pdf-ocr").then(({ PdfOcrSandboxPage }) => ({
+        default: PdfOcrSandboxPage,
+      })),
+    )
+  : null;
+const LicenseNotesSandboxPage = DEV_MODE
+  ? lazy(() =>
+      import("@/sandbox/license-notes").then(({ LicenseNotesSandboxPage }) => ({
+        default: LicenseNotesSandboxPage,
+      })),
+    )
+  : null;
 
 const withDevRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
@@ -70,6 +105,41 @@ export const getDevRouteElements = () => {
         <Route
           path="sandbox/logseq/*"
           element={withDevRouteFallback(<KnowledgeSandboxPage />)}
+        />
+      ) : null}
+
+      {AnkiFsrsSandboxPage ? (
+        <Route
+          path="sandbox/anki-fsrs/*"
+          element={withDevRouteFallback(<AnkiFsrsSandboxPage />)}
+        />
+      ) : null}
+
+      {ExcalidrawSandboxPage ? (
+        <Route
+          path="sandbox/excalidraw/*"
+          element={withDevRouteFallback(<ExcalidrawSandboxPage />)}
+        />
+      ) : null}
+
+      {EditorEnginesSandboxPage ? (
+        <Route
+          path="sandbox/editor-engines/*"
+          element={withDevRouteFallback(<EditorEnginesSandboxPage />)}
+        />
+      ) : null}
+
+      {PdfOcrSandboxPage ? (
+        <Route
+          path="sandbox/pdf-ocr/*"
+          element={withDevRouteFallback(<PdfOcrSandboxPage />)}
+        />
+      ) : null}
+
+      {LicenseNotesSandboxPage ? (
+        <Route
+          path="sandbox/license-notes/*"
+          element={withDevRouteFallback(<LicenseNotesSandboxPage />)}
         />
       ) : null}
     </>
