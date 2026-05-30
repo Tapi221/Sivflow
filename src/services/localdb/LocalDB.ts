@@ -10,17 +10,18 @@ import { nanoid } from "nanoid";
 import * as crud from "./crud";
 import { getDatabaseNameForUser as _getDatabaseNameForUser } from "./generation";
 import { attachHooks } from "./hooks";
-// NOTE: creates a circular dependency with instanceManager.ts; safe in ESM (all usages inside function bodies)
 import { clearInstance as clearInstanceImpl, getInstance as getInstanceImpl, getInstanceUserId as getInstanceUserIdImpl, getLocalDb, getLocalDbSync, initializeDB, resetForLogout as resetForLogoutImpl, resetLocalDBForLogout } from "./instanceManager";
 import * as maintenance from "./maintenance";
-import * as queries from "./queries";
 import { defineSchema } from "./schema";
 import { CURRENT_TAG_STORE } from "./tagStoreNames";
 import type { LocalDBTableMap, SyncableEntityTable, TagRecord } from "./types";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
 import { createDeleteQueueItem, createUpsertQueueItem } from "@/application/usecases/syncQueueItemFactory";
 import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
 import type { AssetRecord, Card, CardSet, Document, Folder, SyncConflict, SyncError, SyncHistory, SyncMetadata, SyncQueueItem, SyncSettings, UploadedImage, User, UserSettings, UserStats } from "@/types";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
+import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 
 export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "./types";
 
@@ -34,28 +35,14 @@ type LocalDbGlobal = typeof globalThis & {
   __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
 };
 
-const getLocalDbGlobal = (): LocalDbGlobal => {
-  return globalThis as LocalDbGlobal;
-};
-
 type SyncDirection = "upload" | "download";
-type SyncQueuePayload = SyncQueueItem["payload"];
 type CrudPayload = Record<string, unknown>;
 
-const syncableTables = [
-  "cards",
-  "folders",
-  "cardSets",
-  "documents",
-  CURRENT_TAG_STORE,
-  "userSettings",
-  "images",
-] as const;
+const syncableTables = ["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "userSettings", "images"] as const;
 
 type SyncableTableName = (typeof syncableTables)[number];
 
-const isSyncableTableName = (t: string): t is SyncableTableName =>
-  (syncableTables as readonly string[]).includes(t);
+const isSyncableTableName = (tableName: string): tableName is SyncableTableName => (syncableTables as readonly string[]).includes(tableName);
 
 const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   cards: "card",
@@ -67,15 +54,31 @@ const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   images: "asset",
 };
 
-const getPayloadId = (payload: unknown) => {
+const getLocalDbGlobal = (): LocalDbGlobal => globalThis as LocalDbGlobal;
+
+const getPayloadId = (payload: unknown): string | null => {
   if (!payload || typeof payload !== "object") return null;
-  const p = payload as Record<string, unknown>;
-  const id = p.id;
+  const id = (payload as Record<string, unknown>).id;
   return typeof id === "string" && id.length > 0 ? id : null;
 };
 
-const toCrudPayload = (value: unknown): CrudPayload => {
-  return value && typeof value === "object" ? { ...(value as Record<string, unknown>) } : {};
+const toCrudPayload = (value: unknown): CrudPayload => value && typeof value === "object" ? { ...(value as Record<string, unknown>) } : {};
+
+const toTimestamp = (value: unknown): number => {
+  if (value instanceof Date) return value.getTime();
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  if (value && typeof value === "object") {
+    const timestamp = value as { toMillis?: () => number; toDate?: () => Date; seconds?: number; _seconds?: number };
+    if (typeof timestamp.toMillis === "function") return timestamp.toMillis();
+    if (typeof timestamp.toDate === "function") return timestamp.toDate().getTime();
+    if (typeof timestamp.seconds === "number") return timestamp.seconds * 1000;
+    if (typeof timestamp._seconds === "number") return timestamp._seconds * 1000;
+  }
+  return 0;
 };
 
 export class LocalDB extends Dexie {
@@ -121,84 +124,58 @@ export class LocalDB extends Dexie {
     this.syncTrigger = trigger;
   }
 
-  async getItem<TTable extends SyncableEntityTable>(
-    table: TTable,
-    id: string,
-  ): Promise<LocalDBTableMap[TTable] | undefined>;
+  async runSyncTransaction<T>(scope: () => Promise<T>): Promise<T> {
+    return this.transaction("rw", this.tables, scope);
+  }
+
+  async getItem<TTable extends SyncableEntityTable>(table: TTable, id: string): Promise<LocalDBTableMap[TTable] | undefined>;
   async getItem(table: string, id: string): Promise<unknown | undefined> {
-    return queries.getItem(this, table as SyncableEntityTable, id);
+    const item = await this.table(table).get(id);
+    if (table === "cards") return item ? normalizeCard(item) : item;
+    if (table === "folders") return item ? normalizeFolderWithSilent(item) : item;
+    return item;
   }
 
-  async getAllItems<TTable extends SyncableEntityTable>(
-    table: TTable,
-  ): Promise<Array<LocalDBTableMap[TTable]>>;
+  async getAllItems<TTable extends SyncableEntityTable>(table: TTable): Promise<Array<LocalDBTableMap[TTable]>>;
   async getAllItems(table: string): Promise<unknown[]> {
-    return queries.getAllItems(this, table as SyncableEntityTable);
+    const items = await this.table(table).toArray();
+    if (table === "cards") return items.map(normalizeCard);
+    if (table === "folders") return items.map(normalizeFolderWithSilent);
+    return items;
   }
 
-  async getDirtyItems<TTable extends SyncableEntityTable>(
-    table: TTable,
-    userId: string,
-    lastSyncTime: Date,
-  ): Promise<Array<LocalDBTableMap[TTable]>>;
-  async getDirtyItems(
-    table: string,
-    userId: string,
-    lastSyncTime: Date,
-  ): Promise<unknown[]> {
-    return queries.getDirtyItems(this, table as SyncableEntityTable, userId, lastSyncTime);
+  async getDirtyItems<TTable extends SyncableEntityTable>(table: TTable, userId: string, lastSyncTime: Date): Promise<Array<LocalDBTableMap[TTable]>>;
+  async getDirtyItems(table: string, userId: string, lastSyncTime: Date): Promise<unknown[]> {
+    const rows = await this.table(table).toArray();
+    const threshold = lastSyncTime.getTime();
+    return rows.filter((row: unknown) => {
+      const record = row as Record<string, unknown>;
+      return record.userId === userId && toTimestamp(record.updatedAt) >= threshold;
+    });
   }
 
-  async getUpdatedCards(
-    folderId: string,
-    lastSyncTime: Date,
-  ): Promise<unknown[]> {
-    return queries.getUpdatedCards(this, folderId, lastSyncTime);
+  async getUpdatedCards(folderId: string, lastSyncTime: Date): Promise<Card[]> {
+    const rows = await this.cards.where("folderId").equals(folderId).toArray();
+    const threshold = lastSyncTime.getTime();
+    return rows.filter((card) => toTimestamp((card as Record<string, unknown>).updatedAt) >= threshold);
   }
 
   async getLastSyncTime(userId: string): Promise<Date | null> {
-    return queries.getLastSyncTime(this, userId);
+    const meta = await this.syncMetadata.get(userId);
+    if (!meta?.lastSyncTime) return null;
+    return new Date(toTimestamp(meta.lastSyncTime));
   }
 
   async updateLastSyncTime(userId: string, syncTime: Date): Promise<void> {
-    return queries.updateLastSyncTime(this, userId, syncTime);
+    await this.syncMetadata.put({ userId, deviceId: getOrCreateDeviceId(), deviceName: getDeviceName(), lastSyncTime: syncTime, lastHighResSync: null, isActive: true });
   }
 
-  async addItem(
-    table: string,
-    item: unknown,
-    skipSync = false,
-  ): Promise<string> {
-    if (!(this instanceof LocalDB)) {
-      console.error(
-        "[Diagnostic] CRITICAL: addItem called on non-LocalDB instance!",
-        this,
-      );
-    }
-
-    return crud.addItem(
-      this,
-      table,
-      toCrudPayload(item),
-      skipSync,
-      (t: string, type: SyncDirection, p: unknown) => this.enqueueSync(t, type, p),
-    );
+  async addItem(table: string, item: unknown, skipSync = false): Promise<string> {
+    return crud.addItem(this, table, toCrudPayload(item), skipSync, (t, type, payload) => this.enqueueSync(t, type, payload));
   }
 
-  async updateItem(
-    table: string,
-    id: string,
-    changes: Record<string, unknown>,
-    skipSync = false,
-  ): Promise<number> {
-    return crud.updateItem(
-      this,
-      table,
-      id,
-      changes,
-      skipSync,
-      (t: string, type: SyncDirection, p: unknown) => this.enqueueSync(t, type, p),
-    );
+  async updateItem(table: string, id: string, changes: Record<string, unknown>, skipSync = false): Promise<number> {
+    return crud.updateItem(this, table, id, changes, skipSync, (t, type, payload) => this.enqueueSync(t, type, payload));
   }
 
   async deleteItem(table: string, id: string): Promise<void> {
@@ -206,58 +183,25 @@ export class LocalDB extends Dexie {
   }
 
   async softDelete(table: string, id: string): Promise<number> {
-    return crud.softDelete(
-      this,
-      table,
-      id,
-      (t: string, i: string, c: Record<string, unknown>) =>
-        this.updateItem(t, i, c),
-    );
+    return crud.softDelete(this, table, id, (t, i, changes) => this.updateItem(t, i, changes));
   }
 
   async restore(table: string, id: string): Promise<number> {
-    return this.updateItem(table, id, {
-      isDeleted: false,
-      deletedAt: null,
-      updatedAt: new Date(),
-    });
+    return this.updateItem(table, id, { isDeleted: false, deletedAt: null, updatedAt: new Date() });
   }
 
   async purge(table: string, id: string): Promise<void> {
     return this.deleteItem(table, id);
   }
 
-  async bulkUpsert(
-    table: string,
-    items: unknown[],
-    skipSync = false,
-  ): Promise<void> {
-    return crud.bulkUpsert(
-      this,
-      table,
-      items.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object"),
-      skipSync,
-      (t: string, type: SyncDirection, p: unknown) => this.enqueueSync(t, type, p),
-    );
+  async bulkUpsert(table: string, items: unknown[], skipSync = false): Promise<void> {
+    const rows = items.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object");
+    return crud.bulkUpsert(this, table, rows, skipSync, (t, type, payload) => this.enqueueSync(t, type, payload));
   }
 
-  async upsert<TTable extends SyncableEntityTable>(
-    tableName: TTable,
-    data: LocalDBTableMap[TTable],
-    skipSync?: boolean,
-  ): Promise<void>;
-  async upsert(
-    tableName: string,
-    data: unknown,
-    skipSync = false,
-  ): Promise<void> {
-    return crud.upsert(
-      this,
-      tableName,
-      toCrudPayload(data),
-      skipSync,
-      (t: string, type: SyncDirection, p: unknown) => this.enqueueSync(t, type, p),
-    );
+  async upsert<TTable extends SyncableEntityTable>(tableName: TTable, data: LocalDBTableMap[TTable], skipSync?: boolean): Promise<void>;
+  async upsert(tableName: string, data: unknown, skipSync = false): Promise<void> {
+    return crud.upsert(this, tableName, toCrudPayload(data), skipSync, (t, type, payload) => this.enqueueSync(t, type, payload));
   }
 
   async clearTable(table: string): Promise<void> {
@@ -268,167 +212,180 @@ export class LocalDB extends Dexie {
     return maintenance.clearAllData(this);
   }
 
+  async clearSyncTables(tables: readonly SyncableEntityTable[]): Promise<void> {
+    for (const table of tables) {
+      await this.table(table).clear();
+    }
+  }
+
+  async putSyncRecord<TTable extends SyncableEntityTable>(table: TTable, data: LocalDBTableMap[TTable]): Promise<void> {
+    await this.upsert(table, data, true);
+  }
+
   async cleanupSyncHistory(): Promise<void> {
     return maintenance.cleanupSyncHistory(this);
   }
 
+  async cleanupSyncErrors(): Promise<void> {
+    await this.syncErrors.clear();
+  }
+
   async getAllCards(): Promise<Card[]> {
-    return queries.getAllCards(this);
+    const rows = await this.cards.toArray();
+    return rows.map((card) => normalizeCard(card)) as Card[];
   }
 
   async getAllFolders(): Promise<Folder[]> {
-    return queries.getAllFolders(this);
+    const rows = await this.folders.toArray();
+    return rows.map((folder) => normalizeFolderWithSilent(folder)) as Folder[];
   }
 
   async listCardsByUser(userId: string): Promise<Card[]> {
-    return queries.listCardsByUser(this, userId);
+    const rows = await this.cards.where("userId").equals(userId).toArray();
+    return rows.map((card) => normalizeCard(card)) as Card[];
   }
 
   async listFoldersByUser(userId: string): Promise<Folder[]> {
-    return queries.listFoldersByUser(this, userId);
+    const rows = await this.folders.where("userId").equals(userId).toArray();
+    return rows.map((folder) => normalizeFolderWithSilent(folder)) as Folder[];
   }
 
   async listCardSetsByUser(userId: string): Promise<CardSet[]> {
-    return queries.listCardSetsByUser(this, userId);
+    return this.cardSets.where("userId").equals(userId).toArray();
+  }
+
+  async addCardSet(cardSet: CardSet): Promise<void> {
+    await this.cardSets.put(cardSet);
+  }
+
+  async updateCardById(id: string, changes: Partial<Card>): Promise<number> {
+    return this.cards.update(id, changes);
   }
 
   async getSyncSettings(id: string): Promise<SyncSettings | undefined> {
-    return queries.getSyncSettings(this, id);
+    return this.syncSettings.get(id);
   }
 
   async putSyncSettings(settings: SyncSettings): Promise<void> {
-    return queries.putSyncSettings(this, settings);
+    await this.syncSettings.put(settings);
   }
 
   async getSyncError(id: string): Promise<SyncError | undefined> {
-    return queries.getSyncError(this, id);
+    return this.syncErrors.get(id);
   }
 
   async putSyncError(error: SyncError): Promise<void> {
-    return queries.putSyncError(this, error);
+    await this.syncErrors.put(error);
   }
 
   async clearSyncErrors(): Promise<void> {
-    return queries.clearSyncErrors(this);
+    await this.syncErrors.clear();
   }
 
   async getRetryableSyncErrors(): Promise<SyncError[]> {
-    return queries.getRetryableSyncErrors(this);
+    return this.syncErrors.toArray();
   }
 
   async findQueueProcessingErrorsByTargetId(targetId: string): Promise<SyncError[]> {
-    return queries.findQueueProcessingErrorsByTargetId(this, targetId);
+    return this.syncErrors.where("targetId").equals(targetId).toArray();
   }
 
   async putSyncHistory(history: SyncHistory): Promise<void> {
-    return queries.putSyncHistory(this, history);
+    await this.syncHistory.put(history);
   }
 
-  async getRecentSyncHistory(limit?: number): Promise<SyncHistory[]> {
-    return queries.getRecentSyncHistory(this, limit);
+  async getRecentSyncHistory(limit = 50): Promise<SyncHistory[]> {
+    return this.syncHistory.orderBy("startedAt").reverse().limit(limit).toArray();
   }
 
   async getSyncStatsSince(timestamp: number): Promise<{ histories: SyncHistory[]; errors: SyncError[] }> {
-    return queries.getSyncStatsSince(this, timestamp);
+    const histories = await this.syncHistory.where("startedAt").aboveOrEqual(timestamp).toArray();
+    const errors = await this.syncErrors.toArray();
+    return { histories, errors };
   }
 
   async getSyncQueueCount(): Promise<number> {
-    return queries.getSyncQueueCount(this);
+    return this.syncQueue.count();
   }
 
   async getQueuedItemsOldestFirst(): Promise<SyncQueueItem[]> {
-    return queries.getQueuedItemsOldestFirst(this);
+    return this.syncQueue.orderBy("createdAt").toArray();
   }
 
   async trimSyncQueueToLimit(limit: number): Promise<void> {
-    return queries.trimSyncQueueToLimit(this, limit);
+    const all = await this.getQueuedItemsOldestFirst();
+    if (all.length > limit) {
+      await this.syncQueue.bulkDelete(all.slice(0, all.length - limit).map((item) => item.id));
+    }
   }
 
   async putSyncQueueItem(item: SyncQueueItem): Promise<void> {
-    return queries.putSyncQueueItem(this, item);
+    await this.syncQueue.put(item);
   }
 
   async removeSyncQueueItem(id: string): Promise<void> {
-    return queries.removeSyncQueueItem(this, id);
+    await this.syncQueue.delete(id);
   }
 
   async putConflict(conflict: SyncConflict): Promise<void> {
-    return queries.putConflict(this, conflict);
+    await this.conflicts.put(conflict);
   }
 
   async getConflict(id: string): Promise<SyncConflict | undefined> {
-    return queries.getConflict(this, id);
+    return this.conflicts.get(id);
   }
 
   async getConflicts(): Promise<SyncConflict[]> {
-    return queries.getConflicts(this);
+    return this.conflicts.toArray();
   }
 
   async removeConflict(id: string): Promise<void> {
-    return queries.removeConflict(this, id);
+    await this.conflicts.delete(id);
   }
 
   async getImageRecord(id: string): Promise<AssetRecord | UploadedImage | undefined> {
-    return queries.getImageRecord(this, id);
+    return this.images.get(id);
   }
 
   async putImageRecord(record: AssetRecord | UploadedImage): Promise<void> {
-    return queries.putImageRecord(this, record);
+    await this.images.put(record);
   }
 
-  async updateImageRecord(
-    id: string,
-    changes: Partial<AssetRecord & UploadedImage>,
-  ): Promise<number> {
-    return queries.updateImageRecord(this, id, changes);
+  async updateImageRecord(id: string, changes: Partial<AssetRecord & UploadedImage>): Promise<number> {
+    return this.images.update(id, changes);
   }
 
-  async enqueueSync(
-    tableName: string,
-    type: SyncDirection,
-    payload: unknown,
-  ): Promise<void> {
+  async queueUpsertSync<TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high" }: { entity: TEntity; operationType: "create" | "update"; payload: SyncPayloadByEntity[TEntity]; priority?: SyncPriority }): Promise<void> {
+    await this.syncQueue.put(createUpsertQueueItem({ entity, operationType, payload, priority }));
+    this.emitSyncTrigger();
+  }
+
+  async queueDeleteSync({ entity, targetId, priority = "high" }: { entity: DeleteEntity; targetId: string; priority?: SyncPriority }): Promise<void> {
+    await this.syncQueue.put(createDeleteQueueItem({ entity, targetId, priority }));
+    this.emitSyncTrigger();
+  }
+
+  async enqueueSync(tableName: string, type: SyncDirection, payload: unknown): Promise<void> {
     if (!isSyncableTableName(tableName)) return;
 
     const entity = entityNameMap[tableName];
     const payloadId = getPayloadId(payload) ?? nanoid();
-    const task =
-      type === "upload"
-        ? createUpsertQueueItem({
-            entity: entity as UpsertEntity,
-            operationType: "update",
-            payload: payload as never,
-            priority: "high",
-          })
-        : createDeleteQueueItem({
-            entity: entity as DeleteEntity,
-            targetId: payloadId,
-            priority: "high",
-          });
-
-    console.log(
-      `[LocalDB] enqueueSync -> table=${tableName} type=${type} targetId=${task.targetId} id=${task.id}`,
-    );
+    const task = type === "upload"
+      ? createUpsertQueueItem({ entity: entity as UpsertEntity, operationType: "update", payload: payload as never, priority: "high" })
+      : createDeleteQueueItem({ entity: entity as DeleteEntity, targetId: payloadId, priority: "high" });
 
     await this.syncQueue.add(task);
 
     if (tableName === "cards" && type === "upload") {
-      await this.cards.update(payloadId, {
-        syncState: "pending",
-      } satisfies Partial<Card>);
+      await this.cards.update(payloadId, { syncState: "pending" } satisfies Partial<Card>);
     }
 
-    if (this.syncTrigger) {
-      console.log("[Diagnostic] enqueueSync -> triggering sync callback");
-      setTimeout(() => {
-        if (this.syncTrigger) {
-          console.log("[Diagnostic] Calling syncTrigger callback now");
-          this.syncTrigger();
-        }
-      }, 0);
-    } else {
-      console.warn("[Diagnostic] enqueueSync -> No syncTrigger registered!");
-    }
+    this.emitSyncTrigger();
+  }
+
+  private emitSyncTrigger(): void {
+    if (!this.syncTrigger) return;
+    setTimeout(() => this.syncTrigger?.(), 0);
   }
 
   static getDatabaseNameForUser(userId: string = "anonymous"): string {
@@ -436,7 +393,7 @@ export class LocalDB extends Dexie {
   }
 
   static async getInstance(userId?: string): Promise<LocalDB> {
-    return getInstanceImpl(userId) as Promise<LocalDB>;
+    return getInstanceImpl(userId) as unknown as Promise<LocalDB>;
   }
 
   static async resetForLogout(userId?: string): Promise<void> {
@@ -447,14 +404,9 @@ export class LocalDB extends Dexie {
     return getInstanceUserIdImpl();
   }
 
-  /** シングルトンインスタンスを明示的に破棄します。 */
   static clearInstance(): void {
     clearInstanceImpl();
   }
 }
 
-/**
- * LocalDB インスタンスを生成する内部ファクトリ関数。
- * instanceManager.ts から使用される。constructor ガード (__ALLOW_LOCAL_DB_CONSTRUCTION) を経由。
- */
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };
