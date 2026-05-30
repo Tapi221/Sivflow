@@ -1,1 +1,1 @@
-export * from "@/domain/card/inkDocument";
+export * from "@core/domain/card/ink/inkDocument";
