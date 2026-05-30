@@ -7,85 +7,8 @@ Mobile: React Native
 iOS native: React Native の ios/ 内で必要な箇所だけ Swift
 ```
 
-その場合、私はこうします。
-
-```text
-apps/
-  web/
-    index.html
-    public/
-    src/
-      main.tsx
-      App.tsx
-
-  desktop/
-    src-tauri/
-      Cargo.toml
-      tauri.conf.json
-      src/
-        main.rs
-
-  mobile/
-    app.json
-    src/
-      App.tsx
-      navigation/
-      screens/
-    ios/
-      Manifolia/
-        NativeModules/
-        NativeViews/
-        Assets.xcassets/
-    android/
-
-packages/
-  web-renderer/
-    src/
-      AppShell.tsx
-      routes/
-      features/
-      components/
-
-  mobile-renderer/
-    src/
-      AppShell.tsx
-      screens/
-      components/
-
-  core/
-    src/
-      domain/
-      usecases/
-      models/
-      validation/
-
-  platform/
-    src/
-      auth/
-      storage/
-      calendar/
-      files/
-      shell/
-
-shared/
-  assets/
-    icons/
-      app-icon.svg
-
-  schemas/
-    card.schema.json
-    deck.schema.json
-
-  design-tokens/
-    colors.json
-    spacing.json
-    typography.json
-```
-
 この構成では、**Swift 専用 app は作りません**。  
 Swift は `apps/mobile/ios/Manifolia/NativeModules` や `NativeViews` に入れます。React Native アプリの一部として扱います。
-
-責務はこうです。
 
 ```text
 apps/web
