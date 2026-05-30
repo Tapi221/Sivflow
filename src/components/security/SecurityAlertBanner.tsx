@@ -1,9 +1,9 @@
 import React from "react";
+import { useSecurity } from "@/contexts/AuthContext";
 import { AlertTriangle, X } from "@/ui/icons";
-import { useAuth } from "@/contexts/AuthContext";
 
 export const SecurityAlertBanner: React.FC = () => {
-  const { securityState, dismissSecurityAlert } = useAuth();
+  const { securityState, dismissSecurityAlert } = useSecurity();
 
   // アラートがない、かつロックも2FA要求もない場合は表示しない
   if (
