@@ -1,26 +1,29 @@
 import type { CSSProperties } from "react";
-import { getTextColorDerivedBackgroundColor } from "@shared/design-tokens/color-scheme";
-import { TAG_COLOR_PALETTE } from "@shared/design-tokens/tag.palette";
+import { TAG_COLOR_PALETTE } from "@/styles/tokens/tag.palette";
 import { getTagColorKey } from "./tag.parser";
 
-const getPalette = (input?: string) => TAG_COLOR_PALETTE[getTagColorKey(input)];
-const getTagBackgroundColor = (input?: string) => getTextColorDerivedBackgroundColor(getPalette(input).fgRgb);
+const getTagPalette = (input?: string) => {
+  const colorKey = getTagColorKey(input);
+  return { colorKey, palette: TAG_COLOR_PALETTE[colorKey] };
+};
+
+const getTagBackgroundColor = (colorKey: ReturnType<typeof getTagColorKey>): string => `var(--ds-color-tag-${colorKey}-bg)`;
 
 export const getTagColorStyle = (input?: string): CSSProperties => {
-  const palette = getPalette(input);
+  const { colorKey, palette } = getTagPalette(input);
 
   return {
-    backgroundColor: getTagBackgroundColor(input),
+    backgroundColor: getTagBackgroundColor(colorKey),
     color: palette.fg,
     borderColor: palette.border,
   };
 };
 
 export const getTagColorSwatchStyle = (input?: string): CSSProperties => {
-  const palette = getPalette(input);
+  const { palette } = getTagPalette(input);
 
   return {
-    backgroundColor: getTagBackgroundColor(input),
+    backgroundColor: palette.swatch,
     borderColor: palette.border,
     color: palette.fg,
   };
