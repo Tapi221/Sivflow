@@ -6,6 +6,7 @@ import { getDevRouteElements } from "./DevRoutes";
 import { ProtectedRoute } from "./ProtectedRoute";
 
 const Schedule = lazy(() => import("@/routes/Schedule"));
+const Trash = lazy(() => import("../../routes/Trash"));
 const REDIRECT_TO_SCHEDULE_ROUTES = ["calendar/*", "CardEdit/*", "CardSetView/*", "CardView/*", "study/*", "library/*", "statistics/*"] as const;
 
 const withRouteFallback = (element: ReactNode) => {
@@ -29,6 +30,7 @@ export const AppRoutes = () => {
       >
         <Route index element={<DefaultRedirect />} />
         <Route path="schedule" element={withRouteFallback(<Schedule />)} />
+        <Route path="trash" element={withRouteFallback(<Trash />)} />
         {REDIRECT_TO_SCHEDULE_ROUTES.map((path) => (
           <Route key={path} path={path} element={<DefaultRedirect />} />
         ))}
