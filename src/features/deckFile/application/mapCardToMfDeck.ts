@@ -173,7 +173,7 @@ export const buildMfDeckArchive = async ({
       version: MF_DECK_VERSION,
       exportedAt: toIsoString(new Date()),
       app: {
-        name: "Manifolia",
+        name: "Sivflow",
         ...(appVersion ? { version: appVersion } : {}),
       },
       deck: {
@@ -190,7 +190,7 @@ export const buildMfDeckArchive = async ({
       },
     },
     cardsJson: {
-      format: "manifolia.deck.cards",
+      format: "sivflow.deck.cards",
       version: MF_DECK_VERSION,
       cards: exportedCards,
     },
