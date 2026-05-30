@@ -24,7 +24,7 @@ const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2
 const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_OAUTH_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
-const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
+const OAUTH_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 const WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 const WEB_SERVER_CODE_CALLBACK_POLL_MS = 250;
 const WEB_AUTH_WINDOW_TARGET = "flashcard-master-google-oauth";
@@ -126,7 +126,7 @@ const waitForDesktopCode = (state: string, redirectUri: string): Promise<string>
   const timer = window.setTimeout(() => {
     unsubscribe();
     reject(new Error("OAuth timeout"));
-  }, DESKTOP_CALLBACK_TIMEOUT_MS);
+  }, OAUTH_CALLBACK_TIMEOUT_MS);
   const unsubscribe = oauthBridge.onCallback((payload) => {
     const url = new URL(payload.url);
     const expected = new URL(redirectUri);
@@ -265,21 +265,6 @@ const waitForWebCode = (state: string, redirectUri: string): Promise<string> => 
   handleStoredCallbackPayload();
 });
 
-const requestDesktopToken = async (): Promise<GoogleCalendarAccess> => {
-  const clientId = getGoogleOAuthClientId();
-  const redirectUri = getDesktopRedirectUri();
-  const state = randomBase64Url(16);
-  const verifier = randomBase64Url(48);
-  const codeChallenge = await createCodeChallenge(verifier);
-  const codePromise = waitForDesktopCode(state, redirectUri);
-  await oauthBridge.start(buildAuthorizeUrl({ clientId, redirectUri, codeChallenge, state }));
-  const code = await codePromise;
-  const tokens = await oauthBridge.exchangeTokens({ clientId, code, codeVerifier: verifier, redirectUri });
-  if (!tokens.accessToken) throw new Error("Google OAuth failed: accessToken is missing");
-  await validateGrantedGoogleScopes({ accessToken: tokens.accessToken, scope: tokens.scope, allowTokenInfoFallback: true });
-  return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, ...getGoogleProfileFromIdToken(tokens.idToken) };
-};
-
 const fetchGoogleUserInfo = async (accessToken: string) => {
   const response = await fetch(GOOGLE_USERINFO_ENDPOINT, { headers: { Authorization: `Bearer ${accessToken}` } });
   if (!response.ok) throw new Error(`Failed to fetch Google profile (${response.status})`);
@@ -298,7 +283,7 @@ export const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCale
 export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<{ code: string; codeVerifier: string; redirectUri: string }> => {
   if (typeof window === "undefined") throw new Error("Google OAuth is not available");
   const clientId = getGoogleOAuthClientId();
-  const redirectUri = window.location.origin;
+  const redirectUri = isDesktopLikeRuntime() ? getDesktopRedirectUri() : window.location.origin;
   const loginHint = auth.currentUser?.email ?? readEmail() ?? undefined;
   const state = randomBase64Url(16);
   const codeVerifier = randomBase64Url(48);
@@ -308,16 +293,21 @@ export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<{ cod
   } catch {
     // storage が使えない環境では BroadcastChannel / postMessage で受け取る。
   }
-  const codePromise = waitForWebCode(state, redirectUri);
-  const authWindow = window.open(buildAuthorizeUrl({ clientId, redirectUri, codeChallenge, loginHint, state }), WEB_AUTH_WINDOW_TARGET, WEB_AUTH_WINDOW_FEATURES);
-  if (!authWindow) throw new Error("Google OAuth window could not be opened");
+  const authorizeUrl = buildAuthorizeUrl({ clientId, redirectUri, codeChallenge, loginHint, state });
+  const codePromise = isDesktopLikeRuntime() ? waitForDesktopCode(state, redirectUri) : waitForWebCode(state, redirectUri);
+  if (isDesktopLikeRuntime()) {
+    await oauthBridge.start(authorizeUrl);
+  } else {
+    const authWindow = window.open(authorizeUrl, WEB_AUTH_WINDOW_TARGET, WEB_AUTH_WINDOW_FEATURES);
+    if (!authWindow) throw new Error("Google OAuth window could not be opened");
+  }
   const code = await codePromise;
   pendingGoogleCalendarServerCodeVerifier = codeVerifier;
   return { code, codeVerifier, redirectUri };
 };
 
 export const requestCalendarAccessToken = async (auth: Auth, silent = false): Promise<GoogleCalendarAccess> => {
-  if (isDesktopLikeRuntime()) return requestDesktopToken();
+  if (isDesktopLikeRuntime()) throw new Error("Desktop Google OAuth must use server-side token exchange.");
   const provider = new GoogleAuthProvider();
   GOOGLE_SCOPES.forEach((scope) => provider.addScope(scope));
   if (silent) provider.setCustomParameters({ prompt: "none" });
@@ -333,12 +323,6 @@ export const requestConnectedServiceAccessToken = requestCalendarAccessToken;
 
 export const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: string }): Promise<GoogleCalendarAccess> => {
   const clientId = getGoogleOAuthClientId();
-  if (isDesktopLikeRuntime()) {
-    const tokens = await oauthBridge.refreshTokens({ clientId, refreshToken });
-    if (!tokens.accessToken) throw new Error("Google token refresh failed");
-    await validateGrantedGoogleScopes({ accessToken: tokens.accessToken, scope: tokens.scope, allowTokenInfoFallback: true });
-    return { accessToken: tokens.accessToken, ...getGoogleProfileFromIdToken(tokens.idToken) };
-  }
   const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: clientId, refresh_token: refreshToken, grant_type: "refresh_token" }) });
   const json = (await response.json()) as { access_token?: string; expires_in?: number; refresh_token?: string; scope?: string; id_token?: string; error?: string; error_description?: string };
   if (!response.ok || !json.access_token) throw new Error(json.error_description ?? json.error ?? "Google token refresh failed");

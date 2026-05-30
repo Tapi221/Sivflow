@@ -33,13 +33,6 @@ struct AuthCodeExchangeInput {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct RefreshInput {
-    client_id: String,
-    refresh_token: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
 struct StoreRefreshTokenInput {
     account_id: String,
     refresh_token: String,
@@ -50,7 +43,6 @@ struct StoreRefreshTokenInput {
 struct AuthExchangeResult {
     access_token: Option<String>,
     id_token: Option<String>,
-    refresh_token: Option<String>,
     scope: Option<String>,
 }
 
@@ -82,7 +74,6 @@ struct DesktopImportFileOpenPayload {
 struct GoogleTokenResponse {
     access_token: Option<String>,
     id_token: Option<String>,
-    refresh_token: Option<String>,
     scope: Option<String>,
     error: Option<String>,
     error_description: Option<String>,
@@ -223,13 +214,6 @@ fn ensure_auth_loopback_redirect(authorize_url: &str) -> Result<(), String> {
     Ok(())
 }
 
-fn get_desktop_client_credential() -> Option<String> {
-    std::env::var("GOOGLE_OAUTH_CLIENT_SECRET")
-        .ok()
-        .map(|value| value.trim().to_string())
-        .filter(|value| !value.is_empty())
-}
-
 fn credential_entry(account_id: &str) -> Result<keyring::Entry, String> {
     keyring::Entry::new("sivflow-google-oauth", account_id).map_err(|error| error.to_string())
 }
@@ -243,10 +227,6 @@ async fn exchange_auth_code(input: AuthCodeExchangeInput) -> Result<AuthExchange
         ("redirect_uri".to_string(), input.redirect_uri),
     ]);
 
-    if let Some(client_credential) = get_desktop_client_credential() {
-        request_body.insert("client_secret".to_string(), client_credential);
-    }
-
     let payload = Client::new()
         .post(GOOGLE_AUTH_EXCHANGE_ENDPOINT)
         .form(&request_body)
@@ -264,40 +244,6 @@ async fn exchange_auth_code(input: AuthCodeExchangeInput) -> Result<AuthExchange
     Ok(AuthExchangeResult {
         access_token: payload.access_token,
         id_token: payload.id_token,
-        refresh_token: payload.refresh_token,
-        scope: payload.scope,
-    })
-}
-
-async fn refresh_auth_access(input: RefreshInput) -> Result<AuthExchangeResult, String> {
-    let mut request_body = HashMap::from([
-        ("client_id".to_string(), input.client_id),
-        ("grant_type".to_string(), "refresh_token".to_string()),
-        ("refresh_token".to_string(), input.refresh_token),
-    ]);
-
-    if let Some(client_credential) = get_desktop_client_credential() {
-        request_body.insert("client_secret".to_string(), client_credential);
-    }
-
-    let payload = Client::new()
-        .post(GOOGLE_AUTH_EXCHANGE_ENDPOINT)
-        .form(&request_body)
-        .send()
-        .await
-        .map_err(|error| error.to_string())?
-        .json::<GoogleTokenResponse>()
-        .await
-        .map_err(|error| error.to_string())?;
-
-    if let Some(error) = payload.error {
-        return Err(payload.error_description.unwrap_or(error));
-    }
-
-    Ok(AuthExchangeResult {
-        access_token: payload.access_token,
-        id_token: payload.id_token,
-        refresh_token: None,
         scope: payload.scope,
     })
 }
@@ -388,16 +334,6 @@ async fn oauth_exchange_id_token(input: AuthCodeExchangeInput) -> Result<String,
 }
 
 #[tauri::command]
-async fn oauth_exchange_tokens(input: AuthCodeExchangeInput) -> Result<AuthExchangeResult, String> {
-    exchange_auth_code(input).await
-}
-
-#[tauri::command]
-async fn oauth_refresh_tokens(input: RefreshInput) -> Result<AuthExchangeResult, String> {
-    refresh_auth_access(input).await
-}
-
-#[tauri::command]
 fn oauth_store_refresh_token(input: StoreRefreshTokenInput) -> Result<(), String> {
     credential_entry(&input.account_id)?.set_password(&input.refresh_token).map_err(|error| error.to_string())
 }
@@ -479,8 +415,6 @@ fn main() {
             oauth_start,
             oauth_cancel,
             oauth_exchange_id_token,
-            oauth_exchange_tokens,
-            oauth_refresh_tokens,
             oauth_store_refresh_token,
             oauth_read_refresh_token,
             oauth_delete_refresh_token,

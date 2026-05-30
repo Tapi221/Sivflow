@@ -1,10 +1,7 @@
 import { httpsCallable } from "firebase/functions";
 import { auth, functionsClient } from "@/infrastructure/firebase/client";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
-import {
-  consumeGoogleCalendarServerCodeVerifier,
-  type GoogleCalendarAccess,
-} from "./google.oauth";
+import { consumeGoogleCalendarServerCodeVerifier, type GoogleCalendarAccess } from "./google.oauth";
 
 type GoogleOAuthReconnectDiagnosis = { cause: string; reconnectRequired: boolean; action: string };
 
@@ -174,8 +171,8 @@ const getGoogleCalendarAccessTokenWithRetry = async (
 };
 
 export const isServerStoredGoogleOAuthEnabled = (): boolean => {
-  if (isDesktopLikeRuntime()) return false;
   if (import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "false") return false;
+  if (isDesktopLikeRuntime()) return true;
 
   return (
     import.meta.env.PROD ||

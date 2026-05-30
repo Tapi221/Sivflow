@@ -16,9 +16,8 @@ const createDesktopBridgeStub = () => ({
   oauth: {
     start: vi.fn(() => "started"),
     cancel: vi.fn(() => {}),
+    takePendingCallback: vi.fn(async () => null),
     exchangeIdToken: vi.fn(async () => "id-token"),
-    exchangeTokens: vi.fn(async () => ({})),
-    refreshTokens: vi.fn(async () => ({})),
     storeRefreshToken: vi.fn(async () => {}),
     readRefreshToken: vi.fn(async () => null),
     deleteRefreshToken: vi.fn(async () => {}),

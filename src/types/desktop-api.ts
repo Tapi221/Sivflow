@@ -13,14 +13,6 @@ export type DesktopOauthExchangeInput = {
   redirectUri: string;
 };
 
-export type DesktopOauthExchangeResult = {
-  accessToken?: string;
-  idToken?: string;
-  // 初回認証時のみ返却されるリフレッシュトークン
-  refreshToken?: string;
-  scope?: string;
-};
-
 export type DesktopImportFileOpenPayload = {
   paths: string[];
 };
@@ -37,14 +29,6 @@ export interface DesktopOauthApi {
   cancel(): Promise<void>;
   takePendingCallback(): Promise<DesktopOauthCallbackPayload | null>;
   exchangeIdToken(input: DesktopOauthExchangeInput): Promise<string>;
-  exchangeTokens(
-    input: DesktopOauthExchangeInput,
-  ): Promise<DesktopOauthExchangeResult>;
-  // refresh_token を使った silent なトークン更新
-  refreshTokens(input: {
-    clientId: string;
-    refreshToken: string;
-  }): Promise<{ accessToken?: string; idToken?: string; scope?: string }>;
   storeRefreshToken(input: { accountId: string; refreshToken: string }): Promise<void>;
   readRefreshToken(accountId: string): Promise<string | null>;
   deleteRefreshToken(accountId: string): Promise<void>;

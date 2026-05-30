@@ -37,24 +37,6 @@ export interface PlatformOauthApi {
     codeVerifier: string;
     redirectUri: string;
   }): Promise<string>;
-  exchangeTokens(input: {
-    clientId: string;
-    code: string;
-    codeVerifier: string;
-    redirectUri: string;
-  }): Promise<{
-    accessToken?: string;
-    idToken?: string;
-    // 初回認証時にのみ返却されるリフレッシュトークン
-    refreshToken?: string;
-    scope?: string;
-  }>;
-  // refresh_token を使った silent なトークン更新
-  refreshTokens(input: { clientId: string; refreshToken: string }): Promise<{
-    accessToken?: string;
-    idToken?: string;
-    scope?: string;
-  }>;
   storeRefreshToken(input: { accountId: string; refreshToken: string }): Promise<void>;
   readRefreshToken(accountId: string): Promise<string | null>;
   deleteRefreshToken(accountId: string): Promise<void>;
