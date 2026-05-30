@@ -1,4 +1,4 @@
-import { INK_PAPER_H, INK_PAPER_W, type InkPoint } from "@/components/ink/ink.types";
+import { INK_PAPER_H, INK_PAPER_W, type InkPoint } from "@core/domain/card/ink/inkDocument";
 
 export type RectLike = {
   left: number;
