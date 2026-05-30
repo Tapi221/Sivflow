@@ -38,7 +38,7 @@ export const ExportMfCardButton = ({
 
       downloadBytesAsMfCard({
         bytes,
-        cardName: card.title || card.questionNumber || "manifolia-card",
+        cardName: card.title || card.questionNumber || "sivflow-card",
       });
 
       toast.success("MFCard をエクスポートしました。");
