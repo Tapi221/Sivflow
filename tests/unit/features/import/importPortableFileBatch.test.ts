@@ -11,13 +11,13 @@ const createMfCardFile = (): File => {
     version: MF_CARD_VERSION,
     exportedAt: "2026-01-01T00:00:00.000Z",
     app: {
-      name: "Manifolia",
+      name: "Sivflow",
       version: "test",
     },
     capabilities: {
-      media: false,
-      ink: false,
-      tags: false,
+      mediaBundled: false,
+      tagNames: false,
+      reviewProgressIncluded: false,
     },
     card: {
       id: "card-source",
@@ -49,7 +49,7 @@ const createMfCardFile = (): File => {
   };
 
   return new File([encodeMfCardFile(cardFile)], "sample.mfcard", {
-    type: "application/vnd.manifolia.card+json",
+    type: "application/vnd.sivflow.card+json",
   });
 };
 
