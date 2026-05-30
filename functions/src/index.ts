@@ -189,7 +189,7 @@ const runFirestoreOperation = async <T>(operation: string, accountId: string | u
   }
 };
 
-const runGoogleCalendarCallable = async <T>(context: "exchangeGoogleCalendarCode" | "storeGoogleCalendarDesktopRefreshToken" | "getGoogleCalendarAccessToken" | "listGoogleCalendarAccounts", accountId: string | undefined, fn: () => Promise<T>): Promise<T> => {
+const runGoogleCalendarCallable = async <T>(context: "exchangeGoogleCalendarCode" | "getGoogleCalendarAccessToken" | "listGoogleCalendarAccounts", accountId: string | undefined, fn: () => Promise<T>): Promise<T> => {
   try {
     return await fn();
   } catch (error) {
@@ -203,18 +203,6 @@ const runGoogleCalendarCallable = async <T>(context: "exchangeGoogleCalendarCode
 };
 
 const buildStoredRefreshTokenParams = (refreshToken: string): URLSearchParams => new URLSearchParams({ client_id: safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration"), client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "GOOGLE_OAUTH_CLIENT_SECRET", "server_oauth_configuration"), grant_type: "refresh_token", refresh_token: refreshToken });
-
-const storeGoogleCalendarAccount = async ({ uid, refreshToken, accessToken, expiresInSeconds }: { uid: string; refreshToken: string; accessToken: string; expiresInSeconds?: number | null }) => {
-  const profile = await fetchUserInfo(accessToken);
-  const accountId = profile.accountEmail;
-  const ref = await accountDoc(uid, accountId);
-  const existingSnap = await runFirestoreOperation("get account", accountId, () => ref.get());
-  const existingData = existingSnap.data() as { createdAt?: unknown } | undefined;
-  const now = await serverTimestamp();
-  const payload: Partial<StoredGoogleCalendarAccount> = { email: profile.accountEmail, name: profile.accountName, photoUrl: profile.accountPhotoUrl, encryptedRefreshToken: encryptRefreshToken(refreshToken), createdAt: existingData?.createdAt ?? now, updatedAt: now };
-  await runFirestoreOperation("set account", accountId, () => ref.set(payload, { merge: true }));
-  return { accessToken, expiresInSeconds, ...profile, refreshTokenStored: true };
-};
 
 export const exchangeGoogleCalendarCode = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => {
   const { code, codeVerifier, forceRefreshToken, redirectUri } = request.data as { code?: string; codeVerifier?: string; forceRefreshToken?: boolean; redirectUri?: string };
@@ -244,21 +232,6 @@ export const exchangeGoogleCalendarCode = onCall({ region: REGION, secrets: [GOO
     if (refreshToken) payload.encryptedRefreshToken = encryptRefreshToken(refreshToken);
     await runFirestoreOperation("set account", accountId, () => ref.set(payload, { merge: true }));
     return { accessToken, expiresInSeconds, ...profile, refreshTokenStored: Boolean(refreshToken || existingData?.encryptedRefreshToken) };
-  });
-});
-
-export const storeGoogleCalendarDesktopRefreshToken = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => {
-  const { refreshToken } = request.data as { refreshToken?: string };
-  return runGoogleCalendarCallable("storeGoogleCalendarDesktopRefreshToken", undefined, async () => {
-    const uid = requireUid(request);
-    if (!refreshToken) throw new HttpsError("invalid-argument", "refreshToken is required.");
-    const token = await exchangeToken(buildStoredRefreshTokenParams(refreshToken), "refresh_token");
-    const accessToken = typeof token.access_token === "string" ? token.access_token : null;
-    const expiresInSeconds = typeof token.expires_in === "number" ? token.expires_in : null;
-    const scope = typeof token.scope === "string" ? token.scope : null;
-    if (!accessToken) throw new HttpsError("internal", "Google token response missing access_token.");
-    await validateGrantedGoogleScopes(accessToken, scope);
-    return storeGoogleCalendarAccount({ uid, refreshToken, accessToken, expiresInSeconds });
   });
 });
 

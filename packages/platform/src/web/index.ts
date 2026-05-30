@@ -23,8 +23,6 @@ export const webPlatform: PlatformApi = {
     cancel: async () => {},
     takePendingCallback: async () => null,
     exchangeIdToken: unavailable,
-    exchangeTokens: unavailable,
-    refreshTokens: unavailable,
     storeRefreshToken: unavailable,
     readRefreshToken: unavailable,
     deleteRefreshToken: async () => {},

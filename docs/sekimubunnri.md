@@ -62,10 +62,6 @@ packages/
   platform/
     src/
       auth/
-        google/
-          GoogleAuthDesktopAdapter.ts
-          GoogleAuthWebAdapter.ts
-          selectGoogleAuthPort.ts
       storage/
       calendar/
       files/
@@ -100,7 +96,6 @@ apps/desktop
   Tauri shell。
   Rust command、window 操作、file dialog、OAuth loopback、bundle 設定。
   UI は持たない。Web renderer を WebView で表示するだけ。
-  OAuth loopback / token exchange / keyring などの Tauri 側実装はここ。
 
 apps/mobile
   React Native app。
@@ -124,7 +119,6 @@ packages/core
 packages/platform
   各 platform adapter の interface と実装。
   Web/Tauri/RN の違いをここで吸収する。
-  GoogleAuthDesktopAdapter / GoogleAuthWebAdapter / selectGoogleAuthPort などの platform 差分を持つ adapter はここ。
 
 shared/assets
   全プラットフォーム共通の元 asset。
@@ -135,4 +129,13 @@ shared/schemas
 
 shared/design-tokens
   Web CSS / RN StyleSheet / Swift Color に変換する元。
+```
+
+一番大事な教訓はこれです。
+
+```text
+Web と Tauri は renderer を共有する。
+React Native は別 renderer にする。
+Swift は apps/mobile/ios 配下の native extension として扱う。
+全 platform 共通にしたいものは TypeScript code ではなく、schema / token / asset に寄せる。
 ```
