@@ -2,7 +2,32 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import type { DesktopBridgeApi, DesktopImportFileOpenPayload, DesktopOauthCallbackPayload } from "../desktopApi";
 
+const oauthCallbackHandlers = new Set<(payload: DesktopOauthCallbackPayload) => void>();
+
+let oauthCallbackListenerStarted = false;
+
 const hasWindowDesktop = (): boolean => typeof window !== "undefined" && typeof window.desktop !== "undefined";
+
+const canInstallTauriDesktopBridge = (): boolean => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
+const dispatchOauthCallback = (payload: DesktopOauthCallbackPayload): void => {
+  for (const handler of Array.from(oauthCallbackHandlers)) {
+    handler(payload);
+  }
+};
+
+const ensureOauthCallbackListener = (): void => {
+  if (oauthCallbackListenerStarted || !canInstallTauriDesktopBridge()) return;
+
+  oauthCallbackListenerStarted = true;
+
+  void listen<DesktopOauthCallbackPayload>("oauth:callback", (event) => {
+    dispatchOauthCallback(event.payload);
+  }).catch((error) => {
+    oauthCallbackListenerStarted = false;
+    console.error("[TauriDesktopBridge] failed to listen for OAuth callback", error);
+  });
+};
 
 const desktopApi: DesktopBridgeApi = {
   app: {
@@ -40,18 +65,11 @@ const desktopApi: DesktopBridgeApi = {
     readRefreshToken: (accountId: string) => invoke<string | null>("oauth_read_refresh_token", { accountId }),
     deleteRefreshToken: (accountId: string) => invoke<void>("oauth_delete_refresh_token", { accountId }),
     onCallback: (handler) => {
-      let unsubscribe: (() => void) | null = null;
-      const unlistenPromise = listen<DesktopOauthCallbackPayload>("oauth:callback", (event) => {
-        handler(event.payload);
-      });
-
-      void unlistenPromise.then((unlisten) => {
-        unsubscribe = unlisten;
-      });
+      ensureOauthCallbackListener();
+      oauthCallbackHandlers.add(handler);
 
       return () => {
-        unsubscribe?.();
-        unsubscribe = null;
+        oauthCallbackHandlers.delete(handler);
       };
     },
   },
@@ -78,6 +96,7 @@ const desktopApi: DesktopBridgeApi = {
   },
 };
 
-if (typeof window !== "undefined" && !hasWindowDesktop() && "__TAURI_INTERNALS__" in window) {
+if (!hasWindowDesktop() && canInstallTauriDesktopBridge()) {
+  ensureOauthCallbackListener();
   window.desktop = desktopApi;
 }
