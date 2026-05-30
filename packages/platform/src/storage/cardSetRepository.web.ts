@@ -1,4 +1,5 @@
-import type { CardSetCommandRepository, CardSetCreateDraft, CardSetDeleteRepository } from "@core/usecases/cardSet";
+import type { CardSetCommandRepository, CardSetCreateDraft, CardSetDeleteRepository, CardSetQueryRepository } from "@core/usecases/cardSet";
+import { ensureLegacyCardsBackfilled } from "@/services/legacyCardSetMigrationBackfill";
 import { getLocalDb } from "@/services/localDB";
 import type { Card, CardSet } from "@/types";
 
@@ -10,9 +11,10 @@ const generateCardSetId = () => {
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
 
-export const createWebCardSetRepository = (): CardSetCommandRepository<CardSet> & CardSetDeleteRepository<Card> => ({
+export const createWebCardSetRepository = (): CardSetCommandRepository<CardSet> & CardSetDeleteRepository<Card> & CardSetQueryRepository<CardSet> => ({
   generateCardSetId,
   listCardSets: async (userId) => {
+    await ensureLegacyCardsBackfilled(userId);
     const db = await getLocalDb(userId);
     return db.cardSets.where("userId").equals(userId).toArray();
   },
