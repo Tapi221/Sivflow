@@ -1,7 +1,8 @@
 import type { RefObject } from "react";
 import { startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { addDays, addWeeks, format, isSameMonth, startOfMonth, startOfWeek } from "date-fns";
+import { addDays, addWeeks, endOfDay, format, isSameMonth, startOfDay, startOfMonth, startOfWeek } from "date-fns";
 import * as C from "@/features/calendar/calendar.constants.desktop";
+import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type { CalendarMonthWeek } from "@/features/calendar/model/calendarMonth.model";
 import { CALENDAR_MONTH_WEEK_DAY_COUNT, CALENDAR_MONTH_WEEK_STARTS_ON, getCalendarMonthKey, getCalendarWeekKey } from "@/features/calendar/model/calendarMonth.model";
 
@@ -19,6 +20,7 @@ type UseMonthInfiniteScrollOptions = {
 
 export type UseMonthInfiniteScrollReturn = {
   monthWeeks: CalendarMonthWeek[];
+  visibleWeekRange: CalendarDateRange;
   topSpacerHeight: number;
   bottomSpacerHeight: number;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
@@ -45,6 +47,13 @@ const VISIBLE_MONTH_SYNC_DELAY_MS = 96;
 const getWeekStart = (date: Date): Date => startOfWeek(date, { weekStartsOn: CALENDAR_MONTH_WEEK_STARTS_ON });
 
 const clampVirtualWeekOffset = (weekOffset: number): number => Math.min(MONTH_VIRTUAL_FUTURE_WEEKS, Math.max(-MONTH_VIRTUAL_PAST_WEEKS, weekOffset));
+
+const buildWeekDateRange = (weekStart: Date): CalendarDateRange => ({
+  start: startOfDay(weekStart),
+  end: endOfDay(addDays(weekStart, CALENDAR_MONTH_WEEK_DAY_COUNT - 1)),
+});
+
+const isSameCalendarDateRange = (left: CalendarDateRange, right: CalendarDateRange): boolean => left.start.getTime() === right.start.getTime() && left.end.getTime() === right.end.getTime();
 
 const createWindowAroundWeekOffset = (weekOffset: number): MonthVirtualWindow => {
   const halfWindow = Math.floor(MONTH_INITIAL_RENDERED_WEEKS / 2);
@@ -87,7 +96,7 @@ const buildVirtualMonthWeeks = (baseWeekStart: Date, virtualWindow: MonthVirtual
 
 const getTopSpacerHeight = (virtualWindow: MonthVirtualWindow, rowHeight: number): number => Math.max(0, virtualWindow.startWeekOffset + MONTH_VIRTUAL_PAST_WEEKS) * rowHeight;
 
-const getBottomSpacerHeight = (virtualWindow: MonthVirtualWindow, rowHeight: number): number => Math.max(0, MONTH_VIRTUAL_FUTURE_WEEKS - virtualWindow.endWeekOffset) * rowHeight;
+const getBottomSpacerHeight = (virtualWindow: MonthVirtualWindow, rowHeight: number): number => Math.max(0, MONTH_VIRTUAL_FUTURE_WEEKS - virtualWindow.endOffset) * rowHeight;
 
 // ── フック本体
 
@@ -112,6 +121,7 @@ export const useMonthInfiniteScroll = ({
   const scheduleVisibleMonthSyncRef = useRef<(() => void) | null>(null);
 
   const [virtualWindow, setVirtualWindow] = useState(() => createWindowAroundWeekOffset(0));
+  const [visibleWeekRange, setVisibleWeekRange] = useState(() => buildWeekDateRange(baseWeekStartRef.current));
 
   const monthWeeks = useMemo(
     () => buildVirtualMonthWeeks(baseWeekStartRef.current, virtualWindow),
@@ -177,10 +187,16 @@ export const useMonthInfiniteScroll = ({
   const syncVisibleMonth = useCallback(() => {
     const scroller = scrollContainerRef.current;
 
-    if (!scroller || !onVisibleMonthChange) return;
+    if (!scroller) return;
 
     const sampleOffsetTop = scroller.scrollTop + C.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
     const visibleWeek = buildCalendarVirtualMonthWeek(baseWeekStartRef.current, getWeekOffsetFromScrollTop(sampleOffsetTop));
+    const nextWeekRange = buildWeekDateRange(visibleWeek.weekStart);
+
+    setVisibleWeekRange((currentRange) => isSameCalendarDateRange(currentRange, nextWeekRange) ? currentRange : nextWeekRange);
+
+    if (!onVisibleMonthChange) return;
+
     const nextKey = getCalendarMonthKey(visibleWeek.visibleMonthDate);
 
     if (nextKey === visibleMonthKeyRef.current) return;
@@ -240,6 +256,7 @@ export const useMonthInfiniteScroll = ({
     visibleMonthKeyRef.current = getCalendarMonthKey(currentDate);
     pendingScrollWeekOffsetRef.current = 0;
     cancelVisibleMonthSync();
+    setVisibleWeekRange(buildWeekDateRange(baseWeekStartRef.current));
     setVirtualWindow(createWindowAroundWeekOffset(0));
   }, [cancelVisibleMonthSync, currentDate, scrollTargetToken]);
 
@@ -296,6 +313,7 @@ export const useMonthInfiniteScroll = ({
 
   return {
     monthWeeks,
+    visibleWeekRange,
     topSpacerHeight: getTopSpacerHeight(virtualWindow, rowHeight),
     bottomSpacerHeight: getBottomSpacerHeight(virtualWindow, rowHeight),
     scrollContainerRef,
