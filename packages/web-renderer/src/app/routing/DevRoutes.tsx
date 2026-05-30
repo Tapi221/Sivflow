@@ -16,6 +16,13 @@ const BlockNoteSandboxPage = DEV_MODE
       })),
     )
   : null;
+const KnowledgeSandboxPage = DEV_MODE
+  ? lazy(() =>
+      import("@/sandbox/logseq").then(({ LogseqSandboxPage }) => ({
+        default: LogseqSandboxPage,
+      })),
+    )
+  : null;
 
 const withDevRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
@@ -56,6 +63,13 @@ export const getDevRouteElements = () => {
         <Route
           path="sandbox/blocknote/*"
           element={withDevRouteFallback(<BlockNoteSandboxPage />)}
+        />
+      ) : null}
+
+      {KnowledgeSandboxPage ? (
+        <Route
+          path="sandbox/logseq/*"
+          element={withDevRouteFallback(<KnowledgeSandboxPage />)}
         />
       ) : null}
     </>
