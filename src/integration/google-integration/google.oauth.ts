@@ -16,6 +16,25 @@ export type GoogleCalendarAccess = {
 
 export type GoogleConnectedServiceAccess = GoogleCalendarAccess;
 
+type GoogleOAuthServerCode = {
+  code: string;
+  codeVerifier: string;
+  redirectUri: string;
+};
+
+type GoogleOAuthAuthorizeInput = {
+  accessType?: "offline";
+  clientId: string;
+  codeChallenge?: string;
+  includeGrantedScopes?: boolean;
+  loginHint?: string;
+  prompt?: string;
+  redirectUri: string;
+  scope: string;
+  state: string;
+};
+
+const GOOGLE_SIGN_IN_SCOPE_PARAM = "openid email profile";
 const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 const GOOGLE_CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
 const GOOGLE_CALENDAR_APP_CREATED_SCOPE = "https://www.googleapis.com/auth/calendar.app.created";
@@ -35,7 +54,7 @@ const GOOGLE_SCOPE_RECONNECT_MESSAGE = "Google Calendar と Google ToDo をま�
 export const GOOGLE_CONNECTED_SERVICE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_CALENDAR_READONLY_SCOPE, GOOGLE_CALENDAR_APP_CREATED_SCOPE, GOOGLE_TASKS_SCOPE] as const;
 
 const GOOGLE_SCOPES = GOOGLE_CONNECTED_SERVICE_SCOPES;
-const GOOGLE_SCOPE_PARAM = `openid email profile ${GOOGLE_SCOPES.join(" ")}`;
+const GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM = `${GOOGLE_SIGN_IN_SCOPE_PARAM} ${GOOGLE_SCOPES.join(" ")}`;
 
 let pendingGoogleCalendarServerCodeVerifier: string | null = null;
 
@@ -112,8 +131,10 @@ const getGoogleOAuthClientId = (): string => {
 
 const getDesktopRedirectUri = (): string => DESKTOP_GOOGLE_OAUTH_REDIRECT_URI;
 
-const buildAuthorizeUrl = ({ clientId, redirectUri, codeChallenge, loginHint, prompt = "consent select_account", state }: { clientId: string; redirectUri: string; codeChallenge?: string; loginHint?: string; prompt?: string; state: string }) => {
-  const params = new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, response_type: "code", scope: GOOGLE_SCOPE_PARAM, state, include_granted_scopes: "true", access_type: "offline", prompt });
+const buildAuthorizeUrl = ({ accessType, clientId, codeChallenge, includeGrantedScopes = false, loginHint, prompt = "select_account", redirectUri, scope, state }: GoogleOAuthAuthorizeInput): string => {
+  const params = new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, response_type: "code", scope, state, prompt });
+  if (accessType) params.set("access_type", accessType);
+  if (includeGrantedScopes) params.set("include_granted_scopes", "true");
   if (codeChallenge) {
     params.set("code_challenge", codeChallenge);
     params.set("code_challenge_method", "S256");
@@ -272,19 +293,10 @@ const fetchGoogleUserInfo = async (accessToken: string) => {
   return { accountEmail: json.email ?? null, accountName: json.name ?? null, accountPhotoUrl: json.picture ?? null };
 };
 
-export const consumeGoogleCalendarServerCodeVerifier = (): string | null => {
-  const verifier = pendingGoogleCalendarServerCodeVerifier;
-  pendingGoogleCalendarServerCodeVerifier = null;
-  return verifier;
-};
-
-export const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCalendarServerCodeVerifier;
-
-export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<{ code: string; codeVerifier: string; redirectUri: string }> => {
+const requestGoogleOAuthServerCode = async ({ accessType, includeGrantedScopes, loginHint, prompt, scope }: { accessType?: "offline"; includeGrantedScopes?: boolean; loginHint?: string; prompt?: string; scope: string }): Promise<GoogleOAuthServerCode> => {
   if (typeof window === "undefined") throw new Error("Google OAuth is not available");
   const clientId = getGoogleOAuthClientId();
   const redirectUri = isDesktopLikeRuntime() ? getDesktopRedirectUri() : window.location.origin;
-  const loginHint = auth.currentUser?.email ?? readEmail() ?? undefined;
   const state = randomBase64Url(16);
   const codeVerifier = randomBase64Url(48);
   const codeChallenge = await createCodeChallenge(codeVerifier);
@@ -293,7 +305,7 @@ export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<{ cod
   } catch {
     // storage が使えない環境では BroadcastChannel / postMessage で受け取る。
   }
-  const authorizeUrl = buildAuthorizeUrl({ clientId, redirectUri, codeChallenge, loginHint, state });
+  const authorizeUrl = buildAuthorizeUrl({ accessType, clientId, codeChallenge, includeGrantedScopes, loginHint, prompt, redirectUri, scope, state });
   const codePromise = isDesktopLikeRuntime() ? waitForDesktopCode(state, redirectUri) : waitForWebCode(state, redirectUri);
   if (isDesktopLikeRuntime()) {
     await oauthBridge.start(authorizeUrl);
@@ -302,8 +314,23 @@ export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<{ cod
     if (!authWindow) throw new Error("Google OAuth window could not be opened");
   }
   const code = await codePromise;
-  pendingGoogleCalendarServerCodeVerifier = codeVerifier;
   return { code, codeVerifier, redirectUri };
+};
+
+export const consumeGoogleCalendarServerCodeVerifier = (): string | null => {
+  const verifier = pendingGoogleCalendarServerCodeVerifier;
+  pendingGoogleCalendarServerCodeVerifier = null;
+  return verifier;
+};
+
+export const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCalendarServerCodeVerifier;
+
+export const requestGoogleSignInServerCode = async (): Promise<GoogleOAuthServerCode> => requestGoogleOAuthServerCode({ prompt: "select_account", scope: GOOGLE_SIGN_IN_SCOPE_PARAM });
+
+export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<GoogleOAuthServerCode> => {
+  const result = await requestGoogleOAuthServerCode({ accessType: "offline", includeGrantedScopes: true, loginHint: auth.currentUser?.email ?? readEmail() ?? undefined, prompt: "consent select_account", scope: GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM });
+  pendingGoogleCalendarServerCodeVerifier = result.codeVerifier;
+  return result;
 };
 
 export const requestCalendarAccessToken = async (auth: Auth, silent = false): Promise<GoogleCalendarAccess> => {
