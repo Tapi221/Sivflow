@@ -2,13 +2,7 @@ import { httpsCallable } from "firebase/functions";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { auth, functionsClient } from "@/services/firebase";
 
-const storeGoogleCalendarDesktopRefreshTokenCallable = httpsCallable<{ refreshToken: string; clientId: string }, { refreshTokenStored: boolean }>(functionsClient, "storeGoogleCalendarDesktopRefreshToken");
-
-const getDesktopClientId = (): string => {
-  const clientId = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_CLIENT_ID;
-  if (!clientId) throw new Error("Missing Google OAuth desktop client id");
-  return clientId;
-};
+const storeGoogleCalendarDesktopRefreshTokenCallable = httpsCallable<{ refreshToken: string }, { refreshTokenStored: boolean }>(functionsClient, "storeGoogleCalendarDesktopRefreshToken");
 
 const waitForCallableAuth = async (): Promise<void> => {
   await auth.authStateReady();
@@ -18,5 +12,5 @@ const waitForCallableAuth = async (): Promise<void> => {
 export const mirrorDesktopGoogleRefreshTokenToServer = async (refreshToken: string | null | undefined): Promise<void> => {
   if (!isDesktopLikeRuntime() || !refreshToken) return;
   await waitForCallableAuth();
-  await storeGoogleCalendarDesktopRefreshTokenCallable({ refreshToken, clientId: getDesktopClientId() });
+  await storeGoogleCalendarDesktopRefreshTokenCallable({ refreshToken });
 };

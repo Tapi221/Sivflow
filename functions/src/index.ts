@@ -5,8 +5,17 @@ import { getDb, serverTimestamp } from "./firebaseAdmin.js";
 import { renewExpiredWatchChannels } from "./gcal/renewWatchChannels.js";
 import { classifyGoogleTokenEndpointFailure, type GoogleOAuthServerErrorReason } from "./gcal/tokenErrors.js";
 
-const GOOGLE_OAUTH_WEB_CLIENT_ID = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_ID");
-const GOOGLE_OAUTH_WEB_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_SECRET");
+type StoredGoogleCalendarAccount = {
+  email: string;
+  name: string | null;
+  photoUrl: string | null;
+  encryptedRefreshToken: string;
+  createdAt: unknown;
+  updatedAt: unknown;
+};
+
+const GOOGLE_OAUTH_CLIENT_ID = defineSecret("GOOGLE_OAUTH_CLIENT_ID");
+const GOOGLE_OAUTH_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_CLIENT_SECRET");
 const GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY = defineSecret("GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY");
 
 const REGION = "asia-northeast1";
@@ -19,19 +28,6 @@ const REQUIRED_GOOGLE_SCOPES = [
   "https://www.googleapis.com/auth/calendar.app.created",
   "https://www.googleapis.com/auth/tasks",
 ] as const;
-
-type GoogleOAuthClientType = "web" | "desktop";
-
-type StoredGoogleCalendarAccount = {
-  email: string;
-  name: string | null;
-  photoUrl: string | null;
-  encryptedRefreshToken: string;
-  oauthClientType?: GoogleOAuthClientType;
-  oauthClientId?: string;
-  createdAt: unknown;
-  updatedAt: unknown;
-};
 
 const requireUid = (request: { auth?: { uid?: string } }) => {
   const uid = request.auth?.uid;
@@ -67,7 +63,7 @@ const safeSecretValue = (secret: { value: () => string }, name: string, reason: 
     throw classifiedPrecondition(`${name} is not configured or cannot be accessed by this function.`, {
       reason,
       reconnectRequired: false,
-      adminAction: reason === "server_oauth_configuration" ? "check GOOGLE_OAUTH_WEB_CLIENT_ID / GOOGLE_OAUTH_WEB_CLIENT_SECRET and redeploy functions" : "check GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY and redeploy functions",
+      adminAction: reason === "server_oauth_configuration" ? "check GOOGLE_OAUTH_CLIENT_ID / GOOGLE_OAUTH_CLIENT_SECRET and redeploy functions" : "check GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY and redeploy functions",
     });
   }
 };
@@ -206,34 +202,27 @@ const runGoogleCalendarCallable = async <T>(context: "exchangeGoogleCalendarCode
   }
 };
 
-const buildStoredRefreshTokenParams = (refreshToken: string, data: { oauthClientType?: GoogleOAuthClientType; oauthClientId?: string }): URLSearchParams => {
-  if (data.oauthClientType === "desktop") {
-    if (!data.oauthClientId) throw classifiedPrecondition("Stored desktop OAuth client id is missing.", { reason: "server_oauth_configuration", reconnectRequired: false, adminAction: "reconnect the desktop Google account to store the desktop OAuth client id" });
-    return new URLSearchParams({ client_id: data.oauthClientId, grant_type: "refresh_token", refresh_token: refreshToken });
-  }
+const buildStoredRefreshTokenParams = (refreshToken: string): URLSearchParams => new URLSearchParams({ client_id: safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration"), client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "GOOGLE_OAUTH_CLIENT_SECRET", "server_oauth_configuration"), grant_type: "refresh_token", refresh_token: refreshToken });
 
-  return new URLSearchParams({ client_id: safeSecretValue(GOOGLE_OAUTH_WEB_CLIENT_ID, "GOOGLE_OAUTH_WEB_CLIENT_ID", "server_oauth_configuration"), client_secret: safeSecretValue(GOOGLE_OAUTH_WEB_CLIENT_SECRET, "GOOGLE_OAUTH_WEB_CLIENT_SECRET", "server_oauth_configuration"), grant_type: "refresh_token", refresh_token: refreshToken });
-};
-
-const storeGoogleCalendarAccount = async ({ uid, refreshToken, oauthClientType, oauthClientId, accessToken, expiresInSeconds }: { uid: string; refreshToken: string; oauthClientType: GoogleOAuthClientType; oauthClientId?: string; accessToken: string; expiresInSeconds?: number | null }) => {
+const storeGoogleCalendarAccount = async ({ uid, refreshToken, accessToken, expiresInSeconds }: { uid: string; refreshToken: string; accessToken: string; expiresInSeconds?: number | null }) => {
   const profile = await fetchUserInfo(accessToken);
   const accountId = profile.accountEmail;
   const ref = await accountDoc(uid, accountId);
   const existingSnap = await runFirestoreOperation("get account", accountId, () => ref.get());
   const existingData = existingSnap.data() as { createdAt?: unknown } | undefined;
   const now = await serverTimestamp();
-  const payload: Partial<StoredGoogleCalendarAccount> = { email: profile.accountEmail, name: profile.accountName, photoUrl: profile.accountPhotoUrl, encryptedRefreshToken: encryptRefreshToken(refreshToken), oauthClientType, oauthClientId, createdAt: existingData?.createdAt ?? now, updatedAt: now };
+  const payload: Partial<StoredGoogleCalendarAccount> = { email: profile.accountEmail, name: profile.accountName, photoUrl: profile.accountPhotoUrl, encryptedRefreshToken: encryptRefreshToken(refreshToken), createdAt: existingData?.createdAt ?? now, updatedAt: now };
   await runFirestoreOperation("set account", accountId, () => ref.set(payload, { merge: true }));
   return { accessToken, expiresInSeconds, ...profile, refreshTokenStored: true };
 };
 
-export const exchangeGoogleCalendarCode = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_WEB_CLIENT_ID, GOOGLE_OAUTH_WEB_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => {
+export const exchangeGoogleCalendarCode = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => {
   const { code, codeVerifier, forceRefreshToken, redirectUri } = request.data as { code?: string; codeVerifier?: string; forceRefreshToken?: boolean; redirectUri?: string };
   return runGoogleCalendarCallable("exchangeGoogleCalendarCode", undefined, async () => {
     const uid = requireUid(request);
     if (!code || !redirectUri) throw new HttpsError("invalid-argument", "code and redirectUri are required.");
-    const webClientId = safeSecretValue(GOOGLE_OAUTH_WEB_CLIENT_ID, "GOOGLE_OAUTH_WEB_CLIENT_ID", "server_oauth_configuration");
-    const tokenParams = new URLSearchParams({ client_id: webClientId, client_secret: safeSecretValue(GOOGLE_OAUTH_WEB_CLIENT_SECRET, "GOOGLE_OAUTH_WEB_CLIENT_SECRET", "server_oauth_configuration"), code, grant_type: "authorization_code", redirect_uri: redirectUri });
+    const clientId = safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration");
+    const tokenParams = new URLSearchParams({ client_id: clientId, client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "GOOGLE_OAUTH_CLIENT_SECRET", "server_oauth_configuration"), code, grant_type: "authorization_code", redirect_uri: redirectUri });
     if (codeVerifier) tokenParams.set("code_verifier", codeVerifier);
     const token = await exchangeToken(tokenParams, "authorization_code");
     const accessToken = typeof token.access_token === "string" ? token.access_token : null;
@@ -251,25 +240,25 @@ export const exchangeGoogleCalendarCode = onCall({ region: REGION, secrets: [GOO
       throw classifiedPrecondition(forceRefreshToken ? "Google did not return a new refresh token. Revoke this app in Google Account permissions, then reconnect." : "Google did not return a refresh token and no stored refresh token exists.", { reason: "stored_refresh_token_missing", reconnectRequired: true, userAction: "reconnect_google_account" });
     }
     const now = await serverTimestamp();
-    const payload: Partial<StoredGoogleCalendarAccount> = { email: profile.accountEmail, name: profile.accountName, photoUrl: profile.accountPhotoUrl, oauthClientType: "web", oauthClientId: webClientId, createdAt: existingData?.createdAt ?? now, updatedAt: now };
+    const payload: Partial<StoredGoogleCalendarAccount> = { email: profile.accountEmail, name: profile.accountName, photoUrl: profile.accountPhotoUrl, createdAt: existingData?.createdAt ?? now, updatedAt: now };
     if (refreshToken) payload.encryptedRefreshToken = encryptRefreshToken(refreshToken);
     await runFirestoreOperation("set account", accountId, () => ref.set(payload, { merge: true }));
     return { accessToken, expiresInSeconds, ...profile, refreshTokenStored: Boolean(refreshToken || existingData?.encryptedRefreshToken) };
   });
 });
 
-export const storeGoogleCalendarDesktopRefreshToken = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => {
-  const { refreshToken, clientId } = request.data as { refreshToken?: string; clientId?: string };
+export const storeGoogleCalendarDesktopRefreshToken = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => {
+  const { refreshToken } = request.data as { refreshToken?: string };
   return runGoogleCalendarCallable("storeGoogleCalendarDesktopRefreshToken", undefined, async () => {
     const uid = requireUid(request);
-    if (!refreshToken || !clientId) throw new HttpsError("invalid-argument", "refreshToken and clientId are required.");
-    const token = await exchangeToken(new URLSearchParams({ client_id: clientId, grant_type: "refresh_token", refresh_token: refreshToken }), "refresh_token");
+    if (!refreshToken) throw new HttpsError("invalid-argument", "refreshToken is required.");
+    const token = await exchangeToken(buildStoredRefreshTokenParams(refreshToken), "refresh_token");
     const accessToken = typeof token.access_token === "string" ? token.access_token : null;
     const expiresInSeconds = typeof token.expires_in === "number" ? token.expires_in : null;
     const scope = typeof token.scope === "string" ? token.scope : null;
     if (!accessToken) throw new HttpsError("internal", "Google token response missing access_token.");
     await validateGrantedGoogleScopes(accessToken, scope);
-    return storeGoogleCalendarAccount({ uid, refreshToken, oauthClientType: "desktop", oauthClientId: clientId, accessToken, expiresInSeconds });
+    return storeGoogleCalendarAccount({ uid, refreshToken, accessToken, expiresInSeconds });
   });
 });
 
@@ -284,7 +273,7 @@ export const listGoogleCalendarAccounts = onCall({ region: REGION }, async (requ
   }) };
 }));
 
-export const getGoogleCalendarAccessToken = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_WEB_CLIENT_ID, GOOGLE_OAUTH_WEB_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => {
+export const getGoogleCalendarAccessToken = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => {
   const { accountId } = request.data as { accountId?: string };
   return runGoogleCalendarCallable("getGoogleCalendarAccessToken", accountId, async () => {
     const uid = requireUid(request);
@@ -292,9 +281,9 @@ export const getGoogleCalendarAccessToken = onCall({ region: REGION, secrets: [G
     const ref = await accountDoc(uid, accountId);
     const snap = await runFirestoreOperation("get account", accountId, () => ref.get());
     if (!snap.exists) throw new HttpsError("not-found", "Google Calendar account not found.");
-    const data = snap.data() as { encryptedRefreshToken?: string; email?: string; name?: string | null; photoUrl?: string | null; oauthClientType?: GoogleOAuthClientType; oauthClientId?: string };
+    const data = snap.data() as { encryptedRefreshToken?: string; email?: string; name?: string | null; photoUrl?: string | null };
     if (!data.encryptedRefreshToken) throw classifiedPrecondition("Stored refresh token is missing.", { reason: "stored_refresh_token_missing", reconnectRequired: true, userAction: "reconnect_google_account" });
-    const token = await exchangeToken(buildStoredRefreshTokenParams(decryptRefreshToken(data.encryptedRefreshToken), data), "refresh_token");
+    const token = await exchangeToken(buildStoredRefreshTokenParams(decryptRefreshToken(data.encryptedRefreshToken)), "refresh_token");
     const accessToken = typeof token.access_token === "string" ? token.access_token : null;
     const expiresInSeconds = typeof token.expires_in === "number" ? token.expires_in : null;
     const rotatedRefreshToken = typeof token.refresh_token === "string" ? token.refresh_token : null;

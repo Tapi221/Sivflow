@@ -155,7 +155,7 @@ info(
 
 if (activeAlias === "prod" || activeProjectId === prodProjectId) {
   const productionEnv = loadDotEnvFile(productionEnvPath);
-  requireEnvValue("VITE_WEB_GOOGLE_OAUTH_CLIENT_ID", productionEnv);
+  requireEnvValue("VITE_GOOGLE_OAUTH_CLIENT_ID", productionEnv);
   requireEnvValue("VITE_GOOGLE_OAUTH_SERVER_TOKENS", productionEnv);
 }
 
