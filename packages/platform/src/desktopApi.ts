@@ -30,6 +30,7 @@ export interface DesktopFileApi {
 export interface PlatformOauthApi {
   start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
+  takePendingCallback(): Promise<DesktopOauthCallbackPayload | null>;
   exchangeIdToken(input: {
     clientId: string;
     code: string;
