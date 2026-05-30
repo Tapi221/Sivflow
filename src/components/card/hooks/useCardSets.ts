@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { deleteCardSetWithCards } from "@core/usecases/cardSet";
+import { createCardSetUseCase, deleteCardSetWithCards, moveCardSetToFolderUseCase, updateCardSetUseCase } from "@core/usecases/cardSet";
 import { createWebCardSetRepository } from "@platform/storage/cardSetRepository.web";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { compareOrderableEntities } from "@/lib/orderableEntity";
@@ -75,51 +75,14 @@ export const useCardSets = (
   ): Promise<CardSet> => {
     if (!currentUser) throw new Error("認証が必要です");
 
-    if (!targetFolderId) {
-      throw new Error("カードセットはフォルダ配下にのみ作成できます");
-    }
-
-    const db = await getLocalDb(currentUser.uid);
-
-    const existingSets = await db.cardSets
-      .where("userId")
-      .equals(currentUser.uid)
-      .toArray();
-
-    const siblingSets = existingSets.filter(
-      (s) => !isDeletedEntity(s) && s.folderId === targetFolderId,
-    );
-
-    const now = new Date();
-    const orderIndex = opts?.orderIndex ?? 0;
-
-    const cardSet: CardSet = {
-      id: opts?.id ?? crypto.randomUUID(),
+    return createCardSetUseCase({
       userId: currentUser.uid,
-      deviceId: "web",
-      folderId: targetFolderId,
       name,
-      description: opts?.description,
-      orderIndex,
+      targetFolderId,
+      options: opts,
       defaultDisplayMode: DEFAULT_CARD_DISPLAY_MODE,
-      isDeleted: false,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    if (orderIndex === 0 && siblingSets.length > 0) {
-      await Promise.all(
-        siblingSets.map((sibling) =>
-          db.cardSets.update(sibling.id, {
-            orderIndex: (sibling.orderIndex ?? 0) + 1,
-            updatedAt: now,
-          }),
-        ),
-      );
-    }
-
-    await db.cardSets.add(cardSet);
-    return cardSet;
+      repository: createWebCardSetRepository(),
+    });
   };
 
   const updateCardSet = async (
@@ -133,10 +96,11 @@ export const useCardSets = (
   ): Promise<void> => {
     if (!currentUser) throw new Error("認証が必要です");
 
-    const db = await getLocalDb(currentUser.uid);
-    await db.cardSets.update(id, {
-      ...data,
-      updatedAt: new Date(),
+    await updateCardSetUseCase({
+      userId: currentUser.uid,
+      cardSetId: id,
+      data,
+      repository: createWebCardSetRepository(),
     });
   };
 
@@ -146,25 +110,11 @@ export const useCardSets = (
   ): Promise<void> => {
     if (!currentUser) throw new Error("認証が必要です");
 
-    if (!targetFolderId) {
-      throw new Error("カードセットをルート直下へ移動することはできません");
-    }
-
-    const db = await getLocalDb(currentUser.uid);
-
-    const siblingSets = (rawSets ?? []).filter(
-      (s) => !isDeletedEntity(s) && s.folderId === targetFolderId,
-    );
-
-    const maxOrder = siblingSets.reduce(
-      (m, s) => Math.max(m, s.orderIndex ?? 0),
-      -1,
-    );
-
-    await db.cardSets.update(cardSetId, {
-      folderId: targetFolderId,
-      orderIndex: maxOrder + 1,
-      updatedAt: new Date(),
+    await moveCardSetToFolderUseCase({
+      userId: currentUser.uid,
+      cardSetId,
+      targetFolderId,
+      repository: createWebCardSetRepository(),
     });
   };
 
