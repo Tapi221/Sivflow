@@ -232,7 +232,7 @@ fn get_desktop_client_credential() -> Option<String> {
 }
 
 fn credential_entry(account_id: &str) -> Result<keyring::Entry, String> {
-    keyring::Entry::new("manifolia-google-oauth", account_id).map_err(|error| error.to_string())
+    keyring::Entry::new("sivflow-google-oauth", account_id).map_err(|error| error.to_string())
 }
 
 async fn exchange_auth_code(input: AuthCodeExchangeInput) -> Result<AuthExchangeResult, String> {
@@ -346,7 +346,7 @@ fn desktop_import_read_file(file_path: String) -> Result<DesktopImportFileReadRe
 fn desktop_import_select_files() -> Vec<String> {
     let files = rfd::FileDialog::new()
         .set_title("MFDeck / MFCard を選択")
-        .add_filter("Manifolia Files", &["mfdeck", "mfcard"])
+        .add_filter("Sivflow Files", &["mfdeck", "mfcard"])
         .add_filter("MFDeck", &["mfdeck"])
         .add_filter("MFCard", &["mfcard"])
         .pick_files()
@@ -380,17 +380,6 @@ fn oauth_cancel(state: State<AuthLoopbackState>) -> Result<(), String> {
     let mut pending_url = state.pending_url.lock().map_err(|_| "OAuth state lock failed".to_string())?;
     *pending_url = None;
     Ok(())
-}
-
-#[tauri::command]
-fn oauth_take_pending_callback(state: State<AuthLoopbackState>) -> Result<Option<DesktopOauthCallbackPayload>, String> {
-    let mut pending_url = state.pending_url.lock().map_err(|_| "OAuth state lock failed".to_string())?;
-    let raw_url = match pending_url.take() {
-        Some(value) => value,
-        None => return Ok(None),
-    };
-
-    parse_callback_payload(&raw_url).map(Some)
 }
 
 #[tauri::command]
@@ -490,7 +479,6 @@ fn main() {
             desktop_import_select_files,
             oauth_start,
             oauth_cancel,
-            oauth_take_pending_callback,
             oauth_exchange_id_token,
             oauth_exchange_tokens,
             oauth_refresh_tokens,
