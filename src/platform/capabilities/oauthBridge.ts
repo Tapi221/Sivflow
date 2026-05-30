@@ -53,6 +53,7 @@ if (typeof window !== "undefined") {
 export const oauthBridge: OAuthBridgePort = {
   start: (authorizeUrl: string) => platform.oauth.start(authorizeUrl),
   cancel: () => platform.oauth.cancel(),
+  takePendingCallback: () => platform.oauth.takePendingCallback(),
   exchangeIdToken: (input) => platform.oauth.exchangeIdToken(input),
   exchangeTokens: (input) => platform.oauth.exchangeTokens(input),
   // refresh_token を使った silent なトークン更新
