@@ -10,6 +10,7 @@ const resolveFromRoot = (relativePath: string) => path.resolve(repoRoot, relativ
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
   root: resolveFromRoot("apps/web"),
+  envDir: repoRoot,
   publicDir: resolveFromRoot("public"),
   plugins: [
     react(),
