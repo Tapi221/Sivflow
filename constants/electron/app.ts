@@ -1,1 +1,1 @@
-export const ELECTRON_APP_NAME = "Manifolia";
+export const ELECTRON_APP_NAME = "Sivflow";
