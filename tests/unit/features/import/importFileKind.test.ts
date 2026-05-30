@@ -15,12 +15,12 @@ describe("importFileKind", () => {
   it("MIME type からインポート形式を判定する", () => {
     expect(
       detectImportFileKind(
-        makeFileLike("backup", "application/vnd.manifolia.deck+zip"),
+        makeFileLike("backup", "application/vnd.sivflow.deck+zip"),
       ),
     ).toBe("mfdeck");
     expect(
       detectImportFileKind(
-        makeFileLike("card", "application/vnd.manifolia.card+json"),
+        makeFileLike("card", "application/vnd.sivflow.card+json"),
       ),
     ).toBe("mfcard");
     expect(
