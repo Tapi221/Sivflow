@@ -6,7 +6,7 @@ import { getDevRouteElements } from "./DevRoutes";
 import { ProtectedRoute } from "./ProtectedRoute";
 
 const Schedule = lazy(() => import("@/routes/Schedule"));
-const Trash = lazy(() => import("../../routes/Trash"));
+const Trash = lazy(() => import("@web-renderer/routes/Trash"));
 const REDIRECT_TO_SCHEDULE_ROUTES = ["calendar/*", "CardEdit/*", "CardSetView/*", "CardView/*", "study/*", "library/*", "statistics/*"] as const;
 
 const withRouteFallback = (element: ReactNode) => {
