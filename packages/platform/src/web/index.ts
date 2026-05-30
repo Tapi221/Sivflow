@@ -19,6 +19,7 @@ export const webPlatform: PlatformApi = {
       throw new Error("OAuth desktop bridge is not available in web runtime");
     },
     cancel: async () => {},
+    takePendingCallback: async () => null,
     exchangeIdToken: async () => {
       throw new Error("OAuth desktop bridge is not available in web runtime");
     },
