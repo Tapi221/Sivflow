@@ -5,7 +5,6 @@ export const oauthBridge: OAuthBridgePort = {
   start: (authorizeUrl: string) => platform.oauth.start(authorizeUrl),
   cancel: () => platform.oauth.cancel(),
   takePendingCallback: () => platform.oauth.takePendingCallback(),
-  exchangeIdToken: (input) => platform.oauth.exchangeIdToken(input),
   storeRefreshToken: (input) => platform.oauth.storeRefreshToken(input),
   readRefreshToken: (accountId) => platform.oauth.readRefreshToken(accountId),
   deleteRefreshToken: (accountId) => platform.oauth.deleteRefreshToken(accountId),
