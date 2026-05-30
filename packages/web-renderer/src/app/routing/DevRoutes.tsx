@@ -65,6 +65,13 @@ const LicenseNotesSandboxPage = DEV_MODE
       })),
     )
   : null;
+const CalendarTimeGridSandboxPage = DEV_MODE
+  ? lazy(() =>
+      import("@/sandbox/calendar-time-grid").then(({ CalendarTimeGridSandboxPage }) => ({
+        default: CalendarTimeGridSandboxPage,
+      })),
+    )
+  : null;
 
 const withDevRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
@@ -154,6 +161,13 @@ export const getDevRouteElements = () => {
         <Route
           path="sandbox/license-notes/*"
           element={withDevRouteFallback(<LicenseNotesSandboxPage />)}
+        />
+      ) : null}
+
+      {CalendarTimeGridSandboxPage ? (
+        <Route
+          path="sandbox/calendar-time-grid/*"
+          element={withDevRouteFallback(<CalendarTimeGridSandboxPage />)}
         />
       ) : null}
     </>
