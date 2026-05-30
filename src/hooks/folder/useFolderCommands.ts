@@ -1,9 +1,9 @@
 import { nanoid } from "nanoid";
-import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { buildCardSetById, resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
+import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
-import type { Card, CardSet, Folder } from "@/types";
+import type { Card, CardSet, Document, Folder } from "@/types";
 
 type CreateFolderOptions = {
   color?: string;
@@ -58,6 +58,19 @@ const collectDescendantFolderIds = (
   return orderedFolderIds;
 };
 
+const collectCardSetsInFolders = ({
+  cardSets,
+  folderIds,
+}: {
+  cardSets: CardSet[];
+  folderIds: ReadonlySet<string>;
+}) => {
+  return cardSets.filter((cardSet) => {
+    if (cardSet.isDeleted) return false;
+    return cardSet.folderId ? folderIds.has(cardSet.folderId) : false;
+  });
+};
+
 const collectCardsInFolders = ({
   cards,
   cardSets,
@@ -74,6 +87,19 @@ const collectCardsInFolders = ({
 
     const resolvedFolderId = resolveCardFolderId(card, activeCardSetById);
     return resolvedFolderId ? folderIds.has(resolvedFolderId) : false;
+  });
+};
+
+const collectDocumentsInFolders = ({
+  documents,
+  folderIds,
+}: {
+  documents: Document[];
+  folderIds: ReadonlySet<string>;
+}) => {
+  return documents.filter((document) => {
+    if (document.isDeleted) return false;
+    return folderIds.has(document.folderId);
   });
 };
 
@@ -195,13 +221,22 @@ export const useFolderCommands = () => {
       folderId,
     );
     const folderIdSet = new Set(folderIdsToDelete);
-    const [cardSets, cards] = await Promise.all([
+    const [cardSets, cards, documents] = await Promise.all([
       db.cardSets.where("userId").equals(currentUser.uid).toArray(),
       db.getAllCards(),
+      db.documents.where("userId").equals(currentUser.uid).toArray(),
     ]);
+    const cardSetsToDelete = collectCardSetsInFolders({
+      cardSets,
+      folderIds: folderIdSet,
+    });
     const cardsToDelete = collectCardsInFolders({
       cards,
       cardSets,
+      folderIds: folderIdSet,
+    });
+    const documentsToDelete = collectDocumentsInFolders({
+      documents,
       folderIds: folderIdSet,
     });
 
@@ -209,8 +244,16 @@ export const useFolderCommands = () => {
       await db.softDelete("folders", targetFolderId);
     }
 
+    for (const cardSet of cardSetsToDelete) {
+      await db.softDelete("cardSets", cardSet.id);
+    }
+
     for (const card of cardsToDelete) {
       await db.softDelete("cards", card.id);
+    }
+
+    for (const document of documentsToDelete) {
+      await db.softDelete("documents", document.id);
     }
   };
 
