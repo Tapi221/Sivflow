@@ -54,6 +54,80 @@ shared/design-tokens
   Web CSS / RN StyleSheet / Swift Color に変換する元。
 ```
 
+## iPad 手書きモードの責務分離
+
+iPad 手書きモードは `apps/mobile` に直接全部置かない。入力体験、保存形式、表示、同期、native bridge を分けて配置する。
+
+```text
+共通Inkモデル
+  packages/core/src/domain/card/ink/
+
+Web/Desktop表示
+  packages/web-renderer/src/components/ink/
+  packages/web-renderer/src/features/card/ink/
+
+Mobile/RN画面
+  packages/mobile-renderer/src/screens/handwriting/
+  packages/mobile-renderer/src/components/ink/
+
+iOS native PencilKit
+  apps/mobile/ios/Manifolia/NativeViews/
+  apps/mobile/ios/Manifolia/NativeModules/
+
+Desktop/Tauri通信
+  apps/desktop/src-tauri/src/
+
+Platform差分吸収
+  packages/platform/src/handwriting/
+
+言語非依存schema
+  shared/schemas/
+```
+
+### 共通Inkモデル
+
+`InkDocument`、`InkStroke`、`InkPoint`、`InkSide`、`InkTool`、正規化、clone、validation は `packages/core/src/domain/card/ink/` に置く。
+
+ここは React、DOM、Tauri、Expo、Swift、PencilKit に依存しない。iPad と Desktop の見た目を揃えるため、保存形式は既存の Ink document 形式に統一する。
+
+### Web/Desktop表示
+
+HTML Canvas、Pointer Events、カード上 overlay、Web/Desktop用 toolbar は `packages/web-renderer` に置く。
+
+Tauri Desktop は UI を持たないため、Desktop 上の Ink 表示・編集 UI は `apps/desktop` ではなく Web renderer に置く。
+
+### Mobile/RN画面
+
+React Native の画面、接続中の Desktop session 表示、iPad 手書きモード画面、Mobile用 toolbar は `packages/mobile-renderer` に置く。
+
+`apps/mobile/src/App.tsx` は起動口と navigation 接続に留め、手書き画面の本体は renderer package 側に寄せる。
+
+### iOS native PencilKit
+
+PencilKit / `PKCanvasView` などの Swift 実装は `apps/mobile/ios/Manifolia/NativeViews/` に置く。
+
+PencilKit のデータ export、InkStroke への変換、session bridge など native module 的な処理は `apps/mobile/ios/Manifolia/NativeModules/` に置く。
+
+Swift 専用 app は作らない。React Native アプリの一部として扱う。
+
+### Desktop/Tauri通信
+
+LAN WebSocket server、session start/stop、Windows ファイアウォールに関係する native command は `apps/desktop/src-tauri/src/` に置く。
+
+ただし、Desktop のボタンや表示 UI はここに置かない。Tauri は shell と native capability に限定する。
+
+### Platform差分吸収
+
+手書き session の interface、Desktop/Mobile/Web adapter、通信方式の差分は `packages/platform/src/handwriting/` に置く。
+
+接続発見を cloud にするか LAN にするか、Desktop が server になるか、Mobile が client になるか、といった差分は renderer から直接扱わない。
+
+### schema
+
+Swift / Kotlin / TypeScript 間で型生成したい Ink document や handwriting session は `shared/schemas/` に置く。
+
+全 platform 共通にしたいものは、可能な限り TypeScript 実装ではなく schema / token / asset に寄せる。
+
 一番大事な教訓はこれです。
 
 ```text
