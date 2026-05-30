@@ -19,7 +19,7 @@ const resolveCardSetName = (cardFile: MfCardFileV1) => {
   const questionNumber = cardFile.card.questionNumber?.trim();
   if (questionNumber) return questionNumber;
 
-  return "単体カード";
+  return "single card";
 };
 
 const buildSingleCardArchive = (cardFile: MfCardFileV1): MfDeckArchiveV1 => {
@@ -37,7 +37,7 @@ const buildSingleCardArchive = (cardFile: MfCardFileV1): MfDeckArchiveV1 => {
       capabilities: cardFile.capabilities,
     },
     cardsJson: {
-      format: "manifolia.deck.cards",
+      format: "sivflow.deck.cards",
       version: MF_DECK_VERSION,
       cards: [cardFile.card],
     },
