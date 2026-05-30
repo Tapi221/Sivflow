@@ -1,25 +1,13 @@
-import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { createCardSetUseCase, deleteCardSetWithCards, moveCardSetToFolderUseCase, updateCardSetUseCase } from "@core/usecases/cardSet";
+import { createCardSetUseCase, deleteCardSetWithCards, listCardSetsForFolder, moveCardSetToFolderUseCase, updateCardSetUseCase } from "@core/usecases/cardSet";
 import { createWebCardSetRepository } from "@platform/storage/cardSetRepository.web";
 import { useAuthSession } from "@/contexts/AuthContext";
-import { compareOrderableEntities } from "@/lib/orderableEntity";
-import { ensureLegacyCardsBackfilled } from "@/services/legacyCardSetMigrationBackfill";
-import { getLocalDb } from "@/services/localDB";
 import type { CardSet } from "@/types";
 import { DEFAULT_CARD_DISPLAY_MODE } from "@/types/domain/cardSet";
 
 type UseCardSetsOptions = {
   enabled?: boolean;
 };
-
-type LegacyDeletedEntity = {
-  isDeleted?: boolean;
-  is_deleted?: boolean;
-};
-
-const isDeletedEntity = (entity: LegacyDeletedEntity) =>
-  Boolean(entity.isDeleted ?? entity.is_deleted);
 
 export const useCardSets = (
   folderId?: string | null,
@@ -29,40 +17,23 @@ export const useCardSets = (
   const userId = currentUser?.uid ?? null;
   const enabled = options?.enabled ?? true;
 
-  const rawSets = useLiveQuery(async () => {
+  const cardSets = useLiveQuery(async () => {
     if (!enabled) return [];
     if (!userId) return [];
+
     try {
-      await ensureLegacyCardsBackfilled(userId);
-      const db = await getLocalDb(userId);
-      return db.cardSets.where("userId").equals(userId).toArray();
+      return listCardSetsForFolder({
+        userId,
+        folderId,
+        repository: createWebCardSetRepository(),
+      });
     } catch (err) {
       console.error("[useCardSets] Error:", err);
       return [];
     }
-  }, [enabled, userId]);
+  }, [enabled, folderId, userId]);
 
-  const cardSets = useMemo(() => {
-    if (!rawSets) return [];
-
-    let sets = rawSets.filter((s) => !isDeletedEntity(s));
-
-    if (folderId !== undefined) {
-      sets = sets.filter((s) => s.folderId === (folderId ?? null));
-    }
-
-    return sets.sort((a, b) =>
-      compareOrderableEntities(a, b, {
-        getOrderIndex: (cardSet) => cardSet.orderIndex,
-        getUpdatedAt: (cardSet) => cardSet.updatedAt,
-        getCreatedAt: (cardSet) => cardSet.createdAt,
-        getName: (cardSet) => cardSet.name,
-        getId: (cardSet) => cardSet.id,
-      }),
-    );
-  }, [rawSets, folderId]);
-
-  const loading = enabled && rawSets === undefined;
+  const loading = enabled && cardSets === undefined;
 
   const createCardSet = async (
     name: string,
@@ -129,7 +100,7 @@ export const useCardSets = (
   };
 
   return {
-    cardSets,
+    cardSets: cardSets ?? [],
     loading,
     createCardSet,
     updateCardSet,
