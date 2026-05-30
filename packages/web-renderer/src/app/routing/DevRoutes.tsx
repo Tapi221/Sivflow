@@ -9,6 +9,13 @@ const CodeBlockVisualTest = DEV_MODE
 const CardLayoutConsistencyTest = DEV_MODE
   ? lazy(() => import("@/routes/CardLayoutConsistencyTest"))
   : null;
+const BlockNoteSandboxPage = DEV_MODE
+  ? lazy(() =>
+      import("@/sandbox/blocknote").then(({ BlockNoteSandboxPage }) => ({
+        default: BlockNoteSandboxPage,
+      })),
+    )
+  : null;
 
 const withDevRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
@@ -42,6 +49,13 @@ export const getDevRouteElements = () => {
         <Route
           path="card-layout-test"
           element={withDevRouteFallback(<CardLayoutConsistencyTest />)}
+        />
+      ) : null}
+
+      {BlockNoteSandboxPage ? (
+        <Route
+          path="sandbox/blocknote/*"
+          element={withDevRouteFallback(<BlockNoteSandboxPage />)}
         />
       ) : null}
     </>
