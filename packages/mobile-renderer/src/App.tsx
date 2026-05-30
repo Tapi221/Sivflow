@@ -2,8 +2,9 @@ import { type ComponentType, memo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { initialWindowMetrics, SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import TrashScreen from "./screens/TrashScreen";
 
-type NavigationItemId = "explore" | "library" | "home" | "schedule" | "settings";
+type NavigationItemId = "explore" | "library" | "home" | "schedule" | "trash" | "settings";
 
 type NavigationItem = {
   id: NavigationItemId;
@@ -32,6 +33,7 @@ const NAVIGATION_ITEMS: readonly NavigationItem[] = [
   { id: "library", label: "Library" },
   { id: "home", label: "Home" },
   { id: "schedule", label: "Schedule" },
+  { id: "trash", label: "Trash" },
   { id: "settings", label: "Settings" },
 ];
 
@@ -59,16 +61,17 @@ const AppContent = ({ ScheduleYearComponent }: AppContentProps) => {
   const insets = useSafeAreaInsets();
   const [activeItemId, setActiveItemId] = useState<NavigationItemId>("schedule");
   const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const isTrashActive = activeItemId === "trash";
 
   return (
     <View style={[styles.safeArea, { paddingBottom: insets.bottom, paddingTop: insets.top }]}>
       <StatusBar style="dark" />
       <View style={styles.header}>
         <Text style={styles.eyebrow}>Mobile Native</Text>
-        <Text style={styles.title}>Schedule</Text>
+        <Text style={styles.title}>{isTrashActive ? "Trash" : "Schedule"}</Text>
       </View>
       <View style={styles.content}>
-        <ScheduleYearComponent selectedDate={selectedDate} yearDate={selectedDate} onSelectDate={setSelectedDate} />
+        {isTrashActive ? <TrashScreen /> : <ScheduleYearComponent selectedDate={selectedDate} yearDate={selectedDate} onSelectDate={setSelectedDate} />}
       </View>
       <NavigationBar activeItemId={activeItemId} onSelectItem={setActiveItemId} />
     </View>
