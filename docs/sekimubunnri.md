@@ -56,7 +56,7 @@ shared/design-tokens
 
 ## iPad 手書きモードの責務分離
 
-iPad 手書きモードは `apps/mobile` に直接全部置かない。入力体験、保存形式、表示、同期、native bridge を分けて配置する。
+iPad 手書きモードは `apps/mobile` に直接全部置かない。入力体験、保存形式、表示、同期、native bridge を分けて配置する。スマホには手書きモードのナビも画面も出さない。
 
 ```text
 共通Inkモデル
@@ -66,9 +66,9 @@ Web/Desktop表示
   packages/web-renderer/src/components/ink/
   packages/web-renderer/src/features/card/ink/
 
-Mobile/RN画面
-  packages/mobile-renderer/src/screens/handwriting/
-  packages/mobile-renderer/src/components/ink/
+iPad専用RN UI
+  packages/mobile-renderer/src/screens/ipad/handwriting/
+  packages/mobile-renderer/src/components/ipad/ink/
 
 iOS native PencilKit
   apps/mobile/ios/Manifolia/NativeViews/
@@ -96,11 +96,13 @@ HTML Canvas、Pointer Events、カード上 overlay、Web/Desktop用 toolbar は
 
 Tauri Desktop は UI を持たないため、Desktop 上の Ink 表示・編集 UI は `apps/desktop` ではなく Web renderer に置く。
 
-### Mobile/RN画面
+### iPad専用RN UI
 
-React Native の画面、接続中の Desktop session 表示、iPad 手書きモード画面、Mobile用 toolbar は `packages/mobile-renderer` に置く。
+React Native の iPad 専用画面、接続中の Desktop session 表示、iPad 手書きモード画面、iPad用 toolbar は `packages/mobile-renderer/src/screens/ipad/handwriting/` と `packages/mobile-renderer/src/components/ipad/ink/` に置く。
 
 `apps/mobile/src/App.tsx` は起動口と navigation 接続に留め、手書き画面の本体は renderer package 側に寄せる。
+
+スマホには手書きモードのナビも画面も出さない。`packages/mobile-renderer` は iOS / Android の React Native アプリ枠であり、手書き機能をスマホ共通機能として扱わない。
 
 ### iOS native PencilKit
 
