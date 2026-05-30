@@ -1,7 +1,7 @@
 import { deleteUserPersistentDatabases, getDatabaseNameForUser } from "./generation";
-import { createInMemoryLocalDB, type InMemoryLocalDB } from "../InMemoryLocalDB";
+import { createInMemoryLocalDB, type InMemoryLocalDB } from "@/services/InMemoryLocalDB";
 import { LocalDB } from "./LocalDB";
-import { clearLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "../localDBRuntimeState";
+import { clearLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "@/services/localDBRuntimeState";
 import type { LocalDBSyncStore } from "./types";
 
 let instance: LocalDB | null = null;

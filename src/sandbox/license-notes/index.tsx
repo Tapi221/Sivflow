@@ -1,4 +1,4 @@
-import { ReferenceSandboxPage } from "../reference/ReferenceSandboxPage";
+import { ReferenceSandboxPage } from "@/sandbox/reference/ReferenceSandboxPage";
 
 const FOCUS_ITEMS = [
   "Outline は知識ベース UI と共同編集の参考に留める",
