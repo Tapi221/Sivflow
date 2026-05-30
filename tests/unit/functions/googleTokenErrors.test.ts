@@ -27,7 +27,7 @@ describe("classifyGoogleTokenEndpointFailure", () => {
     expect(result.code).toBe("failed-precondition");
     expect(result.details.reason).toBe("server_oauth_configuration");
     expect(result.details.reconnectRequired).toBe(false);
-    expect(result.details.adminAction).toContain("GOOGLE_OAUTH_WEB_CLIENT_ID");
+    expect(result.details.adminAction).toContain("GOOGLE_OAUTH_CLIENT_ID");
   });
 
   it("classifies real token endpoint outages as retryable unavailable", () => {

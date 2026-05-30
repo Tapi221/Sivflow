@@ -80,7 +80,7 @@ export const classifyGoogleTokenEndpointFailure = ({
       details: {
         reason: "server_oauth_configuration",
         reconnectRequired: false,
-        adminAction: "check GOOGLE_OAUTH_WEB_CLIENT_ID / GOOGLE_OAUTH_WEB_CLIENT_SECRET and redeploy functions",
+        adminAction: "check GOOGLE_OAUTH_CLIENT_ID / GOOGLE_OAUTH_CLIENT_SECRET and redeploy functions",
         googleError,
         status,
       },

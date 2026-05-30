@@ -226,7 +226,6 @@ fn ensure_auth_loopback_redirect(authorize_url: &str) -> Result<(), String> {
 fn get_desktop_client_credential() -> Option<String> {
     std::env::var("GOOGLE_OAUTH_CLIENT_SECRET")
         .ok()
-        .or_else(|| std::env::var("DESKTOP_GOOGLE_OAUTH_CLIENT_SECRET").ok())
         .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty())
 }

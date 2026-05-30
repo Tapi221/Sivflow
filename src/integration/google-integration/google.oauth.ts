@@ -104,15 +104,9 @@ const getGoogleProfileFromIdToken = (idToken?: string) => ({
   accountPhotoUrl: getStringFromIdToken(idToken, "picture"),
 });
 
-const getClientId = (): string => {
-  const clientId = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_CLIENT_ID;
+const getGoogleOAuthClientId = (): string => {
+  const clientId = import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID;
   if (!clientId) throw new Error("Missing Google OAuth client id");
-  return clientId;
-};
-
-const getWebClientId = (): string => {
-  const clientId = import.meta.env.VITE_WEB_GOOGLE_OAUTH_CLIENT_ID;
-  if (!clientId) throw new Error("Missing Web Google OAuth client id");
   return clientId;
 };
 
@@ -272,7 +266,7 @@ const waitForWebCode = (state: string, redirectUri: string): Promise<string> => 
 });
 
 const requestDesktopToken = async (): Promise<GoogleCalendarAccess> => {
-  const clientId = getClientId();
+  const clientId = getGoogleOAuthClientId();
   const redirectUri = getDesktopRedirectUri();
   const state = randomBase64Url(16);
   const verifier = randomBase64Url(48);
@@ -303,7 +297,7 @@ export const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCale
 
 export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<{ code: string; codeVerifier: string; redirectUri: string }> => {
   if (typeof window === "undefined") throw new Error("Google OAuth is not available");
-  const clientId = getWebClientId();
+  const clientId = getGoogleOAuthClientId();
   const redirectUri = window.location.origin;
   const loginHint = auth.currentUser?.email ?? readEmail() ?? undefined;
   const state = randomBase64Url(16);
@@ -338,7 +332,13 @@ export const requestCalendarAccessToken = async (auth: Auth, silent = false): Pr
 export const requestConnectedServiceAccessToken = requestCalendarAccessToken;
 
 export const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: string }): Promise<GoogleCalendarAccess> => {
-  const clientId = getClientId();
+  const clientId = getGoogleOAuthClientId();
+  if (isDesktopLikeRuntime()) {
+    const tokens = await oauthBridge.refreshTokens({ clientId, refreshToken });
+    if (!tokens.accessToken) throw new Error("Google token refresh failed");
+    await validateGrantedGoogleScopes({ accessToken: tokens.accessToken, scope: tokens.scope, allowTokenInfoFallback: true });
+    return { accessToken: tokens.accessToken, ...getGoogleProfileFromIdToken(tokens.idToken) };
+  }
   const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: clientId, refresh_token: refreshToken, grant_type: "refresh_token" }) });
   const json = (await response.json()) as { access_token?: string; expires_in?: number; refresh_token?: string; scope?: string; id_token?: string; error?: string; error_description?: string };
   if (!response.ok || !json.access_token) throw new Error(json.error_description ?? json.error ?? "Google token refresh failed");

@@ -32,10 +32,10 @@ const createCodeChallenge = async (codeVerifier: string): Promise<string> => {
 };
 
 const getDesktopOauthClientId = (): string => {
-  const clientId = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_CLIENT_ID;
+  const clientId = import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID;
 
   if (!clientId) {
-    throw new Error("Desktop Google OAuth client ID is not configured");
+    throw new Error("Google OAuth client ID is not configured");
   }
 
   return clientId;
