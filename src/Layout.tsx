@@ -70,6 +70,18 @@ const Layout = () => {
           void navigate("/schedule");
         },
       },
+      {
+        id: "action:trash",
+        value: "action:trash",
+        kind: "action",
+        iconKind: "trash",
+        title: "ゴミ箱",
+        keywords: ["ゴミ箱", "trash", "削除済み", "deleted", "復元", "restore"],
+        priority: 88,
+        onSelect: () => {
+          void navigate("/trash");
+        },
+      },
     ],
     [navigate],
   );
