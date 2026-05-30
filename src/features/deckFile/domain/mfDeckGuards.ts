@@ -207,7 +207,7 @@ export const isMfDeckManifestV1 = (
   if (value.version !== MF_DECK_VERSION) return false;
   if (!isIsoLikeString(value.exportedAt)) return false;
   if (!isRecord(value.app)) return false;
-  if (value.app.name !== "Manifolia") return false;
+  if (value.app.name !== "Sivflow") return false;
   if (
     value.app.version !== undefined &&
     typeof value.app.version !== "string"
@@ -256,7 +256,7 @@ export const isMfDeckCardsJsonV1 = (
   value: unknown,
 ): value is MfDeckCardsJsonV1 => {
   if (!isRecord(value)) return false;
-  if (value.format !== "manifolia.deck.cards") return false;
+  if (value.format !== "sivflow.deck.cards") return false;
   if (value.version !== MF_DECK_VERSION) return false;
   if (!Array.isArray(value.cards)) return false;
   return value.cards.every((card) => {
@@ -299,7 +299,7 @@ export const isMfDeckMediaManifestV1 = (
 ): value is MfDeckMediaManifestV1 => {
   if (value === undefined) return true;
   if (!isRecord(value)) return false;
-  if (value.format !== "manifolia.deck.media") return false;
+  if (value.format !== "sivflow.deck.media") return false;
   if (value.version !== MF_DECK_VERSION) return false;
   if (!Array.isArray(value.media)) return false;
   return value.media.every((entry) => {

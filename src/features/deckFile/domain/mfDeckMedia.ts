@@ -15,13 +15,61 @@ const EXTENSION_BY_MIME_TYPE: Record<string, string> = {
   "audio/webm": "webm",
 };
 
-const INVALID_FILENAME_CHARS_PATTERN = /[\\/:*?"<>|]/g;
+const INVALID_FILENAME_CHARACTERS = new Set(["\\", "/", ":", "*", "?", "\"", "<", ">", "|"]);
 
 const replaceControlCharacters = (value: string): string => {
   return Array.from(value, (char) => {
     const codePoint = char.codePointAt(0);
     return codePoint !== undefined && codePoint <= 0x1f ? "_" : char;
   }).join("");
+};
+
+const replaceInvalidFileNameCharacters = (value: string): string => {
+  return Array.from(value, (char) =>
+    INVALID_FILENAME_CHARACTERS.has(char) ? "_" : char,
+  ).join("");
+};
+
+const replaceWhitespaceWithUnderscore = (value: string): string => {
+  return Array.from(value, (char) => (char.trim() === "" ? "_" : char)).join("");
+};
+
+const collapseRepeatedUnderscores = (value: string): string => {
+  let collapsed = "";
+
+  for (const char of value) {
+    if (char === "_" && collapsed.endsWith("_")) continue;
+    collapsed += char;
+  }
+
+  return collapsed;
+};
+
+const stripUrlSuffix = (value: string): string => {
+  const queryIndex = value.indexOf("?");
+  const hashIndex = value.indexOf("#");
+  const suffixIndexes = [queryIndex, hashIndex].filter((index) => index >= 0);
+  const endIndex = suffixIndexes.length > 0 ? Math.min(...suffixIndexes) : value.length;
+  return value.slice(0, endIndex);
+};
+
+const isSafeExtension = (value: string): boolean => {
+  if (value.length < 1 || value.length > 8) return false;
+  return Array.from(value).every(
+    (char) =>
+      (char >= "a" && char <= "z") ||
+      (char >= "0" && char <= "9"),
+  );
+};
+
+const stripLeadingDots = (value: string): string => {
+  let nextValue = value;
+
+  while (nextValue.startsWith(".")) {
+    nextValue = nextValue.slice(1);
+  }
+
+  return nextValue;
 };
 
 export const MF_DECK_MAX_MEDIA_ENTRY_BYTES = 32 * 1024 * 1024;
@@ -69,19 +117,20 @@ export const inferMfDeckMediaExtension = (input: {
   const byMime = EXTENSION_BY_MIME_TYPE[normalizedMimeType];
   if (byMime) return byMime;
 
-  const source = input.sourceName || input.url || "";
-  const match = source.match(/\.([a-z0-9]{1,8})(?:[?#].*)?$/i);
-  if (match?.[1]) return match[1].toLowerCase();
+  const source = stripUrlSuffix(input.sourceName || input.url || "");
+  const dotIndex = source.lastIndexOf(".");
+  const extension = dotIndex >= 0 ? source.slice(dotIndex + 1).toLowerCase() : "";
+  if (isSafeExtension(extension)) return extension;
 
   return "bin";
 };
 
 export const sanitizeMfDeckMediaName = (value: string): string => {
-  const sanitized = replaceControlCharacters(value.trim())
-    .replace(INVALID_FILENAME_CHARS_PATTERN, "_")
-    .replace(/\s+/g, "_")
-    .replace(/_+/g, "_")
-    .slice(0, 80);
+  const sanitized = collapseRepeatedUnderscores(
+    replaceWhitespaceWithUnderscore(
+      replaceInvalidFileNameCharacters(replaceControlCharacters(value.trim())),
+    ),
+  ).slice(0, 80);
 
   return sanitized || "media";
 };
@@ -101,8 +150,7 @@ export const buildMfDeckMediaPath = (input: {
   const name = sanitizeMfDeckMediaName(
     input.sourceName ?? `${input.kind}-${input.index}`,
   );
-  const cleanExtension =
-    sanitizeMfDeckMediaName(input.extension).replace(/^\.+/, "") || "bin";
+  const cleanExtension = stripLeadingDots(sanitizeMfDeckMediaName(input.extension)) || "bin";
   const paddedIndex = String(input.index).padStart(4, "0");
 
   return `${MF_DECK_MEDIA_DIRECTORY}${directory}/${paddedIndex}-${name}.${cleanExtension}`;
@@ -111,7 +159,7 @@ export const buildMfDeckMediaPath = (input: {
 export const buildMfDeckMediaManifest = (
   mediaEntries: MfDeckMediaEntryV1[],
 ) => ({
-  format: "manifolia.deck.media" as const,
+  format: "sivflow.deck.media" as const,
   version: 1 as const,
   media: mediaEntries,
 });
