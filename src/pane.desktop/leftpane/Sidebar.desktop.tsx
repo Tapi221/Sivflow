@@ -100,7 +100,6 @@ const SidebarNavLink = ({
           "app-sidebar__nav-link",
           isActive && "is-active",
           isDisabled && "app-sidebar__nav-link--disabled",
-          "app-sidebar__nav-link--collapsed",
         )}
         aria-current={isActive ? "page" : undefined}
         aria-label={item.label}
@@ -166,12 +165,7 @@ const Sidebar = ({
 
       <div className="app-sidebar__bottom">
         <HoverTooltip label="ログアウト" side="right" offset={0} className="w-8 min-w-8" arrowClassName="hidden">
-          <button
-            type="button"
-            className="app-sidebar__dev-logout"
-            onClick={handleDevLogout}
-            aria-label="ログアウト"
-          >
+          <button type="button" onClick={handleDevLogout} aria-label="ログアウト">
             ろ
           </button>
         </HoverTooltip>
