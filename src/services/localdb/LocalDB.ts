@@ -10,7 +10,7 @@ import { nanoid } from "nanoid";
 import * as crud from "./crud";
 import { getDatabaseNameForUser as _getDatabaseNameForUser } from "./generation";
 import { attachHooks } from "./hooks";
-import { clearInstance as clearInstanceImpl, getInstance as getInstanceImpl, getInstanceUserId as getInstanceUserIdImpl, getLocalDb, getLocalDbSync, initializeDB, resetForLogout as resetForLogoutImpl, resetLocalDBForLogout } from "./instanceManager";
+import { clearInstance as clearInstanceImpl, getInstance as getInstanceImpl, getInstanceUserId as getInstanceUserIdImpl, getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout } from "./instanceManager";
 import * as maintenance from "./maintenance";
 import { defineSchema } from "./schema";
 import { CURRENT_TAG_STORE } from "./tagStoreNames";
@@ -397,7 +397,7 @@ export class LocalDB extends Dexie {
   }
 
   static async resetForLogout(userId?: string): Promise<void> {
-    return resetForLogoutImpl(userId);
+    return resetLocalDBForLogout(userId);
   }
 
   static getInstanceUserId(): string | null {
