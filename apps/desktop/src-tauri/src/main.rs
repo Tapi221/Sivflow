@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::fs;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
