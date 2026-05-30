@@ -1,5 +1,5 @@
 import { Timestamp } from "firebase/firestore";
-import type { InkDocument } from "@/components/ink/ink.types";
+import type { InkDocument } from "@core/domain/card/ink/inkDocument";
 import type { UploadedImage } from "./assets";
 import type { BaseEntity, CardState, MathBlockData, ReferenceBlockData, ReviewLog, SubjectiveScoreValue } from "./base";
 import type { CodeBlockData } from "@/types/core/code-block";
