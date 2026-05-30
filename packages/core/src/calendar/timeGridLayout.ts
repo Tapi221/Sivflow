@@ -44,6 +44,10 @@ type TimeGridLayoutProxy = {
   leaves?: TimeGridLayoutProxy[];
 };
 
+type TimeGridLayoutContainerProxy = TimeGridLayoutProxy & {
+  rows: TimeGridLayoutProxy[];
+};
+
 type NoOverlapLayoutEntry = CalendarTimeGridLayoutEntry & {
   friends: NoOverlapLayoutEntry[];
   idx?: number;
@@ -55,8 +59,7 @@ const DEFAULT_MINIMUM_START_DIFFERENCE_MINUTES = 30;
 const MINUTES_IN_MS = 60_000;
 const PERCENT_MAX = 100;
 
-const getDateTime = (date: Date): number =>
-  date instanceof Date ? date.getTime() : Number.NaN;
+const getDateTime = (date: Date): number => date instanceof Date ? date.getTime() : Number.NaN;
 
 const isFiniteTime = (value: number): boolean => Number.isFinite(value);
 
@@ -168,11 +171,7 @@ const isOnSameRow = (
 
 const getBaseWidth = (event: TimeGridLayoutProxy): number => {
   if (event.rows) {
-    const columns =
-      event.rows.reduce(
-        (max, row) => Math.max(max, (row.leaves?.length ?? 0) + 1),
-        0,
-      ) + 1;
+    const columns = event.rows.reduce((max, row) => Math.max(max, (row.leaves?.length ?? 0) + 1), 0) + 1;
 
     return PERCENT_MAX / columns;
   }
@@ -216,9 +215,7 @@ const getXOffset = (event: TimeGridLayoutProxy): number => {
   return getXOffset(row) + index * getBaseWidth(row);
 };
 
-const mapProxyToLayoutEntry = (
-  event: TimeGridLayoutProxy,
-): CalendarTimeGridLayoutEntry => ({
+const mapProxyToLayoutEntry = (event: TimeGridLayoutProxy): CalendarTimeGridLayoutEntry => ({
   event: event.event,
   style: {
     top: event.top,
@@ -238,7 +235,7 @@ const layoutOverlapEvents = ({
   minimumStartDifferenceMinutes: number;
 }): CalendarTimeGridLayoutEntry[] => {
   const eventsInRenderOrder = sortByRenderOrder(proxies);
-  const containerEvents: TimeGridLayoutProxy[] = [];
+  const containerEvents: TimeGridLayoutContainerProxy[] = [];
 
   for (const event of eventsInRenderOrder) {
     const container = containerEvents.find(
@@ -248,8 +245,8 @@ const layoutOverlapEvents = ({
     );
 
     if (!container) {
-      event.rows = [];
-      containerEvents.push(event);
+      const nextContainer: TimeGridLayoutContainerProxy = Object.assign(event, { rows: [] });
+      containerEvents.push(nextContainer);
       continue;
     }
 
@@ -310,14 +307,10 @@ const collectMaxColumnIndex = (
   return maxIndex;
 };
 
-const assignNoOverlapColumns = (
-  entries: NoOverlapLayoutEntry[],
-): NoOverlapLayoutEntry[] => {
+const assignNoOverlapColumns = (entries: NoOverlapLayoutEntry[]): NoOverlapLayoutEntry[] => {
   for (const entry of entries) {
     const usedIndexes = new Set(
-      entry.friends
-        .map((friend) => friend.idx)
-        .filter((idx): idx is number => idx !== undefined),
+      entry.friends.map((friend) => friend.idx).filter((idx): idx is number => idx !== undefined),
     );
     let idx = 0;
 
@@ -382,10 +375,7 @@ const layoutNoOverlapEvents = ({
     const idx = entry.idx ?? 0;
     const baseSize = entry.size ?? PERCENT_MAX;
     const left = idx * baseSize;
-    const maxFriendIndex = entry.friends.reduce(
-      (max, friend) => Math.max(max, friend.idx ?? 0),
-      0,
-    );
+    const maxFriendIndex = entry.friends.reduce((max, friend) => Math.max(max, friend.idx ?? 0), 0);
     const width = maxFriendIndex <= idx ? PERCENT_MAX - left : baseSize;
     const columnCount = Math.max(1, Math.round(PERCENT_MAX / baseSize));
 
