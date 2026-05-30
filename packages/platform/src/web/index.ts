@@ -2,6 +2,10 @@ import type { PlatformApi } from "../desktopApi";
 
 const WEB_APP_VERSION = import.meta.env.VITE_BUILD_VERSION ?? import.meta.env.MODE;
 
+const unavailable = async (): Promise<never> => {
+  throw new Error("Desktop bridge is not available in web runtime");
+};
+
 export const webPlatform: PlatformApi = {
   app: {
     getVersion: async () => WEB_APP_VERSION,
@@ -15,26 +19,13 @@ export const webPlatform: PlatformApi = {
     },
   },
   oauth: {
-    start: async () => {
-      throw new Error("OAuth desktop bridge is not available in web runtime");
-    },
+    start: unavailable,
     cancel: async () => {},
-    takePendingCallback: async () => null,
-    exchangeIdToken: async () => {
-      throw new Error("OAuth desktop bridge is not available in web runtime");
-    },
-    exchangeTokens: async () => {
-      throw new Error("OAuth desktop bridge is not available in web runtime");
-    },
-    refreshTokens: async () => {
-      throw new Error("OAuth desktop bridge is not available in web runtime");
-    },
-    storeRefreshToken: async () => {
-      throw new Error("OAuth desktop bridge is not available in web runtime");
-    },
-    readRefreshToken: async () => {
-      throw new Error("OAuth desktop bridge is not available in web runtime");
-    },
+    exchangeIdToken: unavailable,
+    exchangeTokens: unavailable,
+    refreshTokens: unavailable,
+    storeRefreshToken: unavailable,
+    readRefreshToken: unavailable,
     deleteRefreshToken: async () => {},
     onCallback: () => () => {},
   },
