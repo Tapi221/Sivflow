@@ -1,4 +1,4 @@
-import type { HandwritingSession, HandwritingSessionControlMessage, HandwritingSessionMessage, HandwritingSessionStatus, HandwritingStrokeDeltaMessage } from "./handwritingSession.types";
+import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionStatus, HandwritingStrokeDeltaMessage } from "./handwritingSession.types";
 import type { HandwritingSessionClient, HandwritingSessionMessageHandler, HandwritingSessionStatusHandler, HandwritingSessionUnsubscribe } from "./handwritingSessionClient";
 
 type InMemoryHandwritingSessionHub = {
@@ -13,10 +13,6 @@ type InMemoryHandwritingSessionClientOptions = {
 const createHub = (): InMemoryHandwritingSessionHub => ({
   clients: new Set(),
 });
-
-const resolveNextStatus = (status: HandwritingSessionStatus): HandwritingSessionStatus => {
-  return status === "closed" || status === "error" ? "connected" : status;
-};
 
 export class InMemoryHandwritingSessionClient implements HandwritingSessionClient {
   readonly session: HandwritingSession;
@@ -34,7 +30,7 @@ export class InMemoryHandwritingSessionClient implements HandwritingSessionClien
 
   async connect(): Promise<void> {
     this.hub.clients.add(this);
-    this.setStatus(resolveNextStatus(this.status));
+    this.setStatus("connected");
   }
 
   async disconnect(reason?: string): Promise<void> {
