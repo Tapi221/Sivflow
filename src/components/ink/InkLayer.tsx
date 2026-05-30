@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Eraser, PenLine, Redo2, Trash2, Undo2 } from "@/ui/icons";
 import { saveInkToStorage } from "./inkStorage";
-import { cloneInkDocument, createEmptyInkDocument, INK_DOCUMENT_VERSION, INK_PAPER_H, INK_PAPER_W, type InkDocument, type InkEditTool, type InkPoint, type InkSide, type InkStroke, normalizeInkDocument } from "./ink.types";
+import { cloneInkDocument, createEmptyInkDocument, INK_DOCUMENT_VERSION, INK_PAPER_H, INK_PAPER_W, type InkDocument, type InkEditTool, type InkPoint, type InkSide, type InkStroke, normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 import type { InkHistoryState, InkLayerHandle } from "./inkLayer.types";
 import { cn } from "@/lib/utils";
 import { clientPointToPaperPoint, paperPointToCanvasPoint, type RectLike, squaredDistance } from "@/utils/inkCoords";

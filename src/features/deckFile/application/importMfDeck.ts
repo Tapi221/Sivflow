@@ -1,4 +1,4 @@
-import { normalizeInkDocument } from "@/domain/card/inkDocument";
+import { normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 import { restoreMfDeckMediaInBlocks } from "./mfDeckMediaRestorer";
 import type { MfDeckArchiveV1, MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
 import type { Card, CardBlock, CardSet } from "@/types";
