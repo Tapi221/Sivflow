@@ -96,7 +96,7 @@ const buildVirtualMonthWeeks = (baseWeekStart: Date, virtualWindow: MonthVirtual
 
 const getTopSpacerHeight = (virtualWindow: MonthVirtualWindow, rowHeight: number): number => Math.max(0, virtualWindow.startWeekOffset + MONTH_VIRTUAL_PAST_WEEKS) * rowHeight;
 
-const getBottomSpacerHeight = (virtualWindow: MonthVirtualWindow, rowHeight: number): number => Math.max(0, MONTH_VIRTUAL_FUTURE_WEEKS - virtualWindow.endOffset) * rowHeight;
+const getBottomSpacerHeight = (virtualWindow: MonthVirtualWindow, rowHeight: number): number => Math.max(0, MONTH_VIRTUAL_FUTURE_WEEKS - virtualWindow.endWeekOffset) * rowHeight;
 
 // ── フック本体
 
