@@ -1,4 +1,4 @@
-import { ReferenceSandboxPage } from "../reference/ReferenceSandboxPage";
+import { ReferenceSandboxPage } from "@/sandbox/reference/ReferenceSandboxPage";
 
 const FOCUS_ITEMS = [
   "Tiptap の headless editor と extension model",
