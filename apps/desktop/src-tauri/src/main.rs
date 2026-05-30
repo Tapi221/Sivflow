@@ -219,7 +219,7 @@ fn credential_entry(account_id: &str) -> Result<keyring::Entry, String> {
 }
 
 async fn exchange_auth_code(input: AuthCodeExchangeInput) -> Result<AuthExchangeResult, String> {
-    let mut request_body = HashMap::from([
+    let request_body = HashMap::from([
         ("client_id".to_string(), input.client_id),
         ("code".to_string(), input.code),
         ("code_verifier".to_string(), input.code_verifier),
