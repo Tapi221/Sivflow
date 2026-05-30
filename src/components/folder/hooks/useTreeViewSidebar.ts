@@ -4,9 +4,9 @@ import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 import { useTreeViewSidebarHotkey } from "@/features/hotkey/useTreeViewSidebarHotkey";
 
 export const TREE_VIEW_SIDEBAR_TOGGLE_EVENT =
-  "manifolia:treeview-sidebar-toggle";
+  "sivflow:treeview-sidebar-toggle";
 
-const SECTION_LIST_PANE_LEFT_VAR = "--manifolia-section-list-pane-left";
+const SECTION_LIST_PANE_LEFT_VAR = "--sivflow-section-list-pane-left";
 
 const clampSidebarWidth = (width: number) =>
   Math.min(Math.max(width, SIDEBAR_WIDTH_LIMITS.min), SIDEBAR_WIDTH_LIMITS.max);

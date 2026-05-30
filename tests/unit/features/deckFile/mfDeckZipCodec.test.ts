@@ -8,7 +8,7 @@ const createArchive = (): MfDeckArchiveV1 => ({
     version: MF_DECK_VERSION,
     exportedAt: "2026-01-01T00:00:00.000Z",
     app: {
-      name: "Manifolia",
+      name: "Sivflow",
       version: "0.0.0-test",
     },
     deck: {
@@ -24,7 +24,7 @@ const createArchive = (): MfDeckArchiveV1 => ({
     },
   },
   cardsJson: {
-    format: "manifolia.deck.cards",
+    format: "sivflow.deck.cards",
     version: MF_DECK_VERSION,
     cards: [
       {
@@ -65,7 +65,7 @@ const createArchive = (): MfDeckArchiveV1 => ({
     ],
   },
   mediaManifest: {
-    format: "manifolia.deck.media",
+    format: "sivflow.deck.media",
     version: MF_DECK_VERSION,
     media: [
       {
