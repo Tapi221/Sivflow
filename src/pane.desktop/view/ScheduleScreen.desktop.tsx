@@ -19,6 +19,7 @@ import { CalendarWorkspaceToolbar } from "@/pane.desktop/header/ScheduleToolbar"
 import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
 import { CalendarSelectedViewsSplitView } from "@/pane.desktop/leftpane/schedule/Calendar.SelectedViewsSplitView.desktop";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 
 type CalendarEventDisplayRange = { start: Date; end: Date };
@@ -118,12 +119,16 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
   const didMigrateLegacyProjectsRef = useRef(false);
+  const workspaceTabs = useWorkspaceTabsStore((state) => state.tabs);
+  const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const { appProjects, loading: rootFolderProjectsLoading, createRootFolderProject, findProjectByLabel, setProjectVisibility, toggleProject, updateRootFolderProjectColor } = useRootFolderProjects();
   const [projectCalendarLinks, setProjectCalendarLinks] = useState<ProjectCalendarLink[]>(readStoredProjectCalendarLinks);
   const [googleCalendarColorOverrides, setGoogleCalendarColorOverrides] = useState<GoogleCalendarColorOverrideMap>(readStoredGoogleCalendarColorOverrides);
   const [planResultModes, setPlanResultModes] = useState<PlanResultMode[]>([...DEFAULT_PLAN_RESULT_MODES]);
   const viewOptions = useMemo(() => [{ value: "year", label: t.viewYear }, { value: "month", label: t.viewMonth }, { value: "week", label: t.viewWeek }, { value: "threeDays", label: t.viewThreeDays }, { value: "days", label: t.viewDay }, { value: "list", label: t.viewList }, { value: "timetable", label: t.viewTimetable }, { value: "pieChart", label: t.viewPieChart }] as const, [t.viewDay, t.viewList, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewTimetable, t.viewWeek, t.viewYear]);
   const { selectedViewMode, primaryViewMode, currentDate, selectedDate, titleDate, monthTitleDate, monthScrollTargetToken, visibleDays, virtualRail, googleCalendarEvents, googleAccounts, isAnyCalendarConnecting, calendarDayColumnWidth, calendarGridStyle, headerScrollRef, allDayScrollRef, scrollContainerRef, contentViewportRef, handleCalendarScroll, handleSelectViewMode, handleSidebarSelectDate, handleSidebarPreviousMonth, handleSidebarNextMonth, handleVisibleDateChange, handleVisibleMonthChange, handlePrevious, handleNext, handleToday, handleMonthCellSelectDate, handleMonthRenderedRangeChange, handleYearRenderedRangeChange, addGoogleCalendar, reconnectGoogleAccount, toggleGoogleCalendar } = pane;
+  const activeWorkspaceSection = workspaceTabs.find((tab) => tab.id === activeTabId)?.sectionKey;
+  const isLibraryWorkspaceActive = activeWorkspaceSection === "library";
 
   useEffect(() => { persistProjectCalendarLinks(projectCalendarLinks); }, [projectCalendarLinks]);
   useEffect(() => { persistGoogleCalendarColorOverrides(googleCalendarColorOverrides); }, [googleCalendarColorOverrides]);
@@ -229,7 +234,7 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const headerTitleLabel = primaryViewMode === "year" ? format(headerTitleDate, "yyyy年", { locale: dateFnsLocale }) : format(headerTitleDate, isPieChartCalendarView || isSplitCalendarView ? "yyyy年M月d日" : monthLabelFormat, { locale: dateFnsLocale });
 
   return (
-    <CarvePanelShell toolbar={<CalendarWorkspaceToolbar viewMode={selectedViewMode} onSelectViewMode={handleSelectViewMode} />} leftPanel={<CalendarSidebar monthDate={sidebarMonthDate} selectedDate={selectedDate} selectedRange={null} visibleEvents={deferredSidebarEvents} appProjects={appProjects} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} googleAccounts={googleAccountsWithColorOverrides} isAnyCalendarConnecting={isAnyCalendarConnecting} onSelectDate={handleSidebarSelectDate} onPreviousMonth={handleSidebarPreviousMonth} onNextMonth={handleSidebarNextMonth} onAddCalendar={addGoogleCalendar} onAddProject={handleAddAppProject} onToggleProject={handleToggleAppProject} onLinkGoogleCalendarAsProject={handleLinkGoogleCalendarAsProject} onLinkProjectToGoogleCalendar={handleLinkProjectToGoogleCalendar} onCreateProjectGoogleCalendar={handleCreateProjectGoogleCalendar} onUnlinkProjectCalendar={handleUnlinkProjectCalendar} onChangeGoogleCalendarColor={handleChangeGoogleCalendarColor} onReconnectAccount={(accountId) => { void reconnectGoogleAccount(accountId); }} onToggleCalendar={toggleGoogleCalendar} />} viewportRef={contentViewportRef}>
+    <CarvePanelShell toolbar={<CalendarWorkspaceToolbar viewMode={selectedViewMode} onSelectViewMode={handleSelectViewMode} />} leftPanel={<CalendarSidebar monthDate={sidebarMonthDate} selectedDate={selectedDate} selectedRange={null} visibleEvents={deferredSidebarEvents} appProjects={appProjects} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} googleAccounts={googleAccountsWithColorOverrides} isAnyCalendarConnecting={isAnyCalendarConnecting} onSelectDate={handleSidebarSelectDate} onPreviousMonth={handleSidebarPreviousMonth} onNextMonth={handleSidebarNextMonth} onAddCalendar={addGoogleCalendar} onAddProject={handleAddAppProject} onToggleProject={handleToggleAppProject} onLinkGoogleCalendarAsProject={handleLinkGoogleCalendarAsProject} onLinkProjectToGoogleCalendar={handleLinkProjectToGoogleCalendar} onCreateProjectGoogleCalendar={handleCreateProjectGoogleCalendar} onUnlinkProjectCalendar={handleUnlinkProjectCalendar} onChangeGoogleCalendarColor={handleChangeGoogleCalendarColor} onReconnectAccount={(accountId) => { void reconnectGoogleAccount(accountId); }} onToggleCalendar={toggleGoogleCalendar} />} viewportRef={contentViewportRef} bodyClassName={isLibraryWorkspaceActive ? "-mt-[var(--ds-semantic-breadcrumb-height)]" : undefined}>
       <CarvePanel>
         <ScheduleScreenHeaderDesktop titleLabel={headerTitleLabel} selectedViewMode={selectedViewMode} viewOptions={viewOptions} planResultModes={planResultModes} showPlanResultToggle={canShowPlanResultToggle} onSelectViewMode={handleSelectViewMode} onChangePlanResultModes={setPlanResultModes} onPrevious={handlePrevious} onNext={handleNext} onToday={handleToday} className="mb-2 flex shrink-0 items-center justify-between px-5 pt-4" />
         {isYearCalendarView ? (
