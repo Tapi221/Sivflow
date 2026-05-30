@@ -1,9 +1,10 @@
 import { nanoid } from "nanoid";
-import { buildCardSetById, resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
+import { deleteFolderCascade } from "@core/usecases/folder";
+import { createWebFolderRepository } from "@platform/storage/folderRepository.web";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
-import type { Card, CardSet, Document, Folder } from "@/types";
+import type { Folder } from "@/types";
 
 type CreateFolderOptions = {
   color?: string;
@@ -13,95 +14,6 @@ type CreateFolderOptions = {
 };
 
 const toNullableParentId = (parentId?: string | null) => parentId ?? null;
-
-const buildChildFolderMap = (folders: Folder[]) => {
-  const childFolderIdsByParentId = new Map<string | null, string[]>();
-
-  folders
-    .filter((folder) => !folder.isDeleted)
-    .forEach((folder) => {
-      const parentId = folder.parentFolderId ?? null;
-      const nextSiblingIds = childFolderIdsByParentId.get(parentId) ?? [];
-      nextSiblingIds.push(folder.id);
-      childFolderIdsByParentId.set(parentId, nextSiblingIds);
-    });
-
-  return childFolderIdsByParentId;
-};
-
-const collectDescendantFolderIds = (
-  childFolderIdsByParentId: ReadonlyMap<string | null, string[]>,
-  rootFolderId: string,
-) => {
-  const visited = new Set<string>();
-  const orderedFolderIds: string[] = [];
-  const stack = [rootFolderId];
-
-  while (stack.length > 0) {
-    const currentFolderId = stack.pop();
-    if (!currentFolderId || visited.has(currentFolderId)) {
-      continue;
-    }
-
-    visited.add(currentFolderId);
-    orderedFolderIds.push(currentFolderId);
-
-    const childFolderIds = childFolderIdsByParentId.get(currentFolderId) ?? [];
-    for (let index = childFolderIds.length - 1; index >= 0; index -= 1) {
-      const childFolderId = childFolderIds[index];
-      if (typeof childFolderId === "string" && childFolderId.length > 0) {
-        stack.push(childFolderId);
-      }
-    }
-  }
-
-  return orderedFolderIds;
-};
-
-const collectCardSetsInFolders = ({
-  cardSets,
-  folderIds,
-}: {
-  cardSets: CardSet[];
-  folderIds: ReadonlySet<string>;
-}) => {
-  return cardSets.filter((cardSet) => {
-    if (cardSet.isDeleted) return false;
-    return cardSet.folderId ? folderIds.has(cardSet.folderId) : false;
-  });
-};
-
-const collectCardsInFolders = ({
-  cards,
-  cardSets,
-  folderIds,
-}: {
-  cards: Card[];
-  cardSets: CardSet[];
-  folderIds: ReadonlySet<string>;
-}) => {
-  const activeCardSetById = buildCardSetById(cardSets.filter((cardSet) => !cardSet.isDeleted));
-
-  return cards.filter((card) => {
-    if (card.isDeleted) return false;
-
-    const resolvedFolderId = resolveCardFolderId(card, activeCardSetById);
-    return resolvedFolderId ? folderIds.has(resolvedFolderId) : false;
-  });
-};
-
-const collectDocumentsInFolders = ({
-  documents,
-  folderIds,
-}: {
-  documents: Document[];
-  folderIds: ReadonlySet<string>;
-}) => {
-  return documents.filter((document) => {
-    if (document.isDeleted) return false;
-    return folderIds.has(document.folderId);
-  });
-};
 
 export const useFolderCommands = () => {
   const { currentUser } = useAuthSession();
@@ -213,48 +125,11 @@ export const useFolderCommands = () => {
       throw new Error("認証が必要です");
     }
 
-    const db = await getLocalDb(currentUser.uid);
-    const folders = (await db.folders.toArray()).map(normalizeFolder);
-    const childFolderIdsByParentId = buildChildFolderMap(folders);
-    const folderIdsToDelete = collectDescendantFolderIds(
-      childFolderIdsByParentId,
+    await deleteFolderCascade({
+      userId: currentUser.uid,
       folderId,
-    );
-    const folderIdSet = new Set(folderIdsToDelete);
-    const [cardSets, cards, documents] = await Promise.all([
-      db.cardSets.where("userId").equals(currentUser.uid).toArray(),
-      db.getAllCards(),
-      db.documents.where("userId").equals(currentUser.uid).toArray(),
-    ]);
-    const cardSetsToDelete = collectCardSetsInFolders({
-      cardSets,
-      folderIds: folderIdSet,
+      repository: createWebFolderRepository(),
     });
-    const cardsToDelete = collectCardsInFolders({
-      cards,
-      cardSets,
-      folderIds: folderIdSet,
-    });
-    const documentsToDelete = collectDocumentsInFolders({
-      documents,
-      folderIds: folderIdSet,
-    });
-
-    for (const targetFolderId of folderIdsToDelete) {
-      await db.softDelete("folders", targetFolderId);
-    }
-
-    for (const cardSet of cardSetsToDelete) {
-      await db.softDelete("cardSets", cardSet.id);
-    }
-
-    for (const card of cardsToDelete) {
-      await db.softDelete("cards", card.id);
-    }
-
-    for (const document of documentsToDelete) {
-      await db.softDelete("documents", document.id);
-    }
   };
 
   return {
