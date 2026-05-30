@@ -51,6 +51,13 @@ const PdfOcrSandboxPage = DEV_MODE
       })),
     )
   : null;
+const PdfConvertersSandboxPage = DEV_MODE
+  ? lazy(() =>
+      import("@/sandbox/pdf-converters").then(({ PdfConvertersSandboxPage }) => ({
+        default: PdfConvertersSandboxPage,
+      })),
+    )
+  : null;
 const LicenseNotesSandboxPage = DEV_MODE
   ? lazy(() =>
       import("@/sandbox/license-notes").then(({ LicenseNotesSandboxPage }) => ({
@@ -133,6 +140,13 @@ export const getDevRouteElements = () => {
         <Route
           path="sandbox/pdf-ocr/*"
           element={withDevRouteFallback(<PdfOcrSandboxPage />)}
+        />
+      ) : null}
+
+      {PdfConvertersSandboxPage ? (
+        <Route
+          path="sandbox/pdf-converters/*"
+          element={withDevRouteFallback(<PdfConvertersSandboxPage />)}
         />
       ) : null}
 
