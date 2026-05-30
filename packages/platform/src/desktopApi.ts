@@ -17,9 +17,7 @@ export interface DesktopImportFileReadResult {
   data: ArrayBuffer | Uint8Array | number[];
 }
 
-export type DesktopImportFileOpenHandler = (
-  payload: DesktopImportFileOpenPayload,
-) => void;
+export type DesktopImportFileOpenHandler = (payload: DesktopImportFileOpenPayload) => void;
 
 export interface DesktopFileApi {
   readImportFile(filePath: string): Promise<DesktopImportFileReadResult>;
@@ -31,12 +29,6 @@ export interface PlatformOauthApi {
   start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
   takePendingCallback(): Promise<DesktopOauthCallbackPayload | null>;
-  exchangeIdToken(input: {
-    clientId: string;
-    code: string;
-    codeVerifier: string;
-    redirectUri: string;
-  }): Promise<string>;
   storeRefreshToken(input: { accountId: string; refreshToken: string }): Promise<void>;
   readRefreshToken(accountId: string): Promise<string | null>;
   deleteRefreshToken(accountId: string): Promise<void>;
@@ -65,9 +57,7 @@ export interface DesktopOauthCallbackPayload {
   errorDescription?: string;
 }
 
-export type DesktopOauthCallbackHandler = (
-  payload: DesktopOauthCallbackPayload,
-) => void;
+export type DesktopOauthCallbackHandler = (payload: DesktopOauthCallbackPayload) => void;
 
 export type DesktopOauthApi = PlatformOauthApi;
 
