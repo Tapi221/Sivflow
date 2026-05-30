@@ -171,8 +171,8 @@ const getGoogleCalendarAccessTokenWithRetry = async (
 };
 
 export const isServerStoredGoogleOAuthEnabled = (): boolean => {
-  if (import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "false") return false;
   if (isDesktopLikeRuntime()) return true;
+  if (import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "false") return false;
 
   return (
     import.meta.env.PROD ||
