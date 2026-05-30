@@ -1,3 +1,11 @@
+import { httpsCallable } from "firebase/functions";
+import { auth, functionsClient } from "@/infrastructure/firebase/client";
+import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
+import {
+  consumeGoogleCalendarServerCodeVerifier,
+  type GoogleCalendarAccess,
+} from "./google.oauth";
+
 type GoogleOAuthReconnectDiagnosis = { cause: string; reconnectRequired: boolean; action: string };
 
 export type GoogleOAuthCallableErrorReason = "invalid_grant" | "server_oauth_configuration" | "token_encryption_key_invalid" | "stored_refresh_token_decrypt_failed" | "stored_refresh_token_missing" | "insufficient_google_scope" | "token_endpoint_failed";
@@ -5,6 +13,30 @@ export type GoogleOAuthCallableErrorReason = "invalid_grant" | "server_oauth_con
 type CallableErrorDetails = { reason?: GoogleOAuthCallableErrorReason; reconnectRequired?: boolean; userAction?: string; adminAction?: string };
 
 type GoogleOAuthReasonedError = Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason };
+
+type ServerGoogleCalendarAccess = GoogleCalendarAccess & {
+  accessToken: string;
+  accountEmail: string | null;
+  accountName: string | null;
+  accountPhotoUrl: string | null;
+  expiresInSeconds?: number | null;
+  refreshTokenStored?: boolean;
+};
+
+type ExchangeGoogleCalendarCodeInput = {
+  code: string;
+  codeVerifier?: string;
+  forceRefreshToken?: boolean;
+  redirectUri: string;
+};
+
+type GetGoogleCalendarAccessTokenInput = {
+  accountId: string;
+};
+
+type DisconnectGoogleCalendarAccountInput = {
+  accountId: string;
+};
 
 const AUTO_RECOVERY_PENDING_ERROR_CODE = "auto-recovery-pending";
 const AUTO_RECOVERY_PENDING_MESSAGE = "Google Calendar の自動復旧を待機中です。しばらくしてからもう一度同期します。";
@@ -16,7 +48,23 @@ const INSUFFICIENT_GOOGLE_SCOPE_ERROR_CODE = "google-scope-insufficient";
 const INSUFFICIENT_GOOGLE_SCOPE_MESSAGE = "Google Calendar と Google Tasks の権限が不足しています。Google アカウントのサードパーティ連携からこのアプリを削除してから、アプリで再連携してください。";
 const SERVER_TOKEN_DECRYPT_ERROR_CODE = "server-stored-token-decrypt-error";
 const SERVER_TOKEN_DECRYPT_ERROR_MESSAGE = "保存済み Google 連携トークンを復号できません。管理者が暗号化キーと保存データを確認してください。";
-const SERVER_OAUTH_DISABLED_MESSAGE = "Google OAuth server token storage is disabled.";
+const SERVER_TOKEN_RETRY_DELAYS_MS = [500, 1_500] as const;
+
+const exchangeGoogleCalendarCodeCallable =
+  httpsCallable<ExchangeGoogleCalendarCodeInput, ServerGoogleCalendarAccess>(
+    functionsClient,
+    "exchangeGoogleCalendarCode",
+  );
+const getGoogleCalendarAccessTokenCallable =
+  httpsCallable<GetGoogleCalendarAccessTokenInput, ServerGoogleCalendarAccess>(
+    functionsClient,
+    "getGoogleCalendarAccessToken",
+  );
+const disconnectGoogleCalendarAccountCallable =
+  httpsCallable<DisconnectGoogleCalendarAccountInput, { ok: boolean }>(
+    functionsClient,
+    "disconnectGoogleCalendarAccount",
+  );
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -42,6 +90,19 @@ const createGoogleOAuthError = (message: string, code: string, reason?: GoogleOA
   if (reason) error.googleOAuthReason = reason;
   return error;
 };
+
+const waitForCallableAuth = async (): Promise<void> => {
+  await auth.authStateReady();
+
+  if (!auth.currentUser) {
+    throw new Error("Firebase 認証が必要です。ログイン状態を確認してください。");
+  }
+};
+
+const sleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
 
 export const readGoogleOAuthCallableErrorDetails = (error: unknown): CallableErrorDetails => {
   if (!isRecord(error)) return {};
@@ -88,20 +149,77 @@ export const toUserTransparentAutoRecoveryError = (sourceError: unknown): Error 
   return createGoogleOAuthError(AUTO_RECOVERY_PENDING_MESSAGE, AUTO_RECOVERY_PENDING_ERROR_CODE, reason);
 };
 
-export const isServerStoredGoogleOAuthEnabled = (): boolean => false;
+const getGoogleCalendarAccessTokenWithRetry = async (
+  input: GetGoogleCalendarAccessTokenInput,
+): Promise<ServerGoogleCalendarAccess> => {
+  for (let attempt = 0; attempt <= SERVER_TOKEN_RETRY_DELAYS_MS.length; attempt += 1) {
+    try {
+      const result = await getGoogleCalendarAccessTokenCallable(input);
+      return result.data;
+    } catch (error) {
+      if (
+        !isServerInfrastructureError(error) ||
+        attempt >= SERVER_TOKEN_RETRY_DELAYS_MS.length
+      ) {
+        throw error;
+      }
 
-export const exchangeGoogleCalendarCode = async (): Promise<never> => {
-  throw createGoogleOAuthError(SERVER_OAUTH_DISABLED_MESSAGE, SERVER_OAUTH_CONFIGURATION_ERROR_CODE, "server_oauth_configuration");
+      await sleep(SERVER_TOKEN_RETRY_DELAYS_MS[attempt]);
+    }
+  }
+
+  throw new Error("Google Calendar server token refresh retry loop exhausted");
+};
+
+export const isServerStoredGoogleOAuthEnabled = (): boolean => {
+  if (isDesktopLikeRuntime()) return false;
+  if (import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "false") return false;
+
+  return (
+    import.meta.env.PROD ||
+    import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true"
+  );
+};
+
+export const exchangeGoogleCalendarCode = async (
+  input: ExchangeGoogleCalendarCodeInput,
+): Promise<ServerGoogleCalendarAccess> => {
+  try {
+    await waitForCallableAuth();
+
+    const result = await exchangeGoogleCalendarCodeCallable({
+      ...input,
+      codeVerifier:
+        input.codeVerifier ??
+        consumeGoogleCalendarServerCodeVerifier() ??
+        undefined,
+    });
+    return result.data;
+  } catch (error) {
+    throw toUserTransparentAutoRecoveryError(error);
+  }
 };
 
 export const exchangeGoogleConnectedServiceCode = exchangeGoogleCalendarCode;
 
-export const getServerStoredGoogleCalendarAccessToken = async (): Promise<never> => {
-  throw createGoogleOAuthError(SERVER_OAUTH_DISABLED_MESSAGE, SERVER_OAUTH_CONFIGURATION_ERROR_CODE, "server_oauth_configuration");
+export const getServerStoredGoogleCalendarAccessToken = async (
+  input: GetGoogleCalendarAccessTokenInput,
+): Promise<ServerGoogleCalendarAccess> => {
+  try {
+    await waitForCallableAuth();
+    return await getGoogleCalendarAccessTokenWithRetry(input);
+  } catch (error) {
+    throw toUserTransparentAutoRecoveryError(error);
+  }
 };
 
 export const getServerStoredGoogleConnectedServiceAccessToken = getServerStoredGoogleCalendarAccessToken;
 
-export const disconnectServerStoredGoogleCalendarAccount = async (): Promise<void> => undefined;
+export const disconnectServerStoredGoogleCalendarAccount = async (
+  input: DisconnectGoogleCalendarAccountInput,
+): Promise<void> => {
+  await waitForCallableAuth();
+  await disconnectGoogleCalendarAccountCallable(input);
+};
 
 export const disconnectServerStoredGoogleConnectedServiceAccount = disconnectServerStoredGoogleCalendarAccount;
