@@ -1,10 +1,11 @@
-import { type ComponentType, memo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { type ComponentType, memo, useEffect, useMemo, useState } from "react";
+import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { initialWindowMetrics, SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import HandwritingModeScreen from "./screens/ipad/handwriting/HandwritingModeScreen";
 import TrashScreen from "./screens/TrashScreen";
 
-type NavigationItemId = "explore" | "library" | "home" | "schedule" | "trash" | "settings";
+type NavigationItemId = "explore" | "library" | "home" | "schedule" | "ipadHandwriting" | "trash" | "settings";
 
 type NavigationItem = {
   id: NavigationItemId;
@@ -13,6 +14,7 @@ type NavigationItem = {
 
 type NavigationBarProps = {
   activeItemId: NavigationItemId;
+  items: readonly NavigationItem[];
   onSelectItem: (itemId: NavigationItemId) => void;
 };
 
@@ -28,7 +30,7 @@ type AppContentProps = {
 
 type AppProps = Partial<AppContentProps>;
 
-const NAVIGATION_ITEMS: readonly NavigationItem[] = [
+const BASE_NAVIGATION_ITEMS: readonly NavigationItem[] = [
   { id: "explore", label: "Explore" },
   { id: "library", label: "Library" },
   { id: "home", label: "Home" },
@@ -37,15 +39,23 @@ const NAVIGATION_ITEMS: readonly NavigationItem[] = [
   { id: "settings", label: "Settings" },
 ];
 
+const IPAD_NAVIGATION_ITEMS: readonly NavigationItem[] = [
+  { id: "ipadHandwriting", label: "Handwriting" },
+];
+
+const isIpadLayout = (width: number, height: number) => {
+  return Platform.OS === "ios" && Math.min(width, height) >= 744;
+};
+
 const DefaultScheduleYear = () => (
   <View style={styles.emptySchedule}>
     <Text style={styles.emptyScheduleText}>Schedule renderer is not configured.</Text>
   </View>
 );
 
-const NavigationBar = ({ activeItemId, onSelectItem }: NavigationBarProps) => (
+const NavigationBar = ({ activeItemId, items, onSelectItem }: NavigationBarProps) => (
   <View accessibilityLabel="Mobile navigation" style={styles.navigationBar}>
-    {NAVIGATION_ITEMS.map((item) => {
+    {items.map((item) => {
       const isActive = item.id === activeItemId;
 
       return (
@@ -59,21 +69,39 @@ const NavigationBar = ({ activeItemId, onSelectItem }: NavigationBarProps) => (
 
 const AppContent = ({ ScheduleYearComponent }: AppContentProps) => {
   const insets = useSafeAreaInsets();
+  const { height, width } = useWindowDimensions();
   const [activeItemId, setActiveItemId] = useState<NavigationItemId>("schedule");
   const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const isIpad = isIpadLayout(width, height);
   const isTrashActive = activeItemId === "trash";
+  const isHandwritingActive = isIpad && activeItemId === "ipadHandwriting";
+  const navigationItems = useMemo(() => {
+    return isIpad ? [...BASE_NAVIGATION_ITEMS, ...IPAD_NAVIGATION_ITEMS] : BASE_NAVIGATION_ITEMS;
+  }, [isIpad]);
+
+  useEffect(() => {
+    if (!isIpad && activeItemId === "ipadHandwriting") setActiveItemId("schedule");
+  }, [activeItemId, isIpad]);
+
+  const title = isTrashActive ? "Trash" : isHandwritingActive ? "Handwriting" : "Schedule";
 
   return (
     <View style={[styles.safeArea, { paddingBottom: insets.bottom, paddingTop: insets.top }]}>
       <StatusBar style="dark" />
       <View style={styles.header}>
         <Text style={styles.eyebrow}>Mobile Native</Text>
-        <Text style={styles.title}>{isTrashActive ? "Trash" : "Schedule"}</Text>
+        <Text style={styles.title}>{title}</Text>
       </View>
       <View style={styles.content}>
-        {isTrashActive ? <TrashScreen /> : <ScheduleYearComponent selectedDate={selectedDate} yearDate={selectedDate} onSelectDate={setSelectedDate} />}
+        {isTrashActive ? (
+          <TrashScreen />
+        ) : isHandwritingActive ? (
+          <HandwritingModeScreen />
+        ) : (
+          <ScheduleYearComponent selectedDate={selectedDate} yearDate={selectedDate} onSelectDate={setSelectedDate} />
+        )}
       </View>
-      <NavigationBar activeItemId={activeItemId} onSelectItem={setActiveItemId} />
+      <NavigationBar activeItemId={activeItemId} items={navigationItems} onSelectItem={setActiveItemId} />
     </View>
   );
 };
