@@ -14,6 +14,7 @@
 | `/sandbox/pdf-ocr` | `src/sandbox/pdf-ocr` | PDF.js / PAWLS / Tesseract.js の教材インポート参考 |
 | `/sandbox/pdf-converters` | `src/sandbox/pdf-converters` | MinerU / Marker / Docling などPDF変換OSS候補 |
 | `/sandbox/license-notes` | `src/sandbox/license-notes` | Outline / tldraw などライセンス注意付き参考 |
+| `/sandbox/calendar-time-grid` | `src/sandbox/calendar-time-grid` | time-grid event chip の重なり表示確認 |
 
 ## Shared components
 
