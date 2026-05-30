@@ -12,6 +12,7 @@ export const desktopPlatform: PlatformApi = {
     start: (authorizeUrl: string) => getDesktopBridge().oauth.start(authorizeUrl),
     cancel: () => getDesktopBridge().oauth.cancel(),
     takePendingCallback: () => getDesktopBridge().oauth.takePendingCallback(),
+    exchangeIdToken: (value: string) => getDesktopBridge().oauth.exchangeIdToken(value),
     storeRefreshToken: (input) => getDesktopBridge().oauth.storeRefreshToken(input),
     readRefreshToken: (accountId) => getDesktopBridge().oauth.readRefreshToken(accountId),
     deleteRefreshToken: (accountId) => getDesktopBridge().oauth.deleteRefreshToken(accountId),
