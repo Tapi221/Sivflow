@@ -6,16 +6,7 @@ import { getDevRouteElements } from "./DevRoutes";
 import { ProtectedRoute } from "./ProtectedRoute";
 
 const Schedule = lazy(() => import("@/routes/Schedule"));
-const REDIRECT_TO_SCHEDULE_ROUTES = [
-  "calendar/*",
-  "CardEdit/*",
-  "CardSetView/*",
-  "CardView/*",
-  "study/*",
-  "library/*",
-  "statistics/*",
-  "sandbox/blocknote/*",
-] as const;
+const REDIRECT_TO_SCHEDULE_ROUTES = ["calendar/*", "CardEdit/*", "CardSetView/*", "CardView/*", "study/*", "library/*", "statistics/*"] as const;
 
 const withRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
