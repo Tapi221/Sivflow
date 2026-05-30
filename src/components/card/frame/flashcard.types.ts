@@ -1,16 +1,16 @@
-import type { InkDocument } from "@/components/ink/ink.types";
+import type { InkDocument } from "@core/domain/card/ink/inkDocument";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
-export type FlashcardMediaLike =
-  | string
-  | {
-    remoteUrl?: string | null;
-    localUrl?: string | null;
-    url?: string | null;
-    localFileId?: string | null;
-    assetId?: string | null;
-  };
+export type FlashcardMediaLike = string | { remoteUrl?: string | null; localUrl?: string | null; url?: string | null; localFileId?: string | null; assetId?: string | null };
+
+type FlashcardCodeLike = { code?: string; language?: string } | null;
+
+type FlashcardFaceLike = {
+  blocks?: CardBlock[] | null;
+  attachments?: CardFaceAttachments | null;
+  ink?: InkDocument | null;
+} | null;
 
 export type FlashcardCardLike = {
   id?: string;
@@ -31,31 +31,19 @@ export type FlashcardCardLike = {
   questionAudios?: FlashcardMediaLike[];
   answer_audios?: FlashcardMediaLike[];
   answerAudios?: FlashcardMediaLike[];
-  questionCode?: { code?: string; language?: string } | null;
-  question_code?: { code?: string; language?: string } | null;
-  answerCode?: { code?: string; language?: string } | null;
-  answer_code?: { code?: string; language?: string } | null;
+  questionCode?: FlashcardCodeLike;
+  question_code?: FlashcardCodeLike;
+  answerCode?: FlashcardCodeLike;
+  answer_code?: FlashcardCodeLike;
   frontBlocks?: CardBlock[];
   backBlocks?: CardBlock[];
-  front?: {
-    blocks?: CardBlock[] | null;
-    attachments?: CardFaceAttachments | null;
-    ink?: InkDocument | null;
-  } | null;
-  back?: {
-    blocks?: CardBlock[] | null;
-    attachments?: CardFaceAttachments | null;
-    ink?: InkDocument | null;
-  } | null;
+  front?: FlashcardFaceLike;
+  back?: FlashcardFaceLike;
   layoutRows?: number;
   layout_rows?: number;
-  /** @deprecated Read-only legacy field. Use layoutRows/layout_rows. */
   questionExtraRows?: number;
-  /** @deprecated Read-only legacy field. Use layoutRows/layout_rows. */
   question_extra_rows?: number;
-  /** @deprecated Read-only legacy field. Use layoutRows/layout_rows. */
   answerExtraRows?: number;
-  /** @deprecated Read-only legacy field. Use layoutRows/layout_rows. */
   answer_extra_rows?: number;
   inkQuestion?: InkDocument | null;
   inkAnswer?: InkDocument | null;
