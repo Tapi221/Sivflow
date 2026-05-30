@@ -7,7 +7,7 @@ const createCardFile = (): MfCardFileV1 => ({
   version: MF_CARD_VERSION,
   exportedAt: "2026-01-01T00:00:00.000Z",
   app: {
-    name: "Manifolia",
+    name: "Sivflow",
     version: "0.0.0-test",
   },
   card: {
@@ -57,7 +57,7 @@ describe("mfCardJsonCodec", () => {
   it("mfcard v1 ではないJSONを拒否する", () => {
     const bytes = new TextEncoder().encode(
       JSON.stringify({
-        format: "manifolia.card",
+        format: "sivflow.card",
         version: 999,
       }),
     );
