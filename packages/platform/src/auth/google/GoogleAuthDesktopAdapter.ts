@@ -177,7 +177,7 @@ const waitForDesktopOAuthCode = (
       if (isSettled) return;
 
       try {
-        const pendingPayload = await oauthBridge.takePendingCallback();
+        const pendingPayload = await platform.oauth.takePendingCallback();
         if (pendingPayload) {
           handlePayload(pendingPayload);
         }
@@ -194,7 +194,7 @@ const waitForDesktopOAuthCode = (
       window.clearInterval(pendingPollId);
     };
 
-    unsubscribe = oauthBridge.onCallback(handlePayload);
+    unsubscribe = platform.oauth.onCallback(handlePayload);
 
     void pollPendingCallback();
 
