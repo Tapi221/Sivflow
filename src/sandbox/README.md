@@ -12,6 +12,7 @@
 | `/sandbox/excalidraw` | `src/sandbox/excalidraw` | Excalidraw の手書き・図解 UI 参考 |
 | `/sandbox/editor-engines` | `src/sandbox/editor-engines` | Tiptap / Plate / Milkdown のエディタ設計比較 |
 | `/sandbox/pdf-ocr` | `src/sandbox/pdf-ocr` | PDF.js / PAWLS / Tesseract.js の教材インポート参考 |
+| `/sandbox/pdf-converters` | `src/sandbox/pdf-converters` | MinerU / Marker / Docling などPDF変換OSS候補 |
 | `/sandbox/license-notes` | `src/sandbox/license-notes` | Outline / tldraw などライセンス注意付き参考 |
 
 ## Shared components
