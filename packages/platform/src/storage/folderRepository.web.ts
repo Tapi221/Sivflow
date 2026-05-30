@@ -1,10 +1,31 @@
-import type { FolderDeleteRepository } from "@core/usecases/folder";
+import type { FolderCommandRepository, FolderCreateDraft, FolderDeleteRepository } from "@core/usecases/folder";
 import { buildCardSetById, resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { getLocalDb } from "@/services/localDB";
 import type { Card, CardSet, Document, Folder } from "@/types";
 
-export const createWebFolderRepository = (): FolderDeleteRepository<Folder, CardSet, Card, Document> => ({
+const generateFolderId = () => {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+};
+
+export const createWebFolderRepository = (): FolderCommandRepository<Folder> & FolderDeleteRepository<Folder, CardSet, Card, Document> => ({
+  generateFolderId,
+  listFolders: async (userId) => {
+    const db = await getLocalDb(userId);
+    return (await db.folders.toArray()).map(normalizeFolder);
+  },
+  addFolder: async (userId, folder) => {
+    const db = await getLocalDb(userId);
+    await db.addItem("folders", folder as FolderCreateDraft as unknown);
+  },
+  updateFolder: async (userId, folderId, changes) => {
+    const db = await getLocalDb(userId);
+    await db.updateItem("folders", folderId, changes);
+  },
   loadDeleteContext: async (userId) => {
     const db = await getLocalDb(userId);
     const [folders, cardSets, cards, documents] = await Promise.all([
