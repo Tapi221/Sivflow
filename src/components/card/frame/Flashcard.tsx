@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { CANONICAL_CARD_WIDTH, CARD_DISPLAY_SCALE, layoutRowsToCardHeightPx } from "@constants/shared/flashcard";
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
-import type { InkDocument } from "@/components/ink/ink.types";
+import type { InkDocument } from "@core/domain/card/ink/inkDocument";
 import { CardFrame } from "./CardFrame";
 import { CARD_SHELL_COMMON_CLASS_NAME } from "./cardShellClassNames";
 import { useFlashcardCornerControls } from "./FlashcardCornerControls";
