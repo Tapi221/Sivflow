@@ -2,8 +2,8 @@ export type ImportFileKind = "xlsx" | "mfdeck" | "mfcard" | "unknown";
 export type PortableImportFileKind = "mfdeck" | "mfcard";
 
 export const IMPORT_FILE_MIME_TYPES = {
-  mfdeck: "application/vnd.manifolia.deck+zip",
-  mfcard: "application/vnd.manifolia.card+json",
+  mfdeck: "application/vnd.sivflow.deck+zip",
+  mfcard: "application/vnd.sivflow.card+json",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 } as const satisfies Record<Exclude<ImportFileKind, "unknown">, string>;
 
