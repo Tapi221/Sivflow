@@ -53,13 +53,15 @@ packages/
     src/
       AppShell.tsx
       screens/
-        handwriting/
-          HandwritingModeScreen.tsx
-          HandwritingSessionListScreen.tsx
+        ipad/
+          handwriting/
+            HandwritingModeScreen.tsx
+            HandwritingSessionListScreen.tsx
       components/
-        ink/
-          MobileInkCanvasHost.tsx
-          MobileInkToolbar.tsx
+        ipad/
+          ink/
+            IpadInkCanvasHost.tsx
+            IpadInkToolbar.tsx
 
   core/
     src/
