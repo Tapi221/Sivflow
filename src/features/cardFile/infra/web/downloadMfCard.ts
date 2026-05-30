@@ -1,11 +1,13 @@
 import { MF_CARD_FILE_EXTENSION, MF_CARD_MIME_TYPE } from "@/features/cardFile/domain/mfCard.types";
 
+const INVALID_FILE_NAME_CHARACTERS = new Set(["\\", "/", ":", "*", "?", "\"", "<", ">", "|"]);
+
 const sanitizeFileName = (name: string) => {
-  const trimmed = name.trim() || "manifolia-card";
-  return trimmed
-    .replace(/[\\/:*?"<>|]/g, "_")
-    .replace(/\s+/g, " ")
-    .slice(0, 120);
+  const trimmed = name.trim() || "sivflow-card";
+  const sanitized = Array.from(trimmed, (char) =>
+    INVALID_FILE_NAME_CHARACTERS.has(char) ? "_" : char,
+  ).join("");
+  return sanitized.slice(0, 120);
 };
 
 const toArrayBuffer = (bytes: Uint8Array): ArrayBuffer => {
