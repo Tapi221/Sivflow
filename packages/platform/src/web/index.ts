@@ -21,6 +21,7 @@ export const webPlatform: PlatformApi = {
   oauth: {
     start: unavailable,
     cancel: async () => {},
+    takePendingCallback: async () => null,
     exchangeIdToken: unavailable,
     exchangeTokens: unavailable,
     refreshTokens: unavailable,

@@ -128,18 +128,23 @@ const waitForDesktopOAuthCode = (
 ): Promise<string> => {
   return new Promise<string>((resolve, reject) => {
     let unsubscribe: (() => void) | undefined;
+    let isSettled = false;
 
     const timeoutId = window.setTimeout(() => {
       unsubscribe?.();
+      isSettled = true;
       reject(new Error("Timed out waiting for desktop OAuth callback"));
     }, CALLBACK_TIMEOUT_MS);
 
     const cleanup = (): void => {
       window.clearTimeout(timeoutId);
+      isSettled = true;
       unsubscribe?.();
     };
 
-    unsubscribe = oauthBridge.onCallback((payload: DesktopOauthCallbackPayload) => {
+    const handlePayload = (payload: DesktopOauthCallbackPayload): void => {
+      if (isSettled) return;
+
       const parsed = parseLoopbackCallback(payload, redirectUri);
       const isStateMatched = parsed.state === expectedState;
 
@@ -166,7 +171,38 @@ const waitForDesktopOAuthCode = (
       }
 
       resolve(code);
-    });
+    };
+
+    const pollPendingCallback = async (): Promise<void> => {
+      if (isSettled) return;
+
+      try {
+        const pendingPayload = await oauthBridge.takePendingCallback();
+        if (pendingPayload) {
+          handlePayload(pendingPayload);
+        }
+      } catch {
+        // Event delivery is the primary path; polling only covers early callback races.
+      }
+    };
+
+    const pendingPollId = window.setInterval(() => {
+      void pollPendingCallback();
+    }, 250);
+
+    const stopPendingPolling = (): void => {
+      window.clearInterval(pendingPollId);
+    };
+
+    unsubscribe = oauthBridge.onCallback(handlePayload);
+
+    void pollPendingCallback();
+
+    const currentUnsubscribe = unsubscribe;
+    unsubscribe = () => {
+      stopPendingPolling();
+      currentUnsubscribe?.();
+    };
   });
 };
 

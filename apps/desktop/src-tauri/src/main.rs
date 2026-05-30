@@ -383,6 +383,17 @@ fn oauth_cancel(state: State<AuthLoopbackState>) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn oauth_take_pending_callback(state: State<AuthLoopbackState>) -> Result<Option<DesktopOauthCallbackPayload>, String> {
+    let mut pending_url = state.pending_url.lock().map_err(|_| "OAuth state lock failed".to_string())?;
+    let raw_url = match pending_url.take() {
+        Some(value) => value,
+        None => return Ok(None),
+    };
+
+    parse_callback_payload(&raw_url).map(Some)
+}
+
+#[tauri::command]
 async fn oauth_exchange_id_token(input: AuthCodeExchangeInput) -> Result<String, String> {
     let payload = exchange_auth_code(input).await?;
     payload.id_token.ok_or_else(|| "Google auth exchange did not return id credential".to_string())
@@ -479,6 +490,7 @@ fn main() {
             desktop_import_select_files,
             oauth_start,
             oauth_cancel,
+            oauth_take_pending_callback,
             oauth_exchange_id_token,
             oauth_exchange_tokens,
             oauth_refresh_tokens,
