@@ -8,7 +8,7 @@ const createCardFile = (): MfCardFileV1 => ({
   version: MF_CARD_VERSION,
   exportedAt: "2026-01-01T00:00:00.000Z",
   app: {
-    name: "Manifolia",
+    name: "Sivflow",
   },
   card: {
     id: "source-card",
