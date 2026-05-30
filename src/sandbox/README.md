@@ -8,6 +8,17 @@
 | --- | --- | --- |
 | `/sandbox/blocknote` | `src/sandbox/blocknote` | BlockNote の表示・操作確認 |
 | `/sandbox/logseq` | `src/sandbox/logseq` | Logseq の設計参考メモ |
+| `/sandbox/anki-fsrs` | `src/sandbox/anki-fsrs` | Anki / FSRS4Anki の復習設計参考 |
+| `/sandbox/excalidraw` | `src/sandbox/excalidraw` | Excalidraw の手書き・図解 UI 参考 |
+| `/sandbox/editor-engines` | `src/sandbox/editor-engines` | Tiptap / Plate / Milkdown のエディタ設計比較 |
+| `/sandbox/pdf-ocr` | `src/sandbox/pdf-ocr` | PDF.js / PAWLS / Tesseract.js の教材インポート参考 |
+| `/sandbox/license-notes` | `src/sandbox/license-notes` | Outline / tldraw などライセンス注意付き参考 |
+
+## Shared components
+
+| Source | 用途 |
+| --- | --- |
+| `src/sandbox/reference/ReferenceSandboxPage.tsx` | 参考OSS sandboxページの共通レイアウト |
 
 ## Notes
 
