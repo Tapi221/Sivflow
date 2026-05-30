@@ -30,7 +30,7 @@ export const buildMfCardFile = ({
     version: MF_CARD_VERSION,
     exportedAt: new Date().toISOString(),
     app: {
-      name: "Manifolia",
+      name: "Sivflow",
       ...(appVersion ? { version: appVersion } : {}),
     },
     card: mapCardToMfDeckCard({ card, tagById }),
