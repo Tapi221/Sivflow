@@ -1,6 +1,6 @@
 import { MF_DECK_FILE_EXTENSION, MF_DECK_MIME_TYPE } from "@/features/deckFile/domain/mfDeck.types";
 
-const INVALID_FILENAME_CHARS_PATTERN = /[\\/:*?"<>|]/g;
+const INVALID_FILE_NAME_CHARACTERS = new Set(["\\", "/", ":", "*", "?", "\"", "<", ">", "|"]);
 
 const replaceControlCharacters = (value: string): string => {
   return Array.from(value, (char) => {
@@ -9,20 +9,25 @@ const replaceControlCharacters = (value: string): string => {
   }).join("");
 };
 
+const replaceInvalidFileNameCharacters = (value: string): string => {
+  return Array.from(value, (char) =>
+    INVALID_FILE_NAME_CHARACTERS.has(char) ? "_" : char,
+  ).join("");
+};
+
 const sanitizeFileNamePart = (value: string): string => {
   const trimmed = value.trim();
-  const sanitized = replaceControlCharacters(trimmed).replace(
-    INVALID_FILENAME_CHARS_PATTERN,
-    "_",
+  const sanitized = replaceInvalidFileNameCharacters(
+    replaceControlCharacters(trimmed),
   );
-  return sanitized || "manifolia-deck";
+  return sanitized || "sivflow-deck";
 };
 
 export const buildMfDeckFileName = (deckName: string): string => {
-  const baseName = sanitizeFileNamePart(deckName).replace(
-    new RegExp(`${MF_DECK_FILE_EXTENSION}$`, "i"),
-    "",
-  );
+  const sanitizedName = sanitizeFileNamePart(deckName);
+  const baseName = sanitizedName.toLowerCase().endsWith(MF_DECK_FILE_EXTENSION)
+    ? sanitizedName.slice(0, -MF_DECK_FILE_EXTENSION.length)
+    : sanitizedName;
 
   return `${baseName}${MF_DECK_FILE_EXTENSION}`;
 };
