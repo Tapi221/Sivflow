@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-import { getDb, serverTimestamp } from "./firebaseAdmin.js";
+import { getAdminAuth, getDb, serverTimestamp } from "./firebaseAdmin.js";
 import { renewExpiredWatchChannels } from "./gcal/renewWatchChannels.js";
 import { classifyGoogleTokenEndpointFailure, type GoogleOAuthServerErrorReason } from "./gcal/tokenErrors.js";
 
@@ -14,6 +14,12 @@ type StoredGoogleCalendarAccount = {
   updatedAt: unknown;
 };
 
+type GoogleOAuthProfile = {
+  accountEmail: string;
+  accountName: string | null;
+  accountPhotoUrl: string | null;
+};
+
 const GOOGLE_OAUTH_CLIENT_ID = defineSecret("GOOGLE_OAUTH_CLIENT_ID");
 const GOOGLE_OAUTH_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_CLIENT_SECRET");
 const GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY = defineSecret("GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY");
@@ -22,12 +28,7 @@ const REGION = "asia-northeast1";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
-const REQUIRED_GOOGLE_SCOPES = [
-  "https://www.googleapis.com/auth/calendar.events",
-  "https://www.googleapis.com/auth/calendar.readonly",
-  "https://www.googleapis.com/auth/calendar.app.created",
-  "https://www.googleapis.com/auth/tasks",
-] as const;
+const REQUIRED_GOOGLE_SCOPES = ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.readonly", "https://www.googleapis.com/auth/calendar.app.created", "https://www.googleapis.com/auth/tasks"] as const;
 
 const requireUid = (request: { auth?: { uid?: string } }) => {
   const uid = request.auth?.uid;
@@ -162,7 +163,7 @@ const validateGrantedGoogleScopes = async (accessToken: string, scope: string | 
   assertRequiredGoogleScopes(await fetchGoogleTokenInfoScope(accessToken));
 };
 
-const fetchUserInfo = async (accessToken: string) => {
+const fetchUserInfo = async (accessToken: string): Promise<GoogleOAuthProfile> => {
   const response = await fetch(GOOGLE_USERINFO_ENDPOINT, { headers: { Authorization: `Bearer ${accessToken}` } });
   const data = (await response.json()) as { email?: string; name?: string; picture?: string };
   if (!response.ok || !data.email) {
@@ -189,30 +190,61 @@ const runFirestoreOperation = async <T>(operation: string, accountId: string | u
   }
 };
 
-const runGoogleCalendarCallable = async <T>(context: "exchangeGoogleCalendarCode" | "getGoogleCalendarAccessToken" | "listGoogleCalendarAccounts", accountId: string | undefined, fn: () => Promise<T>): Promise<T> => {
+const runGoogleCallable = async <T>(context: "exchangeGoogleCalendarCode" | "exchangeGoogleSignInCode" | "getGoogleCalendarAccessToken" | "listGoogleCalendarAccounts", accountId: string | undefined, fn: () => Promise<T>): Promise<T> => {
   try {
     return await fn();
   } catch (error) {
     if (isHttpsError(error)) {
-      console.error("[GoogleCalendarOAuth] callable failed", { context, accountId: maskAccountId(accountId), code: error.code, details: error.details, message: error.message });
+      console.error("[GoogleOAuth] callable failed", { context, accountId: maskAccountId(accountId), code: error.code, details: error.details, message: error.message });
       throw error;
     }
-    console.error("[GoogleCalendarOAuth] unclassified callable failure", { context, accountId: maskAccountId(accountId), error: getErrorSummary(error) });
-    throw new HttpsError("internal", "Google Calendar OAuth server operation failed.", { reason: "unclassified_server_error", reconnectRequired: false });
+    console.error("[GoogleOAuth] unclassified callable failure", { context, accountId: maskAccountId(accountId), error: getErrorSummary(error) });
+    throw new HttpsError("internal", "Google OAuth server operation failed.", { reason: "unclassified_server_error", reconnectRequired: false });
   }
+};
+
+const buildAuthorizationCodeTokenParams = ({ code, codeVerifier, redirectUri }: { code: string; codeVerifier?: string; redirectUri: string }): URLSearchParams => {
+  const params = new URLSearchParams({ client_id: safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration"), client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "GOOGLE_OAUTH_CLIENT_SECRET", "server_oauth_configuration"), code, grant_type: "authorization_code", redirect_uri: redirectUri });
+  if (codeVerifier) params.set("code_verifier", codeVerifier);
+  return params;
 };
 
 const buildStoredRefreshTokenParams = (refreshToken: string): URLSearchParams => new URLSearchParams({ client_id: safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration"), client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "GOOGLE_OAUTH_CLIENT_SECRET", "server_oauth_configuration"), grant_type: "refresh_token", refresh_token: refreshToken });
 
+const buildGoogleAuthUid = (email: string): string => `google-${crypto.createHash("sha256").update(email.toLowerCase()).digest("hex")}`;
+
+const upsertGoogleAuthUser = async (profile: GoogleOAuthProfile): Promise<string> => {
+  const auth = await getAdminAuth();
+  const uid = buildGoogleAuthUid(profile.accountEmail);
+  try {
+    await auth.updateUser(uid, { email: profile.accountEmail, displayName: profile.accountName ?? undefined, photoURL: profile.accountPhotoUrl ?? undefined, emailVerified: true });
+  } catch (error) {
+    if ((error as { code?: string }).code !== "auth/user-not-found") throw error;
+    await auth.createUser({ uid, email: profile.accountEmail, displayName: profile.accountName ?? undefined, photoURL: profile.accountPhotoUrl ?? undefined, emailVerified: true });
+  }
+  return uid;
+};
+
+export const exchangeGoogleSignInCode = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET] }, async (request) => {
+  const { code, codeVerifier, redirectUri } = request.data as { code?: string; codeVerifier?: string; redirectUri?: string };
+  return runGoogleCallable("exchangeGoogleSignInCode", undefined, async () => {
+    if (!code || !redirectUri) throw new HttpsError("invalid-argument", "code and redirectUri are required.");
+    const token = await exchangeToken(buildAuthorizationCodeTokenParams({ code, codeVerifier, redirectUri }), "authorization_code");
+    const accessToken = typeof token.access_token === "string" ? token.access_token : null;
+    if (!accessToken) throw new HttpsError("internal", "Google token response missing access_token.");
+    const profile = await fetchUserInfo(accessToken);
+    const uid = await upsertGoogleAuthUser(profile);
+    const firebaseToken = await (await getAdminAuth()).createCustomToken(uid, { provider: "google", email: profile.accountEmail });
+    return { firebaseToken, ...profile };
+  });
+});
+
 export const exchangeGoogleCalendarCode = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => {
   const { code, codeVerifier, forceRefreshToken, redirectUri } = request.data as { code?: string; codeVerifier?: string; forceRefreshToken?: boolean; redirectUri?: string };
-  return runGoogleCalendarCallable("exchangeGoogleCalendarCode", undefined, async () => {
+  return runGoogleCallable("exchangeGoogleCalendarCode", undefined, async () => {
     const uid = requireUid(request);
     if (!code || !redirectUri) throw new HttpsError("invalid-argument", "code and redirectUri are required.");
-    const clientId = safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration");
-    const tokenParams = new URLSearchParams({ client_id: clientId, client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "GOOGLE_OAUTH_CLIENT_SECRET", "server_oauth_configuration"), code, grant_type: "authorization_code", redirect_uri: redirectUri });
-    if (codeVerifier) tokenParams.set("code_verifier", codeVerifier);
-    const token = await exchangeToken(tokenParams, "authorization_code");
+    const token = await exchangeToken(buildAuthorizationCodeTokenParams({ code, codeVerifier, redirectUri }), "authorization_code");
     const accessToken = typeof token.access_token === "string" ? token.access_token : null;
     const refreshToken = typeof token.refresh_token === "string" ? token.refresh_token : null;
     const expiresInSeconds = typeof token.expires_in === "number" ? token.expires_in : null;
@@ -235,7 +267,7 @@ export const exchangeGoogleCalendarCode = onCall({ region: REGION, secrets: [GOO
   });
 });
 
-export const listGoogleCalendarAccounts = onCall({ region: REGION }, async (request) => runGoogleCalendarCallable("listGoogleCalendarAccounts", undefined, async () => {
+export const listGoogleCalendarAccounts = onCall({ region: REGION }, async (request) => runGoogleCallable("listGoogleCalendarAccounts", undefined, async () => {
   const uid = requireUid(request);
   const db = await runFirestoreOperation("get db for account list", undefined, () => getDb());
   const snap = await runFirestoreOperation("list accounts", undefined, () => db.collection(`users/${uid}/googleCalendarAccounts`).get());
@@ -248,7 +280,7 @@ export const listGoogleCalendarAccounts = onCall({ region: REGION }, async (requ
 
 export const getGoogleCalendarAccessToken = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => {
   const { accountId } = request.data as { accountId?: string };
-  return runGoogleCalendarCallable("getGoogleCalendarAccessToken", accountId, async () => {
+  return runGoogleCallable("getGoogleCalendarAccessToken", accountId, async () => {
     const uid = requireUid(request);
     if (!accountId) throw new HttpsError("invalid-argument", "accountId is required.");
     const ref = await accountDoc(uid, accountId);
