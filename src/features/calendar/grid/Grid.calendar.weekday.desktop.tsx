@@ -63,7 +63,7 @@ const getCurrentTimeTopStyle = (now: Date): CSSProperties => ({
   top: `calc(${(now.getHours() * GRID.WEEKDAY_MINUTES_PER_HOUR + now.getMinutes()) / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
 });
 
-const getHourLabelClassName = (hour: number): string => cn("absolute right-2 z-10 bg-white px-1", WEEKDAY_TIME_LABEL_CLASS_NAME, hour === 0 ? "top-1 translate-y-0" : "top-0 -translate-y-1/2");
+const getHourLabelClassName = (_hour: number): string => cn("absolute right-2 top-0 z-10 -translate-y-1/2 bg-white px-1", WEEKDAY_TIME_LABEL_CLASS_NAME);
 
 const getHeaderDateNumberClassName = (isSelected: boolean, isToday: boolean): string => cn(WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME, isSelected ? "border-0 bg-[var(--ds-color-tag-sky-bg)] text-[var(--ds-color-tag-sky-fg)] shadow-none ring-0" : isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
 
