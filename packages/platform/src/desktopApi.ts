@@ -25,10 +25,21 @@ export interface DesktopFileApi {
   onImportFileOpen(handler: DesktopImportFileOpenHandler): () => void;
 }
 
+export interface DesktopOauthCallbackPayload {
+  url: string;
+  code?: string;
+  state?: string;
+  error?: string;
+  errorDescription?: string;
+}
+
+export type DesktopOauthCallbackHandler = (payload: DesktopOauthCallbackPayload) => void;
+
 export interface PlatformOauthApi {
   start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
   takePendingCallback(): Promise<DesktopOauthCallbackPayload | null>;
+  exchangeIdToken(idToken: string): Promise<unknown>;
   storeRefreshToken(input: { accountId: string; refreshToken: string }): Promise<void>;
   readRefreshToken(accountId: string): Promise<string | null>;
   deleteRefreshToken(accountId: string): Promise<void>;
@@ -48,16 +59,6 @@ export interface PlatformApi {
   shell: PlatformShellApi;
   oauth: PlatformOauthApi;
 }
-
-export interface DesktopOauthCallbackPayload {
-  url: string;
-  code?: string;
-  state?: string;
-  error?: string;
-  errorDescription?: string;
-}
-
-export type DesktopOauthCallbackHandler = (payload: DesktopOauthCallbackPayload) => void;
 
 export type DesktopOauthApi = PlatformOauthApi;
 
