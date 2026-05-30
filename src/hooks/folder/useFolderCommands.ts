@@ -1,8 +1,9 @@
 import { nanoid } from "nanoid";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
+import { buildCardSetById, resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
-import type { Folder } from "@/types";
+import type { Card, CardSet, Folder } from "@/types";
 
 type CreateFolderOptions = {
   color?: string;
@@ -55,6 +56,25 @@ const collectDescendantFolderIds = (
   }
 
   return orderedFolderIds;
+};
+
+const collectCardsInFolders = ({
+  cards,
+  cardSets,
+  folderIds,
+}: {
+  cards: Card[];
+  cardSets: CardSet[];
+  folderIds: ReadonlySet<string>;
+}) => {
+  const activeCardSetById = buildCardSetById(cardSets.filter((cardSet) => !cardSet.isDeleted));
+
+  return cards.filter((card) => {
+    if (card.isDeleted) return false;
+
+    const resolvedFolderId = resolveCardFolderId(card, activeCardSetById);
+    return resolvedFolderId ? folderIds.has(resolvedFolderId) : false;
+  });
 };
 
 export const useFolderCommands = () => {
@@ -174,9 +194,23 @@ export const useFolderCommands = () => {
       childFolderIdsByParentId,
       folderId,
     );
+    const folderIdSet = new Set(folderIdsToDelete);
+    const [cardSets, cards] = await Promise.all([
+      db.cardSets.where("userId").equals(currentUser.uid).toArray(),
+      db.getAllCards(),
+    ]);
+    const cardsToDelete = collectCardsInFolders({
+      cards,
+      cardSets,
+      folderIds: folderIdSet,
+    });
 
     for (const targetFolderId of folderIdsToDelete) {
       await db.softDelete("folders", targetFolderId);
+    }
+
+    for (const card of cardsToDelete) {
+      await db.softDelete("cards", card.id);
     }
   };
 
