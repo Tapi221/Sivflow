@@ -91,7 +91,7 @@ const SidebarNavLink = ({
   };
 
   return (
-    <HoverTooltip label={item.label} side="right" offset={4} className="app-sidebar__nav-tooltip w-full" arrowClassName="hidden">
+    <HoverTooltip label={item.label} side="right" offset={2} className="app-sidebar__nav-tooltip w-full" arrowClassName="hidden">
       <button
         type="button"
         onClick={handleClick}
@@ -165,7 +165,7 @@ const Sidebar = ({
       </div>
 
       <div className="app-sidebar__bottom">
-        <HoverTooltip label="ログアウト" side="right" offset={4} className="app-sidebar__nav-tooltip w-full" arrowClassName="hidden">
+        <HoverTooltip label="ログアウト" side="right" offset={2} className="app-sidebar__nav-tooltip w-full" arrowClassName="hidden">
           <button
             type="button"
             className="app-sidebar__dev-logout"
