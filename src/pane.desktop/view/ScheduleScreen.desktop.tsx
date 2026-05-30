@@ -40,7 +40,7 @@ const createGoogleCalendarColorOverrideKey = (accountId: string, calendarId: str
 
 const isHexColor = (value: string): boolean => /^#[0-9a-f]{6}$/i.test(value);
 
-const readStoredGoogleCalendarColorOverrides = (): GoogleCalendarColorMap => {
+const readStoredGoogleCalendarColorOverrides = (): GoogleCalendarColorOverrideMap => {
   if (typeof window === "undefined") return {};
   try {
     const raw = window.localStorage.getItem(GOOGLE_CALENDAR_COLOR_OVERRIDES_STORAGE_KEY);
