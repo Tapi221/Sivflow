@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { deleteCardSetWithCards } from "@core/usecases/cardSet";
+import { createWebCardSetRepository } from "@platform/storage/cardSetRepository.web";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { compareOrderableEntities } from "@/lib/orderableEntity";
 import { ensureLegacyCardsBackfilled } from "@/services/legacyCardSetMigrationBackfill";
@@ -169,23 +171,10 @@ export const useCardSets = (
   const deleteCardSet = async (id: string): Promise<void> => {
     if (!currentUser) throw new Error("認証が必要です");
 
-    const db = await getLocalDb(currentUser.uid);
-    const now = new Date();
-
-    const cards = await db.cards.where("cardSetId").equals(id).toArray();
-
-    await Promise.all(
-      cards.map((card) =>
-        db.cards.update(card.id, {
-          isDeleted: true,
-          updatedAt: now,
-        }),
-      ),
-    );
-
-    await db.cardSets.update(id, {
-      isDeleted: true,
-      updatedAt: now,
+    await deleteCardSetWithCards({
+      userId: currentUser.uid,
+      cardSetId: id,
+      repository: createWebCardSetRepository(),
     });
   };
 
