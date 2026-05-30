@@ -129,7 +129,7 @@ const SidebarLayeredDirectory = () => {
   }, [focusedProject, folderTagMode]);
 
   return (
-    <div ref={sidebarRef} onClickCapture={handleProjectClickCapture} className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[#5f6672] antialiased">
+    <div ref={sidebarRef} onClickCapture={handleProjectClickCapture} className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pt-[var(--ds-semantic-breadcrumb-height)] font-sans text-[#5f6672] antialiased">
       <div className="shrink-0 pb-1 pl-3 pr-2 pt-2">
         <div className="flex h-6 items-center gap-1.5">
           <div className="min-w-0 flex-1 text-[11px] font-bold uppercase leading-none tracking-[0.04em] text-[#9a9a9a]">
