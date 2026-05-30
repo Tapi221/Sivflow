@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { layoutCalendarTimeGridEvents } from "@core/calendar/timeGridLayout";
-import { getCalendarEventLevels, getCalendarEventSegment } from "@core/calendar/eventLevels";
-import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
+import { getCalendarEventLevels, getCalendarEventSegment } from "../../packages/core/src/calendar/eventLevels";
+import { layoutCalendarTimeGridEvents } from "../../packages/core/src/calendar/timeGridLayout";
+import type { CalendarEvent } from "../../packages/core/src/calendar/calendarEvent.types";
 
 const buildEvent = ({
   id,
