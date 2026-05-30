@@ -191,7 +191,7 @@ const CalendarWeekDayGridComponent = ({
         </div>
       </div>
 
-      <div ref={scrollContainerRef} className="calendar-timeline-scroll scrollbar-hidden min-h-0 flex-1 overflow-auto" onScroll={onScroll}>
+      <div ref={scrollContainerRef} className="calendar-timeline-scroll scrollbar-hidden min-h-0 flex-1 overflow-y-auto overflow-x-hidden" onScroll={onScroll}>
         <div className="grid" style={{ ...calendarGridStyle, gridTemplateColumns, minWidth: contentMinWidth }}>
           <div className="relative bg-white" style={{ zIndex: GRID.WEEKDAY_GRID_TIME_COLUMN_Z_INDEX }}>
             {WEEKDAY_HOURS.map((hour) => (
