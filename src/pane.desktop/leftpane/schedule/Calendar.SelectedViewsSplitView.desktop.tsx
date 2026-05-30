@@ -20,7 +20,6 @@ type CalendarSelectedViewsSplitViewProps = {
   headerScrollRef: RefObject<HTMLDivElement | null>;
   allDayScrollRef?: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
-  calendarDayColumnWidth: number;
   calendarGridStyle: CalendarGridStyle;
   onCalendarScroll?: (event: UIEvent<HTMLDivElement>) => void;
   onSelectDate?: (date: Date) => void;
@@ -35,7 +34,6 @@ type CalendarSelectedViewPanelProps = CalendarSelectedViewsSplitViewProps & {
 
 const SELECTED_VIEW_PANEL_CLASS_NAME = "flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-r border-[#eeeeee] last:border-r-0";
 const WEEKDAY_SURFACE_CLASS_NAME = "flex h-full min-h-0 flex-col overflow-hidden bg-white";
-const SPLIT_DAY_COLUMN_MIN_WIDTH = 1;
 
 const getSelectedViewPanelVisibleDays = ({ viewMode, selectedDate, visibleDays }: Pick<CalendarSelectedViewPanelProps, "viewMode" | "selectedDate" | "visibleDays">): Date[] => {
   if (viewMode === "days") return [selectedDate];
@@ -43,13 +41,7 @@ const getSelectedViewPanelVisibleDays = ({ viewMode, selectedDate, visibleDays }
   return visibleDays;
 };
 
-const getSelectedViewPanelDayColumnWidth = (viewMode: CalendarViewMode, calendarDayColumnWidth: number): number => {
-  if (viewMode === "days") return SPLIT_DAY_COLUMN_MIN_WIDTH;
-
-  return calendarDayColumnWidth;
-};
-
-const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, visibleDays, virtualRail, events, appProjects, googleAccounts, headerScrollRef, allDayScrollRef, scrollContainerRef, calendarDayColumnWidth, calendarGridStyle, onCalendarScroll, onSelectDate, onVisibleMonthChange, onVisibleDateChange }: CalendarSelectedViewPanelProps): ReactNode => {
+const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, visibleDays, virtualRail, events, appProjects, googleAccounts, headerScrollRef, allDayScrollRef, scrollContainerRef, calendarGridStyle, onCalendarScroll, onSelectDate, onVisibleMonthChange, onVisibleDateChange }: CalendarSelectedViewPanelProps): ReactNode => {
   if (viewMode === "list") {
     return <CalendarListView days={visibleDays} virtualRail={virtualRail} events={events} selectedDate={selectedDate} onSelectDate={onSelectDate} onVisibleMonthChange={onVisibleMonthChange} className="h-full" />;
   }
@@ -63,9 +55,8 @@ const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, v
   }
 
   const panelVisibleDays = getSelectedViewPanelVisibleDays({ viewMode, selectedDate, visibleDays });
-  const panelDayColumnWidth = getSelectedViewPanelDayColumnWidth(viewMode, calendarDayColumnWidth);
 
-  return <div className={WEEKDAY_SURFACE_CLASS_NAME}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={panelVisibleDays} virtualRail={virtualRail} visibleEvents={events} calendarDayColumnWidth={panelDayColumnWidth} _calendarDayColumnWidth={panelDayColumnWidth} calendarGridStyle={calendarGridStyle} onScroll={onCalendarScroll} selectedDate={selectedDate} onSelectDate={onSelectDate} /></div>;
+  return <div className={WEEKDAY_SURFACE_CLASS_NAME}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={panelVisibleDays} visibleEvents={events} calendarGridStyle={calendarGridStyle} onScroll={onCalendarScroll} selectedDate={selectedDate} onSelectDate={onSelectDate} /></div>;
 };
 
 const CalendarSelectedViewPanel = (props: CalendarSelectedViewPanelProps) => (
