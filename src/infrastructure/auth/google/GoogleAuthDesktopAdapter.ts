@@ -7,7 +7,7 @@ import type { DesktopOauthCallbackPayload } from "@platform/desktopApi";
 
 const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT =
   "https://accounts.google.com/o/oauth2/v2/auth";
-const CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
+const CALLBACK_TIMEOUT_MS = 30 * 1000;
 
 const toBase64Url = (bytes: Uint8Array): string => {
   const binary = Array.from(bytes, (value) => String.fromCharCode(value)).join(
