@@ -11,7 +11,7 @@ export interface SectionListBlankPaneProps {
   children?: ReactNode;
 }
 
-const SECTION_LIST_PANE_LEFT_VAR = "--manifolia-section-list-pane-left";
+const SECTION_LIST_PANE_LEFT_VAR = "--sivflow-section-list-pane-left";
 
 const buildSidebarWidthFallback = (sidebarWidth: number): string => {
   const normalizedWidth = Number.isFinite(sidebarWidth)
@@ -21,14 +21,6 @@ const buildSidebarWidthFallback = (sidebarWidth: number): string => {
   return `${normalizedWidth}px`;
 };
 
-/**
- * セクション一覧モードで、左サイドバー右側に表示するカラム/詳細ビュー領域。
- *
- * サイドバー幅は useTreeViewSidebar がリサイズ中に DOM と CSS 変数へ直接反映する。
- * React state の renderedSidebarWidth は pointerup まで更新されないため、ここで props の
- * sidebarWidth だけを見ると、ドラッグ中に右ペインの left が追従せず、サイドバーと
- * 右ペインが重なって見える。
- */
 export const SectionListBlankPane = ({
   className,
   contentClassName,
