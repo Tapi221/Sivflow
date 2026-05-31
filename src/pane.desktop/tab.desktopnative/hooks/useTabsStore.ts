@@ -223,11 +223,18 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>()(
         const existing = get().tabs.find((tab) => tab.id === id);
 
         if (existing?.kind === "explorer") {
+          const nextTab: WorkspaceExplorerTab = {
+            ...existing,
+            title: params.title ?? existing.title,
+            explorerState: params.explorerState ?? existing.explorerState,
+            isClosable: params.isClosable ?? existing.isClosable,
+          };
+
           set((state) => ({
-            tabs: upsertTab(state.tabs, existing),
-            activeTabId: existing.id,
+            tabs: upsertTab(state.tabs, nextTab),
+            activeTabId: nextTab.id,
           }));
-          return existing.id;
+          return nextTab.id;
         }
 
         const nextTab: WorkspaceExplorerTab = {
