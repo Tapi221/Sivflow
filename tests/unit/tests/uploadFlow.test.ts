@@ -17,13 +17,13 @@ describe("useReliableFileUpload", () => {
     vi.clearAllMocks();
   });
 
-  it("should initialize with idle status", () => {
+  it("初期状態は idle ステータスになる", () => {
     const { result } = renderHook(() => useReliableFileUpload());
     expect(result.current.uploadStatus).toBe("idle");
     expect(result.current.uploadProgress).toBe(0);
   });
 
-  it("should validate file size", async () => {
+  it("ファイルサイズを検証する", async () => {
     const { result } = renderHook(() => useReliableFileUpload());
 
     const largeFile = new File(["x".repeat(11 * 1024 * 1024)], "large.jpg", {
@@ -41,7 +41,7 @@ describe("useReliableFileUpload", () => {
     expect(result.current.uploadStatus).toBe("failed");
   });
 
-  it("should validate mime type", async () => {
+  it("MIME タイプを検証する", async () => {
     const { result } = renderHook(() => useReliableFileUpload());
 
     const textFile = new File(["test"], "test.txt", { type: "text/plain" });
