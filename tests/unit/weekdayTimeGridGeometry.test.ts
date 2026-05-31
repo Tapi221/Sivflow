@@ -7,7 +7,8 @@ import type { CalendarEvent } from "../../packages/core/src/calendar/calendarEve
 import type { CalendarTimeGridLayoutEntry } from "../../packages/core/src/calendar/timeGridLayout";
 
 const WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES = Math.ceil((WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX / DEFAULT_HOUR_ROW_HEIGHT) * WEEKDAY_MINUTES_PER_HOUR);
-const NEXT_DAY_PREVIEW_HOURS = 1;
+const NEXT_DAY_PREVIEW_MINUTES = 30;
+const NEXT_DAY_PREVIEW_HOURS = NEXT_DAY_PREVIEW_MINUTES / WEEKDAY_MINUTES_PER_HOUR;
 
 const buildEvent = ({
   id,
@@ -62,7 +63,7 @@ describe("weekday time grid geometry", () => {
     expect(suppressedStyle.minHeight).toBe("0px");
   });
 
-  it("24:00 以降プレビューは 1 時間範囲で 0 時台 event の位置と高さを計算する", () => {
+  it("24:00 以降プレビューは 30 分範囲で 0 時台 event の位置と高さを計算する", () => {
     const [entry] = layoutCalendarTimeGridEvents({
       events: [
         buildEvent({
@@ -72,7 +73,7 @@ describe("weekday time grid geometry", () => {
         }),
       ],
       rangeStart: new Date(2026, 3, 13, 0, 0),
-      rangeEnd: new Date(2026, 3, 13, 1, 0),
+      rangeEnd: new Date(2026, 3, 13, 0, 30),
       layoutMode: "no-overlap",
       minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
     });
@@ -112,7 +113,7 @@ describe("weekday time grid geometry", () => {
         }),
       ],
       rangeStart: new Date(2026, 3, 13, 0, 0),
-      rangeEnd: new Date(2026, 3, 13, 1, 0),
+      rangeEnd: new Date(2026, 3, 13, 0, 30),
       layoutMode: "no-overlap",
       minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
     });
@@ -125,6 +126,24 @@ describe("weekday time grid geometry", () => {
     expect(beforeMidnightFrame.heightHours).toBeCloseTo(afterMidnightFrame.heightHours, 6);
     expect(beforeMidnightStyle.height).toBe(afterMidnightStyle.height);
     expect(beforeMidnightStyle.minHeight).toBe(afterMidnightStyle.minHeight);
+  });
+
+  it("24:00 以降プレビューは 0:30 以降の event を範囲外として扱う", () => {
+    const entries = layoutCalendarTimeGridEvents({
+      events: [
+        buildEvent({
+          id: "after-preview",
+          startsAt: new Date(2026, 3, 13, 0, 30),
+          endsAt: new Date(2026, 3, 13, 1, 0),
+        }),
+      ],
+      rangeStart: new Date(2026, 3, 13, 0, 0),
+      rangeEnd: new Date(2026, 3, 13, 0, 30),
+      layoutMode: "no-overlap",
+      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
+    });
+
+    expect(entries).toEqual([]);
   });
 
   it("24:00 前後の overlap event は同じ横並び column を割り当てる", () => {
@@ -160,7 +179,7 @@ describe("weekday time grid geometry", () => {
         }),
       ],
       rangeStart: new Date(2026, 3, 13, 0, 0),
-      rangeEnd: new Date(2026, 3, 13, 1, 0),
+      rangeEnd: new Date(2026, 3, 13, 0, 30),
       layoutMode: "no-overlap",
       minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
     });
