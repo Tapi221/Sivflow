@@ -3,6 +3,7 @@ import { addDays, endOfDay, endOfMonth, endOfWeek, format, startOfDay, startOfMo
 import type { PlanResultMode } from "@/chip/toggle/Toggle.planresult";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
+import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
@@ -37,9 +38,9 @@ const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const WEEKDAY_EVENT_BUFFER_DAYS = 21;
 const MONTH_EVENT_BUFFER_DAYS = 14;
 
-const createGoogleCalendarColorOverrideKey = (accountId: string, calendarId: string): string => `${accountId}:${calendarId}`;
-
 const isHexColor = (value: string): boolean => /^#[0-9a-f]{6}$/i.test(value);
+
+const createGoogleCalendarColorOverrideKey = (accountId: string, calendarId: string): string => `${accountId}:${calendarId}`;
 
 const readStoredGoogleCalendarColorOverrides = (): GoogleCalendarColorOverrideMap => {
   if (typeof window === "undefined") return {};
@@ -67,31 +68,7 @@ const persistGoogleCalendarColorOverrides = (overrides: GoogleCalendarColorOverr
   }
 };
 
-const resolveGoogleEventProjectId = (event: GoogleCalendarEvent, links: ProjectCalendarLink[]): string | undefined => {
-  const exactLink = links.find((link) => link.provider === "google" && link.externalCalendarId === event.calendarId && (!event.accountId || link.accountId === event.accountId));
-  return exactLink?.projectId ?? event.projectId;
-};
-
-const resolveGoogleEventAccentColor = (event: GoogleCalendarEvent, overrides: GoogleCalendarColorOverrideMap): string => {
-  if (!event.accountId) return event.accentColor;
-  return overrides[createGoogleCalendarColorOverrideKey(event.accountId, event.calendarId)] ?? event.accentColor;
-};
-
-const attachProjectIdsToGoogleEvents = (events: GoogleCalendarEvent[], links: ProjectCalendarLink[], overrides: GoogleCalendarColorOverrideMap): GoogleCalendarEvent[] => events.map((event) => {
-  const projectId = resolveGoogleEventProjectId(event, links);
-  const accentColor = resolveGoogleEventAccentColor(event, overrides);
-  return { ...event, ...(projectId ? { projectId } : {}), accentColor };
-});
-
 const applyGoogleCalendarColorOverridesToAccounts = (accounts: GoogleAccountDisplay[], overrides: GoogleCalendarColorOverrideMap): GoogleAccountDisplay[] => accounts.map((account) => ({ ...account, calendars: account.calendars.map((calendar) => ({ ...calendar, backgroundColor: overrides[createGoogleCalendarColorOverrideKey(account.accountId, calendar.id)] ?? calendar.backgroundColor })) }));
-
-const filterEventsByProjectVisibility = (events: GoogleCalendarEvent[], projects: AppCalendarItem[]): GoogleCalendarEvent[] => {
-  const checkedByProjectId = new Map(projects.map((project) => [project.id, project.checked]));
-  return events.filter((event) => {
-    if (!event.projectId) return true;
-    return checkedByProjectId.get(event.projectId) !== false;
-  });
-};
 
 const mergeDisplayRanges = (left: CalendarEventDisplayRange, right: CalendarEventDisplayRange): CalendarEventDisplayRange => ({ start: new Date(Math.min(left.start.getTime(), right.start.getTime())), end: new Date(Math.max(left.end.getTime(), right.end.getTime())) });
 
@@ -222,9 +199,9 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     void Promise.all(Array.from(new Set(linkedProjectIds)).map((projectId) => updateRootFolderProjectColor(projectId, color))).catch((error) => { console.warn("[ScheduleScreen] root folder project color update failed", error); });
   }, [projectCalendarLinks, updateRootFolderProjectColor]);
 
-  const linkedGoogleCalendarEvents = useMemo(() => attachProjectIdsToGoogleEvents(googleCalendarEvents, projectCalendarLinks, googleCalendarColorOverrides), [googleCalendarEvents, googleCalendarColorOverrides, projectCalendarLinks]);
-  const visibleGoogleCalendarEvents = useMemo(() => filterEventsByProjectVisibility(linkedGoogleCalendarEvents, appProjects), [appProjects, linkedGoogleCalendarEvents]);
   const googleAccountsWithColorOverrides = useMemo(() => applyGoogleCalendarColorOverridesToAccounts(googleAccounts, googleCalendarColorOverrides), [googleAccounts, googleCalendarColorOverrides]);
+  const linkedGoogleCalendarEvents = useMemo(() => attachCalendarEventDisplayMetadata(googleCalendarEvents, { appProjects, projectCalendarLinks, googleAccounts: googleAccountsWithColorOverrides, googleCalendarColorOverrides }), [appProjects, googleAccountsWithColorOverrides, googleCalendarColorOverrides, googleCalendarEvents, projectCalendarLinks]);
+  const visibleGoogleCalendarEvents = useMemo(() => filterCalendarEventsBySourceVisibility(linkedGoogleCalendarEvents, { appProjects, projectCalendarLinks, googleAccounts: googleAccountsWithColorOverrides }), [appProjects, googleAccountsWithColorOverrides, linkedGoogleCalendarEvents, projectCalendarLinks]);
   const selectedViewModes = useMemo(() => Array.isArray(selectedViewMode) ? selectedViewMode : [selectedViewMode], [selectedViewMode]);
   const mainDisplayRange = useMemo(() => getScheduleEventDisplayRange({ primaryViewMode, currentDate, selectedDate, monthTitleDate, visibleDays, monthRenderedRange: pane.monthRenderedRange, yearRenderedRange }), [currentDate, monthTitleDate, pane.monthRenderedRange, primaryViewMode, selectedDate, visibleDays, yearRenderedRange]);
   const sidebarDisplayRange = useMemo(() => buildMiniCalendarDisplayRange(primaryViewMode === "month" || selectedViewModes.includes("list") ? monthTitleDate : titleDate), [monthTitleDate, primaryViewMode, selectedViewModes, titleDate]);
