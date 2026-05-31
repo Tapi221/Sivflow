@@ -1,4 +1,4 @@
-import { DEFAULT_NEW_FOLDER_NAME, UNTITLED_FOLDER_NAME, UNTITLED_PROJECT_NAME } from "@/components/folder/explorer/model/utils";
+import { UNTITLED_FOLDER_NAME, UNTITLED_PROJECT_NAME } from "@/components/folder/explorer/model/utils";
 import { toVirtualMfCardDisplayName, toVirtualMfDeckDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
 import type { Card, CardSet, DocumentItem, ExplorerItem, SelectedExplorerItem } from "@/types";
 
