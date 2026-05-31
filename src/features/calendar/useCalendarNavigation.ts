@@ -3,34 +3,6 @@ import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, st
 import { createCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
 import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
 
-export type UseScheduleScreenReturn = {
-  contentViewportRef: React.RefObject<HTMLDivElement | null>;
-  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
-  headerScrollRef: React.RefObject<HTMLDivElement | null>;
-  currentDate: Date;
-  selectedDate: Date;
-  monthTitleDate: Date;
-  setMonthTitleDate: (date: Date) => void;
-  monthScrollTargetToken: number;
-  calendarScrollToken: number;
-  selectedViewMode: CalendarViewModeSelection;
-  primaryViewMode: CalendarViewMode;
-  calendarBuffer: ReturnType<typeof createCalendarScrollBuffer>;
-  viewportWidth: number;
-  setViewportWidth: (width: number) => void;
-  handleSelectViewMode: (next: CalendarViewMode) => void;
-  handleToday: () => void;
-  handlePrevious: () => void;
-  handleNext: () => void;
-  handleSidebarPreviousMonth: () => void;
-  handleSidebarNextMonth: () => void;
-  handleSidebarSelectDate: (date: Date) => void;
-  handleVisibleDateChange: (date: Date) => void;
-  handleVisibleMonthChange: (date: Date) => void;
-  handleMonthCellSelectDate: (date: Date) => void;
-  resetCalendarPosition: (viewMode: CalendarViewMode) => void;
-};
-
 type StoredScheduleNavigationState = {
   currentDate?: unknown;
   selectedDate?: unknown;
@@ -141,11 +113,16 @@ const readStoredScheduleNavigationState = (): Partial<ScheduleNavigationState> |
     const parsed = JSON.parse(raw) as StoredScheduleNavigationState | null;
     if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return null;
 
+    const currentDate = readStoredDate(parsed.currentDate);
+    const selectedDate = readStoredDate(parsed.selectedDate);
+    const monthTitleDate = readStoredDate(parsed.monthTitleDate);
+    const selectedViewMode = readStoredSelectedViewMode(parsed.selectedViewMode);
+
     return {
-      ...(readStoredDate(parsed.currentDate) ? { currentDate: readStoredDate(parsed.currentDate) as Date } : {}),
-      ...(readStoredDate(parsed.selectedDate) ? { selectedDate: readStoredDate(parsed.selectedDate) as Date } : {}),
-      ...(readStoredDate(parsed.monthTitleDate) ? { monthTitleDate: readStoredDate(parsed.monthTitleDate) as Date } : {}),
-      ...(readStoredSelectedViewMode(parsed.selectedViewMode) ? { selectedViewMode: readStoredSelectedViewMode(parsed.selectedViewMode) as CalendarViewModeSelection } : {}),
+      ...(currentDate ? { currentDate } : {}),
+      ...(selectedDate ? { selectedDate } : {}),
+      ...(monthTitleDate ? { monthTitleDate } : {}),
+      ...(selectedViewMode ? { selectedViewMode } : {}),
     };
   } catch {
     return null;
