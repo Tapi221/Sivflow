@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { PointerEvent } from "react";
+import type { MouseEvent, PointerEvent, RefObject } from "react";
 import type { SelectionCapturePoint, SelectionCaptureRect } from "./selectionCapture.types";
 
 const MIN_SELECTION_SIZE_PX = 5;
@@ -21,7 +21,7 @@ const normalizeRect = (
 };
 
 type SelectionCaptureOverlayProps = {
-  targetRef: React.RefObject<HTMLElement | null>;
+  targetRef: RefObject<HTMLElement | null>;
   active: boolean;
   busy?: boolean;
   onCancel: () => void;
@@ -89,7 +89,7 @@ export const SelectionCaptureOverlay = ({
     void onCapture(nextRect);
   }, [busy, getBoundedPoint, onCapture, resetSelection, startPoint, targetRef]);
 
-  const handleContextMenu = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+  const handleContextMenu = useCallback((event: MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
     resetSelection();
     onCancel();
@@ -125,19 +125,12 @@ export const SelectionCaptureOverlay = ({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
     >
-      <div className="absolute inset-0 bg-black/20" />
-
       {selectionRect ? (
         <>
-          <div
-            className="absolute bg-transparent shadow-[0_0_0_9999px_rgba(0,0,0,0.2)]"
-            style={{
-              left: selectionRect.x,
-              top: selectionRect.y,
-              width: selectionRect.width,
-              height: selectionRect.height,
-            }}
-          />
+          <div className="absolute left-0 top-0 right-0 bg-black/20" style={{ height: selectionRect.y }} />
+          <div className="absolute left-0 bg-black/20" style={{ top: selectionRect.y, width: selectionRect.x, height: selectionRect.height }} />
+          <div className="absolute right-0 bg-black/20" style={{ top: selectionRect.y, left: selectionRect.x + selectionRect.width, height: selectionRect.height }} />
+          <div className="absolute left-0 right-0 bottom-0 bg-black/20" style={{ top: selectionRect.y + selectionRect.height }} />
           <div
             className="absolute border border-black"
             style={{
@@ -167,9 +160,12 @@ export const SelectionCaptureOverlay = ({
           </div>
         </>
       ) : (
-        <div className="absolute left-1/2 top-4 -translate-x-1/2 rounded-full border border-white/30 bg-slate-950/70 px-3 py-1 text-xs font-medium text-white shadow-sm">
-          ドラッグして範囲を選択 / Esc でキャンセル
-        </div>
+        <>
+          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute left-1/2 top-4 -translate-x-1/2 rounded-full border border-white/30 bg-slate-950/70 px-3 py-1 text-xs font-medium text-white shadow-sm">
+            ドラッグして範囲を選択 / Esc でキャンセル
+          </div>
+        </>
       )}
 
       {busy ? (
