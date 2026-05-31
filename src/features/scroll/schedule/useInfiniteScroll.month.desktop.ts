@@ -42,6 +42,7 @@ const MONTH_VIRTUAL_PAST_WEEKS = 5200;
 const MONTH_VIRTUAL_FUTURE_WEEKS = 5200;
 const MONTH_VIRTUAL_OVERSCAN_WEEKS = 72;
 const MONTH_INITIAL_RENDERED_WEEKS = 168;
+const MONTH_VIRTUAL_WINDOW_GUARD_WEEKS = 36;
 const VISIBLE_MONTH_SYNC_DELAY_MS = 96;
 
 const getWeekStart = (date: Date): Date => startOfWeek(date, { weekStartsOn: CALENDAR_MONTH_WEEK_STARTS_ON });
@@ -186,9 +187,19 @@ export const useMonthInfiniteScroll = ({
   );
 
   const updateVirtualWindowForScroll = useCallback(
-    (scroller: HTMLDivElement) => {
+    (scroller: HTMLDivElement, force = false) => {
       const firstVisibleWeekOffset = getWeekOffsetFromScrollTop(scroller.scrollTop);
       const lastVisibleWeekOffset = getWeekOffsetFromScrollTop(scroller.scrollTop + scroller.clientHeight);
+      const currentWindow = virtualWindowRef.current;
+
+      if (
+        !force &&
+        firstVisibleWeekOffset >= currentWindow.startWeekOffset + MONTH_VIRTUAL_WINDOW_GUARD_WEEKS &&
+        lastVisibleWeekOffset <= currentWindow.endWeekOffset - MONTH_VIRTUAL_WINDOW_GUARD_WEEKS
+      ) {
+        return;
+      }
+
       const nextWindow = {
         startWeekOffset: clampVirtualWeekOffset(firstVisibleWeekOffset - MONTH_VIRTUAL_OVERSCAN_WEEKS),
         endWeekOffset: clampVirtualWeekOffset(lastVisibleWeekOffset + MONTH_VIRTUAL_OVERSCAN_WEEKS),
@@ -297,7 +308,7 @@ export const useMonthInfiniteScroll = ({
 
       scroller.scrollTop = Math.max(0, rowCenter - viewCenter);
       pendingScrollWeekOffsetRef.current = null;
-      updateVirtualWindowForScroll(scroller);
+      updateVirtualWindowForScroll(scroller, true);
       syncVisibleMonth();
 
       return true;
