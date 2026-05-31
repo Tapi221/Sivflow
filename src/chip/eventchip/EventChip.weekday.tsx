@@ -21,13 +21,13 @@ const CHIP_BASE_CLASS = "relative z-10 flex h-full min-h-0 w-full flex-col overf
 const CHIP_NORMAL_CLASS = "gap-[0.5px] py-[2px] pl-1 pr-[1px]";
 const CHIP_TITLE_CLASS = "overflow-hidden whitespace-normal break-words text-[12px] font-medium leading-[17px]";
 const CHIP_TIME_CLASS = "overflow-hidden whitespace-normal break-words text-[11px] font-semibold leading-[16px] tabular-nums opacity-80";
-const CHIP_INLINE_ROW_CLASS = "flex min-w-0 max-w-full items-baseline gap-1 overflow-hidden";
+const CHIP_INLINE_ROW_CLASS = "flex min-w-0 max-w-full items-baseline gap-1.5 overflow-hidden";
 const CHIP_INLINE_TITLE_CLASS = "min-w-0 max-w-full shrink overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-medium leading-[17px]";
 const CHIP_INLINE_TIME_CLASS = "shrink-0 whitespace-nowrap text-[11px] font-semibold leading-[16px] tabular-nums opacity-80";
 const CHIP_MEASUREMENT_BASE_CLASS = "pointer-events-none invisible absolute inset-0 flex min-h-0 w-full flex-col overflow-hidden rounded-md text-left";
 const CHIP_MEASUREMENT_TOLERANCE_PX = 1;
 const DEFAULT_TITLE_LINE_CLAMP = 1;
-const INLINE_TIME_GAP_PX = 4;
+const INLINE_TIME_GAP_PX = 6;
 const INLINE_TEXT_VISIBLE_RATIO = 0.75;
 const DEFAULT_CHIP_LAYOUT_STATE: ChipLayoutState = {
   showTimeLabel: false,
