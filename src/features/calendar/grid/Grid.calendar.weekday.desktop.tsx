@@ -56,6 +56,8 @@ const getHeaderDateNumberClassName = (isSelected: boolean, isToday: boolean): st
 
 const getViewportGridTemplateColumns = (dayCount: number): string => `${C.TIME_COLUMN_WIDTH}px repeat(${dayCount}, minmax(0, 1fr))`;
 
+const getTimedEntryPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours: number): CSSProperties => getWeekdayTimedEventPositionStyle(entry, rangeHours, { suppressMinHeight: shouldSuppressEntryMinHeight(entry) });
+
 const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]): WeekdayEventsByDay => {
   const dayKeys = new Set(days.map(getCalendarDateKey));
   const allDayEvents = new Map<string, GoogleCalendarEvent[]>();
@@ -91,10 +93,7 @@ const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]): WeekdayE
   return { allDayEvents, timedEvents };
 };
 
-const createTimedLayoutEvents = (events: GoogleCalendarEvent[], day: Date): CalendarTimeGridLayoutEntry[] => {
-  const rangeStart = startOfDay(day);
-  const rangeEnd = addDays(rangeStart, 1);
-
+const createTimedLayoutEventsForRange = (events: GoogleCalendarEvent[], rangeStart: Date, rangeEnd: Date): CalendarTimeGridLayoutEntry[] => {
   return layoutCalendarTimeGridEvents({
     events,
     rangeStart,
@@ -104,18 +103,19 @@ const createTimedLayoutEvents = (events: GoogleCalendarEvent[], day: Date): Cale
   });
 };
 
+const createTimedLayoutEvents = (events: GoogleCalendarEvent[], day: Date): CalendarTimeGridLayoutEntry[] => {
+  const rangeStart = startOfDay(day);
+  const rangeEnd = addDays(rangeStart, 1);
+
+  return createTimedLayoutEventsForRange(events, rangeStart, rangeEnd);
+};
+
 const createNextDayPreviewLayoutEvents = (events: GoogleCalendarEvent[], day: Date): CalendarTimeGridLayoutEntry[] => {
   const rangeStart = addDays(startOfDay(day), 1);
   const rangeEnd = addHours(rangeStart, NEXT_DAY_PREVIEW_HOURS);
   const previewEvents = events.filter((event) => !event.isAllDay && eventOverlapsRange(event, rangeStart, rangeEnd));
 
-  return layoutCalendarTimeGridEvents({
-    events: previewEvents,
-    rangeStart,
-    rangeEnd,
-    layoutMode: "no-overlap",
-    minimumEventDurationMinutes: WEEKDAY_TIMED_EVENT_MIN_LAYOUT_MINUTES,
-  });
+  return createTimedLayoutEventsForRange(previewEvents, rangeStart, rangeEnd);
 };
 
 const useCurrentTime = () => {
@@ -220,7 +220,7 @@ const CalendarWeekDayGridComponent = ({
                 ))}
                 <div className={WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME} data-testid="weekday-preview-bottom-spacer">
                   {nextDayPreviewEvents.map((entry) => (
-                    <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getWeekdayTimedEventPositionStyle(entry, NEXT_DAY_PREVIEW_HOURS)}>
+                    <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getTimedEntryPositionStyle(entry, NEXT_DAY_PREVIEW_HOURS)}>
                       <CalendarEventChipWeekday event={entry.event} compact={isCompactWeekdayTimedEntry(entry)} />
                     </div>
                   ))}
@@ -233,7 +233,7 @@ const CalendarWeekDayGridComponent = ({
                 ) : null}
 
                 {events.map((entry) => (
-                  <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getWeekdayTimedEventPositionStyle(entry, GRID.WEEKDAY_HOURS, { suppressMinHeight: shouldSuppressEntryMinHeight(entry) })}>
+                  <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getTimedEntryPositionStyle(entry, GRID.WEEKDAY_HOURS)}>
                     <CalendarEventChipWeekday event={entry.event} compact={isCompactWeekdayTimedEntry(entry)} />
                   </div>
                 ))}
