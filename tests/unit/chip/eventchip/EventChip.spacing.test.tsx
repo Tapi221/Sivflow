@@ -168,6 +168,16 @@ describe("weekday event chip text clipping", () => {
     expect(timeElement.className).toContain("leading-[16px]");
   });
 
+  it("通常チップの時刻は横幅が狭い時に折り返せる", () => {
+    const { container } = render(<CalendarEventChipWeekday event={TIMED_EVENT} />);
+
+    const timeElement = getWeekdayTimeElement(container);
+
+    expect(timeElement.className).toContain("whitespace-normal");
+    expect(timeElement.className).toContain("break-words");
+    expect(timeElement.className).not.toContain("whitespace-nowrap");
+  });
+
   it("compact チップのタイトルも固定 line-height で表示する", () => {
     render(<CalendarEventChipWeekday event={TIMED_EVENT} compact />);
 
