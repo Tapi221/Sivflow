@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
-import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
+import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { CalendarWorkspaceToolbar } from "@/pane.desktop/header/ScheduleToolbar";
@@ -66,7 +66,15 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId }: ExplorerWork
   if (loading) return <div className="h-full w-full bg-white" />;
   if (error) return <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{error}</div>;
 
-  return <CarvePanelShell toolbar={<CalendarWorkspaceToolbar />} leftPanel={<SidebarLayeredDirectory />}><CarvePanel><TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} /></CarvePanel></CarvePanelShell>;
+  return (
+    <div className="relative flex h-full min-h-0 w-full overflow-hidden bg-transparent">
+      <CalendarWorkspaceToolbar />
+      <SidebarLayeredDirectory />
+      <CarvePanel className="min-w-0">
+        <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} />
+      </CarvePanel>
+    </div>
+  );
 };
 
 const WorkspaceScreen = () => {
