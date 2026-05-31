@@ -21,7 +21,7 @@ const FIXTURE_BLOCKS: CardBlock[] = [
 
 const FIXTURE_CARD = {
   id: "layout-fixture-card",
-  title: "Layout Fixture",
+  title: "レイアウト確認用カード",
   front: {
     blocks: FIXTURE_BLOCKS,
   },
