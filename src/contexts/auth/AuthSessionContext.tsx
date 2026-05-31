@@ -1,33 +1,12 @@
 import { onAuthStateChanged, signOut, type User as FirebaseUser } from "firebase/auth";
-import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { bootstrapUser } from "@/hooks/bootstrap/useUserBootstrap";
 import { hydrateServerStoredGoogleCalendarAccounts } from "@/integration/googlecalendar-integration/gcal.server-account-list";
 import { auth } from "@/services/firebase";
 import { initializeDB, resetLocalDBForLogout } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import { createDevPreviewUser, disableDevPreviewSession, isDevPreviewSessionEnabled } from "@/utils/devPreviewSession";
-
-type AuthSessionContextType = {
-  currentUser: FirebaseUser | null;
-  loading: boolean;
-  logout: () => Promise<void>;
-};
-
-type AuthSessionProviderProps = {
-  children: ReactNode;
-};
-
-const noopLogout = async () => {};
-
-const AuthSessionContext = createContext<AuthSessionContextType>({
-  currentUser: null,
-  loading: true,
-  logout: noopLogout,
-});
-
-const useAuthSession = () => {
-  return useContext(AuthSessionContext);
-};
+import { AuthSessionContext, type AuthSessionProviderProps, type AuthSessionContextType } from "./AuthSessionContextCore";
 
 const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
@@ -107,26 +86,25 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
     try {
       if (isDevPreviewSessionEnabled()) {
         disableDevPreviewSession();
-      } else {
-        await signOut(auth);
+
+        try {
+          await resetLocalDBForLogout(previousUserId);
+          await initializeDB("anonymous");
+        } catch (error) {
+          console.warn("[Auth] Logout DB reset failed (non-fatal):", error);
+        }
+
+        SyncServiceFactory.resetInstance(previousUserId);
+        lastKnownUserIdRef.current = null;
+        setCurrentUser(null);
         return;
       }
 
-      try {
-        await resetLocalDBForLogout(previousUserId);
-        await initializeDB("anonymous");
-      } catch (error) {
-        console.warn("[Auth] Logout DB reset failed (non-fatal):", error);
-      }
-
-      SyncServiceFactory.resetInstance(previousUserId);
-      lastKnownUserIdRef.current = null;
-      setCurrentUser(null);
+      await signOut(auth);
     } catch (error) {
       setLoading(false);
       throw error;
     } finally {
-      if (isDevPreviewSessionEnabled()) return;
       setLoading(false);
     }
   };
@@ -147,5 +125,5 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   );
 };
 
-export { AuthSessionProvider, useAuthSession };
-export type { AuthSessionContextType, AuthSessionProviderProps };
+export { AuthSessionProvider };
+export type { AuthSessionProviderProps };
