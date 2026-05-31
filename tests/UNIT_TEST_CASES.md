@@ -182,6 +182,17 @@
 - [ ] spacer line token を calendar grid と同じ細い色・幅に保つ
 - [ ] 保証された line color と width token から spacer background を描画する
 
+## tests/unit/features/calendar/useCalendarEventSync.test.tsx
+
+- [ ] 年表示ではレンダー済み年範囲を同期する
+- [ ] 月表示ではレンダー済み範囲を優先して前後 buffer を付けて同期する
+- [ ] 日表示では visibleDays の前後2日を同期範囲にする
+- [ ] 週表示では visibleDays の前後3日を同期範囲にする
+
+## tests/unit/features/cardFile/importMfCard.test.ts
+
+- [ ] mfcard を1枚のカードとして新規カードセットに取り込む
+
 ## tests/unit/features/cardFile/mfCardJsonCodec.test.ts
 
 - [ ] mfcard v1 をJSONとして往復できる
@@ -192,6 +203,25 @@
 - [ ] Enter で入力カード番号を commit する
 - [ ] blur 時に範囲外入力を clamp する
 - [ ] 空入力の blur は現在カード番号へ戻す
+
+## tests/unit/features/cardsetview/hooks/useCardSetViewZoom.test.tsx
+
+- [ ] display mode・interaction mode・layout mode をまたいで保存済み zoom を共有する
+- [ ] view と edit で zoom semantics を同一に保つ
+- [ ] legacy scoped key を unified key に移行する
+- [ ] split availability を requested layout mode から独立して評価する
+- [ ] ユーザー変更前は viewport 由来の default を再計算する
+
+## tests/unit/features/cardsetview/useCardSetViewActions.test.ts
+
+- [ ] mount だけではカードを永続化しない
+- [ ] 明示操作のときだけ createAndFocusCard を通してカードを生成する
+- [ ] トグル操作は既存 use case に委譲する
+
+## tests/unit/features/explorer/adapters/web/explorerSectionListNavigation.test.ts
+
+- [ ] dispatches section-list navigation requests to subscribers
+- [ ] does not notify unsubscribed listeners
 
 ## tests/unit/features/import/XlsxImportDialog.test.tsx
 
@@ -215,6 +245,12 @@
 - [ ] 既存カードセット宛先を application use case で組み立てる
 - [ ] blocking error がある場合は import を実行しない
 
+## tests/unit/features/review/VerticalCardPager.test.tsx
+
+- [ ] request key が変わった時だけ active card へ scroll する
+- [ ] 明示ジャンプ時に custom scroll behavior を使う
+- [ ] StrictMode の mount / unmount で ReferenceError を出さない
+
 ## tests/unit/firebaseEmulatorConfigConsistency.test.ts
 
 - [ ] matches firebase.json emulator host and port
@@ -225,6 +261,10 @@
 - [ ] moveCardToSet は cardSetId/orderIndex を同期する
 - [ ] reorderCardsInCardSet は CardSet スコープ外カードを reject する
 - [ ] updateCard は cardSetId / folderId の直接更新を reject する
+
+## tests/unit/hooks/useCardSets.test.ts
+
+- [ ] moveCardSetToFolder は card.folderId を更新しない
 
 ## tests/unit/hooks/useStudyCards.test.ts
 
@@ -246,6 +286,12 @@
 - [ ] Blob URL ではない無効な localUrl を拒否する
 - [ ] remoteUrl 内の埋め込み Base64 マーカーを拒否する
 
+## tests/unit/imageNaturalSize.test.ts
+
+- [ ] 空の source では null を返す
+- [ ] 画像読み込みに成功したら自然サイズを返す
+- [ ] 画像読み込みに失敗したら null を返す
+
 ## tests/unit/importCardsFromPayload.test.ts
 
 - [ ] xlsx 拡張子を除いた名前をベースにする
@@ -253,10 +299,28 @@
 - [ ] 既存カードセット追加時は createCardSet を呼ばず cardSetId をそのまま使う
 - [ ] 作成されるカードの orderIndex は投入順に単調増加する
 
+## tests/unit/layout/AppLayout.test.tsx
+
+- [ ] 画面幅が 768px 以上なら左サイドバーを表示する
+- [ ] 画面幅が 768px 未満なら左サイドバーを表示しない
+- [ ] 左サイドバーのトグルを押すとレイアウト全体も閉じた状態になり、再度押すと開いた状態に戻る
+
 ## tests/unit/layout/TitleBar.test.tsx
 
 - [ ] 現在地のパンくずにもクリック可能なパンくずと同じメトリクスクラスを付与する
 - [ ] 階層が深くなってもフォルダ一覧パンくずは同じメトリクスクラスを維持する
+
+## tests/unit/layout/WorkspaceShell.test.tsx
+
+- [ ] タブ非表示時は without-tabs クラスで breadcrumb と main だけを直接配置する
+- [ ] タブ表示時は tabs / breadcrumb / main の3行構造にする
+- [ ] without-tabs 用のCSSで main が暗黙行に落ちないようにする
+
+## tests/unit/lib/pdf/pdfTextExtraction.test.ts
+
+- [ ] prefers OCR when native text quality is much lower
+- [ ] guesses japanese-first OCR for Japanese heavy text
+- [ ] scores readable paragraph text above noisy symbols
 
 ## tests/unit/pane.desktop/leftpane/Sidebar.desktop.test.tsx
 
@@ -283,6 +347,12 @@
 - [ ] front と back で同じ blockOrder でも別面なら許可する
 - [ ] warning だけなら payload を返しつつ issues に warning を残す
 
+## tests/unit/pdfPageResourceCache.test.ts
+
+- [ ] retain 中の page を evict しない
+- [ ] release 済みの least recently used page を evict する
+- [ ] release を冪等に保つ
+
 ## tests/unit/pdfRenderQuality.test.ts
 
 - [ ] CSS layout size の関心事を backing-store 計算から分離する
@@ -306,6 +376,15 @@
 - [ ] baseScale が null の場合は currentScale にフォールバックする
 - [ ] 無効な gesture scale では null を返す
 - [ ] clamp を適用する
+
+## tests/unit/platform/desktopHandwritingSessionManager.test.ts
+
+- [ ] starts a desktop handwriting session and creates its document slot
+- [ ] attaches a mobile device and marks the session connected
+- [ ] receives a stroke delta and merges it into the session document
+- [ ] rejects messages for unknown sessions
+- [ ] updates session status from control messages
+- [ ] closes or fails a session and clears it when active
 
 ## tests/unit/platform/handwritingSessionLifecycle.test.ts
 
@@ -338,6 +417,11 @@
 - [ ] 永続化用レビュー patch 作成時に計算済み間隔を使用する
 - [ ] 初回以降もスコアに応じて間隔を変化させる
 
+## tests/unit/routes/Schedule.mobile.test.tsx
+
+- [ ] モバイルのスケジュール画面を使用し、デスクトップのプロジェクトコンテキストメニューパスをマウントしない
+- [ ] モバイルのスケジュール画面をデスクトップのプロジェクトサイドバーコンテキストメニューから分離する
+
 ## tests/unit/scrollbarVisibility.test.ts
 
 - [ ] スクロールバーの太さを決める --scrollbar-size の値を 1px に固定する
@@ -364,6 +448,41 @@
 - [ ] client_wins 戦略を尊重する
 - [ ] ID が一致しない場合は false を返す
 - [ ] 基本データに整合性がある場合は true を返す
+
+## tests/unit/tests/BlobUrlManager.test.ts
+
+- [ ] Blob URL を生成できる
+- [ ] Blob URL を解放できる
+- [ ] 上限（20枚）を超えると最古の URL を自動解放
+- [ ] すべての Blob URL を解放できる
+
+## tests/unit/tests/DiffEngine.test.ts
+
+- [ ] 差分がない場合は null を返す
+- [ ] フィールド変更を検出する
+- [ ] メタデータフィールドを無視する
+- [ ] JSON 比較で構造的な変更を検出する
+- [ ] 入力が欠けている場合は null を返す
+- [ ] local が null の初回同期では remote データを返す
+- [ ] remote が null の場合は local データを返す
+- [ ] サーバー側に新しいデータがある場合は local を更新する
+- [ ] local だけが変更されている場合は local を保持する
+- [ ] 両側が変更されている場合は競合を検出する
+- [ ] 競合時に client_wins 戦略を尊重する
+- [ ] ID が一致していれば true を返す
+- [ ] ID が一致しなければ false を返す
+- [ ] どちらかが欠けている場合は false を返す
+
+## tests/unit/tests/cardNormalization.test.ts
+
+- [ ] questionBlocks と answerBlocks から空の数式ブロックを除外する
+- [ ] 数式ブロックにデフォルト値を補う
+- [ ] レガシーフィールドをブロックへ変換する
+- [ ] レイアウト行数を正規化する
+- [ ] レガシーの面別追加行数を大きい側に合わせて layoutRows へ移行する
+- [ ] layoutRows を互換上限で clamp しない
+- [ ] コードブロックの rowOffset を非負 clamp 付きで offsetRows へ移行する
+- [ ] 数式ブロックの rowOffset を非負 clamp 付きで offsetRows へ移行する
 
 ## tests/unit/tests/dateNormalization.test.ts
 
