@@ -1,32 +1,38 @@
 import type { CSSProperties } from "react";
 import { memo, useEffect, useMemo, useState } from "react";
-import { addDays, format, startOfDay } from "date-fns";
+import { addDays, addHours, format, startOfDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { layoutCalendarTimeGridEvents } from "@core/calendar";
 import type { CalendarTimeGridLayoutEntry } from "@core/calendar";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
-import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
+import { clipEventToDay, compareCalendarEvents, eventOverlapsRange, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import { getWeekdayTimedEventPositionStyle, isCompactWeekdayTimedEntry } from "./weekdayTimeGridGeometry";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 import * as COLOR from "./grid.color.constants.desktop";
 import * as GRID from "./grid.layout.constants.desktop";
+import { getWeekdayTimedEventPositionStyle, isCompactWeekdayTimedEntry } from "./weekdayTimeGridGeometry";
 
 export type CalendarWeekDayGridRef = {
   scrollToHour: (hour: number) => void;
 };
 
+type WeekdayEventsByDay = {
+  allDayEvents: Map<string, GoogleCalendarEvent[]>;
+  timedEvents: Map<string, GoogleCalendarEvent[]>;
+};
+
 const WEEKDAY_HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, hour) => hour);
 const CURRENT_TIME_TICK_MS = GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS;
 const END_OF_DAY_HOUR_LABEL = "24:00";
+const NEXT_DAY_PREVIEW_HOURS = 1;
 const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
 const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const WEEKDAY_TIME_LABEL_CLASS_NAME = "text-[11px] font-medium tabular-nums text-[#b8bcc5]";
-const WEEKDAY_BOTTOM_SPACER_CLASS_NAME = "relative h-8";
+const WEEKDAY_BOTTOM_SPACER_CLASS_NAME = "relative h-8 overflow-hidden";
 
 const createEventKey = (event: GoogleCalendarEvent): string => `${event.accountId ?? ""}:${event.calendarId}:${event.id}`;
 
@@ -44,7 +50,7 @@ const getHeaderDateNumberClassName = (isSelected: boolean, isToday: boolean): st
 
 const getViewportGridTemplateColumns = (dayCount: number): string => `${C.TIME_COLUMN_WIDTH}px repeat(${dayCount}, minmax(0, 1fr))`;
 
-const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]) => {
+const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]): WeekdayEventsByDay => {
   const dayKeys = new Set(days.map(getCalendarDateKey));
   const allDayEvents = new Map<string, GoogleCalendarEvent[]>();
   const timedEvents = new Map<string, GoogleCalendarEvent[]>();
@@ -85,6 +91,19 @@ const createTimedLayoutEvents = (events: GoogleCalendarEvent[], day: Date): Cale
 
   return layoutCalendarTimeGridEvents({
     events,
+    rangeStart,
+    rangeEnd,
+    layoutMode: "no-overlap",
+  });
+};
+
+const createNextDayPreviewLayoutEvents = (events: GoogleCalendarEvent[], day: Date): CalendarTimeGridLayoutEntry[] => {
+  const rangeStart = addDays(startOfDay(day), 1);
+  const rangeEnd = addHours(rangeStart, NEXT_DAY_PREVIEW_HOURS);
+  const previewEvents = events.filter((event) => !event.isAllDay && eventOverlapsRange(event, rangeStart, rangeEnd));
+
+  return layoutCalendarTimeGridEvents({
+    events: previewEvents,
     rangeStart,
     rangeEnd,
     layoutMode: "no-overlap",
@@ -184,13 +203,20 @@ const CalendarWeekDayGridComponent = ({
           {visibleDays.map((day) => {
             const dayKey = getCalendarDateKey(day);
             const events = createTimedLayoutEvents(timedEvents.get(dayKey) ?? [], day);
+            const nextDayPreviewEvents = createNextDayPreviewLayoutEvents(visibleEvents, day);
             const isToday = dayKey === currentDayKey;
             return (
               <div key={dayKey} className="relative min-w-0 bg-white">
                 {WEEKDAY_HOURS.map((hour) => (
                   <div key={hour} className="border-b" style={{ height: `var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})`, borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }} />
                 ))}
-                <div className={WEEKDAY_BOTTOM_SPACER_CLASS_NAME} />
+                <div className={WEEKDAY_BOTTOM_SPACER_CLASS_NAME}>
+                  {nextDayPreviewEvents.map((entry) => (
+                    <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getWeekdayTimedEventPositionStyle(entry, NEXT_DAY_PREVIEW_HOURS)}>
+                      <CalendarEventChipWeekday event={entry.event} compact={isCompactWeekdayTimedEntry(entry)} />
+                    </div>
+                  ))}
+                </div>
 
                 {isToday ? (
                   <div className="pointer-events-none absolute left-0 right-0 z-20" style={getCurrentTimeTopStyle(now)}>
