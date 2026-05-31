@@ -16,7 +16,7 @@ describe("platform/desktop.shell.openExternal", () => {
     bridgeShellOpenExternalMock.mockClear();
   });
 
-  it("delegates http(s)/mailto to the desktop bridge", async () => {
+  it("http(s)/mailto は desktop bridge に委譲する", async () => {
     const { desktopPlatform } = await import("@/platform/desktop");
 
     await desktopPlatform.shell.openExternal("https://example.com");
@@ -25,7 +25,7 @@ describe("platform/desktop.shell.openExternal", () => {
     );
   });
 
-  it("falls back to window.open for non-http(s)/mailto urls", async () => {
+  it("http(s)/mailto 以外の URL では window.open にフォールバックする", async () => {
     const windowOpenMock = vi.fn();
     Object.defineProperty(window, "open", {
       value: windowOpenMock,
