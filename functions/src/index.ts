@@ -216,12 +216,21 @@ const buildGoogleAuthUid = (email: string): string => `google-${crypto.createHas
 const upsertGoogleAuthUser = async (profile: GoogleOAuthProfile): Promise<string> => {
   const auth = await getAdminAuth();
   const uid = buildGoogleAuthUid(profile.accountEmail);
+  const userUpdate = { email: profile.accountEmail, displayName: profile.accountName ?? undefined, photoURL: profile.accountPhotoUrl ?? undefined, emailVerified: true };
   try {
-    await auth.updateUser(uid, { email: profile.accountEmail, displayName: profile.accountName ?? undefined, photoURL: profile.accountPhotoUrl ?? undefined, emailVerified: true });
+    await auth.updateUser(uid, userUpdate);
+    return uid;
   } catch (error) {
     if ((error as { code?: string }).code !== "auth/user-not-found") throw error;
-    await auth.createUser({ uid, email: profile.accountEmail, displayName: profile.accountName ?? undefined, photoURL: profile.accountPhotoUrl ?? undefined, emailVerified: true });
   }
+  try {
+    const existingUser = await auth.getUserByEmail(profile.accountEmail);
+    await auth.updateUser(existingUser.uid, userUpdate);
+    return existingUser.uid;
+  } catch (error) {
+    if ((error as { code?: string }).code !== "auth/user-not-found") throw error;
+  }
+  await auth.createUser({ uid, ...userUpdate });
   return uid;
 };
 
