@@ -1,8 +1,4 @@
 @layer components {
-  .calendar-view-content {
-    scrollbar-gutter: auto;
-  }
-
   header[class*="safe-area-inset-top"] > div:first-child {
     justify-content: flex-end;
   }
@@ -11,94 +7,9 @@
     display: none;
   }
 
-  aside[class*="w-[220px]"] > nav.overflow-y-auto {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  aside[class*="w-[220px]"] > nav.overflow-y-auto::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-  }
-
-  aside[class*="w-[220px]"] > nav.overflow-y-auto::-webkit-scrollbar-button {
-    display: none;
-    width: 0;
-    height: 0;
-  }
-
-  aside[class*="w-[220px]"] > nav.overflow-y-auto::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  aside[class*="w-[220px]"] > nav.overflow-y-auto::-webkit-scrollbar-thumb {
-    border-radius: 999px;
-    background-color: transparent;
-  }
-
-  aside[class*="w-[220px]"] > nav.overflow-y-auto:hover,
-  aside[class*="w-[220px]"] > nav.overflow-y-auto:focus-within {
-    scrollbar-width: thin;
-    -ms-overflow-style: auto;
-    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-  }
-
-  aside[class*="w-[220px]"] > nav.overflow-y-auto:hover::-webkit-scrollbar,
-  aside[class*="w-[220px]"] > nav.overflow-y-auto:focus-within::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-
-  aside[class*="w-[220px]"] > nav.overflow-y-auto:hover::-webkit-scrollbar-thumb,
-  aside[class*="w-[220px]"] > nav.overflow-y-auto:focus-within::-webkit-scrollbar-thumb {
-    border-radius: 999px;
-    background-color: rgba(156, 163, 175, 0.5);
-  }
-
   .calendar-month-scroll,
   .calendar-timeline-scroll {
-    scrollbar-gutter: auto;
-    scrollbar-width: none;
     overscroll-behavior: contain;
-  }
-
-  .calendar-month-scroll {
-    scrollbar-gutter: auto;
-  }
-
-  .calendar-year-view {
-    scrollbar-gutter: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .calendar-month-scroll::-webkit-scrollbar,
-  .calendar-timeline-scroll::-webkit-scrollbar,
-  .calendar-year-view::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-  }
-
-  .calendar-month-scroll::-webkit-scrollbar-thumb,
-  .calendar-month-scroll::-webkit-scrollbar-track,
-  .calendar-timeline-scroll::-webkit-scrollbar-thumb,
-  .calendar-timeline-scroll::-webkit-scrollbar-track,
-  .calendar-year-view::-webkit-scrollbar-thumb,
-  .calendar-year-view::-webkit-scrollbar-track {
-    display: none;
-  }
-
-  .calendar-timeline-scroll::-webkit-scrollbar:horizontal {
-    height: 0;
-  }
-
-  .calendar-timeline-scroll::-webkit-scrollbar-thumb:horizontal,
-  .calendar-timeline-scroll::-webkit-scrollbar-track:horizontal {
-    display: none;
-  }
-
-  .calendar-timeline-scroll::-webkit-scrollbar-corner {
-    display: none;
   }
 
   .calendar-timeline-grid {
