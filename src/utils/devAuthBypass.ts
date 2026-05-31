@@ -1,5 +1,5 @@
 import type { User as FirebaseUser } from "firebase/auth";
-import { DEV_MODE, isLocalDevHost } from "@/utils/envGuards";
+import { DEV_MODE, isLocalDevHost } from "./envGuards";
 
 type DevAuthBypassUserJson = {
   displayName: string;
