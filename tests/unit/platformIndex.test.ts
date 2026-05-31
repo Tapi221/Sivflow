@@ -33,7 +33,7 @@ const createDesktopBridgeStub = () => ({
 });
 
 describe("platform/index", () => {
-  it("uses web platform when desktop bridge is not available", async () => {
+  it("デスクトップブリッジが利用できない場合は Web プラットフォームを使用する", async () => {
     const win = window as Window & { desktop?: unknown };
     delete win.desktop;
 
@@ -45,7 +45,7 @@ describe("platform/index", () => {
     );
   });
 
-  it("uses desktop platform when desktop bridge is available", async () => {
+  it("デスクトップブリッジが利用できる場合はデスクトッププラットフォームを使用する", async () => {
     const bridge = createDesktopBridgeStub();
     Object.defineProperty(window, "desktop", {
       value: bridge,
