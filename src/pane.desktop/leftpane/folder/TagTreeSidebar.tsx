@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent } from "react";
-import { getTagColorSwatchStyle } from "@/chip/tag/tagColor";
 import { useCardsRead } from "@/components/card/hooks/useCardsRead";
 import { useTags, type Tag as TagRecord } from "@/features/settings/hooks/useTags";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
@@ -175,7 +174,6 @@ const TagTreeRow = ({ item, selectedTagNames, tagContentCountById, onToggleTag, 
   const isSelected = selectedTagNames.has(item.name);
   const contentCount = tagContentCountById.get(item.id) ?? 0;
   const rowPaddingLeft = Math.max(0, item.level - ROOT_LEVEL) * 12;
-  const markerStyle = getTagColorSwatchStyle(item.color ?? undefined);
 
   const handleToggleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -194,9 +192,13 @@ const TagTreeRow = ({ item, selectedTagNames, tagContentCountById, onToggleTag, 
   return (
     <div data-tag-id={item.id}>
       <div role="treeitem" aria-level={item.level} aria-expanded={item.hasChildren ? item.isExpanded : undefined} aria-selected={isSelected} className={cn("flex h-7 items-center gap-1 rounded-[10px] pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")} style={{ paddingLeft: rowPaddingLeft }}>
-        <button type="button" onClick={handleToggleClick} aria-label={item.isExpanded ? `${item.name} を閉じる` : `${item.name} を開く`} aria-disabled={!item.hasChildren} disabled={!item.hasChildren} className="library-tree-marker" style={markerStyle}>
-          <IconChevronRight className={cn("h-3 w-3 transition-transform", item.hasChildren ? "opacity-100" : "opacity-0", item.isExpanded && "rotate-90")} />
-        </button>
+        {item.hasChildren ? (
+          <button type="button" onClick={handleToggleClick} aria-label={item.isExpanded ? `${item.name} を閉じる` : `${item.name} を開く`} className="flex h-4 w-4 shrink-0 items-center justify-center text-[#9aa1ad]">
+            <IconChevronRight className={cn("h-3 w-3 transition-transform", item.isExpanded && "rotate-90")} />
+          </button>
+        ) : (
+          <span aria-hidden="true" className="h-4 w-4 shrink-0" />
+        )}
         <button type="button" onClick={handleRowClick} title={item.name} className="flex h-7 min-w-0 flex-1 items-center gap-1.5 rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]">
           <IconTag className="h-4 w-4 shrink-0 text-[#9aa1ad]" />
           <span className="min-w-0 flex-1 truncate">{item.name}</span>
