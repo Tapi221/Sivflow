@@ -66,7 +66,7 @@ describe("layoutCalendarTimeGridEvents", () => {
     });
 
     expect(entry.style.top).toBe(0);
-    expect(entry.style.height).toBeCloseTo(1.041_666, 6);
+    expect(entry.style.height).toBeCloseTo(15 / 1_440 * 100, 6);
   });
 
   it("weekday 表示の chip 高さを event duration と同じ時間長にする", () => {
