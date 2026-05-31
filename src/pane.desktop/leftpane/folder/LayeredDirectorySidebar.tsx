@@ -1,8 +1,14 @@
-import { useCallback, useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent } from "react";
-import { DEFAULT_NEW_FOLDER_NAME, getFolderId, UNTITLED_FOLDER_NAME, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type MouseEvent as ReactMouseEvent, type SetStateAction } from "react";
+import { DEFAULT_NEW_CARD_SET_NAME, DEFAULT_NEW_FOLDER_NAME, getFolderId, UNTITLED_FOLDER_NAME, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
+import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+import { LAYERED_COLOR_MENU_HEIGHT, LAYERED_COLOR_MENU_WIDTH, LayeredColorMenu } from "@/chip/rightclickpanel.desktop/LayeredColorMenu.desktop";
+import { LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LayeredProjectMenu, type LayeredProjectMenuAction, type LayeredProjectMenuActionId, type LayeredProjectMenuSubmenuAnchor } from "@/chip/rightclickpanel.desktop/LayeredProjectMenu";
+import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
+import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 
@@ -15,9 +21,7 @@ type DirectoryTreeNodeProps = {
   getFolderContentCount: (folderId: string | null) => number;
   onToggleFolder: (folderId: string) => void;
   onSelectFolder: (folderId: string) => void;
-  onCreateChildFolder: (folderId: string) => void;
-  onRenameFolder: (folder: FolderTreeNode, isRootProject: boolean) => void;
-  onDeleteFolder: (folder: FolderTreeNode) => void;
+  onOpenContextMenu: (event: ReactMouseEvent<HTMLElement>, folder: FolderTreeNode, isRootProject: boolean) => void;
 };
 
 type ProjectListItemProps = {
@@ -25,9 +29,30 @@ type ProjectListItemProps = {
   selectedFolderId: string | null;
   getFolderContentCount: (folderId: string | null) => number;
   onSelectProject: (folderId: string) => void;
-  onCreateProjectFolder: (folderId: string) => void;
-  onRenameProject: (folder: FolderTreeNode) => void;
-  onDeleteProject: (folder: FolderTreeNode) => void;
+  onOpenContextMenu: (event: ReactMouseEvent<HTMLElement>, folder: FolderTreeNode, isRootProject: boolean) => void;
+};
+
+type FolderContextMenuState = {
+  folderId: string;
+  folderName: string;
+  folderColor: string | null;
+  isRootProject: boolean;
+  x: number;
+  y: number;
+};
+
+type FolderColorMenuState = {
+  x: number;
+  y: number;
+};
+
+type UseFolderContextMenuParams = {
+  createFolder: (name: string, parentFolderId?: string | null) => Promise<unknown>;
+  updateFolder: (folderId: string, updates: Record<string, unknown>) => Promise<unknown>;
+  deleteFolder: (folderId: string) => Promise<unknown>;
+  createCardSet: (name: string, targetFolderId?: string | null) => Promise<unknown>;
+  getNextOrderIndex: (folderId: string | null, resolvedFolderId?: string) => number;
+  setExpandedFolderIds: Dispatch<SetStateAction<Set<string>>>;
 };
 
 type IconProps = {
@@ -37,12 +62,12 @@ type IconProps = {
 const EMPTY_COLLECTION: never[] = [];
 const LIBRARY_TITLE = "Library";
 const ROOT_LEVEL = 1;
+const LAYERED_PROJECT_MENU_DIMENSIONS = { width: LAYERED_PROJECT_MENU_WIDTH, height: LAYERED_PROJECT_MENU_HEIGHT };
+const LAYERED_PROJECT_SUBMENU_OVERLAP_PX = 6;
 
 const IconChevronRight = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
 
 const IconFolder = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M2.75 6.5A2.25 2.25 0 0 1 5 4.25h2.05c.47 0 .92.19 1.24.52l.72.73H15A2.25 2.25 0 0 1 17.25 7.75v6A2.25 2.25 0 0 1 15 16H5a2.25 2.25 0 0 1-2.25-2.25V6.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>);
-
-const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 
 const LibraryTreeMarker = ({ className }: IconProps) => <span aria-hidden="true" className={cn("library-tree-marker", className)} />;
 
@@ -51,17 +76,155 @@ const getFolderName = (folder: FolderTreeNode, isRootProject = false): string =>
   return typeof name === "string" && name.trim() ? name.trim() : isRootProject ? UNTITLED_PROJECT_NAME : UNTITLED_FOLDER_NAME;
 };
 
-const getRootFolderIds = (rootFolders: FolderTreeNode[]): string[] => rootFolders.map(getFolderId).filter(Boolean);
-
-const useLibraryHierarchyData = () => {
-  const { folders, loading, error } = useFoldersRead();
-  const treeFolders = useMemo(() => folders as FolderTreeNode[], [folders]);
-  const { rootFolders, getChildFolders, getFolderContentCount } = useExplorerDerivedData({ treeFolders, treeCards: EMPTY_COLLECTION, cardSets: EMPTY_COLLECTION, documents: EMPTY_COLLECTION, isFiltering: false });
-
-  return { rootFolders, getChildFolders, getFolderContentCount, loading, error };
+const getFolderColor = (folder: FolderTreeNode): string | null => {
+  const folderColor = (folder as { folderColor?: string | null; folder_color?: string | null }).folderColor ?? (folder as { folderColor?: string | null; folder_color?: string | null }).folder_color ?? null;
+  return typeof folderColor === "string" && folderColor.trim() ? folderColor : null;
 };
 
-const ProjectListItem = ({ folder, selectedFolderId, getFolderContentCount, onSelectProject, onCreateProjectFolder, onRenameProject, onDeleteProject }: ProjectListItemProps) => {
+const getRootFolderIds = (rootFolders: FolderTreeNode[]): string[] => rootFolders.map(getFolderId).filter(Boolean);
+
+const getLayeredProjectColorMenuPosition = (menu: FolderContextMenuState, anchor: LayeredProjectMenuSubmenuAnchor): FolderColorMenuState => {
+  const rightX = menu.x + LAYERED_PROJECT_MENU_WIDTH - LAYERED_PROJECT_SUBMENU_OVERLAP_PX;
+  const leftX = menu.x - LAYERED_COLOR_MENU_WIDTH + LAYERED_PROJECT_SUBMENU_OVERLAP_PX;
+  const rawX = rightX + LAYERED_COLOR_MENU_WIDTH + LAYERED_PROJECT_SUBMENU_OVERLAP_PX <= window.innerWidth ? rightX : leftX;
+  const rawY = menu.y + anchor.itemOffsetY;
+
+  return clampRightClickPanelPosition(rawX, rawY, { width: LAYERED_COLOR_MENU_WIDTH, height: LAYERED_COLOR_MENU_HEIGHT });
+};
+
+const createFolderContextMenuState = (event: ReactMouseEvent<HTMLElement>, folder: FolderTreeNode, isRootProject: boolean): FolderContextMenuState | null => {
+  const folderId = getFolderId(folder);
+  if (!folderId) return null;
+
+  const position = clampRightClickPanelPosition(event.clientX, event.clientY, LAYERED_PROJECT_MENU_DIMENSIONS);
+  return { folderId, folderName: getFolderName(folder, isRootProject), folderColor: getFolderColor(folder), isRootProject, ...position };
+};
+
+const useLibraryHierarchyData = () => {
+  const { folders, loading: foldersLoading, error: foldersError } = useFoldersRead();
+  const { cardSets, loading: cardSetsLoading, createCardSet } = useCardSets();
+  const { documents, loading: documentsLoading, error: documentsError } = useDocumentsRead();
+  const treeFolders = useMemo(() => folders as FolderTreeNode[], [folders]);
+  const { rootFolders, getChildFolders, getFolderContentCount, getNextOrderIndex } = useExplorerDerivedData({ treeFolders, treeCards: EMPTY_COLLECTION, cardSets, documents, isFiltering: false });
+
+  return { rootFolders, getChildFolders, getFolderContentCount, getNextOrderIndex, createCardSet, loading: foldersLoading || cardSetsLoading || documentsLoading, error: foldersError ?? documentsError };
+};
+
+const useFolderContextMenu = ({ createFolder, updateFolder, deleteFolder, createCardSet, getNextOrderIndex, setExpandedFolderIds }: UseFolderContextMenuParams) => {
+  const layeredProjectMenuRef = useRef<HTMLDivElement | null>(null);
+  const layeredProjectColorMenuRef = useRef<HTMLDivElement | null>(null);
+  const [contextMenu, setContextMenu] = useState<FolderContextMenuState | null>(null);
+  const [colorMenu, setColorMenu] = useState<FolderColorMenuState | null>(null);
+  const { fileInputRef, handleToolbarAddDocument, currentFileAccept, handleToolbarFileInputChange } = useFolderDocumentUpload({ actionFolderId: contextMenu?.folderId ?? null, getNextOrderIndex, setExpandedFolders: setExpandedFolderIds });
+
+  const closeContextMenu = useCallback(() => {
+    setColorMenu(null);
+    setContextMenu(null);
+  }, []);
+
+  useRightClickPanelDismiss(LAYERED_PROJECT_MENU_PANEL_ID, contextMenu !== null, layeredProjectMenuRef, closeContextMenu);
+
+  const openContextMenu = useCallback((event: ReactMouseEvent<HTMLElement>, folder: FolderTreeNode, isRootProject: boolean) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const nextContextMenu = createFolderContextMenuState(event, folder, isRootProject);
+    if (!nextContextMenu) return;
+
+    setColorMenu(null);
+    setContextMenu(nextContextMenu);
+  }, []);
+
+  const handleOpenSubmenu = useCallback((id: LayeredProjectMenuActionId, anchor: LayeredProjectMenuSubmenuAnchor) => {
+    if (!contextMenu || id !== "change-color") return;
+
+    setColorMenu(getLayeredProjectColorMenuPosition(contextMenu, anchor));
+  }, [contextMenu]);
+
+  const handleCloseSubmenu = useCallback(() => {
+    setColorMenu(null);
+  }, []);
+
+  const handleSelectColor = useCallback((folderColor: string) => {
+    if (!contextMenu) return;
+
+    void updateFolder(contextMenu.folderId, { folderColor });
+    closeContextMenu();
+  }, [closeContextMenu, contextMenu, updateFolder]);
+
+  const actions = useMemo<LayeredProjectMenuAction[]>(() => {
+    if (!contextMenu) return [];
+
+    const { folderId, folderName, isRootProject } = contextMenu;
+
+    return [
+      {
+        id: "change-color",
+        onSelect: () => undefined,
+      },
+      {
+        id: "rename",
+        onSelect: () => {
+          const promptTitle = isRootProject ? "プロジェクト名を変更" : "フォルダ名を変更";
+          const nextFolderName = window.prompt(promptTitle, folderName)?.trim();
+          closeContextMenu();
+          if (!nextFolderName || nextFolderName === folderName) return;
+
+          void updateFolder(folderId, { folderName: nextFolderName, name: nextFolderName });
+        },
+      },
+      {
+        id: "create-card-set",
+        onSelect: () => {
+          closeContextMenu();
+          void createCardSet(DEFAULT_NEW_CARD_SET_NAME, folderId);
+        },
+      },
+      {
+        id: "create-folder",
+        onSelect: () => {
+          closeContextMenu();
+          void createFolder(DEFAULT_NEW_FOLDER_NAME, folderId);
+          setExpandedFolderIds((current) => new Set(current).add(folderId));
+        },
+      },
+      {
+        id: "import-pdf",
+        onSelect: () => {
+          handleToolbarAddDocument();
+          closeContextMenu();
+        },
+      },
+      {
+        id: "hide",
+        onSelect: () => {
+          closeContextMenu();
+          void updateFolder(folderId, { isHidden: true });
+        },
+      },
+      {
+        id: "delete",
+        onSelect: () => {
+          closeContextMenu();
+          void deleteFolder(folderId);
+        },
+      },
+    ];
+  }, [closeContextMenu, contextMenu, createCardSet, createFolder, deleteFolder, handleToolbarAddDocument, setExpandedFolderIds, updateFolder]);
+
+  const contextMenuElement = (
+    <>
+      <input ref={fileInputRef} type="file" accept={currentFileAccept} className="hidden" tabIndex={-1} onChange={handleToolbarFileInputChange} />
+      {contextMenu ? (
+        <LayeredProjectMenu x={contextMenu.x} y={contextMenu.y} actions={actions} menuRef={layeredProjectMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} panelId={LAYERED_PROJECT_MENU_PANEL_ID} openSubmenuId={colorMenu ? "change-color" : null} submenuElement={colorMenu ? <LayeredColorMenu x={colorMenu.x} y={colorMenu.y} currentColor={contextMenu.folderColor} menuRef={layeredProjectColorMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} onSelectColor={handleSelectColor} /> : null} onOpenSubmenu={handleOpenSubmenu} onCloseSubmenu={handleCloseSubmenu} />
+      ) : null}
+    </>
+  );
+
+  return { contextMenuElement, openContextMenu };
+};
+
+const ProjectListItem = ({ folder, selectedFolderId, getFolderContentCount, onSelectProject, onOpenContextMenu }: ProjectListItemProps) => {
   const folderId = getFolderId(folder);
   if (!folderId) return null;
 
@@ -75,75 +238,37 @@ const ProjectListItem = ({ folder, selectedFolderId, getFolderContentCount, onSe
     onSelectProject(folderId);
   };
 
-  const handleCreateProjectFolder = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    onCreateProjectFolder(folderId);
-  };
-
-  const handleRenameProject = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    onRenameProject(folder);
-  };
-
-  const handleDeleteProject = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    onDeleteProject(folder);
+  const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => {
+    onOpenContextMenu(event, folder, true);
   };
 
   return (
     <div data-folder-id={folderId}>
-      <div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} className={cn("group flex h-7 items-center gap-1 rounded-[10px] pr-1 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]") }>
+      <div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center gap-1 rounded-[10px] pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]") }>
         <LibraryTreeMarker />
         <button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]">
           <span className="min-w-0 flex-1 truncate">{folderName}</span>
           {contentCount > 0 ? <span className="shrink-0 rounded-full bg-[#eef1f4] px-1.5 py-0.5 text-[10px] font-bold text-[#8b929e]">{contentCount}</span> : null}
         </button>
-        <div className="ml-1 flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
-          <button type="button" onClick={handleCreateProjectFolder} aria-label={`${folderName} にフォルダを追加`} title="フォルダを追加" className="flex h-5 w-5 items-center justify-center rounded-md text-[#9aa1ad] hover:bg-[#f0f1f3] hover:text-[#59616e]"><IconPlus className="h-3 w-3" /></button>
-          <button type="button" onClick={handleRenameProject} aria-label={`${folderName} の名前を変更`} title="プロジェクト名を変更" className="flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[10px] font-bold text-[#9aa1ad] hover:bg-[#f0f1f3] hover:text-[#59616e]">Aa</button>
-          <button type="button" onClick={handleDeleteProject} aria-label={`${folderName} を削除`} title="削除" className="flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[10px] font-bold text-[#b48a8a] hover:bg-[#f7eeee] hover:text-[#9d5555]">×</button>
-        </div>
       </div>
     </div>
   );
 };
 
 const ProjectListSidebar = () => {
-  const { rootFolders, getFolderContentCount, loading, error } = useLibraryHierarchyData();
+  const { rootFolders, getFolderContentCount, getNextOrderIndex, createCardSet, loading, error } = useLibraryHierarchyData();
   const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
+  const [, setExpandedFolderIds] = useState<Set<string>>(() => new Set());
+  const { contextMenuElement, openContextMenu } = useFolderContextMenu({ createFolder, updateFolder, deleteFolder, createCardSet, getNextOrderIndex, setExpandedFolderIds });
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const selectedFolderId = activeTab?.kind === "explorer" && !activeTab.explorerState.isSectionListMode ? activeTab.explorerState.selectedFolderId : null;
 
   const handleSelectProject = useCallback((folderId: string) => {
     openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: folderId, selectedItem: null } });
   }, [openExplorerTab]);
-
-  const handleCreateProjectFolder = useCallback((folderId: string) => {
-    void createFolder(DEFAULT_NEW_FOLDER_NAME, folderId);
-  }, [createFolder]);
-
-  const handleRenameProject = useCallback((folder: FolderTreeNode) => {
-    const folderId = getFolderId(folder);
-    const folderName = getFolderName(folder, true);
-    const nextFolderName = window.prompt("プロジェクト名を変更", folderName)?.trim();
-    if (!folderId || !nextFolderName || nextFolderName === folderName) return;
-
-    void updateFolder(folderId, { folderName: nextFolderName, name: nextFolderName });
-  }, [updateFolder]);
-
-  const handleDeleteProject = useCallback((folder: FolderTreeNode) => {
-    const folderId = getFolderId(folder);
-    const folderName = getFolderName(folder, true);
-    if (!folderId || !window.confirm(`${folderName} を削除しますか？`)) return;
-
-    void deleteFolder(folderId);
-  }, [deleteFolder]);
 
   if (loading) {
     return <aside aria-label="Project list explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#9aa1ad]">読み込み中...</aside>;
@@ -154,19 +279,22 @@ const ProjectListSidebar = () => {
   }
 
   return (
-    <aside aria-label="Project list explorer" className="h-full min-h-0 overflow-hidden">
-      <div className="h-full min-h-0 overflow-y-auto px-2 pb-2 pt-1">
-        <div role="tree" aria-label="プロジェクト" className="flex flex-col gap-0.5">
-          {rootFolders.length > 0 ? rootFolders.map((folder) => (
-            <ProjectListItem key={getFolderId(folder)} folder={folder} selectedFolderId={selectedFolderId} getFolderContentCount={getFolderContentCount} onSelectProject={handleSelectProject} onCreateProjectFolder={handleCreateProjectFolder} onRenameProject={handleRenameProject} onDeleteProject={handleDeleteProject} />
-          )) : <p className="px-2 py-2 text-[12px] font-medium text-[#9aa1ad]">プロジェクトがありません</p>}
+    <>
+      <aside aria-label="Project list explorer" className="h-full min-h-0 overflow-hidden">
+        <div className="h-full min-h-0 overflow-y-auto px-2 pb-2 pt-1">
+          <div role="tree" aria-label="プロジェクト" className="flex flex-col gap-0.5">
+            {rootFolders.length > 0 ? rootFolders.map((folder) => (
+              <ProjectListItem key={getFolderId(folder)} folder={folder} selectedFolderId={selectedFolderId} getFolderContentCount={getFolderContentCount} onSelectProject={handleSelectProject} onOpenContextMenu={openContextMenu} />
+            )) : <p className="px-2 py-2 text-[12px] font-medium text-[#9aa1ad]">プロジェクトがありません</p>}
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+      {contextMenuElement}
+    </>
   );
 };
 
-const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds, getChildFolders, getFolderContentCount, onToggleFolder, onSelectFolder, onCreateChildFolder, onRenameFolder, onDeleteFolder }: DirectoryTreeNodeProps) => {
+const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds, getChildFolders, getFolderContentCount, onToggleFolder, onSelectFolder, onOpenContextMenu }: DirectoryTreeNodeProps) => {
   const folderId = getFolderId(folder);
   if (!folderId) return null;
 
@@ -197,27 +325,13 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
     }
   };
 
-  const handleCreateChildFolder = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    onCreateChildFolder(folderId);
-  };
-
-  const handleRenameFolder = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    onRenameFolder(folder, isRootProject);
-  };
-
-  const handleDeleteFolder = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    onDeleteFolder(folder);
+  const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => {
+    onOpenContextMenu(event, folder, isRootProject);
   };
 
   return (
     <div data-folder-id={folderId}>
-      <div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} className={cn("group flex h-7 items-center gap-1 rounded-[10px] pr-1 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")} style={{ paddingLeft: rowPaddingLeft }}>
+      <div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center gap-1 rounded-[10px] pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")} style={{ paddingLeft: rowPaddingLeft }}>
         <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} aria-disabled={!hasChildren} disabled={!hasChildren} className="library-tree-marker">
           <IconChevronRight className="h-3 w-3 opacity-0" />
         </button>
@@ -226,16 +340,11 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
           <span className="min-w-0 flex-1 truncate">{folderName}</span>
           {contentCount > 0 ? <span className="shrink-0 rounded-full bg-[#eef1f4] px-1.5 py-0.5 text-[10px] font-bold text-[#8b929e]">{contentCount}</span> : null}
         </button>
-        <div className="ml-1 flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
-          <button type="button" onClick={handleCreateChildFolder} aria-label={`${folderName} にフォルダを追加`} title="フォルダを追加" className="flex h-5 w-5 items-center justify-center rounded-md text-[#9aa1ad] hover:bg-[#f0f1f3] hover:text-[#59616e]"><IconPlus className="h-3 w-3" /></button>
-          <button type="button" onClick={handleRenameFolder} aria-label={`${folderName} の名前を変更`} title={isRootProject ? "プロジェクト名を変更" : "フォルダ名を変更"} className="flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[10px] font-bold text-[#9aa1ad] hover:bg-[#f0f1f3] hover:text-[#59616e]">Aa</button>
-          <button type="button" onClick={handleDeleteFolder} aria-label={`${folderName} を削除`} title="削除" className="flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[10px] font-bold text-[#b48a8a] hover:bg-[#f7eeee] hover:text-[#9d5555]">×</button>
-        </div>
       </div>
       {hasChildren && isExpanded ? (
         <div role="group" className="mt-0.5 flex flex-col gap-0.5">
           {childFolders.map((childFolder) => (
-            <DirectoryTreeNode key={getFolderId(childFolder)} folder={childFolder} level={level + 1} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} getChildFolders={getChildFolders} getFolderContentCount={getFolderContentCount} onToggleFolder={onToggleFolder} onSelectFolder={onSelectFolder} onCreateChildFolder={onCreateChildFolder} onRenameFolder={onRenameFolder} onDeleteFolder={onDeleteFolder} />
+            <DirectoryTreeNode key={getFolderId(childFolder)} folder={childFolder} level={level + 1} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} getChildFolders={getChildFolders} getFolderContentCount={getFolderContentCount} onToggleFolder={onToggleFolder} onSelectFolder={onSelectFolder} onOpenContextMenu={onOpenContextMenu} />
           ))}
         </div>
       ) : null}
@@ -244,12 +353,13 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
 };
 
 const LibraryHierarchySidebar = () => {
-  const { rootFolders, getChildFolders, getFolderContentCount, loading, error } = useLibraryHierarchyData();
+  const { rootFolders, getChildFolders, getFolderContentCount, getNextOrderIndex, createCardSet, loading, error } = useLibraryHierarchyData();
   const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
   const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(() => new Set(getRootFolderIds(rootFolders)));
+  const { contextMenuElement, openContextMenu } = useFolderContextMenu({ createFolder, updateFolder, deleteFolder, createCardSet, getNextOrderIndex, setExpandedFolderIds });
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const selectedFolderId = activeTab?.kind === "explorer" && !activeTab.explorerState.isSectionListMode ? activeTab.explorerState.selectedFolderId : null;
 
@@ -285,29 +395,6 @@ const LibraryHierarchySidebar = () => {
     openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: folderId, selectedItem: null } });
   }, [openExplorerTab]);
 
-  const handleCreateChildFolder = useCallback((folderId: string) => {
-    void createFolder(DEFAULT_NEW_FOLDER_NAME, folderId);
-    setExpandedFolderIds((current) => new Set(current).add(folderId));
-  }, [createFolder]);
-
-  const handleRenameFolder = useCallback((folder: FolderTreeNode, isRootProject: boolean) => {
-    const folderId = getFolderId(folder);
-    const folderName = getFolderName(folder, isRootProject);
-    const promptTitle = isRootProject ? "プロジェクト名を変更" : "フォルダ名を変更";
-    const nextFolderName = window.prompt(promptTitle, folderName)?.trim();
-    if (!folderId || !nextFolderName || nextFolderName === folderName) return;
-
-    void updateFolder(folderId, { folderName: nextFolderName, name: nextFolderName });
-  }, [updateFolder]);
-
-  const handleDeleteFolder = useCallback((folder: FolderTreeNode) => {
-    const folderId = getFolderId(folder);
-    const folderName = getFolderName(folder);
-    if (!folderId || !window.confirm(`${folderName} を削除しますか？`)) return;
-
-    void deleteFolder(folderId);
-  }, [deleteFolder]);
-
   if (loading) {
     return <aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#9aa1ad]">読み込み中...</aside>;
   }
@@ -317,15 +404,18 @@ const LibraryHierarchySidebar = () => {
   }
 
   return (
-    <aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-hidden">
-      <div className="h-full min-h-0 overflow-y-auto px-2 pb-2 pt-1">
-        <div role="tree" aria-label="ライブラリ" className="flex flex-col gap-0.5">
-          {rootFolders.length > 0 ? rootFolders.map((folder) => (
-            <DirectoryTreeNode key={getFolderId(folder)} folder={folder} level={ROOT_LEVEL} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} getChildFolders={getChildFolders} getFolderContentCount={getFolderContentCount} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onCreateChildFolder={handleCreateChildFolder} onRenameFolder={handleRenameFolder} onDeleteFolder={handleDeleteFolder} />
-          )) : <p className="px-2 py-2 text-[12px] font-medium text-[#9aa1ad]">プロジェクトがありません</p>}
+    <>
+      <aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-hidden">
+        <div className="h-full min-h-0 overflow-y-auto px-2 pb-2 pt-1">
+          <div role="tree" aria-label="ライブラリ" className="flex flex-col gap-0.5">
+            {rootFolders.length > 0 ? rootFolders.map((folder) => (
+              <DirectoryTreeNode key={getFolderId(folder)} folder={folder} level={ROOT_LEVEL} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} getChildFolders={getChildFolders} getFolderContentCount={getFolderContentCount} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onOpenContextMenu={openContextMenu} />
+            )) : <p className="px-2 py-2 text-[12px] font-medium text-[#9aa1ad]">プロジェクトがありません</p>}
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+      {contextMenuElement}
+    </>
   );
 };
 
