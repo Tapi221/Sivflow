@@ -15,7 +15,7 @@ export type CalendarMonthPlacementWeek = {
   days: CalendarMonthPlacementDay[];
 };
 
-type CalendarMonthEventIndex = Map<string, GoogleCalendarEvent[]>;
+export type CalendarMonthEventIndex = Map<string, GoogleCalendarEvent[]>;
 
 const MONTH_EVENT_CHIP_HEIGHT_PX = 18.3;
 const MONTH_EVENT_CHIP_GAP_PX = 3;
@@ -41,7 +41,7 @@ const getMonthEventChipCount = (contentHeight: number) => {
   );
 };
 
-const createMonthEventIndex = (
+export const createMonthEventIndex = (
   visibleEvents: GoogleCalendarEvent[],
 ): CalendarMonthEventIndex => {
   const eventIndex = new Map<string, GoogleCalendarEvent[]>();
@@ -58,30 +58,11 @@ const createMonthEventIndex = (
     }
   }
 
-  return eventIndex;
-};
-
-const insertVisibleEvent = (
-  dayEvents: CalendarMonthDayEvents,
-  event: GoogleCalendarEvent,
-  maxVisibleEventCandidates: number,
-) => {
-  if (maxVisibleEventCandidates <= 0) return;
-
-  const visibleEvents = dayEvents.visibleEvents;
-  const insertAt = visibleEvents.findIndex(
-    (visibleEvent) => compareCalendarEvents(event, visibleEvent) < 0,
-  );
-  const boundedInsertAt =
-    insertAt === -1 ? visibleEvents.length : insertAt;
-
-  if (boundedInsertAt >= maxVisibleEventCandidates) return;
-
-  visibleEvents.splice(boundedInsertAt, 0, event);
-
-  if (visibleEvents.length > maxVisibleEventCandidates) {
-    visibleEvents.length = maxVisibleEventCandidates;
+  for (const dayEvents of eventIndex.values()) {
+    dayEvents.sort(compareCalendarEvents);
   }
+
+  return eventIndex;
 };
 
 export const getVisibleMonthEventChipCount = (
@@ -105,14 +86,16 @@ export const getVisibleMonthEventChipCount = (
 
 export const computeMonthEventsByDay = ({
   visibleEvents,
+  eventIndex,
   monthWeeks,
   monthRowHeight,
 }: {
-  visibleEvents: GoogleCalendarEvent[];
+  visibleEvents?: GoogleCalendarEvent[];
+  eventIndex?: CalendarMonthEventIndex;
   monthWeeks: CalendarMonthPlacementWeek[];
   monthRowHeight: number;
 }) => {
-  const eventsByDayKey = createMonthEventIndex(visibleEvents);
+  const eventsByDayKey = eventIndex ?? createMonthEventIndex(visibleEvents ?? []);
   const groupedEvents = new Map<string, CalendarMonthDayEvents>();
   const maxVisibleEventCandidates =
     getVisibleMonthEventChipCount(Number.MAX_SAFE_INTEGER, monthRowHeight) + 1;
@@ -124,14 +107,10 @@ export const computeMonthEventsByDay = ({
       if (!sourceEvents?.length) continue;
 
       const dayEvents: CalendarMonthDayEvents = {
-        visibleEvents: [],
+        visibleEvents: sourceEvents.slice(0, maxVisibleEventCandidates),
         totalCount: sourceEvents.length,
         color: sourceEvents[0]?.accentColor ?? null,
       };
-
-      for (const event of sourceEvents) {
-        insertVisibleEvent(dayEvents, event, maxVisibleEventCandidates);
-      }
 
       groupedEvents.set(day.key, dayEvents);
     }

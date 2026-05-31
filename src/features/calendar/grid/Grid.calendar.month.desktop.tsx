@@ -1,8 +1,8 @@
-import { memo, useMemo } from "react";
+import { memo, useMemo, type CSSProperties } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
-import { computeMonthEventsByDay, EMPTY_MONTH_DAY_EVENTS } from "@/chip/eventchip/EventChip.month.placement";
+import { computeMonthEventsByDay, createMonthEventIndex, EMPTY_MONTH_DAY_EVENTS } from "@/chip/eventchip/EventChip.month.placement";
 import type { CalendarMonthDayEvents } from "@/chip/eventchip/EventChip.month.placement";
 import { CalendarDayNumberCircle } from "@/chip/icons/CalendarDayNumberCircle";
 import * as T from "@/features/calendar/calendar.text";
@@ -81,6 +81,13 @@ const weekContainsDayKey = (week: CalendarMonthGridWeek, dayKey: string | null) 
 
 const isWeekAffectedByDayKeyChange = (week: CalendarMonthGridWeek, previousDayKey: string | null, nextDayKey: string | null) => previousDayKey !== nextDayKey && (weekContainsDayKey(week, previousDayKey) || weekContainsDayKey(week, nextDayKey));
 
+const createMonthWeekRowStyle = (monthRowHeight: number): CSSProperties => ({
+  contain: "layout style paint",
+  contentVisibility: "auto",
+  containIntrinsicSize: `${monthRowHeight}px`,
+  minHeight: monthRowHeight,
+});
+
 const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScrollHovered, onSelectDate }: CalendarMonthDayCellProps) => {
   const monthAnnotation = getMonthAnnotation(day.date);
   const { visibleEvents, totalCount } = dayEvents;
@@ -121,7 +128,7 @@ CalendarMonthDayCell.displayName = "CalendarMonthDayCell";
 
 const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDayKey, scrollHoverDayKey, monthRowHeight, setWeekRowRef, onSelectDate, handleResizeReset, handleResizeKeyDown, handleResizePointerDown }: CalendarMonthWeekRowProps) => {
   return (
-    <div ref={(node) => setWeekRowRef(week.key, node)} data-calendar-week-key={week.key} className="calendar-month-week-row relative grid grid-cols-7">
+    <div ref={(node) => setWeekRowRef(week.key, node)} data-calendar-week-key={week.key} className="calendar-month-week-row relative grid grid-cols-7" style={createMonthWeekRowStyle(monthRowHeight)}>
       {week.days.map((day) => {
         const selected = day.key === selectedDayKey;
         const isToday = day.key === todayDayKey;
@@ -146,7 +153,8 @@ CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWeeks, monthRowHeight, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, setWeekRowRef, onSelectDate, handleResizeReset, handleResizeKeyDown, handleResizePointerDown }: GridCalendarMonthDesktopProps) => {
   const selectedDayKey = useMemo(() => getDayKey(selectedDate), [selectedDate]);
   const todayDayKey = useMemo(() => getDayKey(today), [today]);
-  const eventsByDay = useMemo(() => computeMonthEventsByDay({ visibleEvents, monthWeeks, monthRowHeight }), [monthRowHeight, monthWeeks, visibleEvents]);
+  const eventIndex = useMemo(() => createMonthEventIndex(visibleEvents), [visibleEvents]);
+  const eventsByDay = useMemo(() => computeMonthEventsByDay({ eventIndex, monthWeeks, monthRowHeight }), [eventIndex, monthRowHeight, monthWeeks]);
 
   return (
     <>
