@@ -1,5 +1,5 @@
 import { useCallback, useLayoutEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
-import { DEFAULT_NEW_FOLDER_NAME } from "@/components/folder/explorer/model/utils";
+import { DEFAULT_NEW_PROJECT_NAME } from "@/components/folder/explorer/model/utils";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
 import { LibraryHierarchySidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
@@ -95,7 +95,7 @@ const SidebarLayeredDirectory = () => {
   }, []);
 
   const handleCreateRootFolder = useCallback(() => {
-    void createFolder(DEFAULT_NEW_FOLDER_NAME);
+    void createFolder(DEFAULT_NEW_PROJECT_NAME);
   }, [createFolder]);
 
   const handleProjectClickCapture = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
