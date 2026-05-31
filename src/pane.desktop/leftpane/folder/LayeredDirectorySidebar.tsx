@@ -19,7 +19,7 @@ type CardSetCommandSet = ReturnType<typeof useCardSets>;
 
 type DirectoryTreeNodeProps = { folder: FolderTreeNode; level: number; selectedFolderId: string | null; expandedFolderIds: Set<string>; getChildFolders: (folderId: string) => FolderTreeNode[]; getFolderContentCount: (folderId: string | null) => number; onToggleFolder: (folderId: string) => void; onSelectFolder: (folderId: string) => void; onOpenContextMenu: (event: ReactMouseEvent<HTMLElement>, folder: FolderTreeNode, isRootProject: boolean) => void; };
 
-type ProjectListItemProps = { folder: FolderTreeNode; selectedFolderId: string | null; getFolderContentCount: (folderId: string | null) => number; onSelectProject: (folderId: string) => void; onOpenContextMenu: (event: ReactMouseEvent<HTMLElement>, folder: FolderTreeNode, isRootProject: boolean) => void; };
+type ProjectListItemProps = { folder: FolderTreeNode; selectedFolderId: string | null; onSelectProject: (folderId: string) => void; onOpenContextMenu: (event: ReactMouseEvent<HTMLElement>, folder: FolderTreeNode, isRootProject: boolean) => void; };
 
 type FolderContextMenuState = { folderId: string; folderName: string; folderColor: string | null; isRootProject: boolean; x: number; y: number; };
 
@@ -121,13 +121,12 @@ const useFolderContextMenu = ({ createFolder, updateFolder, deleteFolder, create
   return { contextMenuElement, openContextMenu };
 };
 
-const ProjectListItem = ({ folder, selectedFolderId, getFolderContentCount, onSelectProject, onOpenContextMenu }: ProjectListItemProps) => {
+const ProjectListItem = ({ folder, selectedFolderId, onSelectProject, onOpenContextMenu }: ProjectListItemProps) => {
   const folderId = getFolderId(folder);
   if (!folderId) return null;
 
   const folderName = getFolderName(folder, true);
   const folderColor = getFolderProjectColor(folder);
-  const contentCount = getFolderContentCount(folderId);
   const isSelected = selectedFolderId === folderId;
   const handleRowClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -136,11 +135,11 @@ const ProjectListItem = ({ folder, selectedFolderId, getFolderContentCount, onSe
   };
   const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => onOpenContextMenu(event, folder, true);
 
-  return <div data-folder-id={folderId}><div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center gap-1 rounded-[10px] pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")}><LibraryTreeMarker color={folderColor} /><button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><span className="min-w-0 flex-1 truncate">{folderName}</span>{contentCount > 0 ? <span className="shrink-0 rounded-full bg-[#eef1f4] px-1.5 py-0.5 text-[10px] font-bold text-[#8b929e]">{contentCount}</span> : null}</button></div></div>;
+  return <div data-folder-id={folderId}><div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center gap-1 rounded-[10px] pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")}><LibraryTreeMarker color={folderColor} /><button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><span className="min-w-0 flex-1 truncate">{folderName}</span></button></div></div>;
 };
 
 const ProjectListSidebar = () => {
-  const { rootFolders, getFolderContentCount, getNextOrderIndex, createCardSet, loading, error } = useLibraryHierarchyData();
+  const { rootFolders, getNextOrderIndex, createCardSet, loading, error } = useLibraryHierarchyData();
   const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
@@ -154,7 +153,7 @@ const ProjectListSidebar = () => {
   if (loading) return <aside aria-label="Project list explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#9aa1ad]">読み込み中...</aside>;
   if (error) return <aside aria-label="Project list explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#b48a8a]">{error}</aside>;
 
-  return <><aside aria-label="Project list explorer" className="h-full min-h-0 overflow-hidden"><div className="h-full min-h-0 overflow-y-auto px-2 pb-2 pt-1"><div role="tree" aria-label="プロジェクト" className="flex flex-col gap-0.5">{rootFolders.length > 0 ? rootFolders.map((folder) => <ProjectListItem key={getFolderId(folder)} folder={folder} selectedFolderId={selectedFolderId} getFolderContentCount={getFolderContentCount} onSelectProject={handleSelectProject} onOpenContextMenu={openContextMenu} />) : <p className="px-2 py-2 text-[12px] font-medium text-[#9aa1ad]">プロジェクトがありません</p>}</div></div></aside>{contextMenuElement}</>;
+  return <><aside aria-label="Project list explorer" className="h-full min-h-0 overflow-hidden"><div className="h-full min-h-0 overflow-y-auto px-2 pb-2 pt-1"><div role="tree" aria-label="プロジェクト" className="flex flex-col gap-0.5">{rootFolders.length > 0 ? rootFolders.map((folder) => <ProjectListItem key={getFolderId(folder)} folder={folder} selectedFolderId={selectedFolderId} onSelectProject={handleSelectProject} onOpenContextMenu={openContextMenu} />) : <p className="px-2 py-2 text-[12px] font-medium text-[#9aa1ad]">プロジェクトがありません</p>}</div></div></aside>{contextMenuElement}</>;
 };
 
 const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds, getChildFolders, getFolderContentCount, onToggleFolder, onSelectFolder, onOpenContextMenu }: DirectoryTreeNodeProps) => {
