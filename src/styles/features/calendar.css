@@ -160,30 +160,6 @@
     background: #ffffff;
   }
 
-  .calendar-month-week-row::before {
-    content: none;
-    position: absolute;
-    inset: 0;
-    z-index: 4;
-    pointer-events: none;
-    background-image:
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee);
-    background-repeat: no-repeat;
-    background-size: 1px 100%;
-    background-position:
-      14.2857142857% 0,
-      28.5714285714% 0,
-      42.8571428571% 0,
-      57.1428571429% 0,
-      71.4285714286% 0,
-      85.7142857% 0;
-  }
-
   .calendar-month-week-row::after {
     content: "";
     position: absolute;
@@ -205,10 +181,6 @@
     border-right-width: 0 !important;
     border-bottom-width: 0 !important;
     transition: background-color 120ms ease;
-  }
-
-  .calendar-month-day-cell::after {
-    content: none;
   }
 
   .calendar-month-day-cell > button {
