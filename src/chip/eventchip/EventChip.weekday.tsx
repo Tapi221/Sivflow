@@ -20,9 +20,9 @@ const CHIP_LINE_MASK_CLASS = "pointer-events-none absolute inset-0 rounded-md bg
 const CHIP_BASE_CLASS = "relative z-10 flex h-full min-h-0 w-full flex-col overflow-hidden rounded-md text-left";
 const CHIP_NORMAL_CLASS = "gap-[0.5px] py-1 pl-1.5 pr-0";
 const CHIP_COMPACT_CLASS = "gap-0 px-1.5 py-0.5";
-const CHIP_TITLE_CLASS = "overflow-hidden whitespace-normal break-words text-[12px] font-medium leading-snug";
-const CHIP_COMPACT_TITLE_CLASS = "truncate text-[11px] font-semibold leading-[14px]";
-const CHIP_TIME_CLASS = "overflow-hidden whitespace-nowrap text-[11px] font-semibold tabular-nums opacity-80";
+const CHIP_TITLE_CLASS = "overflow-hidden whitespace-normal break-words text-[12px] font-medium leading-[17px]";
+const CHIP_COMPACT_TITLE_CLASS = "truncate text-[11px] font-semibold leading-[15px]";
+const CHIP_TIME_CLASS = "overflow-hidden whitespace-nowrap text-[11px] font-semibold leading-[16px] tabular-nums opacity-80";
 const CHIP_MEASUREMENT_BASE_CLASS = "pointer-events-none invisible absolute inset-0 flex min-h-0 w-full flex-col overflow-hidden rounded-md text-left";
 const CHIP_MEASUREMENT_TOLERANCE_PX = 1;
 const DEFAULT_TITLE_LINE_CLAMP = 1;
@@ -110,11 +110,21 @@ const calculateChipLayout = (
   };
 };
 
-const createTitleClampStyle = (lineClamp: number): CSSProperties => ({
-  display: "-webkit-box",
-  WebkitBoxOrient: "vertical",
-  WebkitLineClamp: lineClamp,
-});
+const createTitleClampStyle = (lineClamp: number): CSSProperties => {
+  if (lineClamp <= DEFAULT_TITLE_LINE_CLAMP) {
+    return {
+      display: "block",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    };
+  }
+
+  return {
+    display: "-webkit-box",
+    WebkitBoxOrient: "vertical",
+    WebkitLineClamp: lineClamp,
+  };
+};
 
 const getChipClassName = (compact: boolean): string => [
   CHIP_BASE_CLASS,
