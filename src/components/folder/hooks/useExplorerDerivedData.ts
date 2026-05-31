@@ -5,30 +5,9 @@ import { getEntityTime, getFolderId, getParentFolderId, isSameFolder, normalizeF
 import { compareOrderableEntities } from "@/lib/orderableEntity";
 import type { Card, CardSet, DocumentItem, ExplorerItem } from "@/types";
 
-type LegacyEntityFields = {
-  isDeleted?: boolean;
-  is_deleted?: boolean;
-  folder_id?: string | null;
-  card_set_id?: string | null;
-  orderIndex?: number;
-};
+type LegacyEntityFields = { isDeleted?: boolean; is_deleted?: boolean; folder_id?: string | null; card_set_id?: string | null; orderIndex?: number };
 
-type DraftFolderFields = {
-  __draft?: boolean;
-  __optimistic?: boolean;
-};
-
-const isSoftDeleted = (
-  entity?: { isDeleted?: boolean; is_deleted?: boolean } | null,
-) => Boolean(entity?.isDeleted ?? entity?.is_deleted);
-
-const isDraftFolder = (folder: FolderTreeNode) => {
-  const draftFolder = folder as FolderTreeNode & DraftFolderFields;
-  return Boolean(draftFolder.__draft || draftFolder.__optimistic);
-};
-
-const withLegacy = <T extends object>(v: T): T & LegacyEntityFields =>
-  v as T & LegacyEntityFields;
+type DraftFolderFields = { __draft?: boolean; __optimistic?: boolean };
 
 interface Params {
   treeFolders: FolderTreeNode[];
@@ -38,114 +17,88 @@ interface Params {
   isFiltering: boolean;
 }
 
+const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean } | null) => Boolean(entity?.isDeleted ?? entity?.is_deleted);
+
+const isDraftFolder = (folder: FolderTreeNode) => {
+  const draftFolder = folder as FolderTreeNode & DraftFolderFields;
+  return Boolean(draftFolder.__draft || draftFolder.__optimistic);
+};
+
+const withLegacy = <T extends object>(v: T): T & LegacyEntityFields => v as T & LegacyEntityFields;
+
 const getFolderOrder = (folder: FolderTreeNode) => {
-  return ((folder as { orderIndex?: number; order_index?: number })
-    .orderIndex ??
-    (folder as { orderIndex?: number; order_index?: number }).order_index ??
-    0) as number;
+  return ((folder as { orderIndex?: number; order_index?: number }).orderIndex ?? (folder as { orderIndex?: number; order_index?: number }).order_index ?? 0) as number;
 };
 
 const getFolderName = (folder: FolderTreeNode) => {
-  return String(
-    (folder as { folderName?: string; folder_name?: string }).folderName ??
-      (folder as { folderName?: string; folder_name?: string }).folder_name ??
-      "",
-  );
+  return String((folder as { folderName?: string; folder_name?: string }).folderName ?? (folder as { folderName?: string; folder_name?: string }).folder_name ?? "");
 };
 
 const compareFolders = (a: FolderTreeNode, b: FolderTreeNode) => {
   return compareOrderableEntities(a, b, {
     getOrderIndex: getFolderOrder,
-    getUpdatedAt: (folder) =>
-      getEntityTime((folder as { updatedAt?: unknown }).updatedAt),
-    getCreatedAt: (folder) =>
-      getEntityTime((folder as { createdAt?: unknown }).createdAt),
+    getUpdatedAt: (folder) => getEntityTime((folder as { updatedAt?: unknown }).updatedAt),
+    getCreatedAt: (folder) => getEntityTime((folder as { createdAt?: unknown }).createdAt),
     getName: getFolderName,
     getId: getFolderId,
   });
 };
 
-export const useExplorerDerivedData = ({
-  treeFolders,
-  treeCards,
-  cardSets = [],
-  documents,
-  isFiltering,
-}: Params) => {
+export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], documents, isFiltering }: Params) => {
   const cardSetById = useMemo(() => {
-    const activeCardSets = cardSets.filter(
-      (cardSet) => !isSoftDeleted(withLegacy(cardSet)),
-    );
+    const activeCardSets = cardSets.filter((cardSet) => !isSoftDeleted(withLegacy(cardSet)));
     return buildCardSetById(activeCardSets);
   }, [cardSets]);
-
-  const childFoldersByParentId = useMemo(() => {
-    const map = new Map<string, FolderTreeNode[]>();
-    for (const folder of treeFolders) {
-      const isHidden =
-        (folder as { isHidden?: boolean; is_hidden?: boolean }).isHidden ??
-        (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden;
-      if (isSoftDeleted(folder) || isHidden) continue;
-      const parentId = normalizeFolderId(getParentFolderId(folder));
-      const siblings = map.get(parentId);
-      if (siblings) siblings.push(folder);
-      else map.set(parentId, [folder]);
-    }
-    for (const siblings of map.values()) {
-      siblings.sort(compareFolders);
-    }
-    return map;
-  }, [treeFolders]);
-
-  const rootFolders = useMemo(
-    () => childFoldersByParentId.get(ROOT_FOLDER_ID) ?? [],
-    [childFoldersByParentId],
-  );
-
-  const getChildFolders = useCallback(
-    (parentId: string) => childFoldersByParentId.get(parentId) ?? [],
-    [childFoldersByParentId],
-  );
 
   const visibleFolderIdSet = useMemo(() => {
     const set = new Set<string>();
     for (const folder of treeFolders) {
-      const isHidden =
-        (folder as { isHidden?: boolean; is_hidden?: boolean }).isHidden ??
-        (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden;
-      if (isSoftDeleted(folder) || isHidden) continue;
+      if (isSoftDeleted(folder)) continue;
       const id = getFolderId(folder);
       if (id) set.add(id);
     }
     return set;
   }, [treeFolders]);
 
-  const resolveTreeFolderId = useCallback(
-    (folderId: string | null | undefined) => {
-      const normalized = normalizeFolderId(folderId);
-      if (normalized === ROOT_FOLDER_ID) return ROOT_FOLDER_ID;
-      return visibleFolderIdSet.has(normalized) ? normalized : ROOT_FOLDER_ID;
-    },
-    [visibleFolderIdSet],
-  );
+  const childFoldersByParentId = useMemo(() => {
+    const map = new Map<string, FolderTreeNode[]>();
+    for (const folder of treeFolders) {
+      if (isSoftDeleted(folder)) continue;
+      const folderId = getFolderId(folder);
+      if (!folderId) continue;
 
-  const hasValidFolderBinding = useCallback(
-    (folderId: string | null | undefined) => {
-      const normalized = normalizeFolderId(folderId);
-      if (normalized === ROOT_FOLDER_ID) return false;
-      return visibleFolderIdSet.has(normalized);
-    },
-    [visibleFolderIdSet],
-  );
+      const rawParentId = normalizeFolderId(getParentFolderId(folder));
+      const parentId = rawParentId !== ROOT_FOLDER_ID && !visibleFolderIdSet.has(rawParentId) ? ROOT_FOLDER_ID : rawParentId;
+      const siblings = map.get(parentId);
+      if (siblings) siblings.push(folder);
+      else map.set(parentId, [folder]);
+    }
+    for (const siblings of map.values()) siblings.sort(compareFolders);
+    return map;
+  }, [treeFolders, visibleFolderIdSet]);
+
+  const rootFolders = useMemo(() => childFoldersByParentId.get(ROOT_FOLDER_ID) ?? [], [childFoldersByParentId]);
+
+  const getChildFolders = useCallback((parentId: string) => childFoldersByParentId.get(parentId) ?? [], [childFoldersByParentId]);
+
+  const resolveTreeFolderId = useCallback((folderId: string | null | undefined) => {
+    const normalized = normalizeFolderId(folderId);
+    if (normalized === ROOT_FOLDER_ID) return ROOT_FOLDER_ID;
+    return visibleFolderIdSet.has(normalized) ? normalized : ROOT_FOLDER_ID;
+  }, [visibleFolderIdSet]);
+
+  const hasValidFolderBinding = useCallback((folderId: string | null | undefined) => {
+    const normalized = normalizeFolderId(folderId);
+    if (normalized === ROOT_FOLDER_ID) return false;
+    return visibleFolderIdSet.has(normalized);
+  }, [visibleFolderIdSet]);
 
   const directCardCountByFolderId = useMemo(() => {
     const map = new Map<string, number>();
     for (const card of treeCards) {
       if (isSoftDeleted(withLegacy(card))) continue;
       const cardFolderId = resolveCardFolderIdStrict(card, cardSetById);
-      if (!hasValidFolderBinding(cardFolderId)) {
-        continue;
-      }
+      if (!hasValidFolderBinding(cardFolderId)) continue;
       const folderId = resolveTreeFolderId(cardFolderId);
       map.set(folderId, (map.get(folderId) ?? 0) + 1);
     }
@@ -154,10 +107,7 @@ export const useExplorerDerivedData = ({
 
   const itemsByFolderId = useMemo(() => {
     const map = new Map<string, ExplorerItem[]>();
-    const pushItem = (
-      folderId: string | null | undefined,
-      item: ExplorerItem,
-    ) => {
+    const pushItem = (folderId: string | null | undefined, item: ExplorerItem) => {
       const key = normalizeFolderId(folderId);
       const list = map.get(key);
       if (list) list.push(item);
@@ -167,25 +117,15 @@ export const useExplorerDerivedData = ({
     for (const card of treeCards) {
       if (isSoftDeleted(withLegacy(card))) continue;
       const cardFolderId = resolveCardFolderIdStrict(card, cardSetById);
-      if (!hasValidFolderBinding(cardFolderId)) {
-        continue;
-      }
-      pushItem(resolveTreeFolderId(cardFolderId), {
-        type: "card",
-        data: card,
-      });
+      if (!hasValidFolderBinding(cardFolderId)) continue;
+      pushItem(resolveTreeFolderId(cardFolderId), { type: "card", data: card });
     }
 
     for (const doc of documents) {
       if (doc.kind !== "pdf") continue;
       if (isSoftDeleted(withLegacy(doc))) continue;
-      if (!hasValidFolderBinding(doc.folderId ?? withLegacy(doc).folder_id)) {
-        continue;
-      }
-      pushItem(resolveTreeFolderId(doc.folderId ?? withLegacy(doc).folder_id), {
-        type: "document",
-        data: doc,
-      });
+      if (!hasValidFolderBinding(doc.folderId ?? withLegacy(doc).folder_id)) continue;
+      pushItem(resolveTreeFolderId(doc.folderId ?? withLegacy(doc).folder_id), { type: "document", data: doc });
     }
 
     for (const list of map.values()) {
@@ -193,29 +133,15 @@ export const useExplorerDerivedData = ({
         const orderA = withLegacy(a.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
         const orderB = withLegacy(b.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
         if (orderA !== orderB) return orderA - orderB;
-        const timeA = getEntityTime(
-          (a.data as { updatedAt?: unknown }).updatedAt,
-        );
-        const timeB = getEntityTime(
-          (b.data as { updatedAt?: unknown }).updatedAt,
-        );
+        const timeA = getEntityTime((a.data as { updatedAt?: unknown }).updatedAt);
+        const timeB = getEntityTime((b.data as { updatedAt?: unknown }).updatedAt);
         return timeB - timeA;
       });
     }
     return map;
-  }, [
-    treeCards,
-    documents,
-    resolveTreeFolderId,
-    hasValidFolderBinding,
-    cardSetById,
-  ]);
+  }, [treeCards, documents, resolveTreeFolderId, hasValidFolderBinding, cardSetById]);
 
-  const getFolderItems = useCallback(
-    (folderId: string | null): ExplorerItem[] =>
-      itemsByFolderId.get(normalizeFolderId(folderId)) ?? [],
-    [itemsByFolderId],
-  );
+  const getFolderItems = useCallback((folderId: string | null): ExplorerItem[] => itemsByFolderId.get(normalizeFolderId(folderId)) ?? [], [itemsByFolderId]);
 
   const matchCountMap = useMemo(() => {
     if (!isFiltering) return new Map<string, number>();
@@ -223,9 +149,7 @@ export const useExplorerDerivedData = ({
     const draftFolderIdSet = new Set<string>();
     for (const folder of treeFolders) {
       const folderId = getFolderId(folder);
-      if (folderId && isDraftFolder(folder)) {
-        draftFolderIdSet.add(folderId);
-      }
+      if (folderId && isDraftFolder(folder)) draftFolderIdSet.add(folderId);
     }
 
     const map = new Map<string, number>();
@@ -233,14 +157,9 @@ export const useExplorerDerivedData = ({
       if (map.has(folderId)) return map.get(folderId)!;
       const directCount = getFolderItems(folderId).length;
       const children = getChildFolders(folderId);
-      const childCount = children.reduce(
-        (acc, child) => acc + calc(getFolderId(child)),
-        0,
-      );
+      const childCount = children.reduce((acc, child) => acc + calc(getFolderId(child)), 0);
       const total = directCount + childCount;
-      const visibleTotal = draftFolderIdSet.has(folderId)
-        ? Math.max(total, 1)
-        : total;
+      const visibleTotal = draftFolderIdSet.has(folderId) ? Math.max(total, 1) : total;
       map.set(folderId, visibleTotal);
       return visibleTotal;
     };
@@ -251,50 +170,40 @@ export const useExplorerDerivedData = ({
     return map;
   }, [isFiltering, treeFolders, getFolderItems, getChildFolders]);
 
-  const deleteTargetCounts = useCallback(
-    (deleteTargetFolderId: string | null) => {
-      if (!deleteTargetFolderId) return { cardCount: 0, subfolderCount: 0 };
-      let cardCount = 0;
-      let subfolderCount = 0;
-      const stack = [deleteTargetFolderId];
-      while (stack.length > 0) {
-        const folderId = stack.pop()!;
-        cardCount += directCardCountByFolderId.get(folderId) ?? 0;
-        const children = childFoldersByParentId.get(folderId) ?? [];
-        subfolderCount += children.length;
-        for (const child of children) stack.push(getFolderId(child));
-      }
-      return { cardCount, subfolderCount };
-    },
-    [directCardCountByFolderId, childFoldersByParentId],
-  );
+  const deleteTargetCounts = useCallback((deleteTargetFolderId: string | null) => {
+    if (!deleteTargetFolderId) return { cardCount: 0, subfolderCount: 0 };
+    let cardCount = 0;
+    let subfolderCount = 0;
+    const stack = [deleteTargetFolderId];
+    while (stack.length > 0) {
+      const folderId = stack.pop()!;
+      cardCount += directCardCountByFolderId.get(folderId) ?? 0;
+      const children = childFoldersByParentId.get(folderId) ?? [];
+      subfolderCount += children.length;
+      for (const child of children) stack.push(getFolderId(child));
+    }
+    return { cardCount, subfolderCount };
+  }, [directCardCountByFolderId, childFoldersByParentId]);
 
-  const getNextOrderIndex = useCallback(
-    (folderId: string | null, resolvedFolderId?: string) => {
-      const targetFolderId = resolvedFolderId ?? resolveTreeFolderId(folderId);
-      let maxOrder = -1;
-      for (const card of treeCards) {
-        if (isSoftDeleted(withLegacy(card))) continue;
-        const cardFolderId = resolveTreeFolderId(
-          resolveCardFolderIdStrict(card, cardSetById),
-        );
-        if (!isSameFolder(cardFolderId, targetFolderId)) continue;
-        const order = withLegacy(card).orderIndex ?? -1;
-        if (order > maxOrder) maxOrder = order;
-      }
-      for (const doc of documents) {
-        if (isSoftDeleted(withLegacy(doc))) continue;
-        const docFolderId = resolveTreeFolderId(
-          doc.folderId ?? withLegacy(doc).folder_id,
-        );
-        if (!isSameFolder(docFolderId, targetFolderId)) continue;
-        const order = withLegacy(doc).orderIndex ?? -1;
-        if (order > maxOrder) maxOrder = order;
-      }
-      return maxOrder + 1;
-    },
-    [treeCards, documents, resolveTreeFolderId, cardSetById],
-  );
+  const getNextOrderIndex = useCallback((folderId: string | null, resolvedFolderId?: string) => {
+    const targetFolderId = resolvedFolderId ?? resolveTreeFolderId(folderId);
+    let maxOrder = -1;
+    for (const card of treeCards) {
+      if (isSoftDeleted(withLegacy(card))) continue;
+      const cardFolderId = resolveTreeFolderId(resolveCardFolderIdStrict(card, cardSetById));
+      if (!isSameFolder(cardFolderId, targetFolderId)) continue;
+      const order = withLegacy(card).orderIndex ?? -1;
+      if (order > maxOrder) maxOrder = order;
+    }
+    for (const doc of documents) {
+      if (isSoftDeleted(withLegacy(doc))) continue;
+      const docFolderId = resolveTreeFolderId(doc.folderId ?? withLegacy(doc).folder_id);
+      if (!isSameFolder(docFolderId, targetFolderId)) continue;
+      const order = withLegacy(doc).orderIndex ?? -1;
+      if (order > maxOrder) maxOrder = order;
+    }
+    return maxOrder + 1;
+  }, [treeCards, documents, resolveTreeFolderId, cardSetById]);
 
   const cardSetsByFolderId = useMemo(() => {
     const map = new Map<string, CardSet[]>();
@@ -305,17 +214,11 @@ export const useExplorerDerivedData = ({
       if (list) list.push(cs);
       else map.set(key, [cs]);
     }
-    for (const list of map.values()) {
-      list.sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
-    }
+    for (const list of map.values()) list.sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
     return map;
   }, [cardSets]);
 
-  const getCardSets = useCallback(
-    (folderId: string | null): CardSet[] =>
-      cardSetsByFolderId.get(normalizeFolderId(folderId)) ?? [],
-    [cardSetsByFolderId],
-  );
+  const getCardSets = useCallback((folderId: string | null): CardSet[] => cardSetsByFolderId.get(normalizeFolderId(folderId)) ?? [], [cardSetsByFolderId]);
 
   const folderContentCountMap = useMemo(() => {
     const counts = new Map<string, number>();
@@ -324,31 +227,19 @@ export const useExplorerDerivedData = ({
     const countFolderContent = (folderId: string): number => {
       const cached = counts.get(folderId);
       if (cached !== undefined) return cached;
-
       if (visiting.has(folderId)) return 0;
       visiting.add(folderId);
 
-      const documentCount = getFolderItems(folderId).filter(
-        (item) => item.type === "document",
-      ).length;
-
+      const documentCount = getFolderItems(folderId).filter((item) => item.type === "document").length;
       const cardSetCount = getCardSets(folderId).length;
-
-      const childFolderContentCount = getChildFolders(folderId).reduce(
-        (total, childFolder) => {
-          const childFolderId = getFolderId(childFolder);
-          return childFolderId
-            ? total + countFolderContent(childFolderId)
-            : total;
-        },
-        0,
-      );
-
+      const childFolderContentCount = getChildFolders(folderId).reduce((total, childFolder) => {
+        const childFolderId = getFolderId(childFolder);
+        return childFolderId ? total + countFolderContent(childFolderId) : total;
+      }, 0);
       const total = documentCount + cardSetCount + childFolderContentCount;
 
       counts.set(folderId, total);
       visiting.delete(folderId);
-
       return total;
     };
 
@@ -360,13 +251,11 @@ export const useExplorerDerivedData = ({
     return counts;
   }, [getCardSets, getChildFolders, getFolderItems, treeFolders]);
 
-  const getFolderContentCount = useCallback(
-    (folderId: string | null): number => {
-      if (!folderId) return 0;
-      return folderContentCountMap.get(folderId) ?? 0;
-    },
-    [folderContentCountMap],
-  );
+  const getFolderContentCount = useCallback((folderId: string | null): number => {
+    if (!folderId) return 0;
+    return folderContentCountMap.get(folderId) ?? 0;
+  }, [folderContentCountMap]);
+
   const itemsByCardSetId = useMemo(() => {
     const map = new Map<string, ExplorerItem[]>();
     if (cardSets.length === 0) return map;
@@ -389,11 +278,7 @@ export const useExplorerDerivedData = ({
     return map;
   }, [cardSets, treeCards]);
 
-  const getCardSetItems = useCallback(
-    (cardSetId: string): ExplorerItem[] =>
-      itemsByCardSetId.get(cardSetId) ?? [],
-    [itemsByCardSetId],
-  );
+  const getCardSetItems = useCallback((cardSetId: string): ExplorerItem[] => itemsByCardSetId.get(cardSetId) ?? [], [itemsByCardSetId]);
 
   return {
     childFoldersByParentId,
