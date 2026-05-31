@@ -37,7 +37,7 @@ afterEach(() => {
 });
 
 describe("Schedule mobile web route", () => {
-  it("uses the mobile schedule screen and does not mount the desktop project context menu path", () => {
+  it("モバイルのスケジュール画面を使用し、デスクトップのプロジェクトコンテキストメニューパスをマウントしない", () => {
     render(React.createElement(ScheduleRoute));
 
     expect(screen.getByTestId("mobile-schedule-screen")).toBeTruthy();
@@ -45,7 +45,7 @@ describe("Schedule mobile web route", () => {
     expect(screen.queryByRole("menu", { name: "layered project context menu" })).toBeNull();
   });
 
-  it("keeps the mobile schedule screen detached from desktop project sidebar context menus", () => {
+  it("モバイルのスケジュール画面をデスクトップのプロジェクトサイドバーコンテキストメニューから分離する", () => {
     const source = readFileSync(MOBILE_SCREEN_SOURCE_PATH, "utf8");
 
     expect(source).not.toContain("CalendarSidebar");
