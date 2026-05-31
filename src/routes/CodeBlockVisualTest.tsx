@@ -23,7 +23,7 @@ const CodeBlockVisualTest = () => {
       <div className="mx-auto flex w-full max-w-[900px] flex-col gap-8">
         <section className="rounded-2xl bg-white p-6 shadow-sm">
           <h1 className="mb-4 text-sm font-bold tracking-wide text-slate-600">
-            コードブロック表示確認
+            Code Block Viewer
           </h1>
           <div data-testid="codeblock-viewer-shot">
             <CodeRenderer code={SAMPLE_CODE} language="typescript" />
@@ -32,7 +32,7 @@ const CodeBlockVisualTest = () => {
 
         <section className="rounded-2xl bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-sm font-bold tracking-wide text-slate-600">
-            コードブロック編集確認
+            Code Block Editor
           </h2>
           <div data-testid="codeblock-editor-shot">
             <CodeBlockEditor value={editorValue} onChange={setEditorValue} />
