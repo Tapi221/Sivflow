@@ -54,9 +54,71 @@ shared/design-tokens
   Web CSS / RN StyleSheet / Swift Color に変換する元。
 ```
 
+## constants フォルダを作らない
+
+`constants/`、`src/constants/`、`packages/*/constants/` のような定数専用フォルダは作らない。
+
+定数は「定数であること」ではなく、「誰の責務か」で置き場所を決める。`constants` という名前に逃がすと、domain、UI、platform、storage、native の責務境界が消えるため禁止する。
+
+配置ルール:
+
+```text
+domain / usecase の値
+  packages/core/src/domain/<domain>/
+  packages/core/src/usecase/<usecase>/
+
+Web / Desktop UI の表示値
+  packages/web-renderer/src/components/<component>/
+  packages/web-renderer/src/features/<feature>/
+
+React Native UI の表示値
+  packages/mobile-renderer/src/components/<component>/
+  packages/mobile-renderer/src/features/<feature>/
+  packages/mobile-renderer/src/screens/<screen>/
+
+platform adapter の設定値
+  packages/platform/src/<capability>/
+
+Web 起動口だけの設定値
+  apps/web/src/
+
+Tauri shell だけの設定値
+  apps/desktop/src-tauri/src/
+
+Mobile app 起動口だけの設定値
+  apps/mobile/src/
+
+Swift / Kotlin / TypeScript で共有したい構造
+  shared/schemas/
+
+色、余白、typography などの design token
+  shared/design-tokens/
+
+画像、icon、音声などの asset 元
+  shared/assets/
+```
+
+例:
+
+```text
+NG: constants/shared/flashcard/geometry.ts
+OK: packages/core/src/domain/card/geometry.ts
+
+NG: constants/web/app/sidebar.ts
+OK: packages/web-renderer/src/features/sidebar/sidebarLayout.ts
+
+NG: constants/web/storage/storageKeys.ts
+OK: packages/platform/src/storage/storageKeys.ts
+
+NG: constants/shared/app/featureFlags.ts
+OK: packages/platform/src/feature-flags/featureFlags.ts
+```
+
+barrel export で `@constants` のような横断入口を作ることも禁止する。共通化したい場合は、責務を持つ module から公開する。
+
 ## iPad 手書きモードの責務分離
 
-iPad 手書きモードは `apps/mobile` に直接全部置かない。入力体験、保存形式、表示、同期、native bridge を分けて配置する。スマホには手書きモードのナビも画面も出さない。
+ iPad 手書きモードは `apps/mobile` に直接全部置かない。入力体験、保存形式、表示、同期、native bridge を分けて配置する。スマホには手書きモードのナビも画面も出さない。
 
 ```text
 共通Inkモデル
@@ -136,5 +198,6 @@ Swift / Kotlin / TypeScript 間で型生成したい Ink document や handwritin
 Web と Tauri は renderer を共有する。
 React Native は別 renderer にする。
 Swift は apps/mobile/ios 配下の native extension として扱う。
+constants フォルダは作らず、責務を持つ module に値を置く。
 全 platform 共通にしたいものは TypeScript code ではなく、schema / token / asset に寄せる。
 ```
