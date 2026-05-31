@@ -5,7 +5,7 @@ describe("DiffEngine", () => {
   const diffEngine = new DiffEngine();
 
   describe("calculateDiff", () => {
-    it("should return null when there are no differences", () => {
+    it("差分がない場合は null を返す", () => {
       const local = { id: "1", title: "test", updatedAt: 100 };
       const remote = { id: "1", title: "test", updatedAt: 200 };
 
@@ -13,7 +13,7 @@ describe("DiffEngine", () => {
       expect(diff).toBeNull();
     });
 
-    it("should detect field changes", () => {
+    it("フィールド変更を検出する", () => {
       const local = { id: "1", title: "new title", updatedAt: 100 };
       const remote = { id: "1", title: "old title", updatedAt: 200 };
 
@@ -21,7 +21,7 @@ describe("DiffEngine", () => {
       expect(diff).toEqual({ title: "new title" });
     });
 
-    it("should ignore metadata fields", () => {
+    it("メタデータフィールドを無視する", () => {
       const local = {
         id: "1",
         title: "test",
@@ -43,7 +43,7 @@ describe("DiffEngine", () => {
       expect(diff).toBeNull();
     });
 
-    it("should detect structural changes via JSON comparison", () => {
+    it("JSON 比較で構造的な変更を検出する", () => {
       const local = { id: "1", tags: ["a", "b"] };
       const remote = { id: "1", tags: ["a"] };
 
@@ -51,7 +51,7 @@ describe("DiffEngine", () => {
       expect(diff).toEqual({ tags: ["a", "b"] });
     });
 
-    it("should return null if input is missing", () => {
+    it("入力が欠けている場合は null を返す", () => {
       expect(diffEngine.calculateDiff(null, {})).toBeNull();
       expect(diffEngine.calculateDiff({}, null)).toBeNull();
     });
@@ -66,20 +66,20 @@ describe("DiffEngine", () => {
       lastSyncedAt: 100,
     };
 
-    it("should return remote data if local is null (initial sync)", () => {
+    it("local が null の初回同期では remote データを返す", () => {
       const remote = { id: "1", title: "remote" };
       const result = diffEngine.merge(null, remote);
       expect(result.merged).toEqual(remote);
       expect(result.conflict).toBe(false);
     });
 
-    it("should return local data if remote is null", () => {
+    it("remote が null の場合は local データを返す", () => {
       const result = diffEngine.merge(baseLocal, null);
       expect(result.merged).toEqual(baseLocal);
       expect(result.conflict).toBe(false);
     });
 
-    it("should update local if server has newer data (no conflict)", () => {
+    it("サーバー側に新しいデータがある場合は local を更新する", () => {
       const remote = {
         id: "1",
         title: "remote update",
@@ -93,7 +93,7 @@ describe("DiffEngine", () => {
       expect(result.merged.updatedAt).toBe(200);
     });
 
-    it("should keep local if only local has changed (no conflict)", () => {
+    it("local だけが変更されている場合は local を保持する", () => {
       const local = {
         ...baseLocal,
         title: "local update",
@@ -111,7 +111,7 @@ describe("DiffEngine", () => {
       expect(result.conflict).toBe(false);
     });
 
-    it("should detect conflict when both sides have changed", () => {
+    it("両側が変更されている場合は競合を検出する", () => {
       const local = {
         ...baseLocal,
         title: "local changes",
@@ -125,7 +125,7 @@ describe("DiffEngine", () => {
       expect(result.merged).toMatchObject({ title: "remote changes" });
     });
 
-    it("should respect client_wins strategy on conflict", () => {
+    it("競合時に client_wins 戦略を尊重する", () => {
       const local = {
         ...baseLocal,
         title: "local changes",
@@ -142,19 +142,19 @@ describe("DiffEngine", () => {
   });
 
   describe("validateConsistency", () => {
-    it("should return true for matching IDs", () => {
+    it("ID が一致していれば true を返す", () => {
       expect(diffEngine.validateConsistency({ id: "1" }, { id: "1" })).toBe(
         true,
       );
     });
 
-    it("should return false for mismatched IDs", () => {
+    it("ID が一致しなければ false を返す", () => {
       expect(diffEngine.validateConsistency({ id: "1" }, { id: "2" })).toBe(
         false,
       );
     });
 
-    it("should return false if any side is missing", () => {
+    it("どちらかが欠けている場合は false を返す", () => {
       expect(diffEngine.validateConsistency(null, { id: "1" })).toBe(false);
       expect(diffEngine.validateConsistency({ id: "1" }, null)).toBe(false);
     });
