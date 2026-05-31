@@ -87,7 +87,7 @@
   .calendar-month-view {
     --calendar-month-row-height: 112px;
     --calendar-month-spacer-line-color: #eef0f3;
-    --calendar-month-spacer-line-width: 0.5px;
+    --calendar-month-spacer-line-width: 1px;
     overflow-anchor: none;
     background: #f2f2f7;
   }
