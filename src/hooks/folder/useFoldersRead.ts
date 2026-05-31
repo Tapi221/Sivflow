@@ -31,12 +31,12 @@ export const useFoldersRead = () => {
 
       const filtered = rawFolders.filter(
         (folder) =>
-          !(Boolean(
+          !(
             (folder as unknown as { isDeleted?: boolean; is_deleted?: boolean })
               .isDeleted ??
             (folder as unknown as { isDeleted?: boolean; is_deleted?: boolean })
-              .is_deleted,
-          )),
+              .is_deleted
+          ),
       );
 
       return filtered.map(normalizeFolder);
