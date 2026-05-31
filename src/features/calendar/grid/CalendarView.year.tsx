@@ -1,4 +1,4 @@
-import { memo, startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { addDays, addYears, eachMonthOfInterval, endOfDay, endOfYear, format, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import { getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
@@ -53,8 +53,14 @@ type YearVirtualWindow = {
   endOffset: number;
 };
 
+type PendingPrependScrollAdjustment = {
+  scrollHeight: number;
+  scrollTop: number;
+};
+
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
-const YEAR_INITIAL_RENDERED_YEARS = 7;
+const YEAR_INITIAL_RENDERED_PAST_YEARS = 3;
+const YEAR_INITIAL_RENDERED_FUTURE_YEARS = 3;
 const YEAR_EXTEND_YEARS = 3;
 const YEAR_SCROLL_EDGE_THRESHOLD_PX = 2400;
 const YEAR_SECTION_GAP_PX = 32;
@@ -170,8 +176,8 @@ const buildYearSyncDateRange = (date: Date): CalendarDateRange => ({
 const isSameCalendarDateRange = (left: CalendarDateRange, right: CalendarDateRange): boolean => left.start.getTime() === right.start.getTime() && left.end.getTime() === right.end.getTime();
 
 const createInitialYearVirtualWindow = (): YearVirtualWindow => ({
-  startOffset: 0,
-  endOffset: YEAR_INITIAL_RENDERED_YEARS - 1,
+  startOffset: -YEAR_INITIAL_RENDERED_PAST_YEARS,
+  endOffset: YEAR_INITIAL_RENDERED_FUTURE_YEARS,
 });
 
 const isSameYearVirtualWindow = (left: YearVirtualWindow, right: YearVirtualWindow): boolean => left.startOffset === right.startOffset && left.endOffset === right.endOffset;
@@ -205,6 +211,8 @@ const CalendarYearViewComponent = ({
   const scrollRafRef = useRef<number | null>(null);
   const pendingScrollScrollerRef = useRef<HTMLDivElement | null>(null);
   const requestedYearKeyRef = useRef(format(startOfYear(yearDate), "yyyy"));
+  const pendingScrollToRequestedYearRef = useRef(true);
+  const pendingPrependScrollAdjustmentRef = useRef<PendingPrependScrollAdjustment | null>(null);
   const baseYearRef = useRef(startOfYear(yearDate));
   const virtualWindowRef = useRef(createInitialYearVirtualWindow());
   const [virtualWindow, setVirtualWindowState] = useState(() => virtualWindowRef.current);
@@ -259,15 +267,27 @@ const CalendarYearViewComponent = ({
   }, [setVirtualWindowState]);
 
   const updateVirtualWindowForScroll = useCallback((scroller: HTMLDivElement) => {
+    const distanceToTop = scroller.scrollTop;
     const distanceToBottom = scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
+    const shouldExtendBefore = distanceToTop <= YEAR_SCROLL_EDGE_THRESHOLD_PX;
+    const shouldExtendAfter = distanceToBottom <= YEAR_SCROLL_EDGE_THRESHOLD_PX;
     const currentWindow = virtualWindowRef.current;
 
-    if (distanceToBottom >= YEAR_SCROLL_EDGE_THRESHOLD_PX) return;
+    if (!shouldExtendBefore && !shouldExtendAfter) return;
 
-    setVirtualWindow({
-      startOffset: currentWindow.startOffset,
-      endOffset: currentWindow.endOffset + YEAR_EXTEND_YEARS,
-    });
+    const nextWindow = {
+      startOffset: shouldExtendBefore ? currentWindow.startOffset - YEAR_EXTEND_YEARS : currentWindow.startOffset,
+      endOffset: shouldExtendAfter ? currentWindow.endOffset + YEAR_EXTEND_YEARS : currentWindow.endOffset,
+    };
+
+    if (shouldExtendBefore && nextWindow.startOffset !== currentWindow.startOffset) {
+      pendingPrependScrollAdjustmentRef.current = {
+        scrollHeight: scroller.scrollHeight,
+        scrollTop: scroller.scrollTop,
+      };
+    }
+
+    setVirtualWindow(nextWindow);
   }, [setVirtualWindow]);
 
   const getSyncRangeFromScroll = useCallback((scroller: HTMLDivElement): CalendarDateRange | null => {
@@ -315,6 +335,30 @@ const CalendarYearViewComponent = ({
     });
   }, [syncVisibleWeekRange]);
 
+  useLayoutEffect(() => {
+    const scroller = scrollContainerRef.current;
+    if (!scroller) return;
+
+    const pendingPrependScrollAdjustment = pendingPrependScrollAdjustmentRef.current;
+
+    if (pendingPrependScrollAdjustment) {
+      pendingPrependScrollAdjustmentRef.current = null;
+      const addedScrollHeight = scroller.scrollHeight - pendingPrependScrollAdjustment.scrollHeight;
+      if (addedScrollHeight > 0) scroller.scrollTop = pendingPrependScrollAdjustment.scrollTop + addedScrollHeight;
+      scheduleSyncVisibleWeekRange(scroller);
+      return;
+    }
+
+    if (!pendingScrollToRequestedYearRef.current) return;
+
+    const requestedYearSection = scroller.querySelector<HTMLElement>('[data-calendar-year-offset="0"]');
+    if (!requestedYearSection) return;
+
+    pendingScrollToRequestedYearRef.current = false;
+    scroller.scrollTop = requestedYearSection.offsetTop;
+    scheduleSyncVisibleWeekRange(scroller);
+  }, [scheduleSyncVisibleWeekRange, years]);
+
   useEffect(() => {
     if (!renderedRange) return;
 
@@ -358,6 +402,7 @@ const CalendarYearViewComponent = ({
 
       pendingSyncScrollerRef.current = null;
       pendingScrollScrollerRef.current = null;
+      pendingPrependScrollAdjustmentRef.current = null;
     };
   }, []);
 
@@ -367,6 +412,8 @@ const CalendarYearViewComponent = ({
     if (requestedYearKeyRef.current === nextRequestedYearKey) return;
 
     requestedYearKeyRef.current = nextRequestedYearKey;
+    pendingScrollToRequestedYearRef.current = true;
+    pendingPrependScrollAdjustmentRef.current = null;
     baseYearRef.current = startOfYear(yearDate);
     setSyncRange(buildYearSyncDateRange(yearDate));
     setVirtualWindow(createInitialYearVirtualWindow());
