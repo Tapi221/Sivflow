@@ -24,12 +24,12 @@ const mocks = vi.hoisted(() => {
 vi.mock("@/components/card/hooks/useCardSets", () => ({ useCardSets: () => ({ cardSets: [], loading: false, createCardSet: mocks.createCardSet }) }));
 vi.mock("@/components/folder/hooks/useExplorerDerivedData", () => ({ useExplorerDerivedData: () => ({ rootFolders: mocks.rootFolders, getChildFolders: () => [], getFolderContentCount: () => 3, getNextOrderIndex: () => 0 }) }));
 vi.mock("@/components/folder/hooks/useFolderDocumentUpload", () => ({ useFolderDocumentUpload: () => ({ fileInputRef: { current: null }, handleToolbarAddDocument: mocks.handleToolbarAddDocument, currentFileAccept: "application/pdf", handleToolbarFileInputChange: mocks.handleToolbarFileInputChange }) }));
-vi.mock("@/chip/toggle/Toggle.foldertag", () => ({ ToggleFolderTag: () => <div data-testid="folder-tag-toggle" /> }));
+vi.mock("@/chip/toggle/Toggle.foldertag", () => ({ ToggleFolderTag: () => React.createElement("div", { "data-testid": "folder-tag-toggle" }) }));
 vi.mock("@/hooks/folder/useFolderCommands", () => ({ useFolderCommands: () => ({ createFolder: mocks.createFolder, updateFolder: mocks.updateFolder, deleteFolder: mocks.deleteFolder }) }));
 vi.mock("@/hooks/folder/useFoldersRead", () => ({ useFoldersRead: () => ({ folders: mocks.rootFolders, loading: false, error: null }) }));
 vi.mock("@/hooks/folder/useFolderTagModeStore", () => ({ useFolderTagModeStore: (selector: (state: unknown) => unknown) => selector({ folderTagMode: "folder", setFolderTagMode: vi.fn() }) }));
 vi.mock("@/hooks/platform/useDocumentsRead", () => ({ useDocumentsRead: () => ({ documents: [], loading: false, error: null }) }));
-vi.mock("@/pane.desktop/leftpane/folder/TagTreeSidebar", () => ({ TagTreeSidebar: () => <aside data-testid="tag-tree-sidebar" /> }));
+vi.mock("@/pane.desktop/leftpane/folder/TagTreeSidebar", () => ({ TagTreeSidebar: () => React.createElement("aside", { "data-testid": "tag-tree-sidebar" }) }));
 vi.mock("@/pane.desktop/tab.desktopnative/hooks/useTabsStore", () => ({ useWorkspaceTabsStore: (selector: (state: unknown) => unknown) => selector(mocks.workspaceState) }));
 
 const SOURCE_PATH = resolve(process.cwd(), "src/pane.desktop/leftpane/folder/LayeredDirectorySidebar.tsx");
@@ -65,7 +65,7 @@ describe("LayeredDirectorySidebar project list", () => {
   it("shows a selected project name above its child hierarchy", () => {
     mocks.workspaceState.tabs = [{ id: "tab-1", kind: "explorer", explorerState: { isSectionListMode: false, selectedFolderId: "project-1" } }];
 
-    render(<SidebarLayeredDirectory />);
+    render(React.createElement(SidebarLayeredDirectory));
 
     expect(screen.getByRole("button", { name: "プロジェクト一覧を開く" }).textContent).toContain("Project Alpha");
     expect(screen.getByText("フォルダがありません")).toBeTruthy();
