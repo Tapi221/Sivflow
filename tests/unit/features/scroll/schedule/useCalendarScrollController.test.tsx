@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { persistScheduleCalendarScrollTop, readStoredScheduleCalendarScrollTop } from "@/features/calendar/scheduleNavigationPersistence";
@@ -32,7 +33,7 @@ const TestHarness = ({ selectedViewMode = "week" }: TestHarnessProps) => {
     scrollTargetToken: 0,
   });
 
-  return <div data-testid="calendar-scroll-container" ref={scrollContainerRef} />;
+  return React.createElement("div", { "data-testid": "calendar-scroll-container", ref: scrollContainerRef });
 };
 
 describe("useCalendarScrollController", () => {
@@ -60,13 +61,13 @@ describe("useCalendarScrollController", () => {
   it("週表示の初期描画で保存済みの縦スクロール位置を復元する", () => {
     persistScheduleCalendarScrollTop(480);
 
-    render(<TestHarness selectedViewMode="week" />);
+    render(React.createElement(TestHarness, { selectedViewMode: "week" }));
 
     expect(screen.getByTestId("calendar-scroll-container").scrollTop).toBe(480);
   });
 
   it("週表示のスクロール時に縦スクロール位置を保存する", () => {
-    render(<TestHarness selectedViewMode="week" />);
+    render(React.createElement(TestHarness, { selectedViewMode: "week" }));
 
     const scroller = screen.getByTestId("calendar-scroll-container");
     scroller.scrollTop = 612;
@@ -78,7 +79,7 @@ describe("useCalendarScrollController", () => {
   it("月表示では週表示用の縦スクロール位置を復元・上書きしない", () => {
     persistScheduleCalendarScrollTop(360);
 
-    render(<TestHarness selectedViewMode="month" />);
+    render(React.createElement(TestHarness, { selectedViewMode: "month" }));
 
     const scroller = screen.getByTestId("calendar-scroll-container");
     expect(scroller.scrollTop).toBe(0);
