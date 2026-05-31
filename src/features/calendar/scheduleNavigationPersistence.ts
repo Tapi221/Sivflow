@@ -5,6 +5,7 @@ type StoredScheduleNavigationState = {
   selectedDate?: unknown;
   monthTitleDate?: unknown;
   selectedViewMode?: unknown;
+  calendarScrollTop?: unknown;
 };
 
 export type ScheduleNavigationState = {
@@ -21,6 +22,8 @@ const CALENDAR_VIEW_MODE_SET = new Set<CalendarViewMode>(CALENDAR_VIEW_MODES);
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
 
+const isStoredScheduleNavigationState = (value: unknown): value is StoredScheduleNavigationState => typeof value === "object" && value !== null && !Array.isArray(value);
+
 const isCalendarViewMode = (value: unknown): value is CalendarViewMode => typeof value === "string" && CALENDAR_VIEW_MODE_SET.has(value as CalendarViewMode);
 
 const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SELECT_VIEW_MODE_SET.has(viewMode);
@@ -32,6 +35,8 @@ const readStoredDate = (value: unknown): Date | null => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const readStoredScrollTop = (value: unknown): number | null => typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+
 const readStoredSelectedViewMode = (value: unknown): CalendarViewModeSelection | null => {
   if (isCalendarViewMode(value)) return value;
   if (!Array.isArray(value)) return null;
@@ -40,38 +45,73 @@ const readStoredSelectedViewMode = (value: unknown): CalendarViewModeSelection |
   return selection.length > 1 ? selection : selection[0] ?? null;
 };
 
-export const readStoredScheduleNavigationState = (): Partial<ScheduleNavigationState> | null => {
+const readStoredScheduleNavigationObject = (): StoredScheduleNavigationState | null => {
   if (typeof window === "undefined") return null;
 
   try {
     const raw = window.localStorage.getItem(SCHEDULE_NAVIGATION_STORAGE_KEY);
     if (!raw) return null;
 
-    const parsed = JSON.parse(raw) as StoredScheduleNavigationState | null;
-    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return null;
-
-    const currentDate = readStoredDate(parsed.currentDate);
-    const selectedDate = readStoredDate(parsed.selectedDate);
-    const monthTitleDate = readStoredDate(parsed.monthTitleDate);
-    const selectedViewMode = readStoredSelectedViewMode(parsed.selectedViewMode);
-
-    return {
-      ...(currentDate ? { currentDate } : {}),
-      ...(selectedDate ? { selectedDate } : {}),
-      ...(monthTitleDate ? { monthTitleDate } : {}),
-      ...(selectedViewMode ? { selectedViewMode } : {}),
-    };
+    const parsed = JSON.parse(raw) as unknown;
+    return isStoredScheduleNavigationState(parsed) ? parsed : null;
   } catch {
     return null;
   }
 };
 
-export const persistScheduleNavigationState = ({ currentDate, selectedDate, monthTitleDate, selectedViewMode }: ScheduleNavigationState) => {
+const writeStoredScheduleNavigationObject = (state: StoredScheduleNavigationState) => {
   if (typeof window === "undefined") return;
 
   try {
-    window.localStorage.setItem(SCHEDULE_NAVIGATION_STORAGE_KEY, JSON.stringify({ currentDate: currentDate.toISOString(), selectedDate: selectedDate.toISOString(), monthTitleDate: monthTitleDate.toISOString(), selectedViewMode }));
+    window.localStorage.setItem(SCHEDULE_NAVIGATION_STORAGE_KEY, JSON.stringify(state));
   } catch {
     // localStorage が使えない環境では React state の状態だけ維持する。
   }
+};
+
+export const readStoredScheduleNavigationState = (): Partial<ScheduleNavigationState> | null => {
+  const parsed = readStoredScheduleNavigationObject();
+  if (!parsed) return null;
+
+  const currentDate = readStoredDate(parsed.currentDate);
+  const selectedDate = readStoredDate(parsed.selectedDate);
+  const monthTitleDate = readStoredDate(parsed.monthTitleDate);
+  const selectedViewMode = readStoredSelectedViewMode(parsed.selectedViewMode);
+
+  return {
+    ...(currentDate ? { currentDate } : {}),
+    ...(selectedDate ? { selectedDate } : {}),
+    ...(monthTitleDate ? { monthTitleDate } : {}),
+    ...(selectedViewMode ? { selectedViewMode } : {}),
+  };
+};
+
+export const readStoredScheduleCalendarScrollTop = (): number | null => {
+  const parsed = readStoredScheduleNavigationObject();
+  if (!parsed) return null;
+
+  return readStoredScrollTop(parsed.calendarScrollTop);
+};
+
+export const persistScheduleNavigationState = ({ currentDate, selectedDate, monthTitleDate, selectedViewMode }: ScheduleNavigationState) => {
+  const stored = readStoredScheduleNavigationObject() ?? {};
+
+  writeStoredScheduleNavigationObject({
+    ...stored,
+    currentDate: currentDate.toISOString(),
+    selectedDate: selectedDate.toISOString(),
+    monthTitleDate: monthTitleDate.toISOString(),
+    selectedViewMode,
+  });
+};
+
+export const persistScheduleCalendarScrollTop = (scrollTop: number) => {
+  if (!Number.isFinite(scrollTop)) return;
+
+  const stored = readStoredScheduleNavigationObject() ?? {};
+
+  writeStoredScheduleNavigationObject({
+    ...stored,
+    calendarScrollTop: Math.max(0, scrollTop),
+  });
 };
