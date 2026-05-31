@@ -2,7 +2,7 @@
 
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { CalendarSidebarProps } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarSidebarProps, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
 
 type WorkspaceTabsState = {
@@ -61,6 +61,23 @@ vi.mock("@shared/i18n/useT", () => ({
   useT: () => ({ myProjects: "MY PROJECTS" }),
 }));
 
+const createGoogleAccountDisplay = (): GoogleAccountDisplay => ({
+  accountId: "google-account-1",
+  email: "akari.tt221@gmail.com",
+  name: null,
+  photoUrl: null,
+  accessToken: null,
+  calendars: [{ id: "calendar-1", summary: "Primary" }],
+  taskLists: [],
+  taskListsError: null,
+  isTaskListsLoading: false,
+  googleTasks: [],
+  googleTasksError: null,
+  selectedCalendarIds: new Set(["calendar-1"]),
+  connectionStatus: "connected",
+  error: null,
+});
+
 const createCalendarSidebarProps = (): CalendarSidebarProps => ({
   monthDate: new Date(2026, 0, 1),
   selectedDate: new Date(2026, 0, 1),
@@ -98,5 +115,13 @@ describe("CalendarSidebar", () => {
     const myProjectsButton = screen.getByRole("button", { name: /MY PROJECTS/ });
 
     expect(within(myProjectsButton).queryByTestId("my-projects-calendar-icon")).toBeNull();
+  });
+
+  it("GOOGLE CALENDARS のセクション見出しと追加ボタンを描画しない", () => {
+    render(<CalendarSidebar {...createCalendarSidebarProps()} googleAccounts={[createGoogleAccountDisplay()]} />);
+
+    expect(screen.queryByText("GOOGLE CALENDARS")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Googleカレンダーを追加" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "akari.tt221" })).not.toBeNull();
   });
 });

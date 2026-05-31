@@ -31,7 +31,7 @@ const ExplorerWorkspaceContent = ({ activeTab }: ExplorerWorkspaceContentProps) 
   if (loading) return <div className="h-full w-full bg-white" />;
   if (error) return <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{error}</div>;
 
-  return <CarvePanelShell reserveToolbar leftPanel={<SidebarLayeredDirectory />}><CarvePanel><TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} /></CarvePanel></CarvePanelShell>;
+  return <CarvePanelShell leftPanel={<SidebarLayeredDirectory />}><CarvePanel><TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} /></CarvePanel></CarvePanelShell>;
 };
 
 const WorkspaceScreen = () => {
