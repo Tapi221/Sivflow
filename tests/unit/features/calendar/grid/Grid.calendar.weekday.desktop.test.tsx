@@ -2,7 +2,7 @@
 
 import React, { createRef } from "react";
 import type { ReactNode, RefObject } from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
@@ -28,6 +28,7 @@ const TIME_LABEL_COLOR_CLASS = "text-[#b8bcc5]";
 const TIME_LABEL_BACKGROUND_CLASS = "bg-white";
 const TIME_LABEL_FONT_CLASS = "font-medium";
 const ALL_DAY_ACCENT_COLOR = "#34c759";
+const NEXT_DAY_PREVIEW_HEIGHT_STYLE = "calc(0.5 * var(--calendar-hour-row-height))";
 
 const createCalendarGridStyle = (): CalendarGridStyle => ({
   "--calendar-hour-row-height": `${HOUR_ROW_HEIGHT_PX}px`,
@@ -110,6 +111,28 @@ describe("CalendarWeekDayGrid", () => {
     expect(endOfDayLabel.className).toContain("-translate-y-1/2");
     expect(bottomTimeSpacer.className).not.toContain("overflow-hidden");
     expect(previewSpacer.className).toContain("overflow-hidden");
+  });
+
+  it("24:00以降プレビューの表示領域を30分ぶんの高さにする", () => {
+    renderWeekDayGrid([createEvent({ id: "next-day-event" })]);
+
+    const bottomTimeSpacer = screen.getByTestId("weekday-time-bottom-spacer");
+    const previewSpacer = screen.getByTestId("weekday-preview-bottom-spacer");
+
+    expect(bottomTimeSpacer.style.height).toBe(NEXT_DAY_PREVIEW_HEIGHT_STYLE);
+    expect(previewSpacer.style.height).toBe(NEXT_DAY_PREVIEW_HEIGHT_STYLE);
+  });
+
+  it("24:00以降プレビューでは0:30以降に始まるeventを描画しない", () => {
+    renderWeekDayGrid([
+      createEvent({ id: "visible-preview-event", title: "Visible preview", startsAt: new Date(2026, 0, 2, 0, 0), endsAt: new Date(2026, 0, 2, 0, 30) }),
+      createEvent({ id: "hidden-preview-event", title: "Hidden preview", startsAt: new Date(2026, 0, 2, 0, 30), endsAt: new Date(2026, 0, 2, 1, 0) }),
+    ]);
+
+    const previewSpacer = screen.getByTestId("weekday-preview-bottom-spacer");
+
+    expect(within(previewSpacer).getByText("Visible preview")).toBeInTheDocument();
+    expect(within(previewSpacer).queryByText("Hidden preview")).toBeNull();
   });
 
   it("時刻ラベルの色、背景、数字用スタイルを維持する", () => {
