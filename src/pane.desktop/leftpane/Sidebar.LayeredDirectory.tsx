@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { DEFAULT_NEW_PROJECT_NAME } from "@/components/folder/explorer/model/utils";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
-import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
+import { ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
 import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
 
 type IconProps = {
@@ -45,4 +45,4 @@ const SidebarLayeredDirectory = () => {
   );
 };
 
-export { LibraryHierarchySidebar, ProjectListSidebar, SidebarLayeredDirectory, TagTreeSidebar };
+export { ProjectListSidebar, SidebarLayeredDirectory, TagTreeSidebar };
