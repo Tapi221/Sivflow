@@ -5,7 +5,79 @@ import { getPullableCollectionRef, getUserSettingsRef, requireCloudSyncFirestore
 import { COLLECTION_BY_TYPE, getUpdatedAtMillis, PULLABLE_ENTITY_TYPES, type PullableEntityType, sanitizeSyncDataFromCloud } from "@/application/usecases/cloudSyncShared";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
 
+type CloudSyncErrorLike = {
+  code?: unknown;
+  message?: unknown;
+};
+
 const PAGE_SIZE = 500;
+
+const PULLABLE_ENTITY_LABEL_BY_TYPE: Record<PullableEntityType, string> = {
+  card: "カード",
+  folder: "フォルダー",
+  cardSet: "カードセット",
+  document: "ドキュメント",
+  tag: "タグ",
+  asset: "アセット",
+};
+
+const LOCALIZED_FIREBASE_ERROR_MESSAGE_BY_CODE: Record<string, string> = {
+  cancelled: "クラウド同期がキャンセルされました。",
+  "failed-precondition": "Firestoreのクエリ条件を満たせませんでした。必要なインデックスまたは設定を確認してください。",
+  "permission-denied": "アクセス権限が不足しています。ログイン状態とFirestoreのセキュリティルールを確認してください。",
+  "resource-exhausted": "Firestoreの利用上限に達しました。時間を置いて再実行してください。",
+  unauthenticated: "認証情報を確認できませんでした。再ログインしてください。",
+  unavailable: "Firestoreに接続できませんでした。ネットワーク状態を確認してください。",
+};
+
+const PERMISSION_DENIED_ERROR_MESSAGE = "Missing or insufficient permissions";
+
+const getCloudSyncErrorCode = (error: unknown): string | null => {
+  if (!error || typeof error !== "object") return null;
+
+  const code = (error as CloudSyncErrorLike).code;
+  return typeof code === "string" ? code : null;
+};
+
+const getCloudSyncErrorMessage = (error: unknown): string | null => {
+  if (!error || typeof error !== "object") return null;
+
+  const message = (error as CloudSyncErrorLike).message;
+  return typeof message === "string" ? message : null;
+};
+
+const getLocalizedCloudSyncErrorDetail = (error: unknown): string => {
+  const code = getCloudSyncErrorCode(error);
+  const normalizedCode = code?.replace(/^firestore\//, "");
+  const localizedMessage = code
+    ? LOCALIZED_FIREBASE_ERROR_MESSAGE_BY_CODE[code] ??
+      (normalizedCode ? LOCALIZED_FIREBASE_ERROR_MESSAGE_BY_CODE[normalizedCode] : undefined)
+    : undefined;
+
+  if (localizedMessage) {
+    return `${localizedMessage}（コード: ${code}）`;
+  }
+
+  const message = getCloudSyncErrorMessage(error);
+  if (message?.includes(PERMISSION_DENIED_ERROR_MESSAGE)) {
+    return LOCALIZED_FIREBASE_ERROR_MESSAGE_BY_CODE["permission-denied"];
+  }
+
+  if (code) {
+    return `クラウド同期中にエラーが発生しました。（コード: ${code}）`;
+  }
+
+  return "クラウド同期中にエラーが発生しました。";
+};
+
+const getPullCollectionDiffErrorMessage = (
+  type: PullableEntityType,
+  error: unknown,
+): string =>
+  `[CloudSyncAdapter] ${PULLABLE_ENTITY_LABEL_BY_TYPE[type]}の差分取得に失敗しました: ${getLocalizedCloudSyncErrorDetail(error)}`;
+
+const getPullDiffErrorMessage = (error: unknown): string =>
+  `❌ [CloudSyncAdapter] 差分取得に失敗しました: ${getLocalizedCloudSyncErrorDetail(error)}`;
 
 export const pullCloudSyncDiff = async (
   userId: string,
@@ -66,10 +138,7 @@ export const pullCloudSyncDiff = async (
           `[CloudSyncAdapter] Remote ${COLLECTION_BY_TYPE[type]} found: ${total}`,
         );
       } catch (error) {
-        console.error(
-          `[CloudSyncAdapter] pullCollectionDiff failed for ${type}`,
-          error,
-        );
+        console.error(getPullCollectionDiffErrorMessage(type, error));
       }
     };
 
@@ -94,7 +163,7 @@ export const pullCloudSyncDiff = async (
     );
     return { changes, serverTime: Date.now() };
   } catch (error) {
-    console.error("❌ [CloudSyncAdapter] pullDiff ERROR:", error);
+    console.error(getPullDiffErrorMessage(error));
     throw error;
   }
 };
