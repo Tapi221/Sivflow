@@ -15,6 +15,14 @@ const TIMED_EVENT: GoogleCalendarEvent = {
   accentColor: "#2f9f6b",
 };
 
+const getClassTokenValue = (className: string, prefix: string): string => {
+  const token = className.split(/\s+/).find((classToken) => classToken.startsWith(prefix));
+
+  if (!token) throw new Error(`${prefix} spacing token was not found`);
+
+  return token.slice(prefix.length);
+};
+
 const getWeekdayChipElement = (): HTMLElement => {
   const titleElement = screen.getAllByText(TIMED_EVENT.title).find((element) => element.parentElement?.className.includes("rounded-md"));
 
@@ -53,5 +61,18 @@ describe("event chip title/time spacing", () => {
     const titleElement = screen.getByText(TIMED_EVENT.title);
 
     expect(titleElement.className).toContain("mt-0.5");
+  });
+
+  it("リスト表示と週表示のタイトルと時刻の間隔を一致させる", () => {
+    const { unmount } = render(<CalendarEventChipWeekday event={TIMED_EVENT} />);
+    const weekdaySpacing = getClassTokenValue(getWeekdayChipElement().className, "gap-");
+
+    unmount();
+    render(<CalendarEventChipList event={TIMED_EVENT} />);
+
+    const listTitleElement = screen.getByText(TIMED_EVENT.title);
+    const listSpacing = getClassTokenValue(listTitleElement.className, "mt-");
+
+    expect(listSpacing).toBe(weekdaySpacing);
   });
 });
