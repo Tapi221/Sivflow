@@ -18,7 +18,7 @@ describe("CalendarYearView", () => {
     vi.restoreAllMocks();
   });
 
-  it("上下端の検知範囲が重なる位置でもスクロール方向の年範囲だけを拡張する", async () => {
+  it("速いスクロールでも固定レール上の表示年ウィンドウへ更新する", async () => {
     vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
       callback(0);
       return 1;
@@ -41,8 +41,8 @@ describe("CalendarYearView", () => {
     expect(scroller).toBeInstanceOf(HTMLElement);
 
     setReadonlyNumber(scroller!, "clientHeight", 1000);
-    setReadonlyNumber(scroller!, "scrollHeight", 5000);
-    setReadonlyNumber(scroller!, "scrollTop", 1900);
+    setReadonlyNumber(scroller!, "scrollHeight", 304000);
+    setReadonlyNumber(scroller!, "scrollTop", 167200);
 
     act(() => {
       fireEvent.scroll(scroller!);
@@ -52,7 +52,7 @@ describe("CalendarYearView", () => {
       | { start: Date; end: Date }
       | undefined;
 
-    expect(latestRange?.start.getFullYear()).toBe(2021);
-    expect(latestRange?.end.getFullYear()).toBe(2035);
+    expect(latestRange?.start.getFullYear()).toBe(2041);
+    expect(latestRange?.end.getFullYear()).toBe(2052);
   }, 20_000);
 });
