@@ -1,14 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import * as C from "./pdf.constants.desktop";
+import { usePdfSelectionCapture } from "./hooks/usePdfSelectionCapture";
 import { usePdfWorkspace } from "@/features/pdf/hooks/usePdfWorkspace";
-import { capturePdfViewerRectToBlob } from "./pdfSelectionCapture";
 import { PdfOverlayToolbar } from "./PdfToolbar";
 import { PdfThumbnailSidePanel } from "./PdfThumbnailSidePanel";
 import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
-import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboardImage";
 import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
-import type { SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
 import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
 import type { BlobUrl } from "@/types/core/branded";
@@ -75,37 +73,18 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
     setCurrentPage,
   } = usePdfWorkspace();
   const [isThumbnailPanelOpen, setIsThumbnailPanelOpen] = useState(false);
-  const [isSelectionCaptureActive, setIsSelectionCaptureActive] = useState(false);
-  const [isSelectionCaptureBusy, setIsSelectionCaptureBusy] = useState(false);
-  const [selectionCaptureMessage, setSelectionCaptureMessage] = useState<string | null>(null);
-
-  const handleToggleSelectionCapture = useCallback(() => {
-    setSelectionCaptureMessage(null);
-    setIsSelectionCaptureActive((isActive) => !isActive);
-  }, []);
-
-  const handleCancelSelectionCapture = useCallback(() => {
-    setIsSelectionCaptureActive(false);
-    setIsSelectionCaptureBusy(false);
-  }, []);
-
-  const handleCaptureSelection = useCallback(async (rect: SelectionCaptureRect) => {
-    const target = containerRef.current;
-    if (!target) return;
-
-    setIsSelectionCaptureBusy(true);
-    try {
-      const blob = await capturePdfViewerRectToBlob(target, rect);
-      await copyImageBlobToClipboard(blob);
-      setSelectionCaptureMessage("PDF範囲をコピーしました");
-      setIsSelectionCaptureActive(false);
-    } catch (error) {
-      console.error("[PdfPane] selection capture failed", error);
-      setSelectionCaptureMessage("PDF範囲コピーに失敗しました");
-    } finally {
-      setIsSelectionCaptureBusy(false);
-    }
-  }, [containerRef]);
+  const {
+    isSelectionCaptureActive,
+    isSelectionCaptureBusy,
+    selectionCaptureMessage,
+    handleToggleSelectionCapture,
+    handleCancelSelectionCapture,
+    handleCaptureSelection,
+  } = usePdfSelectionCapture({
+    targetRef: containerRef,
+    sourceUnavailable,
+    numPages,
+  });
 
   useEffect(() => {
     if (workspaceDoc.id === doc.id) {
@@ -164,25 +143,6 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
       delete debugWindow.__getPdfScrollDiagnostics;
     };
   }, [viewerRef]);
-
-  useEffect(() => {
-    if (!selectionCaptureMessage) return;
-
-    const timeoutId = window.setTimeout(() => {
-      setSelectionCaptureMessage(null);
-    }, 1800);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [selectionCaptureMessage]);
-
-  useEffect(() => {
-    if (sourceUnavailable || numPages <= 0) {
-      setIsSelectionCaptureActive(false);
-      setIsSelectionCaptureBusy(false);
-    }
-  }, [numPages, sourceUnavailable]);
 
   const shouldRenderToolbar = !sourceUnavailable && numPages > 0;
   const shouldRenderThumbnailPanel = shouldRenderToolbar && isThumbnailPanelOpen;
