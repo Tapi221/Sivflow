@@ -1,6 +1,6 @@
 import { memo, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
-import { RIGHT_CLICK_PANEL_MARGIN, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
+import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
 
 type LayeredProjectMenuItemDefinition = {
   id: LayeredProjectMenuActionId;
@@ -36,8 +36,6 @@ type LayeredProjectMenuProps = {
 
 export const LAYERED_PROJECT_MENU_PANEL_ID = "layered-project-context-menu";
 
-const LAYERED_PROJECT_MENU_ITEM_HEIGHT = 28;
-
 const LAYERED_PROJECT_MENU_ITEM_DEFINITIONS: readonly LayeredProjectMenuItemDefinition[] = [
   { id: "change-color", label: "色を変更", submenu: true },
   { id: "rename", label: "名前を変更" },
@@ -51,7 +49,7 @@ const LAYERED_PROJECT_MENU_ITEM_DEFINITIONS: readonly LayeredProjectMenuItemDefi
 const LAYERED_PROJECT_MENU_LABELS = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.map((item) => item.label);
 
 export const LAYERED_PROJECT_MENU_WIDTH = resolveRightClickPanelTextWidth(LAYERED_PROJECT_MENU_LABELS, 132);
-export const LAYERED_PROJECT_MENU_HEIGHT = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.length * LAYERED_PROJECT_MENU_ITEM_HEIGHT + 8;
+export const LAYERED_PROJECT_MENU_HEIGHT = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 export const LAYERED_PROJECT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
 const LAYERED_PROJECT_MENU_STYLE = `
@@ -90,7 +88,7 @@ const LAYERED_PROJECT_MENU_STYLE = `
 
 const getLayeredProjectMenuAction = (actions: LayeredProjectMenuAction[], id: LayeredProjectMenuActionId) => actions.find((action) => action.id === id);
 
-const getLayeredProjectMenuSubmenuAnchor = (index: number): LayeredProjectMenuSubmenuAnchor => ({ itemOffsetY: 3 + index * LAYERED_PROJECT_MENU_ITEM_HEIGHT });
+const getLayeredProjectMenuSubmenuAnchor = (index: number): LayeredProjectMenuSubmenuAnchor => ({ itemOffsetY: RIGHT_CLICK_PANEL_SURFACE_PADDING + index * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT });
 
 const LayeredProjectMenuBase = ({
   x,
