@@ -9,7 +9,7 @@ describe("DiffEngine", () => {
   const engine = new DiffEngine();
 
   describe("calculateDiff", () => {
-    it("should return null when objects are identical", () => {
+    it("オブジェクトが同一なら null を返す", () => {
       const local = { id: "1", title: "test", content: "hello" };
       const remote = { id: "1", title: "test", content: "hello" };
 
@@ -17,7 +17,7 @@ describe("DiffEngine", () => {
       expect(diff).toBeNull();
     });
 
-    it("should detect simple field changes", () => {
+    it("単純なフィールド変更を検出する", () => {
       const local = {
         id: "1",
         title: "new title",
@@ -35,7 +35,7 @@ describe("DiffEngine", () => {
       expect(diff).toEqual({ title: "new title" });
     });
 
-    it("should ignore metadata fields", () => {
+    it("メタデータフィールドを無視する", () => {
       const local = {
         id: "1",
         title: "test",
@@ -55,7 +55,7 @@ describe("DiffEngine", () => {
   });
 
   describe("merge", () => {
-    it("should merge remote changes when no local changes", () => {
+    it("ローカル変更がない場合は remote の変更をマージする", () => {
       const local = {
         id: "1",
         title: "old",
@@ -72,7 +72,7 @@ describe("DiffEngine", () => {
       expect(merged.updatedAt).toBe(200);
     });
 
-    it("should detect conflicts when both sides changed", () => {
+    it("両側が変更されている場合は競合を検出する", () => {
       const local = {
         id: "1",
         title: "local change",
@@ -88,7 +88,7 @@ describe("DiffEngine", () => {
       expect(merged.title).toBe("remote change"); // server_wins logic
     });
 
-    it("should respect client_wins strategy", () => {
+    it("client_wins 戦略を尊重する", () => {
       const local = {
         id: "1",
         title: "local change",
@@ -106,13 +106,13 @@ describe("DiffEngine", () => {
   });
 
   describe("validateConsistency", () => {
-    it("should return false if IDs fail to match", () => {
+    it("ID が一致しない場合は false を返す", () => {
       const local = { id: "1" };
       const remote = { id: "2" };
       expect(engine.validateConsistency(local, remote)).toBe(false);
     });
 
-    it("should return true for consistent basic data", () => {
+    it("基本データに整合性がある場合は true を返す", () => {
       const local = { id: "1", title: "A" };
       const remote = { id: "1", title: "B" };
       expect(engine.validateConsistency(local, remote)).toBe(true);
