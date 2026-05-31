@@ -21,7 +21,7 @@ const waitForSidebarWidth = async (
 ) => {
   await expect
     .poll(async () => readSidebarWidth(page), {
-      message: `sidebar width should settle around ${expectedWidth}px`,
+      message: `サイドバー幅が ${expectedWidth}px 付近で安定すること`,
     })
     .toBeGreaterThan(expectedWidth - 3);
 
@@ -31,8 +31,8 @@ const waitForSidebarWidth = async (
   return actualWidth;
 };
 
-test.describe("Sidebar width consistency", () => {
-  test("desktop: switching explorer tabs should not change sidebar width", async ({
+test.describe("サイドバー幅の一貫性", () => {
+  test("デスクトップでエクスプローラータブを切り替えてもサイドバー幅が変わらない", async ({
     page,
   }) => {
     const persistedSidebarWidth = 360;
