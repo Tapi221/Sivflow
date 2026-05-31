@@ -112,15 +112,18 @@ export const useMonthInfiniteScroll = ({
   const baseWeekStartRef = useRef(getWeekStart(currentDate));
   const visibleMonthSyncRafRef = useRef<number | null>(null);
   const visibleMonthSyncTimeoutRef = useRef<number | null>(null);
+  const scrollRafRef = useRef<number | null>(null);
+  const pendingScrollContainerRef = useRef<HTMLDivElement | null>(null);
   const pendingScrollWeekOffsetRef = useRef<number | null>(0);
 
   const lastScrollTargetTokenRef = useRef(scrollTargetToken);
   const visibleMonthKeyRef = useRef(getCalendarMonthKey(currentDate));
 
   const monthWeeksRef = useRef<CalendarMonthWeek[]>([]);
+  const virtualWindowRef = useRef(createWindowAroundWeekOffset(0));
   const scheduleVisibleMonthSyncRef = useRef<(() => void) | null>(null);
 
-  const [virtualWindow, setVirtualWindow] = useState(() => createWindowAroundWeekOffset(0));
+  const [virtualWindow, setVirtualWindowState] = useState(() => virtualWindowRef.current);
   const [visibleWeekRange, setVisibleWeekRange] = useState(() => buildWeekDateRange(baseWeekStartRef.current));
 
   const monthWeeks = useMemo(
@@ -140,6 +143,13 @@ export const useMonthInfiniteScroll = ({
     },
     [],
   );
+
+  const setVirtualWindow = useCallback((nextWindow: MonthVirtualWindow) => {
+    if (isSameVirtualWindow(virtualWindowRef.current, nextWindow)) return;
+
+    virtualWindowRef.current = nextWindow;
+    setVirtualWindowState(nextWindow);
+  }, []);
 
   const getMonthRowHeight = useCallback(() => {
     const cachedHeight = monthRowHeightRef?.current;
@@ -179,9 +189,9 @@ export const useMonthInfiniteScroll = ({
         endWeekOffset: clampVirtualWeekOffset(lastVisibleWeekOffset + MONTH_VIRTUAL_OVERSCAN_WEEKS),
       };
 
-      setVirtualWindow((currentWindow) => isSameVirtualWindow(currentWindow, nextWindow) ? currentWindow : nextWindow);
+      setVirtualWindow(nextWindow);
     },
-    [getWeekOffsetFromScrollTop],
+    [getWeekOffsetFromScrollTop, setVirtualWindow],
   );
 
   const syncVisibleMonth = useCallback(() => {
@@ -242,8 +252,21 @@ export const useMonthInfiniteScroll = ({
     (scroller: HTMLDivElement) => {
       if (isResizingRef.current) return;
 
-      updateVirtualWindowForScroll(scroller);
-      scheduleVisibleMonthSyncRef.current?.();
+      pendingScrollContainerRef.current = scroller;
+
+      if (scrollRafRef.current !== null) return;
+
+      scrollRafRef.current = window.requestAnimationFrame(() => {
+        scrollRafRef.current = null;
+
+        const pendingScroller = pendingScrollContainerRef.current;
+        pendingScrollContainerRef.current = null;
+
+        if (!pendingScroller || isResizingRef.current) return;
+
+        updateVirtualWindowForScroll(pendingScroller);
+        scheduleVisibleMonthSyncRef.current?.();
+      });
     },
     [isResizingRef, updateVirtualWindowForScroll],
   );
@@ -258,7 +281,7 @@ export const useMonthInfiniteScroll = ({
     cancelVisibleMonthSync();
     setVisibleWeekRange(buildWeekDateRange(baseWeekStartRef.current));
     setVirtualWindow(createWindowAroundWeekOffset(0));
-  }, [cancelVisibleMonthSync, currentDate, scrollTargetToken]);
+  }, [cancelVisibleMonthSync, currentDate, scrollTargetToken, setVirtualWindow]);
 
   useLayoutEffect(() => {
     const targetWeekOffset = pendingScrollWeekOffsetRef.current;
@@ -307,7 +330,16 @@ export const useMonthInfiniteScroll = ({
     };
   }, [handleScroll]);
 
-  useEffect(() => cancelVisibleMonthSync, [cancelVisibleMonthSync]);
+  useEffect(() => () => {
+    cancelVisibleMonthSync();
+
+    if (scrollRafRef.current !== null) {
+      window.cancelAnimationFrame(scrollRafRef.current);
+      scrollRafRef.current = null;
+    }
+
+    pendingScrollContainerRef.current = null;
+  }, [cancelVisibleMonthSync]);
 
   const rowHeight = getMonthRowHeight();
 
