@@ -39,6 +39,7 @@ describe("CalendarYearView", () => {
 
     const scroller = container.querySelector(".calendar-year-view");
     expect(scroller).toBeInstanceOf(HTMLElement);
+    expect((scroller as HTMLElement).scrollTop).toBe(0);
 
     let latestRange = onRenderedRangeChange.mock.calls.at(-1)?.[0] as
       | { start: Date; end: Date }
