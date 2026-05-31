@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { resolvePresentationWidthPx, resolveSplitMinimumRequiredWidthPx, resolveZoomDefaultPercent, resolveZoomMinBaseWidthPx } from "@/features/cardsetview/domain/cardSetViewPresentationPolicy";
 
 describe("cardSetViewPresentationPolicy", () => {
-  it("uses a shared single-column zoom floor across card layouts", () => {
+  it("card layout 間で単一列 zoom floor を共有する", () => {
     expect(
       resolveZoomMinBaseWidthPx({
         cardLayoutMode: "flip",
@@ -23,7 +23,7 @@ describe("cardSetViewPresentationPolicy", () => {
     ).toBe(360);
   });
 
-  it("keeps split availability on a shared threshold in fluid mode", () => {
+  it("fluid mode では共有しきい値で split availability を維持する", () => {
     expect(
       resolveSplitMinimumRequiredWidthPx({
         displayMode: "fluid",
@@ -31,7 +31,7 @@ describe("cardSetViewPresentationPolicy", () => {
     ).toBe(784);
   });
 
-  it("keeps split availability on a shared threshold in fixed mode", () => {
+  it("fixed mode では共有しきい値で split availability を維持する", () => {
     expect(
       resolveSplitMinimumRequiredWidthPx({
         displayMode: "fixed",
@@ -39,7 +39,7 @@ describe("cardSetViewPresentationPolicy", () => {
     ).toBe(808);
   });
 
-  it("allows split to resolve from the shared zoom floor", () => {
+  it("共有 zoom floor から split を解決できる", () => {
     expect(
       resolvePresentationWidthPx({
         zoomPercent: 0,
@@ -49,7 +49,7 @@ describe("cardSetViewPresentationPolicy", () => {
     ).toBe(360);
   });
 
-  it("resolves a default zoom percent that renders the canonical width", () => {
+  it("canonical width を描画するデフォルト zoom percent を解決する", () => {
     const zoomPercent = resolveZoomDefaultPercent({
       cardLayoutMode: "flip",
       maxPresentationWidthPx: 1360,
@@ -65,7 +65,7 @@ describe("cardSetViewPresentationPolicy", () => {
     ).toBe(CANONICAL_CARD_WIDTH);
   });
 
-  it("clamps the default zoom percent when the canonical width does not fit", () => {
+  it("canonical width が収まらない場合はデフォルト zoom percent を clamp する", () => {
     const zoomPercent = resolveZoomDefaultPercent({
       cardLayoutMode: "flip",
       maxPresentationWidthPx: 440,
