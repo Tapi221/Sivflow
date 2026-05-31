@@ -17,7 +17,7 @@ describe("SharedCardContent", () => {
     { id: "b-1", type: "text", orderIndex: 0, content: "hello" },
   ];
 
-  it("renders the shared root and view scene in view mode", () => {
+  it("view mode では共有 root と view scene を描画する", () => {
     const { container } = render(
       <SharedCardContent mode="view" blocks={blocks} />,
     );
@@ -26,7 +26,7 @@ describe("SharedCardContent", () => {
     expect(screen.getByTestId("shared-card-view-scene")).toBeTruthy();
   });
 
-  it("renders the shared root and edit scene in edit mode", () => {
+  it("edit mode では共有 root と edit scene を描画する", () => {
     const { container } = render(
       <SharedCardContent
         mode="edit"
