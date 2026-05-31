@@ -7,7 +7,6 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 
 type CalendarEventChipWeekdayProps = {
   event: GoogleCalendarEvent;
-  compact?: boolean;
 };
 
 type ChipLayoutState = {
@@ -20,9 +19,7 @@ const CHIP_ROOT_CLASS = "relative isolate h-full min-h-0 w-full";
 const CHIP_LINE_MASK_CLASS = "pointer-events-none absolute inset-0 rounded-md bg-white";
 const CHIP_BASE_CLASS = "relative z-10 flex h-full min-h-0 w-full flex-col overflow-hidden rounded-md text-left";
 const CHIP_NORMAL_CLASS = "gap-[0.5px] py-[2px] pl-1.5 pr-1";
-const CHIP_COMPACT_CLASS = "gap-0 py-px pl-1.5 pr-1";
 const CHIP_TITLE_CLASS = "overflow-hidden whitespace-normal break-words text-[12px] font-medium leading-[17px]";
-const CHIP_COMPACT_TITLE_CLASS = "truncate text-[11px] font-semibold leading-[15px]";
 const CHIP_TIME_CLASS = "overflow-hidden whitespace-normal break-words text-[11px] font-semibold leading-[16px] tabular-nums opacity-80";
 const CHIP_INLINE_ROW_CLASS = "flex min-w-0 max-w-full items-baseline gap-1 overflow-hidden";
 const CHIP_INLINE_TITLE_CLASS = "min-w-0 max-w-full shrink overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-medium leading-[17px]";
@@ -80,7 +77,6 @@ const calculateChipLayout = (
   container: HTMLDivElement,
   titleMeasurement: HTMLSpanElement,
   timeMeasurement: HTMLSpanElement,
-  compact: boolean,
 ): ChipLayoutState => {
   const containerStyles = window.getComputedStyle(container);
   const contentHeight = Math.max(
@@ -97,19 +93,6 @@ const calculateChipLayout = (
   );
   const titleLineHeight = getElementLineHeight(titleMeasurement);
   const fullTitleHeight = titleMeasurement.scrollHeight;
-
-  if (compact) {
-    return {
-      showTimeLabel: false,
-      showInlineTimeLabel: false,
-      titleLineClamp: calculateTitleLineClamp(
-        contentHeight,
-        fullTitleHeight,
-        titleLineHeight,
-      ),
-    };
-  }
-
   const timeHeight = timeMeasurement.scrollHeight;
   const rowGap = getPixelValue(containerStyles.rowGap || containerStyles.gap);
   const canShowTimeLabel =
@@ -150,21 +133,18 @@ const createTitleClampStyle = (lineClamp: number): CSSProperties => {
   };
 };
 
-const getChipClassName = (compact: boolean): string => [
+const getChipClassName = (): string => [
   CHIP_BASE_CLASS,
-  compact ? CHIP_COMPACT_CLASS : CHIP_NORMAL_CLASS,
+  CHIP_NORMAL_CLASS,
 ].join(" ");
 
-const getTitleClassName = (compact: boolean): string => compact ? CHIP_COMPACT_TITLE_CLASS : CHIP_TITLE_CLASS;
-
-const getMeasurementClassName = (compact: boolean): string => [
+const getMeasurementClassName = (): string => [
   CHIP_MEASUREMENT_BASE_CLASS,
-  compact ? CHIP_COMPACT_CLASS : CHIP_NORMAL_CLASS,
+  CHIP_NORMAL_CLASS,
 ].join(" ");
 
 const CalendarEventChipWeekday = ({
   event,
-  compact = false,
 }: CalendarEventChipWeekdayProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleMeasurementRef = useRef<HTMLSpanElement>(null);
@@ -177,7 +157,6 @@ const CalendarEventChipWeekday = ({
   const endsAt = event.endsAt instanceof Date ? event.endsAt : new Date(event.endsAt ?? event.startsAt);
   const timeLabel = event.isAllDay ? "終日" : `${format(startsAt, "H:mm")} ~ ${format(endsAt, "H:mm")}`;
   const titleLabel = event.title || "Untitled";
-  const titleClassName = getTitleClassName(compact);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -195,7 +174,6 @@ const CalendarEventChipWeekday = ({
           container,
           titleMeasurement,
           timeMeasurement,
-          compact,
         );
 
         setChipLayout((previousLayout) => {
@@ -230,7 +208,7 @@ const CalendarEventChipWeekday = ({
       window.cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
     };
-  }, [compact, timeLabel, titleLabel]);
+  }, [timeLabel, titleLabel]);
 
   return (
     <HoverEventTooltip
@@ -243,7 +221,7 @@ const CalendarEventChipWeekday = ({
         <div aria-hidden="true" className={CHIP_LINE_MASK_CLASS} />
         <div
           ref={containerRef}
-          className={getChipClassName(compact)}
+          className={getChipClassName()}
           style={{
             background: tokens.bg,
             borderLeft: `3px solid ${tokens.border}`,
@@ -257,8 +235,8 @@ const CalendarEventChipWeekday = ({
             </div>
           ) : (
             <span
-              className={titleClassName}
-              style={compact ? undefined : createTitleClampStyle(chipLayout.titleLineClamp)}
+              className={CHIP_TITLE_CLASS}
+              style={createTitleClampStyle(chipLayout.titleLineClamp)}
             >
               {titleLabel}
             </span>
@@ -268,9 +246,9 @@ const CalendarEventChipWeekday = ({
 
           <div
             aria-hidden="true"
-            className={getMeasurementClassName(compact)}
+            className={getMeasurementClassName()}
           >
-            <span ref={titleMeasurementRef} className={titleClassName}>
+            <span ref={titleMeasurementRef} className={CHIP_TITLE_CLASS}>
               {titleLabel}
             </span>
             <span ref={timeMeasurementRef} className={CHIP_TIME_CLASS}>
