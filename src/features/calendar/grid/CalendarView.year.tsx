@@ -1,6 +1,6 @@
 import { memo, startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import { addDays, addYears, eachMonthOfInterval, endOfDay, endOfMonth, endOfYear, format, isSameDay, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
+import { addDays, addYears, eachMonthOfInterval, endOfDay, endOfYear, format, isSameDay, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import { getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -13,6 +13,7 @@ type CalendarYearViewProps = {
   visibleEvents?: GoogleCalendarEvent[];
   onSelectDate: (date: Date) => void;
   onRenderedRangeChange?: (range: CalendarDateRange) => void;
+  onSyncRangeChange?: (range: CalendarDateRange) => void;
 };
 
 type CalendarYearDayEvents = {
@@ -28,11 +29,16 @@ type CalendarYearDay = {
   events: CalendarYearDayEvents | null;
 };
 
+type CalendarYearWeek = {
+  key: string;
+  days: CalendarYearDay[];
+};
+
 type CalendarYearMonth = {
   key: string;
   date: Date;
   label: string;
-  weeks: CalendarYearDay[][];
+  weeks: CalendarYearWeek[];
 };
 
 type CalendarYearBlock = {
@@ -52,9 +58,8 @@ const INITIAL_YEAR_BUFFER = 5;
 const YEAR_EXTEND_COUNT = 2;
 const YEAR_MAX_RENDERED_YEARS = 11;
 const YEAR_SCROLL_EDGE_THRESHOLD_PX = 2400;
-const YEAR_RENDERED_RANGE_NOTIFY_DELAY_MS = 180;
-const YEAR_RENDERED_RANGE_SAMPLE_OFFSET_PX = 160;
-const YEAR_MONTH_ROW_OFFSET_TOLERANCE_PX = 2;
+const YEAR_SYNC_RANGE_NOTIFY_DELAY_MS = 180;
+const YEAR_SYNC_RANGE_SAMPLE_OFFSET_PX = 160;
 const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
 
 const createDayAriaLabel = (date: Date, eventCount: number): string => {
@@ -130,30 +135,41 @@ const buildMonthDays = (monthDate: Date, eventsByDay: Map<string, CalendarYearDa
   });
 };
 
-const chunkMonthWeeks = (days: CalendarYearDay[]): CalendarYearDay[][] => {
-  const weeks: CalendarYearDay[][] = [];
+const chunkMonthWeeks = (monthKey: string, days: CalendarYearDay[]): CalendarYearWeek[] => {
+  const weeks: CalendarYearWeek[] = [];
 
   for (let index = 0; index < days.length; index += 7) {
-    weeks.push(days.slice(index, index + 7));
+    const weekDays = days.slice(index, index + 7);
+    const firstDay = weekDays[0];
+    if (!firstDay) continue;
+    weeks.push({ key: `${monthKey}:${firstDay.key}`, days: weekDays });
   }
 
   return weeks;
 };
 
-const buildMonthDateRange = (date: Date): CalendarDateRange => ({
-  start: startOfMonth(date),
-  end: endOfDay(endOfMonth(date)),
+const buildWeekDateRange = (week: CalendarYearWeek): CalendarDateRange => ({
+  start: startOfDay(week.days[0].date),
+  end: endOfDay(week.days[week.days.length - 1].date),
 });
 
-const buildMonthRowDateRange = (months: CalendarYearMonth[]): CalendarDateRange | null => {
-  if (months.length === 0) return null;
-  const sortedMonths = [...months].sort((left, right) => left.date.getTime() - right.date.getTime());
-  const firstMonth = sortedMonths[0];
-  const lastMonth = sortedMonths[sortedMonths.length - 1];
+const buildYearDateRange = (years: CalendarYearBlock[]): CalendarDateRange | null => {
+  const firstYear = years[0];
+  const lastYear = years[years.length - 1];
+  if (!firstYear || !lastYear) return null;
 
   return {
-    start: startOfMonth(firstMonth.date),
-    end: endOfDay(endOfMonth(lastMonth.date)),
+    start: startOfYear(firstYear.date),
+    end: endOfDay(endOfYear(lastYear.date)),
+  };
+};
+
+const buildFallbackWeekDateRange = (date: Date): CalendarDateRange => {
+  const start = startOfWeek(date, { weekStartsOn: 0 });
+
+  return {
+    start,
+    end: endOfDay(addDays(start, 6)),
   };
 };
 
@@ -174,18 +190,19 @@ const CalendarYearViewComponent = ({
   visibleEvents = [],
   onSelectDate,
   onRenderedRangeChange,
+  onSyncRangeChange,
 }: CalendarYearViewProps) => {
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const today = useMemo(() => new Date(), []);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const yearSectionRefsMap = useRef<Map<string, HTMLElement>>(new Map());
-  const monthSectionRefsMap = useRef<Map<string, HTMLElement>>(new Map());
+  const weekRowRefsMap = useRef<Map<string, HTMLElement>>(new Map());
   const rangeAnchorRef = useRef<YearRangeAnchor | null>(null);
   const isExtendingBeforeRef = useRef(false);
   const isExtendingAfterRef = useRef(false);
   const lastScrollTopRef = useRef(0);
-  const renderedRangeNotifyTimeoutRef = useRef<number | null>(null);
+  const syncRangeNotifyTimeoutRef = useRef<number | null>(null);
   const requestedYearKeyRef = useRef(format(startOfYear(yearDate), "yyyy"));
   const pendingScrollYearKeyRef = useRef<string | null>(format(startOfYear(yearDate), "yyyy"));
   const [anchorYear, setAnchorYear] = useState(() => startOfYear(yearDate));
@@ -193,7 +210,7 @@ const CalendarYearViewComponent = ({
     startOffset: -INITIAL_YEAR_BUFFER,
     endOffset: INITIAL_YEAR_BUFFER,
   }));
-  const [renderedRange, setRenderedRange] = useState(() => buildMonthDateRange(yearDate));
+  const [syncRange, setSyncRange] = useState(() => buildFallbackWeekDateRange(yearDate));
 
   const eventsByDay = useMemo(() => buildEventsByDay(visibleEvents), [visibleEvents]);
 
@@ -203,13 +220,14 @@ const CalendarYearViewComponent = ({
         start: startOfYear(targetYear),
         end: endOfYear(targetYear),
       }).map((monthDate) => {
+        const monthKey = format(monthDate, "yyyy-MM");
         const days = buildMonthDays(monthDate, eventsByDay);
 
         return {
-          key: format(monthDate, "yyyy-MM"),
+          key: monthKey,
           date: monthDate,
           label: format(monthDate, t.dateFnsLocaleKey === "ja" ? "M月" : "MMM", { locale: dateFnsLocale }),
-          weeks: chunkMonthWeeks(days),
+          weeks: chunkMonthWeeks(monthKey, days),
         };
       });
     },
@@ -231,71 +249,69 @@ const CalendarYearViewComponent = ({
     });
   }, [anchorYear, buildYearMonths, dateFnsLocale, yearOffsetRange.endOffset, yearOffsetRange.startOffset]);
 
-  const getRenderedRangeFromScroll = useCallback((scroller: HTMLDivElement): CalendarDateRange | null => {
-    const sampleTop = scroller.scrollTop + Math.min(YEAR_RENDERED_RANGE_SAMPLE_OFFSET_PX, scroller.clientHeight / 2);
-    let bestYear: CalendarYearBlock | null = null;
-    let bestMonth: CalendarYearMonth | null = null;
-    let bestSection: HTMLElement | null = null;
+  const renderedRange = useMemo(() => buildYearDateRange(years), [years]);
+
+  const getSyncRangeFromScroll = useCallback((scroller: HTMLDivElement): CalendarDateRange | null => {
+    const scrollerRect = scroller.getBoundingClientRect();
+    const sampleY = scrollerRect.top + Math.min(YEAR_SYNC_RANGE_SAMPLE_OFFSET_PX, scroller.clientHeight / 2);
+    let bestWeek: CalendarYearWeek | null = null;
     let bestDistance = Number.POSITIVE_INFINITY;
 
     for (const year of years) {
       for (const month of year.months) {
-        const section = monthSectionRefsMap.current.get(month.key);
-        if (!section) continue;
+        for (const week of month.weeks) {
+          const row = weekRowRefsMap.current.get(week.key);
+          if (!row) continue;
 
-        const sectionTop = section.offsetTop;
-        const sectionBottom = sectionTop + section.offsetHeight;
-        const distance = sampleTop < sectionTop ? sectionTop - sampleTop : sampleTop > sectionBottom ? sampleTop - sectionBottom : 0;
+          const rect = row.getBoundingClientRect();
+          const distance = sampleY < rect.top ? rect.top - sampleY : sampleY > rect.bottom ? sampleY - rect.bottom : 0;
 
-        if (distance < bestDistance) {
-          bestDistance = distance;
-          bestYear = year;
-          bestMonth = month;
-          bestSection = section;
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            bestWeek = week;
+          }
         }
       }
     }
 
-    if (!bestYear || !bestMonth || !bestSection) return null;
-
-    const rowTop = bestSection.offsetTop;
-    const rowMonths = bestYear.months.filter((month) => {
-      const section = monthSectionRefsMap.current.get(month.key);
-      return section ? Math.abs(section.offsetTop - rowTop) <= YEAR_MONTH_ROW_OFFSET_TOLERANCE_PX : false;
-    });
-
-    return buildMonthRowDateRange(rowMonths) ?? buildMonthDateRange(bestMonth.date);
+    return bestWeek ? buildWeekDateRange(bestWeek) : null;
   }, [years]);
 
-  const syncRenderedRange = useCallback((scroller: HTMLDivElement) => {
-    const nextRange = getRenderedRangeFromScroll(scroller);
+  const syncVisibleWeekRange = useCallback((scroller: HTMLDivElement) => {
+    const nextRange = getSyncRangeFromScroll(scroller);
     if (!nextRange) return;
 
-    setRenderedRange((currentRange) => isSameCalendarDateRange(currentRange, nextRange) ? currentRange : nextRange);
-  }, [getRenderedRangeFromScroll]);
+    setSyncRange((currentRange) => isSameCalendarDateRange(currentRange, nextRange) ? currentRange : nextRange);
+  }, [getSyncRangeFromScroll]);
 
   useEffect(() => {
-    if (!onRenderedRangeChange) return;
+    if (!renderedRange) return;
 
-    if (renderedRangeNotifyTimeoutRef.current !== null) {
-      window.clearTimeout(renderedRangeNotifyTimeoutRef.current);
+    onRenderedRangeChange?.(renderedRange);
+  }, [onRenderedRangeChange, renderedRange]);
+
+  useEffect(() => {
+    if (!onSyncRangeChange) return;
+
+    if (syncRangeNotifyTimeoutRef.current !== null) {
+      window.clearTimeout(syncRangeNotifyTimeoutRef.current);
     }
 
-    renderedRangeNotifyTimeoutRef.current = window.setTimeout(() => {
-      renderedRangeNotifyTimeoutRef.current = null;
+    syncRangeNotifyTimeoutRef.current = window.setTimeout(() => {
+      syncRangeNotifyTimeoutRef.current = null;
 
       startTransition(() => {
-        onRenderedRangeChange(renderedRange);
+        onSyncRangeChange(syncRange);
       });
-    }, YEAR_RENDERED_RANGE_NOTIFY_DELAY_MS);
+    }, YEAR_SYNC_RANGE_NOTIFY_DELAY_MS);
 
     return () => {
-      if (renderedRangeNotifyTimeoutRef.current === null) return;
+      if (syncRangeNotifyTimeoutRef.current === null) return;
 
-      window.clearTimeout(renderedRangeNotifyTimeoutRef.current);
-      renderedRangeNotifyTimeoutRef.current = null;
+      window.clearTimeout(syncRangeNotifyTimeoutRef.current);
+      syncRangeNotifyTimeoutRef.current = null;
     };
-  }, [onRenderedRangeChange, renderedRange]);
+  }, [onSyncRangeChange, syncRange]);
 
   const setYearSectionRef = useCallback((yearKey: string, node: HTMLElement | null) => {
     if (node) {
@@ -305,11 +321,11 @@ const CalendarYearViewComponent = ({
     }
   }, []);
 
-  const setMonthSectionRef = useCallback((monthKey: string, node: HTMLElement | null) => {
+  const setWeekRowRef = useCallback((weekKey: string, node: HTMLElement | null) => {
     if (node) {
-      monthSectionRefsMap.current.set(monthKey, node);
+      weekRowRefsMap.current.set(weekKey, node);
     } else {
-      monthSectionRefsMap.current.delete(monthKey);
+      weekRowRefsMap.current.delete(weekKey);
     }
   }, []);
 
@@ -347,7 +363,7 @@ const CalendarYearViewComponent = ({
     rangeAnchorRef.current = null;
     isExtendingBeforeRef.current = false;
     isExtendingAfterRef.current = false;
-    setRenderedRange(buildMonthDateRange(yearDate));
+    setSyncRange(buildFallbackWeekDateRange(yearDate));
     setAnchorYear(startOfYear(yearDate));
     setYearOffsetRange({
       startOffset: -INITIAL_YEAR_BUFFER,
@@ -366,8 +382,8 @@ const CalendarYearViewComponent = ({
     scroller.scrollTop = Math.max(0, targetSection.offsetTop);
     lastScrollTopRef.current = scroller.scrollTop;
     pendingScrollYearKeyRef.current = null;
-    syncRenderedRange(scroller);
-  }, [syncRenderedRange, years]);
+    syncVisibleWeekRange(scroller);
+  }, [syncVisibleWeekRange, years]);
 
   useLayoutEffect(() => {
     const rangeAnchor = rangeAnchorRef.current;
@@ -392,8 +408,8 @@ const CalendarYearViewComponent = ({
     rangeAnchorRef.current = null;
     isExtendingBeforeRef.current = false;
     isExtendingAfterRef.current = false;
-    syncRenderedRange(scroller);
-  }, [syncRenderedRange, years]);
+    syncVisibleWeekRange(scroller);
+  }, [syncVisibleWeekRange, years]);
 
   useEffect(() => {
     const scroller = scrollContainerRef.current;
@@ -405,7 +421,7 @@ const CalendarYearViewComponent = ({
       const isScrollingUp = currentScrollTop < previousScrollTop;
       const isScrollingDown = currentScrollTop > previousScrollTop;
       lastScrollTopRef.current = currentScrollTop;
-      syncRenderedRange(scroller);
+      syncVisibleWeekRange(scroller);
 
       if (
         isScrollingUp &&
@@ -447,7 +463,7 @@ const CalendarYearViewComponent = ({
     return () => {
       scroller.removeEventListener("scroll", handleScroll);
     };
-  }, [getCurrentRangeAnchor, syncRenderedRange]);
+  }, [getCurrentRangeAnchor, syncVisibleWeekRange]);
 
   return (
     <div
@@ -471,8 +487,6 @@ const CalendarYearViewComponent = ({
               {year.months.map((month) => (
                 <section
                   key={month.key}
-                  ref={(node) => setMonthSectionRef(month.key, node)}
-                  data-calendar-month-key={month.key}
                   className="min-w-0 bg-white px-4 pb-3 pt-3"
                   aria-label={month.label}
                 >
@@ -488,37 +502,41 @@ const CalendarYearViewComponent = ({
                     ))}
                   </div>
 
-                  <div className="mt-1 grid grid-cols-7 gap-y-1 text-center text-[12px] leading-none">
-                    {month.weeks.flat().map((day) => {
-                      const selected = day.isCurrentMonth && isSameDay(day.date, selectedDate);
-                      const isToday = isSameDay(day.date, today);
-                      const eventCount = day.events?.count ?? 0;
+                  <div className="mt-1 space-y-1 text-center text-[12px] leading-none">
+                    {month.weeks.map((week) => (
+                      <div key={week.key} ref={(node) => setWeekRowRef(week.key, node)} data-calendar-week-key={week.key} className="grid grid-cols-7 gap-y-1">
+                        {week.days.map((day) => {
+                          const selected = day.isCurrentMonth && isSameDay(day.date, selectedDate);
+                          const isToday = isSameDay(day.date, today);
+                          const eventCount = day.events?.count ?? 0;
 
-                      return (
-                        <button
-                          key={day.key}
-                          type="button"
-                          aria-label={createDayAriaLabel(day.date, eventCount)}
-                          aria-pressed={selected}
-                          title={eventCount > 0 ? `${eventCount}件` : undefined}
-                          className={cn(
-                            "mx-auto flex h-6 w-6 items-center justify-center rounded-full font-medium transition-colors duration-150 ease-out",
-                            "appearance-none select-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]",
-                            selected
-                              ? "bg-[#3478f6] text-white shadow-[0_1px_2px_rgba(52,120,246,0.25)]"
-                              : isToday
-                                ? "text-[#3478f6]"
-                                : day.isCurrentMonth
-                                  ? "text-[#2c2c2e] hover:bg-[#f2f2f7]"
-                                  : "text-[#b8b8bd] hover:bg-[#f7f7f7]",
-                          )}
-                          style={getDayButtonStyle(day, selected)}
-                          onClick={() => onSelectDate(day.date)}
-                        >
-                          {day.dayOfMonth}
-                        </button>
-                      );
-                    })}
+                          return (
+                            <button
+                              key={day.key}
+                              type="button"
+                              aria-label={createDayAriaLabel(day.date, eventCount)}
+                              aria-pressed={selected}
+                              title={eventCount > 0 ? `${eventCount}件` : undefined}
+                              className={cn(
+                                "mx-auto flex h-6 w-6 items-center justify-center rounded-full font-medium transition-colors duration-150 ease-out",
+                                "appearance-none select-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7cc]",
+                                selected
+                                  ? "bg-[#3478f6] text-white shadow-[0_1px_2px_rgba(52,120,246,0.25)]"
+                                  : isToday
+                                    ? "text-[#3478f6]"
+                                    : day.isCurrentMonth
+                                      ? "text-[#2c2c2e] hover:bg-[#f2f2f7]"
+                                      : "text-[#b8b8bd] hover:bg-[#f7f7f7]",
+                              )}
+                              style={getDayButtonStyle(day, selected)}
+                              onClick={() => onSelectDate(day.date)}
+                            >
+                              {day.dayOfMonth}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))}
                   </div>
                 </section>
               ))}
