@@ -125,15 +125,7 @@
   .calendar-month-grid {
     border-top: 0;
     background-color: #ffffff;
-    background-image: repeating-linear-gradient(
-      to bottom,
-      transparent 0,
-      transparent calc(var(--calendar-month-row-height) - 1px),
-      #eeeeee calc(var(--calendar-month-row-height) - 1px),
-      #eeeeee var(--calendar-month-row-height)
-    );
-    background-repeat: repeat;
-    background-size: 100% var(--calendar-month-row-height);
+    background-image: none;
   }
 
   .calendar-year-section {
