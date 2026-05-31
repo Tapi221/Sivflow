@@ -97,9 +97,7 @@
     transition: background 0ms ease;
   }
 
-  :hover::-webkit-scrollbar-thumb,
-  :focus-within::-webkit-scrollbar-thumb,
-  :active::-webkit-scrollbar-thumb {
+  :hover::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb);
   }
 
@@ -116,9 +114,7 @@
     scrollbar-color: transparent transparent;
   }
 
-  *:hover,
-  *:focus-within,
-  *:active {
+  *:hover {
     scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   }
 
