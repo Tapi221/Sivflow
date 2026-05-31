@@ -7,7 +7,7 @@ import { expect, test } from "@playwright/test";
  * 1. App running on localhost:5173
  * 2. `forceSyncUI` hook present in SyncSettings.tsx
  */
-test.describe("Sync UI Verification", () => {
+test.describe("同期 UI 検証", () => {
   test.beforeEach(async ({ page }) => {
     // Set a very long timeout for the test
     test.setTimeout(120000);
@@ -37,7 +37,7 @@ test.describe("Sync UI Verification", () => {
     await page.evaluate(() => window.forceSyncUI(null, null));
   });
 
-  test("Should verify Success State", async ({ page }) => {
+  test("成功状態を検証する", async ({ page }) => {
     // Inject Success
     await page.evaluate(() => window.forceSyncUI("success", 0));
 
@@ -52,7 +52,7 @@ test.describe("Sync UI Verification", () => {
     // Note: checking classes/color in CSS is brittle, relying on Text presence for Reassurance logic
   });
 
-  test("Should verify Error State", async ({ page }) => {
+  test("エラー状態を検証する", async ({ page }) => {
     // Inject Error
     await page.evaluate(() => window.forceSyncUI("error", 0));
 
@@ -65,7 +65,7 @@ test.describe("Sync UI Verification", () => {
     ).toBeVisible();
   });
 
-  test("Should verify Conflict State (Priority)", async ({ page }) => {
+  test("競合状態が優先されることを検証する", async ({ page }) => {
     // Inject Success but with Conflict
     await page.evaluate(() => window.forceSyncUI("success", 3));
 
@@ -79,7 +79,7 @@ test.describe("Sync UI Verification", () => {
     // await page.getByRole('button', { name: 'Menu' }).click(); // Selector depends on implementation
   });
 
-  test("Should verify Collapsible Details", async ({ page }) => {
+  test("折りたたみ詳細を検証する", async ({ page }) => {
     // Initially Hidden (Stats not visible)
     await expect(page.getByText("成功率")).not.toBeVisible();
 
