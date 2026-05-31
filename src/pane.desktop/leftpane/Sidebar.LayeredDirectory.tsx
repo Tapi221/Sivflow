@@ -54,7 +54,14 @@ const SidebarLayeredDirectory = () => {
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const treeFolders = useMemo(() => folders as FolderTreeNode[], [folders]);
   const { rootFolders } = useExplorerDerivedData({ treeFolders, treeCards: EMPTY_COLLECTION, cardSets: EMPTY_COLLECTION, documents: EMPTY_COLLECTION, isFiltering: false });
-  const folderById = useMemo(() => new Map(treeFolders.map((folder) => [getFolderId(folder), folder]).filter(([folderId]) => folderId)), [treeFolders]);
+  const folderById = useMemo(() => {
+    const map = new Map<string, FolderTreeNode>();
+    treeFolders.forEach((folder) => {
+      const folderId = getFolderId(folder);
+      if (folderId) map.set(folderId, folder);
+    });
+    return map;
+  }, [treeFolders]);
   const rootFolderIds = useMemo(() => new Set(rootFolders.map(getFolderId).filter(Boolean)), [rootFolders]);
   const selectedFolderId = activeTab?.kind === "explorer" && !activeTab.explorerState.isSectionListMode ? activeTab.explorerState.selectedFolderId : null;
   const selectedProjectId = useMemo(() => resolveRootProjectId(selectedFolderId, folderById, rootFolderIds), [folderById, rootFolderIds, selectedFolderId]);
