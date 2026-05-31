@@ -102,6 +102,8 @@ const createCalendarSidebarProps = (): CalendarSidebarProps => ({
   onToggleCalendar: vi.fn(),
 });
 
+const hasCalendarListDividerClass = (calendarList: HTMLElement): boolean => Array.from(calendarList.querySelectorAll("*")).some((element) => element.classList.contains("border-t") || element.classList.contains("border-[#eeeeee]"));
+
 describe("CalendarSidebar", () => {
   afterEach(() => {
     cleanup();
@@ -123,5 +125,13 @@ describe("CalendarSidebar", () => {
     expect(screen.queryByText("GOOGLE CALENDARS")).toBeNull();
     expect(screen.queryByRole("button", { name: "Googleカレンダーを追加" })).toBeNull();
     expect(screen.queryByRole("button", { name: "akari.tt221" })).not.toBeNull();
+  });
+
+  it("MY PROJECTS と Google アカウント一覧の間に区切り線を描画しない", () => {
+    render(<CalendarSidebar {...createCalendarSidebarProps()} googleAccounts={[createGoogleAccountDisplay()]} />);
+
+    const calendarList = screen.getByRole("navigation", { name: "カレンダー一覧" });
+
+    expect(hasCalendarListDividerClass(calendarList)).toBe(false);
   });
 });
