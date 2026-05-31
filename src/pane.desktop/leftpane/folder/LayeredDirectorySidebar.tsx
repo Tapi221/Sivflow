@@ -44,6 +44,8 @@ const IconFolder = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill=
 
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 
+const LibraryTreeMarker = ({ className }: IconProps) => <span aria-hidden="true" className={cn("library-tree-marker", className)} />;
+
 const getFolderName = (folder: FolderTreeNode, isRootProject = false): string => {
   const name = folder.folderName ?? folder.folder_name;
   return typeof name === "string" && name.trim() ? name.trim() : isRootProject ? UNTITLED_PROJECT_NAME : UNTITLED_FOLDER_NAME;
@@ -93,8 +95,9 @@ const ProjectListItem = ({ folder, selectedFolderId, getFolderContentCount, onSe
 
   return (
     <div data-folder-id={folderId}>
-      <div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} className={cn("group flex h-7 items-center rounded-[10px] pr-1 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5] text-[#343a45]")}>
-        <button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center rounded-[10px] text-left hover:bg-[#f7f7f8]">
+      <div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} className={cn("group flex h-7 items-center gap-1 rounded-[10px] pr-1 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]") }>
+        <LibraryTreeMarker />
+        <button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]">
           <span className="min-w-0 flex-1 truncate">{folderName}</span>
           {contentCount > 0 ? <span className="shrink-0 rounded-full bg-[#eef1f4] px-1.5 py-0.5 text-[10px] font-bold text-[#8b929e]">{contentCount}</span> : null}
         </button>
@@ -214,11 +217,11 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
 
   return (
     <div data-folder-id={folderId}>
-      <div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} className={cn("group flex h-7 items-center rounded-[10px] pr-1 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5] text-[#343a45]")} style={{ paddingLeft: rowPaddingLeft }}>
-        <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} disabled={!hasChildren} className={cn("flex h-6 w-5 shrink-0 items-center justify-center rounded-md text-[#b0b5bd]", hasChildren ? "hover:bg-white hover:text-[#6f7681]" : "opacity-0")}>
-          <IconChevronRight className={cn("h-3 w-3 transition-transform", isExpanded && "rotate-90")} />
+      <div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} className={cn("group flex h-7 items-center gap-1 rounded-[10px] pr-1 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")} style={{ paddingLeft: rowPaddingLeft }}>
+        <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} aria-disabled={!hasChildren} disabled={!hasChildren} className="library-tree-marker">
+          <IconChevronRight className="h-3 w-3 opacity-0" />
         </button>
-        <button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center gap-1.5 rounded-[10px] text-left hover:bg-[#f7f7f8]">
+        <button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center gap-1.5 rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]">
           <IconFolder className="h-4 w-4 shrink-0 text-[#9aa1ad]" />
           <span className="min-w-0 flex-1 truncate">{folderName}</span>
           {contentCount > 0 ? <span className="shrink-0 rounded-full bg-[#eef1f4] px-1.5 py-0.5 text-[10px] font-bold text-[#8b929e]">{contentCount}</span> : null}
