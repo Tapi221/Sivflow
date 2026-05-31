@@ -28,14 +28,14 @@ const extractCssRule = (source: string, selector: string): string => {
 };
 
 describe("month calendar spacer grid style", () => {
-  it("keeps the spacer line token at the same thin color and width used by calendar grids", () => {
+  it("spacer line token を calendar grid と同じ細い色・幅に保つ", () => {
     const monthViewRule = extractCssRule(calendarCss, ".calendar-month-view");
 
     expect(monthViewRule).toContain(`--calendar-month-spacer-line-color: ${EXPECTED_SPACER_LINE_COLOR};`);
     expect(monthViewRule).toContain(`--calendar-month-spacer-line-width: ${EXPECTED_SPACER_LINE_WIDTH};`);
   });
 
-  it("draws the spacer background from the guaranteed line color and width tokens", () => {
+  it("保証された line color と width token から spacer background を描画する", () => {
     const spacerRule = extractCssRule(calendarCss, ".calendar-month-grid-spacer::before");
 
     expect(spacerRule).toContain("background-image: repeating-linear-gradient(");
