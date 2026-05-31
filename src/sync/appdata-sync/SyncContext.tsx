@@ -3,18 +3,8 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { ISyncService, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
 import { getLocalDb } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-import { DEFAULT_SYNC_SETTINGS, type SyncConflict, type SyncEntity, type SyncSettings } from "@/types/domain/sync";
-import { SyncContext, type SyncContextType, type SyncNotice, type SyncProviderProps, type SyncStatus, type SyncTableName } from "./SyncContextCore";
-
-const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncTableName> = {
-  card: "cards",
-  folder: "folders",
-  cardSet: "cardSets",
-  document: "documents",
-  tag: "tagRecords",
-  userSetting: "userSettings",
-  asset: "images",
-};
+import { DEFAULT_SYNC_SETTINGS, type SyncConflict, type SyncSettings } from "@/types/domain/sync";
+import { SyncContext, type SyncContextType, type SyncNotice, type SyncProviderProps, type SyncStatus } from "./SyncContextCore";
 
 const isSyncIntervalMinutes = (value: unknown): value is SyncSettings["intervalMinutes"] => {
   return value === 5 || value === 15 || value === 30 || value === 60;
