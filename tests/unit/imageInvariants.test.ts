@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import type { UploadedImage } from "@/types";
 import { assertImageInvariant, assertNoBase64InImage, ImageInvariantViolation } from "@/utils/imageAssertions";
 
-describe("Image Invariants", () => {
+describe("画像不変条件", () => {
   describe("assertNoBase64InImage", () => {
-    it("should reject Base64 in remoteUrl", () => {
+    it("remoteUrl 内の Base64 を拒否する", () => {
       const image: UploadedImage = {
         id: "test-1",
         remoteUrl: "data:image/png;base64,iVBORw0KG..." as unknown,
@@ -19,7 +19,7 @@ describe("Image Invariants", () => {
       );
     });
 
-    it("should reject Base64 in localUrl", () => {
+    it("localUrl 内の Base64 を拒否する", () => {
       const image: UploadedImage = {
         id: "test-2",
         localUrl: "data:image/png;base64,iVBORw0KG..." as unknown,
@@ -34,7 +34,7 @@ describe("Image Invariants", () => {
       );
     });
 
-    it("should reject embedded base64 marker in thumbnailUrl", () => {
+    it("thumbnailUrl 内の埋め込み Base64 マーカーを拒否する", () => {
       const image: UploadedImage = {
         id: "test-3",
         thumbnailUrl:
@@ -50,7 +50,7 @@ describe("Image Invariants", () => {
       );
     });
 
-    it("should accept valid Blob URL in localUrl", () => {
+    it("localUrl の有効な Blob URL を受け入れる", () => {
       const image: UploadedImage = {
         id: "test-4",
         localUrl: "blob:http://localhost:5173/abc-123" as unknown,
@@ -60,7 +60,7 @@ describe("Image Invariants", () => {
       expect(() => assertNoBase64InImage(image)).not.toThrow();
     });
 
-    it("should accept valid Storage URL in remoteUrl and thumbnailUrl", () => {
+    it("remoteUrl と thumbnailUrl の有効な Storage URL を受け入れる", () => {
       const image: UploadedImage = {
         id: "test-5",
         remoteUrl:
@@ -75,7 +75,7 @@ describe("Image Invariants", () => {
   });
 
   describe("assertImageInvariant", () => {
-    it("should pass for valid image with Storage URL", () => {
+    it("Storage URL を持つ有効な画像を通す", () => {
       const image: UploadedImage = {
         id: "test-6",
         remoteUrl:
@@ -86,7 +86,7 @@ describe("Image Invariants", () => {
       expect(() => assertImageInvariant(image)).not.toThrow();
     });
 
-    it("should pass for valid image with Blob URL", () => {
+    it("Blob URL を持つ有効な画像を通す", () => {
       const image: UploadedImage = {
         id: "test-7",
         localUrl: "blob:http://localhost:5173/abc-123" as unknown,
@@ -96,7 +96,7 @@ describe("Image Invariants", () => {
       expect(() => assertImageInvariant(image)).not.toThrow();
     });
 
-    it("should pass for valid thumbnail Storage URL", () => {
+    it("有効な thumbnail Storage URL を通す", () => {
       const image: UploadedImage = {
         id: "test-8",
         thumbnailUrl:
@@ -107,7 +107,7 @@ describe("Image Invariants", () => {
       expect(() => assertImageInvariant(image)).not.toThrow();
     });
 
-    it("should reject invalid remoteUrl even when it is https", () => {
+    it("https でも無効な remoteUrl は拒否する", () => {
       const image: UploadedImage = {
         id: "test-9",
         remoteUrl: "https://example.com/image.jpg" as unknown,
@@ -120,7 +120,7 @@ describe("Image Invariants", () => {
       expect(() => assertImageInvariant(image)).toThrow(/Invalid remoteUrl/);
     });
 
-    it("should reject invalid thumbnailUrl even when it is https", () => {
+    it("https でも無効な thumbnailUrl は拒否する", () => {
       const image: UploadedImage = {
         id: "test-10",
         thumbnailUrl: "https://example.com/thumb.jpg" as unknown,
@@ -133,7 +133,7 @@ describe("Image Invariants", () => {
       expect(() => assertImageInvariant(image)).toThrow(/Invalid thumbnailUrl/);
     });
 
-    it("should reject invalid localUrl (not Blob URL)", () => {
+    it("Blob URL ではない無効な localUrl を拒否する", () => {
       const image: UploadedImage = {
         id: "test-11",
         localUrl: "file:///C:/Users/image.jpg" as unknown,
@@ -145,7 +145,7 @@ describe("Image Invariants", () => {
       );
     });
 
-    it("should reject embedded base64 marker in remoteUrl", () => {
+    it("remoteUrl 内の埋め込み Base64 マーカーを拒否する", () => {
       const image: UploadedImage = {
         id: "test-12",
         remoteUrl:
