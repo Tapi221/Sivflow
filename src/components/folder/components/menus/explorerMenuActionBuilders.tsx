@@ -187,7 +187,7 @@ export const buildExplorerCreateMenuActions = ({
   const actions: MenuAction[] = [
     {
       id: "create-root-folder",
-      label: "新規フォルダ",
+      label: "新規プロジェクト",
       icon: <CreateFolderIcon />,
       onSelect: () => {
         void onCreateRootFolder?.();
