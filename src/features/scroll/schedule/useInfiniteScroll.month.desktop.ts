@@ -40,9 +40,9 @@ type MonthVirtualWindow = {
 const MONTH_GRID_FIRST_WEEK_OFFSET_PX = C.CALENDAR_WEEKDAY_HEADER_HEIGHT;
 const MONTH_VIRTUAL_PAST_WEEKS = 5200;
 const MONTH_VIRTUAL_FUTURE_WEEKS = 5200;
-const MONTH_VIRTUAL_OVERSCAN_WEEKS = 36;
-const MONTH_INITIAL_RENDERED_WEEKS = 96;
-const MONTH_VIRTUAL_WINDOW_GUARD_WEEKS = 18;
+const MONTH_VIRTUAL_OVERSCAN_WEEKS = 12;
+const MONTH_INITIAL_RENDERED_WEEKS = 36;
+const MONTH_VIRTUAL_WINDOW_GUARD_WEEKS = 6;
 const VISIBLE_MONTH_SYNC_DELAY_MS = 96;
 
 const getWeekStart = (date: Date): Date => startOfWeek(date, { weekStartsOn: CALENDAR_MONTH_WEEK_STARTS_ON });
@@ -149,11 +149,13 @@ export const useMonthInfiniteScroll = ({
     if (isSameVirtualWindow(virtualWindowRef.current, nextWindow)) return;
 
     virtualWindowRef.current = nextWindow;
-    setVirtualWindowState(nextWindow);
-    setVisibleWeekRange((currentRange) => {
-      const nextRange = buildWindowDateRange(baseWeekStartRef.current, nextWindow);
+    const nextRange = buildWindowDateRange(baseWeekStartRef.current, nextWindow);
 
-      return isSameCalendarDateRange(currentRange, nextRange) ? currentRange : nextRange;
+    startTransition(() => {
+      setVirtualWindowState(nextWindow);
+      setVisibleWeekRange((currentRange) => {
+        return isSameCalendarDateRange(currentRange, nextRange) ? currentRange : nextRange;
+      });
     });
   }, []);
 

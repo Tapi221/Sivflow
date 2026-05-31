@@ -52,7 +52,7 @@ describe("CalendarYearView", () => {
       | { start: Date; end: Date }
       | undefined;
 
-    expect(latestRange?.start.getFullYear()).toBe(2041);
-    expect(latestRange?.end.getFullYear()).toBe(2052);
+    expect(latestRange?.start.getFullYear()).toBe(2044);
+    expect(latestRange?.end.getFullYear()).toBe(2049);
   }, 60_000);
 });
