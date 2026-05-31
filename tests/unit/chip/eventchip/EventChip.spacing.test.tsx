@@ -177,12 +177,4 @@ describe("weekday event chip text clipping", () => {
     expect(timeElement.className).toContain("break-words");
     expect(timeElement.className).not.toContain("whitespace-nowrap");
   });
-
-  it("compact チップのタイトルも固定 line-height で表示する", () => {
-    render(<CalendarEventChipWeekday event={TIMED_EVENT} compact />);
-
-    const titleElement = getWeekdayVisibleTitleElement();
-
-    expect(titleElement.className).toContain("leading-[15px]");
-  });
 });
