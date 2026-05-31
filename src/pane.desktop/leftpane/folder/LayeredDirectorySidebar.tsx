@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type MouseEvent as ReactMouseEvent, type SetStateAction } from "react";
-import { useCardSets } from "@/components/card/hooks/useCardSets";
-import { getFolderProjectColor } from "@/components/folder/explorer/model/projectColor";
-import { DEFAULT_NEW_CARD_SET_NAME, DEFAULT_NEW_FOLDER_NAME, getFolderId, UNTITLED_FOLDER_NAME, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
-import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
-import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+import { useCallback, useMemo, useRef, useState, type Dispatch, type MouseEvent as ReactMouseEvent, type SetStateAction } from "react";
 import { LAYERED_COLOR_MENU_HEIGHT, LAYERED_COLOR_MENU_WIDTH, LayeredColorMenu } from "@/chip/rightclickpanel.desktop/LayeredColorMenu.desktop";
 import { LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LayeredProjectMenu, type LayeredProjectMenuAction, type LayeredProjectMenuActionId, type LayeredProjectMenuSubmenuAnchor } from "@/chip/rightclickpanel.desktop/LayeredProjectMenu";
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
+import { useCardSets } from "@/components/card/hooks/useCardSets";
+import { getFolderProjectColor } from "@/components/folder/explorer/model/projectColor";
+import { DEFAULT_NEW_CARD_SET_NAME, DEFAULT_NEW_FOLDER_NAME, getFolderId, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
+import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
@@ -17,17 +17,40 @@ type FolderCommandSet = ReturnType<typeof useFolderCommands>;
 
 type CardSetCommandSet = ReturnType<typeof useCardSets>;
 
-type DirectoryTreeNodeProps = { folder: FolderTreeNode; level: number; selectedFolderId: string | null; expandedFolderIds: Set<string>; getChildFolders: (folderId: string) => FolderTreeNode[]; getFolderContentCount: (folderId: string | null) => number; onToggleFolder: (folderId: string) => void; onSelectFolder: (folderId: string) => void; onOpenContextMenu: (event: ReactMouseEvent<HTMLElement>, folder: FolderTreeNode, isRootProject: boolean) => void; };
+type ProjectListItemProps = {
+  folder: FolderTreeNode;
+  selectedFolderId: string | null;
+  onSelectProject: (folderId: string) => void;
+  onOpenContextMenu: (event: ReactMouseEvent<HTMLElement>, folder: FolderTreeNode, isRootProject: boolean) => void;
+};
 
-type ProjectListItemProps = { folder: FolderTreeNode; selectedFolderId: string | null; onSelectProject: (folderId: string) => void; onOpenContextMenu: (event: ReactMouseEvent<HTMLElement>, folder: FolderTreeNode, isRootProject: boolean) => void; };
+type FolderContextMenuState = {
+  folderId: string;
+  folderName: string;
+  folderColor: string | null;
+  isRootProject: boolean;
+  x: number;
+  y: number;
+};
 
-type FolderContextMenuState = { folderId: string; folderName: string; folderColor: string | null; isRootProject: boolean; x: number; y: number; };
+type FolderColorMenuState = {
+  x: number;
+  y: number;
+};
 
-type FolderColorMenuState = { x: number; y: number; };
+type UseFolderContextMenuParams = {
+  createFolder: FolderCommandSet["createFolder"];
+  updateFolder: FolderCommandSet["updateFolder"];
+  deleteFolder: FolderCommandSet["deleteFolder"];
+  createCardSet: CardSetCommandSet["createCardSet"];
+  getNextOrderIndex: (folderId: string | null, resolvedFolderId?: string) => number;
+  setExpandedFolderIds: Dispatch<SetStateAction<Set<string>>>;
+};
 
-type UseFolderContextMenuParams = { createFolder: FolderCommandSet["createFolder"]; updateFolder: FolderCommandSet["updateFolder"]; deleteFolder: FolderCommandSet["deleteFolder"]; createCardSet: CardSetCommandSet["createCardSet"]; getNextOrderIndex: (folderId: string | null, resolvedFolderId?: string) => number; setExpandedFolderIds: Dispatch<SetStateAction<Set<string>>>; };
-
-type LibraryTreeMarkerProps = { className?: string; color?: string | null; };
+type LibraryTreeMarkerProps = {
+  className?: string;
+  color?: string | null;
+};
 
 const EMPTY_COLLECTION: never[] = [];
 const LIBRARY_TITLE = "Library";
@@ -37,19 +60,16 @@ const LAYERED_PROJECT_SUBMENU_OVERLAP_PX = 6;
 
 const LibraryTreeMarker = ({ className, color }: LibraryTreeMarkerProps) => <span aria-hidden="true" className={cn("library-tree-marker", className)} style={{ color: color ?? undefined }} />;
 
-const IconFolder = () => <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0 text-[#9aa1ad]"><path d="M2.75 6.5A2.25 2.25 0 0 1 5 4.25h2.05c.47 0 .92.19 1.24.52l.72.73H15A2.25 2.25 0 0 1 17.25 7.75v6A2.25 2.25 0 0 1 15 16H5a2.25 2.25 0 0 1-2.25-2.25V6.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>;
-
 const getFolderName = (folder: FolderTreeNode, isRootProject = false): string => {
   const name = folder.folderName ?? folder.folder_name;
-  return typeof name === "string" && name.trim() ? name.trim() : isRootProject ? UNTITLED_PROJECT_NAME : UNTITLED_FOLDER_NAME;
+  return typeof name === "string" && name.trim() ? name.trim() : isRootProject ? UNTITLED_PROJECT_NAME : "無題のフォルダ";
 };
-
-const getRootFolderIds = (rootFolders: FolderTreeNode[]): string[] => rootFolders.map(getFolderId).filter(Boolean);
 
 const getLayeredProjectColorMenuPosition = (menu: FolderContextMenuState, anchor: LayeredProjectMenuSubmenuAnchor): FolderColorMenuState => {
   const rightX = menu.x + LAYERED_PROJECT_MENU_WIDTH - LAYERED_PROJECT_SUBMENU_OVERLAP_PX;
   const leftX = menu.x - LAYERED_COLOR_MENU_WIDTH + LAYERED_PROJECT_SUBMENU_OVERLAP_PX;
   const rawX = rightX + LAYERED_COLOR_MENU_WIDTH + LAYERED_PROJECT_SUBMENU_OVERLAP_PX <= window.innerWidth ? rightX : leftX;
+
   return clampRightClickPanelPosition(rawX, menu.y + anchor.itemOffsetY, { width: LAYERED_COLOR_MENU_WIDTH, height: LAYERED_COLOR_MENU_HEIGHT });
 };
 
@@ -60,14 +80,14 @@ const createFolderContextMenuState = (event: ReactMouseEvent<HTMLElement>, folde
   return { folderId, folderName: getFolderName(folder, isRootProject), folderColor: getFolderProjectColor(folder), isRootProject, ...clampRightClickPanelPosition(event.clientX, event.clientY, LAYERED_PROJECT_MENU_DIMENSIONS) };
 };
 
-const useLibraryHierarchyData = () => {
+const useProjectListData = () => {
   const { folders, loading: foldersLoading, error: foldersError } = useFoldersRead();
   const { cardSets, loading: cardSetsLoading, createCardSet } = useCardSets();
   const { documents, loading: documentsLoading, error: documentsError } = useDocumentsRead();
   const treeFolders = useMemo(() => folders as FolderTreeNode[], [folders]);
-  const { rootFolders, getChildFolders, getFolderContentCount, getNextOrderIndex } = useExplorerDerivedData({ treeFolders, treeCards: EMPTY_COLLECTION, cardSets, documents, isFiltering: false });
+  const { rootFolders, getNextOrderIndex } = useExplorerDerivedData({ treeFolders, treeCards: EMPTY_COLLECTION, cardSets, documents, isFiltering: false });
 
-  return { rootFolders, getChildFolders, getFolderContentCount, getNextOrderIndex, createCardSet, loading: foldersLoading || cardSetsLoading || documentsLoading, error: foldersError ?? documentsError };
+  return { rootFolders, getNextOrderIndex, createCardSet, loading: foldersLoading || cardSetsLoading || documentsLoading, error: foldersError ?? documentsError };
 };
 
 const useFolderContextMenu = ({ createFolder, updateFolder, deleteFolder, createCardSet, getNextOrderIndex, setExpandedFolderIds }: UseFolderContextMenuParams) => {
@@ -104,7 +124,9 @@ const useFolderContextMenu = ({ createFolder, updateFolder, deleteFolder, create
 
   const actions = useMemo<LayeredProjectMenuAction[]>(() => {
     if (!contextMenu) return [];
+
     const { folderId, folderName, isRootProject } = contextMenu;
+
     return [
       { id: "change-color", onSelect: () => undefined },
       { id: "rename", onSelect: () => { const nextFolderName = window.prompt(isRootProject ? "プロジェクト名を変更" : "フォルダ名を変更", folderName)?.trim(); closeContextMenu(); if (nextFolderName && nextFolderName !== folderName) void updateFolder(folderId, { folderName: nextFolderName, name: nextFolderName }); } },
@@ -128,18 +150,22 @@ const ProjectListItem = ({ folder, selectedFolderId, onSelectProject, onOpenCont
   const folderName = getFolderName(folder, true);
   const folderColor = getFolderProjectColor(folder);
   const isSelected = selectedFolderId === folderId;
+
   const handleRowClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
     onSelectProject(folderId);
   };
-  const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => onOpenContextMenu(event, folder, true);
+
+  const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => {
+    onOpenContextMenu(event, folder, true);
+  };
 
   return <div data-folder-id={folderId}><div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center gap-1 rounded-[10px] pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")}><LibraryTreeMarker color={folderColor} /><button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><span className="min-w-0 flex-1 truncate">{folderName}</span></button></div></div>;
 };
 
 const ProjectListSidebar = () => {
-  const { rootFolders, getNextOrderIndex, createCardSet, loading, error } = useLibraryHierarchyData();
+  const { rootFolders, getNextOrderIndex, createCardSet, loading, error } = useProjectListData();
   const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
@@ -148,7 +174,10 @@ const ProjectListSidebar = () => {
   const { contextMenuElement, openContextMenu } = useFolderContextMenu({ createFolder, updateFolder, deleteFolder, createCardSet, getNextOrderIndex, setExpandedFolderIds });
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const selectedFolderId = activeTab?.kind === "explorer" && !activeTab.explorerState.isSectionListMode ? activeTab.explorerState.selectedFolderId : null;
-  const handleSelectProject = useCallback((folderId: string) => openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: folderId, selectedItem: null } }), [openExplorerTab]);
+
+  const handleSelectProject = useCallback((folderId: string) => {
+    openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: folderId, selectedItem: null } });
+  }, [openExplorerTab]);
 
   if (loading) return <aside aria-label="Project list explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#9aa1ad]">読み込み中...</aside>;
   if (error) return <aside aria-label="Project list explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#b48a8a]">{error}</aside>;
@@ -156,68 +185,4 @@ const ProjectListSidebar = () => {
   return <><aside aria-label="Project list explorer" className="h-full min-h-0 overflow-hidden"><div className="h-full min-h-0 overflow-y-auto px-2 pb-2 pt-1"><div role="tree" aria-label="プロジェクト" className="flex flex-col gap-0.5">{rootFolders.length > 0 ? rootFolders.map((folder) => <ProjectListItem key={getFolderId(folder)} folder={folder} selectedFolderId={selectedFolderId} onSelectProject={handleSelectProject} onOpenContextMenu={openContextMenu} />) : <p className="px-2 py-2 text-[12px] font-medium text-[#9aa1ad]">プロジェクトがありません</p>}</div></div></aside>{contextMenuElement}</>;
 };
 
-const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds, getChildFolders, getFolderContentCount, onToggleFolder, onSelectFolder, onOpenContextMenu }: DirectoryTreeNodeProps) => {
-  const folderId = getFolderId(folder);
-  if (!folderId) return null;
-
-  const isRootProject = level === ROOT_LEVEL;
-  const childFolders = getChildFolders(folderId);
-  const hasChildren = childFolders.length > 0;
-  const isExpanded = expandedFolderIds.has(folderId);
-  const isSelected = selectedFolderId === folderId;
-  const folderName = getFolderName(folder, isRootProject);
-  const folderColor = getFolderProjectColor(folder);
-  const contentCount = getFolderContentCount(folderId);
-  const rowPaddingLeft = Math.max(0, level - ROOT_LEVEL) * 12;
-  const handleToggleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (hasChildren) onToggleFolder(folderId);
-  };
-  const handleRowClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    onSelectFolder(folderId);
-    if (hasChildren && !isExpanded) onToggleFolder(folderId);
-  };
-  const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => onOpenContextMenu(event, folder, isRootProject);
-
-  return <div data-folder-id={folderId}><div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center gap-1 rounded-[10px] pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")} style={{ paddingLeft: rowPaddingLeft }}><button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} aria-disabled={!hasChildren} disabled={!hasChildren} className="library-tree-marker" style={{ color: folderColor }} /><button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center gap-1.5 rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><IconFolder /><span className="min-w-0 flex-1 truncate">{folderName}</span>{contentCount > 0 ? <span className="shrink-0 rounded-full bg-[#eef1f4] px-1.5 py-0.5 text-[10px] font-bold text-[#8b929e]">{contentCount}</span> : null}</button></div>{hasChildren && isExpanded ? <div role="group" className="mt-0.5 flex flex-col gap-0.5">{childFolders.map((childFolder) => <DirectoryTreeNode key={getFolderId(childFolder)} folder={childFolder} level={level + 1} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} getChildFolders={getChildFolders} getFolderContentCount={getFolderContentCount} onToggleFolder={onToggleFolder} onSelectFolder={onSelectFolder} onOpenContextMenu={onOpenContextMenu} />)}</div> : null}</div>;
-};
-
-const LibraryHierarchySidebar = () => {
-  const { rootFolders, getChildFolders, getFolderContentCount, getNextOrderIndex, createCardSet, loading, error } = useLibraryHierarchyData();
-  const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
-  const tabs = useWorkspaceTabsStore((state) => state.tabs);
-  const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
-  const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
-  const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(() => new Set(getRootFolderIds(rootFolders)));
-  const { contextMenuElement, openContextMenu } = useFolderContextMenu({ createFolder, updateFolder, deleteFolder, createCardSet, getNextOrderIndex, setExpandedFolderIds });
-  const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
-  const selectedFolderId = activeTab?.kind === "explorer" && !activeTab.explorerState.isSectionListMode ? activeTab.explorerState.selectedFolderId : null;
-
-  useEffect(() => {
-    const rootFolderIds = getRootFolderIds(rootFolders);
-    if (rootFolderIds.length === 0) return;
-    setExpandedFolderIds((current) => {
-      const next = new Set(current);
-      let didChange = false;
-      rootFolderIds.forEach((folderId) => {
-        if (next.has(folderId)) return;
-        next.add(folderId);
-        didChange = true;
-      });
-      return didChange ? next : current;
-    });
-  }, [rootFolders]);
-
-  const handleToggleFolder = useCallback((folderId: string) => setExpandedFolderIds((current) => { const next = new Set(current); if (next.has(folderId)) next.delete(folderId); else next.add(folderId); return next; }), []);
-  const handleSelectFolder = useCallback((folderId: string) => openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: folderId, selectedItem: null } }), [openExplorerTab]);
-
-  if (loading) return <aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#9aa1ad]">読み込み中...</aside>;
-  if (error) return <aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#b48a8a]">{error}</aside>;
-
-  return <><aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-hidden"><div className="h-full min-h-0 overflow-y-auto px-2 pb-2 pt-1"><div role="tree" aria-label="ライブラリ" className="flex flex-col gap-0.5">{rootFolders.length > 0 ? rootFolders.map((folder) => <DirectoryTreeNode key={getFolderId(folder)} folder={folder} level={ROOT_LEVEL} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} getChildFolders={getChildFolders} getFolderContentCount={getFolderContentCount} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onOpenContextMenu={openContextMenu} />) : <p className="px-2 py-2 text-[12px] font-medium text-[#9aa1ad]">プロジェクトがありません</p>}</div></div></aside>{contextMenuElement}</>;
-};
-
-export { LibraryHierarchySidebar, ProjectListSidebar };
+export { ProjectListSidebar };
