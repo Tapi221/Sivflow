@@ -161,10 +161,6 @@
     box-shadow: inset 0 calc(-1 * var(--calendar-month-spacer-line-width)) 0 var(--calendar-month-spacer-line-color);
   }
 
-  .calendar-month-week-row::after {
-    content: none;
-  }
-
   .calendar-month-day-cell {
     overflow: visible;
     min-height: var(--calendar-month-row-height);
