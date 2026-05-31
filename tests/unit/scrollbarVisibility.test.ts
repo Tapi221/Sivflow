@@ -47,7 +47,7 @@ const expectScrollbarRevealSelectorsToUseHoverOnly = (css: string) => {
   }
 };
 
-describe("グローバルCSSで定義しているネイティブスクロールバーの表示条件と太さ", () => {
+describe("グローバルCSSではネイティブスクロールバーを 1px にし、hover 時だけ表示する", () => {
   it("スクロールバーの太さを決める --scrollbar-size の値を 1px に固定する", () => {
     const css = readStyleFile("src/styles/index.css");
 
