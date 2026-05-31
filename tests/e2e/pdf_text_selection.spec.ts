@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("PDF text selection", () => {
-  test("text layer should produce a non-empty selection", async ({ page }) => {
+test.describe("PDF テキスト選択", () => {
+  test("テキストレイヤーで空ではない選択範囲を取得できる", async ({ page }) => {
     test.setTimeout(120000);
     const baseUrl = process.env.E2E_BASE_URL ?? "http://localhost:5173";
 
@@ -28,7 +28,7 @@ test.describe("PDF text selection", () => {
     expect(box).not.toBeNull();
 
     if (!box) {
-      throw new Error("PDF text span bounding box is not available");
+      throw new Error("PDF テキスト span の bounding box を取得できません");
     }
 
     await page.mouse.move(box.x + 4, box.y + box.height / 2);
