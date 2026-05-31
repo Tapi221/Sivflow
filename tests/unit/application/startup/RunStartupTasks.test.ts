@@ -100,7 +100,7 @@ describe("RunStartupTasks", () => {
     });
   });
 
-  it("performs startup sync before the integrity check", async () => {
+  it("整合性チェックの前に startup sync を実行する", async () => {
     await runStartupTasks({ userId: "user-1" });
 
     expect(state.getInstance).toHaveBeenCalledWith("user-1");
@@ -111,7 +111,7 @@ describe("RunStartupTasks", () => {
     ).toBeLessThan(state.checkDataIntegrityExecute.mock.invocationCallOrder[0]);
   });
 
-  it("does not start sync when disposed before the startup sync step", async () => {
+  it("startup sync step の前に disposed なら sync を開始しない", async () => {
     const isDisposed = vi
       .fn()
       .mockReturnValueOnce(false)
@@ -127,7 +127,7 @@ describe("RunStartupTasks", () => {
     expect(state.checkDataIntegrityExecute).not.toHaveBeenCalled();
   });
 
-  it("keeps resetStartupTasks as a no-op for API compatibility", async () => {
+  it("API 互換性のため resetStartupTasks を no-op に保つ", async () => {
     await expect(resetStartupTasks()).resolves.toBeUndefined();
     expect(state.getInstance).not.toHaveBeenCalled();
     expect(state.performStartupSync).not.toHaveBeenCalled();
