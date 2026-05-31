@@ -84,7 +84,7 @@ export const CardWorkspaceShell = ({
   isMetaOpen,
   metaPanel,
   metaPanelContainerClassName,
-  selectionCaptureEnabled = true,
+  selectionCaptureEnabled = false,
 }: CardWorkspaceShellProps) => {
   const viewportNodeRef = useRef<HTMLDivElement | null>(null);
   const [isSelectionCaptureActive, setIsSelectionCaptureActive] = useState(false);
