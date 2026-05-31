@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { Sidebar } from "@/pane.desktop/leftpane/Sidebar.desktop";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+import { useLocaleStore } from "@shared/i18n/locale.store";
 
 vi.mock("firebase/auth", () => ({
   signOut: vi.fn(),
@@ -17,12 +18,29 @@ vi.mock("@/services/firebase", () => ({
 
 const ACTIVE_PAGE_ARIA_CURRENT = "page";
 const CLOSED_CLASS_NAME = "app-sidebar--closed";
-const SECTION_NAV_LABELS = ["Home", "Library", "Schedule", "設定"] as const;
+const SECTION_NAV_LABELS = ["ホーム", "ライブラリ", "スケジュール", "設定"] as const;
 
 const getClassNameList = (element: HTMLElement) => element.className.split(/\s+/);
 
+const mockHoverCapableMediaQuery = () => {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: true,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+};
+
 const resetStores = () => {
   localStorage.clear();
+  useLocaleStore.setState({ locale: "ja" });
   useSearchStore.setState({ isOpen: false, query: "", sources: {} });
   useWorkspaceTabsStore.setState({ tabs: [], activeTabId: null, lastOpenedTabId: null });
 };
@@ -56,7 +74,7 @@ describe("Sidebar", () => {
     render(<SidebarHarness />);
 
     const sidebar = screen.getByRole("complementary", {
-      name: "Sidebar",
+      name: "サイドバー",
     }) as HTMLElement;
 
     const closeButton = screen.getByRole("button", {
@@ -118,5 +136,64 @@ describe("Sidebar", () => {
     });
 
     expect(useWorkspaceTabsStore.getState().activeTabId).toBeNull();
+  });
+
+  it("日本語ロケールではサイドバー項目のツールチップも日本語で表示する", async () => {
+    const user = userEvent.setup();
+    mockHoverCapableMediaQuery();
+
+    render(<Sidebar />);
+
+    await user.hover(screen.getByRole("button", {
+      name: "スケジュール",
+    }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("tooltip").textContent).toBe("スケジュール");
+    });
+  });
+
+  it("英語ロケールではサイドバー項目とツールチップを英語で表示する", async () => {
+    const user = userEvent.setup();
+    mockHoverCapableMediaQuery();
+    useLocaleStore.setState({ locale: "en" });
+
+    render(<Sidebar />);
+
+    expect(screen.getByRole("complementary", {
+      name: "Sidebar",
+    })).toBeDefined();
+    expect(screen.getByRole("button", {
+      name: "Home",
+    })).toBeDefined();
+    expect(screen.getByRole("button", {
+      name: "Library",
+    })).toBeDefined();
+    expect(screen.getByRole("button", {
+      name: "Tags",
+    })).toBeDefined();
+    expect(screen.getByRole("button", {
+      name: "Explore",
+    })).toBeDefined();
+    expect(screen.getByRole("button", {
+      name: "Settings",
+    })).toBeDefined();
+    expect(screen.getByRole("button", {
+      name: "Log out",
+    })).toBeDefined();
+    expect(screen.getByRole("button", {
+      name: "Close sidebar",
+    })).toBeDefined();
+    expect(screen.queryByRole("button", {
+      name: "スケジュール",
+    })).toBeNull();
+
+    await user.hover(screen.getByRole("button", {
+      name: "Schedule",
+    }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("tooltip").textContent).toBe("Schedule");
+    });
   });
 });
