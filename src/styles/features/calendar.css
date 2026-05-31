@@ -125,44 +125,15 @@
   .calendar-month-grid {
     border-top: 0;
     background-color: #ffffff;
-    background-image:
-      repeating-linear-gradient(
-        to bottom,
-        transparent 0,
-        transparent calc(var(--calendar-month-row-height) - 1px),
-        #eeeeee calc(var(--calendar-month-row-height) - 1px),
-        #eeeeee var(--calendar-month-row-height)
-      ),
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee),
-      linear-gradient(#eeeeee, #eeeeee);
-    background-position:
-      0 0,
-      14.2857142857% 0,
-      28.5714285714% 0,
-      42.8571428571% 0,
-      57.1428571429% 0,
-      71.4285714286% 0,
-      85.7142857% 0;
-    background-repeat:
-      repeat,
-      no-repeat,
-      no-repeat,
-      no-repeat,
-      no-repeat,
-      no-repeat,
-      no-repeat;
-    background-size:
-      100% var(--calendar-month-row-height),
-      1px 100%,
-      1px 100%,
-      1px 100%,
-      1px 100%,
-      1px 100%,
-      1px 100%;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--calendar-month-row-height) - 1px),
+      #eeeeee calc(var(--calendar-month-row-height) - 1px),
+      #eeeeee var(--calendar-month-row-height)
+    );
+    background-repeat: repeat;
+    background-size: 100% var(--calendar-month-row-height);
   }
 
   .calendar-year-section {
