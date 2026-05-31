@@ -42,6 +42,23 @@ describe("layoutCalendarTimeGridEvents", () => {
     expect(entry.style.xOffset).toBe(0);
   });
 
+  it("短いイベントも実時間どおりの height にする", () => {
+    const [entry] = layoutCalendarTimeGridEvents({
+      events: [
+        buildEvent({
+          id: "short-event",
+          startsAt: new Date(2026, 3, 12, 0, 0),
+          endsAt: new Date(2026, 3, 12, 0, 15),
+        }),
+      ],
+      rangeStart: new Date(2026, 3, 12, 0, 0),
+      rangeEnd: new Date(2026, 3, 13, 0, 0),
+    });
+
+    expect(entry.style.top).toBe(0);
+    expect(entry.style.height).toBeCloseTo(1.041_666, 6);
+  });
+
   it("overlap mode では重なる event に横幅と xOffset を割り当てる", () => {
     const entries = layoutCalendarTimeGridEvents({
       events: [
