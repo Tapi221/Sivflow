@@ -1,6 +1,6 @@
 import { memo, startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import { addDays, addMonths, addYears, eachMonthOfInterval, endOfDay, endOfMonth, endOfYear, format, isSameDay, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
+import { addDays, addYears, eachMonthOfInterval, endOfDay, endOfMonth, endOfYear, format, isSameDay, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import { getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -52,9 +52,9 @@ const INITIAL_YEAR_BUFFER = 5;
 const YEAR_EXTEND_COUNT = 2;
 const YEAR_MAX_RENDERED_YEARS = 11;
 const YEAR_SCROLL_EDGE_THRESHOLD_PX = 2400;
-const YEAR_RENDERED_RANGE_MONTH_COUNT = 3;
 const YEAR_RENDERED_RANGE_NOTIFY_DELAY_MS = 180;
 const YEAR_RENDERED_RANGE_SAMPLE_OFFSET_PX = 160;
+const YEAR_MONTH_ROW_OFFSET_TOLERANCE_PX = 2;
 const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
 
 const createDayAriaLabel = (date: Date, eventCount: number): string => {
@@ -140,13 +140,20 @@ const chunkMonthWeeks = (days: CalendarYearDay[]): CalendarYearDay[][] => {
   return weeks;
 };
 
-const getThreeMonthRange = (date: Date): CalendarDateRange => {
-  const startMonth = Math.floor(date.getMonth() / YEAR_RENDERED_RANGE_MONTH_COUNT) * YEAR_RENDERED_RANGE_MONTH_COUNT;
-  const start = startOfMonth(new Date(date.getFullYear(), startMonth, 1));
+const buildMonthDateRange = (date: Date): CalendarDateRange => ({
+  start: startOfMonth(date),
+  end: endOfDay(endOfMonth(date)),
+});
+
+const buildMonthRowDateRange = (months: CalendarYearMonth[]): CalendarDateRange | null => {
+  if (months.length === 0) return null;
+  const sortedMonths = [...months].sort((left, right) => left.date.getTime() - right.date.getTime());
+  const firstMonth = sortedMonths[0];
+  const lastMonth = sortedMonths[sortedMonths.length - 1];
 
   return {
-    start,
-    end: endOfDay(endOfMonth(addMonths(start, YEAR_RENDERED_RANGE_MONTH_COUNT - 1))),
+    start: startOfMonth(firstMonth.date),
+    end: endOfDay(endOfMonth(lastMonth.date)),
   };
 };
 
@@ -173,6 +180,7 @@ const CalendarYearViewComponent = ({
   const today = useMemo(() => new Date(), []);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const yearSectionRefsMap = useRef<Map<string, HTMLElement>>(new Map());
+  const monthSectionRefsMap = useRef<Map<string, HTMLElement>>(new Map());
   const rangeAnchorRef = useRef<YearRangeAnchor | null>(null);
   const isExtendingBeforeRef = useRef(false);
   const isExtendingAfterRef = useRef(false);
@@ -185,7 +193,7 @@ const CalendarYearViewComponent = ({
     startOffset: -INITIAL_YEAR_BUFFER,
     endOffset: INITIAL_YEAR_BUFFER,
   }));
-  const [renderedRange, setRenderedRange] = useState(() => getThreeMonthRange(yearDate));
+  const [renderedRange, setRenderedRange] = useState(() => buildMonthDateRange(yearDate));
 
   const eventsByDay = useMemo(() => buildEventsByDay(visibleEvents), [visibleEvents]);
 
@@ -226,31 +234,37 @@ const CalendarYearViewComponent = ({
   const getRenderedRangeFromScroll = useCallback((scroller: HTMLDivElement): CalendarDateRange | null => {
     const sampleTop = scroller.scrollTop + Math.min(YEAR_RENDERED_RANGE_SAMPLE_OFFSET_PX, scroller.clientHeight / 2);
     let bestYear: CalendarYearBlock | null = null;
+    let bestMonth: CalendarYearMonth | null = null;
     let bestSection: HTMLElement | null = null;
     let bestDistance = Number.POSITIVE_INFINITY;
 
     for (const year of years) {
-      const section = yearSectionRefsMap.current.get(year.key);
-      if (!section) continue;
+      for (const month of year.months) {
+        const section = monthSectionRefsMap.current.get(month.key);
+        if (!section) continue;
 
-      const sectionTop = section.offsetTop;
-      const sectionBottom = sectionTop + section.offsetHeight;
-      const distance = sampleTop < sectionTop ? sectionTop - sampleTop : sampleTop > sectionBottom ? sampleTop - sectionBottom : 0;
+        const sectionTop = section.offsetTop;
+        const sectionBottom = sectionTop + section.offsetHeight;
+        const distance = sampleTop < sectionTop ? sectionTop - sampleTop : sampleTop > sectionBottom ? sampleTop - sectionBottom : 0;
 
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        bestYear = year;
-        bestSection = section;
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestYear = year;
+          bestMonth = month;
+          bestSection = section;
+        }
       }
     }
 
-    if (!bestYear || !bestSection) return null;
+    if (!bestYear || !bestMonth || !bestSection) return null;
 
-    const sectionHeight = bestSection.offsetHeight || 1;
-    const ratio = Math.min(0.999, Math.max(0, (sampleTop - bestSection.offsetTop) / sectionHeight));
-    const rangeIndex = Math.min(3, Math.max(0, Math.floor(ratio * 4)));
+    const rowTop = bestSection.offsetTop;
+    const rowMonths = bestYear.months.filter((month) => {
+      const section = monthSectionRefsMap.current.get(month.key);
+      return section ? Math.abs(section.offsetTop - rowTop) <= YEAR_MONTH_ROW_OFFSET_TOLERANCE_PX : false;
+    });
 
-    return getThreeMonthRange(addMonths(startOfYear(bestYear.date), rangeIndex * YEAR_RENDERED_RANGE_MONTH_COUNT));
+    return buildMonthRowDateRange(rowMonths) ?? buildMonthDateRange(bestMonth.date);
   }, [years]);
 
   const syncRenderedRange = useCallback((scroller: HTMLDivElement) => {
@@ -291,6 +305,14 @@ const CalendarYearViewComponent = ({
     }
   }, []);
 
+  const setMonthSectionRef = useCallback((monthKey: string, node: HTMLElement | null) => {
+    if (node) {
+      monthSectionRefsMap.current.set(monthKey, node);
+    } else {
+      monthSectionRefsMap.current.delete(monthKey);
+    }
+  }, []);
+
   const getCurrentRangeAnchor = useCallback((scroller: HTMLDivElement): YearRangeAnchor | null => {
     let bestSection: HTMLElement | null = null;
     let bestDistance = Number.POSITIVE_INFINITY;
@@ -325,7 +347,7 @@ const CalendarYearViewComponent = ({
     rangeAnchorRef.current = null;
     isExtendingBeforeRef.current = false;
     isExtendingAfterRef.current = false;
-    setRenderedRange(getThreeMonthRange(yearDate));
+    setRenderedRange(buildMonthDateRange(yearDate));
     setAnchorYear(startOfYear(yearDate));
     setYearOffsetRange({
       startOffset: -INITIAL_YEAR_BUFFER,
@@ -449,6 +471,8 @@ const CalendarYearViewComponent = ({
               {year.months.map((month) => (
                 <section
                   key={month.key}
+                  ref={(node) => setMonthSectionRef(month.key, node)}
+                  data-calendar-month-key={month.key}
                   className="min-w-0 bg-white px-4 pb-3 pt-3"
                   aria-label={month.label}
                 >
