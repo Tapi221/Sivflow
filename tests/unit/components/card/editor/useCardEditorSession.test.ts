@@ -20,7 +20,7 @@ const makeCard = (overrides: Partial<Card> = {}) => {
 };
 
 describe("useCardEditorSession", () => {
-  it("saves latest title even when save is triggered immediately after input", async () => {
+  it("入力直後に保存しても最新タイトルを保存する", async () => {
     const updateCard = vi.fn().mockResolvedValue(undefined);
     const addTag = vi.fn(async (name: string) => ({ id: `tag-${name}` }));
     const card = makeCard();
@@ -56,7 +56,7 @@ describe("useCardEditorSession", () => {
     );
   });
 
-  it("keeps editing after save when autoEdit is enabled", async () => {
+  it("autoEdit が有効なら保存後も編集中を維持する", async () => {
     const updateCard = vi.fn().mockResolvedValue(undefined);
     const addTag = vi.fn(async (name: string) => ({ id: `tag-${name}` }));
     const card = makeCard();
@@ -88,7 +88,7 @@ describe("useCardEditorSession", () => {
     expect(result.current.isEditing).toBe(true);
   });
 
-  it("exits editing after save when autoEdit is disabled", async () => {
+  it("autoEdit が無効なら保存後に編集を終了する", async () => {
     const updateCard = vi.fn().mockResolvedValue(undefined);
     const addTag = vi.fn(async (name: string) => ({ id: `tag-${name}` }));
     const card = makeCard();
