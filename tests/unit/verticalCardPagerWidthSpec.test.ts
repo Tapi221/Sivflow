@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildVerticalCardPagerItemStyle, resolveVerticalCardPagerItemWidthSpec } from "@/features/review/verticalCardPagerWidthSpec";
 
 describe("resolveVerticalCardPagerItemWidthSpec", () => {
-  it("falls back to fixed width when no width strategy is provided", () => {
+  it("幅戦略が指定されていない場合は固定幅にフォールバックする", () => {
     const widthSpec = resolveVerticalCardPagerItemWidthSpec({
       card: { id: "card-1" },
       idx: 0,
@@ -16,7 +16,7 @@ describe("resolveVerticalCardPagerItemWidthSpec", () => {
     });
   });
 
-  it("uses stretch mode when getCardWidthSpec returns stretch", () => {
+  it("getCardWidthSpec が stretch を返す場合は stretch mode を使用する", () => {
     const widthSpec = resolveVerticalCardPagerItemWidthSpec({
       card: { id: "card-1" },
       idx: 0,
@@ -30,7 +30,7 @@ describe("resolveVerticalCardPagerItemWidthSpec", () => {
     });
   });
 
-  it("clamps fixed widths to at least 1px", () => {
+  it("固定幅を少なくとも 1px に clamp する", () => {
     const widthSpec = resolveVerticalCardPagerItemWidthSpec({
       card: { id: "card-1" },
       idx: 0,
@@ -47,7 +47,7 @@ describe("resolveVerticalCardPagerItemWidthSpec", () => {
 });
 
 describe("buildVerticalCardPagerItemStyle", () => {
-  it("builds a fixed-width item style", () => {
+  it("固定幅 item style を構築する", () => {
     expect(
       buildVerticalCardPagerItemStyle({
         mode: "fixed",
@@ -61,7 +61,7 @@ describe("buildVerticalCardPagerItemStyle", () => {
     });
   });
 
-  it("builds a stretch-width item style", () => {
+  it("stretch 幅 item style を構築する", () => {
     expect(
       buildVerticalCardPagerItemStyle({
         mode: "stretch",
