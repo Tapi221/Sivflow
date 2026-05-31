@@ -6,14 +6,37 @@ import { SegmentedControlGroup, type SegmentedOption } from "@/components/panel/
 import { TagBadge } from "@/components/tag/TagBadge";
 import { SurfaceButton } from "@/components/ui/surface-button";
 import { Switch } from "@/components/ui/switch";
-import { Tag } from "@/ui/icons";
-import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useTags } from "@/features/settings/hooks/useTags";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
+import { Tag } from "@/ui/icons";
 
 type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";
 type TagMatchMode = "any" | "all";
+
+type TagTreeSource = {
+  id: string;
+  name: string;
+  color?: string | null;
+  parentId?: string | null;
+};
+
+type TagTreeNode = {
+  id: string;
+  name: string;
+  nameLower: string;
+  colorKey: TagColorKey;
+  parentId: string | null;
+  children: TagTreeNode[];
+};
+
+type VisibleTagTreeItem = {
+  id: string;
+  name: string;
+  colorKey: TagColorKey;
+  depth: number;
+};
 
 interface TagFilterPanelProps {
   allTags: string[];
@@ -39,6 +62,138 @@ const CONTENT_TYPE_OPTIONS = [
   label: string;
   value: ContentTypeFilter;
 }>;
+
+const normalizeTagParentId = (parentId: string | null | undefined): string | null => {
+  return typeof parentId === "string" && parentId.trim().length > 0
+    ? parentId
+    : null;
+};
+
+const sortTagTreeNodes = (nodes: TagTreeNode[]): TagTreeNode[] => {
+  return nodes.sort((left, right) => left.name.localeCompare(right.name, "ja"));
+};
+
+const cloneTagTreeBranch = (node: TagTreeNode): TagTreeNode => {
+  return {
+    ...node,
+    children: node.children.map(cloneTagTreeBranch),
+  };
+};
+
+const filterTagTreeNode = (
+  node: TagTreeNode,
+  normalizedSearchQuery: string,
+): TagTreeNode | null => {
+  const selfMatches = node.nameLower.includes(normalizedSearchQuery);
+  const children = selfMatches
+    ? node.children.map(cloneTagTreeBranch)
+    : node.children
+        .map((child) => filterTagTreeNode(child, normalizedSearchQuery))
+        .filter((child): child is TagTreeNode => child !== null);
+
+  if (!selfMatches && children.length === 0) {
+    return null;
+  }
+
+  return {
+    ...node,
+    children,
+  };
+};
+
+const flattenTagTreeNodes = (
+  nodes: TagTreeNode[],
+  depth: number,
+): VisibleTagTreeItem[] => {
+  return nodes.flatMap((node) => [
+    {
+      id: node.id,
+      name: node.name,
+      colorKey: node.colorKey,
+      depth,
+    },
+    ...flattenTagTreeNodes(node.children, depth + 1),
+  ]);
+};
+
+const buildTagTreeNodes = (
+  tagRecords: ReadonlyArray<TagTreeSource>,
+  allTags: string[],
+): TagTreeNode[] => {
+  const nodeById = new Map<string, TagTreeNode>();
+  const nameLowerSet = new Set<string>();
+
+  tagRecords.forEach((tag) => {
+    const name = tag.name.trim();
+    if (!name) return;
+
+    const nameLower = name.toLocaleLowerCase();
+    nodeById.set(tag.id, {
+      id: tag.id,
+      name,
+      nameLower,
+      colorKey: getTagColorKey(tag.color),
+      parentId: normalizeTagParentId(tag.parentId),
+      children: [],
+    });
+    nameLowerSet.add(nameLower);
+  });
+
+  allTags.forEach((label) => {
+    const name = label.trim();
+    if (!name) return;
+
+    const nameLower = name.toLocaleLowerCase();
+    if (nameLowerSet.has(nameLower)) return;
+
+    nodeById.set(`fallback:${nameLower}`, {
+      id: `fallback:${nameLower}`,
+      name,
+      nameLower,
+      colorKey: getTagColorKey(),
+      parentId: null,
+      children: [],
+    });
+    nameLowerSet.add(nameLower);
+  });
+
+  const roots: TagTreeNode[] = [];
+
+  nodeById.forEach((node) => {
+    const parentId = node.parentId;
+    const parent = parentId ? nodeById.get(parentId) : undefined;
+
+    if (parent) {
+      parent.children.push(node);
+      return;
+    }
+
+    node.parentId = null;
+    roots.push(node);
+  });
+
+  nodeById.forEach((node) => {
+    sortTagTreeNodes(node.children);
+  });
+
+  return sortTagTreeNodes(roots);
+};
+
+const buildVisibleTagTreeItems = (
+  tagRecords: ReadonlyArray<TagTreeSource>,
+  allTags: string[],
+  searchQuery: string,
+): VisibleTagTreeItem[] => {
+  const tagTreeNodes = buildTagTreeNodes(tagRecords, allTags);
+  const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
+  const visibleNodes = normalizedSearchQuery
+    ? tagTreeNodes
+        .map((node) => filterTagTreeNode(node, normalizedSearchQuery))
+        .filter((node): node is TagTreeNode => node !== null)
+    : tagTreeNodes;
+
+  return flattenTagTreeNodes(visibleNodes, 0);
+};
 
 export const TagFilterPanel = ({
   allTags,
@@ -83,34 +238,10 @@ export const TagFilterPanel = ({
     };
   }, [isOpen]);
 
-  const colorKeyByName = useMemo(() => {
-    const map = new Map<string, TagColorKey>();
-
-    tagRecords.forEach((tag) => {
-      const resolvedColorKey = getTagColorKey(tag.color);
-      map.set(tag.name, resolvedColorKey);
-      map.set(tag.name.toLowerCase(), resolvedColorKey);
-    });
-
-    return map;
-  }, [tagRecords]);
-
-  const resolveTagColor = (tag: string): TagColorKey =>
-    colorKeyByName.get(tag) ??
-    colorKeyByName.get(tag.toLowerCase()) ??
-    getTagColorKey();
-
-  const filteredTags = useMemo(() => {
-    const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
-
-    if (normalizedSearchQuery.length === 0) {
-      return allTags;
-    }
-
-    return allTags.filter((tag) =>
-      tag.toLocaleLowerCase().includes(normalizedSearchQuery),
-    );
-  }, [allTags, searchQuery]);
+  const visibleTagItems = useMemo(
+    () => buildVisibleTagTreeItems(tagRecords, allTags, searchQuery),
+    [allTags, searchQuery, tagRecords],
+  );
 
   const isFilterActive =
     tagFilter.length > 0 ||
@@ -230,42 +361,44 @@ export const TagFilterPanel = ({
         </>
       }
     >
-      {filteredTags.length === 0 ? (
+      {visibleTagItems.length === 0 ? (
         <PanelEmptyState
           icon={<Tag className="h-8 w-8" />}
           message="タグが見つかりません"
         />
       ) : (
-        <div className="space-y-0.5">
-          {filteredTags.map((tag) => {
-            const isSelected = tagFilter.includes(tag);
+        <div role="tree" className="space-y-0.5">
+          {visibleTagItems.map((item) => {
+            const isSelected = tagFilter.includes(item.name);
 
             return (
               <div
-                key={tag}
-                role="button"
+                key={item.id}
+                role="treeitem"
                 tabIndex={0}
+                aria-level={item.depth + 1}
                 aria-pressed={isSelected}
-                onClick={() => toggleTag(tag)}
-                onKeyDown={(event) => handleTagRowKeyDown(event, tag)}
+                onClick={() => toggleTag(item.name)}
+                onKeyDown={(event) => handleTagRowKeyDown(event, item.name)}
+                style={{ paddingLeft: `${8 + item.depth * 14}px` }}
                 className={cn(
-                  "ds-floating-panel__row ds-filter-row group flex w-full items-center px-2 py-1 text-left text-xs outline-none",
+                  "ds-floating-panel__row ds-filter-row group flex w-full items-center py-1 pr-2 text-left text-xs outline-none",
                   isSelected &&
                     "ds-floating-panel__row--active ds-filter-row--active",
                 )}
               >
                 <Switch
                   checked={isSelected}
-                  onCheckedChange={() => toggleTag(tag)}
+                  onCheckedChange={() => toggleTag(item.name)}
                   onClick={(event) => event.stopPropagation()}
                   className="mr-2"
-                  aria-label={`${tag} を${isSelected ? "除外" : "追加"}`}
+                  aria-label={`${item.name} を${isSelected ? "除外" : "追加"}`}
                 />
 
                 <div className="min-w-0 flex-1">
                   <TagBadge
-                    label={tag}
-                    colorKey={resolveTagColor(tag)}
+                    label={item.name}
+                    colorKey={item.colorKey}
                     className="max-w-full"
                   />
                 </div>
