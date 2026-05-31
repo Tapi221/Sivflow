@@ -76,6 +76,7 @@ const LOCAL_DAYS = 3650;
 const OVERSCAN = 5000;
 const ANCHOR_OFFSET = 160;
 const SELECTED_OFFSET = 8;
+const USER_SCROLL_AUTO_SCROLL_BLOCK_MS = 350;
 const EMPTY_DAY_LABEL = "予定なし";
 const DEFAULT_COLOR = "#8e8e93";
 const GAP_COLOR = "#f2f2f7";
@@ -350,6 +351,7 @@ const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, eve
   const lastVisibleKeyRef = useRef<string | null>(null);
   const frameRef = useRef<number | null>(null);
   const pendingRef = useRef<HTMLDivElement | null>(null);
+  const userScrollBlockUntilRef = useRef(0);
   const rail = useMemo(() => virtualRail ?? createRail(selectedDate), [selectedDate, virtualRail]);
   const metrics = useMemo(() => buildSplitVirtualMetrics(rail, rail.totalDayCount, events), [events, rail]);
   const [range, setRange] = useState<VirtualRange>({ start: 0, end: 1 });
@@ -386,6 +388,7 @@ const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, eve
   }, [updateVisibleDate]);
 
   const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
+    userScrollBlockUntilRef.current = Date.now() + USER_SCROLL_AUTO_SCROLL_BLOCK_MS;
     updateRange(event.currentTarget);
     scheduleDeferred(event.currentTarget);
   }, [scheduleDeferred, updateRange]);
@@ -398,6 +401,7 @@ const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, eve
     const index = getIndexForDate(rail, selectedDate);
     if (lastSelectedKeyRef.current === key || !element || index < 0 || index >= rail.totalDayCount) return;
     lastSelectedKeyRef.current = key;
+    if (Date.now() < userScrollBlockUntilRef.current) return;
     element.scrollTop = Math.max(0, getDayTop(metrics, index) - SELECTED_OFFSET);
     updateRange(element);
   }, [metrics, rail, selectedDate, updateRange]);
