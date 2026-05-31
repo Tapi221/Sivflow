@@ -16,7 +16,8 @@ const toBlob = (canvas: HTMLCanvasElement): Promise<Blob> => {
 const inlineComputedStyles = (source: Element, clone: Element): void => {
   if (source instanceof HTMLElement && clone instanceof HTMLElement) {
     const computedStyle = window.getComputedStyle(source);
-    for (const propertyName of computedStyle) {
+    for (let index = 0; index < computedStyle.length; index += 1) {
+      const propertyName = computedStyle.item(index);
       clone.style.setProperty(
         propertyName,
         computedStyle.getPropertyValue(propertyName),
