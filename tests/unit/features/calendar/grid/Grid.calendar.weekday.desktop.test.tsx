@@ -131,7 +131,7 @@ describe("CalendarWeekDayGrid", () => {
 
     const previewSpacer = screen.getByTestId("weekday-preview-bottom-spacer");
 
-    expect(within(previewSpacer).getByText("Visible preview")).toBeInTheDocument();
+    expect(within(previewSpacer).getByText("Visible preview")).not.toBeNull();
     expect(within(previewSpacer).queryByText("Hidden preview")).toBeNull();
   });
 
@@ -143,7 +143,7 @@ describe("CalendarWeekDayGrid", () => {
     const previewSpacer = screen.getByTestId("weekday-preview-bottom-spacer");
     const previewChip = within(previewSpacer).getByTestId("weekday-event-chip");
 
-    expect(previewChip).toHaveAttribute("data-ends-at", new Date(2026, 0, 2, 1, 30).toISOString());
+    expect(previewChip.getAttribute("data-ends-at")).toBe(new Date(2026, 0, 2, 1, 30).toISOString());
   });
 
   it("時刻ラベルの色、背景、数字用スタイルを維持する", () => {
