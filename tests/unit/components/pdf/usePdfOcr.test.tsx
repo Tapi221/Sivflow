@@ -116,7 +116,7 @@ describe("usePdfOcr", () => {
     await resetOcrDatabase();
   });
 
-  it("keeps persisted OCR records while the PDF identity is still unresolved", async () => {
+  it("PDF identity が未解決の間は永続化済み OCR record を保持する", async () => {
     const docId = "doc-loading-regression";
     const resolvedDocumentKey = "fingerprint:resolved-loading-doc";
     const persistedText = "保存済み OCR テキスト";
@@ -129,7 +129,6 @@ describe("usePdfOcr", () => {
       nativeText: "",
       ocrText: persistedText,
     });
-
     const initialController = createDocumentController({
       isResolved: false,
     });
@@ -174,7 +173,7 @@ describe("usePdfOcr", () => {
     expect(result.current.ocrPageNumbers).toEqual([1]);
   });
 
-  it("trims OCR retention by resolved document key without deleting the active cache", async () => {
+  it("active cache を削除せずに resolved document key ごとの OCR retention を trim する", async () => {
     const nowSpy = vi.spyOn(Date, "now");
     let nextTimestamp = 1_000;
 
@@ -186,38 +185,10 @@ describe("usePdfOcr", () => {
 
     const docId = "doc-retention-regression";
 
-    await putPdfOcrPageRecord({
-      docId,
-      documentKey: "fingerprint:oldest",
-      pageNumber: 1,
-      finalText: "oldest",
-      nativeText: "",
-      ocrText: "oldest",
-    });
-    await putPdfOcrPageRecord({
-      docId,
-      documentKey: "fingerprint:older",
-      pageNumber: 1,
-      finalText: "older",
-      nativeText: "",
-      ocrText: "older",
-    });
-    await putPdfOcrPageRecord({
-      docId,
-      documentKey: "fingerprint:recent",
-      pageNumber: 1,
-      finalText: "recent",
-      nativeText: "",
-      ocrText: "recent",
-    });
-    await putPdfOcrPageRecord({
-      docId,
-      documentKey: "fingerprint:active",
-      pageNumber: 1,
-      finalText: "active",
-      nativeText: "",
-      ocrText: "active",
-    });
+    await putPdfOcrPageRecord({ docId, documentKey: "fingerprint:oldest", pageNumber: 1, finalText: "oldest", nativeText: "", ocrText: "oldest" });
+    await putPdfOcrPageRecord({ docId, documentKey: "fingerprint:older", pageNumber: 1, finalText: "older", nativeText: "", ocrText: "older" });
+    await putPdfOcrPageRecord({ docId, documentKey: "fingerprint:recent", pageNumber: 1, finalText: "recent", nativeText: "", ocrText: "recent" });
+    await putPdfOcrPageRecord({ docId, documentKey: "fingerprint:active", pageNumber: 1, finalText: "active", nativeText: "", ocrText: "active" });
 
     const { result } = renderHook(() =>
       usePdfOcr({
@@ -244,7 +215,7 @@ describe("usePdfOcr", () => {
     });
   });
 
-  it("retries OCR with enhanced profiles for low quality native text and persists the best attempt", async () => {
+  it("低品質 native text では拡張 profile で OCR を再試行し、最良の試行を永続化する", async () => {
     const docId = "doc-performance-retry";
     recognizeMock
       .mockResolvedValueOnce({ data: { text: "a b c d" } })
