@@ -4,6 +4,7 @@ import { DEFAULT_HOUR_ROW_HEIGHT } from "../../src/features/calendar/calendar.co
 import { WEEKDAY_HOURS, WEEKDAY_MINUTES_PER_HOUR } from "../../src/features/calendar/grid/grid.layout.constants.desktop";
 import { layoutCalendarTimeGridEvents } from "../../packages/core/src/calendar/timeGridLayout";
 import type { CalendarEvent } from "../../packages/core/src/calendar/calendarEvent.types";
+import type { CalendarTimeGridLayoutEntry } from "../../packages/core/src/calendar/timeGridLayout";
 
 const WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES = Math.ceil((WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX / DEFAULT_HOUR_ROW_HEIGHT) * WEEKDAY_MINUTES_PER_HOUR);
 const NEXT_DAY_PREVIEW_HOURS = 1;
@@ -25,6 +26,14 @@ const buildEvent = ({
   isAllDay: false,
   accentColor: "#2563eb",
 });
+
+const getEntryById = (entries: readonly CalendarTimeGridLayoutEntry[], id: string): CalendarTimeGridLayoutEntry => {
+  const entry = entries.find((item) => item.event.id === id);
+
+  if (!entry) throw new Error(`Missing layout entry: ${id}`);
+
+  return entry;
+};
 
 describe("weekday time grid geometry", () => {
   it("24:00 をまたぐ当日側 event は minHeight を抑制して下端からはみ出さない", () => {
@@ -78,5 +87,96 @@ describe("weekday time grid geometry", () => {
     expect(style.top).toBe("calc(0 * var(--calendar-hour-row-height))");
     expect(style.height).toBe("calc(0.5 * var(--calendar-hour-row-height))");
     expect(style.minHeight).toBe("18px");
+  });
+
+  it("24:00 前後の同じ長さの event は同じ表示高さと minHeight になる", () => {
+    const [beforeMidnightEntry] = layoutCalendarTimeGridEvents({
+      events: [
+        buildEvent({
+          id: "before-midnight",
+          startsAt: new Date(2026, 3, 12, 23, 0),
+          endsAt: new Date(2026, 3, 12, 23, 30),
+        }),
+      ],
+      rangeStart: new Date(2026, 3, 12, 0, 0),
+      rangeEnd: new Date(2026, 3, 13, 0, 0),
+      layoutMode: "no-overlap",
+      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
+    });
+    const [afterMidnightEntry] = layoutCalendarTimeGridEvents({
+      events: [
+        buildEvent({
+          id: "after-midnight",
+          startsAt: new Date(2026, 3, 13, 0, 0),
+          endsAt: new Date(2026, 3, 13, 0, 30),
+        }),
+      ],
+      rangeStart: new Date(2026, 3, 13, 0, 0),
+      rangeEnd: new Date(2026, 3, 13, 1, 0),
+      layoutMode: "no-overlap",
+      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
+    });
+
+    const beforeMidnightFrame = getWeekdayTimedEventFrame(beforeMidnightEntry);
+    const afterMidnightFrame = getWeekdayTimedEventFrame(afterMidnightEntry, NEXT_DAY_PREVIEW_HOURS);
+    const beforeMidnightStyle = getWeekdayTimedEventPositionStyle(beforeMidnightEntry);
+    const afterMidnightStyle = getWeekdayTimedEventPositionStyle(afterMidnightEntry, NEXT_DAY_PREVIEW_HOURS);
+
+    expect(beforeMidnightFrame.heightHours).toBeCloseTo(afterMidnightFrame.heightHours, 6);
+    expect(beforeMidnightStyle.height).toBe(afterMidnightStyle.height);
+    expect(beforeMidnightStyle.minHeight).toBe(afterMidnightStyle.minHeight);
+  });
+
+  it("24:00 前後の overlap event は同じ横並び column を割り当てる", () => {
+    const beforeMidnightEntries = layoutCalendarTimeGridEvents({
+      events: [
+        buildEvent({
+          id: "before-a",
+          startsAt: new Date(2026, 3, 12, 23, 0),
+          endsAt: new Date(2026, 3, 12, 23, 20),
+        }),
+        buildEvent({
+          id: "before-b",
+          startsAt: new Date(2026, 3, 12, 23, 10),
+          endsAt: new Date(2026, 3, 12, 23, 30),
+        }),
+      ],
+      rangeStart: new Date(2026, 3, 12, 0, 0),
+      rangeEnd: new Date(2026, 3, 13, 0, 0),
+      layoutMode: "no-overlap",
+      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
+    });
+    const afterMidnightEntries = layoutCalendarTimeGridEvents({
+      events: [
+        buildEvent({
+          id: "after-a",
+          startsAt: new Date(2026, 3, 13, 0, 0),
+          endsAt: new Date(2026, 3, 13, 0, 20),
+        }),
+        buildEvent({
+          id: "after-b",
+          startsAt: new Date(2026, 3, 13, 0, 10),
+          endsAt: new Date(2026, 3, 13, 0, 30),
+        }),
+      ],
+      rangeStart: new Date(2026, 3, 13, 0, 0),
+      rangeEnd: new Date(2026, 3, 13, 1, 0),
+      layoutMode: "no-overlap",
+      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
+    });
+
+    const beforeA = getEntryById(beforeMidnightEntries, "before-a");
+    const beforeB = getEntryById(beforeMidnightEntries, "before-b");
+    const afterA = getEntryById(afterMidnightEntries, "after-a");
+    const afterB = getEntryById(afterMidnightEntries, "after-b");
+
+    expect(beforeA.columnIndex).toBe(afterA.columnIndex);
+    expect(beforeA.columnCount).toBe(afterA.columnCount);
+    expect(beforeA.style.width).toBe(afterA.style.width);
+    expect(beforeA.style.xOffset).toBe(afterA.style.xOffset);
+    expect(beforeB.columnIndex).toBe(afterB.columnIndex);
+    expect(beforeB.columnCount).toBe(afterB.columnCount);
+    expect(beforeB.style.width).toBe(afterB.style.width);
+    expect(beforeB.style.xOffset).toBe(afterB.style.xOffset);
   });
 });
