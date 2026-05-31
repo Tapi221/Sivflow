@@ -41,11 +41,11 @@ describe("loadImageNaturalSize", () => {
     vi.unstubAllGlobals();
   });
 
-  it("returns null for an empty source", async () => {
+  it("空の source では null を返す", async () => {
     await expect(loadImageNaturalSize("")).resolves.toBeNull();
   });
 
-  it("returns natural size when image loading succeeds", async () => {
+  it("画像読み込みに成功したら自然サイズを返す", async () => {
     stubImage({ naturalWidth: 1280, naturalHeight: 720 });
 
     await expect(loadImageNaturalSize("blob:test")).resolves.toEqual({
@@ -54,7 +54,7 @@ describe("loadImageNaturalSize", () => {
     });
   });
 
-  it("returns null when image loading fails", async () => {
+  it("画像読み込みに失敗したら null を返す", async () => {
     stubImage({ shouldError: true });
 
     await expect(loadImageNaturalSize("blob:test")).resolves.toBeNull();
