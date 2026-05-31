@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { resolveCardScaleRenderingStrategy } from "@/components/card/frame/cardScaleRenderingStrategy";
 
 describe("resolveCardScaleRenderingStrategy", () => {
-  it("returns none when scaling is disabled", () => {
+  it("スケーリングが無効な場合は none を返す", () => {
     const result = resolveCardScaleRenderingStrategy({
       disableScale: true,
       effectiveScale: 1.5,
@@ -15,7 +15,7 @@ describe("resolveCardScaleRenderingStrategy", () => {
     expect(result.willChange).toBeUndefined();
   });
 
-  it("prefers css zoom when supported", () => {
+  it("対応していれば css zoom を優先する", () => {
     const result = resolveCardScaleRenderingStrategy({
       disableScale: false,
       effectiveScale: 1.35,
@@ -27,7 +27,7 @@ describe("resolveCardScaleRenderingStrategy", () => {
     expect(result.transform).toBe("none");
   });
 
-  it("falls back to transform when css zoom is not supported", () => {
+  it("css zoom 非対応なら transform にフォールバックする", () => {
     const result = resolveCardScaleRenderingStrategy({
       disableScale: false,
       effectiveScale: 1.35,
