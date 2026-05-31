@@ -52,7 +52,7 @@ describe("layoutCalendarTimeGridEvents", () => {
     expect(entry.style.xOffset).toBe(0);
   });
 
-  it("短いイベントも実時間どおりの height にする", () => {
+  it("短いイベントの layout height は実時間どおりにする", () => {
     const [entry] = layoutCalendarTimeGridEvents({
       events: [
         buildEvent({
@@ -69,7 +69,7 @@ describe("layoutCalendarTimeGridEvents", () => {
     expect(entry.style.height).toBeCloseTo(15 / 1_440 * 100, 6);
   });
 
-  it("weekday 表示の chip 高さを event duration と同じ時間長にする", () => {
+  it("weekday 表示の chip 高さは実時間を使い、最低表示高さはタイトル 1 行分にする", () => {
     const [shortEntry, longEntry] = layoutCalendarTimeGridEvents({
       events: [
         buildEvent({
@@ -97,7 +97,9 @@ describe("layoutCalendarTimeGridEvents", () => {
     expect(longFrame.heightHours).toBeCloseTo(107 / 60, 6);
     expect(longFrame.heightHours / shortFrame.heightHours).toBeCloseTo(107 / 15, 6);
     expect(shortStyle.height).toBe("calc(0.25 * var(--calendar-hour-row-height))");
+    expect(shortStyle.minHeight).toBe("18px");
     expect(longStyle.height).toBe("calc(1.7833333333333332 * var(--calendar-hour-row-height))");
+    expect(longStyle.minHeight).toBe("18px");
   });
 
   it("weekday 表示の chip top を開始時刻と同じ時間位置にする", () => {
