@@ -54,7 +54,7 @@ type NoOverlapLayoutEntry = CalendarTimeGridLayoutEntry & {
   size?: number;
 };
 
-const DEFAULT_MINIMUM_EVENT_DURATION_MINUTES = 1;
+const DEFAULT_MINIMUM_EVENT_DURATION_MINUTES = 30;
 const DEFAULT_MINIMUM_START_DIFFERENCE_MINUTES = 30;
 const MINUTES_IN_MS = 60_000;
 const PERCENT_MAX = 100;
