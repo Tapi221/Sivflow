@@ -29,6 +29,7 @@ export type UseScheduleScreenReturn = {
   visibleDays: Date[];
   displayDays: Date[];
   virtualRail: ScheduleVirtualRail;
+  monthRenderedRange: CalendarDateRange | null;
   yearRenderedRange: CalendarDateRange | null;
 
   titleDate: Date;
@@ -181,6 +182,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     visibleDays,
     displayDays,
     virtualRail,
+    monthRenderedRange,
     yearRenderedRange,
     titleDate: layout.titleDate,
     monthLabel: layout.monthLabel,
