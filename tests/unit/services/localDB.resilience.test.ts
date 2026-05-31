@@ -26,7 +26,7 @@ describe("LocalDB resilience", () => {
     vi.restoreAllMocks();
   });
 
-  it("returns the same in-flight promise for concurrent getInstance calls", async () => {
+  it("同時 getInstance 呼び出しでは同じ in-flight promise を返す", async () => {
     const openSpy = vi
       .spyOn(Dexie.prototype, "open")
       .mockImplementation(function mockOpen(this: Dexie) {
@@ -44,7 +44,7 @@ describe("LocalDB resilience", () => {
     expect(openSpy).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps logout reset best-effort and stores failure reason", async () => {
+  it("ログアウト reset を best-effort に保ち、失敗理由を保存する", async () => {
     LocalDB.clearInstance();
     const deleteSpy = vi
       .spyOn(Dexie, "delete")
@@ -57,7 +57,7 @@ describe("LocalDB resilience", () => {
     expect(status.resetFailedReason).toContain("delete failed");
   });
 
-  it("switches to fallback mode on backing-store UnknownError and does not retry infinitely", async () => {
+  it("backing-store UnknownError で fallback mode に切り替え、無限に再試行しない", async () => {
     const backingStoreError = Object.assign(
       new Error("Internal error opening backing store for indexedDB.open."),
       { name: "UnknownError" },
@@ -80,7 +80,7 @@ describe("LocalDB resilience", () => {
     expect(openSpy).toHaveBeenCalledTimes(1);
   });
 
-  it("bumps generation at most once per session for repeated backing-store failures", async () => {
+  it("backing-store 失敗が繰り返されても generation bump は session あたり最大 1 回にする", async () => {
     const backingStoreError = Object.assign(
       new Error("Internal error opening backing store for indexedDB.open."),
       { name: "UnknownError" },
@@ -102,7 +102,7 @@ describe("LocalDB resilience", () => {
     expect(secondGeneration).toBe("1");
   });
 
-  it("attempts to delete all known generations during logout reset", async () => {
+  it("ログアウト reset 時に既知のすべての generation の削除を試みる", async () => {
     const originalDatabases = indexedDB.databases;
     try {
       (indexedDB as unknown).databases = vi
@@ -130,7 +130,7 @@ describe("LocalDB resilience", () => {
     }
   });
 
-  it("exposes localdb telemetry snapshot keys", async () => {
+  it("LocalDB telemetry snapshot key を公開する", async () => {
     const snapshot = getLocalDBTelemetrySnapshot();
     expect(snapshot).toHaveProperty("localdb_mode");
     expect(snapshot).toHaveProperty("localdb_reason_code");
@@ -139,7 +139,7 @@ describe("LocalDB resilience", () => {
     expect(snapshot).toHaveProperty("localdb_reset_failed");
   });
 
-  it("emits localdb telemetry once per session key", () => {
+  it("LocalDB telemetry を session key ごとに 1 回だけ送出する", () => {
     expect(telemetryOncePerSession("localdb_runtime")).toBe(true);
     expect(telemetryOncePerSession("localdb_runtime")).toBe(false);
   });
