@@ -45,7 +45,7 @@ const SidebarLayeredDirectory = () => {
         </div>
       </div>
       <div className="min-h-0 flex-1">
-        {folderTagMode === "tag" ? <TagTreeSidebar /> : <LibraryHierarchySidebar />}
+        {folderTagMode === "tag" ? <TagTreeSidebar /> : <ProjectListSidebar />}
       </div>
     </div>
   );

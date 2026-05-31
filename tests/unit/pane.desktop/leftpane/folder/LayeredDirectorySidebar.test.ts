@@ -36,9 +36,10 @@ const getFunctionSource = (source: string, functionName: string): string => {
   expect(start).toBeGreaterThanOrEqual(0);
 
   const nextConst = source.indexOf("\nconst ", start + marker.length);
-  expect(nextConst).toBeGreaterThan(start);
+  const end = nextConst > start ? nextConst : source.indexOf("\nexport ", start + marker.length);
+  expect(end).toBeGreaterThan(start);
 
-  return source.slice(start, nextConst);
+  return source.slice(start, end);
 };
 
 afterEach(() => {
@@ -47,6 +48,14 @@ afterEach(() => {
 });
 
 describe("LayeredDirectorySidebar project list", () => {
+  it("uses the flat project list for MY PROJECTS instead of the hierarchy tree", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/pane.desktop/leftpane/Sidebar.LayeredDirectory.tsx"), "utf8");
+    const sidebarSource = getFunctionSource(source, "SidebarLayeredDirectory");
+
+    expect(sidebarSource).toContain("<ProjectListSidebar />");
+    expect(sidebarSource).not.toContain("<LibraryHierarchySidebar />");
+  });
+
   it("does not render project content count badges", () => {
     const source = readFileSync(SOURCE_PATH, "utf8");
     const projectListItemSource = getFunctionSource(source, "ProjectListItem");
