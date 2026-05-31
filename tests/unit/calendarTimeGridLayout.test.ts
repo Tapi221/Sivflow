@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle, isCompactWeekdayTimedEntry } from "../../src/features/calendar/grid/weekdayTimeGridGeometry";
+import { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle } from "../../src/features/calendar/grid/weekdayTimeGridGeometry";
 import { DEFAULT_HOUR_ROW_HEIGHT } from "../../src/features/calendar/calendar.constants.desktop";
 import { WEEKDAY_MINUTES_PER_HOUR } from "../../src/features/calendar/grid/grid.layout.constants.desktop";
 import { getCalendarEventLevels, getCalendarEventSegment } from "../../packages/core/src/calendar/eventLevels";
@@ -273,50 +273,11 @@ describe("layoutCalendarTimeGridEvents", () => {
     }
   });
 
-  it("連鎖 overlap では直接重ならない event だけ同じ column を再利用する", () => {
+  it("短時間 event の weekday frame に compact 判定を付けない", () => {
     const entries = layoutCalendarTimeGridEvents({
       events: [
         buildEvent({
-          id: "a",
-          startsAt: new Date(2026, 3, 12, 9, 0),
-          endsAt: new Date(2026, 3, 12, 10, 0),
-        }),
-        buildEvent({
-          id: "b",
-          startsAt: new Date(2026, 3, 12, 9, 30),
-          endsAt: new Date(2026, 3, 12, 10, 30),
-        }),
-        buildEvent({
-          id: "c",
-          startsAt: new Date(2026, 3, 12, 10, 0),
-          endsAt: new Date(2026, 3, 12, 11, 0),
-        }),
-      ],
-      rangeStart: new Date(2026, 3, 12, 0, 0),
-      rangeEnd: new Date(2026, 3, 13, 0, 0),
-      layoutMode: "no-overlap",
-    });
-
-    const a = getEntryById(entries, "a");
-    const b = getEntryById(entries, "b");
-    const c = getEntryById(entries, "c");
-
-    expect(a.columnCount).toBe(2);
-    expect(b.columnCount).toBe(2);
-    expect(c.columnCount).toBe(2);
-    expect(a.style.xOffset).toBe(0);
-    expect(b.style.xOffset).toBe(50);
-    expect(c.style.xOffset).toBe(0);
-    expect(a.style.width).toBe(50);
-    expect(b.style.width).toBe(50);
-    expect(c.style.width).toBe(50);
-  });
-
-  it("短時間 event の compact 判定を 30 分未満に固定する", () => {
-    const entries = layoutCalendarTimeGridEvents({
-      events: [
-        buildEvent({
-          id: "compact-29",
+          id: "short-29",
           startsAt: new Date(2026, 3, 12, 9, 0),
           endsAt: new Date(2026, 3, 12, 9, 29),
         }),
@@ -331,8 +292,13 @@ describe("layoutCalendarTimeGridEvents", () => {
       layoutMode: "no-overlap",
     });
 
-    expect(isCompactWeekdayTimedEntry(getEntryById(entries, "compact-29"))).toBe(true);
-    expect(isCompactWeekdayTimedEntry(getEntryById(entries, "normal-30"))).toBe(false);
+    const shortFrame = getWeekdayTimedEventFrame(getEntryById(entries, "short-29"));
+    const normalFrame = getWeekdayTimedEventFrame(getEntryById(entries, "normal-30"));
+
+    expect(shortFrame).not.toHaveProperty("compact");
+    expect(normalFrame).not.toHaveProperty("compact");
+    expect(shortFrame.heightHours).toBeCloseTo(29 / 60, 6);
+    expect(normalFrame.heightHours).toBeCloseTo(30 / 60, 6);
   });
 
   it("all-day event はデフォルトで time grid から除外する", () => {
