@@ -271,7 +271,7 @@ const CalendarYearViewComponent = ({
 
     virtualWindowRef.current = nextWindow;
     setVirtualWindowState(nextWindow);
-  }, []);
+  }, [setVirtualWindowState]);
 
   const getYearOffsetFromScrollTop = useCallback((scrollTop: number): number => {
     return clampYearOffset(Math.floor(scrollTop / yearStepHeightRef.current) - YEAR_VIRTUAL_PAST_YEARS);
@@ -311,7 +311,7 @@ const CalendarYearViewComponent = ({
     if (!nextRange) return;
 
     setSyncRange((currentRange) => isSameCalendarDateRange(currentRange, nextRange) ? currentRange : nextRange);
-  }, [getSyncRangeFromScroll]);
+  }, [getSyncRangeFromScroll, setSyncRange]);
 
   const scheduleSyncVisibleWeekRange = useCallback((scroller: HTMLDivElement) => {
     pendingSyncScrollerRef.current = scroller;
