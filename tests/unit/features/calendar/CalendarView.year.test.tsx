@@ -45,7 +45,7 @@ describe("CalendarYearView", () => {
       | undefined;
 
     expect(latestRange?.start.getFullYear()).toBe(2026);
-    expect(latestRange?.end.getFullYear()).toBe(2032);
+    expect(latestRange?.end.getFullYear()).toBe(2029);
     expect(container.textContent).toContain("2026年");
 
     setReadonlyNumber(scroller!, "clientHeight", 1000);
@@ -61,6 +61,6 @@ describe("CalendarYearView", () => {
       | undefined;
 
     expect(latestRange?.start.getFullYear()).toBe(2026);
-    expect(latestRange?.end.getFullYear()).toBe(2035);
+    expect(latestRange?.end.getFullYear()).toBe(2032);
   }, 60_000);
 });
