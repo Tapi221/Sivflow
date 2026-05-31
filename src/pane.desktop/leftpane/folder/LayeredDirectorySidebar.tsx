@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
-import { DEFAULT_NEW_FOLDER_NAME, getFolderId, getParentFolderId, UNTITLED_FOLDER_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { DEFAULT_NEW_FOLDER_NAME, getFolderId, UNTITLED_FOLDER_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { cn } from "@/lib/utils";
@@ -91,7 +91,7 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
 
   return (
     <div data-folder-id={folderId}>
-      <div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} className={cn("group flex h-7 items-center rounded-[10px] pr-1 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5] text-[#343a45]") } style={{ paddingLeft: rowPaddingLeft }}>
+      <div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} className={cn("group flex h-7 items-center rounded-[10px] pr-1 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5] text-[#343a45]")} style={{ paddingLeft: rowPaddingLeft }}>
         <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} disabled={!hasChildren} className={cn("flex h-6 w-5 shrink-0 items-center justify-center rounded-md text-[#b0b5bd]", hasChildren ? "hover:bg-white hover:text-[#6f7681]" : "opacity-0")}>
           <IconChevronRight className={cn("h-3 w-3 transition-transform", isExpanded && "rotate-90")} />
         </button>
