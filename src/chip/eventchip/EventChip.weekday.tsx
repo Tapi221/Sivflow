@@ -15,7 +15,9 @@ type ChipLayoutState = {
   titleLineClamp: number;
 };
 
-const CHIP_BASE_CLASS = "relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-md text-left";
+const CHIP_ROOT_CLASS = "relative isolate h-full min-h-0 w-full";
+const CHIP_LINE_MASK_CLASS = "pointer-events-none absolute inset-0 rounded-md bg-white";
+const CHIP_BASE_CLASS = "relative z-10 flex h-full min-h-0 w-full flex-col overflow-hidden rounded-md text-left";
 const CHIP_NORMAL_CLASS = "gap-[0.5px] py-1 pl-1.5 pr-0";
 const CHIP_COMPACT_CLASS = "gap-0 px-1.5 py-0.5";
 const CHIP_TITLE_CLASS = "overflow-hidden whitespace-normal break-words text-[12px] font-medium leading-snug";
@@ -202,34 +204,37 @@ const CalendarEventChipWeekday = ({
       accentColor={tokens.border}
       className="h-full min-h-0 w-full"
     >
-      <div
-        ref={containerRef}
-        className={getChipClassName(compact)}
-        style={{
-          background: tokens.bg,
-          borderLeft: `3px solid ${tokens.border}`,
-          color: tokens.text,
-        }}
-      >
-        <span
-          className={titleClassName}
-          style={compact ? undefined : createTitleClampStyle(chipLayout.titleLineClamp)}
-        >
-          {titleLabel}
-        </span>
-
-        {chipLayout.showTimeLabel ? <span className={CHIP_TIME_CLASS}>{timeLabel}</span> : null}
-
+      <div className={CHIP_ROOT_CLASS}>
+        <div aria-hidden="true" className={CHIP_LINE_MASK_CLASS} />
         <div
-          aria-hidden="true"
-          className={getMeasurementClassName(compact)}
+          ref={containerRef}
+          className={getChipClassName(compact)}
+          style={{
+            background: tokens.bg,
+            borderLeft: `3px solid ${tokens.border}`,
+            color: tokens.text,
+          }}
         >
-          <span ref={titleMeasurementRef} className={titleClassName}>
+          <span
+            className={titleClassName}
+            style={compact ? undefined : createTitleClampStyle(chipLayout.titleLineClamp)}
+          >
             {titleLabel}
           </span>
-          <span ref={timeMeasurementRef} className={CHIP_TIME_CLASS}>
-            {timeLabel}
-          </span>
+
+          {chipLayout.showTimeLabel ? <span className={CHIP_TIME_CLASS}>{timeLabel}</span> : null}
+
+          <div
+            aria-hidden="true"
+            className={getMeasurementClassName(compact)}
+          >
+            <span ref={titleMeasurementRef} className={titleClassName}>
+              {titleLabel}
+            </span>
+            <span ref={timeMeasurementRef} className={CHIP_TIME_CLASS}>
+              {timeLabel}
+            </span>
+          </div>
         </div>
       </div>
     </HoverEventTooltip>
