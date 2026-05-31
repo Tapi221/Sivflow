@@ -30,6 +30,8 @@ export type GoogleOAuthServerErrorReason =
   | "google_userinfo_invalid_response"
   | "google_userinfo_failed"
   | "firestore_access_failed"
+  | "firebase_auth_user_sync_failed"
+  | "firebase_custom_token_failed"
   | "unclassified_server_error";
 
 const OAUTH_CLIENT_NOT_FOUND_PATTERNS = [
