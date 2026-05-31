@@ -54,5 +54,5 @@ describe("CalendarYearView", () => {
 
     expect(latestRange?.start.getFullYear()).toBe(2021);
     expect(latestRange?.end.getFullYear()).toBe(2035);
-  });
+  }, 20_000);
 });

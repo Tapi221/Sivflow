@@ -48,16 +48,19 @@ type CalendarYearBlock = {
   months: CalendarYearMonth[];
 };
 
-type YearRangeAnchor = {
-  yearKey: string;
-  offsetTop: number;
+type YearVirtualWindow = {
+  startOffset: number;
+  endOffset: number;
 };
 
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
-const INITIAL_YEAR_BUFFER = 5;
-const YEAR_EXTEND_COUNT = 4;
-const YEAR_MAX_RENDERED_YEARS = 15;
-const YEAR_SCROLL_EDGE_THRESHOLD_PX = 4800;
+const YEAR_VIRTUAL_PAST_YEARS = 200;
+const YEAR_VIRTUAL_FUTURE_YEARS = 200;
+const YEAR_INITIAL_RENDERED_YEARS = 15;
+const YEAR_VIRTUAL_OVERSCAN_YEARS = 5;
+const YEAR_VIRTUAL_WINDOW_GUARD_YEARS = 3;
+const YEAR_SECTION_GAP_PX = 32;
+const DEFAULT_YEAR_SECTION_STEP_HEIGHT = 760;
 const YEAR_SYNC_RANGE_NOTIFY_DELAY_MS = 180;
 const YEAR_SYNC_RANGE_SAMPLE_OFFSET_PX = 160;
 const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
@@ -162,42 +165,29 @@ const buildYearDateRange = (years: CalendarYearBlock[]): CalendarDateRange | nul
   };
 };
 
-const buildFallbackWeekDateRange = (date: Date): CalendarDateRange => {
-  const start = startOfWeek(date, { weekStartsOn: 0 });
-
-  return {
-    start,
-    end: endOfDay(addDays(start, 6)),
-  };
-};
-
 const buildYearSyncDateRange = (date: Date): CalendarDateRange => ({
   start: startOfYear(date),
   end: endOfDay(endOfYear(date)),
 });
 
-const getBestYearForScrollPosition = (years: CalendarYearBlock[], yearSectionRefsMap: Map<string, HTMLElement>, scrollTop: number): CalendarYearBlock | null => {
-  let bestYear: CalendarYearBlock | null = null;
-  let bestDistance = Number.POSITIVE_INFINITY;
+const isSameCalendarDateRange = (left: CalendarDateRange, right: CalendarDateRange): boolean => left.start.getTime() === right.start.getTime() && left.end.getTime() === right.end.getTime();
 
-  for (const year of years) {
-    const section = yearSectionRefsMap.get(year.key);
-    if (!section) continue;
+const clampYearOffset = (yearOffset: number): number => Math.min(YEAR_VIRTUAL_FUTURE_YEARS, Math.max(-YEAR_VIRTUAL_PAST_YEARS, yearOffset));
 
-    const sectionTop = section.offsetTop;
-    const sectionBottom = sectionTop + section.offsetHeight;
-    const distance = scrollTop < sectionTop ? sectionTop - scrollTop : scrollTop > sectionBottom ? scrollTop - sectionBottom : 0;
+const createYearVirtualWindowAround = (yearOffset: number): YearVirtualWindow => {
+  const halfWindow = Math.floor(YEAR_INITIAL_RENDERED_YEARS / 2);
 
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      bestYear = year;
-    }
-  }
-
-  return bestYear;
+  return {
+    startOffset: clampYearOffset(yearOffset - halfWindow),
+    endOffset: clampYearOffset(yearOffset + halfWindow),
+  };
 };
 
-const isSameCalendarDateRange = (left: CalendarDateRange, right: CalendarDateRange): boolean => left.start.getTime() === right.start.getTime() && left.end.getTime() === right.end.getTime();
+const isSameYearVirtualWindow = (left: YearVirtualWindow, right: YearVirtualWindow): boolean => left.startOffset === right.startOffset && left.endOffset === right.endOffset;
+
+const getTopSpacerHeight = (virtualWindow: YearVirtualWindow, yearStepHeight: number): number => Math.max(0, virtualWindow.startOffset + YEAR_VIRTUAL_PAST_YEARS) * yearStepHeight;
+
+const getBottomSpacerHeight = (virtualWindow: YearVirtualWindow, yearStepHeight: number): number => Math.max(0, YEAR_VIRTUAL_FUTURE_YEARS - virtualWindow.endOffset) * yearStepHeight;
 
 const getDayButtonStyle = (day: CalendarYearDay, selected: boolean): CSSProperties | undefined => {
   if (selected || !day.events) return undefined;
@@ -222,10 +212,6 @@ const CalendarYearViewComponent = ({
   const todayKey = useMemo(() => getCalendarDateKey(today), [today]);
   const selectedDateKey = useMemo(() => getCalendarDateKey(selectedDate), [selectedDate]);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const yearSectionRefsMap = useRef<Map<string, HTMLElement>>(new Map());
-  const rangeAnchorRef = useRef<YearRangeAnchor | null>(null);
-  const isExtendingBeforeRef = useRef(false);
-  const isExtendingAfterRef = useRef(false);
   const lastScrollTopRef = useRef(0);
   const syncRangeNotifyTimeoutRef = useRef<number | null>(null);
   const syncRangeRafRef = useRef<number | null>(null);
@@ -233,13 +219,13 @@ const CalendarYearViewComponent = ({
   const scrollRafRef = useRef<number | null>(null);
   const pendingScrollScrollerRef = useRef<HTMLDivElement | null>(null);
   const requestedYearKeyRef = useRef(format(startOfYear(yearDate), "yyyy"));
-  const pendingScrollYearKeyRef = useRef<string | null>(format(startOfYear(yearDate), "yyyy"));
-  const [anchorYear, setAnchorYear] = useState(() => startOfYear(yearDate));
-  const [yearOffsetRange, setYearOffsetRange] = useState(() => ({
-    startOffset: -INITIAL_YEAR_BUFFER,
-    endOffset: INITIAL_YEAR_BUFFER,
-  }));
-  const [syncRange, setSyncRange] = useState(() => buildFallbackWeekDateRange(yearDate));
+  const pendingScrollYearOffsetRef = useRef<number | null>(0);
+  const baseYearRef = useRef(startOfYear(yearDate));
+  const yearStepHeightRef = useRef(DEFAULT_YEAR_SECTION_STEP_HEIGHT);
+  const virtualWindowRef = useRef(createYearVirtualWindowAround(0));
+  const [virtualWindow, setVirtualWindowState] = useState(() => virtualWindowRef.current);
+  const [yearStepHeight, setYearStepHeight] = useState(DEFAULT_YEAR_SECTION_STEP_HEIGHT);
+  const [syncRange, setSyncRange] = useState(() => buildYearSyncDateRange(yearDate));
 
   const eventsByDay = useMemo(() => buildEventsByDay(visibleEvents), [visibleEvents]);
 
@@ -264,10 +250,10 @@ const CalendarYearViewComponent = ({
   );
 
   const years = useMemo<CalendarYearBlock[]>(() => {
-    const yearCount = Math.max(0, yearOffsetRange.endOffset - yearOffsetRange.startOffset + 1);
+    const yearCount = Math.max(0, virtualWindow.endOffset - virtualWindow.startOffset + 1);
 
     return Array.from({ length: yearCount }, (_, index) => {
-      const date = startOfYear(addYears(anchorYear, yearOffsetRange.startOffset + index));
+      const date = startOfYear(addYears(baseYearRef.current, virtualWindow.startOffset + index));
 
       return {
         key: format(date, "yyyy"),
@@ -276,15 +262,49 @@ const CalendarYearViewComponent = ({
         months: buildYearMonths(date),
       };
     });
-  }, [anchorYear, buildYearMonths, dateFnsLocale, yearOffsetRange.endOffset, yearOffsetRange.startOffset]);
+  }, [buildYearMonths, dateFnsLocale, virtualWindow.endOffset, virtualWindow.startOffset]);
 
   const renderedRange = useMemo(() => buildYearDateRange(years), [years]);
 
+  const setVirtualWindow = useCallback((nextWindow: YearVirtualWindow) => {
+    if (isSameYearVirtualWindow(virtualWindowRef.current, nextWindow)) return;
+
+    virtualWindowRef.current = nextWindow;
+    setVirtualWindowState(nextWindow);
+  }, []);
+
+  const getYearOffsetFromScrollTop = useCallback((scrollTop: number): number => {
+    return clampYearOffset(Math.floor(scrollTop / yearStepHeightRef.current) - YEAR_VIRTUAL_PAST_YEARS);
+  }, []);
+
+  const getYearOffsetTop = useCallback((yearOffset: number): number => {
+    return (yearOffset + YEAR_VIRTUAL_PAST_YEARS) * yearStepHeightRef.current;
+  }, []);
+
+  const updateVirtualWindowForScroll = useCallback((scroller: HTMLDivElement, force = false) => {
+    const firstVisibleYearOffset = getYearOffsetFromScrollTop(scroller.scrollTop);
+    const lastVisibleYearOffset = getYearOffsetFromScrollTop(scroller.scrollTop + scroller.clientHeight);
+    const currentWindow = virtualWindowRef.current;
+
+    if (
+      !force &&
+      firstVisibleYearOffset >= currentWindow.startOffset + YEAR_VIRTUAL_WINDOW_GUARD_YEARS &&
+      lastVisibleYearOffset <= currentWindow.endOffset - YEAR_VIRTUAL_WINDOW_GUARD_YEARS
+    ) {
+      return;
+    }
+
+    setVirtualWindow({
+      startOffset: clampYearOffset(firstVisibleYearOffset - YEAR_VIRTUAL_OVERSCAN_YEARS),
+      endOffset: clampYearOffset(lastVisibleYearOffset + YEAR_VIRTUAL_OVERSCAN_YEARS),
+    });
+  }, [getYearOffsetFromScrollTop, setVirtualWindow]);
+
   const getSyncRangeFromScroll = useCallback((scroller: HTMLDivElement): CalendarDateRange | null => {
     const sampleScrollTop = scroller.scrollTop + Math.min(YEAR_SYNC_RANGE_SAMPLE_OFFSET_PX, scroller.clientHeight / 2);
-    const targetYear = getBestYearForScrollPosition(years, yearSectionRefsMap.current, sampleScrollTop);
-    return targetYear ? buildYearSyncDateRange(targetYear.date) : null;
-  }, [years]);
+    const targetYear = addYears(baseYearRef.current, getYearOffsetFromScrollTop(sampleScrollTop));
+    return buildYearSyncDateRange(targetYear);
+  }, [getYearOffsetFromScrollTop]);
 
   const syncVisibleWeekRange = useCallback((scroller: HTMLDivElement) => {
     const nextRange = getSyncRangeFromScroll(scroller);
@@ -355,141 +375,62 @@ const CalendarYearViewComponent = ({
     };
   }, []);
 
-  const setYearSectionRef = useCallback((yearKey: string, node: HTMLElement | null) => {
-    if (node) {
-      yearSectionRefsMap.current.set(yearKey, node);
-    } else {
-      yearSectionRefsMap.current.delete(yearKey);
-    }
-  }, []);
-
-  const getCurrentRangeAnchor = useCallback((scroller: HTMLDivElement): YearRangeAnchor | null => {
-    let bestSection: HTMLElement | null = null;
-    let bestDistance = Number.POSITIVE_INFINITY;
-
-    for (const year of years) {
-      const section = yearSectionRefsMap.current.get(year.key);
-      if (!section) continue;
-
-      const distance = Math.abs(section.offsetTop - scroller.scrollTop);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        bestSection = section;
-      }
-    }
-
-    const yearKey = bestSection?.dataset.calendarYearKey;
-    if (!bestSection || !yearKey) return null;
-
-    return {
-      yearKey,
-      offsetTop: bestSection.offsetTop - scroller.scrollTop,
-    };
-  }, [years]);
-
   useEffect(() => {
     const nextRequestedYearKey = format(startOfYear(yearDate), "yyyy");
 
     if (requestedYearKeyRef.current === nextRequestedYearKey) return;
 
     requestedYearKeyRef.current = nextRequestedYearKey;
-    pendingScrollYearKeyRef.current = nextRequestedYearKey;
-    rangeAnchorRef.current = null;
-    isExtendingBeforeRef.current = false;
-    isExtendingAfterRef.current = false;
-    setSyncRange(buildFallbackWeekDateRange(yearDate));
-    setAnchorYear(startOfYear(yearDate));
-    setYearOffsetRange({
-      startOffset: -INITIAL_YEAR_BUFFER,
-      endOffset: INITIAL_YEAR_BUFFER,
-    });
-  }, [yearDate]);
+    baseYearRef.current = startOfYear(yearDate);
+    pendingScrollYearOffsetRef.current = 0;
+    setSyncRange(buildYearSyncDateRange(yearDate));
+    setVirtualWindow(createYearVirtualWindowAround(0));
+  }, [setVirtualWindow, yearDate]);
 
   useLayoutEffect(() => {
-    const targetYearKey = pendingScrollYearKeyRef.current;
-    if (!targetYearKey) return;
+    const targetYearOffset = pendingScrollYearOffsetRef.current;
+    if (targetYearOffset === null) return;
 
     const scroller = scrollContainerRef.current;
-    const targetSection = yearSectionRefsMap.current.get(targetYearKey);
-    if (!scroller || !targetSection) return;
+    if (!scroller) return;
 
-    scroller.scrollTop = Math.max(0, targetSection.offsetTop);
+    scroller.scrollTop = Math.max(0, getYearOffsetTop(targetYearOffset));
     lastScrollTopRef.current = scroller.scrollTop;
-    pendingScrollYearKeyRef.current = null;
+    pendingScrollYearOffsetRef.current = null;
+    updateVirtualWindowForScroll(scroller, true);
     syncVisibleWeekRange(scroller);
-  }, [syncVisibleWeekRange, years]);
+  }, [getYearOffsetTop, syncVisibleWeekRange, updateVirtualWindowForScroll, years]);
 
   useLayoutEffect(() => {
-    const rangeAnchor = rangeAnchorRef.current;
-    if (!rangeAnchor) {
-      isExtendingBeforeRef.current = false;
-      isExtendingAfterRef.current = false;
-      return;
-    }
-
     const scroller = scrollContainerRef.current;
-    const anchorSection = yearSectionRefsMap.current.get(rangeAnchor.yearKey);
+    const firstYearSection = scroller?.querySelector<HTMLElement>(".calendar-year-section");
+    const measuredHeight = firstYearSection?.offsetHeight ?? 0;
+    const nextStepHeight = measuredHeight > 0 ? measuredHeight + YEAR_SECTION_GAP_PX : DEFAULT_YEAR_SECTION_STEP_HEIGHT;
 
-    if (!scroller || !anchorSection) {
-      rangeAnchorRef.current = null;
-      isExtendingBeforeRef.current = false;
-      isExtendingAfterRef.current = false;
-      return;
-    }
+    if (Math.abs(nextStepHeight - yearStepHeightRef.current) < 1) return;
 
-    scroller.scrollTop = anchorSection.offsetTop - rangeAnchor.offsetTop;
+    const previousStepHeight = yearStepHeightRef.current;
+    const scrollRatio = scroller ? scroller.scrollTop / previousStepHeight : 0;
+
+    yearStepHeightRef.current = nextStepHeight;
+    setYearStepHeight(nextStepHeight);
+
+    if (!scroller || pendingScrollYearOffsetRef.current !== null) return;
+
+    scroller.scrollTop = Math.max(0, scrollRatio * nextStepHeight);
     lastScrollTopRef.current = scroller.scrollTop;
-    rangeAnchorRef.current = null;
-    isExtendingBeforeRef.current = false;
-    isExtendingAfterRef.current = false;
-    syncVisibleWeekRange(scroller);
-  }, [syncVisibleWeekRange, years]);
+    updateVirtualWindowForScroll(scroller, true);
+  }, [updateVirtualWindowForScroll, years]);
 
   useEffect(() => {
     const scroller = scrollContainerRef.current;
     if (!scroller) return;
 
     const flushScroll = (pendingScroller: HTMLDivElement) => {
-      const previousScrollTop = lastScrollTopRef.current;
       const currentScrollTop = pendingScroller.scrollTop;
-      const isScrollingUp = currentScrollTop < previousScrollTop;
-      const isScrollingDown = currentScrollTop > previousScrollTop;
       lastScrollTopRef.current = currentScrollTop;
+      updateVirtualWindowForScroll(pendingScroller);
       scheduleSyncVisibleWeekRange(pendingScroller);
-
-      if (
-        isScrollingUp &&
-        currentScrollTop < YEAR_SCROLL_EDGE_THRESHOLD_PX &&
-        !isExtendingBeforeRef.current
-      ) {
-        isExtendingBeforeRef.current = true;
-        rangeAnchorRef.current = getCurrentRangeAnchor(pendingScroller);
-
-        setYearOffsetRange((currentRange) => {
-          const shouldTrimAfter = currentRange.endOffset - currentRange.startOffset + 1 + YEAR_EXTEND_COUNT > YEAR_MAX_RENDERED_YEARS;
-
-          return {
-            startOffset: currentRange.startOffset - YEAR_EXTEND_COUNT,
-            endOffset: shouldTrimAfter ? currentRange.endOffset - YEAR_EXTEND_COUNT : currentRange.endOffset,
-          };
-        });
-      }
-
-      const distToBottom = pendingScroller.scrollHeight - pendingScroller.clientHeight - currentScrollTop;
-
-      if (
-        isScrollingDown &&
-        distToBottom < YEAR_SCROLL_EDGE_THRESHOLD_PX &&
-        !isExtendingAfterRef.current
-      ) {
-        isExtendingAfterRef.current = true;
-        rangeAnchorRef.current = getCurrentRangeAnchor(pendingScroller);
-
-        setYearOffsetRange((currentRange) => ({
-          startOffset: currentRange.endOffset - currentRange.startOffset + 1 + YEAR_EXTEND_COUNT > YEAR_MAX_RENDERED_YEARS ? currentRange.startOffset + YEAR_EXTEND_COUNT : currentRange.startOffset,
-          endOffset: currentRange.endOffset + YEAR_EXTEND_COUNT,
-        }));
-      }
     };
 
     const handleScroll = () => {
@@ -520,20 +461,21 @@ const CalendarYearViewComponent = ({
 
       pendingScrollScrollerRef.current = null;
     };
-  }, [getCurrentRangeAnchor, scheduleSyncVisibleWeekRange]);
+  }, [scheduleSyncVisibleWeekRange, updateVirtualWindowForScroll]);
 
   return (
     <div
       ref={scrollContainerRef}
       className="calendar-year-view min-h-0 flex-1 overflow-y-auto bg-[rgba(255,255,255,0.92)] px-4 pb-5 pt-4"
     >
-      <div className="space-y-8">
+      <div>
+        <div aria-hidden="true" style={{ height: getTopSpacerHeight(virtualWindow, yearStepHeight) }} />
         {years.map((year) => (
           <section
             key={year.key}
-            ref={(node) => setYearSectionRef(year.key, node)}
             data-calendar-year-key={year.key}
             className="calendar-year-section min-w-0 bg-white"
+            style={{ marginBottom: YEAR_SECTION_GAP_PX }}
             aria-label={year.label}
           >
             <h2 className="mb-4 px-1 text-[17px] font-semibold leading-none tracking-[-0.01em] text-[#1c1c1e]">
@@ -600,6 +542,7 @@ const CalendarYearViewComponent = ({
             </div>
           </section>
         ))}
+        <div aria-hidden="true" style={{ height: getBottomSpacerHeight(virtualWindow, yearStepHeight) }} />
       </div>
     </div>
   );
