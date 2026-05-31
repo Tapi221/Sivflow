@@ -6,7 +6,7 @@ import { layoutCalendarTimeGridEvents } from "@core/calendar";
 import type { CalendarTimeGridLayoutEntry } from "@core/calendar";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
-import { clipEventToDay, compareCalendarEvents, eventOverlapsRange, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
+import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
@@ -58,6 +58,35 @@ const getViewportGridTemplateColumns = (dayCount: number): string => `${C.TIME_C
 
 const getTimedEntryPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours: number): CSSProperties => getWeekdayTimedEventPositionStyle(entry, rangeHours, { suppressMinHeight: shouldSuppressEntryMinHeight(entry) });
 
+const toEventDate = (value: Date): Date | null => {
+  const date = value instanceof Date ? value : new Date(value);
+
+  return Number.isFinite(date.getTime()) ? date : null;
+};
+
+const clipEventToRange = (event: GoogleCalendarEvent, rangeStart: Date, rangeEnd: Date): GoogleCalendarEvent | null => {
+  const startsAt = toEventDate(event.startsAt);
+  const endsAt = toEventDate(event.endsAt);
+
+  if (!startsAt || !endsAt) return null;
+
+  const startTime = startsAt.getTime();
+  const endTime = endsAt.getTime();
+  const normalizedEndTime = endTime > startTime ? endTime : startTime + 1;
+  const clippedStart = new Date(Math.max(startTime, rangeStart.getTime()));
+  const clippedEnd = new Date(Math.min(normalizedEndTime, rangeEnd.getTime()));
+
+  if (clippedEnd.getTime() <= clippedStart.getTime()) return null;
+
+  if (clippedStart.getTime() === startTime && clippedEnd.getTime() === endTime) return event;
+
+  return {
+    ...event,
+    startsAt: clippedStart,
+    endsAt: clippedEnd,
+  };
+};
+
 const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]): WeekdayEventsByDay => {
   const dayKeys = new Set(days.map(getCalendarDateKey));
   const allDayEvents = new Map<string, GoogleCalendarEvent[]>();
@@ -94,8 +123,15 @@ const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]): WeekdayE
 };
 
 const createTimedLayoutEventsForRange = (events: GoogleCalendarEvent[], rangeStart: Date, rangeEnd: Date): CalendarTimeGridLayoutEntry[] => {
+  const clippedEvents = events.flatMap((event) => {
+    if (event.isAllDay) return [];
+    const clippedEvent = clipEventToRange(event, rangeStart, rangeEnd);
+
+    return clippedEvent ? [clippedEvent] : [];
+  });
+
   return layoutCalendarTimeGridEvents({
-    events,
+    events: clippedEvents,
     rangeStart,
     rangeEnd,
     layoutMode: "no-overlap",
@@ -113,9 +149,8 @@ const createTimedLayoutEvents = (events: GoogleCalendarEvent[], day: Date): Cale
 const createNextDayPreviewLayoutEvents = (events: GoogleCalendarEvent[], day: Date): CalendarTimeGridLayoutEntry[] => {
   const rangeStart = addDays(startOfDay(day), 1);
   const rangeEnd = addHours(rangeStart, NEXT_DAY_PREVIEW_HOURS);
-  const previewEvents = events.filter((event) => !event.isAllDay && eventOverlapsRange(event, rangeStart, rangeEnd));
 
-  return createTimedLayoutEventsForRange(previewEvents, rangeStart, rangeEnd);
+  return createTimedLayoutEventsForRange(events, rangeStart, rangeEnd);
 };
 
 const useCurrentTime = () => {
