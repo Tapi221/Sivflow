@@ -2,8 +2,8 @@ import type { CSSProperties } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { HoverEventTooltip } from "@/chip/toolchip/HoverEventTooltip";
-import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 type CalendarEventChipWeekdayProps = {
   event: GoogleCalendarEvent;
@@ -15,12 +15,13 @@ type ChipLayoutState = {
   titleLineClamp: number;
 };
 
-const CHIP_CLASS = "relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-md py-1 pl-1.5 pr-0 text-left";
+const CHIP_BASE_CLASS = "relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-md text-left";
+const CHIP_NORMAL_CLASS = "gap-1 py-1 pl-1.5 pr-0";
+const CHIP_COMPACT_CLASS = "gap-0 px-1.5 py-0.5";
 const CHIP_TITLE_CLASS = "overflow-hidden whitespace-normal break-words text-[12px] font-medium leading-snug";
+const CHIP_COMPACT_TITLE_CLASS = "truncate text-[11px] font-semibold leading-[14px]";
 const CHIP_TIME_CLASS = "overflow-hidden whitespace-nowrap text-[11px] font-semibold tabular-nums opacity-80";
-const CHIP_MEASUREMENT_CLASS = "pointer-events-none invisible absolute inset-0 flex min-h-0 w-full flex-col overflow-hidden rounded-md py-1 pl-1.5 pr-0 text-left";
-const CHIP_GAP_CLASS = "gap-1";
-const CHIP_COMPACT_GAP_CLASS = "gap-0.5";
+const CHIP_MEASUREMENT_BASE_CLASS = "pointer-events-none invisible absolute inset-0 flex min-h-0 w-full flex-col overflow-hidden rounded-md text-left";
 const CHIP_MEASUREMENT_TOLERANCE_PX = 1;
 const DEFAULT_TITLE_LINE_CLAMP = 1;
 const DEFAULT_CHIP_LAYOUT_STATE: ChipLayoutState = {
@@ -113,6 +114,18 @@ const createTitleClampStyle = (lineClamp: number): CSSProperties => ({
   WebkitLineClamp: lineClamp,
 });
 
+const getChipClassName = (compact: boolean): string => [
+  CHIP_BASE_CLASS,
+  compact ? CHIP_COMPACT_CLASS : CHIP_NORMAL_CLASS,
+].join(" ");
+
+const getTitleClassName = (compact: boolean): string => compact ? CHIP_COMPACT_TITLE_CLASS : CHIP_TITLE_CLASS;
+
+const getMeasurementClassName = (compact: boolean): string => [
+  CHIP_MEASUREMENT_BASE_CLASS,
+  compact ? CHIP_COMPACT_CLASS : CHIP_NORMAL_CLASS,
+].join(" ");
+
 const CalendarEventChipWeekday = ({
   event,
   compact = false,
@@ -124,21 +137,11 @@ const CalendarEventChipWeekday = ({
     DEFAULT_CHIP_LAYOUT_STATE,
   );
   const tokens = generateColorTokens(event.accentColor);
-
-  // Date 化
-  const startsAt =
-    event.startsAt instanceof Date ? event.startsAt : new Date(event.startsAt);
-
-  const endsAt =
-    event.endsAt instanceof Date
-      ? event.endsAt
-      : new Date(event.endsAt ?? event.startsAt);
-
-  const timeLabel = event.isAllDay
-    ? "終日"
-    : `${format(startsAt, "H:mm")} ~ ${format(endsAt, "H:mm")}`;
-
+  const startsAt = event.startsAt instanceof Date ? event.startsAt : new Date(event.startsAt);
+  const endsAt = event.endsAt instanceof Date ? event.endsAt : new Date(event.endsAt ?? event.startsAt);
+  const timeLabel = event.isAllDay ? "終日" : `${format(startsAt, "H:mm")} ~ ${format(endsAt, "H:mm")}`;
   const titleLabel = event.title || "Untitled";
+  const titleClassName = getTitleClassName(compact);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -201,7 +204,7 @@ const CalendarEventChipWeekday = ({
     >
       <div
         ref={containerRef}
-        className={[CHIP_CLASS, compact ? CHIP_COMPACT_GAP_CLASS : CHIP_GAP_CLASS].join(" ")}
+        className={getChipClassName(compact)}
         style={{
           background: tokens.bg,
           borderLeft: `3px solid ${tokens.border}`,
@@ -209,8 +212,8 @@ const CalendarEventChipWeekday = ({
         }}
       >
         <span
-          className={CHIP_TITLE_CLASS}
-          style={createTitleClampStyle(chipLayout.titleLineClamp)}
+          className={titleClassName}
+          style={compact ? undefined : createTitleClampStyle(chipLayout.titleLineClamp)}
         >
           {titleLabel}
         </span>
@@ -219,9 +222,9 @@ const CalendarEventChipWeekday = ({
 
         <div
           aria-hidden="true"
-          className={[CHIP_MEASUREMENT_CLASS, compact ? CHIP_COMPACT_GAP_CLASS : CHIP_GAP_CLASS].join(" ")}
+          className={getMeasurementClassName(compact)}
         >
-          <span ref={titleMeasurementRef} className={CHIP_TITLE_CLASS}>
+          <span ref={titleMeasurementRef} className={titleClassName}>
             {titleLabel}
           </span>
           <span ref={timeMeasurementRef} className={CHIP_TIME_CLASS}>
