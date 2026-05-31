@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { Button, buttonVariants } from "@/components/ui/button";
 
 describe("Button", () => {
-  it("keeps the default public variant contract while using token classes", () => {
+  it("token class を使用しつつ default public variant contract を維持する", () => {
     render(<Button>Save</Button>);
 
     const button = screen.getByRole("button", { name: "Save" });
@@ -13,7 +13,7 @@ describe("Button", () => {
     expect(button.className).toContain("ds-button--default");
   });
 
-  it("preserves the exported variant names", () => {
+  it("export された variant 名を保持する", () => {
     expect(buttonVariants({ variant: "secondary", size: "sm" })).toContain(
       "ds-button--secondary",
     );
