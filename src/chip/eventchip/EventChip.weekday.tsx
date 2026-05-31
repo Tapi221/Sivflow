@@ -16,7 +16,7 @@ type ChipLayoutState = {
 };
 
 const CHIP_BASE_CLASS = "relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-md text-left";
-const CHIP_NORMAL_CLASS = "gap-1 py-1 pl-1.5 pr-0";
+const CHIP_NORMAL_CLASS = "gap-0.5 py-1 pl-1.5 pr-0";
 const CHIP_COMPACT_CLASS = "gap-0 px-1.5 py-0.5";
 const CHIP_TITLE_CLASS = "overflow-hidden whitespace-normal break-words text-[12px] font-medium leading-snug";
 const CHIP_COMPACT_TITLE_CLASS = "truncate text-[11px] font-semibold leading-[14px]";
