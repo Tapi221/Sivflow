@@ -29,9 +29,9 @@ function getChartProps(cards) {
   };
 }
 
-describe("Statistics Page Logic", () => {
-  describe("Empty State Logic", () => {
-    it("should return empty mode props when cards array is empty", () => {
+describe("統計ページロジック", () => {
+  describe("空状態のロジック", () => {
+    it("カード配列が空なら空状態用の props を返す", () => {
       const cards = [];
       const props = getChartProps(cards);
 
@@ -43,8 +43,8 @@ describe("Statistics Page Logic", () => {
     });
   });
 
-  describe("Normal State Logic", () => {
-    it("should return normal mode props when cards exist", () => {
+  describe("通常状態のロジック", () => {
+    it("カードが存在するなら通常状態用の props を返す", () => {
       const cards = [{ id: 1, question: "test" }]; // ダミーカード
       const props = getChartProps(cards);
 
