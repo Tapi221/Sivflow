@@ -1,8 +1,8 @@
 import { calculateResistanceScore, calculateRetentionProbability } from "@/utils/reviewMetrics";
 import { getStabilityPhase } from "@/utils/reviewUtils";
 
-describe("Review Metrics", () => {
-  test("Retention Probability decreases as Interval increases (for fixed S)", () => {
+describe("復習メトリクス", () => {
+  test("安定度が固定なら間隔が長いほど保持確率は下がる", () => {
     const S = 0.5;
 
     const ret1 = calculateRetentionProbability(S, 1);
@@ -10,26 +10,26 @@ describe("Review Metrics", () => {
     const ret30 = calculateRetentionProbability(S, 30);
 
     console.log(
-      `Retention S=0.5: 1day=${ret1}%, 10days=${ret10}%, 30days=${ret30}%`,
+      `保持確率 S=0.5: 1日=${ret1}%, 10日=${ret10}%, 30日=${ret30}%`,
     );
 
     expect(ret1).toBeGreaterThan(ret10);
     expect(ret10).toBeGreaterThan(ret30);
   });
 
-  test("Resistance Score increases as Interval increases", () => {
+  test("間隔が長いほど耐性スコアは上がる", () => {
     const res1 = calculateResistanceScore(1);
     const res10 = calculateResistanceScore(10);
     const res90 = calculateResistanceScore(90);
 
-    console.log(`Resistance: 1day=${res1}, 10days=${res10}, 90days=${res90}`);
+    console.log(`耐性: 1日=${res1}, 10日=${res10}, 90日=${res90}`);
 
     expect(res10).toBeGreaterThan(res1);
     expect(res90).toBeGreaterThan(res10);
     expect(res90).toBe(100);
   });
 
-  test("Resistance boundary and representative values", () => {
+  test("耐性スコアの境界値と代表値を確認する", () => {
     expect(calculateResistanceScore(0)).toBe(0);
     expect(calculateResistanceScore(-5)).toBe(0);
 
@@ -49,7 +49,7 @@ describe("Review Metrics", () => {
     expect(r30).toBeLessThanOrEqual(78);
   });
 
-  test("Stability Phase classifies based on Retention Probability", () => {
+  test("安定度フェーズは保持確率に基づいて分類される", () => {
     const S = 1.0;
 
     const phaseShort = getStabilityPhase(S, 1);
@@ -59,7 +59,7 @@ describe("Review Metrics", () => {
     expect(phaseLong.key).toBe("fragile");
 
     console.log(
-      `Phase S=1.0: 1day=${phaseShort.label}, 120days=${phaseLong.label}`,
+      `フェーズ S=1.0: 1日=${phaseShort.label}, 120日=${phaseLong.label}`,
     );
   });
 });
