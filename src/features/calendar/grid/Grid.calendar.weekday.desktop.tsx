@@ -8,6 +8,7 @@ import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
+import { getWeekdayTimedEventPositionStyle, isCompactWeekdayTimedEntry } from "@/features/calendar/grid/weekdayTimeGridGeometry";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -15,24 +16,13 @@ import { cn } from "@/lib/utils";
 import * as COLOR from "./grid.color.constants.desktop";
 import * as GRID from "./grid.layout.constants.desktop";
 
-type CalendarEventPositionStyle = CSSProperties & {
-  left: string;
-  top: string;
-  width: string;
-  height: string;
-};
-
 export type CalendarWeekDayGridRef = {
   scrollToHour: (hour: number) => void;
 };
 
 const WEEKDAY_HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, hour) => hour);
-const EVENT_COLUMN_GAP_PX = 4;
-const EVENT_COLUMN_INSET_PX = 3;
 const CURRENT_TIME_TICK_MS = GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS;
 const END_OF_DAY_HOUR_LABEL = "24:00";
-const PERCENT_MAX = 100;
-const SHORT_EVENT_THRESHOLD_MINUTES = 30;
 const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
 const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const WEEKDAY_TIME_LABEL_CLASS_NAME = "text-[11px] font-medium tabular-nums text-[#b8bcc5]";
@@ -42,20 +32,7 @@ const createEventKey = (event: GoogleCalendarEvent): string => `${event.accountI
 
 const isSameCalendarDate = (left: Date, right: Date): boolean => getCalendarDateKey(left) === getCalendarDateKey(right);
 
-const getEntryDurationMinutes = (entry: CalendarTimeGridLayoutEntry): number => {
-  return Math.max(0, (entry.event.endsAt.getTime() - entry.event.startsAt.getTime()) / 60_000);
-};
-
-const isCompactTimedEntry = (entry: CalendarTimeGridLayoutEntry): boolean => getEntryDurationMinutes(entry) < SHORT_EVENT_THRESHOLD_MINUTES;
-
 const formatHourLabel = (hour: number): string => hour === GRID.WEEKDAY_HOURS ? END_OF_DAY_HOUR_LABEL : format(new Date(2000, 0, 1, hour), GRID.WEEKDAY_HOUR_LABEL_FORMAT);
-
-const getTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry): CalendarEventPositionStyle => ({
-  left: `calc(${entry.style.xOffset}% + ${EVENT_COLUMN_INSET_PX}px)`,
-  top: `calc(${(entry.style.top / PERCENT_MAX) * GRID.WEEKDAY_HOURS} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
-  width: `calc(${entry.style.width}% - ${EVENT_COLUMN_GAP_PX + EVENT_COLUMN_INSET_PX}px)`,
-  height: `calc(${(entry.style.height / PERCENT_MAX) * GRID.WEEKDAY_HOURS} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
-});
 
 const getCurrentTimeTopStyle = (now: Date): CSSProperties => ({
   top: `calc(${(now.getHours() * GRID.WEEKDAY_MINUTES_PER_HOUR + now.getMinutes()) / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
@@ -222,8 +199,8 @@ const CalendarWeekDayGridComponent = ({
                 ) : null}
 
                 {events.map((entry) => (
-                  <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getTimedEventPositionStyle(entry)}>
-                    <CalendarEventChipWeekday event={entry.event} compact={isCompactTimedEntry(entry)} />
+                  <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getWeekdayTimedEventPositionStyle(entry)}>
+                    <CalendarEventChipWeekday event={entry.event} compact={isCompactWeekdayTimedEntry(entry)} />
                   </div>
                 ))}
               </div>
