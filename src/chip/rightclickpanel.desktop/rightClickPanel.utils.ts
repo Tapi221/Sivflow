@@ -21,8 +21,11 @@ type RightClickPanelOpenEventDetail = {
 };
 
 export const RIGHT_CLICK_PANEL_MARGIN = 8;
-export const RIGHT_CLICK_PANEL_SURFACE_PADDING = 3;
+export const RIGHT_CLICK_PANEL_SURFACE_PADDING = 2;
+export const RIGHT_CLICK_PANEL_SURFACE_BORDER_WIDTH = 1;
+export const RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE = RIGHT_CLICK_PANEL_SURFACE_PADDING * 2 + RIGHT_CLICK_PANEL_SURFACE_BORDER_WIDTH * 2;
 export const RIGHT_CLICK_PANEL_ITEM_HORIZONTAL_PADDING = 10;
+export const RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT = 26;
 export const RIGHT_CLICK_PANEL_TEXT_FONT_SIZE = 13;
 export const RIGHT_CLICK_PANEL_OPEN_EVENT = "manifolia:right-click-panel-open";
 
@@ -50,7 +53,7 @@ export const RIGHT_CLICK_PANEL_STYLE = `
   padding: ${RIGHT_CLICK_PANEL_SURFACE_PADDING}px;
   overflow: hidden;
   background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: ${RIGHT_CLICK_PANEL_SURFACE_BORDER_WIDTH}px solid rgba(0, 0, 0, 0.12);
   border-radius: 8px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14), 0 1px 6px rgba(0, 0, 0, 0.08);
   font-family: ${RIGHT_CLICK_PANEL_FONT_FAMILY};
@@ -72,7 +75,7 @@ export const RIGHT_CLICK_PANEL_STYLE = `
   align-items: center;
   width: 100%;
   min-width: 0;
-  min-height: 28px;
+  min-height: ${RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT}px;
   padding: 0 ${RIGHT_CLICK_PANEL_ITEM_HORIZONTAL_PADDING}px;
   border: 0;
   border-radius: 4px;
