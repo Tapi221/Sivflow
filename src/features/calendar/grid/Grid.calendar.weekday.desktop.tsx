@@ -32,6 +32,7 @@ const EVENT_COLUMN_INSET_PX = 3;
 const CURRENT_TIME_TICK_MS = GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS;
 const END_OF_DAY_HOUR_LABEL = "24:00";
 const PERCENT_MAX = 100;
+const SHORT_EVENT_THRESHOLD_MINUTES = 30;
 const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
 const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const WEEKDAY_TIME_LABEL_CLASS_NAME = "text-[11px] font-medium tabular-nums text-[#b8bcc5]";
@@ -40,6 +41,12 @@ const WEEKDAY_BOTTOM_SPACER_CLASS_NAME = "relative h-8";
 const createEventKey = (event: GoogleCalendarEvent): string => `${event.accountId ?? ""}:${event.calendarId}:${event.id}`;
 
 const isSameCalendarDate = (left: Date, right: Date): boolean => getCalendarDateKey(left) === getCalendarDateKey(right);
+
+const getEntryDurationMinutes = (entry: CalendarTimeGridLayoutEntry): number => {
+  return Math.max(0, (entry.event.endsAt.getTime() - entry.event.startsAt.getTime()) / 60_000);
+};
+
+const isCompactTimedEntry = (entry: CalendarTimeGridLayoutEntry): boolean => getEntryDurationMinutes(entry) < SHORT_EVENT_THRESHOLD_MINUTES;
 
 const formatHourLabel = (hour: number): string => hour === GRID.WEEKDAY_HOURS ? END_OF_DAY_HOUR_LABEL : format(new Date(2000, 0, 1, hour), GRID.WEEKDAY_HOUR_LABEL_FORMAT);
 
@@ -216,7 +223,7 @@ const CalendarWeekDayGridComponent = ({
 
                 {events.map((entry) => (
                   <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getTimedEventPositionStyle(entry)}>
-                    <CalendarEventChipWeekday event={entry.event} />
+                    <CalendarEventChipWeekday event={entry.event} compact={isCompactTimedEntry(entry)} />
                   </div>
                 ))}
               </div>
