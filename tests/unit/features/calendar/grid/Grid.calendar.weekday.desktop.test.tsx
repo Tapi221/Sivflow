@@ -16,7 +16,7 @@ type MockCalendarEventChipWeekdayProps = {
 };
 
 vi.mock("@/chip/eventchip/EventChip.weekday", () => ({
-  CalendarEventChipWeekday: ({ event, compact = false }: MockCalendarEventChipWeekdayProps) => <div data-accent-color={event.accentColor} data-compact={String(compact)} data-testid="weekday-event-chip">{event.title}</div>,
+  CalendarEventChipWeekday: ({ event, compact = false }: MockCalendarEventChipWeekdayProps) => <div data-accent-color={event.accentColor} data-compact={String(compact)} data-ends-at={event.endsAt.toISOString()} data-testid="weekday-event-chip">{event.title}</div>,
 }));
 
 vi.mock("@/chip/toolchip/HoverEventTooltip", () => ({
@@ -135,15 +135,15 @@ describe("CalendarWeekDayGrid", () => {
     expect(within(previewSpacer).queryByText("Hidden preview")).toBeNull();
   });
 
-  it("30分未満のeventでもcompactを渡さず通常チップで描画する", () => {
+  it("24:00以降プレビューのeventは表示範囲で切り詰めず、元の終了時刻を渡す", () => {
     renderWeekDayGrid([
-      createEvent({ id: "short-event", title: "Short event", startsAt: new Date(2026, 0, 1, 20, 48), endsAt: new Date(2026, 0, 1, 21, 13) }),
+      createEvent({ id: "long-preview-event", title: "Long preview", startsAt: new Date(2026, 0, 2, 0, 0), endsAt: new Date(2026, 0, 2, 1, 30) }),
     ]);
 
-    const shortChip = screen.getByTestId("weekday-event-chip");
+    const previewSpacer = screen.getByTestId("weekday-preview-bottom-spacer");
+    const previewChip = within(previewSpacer).getByTestId("weekday-event-chip");
 
-    expect(shortChip).toHaveTextContent("Short event");
-    expect(shortChip.dataset.compact).toBe("false");
+    expect(previewChip).toHaveAttribute("data-ends-at", new Date(2026, 0, 2, 1, 30).toISOString());
   });
 
   it("時刻ラベルの色、背景、数字用スタイルを維持する", () => {
