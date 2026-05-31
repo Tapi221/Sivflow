@@ -21,7 +21,7 @@ const readCardRect = async (
     });
 };
 
-test.describe("Card layout consistency", () => {
+test.describe("カードレイアウトの一貫性", () => {
   const baseUrl = process.env.E2E_BASE_URL ?? "http://localhost:5173";
   const preparePage = async (page: import("@playwright/test").Page) => {
     await page.addStyleTag({
@@ -29,7 +29,7 @@ test.describe("Card layout consistency", () => {
     });
   };
 
-  test("desktop: view/edit shell dimensions should match", async ({ page }) => {
+  test("デスクトップで表示用と編集用のシェル寸法が一致する", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await preparePage(page);
     await page.goto(`${baseUrl}/card-layout-test?test_bypass=true`, {
@@ -43,7 +43,7 @@ test.describe("Card layout consistency", () => {
     expect(Math.abs(viewRect.height - editRect.height)).toBeLessThanOrEqual(2);
   });
 
-  test("mobile: view/edit shell dimensions should match", async ({ page }) => {
+  test("モバイルで表示用と編集用のシェル寸法が一致する", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await preparePage(page);
     await page.goto(`${baseUrl}/card-layout-test?test_bypass=true`, {
