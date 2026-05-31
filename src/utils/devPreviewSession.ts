@@ -51,6 +51,14 @@ export const isDevPreviewSessionEnabled = (): boolean => {
   return isLocalDevHost(url.hostname);
 };
 
+export const disableDevPreviewSession = (): void => {
+  const url = getCurrentUrl();
+  if (!url || typeof window === "undefined") return;
+
+  url.searchParams.set(DEV_PREVIEW_DISABLE_PARAM, "true");
+  window.history.replaceState(window.history.state, "", url.toString());
+};
+
 export const createDevPreviewUser = (): FirebaseUser => ({
   ...createDevPreviewUserJson(),
   metadata: {
