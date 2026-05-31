@@ -85,6 +85,7 @@
   }
 
   .calendar-month-view {
+    --calendar-month-grid-line-color: #eeeeee;
     --calendar-month-row-height: 112px;
     overflow-anchor: none;
     background: #f2f2f7;
@@ -125,7 +126,15 @@
   .calendar-month-grid {
     border-top: 0;
     background-color: #ffffff;
-    background-image: none;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--calendar-month-row-height) - 1px),
+      var(--calendar-month-grid-line-color) calc(var(--calendar-month-row-height) - 1px),
+      var(--calendar-month-grid-line-color) var(--calendar-month-row-height)
+    );
+    background-repeat: repeat;
+    background-size: 100% var(--calendar-month-row-height);
   }
 
   .calendar-year-section {
@@ -162,15 +171,7 @@
   }
 
   .calendar-month-week-row::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 4;
-    height: 1px;
-    pointer-events: none;
-    background: #eeeeee;
+    content: none;
   }
 
   .calendar-month-day-cell {
@@ -181,6 +182,15 @@
     border-color: #eeeeee !important;
     border-right-width: 0 !important;
     border-bottom-width: 0 !important;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--calendar-month-row-height) - 1px),
+      var(--calendar-month-grid-line-color) calc(var(--calendar-month-row-height) - 1px),
+      var(--calendar-month-grid-line-color) var(--calendar-month-row-height)
+    );
+    background-repeat: repeat;
+    background-size: 100% var(--calendar-month-row-height);
     transition: background-color 120ms ease;
   }
 
