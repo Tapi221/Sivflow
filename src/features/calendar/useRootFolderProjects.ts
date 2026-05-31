@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { getFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { getFolderId, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
@@ -59,7 +59,7 @@ const getFallbackProjectColor = (seed: string): string => PROJECT_COLOR_PALETTE[
 
 const getFolderProjectLabel = (folder: FolderTreeNode): string => {
   const record = folder as { folderName?: unknown; folder_name?: unknown; name?: unknown };
-  return readTrimmedString(record.folderName) ?? readTrimmedString(record.folder_name) ?? readTrimmedString(record.name) ?? "無題のフォルダ";
+  return readTrimmedString(record.folderName) ?? readTrimmedString(record.folder_name) ?? readTrimmedString(record.name) ?? UNTITLED_PROJECT_NAME;
 };
 
 const getFolderProjectColor = (folder: FolderTreeNode): string => {
