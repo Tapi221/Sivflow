@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { MouseEvent, PointerEvent, RefObject } from "react";
+import type { MouseEvent, PointerEvent } from "react";
 import type { SelectionCapturePoint, SelectionCaptureRect } from "./selectionCapture.types";
 
 const MIN_SELECTION_SIZE_PX = 5;
@@ -20,8 +20,12 @@ const normalizeRect = (
   return { x, y, width, height };
 };
 
+type SelectionCaptureTargetRef = {
+  readonly current: HTMLElement | null;
+};
+
 type SelectionCaptureOverlayProps = {
-  targetRef: RefObject<HTMLElement | null>;
+  targetRef: SelectionCaptureTargetRef;
   active: boolean;
   busy?: boolean;
   onCancel: () => void;
