@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 import { getTagColorSwatchStyle } from "@/chip/tag/tagColor";
 import { useCardsRead } from "@/components/card/hooks/useCardsRead";
-import { useTags, type Tag as TagRecord } from "@/features/settings/hooks/useTags";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+import { getLocalDb } from "@/services/localDB";
+import type { TagRecord } from "@/services/localdb/types";
 import type { Card } from "@/types";
+
+type TagRecordLike = TagRecord;
 
 type TagTreeNode = {
   id: string;
@@ -39,12 +44,12 @@ const IconChevronRight = ({ className }: { className?: string }) => (<svg viewBo
 
 const IconTag = ({ className }: { className?: string }) => (<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M3.5 5.5V9.4c0 .4.16.78.44 1.06l5.6 5.6a1.5 1.5 0 0 0 2.12 0l4.4-4.4a1.5 1.5 0 0 0 0-2.12l-5.6-5.6A1.5 1.5 0 0 0 9.4 3.5H5.5a2 2 0 0 0-2 2Z" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" /><circle cx="7" cy="7" r="1.1" fill="currentColor" /></svg>);
 
-const getTagName = (tag: TagRecord): string => {
+const getTagName = (tag: TagRecordLike): string => {
   const name = tag.name.trim();
   return name.length > 0 ? name : "無題のタグ";
 };
 
-const getTagParentId = (tag: TagRecord): string | null => typeof tag.parentId === "string" && tag.parentId.trim().length > 0 ? tag.parentId : null;
+const getTagParentId = (tag: TagRecordLike): string | null => typeof tag.parentId === "string" && tag.parentId.trim().length > 0 ? tag.parentId : null;
 
 const asStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
@@ -58,7 +63,7 @@ const getCardTagIds = (card: Card): string[] => {
 
 const sortTagTreeNodes = (nodes: TagTreeNode[]): TagTreeNode[] => nodes.sort((left, right) => left.name.localeCompare(right.name, "ja"));
 
-const buildTagTreeNodes = (tags: TagRecord[]): TagTreeNode[] => {
+const buildTagTreeNodes = (tags: TagRecordLike[]): TagTreeNode[] => {
   const nodeById = new Map<string, TagTreeNode>();
 
   tags.forEach((tag) => {
@@ -100,7 +105,7 @@ const flattenVisibleTagTree = (nodes: TagTreeNode[], expandedTagIds: Set<string>
   return [item, ...flattenVisibleTagTree(node.children, expandedTagIds, level + 1, nextVisitedTagIds)];
 });
 
-const buildTagChildrenMap = (tags: TagRecord[]): Map<string, string[]> => {
+const buildTagChildrenMap = (tags: TagRecordLike[]): Map<string, string[]> => {
   const tagIdSet = new Set(tags.map((tag) => tag.id));
   const childrenByParentId = new Map<string, string[]>();
 
@@ -116,7 +121,7 @@ const buildTagChildrenMap = (tags: TagRecord[]): Map<string, string[]> => {
   return childrenByParentId;
 };
 
-const buildTagContentCountById = (tags: TagRecord[], cards: Card[]): Map<string, number> => {
+const buildTagContentCountById = (tags: TagRecordLike[], cards: Card[]): Map<string, number> => {
   const directCountById = new Map<string, number>();
   const childrenByParentId = buildTagChildrenMap(tags);
 
@@ -146,6 +151,17 @@ const buildTagContentCountById = (tags: TagRecord[], cards: Card[]): Map<string,
   return totalCountById;
 };
 
+const useSidebarTags = (): { tags: TagRecordLike[]; loading: boolean } => {
+  const userId = useEffectiveLocalUserId();
+  const tags = useLiveQuery(async () => {
+    if (!userId) return undefined;
+    const db = await getLocalDb(userId);
+    return (await db.tagRecords.where("userId").equals(userId).toArray()).filter((tag) => !tag.isDeleted);
+  }, [userId]);
+
+  return { tags: tags ?? [], loading: tags === undefined };
+};
+
 const TagTreeRow = ({ item, selectedTagNames, tagContentCountById, onToggleTag, onSelectTag }: TagTreeRowProps) => {
   const isSelected = selectedTagNames.has(item.name);
   const contentCount = tagContentCountById.get(item.id) ?? 0;
@@ -170,8 +186,8 @@ const TagTreeRow = ({ item, selectedTagNames, tagContentCountById, onToggleTag, 
 };
 
 const TagTreeSidebar = () => {
-  const { tags } = useTags();
-  const { cards, loading, error } = useCardsRead();
+  const { tags, loading: tagsLoading } = useSidebarTags();
+  const { cards, loading: cardsLoading, error } = useCardsRead();
   const tagFilter = useExplorerStore((state) => state.tagFilter);
   const setTagFilter = useExplorerStore((state) => state.setTagFilter);
   const clearTagFilter = useExplorerStore((state) => state.clearTagFilter);
@@ -215,7 +231,7 @@ const TagTreeSidebar = () => {
     openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
   }, [clearTagFilter, openExplorerTab, setTagFilter, tagFilter]);
 
-  if (loading) return <aside aria-label="Tag tree explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#9aa1ad]">読み込み中...</aside>;
+  if (tagsLoading || cardsLoading) return <aside aria-label="Tag tree explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#9aa1ad]">読み込み中...</aside>;
   if (error) return <aside aria-label="Tag tree explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#b48a8a]">{error}</aside>;
 
   return <aside aria-label="Tag tree explorer" className="h-full min-h-0 overflow-hidden"><div className="h-full min-h-0 overflow-y-auto px-2 pb-2 pt-1"><div role="tree" aria-label="タグツリー" className="flex flex-col gap-0.5">{visibleTagItems.length > 0 ? visibleTagItems.map((item) => <TagTreeRow key={item.id} item={item} selectedTagNames={selectedTagNames} tagContentCountById={tagContentCountById} onToggleTag={handleToggleTag} onSelectTag={handleSelectTag} />) : <p className="px-2 py-2 text-[12px] font-medium text-[#9aa1ad]">タグがありません</p>}</div></div></aside>;
