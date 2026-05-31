@@ -1,7 +1,7 @@
 import { OverlayToolbar } from "@/chip/overlay-toolbar/OverlayToolbar";
 import { OverlayToolbarButton } from "@/chip/overlay-toolbar/OverlayToolbarButton";
 import { OverlayToolbarDivider } from "@/chip/overlay-toolbar/OverlayToolbarDivider";
-import { PdfDoublePageGlyph, PdfFitWidthGlyph, PdfNextGlyph, PdfPrevGlyph, PdfSinglePageGlyph } from "@/chip/overlay-toolbar/OverlayToolbarGlyphs";
+import { PdfDoublePageGlyph, PdfFitWidthGlyph, PdfNextGlyph, PdfPrevGlyph, PdfSinglePageGlyph, SelectionCaptureGlyph } from "@/chip/overlay-toolbar/OverlayToolbarGlyphs";
 import { OverlayToolbarIndexNavigator } from "@/chip/overlay-toolbar/OverlayToolbarIndexNavigator";
 import { OverlayToolbarZoomControl } from "@/chip/overlay-toolbar/OverlayToolbarZoomControl";
 import { pdfOverlayToolbarButtonActiveClassName, pdfOverlayToolbarButtonClassName, pdfOverlayToolbarDividerClassName, pdfOverlayToolbarNavigatorClassName, pdfOverlayToolbarNavigatorInputClassName, pdfOverlayToolbarShellClassName, pdfOverlayToolbarSliderRangeClassName, pdfOverlayToolbarSliderThumbClassName, pdfOverlayToolbarSliderTrackClassName, pdfOverlayToolbarTotalClassName } from "./pdfToolbar.classname";
@@ -27,6 +27,9 @@ type PdfOverlayToolbarProps = {
   onPageLayoutModeChange: (nextMode: PdfPageLayoutMode) => void;
   canGoToPrevPage: boolean;
   canGoToNextPage: boolean;
+  selectionCaptureActive?: boolean;
+  selectionCaptureDisabled?: boolean;
+  onSelectionCaptureToggle?: () => void;
   disabled?: boolean;
 };
 
@@ -47,6 +50,9 @@ export const PdfOverlayToolbar = ({
   onPageLayoutModeChange,
   canGoToPrevPage,
   canGoToNextPage,
+  selectionCaptureActive = false,
+  selectionCaptureDisabled = false,
+  onSelectionCaptureToggle,
   disabled = false,
 }: PdfOverlayToolbarProps) => {
   const isFitWidthActive = fitMode === "width";
@@ -57,6 +63,7 @@ export const PdfOverlayToolbar = ({
     pageLayoutMode === "single"
       ? "単一表示。タップで2枚表示に切り替え"
       : "2枚表示。タップで単一表示に切り替え";
+  const shouldRenderSelectionCaptureControl = Boolean(onSelectionCaptureToggle);
 
   return (
     <OverlayToolbar className={pdfOverlayToolbarShellClassName}>
@@ -125,6 +132,27 @@ export const PdfOverlayToolbar = ({
           <PdfDoublePageGlyph />
         )}
       </OverlayToolbarButton>
+
+      {shouldRenderSelectionCaptureControl ? (
+        <>
+          <OverlayToolbarDivider className={pdfOverlayToolbarDividerClassName} />
+
+          <OverlayToolbarButton
+            onClick={() => {
+              onSelectionCaptureToggle?.();
+            }}
+            label={selectionCaptureActive ? "PDF範囲コピーをキャンセル" : "PDF範囲コピー"}
+            disabled={disabled || selectionCaptureDisabled}
+            active={selectionCaptureActive}
+            className={cn(
+              pdfOverlayToolbarButtonClassName,
+              selectionCaptureActive && pdfOverlayToolbarButtonActiveClassName,
+            )}
+          >
+            <SelectionCaptureGlyph />
+          </OverlayToolbarButton>
+        </>
+      ) : null}
 
       <OverlayToolbarDivider className={pdfOverlayToolbarDividerClassName} />
 
