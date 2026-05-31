@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { Card, Folder } from "@/types";
 import { useTrashItems } from "./useTrashItems";
 
