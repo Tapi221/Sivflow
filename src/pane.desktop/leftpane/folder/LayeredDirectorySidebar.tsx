@@ -58,6 +58,8 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
   const folderName = getFolderName(folder, isRootProject);
   const contentCount = getFolderContentCount(folderId);
   const rowPaddingLeft = Math.max(0, level - ROOT_LEVEL) * 12;
+  const shouldShowTreeControls = showChildFolders;
+  const shouldShowFolderIcon = showChildFolders || !isRootProject;
 
   const handleToggleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -98,11 +100,13 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
   return (
     <div data-folder-id={folderId}>
       <div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} className={cn("group flex h-7 items-center rounded-[10px] pr-1 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5] text-[#343a45]") } style={{ paddingLeft: rowPaddingLeft }}>
-        <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} disabled={!hasChildren} className={cn("flex h-6 w-5 shrink-0 items-center justify-center rounded-md text-[#b0b5bd]", hasChildren ? "hover:bg-white hover:text-[#6f7681]" : "opacity-0")}>
-          <IconChevronRight className={cn("h-3 w-3 transition-transform", isExpanded && "rotate-90")} />
-        </button>
-        <button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center gap-1.5 rounded-[10px] text-left hover:bg-[#f7f7f8]">
-          <IconFolder className="h-4 w-4 shrink-0 text-[#9aa1ad]" />
+        {shouldShowTreeControls ? (
+          <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} disabled={!hasChildren} className={cn("flex h-6 w-5 shrink-0 items-center justify-center rounded-md text-[#b0b5bd]", hasChildren ? "hover:bg-white hover:text-[#6f7681]" : "opacity-0")}>
+            <IconChevronRight className={cn("h-3 w-3 transition-transform", isExpanded && "rotate-90")} />
+          </button>
+        ) : null}
+        <button type="button" onClick={handleRowClick} title={folderName} className={cn("flex h-7 min-w-0 flex-1 items-center rounded-[10px] text-left hover:bg-[#f7f7f8]", shouldShowFolderIcon && "gap-1.5")}>
+          {shouldShowFolderIcon ? <IconFolder className="h-4 w-4 shrink-0 text-[#9aa1ad]" /> : null}
           <span className="min-w-0 flex-1 truncate">{folderName}</span>
           {contentCount > 0 ? <span className="shrink-0 rounded-full bg-[#eef1f4] px-1.5 py-0.5 text-[10px] font-bold text-[#8b929e]">{contentCount}</span> : null}
         </button>
