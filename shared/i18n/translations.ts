@@ -44,6 +44,18 @@ export type RawTranslations = {
   nextLabel: string;
   previousMonthLabel: string;
   nextMonthLabel: string;
+  sidebarAriaLabel: string;
+  sidebarMainNavAriaLabel: string;
+  sidebarFooterNavAriaLabel: string;
+  sidebarHome: string;
+  sidebarLibrary: string;
+  sidebarTags: string;
+  sidebarSchedule: string;
+  sidebarExplore: string;
+  sidebarSettings: string;
+  sidebarLogout: string;
+  sidebarToggleOpen: string;
+  sidebarToggleClose: string;
   settingLanguageLabel: string;
   settingLanguageTitle: string;
   langJapanese: string;
