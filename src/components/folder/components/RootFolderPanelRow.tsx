@@ -3,6 +3,7 @@ import { ExplorerChromeCardIcon, ExplorerChromeCardSetIcon, ExplorerChromeFolder
 import { buildEntityRenameDeleteMenuActions, buildFolderMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
 import type { MenuAction } from "@/components/folder/components/menus/menuActions";
+import { DEFAULT_NEW_PROJECT_NAME } from "@/components/folder/explorer/model/utils";
 import { EXPLORER_ROW_CONTENT_CLASS, EXPLORER_ROW_ICON_SLOT_CLASS, EXPLORER_ROW_INPUT_CLASS, EXPLORER_ROW_TITLE_SLOT_CLASS, FOLDER_ROW_ICON_SIZE_CLASS, FOLDER_ROW_TITLE_CLASS } from "@/components/folder/explorer/rows/shared";
 import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
 import type { NavigationListEntry } from "./RootFolderPanelList";
@@ -199,7 +200,7 @@ export const RootFolderPanelRow = ({
         nextTarget === document.body ||
         nextTarget === document.documentElement;
       const isInitialCreateDraftBlur =
-        isBodyFocus && input.value.trim() === "新規フォルダ";
+        isBodyFocus && input.value.trim() === DEFAULT_NEW_PROJECT_NAME;
       const shouldKeepCreateDraftOpen =
         createDraftIdRef.current === entry.id &&
         entry.kind === "folder" &&
