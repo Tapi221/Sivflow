@@ -72,7 +72,12 @@ const getProjectLinkProviderLabel = (link: ProjectCalendarLink): string => {
   }
 };
 
-const getGoogleAccountLabel = (account: GoogleAccountDisplay): string => account.email ?? account.name ?? "Google";
+const getEmailLocalPart = (email: string): string => {
+  const [localPart] = email.split("@");
+  return localPart.trim() || email;
+};
+
+const getGoogleAccountLabel = (account: GoogleAccountDisplay): string => account.email ? getEmailLocalPart(account.email) : account.name ?? "Google";
 
 const isLinkedGoogleCalendar = (accountId: string, calendarId: string, links: ProjectCalendarLink[]): boolean => getLinkedGoogleCalendarLink(accountId, calendarId, links) !== null;
 
@@ -142,11 +147,11 @@ const AppProjectsSection = ({ projects, isAdding, onAddProject, onToggleProject,
 
 const GoogleAccountSection = ({ account, projectCalendarLinks, googleCalendarColorOverrides, onToggleCalendar, onOpenCalendarContextMenu, onReconnect }: GoogleAccountSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
-  const accountName = account.name ?? account.email ?? "Google";
+  const accountName = getGoogleAccountLabel(account);
   const projectLinkedCalendars = useMemo(() => account.calendars.filter((calendar) => isLinkedGoogleCalendar(account.accountId, calendar.id, projectCalendarLinks)), [account.accountId, account.calendars, projectCalendarLinks]);
   const regularCalendars = useMemo(() => account.calendars.filter((calendar) => !isLinkedGoogleCalendar(account.accountId, calendar.id, projectCalendarLinks)), [account.accountId, account.calendars, projectCalendarLinks]);
 
-  return (<div className="mt-2"><button type="button" className="group flex h-7 w-full items-center gap-1.5 rounded-[10px] px-1.5 text-left transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1]" onClick={() => setIsOpen((value) => !value)} aria-expanded={isOpen}><GoogleIcon className="size-[16px] shrink-0 text-[#5f6368]" label={accountName} />{account.email && <span className="truncate text-[11px] font-semibold tracking-wider text-[#9a9a9a]">{account.email}</span>}<span className={cn("ml-auto flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-[#b3b3b3] transition-all duration-200 group-hover:bg-white group-hover:text-[#8c8c8c]", !isOpen && "-rotate-90")}><IconChevronRight className="h-3 w-3" /></span></button>{isOpen && (<div className="mt-0.5 flex flex-col gap-0.5">{regularCalendars.map((calendar) => (<GoogleCalendarSourceRow key={calendar.id} account={account} calendar={calendar} color={resolveCalendarColor(account.accountId, calendar, googleCalendarColorOverrides)} onToggleCalendar={onToggleCalendar} onOpenCalendarContextMenu={onOpenCalendarContextMenu} />))}<ProjectLinkedGoogleCalendarsSection account={account} calendars={projectLinkedCalendars} googleCalendarColorOverrides={googleCalendarColorOverrides} />{account.error && (<div className="px-5 py-1 text-[11px] text-[#c25f5f]"><p>Google カレンダーを取得できませんでした。</p><p className="mt-0.5 text-[#9a9a9a]">{account.error}</p><button type="button" className="mt-1 rounded-full bg-[#f4f4f4] px-2 py-0.5 text-[11px] font-semibold text-[#5f6574] transition hover:bg-[#ececec] active:scale-[0.97]" onClick={onReconnect}>再連携</button></div>)}</div>)}</div>);
+  return (<div className="mt-2"><button type="button" className="group flex h-7 w-full items-center gap-1.5 rounded-[10px] px-1.5 text-left transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1]" onClick={() => setIsOpen((value) => !value)} aria-expanded={isOpen}><GoogleIcon className="size-[16px] shrink-0 text-[#5f6368]" label={accountName} /><span className="truncate text-[11px] font-semibold tracking-wider text-[#9a9a9a]">{accountName}</span><span className={cn("ml-auto flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-[#b3b3b3] transition-all duration-200 group-hover:bg-white group-hover:text-[#8c8c8c]", !isOpen && "-rotate-90")}><IconChevronRight className="h-3 w-3" /></span></button>{isOpen && (<div className="mt-0.5 flex flex-col gap-0.5">{regularCalendars.map((calendar) => (<GoogleCalendarSourceRow key={calendar.id} account={account} calendar={calendar} color={resolveCalendarColor(account.accountId, calendar, googleCalendarColorOverrides)} onToggleCalendar={onToggleCalendar} onOpenCalendarContextMenu={onOpenCalendarContextMenu} />))}<ProjectLinkedGoogleCalendarsSection account={account} calendars={projectLinkedCalendars} googleCalendarColorOverrides={googleCalendarColorOverrides} />{account.error && (<div className="px-5 py-1 text-[11px] text-[#c25f5f]"><p>Google カレンダーを取得できませんでした。</p><p className="mt-0.5 text-[#9a9a9a]">{account.error}</p><button type="button" className="mt-1 rounded-full bg-[#f4f4f4] px-2 py-0.5 text-[11px] font-semibold text-[#5f6574] transition hover:bg-[#ececec] active:scale-[0.97]" onClick={onReconnect}>再連携</button></div>)}</div>)}</div>);
 };
 
 const GoogleAccountsSection = ({ accounts, isConnecting, projectCalendarLinks, googleCalendarColorOverrides, onAddCalendar, onToggleCalendar, onOpenCalendarContextMenu, onReconnectAccount }: GoogleAccountsSectionProps) => {
@@ -250,7 +255,7 @@ export const CalendarSidebar = ({ monthDate, selectedDate, visibleEvents, appPro
   }, [googleAccounts, onCreateProjectGoogleCalendar, onLinkProjectToGoogleCalendar, onUnlinkProjectCalendar, projectLinksContextMenu]);
 
   const calendarContextMenuElement = calendarContextMenu ? (<CalendarListMenu x={calendarContextMenu.x} y={calendarContextMenu.y} actions={calendarMenuActions} menuRef={calendarContextMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} />) : null;
-  const projectLinksContextMenuElement = projectLinksContextMenu ? (<ProjectCalendarLinksMenu x={projectLinksContextMenu.x} y={projectLinksContextMenu.y} actions={projectLinksMenuActions} menuRef={projectLinksContextMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} />) : null;
+  const projectLinksContextMenuElement = projectLinksContextMenu ? (<ProjectCalendarLinksMenu x={projectLinksContextMenu.x} y={projectLinksMenuActions.length > 0 ? projectLinksContextMenu.y : projectLinksContextMenu.y} actions={projectLinksMenuActions} menuRef={projectLinksContextMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} />) : null;
 
   if (isLibrarySidebarActive) return <SidebarLayeredDirectory />;
 
