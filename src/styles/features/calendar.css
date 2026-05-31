@@ -45,8 +45,8 @@
 
   aside[class*="w-[220px]"] > nav.overflow-y-auto:hover::-webkit-scrollbar,
   aside[class*="w-[220px]"] > nav.overflow-y-auto:focus-within::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 4px;
+    height: 4px;
   }
 
   aside[class*="w-[220px]"] > nav.overflow-y-auto:hover::-webkit-scrollbar-thumb,
