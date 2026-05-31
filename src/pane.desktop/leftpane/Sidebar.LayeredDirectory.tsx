@@ -3,6 +3,7 @@ import { DEFAULT_NEW_PROJECT_NAME } from "@/components/folder/explorer/model/uti
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
 import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
+import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
 
 type IconProps = {
   className?: string;
@@ -38,10 +39,10 @@ const SidebarLayeredDirectory = () => {
         </div>
       </div>
       <div className="min-h-0 flex-1">
-        {folderTagMode === "tag" ? <LibraryHierarchySidebar /> : <ProjectListSidebar />}
+        {folderTagMode === "tag" ? <TagTreeSidebar /> : <LibraryHierarchySidebar />}
       </div>
     </div>
   );
 };
 
-export { LibraryHierarchySidebar, ProjectListSidebar, SidebarLayeredDirectory };
+export { LibraryHierarchySidebar, ProjectListSidebar, SidebarLayeredDirectory, TagTreeSidebar };
