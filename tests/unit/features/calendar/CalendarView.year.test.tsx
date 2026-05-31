@@ -8,6 +8,7 @@ import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 const setReadonlyNumber = (element: Element, property: string, value: number) => {
   Object.defineProperty(element, property, {
     configurable: true,
+    writable: true,
     value,
   });
 };
@@ -40,8 +41,8 @@ describe("CalendarYearView", () => {
         | { start: Date; end: Date }
         | undefined;
 
-      expect(latestRange?.start.getFullYear()).toBe(2023);
-      expect(latestRange?.end.getFullYear()).toBe(2033);
+      expect(latestRange?.start.getFullYear()).toBe(2021);
+      expect(latestRange?.end.getFullYear()).toBe(2035);
     });
   });
 });
