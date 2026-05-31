@@ -93,9 +93,9 @@ describe("AppLayout desktop sidebar media query", () => {
     renderAppLayout();
 
     expect(window.matchMedia).toHaveBeenCalledWith(DESKTOP_LAYOUT_MEDIA_QUERY);
-    expect(screen.getByTestId("desktop-sidebar")).toBeInTheDocument();
-    expect(screen.getByTestId("workspace-shell")).toBeInTheDocument();
-    expect(screen.getByTestId("app-outlet")).toBeInTheDocument();
+    expect(screen.getByTestId("desktop-sidebar")).not.toBeNull();
+    expect(screen.getByTestId("workspace-shell")).not.toBeNull();
+    expect(screen.getByTestId("app-outlet")).not.toBeNull();
     expect(document.querySelector(".app-layout")?.className).not.toContain("app-layout--without-sidebar");
   });
 
@@ -105,9 +105,9 @@ describe("AppLayout desktop sidebar media query", () => {
     renderAppLayout();
 
     expect(window.matchMedia).toHaveBeenCalledWith(DESKTOP_LAYOUT_MEDIA_QUERY);
-    expect(screen.queryByTestId("desktop-sidebar")).not.toBeInTheDocument();
-    expect(screen.getByTestId("workspace-shell")).toBeInTheDocument();
-    expect(screen.getByTestId("app-outlet")).toBeInTheDocument();
+    expect(screen.queryByTestId("desktop-sidebar")).toBeNull();
+    expect(screen.getByTestId("workspace-shell")).not.toBeNull();
+    expect(screen.getByTestId("app-outlet")).not.toBeNull();
     expect(document.querySelector(".app-layout")?.className).toContain("app-layout--without-sidebar");
   });
 });
