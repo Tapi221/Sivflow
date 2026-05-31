@@ -4,7 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import type { ReactNode } from "react";
 import "@mantine/core/styles.css";
 import { NotificationProvider } from "@/components/notifications/NotificationProvider";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider } from "@/contexts/AuthProvider";
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 import { ToastProvider } from "../contexts/ToastContext";
 
