@@ -93,14 +93,14 @@ describe("CalendarWeekDayGrid", () => {
     expect(midnightLabel.className).not.toContain("-translate-y-1/2");
   });
 
-  it("24:00ラベルを下端方向にずらさず、時刻列側ではクリップしない", () => {
+  it("24:00ラベルを境界線中央に合わせ、時刻列側ではクリップしない", () => {
     renderWeekDayGrid([createEvent({ id: "next-day-event" })]);
 
     const bottomTimeSpacer = screen.getByTestId("weekday-time-bottom-spacer");
     const previewSpacer = screen.getByTestId("weekday-preview-bottom-spacer");
     const endOfDayLabel = screen.getByText("24:00");
 
-    expect(endOfDayLabel.className).not.toContain("-translate-y-1/2");
+    expect(endOfDayLabel.className).toContain("-translate-y-1/2");
     expect(bottomTimeSpacer.className).not.toContain("overflow-hidden");
     expect(previewSpacer.className).toContain("overflow-hidden");
   });
