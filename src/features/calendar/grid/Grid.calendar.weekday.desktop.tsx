@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { memo, useEffect, useMemo, useState } from "react";
-import { addDays, addHours, format, startOfDay } from "date-fns";
+import { addDays, addMinutes, format, startOfDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { layoutCalendarTimeGridEvents } from "@core/calendar";
 import type { CalendarTimeGridLayoutEntry } from "@core/calendar";
@@ -28,13 +28,15 @@ type WeekdayEventsByDay = {
 const WEEKDAY_HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, hour) => hour);
 const CURRENT_TIME_TICK_MS = GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS;
 const END_OF_DAY_HOUR_LABEL = "24:00";
-const NEXT_DAY_PREVIEW_HOURS = 1;
+const NEXT_DAY_PREVIEW_MINUTES = 30;
+const NEXT_DAY_PREVIEW_HOURS = NEXT_DAY_PREVIEW_MINUTES / GRID.WEEKDAY_MINUTES_PER_HOUR;
 const WEEKDAY_TIMED_EVENT_MIN_LAYOUT_MINUTES = Math.ceil((WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX / C.DEFAULT_HOUR_ROW_HEIGHT) * GRID.WEEKDAY_MINUTES_PER_HOUR);
 const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
 const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const WEEKDAY_TIME_LABEL_CLASS_NAME = "text-[11px] font-medium tabular-nums text-[#b8bcc5]";
-const WEEKDAY_BOTTOM_TIME_SPACER_CLASS_NAME = "relative h-[var(--calendar-hour-row-height)]";
-const WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME = "relative h-[var(--calendar-hour-row-height)] overflow-hidden";
+const WEEKDAY_BOTTOM_SPACER_STYLE: CSSProperties = { height: `calc(${NEXT_DAY_PREVIEW_HOURS} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))` };
+const WEEKDAY_BOTTOM_TIME_SPACER_CLASS_NAME = "relative";
+const WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME = "relative overflow-hidden";
 
 const createEventKey = (event: GoogleCalendarEvent): string => `${event.accountId ?? ""}:${event.calendarId}:${event.id}`;
 
@@ -148,7 +150,7 @@ const createTimedLayoutEvents = (events: GoogleCalendarEvent[], day: Date): Cale
 
 const createNextDayPreviewLayoutEvents = (events: GoogleCalendarEvent[], day: Date): CalendarTimeGridLayoutEntry[] => {
   const rangeStart = addDays(startOfDay(day), 1);
-  const rangeEnd = addHours(rangeStart, NEXT_DAY_PREVIEW_HOURS);
+  const rangeEnd = addMinutes(rangeStart, NEXT_DAY_PREVIEW_MINUTES);
 
   return createTimedLayoutEventsForRange(events, rangeStart, rangeEnd);
 };
@@ -238,7 +240,7 @@ const CalendarWeekDayGridComponent = ({
                 <span className={getHourLabelClassName(hour)}>{formatHourLabel(hour)}</span>
               </div>
             ))}
-            <div className={WEEKDAY_BOTTOM_TIME_SPACER_CLASS_NAME} data-testid="weekday-time-bottom-spacer">
+            <div className={WEEKDAY_BOTTOM_TIME_SPACER_CLASS_NAME} data-testid="weekday-time-bottom-spacer" style={WEEKDAY_BOTTOM_SPACER_STYLE}>
               <span className={getHourLabelClassName(GRID.WEEKDAY_HOURS)}>{formatHourLabel(GRID.WEEKDAY_HOURS)}</span>
             </div>
           </div>
@@ -253,7 +255,7 @@ const CalendarWeekDayGridComponent = ({
                 {WEEKDAY_HOURS.map((hour) => (
                   <div key={hour} className="border-b" style={{ height: `var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})`, borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }} />
                 ))}
-                <div className={WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME} data-testid="weekday-preview-bottom-spacer">
+                <div className={WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME} data-testid="weekday-preview-bottom-spacer" style={WEEKDAY_BOTTOM_SPACER_STYLE}>
                   {nextDayPreviewEvents.map((entry) => (
                     <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getTimedEntryPositionStyle(entry, NEXT_DAY_PREVIEW_HOURS)}>
                       <CalendarEventChipWeekday event={entry.event} compact={isCompactWeekdayTimedEntry(entry)} />
