@@ -14,7 +14,7 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 import { cn } from "@/lib/utils";
 import * as COLOR from "./grid.color.constants.desktop";
 import * as GRID from "./grid.layout.constants.desktop";
-import { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventPositionStyle, isCompactWeekdayTimedEntry } from "./weekdayTimeGridGeometry";
+import { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventPositionStyle } from "./weekdayTimeGridGeometry";
 
 export type CalendarWeekDayGridRef = {
   scrollToHour: (hour: number) => void;
@@ -258,7 +258,7 @@ const CalendarWeekDayGridComponent = ({
                 <div className={WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME} data-testid="weekday-preview-bottom-spacer" style={WEEKDAY_BOTTOM_SPACER_STYLE}>
                   {nextDayPreviewEvents.map((entry) => (
                     <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getTimedEntryPositionStyle(entry, NEXT_DAY_PREVIEW_HOURS)}>
-                      <CalendarEventChipWeekday event={entry.event} compact={isCompactWeekdayTimedEntry(entry)} />
+                      <CalendarEventChipWeekday event={entry.event} />
                     </div>
                   ))}
                 </div>
@@ -271,7 +271,7 @@ const CalendarWeekDayGridComponent = ({
 
                 {events.map((entry) => (
                   <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getTimedEntryPositionStyle(entry, GRID.WEEKDAY_HOURS)}>
-                    <CalendarEventChipWeekday event={entry.event} compact={isCompactWeekdayTimedEntry(entry)} />
+                    <CalendarEventChipWeekday event={entry.event} />
                   </div>
                 ))}
               </div>
