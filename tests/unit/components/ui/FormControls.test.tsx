@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 
 describe("form control primitives", () => {
-  it("applies token-backed classes to input, checkbox, switch, and label", () => {
+  it("input、checkbox、switch、label に token-backed class を適用する", () => {
     render(
       <>
         <Label htmlFor="name">Name</Label>
@@ -28,7 +28,7 @@ describe("form control primitives", () => {
     );
   });
 
-  it("keeps select on the shared token-backed contract", () => {
+  it("select を共有 token-backed contract に保つ", () => {
     render(
       <Select>
         <SelectTrigger aria-label="Sort">
