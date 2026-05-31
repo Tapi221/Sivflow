@@ -28,6 +28,7 @@ const CHIP_MEASUREMENT_BASE_CLASS = "pointer-events-none invisible absolute inse
 const CHIP_MEASUREMENT_TOLERANCE_PX = 1;
 const DEFAULT_TITLE_LINE_CLAMP = 1;
 const INLINE_TIME_GAP_PX = 4;
+const INLINE_TEXT_VISIBLE_RATIO = 0.75;
 const DEFAULT_CHIP_LAYOUT_STATE: ChipLayoutState = {
   showTimeLabel: false,
   showInlineTimeLabel: false,
@@ -57,6 +58,26 @@ const getElementWidth = (element: HTMLElement) => {
   return rectWidth > 0 ? rectWidth : element.scrollWidth;
 };
 
+const getCanvasTextMeasureContext = (): CanvasRenderingContext2D | null => {
+  if (typeof document === "undefined") return null;
+
+  return document.createElement("canvas").getContext("2d");
+};
+
+const getElementFont = (element: HTMLElement): string => {
+  const styles = window.getComputedStyle(element);
+
+  return styles.font || `${styles.fontStyle} ${styles.fontVariant} ${styles.fontWeight} ${styles.fontSize} / ${styles.lineHeight} ${styles.fontFamily}`;
+};
+
+const getTextWidth = (value: string, element: HTMLElement): number => {
+  const context = getCanvasTextMeasureContext();
+  if (!context) return getElementWidth(element);
+
+  context.font = getElementFont(element);
+  return context.measureText(value).width;
+};
+
 const calculateTitleLineClamp = (
   availableHeight: number,
   fullTitleHeight: number,
@@ -77,6 +98,8 @@ const calculateChipLayout = (
   container: HTMLDivElement,
   titleMeasurement: HTMLSpanElement,
   timeMeasurement: HTMLSpanElement,
+  titleLabel: string,
+  timeLabel: string,
 ): ChipLayoutState => {
   const containerStyles = window.getComputedStyle(container);
   const contentHeight = Math.max(
@@ -92,16 +115,20 @@ const calculateChipLayout = (
       getPixelValue(containerStyles.paddingRight),
   );
   const titleLineHeight = getElementLineHeight(titleMeasurement);
+  const timeLineHeight = getElementLineHeight(timeMeasurement);
   const fullTitleHeight = titleMeasurement.scrollHeight;
   const timeHeight = timeMeasurement.scrollHeight;
   const rowGap = getPixelValue(containerStyles.rowGap || containerStyles.gap);
+  const inlineTitleWidth = getTextWidth(titleLabel, titleMeasurement);
+  const inlineTimeWidth = getTextWidth(timeLabel, timeMeasurement);
+  const inlineContentWidth = inlineTitleWidth + INLINE_TIME_GAP_PX + inlineTimeWidth;
   const canShowTimeLabel =
     fullTitleHeight + rowGap + timeHeight <=
     contentHeight + CHIP_MEASUREMENT_TOLERANCE_PX;
   const canShowInlineTimeLabel =
     !canShowTimeLabel &&
-    contentHeight + CHIP_MEASUREMENT_TOLERANCE_PX >= titleLineHeight &&
-    getElementWidth(timeMeasurement) + INLINE_TIME_GAP_PX <= contentWidth + CHIP_MEASUREMENT_TOLERANCE_PX;
+    contentHeight + CHIP_MEASUREMENT_TOLERANCE_PX >= Math.min(titleLineHeight, timeLineHeight) * INLINE_TEXT_VISIBLE_RATIO &&
+    inlineContentWidth <= contentWidth + CHIP_MEASUREMENT_TOLERANCE_PX;
   const titleAvailableHeight = canShowTimeLabel
     ? contentHeight - rowGap - timeHeight
     : contentHeight;
@@ -174,6 +201,8 @@ const CalendarEventChipWeekday = ({
           container,
           titleMeasurement,
           timeMeasurement,
+          titleLabel,
+          timeLabel,
         );
 
         setChipLayout((previousLayout) => {
