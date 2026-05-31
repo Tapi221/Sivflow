@@ -5,7 +5,7 @@ import { clampZoomPercent, computeDynamicMaxZoomPercent, normalizeZoomPercent, z
 
 describe("cardSetViewZoom", () => {
   describe("default/min constants", () => {
-    it("keeps the current visual defaults by mapping existing width defaults to percent", () => {
+    it("既存の幅デフォルトを percent に対応させて現在の視覚デフォルトを維持する", () => {
       expect(CARD_VIEW_DEFAULT_ZOOM_PERCENT).toBeGreaterThan(100);
       expect(CARD_VIEW_MIN_ZOOM_PERCENT).toBeLessThan(
         CARD_VIEW_DEFAULT_ZOOM_PERCENT,
@@ -15,14 +15,14 @@ describe("cardSetViewZoom", () => {
   });
 
   describe("zoomPercentToFactor", () => {
-    it("converts percent to scale factor", () => {
+    it("percent を scale factor に変換する", () => {
       expect(zoomPercentToFactor(100)).toBe(1);
       expect(zoomPercentToFactor(125)).toBe(1.25);
     });
   });
 
   describe("zoomPercentToFixedCardWidthPx", () => {
-    it("converts zoom percent to fixed card width using the canonical card width", () => {
+    it("canonical card width を使って zoom percent を固定カード幅に変換する", () => {
       expect(zoomPercentToFixedCardWidthPx(100)).toBe(CANONICAL_CARD_WIDTH);
       expect(zoomPercentToFixedCardWidthPx(125)).toBe(
         Math.round(CANONICAL_CARD_WIDTH * 1.25),
@@ -31,7 +31,7 @@ describe("cardSetViewZoom", () => {
   });
 
   describe("computeDynamicMaxZoomPercent", () => {
-    it("rounds down to the nearest 5% step", () => {
+    it("最も近い 5% ステップへ切り下げる", () => {
       expect(
         computeDynamicMaxZoomPercent({
           availableWidthPx: 719,
@@ -41,7 +41,7 @@ describe("cardSetViewZoom", () => {
       ).toBe(145);
     });
 
-    it("never returns less than one step", () => {
+    it("1 ステップ未満を返さない", () => {
       expect(
         computeDynamicMaxZoomPercent({
           availableWidthPx: 10,
@@ -53,7 +53,7 @@ describe("cardSetViewZoom", () => {
   });
 
   describe("clampZoomPercent", () => {
-    it("clamps to min and max", () => {
+    it("最小値と最大値に clamp する", () => {
       expect(
         clampZoomPercent({
           value: 60,
@@ -73,7 +73,7 @@ describe("cardSetViewZoom", () => {
   });
 
   describe("normalizeZoomPercent", () => {
-    it("snaps to 5% increments before clamping", () => {
+    it("clamp 前に 5% 単位へ snap する", () => {
       expect(
         normalizeZoomPercent({
           value: 123,
@@ -84,7 +84,7 @@ describe("cardSetViewZoom", () => {
       ).toBe(125);
     });
 
-    it("supports dynamic max lower than the normal minimum", () => {
+    it("通常の最小値より低い dynamic max に対応する", () => {
       expect(
         normalizeZoomPercent({
           value: 120,
