@@ -7,6 +7,7 @@ import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { auth } from "@/services/firebase";
+import { StratisTagIcon } from "@/ui/icons/stratis";
 import "./sidebar.desktop.css";
 import "./sidebar.layered-directory.css";
 
@@ -37,6 +38,11 @@ const mainNavItems: SidebarNavItem[] = [
     label: "Library",
     icon: <ExplorerChromeFolderIcon className="app-sidebar__nav-icon" />,
     sectionKey: "library",
+  },
+  {
+    id: "tags",
+    label: "タグ",
+    icon: <StratisTagIcon className="app-sidebar__nav-icon" />,
   },
   {
     id: "calendar",
