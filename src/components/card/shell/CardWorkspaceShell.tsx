@@ -1,5 +1,11 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode, Ref } from "react";
+import { SelectionCaptureGlyph } from "@/chip/overlay-toolbar/OverlayToolbarGlyphs";
 import { CardPaneWidthAdjuster } from "@/features/cardsetview/hooks/components/CardPaneWidthAdjuster";
+import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboardImage";
+import { captureElementRectToBlob } from "@/features/selection-capture/domSelectionCapture";
+import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
+import type { SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
 import { cn } from "@/lib/utils";
 
 export type CardWorkspaceSurfaceVariant = "plain" | "dotted";
@@ -43,6 +49,21 @@ export type CardWorkspaceShellProps = {
   isMetaOpen: boolean;
   metaPanel?: ReactNode;
   metaPanelContainerClassName?: string;
+  selectionCaptureEnabled?: boolean;
+};
+
+const setExternalRef = (
+  ref: Ref<HTMLDivElement> | undefined,
+  node: HTMLDivElement | null,
+): void => {
+  if (!ref) return;
+
+  if (typeof ref === "function") {
+    ref(node);
+    return;
+  }
+
+  (ref as { current: HTMLDivElement | null }).current = node;
 };
 
 export const CardWorkspaceShell = ({
@@ -63,10 +84,84 @@ export const CardWorkspaceShell = ({
   isMetaOpen,
   metaPanel,
   metaPanelContainerClassName,
+  selectionCaptureEnabled = true,
 }: CardWorkspaceShellProps) => {
+  const viewportNodeRef = useRef<HTMLDivElement | null>(null);
+  const [isSelectionCaptureActive, setIsSelectionCaptureActive] = useState(false);
+  const [isSelectionCaptureBusy, setIsSelectionCaptureBusy] = useState(false);
+  const [selectionCaptureMessage, setSelectionCaptureMessage] = useState<string | null>(null);
   const topControlsOffsetPx = overlayTopInsetPx + 8;
   const surfaceClassName = WORKSPACE_SURFACE_CLASS_NAMES[surfaceVariant];
   const metaPanelWidth = isMetaOpen ? "var(--ui-panel-width)" : "0px";
+
+  const setViewportNode = useCallback((node: HTMLDivElement | null) => {
+    viewportNodeRef.current = node;
+    setExternalRef(viewportRef, node);
+  }, [viewportRef]);
+
+  const handleStartSelectionCapture = useCallback(() => {
+    setSelectionCaptureMessage(null);
+    setIsSelectionCaptureActive((isActive) => !isActive);
+  }, []);
+
+  const handleCancelSelectionCapture = useCallback(() => {
+    setIsSelectionCaptureActive(false);
+    setIsSelectionCaptureBusy(false);
+  }, []);
+
+  const handleCaptureSelection = useCallback(async (rect: SelectionCaptureRect) => {
+    const target = viewportNodeRef.current;
+    if (!target) return;
+
+    setIsSelectionCaptureBusy(true);
+    try {
+      const blob = await captureElementRectToBlob(target, rect);
+      await copyImageBlobToClipboard(blob);
+      setSelectionCaptureMessage("範囲をコピーしました");
+      setIsSelectionCaptureActive(false);
+    } catch (error) {
+      console.error("[CardWorkspaceShell] selection capture failed", error);
+      setSelectionCaptureMessage("範囲コピーに失敗しました");
+    } finally {
+      setIsSelectionCaptureBusy(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!selectionCaptureMessage) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setSelectionCaptureMessage(null);
+    }, 1800);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [selectionCaptureMessage]);
+
+  const selectionCaptureControl = selectionCaptureEnabled ? (
+    <button
+      type="button"
+      data-selection-capture-ignore="true"
+      className={cn(
+        "inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-700 shadow-sm backdrop-blur-[2px] transition-colors hover:bg-white hover:text-slate-900",
+        isSelectionCaptureActive && "border-slate-300 bg-slate-100 text-slate-900",
+      )}
+      aria-label="範囲コピー"
+      aria-pressed={isSelectionCaptureActive}
+      title="範囲コピー"
+      onClick={handleStartSelectionCapture}
+    >
+      <SelectionCaptureGlyph />
+    </button>
+  ) : null;
+
+  const topRightControls = selectionCaptureControl || topRightControl ? (
+    <div className="flex items-center gap-2">
+      {selectionCaptureControl}
+      {topRightControl}
+    </div>
+  ) : null;
 
   return (
     <div className={cn(surfaceClassName, containerClassName)}>
@@ -78,6 +173,7 @@ export const CardWorkspaceShell = ({
       >
         {topLeftControl || widthControl ? (
           <div
+            data-selection-capture-ignore="true"
             className="pointer-events-none absolute left-3 z-30 flex items-center gap-2"
             style={{ top: `${topControlsOffsetPx}px` }}
           >
@@ -111,12 +207,13 @@ export const CardWorkspaceShell = ({
 
         {overlayChildren}
 
-        {topRightControl ? (
+        {topRightControls ? (
           <div
+            data-selection-capture-ignore="true"
             className="pointer-events-auto absolute right-3 z-30 flex"
             style={{ top: `${topControlsOffsetPx}px` }}
           >
-            {topRightControl}
+            {topRightControls}
           </div>
         ) : null}
 
@@ -127,14 +224,28 @@ export const CardWorkspaceShell = ({
           )}
         >
           <div
-            ref={viewportRef}
+            ref={setViewportNode}
             className={cn(
-              "min-h-0 min-w-0 flex-1 overflow-hidden",
+              "relative min-h-0 min-w-0 flex-1 overflow-hidden",
               viewportClassName,
             )}
             style={viewportStyle}
           >
             {children}
+
+            <SelectionCaptureOverlay
+              targetRef={viewportNodeRef}
+              active={isSelectionCaptureActive}
+              busy={isSelectionCaptureBusy}
+              onCancel={handleCancelSelectionCapture}
+              onCapture={handleCaptureSelection}
+            />
+
+            {selectionCaptureMessage ? (
+              <div data-selection-capture-ignore="true" className="pointer-events-none absolute left-1/2 top-4 z-[60] -translate-x-1/2 rounded-full border border-slate-900/10 bg-white/95 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm">
+                {selectionCaptureMessage}
+              </div>
+            ) : null}
           </div>
         </div>
 
