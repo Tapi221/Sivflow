@@ -6,7 +6,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import ScheduleRoute from "@/routes/Schedule";
 
-vi.mock("@/pane.desktop/view/ScheduleScreen.desktop", () => ({ ScheduleScreen: () => React.createElement("div", { role: "menu", "aria-label": "layered project context menu", "data-testid": "desktop-schedule-screen" }) }));
+vi.mock("@/pane.desktop/view/ScheduleScreen.workspace", () => ({ ScheduleScreen: () => React.createElement("div", { role: "menu", "aria-label": "layered project context menu", "data-testid": "desktop-schedule-screen" }) }));
 vi.mock("@/pane.desktop/view/ScheduleScreen.mobile", () => ({ ScheduleScreen: () => React.createElement("div", { "data-testid": "mobile-schedule-screen" }) }));
 
 const MOBILE_SCREEN_SOURCE_PATH = resolve(process.cwd(), "src/pane.desktop/view/ScheduleScreen.mobile.tsx");
