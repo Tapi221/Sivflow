@@ -1,4 +1,4 @@
-import { addDays, endOfDay, endOfMonth, endOfWeek, endOfYear, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays } from "date-fns";
+import { addDays, endOfDay, endOfMonth, endOfWeek, startOfDay, startOfMonth, startOfWeek, subDays } from "date-fns";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarViewMode } from "@/features/calendar/calendar.types";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
@@ -30,23 +30,16 @@ const buildMiniCalendarMonthRange = (monthTitleDate: Date): CalendarEventSyncRan
   };
 };
 
-const mergeCalendarEventSyncRanges = (
-  left: CalendarEventSyncRange,
-  right: CalendarEventSyncRange,
-): CalendarEventSyncRange => ({
+const mergeCalendarEventSyncRanges = (left: CalendarEventSyncRange, right: CalendarEventSyncRange): CalendarEventSyncRange => ({
   rangeStart: new Date(Math.min(left.rangeStart.getTime(), right.rangeStart.getTime())),
   rangeEnd: new Date(Math.max(left.rangeEnd.getTime(), right.rangeEnd.getTime())),
 });
 
-const buildYearCalendarEventSyncRange = (
-  visibleDays: Date[],
-  monthTitleDate: Date,
-  yearRenderedRange?: CalendarDateRange | null,
-): CalendarEventSyncRange => {
+const buildYearCalendarEventSyncRange = (visibleDays: Date[], monthTitleDate: Date, yearRenderedRange?: CalendarDateRange | null): CalendarEventSyncRange => {
   if (yearRenderedRange) {
     return {
-      rangeStart: startOfDay(startOfYear(yearRenderedRange.start)),
-      rangeEnd: endOfDay(endOfYear(yearRenderedRange.end)),
+      rangeStart: startOfDay(yearRenderedRange.start),
+      rangeEnd: endOfDay(yearRenderedRange.end),
     };
   }
 
@@ -54,66 +47,39 @@ const buildYearCalendarEventSyncRange = (
   const firstVisibleDay = new Date(visibleDays[0]?.getTime() ?? fallbackDayTime);
 
   return {
-    rangeStart: startOfDay(startOfYear(firstVisibleDay)),
-    rangeEnd: endOfDay(endOfYear(firstVisibleDay)),
+    rangeStart: startOfDay(firstVisibleDay),
+    rangeEnd: endOfDay(firstVisibleDay),
   };
 };
 
-const buildMonthCalendarEventSyncRange = (
-  monthTitleDate: Date,
-  monthRenderedRange?: CalendarDateRange | null,
-): CalendarEventSyncRange => {
+const buildMonthCalendarEventSyncRange = (monthTitleDate: Date, monthRenderedRange?: CalendarDateRange | null): CalendarEventSyncRange => {
   if (monthRenderedRange) {
     return {
-      rangeStart: startOfDay(
-        subDays(monthRenderedRange.start, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS),
-      ),
-      rangeEnd: endOfDay(
-        addDays(monthRenderedRange.end, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS),
-      ),
+      rangeStart: startOfDay(subDays(monthRenderedRange.start, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS)),
+      rangeEnd: endOfDay(addDays(monthRenderedRange.end, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS)),
     };
   }
 
-  const gridStart = startOfWeek(startOfMonth(monthTitleDate), {
-    weekStartsOn: C.WEEK_STARTS_ON_MONDAY,
-  });
-  const gridEnd = endOfWeek(endOfMonth(monthTitleDate), {
-    weekStartsOn: C.WEEK_STARTS_ON_MONDAY,
-  });
+  const gridStart = startOfWeek(startOfMonth(monthTitleDate), { weekStartsOn: C.WEEK_STARTS_ON_MONDAY });
+  const gridEnd = endOfWeek(endOfMonth(monthTitleDate), { weekStartsOn: C.WEEK_STARTS_ON_MONDAY });
 
   return {
-    rangeStart: startOfDay(
-      subDays(gridStart, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS),
-    ),
-    rangeEnd: endOfDay(
-      addDays(gridEnd, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS),
-    ),
+    rangeStart: startOfDay(subDays(gridStart, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS)),
+    rangeEnd: endOfDay(addDays(gridEnd, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS)),
   };
 };
 
-const buildAnchoredCalendarEventSyncRange = (
-  monthTitleDate: Date,
-  bufferDays: number,
-): CalendarEventSyncRange => ({
+const buildAnchoredCalendarEventSyncRange = (monthTitleDate: Date, bufferDays: number): CalendarEventSyncRange => ({
   rangeStart: startOfDay(subDays(monthTitleDate, bufferDays)),
   rangeEnd: endOfDay(addDays(monthTitleDate, bufferDays)),
 });
 
-const buildDefaultCalendarEventSyncRange = (
-  selectedViewMode: CalendarViewMode,
-  visibleDays: Date[],
-  monthTitleDate: Date,
-): CalendarEventSyncRange => {
+const buildDefaultCalendarEventSyncRange = (selectedViewMode: CalendarViewMode, visibleDays: Date[], monthTitleDate: Date): CalendarEventSyncRange => {
   if (selectedViewMode === "list" || selectedViewMode === "pieChart") {
     return buildAnchoredCalendarEventSyncRange(monthTitleDate, LIST_AND_PIE_CHART_SYNC_BUFFER_DAYS);
   }
 
-  if (
-    selectedViewMode === "days" ||
-    selectedViewMode === "threeDays" ||
-    selectedViewMode === "week" ||
-    selectedViewMode === "timetable"
-  ) {
+  if (selectedViewMode === "days" || selectedViewMode === "threeDays" || selectedViewMode === "week" || selectedViewMode === "timetable") {
     return buildAnchoredCalendarEventSyncRange(monthTitleDate, WEEKDAY_SYNC_BUFFER_DAYS);
   }
 
