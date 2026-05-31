@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import * as C from "./pdf.constants.desktop";
 import { usePdfWorkspace } from "@/features/pdf/hooks/usePdfWorkspace";
-import { capturePdfViewerRectToBlob } from "@/features/pdf/pdfSelectionCapture";
+import { capturePdfViewerRectToBlob } from "./pdfSelectionCapture";
 import { PdfOverlayToolbar } from "./PdfToolbar";
 import { PdfThumbnailSidePanel } from "./PdfThumbnailSidePanel";
 import type { PdfViewerHandle } from "./PdfViewer";
