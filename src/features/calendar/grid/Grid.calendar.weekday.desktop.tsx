@@ -33,14 +33,16 @@ const WEEKDAY_TIMED_EVENT_MIN_LAYOUT_MINUTES = Math.ceil((WEEKDAY_TIMED_EVENT_MI
 const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
 const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const WEEKDAY_TIME_LABEL_CLASS_NAME = "text-[11px] font-medium tabular-nums text-[#b8bcc5]";
-const WEEKDAY_BOTTOM_TIME_SPACER_CLASS_NAME = "relative h-8";
-const WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME = "relative h-8 overflow-hidden";
+const WEEKDAY_BOTTOM_TIME_SPACER_CLASS_NAME = "relative h-[var(--calendar-hour-row-height)]";
+const WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME = "relative h-[var(--calendar-hour-row-height)] overflow-hidden";
 
 const createEventKey = (event: GoogleCalendarEvent): string => `${event.accountId ?? ""}:${event.calendarId}:${event.id}`;
 
 const isUnshiftedHourLabel = (hour: number): boolean => hour === 0;
 
 const isSameCalendarDate = (left: Date, right: Date): boolean => getCalendarDateKey(left) === getCalendarDateKey(right);
+
+const shouldSuppressEntryMinHeight = (entry: CalendarTimeGridLayoutEntry): boolean => entry.endsAfterRange;
 
 const formatHourLabel = (hour: number): string => hour === GRID.WEEKDAY_HOURS ? END_OF_DAY_HOUR_LABEL : format(new Date(2000, 0, 1, hour), GRID.WEEKDAY_HOUR_LABEL_FORMAT);
 
@@ -231,7 +233,7 @@ const CalendarWeekDayGridComponent = ({
                 ) : null}
 
                 {events.map((entry) => (
-                  <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getWeekdayTimedEventPositionStyle(entry)}>
+                  <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getWeekdayTimedEventPositionStyle(entry, GRID.WEEKDAY_HOURS, { suppressMinHeight: shouldSuppressEntryMinHeight(entry) })}>
                     <CalendarEventChipWeekday event={entry.event} compact={isCompactWeekdayTimedEntry(entry)} />
                   </div>
                 ))}
