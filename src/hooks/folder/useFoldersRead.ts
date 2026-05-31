@@ -2,6 +2,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import { getLocalDb } from "@/services/localDB";
+import type { Folder } from "@/types";
 
 const isDatabaseClosedError = (error: unknown) => {
   if (!error || typeof error !== "object") {
@@ -28,18 +29,7 @@ export const useFoldersRead = () => {
     try {
       const db = await getLocalDb(userId);
       const rawFolders = await db.folders.toArray();
-
-      const filtered = rawFolders.filter(
-        (folder) =>
-          !(
-            (folder as unknown as { isDeleted?: boolean; is_deleted?: boolean })
-              .isDeleted ??
-            (folder as unknown as { isDeleted?: boolean; is_deleted?: boolean })
-              .is_deleted
-          ),
-      );
-
-      return filtered.map(normalizeFolder);
+      return normalizeVisibleFolders(rawFolders);
     } catch (error) {
       if (isDatabaseClosedError(error)) {
         console.warn(
@@ -61,3 +51,6 @@ export const useFoldersRead = () => {
     error: null as string | null,
   };
 };
+
+export const normalizeVisibleFolders = (rawFolders: unknown[]): Folder[] =>
+  rawFolders.map(normalizeFolder).filter((folder) => !folder.isDeleted);
