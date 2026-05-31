@@ -1,32 +1,35 @@
+import { onAuthStateChanged, signOut, type User as FirebaseUser } from "firebase/auth";
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
-import { hydrateServerStoredGoogleCalendarAccounts } from "@/integration/googlecalendar-integration/gcal.server-account-list";
 import { bootstrapUser } from "@/hooks/bootstrap/useUserBootstrap";
+import { hydrateServerStoredGoogleCalendarAccounts } from "@/integration/googlecalendar-integration/gcal.server-account-list";
 import { auth } from "@/services/firebase";
 import { initializeDB, resetLocalDBForLogout } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-import { createDevPreviewUser, isDevPreviewSessionEnabled } from "@/utils/devPreviewSession";
+import { createDevPreviewUser, disableDevPreviewSession, isDevPreviewSessionEnabled } from "@/utils/devPreviewSession";
 
-interface AuthSessionContextType {
+type AuthSessionContextType = {
   currentUser: FirebaseUser | null;
   loading: boolean;
-}
+  logout: () => Promise<void>;
+};
+
+type AuthSessionProviderProps = {
+  children: ReactNode;
+};
+
+const noopLogout = async () => {};
 
 const AuthSessionContext = createContext<AuthSessionContextType>({
   currentUser: null,
   loading: true,
+  logout: noopLogout,
 });
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAuthSession = () => {
+const useAuthSession = () => {
   return useContext(AuthSessionContext);
 };
 
-interface AuthSessionProviderProps {
-  children: ReactNode;
-}
-
-export const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
+const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const lastKnownUserIdRef = useRef<string | null>(null);
@@ -96,10 +99,43 @@ export const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
     return unsubscribe;
   }, []);
 
+  const logout = async () => {
+    setLoading(true);
+
+    const previousUserId = lastKnownUserIdRef.current || currentUser?.uid || undefined;
+
+    try {
+      if (isDevPreviewSessionEnabled()) {
+        disableDevPreviewSession();
+      } else {
+        await signOut(auth);
+        return;
+      }
+
+      try {
+        await resetLocalDBForLogout(previousUserId);
+        await initializeDB("anonymous");
+      } catch (error) {
+        console.warn("[Auth] Logout DB reset failed (non-fatal):", error);
+      }
+
+      SyncServiceFactory.resetInstance(previousUserId);
+      lastKnownUserIdRef.current = null;
+      setCurrentUser(null);
+    } catch (error) {
+      setLoading(false);
+      throw error;
+    } finally {
+      if (isDevPreviewSessionEnabled()) return;
+      setLoading(false);
+    }
+  };
+
   const value = useMemo<AuthSessionContextType>(
     () => ({
       currentUser,
       loading,
+      logout,
     }),
     [currentUser, loading],
   );
@@ -110,3 +146,6 @@ export const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
     </AuthSessionContext.Provider>
   );
 };
+
+export { AuthSessionProvider, useAuthSession };
+export type { AuthSessionContextType, AuthSessionProviderProps };
