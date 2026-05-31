@@ -1,7 +1,6 @@
 import type { CSSProperties, ReactNode, RefObject } from "react";
 import { TabsBar } from "@/pane.desktop/tab.desktopnative/TabsBar";
 import { isDesktopRuntime } from "@/platform/runtime";
-import { WorkspaceBreadcrumbBar } from "./WorkspaceBreadcrumbBar";
 
 type WorkspaceShellProps = {
   children: ReactNode;
@@ -34,7 +33,6 @@ export const WorkspaceShell = ({
           <TabsBar />
         </div>
       ) : null}
-      <WorkspaceBreadcrumbBar hideCrumbs />
 
       <main
         ref={mainRef}
