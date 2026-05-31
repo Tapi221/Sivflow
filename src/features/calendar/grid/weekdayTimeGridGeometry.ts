@@ -18,6 +18,10 @@ export type WeekdayTimedEventFrame = {
   compact: boolean;
 };
 
+export type WeekdayTimedEventPositionOptions = {
+  suppressMinHeight?: boolean;
+};
+
 const EVENT_COLUMN_GAP_PX = 4;
 const EVENT_COLUMN_INSET_PX = 3;
 export const WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX = 18;
@@ -52,7 +56,7 @@ export const getWeekdayTimedEventFrame = (entry: CalendarTimeGridLayoutEntry, ra
   };
 };
 
-export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS): WeekdayTimedEventPositionStyle => {
+export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS, options: WeekdayTimedEventPositionOptions = {}): WeekdayTimedEventPositionStyle => {
   const frame = getWeekdayTimedEventFrame(entry, rangeHours);
 
   return {
@@ -60,6 +64,6 @@ export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutE
     top: `calc(${frame.topHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
     width: `calc(${frame.widthPercent}% - ${EVENT_COLUMN_GAP_PX + EVENT_COLUMN_INSET_PX}px)`,
     height: `calc(${frame.heightHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
-    minHeight: `${WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX}px`,
+    minHeight: options.suppressMinHeight ? "0px" : `${WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX}px`,
   };
 };
