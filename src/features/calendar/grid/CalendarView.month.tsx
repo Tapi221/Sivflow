@@ -1,12 +1,10 @@
-import { startTransition, useDeferredValue, useEffect, useRef } from "react";
+import { startTransition, useEffect, useRef } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import { useMonthRowResize } from "@/features/calendar/grid/height/useRowResize.month.desktop";
 import { useMonthInfiniteScroll } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { GridCalendarMonthDesktop } from "./Grid.calendar.month.desktop";
-
-const RENDERED_RANGE_NOTIFY_DELAY_MS = 180;
 
 type CalendarMonthViewProps = {
   currentDate: Date;
@@ -28,11 +26,9 @@ export const CalendarMonthView = ({
   onRenderedRangeChange,
 }: CalendarMonthViewProps) => {
   const todayRef = useRef(new Date());
-  const deferredVisibleEvents = useDeferredValue(visibleEvents);
 
   const isResizingRef = useRef(false);
   const monthRowHeightRef = useRef(C.readStoredMonthRowHeight());
-  const renderedRangeNotifyTimeoutRef = useRef<number | null>(null);
 
   const scroll = useMonthInfiniteScroll({
     currentDate,
@@ -64,24 +60,9 @@ export const CalendarMonthView = ({
   });
 
   useEffect(() => {
-    if (renderedRangeNotifyTimeoutRef.current !== null) {
-      window.clearTimeout(renderedRangeNotifyTimeoutRef.current);
-    }
-
-    renderedRangeNotifyTimeoutRef.current = window.setTimeout(() => {
-      renderedRangeNotifyTimeoutRef.current = null;
-
-      startTransition(() => {
-        onRenderedRangeChange?.(scroll.visibleWeekRange);
-      });
-    }, RENDERED_RANGE_NOTIFY_DELAY_MS);
-
-    return () => {
-      if (renderedRangeNotifyTimeoutRef.current === null) return;
-
-      window.clearTimeout(renderedRangeNotifyTimeoutRef.current);
-      renderedRangeNotifyTimeoutRef.current = null;
-    };
+    startTransition(() => {
+      onRenderedRangeChange?.(scroll.visibleWeekRange);
+    });
   }, [onRenderedRangeChange, scroll.visibleWeekRange]);
 
   return (
@@ -97,7 +78,7 @@ export const CalendarMonthView = ({
         <GridCalendarMonthDesktop
           today={todayRef.current}
           selectedDate={selectedDate}
-          visibleEvents={deferredVisibleEvents}
+          visibleEvents={visibleEvents}
           monthWeeks={scroll.monthWeeks}
           monthRowHeight={monthRowHeight}
           topSpacerHeight={scroll.topSpacerHeight}
