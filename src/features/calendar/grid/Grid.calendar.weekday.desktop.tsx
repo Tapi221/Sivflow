@@ -66,7 +66,7 @@ const toEventDate = (value: Date): Date | null => {
   return Number.isFinite(date.getTime()) ? date : null;
 };
 
-const clipEventToRange = (event: GoogleCalendarEvent, rangeStart: Date, rangeEnd: Date): GoogleCalendarEvent | null => {
+const getEventInRange = (event: GoogleCalendarEvent, rangeStart: Date, rangeEnd: Date): GoogleCalendarEvent | null => {
   const startsAt = toEventDate(event.startsAt);
   const endsAt = toEventDate(event.endsAt);
 
@@ -75,18 +75,10 @@ const clipEventToRange = (event: GoogleCalendarEvent, rangeStart: Date, rangeEnd
   const startTime = startsAt.getTime();
   const endTime = endsAt.getTime();
   const normalizedEndTime = endTime > startTime ? endTime : startTime + 1;
-  const clippedStart = new Date(Math.max(startTime, rangeStart.getTime()));
-  const clippedEnd = new Date(Math.min(normalizedEndTime, rangeEnd.getTime()));
 
-  if (clippedEnd.getTime() <= clippedStart.getTime()) return null;
+  if (startTime >= rangeEnd.getTime() || normalizedEndTime <= rangeStart.getTime()) return null;
 
-  if (clippedStart.getTime() === startTime && clippedEnd.getTime() === endTime) return event;
-
-  return {
-    ...event,
-    startsAt: clippedStart,
-    endsAt: clippedEnd,
-  };
+  return event;
 };
 
 const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]): WeekdayEventsByDay => {
@@ -125,15 +117,15 @@ const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]): WeekdayE
 };
 
 const createTimedLayoutEventsForRange = (events: GoogleCalendarEvent[], rangeStart: Date, rangeEnd: Date): CalendarTimeGridLayoutEntry[] => {
-  const clippedEvents = events.flatMap((event) => {
+  const rangeEvents = events.flatMap((event) => {
     if (event.isAllDay) return [];
-    const clippedEvent = clipEventToRange(event, rangeStart, rangeEnd);
+    const eventInRange = getEventInRange(event, rangeStart, rangeEnd);
 
-    return clippedEvent ? [clippedEvent] : [];
+    return eventInRange ? [eventInRange] : [];
   });
 
   return layoutCalendarTimeGridEvents({
-    events: clippedEvents,
+    events: rangeEvents,
     rangeStart,
     rangeEnd,
     layoutMode: "no-overlap",
