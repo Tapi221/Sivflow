@@ -21,10 +21,11 @@ const EVENT_COLUMN_GAP_PX = 4;
 const EVENT_COLUMN_INSET_PX = 3;
 const PERCENT_MAX = 100;
 const SHORT_EVENT_THRESHOLD_MINUTES = 30;
+const TIME_GRID_DECIMAL_PLACES = 12;
 
-const getPercentAsHourSpan = (percent: number): number => {
-  return (percent / PERCENT_MAX) * GRID.WEEKDAY_HOURS;
-};
+const normalizeTimeGridNumber = (value: number): number => Number(value.toFixed(TIME_GRID_DECIMAL_PLACES));
+
+const getPercentAsHourSpan = (percent: number): number => normalizeTimeGridNumber((percent / PERCENT_MAX) * GRID.WEEKDAY_HOURS);
 
 export const getWeekdayTimedEventDurationMinutes = (entry: CalendarTimeGridLayoutEntry): number => {
   return Math.max(0, (entry.event.endsAt.getTime() - entry.event.startsAt.getTime()) / 60_000);
