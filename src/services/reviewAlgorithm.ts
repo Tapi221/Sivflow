@@ -11,6 +11,7 @@ export type ReviewAlgorithmInput = {
     currentLevel?: number | null;
     level?: number | null;
     nextReviewDate?: Date | Timestamp | null;
+    next_review_date?: Date | Timestamp | string | number | null;
     lastReviewAt?: Date | Timestamp | null;
     recoveryRemaining?: number | null;
     reviewCount?: number | null;
@@ -434,6 +435,7 @@ const buildNextReviewDate = (reviewedAt: Date, intervalDays: number): Date => {
 
 type ReviewHistoryCard = ReviewAlgorithmInput["card"] & {
   createdAt?: Date | Timestamp | null;
+  created_at?: Date | Timestamp | string | number | null;
   reviewLogs?: ReviewLog[] | null;
 };
 
