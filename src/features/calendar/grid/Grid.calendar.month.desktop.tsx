@@ -6,10 +6,10 @@ import { computeMonthEventsByDay, createMonthEventIndex, EMPTY_MONTH_DAY_EVENTS 
 import type { CalendarMonthDayEvents } from "@/chip/eventchip/EventChip.month.placement";
 import { CalendarDayNumberCircle } from "@/chip/icons/CalendarDayNumberCircle";
 import * as T from "@/features/calendar/calendar.text";
-import * as GD from "./grid.layout.constants.desktop";
 import { MonthRowResizeBar } from "@/features/calendar/grid/height/MonthRowResizeBar.month.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
+import * as GD from "./grid.layout.constants.desktop";
 
 type CalendarMonthGridDay = {
   date: Date;
@@ -164,13 +164,13 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
       </div>
 
       <div className="calendar-month-grid bg-white">
-        <div aria-hidden="true" style={{ height: topSpacerHeight }} />
+        <div aria-hidden="true" className="calendar-month-grid-spacer" style={{ height: topSpacerHeight }} />
 
         {monthWeeks.map((week) => (
           <CalendarMonthWeekRow key={week.key} week={week} eventsByDay={eventsByDay} selectedDayKey={selectedDayKey} todayDayKey={todayDayKey} scrollHoverDayKey={scrollHoverDayKey} monthRowHeight={monthRowHeight} setWeekRowRef={setWeekRowRef} onSelectDate={onSelectDate} handleResizeReset={handleResizeReset} handleResizeKeyDown={handleResizeKeyDown} handleResizePointerDown={handleResizePointerDown} />
         ))}
 
-        <div aria-hidden="true" style={{ height: bottomSpacerHeight }} />
+        <div aria-hidden="true" className="calendar-month-grid-spacer" style={{ height: bottomSpacerHeight }} />
       </div>
     </>
   );
