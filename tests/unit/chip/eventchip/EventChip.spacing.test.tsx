@@ -24,11 +24,27 @@ const getClassTokenValue = (className: string, prefix: string): string => {
 };
 
 const getWeekdayChipElement = (): HTMLElement => {
-  const titleElement = screen.getAllByText(TIMED_EVENT.title).find((element) => element.parentElement?.className.includes("rounded-md"));
+  const titleElement = screen.getAllByText(TIMED_EVENT.title).find((element) => element.parentElement?.className.includes("z-10") && element.parentElement?.className.includes("rounded-md"));
 
   if (!titleElement?.parentElement) throw new Error("weekday event chip was not rendered");
 
   return titleElement.parentElement;
+};
+
+const getWeekdayVisibleTitleElement = (): HTMLElement => {
+  const titleElement = screen.getAllByText(TIMED_EVENT.title).find((element) => element.parentElement?.className.includes("z-10") && element.parentElement?.className.includes("rounded-md"));
+
+  if (!(titleElement instanceof HTMLElement)) throw new Error("weekday event title was not rendered");
+
+  return titleElement;
+};
+
+const getWeekdayTimeElement = (container: HTMLElement): HTMLElement => {
+  const timeElement = Array.from(container.querySelectorAll("span")).find((element) => element.className.includes("tabular-nums"));
+
+  if (!(timeElement instanceof HTMLElement)) throw new Error("weekday event time was not rendered");
+
+  return timeElement;
 };
 
 beforeEach(() => {
@@ -76,5 +92,35 @@ describe("event chip title/time spacing", () => {
     const listSpacing = getClassTokenValue(listTitleElement.className, "mt-");
 
     expect(listSpacing).toBe(weekdaySpacing);
+  });
+});
+
+describe("weekday event chip text clipping", () => {
+  it("通常チップの 1 行タイトルは -webkit-line-clamp を使わず固定 line-height で表示する", () => {
+    render(<CalendarEventChipWeekday event={TIMED_EVENT} />);
+
+    const titleElement = getWeekdayVisibleTitleElement();
+
+    expect(titleElement.className).toContain("leading-[17px]");
+    expect(titleElement.style.display).toBe("block");
+    expect(titleElement.style.whiteSpace).toBe("nowrap");
+    expect(titleElement.style.textOverflow).toBe("ellipsis");
+    expect(titleElement.style.WebkitLineClamp).toBe("");
+  });
+
+  it("通常チップの時刻も固定 line-height で表示する", () => {
+    const { container } = render(<CalendarEventChipWeekday event={TIMED_EVENT} />);
+
+    const timeElement = getWeekdayTimeElement(container);
+
+    expect(timeElement.className).toContain("leading-[16px]");
+  });
+
+  it("compact チップのタイトルも固定 line-height で表示する", () => {
+    render(<CalendarEventChipWeekday event={TIMED_EVENT} compact />);
+
+    const titleElement = getWeekdayVisibleTitleElement();
+
+    expect(titleElement.className).toContain("leading-[15px]");
   });
 });
