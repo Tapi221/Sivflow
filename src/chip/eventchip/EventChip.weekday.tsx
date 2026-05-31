@@ -28,9 +28,9 @@ const CHIP_INLINE_ROW_CLASS = "flex min-w-0 max-w-full items-baseline gap-1 over
 const CHIP_INLINE_TITLE_CLASS = "min-w-0 max-w-full shrink overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-medium leading-[17px]";
 const CHIP_INLINE_TIME_CLASS = "shrink-0 whitespace-nowrap text-[11px] font-semibold leading-[16px] tabular-nums opacity-80";
 const CHIP_MEASUREMENT_BASE_CLASS = "pointer-events-none invisible absolute inset-0 flex min-h-0 w-full flex-col overflow-hidden rounded-md text-left";
-const CHIP_INLINE_MEASUREMENT_CLASS = "pointer-events-none invisible absolute left-0 top-0 flex max-w-none items-baseline gap-1 whitespace-nowrap";
 const CHIP_MEASUREMENT_TOLERANCE_PX = 1;
 const DEFAULT_TITLE_LINE_CLAMP = 1;
+const INLINE_TIME_GAP_PX = 4;
 const DEFAULT_CHIP_LAYOUT_STATE: ChipLayoutState = {
   showTimeLabel: false,
   showInlineTimeLabel: false,
@@ -80,7 +80,6 @@ const calculateChipLayout = (
   container: HTMLDivElement,
   titleMeasurement: HTMLSpanElement,
   timeMeasurement: HTMLSpanElement,
-  inlineMeasurement: HTMLDivElement,
   compact: boolean,
 ): ChipLayoutState => {
   const containerStyles = window.getComputedStyle(container);
@@ -119,7 +118,7 @@ const calculateChipLayout = (
   const canShowInlineTimeLabel =
     !canShowTimeLabel &&
     contentHeight + CHIP_MEASUREMENT_TOLERANCE_PX >= titleLineHeight &&
-    getElementWidth(inlineMeasurement) <= contentWidth + CHIP_MEASUREMENT_TOLERANCE_PX;
+    getElementWidth(timeMeasurement) + INLINE_TIME_GAP_PX <= contentWidth + CHIP_MEASUREMENT_TOLERANCE_PX;
   const titleAvailableHeight = canShowTimeLabel
     ? contentHeight - rowGap - timeHeight
     : contentHeight;
@@ -170,7 +169,6 @@ const CalendarEventChipWeekday = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const titleMeasurementRef = useRef<HTMLSpanElement>(null);
   const timeMeasurementRef = useRef<HTMLSpanElement>(null);
-  const inlineMeasurementRef = useRef<HTMLDivElement>(null);
   const [chipLayout, setChipLayout] = useState<ChipLayoutState>(
     DEFAULT_CHIP_LAYOUT_STATE,
   );
@@ -185,9 +183,8 @@ const CalendarEventChipWeekday = ({
     const container = containerRef.current;
     const titleMeasurement = titleMeasurementRef.current;
     const timeMeasurement = timeMeasurementRef.current;
-    const inlineMeasurement = inlineMeasurementRef.current;
 
-    if (!container || !titleMeasurement || !timeMeasurement || !inlineMeasurement) return;
+    if (!container || !titleMeasurement || !timeMeasurement) return;
 
     let frameId = 0;
 
@@ -198,7 +195,6 @@ const CalendarEventChipWeekday = ({
           container,
           titleMeasurement,
           timeMeasurement,
-          inlineMeasurement,
           compact,
         );
 
@@ -280,10 +276,6 @@ const CalendarEventChipWeekday = ({
             <span ref={timeMeasurementRef} className={CHIP_TIME_CLASS}>
               {timeLabel}
             </span>
-            <div ref={inlineMeasurementRef} className={CHIP_INLINE_MEASUREMENT_CLASS}>
-              <span className={CHIP_INLINE_TITLE_CLASS}>{titleLabel}</span>
-              <span className={CHIP_INLINE_TIME_CLASS}>{timeLabel}</span>
-            </div>
           </div>
         </div>
       </div>
