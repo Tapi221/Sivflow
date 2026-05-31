@@ -163,6 +163,29 @@ export const SplitGlyph = () => (
   </OverlayToolbarGlyph>
 );
 
+export const SelectionCaptureGlyph = () => (
+  <OverlayToolbarGlyph>
+    <path
+      d="M3 5.25V3h2.25M10.75 3H13v2.25M13 10.75V13h-2.25M5.25 13H3v-2.25"
+      stroke="currentColor"
+      strokeWidth="1.35"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <rect
+      x="5"
+      y="5"
+      width="6"
+      height="6"
+      rx="1.1"
+      stroke="currentColor"
+      strokeWidth="1.15"
+      strokeDasharray="1.8 1.4"
+      opacity="0.78"
+    />
+  </OverlayToolbarGlyph>
+);
+
 export const PdfPrevGlyph = () => (
   <OverlayToolbarGlyph>
     <path
