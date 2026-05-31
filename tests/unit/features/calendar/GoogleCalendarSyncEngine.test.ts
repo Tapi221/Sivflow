@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { addDays } from "date-fns";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GoogleCalendarSyncEngine } from "@/features/calendar/googlecalendar-sync/GoogleCalendarSyncEngine";
 import type { GCalSilentReconnectResult, GCalSyncEngineOptions, GCalSyncStartContext, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
@@ -172,6 +173,28 @@ describe("GoogleCalendarSyncEngine", () => {
       expect(onEventsRangeReplaced.mock.calls[0][0].events).toEqual([]);
       expect(onEventAdded).not.toHaveBeenCalled();
       expect(onEventDeleted).not.toHaveBeenCalled();
+    });
+
+    it("初回フル同期は1年以上先の予定を含む未来範囲を取得する", async () => {
+      const startedAt = new Date();
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockReturnValue(
+        mockEventsListResponse([], "initial-sync-token"),
+      );
+
+      engine.start(testContext);
+
+      await vi.waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      });
+
+      engine.stop();
+
+      const url = new URL(String(fetchMock.mock.calls[0][0]));
+      const timeMax = new Date(url.searchParams.get("timeMax") ?? "");
+
+      expect(timeMax.getTime()).toBeGreaterThan(
+        addDays(startedAt, 365).getTime(),
+      );
     });
   });
 
