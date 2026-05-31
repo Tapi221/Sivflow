@@ -46,21 +46,23 @@ afterEach(() => {
 });
 
 describe("event chip title/time spacing", () => {
-  it("週表示の通常チップはタイトルと時刻の間隔を gap-0.5 にする", () => {
+  it("週表示の通常チップはタイトルと時刻の間隔を gap-[0.5px] にする", () => {
     render(<CalendarEventChipWeekday event={TIMED_EVENT} />);
 
     const chipElement = getWeekdayChipElement();
 
-    expect(chipElement.className).toContain("gap-0.5");
+    expect(chipElement.className).toContain("gap-[0.5px]");
+    expect(chipElement.className).not.toContain("gap-0.5");
     expect(chipElement.className).not.toContain("gap-1");
   });
 
-  it("リスト表示のチップもタイトルと時刻の間隔を mt-0.5 にする", () => {
+  it("リスト表示のチップもタイトルと時刻の間隔を mt-[0.5px] にする", () => {
     render(<CalendarEventChipList event={TIMED_EVENT} />);
 
     const titleElement = screen.getByText(TIMED_EVENT.title);
 
-    expect(titleElement.className).toContain("mt-0.5");
+    expect(titleElement.className).toContain("mt-[0.5px]");
+    expect(titleElement.className).not.toContain("mt-0.5");
   });
 
   it("リスト表示と週表示のタイトルと時刻の間隔を一致させる", () => {
