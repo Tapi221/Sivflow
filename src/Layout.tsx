@@ -116,7 +116,6 @@ const Layout = () => {
     <div
       className={cn(
         "relative flex flex-col h-[100dvh] w-full overflow-hidden",
-        isScheduleRoute ? "app-layout-route--schedule" : "",
         UI_TYPO,
       )}
       data-presentation-target={presentationTarget}
