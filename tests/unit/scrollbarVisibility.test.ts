@@ -9,6 +9,20 @@ const SCROLLBAR_STYLE_PATHS = [
 
 const readStyleFile = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8");
 
+const extractRuleBody = (css: string, selector: string) => {
+  const rulePattern = new RegExp(`${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`);
+  const match = css.match(rulePattern);
+
+  return match?.[1]?.trim() ?? "";
+};
+
+const extractCustomPropertyValue = (css: string, propertyName: string) => {
+  const propertyPattern = new RegExp(`${propertyName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*:\\s*([^;]+);`);
+  const match = css.match(propertyPattern);
+
+  return match?.[1]?.trim() ?? "";
+};
+
 const extractRuleSelectors = (css: string, declaration: string) => {
   const rules = css.match(/[^{}]+\{[^{}]*\}/g) ?? [];
 
@@ -33,12 +47,22 @@ const expectScrollbarRevealSelectorsToUseHoverOnly = (css: string) => {
   }
 };
 
-describe("スクロールバーの表示スタイル", () => {
-  it("共通のスクロールバー幅を細い値に保つ", () => {
-    expect(readStyleFile("src/styles/index.css")).toContain("--scrollbar-size: 1px;");
+describe("グローバルCSSで定義しているネイティブスクロールバーの表示条件と太さ", () => {
+  it("スクロールバーの太さを決める --scrollbar-size の値を 1px に固定する", () => {
+    const css = readStyleFile("src/styles/index.css");
+
+    expect(extractCustomPropertyValue(css, "--scrollbar-size")).toBe("1px");
   });
 
-  it("グローバルスクロールバーを hover 時だけ表示する", () => {
+  it("WebKit 系ブラウザのスクロールバー幅と高さを --scrollbar-size で制御する", () => {
+    const css = readStyleFile("src/styles/index.css");
+    const scrollbarRuleBody = extractRuleBody(css, "*::-webkit-scrollbar");
+
+    expect(scrollbarRuleBody).toContain("width: var(--scrollbar-size);");
+    expect(scrollbarRuleBody).toContain("height: var(--scrollbar-size);");
+  });
+
+  it("通常時は透明で、hover 時だけスクロールバーのつまみを表示し、focus-within と active では表示しない", () => {
     for (const path of SCROLLBAR_STYLE_PATHS) {
       expectScrollbarRevealSelectorsToUseHoverOnly(readStyleFile(path));
     }
