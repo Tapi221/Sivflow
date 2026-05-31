@@ -1,10 +1,11 @@
 import type { CSSProperties } from "react";
 import { memo, useEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
+import { addDays, format, startOfDay } from "date-fns";
 import { ja } from "date-fns/locale";
+import { layoutCalendarTimeGridEvents } from "@core/calendar";
+import type { CalendarTimeGridLayoutEntry } from "@core/calendar";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
-import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.weekday.placement";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
@@ -21,15 +22,6 @@ type CalendarEventPositionStyle = CSSProperties & {
   height: string;
 };
 
-type TimedLayoutEvent = {
-  key: string;
-  event: GoogleCalendarEvent;
-  layout: {
-    left: number;
-    width: number;
-  };
-};
-
 export type CalendarWeekDayGridRef = {
   scrollToHour: (hour: number) => void;
 };
@@ -39,6 +31,7 @@ const EVENT_COLUMN_GAP_PX = 4;
 const EVENT_COLUMN_INSET_PX = 3;
 const CURRENT_TIME_TICK_MS = GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS;
 const END_OF_DAY_HOUR_LABEL = "24:00";
+const PERCENT_MAX = 100;
 const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
 const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const WEEKDAY_TIME_LABEL_CLASS_NAME = "text-[11px] font-medium tabular-nums text-[#b8bcc5]";
@@ -48,15 +41,13 @@ const createEventKey = (event: GoogleCalendarEvent): string => `${event.accountI
 
 const isSameCalendarDate = (left: Date, right: Date): boolean => getCalendarDateKey(left) === getCalendarDateKey(right);
 
-const getEventDurationMinutes = (event: GoogleCalendarEvent): number => Math.max(1, Math.round((event.endsAt.getTime() - event.startsAt.getTime()) / 60_000));
-
 const formatHourLabel = (hour: number): string => hour === GRID.WEEKDAY_HOURS ? END_OF_DAY_HOUR_LABEL : format(new Date(2000, 0, 1, hour), GRID.WEEKDAY_HOUR_LABEL_FORMAT);
 
-const getTimedEventPositionStyle = ({ event, layout }: TimedLayoutEvent): CalendarEventPositionStyle => ({
-  left: `calc(${layout.left * 100}% + ${EVENT_COLUMN_INSET_PX}px)`,
-  top: `calc(${(event.startsAt.getHours() * GRID.WEEKDAY_MINUTES_PER_HOUR + event.startsAt.getMinutes()) / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
-  width: `calc(${layout.width * 100}% - ${EVENT_COLUMN_GAP_PX + EVENT_COLUMN_INSET_PX}px)`,
-  height: `max(${C.MIN_EVENT_DISPLAY_HEIGHT_PX}px, calc(${getEventDurationMinutes(event) / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})))`,
+const getTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry): CalendarEventPositionStyle => ({
+  left: `calc(${entry.style.xOffset}% + ${EVENT_COLUMN_INSET_PX}px)`,
+  top: `calc(${(entry.style.top / PERCENT_MAX) * GRID.WEEKDAY_HOURS} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
+  width: `calc(${entry.style.width}% - ${EVENT_COLUMN_GAP_PX + EVENT_COLUMN_INSET_PX}px)`,
+  height: `max(${C.MIN_EVENT_DISPLAY_HEIGHT_PX}px, calc(${(entry.style.height / PERCENT_MAX) * GRID.WEEKDAY_HOURS} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})))`,
 });
 
 const getCurrentTimeTopStyle = (now: Date): CSSProperties => ({
@@ -104,17 +95,16 @@ const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]) => {
   return { allDayEvents, timedEvents };
 };
 
-const createTimedLayoutEvents = (events: GoogleCalendarEvent[]): TimedLayoutEvent[] => {
-  const layoutEvents = events.map((event) => toLayoutEvent(createEventKey(event), event.startsAt, getEventDurationMinutes(event), C.MIN_LAYOUT_MINUTES));
-  const layoutByKey = computeEventLayout(layoutEvents);
+const createTimedLayoutEvents = (events: GoogleCalendarEvent[], day: Date): CalendarTimeGridLayoutEntry[] => {
+  const rangeStart = startOfDay(day);
+  const rangeEnd = addDays(rangeStart, 1);
 
-  return events.map((event) => {
-    const key = createEventKey(event);
-    return {
-      key,
-      event,
-      layout: layoutByKey.get(key) ?? { left: 0, width: 1 },
-    };
+  return layoutCalendarTimeGridEvents({
+    events,
+    rangeStart,
+    rangeEnd,
+    layoutMode: "no-overlap",
+    minimumEventDurationMinutes: C.MIN_LAYOUT_MINUTES,
   });
 };
 
@@ -210,7 +200,7 @@ const CalendarWeekDayGridComponent = ({
 
           {visibleDays.map((day) => {
             const dayKey = getCalendarDateKey(day);
-            const events = createTimedLayoutEvents(timedEvents.get(dayKey) ?? []);
+            const events = createTimedLayoutEvents(timedEvents.get(dayKey) ?? [], day);
             const isToday = dayKey === currentDayKey;
             return (
               <div key={dayKey} className="relative min-w-0 bg-white">
@@ -225,9 +215,9 @@ const CalendarWeekDayGridComponent = ({
                   </div>
                 ) : null}
 
-                {events.map((layoutEvent) => (
-                  <div key={layoutEvent.key} className="absolute z-10 min-w-0" style={getTimedEventPositionStyle(layoutEvent)}>
-                    <CalendarEventChipWeekday event={layoutEvent.event} />
+                {events.map((entry) => (
+                  <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getTimedEventPositionStyle(entry)}>
+                    <CalendarEventChipWeekday event={entry.event} />
                   </div>
                 ))}
               </div>
