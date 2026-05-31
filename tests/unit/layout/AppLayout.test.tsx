@@ -87,7 +87,7 @@ afterEach(() => {
 });
 
 describe("AppLayout のサイドバー表示幅判定", () => {
-  it("サイドバーを表示できる画面幅では左サイドバーを表示する", () => {
+  it("画面幅が 768px 以上なら左サイドバーを表示する", () => {
     setDesktopLayoutMatchMedia(true);
 
     renderAppLayout();
@@ -99,7 +99,7 @@ describe("AppLayout のサイドバー表示幅判定", () => {
     expect(document.querySelector(".app-layout")?.className).not.toContain("app-layout--without-sidebar");
   });
 
-  it("サイドバーを表示できない画面幅では左サイドバーを表示しない", () => {
+  it("画面幅が 768px 未満なら左サイドバーを表示しない", () => {
     setDesktopLayoutMatchMedia(false);
 
     renderAppLayout();
