@@ -57,6 +57,22 @@ describe("LayeredDirectorySidebar project list", () => {
     expect(projectListSidebarSource).not.toContain("getFolderContentCount");
   });
 
+  it("opens the selected project in explorer mode on click", () => {
+    render(React.createElement(ProjectListSidebar));
+
+    fireEvent.click(screen.getByRole("button", { name: "Project Alpha" }));
+
+    expect(mocks.openExplorerTab).toHaveBeenCalledWith({
+      title: "Library",
+      explorerState: {
+        isHomeOnlyMode: false,
+        isSectionListMode: false,
+        selectedFolderId: "project-1",
+        selectedItem: null,
+      },
+    });
+  });
+
   it("opens the layered project context menu on right-click", () => {
     render(React.createElement(ProjectListSidebar));
 
