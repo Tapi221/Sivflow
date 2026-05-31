@@ -35,6 +35,12 @@
 
 - [ ] removes local-only image fields from card payloads
 
+## tests/unit/application/startup/RunStartupTasks.test.ts
+
+- [ ] 整合性チェックの前に startup sync を実行する
+- [ ] startup sync step の前に disposed なら sync を開始しない
+- [ ] API 互換性のため resetStartupTasks を no-op に保つ
+
 ## tests/unit/brandedTypes.test.ts
 
 - [ ] 有効な Blob URL なら true を返す
@@ -94,6 +100,17 @@
 - [ ] 編集可能な子孫を拒否する
 - [ ] workspace 外の target を拒否する
 
+## tests/unit/cardSetViewZoomUtils.test.ts
+
+- [ ] 既存の幅デフォルトを percent に対応させて現在の視覚デフォルトを維持する
+- [ ] percent を scale factor に変換する
+- [ ] canonical card width を使って zoom percent を固定カード幅に変換する
+- [ ] 最も近い 5% ステップへ切り下げる
+- [ ] 1 ステップ未満を返さない
+- [ ] 最小値と最大値に clamp する
+- [ ] clamp 前に 5% 単位へ snap する
+- [ ] 通常の最小値より低い dynamic max に対応する
+
 ## tests/unit/chip/eventchip/EventChip.spacing.test.tsx
 
 - [ ] 週表示の通常チップはタイトルと時刻の間隔を小さく保つ
@@ -127,6 +144,21 @@
 - [ ] 本文段落に whitespace 保持用の識別属性を付与する
 - [ ] blockquote 内本文にも whitespace 保持用の識別属性を付与する
 - [ ] blockquote 内の nested paragraph は whitespace selector の対象外にできる DOM 形になる
+
+## tests/unit/components/card/CodeBlockConsistency.test.tsx
+
+- [ ] long single-line code keeps no-wrap and horizontal scroll classes
+- [ ] editor/view/preview use the same CodeBlockFrame structure
+- [ ] editor contract keeps width-expanding host for horizontal scroll parity
+- [ ] code block item keeps outer wrapper spacing neutralized
+- [ ] viewer code block is not clipped by block wrapper overflow
+
+## tests/unit/components/card/editor/cardEditorSessionCore.test.ts
+
+- [ ] detects meaningful draft without React state
+- [ ] extracts created card id from multiple payload shapes
+- [ ] creates stable draft signature
+- [ ] creates panel card from draft without React component state
 
 ## tests/unit/components/card/editor/useCardEditorSession.test.ts
 
@@ -171,6 +203,12 @@
 - [ ] folder item 集計は CardSet.folderId を使い missing cardSetId は除外する
 - [ ] moveCardSetToFolder 後は古い card.folderId でも表示先フォルダが追従する
 - [ ] カードを別 CardSet へ移すと Explorer の所属フォルダ集計が追従する
+
+## tests/unit/components/folder/panes/cardEditorPaneControllerCore.test.ts
+
+- [ ] builds cardsById outside React
+- [ ] resolves selected card snapshot from pure map
+- [ ] applies draft patch only when editing current card
 
 ## tests/unit/components/ink/inkStorage.test.ts
 
@@ -306,6 +344,11 @@
 - [ ] 日表示では visibleDays の前後2日を同期範囲にする
 - [ ] 週表示では visibleDays の前後3日を同期範囲にする
 
+## tests/unit/features/calendar/useGoogleTaskLists.test.tsx
+
+- [ ] missing Google Tasks scope を空リスト扱いせず再連携可能な権限エラーとして表示する
+- [ ] refresh token が無い場合も silent access token で Google Tasks list loading を復旧する
+
 ## tests/unit/features/cardFile/importMfCard.test.ts
 
 - [ ] mfcard を1枚のカードとして新規カードセットに取り込む
@@ -320,6 +363,11 @@
 - [ ] Enter で入力カード番号を commit する
 - [ ] blur 時に範囲外入力を clamp する
 - [ ] 空入力の blur は現在カード番号へ戻す
+
+## tests/unit/features/cardsetview/components/DesktopCardSurface.flipState.test.tsx
+
+- [ ] card が inactive になっても flipped state を維持する
+- [ ] fluid mode を ink controls なしで渡す
 
 ## tests/unit/features/cardsetview/hooks/useCardSetViewZoom.test.tsx
 
@@ -367,6 +415,18 @@
 - [ ] request key が変わった時だけ active card へ scroll する
 - [ ] 明示ジャンプ時に custom scroll behavior を使う
 - [ ] StrictMode の mount / unmount で ReferenceError を出さない
+
+## tests/unit/features/review/useCardCarousel3DWebBridge.test.tsx
+
+- [ ] unmount 時に observer を cleanup する
+- [ ] unmount 時に保留中の debounce timer を破棄し、後続通知を発火しない
+- [ ] activeIndex 変更時に observer を差し替える前の disconnect を呼ぶ
+
+## tests/unit/features/scroll/schedule/useCalendarScrollController.test.tsx
+
+- [ ] 週表示の初期描画で保存済みの縦スクロール位置を復元する
+- [ ] 週表示のスクロール時に縦スクロール位置を保存する
+- [ ] 月表示では週表示用の縦スクロール位置を復元・上書きしない
 
 ## tests/unit/firebaseEmulatorConfigConsistency.test.ts
 
@@ -445,6 +505,13 @@
 - [ ] guesses japanese-first OCR for Japanese heavy text
 - [ ] scores readable paragraph text above noisy symbols
 
+## tests/unit/pane.desktop/leftpane/folder/LayeredDirectorySidebar.test.ts
+
+- [ ] MY PROJECTS では hierarchy tree ではなく flat project list を使う
+- [ ] project content count badges を描画しない
+- [ ] click で選択 project を explorer mode で開く
+- [ ] right-click で layered project context menu を開く
+
 ## tests/unit/pane.desktop/leftpane/Sidebar.desktop.test.tsx
 
 - [ ] トグルアイコンは閉じる状態と開く状態を切り替え、操作名も現在状態に合わせて変える
@@ -452,6 +519,16 @@
 - [ ] 探すアイコンは検索を開き、サイドバーのアクティブセクションは変更しない
 - [ ] 日本語ロケールではサイドバー項目のツールチップも日本語で表示する
 - [ ] 英語ロケールではサイドバー項目とツールチップを英語で表示する
+
+## tests/unit/pane.desktop/leftpane/schedule/CalendarSidebar.test.tsx
+
+- [ ] MY PROJECTS の見出しにカレンダーアイコンを描画しない
+- [ ] GOOGLE CALENDARS のセクション見出しと追加ボタンを描画しない
+- [ ] MY PROJECTS と Google アカウント一覧の間に区切り線を描画しない
+
+## tests/unit/pane.desktop/tab.desktopnative/useTabsStore.test.ts
+
+- [ ] project を開くと既存 explorer tab state を更新する
 
 ## tests/unit/parseImportRows.test.ts
 
@@ -561,6 +638,23 @@
 - [ ] calculates next score from decayed base score
 - [ ] resolves risk level thresholds deterministically
 
+## tests/unit/services/cardSetViewFlippedFacePreferences.test.ts
+
+- [ ] deviceScope + cardSetId を現在の永続化 key として使用する
+- [ ] flipped ids を localStorage に永続化する
+- [ ] deviceScope ごとに状態を分離する
+- [ ] ids が空になったら永続化 entry を削除する
+
+## tests/unit/services/localDB.resilience.test.ts
+
+- [ ] 同時 getInstance 呼び出しでは同じ in-flight promise を返す
+- [ ] ログアウト reset を best-effort に保ち、失敗理由を保存する
+- [ ] backing-store UnknownError で fallback mode に切り替え、無限に再試行しない
+- [ ] backing-store 失敗が繰り返されても generation bump は session あたり最大 1 回にする
+- [ ] ログアウト reset 時に既知のすべての generation の削除を試みる
+- [ ] LocalDB telemetry snapshot key を公開する
+- [ ] LocalDB telemetry を session key ごとに 1 回だけ送出する
+
 ## tests/unit/services/logic/DiffEngine.test.ts
 
 - [ ] オブジェクトが同一なら null を返す
@@ -648,6 +742,11 @@
 - [ ] 初期状態は idle ステータスになる
 - [ ] ファイルサイズを検証する
 - [ ] MIME タイプを検証する
+
+## tests/unit/useExplorerStore.test.ts
+
+- [ ] filter state を hydrate しつつ legacy history と tab state を破棄する
+- [ ] invalid persisted filter values を正規化する
 
 ## tests/unit/utils/blobUrlSanitizer.test.ts
 
