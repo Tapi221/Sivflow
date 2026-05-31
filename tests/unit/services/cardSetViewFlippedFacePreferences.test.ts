@@ -8,7 +8,7 @@ describe("cardSetViewFlippedFacePreferences", () => {
     window.localStorage.clear();
   });
 
-  it("uses deviceScope + cardSetId as the current persistence key", () => {
+  it("deviceScope + cardSetId を現在の永続化 key として使用する", () => {
     const currentKey = buildCardSetViewFlippedFaceScopeKey({
       deviceScope: "desktop",
       cardSetId: "set-1",
@@ -26,7 +26,7 @@ describe("cardSetViewFlippedFacePreferences", () => {
     expect(window.localStorage.getItem(currentKey)).toBe(JSON.stringify(["card-a"]));
   });
 
-  it("persists flipped ids in localStorage", () => {
+  it("flipped ids を localStorage に永続化する", () => {
     setCardSetViewFlippedCardIds({
       deviceScope: "desktop",
       cardSetId: "set-2",
@@ -41,7 +41,7 @@ describe("cardSetViewFlippedFacePreferences", () => {
     ).toEqual(new Set(["card-a", "card-b"]));
   });
 
-  it("separates state by deviceScope", () => {
+  it("deviceScope ごとに状態を分離する", () => {
     setCardSetViewFlippedCardIds({
       deviceScope: "desktop",
       cardSetId: "set-3",
@@ -67,7 +67,7 @@ describe("cardSetViewFlippedFacePreferences", () => {
     ).toEqual(new Set(["card-mobile"]));
   });
 
-  it("removes the persistence entry when ids become empty", () => {
+  it("ids が空になったら永続化 entry を削除する", () => {
     const currentKey = buildCardSetViewFlippedFaceScopeKey({
       deviceScope: "desktop",
       cardSetId: "set-4",
