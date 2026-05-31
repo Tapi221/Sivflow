@@ -132,7 +132,7 @@ const ToggleCalendarViewMode = ({
         disabled={isDisabled}
         onClick={() => handleChange(option.value)}
         className={cn(
-          "relative isolate z-10 flex h-6 min-w-7 items-center justify-center rounded-[8px] px-1.5",
+          "relative isolate z-10 flex h-6 min-h-0 min-w-7 items-center justify-center rounded-[8px] px-1.5",
           "appearance-none select-none text-[11px] font-semibold leading-none tracking-[-0.01em]",
           "outline-none ring-0 transition-colors duration-100 ease-out motion-reduce:transition-none",
           "focus:outline-none focus:ring-0 focus-visible:outline-none",
@@ -177,7 +177,7 @@ const ToggleCalendarViewMode = ({
           aria-disabled={true}
           tabIndex={-1}
           className={cn(
-            "relative isolate z-10 flex h-6 min-w-7 cursor-default items-center justify-center rounded-[8px] px-1.5",
+            "relative isolate z-10 flex h-6 min-h-0 min-w-7 cursor-default items-center justify-center rounded-[8px] px-1.5",
             "appearance-none select-none text-[11px] font-semibold leading-none tracking-[-0.01em]",
             "outline-none ring-0",
             CALENDAR_VIEW_MODE_INACTIVE_TEXT_CLASS,
