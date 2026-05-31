@@ -35,7 +35,7 @@ vi.mock("@/components/ui/dialog", () => ({
 }));
 
 describe("Flashcard layoutRows height behavior", () => {
-  it("keeps the same height before/after flip", () => {
+  it("flip 前後で同じ高さを維持する", () => {
     const card = {
       id: "card-1",
       questionText: "Q",
