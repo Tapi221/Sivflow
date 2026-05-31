@@ -18,7 +18,7 @@ describe("CalendarYearView", () => {
     vi.restoreAllMocks();
   });
 
-  it("速いスクロールでも固定レール上の表示年ウィンドウへ更新する", async () => {
+  it("初期表示で現在年から描画し、下端付近で表示年を追加する", async () => {
     vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
       callback(0);
       return 1;
@@ -40,19 +40,27 @@ describe("CalendarYearView", () => {
     const scroller = container.querySelector(".calendar-year-view");
     expect(scroller).toBeInstanceOf(HTMLElement);
 
+    let latestRange = onRenderedRangeChange.mock.calls.at(-1)?.[0] as
+      | { start: Date; end: Date }
+      | undefined;
+
+    expect(latestRange?.start.getFullYear()).toBe(2026);
+    expect(latestRange?.end.getFullYear()).toBe(2032);
+    expect(container.textContent).toContain("2026年");
+
     setReadonlyNumber(scroller!, "clientHeight", 1000);
     setReadonlyNumber(scroller!, "scrollHeight", 304000);
-    setReadonlyNumber(scroller!, "scrollTop", 167200);
+    setReadonlyNumber(scroller!, "scrollTop", 303000);
 
     act(() => {
       fireEvent.scroll(scroller!);
     });
 
-    const latestRange = onRenderedRangeChange.mock.calls.at(-1)?.[0] as
+    latestRange = onRenderedRangeChange.mock.calls.at(-1)?.[0] as
       | { start: Date; end: Date }
       | undefined;
 
-    expect(latestRange?.start.getFullYear()).toBe(2044);
-    expect(latestRange?.end.getFullYear()).toBe(2049);
+    expect(latestRange?.start.getFullYear()).toBe(2026);
+    expect(latestRange?.end.getFullYear()).toBe(2035);
   }, 60_000);
 });
