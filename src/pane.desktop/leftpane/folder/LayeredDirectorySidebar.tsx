@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { DEFAULT_NEW_FOLDER_NAME, getFolderId, UNTITLED_FOLDER_NAME, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
-import { DEFAULT_NEW_FOLDER_NAME, getFolderId, UNTITLED_FOLDER_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ type DirectoryTreeNodeProps = {
   onToggleFolder: (folderId: string) => void;
   onSelectFolder: (folderId: string) => void;
   onCreateChildFolder: (folderId: string) => void;
-  onRenameFolder: (folder: FolderTreeNode) => void;
+  onRenameFolder: (folder: FolderTreeNode, isRootProject: boolean) => void;
   onDeleteFolder: (folder: FolderTreeNode) => void;
 };
 
@@ -34,9 +34,9 @@ const IconFolder = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill=
 
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 
-const getFolderName = (folder: FolderTreeNode): string => {
+const getFolderName = (folder: FolderTreeNode, isRootProject = false): string => {
   const name = folder.folderName ?? folder.folder_name;
-  return typeof name === "string" && name.trim() ? name.trim() : UNTITLED_FOLDER_NAME;
+  return typeof name === "string" && name.trim() ? name.trim() : isRootProject ? UNTITLED_PROJECT_NAME : UNTITLED_FOLDER_NAME;
 };
 
 const getRootFolderIds = (rootFolders: FolderTreeNode[]): string[] => rootFolders.map(getFolderId).filter(Boolean);
@@ -45,11 +45,12 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
   const folderId = getFolderId(folder);
   if (!folderId) return null;
 
+  const isRootProject = level === ROOT_LEVEL;
   const childFolders = getChildFolders(folderId);
   const hasChildren = childFolders.length > 0;
   const isExpanded = expandedFolderIds.has(folderId);
   const isSelected = selectedFolderId === folderId;
-  const folderName = getFolderName(folder);
+  const folderName = getFolderName(folder, isRootProject);
   const contentCount = getFolderContentCount(folderId);
   const rowPaddingLeft = Math.max(0, level - ROOT_LEVEL) * 12;
 
@@ -80,7 +81,7 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
   const handleRenameFolder = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    onRenameFolder(folder);
+    onRenameFolder(folder, isRootProject);
   };
 
   const handleDeleteFolder = (event: ReactMouseEvent<HTMLButtonElement>) => {
@@ -91,7 +92,7 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
 
   return (
     <div data-folder-id={folderId}>
-      <div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} className={cn("group flex h-7 items-center rounded-[10px] pr-1 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5] text-[#343a45]")} style={{ paddingLeft: rowPaddingLeft }}>
+      <div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} className={cn("group flex h-7 items-center rounded-[10px] pr-1 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5] text-[#343a45]") } style={{ paddingLeft: rowPaddingLeft }}>
         <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} disabled={!hasChildren} className={cn("flex h-6 w-5 shrink-0 items-center justify-center rounded-md text-[#b0b5bd]", hasChildren ? "hover:bg-white hover:text-[#6f7681]" : "opacity-0")}>
           <IconChevronRight className={cn("h-3 w-3 transition-transform", isExpanded && "rotate-90")} />
         </button>
@@ -102,7 +103,7 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
         </button>
         <div className="ml-1 flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
           <button type="button" onClick={handleCreateChildFolder} aria-label={`${folderName} にフォルダを追加`} title="フォルダを追加" className="flex h-5 w-5 items-center justify-center rounded-md text-[#9aa1ad] hover:bg-[#f0f1f3] hover:text-[#59616e]"><IconPlus className="h-3 w-3" /></button>
-          <button type="button" onClick={handleRenameFolder} aria-label={`${folderName} の名前を変更`} title="名前を変更" className="flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[10px] font-bold text-[#9aa1ad] hover:bg-[#f0f1f3] hover:text-[#59616e]">Aa</button>
+          <button type="button" onClick={handleRenameFolder} aria-label={`${folderName} の名前を変更`} title={isRootProject ? "プロジェクト名を変更" : "フォルダ名を変更"} className="flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[10px] font-bold text-[#9aa1ad] hover:bg-[#f0f1f3] hover:text-[#59616e]">Aa</button>
           <button type="button" onClick={handleDeleteFolder} aria-label={`${folderName} を削除`} title="削除" className="flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[10px] font-bold text-[#b48a8a] hover:bg-[#f7eeee] hover:text-[#9d5555]">×</button>
         </div>
       </div>
@@ -166,13 +167,14 @@ const LibraryHierarchySidebar = () => {
     setExpandedFolderIds((current) => new Set(current).add(folderId));
   }, [createFolder]);
 
-  const handleRenameFolder = useCallback((folder: FolderTreeNode) => {
+  const handleRenameFolder = useCallback((folder: FolderTreeNode, isRootProject: boolean) => {
     const folderId = getFolderId(folder);
-    const folderName = getFolderName(folder);
-    const nextFolderName = window.prompt("フォルダ名を変更", folderName)?.trim();
+    const folderName = getFolderName(folder, isRootProject);
+    const promptTitle = isRootProject ? "プロジェクト名を変更" : "フォルダ名を変更";
+    const nextFolderName = window.prompt(promptTitle, folderName)?.trim();
     if (!folderId || !nextFolderName || nextFolderName === folderName) return;
 
-    void updateFolder(folderId, { folderName: nextFolderName });
+    void updateFolder(folderId, { folderName: nextFolderName, name: nextFolderName });
   }, [updateFolder]);
 
   const handleDeleteFolder = useCallback((folder: FolderTreeNode) => {
