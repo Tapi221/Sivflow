@@ -24,7 +24,7 @@ import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 
 type CalendarEventDisplayRange = { start: Date; end: Date };
 
-type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; monthTitleDate: Date; visibleDays: Date[]; yearRenderedRange: CalendarDateRange | null };
+type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; monthTitleDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange | null; yearRenderedRange: CalendarDateRange | null };
 
 type CreateGoogleProjectCalendarLinkInput = { project: AppCalendarItem; accountId: string; calendar: GoogleCalendarListItem; color: string; createdByApp: boolean };
 
@@ -108,10 +108,15 @@ const buildYearDisplayRange = (currentDate: Date, yearRenderedRange: CalendarDat
   };
 };
 
-const getScheduleEventDisplayRange = ({ primaryViewMode, currentDate, selectedDate, monthTitleDate, visibleDays, yearRenderedRange }: CalendarEventDisplayRangeOptions): CalendarEventDisplayRange => {
+const buildCalendarDateDisplayRange = (range: CalendarDateRange): CalendarEventDisplayRange => ({
+  start: startOfDay(range.start),
+  end: endOfDay(range.end),
+});
+
+const getScheduleEventDisplayRange = ({ primaryViewMode, currentDate, selectedDate, monthTitleDate, visibleDays, monthRenderedRange, yearRenderedRange }: CalendarEventDisplayRangeOptions): CalendarEventDisplayRange => {
   const miniCalendarRange = buildMiniCalendarDisplayRange(monthTitleDate);
   if (primaryViewMode === "year") return mergeDisplayRanges(miniCalendarRange, buildYearDisplayRange(currentDate, yearRenderedRange));
-  if (primaryViewMode === "month") return mergeDisplayRanges(miniCalendarRange, buildDaysDisplayRange(visibleDays, currentDate, MONTH_EVENT_BUFFER_DAYS));
+  if (primaryViewMode === "month") return mergeDisplayRanges(miniCalendarRange, monthRenderedRange ? buildCalendarDateDisplayRange(monthRenderedRange) : buildDaysDisplayRange(visibleDays, currentDate, MONTH_EVENT_BUFFER_DAYS));
   if (primaryViewMode === "list" || primaryViewMode === "pieChart") return mergeDisplayRanges(miniCalendarRange, buildDaysDisplayRange(visibleDays, selectedDate, LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS));
   return mergeDisplayRanges(miniCalendarRange, buildDaysDisplayRange(visibleDays, selectedDate, WEEKDAY_EVENT_BUFFER_DAYS));
 };
@@ -221,7 +226,7 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const visibleGoogleCalendarEvents = useMemo(() => filterEventsByProjectVisibility(linkedGoogleCalendarEvents, appProjects), [appProjects, linkedGoogleCalendarEvents]);
   const googleAccountsWithColorOverrides = useMemo(() => applyGoogleCalendarColorOverridesToAccounts(googleAccounts, googleCalendarColorOverrides), [googleAccounts, googleCalendarColorOverrides]);
   const selectedViewModes = useMemo(() => Array.isArray(selectedViewMode) ? selectedViewMode : [selectedViewMode], [selectedViewMode]);
-  const mainDisplayRange = useMemo(() => getScheduleEventDisplayRange({ primaryViewMode, currentDate, selectedDate, monthTitleDate, visibleDays, yearRenderedRange }), [currentDate, monthTitleDate, primaryViewMode, selectedDate, visibleDays, yearRenderedRange]);
+  const mainDisplayRange = useMemo(() => getScheduleEventDisplayRange({ primaryViewMode, currentDate, selectedDate, monthTitleDate, visibleDays, monthRenderedRange: pane.monthRenderedRange, yearRenderedRange }), [currentDate, monthTitleDate, pane.monthRenderedRange, primaryViewMode, selectedDate, visibleDays, yearRenderedRange]);
   const sidebarDisplayRange = useMemo(() => buildMiniCalendarDisplayRange(primaryViewMode === "month" || selectedViewModes.includes("list") ? monthTitleDate : titleDate), [monthTitleDate, primaryViewMode, selectedViewModes, titleDate]);
   const mainCalendarEvents = useMemo(() => filterEventsByDisplayRange(visibleGoogleCalendarEvents, mainDisplayRange), [mainDisplayRange, visibleGoogleCalendarEvents]);
   const sidebarCalendarEvents = useMemo(() => filterEventsByDisplayRange(visibleGoogleCalendarEvents, sidebarDisplayRange), [sidebarDisplayRange, visibleGoogleCalendarEvents]);
@@ -251,7 +256,7 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
         ) : isListCalendarView ? (
           <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-white"><CalendarListView days={visibleDays} virtualRail={virtualRail} events={deferredCalendarEvents} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onVisibleMonthChange={handleVisibleMonthChange} /></div>
         ) : isMonthCalendarView ? (
-          <div className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-r-0", IOS_CALENDAR_MONTH_SURFACE_CLASS)}><CalendarMonthView currentDate={currentDate} selectedDate={selectedDate} scrollTargetToken={monthScrollTargetToken} visibleEvents={deferredCalendarEvents} onSelectDate={handleMonthCellSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onRenderedRangeChange={handleMonthRenderedRangeChange} /></div>
+          <div className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-r-0", IOS_CALENDAR_MONTH_SURFACE_CLASS)}><CalendarMonthView currentDate={currentDate} selectedDate={selectedDate} scrollTargetToken={monthScrollTargetToken} visibleEvents={mainCalendarEvents} onSelectDate={handleMonthCellSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onRenderedRangeChange={handleMonthRenderedRangeChange} /></div>
         ) : isTimetableCalendarView ? (
           <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-white"><CalendarTimetableView weekDate={currentDate} /></div>
         ) : (
