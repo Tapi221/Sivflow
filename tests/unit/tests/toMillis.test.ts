@@ -3,20 +3,20 @@ import { normalizeDate } from "@/shared/codec/date";
 import { toDateOrNull, toIsoStringOrNull, toMillis, toMillisOrNull } from "@/utils/toMillis";
 
 describe("toMillis utilities", () => {
-  it("treats numeric epoch seconds as seconds", () => {
+  it("数値の epoch 秒を秒として扱う", () => {
     expect(toMillis(1_700_000_000)).toBe(1_700_000_000_000);
   });
 
-  it("treats numeric epoch milliseconds as milliseconds", () => {
+  it("数値の epoch ミリ秒をミリ秒として扱う", () => {
     expect(toMillis(1_700_000_000_000)).toBe(1_700_000_000_000);
   });
 
-  it("treats 10-13 digit numeric strings as epoch values", () => {
+  it("10〜13 桁の数値文字列を epoch 値として扱う", () => {
     expect(toMillis("1700000000")).toBe(1_700_000_000_000);
     expect(toMillis("1700000000000")).toBe(1_700_000_000_000);
   });
 
-  it("supports firestore-like timestamp objects with seconds and nanoseconds", () => {
+  it("seconds と nanoseconds を持つ Firestore 風 timestamp object に対応する", () => {
     expect(
       toMillis({
         seconds: 1_700_000_000,
@@ -25,7 +25,7 @@ describe("toMillis utilities", () => {
     ).toBe(1_700_000_000_500);
   });
 
-  it("supports timestamp objects with toMillis()", () => {
+  it("toMillis() を持つ timestamp object に対応する", () => {
     expect(
       toMillis({
         toMillis: () => 1_700_000_000_123,
@@ -33,7 +33,7 @@ describe("toMillis utilities", () => {
     ).toBe(1_700_000_000_123);
   });
 
-  it("returns nullish fallbacks safely for invalid values", () => {
+  it("無効な値では nullish fallback を安全に返す", () => {
     expect(toMillisOrNull("not-a-date")).toBeNull();
     expect(toDateOrNull("not-a-date")).toBeNull();
     expect(toIsoStringOrNull("not-a-date")).toBeNull();
@@ -41,13 +41,13 @@ describe("toMillis utilities", () => {
     expect(toMillis("not-a-date", 123)).toBe(123);
   });
 
-  it("normalizes Date objects without mutating semantics", () => {
+  it("Date object を意味を変えずに正規化する", () => {
     const source = new Date("2026-04-15T10:20:30.000Z");
     expect(toMillis(source)).toBe(source.getTime());
     expect(toIsoStringOrNull(source)).toBe("2026-04-15T10:20:30.000Z");
   });
 
-  it("keeps normalizeDate aligned with toDateOrNull", () => {
+  it("normalizeDate を toDateOrNull と一致させる", () => {
     const value = {
       seconds: 1_700_000_000,
       nanoseconds: 250_000_000,
