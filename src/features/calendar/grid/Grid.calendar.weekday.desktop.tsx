@@ -8,7 +8,7 @@ import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import { getWeekdayTimedEventPositionStyle, isCompactWeekdayTimedEntry } from "@/features/calendar/grid/weekdayTimeGridGeometry";
+import { getWeekdayTimedEventPositionStyle, isCompactWeekdayTimedEntry } from "./weekdayTimeGridGeometry";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
