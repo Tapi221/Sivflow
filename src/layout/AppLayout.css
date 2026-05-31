@@ -72,6 +72,10 @@
   --app-layout-padding-x: 0px;
 }
 
+.app-layout--without-sidebar {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .app-layout--sidebar-closed {
   grid-template-columns:
     var(--app-sidebar-closed-width)
@@ -121,6 +125,15 @@
 
   background: var(--app-active-tab-bg);
   background-clip: padding-box;
+}
+
+.app-layout--without-sidebar .workspace-shell,
+.app-layout--without-sidebar .app-layout__content {
+  --workspace-content-gutter: 0px;
+
+  grid-column: 1;
+
+  border-radius: 0;
 }
 
 .workspace-shell--with-tabs {
