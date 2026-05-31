@@ -1,6 +1,6 @@
 import { memo, startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import { addDays, addYears, eachMonthOfInterval, endOfDay, endOfYear, format, isSameDay, isSameMonth, startOfDay, startOfMonth, startOfWeek, startOfYear } from "date-fns";
+import { addDays, addYears, eachMonthOfInterval, endOfDay, endOfYear, format, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import { getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -18,7 +18,7 @@ type CalendarYearViewProps = {
 
 type CalendarYearDayEvents = {
   count: number;
-  color: string;
+  backgroundColor: string;
 };
 
 type CalendarYearDay = {
@@ -55,9 +55,9 @@ type YearRangeAnchor = {
 
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
 const INITIAL_YEAR_BUFFER = 5;
-const YEAR_EXTEND_COUNT = 2;
-const YEAR_MAX_RENDERED_YEARS = 11;
-const YEAR_SCROLL_EDGE_THRESHOLD_PX = 2400;
+const YEAR_EXTEND_COUNT = 4;
+const YEAR_MAX_RENDERED_YEARS = 15;
+const YEAR_SCROLL_EDGE_THRESHOLD_PX = 4800;
 const YEAR_SYNC_RANGE_NOTIFY_DELAY_MS = 180;
 const YEAR_SYNC_RANGE_SAMPLE_OFFSET_PX = 160;
 const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
@@ -100,6 +100,9 @@ const buildEventsByDay = (events: GoogleCalendarEvent[]): Map<string, CalendarYe
   const eventsByDay = new Map<string, CalendarYearDayEvents>();
 
   for (const event of events) {
+    const color = event.accentColor;
+    const backgroundColor = colorToRgba(color, EVENT_DAY_BACKGROUND_ALPHA);
+
     for (const dayKey of getEventDateKeys(event)) {
       const current = eventsByDay.get(dayKey);
 
@@ -108,7 +111,7 @@ const buildEventsByDay = (events: GoogleCalendarEvent[]): Map<string, CalendarYe
       } else {
         eventsByDay.set(dayKey, {
           count: 1,
-          color: event.accentColor,
+          backgroundColor,
         });
       }
     }
@@ -148,11 +151,6 @@ const chunkMonthWeeks = (monthKey: string, days: CalendarYearDay[]): CalendarYea
   return weeks;
 };
 
-const buildWeekDateRange = (week: CalendarYearWeek): CalendarDateRange => ({
-  start: startOfDay(week.days[0].date),
-  end: endOfDay(week.days[week.days.length - 1].date),
-});
-
 const buildYearDateRange = (years: CalendarYearBlock[]): CalendarDateRange | null => {
   const firstYear = years[0];
   const lastYear = years[years.length - 1];
@@ -172,6 +170,11 @@ const buildFallbackWeekDateRange = (date: Date): CalendarDateRange => {
     end: endOfDay(addDays(start, 6)),
   };
 };
+
+const buildYearSyncDateRange = (date: Date): CalendarDateRange => ({
+  start: startOfYear(date),
+  end: endOfDay(endOfYear(date)),
+});
 
 const getBestYearForScrollPosition = (years: CalendarYearBlock[], yearSectionRefsMap: Map<string, HTMLElement>, scrollTop: number): CalendarYearBlock | null => {
   let bestYear: CalendarYearBlock | null = null;
@@ -200,7 +203,7 @@ const getDayButtonStyle = (day: CalendarYearDay, selected: boolean): CSSProperti
   if (selected || !day.events) return undefined;
 
   return {
-    backgroundColor: colorToRgba(day.events.color, EVENT_DAY_BACKGROUND_ALPHA),
+    backgroundColor: day.events.backgroundColor,
     transition: "none",
   };
 };
@@ -216,9 +219,10 @@ const CalendarYearViewComponent = ({
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const today = useMemo(() => new Date(), []);
+  const todayKey = useMemo(() => getCalendarDateKey(today), [today]);
+  const selectedDateKey = useMemo(() => getCalendarDateKey(selectedDate), [selectedDate]);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const yearSectionRefsMap = useRef<Map<string, HTMLElement>>(new Map());
-  const weekRowRefsMap = useRef<Map<string, HTMLElement>>(new Map());
   const rangeAnchorRef = useRef<YearRangeAnchor | null>(null);
   const isExtendingBeforeRef = useRef(false);
   const isExtendingAfterRef = useRef(false);
@@ -226,6 +230,8 @@ const CalendarYearViewComponent = ({
   const syncRangeNotifyTimeoutRef = useRef<number | null>(null);
   const syncRangeRafRef = useRef<number | null>(null);
   const pendingSyncScrollerRef = useRef<HTMLDivElement | null>(null);
+  const scrollRafRef = useRef<number | null>(null);
+  const pendingScrollScrollerRef = useRef<HTMLDivElement | null>(null);
   const requestedYearKeyRef = useRef(format(startOfYear(yearDate), "yyyy"));
   const pendingScrollYearKeyRef = useRef<string | null>(format(startOfYear(yearDate), "yyyy"));
   const [anchorYear, setAnchorYear] = useState(() => startOfYear(yearDate));
@@ -277,29 +283,7 @@ const CalendarYearViewComponent = ({
   const getSyncRangeFromScroll = useCallback((scroller: HTMLDivElement): CalendarDateRange | null => {
     const sampleScrollTop = scroller.scrollTop + Math.min(YEAR_SYNC_RANGE_SAMPLE_OFFSET_PX, scroller.clientHeight / 2);
     const targetYear = getBestYearForScrollPosition(years, yearSectionRefsMap.current, sampleScrollTop);
-    if (!targetYear) return null;
-
-    const scrollerRect = scroller.getBoundingClientRect();
-    const sampleY = scrollerRect.top + Math.min(YEAR_SYNC_RANGE_SAMPLE_OFFSET_PX, scroller.clientHeight / 2);
-    let bestWeek: CalendarYearWeek | null = null;
-    let bestDistance = Number.POSITIVE_INFINITY;
-
-    for (const month of targetYear.months) {
-      for (const week of month.weeks) {
-        const row = weekRowRefsMap.current.get(week.key);
-        if (!row) continue;
-
-        const rect = row.getBoundingClientRect();
-        const distance = sampleY < rect.top ? rect.top - sampleY : sampleY > rect.bottom ? sampleY - rect.bottom : 0;
-
-        if (distance < bestDistance) {
-          bestDistance = distance;
-          bestWeek = week;
-        }
-      }
-    }
-
-    return bestWeek ? buildWeekDateRange(bestWeek) : null;
+    return targetYear ? buildYearSyncDateRange(targetYear.date) : null;
   }, [years]);
 
   const syncVisibleWeekRange = useCallback((scroller: HTMLDivElement) => {
@@ -356,11 +340,18 @@ const CalendarYearViewComponent = ({
 
   useEffect(() => {
     return () => {
-      if (syncRangeRafRef.current === null) return;
+      if (syncRangeRafRef.current !== null) {
+        window.cancelAnimationFrame(syncRangeRafRef.current);
+        syncRangeRafRef.current = null;
+      }
 
-      window.cancelAnimationFrame(syncRangeRafRef.current);
-      syncRangeRafRef.current = null;
+      if (scrollRafRef.current !== null) {
+        window.cancelAnimationFrame(scrollRafRef.current);
+        scrollRafRef.current = null;
+      }
+
       pendingSyncScrollerRef.current = null;
+      pendingScrollScrollerRef.current = null;
     };
   }, []);
 
@@ -369,14 +360,6 @@ const CalendarYearViewComponent = ({
       yearSectionRefsMap.current.set(yearKey, node);
     } else {
       yearSectionRefsMap.current.delete(yearKey);
-    }
-  }, []);
-
-  const setWeekRowRef = useCallback((weekKey: string, node: HTMLElement | null) => {
-    if (node) {
-      weekRowRefsMap.current.set(weekKey, node);
-    } else {
-      weekRowRefsMap.current.delete(weekKey);
     }
   }, []);
 
@@ -466,13 +449,13 @@ const CalendarYearViewComponent = ({
     const scroller = scrollContainerRef.current;
     if (!scroller) return;
 
-    const handleScroll = () => {
+    const flushScroll = (pendingScroller: HTMLDivElement) => {
       const previousScrollTop = lastScrollTopRef.current;
-      const currentScrollTop = scroller.scrollTop;
+      const currentScrollTop = pendingScroller.scrollTop;
       const isScrollingUp = currentScrollTop < previousScrollTop;
       const isScrollingDown = currentScrollTop > previousScrollTop;
       lastScrollTopRef.current = currentScrollTop;
-      scheduleSyncVisibleWeekRange(scroller);
+      scheduleSyncVisibleWeekRange(pendingScroller);
 
       if (
         isScrollingUp &&
@@ -480,7 +463,7 @@ const CalendarYearViewComponent = ({
         !isExtendingBeforeRef.current
       ) {
         isExtendingBeforeRef.current = true;
-        rangeAnchorRef.current = getCurrentRangeAnchor(scroller);
+        rangeAnchorRef.current = getCurrentRangeAnchor(pendingScroller);
 
         setYearOffsetRange((currentRange) => {
           const shouldTrimAfter = currentRange.endOffset - currentRange.startOffset + 1 + YEAR_EXTEND_COUNT > YEAR_MAX_RENDERED_YEARS;
@@ -492,7 +475,7 @@ const CalendarYearViewComponent = ({
         });
       }
 
-      const distToBottom = scroller.scrollHeight - scroller.clientHeight - currentScrollTop;
+      const distToBottom = pendingScroller.scrollHeight - pendingScroller.clientHeight - currentScrollTop;
 
       if (
         isScrollingDown &&
@@ -500,7 +483,7 @@ const CalendarYearViewComponent = ({
         !isExtendingAfterRef.current
       ) {
         isExtendingAfterRef.current = true;
-        rangeAnchorRef.current = getCurrentRangeAnchor(scroller);
+        rangeAnchorRef.current = getCurrentRangeAnchor(pendingScroller);
 
         setYearOffsetRange((currentRange) => ({
           startOffset: currentRange.endOffset - currentRange.startOffset + 1 + YEAR_EXTEND_COUNT > YEAR_MAX_RENDERED_YEARS ? currentRange.startOffset + YEAR_EXTEND_COUNT : currentRange.startOffset,
@@ -509,10 +492,33 @@ const CalendarYearViewComponent = ({
       }
     };
 
+    const handleScroll = () => {
+      pendingScrollScrollerRef.current = scroller;
+
+      if (scrollRafRef.current !== null) return;
+
+      scrollRafRef.current = window.requestAnimationFrame(() => {
+        scrollRafRef.current = null;
+        const pendingScroller = pendingScrollScrollerRef.current;
+        pendingScrollScrollerRef.current = null;
+
+        if (!pendingScroller) return;
+
+        flushScroll(pendingScroller);
+      });
+    };
+
     scroller.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       scroller.removeEventListener("scroll", handleScroll);
+
+      if (scrollRafRef.current !== null) {
+        window.cancelAnimationFrame(scrollRafRef.current);
+        scrollRafRef.current = null;
+      }
+
+      pendingScrollScrollerRef.current = null;
     };
   }, [getCurrentRangeAnchor, scheduleSyncVisibleWeekRange]);
 
@@ -555,10 +561,10 @@ const CalendarYearViewComponent = ({
 
                   <div className="mt-1 space-y-1 text-center text-[12px] leading-none">
                     {month.weeks.map((week) => (
-                      <div key={week.key} ref={(node) => setWeekRowRef(week.key, node)} data-calendar-week-key={week.key} className="grid grid-cols-7 gap-y-1">
+                      <div key={week.key} data-calendar-week-key={week.key} className="grid grid-cols-7 gap-y-1">
                         {week.days.map((day) => {
-                          const selected = day.isCurrentMonth && isSameDay(day.date, selectedDate);
-                          const isToday = isSameDay(day.date, today);
+                          const selected = day.isCurrentMonth && day.key === selectedDateKey;
+                          const isToday = day.key === todayKey;
                           const eventCount = day.events?.count ?? 0;
 
                           return (
