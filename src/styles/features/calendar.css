@@ -169,7 +169,9 @@
     z-index: 4;
     height: 1px;
     pointer-events: none;
-    background: #eeeeee;
+    background: var(--calendar-month-spacer-line-color);
+    transform: scaleY(0.5);
+    transform-origin: bottom;
   }
 
   .calendar-month-day-cell {
