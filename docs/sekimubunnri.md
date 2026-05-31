@@ -58,13 +58,15 @@ shared/design-tokens
 
 `constants/`、`src/constants/`、`packages/*/constants/` のような定数専用フォルダは作らない。
 
-定数は「定数であること」ではなく、「誰の責務か」で置き場所を決める。`constants` という名前に逃がすと、domain、UI、platform、storage、native の責務境界が消えるため禁止する。
+定数は「定数であること」ではなく、「誰の責務か」で置き場所を決める。`constants` という名前のフォルダに逃がすと、domain、UI、platform、storage、native の責務境界が消えるため禁止する。
 
-そのファイルでしか使わない値は、そのファイル内に定義する。別ファイルに逃がさない。単一ファイル専用の値のために shared、utils、config、constants などの置き場を作らない。
+そのファイルでしか使わない値は、そのファイル内に定義する。別ファイルに逃がさない。単一ファイル専用の値のために shared、utils、config、constants、`.constants.ts` などの置き場を作らない。
 
 ファイル内では、import、型定義、定数、helper 関数、component 本体、memo / displayName / export の順に置く。単一ファイル専用の定数は import と型定義の後、helper 関数より前に置く。
 
-複数ファイルで使う値だけ、責務を持つ module に昇格する。昇格先は「どの platform で使うか」ではなく「どの責務の値か」で決める。
+複数ファイルで使う値だけ、責務を持つ module に昇格する。この場合は `<責務名>.constants.ts` を作ってよい。置き場所は専用 `constants` フォルダではなく、利用責務の module と同じ階層にする。
+
+`.constants.ts` は、複数ファイルから import される値だけを置く。1 ファイルからしか import されない `.constants.ts` は作らない。昇格先は「どの platform で使うか」ではなく「どの責務の値か」で決める。
 
 配置ルール:
 
@@ -72,30 +74,30 @@ shared/design-tokens
 そのファイルでしか使わない値
   そのファイル内
 
-domain / usecase の値
-  packages/core/src/domain/<domain>/
-  packages/core/src/usecase/<usecase>/
+複数ファイルで使う domain / usecase の値
+  packages/core/src/domain/<domain>/<domain>.constants.ts
+  packages/core/src/usecase/<usecase>/<usecase>.constants.ts
 
-Web / Desktop UI の表示値
-  packages/web-renderer/src/components/<component>/
-  packages/web-renderer/src/features/<feature>/
+複数ファイルで使う Web / Desktop UI の表示値
+  packages/web-renderer/src/components/<component>/<component>.constants.ts
+  packages/web-renderer/src/features/<feature>/<feature>.constants.ts
 
-React Native UI の表示値
-  packages/mobile-renderer/src/components/<component>/
-  packages/mobile-renderer/src/features/<feature>/
-  packages/mobile-renderer/src/screens/<screen>/
+複数ファイルで使う React Native UI の表示値
+  packages/mobile-renderer/src/components/<component>/<component>.constants.ts
+  packages/mobile-renderer/src/features/<feature>/<feature>.constants.ts
+  packages/mobile-renderer/src/screens/<screen>/<screen>.constants.ts
 
-platform adapter の設定値
-  packages/platform/src/<capability>/
+複数ファイルで使う platform adapter の設定値
+  packages/platform/src/<capability>/<capability>.constants.ts
 
 Web 起動口だけの設定値
-  apps/web/src/
+  apps/web/src/<責務名>.constants.ts
 
 Tauri shell だけの設定値
-  apps/desktop/src-tauri/src/
+  apps/desktop/src-tauri/src/<責務名>.constants.ts
 
 Mobile app 起動口だけの設定値
-  apps/mobile/src/
+  apps/mobile/src/<責務名>.constants.ts
 
 Swift / Kotlin / TypeScript で共有したい構造
   shared/schemas/
@@ -111,19 +113,23 @@ Swift / Kotlin / TypeScript で共有したい構造
 
 ```text
 NG: constants/shared/flashcard/geometry.ts
-OK: packages/core/src/domain/card/geometry.ts
+OK: packages/core/src/domain/card/cardGeometry.constants.ts
 
 NG: constants/web/app/sidebar.ts
-OK: packages/web-renderer/src/features/sidebar/sidebarLayout.ts
+OK: packages/web-renderer/src/features/sidebar/sidebarLayout.constants.ts
 
 NG: constants/web/storage/storageKeys.ts
-OK: packages/platform/src/storage/storageKeys.ts
+OK: packages/platform/src/storage/storageKeys.constants.ts
 
 NG: constants/shared/app/featureFlags.ts
-OK: packages/platform/src/feature-flags/featureFlags.ts
+OK: packages/platform/src/feature-flags/featureFlags.constants.ts
 
 NG: src/components/card/frame/CardShell.constants.ts
+    CardShell.tsx からしか使わない値を分離している
 OK: src/components/card/frame/CardShell.tsx 内に定義する
+
+OK: src/components/card/frame/cardFrame.constants.ts
+    CardFrame.tsx、CardShell.tsx、MobileScalableCard.tsx など複数ファイルから使う値だけを置く
 ```
 
 barrel export で `@constants` のような横断入口を作ることも禁止する。共通化したい場合は、責務を持つ module から公開する。
@@ -212,5 +218,6 @@ React Native は別 renderer にする。
 Swift は apps/mobile/ios 配下の native extension として扱う。
 constants フォルダは作らず、責務を持つ module に値を置く。
 そのファイルでしか使わない定数は、そのファイル内に定義する。
+複数ファイルで使う定数だけ、責務 module 内の .constants.ts に置いてよい。
 全 platform 共通にしたいものは TypeScript code ではなく、schema / token / asset に寄せる。
 ```
