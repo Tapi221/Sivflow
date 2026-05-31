@@ -26,7 +26,7 @@ const makeCard = (overrides: Partial<Card> = {}) => {
 };
 
 describe("DesktopCardSurface flip state", () => {
-  it("keeps flipped state when card becomes inactive (preview mode)", () => {
+  it("card が inactive になっても flipped state を維持する", () => {
     flashcardPropsSpy.mockClear();
 
     const props = {
@@ -81,7 +81,7 @@ describe("DesktopCardSurface flip state", () => {
     expect(inactiveCall?.inkEditingEnabled).toBe(false);
   });
 
-  it("passes fluid mode through without ink controls", () => {
+  it("fluid mode を ink controls なしで渡す", () => {
     flashcardPropsSpy.mockClear();
 
     render(
