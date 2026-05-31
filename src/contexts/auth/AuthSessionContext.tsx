@@ -5,6 +5,7 @@ import { bootstrapUser } from "@/hooks/bootstrap/useUserBootstrap";
 import { auth } from "@/services/firebase";
 import { initializeDB, resetLocalDBForLogout } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
+import { createDevPreviewUser, isDevPreviewSessionEnabled } from "@/utils/devPreviewSession";
 
 interface AuthSessionContextType {
   currentUser: FirebaseUser | null;
@@ -31,6 +32,22 @@ export const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   const lastKnownUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (isDevPreviewSessionEnabled()) {
+      const devUser = createDevPreviewUser();
+      lastKnownUserIdRef.current = devUser.uid;
+
+      void bootstrapUser(devUser.uid)
+        .catch((error) => {
+          console.error("[Auth] Dev preview setup error:", error);
+        })
+        .finally(() => {
+          setCurrentUser(devUser);
+          setLoading(false);
+        });
+
+      return;
+    }
+
     let isInitialCall = true;
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
