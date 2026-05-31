@@ -61,11 +61,14 @@ export type UseScheduleScreenReturn = {
   handleMonthCellSelectDate: (date: Date) => void;
   handleMonthRenderedRangeChange: (range: CalendarDateRange) => void;
   handleYearRenderedRangeChange: (range: CalendarDateRange) => void;
+  handleYearSyncRangeChange: (range: CalendarDateRange) => void;
 
   setMonthTitleDate: (date: Date) => void;
 };
 
 const getGoogleCalendarEventDedupeKey = (event: GoogleCalendarEvent): string => event.id;
+
+const isSameCalendarDateRange = (left: CalendarDateRange | null, right: CalendarDateRange): boolean => left?.start.getTime() === right.start.getTime() && left.end.getTime() === right.end.getTime();
 
 const dedupeGoogleCalendarEvents = (events: GoogleCalendarEvent[]): GoogleCalendarEvent[] => {
   const seenKeys = new Set<string>();
@@ -84,25 +87,18 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
   const navigation = useCalendarNavigation();
   const [monthRenderedRange, setMonthRenderedRange] = useState<CalendarDateRange | null>(null);
   const [yearRenderedRange, setYearRenderedRange] = useState<CalendarDateRange | null>(null);
+  const [yearSyncRange, setYearSyncRange] = useState<CalendarDateRange | null>(null);
 
   const handleMonthRenderedRangeChange = useCallback((range: CalendarDateRange) => {
-    setMonthRenderedRange((prev) => {
-      if (prev?.start.getTime() === range.start.getTime() && prev.end.getTime() === range.end.getTime()) {
-        return prev;
-      }
-
-      return range;
-    });
+    setMonthRenderedRange((prev) => isSameCalendarDateRange(prev, range) ? prev : range);
   }, []);
 
   const handleYearRenderedRangeChange = useCallback((range: CalendarDateRange) => {
-    setYearRenderedRange((prev) => {
-      if (prev?.start.getTime() === range.start.getTime() && prev.end.getTime() === range.end.getTime()) {
-        return prev;
-      }
+    setYearRenderedRange((prev) => isSameCalendarDateRange(prev, range) ? prev : range);
+  }, []);
 
-      return range;
-    });
+  const handleYearSyncRangeChange = useCallback((range: CalendarDateRange) => {
+    setYearSyncRange((prev) => isSameCalendarDateRange(prev, range) ? prev : range);
   }, []);
 
   const visibleRange = useCalendarVisibleRange({
@@ -140,6 +136,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     monthTitleDate: navigation.monthTitleDate,
     monthRenderedRange,
     yearRenderedRange,
+    yearSyncRange,
     googleCalendar: {
       selectedCalendarIds: google.selectedCalendarIds,
       forceSyncRange: google.forceSyncRange,
@@ -210,6 +207,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     handleMonthCellSelectDate: navigation.handleMonthCellSelectDate,
     handleMonthRenderedRangeChange,
     handleYearRenderedRangeChange,
+    handleYearSyncRangeChange,
     setMonthTitleDate: navigation.setMonthTitleDate,
   };
 };
