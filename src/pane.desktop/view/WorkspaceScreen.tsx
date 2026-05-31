@@ -3,7 +3,6 @@ import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
-import { CalendarWorkspaceToolbar } from "@/pane.desktop/header/ScheduleToolbar";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceExplorerTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
@@ -68,7 +67,6 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId }: ExplorerWork
 
   return (
     <div className="relative flex h-full min-h-0 w-full overflow-hidden bg-transparent">
-      <CalendarWorkspaceToolbar />
       <SidebarLayeredDirectory />
       <CarvePanel className="min-w-0">
         <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} />
