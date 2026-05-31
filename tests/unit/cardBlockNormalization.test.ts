@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 
 describe("normalizeCard block typing", () => {
-  it("prefers canonical face blocks over stale legacy block arrays", () => {
+  it("古い legacy block arrays より canonical face blocks を優先する", () => {
     const normalized = normalizeCard({
       id: "canonical-over-legacy",
       front: {
@@ -33,7 +33,7 @@ describe("normalizeCard block typing", () => {
     expect(normalized.front.blocks[0]?.markdown).toBe("DARKNESS SUITS ME.");
   });
 
-  it("does not resurrect legacy content when canonical face blocks are explicitly empty", () => {
+  it("canonical face blocks が明示的に空なら legacy content を復活させない", () => {
     const normalized = normalizeCard({
       id: "respect-empty-face",
       front: {
@@ -49,7 +49,7 @@ describe("normalizeCard block typing", () => {
     expect(normalized.front.blocks).toEqual([]);
   });
 
-  it("falls back unknown block types to text instead of code", () => {
+  it("未知の block type は code ではなく text にフォールバックする", () => {
     const normalized = normalizeCard({
       id: "unknown-type-fallback",
       front: {
