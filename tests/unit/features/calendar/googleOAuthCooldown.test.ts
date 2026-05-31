@@ -25,13 +25,13 @@ const errorWithReason = (reason: string) => {
 };
 
 describe("Google Calendar OAuth retry cooldown helpers", () => {
-  it("cooldowns deterministic OAuth failures", () => {
+  it("決定的な OAuth 失敗を cooldown 対象にする", () => {
     expect(shouldCooldownGoogleOAuthError(errorWithReason("invalid_grant"))).toBe(true);
     expect(shouldCooldownGoogleOAuthError(errorWithReason("server_oauth_configuration"))).toBe(true);
     expect(shouldCooldownGoogleOAuthError(errorWithReason("token_endpoint_failed"))).toBe(false);
   });
 
-  it("keeps cooldown errors classified with the original OAuth reason", () => {
+  it("cooldown error を元の OAuth reason 付きで分類する", () => {
     const error = createGoogleOAuthCooldownError({
       reason: "stored_refresh_token_missing",
       message: "cooldown",
