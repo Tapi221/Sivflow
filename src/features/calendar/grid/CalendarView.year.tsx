@@ -409,16 +409,11 @@ const CalendarYearViewComponent = ({
 
     if (Math.abs(nextStepHeight - yearStepHeightRef.current) < 1) return;
 
-    const previousStepHeight = yearStepHeightRef.current;
-    const scrollRatio = scroller ? scroller.scrollTop / previousStepHeight : 0;
-
     yearStepHeightRef.current = nextStepHeight;
     setYearStepHeight(nextStepHeight);
 
     if (!scroller || pendingScrollYearOffsetRef.current !== null) return;
 
-    scroller.scrollTop = Math.max(0, scrollRatio * nextStepHeight);
-    lastScrollTopRef.current = scroller.scrollTop;
     updateVirtualWindowForScroll(scroller, true);
   }, [updateVirtualWindowForScroll, years]);
 
