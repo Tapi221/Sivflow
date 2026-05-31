@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("CodeBlock visual regression", () => {
-  test("viewer/editor frame should remain visually stable", async ({
+test.describe("コードブロックのビジュアルリグレッション", () => {
+  test("表示枠と編集枠の見た目が安定している", async ({
     page,
   }) => {
     test.setTimeout(120000);
