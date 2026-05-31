@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createEmptyInkDocument, type InkStroke } from "@core/domain/card/ink/inkDocument";
-import { applyHandwritingStrokeDelta, createHandwritingStrokeDeltaMessage } from "@platform/handwriting/handwritingStrokeMessages";
+import { createEmptyInkDocument, type InkStroke } from "../../../packages/core/src/domain/card/ink/inkDocument";
+import { applyHandwritingStrokeDelta, createHandwritingStrokeDeltaMessage } from "../../../packages/platform/src/handwriting/handwritingStrokeMessages";
 
 const createStroke = (id = "stroke-1"): InkStroke => ({
   id,
