@@ -82,9 +82,6 @@ const weekContainsDayKey = (week: CalendarMonthGridWeek, dayKey: string | null) 
 const isWeekAffectedByDayKeyChange = (week: CalendarMonthGridWeek, previousDayKey: string | null, nextDayKey: string | null) => previousDayKey !== nextDayKey && (weekContainsDayKey(week, previousDayKey) || weekContainsDayKey(week, nextDayKey));
 
 const createMonthWeekRowStyle = (monthRowHeight: number): CSSProperties => ({
-  contain: "layout style paint",
-  contentVisibility: "auto",
-  containIntrinsicSize: `${monthRowHeight}px`,
   minHeight: monthRowHeight,
 });
 
