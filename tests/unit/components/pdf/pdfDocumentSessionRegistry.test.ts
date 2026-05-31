@@ -104,7 +104,7 @@ describe("pdfDocumentSessionRegistry", () => {
     vi.useRealTimers();
   });
 
-  it("reuses the same loading task across transient release and reacquire", async () => {
+  it("一時的な release と再取得の間で同じ loading task を再利用する", async () => {
     const deferred = createDeferred<PdfJsDocument>();
     const loadingTask = createLoadingTask(deferred.promise);
 
@@ -140,7 +140,7 @@ describe("pdfDocumentSessionRegistry", () => {
     );
   });
 
-  it("removes rejected sessions from the registry and recreates them on retry", async () => {
+  it("失敗した session を registry から削除し、再試行時に作り直す", async () => {
     const firstDeferred = createDeferred<PdfJsDocument>();
     const secondDeferred = createDeferred<PdfJsDocument>();
 
@@ -177,7 +177,7 @@ describe("pdfDocumentSessionRegistry", () => {
     expect(destroyPdfResourceMock).toHaveBeenCalledTimes(2);
   });
 
-  it("disposes documents that resolve after the session was already released", async () => {
+  it("session release 後に解決した document を破棄する", async () => {
     const deferred = createDeferred<PdfJsDocument>();
     getPdfDocumentMock.mockReturnValue(createLoadingTask(deferred.promise));
 
