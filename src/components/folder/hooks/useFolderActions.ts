@@ -1,6 +1,6 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import { useCallback, useRef } from "react";
-import { type FolderTreeNode, getFolderId, normalizeFolderId } from "@/components/folder/explorer/model/utils";
+import { DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_PROJECT_NAME, type FolderTreeNode, getFolderId, normalizeFolderId } from "@/components/folder/explorer/model/utils";
 import type { CardSet, SelectedExplorerItem } from "@/types";
 
 type RenameTargetKind = "folder" | "cardSet" | "card" | "document";
@@ -97,7 +97,6 @@ type UseFolderActionsParams = {
   getUniqueFolderName?: (parentId: string | null, baseName: string) => string;
 };
 
-const DEFAULT_NEW_FOLDER_NAME = "新規フォルダ";
 const DEFAULT_NEW_CARDSET_NAME = "新規カードセット";
 
 const parseTarget = (target: DeleteLikeTarget, fallbackId: string | null) => {
@@ -419,9 +418,10 @@ export const useFolderActions = ({
   const handleCreateFolderAction = useCallback(
     (parentFolderId: string | null) => {
       const normalizedParentId = normalizeFolderId(parentFolderId);
+      const defaultName = normalizedParentId ? DEFAULT_NEW_FOLDER_NAME : DEFAULT_NEW_PROJECT_NAME;
       const nextName = getUniqueFolderName
-        ? getUniqueFolderName(normalizedParentId, DEFAULT_NEW_FOLDER_NAME)
-        : DEFAULT_NEW_FOLDER_NAME;
+        ? getUniqueFolderName(normalizedParentId, defaultName)
+        : defaultName;
       const folderId = createEntityId("folder");
       const orderIndex = nextOrderIndexForFolder(
         treeFolders,
