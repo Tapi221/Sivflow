@@ -35,6 +35,9 @@ const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-non
 const WEEKDAY_TIME_LABEL_CLASS_NAME = "text-[11px] font-medium tabular-nums text-[#b8bcc5]";
 const WEEKDAY_BOTTOM_TIME_SPACER_CLASS_NAME = "relative h-8";
 const WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME = "relative h-8 overflow-hidden";
+const WEEKDAY_TIMED_EVENT_WRAPPER_CLASS_NAME = "absolute z-10 min-w-0";
+const WEEKDAY_TIMED_EVENT_UNDERLAY_CLASS_NAME = "pointer-events-none absolute inset-0 rounded-md bg-white";
+const WEEKDAY_TIMED_EVENT_CONTENT_CLASS_NAME = "relative z-10 h-full min-h-0 w-full";
 
 const createEventKey = (event: GoogleCalendarEvent): string => `${event.accountId ?? ""}:${event.calendarId}:${event.id}`;
 
@@ -218,8 +221,11 @@ const CalendarWeekDayGridComponent = ({
                 ))}
                 <div className={WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME} data-testid="weekday-preview-bottom-spacer">
                   {nextDayPreviewEvents.map((entry) => (
-                    <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getWeekdayTimedEventPositionStyle(entry, NEXT_DAY_PREVIEW_HOURS)}>
-                      <CalendarEventChipWeekday event={entry.event} compact={isCompactWeekdayTimedEntry(entry)} />
+                    <div key={createEventKey(entry.event)} className={WEEKDAY_TIMED_EVENT_WRAPPER_CLASS_NAME} style={getWeekdayTimedEventPositionStyle(entry, NEXT_DAY_PREVIEW_HOURS)}>
+                      <div aria-hidden="true" className={WEEKDAY_TIMED_EVENT_UNDERLAY_CLASS_NAME} />
+                      <div className={WEEKDAY_TIMED_EVENT_CONTENT_CLASS_NAME}>
+                        <CalendarEventChipWeekday event={entry.event} compact={isCompactWeekdayTimedEntry(entry)} />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -231,8 +237,11 @@ const CalendarWeekDayGridComponent = ({
                 ) : null}
 
                 {events.map((entry) => (
-                  <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getWeekdayTimedEventPositionStyle(entry)}>
-                    <CalendarEventChipWeekday event={entry.event} compact={isCompactWeekdayTimedEntry(entry)} />
+                  <div key={createEventKey(entry.event)} className={WEEKDAY_TIMED_EVENT_WRAPPER_CLASS_NAME} style={getWeekdayTimedEventPositionStyle(entry)}>
+                    <div aria-hidden="true" className={WEEKDAY_TIMED_EVENT_UNDERLAY_CLASS_NAME} />
+                    <div className={WEEKDAY_TIMED_EVENT_CONTENT_CLASS_NAME}>
+                      <CalendarEventChipWeekday event={entry.event} compact={isCompactWeekdayTimedEntry(entry)} />
+                    </div>
                   </div>
                 ))}
               </div>
