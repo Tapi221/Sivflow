@@ -20,7 +20,7 @@ export type WeekdayTimedEventFrame = {
 
 const EVENT_COLUMN_GAP_PX = 4;
 const EVENT_COLUMN_INSET_PX = 3;
-const MIN_EVENT_TITLE_LINE_HEIGHT_PX = 18;
+export const WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX = 18;
 const PERCENT_MAX = 100;
 const SHORT_EVENT_THRESHOLD_MINUTES = 30;
 const TIME_GRID_DECIMAL_PLACES = 12;
@@ -60,6 +60,6 @@ export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutE
     top: `calc(${frame.topHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
     width: `calc(${frame.widthPercent}% - ${EVENT_COLUMN_GAP_PX + EVENT_COLUMN_INSET_PX}px)`,
     height: `calc(${frame.heightHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
-    minHeight: `${MIN_EVENT_TITLE_LINE_HEIGHT_PX}px`,
+    minHeight: `${WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX}px`,
   };
 };
