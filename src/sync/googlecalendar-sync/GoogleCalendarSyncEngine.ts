@@ -10,7 +10,7 @@ const MAX_BACKOFF_MS = 10 * 60 * 1000;
 const INITIAL_BACKOFF_MS = 60_000;
 
 const DEFAULT_FULL_SYNC_PAST_DAYS = 365;
-const DEFAULT_FULL_SYNC_FUTURE_DAYS = 365;
+const DEFAULT_FULL_SYNC_FUTURE_DAYS = 3650;
 
 const readSyncTokens = (): GCalSyncTokenMap => {
   try {
