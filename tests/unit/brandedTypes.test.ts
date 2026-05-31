@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { createBlobUrl, createStorageUrl, isBase64DataUrl, isBlobUrl, isStorageUrl } from "@/types/core/branded";
 
-describe("Branded Types", () => {
+describe("ブランド型", () => {
   describe("isBlobUrl", () => {
-    it("should return true for valid Blob URL", () => {
+    it("有効な Blob URL なら true を返す", () => {
       expect(isBlobUrl("blob:http://localhost:5173/abc-123")).toBe(true);
       expect(isBlobUrl("blob:https://example.com/xyz-789")).toBe(true);
     });
 
-    it("should return false for non-Blob URL", () => {
+    it("Blob URL 以外なら false を返す", () => {
       expect(isBlobUrl("https://example.com/image.jpg")).toBe(false);
       expect(isBlobUrl("data:image/png;base64,abc")).toBe(false);
       expect(isBlobUrl("file:///C:/image.jpg")).toBe(false);
@@ -16,7 +16,7 @@ describe("Branded Types", () => {
   });
 
   describe("isStorageUrl", () => {
-    it("should return true for valid Firebase Storage URL", () => {
+    it("有効な Firebase Storage URL なら true を返す", () => {
       expect(
         isStorageUrl(
           "https://firebasestorage.googleapis.com/v0/b/bucket/o/image.jpg",
@@ -27,7 +27,7 @@ describe("Branded Types", () => {
       ).toBe(true);
     });
 
-    it("should return false for non-Storage URL", () => {
+    it("Storage URL 以外なら false を返す", () => {
       expect(isStorageUrl("http://example.com/image.jpg")).toBe(false);
       expect(isStorageUrl("blob:http://localhost:5173/abc")).toBe(false);
       expect(isStorageUrl("data:image/png;base64,abc")).toBe(false);
@@ -35,25 +35,25 @@ describe("Branded Types", () => {
   });
 
   describe("isBase64DataUrl", () => {
-    it("should return true for valid Base64 Data URL", () => {
+    it("有効な Base64 Data URL なら true を返す", () => {
       expect(isBase64DataUrl("data:image/png;base64,iVBORw0KG")).toBe(true);
       expect(isBase64DataUrl("data:image/jpeg;base64,/9j/4AAQ")).toBe(true);
     });
 
-    it("should return false for non-Base64 URL", () => {
+    it("Base64 URL 以外なら false を返す", () => {
       expect(isBase64DataUrl("https://example.com/image.jpg")).toBe(false);
       expect(isBase64DataUrl("blob:http://localhost:5173/abc")).toBe(false);
     });
   });
 
   describe("createBlobUrl", () => {
-    it("should create BlobUrl for valid Blob URL", () => {
+    it("有効な Blob URL から BlobUrl を作成する", () => {
       const url = "blob:http://localhost:5173/abc-123";
       const blobUrl = createBlobUrl(url);
       expect(blobUrl).toBe(url);
     });
 
-    it("should throw for invalid Blob URL", () => {
+    it("無効な Blob URL では例外を投げる", () => {
       expect(() => createBlobUrl("https://example.com/image.jpg")).toThrow(
         /Invalid BlobUrl/,
       );
@@ -64,14 +64,14 @@ describe("Branded Types", () => {
   });
 
   describe("createStorageUrl", () => {
-    it("should create StorageUrl for valid Storage URL", () => {
+    it("有効な Storage URL から StorageUrl を作成する", () => {
       const url =
         "https://firebasestorage.googleapis.com/v0/b/bucket/o/image.jpg";
       const storageUrl = createStorageUrl(url);
       expect(storageUrl).toBe(url);
     });
 
-    it("should throw for invalid Storage URL", () => {
+    it("無効な Storage URL では例外を投げる", () => {
       expect(() => createStorageUrl("http://example.com/image.jpg")).toThrow(
         /Invalid StorageUrl/,
       );
