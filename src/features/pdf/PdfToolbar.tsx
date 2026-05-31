@@ -1,7 +1,7 @@
 import { OverlayToolbar } from "@/chip/overlay-toolbar/OverlayToolbar";
 import { OverlayToolbarButton } from "@/chip/overlay-toolbar/OverlayToolbarButton";
 import { OverlayToolbarDivider } from "@/chip/overlay-toolbar/OverlayToolbarDivider";
-import { PdfDoublePageGlyph, PdfFitWidthGlyph, PdfNextGlyph, PdfPrevGlyph, PdfSinglePageGlyph, SelectionCaptureGlyph } from "@/chip/overlay-toolbar/OverlayToolbarGlyphs";
+import { PdfDoublePageGlyph, PdfFitWidthGlyph, PdfNextGlyph, PdfPrevGlyph, PdfSinglePageGlyph } from "@/chip/overlay-toolbar/OverlayToolbarGlyphs";
 import { OverlayToolbarIndexNavigator } from "@/chip/overlay-toolbar/OverlayToolbarIndexNavigator";
 import { OverlayToolbarZoomControl } from "@/chip/overlay-toolbar/OverlayToolbarZoomControl";
 import { pdfOverlayToolbarButtonActiveClassName, pdfOverlayToolbarButtonClassName, pdfOverlayToolbarDividerClassName, pdfOverlayToolbarNavigatorClassName, pdfOverlayToolbarNavigatorInputClassName, pdfOverlayToolbarShellClassName, pdfOverlayToolbarSliderRangeClassName, pdfOverlayToolbarSliderThumbClassName, pdfOverlayToolbarSliderTrackClassName, pdfOverlayToolbarTotalClassName } from "./pdfToolbar.classname";
@@ -25,10 +25,8 @@ type PdfOverlayToolbarProps = {
   onFitWidth: () => void;
   onZoomPercentChange: (nextPercent: number) => void;
   onPageLayoutModeChange: (nextMode: PdfPageLayoutMode) => void;
-  onStartSelectionCapture?: () => void;
   canGoToPrevPage: boolean;
   canGoToNextPage: boolean;
-  selectionCaptureActive?: boolean;
   disabled?: boolean;
 };
 
@@ -47,10 +45,8 @@ export const PdfOverlayToolbar = ({
   onFitWidth,
   onZoomPercentChange,
   onPageLayoutModeChange,
-  onStartSelectionCapture,
   canGoToPrevPage,
   canGoToNextPage,
-  selectionCaptureActive = false,
   disabled = false,
 }: PdfOverlayToolbarProps) => {
   const isFitWidthActive = fitMode === "width";
@@ -64,25 +60,6 @@ export const PdfOverlayToolbar = ({
 
   return (
     <OverlayToolbar className={pdfOverlayToolbarShellClassName}>
-      {onStartSelectionCapture ? (
-        <>
-          <OverlayToolbarButton
-            onClick={onStartSelectionCapture}
-            label="範囲コピー"
-            disabled={disabled}
-            active={selectionCaptureActive}
-            className={cn(
-              pdfOverlayToolbarButtonClassName,
-              selectionCaptureActive && pdfOverlayToolbarButtonActiveClassName,
-            )}
-          >
-            <SelectionCaptureGlyph />
-          </OverlayToolbarButton>
-
-          <OverlayToolbarDivider className={pdfOverlayToolbarDividerClassName} />
-        </>
-      ) : null}
-
       <OverlayToolbarButton
         onClick={onPrevPage}
         label="前のページ"
