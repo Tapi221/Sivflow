@@ -26,7 +26,7 @@
   --scrollbar-thumb: #d9d9d9;
   --scrollbar-thumb-hover: #cacaca;
   --scrollbar-thumb-active: #bdbdbd;
-  --scrollbar-size: 2px;
+  --scrollbar-size: 1px;
   --scrollbar-radius: 9999px;
   --scrollbar-thumb-inset: 0px;
   --ds-motion-transition-interactive: 0ms ease;
