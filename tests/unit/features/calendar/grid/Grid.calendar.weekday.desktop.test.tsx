@@ -135,6 +135,17 @@ describe("CalendarWeekDayGrid", () => {
     expect(within(previewSpacer).queryByText("Hidden preview")).toBeNull();
   });
 
+  it("30分未満のeventでもcompactを渡さず通常チップで描画する", () => {
+    renderWeekDayGrid([
+      createEvent({ id: "short-event", title: "Short event", startsAt: new Date(2026, 0, 1, 20, 48), endsAt: new Date(2026, 0, 1, 21, 13) }),
+    ]);
+
+    const shortChip = screen.getByTestId("weekday-event-chip");
+
+    expect(shortChip).toHaveTextContent("Short event");
+    expect(shortChip.dataset.compact).toBe("false");
+  });
+
   it("時刻ラベルの色、背景、数字用スタイルを維持する", () => {
     renderWeekDayGrid();
 
