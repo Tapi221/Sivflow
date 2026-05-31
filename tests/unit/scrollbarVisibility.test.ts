@@ -34,6 +34,10 @@ const expectScrollbarRevealSelectorsToUseHoverOnly = (css: string) => {
 };
 
 describe("scrollbar visibility styles", () => {
+  it("keeps the shared scrollbar width thin", () => {
+    expect(readStyleFile("src/styles/index.css")).toContain("--scrollbar-size: 1px;");
+  });
+
   it("reveals global scrollbars only on hover", () => {
     for (const path of SCROLLBAR_STYLE_PATHS) {
       expectScrollbarRevealSelectorsToUseHoverOnly(readStyleFile(path));
