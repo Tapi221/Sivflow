@@ -11,7 +11,7 @@ describe("inkStorage", () => {
     window.localStorage.clear();
   });
 
-  it("saves and loads ink documents by card and side key", () => {
+  it("card と side の key で ink document を保存・読み込みする", () => {
     const doc = {
       ...createEmptyInkDocument(),
       strokes: [
@@ -37,7 +37,7 @@ describe("inkStorage", () => {
     expect(loaded.strokes[0].id).toBe("s1");
   });
 
-  it("falls back to provided document when key is absent", () => {
+  it("key が存在しない場合は指定された document にフォールバックする", () => {
     const fallback = {
       ...createEmptyInkDocument(),
       strokes: [
@@ -57,7 +57,7 @@ describe("inkStorage", () => {
     expect(loaded.strokes[0].id).toBe("fallback");
   });
 
-  it("clears stored key", () => {
+  it("保存済み key をクリアする", () => {
     saveInkToStorage(cardId, side, createEmptyInkDocument());
     clearInkFromStorage(cardId, side);
 
