@@ -3,7 +3,7 @@ import { LEGACY_BASE_LAYOUT_ROWS, MAX_LAYOUT_ROWS } from "@/domain/card/extraRow
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 
 describe("normalizeCard", () => {
-  it("should filter out empty math blocks from questionBlocks and answerBlocks", () => {
+  it("questionBlocks と answerBlocks から空の数式ブロックを除外する", () => {
     const rawCard = {
       id: "test-card",
       questionBlocks: [
@@ -29,7 +29,7 @@ describe("normalizeCard", () => {
     expect(normalized.answerBlocks).toHaveLength(0);
   });
 
-  it("should provide default values for math blocks", () => {
+  it("数式ブロックにデフォルト値を補う", () => {
     const rawCard = {
       id: "test-card",
       questionBlocks: [{ id: "q1", type: "math", math: { latex: "x^2" } }],
@@ -39,7 +39,7 @@ describe("normalizeCard", () => {
     expect(normalized.questionBlocks[0].math.latex).toBe("x^2");
   });
 
-  it("should handle legacy fields by converting them to blocks", () => {
+  it("レガシーフィールドをブロックへ変換する", () => {
     const rawCard = {
       id: "legacy-card",
       question_text: "Legacy Question",
@@ -56,7 +56,7 @@ describe("normalizeCard", () => {
     expect(normalized.answerBlocks[0].content).toBe("Legacy Answer");
   });
 
-  it("should normalize layout rows", () => {
+  it("レイアウト行数を正規化する", () => {
     const rawCard = {
       id: "rows-card",
       layout_rows: "20",
@@ -69,7 +69,7 @@ describe("normalizeCard", () => {
     expect(normalized.layoutRows).toBe(20);
   });
 
-  it("migrates legacy per-side extra rows to layoutRows using larger side", () => {
+  it("レガシーの面別追加行数を大きい側に合わせて layoutRows へ移行する", () => {
     const rawCard = {
       id: "legacy-rows-card",
       question_extra_rows: "3",
@@ -80,7 +80,7 @@ describe("normalizeCard", () => {
     expect(normalized.layoutRows).toBe(LEGACY_BASE_LAYOUT_ROWS + 10);
   });
 
-  it("does not clamp layoutRows to compatibility max bound", () => {
+  it("layoutRows を互換上限で clamp しない", () => {
     const rawCard = {
       id: "clamp-rows-card",
       layoutRows: MAX_LAYOUT_ROWS + 100,
@@ -90,7 +90,7 @@ describe("normalizeCard", () => {
     expect(normalized.layoutRows).toBe(MAX_LAYOUT_ROWS + 100);
   });
 
-  it("migrates code block rowOffset to offsetRows with non-negative clamp", () => {
+  it("コードブロックの rowOffset を非負 clamp 付きで offsetRows へ移行する", () => {
     const rawCard = {
       id: "offset-migrate-card",
       questionBlocks: [
@@ -116,7 +116,7 @@ describe("normalizeCard", () => {
     expect(normalized.questionBlocks[1].rowOffset).toBeUndefined();
   });
 
-  it("migrates math block rowOffset to offsetRows with non-negative clamp", () => {
+  it("数式ブロックの rowOffset を非負 clamp 付きで offsetRows へ移行する", () => {
     const rawCard = {
       id: "math-offset-migrate-card",
       answerBlocks: [
