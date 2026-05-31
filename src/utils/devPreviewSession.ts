@@ -12,7 +12,7 @@ type DevPreviewUserJson = {
   uid: string;
 };
 
-const DEV_PREVIEW_PARAM = "test_bypass";
+const DEV_PREVIEW_DISABLE_PARAM = "real_auth";
 const DEV_PREVIEW_USER_ID = "dev-ipad-user";
 const DEV_PREVIEW_EMAIL = "dev-ipad-user@example.local";
 const DEV_PREVIEW_DISPLAY_NAME = "Dev iPad User";
@@ -46,8 +46,9 @@ export const isDevPreviewSessionEnabled = (): boolean => {
 
   const url = getCurrentUrl();
   if (!url) return false;
+  if (url.searchParams.get(DEV_PREVIEW_DISABLE_PARAM) === "true") return false;
 
-  return url.searchParams.get(DEV_PREVIEW_PARAM) === "true" && isLocalDevHost(url.hostname);
+  return isLocalDevHost(url.hostname);
 };
 
 export const createDevPreviewUser = (): FirebaseUser => ({
