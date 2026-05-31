@@ -21,7 +21,6 @@ const Layout = () => {
     location.pathname,
   );
   const presentationTarget = usePresentationTarget();
-  const isDesktopPresentation = presentationTarget === "desktop";
   const appTopInsetPx = getAppTopInsetPx({ presentationTarget });
   const registerSource = useSearchStore((state) => state.registerSource);
   const unregisterSource = useSearchStore(
@@ -100,7 +99,7 @@ const Layout = () => {
   useEffect(() => {
     if (typeof document === "undefined") return;
 
-    const shouldLockPageScroll = isDesktopPresentation && isScheduleRoute;
+    const shouldLockPageScroll = isScheduleRoute;
 
     document.documentElement.classList.toggle(
       "no-page-scroll",
@@ -111,7 +110,7 @@ const Layout = () => {
       if (!shouldLockPageScroll) return;
       document.documentElement.classList.remove("no-page-scroll");
     };
-  }, [isDesktopPresentation, isScheduleRoute]);
+  }, [isScheduleRoute]);
 
   return (
     <div
