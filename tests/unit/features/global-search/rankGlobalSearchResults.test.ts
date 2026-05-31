@@ -20,7 +20,7 @@ const createSearchItem = (
 };
 
 describe("rankSearchResults", () => {
-  it("returns recent items first when query is empty", () => {
+  it("query が空の場合は最近の項目を先に返す", () => {
     const recent = createSearchItem({
       id: "recent",
       value: "recent",
@@ -43,7 +43,7 @@ describe("rankSearchResults", () => {
     expect(results.map((item) => item.id)).toEqual(["recent", "older"]);
   });
 
-  it("prefers exact and prefix title matches over loose keyword matches", () => {
+  it("ゆるいキーワード一致より完全一致と前方一致のタイトルを優先する", () => {
     const exact = createSearchItem({
       id: "exact",
       value: "exact",
