@@ -13,8 +13,31 @@ const toBlob = (canvas: HTMLCanvasElement): Promise<Blob> => {
   });
 };
 
+const inlineComputedStyles = (source: Element, clone: Element): void => {
+  if (source instanceof HTMLElement && clone instanceof HTMLElement) {
+    const computedStyle = window.getComputedStyle(source);
+    for (const propertyName of computedStyle) {
+      clone.style.setProperty(
+        propertyName,
+        computedStyle.getPropertyValue(propertyName),
+        computedStyle.getPropertyPriority(propertyName),
+      );
+    }
+  }
+
+  const sourceChildren = Array.from(source.children);
+  const cloneChildren = Array.from(clone.children);
+  sourceChildren.forEach((sourceChild, index) => {
+    const cloneChild = cloneChildren[index];
+    if (cloneChild) {
+      inlineComputedStyles(sourceChild, cloneChild);
+    }
+  });
+};
+
 const cloneElementForCapture = (element: HTMLElement): HTMLElement => {
   const clone = element.cloneNode(true) as HTMLElement;
+  inlineComputedStyles(element, clone);
   clone.querySelectorAll("[data-selection-capture-ignore='true']").forEach((node) => {
     node.remove();
   });
