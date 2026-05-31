@@ -11,6 +11,7 @@ type DirectoryTreeNodeProps = {
   level: number;
   selectedFolderId: string | null;
   expandedFolderIds: Set<string>;
+  showChildFolders: boolean;
   getChildFolders: (folderId: string) => FolderTreeNode[];
   getFolderContentCount: (folderId: string | null) => number;
   onToggleFolder: (folderId: string) => void;
@@ -18,6 +19,10 @@ type DirectoryTreeNodeProps = {
   onCreateChildFolder: (folderId: string) => void;
   onRenameFolder: (folder: FolderTreeNode, isRootProject: boolean) => void;
   onDeleteFolder: (folder: FolderTreeNode) => void;
+};
+
+type LibraryHierarchySidebarProps = {
+  showChildFolders?: boolean;
 };
 
 type IconProps = {
@@ -41,12 +46,12 @@ const getFolderName = (folder: FolderTreeNode, isRootProject = false): string =>
 
 const getRootFolderIds = (rootFolders: FolderTreeNode[]): string[] => rootFolders.map(getFolderId).filter(Boolean);
 
-const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds, getChildFolders, getFolderContentCount, onToggleFolder, onSelectFolder, onCreateChildFolder, onRenameFolder, onDeleteFolder }: DirectoryTreeNodeProps) => {
+const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds, showChildFolders, getChildFolders, getFolderContentCount, onToggleFolder, onSelectFolder, onCreateChildFolder, onRenameFolder, onDeleteFolder }: DirectoryTreeNodeProps) => {
   const folderId = getFolderId(folder);
   if (!folderId) return null;
 
   const isRootProject = level === ROOT_LEVEL;
-  const childFolders = getChildFolders(folderId);
+  const childFolders = showChildFolders ? getChildFolders(folderId) : EMPTY_COLLECTION;
   const hasChildren = childFolders.length > 0;
   const isExpanded = expandedFolderIds.has(folderId);
   const isSelected = selectedFolderId === folderId;
@@ -110,7 +115,7 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
       {hasChildren && isExpanded ? (
         <div role="group" className="mt-0.5 flex flex-col gap-0.5">
           {childFolders.map((childFolder) => (
-            <DirectoryTreeNode key={getFolderId(childFolder)} folder={childFolder} level={level + 1} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} getChildFolders={getChildFolders} getFolderContentCount={getFolderContentCount} onToggleFolder={onToggleFolder} onSelectFolder={onSelectFolder} onCreateChildFolder={onCreateChildFolder} onRenameFolder={onRenameFolder} onDeleteFolder={onDeleteFolder} />
+            <DirectoryTreeNode key={getFolderId(childFolder)} folder={childFolder} level={level + 1} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} showChildFolders={showChildFolders} getChildFolders={getChildFolders} getFolderContentCount={getFolderContentCount} onToggleFolder={onToggleFolder} onSelectFolder={onSelectFolder} onCreateChildFolder={onCreateChildFolder} onRenameFolder={onRenameFolder} onDeleteFolder={onDeleteFolder} />
           ))}
         </div>
       ) : null}
@@ -118,7 +123,7 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
   );
 };
 
-const LibraryHierarchySidebar = () => {
+const LibraryHierarchySidebar = ({ showChildFolders = true }: LibraryHierarchySidebarProps) => {
   const { folders, loading, error } = useFoldersRead();
   const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
@@ -164,8 +169,8 @@ const LibraryHierarchySidebar = () => {
 
   const handleCreateChildFolder = useCallback((folderId: string) => {
     void createFolder(DEFAULT_NEW_FOLDER_NAME, folderId);
-    setExpandedFolderIds((current) => new Set(current).add(folderId));
-  }, [createFolder]);
+    if (showChildFolders) setExpandedFolderIds((current) => new Set(current).add(folderId));
+  }, [createFolder, showChildFolders]);
 
   const handleRenameFolder = useCallback((folder: FolderTreeNode, isRootProject: boolean) => {
     const folderId = getFolderId(folder);
@@ -198,7 +203,7 @@ const LibraryHierarchySidebar = () => {
       <div className="h-full min-h-0 overflow-y-auto px-2 pb-2 pt-1">
         <div role="tree" aria-label="ライブラリ" className="flex flex-col gap-0.5">
           {rootFolders.length > 0 ? rootFolders.map((folder) => (
-            <DirectoryTreeNode key={getFolderId(folder)} folder={folder} level={ROOT_LEVEL} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} getChildFolders={getChildFolders} getFolderContentCount={getFolderContentCount} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onCreateChildFolder={handleCreateChildFolder} onRenameFolder={handleRenameFolder} onDeleteFolder={handleDeleteFolder} />
+            <DirectoryTreeNode key={getFolderId(folder)} folder={folder} level={ROOT_LEVEL} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} showChildFolders={showChildFolders} getChildFolders={getChildFolders} getFolderContentCount={getFolderContentCount} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onCreateChildFolder={handleCreateChildFolder} onRenameFolder={handleRenameFolder} onDeleteFolder={handleDeleteFolder} />
           )) : <p className="px-2 py-2 text-[12px] font-medium text-[#9aa1ad]">プロジェクトがありません</p>}
         </div>
       </div>
