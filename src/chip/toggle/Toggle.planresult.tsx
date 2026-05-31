@@ -68,7 +68,7 @@ const TogglePlanResult = ({ value, onChange, className }: TogglePlanResultProps)
             aria-pressed={isActive}
             onClick={() => onChange(togglePlanResultValue(value, option.value))}
             className={cn(
-              "relative z-10 flex h-6 min-w-7 items-center justify-center rounded-[8px] px-1.5",
+              "relative z-10 flex h-6 min-h-0 min-w-7 items-center justify-center rounded-[8px] px-1.5",
               "appearance-none select-none text-[11px] font-semibold leading-none tracking-[-0.01em]",
               "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
               "focus:outline-none focus:ring-0 focus-visible:outline-none",
