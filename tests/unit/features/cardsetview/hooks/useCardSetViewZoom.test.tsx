@@ -35,7 +35,7 @@ describe("useCardSetViewZoom", () => {
       : null;
   };
 
-  it("shares persisted zoom across display mode, interaction mode, and layout mode", () => {
+  it("display mode・interaction mode・layout mode をまたいで保存済み zoom を共有する", () => {
     const viewportRef = createViewportRef(1400);
     const unifiedKey = buildCardSetViewZoomPreferenceScopeKey({
       deviceScope: "desktop",
@@ -131,7 +131,7 @@ describe("useCardSetViewZoom", () => {
     expect(readCurrentZoomStore()?.byScope[unifiedKey]).toBe(75);
   });
 
-  it("keeps zoom semantics identical between view and edit", () => {
+  it("view と edit で zoom semantics を同一に保つ", () => {
     const viewportRef = createViewportRef(1400);
 
     const { result, rerender } = renderHook(
@@ -179,7 +179,7 @@ describe("useCardSetViewZoom", () => {
     expect(result.current.canUseSplit).toBe(viewSnapshot.canUseSplit);
   });
 
-  it("migrates a legacy scoped key into the unified key", () => {
+  it("legacy scoped key を unified key に移行する", () => {
     const viewportRef = createViewportRef(1400);
     const unifiedKey = buildCardSetViewZoomPreferenceScopeKey({
       deviceScope: "desktop",
@@ -214,7 +214,7 @@ describe("useCardSetViewZoom", () => {
     expect(readCurrentZoomStore()?.byScope[unifiedKey]).toBe(63);
   });
 
-  it("evaluates split availability independently from the requested layout mode", () => {
+  it("split availability を requested layout mode から独立して評価する", () => {
     const viewportRef = createViewportRef(820);
 
     const { result } = renderHook(() =>
@@ -234,7 +234,7 @@ describe("useCardSetViewZoom", () => {
     expect(result.current.effectiveCardLayoutMode).toBe("flip");
   });
 
-  it("recomputes the viewport-derived default until the user changes it", () => {
+  it("ユーザー変更前は viewport 由来の default を再計算する", () => {
     const viewportRef = createViewportRef(1400);
 
     const { result } = renderHook(() =>
