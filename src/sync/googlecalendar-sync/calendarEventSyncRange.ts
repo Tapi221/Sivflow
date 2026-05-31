@@ -14,6 +14,7 @@ export type BuildCalendarEventSyncRangeOptions = {
   monthTitleDate: Date;
   monthRenderedRange?: CalendarDateRange | null;
   yearRenderedRange?: CalendarDateRange | null;
+  yearSyncRange?: CalendarDateRange | null;
 };
 
 const LIST_AND_PIE_CHART_SYNC_BUFFER_DAYS = 45;
@@ -35,11 +36,11 @@ const mergeCalendarEventSyncRanges = (left: CalendarEventSyncRange, right: Calen
   rangeEnd: new Date(Math.max(left.rangeEnd.getTime(), right.rangeEnd.getTime())),
 });
 
-const buildYearCalendarEventSyncRange = (visibleDays: Date[], monthTitleDate: Date, yearRenderedRange?: CalendarDateRange | null): CalendarEventSyncRange => {
-  if (yearRenderedRange) {
+const buildYearCalendarEventSyncRange = (visibleDays: Date[], monthTitleDate: Date, yearSyncRange?: CalendarDateRange | null): CalendarEventSyncRange => {
+  if (yearSyncRange) {
     return {
-      rangeStart: startOfDay(yearRenderedRange.start),
-      rangeEnd: endOfDay(yearRenderedRange.end),
+      rangeStart: startOfDay(yearSyncRange.start),
+      rangeEnd: endOfDay(yearSyncRange.end),
     };
   }
 
@@ -98,11 +99,11 @@ export const buildCalendarEventSyncRange = ({
   visibleDays,
   monthTitleDate,
   monthRenderedRange,
-  yearRenderedRange,
+  yearSyncRange,
 }: BuildCalendarEventSyncRangeOptions): CalendarEventSyncRange => {
   const miniCalendarRange = buildMiniCalendarMonthRange(monthTitleDate);
   const viewRange = selectedViewMode === "year"
-    ? buildYearCalendarEventSyncRange(visibleDays, monthTitleDate, yearRenderedRange)
+    ? buildYearCalendarEventSyncRange(visibleDays, monthTitleDate, yearSyncRange)
     : selectedViewMode === "month"
       ? buildMonthCalendarEventSyncRange(monthTitleDate, monthRenderedRange)
       : buildDefaultCalendarEventSyncRange(selectedViewMode, visibleDays, monthTitleDate);
