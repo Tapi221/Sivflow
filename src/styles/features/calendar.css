@@ -167,11 +167,9 @@
     right: 0;
     bottom: 0;
     z-index: 4;
-    height: 1px;
+    height: var(--calendar-month-spacer-line-width);
     pointer-events: none;
     background: var(--calendar-month-spacer-line-color);
-    transform: scaleY(0.5);
-    transform-origin: bottom;
   }
 
   .calendar-month-day-cell {
