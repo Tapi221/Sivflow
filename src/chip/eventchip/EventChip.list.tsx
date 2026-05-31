@@ -18,7 +18,7 @@ const LIST_EVENT_DOT_CLASS_NAME = "relative mt-2 h-2 w-2 rounded-full border-2 b
 const LIST_EVENT_CHIP_CLASS_NAME = "w-full overflow-hidden rounded-md py-0.5 pl-1.5 pr-2 text-left";
 const LIST_ALL_DAY_EVENT_CHIP_CLASS_NAME = "flex items-center py-0 pl-1.5 pr-2";
 const LIST_EVENT_TIME_CLASS_NAME = "overflow-hidden whitespace-nowrap text-[11px] font-semibold tabular-nums opacity-80";
-const LIST_EVENT_TITLE_CLASS_NAME = "mt-0.5 line-clamp-2 overflow-hidden whitespace-normal break-words text-[11px] font-semibold leading-snug tracking-[-0.01em]";
+const LIST_EVENT_TITLE_CLASS_NAME = "mt-[0.5px] line-clamp-2 overflow-hidden whitespace-normal break-words text-[11px] font-semibold leading-snug tracking-[-0.01em]";
 const LIST_ALL_DAY_EVENT_TITLE_CLASS_NAME = "mt-0 line-clamp-1 whitespace-nowrap leading-none";
 const MINUTE_IN_MS = 60_000;
 
