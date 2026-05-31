@@ -5,7 +5,7 @@ import { calculateResistanceScore } from "@/utils/reviewMetrics";
 const now = new Date("2026-03-26T13:33:00.000Z");
 
 describe("reviewAlgorithm", () => {
-  it("changes the first review interval by subjective score", () => {
+  it("初回レビュー間隔を主観スコアに応じて変化させる", () => {
     const card = {
       memoryStability: 0,
       nextReviewDate: new Date("2026-03-26T00:00:00.000Z"),
@@ -25,7 +25,7 @@ describe("reviewAlgorithm", () => {
     expect(intervals).toEqual([2, 3, 8, 15]);
   });
 
-  it("uses the computed interval when creating a persisted review patch", () => {
+  it("永続化用レビュー patch 作成時に計算済み間隔を使用する", () => {
     const card = {
       memoryStability: 0,
       nextReviewDate: new Date("2026-03-26T00:00:00.000Z"),
@@ -48,7 +48,7 @@ describe("reviewAlgorithm", () => {
     );
   });
 
-  it("still changes intervals by score after the first review", () => {
+  it("初回以降もスコアに応じて間隔を変化させる", () => {
     const card = {
       memoryStability: 0.35,
       nextReviewDate: new Date("2026-03-26T00:00:00.000Z"),
