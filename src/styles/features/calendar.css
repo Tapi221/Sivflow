@@ -86,6 +86,8 @@
 
   .calendar-month-view {
     --calendar-month-row-height: 112px;
+    --calendar-month-spacer-line-color: #eef0f3;
+    --calendar-month-spacer-line-width: 0.5px;
     overflow-anchor: none;
     background: #f2f2f7;
   }
@@ -141,9 +143,9 @@
     background-image: repeating-linear-gradient(
       to bottom,
       transparent 0,
-      transparent calc(var(--calendar-month-row-height) - 1px),
-      #eeeeee calc(var(--calendar-month-row-height) - 1px),
-      #eeeeee var(--calendar-month-row-height)
+      transparent calc(var(--calendar-month-row-height) - var(--calendar-month-spacer-line-width)),
+      var(--calendar-month-spacer-line-color) calc(var(--calendar-month-row-height) - var(--calendar-month-spacer-line-width)),
+      var(--calendar-month-spacer-line-color) var(--calendar-month-row-height)
     );
     background-repeat: repeat;
     background-size: 100% var(--calendar-month-row-height);
