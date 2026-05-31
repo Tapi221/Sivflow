@@ -31,6 +31,22 @@ const safeStringifyError = (error: unknown): string => {
 
 const getFallbackKey = (userId?: string): string => userId ?? "anonymous";
 
+const isPersistentCachedInstance = (targetUserId: string): boolean => Boolean(instance && cachedInstance === instance && currentUserId === targetUserId);
+
+const disposeFallbackInstance = (userId: string): void => {
+  const fallback = fallbackInstances.get(userId);
+  if (!fallback) return;
+
+  try {
+    fallback.close();
+  } catch {
+    // ignore fallback close failure
+  }
+
+  fallbackInstances.delete(userId);
+  if (cachedInstance === fallback) cachedInstance = null;
+};
+
 const bumpGenerationForUser = (userId: string): void => {
   generationBumps.set(userId, (generationBumps.get(userId) ?? 0) + 1);
 };
@@ -58,12 +74,13 @@ const createFallbackInstance = (userId?: string, reason?: unknown): InMemoryLoca
 
 const getFallbackInstance = async (userId?: string, reason?: unknown): Promise<InMemoryLocalDB> => createFallbackInstance(userId, reason);
 
-export const getLocalDb = (userId?: string): LocalDBSyncStore => {
-  if (cachedInstance) return cachedInstance as unknown as LocalDBSyncStore;
-  return createFallbackInstance(userId, "local-db-not-initialized") as unknown as LocalDBSyncStore;
-};
+export const getLocalDb = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
 
-export const getLocalDbSync = (userId?: string): LocalDBSyncStore => getLocalDb(userId);
+export const getLocalDbSync = (userId?: string): LocalDBSyncStore => {
+  const targetUserId = userId ?? currentUserId ?? "anonymous";
+  if (cachedInstance && currentUserId === targetUserId) return cachedInstance as unknown as LocalDBSyncStore;
+  return createFallbackInstance(targetUserId, "local-db-not-initialized") as unknown as LocalDBSyncStore;
+};
 
 export const getInstanceUserId = (): string | null => currentUserId;
 
@@ -72,8 +89,12 @@ export const getInstance = async (userId?: string): Promise<LocalDBSyncStore> =>
 
   if (resettingPromise) await resettingPromise;
 
-  if (cachedInstance && currentUserId === targetUserId) {
+  if (isPersistentCachedInstance(targetUserId)) {
     return cachedInstance as unknown as LocalDBSyncStore;
+  }
+
+  if (cachedInstance && currentUserId === targetUserId && cachedInstance !== instance && !persistentOpenDisabled) {
+    disposeFallbackInstance(targetUserId);
   }
 
   if (persistentOpenDisabled) {
@@ -122,9 +143,18 @@ export const clearInstance = (): void => {
     }
   }
 
+  for (const fallback of fallbackInstances.values()) {
+    try {
+      fallback.close();
+    } catch {
+      // ignore fallback close failure
+    }
+  }
+
   instance = null;
   cachedInstance = null;
   currentUserId = null;
+  fallbackInstances.clear();
 };
 
 export const resetForLogout = async (userId?: string): Promise<void> => {
