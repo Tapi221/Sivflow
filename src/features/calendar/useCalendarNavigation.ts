@@ -3,8 +3,55 @@ import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, st
 import { createCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
 import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
 
+export type UseScheduleScreenReturn = {
+  contentViewportRef: React.RefObject<HTMLDivElement | null>;
+  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+  headerScrollRef: React.RefObject<HTMLDivElement | null>;
+  currentDate: Date;
+  selectedDate: Date;
+  monthTitleDate: Date;
+  setMonthTitleDate: (date: Date) => void;
+  monthScrollTargetToken: number;
+  calendarScrollToken: number;
+  selectedViewMode: CalendarViewModeSelection;
+  primaryViewMode: CalendarViewMode;
+  calendarBuffer: ReturnType<typeof createCalendarScrollBuffer>;
+  viewportWidth: number;
+  setViewportWidth: (width: number) => void;
+  handleSelectViewMode: (next: CalendarViewMode) => void;
+  handleToday: () => void;
+  handlePrevious: () => void;
+  handleNext: () => void;
+  handleSidebarPreviousMonth: () => void;
+  handleSidebarNextMonth: () => void;
+  handleSidebarSelectDate: (date: Date) => void;
+  handleVisibleDateChange: (date: Date) => void;
+  handleVisibleMonthChange: (date: Date) => void;
+  handleMonthCellSelectDate: (date: Date) => void;
+  resetCalendarPosition: (viewMode: CalendarViewMode) => void;
+};
+
+type StoredScheduleNavigationState = {
+  currentDate?: unknown;
+  selectedDate?: unknown;
+  monthTitleDate?: unknown;
+  selectedViewMode?: unknown;
+};
+
+type ScheduleNavigationState = {
+  currentDate: Date;
+  selectedDate: Date;
+  monthTitleDate: Date;
+  selectedViewMode: CalendarViewModeSelection;
+};
+
+const SCHEDULE_NAVIGATION_STORAGE_KEY = "flashcard-master:schedule:navigation";
+const CALENDAR_VIEW_MODES = ["year", "month", "week", "threeDays", "days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
+const CALENDAR_VIEW_MODE_SET = new Set<CalendarViewMode>(CALENDAR_VIEW_MODES);
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
+
+const isCalendarViewMode = (value: unknown): value is CalendarViewMode => typeof value === "string" && CALENDAR_VIEW_MODE_SET.has(value as CalendarViewMode);
 
 const isViewModeSelectionArray = (selection: CalendarViewModeSelection): selection is readonly CalendarViewMode[] => Array.isArray(selection);
 
@@ -69,19 +116,83 @@ const resolveNextViewModeSelection = (currentSelection: CalendarViewModeSelectio
   return next;
 };
 
+const readStoredDate = (value: unknown): Date | null => {
+  if (typeof value !== "string") return null;
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const readStoredSelectedViewMode = (value: unknown): CalendarViewModeSelection | null => {
+  if (isCalendarViewMode(value)) return value;
+  if (!Array.isArray(value)) return null;
+
+  const selection = Array.from(new Set(value.filter(isCalendarViewMode).filter(isMultiSelectViewMode))).slice(-2);
+  return selection.length > 1 ? selection : selection[0] ?? null;
+};
+
+const readStoredScheduleNavigationState = (): Partial<ScheduleNavigationState> | null => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.localStorage.getItem(SCHEDULE_NAVIGATION_STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as StoredScheduleNavigationState | null;
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return null;
+
+    return {
+      ...(readStoredDate(parsed.currentDate) ? { currentDate: readStoredDate(parsed.currentDate) as Date } : {}),
+      ...(readStoredDate(parsed.selectedDate) ? { selectedDate: readStoredDate(parsed.selectedDate) as Date } : {}),
+      ...(readStoredDate(parsed.monthTitleDate) ? { monthTitleDate: readStoredDate(parsed.monthTitleDate) as Date } : {}),
+      ...(readStoredSelectedViewMode(parsed.selectedViewMode) ? { selectedViewMode: readStoredSelectedViewMode(parsed.selectedViewMode) as CalendarViewModeSelection } : {}),
+    };
+  } catch {
+    return null;
+  }
+};
+
+const createInitialScheduleNavigationState = (): ScheduleNavigationState => {
+  const now = new Date();
+  const stored = readStoredScheduleNavigationState();
+  const selectedDate = stored?.selectedDate ?? now;
+  const selectedViewMode = stored?.selectedViewMode ?? "days";
+  const primaryViewMode = getPrimaryViewMode(selectedViewMode);
+
+  return {
+    currentDate: stored?.currentDate ?? normalizeCurrentDateForSelectedDate(selectedDate, primaryViewMode),
+    selectedDate,
+    monthTitleDate: stored?.monthTitleDate ?? startOfMonth(selectedDate),
+    selectedViewMode,
+  };
+};
+
+const persistScheduleNavigationState = ({ currentDate, selectedDate, monthTitleDate, selectedViewMode }: ScheduleNavigationState) => {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(SCHEDULE_NAVIGATION_STORAGE_KEY, JSON.stringify({ currentDate: currentDate.toISOString(), selectedDate: selectedDate.toISOString(), monthTitleDate: monthTitleDate.toISOString(), selectedViewMode }));
+  } catch {
+    // localStorage が使えない環境では React state の状態だけ維持する。
+  }
+};
+
 export const useCalendarNavigation = () => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
-  const [currentDate, setCurrentDate] = useState(() => new Date());
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const [monthTitleDate, setMonthTitleDate] = useState(() => startOfMonth(new Date()));
+  const initialNavigationStateRef = useRef<ScheduleNavigationState | null>(null);
+  if (!initialNavigationStateRef.current) initialNavigationStateRef.current = createInitialScheduleNavigationState();
+  const initialNavigationState = initialNavigationStateRef.current;
+  const [currentDate, setCurrentDate] = useState(() => initialNavigationState.currentDate);
+  const [selectedDate, setSelectedDate] = useState(() => initialNavigationState.selectedDate);
+  const [monthTitleDate, setMonthTitleDate] = useState(() => initialNavigationState.monthTitleDate);
   const [monthScrollTargetToken, setMonthScrollTargetToken] = useState(0);
   const [calendarScrollToken, setCalendarScrollToken] = useState(0);
-  const [selectedViewMode, setSelectedViewMode] = useState<CalendarViewModeSelection>("days");
+  const [selectedViewMode, setSelectedViewMode] = useState<CalendarViewModeSelection>(() => initialNavigationState.selectedViewMode);
   const primaryViewMode = getPrimaryViewMode(selectedViewMode);
   const selectedDateStepViewMode = getSelectedDateStepViewMode(selectedViewMode, primaryViewMode);
-  const [calendarBuffer, setCalendarBuffer] = useState(() => createCalendarScrollBuffer("calendar", "days"));
+  const [calendarBuffer, setCalendarBuffer] = useState(() => createCalendarScrollBuffer("calendar", primaryViewMode));
   const [viewportWidth, setViewportWidth] = useState(0);
 
   const getProjectedViewportWidth = useCallback((includeTrailingPanel: boolean) => {
@@ -112,6 +223,10 @@ export const useCalendarNavigation = () => {
     setViewportWidth(el.getBoundingClientRect().width);
     return () => ro.disconnect();
   }, []);
+
+  useEffect(() => {
+    persistScheduleNavigationState({ currentDate, selectedDate, monthTitleDate, selectedViewMode });
+  }, [currentDate, monthTitleDate, selectedDate, selectedViewMode]);
 
   const handleSelectViewMode = useCallback((next: CalendarViewMode) => {
     if (next !== "month") {
