@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { HandwritingSession } from "@platform/handwriting/handwritingSession.types";
-import { createInMemoryHandwritingSessionClientPair } from "@platform/handwriting/inMemoryHandwritingSessionClient";
-import { createHandwritingStrokeDeltaMessage } from "@platform/handwriting/handwritingStrokeMessages";
-import type { InkStroke } from "@core/domain/card/ink/inkDocument";
+import type { HandwritingSession } from "../../../packages/platform/src/handwriting/handwritingSession.types";
+import { createInMemoryHandwritingSessionClientPair } from "../../../packages/platform/src/handwriting/inMemoryHandwritingSessionClient";
+import { createHandwritingStrokeDeltaMessage } from "../../../packages/platform/src/handwriting/handwritingStrokeMessages";
+import type { InkStroke } from "../../../packages/core/src/domain/card/ink/inkDocument";
 
 const createSession = (): HandwritingSession => ({
   id: "session-1",
