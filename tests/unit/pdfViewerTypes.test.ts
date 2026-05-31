@@ -8,7 +8,7 @@ const flushMicrotasks = async () => {
 
 describe("pdfViewerTypes", () => {
   describe("isPdfAbortError", () => {
-    it("detects PDF.js cancellation errors", () => {
+    it("PDF.js のキャンセルエラーを検出する", () => {
       expect(
         isPdfAbortError({
           name: "RenderingCancelledException",
@@ -27,7 +27,7 @@ describe("pdfViewerTypes", () => {
   });
 
   describe("getPdfErrorDetails", () => {
-    it("extracts serializable error details", () => {
+    it("シリアライズ可能なエラー詳細を抽出する", () => {
       const details = getPdfErrorDetails({
         name: "CustomError",
         message: "broken",
@@ -45,7 +45,7 @@ describe("pdfViewerTypes", () => {
   });
 
   describe("disposePdfDocumentResource", () => {
-    it("runs cleanup before destroy", async () => {
+    it("destroy の前に cleanup を実行する", async () => {
       const events: string[] = [];
       const cleanup = vi.fn(async () => {
         events.push("cleanup");
