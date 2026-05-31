@@ -61,6 +61,7 @@ const LIST_VIRTUAL_BASE_DAY_HEIGHT_PX = LIST_EMPTY_DAY_HEIGHT_PX;
 const LIST_VIRTUAL_BASE_DAY_BLOCK_HEIGHT_PX = LIST_VIRTUAL_BASE_DAY_HEIGHT_PX + LIST_DAY_GAP_PX;
 const LIST_MATERIALIZE_OVERSCAN_PX = 8_000;
 const LIST_MAX_RANGE_UPDATE_GUARD_PX = 8_000;
+const USER_SCROLL_AUTO_SCROLL_BLOCK_MS = 350;
 const DATE_KEY_PART_COUNT = 3;
 const LIST_DAY_RAIL_CLASS_NAME = "pointer-events-none absolute -bottom-2 left-[67px] top-0 w-px -translate-x-1/2 bg-[#eceff3]";
 const DAY_DATE_NUMBER_CLASS_NAME = "flex h-8 w-8 items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-all duration-150";
@@ -271,6 +272,7 @@ const CalendarListViewComponent = ({ virtualRail, events, selectedDate, onSelect
   const pendingRef = useRef<HTMLDivElement | null>(null);
   const lastSelectedRef = useRef<string | null>(null);
   const lastVisibleRef = useRef<string | null>(null);
+  const userScrollBlockUntilRef = useRef(0);
   const dates = useMemo(() => buildScheduleVirtualRailDays(rail, range.start, range.end), [rail, range.end, range.start]);
   const days = useMemo(() => buildListDays(dates, eventsByDateKey, selectedDate), [dates, eventsByDateKey, selectedDate]);
   const totalHeight = metrics.totalHeight;
@@ -278,11 +280,11 @@ const CalendarListViewComponent = ({ virtualRail, events, selectedDate, onSelect
   const setRangeIfChanged = useCallback((next: VirtualRange) => { if (sameRange(rangeRef.current, next)) return; rangeRef.current = next; setRange(next); }, []);
   const updateRange = useCallback((element: HTMLDivElement | null, force = false) => { if (!element) return; if (!force && !shouldRefreshRange(element, metrics, rangeRef.current, LIST_MATERIALIZE_OVERSCAN_PX)) return; setRangeIfChanged(getRange(metrics, element.scrollTop, element.clientHeight, rail.totalDayCount, LIST_MATERIALIZE_OVERSCAN_PX)); }, [metrics, rail.totalDayCount, setRangeIfChanged]);
   const updateVisibleDate = useCallback((element: HTMLDivElement | null) => { if (!element || !onVisibleMonthChange) return; const index = getDayIndexAtOffset(metrics, rail.totalDayCount, element.scrollTop + Math.min(ANCHOR_OFFSET, element.clientHeight / 2)); const date = getScheduleVirtualRailDate(rail, index); if (!date) return; const key = getMonthVisibilityKey(date); if (lastVisibleRef.current === key) return; lastVisibleRef.current = key; onVisibleMonthChange(date); }, [metrics, onVisibleMonthChange, rail]);
-  const scheduleScrollWork = useCallback((element: HTMLDivElement) => { pendingRef.current = element; if (frameRef.current !== null) return; frameRef.current = window.requestAnimationFrame(() => { frameRef.current = null; const pending = pendingRef.current; pendingRef.current = null; if (!pending) return; updateRange(pending); updateVisibleDate(pending); onScrollTopChange?.(pending.scrollTop); }); }, [onScrollTopChange, updateRange, updateVisibleDate]);
+  const scheduleScrollWork = useCallback((element: HTMLDivElement) => { userScrollBlockUntilRef.current = Date.now() + USER_SCROLL_AUTO_SCROLL_BLOCK_MS; pendingRef.current = element; if (frameRef.current !== null) return; frameRef.current = window.requestAnimationFrame(() => { frameRef.current = null; const pending = pendingRef.current; pendingRef.current = null; if (!pending) return; updateRange(pending); updateVisibleDate(pending); onScrollTopChange?.(pending.scrollTop); }); }, [onScrollTopChange, updateRange, updateVisibleDate]);
 
   useLayoutEffect(() => { updateRange(scrollRef.current, true); }, [scrollRef, updateRange]);
   useEffect(() => { const element = scrollRef.current; if (!element) return; const handleScroll = () => scheduleScrollWork(element); element.addEventListener("scroll", handleScroll, { passive: true }); return () => element.removeEventListener("scroll", handleScroll); }, [scheduleScrollWork, scrollRef]);
-  useEffect(() => { const element = scrollRef.current; const key = getCalendarDateKey(selectedDate); const index = getIndexForDate(rail, selectedDate); if (lastSelectedRef.current === key || !element || index < 0 || index >= rail.totalDayCount) return; lastSelectedRef.current = key; element.scrollTop = Math.max(0, getDayTop(metrics, index) - SELECTED_OFFSET); updateRange(element, true); }, [metrics, rail, scrollRef, selectedDate, updateRange]);
+  useEffect(() => { const element = scrollRef.current; const key = getCalendarDateKey(selectedDate); const index = getIndexForDate(rail, selectedDate); if (lastSelectedRef.current === key || !element || index < 0 || index >= rail.totalDayCount) return; lastSelectedRef.current = key; if (Date.now() < userScrollBlockUntilRef.current) return; element.scrollTop = Math.max(0, getDayTop(metrics, index) - SELECTED_OFFSET); updateRange(element, true); }, [metrics, rail, scrollRef, selectedDate, updateRange]);
   useEffect(() => () => { if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current); }, []);
 
   return <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}><div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden"><div className="mx-auto w-full max-w-[940px]"><div className="relative w-full" style={{ height: totalHeight }}>{days.map((day, offset) => { const dayIndex = range.start + offset; const height = getRenderedDayHeight(dayHeights, day); return <div key={day.dateKey} className="absolute left-0 right-0 top-0" style={createVirtualDayStyle(metrics, dayIndex, height)}><CalendarListDaySection day={day} onSelectDate={onSelectDate} /></div>; })}</div></div></div></div>;

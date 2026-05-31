@@ -24,6 +24,7 @@ const MATERIALIZE_OVERSCAN = 20_000;
 const RANGE_UPDATE_GUARD = 8_000;
 const ANCHOR_OFFSET = 160;
 const SELECTED_OFFSET = 8;
+const USER_SCROLL_AUTO_SCROLL_BLOCK_MS = 350;
 const DAY_DATE_NUMBER_CLASS_NAME = "flex h-8 w-8 items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-all duration-150";
 const DAY_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const SELECTED_DAY_DATE_NUMBER_CLASS_NAME = "border-0 bg-[var(--ds-color-tag-sky-bg)] text-[var(--ds-color-tag-sky-fg)] shadow-none ring-0";
@@ -117,6 +118,7 @@ const CalendarPieChartViewComponent = ({ virtualRail, selectedDate, events, onSe
   const lastVisibleKeyRef = useRef<string | null>(null);
   const frameRef = useRef<number | null>(null);
   const pendingRef = useRef<HTMLDivElement | null>(null);
+  const userScrollBlockUntilRef = useRef(0);
   const rail = useMemo(() => virtualRail ?? createRail(selectedDate), [selectedDate, virtualRail]);
   const [range, setRange] = useState<VirtualRange>({ start: 0, end: 1 });
   const rangeRef = useRef(range);
@@ -127,11 +129,11 @@ const CalendarPieChartViewComponent = ({ virtualRail, selectedDate, events, onSe
   const setRangeIfChanged = useCallback((next: VirtualRange) => { if (sameRange(rangeRef.current, next)) return; rangeRef.current = next; setRange(next); }, []);
   const updateRange = useCallback((element: HTMLDivElement | null, force = false) => { if (!element) return; if (!force && !shouldRefreshRange(element, rangeRef.current)) return; setRangeIfChanged(getRange(element.scrollTop, element.clientHeight, rail.totalDayCount)); }, [rail.totalDayCount, setRangeIfChanged]);
   const updateVisibleDate = useCallback((element: HTMLDivElement | null) => { if (!element || !onVisibleDateChange) return; const index = Math.max(0, Math.min(rail.totalDayCount - 1, Math.floor((element.scrollTop + Math.min(ANCHOR_OFFSET, element.clientHeight / 2)) / DAY_BLOCK))); const date = getScheduleVirtualRailDate(rail, index); if (!date) return; const key = getKey(date); if (lastVisibleKeyRef.current === key) return; lastVisibleKeyRef.current = key; onVisibleDateChange(date); }, [onVisibleDateChange, rail]);
-  const scheduleScrollWork = useCallback((element: HTMLDivElement) => { pendingRef.current = element; if (frameRef.current !== null) return; frameRef.current = window.requestAnimationFrame(() => { frameRef.current = null; const pending = pendingRef.current; pendingRef.current = null; if (!pending) return; updateRange(pending); updateVisibleDate(pending); onScrollTopChange?.(pending.scrollTop); }); }, [onScrollTopChange, updateRange, updateVisibleDate]);
+  const scheduleScrollWork = useCallback((element: HTMLDivElement) => { userScrollBlockUntilRef.current = Date.now() + USER_SCROLL_AUTO_SCROLL_BLOCK_MS; pendingRef.current = element; if (frameRef.current !== null) return; frameRef.current = window.requestAnimationFrame(() => { frameRef.current = null; const pending = pendingRef.current; pendingRef.current = null; if (!pending) return; updateRange(pending); updateVisibleDate(pending); onScrollTopChange?.(pending.scrollTop); }); }, [onScrollTopChange, updateRange, updateVisibleDate]);
 
   useLayoutEffect(() => { updateRange(scrollRef.current, true); }, [scrollRef, updateRange]);
   useEffect(() => { const element = scrollRef.current; if (!element) return; const handleScroll = () => scheduleScrollWork(element); element.addEventListener("scroll", handleScroll, { passive: true }); return () => element.removeEventListener("scroll", handleScroll); }, [scheduleScrollWork, scrollRef]);
-  useEffect(() => { const element = scrollRef.current; const key = getKey(selectedDate); const index = getIndexForDate(rail, selectedDate); if (lastSelectedKeyRef.current === key || !element || index < 0 || index >= rail.totalDayCount) return; lastSelectedKeyRef.current = key; element.scrollTop = Math.max(0, index * DAY_BLOCK - SELECTED_OFFSET); updateRange(element, true); }, [rail, scrollRef, selectedDate, updateRange]);
+  useEffect(() => { const element = scrollRef.current; const key = getKey(selectedDate); const index = getIndexForDate(rail, selectedDate); if (lastSelectedKeyRef.current === key || !element || index < 0 || index >= rail.totalDayCount) return; lastSelectedKeyRef.current = key; if (Date.now() < userScrollBlockUntilRef.current) return; element.scrollTop = Math.max(0, index * DAY_BLOCK - SELECTED_OFFSET); updateRange(element, true); }, [rail, scrollRef, selectedDate, updateRange]);
   useEffect(() => () => { if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current); }, []);
 
   return <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}><div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden"><div className="mx-auto w-full max-w-[940px]"><div className="relative w-full" style={{ height: totalHeight }}>{days.map((day, offset) => <div key={day.key} className="absolute left-0 right-0" style={{ contain: "layout style", top: (range.start + offset) * DAY_BLOCK, height: DAY_HEIGHT }}><DayRow day={day} onSelectDate={onSelectDate} /></div>)}</div></div></div></div>;
