@@ -35,9 +35,12 @@ export const useWorkspaceTabsRouteSync = ({
 
     const {
       activeTabId,
+      tabs,
       openSectionTab,
       selectTab,
     } = useWorkspaceTabsStore.getState();
+
+    const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null;
 
     if (pathname === "/study") {
       const nextTabId = openSectionTab("review");
@@ -50,6 +53,10 @@ export const useWorkspaceTabsRouteSync = ({
     }
 
     if (pathname === "/schedule") {
+      if (activeTab?.sectionKey === "library") {
+        return;
+      }
+
       const nextTabId = openSectionTab("schedule");
 
       if (activeTabId !== nextTabId) {
