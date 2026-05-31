@@ -43,6 +43,13 @@ const createRefs = (): {
   scrollContainerRef: createRef<HTMLDivElement>(),
 });
 
+const normalizeCssColor = (color: string): string => {
+  const element = document.createElement("div");
+  element.style.color = color;
+
+  return element.style.color;
+};
+
 const createEvent = (overrides: Partial<GoogleCalendarEvent>): GoogleCalendarEvent => ({
   id: "event-1",
   calendarId: "calendar-1",
@@ -121,7 +128,7 @@ describe("CalendarWeekDayGrid", () => {
 
     expect(allDayLabel.className).toContain(TIME_LABEL_COLOR_CLASS);
     expect(allDayLabel.className).toContain(TIME_LABEL_FONT_CLASS);
-    expect(firstHourRow?.style.borderColor).toBe(COLOR.WEEKDAY_COLOR_BORDER_SUB);
+    expect(firstHourRow?.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
   });
 
   it("終日イベントの色トークンをそのまま使う", () => {
@@ -132,7 +139,7 @@ describe("CalendarWeekDayGrid", () => {
 
     const allDayChip = screen.getByText("All day event");
 
-    expect(allDayChip.style.background).toBe(tokens.bg);
-    expect(allDayChip.style.color).toBe(tokens.text);
+    expect(allDayChip.style.background).toBe(normalizeCssColor(tokens.bg));
+    expect(allDayChip.style.color).toBe(normalizeCssColor(tokens.text));
   });
 });
