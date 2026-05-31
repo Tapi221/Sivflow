@@ -2,8 +2,7 @@ import { useCallback } from "react";
 import { DEFAULT_NEW_PROJECT_NAME } from "@/components/folder/explorer/model/utils";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
-import { ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
-import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
+import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
 
 type IconProps = {
   className?: string;
@@ -39,10 +38,10 @@ const SidebarLayeredDirectory = () => {
         </div>
       </div>
       <div className="min-h-0 flex-1">
-        {folderTagMode === "tag" ? <TagTreeSidebar /> : <ProjectListSidebar />}
+        {folderTagMode === "tag" ? <LibraryHierarchySidebar /> : <ProjectListSidebar />}
       </div>
     </div>
   );
 };
 
-export { ProjectListSidebar, SidebarLayeredDirectory, TagTreeSidebar };
+export { LibraryHierarchySidebar, ProjectListSidebar, SidebarLayeredDirectory };
