@@ -1,5 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { addDays, endOfDay, endOfMonth, endOfWeek, endOfYear, format, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays } from "date-fns";
+import { addDays, endOfDay, endOfMonth, endOfWeek, format, startOfDay, startOfMonth, startOfWeek, subDays } from "date-fns";
 import type { PlanResultMode } from "@/chip/toggle/Toggle.planresult";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
@@ -100,11 +100,11 @@ const buildMiniCalendarDisplayRange = (monthDate: Date): CalendarEventDisplayRan
 const buildDaysDisplayRange = (days: Date[], fallbackDate: Date, bufferDays: number): CalendarEventDisplayRange => ({ start: startOfDay(subDays(days[0] ?? fallbackDate, bufferDays)), end: endOfDay(addDays(days.at(-1) ?? fallbackDate, bufferDays)) });
 
 const buildYearDisplayRange = (currentDate: Date, yearRenderedRange: CalendarDateRange | null): CalendarEventDisplayRange => {
-  if (!yearRenderedRange) return { start: startOfDay(startOfYear(currentDate)), end: endOfDay(endOfYear(currentDate)) };
+  if (!yearRenderedRange) return { start: startOfDay(currentDate), end: endOfDay(currentDate) };
 
   return {
-    start: startOfDay(startOfYear(yearRenderedRange.start)),
-    end: endOfDay(endOfYear(yearRenderedRange.end)),
+    start: startOfDay(yearRenderedRange.start),
+    end: endOfDay(yearRenderedRange.end),
   };
 };
 
