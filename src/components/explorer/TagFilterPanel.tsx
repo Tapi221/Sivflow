@@ -88,8 +88,8 @@ const filterTagTreeNode = (
   const children = selfMatches
     ? node.children.map(cloneTagTreeBranch)
     : node.children
-        .map((child) => filterTagTreeNode(child, normalizedSearchQuery))
-        .filter((child): child is TagTreeNode => child !== null);
+      .map((child) => filterTagTreeNode(child, normalizedSearchQuery))
+      .filter((child): child is TagTreeNode => child !== null);
 
   if (!selfMatches && children.length === 0) {
     return null;
@@ -188,8 +188,8 @@ const buildVisibleTagTreeItems = (
   const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
   const visibleNodes = normalizedSearchQuery
     ? tagTreeNodes
-        .map((node) => filterTagTreeNode(node, normalizedSearchQuery))
-        .filter((node): node is TagTreeNode => node !== null)
+      .map((node) => filterTagTreeNode(node, normalizedSearchQuery))
+      .filter((node): node is TagTreeNode => node !== null)
     : tagTreeNodes;
 
   return flattenTagTreeNodes(visibleNodes, 0);
