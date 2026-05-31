@@ -117,11 +117,11 @@ describe("CalendarWeekDayGrid", () => {
     renderWeekDayGrid();
 
     const allDayLabel = screen.getByText("終日");
-    const firstHourRow = screen.getByText("00:00").closest(".border-b");
+    const firstHourRow = screen.getByText("00:00").closest(".border-b") as HTMLElement | null;
 
     expect(allDayLabel.className).toContain(TIME_LABEL_COLOR_CLASS);
     expect(allDayLabel.className).toContain(TIME_LABEL_FONT_CLASS);
-    expect(firstHourRow).toHaveStyle({ borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB });
+    expect(firstHourRow?.style.borderColor).toBe(COLOR.WEEKDAY_COLOR_BORDER_SUB);
   });
 
   it("終日イベントの色トークンをそのまま使う", () => {
@@ -132,6 +132,7 @@ describe("CalendarWeekDayGrid", () => {
 
     const allDayChip = screen.getByText("All day event");
 
-    expect(allDayChip).toHaveStyle({ background: tokens.bg, color: tokens.text });
+    expect(allDayChip.style.background).toBe(tokens.bg);
+    expect(allDayChip.style.color).toBe(tokens.text);
   });
 });
