@@ -56,9 +56,9 @@ type YearVirtualWindow = {
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
 const YEAR_VIRTUAL_PAST_YEARS = 200;
 const YEAR_VIRTUAL_FUTURE_YEARS = 200;
-const YEAR_INITIAL_RENDERED_YEARS = 15;
-const YEAR_VIRTUAL_OVERSCAN_YEARS = 5;
-const YEAR_VIRTUAL_WINDOW_GUARD_YEARS = 3;
+const YEAR_INITIAL_RENDERED_YEARS = 7;
+const YEAR_VIRTUAL_OVERSCAN_YEARS = 2;
+const YEAR_VIRTUAL_WINDOW_GUARD_YEARS = 1;
 const YEAR_SECTION_GAP_PX = 32;
 const DEFAULT_YEAR_SECTION_STEP_HEIGHT = 760;
 const YEAR_SYNC_RANGE_NOTIFY_DELAY_MS = 180;
@@ -270,7 +270,9 @@ const CalendarYearViewComponent = ({
     if (isSameYearVirtualWindow(virtualWindowRef.current, nextWindow)) return;
 
     virtualWindowRef.current = nextWindow;
-    setVirtualWindowState(nextWindow);
+    startTransition(() => {
+      setVirtualWindowState(nextWindow);
+    });
   }, [setVirtualWindowState]);
 
   const getYearOffsetFromScrollTop = useCallback((scrollTop: number): number => {
@@ -470,7 +472,7 @@ const CalendarYearViewComponent = ({
             key={year.key}
             data-calendar-year-key={year.key}
             className="calendar-year-section min-w-0 bg-white"
-            style={{ marginBottom: YEAR_SECTION_GAP_PX }}
+            style={{ contentVisibility: "auto", containIntrinsicSize: `${yearStepHeight}px`, marginBottom: YEAR_SECTION_GAP_PX }}
             aria-label={year.label}
           >
             <h2 className="mb-4 px-1 text-[17px] font-semibold leading-none tracking-[-0.01em] text-[#1c1c1e]">
