@@ -31,3 +31,8 @@
 ## tests/unit/components/card/MathBlockConsistency.test.tsx
 
 - [ ] viewer and editor-preview path both use mathBlockRoot frame
+
+## tests/unit/components/card/panels/MetaPanelPrimitives.test.tsx
+
+- [ ] 共有 panel styling contract を 1 か所に保つ
+- [ ] switch 変更を共有 meta panel wrapper 経由で転送する
