@@ -5,7 +5,7 @@ import { computeNextCardSetViewZoomPercentFromGesture, computeNextCardSetViewZoo
 
 describe("cardSetViewZoomInputUtils", () => {
   describe("computeNextCardSetViewZoomPercentFromWheel", () => {
-    it("increments and decrements zoom by 1 percent for fine-grained wheel zoom", () => {
+    it("細かなホイールズームではズームを 1% ずつ増減する", () => {
       expect(
         computeNextCardSetViewZoomPercentFromWheel({
           currentZoomPercent: 45,
@@ -27,7 +27,7 @@ describe("cardSetViewZoomInputUtils", () => {
       ).toBe(44);
     });
 
-    it("applies larger step counts for larger trackpad deltas", () => {
+    it("大きなトラックパッド delta では大きいステップ数を適用する", () => {
       expect(
         computeNextCardSetViewZoomPercentFromWheel({
           currentZoomPercent: 45,
@@ -39,7 +39,7 @@ describe("cardSetViewZoomInputUtils", () => {
       ).toBe(47);
     });
 
-    it("clamps to min and max bounds", () => {
+    it("最小・最大境界へ clamp する", () => {
       expect(
         computeNextCardSetViewZoomPercentFromWheel({
           currentZoomPercent: 0,
@@ -66,7 +66,7 @@ describe("cardSetViewZoomInputUtils", () => {
     const cardLayoutMode: CardLayoutMode = "flip";
     const maxPresentationWidthPx = 1200;
 
-    it("maps Safari gesture scale through presentation width semantics with 1 percent precision", () => {
+    it("Safari gesture scale を 1% 精度の presentation width semantics 経由で変換する", () => {
       const currentZoomPercent = 45;
       const basePresentationWidthPx = resolvePresentationWidthPx({
         zoomPercent: currentZoomPercent,
@@ -97,7 +97,7 @@ describe("cardSetViewZoomInputUtils", () => {
       ).toBe(expectedPercent);
     });
 
-    it("returns the current zoom percent for no-op gesture changes", () => {
+    it("no-op の gesture 変更では現在のズーム率を返す", () => {
       expect(
         computeNextCardSetViewZoomPercentFromGesture({
           currentZoomPercent: 45,
@@ -114,7 +114,7 @@ describe("cardSetViewZoomInputUtils", () => {
   });
 
   describe("shouldHandleCardSetViewZoomInputTarget", () => {
-    it("accepts non-interactive descendants inside the workspace", () => {
+    it("workspace 内の非インタラクティブ子孫を受け入れる", () => {
       const container = document.createElement("div");
       const cardBody = document.createElement("div");
       container.appendChild(cardBody);
@@ -127,7 +127,7 @@ describe("cardSetViewZoomInputUtils", () => {
       ).toBe(true);
     });
 
-    it("rejects targets marked as zoom-input-ignore", () => {
+    it("zoom-input-ignore としてマークされた target を拒否する", () => {
       const container = document.createElement("div");
       const ignoredRoot = document.createElement("div");
       const sliderThumb = document.createElement("span");
@@ -144,7 +144,7 @@ describe("cardSetViewZoomInputUtils", () => {
       ).toBe(false);
     });
 
-    it("rejects editable descendants", () => {
+    it("編集可能な子孫を拒否する", () => {
       const container = document.createElement("div");
       const editor = document.createElement("div");
       editor.setAttribute("contenteditable", "true");
@@ -158,7 +158,7 @@ describe("cardSetViewZoomInputUtils", () => {
       ).toBe(false);
     });
 
-    it("rejects targets outside the workspace", () => {
+    it("workspace 外の target を拒否する", () => {
       const container = document.createElement("div");
       const outside = document.createElement("div");
 
