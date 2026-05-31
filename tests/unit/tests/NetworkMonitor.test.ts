@@ -14,14 +14,14 @@ describe("NetworkMonitor", () => {
     });
   });
 
-  describe("Initial State", () => {
-    it("should start with good status", () => {
+  describe("初期状態", () => {
+    it("good ステータスで開始する", () => {
       expect(monitor.status).toBe("good");
     });
   });
 
-  describe("State Transitions (Hysteresis)", () => {
-    it("should degrade to poor immediately upon failure threshold", () => {
+  describe("状態遷移（ヒステリシス）", () => {
+    it("失敗しきい値に達したら即座に poor へ下げる", () => {
       monitor.reportResult(false, 100);
       expect(monitor.status).toBe("good");
 
@@ -29,12 +29,12 @@ describe("NetworkMonitor", () => {
       expect(monitor.status).toBe("poor");
     });
 
-    it("should degrade to poor immediately upon slow RTT", () => {
+    it("RTT が遅い場合は即座に poor へ下げる", () => {
       monitor.reportResult(true, 5000);
       expect(monitor.status).toBe("poor");
     });
 
-    it("should require multiple successes to recover from poor to good", () => {
+    it("poor から good へ回復するには複数回の成功が必要", () => {
       monitor.reportResult(false, 100);
       monitor.reportResult(false, 100);
       expect(monitor.status).toBe("poor");
@@ -49,7 +49,7 @@ describe("NetworkMonitor", () => {
       expect(monitor.status).toBe("good");
     });
 
-    it("should require strict conditions to reach excellent", () => {
+    it("excellent に到達するには厳密な条件が必要", () => {
       expect(monitor.status).toBe("good");
 
       for (let i = 0; i < 4; i++) {
@@ -61,7 +61,7 @@ describe("NetworkMonitor", () => {
       expect(monitor.status).toBe("excellent");
     });
 
-    it("should detect offline status", () => {
+    it("オフライン状態を検出する", () => {
       Object.defineProperty(window.navigator, "onLine", {
         value: false,
         configurable: true,
@@ -71,7 +71,7 @@ describe("NetworkMonitor", () => {
       expect(monitor.status).toBe("offline");
     });
 
-    it("should verify notifications to listeners", () => {
+    it("リスナーへの通知を確認する", () => {
       const listener = vi.fn();
       monitor.subscribe(listener);
 
@@ -83,7 +83,7 @@ describe("NetworkMonitor", () => {
   });
 
   describe("getBatchConstraint", () => {
-    it("should give max resources for user_initiated sync", () => {
+    it("user_initiated 同期には最大リソースを与える", () => {
       const constraint = monitor.getBatchConstraint("user_initiated");
       expect(constraint).toEqual({
         maxSize: 100,
@@ -92,13 +92,13 @@ describe("NetworkMonitor", () => {
       });
     });
 
-    it("should give limited resources for background sync based on Good status", () => {
+    it("Good 状態のバックグラウンド同期には制限されたリソースを与える", () => {
       const constraint = monitor.getBatchConstraint("background");
       expect(constraint.maxSize).toBe(20);
       expect(constraint.concurrency).toBe(1);
     });
 
-    it("should give extremely limited resources for Poor status", () => {
+    it("Poor 状態では非常に制限されたリソースを与える", () => {
       monitor.reportResult(false, 100);
       monitor.reportResult(false, 100);
       expect(monitor.status).toBe("poor");
@@ -111,7 +111,7 @@ describe("NetworkMonitor", () => {
       });
     });
 
-    it("should allow higher capacity for Excellent status", () => {
+    it("Excellent 状態では高めの容量を許可する", () => {
       for (let i = 0; i < 5; i++) monitor.reportResult(true, 50);
       expect(monitor.status).toBe("excellent");
 
