@@ -12,6 +12,10 @@ import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 
+type FolderCommandSet = ReturnType<typeof useFolderCommands>;
+
+type CardSetCommandSet = ReturnType<typeof useCardSets>;
+
 type DirectoryTreeNodeProps = {
   folder: FolderTreeNode;
   level: number;
@@ -47,10 +51,10 @@ type FolderColorMenuState = {
 };
 
 type UseFolderContextMenuParams = {
-  createFolder: (name: string, parentFolderId?: string | null) => Promise<unknown>;
-  updateFolder: (folderId: string, updates: Record<string, unknown>) => Promise<unknown>;
-  deleteFolder: (folderId: string) => Promise<unknown>;
-  createCardSet: (name: string, targetFolderId?: string | null) => Promise<unknown>;
+  createFolder: FolderCommandSet["createFolder"];
+  updateFolder: FolderCommandSet["updateFolder"];
+  deleteFolder: FolderCommandSet["deleteFolder"];
+  createCardSet: CardSetCommandSet["createCardSet"];
   getNextOrderIndex: (folderId: string | null, resolvedFolderId?: string) => number;
   setExpandedFolderIds: Dispatch<SetStateAction<Set<string>>>;
 };
@@ -59,9 +63,16 @@ type IconProps = {
   className?: string;
 };
 
+type LibraryTreeMarkerProps = {
+  className?: string;
+  color?: string | null;
+};
+
 const EMPTY_COLLECTION: never[] = [];
 const LIBRARY_TITLE = "Library";
 const ROOT_LEVEL = 1;
+const PROJECT_COLOR_PALETTE = ["#34c759", "#ff3b30", "#4f8ce7", "#ffd166", "#9adfe7", "#66a77a", "#9ca3ff"];
+const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 const LAYERED_PROJECT_MENU_DIMENSIONS = { width: LAYERED_PROJECT_MENU_WIDTH, height: LAYERED_PROJECT_MENU_HEIGHT };
 const LAYERED_PROJECT_SUBMENU_OVERLAP_PX = 6;
 
@@ -69,16 +80,33 @@ const IconChevronRight = ({ className }: IconProps) => (<svg viewBox="0 0 16 16"
 
 const IconFolder = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M2.75 6.5A2.25 2.25 0 0 1 5 4.25h2.05c.47 0 .92.19 1.24.52l.72.73H15A2.25 2.25 0 0 1 17.25 7.75v6A2.25 2.25 0 0 1 15 16H5a2.25 2.25 0 0 1-2.25-2.25V6.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>);
 
-const LibraryTreeMarker = ({ className }: IconProps) => <span aria-hidden="true" className={cn("library-tree-marker", className)} />;
+const LibraryTreeMarker = ({ className, color }: LibraryTreeMarkerProps) => <span aria-hidden="true" className={cn("library-tree-marker", className)} style={color ? { color } : undefined} />;
 
 const getFolderName = (folder: FolderTreeNode, isRootProject = false): string => {
   const name = folder.folderName ?? folder.folder_name;
   return typeof name === "string" && name.trim() ? name.trim() : isRootProject ? UNTITLED_PROJECT_NAME : UNTITLED_FOLDER_NAME;
 };
 
-const getFolderColor = (folder: FolderTreeNode): string | null => {
-  const folderColor = (folder as { folderColor?: string | null; folder_color?: string | null }).folderColor ?? (folder as { folderColor?: string | null; folder_color?: string | null }).folder_color ?? null;
-  return typeof folderColor === "string" && folderColor.trim() ? folderColor : null;
+const isHexColor = (value: unknown): value is string => typeof value === "string" && HEX_COLOR_PATTERN.test(value);
+
+const hashString = (value: string): number => {
+  let hash = 0;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+  }
+
+  return hash;
+};
+
+const getFallbackProjectColor = (seed: string): string => PROJECT_COLOR_PALETTE[hashString(seed) % PROJECT_COLOR_PALETTE.length];
+
+const getFolderProjectColor = (folder: FolderTreeNode): string => {
+  const record = folder as { folderColor?: unknown; folder_color?: unknown; color?: unknown };
+  const folderColor = record.folderColor ?? record.folder_color ?? record.color;
+  if (isHexColor(folderColor)) return folderColor;
+
+  return getFallbackProjectColor(getFolderId(folder));
 };
 
 const getRootFolderIds = (rootFolders: FolderTreeNode[]): string[] => rootFolders.map(getFolderId).filter(Boolean);
@@ -97,7 +125,7 @@ const createFolderContextMenuState = (event: ReactMouseEvent<HTMLElement>, folde
   if (!folderId) return null;
 
   const position = clampRightClickPanelPosition(event.clientX, event.clientY, LAYERED_PROJECT_MENU_DIMENSIONS);
-  return { folderId, folderName: getFolderName(folder, isRootProject), folderColor: getFolderColor(folder), isRootProject, ...position };
+  return { folderId, folderName: getFolderName(folder, isRootProject), folderColor: getFolderProjectColor(folder), isRootProject, ...position };
 };
 
 const useLibraryHierarchyData = () => {
@@ -229,6 +257,7 @@ const ProjectListItem = ({ folder, selectedFolderId, getFolderContentCount, onSe
   if (!folderId) return null;
 
   const folderName = getFolderName(folder, true);
+  const folderColor = getFolderProjectColor(folder);
   const contentCount = getFolderContentCount(folderId);
   const isSelected = selectedFolderId === folderId;
 
@@ -245,7 +274,7 @@ const ProjectListItem = ({ folder, selectedFolderId, getFolderContentCount, onSe
   return (
     <div data-folder-id={folderId}>
       <div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center gap-1 rounded-[10px] pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]") }>
-        <LibraryTreeMarker />
+        <LibraryTreeMarker color={folderColor} />
         <button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]">
           <span className="min-w-0 flex-1 truncate">{folderName}</span>
           {contentCount > 0 ? <span className="shrink-0 rounded-full bg-[#eef1f4] px-1.5 py-0.5 text-[10px] font-bold text-[#8b929e]">{contentCount}</span> : null}
@@ -304,6 +333,7 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
   const isExpanded = expandedFolderIds.has(folderId);
   const isSelected = selectedFolderId === folderId;
   const folderName = getFolderName(folder, isRootProject);
+  const folderColor = getFolderProjectColor(folder);
   const contentCount = getFolderContentCount(folderId);
   const rowPaddingLeft = Math.max(0, level - ROOT_LEVEL) * 12;
 
@@ -332,7 +362,7 @@ const DirectoryTreeNode = ({ folder, level, selectedFolderId, expandedFolderIds,
   return (
     <div data-folder-id={folderId}>
       <div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center gap-1 rounded-[10px] pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")} style={{ paddingLeft: rowPaddingLeft }}>
-        <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} aria-disabled={!hasChildren} disabled={!hasChildren} className="library-tree-marker">
+        <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} aria-disabled={!hasChildren} disabled={!hasChildren} className="library-tree-marker" style={{ color: folderColor }}>
           <IconChevronRight className="h-3 w-3 opacity-0" />
         </button>
         <button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center gap-1.5 rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]">
