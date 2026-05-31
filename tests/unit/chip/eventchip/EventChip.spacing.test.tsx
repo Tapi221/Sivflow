@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
+import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 const TIMED_EVENT: GoogleCalendarEvent = {
@@ -29,6 +30,23 @@ const getWeekdayChipElement = (): HTMLElement => {
   if (!titleElement?.parentElement) throw new Error("weekday event chip was not rendered");
 
   return titleElement.parentElement;
+};
+
+const getWeekdayChipRootElement = (): HTMLElement => {
+  const chipElement = getWeekdayChipElement();
+  const rootElement = chipElement.parentElement;
+
+  if (!(rootElement instanceof HTMLElement)) throw new Error("weekday event chip root was not rendered");
+
+  return rootElement;
+};
+
+const getWeekdayLineMaskElement = (): HTMLElement => {
+  const lineMaskElement = getWeekdayChipRootElement().querySelector('[aria-hidden="true"].bg-white');
+
+  if (!(lineMaskElement instanceof HTMLElement)) throw new Error("weekday event chip line mask was not rendered");
+
+  return lineMaskElement;
 };
 
 const getWeekdayVisibleTitleElement = (): HTMLElement => {
@@ -92,6 +110,40 @@ describe("event chip title/time spacing", () => {
     const listSpacing = getClassTokenValue(listTitleElement.className, "mt-");
 
     expect(listSpacing).toBe(weekdaySpacing);
+  });
+});
+
+describe("weekday event chip grid line mask", () => {
+  it("チップ本体の下に白い line mask を置いてグリッド線だけを隠す", () => {
+    render(<CalendarEventChipWeekday event={TIMED_EVENT} />);
+
+    const rootElement = getWeekdayChipRootElement();
+    const lineMaskElement = getWeekdayLineMaskElement();
+    const chipElement = getWeekdayChipElement();
+
+    expect(rootElement.className).toContain("relative");
+    expect(rootElement.className).toContain("isolate");
+    expect(lineMaskElement.className).toContain("pointer-events-none");
+    expect(lineMaskElement.className).toContain("absolute");
+    expect(lineMaskElement.className).toContain("inset-0");
+    expect(lineMaskElement.className).toContain("rounded-md");
+    expect(lineMaskElement.className).toContain("bg-white");
+    expect(lineMaskElement.nextElementSibling).toBe(chipElement);
+    expect(chipElement.className).toContain("relative");
+    expect(chipElement.className).toContain("z-10");
+  });
+
+  it("チップ本体の色トークンと透明度は line mask に移さず維持する", () => {
+    const tokens = generateColorTokens(TIMED_EVENT.accentColor);
+
+    render(<CalendarEventChipWeekday event={TIMED_EVENT} />);
+
+    const lineMaskElement = getWeekdayLineMaskElement();
+    const chipElement = getWeekdayChipElement();
+
+    expect(lineMaskElement.getAttribute("style")).toBeNull();
+    expect(chipElement.style.background).toBe(tokens.bg);
+    expect(chipElement.style.color).toBe(tokens.text);
   });
 });
 
