@@ -9,7 +9,6 @@ import type { Card } from "@/types";
 type TagTreeNode = {
   id: string;
   name: string;
-  color: string | null;
   parentId: string | null;
   children: TagTreeNode[];
 };
@@ -17,7 +16,6 @@ type TagTreeNode = {
 type VisibleTagTreeNode = {
   id: string;
   name: string;
-  color: string | null;
   level: number;
   hasChildren: boolean;
   isExpanded: boolean;
@@ -68,7 +66,6 @@ const buildTagTreeNodes = (tags: TagRecord[]): TagTreeNode[] => {
     nodeById.set(tag.id, {
       id: tag.id,
       name: getTagName(tag),
-      color: tag.color ?? null,
       parentId: getTagParentId(tag),
       children: [],
     });
@@ -109,7 +106,6 @@ const flattenVisibleTagTree = (nodes: TagTreeNode[], expandedTagIds: Set<string>
     const item: VisibleTagTreeNode = {
       id: node.id,
       name: node.name,
-      color: node.color,
       level,
       hasChildren,
       isExpanded,
