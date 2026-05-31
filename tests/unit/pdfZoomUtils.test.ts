@@ -3,14 +3,14 @@ import { clampScale, computeNextScaleFromGesture, computeNextScaleFromWheel, nor
 
 describe("pdfZoomUtils", () => {
   describe("normalizeScale", () => {
-    it("rounds to 3 decimal places", () => {
+    it("小数第3位に丸める", () => {
       expect(normalizeScale(1.23456)).toBe(1.235);
       expect(normalizeScale(1.23444)).toBe(1.234);
     });
   });
 
   describe("clampScale", () => {
-    it("clamps to min/max and supports inverted bounds", () => {
+    it("最小値・最大値に clamp し、反転した境界にも対応する", () => {
       expect(clampScale(0.4, 0.5, 3)).toBe(0.5);
       expect(clampScale(4, 0.5, 3)).toBe(3);
       expect(clampScale(2, 3, 0.5)).toBe(2);
@@ -18,7 +18,7 @@ describe("pdfZoomUtils", () => {
   });
 
   describe("computeNextScaleFromWheel", () => {
-    it("decreases scale for positive deltaY and increases for negative deltaY", () => {
+    it("正の deltaY では縮小し、負の deltaY では拡大する", () => {
       expect(
         computeNextScaleFromWheel({
           currentScale: 1,
@@ -40,7 +40,7 @@ describe("pdfZoomUtils", () => {
       ).toBe(1.1);
     });
 
-    it("returns null when direction is 0", () => {
+    it("方向が 0 の場合は null を返す", () => {
       expect(
         computeNextScaleFromWheel({
           currentScale: 1,
@@ -52,7 +52,7 @@ describe("pdfZoomUtils", () => {
       ).toBeNull();
     });
 
-    it("applies clamp and 3-digit normalization", () => {
+    it("clamp と 3 桁正規化を適用する", () => {
       expect(
         computeNextScaleFromWheel({
           currentScale: 0.52,
@@ -84,7 +84,7 @@ describe("pdfZoomUtils", () => {
       ).toBe(1.667);
     });
 
-    it("scales wheel step count by delta magnitude", () => {
+    it("delta の大きさに応じてホイールステップ数をスケールする", () => {
       expect(
         computeNextScaleFromWheel({
           currentScale: 1,
@@ -98,7 +98,7 @@ describe("pdfZoomUtils", () => {
   });
 
   describe("computeNextScaleFromGesture", () => {
-    it("uses baseScale * gestureScale and normalizes", () => {
+    it("baseScale * gestureScale を使用して正規化する", () => {
       expect(
         computeNextScaleFromGesture({
           currentScale: 1,
@@ -110,7 +110,7 @@ describe("pdfZoomUtils", () => {
       ).toBe(1.5);
     });
 
-    it("falls back to currentScale when baseScale is null", () => {
+    it("baseScale が null の場合は currentScale にフォールバックする", () => {
       expect(
         computeNextScaleFromGesture({
           currentScale: 1.23456,
@@ -122,7 +122,7 @@ describe("pdfZoomUtils", () => {
       ).toBe(1.235);
     });
 
-    it("returns null for invalid gesture scale", () => {
+    it("無効な gesture scale では null を返す", () => {
       expect(
         computeNextScaleFromGesture({
           currentScale: 1,
@@ -134,7 +134,7 @@ describe("pdfZoomUtils", () => {
       ).toBeNull();
     });
 
-    it("applies clamp", () => {
+    it("clamp を適用する", () => {
       expect(
         computeNextScaleFromGesture({
           currentScale: 2.9,
