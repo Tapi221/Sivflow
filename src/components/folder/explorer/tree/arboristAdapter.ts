@@ -1,3 +1,4 @@
+import { DEFAULT_NEW_FOLDER_NAME, UNTITLED_FOLDER_NAME, UNTITLED_PROJECT_NAME } from "@/components/folder/explorer/model/utils";
 import { toVirtualMfCardDisplayName, toVirtualMfDeckDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
 import type { Card, CardSet, DocumentItem, ExplorerItem, SelectedExplorerItem } from "@/types";
 
@@ -51,7 +52,7 @@ export const parseSelectedTreeId = (
   return { type, id };
 };
 
-const getFolderName = (folder: unknown): string => {
+const getFolderName = (folder: unknown, fallbackName: string): string => {
   const value = folder as {
     folderName?: string;
     folder_name?: string;
@@ -62,7 +63,7 @@ const getFolderName = (folder: unknown): string => {
     value.folderName?.trim() ||
     value.folder_name?.trim() ||
     value.name?.trim() ||
-    "無題のフォルダ"
+    fallbackName
   );
 };
 
@@ -131,7 +132,7 @@ export const buildExplorerTreeData = <TFolder,>({
     };
   };
 
-  const buildFolderNode = (folder: TFolder): ExplorerTreeNode | null => {
+  const buildFolderNode = (folder: TFolder, fallbackName: string): ExplorerTreeNode | null => {
     const folderId = getFolderId(folder);
     if (!folderId) return null;
 
@@ -140,7 +141,7 @@ export const buildExplorerTreeData = <TFolder,>({
     }
 
     const childFolders = getChildFolders(folderId)
-      .map(buildFolderNode)
+      .map((childFolder) => buildFolderNode(childFolder, UNTITLED_FOLDER_NAME))
       .filter((node): node is ExplorerTreeNode => node !== null);
 
     const cardSetNodes = getCardSets(folderId)
@@ -156,7 +157,7 @@ export const buildExplorerTreeData = <TFolder,>({
       rawId: folderId,
       type: "folder",
       kind: "folder",
-      name: getFolderName(folder),
+      name: getFolderName(folder, fallbackName),
       folderId,
       data: folder,
       children: [...childFolders, ...cardSetNodes, ...itemNodes],
@@ -164,7 +165,7 @@ export const buildExplorerTreeData = <TFolder,>({
   };
 
   const folderNodes = rootFolders
-    .map(buildFolderNode)
+    .map((folder) => buildFolderNode(folder, UNTITLED_PROJECT_NAME))
     .filter((node): node is ExplorerTreeNode => node !== null);
 
   const rootCardSetNodes = getCardSets(null)
