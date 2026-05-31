@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
-import { TreeViewLayout } from "@/components/folder/layout/TreeViewLayout";
+import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
