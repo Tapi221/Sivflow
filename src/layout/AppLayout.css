@@ -143,6 +143,18 @@
     minmax(0, 1fr);
 }
 
+.workspace-shell--without-tabs {
+  grid-template-rows:
+    auto
+    minmax(0, 1fr);
+}
+
+.workspace-breadcrumb-bar--collapsed {
+  height: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .workspace-shell__tabs {
   min-width: 0;
   min-height: 0;
