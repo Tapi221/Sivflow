@@ -3,7 +3,7 @@ import { computeNextReview, createReviewLogEntry, ratingToSubjectiveScore } from
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 
 describe("reviewAlgorithm initial resistance", () => {
-  it("does not pin every first review to the same one-day interval", () => {
+  it("初回レビューをすべて同じ 1 日間隔に固定しない", () => {
     const now = new Date("2026-03-26T12:00:00.000Z");
     const newCard = {
       memoryStability: 0,
@@ -36,7 +36,7 @@ describe("reviewAlgorithm initial resistance", () => {
     expect(results[0].intervalDays).toBeLessThan(results[3].intervalDays);
   });
 
-  it("keeps logged resistance scores aligned with the interval-to-score mapping", () => {
+  it("記録された耐性スコアを間隔からスコアへの対応と一致させる", () => {
     const now = new Date("2026-03-26T12:00:00.000Z");
     const reviewUpdate = computeNextReview({
       card: {
