@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { getCalendarDateKey } from "@/features/calendar/calendarEventRange";
+import { persistScheduleCalendarScrollTop, readStoredScheduleCalendarScrollTop } from "@/features/calendar/scheduleNavigationPersistence";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { getScheduleVirtualRailDate } from "@/features/calendar/grid/ScheduleColumn.shared";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
@@ -29,6 +30,8 @@ const isWeekdayHorizontalViewMode = (viewMode: CalendarViewMode) =>
   viewMode === "week" ||
   viewMode === "timetable";
 
+const isRestorableVerticalScrollViewMode = (viewMode: CalendarViewMode): boolean => isWeekdayHorizontalViewMode(viewMode);
+
 export const useCalendarScrollController = ({
   selectedViewMode,
   visibleDays,
@@ -45,6 +48,7 @@ export const useCalendarScrollController = ({
   const scrollRafRef = useRef<number | null>(null);
   const latestScrollerRef = useRef<HTMLDivElement | null>(null);
   const lastVisibleDateKeyRef = useRef<string | null>(null);
+  const didRestoreScrollTopRef = useRef(false);
   const fixedRowScrollRefs = useMemo(() => [headerScrollRef, allDayScrollRef], []);
 
   useCalendarScrollPositionSync({
@@ -62,6 +66,20 @@ export const useCalendarScrollController = ({
     syncedRefs: fixedRowScrollRefs,
     syncKey: selectedViewMode,
   });
+
+  useLayoutEffect(() => {
+    if (didRestoreScrollTopRef.current) return;
+    if (!isRestorableVerticalScrollViewMode(selectedViewMode)) return;
+
+    const scroller = scrollContainerRef.current;
+    if (!scroller) return;
+
+    const storedScrollTop = readStoredScheduleCalendarScrollTop();
+    if (storedScrollTop === null) return;
+
+    scroller.scrollTop = storedScrollTop;
+    didRestoreScrollTopRef.current = true;
+  }, [selectedViewMode]);
 
   const syncVisibleDate = useCallback((scroller: HTMLDivElement) => {
     if (!onVisibleDateChange || !isWeekdayHorizontalViewMode(selectedViewMode) || calendarDayColumnWidth <= 0) {
@@ -83,6 +101,12 @@ export const useCalendarScrollController = ({
     onVisibleDateChange(visibleDate);
   }, [calendarDayColumnWidth, onVisibleDateChange, selectedViewMode, virtualRail, visibleDays]);
 
+  const persistVerticalScrollPosition = useCallback((scroller: HTMLDivElement) => {
+    if (!isRestorableVerticalScrollViewMode(selectedViewMode)) return;
+
+    persistScheduleCalendarScrollTop(scroller.scrollTop);
+  }, [selectedViewMode]);
+
   const scheduleScrollWork = useCallback((scroller: HTMLDivElement) => {
     latestScrollerRef.current = scroller;
 
@@ -97,8 +121,9 @@ export const useCalendarScrollController = ({
       if (!latestScroller) return;
 
       syncVisibleDate(latestScroller);
+      persistVerticalScrollPosition(latestScroller);
     });
-  }, [syncVisibleDate]);
+  }, [persistVerticalScrollPosition, syncVisibleDate]);
 
   useEffect(() => {
     const scroller = scrollContainerRef.current;
