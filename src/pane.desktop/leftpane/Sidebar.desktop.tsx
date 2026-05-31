@@ -2,7 +2,7 @@ import { type MouseEvent, type ReactNode } from "react";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { ClockIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
-import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
