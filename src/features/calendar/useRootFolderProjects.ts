@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { getFallbackProjectColor, getFolderProjectColor, isProjectColor } from "@/components/folder/explorer/model/projectColor";
 import { getFolderId, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
@@ -31,12 +32,9 @@ type StoredLegacyProject = Partial<AppCalendarItem>;
 
 const LEGACY_APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const PROJECT_VISIBILITY_STORAGE_KEY = "flashcard-master:schedule:root-folder-project-visibility";
-const PROJECT_COLOR_PALETTE = ["#34c759", "#ff3b30", "#4f8ce7", "#ffd166", "#9adfe7", "#66a77a", "#9ca3ff"];
 const EMPTY_COLLECTION: never[] = [];
 
 export const normalizeRootFolderProjectLabel = (label: string): string => label.trim().toLowerCase();
-
-const isHexColor = (value: unknown): value is string => typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value);
 
 const readTrimmedString = (value: unknown): string | null => {
   if (typeof value !== "string") return null;
@@ -45,29 +43,9 @@ const readTrimmedString = (value: unknown): string | null => {
   return trimmed ? trimmed : null;
 };
 
-const hashString = (value: string): number => {
-  let hash = 0;
-
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
-  }
-
-  return hash;
-};
-
-const getFallbackProjectColor = (seed: string): string => PROJECT_COLOR_PALETTE[hashString(seed) % PROJECT_COLOR_PALETTE.length];
-
 const getFolderProjectLabel = (folder: FolderTreeNode): string => {
   const record = folder as { folderName?: unknown; folder_name?: unknown; name?: unknown };
   return readTrimmedString(record.folderName) ?? readTrimmedString(record.folder_name) ?? readTrimmedString(record.name) ?? UNTITLED_PROJECT_NAME;
-};
-
-const getFolderProjectColor = (folder: FolderTreeNode): string => {
-  const record = folder as { folderColor?: unknown; folder_color?: unknown; color?: unknown };
-  const folderColor = record.folderColor ?? record.folder_color ?? record.color;
-  if (isHexColor(folderColor)) return folderColor;
-
-  return getFallbackProjectColor(getFolderId(folder));
 };
 
 const createLegacyFallbackProjectId = (label: string, index: number): string => `legacy-app-project:${index}:${normalizeRootFolderProjectLabel(label)}`;
@@ -122,7 +100,7 @@ export const readLegacyStoredAppProjects = (): LegacyStoredAppProject[] => {
       if (!label) return [];
 
       const id = readTrimmedString(project.id) ?? createLegacyFallbackProjectId(label, index);
-      const color = isHexColor(project.color) ? project.color : getFallbackProjectColor(id);
+      const color = isProjectColor(project.color) ? project.color : getFallbackProjectColor(id);
 
       return [
         {
@@ -195,7 +173,7 @@ export const useRootFolderProjects = (): UseRootFolderProjectsResult => {
       return { ...existingProject, checked };
     }
 
-    const resolvedColor = isHexColor(color) ? color : getFallbackProjectColor(trimmedLabel);
+    const resolvedColor = isProjectColor(color) ? color : getFallbackProjectColor(trimmedLabel);
     const projectId = await createFolder(trimmedLabel, undefined, { color: resolvedColor, cloudSyncEnabled: true });
     const project = { id: projectId, label: trimmedLabel, color: resolvedColor, checked };
     setProjectVisibility(projectId, checked);
@@ -204,7 +182,7 @@ export const useRootFolderProjects = (): UseRootFolderProjectsResult => {
   }, [createFolder, findProjectByLabel, setProjectVisibility]);
 
   const updateRootFolderProjectColor = useCallback(async (projectId: string, color: string) => {
-    if (!isHexColor(color)) return;
+    if (!isProjectColor(color)) return;
 
     await updateFolder(projectId, { folderColor: color });
   }, [updateFolder]);
