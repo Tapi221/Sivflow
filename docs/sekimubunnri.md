@@ -60,9 +60,18 @@ shared/design-tokens
 
 定数は「定数であること」ではなく、「誰の責務か」で置き場所を決める。`constants` という名前に逃がすと、domain、UI、platform、storage、native の責務境界が消えるため禁止する。
 
+そのファイルでしか使わない値は、そのファイル内に定義する。別ファイルに逃がさない。単一ファイル専用の値のために shared、utils、config、constants などの置き場を作らない。
+
+ファイル内では、import、型定義、定数、helper 関数、component 本体、memo / displayName / export の順に置く。単一ファイル専用の定数は import と型定義の後、helper 関数より前に置く。
+
+複数ファイルで使う値だけ、責務を持つ module に昇格する。昇格先は「どの platform で使うか」ではなく「どの責務の値か」で決める。
+
 配置ルール:
 
 ```text
+そのファイルでしか使わない値
+  そのファイル内
+
 domain / usecase の値
   packages/core/src/domain/<domain>/
   packages/core/src/usecase/<usecase>/
@@ -112,13 +121,16 @@ OK: packages/platform/src/storage/storageKeys.ts
 
 NG: constants/shared/app/featureFlags.ts
 OK: packages/platform/src/feature-flags/featureFlags.ts
+
+NG: src/components/card/frame/CardShell.constants.ts
+OK: src/components/card/frame/CardShell.tsx 内に定義する
 ```
 
 barrel export で `@constants` のような横断入口を作ることも禁止する。共通化したい場合は、責務を持つ module から公開する。
 
 ## iPad 手書きモードの責務分離
 
- iPad 手書きモードは `apps/mobile` に直接全部置かない。入力体験、保存形式、表示、同期、native bridge を分けて配置する。スマホには手書きモードのナビも画面も出さない。
+iPad 手書きモードは `apps/mobile` に直接全部置かない。入力体験、保存形式、表示、同期、native bridge を分けて配置する。スマホには手書きモードのナビも画面も出さない。
 
 ```text
 共通Inkモデル
@@ -199,5 +211,6 @@ Web と Tauri は renderer を共有する。
 React Native は別 renderer にする。
 Swift は apps/mobile/ios 配下の native extension として扱う。
 constants フォルダは作らず、責務を持つ module に値を置く。
+そのファイルでしか使わない定数は、そのファイル内に定義する。
 全 platform 共通にしたいものは TypeScript code ではなく、schema / token / asset に寄せる。
 ```
