@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle } from "../../src/features/calendar/grid/weekdayTimeGridGeometry";
 import { getCalendarEventLevels, getCalendarEventSegment } from "../../packages/core/src/calendar/eventLevels";
 import { layoutCalendarTimeGridEvents } from "../../packages/core/src/calendar/timeGridLayout";
 import type { CalendarEvent } from "../../packages/core/src/calendar/calendarEvent.types";
@@ -57,6 +58,37 @@ describe("layoutCalendarTimeGridEvents", () => {
 
     expect(entry.style.top).toBe(0);
     expect(entry.style.height).toBeCloseTo(1.041_666, 6);
+  });
+
+  it("weekday 表示の chip 高さを event duration と同じ時間長にする", () => {
+    const [shortEntry, longEntry] = layoutCalendarTimeGridEvents({
+      events: [
+        buildEvent({
+          id: "0-15",
+          startsAt: new Date(2026, 3, 12, 0, 0),
+          endsAt: new Date(2026, 3, 12, 0, 15),
+        }),
+        buildEvent({
+          id: "33-140",
+          startsAt: new Date(2026, 3, 12, 0, 33),
+          endsAt: new Date(2026, 3, 12, 2, 20),
+        }),
+      ],
+      rangeStart: new Date(2026, 3, 12, 0, 0),
+      rangeEnd: new Date(2026, 3, 13, 0, 0),
+      layoutMode: "no-overlap",
+    });
+
+    const shortFrame = getWeekdayTimedEventFrame(shortEntry);
+    const longFrame = getWeekdayTimedEventFrame(longEntry);
+    const shortStyle = getWeekdayTimedEventPositionStyle(shortEntry);
+    const longStyle = getWeekdayTimedEventPositionStyle(longEntry);
+
+    expect(shortFrame.heightHours).toBeCloseTo(15 / 60, 6);
+    expect(longFrame.heightHours).toBeCloseTo(107 / 60, 6);
+    expect(longFrame.heightHours / shortFrame.heightHours).toBeCloseTo(107 / 15, 6);
+    expect(shortStyle.height).toBe("calc(0.25 * var(--calendar-hour-row-height))");
+    expect(longStyle.height).toBe("calc(1.7833333333333332 * var(--calendar-hour-row-height))");
   });
 
   it("overlap mode では重なる event に横幅と xOffset を割り当てる", () => {
