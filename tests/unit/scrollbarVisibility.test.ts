@@ -33,12 +33,12 @@ const expectScrollbarRevealSelectorsToUseHoverOnly = (css: string) => {
   }
 };
 
-describe("scrollbar visibility styles", () => {
-  it("keeps the shared scrollbar width thin", () => {
+describe("スクロールバーの表示スタイル", () => {
+  it("共通のスクロールバー幅を細い値に保つ", () => {
     expect(readStyleFile("src/styles/index.css")).toContain("--scrollbar-size: 1px;");
   });
 
-  it("reveals global scrollbars only on hover", () => {
+  it("グローバルスクロールバーを hover 時だけ表示する", () => {
     for (const path of SCROLLBAR_STYLE_PATHS) {
       expectScrollbarRevealSelectorsToUseHoverOnly(readStyleFile(path));
     }
