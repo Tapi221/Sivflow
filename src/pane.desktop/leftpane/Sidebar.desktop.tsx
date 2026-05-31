@@ -8,12 +8,21 @@ import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { auth } from "@/services/firebase";
 import { StratisTagIcon } from "@/ui/icons/stratis";
+import { useT } from "@shared/i18n/useT";
 import "./sidebar.desktop.css";
 import "./sidebar.layered-directory.css";
 
+type SidebarTranslationKey =
+  | "sidebarHome"
+  | "sidebarLibrary"
+  | "sidebarTags"
+  | "sidebarSchedule"
+  | "sidebarExplore"
+  | "sidebarSettings";
+
 type SidebarNavItem = {
   id: string;
-  label: string;
+  labelKey: SidebarTranslationKey;
   icon: ReactNode;
   sectionKey?: "home" | "review" | "library" | "schedule" | "settings";
   onClick?: () => void;
@@ -29,30 +38,30 @@ type SidebarProps = {
 const mainNavItems: SidebarNavItem[] = [
   {
     id: "home",
-    label: "Home",
+    labelKey: "sidebarHome",
     icon: <HomeIcon className="app-sidebar__nav-icon" />,
     sectionKey: "home",
   },
   {
     id: "library",
-    label: "Library",
+    labelKey: "sidebarLibrary",
     icon: <ExplorerChromeFolderIcon className="app-sidebar__nav-icon" />,
     sectionKey: "library",
   },
   {
     id: "tags",
-    label: "タグ",
+    labelKey: "sidebarTags",
     icon: <StratisTagIcon className="app-sidebar__nav-icon" />,
   },
   {
     id: "calendar",
-    label: "Schedule",
+    labelKey: "sidebarSchedule",
     icon: <ClockIcon className="app-sidebar__nav-icon" />,
     sectionKey: "schedule",
   },
   {
     id: "explore",
-    label: "探す",
+    labelKey: "sidebarExplore",
     icon: <GalleryIcon className="app-sidebar__nav-icon" />,
   },
 ];
@@ -72,6 +81,7 @@ const SidebarNavLink = ({
   item: SidebarNavItem;
   disabled?: boolean;
 }) => {
+  const t = useT();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
@@ -81,6 +91,7 @@ const SidebarNavLink = ({
       ? null
       : (tabs.find((tab) => tab.id === activeTabId) ?? null);
 
+  const label = t[item.labelKey];
   const isDisabled = disabled ?? item.disabled ?? false;
   const isActive = item.sectionKey !== undefined && activeTab?.sectionKey === item.sectionKey;
 
@@ -97,7 +108,7 @@ const SidebarNavLink = ({
   };
 
   return (
-    <HoverTooltip label={item.label} side="right" offset={0} className="w-8 min-w-8" arrowClassName="hidden">
+    <HoverTooltip label={label} side="right" offset={0} className="w-8 min-w-8" arrowClassName="hidden">
       <button
         type="button"
         onClick={handleClick}
@@ -108,10 +119,10 @@ const SidebarNavLink = ({
           isDisabled && "app-sidebar__nav-link--disabled",
         )}
         aria-current={isActive ? "page" : undefined}
-        aria-label={item.label}
+        aria-label={label}
       >
         <span className="app-sidebar__nav-icon-slot">{item.icon}</span>
-        <span className="app-sidebar__nav-label">{item.label}</span>
+        <span className="app-sidebar__nav-label">{label}</span>
       </button>
     </HoverTooltip>
   );
@@ -122,6 +133,7 @@ const Sidebar = ({
   onToggleClosed,
   onOpenSettings,
 }: SidebarProps) => {
+  const t = useT();
   const openSearch = useSearchStore((s) => s.open);
 
   const mainNavItemsWithActions = mainNavItems.map((item) => ({
@@ -138,19 +150,19 @@ const Sidebar = ({
   const footerItems: SidebarNavItem[] = [
     {
       id: "settings",
-      label: "設定",
+      labelKey: "sidebarSettings",
       icon: <SettingIcon className="app-sidebar__nav-icon" />,
       sectionKey: "settings",
       onClick: onOpenSettings,
     },
   ];
 
-  const sidebarToggleLabel = isClosed ? "サイドバーを開く" : "サイドバーを閉じる";
+  const sidebarToggleLabel = isClosed ? t.sidebarToggleOpen : t.sidebarToggleClose;
 
   return (
     <aside
       className={cn("app-sidebar", isClosed && "app-sidebar--closed")}
-      aria-label="Sidebar"
+      aria-label={t.sidebarAriaLabel}
     >
       <div className="app-sidebar__top">
         <button
@@ -162,7 +174,7 @@ const Sidebar = ({
           <SidebarOpenIcon className="app-sidebar__toggle-icon" />
         </button>
 
-        <nav className="app-sidebar__nav" aria-label="メインナビゲーション">
+        <nav className="app-sidebar__nav" aria-label={t.sidebarMainNavAriaLabel}>
           {mainNavItemsWithActions.map((item) => (
             <SidebarNavLink key={item.id} item={item} />
           ))}
@@ -170,13 +182,13 @@ const Sidebar = ({
       </div>
 
       <div className="app-sidebar__bottom">
-        <HoverTooltip label="ログアウト" side="right" offset={0} className="w-8 min-w-8" arrowClassName="hidden">
-          <button type="button" onClick={handleDevLogout} aria-label="ログアウト">
+        <HoverTooltip label={t.sidebarLogout} side="right" offset={0} className="w-8 min-w-8" arrowClassName="hidden">
+          <button type="button" onClick={handleDevLogout} aria-label={t.sidebarLogout}>
             ろ
           </button>
         </HoverTooltip>
 
-        <nav className="app-sidebar__nav" aria-label="フッターナビゲーション">
+        <nav className="app-sidebar__nav" aria-label={t.sidebarFooterNavAriaLabel}>
           {footerItems.map((item) => (
             <SidebarNavLink key={item.id} item={item} />
           ))}
