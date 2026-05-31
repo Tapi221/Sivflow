@@ -58,11 +58,47 @@ export const createMonthEventIndex = (
     }
   }
 
-  for (const dayEvents of eventIndex.values()) {
-    dayEvents.sort(compareCalendarEvents);
+  return eventIndex;
+};
+
+const insertSortedVisibleEvent = (
+  visibleEvents: GoogleCalendarEvent[],
+  event: GoogleCalendarEvent,
+  maxVisibleEventCandidates: number,
+) => {
+  let insertIndex = visibleEvents.length;
+
+  while (
+    insertIndex > 0 &&
+    compareCalendarEvents(event, visibleEvents[insertIndex - 1]) < 0
+  ) {
+    insertIndex -= 1;
   }
 
-  return eventIndex;
+  if (insertIndex >= maxVisibleEventCandidates) return;
+
+  visibleEvents.splice(insertIndex, 0, event);
+
+  if (visibleEvents.length > maxVisibleEventCandidates) {
+    visibleEvents.length = maxVisibleEventCandidates;
+  }
+};
+
+const getVisibleMonthEvents = (
+  sourceEvents: GoogleCalendarEvent[],
+  maxVisibleEventCandidates: number,
+) => {
+  if (sourceEvents.length <= maxVisibleEventCandidates) {
+    return sourceEvents.slice().sort(compareCalendarEvents);
+  }
+
+  const visibleEvents: GoogleCalendarEvent[] = [];
+
+  for (const event of sourceEvents) {
+    insertSortedVisibleEvent(visibleEvents, event, maxVisibleEventCandidates);
+  }
+
+  return visibleEvents;
 };
 
 export const getVisibleMonthEventChipCount = (
@@ -106,10 +142,15 @@ export const computeMonthEventsByDay = ({
 
       if (!sourceEvents?.length) continue;
 
+      const visibleEvents = getVisibleMonthEvents(
+        sourceEvents,
+        maxVisibleEventCandidates,
+      );
+
       const dayEvents: CalendarMonthDayEvents = {
-        visibleEvents: sourceEvents.slice(0, maxVisibleEventCandidates),
+        visibleEvents,
         totalCount: sourceEvents.length,
-        color: sourceEvents[0]?.accentColor ?? null,
+        color: visibleEvents[0]?.accentColor ?? null,
       };
 
       groupedEvents.set(day.key, dayEvents);
