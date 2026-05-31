@@ -86,8 +86,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("AppLayout desktop sidebar media query", () => {
-  it("desktop layout media query に一致する場合は desktop sidebar を render する", () => {
+describe("AppLayout のサイドバー表示幅判定", () => {
+  it("サイドバーを表示できる画面幅では左サイドバーを表示する", () => {
     setDesktopLayoutMatchMedia(true);
 
     renderAppLayout();
@@ -99,7 +99,7 @@ describe("AppLayout desktop sidebar media query", () => {
     expect(document.querySelector(".app-layout")?.className).not.toContain("app-layout--without-sidebar");
   });
 
-  it("desktop layout media query に一致しない場合は desktop sidebar を render しない", () => {
+  it("サイドバーを表示できない画面幅では左サイドバーを表示しない", () => {
     setDesktopLayoutMatchMedia(false);
 
     renderAppLayout();
