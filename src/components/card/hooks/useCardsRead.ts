@@ -3,7 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { normalizeCardFolderId } from "@/domain/card/normalizers/cardShape";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { buildCardSetById, filterCardsByFolderId } from "@/domain/card/selectors/cardFolder";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import { getLocalDb } from "@/services/localDB";
 import type { Card } from "@/types";
 import { toMillis } from "@/utils/toMillis";
@@ -108,16 +108,16 @@ export const useCardsRead = (
   cardSetId?: string,
   options?: UseCardsReadOptions,
 ) => {
-  const { currentUser } = useAuthSession();
+  const userId = useEffectiveLocalUserId();
   const [error] = useState<string | null>(null);
   const enabled = options?.enabled ?? true;
 
   const rawCards = useLiveQuery(async () => {
     try {
       if (!enabled) return [];
-      if (!currentUser) return [];
+      if (!userId) return undefined;
 
-      const db = await getLocalDb(currentUser.uid);
+      const db = await getLocalDb(userId);
 
       if (cardSetId) {
         try {
@@ -134,7 +134,7 @@ export const useCardsRead = (
             normalizeCardFolderId(folderId),
           );
           const siblingSets = (
-            await db.cardSets.where("userId").equals(currentUser.uid).toArray()
+            await db.cardSets.where("userId").equals(userId).toArray()
           ).filter(
             (set) =>
               !set.isDeleted &&
@@ -164,22 +164,22 @@ export const useCardsRead = (
       console.error(`[useCardsRead] Error: ${message}`);
       return [];
     }
-  }, [currentUser?.uid, folderId, cardSetId, enabled]);
+  }, [userId, folderId, cardSetId, enabled]);
 
   const shouldReadCardSets = enabled && !cardSetId && Boolean(folderId);
 
   const rawCardSets = useLiveQuery(
     async () => {
       if (!shouldReadCardSets) return [];
-      if (!currentUser) return [];
+      if (!userId) return [];
 
-      const db = await getLocalDb(currentUser.uid);
+      const db = await getLocalDb(userId);
       return await db.cardSets
         .where("userId")
-        .equals(currentUser.uid)
+        .equals(userId)
         .toArray();
     },
-    [currentUser?.uid, shouldReadCardSets],
+    [userId, shouldReadCardSets],
     [],
   );
 
