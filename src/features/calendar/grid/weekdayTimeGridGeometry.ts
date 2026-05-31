@@ -22,8 +22,13 @@ const EVENT_COLUMN_INSET_PX = 3;
 const PERCENT_MAX = 100;
 const SHORT_EVENT_THRESHOLD_MINUTES = 30;
 const TIME_GRID_DECIMAL_PLACES = 12;
+const TIME_GRID_FLOATING_POINT_EPSILON = Number.EPSILON * 10;
 
-const normalizeTimeGridNumber = (value: number): number => Number(value.toFixed(TIME_GRID_DECIMAL_PLACES));
+const normalizeTimeGridNumber = (value: number): number => {
+  const rounded = Number(value.toFixed(TIME_GRID_DECIMAL_PLACES));
+
+  return Math.abs(value - rounded) <= TIME_GRID_FLOATING_POINT_EPSILON ? rounded : value;
+};
 
 const getPercentAsHourSpan = (percent: number): number => normalizeTimeGridNumber((percent / PERCENT_MAX) * GRID.WEEKDAY_HOURS);
 
