@@ -47,7 +47,7 @@ const getTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry): Calenda
   left: `calc(${entry.style.xOffset}% + ${EVENT_COLUMN_INSET_PX}px)`,
   top: `calc(${(entry.style.top / PERCENT_MAX) * GRID.WEEKDAY_HOURS} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
   width: `calc(${entry.style.width}% - ${EVENT_COLUMN_GAP_PX + EVENT_COLUMN_INSET_PX}px)`,
-  height: `max(${C.MIN_EVENT_DISPLAY_HEIGHT_PX}px, calc(${(entry.style.height / PERCENT_MAX) * GRID.WEEKDAY_HOURS} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})))`,
+  height: `calc(${(entry.style.height / PERCENT_MAX) * GRID.WEEKDAY_HOURS} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
 });
 
 const getCurrentTimeTopStyle = (now: Date): CSSProperties => ({
@@ -104,7 +104,6 @@ const createTimedLayoutEvents = (events: GoogleCalendarEvent[], day: Date): Cale
     rangeStart,
     rangeEnd,
     layoutMode: "no-overlap",
-    minimumEventDurationMinutes: C.MIN_LAYOUT_MINUTES,
   });
 };
 
