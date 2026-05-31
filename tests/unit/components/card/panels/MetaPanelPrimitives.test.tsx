@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { MetaPanelActionRow, MetaPanelInfoRow, MetaPanelInput, MetaPanelSectionActionButton, MetaPanelSectionHeader, MetaPanelSurfaceField, MetaPanelSwitchRow } from "@/components/card/panels/MetaPanelPrimitives";
 
 describe("MetaPanelPrimitives", () => {
-  it("keeps the shared panel styling contract in one place", () => {
+  it("共有 panel styling contract を 1 か所に保つ", () => {
     render(
       <>
         <MetaPanelActionRow>
@@ -44,7 +44,7 @@ describe("MetaPanelPrimitives", () => {
     );
   });
 
-  it("forwards switch changes through the shared meta panel wrapper", () => {
+  it("switch 変更を共有 meta panel wrapper 経由で転送する", () => {
     const onCheckedChange = vi.fn();
 
     render(
