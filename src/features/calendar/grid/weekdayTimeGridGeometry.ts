@@ -32,7 +32,7 @@ const normalizeTimeGridNumber = (value: number): number => {
   return Math.abs(value - rounded) <= TIME_GRID_FLOATING_POINT_EPSILON ? rounded : value;
 };
 
-const getPercentAsHourSpan = (percent: number): number => normalizeTimeGridNumber((percent / PERCENT_MAX) * GRID.WEEKDAY_HOURS);
+const getPercentAsHourSpan = (percent: number, rangeHours: number): number => normalizeTimeGridNumber((percent / PERCENT_MAX) * rangeHours);
 
 export const getWeekdayTimedEventDurationMinutes = (entry: CalendarTimeGridLayoutEntry): number => {
   return Math.max(0, (entry.event.endsAt.getTime() - entry.event.startsAt.getTime()) / 60_000);
@@ -42,18 +42,18 @@ export const isCompactWeekdayTimedEntry = (entry: CalendarTimeGridLayoutEntry): 
   return getWeekdayTimedEventDurationMinutes(entry) < SHORT_EVENT_THRESHOLD_MINUTES;
 };
 
-export const getWeekdayTimedEventFrame = (entry: CalendarTimeGridLayoutEntry): WeekdayTimedEventFrame => {
+export const getWeekdayTimedEventFrame = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS): WeekdayTimedEventFrame => {
   return {
     leftPercent: entry.style.xOffset,
-    topHours: getPercentAsHourSpan(entry.style.top),
+    topHours: getPercentAsHourSpan(entry.style.top, rangeHours),
     widthPercent: entry.style.width,
-    heightHours: getPercentAsHourSpan(entry.style.height),
+    heightHours: getPercentAsHourSpan(entry.style.height, rangeHours),
     compact: isCompactWeekdayTimedEntry(entry),
   };
 };
 
-export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry): WeekdayTimedEventPositionStyle => {
-  const frame = getWeekdayTimedEventFrame(entry);
+export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS): WeekdayTimedEventPositionStyle => {
+  const frame = getWeekdayTimedEventFrame(entry, rangeHours);
 
   return {
     left: `calc(${frame.leftPercent}% + ${EVENT_COLUMN_INSET_PX}px)`,
