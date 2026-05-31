@@ -11,6 +11,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "types": ["vitest/globals", "node", "vite/client"],
+    "baseUrl": ".",
     "paths": {
       "@/services/localDB": ["src/services/localdb/index.ts"],
       "@/services/firebase": ["src/infrastructure/firebase/client.ts"],
