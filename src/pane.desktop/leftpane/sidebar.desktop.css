@@ -245,10 +245,3 @@
 .app-sidebar__nav-label {
   display: none;
 }
-
-@media (max-width: 767px) {
-  .app-sidebar,
-  .app-right-sidebar {
-    display: none;
-  }
-}
