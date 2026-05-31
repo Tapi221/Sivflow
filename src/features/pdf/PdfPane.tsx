@@ -1,14 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import * as C from "./pdf.constants.desktop";
 import { usePdfWorkspace } from "@/features/pdf/hooks/usePdfWorkspace";
-import { capturePdfViewerRectToBlob } from "./pdfSelectionCapture";
 import { PdfOverlayToolbar } from "./PdfToolbar";
 import { PdfThumbnailSidePanel } from "./PdfThumbnailSidePanel";
 import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
-import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboardImage";
-import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
-import type { SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
 import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
 import type { BlobUrl } from "@/types/core/branded";
@@ -75,9 +71,6 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
     setCurrentPage,
   } = usePdfWorkspace();
   const [isThumbnailPanelOpen, setIsThumbnailPanelOpen] = useState(false);
-  const [isSelectionCaptureActive, setIsSelectionCaptureActive] = useState(false);
-  const [isSelectionCaptureBusy, setIsSelectionCaptureBusy] = useState(false);
-  const [selectionCaptureMessage, setSelectionCaptureMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (workspaceDoc.id === doc.id) {
@@ -109,18 +102,6 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
   }, []);
 
   useEffect(() => {
-    if (!selectionCaptureMessage) return;
-
-    const timeoutId = window.setTimeout(() => {
-      setSelectionCaptureMessage(null);
-    }, 1800);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [selectionCaptureMessage]);
-
-  useEffect(() => {
     if (!DEV_MODE) {
       return;
     }
@@ -148,34 +129,6 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
       delete debugWindow.__getPdfScrollDiagnostics;
     };
   }, [viewerRef]);
-
-  const handleStartSelectionCapture = useCallback(() => {
-    setSelectionCaptureMessage(null);
-    setIsSelectionCaptureActive((isActive) => !isActive);
-  }, []);
-
-  const handleCancelSelectionCapture = useCallback(() => {
-    setIsSelectionCaptureActive(false);
-    setIsSelectionCaptureBusy(false);
-  }, []);
-
-  const handleCaptureSelection = useCallback(async (rect: SelectionCaptureRect) => {
-    const target = containerRef.current;
-    if (!target) return;
-
-    setIsSelectionCaptureBusy(true);
-    try {
-      const blob = await capturePdfViewerRectToBlob(target, rect);
-      await copyImageBlobToClipboard(blob);
-      setSelectionCaptureMessage("範囲をコピーしました");
-      setIsSelectionCaptureActive(false);
-    } catch (error) {
-      console.error("[PdfPane] selection capture failed", error);
-      setSelectionCaptureMessage("範囲コピーに失敗しました");
-    } finally {
-      setIsSelectionCaptureBusy(false);
-    }
-  }, [containerRef]);
 
   const shouldRenderToolbar = !sourceUnavailable && numPages > 0;
   const shouldRenderThumbnailPanel = shouldRenderToolbar && isThumbnailPanelOpen;
@@ -232,23 +185,8 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
                 className="h-full w-full"
               />
 
-              <SelectionCaptureOverlay
-                targetRef={containerRef}
-                active={isSelectionCaptureActive}
-                busy={isSelectionCaptureBusy}
-                onCancel={handleCancelSelectionCapture}
-                onCapture={handleCaptureSelection}
-              />
-
-              {selectionCaptureMessage ? (
-                <div data-selection-capture-ignore="true" className="pointer-events-none absolute left-1/2 top-4 z-[60] -translate-x-1/2 rounded-full border border-slate-900/10 bg-white/95 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm">
-                  {selectionCaptureMessage}
-                </div>
-              ) : null}
-
               {shouldRenderToolbar ? (
                 <div
-                  data-selection-capture-ignore="true"
                   className="pointer-events-none absolute z-20 flex items-end gap-2"
                   style={{
                     right: "max(1rem, env(safe-area-inset-right))",
@@ -272,10 +210,8 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
                       onFitWidth={handleFitWidth}
                       onZoomPercentChange={handleZoomPercentChange}
                       onPageLayoutModeChange={handlePageLayoutModeChange}
-                      onStartSelectionCapture={handleStartSelectionCapture}
                       canGoToPrevPage={canGoToPrevPage}
                       canGoToNextPage={canGoToNextPage}
-                      selectionCaptureActive={isSelectionCaptureActive}
                     />
                   </div>
                 </div>
