@@ -21,7 +21,7 @@ const createStroke = (id = "stroke-1"): InkStroke => ({
 });
 
 describe("desktopHandwritingReceiver", () => {
-  it("applies a stroke delta to the active ink document", () => {
+  it("アクティブなインク文書に stroke delta を適用する", () => {
     const session = createSession();
     const message = createHandwritingStrokeDeltaMessage({ sessionId: session.id, cardId: session.cardId, side: session.side, stroke: createStroke() });
     const result = receiveDesktopHandwritingMessage({ document: createEmptyInkDocument(), session, message, now: 123 });
@@ -34,7 +34,7 @@ describe("desktopHandwritingReceiver", () => {
     expect(result.document.strokes[0].id).toBe("stroke-1");
   });
 
-  it("rejects messages for another session", () => {
+  it("別 session 宛ての message を拒否する", () => {
     const session = createSession();
     const message = createHandwritingStrokeDeltaMessage({ sessionId: "other-session", cardId: session.cardId, side: session.side, stroke: createStroke() });
     const result = receiveDesktopHandwritingMessage({ document: null, session, message });
@@ -44,7 +44,7 @@ describe("desktopHandwritingReceiver", () => {
     expect(result.document.strokes).toHaveLength(0);
   });
 
-  it("rejects messages for another card or side", () => {
+  it("別 card または side 宛ての message を拒否する", () => {
     const session = createSession();
     const wrongCardMessage = createHandwritingStrokeDeltaMessage({ sessionId: session.id, cardId: "other-card", side: session.side, stroke: createStroke("wrong-card") });
     const wrongSideMessage = createHandwritingStrokeDeltaMessage({ sessionId: session.id, cardId: session.cardId, side: "answer", stroke: createStroke("wrong-side") });
@@ -53,7 +53,7 @@ describe("desktopHandwritingReceiver", () => {
     expect(receiveDesktopHandwritingMessage({ document: null, session, message: wrongSideMessage }).reason).toBe("side-mismatch");
   });
 
-  it("returns session status changes from control messages without changing the document", () => {
+  it("制御 message から session status の変更を返し、document は変更しない", () => {
     const session = createSession();
     const document = { ...createEmptyInkDocument(), strokes: [createStroke()] };
     const result = receiveDesktopHandwritingMessage({ document, session, message: { type: "handwriting:session-control", sessionId: session.id, status: "closed", reason: "done" } });
