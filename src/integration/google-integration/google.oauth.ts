@@ -44,6 +44,7 @@ const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_OAUTH_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
 const OAUTH_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
+const DESKTOP_CODE_CALLBACK_POLL_MS = 250;
 const WEB_SERVER_CODE_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 const WEB_SERVER_CODE_CALLBACK_POLL_MS = 250;
 const WEB_AUTH_WINDOW_TARGET = "flashcard-master-google-oauth";
@@ -144,30 +145,77 @@ const buildAuthorizeUrl = ({ accessType, clientId, codeChallenge, includeGranted
 };
 
 const waitForDesktopCode = (state: string, redirectUri: string): Promise<string> => new Promise((resolve, reject) => {
-  const timer = window.setTimeout(() => {
+  const expected = new URL(redirectUri);
+  let settled = false;
+  let timeoutTimer: number | null = null;
+  let pollTimer: number | null = null;
+  let unsubscribe: () => void = () => {};
+
+  const cleanup = (): void => {
+    if (timeoutTimer !== null) window.clearTimeout(timeoutTimer);
+    if (pollTimer !== null) window.clearInterval(pollTimer);
     unsubscribe();
-    reject(new Error("OAuth timeout"));
-  }, OAUTH_CALLBACK_TIMEOUT_MS);
-  const unsubscribe = oauthBridge.onCallback((payload) => {
-    const url = new URL(payload.url);
-    const expected = new URL(redirectUri);
-    if (url.pathname !== expected.pathname) return;
-    const returnedState = payload.state ?? url.searchParams.get("state");
+  };
+
+  const finish = (callback: () => void): void => {
+    if (settled) return;
+    settled = true;
+    cleanup();
+    callback();
+  };
+
+  const handleCallbackUrl = ({ rawUrl, callbackState, callbackCode, callbackError, errorDescription }: { rawUrl: string; callbackState?: string | null; callbackCode?: string | null; callbackError?: string | null; errorDescription?: string | null }): void => {
+    let url: URL;
+    try {
+      url = new URL(rawUrl);
+    } catch {
+      return;
+    }
+
+    if (url.origin !== expected.origin || url.pathname !== expected.pathname) return;
+    const returnedState = callbackState ?? url.searchParams.get("state");
     if (returnedState !== state) return;
-    window.clearTimeout(timer);
-    unsubscribe();
-    const error = payload.error ?? url.searchParams.get("error");
+    const error = callbackError ?? url.searchParams.get("error");
+
     if (error) {
-      reject(new Error(error));
+      finish(() => reject(new Error(errorDescription ?? url.searchParams.get("error_description") ?? error)));
       return;
     }
-    const code = payload.code ?? url.searchParams.get("code");
+
+    const code = callbackCode ?? url.searchParams.get("code");
     if (!code) {
-      reject(new Error("No auth code"));
+      finish(() => reject(new Error("No auth code")));
       return;
     }
-    resolve(code);
-  });
+
+    finish(() => resolve(code));
+  };
+
+  const handleCallbackPayload = (payload: { url: string; state?: string | null; code?: string | null; error?: string | null; errorDescription?: string | null } | null): void => {
+    if (!payload) return;
+    handleCallbackUrl({
+      rawUrl: payload.url,
+      callbackState: payload.state,
+      callbackCode: payload.code,
+      callbackError: payload.error,
+      errorDescription: payload.errorDescription,
+    });
+  };
+
+  const handlePendingCallbackPayload = async (): Promise<void> => {
+    handleCallbackPayload(await oauthBridge.takePendingCallback());
+  };
+
+  const handlePendingCallback = (): void => {
+    void handlePendingCallbackPayload().catch(() => {});
+  };
+
+  timeoutTimer = window.setTimeout(() => {
+    void handlePendingCallbackPayload().catch(() => undefined).finally(() => finish(() => reject(new Error("OAuth timeout"))));
+  }, OAUTH_CALLBACK_TIMEOUT_MS);
+  pollTimer = window.setInterval(handlePendingCallback, DESKTOP_CODE_CALLBACK_POLL_MS);
+  unsubscribe = oauthBridge.onCallback(handleCallbackPayload);
+  handlePendingCallback();
 });
 
 const parseStoredGoogleOAuthCallbackPayload = (): GoogleOAuthCallbackPayload | null => {
