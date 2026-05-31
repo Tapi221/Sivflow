@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ScheduleScreen as DesktopScheduleScreen } from "@/pane.desktop/view/ScheduleScreen.desktop";
+import { ScheduleScreen as DesktopScheduleScreen } from "@/pane.desktop/view/ScheduleScreen.workspace";
 import { ScheduleScreen as MobileScheduleScreen } from "@/pane.desktop/view/ScheduleScreen.mobile";
 
 const MOBILE_SCHEDULE_MEDIA_QUERY = "(max-width: 767px)";
