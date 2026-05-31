@@ -34,9 +34,12 @@ const WEEKDAY_TIMED_EVENT_MIN_LAYOUT_MINUTES = Math.ceil((WEEKDAY_TIMED_EVENT_MI
 const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
 const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const WEEKDAY_TIME_LABEL_CLASS_NAME = "text-[11px] font-medium tabular-nums text-[#b8bcc5]";
-const WEEKDAY_BOTTOM_SPACER_CLASS_NAME = "relative h-8 overflow-hidden";
+const WEEKDAY_BOTTOM_TIME_SPACER_CLASS_NAME = "relative h-8";
+const WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME = "relative h-8 overflow-hidden";
 
 const createEventKey = (event: GoogleCalendarEvent): string => `${event.accountId ?? ""}:${event.calendarId}:${event.id}`;
+
+const isBoundaryHourLabel = (hour: number): boolean => hour === 0 || hour === GRID.WEEKDAY_HOURS;
 
 const isSameCalendarDate = (left: Date, right: Date): boolean => getCalendarDateKey(left) === getCalendarDateKey(right);
 
@@ -46,7 +49,7 @@ const getCurrentTimeTopStyle = (now: Date): CSSProperties => ({
   top: `calc(${(now.getHours() * GRID.WEEKDAY_MINUTES_PER_HOUR + now.getMinutes()) / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
 });
 
-const getHourLabelClassName = (_hour: number): string => cn("absolute right-2 top-0 z-10 -translate-y-1/2 bg-white px-1", WEEKDAY_TIME_LABEL_CLASS_NAME);
+const getHourLabelClassName = (hour: number): string => cn("absolute right-2 top-0 z-10 bg-white px-1", isBoundaryHourLabel(hour) ? null : "-translate-y-1/2", WEEKDAY_TIME_LABEL_CLASS_NAME);
 
 const getHeaderDateNumberClassName = (isSelected: boolean, isToday: boolean): string => cn(WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME, isSelected ? "border-0 bg-[var(--ds-color-tag-sky-bg)] text-[var(--ds-color-tag-sky-fg)] shadow-none ring-0" : isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
 
@@ -199,7 +202,7 @@ const CalendarWeekDayGridComponent = ({
                 <span className={getHourLabelClassName(hour)}>{formatHourLabel(hour)}</span>
               </div>
             ))}
-            <div className={WEEKDAY_BOTTOM_SPACER_CLASS_NAME}>
+            <div className={WEEKDAY_BOTTOM_TIME_SPACER_CLASS_NAME} data-testid="weekday-time-bottom-spacer">
               <span className={getHourLabelClassName(GRID.WEEKDAY_HOURS)}>{formatHourLabel(GRID.WEEKDAY_HOURS)}</span>
             </div>
           </div>
@@ -214,7 +217,7 @@ const CalendarWeekDayGridComponent = ({
                 {WEEKDAY_HOURS.map((hour) => (
                   <div key={hour} className="border-b" style={{ height: `var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})`, borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }} />
                 ))}
-                <div className={WEEKDAY_BOTTOM_SPACER_CLASS_NAME}>
+                <div className={WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME} data-testid="weekday-preview-bottom-spacer">
                   {nextDayPreviewEvents.map((entry) => (
                     <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getWeekdayTimedEventPositionStyle(entry, NEXT_DAY_PREVIEW_HOURS)}>
                       <CalendarEventChipWeekday event={entry.event} compact={isCompactWeekdayTimedEntry(entry)} />
