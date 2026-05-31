@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AppLayout } from "@/layout/AppLayout";
 import { DESKTOP_LAYOUT_MEDIA_QUERY } from "@/layout/hooks/useDesktopLayoutMediaQuery";
@@ -67,11 +67,15 @@ const createMatchMedia = (matches: boolean) => {
     matches,
     media: query,
     onchange: null,
-    addEventListener: (_type: "change", listener: MatchMediaListener) => {
-      listeners.add(listener);
+    addEventListener: (_type: string, listener: EventListenerOrEventListenerObject) => {
+      if (typeof listener === "function") {
+        listeners.add(listener as MatchMediaListener);
+      }
     },
-    removeEventListener: (_type: "change", listener: MatchMediaListener) => {
-      listeners.delete(listener);
+    removeEventListener: (_type: string, listener: EventListenerOrEventListenerObject) => {
+      if (typeof listener === "function") {
+        listeners.delete(listener as MatchMediaListener);
+      }
     },
     addListener: (listener: MatchMediaListener) => {
       listeners.add(listener);
