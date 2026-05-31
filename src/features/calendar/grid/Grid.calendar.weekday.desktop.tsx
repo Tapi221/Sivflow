@@ -14,7 +14,7 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 import { cn } from "@/lib/utils";
 import * as COLOR from "./grid.color.constants.desktop";
 import * as GRID from "./grid.layout.constants.desktop";
-import { getWeekdayTimedEventPositionStyle, isCompactWeekdayTimedEntry } from "./weekdayTimeGridGeometry";
+import { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventPositionStyle, isCompactWeekdayTimedEntry } from "./weekdayTimeGridGeometry";
 
 export type CalendarWeekDayGridRef = {
   scrollToHour: (hour: number) => void;
@@ -29,7 +29,6 @@ const WEEKDAY_HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, hour) => ho
 const CURRENT_TIME_TICK_MS = GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS;
 const END_OF_DAY_HOUR_LABEL = "24:00";
 const NEXT_DAY_PREVIEW_HOURS = 1;
-const WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX = 18;
 const WEEKDAY_TIMED_EVENT_MIN_LAYOUT_MINUTES = Math.ceil((WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX / C.DEFAULT_HOUR_ROW_HEIGHT) * GRID.WEEKDAY_MINUTES_PER_HOUR);
 const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
 const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
