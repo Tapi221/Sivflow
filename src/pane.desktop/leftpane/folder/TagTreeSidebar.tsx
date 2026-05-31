@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getTagColorSwatchStyle } from "@/chip/tag/tagColor";
 import { useCardsRead } from "@/components/card/hooks/useCardsRead";
-import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { getLocalDb } from "@/services/localDB";
@@ -15,7 +14,6 @@ type TagRecordLike = TagRecord;
 type TagTreeNode = {
   id: string;
   name: string;
-  color: string | null;
   parentId: string | null;
   children: TagTreeNode[];
 };
@@ -23,7 +21,6 @@ type TagTreeNode = {
 type VisibleTagTreeNode = {
   id: string;
   name: string;
-  color: string | null;
   level: number;
   hasChildren: boolean;
   isExpanded: boolean;
@@ -67,7 +64,7 @@ const buildTagTreeNodes = (tags: TagRecordLike[]): TagTreeNode[] => {
   const nodeById = new Map<string, TagTreeNode>();
 
   tags.forEach((tag) => {
-    nodeById.set(tag.id, { id: tag.id, name: getTagName(tag), color: tag.color ?? null, parentId: getTagParentId(tag), children: [] });
+    nodeById.set(tag.id, { id: tag.id, name: getTagName(tag), parentId: getTagParentId(tag), children: [] });
   });
 
   const roots: TagTreeNode[] = [];
@@ -98,7 +95,7 @@ const flattenVisibleTagTree = (nodes: TagTreeNode[], expandedTagIds: Set<string>
   const hasChildren = node.children.length > 0;
   const isExpanded = expandedTagIds.has(node.id);
   const nextVisitedTagIds = new Set(visitedTagIds).add(node.id);
-  const item: VisibleTagTreeNode = { id: node.id, name: node.name, color: node.color, level, hasChildren, isExpanded };
+  const item: VisibleTagTreeNode = { id: node.id, name: node.name, level, hasChildren, isExpanded };
 
   if (!hasChildren || !isExpanded) return [item];
 
@@ -166,7 +163,6 @@ const TagTreeRow = ({ item, selectedTagNames, tagContentCountById, onToggleTag, 
   const isSelected = selectedTagNames.has(item.name);
   const contentCount = tagContentCountById.get(item.id) ?? 0;
   const rowPaddingLeft = Math.max(0, item.level - ROOT_LEVEL) * 12;
-  const markerStyle = getTagColorSwatchStyle(item.color ?? undefined);
 
   const handleToggleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -182,7 +178,7 @@ const TagTreeRow = ({ item, selectedTagNames, tagContentCountById, onToggleTag, 
     if (item.hasChildren && !item.isExpanded) onToggleTag(item.id);
   };
 
-  return <div data-tag-id={item.id}><div role="treeitem" aria-level={item.level} aria-expanded={item.hasChildren ? item.isExpanded : undefined} aria-selected={isSelected} className={cn("flex h-7 items-center gap-1 rounded-[10px] pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")} style={{ paddingLeft: rowPaddingLeft }}><button type="button" onClick={handleToggleClick} aria-label={item.isExpanded ? `${item.name} を閉じる` : `${item.name} を開く`} aria-disabled={!item.hasChildren} disabled={!item.hasChildren} className="library-tree-marker" style={markerStyle}><IconChevronRight className={cn("h-3 w-3 transition-transform", item.hasChildren ? "opacity-100" : "opacity-0", item.isExpanded && "rotate-90")} /></button><button type="button" onClick={handleRowClick} title={item.name} className="flex h-7 min-w-0 flex-1 items-center gap-1.5 rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><IconTag className="h-4 w-4 shrink-0 text-[#9aa1ad]" /><span className="min-w-0 flex-1 truncate">{item.name}</span>{contentCount > 0 ? <span className="shrink-0 rounded-full bg-[#eef1f4] px-1.5 py-0.5 text-[10px] font-bold text-[#8b929e]">{contentCount}</span> : null}</button></div></div>;
+  return <div data-tag-id={item.id}><div role="treeitem" aria-level={item.level} aria-expanded={item.hasChildren ? item.isExpanded : undefined} aria-selected={isSelected} className={cn("flex h-7 items-center gap-1 rounded-[10px] pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")} style={{ paddingLeft: rowPaddingLeft }}><button type="button" onClick={handleToggleClick} aria-label={item.isExpanded ? `${item.name} を閉じる` : `${item.name} を開く`} aria-disabled={!item.hasChildren} disabled={!item.hasChildren} className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[#a6adba] transition hover:bg-[#f7f7f8] disabled:pointer-events-none"><IconChevronRight className={cn("h-3 w-3 transition-transform", item.hasChildren ? "opacity-100" : "opacity-0", item.isExpanded && "rotate-90")} /></button><button type="button" onClick={handleRowClick} title={item.name} className="flex h-7 min-w-0 flex-1 items-center gap-1.5 rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><IconTag className="h-4 w-4 shrink-0 text-[#9aa1ad]" /><span className="min-w-0 flex-1 truncate">{item.name}</span>{contentCount > 0 ? <span className="shrink-0 rounded-full bg-[#eef1f4] px-1.5 py-0.5 text-[10px] font-bold text-[#8b929e]">{contentCount}</span> : null}</button></div></div>;
 };
 
 const TagTreeSidebar = () => {
