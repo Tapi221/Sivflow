@@ -6,6 +6,7 @@
 
 | Route | Source | 用途 |
 | --- | --- | --- |
+| `/sandbox/2` | `src/sandbox/2` | selection capture の範囲選択・PNGコピー確認 |
 | `/sandbox/blocknote` | `src/sandbox/blocknote` | BlockNote の表示・操作確認 |
 | `/sandbox/logseq` | `src/sandbox/logseq` | Logseq の設計参考メモ |
 | `/sandbox/anki-fsrs` | `src/sandbox/anki-fsrs` | Anki / FSRS4Anki の復習設計参考 |
