@@ -7,7 +7,7 @@ const flushMicrotasks = async () => {
 };
 
 describe("pdfPageResourceCache", () => {
-  it("does not evict retained pages", async () => {
+  it("retain 中の page を evict しない", async () => {
     const cleanupPage = vi.fn();
     const loadPage = vi.fn(async (pageNumber: number) => ({ pageNumber }));
 
@@ -28,7 +28,7 @@ describe("pdfPageResourceCache", () => {
     retainedPageLease.release();
   });
 
-  it("evicts the least recently used released page", async () => {
+  it("release 済みの least recently used page を evict する", async () => {
     const cleanupPage = vi.fn();
     const loadPage = vi.fn(async (pageNumber: number) => ({ pageNumber }));
 
@@ -50,7 +50,7 @@ describe("pdfPageResourceCache", () => {
     expect(cache.getSize()).toBe(1);
   });
 
-  it("keeps release idempotent", async () => {
+  it("release を冪等に保つ", async () => {
     const cleanupPage = vi.fn();
     const loadPage = vi.fn(async (pageNumber: number) => ({ pageNumber }));
 
