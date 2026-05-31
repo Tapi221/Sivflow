@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
@@ -23,6 +23,13 @@ const getClassTokenValue = (className: string, prefix: string): string => {
   if (!token) throw new Error(`${prefix} spacing token was not found`);
 
   return token.slice(prefix.length);
+};
+
+const normalizeCssColor = (color: string): string => {
+  const element = document.createElement("div");
+  element.style.color = color;
+
+  return element.style.color;
 };
 
 const getWeekdayChipElement = (): HTMLElement => {
@@ -58,6 +65,14 @@ const getWeekdayVisibleTitleElement = (): HTMLElement => {
   return titleElement;
 };
 
+const getListTitleElement = (): HTMLElement => {
+  const titleElement = screen.getAllByText(TIMED_EVENT.title).find((element) => element.className.includes("mt-[0.5px]"));
+
+  if (!(titleElement instanceof HTMLElement)) throw new Error("list event title was not rendered");
+
+  return titleElement;
+};
+
 const getWeekdayTimeElement = (container: HTMLElement): HTMLElement => {
   const timeElement = Array.from(container.querySelectorAll("span")).find((element) => element.className.includes("tabular-nums"));
 
@@ -77,6 +92,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  cleanup();
   vi.unstubAllGlobals();
 });
 
@@ -94,7 +110,7 @@ describe("event chip title/time spacing", () => {
   it("リスト表示のチップもタイトルと時刻の間隔を mt-[0.5px] にする", () => {
     render(<CalendarEventChipList event={TIMED_EVENT} />);
 
-    const titleElement = screen.getByText(TIMED_EVENT.title);
+    const titleElement = getListTitleElement();
 
     expect(titleElement.className).toContain("mt-[0.5px]");
     expect(titleElement.className).not.toContain("mt-0.5");
@@ -107,8 +123,7 @@ describe("event chip title/time spacing", () => {
     unmount();
     render(<CalendarEventChipList event={TIMED_EVENT} />);
 
-    const listTitleElement = screen.getByText(TIMED_EVENT.title);
-    const listSpacing = getClassTokenValue(listTitleElement.className, "mt-");
+    const listSpacing = getClassTokenValue(getListTitleElement().className, "mt-");
 
     expect(listSpacing).toBe(weekdaySpacing);
   });
@@ -144,7 +159,7 @@ describe("weekday event chip grid line mask", () => {
 
     expect(lineMaskElement.getAttribute("style")).toBeNull();
     expect(chipElement.style.background).toBe(tokens.bg);
-    expect(chipElement.style.color).toBe(tokens.text);
+    expect(chipElement.style.color).toBe(normalizeCssColor(tokens.text));
   });
 });
 
