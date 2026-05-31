@@ -25,8 +25,15 @@ type HoverTooltipProps = {
   disabled?: boolean;
 };
 
+const HOVER_CAPABLE_MEDIA_QUERY = "(hover: hover) and (pointer: fine)";
 const TOOLTIP_ARROW_BORDER_CLASS_NAME = "border-[rgba(0,0,0,0.12)]";
 const TOOLTIP_ARROW_SURFACE_CLASS_NAME = "absolute -z-10 rotate-45 rounded-[2px]";
+
+const getCanUseHoverTooltip = () => {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
+
+  return window.matchMedia(HOVER_CAPABLE_MEDIA_QUERY).matches;
+};
 
 const getTransform = (side: TooltipSide, align: TooltipAlign) => {
   if (side === "top") {
@@ -167,6 +174,7 @@ export const HoverTooltip = ({
   disabled = false,
 }: HoverTooltipProps) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
+  const [canUseHoverTooltip, setCanUseHoverTooltip] = useState(getCanUseHoverTooltip);
   const [position, setPosition] = useState<TooltipPosition | null>(null);
 
   const tooltipLabel = label?.trim();
@@ -174,7 +182,7 @@ export const HoverTooltip = ({
   const presetClassNames = TOOLTIP_PRESET_CLASS_NAMES[visualPreset];
 
   const showTooltip = () => {
-    if (disabled || !tooltipLabel || !anchorRef.current) return;
+    if (!canUseHoverTooltip || disabled || !tooltipLabel || !anchorRef.current) return;
 
     const rect = anchorRef.current.getBoundingClientRect();
     setPosition(getPosition(rect, side, offset, align));
@@ -183,6 +191,33 @@ export const HoverTooltip = ({
   const hideTooltip = () => {
     setPosition(null);
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+
+    const mediaQueryList = window.matchMedia(HOVER_CAPABLE_MEDIA_QUERY);
+    const updateCanUseHoverTooltip = () => {
+      const nextCanUseHoverTooltip = mediaQueryList.matches;
+      setCanUseHoverTooltip(nextCanUseHoverTooltip);
+
+      if (!nextCanUseHoverTooltip) {
+        setPosition(null);
+      }
+    };
+
+    updateCanUseHoverTooltip();
+    mediaQueryList.addEventListener("change", updateCanUseHoverTooltip);
+
+    return () => {
+      mediaQueryList.removeEventListener("change", updateCanUseHoverTooltip);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (canUseHoverTooltip && !disabled && tooltipLabel) return;
+
+    setPosition(null);
+  }, [canUseHoverTooltip, disabled, tooltipLabel]);
 
   useEffect(() => {
     if (!position) return;
@@ -207,11 +242,13 @@ export const HoverTooltip = ({
         className={cn("relative flex", className)}
         onMouseEnter={showTooltip}
         onMouseLeave={hideTooltip}
+        onPointerDown={hideTooltip}
       >
         {children}
       </div>
 
-      {position &&
+      {canUseHoverTooltip &&
+        position &&
         tooltipLabel &&
         typeof document !== "undefined" &&
         createPortal(
