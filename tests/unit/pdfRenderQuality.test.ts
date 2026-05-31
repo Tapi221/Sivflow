@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { resolvePdfRenderBackingStore } from "@/components/pdf/pdfRenderQuality";
 
 describe("resolvePdfRenderBackingStore", () => {
-  it("keeps css layout size concerns out of the backing-store calculation", () => {
+  it("CSS layout size の関心事を backing-store 計算から分離する", () => {
     const result = resolvePdfRenderBackingStore({
       viewportWidthPx: 1200,
       viewportHeightPx: 1800,
@@ -15,7 +15,7 @@ describe("resolvePdfRenderBackingStore", () => {
     expect(result.scaleY).toBe(2);
   });
 
-  it("falls back to 1x when the provided device pixel ratio is invalid", () => {
+  it("指定された device pixel ratio が無効なら 1x にフォールバックする", () => {
     const result = resolvePdfRenderBackingStore({
       viewportWidthPx: 1024,
       viewportHeightPx: 768,
