@@ -55,11 +55,16 @@ export type Translations = Omit<RawTranslations, "overflowEvents"> & {
   overflowEvents: (count: number) => string;
 };
 
+const DEFAULT_MY_PROJECTS_LABEL = "MY PROJECTS";
+
 const formatCountTemplate = (template: string, count: number): string =>
   template.replace("{{count}}", String(count));
 
+const normalizeMyProjectsLabel = (label: string): string => label === "myProjects" ? DEFAULT_MY_PROJECTS_LABEL : label;
+
 const toTranslations = (translations: RawTranslations): Translations => ({
   ...translations,
+  myProjects: normalizeMyProjectsLabel(translations.myProjects),
   overflowEvents: (count: number) => formatCountTemplate(translations.overflowEvents, count),
 });
 
