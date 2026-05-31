@@ -1,19 +1,16 @@
 import { useCallback, useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
+import { getTagColorSwatchStyle } from "@/chip/tag/tagColor";
 import { useCardsRead } from "@/components/card/hooks/useCardsRead";
-import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
+import { useTags, type Tag as TagRecord } from "@/features/settings/hooks/useTags";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { getLocalDb } from "@/services/localDB";
-import type { TagRecord } from "@/services/localdb/types";
 import type { Card } from "@/types";
-
-type TagRecordLike = TagRecord;
 
 type TagTreeNode = {
   id: string;
   name: string;
+  color: string | null;
   parentId: string | null;
   children: TagTreeNode[];
 };
@@ -21,6 +18,7 @@ type TagTreeNode = {
 type VisibleTagTreeNode = {
   id: string;
   name: string;
+  color: string | null;
   level: number;
   hasChildren: boolean;
   isExpanded: boolean;
@@ -41,12 +39,12 @@ const IconChevronRight = ({ className }: { className?: string }) => (<svg viewBo
 
 const IconTag = ({ className }: { className?: string }) => (<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M3.5 5.5V9.4c0 .4.16.78.44 1.06l5.6 5.6a1.5 1.5 0 0 0 2.12 0l4.4-4.4a1.5 1.5 0 0 0 0-2.12l-5.6-5.6A1.5 1.5 0 0 0 9.4 3.5H5.5a2 2 0 0 0-2 2Z" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" /><circle cx="7" cy="7" r="1.1" fill="currentColor" /></svg>);
 
-const getTagName = (tag: TagRecordLike): string => {
+const getTagName = (tag: TagRecord): string => {
   const name = tag.name.trim();
   return name.length > 0 ? name : "無題のタグ";
 };
 
-const getTagParentId = (tag: TagRecordLike): string | null => typeof tag.parentId === "string" && tag.parentId.trim().length > 0 ? tag.parentId : null;
+const getTagParentId = (tag: TagRecord): string | null => typeof tag.parentId === "string" && tag.parentId.trim().length > 0 ? tag.parentId : null;
 
 const asStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
@@ -60,11 +58,11 @@ const getCardTagIds = (card: Card): string[] => {
 
 const sortTagTreeNodes = (nodes: TagTreeNode[]): TagTreeNode[] => nodes.sort((left, right) => left.name.localeCompare(right.name, "ja"));
 
-const buildTagTreeNodes = (tags: TagRecordLike[]): TagTreeNode[] => {
+const buildTagTreeNodes = (tags: TagRecord[]): TagTreeNode[] => {
   const nodeById = new Map<string, TagTreeNode>();
 
   tags.forEach((tag) => {
-    nodeById.set(tag.id, { id: tag.id, name: getTagName(tag), parentId: getTagParentId(tag), children: [] });
+    nodeById.set(tag.id, { id: tag.id, name: getTagName(tag), color: tag.color ?? null, parentId: getTagParentId(tag), children: [] });
   });
 
   const roots: TagTreeNode[] = [];
@@ -95,14 +93,14 @@ const flattenVisibleTagTree = (nodes: TagTreeNode[], expandedTagIds: Set<string>
   const hasChildren = node.children.length > 0;
   const isExpanded = expandedTagIds.has(node.id);
   const nextVisitedTagIds = new Set(visitedTagIds).add(node.id);
-  const item: VisibleTagTreeNode = { id: node.id, name: node.name, level, hasChildren, isExpanded };
+  const item: VisibleTagTreeNode = { id: node.id, name: node.name, color: node.color, level, hasChildren, isExpanded };
 
   if (!hasChildren || !isExpanded) return [item];
 
   return [item, ...flattenVisibleTagTree(node.children, expandedTagIds, level + 1, nextVisitedTagIds)];
 });
 
-const buildTagChildrenMap = (tags: TagRecordLike[]): Map<string, string[]> => {
+const buildTagChildrenMap = (tags: TagRecord[]): Map<string, string[]> => {
   const tagIdSet = new Set(tags.map((tag) => tag.id));
   const childrenByParentId = new Map<string, string[]>();
 
@@ -118,7 +116,7 @@ const buildTagChildrenMap = (tags: TagRecordLike[]): Map<string, string[]> => {
   return childrenByParentId;
 };
 
-const buildTagContentCountById = (tags: TagRecordLike[], cards: Card[]): Map<string, number> => {
+const buildTagContentCountById = (tags: TagRecord[], cards: Card[]): Map<string, number> => {
   const directCountById = new Map<string, number>();
   const childrenByParentId = buildTagChildrenMap(tags);
 
@@ -148,21 +146,11 @@ const buildTagContentCountById = (tags: TagRecordLike[], cards: Card[]): Map<str
   return totalCountById;
 };
 
-const useSidebarTags = (): { tags: TagRecordLike[]; loading: boolean } => {
-  const userId = useEffectiveLocalUserId();
-  const tags = useLiveQuery(async () => {
-    if (!userId) return undefined;
-    const db = await getLocalDb(userId);
-    return (await db.tagRecords.where("userId").equals(userId).toArray()).filter((tag) => !tag.isDeleted);
-  }, [userId]);
-
-  return { tags: tags ?? [], loading: tags === undefined };
-};
-
 const TagTreeRow = ({ item, selectedTagNames, tagContentCountById, onToggleTag, onSelectTag }: TagTreeRowProps) => {
   const isSelected = selectedTagNames.has(item.name);
   const contentCount = tagContentCountById.get(item.id) ?? 0;
   const rowPaddingLeft = Math.max(0, item.level - ROOT_LEVEL) * 12;
+  const markerStyle = getTagColorSwatchStyle(item.color ?? undefined);
 
   const handleToggleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -178,12 +166,12 @@ const TagTreeRow = ({ item, selectedTagNames, tagContentCountById, onToggleTag, 
     if (item.hasChildren && !item.isExpanded) onToggleTag(item.id);
   };
 
-  return <div data-tag-id={item.id}><div role="treeitem" aria-level={item.level} aria-expanded={item.hasChildren ? item.isExpanded : undefined} aria-selected={isSelected} className={cn("flex h-7 items-center gap-1 rounded-[10px] pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")} style={{ paddingLeft: rowPaddingLeft }}><button type="button" onClick={handleToggleClick} aria-label={item.isExpanded ? `${item.name} を閉じる` : `${item.name} を開く`} aria-disabled={!item.hasChildren} disabled={!item.hasChildren} className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[#a6adba] transition hover:bg-[#f7f7f8] disabled:pointer-events-none"><IconChevronRight className={cn("h-3 w-3 transition-transform", item.hasChildren ? "opacity-100" : "opacity-0", item.isExpanded && "rotate-90")} /></button><button type="button" onClick={handleRowClick} title={item.name} className="flex h-7 min-w-0 flex-1 items-center gap-1.5 rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><IconTag className="h-4 w-4 shrink-0 text-[#9aa1ad]" /><span className="min-w-0 flex-1 truncate">{item.name}</span>{contentCount > 0 ? <span className="shrink-0 rounded-full bg-[#eef1f4] px-1.5 py-0.5 text-[10px] font-bold text-[#8b929e]">{contentCount}</span> : null}</button></div></div>;
+  return <div data-tag-id={item.id}><div role="treeitem" aria-level={item.level} aria-expanded={item.hasChildren ? item.isExpanded : undefined} aria-selected={isSelected} className={cn("flex h-7 items-center gap-1 rounded-[10px] pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")} style={{ paddingLeft: rowPaddingLeft }}><button type="button" onClick={handleToggleClick} aria-label={item.isExpanded ? `${item.name} を閉じる` : `${item.name} を開く`} aria-disabled={!item.hasChildren} disabled={!item.hasChildren} className="library-tree-marker" style={markerStyle}><IconChevronRight className={cn("h-3 w-3 transition-transform", item.hasChildren ? "opacity-100" : "opacity-0", item.isExpanded && "rotate-90")} /></button><button type="button" onClick={handleRowClick} title={item.name} className="flex h-7 min-w-0 flex-1 items-center gap-1.5 rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><IconTag className="h-4 w-4 shrink-0 text-[#9aa1ad]" /><span className="min-w-0 flex-1 truncate">{item.name}</span>{contentCount > 0 ? <span className="shrink-0 rounded-full bg-[#eef1f4] px-1.5 py-0.5 text-[10px] font-bold text-[#8b929e]">{contentCount}</span> : null}</button></div></div>;
 };
 
 const TagTreeSidebar = () => {
-  const { tags, loading: tagsLoading } = useSidebarTags();
-  const { cards, loading: cardsLoading, error } = useCardsRead();
+  const { tags } = useTags();
+  const { cards, loading, error } = useCardsRead();
   const tagFilter = useExplorerStore((state) => state.tagFilter);
   const setTagFilter = useExplorerStore((state) => state.setTagFilter);
   const clearTagFilter = useExplorerStore((state) => state.clearTagFilter);
@@ -227,7 +215,7 @@ const TagTreeSidebar = () => {
     openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
   }, [clearTagFilter, openExplorerTab, setTagFilter, tagFilter]);
 
-  if (tagsLoading || cardsLoading) return <aside aria-label="Tag tree explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#9aa1ad]">読み込み中...</aside>;
+  if (loading) return <aside aria-label="Tag tree explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#9aa1ad]">読み込み中...</aside>;
   if (error) return <aside aria-label="Tag tree explorer" className="h-full min-h-0 overflow-y-auto px-2 py-1 text-[12px] text-[#b48a8a]">{error}</aside>;
 
   return <aside aria-label="Tag tree explorer" className="h-full min-h-0 overflow-hidden"><div className="h-full min-h-0 overflow-y-auto px-2 pb-2 pt-1"><div role="tree" aria-label="タグツリー" className="flex flex-col gap-0.5">{visibleTagItems.length > 0 ? visibleTagItems.map((item) => <TagTreeRow key={item.id} item={item} selectedTagNames={selectedTagNames} tagContentCountById={tagContentCountById} onToggleTag={handleToggleTag} onSelectTag={handleSelectTag} />) : <p className="px-2 py-2 text-[12px] font-medium text-[#9aa1ad]">タグがありません</p>}</div></div></aside>;
