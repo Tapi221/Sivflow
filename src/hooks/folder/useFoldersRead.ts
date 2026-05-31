@@ -1,6 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import { getLocalDb } from "@/services/localDB";
 
 const isDatabaseClosedError = (error: unknown) => {
@@ -18,12 +18,11 @@ const isDatabaseClosedError = (error: unknown) => {
 };
 
 export const useFoldersRead = () => {
-  const { currentUser } = useAuthSession();
-  const userId = currentUser?.uid ?? null;
+  const userId = useEffectiveLocalUserId();
 
   const folders = useLiveQuery(async () => {
     if (!userId) {
-      return [];
+      return undefined;
     }
 
     try {
@@ -32,12 +31,12 @@ export const useFoldersRead = () => {
 
       const filtered = rawFolders.filter(
         (folder) =>
-          !(
+          !(Boolean(
             (folder as unknown as { isDeleted?: boolean; is_deleted?: boolean })
               .isDeleted ??
             (folder as unknown as { isDeleted?: boolean; is_deleted?: boolean })
-              .is_deleted
-          ),
+              .is_deleted,
+          )),
       );
 
       return filtered.map(normalizeFolder);
