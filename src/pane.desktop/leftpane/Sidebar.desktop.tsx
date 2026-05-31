@@ -1,12 +1,12 @@
-import { signOut } from "firebase/auth";
 import { type MouseEvent, type ReactNode } from "react";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { ClockIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
+import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { auth } from "@/services/firebase";
+import { LogOut } from "@/ui/icons";
 import { StratisTagIcon } from "@/ui/icons/stratis";
 import { useT } from "@shared/i18n/useT";
 import "./sidebar.desktop.css";
@@ -65,14 +65,6 @@ const mainNavItems: SidebarNavItem[] = [
     icon: <GalleryIcon className="app-sidebar__nav-icon" />,
   },
 ];
-
-const handleDevLogout = async () => {
-  try {
-    await signOut(auth);
-  } catch (error) {
-    console.error("[Sidebar] Logout failed:", error);
-  }
-};
 
 const SidebarNavLink = ({
   item,
@@ -134,6 +126,7 @@ const Sidebar = ({
   onOpenSettings,
 }: SidebarProps) => {
   const t = useT();
+  const { logout, loading } = useAuthSession();
   const openSearch = useSearchStore((s) => s.open);
 
   const mainNavItemsWithActions = mainNavItems.map((item) => ({
@@ -159,6 +152,14 @@ const Sidebar = ({
 
   const sidebarToggleLabel = isClosed ? t.sidebarToggleOpen : t.sidebarToggleClose;
 
+  const handleLogoutClick = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("[Sidebar] Logout failed:", error);
+    }
+  };
+
   return (
     <aside
       className={cn("app-sidebar", isClosed && "app-sidebar--closed")}
@@ -183,8 +184,16 @@ const Sidebar = ({
 
       <div className="app-sidebar__bottom">
         <HoverTooltip label={t.sidebarLogout} side="right" offset={0} className="w-8 min-w-8" arrowClassName="hidden">
-          <button type="button" onClick={handleDevLogout} aria-label={t.sidebarLogout}>
-            ろ
+          <button
+            type="button"
+            className={cn("app-sidebar__nav-link", loading && "app-sidebar__nav-link--disabled")}
+            onClick={handleLogoutClick}
+            disabled={loading}
+            aria-label={t.sidebarLogout}
+          >
+            <span className="app-sidebar__nav-icon-slot">
+              <LogOut className="app-sidebar__nav-icon" />
+            </span>
           </button>
         </HoverTooltip>
 
