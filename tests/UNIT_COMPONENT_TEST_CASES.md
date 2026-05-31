@@ -8,3 +8,26 @@
 - [ ] 通常チップの 1 行タイトルは固定 line-height で表示する
 - [ ] 通常チップの時刻も固定 line-height で表示する
 - [ ] 通常チップの時刻は横幅が狭い時に折り返せる
+
+## tests/unit/components/card/blocks/MarkdownBlockContent.test.tsx
+
+- [ ] Markdown本文は常に左揃えになる
+- [ ] 複数段落を個別の p 要素として描画する
+- [ ] 段落の後にリストを別ブロックとして描画する
+- [ ] 2行空行を空白段落として保持する
+- [ ] 本文段落に whitespace 保持用の識別属性を付与する
+- [ ] blockquote 内本文にも whitespace 保持用の識別属性を付与する
+- [ ] blockquote 内の nested paragraph は whitespace selector の対象外にできる DOM 形になる
+
+## tests/unit/components/card/SharedCardContent.test.tsx
+
+- [ ] view mode では共有 root と view scene を描画する
+- [ ] edit mode では共有 root と edit scene を描画する
+
+## tests/unit/components/card/Flashcard.layoutRows.test.tsx
+
+- [ ] flip 前後で同じ高さを維持する
+
+## tests/unit/components/card/MathBlockConsistency.test.tsx
+
+- [ ] viewer and editor-preview path both use mathBlockRoot frame
