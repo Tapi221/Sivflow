@@ -203,7 +203,7 @@ const CalendarWeekDayGridComponent = ({
 
       <div ref={allDayScrollRef} className="shrink-0 overflow-hidden">
         <div className="grid min-w-0" style={{ gridTemplateColumns }}>
-          <div className={cn("flex min-h-10 min-w-0 items-start justify-end px-2 py-2", WEEKDAY_TIME_LABEL_CLASS_NAME)}>終日</div>
+          <div className={cn("flex min-h-10 min-w-0 items-start justify-end py-2 pl-2 pr-3", WEEKDAY_TIME_LABEL_CLASS_NAME)}>終日</div>
           {visibleDays.map((day) => {
             const dayKey = getCalendarDateKey(day);
             const events = allDayEvents.get(dayKey) ?? [];
