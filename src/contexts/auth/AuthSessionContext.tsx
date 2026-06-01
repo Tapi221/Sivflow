@@ -5,7 +5,6 @@ import { hydrateServerStoredGoogleCalendarAccounts } from "@/integration/googlec
 import { auth } from "@/services/firebase";
 import { initializeDB, resetLocalDBForLogout } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-import { createDevPreviewUser, disableDevPreviewSession, isDevPreviewSessionEnabled } from "@/utils/devPreviewSession";
 import { AuthSessionContext, type AuthSessionProviderProps, type AuthSessionContextType } from "./AuthSessionContextCore";
 
 const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
@@ -14,29 +13,7 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   const lastKnownUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (isDevPreviewSessionEnabled()) {
-      const devUser = createDevPreviewUser();
-      lastKnownUserIdRef.current = devUser.uid;
-
-      void bootstrapUser(devUser.uid)
-        .catch((error) => {
-          console.error("[Auth] Dev preview setup error:", error);
-        })
-        .finally(() => {
-          setCurrentUser(devUser);
-          setLoading(false);
-        });
-
-      return;
-    }
-
-    let isInitialCall = true;
-
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (isInitialCall) {
-        isInitialCall = false;
-      }
-
       if (user) {
         lastKnownUserIdRef.current = user.uid;
 
@@ -81,25 +58,7 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   const logout = async () => {
     setLoading(true);
 
-    const previousUserId = lastKnownUserIdRef.current || currentUser?.uid || undefined;
-
     try {
-      if (isDevPreviewSessionEnabled()) {
-        disableDevPreviewSession();
-
-        try {
-          await resetLocalDBForLogout(previousUserId);
-          await initializeDB("anonymous");
-        } catch (error) {
-          console.warn("[Auth] Logout DB reset failed (non-fatal):", error);
-        }
-
-        SyncServiceFactory.resetInstance(previousUserId);
-        lastKnownUserIdRef.current = null;
-        setCurrentUser(null);
-        return;
-      }
-
       await signOut(auth);
     } catch (error) {
       setLoading(false);
