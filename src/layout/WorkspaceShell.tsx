@@ -1,6 +1,4 @@
-import type { CSSProperties, ReactNode, RefObject } from "react";
-import { TabsBar } from "@/pane.desktop/tab.desktopnative/TabsBar";
-import { isDesktopRuntime } from "@/platform/runtime";
+import type { ReactNode, RefObject } from "react";
 
 type WorkspaceShellProps = {
   children: ReactNode;
@@ -8,32 +6,13 @@ type WorkspaceShellProps = {
   mainRef: RefObject<HTMLElement | null>;
 };
 
-const tabsBackgroundStyle: CSSProperties = {
-  background: "var(--backpane-bg)",
-};
-
 export const WorkspaceShell = ({
   children,
   isScrollLocked,
   mainRef,
 }: WorkspaceShellProps) => {
-  const showTabs = isDesktopRuntime();
-
   return (
-    <div
-      className={[
-        "workspace-shell app-layout__content",
-        showTabs ? "workspace-shell--with-tabs" : "workspace-shell--without-tabs",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      {showTabs ? (
-        <div className="workspace-shell__tabs" style={tabsBackgroundStyle}>
-          <TabsBar />
-        </div>
-      ) : null}
-
+    <div className="workspace-shell app-layout__content workspace-shell--without-tabs">
       <main
         ref={mainRef}
         className={[
