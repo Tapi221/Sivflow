@@ -162,7 +162,13 @@ a:hover,
 .scrollbar-hidden,
 .calendar-year-view {
   -ms-overflow-style: none;
+  scrollbar-gutter: auto;
   scrollbar-width: none;
+}
+
+.calendar-year-view {
+  margin-right: calc(-1 * var(--scrollbar-size));
+  padding-right: calc(1rem + var(--scrollbar-size));
 }
 
 .scrollbar-hidden::-webkit-scrollbar,
