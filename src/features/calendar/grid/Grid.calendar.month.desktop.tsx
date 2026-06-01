@@ -10,6 +10,7 @@ import * as T from "@/features/calendar/calendar.text";
 import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
+import { CALENDAR_EVENT_DRAGGING_STYLE, areSameCalendarEventTimes, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragBodyStyle } from "./calendarEventDrag.shared";
 import * as COLOR from "./grid.color.constants.desktop";
 import * as GD from "./grid.layout.constants.desktop";
 
@@ -102,7 +103,6 @@ type CalendarMonthWeekRowProps = {
 };
 
 const MONTH_GRID_BORDER_STYLE: CSSProperties = { borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB };
-const MONTH_EVENT_DRAGGING_STYLE: CSSProperties = { filter: "drop-shadow(0 14px 22px rgba(15, 23, 42, 0.22))", transform: "scale(1.015)", zIndex: 30 };
 const DEFAULT_MONTH_TIMED_EVENT_DURATION_MS = 30 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -112,8 +112,6 @@ const getDayKey = (date: Date): string => {
 
   return `${date.getFullYear()}-${month}-${day}`;
 };
-
-const createEventKey = (event: GoogleCalendarEvent): string => `${event.accountId ?? ""}:${event.calendarId}:${event.id}`;
 
 const getDayAriaLabel = (date: Date): string => `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
 
@@ -132,15 +130,9 @@ const createMonthWeekRowStyle = (monthRowHeight: number): CSSProperties => ({
   minHeight: monthRowHeight,
 });
 
-const toEventDate = (value: Date): Date | null => {
-  const date = value instanceof Date ? value : new Date(value);
-
-  return Number.isFinite(date.getTime()) ? date : null;
-};
-
 const getEventDurationMs = (event: GoogleCalendarEvent): number => {
-  const startsAt = toEventDate(event.startsAt);
-  const endsAt = toEventDate(event.endsAt);
+  const startsAt = getCalendarEventDateOrNull(event.startsAt);
+  const endsAt = getCalendarEventDateOrNull(event.endsAt);
   const durationMs = startsAt && endsAt ? endsAt.getTime() - startsAt.getTime() : 0;
 
   if (durationMs > 0) return durationMs;
@@ -167,14 +159,6 @@ const getMovedMonthEventDateRange = (event: GoogleCalendarEvent, targetDay: Date
   return { previewStartsAt, previewEndsAt, previewIsAllDay: false };
 };
 
-const createPreviewEvent = (event: GoogleCalendarEvent, startsAt: Date, endsAt: Date, isAllDay: boolean): GoogleCalendarEvent => ({ ...event, startsAt, endsAt, isAllDay });
-
-const isCalendarEventDraggable = (event: GoogleCalendarEvent, onMoveCalendarEvent?: CalendarEventMoveHandler): boolean => Boolean(onMoveCalendarEvent && event.accountId);
-
-const areSameEventTimes = (leftStart: Date, leftEnd: Date, rightStart: Date, rightEnd: Date): boolean => leftStart.getTime() === rightStart.getTime() && leftEnd.getTime() === rightEnd.getTime();
-
-const isSameEventMove = (event: GoogleCalendarEvent, previewStartsAt: Date, previewEndsAt: Date, previewIsAllDay: boolean): boolean => event.isAllDay === previewIsAllDay && areSameEventTimes(event.startsAt, event.endsAt, previewStartsAt, previewEndsAt);
-
 const getDistanceToRect = (clientX: number, clientY: number, rect: DOMRect): number => {
   const nearestX = Math.max(rect.left, Math.min(clientX, rect.right));
   const nearestY = Math.max(rect.top, Math.min(clientY, rect.bottom));
@@ -185,13 +169,13 @@ const getDistanceToRect = (clientX: number, clientY: number, rect: DOMRect): num
 const getMonthEventWrapperClassName = (isDraggable: boolean, isDragging: boolean, isPreview = false): string => cn("shrink-0 transition-opacity duration-150 ease-out", isDraggable ? "touch-none cursor-grab select-none active:cursor-grabbing" : null, isDragging ? "opacity-35" : null, isPreview ? "pointer-events-none transition-none" : null);
 
 const createVisibleMonthEventRenderItem = (event: GoogleCalendarEvent): MonthEventRenderItem => {
-  const eventKey = createEventKey(event);
+  const eventKey = createCalendarEventKey(event);
 
   return { event, eventKey, renderKey: eventKey, isDragPreview: false };
 };
 
 const createMonthDragPreviewRenderItem = (event: GoogleCalendarEvent): MonthEventRenderItem => {
-  const eventKey = createEventKey(event);
+  const eventKey = createCalendarEventKey(event);
 
   return { event, eventKey, renderKey: `${eventKey}:preview`, isDragPreview: true };
 };
@@ -243,7 +227,7 @@ const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScroll
               const isDraggable = !isDragPreview && isCalendarEventDraggable(event, onMoveCalendarEvent);
 
               return (
-                <div key={renderKey} className={getMonthEventWrapperClassName(isDraggable, isDragging, isDragPreview)} style={isDragPreview ? MONTH_EVENT_DRAGGING_STYLE : undefined} onClick={isDraggable ? onEventClick : undefined} onPointerDown={isDraggable ? (pointerEvent) => onEventPointerDown(pointerEvent, event) : undefined}>
+                <div key={renderKey} className={getMonthEventWrapperClassName(isDraggable, isDragging, isDragPreview)} style={isDragPreview ? CALENDAR_EVENT_DRAGGING_STYLE : undefined} onClick={isDraggable ? onEventClick : undefined} onPointerDown={isDraggable ? (pointerEvent) => onEventPointerDown(pointerEvent, event) : undefined}>
                   <CalendarEventChipMonth event={event} tooltipDisabled={isDragPreview || isDragging} />
                 </div>
               );
@@ -294,7 +278,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
   const todayDayKey = useMemo(() => getDayKey(today), [today]);
   const eventIndex = useMemo(() => createMonthEventIndex(visibleEvents), [visibleEvents]);
   const eventsByDay = useMemo(() => computeMonthEventsByDay({ eventIndex, monthWeeks, monthRowHeight }), [eventIndex, monthRowHeight, monthWeeks]);
-  const dragPreviewEvent = useMemo(() => dragState ? createPreviewEvent(dragState.event, dragState.previewStartsAt, dragState.previewEndsAt, dragState.previewIsAllDay) : null, [dragState]);
+  const dragPreviewEvent = useMemo(() => dragState ? createCalendarEventDragPreview(dragState.event, dragState.previewStartsAt, dragState.previewEndsAt, dragState.previewIsAllDay) : null, [dragState]);
   const dragPreviewDayKey = dragState ? getDayKey(dragState.previewStartsAt) : null;
 
   const setDragStateValue = useCallback((nextDragState: MonthEventDragState | null) => {
@@ -350,13 +334,13 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
 
     event.preventDefault();
 
-    if (state.previewIsAllDay === preview.previewIsAllDay && areSameEventTimes(state.previewStartsAt, state.previewEndsAt, preview.previewStartsAt, preview.previewEndsAt)) return;
+    if (state.previewIsAllDay === preview.previewIsAllDay && areSameCalendarEventTimes(state.previewStartsAt, state.previewEndsAt, preview.previewStartsAt, preview.previewEndsAt)) return;
 
     setDragStateValue({ ...state, ...preview });
   }, [getMonthDragPreview, setDragStateValue]);
 
   const commitDragState = useCallback((state: MonthEventDragState) => {
-    if (isSameEventMove(state.event, state.previewStartsAt, state.previewEndsAt, state.previewIsAllDay)) return;
+    if (isSameCalendarEventMove(state.event, state.previewStartsAt, state.previewEndsAt, state.previewIsAllDay)) return;
 
     void Promise.resolve(onMoveCalendarEvent?.({ event: state.event, startsAt: state.previewStartsAt, endsAt: state.previewEndsAt, isAllDay: state.previewIsAllDay })).catch((error: unknown) => {
       console.warn("[GridCalendarMonthDesktop] calendar event move failed", error);
@@ -388,7 +372,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
   const handleEventPointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>, calendarEvent: GoogleCalendarEvent) => {
     if (event.button !== 0 || !isCalendarEventDraggable(calendarEvent, onMoveCalendarEvent)) return;
 
-    const eventKey = createEventKey(calendarEvent);
+    const eventKey = createCalendarEventKey(calendarEvent);
     const durationMs = getEventDurationMs(calendarEvent);
     const sourceDayKey = getDayKey(calendarEvent.startsAt);
     const preview = getMonthDragPreview(calendarEvent, durationMs, event.clientX, event.clientY);
@@ -428,20 +412,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
     };
   }, [finishDrag, updateDragPreview]);
 
-  useEffect(() => {
-    if (!dragState || typeof document === "undefined") return undefined;
-
-    const previousCursor = document.body.style.cursor;
-    const previousUserSelect = document.body.style.userSelect;
-
-    document.body.style.cursor = "grabbing";
-    document.body.style.userSelect = "none";
-
-    return () => {
-      document.body.style.cursor = previousCursor;
-      document.body.style.userSelect = previousUserSelect;
-    };
-  }, [dragState]);
+  useCalendarEventDragBodyStyle(Boolean(dragState));
 
   return (
     <>
