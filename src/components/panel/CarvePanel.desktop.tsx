@@ -16,6 +16,7 @@ type CarvePanelShellProps = {
   toolbar?: ReactNode;
   overlay?: ReactNode;
   leftPanel?: ReactNode;
+  isLeftPanelCollapsed?: boolean;
   reserveToolbar?: boolean;
   reserveLeftPanel?: boolean;
   viewportRef?: Ref<HTMLDivElement>;
@@ -34,6 +35,9 @@ const CARVE_PANEL_TOOLBAR_SPACER_CLASS =
   "h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 bg-white";
 
 const CARVE_PANEL_LEFT_SPACER_CLASS = "w-[220px] shrink-0";
+const CARVE_PANEL_LEFT_PANEL_CLASS = "shrink-0 overflow-hidden transition-[width,opacity] duration-180 ease-out";
+const CARVE_PANEL_LEFT_PANEL_OPEN_CLASS = "w-[220px] opacity-100";
+const CARVE_PANEL_LEFT_PANEL_COLLAPSED_CLASS = "w-0 opacity-0 pointer-events-none";
 
 const CARVE_PANEL_VIEWPORT_BASE_CLASS =
   "flex min-h-0 min-w-0 flex-1 flex-col bg-white";
@@ -97,6 +101,7 @@ const CarvePanelShell = ({
   toolbar = null,
   overlay = null,
   leftPanel = null,
+  isLeftPanelCollapsed = false,
   reserveToolbar = false,
   reserveLeftPanel = false,
   viewportRef,
@@ -108,7 +113,17 @@ const CarvePanelShell = ({
     reserveToolbar ? <div aria-hidden="true" className={CARVE_PANEL_TOOLBAR_SPACER_CLASS} /> : null
   );
 
-  const leftPanelNode = leftPanel ?? (
+  const leftPanelNode = leftPanel ? (
+    <div
+      className={cn(
+        CARVE_PANEL_LEFT_PANEL_CLASS,
+        isLeftPanelCollapsed ? CARVE_PANEL_LEFT_PANEL_COLLAPSED_CLASS : CARVE_PANEL_LEFT_PANEL_OPEN_CLASS,
+      )}
+      aria-hidden={isLeftPanelCollapsed}
+    >
+      {leftPanel}
+    </div>
+  ) : (
     reserveLeftPanel ? <div aria-hidden="true" className={CARVE_PANEL_LEFT_SPACER_CLASS} /> : null
   );
 
