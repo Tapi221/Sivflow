@@ -21,7 +21,7 @@ export type WeekdayTimedEventPositionOptions = {
   suppressMinHeight?: boolean;
 };
 
-const EVENT_COLUMN_GAP_PX = 4;
+const EVENT_COLUMN_GAP_PX = 3;
 const EVENT_COLUMN_INSET_PX = 3;
 export const WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX = 18;
 const PERCENT_MAX = 100;
