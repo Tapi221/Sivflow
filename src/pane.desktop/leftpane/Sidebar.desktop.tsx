@@ -130,7 +130,6 @@ const SidebarNavLink = ({
         aria-label={label}
       >
         <span className="app-sidebar__nav-icon-slot">{item.icon}</span>
-        <span className="app-sidebar__nav-label">{label}</span>
       </button>
     </HoverTooltip>
   );
