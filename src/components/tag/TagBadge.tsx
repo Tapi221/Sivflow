@@ -1,8 +1,8 @@
 import type { CSSProperties, SVGProps } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getTagColorStyle, type TagColorKey } from "@/chip/tag/tagColor";
-import { X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
+import { X } from "@/ui/icons";
 
 interface TagBadgeProps {
   label: string;
@@ -20,10 +20,24 @@ const TAG_TEXT_FADE_STYLE: CSSProperties = {
   maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
 };
 
+const TAG_TEXT_STYLE: CSSProperties = {
+  fontFamily: "Arial, Helvetica, sans-serif",
+};
+
 const OVERFLOW_THRESHOLD = 1;
+
+const LONG_DOT_SEQUENCE_PATTERN = /[.。．]{4,}/g;
 
 const isElementTextOverflowing = (element: HTMLElement | null) => {
   return Boolean(element && element.scrollWidth > element.clientWidth + OVERFLOW_THRESHOLD);
+};
+
+const normalizeTagText = (value: string): string => {
+  return value.replace(LONG_DOT_SEQUENCE_PATTERN, "...");
+};
+
+const getTagTextStyle = (isOverflowing: boolean): CSSProperties => {
+  return isOverflowing ? { ...TAG_TEXT_STYLE, ...TAG_TEXT_FADE_STYLE } : TAG_TEXT_STYLE;
 };
 
 const useTextOverflow = (value: string) => {
@@ -91,7 +105,8 @@ export const TagBadge = ({
 }: TagBadgeProps) => {
   const resolvedColorStyle = getTagColorStyle(colorKey);
 
-  const textLabel = label.startsWith("#") ? label.slice(1) : label;
+  const rawTextLabel = label.startsWith("#") ? label.slice(1) : label;
+  const textLabel = normalizeTagText(rawTextLabel);
   const displayLabel = `#${textLabel}`;
   const { isOverflowing, textRef } = useTextOverflow(textLabel);
 
@@ -101,7 +116,7 @@ export const TagBadge = ({
       <span
         ref={textRef}
         className={cn("min-w-0 overflow-hidden whitespace-nowrap opacity-70", textClassName)}
-        style={isOverflowing ? TAG_TEXT_FADE_STYLE : undefined}
+        style={getTagTextStyle(isOverflowing)}
       >
         {textLabel}
       </span>
