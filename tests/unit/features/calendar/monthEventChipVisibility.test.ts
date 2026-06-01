@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeMonthEventsByDay, getVisibleMonthEventChipCount } from "@/chip/eventchip/EventChip.month.placement";
+import { computeMonthEventsByDay, createMonthEventIndex, getVisibleMonthEventChipCount } from "@/chip/eventchip/EventChip.month.placement";
 import { DEFAULT_MONTH_ROW_HEIGHT } from "@/features/calendar/calendar.constants.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
@@ -38,6 +38,23 @@ describe("month event chip visibility", () => {
 });
 
 describe("computeMonthEventsByDay", () => {
+  it("許可された日付だけをイベント索引に入れる", () => {
+    const event = createEvent({
+      id: "range",
+      startsAt: new Date(2026, 0, 1),
+      endsAt: new Date(2026, 0, 4),
+    });
+
+    const index = createMonthEventIndex(
+      [event],
+      new Set(["2026-01-02"]),
+    );
+
+    expect(index.has("2026-01-01")).toBe(false);
+    expect(index.get("2026-01-02")?.map((item) => item.id)).toEqual(["range"]);
+    expect(index.has("2026-01-03")).toBe(false);
+  });
+
   it("月表示の日別イベントを並び順と表示件数つきで集約する", () => {
     const monthWeeks = [
       {

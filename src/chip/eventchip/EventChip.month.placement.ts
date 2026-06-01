@@ -43,11 +43,14 @@ const getMonthEventChipCount = (contentHeight: number) => {
 
 export const createMonthEventIndex = (
   visibleEvents: GoogleCalendarEvent[],
+  allowedDayKeys?: ReadonlySet<string>,
 ): CalendarMonthEventIndex => {
   const eventIndex = new Map<string, GoogleCalendarEvent[]>();
 
   for (const event of visibleEvents) {
     for (const dayKey of getEventDateKeys(event)) {
+      if (allowedDayKeys && !allowedDayKeys.has(dayKey)) continue;
+
       const dayEvents = eventIndex.get(dayKey);
 
       if (dayEvents) {
@@ -59,6 +62,20 @@ export const createMonthEventIndex = (
   }
 
   return eventIndex;
+};
+
+const createMonthWeekDayKeySet = (
+  monthWeeks: CalendarMonthPlacementWeek[],
+): Set<string> => {
+  const dayKeys = new Set<string>();
+
+  for (const week of monthWeeks) {
+    for (const day of week.days) {
+      dayKeys.add(day.key);
+    }
+  }
+
+  return dayKeys;
 };
 
 const insertSortedVisibleEvent = (
@@ -131,7 +148,7 @@ export const computeMonthEventsByDay = ({
   monthWeeks: CalendarMonthPlacementWeek[];
   monthRowHeight: number;
 }) => {
-  const eventsByDayKey = eventIndex ?? createMonthEventIndex(visibleEvents ?? []);
+  const eventsByDayKey = eventIndex ?? createMonthEventIndex(visibleEvents ?? [], createMonthWeekDayKeySet(monthWeeks));
   const groupedEvents = new Map<string, CalendarMonthDayEvents>();
   const maxVisibleEventCandidates =
     getVisibleMonthEventChipCount(Number.MAX_SAFE_INTEGER, monthRowHeight) + 1;
