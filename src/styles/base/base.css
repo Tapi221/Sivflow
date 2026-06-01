@@ -7,7 +7,7 @@
     --app-bg-dot-gap: 14px;
     --app-loading-spinner-track: rgba(148, 163, 184, 0.18);
     --app-loading-spinner-indicator: rgba(100, 116, 139, 0.64);
-    --app-highlight-bg: rgba(0, 122, 255, 0.24);
+    --app-highlight-bg: #d5eefd;
   }
 
   *,
