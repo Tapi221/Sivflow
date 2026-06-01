@@ -4,152 +4,39 @@ import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.week
 import type { CalendarGridStyle, CalendarTimedEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
+type SampleEventDefinition = { id: string; title: string; startsAt: Date; endsAt: Date; isAllDay?: boolean; accentColor: string };
+
 const SANDBOX_ACCOUNT_ID = "calendar-dnd-sandbox";
 const SANDBOX_CALENDAR_ID = "sandbox-calendar";
 const SAMPLE_START_DATE = new Date(2026, 5, 1);
 const CALENDAR_GRID_STYLE: CalendarGridStyle = { "--calendar-hour-row-height": "72px" };
-const SAMPLE_EVENTS: readonly GoogleCalendarEvent[] = [
-  {
-    id: "midnight-review",
-    accountId: SANDBOX_ACCOUNT_ID,
-    calendarId: SANDBOX_CALENDAR_ID,
-    title: "深夜レビュー",
-    startsAt: new Date(2026, 5, 1, 0, 30),
-    endsAt: new Date(2026, 5, 1, 1, 30),
-    isAllDay: false,
-    accentColor: "#0ea5e9",
-  },
-  {
-    id: "early-vocab",
-    accountId: SANDBOX_ACCOUNT_ID,
-    calendarId: SANDBOX_CALENDAR_ID,
-    title: "早朝英単語",
-    startsAt: new Date(2026, 5, 2, 2, 0),
-    endsAt: new Date(2026, 5, 2, 3, 0),
-    isAllDay: false,
-    accentColor: "#22c55e",
-  },
-  {
-    id: "visible-overlap-a",
-    accountId: SANDBOX_ACCOUNT_ID,
-    calendarId: SANDBOX_CALENDAR_ID,
-    title: "重なり確認 A",
-    startsAt: new Date(2026, 5, 3, 3, 15),
-    endsAt: new Date(2026, 5, 3, 4, 30),
-    isAllDay: false,
-    accentColor: "#a78bfa",
-  },
-  {
-    id: "visible-overlap-b",
-    accountId: SANDBOX_ACCOUNT_ID,
-    calendarId: SANDBOX_CALENDAR_ID,
-    title: "重なり確認 B",
-    startsAt: new Date(2026, 5, 3, 3, 45),
-    endsAt: new Date(2026, 5, 3, 4, 15),
-    isAllDay: false,
-    accentColor: "#ec4899",
-  },
-  {
-    id: "morning-visible",
-    accountId: SANDBOX_ACCOUNT_ID,
-    calendarId: SANDBOX_CALENDAR_ID,
-    title: "朝の移動テスト",
-    startsAt: new Date(2026, 5, 4, 6, 15),
-    endsAt: new Date(2026, 5, 4, 7, 15),
-    isAllDay: false,
-    accentColor: "#f97316",
-  },
-  {
-    id: "morning-review",
-    accountId: SANDBOX_ACCOUNT_ID,
-    calendarId: SANDBOX_CALENDAR_ID,
-    title: "朝の復習セッション",
-    startsAt: new Date(2026, 5, 1, 9, 0),
-    endsAt: new Date(2026, 5, 1, 10, 15),
-    isAllDay: false,
-    accentColor: "#38bdf8",
-  },
-  {
-    id: "overlap-short",
-    accountId: SANDBOX_ACCOUNT_ID,
-    calendarId: SANDBOX_CALENDAR_ID,
-    title: "英単語 20 枚",
-    startsAt: new Date(2026, 5, 1, 9, 20),
-    endsAt: new Date(2026, 5, 1, 9, 55),
-    isAllDay: false,
-    accentColor: "#22c55e",
-  },
-  {
-    id: "deck-maintenance",
-    accountId: SANDBOX_ACCOUNT_ID,
-    calendarId: SANDBOX_CALENDAR_ID,
-    title: "デッキ整理",
-    startsAt: new Date(2026, 5, 2, 10, 0),
-    endsAt: new Date(2026, 5, 2, 11, 30),
-    isAllDay: false,
-    accentColor: "#a78bfa",
-  },
-  {
-    id: "reading-block",
-    accountId: SANDBOX_ACCOUNT_ID,
-    calendarId: SANDBOX_CALENDAR_ID,
-    title: "PDF 読解",
-    startsAt: new Date(2026, 5, 3, 13, 0),
-    endsAt: new Date(2026, 5, 3, 14, 30),
-    isAllDay: false,
-    accentColor: "#f97316",
-  },
-  {
-    id: "dense-a",
-    accountId: SANDBOX_ACCOUNT_ID,
-    calendarId: SANDBOX_CALENDAR_ID,
-    title: "復習予定 A",
-    startsAt: new Date(2026, 5, 3, 13, 15),
-    endsAt: new Date(2026, 5, 3, 15, 0),
-    isAllDay: false,
-    accentColor: "#ec4899",
-  },
-  {
-    id: "dense-b",
-    accountId: SANDBOX_ACCOUNT_ID,
-    calendarId: SANDBOX_CALENDAR_ID,
-    title: "復習予定 B",
-    startsAt: new Date(2026, 5, 3, 13, 45),
-    endsAt: new Date(2026, 5, 3, 14, 15),
-    isAllDay: false,
-    accentColor: "#eab308",
-  },
-  {
-    id: "all-day-note",
-    accountId: SANDBOX_ACCOUNT_ID,
-    calendarId: SANDBOX_CALENDAR_ID,
-    title: "終日イベントはドラッグ対象外",
-    startsAt: new Date(2026, 5, 4, 0, 0),
-    endsAt: new Date(2026, 5, 5, 0, 0),
-    isAllDay: true,
-    accentColor: "#14b8a6",
-  },
+const SAMPLE_EVENT_DEFINITIONS: readonly SampleEventDefinition[] = [
+  { id: "midnight-review", title: "深夜レビュー", startsAt: new Date(2026, 5, 1, 0, 30), endsAt: new Date(2026, 5, 1, 1, 30), accentColor: "#0ea5e9" },
+  { id: "early-vocab", title: "早朝英単語", startsAt: new Date(2026, 5, 2, 2, 0), endsAt: new Date(2026, 5, 2, 3, 0), accentColor: "#22c55e" },
+  { id: "visible-overlap-a", title: "重なり確認 A", startsAt: new Date(2026, 5, 3, 3, 15), endsAt: new Date(2026, 5, 3, 4, 30), accentColor: "#a78bfa" },
+  { id: "visible-overlap-b", title: "重なり確認 B", startsAt: new Date(2026, 5, 3, 3, 45), endsAt: new Date(2026, 5, 3, 4, 15), accentColor: "#ec4899" },
+  { id: "morning-visible", title: "朝の移動テスト", startsAt: new Date(2026, 5, 4, 6, 15), endsAt: new Date(2026, 5, 4, 7, 15), accentColor: "#f97316" },
+  { id: "morning-review", title: "朝の復習セッション", startsAt: new Date(2026, 5, 1, 9, 0), endsAt: new Date(2026, 5, 1, 10, 15), accentColor: "#38bdf8" },
+  { id: "overlap-short", title: "英単語 20 枚", startsAt: new Date(2026, 5, 1, 9, 20), endsAt: new Date(2026, 5, 1, 9, 55), accentColor: "#22c55e" },
+  { id: "deck-maintenance", title: "デッキ整理", startsAt: new Date(2026, 5, 2, 10, 0), endsAt: new Date(2026, 5, 2, 11, 30), accentColor: "#a78bfa" },
+  { id: "reading-block", title: "PDF 読解", startsAt: new Date(2026, 5, 3, 13, 0), endsAt: new Date(2026, 5, 3, 14, 30), accentColor: "#f97316" },
+  { id: "dense-a", title: "復習予定 A", startsAt: new Date(2026, 5, 3, 13, 15), endsAt: new Date(2026, 5, 3, 15, 0), accentColor: "#ec4899" },
+  { id: "dense-b", title: "復習予定 B", startsAt: new Date(2026, 5, 3, 13, 45), endsAt: new Date(2026, 5, 3, 14, 15), accentColor: "#eab308" },
+  { id: "all-day-note", title: "終日イベントはドラッグ対象外", startsAt: new Date(2026, 5, 4, 0, 0), endsAt: new Date(2026, 5, 5, 0, 0), isAllDay: true, accentColor: "#14b8a6" },
 ] as const;
 
-const cloneEvent = (event: GoogleCalendarEvent): GoogleCalendarEvent => ({
-  ...event,
-  startsAt: new Date(event.startsAt),
-  endsAt: new Date(event.endsAt),
-});
+const createSampleEvent = (definition: SampleEventDefinition): GoogleCalendarEvent => ({ accountId: SANDBOX_ACCOUNT_ID, calendarId: SANDBOX_CALENDAR_ID, isAllDay: false, ...definition, startsAt: new Date(definition.startsAt), endsAt: new Date(definition.endsAt) });
 
-const createSampleEvents = (): GoogleCalendarEvent[] => SAMPLE_EVENTS.map(cloneEvent);
+const cloneEvent = (event: GoogleCalendarEvent): GoogleCalendarEvent => ({ ...event, startsAt: new Date(event.startsAt), endsAt: new Date(event.endsAt) });
+
+const createSampleEvents = (): GoogleCalendarEvent[] => SAMPLE_EVENT_DEFINITIONS.map(createSampleEvent);
 
 const createVisibleDays = (): Date[] => Array.from({ length: 5 }, (_, index) => addDays(startOfDay(SAMPLE_START_DATE), index));
 
-const moveEventTime = (targetEvent: GoogleCalendarEvent, sourceEvent: GoogleCalendarEvent, startsAt: Date, endsAt: Date): GoogleCalendarEvent => {
+const moveEventTime = (targetEvent: GoogleCalendarEvent, sourceEvent: GoogleCalendarEvent, startsAt: Date, endsAt: Date, isAllDay: boolean): GoogleCalendarEvent => {
   if (targetEvent.id !== sourceEvent.id) return targetEvent;
 
-  return {
-    ...targetEvent,
-    startsAt: new Date(startsAt),
-    endsAt: new Date(endsAt),
-    isAllDay: false,
-  };
+  return { ...targetEvent, startsAt: new Date(startsAt), endsAt: new Date(endsAt), isAllDay };
 };
 
 const CalendarDndSandboxPage = () => {
@@ -157,14 +44,14 @@ const CalendarDndSandboxPage = () => {
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const visibleDays = useMemo(() => createVisibleDays(), []);
-  const [events, setEvents] = useState<GoogleCalendarEvent[]>(createSampleEvents);
+  const [events, setEvents] = useState<GoogleCalendarEvent[]>(() => createSampleEvents().map(cloneEvent));
 
-  const handleMoveTimedEvent = useCallback<CalendarTimedEventMoveHandler>((event, startsAt, endsAt) => {
-    setEvents((currentEvents) => currentEvents.map((currentEvent) => moveEventTime(currentEvent, event, startsAt, endsAt)));
+  const handleMoveTimedEvent = useCallback<CalendarTimedEventMoveHandler>((event, startsAt, endsAt, isAllDay = false) => {
+    setEvents((currentEvents) => currentEvents.map((currentEvent) => moveEventTime(currentEvent, event, startsAt, endsAt, isAllDay)));
   }, []);
 
   const handleReset = useCallback(() => {
-    setEvents(createSampleEvents());
+    setEvents(createSampleEvents().map(cloneEvent));
   }, []);
 
   return (
@@ -175,7 +62,7 @@ const CalendarDndSandboxPage = () => {
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-300">Calendar DND Sandbox</p>
               <h1 className="mt-2 text-2xl font-bold tracking-tight text-white">週カレンダー DnD 操作確認</h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">初期表示範囲の 00:30 / 02:00 / 03:15 / 06:15 にドラッグ可能な event を置いてあります。別日・別時刻に動かすと、15分単位で snap して sandbox 内の state だけを更新します。</p>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">初期表示範囲の 00:30 / 02:00 / 03:15 / 06:15 にドラッグ可能な event を置いてあります。別日・別時刻・終日行に動かすと sandbox 内の state だけを更新します。</p>
             </div>
             <button type="button" className="rounded-full border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-900" onClick={handleReset}>Reset</button>
           </div>
