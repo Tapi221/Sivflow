@@ -75,6 +75,13 @@ const CalendarTimeGridSandboxPage = DEV_MODE
       })),
     )
   : null;
+const CalendarDndSandboxPage = DEV_MODE
+  ? lazy(() =>
+      import("@/sandbox/calendar-dnd").then(({ CalendarDndSandboxPage }) => ({
+        default: CalendarDndSandboxPage,
+      })),
+    )
+  : null;
 
 const withDevRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
@@ -178,6 +185,13 @@ export const getDevRouteElements = () => {
         <Route
           path="sandbox/calendar-time-grid/*"
           element={withDevRouteFallback(<CalendarTimeGridSandboxPage />)}
+        />
+      ) : null}
+
+      {CalendarDndSandboxPage ? (
+        <Route
+          path="sandbox/calendar-dnd/*"
+          element={withDevRouteFallback(<CalendarDndSandboxPage />)}
         />
       ) : null}
     </>
