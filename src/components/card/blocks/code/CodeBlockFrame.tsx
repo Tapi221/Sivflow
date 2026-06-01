@@ -71,7 +71,7 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
           </div>
         )}
 
-        <div className="codeBlockBody codeBlockBody--withHeader scrollbar-hidden relative">
+        <div className="codeBlockBody codeBlockBody--withHeader relative">
           {children}
         </div>
       </RowSnappedRoot>
