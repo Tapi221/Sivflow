@@ -6,6 +6,7 @@ import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import type { ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
+import { useCalendarEventMoveController, applyCalendarEventMoveOverrides } from "@/features/calendar/useCalendarEventMoveController";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { cn } from "@/lib/utils";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
@@ -21,7 +22,9 @@ export const ScheduleScreen = (_props: ScheduleScreenProps) => {
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
-  const { selectedViewMode, currentDate, selectedDate, titleDate, monthTitleDate, monthScrollTargetToken, visibleDays, googleCalendarEvents, googleAccounts, calendarGridStyle, headerScrollRef, allDayScrollRef, scrollContainerRef, contentViewportRef, handleCalendarScroll, handleSelectViewMode, handleSidebarSelectDate, handleVisibleDateChange, handleVisibleMonthChange, handlePrevious, handleNext, handleToday, handleMonthCellSelectDate, handleMonthRenderedRangeChange } = pane;
+  const { selectedViewMode, currentDate, selectedDate, titleDate, monthTitleDate, monthScrollTargetToken, visibleDays, googleCalendarEvents, googleAccounts, calendarGridStyle, headerScrollRef, allDayScrollRef, scrollContainerRef, contentViewportRef, handleCalendarScroll, handleSelectViewMode, handleSidebarSelectDate, handleVisibleDateChange, handleVisibleMonthChange, handlePrevious, handleNext, handleToday, handleMonthCellSelectDate, handleMonthRenderedRangeChange, updateGoogleCalendarEvent } = pane;
+  const { calendarEventMoveOverrides, handleMoveCalendarEvent } = useCalendarEventMoveController({ updateGoogleCalendarEvent });
+  const visibleGoogleCalendarEvents = useMemo(() => applyCalendarEventMoveOverrides(googleCalendarEvents, calendarEventMoveOverrides), [calendarEventMoveOverrides, googleCalendarEvents]);
   const viewOptions = useMemo(() => [{ value: "month", label: t.viewMonth }, { value: "week", label: t.viewWeek }, { value: "threeDays", label: t.viewThreeDays }, { value: "days", label: t.viewDay }, { value: "pieChart", label: t.viewPieChart }] as const, [t.viewDay, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewWeek]);
   const isMonthCalendarView = selectedViewMode === "month";
   const isPieChartCalendarView = selectedViewMode === "pieChart";
@@ -53,14 +56,14 @@ export const ScheduleScreen = (_props: ScheduleScreenProps) => {
 
   const renderCalendarContent = () => {
     if (isPieChartCalendarView) {
-      return <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">{renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}<div className="mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border border-[#eeeeee] bg-white"><CalendarPieChartView days={visibleDays} selectedDate={selectedDate} events={googleCalendarEvents} appProjects={EMPTY_APP_PROJECTS} googleAccounts={googleAccounts} onSelectDate={handleSidebarSelectDate} onVisibleDateChange={handleVisibleDateChange} /></div></CarvePanel>;
+      return <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">{renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}<div className="mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border border-[#eeeeee] bg-white"><CalendarPieChartView days={visibleDays} selectedDate={selectedDate} events={visibleGoogleCalendarEvents} appProjects={EMPTY_APP_PROJECTS} googleAccounts={googleAccounts} onSelectDate={handleSidebarSelectDate} onVisibleDateChange={handleVisibleDateChange} /></div></CarvePanel>;
     }
 
     if (isMonthCalendarView) {
-      return <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">{renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}<div className={cn("schedule-mobile-month-surface mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border", IOS_CALENDAR_MONTH_SURFACE_CLASS)}><CalendarMonthView currentDate={currentDate} selectedDate={selectedDate} scrollTargetToken={monthScrollTargetToken} visibleEvents={googleCalendarEvents} onSelectDate={handleSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onRenderedRangeChange={handleMonthRenderedRangeChange} /></div></CarvePanel>;
+      return <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">{renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}<div className={cn("schedule-mobile-month-surface mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border", IOS_CALENDAR_MONTH_SURFACE_CLASS)}><CalendarMonthView currentDate={currentDate} selectedDate={selectedDate} scrollTargetToken={monthScrollTargetToken} visibleEvents={visibleGoogleCalendarEvents} onSelectDate={handleSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onRenderedRangeChange={handleMonthRenderedRangeChange} /></div></CarvePanel>;
     }
 
-    return <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">{renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}<div className={cn("mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border", IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={googleCalendarEvents} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} /></div></CarvePanel>;
+    return <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">{renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}<div className={cn("mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border", IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={visibleGoogleCalendarEvents} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onMoveCalendarEvent={handleMoveCalendarEvent} /></div></CarvePanel>;
   };
 
   return <div ref={contentViewportRef} className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]"><style>{MOBILE_SCHEDULE_STYLE}</style><main className="min-h-0 flex-1 overflow-y-auto bg-white pb-[calc(env(safe-area-inset-bottom)+16px)] pt-3">{renderCalendarContent()}</main></div>;
