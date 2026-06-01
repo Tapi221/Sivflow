@@ -13,7 +13,7 @@ import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.94)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-none";
-const MOBILE_SCHEDULE_STYLE = `@media (max-width: 767px) { .schedule-mobile-month-surface .calendar-month-view { --calendar-month-row-height: 82px !important; } .schedule-mobile-month-surface .calendar-month-row-boundary-resize-handle { display: none !important; } }`;
+const MOBILE_SCHEDULE_STYLE = "@media (max-width: 767px) { .schedule-mobile-month-surface .calendar-month-view { --calendar-month-row-height: 82px !important; } .schedule-mobile-month-surface .calendar-month-row-boundary-resize-handle { display: none !important; } }";
 const EMPTY_APP_PROJECTS = [];
 
 export const ScheduleScreen = (_props: ScheduleScreenProps) => {
