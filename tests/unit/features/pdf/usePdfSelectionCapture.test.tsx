@@ -1,18 +1,18 @@
 // @vitest-environment jsdom
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
+import type { SelectionCaptureArea } from "@/features/selection-capture/selectionCapture.types";
 
 const state = vi.hoisted(() => {
   return {
-    capturePdfViewerRectToBlob: vi.fn(),
+    capturePdfViewerAreaToBlob: vi.fn(),
     copyImageBlobToClipboard: vi.fn(),
     recognizeSelectionCaptureText: vi.fn(),
   };
 });
 
 vi.mock("@/features/pdf/pdfSelectionCapture", () => ({
-  capturePdfViewerRectToBlob: state.capturePdfViewerRectToBlob,
+  capturePdfViewerAreaToBlob: state.capturePdfViewerAreaToBlob,
 }));
 
 vi.mock("@/features/selection-capture/clipboardImage", () => ({
@@ -26,11 +26,14 @@ vi.mock("@/features/selection-capture/selectionCaptureOcr", () => ({
 import { usePdfSelectionCapture } from "@/features/pdf/hooks/usePdfSelectionCapture";
 import { CARD_SELECTION_CAPTURE_EVENT, type CardSelectionCaptureEventDetail } from "@/features/selection-capture/cardSelectionCaptureEvents";
 
-const CAPTURE_RECT: SelectionCaptureRect = {
-  x: 4,
-  y: 8,
-  width: 120,
-  height: 64,
+const CAPTURE_AREA: SelectionCaptureArea = {
+  shape: "rectangle",
+  rect: {
+    x: 4,
+    y: 8,
+    width: 120,
+    height: 64,
+  },
 };
 
 const createPngBlob = () => new Blob(["pdf-capture"], { type: "image/png" });
@@ -44,7 +47,7 @@ const createTargetRef = () => {
 describe("usePdfSelectionCapture", () => {
   beforeEach(() => {
     cleanup();
-    state.capturePdfViewerRectToBlob.mockReset();
+    state.capturePdfViewerAreaToBlob.mockReset();
     state.copyImageBlobToClipboard.mockReset().mockResolvedValue(undefined);
     state.recognizeSelectionCaptureText.mockReset();
   });
@@ -59,7 +62,7 @@ describe("usePdfSelectionCapture", () => {
     const targetRef = createTargetRef();
     const receivedDetails: CardSelectionCaptureEventDetail[] = [];
 
-    state.capturePdfViewerRectToBlob.mockResolvedValue(blob);
+    state.capturePdfViewerAreaToBlob.mockResolvedValue(blob);
     state.recognizeSelectionCaptureText.mockResolvedValue("PDF OCR text");
 
     document.addEventListener(
@@ -83,15 +86,16 @@ describe("usePdfSelectionCapture", () => {
     );
 
     await act(async () => {
-      await result.current.handleCaptureSelection(CAPTURE_RECT);
+      await result.current.handleCaptureSelection(CAPTURE_AREA);
     });
 
-    expect(state.capturePdfViewerRectToBlob).toHaveBeenCalledWith(targetRef.current, CAPTURE_RECT);
+    expect(state.capturePdfViewerAreaToBlob).toHaveBeenCalledWith(targetRef.current, CAPTURE_AREA);
     expect(state.recognizeSelectionCaptureText).toHaveBeenCalledWith(blob);
     expect(state.copyImageBlobToClipboard).not.toHaveBeenCalled();
     expect(receivedDetails).toHaveLength(1);
     expect(receivedDetails[0].blob).toBe(blob);
-    expect(receivedDetails[0].rect).toEqual(CAPTURE_RECT);
+    expect(receivedDetails[0].rect).toEqual(CAPTURE_AREA.rect);
+    expect(receivedDetails[0].area).toEqual(CAPTURE_AREA);
     expect(receivedDetails[0].target).toBe(targetRef.current);
     expect(receivedDetails[0].side).toBe("answer");
     expect(receivedDetails[0].ocrText).toBe("PDF OCR text");
@@ -102,7 +106,7 @@ describe("usePdfSelectionCapture", () => {
     const blob = createPngBlob();
     const targetRef = createTargetRef();
 
-    state.capturePdfViewerRectToBlob.mockResolvedValue(blob);
+    state.capturePdfViewerAreaToBlob.mockResolvedValue(blob);
     state.recognizeSelectionCaptureText.mockResolvedValue(null);
 
     const { result } = renderHook(() =>
@@ -115,10 +119,10 @@ describe("usePdfSelectionCapture", () => {
     );
 
     await act(async () => {
-      await result.current.handleCaptureSelection(CAPTURE_RECT);
+      await result.current.handleCaptureSelection(CAPTURE_AREA);
     });
 
-    expect(state.capturePdfViewerRectToBlob).toHaveBeenCalledWith(targetRef.current, CAPTURE_RECT);
+    expect(state.capturePdfViewerAreaToBlob).toHaveBeenCalledWith(targetRef.current, CAPTURE_AREA);
     expect(state.copyImageBlobToClipboard).toHaveBeenCalledWith(blob);
     expect(result.current.selectionCaptureMessage).toBe("PDF範囲をコピーしました");
   });
