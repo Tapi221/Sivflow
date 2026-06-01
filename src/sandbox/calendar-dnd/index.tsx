@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { addDays, startOfDay } from "date-fns";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
-import type { CalendarGridStyle, CalendarTimedEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarEventMoveHandler, CalendarGridStyle } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 type SampleEventDefinition = { id: string; title: string; startsAt: Date; endsAt: Date; isAllDay?: boolean; accentColor: string };
@@ -46,7 +46,7 @@ const CalendarDndSandboxPage = () => {
   const visibleDays = useMemo(() => createVisibleDays(), []);
   const [events, setEvents] = useState<GoogleCalendarEvent[]>(() => createSampleEvents().map(cloneEvent));
 
-  const handleMoveTimedEvent = useCallback<CalendarTimedEventMoveHandler>((event, startsAt, endsAt, isAllDay = false) => {
+  const handleMoveCalendarEvent = useCallback<CalendarEventMoveHandler>(({ event, startsAt, endsAt, isAllDay }) => {
     setEvents((currentEvents) => currentEvents.map((currentEvent) => moveEventTime(currentEvent, event, startsAt, endsAt, isAllDay)));
   }, []);
 
@@ -70,7 +70,7 @@ const CalendarDndSandboxPage = () => {
 
         <section className="grid min-h-0 flex-1">
           <div className="min-h-0 overflow-hidden rounded-3xl border border-slate-800 bg-white">
-            <CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={events} calendarGridStyle={CALENDAR_GRID_STYLE} selectedDate={visibleDays[0] ?? SAMPLE_START_DATE} onMoveTimedEvent={handleMoveTimedEvent} />
+            <CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={events} calendarGridStyle={CALENDAR_GRID_STYLE} selectedDate={visibleDays[0] ?? SAMPLE_START_DATE} onMoveCalendarEvent={handleMoveCalendarEvent} />
           </div>
         </section>
       </div>
