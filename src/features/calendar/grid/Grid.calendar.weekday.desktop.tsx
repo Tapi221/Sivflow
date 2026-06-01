@@ -201,14 +201,14 @@ const CalendarWeekDayGridComponent = ({
         </div>
       </div>
 
-      <div ref={allDayScrollRef} className="shrink-0 overflow-hidden border-b" style={{ borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }}>
+      <div ref={allDayScrollRef} className="shrink-0 overflow-hidden">
         <div className="grid min-w-0" style={{ gridTemplateColumns }}>
           <div className={cn("flex min-h-10 min-w-0 items-start justify-end px-2 py-2", WEEKDAY_TIME_LABEL_CLASS_NAME)}>終日</div>
           {visibleDays.map((day) => {
             const dayKey = getCalendarDateKey(day);
             const events = allDayEvents.get(dayKey) ?? [];
             return (
-              <div key={dayKey} className="min-h-10 min-w-0 border-l px-1 py-1" style={WEEKDAY_COLUMN_BORDER_STYLE}>
+              <div key={dayKey} className="min-h-10 min-w-0 border-b border-l px-1 py-1" style={WEEKDAY_COLUMN_BORDER_STYLE}>
                 <div className="flex min-w-0 flex-col gap-1">
                   {events.map((event) => {
                     const tokens = generateColorTokens(event.accentColor);
@@ -229,7 +229,7 @@ const CalendarWeekDayGridComponent = ({
         <div className="grid min-w-0" style={timelineGridStyle}>
           <div className="relative min-w-0 bg-white" style={{ zIndex: GRID.WEEKDAY_GRID_TIME_COLUMN_Z_INDEX }}>
             {WEEKDAY_HOURS.map((hour) => (
-              <div key={hour} className="relative border-b" style={{ height: `var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})`, borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }}>
+              <div key={hour} className="relative" style={{ height: `var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})` }}>
                 <span className={getHourLabelClassName(hour)}>{formatHourLabel(hour)}</span>
               </div>
             ))}
