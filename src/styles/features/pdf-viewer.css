@@ -35,7 +35,7 @@
 }
 
 .pdf-text-layer :is(span, br)::selection {
-  background: rgb(59 130 246 / 28%);
+  background: var(--app-highlight-bg);
 }
 
 .pdf-search-layer {
