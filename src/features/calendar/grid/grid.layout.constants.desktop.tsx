@@ -2,7 +2,7 @@
 export const MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS = "h-8";
 export const MONTH_GRID_DAY_NUMBER_POSITION_CLASS = "left-3 top-1";
 export const MONTH_GRID_MONTH_ANNOTATION_POSITION_CLASS = "right-3 top-[8px]";
-export const MONTH_GRID_EVENTS_CONTAINER_POSITION_CLASS = "inset-x-1 top-8";
+export const MONTH_GRID_EVENTS_CONTAINER_POSITION_CLASS = "inset-x-px top-8";
 export const MONTH_GRID_EVENTS_GAP_CLASS = "gap-[3px]";
 export const MONTH_GRID_OVERFLOW_TEXT_CLASS = "bottom-2 right-3 text-[11px] leading-none";
 
