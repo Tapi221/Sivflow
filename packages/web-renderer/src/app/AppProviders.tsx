@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import type { ReactNode } from "react";
 import "@mantine/core/styles.css";
 import { NotificationProvider } from "@/components/notifications/NotificationProvider";
+import { AppSonnerToaster } from "@/components/notifications/AppSonnerToaster";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 import { ToastProvider } from "../contexts/ToastContext";
@@ -22,6 +23,7 @@ const AppProviders = ({ children }: AppProvidersProps) => (
               <Suspense fallback={null}>{children}</Suspense>
             </BreadcrumbProvider>
           </BrowserRouter>
+          <AppSonnerToaster />
         </NotificationProvider>
       </ToastProvider>
     </AuthProvider>
