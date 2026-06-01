@@ -63,7 +63,7 @@ const createEvent = (overrides: Partial<GoogleCalendarEvent>): GoogleCalendarEve
   ...overrides,
 });
 
-const renderWeekDayGrid = (visibleEvents: GoogleCalendarEvent[] = []) => {
+const renderWeekDayGrid = (visibleEvents: GoogleCalendarEvent[] = [], visibleDays: Date[] = [new Date(2026, 0, 1)]) => {
   const refs = createRefs();
 
   return render(
@@ -71,10 +71,10 @@ const renderWeekDayGrid = (visibleEvents: GoogleCalendarEvent[] = []) => {
       headerScrollRef={refs.headerScrollRef}
       allDayScrollRef={refs.allDayScrollRef}
       scrollContainerRef={refs.scrollContainerRef}
-      visibleDays={[new Date(2026, 0, 1)]}
+      visibleDays={visibleDays}
       visibleEvents={visibleEvents}
       calendarGridStyle={createCalendarGridStyle()}
-      selectedDate={new Date(2026, 0, 1)}
+      selectedDate={visibleDays[0] ?? new Date(2026, 0, 1)}
       onSelectDate={vi.fn()}
     />,
   );
@@ -104,6 +104,15 @@ const getFirstDayHourRow = (): HTMLElement => {
   expect(firstDayHourRow).not.toBeNull();
 
   return firstDayHourRow as HTMLElement;
+};
+
+const getFirstDayColumn = (): HTMLElement => {
+  const firstDayHourRow = getFirstDayHourRow();
+  const firstDayColumn = firstDayHourRow.parentElement as HTMLElement | null;
+
+  expect(firstDayColumn).not.toBeNull();
+
+  return firstDayColumn as HTMLElement;
 };
 
 describe("CalendarWeekDayGrid", () => {
@@ -186,19 +195,22 @@ describe("CalendarWeekDayGrid", () => {
     expect(allDayLabel.className).not.toContain("px-2");
   });
 
-  it("日付ヘッダーには縦線を入れず、終日行と時間グリッドだけ縦線を入れる", () => {
-    renderWeekDayGrid();
+  it("日付ヘッダーと時刻ラベル境界には縦線を入れず、日付間だけ縦線を入れる", () => {
+    renderWeekDayGrid([], [new Date(2026, 0, 1), new Date(2026, 0, 2)]);
 
     const dayHeaderCell = screen.getByRole("button", { name: /1\s*木/ }).parentElement as HTMLElement | null;
     const allDayEventCell = getAllDayEventCell();
-    const firstDayHourRow = getFirstDayHourRow();
-    const firstDayColumn = firstDayHourRow.parentElement as HTMLElement | null;
+    const firstDayColumn = getFirstDayColumn();
+    const secondAllDayEventCell = allDayEventCell.nextElementSibling as HTMLElement | null;
+    const secondDayColumn = firstDayColumn.nextElementSibling as HTMLElement | null;
 
     expect(dayHeaderCell?.className).not.toContain("border-l");
-    expect(allDayEventCell.className).toContain("border-l");
-    expect(firstDayColumn?.className).toContain("border-l");
-    expect(allDayEventCell.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
-    expect(firstDayColumn?.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
+    expect(allDayEventCell.className).not.toContain("border-l");
+    expect(firstDayColumn.className).not.toContain("border-l");
+    expect(secondAllDayEventCell?.className).toContain("border-l");
+    expect(secondDayColumn?.className).toContain("border-l");
+    expect(secondAllDayEventCell?.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
+    expect(secondDayColumn?.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
   });
 
   it("時刻ラベル列には横線を出さず、日付カラム側だけ横線を出す", () => {
