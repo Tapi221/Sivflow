@@ -114,11 +114,6 @@ export type CalendarSidebarProps = {
   onToggleCalendar: (accountId: string, calendarId: string) => void;
 };
 
-export type CalendarWorkspaceToolbarProps = {
-  viewMode?: CalendarViewModeSelection;
-  onSelectViewMode?: (viewMode: CalendarViewMode) => void;
-};
-
 export type CalendarWeekDayGridProps = {
   headerScrollRef: RefObject<HTMLDivElement | null>;
   allDayScrollRef?: RefObject<HTMLDivElement | null>;
