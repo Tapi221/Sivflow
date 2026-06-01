@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 type CalendarEventChipMonthProps = {
   event: GoogleCalendarEvent;
+  tooltipDisabled?: boolean;
 };
 
 const CHIP_TEXT_FADE_STYLE: CSSProperties = {
@@ -18,6 +19,7 @@ const CHIP_TEXT_FADE_STYLE: CSSProperties = {
 
 const CalendarEventChipMonth = memo(({
   event,
+  tooltipDisabled = false,
 }: CalendarEventChipMonthProps) => {
   const tokens = useMemo(
     () => generateColorTokens(event.accentColor),
@@ -38,6 +40,7 @@ const CalendarEventChipMonth = memo(({
       timeLabel={timeLabel}
       accentColor={tokens.border}
       className="w-full min-w-0"
+      disabled={tooltipDisabled}
     >
       <div
         className={cn(
