@@ -1,4 +1,6 @@
 import { useCallback, useMemo } from "react";
+import { getFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
@@ -13,6 +15,8 @@ type ExplorerWorkspaceContentProps = {
   explorerState: ExplorerRouteState;
   explorerTabId: WorkspaceExplorerTab["id"] | null;
 };
+
+const EMPTY_COLLECTION: never[] = [];
 
 const createFolderRouteState = (folderId: string | null): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: folderId === null, selectedFolderId: folderId, selectedItem: null });
 
@@ -38,12 +42,17 @@ const getExplorerTabId = (tab: WorkspaceTab | null): WorkspaceExplorerTab["id"] 
   return tab?.kind === "explorer" ? tab.id : null;
 };
 
+export const isProjectRootSelection = ({ selectedFolderId, selectedItem, rootFolders }: { selectedFolderId: string | null; selectedItem: SelectedExplorerItem; rootFolders: FolderTreeNode[] }): boolean => Boolean(selectedFolderId && selectedItem === null && rootFolders.some((folder) => getFolderId(folder) === selectedFolderId));
+
 const ExplorerWorkspaceContent = ({ explorerState, explorerTabId }: ExplorerWorkspaceContentProps) => {
   const { folders, loading, error } = useFoldersRead();
   const updateExplorerTabState = useWorkspaceTabsStore((state) => state.updateExplorerTabState);
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
   const selectedCardId = useMemo(() => getSelectedCardId(explorerState.selectedItem), [explorerState.selectedItem]);
   const selectedDocumentId = useMemo(() => getSelectedDocumentId(explorerState.selectedItem), [explorerState.selectedItem]);
+  const treeFolders = useMemo(() => folders as FolderTreeNode[], [folders]);
+  const { rootFolders } = useExplorerDerivedData({ treeFolders, treeCards: EMPTY_COLLECTION, cardSets: EMPTY_COLLECTION, documents: EMPTY_COLLECTION, isFiltering: false });
+  const shouldHideMainPane = isProjectRootSelection({ selectedFolderId: explorerState.selectedFolderId, selectedItem: explorerState.selectedItem, rootFolders });
 
   const updateLibraryExplorerState = useCallback((nextExplorerState: ExplorerRouteState) => {
     if (explorerTabId) {
@@ -68,9 +77,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId }: ExplorerWork
   return (
     <div className="relative flex h-full min-h-0 w-full overflow-hidden bg-transparent">
       <SidebarLayeredDirectory />
-      <CarvePanel className="min-w-0">
-        <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} />
-      </CarvePanel>
+      {shouldHideMainPane ? <div className="min-h-0 min-w-0 flex-1 bg-transparent" /> : <CarvePanel className="min-w-0"><TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} /></CarvePanel>}
     </div>
   );
 };
