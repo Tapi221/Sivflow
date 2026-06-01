@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, endOfDay, endOfMonth, endOfWeek, format, startOfDay, startOfMonth, startOfWeek, subDays } from "date-fns";
+import { toast } from "sonner";
 import type { PlanResultMode } from "@/chip/toggle/Toggle.planresult";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
@@ -129,6 +130,8 @@ const createGoogleProjectCalendarLink = ({ project, accountId, calendar, color, 
 
 const getCalendarEventOverrideKey = (event: GoogleCalendarEvent): string => event.id;
 
+const getCalendarEventToastDescription = (event: GoogleCalendarEvent): string => event.title || "Untitled";
+
 const applyCalendarEventMoveOverrides = (events: GoogleCalendarEvent[], overrides: Map<string, CalendarEventMoveOverride>): GoogleCalendarEvent[] => {
   if (overrides.size === 0) return events;
   return events.map((event) => {
@@ -248,7 +251,8 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     });
   }, []);
   const handleMoveCalendarEvent = useCallback<CalendarEventMoveHandler>(async ({ event, startsAt, endsAt, isAllDay }) => {
-    if (!event.accountId) return;
+    const accountId = event.accountId;
+    if (!accountId) return;
 
     const overrideKey = getCalendarEventOverrideKey(event);
     const rollbackOverride = { startsAt: event.startsAt, endsAt: event.endsAt, isAllDay: event.isAllDay };
@@ -260,9 +264,34 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     });
 
     try {
-      await updateGoogleCalendarEvent(event.accountId, { calendarId: event.calendarId, eventId: event.externalId ?? event.id, startsAt, endsAt, isAllDay });
+      await updateGoogleCalendarEvent(accountId, { calendarId: event.calendarId, eventId: event.externalId ?? event.id, startsAt, endsAt, isAllDay });
+      toast("予定を移動しました", {
+        description: getCalendarEventToastDescription(event),
+        action: {
+          label: "元に戻す",
+          onClick: () => {
+            setCalendarEventMoveOverrides((overrides) => {
+              const next = new Map(overrides);
+              next.set(overrideKey, rollbackOverride);
+              return next;
+            });
+            void updateGoogleCalendarEvent(accountId, { calendarId: event.calendarId, eventId: event.externalId ?? event.id, startsAt: rollbackOverride.startsAt, endsAt: rollbackOverride.endsAt, isAllDay: rollbackOverride.isAllDay }).then(() => {
+              toast("予定を元に戻しました", { description: getCalendarEventToastDescription(event) });
+            }).catch((undoError: unknown) => {
+              console.warn("[ScheduleScreen] calendar event move undo failed", undoError);
+              setCalendarEventMoveOverrides((overrides) => {
+                const next = new Map(overrides);
+                next.set(overrideKey, { startsAt, endsAt, isAllDay });
+                return next;
+              });
+              toast.error("予定を元に戻せませんでした", { description: getCalendarEventToastDescription(event) });
+            });
+          },
+        },
+      });
     } catch (error) {
       console.warn("[ScheduleScreen] calendar event move failed", error);
+      toast.error("予定の移動に失敗しました", { description: getCalendarEventToastDescription(event) });
       setCalendarEventMoveOverrides((overrides) => {
         const next = new Map(overrides);
         next.set(overrideKey, rollbackOverride);
