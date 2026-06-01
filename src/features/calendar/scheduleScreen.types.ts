@@ -33,6 +33,7 @@ export type CalendarEventLabelStyle = CSSProperties & {
 };
 
 export type ScheduleScreenProps = {
+  isLeftPanelCollapsed?: boolean;
   onClose?: () => void;
 };
 
