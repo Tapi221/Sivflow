@@ -2,6 +2,7 @@ import { startTransition, useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
+import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
 import { useMonthInfiniteScroll } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { GridCalendarMonthDesktop } from "./Grid.calendar.month.desktop";
@@ -14,6 +15,7 @@ type CalendarMonthViewProps = {
   onSelectDate: (date: Date) => void;
   onVisibleMonthChange?: (date: Date) => void;
   onRenderedRangeChange?: (range: CalendarDateRange) => void;
+  onMoveCalendarEvent?: CalendarEventMoveHandler;
 };
 
 type MonthViewStyle = CSSProperties & {
@@ -33,6 +35,7 @@ export const CalendarMonthView = ({
   onSelectDate,
   onVisibleMonthChange,
   onRenderedRangeChange,
+  onMoveCalendarEvent,
 }: CalendarMonthViewProps) => {
   const todayRef = useRef(new Date());
 
@@ -61,6 +64,7 @@ export const CalendarMonthView = ({
           bottomSpacerHeight={scroll.bottomSpacerHeight}
           scrollHoverDayKey={null}
           onSelectDate={onSelectDate}
+          onMoveCalendarEvent={onMoveCalendarEvent}
         />
       </div>
     </div>
