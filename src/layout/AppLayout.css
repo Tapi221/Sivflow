@@ -1,32 +1,7 @@
 .app-layout {
   --app-sidebar-rail-width: 44px;
   --app-sidebar-closed-width: 0px;
-  --app-right-sidebar-width: 240px;
-  --app-layout-padding-x: 0px;
-  --desktop-window-controls-width: 138px;
-
-  --app-titlebar-bg: linear-gradient(
-    90deg,
-    #f5f5f5 0%,
-    #f2f2f2 48%,
-    #f7f7f7 100%
-  );
-  --app-titlebar-text: #606060;
-  --app-titlebar-text-strong: #2f2f2f;
-  --app-titlebar-icon: #8a8a8a;
-  --app-titlebar-surface: rgba(0, 0, 0, 0.04);
-  --app-titlebar-surface-hover: rgba(0, 0, 0, 0.07);
-
   --app-active-tab-bg: #ffffff;
-  --app-sidebar-hover-bg: rgba(0, 0, 0, 0.05);
-  --app-sidebar-active-bg: rgba(0, 0, 0, 0.07);
-  --app-sidebar-text: #606060;
-  --app-sidebar-text-strong: #2f2f2f;
-  --app-sidebar-text-muted: #9a9a9a;
-  --app-sidebar-text-hover: #2f2f2f;
-  --app-sidebar-icon: #8a8a8a;
-  --app-sidebar-icon-active: #707070;
-  --app-sidebar-focus-ring: rgba(0, 0, 0, 0.16);
 
   position: relative;
 
@@ -64,14 +39,6 @@
   grid-row: 1;
 }
 
-[data-presentation-target="desktop"] .app-layout {
-  padding-top: 0;
-}
-
-.app-layout--folders {
-  --app-layout-padding-x: 0px;
-}
-
 .app-layout--without-sidebar {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -80,25 +47,6 @@
   grid-template-columns:
     var(--app-sidebar-closed-width)
     minmax(0, 1fr);
-}
-
-.app-layout--right-sidebar-open {
-  grid-template-columns:
-    var(--app-sidebar-rail-width)
-    minmax(0, 1fr)
-    var(--app-right-sidebar-width);
-}
-
-.app-layout--sidebar-closed.app-layout--right-sidebar-open {
-  grid-template-columns:
-    var(--app-sidebar-closed-width)
-    minmax(0, 1fr)
-    var(--app-right-sidebar-width);
-}
-
-.app-right-sidebar {
-  grid-column: 3;
-  grid-row: 1;
 }
 
 .workspace-shell,
