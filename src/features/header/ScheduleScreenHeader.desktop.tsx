@@ -42,16 +42,16 @@ const ScheduleScreenHeaderDesktop = ({
       </h1>
 
       <div className="ml-auto flex shrink-0 items-center gap-2">
-        <ViewModeDropdown
-          value={selectedViewMode}
-          onChange={onSelectViewMode}
-          options={viewOptions}
-        />
-
         <TodayBar
           onPrevious={onPrevious}
           onNext={onNext}
           onToday={onToday}
+        />
+
+        <ViewModeDropdown
+          value={selectedViewMode}
+          onChange={onSelectViewMode}
+          options={viewOptions}
         />
 
         {showPlanResultToggle && (
