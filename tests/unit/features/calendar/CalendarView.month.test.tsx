@@ -40,17 +40,6 @@ vi.mock("@/features/scroll/schedule/useInfiniteScroll.month.desktop", () => ({
   }),
 }));
 
-vi.mock("@/features/calendar/grid/height/useRowResize.month.desktop", () => ({
-  useMonthRowResize: () => ({
-    rootRef: { current: null },
-    monthRowHeight: 112,
-    monthViewStyle: {},
-    handleResizeReset: vi.fn(),
-    handleResizeKeyDown: vi.fn(),
-    handleResizePointerDown: vi.fn(),
-  }),
-}));
-
 vi.mock("@/features/calendar/grid/Grid.calendar.month.desktop", () => ({
   GridCalendarMonthDesktop: () => <div data-testid="month-grid" />,
 }));
