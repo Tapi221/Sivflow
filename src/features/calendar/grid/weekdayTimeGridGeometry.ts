@@ -31,6 +31,7 @@ const EVENT_COLUMN_OVERLAP_GAP_PX = 2;
 const EVENT_COLUMN_OVERLAP_SIDE_GAP_PX = EVENT_COLUMN_OVERLAP_GAP_PX / 2;
 export const WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX = 18;
 const PERCENT_MAX = 100;
+const SHORT_RANGE_CARRY_OVER_HIDE_THRESHOLD_HOURS = 1;
 const TIME_GRID_DECIMAL_PLACES = 12;
 const TIME_GRID_FLOATING_POINT_EPSILON = Number.EPSILON * 10;
 
@@ -50,6 +51,8 @@ const getWeekdayTimedEventHorizontalInsets = (frame: WeekdayTimedEventFrame): We
   return { leftPx, rightPx };
 };
 
+const shouldHideCarryOverEventInShortRange = (entry: CalendarTimeGridLayoutEntry, rangeHours: number): boolean => entry.startsBeforeRange && rangeHours <= SHORT_RANGE_CARRY_OVER_HIDE_THRESHOLD_HOURS;
+
 export const getWeekdayTimedEventFrame = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS): WeekdayTimedEventFrame => ({
   leftPercent: entry.style.xOffset,
   topHours: getPercentAsHourSpan(entry.style.top, rangeHours),
@@ -60,12 +63,15 @@ export const getWeekdayTimedEventFrame = (entry: CalendarTimeGridLayoutEntry, ra
 export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS, options: WeekdayTimedEventPositionOptions = {}): WeekdayTimedEventPositionStyle => {
   const frame = getWeekdayTimedEventFrame(entry, rangeHours);
   const horizontalInsets = getWeekdayTimedEventHorizontalInsets(frame);
+  const shouldHideEvent = shouldHideCarryOverEventInShortRange(entry, rangeHours);
 
   return {
     left: `calc(${frame.leftPercent}% + ${horizontalInsets.leftPx}px)`,
     top: `calc(${frame.topHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
     width: `calc(${frame.widthPercent}% - ${horizontalInsets.leftPx + horizontalInsets.rightPx}px)`,
-    height: `calc(${frame.heightHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
-    minHeight: options.suppressMinHeight ? "0px" : `${WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX}px`,
+    height: shouldHideEvent ? "0px" : `calc(${frame.heightHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
+    minHeight: shouldHideEvent || options.suppressMinHeight ? "0px" : `${WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX}px`,
+    overflow: shouldHideEvent ? "hidden" : undefined,
+    pointerEvents: shouldHideEvent ? "none" : undefined,
   };
 };
