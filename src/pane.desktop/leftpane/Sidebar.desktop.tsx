@@ -32,8 +32,8 @@ type SidebarNavItem = {
 };
 
 type SidebarProps = {
-  isClosed?: boolean;
-  onToggleClosed?: () => void;
+  isLeftPanelCollapsed?: boolean;
+  onToggleLeftPanel?: () => void;
   onOpenSettings?: () => void;
 };
 
@@ -136,8 +136,8 @@ const SidebarNavLink = ({
 };
 
 const Sidebar = ({
-  isClosed = false,
-  onToggleClosed,
+  isLeftPanelCollapsed = false,
+  onToggleLeftPanel,
   onOpenSettings,
 }: SidebarProps) => {
   const t = useT();
@@ -165,7 +165,7 @@ const Sidebar = ({
     },
   ];
 
-  const sidebarToggleLabel = isClosed ? t.sidebarToggleOpen : t.sidebarToggleClose;
+  const sidebarToggleLabel = isLeftPanelCollapsed ? t.sidebarToggleOpen : t.sidebarToggleClose;
 
   const handleLogoutClick = async () => {
     try {
@@ -177,15 +177,16 @@ const Sidebar = ({
 
   return (
     <aside
-      className={cn("app-sidebar", isClosed && "app-sidebar--closed")}
+      className="app-sidebar"
       aria-label={t.sidebarAriaLabel}
     >
       <div className="app-sidebar__top">
         <button
           type="button"
-          className="app-sidebar__toggle"
-          onClick={onToggleClosed}
+          className={cn("app-sidebar__toggle", isLeftPanelCollapsed && "app-sidebar__toggle--panel-collapsed")}
+          onClick={onToggleLeftPanel}
           aria-label={sidebarToggleLabel}
+          aria-pressed={isLeftPanelCollapsed}
         >
           <SidebarOpenIcon className="app-sidebar__toggle-icon" />
         </button>
