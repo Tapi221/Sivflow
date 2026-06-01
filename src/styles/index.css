@@ -166,11 +166,6 @@ a:hover,
   scrollbar-width: none;
 }
 
-.calendar-year-view {
-  margin-right: calc(-1 * var(--scrollbar-size));
-  padding-right: calc(1rem + var(--scrollbar-size));
-}
-
 .scrollbar-hidden::-webkit-scrollbar,
 .calendar-year-view::-webkit-scrollbar {
   display: none;

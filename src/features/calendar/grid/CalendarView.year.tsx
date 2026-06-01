@@ -420,9 +420,9 @@ const CalendarYearViewComponent = ({
   return (
     <div
       ref={scrollContainerRef}
-      className="calendar-year-view min-h-0 flex-1 overflow-y-auto bg-[rgba(255,255,255,0.92)] px-4 pb-5 pt-4"
+      className="calendar-year-view min-h-0 flex-1 overflow-y-auto bg-[rgba(255,255,255,0.92)]"
     >
-      <div>
+      <div className="px-4 pb-5 pt-4">
         {years.map((year) => (
           <section
             key={year.key}
