@@ -156,7 +156,7 @@ const CalendarDndSandboxPage = () => {
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const visibleDays = useMemo(createVisibleDays, []);
+  const visibleDays = useMemo(() => createVisibleDays(), []);
   const [events, setEvents] = useState<GoogleCalendarEvent[]>(createSampleEvents);
 
   const handleMoveTimedEvent = useCallback<CalendarTimedEventMoveHandler>((event, startsAt, endsAt) => {
