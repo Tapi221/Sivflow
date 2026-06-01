@@ -1,5 +1,4 @@
 import { useCallback, useMemo } from "react";
-import { ToggleFolderTag, type FolderTagTab } from "@/chip/toggle/Toggle.foldertag";
 import { DEFAULT_NEW_PROJECT_NAME, getFolderId, getParentFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
@@ -45,7 +44,6 @@ const resolveRootProjectId = (folderId: string | null | undefined, folderById: R
 
 const SidebarLayeredDirectory = () => {
   const folderTagMode = useFolderTagModeStore((state) => state.folderTagMode);
-  const setFolderTagMode = useFolderTagModeStore((state) => state.setFolderTagMode);
   const { createFolder } = useFolderCommands();
   const { folders } = useFoldersRead();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
@@ -67,7 +65,6 @@ const SidebarLayeredDirectory = () => {
   const selectedProjectId = useMemo(() => resolveRootProjectId(selectedFolderId, folderById, rootFolderIds), [folderById, rootFolderIds, selectedFolderId]);
   const selectedProject = selectedProjectId ? folderById.get(selectedProjectId) ?? null : null;
   const sectionLabel = folderTagMode === "tag" ? TAG_SECTION_LABEL : selectedProject ? getFolderName(selectedProject) : PROJECT_SECTION_LABEL;
-  const folderTagTabs = useMemo<FolderTagTab[]>(() => [{ value: "folder", label: "Folder", onClick: () => setFolderTagMode("folder") }, { value: "tag", label: "Tag", onClick: () => setFolderTagMode("tag") }], [setFolderTagMode]);
 
   const handleCreateRootFolder = useCallback(() => {
     void createFolder(DEFAULT_NEW_PROJECT_NAME);
@@ -79,10 +76,7 @@ const SidebarLayeredDirectory = () => {
 
   return (
     <div className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[#5f6672] antialiased">
-      <div className="shrink-0 px-3 pb-5 pt-3">
-        <ToggleFolderTag activeMode={folderTagMode} tabs={folderTagTabs} />
-      </div>
-      <div className="shrink-0 pb-1 pl-3 pr-2 pt-0">
+      <div className="shrink-0 pb-1 pl-3 pr-2 pt-3">
         <div className="flex h-6 items-center gap-1.5">
           <div className="min-w-0 flex-1 text-[11px] font-bold uppercase leading-none tracking-[0.04em] text-[#9a9a9a]">
             {folderTagMode !== "tag" && selectedProject ? (
