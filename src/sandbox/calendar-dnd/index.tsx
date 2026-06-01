@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { addDays, format, startOfDay } from "date-fns";
+import { addDays, startOfDay } from "date-fns";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import type { CalendarGridStyle, CalendarTimedEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -141,8 +141,6 @@ const createSampleEvents = (): GoogleCalendarEvent[] => SAMPLE_EVENTS.map(cloneE
 
 const createVisibleDays = (): Date[] => Array.from({ length: 5 }, (_, index) => addDays(startOfDay(SAMPLE_START_DATE), index));
 
-const formatDateTime = (date: Date): string => format(date, "M/d HH:mm");
-
 const moveEventTime = (targetEvent: GoogleCalendarEvent, sourceEvent: GoogleCalendarEvent, startsAt: Date, endsAt: Date): GoogleCalendarEvent => {
   if (targetEvent.id !== sourceEvent.id) return targetEvent;
 
@@ -183,22 +181,7 @@ const CalendarDndSandboxPage = () => {
           </div>
         </section>
 
-        <section className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="min-h-0 overflow-auto rounded-3xl border border-slate-800 bg-slate-900/80 p-5">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">Current events</h2>
-            <div className="mt-4 space-y-3">
-              {events.map((event) => (
-                <div key={event.id} className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: event.accentColor }} />
-                    <p className="min-w-0 truncate text-sm font-semibold text-white">{event.title}</p>
-                  </div>
-                  <p className="mt-1 text-xs tabular-nums text-slate-400">{event.isAllDay ? "終日" : `${formatDateTime(event.startsAt)} - ${formatDateTime(event.endsAt)}`}</p>
-                </div>
-              ))}
-            </div>
-          </aside>
-
+        <section className="grid min-h-0 flex-1">
           <div className="min-h-0 overflow-hidden rounded-3xl border border-slate-800 bg-white">
             <CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={events} calendarGridStyle={CALENDAR_GRID_STYLE} selectedDate={visibleDays[0] ?? SAMPLE_START_DATE} onMoveTimedEvent={handleMoveTimedEvent} />
           </div>
