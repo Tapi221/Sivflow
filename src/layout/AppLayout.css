@@ -1,6 +1,5 @@
 .app-layout {
   --app-sidebar-rail-width: 44px;
-  --app-sidebar-closed-width: 0px;
   --app-active-tab-bg: #ffffff;
 
   position: relative;
@@ -30,8 +29,6 @@
   background: var(--backpane-bg);
 
   align-items: stretch;
-
-  transition: grid-template-columns 180ms ease;
 }
 
 .app-sidebar {
@@ -41,12 +38,6 @@
 
 .app-layout--without-sidebar {
   grid-template-columns: minmax(0, 1fr);
-}
-
-.app-layout--sidebar-closed {
-  grid-template-columns:
-    var(--app-sidebar-closed-width)
-    minmax(0, 1fr);
 }
 
 .workspace-shell,
