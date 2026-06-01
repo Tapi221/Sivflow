@@ -1,6 +1,6 @@
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { addDays, addMinutes, format, startOfDay } from "date-fns";
+import { addDays, addMinutes, differenceInMinutes, format, startOfDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { layoutCalendarTimeGridEvents } from "@core/calendar";
 import type { CalendarTimeGridLayoutEntry } from "@core/calendar";
@@ -81,9 +81,7 @@ const getViewportGridTemplateColumns = (dayCount: number): string => `${C.TIME_C
 
 const getTimedEntryPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours: number): CSSProperties => getWeekdayTimedEventPositionStyle(entry, rangeHours, { suppressMinHeight: shouldSuppressEntryMinHeight(entry) });
 
-const getTimedEntryDragPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours: number, isDragging: boolean): CSSProperties => isDragging ? { ...getTimedEntryPositionStyle(entry, rangeHours), ...WEEKDAY_TIMED_EVENT_DRAGGING_STYLE } : getTimedEntryPositionStyle(entry, rangeHours);
-
-const getTimedEventWrapperClassName = (isDraggable: boolean, isDragging: boolean): string => cn("absolute z-10 min-w-0 transition-[filter,opacity,transform] duration-150 ease-out", isDraggable ? "touch-none cursor-grab select-none active:cursor-grabbing" : null, isDragging ? "opacity-95" : null);
+const getTimedEventWrapperClassName = (isDraggable: boolean, isDragging: boolean): string => cn("absolute z-10 min-w-0 transition-opacity duration-150 ease-out", isDraggable ? "touch-none cursor-grab select-none active:cursor-grabbing" : null, isDragging ? "opacity-35" : null);
 
 const toEventDate = (value: Date): Date | null => {
   const date = value instanceof Date ? value : new Date(value);
@@ -130,6 +128,26 @@ const clampMinutes = (minutes: number, maxMinutes: number): number => Math.max(0
 const areSameEventTimes = (leftStart: Date, leftEnd: Date, rightStart: Date, rightEnd: Date): boolean => leftStart.getTime() === rightStart.getTime() && leftEnd.getTime() === rightEnd.getTime();
 
 const createPreviewEvent = (event: GoogleCalendarEvent, startsAt: Date, endsAt: Date): GoogleCalendarEvent => ({ ...event, startsAt, endsAt, isAllDay: false });
+
+const getDragPreviewDayKey = (state: WeekdayEventDragState): string => getCalendarDateKey(state.previewStartsAt);
+
+const getDragPreviewStyle = (state: WeekdayEventDragState, day: Date): CSSProperties => {
+  const dayStart = startOfDay(day);
+  const startMinutes = clampMinutes(differenceInMinutes(state.previewStartsAt, dayStart), DAY_MINUTES);
+  const durationMinutes = Math.max(1, state.durationMs / MINUTE_MS);
+  const maxVisibleDurationMinutes = Math.max(1, DAY_MINUTES - startMinutes);
+  const visibleDurationMinutes = Math.min(durationMinutes, maxVisibleDurationMinutes);
+
+  return {
+    left: "3px",
+    top: `calc(${startMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
+    width: "calc(100% - 7px)",
+    height: `calc(${visibleDurationMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
+    minHeight: `${WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX}px`,
+    pointerEvents: "none",
+    ...WEEKDAY_TIMED_EVENT_DRAGGING_STYLE,
+  };
+};
 
 const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]): WeekdayEventsByDay => {
   const dayKeys = new Set(days.map(getCalendarDateKey));
@@ -225,16 +243,9 @@ const CalendarWeekDayGridComponent = ({
   const dragElementRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<WeekdayEventDragState | null>(null);
   const [dragState, setDragState] = useState<WeekdayEventDragState | null>(null);
-  const renderedEvents = useMemo(() => {
-    if (!dragState) return visibleEvents;
-
-    return visibleEvents.map((event) => {
-      if (createEventKey(event) !== dragState.eventKey) return event;
-
-      return createPreviewEvent(event, dragState.previewStartsAt, dragState.previewEndsAt);
-    });
-  }, [dragState, visibleEvents]);
-  const { allDayEvents, timedEvents } = useMemo(() => groupEventsByDay(renderedEvents, visibleDays), [renderedEvents, visibleDays]);
+  const { allDayEvents, timedEvents } = useMemo(() => groupEventsByDay(visibleEvents, visibleDays), [visibleEvents, visibleDays]);
+  const dragPreviewEvent = useMemo(() => dragState ? createPreviewEvent(dragState.event, dragState.previewStartsAt, dragState.previewEndsAt) : null, [dragState]);
+  const dragPreviewDayKey = dragState ? getDragPreviewDayKey(dragState) : null;
   const gridTemplateColumns = getViewportGridTemplateColumns(visibleDays.length);
   const timelineGridStyle = {
     [GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT]: calendarGridStyle[GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT],
@@ -465,8 +476,9 @@ const CalendarWeekDayGridComponent = ({
           {visibleDays.map((day, dayIndex) => {
             const dayKey = getCalendarDateKey(day);
             const events = createTimedLayoutEvents(timedEvents.get(dayKey) ?? [], day);
-            const nextDayPreviewEvents = createNextDayPreviewLayoutEvents(renderedEvents, day);
+            const nextDayPreviewEvents = createNextDayPreviewLayoutEvents(visibleEvents, day);
             const isToday = dayKey === currentDayKey;
+            const shouldRenderDragPreview = dragState && dragPreviewEvent && dragPreviewDayKey === dayKey;
             return (
               <div key={dayKey} ref={setDayColumnRef(dayKey)} className={cn("relative min-w-0 bg-white", dayIndex === 0 ? null : "border-l")} style={WEEKDAY_COLUMN_BORDER_STYLE}>
                 {WEEKDAY_HOURS.map((hour) => (
@@ -492,11 +504,17 @@ const CalendarWeekDayGridComponent = ({
                   const isDraggable = isTimedEventDraggable(entry.event, onMoveTimedEvent);
 
                   return (
-                    <div key={eventKey} className={getTimedEventWrapperClassName(isDraggable, isDragging)} style={getTimedEntryDragPositionStyle(entry, GRID.WEEKDAY_HOURS, isDragging)} onPointerDown={isDraggable ? (event) => handleTimedEventPointerDown(event, entry.event) : undefined}>
-                      <CalendarEventChipWeekday event={entry.event} />
+                    <div key={eventKey} className={getTimedEventWrapperClassName(isDraggable, isDragging)} style={getTimedEntryPositionStyle(entry, GRID.WEEKDAY_HOURS)} onPointerDown={isDraggable ? (event) => handleTimedEventPointerDown(event, entry.event) : undefined}>
+                      <CalendarEventChipWeekday event={entry.event} tooltipDisabled={isDragging} />
                     </div>
                   );
                 })}
+
+                {shouldRenderDragPreview ? (
+                  <div className="absolute min-w-0 transition-none" style={getDragPreviewStyle(dragState, day)}>
+                    <CalendarEventChipWeekday event={dragPreviewEvent} tooltipDisabled />
+                  </div>
+                ) : null}
               </div>
             );
           })}
