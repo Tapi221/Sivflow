@@ -3,7 +3,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, format, startOfDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
-import { computeMonthEventsByDay, createMonthEventIndex, EMPTY_MONTH_DAY_EVENTS } from "@/chip/eventchip/EventChip.month.placement";
+import { computeMonthEventsByDay, EMPTY_MONTH_DAY_EVENTS } from "@/chip/eventchip/EventChip.month.placement";
 import type { CalendarMonthDayEvents } from "@/chip/eventchip/EventChip.month.placement";
 import { CalendarDayNumberCircle } from "@/chip/icons/CalendarDayNumberCircle";
 import * as T from "@/features/calendar/calendar.text";
@@ -301,8 +301,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
   const [dragState, setDragState] = useState<MonthEventDragState | null>(null);
   const selectedDayKey = useMemo(() => getDayKey(selectedDate), [selectedDate]);
   const todayDayKey = useMemo(() => getDayKey(today), [today]);
-  const eventIndex = useMemo(() => createMonthEventIndex(visibleEvents), [visibleEvents]);
-  const eventsByDay = useMemo(() => computeMonthEventsByDay({ eventIndex, monthWeeks, monthRowHeight }), [eventIndex, monthRowHeight, monthWeeks]);
+  const eventsByDay = useMemo(() => computeMonthEventsByDay({ visibleEvents, monthWeeks, monthRowHeight }), [monthRowHeight, monthWeeks, visibleEvents]);
   const dragPreviewEvent = useMemo(() => dragState ? createCalendarEventDragPreview(dragState.event, dragState.previewStartsAt, dragState.previewEndsAt, dragState.previewIsAllDay) : null, [dragState]);
   const dragPreviewDayKey = dragState ? getDayKey(dragState.previewStartsAt) : null;
   const isEventDragEnabled = useCalendarEventDragEnabled();

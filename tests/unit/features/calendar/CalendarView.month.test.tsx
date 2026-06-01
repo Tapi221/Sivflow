@@ -2,13 +2,21 @@
 
 import { render, waitFor } from "@testing-library/react";
 import { addDays, format, startOfDay } from "date-fns";
+import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import type { CalendarMonthWeek } from "@/features/calendar/model/calendarMonth.model";
 
-const { monthWeeksRef } = vi.hoisted(() => ({
+const { monthWeeksRef, visibleWeekRangeRef } = vi.hoisted(() => ({
   monthWeeksRef: {
     current: [] as CalendarMonthWeek[],
+  },
+  visibleWeekRangeRef: {
+    current: {
+      start: new Date(2026, 0, 1),
+      end: new Date(2026, 0, 1, 23, 59, 59, 999),
+    } as CalendarDateRange,
   },
 }));
 
@@ -32,6 +40,7 @@ const buildWeek = (weekStart: Date): CalendarMonthWeek => ({
 vi.mock("@/features/scroll/schedule/useInfiniteScroll.month.desktop", () => ({
   useMonthInfiniteScroll: () => ({
     monthWeeks: monthWeeksRef.current,
+    visibleWeekRange: visibleWeekRangeRef.current,
     scrollContainerRef: { current: null },
     weekRowRefsMap: { current: new Map() },
     setWeekRowRef: vi.fn(),
@@ -51,6 +60,10 @@ const expectSameTime = (actual: Date, expected: Date) => {
 describe("CalendarMonthView", () => {
   beforeEach(() => {
     monthWeeksRef.current = [];
+    visibleWeekRangeRef.current = {
+      start: new Date(2026, 0, 1),
+      end: new Date(2026, 0, 1, 23, 59, 59, 999),
+    };
   });
 
   it("レンダーされている monthWeeks の先頭日〜末尾日を onRenderedRangeChange で通知する", async () => {
@@ -61,6 +74,10 @@ describe("CalendarMonthView", () => {
       buildWeek(startOfDay(new Date(2026, 3, 1))),
       buildWeek(lastWeekStart),
     ];
+    visibleWeekRangeRef.current = {
+      start: firstWeekStart,
+      end: new Date(2026, 4, 31, 23, 59, 59, 999),
+    };
     const onRenderedRangeChange = vi.fn();
 
     render(

@@ -9,8 +9,8 @@ const expectSameTime = (actual: Date | undefined, expected: Date) => {
 };
 
 describe("buildCalendarEventSyncRange", () => {
-  it("年表示ではレンダー済み年範囲を同期する", () => {
-    const yearRenderedRange: CalendarDateRange = {
+  it("年表示では表示中の年範囲を同期する", () => {
+    const yearSyncRange: CalendarDateRange = {
       start: new Date(2023, 0, 1),
       end: endOfDay(new Date(2027, 11, 31)),
     };
@@ -19,41 +19,44 @@ describe("buildCalendarEventSyncRange", () => {
       selectedViewMode: "year",
       visibleDays: [],
       monthTitleDate: new Date(2025, 0, 1),
-      yearRenderedRange,
+      yearSyncRange,
     });
 
-    expectSameTime(range.rangeStart, startOfDay(startOfYear(yearRenderedRange.start)));
-    expectSameTime(range.rangeEnd, endOfDay(endOfYear(yearRenderedRange.end)));
+    expectSameTime(range.rangeStart, startOfDay(startOfYear(yearSyncRange.start)));
+    expectSameTime(range.rangeEnd, endOfDay(endOfYear(yearSyncRange.end)));
   });
 
-  it("月表示ではレンダー済み範囲を優先して前後 buffer を付けて同期する", () => {
+  it("月表示では表示月のカレンダー範囲に前後 buffer を付けて同期する", () => {
     const monthRenderedRange: CalendarDateRange = {
       start: new Date(2026, 2, 1),
       end: endOfDay(new Date(2026, 4, 31)),
     };
+    const monthTitleDate = new Date(2026, 0, 1);
 
     const range = buildCalendarEventSyncRange({
       selectedViewMode: "month",
       visibleDays: [],
-      monthTitleDate: new Date(2026, 0, 1),
+      monthTitleDate,
       monthRenderedRange,
     });
+    const gridStart = new Date(2025, 11, 29);
+    const gridEnd = new Date(2026, 1, 1);
 
     expectSameTime(
       range.rangeStart,
       startOfDay(
-        subDays(monthRenderedRange.start, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS),
+        subDays(gridStart, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS),
       ),
     );
     expectSameTime(
       range.rangeEnd,
       endOfDay(
-        addDays(monthRenderedRange.end, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS),
+        addDays(gridEnd, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS),
       ),
     );
   });
 
-  it("日表示では visibleDays の前後2日を同期範囲にする", () => {
+  it("日表示ではタイトル日を中心に同期範囲にする", () => {
     const firstVisibleDay = new Date(2026, 4, 10);
     const lastVisibleDay = new Date(2026, 4, 14);
 
@@ -63,11 +66,11 @@ describe("buildCalendarEventSyncRange", () => {
       monthTitleDate: new Date(2026, 4, 1),
     });
 
-    expectSameTime(range.rangeStart, startOfDay(subDays(firstVisibleDay, 2)));
-    expectSameTime(range.rangeEnd, endOfDay(addDays(lastVisibleDay, 2)));
+    expectSameTime(range.rangeStart, startOfDay(subDays(new Date(2026, 4, 1), 21)));
+    expectSameTime(range.rangeEnd, endOfDay(new Date(2026, 5, 6)));
   });
 
-  it("週表示では visibleDays の前後3日を同期範囲にする", () => {
+  it("週表示ではタイトル日を中心に同期範囲にする", () => {
     const firstVisibleDay = new Date(2026, 4, 4);
     const lastVisibleDay = new Date(2026, 4, 10);
 
@@ -77,7 +80,7 @@ describe("buildCalendarEventSyncRange", () => {
       monthTitleDate: new Date(2026, 4, 1),
     });
 
-    expectSameTime(range.rangeStart, startOfDay(subDays(firstVisibleDay, 3)));
-    expectSameTime(range.rangeEnd, endOfDay(addDays(lastVisibleDay, 3)));
+    expectSameTime(range.rangeStart, startOfDay(subDays(new Date(2026, 4, 1), 21)));
+    expectSameTime(range.rangeEnd, endOfDay(new Date(2026, 5, 6)));
   });
 });
