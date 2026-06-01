@@ -159,15 +159,13 @@ a:hover,
   background: transparent;
 }
 
-.scrollbar-hidden,
-.calendar-year-view {
+.scrollbar-hidden {
   -ms-overflow-style: none;
   scrollbar-gutter: auto;
   scrollbar-width: none;
 }
 
-.scrollbar-hidden::-webkit-scrollbar,
-.calendar-year-view::-webkit-scrollbar {
+.scrollbar-hidden::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
