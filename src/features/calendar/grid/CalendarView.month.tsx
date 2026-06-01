@@ -35,14 +35,10 @@ export const CalendarMonthView = ({
   onRenderedRangeChange,
 }: CalendarMonthViewProps) => {
   const todayRef = useRef(new Date());
-  const isResizingRef = useRef(false);
-  const monthRowHeightRef = useRef(FIXED_MONTH_ROW_HEIGHT);
 
   const scroll = useMonthInfiniteScroll({
     currentDate,
     scrollTargetToken,
-    isResizingRef,
-    monthRowHeightRef,
     onVisibleMonthChange,
   });
 
@@ -64,7 +60,6 @@ export const CalendarMonthView = ({
           topSpacerHeight={scroll.topSpacerHeight}
           bottomSpacerHeight={scroll.bottomSpacerHeight}
           scrollHoverDayKey={null}
-          setWeekRowRef={scroll.setWeekRowRef}
           onSelectDate={onSelectDate}
         />
       </div>
