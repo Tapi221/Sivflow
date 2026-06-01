@@ -159,7 +159,21 @@
   }
 
   .calendar-year-section {
-    contain: layout style;
+    contain: layout paint style;
+    content-visibility: auto;
+    contain-intrinsic-size: 2900px;
+  }
+
+  @media (min-width: 768px) {
+    .calendar-year-section {
+      contain-intrinsic-size: 1600px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .calendar-year-section {
+      contain-intrinsic-size: 850px;
+    }
   }
 
   .calendar-month-week-row {

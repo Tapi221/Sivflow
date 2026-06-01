@@ -1,4 +1,4 @@
-import { memo, startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, startTransition, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { addDays, addYears, eachMonthOfInterval, endOfDay, endOfYear, format, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import { getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
@@ -55,12 +55,14 @@ type YearVirtualWindow = {
 
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
 const YEAR_INITIAL_RENDERED_FUTURE_YEARS = 3;
-const YEAR_EXTEND_YEARS = 3;
-const YEAR_SCROLL_EDGE_THRESHOLD_PX = 2400;
+const YEAR_EXTEND_YEARS = 1;
+const YEAR_SCROLL_EDGE_THRESHOLD_PX = 1200;
 const YEAR_SECTION_GAP_PX = 32;
 const YEAR_SYNC_RANGE_NOTIFY_DELAY_MS = 180;
+const YEAR_SCROLL_SYNC_DEBOUNCE_MS = 120;
 const YEAR_SYNC_RANGE_SAMPLE_OFFSET_PX = 160;
 const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
+const EMPTY_YEAR_EVENTS: GoogleCalendarEvent[] = [];
 
 const createDayAriaLabel = (date: Date, eventCount: number): string => {
   const baseLabel = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
@@ -188,7 +190,7 @@ const getDayButtonStyle = (day: CalendarYearDay, selected: boolean): CSSProperti
 const CalendarYearViewComponent = ({
   yearDate,
   selectedDate,
-  visibleEvents = [],
+  visibleEvents = EMPTY_YEAR_EVENTS,
   onSelectDate,
   onRenderedRangeChange,
   onSyncRangeChange,
@@ -200,7 +202,7 @@ const CalendarYearViewComponent = ({
   const selectedDateKey = useMemo(() => getCalendarDateKey(selectedDate), [selectedDate]);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const syncRangeNotifyTimeoutRef = useRef<number | null>(null);
-  const syncRangeRafRef = useRef<number | null>(null);
+  const syncRangeScrollTimeoutRef = useRef<number | null>(null);
   const pendingSyncScrollerRef = useRef<HTMLDivElement | null>(null);
   const scrollRafRef = useRef<number | null>(null);
   const pendingScrollScrollerRef = useRef<HTMLDivElement | null>(null);
@@ -210,7 +212,8 @@ const CalendarYearViewComponent = ({
   const [virtualWindow, setVirtualWindowState] = useState(() => virtualWindowRef.current);
   const [syncRange, setSyncRange] = useState(() => buildYearSyncDateRange(yearDate));
 
-  const eventsByDay = useMemo(() => buildEventsByDay(visibleEvents), [visibleEvents]);
+  const deferredVisibleEvents = useDeferredValue(visibleEvents);
+  const eventsByDay = useMemo(() => buildEventsByDay(deferredVisibleEvents), [deferredVisibleEvents]);
 
   const buildYearMonths = useCallback(
     (targetYear: Date): CalendarYearMonth[] => {
@@ -302,13 +305,13 @@ const CalendarYearViewComponent = ({
     setSyncRange((currentRange) => isSameCalendarDateRange(currentRange, nextRange) ? currentRange : nextRange);
   }, [getSyncRangeFromScroll, setSyncRange]);
 
-  const scheduleSyncVisibleWeekRange = useCallback((scroller: HTMLDivElement) => {
+  const scheduleSyncVisibleYearRange = useCallback((scroller: HTMLDivElement) => {
     pendingSyncScrollerRef.current = scroller;
 
-    if (syncRangeRafRef.current !== null) return;
+    if (syncRangeScrollTimeoutRef.current !== null) return;
 
-    syncRangeRafRef.current = window.requestAnimationFrame(() => {
-      syncRangeRafRef.current = null;
+    syncRangeScrollTimeoutRef.current = window.setTimeout(() => {
+      syncRangeScrollTimeoutRef.current = null;
       const pendingScroller = pendingSyncScrollerRef.current;
       pendingSyncScrollerRef.current = null;
 
@@ -349,9 +352,9 @@ const CalendarYearViewComponent = ({
 
   useEffect(() => {
     return () => {
-      if (syncRangeRafRef.current !== null) {
-        window.cancelAnimationFrame(syncRangeRafRef.current);
-        syncRangeRafRef.current = null;
+      if (syncRangeScrollTimeoutRef.current !== null) {
+        window.clearTimeout(syncRangeScrollTimeoutRef.current);
+        syncRangeScrollTimeoutRef.current = null;
       }
 
       if (scrollRafRef.current !== null) {
@@ -381,7 +384,7 @@ const CalendarYearViewComponent = ({
 
     const flushScroll = (pendingScroller: HTMLDivElement) => {
       updateVirtualWindowForScroll(pendingScroller);
-      scheduleSyncVisibleWeekRange(pendingScroller);
+      scheduleSyncVisibleYearRange(pendingScroller);
     };
 
     const handleScroll = () => {
@@ -412,7 +415,7 @@ const CalendarYearViewComponent = ({
 
       pendingScrollScrollerRef.current = null;
     };
-  }, [scheduleSyncVisibleWeekRange, updateVirtualWindowForScroll]);
+  }, [scheduleSyncVisibleYearRange, updateVirtualWindowForScroll]);
 
   return (
     <div
