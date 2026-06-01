@@ -55,6 +55,9 @@ debug_*.txt
 # Nested workspace folder (avoid separate repo/worktree)
 FlashCard-Master/
 
+# Legacy local duplicate workspace folder
+package/
+
 # Firebase
 .firebase/
 serviceAccountKey.json
