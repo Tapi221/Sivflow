@@ -26,7 +26,7 @@ type CalendarEventDisplayRange = { start: Date; end: Date };
 
 type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; monthTitleDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange | null; yearRenderedRange: CalendarDateRange | null };
 
-type CalendarTimedEventTimeOverride = { startsAt: Date; endsAt: Date };
+type CalendarTimedEventTimeOverride = { startsAt: Date; endsAt: Date; isAllDay: boolean };
 
 type CreateGoogleProjectCalendarLinkInput = { project: AppCalendarItem; accountId: string; calendar: GoogleCalendarListItem; color: string; createdByApp: boolean };
 
@@ -106,7 +106,7 @@ const applyTimedEventTimeOverrides = (events: GoogleCalendarEvent[], overrides: 
   if (overrides.size === 0) return events;
   return events.map((event) => {
     const override = overrides.get(getTimedEventOverrideKey(event));
-    return override ? { ...event, ...override, isAllDay: false } : event;
+    return override ? { ...event, ...override } : event;
   });
 };
 
@@ -205,20 +205,20 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     setProjectCalendarLinks((links) => links.map((link) => link.provider === "google" && link.accountId === accountId && link.externalCalendarId === calendarId ? { ...link, color } : link));
     void Promise.all(Array.from(new Set(linkedProjectIds)).map((projectId) => updateRootFolderProjectColor(projectId, color))).catch((error) => { console.warn("[ScheduleScreen] root folder project color update failed", error); });
   }, [projectCalendarLinks, updateRootFolderProjectColor]);
-  const handleMoveTimedEvent = useCallback<CalendarTimedEventMoveHandler>(async (event, startsAt, endsAt) => {
+  const handleMoveTimedEvent = useCallback<CalendarTimedEventMoveHandler>(async (event, startsAt, endsAt, isAllDay = false) => {
     if (!event.accountId) return;
 
     const overrideKey = getTimedEventOverrideKey(event);
-    const rollbackOverride = { startsAt: event.startsAt, endsAt: event.endsAt };
+    const rollbackOverride = { startsAt: event.startsAt, endsAt: event.endsAt, isAllDay: event.isAllDay };
 
     setTimedEventTimeOverrides((overrides) => {
       const next = new Map(overrides);
-      next.set(overrideKey, { startsAt, endsAt });
+      next.set(overrideKey, { startsAt, endsAt, isAllDay });
       return next;
     });
 
     try {
-      await updateGoogleCalendarEvent(event.accountId, { calendarId: event.calendarId, eventId: event.externalId ?? event.id, startsAt, endsAt, isAllDay: false });
+      await updateGoogleCalendarEvent(event.accountId, { calendarId: event.calendarId, eventId: event.externalId ?? event.id, startsAt, endsAt, isAllDay });
     } catch (error) {
       console.warn("[ScheduleScreen] timed event move failed", error);
       setTimedEventTimeOverrides((overrides) => {
@@ -229,7 +229,7 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
       window.setTimeout(() => {
         setTimedEventTimeOverrides((overrides) => {
           const current = overrides.get(overrideKey);
-          if (!current || current.startsAt.getTime() !== rollbackOverride.startsAt.getTime() || current.endsAt.getTime() !== rollbackOverride.endsAt.getTime()) return overrides;
+          if (!current || current.startsAt.getTime() !== rollbackOverride.startsAt.getTime() || current.endsAt.getTime() !== rollbackOverride.endsAt.getTime() || current.isAllDay !== rollbackOverride.isAllDay) return overrides;
           const next = new Map(overrides);
           next.delete(overrideKey);
           return next;
