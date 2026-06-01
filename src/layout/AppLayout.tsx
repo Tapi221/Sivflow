@@ -1,4 +1,4 @@
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
 import { useDesktopLayoutMediaQuery } from "@/layout/hooks/useDesktopLayoutMediaQuery";
@@ -10,16 +10,21 @@ import "@/styles/backpane.css";
 import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
 
-export const AppLayout = () => {
+type AppLayoutOutletContext = {
+  isLeftPanelCollapsed: boolean;
+};
+
+const AppLayout = () => {
   const { pathname, isFoldersRoute, isScrollLocked } =
     useLayoutRouteStateDesktop();
   const shouldRenderDesktopSidebar = useDesktopLayoutMediaQuery();
   const shouldShowRightSidebar = shouldRenderDesktopSidebar && isDesktopRuntime();
 
-  const [isSidebarClosed, setIsSidebarClosed] = useState(false);
+  const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
   const mainRef = useRef<HTMLElement | null>(null);
+  const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed }), [isLeftPanelCollapsed]);
 
   useHotKeyDesktop({
     onToggleRightSidebar: () => {
@@ -34,7 +39,7 @@ export const AppLayout = () => {
     isFoldersRoute ? "app-layout--folders" : "",
     isScrollLocked ? "app-layout--scroll-locked" : "",
     shouldRenderDesktopSidebar ? "" : "app-layout--without-sidebar",
-    shouldRenderDesktopSidebar && isSidebarClosed ? "app-layout--sidebar-closed" : "",
+    shouldRenderDesktopSidebar && isLeftPanelCollapsed ? "app-layout--left-panel-collapsed" : "",
     shouldShowRightSidebar && isRightSidebarOpen ? "app-layout--right-sidebar-open" : "",
   ]
     .filter(Boolean)
@@ -44,16 +49,18 @@ export const AppLayout = () => {
     <div className={className}>
       {shouldRenderDesktopSidebar && (
         <Sidebar
-          isClosed={isSidebarClosed}
-          onToggleClosed={() => setIsSidebarClosed((current) => !current)}
+          isLeftPanelCollapsed={isLeftPanelCollapsed}
+          onToggleLeftPanel={() => setIsLeftPanelCollapsed((current) => !current)}
         />
       )}
 
       <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
         <Suspense fallback={null}>
-          <Outlet />
+          <Outlet context={outletContext} />
         </Suspense>
       </WorkspaceShell>
     </div>
   );
 };
+
+export { AppLayout, type AppLayoutOutletContext };
