@@ -19,6 +19,7 @@ const CHIP_ROOT_CLASS = "relative isolate h-full min-h-0 w-full";
 const CHIP_LINE_MASK_CLASS = "pointer-events-none absolute inset-0 rounded-md bg-white";
 const CHIP_BASE_CLASS = "relative z-10 flex h-full min-h-0 w-full flex-col overflow-hidden rounded-md text-left";
 const CHIP_NORMAL_CLASS = "gap-[0.5px] py-[2px] pl-1 pr-[1px]";
+const CHIP_INLINE_CLASS = "gap-[0.5px] py-[1px] pl-1 pr-[1px]";
 const CHIP_TITLE_CLASS = "overflow-hidden whitespace-normal break-words text-[12px] font-medium leading-[17px]";
 const CHIP_TIME_CLASS = "overflow-hidden whitespace-normal break-words text-[11px] font-semibold leading-[16px] tabular-nums opacity-80";
 const CHIP_INLINE_ROW_CLASS = "flex min-w-0 max-w-full items-baseline gap-1.5 overflow-hidden";
@@ -160,9 +161,9 @@ const createTitleClampStyle = (lineClamp: number): CSSProperties => {
   };
 };
 
-const getChipClassName = (): string => [
+const getChipClassName = (showInlineTimeLabel = false): string => [
   CHIP_BASE_CLASS,
-  CHIP_NORMAL_CLASS,
+  showInlineTimeLabel ? CHIP_INLINE_CLASS : CHIP_NORMAL_CLASS,
 ].join(" ");
 
 const getMeasurementClassName = (): string => [
@@ -250,7 +251,7 @@ const CalendarEventChipWeekday = ({
         <div aria-hidden="true" className={CHIP_LINE_MASK_CLASS} />
         <div
           ref={containerRef}
-          className={getChipClassName()}
+          className={getChipClassName(chipLayout.showInlineTimeLabel)}
           style={{
             background: tokens.bg,
             borderLeft: `3px solid ${tokens.border}`,
