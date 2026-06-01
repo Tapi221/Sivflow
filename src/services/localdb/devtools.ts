@@ -1,8 +1,33 @@
-import { getLocalDb, getLocalDbSync } from "./LocalDB";
+import { LOCALDB_GENERATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME, SHARED_STORAGE_KEYS } from "@constants/shared/storage";
+import { WEB_STORAGE_KEYS } from "@constants/web/storage";
+import { LocalDB, getLocalDb, getLocalDbSync } from "./LocalDB";
 import { auditAndRepairTags } from "@/services/localdb/audit/tags";
 import { auth } from "@/services/firebase";
 
+type ClearDevModeCacheOptions = {
+  userId?: string;
+  reload?: boolean;
+};
+
+type ClearDevModeCacheResult = {
+  userId: string | null;
+  deletedIndexedDbNames: string[];
+  failedIndexedDbNames: string[];
+  removedLocalStorageKeys: string[];
+  clearedSessionStorage: boolean;
+  deletedCacheStorageKeys: string[];
+  reloaded: boolean;
+};
+
+type ClearDevModeCache = (
+  options?: string | ClearDevModeCacheOptions,
+) => Promise<ClearDevModeCacheResult>;
+
+type StorageKeySource = Record<string, string | readonly string[]>;
+
 type WindowWithLocalDbDevtools = Window & {
+  clearDevCache?: ClearDevModeCache;
+  clearDevModeCache?: ClearDevModeCache;
   dbDebug?: () => Promise<void>;
   repairTags?: (userId?: string) => Promise<unknown>;
   __dbHelpers?: {
@@ -25,6 +50,19 @@ const REPAIR_TAGS_ALLOWLIST = (
   .split(",")
   .map((uid) => uid.trim())
   .filter(Boolean);
+const DEV_INDEXED_DB_DELETE_TIMEOUT_MS = 2000;
+const DEV_LOCAL_STORAGE_PREFIXES = [
+  LOCALDB_GENERATION_KEY_PREFIX,
+  "flashcard-master:",
+  "cardsetview.",
+  "card-view.",
+  "card-editor.",
+  "folder_",
+  "ui.",
+  "workspace.",
+  "app:",
+] as const;
+const DEV_LOCAL_STORAGE_EXTRA_KEYS = ["explorer-storage"] as const;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -68,10 +106,220 @@ const assertRepairTagsAllowed = (userId: string): void => {
   }
 };
 
+const normalizeClearDevModeCacheOptions = (
+  options?: string | ClearDevModeCacheOptions,
+): Required<ClearDevModeCacheOptions> => {
+  if (typeof options === "string") {
+    return { userId: options, reload: true };
+  }
+
+  return {
+    userId: options?.userId ?? "",
+    reload: options?.reload ?? true,
+  };
+};
+
+const collectStorageKeys = (...sources: StorageKeySource[]): Set<string> => {
+  const keys = new Set<string>(DEV_LOCAL_STORAGE_EXTRA_KEYS);
+
+  for (const source of sources) {
+    for (const value of Object.values(source)) {
+      if (typeof value === "string") {
+        keys.add(value);
+        continue;
+      }
+
+      for (const key of value) {
+        keys.add(key);
+      }
+    }
+  }
+
+  return keys;
+};
+
+const shouldRemoveLocalStorageKey = (
+  key: string,
+  exactKeys: ReadonlySet<string>,
+): boolean => {
+  if (exactKeys.has(key)) return true;
+  return DEV_LOCAL_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix));
+};
+
+const removeDevelopmentLocalStorageKeys = (): string[] => {
+  if (typeof window === "undefined") return [];
+
+  const exactKeys = collectStorageKeys(SHARED_STORAGE_KEYS, WEB_STORAGE_KEYS);
+  const removedKeys: string[] = [];
+  const keys = Array.from({ length: window.localStorage.length }, (_, index) =>
+    window.localStorage.key(index),
+  ).filter((key): key is string => typeof key === "string");
+
+  for (const key of keys) {
+    if (!shouldRemoveLocalStorageKey(key, exactKeys)) continue;
+    window.localStorage.removeItem(key);
+    removedKeys.push(key);
+  }
+
+  return removedKeys;
+};
+
+const clearDevelopmentSessionStorage = (): boolean => {
+  if (typeof window === "undefined") return false;
+
+  window.sessionStorage.clear();
+  return true;
+};
+
+const getKnownLocalDbNamesForUser = (userId: string): string[] => {
+  const names: string[] = [];
+
+  for (let generation = 0; generation <= LOCALDB_GENERATION_MAX; generation += 1) {
+    names.push(
+      `${LOCALDB_NAME_PREFIX}${userId}_v${LOCALDB_SCHEMA_VERSION_FOR_NAME}_g${generation}`,
+    );
+  }
+
+  names.push(`${LOCALDB_NAME_PREFIX}${userId}`);
+  return names;
+};
+
+const listDevelopmentIndexedDbNames = async (
+  userId: string | null,
+): Promise<string[]> => {
+  if (typeof indexedDB === "undefined") return [];
+
+  const names = new Set<string>();
+  const knownUserIds = new Set<string>(["anonymous"]);
+  if (userId) knownUserIds.add(userId);
+
+  for (const knownUserId of knownUserIds) {
+    for (const name of getKnownLocalDbNamesForUser(knownUserId)) {
+      names.add(name);
+    }
+  }
+
+  if (typeof indexedDB.databases === "function") {
+    const dbs = await indexedDB.databases();
+    for (const db of dbs) {
+      const name = db?.name;
+      if (!name?.startsWith(LOCALDB_NAME_PREFIX)) continue;
+      names.add(name);
+    }
+  }
+
+  return Array.from(names.values());
+};
+
+const deleteIndexedDatabase = async (name: string): Promise<boolean> => {
+  if (typeof window === "undefined" || typeof indexedDB === "undefined") {
+    return false;
+  }
+
+  return await new Promise((resolve) => {
+    let settled = false;
+    const timeoutId = window.setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      console.warn(`[clearDevModeCache] IndexedDB delete timed out: ${name}`);
+      resolve(false);
+    }, DEV_INDEXED_DB_DELETE_TIMEOUT_MS);
+    const finish = (deleted: boolean) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeoutId);
+      resolve(deleted);
+    };
+    const request = indexedDB.deleteDatabase(name);
+
+    request.onsuccess = () => finish(true);
+    request.onerror = () => {
+      console.warn(`[clearDevModeCache] IndexedDB delete failed: ${name}`, request.error);
+      finish(false);
+    };
+    request.onblocked = () => {
+      console.warn(`[clearDevModeCache] IndexedDB delete blocked: ${name}`);
+    };
+  });
+};
+
+const clearDevelopmentIndexedDbs = async (
+  userId: string | null,
+): Promise<Pick<ClearDevModeCacheResult, "deletedIndexedDbNames" | "failedIndexedDbNames">> => {
+  LocalDB.clearInstance();
+
+  const deletedIndexedDbNames: string[] = [];
+  const failedIndexedDbNames: string[] = [];
+  const names = await listDevelopmentIndexedDbNames(userId);
+
+  for (const name of names) {
+    const deleted = await deleteIndexedDatabase(name);
+    if (deleted) {
+      deletedIndexedDbNames.push(name);
+      continue;
+    }
+
+    failedIndexedDbNames.push(name);
+  }
+
+  return { deletedIndexedDbNames, failedIndexedDbNames };
+};
+
+const clearDevelopmentCacheStorage = async (): Promise<string[]> => {
+  if (typeof caches === "undefined") return [];
+
+  const keys = await caches.keys();
+  const deletedKeys: string[] = [];
+
+  for (const key of keys) {
+    const deleted = await caches.delete(key);
+    if (deleted) deletedKeys.push(key);
+  }
+
+  return deletedKeys;
+};
+
+const clearDevModeCache = async (
+  w: WindowWithLocalDbDevtools,
+  options?: string | ClearDevModeCacheOptions,
+): Promise<ClearDevModeCacheResult> => {
+  if (!import.meta.env.DEV) {
+    throw new Error("clearDevModeCache is only available in development mode.");
+  }
+
+  const normalizedOptions = normalizeClearDevModeCacheOptions(options);
+  const userId = normalizedOptions.userId || getAuthUid(w) || null;
+  const removedLocalStorageKeys = removeDevelopmentLocalStorageKeys();
+  const clearedSessionStorage = clearDevelopmentSessionStorage();
+  const { deletedIndexedDbNames, failedIndexedDbNames } =
+    await clearDevelopmentIndexedDbs(userId);
+  const deletedCacheStorageKeys = await clearDevelopmentCacheStorage();
+  const result: ClearDevModeCacheResult = {
+    userId,
+    deletedIndexedDbNames,
+    failedIndexedDbNames,
+    removedLocalStorageKeys,
+    clearedSessionStorage,
+    deletedCacheStorageKeys,
+    reloaded: normalizedOptions.reload,
+  };
+
+  console.log("[clearDevModeCache] done", result);
+
+  if (normalizedOptions.reload) {
+    window.setTimeout(() => window.location.reload(), 0);
+  }
+
+  return result;
+};
+
 export const installLocalDbDevtools = () => {
   if (typeof window === "undefined") return;
 
   const w = window as WindowWithLocalDbDevtools;
+
+  w.clearDevModeCache = (options) => clearDevModeCache(w, options);
+  w.clearDevCache = w.clearDevModeCache;
 
   w.repairTags = async (userId?: string) => {
     const resolvedUserId = userId ?? getAuthUid(w);
