@@ -10,6 +10,56 @@ const SAMPLE_START_DATE = new Date(2026, 5, 1);
 const CALENDAR_GRID_STYLE: CalendarGridStyle = { "--calendar-hour-row-height": "72px" };
 const SAMPLE_EVENTS: readonly GoogleCalendarEvent[] = [
   {
+    id: "midnight-review",
+    accountId: SANDBOX_ACCOUNT_ID,
+    calendarId: SANDBOX_CALENDAR_ID,
+    title: "深夜レビュー",
+    startsAt: new Date(2026, 5, 1, 0, 30),
+    endsAt: new Date(2026, 5, 1, 1, 30),
+    isAllDay: false,
+    accentColor: "#0ea5e9",
+  },
+  {
+    id: "early-vocab",
+    accountId: SANDBOX_ACCOUNT_ID,
+    calendarId: SANDBOX_CALENDAR_ID,
+    title: "早朝英単語",
+    startsAt: new Date(2026, 5, 2, 2, 0),
+    endsAt: new Date(2026, 5, 2, 3, 0),
+    isAllDay: false,
+    accentColor: "#22c55e",
+  },
+  {
+    id: "visible-overlap-a",
+    accountId: SANDBOX_ACCOUNT_ID,
+    calendarId: SANDBOX_CALENDAR_ID,
+    title: "重なり確認 A",
+    startsAt: new Date(2026, 5, 3, 3, 15),
+    endsAt: new Date(2026, 5, 3, 4, 30),
+    isAllDay: false,
+    accentColor: "#a78bfa",
+  },
+  {
+    id: "visible-overlap-b",
+    accountId: SANDBOX_ACCOUNT_ID,
+    calendarId: SANDBOX_CALENDAR_ID,
+    title: "重なり確認 B",
+    startsAt: new Date(2026, 5, 3, 3, 45),
+    endsAt: new Date(2026, 5, 3, 4, 15),
+    isAllDay: false,
+    accentColor: "#ec4899",
+  },
+  {
+    id: "morning-visible",
+    accountId: SANDBOX_ACCOUNT_ID,
+    calendarId: SANDBOX_CALENDAR_ID,
+    title: "朝の移動テスト",
+    startsAt: new Date(2026, 5, 4, 6, 15),
+    endsAt: new Date(2026, 5, 4, 7, 15),
+    isAllDay: false,
+    accentColor: "#f97316",
+  },
+  {
     id: "morning-review",
     accountId: SANDBOX_ACCOUNT_ID,
     calendarId: SANDBOX_CALENDAR_ID,
@@ -127,7 +177,7 @@ const CalendarDndSandboxPage = () => {
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-300">Calendar DND Sandbox</p>
               <h1 className="mt-2 text-2xl font-bold tracking-tight text-white">週カレンダー DnD 操作確認</h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">イベントチップを掴んで、別日・別時刻にドラッグできます。15分単位で snap し、drop 後はこの sandbox 内の state だけを更新します。</p>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">初期表示範囲の 00:30 / 02:00 / 03:15 / 06:15 にドラッグ可能な event を置いてあります。別日・別時刻に動かすと、15分単位で snap して sandbox 内の state だけを更新します。</p>
             </div>
             <button type="button" className="rounded-full border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-900" onClick={handleReset}>Reset</button>
           </div>
