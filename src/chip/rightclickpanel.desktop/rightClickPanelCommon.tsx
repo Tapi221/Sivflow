@@ -39,14 +39,17 @@ export const RightClickPanelSurface = ({
         setDismissedPanelInstanceKey(panelInstanceKey);
       }
     };
+    const isNestedPanel = Boolean(panelRef.current?.parentElement?.closest(".right-click-panel"));
 
     window.addEventListener(RIGHT_CLICK_PANEL_OPEN_EVENT, handleOtherPanelOpen);
-    announceRightClickPanelOpen(panelId);
+    if (!isNestedPanel) {
+      announceRightClickPanelOpen(panelId);
+    }
 
     return () => {
       window.removeEventListener(RIGHT_CLICK_PANEL_OPEN_EVENT, handleOtherPanelOpen);
     };
-  }, [panelId, panelInstanceKey]);
+  }, [panelId, panelInstanceKey, panelRef]);
 
   if (panelInstanceKey && dismissedPanelInstanceKey === panelInstanceKey) return null;
 
