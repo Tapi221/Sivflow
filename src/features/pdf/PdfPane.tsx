@@ -7,6 +7,7 @@ import { PdfThumbnailSidePanel } from "./PdfThumbnailSidePanel";
 import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
 import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
+import type { CardSelectionCaptureSide } from "@/features/selection-capture/cardSelectionCaptureEvents";
 import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
 import type { BlobUrl } from "@/types/core/branded";
@@ -73,6 +74,7 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
     setCurrentPage,
   } = usePdfWorkspace();
   const [isThumbnailPanelOpen, setIsThumbnailPanelOpen] = useState(false);
+  const [selectionCaptureSide, setSelectionCaptureSide] = useState<CardSelectionCaptureSide>("question");
   const {
     isSelectionCaptureActive,
     isSelectionCaptureBusy,
@@ -82,6 +84,7 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
     handleCaptureSelection,
   } = usePdfSelectionCapture({
     targetRef: containerRef,
+    selectionCaptureSide,
     sourceUnavailable,
     numPages,
   });
@@ -243,6 +246,8 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
                       canGoToNextPage={canGoToNextPage}
                       selectionCaptureActive={isSelectionCaptureActive}
                       selectionCaptureDisabled={isSelectionCaptureBusy}
+                      selectionCaptureSide={selectionCaptureSide}
+                      onSelectionCaptureSideChange={setSelectionCaptureSide}
                       onSelectionCaptureToggle={handleToggleSelectionCapture}
                     />
                   </div>
