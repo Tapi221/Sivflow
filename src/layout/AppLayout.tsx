@@ -5,7 +5,6 @@ import { useDesktopLayoutMediaQuery } from "@/layout/hooks/useDesktopLayoutMedia
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
 import { Sidebar } from "@/pane.desktop/leftpane/Sidebar.desktop";
-import { useWorkspaceTabsRouteSync } from "@/pane.desktop/tab.desktopnative/hooks/useTabsRouteSync";
 import { isDesktopRuntime } from "@/platform/runtime";
 import "@/styles/backpane.css";
 import { WorkspaceShell } from "./WorkspaceShell";
@@ -14,7 +13,6 @@ import "./AppLayout.css";
 export const AppLayout = () => {
   const { pathname, isFoldersRoute, isScrollLocked } =
     useLayoutRouteStateDesktop();
-  const showWorkspaceTabs = isDesktopRuntime();
   const shouldRenderDesktopSidebar = useDesktopLayoutMediaQuery();
   const shouldShowRightSidebar = shouldRenderDesktopSidebar && isDesktopRuntime();
 
@@ -22,8 +20,6 @@ export const AppLayout = () => {
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
   const mainRef = useRef<HTMLElement | null>(null);
-
-  useWorkspaceTabsRouteSync({ enabled: showWorkspaceTabs });
 
   useHotKeyDesktop({
     onToggleRightSidebar: () => {
