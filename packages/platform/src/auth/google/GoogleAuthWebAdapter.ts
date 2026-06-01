@@ -1,20 +1,12 @@
-import { signInWithCustomToken } from "firebase/auth";
-import { httpsCallable } from "firebase/functions";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
-import { auth, functionsClient } from "@/infrastructure/firebase/client";
-import { requestGoogleSignInServerCode } from "@/integration/google-integration/google.oauth";
-
-const exchangeGoogleSignInCodeCallable = httpsCallable<{ code: string; codeVerifier: string; redirectUri: string }, { firebaseToken: string }>(functionsClient, "exchangeGoogleSignInCode");
-
-const exchangeCodeForFirebaseToken = async (input: { code: string; codeVerifier: string; redirectUri: string }): Promise<string> => {
-  const result = await exchangeGoogleSignInCodeCallable(input);
-  return result.data.firebaseToken;
-};
+import { auth } from "@/infrastructure/firebase/client";
 
 const signIn: GoogleAuthPort["signIn"] = async () => {
-  const input = await requestGoogleSignInServerCode();
-  const firebaseToken = await exchangeCodeForFirebaseToken(input);
-  await signInWithCustomToken(auth, firebaseToken);
+  const provider = new GoogleAuthProvider();
+  provider.addScope("email");
+  provider.addScope("profile");
+  await signInWithPopup(auth, provider);
 };
 
 export const googleAuthWebAdapter: GoogleAuthPort = {
