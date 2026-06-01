@@ -165,6 +165,15 @@ describe("event chip title/time spacing", () => {
     expect(chipElement.className).not.toContain("gap-1");
   });
 
+  it("週表示の通常チップは上下 padding を py-[2px] にする", () => {
+    render(<CalendarEventChipWeekday event={TIMED_EVENT} />);
+
+    const chipElement = getWeekdayChipElement();
+
+    expect(chipElement.className).toContain("py-[2px]");
+    expect(chipElement.className).not.toContain("py-[1px]");
+  });
+
   it("リスト表示のチップもタイトルと時刻の間隔を mt-[0.5px] にする", () => {
     render(<CalendarEventChipList event={TIMED_EVENT} />);
 
@@ -266,6 +275,18 @@ describe("weekday event chip inline time layout", () => {
     expect(inlineRowElement?.textContent).toContain(SHORT_TITLE_EVENT.title);
     expect(inlineRowElement?.textContent).toContain("~");
     expect(inlineRowElement?.querySelector("span")?.className).toContain("whitespace-nowrap");
+  });
+
+  it("横並び表示ではチップ本体の上下 padding を py-[1px] にする", () => {
+    stubWeekdayChipLayout({ chipHeight: 12, chipWidth: 70, titleText: SHORT_TITLE_EVENT.title, titleTextWidth: 8, timeTextWidth: 40 });
+
+    render(<CalendarEventChipWeekday event={SHORT_TITLE_EVENT} />);
+
+    const chipElement = getWeekdayChipElement(SHORT_TITLE_EVENT.title);
+
+    expect(getWeekdayInlineRowElement(SHORT_TITLE_EVENT.title)).not.toBeNull();
+    expect(chipElement.className).toContain("py-[1px]");
+    expect(chipElement.className).not.toContain("py-[2px]");
   });
 
   it("時刻単体が収まってもタイトルと時刻の合計幅が足りない場合は横並び表示にしない", () => {
