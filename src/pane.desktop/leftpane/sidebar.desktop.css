@@ -35,22 +35,6 @@
   font-family: var(--app-font-family-sidebar);
   font-feature-settings: "palt" 1, "lnum" 1, "tnum" 1;
   user-select: none;
-  transition: width 180ms ease, padding 180ms ease;
-}
-
-.app-sidebar--closed {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-  box-sizing: border-box;
-  width: var(--app-sidebar-rail-width, 48px);
-  min-width: var(--app-sidebar-rail-width, 48px);
-  height: 40px;
-  overflow: visible;
-  padding: 4px 0;
-  pointer-events: none;
-  background: var(--backpane-bg) !important;
 }
 
 .app-right-sidebar {
@@ -120,33 +104,8 @@
   color: currentColor;
 }
 
-.app-sidebar--closed .app-sidebar__toggle {
-  position: relative;
-  z-index: 1;
-  width: 32px;
-  min-width: 32px;
-  height: 32px;
-  padding: 0;
-  pointer-events: auto;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--app-sidebar-icon);
-}
-
-.app-sidebar--closed .app-sidebar__toggle:hover {
-  background: var(--app-sidebar-hover-bg);
-  color: var(--app-sidebar-text-hover);
-}
-
-.app-sidebar--closed .app-sidebar__toggle-icon {
-  width: 20px;
-  height: 20px;
-  color: currentColor;
-}
-
-.app-sidebar--closed .app-sidebar__nav,
-.app-sidebar--closed .app-sidebar__bottom {
-  display: none;
+.app-sidebar__toggle--panel-collapsed .app-sidebar__toggle-icon {
+  transform: scaleX(-1);
 }
 
 .app-sidebar__nav {
