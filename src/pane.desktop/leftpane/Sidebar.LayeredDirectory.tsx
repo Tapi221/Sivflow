@@ -75,21 +75,21 @@ const SidebarLayeredDirectory = () => {
   }, [openExplorerTab]);
 
   return (
-    <div className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[#5f6672] antialiased">
+    <div className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased">
       <div className="shrink-0 pb-1 pl-3 pr-2 pt-3">
         <div className="flex h-6 items-center gap-1.5">
-          <div className="min-w-0 flex-1 text-[11px] font-bold uppercase leading-none tracking-[0.04em] text-[#9a9a9a]">
+          <div className="min-w-0 flex-1 text-[11px] font-bold uppercase leading-none tracking-[0.04em] text-[var(--app-sidebar-text-muted)]">
             {folderTagMode !== "tag" && selectedProject ? (
-              <button type="button" className="flex min-w-0 items-center gap-1 text-left text-[13px] font-semibold normal-case leading-none tracking-normal text-[#4f5561] transition hover:text-[#2f3440]" onClick={handleOpenProjectList} aria-label="プロジェクト一覧を開く">
+              <button type="button" className="flex min-w-0 items-center gap-1 text-left text-[13px] font-semibold normal-case leading-none tracking-normal text-[var(--app-sidebar-text-strong)] transition hover:text-[var(--app-sidebar-text-hover)]" onClick={handleOpenProjectList} aria-label="プロジェクト一覧を開く">
                 <span className="block truncate">{sectionLabel}</span>
-                <IconChevronDown className="h-3.5 w-3.5 shrink-0 text-[#9aa1ad]" />
+                <IconChevronDown className="h-3.5 w-3.5 shrink-0 text-[var(--app-sidebar-icon)]" />
               </button>
             ) : (
               <span className="block truncate">{sectionLabel}</span>
             )}
           </div>
           {folderTagMode !== "tag" && !selectedProject ? (
-            <button type="button" onClick={handleCreateRootFolder} aria-label={ADD_PROJECT_ARIA_LABEL} title={ADD_PROJECT_ARIA_LABEL} className="ml-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#f4f4f4] text-[#8c8c8c] transition hover:bg-[#ececec] hover:text-[#5f6574] active:scale-[0.94]">
+            <button type="button" onClick={handleCreateRootFolder} aria-label={ADD_PROJECT_ARIA_LABEL} title={ADD_PROJECT_ARIA_LABEL} className="ml-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--app-sidebar-hover-bg)] text-[var(--app-sidebar-icon)] transition hover:bg-[var(--app-sidebar-active-bg)] hover:text-[var(--app-sidebar-text-hover)] active:scale-[0.94]">
               <IconPlus className="h-3.5 w-3.5" />
             </button>
           ) : null}
