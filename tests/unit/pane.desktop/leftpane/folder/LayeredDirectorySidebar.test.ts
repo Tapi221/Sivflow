@@ -24,7 +24,6 @@ const mocks = vi.hoisted(() => {
 vi.mock("@/components/card/hooks/useCardSets", () => ({ useCardSets: () => ({ cardSets: [], loading: false, createCardSet: mocks.createCardSet }) }));
 vi.mock("@/components/folder/hooks/useExplorerDerivedData", () => ({ useExplorerDerivedData: () => ({ rootFolders: mocks.rootFolders, getChildFolders: () => [], getFolderContentCount: () => 3, getNextOrderIndex: () => 0 }) }));
 vi.mock("@/components/folder/hooks/useFolderDocumentUpload", () => ({ useFolderDocumentUpload: () => ({ fileInputRef: { current: null }, handleToolbarAddDocument: mocks.handleToolbarAddDocument, currentFileAccept: "application/pdf", handleToolbarFileInputChange: mocks.handleToolbarFileInputChange }) }));
-vi.mock("@/chip/toggle/Toggle.foldertag", () => ({ ToggleFolderTag: () => React.createElement("div", { "data-testid": "folder-tag-toggle" }) }));
 vi.mock("@/hooks/folder/useFolderCommands", () => ({ useFolderCommands: () => ({ createFolder: mocks.createFolder, updateFolder: mocks.updateFolder, deleteFolder: mocks.deleteFolder }) }));
 vi.mock("@/hooks/folder/useFoldersRead", () => ({ useFoldersRead: () => ({ folders: mocks.rootFolders, loading: false, error: null }) }));
 vi.mock("@/hooks/folder/useFolderTagModeStore", () => ({ useFolderTagModeStore: (selector: (state: unknown) => unknown) => selector({ folderTagMode: "folder", setFolderTagMode: vi.fn() }) }));
@@ -60,6 +59,14 @@ describe("LayeredDirectorySidebar project list", () => {
 
     expect(sidebarSource).toContain("<ProjectListSidebar />");
     expect(sidebarSource).toContain("<LibraryHierarchySidebar projectRootId={selectedProjectId} />");
+  });
+
+  it("does not render the removed folder tag toggle", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/pane.desktop/leftpane/Sidebar.LayeredDirectory.tsx"), "utf8");
+    const sidebarSource = getFunctionSource(source, "SidebarLayeredDirectory");
+
+    expect(source).not.toContain("ToggleFolderTag");
+    expect(sidebarSource).not.toContain("folder-tag-toggle");
   });
 
   it("shows a selected project name above its child hierarchy", () => {
