@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { addDays, startOfDay } from "date-fns";
+import { addBusinessDays, startOfDay } from "date-fns";
 import { toast } from "sonner";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
@@ -19,8 +19,10 @@ type CalendarEventUndoSnapshot = {
 const SANDBOX_ACCOUNT_ID = "calendar-dnd-sandbox";
 const SANDBOX_CALENDAR_ID = "sandbox-calendar";
 const SAMPLE_START_DATE = new Date(2026, 5, 1);
+const VISIBLE_WORKWEEK_COUNT = 2;
+const WEEKDAYS_PER_WORKWEEK = 5;
 const CALENDAR_GRID_STYLE: CalendarGridStyle = { "--calendar-hour-row-height": "72px" };
-const SANDBOX_HEADER_DESCRIPTION = "週表示と月表示の DnD を同じサンプル予定で確認します。移動は sandbox 内の state だけに反映し、元に戻す toast を表示します。";
+const SANDBOX_HEADER_DESCRIPTION = "週表示は2週分の平日、月表示は同じサンプル予定で DnD を確認します。移動は sandbox 内の state だけに反映し、元に戻す toast を表示します。";
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-none";
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 const VIEW_MODE_OPTIONS: readonly { value: CalendarDndViewMode; label: string }[] = [
@@ -51,7 +53,7 @@ const cloneEvent = (event: GoogleCalendarEvent): GoogleCalendarEvent => ({ ...ev
 
 const createSampleEvents = (): GoogleCalendarEvent[] => SAMPLE_EVENT_DEFINITIONS.map(createSampleEvent);
 
-const createVisibleDays = (): Date[] => Array.from({ length: 5 }, (_, index) => addDays(startOfDay(SAMPLE_START_DATE), index));
+const createVisibleDays = (): Date[] => Array.from({ length: VISIBLE_WORKWEEK_COUNT * WEEKDAYS_PER_WORKWEEK }, (_, index) => addBusinessDays(startOfDay(SAMPLE_START_DATE), index));
 
 const createCalendarEventUndoSnapshot = (event: GoogleCalendarEvent): CalendarEventUndoSnapshot => ({ event: cloneEvent(event) });
 
