@@ -190,7 +190,7 @@ const CalendarWeekDayGridComponent = ({
             const isToday = isSameCalendarDate(day, now);
 
             return (
-              <div key={dayKey} className="flex h-12 min-w-0 items-center justify-center border-l px-2" style={WEEKDAY_COLUMN_BORDER_STYLE}>
+              <div key={dayKey} className="flex h-12 min-w-0 items-center justify-center px-2">
                 <button type="button" className="flex h-12 w-full min-w-0 items-center justify-center gap-1 bg-transparent p-0 text-center outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25" aria-pressed={isSelected} onClick={() => onSelectDate?.(day)}>
                   <span className={getHeaderDateNumberClassName(isSelected, isToday)}>{format(day, "d", { locale: ja })}</span>
                   <span className={WEEKDAY_HEADER_WEEKDAY_CLASS_NAME}>{format(day, "EEE", { locale: ja })}</span>
