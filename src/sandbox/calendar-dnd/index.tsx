@@ -1,10 +1,15 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, startOfDay } from "date-fns";
+import { toast } from "sonner";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import type { CalendarEventMoveHandler, CalendarGridStyle } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 type SampleEventDefinition = { id: string; title: string; startsAt: Date; endsAt: Date; isAllDay?: boolean; accentColor: string };
+
+type CalendarEventUndoSnapshot = {
+  event: GoogleCalendarEvent;
+};
 
 const SANDBOX_ACCOUNT_ID = "calendar-dnd-sandbox";
 const SANDBOX_CALENDAR_ID = "sandbox-calendar";
@@ -33,25 +38,57 @@ const createSampleEvents = (): GoogleCalendarEvent[] => SAMPLE_EVENT_DEFINITIONS
 
 const createVisibleDays = (): Date[] => Array.from({ length: 5 }, (_, index) => addDays(startOfDay(SAMPLE_START_DATE), index));
 
+const createCalendarEventUndoSnapshot = (event: GoogleCalendarEvent): CalendarEventUndoSnapshot => ({ event: cloneEvent(event) });
+
+const isSameCalendarEvent = (left: GoogleCalendarEvent, right: GoogleCalendarEvent): boolean => left.id === right.id && left.calendarId === right.calendarId && left.accountId === right.accountId;
+
 const moveEventTime = (targetEvent: GoogleCalendarEvent, sourceEvent: GoogleCalendarEvent, startsAt: Date, endsAt: Date, isAllDay: boolean): GoogleCalendarEvent => {
-  if (targetEvent.id !== sourceEvent.id) return targetEvent;
+  if (!isSameCalendarEvent(targetEvent, sourceEvent)) return targetEvent;
 
   return { ...targetEvent, startsAt: new Date(startsAt), endsAt: new Date(endsAt), isAllDay };
+};
+
+const restoreEventTime = (targetEvent: GoogleCalendarEvent, snapshot: CalendarEventUndoSnapshot): GoogleCalendarEvent => {
+  if (!isSameCalendarEvent(targetEvent, snapshot.event)) return targetEvent;
+
+  return cloneEvent(snapshot.event);
 };
 
 const CalendarDndSandboxPage = () => {
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const eventsRef = useRef<GoogleCalendarEvent[]>([]);
   const visibleDays = useMemo(() => createVisibleDays(), []);
   const [events, setEvents] = useState<GoogleCalendarEvent[]>(() => createSampleEvents().map(cloneEvent));
 
+  useEffect(() => {
+    eventsRef.current = events;
+  }, [events]);
+
   const handleMoveCalendarEvent = useCallback<CalendarEventMoveHandler>(({ event, startsAt, endsAt, isAllDay }) => {
+    const previousEvent = eventsRef.current.find((currentEvent) => isSameCalendarEvent(currentEvent, event));
+    if (!previousEvent) return;
+
+    const snapshot = createCalendarEventUndoSnapshot(previousEvent);
+    const toastId = `calendar-event-moved-${event.accountId ?? ""}-${event.calendarId}-${event.id}`;
+
     setEvents((currentEvents) => currentEvents.map((currentEvent) => moveEventTime(currentEvent, event, startsAt, endsAt, isAllDay)));
+    toast("予定を移動しました", {
+      id: toastId,
+      description: previousEvent.title || "Untitled",
+      action: {
+        label: "元に戻す",
+        onClick: () => {
+          setEvents((currentEvents) => currentEvents.map((currentEvent) => restoreEventTime(currentEvent, snapshot)));
+        },
+      },
+    });
   }, []);
 
   const handleReset = useCallback(() => {
     setEvents(createSampleEvents().map(cloneEvent));
+    toast.dismiss();
   }, []);
 
   return (
@@ -62,7 +99,7 @@ const CalendarDndSandboxPage = () => {
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-300">Calendar DND Sandbox</p>
               <h1 className="mt-2 text-2xl font-bold tracking-tight text-white">週カレンダー DnD 操作確認</h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">初期表示範囲の 00:30 / 02:00 / 03:15 / 06:15 にドラッグ可能な event を置いてあります。別日・別時刻・終日行に動かすと sandbox 内の state だけを更新します。</p>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">初期表示範囲の 00:30 / 02:00 / 03:15 / 06:15 にドラッグ可能な event を置いてあります。別日・別時刻・終日行に動かすと sandbox 内の state だけを更新し、元に戻す toast を表示します。</p>
             </div>
             <button type="button" className="rounded-full border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-900" onClick={handleReset}>Reset</button>
           </div>
