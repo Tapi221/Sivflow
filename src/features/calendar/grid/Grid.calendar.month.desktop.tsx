@@ -105,6 +105,31 @@ type CalendarMonthWeekRowProps = {
 const MONTH_GRID_BORDER_STYLE: CSSProperties = { borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB };
 const DEFAULT_MONTH_TIMED_EVENT_DURATION_MS = 30 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
+const CALENDAR_EVENT_DRAG_FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
+
+const getCanUseCalendarEventDragPointer = (): boolean => {
+  if (typeof window === "undefined") return false;
+
+  return window.matchMedia(CALENDAR_EVENT_DRAG_FINE_POINTER_QUERY).matches;
+};
+
+const useCalendarEventDragEnabled = (): boolean => {
+  const [isEnabled, setIsEnabled] = useState(getCanUseCalendarEventDragPointer);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const mediaQuery = window.matchMedia(CALENDAR_EVENT_DRAG_FINE_POINTER_QUERY);
+    const handleChange = () => setIsEnabled(mediaQuery.matches);
+
+    handleChange();
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  return isEnabled;
+};
 
 const getDayKey = (date: Date): string => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -280,6 +305,8 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
   const eventsByDay = useMemo(() => computeMonthEventsByDay({ eventIndex, monthWeeks, monthRowHeight }), [eventIndex, monthRowHeight, monthWeeks]);
   const dragPreviewEvent = useMemo(() => dragState ? createCalendarEventDragPreview(dragState.event, dragState.previewStartsAt, dragState.previewEndsAt, dragState.previewIsAllDay) : null, [dragState]);
   const dragPreviewDayKey = dragState ? getDayKey(dragState.previewStartsAt) : null;
+  const isEventDragEnabled = useCalendarEventDragEnabled();
+  const effectiveMoveCalendarEvent = isEventDragEnabled ? onMoveCalendarEvent : undefined;
 
   const setDragStateValue = useCallback((nextDragState: MonthEventDragState | null) => {
     dragStateRef.current = nextDragState;
@@ -342,10 +369,10 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
   const commitDragState = useCallback((state: MonthEventDragState) => {
     if (isSameCalendarEventMove(state.event, state.previewStartsAt, state.previewEndsAt, state.previewIsAllDay)) return;
 
-    void Promise.resolve(onMoveCalendarEvent?.({ event: state.event, startsAt: state.previewStartsAt, endsAt: state.previewEndsAt, isAllDay: state.previewIsAllDay })).catch((error: unknown) => {
+    void Promise.resolve(effectiveMoveCalendarEvent?.({ event: state.event, startsAt: state.previewStartsAt, endsAt: state.previewEndsAt, isAllDay: state.previewIsAllDay })).catch((error: unknown) => {
       console.warn("[GridCalendarMonthDesktop] calendar event move failed", error);
     });
-  }, [onMoveCalendarEvent]);
+  }, [effectiveMoveCalendarEvent]);
 
   const finishDrag = useCallback((event: PointerEvent, shouldCommit: boolean) => {
     const state = dragStateRef.current;
@@ -370,7 +397,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
   }, []);
 
   const handleEventPointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>, calendarEvent: GoogleCalendarEvent) => {
-    if (event.button !== 0 || !isCalendarEventDraggable(calendarEvent, onMoveCalendarEvent)) return;
+    if (!isEventDragEnabled || event.pointerType !== "mouse" || event.button !== 0 || !isCalendarEventDraggable(calendarEvent, effectiveMoveCalendarEvent)) return;
 
     const eventKey = createCalendarEventKey(calendarEvent);
     const durationMs = getEventDurationMs(calendarEvent);
@@ -392,7 +419,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
       previewEndsAt: preview?.previewEndsAt ?? calendarEvent.endsAt,
       previewIsAllDay: preview?.previewIsAllDay ?? calendarEvent.isAllDay,
     });
-  }, [getMonthDragPreview, onMoveCalendarEvent, setDragStateValue]);
+  }, [effectiveMoveCalendarEvent, getMonthDragPreview, isEventDragEnabled, setDragStateValue]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -428,7 +455,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
         <div aria-hidden="true" className="calendar-month-grid-spacer" style={{ height: topSpacerHeight }} />
 
         {monthWeeks.map((week) => (
-          <CalendarMonthWeekRow key={week.key} week={week} eventsByDay={eventsByDay} selectedDayKey={selectedDayKey} todayDayKey={todayDayKey} scrollHoverDayKey={scrollHoverDayKey} monthRowHeight={monthRowHeight} dragState={dragState} dragPreviewEvent={dragPreviewEvent} dragPreviewDayKey={dragPreviewDayKey} setDayCellRef={setDayCellRef} onSelectDate={onSelectDate} onEventClick={handleEventClick} onEventPointerDown={handleEventPointerDown} onMoveCalendarEvent={onMoveCalendarEvent} />
+          <CalendarMonthWeekRow key={week.key} week={week} eventsByDay={eventsByDay} selectedDayKey={selectedDayKey} todayDayKey={todayDayKey} scrollHoverDayKey={scrollHoverDayKey} monthRowHeight={monthRowHeight} dragState={dragState} dragPreviewEvent={dragPreviewEvent} dragPreviewDayKey={dragPreviewDayKey} setDayCellRef={setDayCellRef} onSelectDate={onSelectDate} onEventClick={handleEventClick} onEventPointerDown={handleEventPointerDown} onMoveCalendarEvent={effectiveMoveCalendarEvent} />
         ))}
 
         <div aria-hidden="true" className="calendar-month-grid-spacer" style={{ height: bottomSpacerHeight }} />
