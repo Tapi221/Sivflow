@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { capturePdfViewerRectToBlob } from "../pdfSelectionCapture";
+import { capturePdfViewerRectToBlob } from "@/features/pdf/pdfSelectionCapture";
 import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboardImage";
 import type { SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
 

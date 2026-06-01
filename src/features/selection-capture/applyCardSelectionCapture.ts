@@ -1,4 +1,4 @@
-import { createSelectionCaptureImageAsset } from "@/features/selection-capture/createSelectionCaptureImageAsset";
+import { createSelectionCaptureImageAsset } from "./createSelectionCaptureImageAsset";
 import type { CardBlock } from "@/types";
 
 export type ApplyCardSelectionCaptureSide = "question" | "answer";

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import * as C from "./pdf.constants.desktop";
-import { usePdfSelectionCapture } from "./hooks/usePdfSelectionCapture";
+import { usePdfSelectionCapture } from "@/features/pdf/hooks/usePdfSelectionCapture";
 import { usePdfWorkspace } from "@/features/pdf/hooks/usePdfWorkspace";
 import { PdfOverlayToolbar } from "./PdfToolbar";
 import { PdfThumbnailSidePanel } from "./PdfThumbnailSidePanel";
