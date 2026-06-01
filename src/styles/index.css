@@ -170,12 +170,18 @@ a:hover,
   height: 0;
 }
 
+[aria-label="Project list explorer"] [role="tree"],
+[aria-label="Project list explorer"] [role="treeitem"],
 [aria-label="Library hierarchy explorer"] [role="tree"],
-[aria-label="Library hierarchy explorer"] [role="treeitem"] {
+[aria-label="Library hierarchy explorer"] [role="treeitem"],
+[aria-label="Tag tree explorer"] [role="tree"],
+[aria-label="Tag tree explorer"] [role="treeitem"] {
   overflow-anchor: none;
 }
 
-[aria-label="Library hierarchy explorer"] .truncate {
+[aria-label="Project list explorer"] .truncate,
+[aria-label="Library hierarchy explorer"] .truncate,
+[aria-label="Tag tree explorer"] .truncate {
   overflow: hidden;
   text-overflow: clip;
   white-space: nowrap;
@@ -183,20 +189,24 @@ a:hover,
   mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%);
 }
 
+[aria-label="Project list explorer"] [aria-hidden="true"][class*="bg-[#eeeeee]"],
 [aria-label="Library hierarchy explorer"] [aria-hidden="true"][class*="bg-[#eeeeee]"] {
   z-index: 2;
 }
 
+[aria-label="Project list explorer"] [role="treeitem"] > .library-tree-marker,
 [aria-label="Library hierarchy explorer"] [role="treeitem"] > .library-tree-marker {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6.25px;
+  width: 13px;
+  height: 13px;
+  padding: 0;
   border: 0;
-  background-color: var(--sidebar-folder-mark-color, #6baa7e);
-  background-clip: content-box;
-  box-shadow: none;
+  border-radius: 9999px;
+  background-color: currentColor;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 22%, #ffffff), 0 0 0 2px color-mix(in srgb, currentColor 16%, transparent);
   -webkit-appearance: none;
   appearance: none;
 }
@@ -205,67 +215,45 @@ a:hover,
   display: none;
 }
 
-[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .library-tree-marker {
-  padding: 5.5px;
+[aria-label="Project list explorer"] [role="treeitem"] > .library-tree-marker {
+  margin-left: 1px;
+  margin-right: 3px;
 }
 
-[aria-label="Tag hierarchy explorer"] [role="treeitem"] > span:first-child {
+[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .library-tree-marker {
+  width: 13px;
+  height: 13px;
+}
+
+[aria-label="Tag tree explorer"] [role="treeitem"] > span:first-child {
   display: none;
 }
 
-[aria-label="Tag hierarchy explorer"] [role="treeitem"] > .library-tree-marker {
+[aria-label="Tag tree explorer"] [role="treeitem"] > .library-tree-marker {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
   padding: 0;
   border: 0 !important;
-  background-color: color-mix(in srgb, currentColor 12%, #ffffff) !important;
-  background-clip: border-box;
-  box-shadow: none;
+  border-radius: 9999px;
+  background-color: currentColor !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 22%, #ffffff), 0 0 0 2px color-mix(in srgb, currentColor 16%, transparent);
   -webkit-appearance: none;
   appearance: none;
 }
 
-[aria-label="Tag hierarchy explorer"] [role="treeitem"] > .library-tree-marker > svg {
+[aria-label="Tag tree explorer"] [role="treeitem"] > .library-tree-marker > svg {
   display: none;
 }
 
-[aria-label="Tag hierarchy explorer"] [role="treeitem"] > .library-tree-marker::after {
+[aria-label="Tag tree explorer"] [role="treeitem"] > .library-tree-marker::after {
   content: "";
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 9999px;
-  background: currentColor;
-  opacity: 0.28;
-}
-
-[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 1) {
-  --sidebar-folder-mark-color: #6baa7e;
-}
-
-[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 2) {
-  --sidebar-folder-mark-color: #ffd678;
-}
-
-[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 3) {
-  --sidebar-folder-mark-color: #6499ea;
-}
-
-[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 4) {
-  --sidebar-folder-mark-color: #9ce0e7;
-}
-
-[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 5) {
-  --sidebar-folder-mark-color: #4dce6e;
-}
-
-[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 6) {
-  --sidebar-folder-mark-color: #ff7c7c;
-}
-
-[aria-label="Library hierarchy explorer"] [role="tree"] > div:nth-child(8n + 7) {
-  --sidebar-folder-mark-color: #6499ea;
+  background: color-mix(in srgb, currentColor 18%, #ffffff);
+  opacity: 1;
 }
