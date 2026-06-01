@@ -5,12 +5,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { applyCalendarEventMoveOverrides, useCalendarEventMoveController } from "@/features/calendar/useCalendarEventMoveController";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-const toastMock = vi.fn();
-const toastErrorMock = vi.fn();
+type ToastOptions = { action?: { onClick?: () => void } };
 
-vi.mock("sonner", () => ({
-  toast: Object.assign(toastMock, { error: toastErrorMock }),
-}));
+const { toastMock, toastErrorMock } = vi.hoisted(() => ({ toastMock: vi.fn(), toastErrorMock: vi.fn() }));
 
 const ACCOUNT_ID = "account-1";
 const CALENDAR_ID = "calendar-1";
@@ -31,6 +28,10 @@ const createGoogleCalendarEvent = (): GoogleCalendarEvent => ({
   accentColor: "#0ea5e9",
 });
 
+vi.mock("sonner", () => ({
+  toast: Object.assign(toastMock, { error: toastErrorMock }),
+}));
+
 describe("useCalendarEventMoveController", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -49,7 +50,7 @@ describe("useCalendarEventMoveController", () => {
     expect(toastMock).toHaveBeenCalledWith("予定を移動しました", expect.objectContaining({ description: "移動テスト" }));
     expect(applyCalendarEventMoveOverrides([event], result.current.calendarEventMoveOverrides)[0]?.startsAt).toBe(ORIGINAL_START);
 
-    const toastOptions = toastMock.mock.calls[0]?.[1] as { action?: { onClick?: () => void } };
+    const toastOptions = toastMock.mock.calls[0]?.[1] as ToastOptions;
 
     act(() => {
       toastOptions.action?.onClick?.();
