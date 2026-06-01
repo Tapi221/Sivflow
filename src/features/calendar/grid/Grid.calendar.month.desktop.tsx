@@ -33,7 +33,6 @@ type GridCalendarMonthDesktopProps = {
   topSpacerHeight: number;
   bottomSpacerHeight: number;
   scrollHoverDayKey: string | null;
-  setWeekRowRef: (key: string, node: HTMLDivElement | null) => void;
   onSelectDate: (date: Date) => void;
 };
 
@@ -54,7 +53,6 @@ type CalendarMonthWeekRowProps = {
   todayDayKey: string;
   scrollHoverDayKey: string | null;
   monthRowHeight: number;
-  setWeekRowRef: (key: string, node: HTMLDivElement | null) => void;
   onSelectDate: (date: Date) => void;
 };
 
@@ -122,9 +120,9 @@ const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScroll
 
 CalendarMonthDayCell.displayName = "CalendarMonthDayCell";
 
-const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDayKey, scrollHoverDayKey, monthRowHeight, setWeekRowRef, onSelectDate }: CalendarMonthWeekRowProps) => {
+const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDayKey, scrollHoverDayKey, monthRowHeight, onSelectDate }: CalendarMonthWeekRowProps) => {
   return (
-    <div ref={(node) => setWeekRowRef(week.key, node)} data-calendar-week-key={week.key} className="calendar-month-week-row relative grid grid-cols-7 border-b" style={createMonthWeekRowStyle(monthRowHeight)}>
+    <div data-calendar-week-key={week.key} className="calendar-month-week-row relative grid grid-cols-7 border-b" style={createMonthWeekRowStyle(monthRowHeight)}>
       {week.days.map((day, dayIndex) => {
         const selected = day.key === selectedDayKey;
         const isToday = day.key === todayDayKey;
@@ -135,7 +133,7 @@ const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDay
     </div>
   );
 }, (previous, next) => {
-  if (previous.week !== next.week || previous.eventsByDay !== next.eventsByDay || previous.monthRowHeight !== next.monthRowHeight || previous.setWeekRowRef !== next.setWeekRowRef || previous.onSelectDate !== next.onSelectDate) return false;
+  if (previous.week !== next.week || previous.eventsByDay !== next.eventsByDay || previous.monthRowHeight !== next.monthRowHeight || previous.onSelectDate !== next.onSelectDate) return false;
   if (isWeekAffectedByDayKeyChange(previous.week, previous.selectedDayKey, next.selectedDayKey)) return false;
   if (isWeekAffectedByDayKeyChange(previous.week, previous.todayDayKey, next.todayDayKey)) return false;
   if (isWeekAffectedByDayKeyChange(previous.week, previous.scrollHoverDayKey, next.scrollHoverDayKey)) return false;
@@ -144,7 +142,7 @@ const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDay
 
 CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 
-const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWeeks, monthRowHeight, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, setWeekRowRef, onSelectDate }: GridCalendarMonthDesktopProps) => {
+const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWeeks, monthRowHeight, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, onSelectDate }: GridCalendarMonthDesktopProps) => {
   const selectedDayKey = useMemo(() => getDayKey(selectedDate), [selectedDate]);
   const todayDayKey = useMemo(() => getDayKey(today), [today]);
   const eventIndex = useMemo(() => createMonthEventIndex(visibleEvents), [visibleEvents]);
@@ -164,7 +162,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
         <div aria-hidden="true" className="calendar-month-grid-spacer" style={{ height: topSpacerHeight }} />
 
         {monthWeeks.map((week) => (
-          <CalendarMonthWeekRow key={week.key} week={week} eventsByDay={eventsByDay} selectedDayKey={selectedDayKey} todayDayKey={todayDayKey} scrollHoverDayKey={scrollHoverDayKey} monthRowHeight={monthRowHeight} setWeekRowRef={setWeekRowRef} onSelectDate={onSelectDate} />
+          <CalendarMonthWeekRow key={week.key} week={week} eventsByDay={eventsByDay} selectedDayKey={selectedDayKey} todayDayKey={todayDayKey} scrollHoverDayKey={scrollHoverDayKey} monthRowHeight={monthRowHeight} onSelectDate={onSelectDate} />
         ))}
 
         <div aria-hidden="true" className="calendar-month-grid-spacer" style={{ height: bottomSpacerHeight }} />
