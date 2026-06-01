@@ -66,6 +66,13 @@
   background-clip: padding-box;
 }
 
+.app-layout--left-panel-collapsed .workspace-shell,
+.app-layout--left-panel-collapsed .app-layout__content {
+  --workspace-content-gutter: 0px;
+
+  border-radius: 0;
+}
+
 .app-layout--without-sidebar .workspace-shell,
 .app-layout--without-sidebar .app-layout__content {
   --workspace-content-gutter: 0px;

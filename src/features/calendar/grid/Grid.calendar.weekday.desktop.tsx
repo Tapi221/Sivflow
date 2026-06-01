@@ -36,6 +36,7 @@ type WeekdayEventDragState = {
   previewEndsAt: Date;
   previewIsAllDay: boolean;
   previewAllDayIndex: number | null;
+  previewColumnDayKey: string | null;
 };
 
 type WeekdayDayColumnHit = {
@@ -48,6 +49,7 @@ type WeekdayEventDragPreview = {
   previewEndsAt: Date;
   previewIsAllDay: boolean;
   previewAllDayIndex: number | null;
+  previewColumnDayKey: string | null;
 };
 
 type WeekdayAllDayRenderItem = {
@@ -62,6 +64,7 @@ const END_OF_DAY_HOUR_LABEL = "24:00";
 const NEXT_DAY_PREVIEW_MINUTES = 30;
 const NEXT_DAY_PREVIEW_HOURS = NEXT_DAY_PREVIEW_MINUTES / GRID.WEEKDAY_MINUTES_PER_HOUR;
 const WEEKDAY_TIMELINE_RANGE_HOURS = GRID.WEEKDAY_HOURS + NEXT_DAY_PREVIEW_HOURS;
+const WEEKDAY_TIMELINE_RANGE_MINUTES = GRID.WEEKDAY_HOURS * GRID.WEEKDAY_MINUTES_PER_HOUR + NEXT_DAY_PREVIEW_MINUTES;
 const WEEKDAY_TIMED_EVENT_MIN_LAYOUT_MINUTES = Math.ceil((WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX / C.DEFAULT_HOUR_ROW_HEIGHT) * GRID.WEEKDAY_MINUTES_PER_HOUR);
 const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
 const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
@@ -73,7 +76,6 @@ const WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME = "relative overflow-hidden";
 const WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES = 15;
 const WEEKDAY_TIMED_EVENT_DRAG_FALLBACK_MINUTES = 30;
 const MINUTE_MS = 60 * 1000;
-const DAY_MINUTES = GRID.WEEKDAY_HOURS * GRID.WEEKDAY_MINUTES_PER_HOUR;
 
 const isUnshiftedHourLabel = (hour: number): boolean => hour === 0;
 
@@ -143,9 +145,9 @@ const getDragPreviewDayKey = (state: WeekdayEventDragState): string => getCalend
 
 const getDragPreviewStyle = (state: WeekdayEventDragState, day: Date): CSSProperties => {
   const dayStart = startOfDay(day);
-  const startMinutes = clampMinutes(differenceInMinutes(state.previewStartsAt, dayStart), DAY_MINUTES);
+  const startMinutes = clampMinutes(differenceInMinutes(state.previewStartsAt, dayStart), WEEKDAY_TIMELINE_RANGE_MINUTES);
   const durationMinutes = Math.max(1, state.durationMs / MINUTE_MS);
-  const maxVisibleDurationMinutes = Math.max(1, DAY_MINUTES - startMinutes);
+  const maxVisibleDurationMinutes = Math.max(1, WEEKDAY_TIMELINE_RANGE_MINUTES - startMinutes);
   const visibleDurationMinutes = Math.min(durationMinutes, maxVisibleDurationMinutes);
 
   return {
@@ -368,7 +370,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
     const previewEndsAt = addDays(previewStartsAt, 1);
     const previewAllDayIndex = getAllDayDropIndex(hit.element, clientY);
 
-    return { previewStartsAt, previewEndsAt, previewIsAllDay: true, previewAllDayIndex };
+    return { previewStartsAt, previewEndsAt, previewIsAllDay: true, previewAllDayIndex, previewColumnDayKey: null };
   }, [allDayScrollRef, getAllDayColumnAtClientX]);
 
   const getTimedDragPreview = useCallback((state: WeekdayEventDragState, clientX: number, clientY: number): WeekdayEventDragPreview | null => {
@@ -378,12 +380,13 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
     const rect = hit.element.getBoundingClientRect();
     const rowHeight = getHourRowHeightPx(hit.element);
     const rawStartMinutes = ((clientY - rect.top) / rowHeight) * GRID.WEEKDAY_MINUTES_PER_HOUR - state.pointerOffsetMinutes;
-    const maxStartMinutes = Math.max(0, DAY_MINUTES - state.durationMs / MINUTE_MS);
+    const maxStartMinutes = Math.max(0, WEEKDAY_TIMELINE_RANGE_MINUTES - WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES);
     const startMinutes = clampMinutes(snapMinutes(rawStartMinutes), maxStartMinutes);
     const previewStartsAt = addMinutes(startOfDay(hit.day), startMinutes);
     const previewEndsAt = new Date(previewStartsAt.getTime() + state.durationMs);
+    const previewColumnDayKey = getCalendarDateKey(hit.day);
 
-    return { previewStartsAt, previewEndsAt, previewIsAllDay: false, previewAllDayIndex: null };
+    return { previewStartsAt, previewEndsAt, previewIsAllDay: false, previewAllDayIndex: null, previewColumnDayKey };
   }, [getDayColumnAtClientX]);
 
   const getDragPreviewTimes = useCallback((state: WeekdayEventDragState, clientX: number, clientY: number) => getAllDayDragPreview(clientX, clientY) ?? getTimedDragPreview(state, clientX, clientY), [getAllDayDragPreview, getTimedDragPreview]);
@@ -397,7 +400,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
 
     event.preventDefault();
 
-    if (state.previewIsAllDay === preview.previewIsAllDay && state.previewAllDayIndex === preview.previewAllDayIndex && areSameCalendarEventTimes(state.previewStartsAt, state.previewEndsAt, preview.previewStartsAt, preview.previewEndsAt)) return;
+    if (state.previewIsAllDay === preview.previewIsAllDay && state.previewAllDayIndex === preview.previewAllDayIndex && state.previewColumnDayKey === preview.previewColumnDayKey && areSameCalendarEventTimes(state.previewStartsAt, state.previewEndsAt, preview.previewStartsAt, preview.previewEndsAt)) return;
 
     setDragStateValue({ ...state, ...preview });
   }, [getDragPreviewTimes, setDragStateValue]);
@@ -442,27 +445,27 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
     if (shouldCommit) commitDragState(state);
   }, [commitDragState, setDragStateValue]);
 
-  const startEventDrag = useCallback((event: ReactPointerEvent<HTMLDivElement>, calendarEvent: GoogleCalendarEvent, pointerOffsetMinutes: number, durationMs: number) => {
+  const startEventDrag = useCallback((event: ReactPointerEvent<HTMLDivElement>, calendarEvent: GoogleCalendarEvent, pointerOffsetMinutes: number, durationMs: number, sourceColumnDayKey: string | null) => {
     if (event.button !== 0 || !isCalendarEventDraggable(calendarEvent, onMoveCalendarEvent)) return;
 
     const eventKey = createCalendarEventKey(calendarEvent);
     const sourceDayKey = getCalendarDateKey(calendarEvent.startsAt);
-    const preview = getDragPreviewTimes({ eventKey, event: calendarEvent, pointerId: event.pointerId, pointerOffsetMinutes, durationMs, sourceDayKey, previewStartsAt: calendarEvent.startsAt, previewEndsAt: calendarEvent.endsAt, previewIsAllDay: calendarEvent.isAllDay, previewAllDayIndex: null }, event.clientX, event.clientY);
+    const preview = getDragPreviewTimes({ eventKey, event: calendarEvent, pointerId: event.pointerId, pointerOffsetMinutes, durationMs, sourceDayKey, previewStartsAt: calendarEvent.startsAt, previewEndsAt: calendarEvent.endsAt, previewIsAllDay: calendarEvent.isAllDay, previewAllDayIndex: null, previewColumnDayKey: sourceColumnDayKey }, event.clientX, event.clientY);
 
     event.preventDefault();
     event.stopPropagation();
     event.currentTarget.setPointerCapture(event.pointerId);
     dragElementRef.current = event.currentTarget;
 
-    setDragStateValue({ eventKey, event: calendarEvent, pointerId: event.pointerId, pointerOffsetMinutes, durationMs, sourceDayKey, previewStartsAt: preview?.previewStartsAt ?? calendarEvent.startsAt, previewEndsAt: preview?.previewEndsAt ?? calendarEvent.endsAt, previewIsAllDay: preview?.previewIsAllDay ?? calendarEvent.isAllDay, previewAllDayIndex: preview?.previewAllDayIndex ?? null });
+    setDragStateValue({ eventKey, event: calendarEvent, pointerId: event.pointerId, pointerOffsetMinutes, durationMs, sourceDayKey, previewStartsAt: preview?.previewStartsAt ?? calendarEvent.startsAt, previewEndsAt: preview?.previewEndsAt ?? calendarEvent.endsAt, previewIsAllDay: preview?.previewIsAllDay ?? calendarEvent.isAllDay, previewAllDayIndex: preview?.previewAllDayIndex ?? null, previewColumnDayKey: preview?.previewColumnDayKey ?? sourceColumnDayKey });
   }, [getDragPreviewTimes, onMoveCalendarEvent, setDragStateValue]);
 
   const handleAllDayEventPointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>, calendarEvent: GoogleCalendarEvent) => {
-    startEventDrag(event, calendarEvent, 0, getEventTimedDragDurationMs(calendarEvent));
+    startEventDrag(event, calendarEvent, 0, getEventTimedDragDurationMs(calendarEvent), null);
   }, [startEventDrag]);
 
-  const handleTimedEventPointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>, calendarEvent: GoogleCalendarEvent) => {
-    const dayKey = getCalendarDateKey(calendarEvent.startsAt);
+  const handleTimedEventPointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>, calendarEvent: GoogleCalendarEvent, day: Date) => {
+    const dayKey = getCalendarDateKey(day);
     const dayColumn = dayColumnRefs.current.get(dayKey);
     if (!dayColumn) return;
 
@@ -470,7 +473,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
     const eventRect = event.currentTarget.getBoundingClientRect();
     const pointerOffsetMinutes = Math.max(0, ((event.clientY - eventRect.top) / rowHeight) * GRID.WEEKDAY_MINUTES_PER_HOUR);
 
-    startEventDrag(event, calendarEvent, pointerOffsetMinutes, getEventTimedDragDurationMs(calendarEvent));
+    startEventDrag(event, calendarEvent, pointerOffsetMinutes, getEventTimedDragDurationMs(calendarEvent), dayKey);
   }, [startEventDrag]);
 
   useEffect(() => {
@@ -568,7 +571,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
             const dayKey = getCalendarDateKey(day);
             const events = createTimedLayoutEvents(visibleEvents, day);
             const isToday = dayKey === currentDayKey;
-            const shouldRenderDragPreview = dragState && dragPreviewEvent && !dragState.previewIsAllDay && dragPreviewDayKey === dayKey;
+            const shouldRenderDragPreview = dragState && dragPreviewEvent && !dragState.previewIsAllDay && dragState.previewColumnDayKey === dayKey;
             return (
               <div key={dayKey} ref={setDayColumnRef(dayKey)} className={cn("relative min-w-0 bg-white", dayIndex === 0 ? null : "border-l")} style={WEEKDAY_COLUMN_BORDER_STYLE}>
                 {WEEKDAY_HOURS.map((hour) => (
@@ -588,7 +591,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
                   const isDraggable = isCalendarEventDraggable(entry.event, onMoveCalendarEvent);
 
                   return (
-                    <div key={eventKey} className={getTimedEventWrapperClassName(isDraggable, isDragging)} style={getTimedEntryPositionStyle(entry, WEEKDAY_TIMELINE_RANGE_HOURS)} onPointerDown={isDraggable ? (event) => handleTimedEventPointerDown(event, entry.event) : undefined}>
+                    <div key={eventKey} className={getTimedEventWrapperClassName(isDraggable, isDragging)} style={getTimedEntryPositionStyle(entry, WEEKDAY_TIMELINE_RANGE_HOURS)} onPointerDown={isDraggable ? (event) => handleTimedEventPointerDown(event, entry.event, day) : undefined}>
                       <CalendarEventChipWeekday event={entry.event} tooltipDisabled={isDragging} />
                     </div>
                   );
