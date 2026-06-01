@@ -87,6 +87,8 @@ export type CalendarSelectionRange = {
   end: Date;
 };
 
+export type CalendarTimedEventMoveHandler = (event: GoogleCalendarEvent, startsAt: Date, endsAt: Date) => void | Promise<void>;
+
 export type CalendarSidebarProps = {
   monthDate: Date;
   selectedDate: Date;
@@ -127,4 +129,5 @@ export type CalendarWeekDayGridProps = {
   onScroll?: (event: UIEvent<HTMLDivElement>) => void;
   selectedDate: Date;
   onSelectDate?: (date: Date) => void;
+  onMoveTimedEvent?: CalendarTimedEventMoveHandler;
 };
