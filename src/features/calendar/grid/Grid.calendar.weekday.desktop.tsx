@@ -518,7 +518,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
         </div>
       </div>
 
-      <div ref={allDayScrollRef} className="shrink-0 overflow-hidden">
+      <div ref={allDayScrollRef} className="relative z-20 shrink-0 overflow-hidden border-b bg-white" style={WEEKDAY_COLUMN_BORDER_STYLE}>
         <div className="grid min-w-0" style={{ gridTemplateColumns }}>
           <div className={cn("flex min-h-10 min-w-0 items-start justify-end py-2 pl-2 pr-3", WEEKDAY_TIME_LABEL_CLASS_NAME)}>終日</div>
           {visibleDays.map((day, dayIndex) => {
@@ -526,7 +526,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
             const events = createAllDayRenderItems(allDayEvents.get(dayKey) ?? [], dayKey, allDayEventOrder, dragState, dragPreviewEvent, dragPreviewDayKey);
 
             return (
-              <div key={dayKey} ref={setAllDayColumnRef(dayKey)} className={cn("min-h-10 min-w-0 border-b px-1 py-1", dayIndex === 0 ? null : "border-l")} style={WEEKDAY_COLUMN_BORDER_STYLE}>
+              <div key={dayKey} ref={setAllDayColumnRef(dayKey)} className={cn("min-h-10 min-w-0 px-1 py-1", dayIndex === 0 ? null : "border-l")} style={WEEKDAY_COLUMN_BORDER_STYLE}>
                 <div className="flex min-w-0 flex-col gap-1">
                   {events.map(({ event, eventKey, isDragPreview }) => {
                     const isDragging = dragState?.eventKey === eventKey;
