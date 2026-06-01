@@ -47,6 +47,12 @@ type WeekdayEventDragPreview = {
   previewIsAllDay: boolean;
 };
 
+type WeekdayAllDayRenderItem = {
+  event: GoogleCalendarEvent;
+  eventKey: string;
+  isDragPreview: boolean;
+};
+
 const WEEKDAY_HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, hour) => hour);
 const CURRENT_TIME_TICK_MS = GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS;
 const END_OF_DAY_HOUR_LABEL = "24:00";
@@ -226,6 +232,22 @@ const createNextDayPreviewLayoutEvents = (events: GoogleCalendarEvent[], day: Da
   const rangeEnd = addMinutes(rangeStart, NEXT_DAY_PREVIEW_MINUTES);
 
   return createTimedLayoutEventsForRange(events, rangeStart, rangeEnd);
+};
+
+const createAllDayRenderItems = (events: GoogleCalendarEvent[], dayKey: string, dragState: WeekdayEventDragState | null, dragPreviewEvent: GoogleCalendarEvent | null, dragPreviewDayKey: string | null): WeekdayAllDayRenderItem[] => {
+  const shouldInsertPreview = Boolean(dragState && dragPreviewEvent && dragState.previewIsAllDay && dragPreviewDayKey === dayKey);
+  const visibleEvents = shouldInsertPreview && dragState && dragPreviewEvent ? [...events.filter((event) => createEventKey(event) !== dragState.eventKey), dragPreviewEvent].sort(compareCalendarEvents) : events;
+  const previewEventKey = shouldInsertPreview && dragPreviewEvent ? createEventKey(dragPreviewEvent) : null;
+
+  return visibleEvents.map((event) => {
+    const eventKey = createEventKey(event);
+
+    return {
+      event,
+      eventKey,
+      isDragPreview: Boolean(previewEventKey && eventKey === previewEventKey),
+    };
+  });
 };
 
 const useCurrentTime = () => {
@@ -514,31 +536,30 @@ const CalendarWeekDayGridComponent = ({
           <div className={cn("flex min-h-10 min-w-0 items-start justify-end py-2 pl-2 pr-3", WEEKDAY_TIME_LABEL_CLASS_NAME)}>終日</div>
           {visibleDays.map((day, dayIndex) => {
             const dayKey = getCalendarDateKey(day);
-            const events = allDayEvents.get(dayKey) ?? [];
-            const shouldRenderAllDayDragPreview = dragState && dragPreviewEvent && dragState.previewIsAllDay && dragPreviewDayKey === dayKey;
+            const events = createAllDayRenderItems(allDayEvents.get(dayKey) ?? [], dayKey, dragState, dragPreviewEvent, dragPreviewDayKey);
 
             return (
               <div key={dayKey} ref={setAllDayColumnRef(dayKey)} className={cn("min-h-10 min-w-0 border-b px-1 py-1", dayIndex === 0 ? null : "border-l")} style={WEEKDAY_COLUMN_BORDER_STYLE}>
                 <div className="flex min-w-0 flex-col gap-1">
-                  {events.map((event) => {
-                    const eventKey = createEventKey(event);
+                  {events.map(({ event, eventKey, isDragPreview }) => {
                     const isDragging = dragState?.eventKey === eventKey;
                     const isDraggable = isCalendarEventDraggable(event, onMoveCalendarEvent);
                     const tokens = generateColorTokens(event.accentColor);
+
+                    if (isDragPreview) {
+                      return (
+                        <div key={`${eventKey}:preview`} className={cn(eventChipAllDayClass, "pointer-events-none transition-none")} style={{ background: tokens.bg, color: tokens.text, ...WEEKDAY_TIMED_EVENT_DRAGGING_STYLE }} title={event.title}>
+                          {event.title || "Untitled"}
+                        </div>
+                      );
+                    }
+
                     return (
                       <div key={eventKey} className={getAllDayEventClassName(isDraggable, isDragging)} style={{ background: tokens.bg, color: tokens.text }} title={event.title} onPointerDown={isDraggable ? (pointerEvent) => handleAllDayEventPointerDown(pointerEvent, event) : undefined}>
                         {event.title || "Untitled"}
                       </div>
                     );
                   })}
-                  {shouldRenderAllDayDragPreview ? (() => {
-                    const tokens = generateColorTokens(dragPreviewEvent.accentColor);
-                    return (
-                      <div className={cn(eventChipAllDayClass, "pointer-events-none transition-none")} style={{ background: tokens.bg, color: tokens.text, ...WEEKDAY_TIMED_EVENT_DRAGGING_STYLE }} title={dragPreviewEvent.title}>
-                        {dragPreviewEvent.title || "Untitled"}
-                      </div>
-                    );
-                  })() : null}
                 </div>
               </div>
             );
