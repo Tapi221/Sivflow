@@ -5,6 +5,7 @@ import { PdfDoublePageGlyph, PdfFitWidthGlyph, PdfNextGlyph, PdfPrevGlyph, PdfSi
 import { OverlayToolbarIndexNavigator } from "@/chip/overlay-toolbar/OverlayToolbarIndexNavigator";
 import { OverlayToolbarZoomControl } from "@/chip/overlay-toolbar/OverlayToolbarZoomControl";
 import { pdfOverlayToolbarButtonActiveClassName, pdfOverlayToolbarButtonClassName, pdfOverlayToolbarDividerClassName, pdfOverlayToolbarNavigatorClassName, pdfOverlayToolbarNavigatorInputClassName, pdfOverlayToolbarShellClassName, pdfOverlayToolbarSliderRangeClassName, pdfOverlayToolbarSliderThumbClassName, pdfOverlayToolbarSliderTrackClassName, pdfOverlayToolbarTotalClassName } from "./pdfToolbar.classname";
+import type { CardSelectionCaptureSide } from "@/features/selection-capture/cardSelectionCaptureEvents";
 import { cn } from "@/lib/utils";
 import type { PdfPageLayoutMode } from "@/types";
 
@@ -29,9 +30,13 @@ type PdfOverlayToolbarProps = {
   canGoToNextPage: boolean;
   selectionCaptureActive?: boolean;
   selectionCaptureDisabled?: boolean;
+  selectionCaptureSide?: CardSelectionCaptureSide;
+  onSelectionCaptureSideChange?: (side: CardSelectionCaptureSide) => void;
   onSelectionCaptureToggle?: () => void;
   disabled?: boolean;
 };
+
+const captureSideButtonClassName = "h-7 min-w-7 px-2 text-[11px] font-semibold leading-none";
 
 export const PdfOverlayToolbar = ({
   currentPage,
@@ -52,6 +57,8 @@ export const PdfOverlayToolbar = ({
   canGoToNextPage,
   selectionCaptureActive = false,
   selectionCaptureDisabled = false,
+  selectionCaptureSide = "question",
+  onSelectionCaptureSideChange,
   onSelectionCaptureToggle,
   disabled = false,
 }: PdfOverlayToolbarProps) => {
@@ -64,6 +71,7 @@ export const PdfOverlayToolbar = ({
       ? "単一表示。タップで2枚表示に切り替え"
       : "2枚表示。タップで単一表示に切り替え";
   const shouldRenderSelectionCaptureControl = Boolean(onSelectionCaptureToggle);
+  const shouldRenderSelectionCaptureSideControl = Boolean(onSelectionCaptureSideChange);
 
   return (
     <OverlayToolbar className={pdfOverlayToolbarShellClassName}>
@@ -137,11 +145,47 @@ export const PdfOverlayToolbar = ({
         <>
           <OverlayToolbarDivider className={pdfOverlayToolbarDividerClassName} />
 
+          {shouldRenderSelectionCaptureSideControl ? (
+            <>
+              <OverlayToolbarButton
+                onClick={() => {
+                  onSelectionCaptureSideChange?.("question");
+                }}
+                label="PDF範囲の追加先: 問題"
+                disabled={disabled || selectionCaptureDisabled}
+                active={selectionCaptureSide === "question"}
+                className={cn(
+                  pdfOverlayToolbarButtonClassName,
+                  captureSideButtonClassName,
+                  selectionCaptureSide === "question" && pdfOverlayToolbarButtonActiveClassName,
+                )}
+              >
+                Q
+              </OverlayToolbarButton>
+
+              <OverlayToolbarButton
+                onClick={() => {
+                  onSelectionCaptureSideChange?.("answer");
+                }}
+                label="PDF範囲の追加先: 答え"
+                disabled={disabled || selectionCaptureDisabled}
+                active={selectionCaptureSide === "answer"}
+                className={cn(
+                  pdfOverlayToolbarButtonClassName,
+                  captureSideButtonClassName,
+                  selectionCaptureSide === "answer" && pdfOverlayToolbarButtonActiveClassName,
+                )}
+              >
+                A
+              </OverlayToolbarButton>
+            </>
+          ) : null}
+
           <OverlayToolbarButton
             onClick={() => {
               onSelectionCaptureToggle?.();
             }}
-            label={selectionCaptureActive ? "PDF範囲コピーをキャンセル" : "PDF範囲コピー"}
+            label={selectionCaptureActive ? "PDF範囲追加をキャンセル" : "PDF範囲をカードへ追加"}
             disabled={disabled || selectionCaptureDisabled}
             active={selectionCaptureActive}
             className={cn(
