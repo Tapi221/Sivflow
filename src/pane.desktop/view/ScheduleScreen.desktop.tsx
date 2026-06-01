@@ -36,7 +36,7 @@ const ALL_DAY_EVENT_ORDER_STORAGE_KEY = "flashcard-master:schedule:all-day-event
 const DEFAULT_PLAN_RESULT_MODES: readonly PlanResultMode[] = ["plan", "actual"];
 const PLAN_RESULT_TOGGLE_VIEW_MODES = new Set(["threeDays", "days", "pieChart"]);
 const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
-const WEEKDAY_EVENT_BUFFER_DAYS = 21;
+const WEEKDAY_EVENT_BUFFER_DAYS = 1;
 const MONTH_EVENT_BUFFER_DAYS = 14;
 
 const isHexColor = (value: string): boolean => /^#[0-9a-f]{6}$/i.test(value);
@@ -112,11 +112,10 @@ const buildYearDisplayRange = (currentDate: Date, yearRenderedRange: CalendarDat
 const buildCalendarDateDisplayRange = (range: CalendarDateRange): CalendarEventDisplayRange => ({ start: startOfDay(range.start), end: endOfDay(range.end) });
 
 const getScheduleEventDisplayRange = ({ primaryViewMode, currentDate, selectedDate, monthTitleDate, visibleDays, monthRenderedRange, yearRenderedRange }: CalendarEventDisplayRangeOptions): CalendarEventDisplayRange => {
-  const miniCalendarRange = buildMiniCalendarDisplayRange(monthTitleDate);
-  if (primaryViewMode === "year") return mergeDisplayRanges(miniCalendarRange, buildYearDisplayRange(currentDate, yearRenderedRange));
-  if (primaryViewMode === "month") return mergeDisplayRanges(miniCalendarRange, monthRenderedRange ? buildCalendarDateDisplayRange(monthRenderedRange) : buildDaysDisplayRange(visibleDays, currentDate, MONTH_EVENT_BUFFER_DAYS));
-  if (primaryViewMode === "list" || primaryViewMode === "pieChart") return mergeDisplayRanges(miniCalendarRange, buildDaysDisplayRange(visibleDays, selectedDate, LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS));
-  return mergeDisplayRanges(miniCalendarRange, buildDaysDisplayRange(visibleDays, selectedDate, WEEKDAY_EVENT_BUFFER_DAYS));
+  if (primaryViewMode === "year") return buildYearDisplayRange(currentDate, yearRenderedRange);
+  if (primaryViewMode === "month") return monthRenderedRange ? buildCalendarDateDisplayRange(monthRenderedRange) : buildDaysDisplayRange(visibleDays, currentDate, MONTH_EVENT_BUFFER_DAYS);
+  if (primaryViewMode === "list" || primaryViewMode === "pieChart") return buildDaysDisplayRange(visibleDays, selectedDate, LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS);
+  return buildDaysDisplayRange(visibleDays, selectedDate, WEEKDAY_EVENT_BUFFER_DAYS);
 };
 
 const eventOverlapsDisplayRange = (event: GoogleCalendarEvent, range: CalendarEventDisplayRange): boolean => event.startsAt <= range.end && event.endsAt >= range.start;
