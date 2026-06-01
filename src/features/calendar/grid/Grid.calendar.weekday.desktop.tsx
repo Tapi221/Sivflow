@@ -9,7 +9,7 @@ import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
-import type { CalendarTimedEventMoveHandler, CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarEventMoveHandler, CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 import * as COLOR from "./grid.color.constants.desktop";
@@ -119,7 +119,7 @@ const getEventInRange = (event: GoogleCalendarEvent, rangeStart: Date, rangeEnd:
   return event;
 };
 
-const isTimedEventDraggable = (event: GoogleCalendarEvent, onMoveTimedEvent?: CalendarTimedEventMoveHandler): boolean => Boolean(onMoveTimedEvent && event.accountId && !event.isAllDay);
+const isCalendarEventDraggable = (event: GoogleCalendarEvent, onMoveCalendarEvent?: CalendarEventMoveHandler): boolean => Boolean(onMoveCalendarEvent && event.accountId && !event.isAllDay);
 
 const getHourRowHeightPx = (element: HTMLElement): number => {
   const computedValue = window.getComputedStyle(element).getPropertyValue(GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT);
@@ -245,7 +245,7 @@ const CalendarWeekDayGridComponent = ({
   onScroll,
   selectedDate,
   onSelectDate,
-  onMoveTimedEvent,
+  onMoveCalendarEvent,
 }: CalendarWeekDayGridProps) => {
   const now = useCurrentTime();
   const allDayColumnRefs = useRef(new Map<string, HTMLDivElement>());
@@ -380,10 +380,10 @@ const CalendarWeekDayGridComponent = ({
   const commitDragState = useCallback((state: WeekdayEventDragState) => {
     if (isSameEventMove(state.event, state.previewStartsAt, state.previewEndsAt, state.previewIsAllDay)) return;
 
-    void Promise.resolve(onMoveTimedEvent?.(state.event, state.previewStartsAt, state.previewEndsAt, state.previewIsAllDay)).catch((error: unknown) => {
-      console.warn("[CalendarWeekDayGrid] timed event move failed", error);
+    void Promise.resolve(onMoveCalendarEvent?.({ event: state.event, startsAt: state.previewStartsAt, endsAt: state.previewEndsAt, isAllDay: state.previewIsAllDay })).catch((error: unknown) => {
+      console.warn("[CalendarWeekDayGrid] calendar event move failed", error);
     });
-  }, [onMoveTimedEvent]);
+  }, [onMoveCalendarEvent]);
 
   const finishDrag = useCallback((event: PointerEvent, shouldCommit: boolean) => {
     const state = dragStateRef.current;
@@ -403,7 +403,7 @@ const CalendarWeekDayGridComponent = ({
   }, [commitDragState, setDragStateValue]);
 
   const handleTimedEventPointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>, calendarEvent: GoogleCalendarEvent) => {
-    if (event.button !== 0 || !isTimedEventDraggable(calendarEvent, onMoveTimedEvent)) return;
+    if (event.button !== 0 || !isCalendarEventDraggable(calendarEvent, onMoveCalendarEvent)) return;
 
     const eventKey = createEventKey(calendarEvent);
     const dayKey = getCalendarDateKey(calendarEvent.startsAt);
@@ -440,7 +440,7 @@ const CalendarWeekDayGridComponent = ({
       previewEndsAt: preview?.previewEndsAt ?? calendarEvent.endsAt,
       previewIsAllDay: preview?.previewIsAllDay ?? calendarEvent.isAllDay,
     });
-  }, [getDragPreviewTimes, onMoveTimedEvent, setDragStateValue]);
+  }, [getDragPreviewTimes, onMoveCalendarEvent, setDragStateValue]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -572,7 +572,7 @@ const CalendarWeekDayGridComponent = ({
                 {events.map((entry) => {
                   const eventKey = createEventKey(entry.event);
                   const isDragging = dragState?.eventKey === eventKey;
-                  const isDraggable = isTimedEventDraggable(entry.event, onMoveTimedEvent);
+                  const isDraggable = isCalendarEventDraggable(entry.event, onMoveCalendarEvent);
 
                   return (
                     <div key={eventKey} className={getTimedEventWrapperClassName(isDraggable, isDragging)} style={getTimedEntryPositionStyle(entry, GRID.WEEKDAY_HOURS)} onPointerDown={isDraggable ? (event) => handleTimedEventPointerDown(event, entry.event) : undefined}>
