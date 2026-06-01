@@ -1,6 +1,6 @@
 import { getFolderId, type FolderTreeNode } from "./utils";
 
-const PROJECT_COLOR_PALETTE = ["#34c759", "#ff3b30", "#4f8ce7", "#ffd166", "#9adfe7", "#66a77a", "#9ca3ff"];
+const PROJECT_COLOR_PALETTE = ["#2f9d63", "#e25555", "#3f7fe5", "#d99600", "#1f9aa5", "#4f8f63", "#7c62d9", "#e8783c"];
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 
 export const isProjectColor = (value: unknown): value is string => typeof value === "string" && HEX_COLOR_PATTERN.test(value);
