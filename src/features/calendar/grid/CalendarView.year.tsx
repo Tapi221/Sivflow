@@ -298,7 +298,7 @@ const CalendarYearViewComponent = ({
     return buildYearSyncDateRange(targetYear);
   }, []);
 
-  const syncVisibleWeekRange = useCallback((scroller: HTMLDivElement) => {
+  const syncVisibleYearRange = useCallback((scroller: HTMLDivElement) => {
     const nextRange = getSyncRangeFromScroll(scroller);
     if (!nextRange) return;
 
@@ -317,9 +317,9 @@ const CalendarYearViewComponent = ({
 
       if (!pendingScroller) return;
 
-      syncVisibleWeekRange(pendingScroller);
-    });
-  }, [syncVisibleWeekRange]);
+      syncVisibleYearRange(pendingScroller);
+    }, YEAR_SCROLL_SYNC_DEBOUNCE_MS);
+  }, [syncVisibleYearRange]);
 
   useEffect(() => {
     if (!renderedRange) return;
