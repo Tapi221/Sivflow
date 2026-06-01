@@ -4,7 +4,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import React, { createRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
-import type { CalendarGridStyle, CalendarTimedEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarEventMoveHandler, CalendarGridStyle } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 type ResizeObserverCallbackMock = ConstructorParameters<typeof ResizeObserver>[0];
@@ -85,7 +85,7 @@ class ResizeObserverMock {
   disconnect = vi.fn();
 }
 
-const renderGrid = (onMoveTimedEvent: CalendarTimedEventMoveHandler = vi.fn()) => render(
+const renderGrid = (onMoveCalendarEvent: CalendarEventMoveHandler = vi.fn()) => render(
   <CalendarWeekDayGrid
     headerScrollRef={createRef<HTMLDivElement>()}
     allDayScrollRef={createRef<HTMLDivElement>()}
@@ -94,7 +94,7 @@ const renderGrid = (onMoveTimedEvent: CalendarTimedEventMoveHandler = vi.fn()) =
     visibleEvents={OVERLAP_EVENTS}
     calendarGridStyle={CALENDAR_GRID_STYLE}
     selectedDate={VISIBLE_DAY}
-    onMoveTimedEvent={onMoveTimedEvent}
+    onMoveCalendarEvent={onMoveCalendarEvent}
   />,
 );
 
@@ -128,8 +128,8 @@ describe("CalendarWeekDayGrid", () => {
   });
 
   it("ドラッグ中の preview を通常の重なりレイアウトから切り離して固定幅 overlay で描画する", () => {
-    const onMoveTimedEvent = vi.fn();
-    const { container } = renderGrid(onMoveTimedEvent);
+    const onMoveCalendarEvent = vi.fn();
+    const { container } = renderGrid(onMoveCalendarEvent);
     const title = screen.getAllByText("重なり確認 A")[0] as HTMLElement;
     const eventWrapper = findEventWrapper(title);
     const dayColumn = findDayColumn(title);
@@ -160,6 +160,6 @@ describe("CalendarWeekDayGrid", () => {
     expect(dragPreview?.style.pointerEvents).toBe("none");
     expect(dragPreview?.style.top).toBe("calc(4.5 * var(--calendar-hour-row-height))");
     expect(eventWrapper.style.top).toBe(originalTop);
-    expect(onMoveTimedEvent).not.toHaveBeenCalled();
+    expect(onMoveCalendarEvent).not.toHaveBeenCalled();
   });
 });
