@@ -2,7 +2,6 @@ import type { ComponentProps } from "react";
 import { useMemo } from "react";
 import { CardPane } from "@/components/folder/panes/CardPane";
 import { PdfPane } from "@/features/pdf/PdfPane";
-import { PdfWorkspaceProvider } from "@/features/pdf/PdfWorkspaceProvider";
 import type { WorkspaceEntityTab } from "./Tab";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import type { Card, DocumentItem } from "@/types";
@@ -63,11 +62,9 @@ export const WorkspaceTabPanel = ({
     };
 
     return (
-      <PdfWorkspaceProvider key={document.id} doc={document} onDocumentUpdate={handleDocumentUpdate}>
-        <div className={`relative h-full min-h-0 w-full overflow-hidden bg-white ${workspaceTabPanelTextClassName}`}>
-          <PdfPane doc={document} className="h-full min-h-0" onDocumentUpdate={handleDocumentUpdate} />
-        </div>
-      </PdfWorkspaceProvider>
+      <div className={`relative h-full min-h-0 w-full overflow-hidden bg-white ${workspaceTabPanelTextClassName}`}>
+        <PdfPane doc={document} className="h-full min-h-0" onDocumentUpdate={handleDocumentUpdate} />
+      </div>
     );
   }
 
