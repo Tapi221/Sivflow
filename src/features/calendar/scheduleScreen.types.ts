@@ -87,7 +87,7 @@ export type CalendarSelectionRange = {
   end: Date;
 };
 
-export type CalendarTimedEventMoveHandler = (event: GoogleCalendarEvent, startsAt: Date, endsAt: Date) => void | Promise<void>;
+export type CalendarTimedEventMoveHandler = (event: GoogleCalendarEvent, startsAt: Date, endsAt: Date, isAllDay?: boolean) => void | Promise<void>;
 
 export type CalendarSidebarProps = {
   monthDate: Date;
