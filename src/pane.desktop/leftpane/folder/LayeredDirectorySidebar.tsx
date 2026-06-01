@@ -62,9 +62,9 @@ const createProjectMarkerStyle = (folderColor: string): CSSProperties => {
   const tokens = generateColorTokens(folderColor);
 
   return {
-    backgroundColor: tokens.bg,
-    borderColor: tokens.bg,
-    borderLeftColor: tokens.border,
+    backgroundColor: tokens.border,
+    boxShadow: `0 0 0 2px ${tokens.bg}`,
+    opacity: 0.56,
   };
 };
 
@@ -144,7 +144,7 @@ const ProjectListItem = ({ folder, selectedFolderId, onSelectProject, onOpenCont
   };
   const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => onOpenContextMenu(event, folder, true);
 
-  return <div data-folder-id={folderId}><div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center rounded-[10px] pl-1.5 pr-2 text-[12px] font-medium text-[var(--app-sidebar-text)]", isSelected && "bg-[#f4f4f5]")}><button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center gap-2 rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><span aria-hidden="true" className="h-4 w-1.5 shrink-0 rounded-[999px] border border-l-[3px]" style={markerStyle} /><span className="min-w-0 flex-1 truncate">{folderName}</span></button></div></div>;
+  return <div data-folder-id={folderId}><div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center rounded-[10px] pl-1.5 pr-2 text-[12px] font-medium text-[var(--app-sidebar-text)]", isSelected && "bg-[#f4f4f5]")}><button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center gap-2 rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><span aria-hidden="true" className="h-3 w-1 shrink-0 rounded-[999px]" style={markerStyle} /><span className="min-w-0 flex-1 truncate">{folderName}</span></button></div></div>;
 };
 
 const ProjectListSidebar = () => {
