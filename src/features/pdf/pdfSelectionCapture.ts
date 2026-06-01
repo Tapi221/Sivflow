@@ -1,4 +1,5 @@
-import type { SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
+import { applySelectionCaptureMask } from "@/features/selection-capture/selectionCaptureCanvasMask";
+import type { SelectionCaptureArea, SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
 
 const toBlob = (canvas: HTMLCanvasElement): Promise<Blob> => {
   return new Promise((resolve, reject) => {
@@ -32,13 +33,13 @@ const intersectRects = (
   return { x, y, width, height };
 };
 
-export const capturePdfViewerRectToBlob = async (
+export const capturePdfViewerAreaToBlob = async (
   container: HTMLElement,
-  rect: SelectionCaptureRect,
+  area: SelectionCaptureArea,
 ): Promise<Blob> => {
   const outputCanvas = document.createElement("canvas");
-  outputCanvas.width = Math.max(1, Math.round(rect.width));
-  outputCanvas.height = Math.max(1, Math.round(rect.height));
+  outputCanvas.width = Math.max(1, Math.round(area.rect.width));
+  outputCanvas.height = Math.max(1, Math.round(area.rect.height));
 
   const context = outputCanvas.getContext("2d");
   if (!context) {
@@ -56,10 +57,10 @@ export const capturePdfViewerRectToBlob = async (
     const canvasRight = canvasLeft + canvasBounds.width;
     const canvasBottom = canvasTop + canvasBounds.height;
     const intersection = intersectRects(
-      rect.x,
-      rect.y,
-      rect.x + rect.width,
-      rect.y + rect.height,
+      area.rect.x,
+      area.rect.y,
+      area.rect.x + area.rect.width,
+      area.rect.y + area.rect.height,
       canvasLeft,
       canvasTop,
       canvasRight,
@@ -74,8 +75,8 @@ export const capturePdfViewerRectToBlob = async (
     const sourceY = (intersection.y - canvasTop) * sourceScaleY;
     const sourceWidth = intersection.width * sourceScaleX;
     const sourceHeight = intersection.height * sourceScaleY;
-    const outputX = intersection.x - rect.x;
-    const outputY = intersection.y - rect.y;
+    const outputX = intersection.x - area.rect.x;
+    const outputY = intersection.y - area.rect.y;
 
     context.drawImage(
       canvas,
@@ -95,5 +96,13 @@ export const capturePdfViewerRectToBlob = async (
     throw new Error("No PDF canvas was found in the selected area.");
   }
 
+  applySelectionCaptureMask(context, area);
   return toBlob(outputCanvas);
+};
+
+export const capturePdfViewerRectToBlob = async (
+  container: HTMLElement,
+  rect: SelectionCaptureRect,
+): Promise<Blob> => {
+  return capturePdfViewerAreaToBlob(container, { shape: "rectangle", rect });
 };
