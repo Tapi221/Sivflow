@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, endOfDay, endOfMonth, endOfWeek, format, startOfDay, startOfMonth, startOfWeek, subDays } from "date-fns";
-import { toast } from "sonner";
 import type { PlanResultMode } from "@/chip/toggle/Toggle.planresult";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
@@ -10,8 +9,9 @@ import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
 import { createProjectCalendarLink, persistProjectCalendarLinks, readStoredProjectCalendarLinks } from "@/features/calendar/projectCalendarLinks.storage";
-import type { AppCalendarItem, CalendarAllDayEventOrderMap, CalendarAllDayEventReorderHandler, CalendarEventMoveHandler, CalendarViewMode, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
+import type { AppCalendarItem, CalendarAllDayEventOrderMap, CalendarAllDayEventReorderHandler, CalendarViewMode, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { CalendarTimetableView } from "@/features/calendar/timetable/CalendarTimetableView";
+import { useCalendarEventMoveController, applyCalendarEventMoveOverrides } from "@/features/calendar/useCalendarEventMoveController";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { clearLegacyStoredAppProjects, normalizeRootFolderProjectLabel, readLegacyStoredAppProjects, useRootFolderProjects } from "@/features/calendar/useRootFolderProjects";
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
@@ -27,8 +27,6 @@ type CalendarEventDisplayRange = { start: Date; end: Date };
 
 type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; monthTitleDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange | null; yearRenderedRange: CalendarDateRange | null };
 
-type CalendarEventMoveOverride = { startsAt: Date; endsAt: Date; isAllDay: boolean };
-
 type CreateGoogleProjectCalendarLinkInput = { project: AppCalendarItem; accountId: string; calendar: GoogleCalendarListItem; color: string; createdByApp: boolean };
 
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
@@ -40,7 +38,6 @@ const PLAN_RESULT_TOGGLE_VIEW_MODES = new Set(["threeDays", "days", "pieChart"])
 const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const WEEKDAY_EVENT_BUFFER_DAYS = 21;
 const MONTH_EVENT_BUFFER_DAYS = 14;
-const EVENT_MOVE_ROLLBACK_MS = 1200;
 
 const isHexColor = (value: string): boolean => /^#[0-9a-f]{6}$/i.test(value);
 
@@ -128,18 +125,6 @@ const filterEventsByDisplayRange = (events: GoogleCalendarEvent[], range: Calend
 
 const createGoogleProjectCalendarLink = ({ project, accountId, calendar, color, createdByApp }: CreateGoogleProjectCalendarLinkInput): ProjectCalendarLink => createProjectCalendarLink({ projectId: project.id, provider: "google", accountId, externalCalendarId: calendar.id, externalCalendarName: calendar.summaryOverride ?? calendar.summary, syncDirection: "importOnly", createdByApp, color, lastSyncedAt: new Date().toISOString() });
 
-const getCalendarEventOverrideKey = (event: GoogleCalendarEvent): string => event.id;
-
-const getCalendarEventToastDescription = (event: GoogleCalendarEvent): string => event.title || "Untitled";
-
-const applyCalendarEventMoveOverrides = (events: GoogleCalendarEvent[], overrides: Map<string, CalendarEventMoveOverride>): GoogleCalendarEvent[] => {
-  if (overrides.size === 0) return events;
-  return events.map((event) => {
-    const override = overrides.get(getCalendarEventOverrideKey(event));
-    return override ? { ...event, ...override } : event;
-  });
-};
-
 const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const pane = useScheduleScreen();
   const t = useT();
@@ -149,11 +134,11 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const { appProjects, loading: rootFolderProjectsLoading, createRootFolderProject, findProjectByLabel, setProjectVisibility, toggleProject, updateRootFolderProjectColor } = useRootFolderProjects();
   const [projectCalendarLinks, setProjectCalendarLinks] = useState<ProjectCalendarLink[]>(readStoredProjectCalendarLinks);
   const [googleCalendarColorOverrides, setGoogleCalendarColorOverrides] = useState<GoogleCalendarColorOverrideMap>(readStoredGoogleCalendarColorOverrides);
-  const [calendarEventMoveOverrides, setCalendarEventMoveOverrides] = useState<Map<string, CalendarEventMoveOverride>>(() => new Map());
   const [allDayEventOrder, setAllDayEventOrder] = useState<CalendarAllDayEventOrderMap>(readStoredAllDayEventOrder);
   const [planResultModes, setPlanResultModes] = useState<PlanResultMode[]>([...DEFAULT_PLAN_RESULT_MODES]);
   const viewOptions = useMemo(() => [{ value: "year", label: t.viewYear }, { value: "month", label: t.viewMonth }, { value: "week", label: t.viewWeek }, { value: "threeDays", label: t.viewThreeDays }, { value: "days", label: t.viewDay }, { value: "list", label: t.viewList }, { value: "timetable", label: t.viewTimetable }, { value: "pieChart", label: t.viewPieChart }] as const, [t.viewDay, t.viewList, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewTimetable, t.viewWeek, t.viewYear]);
   const { selectedViewMode, primaryViewMode, currentDate, selectedDate, titleDate, monthTitleDate, monthScrollTargetToken, visibleDays, virtualRail, yearRenderedRange, googleCalendarEvents, googleAccounts, isAnyCalendarConnecting, calendarGridStyle, headerScrollRef, allDayScrollRef, scrollContainerRef, contentViewportRef, handleCalendarScroll, handleSelectViewMode, handleSidebarSelectDate, handleSidebarPreviousMonth, handleSidebarNextMonth, handleVisibleDateChange, handleVisibleMonthChange, handlePrevious, handleNext, handleToday, handleMonthCellSelectDate, handleMonthRenderedRangeChange, handleYearRenderedRangeChange, handleYearSyncRangeChange, addGoogleCalendar, reconnectGoogleAccount, toggleGoogleCalendar, updateGoogleCalendarEvent } = pane;
+  const { calendarEventMoveOverrides, handleMoveCalendarEvent } = useCalendarEventMoveController({ updateGoogleCalendarEvent });
 
   useEffect(() => { persistProjectCalendarLinks(projectCalendarLinks); }, [projectCalendarLinks]);
   useEffect(() => { persistGoogleCalendarColorOverrides(googleCalendarColorOverrides); }, [googleCalendarColorOverrides]);
@@ -250,64 +235,6 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
       return next;
     });
   }, []);
-  const handleMoveCalendarEvent = useCallback<CalendarEventMoveHandler>(async ({ event, startsAt, endsAt, isAllDay }) => {
-    const accountId = event.accountId;
-    if (!accountId) return;
-
-    const overrideKey = getCalendarEventOverrideKey(event);
-    const rollbackOverride = { startsAt: event.startsAt, endsAt: event.endsAt, isAllDay: event.isAllDay };
-
-    setCalendarEventMoveOverrides((overrides) => {
-      const next = new Map(overrides);
-      next.set(overrideKey, { startsAt, endsAt, isAllDay });
-      return next;
-    });
-
-    try {
-      await updateGoogleCalendarEvent(accountId, { calendarId: event.calendarId, eventId: event.externalId ?? event.id, startsAt, endsAt, isAllDay });
-      toast("予定を移動しました", {
-        description: getCalendarEventToastDescription(event),
-        action: {
-          label: "元に戻す",
-          onClick: () => {
-            setCalendarEventMoveOverrides((overrides) => {
-              const next = new Map(overrides);
-              next.set(overrideKey, rollbackOverride);
-              return next;
-            });
-            void updateGoogleCalendarEvent(accountId, { calendarId: event.calendarId, eventId: event.externalId ?? event.id, startsAt: rollbackOverride.startsAt, endsAt: rollbackOverride.endsAt, isAllDay: rollbackOverride.isAllDay }).then(() => {
-              toast("予定を元に戻しました", { description: getCalendarEventToastDescription(event) });
-            }).catch((undoError: unknown) => {
-              console.warn("[ScheduleScreen] calendar event move undo failed", undoError);
-              setCalendarEventMoveOverrides((overrides) => {
-                const next = new Map(overrides);
-                next.set(overrideKey, { startsAt, endsAt, isAllDay });
-                return next;
-              });
-              toast.error("予定を元に戻せませんでした", { description: getCalendarEventToastDescription(event) });
-            });
-          },
-        },
-      });
-    } catch (error) {
-      console.warn("[ScheduleScreen] calendar event move failed", error);
-      toast.error("予定の移動に失敗しました", { description: getCalendarEventToastDescription(event) });
-      setCalendarEventMoveOverrides((overrides) => {
-        const next = new Map(overrides);
-        next.set(overrideKey, rollbackOverride);
-        return next;
-      });
-      window.setTimeout(() => {
-        setCalendarEventMoveOverrides((overrides) => {
-          const current = overrides.get(overrideKey);
-          if (!current || current.startsAt.getTime() !== rollbackOverride.startsAt.getTime() || current.endsAt.getTime() !== rollbackOverride.endsAt.getTime() || current.isAllDay !== rollbackOverride.isAllDay) return overrides;
-          const next = new Map(overrides);
-          next.delete(overrideKey);
-          return next;
-        });
-      }, EVENT_MOVE_ROLLBACK_MS);
-    }
-  }, [updateGoogleCalendarEvent]);
 
   const googleAccountsWithColorOverrides = useMemo(() => applyGoogleCalendarColorOverridesToAccounts(googleAccounts, googleCalendarColorOverrides), [googleAccounts, googleCalendarColorOverrides]);
   const linkedGoogleCalendarEvents = useMemo(() => attachCalendarEventDisplayMetadata(googleCalendarEvents, { appProjects, projectCalendarLinks, googleAccounts: googleAccountsWithColorOverrides, googleCalendarColorOverrides }), [appProjects, googleAccountsWithColorOverrides, googleCalendarColorOverrides, googleCalendarEvents, projectCalendarLinks]);
