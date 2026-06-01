@@ -15,6 +15,14 @@ type MockCalendarEventChipWeekdayProps = {
   compact?: boolean;
 };
 
+const HOUR_ROW_HEIGHT_PX = 72;
+const TIME_LABEL_COLOR_CLASS = "text-[#b8bcc5]";
+const TIME_LABEL_BACKGROUND_CLASS = "bg-white";
+const TIME_LABEL_FONT_CLASS = "font-medium";
+const ALL_DAY_LABEL_RIGHT_PADDING_CLASS = "pr-3";
+const ALL_DAY_ACCENT_COLOR = "#34c759";
+const NEXT_DAY_PREVIEW_HEIGHT_STYLE = "calc(0.5 * var(--calendar-hour-row-height))";
+
 vi.mock("@/chip/eventchip/EventChip.weekday", () => ({
   CalendarEventChipWeekday: ({ event, compact = false }: MockCalendarEventChipWeekdayProps) => <div data-accent-color={event.accentColor} data-compact={String(compact)} data-ends-at={event.endsAt.toISOString()} data-testid="weekday-event-chip">{event.title}</div>,
 }));
@@ -22,13 +30,6 @@ vi.mock("@/chip/eventchip/EventChip.weekday", () => ({
 vi.mock("@/chip/toolchip/HoverEventTooltip", () => ({
   HoverEventTooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
 }));
-
-const HOUR_ROW_HEIGHT_PX = 72;
-const TIME_LABEL_COLOR_CLASS = "text-[#b8bcc5]";
-const TIME_LABEL_BACKGROUND_CLASS = "bg-white";
-const TIME_LABEL_FONT_CLASS = "font-medium";
-const ALL_DAY_ACCENT_COLOR = "#34c759";
-const NEXT_DAY_PREVIEW_HEIGHT_STYLE = "calc(0.5 * var(--calendar-hour-row-height))";
 
 const createCalendarGridStyle = (): CalendarGridStyle => ({
   "--calendar-hour-row-height": `${HOUR_ROW_HEIGHT_PX}px`,
@@ -65,7 +66,7 @@ const createEvent = (overrides: Partial<GoogleCalendarEvent>): GoogleCalendarEve
 const renderWeekDayGrid = (visibleEvents: GoogleCalendarEvent[] = []) => {
   const refs = createRefs();
 
-  render(
+  return render(
     <CalendarWeekDayGrid
       headerScrollRef={refs.headerScrollRef}
       allDayScrollRef={refs.allDayScrollRef}
@@ -86,6 +87,25 @@ const expectTimeLabelStyleClasses = (label: HTMLElement) => {
   expect(label.className).toContain("tabular-nums");
 };
 
+const getAllDayEventCell = (): HTMLElement => {
+  const allDayLabel = screen.getByText("終日");
+  const allDayEventCell = allDayLabel.nextElementSibling as HTMLElement | null;
+
+  expect(allDayEventCell).not.toBeNull();
+
+  return allDayEventCell as HTMLElement;
+};
+
+const getFirstDayHourRow = (): HTMLElement => {
+  const timeColumn = screen.getByText("00:00").parentElement?.parentElement as HTMLElement | null;
+  const firstDayColumn = timeColumn?.nextElementSibling as HTMLElement | null;
+  const firstDayHourRow = firstDayColumn?.firstElementChild as HTMLElement | null;
+
+  expect(firstDayHourRow).not.toBeNull();
+
+  return firstDayHourRow as HTMLElement;
+};
+
 describe("CalendarWeekDayGrid", () => {
   afterEach(() => {
     cleanup();
@@ -97,7 +117,7 @@ describe("CalendarWeekDayGrid", () => {
     const allDayLabel = screen.getByText("終日");
     const midnightLabel = screen.getByText("00:00");
 
-    expect(allDayLabel.closest(".border-b")).not.toBe(midnightLabel.closest(".border-b"));
+    expect(allDayLabel.parentElement).not.toBe(midnightLabel.parentElement);
     expect(midnightLabel.className).not.toContain("-translate-y-1/2");
   });
 
@@ -154,15 +174,47 @@ describe("CalendarWeekDayGrid", () => {
     expectTimeLabelStyleClasses(screen.getByText("24:00"));
   });
 
-  it("終日ラベルとグリッド線の色を維持する", () => {
+  it("終日ラベルの文字色、太さ、右側paddingを時刻ラベル列に合わせる", () => {
     renderWeekDayGrid();
 
     const allDayLabel = screen.getByText("終日");
-    const firstHourRow = screen.getByText("00:00").closest(".border-b") as HTMLElement | null;
 
     expect(allDayLabel.className).toContain(TIME_LABEL_COLOR_CLASS);
     expect(allDayLabel.className).toContain(TIME_LABEL_FONT_CLASS);
-    expect(firstHourRow?.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
+    expect(allDayLabel.className).toContain("tabular-nums");
+    expect(allDayLabel.className).toContain(ALL_DAY_LABEL_RIGHT_PADDING_CLASS);
+    expect(allDayLabel.className).not.toContain("px-2");
+  });
+
+  it("日付ヘッダーには縦線を入れず、終日行と時間グリッドだけ縦線を入れる", () => {
+    renderWeekDayGrid();
+
+    const dayHeaderCell = screen.getByRole("button", { name: /1\s*木/ }).parentElement as HTMLElement | null;
+    const allDayEventCell = getAllDayEventCell();
+    const firstDayHourRow = getFirstDayHourRow();
+    const firstDayColumn = firstDayHourRow.parentElement as HTMLElement | null;
+
+    expect(dayHeaderCell?.className).not.toContain("border-l");
+    expect(allDayEventCell.className).toContain("border-l");
+    expect(firstDayColumn?.className).toContain("border-l");
+    expect(allDayEventCell.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
+    expect(firstDayColumn?.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
+  });
+
+  it("時刻ラベル列には横線を出さず、日付カラム側だけ横線を出す", () => {
+    renderWeekDayGrid();
+
+    const midnightLabelRow = screen.getByText("00:00").parentElement as HTMLElement | null;
+    const allDayLabel = screen.getByText("終日");
+    const allDayEventCell = getAllDayEventCell();
+    const firstDayHourRow = getFirstDayHourRow();
+
+    expect(allDayLabel.className).not.toContain("border-b");
+    expect(midnightLabelRow?.className).not.toContain("border-b");
+    expect(allDayEventCell.className).toContain("border-b");
+    expect(firstDayHourRow.className).toContain("border-b");
+    expect(allDayEventCell.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
+    expect(firstDayHourRow.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
   });
 
   it("終日イベントの色トークンをそのまま使う", () => {
