@@ -1,12 +1,12 @@
 import { memo, useCallback, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
-import { CalendarIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
+import { GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import type { WorkspaceSidebarSection } from "@/pane.desktop/tab.desktopnative/Tab";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
-import "./nabigationbar.mobile.css";
+import "./navigationbar.css";
 
-type NavigationBarItemId = "explore" | "library" | "home" | "schedule" | "settings";
+type NavigationBarItemId = "explore" | "library" | "home" | "settings";
 
 type SidebarIconComponent = (props: { className?: string }) => ReactNode;
 
@@ -34,7 +34,6 @@ const NAVIGATION_BAR_ITEMS: readonly NavigationBarItem[] = [
   { id: "explore", label: "探す", Icon: GalleryIcon },
   { id: "library", label: "Library", Icon: LibraryIcon, sectionKey: "library" },
   { id: "home", label: "Home", Icon: HomeIcon, sectionKey: "home" },
-  { id: "schedule", label: "Schedule", Icon: CalendarIcon, sectionKey: "schedule" },
   { id: "settings", label: "設定", Icon: SettingIcon, sectionKey: "settings" },
 ];
 
@@ -43,7 +42,7 @@ const getNavigationBarItemIndex = (itemId: NavigationBarItemId) => {
   return itemIndex >= 0 ? itemIndex : NAVIGATION_BAR_ITEMS.findIndex((item) => item.id === DEFAULT_ACTIVE_ITEM_ID);
 };
 
-const getNavigationBarActiveX = (itemIndex: number) => `${itemIndex * 20 + 10}%`;
+const getNavigationBarActiveX = (itemIndex: number) => `${((itemIndex + 0.5) / NAVIGATION_BAR_ITEMS.length) * 100}%`;
 
 const NavigationBarMobileComponent = ({ activeItemId, className, onItemSelect, onOpenSettings }: NavigationBarMobileProps) => {
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
