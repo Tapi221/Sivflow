@@ -7,6 +7,7 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 
 type CalendarEventChipWeekdayProps = {
   event: GoogleCalendarEvent;
+  tooltipDisabled?: boolean;
 };
 
 type ChipLayoutState = {
@@ -173,6 +174,7 @@ const getMeasurementClassName = (): string => [
 
 const CalendarEventChipWeekday = ({
   event,
+  tooltipDisabled = false,
 }: CalendarEventChipWeekdayProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleMeasurementRef = useRef<HTMLSpanElement>(null);
@@ -246,6 +248,7 @@ const CalendarEventChipWeekday = ({
       subtitle={timeLabel}
       accentColor={tokens.border}
       className="h-full min-h-0 w-full"
+      disabled={tooltipDisabled}
     >
       <div className={CHIP_ROOT_CLASS}>
         <div aria-hidden="true" className={CHIP_LINE_MASK_CLASS} />
