@@ -204,11 +204,11 @@ const CalendarWeekDayGridComponent = ({
       <div ref={allDayScrollRef} className="shrink-0 overflow-hidden">
         <div className="grid min-w-0" style={{ gridTemplateColumns }}>
           <div className={cn("flex min-h-10 min-w-0 items-start justify-end py-2 pl-2 pr-3", WEEKDAY_TIME_LABEL_CLASS_NAME)}>終日</div>
-          {visibleDays.map((day) => {
+          {visibleDays.map((day, dayIndex) => {
             const dayKey = getCalendarDateKey(day);
             const events = allDayEvents.get(dayKey) ?? [];
             return (
-              <div key={dayKey} className="min-h-10 min-w-0 border-b border-l px-1 py-1" style={WEEKDAY_COLUMN_BORDER_STYLE}>
+              <div key={dayKey} className={cn("min-h-10 min-w-0 border-b px-1 py-1", dayIndex > 0 ? "border-l" : null)} style={WEEKDAY_COLUMN_BORDER_STYLE}>
                 <div className="flex min-w-0 flex-col gap-1">
                   {events.map((event) => {
                     const tokens = generateColorTokens(event.accentColor);
@@ -238,13 +238,13 @@ const CalendarWeekDayGridComponent = ({
             </div>
           </div>
 
-          {visibleDays.map((day) => {
+          {visibleDays.map((day, dayIndex) => {
             const dayKey = getCalendarDateKey(day);
             const events = createTimedLayoutEvents(timedEvents.get(dayKey) ?? [], day);
             const nextDayPreviewEvents = createNextDayPreviewLayoutEvents(visibleEvents, day);
             const isToday = dayKey === currentDayKey;
             return (
-              <div key={dayKey} className="relative min-w-0 border-l bg-white" style={WEEKDAY_COLUMN_BORDER_STYLE}>
+              <div key={dayKey} className={cn("relative min-w-0 bg-white", dayIndex > 0 ? "border-l" : null)} style={WEEKDAY_COLUMN_BORDER_STYLE}>
                 {WEEKDAY_HOURS.map((hour) => (
                   <div key={hour} className="border-b" style={{ height: `var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})`, borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }} />
                 ))}
