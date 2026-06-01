@@ -96,6 +96,15 @@ const getAllDayEventCell = (): HTMLElement => {
   return allDayEventCell as HTMLElement;
 };
 
+const getAllDayScrollContainer = (): HTMLElement => {
+  const allDayLabel = screen.getByText("終日");
+  const allDayScrollContainer = allDayLabel.parentElement?.parentElement as HTMLElement | null;
+
+  expect(allDayScrollContainer).not.toBeNull();
+
+  return allDayScrollContainer as HTMLElement;
+};
+
 const getFirstDayHourRow = (): HTMLElement => {
   const timeColumn = screen.getByText("00:00").parentElement?.parentElement as HTMLElement | null;
   const firstDayColumn = timeColumn?.nextElementSibling as HTMLElement | null;
@@ -213,19 +222,23 @@ describe("CalendarWeekDayGrid", () => {
     expect(secondDayColumn?.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
   });
 
-  it("時刻ラベル列には横線を出さず、日付カラム側だけ横線を出す", () => {
+  it("終日の下線を終日行の前面レイヤーに描画し、スクロール中も時刻グリッドより前に出す", () => {
     renderWeekDayGrid();
 
     const midnightLabelRow = screen.getByText("00:00").parentElement as HTMLElement | null;
     const allDayLabel = screen.getByText("終日");
     const allDayEventCell = getAllDayEventCell();
+    const allDayScrollContainer = getAllDayScrollContainer();
     const firstDayHourRow = getFirstDayHourRow();
 
     expect(allDayLabel.className).not.toContain("border-b");
     expect(midnightLabelRow?.className).not.toContain("border-b");
-    expect(allDayEventCell.className).toContain("border-b");
+    expect(allDayEventCell.className).not.toContain("border-b");
+    expect(allDayScrollContainer.className).toContain("border-b");
+    expect(allDayScrollContainer.className).toContain("z-20");
+    expect(allDayScrollContainer.className).toContain("bg-white");
     expect(firstDayHourRow.className).toContain("border-b");
-    expect(allDayEventCell.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
+    expect(allDayScrollContainer.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
     expect(firstDayHourRow.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
   });
 
