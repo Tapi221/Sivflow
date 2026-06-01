@@ -81,6 +81,10 @@ const toTimestamp = (value: unknown): number => {
   return 0;
 };
 
+const compareSyncHistoryNewestFirst = (left: SyncHistory, right: SyncHistory): number => right.startedAt - left.startedAt;
+
+const compareSyncQueueOldestFirst = (left: SyncQueueItem, right: SyncQueueItem): number => left.createdAt - right.createdAt;
+
 export class LocalDB extends Dexie {
   users!: Dexie.Table<User, string>;
   folders!: Dexie.Table<Folder, string>;
@@ -295,11 +299,12 @@ export class LocalDB extends Dexie {
   }
 
   async getRecentSyncHistory(limit = 50): Promise<SyncHistory[]> {
-    return this.syncHistory.orderBy("startedAt").reverse().limit(limit).toArray();
+    const histories = await this.syncHistory.toArray();
+    return histories.sort(compareSyncHistoryNewestFirst).slice(0, limit);
   }
 
   async getSyncStatsSince(timestamp: number): Promise<{ histories: SyncHistory[]; errors: SyncError[] }> {
-    const histories = await this.syncHistory.where("startedAt").aboveOrEqual(timestamp).toArray();
+    const histories = (await this.syncHistory.toArray()).filter((history) => history.startedAt >= timestamp);
     const errors = await this.syncErrors.toArray();
     return { histories, errors };
   }
@@ -309,7 +314,8 @@ export class LocalDB extends Dexie {
   }
 
   async getQueuedItemsOldestFirst(): Promise<SyncQueueItem[]> {
-    return this.syncQueue.orderBy("createdAt").toArray();
+    const items = await this.syncQueue.toArray();
+    return items.sort(compareSyncQueueOldestFirst);
   }
 
   async trimSyncQueueToLimit(limit: number): Promise<void> {
