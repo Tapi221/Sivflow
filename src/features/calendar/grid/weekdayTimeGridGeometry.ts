@@ -21,8 +21,14 @@ export type WeekdayTimedEventPositionOptions = {
   suppressMinHeight?: boolean;
 };
 
-const EVENT_COLUMN_GAP_PX = 3;
-const EVENT_COLUMN_INSET_PX = 3;
+type WeekdayTimedEventHorizontalInsets = {
+  leftPx: number;
+  rightPx: number;
+};
+
+const EVENT_COLUMN_OUTER_INSET_PX = 3;
+const EVENT_COLUMN_OVERLAP_GAP_PX = 2;
+const EVENT_COLUMN_OVERLAP_SIDE_GAP_PX = EVENT_COLUMN_OVERLAP_GAP_PX / 2;
 export const WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX = 18;
 const PERCENT_MAX = 100;
 const TIME_GRID_DECIMAL_PLACES = 12;
@@ -36,6 +42,14 @@ const normalizeTimeGridNumber = (value: number): number => {
 
 const getPercentAsHourSpan = (percent: number, rangeHours: number): number => normalizeTimeGridNumber((percent / PERCENT_MAX) * rangeHours);
 
+const getWeekdayTimedEventHorizontalInsets = (frame: WeekdayTimedEventFrame): WeekdayTimedEventHorizontalInsets => {
+  const rightPercent = frame.leftPercent + frame.widthPercent;
+  const leftPx = frame.leftPercent <= TIME_GRID_FLOATING_POINT_EPSILON ? EVENT_COLUMN_OUTER_INSET_PX : EVENT_COLUMN_OVERLAP_SIDE_GAP_PX;
+  const rightPx = rightPercent >= PERCENT_MAX - TIME_GRID_FLOATING_POINT_EPSILON ? EVENT_COLUMN_OUTER_INSET_PX : EVENT_COLUMN_OVERLAP_SIDE_GAP_PX;
+
+  return { leftPx, rightPx };
+};
+
 export const getWeekdayTimedEventFrame = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS): WeekdayTimedEventFrame => ({
   leftPercent: entry.style.xOffset,
   topHours: getPercentAsHourSpan(entry.style.top, rangeHours),
@@ -45,11 +59,12 @@ export const getWeekdayTimedEventFrame = (entry: CalendarTimeGridLayoutEntry, ra
 
 export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS, options: WeekdayTimedEventPositionOptions = {}): WeekdayTimedEventPositionStyle => {
   const frame = getWeekdayTimedEventFrame(entry, rangeHours);
+  const horizontalInsets = getWeekdayTimedEventHorizontalInsets(frame);
 
   return {
-    left: `calc(${frame.leftPercent}% + ${EVENT_COLUMN_INSET_PX}px)`,
+    left: `calc(${frame.leftPercent}% + ${horizontalInsets.leftPx}px)`,
     top: `calc(${frame.topHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
-    width: `calc(${frame.widthPercent}% - ${EVENT_COLUMN_GAP_PX + EVENT_COLUMN_INSET_PX}px)`,
+    width: `calc(${frame.widthPercent}% - ${horizontalInsets.leftPx + horizontalInsets.rightPx}px)`,
     height: `calc(${frame.heightHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
     minHeight: options.suppressMinHeight ? "0px" : `${WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX}px`,
   };
