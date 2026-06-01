@@ -1,7 +1,7 @@
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useMemo, useState } from "react";
 import { auth } from "@/services/firebase";
-import { buildCalendarEventSyncRange, type BuildCalendarEventSyncRangeOptions } from "./calendarEventSyncRange";
+import { buildCalendarEventPrioritySyncRange, buildCalendarEventSyncRange, type BuildCalendarEventSyncRangeOptions, type CalendarEventSyncRange } from "./calendarEventSyncRange";
 import { useGoogleCalendarPushSync } from "./useGoogleCalendarPushSync";
 
 type GoogleCalendarSlice = {
@@ -15,6 +15,10 @@ type GoogleCalendarSlice = {
 export type UseCalendarEventSyncOptions = BuildCalendarEventSyncRangeOptions & {
   googleCalendar: GoogleCalendarSlice;
 };
+
+const PREFETCH_SYNC_DELAY_MS = 250;
+
+const isSameCalendarEventSyncRange = (left: CalendarEventSyncRange, right: CalendarEventSyncRange): boolean => left.rangeStart.getTime() === right.rangeStart.getTime() && left.rangeEnd.getTime() === right.rangeEnd.getTime();
 
 export const useCalendarEventSync = ({
   selectedViewMode,
@@ -43,10 +47,23 @@ export const useCalendarEventSync = ({
       yearSyncRange,
     });
   }, [monthRenderedRange, monthTitleDate, selectedViewMode, visibleDays, yearSyncRange]);
+  const prioritySyncRange = useMemo(() => {
+    return buildCalendarEventPrioritySyncRange({
+      selectedViewMode,
+      visibleDays,
+      monthTitleDate,
+      monthRenderedRange,
+      yearSyncRange,
+    });
+  }, [monthRenderedRange, monthTitleDate, selectedViewMode, visibleDays, yearSyncRange]);
 
   const syncRangeKey = useMemo(
     () => `${syncRange.rangeStart.toISOString()}|${syncRange.rangeEnd.toISOString()}`,
     [syncRange],
+  );
+  const prioritySyncRangeKey = useMemo(
+    () => `${prioritySyncRange.rangeStart.toISOString()}|${prioritySyncRange.rangeEnd.toISOString()}`,
+    [prioritySyncRange],
   );
 
   useEffect(() => {
@@ -59,9 +76,29 @@ export const useCalendarEventSync = ({
 
   useEffect(() => {
     if (!calendarKey) return;
+    if (!forceSyncRange) return;
 
-    void forceSyncRange?.(syncRange);
-  }, [calendarKey, forceSyncRange, syncRange, syncRangeKey]);
+    let cancelled = false;
+    let prefetchTimeoutId: number | null = null;
+
+    void (async () => {
+      await forceSyncRange(prioritySyncRange);
+      if (cancelled || isSameCalendarEventSyncRange(prioritySyncRange, syncRange)) return;
+
+      prefetchTimeoutId = window.setTimeout(() => {
+        if (cancelled) return;
+        void forceSyncRange(syncRange);
+      }, PREFETCH_SYNC_DELAY_MS);
+    })();
+
+    return () => {
+      cancelled = true;
+
+      if (prefetchTimeoutId !== null) {
+        window.clearTimeout(prefetchTimeoutId);
+      }
+    };
+  }, [calendarKey, forceSyncRange, prioritySyncRange, prioritySyncRangeKey, syncRange, syncRangeKey]);
 
   useGoogleCalendarPushSync({
     userId,

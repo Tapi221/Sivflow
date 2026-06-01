@@ -2,7 +2,7 @@ import { addDays, endOfDay, endOfYear, startOfDay, startOfYear, subDays } from "
 import { describe, expect, it } from "vitest";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
-import { buildCalendarEventSyncRange } from "@/sync/googlecalendar-sync/calendarEventSyncRange";
+import { buildCalendarEventPrioritySyncRange, buildCalendarEventSyncRange } from "@/sync/googlecalendar-sync/calendarEventSyncRange";
 
 const expectSameTime = (actual: Date | undefined, expected: Date) => {
   expect(actual?.getTime()).toBe(expected.getTime());
@@ -82,5 +82,19 @@ describe("buildCalendarEventSyncRange", () => {
 
     expectSameTime(range.rangeStart, startOfDay(subDays(new Date(2026, 4, 1), 21)));
     expectSameTime(range.rangeEnd, endOfDay(new Date(2026, 5, 6)));
+  });
+
+  it("週表示の優先同期では表示週と隣接週を先に同期する", () => {
+    const firstVisibleDay = new Date(2026, 4, 4);
+    const lastVisibleDay = new Date(2026, 4, 10);
+
+    const range = buildCalendarEventPrioritySyncRange({
+      selectedViewMode: "week",
+      visibleDays: [firstVisibleDay, lastVisibleDay],
+      monthTitleDate: new Date(2026, 4, 1),
+    });
+
+    expectSameTime(range.rangeStart, startOfDay(subDays(firstVisibleDay, 7)));
+    expectSameTime(range.rangeEnd, endOfDay(addDays(lastVisibleDay, 7)));
   });
 });
