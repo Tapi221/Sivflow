@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, startOfDay } from "date-fns";
 import { toast } from "sonner";
+import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import type { CalendarEventMoveHandler, CalendarGridStyle } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -15,6 +16,8 @@ const SANDBOX_ACCOUNT_ID = "calendar-dnd-sandbox";
 const SANDBOX_CALENDAR_ID = "sandbox-calendar";
 const SAMPLE_START_DATE = new Date(2026, 5, 1);
 const CALENDAR_GRID_STYLE: CalendarGridStyle = { "--calendar-hour-row-height": "72px" };
+const SANDBOX_HEADER_DESCRIPTION = "00:30 / 02:00 / 03:15 / 06:15 と終日行の予定をドラッグして、週カレンダーの DnD 挙動を確認します。移動は sandbox 内の state だけに反映し、元に戻す toast を表示します。";
+const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-none";
 const SAMPLE_EVENT_DEFINITIONS: readonly SampleEventDefinition[] = [
   { id: "midnight-review", title: "深夜レビュー", startsAt: new Date(2026, 5, 1, 0, 30), endsAt: new Date(2026, 5, 1, 1, 30), accentColor: "#0ea5e9" },
   { id: "early-vocab", title: "早朝英単語", startsAt: new Date(2026, 5, 2, 2, 0), endsAt: new Date(2026, 5, 2, 3, 0), accentColor: "#22c55e" },
@@ -27,7 +30,7 @@ const SAMPLE_EVENT_DEFINITIONS: readonly SampleEventDefinition[] = [
   { id: "reading-block", title: "PDF 読解", startsAt: new Date(2026, 5, 3, 13, 0), endsAt: new Date(2026, 5, 3, 14, 30), accentColor: "#f97316" },
   { id: "dense-a", title: "復習予定 A", startsAt: new Date(2026, 5, 3, 13, 15), endsAt: new Date(2026, 5, 3, 15, 0), accentColor: "#ec4899" },
   { id: "dense-b", title: "復習予定 B", startsAt: new Date(2026, 5, 3, 13, 45), endsAt: new Date(2026, 5, 3, 14, 15), accentColor: "#eab308" },
-  { id: "all-day-note", title: "終日イベントはドラッグ対象外", startsAt: new Date(2026, 5, 4, 0, 0), endsAt: new Date(2026, 5, 5, 0, 0), isAllDay: true, accentColor: "#14b8a6" },
+  { id: "all-day-note", title: "終日イベント移動テスト", startsAt: new Date(2026, 5, 4, 0, 0), endsAt: new Date(2026, 5, 5, 0, 0), isAllDay: true, accentColor: "#14b8a6" },
 ] as const;
 
 const createSampleEvent = (definition: SampleEventDefinition): GoogleCalendarEvent => ({ accountId: SANDBOX_ACCOUNT_ID, calendarId: SANDBOX_CALENDAR_ID, isAllDay: false, ...definition, startsAt: new Date(definition.startsAt), endsAt: new Date(definition.endsAt) });
@@ -90,25 +93,25 @@ const CalendarDndSandboxPage = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen w-full min-w-0 flex-col bg-slate-950 p-6 text-slate-100">
-      <div className="mx-auto flex h-[calc(100vh-48px)] w-full max-w-7xl min-w-0 flex-col gap-4">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 shadow-2xl shadow-black/20">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-300">Calendar DND Sandbox</p>
-              <h1 className="mt-2 text-2xl font-bold tracking-tight text-white">週カレンダー DnD 操作確認</h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">初期表示範囲の 00:30 / 02:00 / 03:15 / 06:15 にドラッグ可能な event を置いてあります。別日・別時刻・終日行に動かすと sandbox 内の state だけを更新し、元に戻す toast を表示します。</p>
+    <div className="flex h-screen min-h-0 w-full min-w-0 flex-col bg-white text-[#1c1c1e]">
+      <CarvePanelShell>
+        <CarvePanel>
+          <div className="mb-2 flex shrink-0 items-start justify-between gap-4 px-5 pt-4">
+            <div className="min-w-0">
+              <div className="flex min-w-0 items-center gap-3">
+                <h1 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">週カレンダー DnD 操作確認</h1>
+                <span className="shrink-0 rounded-full border border-[#e5e5ea] bg-[#f5f5f7] px-2.5 py-1 text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]">Sandbox</span>
+              </div>
+              <p className="mt-1 max-w-3xl text-[12px] leading-5 text-[rgba(60,60,67,0.58)]">{SANDBOX_HEADER_DESCRIPTION}</p>
             </div>
-            <button type="button" className="rounded-full border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-900" onClick={handleReset}>Reset</button>
+            <button type="button" className="h-8 shrink-0 rounded-full border border-[#d1d1d6] bg-white px-3 text-[13px] font-semibold text-[#1c1c1e] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset] transition-colors hover:bg-[#f5f5f7]" onClick={handleReset}>Reset</button>
           </div>
-        </section>
 
-        <section className="grid min-h-0 flex-1">
-          <div className="min-h-0 overflow-hidden rounded-3xl border border-slate-800 bg-white">
+          <div className={`ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0 ${IOS_CALENDAR_WEEKDAY_SURFACE_CLASS}`}>
             <CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={events} calendarGridStyle={CALENDAR_GRID_STYLE} selectedDate={visibleDays[0] ?? SAMPLE_START_DATE} onMoveCalendarEvent={handleMoveCalendarEvent} />
           </div>
-        </section>
-      </div>
+        </CarvePanel>
+      </CarvePanelShell>
     </div>
   );
 };
