@@ -12,8 +12,6 @@
 | `/sandbox/anki-fsrs` | `src/sandbox/anki-fsrs` | Anki / FSRS4Anki の復習設計参考 |
 | `/sandbox/excalidraw` | `src/sandbox/excalidraw` | Excalidraw の手書き・図解 UI 参考 |
 | `/sandbox/editor-engines` | `src/sandbox/editor-engines` | Tiptap / Plate / Milkdown のエディタ設計比較 |
-| `/sandbox/pdf-ocr` | `src/sandbox/pdf-ocr` | PDF.js / PAWLS / Tesseract.js の教材インポート参考 |
-| `/sandbox/pdf-converters` | `src/sandbox/pdf-converters` | MinerU / Marker / Docling などPDF変換OSS候補 |
 | `/sandbox/license-notes` | `src/sandbox/license-notes` | Outline / tldraw などライセンス注意付き参考 |
 | `/sandbox/calendar-time-grid` | `src/sandbox/calendar-time-grid` | time-grid event chip の重なり表示確認 |
 
