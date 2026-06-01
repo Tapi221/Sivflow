@@ -18,7 +18,7 @@
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: center;
   width: min(100%, 263px);
   height: var(--mobile-navigation-bar-height);
