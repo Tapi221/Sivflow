@@ -1,16 +1,27 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
 import { TodayBar } from "@/chip/bar/TodayBar";
-import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
+import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/calendar.types";
 import type { ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { useCalendarEventMoveController, applyCalendarEventMoveOverrides } from "@/features/calendar/useCalendarEventMoveController";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { cn } from "@/lib/utils";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
+
+type MobileCalendarViewModeOption = {
+  value: CalendarViewMode;
+  label: string;
+};
+
+type MobileViewModeDropdownProps = {
+  value: CalendarViewModeSelection;
+  onChange: (value: CalendarViewMode) => void;
+  options: readonly MobileCalendarViewModeOption[];
+};
 
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.94)] shadow-none";
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-none";
@@ -19,6 +30,77 @@ const MOBILE_SCHEDULE_PANEL_CLASS = "!m-0 h-full min-h-0 !rounded-none !border-0
 const MOBILE_SCHEDULE_HEADER_CLASS = "flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4";
 const MOBILE_SCHEDULE_SURFACE_CLASS = "mx-0 flex min-h-0 flex-1 flex-col overflow-hidden !rounded-none !border-0";
 const EMPTY_APP_PROJECTS = [];
+
+const isSelectedViewMode = (value: CalendarViewModeSelection, optionValue: CalendarViewMode): boolean => Array.isArray(value) ? value.includes(optionValue) : value === optionValue;
+
+const resolveSelectedViewModeLabel = (value: CalendarViewModeSelection, options: readonly MobileCalendarViewModeOption[]): string => options.find((option) => isSelectedViewMode(value, option.value))?.label ?? options[0]?.label ?? "表示形式";
+
+const MobileViewModeDropdown = ({ value, onChange, options }: MobileViewModeDropdownProps) => {
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedLabel = resolveSelectedViewModeLabel(value, options);
+
+  const handleToggle = useCallback(() => {
+    setIsOpen((currentValue) => !currentValue);
+  }, []);
+
+  const handleSelect = useCallback((nextValue: CalendarViewMode) => {
+    onChange(nextValue);
+    setIsOpen(false);
+  }, [onChange]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      if (dropdownRef.current?.contains(event.target as Node)) return;
+
+      setIsOpen(false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+
+      setIsOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  return (
+    <div ref={dropdownRef} className="relative shrink-0">
+      <button type="button" className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#3a3a3c] shadow-[0_1px_6px_rgba(0,0,0,0.08)] ring-1 ring-black/5 transition hover:bg-[#f7f7f7] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]" onClick={handleToggle} aria-label={`表示形式: ${selectedLabel}`} aria-haspopup="menu" aria-expanded={isOpen}>
+        <span aria-hidden="true" className="flex h-5 w-5 flex-col justify-center gap-[5px]">
+          <span className="block h-[2px] w-full rounded-full bg-current" />
+          <span className="block h-[2px] w-full rounded-full bg-current" />
+          <span className="block h-[2px] w-full rounded-full bg-current" />
+        </span>
+      </button>
+      {isOpen && (
+        <div role="menu" aria-label="表示形式" className="absolute right-0 top-[calc(100%+8px)] z-50 w-40 overflow-hidden rounded-2xl border border-[#e5e5ea] bg-white py-1 shadow-[0_10px_30px_rgba(0,0,0,0.12)]">
+          {options.map((option) => {
+            const isActive = isSelectedViewMode(value, option.value);
+
+            return (
+              <button key={option.value} type="button" role="menuitemradio" aria-checked={isActive} className={cn("flex w-full items-center justify-between px-4 py-2.5 text-left text-[14px] font-semibold tracking-[-0.02em] transition hover:bg-[#f7f7f7]", isActive ? "text-[#1c1c1e]" : "text-[#6e6e73]")} onClick={() => handleSelect(option.value)}>
+                <span>{option.label}</span>
+                {isActive && <span aria-hidden="true" className="text-[12px] text-[#8e8e93]">✓</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const ScheduleScreen = (_props: ScheduleScreenProps) => {
   const pane = useScheduleScreen();
@@ -45,13 +127,15 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
 
   const renderViewHeader = (className: string) => (
     <div className={className}>
-      <div className="flex min-w-0 items-center gap-2">
-        <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]" onClick={handlePrevious} aria-label={t.previousLabel}>‹</button>
-        <h1 className="truncate text-[19px] font-bold tracking-[-0.03em] text-[#1c1c1e]">{format(headerTitleDate, headerTitleFormat, { locale: dateFnsLocale })}</h1>
-        <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]" onClick={handleNext} aria-label={t.nextLabel}>›</button>
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2 pt-1">
+          <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]" onClick={handlePrevious} aria-label={t.previousLabel}>‹</button>
+          <h1 className="truncate text-[19px] font-bold tracking-[-0.03em] text-[#1c1c1e]">{format(headerTitleDate, headerTitleFormat, { locale: dateFnsLocale })}</h1>
+          <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]" onClick={handleNext} aria-label={t.nextLabel}>›</button>
+        </div>
+        <MobileViewModeDropdown value={selectedViewMode} onChange={handleSelectViewMode} options={viewOptions} />
       </div>
-      <div className="flex shrink-0 items-center gap-2">
-        <ViewModeDropdown value={selectedViewMode} onChange={handleSelectViewMode} options={viewOptions} />
+      <div className="flex shrink-0 items-center justify-end gap-2">
         <TodayBar onPrevious={handlePrevious} onNext={handleNext} onToday={handleToday} />
       </div>
     </div>
