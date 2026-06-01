@@ -12,6 +12,7 @@ import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { CalendarAllDayEventOrderMap, CalendarEventMoveHandler, CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
+import { CALENDAR_EVENT_DRAGGING_STYLE, areSameCalendarEventTimes, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragBodyStyle } from "./calendarEventDrag.shared";
 import * as COLOR from "./grid.color.constants.desktop";
 import * as GRID from "./grid.layout.constants.desktop";
 import { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventPositionStyle } from "./weekdayTimeGridGeometry";
@@ -71,11 +72,8 @@ const WEEKDAY_BOTTOM_TIME_SPACER_CLASS_NAME = "relative";
 const WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME = "relative overflow-hidden";
 const WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES = 15;
 const WEEKDAY_TIMED_EVENT_DRAG_FALLBACK_MINUTES = 30;
-const WEEKDAY_TIMED_EVENT_DRAGGING_STYLE: CSSProperties = { filter: "drop-shadow(0 14px 22px rgba(15, 23, 42, 0.22))", transform: "scale(1.015)", zIndex: 30 };
 const MINUTE_MS = 60 * 1000;
 const DAY_MINUTES = GRID.WEEKDAY_HOURS * GRID.WEEKDAY_MINUTES_PER_HOUR;
-
-const createEventKey = (event: GoogleCalendarEvent): string => `${event.accountId ?? ""}:${event.calendarId}:${event.id}`;
 
 const isUnshiftedHourLabel = (hour: number): boolean => hour === 0;
 
@@ -101,15 +99,9 @@ const getAllDayEventClassName = (isDraggable: boolean, isDragging: boolean): str
 
 const getTimedEventWrapperClassName = (isDraggable: boolean, isDragging: boolean): string => cn("absolute z-10 min-w-0 transition-opacity duration-150 ease-out", isDraggable ? "touch-none cursor-grab select-none active:cursor-grabbing" : null, isDragging ? "opacity-35" : null);
 
-const toEventDate = (value: Date): Date | null => {
-  const date = value instanceof Date ? value : new Date(value);
-
-  return Number.isFinite(date.getTime()) ? date : null;
-};
-
 const getEventDurationMs = (event: GoogleCalendarEvent): number => {
-  const startsAt = toEventDate(event.startsAt);
-  const endsAt = toEventDate(event.endsAt);
+  const startsAt = getCalendarEventDateOrNull(event.startsAt);
+  const endsAt = getCalendarEventDateOrNull(event.endsAt);
   const durationMs = startsAt && endsAt ? endsAt.getTime() - startsAt.getTime() : 0;
 
   return durationMs > 0 ? durationMs : WEEKDAY_TIMED_EVENT_DRAG_FALLBACK_MINUTES * MINUTE_MS;
@@ -118,8 +110,8 @@ const getEventDurationMs = (event: GoogleCalendarEvent): number => {
 const getEventTimedDragDurationMs = (event: GoogleCalendarEvent): number => event.isAllDay ? WEEKDAY_TIMED_EVENT_DRAG_FALLBACK_MINUTES * MINUTE_MS : getEventDurationMs(event);
 
 const getEventInRange = (event: GoogleCalendarEvent, rangeStart: Date, rangeEnd: Date): GoogleCalendarEvent | null => {
-  const startsAt = toEventDate(event.startsAt);
-  const endsAt = toEventDate(event.endsAt);
+  const startsAt = getCalendarEventDateOrNull(event.startsAt);
+  const endsAt = getCalendarEventDateOrNull(event.endsAt);
 
   if (!startsAt || !endsAt) return null;
 
@@ -132,8 +124,6 @@ const getEventInRange = (event: GoogleCalendarEvent, rangeStart: Date, rangeEnd:
   return event;
 };
 
-const isCalendarEventDraggable = (event: GoogleCalendarEvent, onMoveCalendarEvent?: CalendarEventMoveHandler): boolean => Boolean(onMoveCalendarEvent && event.accountId);
-
 const getHourRowHeightPx = (element: HTMLElement): number => {
   const computedValue = window.getComputedStyle(element).getPropertyValue(GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT);
   const parsedValue = Number.parseFloat(computedValue);
@@ -145,13 +135,7 @@ const snapMinutes = (minutes: number): number => Math.round(minutes / WEEKDAY_TI
 
 const clampMinutes = (minutes: number, maxMinutes: number): number => Math.max(0, Math.min(maxMinutes, minutes));
 
-const areSameEventTimes = (leftStart: Date, leftEnd: Date, rightStart: Date, rightEnd: Date): boolean => leftStart.getTime() === rightStart.getTime() && leftEnd.getTime() === rightEnd.getTime();
-
-const isSameEventMove = (event: GoogleCalendarEvent, previewStartsAt: Date, previewEndsAt: Date, previewIsAllDay: boolean): boolean => event.isAllDay === previewIsAllDay && areSameEventTimes(event.startsAt, event.endsAt, previewStartsAt, previewEndsAt);
-
 const areSameEventKeyOrder = (left: string[], right: string[]): boolean => left.length === right.length && left.every((key, index) => key === right[index]);
-
-const createPreviewEvent = (event: GoogleCalendarEvent, startsAt: Date, endsAt: Date, isAllDay: boolean): GoogleCalendarEvent => ({ ...event, startsAt, endsAt, isAllDay });
 
 const getDragPreviewDayKey = (state: WeekdayEventDragState): string => getCalendarDateKey(state.previewStartsAt);
 
@@ -169,7 +153,7 @@ const getDragPreviewStyle = (state: WeekdayEventDragState, day: Date): CSSProper
     height: `calc(${visibleDurationMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
     minHeight: `${WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX}px`,
     pointerEvents: "none",
-    ...WEEKDAY_TIMED_EVENT_DRAGGING_STYLE,
+    ...CALENDAR_EVENT_DRAGGING_STYLE,
   };
 };
 
@@ -178,14 +162,14 @@ const getOrderedAllDayEvents = (events: GoogleCalendarEvent[], dayKey: string, o
   const orderedKeys = order?.[dayKey] ?? [];
   if (orderedKeys.length === 0) return sortedEvents;
 
-  const eventByKey = new Map(sortedEvents.map((event) => [createEventKey(event), event]));
+  const eventByKey = new Map(sortedEvents.map((event) => [createCalendarEventKey(event), event]));
   const orderedEvents = orderedKeys.flatMap((key) => {
     const event = eventByKey.get(key);
     return event ? [event] : [];
   });
-  const usedKeys = new Set(orderedEvents.map(createEventKey));
+  const usedKeys = new Set(orderedEvents.map(createCalendarEventKey));
 
-  return [...orderedEvents, ...sortedEvents.filter((event) => !usedKeys.has(createEventKey(event)))];
+  return [...orderedEvents, ...sortedEvents.filter((event) => !usedKeys.has(createCalendarEventKey(event)))];
 };
 
 const getAllDayDropIndex = (element: HTMLDivElement, clientY: number): number => {
@@ -274,11 +258,11 @@ const createNextDayPreviewLayoutEvents = (events: GoogleCalendarEvent[], day: Da
 const createAllDayRenderItems = (events: GoogleCalendarEvent[], dayKey: string, allDayEventOrder: CalendarAllDayEventOrderMap | undefined, dragState: WeekdayEventDragState | null, dragPreviewEvent: GoogleCalendarEvent | null, dragPreviewDayKey: string | null): WeekdayAllDayRenderItem[] => {
   const shouldInsertPreview = Boolean(dragState && dragPreviewEvent && dragState.previewIsAllDay && dragPreviewDayKey === dayKey);
   const orderedEvents = getOrderedAllDayEvents(events, dayKey, allDayEventOrder);
-  const visibleEvents = shouldInsertPreview && dragState && dragPreviewEvent ? insertEventKeyAtIndex(orderedEvents.map(createEventKey), dragState.eventKey, dragState.previewAllDayIndex ?? orderedEvents.length).flatMap((key) => key === dragState.eventKey ? [dragPreviewEvent] : orderedEvents.filter((event) => createEventKey(event) === key)) : orderedEvents;
-  const previewEventKey = shouldInsertPreview && dragPreviewEvent ? createEventKey(dragPreviewEvent) : null;
+  const visibleEvents = shouldInsertPreview && dragState && dragPreviewEvent ? insertEventKeyAtIndex(orderedEvents.map(createCalendarEventKey), dragState.eventKey, dragState.previewAllDayIndex ?? orderedEvents.length).flatMap((key) => key === dragState.eventKey ? [dragPreviewEvent] : orderedEvents.filter((event) => createCalendarEventKey(event) === key)) : orderedEvents;
+  const previewEventKey = shouldInsertPreview && dragPreviewEvent ? createCalendarEventKey(dragPreviewEvent) : null;
 
   return visibleEvents.map((event) => {
-    const eventKey = createEventKey(event);
+    const eventKey = createCalendarEventKey(event);
 
     return {
       event,
@@ -299,20 +283,7 @@ const useCurrentTime = () => {
   return now;
 };
 
-const CalendarWeekDayGridComponent = ({
-  headerScrollRef,
-  allDayScrollRef,
-  scrollContainerRef,
-  visibleDays,
-  visibleEvents,
-  calendarGridStyle,
-  allDayEventOrder,
-  onScroll,
-  selectedDate,
-  onSelectDate,
-  onMoveCalendarEvent,
-  onReorderAllDayEvents,
-}: CalendarWeekDayGridProps) => {
+const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scrollContainerRef, visibleDays, visibleEvents, calendarGridStyle, allDayEventOrder, onScroll, selectedDate, onSelectDate, onMoveCalendarEvent, onReorderAllDayEvents }: CalendarWeekDayGridProps) => {
   const now = useCurrentTime();
   const allDayColumnRefs = useRef(new Map<string, HTMLDivElement>());
   const dayColumnRefs = useRef(new Map<string, HTMLDivElement>());
@@ -320,13 +291,10 @@ const CalendarWeekDayGridComponent = ({
   const dragStateRef = useRef<WeekdayEventDragState | null>(null);
   const [dragState, setDragState] = useState<WeekdayEventDragState | null>(null);
   const { allDayEvents, timedEvents } = useMemo(() => groupEventsByDay(visibleEvents, visibleDays), [visibleEvents, visibleDays]);
-  const dragPreviewEvent = useMemo(() => dragState ? createPreviewEvent(dragState.event, dragState.previewStartsAt, dragState.previewEndsAt, dragState.previewIsAllDay) : null, [dragState]);
+  const dragPreviewEvent = useMemo(() => dragState ? createCalendarEventDragPreview(dragState.event, dragState.previewStartsAt, dragState.previewEndsAt, dragState.previewIsAllDay) : null, [dragState]);
   const dragPreviewDayKey = dragState ? getDragPreviewDayKey(dragState) : null;
   const gridTemplateColumns = getViewportGridTemplateColumns(visibleDays.length);
-  const timelineGridStyle = {
-    [GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT]: calendarGridStyle[GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT],
-    gridTemplateColumns,
-  } as CSSProperties;
+  const timelineGridStyle = { [GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT]: calendarGridStyle[GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT], gridTemplateColumns } as CSSProperties;
   const currentDayKey = getCalendarDateKey(now);
 
   const setDragStateValue = useCallback((nextDragState: WeekdayEventDragState | null) => {
@@ -439,7 +407,7 @@ const CalendarWeekDayGridComponent = ({
 
     event.preventDefault();
 
-    if (state.previewIsAllDay === preview.previewIsAllDay && state.previewAllDayIndex === preview.previewAllDayIndex && areSameEventTimes(state.previewStartsAt, state.previewEndsAt, preview.previewStartsAt, preview.previewEndsAt)) return;
+    if (state.previewIsAllDay === preview.previewIsAllDay && state.previewAllDayIndex === preview.previewAllDayIndex && areSameCalendarEventTimes(state.previewStartsAt, state.previewEndsAt, preview.previewStartsAt, preview.previewEndsAt)) return;
 
     setDragStateValue({ ...state, ...preview });
   }, [getDragPreviewTimes, setDragStateValue]);
@@ -449,7 +417,7 @@ const CalendarWeekDayGridComponent = ({
 
     const targetDayKey = getCalendarDateKey(state.previewStartsAt);
     const targetEvents = getOrderedAllDayEvents(allDayEvents.get(targetDayKey) ?? [], targetDayKey, allDayEventOrder);
-    const currentEventKeys = targetEvents.map(createEventKey);
+    const currentEventKeys = targetEvents.map(createCalendarEventKey);
     const orderedEventKeys = insertEventKeyAtIndex(currentEventKeys, state.eventKey, state.previewAllDayIndex);
 
     if (targetDayKey === state.sourceDayKey && areSameEventKeyOrder(currentEventKeys, orderedEventKeys)) return;
@@ -460,7 +428,7 @@ const CalendarWeekDayGridComponent = ({
   const commitDragState = useCallback((state: WeekdayEventDragState) => {
     commitAllDayOrder(state);
 
-    if (isSameEventMove(state.event, state.previewStartsAt, state.previewEndsAt, state.previewIsAllDay)) return;
+    if (isSameCalendarEventMove(state.event, state.previewStartsAt, state.previewEndsAt, state.previewIsAllDay)) return;
 
     void Promise.resolve(onMoveCalendarEvent?.({ event: state.event, startsAt: state.previewStartsAt, endsAt: state.previewEndsAt, isAllDay: state.previewIsAllDay })).catch((error: unknown) => {
       console.warn("[CalendarWeekDayGrid] calendar event move failed", error);
@@ -487,38 +455,16 @@ const CalendarWeekDayGridComponent = ({
   const startEventDrag = useCallback((event: ReactPointerEvent<HTMLDivElement>, calendarEvent: GoogleCalendarEvent, pointerOffsetMinutes: number, durationMs: number) => {
     if (event.button !== 0 || !isCalendarEventDraggable(calendarEvent, onMoveCalendarEvent)) return;
 
-    const eventKey = createEventKey(calendarEvent);
+    const eventKey = createCalendarEventKey(calendarEvent);
     const sourceDayKey = getCalendarDateKey(calendarEvent.startsAt);
-    const preview = getDragPreviewTimes({
-      eventKey,
-      event: calendarEvent,
-      pointerId: event.pointerId,
-      pointerOffsetMinutes,
-      durationMs,
-      sourceDayKey,
-      previewStartsAt: calendarEvent.startsAt,
-      previewEndsAt: calendarEvent.endsAt,
-      previewIsAllDay: calendarEvent.isAllDay,
-      previewAllDayIndex: null,
-    }, event.clientX, event.clientY);
+    const preview = getDragPreviewTimes({ eventKey, event: calendarEvent, pointerId: event.pointerId, pointerOffsetMinutes, durationMs, sourceDayKey, previewStartsAt: calendarEvent.startsAt, previewEndsAt: calendarEvent.endsAt, previewIsAllDay: calendarEvent.isAllDay, previewAllDayIndex: null }, event.clientX, event.clientY);
 
     event.preventDefault();
     event.stopPropagation();
     event.currentTarget.setPointerCapture(event.pointerId);
     dragElementRef.current = event.currentTarget;
 
-    setDragStateValue({
-      eventKey,
-      event: calendarEvent,
-      pointerId: event.pointerId,
-      pointerOffsetMinutes,
-      durationMs,
-      sourceDayKey,
-      previewStartsAt: preview?.previewStartsAt ?? calendarEvent.startsAt,
-      previewEndsAt: preview?.previewEndsAt ?? calendarEvent.endsAt,
-      previewIsAllDay: preview?.previewIsAllDay ?? calendarEvent.isAllDay,
-      previewAllDayIndex: preview?.previewAllDayIndex ?? null,
-    });
+    setDragStateValue({ eventKey, event: calendarEvent, pointerId: event.pointerId, pointerOffsetMinutes, durationMs, sourceDayKey, previewStartsAt: preview?.previewStartsAt ?? calendarEvent.startsAt, previewEndsAt: preview?.previewEndsAt ?? calendarEvent.endsAt, previewIsAllDay: preview?.previewIsAllDay ?? calendarEvent.isAllDay, previewAllDayIndex: preview?.previewAllDayIndex ?? null });
   }, [getDragPreviewTimes, onMoveCalendarEvent, setDragStateValue]);
 
   const handleAllDayEventPointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>, calendarEvent: GoogleCalendarEvent) => {
@@ -555,20 +501,7 @@ const CalendarWeekDayGridComponent = ({
     };
   }, [finishDrag, updateDragPreview]);
 
-  useEffect(() => {
-    if (!dragState || typeof document === "undefined") return undefined;
-
-    const previousCursor = document.body.style.cursor;
-    const previousUserSelect = document.body.style.userSelect;
-
-    document.body.style.cursor = "grabbing";
-    document.body.style.userSelect = "none";
-
-    return () => {
-      document.body.style.cursor = previousCursor;
-      document.body.style.userSelect = previousUserSelect;
-    };
-  }, [dragState]);
+  useCalendarEventDragBodyStyle(Boolean(dragState));
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
@@ -609,7 +542,7 @@ const CalendarWeekDayGridComponent = ({
 
                     if (isDragPreview) {
                       return (
-                        <div key={`${eventKey}:preview`} data-calendar-all-day-event-item="true" className={cn(eventChipAllDayClass, "pointer-events-none transition-none")} style={{ background: tokens.bg, color: tokens.text, ...WEEKDAY_TIMED_EVENT_DRAGGING_STYLE }} title={event.title}>
+                        <div key={`${eventKey}:preview`} data-calendar-all-day-event-item="true" className={cn(eventChipAllDayClass, "pointer-events-none transition-none")} style={{ background: tokens.bg, color: tokens.text, ...CALENDAR_EVENT_DRAGGING_STYLE }} title={event.title}>
                           {event.title || "Untitled"}
                         </div>
                       );
@@ -654,7 +587,7 @@ const CalendarWeekDayGridComponent = ({
                 ))}
                 <div className={WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME} data-testid="weekday-preview-bottom-spacer" style={WEEKDAY_BOTTOM_SPACER_STYLE}>
                   {nextDayPreviewEvents.map((entry) => (
-                    <div key={createEventKey(entry.event)} className="absolute z-10 min-w-0" style={getTimedEntryPositionStyle(entry, NEXT_DAY_PREVIEW_HOURS)}>
+                    <div key={createCalendarEventKey(entry.event)} className="absolute z-10 min-w-0" style={getTimedEntryPositionStyle(entry, NEXT_DAY_PREVIEW_HOURS)}>
                       <CalendarEventChipWeekday event={entry.event} />
                     </div>
                   ))}
@@ -667,7 +600,7 @@ const CalendarWeekDayGridComponent = ({
                 ) : null}
 
                 {events.map((entry) => {
-                  const eventKey = createEventKey(entry.event);
+                  const eventKey = createCalendarEventKey(entry.event);
                   const isDragging = dragState?.eventKey === eventKey;
                   const isDraggable = isCalendarEventDraggable(entry.event, onMoveCalendarEvent);
 
