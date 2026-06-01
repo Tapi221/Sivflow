@@ -244,7 +244,7 @@ const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScroll
 
               return (
                 <div key={renderKey} className={getMonthEventWrapperClassName(isDraggable, isDragging, isDragPreview)} style={isDragPreview ? MONTH_EVENT_DRAGGING_STYLE : undefined} onClick={isDraggable ? onEventClick : undefined} onPointerDown={isDraggable ? (pointerEvent) => onEventPointerDown(pointerEvent, event) : undefined}>
-                  <CalendarEventChipMonth event={event} />
+                  <CalendarEventChipMonth event={event} tooltipDisabled={isDragPreview || isDragging} />
                 </div>
               );
             })}
