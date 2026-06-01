@@ -42,7 +42,7 @@ const getExplorerTabId = (tab: WorkspaceTab | null): WorkspaceExplorerTab["id"] 
   return tab?.kind === "explorer" ? tab.id : null;
 };
 
-export const isProjectRootSelection = ({ selectedFolderId, selectedItem, rootFolders }: { selectedFolderId: string | null; selectedItem: SelectedExplorerItem; rootFolders: FolderTreeNode[] }): boolean => Boolean(selectedFolderId && selectedItem === null && rootFolders.some((folder) => getFolderId(folder) === selectedFolderId));
+const isProjectRootSelection = ({ selectedFolderId, selectedItem, rootFolders }: { selectedFolderId: string | null; selectedItem: SelectedExplorerItem; rootFolders: FolderTreeNode[] }): boolean => Boolean(selectedFolderId && selectedItem === null && rootFolders.some((folder) => getFolderId(folder) === selectedFolderId));
 
 const ExplorerWorkspaceContent = ({ explorerState, explorerTabId }: ExplorerWorkspaceContentProps) => {
   const { folders, loading, error } = useFoldersRead();
