@@ -26,7 +26,7 @@ type WeekdayTimedEventHorizontalInsets = {
   rightPx: number;
 };
 
-const EVENT_COLUMN_OUTER_INSET_PX = 3;
+const EVENT_COLUMN_OUTER_INSET_PX = 1;
 const EVENT_COLUMN_OVERLAP_GAP_PX = 2;
 const EVENT_COLUMN_OVERLAP_SIDE_GAP_PX = EVENT_COLUMN_OVERLAP_GAP_PX / 2;
 export const WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX = 18;
