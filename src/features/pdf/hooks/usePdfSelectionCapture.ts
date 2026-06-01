@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { capturePdfViewerRectToBlob } from "@/features/pdf/pdfSelectionCapture";
 import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboardImage";
+import { dispatchCardSelectionCaptureEvent, type CardSelectionCaptureSide, type CardSelectionCaptureTaskResult } from "@/features/selection-capture/cardSelectionCaptureEvents";
 import type { SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
+import { recognizeSelectionCaptureText } from "@/features/selection-capture/selectionCaptureOcr";
 
 type PdfSelectionCaptureTargetRef = {
   readonly current: HTMLElement | null;
@@ -9,12 +11,23 @@ type PdfSelectionCaptureTargetRef = {
 
 type UsePdfSelectionCaptureOptions = {
   targetRef: PdfSelectionCaptureTargetRef;
+  selectionCaptureSide: CardSelectionCaptureSide;
   sourceUnavailable: boolean;
   numPages: number;
 };
 
+const resolveTaskMessage = (values: CardSelectionCaptureTaskResult[]): string | null => {
+  return values.find((value): value is string => typeof value === "string" && value.trim().length > 0) ?? null;
+};
+
+const resolveHandledCaptureMessage = (taskMessage: string | null, ocrText: string | null): string => {
+  if (taskMessage) return taskMessage;
+  return ocrText ? "PDF範囲画像とOCRテキストをカードへ追加しました" : "PDF範囲画像をカードへ追加しました";
+};
+
 export const usePdfSelectionCapture = ({
   targetRef,
+  selectionCaptureSide,
   sourceUnavailable,
   numPages,
 }: UsePdfSelectionCaptureOptions) => {
@@ -39,16 +52,34 @@ export const usePdfSelectionCapture = ({
     setIsSelectionCaptureBusy(true);
     try {
       const blob = await capturePdfViewerRectToBlob(target, rect);
-      await copyImageBlobToClipboard(blob);
-      setSelectionCaptureMessage("PDF範囲をコピーしました");
+      const ocrText = await recognizeSelectionCaptureText(blob).catch((error) => {
+        console.warn("[usePdfSelectionCapture] selection capture OCR failed", error);
+        return null;
+      });
+      const dispatched = dispatchCardSelectionCaptureEvent({
+        blob,
+        rect,
+        target,
+        side: selectionCaptureSide,
+        ocrText,
+      });
+
+      if (dispatched.handled) {
+        const taskResults = await Promise.all(dispatched.tasks);
+        setSelectionCaptureMessage(resolveHandledCaptureMessage(resolveTaskMessage(taskResults), ocrText));
+      } else {
+        await copyImageBlobToClipboard(blob);
+        setSelectionCaptureMessage("PDF範囲をコピーしました");
+      }
+
       setIsSelectionCaptureActive(false);
     } catch (error) {
       console.error("[usePdfSelectionCapture] selection capture failed", error);
-      setSelectionCaptureMessage("PDF範囲コピーに失敗しました");
+      setSelectionCaptureMessage("PDF範囲処理に失敗しました");
     } finally {
       setIsSelectionCaptureBusy(false);
     }
-  }, [targetRef]);
+  }, [selectionCaptureSide, targetRef]);
 
   useEffect(() => {
     if (!selectionCaptureMessage) return;
