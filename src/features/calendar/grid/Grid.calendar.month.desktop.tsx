@@ -30,6 +30,7 @@ type MonthEventDragState = {
   event: GoogleCalendarEvent;
   pointerId: number;
   durationMs: number;
+  sourceDayKey: string;
   previewStartsAt: Date;
   previewEndsAt: Date;
   previewIsAllDay: boolean;
@@ -180,7 +181,7 @@ const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScroll
   const monthAnnotation = getMonthAnnotation(day.date);
   const { visibleEvents, totalCount } = dayEvents;
   const overflowCount = totalCount - visibleEvents.length;
-  const shouldRenderDragPreview = dragState && dragPreviewEvent && dragPreviewDayKey === day.key;
+  const shouldRenderDragPreview = Boolean(dragState && dragPreviewEvent && dragPreviewDayKey === day.key && dragPreviewDayKey !== dragState.sourceDayKey);
 
   return (
     <div ref={setDayCellRef(day.key)} data-calendar-month-day-key={day.key} className={cn("calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible bg-white text-left", hasLeadingBorder && "border-l", isToday && "bg-[#f7fbff]", selected && !isToday && "bg-[#f7f7f8]", !selected && !isToday && "calendar-month-day-cell-hoverable", isScrollHovered && !selected && !isToday && "calendar-month-day-cell-scroll-hovered bg-[#fafafa]")} style={MONTH_GRID_BORDER_STYLE}>
@@ -356,6 +357,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
 
     const eventKey = createEventKey(calendarEvent);
     const durationMs = getEventDurationMs(calendarEvent);
+    const sourceDayKey = getDayKey(calendarEvent.startsAt);
     const preview = getMonthDragPreview(calendarEvent, durationMs, event.clientX, event.clientY);
 
     event.preventDefault();
@@ -368,6 +370,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
       event: calendarEvent,
       pointerId: event.pointerId,
       durationMs,
+      sourceDayKey,
       previewStartsAt: preview?.previewStartsAt ?? calendarEvent.startsAt,
       previewEndsAt: preview?.previewEndsAt ?? calendarEvent.endsAt,
       previewIsAllDay: preview?.previewIsAllDay ?? calendarEvent.isAllDay,
