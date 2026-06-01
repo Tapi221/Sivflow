@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { capturePdfViewerRectToBlob } from "@/features/pdf/pdfSelectionCapture";
+import { capturePdfViewerAreaToBlob } from "@/features/pdf/pdfSelectionCapture";
 import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboardImage";
 import { dispatchCardSelectionCaptureEvent, type CardSelectionCaptureSide, type CardSelectionCaptureTaskResult } from "@/features/selection-capture/cardSelectionCaptureEvents";
-import type { SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
+import type { SelectionCaptureArea } from "@/features/selection-capture/selectionCapture.types";
 import { recognizeSelectionCaptureText } from "@/features/selection-capture/selectionCaptureOcr";
 
 type PdfSelectionCaptureTargetRef = {
@@ -45,20 +45,21 @@ export const usePdfSelectionCapture = ({
     setIsSelectionCaptureBusy(false);
   }, []);
 
-  const handleCaptureSelection = useCallback(async (rect: SelectionCaptureRect) => {
+  const handleCaptureSelection = useCallback(async (area: SelectionCaptureArea) => {
     const target = targetRef.current;
     if (!target) return;
 
     setIsSelectionCaptureBusy(true);
     try {
-      const blob = await capturePdfViewerRectToBlob(target, rect);
+      const blob = await capturePdfViewerAreaToBlob(target, area);
       const ocrText = await recognizeSelectionCaptureText(blob).catch((error) => {
         console.warn("[usePdfSelectionCapture] selection capture OCR failed", error);
         return null;
       });
       const dispatched = dispatchCardSelectionCaptureEvent({
         blob,
-        rect,
+        rect: area.rect,
+        area,
         target,
         side: selectionCaptureSide,
         ocrText,
