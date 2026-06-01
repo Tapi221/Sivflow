@@ -9,7 +9,7 @@ import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
 import { createProjectCalendarLink, persistProjectCalendarLinks, readStoredProjectCalendarLinks } from "@/features/calendar/projectCalendarLinks.storage";
-import type { AppCalendarItem, CalendarTimedEventMoveHandler, CalendarViewMode, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
+import type { AppCalendarItem, CalendarEventMoveHandler, CalendarViewMode, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { CalendarTimetableView } from "@/features/calendar/timetable/CalendarTimetableView";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { clearLegacyStoredAppProjects, normalizeRootFolderProjectLabel, readLegacyStoredAppProjects, useRootFolderProjects } from "@/features/calendar/useRootFolderProjects";
@@ -26,7 +26,7 @@ type CalendarEventDisplayRange = { start: Date; end: Date };
 
 type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; monthTitleDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange | null; yearRenderedRange: CalendarDateRange | null };
 
-type CalendarTimedEventTimeOverride = { startsAt: Date; endsAt: Date; isAllDay: boolean };
+type CalendarEventMoveOverride = { startsAt: Date; endsAt: Date; isAllDay: boolean };
 
 type CreateGoogleProjectCalendarLinkInput = { project: AppCalendarItem; accountId: string; calendar: GoogleCalendarListItem; color: string; createdByApp: boolean };
 
@@ -38,7 +38,7 @@ const PLAN_RESULT_TOGGLE_VIEW_MODES = new Set(["threeDays", "days", "pieChart"])
 const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const WEEKDAY_EVENT_BUFFER_DAYS = 21;
 const MONTH_EVENT_BUFFER_DAYS = 14;
-const TIMED_EVENT_MOVE_ROLLBACK_MS = 1200;
+const EVENT_MOVE_ROLLBACK_MS = 1200;
 
 const isHexColor = (value: string): boolean => /^#[0-9a-f]{6}$/i.test(value);
 
@@ -100,12 +100,12 @@ const filterEventsByDisplayRange = (events: GoogleCalendarEvent[], range: Calend
 
 const createGoogleProjectCalendarLink = ({ project, accountId, calendar, color, createdByApp }: CreateGoogleProjectCalendarLinkInput): ProjectCalendarLink => createProjectCalendarLink({ projectId: project.id, provider: "google", accountId, externalCalendarId: calendar.id, externalCalendarName: calendar.summaryOverride ?? calendar.summary, syncDirection: "importOnly", createdByApp, color, lastSyncedAt: new Date().toISOString() });
 
-const getTimedEventOverrideKey = (event: GoogleCalendarEvent): string => event.id;
+const getCalendarEventOverrideKey = (event: GoogleCalendarEvent): string => event.id;
 
-const applyTimedEventTimeOverrides = (events: GoogleCalendarEvent[], overrides: Map<string, CalendarTimedEventTimeOverride>): GoogleCalendarEvent[] => {
+const applyCalendarEventMoveOverrides = (events: GoogleCalendarEvent[], overrides: Map<string, CalendarEventMoveOverride>): GoogleCalendarEvent[] => {
   if (overrides.size === 0) return events;
   return events.map((event) => {
-    const override = overrides.get(getTimedEventOverrideKey(event));
+    const override = overrides.get(getCalendarEventOverrideKey(event));
     return override ? { ...event, ...override } : event;
   });
 };
@@ -119,7 +119,7 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const { appProjects, loading: rootFolderProjectsLoading, createRootFolderProject, findProjectByLabel, setProjectVisibility, toggleProject, updateRootFolderProjectColor } = useRootFolderProjects();
   const [projectCalendarLinks, setProjectCalendarLinks] = useState<ProjectCalendarLink[]>(readStoredProjectCalendarLinks);
   const [googleCalendarColorOverrides, setGoogleCalendarColorOverrides] = useState<GoogleCalendarColorOverrideMap>(readStoredGoogleCalendarColorOverrides);
-  const [timedEventTimeOverrides, setTimedEventTimeOverrides] = useState<Map<string, CalendarTimedEventTimeOverride>>(() => new Map());
+  const [calendarEventMoveOverrides, setCalendarEventMoveOverrides] = useState<Map<string, CalendarEventMoveOverride>>(() => new Map());
   const [planResultModes, setPlanResultModes] = useState<PlanResultMode[]>([...DEFAULT_PLAN_RESULT_MODES]);
   const viewOptions = useMemo(() => [{ value: "year", label: t.viewYear }, { value: "month", label: t.viewMonth }, { value: "week", label: t.viewWeek }, { value: "threeDays", label: t.viewThreeDays }, { value: "days", label: t.viewDay }, { value: "list", label: t.viewList }, { value: "timetable", label: t.viewTimetable }, { value: "pieChart", label: t.viewPieChart }] as const, [t.viewDay, t.viewList, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewTimetable, t.viewWeek, t.viewYear]);
   const { selectedViewMode, primaryViewMode, currentDate, selectedDate, titleDate, monthTitleDate, monthScrollTargetToken, visibleDays, virtualRail, yearRenderedRange, googleCalendarEvents, googleAccounts, isAnyCalendarConnecting, calendarGridStyle, headerScrollRef, allDayScrollRef, scrollContainerRef, contentViewportRef, handleCalendarScroll, handleSelectViewMode, handleSidebarSelectDate, handleSidebarPreviousMonth, handleSidebarNextMonth, handleVisibleDateChange, handleVisibleMonthChange, handlePrevious, handleNext, handleToday, handleMonthCellSelectDate, handleMonthRenderedRangeChange, handleYearRenderedRangeChange, handleYearSyncRangeChange, addGoogleCalendar, reconnectGoogleAccount, toggleGoogleCalendar, updateGoogleCalendarEvent } = pane;
@@ -205,13 +205,13 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     setProjectCalendarLinks((links) => links.map((link) => link.provider === "google" && link.accountId === accountId && link.externalCalendarId === calendarId ? { ...link, color } : link));
     void Promise.all(Array.from(new Set(linkedProjectIds)).map((projectId) => updateRootFolderProjectColor(projectId, color))).catch((error) => { console.warn("[ScheduleScreen] root folder project color update failed", error); });
   }, [projectCalendarLinks, updateRootFolderProjectColor]);
-  const handleMoveTimedEvent = useCallback<CalendarTimedEventMoveHandler>(async (event, startsAt, endsAt, isAllDay = false) => {
+  const handleMoveCalendarEvent = useCallback<CalendarEventMoveHandler>(async ({ event, startsAt, endsAt, isAllDay }) => {
     if (!event.accountId) return;
 
-    const overrideKey = getTimedEventOverrideKey(event);
+    const overrideKey = getCalendarEventOverrideKey(event);
     const rollbackOverride = { startsAt: event.startsAt, endsAt: event.endsAt, isAllDay: event.isAllDay };
 
-    setTimedEventTimeOverrides((overrides) => {
+    setCalendarEventMoveOverrides((overrides) => {
       const next = new Map(overrides);
       next.set(overrideKey, { startsAt, endsAt, isAllDay });
       return next;
@@ -220,27 +220,27 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     try {
       await updateGoogleCalendarEvent(event.accountId, { calendarId: event.calendarId, eventId: event.externalId ?? event.id, startsAt, endsAt, isAllDay });
     } catch (error) {
-      console.warn("[ScheduleScreen] timed event move failed", error);
-      setTimedEventTimeOverrides((overrides) => {
+      console.warn("[ScheduleScreen] calendar event move failed", error);
+      setCalendarEventMoveOverrides((overrides) => {
         const next = new Map(overrides);
         next.set(overrideKey, rollbackOverride);
         return next;
       });
       window.setTimeout(() => {
-        setTimedEventTimeOverrides((overrides) => {
+        setCalendarEventMoveOverrides((overrides) => {
           const current = overrides.get(overrideKey);
           if (!current || current.startsAt.getTime() !== rollbackOverride.startsAt.getTime() || current.endsAt.getTime() !== rollbackOverride.endsAt.getTime() || current.isAllDay !== rollbackOverride.isAllDay) return overrides;
           const next = new Map(overrides);
           next.delete(overrideKey);
           return next;
         });
-      }, TIMED_EVENT_MOVE_ROLLBACK_MS);
+      }, EVENT_MOVE_ROLLBACK_MS);
     }
   }, [updateGoogleCalendarEvent]);
 
   const googleAccountsWithColorOverrides = useMemo(() => applyGoogleCalendarColorOverridesToAccounts(googleAccounts, googleCalendarColorOverrides), [googleAccounts, googleCalendarColorOverrides]);
   const linkedGoogleCalendarEvents = useMemo(() => attachCalendarEventDisplayMetadata(googleCalendarEvents, { appProjects, projectCalendarLinks, googleAccounts: googleAccountsWithColorOverrides, googleCalendarColorOverrides }), [appProjects, googleAccountsWithColorOverrides, googleCalendarColorOverrides, googleCalendarEvents, projectCalendarLinks]);
-  const overriddenGoogleCalendarEvents = useMemo(() => applyTimedEventTimeOverrides(linkedGoogleCalendarEvents, timedEventTimeOverrides), [linkedGoogleCalendarEvents, timedEventTimeOverrides]);
+  const overriddenGoogleCalendarEvents = useMemo(() => applyCalendarEventMoveOverrides(linkedGoogleCalendarEvents, calendarEventMoveOverrides), [calendarEventMoveOverrides, linkedGoogleCalendarEvents]);
   const visibleGoogleCalendarEvents = useMemo(() => filterCalendarEventsBySourceVisibility(overriddenGoogleCalendarEvents, { appProjects, projectCalendarLinks, googleAccounts: googleAccountsWithColorOverrides }), [appProjects, googleAccountsWithColorOverrides, overriddenGoogleCalendarEvents, projectCalendarLinks]);
   const selectedViewModes = useMemo(() => Array.isArray(selectedViewMode) ? selectedViewMode : [selectedViewMode], [selectedViewMode]);
   const mainDisplayRange = useMemo(() => getScheduleEventDisplayRange({ primaryViewMode, currentDate, selectedDate, monthTitleDate, visibleDays, monthRenderedRange: pane.monthRenderedRange, yearRenderedRange }), [currentDate, monthTitleDate, pane.monthRenderedRange, primaryViewMode, selectedDate, visibleDays, yearRenderedRange]);
@@ -265,7 +265,7 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
         {isYearCalendarView ? (
           <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white"><CalendarYearView yearDate={currentDate} selectedDate={selectedDate} visibleEvents={mainCalendarEvents} onSelectDate={handleMonthCellSelectDate} onRenderedRangeChange={handleYearRenderedRangeChange} onSyncRangeChange={handleYearSyncRangeChange} /></div>
         ) : isSplitCalendarView ? (
-          <CalendarSelectedViewsSplitView selectedViewModes={selectedViewModes} currentDate={currentDate} selectedDate={selectedDate} visibleDays={visibleDays} virtualRail={virtualRail} events={mainCalendarEvents} appProjects={appProjects} googleAccounts={googleAccountsWithColorOverrides} headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} calendarGridStyle={calendarGridStyle} onCalendarScroll={handleCalendarScroll} onSelectDate={handleSidebarSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onVisibleDateChange={handleVisibleDateChange} onMoveTimedEvent={handleMoveTimedEvent} />
+          <CalendarSelectedViewsSplitView selectedViewModes={selectedViewModes} currentDate={currentDate} selectedDate={selectedDate} visibleDays={visibleDays} virtualRail={virtualRail} events={mainCalendarEvents} appProjects={appProjects} googleAccounts={googleAccountsWithColorOverrides} headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} calendarGridStyle={calendarGridStyle} onCalendarScroll={handleCalendarScroll} onSelectDate={handleSidebarSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onVisibleDateChange={handleVisibleDateChange} onMoveCalendarEvent={handleMoveCalendarEvent} />
         ) : isPieChartCalendarView ? (
           <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white"><CalendarPieChartView days={visibleDays} virtualRail={virtualRail} selectedDate={selectedDate} events={mainCalendarEvents} appProjects={appProjects} googleAccounts={googleAccountsWithColorOverrides} onSelectDate={handleSidebarSelectDate} onVisibleDateChange={handleVisibleDateChange} /></div>
         ) : isListCalendarView ? (
@@ -275,7 +275,7 @@ const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
         ) : isTimetableCalendarView ? (
           <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-white"><CalendarTimetableView weekDate={currentDate} /></div>
         ) : (
-          <div className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0", IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={mainCalendarEvents} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onMoveTimedEvent={handleMoveTimedEvent} /></div>
+          <div className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0", IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={mainCalendarEvents} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onMoveCalendarEvent={handleMoveCalendarEvent} /></div>
         )}
       </CarvePanel>
     </CarvePanelShell>
