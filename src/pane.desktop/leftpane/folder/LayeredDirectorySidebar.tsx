@@ -123,6 +123,7 @@ const ProjectListItem = ({ folder, selectedFolderId, onSelectProject, onOpenCont
   if (!folderId) return null;
 
   const folderName = getFolderName(folder, true);
+  const folderColor = getFolderProjectColor(folder);
   const isSelected = selectedFolderId === folderId;
   const handleRowClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -131,7 +132,7 @@ const ProjectListItem = ({ folder, selectedFolderId, onSelectProject, onOpenCont
   };
   const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => onOpenContextMenu(event, folder, true);
 
-  return <div data-folder-id={folderId}><div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center rounded-[10px] pl-2 pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")}><button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><span className="min-w-0 flex-1 truncate">{folderName}</span></button></div></div>;
+  return <div data-folder-id={folderId}><div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center rounded-[10px] pl-1.5 pr-2 text-[12px] font-medium text-[#6d7380]", isSelected && "bg-[#f4f4f5]")}><button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center gap-2 rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><span aria-hidden="true" className="h-4 w-1 shrink-0 rounded-full opacity-80" style={{ backgroundColor: folderColor }} /><span className="min-w-0 flex-1 truncate">{folderName}</span></button></div></div>;
 };
 
 const ProjectListSidebar = () => {
