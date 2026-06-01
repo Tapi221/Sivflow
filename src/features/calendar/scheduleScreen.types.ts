@@ -11,6 +11,8 @@ export type ProjectCalendarSyncDirection = "importOnly" | "exportOnly" | "twoWay
 
 export type GoogleCalendarColorOverrideMap = Record<string, string>;
 
+export type CalendarAllDayEventOrderMap = Record<string, string[]>;
+
 export type CalendarBufferDays = {
   before: number;
   after: number;
@@ -96,6 +98,15 @@ export type CalendarEventMoveRequest = {
 
 export type CalendarEventMoveHandler = (request: CalendarEventMoveRequest) => void | Promise<void>;
 
+export type CalendarAllDayEventReorderRequest = {
+  eventKey: string;
+  sourceDayKey: string;
+  targetDayKey: string;
+  orderedEventKeys: string[];
+};
+
+export type CalendarAllDayEventReorderHandler = (request: CalendarAllDayEventReorderRequest) => void;
+
 export type CalendarSidebarProps = {
   monthDate: Date;
   selectedDate: Date;
@@ -128,8 +139,10 @@ export type CalendarWeekDayGridProps = {
   visibleDays: Date[];
   visibleEvents: GoogleCalendarEvent[];
   calendarGridStyle: CalendarGridStyle;
+  allDayEventOrder?: CalendarAllDayEventOrderMap;
   onScroll?: (event: UIEvent<HTMLDivElement>) => void;
   selectedDate: Date;
   onSelectDate?: (date: Date) => void;
   onMoveCalendarEvent?: CalendarEventMoveHandler;
+  onReorderAllDayEvents?: CalendarAllDayEventReorderHandler;
 };
