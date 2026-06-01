@@ -2,7 +2,7 @@ import type { ReactNode, RefObject, UIEvent } from "react";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
-import type { AppCalendarItem, CalendarEventMoveHandler, CalendarGridStyle, CalendarViewMode, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
+import type { AppCalendarItem, CalendarAllDayEventOrderMap, CalendarAllDayEventReorderHandler, CalendarEventMoveHandler, CalendarGridStyle, CalendarViewMode, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import { CalendarTimetableView } from "@/features/calendar/timetable/CalendarTimetableView";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
@@ -21,11 +21,13 @@ type CalendarSelectedViewsSplitViewProps = {
   allDayScrollRef?: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   calendarGridStyle: CalendarGridStyle;
+  allDayEventOrder?: CalendarAllDayEventOrderMap;
   onCalendarScroll?: (event: UIEvent<HTMLDivElement>) => void;
   onSelectDate?: (date: Date) => void;
   onVisibleMonthChange?: (date: Date) => void;
   onVisibleDateChange?: (date: Date) => void;
   onMoveCalendarEvent?: CalendarEventMoveHandler;
+  onReorderAllDayEvents?: CalendarAllDayEventReorderHandler;
   className?: string;
 };
 
@@ -42,7 +44,7 @@ const getSelectedViewPanelVisibleDays = ({ viewMode, selectedDate, visibleDays }
   return visibleDays;
 };
 
-const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, visibleDays, virtualRail, events, appProjects, googleAccounts, headerScrollRef, allDayScrollRef, scrollContainerRef, calendarGridStyle, onCalendarScroll, onSelectDate, onVisibleMonthChange, onVisibleDateChange, onMoveCalendarEvent }: CalendarSelectedViewPanelProps): ReactNode => {
+const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, visibleDays, virtualRail, events, appProjects, googleAccounts, headerScrollRef, allDayScrollRef, scrollContainerRef, calendarGridStyle, allDayEventOrder, onCalendarScroll, onSelectDate, onVisibleMonthChange, onVisibleDateChange, onMoveCalendarEvent, onReorderAllDayEvents }: CalendarSelectedViewPanelProps): ReactNode => {
   if (viewMode === "list") {
     return <CalendarListView days={visibleDays} virtualRail={virtualRail} events={events} selectedDate={selectedDate} onSelectDate={onSelectDate} onVisibleMonthChange={onVisibleMonthChange} className="h-full" />;
   }
@@ -57,7 +59,7 @@ const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, v
 
   const panelVisibleDays = getSelectedViewPanelVisibleDays({ viewMode, selectedDate, visibleDays });
 
-  return <div className={WEEKDAY_SURFACE_CLASS_NAME}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={panelVisibleDays} visibleEvents={events} calendarGridStyle={calendarGridStyle} onScroll={onCalendarScroll} selectedDate={selectedDate} onSelectDate={onSelectDate} onMoveCalendarEvent={onMoveCalendarEvent} /></div>;
+  return <div className={WEEKDAY_SURFACE_CLASS_NAME}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={panelVisibleDays} visibleEvents={events} calendarGridStyle={calendarGridStyle} allDayEventOrder={allDayEventOrder} onScroll={onCalendarScroll} selectedDate={selectedDate} onSelectDate={onSelectDate} onMoveCalendarEvent={onMoveCalendarEvent} onReorderAllDayEvents={onReorderAllDayEvents} /></div>;
 };
 
 const CalendarSelectedViewPanel = (props: CalendarSelectedViewPanelProps) => (
