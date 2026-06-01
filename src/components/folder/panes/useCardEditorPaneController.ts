@@ -4,6 +4,7 @@ import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 import { type CardSetViewEditingDraftPatch, subscribeCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { useCardEditorContentController } from "@/components/card/editor/useCardEditorContentController";
 import { useCardEditorSession } from "@/components/card/editor/useCardEditorSession";
+import { useCardEditorTags } from "@/components/card/editor/useCardEditorTags";
 import { useLayoutRowsController } from "@/components/card/editor/useLayoutRowsController";
 import { applyEditingDraftPatch, buildCardsById, createMetaPanelActions, resolveSelectedCardSnapshot } from "./cardEditorPaneControllerCore";
 import { appendSelectionCaptureBlocks, normalizeSelectionCaptureOcrText } from "@/features/selection-capture/applyCardSelectionCapture";
@@ -12,7 +13,6 @@ import { CARD_SELECTION_CAPTURE_EVENT, type CardSelectionCaptureEventDetail } fr
 import { useToast } from "@/contexts/ToastContext";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useCards } from "@/components/card/hooks/useCards";
-import { useTags } from "@/features/settings/hooks/useTags";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { Card, CardPatch, UserSettings } from "@/types";
 
@@ -47,7 +47,7 @@ export const useCardEditorPaneController = ({
   const settings = settingsOverride ?? settingsFromHook;
   const { currentUser } = useAuthSession();
   const { success: toastSuccess, error: toastError } = useToast();
-  const { tags, tagById, addTag } = useTags();
+  const { tags, tagById, addTag } = useCardEditorTags();
   void tags;
   const {
     cards: cardsFromHook,
