@@ -10,9 +10,11 @@
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "eslint.workingDirectories": [{ "mode": "auto" }],
   "eslint.probe": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
-  "prettier.enable": false
-<<<<<<< HEAD
+  "prettier.enable": false,
+  "files.exclude": {
+    "package": true
+  },
+  "search.exclude": {
+    "package": true
+  }
 }
-=======
-}
->>>>>>> eeed526e0059bc860b62c582678e5bfeb517ff4f
