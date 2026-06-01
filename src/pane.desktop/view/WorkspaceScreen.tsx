@@ -1,9 +1,11 @@
 import { useCallback, useMemo } from "react";
+import { useOutletContext } from "react-router-dom";
 import { getFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
+import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
@@ -14,6 +16,7 @@ import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.deskt
 type ExplorerWorkspaceContentProps = {
   explorerState: ExplorerRouteState;
   explorerTabId: WorkspaceExplorerTab["id"] | null;
+  isLeftPanelCollapsed: boolean;
 };
 
 const EMPTY_COLLECTION: never[] = [];
@@ -44,7 +47,7 @@ const getExplorerTabId = (tab: WorkspaceTab | null): WorkspaceExplorerTab["id"] 
 
 const isProjectRootSelection = ({ selectedFolderId, selectedItem, rootFolders }: { selectedFolderId: string | null; selectedItem: SelectedExplorerItem; rootFolders: FolderTreeNode[] }): boolean => Boolean(selectedFolderId && selectedItem === null && rootFolders.some((folder) => getFolderId(folder) === selectedFolderId));
 
-const ExplorerWorkspaceContent = ({ explorerState, explorerTabId }: ExplorerWorkspaceContentProps) => {
+const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCollapsed }: ExplorerWorkspaceContentProps) => {
   const { folders, loading, error } = useFoldersRead();
   const updateExplorerTabState = useWorkspaceTabsStore((state) => state.updateExplorerTabState);
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
@@ -76,22 +79,23 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId }: ExplorerWork
 
   return (
     <div className="relative flex h-full min-h-0 w-full overflow-hidden bg-transparent">
-      <SidebarLayeredDirectory />
+      {!isLeftPanelCollapsed && <SidebarLayeredDirectory />}
       {shouldHideMainPane ? <div className="min-h-0 min-w-0 flex-1 bg-transparent" /> : <CarvePanel className="min-w-0"><TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} /></CarvePanel>}
     </div>
   );
 };
 
 const WorkspaceScreen = () => {
+  const { isLeftPanelCollapsed = false } = useOutletContext<AppLayoutOutletContext>();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const libraryExplorerState = useMemo(() => getLibraryExplorerState(activeTab), [activeTab]);
   const explorerTabId = useMemo(() => getExplorerTabId(activeTab), [activeTab]);
 
-  if (libraryExplorerState) return <ExplorerWorkspaceContent explorerState={libraryExplorerState} explorerTabId={explorerTabId} />;
+  if (libraryExplorerState) return <ExplorerWorkspaceContent explorerState={libraryExplorerState} explorerTabId={explorerTabId} isLeftPanelCollapsed={isLeftPanelCollapsed} />;
 
-  return <CalendarScheduleScreen />;
+  return <CalendarScheduleScreen isLeftPanelCollapsed={isLeftPanelCollapsed} />;
 };
 
 export { WorkspaceScreen };
