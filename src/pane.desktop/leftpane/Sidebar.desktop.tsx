@@ -1,9 +1,10 @@
 import { type MouseEvent, type ReactNode } from "react";
-import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { ClockIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
+import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
+import { useFolderTagModeStore, type FolderTagMode } from "@/hooks/folder/useFolderTagModeStore";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { LogOut } from "@/ui/icons";
@@ -25,6 +26,7 @@ type SidebarNavItem = {
   labelKey: SidebarTranslationKey;
   icon: ReactNode;
   sectionKey?: "home" | "review" | "library" | "schedule" | "settings";
+  folderTagMode?: FolderTagMode;
   onClick?: () => void;
   disabled?: boolean;
 };
@@ -34,6 +36,8 @@ type SidebarProps = {
   onToggleClosed?: () => void;
   onOpenSettings?: () => void;
 };
+
+const LIBRARY_EXPLORER_STATE = { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null };
 
 const mainNavItems: SidebarNavItem[] = [
   {
@@ -47,11 +51,14 @@ const mainNavItems: SidebarNavItem[] = [
     labelKey: "sidebarLibrary",
     icon: <ExplorerChromeFolderIcon className="app-sidebar__nav-icon" />,
     sectionKey: "library",
+    folderTagMode: "folder",
   },
   {
     id: "tags",
     labelKey: "sidebarTags",
     icon: <StratisTagIcon className="app-sidebar__nav-icon" />,
+    sectionKey: "library",
+    folderTagMode: "tag",
   },
   {
     id: "calendar",
@@ -74,9 +81,12 @@ const SidebarNavLink = ({
   disabled?: boolean;
 }) => {
   const t = useT();
+  const folderTagMode = useFolderTagModeStore((state) => state.folderTagMode);
+  const setFolderTagMode = useFolderTagModeStore((state) => state.setFolderTagMode);
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
+  const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
 
   const activeTab =
     activeTabId === null
@@ -85,7 +95,7 @@ const SidebarNavLink = ({
 
   const label = t[item.labelKey];
   const isDisabled = disabled ?? item.disabled ?? false;
-  const isActive = item.sectionKey !== undefined && activeTab?.sectionKey === item.sectionKey;
+  const isActive = item.folderTagMode !== undefined ? activeTab?.sectionKey === "library" && folderTagMode === item.folderTagMode : item.sectionKey !== undefined && activeTab?.sectionKey === item.sectionKey;
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -93,6 +103,12 @@ const SidebarNavLink = ({
     if (isDisabled) return;
 
     item.onClick?.();
+
+    if (item.folderTagMode) {
+      setFolderTagMode(item.folderTagMode);
+      openExplorerTab({ title: "Library", explorerState: LIBRARY_EXPLORER_STATE });
+      return;
+    }
 
     if (item.sectionKey) {
       openSectionTab(item.sectionKey);
