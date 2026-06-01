@@ -71,11 +71,9 @@ const CalendarDndSandboxPage = () => {
     if (!previousEvent) return;
 
     const snapshot = createCalendarEventUndoSnapshot(previousEvent);
-    const toastId = `calendar-event-moved-${event.accountId ?? ""}-${event.calendarId}-${event.id}`;
 
     setEvents((currentEvents) => currentEvents.map((currentEvent) => moveEventTime(currentEvent, event, startsAt, endsAt, isAllDay)));
     toast("予定を移動しました", {
-      id: toastId,
       description: previousEvent.title || "Untitled",
       action: {
         label: "元に戻す",
