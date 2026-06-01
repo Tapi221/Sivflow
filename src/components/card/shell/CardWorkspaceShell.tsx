@@ -4,16 +4,21 @@ import { SelectionCaptureGlyph } from "@/chip/overlay-toolbar/OverlayToolbarGlyp
 import { CardPaneWidthAdjuster } from "@/features/cardsetview/hooks/components/CardPaneWidthAdjuster";
 import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboardImage";
 import { captureElementRectToBlob } from "@/features/selection-capture/domSelectionCapture";
+import { dispatchCardSelectionCaptureEvent, type CardSelectionCaptureSide } from "@/features/selection-capture/cardSelectionCaptureEvents";
 import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
 import type { SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
+import { recognizeSelectionCaptureText } from "@/features/selection-capture/selectionCaptureOcr";
 import { cn } from "@/lib/utils";
 
 export type CardWorkspaceSurfaceVariant = "plain" | "dotted";
 
-const WORKSPACE_SURFACE_CLASS_NAMES: Record<
-  CardWorkspaceSurfaceVariant,
-  string
-> = {
+type CardWorkspaceCaptureTarget = {
+  side: CardSelectionCaptureSide;
+  element: HTMLElement;
+  area: number;
+};
+
+const WORKSPACE_SURFACE_CLASS_NAMES: Record<CardWorkspaceSurfaceVariant, string> = {
   plain: "workspace-surface--plain",
   dotted: "workspace-surface--dotted",
 };
@@ -52,10 +57,7 @@ export type CardWorkspaceShellProps = {
   selectionCaptureEnabled?: boolean;
 };
 
-const setExternalRef = (
-  ref: Ref<HTMLDivElement> | undefined,
-  node: HTMLDivElement | null,
-): void => {
+const setExternalRef = (ref: Ref<HTMLDivElement> | undefined, node: HTMLDivElement | null): void => {
   if (!ref) return;
 
   if (typeof ref === "function") {
@@ -64,6 +66,35 @@ const setExternalRef = (
   }
 
   (ref as { current: HTMLDivElement | null }).current = node;
+};
+
+const getIntersectionArea = (left: DOMRect, right: DOMRect): number => {
+  const width = Math.min(left.right, right.right) - Math.max(left.left, right.left);
+  const height = Math.min(left.bottom, right.bottom) - Math.max(left.top, right.top);
+  return width > 0 && height > 0 ? width * height : 0;
+};
+
+const resolveCaptureSide = (target: HTMLElement, rect: SelectionCaptureRect): CardSelectionCaptureSide => {
+  const targetBounds = target.getBoundingClientRect();
+  const selectionBounds = new DOMRect(targetBounds.left + rect.x, targetBounds.top + rect.y, rect.width, rect.height);
+  const candidates: CardWorkspaceCaptureTarget[] = [];
+
+  target.querySelectorAll<HTMLElement>(".js-question-editor, .js-answer-editor").forEach((element) => {
+    const area = getIntersectionArea(selectionBounds, element.getBoundingClientRect());
+    if (area <= 0) return;
+    candidates.push({
+      element,
+      side: element.classList.contains("js-answer-editor") ? "answer" : "question",
+      area,
+    });
+  });
+
+  candidates.sort((left, right) => right.area - left.area);
+  return candidates[0]?.side ?? "question";
+};
+
+const resolveTaskMessage = (values: Array<string | void>): string | null => {
+  return values.find((value): value is string => typeof value === "string" && value.trim().length > 0) ?? null;
 };
 
 export const CardWorkspaceShell = ({
@@ -84,7 +115,7 @@ export const CardWorkspaceShell = ({
   isMetaOpen,
   metaPanel,
   metaPanelContainerClassName,
-  selectionCaptureEnabled = false,
+  selectionCaptureEnabled = true,
 }: CardWorkspaceShellProps) => {
   const viewportNodeRef = useRef<HTMLDivElement | null>(null);
   const [isSelectionCaptureActive, setIsSelectionCaptureActive] = useState(false);
@@ -116,8 +147,27 @@ export const CardWorkspaceShell = ({
     setIsSelectionCaptureBusy(true);
     try {
       const blob = await captureElementRectToBlob(target, rect);
-      await copyImageBlobToClipboard(blob);
-      setSelectionCaptureMessage("範囲をコピーしました");
+      const ocrText = await recognizeSelectionCaptureText(blob).catch((error) => {
+        console.warn("[CardWorkspaceShell] selection capture OCR failed", error);
+        return null;
+      });
+      const side = resolveCaptureSide(target, rect);
+      const dispatched = dispatchCardSelectionCaptureEvent({
+        blob,
+        rect,
+        target,
+        side,
+        ocrText,
+      });
+
+      if (dispatched.handled) {
+        const taskResults = await Promise.all(dispatched.tasks);
+        setSelectionCaptureMessage(resolveTaskMessage(taskResults) ?? "範囲をカードへ追加しました");
+      } else {
+        await copyImageBlobToClipboard(blob);
+        setSelectionCaptureMessage("範囲をコピーしました");
+      }
+
       setIsSelectionCaptureActive(false);
     } catch (error) {
       console.error("[CardWorkspaceShell] selection capture failed", error);
@@ -165,29 +215,13 @@ export const CardWorkspaceShell = ({
 
   return (
     <div className={cn(surfaceClassName, containerClassName)}>
-      <div
-        className={cn(
-          "relative flex h-full min-h-0 overflow-hidden",
-          shellClassName,
-        )}
-      >
+      <div className={cn("relative flex h-full min-h-0 overflow-hidden", shellClassName)}>
         {topLeftControl || widthControl ? (
-          <div
-            data-selection-capture-ignore="true"
-            className="pointer-events-none absolute left-3 z-30 flex items-center gap-2"
-            style={{ top: `${topControlsOffsetPx}px` }}
-          >
-            {topLeftControl ? (
-              <div className="pointer-events-auto flex">{topLeftControl}</div>
-            ) : null}
+          <div data-selection-capture-ignore="true" className="pointer-events-none absolute left-3 z-30 flex items-center gap-2" style={{ top: `${topControlsOffsetPx}px` }}>
+            {topLeftControl ? <div className="pointer-events-auto flex">{topLeftControl}</div> : null}
 
             {widthControl ? (
-              <div
-                className={cn(
-                  "pointer-events-auto flex",
-                  widthControlClassName,
-                )}
-              >
+              <div className={cn("pointer-events-auto flex", widthControlClassName)}>
                 <CardPaneWidthAdjuster
                   modeLabel={widthControl.modeLabel}
                   value={widthControl.value}
@@ -208,38 +242,16 @@ export const CardWorkspaceShell = ({
         {overlayChildren}
 
         {topRightControls ? (
-          <div
-            data-selection-capture-ignore="true"
-            className="pointer-events-auto absolute right-3 z-30 flex"
-            style={{ top: `${topControlsOffsetPx}px` }}
-          >
+          <div data-selection-capture-ignore="true" className="pointer-events-auto absolute right-3 z-30 flex" style={{ top: `${topControlsOffsetPx}px` }}>
             {topRightControls}
           </div>
         ) : null}
 
-        <div
-          className={cn(
-            "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
-            contentAreaClassName,
-          )}
-        >
-          <div
-            ref={setViewportNode}
-            className={cn(
-              "relative min-h-0 min-w-0 flex-1 overflow-hidden",
-              viewportClassName,
-            )}
-            style={viewportStyle}
-          >
+        <div className={cn("flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden", contentAreaClassName)}>
+          <div ref={setViewportNode} className={cn("relative min-h-0 min-w-0 flex-1 overflow-hidden", viewportClassName)} style={viewportStyle}>
             {children}
 
-            <SelectionCaptureOverlay
-              targetRef={viewportNodeRef}
-              active={isSelectionCaptureActive}
-              busy={isSelectionCaptureBusy}
-              onCancel={handleCancelSelectionCapture}
-              onCapture={handleCaptureSelection}
-            />
+            <SelectionCaptureOverlay targetRef={viewportNodeRef} active={isSelectionCaptureActive} busy={isSelectionCaptureBusy} onCancel={handleCancelSelectionCapture} onCapture={handleCaptureSelection} />
 
             {selectionCaptureMessage ? (
               <div data-selection-capture-ignore="true" className="pointer-events-none absolute left-1/2 top-4 z-[60] -translate-x-1/2 rounded-full border border-slate-900/10 bg-white/95 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm">
