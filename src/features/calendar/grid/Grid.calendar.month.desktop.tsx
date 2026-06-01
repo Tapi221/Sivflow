@@ -9,6 +9,7 @@ import * as T from "@/features/calendar/calendar.text";
 import { MonthRowResizeBar } from "@/features/calendar/grid/height/MonthRowResizeBar.month.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
+import * as COLOR from "./grid.color.constants.desktop";
 import * as GD from "./grid.layout.constants.desktop";
 
 type CalendarMonthGridDay = {
@@ -45,6 +46,7 @@ type CalendarMonthDayCellProps = {
   isToday: boolean;
   selected: boolean;
   isScrollHovered: boolean;
+  hasLeadingBorder: boolean;
   onSelectDate: (date: Date) => void;
 };
 
@@ -61,6 +63,8 @@ type CalendarMonthWeekRowProps = {
   handleResizeKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => void;
   handleResizePointerDown: (event: React.PointerEvent<HTMLDivElement>) => void;
 };
+
+const MONTH_GRID_BORDER_STYLE: CSSProperties = { borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB };
 
 const getDayKey = (date: Date): string => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -82,16 +86,17 @@ const weekContainsDayKey = (week: CalendarMonthGridWeek, dayKey: string | null) 
 const isWeekAffectedByDayKeyChange = (week: CalendarMonthGridWeek, previousDayKey: string | null, nextDayKey: string | null) => previousDayKey !== nextDayKey && (weekContainsDayKey(week, previousDayKey) || weekContainsDayKey(week, nextDayKey));
 
 const createMonthWeekRowStyle = (monthRowHeight: number): CSSProperties => ({
+  ...MONTH_GRID_BORDER_STYLE,
   minHeight: monthRowHeight,
 });
 
-const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScrollHovered, onSelectDate }: CalendarMonthDayCellProps) => {
+const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScrollHovered, hasLeadingBorder, onSelectDate }: CalendarMonthDayCellProps) => {
   const monthAnnotation = getMonthAnnotation(day.date);
   const { visibleEvents, totalCount } = dayEvents;
   const overflowCount = totalCount - visibleEvents.length;
 
   return (
-    <div data-calendar-month-day-key={day.key} className={cn("calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible bg-white text-left", isToday && "bg-[#f7fbff]", selected && !isToday && "bg-[#f7f7f8]", !selected && !isToday && "calendar-month-day-cell-hoverable", isScrollHovered && !selected && !isToday && "calendar-month-day-cell-scroll-hovered bg-[#fafafa]")}> 
+    <div data-calendar-month-day-key={day.key} className={cn("calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible bg-white text-left", hasLeadingBorder && "border-l", isToday && "bg-[#f7fbff]", selected && !isToday && "bg-[#f7f7f8]", !selected && !isToday && "calendar-month-day-cell-hoverable", isScrollHovered && !selected && !isToday && "calendar-month-day-cell-scroll-hovered bg-[#fafafa]")} style={MONTH_GRID_BORDER_STYLE}> 
       <button type="button" aria-label={getDayAriaLabel(day.date)} aria-pressed={selected} className="relative h-full w-full overflow-hidden text-left outline-none focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#c7c7cc]" onClick={() => onSelectDate(day.date)}>
         <CalendarDayNumberCircle isToday={isToday} isSelected={selected} isCurrentMonth={day.isCurrentMonth} className={cn("absolute", GD.MONTH_GRID_DAY_NUMBER_POSITION_CLASS)}>
           {day.dayOfMonth}
@@ -125,13 +130,13 @@ CalendarMonthDayCell.displayName = "CalendarMonthDayCell";
 
 const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDayKey, scrollHoverDayKey, monthRowHeight, setWeekRowRef, onSelectDate, handleResizeReset, handleResizeKeyDown, handleResizePointerDown }: CalendarMonthWeekRowProps) => {
   return (
-    <div ref={(node) => setWeekRowRef(week.key, node)} data-calendar-week-key={week.key} className="calendar-month-week-row relative grid grid-cols-7" style={createMonthWeekRowStyle(monthRowHeight)}>
-      {week.days.map((day) => {
+    <div ref={(node) => setWeekRowRef(week.key, node)} data-calendar-week-key={week.key} className="calendar-month-week-row relative grid grid-cols-7 border-b" style={createMonthWeekRowStyle(monthRowHeight)}>
+      {week.days.map((day, dayIndex) => {
         const selected = day.key === selectedDayKey;
         const isToday = day.key === todayDayKey;
         const isScrollHovered = day.key === scrollHoverDayKey;
 
-        return <CalendarMonthDayCell key={day.key} day={day} dayEvents={eventsByDay.get(day.key) ?? EMPTY_MONTH_DAY_EVENTS} isToday={isToday} selected={selected} isScrollHovered={isScrollHovered} onSelectDate={onSelectDate} />;
+        return <CalendarMonthDayCell key={day.key} day={day} dayEvents={eventsByDay.get(day.key) ?? EMPTY_MONTH_DAY_EVENTS} isToday={isToday} selected={selected} isScrollHovered={isScrollHovered} hasLeadingBorder={dayIndex > 0} onSelectDate={onSelectDate} />;
       })}
 
       <MonthRowResizeBar monthRowHeight={monthRowHeight} onResizeReset={handleResizeReset} onResizeKeyDown={handleResizeKeyDown} onResizePointerDown={handleResizePointerDown} />
@@ -155,7 +160,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
 
   return (
     <>
-      <div className={cn("sticky top-0 z-30 grid grid-cols-7 overflow-hidden border-b border-[#eeeeee] bg-white shadow-none", GD.MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS)}>
+      <div className={cn("sticky top-0 z-30 grid grid-cols-7 overflow-hidden border-b bg-white shadow-none", GD.MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS)} style={MONTH_GRID_BORDER_STYLE}>
         {T.WEEKDAY_LABELS.map((label: string) => (
           <div key={label} className="calendar-month-weekday-cell flex items-center justify-center text-[11px] leading-none font-semibold tracking-[0.03em] text-[#8e8e93]">
             {label}
