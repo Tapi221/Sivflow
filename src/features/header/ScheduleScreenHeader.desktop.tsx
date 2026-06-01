@@ -22,7 +22,7 @@ type ScheduleScreenHeaderDesktopProps = {
   className?: string;
 };
 
-export const ScheduleScreenHeaderDesktop = ({
+const ScheduleScreenHeaderDesktop = ({
   titleLabel,
   selectedViewMode,
   viewOptions,
@@ -37,32 +37,32 @@ export const ScheduleScreenHeaderDesktop = ({
 }: ScheduleScreenHeaderDesktopProps) => {
   return (
     <div className={className}>
-      <div className="flex min-w-0 items-center">
-        <h1 className="w-32 shrink-0 truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
-          {titleLabel}
-        </h1>
+      <h1 className="w-32 shrink-0 truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
+        {titleLabel}
+      </h1>
 
-        <div className="ml-5 flex shrink-0 items-center gap-2">
-          <ViewModeDropdown
-            value={selectedViewMode}
-            onChange={onSelectViewMode}
-            options={viewOptions}
+      <div className="ml-auto flex shrink-0 items-center gap-2">
+        <ViewModeDropdown
+          value={selectedViewMode}
+          onChange={onSelectViewMode}
+          options={viewOptions}
+        />
+
+        <TodayBar
+          onPrevious={onPrevious}
+          onNext={onNext}
+          onToday={onToday}
+        />
+
+        {showPlanResultToggle && (
+          <TogglePlanResult
+            value={planResultModes}
+            onChange={onChangePlanResultModes}
           />
-
-          <TodayBar
-            onPrevious={onPrevious}
-            onNext={onNext}
-            onToday={onToday}
-          />
-
-          {showPlanResultToggle && (
-            <TogglePlanResult
-              value={planResultModes}
-              onChange={onChangePlanResultModes}
-            />
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
 };
+
+export { ScheduleScreenHeaderDesktop };
