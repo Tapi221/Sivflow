@@ -90,6 +90,34 @@ describe("weekday time grid geometry", () => {
     expect(style.minHeight).toBe("18px");
   });
 
+  it("24:00 以降プレビューは前日から継続する event を高さ 0 にして重複表示しない", () => {
+    const [entry] = layoutCalendarTimeGridEvents({
+      events: [
+        buildEvent({
+          id: "carry-over-preview",
+          startsAt: new Date(2026, 3, 12, 23, 54),
+          endsAt: new Date(2026, 3, 13, 0, 34),
+        }),
+      ],
+      rangeStart: new Date(2026, 3, 13, 0, 0),
+      rangeEnd: new Date(2026, 3, 13, 0, 30),
+      layoutMode: "no-overlap",
+      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
+    });
+
+    const frame = getWeekdayTimedEventFrame(entry, NEXT_DAY_PREVIEW_HOURS);
+    const style = getWeekdayTimedEventPositionStyle(entry, NEXT_DAY_PREVIEW_HOURS);
+
+    expect(entry.startsBeforeRange).toBe(true);
+    expect(entry.endsAfterRange).toBe(true);
+    expect(frame.topHours).toBe(0);
+    expect(frame.heightHours).toBeCloseTo(0.5, 6);
+    expect(style.height).toBe("0px");
+    expect(style.minHeight).toBe("0px");
+    expect(style.overflow).toBe("hidden");
+    expect(style.pointerEvents).toBe("none");
+  });
+
   it("24:00 前後の同じ長さの event は同じ表示高さと minHeight になる", () => {
     const [beforeMidnightEntry] = layoutCalendarTimeGridEvents({
       events: [
