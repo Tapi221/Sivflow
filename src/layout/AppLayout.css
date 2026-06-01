@@ -140,10 +140,6 @@
   grid-template-rows: minmax(0, 1fr);
 }
 
-.app-layout--sidebar-closed .calendar-workspace-toolbar {
-  padding-left: 0;
-}
-
 .workspace-shell__main,
 .app-layout__main {
   display: flex;
