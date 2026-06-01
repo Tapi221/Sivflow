@@ -143,9 +143,7 @@
 }
 
 .workspace-shell--without-tabs {
-  grid-template-rows:
-    auto
-    minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
 }
 
 .workspace-breadcrumb-bar--collapsed {
