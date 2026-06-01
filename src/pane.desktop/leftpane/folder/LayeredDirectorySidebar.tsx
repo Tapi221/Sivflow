@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type MouseEvent as ReactMouseEvent, type SetStateAction } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type MouseEvent as ReactMouseEvent, type SetStateAction } from "react";
 import { LAYERED_COLOR_MENU_HEIGHT, LAYERED_COLOR_MENU_WIDTH, LayeredColorMenu } from "@/chip/rightclickpanel.desktop/LayeredColorMenu.desktop";
 import { LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LayeredProjectMenu, type LayeredProjectMenuAction, type LayeredProjectMenuActionId, type LayeredProjectMenuSubmenuAnchor } from "@/chip/rightclickpanel.desktop/LayeredProjectMenu";
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
@@ -7,6 +7,7 @@ import { getFolderProjectColor } from "@/components/folder/explorer/model/projec
 import { DEFAULT_NEW_CARD_SET_NAME, DEFAULT_NEW_FOLDER_NAME, getFolderId, UNTITLED_FOLDER_NAME, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
@@ -55,6 +56,16 @@ const createFolderContextMenuState = (event: ReactMouseEvent<HTMLElement>, folde
   if (!folderId) return null;
 
   return { folderId, folderName: getFolderName(folder, isRootProject), folderColor: getFolderProjectColor(folder), isRootProject, ...clampRightClickPanelPosition(event.clientX, event.clientY, LAYERED_PROJECT_MENU_DIMENSIONS) };
+};
+
+const createProjectMarkerStyle = (folderColor: string): CSSProperties => {
+  const tokens = generateColorTokens(folderColor);
+
+  return {
+    backgroundColor: tokens.bg,
+    borderColor: tokens.bg,
+    borderLeftColor: tokens.border,
+  };
 };
 
 const useLibraryHierarchyData = () => {
@@ -124,6 +135,7 @@ const ProjectListItem = ({ folder, selectedFolderId, onSelectProject, onOpenCont
 
   const folderName = getFolderName(folder, true);
   const folderColor = getFolderProjectColor(folder);
+  const markerStyle = useMemo(() => createProjectMarkerStyle(folderColor), [folderColor]);
   const isSelected = selectedFolderId === folderId;
   const handleRowClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -132,7 +144,7 @@ const ProjectListItem = ({ folder, selectedFolderId, onSelectProject, onOpenCont
   };
   const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => onOpenContextMenu(event, folder, true);
 
-  return <div data-folder-id={folderId}><div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center rounded-[10px] pl-1.5 pr-2 text-[12px] font-medium text-[var(--app-sidebar-text)]", isSelected && "bg-[#f4f4f5]")}><button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center gap-2 rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><span aria-hidden="true" className="h-4 w-1 shrink-0 rounded-full opacity-80" style={{ backgroundColor: folderColor }} /><span className="min-w-0 flex-1 truncate">{folderName}</span></button></div></div>;
+  return <div data-folder-id={folderId}><div role="treeitem" aria-level={ROOT_LEVEL} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("flex h-7 items-center rounded-[10px] pl-1.5 pr-2 text-[12px] font-medium text-[var(--app-sidebar-text)]", isSelected && "bg-[#f4f4f5]")}><button type="button" onClick={handleRowClick} title={folderName} className="flex h-7 min-w-0 flex-1 items-center gap-2 rounded-[10px] text-left text-inherit hover:bg-[#f7f7f8]"><span aria-hidden="true" className="h-4 w-1.5 shrink-0 rounded-[999px] border border-l-[3px]" style={markerStyle} /><span className="min-w-0 flex-1 truncate">{folderName}</span></button></div></div>;
 };
 
 const ProjectListSidebar = () => {
