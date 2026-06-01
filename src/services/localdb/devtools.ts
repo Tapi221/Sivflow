@@ -1,6 +1,8 @@
 import { LOCALDB_GENERATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME, SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
+import { collection, doc, getDocs, query, where, writeBatch } from "firebase/firestore";
 import { LocalDB, getLocalDb, getLocalDbSync } from "./LocalDB";
+import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { auditAndRepairTags } from "@/services/localdb/audit/tags";
 import { auth } from "@/services/firebase";
 
@@ -23,11 +25,43 @@ type ClearDevModeCache = (
   options?: string | ClearDevModeCacheOptions,
 ) => Promise<ClearDevModeCacheResult>;
 
+type DeleteDefaultNewFoldersOptions = {
+  userId?: string;
+  names?: string[];
+  includeLocal?: boolean;
+  includeFirebase?: boolean;
+  includeDeleted?: boolean;
+  dryRun?: boolean;
+  reload?: boolean;
+};
+
+type DeleteDefaultNewFoldersResult = {
+  userId: string | null;
+  targetNames: string[];
+  matchedLocalFolderIds: string[];
+  deletedLocalFolderIds: string[];
+  matchedFirebaseFolderIds: string[];
+  deletedFirebaseFolderIds: string[];
+  dryRun: boolean;
+  reloaded: boolean;
+};
+
+type DeleteDefaultNewFolders = (
+  options?: string | string[] | DeleteDefaultNewFoldersOptions,
+) => Promise<DeleteDefaultNewFoldersResult>;
+
 type StorageKeySource = Record<string, string | readonly string[]>;
+
+type LocalFolderTable = {
+  toArray: () => Promise<unknown[]>;
+  bulkDelete: (keys: string[]) => Promise<void>;
+};
 
 type WindowWithLocalDbDevtools = Window & {
   clearDevCache?: ClearDevModeCache;
   clearDevModeCache?: ClearDevModeCache;
+  deleteDefaultNewFolders?: DeleteDefaultNewFolders;
+  deleteNewFolders?: DeleteDefaultNewFolders;
   dbDebug?: () => Promise<void>;
   repairTags?: (userId?: string) => Promise<unknown>;
   __dbHelpers?: {
@@ -51,6 +85,9 @@ const REPAIR_TAGS_ALLOWLIST = (
   .map((uid) => uid.trim())
   .filter(Boolean);
 const DEV_INDEXED_DB_DELETE_TIMEOUT_MS = 2000;
+const DEV_FIRESTORE_BATCH_LIMIT = 450;
+const DEFAULT_NEW_FOLDER_NAMES = ["新規フォルダ"] as const;
+const FIRESTORE_FOLDER_NAME_FIELDS = ["folderName", "folder_name", "name"] as const;
 const DEV_LOCAL_STORAGE_PREFIXES = [
   LOCALDB_GENERATION_KEY_PREFIX,
   "flashcard-master:",
@@ -115,6 +152,44 @@ const normalizeClearDevModeCacheOptions = (
 
   return {
     userId: options?.userId ?? "",
+    reload: options?.reload ?? true,
+  };
+};
+
+const normalizeDeleteDefaultNewFoldersOptions = (
+  options?: string | string[] | DeleteDefaultNewFoldersOptions,
+): Required<DeleteDefaultNewFoldersOptions> => {
+  if (typeof options === "string") {
+    return {
+      userId: "",
+      names: [options],
+      includeLocal: true,
+      includeFirebase: true,
+      includeDeleted: false,
+      dryRun: false,
+      reload: true,
+    };
+  }
+
+  if (Array.isArray(options)) {
+    return {
+      userId: "",
+      names: options,
+      includeLocal: true,
+      includeFirebase: true,
+      includeDeleted: false,
+      dryRun: false,
+      reload: true,
+    };
+  }
+
+  return {
+    userId: options?.userId ?? "",
+    names: options?.names ?? [...DEFAULT_NEW_FOLDER_NAMES],
+    includeLocal: options?.includeLocal ?? true,
+    includeFirebase: options?.includeFirebase ?? true,
+    includeDeleted: options?.includeDeleted ?? false,
+    dryRun: options?.dryRun ?? false,
     reload: options?.reload ?? true,
   };
 };
@@ -279,6 +354,135 @@ const clearDevelopmentCacheStorage = async (): Promise<string[]> => {
   return deletedKeys;
 };
 
+const getFolderTable = (db: unknown): LocalFolderTable =>
+  (db as { folders: LocalFolderTable }).folders;
+
+const getFolderRecordId = (folder: unknown): string | null => {
+  if (!isRecord(folder)) return null;
+  const id = getString(folder.id) ?? getString(folder.folderId);
+  return id && id.trim().length > 0 ? id : null;
+};
+
+const getFolderRecordName = (folder: unknown): string | null => {
+  if (!isRecord(folder)) return null;
+  return getString(folder.folderName) ?? getString(folder.folder_name) ?? getString(folder.name) ?? null;
+};
+
+const isFolderRecordDeleted = (folder: unknown): boolean => {
+  if (!isRecord(folder)) return false;
+  return folder.isDeleted === true || folder.is_deleted === true;
+};
+
+const getUniqueNames = (names: string[]): string[] => {
+  return Array.from(
+    new Set(
+      names
+        .map((name) => name.trim())
+        .filter((name) => name.length > 0),
+    ),
+  );
+};
+
+const shouldDeleteFolderRecord = (
+  folder: unknown,
+  userId: string | null,
+  targetNames: ReadonlySet<string>,
+  includeDeleted: boolean,
+): boolean => {
+  if (!isRecord(folder)) return false;
+  if (userId && folder.userId !== userId) return false;
+  if (!includeDeleted && isFolderRecordDeleted(folder)) return false;
+
+  const name = getFolderRecordName(folder);
+  return name !== null && targetNames.has(name);
+};
+
+const listLocalDefaultNewFolderIds = async (
+  userId: string | null,
+  names: string[],
+  includeDeleted: boolean,
+): Promise<string[]> => {
+  const db = await getLocalDb(userId ?? undefined);
+  const folderTable = getFolderTable(db);
+  const folders = await folderTable.toArray();
+  const targetNames = new Set(names);
+  const ids = folders
+    .filter((folder) => shouldDeleteFolderRecord(folder, userId, targetNames, includeDeleted))
+    .map(getFolderRecordId)
+    .filter((id): id is string => typeof id === "string");
+
+  return Array.from(new Set(ids));
+};
+
+const deleteLocalDefaultNewFolders = async (ids: string[]): Promise<string[]> => {
+  if (ids.length === 0) return [];
+
+  const db = await getLocalDb();
+  await getFolderTable(db).bulkDelete(ids);
+  return ids;
+};
+
+const listFirebaseDefaultNewFolderIds = async (
+  userId: string,
+  names: string[],
+  includeDeleted: boolean,
+): Promise<string[]> => {
+  const firestore = requireFirestoreDb();
+  const ids = new Set<string>();
+
+  for (const name of names) {
+    for (const field of FIRESTORE_FOLDER_NAME_FIELDS) {
+      const snapshot = await getDocs(
+        query(collection(firestore, `users/${userId}/folders`), where(field, "==", name)),
+      );
+
+      for (const folderDoc of snapshot.docs) {
+        if (!includeDeleted) {
+          const data = folderDoc.data();
+          if (data.isDeleted === true || data.is_deleted === true) continue;
+        }
+
+        ids.add(folderDoc.id);
+      }
+    }
+  }
+
+  return Array.from(ids.values());
+};
+
+const deleteFirebaseDefaultNewFolders = async (
+  userId: string,
+  ids: string[],
+): Promise<string[]> => {
+  if (ids.length === 0) return [];
+
+  const firestore = requireFirestoreDb();
+  const deletedIds: string[] = [];
+
+  for (let index = 0; index < ids.length; index += DEV_FIRESTORE_BATCH_LIMIT) {
+    const batchIds = ids.slice(index, index + DEV_FIRESTORE_BATCH_LIMIT);
+    const batch = writeBatch(firestore);
+
+    for (const id of batchIds) {
+      batch.delete(doc(firestore, `users/${userId}/folders`, id));
+    }
+
+    await batch.commit();
+    deletedIds.push(...batchIds);
+  }
+
+  return deletedIds;
+};
+
+const clearDeletedFolderSelectionState = (deletedFolderIds: string[]): void => {
+  if (typeof window === "undefined" || deletedFolderIds.length === 0) return;
+
+  const deletedIds = new Set(deletedFolderIds);
+  if (deletedIds.has(window.localStorage.getItem(WEB_STORAGE_KEYS.lastSelectedFolderId) ?? "")) {
+    window.localStorage.removeItem(WEB_STORAGE_KEYS.lastSelectedFolderId);
+  }
+};
+
 const clearDevModeCache = async (
   w: WindowWithLocalDbDevtools,
   options?: string | ClearDevModeCacheOptions,
@@ -313,6 +517,63 @@ const clearDevModeCache = async (
   return result;
 };
 
+const deleteDefaultNewFolders = async (
+  w: WindowWithLocalDbDevtools,
+  options?: string | string[] | DeleteDefaultNewFoldersOptions,
+): Promise<DeleteDefaultNewFoldersResult> => {
+  if (!import.meta.env.DEV) {
+    throw new Error("deleteDefaultNewFolders is only available in development mode.");
+  }
+
+  const normalizedOptions = normalizeDeleteDefaultNewFoldersOptions(options);
+  const targetNames = getUniqueNames(normalizedOptions.names);
+  const userId = normalizedOptions.userId || getAuthUid(w) || null;
+
+  if (targetNames.length === 0) {
+    throw new Error("deleteDefaultNewFolders: at least one folder name is required.");
+  }
+
+  if (normalizedOptions.includeFirebase && !userId) {
+    throw new Error("deleteDefaultNewFolders: userId is required when includeFirebase is true.");
+  }
+
+  const matchedLocalFolderIds = normalizedOptions.includeLocal
+    ? await listLocalDefaultNewFolderIds(userId, targetNames, normalizedOptions.includeDeleted)
+    : [];
+  const matchedFirebaseFolderIds = normalizedOptions.includeFirebase && userId
+    ? await listFirebaseDefaultNewFolderIds(userId, targetNames, normalizedOptions.includeDeleted)
+    : [];
+  const firebaseTargetIds = Array.from(new Set([...matchedLocalFolderIds, ...matchedFirebaseFolderIds]));
+  const deletedLocalFolderIds = normalizedOptions.dryRun
+    ? []
+    : await deleteLocalDefaultNewFolders(matchedLocalFolderIds);
+  const deletedFirebaseFolderIds = normalizedOptions.dryRun || !normalizedOptions.includeFirebase || !userId
+    ? []
+    : await deleteFirebaseDefaultNewFolders(userId, firebaseTargetIds);
+  const result: DeleteDefaultNewFoldersResult = {
+    userId,
+    targetNames,
+    matchedLocalFolderIds,
+    deletedLocalFolderIds,
+    matchedFirebaseFolderIds,
+    deletedFirebaseFolderIds,
+    dryRun: normalizedOptions.dryRun,
+    reloaded: normalizedOptions.reload && !normalizedOptions.dryRun,
+  };
+
+  if (!normalizedOptions.dryRun) {
+    clearDeletedFolderSelectionState([...deletedLocalFolderIds, ...deletedFirebaseFolderIds]);
+  }
+
+  console.log("[deleteDefaultNewFolders] done", result);
+
+  if (normalizedOptions.reload && !normalizedOptions.dryRun) {
+    window.setTimeout(() => window.location.reload(), 0);
+  }
+
+  return result;
+};
+
 export const installLocalDbDevtools = () => {
   if (typeof window === "undefined") return;
 
@@ -320,6 +581,8 @@ export const installLocalDbDevtools = () => {
 
   w.clearDevModeCache = (options) => clearDevModeCache(w, options);
   w.clearDevCache = w.clearDevModeCache;
+  w.deleteDefaultNewFolders = (options) => deleteDefaultNewFolders(w, options);
+  w.deleteNewFolders = w.deleteDefaultNewFolders;
 
   w.repairTags = async (userId?: string) => {
     const resolvedUserId = userId ?? getAuthUid(w);
