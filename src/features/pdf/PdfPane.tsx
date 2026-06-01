@@ -8,6 +8,7 @@ import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
 import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
 import type { CardSelectionCaptureSide } from "@/features/selection-capture/cardSelectionCaptureEvents";
+import type { SelectionCaptureShape } from "@/features/selection-capture/selectionCapture.types";
 import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
 import type { BlobUrl } from "@/types/core/branded";
@@ -75,6 +76,7 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
   } = usePdfWorkspace();
   const [isThumbnailPanelOpen, setIsThumbnailPanelOpen] = useState(false);
   const [selectionCaptureSide, setSelectionCaptureSide] = useState<CardSelectionCaptureSide>("question");
+  const [selectionCaptureShape, setSelectionCaptureShape] = useState<SelectionCaptureShape>("rectangle");
   const {
     isSelectionCaptureActive,
     isSelectionCaptureBusy,
@@ -206,6 +208,7 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
                 targetRef={containerRef}
                 active={isSelectionCaptureActive}
                 busy={isSelectionCaptureBusy}
+                shape={selectionCaptureShape}
                 onCancel={handleCancelSelectionCapture}
                 onCapture={handleCaptureSelection}
               />
@@ -247,7 +250,9 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
                       selectionCaptureActive={isSelectionCaptureActive}
                       selectionCaptureDisabled={isSelectionCaptureBusy}
                       selectionCaptureSide={selectionCaptureSide}
+                      selectionCaptureShape={selectionCaptureShape}
                       onSelectionCaptureSideChange={setSelectionCaptureSide}
+                      onSelectionCaptureShapeChange={setSelectionCaptureShape}
                       onSelectionCaptureToggle={handleToggleSelectionCapture}
                     />
                   </div>
