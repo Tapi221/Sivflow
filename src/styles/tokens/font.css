@@ -22,7 +22,7 @@
     -apple-system, BlinkMacSystemFont, "Noto Sans JP", "Yu Gothic UI",
     "Hiragino Sans", sans-serif;
   --app-font-family-titlebar: var(--app-font-family-ui);
-  --app-font-family-sidebar: var(--app-font-family-explorer);
+  --app-font-family-sidebar: var(--app-font-family-ui);
   --app-font-family-calendar: var(--app-font-family-numeric);
 
   /* Design token and feature aliases. */
