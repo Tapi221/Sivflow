@@ -2,6 +2,29 @@
 
 - [ ] removes local-only image fields from card payloads
 
+## tests/unit/architecture/directoryLayoutPolicy.test.ts
+
+- [ ] Web entrypoint を apps/web に限定し、共有 React UI 本体は packages/web-renderer に置く
+- [ ] Tauri shell は apps/desktop/src-tauri に限定し、Desktop UI を apps/desktop に置かない
+- [ ] React Native app の起動口を apps/mobile に置き、Swift native module / native view は ios/Manifolia 配下に置く
+- [ ] 共通 Ink model は packages/core/src/domain/card/ink に置く
+- [ ] handwriting session adapter は packages/platform/src/handwriting に置く
+- [ ] schema / design token / asset は shared 配下の責務別 root に置く
+- [ ] Swift 専用 app root を作らず React Native app の native extension として扱う
+
+## tests/unit/architecture/responsibilityBoundaries.test.ts
+
+- [ ] constants / src/constants / packages/*/constants のような定数専用フォルダを拒否する
+- [ ] 1ファイル専用の定数を .constants.ts に逃がさず、そのファイル内に保持する
+- [ ] .constants.ts は複数ファイルから参照される責務 module 内の値だけを許可する
+- [ ] @constants のような横断 barrel export を拒否する
+- [ ] ファイル内の import / 型定義 / 定数 / helper / component / memo-displayName-export の順序を検証する
+- [ ] core の Ink document model が React / DOM / Tauri / Expo / Swift / PencilKit に依存しないことを検証する
+- [ ] Web/Desktop の Ink UI が packages/web-renderer にあり apps/desktop に漏れていないことを検証する
+- [ ] iPad 手書き画面と toolbar が packages/mobile-renderer の ipad 配下にあることを検証する
+- [ ] PencilKit view と native module が apps/mobile/ios/Manifolia/NativeViews と NativeModules に分かれることを検証する
+- [ ] Ink document と handwriting session の共有構造を shared/schemas に置くことを検証する
+
 ## tests/unit/brandedTypes.test.ts
 
 - [ ] 有効な Blob URL なら true を返す
@@ -409,7 +432,6 @@
 ## tests/unit/platformIndex.test.ts
 
 - [ ] デスクトップブリッジが利用できない場合は Web プラットフォームを使用する
-- [ ] デスクトップブリッジが利用できる場合はデスクトッププラットフォームを使用する
 
 ## tests/unit/reviewAlgorithm.test.ts
 
