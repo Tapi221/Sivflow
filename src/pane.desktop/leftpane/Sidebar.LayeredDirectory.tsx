@@ -35,7 +35,8 @@ type ProjectAddMenuProps = {
   onImportPdf: () => void;
 };
 
-const FAVORITE_SECTION_LABEL = "最近";
+const RECENT_SECTION_LABEL = "最近";
+const FAVORITE_SECTION_LABEL = "お気に入り";
 const PROJECT_SECTION_LABEL = "プロジェクト";
 const TAG_SECTION_LABEL = "MY TAG TREE";
 const ADD_PROJECT_ARIA_LABEL = "プロジェクトを追加";
@@ -167,11 +168,18 @@ const SidebarLayeredDirectory = () => {
     <div className="app-layered-directory flex h-full min-h-0 w-[200px] shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased">
       <div className="shrink-0 pb-0 pl-3 pr-2 pt-3">
         {shouldShowFavoriteSection ? (
-          <div className="mb-0 flex h-6 items-center gap-1.5">
-            <div className="min-w-0 flex-1 text-[11px] font-bold uppercase leading-none tracking-[0.04em] text-[var(--app-sidebar-text-muted)]">
-              <span className="block truncate">{FAVORITE_SECTION_LABEL}</span>
+          <>
+            <div className="mb-0 flex h-6 items-center gap-1.5">
+              <div className="min-w-0 flex-1 text-[11px] font-bold uppercase leading-none tracking-[0.04em] text-[var(--app-sidebar-text-muted)]">
+                <span className="block truncate">{RECENT_SECTION_LABEL}</span>
+              </div>
             </div>
-          </div>
+            <div className="mb-0 flex h-6 items-center gap-1.5">
+              <div className="min-w-0 flex-1 text-[11px] font-bold uppercase leading-none tracking-[0.04em] text-[var(--app-sidebar-text-muted)]">
+                <span className="block truncate">{FAVORITE_SECTION_LABEL}</span>
+              </div>
+            </div>
+          </>
         ) : null}
         <div className="flex h-6 items-center gap-1.5">
           <div className="min-w-0 flex-1 text-[11px] font-bold uppercase leading-none tracking-[0.04em] text-[var(--app-sidebar-text-muted)]">
