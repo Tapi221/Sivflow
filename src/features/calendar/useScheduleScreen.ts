@@ -45,6 +45,7 @@ export type UseScheduleScreenReturn = {
   addGoogleCalendar: () => Promise<void>;
   reconnectGoogleAccount: (accountId: string) => Promise<void>;
   toggleGoogleCalendar: (accountId: string, calendarId: string) => void;
+  syncGoogleCalendarRange: (range: CalendarDateRange) => Promise<void>;
   createGoogleCalendarEvent: (accountId: string, event: GCalWritableEventInput) => Promise<GoogleCalendarEvent>;
   updateGoogleCalendarEvent: (accountId: string, event: GCalWritableEventUpdateInput) => Promise<GoogleCalendarEvent>;
   deleteGoogleCalendarEvent: (accountId: string, event: GCalWritableEventDeleteInput) => Promise<void>;
@@ -195,6 +196,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     addGoogleCalendar: google.addAccount,
     reconnectGoogleAccount: google.reconnectAccount,
     toggleGoogleCalendar: google.toggleCalendar,
+    syncGoogleCalendarRange: google.forceSyncRange,
     createGoogleCalendarEvent: google.createCalendarEvent,
     updateGoogleCalendarEvent: google.updateCalendarEvent,
     deleteGoogleCalendarEvent: google.deleteCalendarEvent,
