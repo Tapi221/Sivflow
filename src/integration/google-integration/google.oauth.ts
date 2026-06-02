@@ -34,6 +34,14 @@ type GoogleOAuthAuthorizeInput = {
   state: string;
 };
 
+type GoogleOAuthCallbackLike = {
+  url: string;
+  state?: string | null;
+  code?: string | null;
+  error?: string | null;
+  errorDescription?: string | null;
+};
+
 const GOOGLE_SIGN_IN_SCOPE_PARAM = "openid email profile";
 const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 const GOOGLE_CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
@@ -51,9 +59,9 @@ const WEB_SERVER_CODE_CALLBACK_POLL_MS = 250;
 const WEB_AUTH_WINDOW_TARGET = "flashcard-master-google-oauth";
 const WEB_AUTH_WINDOW_FEATURES = "popup=yes,width=520,height=720";
 const GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE = "failed-precondition";
-const GOOGLE_SCOPE_RECONNECT_MESSAGE = "Google Calendar と Google ToDo をまとめて連携するための権限が必要です。両方の権限を有効にして再連携してください。";
+const GOOGLE_SCOPE_RECONNECT_MESSAGE = "Google Calendar / Google ToDo / Google Drive をまとめて連携するための権限が必要です。必要な権限を有効にして再連携してください。";
 
-export const GOOGLE_CONNECTED_SERVICE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_CALENDAR_READONLY_SCOPE, GOOGLE_CALENDAR_APP_CREATED_SCOPE, GOOGLE_TASKS_SCOPE] as const;
+export const GOOGLE_CONNECTED_SERVICE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_CALENDAR_READONLY_SCOPE, GOOGLE_CALENDAR_APP_CREATED_SCOPE, GOOGLE_TASKS_SCOPE, GOOGLE_DRIVE_FILE_SCOPE] as const;
 
 const GOOGLE_SCOPES = GOOGLE_CONNECTED_SERVICE_SCOPES;
 const GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM = `${GOOGLE_SIGN_IN_SCOPE_PARAM} ${GOOGLE_SCOPES.join(" ")}`;
@@ -192,15 +200,9 @@ const waitForDesktopCode = (state: string, redirectUri: string): Promise<string>
     finish(() => resolve(code));
   };
 
-  const handleCallbackPayload = (payload: { url: string; state?: string | null; code?: string | null; error?: string | null; errorDescription?: string | null } | null): void => {
+  const handleCallbackPayload = (payload: GoogleOAuthCallbackLike | null): void => {
     if (!payload) return;
-    handleCallbackUrl({
-      rawUrl: payload.url,
-      callbackState: payload.state,
-      callbackCode: payload.code,
-      callbackError: payload.error,
-      errorDescription: payload.errorDescription,
-    });
+    handleCallbackUrl({ rawUrl: payload.url, callbackState: payload.state, callbackCode: payload.code, callbackError: payload.error, errorDescription: payload.errorDescription });
   };
 
   const handlePendingCallbackPayload = async (): Promise<void> => {
@@ -288,13 +290,7 @@ const waitForWebCode = (state: string, redirectUri: string): Promise<string> => 
 
   const handleCallbackPayload = (payload: unknown): void => {
     if (!isGoogleOAuthCallbackPayload(payload)) return;
-    handleCallbackUrl({
-      rawUrl: payload.url,
-      callbackState: payload.state,
-      callbackCode: payload.code,
-      callbackError: payload.error,
-      errorDescription: payload.errorDescription,
-    });
+    handleCallbackUrl({ rawUrl: payload.url, callbackState: payload.state, callbackCode: payload.code, callbackError: payload.error, errorDescription: payload.errorDescription });
   };
 
   function handleMessage(event: MessageEvent<unknown>): void {
@@ -393,17 +389,6 @@ export const requestCalendarAccessToken = async (auth: Auth, silent = false): Pr
   await validateGrantedGoogleScopes({ accessToken: credential.accessToken, scope: undefined, allowTokenInfoFallback: true });
   const profile = await fetchGoogleUserInfo(credential.accessToken).catch(() => ({ accountEmail: result.user.email, accountName: result.user.displayName, accountPhotoUrl: result.user.photoURL }));
   return { accessToken: credential.accessToken, ...profile };
-};
-
-export const requestGoogleDriveFileAccessToken = async (auth: Auth): Promise<string> => {
-  if (isDesktopLikeRuntime()) throw new Error("Desktop Google Drive OAuth is not available yet.");
-  const provider = new GoogleAuthProvider();
-  provider.addScope(GOOGLE_DRIVE_FILE_SCOPE);
-  provider.setCustomParameters({ prompt: "consent select_account" });
-  const result = await signInWithPopup(auth, provider);
-  const credential = GoogleAuthProvider.credentialFromResult(result);
-  if (!credential?.accessToken) throw createGoogleCalendarReconnectRequiredError();
-  return credential.accessToken;
 };
 
 export const requestConnectedServiceAccessToken = requestCalendarAccessToken;
