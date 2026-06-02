@@ -27,9 +27,12 @@ type MonthViewStyle = CSSProperties & {
 const MONTH_ROW_HEIGHT_PER_EVENT_COUNT = 22;
 
 const getMonthRowHeight = (monthVisibleEventCount: number): number => {
-  const extraEventCount = Math.max(0, monthVisibleEventCount - C.DEFAULT_MONTH_VISIBLE_EVENT_COUNT);
+  const normalizedEventCount = Number.isFinite(monthVisibleEventCount)
+    ? Math.max(C.MONTH_VISIBLE_EVENT_COUNT_MIN, Math.round(monthVisibleEventCount))
+    : C.DEFAULT_MONTH_VISIBLE_EVENT_COUNT;
+  const eventCountDelta = normalizedEventCount - C.DEFAULT_MONTH_VISIBLE_EVENT_COUNT;
 
-  return C.DEFAULT_MONTH_ROW_HEIGHT + extraEventCount * MONTH_ROW_HEIGHT_PER_EVENT_COUNT;
+  return C.DEFAULT_MONTH_ROW_HEIGHT + eventCountDelta * MONTH_ROW_HEIGHT_PER_EVENT_COUNT;
 };
 
 const createMonthViewStyle = (monthRowHeight: number): MonthViewStyle => ({
