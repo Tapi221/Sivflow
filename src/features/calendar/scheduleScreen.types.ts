@@ -133,6 +133,7 @@ export type CalendarWeekDayGridProps = {
   visibleDays: Date[];
   visibleEvents: GoogleCalendarEvent[];
   calendarGridStyle: CalendarGridStyle;
+  hourLabelDisplay?: "full" | "compact";
   allDayEventOrder?: CalendarAllDayEventOrderMap;
   onScroll?: (event: UIEvent<HTMLDivElement>) => void;
   selectedDate: Date;
