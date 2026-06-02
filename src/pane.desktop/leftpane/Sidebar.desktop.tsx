@@ -1,5 +1,5 @@
 import { type MouseEvent, type ReactNode } from "react";
-import { ClockIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
+import { ClockIcon, GalleryIcon, HomeIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
@@ -188,7 +188,10 @@ const Sidebar = ({
           aria-label={sidebarToggleLabel}
           aria-pressed={isLeftPanelCollapsed}
         >
-          <SidebarOpenIcon className="app-sidebar__toggle-icon" />
+          <span className="app-sidebar__toggle-bars" aria-hidden="true">
+            <span className="app-sidebar__toggle-bar" />
+            <span className="app-sidebar__toggle-bar" />
+          </span>
         </button>
 
         <nav className="app-sidebar__nav" aria-label={t.sidebarMainNavAriaLabel}>
