@@ -1,6 +1,6 @@
 import type { ChangeEvent, CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
 import { TogglePlanResult, type PlanResultMode } from "@/chip/toggle/Toggle.planresult";
@@ -63,13 +63,8 @@ const DEFAULT_CALENDAR_PRINT_RANGE: CalendarPrintRangeState = { mode: "current",
 
 const clampMonthVisibleEventCount = (value: number): number => Math.min(C.MONTH_VISIBLE_EVENT_COUNT_MAX, Math.max(C.MONTH_VISIBLE_EVENT_COUNT_MIN, Math.round(value)));
 
-const waitForCalendarPrintRender = async (): Promise<void> => {
-  await new Promise<void>((resolve) => {
-    window.requestAnimationFrame(() => resolve());
-  });
-  await new Promise<void>((resolve) => {
-    window.requestAnimationFrame(() => resolve());
-  });
+const flushCalendarPrintUpdates = (): void => {
+  flushSync(() => undefined);
 };
 
 const getCalendarPrintPanel = (source: HTMLElement | null): HTMLElement | null => {
@@ -93,7 +88,7 @@ const printCalendarPanel = async (source: HTMLElement | null, onBeforePrint?: ()
   if (typeof window === "undefined" || typeof document === "undefined") return;
 
   await onBeforePrint?.();
-  await waitForCalendarPrintRender();
+  flushCalendarPrintUpdates();
 
   const panel = getCalendarPrintPanel(source);
 
@@ -114,7 +109,7 @@ const printCalendarPanel = async (source: HTMLElement | null, onBeforePrint?: ()
   panel.classList.add(CALENDAR_PRINT_PANEL_CLASS);
   document.body.classList.add(CALENDAR_PRINTING_CLASS);
   window.addEventListener("afterprint", cleanup, { once: true });
-  await waitForCalendarPrintRender();
+  flushCalendarPrintUpdates();
   window.print();
   window.setTimeout(cleanup, CALENDAR_PRINT_CLEANUP_DELAY_MS);
 };
