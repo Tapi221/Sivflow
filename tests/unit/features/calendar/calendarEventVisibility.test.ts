@@ -88,7 +88,7 @@ describe("calendarEventVisibility", () => {
     expect(visibleEvents).toEqual([]);
   });
 
-  it("uses the Google calendar name as the source project when no explicit link exists", () => {
+  it("does not use the Google calendar name as the source project without an explicit link", () => {
     const [event] = attachCalendarEventDisplayMetadata(
       [createEvent()],
       {
@@ -99,7 +99,21 @@ describe("calendarEventVisibility", () => {
       },
     );
 
-    expect(event.projectId).toBe("project-chemistry");
+    expect(event.projectId).toBeUndefined();
+  });
+
+  it("keeps events visible when only a same-name hidden project exists", () => {
+    const event = createEvent();
+    const visibleEvents = filterCalendarEventsBySourceVisibility(
+      [event],
+      {
+        appProjects: [createProject({ checked: false })],
+        projectCalendarLinks: [],
+        googleAccounts: [createAccount()],
+      },
+    );
+
+    expect(visibleEvents).toEqual([event]);
   });
 
   it("keeps unrelated events visible when a hidden project does not own their source", () => {
