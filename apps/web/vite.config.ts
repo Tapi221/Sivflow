@@ -34,8 +34,8 @@ export default defineConfig(({ command }) => ({
         name: "Sivflow",
         short_name: "Sivflow",
         description: "Advanced learning app for serious learners",
-        theme_color: "#35507b",
-        background_color: "#F8FAFB",
+        theme_color: "#ffffff",
+        background_color: "#ffffff",
         display: "standalone",
         orientation: "portrait",
         icons: [
