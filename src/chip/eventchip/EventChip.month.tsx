@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 type CalendarEventChipMonthProps = {
   event: GoogleCalendarEvent;
+  showTimeLabel?: boolean;
   tooltipDisabled?: boolean;
 };
 
@@ -19,6 +20,7 @@ const CHIP_TEXT_FADE_STYLE: CSSProperties = {
 
 const CalendarEventChipMonth = memo(({
   event,
+  showTimeLabel = true,
   tooltipDisabled = false,
 }: CalendarEventChipMonthProps) => {
   const tokens = useMemo(
@@ -37,7 +39,7 @@ const CalendarEventChipMonth = memo(({
   return (
     <HoverMonthEventTooltip
       title={titleLabel}
-      timeLabel={timeLabel}
+      timeLabel={showTimeLabel ? timeLabel : null}
       accentColor={tokens.border}
       className="w-full min-w-0"
       disabled={tooltipDisabled}
@@ -61,15 +63,17 @@ const CalendarEventChipMonth = memo(({
           color: tokens.text,
         }}
       >
-        <span
-          className="
-            shrink-0
-            tabular-nums
-            opacity-80
-          "
-        >
-          {timeLabel}
-        </span>
+        {showTimeLabel && (
+          <span
+            className="
+              shrink-0
+              tabular-nums
+              opacity-80
+            "
+          >
+            {timeLabel}
+          </span>
+        )}
 
         <span
           className="min-w-0 flex-1 overflow-hidden whitespace-nowrap"
