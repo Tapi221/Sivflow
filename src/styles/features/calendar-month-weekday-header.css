@@ -1,4 +1,32 @@
 @layer components {
+  .calendar-month-view {
+    position: relative;
+  }
+
+  .calendar-month-view::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 14px;
+    z-index: 21;
+    height: 1px;
+    pointer-events: none;
+    background: #eeeeee;
+  }
+
+  .calendar-month-view::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    height: 14px;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgb(255 255 255 / 0), rgb(255 255 255 / 0.78));
+  }
+
   .calendar-month-weekday-header::before,
   .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7::before {
     content: "" !important;
