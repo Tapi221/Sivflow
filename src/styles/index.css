@@ -1,5 +1,6 @@
 @import "./features/markdown-mono.css";
 @import "./features/mobile-schedule.css";
+@import "./mobile-calendar-list.css";
 @import "../presentation/design-tokens.css";
 @import "../presentation/button.css";
 @import "../presentation/dialog.css";
@@ -218,56 +219,4 @@ a:hover,
   height: 13px;
   padding: 0;
   border: 0;
-  border-radius: 9999px;
-  background-color: currentColor;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 22%, #ffffff), 0 0 0 2px color-mix(in srgb, currentColor 16%, transparent);
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-[aria-label="Library hierarchy explorer"] [role="treeitem"] > button + .library-tree-marker {
-  display: none;
-}
-
-[aria-label="Project list explorer"] [role="treeitem"] > .library-tree-marker {
-  margin-left: 1px;
-  margin-right: 3px;
-}
-
-[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-level="1"] > .library-tree-marker {
-  width: 13px;
-  height: 13px;
-}
-
-[aria-label="Tag tree explorer"] [role="treeitem"] > span:first-child {
-  display: none;
-}
-
-[aria-label="Tag tree explorer"] [role="treeitem"] > .library-tree-marker {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 13px;
-  height: 13px;
-  padding: 0;
-  border: 0 !important;
-  border-radius: 9999px;
-  background-color: currentColor !important;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 22%, #ffffff), 0 0 0 2px color-mix(in srgb, currentColor 16%, transparent);
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-[aria-label="Tag tree explorer"] [role="treeitem"] > .library-tree-marker > svg {
-  display: none;
-}
-
-[aria-label="Tag tree explorer"] [role="treeitem"] > .library-tree-marker::after {
-  content: "";
-  width: 5px;
-  height: 5px;
-  border-radius: 9999px;
-  background: color-mix(in srgb, currentColor 18%, #ffffff);
-  opacity: 1;
 }
