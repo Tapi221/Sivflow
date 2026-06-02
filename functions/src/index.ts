@@ -44,9 +44,7 @@ const maskAccountId = (accountId?: string): string | undefined => {
 };
 
 const getErrorSummary = (error: unknown): Record<string, unknown> => {
-  if (error instanceof Error) {
-    return { name: error.name, message: error.message, stack: error.stack };
-  }
+  if (error instanceof Error) return { name: error.name, message: error.message, stack: error.stack };
   return { type: typeof error };
 };
 
@@ -209,7 +207,7 @@ const buildAuthorizationCodeTokenParams = ({ code, codeVerifier, redirectUri }: 
   return params;
 };
 
-const buildStoredRefreshTokenParams = (refreshToken: string): URLSearchParams => new URLSearchParams({ client_id: safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration"), client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "server_oauth_configuration", "server_oauth_configuration"), grant_type: "refresh_token", refresh_token: refreshToken });
+const buildStoredRefreshTokenParams = (refreshToken: string): URLSearchParams => new URLSearchParams({ client_id: safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration"), client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "GOOGLE_OAUTH_CLIENT_SECRET", "server_oauth_configuration"), grant_type: "refresh_token", refresh_token: refreshToken });
 
 const buildGoogleAuthUid = (email: string): string => `google-${crypto.createHash("sha256").update(email.toLowerCase()).digest("hex")}`;
 
