@@ -39,6 +39,7 @@ export type RawTranslations = {
   viewPieChart: string;
   viewsLabel: string;
   todayButton: string;
+  exportCalendarPdf: string;
   todayTooltipDateFormat: string;
   previousLabel: string;
   nextLabel: string;
