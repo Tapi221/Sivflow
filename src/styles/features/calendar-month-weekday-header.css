@@ -1,0 +1,20 @@
+@layer components {
+  .calendar-month-weekday-header::before,
+  .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7::before {
+    content: "" !important;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    height: 1px;
+    pointer-events: none;
+    background: #eeeeee;
+    background-image: none !important;
+  }
+
+  .calendar-month-weekday-header::after,
+  .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7::after {
+    z-index: 1;
+  }
+}
