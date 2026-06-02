@@ -164,7 +164,6 @@ export const useFolderDocumentUpload = ({
           });
 
           await db.updateItem("documents", docId, {
-            remoteUrl: result.webViewLink,
             downloadUrl: result.webContentLink ?? result.webViewLink,
             storagePath: `google-drive://${result.id}`,
             uploadStatus: "ready",
