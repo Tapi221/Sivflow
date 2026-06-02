@@ -560,7 +560,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
                 <div className={WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME} data-testid="weekday-preview-bottom-spacer" style={WEEKDAY_BOTTOM_SPACER_STYLE} />
 
                 <div className="pointer-events-none absolute left-0 right-0 z-20" style={getCurrentTimeTopStyle(now)}>
-                  <div className={isToday ? "h-px bg-blue-500" : "h-px"} style={isToday ? undefined : { backgroundImage: "repeating-linear-gradient(to right, rgb(59 130 246 / 0.45) 0 10px, transparent 10px 24px)" }} />
+                  <div className={isToday ? "h-px bg-blue-500" : "h-px"} style={isToday ? undefined : { backgroundImage: "repeating-linear-gradient(to right, rgb(59 130 246 / 0.45) 0 7px, transparent 7px 16px)" }} />
                 </div>
 
                 {events.map((entry) => {
