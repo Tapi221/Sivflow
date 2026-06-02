@@ -17,6 +17,10 @@ type CalendarTimetableViewProps = { weekDate: Date; density?: CalendarTimetableD
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金"] as const;
 const TIMETABLE_GRID_TEMPLATE_COLUMNS = "56px repeat(5, 112px)";
 const TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS = "34px repeat(5, minmax(0, 1fr))";
+const TIMETABLE_WEEK_STARTS_ON = 1;
+const TIMETABLE_SUNDAY_INDEX = 0;
+const TIMETABLE_SATURDAY_INDEX = 6;
+const TIMETABLE_WEEKEND_REFERENCE_OFFSET_DAYS = 7;
 const TIMETABLE_PERIODS: readonly TimetablePeriod[] = [
   { label: "1", startTime: "8:50", endTime: "10:20" },
   { label: "2", startTime: "10:30", endTime: "12:00" },
@@ -53,7 +57,16 @@ const TIMETABLE_ENTRIES: readonly TimetableEntry[] = [
 
 const createTimetableSlotKey = ({ dayIndex, periodIndex }: TimetableSlot): string => `${dayIndex}:${periodIndex}`;
 
-const buildTimetableWeekDays = (weekDate: Date): Date[] => Array.from({ length: TIMETABLE_DAY_LABELS.length }, (_, index) => addDays(startOfWeek(weekDate, { weekStartsOn: 1 }), index));
+const buildTimetableWeekDays = (weekDate: Date): Date[] => Array.from({ length: TIMETABLE_DAY_LABELS.length }, (_, index) => addDays(startOfWeek(weekDate, { weekStartsOn: TIMETABLE_WEEK_STARTS_ON }), index));
+
+const isWeekendDate = (date: Date): boolean => {
+  const dayIndex = date.getDay();
+  return dayIndex === TIMETABLE_SUNDAY_INDEX || dayIndex === TIMETABLE_SATURDAY_INDEX;
+};
+
+const getTimetableReferenceDate = (date: Date): Date => isWeekendDate(date) ? addDays(date, TIMETABLE_WEEKEND_REFERENCE_OFFSET_DAYS) : date;
+
+const buildCurrentTimetableWeekDays = (today: Date): Date[] => buildTimetableWeekDays(getTimetableReferenceDate(today));
 
 const createTimetableEntryMap = () => {
   const map = new Map<string, TimetableEntry>();
@@ -69,8 +82,9 @@ const getTimetableGridTemplateColumns = (density: CalendarTimetableDensity): str
 
 const TIMETABLE_ENTRY_MAP = createTimetableEntryMap();
 
-const CalendarTimetableViewComponent = ({ weekDate, density = "default", className }: CalendarTimetableViewProps) => {
-  const weekDays = buildTimetableWeekDays(weekDate);
+const CalendarTimetableViewComponent = ({ density = "default", className }: CalendarTimetableViewProps) => {
+  const today = new Date();
+  const weekDays = buildCurrentTimetableWeekDays(today);
   const weekRangeLabel = formatTimetableWeekRange(weekDays);
   const registeredCountLabel = `${TIMETABLE_ENTRIES.length}コマ`;
   const isCompact = density === "compact";
@@ -90,7 +104,7 @@ const CalendarTimetableViewComponent = ({ weekDate, density = "default", classNa
         <div className={cn("gap-y-2 text-left", isCompact ? "grid w-full min-w-0 gap-x-1" : "inline-grid w-max gap-x-2")} style={{ gridTemplateColumns: getTimetableGridTemplateColumns(density) }}>
           <div aria-hidden="true" className={isCompact ? "h-7" : "h-8"} />
           {weekDays.map((day, dayIndex) => {
-            const isToday = isSameDay(day, new Date());
+            const isToday = isSameDay(day, today);
             return (
               <div key={day.toISOString()} className={cn("flex min-w-0 items-center justify-center text-center", isCompact ? "h-7 gap-1" : "h-8 gap-1.5")}>
                 <span className={cn("font-bold tracking-[-0.02em]", isCompact ? "text-[11px]" : "text-[13px]", isToday ? "text-[#007aff]" : "text-[#1c1c1e]")}>{TIMETABLE_DAY_LABELS[dayIndex]}</span>
