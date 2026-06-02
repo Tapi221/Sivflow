@@ -41,6 +41,7 @@ const useCalendarEventDragRepeatAction = <TDirection extends string>({ repeatInt
   const directionRef = useRef<TDirection | null>(null);
   const frameRef = useRef<number | null>(null);
   const lastStepAtRef = useRef<number | null>(null);
+  const stopRef = useRef<(pointerId?: number) => void>(() => undefined);
 
   optionsRef.current = { repeatIntervalMs, getDirection, onStep };
 
@@ -51,20 +52,12 @@ const useCalendarEventDragRepeatAction = <TDirection extends string>({ repeatInt
     lastStepAtRef.current = null;
   }, []);
 
-  const stop = useCallback((pointerId?: number) => {
-    if (pointerId !== undefined && pointerIdRef.current !== pointerId) return;
-
-    pointerIdRef.current = null;
-    pointerSnapshotRef.current = null;
-    pause();
-  }, [pause]);
-
   const runFrame = useCallback((timestamp: number) => {
     const snapshot = pointerSnapshotRef.current;
     const direction = directionRef.current;
 
     if (!snapshot || !direction || !isPrimaryButtonDragSnapshot(snapshot)) {
-      stop(snapshot?.pointerId);
+      stopRef.current(snapshot?.pointerId);
       return;
     }
 
@@ -79,13 +72,23 @@ const useCalendarEventDragRepeatAction = <TDirection extends string>({ repeatInt
     }
 
     frameRef.current = window.requestAnimationFrame(runFrame);
-  }, [pause, stop]);
+  }, [pause]);
 
   const startFrame = useCallback(() => {
     if (frameRef.current !== null || typeof window === "undefined") return;
 
     frameRef.current = window.requestAnimationFrame(runFrame);
   }, [runFrame]);
+
+  const stop = useCallback((pointerId?: number) => {
+    if (pointerId !== undefined && pointerIdRef.current !== pointerId) return;
+
+    pointerIdRef.current = null;
+    pointerSnapshotRef.current = null;
+    pause();
+  }, [pause]);
+
+  stopRef.current = stop;
 
   const update = useCallback((snapshot: CalendarEventDragPointerSnapshot) => {
     if (pointerIdRef.current !== snapshot.pointerId) return;
