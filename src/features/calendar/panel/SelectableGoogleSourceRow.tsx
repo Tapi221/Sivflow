@@ -14,24 +14,19 @@ type SourceRowMarkerProps = {
   color: string;
 };
 
-const GOOGLE_SOURCE_ROW_CLASS_NAME =
-  "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
+const GOOGLE_SOURCE_ROW_CLASS_NAME = "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
 const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#5f6672]";
 const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#b3b7be]";
-const SOURCE_ROW_MARKER_CLASS_NAME = "relative h-3.5 w-3.5 shrink-0 rounded-full";
-const SOURCE_ROW_MARKER_DOT_CLASS_NAME = "absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full";
+const SOURCE_ROW_MARKER_CLASS_NAME = "relative flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[4px] border";
+const SOURCE_ROW_MARKER_CHECK_CLASS_NAME = "h-2 w-1.5 translate-y-[-1px] rotate-45 border-b-[1.6px] border-r-[1.6px] border-current";
 const SOURCE_ROW_UNCHECKED_MARKER_COLOR = "#c7c7cc";
 
 const createSourceRowMarkerStyle = (color: string, checked: boolean): CSSProperties => ({
   "--source-row-marker-color": checked ? color : SOURCE_ROW_UNCHECKED_MARKER_COLOR,
-  backgroundColor: checked
-    ? "color-mix(in srgb, var(--source-row-marker-color) 15%, white 85%)"
-    : "color-mix(in srgb, var(--source-row-marker-color) 10%, white 90%)",
+  backgroundColor: checked ? "color-mix(in srgb, var(--source-row-marker-color) 12%, white 88%)" : "transparent",
+  borderColor: checked ? "color-mix(in srgb, var(--source-row-marker-color) 52%, white 48%)" : "color-mix(in srgb, var(--source-row-marker-color) 38%, white 62%)",
+  color: checked ? "color-mix(in srgb, var(--source-row-marker-color) 78%, #4f5663 22%)" : "transparent",
 } as CSSProperties);
-
-const SOURCE_ROW_MARKER_DOT_STYLE: CSSProperties = {
-  backgroundColor: "color-mix(in srgb, var(--source-row-marker-color) 34%, transparent)",
-};
 
 const SourceRowMarker = ({ checked, color }: SourceRowMarkerProps) => {
   return (
@@ -40,7 +35,7 @@ const SourceRowMarker = ({ checked, color }: SourceRowMarkerProps) => {
       style={createSourceRowMarkerStyle(color, checked)}
       aria-hidden="true"
     >
-      <span className={SOURCE_ROW_MARKER_DOT_CLASS_NAME} style={SOURCE_ROW_MARKER_DOT_STYLE} />
+      <span className={cn(SOURCE_ROW_MARKER_CHECK_CLASS_NAME, !checked && "opacity-0")} />
     </span>
   );
 };
