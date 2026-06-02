@@ -4,7 +4,7 @@ export const MONTH_GRID_DAY_NUMBER_POSITION_CLASS = "left-0 top-0 md:left-3 md:t
 export const MONTH_GRID_MONTH_ANNOTATION_POSITION_CLASS = "right-3 top-[8px]";
 export const MONTH_GRID_EVENTS_CONTAINER_POSITION_CLASS = "inset-x-px top-8";
 export const MONTH_GRID_EVENTS_GAP_CLASS = "gap-[3px]";
-export const MONTH_GRID_OVERFLOW_TEXT_CLASS = "bottom-2 right-3 text-[11px] leading-none";
+export const MONTH_GRID_OVERFLOW_TEXT_CLASS = "w-full pr-3 text-right text-[11px] leading-none";
 
 //Daydetail
 export const DAY_DETAIL_HEADER_HEIGHT_CLASS = "h-8";
