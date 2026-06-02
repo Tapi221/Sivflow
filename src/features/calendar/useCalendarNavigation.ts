@@ -6,6 +6,7 @@ import { persistScheduleNavigationState, readStoredScheduleNavigationState, type
 
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
+const MOBILE_SCHEDULE_VIEWPORT_QUERY = "(max-width: 767px)";
 
 const isViewModeSelectionArray = (selection: CalendarViewModeSelection): selection is readonly CalendarViewMode[] => Array.isArray(selection);
 
@@ -14,6 +15,8 @@ const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SEL
 const isMultiSelectViewModeSelection = (selection: CalendarViewModeSelection): boolean => isViewModeSelectionArray(selection) && selection.length > 1;
 
 const appendMultiSelectViewMode = (currentSelection: readonly CalendarViewMode[], next: CalendarViewMode): CalendarViewMode[] => [...currentSelection.filter(isMultiSelectViewMode), next].slice(-2);
+
+const isMobileScheduleViewport = (): boolean => typeof window !== "undefined" && window.matchMedia(MOBILE_SCHEDULE_VIEWPORT_QUERY).matches;
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return addYears(current, 1);
@@ -54,7 +57,7 @@ const getSelectedDateStepViewMode = (selection: CalendarViewModeSelection, prima
 const getPrimaryViewMode = (selection: CalendarViewModeSelection): CalendarViewMode => isViewModeSelectionArray(selection) ? selection[0] : selection;
 
 const resolveNextViewModeSelection = (currentSelection: CalendarViewModeSelection, primaryViewMode: CalendarViewMode, next: CalendarViewMode): CalendarViewModeSelection => {
-  if (!isMultiSelectViewMode(next)) return next;
+  if (isMobileScheduleViewport() || !isMultiSelectViewMode(next)) return next;
 
   if (isViewModeSelectionArray(currentSelection)) {
     if (currentSelection.includes(next)) {
@@ -74,7 +77,8 @@ const createInitialScheduleNavigationState = (): ScheduleNavigationState => {
   const now = new Date();
   const stored = readStoredScheduleNavigationState();
   const selectedDate = stored?.selectedDate ?? now;
-  const selectedViewMode = stored?.selectedViewMode ?? "days";
+  const storedSelectedViewMode = stored?.selectedViewMode ?? "days";
+  const selectedViewMode = isMobileScheduleViewport() ? getPrimaryViewMode(storedSelectedViewMode) : storedSelectedViewMode;
   const primaryViewMode = getPrimaryViewMode(selectedViewMode);
 
   return {
