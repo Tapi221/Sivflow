@@ -155,6 +155,22 @@ export const useCalendarNavigation = () => {
     resetCalendarPosition(primaryNext);
   }, [getProjectedViewportWidth, primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, selectedDate, selectedViewMode]);
 
+  const handleSelectDateViewMode = useCallback((date: Date, next: CalendarViewMode) => {
+    if (next !== "month") {
+      const projectedViewportWidth = getProjectedViewportWidth(false);
+      if (projectedViewportWidth > 0) setViewportWidth(projectedViewportWidth);
+    }
+
+    setSelectedViewMode(next);
+    setCurrentDate(normalizeCurrentDateForSelectedDate(date, next));
+    setSelectedDate(date);
+    setMonthTitleDate(startOfMonth(date));
+
+    if (next === "month") requestMonthScrollTarget();
+
+    resetCalendarPosition(next);
+  }, [getProjectedViewportWidth, requestMonthScrollTarget, resetCalendarPosition]);
+
   const handleToday = useCallback(() => {
     const now = new Date();
     const nextSelectedDate = primaryViewMode === "list" ? now : normalizeViewDate(now, primaryViewMode);
@@ -247,6 +263,7 @@ export const useCalendarNavigation = () => {
     viewportWidth,
     setViewportWidth,
     handleSelectViewMode,
+    handleSelectDateViewMode,
     handleToday,
     handlePrevious,
     handleNext,
