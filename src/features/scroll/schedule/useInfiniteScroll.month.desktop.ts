@@ -120,7 +120,6 @@ export const useMonthInfiniteScroll = ({
   const lastScrollTargetTokenRef = useRef(scrollTargetToken);
   const visibleMonthKeyRef = useRef(getCalendarMonthKey(currentDate));
   const virtualWindowRef = useRef(initialVirtualWindow);
-  const scheduleVisibleMonthSyncRef = useRef<(() => void) | null>(null);
 
   const [baseWeekStart, setBaseWeekStart] = useState(initialBaseWeekStart);
   const [virtualWindow, setVirtualWindowState] = useState(initialVirtualWindow);
@@ -210,8 +209,6 @@ export const useMonthInfiniteScroll = ({
     }, VISIBLE_MONTH_SYNC_DELAY_MS);
   }, [syncVisibleMonth]);
 
-  scheduleVisibleMonthSyncRef.current = scheduleVisibleMonthSync;
-
   const cancelVisibleMonthSync = useCallback(() => {
     if (visibleMonthSyncTimeoutRef.current !== null) {
       window.clearTimeout(visibleMonthSyncTimeoutRef.current);
@@ -254,10 +251,10 @@ export const useMonthInfiniteScroll = ({
         if (!pendingScroller) return;
 
         updateVirtualWindowForScroll(pendingScroller);
-        scheduleVisibleMonthSyncRef.current?.();
+        scheduleVisibleMonthSync();
       });
     },
-    [updateVirtualWindowForScroll],
+    [scheduleVisibleMonthSync, updateVirtualWindowForScroll],
   );
 
   const setScrollContainerRef = useCallback<RefCallback<HTMLDivElement>>((element) => {
@@ -293,8 +290,8 @@ export const useMonthInfiniteScroll = ({
     const relativeOffsetInWeek = (scroller.scrollTop - previousWeekTop) / Math.max(1, previousMonthRowHeight);
 
     scroller.scrollTop = getWeekOffsetTop(weekOffset, currentWindow, monthRowHeight) + relativeOffsetInWeek * monthRowHeight;
-    scheduleVisibleMonthSyncRef.current?.();
-  }, [getWeekOffsetFromScrollTop, getWeekOffsetTop, monthRowHeight]);
+    scheduleVisibleMonthSync();
+  }, [getWeekOffsetFromScrollTop, getWeekOffsetTop, monthRowHeight, scheduleVisibleMonthSync]);
 
   useLayoutEffect(() => {
     if (lastScrollTargetTokenRef.current === scrollTargetToken) return;
