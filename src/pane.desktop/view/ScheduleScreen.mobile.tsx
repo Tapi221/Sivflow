@@ -42,7 +42,7 @@ const MOBILE_SIDEBAR_SWIPE_VERTICAL_LIMIT = 72;
 const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const WEEKDAY_EVENT_BUFFER_DAYS = 1;
 const MONTH_EVENT_BUFFER_DAYS = 14;
-const EMPTY_APP_PROJECTS: AppCalendarItem[] = [];
+const EMPTY_APP_PROJECTS = [] as AppCalendarItem[];
 
 const isHexColor = (value: string): boolean => /^#[0-9a-f]{6}$/i.test(value);
 
@@ -103,7 +103,12 @@ const isSelectedViewMode = (value: CalendarViewModeSelection, optionValue: Calen
 
 const resolveSelectedViewModeLabel = (value: CalendarViewModeSelection, options: readonly MobileCalendarViewModeOption[]): string => options.find((option) => isSelectedViewMode(value, option.value))?.label ?? options[0]?.label ?? "表示形式";
 
-const getPrimaryTouchPoint = (event: ReactTouchEvent<HTMLElement>): MobileTouchPoint | null => event.touches[0] ?? event.changedTouches[0] ?? null;
+const getPrimaryTouchPoint = (event: ReactTouchEvent<HTMLElement>): MobileTouchPoint | null => {
+  const touch = event.touches[0] ?? event.changedTouches[0];
+  if (!touch) return null;
+
+  return { clientX: touch.clientX, clientY: touch.clientY };
+};
 
 const isMobileSidebarHorizontalSwipeIntent = (distanceX: number, distanceY: number): boolean => Math.abs(distanceX) >= MOBILE_SIDEBAR_SWIPE_HORIZONTAL_INTENT && Math.abs(distanceX) > Math.abs(distanceY) * 1.2;
 
