@@ -173,6 +173,16 @@ a:hover,
   height: 0;
 }
 
+@media (max-width: 767px) {
+  .schedule-mobile-calendar-surface .calendar-timeline-scroll > .grid > div:first-child > div > span {
+    width: 2ch;
+    overflow: hidden;
+    padding-left: 0;
+    padding-right: 0;
+    white-space: nowrap;
+  }
+}
+
 [aria-label="Project list explorer"] [role="tree"],
 [aria-label="Project list explorer"] [role="treeitem"],
 [aria-label="Library hierarchy explorer"] [role="tree"],
