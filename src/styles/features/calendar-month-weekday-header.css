@@ -15,11 +15,13 @@
     background: linear-gradient(to bottom, rgb(255 255 255 / 0), rgb(255 255 255 / 0.78));
   }
 
-  .calendar-print-screen-content > div:has(> .flex.min-h-0.flex-1.flex-col.overflow-hidden.bg-white > .scrollbar-hidden) {
+  .calendar-print-screen-content > div:has(> .flex.min-h-0.flex-1.flex-col.overflow-hidden.bg-white > .scrollbar-hidden),
+  .calendar-selected-view-panel:has(.scrollbar-hidden) {
     position: relative;
   }
 
-  .calendar-print-screen-content > div:has(> .flex.min-h-0.flex-1.flex-col.overflow-hidden.bg-white > .scrollbar-hidden)::before {
+  .calendar-print-screen-content > div:has(> .flex.min-h-0.flex-1.flex-col.overflow-hidden.bg-white > .scrollbar-hidden)::before,
+  .calendar-selected-view-panel:has(.scrollbar-hidden)::before {
     content: "";
     position: absolute;
     left: 0;
