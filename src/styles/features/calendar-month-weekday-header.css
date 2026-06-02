@@ -53,9 +53,11 @@
 
   .calendar-timeline-scroll::before {
     opacity: 0;
-    animation: calendar-timeline-top-fade linear both;
-    animation-timeline: scroll(self block);
-    animation-range: 0 12px;
+    transition: opacity 120ms ease;
+  }
+
+  .calendar-timeline-scroll.calendar-timeline-scroll-scrolled::before {
+    opacity: 1;
   }
 
   .calendar-month-weekday-header::before,
@@ -75,15 +77,5 @@
   .calendar-month-weekday-header::after,
   .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7::after {
     z-index: 1;
-  }
-}
-
-@keyframes calendar-timeline-top-fade {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
   }
 }
