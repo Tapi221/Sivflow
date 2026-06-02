@@ -55,6 +55,39 @@ describe("computeMonthEventsByDay", () => {
     expect(index.has("2026-01-03")).toBe(false);
   });
 
+  it("長期予定は許可された表示日範囲にクリップして索引化する", () => {
+    const event = createEvent({
+      id: "long-range",
+      startsAt: new Date(2025, 0, 1),
+      endsAt: new Date(2027, 0, 1),
+    });
+
+    const index = createMonthEventIndex(
+      [event],
+      new Set(["2026-06-01", "2026-06-03"]),
+    );
+
+    expect(index.get("2026-06-01")?.map((item) => item.id)).toEqual(["long-range"]);
+    expect(index.has("2026-06-02")).toBe(false);
+    expect(index.get("2026-06-03")?.map((item) => item.id)).toEqual(["long-range"]);
+    expect(index.size).toBe(2);
+  });
+
+  it("表示日範囲外の予定は日付キーを作らず除外する", () => {
+    const event = createEvent({
+      id: "outside",
+      startsAt: new Date(2026, 0, 1),
+      endsAt: new Date(2026, 0, 2),
+    });
+
+    const index = createMonthEventIndex(
+      [event],
+      new Set(["2026-02-01", "2026-02-02"]),
+    );
+
+    expect(index.size).toBe(0);
+  });
+
   it("月表示の日別イベントを並び順と表示件数つきで集約する", () => {
     const monthWeeks = [
       {
