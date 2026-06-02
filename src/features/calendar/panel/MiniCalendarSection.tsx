@@ -21,7 +21,7 @@ type MiniCalendarSectionProps = {
 
 type MiniCalendarDayEventColors = Map<string, string[]>;
 
-const MINI_CALENDAR_DIVIDER_CLASS_NAME = "mt-2 h-px w-full shrink-0 bg-[#eeeeee]";
+const MINI_CALENDAR_DIVIDER_CLASS_NAME = "hidden mt-2 h-px w-full shrink-0 bg-[#eeeeee] md:block";
 const MINI_CALENDAR_MONTH_LABEL_CLASS_NAME = "mb-1 flex h-7 max-w-full items-center justify-start overflow-hidden pl-2.5 pr-0.5 text-left text-[14px] font-semibold leading-none tracking-[-0.01em] text-[#2f2f2f]";
 const MINI_CALENDAR_MONTH_LABEL_TEXT_CLASS_NAME = "block min-w-0 truncate";
 const MINI_CALENDAR_WEEKDAY_CLASS_NAME = "flex h-6 items-center justify-center text-[11px] font-semibold leading-none tracking-[0.03em] text-[#8e8e93]";
@@ -114,7 +114,7 @@ const MiniCalendarSectionBase = ({ monthDate, selectedDate, visibleEvents, onSel
 
   return (
     <>
-      <section className="flex w-full shrink-0 flex-col overflow-hidden pb-2.5 pl-0 pr-2.5 pt-2.5">
+      <section className="hidden w-full shrink-0 flex-col overflow-hidden pb-2.5 pl-0 pr-2.5 pt-2.5 md:flex">
         <div className={MINI_CALENDAR_MONTH_LABEL_CLASS_NAME} aria-live="polite">
           <span className={MINI_CALENDAR_MONTH_LABEL_TEXT_CLASS_NAME}>{monthLabel}</span>
         </div>
