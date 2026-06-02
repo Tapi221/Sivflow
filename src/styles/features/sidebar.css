@@ -168,4 +168,12 @@
   button.library-tree-marker[aria-disabled="true"] {
     cursor: default;
   }
+
+  @media (max-width: 767px) {
+    #mobile-schedule-sidebar {
+      border-top-right-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+      border-right: 1px solid #e5e5ea;
+    }
+  }
 }
