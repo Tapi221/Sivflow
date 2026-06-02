@@ -12,6 +12,9 @@ export const MONTH_SCROLL_EDGE_THRESHOLD_PX = 2400;
 export const MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX = 56;
 
 export const DEFAULT_MONTH_ROW_HEIGHT = CALENDAR_DAY_HEADER_CELL_HEIGHT;
+export const MONTH_VISIBLE_EVENT_COUNT_MIN = 1;
+export const DEFAULT_MONTH_VISIBLE_EVENT_COUNT = 3;
+export const MONTH_VISIBLE_EVENT_COUNT_MAX = 7;
 
 export const createInitialMonthOffsetRange = () => ({
   startOffset: -INITIAL_MONTH_BUFFER,
