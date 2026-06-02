@@ -12,6 +12,7 @@ type CalendarMonthViewProps = {
   selectedDate: Date;
   scrollTargetToken?: number;
   visibleEvents?: GoogleCalendarEvent[];
+  showEventTimeLabel?: boolean;
   onSelectDate: (date: Date) => void;
   onVisibleMonthChange?: (date: Date) => void;
   onRenderedRangeChange?: (range: CalendarDateRange) => void;
@@ -32,6 +33,7 @@ export const CalendarMonthView = ({
   selectedDate,
   scrollTargetToken = 0,
   visibleEvents = [],
+  showEventTimeLabel = true,
   onSelectDate,
   onVisibleMonthChange,
   onRenderedRangeChange,
@@ -63,6 +65,7 @@ export const CalendarMonthView = ({
           topSpacerHeight={scroll.topSpacerHeight}
           bottomSpacerHeight={scroll.bottomSpacerHeight}
           scrollHoverDayKey={null}
+          showEventTimeLabel={showEventTimeLabel}
           onSelectDate={onSelectDate}
           onMoveCalendarEvent={onMoveCalendarEvent}
         />
