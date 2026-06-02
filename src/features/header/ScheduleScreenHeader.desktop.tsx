@@ -1,3 +1,4 @@
+import type { ChangeEvent } from "react";
 import { useCallback, useRef } from "react";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
@@ -105,13 +106,13 @@ const ScheduleScreenHeaderDesktop = ({
   const handlePrintCalendar = useCallback(() => {
     void printCalendarPanel(printButtonRef.current, onBeforePrint);
   }, [onBeforePrint]);
-  const handleChangePrintRangeMode = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChangePrintRangeMode = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
     onChangePrintRange({ ...printRange, mode: event.target.value as CalendarPrintRangeMode });
   }, [onChangePrintRange, printRange]);
-  const handleChangeCustomStartDate = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeCustomStartDate = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     onChangePrintRange({ ...printRange, customStartDate: event.target.value });
   }, [onChangePrintRange, printRange]);
-  const handleChangeCustomEndDate = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeCustomEndDate = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     onChangePrintRange({ ...printRange, customEndDate: event.target.value });
   }, [onChangePrintRange, printRange]);
 
