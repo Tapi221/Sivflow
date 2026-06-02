@@ -9,6 +9,7 @@ export type Folder = BaseEntity & {
   folderColor?: string;
   orderIndex?: number;
   cloudSyncEnabled: boolean;
+  isFavorite?: boolean;
   isSilent?: boolean;
   isHidden?: boolean;
   tags?: string[];
