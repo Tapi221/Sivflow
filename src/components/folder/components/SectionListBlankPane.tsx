@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export interface SectionListBlankPaneProps {
+interface SectionListBlankPaneProps {
   className?: string;
   contentClassName?: string;
   sidebarWidth: number;
@@ -21,7 +21,7 @@ const buildSidebarWidthFallback = (sidebarWidth: number): string => {
   return `${normalizedWidth}px`;
 };
 
-export const SectionListBlankPane = ({
+const SectionListBlankPane = ({
   className,
   contentClassName,
   sidebarWidth,
@@ -47,7 +47,7 @@ export const SectionListBlankPane = ({
     <div
       style={style}
       className={cn(
-        "section-list-blank-pane absolute z-0 hidden min-h-0 min-w-0 bg-transparent md:block",
+        "section-list-blank-pane absolute z-0 block min-h-0 min-w-0 bg-transparent",
         className,
       )}
     >
@@ -64,3 +64,5 @@ export const SectionListBlankPane = ({
     </div>
   );
 };
+
+export { SectionListBlankPane };
