@@ -40,6 +40,10 @@ export type RawTranslations = {
   viewsLabel: string;
   todayButton: string;
   exportCalendarPdf: string;
+  monthEventCountLabel: string;
+  monthEventCountShortLabel: string;
+  monthEventCountDecreaseLabel: string;
+  monthEventCountIncreaseLabel: string;
   printRangeLabel: string;
   printRangeCurrent: string;
   printRangeDay: string;
