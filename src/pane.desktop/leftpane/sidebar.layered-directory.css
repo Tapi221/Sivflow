@@ -9,7 +9,7 @@
   background: transparent !important;
   color: #4f5968 !important;
   font-family: var(--app-font-family-sidebar) !important;
-  font-size: 15px !important;
+  font-size: 13px !important;
   font-weight: 500 !important;
   letter-spacing: -0.012em !important;
 }
@@ -17,26 +17,26 @@
 .app-layered-directory__primary-nav {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 18px 10px 18px;
+  gap: 8px;
+  padding: 16px 10px 16px;
 }
 
 .app-layered-directory__primary-item {
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 28px;
-  gap: 10px;
-  padding: 3px 4px;
+  min-height: 26px;
+  gap: 8px;
+  padding: 2px 4px;
   border: 0;
   border-radius: 7px;
   background: transparent;
   color: #2f343b;
   font: inherit;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: -0.012em;
-  line-height: 20px;
+  line-height: 18px;
   text-align: left;
   outline: none;
 }
@@ -52,16 +52,16 @@
 }
 
 .app-layered-directory__primary-icon {
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
   color: #5f666f;
 }
 
 .app-layered-directory__section-strip {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 18px;
   padding: 2px 0 6px;
 }
 
@@ -69,7 +69,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  gap: 12px;
+  gap: 10px;
 }
 
 .app-layered-directory__section--favorites {
@@ -79,7 +79,7 @@
 .app-layered-directory__section-heading-row {
   display: flex;
   align-items: center;
-  min-height: 30px;
+  min-height: 26px;
   gap: 6px;
   padding: 0 10px;
 }
@@ -87,10 +87,10 @@
 .app-layered-directory__section-heading {
   margin: 0;
   color: #111111;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: -0.018em;
-  line-height: 20px;
+  line-height: 18px;
 }
 
 .app-layered-directory__section-heading-button {
@@ -104,17 +104,17 @@
   background: transparent;
   color: #111111;
   font: inherit;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: -0.018em;
-  line-height: 20px;
+  line-height: 18px;
   text-align: left;
 }
 
 .app-layered-directory__section-leading-icon {
-  width: 17px;
-  height: 17px;
-  min-width: 17px;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
   color: #6d737c;
 }
 
@@ -129,9 +129,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  min-width: 26px;
-  height: 26px;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
   padding: 0;
   border: 0;
   border-radius: 8px;
@@ -150,10 +150,10 @@
   margin: 0;
   padding-right: 18px;
   color: #a1a1a1;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 18px;
+  line-height: 16px;
 }
 
 aside[aria-label="Project list explorer"],
@@ -161,7 +161,7 @@ aside[aria-label="Library hierarchy explorer"],
 aside[aria-label="Tag tree explorer"] {
   color: #5f6877 !important;
   font-family: var(--app-font-family-sidebar) !important;
-  font-size: 15px !important;
+  font-size: 13px !important;
   font-weight: 500 !important;
   letter-spacing: -0.012em !important;
 }
@@ -179,10 +179,10 @@ aside[aria-label="Tag tree explorer"] > div:first-child {
 aside[aria-label="Project list explorer"] > div:first-child:hover,
 aside[aria-label="Project list explorer"] > div:first-child:focus-within,
 aside[aria-label="Project list explorer"] > div:first-child:active,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:hover,
+aside[aria-label="Library hierarchy explorer"] > div:first-child:hover,\
 aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within,
 aside[aria-label="Library hierarchy explorer"] > div:first-child:active,
-aside[aria-label="Tag tree explorer"] > div:first-child:hover,
+aside[aria-label="Tag tree explorer"] > div:first-child:hover,\
 aside[aria-label="Tag tree explorer"] > div:first-child:focus-within,
 aside[aria-label="Tag tree explorer"] > div:first-child:active {
   scrollbar-width: none !important;
@@ -209,15 +209,15 @@ aside[aria-label="Project list explorer"] [role="treeitem"],
 aside[aria-label="Library hierarchy explorer"] [role="treeitem"],
 aside[aria-label="Tag tree explorer"] [role="treeitem"] {
   gap: 2px !important;
-  height: 32px !important;
-  min-height: 32px !important;
+  height: 28px !important;
+  min-height: 28px !important;
   border-radius: 8px !important;
   box-shadow: none !important;
   color: #5f6877 !important;
-  font-size: 15px !important;
+  font-size: 13px !important;
   font-weight: 500 !important;
   letter-spacing: -0.012em !important;
-  line-height: 20px !important;
+  line-height: 18px !important;
   transition: none !important;
 }
 
@@ -230,7 +230,7 @@ aside[aria-label="Tag tree explorer"] [role="treeitem"][aria-selected="true"] {
 aside[aria-label="Project list explorer"] [role="treeitem"] > button,
 aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button,
 aside[aria-label="Tag tree explorer"] [role="treeitem"] > button {
-  height: 32px !important;
+  height: 28px !important;
   border-radius: 8px !important;
   background: transparent !important;
   color: inherit !important;
@@ -283,9 +283,9 @@ aside[aria-label="Library hierarchy explorer"] button[aria-pressed] svg * {
 
 aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > .library-tree-marker,
 aside[aria-label="Tag tree explorer"] [role="treeitem"] > .library-tree-marker {
-  width: 18px !important;
-  min-width: 18px !important;
-  height: 18px !important;
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
   border: 0 !important;
   border-radius: 6px !important;
   background-color: transparent !important;
@@ -298,6 +298,6 @@ aside[aria-label="Tag tree explorer"] [role="treeitem"] > .library-tree-marker:h
   background: transparent !important;
 }
 
-aside[aria-label="Tag tree explorer"] [role="treeitem"] > .library-tree-marker::after {
+aside[aria-label="Tag tree explorer"] > .library-tree-marker::after {
   content: none !important;
 }
