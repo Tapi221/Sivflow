@@ -9,6 +9,7 @@ import { CALENDAR_MONTH_WEEK_DAY_COUNT, CALENDAR_MONTH_WEEK_STARTS_ON, getCalend
 type UseMonthInfiniteScrollOptions = {
   currentDate: Date;
   scrollTargetToken: number;
+  monthRowHeight: number;
   onVisibleMonthChange?: (date: Date) => void;
 };
 
@@ -31,7 +32,6 @@ type SetVirtualWindowOptions = {
 };
 
 const MONTH_GRID_FIRST_WEEK_OFFSET_PX = C.CALENDAR_WEEKDAY_HEADER_HEIGHT;
-const MONTH_ROW_HEIGHT = C.DEFAULT_MONTH_ROW_HEIGHT;
 const MONTH_VIRTUAL_PAST_WEEKS = 5200;
 const MONTH_VIRTUAL_FUTURE_WEEKS = 5200;
 const MONTH_RENDERED_WEEK_COUNT = 36;
@@ -103,6 +103,7 @@ const getMonthVirtualSpacerHeight = (): number => MONTH_VIRTUAL_SPACER_HEIGHT;
 export const useMonthInfiniteScroll = ({
   currentDate,
   scrollTargetToken,
+  monthRowHeight,
   onVisibleMonthChange,
 }: UseMonthInfiniteScrollOptions): UseMonthInfiniteScrollReturn => {
   const initialBaseWeekStart = useMemo(() => getWeekStart(currentDate), []);
@@ -115,6 +116,7 @@ export const useMonthInfiniteScroll = ({
   const pendingScrollContainerRef = useRef<HTMLDivElement | null>(null);
   const pendingScrollWeekOffsetRef = useRef<number | null>(0);
   const pendingScrollAdjustmentRef = useRef(0);
+  const previousMonthRowHeightRef = useRef(monthRowHeight);
   const lastScrollTargetTokenRef = useRef(scrollTargetToken);
   const visibleMonthKeyRef = useRef(getCalendarMonthKey(currentDate));
   const virtualWindowRef = useRef(initialVirtualWindow);
@@ -126,13 +128,13 @@ export const useMonthInfiniteScroll = ({
 
   const monthWeeks = useMemo(() => buildVirtualMonthWeeks(baseWeekStart, virtualWindow), [baseWeekStart, virtualWindow]);
 
-  const getWeekOffsetFromScrollTop = useCallback((scrollTop: number, currentWindow = virtualWindowRef.current) => {
-    const rawWeekIndex = Math.floor((scrollTop - MONTH_GRID_FIRST_WEEK_OFFSET_PX) / MONTH_ROW_HEIGHT);
+  const getWeekOffsetFromScrollTop = useCallback((scrollTop: number, currentWindow = virtualWindowRef.current, rowHeight = monthRowHeight) => {
+    const rawWeekIndex = Math.floor((scrollTop - MONTH_GRID_FIRST_WEEK_OFFSET_PX) / rowHeight);
 
     return clampVirtualWeekOffset(currentWindow.startWeekOffset + rawWeekIndex);
-  }, []);
+  }, [monthRowHeight]);
 
-  const getWeekOffsetTop = useCallback((weekOffset: number, currentWindow = virtualWindowRef.current) => MONTH_GRID_FIRST_WEEK_OFFSET_PX + (weekOffset - currentWindow.startWeekOffset) * MONTH_ROW_HEIGHT, []);
+  const getWeekOffsetTop = useCallback((weekOffset: number, currentWindow = virtualWindowRef.current, rowHeight = monthRowHeight) => MONTH_GRID_FIRST_WEEK_OFFSET_PX + (weekOffset - currentWindow.startWeekOffset) * rowHeight, [monthRowHeight]);
 
   const setVirtualWindow = useCallback((nextWindow: MonthVirtualWindow, options: SetVirtualWindowOptions = {}) => {
     const currentWindow = virtualWindowRef.current;
@@ -144,7 +146,7 @@ export const useMonthInfiniteScroll = ({
     }
 
     if (options.preserveScrollPosition) {
-      pendingScrollAdjustmentRef.current += (currentWindow.startWeekOffset - nextWindow.startWeekOffset) * MONTH_ROW_HEIGHT;
+      pendingScrollAdjustmentRef.current += (currentWindow.startWeekOffset - nextWindow.startWeekOffset) * monthRowHeight;
     }
 
     virtualWindowRef.current = nextWindow;
@@ -153,7 +155,7 @@ export const useMonthInfiniteScroll = ({
       setVirtualWindowState(nextWindow);
       setVisibleWeekRange((currentRange) => isSameCalendarDateRange(currentRange, nextRange) ? currentRange : nextRange);
     });
-  }, []);
+  }, [monthRowHeight]);
 
   const syncVisibleMonth = useCallback(() => {
     const scroller = scrollContainerRef.current;
@@ -181,7 +183,7 @@ export const useMonthInfiniteScroll = ({
 
     if (targetWeekOffset === null || !scroller || scroller.clientHeight <= 0) return false;
 
-    const rowCenter = getWeekOffsetTop(targetWeekOffset) + MONTH_ROW_HEIGHT / 2;
+    const rowCenter = getWeekOffsetTop(targetWeekOffset) + monthRowHeight / 2;
     const viewCenter = scroller.clientHeight / 2;
 
     scroller.scrollTop = Math.max(0, rowCenter - viewCenter);
@@ -189,7 +191,7 @@ export const useMonthInfiniteScroll = ({
     syncVisibleMonth();
 
     return true;
-  }, [getWeekOffsetTop, syncVisibleMonth]);
+  }, [getWeekOffsetTop, monthRowHeight, syncVisibleMonth]);
 
   const scheduleVisibleMonthSync = useCallback(() => {
     if (visibleMonthSyncTimeoutRef.current !== null) {
@@ -275,6 +277,24 @@ export const useMonthInfiniteScroll = ({
     pendingScrollAdjustmentRef.current = 0;
     scroller.scrollTop += scrollAdjustment;
   }, [virtualWindow]);
+
+  useLayoutEffect(() => {
+    const previousMonthRowHeight = previousMonthRowHeightRef.current;
+    const scroller = scrollContainerRef.current;
+
+    if (previousMonthRowHeight === monthRowHeight) return;
+
+    previousMonthRowHeightRef.current = monthRowHeight;
+    if (!scroller) return;
+
+    const currentWindow = virtualWindowRef.current;
+    const weekOffset = getWeekOffsetFromScrollTop(scroller.scrollTop, currentWindow, previousMonthRowHeight);
+    const previousWeekTop = getWeekOffsetTop(weekOffset, currentWindow, previousMonthRowHeight);
+    const relativeOffsetInWeek = (scroller.scrollTop - previousWeekTop) / Math.max(1, previousMonthRowHeight);
+
+    scroller.scrollTop = getWeekOffsetTop(weekOffset, currentWindow, monthRowHeight) + relativeOffsetInWeek * monthRowHeight;
+    scheduleVisibleMonthSyncRef.current?.();
+  }, [getWeekOffsetFromScrollTop, getWeekOffsetTop, monthRowHeight]);
 
   useLayoutEffect(() => {
     if (lastScrollTargetTokenRef.current === scrollTargetToken) return;
