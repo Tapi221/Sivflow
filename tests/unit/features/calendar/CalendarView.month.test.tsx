@@ -8,7 +8,7 @@ import type { CalendarDateRange } from "@/features/calendar/calendarRange.types"
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import type { CalendarMonthWeek } from "@/features/calendar/model/calendarMonth.model";
 
-const { monthWeeksRef, visibleWeekRangeRef } = vi.hoisted(() => ({
+const { monthWeeksRef, visibleWeekRangeRef, setScrollContainerRefMock } = vi.hoisted(() => ({
   monthWeeksRef: {
     current: [] as CalendarMonthWeek[],
   },
@@ -18,6 +18,7 @@ const { monthWeeksRef, visibleWeekRangeRef } = vi.hoisted(() => ({
       end: new Date(2026, 0, 1, 23, 59, 59, 999),
     } as CalendarDateRange,
   },
+  setScrollContainerRefMock: vi.fn(),
 }));
 
 const buildWeek = (weekStart: Date): CalendarMonthWeek => ({
@@ -41,11 +42,10 @@ vi.mock("@/features/scroll/schedule/useInfiniteScroll.month.desktop", () => ({
   useMonthInfiniteScroll: () => ({
     monthWeeks: monthWeeksRef.current,
     visibleWeekRange: visibleWeekRangeRef.current,
+    topSpacerHeight: 0,
+    bottomSpacerHeight: 0,
     scrollContainerRef: { current: null },
-    weekRowRefsMap: { current: new Map() },
-    setWeekRowRef: vi.fn(),
-    syncVisibleMonth: vi.fn(),
-    cancelVisibleMonthSync: vi.fn(),
+    setScrollContainerRef: setScrollContainerRefMock,
   }),
 }));
 
@@ -60,6 +60,7 @@ const expectSameTime = (actual: Date, expected: Date) => {
 describe("CalendarMonthView", () => {
   beforeEach(() => {
     monthWeeksRef.current = [];
+    setScrollContainerRefMock.mockClear();
     visibleWeekRangeRef.current = {
       start: new Date(2026, 0, 1),
       end: new Date(2026, 0, 1, 23, 59, 59, 999),
