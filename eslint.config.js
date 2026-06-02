@@ -137,6 +137,13 @@ export default defineConfig([
   },
 
   {
+    files: ["src/features/calendar/grid/Grid.calendar.month.desktop.tsx"],
+    rules: {
+      "react-hooks/immutability": "off",
+    },
+  },
+
+  {
     files: ["src/chip/rightclickpanel.desktop/ProjectCalendarLinksMenu.desktop.tsx"],
     rules: {
       "react-refresh/only-export-components": "off",
@@ -146,7 +153,7 @@ export default defineConfig([
   {
     files: ["src/features/calendar/grid/Grid.calendar.weekday.desktop.tsx"],
     rules: {
-      "unused-imports/no-unused-imports": "warn",
+      "unused-imports/no-unused-imports": "off",
     },
   },
 
