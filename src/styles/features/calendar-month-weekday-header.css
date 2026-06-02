@@ -33,7 +33,8 @@
     background: linear-gradient(to bottom, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0));
   }
 
-  .calendar-year-view::before {
+  .calendar-year-view::before,
+  .calendar-timeline-scroll::before {
     content: "";
     position: sticky;
     top: 0;
