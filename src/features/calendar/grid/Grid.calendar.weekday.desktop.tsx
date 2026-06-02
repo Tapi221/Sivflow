@@ -4,12 +4,11 @@ import { addDays, addMinutes, differenceInMinutes, format, startOfDay } from "da
 import { ja } from "date-fns/locale";
 import { layoutCalendarTimeGridEvents } from "@core/calendar";
 import type { CalendarTimeGridLayoutEntry } from "@core/calendar";
-import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
+import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
-import type { CalendarAllDayEventOrderMap, CalendarEventMoveHandler, CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarAllDayEventOrderMap, CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 import { CALENDAR_EVENT_DRAGGING_STYLE, areSameCalendarEventTimes, createCalendarEventDragPointerSnapshot, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragAutoScroll, useCalendarEventDragBodyStyle } from "./calendarEventDrag.shared";
@@ -22,11 +21,29 @@ export type CalendarWeekDayGridRef = { scrollToHour: (hour: number) => void };
 
 type WeekdayEventsByDay = { allDayEvents: Map<string, GoogleCalendarEvent[]> };
 
-type WeekdayEventDragState = { eventKey: string; event: GoogleCalendarEvent; pointerId: number; pointerOffsetMinutes: number; durationMs: number; sourceDayKey: string; previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; previewAllDayIndex: number | null; previewColumnDayKey: string | null };
+type WeekdayEventDragState = {
+  eventKey: string;
+  event: GoogleCalendarEvent;
+  pointerId: number;
+  pointerOffsetMinutes: number;
+  durationMs: number;
+  sourceDayKey: string;
+  previewStartsAt: Date;
+  previewEndsAt: Date;
+  previewIsAllDay: boolean;
+  previewAllDayIndex: number | null;
+  previewColumnDayKey: string | null;
+};
 
 type WeekdayDayColumnHit = { day: Date; element: HTMLDivElement };
 
-type WeekdayEventDragPreview = { previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; previewAllDayIndex: number | null; previewColumnDayKey: string | null };
+type WeekdayEventDragPreview = {
+  previewStartsAt: Date;
+  previewEndsAt: Date;
+  previewIsAllDay: boolean;
+  previewAllDayIndex: number | null;
+  previewColumnDayKey: string | null;
+};
 
 type WeekdayAllDayRenderItem = { event: GoogleCalendarEvent; eventKey: string; isDragPreview: boolean };
 
@@ -41,6 +58,7 @@ const WEEKDAY_TIMED_EVENT_MIN_LAYOUT_MINUTES = Math.ceil((WEEKDAY_TIMED_EVENT_MI
 const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
 const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const WEEKDAY_TIME_LABEL_CLASS_NAME = "text-[11px] font-medium tabular-nums text-[#b8bcc5]";
+const WEEKDAY_ALL_DAY_EVENT_WRAPPER_CLASS_NAME = "shrink-0 transition-opacity duration-150 ease-out";
 const WEEKDAY_COLUMN_BORDER_STYLE: CSSProperties = { borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB };
 const WEEKDAY_BOTTOM_SPACER_STYLE: CSSProperties = { height: `calc(${NEXT_DAY_PREVIEW_HOURS} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))` };
 const WEEKDAY_BOTTOM_TIME_SPACER_CLASS_NAME = "relative";
@@ -80,7 +98,7 @@ const getViewportGridTemplateColumns = (dayCount: number): string => `${C.TIME_C
 
 const getTimedEntryPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours: number): CSSProperties => getWeekdayTimedEventPositionStyle(entry, rangeHours, { suppressMinHeight: shouldSuppressEntryMinHeight(entry) });
 
-const getAllDayEventClassName = (isDraggable: boolean, isDragging: boolean): string => cn(eventChipAllDayClass, isDraggable ? "touch-none cursor-grab select-none active:cursor-grabbing" : null, isDragging ? "opacity-35" : null);
+const getAllDayEventWrapperClassName = (isDraggable: boolean, isDragging: boolean, isPreview = false): string => cn(WEEKDAY_ALL_DAY_EVENT_WRAPPER_CLASS_NAME, isDraggable ? "touch-none cursor-grab select-none active:cursor-grabbing" : null, isDragging ? "opacity-35" : null, isPreview ? "pointer-events-none transition-none" : null);
 
 const getTimedEventWrapperClassName = (isDraggable: boolean, isDragging: boolean): string => cn("absolute z-10 min-w-0 transition-opacity duration-150 ease-out", isDraggable ? "touch-none cursor-grab select-none active:cursor-grabbing" : null, isDragging ? "opacity-35" : null);
 
@@ -147,6 +165,7 @@ const getDragPreviewStyle = (state: WeekdayEventDragState, day: Date): CSSProper
 const getOrderedAllDayEvents = (events: GoogleCalendarEvent[], dayKey: string, order?: CalendarAllDayEventOrderMap): GoogleCalendarEvent[] => {
   const sortedEvents = [...events].sort(compareCalendarEvents);
   const orderedKeys = order?.[dayKey] ?? [];
+
   if (orderedKeys.length === 0) return sortedEvents;
 
   const eventByKey = new Map(sortedEvents.map((event) => [createCalendarEventKey(event), event]));
@@ -519,24 +538,15 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
             const events = createAllDayRenderItems(allDayEvents.get(dayKey) ?? [], dayKey, allDayEventOrder, dragState, dragPreviewEvent, dragPreviewDayKey);
 
             return (
-              <div key={dayKey} ref={setAllDayColumnRef(dayKey)} className={cn("min-h-10 min-w-0 px-1 py-1", dayIndex === 0 ? null : "border-l")} style={WEEKDAY_COLUMN_BORDER_STYLE}>
-                <div className="flex min-w-0 flex-col gap-1">
+              <div key={dayKey} ref={setAllDayColumnRef(dayKey)} className={cn("min-h-10 min-w-0 px-px py-1", dayIndex === 0 ? null : "border-l")} style={WEEKDAY_COLUMN_BORDER_STYLE}>
+                <div className="flex min-w-0 flex-col gap-[3px]">
                   {events.map(({ event, eventKey, isDragPreview }) => {
                     const isDragging = dragState?.eventKey === eventKey;
                     const isDraggable = isCalendarEventDraggable(event, onMoveCalendarEvent);
-                    const tokens = generateColorTokens(event.accentColor);
-
-                    if (isDragPreview) {
-                      return (
-                        <div key={`${eventKey}:preview`} data-calendar-all-day-event-item="true" className={cn(eventChipAllDayClass, "pointer-events-none transition-none")} style={{ background: tokens.bg, color: tokens.text, ...CALENDAR_EVENT_DRAGGING_STYLE }} title={event.title}>
-                          {event.title || "Untitled"}
-                        </div>
-                      );
-                    }
 
                     return (
-                      <div key={eventKey} data-calendar-all-day-event-item="true" className={getAllDayEventClassName(isDraggable, isDragging)} style={{ background: tokens.bg, color: tokens.text }} title={event.title} onPointerDown={isDraggable ? (pointerEvent) => handleAllDayEventPointerDown(pointerEvent, event) : undefined}>
-                        {event.title || "Untitled"}
+                      <div key={isDragPreview ? `${eventKey}:preview` : eventKey} data-calendar-all-day-event-item="true" className={getAllDayEventWrapperClassName(isDraggable, isDragging, isDragPreview)} style={isDragPreview ? CALENDAR_EVENT_DRAGGING_STYLE : undefined} onPointerDown={!isDragPreview && isDraggable ? (pointerEvent) => handleAllDayEventPointerDown(pointerEvent, event) : undefined}>
+                        <CalendarEventChipMonth event={event} showTimeLabel={false} tooltipDisabled={isDragPreview || isDragging} />
                       </div>
                     );
                   })}
@@ -564,6 +574,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
             const dayKey = getCalendarDateKey(day);
             const events = createTimedLayoutEvents(visibleEvents, day);
             const shouldRenderDragPreview = dragState && dragPreviewEvent && !dragState.previewIsAllDay && dragState.previewColumnDayKey === dayKey;
+
             return (
               <div key={dayKey} ref={setDayColumnRef(dayKey)} className={cn("relative min-w-0 bg-white", dayIndex === 0 ? null : "border-l")} style={WEEKDAY_COLUMN_BORDER_STYLE}>
                 {WEEKDAY_HOURS.map((hour) => (
