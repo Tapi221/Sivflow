@@ -26,6 +26,11 @@
 
 - [ ] Web 起動口は apps/web に限定し、共有 React UI 本体を packages/web-renderer に置く
 - [ ] Tauri shell は apps/desktop/src-tauri に限定し、Desktop UI を apps/desktop に置かない
+- [ ] Desktop の LAN WebSocket server / session command / native capability は apps/desktop/src-tauri/src に置く
 - [ ] React Native app 起動口は apps/mobile に限定し、RN UI 本体を packages/mobile-renderer に置く
+- [ ] apps/mobile/src/App.tsx は起動口と navigation 接続に留め、手書き画面本体を renderer package に置く
+- [ ] iPad 専用手書き画面と toolbar は packages/mobile-renderer/src/screens/ipad/handwriting と packages/mobile-renderer/src/components/ipad/ink に置く
+- [ ] スマホには手書きモードの navigation と screen を出さない
 - [ ] Swift / PencilKit 実装は apps/mobile/ios/Manifolia 配下の native extension として扱い、Swift 専用 app root を作らない
+- [ ] PencilKit view は NativeViews、InkStroke export / session bridge は NativeModules に分ける
 - [ ] Ink document と handwriting session の共有構造は shared/schemas に置く
