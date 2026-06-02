@@ -1,3 +1,4 @@
+import * as C from "./calendar.constants.desktop";
 import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
 
 type StoredScheduleNavigationState = {
@@ -6,6 +7,7 @@ type StoredScheduleNavigationState = {
   monthTitleDate?: unknown;
   selectedViewMode?: unknown;
   calendarScrollTop?: unknown;
+  monthVisibleEventCount?: unknown;
 };
 
 export type ScheduleNavigationState = {
@@ -69,6 +71,8 @@ const writeStoredScheduleNavigationObject = (state: StoredScheduleNavigationStat
   }
 };
 
+export const normalizeScheduleMonthVisibleEventCount = (value: number): number => Math.min(C.MONTH_VISIBLE_EVENT_COUNT_MAX, Math.max(C.MONTH_VISIBLE_EVENT_COUNT_MIN, Math.round(value)));
+
 export const readStoredScheduleNavigationState = (): Partial<ScheduleNavigationState> | null => {
   const parsed = readStoredScheduleNavigationObject();
   if (!parsed) return null;
@@ -93,6 +97,13 @@ export const readStoredScheduleCalendarScrollTop = (): number | null => {
   return readStoredScrollTop(parsed.calendarScrollTop);
 };
 
+export const readStoredScheduleMonthVisibleEventCount = (): number | null => {
+  const parsed = readStoredScheduleNavigationObject();
+  if (!parsed || typeof parsed.monthVisibleEventCount !== "number" || !Number.isFinite(parsed.monthVisibleEventCount)) return null;
+
+  return normalizeScheduleMonthVisibleEventCount(parsed.monthVisibleEventCount);
+};
+
 export const persistScheduleNavigationState = ({ currentDate, selectedDate, monthTitleDate, selectedViewMode }: ScheduleNavigationState) => {
   const stored = readStoredScheduleNavigationObject() ?? {};
 
@@ -113,5 +124,16 @@ export const persistScheduleCalendarScrollTop = (scrollTop: number) => {
   writeStoredScheduleNavigationObject({
     ...stored,
     calendarScrollTop: Math.max(0, scrollTop),
+  });
+};
+
+export const persistScheduleMonthVisibleEventCount = (monthVisibleEventCount: number) => {
+  if (!Number.isFinite(monthVisibleEventCount)) return;
+
+  const stored = readStoredScheduleNavigationObject() ?? {};
+
+  writeStoredScheduleNavigationObject({
+    ...stored,
+    monthVisibleEventCount: normalizeScheduleMonthVisibleEventCount(monthVisibleEventCount),
   });
 };
