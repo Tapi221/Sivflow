@@ -11,6 +11,8 @@ import { useCalendarNavigation } from "./useCalendarNavigation";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 
+type UseScheduleScreenOptions = { allowMultiSelectViewMode?: boolean };
+
 export type UseScheduleScreenReturn = {
   contentViewportRef: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
@@ -86,8 +88,8 @@ const dedupeGoogleCalendarEvents = (events: GoogleCalendarEvent[]): GoogleCalend
   });
 };
 
-export const useScheduleScreen = (): UseScheduleScreenReturn => {
-  const navigation = useCalendarNavigation();
+export const useScheduleScreen = ({ allowMultiSelectViewMode = true }: UseScheduleScreenOptions = {}): UseScheduleScreenReturn => {
+  const navigation = useCalendarNavigation({ allowMultiSelectViewMode });
   const [monthRenderedRange, setMonthRenderedRange] = useState<CalendarDateRange | null>(null);
   const [yearRenderedRange, setYearRenderedRange] = useState<CalendarDateRange | null>(null);
   const [yearSyncRange, setYearSyncRange] = useState<CalendarDateRange | null>(null);
