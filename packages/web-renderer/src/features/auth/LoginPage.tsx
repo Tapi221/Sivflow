@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from "react";
+import appIconSrc from "@shared/assets/icons/app-icon.svg";
 import { signInWithGoogle } from "@/services/auth/googleSignIn";
 
 type LoginPageStyles = {
@@ -27,8 +28,6 @@ type LoginPageStyles = {
   startRow: CSSProperties;
   startText: CSSProperties;
 };
-
-const appIconSrc = "/icon.svg";
 
 const styles: LoginPageStyles = {
   page: {
