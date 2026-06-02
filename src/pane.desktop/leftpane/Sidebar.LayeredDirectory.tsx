@@ -37,11 +37,11 @@ type ProjectAddMenuProps = {
 };
 
 const FAVORITE_SECTION_LABEL = "お気に入り";
-const FAVORITE_EMPTY_MESSAGE = "フォルダをお気に入りに追加すると、ここからすぐ開けます";
-const PROJECT_SECTION_LABEL = "フォルダ";
+const FAVORITE_EMPTY_MESSAGE = "プロジェクトをお気に入りに追加すると、ここからすぐ開けます";
+const PROJECT_SECTION_LABEL = "プロジェクト";
 const TAG_SECTION_LABEL = "MY TAG TREE";
-const ADD_PROJECT_ARIA_LABEL = "フォルダを追加";
-const ADD_PROJECT_CONTENT_ARIA_LABEL = "フォルダに追加";
+const ADD_PROJECT_ARIA_LABEL = "プロジェクトを追加";
+const ADD_PROJECT_CONTENT_ARIA_LABEL = "プロジェクトに追加";
 const PROJECT_ADD_MENU_PANEL_ID = "layered-project-add-menu";
 const PROJECT_ADD_MENU_ITEM_DEFINITIONS: readonly ProjectAddMenuItemDefinition[] = [
   { id: "create-folder", label: "新規フォルダ" },
@@ -212,7 +212,7 @@ const SidebarLayeredDirectory = () => {
         <section className="app-layered-directory__section" aria-label={sectionLabel}>
           <div className="app-layered-directory__section-heading-row">
             {folderTagMode !== "tag" && selectedProject ? (
-              <button type="button" className="app-layered-directory__section-heading-button" onClick={handleOpenProjectList} aria-label="フォルダ一覧を開く">
+              <button type="button" className="app-layered-directory__section-heading-button" onClick={handleOpenProjectList} aria-label="プロジェクト一覧を開く">
                 <SidebarOpenIcon className="app-layered-directory__section-leading-icon" />
                 <span className="block truncate">{sectionLabel}</span>
                 <IconChevronDown className="app-layered-directory__section-chevron" />
