@@ -1,5 +1,5 @@
 import { type TouchEvent as ReactTouchEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { addDays, endOfDay, format, startOfDay, startOfMonth, subDays } from "date-fns";
+import { addDays, endOfDay, format, startOfDay, subDays } from "date-fns";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
@@ -21,29 +21,12 @@ import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSideba
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 
 type CalendarEventDisplayRange = { start: Date; end: Date };
-
 type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange | null; yearRenderedRange: CalendarDateRange | null };
-
 type CreateGoogleProjectCalendarLinkInput = { project: AppCalendarItem; accountId: string; calendar: GoogleCalendarListItem; color: string; createdByApp: boolean };
-
-type MobileCalendarViewModeOption = {
-  value: CalendarViewMode;
-  label: string;
-};
-
-type MobileViewModeDropdownProps = {
-  value: CalendarViewModeSelection;
-  onChange: (value: CalendarViewMode) => void;
-  options: readonly MobileCalendarViewModeOption[];
-};
-
-type MobileSidebarSwipeState = {
-  startX: number;
-  startY: number;
-  latestX: number;
-  latestY: number;
-  isHorizontal: boolean;
-};
+type MobileTouchPoint = { clientX: number; clientY: number };
+type MobileCalendarViewModeOption = { value: CalendarViewMode; label: string };
+type MobileViewModeDropdownProps = { value: CalendarViewModeSelection; onChange: (value: CalendarViewMode) => void; options: readonly MobileCalendarViewModeOption[] };
+type MobileSidebarSwipeState = { startX: number; startY: number; latestX: number; latestY: number; isHorizontal: boolean };
 
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.94)] shadow-none";
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-none";
@@ -59,7 +42,7 @@ const MOBILE_SIDEBAR_SWIPE_VERTICAL_LIMIT = 72;
 const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const WEEKDAY_EVENT_BUFFER_DAYS = 1;
 const MONTH_EVENT_BUFFER_DAYS = 14;
-const EMPTY_APP_PROJECTS = [];
+const EMPTY_APP_PROJECTS: AppCalendarItem[] = [];
 
 const isHexColor = (value: string): boolean => /^#[0-9a-f]{6}$/i.test(value);
 
@@ -120,7 +103,7 @@ const isSelectedViewMode = (value: CalendarViewModeSelection, optionValue: Calen
 
 const resolveSelectedViewModeLabel = (value: CalendarViewModeSelection, options: readonly MobileCalendarViewModeOption[]): string => options.find((option) => isSelectedViewMode(value, option.value))?.label ?? options[0]?.label ?? "表示形式";
 
-const getPrimaryTouchPoint = (event: ReactTouchEvent<HTMLElement>): Touch | null => event.touches[0] ?? event.changedTouches[0] ?? null;
+const getPrimaryTouchPoint = (event: ReactTouchEvent<HTMLElement>): MobileTouchPoint | null => event.touches[0] ?? event.changedTouches[0] ?? null;
 
 const isMobileSidebarHorizontalSwipeIntent = (distanceX: number, distanceY: number): boolean => Math.abs(distanceX) >= MOBILE_SIDEBAR_SWIPE_HORIZONTAL_INTENT && Math.abs(distanceX) > Math.abs(distanceY) * 1.2;
 
