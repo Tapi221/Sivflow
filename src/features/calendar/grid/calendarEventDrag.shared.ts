@@ -99,7 +99,7 @@ const useCalendarEventDragAutoScroll = <TElement extends HTMLElement>({ scrollCo
     if (!element || !snapshot) return;
 
     const previousScrollTop = element.scrollTop;
-    element.scrollTop += getCalendarEventDragAutoScrollDelta(direction);
+    element.scrollBy({ top: getCalendarEventDragAutoScrollDelta(direction) });
 
     if (element.scrollTop === previousScrollTop) {
       pauseDragAutoScroll();
