@@ -1,43 +1,48 @@
 @layer utilities {
   @media (max-width: 767px) {
-    div:has(> div > div > button[aria-label="サイドバーを開く"]) {
+    div:has(> div > div > button[aria-controls="mobile-schedule-sidebar"]) {
       padding-top: 10px !important;
       padding-bottom: 8px !important;
     }
 
-    div:has(> div > div > button[aria-label="サイドバーを開く"]) > div {
+    div:has(> div > div > button[aria-controls="mobile-schedule-sidebar"]) > div {
       gap: 8px !important;
     }
 
-    div:has(> div > div > button[aria-label="サイドバーを開く"]) > div > div {
+    div:has(> div > div > button[aria-controls="mobile-schedule-sidebar"]) > div > div {
       gap: 6px !important;
       padding-top: 0 !important;
     }
 
-    div:has(> div > div > button[aria-label="サイドバーを開く"]) button[aria-label="サイドバーを開く"],
-    div:has(> div > div > button[aria-label="サイドバーを開く"]) button[aria-label^="表示形式:"] {
+    div:has(> div > div > button[aria-controls="mobile-schedule-sidebar"]) button[aria-controls="mobile-schedule-sidebar"],
+    div:has(> div > div > button[aria-controls="mobile-schedule-sidebar"]) button[aria-label^="表示形式:"] {
       width: 36px !important;
       height: 36px !important;
     }
 
-    div:has(> div > div > button[aria-label="サイドバーを開く"]) button[aria-label="サイドバーを開く"] > span,
-    div:has(> div > div > button[aria-label="サイドバーを開く"]) button[aria-label^="表示形式:"] > span {
+    div:has(> div > div > button[aria-controls="mobile-schedule-sidebar"]) button[aria-label^="表示形式:"] > span {
       width: 18px !important;
       height: 18px !important;
       gap: 4px !important;
     }
 
-    div:has(> div > div > button[aria-label="サイドバーを開く"]) button[aria-label="サイドバーを開く"] + button,
-    div:has(> div > div > button[aria-label="サイドバーを開く"]) h1 + button + button {
+    button[aria-controls="mobile-schedule-sidebar"] > span[aria-hidden="true"] {
+      width: 1.25rem !important;
+      height: 1rem !important;
+      gap: 5px !important;
+    }
+
+    div:has(> div > div > button[aria-controls="mobile-schedule-sidebar"]) button[aria-controls="mobile-schedule-sidebar"] + button,
+    div:has(> div > div > button[aria-controls="mobile-schedule-sidebar"]) h1 + button + button {
       width: 28px !important;
       height: 28px !important;
     }
 
-    div:has(> div > div > button[aria-label="サイドバーを開く"]) h1 {
+    div:has(> div > div > button[aria-controls="mobile-schedule-sidebar"]) h1 {
       font-size: 17px !important;
     }
 
-    div:has(> div > div > button[aria-label="サイドバーを開く"]) h1 + button {
+    div:has(> div > div > button[aria-controls="mobile-schedule-sidebar"]) h1 + button {
       height: 28px !important;
       padding-left: 10px !important;
       padding-right: 10px !important;
