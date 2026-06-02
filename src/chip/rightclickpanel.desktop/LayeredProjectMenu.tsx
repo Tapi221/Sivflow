@@ -9,7 +9,7 @@ type LayeredProjectMenuItemDefinition = {
   submenu?: boolean;
 };
 
-export type LayeredProjectMenuActionId = "change-color" | "rename" | "create-card-set" | "create-folder" | "import-pdf" | "hide" | "delete";
+export type LayeredProjectMenuActionId = "change-color" | "rename" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
 
 export type LayeredProjectMenuAction = {
   id: LayeredProjectMenuActionId;
@@ -42,6 +42,7 @@ const LAYERED_PROJECT_MENU_ITEM_DEFINITIONS: readonly LayeredProjectMenuItemDefi
   { id: "create-card-set", label: "新規カードセット" },
   { id: "create-folder", label: "新規フォルダ" },
   { id: "import-pdf", label: "PDFをインポート" },
+  { id: "add-to-favorites", label: "お気に入りに追加" },
   { id: "hide", label: "非表示" },
   { id: "delete", label: "削除", danger: true },
 ];
