@@ -1,8 +1,18 @@
 /* Layered directory sidebar overrides.
-   Keep the original width, background, font, and text sizing from the component. */
+   Keep the Craft-like rail typography, row rhythm, and muted navigation tone here. */
+
+aside[aria-label="Project list explorer"],
+aside[aria-label="Library hierarchy explorer"],
+aside[aria-label="Tag tree explorer"] {
+  color: #5f6877 !important;
+  font-family: var(--app-font-family-sidebar) !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
 
 aside[aria-label="Library hierarchy explorer"] [role="tree"] {
-  gap: 0 !important;
+  gap: 1px !important;
 }
 
 /* Scroller: keep scrolling active, but hide the native scrollbar surface entirely. */
@@ -86,20 +96,46 @@ aside[aria-label="Library hierarchy explorer"] > div:first-child:active::-webkit
   appearance: none !important;
 }
 
-/* Tree rows: keep original typography while flattening the layered directory look. */
-aside[aria-label="Library hierarchy explorer"] [role="treeitem"] {
-  gap: 0 !important;
+/* Tree rows: keep original layout while shifting the visual weight toward Craft. */
+aside[aria-label="Project list explorer"] [role="treeitem"],
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"],
+aside[aria-label="Tag tree explorer"] [role="treeitem"] {
+  gap: 2px !important;
+  height: 31px !important;
+  min-height: 31px !important;
+  border-radius: 8px !important;
   box-shadow: none !important;
+  color: #5f6877 !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  line-height: 20px !important;
   transition: none !important;
 }
 
-aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button {
+aside[aria-label="Project list explorer"] [role="treeitem"][aria-selected="true"],
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"][aria-selected="true"],
+aside[aria-label="Tag tree explorer"] [role="treeitem"][aria-selected="true"] {
+  background: #ececec !important;
+}
+
+aside[aria-label="Project list explorer"] [role="treeitem"] > button,
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button,
+aside[aria-label="Tag tree explorer"] [role="treeitem"] > button {
+  height: 31px !important;
+  border-radius: 8px !important;
   background: transparent !important;
+  color: inherit !important;
+  font: inherit !important;
+  letter-spacing: inherit !important;
+  line-height: inherit !important;
   transition: none !important;
 }
 
-aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button:hover {
-  background: transparent !important;
+aside[aria-label="Project list explorer"] [role="treeitem"] > button:hover,
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button:hover,
+aside[aria-label="Tag tree explorer"] [role="treeitem"] > button:hover {
+  background: #f0f0f0 !important;
 }
 
 /* Hide file/folder glyphs; keep only disclosure chevrons and text. */
@@ -108,13 +144,16 @@ aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > svg {
 }
 
 aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button svg,
-aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button svg * {
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button svg *,
+aside[aria-label="Tag tree explorer"] [role="treeitem"] > button svg,
+aside[aria-label="Tag tree explorer"] [role="treeitem"] > button svg * {
   fill: none !important;
   stroke: currentColor !important;
   opacity: 1 !important;
 }
 
-aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button svg path {
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > button svg path,
+aside[aria-label="Tag tree explorer"] [role="treeitem"] > button svg path {
   stroke-width: 1.8 !important;
 }
 
