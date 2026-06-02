@@ -12,6 +12,22 @@
     overscroll-behavior: contain;
   }
 
+  .calendar-month-scroll,
+  .calendar-timeline-scroll,
+  .calendar-year-view {
+    -ms-overflow-style: none;
+    scrollbar-gutter: auto;
+    scrollbar-width: none;
+  }
+
+  .calendar-month-scroll::-webkit-scrollbar,
+  .calendar-timeline-scroll::-webkit-scrollbar,
+  .calendar-year-view::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
   .calendar-timeline-scroll > .grid > div:first-child,
   .calendar-timeline-scroll > .grid > div:first-child > div > span {
     background: transparent !important;
