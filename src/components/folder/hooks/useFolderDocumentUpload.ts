@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from "react";
-import { uploadPdfToGoogleDrive } from "@platform/files/googleDrivePdfUpload.web";
+import { uploadPdfToGoogleDrive } from "@/integration/google-integration/googleDrive.pdfUpload";
 import { buildStoragePath, createDocumentId, extractPdfFiles } from "@/components/folder/explorer/model/utils";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
