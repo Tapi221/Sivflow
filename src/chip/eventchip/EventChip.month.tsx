@@ -13,6 +13,13 @@ type CalendarEventChipMonthProps = {
   tooltipDisabled?: boolean;
 };
 
+type CalendarEventChipMonthStyle = CSSProperties & {
+  "--calendar-event-chip-accent": string;
+  "--calendar-event-chip-bg": string;
+  WebkitPrintColorAdjust: "exact";
+  printColorAdjust: "exact";
+};
+
 const CHIP_TEXT_FADE_STYLE: CSSProperties = {
   WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
   maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
@@ -24,6 +31,16 @@ const getIsMobileWeb = (): boolean => {
 
   return window.matchMedia(MOBILE_WEB_MEDIA_QUERY).matches;
 };
+
+const createCalendarEventChipMonthStyle = (backgroundColor: string, accentColor: string, textColor: string, borderLeft?: string): CalendarEventChipMonthStyle => ({
+  "--calendar-event-chip-accent": accentColor,
+  "--calendar-event-chip-bg": backgroundColor,
+  WebkitPrintColorAdjust: "exact",
+  printColorAdjust: "exact",
+  background: backgroundColor,
+  borderLeft,
+  color: textColor,
+});
 
 const useIsMobileWeb = (): boolean => {
   const [isMobileWeb, setIsMobileWeb] = useState(getIsMobileWeb);
@@ -63,6 +80,7 @@ const CalendarEventChipMonth = memo(({
   const titleLabel = event.title || "Untitled";
   const titleFadeStyle = isMobileWeb ? undefined : CHIP_TEXT_FADE_STYLE;
   const chipBorderLeft = event.isAllDay || isMobileWeb ? undefined : `3px solid ${tokens.border}`;
+  const chipStyle = useMemo(() => createCalendarEventChipMonthStyle(tokens.bg, tokens.border, tokens.text, chipBorderLeft), [chipBorderLeft, tokens.bg, tokens.border, tokens.text]);
 
   return (
     <HoverMonthEventTooltip
@@ -73,6 +91,7 @@ const CalendarEventChipMonth = memo(({
       disabled={tooltipDisabled}
     >
       <div
+        data-calendar-event-chip="month"
         className={cn(
           eventChipAllDayClass,
           `
@@ -83,11 +102,7 @@ const CalendarEventChipMonth = memo(({
             gap-1
           `,
         )}
-        style={{
-          background: tokens.bg,
-          borderLeft: chipBorderLeft,
-          color: tokens.text,
-        }}
+        style={chipStyle}
       >
         {showTimeLabel && (
           <span
