@@ -8,6 +8,9 @@ import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
+import { CalendarPrintRangeView } from "@/features/calendar/print/CalendarPrintRangeView.desktop";
+import type { CalendarPrintRangeState } from "@/features/calendar/print/calendarPrint.types";
+import { createCalendarPrintDateInputValue, getCalendarPrintRange, getCalendarPrintRangeLabel } from "@/features/calendar/print/calendarPrintRange.utils";
 import { createProjectCalendarLink, persistProjectCalendarLinks, readStoredProjectCalendarLinks } from "@/features/calendar/projectCalendarLinks.storage";
 import type { AppCalendarItem, CalendarAllDayEventOrderMap, CalendarAllDayEventReorderHandler, CalendarViewMode, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { CalendarTimetableView } from "@/features/calendar/timetable/CalendarTimetableView";
@@ -122,6 +125,12 @@ const filterEventsByDisplayRange = (events: GoogleCalendarEvent[], range: Calend
 
 const createGoogleProjectCalendarLink = ({ project, accountId, calendar, color, createdByApp }: CreateGoogleProjectCalendarLinkInput): ProjectCalendarLink => createProjectCalendarLink({ projectId: project.id, provider: "google", accountId, externalCalendarId: calendar.id, externalCalendarName: calendar.summaryOverride ?? calendar.summary, syncDirection: "importOnly", createdByApp, color, lastSyncedAt: new Date().toISOString() });
 
+const createInitialCalendarPrintRange = (date: Date): CalendarPrintRangeState => {
+  const dateValue = createCalendarPrintDateInputValue(date);
+
+  return { mode: "current", customStartDate: dateValue, customEndDate: dateValue };
+};
+
 const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: ScheduleScreenProps) => {
   const pane = useScheduleScreen();
   const t = useT();
@@ -133,8 +142,9 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: Sch
   const [googleCalendarColorOverrides, setGoogleCalendarColorOverrides] = useState<GoogleCalendarColorOverrideMap>(readStoredGoogleCalendarColorOverrides);
   const [allDayEventOrder, setAllDayEventOrder] = useState<CalendarAllDayEventOrderMap>(readStoredAllDayEventOrder);
   const [planResultModes, setPlanResultModes] = useState<PlanResultMode[]>([...DEFAULT_PLAN_RESULT_MODES]);
+  const [printRange, setPrintRange] = useState<CalendarPrintRangeState>(() => createInitialCalendarPrintRange(new Date()));
   const viewOptions = useMemo(() => [{ value: "year", label: t.viewYear }, { value: "month", label: t.viewMonth }, { value: "week", label: t.viewWeek }, { value: "threeDays", label: t.viewThreeDays }, { value: "days", label: t.viewDay }, { value: "list", label: t.viewList }, { value: "timetable", label: t.viewTimetable }, { value: "pieChart", label: t.viewPieChart }] as const, [t.viewDay, t.viewList, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewTimetable, t.viewWeek, t.viewYear]);
-  const { selectedViewMode, primaryViewMode, currentDate, selectedDate, titleDate, monthTitleDate, monthScrollTargetToken, visibleDays, virtualRail, yearRenderedRange, googleCalendarEvents, googleAccounts, isAnyCalendarConnecting, calendarGridStyle, headerScrollRef, allDayScrollRef, scrollContainerRef, contentViewportRef, handleCalendarScroll, handleSelectViewMode, handleSidebarSelectDate, handleSidebarPreviousMonth, handleSidebarNextMonth, handleVisibleDateChange, handleVisibleMonthChange, handlePrevious, handleNext, handleToday, handleMonthCellSelectDate, handleMonthRenderedRangeChange, handleYearRenderedRangeChange, handleYearSyncRangeChange, addGoogleCalendar, reconnectGoogleAccount, toggleGoogleCalendar, updateGoogleCalendarEvent } = pane;
+  const { selectedViewMode, primaryViewMode, currentDate, selectedDate, titleDate, monthTitleDate, monthScrollTargetToken, visibleDays, virtualRail, yearRenderedRange, googleCalendarEvents, googleAccounts, isAnyCalendarConnecting, calendarGridStyle, headerScrollRef, allDayScrollRef, scrollContainerRef, contentViewportRef, handleCalendarScroll, handleSelectViewMode, handleSidebarSelectDate, handleSidebarPreviousMonth, handleSidebarNextMonth, handleVisibleDateChange, handleVisibleMonthChange, handlePrevious, handleNext, handleToday, handleMonthCellSelectDate, handleMonthRenderedRangeChange, handleYearRenderedRangeChange, handleYearSyncRangeChange, addGoogleCalendar, reconnectGoogleAccount, toggleGoogleCalendar, syncGoogleCalendarRange, updateGoogleCalendarEvent } = pane;
   const { calendarEventMoveOverrides, handleMoveCalendarEvent } = useCalendarEventMoveController({ updateGoogleCalendarEvent });
 
   useEffect(() => { persistProjectCalendarLinks(projectCalendarLinks); }, [projectCalendarLinks]);
@@ -240,8 +250,10 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: Sch
   const selectedViewModes = useMemo(() => Array.isArray(selectedViewMode) ? selectedViewMode : [selectedViewMode], [selectedViewMode]);
   const mainDisplayRange = useMemo(() => getScheduleEventDisplayRange({ primaryViewMode, currentDate, selectedDate, visibleDays, monthRenderedRange: pane.monthRenderedRange, yearRenderedRange }), [currentDate, pane.monthRenderedRange, primaryViewMode, selectedDate, visibleDays, yearRenderedRange]);
   const sidebarDisplayRange = useMemo(() => buildMiniCalendarDisplayRange(primaryViewMode === "month" || selectedViewModes.includes("list") ? monthTitleDate : titleDate), [monthTitleDate, primaryViewMode, selectedViewModes, titleDate]);
+  const printDisplayRange = useMemo(() => getCalendarPrintRange({ printRange, primaryViewMode, currentDate, selectedDate, visibleDays, currentDisplayRange: mainDisplayRange }), [currentDate, mainDisplayRange, primaryViewMode, printRange, selectedDate, visibleDays]);
   const mainCalendarEvents = useMemo(() => filterEventsByDisplayRange(visibleGoogleCalendarEvents, mainDisplayRange), [mainDisplayRange, visibleGoogleCalendarEvents]);
   const sidebarCalendarEvents = useMemo(() => filterEventsByDisplayRange(visibleGoogleCalendarEvents, sidebarDisplayRange), [sidebarDisplayRange, visibleGoogleCalendarEvents]);
+  const printCalendarEvents = useMemo(() => filterEventsByDisplayRange(visibleGoogleCalendarEvents, printDisplayRange), [printDisplayRange, visibleGoogleCalendarEvents]);
   const isListCalendarView = selectedViewModes.includes("list");
   const isPieChartCalendarView = selectedViewModes.includes("pieChart");
   const isSplitCalendarView = selectedViewModes.length > 1;
@@ -252,26 +264,33 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: Sch
   const canShowPlanResultToggle = selectedViewModes.some((mode) => PLAN_RESULT_TOGGLE_VIEW_MODES.has(mode));
   const headerTitleDate = isSplitCalendarView ? selectedDate : primaryViewMode === "month" || isListCalendarView ? monthTitleDate : isPieChartCalendarView ? selectedDate : titleDate;
   const headerTitleLabel = primaryViewMode === "year" ? format(headerTitleDate, "yyyy年", { locale: dateFnsLocale }) : format(headerTitleDate, isPieChartCalendarView || isSplitCalendarView ? "yyyy年M月d日" : monthLabelFormat, { locale: dateFnsLocale });
+  const printRangeLabel = useMemo(() => getCalendarPrintRangeLabel(printDisplayRange, printRange.mode, primaryViewMode), [primaryViewMode, printDisplayRange, printRange.mode]);
+  const handleBeforePrintCalendar = useCallback(async () => {
+    await syncGoogleCalendarRange(printDisplayRange);
+  }, [printDisplayRange, syncGoogleCalendarRange]);
 
   return (
     <CarvePanelShell isLeftPanelCollapsed={isLeftPanelCollapsed} leftPanel={<CalendarSidebar monthDate={sidebarMonthDate} selectedDate={selectedDate} selectedRange={null} visibleEvents={sidebarCalendarEvents} appProjects={appProjects} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} googleAccounts={googleAccountsWithColorOverrides} isAnyCalendarConnecting={isAnyCalendarConnecting} onSelectDate={handleSidebarSelectDate} onPreviousMonth={handleSidebarPreviousMonth} onNextMonth={handleSidebarNextMonth} onAddCalendar={addGoogleCalendar} onAddProject={handleAddAppProject} onToggleProject={handleToggleAppProject} onLinkGoogleCalendarAsProject={handleLinkGoogleCalendarAsProject} onLinkProjectToGoogleCalendar={handleLinkProjectToGoogleCalendar} onCreateProjectGoogleCalendar={handleCreateProjectGoogleCalendar} onUnlinkProjectCalendar={handleUnlinkProjectCalendar} onChangeGoogleCalendarColor={handleChangeGoogleCalendarColor} onReconnectAccount={(accountId) => { void reconnectGoogleAccount(accountId); }} onToggleCalendar={toggleGoogleCalendar} />} viewportRef={contentViewportRef}>
       <CarvePanel>
-        <ScheduleScreenHeaderDesktop titleLabel={headerTitleLabel} selectedViewMode={selectedViewMode} viewOptions={viewOptions} planResultModes={planResultModes} showPlanResultToggle={canShowPlanResultToggle} onSelectViewMode={handleSelectViewMode} onChangePlanResultModes={setPlanResultModes} onPrevious={handlePrevious} onNext={handleNext} onToday={handleToday} className="mb-2 flex shrink-0 items-center justify-between px-5 pt-4" />
-        {isYearCalendarView ? (
-          <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white"><CalendarYearView yearDate={currentDate} selectedDate={selectedDate} visibleEvents={mainCalendarEvents} onSelectDate={handleMonthCellSelectDate} onRenderedRangeChange={handleYearRenderedRangeChange} onSyncRangeChange={handleYearSyncRangeChange} /></div>
-        ) : isSplitCalendarView ? (
-          <CalendarSelectedViewsSplitView selectedViewModes={selectedViewModes} currentDate={currentDate} selectedDate={selectedDate} visibleDays={visibleDays} virtualRail={virtualRail} events={mainCalendarEvents} appProjects={appProjects} googleAccounts={googleAccountsWithColorOverrides} headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} calendarGridStyle={calendarGridStyle} allDayEventOrder={allDayEventOrder} onCalendarScroll={handleCalendarScroll} onSelectDate={handleSidebarSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onVisibleDateChange={handleVisibleDateChange} onMoveCalendarEvent={handleMoveCalendarEvent} onReorderAllDayEvents={handleReorderAllDayEvents} />
-        ) : isPieChartCalendarView ? (
-          <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white"><CalendarPieChartView days={visibleDays} virtualRail={virtualRail} selectedDate={selectedDate} events={mainCalendarEvents} appProjects={appProjects} googleAccounts={googleAccountsWithColorOverrides} onSelectDate={handleSidebarSelectDate} onVisibleDateChange={handleVisibleDateChange} /></div>
-        ) : isListCalendarView ? (
-          <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-white"><CalendarListView days={visibleDays} virtualRail={virtualRail} events={mainCalendarEvents} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onVisibleMonthChange={handleVisibleMonthChange} /></div>
-        ) : isMonthCalendarView ? (
-          <div className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-r-0", IOS_CALENDAR_MONTH_SURFACE_CLASS)}><CalendarMonthView currentDate={currentDate} selectedDate={selectedDate} scrollTargetToken={monthScrollTargetToken} visibleEvents={mainCalendarEvents} onSelectDate={handleMonthCellSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onRenderedRangeChange={handleMonthRenderedRangeChange} onMoveCalendarEvent={handleMoveCalendarEvent} /></div>
-        ) : isTimetableCalendarView ? (
-          <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-white"><CalendarTimetableView weekDate={currentDate} /></div>
-        ) : (
-          <div className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0", IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={mainCalendarEvents} calendarGridStyle={calendarGridStyle} allDayEventOrder={allDayEventOrder} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onMoveCalendarEvent={handleMoveCalendarEvent} onReorderAllDayEvents={handleReorderAllDayEvents} /></div>
-        )}
+        <ScheduleScreenHeaderDesktop titleLabel={headerTitleLabel} selectedViewMode={selectedViewMode} viewOptions={viewOptions} planResultModes={planResultModes} showPlanResultToggle={canShowPlanResultToggle} printRange={printRange} onSelectViewMode={handleSelectViewMode} onChangePlanResultModes={setPlanResultModes} onChangePrintRange={setPrintRange} onBeforePrint={handleBeforePrintCalendar} onPrevious={handlePrevious} onNext={handleNext} onToday={handleToday} className="mb-2 flex shrink-0 items-center justify-between px-5 pt-4" />
+        <div className="calendar-print-screen-content flex min-h-0 flex-1 flex-col">
+          {isYearCalendarView ? (
+            <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white"><CalendarYearView yearDate={currentDate} selectedDate={selectedDate} visibleEvents={mainCalendarEvents} onSelectDate={handleMonthCellSelectDate} onRenderedRangeChange={handleYearRenderedRangeChange} onSyncRangeChange={handleYearSyncRangeChange} /></div>
+          ) : isSplitCalendarView ? (
+            <CalendarSelectedViewsSplitView selectedViewModes={selectedViewModes} currentDate={currentDate} selectedDate={selectedDate} visibleDays={visibleDays} virtualRail={virtualRail} events={mainCalendarEvents} appProjects={appProjects} googleAccounts={googleAccountsWithColorOverrides} headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} calendarGridStyle={calendarGridStyle} allDayEventOrder={allDayEventOrder} onCalendarScroll={handleCalendarScroll} onSelectDate={handleSidebarSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onVisibleDateChange={handleVisibleDateChange} onMoveCalendarEvent={handleMoveCalendarEvent} onReorderAllDayEvents={handleReorderAllDayEvents} />
+          ) : isPieChartCalendarView ? (
+            <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white"><CalendarPieChartView days={visibleDays} virtualRail={virtualRail} selectedDate={selectedDate} events={mainCalendarEvents} appProjects={appProjects} googleAccounts={googleAccountsWithColorOverrides} onSelectDate={handleSidebarSelectDate} onVisibleDateChange={handleVisibleDateChange} /></div>
+          ) : isListCalendarView ? (
+            <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-white"><CalendarListView days={visibleDays} virtualRail={virtualRail} events={mainCalendarEvents} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onVisibleMonthChange={handleVisibleMonthChange} /></div>
+          ) : isMonthCalendarView ? (
+            <div className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-r-0", IOS_CALENDAR_MONTH_SURFACE_CLASS)}><CalendarMonthView currentDate={currentDate} selectedDate={selectedDate} scrollTargetToken={monthScrollTargetToken} visibleEvents={mainCalendarEvents} onSelectDate={handleMonthCellSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onRenderedRangeChange={handleMonthRenderedRangeChange} onMoveCalendarEvent={handleMoveCalendarEvent} /></div>
+          ) : isTimetableCalendarView ? (
+            <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-white"><CalendarTimetableView weekDate={currentDate} /></div>
+          ) : (
+            <div className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0", IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={mainCalendarEvents} calendarGridStyle={calendarGridStyle} allDayEventOrder={allDayEventOrder} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onMoveCalendarEvent={handleMoveCalendarEvent} onReorderAllDayEvents={handleReorderAllDayEvents} /></div>
+          )}
+        </div>
+        <CalendarPrintRangeView titleLabel={headerTitleLabel} rangeLabel={printRangeLabel} focusDate={currentDate} range={printDisplayRange} events={printCalendarEvents} />
       </CarvePanel>
     </CarvePanelShell>
   );
