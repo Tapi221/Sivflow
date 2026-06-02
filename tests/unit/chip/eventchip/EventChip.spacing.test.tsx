@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
@@ -13,6 +13,12 @@ type WeekdayChipLayoutStubOptions = {
   titleText: string;
   titleTextWidth: number;
   timeTextWidth: number;
+};
+
+type ResizeObserverMock = {
+  disconnect: () => void;
+  observe: (target: Element) => void;
+  unobserve: (target: Element) => void;
 };
 
 const TIMED_EVENT: GoogleCalendarEvent = {
@@ -48,6 +54,8 @@ const normalizeCssColor = (color: string): string => {
 };
 
 const isWeekdayChipElement = (element: HTMLElement): boolean => element.className.includes("z-10") && element.className.includes("rounded-md");
+
+const isWeekdayMeasurementElement = (element: HTMLElement): boolean => element.className.includes("invisible") && element.className.includes("absolute") && element.className.includes("rounded-md");
 
 const findClosestWeekdayChipElement = (element: Element | null): HTMLElement | null => {
   let currentElement = element;
@@ -118,10 +126,10 @@ const getWeekdayInlineRowElement = (title: string): HTMLElement | null => {
 
 const stubWeekdayChipLayout = ({ chipHeight, chipWidth, titleText, titleTextWidth, timeTextWidth }: WeekdayChipLayoutStubOptions) => {
   vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(function (this: HTMLElement) {
-    return isWeekdayChipElement(this) ? chipHeight : 0;
+    return isWeekdayChipElement(this) || isWeekdayMeasurementElement(this) ? chipHeight : 0;
   });
   vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(function (this: HTMLElement) {
-    return isWeekdayChipElement(this) ? chipWidth : 0;
+    return isWeekdayChipElement(this) || isWeekdayMeasurementElement(this) ? chipWidth : 0;
   });
   vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(function (this: HTMLElement) {
     if (this.className.includes("text-[12px]")) return 17;
@@ -297,5 +305,31 @@ describe("weekday event chip inline time layout", () => {
     const inlineRowElement = getWeekdayInlineRowElement(SHORT_TITLE_EVENT.title);
 
     expect(inlineRowElement).toBeNull();
+  });
+
+  it("横並び表示に切り替わっても測定基準を変えず、タイトル下表示へ発振しない", async () => {
+    const observerCallbacks: ResizeObserverCallback[] = [];
+    const resizeObserverConstructor = vi.fn((callback: ResizeObserverCallback): ResizeObserverMock => {
+      observerCallbacks.push(callback);
+
+      return {
+        disconnect: vi.fn(),
+        observe: vi.fn(),
+        unobserve: vi.fn(),
+      };
+    });
+
+    vi.stubGlobal("ResizeObserver", resizeObserverConstructor);
+    stubWeekdayChipLayout({ chipHeight: 12, chipWidth: 70, titleText: SHORT_TITLE_EVENT.title, titleTextWidth: 8, timeTextWidth: 40 });
+
+    render(<CalendarEventChipWeekday event={SHORT_TITLE_EVENT} />);
+
+    await waitFor(() => expect(getWeekdayInlineRowElement(SHORT_TITLE_EVENT.title)).not.toBeNull());
+
+    observerCallbacks.forEach((callback) => callback([], {} as ResizeObserver));
+
+    await waitFor(() => expect(getWeekdayInlineRowElement(SHORT_TITLE_EVENT.title)).not.toBeNull());
+    expect(getWeekdayChipElement(SHORT_TITLE_EVENT.title).className).toContain("py-[1px]");
+    expect(getWeekdayChipElement(SHORT_TITLE_EVENT.title).textContent).toContain("~");
   });
 });
