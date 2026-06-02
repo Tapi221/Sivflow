@@ -6,7 +6,7 @@ import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboard
 import { captureElementRectToBlob } from "@/features/selection-capture/domSelectionCapture";
 import { dispatchCardSelectionCaptureEvent, type CardSelectionCaptureSide } from "@/features/selection-capture/cardSelectionCaptureEvents";
 import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
-import type { SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
+import type { SelectionCaptureArea, SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
 import { recognizeSelectionCaptureText } from "@/features/selection-capture/selectionCaptureOcr";
 import { cn } from "@/lib/utils";
 
@@ -140,10 +140,11 @@ export const CardWorkspaceShell = ({
     setIsSelectionCaptureBusy(false);
   }, []);
 
-  const handleCaptureSelection = useCallback(async (rect: SelectionCaptureRect) => {
+  const handleCaptureSelection = useCallback(async (area: SelectionCaptureArea) => {
     const target = viewportNodeRef.current;
     if (!target) return;
 
+    const rect = area.rect;
     setIsSelectionCaptureBusy(true);
     try {
       const blob = await captureElementRectToBlob(target, rect);
