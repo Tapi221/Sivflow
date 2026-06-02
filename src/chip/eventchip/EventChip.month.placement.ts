@@ -124,6 +124,18 @@ const getMonthEventChipCount = (contentHeight: number) => {
   );
 };
 
+const getMonthVisibleEventLimit = (
+  eventCount: number,
+  monthRowHeight: number,
+  maxVisibleEventCount?: number,
+) => {
+  const visibleChipCount = getVisibleMonthEventChipCount(eventCount, monthRowHeight);
+
+  if (typeof maxVisibleEventCount !== "number" || !Number.isFinite(maxVisibleEventCount)) return visibleChipCount;
+
+  return Math.max(0, Math.min(visibleChipCount, Math.floor(maxVisibleEventCount)));
+};
+
 export const createMonthEventIndex = (
   visibleEvents: GoogleCalendarEvent[],
   allowedDayKeys?: ReadonlySet<string>,
@@ -232,16 +244,18 @@ export const computeMonthEventsByDay = ({
   eventIndex,
   monthWeeks,
   monthRowHeight,
+  maxVisibleEventCount,
 }: {
   visibleEvents?: GoogleCalendarEvent[];
   eventIndex?: CalendarMonthEventIndex;
   monthWeeks: CalendarMonthPlacementWeek[];
   monthRowHeight: number;
+  maxVisibleEventCount?: number;
 }) => {
   const eventsByDayKey = eventIndex ?? createMonthEventIndex(visibleEvents ?? [], createMonthWeekDayKeySet(monthWeeks));
   const groupedEvents = new Map<string, CalendarMonthDayEvents>();
   const maxVisibleEventCandidates =
-    getVisibleMonthEventChipCount(Number.MAX_SAFE_INTEGER, monthRowHeight) + 1;
+    getMonthVisibleEventLimit(Number.MAX_SAFE_INTEGER, monthRowHeight, maxVisibleEventCount) + 1;
 
   for (const week of monthWeeks) {
     for (const day of week.days) {
@@ -265,9 +279,10 @@ export const computeMonthEventsByDay = ({
   }
 
   for (const dayEvents of groupedEvents.values()) {
-    const visibleChipCount = getVisibleMonthEventChipCount(
+    const visibleChipCount = getMonthVisibleEventLimit(
       dayEvents.totalCount,
       monthRowHeight,
+      maxVisibleEventCount,
     );
 
     if (dayEvents.visibleEvents.length > visibleChipCount) {
