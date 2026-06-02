@@ -55,6 +55,7 @@ const CalendarMonthView = ({
   const scroll = useMonthInfiniteScroll({
     currentDate,
     scrollTargetToken,
+    monthRowHeight,
     onVisibleMonthChange,
   });
 
