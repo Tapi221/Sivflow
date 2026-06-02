@@ -16,6 +16,13 @@ type ChipLayoutState = {
   useInlineTimeLayout: boolean;
 };
 
+type CalendarEventChipWeekdayStyle = CSSProperties & {
+  "--calendar-event-chip-accent": string;
+  "--calendar-event-chip-bg": string;
+  WebkitPrintColorAdjust: "exact";
+  printColorAdjust: "exact";
+};
+
 const CHIP_ROOT_CLASS = "relative isolate h-full min-h-0 w-full";
 const CHIP_LINE_MASK_CLASS = "pointer-events-none absolute inset-0 rounded-md bg-white";
 const CHIP_BASE_CLASS = "relative z-10 flex h-full min-h-0 w-full overflow-hidden rounded-md text-left";
@@ -109,6 +116,16 @@ const createTitleClampStyle = (lineClamp: number): CSSProperties => {
   };
 };
 
+const createCalendarEventChipWeekdayStyle = (backgroundColor: string, accentColor: string, textColor: string): CalendarEventChipWeekdayStyle => ({
+  "--calendar-event-chip-accent": accentColor,
+  "--calendar-event-chip-bg": backgroundColor,
+  WebkitPrintColorAdjust: "exact",
+  printColorAdjust: "exact",
+  background: backgroundColor,
+  borderLeft: `3px solid ${accentColor}`,
+  color: textColor,
+});
+
 const getChipClassName = (useInlineTimeLayout: boolean): string => [CHIP_BASE_CLASS, useInlineTimeLayout ? CHIP_INLINE_CLASS : CHIP_NORMAL_CLASS].join(" ");
 
 const getMeasurementClassName = (): string => [CHIP_MEASUREMENT_BASE_CLASS, CHIP_NORMAL_CLASS].join(" ");
@@ -123,6 +140,7 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
   const endsAt = event.endsAt instanceof Date ? event.endsAt : new Date(event.endsAt ?? event.startsAt);
   const timeLabel = event.isAllDay ? "終日" : `${format(startsAt, "H:mm")} ~ ${format(endsAt, "H:mm")}`;
   const titleLabel = event.title || "Untitled";
+  const chipStyle = createCalendarEventChipWeekdayStyle(tokens.bg, tokens.border, tokens.text);
 
   useLayoutEffect(() => {
     const layoutMeasurement = layoutMeasurementRef.current;
@@ -172,14 +190,7 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
     <HoverEventTooltip title={titleLabel} subtitle={timeLabel} accentColor={tokens.border} className="h-full min-h-0 w-full" disabled={tooltipDisabled}>
       <div className={CHIP_ROOT_CLASS}>
         <div aria-hidden="true" className={CHIP_LINE_MASK_CLASS} />
-        <div
-          className={getChipClassName(chipLayout.useInlineTimeLayout)}
-          style={{
-            background: tokens.bg,
-            borderLeft: `3px solid ${tokens.border}`,
-            color: tokens.text,
-          }}
-        >
+        <div data-calendar-event-chip="weekday" className={getChipClassName(chipLayout.useInlineTimeLayout)} style={chipStyle}>
           {chipLayout.useInlineTimeLayout ? (
             <div className={CHIP_INLINE_ROW_CLASS}>
               <span className={CHIP_INLINE_TITLE_CLASS}>{titleLabel}</span>
