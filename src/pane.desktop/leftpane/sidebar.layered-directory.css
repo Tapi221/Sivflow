@@ -135,3 +135,34 @@ aside[aria-label="Library hierarchy explorer"] button[aria-pressed] svg * {
   stroke: currentColor !important;
   opacity: 1 !important;
 }
+
+/* Replace circular markers with square checkbox-style indicators. */
+aside[aria-label="Project list explorer"] [role="treeitem"] > button > span[aria-hidden="true"],
+aside[aria-label="Library hierarchy explorer"] [role="treeitem"] > .library-tree-marker,
+aside[aria-label="Tag tree explorer"] [role="treeitem"] > .library-tree-marker {
+  position: relative !important;
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+  border: 1.5px solid color-mix(in srgb, currentColor 42%, #ffffff) !important;
+  border-radius: 4px !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+aside[aria-label="Tag tree explorer"] [role="treeitem"] > .library-tree-marker::after {
+  content: "" !important;
+  display: block !important;
+  width: 5px !important;
+  height: 8px !important;
+  border: solid currentColor !important;
+  border-width: 0 1.6px 1.6px 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  opacity: 0 !important;
+  transform: rotate(45deg) translate(-1px, -1px) !important;
+}
+
+aside[aria-label="Tag tree explorer"] [role="treeitem"][aria-selected="true"] > .library-tree-marker::after {
+  opacity: 1 !important;
+}
