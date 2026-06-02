@@ -216,6 +216,10 @@
     box-shadow: none;
   }
 
+  .calendar-print-range-view {
+    display: none;
+  }
+
   .task-chip-compact-ellipsis {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -270,24 +274,101 @@
       background: #ffffff !important;
     }
 
-    body.calendar-printing .calendar-print-panel [data-calendar-print-toolbar] {
-      padding: 0 0 6mm 0 !important;
-      margin: 0 !important;
-    }
-
-    body.calendar-printing .calendar-print-panel [data-calendar-print-toolbar] > div,
-    body.calendar-printing .calendar-print-panel [data-calendar-print-toolbar] button {
+    body.calendar-printing .calendar-print-panel [data-calendar-print-toolbar],
+    body.calendar-printing .calendar-print-panel .calendar-print-screen-content {
       display: none !important;
     }
 
-    body.calendar-printing .calendar-print-panel [data-calendar-print-toolbar] > h1 {
+    body.calendar-printing .calendar-print-panel .calendar-print-range-view {
       display: block !important;
-      width: auto !important;
-      max-width: none !important;
-      overflow: visible !important;
+      width: 100% !important;
+      color: #111111 !important;
+      background: #ffffff !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-print-range-header {
+      display: flex !important;
+      align-items: baseline !important;
+      justify-content: space-between !important;
+      gap: 10mm !important;
+      padding: 0 0 5mm 0 !important;
+      margin: 0 !important;
+      border-bottom: 1px solid #e5e7eb !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-print-range-title {
+      margin: 0 !important;
       color: #111111 !important;
       font-size: 18px !important;
+      font-weight: 700 !important;
       line-height: 1.25 !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-print-range-subtitle {
+      margin: 0 !important;
+      color: #6b7280 !important;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      line-height: 1.25 !important;
+      white-space: nowrap !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-print-range-grid {
+      display: grid !important;
+      grid-template-columns: repeat(var(--calendar-print-range-column-count), minmax(0, 1fr)) !important;
+      gap: 0 !important;
+      width: 100% !important;
+      padding-top: 5mm !important;
+      break-inside: auto !important;
+      page-break-inside: auto !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-print-range-day {
+      display: flex !important;
+      min-height: 32mm !important;
+      flex-direction: column !important;
+      gap: 2mm !important;
+      padding: 2mm !important;
+      border-right: 1px solid #e5e7eb !important;
+      border-bottom: 1px solid #e5e7eb !important;
+      background: #ffffff !important;
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-print-range-day-outside {
+      color: #9ca3af !important;
+      background: #fafafa !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-print-range-day-heading {
+      display: flex !important;
+      align-items: baseline !important;
+      gap: 2mm !important;
+      min-height: 5mm !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-print-range-day-number {
+      color: #111827 !important;
+      font-size: 12px !important;
+      font-weight: 700 !important;
+      line-height: 1 !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-print-range-weekday {
+      color: #6b7280 !important;
+      font-size: 9px !important;
+      font-weight: 700 !important;
+      line-height: 1 !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-print-range-events {
+      display: flex !important;
+      min-width: 0 !important;
+      flex-direction: column !important;
+      gap: 1mm !important;
     }
 
     body.calendar-printing .calendar-print-panel .overflow-hidden,
