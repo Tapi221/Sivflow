@@ -3,7 +3,7 @@ import type { Locale } from "./locale.store";
 
 export type RawTranslations = {
   weekdayLabels: string[];
-  calendarMonthWeekdays: string[];
+  miniCalendarWeekdays: string[];
   monthRowResizeTitle: string;
   monthRowResizeAriaLabel: string;
   todayDescriptionEmpty: string;
