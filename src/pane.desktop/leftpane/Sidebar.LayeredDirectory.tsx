@@ -75,7 +75,7 @@ const SidebarLayeredDirectory = () => {
   }, [openExplorerTab]);
 
   return (
-    <div className="app-layered-directory flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased">
+    <div className="app-layered-directory flex h-full min-h-0 w-[200px] shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased">
       <div className="shrink-0 pb-1 pl-3 pr-2 pt-3">
         <div className="flex h-6 items-center gap-1.5">
           <div className="min-w-0 flex-1 text-[11px] font-bold uppercase leading-none tracking-[0.04em] text-[var(--app-sidebar-text-muted)]">
