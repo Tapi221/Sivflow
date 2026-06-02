@@ -17,6 +17,8 @@ export type FolderTreeNode = {
   order_index?: number;
   isDeleted?: boolean;
   is_deleted?: boolean;
+  isFavorite?: boolean;
+  is_favorite?: boolean;
   isHidden?: boolean;
   is_hidden?: boolean;
   __optimistic?: boolean;
