@@ -19,21 +19,16 @@ type CalendarEventUndoSnapshot = {
   event: GoogleCalendarEvent;
 };
 
-type CalendarDndDragPageRequest = {
-  direction: CalendarDndPageDirection;
-  requestedAt: number;
-};
-
 const SANDBOX_ACCOUNT_ID = "calendar-dnd-sandbox";
 const SANDBOX_CALENDAR_ID = "sandbox-calendar";
 const SAMPLE_START_DATE = new Date(2026, 5, 1);
 const WEEKDAYS_PER_WORKWEEK = 5;
 const CALENDAR_GRID_STYLE: CalendarGridStyle = { "--calendar-hour-row-height": "72px" };
-const SANDBOX_HEADER_DESCRIPTION = "週表示と月表示の DnD を同じサンプル予定で確認します。週表示では予定をドラッグしたまま左右端へ寄せると前後の週へページ送りします。";
+const SANDBOX_HEADER_DESCRIPTION = "週表示と月表示の DnD を同じサンプル予定で確認します。週表示では予定をドラッグしたまま左右端へ寄せると前後の週へ連続ページ送りします。";
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-none";
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 const WEEKDAY_DRAG_PAGE_EDGE_WIDTH_PX = 72;
-const WEEKDAY_DRAG_PAGE_REQUEST_COOLDOWN_MS = 700;
+const WEEKDAY_DRAG_PAGE_REPEAT_INTERVAL_MS = 700;
 const VIEW_MODE_OPTIONS: readonly { value: CalendarDndViewMode; label: string }[] = [
   { value: "week", label: "週表示" },
   { value: "month", label: "月表示" },
@@ -79,8 +74,6 @@ const getDragPageDirection = (element: HTMLElement, clientX: number): CalendarDn
   return null;
 };
 
-const shouldRequestDragPage = (previousRequest: CalendarDndDragPageRequest | null, direction: CalendarDndPageDirection, requestedAt: number): boolean => !previousRequest || previousRequest.direction !== direction || requestedAt - previousRequest.requestedAt >= WEEKDAY_DRAG_PAGE_REQUEST_COOLDOWN_MS;
-
 const moveEventTime = (targetEvent: GoogleCalendarEvent, sourceEvent: GoogleCalendarEvent, startsAt: Date, endsAt: Date, isAllDay: boolean): GoogleCalendarEvent => {
   if (!isSameCalendarEvent(targetEvent, sourceEvent)) return targetEvent;
 
@@ -103,7 +96,9 @@ const CalendarDndSandboxPage = () => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const calendarSurfaceRef = useRef<HTMLDivElement | null>(null);
   const eventsRef = useRef<GoogleCalendarEvent[]>([]);
-  const dragPageRequestRef = useRef<CalendarDndDragPageRequest | null>(null);
+  const dragPagePointerIdRef = useRef<number | null>(null);
+  const dragPageDirectionRef = useRef<CalendarDndPageDirection | null>(null);
+  const dragPageIntervalRef = useRef<number | null>(null);
   const [viewMode, setViewMode] = useState<CalendarDndViewMode>("week");
   const [weekStartDate, setWeekStartDate] = useState<Date>(() => new Date(SAMPLE_START_DATE));
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date(SAMPLE_START_DATE));
@@ -118,26 +113,93 @@ const CalendarDndSandboxPage = () => {
     setWeekStartDate((currentDate) => addBusinessDays(currentDate, direction === "next" ? WEEKDAYS_PER_WORKWEEK : -WEEKDAYS_PER_WORKWEEK));
   }, []);
 
-  const handleWeekDragPointerMoveCapture = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
-    const surfaceElement = calendarSurfaceRef.current;
-    if (event.buttons !== 1 || !surfaceElement || !isCalendarDndEventDragTarget(event.target)) return;
+  const clearDragPageInterval = useCallback(() => {
+    if (dragPageIntervalRef.current === null) return;
 
-    const direction = getDragPageDirection(surfaceElement, event.clientX);
-    if (!direction) {
-      dragPageRequestRef.current = null;
+    window.clearInterval(dragPageIntervalRef.current);
+    dragPageIntervalRef.current = null;
+  }, []);
+
+  const stopWeekDragPaging = useCallback(() => {
+    dragPagePointerIdRef.current = null;
+    dragPageDirectionRef.current = null;
+    clearDragPageInterval();
+  }, [clearDragPageInterval]);
+
+  const pauseWeekDragPaging = useCallback(() => {
+    dragPageDirectionRef.current = null;
+    clearDragPageInterval();
+  }, [clearDragPageInterval]);
+
+  const startWeekDragPaging = useCallback((direction: CalendarDndPageDirection) => {
+    if (dragPageDirectionRef.current === direction && dragPageIntervalRef.current !== null) return;
+
+    clearDragPageInterval();
+    dragPageDirectionRef.current = direction;
+    handleMoveWeekPage(direction);
+    dragPageIntervalRef.current = window.setInterval(() => {
+      if (dragPagePointerIdRef.current === null || dragPageDirectionRef.current !== direction) {
+        clearDragPageInterval();
+        return;
+      }
+
+      handleMoveWeekPage(direction);
+    }, WEEKDAY_DRAG_PAGE_REPEAT_INTERVAL_MS);
+  }, [clearDragPageInterval, handleMoveWeekPage]);
+
+  const updateWeekDragPaging = useCallback((pointerId: number, buttons: number, clientX: number) => {
+    const surfaceElement = calendarSurfaceRef.current;
+    if (dragPagePointerIdRef.current !== pointerId) return;
+
+    if (buttons !== 1 || !surfaceElement) {
+      stopWeekDragPaging();
       return;
     }
 
-    const requestedAt = window.performance.now();
-    if (!shouldRequestDragPage(dragPageRequestRef.current, direction, requestedAt)) return;
+    const direction = getDragPageDirection(surfaceElement, clientX);
+    if (!direction) {
+      pauseWeekDragPaging();
+      return;
+    }
 
-    dragPageRequestRef.current = { direction, requestedAt };
-    handleMoveWeekPage(direction);
-  }, [handleMoveWeekPage]);
+    startWeekDragPaging(direction);
+  }, [pauseWeekDragPaging, startWeekDragPaging, stopWeekDragPaging]);
 
-  const handleWeekDragPointerEndCapture = useCallback(() => {
-    dragPageRequestRef.current = null;
+  const handleWeekDragPointerDownCapture = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || !isCalendarDndEventDragTarget(event.target)) return;
+
+    dragPagePointerIdRef.current = event.pointerId;
   }, []);
+
+  const handleWeekDragPointerMoveCapture = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    updateWeekDragPaging(event.pointerId, event.buttons, event.clientX);
+  }, [updateWeekDragPaging]);
+
+  const handleWeekDragPointerEndCapture = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragPagePointerIdRef.current !== event.pointerId) return;
+
+    stopWeekDragPaging();
+  }, [stopWeekDragPaging]);
+
+  useEffect(() => {
+    const handlePointerMove = (event: PointerEvent) => updateWeekDragPaging(event.pointerId, event.buttons, event.clientX);
+    const handlePointerEnd = (event: PointerEvent) => {
+      if (dragPagePointerIdRef.current !== event.pointerId) return;
+
+      stopWeekDragPaging();
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerEnd);
+    window.addEventListener("pointercancel", handlePointerEnd);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerEnd);
+      window.removeEventListener("pointercancel", handlePointerEnd);
+      clearDragPageInterval();
+    };
+  }, [clearDragPageInterval, stopWeekDragPaging, updateWeekDragPaging]);
 
   const handleMoveCalendarEvent = useCallback<CalendarEventMoveHandler>(({ event, startsAt, endsAt, isAllDay }) => {
     const previousEvent = eventsRef.current.find((currentEvent) => isSameCalendarEvent(currentEvent, event));
@@ -161,8 +223,9 @@ const CalendarDndSandboxPage = () => {
     setWeekStartDate(new Date(SAMPLE_START_DATE));
     setSelectedDate(new Date(SAMPLE_START_DATE));
     setEvents(createSampleEvents().map(cloneEvent));
+    stopWeekDragPaging();
     toast.dismiss();
-  }, []);
+  }, [stopWeekDragPaging]);
 
   return (
     <div className="flex h-screen min-h-0 w-full min-w-0 flex-col bg-white text-[#1c1c1e]">
@@ -199,7 +262,7 @@ const CalendarDndSandboxPage = () => {
               <CalendarMonthView currentDate={SAMPLE_START_DATE} selectedDate={selectedDate} visibleEvents={events} onSelectDate={setSelectedDate} onMoveCalendarEvent={handleMoveCalendarEvent} />
             </div>
           ) : (
-            <div ref={calendarSurfaceRef} className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0", IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)} onPointerMoveCapture={handleWeekDragPointerMoveCapture} onPointerUpCapture={handleWeekDragPointerEndCapture} onPointerCancelCapture={handleWeekDragPointerEndCapture}>
+            <div ref={calendarSurfaceRef} className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0", IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)} onPointerDownCapture={handleWeekDragPointerDownCapture} onPointerMoveCapture={handleWeekDragPointerMoveCapture} onPointerUpCapture={handleWeekDragPointerEndCapture} onPointerCancelCapture={handleWeekDragPointerEndCapture}>
               <CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={events} calendarGridStyle={CALENDAR_GRID_STYLE} selectedDate={selectedDate} onSelectDate={setSelectedDate} onMoveCalendarEvent={handleMoveCalendarEvent} />
             </div>
           )}
