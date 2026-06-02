@@ -1,0 +1,7 @@
+@media (max-width: 767px) {
+  .schedule-mobile-calendar-surface > .flex.min-h-0.flex-1.flex-col.overflow-hidden.bg-white > .px-2.scrollbar-hidden {
+    padding-left: 52px;
+    padding-right: 8px;
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  }
+}
