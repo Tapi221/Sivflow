@@ -1,4 +1,4 @@
-import type { GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { AppCalendarItem, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink } from "./scheduleScreen.types";
 
 type CalendarEventSourceIndex = {
@@ -6,8 +6,6 @@ type CalendarEventSourceIndex = {
   projectByNormalizedLabel: Map<string, AppCalendarItem>;
   linkedProjectIdByExactGoogleCalendarKey: Map<string, string>;
   linkedProjectIdByGoogleCalendarId: Map<string, string | null>;
-  googleCalendarNameByExactKey: Map<string, string>;
-  googleCalendarNameByCalendarId: Map<string, string | null>;
 };
 
 type CalendarEventVisibilityInput = {
@@ -28,8 +26,6 @@ const createGoogleCalendarKey = (accountId: string, calendarId: string): string 
 
 const normalizeCalendarSourceLabel = (value: string): string => value.trim().toLowerCase();
 
-const getGoogleCalendarName = (calendar: GoogleCalendarListItem): string => calendar.summaryOverride ?? calendar.summary;
-
 const setUnambiguousValue = <T>(map: Map<string, T | null>, key: string, value: T): void => {
   if (!map.has(key)) {
     map.set(key, value);
@@ -41,17 +37,11 @@ const setUnambiguousValue = <T>(map: Map<string, T | null>, key: string, value: 
   }
 };
 
-const createCalendarEventSourceIndex = ({
-  appProjects,
-  projectCalendarLinks,
-  googleAccounts,
-}: CalendarEventVisibilityInput): CalendarEventSourceIndex => {
+const createCalendarEventSourceIndex = ({ appProjects, projectCalendarLinks }: CalendarEventVisibilityInput): CalendarEventSourceIndex => {
   const projectById = new Map(appProjects.map((project) => [project.id, project]));
   const projectByNormalizedLabel = new Map(appProjects.map((project) => [normalizeCalendarSourceLabel(project.label), project]));
   const linkedProjectIdByExactGoogleCalendarKey = new Map<string, string>();
   const linkedProjectIdByGoogleCalendarId = new Map<string, string | null>();
-  const googleCalendarNameByExactKey = new Map<string, string>();
-  const googleCalendarNameByCalendarId = new Map<string, string | null>();
 
   for (const link of projectCalendarLinks) {
     if (link.provider !== "google") continue;
@@ -60,22 +50,11 @@ const createCalendarEventSourceIndex = ({
     setUnambiguousValue(linkedProjectIdByGoogleCalendarId, link.externalCalendarId, link.projectId);
   }
 
-  for (const account of googleAccounts) {
-    for (const calendar of account.calendars) {
-      const name = getGoogleCalendarName(calendar);
-
-      googleCalendarNameByExactKey.set(createGoogleCalendarKey(account.accountId, calendar.id), name);
-      setUnambiguousValue(googleCalendarNameByCalendarId, calendar.id, name);
-    }
-  }
-
   return {
     projectById,
     projectByNormalizedLabel,
     linkedProjectIdByExactGoogleCalendarKey,
     linkedProjectIdByGoogleCalendarId,
-    googleCalendarNameByExactKey,
-    googleCalendarNameByCalendarId,
   };
 };
 
@@ -92,18 +71,9 @@ const resolveGoogleCalendarLinkedProject = (event: GoogleCalendarEvent, index: C
   return findProjectByIdOrLabel(fallbackProjectId, index);
 };
 
-const resolveGoogleCalendarNameProject = (event: GoogleCalendarEvent, index: CalendarEventSourceIndex): AppCalendarItem | null => {
-  const exactName = event.accountId ? index.googleCalendarNameByExactKey.get(createGoogleCalendarKey(event.accountId, event.calendarId)) : undefined;
-  const fallbackName = exactName ?? index.googleCalendarNameByCalendarId.get(event.calendarId) ?? undefined;
-
-  return findProjectByIdOrLabel(fallbackName, index);
-};
-
 const resolveCalendarEventProject = (event: GoogleCalendarEvent, index: CalendarEventSourceIndex): AppCalendarItem | null => (
   resolveGoogleCalendarLinkedProject(event, index) ??
-  findProjectByIdOrLabel(event.projectId, index) ??
-  findProjectByIdOrLabel(event.calendarId, index) ??
-  resolveGoogleCalendarNameProject(event, index)
+  findProjectByIdOrLabel(event.projectId, index)
 );
 
 const resolveGoogleEventAccentColor = (event: GoogleCalendarEvent, overrides: GoogleCalendarColorOverrideMap): string => {
