@@ -29,10 +29,13 @@ export interface DocumentItem extends BaseEntity {
   localFileId?: string | null;
   storagePath?: string | null;
   downloadUrl?: string | null;
-  thumbnailUrl?: string | null;
+  thumbnailUrl?: string;
   tags?: string[];
   pageCount?: number | null;
   uploadStatus?: "pending" | "queued" | "uploading" | "ready" | "failed";
+  googleDriveFileId?: string | null;
+  googleDriveWebViewLink?: string | null;
+  googleDriveWebContentLink?: string | null;
   documentId?: string;
   viewerState?: PdfViewerState | null;
 }
