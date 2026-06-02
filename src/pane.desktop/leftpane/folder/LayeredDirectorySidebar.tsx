@@ -24,7 +24,7 @@ type ProjectListItemProps = { folder: FolderTreeNode; selectedFolderId: string |
 
 type LibraryHierarchySidebarProps = { projectRootId?: string | null; };
 
-type FolderContextMenuState = { folderId: string; folderName: string; folderColor: string | null; isRootProject: boolean; x: number; y: number; };
+type FolderContextMenuState = { folderId: string; folderName: string; folderColor: string | null; isFavorite: boolean; isRootProject: boolean; x: number; y: number; };
 
 type FolderColorMenuState = { x: number; y: number; };
 
@@ -44,6 +44,8 @@ const getFolderName = (folder: FolderTreeNode, isRootProject = false): string =>
   return typeof name === "string" && name.trim() ? name.trim() : isRootProject ? UNTITLED_PROJECT_NAME : UNTITLED_FOLDER_NAME;
 };
 
+const getFolderIsFavorite = (folder: FolderTreeNode): boolean => folder.isFavorite === true || folder.is_favorite === true;
+
 const getRootFolderIds = (rootFolders: FolderTreeNode[]): string[] => rootFolders.map(getFolderId).filter(Boolean);
 
 const getLayeredProjectColorMenuPosition = (menu: FolderContextMenuState, anchor: LayeredProjectMenuSubmenuAnchor): FolderColorMenuState => {
@@ -57,7 +59,7 @@ const createFolderContextMenuState = (event: ReactMouseEvent<HTMLElement>, folde
   const folderId = getFolderId(folder);
   if (!folderId) return null;
 
-  return { folderId, folderName: getFolderName(folder, isRootProject), folderColor: getFolderProjectColor(folder), isRootProject, ...clampRightClickPanelPosition(event.clientX, event.clientY, LAYERED_PROJECT_MENU_DIMENSIONS) };
+  return { folderId, folderName: getFolderName(folder, isRootProject), folderColor: getFolderProjectColor(folder), isFavorite: getFolderIsFavorite(folder), isRootProject, ...clampRightClickPanelPosition(event.clientX, event.clientY, LAYERED_PROJECT_MENU_DIMENSIONS) };
 };
 
 const createProjectMarkerStyle = (folderColor: string): CSSProperties => {
@@ -114,13 +116,14 @@ const useFolderContextMenu = ({ createFolder, updateFolder, deleteFolder, create
 
   const actions = useMemo<LayeredProjectMenuAction[]>(() => {
     if (!contextMenu) return [];
-    const { folderId, folderName, isRootProject } = contextMenu;
+    const { folderId, folderName, isFavorite, isRootProject } = contextMenu;
     return [
       { id: "change-color", onSelect: () => undefined },
       { id: "rename", onSelect: () => { const nextFolderName = window.prompt(isRootProject ? "プロジェクト名を変更" : "フォルダ名を変更", folderName)?.trim(); closeContextMenu(); if (nextFolderName && nextFolderName !== folderName) void updateFolder(folderId, { folderName: nextFolderName, name: nextFolderName }); } },
       { id: "create-card-set", onSelect: () => { closeContextMenu(); void createCardSet(DEFAULT_NEW_CARD_SET_NAME, folderId); } },
       { id: "create-folder", onSelect: () => { closeContextMenu(); void createFolder(DEFAULT_NEW_FOLDER_NAME, folderId); setExpandedFolderIds((current) => new Set(current).add(folderId)); } },
       { id: "import-pdf", onSelect: () => { handleToolbarAddDocument(); closeContextMenu(); } },
+      { id: "add-to-favorites", disabled: isFavorite, onSelect: () => { closeContextMenu(); void updateFolder(folderId, { isFavorite: true }); } },
       { id: "hide", onSelect: () => { closeContextMenu(); void updateFolder(folderId, { isHidden: true }); } },
       { id: "delete", onSelect: () => { closeContextMenu(); void deleteFolder(folderId); } },
     ];
