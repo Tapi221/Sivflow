@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
+import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/calendar.types";
 import type { ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
@@ -107,23 +108,24 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
-  const { selectedViewMode, currentDate, selectedDate, titleDate, monthTitleDate, monthScrollTargetToken, visibleDays, googleCalendarEvents, googleAccounts, calendarGridStyle, headerScrollRef, allDayScrollRef, scrollContainerRef, contentViewportRef, handleCalendarScroll, handleSelectViewMode, handleSidebarSelectDate, handleVisibleDateChange, handleVisibleMonthChange, handlePrevious, handleNext, handleToday, handleMonthCellSelectDate, handleMonthRenderedRangeChange, updateGoogleCalendarEvent } = pane;
+  const { selectedViewMode, primaryViewMode, currentDate, selectedDate, titleDate, monthTitleDate, monthScrollTargetToken, visibleDays, googleCalendarEvents, googleAccounts, calendarGridStyle, headerScrollRef, allDayScrollRef, scrollContainerRef, contentViewportRef, handleCalendarScroll, handleSelectViewMode, handleSidebarSelectDate, handleVisibleDateChange, handleVisibleMonthChange, handlePrevious, handleNext, handleToday, handleMonthCellSelectDate, handleMonthRenderedRangeChange, handleYearRenderedRangeChange, handleYearSyncRangeChange, updateGoogleCalendarEvent } = pane;
   const { calendarEventMoveOverrides, handleMoveCalendarEvent } = useCalendarEventMoveController({ updateGoogleCalendarEvent });
   const visibleGoogleCalendarEvents = useMemo(() => applyCalendarEventMoveOverrides(googleCalendarEvents, calendarEventMoveOverrides), [calendarEventMoveOverrides, googleCalendarEvents]);
-  const viewOptions = useMemo(() => [{ value: "month", label: t.viewMonth }, { value: "week", label: t.viewWeek }, { value: "threeDays", label: t.viewThreeDays }, { value: "days", label: t.viewDay }, { value: "pieChart", label: t.viewPieChart }] as const, [t.viewDay, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewWeek]);
-  const isMonthCalendarView = selectedViewMode === "month";
-  const isPieChartCalendarView = selectedViewMode === "pieChart";
-  const headerTitleDate = selectedViewMode === "month" ? monthTitleDate : isPieChartCalendarView ? selectedDate : titleDate;
-  const headerTitleFormat = isPieChartCalendarView ? "yyyy年M月d日" : monthLabelFormat;
+  const viewOptions = useMemo(() => [{ value: "year", label: t.viewYear }, { value: "month", label: t.viewMonth }, { value: "week", label: t.viewWeek }, { value: "threeDays", label: t.viewThreeDays }, { value: "days", label: t.viewDay }, { value: "pieChart", label: t.viewPieChart }] as const, [t.viewDay, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewWeek, t.viewYear]);
+  const isYearCalendarView = primaryViewMode === "year";
+  const isMonthCalendarView = primaryViewMode === "month";
+  const isPieChartCalendarView = primaryViewMode === "pieChart";
+  const headerTitleDate = isYearCalendarView ? currentDate : isMonthCalendarView ? monthTitleDate : isPieChartCalendarView ? selectedDate : titleDate;
+  const headerTitleFormat = isYearCalendarView ? "yyyy年" : isPieChartCalendarView ? "yyyy年M月d日" : monthLabelFormat;
 
   const handleSelectDate = useCallback((date: Date) => {
-    if (selectedViewMode === "month") {
+    if (primaryViewMode === "month") {
       handleMonthCellSelectDate(date);
       return;
     }
 
     handleSidebarSelectDate(date);
-  }, [handleMonthCellSelectDate, handleSidebarSelectDate, selectedViewMode]);
+  }, [handleMonthCellSelectDate, handleSidebarSelectDate, primaryViewMode]);
 
   const renderViewHeader = (className: string) => (
     <div className={className}>
@@ -140,6 +142,10 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
   );
 
   const renderCalendarContent = () => {
+    if (isYearCalendarView) {
+      return <CarvePanel className={MOBILE_SCHEDULE_PANEL_CLASS}>{renderViewHeader(MOBILE_SCHEDULE_HEADER_CLASS)}<div className={cn(MOBILE_SCHEDULE_SURFACE_CLASS, IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}><CalendarYearView yearDate={currentDate} selectedDate={selectedDate} visibleEvents={visibleGoogleCalendarEvents} onSelectDate={handleMonthCellSelectDate} onRenderedRangeChange={handleYearRenderedRangeChange} onSyncRangeChange={handleYearSyncRangeChange} /></div></CarvePanel>;
+    }
+
     if (isPieChartCalendarView) {
       return <CarvePanel className={MOBILE_SCHEDULE_PANEL_CLASS}>{renderViewHeader(MOBILE_SCHEDULE_HEADER_CLASS)}<div className={cn(MOBILE_SCHEDULE_SURFACE_CLASS, IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}><CalendarPieChartView days={visibleDays} selectedDate={selectedDate} events={visibleGoogleCalendarEvents} appProjects={EMPTY_APP_PROJECTS} googleAccounts={googleAccounts} onSelectDate={handleSidebarSelectDate} onVisibleDateChange={handleVisibleDateChange} /></div></CarvePanel>;
     }
