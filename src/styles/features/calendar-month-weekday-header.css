@@ -15,7 +15,8 @@
     background: linear-gradient(to bottom, rgb(255 255 255 / 0), rgb(255 255 255 / 0.78));
   }
 
-  .calendar-year-view::before {
+  .calendar-year-view::before,
+  .calendar-print-screen-content > div > .flex.min-h-0.flex-1.flex-col.overflow-hidden.bg-white > .scrollbar-hidden::before {
     content: "";
     position: sticky;
     top: 0;
