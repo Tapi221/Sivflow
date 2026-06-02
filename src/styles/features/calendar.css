@@ -307,12 +307,26 @@
       background: #ffffff !important;
     }
 
-    body.calendar-printing .calendar-print-panel [data-calendar-print-toolbar],
-    body.calendar-printing .calendar-print-panel .calendar-print-screen-content {
+    body.calendar-printing .calendar-print-panel [data-calendar-print-toolbar] {
       display: none !important;
     }
 
-    body.calendar-printing .calendar-print-panel .calendar-print-range-view {
+    body.calendar-printing .calendar-print-panel.calendar-print-range-mode .calendar-print-screen-content {
+      display: none !important;
+    }
+
+    body.calendar-printing .calendar-print-panel:not(.calendar-print-range-mode) .calendar-print-range-view {
+      display: none !important;
+    }
+
+    body.calendar-printing .calendar-print-panel:not(.calendar-print-range-mode) .calendar-print-screen-content {
+      display: flex !important;
+      width: 100% !important;
+      min-height: 0 !important;
+      background: #ffffff !important;
+    }
+
+    body.calendar-printing .calendar-print-panel.calendar-print-range-mode .calendar-print-range-view {
       display: block !important;
       width: 100% !important;
       color: #111111 !important;
@@ -409,7 +423,8 @@
     body.calendar-printing .calendar-print-panel .overflow-y-auto,
     body.calendar-printing .calendar-print-panel .overflow-x-auto,
     body.calendar-printing .calendar-print-panel .calendar-month-scroll,
-    body.calendar-printing .calendar-print-panel .calendar-timeline-scroll {
+    body.calendar-printing .calendar-print-panel .calendar-timeline-scroll,
+    body.calendar-printing .calendar-print-panel .calendar-year-view {
       overflow: visible !important;
     }
 
