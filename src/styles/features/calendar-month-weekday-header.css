@@ -1,15 +1,15 @@
 @layer components {
-  .calendar-month-view {
+  .calendar-print-screen-content {
     position: relative;
   }
 
-  .calendar-month-view::after {
+  .calendar-print-screen-content::after {
     content: "";
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 20;
+    z-index: 40;
     height: 14px;
     pointer-events: none;
     background: linear-gradient(to bottom, rgb(255 255 255 / 0), rgb(255 255 255 / 0.78));
@@ -25,18 +25,6 @@
     margin-bottom: -14px;
     pointer-events: none;
     background: linear-gradient(to bottom, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0));
-  }
-
-  .calendar-year-view::after {
-    content: "";
-    position: sticky;
-    bottom: 0;
-    z-index: 20;
-    display: block;
-    height: 14px;
-    margin-top: -14px;
-    pointer-events: none;
-    background: linear-gradient(to bottom, rgb(255 255 255 / 0), rgb(255 255 255 / 0.78));
   }
 
   .calendar-month-weekday-header::before,
