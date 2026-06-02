@@ -185,7 +185,7 @@ const SidebarLayeredDirectory = () => {
             )}
           </div>
           {folderTagMode !== "tag" ? (
-            <button type="button" onClick={selectedProject ? handleOpenProjectAddMenu : handleCreateRootFolder} aria-label={selectedProject ? ADD_PROJECT_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} title={selectedProject ? ADD_PROJECT_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} className="ml-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#f4f4f4] text-[#8c8c8c] transition hover:bg-[#ececec] hover:text-[#5f6574] active:scale-[0.94]">
+            <button type="button" onClick={selectedProject ? handleOpenProjectAddMenu : handleCreateRootFolder} aria-label={selectedProject ? ADD_PROJECT_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} title={selectedProject ? ADD_PROJECT_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} className="ml-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-[10px] text-[var(--app-sidebar-icon)] transition hover:bg-white/70 hover:text-[var(--app-sidebar-text-hover)] active:scale-[0.94]">
               <IconPlus className="h-3.5 w-3.5" />
             </button>
           ) : null}
