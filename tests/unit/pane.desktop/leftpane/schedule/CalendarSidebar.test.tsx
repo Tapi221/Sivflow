@@ -41,10 +41,6 @@ vi.mock("@/chip/rightclickpanel.desktop/rightClickPanel.utils", () => ({
   useRightClickPanelDismiss: vi.fn(),
 }));
 
-vi.mock("@/features/calendar/panel/MiniCalendarSection", () => ({
-  MiniCalendarSection: () => <section data-testid="mini-calendar" />,
-}));
-
 vi.mock("@/features/calendar/panel/SelectableGoogleSourceRow", () => ({
   GOOGLE_SOURCE_ROW_CLASS_NAME: "google-source-row",
   SelectableGoogleSourceRow: ({ label }: { label: string }) => <div>{label}</div>,
@@ -80,17 +76,11 @@ const createGoogleAccountDisplay = (): GoogleAccountDisplay => ({
 });
 
 const createCalendarSidebarProps = (): CalendarSidebarProps => ({
-  monthDate: new Date(2026, 0, 1),
-  selectedDate: new Date(2026, 0, 1),
-  visibleEvents: [],
   appProjects: [],
   projectCalendarLinks: [],
   googleCalendarColorOverrides: {},
   googleAccounts: [],
   isAnyCalendarConnecting: false,
-  onSelectDate: vi.fn(),
-  onPreviousMonth: vi.fn(),
-  onNextMonth: vi.fn(),
   onAddCalendar: vi.fn(),
   onAddProject: vi.fn(),
   onToggleProject: vi.fn(),
