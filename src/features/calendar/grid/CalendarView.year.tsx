@@ -12,13 +12,18 @@ export type CalendarYearEventPriority = {
   index: number;
 };
 
-export type CalendarYearEventPriorityResolver = (event: GoogleCalendarEvent) => CalendarYearEventPriority;
+export type CalendarYearEventDisplay = {
+  color?: string;
+  priority: CalendarYearEventPriority;
+};
+
+export type CalendarYearEventDisplayResolver = (event: GoogleCalendarEvent) => CalendarYearEventDisplay;
 
 type CalendarYearViewProps = {
   yearDate: Date;
   selectedDate: Date;
   visibleEvents?: GoogleCalendarEvent[];
-  eventPriorityResolver?: CalendarYearEventPriorityResolver;
+  eventDisplayResolver?: CalendarYearEventDisplayResolver;
   onSelectDate: (date: Date) => void;
   onRenderedRangeChange?: (range: CalendarDateRange) => void;
   onSyncRangeChange?: (range: CalendarDateRange) => void;
@@ -73,6 +78,7 @@ const YEAR_SYNC_RANGE_SAMPLE_OFFSET_PX = 160;
 const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
 const EMPTY_YEAR_EVENTS: GoogleCalendarEvent[] = [];
 const DEFAULT_YEAR_EVENT_PRIORITY: CalendarYearEventPriority = { group: Number.MAX_SAFE_INTEGER, index: Number.MAX_SAFE_INTEGER };
+const DEFAULT_YEAR_EVENT_DISPLAY: CalendarYearEventDisplay = { priority: DEFAULT_YEAR_EVENT_PRIORITY };
 
 const createDayAriaLabel = (date: Date, eventCount: number): string => {
   const baseLabel = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
@@ -108,7 +114,7 @@ const colorToRgba = (color: string, alpha: number): string => {
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 };
 
-const resolveDefaultYearEventPriority: CalendarYearEventPriorityResolver = () => DEFAULT_YEAR_EVENT_PRIORITY;
+const resolveDefaultYearEventDisplay: CalendarYearEventDisplayResolver = () => DEFAULT_YEAR_EVENT_DISPLAY;
 
 const compareCalendarYearEventPriority = (left: CalendarYearEventPriority, right: CalendarYearEventPriority): number => {
   const groupDiff = left.group - right.group;
@@ -117,13 +123,12 @@ const compareCalendarYearEventPriority = (left: CalendarYearEventPriority, right
   return left.index - right.index;
 };
 
-const buildEventsByDay = (events: GoogleCalendarEvent[], eventPriorityResolver: CalendarYearEventPriorityResolver = resolveDefaultYearEventPriority): Map<string, CalendarYearDayEvents> => {
+const buildEventsByDay = (events: GoogleCalendarEvent[], eventDisplayResolver: CalendarYearEventDisplayResolver = resolveDefaultYearEventDisplay): Map<string, CalendarYearDayEvents> => {
   const eventsByDay = new Map<string, CalendarYearDayEvents>();
 
   for (const event of events) {
-    const color = event.accentColor;
-    const backgroundColor = colorToRgba(color, EVENT_DAY_BACKGROUND_ALPHA);
-    const priority = eventPriorityResolver(event);
+    const display = eventDisplayResolver(event);
+    const backgroundColor = colorToRgba(display.color ?? event.accentColor, EVENT_DAY_BACKGROUND_ALPHA);
 
     for (const dayKey of getEventDateKeys(event)) {
       const current = eventsByDay.get(dayKey);
@@ -131,15 +136,15 @@ const buildEventsByDay = (events: GoogleCalendarEvent[], eventPriorityResolver: 
       if (current) {
         current.count += 1;
 
-        if (compareCalendarYearEventPriority(priority, current.priority) < 0) {
+        if (compareCalendarYearEventPriority(display.priority, current.priority) < 0) {
           current.backgroundColor = backgroundColor;
-          current.priority = priority;
+          current.priority = display.priority;
         }
       } else {
         eventsByDay.set(dayKey, {
           count: 1,
           backgroundColor,
-          priority,
+          priority: display.priority,
         });
       }
     }
@@ -217,7 +222,7 @@ const CalendarYearViewComponent = ({
   yearDate,
   selectedDate,
   visibleEvents = EMPTY_YEAR_EVENTS,
-  eventPriorityResolver,
+  eventDisplayResolver,
   onSelectDate,
   onRenderedRangeChange,
   onSyncRangeChange,
@@ -240,7 +245,7 @@ const CalendarYearViewComponent = ({
   const [syncRange, setSyncRange] = useState(() => buildYearSyncDateRange(yearDate));
 
   const deferredVisibleEvents = useDeferredValue(visibleEvents);
-  const eventsByDay = useMemo(() => buildEventsByDay(deferredVisibleEvents, eventPriorityResolver), [deferredVisibleEvents, eventPriorityResolver]);
+  const eventsByDay = useMemo(() => buildEventsByDay(deferredVisibleEvents, eventDisplayResolver), [deferredVisibleEvents, eventDisplayResolver]);
 
   const buildYearMonths = useCallback(
     (targetYear: Date): CalendarYearMonth[] => {
