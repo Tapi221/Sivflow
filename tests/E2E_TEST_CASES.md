@@ -27,9 +27,18 @@
 - [ ] iPad では手書きモードの navigation と画面を表示する
 - [ ] スマホでは手書きモードの navigation と画面を表示しない
 - [ ] Desktop は Web renderer 上の Ink 表示・編集 UI を使用し、Tauri shell 側に UI を持たない
+- [ ] apps/mobile/src/App.tsx は起動口と navigation 接続に留め、手書き画面本体を packages/mobile-renderer 側から表示する
 
 ## tests/e2e/handwriting_session_flow.spec.ts
 
 - [ ] Desktop で handwriting session を開始し、iPad から接続できる
 - [ ] iPad PencilKit 入力を Ink document 形式として Desktop 表示に同期する
 - [ ] session close / fail 状態を Desktop と iPad の両方で表示する
+- [ ] Desktop の LAN WebSocket server start / stop を Tauri command 経由で実行し、UI は Web renderer 側に残す
+
+## tests/e2e/platform_renderer_boundary.spec.ts
+
+- [ ] Web と Tauri は packages/web-renderer の React UI を共有する
+- [ ] React Native は packages/mobile-renderer の別 renderer を使用する
+- [ ] Web / Tauri / RN の platform 差分を renderer から直接扱わず packages/platform の adapter 経由にする
+- [ ] 全 platform 共通にしたい schema / token / asset を TypeScript UI code ではなく shared 配下から読み込む
