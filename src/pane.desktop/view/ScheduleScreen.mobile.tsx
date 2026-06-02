@@ -382,11 +382,10 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
     <div className={className}>
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2 pt-1">
-          <button type="button" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#4a4a4a] shadow-[0_1px_6px_rgba(0,0,0,0.08)] ring-1 ring-black/5 transition hover:bg-[#f7f7f7] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]" onClick={handleOpenSidebar} aria-label="サイドバーを開く" aria-controls="mobile-schedule-sidebar" aria-expanded={isSidebarOpen}>
-            <span aria-hidden="true" className="flex h-5 w-5 flex-col justify-center gap-[5px]">
-              <span className="block h-[2px] w-full rounded-full bg-current" />
-              <span className="block h-[2px] w-full rounded-full bg-current" />
-              <span className="block h-[2px] w-full rounded-full bg-current" />
+          <button type="button" className="flex h-10 w-10 shrink-0 items-center justify-center bg-transparent text-[#111111] transition hover:text-[#111111] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]" onClick={handleOpenSidebar} aria-label="サイドバーを開く" aria-controls="mobile-schedule-sidebar" aria-expanded={isSidebarOpen}>
+            <span aria-hidden="true" className="flex h-7 w-8 flex-col justify-center gap-[7px]">
+              <span className="block h-[5px] w-full rounded-full bg-current" />
+              <span className="block h-[5px] w-full rounded-full bg-current" />
             </span>
           </button>
           <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]" onClick={handlePrevious} aria-label={t.previousLabel}>‹</button>
