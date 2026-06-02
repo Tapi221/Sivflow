@@ -62,6 +62,7 @@ const CalendarEventChipMonth = memo(({
 
   const titleLabel = event.title || "Untitled";
   const titleFadeStyle = isMobileWeb ? undefined : CHIP_TEXT_FADE_STYLE;
+  const chipBorderLeft = event.isAllDay || isMobileWeb ? undefined : `3px solid ${tokens.border}`;
 
   return (
     <HoverMonthEventTooltip
@@ -84,9 +85,7 @@ const CalendarEventChipMonth = memo(({
         )}
         style={{
           background: tokens.bg,
-          borderLeft: event.isAllDay
-            ? undefined
-            : `3px solid ${tokens.border}`,
+          borderLeft: chipBorderLeft,
           color: tokens.text,
         }}
       >
