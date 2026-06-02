@@ -165,7 +165,7 @@ const MobileViewModeDropdown = ({ value, onChange, options }: MobileViewModeDrop
         </span>
       </button>
       {isOpen && (
-        <div role="menu" aria-label="表示形式" className="absolute right-0 top-[calc(100%+8px)] z-50 w-40 overflow-hidden rounded-2xl border border-[#e5e5ea] bg-white py-1 shadow-[0_10px_30px_rgba(0,0,0,0.12)]">
+        <div role="menu" aria-label="表示形式" className="absolute right-0 top-[calc(100%+8px)] z-50 w-40 overflow-hidden rounded-[8px] border border-[rgba(0,0,0,0.12)] bg-white py-1 shadow-[0_6px_20px_rgba(0,0,0,0.14),0_1px_6px_rgba(0,0,0,0.08)]">
           {options.map((option) => {
             const isActive = isSelectedViewMode(value, option.value);
 
