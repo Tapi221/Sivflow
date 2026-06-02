@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { ISyncService, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
+import type { LocalDBTableMap, SyncableEntityTable } from "@/services/localdb/types";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import { DEFAULT_SYNC_SETTINGS, type SyncConflict, type SyncEntity, type SyncSettings } from "@/types/domain/sync";
 import { SyncContext, type SyncContextType, type SyncNotice, type SyncProviderProps, type SyncStatus } from "./SyncContextCore";
 
-const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, string> = {
+const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   card: "cards",
   folder: "folders",
   cardSet: "cardSets",
@@ -215,8 +216,9 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
       const conflict = await db.getConflict(conflictId);
       if (!conflict) return;
 
+      const tableName = SYNC_TABLE_BY_ENTITY[conflict.entityType];
       const resolvedRecord = buildResolvedConflictRecord(conflict, resolvedData);
-      await db.upsert(SYNC_TABLE_BY_ENTITY[conflict.entityType], resolvedRecord);
+      await db.upsert(tableName, resolvedRecord as LocalDBTableMap[typeof tableName]);
       await db.removeConflict(conflict.id);
       await updateCounts();
     } catch (error) {
