@@ -109,7 +109,7 @@ const getHourRowHeightPx = (element: HTMLElement): number => {
 
 const snapMinutes = (minutes: number): number => Math.round(minutes / WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES) * WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES;
 
-const clampMinutes = (minutes: number, maxMinutes: number): boolean | number => Math.max(0, Math.min(maxMinutes, minutes));
+const clampMinutes = (minutes: number, maxMinutes: number): number => Math.max(0, Math.min(maxMinutes, minutes));
 
 const areSameEventKeyOrder = (left: string[], right: string[]): boolean => left.length === right.length && left.every((key, index) => key === right[index]);
 
@@ -560,7 +560,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
                 <div className={WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME} data-testid="weekday-preview-bottom-spacer" style={WEEKDAY_BOTTOM_SPACER_STYLE} />
 
                 <div className="pointer-events-none absolute left-0 right-0 z-20" style={getCurrentTimeTopStyle(now)}>
-                  <div className={isToday ? "h-px bg-blue-500" : "border-t border-dotted border-blue-500/45"} />
+                  <div className={isToday ? "h-px bg-blue-500" : "h-px"} style={isToday ? undefined : { backgroundImage: "repeating-linear-gradient(to right, rgb(59 130 246 / 0.45) 0 10px, transparent 10px 24px)" }} />
                 </div>
 
                 {events.map((entry) => {
