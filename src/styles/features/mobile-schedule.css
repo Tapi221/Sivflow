@@ -43,17 +43,5 @@
       padding-right: 10px !important;
       font-size: 12px !important;
     }
-
-    .schedule-mobile-calendar-surface .calendar-timeline-scroll > .grid > div:first-child,
-    .schedule-mobile-calendar-surface .calendar-timeline-scroll > .grid > div:first-child > div > span {
-      background: transparent !important;
-      box-shadow: none !important;
-      filter: none !important;
-      text-shadow: none !important;
-    }
-
-    .schedule-mobile-calendar-surface .calendar-timeline-scroll > .grid > div:first-child {
-      z-index: auto !important;
-    }
   }
 }
