@@ -1,4 +1,4 @@
-import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
+import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, RefObject } from "react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, format, startOfDay } from "date-fns";
 import { ja } from "date-fns/locale";
@@ -55,6 +55,15 @@ type MonthEventRenderItem = {
   isDragPreview: boolean;
 };
 
+type MonthDragAutoScrollDirection = "up" | "down";
+
+type MonthDragPointerSnapshot = {
+  pointerId: number;
+  buttons: number;
+  clientX: number;
+  clientY: number;
+};
+
 type GridCalendarMonthDesktopProps = {
   today: Date;
   selectedDate: Date;
@@ -65,6 +74,7 @@ type GridCalendarMonthDesktopProps = {
   bottomSpacerHeight: number;
   scrollHoverDayKey: string | null;
   showEventTimeLabel?: boolean;
+  monthScrollContainerRef?: RefObject<HTMLDivElement | null>;
   onSelectDate: (date: Date) => void;
   onMoveCalendarEvent?: CalendarEventMoveHandler;
 };
@@ -109,6 +119,9 @@ const MONTH_GRID_BORDER_STYLE: CSSProperties = { borderColor: COLOR.WEEKDAY_COLO
 const DEFAULT_MONTH_TIMED_EVENT_DURATION_MS = 30 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CALENDAR_EVENT_DRAG_FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
+const MONTH_DRAG_SCROLL_EDGE_PX = 88;
+const MONTH_DRAG_SCROLL_STEP_PX = 28;
+const MONTH_DRAG_SCROLL_INTERVAL_MS = 16;
 
 const getCanUseCalendarEventDragPointer = (): boolean => {
   if (typeof window === "undefined") return false;
@@ -158,6 +171,8 @@ const createMonthWeekRowStyle = (monthRowHeight: number): CSSProperties => ({
   minHeight: monthRowHeight,
 });
 
+const createMonthDragPointerSnapshot = (pointerId: number, buttons: number, clientX: number, clientY: number): MonthDragPointerSnapshot => ({ pointerId, buttons, clientX, clientY });
+
 const getEventDurationMs = (event: GoogleCalendarEvent): number => {
   const startsAt = getCalendarEventDateOrNull(event.startsAt);
   const endsAt = getCalendarEventDateOrNull(event.endsAt);
@@ -193,6 +208,19 @@ const getDistanceToRect = (clientX: number, clientY: number, rect: DOMRect): num
 
   return Math.hypot(clientX - nearestX, clientY - nearestY);
 };
+
+const getMonthDragAutoScrollDirection = (element: HTMLDivElement, clientY: number): MonthDragAutoScrollDirection | null => {
+  const rect = element.getBoundingClientRect();
+  const canScrollUp = element.scrollTop > 0;
+  const canScrollDown = element.scrollTop + element.clientHeight < element.scrollHeight;
+
+  if (canScrollUp && clientY <= rect.top + MONTH_DRAG_SCROLL_EDGE_PX) return "up";
+  if (canScrollDown && clientY >= rect.bottom - MONTH_DRAG_SCROLL_EDGE_PX) return "down";
+
+  return null;
+};
+
+const getMonthDragAutoScrollDelta = (direction: MonthDragAutoScrollDirection): number => direction === "up" ? -MONTH_DRAG_SCROLL_STEP_PX : MONTH_DRAG_SCROLL_STEP_PX;
 
 const getMonthEventWrapperClassName = (isDraggable: boolean, isDragging: boolean, isPreview = false): string => cn("shrink-0 transition-opacity duration-150 ease-out", isDraggable ? "touch-none cursor-grab select-none active:cursor-grabbing" : null, isDragging ? "opacity-35" : null, isPreview ? "pointer-events-none transition-none" : null);
 
@@ -297,10 +325,13 @@ const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDay
 
 CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 
-const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWeeks, monthRowHeight, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, showEventTimeLabel = true, onSelectDate, onMoveCalendarEvent }: GridCalendarMonthDesktopProps) => {
+const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWeeks, monthRowHeight, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, showEventTimeLabel = true, monthScrollContainerRef, onSelectDate, onMoveCalendarEvent }: GridCalendarMonthDesktopProps) => {
   const dayCellRefs = useRef(new Map<string, HTMLDivElement>());
   const dragElementRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<MonthEventDragState | null>(null);
+  const dragPointerSnapshotRef = useRef<MonthDragPointerSnapshot | null>(null);
+  const dragAutoScrollDirectionRef = useRef<MonthDragAutoScrollDirection | null>(null);
+  const dragAutoScrollIntervalRef = useRef<number | null>(null);
   const [dragState, setDragState] = useState<MonthEventDragState | null>(null);
   const selectedDayKey = useMemo(() => getDayKey(selectedDate), [selectedDate]);
   const todayDayKey = useMemo(() => getDayKey(today), [today]);
@@ -354,19 +385,100 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
     return getMovedMonthEventDateRange(calendarEvent, hit.day.date, durationMs);
   }, [getMonthDayAtClientPoint]);
 
-  const updateDragPreview = useCallback((event: PointerEvent) => {
+  const clearDragAutoScrollInterval = useCallback(() => {
+    if (dragAutoScrollIntervalRef.current === null) return;
+
+    window.clearInterval(dragAutoScrollIntervalRef.current);
+    dragAutoScrollIntervalRef.current = null;
+  }, []);
+
+  const stopDragAutoScroll = useCallback(() => {
+    dragPointerSnapshotRef.current = null;
+    dragAutoScrollDirectionRef.current = null;
+    clearDragAutoScrollInterval();
+  }, [clearDragAutoScrollInterval]);
+
+  const pauseDragAutoScroll = useCallback(() => {
+    dragAutoScrollDirectionRef.current = null;
+    clearDragAutoScrollInterval();
+  }, [clearDragAutoScrollInterval]);
+
+  const updateDragPreviewFromSnapshot = useCallback((snapshot: MonthDragPointerSnapshot) => {
     const state = dragStateRef.current;
-    if (!state || event.pointerId !== state.pointerId) return;
+    if (!state || snapshot.pointerId !== state.pointerId) return;
 
-    const preview = getMonthDragPreview(state.event, state.durationMs, event.clientX, event.clientY);
+    const preview = getMonthDragPreview(state.event, state.durationMs, snapshot.clientX, snapshot.clientY);
     if (!preview) return;
-
-    event.preventDefault();
 
     if (state.previewIsAllDay === preview.previewIsAllDay && areSameCalendarEventTimes(state.previewStartsAt, state.previewEndsAt, preview.previewStartsAt, preview.previewEndsAt)) return;
 
     setDragStateValue({ ...state, ...preview });
   }, [getMonthDragPreview, setDragStateValue]);
+
+  const scrollDragPreviewOnce = useCallback((direction: MonthDragAutoScrollDirection) => {
+    const element = monthScrollContainerRef?.current;
+    const snapshot = dragPointerSnapshotRef.current;
+    if (!element || !snapshot) return;
+
+    const previousScrollTop = element.scrollTop;
+    element.scrollTop += getMonthDragAutoScrollDelta(direction);
+
+    if (element.scrollTop === previousScrollTop) {
+      pauseDragAutoScroll();
+      return;
+    }
+
+    updateDragPreviewFromSnapshot(snapshot);
+  }, [monthScrollContainerRef, pauseDragAutoScroll, updateDragPreviewFromSnapshot]);
+
+  const startDragAutoScroll = useCallback((direction: MonthDragAutoScrollDirection) => {
+    if (dragAutoScrollDirectionRef.current === direction && dragAutoScrollIntervalRef.current !== null) return;
+
+    clearDragAutoScrollInterval();
+    dragAutoScrollDirectionRef.current = direction;
+    scrollDragPreviewOnce(direction);
+    dragAutoScrollIntervalRef.current = window.setInterval(() => {
+      const currentDirection = dragAutoScrollDirectionRef.current;
+      if (!currentDirection || !dragPointerSnapshotRef.current) {
+        clearDragAutoScrollInterval();
+        return;
+      }
+
+      scrollDragPreviewOnce(currentDirection);
+    }, MONTH_DRAG_SCROLL_INTERVAL_MS);
+  }, [clearDragAutoScrollInterval, scrollDragPreviewOnce]);
+
+  const updateDragAutoScroll = useCallback((snapshot: MonthDragPointerSnapshot) => {
+    const state = dragStateRef.current;
+    const element = monthScrollContainerRef?.current;
+    if (!state || snapshot.pointerId !== state.pointerId || !element) return;
+
+    dragPointerSnapshotRef.current = snapshot;
+
+    if (snapshot.buttons !== 1) {
+      stopDragAutoScroll();
+      return;
+    }
+
+    const direction = getMonthDragAutoScrollDirection(element, snapshot.clientY);
+    if (!direction) {
+      pauseDragAutoScroll();
+      return;
+    }
+
+    startDragAutoScroll(direction);
+  }, [monthScrollContainerRef, pauseDragAutoScroll, startDragAutoScroll, stopDragAutoScroll]);
+
+  const updateDragPreview = useCallback((event: PointerEvent) => {
+    const state = dragStateRef.current;
+    if (!state || event.pointerId !== state.pointerId) return;
+
+    const snapshot = createMonthDragPointerSnapshot(event.pointerId, event.buttons, event.clientX, event.clientY);
+    dragPointerSnapshotRef.current = snapshot;
+    updateDragAutoScroll(snapshot);
+    updateDragPreviewFromSnapshot(snapshot);
+    event.preventDefault();
+  }, [updateDragAutoScroll, updateDragPreviewFromSnapshot]);
 
   const commitDragState = useCallback((state: MonthEventDragState) => {
     if (isSameCalendarEventMove(state.event, state.previewStartsAt, state.previewEndsAt, state.previewIsAllDay)) return;
@@ -388,10 +500,11 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
     }
 
     dragElementRef.current = null;
+    stopDragAutoScroll();
     setDragStateValue(null);
 
     if (shouldCommit) commitDragState(state);
-  }, [commitDragState, setDragStateValue]);
+  }, [commitDragState, setDragStateValue, stopDragAutoScroll]);
 
   const handleEventClick = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -410,6 +523,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
     event.stopPropagation();
     event.currentTarget.setPointerCapture(event.pointerId);
     dragElementRef.current = event.currentTarget;
+    dragPointerSnapshotRef.current = createMonthDragPointerSnapshot(event.pointerId, event.buttons, event.clientX, event.clientY);
 
     setDragStateValue({
       eventKey,
@@ -438,8 +552,9 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
       window.removeEventListener("pointercancel", handlePointerCancel);
+      clearDragAutoScrollInterval();
     };
-  }, [finishDrag, updateDragPreview]);
+  }, [clearDragAutoScrollInterval, finishDrag, updateDragPreview]);
 
   useCalendarEventDragBodyStyle(Boolean(dragState));
 
