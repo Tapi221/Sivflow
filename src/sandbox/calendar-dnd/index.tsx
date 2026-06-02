@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { addBusinessDays, startOfDay } from "date-fns";
 import { toast } from "sonner";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
@@ -10,21 +11,29 @@ import { cn } from "@/lib/utils";
 
 type CalendarDndViewMode = "week" | "month";
 
+type CalendarDndPageDirection = "previous" | "next";
+
 type SampleEventDefinition = { id: string; title: string; startsAt: Date; endsAt: Date; isAllDay?: boolean; accentColor: string };
 
 type CalendarEventUndoSnapshot = {
   event: GoogleCalendarEvent;
 };
 
+type CalendarDndDragPageRequest = {
+  direction: CalendarDndPageDirection;
+  requestedAt: number;
+};
+
 const SANDBOX_ACCOUNT_ID = "calendar-dnd-sandbox";
 const SANDBOX_CALENDAR_ID = "sandbox-calendar";
 const SAMPLE_START_DATE = new Date(2026, 5, 1);
-const VISIBLE_WORKWEEK_COUNT = 2;
 const WEEKDAYS_PER_WORKWEEK = 5;
 const CALENDAR_GRID_STYLE: CalendarGridStyle = { "--calendar-hour-row-height": "72px" };
-const SANDBOX_HEADER_DESCRIPTION = "週表示は2週分の平日、月表示は同じサンプル予定で DnD を確認します。移動は sandbox 内の state だけに反映し、元に戻す toast を表示します。";
+const SANDBOX_HEADER_DESCRIPTION = "週表示と月表示の DnD を同じサンプル予定で確認します。週表示では予定をドラッグしたまま左右端へ寄せると前後の週へページ送りします。";
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-none";
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
+const WEEKDAY_DRAG_PAGE_EDGE_WIDTH_PX = 72;
+const WEEKDAY_DRAG_PAGE_REQUEST_COOLDOWN_MS = 700;
 const VIEW_MODE_OPTIONS: readonly { value: CalendarDndViewMode; label: string }[] = [
   { value: "week", label: "週表示" },
   { value: "month", label: "月表示" },
@@ -53,11 +62,24 @@ const cloneEvent = (event: GoogleCalendarEvent): GoogleCalendarEvent => ({ ...ev
 
 const createSampleEvents = (): GoogleCalendarEvent[] => SAMPLE_EVENT_DEFINITIONS.map(createSampleEvent);
 
-const createVisibleDays = (): Date[] => Array.from({ length: VISIBLE_WORKWEEK_COUNT * WEEKDAYS_PER_WORKWEEK }, (_, index) => addBusinessDays(startOfDay(SAMPLE_START_DATE), index));
+const createVisibleDays = (startDate: Date): Date[] => Array.from({ length: WEEKDAYS_PER_WORKWEEK }, (_, index) => addBusinessDays(startOfDay(startDate), index));
 
 const createCalendarEventUndoSnapshot = (event: GoogleCalendarEvent): CalendarEventUndoSnapshot => ({ event: cloneEvent(event) });
 
 const isSameCalendarEvent = (left: GoogleCalendarEvent, right: GoogleCalendarEvent): boolean => left.id === right.id && left.calendarId === right.calendarId && left.accountId === right.accountId;
+
+const isCalendarDndEventDragTarget = (target: EventTarget | null): boolean => target instanceof Element && target.closest(".cursor-grab") !== null;
+
+const getDragPageDirection = (element: HTMLElement, clientX: number): CalendarDndPageDirection | null => {
+  const rect = element.getBoundingClientRect();
+
+  if (clientX <= rect.left + WEEKDAY_DRAG_PAGE_EDGE_WIDTH_PX) return "previous";
+  if (clientX >= rect.right - WEEKDAY_DRAG_PAGE_EDGE_WIDTH_PX) return "next";
+
+  return null;
+};
+
+const shouldRequestDragPage = (previousRequest: CalendarDndDragPageRequest | null, direction: CalendarDndPageDirection, requestedAt: number): boolean => !previousRequest || previousRequest.direction !== direction || requestedAt - previousRequest.requestedAt >= WEEKDAY_DRAG_PAGE_REQUEST_COOLDOWN_MS;
 
 const moveEventTime = (targetEvent: GoogleCalendarEvent, sourceEvent: GoogleCalendarEvent, startsAt: Date, endsAt: Date, isAllDay: boolean): GoogleCalendarEvent => {
   if (!isSameCalendarEvent(targetEvent, sourceEvent)) return targetEvent;
@@ -73,19 +95,49 @@ const restoreEventTime = (targetEvent: GoogleCalendarEvent, snapshot: CalendarEv
 
 const getViewModeButtonClassName = (isSelected: boolean): string => cn("h-8 rounded-full px-3 text-[13px] font-semibold transition-colors", isSelected ? "bg-[#1c1c1e] text-white" : "text-[rgba(60,60,67,0.72)] hover:bg-[#f5f5f7] hover:text-[#1c1c1e]");
 
+const getWeekPageButtonClassName = (): string => "h-8 shrink-0 rounded-full border border-[#d1d1d6] bg-white px-3 text-[13px] font-semibold text-[#1c1c1e] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset] transition-colors hover:bg-[#f5f5f7]";
+
 const CalendarDndSandboxPage = () => {
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const calendarSurfaceRef = useRef<HTMLDivElement | null>(null);
   const eventsRef = useRef<GoogleCalendarEvent[]>([]);
-  const visibleDays = useMemo(() => createVisibleDays(), []);
+  const dragPageRequestRef = useRef<CalendarDndDragPageRequest | null>(null);
   const [viewMode, setViewMode] = useState<CalendarDndViewMode>("week");
+  const [weekStartDate, setWeekStartDate] = useState<Date>(() => new Date(SAMPLE_START_DATE));
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date(SAMPLE_START_DATE));
   const [events, setEvents] = useState<GoogleCalendarEvent[]>(() => createSampleEvents().map(cloneEvent));
+  const visibleDays = useMemo(() => createVisibleDays(weekStartDate), [weekStartDate]);
 
   useEffect(() => {
     eventsRef.current = events;
   }, [events]);
+
+  const handleMoveWeekPage = useCallback((direction: CalendarDndPageDirection) => {
+    setWeekStartDate((currentDate) => addBusinessDays(currentDate, direction === "next" ? WEEKDAYS_PER_WORKWEEK : -WEEKDAYS_PER_WORKWEEK));
+  }, []);
+
+  const handleWeekDragPointerMoveCapture = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    const surfaceElement = calendarSurfaceRef.current;
+    if (event.buttons !== 1 || !surfaceElement || !isCalendarDndEventDragTarget(event.target)) return;
+
+    const direction = getDragPageDirection(surfaceElement, event.clientX);
+    if (!direction) {
+      dragPageRequestRef.current = null;
+      return;
+    }
+
+    const requestedAt = window.performance.now();
+    if (!shouldRequestDragPage(dragPageRequestRef.current, direction, requestedAt)) return;
+
+    dragPageRequestRef.current = { direction, requestedAt };
+    handleMoveWeekPage(direction);
+  }, [handleMoveWeekPage]);
+
+  const handleWeekDragPointerEndCapture = useCallback(() => {
+    dragPageRequestRef.current = null;
+  }, []);
 
   const handleMoveCalendarEvent = useCallback<CalendarEventMoveHandler>(({ event, startsAt, endsAt, isAllDay }) => {
     const previousEvent = eventsRef.current.find((currentEvent) => isSameCalendarEvent(currentEvent, event));
@@ -106,6 +158,7 @@ const CalendarDndSandboxPage = () => {
   }, []);
 
   const handleReset = useCallback(() => {
+    setWeekStartDate(new Date(SAMPLE_START_DATE));
     setSelectedDate(new Date(SAMPLE_START_DATE));
     setEvents(createSampleEvents().map(cloneEvent));
     toast.dismiss();
@@ -124,6 +177,12 @@ const CalendarDndSandboxPage = () => {
               <p className="mt-1 max-w-3xl text-[12px] leading-5 text-[rgba(60,60,67,0.58)]">{SANDBOX_HEADER_DESCRIPTION}</p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
+              {viewMode === "week" ? (
+                <div className="flex items-center gap-1">
+                  <button type="button" className={getWeekPageButtonClassName()} onClick={() => handleMoveWeekPage("previous")}>前週</button>
+                  <button type="button" className={getWeekPageButtonClassName()} onClick={() => handleMoveWeekPage("next")}>次週</button>
+                </div>
+              ) : null}
               <div className="flex items-center rounded-full border border-[#e5e5ea] bg-white p-0.5 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
                 {VIEW_MODE_OPTIONS.map((option) => (
                   <button key={option.value} type="button" className={getViewModeButtonClassName(viewMode === option.value)} onClick={() => setViewMode(option.value)}>
@@ -140,7 +199,7 @@ const CalendarDndSandboxPage = () => {
               <CalendarMonthView currentDate={SAMPLE_START_DATE} selectedDate={selectedDate} visibleEvents={events} onSelectDate={setSelectedDate} onMoveCalendarEvent={handleMoveCalendarEvent} />
             </div>
           ) : (
-            <div className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0", IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}>
+            <div ref={calendarSurfaceRef} className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0", IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)} onPointerMoveCapture={handleWeekDragPointerMoveCapture} onPointerUpCapture={handleWeekDragPointerEndCapture} onPointerCancelCapture={handleWeekDragPointerEndCapture}>
               <CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={events} calendarGridStyle={CALENDAR_GRID_STYLE} selectedDate={selectedDate} onSelectDate={setSelectedDate} onMoveCalendarEvent={handleMoveCalendarEvent} />
             </div>
           )}
