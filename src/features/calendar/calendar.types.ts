@@ -120,14 +120,3 @@ export type CalendarDemoEvent = {
   startsAt: Date;
   minutes: number;
 };
-
-export type MiniCalendarDay = {
-  date: Date;
-  dayNumber: string;
-  isCurrentMonth: boolean;
-  isSelected: boolean;
-  isToday: boolean;
-  isRangeStart?: boolean;
-  isRangeEnd?: boolean;
-  isInSelectedRange?: boolean;
-};
