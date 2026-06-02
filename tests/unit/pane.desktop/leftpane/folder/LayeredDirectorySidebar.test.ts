@@ -50,6 +50,7 @@ afterEach(() => {
   vi.clearAllMocks();
   mocks.workspaceState.tabs = [{ id: "tab-1", kind: "explorer", explorerState: { isSectionListMode: false, selectedFolderId: null } }];
   mocks.workspaceState.activeTabId = "tab-1";
+  mocks.rootFolders[0].isFavorite = undefined;
 });
 
 describe("LayeredDirectorySidebar project list", () => {
@@ -115,7 +116,27 @@ describe("LayeredDirectorySidebar project list", () => {
     expect(screen.getByRole("menuitem", { name: "新規カードセット" })).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: "新規フォルダ" })).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: "PDFをインポート" })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: "お気に入りに追加" })).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: "非表示" })).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: "削除" })).toBeTruthy();
+  });
+
+  it("marks the selected project as favorite from the context menu", () => {
+    render(React.createElement(ProjectListSidebar));
+
+    fireEvent.contextMenu(screen.getByRole("button", { name: "Project Alpha" }), { clientX: 160, clientY: 180 });
+    fireEvent.click(screen.getByRole("menuitem", { name: "お気に入りに追加" }));
+
+    expect(mocks.updateFolder).toHaveBeenCalledWith("project-1", { isFavorite: true });
+  });
+
+  it("disables favorite action when the selected project is already favorite", () => {
+    mocks.rootFolders[0].isFavorite = true;
+
+    render(React.createElement(ProjectListSidebar));
+
+    fireEvent.contextMenu(screen.getByRole("button", { name: "Project Alpha" }), { clientX: 160, clientY: 180 });
+
+    expect(screen.getByRole("menuitem", { name: "お気に入りに追加" })).toBeDisabled();
   });
 });
