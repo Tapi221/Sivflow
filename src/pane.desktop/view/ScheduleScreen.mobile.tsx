@@ -1,6 +1,6 @@
 import { type TouchEvent as ReactTouchEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, endOfDay, format, startOfDay, subDays } from "date-fns";
-import { RIGHT_CLICK_PANEL_STYLE } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
+import { RIGHT_CLICK_PANEL_STYLE, resolveRightClickPanelTextWidth } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
@@ -120,6 +120,7 @@ const MobileViewModeDropdown = ({ value, onChange, options }: MobileViewModeDrop
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const selectedLabel = resolveSelectedViewModeLabel(value, options);
+  const dropdownWidth = useMemo(() => resolveRightClickPanelTextWidth(options.map((option) => option.label)), [options]);
 
   const handleToggle = useCallback(() => {
     setIsOpen((currentValue) => !currentValue);
@@ -167,17 +168,12 @@ const MobileViewModeDropdown = ({ value, onChange, options }: MobileViewModeDrop
         </span>
       </button>
       {isOpen && (
-        <div role="menu" aria-label="表示形式" className="right-click-panel absolute right-0 top-[calc(100%+8px)] z-50 w-40">
-          {options.map((option) => {
-            const isActive = isSelectedViewMode(value, option.value);
-
-            return (
-              <button key={option.value} type="button" role="menuitemradio" aria-checked={isActive} className={cn("right-click-panel-item justify-between", isActive && "text-[#1c1c1e]")} onClick={() => handleSelect(option.value)}>
-                <span>{option.label}</span>
-                {isActive && <span aria-hidden="true">✓</span>}
-              </button>
-            );
-          })}
+        <div role="menu" aria-label="表示形式" className="right-click-panel absolute right-0 top-[calc(100%+8px)] z-50" style={{ width: dropdownWidth, minWidth: dropdownWidth, maxWidth: dropdownWidth }}>
+          {options.map((option) => (
+            <button key={option.value} type="button" role="menuitem" className="right-click-panel-item" onClick={(event) => { event.preventDefault(); event.stopPropagation(); handleSelect(option.value); }}>
+              {option.label}
+            </button>
+          ))}
         </div>
       )}
     </div>
