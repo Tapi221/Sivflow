@@ -313,10 +313,20 @@
     body.calendar-printing .calendar-print-panel .calendar-month-view,
     body.calendar-printing .calendar-print-panel .calendar-month-scroll,
     body.calendar-printing .calendar-print-panel .calendar-month-grid,
-    body.calendar-printing .calendar-print-panel .calendar-month-grid-spacer,
     body.calendar-printing .calendar-print-panel .calendar-month-week-row,
     body.calendar-printing .calendar-print-panel .calendar-month-day-cell {
       background: #ffffff !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-month-grid-spacer {
+      display: none !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      background: transparent !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-month-grid-spacer::before {
+      content: none !important;
     }
   }
 }
