@@ -36,13 +36,13 @@ type DisconnectGoogleCalendarAccountInput = {
 };
 
 const AUTO_RECOVERY_PENDING_ERROR_CODE = "auto-recovery-pending";
-const AUTO_RECOVERY_PENDING_MESSAGE = "Google Calendar の自動復旧を待機中です。しばらくしてからもう一度同期します。";
+const AUTO_RECOVERY_PENDING_MESSAGE = "Google 連携の自動復旧を待機中です。しばらくしてからもう一度同期します。";
 const SERVER_OAUTH_CONFIGURATION_ERROR_CODE = "server-oauth-configuration-error";
 const SERVER_OAUTH_CONFIGURATION_ERROR_MESSAGE = "Google OAuth のサーバー設定に問題があります。管理者は Firebase Functions secrets を確認してください。";
 const INVALID_REFRESH_TOKEN_ERROR_CODE = "google-refresh-token-invalid";
 const INVALID_REFRESH_TOKEN_MESSAGE = "Google 連携トークンが無効です。Google アカウントのサードパーティ連携からこのアプリを削除してから、アプリで再連携してください。";
 const INSUFFICIENT_GOOGLE_SCOPE_ERROR_CODE = "google-scope-insufficient";
-const INSUFFICIENT_GOOGLE_SCOPE_MESSAGE = "Google Calendar と Google Tasks の権限が不足しています。Google アカウントのサードパーティ連携からこのアプリを削除してから、アプリで再連携してください。";
+const INSUFFICIENT_GOOGLE_SCOPE_MESSAGE = "Google Calendar / Google Tasks / Google Drive の権限が不足しています。Google アカウントのサードパーティ連携からこのアプリを削除してから、アプリで再連携してください。";
 const SERVER_TOKEN_DECRYPT_ERROR_CODE = "server-stored-token-decrypt-error";
 const SERVER_TOKEN_DECRYPT_ERROR_MESSAGE = "保存済み Google 連携トークンを復号できません。管理者が暗号化キーと保存データを確認してください。";
 const SERVER_TOKEN_RETRY_DELAYS_MS = [500, 1_500] as const;
@@ -125,7 +125,7 @@ export const diagnoseGoogleOAuthReconnectCause = (error: unknown): GoogleOAuthRe
 
   if (reason === "invalid_grant") return { cause: "Google 側で refresh token または認可コードが無効化されています。", reconnectRequired: true, action: "Google アカウントのサードパーティ連携からこのアプリを削除してから、アプリで再連携してください。" };
   if (reason === "stored_refresh_token_missing") return { cause: "保存済み refresh token が欠落しています。", reconnectRequired: true, action: "Google アカウントのサードパーティ連携からこのアプリを削除してから、アプリで再連携してください。" };
-  if (reason === "insufficient_google_scope") return { cause: "保存済み Google OAuth トークンに Calendar と Tasks の両方の権限がありません。", reconnectRequired: true, action: "Google アカウントのサードパーティ連携からこのアプリを削除してから、Calendar と Tasks の両方を許可して再連携してください。" };
+  if (reason === "insufficient_google_scope") return { cause: "保存済み Google OAuth トークンに Calendar / Tasks / Drive の権限がありません。", reconnectRequired: true, action: "Google アカウントのサードパーティ連携からこのアプリを削除してから、Calendar / Tasks / Drive を許可して再連携してください。" };
   if (reason === "server_oauth_configuration") return { cause: "Cloud Functions の OAuth 設定に問題があります。", reconnectRequired: false, action: details.adminAction ?? "ユーザー操作では直りません。Firebase Functions secrets を確認してください。" };
   if (reason === "token_encryption_key_invalid" || reason === "stored_refresh_token_decrypt_failed") return { cause: "暗号化キー不一致、または保存済み refresh token の暗号化データ破損が疑われます。", reconnectRequired: false, action: "ユーザー操作では直りません。暗号化キーと保存データを確認してください。" };
   if (code === "not-found") return { cause: "Firestore に保存済み Google OAuth アカウントが見つかりません。", reconnectRequired: false, action: "画面から Google アカウントを再連携してください。" };
@@ -167,7 +167,7 @@ const getGoogleCalendarAccessTokenWithRetry = async (
     }
   }
 
-  throw new Error("Google Calendar server token refresh retry loop exhausted");
+  throw new Error("Google server token refresh retry loop exhausted");
 };
 
 export const isServerStoredGoogleOAuthEnabled = (): boolean => {
@@ -220,5 +220,3 @@ export const disconnectServerStoredGoogleCalendarAccount = async (
   await waitForCallableAuth();
   await disconnectGoogleCalendarAccountCallable(input);
 };
-
-export const disconnectServerStoredGoogleConnectedServiceAccount = disconnectServerStoredGoogleCalendarAccount;
