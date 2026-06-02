@@ -35,7 +35,7 @@ type ProjectAddMenuProps = {
   onImportPdf: () => void;
 };
 
-const FAVORITE_SECTION_LABEL = "お気に入り";
+const FAVORITE_SECTION_LABEL = "最近";
 const PROJECT_SECTION_LABEL = "プロジェクト";
 const TAG_SECTION_LABEL = "MY TAG TREE";
 const ADD_PROJECT_ARIA_LABEL = "プロジェクトを追加";
