@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { signInWithGoogle } from "@/services/auth/googleSignIn";
 
-type ViewportStyle = {
+type LoginPageStyles = {
   page: CSSProperties;
   glowLeft: CSSProperties;
   glowRight: CSSProperties;
@@ -10,6 +10,7 @@ type ViewportStyle = {
   waveOne: CSSProperties;
   waveTwo: CSSProperties;
   brandBlock: CSSProperties;
+  logoIcon: CSSProperties;
   logoTitle: CSSProperties;
   tagline: CSSProperties;
   description: CSSProperties;
@@ -27,7 +28,9 @@ type ViewportStyle = {
   startText: CSSProperties;
 };
 
-const styles: ViewportStyle = {
+const appIconSrc = "/icon.svg";
+
+const styles: LoginPageStyles = {
   page: {
     position: "relative",
     minHeight: "100dvh",
@@ -120,6 +123,12 @@ const styles: ViewportStyle = {
     alignItems: "center",
     textAlign: "center",
     maxWidth: "540px",
+  },
+  logoIcon: {
+    display: "block",
+    width: "250px",
+    height: "250px",
+    objectFit: "contain",
   },
   logoTitle: {
     margin: "6px 0 0",
@@ -249,35 +258,6 @@ const isAuthPopupClosedByUserError = (error: unknown): boolean =>
   "code" in error &&
   error.code === "auth/popup-closed-by-user";
 
-const SivflowMark = () => (
-  <svg style={{ width: 250, height: 250, display: "block" }} viewBox="0 0 220 220" role="img" aria-label="Sivflow">
-    <defs>
-      <linearGradient id="sivflow-orange" x1="84" y1="10" x2="157" y2="143" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#FF6A00" />
-        <stop offset="0.52" stopColor="#FFAA1C" />
-        <stop offset="1" stopColor="#FFE45C" />
-      </linearGradient>
-      <linearGradient id="sivflow-cyan" x1="18" y1="89" x2="129" y2="163" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#37D7F5" />
-        <stop offset="0.48" stopColor="#22B7F1" />
-        <stop offset="1" stopColor="#2F62FF" />
-      </linearGradient>
-      <linearGradient id="sivflow-magenta" x1="91" y1="91" x2="184" y2="190" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#FF4EAF" />
-        <stop offset="0.5" stopColor="#D749F3" />
-        <stop offset="1" stopColor="#723CFF" />
-      </linearGradient>
-    </defs>
-    <path fill="url(#sivflow-orange)" d="M119.1 15.3c35.6 22 50.6 61 35.2 96.8-8.1 18.6-23.8 31.4-44.9 38.2 9-14.8 11.2-31.1 5.5-45.4-5.9-15-19.5-24.2-38.6-25.8 20.8-12.3 34-31.6 35.1-52.4.2-4.3 2.4-8.3 7.7-11.4Z" />
-    <path fill="#FF4B00" fillOpacity="0.62" d="M122.5 50.5c-1.3 15.2-13.2 29.4-32.1 37.7 24.4-2.9 43.6-15 53.2-34.1-7.7 6.5-14.6 9.2-21.1 8.8 1-3.8 1-7.8 0-12.4Z" />
-    <path fill="url(#sivflow-cyan)" d="M19.4 137.2c-.6-41.8 25.7-74.2 64.1-80.8 20-3.4 39 2.5 56.2 16.6-17.3-.4-32.4 6-41.6 18.3-9.7 12.9-10.8 29.3-3.2 46.9-21-12-44.4-13.7-62.9-4.3-3.9 2-8.4 2.3-12.6 3.3Z" />
-    <path fill="#79E8FF" fillOpacity="0.66" d="M59.4 90.3c13.8-6.5 32.1-4.8 49.8 5.8-14.8-19.6-35.1-29.5-56.1-27.5 9.5 3.3 15.4 7.9 18.4 13.7-3.9 1.1-7.8 3.7-12.1 8Z" />
-    <path fill="url(#sivflow-magenta)" d="M186.3 171.3c-35 22.8-76.1 19.7-101.4-9.8-13.2-15.4-18-34.7-14.5-56.7 8.7 15 21.8 24.8 37 26.8 16 2.1 30.8-5 42.5-20.2.2 24.2 10.1 45.5 26.9 57.7 3.5 2.5 6 6.4 9.5 2.2Z" />
-    <path fill="#FF8CDE" fillOpacity="0.62" d="M127.4 162.4c-12.6-8.7-20.1-25.5-20.6-46.1-9.5 22.7-8.7 45.2 2.9 62.8 1.4-10 4.4-16.8 9.4-21 2.7 2.9 5.8 4.4 8.3 4.3Z" />
-    <circle cx="111" cy="111" r="27" fill="white" />
-  </svg>
-);
-
 const GoogleIcon = () => (
   <svg style={{ width: 38, height: 38, flexShrink: 0 }} viewBox="0 0 24 24" aria-hidden="true">
     <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.2-.9 2.2-1.9 2.9l3.1 2.4c1.8-1.7 2.9-4.2 2.9-7.2 0-.7-.1-1.4-.2-2H12z" />
@@ -334,7 +314,7 @@ const LoginPage = () => {
           <div style={styles.waveTwo} />
 
           <div style={styles.brandBlock}>
-            <SivflowMark />
+            <img src={appIconSrc} alt="Sivflow" style={styles.logoIcon} />
             <h1 style={styles.logoTitle}>Sivflow</h1>
             <p style={styles.tagline}>Write. Connect. Evolve.</p>
             <p style={styles.description}>
