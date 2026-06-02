@@ -3,18 +3,6 @@
     position: relative;
   }
 
-  .calendar-month-view::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 14px;
-    z-index: 21;
-    height: 1px;
-    pointer-events: none;
-    background: #eeeeee;
-  }
-
   .calendar-month-view::after {
     content: "";
     position: absolute;
