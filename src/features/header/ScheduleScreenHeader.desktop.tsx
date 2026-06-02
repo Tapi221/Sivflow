@@ -1,5 +1,5 @@
 import type { ChangeEvent } from "react";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
 import { TogglePlanResult, type PlanResultMode } from "@/chip/toggle/Toggle.planresult";
@@ -19,10 +19,10 @@ type ScheduleScreenHeaderDesktopProps = {
   viewOptions: readonly ScheduleScreenHeaderViewOption[];
   planResultModes: readonly PlanResultMode[];
   showPlanResultToggle: boolean;
-  printRange: CalendarPrintRangeState;
+  printRange?: CalendarPrintRangeState;
   onSelectViewMode: (viewMode: CalendarViewMode) => void;
   onChangePlanResultModes: (value: PlanResultMode[]) => void;
-  onChangePrintRange: (value: CalendarPrintRangeState) => void;
+  onChangePrintRange?: (value: CalendarPrintRangeState) => void;
   onBeforePrint?: () => Promise<void> | void;
   onPrevious: () => void;
   onNext: () => void;
@@ -41,6 +41,7 @@ const CALENDAR_PRINT_CLEANUP_DELAY_MS = 30_000;
 const CALENDAR_PRINT_BUTTON_CLASS_NAME = "relative z-10 flex h-7 min-h-0 min-w-[72px] shrink-0 items-center justify-center gap-1 rounded-[9px] border border-[#eeeeee] bg-white px-2.5 text-[11px] font-semibold leading-none tracking-[-0.01em] text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.06)] outline-none ring-0 transition-[background-color,color,box-shadow] duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:text-[#6f6f6f] hover:shadow-[0_1px_4px_rgba(0,0,0,0.08)] focus:outline-none focus:ring-0 focus-visible:outline-none motion-reduce:transition-none disabled:cursor-wait disabled:opacity-60";
 const CALENDAR_PRINT_RANGE_SELECT_CLASS_NAME = "h-7 min-w-[96px] shrink-0 rounded-[9px] border border-[#eeeeee] bg-white px-2 text-[11px] font-semibold leading-none tracking-[-0.01em] text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.06)] outline-none transition-[box-shadow,color] duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:text-[#6f6f6f] hover:shadow-[0_1px_4px_rgba(0,0,0,0.08)] focus:outline-none focus:ring-0 focus-visible:outline-none";
 const CALENDAR_PRINT_RANGE_DATE_INPUT_CLASS_NAME = "h-7 w-[118px] shrink-0 rounded-[9px] border border-[#eeeeee] bg-white px-2 text-[11px] font-semibold leading-none tracking-[-0.01em] text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.06)] outline-none transition-[box-shadow,color] duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:text-[#6f6f6f] hover:shadow-[0_1px_4px_rgba(0,0,0,0.08)] focus:outline-none focus:ring-0 focus-visible:outline-none";
+const DEFAULT_CALENDAR_PRINT_RANGE: CalendarPrintRangeState = { mode: "current", customStartDate: "", customEndDate: "" };
 
 const getCalendarPrintPanel = (source: HTMLElement | null): HTMLElement | null => {
   const toolbar = source?.closest<HTMLElement>("[data-calendar-print-toolbar]");
@@ -96,6 +97,8 @@ const ScheduleScreenHeaderDesktop = ({
 }: ScheduleScreenHeaderDesktopProps) => {
   const t = useT();
   const printButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [fallbackPrintRange, setFallbackPrintRange] = useState<CalendarPrintRangeState>(DEFAULT_CALENDAR_PRINT_RANGE);
+  const resolvedPrintRange = printRange ?? fallbackPrintRange;
   const printRangeOptions: readonly CalendarPrintRangeOption[] = [
     { value: "current", label: t.printRangeCurrent },
     { value: "day", label: t.printRangeDay },
@@ -106,15 +109,19 @@ const ScheduleScreenHeaderDesktop = ({
   const handlePrintCalendar = useCallback(() => {
     void printCalendarPanel(printButtonRef.current, onBeforePrint);
   }, [onBeforePrint]);
+  const handleUpdatePrintRange = useCallback((value: CalendarPrintRangeState) => {
+    setFallbackPrintRange(value);
+    onChangePrintRange?.(value);
+  }, [onChangePrintRange]);
   const handleChangePrintRangeMode = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
-    onChangePrintRange({ ...printRange, mode: event.target.value as CalendarPrintRangeMode });
-  }, [onChangePrintRange, printRange]);
+    handleUpdatePrintRange({ ...resolvedPrintRange, mode: event.target.value as CalendarPrintRangeMode });
+  }, [handleUpdatePrintRange, resolvedPrintRange]);
   const handleChangeCustomStartDate = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    onChangePrintRange({ ...printRange, customStartDate: event.target.value });
-  }, [onChangePrintRange, printRange]);
+    handleUpdatePrintRange({ ...resolvedPrintRange, customStartDate: event.target.value });
+  }, [handleUpdatePrintRange, resolvedPrintRange]);
   const handleChangeCustomEndDate = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    onChangePrintRange({ ...printRange, customEndDate: event.target.value });
-  }, [onChangePrintRange, printRange]);
+    handleUpdatePrintRange({ ...resolvedPrintRange, customEndDate: event.target.value });
+  }, [handleUpdatePrintRange, resolvedPrintRange]);
 
   return (
     <div className={className} data-calendar-print-toolbar="">
@@ -144,7 +151,7 @@ const ScheduleScreenHeaderDesktop = ({
 
         <select
           className={CALENDAR_PRINT_RANGE_SELECT_CLASS_NAME}
-          value={printRange.mode}
+          value={resolvedPrintRange.mode}
           aria-label={t.printRangeLabel}
           title={t.printRangeLabel}
           onChange={handleChangePrintRangeMode}
@@ -154,10 +161,10 @@ const ScheduleScreenHeaderDesktop = ({
           ))}
         </select>
 
-        {printRange.mode === "custom" && (
+        {resolvedPrintRange.mode === "custom" && (
           <>
-            <input className={CALENDAR_PRINT_RANGE_DATE_INPUT_CLASS_NAME} type="date" value={printRange.customStartDate} aria-label={t.printRangeStartDate} title={t.printRangeStartDate} onChange={handleChangeCustomStartDate} />
-            <input className={CALENDAR_PRINT_RANGE_DATE_INPUT_CLASS_NAME} type="date" value={printRange.customEndDate} aria-label={t.printRangeEndDate} title={t.printRangeEndDate} onChange={handleChangeCustomEndDate} />
+            <input className={CALENDAR_PRINT_RANGE_DATE_INPUT_CLASS_NAME} type="date" value={resolvedPrintRange.customStartDate} aria-label={t.printRangeStartDate} title={t.printRangeStartDate} onChange={handleChangeCustomStartDate} />
+            <input className={CALENDAR_PRINT_RANGE_DATE_INPUT_CLASS_NAME} type="date" value={resolvedPrintRange.customEndDate} aria-label={t.printRangeEndDate} title={t.printRangeEndDate} onChange={handleChangeCustomEndDate} />
           </>
         )}
 
