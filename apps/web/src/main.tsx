@@ -6,7 +6,6 @@ import { createRoot } from "react-dom/client";
 import { QueryClientProvider } from "@tanstack/react-query";
 import "katex/dist/katex.min.css";
 import "@/styles/index.css";
-import "@/styles/features/calendar-scrollbar.css";
 import "@/features/scroll/schedule/weekdayHeaderScrollBridge";
 import "@/services/localDB";
 import App from "@web-renderer/App";
