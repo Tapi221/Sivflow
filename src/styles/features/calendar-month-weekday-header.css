@@ -15,6 +15,18 @@
     background: linear-gradient(to bottom, rgb(255 255 255 / 0), rgb(255 255 255 / 0.78));
   }
 
+  .calendar-year-view::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: block;
+    height: 14px;
+    margin-bottom: -14px;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0));
+  }
+
   .calendar-month-weekday-header::before,
   .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7::before {
     content: "" !important;
