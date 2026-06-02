@@ -76,7 +76,7 @@ const CalendarEventChipMonth = memo(({
         )}
 
         <span
-          className="min-w-0 flex-1 overflow-hidden whitespace-nowrap"
+          className="event-chip-month-title min-w-0 flex-1 overflow-hidden whitespace-nowrap"
           style={CHIP_TEXT_FADE_STYLE}
         >
           {titleLabel}
