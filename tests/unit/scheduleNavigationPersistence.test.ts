@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { SCHEDULE_NAVIGATION_STORAGE_KEY, persistScheduleCalendarScrollTop, persistScheduleNavigationState, readStoredScheduleCalendarScrollTop, readStoredScheduleNavigationState } from "@/features/calendar/scheduleNavigationPersistence";
+import { SCHEDULE_NAVIGATION_STORAGE_KEY, persistScheduleCalendarScrollTop, persistScheduleMonthVisibleEventCount, persistScheduleNavigationState, readStoredScheduleCalendarScrollTop, readStoredScheduleMonthVisibleEventCount, readStoredScheduleNavigationState } from "@/features/calendar/scheduleNavigationPersistence";
 
 const originalWindow = globalThis.window;
 
@@ -74,11 +74,34 @@ describe("scheduleNavigationPersistence", () => {
     expect(stored?.selectedViewMode).toBe("week");
   });
 
+  it("月表示の予定表示数を保存して読み戻す", () => {
+    persistScheduleNavigationState({
+      currentDate: new Date("2024-11-25T00:00:00.000Z"),
+      selectedDate: new Date("2024-11-27T00:00:00.000Z"),
+      monthTitleDate: new Date("2024-11-01T00:00:00.000Z"),
+      selectedViewMode: "month",
+    });
+
+    persistScheduleMonthVisibleEventCount(5);
+
+    const stored = readStoredScheduleNavigationState();
+
+    expect(readStoredScheduleMonthVisibleEventCount()).toBe(5);
+    expect(stored?.selectedViewMode).toBe("month");
+  });
+
+  it("月表示の予定表示数は範囲内に丸める", () => {
+    persistScheduleMonthVisibleEventCount(100);
+
+    expect(readStoredScheduleMonthVisibleEventCount()).toBe(7);
+  });
+
   it("壊れた保存値は null として扱う", () => {
     window.localStorage.setItem(SCHEDULE_NAVIGATION_STORAGE_KEY, "not-json");
 
     expect(readStoredScheduleNavigationState()).toBeNull();
     expect(readStoredScheduleCalendarScrollTop()).toBeNull();
+    expect(readStoredScheduleMonthVisibleEventCount()).toBeNull();
   });
 
   it("無効な日付と表示モードは破棄する", () => {
@@ -88,6 +111,7 @@ describe("scheduleNavigationPersistence", () => {
       monthTitleDate: 123,
       selectedViewMode: ["month", "unknown"],
       calendarScrollTop: -1,
+      monthVisibleEventCount: "invalid",
     }));
 
     const stored = readStoredScheduleNavigationState();
@@ -97,5 +121,6 @@ describe("scheduleNavigationPersistence", () => {
     expect(stored?.monthTitleDate).toBeUndefined();
     expect(stored?.selectedViewMode).toBeUndefined();
     expect(readStoredScheduleCalendarScrollTop()).toBeNull();
+    expect(readStoredScheduleMonthVisibleEventCount()).toBeNull();
   });
 });
