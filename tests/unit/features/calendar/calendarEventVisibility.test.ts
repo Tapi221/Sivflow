@@ -75,6 +75,49 @@ describe("calendarEventVisibility", () => {
     expect(visibleEvents).toEqual([]);
   });
 
+  it("assigns project metadata only from an explicit Google calendar link", () => {
+    const [event] = attachCalendarEventDisplayMetadata(
+      [createEvent()],
+      {
+        appProjects: [createProject()],
+        projectCalendarLinks: [createProjectCalendarLink()],
+        googleAccounts: [
+          createAccount({
+            calendars: [
+              {
+                id: "calendar-chemistry",
+                summary: "Not Chemistry",
+                backgroundColor: "#4f7cff",
+              },
+            ],
+          }),
+        ],
+        googleCalendarColorOverrides: {},
+      },
+    );
+
+    expect(event.projectId).toBe("project-chemistry");
+  });
+
+  it("uses account-specific explicit links when the same Google calendar id exists on multiple accounts", () => {
+    const accountOneProject = createProject({ id: "project-account-one", label: "Account One", checked: false });
+    const accountTwoProject = createProject({ id: "project-account-two", label: "Account Two", checked: true });
+    const event = createEvent({ id: "account-2:calendar-chemistry:event-1", accountId: "account-2" });
+    const visibleEvents = filterCalendarEventsBySourceVisibility(
+      [event],
+      {
+        appProjects: [accountOneProject, accountTwoProject],
+        projectCalendarLinks: [
+          createProjectCalendarLink({ accountId: "account-1", projectId: "project-account-one" }),
+          createProjectCalendarLink({ accountId: "account-2", projectId: "project-account-two" }),
+        ],
+        googleAccounts: [createAccount(), createAccount({ accountId: "account-2" })],
+      },
+    );
+
+    expect(visibleEvents).toEqual([event]);
+  });
+
   it("hides events whose projectId is a legacy project label", () => {
     const visibleEvents = filterCalendarEventsBySourceVisibility(
       [createEvent({ projectId: "Chemistry" })],
@@ -100,6 +143,20 @@ describe("calendarEventVisibility", () => {
     );
 
     expect(event.projectId).toBeUndefined();
+  });
+
+  it("does not use the Google calendar id as the source project without an explicit link", () => {
+    const event = createEvent();
+    const visibleEvents = filterCalendarEventsBySourceVisibility(
+      [event],
+      {
+        appProjects: [createProject({ id: "calendar-chemistry", checked: false })],
+        projectCalendarLinks: [],
+        googleAccounts: [createAccount()],
+      },
+    );
+
+    expect(visibleEvents).toEqual([event]);
   });
 
   it("keeps events visible when only a same-name hidden project exists", () => {
