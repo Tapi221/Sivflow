@@ -28,7 +28,7 @@ const REGION = "asia-northeast1";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
-const REQUIRED_GOOGLE_SCOPES = ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.readonly", "https://www.googleapis.com/auth/calendar.app.created", "https://www.googleapis.com/auth/tasks"] as const;
+const REQUIRED_GOOGLE_SCOPES = ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.readonly", "https://www.googleapis.com/auth/calendar.app.created", "https://www.googleapis.com/auth/tasks", "https://www.googleapis.com/auth/drive.file"] as const;
 
 const requireUid = (request: { auth?: { uid?: string } }) => {
   const uid = request.auth?.uid;
@@ -139,7 +139,7 @@ const assertRequiredGoogleScopes = (scope: string | undefined | null): void => {
   const missingScopes = REQUIRED_GOOGLE_SCOPES.filter((requiredScope) => !grantedScopes.has(requiredScope));
   if (missingScopes.length === 0) return;
   console.error("[GoogleCalendarOAuth] required Google scopes are missing", { missingScopes });
-  throw classifiedPrecondition("Google Calendar and Google Tasks scopes are required.", { reason: "insufficient_google_scope", reconnectRequired: true, userAction: "reconnect_google_account" });
+  throw classifiedPrecondition("Google Calendar, Google Tasks, and Google Drive scopes are required.", { reason: "insufficient_google_scope", reconnectRequired: true, userAction: "reconnect_google_account" });
 };
 
 const fetchGoogleTokenInfoScope = async (accessToken: string): Promise<string | null> => {
@@ -209,7 +209,7 @@ const buildAuthorizationCodeTokenParams = ({ code, codeVerifier, redirectUri }: 
   return params;
 };
 
-const buildStoredRefreshTokenParams = (refreshToken: string): URLSearchParams => new URLSearchParams({ client_id: safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration"), client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "GOOGLE_OAUTH_CLIENT_SECRET", "server_oauth_configuration"), grant_type: "refresh_token", refresh_token: refreshToken });
+const buildStoredRefreshTokenParams = (refreshToken: string): URLSearchParams => new URLSearchParams({ client_id: safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration"), client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "server_oauth_configuration", "server_oauth_configuration"), grant_type: "refresh_token", refresh_token: refreshToken });
 
 const buildGoogleAuthUid = (email: string): string => `google-${crypto.createHash("sha256").update(email.toLowerCase()).digest("hex")}`;
 
