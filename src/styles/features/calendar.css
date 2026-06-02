@@ -233,4 +233,90 @@
       text-overflow: "...";
     }
   }
+
+  @media print {
+    @page {
+      size: landscape;
+      margin: 8mm;
+    }
+
+    html,
+    body,
+    #root {
+      height: auto !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+      background: #ffffff !important;
+    }
+
+    body.calendar-printing * {
+      visibility: hidden !important;
+    }
+
+    body.calendar-printing .calendar-print-panel,
+    body.calendar-printing .calendar-print-panel * {
+      visibility: visible !important;
+    }
+
+    body.calendar-printing .calendar-print-panel {
+      position: static !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      background: #ffffff !important;
+    }
+
+    body.calendar-printing .calendar-print-panel [data-calendar-print-toolbar] {
+      padding: 0 0 6mm 0 !important;
+      margin: 0 !important;
+    }
+
+    body.calendar-printing .calendar-print-panel [data-calendar-print-toolbar] > div,
+    body.calendar-printing .calendar-print-panel [data-calendar-print-toolbar] button {
+      display: none !important;
+    }
+
+    body.calendar-printing .calendar-print-panel [data-calendar-print-toolbar] > h1 {
+      display: block !important;
+      width: auto !important;
+      max-width: none !important;
+      overflow: visible !important;
+      color: #111111 !important;
+      font-size: 18px !important;
+      line-height: 1.25 !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .overflow-hidden,
+    body.calendar-printing .calendar-print-panel .overflow-auto,
+    body.calendar-printing .calendar-print-panel .overflow-y-auto,
+    body.calendar-printing .calendar-print-panel .overflow-x-auto,
+    body.calendar-printing .calendar-print-panel .calendar-month-scroll,
+    body.calendar-printing .calendar-print-panel .calendar-timeline-scroll {
+      overflow: visible !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .shadow-none,
+    body.calendar-printing .calendar-print-panel [class*="shadow-"] {
+      box-shadow: none !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-year-section {
+      contain: none !important;
+      content-visibility: visible !important;
+      contain-intrinsic-size: auto !important;
+    }
+
+    body.calendar-printing .calendar-print-panel .calendar-month-view,
+    body.calendar-printing .calendar-print-panel .calendar-month-scroll,
+    body.calendar-printing .calendar-print-panel .calendar-month-grid,
+    body.calendar-printing .calendar-print-panel .calendar-month-grid-spacer,
+    body.calendar-printing .calendar-print-panel .calendar-month-week-row,
+    body.calendar-printing .calendar-print-panel .calendar-month-day-cell {
+      background: #ffffff !important;
+    }
+  }
 }
