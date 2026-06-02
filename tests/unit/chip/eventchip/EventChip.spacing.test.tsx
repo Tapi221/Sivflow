@@ -57,6 +57,16 @@ const isWeekdayChipElement = (element: HTMLElement): boolean => element.classNam
 
 const isWeekdayMeasurementElement = (element: HTMLElement): boolean => element.className.includes("invisible") && element.className.includes("absolute") && element.className.includes("rounded-md");
 
+const createLayoutStyles = (element: Element) => ({
+  ...window.getComputedStyle(element),
+  gap: element.className.includes("gap-[0.5px]") ? "0.5px" : "0px",
+  paddingBottom: element.className.includes("py-[2px]") ? "2px" : element.className.includes("py-[1px]") ? "1px" : "0px",
+  paddingLeft: element.className.includes("pl-1") ? "4px" : "0px",
+  paddingRight: element.className.includes("pr-[1px]") ? "1px" : "0px",
+  paddingTop: element.className.includes("py-[2px]") ? "2px" : element.className.includes("py-[1px]") ? "1px" : "0px",
+  rowGap: element.className.includes("gap-[0.5px]") ? "0.5px" : "0px",
+} as CSSStyleDeclaration);
+
 const findClosestWeekdayChipElement = (element: Element | null): HTMLElement | null => {
   let currentElement = element;
 
@@ -320,7 +330,8 @@ describe("weekday event chip inline time layout", () => {
     });
 
     vi.stubGlobal("ResizeObserver", resizeObserverConstructor);
-    stubWeekdayChipLayout({ chipHeight: 12, chipWidth: 70, titleText: SHORT_TITLE_EVENT.title, titleTextWidth: 8, timeTextWidth: 40 });
+    vi.spyOn(window, "getComputedStyle").mockImplementation((element) => createLayoutStyles(element));
+    stubWeekdayChipLayout({ chipHeight: 36, chipWidth: 70, titleText: SHORT_TITLE_EVENT.title, titleTextWidth: 8, timeTextWidth: 40 });
 
     render(<CalendarEventChipWeekday event={SHORT_TITLE_EVENT} />);
 
