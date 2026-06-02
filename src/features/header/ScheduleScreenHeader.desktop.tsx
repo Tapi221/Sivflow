@@ -1,6 +1,6 @@
 import type { ChangeEvent, CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal, flushSync } from "react-dom";
+import { createPortal } from "react-dom";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
 import { TogglePlanResult, type PlanResultMode } from "@/chip/toggle/Toggle.planresult";
@@ -28,7 +28,7 @@ type ScheduleScreenHeaderDesktopProps = {
   onChangePlanResultModes: (value: PlanResultMode[]) => void;
   onChangeMonthVisibleEventCount: (value: number) => void;
   onChangePrintRange?: (value: CalendarPrintRangeState) => void;
-  onBeforePrint?: () => Promise<void> | void;
+  onPrintCalendar?: () => void;
   onPrevious: () => void;
   onNext: () => void;
   onToday: () => void;
@@ -45,9 +45,6 @@ type CalendarPrintPopoverPosition = {
   right: number;
 };
 
-const CALENDAR_PRINTING_CLASS = "calendar-printing";
-const CALENDAR_PRINT_PANEL_CLASS = "calendar-print-panel";
-const CALENDAR_PRINT_CLEANUP_DELAY_MS = 30_000;
 const CALENDAR_PRINT_POPOVER_OFFSET_PX = 8;
 const CALENDAR_PRINT_POPOVER_MIN_SIDE_MARGIN_PX = 16;
 const CALENDAR_PRINT_BUTTON_CLASS_NAME = "relative z-10 flex h-7 min-h-0 min-w-[84px] shrink-0 items-center justify-center gap-1 rounded-[9px] border border-[#eeeeee] bg-white px-2.5 text-[11px] font-semibold leading-none tracking-[-0.01em] text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.06)] outline-none ring-0 transition-[background-color,color,box-shadow] duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:text-[#6f6f6f] hover:shadow-[0_1px_4px_rgba(0,0,0,0.08)] focus:outline-none focus:ring-0 focus-visible:outline-none motion-reduce:transition-none disabled:cursor-wait disabled:opacity-60";
@@ -63,16 +60,6 @@ const DEFAULT_CALENDAR_PRINT_RANGE: CalendarPrintRangeState = { mode: "current",
 
 const clampMonthVisibleEventCount = (value: number): number => Math.min(C.MONTH_VISIBLE_EVENT_COUNT_MAX, Math.max(C.MONTH_VISIBLE_EVENT_COUNT_MIN, Math.round(value)));
 
-const flushCalendarPrintUpdates = (): void => {
-  flushSync(() => undefined);
-};
-
-const getCalendarPrintPanel = (source: HTMLElement | null): HTMLElement | null => {
-  const toolbar = source?.closest<HTMLElement>("[data-calendar-print-toolbar]");
-
-  return toolbar?.parentElement ?? null;
-};
-
 const getCalendarPrintPopoverPosition = (button: HTMLElement | null): CalendarPrintPopoverPosition | null => {
   if (typeof window === "undefined" || !button) return null;
 
@@ -82,36 +69,6 @@ const getCalendarPrintPopoverPosition = (button: HTMLElement | null): CalendarPr
     top: rect.bottom + CALENDAR_PRINT_POPOVER_OFFSET_PX,
     right: Math.max(CALENDAR_PRINT_POPOVER_MIN_SIDE_MARGIN_PX, window.innerWidth - rect.right),
   };
-};
-
-const printCalendarPanel = async (source: HTMLElement | null, onBeforePrint?: () => Promise<void> | void) => {
-  if (typeof window === "undefined" || typeof document === "undefined") return;
-
-  await onBeforePrint?.();
-  flushCalendarPrintUpdates();
-
-  const panel = getCalendarPrintPanel(source);
-
-  if (!panel) {
-    window.print();
-    return;
-  }
-
-  let isCleanedUp = false;
-  const cleanup = () => {
-    if (isCleanedUp) return;
-    isCleanedUp = true;
-    panel.classList.remove(CALENDAR_PRINT_PANEL_CLASS);
-    document.body.classList.remove(CALENDAR_PRINTING_CLASS);
-    window.removeEventListener("afterprint", cleanup);
-  };
-
-  panel.classList.add(CALENDAR_PRINT_PANEL_CLASS);
-  document.body.classList.add(CALENDAR_PRINTING_CLASS);
-  window.addEventListener("afterprint", cleanup, { once: true });
-  flushCalendarPrintUpdates();
-  window.print();
-  window.setTimeout(cleanup, CALENDAR_PRINT_CLEANUP_DELAY_MS);
 };
 
 const ScheduleScreenHeaderDesktop = ({
@@ -127,7 +84,7 @@ const ScheduleScreenHeaderDesktop = ({
   onChangePlanResultModes,
   onChangeMonthVisibleEventCount,
   onChangePrintRange,
-  onBeforePrint,
+  onPrintCalendar,
   onPrevious,
   onNext,
   onToday,
@@ -155,8 +112,8 @@ const ScheduleScreenHeaderDesktop = ({
   }, []);
   const handlePrintCalendar = useCallback(() => {
     setIsPrintPopoverOpen(false);
-    void printCalendarPanel(printButtonRef.current, onBeforePrint);
-  }, [onBeforePrint]);
+    onPrintCalendar?.();
+  }, [onPrintCalendar]);
   const handleTogglePrintPopover = useCallback(() => {
     setIsPrintPopoverOpen((value) => {
       const nextValue = !value;
