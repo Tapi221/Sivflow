@@ -27,6 +27,8 @@ const createEvent = ({
   accentColor,
 });
 
+const createTimedEvent = (id: string, hour: number): GoogleCalendarEvent => createEvent({ id, startsAt: new Date(2026, 0, 1, hour, 0), endsAt: new Date(2026, 0, 1, hour + 1, 0) });
+
 describe("month event chip visibility", () => {
   it("デフォルト行高で3件と省略表示を表示できる", () => {
     expect(getVisibleMonthEventChipCount(4, DEFAULT_MONTH_ROW_HEIGHT)).toBe(3);
@@ -103,21 +105,9 @@ describe("computeMonthEventsByDay", () => {
       endsAt: new Date(2026, 0, 2),
       isAllDay: true,
     });
-    const lateEvent = createEvent({
-      id: "late",
-      startsAt: new Date(2026, 0, 1, 15, 0),
-      endsAt: new Date(2026, 0, 1, 16, 0),
-    });
-    const earlyEvent = createEvent({
-      id: "early",
-      startsAt: new Date(2026, 0, 1, 8, 0),
-      endsAt: new Date(2026, 0, 1, 9, 0),
-    });
-    const noonEvent = createEvent({
-      id: "noon",
-      startsAt: new Date(2026, 0, 1, 12, 0),
-      endsAt: new Date(2026, 0, 1, 13, 0),
-    });
+    const lateEvent = createTimedEvent("late", 15);
+    const earlyEvent = createTimedEvent("early", 8);
+    const noonEvent = createTimedEvent("noon", 12);
 
     const eventsByDay = computeMonthEventsByDay({
       visibleEvents: [lateEvent, allDayEvent, noonEvent, earlyEvent],
@@ -128,6 +118,28 @@ describe("computeMonthEventsByDay", () => {
 
     expect(dayEvents?.totalCount).toBe(4);
     expect(dayEvents?.visibleEvents.map((event) => event.id)).toEqual(["all-day", "early", "noon"]);
+  });
+
+  it("指定された月表示件数で表示数を制限する", () => {
+    const monthWeeks = [
+      {
+        days: [
+          { key: "2026-01-01" },
+        ],
+      },
+    ];
+    const events = [createTimedEvent("one", 8), createTimedEvent("two", 9), createTimedEvent("three", 10), createTimedEvent("four", 11)];
+
+    const eventsByDay = computeMonthEventsByDay({
+      visibleEvents: events,
+      monthWeeks,
+      monthRowHeight: DEFAULT_MONTH_ROW_HEIGHT + 88,
+      maxVisibleEventCount: 2,
+    });
+    const dayEvents = eventsByDay.get("2026-01-01");
+
+    expect(dayEvents?.totalCount).toBe(4);
+    expect(dayEvents?.visibleEvents.map((event) => event.id)).toEqual(["one", "two"]);
   });
 
   it("複数日にまたがる予定を対象日の両方に入れる", () => {
