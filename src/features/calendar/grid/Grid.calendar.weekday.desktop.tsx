@@ -61,6 +61,17 @@ const getCurrentTimeTopStyle = (now: Date): CSSProperties => ({
   top: `calc(${(now.getHours() * GRID.WEEKDAY_MINUTES_PER_HOUR + now.getMinutes()) / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
 });
 
+const getCurrentTimeGridLineStyle = (now: Date): CSSProperties => ({
+  ...getCurrentTimeTopStyle(now),
+  left: `${C.TIME_COLUMN_WIDTH}px`,
+  right: 0,
+});
+
+const getCurrentTimeTodayLineStyle = (todayIndex: number, dayCount: number): CSSProperties => ({
+  left: `calc((100% / ${dayCount}) * ${todayIndex})`,
+  width: `calc(100% / ${dayCount})`,
+});
+
 const getHourLabelClassName = (hour: number): string => cn("absolute right-2 top-0 z-10 bg-white px-1", isUnshiftedHourLabel(hour) ? null : "-translate-y-1/2", WEEKDAY_TIME_LABEL_CLASS_NAME);
 
 const getHeaderDateNumberClassName = (isSelected: boolean, isToday: boolean): string => cn(WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME, isSelected ? "border-0 bg-[var(--ds-color-tag-sky-bg)] text-[var(--ds-color-tag-sky-fg)] shadow-none ring-0" : isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
@@ -256,6 +267,8 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
   const gridTemplateColumns = getViewportGridTemplateColumns(visibleDays.length);
   const timelineGridStyle = { [GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT]: calendarGridStyle[GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT], gridTemplateColumns } as CSSProperties;
   const currentDayKey = getCalendarDateKey(now);
+  const currentDayIndex = visibleDays.findIndex((day) => getCalendarDateKey(day) === currentDayKey);
+  const shouldRenderCurrentTime = currentDayIndex !== -1;
 
   const setDragStateValue = useCallback((nextDragState: WeekdayEventDragState | null) => {
     dragStateRef.current = nextDragState;
@@ -535,7 +548,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
       </div>
 
       <div ref={scrollContainerRef} className="calendar-timeline-scroll scrollbar-hidden -mt-2 min-h-0 flex-1 overflow-auto pt-2" onScroll={onScroll}>
-        <div className="grid min-w-0" style={timelineGridStyle}>
+        <div className="relative grid min-w-0" style={timelineGridStyle}>
           <div className="relative min-w-0 bg-white" style={{ zIndex: GRID.WEEKDAY_GRID_TIME_COLUMN_Z_INDEX }}>
             {WEEKDAY_HOURS.map((hour) => (
               <div key={hour} className="relative" style={{ height: `var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})` }}>
@@ -550,7 +563,6 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
           {visibleDays.map((day, dayIndex) => {
             const dayKey = getCalendarDateKey(day);
             const events = createTimedLayoutEvents(visibleEvents, day);
-            const isToday = dayKey === currentDayKey;
             const shouldRenderDragPreview = dragState && dragPreviewEvent && !dragState.previewIsAllDay && dragState.previewColumnDayKey === dayKey;
             return (
               <div key={dayKey} ref={setDayColumnRef(dayKey)} className={cn("relative min-w-0 bg-white", dayIndex === 0 ? null : "border-l")} style={WEEKDAY_COLUMN_BORDER_STYLE}>
@@ -558,10 +570,6 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
                   <div key={hour} className="border-b" style={{ height: `var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT})`, borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB }} />
                 ))}
                 <div className={WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME} data-testid="weekday-preview-bottom-spacer" style={WEEKDAY_BOTTOM_SPACER_STYLE} />
-
-                <div className="pointer-events-none absolute left-0 right-0 z-20" style={getCurrentTimeTopStyle(now)}>
-                  <div className={isToday ? "h-px bg-blue-500" : "h-px"} style={isToday ? undefined : { backgroundImage: "repeating-linear-gradient(to right, rgb(59 130 246 / 0.45) 0 7px, transparent 7px 16px)" }} />
-                </div>
 
                 {events.map((entry) => {
                   const eventKey = createCalendarEventKey(entry.event);
@@ -583,6 +591,13 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
               </div>
             );
           })}
+
+          {shouldRenderCurrentTime ? (
+            <div className="pointer-events-none absolute z-20" style={getCurrentTimeGridLineStyle(now)}>
+              <div className="h-px" style={{ backgroundImage: "repeating-linear-gradient(to right, rgb(59 130 246 / 0.45) 0 7px, transparent 7px 16px)" }} />
+              <div className="absolute top-0 h-px bg-blue-500" style={getCurrentTimeTodayLineStyle(currentDayIndex, visibleDays.length)} />
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
