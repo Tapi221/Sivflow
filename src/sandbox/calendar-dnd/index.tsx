@@ -19,6 +19,13 @@ type CalendarEventUndoSnapshot = {
   event: GoogleCalendarEvent;
 };
 
+type CalendarDndPointerSnapshot = {
+  pointerId: number;
+  buttons: number;
+  clientX: number;
+  clientY: number;
+};
+
 const SANDBOX_ACCOUNT_ID = "calendar-dnd-sandbox";
 const SANDBOX_CALENDAR_ID = "sandbox-calendar";
 const SAMPLE_START_DATE = new Date(2026, 5, 1);
@@ -61,9 +68,17 @@ const createVisibleDays = (startDate: Date): Date[] => Array.from({ length: WEEK
 
 const createCalendarEventUndoSnapshot = (event: GoogleCalendarEvent): CalendarEventUndoSnapshot => ({ event: cloneEvent(event) });
 
+const createPointerSnapshot = (pointerId: number, buttons: number, clientX: number, clientY: number): CalendarDndPointerSnapshot => ({ pointerId, buttons, clientX, clientY });
+
 const isSameCalendarEvent = (left: GoogleCalendarEvent, right: GoogleCalendarEvent): boolean => left.id === right.id && left.calendarId === right.calendarId && left.accountId === right.accountId;
 
 const isCalendarDndEventDragTarget = (target: EventTarget | null): boolean => target instanceof Element && target.closest(".cursor-grab") !== null;
+
+const dispatchDragPreviewPointerMove = (snapshot: CalendarDndPointerSnapshot): void => {
+  if (typeof window === "undefined" || typeof window.PointerEvent === "undefined") return;
+
+  window.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, cancelable: true, pointerId: snapshot.pointerId, buttons: snapshot.buttons, clientX: snapshot.clientX, clientY: snapshot.clientY }));
+};
 
 const getDragPageDirection = (element: HTMLElement, clientX: number): CalendarDndPageDirection | null => {
   const rect = element.getBoundingClientRect();
@@ -99,6 +114,7 @@ const CalendarDndSandboxPage = () => {
   const dragPagePointerIdRef = useRef<number | null>(null);
   const dragPageDirectionRef = useRef<CalendarDndPageDirection | null>(null);
   const dragPageIntervalRef = useRef<number | null>(null);
+  const dragPointerSnapshotRef = useRef<CalendarDndPointerSnapshot | null>(null);
   const [viewMode, setViewMode] = useState<CalendarDndViewMode>("week");
   const [weekStartDate, setWeekStartDate] = useState<Date>(() => new Date(SAMPLE_START_DATE));
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date(SAMPLE_START_DATE));
@@ -123,6 +139,7 @@ const CalendarDndSandboxPage = () => {
   const stopWeekDragPaging = useCallback(() => {
     dragPagePointerIdRef.current = null;
     dragPageDirectionRef.current = null;
+    dragPointerSnapshotRef.current = null;
     clearDragPageInterval();
   }, [clearDragPageInterval]);
 
@@ -147,9 +164,11 @@ const CalendarDndSandboxPage = () => {
     }, WEEKDAY_DRAG_PAGE_REPEAT_INTERVAL_MS);
   }, [clearDragPageInterval, handleMoveWeekPage]);
 
-  const updateWeekDragPaging = useCallback((pointerId: number, buttons: number, clientX: number) => {
+  const updateWeekDragPaging = useCallback((pointerId: number, buttons: number, clientX: number, clientY: number) => {
     const surfaceElement = calendarSurfaceRef.current;
     if (dragPagePointerIdRef.current !== pointerId) return;
+
+    dragPointerSnapshotRef.current = createPointerSnapshot(pointerId, buttons, clientX, clientY);
 
     if (buttons !== 1 || !surfaceElement) {
       stopWeekDragPaging();
@@ -169,10 +188,11 @@ const CalendarDndSandboxPage = () => {
     if (event.button !== 0 || !isCalendarDndEventDragTarget(event.target)) return;
 
     dragPagePointerIdRef.current = event.pointerId;
+    dragPointerSnapshotRef.current = createPointerSnapshot(event.pointerId, event.buttons, event.clientX, event.clientY);
   }, []);
 
   const handleWeekDragPointerMoveCapture = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
-    updateWeekDragPaging(event.pointerId, event.buttons, event.clientX);
+    updateWeekDragPaging(event.pointerId, event.buttons, event.clientX, event.clientY);
   }, [updateWeekDragPaging]);
 
   const handleWeekDragPointerEndCapture = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
@@ -182,7 +202,7 @@ const CalendarDndSandboxPage = () => {
   }, [stopWeekDragPaging]);
 
   useEffect(() => {
-    const handlePointerMove = (event: PointerEvent) => updateWeekDragPaging(event.pointerId, event.buttons, event.clientX);
+    const handlePointerMove = (event: PointerEvent) => updateWeekDragPaging(event.pointerId, event.buttons, event.clientX, event.clientY);
     const handlePointerEnd = (event: PointerEvent) => {
       if (dragPagePointerIdRef.current !== event.pointerId) return;
 
@@ -200,6 +220,14 @@ const CalendarDndSandboxPage = () => {
       clearDragPageInterval();
     };
   }, [clearDragPageInterval, stopWeekDragPaging, updateWeekDragPaging]);
+
+  useEffect(() => {
+    const snapshot = dragPointerSnapshotRef.current;
+    if (!snapshot || snapshot.buttons !== 1 || dragPagePointerIdRef.current !== snapshot.pointerId) return undefined;
+
+    const frame = window.requestAnimationFrame(() => dispatchDragPreviewPointerMove(snapshot));
+    return () => window.cancelAnimationFrame(frame);
+  }, [visibleDays]);
 
   const handleMoveCalendarEvent = useCallback<CalendarEventMoveHandler>(({ event, startsAt, endsAt, isAllDay }) => {
     const previousEvent = eventsRef.current.find((currentEvent) => isSameCalendarEvent(currentEvent, event));
