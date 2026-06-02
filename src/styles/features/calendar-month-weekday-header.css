@@ -33,6 +33,11 @@
     background: linear-gradient(to bottom, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0));
   }
 
+  .calendar-print-screen-content > div:has(> .flex.min-h-0.flex-1.flex-col.overflow-hidden.bg-white > .calendar-timeline-scroll)::before,
+  .calendar-selected-view-panel:has(.calendar-timeline-scroll)::before {
+    content: none;
+  }
+
   .calendar-year-view::before,
   .calendar-timeline-scroll::before {
     content: "";
@@ -44,6 +49,13 @@
     margin-bottom: -14px;
     pointer-events: none;
     background: linear-gradient(to bottom, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0));
+  }
+
+  .calendar-timeline-scroll::before {
+    opacity: 0;
+    animation: calendar-timeline-top-fade linear both;
+    animation-timeline: scroll(self block);
+    animation-range: 0 12px;
   }
 
   .calendar-month-weekday-header::before,
@@ -63,5 +75,15 @@
   .calendar-month-weekday-header::after,
   .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7::after {
     z-index: 1;
+  }
+}
+
+@keyframes calendar-timeline-top-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
