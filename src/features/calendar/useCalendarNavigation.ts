@@ -6,8 +6,13 @@ import { persistScheduleNavigationState, readStoredScheduleNavigationState, type
 
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
+const MOBILE_CALENDAR_DRILLDOWN_MEDIA_QUERY = "(max-width: 767px)";
 
 const isViewModeSelectionArray = (selection: CalendarViewModeSelection): selection is readonly CalendarViewMode[] => Array.isArray(selection);
+
+const isMobileCalendarViewport = (): boolean => typeof window !== "undefined" && window.matchMedia(MOBILE_CALENDAR_DRILLDOWN_MEDIA_QUERY).matches;
+
+const isMobileCalendarDrilldownView = (viewMode: CalendarViewMode): boolean => viewMode === "week" || viewMode === "threeDays" || viewMode === "month";
 
 const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SELECT_VIEW_MODE_SET.has(viewMode);
 
@@ -231,21 +236,31 @@ export const useCalendarNavigation = () => {
   }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition]);
 
   const handleSidebarSelectDate = useCallback((date: Date) => {
+    if (isMobileCalendarViewport() && isMobileCalendarDrilldownView(primaryViewMode)) {
+      handleSelectDateViewMode(date, "days");
+      return;
+    }
+
     setCurrentDate(normalizeCurrentDateForSelectedDate(date, primaryViewMode));
     setSelectedDate(date);
     setMonthTitleDate(startOfMonth(date));
     requestMonthScrollTarget();
     resetCalendarPosition(primaryViewMode);
-  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition]);
+  }, [handleSelectDateViewMode, primaryViewMode, requestMonthScrollTarget, resetCalendarPosition]);
 
   const handleVisibleDateChange = useCallback((date: Date) => setMonthTitleDate(startOfMonth(startOfDay(date))), []);
 
   const handleVisibleMonthChange = useCallback((date: Date) => setMonthTitleDate(startOfMonth(startOfDay(date))), []);
 
   const handleMonthCellSelectDate = useCallback((date: Date) => {
+    if (isMobileCalendarViewport()) {
+      handleSelectDateViewMode(date, "days");
+      return;
+    }
+
     setSelectedDate(date);
     setCurrentDate(date);
-  }, []);
+  }, [handleSelectDateViewMode]);
 
   return {
     contentViewportRef,
