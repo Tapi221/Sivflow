@@ -328,5 +328,12 @@
     body.calendar-printing .calendar-print-panel .calendar-month-grid-spacer::before {
       content: none !important;
     }
+
+    body.calendar-printing .calendar-print-panel [data-calendar-event-chip="month"] {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      background: var(--calendar-event-chip-bg) !important;
+      border-left: 3px solid var(--calendar-event-chip-accent) !important;
+    }
   }
 }
