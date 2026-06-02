@@ -70,6 +70,7 @@ export const normalizeFolder = (raw: unknown): Folder => {
     ),
     isDeleted,
     deletedAt,
+    isFavorite: toBoolOr(pick(record.isFavorite, record.is_favorite), false),
     isHidden: toBoolOr(pick(record.isHidden, record.is_hidden), false),
     isSilent: toBoolOr(pick(record.isSilent, record.is_silent), false),
     notePdfs: normalizeNotePdfs(pick(record.notePdfs, record.note_pdfs)),
