@@ -132,6 +132,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
   });
   const google = useGoogleCalendarLayer();
   const googleCalendarEvents = useMemo(() => dedupeGoogleCalendarEvents(google.events), [google.events]);
+  const syncGoogleCalendarRange = useCallback((range: CalendarDateRange) => google.forceSyncRange({ rangeStart: range.start, rangeEnd: range.end }), [google]);
 
   useCalendarEventSync({
     selectedViewMode: navigation.primaryViewMode,
@@ -196,7 +197,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     addGoogleCalendar: google.addAccount,
     reconnectGoogleAccount: google.reconnectAccount,
     toggleGoogleCalendar: google.toggleCalendar,
-    syncGoogleCalendarRange: google.forceSyncRange,
+    syncGoogleCalendarRange,
     createGoogleCalendarEvent: google.createCalendarEvent,
     updateGoogleCalendarEvent: google.updateCalendarEvent,
     deleteGoogleCalendarEvent: google.deleteCalendarEvent,
