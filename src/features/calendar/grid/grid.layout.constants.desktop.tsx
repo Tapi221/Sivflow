@@ -21,7 +21,7 @@ export const DAY_DETAIL_CURRENT_TIME_LABEL_CLASS = "-translate-y-1/2 text-[10px]
 // time / grid
 export const WEEKDAY_HOURS = 24;
 export const WEEKDAY_MINUTES_PER_HOUR = 60;
-export const WEEKDAY_HOUR_LABEL_FORMAT = "HH:mm";
+export const WEEKDAY_HOUR_LABEL_FORMAT = typeof window !== "undefined" && window.innerWidth <= 767 ? "H" : "HH:mm";
 export const WEEKDAY_DAY_FORMAT = "E";
 export const WEEKDAY_DATE_FORMAT = "d";
 
