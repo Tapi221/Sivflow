@@ -7,7 +7,7 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 
 type ToastOptions = { action?: { onClick?: () => void } };
 
-const { toastMock, toastErrorMock } = vi.hoisted(() => ({ toastMock: vi.fn(), toastErrorMock: vi.fn() }));
+const { toastMock, toastErrorMock, toastLoadingMock, toastSuccessMock } = vi.hoisted(() => ({ toastMock: vi.fn(), toastErrorMock: vi.fn(), toastLoadingMock: vi.fn(() => "move-toast-id"), toastSuccessMock: vi.fn() }));
 
 const ACCOUNT_ID = "account-1";
 const CALENDAR_ID = "calendar-1";
@@ -29,7 +29,7 @@ const createGoogleCalendarEvent = (): GoogleCalendarEvent => ({
 });
 
 vi.mock("sonner", () => ({
-  toast: Object.assign(toastMock, { error: toastErrorMock }),
+  toast: Object.assign(toastMock, { error: toastErrorMock, loading: toastLoadingMock, success: toastSuccessMock }),
 }));
 
 describe("useCalendarEventMoveController", () => {
@@ -47,10 +47,11 @@ describe("useCalendarEventMoveController", () => {
     });
 
     expect(updateGoogleCalendarEvent).toHaveBeenCalledWith(ACCOUNT_ID, { calendarId: CALENDAR_ID, eventId: "external-event-1", startsAt: MOVED_START, endsAt: MOVED_END, isAllDay: false });
-    expect(toastMock).toHaveBeenCalledWith("予定を移動しました", expect.objectContaining({ description: "移動テスト" }));
+    expect(toastLoadingMock).toHaveBeenCalledWith("予定を移動しています", { description: "変更を保存しています" });
+    expect(toastSuccessMock).toHaveBeenCalledWith("予定を移動しました", expect.objectContaining({ id: "move-toast-id", description: "元に戻すことができます" }));
     expect(applyCalendarEventMoveOverrides([event], result.current.calendarEventMoveOverrides)[0]?.startsAt).toBe(ORIGINAL_START);
 
-    const toastOptions = toastMock.mock.calls[0]?.[1] as ToastOptions;
+    const toastOptions = toastSuccessMock.mock.calls[0]?.[1] as ToastOptions;
 
     act(() => {
       toastOptions.action?.onClick?.();
@@ -60,7 +61,7 @@ describe("useCalendarEventMoveController", () => {
       expect(updateGoogleCalendarEvent).toHaveBeenCalledWith(ACCOUNT_ID, { calendarId: CALENDAR_ID, eventId: "external-event-1", startsAt: ORIGINAL_START, endsAt: ORIGINAL_END, isAllDay: false });
     });
     await waitFor(() => {
-      expect(toastMock).toHaveBeenCalledWith("予定を元に戻しました", { description: "移動テスト" });
+      expect(toastSuccessMock).toHaveBeenCalledWith("予定を元に戻しました", { description: "移動前の日時に戻しました" });
     });
   });
 
@@ -75,7 +76,7 @@ describe("useCalendarEventMoveController", () => {
       await result.current.handleMoveCalendarEvent({ event, startsAt: MOVED_START, endsAt: MOVED_END, isAllDay: false });
     });
 
-    expect(toastErrorMock).toHaveBeenCalledWith("予定の移動に失敗しました", { description: "移動テスト" });
+    expect(toastErrorMock).toHaveBeenCalledWith("予定の移動に失敗しました", { id: "move-toast-id", description: "移動前の日時に戻しました" });
     expect(applyCalendarEventMoveOverrides([{ ...event, startsAt: MOVED_START, endsAt: MOVED_END }], result.current.calendarEventMoveOverrides)[0]?.startsAt).toBe(ORIGINAL_START);
   });
 });
