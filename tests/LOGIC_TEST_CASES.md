@@ -10,7 +10,9 @@
 - [ ] Swift は React Native app の ios 配下 native extension として扱う
 - [ ] Swift 専用 app を作らない
 - [ ] Web 起動口は apps/web、Tauri shell は apps/desktop、React Native 起動口は apps/mobile に分ける
+- [ ] Desktop は UI を持たず Web renderer を WebView で表示する shell として扱う
 - [ ] 共通構造は shared/schemas、shared/design-tokens、shared/assets に寄せる
+- [ ] 全 platform 共通にしたい構造は TypeScript code ではなく schema / token / asset を優先する
 
 ## tests/logic/constantsResponsibilityLogic.test.js
 
@@ -23,7 +25,11 @@
 ## tests/logic/handwritingModeResponsibilityLogic.test.js
 
 - [ ] InkDocument / InkStroke / InkPoint / InkSide / InkTool を core の純粋 model として扱う
+- [ ] core の Ink model は React / DOM / Tauri / Expo / Swift / PencilKit に依存しない
 - [ ] Web/Desktop の Ink UI は web-renderer、iPad 専用 RN UI は mobile-renderer の ipad 配下に分ける
+- [ ] iPad 手書きモードは apps/mobile に直接置かず、入力体験 / 保存形式 / 表示 / 同期 / native bridge を分ける
+- [ ] スマホでは手書きモードをスマホ共通機能として扱わない
 - [ ] PencilKit view と export / bridge module を NativeViews と NativeModules に分ける
 - [ ] Desktop/Tauri は通信と native capability に限定し、表示 UI を持たない
 - [ ] handwriting session の interface と adapter 差分を packages/platform/src/handwriting に閉じ込める
+- [ ] 接続方式の差分は renderer から直接扱わない
