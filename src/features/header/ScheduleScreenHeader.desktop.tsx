@@ -63,6 +63,15 @@ const DEFAULT_CALENDAR_PRINT_RANGE: CalendarPrintRangeState = { mode: "current",
 
 const clampMonthVisibleEventCount = (value: number): number => Math.min(C.MONTH_VISIBLE_EVENT_COUNT_MAX, Math.max(C.MONTH_VISIBLE_EVENT_COUNT_MIN, Math.round(value)));
 
+const waitForCalendarPrintRender = async (): Promise<void> => {
+  await new Promise<void>((resolve) => {
+    window.requestAnimationFrame(() => resolve());
+  });
+  await new Promise<void>((resolve) => {
+    window.requestAnimationFrame(() => resolve());
+  });
+};
+
 const getCalendarPrintPanel = (source: HTMLElement | null): HTMLElement | null => {
   const toolbar = source?.closest<HTMLElement>("[data-calendar-print-toolbar]");
 
@@ -84,6 +93,7 @@ const printCalendarPanel = async (source: HTMLElement | null, onBeforePrint?: ()
   if (typeof window === "undefined" || typeof document === "undefined") return;
 
   await onBeforePrint?.();
+  await waitForCalendarPrintRender();
 
   const panel = getCalendarPrintPanel(source);
 
@@ -104,10 +114,9 @@ const printCalendarPanel = async (source: HTMLElement | null, onBeforePrint?: ()
   panel.classList.add(CALENDAR_PRINT_PANEL_CLASS);
   document.body.classList.add(CALENDAR_PRINTING_CLASS);
   window.addEventListener("afterprint", cleanup, { once: true });
-  window.requestAnimationFrame(() => {
-    window.print();
-    window.setTimeout(cleanup, CALENDAR_PRINT_CLEANUP_DELAY_MS);
-  });
+  await waitForCalendarPrintRender();
+  window.print();
+  window.setTimeout(cleanup, CALENDAR_PRINT_CLEANUP_DELAY_MS);
 };
 
 const ScheduleScreenHeaderDesktop = ({
