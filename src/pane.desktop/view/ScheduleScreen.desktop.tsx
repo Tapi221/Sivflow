@@ -96,7 +96,7 @@ const readStoredAllDayEventOrder = (): CalendarAllDayEventOrderMap => {
 const persistAllDayEventOrder = (order: CalendarAllDayEventOrderMap) => {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(ALL_DAY_EVENT_ORDER_KEY, JSON.stringify(order));
+    window.localStorage.setItem(ALL_DAY_EVENT_ORDER_STORAGE_KEY, JSON.stringify(order));
   } catch {
     // localStorage が使えない環境では React state の状態だけ維持する。
   }
