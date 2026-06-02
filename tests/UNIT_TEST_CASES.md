@@ -78,6 +78,10 @@
 - [ ] 編集可能な子孫を拒否する
 - [ ] workspace 外の target を拒否する
 
+## tests/unit/chip/eventchip/EventChip.spacing.test.tsx
+
+- [ ] 横並び表示に切り替わっても測定基準を変えず、タイトル下表示へ発振しない
+
 ## tests/unit/components/card/editor/useCardEditorSession.test.ts
 
 - [ ] 入力直後に保存しても最新タイトルを保存する
@@ -197,13 +201,19 @@
 - [ ] 24:00以降プレビューでは0:30以降に始まるeventを描画しない
 - [ ] 24:00以降プレビューのeventは表示範囲で切り詰めず、元の終了時刻を渡す
 - [ ] 時刻ラベルの色、背景、数字用スタイルを維持する
-- [ ] 終日ラベルとグリッド線の色を維持する
+- [ ] 終日の下線を終日行の前面レイヤーに描画し、スクロール中も時刻グリッドより前に出す
 - [ ] 終日イベントの色トークンをそのまま使う
 
 ## tests/unit/features/calendar/monthSpacerGridStyle.test.ts
 
 - [ ] spacer line token を calendar grid と同じ細い色・幅に保つ
 - [ ] 保証された line color と width token から spacer background を描画する
+
+## tests/unit/features/calendar/useCalendarEventMoveController.test.tsx
+
+- [ ] 予定移動中の loading toast を表示し、保存成功後に元に戻す action 付き success toast を表示する
+- [ ] 元に戻す action から Google Calendar 更新を呼び、移動前の日時に戻した success toast を表示する
+- [ ] 移動失敗時は rollback override を保持し、同じ toast id で error toast を表示する
 
 ## tests/unit/features/calendar/useCalendarEventSync.test.tsx
 
@@ -326,7 +336,7 @@
 
 - [ ] 画面幅が 768px 以上なら左サイドバーを表示する
 - [ ] 画面幅が 768px 未満なら左サイドバーを表示しない
-- [ ] 左サイドバーのトグルを押すとレイアウト全体も閉じた状態になり、再度押すと開いた状態に戻る
+- [ ] 左サイドバーのトグルを押すと左ペインだけが閉じた状態になり、再度押すと開いた状態に戻る
 
 ## tests/unit/layout/TitleBar.test.tsx
 
@@ -449,6 +459,8 @@
 - [ ] スクロールバーの太さを決める --scrollbar-size の値を 1px に固定する
 - [ ] WebKit 系ブラウザのスクロールバー幅と高さを --scrollbar-size で制御する
 - [ ] 通常時は透明で、hover 時だけスクロールバーのつまみを表示し、focus-within と active では表示しない
+- [ ] 非表示スクロールバーはスクロールバー溝を予約しない共通レイアウトにする
+- [ ] コードブロックは専用CSSを維持し、共通 scrollbar-hidden を付けない
 
 ## tests/unit/security/policy.test.ts
 
@@ -581,6 +593,7 @@
 ## tests/unit/weekdayTimeGridGeometry.test.ts
 
 - [ ] 24:00 をまたぐ当日側 event は minHeight を抑制して下端からはみ出さない
+- [ ] 24:00 以降プレビューは前日から継続する event を高さ 0 にして重複表示しない
 - [ ] 24:00 以降プレビューは 30 分範囲で 0 時台 event の位置と高さを計算する
 - [ ] 24:00 前後の同じ長さの event は同じ表示高さと minHeight になる
 - [ ] 24:00 以降プレビューは 0:30 以降の event を範囲外として扱う
