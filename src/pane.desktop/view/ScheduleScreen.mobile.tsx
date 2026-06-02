@@ -1,5 +1,6 @@
 import { type TouchEvent as ReactTouchEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, endOfDay, format, startOfDay, subDays } from "date-fns";
+import { RIGHT_CLICK_PANEL_STYLE } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
@@ -157,6 +158,7 @@ const MobileViewModeDropdown = ({ value, onChange, options }: MobileViewModeDrop
 
   return (
     <div ref={dropdownRef} className="relative shrink-0">
+      <style>{RIGHT_CLICK_PANEL_STYLE}</style>
       <button type="button" className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#3a3a3c] shadow-[0_1px_6px_rgba(0,0,0,0.08)] ring-1 ring-black/5 transition hover:bg-[#f7f7f7] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]" onClick={handleToggle} aria-label={`表示形式: ${selectedLabel}`} aria-haspopup="menu" aria-expanded={isOpen}>
         <span aria-hidden="true" className="flex h-5 w-5 flex-col justify-center gap-[5px]">
           <span className="block h-[2px] w-full rounded-full bg-current" />
@@ -165,14 +167,14 @@ const MobileViewModeDropdown = ({ value, onChange, options }: MobileViewModeDrop
         </span>
       </button>
       {isOpen && (
-        <div role="menu" aria-label="表示形式" className="absolute right-0 top-[calc(100%+8px)] z-50 w-40 overflow-hidden rounded-2xl border border-[#e5e5ea] bg-white py-1 shadow-[0_10px_30px_rgba(0,0,0,0.12)]">
+        <div role="menu" aria-label="表示形式" className="right-click-panel absolute right-0 top-[calc(100%+8px)] z-50 w-40">
           {options.map((option) => {
             const isActive = isSelectedViewMode(value, option.value);
 
             return (
-              <button key={option.value} type="button" role="menuitemradio" aria-checked={isActive} className={cn("flex w-full items-center justify-between px-4 py-2.5 text-left text-[14px] font-semibold tracking-[-0.02em] transition hover:bg-[#f7f7f7]", isActive ? "text-[#1c1c1e]" : "text-[#6e6e73]")} onClick={() => handleSelect(option.value)}>
+              <button key={option.value} type="button" role="menuitemradio" aria-checked={isActive} className={cn("right-click-panel-item justify-between", isActive && "text-[#1c1c1e]")} onClick={() => handleSelect(option.value)}>
                 <span>{option.label}</span>
-                {isActive && <span aria-hidden="true" className="text-[12px] text-[#8e8e93]">✓</span>}
+                {isActive && <span aria-hidden="true">✓</span>}
               </button>
             );
           })}
