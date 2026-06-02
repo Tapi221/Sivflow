@@ -15,8 +15,23 @@
     background: linear-gradient(to bottom, rgb(255 255 255 / 0), rgb(255 255 255 / 0.78));
   }
 
-  .calendar-year-view::before,
-  .calendar-print-screen-content > div > .flex.min-h-0.flex-1.flex-col.overflow-hidden.bg-white > .scrollbar-hidden::before {
+  .calendar-print-screen-content > div:has(> .flex.min-h-0.flex-1.flex-col.overflow-hidden.bg-white > .scrollbar-hidden) {
+    position: relative;
+  }
+
+  .calendar-print-screen-content > div:has(> .flex.min-h-0.flex-1.flex-col.overflow-hidden.bg-white > .scrollbar-hidden)::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 20;
+    height: 14px;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0));
+  }
+
+  .calendar-year-view::before {
     content: "";
     position: sticky;
     top: 0;
