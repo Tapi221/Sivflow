@@ -55,7 +55,7 @@ const CalendarMonthView = ({
 
   return (
     <div className="calendar-month-view flex min-h-0 flex-1 flex-col overflow-hidden bg-white" style={MONTH_VIEW_STYLE}>
-      <div ref={scroll.scrollContainerRef} className="calendar-month-scroll min-h-0 flex-1 overflow-y-auto bg-white">
+      <div ref={scroll.setScrollContainerRef} className="calendar-month-scroll min-h-0 flex-1 overflow-y-auto bg-white">
         <GridCalendarMonthDesktop
           today={todayRef.current}
           selectedDate={selectedDate}
