@@ -39,6 +39,7 @@ const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 const GOOGLE_CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
 const GOOGLE_CALENDAR_APP_CREATED_SCOPE = "https://www.googleapis.com/auth/calendar.app.created";
 const GOOGLE_TASKS_SCOPE = "https://www.googleapis.com/auth/tasks";
+const GOOGLE_DRIVE_FILE_SCOPE = "https://www.googleapis.com/auth/drive.file";
 const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_OAUTH_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
@@ -392,6 +393,17 @@ export const requestCalendarAccessToken = async (auth: Auth, silent = false): Pr
   await validateGrantedGoogleScopes({ accessToken: credential.accessToken, scope: undefined, allowTokenInfoFallback: true });
   const profile = await fetchGoogleUserInfo(credential.accessToken).catch(() => ({ accountEmail: result.user.email, accountName: result.user.displayName, accountPhotoUrl: result.user.photoURL }));
   return { accessToken: credential.accessToken, ...profile };
+};
+
+export const requestGoogleDriveFileAccessToken = async (auth: Auth): Promise<string> => {
+  if (isDesktopLikeRuntime()) throw new Error("Desktop Google Drive OAuth is not available yet.");
+  const provider = new GoogleAuthProvider();
+  provider.addScope(GOOGLE_DRIVE_FILE_SCOPE);
+  provider.setCustomParameters({ prompt: "consent select_account" });
+  const result = await signInWithPopup(auth, provider);
+  const credential = GoogleAuthProvider.credentialFromResult(result);
+  if (!credential?.accessToken) throw createGoogleCalendarReconnectRequiredError();
+  return credential.accessToken;
 };
 
 export const requestConnectedServiceAccessToken = requestCalendarAccessToken;
