@@ -1,4 +1,4 @@
-import { startTransition, useDeferredValue, useEffect, useRef } from "react";
+import { startTransition, useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
@@ -40,7 +40,6 @@ const CalendarMonthView = ({
   onMoveCalendarEvent,
 }: CalendarMonthViewProps) => {
   const todayRef = useRef(new Date());
-  const deferredVisibleEvents = useDeferredValue(visibleEvents);
 
   const scroll = useMonthInfiniteScroll({
     currentDate,
@@ -60,7 +59,7 @@ const CalendarMonthView = ({
         <GridCalendarMonthDesktop
           today={todayRef.current}
           selectedDate={selectedDate}
-          visibleEvents={deferredVisibleEvents}
+          visibleEvents={visibleEvents}
           monthWeeks={scroll.monthWeeks}
           monthRowHeight={FIXED_MONTH_ROW_HEIGHT}
           topSpacerHeight={scroll.topSpacerHeight}
