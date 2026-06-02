@@ -10,59 +10,22 @@ import * as T from "@/features/calendar/calendar.text";
 import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
-import { CALENDAR_EVENT_DRAGGING_STYLE, areSameCalendarEventTimes, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragBodyStyle } from "./calendarEventDrag.shared";
+import { CALENDAR_EVENT_DRAGGING_STYLE, areSameCalendarEventTimes, createCalendarEventDragPointerSnapshot, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragAutoScroll, useCalendarEventDragBodyStyle } from "./calendarEventDrag.shared";
+import type { CalendarEventDragPointerSnapshot } from "./calendarEventDrag.shared";
 import * as COLOR from "./grid.color.constants.desktop";
 import * as GD from "./grid.layout.constants.desktop";
 
-type CalendarMonthGridDay = {
-  date: Date;
-  key: string;
-  dayOfMonth: number;
-  isCurrentMonth: boolean;
-};
+type CalendarMonthGridDay = { date: Date; key: string; dayOfMonth: number; isCurrentMonth: boolean };
 
-type CalendarMonthGridWeek = {
-  key: string;
-  days: CalendarMonthGridDay[];
-};
+type CalendarMonthGridWeek = { key: string; days: CalendarMonthGridDay[] };
 
-type MonthEventDragState = {
-  eventKey: string;
-  event: GoogleCalendarEvent;
-  pointerId: number;
-  durationMs: number;
-  sourceDayKey: string;
-  previewStartsAt: Date;
-  previewEndsAt: Date;
-  previewIsAllDay: boolean;
-};
+type MonthEventDragState = { eventKey: string; event: GoogleCalendarEvent; pointerId: number; durationMs: number; sourceDayKey: string; previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean };
 
-type MonthDayCellHit = {
-  day: CalendarMonthGridDay;
-  element: HTMLDivElement;
-};
+type MonthDayCellHit = { day: CalendarMonthGridDay; element: HTMLDivElement };
 
-type MonthEventDragPreview = {
-  previewStartsAt: Date;
-  previewEndsAt: Date;
-  previewIsAllDay: boolean;
-};
+type MonthEventDragPreview = { previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean };
 
-type MonthEventRenderItem = {
-  event: GoogleCalendarEvent;
-  eventKey: string;
-  renderKey: string;
-  isDragPreview: boolean;
-};
-
-type MonthDragAutoScrollDirection = "up" | "down";
-
-type MonthDragPointerSnapshot = {
-  pointerId: number;
-  buttons: number;
-  clientX: number;
-  clientY: number;
-};
+type MonthEventRenderItem = { event: GoogleCalendarEvent; eventKey: string; renderKey: string; isDragPreview: boolean };
 
 type GridCalendarMonthDesktopProps = {
   today: Date;
@@ -119,9 +82,6 @@ const MONTH_GRID_BORDER_STYLE: CSSProperties = { borderColor: COLOR.WEEKDAY_COLO
 const DEFAULT_MONTH_TIMED_EVENT_DURATION_MS = 30 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CALENDAR_EVENT_DRAG_FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
-const MONTH_DRAG_SCROLL_EDGE_PX = 88;
-const MONTH_DRAG_SCROLL_STEP_PX = 28;
-const MONTH_DRAG_SCROLL_INTERVAL_MS = 16;
 
 const getCanUseCalendarEventDragPointer = (): boolean => {
   if (typeof window === "undefined") return false;
@@ -166,12 +126,7 @@ const weekContainsDayKey = (week: CalendarMonthGridWeek, dayKey: string | null) 
 
 const isWeekAffectedByDayKeyChange = (week: CalendarMonthGridWeek, previousDayKey: string | null, nextDayKey: string | null) => previousDayKey !== nextDayKey && (weekContainsDayKey(week, previousDayKey) || weekContainsDayKey(week, nextDayKey));
 
-const createMonthWeekRowStyle = (monthRowHeight: number): CSSProperties => ({
-  ...MONTH_GRID_BORDER_STYLE,
-  minHeight: monthRowHeight,
-});
-
-const createMonthDragPointerSnapshot = (pointerId: number, buttons: number, clientX: number, clientY: number): MonthDragPointerSnapshot => ({ pointerId, buttons, clientX, clientY });
+const createMonthWeekRowStyle = (monthRowHeight: number): CSSProperties => ({ ...MONTH_GRID_BORDER_STYLE, minHeight: monthRowHeight });
 
 const getEventDurationMs = (event: GoogleCalendarEvent): number => {
   const startsAt = getCalendarEventDateOrNull(event.startsAt);
@@ -208,19 +163,6 @@ const getDistanceToRect = (clientX: number, clientY: number, rect: DOMRect): num
 
   return Math.hypot(clientX - nearestX, clientY - nearestY);
 };
-
-const getMonthDragAutoScrollDirection = (element: HTMLDivElement, clientY: number): MonthDragAutoScrollDirection | null => {
-  const rect = element.getBoundingClientRect();
-  const canScrollUp = element.scrollTop > 0;
-  const canScrollDown = element.scrollTop + element.clientHeight < element.scrollHeight;
-
-  if (canScrollUp && clientY <= rect.top + MONTH_DRAG_SCROLL_EDGE_PX) return "up";
-  if (canScrollDown && clientY >= rect.bottom - MONTH_DRAG_SCROLL_EDGE_PX) return "down";
-
-  return null;
-};
-
-const getMonthDragAutoScrollDelta = (direction: MonthDragAutoScrollDirection): number => direction === "up" ? -MONTH_DRAG_SCROLL_STEP_PX : MONTH_DRAG_SCROLL_STEP_PX;
 
 const getMonthEventWrapperClassName = (isDraggable: boolean, isDragging: boolean, isPreview = false): string => cn("shrink-0 transition-opacity duration-150 ease-out", isDraggable ? "touch-none cursor-grab select-none active:cursor-grabbing" : null, isDragging ? "opacity-35" : null, isPreview ? "pointer-events-none transition-none" : null);
 
@@ -329,9 +271,6 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
   const dayCellRefs = useRef(new Map<string, HTMLDivElement>());
   const dragElementRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<MonthEventDragState | null>(null);
-  const dragPointerSnapshotRef = useRef<MonthDragPointerSnapshot | null>(null);
-  const dragAutoScrollDirectionRef = useRef<MonthDragAutoScrollDirection | null>(null);
-  const dragAutoScrollIntervalRef = useRef<number | null>(null);
   const [dragState, setDragState] = useState<MonthEventDragState | null>(null);
   const selectedDayKey = useMemo(() => getDayKey(selectedDate), [selectedDate]);
   const todayDayKey = useMemo(() => getDayKey(today), [today]);
@@ -385,25 +324,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
     return getMovedMonthEventDateRange(calendarEvent, hit.day.date, durationMs);
   }, [getMonthDayAtClientPoint]);
 
-  const clearDragAutoScrollInterval = useCallback(() => {
-    if (dragAutoScrollIntervalRef.current === null) return;
-
-    window.clearInterval(dragAutoScrollIntervalRef.current);
-    dragAutoScrollIntervalRef.current = null;
-  }, []);
-
-  const stopDragAutoScroll = useCallback(() => {
-    dragPointerSnapshotRef.current = null;
-    dragAutoScrollDirectionRef.current = null;
-    clearDragAutoScrollInterval();
-  }, [clearDragAutoScrollInterval]);
-
-  const pauseDragAutoScroll = useCallback(() => {
-    dragAutoScrollDirectionRef.current = null;
-    clearDragAutoScrollInterval();
-  }, [clearDragAutoScrollInterval]);
-
-  const updateDragPreviewFromSnapshot = useCallback((snapshot: MonthDragPointerSnapshot) => {
+  const updateDragPreviewFromSnapshot = useCallback((snapshot: CalendarEventDragPointerSnapshot) => {
     const state = dragStateRef.current;
     if (!state || snapshot.pointerId !== state.pointerId) return;
 
@@ -415,67 +336,14 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
     setDragStateValue({ ...state, ...preview });
   }, [getMonthDragPreview, setDragStateValue]);
 
-  const scrollDragPreviewOnce = useCallback((direction: MonthDragAutoScrollDirection) => {
-    const element = monthScrollContainerRef?.current;
-    const snapshot = dragPointerSnapshotRef.current;
-    if (!element || !snapshot) return;
-
-    const previousScrollTop = element.scrollTop;
-    element.scrollTop += getMonthDragAutoScrollDelta(direction);
-
-    if (element.scrollTop === previousScrollTop) {
-      pauseDragAutoScroll();
-      return;
-    }
-
-    updateDragPreviewFromSnapshot(snapshot);
-  }, [monthScrollContainerRef, pauseDragAutoScroll, updateDragPreviewFromSnapshot]);
-
-  const startDragAutoScroll = useCallback((direction: MonthDragAutoScrollDirection) => {
-    if (dragAutoScrollDirectionRef.current === direction && dragAutoScrollIntervalRef.current !== null) return;
-
-    clearDragAutoScrollInterval();
-    dragAutoScrollDirectionRef.current = direction;
-    scrollDragPreviewOnce(direction);
-    dragAutoScrollIntervalRef.current = window.setInterval(() => {
-      const currentDirection = dragAutoScrollDirectionRef.current;
-      if (!currentDirection || !dragPointerSnapshotRef.current) {
-        clearDragAutoScrollInterval();
-        return;
-      }
-
-      scrollDragPreviewOnce(currentDirection);
-    }, MONTH_DRAG_SCROLL_INTERVAL_MS);
-  }, [clearDragAutoScrollInterval, scrollDragPreviewOnce]);
-
-  const updateDragAutoScroll = useCallback((snapshot: MonthDragPointerSnapshot) => {
-    const state = dragStateRef.current;
-    const element = monthScrollContainerRef?.current;
-    if (!state || snapshot.pointerId !== state.pointerId || !element) return;
-
-    dragPointerSnapshotRef.current = snapshot;
-
-    if (snapshot.buttons !== 1) {
-      stopDragAutoScroll();
-      return;
-    }
-
-    const direction = getMonthDragAutoScrollDirection(element, snapshot.clientY);
-    if (!direction) {
-      pauseDragAutoScroll();
-      return;
-    }
-
-    startDragAutoScroll(direction);
-  }, [monthScrollContainerRef, pauseDragAutoScroll, startDragAutoScroll, stopDragAutoScroll]);
+  const { stopDragAutoScroll, updateDragAutoScroll } = useCalendarEventDragAutoScroll<HTMLDivElement>({ scrollContainerRef: monthScrollContainerRef, onScroll: updateDragPreviewFromSnapshot });
 
   const updateDragPreview = useCallback((event: PointerEvent) => {
     const state = dragStateRef.current;
     if (!state || event.pointerId !== state.pointerId) return;
 
-    const snapshot = createMonthDragPointerSnapshot(event.pointerId, event.buttons, event.clientX, event.clientY);
-    dragPointerSnapshotRef.current = snapshot;
-    updateDragAutoScroll(snapshot);
+    const snapshot = createCalendarEventDragPointerSnapshot(event.pointerId, event.buttons, event.clientX, event.clientY);
+    updateDragAutoScroll(snapshot, true);
     updateDragPreviewFromSnapshot(snapshot);
     event.preventDefault();
   }, [updateDragAutoScroll, updateDragPreviewFromSnapshot]);
@@ -523,18 +391,8 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
     event.stopPropagation();
     event.currentTarget.setPointerCapture(event.pointerId);
     dragElementRef.current = event.currentTarget;
-    dragPointerSnapshotRef.current = createMonthDragPointerSnapshot(event.pointerId, event.buttons, event.clientX, event.clientY);
 
-    setDragStateValue({
-      eventKey,
-      event: calendarEvent,
-      pointerId: event.pointerId,
-      durationMs,
-      sourceDayKey,
-      previewStartsAt: preview?.previewStartsAt ?? calendarEvent.startsAt,
-      previewEndsAt: preview?.previewEndsAt ?? calendarEvent.endsAt,
-      previewIsAllDay: preview?.previewIsAllDay ?? calendarEvent.isAllDay,
-    });
+    setDragStateValue({ eventKey, event: calendarEvent, pointerId: event.pointerId, durationMs, sourceDayKey, previewStartsAt: preview?.previewStartsAt ?? calendarEvent.startsAt, previewEndsAt: preview?.previewEndsAt ?? calendarEvent.endsAt, previewIsAllDay: preview?.previewIsAllDay ?? calendarEvent.isAllDay });
   }, [effectiveMoveCalendarEvent, getMonthDragPreview, isEventDragEnabled, setDragStateValue]);
 
   useEffect(() => {
@@ -552,9 +410,9 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
       window.removeEventListener("pointercancel", handlePointerCancel);
-      clearDragAutoScrollInterval();
+      stopDragAutoScroll();
     };
-  }, [clearDragAutoScrollInterval, finishDrag, updateDragPreview]);
+  }, [finishDrag, stopDragAutoScroll, updateDragPreview]);
 
   useCalendarEventDragBodyStyle(Boolean(dragState));
 
