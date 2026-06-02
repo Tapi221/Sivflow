@@ -14,3 +14,18 @@
 - [ ] import、型定義、定数、helper 関数、component 本体、memo / displayName / export の順に並べる
 - [ ] 各ブロックの間には空行を1行だけ挟む
 - [ ] 依存される型、定数、helper を依存する定義より先に置く
+
+## tests/src/architecture/constantsDirectoryPolicy.test.ts
+
+- [ ] constants / src/constants / packages/*/constants のような定数専用フォルダを作らない
+- [ ] 単一ファイル専用の値を shared / utils / config / constants / .constants.ts に逃がさず、使用ファイル内に保持する
+- [ ] 複数ファイルで使う定数だけ責務を持つ module と同じ階層の <責務名>.constants.ts に置く
+- [ ] @constants のような横断 barrel export を作らない
+
+## tests/src/architecture/platformDirectoryPolicy.test.ts
+
+- [ ] Web 起動口は apps/web に限定し、共有 React UI 本体を packages/web-renderer に置く
+- [ ] Tauri shell は apps/desktop/src-tauri に限定し、Desktop UI を apps/desktop に置かない
+- [ ] React Native app 起動口は apps/mobile に限定し、RN UI 本体を packages/mobile-renderer に置く
+- [ ] Swift / PencilKit 実装は apps/mobile/ios/Manifolia 配下の native extension として扱い、Swift 専用 app root を作らない
+- [ ] Ink document と handwriting session の共有構造は shared/schemas に置く
