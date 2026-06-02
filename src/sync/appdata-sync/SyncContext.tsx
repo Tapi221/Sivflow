@@ -3,8 +3,18 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { ISyncService, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
 import { getLocalDb } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-import { DEFAULT_SYNC_SETTINGS, type SyncConflict, type SyncSettings } from "@/types/domain/sync";
+import { DEFAULT_SYNC_SETTINGS, type SyncConflict, type SyncEntity, type SyncSettings } from "@/types/domain/sync";
 import { SyncContext, type SyncContextType, type SyncNotice, type SyncProviderProps, type SyncStatus } from "./SyncContextCore";
+
+const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, string> = {
+  card: "cards",
+  folder: "folders",
+  cardSet: "cardSets",
+  document: "documents",
+  tag: "tagRecords",
+  userSetting: "userSettings",
+  asset: "images",
+};
 
 const isSyncIntervalMinutes = (value: unknown): value is SyncSettings["intervalMinutes"] => {
   return value === 5 || value === 15 || value === 30 || value === 60;
@@ -161,7 +171,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
     };
   }, [clearSyncInterval, initializeSyncService]);
 
-  const syncNow = useCallback(async () => {
+  const triggerSync = useCallback(async () => {
     if (!userId) return;
 
     const service = syncServiceRef.current ?? await SyncServiceFactory.getInstance(userId);
@@ -185,18 +195,45 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
     }
   }, [updateCounts, updateLastSyncTime, userId]);
 
-  const resolveConflict = useCallback(async (conflict: SyncConflict, resolvedData: unknown) => {
+  const getUnresolvedConflicts = useCallback(async () => {
+    if (!userId) return [];
+
+    try {
+      const db = await getLocalDb(userId);
+      return await db.getConflicts();
+    } catch (error) {
+      console.error("[Sync] Failed to load conflicts:", error);
+      return [];
+    }
+  }, [userId]);
+
+  const resolveConflict = useCallback(async (conflictId: string, resolvedData: unknown) => {
     if (!userId) return;
 
     try {
       const db = await getLocalDb(userId);
+      const conflict = await db.getConflict(conflictId);
+      if (!conflict) return;
+
       const resolvedRecord = buildResolvedConflictRecord(conflict, resolvedData);
-      await db.saveResolvedConflict(conflict, resolvedRecord);
+      await db.upsert(SYNC_TABLE_BY_ENTITY[conflict.entityType], resolvedRecord);
+      await db.removeConflict(conflict.id);
       await updateCounts();
     } catch (error) {
       console.error("[Sync] Failed to resolve conflict:", error);
     }
   }, [updateCounts, userId]);
+
+  const clearSyncErrors = useCallback(async () => {
+    if (!userId) return;
+
+    try {
+      const db = await getLocalDb(userId);
+      await db.clearSyncErrors();
+    } catch (error) {
+      console.error("[Sync] Failed to clear sync errors:", error);
+    }
+  }, [userId]);
 
   const value = useMemo<SyncContextType>(
     () => ({
@@ -205,11 +242,13 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
       lastSyncTime,
       queueCount,
       conflictCount,
-      syncNow,
+      triggerSync,
       reloadSyncSettings,
+      getUnresolvedConflicts,
       resolveConflict,
+      clearSyncErrors,
     }),
-    [conflictCount, lastSyncTime, queueCount, reloadSyncSettings, resolveConflict, syncNow, syncNotice, syncStatus],
+    [clearSyncErrors, conflictCount, getUnresolvedConflicts, lastSyncTime, queueCount, reloadSyncSettings, resolveConflict, syncNotice, syncStatus, triggerSync],
   );
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
