@@ -1,4 +1,5 @@
 @import "./features/markdown-mono.css";
+@import "./features/mobile-schedule.css";
 @import "../presentation/design-tokens.css";
 @import "../presentation/button.css";
 @import "../presentation/dialog.css";
