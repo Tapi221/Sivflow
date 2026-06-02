@@ -110,7 +110,9 @@
     background: #f2f2f7;
   }
 
-  .calendar-month-weekday-header {
+  .calendar-month-weekday-header,
+  .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7 {
+    overflow: visible !important;
     border-color: #eeeeee !important;
     background: #ffffff !important;
     -webkit-backdrop-filter: none;
@@ -118,12 +120,27 @@
     box-shadow: none;
   }
 
-  .calendar-month-weekday-header::before {
+  .calendar-month-weekday-header::before,
+  .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7::before {
     content: none !important;
     background-image: none !important;
   }
 
-  .calendar-month-weekday-header > .calendar-month-weekday-cell {
+  .calendar-month-weekday-header::after,
+  .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -14px;
+    z-index: 1;
+    height: 14px;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0));
+  }
+
+  .calendar-month-weekday-header > .calendar-month-weekday-cell,
+  .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7 > .calendar-month-weekday-cell {
     border-left: 0 !important;
     border-right: 0 !important;
     box-shadow: none !important;
