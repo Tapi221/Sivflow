@@ -4,9 +4,10 @@ import { createCalendarScrollBuffer } from "@/features/scroll/schedule/calendarS
 import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
 import { persistScheduleNavigationState, readStoredScheduleNavigationState, type ScheduleNavigationState } from "./scheduleNavigationPersistence";
 
+type CalendarNavigationOptions = { allowMultiSelectViewMode?: boolean };
+
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
-const MOBILE_SCHEDULE_VIEWPORT_QUERY = "(max-width: 767px)";
 
 const isViewModeSelectionArray = (selection: CalendarViewModeSelection): selection is readonly CalendarViewMode[] => Array.isArray(selection);
 
@@ -15,8 +16,6 @@ const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SEL
 const isMultiSelectViewModeSelection = (selection: CalendarViewModeSelection): boolean => isViewModeSelectionArray(selection) && selection.length > 1;
 
 const appendMultiSelectViewMode = (currentSelection: readonly CalendarViewMode[], next: CalendarViewMode): CalendarViewMode[] => [...currentSelection.filter(isMultiSelectViewMode), next].slice(-2);
-
-const isMobileScheduleViewport = (): boolean => typeof window !== "undefined" && window.matchMedia(MOBILE_SCHEDULE_VIEWPORT_QUERY).matches;
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return addYears(current, 1);
@@ -56,8 +55,8 @@ const getSelectedDateStepViewMode = (selection: CalendarViewModeSelection, prima
 
 const getPrimaryViewMode = (selection: CalendarViewModeSelection): CalendarViewMode => isViewModeSelectionArray(selection) ? selection[0] : selection;
 
-const resolveNextViewModeSelection = (currentSelection: CalendarViewModeSelection, primaryViewMode: CalendarViewMode, next: CalendarViewMode): CalendarViewModeSelection => {
-  if (isMobileScheduleViewport() || !isMultiSelectViewMode(next)) return next;
+const resolveNextViewModeSelection = (currentSelection: CalendarViewModeSelection, primaryViewMode: CalendarViewMode, next: CalendarViewMode, allowMultiSelectViewMode: boolean): CalendarViewModeSelection => {
+  if (!allowMultiSelectViewMode || !isMultiSelectViewMode(next)) return next;
 
   if (isViewModeSelectionArray(currentSelection)) {
     if (currentSelection.includes(next)) {
@@ -73,12 +72,12 @@ const resolveNextViewModeSelection = (currentSelection: CalendarViewModeSelectio
   return next;
 };
 
-const createInitialScheduleNavigationState = (): ScheduleNavigationState => {
+const createInitialScheduleNavigationState = ({ allowMultiSelectViewMode }: Required<CalendarNavigationOptions>): ScheduleNavigationState => {
   const now = new Date();
   const stored = readStoredScheduleNavigationState();
   const selectedDate = stored?.selectedDate ?? now;
   const storedSelectedViewMode = stored?.selectedViewMode ?? "days";
-  const selectedViewMode = isMobileScheduleViewport() ? getPrimaryViewMode(storedSelectedViewMode) : storedSelectedViewMode;
+  const selectedViewMode = allowMultiSelectViewMode ? storedSelectedViewMode : getPrimaryViewMode(storedSelectedViewMode);
   const primaryViewMode = getPrimaryViewMode(selectedViewMode);
 
   return {
@@ -89,12 +88,12 @@ const createInitialScheduleNavigationState = (): ScheduleNavigationState => {
   };
 };
 
-export const useCalendarNavigation = () => {
+export const useCalendarNavigation = ({ allowMultiSelectViewMode = true }: CalendarNavigationOptions = {}) => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const initialNavigationStateRef = useRef<ScheduleNavigationState | null>(null);
-  if (!initialNavigationStateRef.current) initialNavigationStateRef.current = createInitialScheduleNavigationState();
+  if (!initialNavigationStateRef.current) initialNavigationStateRef.current = createInitialScheduleNavigationState({ allowMultiSelectViewMode });
   const initialNavigationState = initialNavigationStateRef.current;
   const [currentDate, setCurrentDate] = useState(() => initialNavigationState.currentDate);
   const [selectedDate, setSelectedDate] = useState(() => initialNavigationState.selectedDate);
@@ -146,7 +145,7 @@ export const useCalendarNavigation = () => {
       if (projectedViewportWidth > 0) setViewportWidth(projectedViewportWidth);
     }
 
-    const resolvedNext = resolveNextViewModeSelection(selectedViewMode, primaryViewMode, next);
+    const resolvedNext = resolveNextViewModeSelection(selectedViewMode, primaryViewMode, next, allowMultiSelectViewMode);
     const primaryNext = getPrimaryViewMode(resolvedNext);
     const normalized = normalizeCurrentDateForSelectedDate(selectedDate, primaryNext);
 
@@ -157,7 +156,7 @@ export const useCalendarNavigation = () => {
     if (primaryNext === "month") requestMonthScrollTarget();
 
     resetCalendarPosition(primaryNext);
-  }, [getProjectedViewportWidth, primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, selectedDate, selectedViewMode]);
+  }, [allowMultiSelectViewMode, getProjectedViewportWidth, primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, selectedDate, selectedViewMode]);
 
   const handleSelectDateViewMode = useCallback((date: Date, next: CalendarViewMode) => {
     if (next !== "month") {
