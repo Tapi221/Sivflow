@@ -182,7 +182,7 @@ const MobileViewModeDropdown = ({ value, onChange, options }: MobileViewModeDrop
 };
 
 const ScheduleScreen = (_props: ScheduleScreenProps) => {
-  const pane = useScheduleScreen();
+  const pane = useScheduleScreen({ allowMultiSelectViewMode: false });
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
