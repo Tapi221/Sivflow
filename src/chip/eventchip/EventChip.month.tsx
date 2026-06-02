@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { memo, useMemo } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { eventChipAllDayClass } from "./eventchip.allday.styles";
 import { HoverMonthEventTooltip } from "@/chip/toolchip/HoverMonthEventTooltip";
@@ -17,12 +17,38 @@ const CHIP_TEXT_FADE_STYLE: CSSProperties = {
   WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
   maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
 };
+const MOBILE_WEB_MEDIA_QUERY = "(max-width: 767px)";
+
+const getIsMobileWeb = (): boolean => {
+  if (typeof window === "undefined") return false;
+
+  return window.matchMedia(MOBILE_WEB_MEDIA_QUERY).matches;
+};
+
+const useIsMobileWeb = (): boolean => {
+  const [isMobileWeb, setIsMobileWeb] = useState(getIsMobileWeb);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const mediaQuery = window.matchMedia(MOBILE_WEB_MEDIA_QUERY);
+    const handleChange = () => setIsMobileWeb(mediaQuery.matches);
+
+    handleChange();
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  return isMobileWeb;
+};
 
 const CalendarEventChipMonth = memo(({
   event,
   showTimeLabel = true,
   tooltipDisabled = false,
 }: CalendarEventChipMonthProps) => {
+  const isMobileWeb = useIsMobileWeb();
   const tokens = useMemo(
     () => generateColorTokens(event.accentColor),
     [event.accentColor],
@@ -35,6 +61,7 @@ const CalendarEventChipMonth = memo(({
   }, [event.isAllDay, event.startsAt]);
 
   const titleLabel = event.title || "Untitled";
+  const titleFadeStyle = isMobileWeb ? undefined : CHIP_TEXT_FADE_STYLE;
 
   return (
     <HoverMonthEventTooltip
@@ -77,7 +104,7 @@ const CalendarEventChipMonth = memo(({
 
         <span
           className="event-chip-month-title min-w-0 flex-1 overflow-hidden whitespace-nowrap"
-          style={CHIP_TEXT_FADE_STYLE}
+          style={titleFadeStyle}
         >
           {titleLabel}
         </span>
