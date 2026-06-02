@@ -21,3 +21,15 @@
 - [ ] エラー状態を検証する
 - [ ] 競合状態が優先されることを検証する
 - [ ] 折りたたみ詳細を検証する
+
+## tests/e2e/handwriting_mode_visibility.spec.ts
+
+- [ ] iPad では手書きモードの navigation と画面を表示する
+- [ ] スマホでは手書きモードの navigation と画面を表示しない
+- [ ] Desktop は Web renderer 上の Ink 表示・編集 UI を使用し、Tauri shell 側に UI を持たない
+
+## tests/e2e/handwriting_session_flow.spec.ts
+
+- [ ] Desktop で handwriting session を開始し、iPad から接続できる
+- [ ] iPad PencilKit 入力を Ink document 形式として Desktop 表示に同期する
+- [ ] session close / fail 状態を Desktop と iPad の両方で表示する
