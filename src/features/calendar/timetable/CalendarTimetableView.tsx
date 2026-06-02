@@ -4,34 +4,15 @@ import { ja } from "date-fns/locale";
 import { getTagColorStyle, type TagColorKey } from "@/chip/tag/tagColor";
 import { cn } from "@/lib/utils";
 
-type TimetablePeriod = {
-  label: string;
-  startTime: string;
-  endTime: string;
-};
+type TimetablePeriod = { label: string; startTime: string; endTime: string };
 
-type TimetableEntry = {
-  id: string;
-  dayIndex: number;
-  periodIndex: number;
-  title: string;
-  room: string;
-  colorKey: TagColorKey;
-  note?: string;
-};
+type TimetableEntry = { id: string; dayIndex: number; periodIndex: number; title: string; room: string; colorKey: TagColorKey; note?: string };
 
-type TimetableSlot = {
-  dayIndex: number;
-  periodIndex: number;
-};
+type TimetableSlot = { dayIndex: number; periodIndex: number };
 
 type CalendarTimetableDensity = "default" | "compact";
 
-type CalendarTimetableViewProps = {
-  weekDate: Date;
-  density?: CalendarTimetableDensity;
-  className?: string;
-};
+type CalendarTimetableViewProps = { weekDate: Date; density?: CalendarTimetableDensity; className?: string };
 
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金"] as const;
 const TIMETABLE_GRID_TEMPLATE_COLUMNS = "56px repeat(5, 112px)";
@@ -72,19 +53,11 @@ const TIMETABLE_ENTRIES: readonly TimetableEntry[] = [
 
 const createTimetableSlotKey = ({ dayIndex, periodIndex }: TimetableSlot): string => `${dayIndex}:${periodIndex}`;
 
-const buildTimetableWeekDays = (weekDate: Date): Date[] => {
-  const weekStart = startOfWeek(weekDate, { weekStartsOn: 1 });
-
-  return Array.from({ length: TIMETABLE_DAY_LABELS.length }, (_, index) => addDays(weekStart, index));
-};
+const buildTimetableWeekDays = (weekDate: Date): Date[] => Array.from({ length: TIMETABLE_DAY_LABELS.length }, (_, index) => addDays(startOfWeek(weekDate, { weekStartsOn: 1 }), index));
 
 const createTimetableEntryMap = () => {
   const map = new Map<string, TimetableEntry>();
-
-  TIMETABLE_ENTRIES.forEach((entry) => {
-    map.set(createTimetableSlotKey(entry), entry);
-  });
-
+  TIMETABLE_ENTRIES.forEach((entry) => map.set(createTimetableSlotKey(entry), entry));
   return map;
 };
 
@@ -96,11 +69,7 @@ const getTimetableGridTemplateColumns = (density: CalendarTimetableDensity): str
 
 const TIMETABLE_ENTRY_MAP = createTimetableEntryMap();
 
-const CalendarTimetableViewComponent = ({
-  weekDate,
-  density = "default",
-  className,
-}: CalendarTimetableViewProps) => {
+const CalendarTimetableViewComponent = ({ weekDate, density = "default", className }: CalendarTimetableViewProps) => {
   const weekDays = buildTimetableWeekDays(weekDate);
   const weekRangeLabel = formatTimetableWeekRange(weekDays);
   const registeredCountLabel = `${TIMETABLE_ENTRIES.length}コマ`;
@@ -114,23 +83,14 @@ const CalendarTimetableViewComponent = ({
           <span className={cn("rounded-full border border-[#eeeeee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>平日5日 / 7限</span>
           <span className={cn("rounded-full border border-[#eeeeee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{registeredCountLabel}配置済み</span>
         </div>
-
-        <div className="flex shrink-0 items-center gap-2">
-          <button type="button" className={cn("inline-flex items-center justify-center rounded-full border border-[#e5e5ea] bg-white font-bold tracking-[-0.01em] text-[#1c1c1e] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 px-3 text-[12px]" : "h-9 px-4 text-[13px]")}>
-            <span className="mr-1.5 text-[16px] leading-none text-[#6e6e73]">＋</span>
-            授業を追加
-          </button>
-          <button type="button" aria-label="時間割設定" className={cn("flex items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 w-8 text-[14px]" : "h-9 w-9 text-[15px]")}>⚙︎</button>
-        </div>
+        <button type="button" aria-label="時間割設定" className={cn("flex shrink-0 items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 w-8 text-[14px]" : "h-9 w-9 text-[15px]")}>⚙︎</button>
       </div>
 
       <div className={cn("min-h-0 flex-1 text-center scrollbar-hidden", isCompact ? "overflow-y-auto overflow-x-hidden px-4 pb-3" : "overflow-auto px-5 pb-5")}>
         <div className={cn("gap-y-2 text-left", isCompact ? "grid w-full min-w-0 gap-x-1" : "inline-grid w-max gap-x-2")} style={{ gridTemplateColumns: getTimetableGridTemplateColumns(density) }}>
           <div aria-hidden="true" className={isCompact ? "h-7" : "h-8"} />
-
           {weekDays.map((day, dayIndex) => {
             const isToday = isSameDay(day, new Date());
-
             return (
               <div key={day.toISOString()} className={cn("flex min-w-0 items-center justify-center text-center", isCompact ? "h-7 gap-1" : "h-8 gap-1.5")}>
                 <span className={cn("font-bold tracking-[-0.02em]", isCompact ? "text-[11px]" : "text-[13px]", isToday ? "text-[#007aff]" : "text-[#1c1c1e]")}>{TIMETABLE_DAY_LABELS[dayIndex]}</span>
@@ -138,7 +98,6 @@ const CalendarTimetableViewComponent = ({
               </div>
             );
           })}
-
           {TIMETABLE_PERIODS.map((period, periodIndex) => (
             <div key={period.label} className="contents">
               <div className={cn("flex items-center justify-end pr-1", isCompact ? "min-h-[48px]" : "min-h-[52px]")}>
@@ -151,11 +110,9 @@ const CalendarTimetableViewComponent = ({
                   </div>
                 </div>
               </div>
-
               {weekDays.map((day, dayIndex) => {
                 const slot = { dayIndex, periodIndex } satisfies TimetableSlot;
                 const entry = TIMETABLE_ENTRY_MAP.get(createTimetableSlotKey(slot)) ?? null;
-
                 return (
                   <button key={`${day.toISOString()}-${period.label}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "min-h-[48px] rounded-[14px]" : "min-h-[52px] rounded-[18px]", entry ? (isCompact ? "border px-1.5 py-1" : "border px-2.5 py-1") : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.colorKey) : undefined}>
                     {entry ? (
@@ -164,11 +121,7 @@ const CalendarTimetableViewComponent = ({
                         <span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-80", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.room}</span>
                         {entry.note ? <span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-60", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.note}</span> : null}
                       </span>
-                    ) : (
-                      <span className={cn("flex h-full items-center justify-center", isCompact ? "min-h-[36px]" : "min-h-[40px]")}>
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[14px] font-light leading-none text-[#8f929c]">＋</span>
-                      </span>
-                    )}
+                    ) : null}
                   </button>
                 );
               })}
