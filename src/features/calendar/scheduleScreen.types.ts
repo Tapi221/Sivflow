@@ -1,7 +1,7 @@
 import type { CSSProperties, RefObject, UIEvent } from "react";
-import type { CalendarViewMode, CalendarViewModeSelection } from "./calendar.types";
 import type { GCalConnectionStatus, GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
+import type { CalendarViewMode, CalendarViewModeSelection } from "./calendar.types";
 
 export type { CalendarViewMode, CalendarViewModeSelection };
 
@@ -109,18 +109,11 @@ export type CalendarAllDayEventReorderRequest = {
 export type CalendarAllDayEventReorderHandler = (request: CalendarAllDayEventReorderRequest) => void;
 
 export type CalendarSidebarProps = {
-  monthDate: Date;
-  selectedDate: Date;
-  selectedRange?: CalendarSelectionRange | null;
-  visibleEvents: GoogleCalendarEvent[];
   appProjects: AppCalendarItem[];
   projectCalendarLinks: ProjectCalendarLink[];
   googleCalendarColorOverrides: GoogleCalendarColorOverrideMap;
   googleAccounts: GoogleAccountDisplay[];
   isAnyCalendarConnecting: boolean;
-  onSelectDate: (date: Date) => void;
-  onPreviousMonth: () => void;
-  onNextMonth: () => void;
   onAddCalendar: () => void;
   onAddProject: (projectName: string) => void;
   onToggleProject: (projectId: string) => void;
