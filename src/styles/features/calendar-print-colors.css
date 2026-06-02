@@ -1,0 +1,14 @@
+@layer components {
+  @media print {
+    body.calendar-printing .calendar-print-panel [data-calendar-all-day-event-item="true"],
+    body.calendar-printing .calendar-print-panel [data-calendar-event-chip="weekday"] {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body.calendar-printing .calendar-print-panel [data-calendar-event-chip="weekday"] {
+      background: var(--calendar-event-chip-bg) !important;
+      border-left: 3px solid var(--calendar-event-chip-accent) !important;
+    }
+  }
+}
