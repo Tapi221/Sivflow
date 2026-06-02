@@ -24,6 +24,8 @@ type Props = {
   scrollTargetToken?: number;
 };
 
+const CALENDAR_TIMELINE_SCROLLED_CLASS_NAME = "calendar-timeline-scroll-scrolled";
+
 const isWeekdayHorizontalViewMode = (viewMode: CalendarViewMode) =>
   viewMode === "days" ||
   viewMode === "threeDays" ||
@@ -31,6 +33,10 @@ const isWeekdayHorizontalViewMode = (viewMode: CalendarViewMode) =>
   viewMode === "timetable";
 
 const isRestorableVerticalScrollViewMode = (viewMode: CalendarViewMode): boolean => isWeekdayHorizontalViewMode(viewMode);
+
+const updateTimelineScrollFadeVisibility = (scroller: HTMLDivElement): void => {
+  scroller.classList.toggle(CALENDAR_TIMELINE_SCROLLED_CLASS_NAME, scroller.scrollTop > 0);
+};
 
 export const useCalendarScrollController = ({
   selectedViewMode,
@@ -78,6 +84,7 @@ export const useCalendarScrollController = ({
     if (storedScrollTop === null) return;
 
     scroller.scrollTop = storedScrollTop;
+    updateTimelineScrollFadeVisibility(scroller);
     didRestoreScrollTopRef.current = true;
   }, [selectedViewMode]);
 
@@ -120,6 +127,7 @@ export const useCalendarScrollController = ({
 
       if (!latestScroller) return;
 
+      updateTimelineScrollFadeVisibility(latestScroller);
       syncVisibleDate(latestScroller);
       persistVerticalScrollPosition(latestScroller);
     });
@@ -134,11 +142,13 @@ export const useCalendarScrollController = ({
     scroller.addEventListener("scroll", handleScroll, { passive: true });
 
     const initialFrameId = window.requestAnimationFrame(() => {
+      updateTimelineScrollFadeVisibility(scroller);
       syncVisibleDate(scroller);
     });
 
     return () => {
       scroller.removeEventListener("scroll", handleScroll);
+      scroller.classList.remove(CALENDAR_TIMELINE_SCROLLED_CLASS_NAME);
       window.cancelAnimationFrame(initialFrameId);
 
       if (scrollRafRef.current !== null) {
