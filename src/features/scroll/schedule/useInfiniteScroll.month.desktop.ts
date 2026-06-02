@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import type { RefCallback, RefObject } from "react";
 import { startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { addDays, addWeeks, endOfDay, format, isSameMonth, startOfDay, startOfMonth, startOfWeek } from "date-fns";
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -18,6 +18,7 @@ export type UseMonthInfiniteScrollReturn = {
   topSpacerHeight: number;
   bottomSpacerHeight: number;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
+  setScrollContainerRef: RefCallback<HTMLDivElement>;
 };
 
 type MonthVirtualWindow = {
@@ -224,6 +225,23 @@ export const useMonthInfiniteScroll = ({
     [updateVirtualWindowForScroll],
   );
 
+  const setScrollContainerRef = useCallback<RefCallback<HTMLDivElement>>((element) => {
+    scrollContainerRef.current = element;
+
+    if (!element || element.clientHeight <= 0) return;
+
+    const targetWeekOffset = pendingScrollWeekOffsetRef.current;
+    if (targetWeekOffset === null) return;
+
+    const rowCenter = getWeekOffsetTop(targetWeekOffset) + MONTH_ROW_HEIGHT / 2;
+    const viewCenter = element.clientHeight / 2;
+
+    element.scrollTop = Math.max(0, rowCenter - viewCenter);
+    pendingScrollWeekOffsetRef.current = null;
+    updateVirtualWindowForScroll(element, true);
+    syncVisibleMonth();
+  }, [getWeekOffsetTop, syncVisibleMonth, updateVirtualWindowForScroll]);
+
   useLayoutEffect(() => {
     if (lastScrollTargetTokenRef.current === scrollTargetToken) return;
 
@@ -299,5 +317,6 @@ export const useMonthInfiniteScroll = ({
     topSpacerHeight: getTopSpacerHeight(virtualWindow),
     bottomSpacerHeight: getBottomSpacerHeight(virtualWindow),
     scrollContainerRef,
+    setScrollContainerRef,
   };
 };
