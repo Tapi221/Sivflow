@@ -243,9 +243,18 @@ export const useCalendarNavigation = () => {
   const handleVisibleMonthChange = useCallback((date: Date) => setMonthTitleDate(startOfMonth(startOfDay(date))), []);
 
   const handleMonthCellSelectDate = useCallback((date: Date) => {
+    if (primaryViewMode === "year") {
+      setSelectedViewMode("days");
+      setCurrentDate(normalizeCurrentDateForSelectedDate(date, "days"));
+      setSelectedDate(date);
+      setMonthTitleDate(startOfMonth(date));
+      resetCalendarPosition("days");
+      return;
+    }
+
     setSelectedDate(date);
     setCurrentDate(date);
-  }, []);
+  }, [primaryViewMode, resetCalendarPosition]);
 
   return {
     contentViewportRef,
