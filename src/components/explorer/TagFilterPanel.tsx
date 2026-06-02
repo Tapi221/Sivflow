@@ -132,7 +132,7 @@ const buildTagTreeNodes = (
       id: tag.id,
       name,
       nameLower,
-      colorKey: getTagColorKey(tag.color),
+      colorKey: getTagColorKey(tag.color ?? undefined),
       parentId: normalizeTagParentId(tag.parentId),
       children: [],
     });
