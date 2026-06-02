@@ -47,7 +47,7 @@ const AnimatedCheckboxBase = ({
   const rootStyle = { "--checkbox-color": color } as CSSProperties;
 
   return (
-    <span className={cn("relative h-3.5 w-3.5 shrink-0", className)} style={rootStyle}>
+    <span className={cn("relative inline-flex h-3.5 w-3.5 shrink-0", className)} style={rootStyle}>
       <span
         className={cn(
           "absolute inset-0 border transition-all duration-200 ease-out",
