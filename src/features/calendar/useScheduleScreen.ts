@@ -50,6 +50,7 @@ export type UseScheduleScreenReturn = {
   deleteGoogleCalendarEvent: (accountId: string, event: GCalWritableEventDeleteInput) => Promise<void>;
 
   handleSelectViewMode: (viewMode: CalendarViewMode) => void;
+  handleSelectDateViewMode: (date: Date, viewMode: CalendarViewMode) => void;
   handleToday: () => void;
   handlePrevious: () => void;
   handleNext: () => void;
@@ -198,6 +199,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     updateGoogleCalendarEvent: google.updateCalendarEvent,
     deleteGoogleCalendarEvent: google.deleteCalendarEvent,
     handleSelectViewMode: navigation.handleSelectViewMode,
+    handleSelectDateViewMode: navigation.handleSelectDateViewMode,
     handleToday: navigation.handleToday,
     handlePrevious: navigation.handlePrevious,
     handleNext: navigation.handleNext,
