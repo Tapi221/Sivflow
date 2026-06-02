@@ -1,7 +1,7 @@
 //Month
 export const MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS = "h-8";
 export const MONTH_GRID_DAY_NUMBER_POSITION_CLASS = "left-0 top-0 md:left-3 md:top-1";
-export const MONTH_GRID_MONTH_ANNOTATION_POSITION_CLASS = "left-[28px] top-[5px]";
+export const MONTH_GRID_MONTH_ANNOTATION_POSITION_CLASS = "left-[28px] top-[5px] md:left-[40px]";
 export const MONTH_GRID_EVENTS_CONTAINER_POSITION_CLASS = "inset-x-px top-8";
 export const MONTH_GRID_EVENTS_GAP_CLASS = "gap-[3px]";
 export const MONTH_GRID_OVERFLOW_TEXT_CLASS = "w-full pr-3 text-right text-[11px] leading-none";
