@@ -33,6 +33,7 @@ type GridCalendarMonthDesktopProps = {
   visibleEvents: GoogleCalendarEvent[];
   monthWeeks: CalendarMonthGridWeek[];
   monthRowHeight: number;
+  maxVisibleEventCount?: number;
   topSpacerHeight: number;
   bottomSpacerHeight: number;
   scrollHoverDayKey: string | null;
@@ -267,14 +268,14 @@ const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDay
 
 CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 
-const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWeeks, monthRowHeight, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, showEventTimeLabel = true, monthScrollContainerRef, onSelectDate, onMoveCalendarEvent }: GridCalendarMonthDesktopProps) => {
+const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWeeks, monthRowHeight, maxVisibleEventCount, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, showEventTimeLabel = true, monthScrollContainerRef, onSelectDate, onMoveCalendarEvent }: GridCalendarMonthDesktopProps) => {
   const dayCellRefs = useRef(new Map<string, HTMLDivElement>());
   const dragElementRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<MonthEventDragState | null>(null);
   const [dragState, setDragState] = useState<MonthEventDragState | null>(null);
   const selectedDayKey = useMemo(() => getDayKey(selectedDate), [selectedDate]);
   const todayDayKey = useMemo(() => getDayKey(today), [today]);
-  const eventsByDay = useMemo(() => computeMonthEventsByDay({ visibleEvents, monthWeeks, monthRowHeight }), [monthRowHeight, monthWeeks, visibleEvents]);
+  const eventsByDay = useMemo(() => computeMonthEventsByDay({ visibleEvents, monthWeeks, monthRowHeight, maxVisibleEventCount }), [maxVisibleEventCount, monthRowHeight, monthWeeks, visibleEvents]);
   const dragPreviewEvent = useMemo(() => dragState ? createCalendarEventDragPreview(dragState.event, dragState.previewStartsAt, dragState.previewEndsAt, dragState.previewIsAllDay) : null, [dragState]);
   const dragPreviewDayKey = dragState ? getDayKey(dragState.previewStartsAt) : null;
   const isEventDragEnabled = useCalendarEventDragEnabled();
