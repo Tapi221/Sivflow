@@ -64,6 +64,7 @@ type GridCalendarMonthDesktopProps = {
   topSpacerHeight: number;
   bottomSpacerHeight: number;
   scrollHoverDayKey: string | null;
+  showEventTimeLabel?: boolean;
   onSelectDate: (date: Date) => void;
   onMoveCalendarEvent?: CalendarEventMoveHandler;
 };
@@ -78,6 +79,7 @@ type CalendarMonthDayCellProps = {
   dragState: MonthEventDragState | null;
   dragPreviewEvent: GoogleCalendarEvent | null;
   dragPreviewDayKey: string | null;
+  showEventTimeLabel: boolean;
   setDayCellRef: (dayKey: string) => (element: HTMLDivElement | null) => void;
   onSelectDate: (date: Date) => void;
   onEventClick: (event: ReactMouseEvent<HTMLDivElement>) => void;
@@ -95,6 +97,7 @@ type CalendarMonthWeekRowProps = {
   dragState: MonthEventDragState | null;
   dragPreviewEvent: GoogleCalendarEvent | null;
   dragPreviewDayKey: string | null;
+  showEventTimeLabel: boolean;
   setDayCellRef: (dayKey: string) => (element: HTMLDivElement | null) => void;
   onSelectDate: (date: Date) => void;
   onEventClick: (event: ReactMouseEvent<HTMLDivElement>) => void;
@@ -226,7 +229,7 @@ const createMonthEventRenderItems = (visibleEvents: GoogleCalendarEvent[], dayKe
   return didReplaceSource ? replacedItems : visibleItems;
 };
 
-const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScrollHovered, hasLeadingBorder, dragState, dragPreviewEvent, dragPreviewDayKey, setDayCellRef, onSelectDate, onEventClick, onEventPointerDown, onMoveCalendarEvent }: CalendarMonthDayCellProps) => {
+const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScrollHovered, hasLeadingBorder, dragState, dragPreviewEvent, dragPreviewDayKey, showEventTimeLabel, setDayCellRef, onSelectDate, onEventClick, onEventPointerDown, onMoveCalendarEvent }: CalendarMonthDayCellProps) => {
   const monthAnnotation = getMonthAnnotation(day.date);
   const { visibleEvents, totalCount } = dayEvents;
   const renderItems = createMonthEventRenderItems(visibleEvents, day.key, dragState, dragPreviewEvent, dragPreviewDayKey);
@@ -253,7 +256,7 @@ const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScroll
 
               return (
                 <div key={renderKey} className={getMonthEventWrapperClassName(isDraggable, isDragging, isDragPreview)} style={isDragPreview ? CALENDAR_EVENT_DRAGGING_STYLE : undefined} onClick={isDraggable ? onEventClick : undefined} onPointerDown={isDraggable ? (pointerEvent) => onEventPointerDown(pointerEvent, event) : undefined}>
-                  <CalendarEventChipMonth event={event} tooltipDisabled={isDragPreview || isDragging} />
+                  <CalendarEventChipMonth event={event} showTimeLabel={showEventTimeLabel} tooltipDisabled={isDragPreview || isDragging} />
                 </div>
               );
             })}
@@ -272,7 +275,7 @@ const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScroll
 
 CalendarMonthDayCell.displayName = "CalendarMonthDayCell";
 
-const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDayKey, scrollHoverDayKey, monthRowHeight, dragState, dragPreviewEvent, dragPreviewDayKey, setDayCellRef, onSelectDate, onEventClick, onEventPointerDown, onMoveCalendarEvent }: CalendarMonthWeekRowProps) => {
+const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDayKey, scrollHoverDayKey, monthRowHeight, dragState, dragPreviewEvent, dragPreviewDayKey, showEventTimeLabel, setDayCellRef, onSelectDate, onEventClick, onEventPointerDown, onMoveCalendarEvent }: CalendarMonthWeekRowProps) => {
   return (
     <div data-calendar-week-key={week.key} className="calendar-month-week-row relative grid grid-cols-7 border-b" style={createMonthWeekRowStyle(monthRowHeight)}>
       {week.days.map((day, dayIndex) => {
@@ -280,12 +283,12 @@ const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDay
         const isToday = day.key === todayDayKey;
         const isScrollHovered = day.key === scrollHoverDayKey;
 
-        return <CalendarMonthDayCell key={day.key} day={day} dayEvents={eventsByDay.get(day.key) ?? EMPTY_MONTH_DAY_EVENTS} isToday={isToday} selected={selected} isScrollHovered={isScrollHovered} hasLeadingBorder={dayIndex > 0} dragState={dragState} dragPreviewEvent={dragPreviewEvent} dragPreviewDayKey={dragPreviewDayKey} setDayCellRef={setDayCellRef} onSelectDate={onSelectDate} onEventClick={onEventClick} onEventPointerDown={onEventPointerDown} onMoveCalendarEvent={onMoveCalendarEvent} />;
+        return <CalendarMonthDayCell key={day.key} day={day} dayEvents={eventsByDay.get(day.key) ?? EMPTY_MONTH_DAY_EVENTS} isToday={isToday} selected={selected} isScrollHovered={isScrollHovered} hasLeadingBorder={dayIndex > 0} dragState={dragState} dragPreviewEvent={dragPreviewEvent} dragPreviewDayKey={dragPreviewDayKey} showEventTimeLabel={showEventTimeLabel} setDayCellRef={setDayCellRef} onSelectDate={onSelectDate} onEventClick={onEventClick} onEventPointerDown={onEventPointerDown} onMoveCalendarEvent={onMoveCalendarEvent} />;
       })}
     </div>
   );
 }, (previous, next) => {
-  if (previous.week !== next.week || previous.eventsByDay !== next.eventsByDay || previous.monthRowHeight !== next.monthRowHeight || previous.onSelectDate !== next.onSelectDate || previous.dragState !== next.dragState || previous.dragPreviewEvent !== next.dragPreviewEvent || previous.dragPreviewDayKey !== next.dragPreviewDayKey || previous.setDayCellRef !== next.setDayCellRef || previous.onEventClick !== next.onEventClick || previous.onEventPointerDown !== next.onEventPointerDown || previous.onMoveCalendarEvent !== next.onMoveCalendarEvent) return false;
+  if (previous.week !== next.week || previous.eventsByDay !== next.eventsByDay || previous.monthRowHeight !== next.monthRowHeight || previous.onSelectDate !== next.onSelectDate || previous.dragState !== next.dragState || previous.dragPreviewEvent !== next.dragPreviewEvent || previous.dragPreviewDayKey !== next.dragPreviewDayKey || previous.showEventTimeLabel !== next.showEventTimeLabel || previous.setDayCellRef !== next.setDayCellRef || previous.onEventClick !== next.onEventClick || previous.onEventPointerDown !== next.onEventPointerDown || previous.onMoveCalendarEvent !== next.onMoveCalendarEvent) return false;
   if (isWeekAffectedByDayKeyChange(previous.week, previous.selectedDayKey, next.selectedDayKey)) return false;
   if (isWeekAffectedByDayKeyChange(previous.week, previous.todayDayKey, next.todayDayKey)) return false;
   if (isWeekAffectedByDayKeyChange(previous.week, previous.scrollHoverDayKey, next.scrollHoverDayKey)) return false;
@@ -294,7 +297,7 @@ const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDay
 
 CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 
-const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWeeks, monthRowHeight, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, onSelectDate, onMoveCalendarEvent }: GridCalendarMonthDesktopProps) => {
+const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWeeks, monthRowHeight, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, showEventTimeLabel = true, onSelectDate, onMoveCalendarEvent }: GridCalendarMonthDesktopProps) => {
   const dayCellRefs = useRef(new Map<string, HTMLDivElement>());
   const dragElementRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<MonthEventDragState | null>(null);
@@ -454,7 +457,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
         <div aria-hidden="true" className="calendar-month-grid-spacer" style={{ height: topSpacerHeight }} />
 
         {monthWeeks.map((week) => (
-          <CalendarMonthWeekRow key={week.key} week={week} eventsByDay={eventsByDay} selectedDayKey={selectedDayKey} todayDayKey={todayDayKey} scrollHoverDayKey={scrollHoverDayKey} monthRowHeight={monthRowHeight} dragState={dragState} dragPreviewEvent={dragPreviewEvent} dragPreviewDayKey={dragPreviewDayKey} setDayCellRef={setDayCellRef} onSelectDate={onSelectDate} onEventClick={handleEventClick} onEventPointerDown={handleEventPointerDown} onMoveCalendarEvent={effectiveMoveCalendarEvent} />
+          <CalendarMonthWeekRow key={week.key} week={week} eventsByDay={eventsByDay} selectedDayKey={selectedDayKey} todayDayKey={todayDayKey} scrollHoverDayKey={scrollHoverDayKey} monthRowHeight={monthRowHeight} dragState={dragState} dragPreviewEvent={dragPreviewEvent} dragPreviewDayKey={dragPreviewDayKey} showEventTimeLabel={showEventTimeLabel} setDayCellRef={setDayCellRef} onSelectDate={onSelectDate} onEventClick={handleEventClick} onEventPointerDown={handleEventPointerDown} onMoveCalendarEvent={effectiveMoveCalendarEvent} />
         ))}
 
         <div aria-hidden="true" className="calendar-month-grid-spacer" style={{ height: bottomSpacerHeight }} />
