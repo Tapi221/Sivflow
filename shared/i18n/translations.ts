@@ -40,6 +40,14 @@ export type RawTranslations = {
   viewsLabel: string;
   todayButton: string;
   exportCalendarPdf: string;
+  printRangeLabel: string;
+  printRangeCurrent: string;
+  printRangeDay: string;
+  printRangeWeek: string;
+  printRangeMonth: string;
+  printRangeCustom: string;
+  printRangeStartDate: string;
+  printRangeEndDate: string;
   todayTooltipDateFormat: string;
   previousLabel: string;
   nextLabel: string;
