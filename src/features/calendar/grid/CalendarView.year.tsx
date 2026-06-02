@@ -7,10 +7,18 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 import { cn } from "@/lib/utils";
 import { useDateFnsLocale, useT } from "@shared/i18n/useT";
 
+export type CalendarYearEventPriority = {
+  group: number;
+  index: number;
+};
+
+export type CalendarYearEventPriorityResolver = (event: GoogleCalendarEvent) => CalendarYearEventPriority;
+
 type CalendarYearViewProps = {
   yearDate: Date;
   selectedDate: Date;
   visibleEvents?: GoogleCalendarEvent[];
+  eventPriorityResolver?: CalendarYearEventPriorityResolver;
   onSelectDate: (date: Date) => void;
   onRenderedRangeChange?: (range: CalendarDateRange) => void;
   onSyncRangeChange?: (range: CalendarDateRange) => void;
@@ -19,6 +27,7 @@ type CalendarYearViewProps = {
 type CalendarYearDayEvents = {
   count: number;
   backgroundColor: string;
+  priority: CalendarYearEventPriority;
 };
 
 type CalendarYearDay = {
@@ -63,6 +72,7 @@ const YEAR_SCROLL_SYNC_DEBOUNCE_MS = 120;
 const YEAR_SYNC_RANGE_SAMPLE_OFFSET_PX = 160;
 const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
 const EMPTY_YEAR_EVENTS: GoogleCalendarEvent[] = [];
+const DEFAULT_YEAR_EVENT_PRIORITY: CalendarYearEventPriority = { group: Number.MAX_SAFE_INTEGER, index: Number.MAX_SAFE_INTEGER };
 
 const createDayAriaLabel = (date: Date, eventCount: number): string => {
   const baseLabel = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
@@ -98,22 +108,38 @@ const colorToRgba = (color: string, alpha: number): string => {
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 };
 
-const buildEventsByDay = (events: GoogleCalendarEvent[]): Map<string, CalendarYearDayEvents> => {
+const resolveDefaultYearEventPriority: CalendarYearEventPriorityResolver = () => DEFAULT_YEAR_EVENT_PRIORITY;
+
+const compareCalendarYearEventPriority = (left: CalendarYearEventPriority, right: CalendarYearEventPriority): number => {
+  const groupDiff = left.group - right.group;
+  if (groupDiff !== 0) return groupDiff;
+
+  return left.index - right.index;
+};
+
+const buildEventsByDay = (events: GoogleCalendarEvent[], eventPriorityResolver: CalendarYearEventPriorityResolver = resolveDefaultYearEventPriority): Map<string, CalendarYearDayEvents> => {
   const eventsByDay = new Map<string, CalendarYearDayEvents>();
 
   for (const event of events) {
     const color = event.accentColor;
     const backgroundColor = colorToRgba(color, EVENT_DAY_BACKGROUND_ALPHA);
+    const priority = eventPriorityResolver(event);
 
     for (const dayKey of getEventDateKeys(event)) {
       const current = eventsByDay.get(dayKey);
 
       if (current) {
         current.count += 1;
+
+        if (compareCalendarYearEventPriority(priority, current.priority) < 0) {
+          current.backgroundColor = backgroundColor;
+          current.priority = priority;
+        }
       } else {
         eventsByDay.set(dayKey, {
           count: 1,
           backgroundColor,
+          priority,
         });
       }
     }
@@ -191,6 +217,7 @@ const CalendarYearViewComponent = ({
   yearDate,
   selectedDate,
   visibleEvents = EMPTY_YEAR_EVENTS,
+  eventPriorityResolver,
   onSelectDate,
   onRenderedRangeChange,
   onSyncRangeChange,
@@ -213,7 +240,7 @@ const CalendarYearViewComponent = ({
   const [syncRange, setSyncRange] = useState(() => buildYearSyncDateRange(yearDate));
 
   const deferredVisibleEvents = useDeferredValue(visibleEvents);
-  const eventsByDay = useMemo(() => buildEventsByDay(deferredVisibleEvents), [deferredVisibleEvents]);
+  const eventsByDay = useMemo(() => buildEventsByDay(deferredVisibleEvents, eventPriorityResolver), [deferredVisibleEvents, eventPriorityResolver]);
 
   const buildYearMonths = useCallback(
     (targetYear: Date): CalendarYearMonth[] => {
