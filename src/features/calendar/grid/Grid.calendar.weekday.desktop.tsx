@@ -58,8 +58,11 @@ type WeekdayAllDayRenderItem = {
   isDragPreview: boolean;
 };
 
+type WeekdayDragAutoScrollDirection = "up" | "down";
+
 type WeekdayDragPointerSnapshot = {
   pointerId: number;
+  buttons: number;
   clientX: number;
   clientY: number;
 };
@@ -81,9 +84,9 @@ const WEEKDAY_BOTTOM_TIME_SPACER_CLASS_NAME = "relative";
 const WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME = "relative overflow-hidden";
 const WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES = 15;
 const WEEKDAY_TIMED_EVENT_DRAG_FALLBACK_MINUTES = 30;
-const WEEKDAY_DRAG_AUTO_SCROLL_EDGE_PX = 72;
-const WEEKDAY_DRAG_AUTO_SCROLL_MAX_STEP_PX = 18;
-const WEEKDAY_DRAG_AUTO_SCROLL_INTERVAL_MS = 16;
+const WEEKDAY_DRAG_SCROLL_EDGE_PX = 88;
+const WEEKDAY_DRAG_SCROLL_STEP_PX = 28;
+const WEEKDAY_DRAG_SCROLL_INTERVAL_MS = 16;
 const MINUTE_MS = 60 * 1000;
 
 const isUnshiftedHourLabel = (hour: number): boolean => hour === 0;
@@ -110,7 +113,7 @@ const getAllDayEventClassName = (isDraggable: boolean, isDragging: boolean): str
 
 const getTimedEventWrapperClassName = (isDraggable: boolean, isDragging: boolean): string => cn("absolute z-10 min-w-0 transition-opacity duration-150 ease-out", isDraggable ? "touch-none cursor-grab select-none active:cursor-grabbing" : null, isDragging ? "opacity-35" : null);
 
-const createDragPointerSnapshot = (pointerId: number, clientX: number, clientY: number): WeekdayDragPointerSnapshot => ({ pointerId, clientX, clientY });
+const createDragPointerSnapshot = (pointerId: number, buttons: number, clientX: number, clientY: number): WeekdayDragPointerSnapshot => ({ pointerId, buttons, clientX, clientY });
 
 const getEventDurationMs = (event: GoogleCalendarEvent): number => {
   const startsAt = getCalendarEventDateOrNull(event.startsAt);
@@ -150,26 +153,20 @@ const snapMinutes = (minutes: number): number => Math.round(minutes / WEEKDAY_TI
 
 const clampMinutes = (minutes: number, maxMinutes: number): number => Math.max(0, Math.min(maxMinutes, minutes));
 
-const clampScrollTop = (element: HTMLElement, scrollTop: number): number => Math.max(0, Math.min(element.scrollHeight - element.clientHeight, scrollTop));
-
 const areSameEventKeyOrder = (left: string[], right: string[]): boolean => left.length === right.length && left.every((key, index) => key === right[index]);
 
-const getDragAutoScrollStep = (element: HTMLElement, clientY: number): number => {
+const getDragAutoScrollDirection = (element: HTMLDivElement, clientY: number): WeekdayDragAutoScrollDirection | null => {
   const rect = element.getBoundingClientRect();
-  const topDistance = clientY - rect.top;
-  if (topDistance < WEEKDAY_DRAG_AUTO_SCROLL_EDGE_PX) {
-    const intensity = (WEEKDAY_DRAG_AUTO_SCROLL_EDGE_PX - Math.max(0, topDistance)) / WEEKDAY_DRAG_AUTO_SCROLL_EDGE_PX;
-    return -Math.max(1, Math.ceil(intensity * WEEKDAY_DRAG_AUTO_SCROLL_MAX_STEP_PX));
-  }
+  const canScrollUp = element.scrollTop > 0;
+  const canScrollDown = element.scrollTop + element.clientHeight < element.scrollHeight;
 
-  const bottomDistance = rect.bottom - clientY;
-  if (bottomDistance < WEEKDAY_DRAG_AUTO_SCROLL_EDGE_PX) {
-    const intensity = (WEEKDAY_DRAG_AUTO_SCROLL_EDGE_PX - Math.max(0, bottomDistance)) / WEEKDAY_DRAG_AUTO_SCROLL_EDGE_PX;
-    return Math.max(1, Math.ceil(intensity * WEEKDAY_DRAG_AUTO_SCROLL_MAX_STEP_PX));
-  }
+  if (canScrollUp && clientY <= rect.top + WEEKDAY_DRAG_SCROLL_EDGE_PX) return "up";
+  if (canScrollDown && clientY >= rect.bottom - WEEKDAY_DRAG_SCROLL_EDGE_PX) return "down";
 
-  return 0;
+  return null;
 };
+
+const getDragAutoScrollDelta = (direction: WeekdayDragAutoScrollDirection): number => direction === "up" ? -WEEKDAY_DRAG_SCROLL_STEP_PX : WEEKDAY_DRAG_SCROLL_STEP_PX;
 
 const getDragPreviewDayKey = (state: WeekdayEventDragState): string => getCalendarDateKey(state.previewStartsAt);
 
@@ -312,6 +309,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
   const dragElementRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<WeekdayEventDragState | null>(null);
   const dragPointerSnapshotRef = useRef<WeekdayDragPointerSnapshot | null>(null);
+  const dragAutoScrollDirectionRef = useRef<WeekdayDragAutoScrollDirection | null>(null);
   const dragAutoScrollIntervalRef = useRef<number | null>(null);
   const [dragState, setDragState] = useState<WeekdayEventDragState | null>(null);
   const { allDayEvents } = useMemo(() => groupEventsByDay(visibleEvents, visibleDays), [visibleEvents, visibleDays]);
@@ -350,6 +348,17 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
     window.clearInterval(dragAutoScrollIntervalRef.current);
     dragAutoScrollIntervalRef.current = null;
   }, []);
+
+  const stopDragAutoScroll = useCallback(() => {
+    dragPointerSnapshotRef.current = null;
+    dragAutoScrollDirectionRef.current = null;
+    clearDragAutoScrollInterval();
+  }, [clearDragAutoScrollInterval]);
+
+  const pauseDragAutoScroll = useCallback(() => {
+    dragAutoScrollDirectionRef.current = null;
+    clearDragAutoScrollInterval();
+  }, [clearDragAutoScrollInterval]);
 
   const getDayColumnAtClientX = useCallback((clientX: number): WeekdayDayColumnHit | null => {
     let nearestHit: WeekdayDayColumnHit | null = null;
@@ -430,69 +439,82 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
 
   const getDragPreviewTimes = useCallback((state: WeekdayEventDragState, clientX: number, clientY: number) => getAllDayDragPreview(clientX, clientY) ?? getTimedDragPreview(state, clientX, clientY), [getAllDayDragPreview, getTimedDragPreview]);
 
-  const updateDragPreviewAtPoint = useCallback((pointerId: number, clientX: number, clientY: number): boolean => {
+  const updateDragPreviewFromSnapshot = useCallback((snapshot: WeekdayDragPointerSnapshot) => {
     const state = dragStateRef.current;
-    if (!state || pointerId !== state.pointerId) return false;
+    if (!state || snapshot.pointerId !== state.pointerId) return;
 
-    const preview = getDragPreviewTimes(state, clientX, clientY);
-    if (!preview) return false;
+    const preview = getDragPreviewTimes(state, snapshot.clientX, snapshot.clientY);
+    if (!preview) return;
 
-    if (state.previewIsAllDay === preview.previewIsAllDay && state.previewAllDayIndex === preview.previewAllDayIndex && state.previewColumnDayKey === preview.previewColumnDayKey && areSameCalendarEventTimes(state.previewStartsAt, state.previewEndsAt, preview.previewStartsAt, preview.previewEndsAt)) return true;
+    if (state.previewIsAllDay === preview.previewIsAllDay && state.previewAllDayIndex === preview.previewAllDayIndex && state.previewColumnDayKey === preview.previewColumnDayKey && areSameCalendarEventTimes(state.previewStartsAt, state.previewEndsAt, preview.previewStartsAt, preview.previewEndsAt)) return;
 
     setDragStateValue({ ...state, ...preview });
-    return true;
   }, [getDragPreviewTimes, setDragStateValue]);
 
-  const updateDragAutoScroll = useCallback((pointerId: number, clientX: number, clientY: number) => {
-    dragPointerSnapshotRef.current = createDragPointerSnapshot(pointerId, clientX, clientY);
+  const scrollDragPreviewOnce = useCallback((direction: WeekdayDragAutoScrollDirection) => {
+    const element = scrollContainerRef.current;
+    const snapshot = dragPointerSnapshotRef.current;
+    if (!element || !snapshot) return;
 
-    const scrollElement = scrollContainerRef.current;
-    if (!scrollElement || dragStateRef.current?.pointerId !== pointerId || dragStateRef.current.previewIsAllDay) {
-      clearDragAutoScrollInterval();
+    const previousScrollTop = element.scrollTop;
+    element.scrollTop += getDragAutoScrollDelta(direction);
+
+    if (element.scrollTop === previousScrollTop) {
+      pauseDragAutoScroll();
       return;
     }
 
-    const scrollStep = getDragAutoScrollStep(scrollElement, clientY);
-    if (scrollStep === 0) {
-      clearDragAutoScrollInterval();
-      return;
-    }
+    updateDragPreviewFromSnapshot(snapshot);
+  }, [pauseDragAutoScroll, scrollContainerRef, updateDragPreviewFromSnapshot]);
 
-    if (dragAutoScrollIntervalRef.current !== null) return;
+  const startDragAutoScroll = useCallback((direction: WeekdayDragAutoScrollDirection) => {
+    if (dragAutoScrollDirectionRef.current === direction && dragAutoScrollIntervalRef.current !== null) return;
 
+    clearDragAutoScrollInterval();
+    dragAutoScrollDirectionRef.current = direction;
+    scrollDragPreviewOnce(direction);
     dragAutoScrollIntervalRef.current = window.setInterval(() => {
-      const pointerSnapshot = dragPointerSnapshotRef.current;
-      const state = dragStateRef.current;
-      const element = scrollContainerRef.current;
-      if (!pointerSnapshot || !state || pointerSnapshot.pointerId !== state.pointerId || state.previewIsAllDay || !element) {
+      const currentDirection = dragAutoScrollDirectionRef.current;
+      if (!currentDirection || !dragPointerSnapshotRef.current) {
         clearDragAutoScrollInterval();
         return;
       }
 
-      const nextScrollStep = getDragAutoScrollStep(element, pointerSnapshot.clientY);
-      if (nextScrollStep === 0) {
-        clearDragAutoScrollInterval();
-        return;
-      }
+      scrollDragPreviewOnce(currentDirection);
+    }, WEEKDAY_DRAG_SCROLL_INTERVAL_MS);
+  }, [clearDragAutoScrollInterval, scrollDragPreviewOnce]);
 
-      const nextScrollTop = clampScrollTop(element, element.scrollTop + nextScrollStep);
-      if (nextScrollTop === element.scrollTop) {
-        clearDragAutoScrollInterval();
-        return;
-      }
+  const updateDragAutoScroll = useCallback((snapshot: WeekdayDragPointerSnapshot) => {
+    const state = dragStateRef.current;
+    const element = scrollContainerRef.current;
+    if (!state || snapshot.pointerId !== state.pointerId || !element) return;
 
-      element.scrollTop = nextScrollTop;
-      updateDragPreviewAtPoint(pointerSnapshot.pointerId, pointerSnapshot.clientX, pointerSnapshot.clientY);
-    }, WEEKDAY_DRAG_AUTO_SCROLL_INTERVAL_MS);
-  }, [clearDragAutoScrollInterval, scrollContainerRef, updateDragPreviewAtPoint]);
+    dragPointerSnapshotRef.current = snapshot;
+
+    if (state.previewIsAllDay || snapshot.buttons !== 1) {
+      stopDragAutoScroll();
+      return;
+    }
+
+    const direction = getDragAutoScrollDirection(element, snapshot.clientY);
+    if (!direction) {
+      pauseDragAutoScroll();
+      return;
+    }
+
+    startDragAutoScroll(direction);
+  }, [pauseDragAutoScroll, scrollContainerRef, startDragAutoScroll, stopDragAutoScroll]);
 
   const updateDragPreview = useCallback((event: PointerEvent) => {
-    const didUpdateDragPreview = updateDragPreviewAtPoint(event.pointerId, event.clientX, event.clientY);
-    if (!didUpdateDragPreview) return;
+    const state = dragStateRef.current;
+    if (!state || event.pointerId !== state.pointerId) return;
 
+    const snapshot = createDragPointerSnapshot(event.pointerId, event.buttons, event.clientX, event.clientY);
+    dragPointerSnapshotRef.current = snapshot;
+    updateDragAutoScroll(snapshot);
+    updateDragPreviewFromSnapshot(snapshot);
     event.preventDefault();
-    updateDragAutoScroll(event.pointerId, event.clientX, event.clientY);
-  }, [updateDragAutoScroll, updateDragPreviewAtPoint]);
+  }, [updateDragAutoScroll, updateDragPreviewFromSnapshot]);
 
   const commitAllDayOrder = useCallback((state: WeekdayEventDragState) => {
     if (!state.previewIsAllDay || state.previewAllDayIndex === null) return;
@@ -522,7 +544,6 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
     if (!state || event.pointerId !== state.pointerId) return;
 
     event.preventDefault();
-    clearDragAutoScrollInterval();
 
     const dragElement = dragElementRef.current;
     if (dragElement?.hasPointerCapture(event.pointerId)) {
@@ -530,11 +551,11 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
     }
 
     dragElementRef.current = null;
-    dragPointerSnapshotRef.current = null;
+    stopDragAutoScroll();
     setDragStateValue(null);
 
     if (shouldCommit) commitDragState(state);
-  }, [clearDragAutoScrollInterval, commitDragState, setDragStateValue]);
+  }, [commitDragState, setDragStateValue, stopDragAutoScroll]);
 
   const startEventDrag = useCallback((event: ReactPointerEvent<HTMLDivElement>, calendarEvent: GoogleCalendarEvent, pointerOffsetMinutes: number, durationMs: number, sourceColumnDayKey: string | null) => {
     if (event.button !== 0 || !isCalendarEventDraggable(calendarEvent, onMoveCalendarEvent)) return;
@@ -547,7 +568,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
     event.stopPropagation();
     event.currentTarget.setPointerCapture(event.pointerId);
     dragElementRef.current = event.currentTarget;
-    dragPointerSnapshotRef.current = createDragPointerSnapshot(event.pointerId, event.clientX, event.clientY);
+    dragPointerSnapshotRef.current = createDragPointerSnapshot(event.pointerId, event.buttons, event.clientX, event.clientY);
 
     setDragStateValue({ eventKey, event: calendarEvent, pointerId: event.pointerId, pointerOffsetMinutes, durationMs, sourceDayKey, previewStartsAt: preview?.previewStartsAt ?? calendarEvent.startsAt, previewEndsAt: preview?.previewEndsAt ?? calendarEvent.endsAt, previewIsAllDay: preview?.previewIsAllDay ?? calendarEvent.isAllDay, previewAllDayIndex: preview?.previewAllDayIndex ?? null, previewColumnDayKey: preview?.previewColumnDayKey ?? sourceColumnDayKey });
   }, [getDragPreviewTimes, onMoveCalendarEvent, setDragStateValue]);
