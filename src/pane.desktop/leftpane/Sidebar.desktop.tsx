@@ -169,8 +169,6 @@ const Sidebar = ({
     },
   ];
 
-  const sidebarToggleLabel = isLeftPanelCollapsed ? t.sidebarToggleOpen : t.sidebarToggleClose;
-
   const handleLogoutClick = async () => {
     try {
       await logout();
@@ -185,15 +183,17 @@ const Sidebar = ({
       aria-label={t.sidebarAriaLabel}
     >
       <div className="app-sidebar__top">
-        <button
-          type="button"
-          className={cn("app-sidebar__toggle", isLeftPanelCollapsed && "app-sidebar__toggle--panel-collapsed")}
-          onClick={onToggleLeftPanel}
-          aria-label={sidebarToggleLabel}
-          aria-pressed={isLeftPanelCollapsed}
-        >
-          <SidebarOpenIcon className="app-sidebar__toggle-icon" />
-        </button>
+        {isLeftPanelCollapsed ? (
+          <button
+            type="button"
+            className="app-sidebar__toggle app-sidebar__toggle--panel-collapsed"
+            onClick={onToggleLeftPanel}
+            aria-label={t.sidebarToggleOpen}
+            aria-pressed={isLeftPanelCollapsed}
+          >
+            <SidebarOpenIcon className="app-sidebar__toggle-icon" />
+          </button>
+        ) : null}
 
         <nav className="app-sidebar__nav" aria-label={t.sidebarMainNavAriaLabel}>
           {mainNavItemsWithActions.map((item) => (
