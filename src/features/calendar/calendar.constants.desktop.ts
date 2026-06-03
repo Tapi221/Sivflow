@@ -31,7 +31,7 @@ export const TIMELINE_DEFAULT_ROW_COUNT = 4;
 
 //Side Calendar
 export const WEEK_STARTS_ON_MONDAY = 1;
-export const TIME_COLUMN_WIDTH = 38;
+export const TIME_COLUMN_WIDTH = 52;
 export const DAY_COLUMN_MIN_WIDTH = 136;
 export const DEFAULT_HOUR_ROW_HEIGHT = 80;
 export const INITIAL_CALENDAR_BUFFER_DAYS = 7;
