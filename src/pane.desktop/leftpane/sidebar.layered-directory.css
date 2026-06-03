@@ -12,6 +12,7 @@
   font-size: 12px !important;
   font-weight: 500 !important;
   letter-spacing: -0.012em !important;
+  --app-layered-directory-content-inset: 16px;
 }
 
 .app-layered-directory__primary-nav {
@@ -180,7 +181,7 @@
 }
 
 .app-layered-directory__section--favorites {
-  padding: 0 9px;
+  padding: 0 var(--app-layered-directory-content-inset);
 }
 
 .app-layered-directory__section-heading-row {
@@ -188,7 +189,7 @@
   align-items: center;
   min-height: 22px;
   gap: 3px;
-  padding: 0 9px;
+  padding: 0 var(--app-layered-directory-content-inset);
 }
 
 .app-layered-directory__section-heading {
@@ -273,7 +274,7 @@
 
 .app-layered-directory [aria-label="Project list explorer"] > div,
 .app-layered-directory [aria-label="Library hierarchy explorer"] > div {
-  padding: 0 10px 10px !important;
+  padding: 0 var(--app-layered-directory-content-inset) 10px !important;
 }
 
 .app-layered-directory [aria-label="Project list explorer"] [role="tree"],
@@ -328,7 +329,7 @@
   min-height: 22px !important;
   gap: 3px !important;
   margin-bottom: 4px !important;
-  padding: 0 9px !important;
+  padding: 0 var(--app-layered-directory-content-inset) !important;
 }
 
 .app-layered-directory nav[aria-label="カレンダー一覧"] > div:first-child > button:first-child {
@@ -359,7 +360,7 @@
 }
 
 .app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child {
-  padding: 0 10px 4px !important;
+  padding: 0 var(--app-layered-directory-content-inset) 4px !important;
 }
 
 .app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child > div {
