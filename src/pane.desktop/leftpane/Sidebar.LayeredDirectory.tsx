@@ -235,7 +235,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   }, [openSectionTab]);
 
   return (
-    <div className="app-layered-directory flex h-full min-h-0 w-[240px] shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased">
+    <div className="app-layered-directory flex h-full min-h-0 shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased">
       <div className="app-layered-directory__primary-nav">
         <div className="app-layered-directory__workspace-header">
           <button type="button" className="app-layered-directory__workspace-toggle" onClick={onToggleLeftPanel} aria-label="サイドバーを閉じる" disabled={!onToggleLeftPanel}>
