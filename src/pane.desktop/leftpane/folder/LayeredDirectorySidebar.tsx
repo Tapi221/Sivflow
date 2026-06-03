@@ -35,7 +35,6 @@ const LIBRARY_TITLE = "Library";
 const ROOT_LEVEL = 1;
 const LAYERED_PROJECT_MENU_DIMENSIONS = { width: LAYERED_PROJECT_MENU_WIDTH, height: LAYERED_PROJECT_MENU_HEIGHT };
 const LAYERED_PROJECT_SUBMENU_OVERLAP_PX = 6;
-const DIRECTORY_TREE_TOGGLE_OVERLAY_OFFSET = 18;
 
 const IconChevronRight = ({ className }: IconProps) => (
   <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -147,7 +146,6 @@ const DirectoryTreeNode = ({ folder, level, isRootProject, selectedFolderId, exp
   const isSelected = selectedFolderId === folderId;
   const folderName = getFolderName(folder, isRootProject);
   const rowPaddingLeft = Math.max(0, level - ROOT_LEVEL) * 14;
-  const toggleButtonLeft = rowPaddingLeft - DIRECTORY_TREE_TOGGLE_OVERLAY_OFFSET;
   const Icon = isRootProject ? IconProjectFolder : ExplorerChromeFolderIcon;
   const handleToggleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -162,7 +160,7 @@ const DirectoryTreeNode = ({ folder, level, isRootProject, selectedFolderId, exp
   };
   const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => onOpenContextMenu(event, folder, isRootProject);
 
-  return <div data-folder-id={folderId}><div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("group/directory-tree-row relative flex h-8 items-center rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)]", isSelected && "bg-[#e9e9e9]")} style={{ paddingLeft: rowPaddingLeft }}>{hasChildren ? <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} className="library-tree-marker pointer-events-none absolute top-1/2 z-10 -translate-y-1/2 opacity-0 transition-opacity group-hover/directory-tree-row:pointer-events-auto group-hover/directory-tree-row:opacity-100 group-focus-within/directory-tree-row:pointer-events-auto group-focus-within/directory-tree-row:opacity-100" style={{ left: toggleButtonLeft }}><IconChevronRight className={cn("h-3.5 w-3.5 transition-transform", isExpanded && "rotate-90")} /></button> : null}<button type="button" onClick={handleRowClick} title={folderName} className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[8px] text-left text-inherit hover:bg-[#eeeeee]"><Icon className="layered-directory-row-icon" /><span className="min-w-0 flex-1 truncate">{folderName}</span></button></div>{hasChildren && isExpanded ? <div role="group" className="mt-0.5 flex flex-col gap-0.5">{childFolders.map((childFolder) => <DirectoryTreeNode key={getFolderId(childFolder)} folder={childFolder} level={level + 1} isRootProject={false} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} getChildFolders={getChildFolders} onToggleFolder={onToggleFolder} onSelectFolder={onSelectFolder} onOpenContextMenu={onOpenContextMenu} />)}</div> : null}</div>;
+  return <div data-folder-id={folderId}><div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} onContextMenu={handleContextMenu} className={cn("group/directory-tree-row flex h-8 items-center gap-2 rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)] hover:bg-[#eeeeee]", isSelected && "bg-[#e9e9e9]")} style={{ paddingLeft: rowPaddingLeft }}>{hasChildren ? <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} className="relative flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] text-[var(--app-sidebar-icon)]"><Icon className="layered-directory-row-icon absolute inset-0 h-full w-full transition-opacity group-hover/directory-tree-row:opacity-0 group-focus-within/directory-tree-row:opacity-0" /><IconChevronRight className={cn("absolute inset-0 h-full w-full opacity-0 transition-opacity group-hover/directory-tree-row:opacity-100 group-focus-within/directory-tree-row:opacity-100", isExpanded && "rotate-90")} /></button> : <span className="flex h-4 w-4 shrink-0 items-center justify-center text-[var(--app-sidebar-icon)]"><Icon className="layered-directory-row-icon h-full w-full" /></span>}<button type="button" onClick={handleRowClick} title={folderName} className="flex h-8 min-w-0 flex-1 items-center text-left text-inherit"><span className="min-w-0 flex-1 truncate">{folderName}</span></button></div>{hasChildren && isExpanded ? <div role="group" className="mt-0.5 flex flex-col gap-0.5">{childFolders.map((childFolder) => <DirectoryTreeNode key={getFolderId(childFolder)} folder={childFolder} level={level + 1} isRootProject={false} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} getChildFolders={getChildFolders} onToggleFolder={onToggleFolder} onSelectFolder={onSelectFolder} onOpenContextMenu={onOpenContextMenu} />)}</div> : null}</div>;
 };
 
 const ProjectListSidebar = () => {
