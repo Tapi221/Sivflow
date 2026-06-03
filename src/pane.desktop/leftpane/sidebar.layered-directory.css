@@ -179,10 +179,10 @@ aside[aria-label="Tag tree explorer"] > div:first-child {
 aside[aria-label="Project list explorer"] > div:first-child:hover,
 aside[aria-label="Project list explorer"] > div:first-child:focus-within,
 aside[aria-label="Project list explorer"] > div:first-child:active,
-aside[aria-label="Library hierarchy explorer"] > div:first-child:hover,\
+aside[aria-label="Library hierarchy explorer"] > div:first-child:hover,
 aside[aria-label="Library hierarchy explorer"] > div:first-child:focus-within,
 aside[aria-label="Library hierarchy explorer"] > div:first-child:active,
-aside[aria-label="Tag tree explorer"] > div:first-child:hover,\
+aside[aria-label="Tag tree explorer"] > div:first-child:hover,
 aside[aria-label="Tag tree explorer"] > div:first-child:focus-within,
 aside[aria-label="Tag tree explorer"] > div:first-child:active {
   scrollbar-width: none !important;
@@ -298,6 +298,6 @@ aside[aria-label="Tag tree explorer"] [role="treeitem"] > .library-tree-marker:h
   background: transparent !important;
 }
 
-aside[aria-label="Tag tree explorer"] > .library-tree-marker::after {
+aside[aria-label="Tag tree explorer"] [role="treeitem"] > .library-tree-marker::after {
   content: none !important;
 }
