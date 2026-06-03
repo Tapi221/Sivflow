@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type RefObject } from "react";
-import { ClockIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
+import { HomeIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { RightClickPanelSurface } from "@/chip/rightclickpanel.desktop/rightClickPanelCommon";
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_PROJECT_NAME, getFolderId, getParentFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
+import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
@@ -36,6 +38,18 @@ type ProjectAddMenuProps = {
   onImportPdf: () => void;
 };
 
+type SidebarLayeredDirectoryProps = {
+  onToggleLeftPanel?: () => void;
+};
+
+const WORKSPACE_OWNER_FALLBACK_NAME = "Akari T";
+const WORKSPACE_NAME_SUFFIX = "のNotion";
+const WORKSPACE_AVATAR_FALLBACK = "A";
+const WORKSPACE_HOME_LABEL = "ホーム";
+const WORKSPACE_COMMENTS_LABEL = "コメント";
+const WORKSPACE_NEW_DOCUMENT_LABEL = "新しいドキュメント";
+const WORKSPACE_ALL_DOCUMENTS_LABEL = "すべてのドキュメント";
+const WORKSPACE_SEARCH_LABEL = "検索";
 const FAVORITE_SECTION_LABEL = "お気に入り";
 const FAVORITE_EMPTY_MESSAGE = "プロジェクトをお気に入りに追加すると、ここからすぐ開けます";
 const PROJECT_SECTION_LABEL = "プロジェクト";
@@ -53,14 +67,30 @@ const EMPTY_COLLECTION: never[] = [];
 
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 const IconChevronDown = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M4 6.25L8 10.25L12 6.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
-const IconDocument = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M6 2.75h5.15c.4 0 .78.16 1.06.44l2.6 2.6c.28.28.44.66.44 1.06V15A2.25 2.25 0 0 1 13 17.25H6A2.25 2.25 0 0 1 3.75 15V5A2.25 2.25 0 0 1 6 2.75Z" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" /><path d="M11 3v3.1c0 .5.4.9.9.9H15" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" /></svg>);
-const IconCheckCircle = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M10 17.25a7.25 7.25 0 1 0 0-14.5 7.25 7.25 0 0 0 0 14.5Z" stroke="currentColor" strokeWidth="1.45" /><path d="m6.75 10.15 2.05 2.05 4.45-4.65" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" strokeLinejoin="round" /></svg>);
-const IconCloud = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M6.4 15.75h7.7a3.45 3.45 0 0 0 .32-6.88 4.65 4.65 0 0 0-8.88-1.3A3.98 3.98 0 0 0 6.4 15.75Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round" /></svg>);
-const IconUsers = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M7.75 10.25A3.25 3.25 0 1 0 7.75 3.75a3.25 3.25 0 0 0 0 6.5Z" stroke="currentColor" strokeWidth="1.35" /><path d="M2.75 16.25c.7-2.18 2.5-3.5 5-3.5 2.48 0 4.3 1.32 5 3.5" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" /><path d="M13 10.25a2.45 2.45 0 1 0 0-4.9" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" /><path d="M14.3 12.9c1.38.42 2.4 1.53 2.95 3.1" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" /></svg>);
+const IconDoubleChevronLeft = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M12.5 5L7.5 10L12.5 15" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" /><path d="M16.5 5L11.5 10L16.5 15" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" /></svg>);
+const IconComment = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M10 3.25c-4.1 0-7.25 2.78-7.25 6.2 0 1.72.8 3.26 2.08 4.38l-.46 2.24c-.07.36.31.63.61.43l2.2-1.42c.86.36 1.81.56 2.82.56 4.1 0 7.25-2.78 7.25-6.19 0-3.42-3.15-6.2-7.25-6.2Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round" /></svg>);
+const IconQuickDocument = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M6 2.75h5.15c.4 0 .78.16 1.06.44l2.6 2.6c.28.28.44.66.44 1.06V15A2.25 2.25 0 0 1 13 17.25H6A2.25 2.25 0 0 1 3.75 15V5A2.25 2.25 0 0 1 6 2.75Z" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" /><path d="M11 3v3.1c0 .5.4.9.9.9H15" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" /><path d="M8 11.25h4M10 9.25v4" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" /></svg>);
+const IconTray = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M4.75 7.75h10.5l1.4 6.3c.15.67-.36 1.3-1.04 1.3H4.39c-.68 0-1.19-.63-1.04-1.3l1.4-6.3Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round" /><path d="M7.5 11.25h1.05c.45 0 .84.28.98.7.15.43.54.72.99.72h.96c.45 0 .84-.29.99-.72.14-.42.53-.7.98-.7h1.05" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" strokeLinejoin="round" /><path d="M6.5 7.75V5.9c0-.69.56-1.25 1.25-1.25h4.5c.69 0 1.25.56 1.25 1.25v1.85" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" /></svg>);
+const IconSearch = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M9.15 15.05a5.9 5.9 0 1 0 0-11.8 5.9 5.9 0 0 0 0 11.8Z" stroke="currentColor" strokeWidth="1.55" /><path d="m13.55 13.55 3.2 3.2" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" /></svg>);
 
 const getFolderName = (folder: FolderTreeNode): string => {
   const name = folder.folderName ?? folder.folder_name;
   return typeof name === "string" && name.trim() ? name.trim() : "無題のフォルダ";
+};
+
+const getWorkspaceOwnerName = (displayName: string | null | undefined, email: string | null | undefined): string => {
+  const trimmedDisplayName = displayName?.trim();
+  if (trimmedDisplayName) return trimmedDisplayName;
+
+  const emailLocalPart = email?.split("@")[0]?.trim();
+  if (emailLocalPart) return emailLocalPart;
+
+  return WORKSPACE_OWNER_FALLBACK_NAME;
+};
+
+const getWorkspaceInitial = (workspaceOwnerName: string): string => {
+  const initial = workspaceOwnerName.trim().charAt(0);
+  return initial ? initial.toUpperCase() : WORKSPACE_AVATAR_FALLBACK;
 };
 
 const ProjectAddMenu = ({ x, y, menuRef, onCreateFolder, onImportPdf }: ProjectAddMenuProps) => {
@@ -109,10 +139,12 @@ const resolveRootProjectId = (folderId: string | null | undefined, folderById: R
   return null;
 };
 
-const SidebarLayeredDirectory = () => {
+const SidebarLayeredDirectory = ({ onToggleLeftPanel }: SidebarLayeredDirectoryProps) => {
+  const { currentUser } = useAuthSession();
   const folderTagMode = useFolderTagModeStore((state) => state.folderTagMode);
   const { createFolder } = useFolderCommands();
   const { folders } = useFoldersRead();
+  const openSearch = useSearchStore((state) => state.open);
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
@@ -137,6 +169,10 @@ const SidebarLayeredDirectory = () => {
   const selectedProject = selectedProjectId ? folderById.get(selectedProjectId) ?? null : null;
   const sectionLabel = folderTagMode === "tag" ? TAG_SECTION_LABEL : selectedProject ? getFolderName(selectedProject) : PROJECT_SECTION_LABEL;
   const shouldShowFavoriteSection = folderTagMode !== "tag" && !selectedProject;
+  const workspaceOwnerName = useMemo(() => getWorkspaceOwnerName(currentUser?.displayName, currentUser?.email), [currentUser?.displayName, currentUser?.email]);
+  const workspaceName = `${workspaceOwnerName}${WORKSPACE_NAME_SUFFIX}`;
+  const workspaceInitial = useMemo(() => getWorkspaceInitial(workspaceOwnerName), [workspaceOwnerName]);
+  const isHomeActive = activeTab?.sectionKey === "home";
   const { fileInputRef, handleToolbarAddDocument, currentFileAccept, handleToolbarFileInputChange } = useFolderDocumentUpload({ actionFolderId: selectedProjectId, getNextOrderIndex, setExpandedFolders: setProjectAddExpandedFolderIds });
 
   const closeProjectAddMenu = useCallback(() => {
@@ -148,6 +184,10 @@ const SidebarLayeredDirectory = () => {
   const handleCreateRootFolder = useCallback(() => {
     void createFolder(DEFAULT_NEW_PROJECT_NAME);
   }, [createFolder]);
+
+  const handleOpenHome = useCallback(() => {
+    openSectionTab("home");
+  }, [openSectionTab]);
 
   const handleOpenProjectList = useCallback(() => {
     openExplorerTab({ title: "Library", explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
@@ -170,37 +210,51 @@ const SidebarLayeredDirectory = () => {
     closeProjectAddMenu();
   }, [closeProjectAddMenu, handleToolbarAddDocument]);
 
-  const handleOpenSchedule = useCallback(() => {
-    openSectionTab("schedule");
-  }, [openSectionTab]);
+  const handleOpenNewDocument = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+
+    if (selectedProjectId) {
+      handleOpenProjectAddMenu(event);
+      return;
+    }
+
+    handleCreateRootFolder();
+  }, [handleCreateRootFolder, handleOpenProjectAddMenu, selectedProjectId]);
+
+  const handleOpenSearch = useCallback(() => {
+    openSearch();
+  }, [openSearch]);
 
   return (
     <div className="app-layered-directory flex h-full min-h-0 w-[240px] shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased">
       <div className="app-layered-directory__primary-nav">
-        <button type="button" className="app-layered-directory__primary-item" onClick={selectedProject ? handleOpenProjectAddMenu : handleCreateRootFolder}>
-          <IconDocument className="app-layered-directory__primary-icon" />
-          <span>新しいドキュメント</span>
-        </button>
-        <button type="button" className="app-layered-directory__primary-item" onClick={handleOpenProjectList}>
-          <IconDocument className="app-layered-directory__primary-icon" />
-          <span>すべてのドキュメント</span>
-        </button>
-        <button type="button" className="app-layered-directory__primary-item" onClick={handleOpenSchedule}>
-          <IconCheckCircle className="app-layered-directory__primary-icon" />
-          <span>タスク</span>
-        </button>
-        <button type="button" className="app-layered-directory__primary-item" onClick={handleOpenSchedule}>
-          <ClockIcon className="app-layered-directory__primary-icon" />
-          <span>カレンダー</span>
-        </button>
-        <button type="button" className="app-layered-directory__primary-item" disabled>
-          <IconCloud className="app-layered-directory__primary-icon" />
-          <span>Imagine</span>
-        </button>
-        <button type="button" className="app-layered-directory__primary-item" disabled>
-          <IconUsers className="app-layered-directory__primary-icon" />
-          <span>共有アイテム</span>
-        </button>
+        <div className="app-layered-directory__workspace-header">
+          <button type="button" className="app-layered-directory__workspace-button" onClick={handleOpenProjectList} aria-label={`${workspaceName}を開く`}>
+            <span className="app-layered-directory__workspace-avatar" aria-hidden="true">{workspaceInitial}</span>
+            <span className="app-layered-directory__workspace-name">{workspaceName}</span>
+          </button>
+          <button type="button" className="app-layered-directory__workspace-collapse" onClick={onToggleLeftPanel} aria-label="サイドバーを閉じる" disabled={!onToggleLeftPanel}>
+            <IconDoubleChevronLeft className="app-layered-directory__workspace-collapse-icon" />
+          </button>
+        </div>
+        <nav className="app-layered-directory__notion-nav" aria-label="ワークスペースナビゲーション">
+          <button type="button" className={`app-layered-directory__notion-home${isHomeActive ? " is-active" : ""}`} onClick={handleOpenHome} aria-current={isHomeActive ? "page" : undefined} aria-label={WORKSPACE_HOME_LABEL} title={WORKSPACE_HOME_LABEL}>
+            <HomeIcon className="app-layered-directory__notion-icon" />
+            <span>{WORKSPACE_HOME_LABEL}</span>
+          </button>
+          <button type="button" className="app-layered-directory__notion-action" disabled aria-label={WORKSPACE_COMMENTS_LABEL} title={WORKSPACE_COMMENTS_LABEL}>
+            <IconComment className="app-layered-directory__notion-icon" />
+          </button>
+          <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenNewDocument} aria-label={WORKSPACE_NEW_DOCUMENT_LABEL} title={WORKSPACE_NEW_DOCUMENT_LABEL}>
+            <IconQuickDocument className="app-layered-directory__notion-icon" />
+          </button>
+          <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenProjectList} aria-label={WORKSPACE_ALL_DOCUMENTS_LABEL} title={WORKSPACE_ALL_DOCUMENTS_LABEL}>
+            <IconTray className="app-layered-directory__notion-icon" />
+          </button>
+          <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenSearch} aria-label={WORKSPACE_SEARCH_LABEL} title={WORKSPACE_SEARCH_LABEL}>
+            <IconSearch className="app-layered-directory__notion-icon" />
+          </button>
+        </nav>
       </div>
       <div className="app-layered-directory__section-strip">
         {shouldShowFavoriteSection ? (
