@@ -5,6 +5,7 @@ import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
+import { Sidebar } from "@/pane.desktop/leftpane/Sidebar.desktop";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
@@ -72,7 +73,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
 
   return (
     <div className="relative flex h-full min-h-0 w-full overflow-hidden bg-transparent">
-      {!isLeftPanelCollapsed && <SidebarLayeredDirectory onToggleLeftPanel={onToggleLeftPanel} />}
+      {isLeftPanelCollapsed ? <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} /> : <SidebarLayeredDirectory onToggleLeftPanel={onToggleLeftPanel} />}
       <CarvePanel className="min-w-0"><TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} /></CarvePanel>
     </div>
   );
