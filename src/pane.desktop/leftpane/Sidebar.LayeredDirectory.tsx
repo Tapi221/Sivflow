@@ -240,7 +240,6 @@ const SidebarLayeredDirectory = ({ onToggleLeftPanel }: SidebarLayeredDirectoryP
         <nav className="app-layered-directory__notion-nav" aria-label="ワークスペースナビゲーション">
           <button type="button" className={`app-layered-directory__notion-home${isHomeActive ? " is-active" : ""}`} onClick={handleOpenHome} aria-current={isHomeActive ? "page" : undefined} aria-label={WORKSPACE_HOME_LABEL} title={WORKSPACE_HOME_LABEL}>
             <HomeIcon className="app-layered-directory__notion-icon" />
-            <span>{WORKSPACE_HOME_LABEL}</span>
           </button>
           <button type="button" className="app-layered-directory__notion-action" disabled aria-label={WORKSPACE_COMMENTS_LABEL} title={WORKSPACE_COMMENTS_LABEL}>
             <IconComment className="app-layered-directory__notion-icon" />
