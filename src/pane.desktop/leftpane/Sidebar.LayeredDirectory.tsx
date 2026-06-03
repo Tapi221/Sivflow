@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type RefObject } from "react";
-import { ClockIcon, GalleryIcon, HomeIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
+import { ClockIcon, GalleryIcon, HomeIcon } from "@/chip/icons/icons.sidebar";
 import { RightClickPanelSurface } from "@/chip/rightclickpanel.desktop/rightClickPanelCommon";
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
@@ -267,7 +267,6 @@ const SidebarLayeredDirectory = ({ onToggleLeftPanel }: SidebarLayeredDirectoryP
           <div className="app-layered-directory__section-heading-row">
             {folderTagMode !== "tag" && selectedProject ? (
               <button type="button" className="app-layered-directory__section-heading-button" onClick={handleOpenProjectList} aria-label="プロジェクト一覧を開く">
-                <SidebarOpenIcon className="app-layered-directory__section-leading-icon" />
                 <span className="block truncate">{sectionLabel}</span>
                 <IconChevronDown className="app-layered-directory__section-chevron" />
               </button>
