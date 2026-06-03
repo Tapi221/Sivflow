@@ -26,6 +26,8 @@ type FolderDragState = { draggingFolderId: string | null; dropInstruction: Folde
 
 type DirectoryTreeNodeProps = { folder: FolderTreeNode; level: number; isRootProject: boolean; selectedFolderId: string | null; expandedFolderIds: Set<string>; dragState: FolderDragState; getChildFolders: (folderId: string) => FolderTreeNode[]; onToggleFolder: (folderId: string) => void; onSelectFolder: (folderId: string) => void; onOpenContextMenu: (event: ReactMouseEvent<HTMLElement>, folder: FolderTreeNode, isRootProject: boolean) => void; onFolderDragStart: (event: ReactDragEvent<HTMLElement>, folderId: string) => void; onFolderDragOver: (event: ReactDragEvent<HTMLElement>, targetId: string) => void; onFolderDragLeave: (event: ReactDragEvent<HTMLElement>, targetId: string) => void; onFolderDrop: (event: ReactDragEvent<HTMLElement>, targetId: string) => void; onFolderDragEnd: () => void; };
 
+type FolderDropIndicatorProps = { position: Exclude<FolderDropPosition, "inside">; left: number; className?: string; };
+
 type LibraryHierarchySidebarProps = { projectRootId?: string | null; };
 
 type FolderContextMenuState = { folderId: string; folderName: string; folderColor: string | null; isFavorite: boolean; isRootProject: boolean; x: number; y: number; };
@@ -51,6 +53,9 @@ const FOLDER_DRAG_IMAGE_OFFSET_Y = 16;
 const FOLDER_TREE_ROW_SELECTOR = "[data-folder-tree-row='true']";
 const FOLDER_AUTO_SCROLL_EDGE_PX = 42;
 const FOLDER_AUTO_SCROLL_MAX_STEP = 18;
+const FOLDER_TREE_INDENT_PX = 14;
+const FOLDER_DROP_INDICATOR_BASE_LEFT_PX = 18;
+const FOLDER_DROP_INDICATOR_ROOT_LEFT_PX = 8;
 
 const IconChevronRight = ({ className }: IconProps) => (
   <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -90,6 +95,8 @@ const getFolderDropPosition = (event: ReactDragEvent<HTMLElement>): FolderDropPo
 };
 
 const getFolderDropParentId = (targetFolder: FolderTreeNode, targetId: string, position: FolderDropPosition): string | null => position === "inside" ? targetId : getParentFolderId(targetFolder);
+
+const getFolderDropIndicatorLeft = (level: number): number => Math.max(0, level - ROOT_LEVEL) * FOLDER_TREE_INDENT_PX + FOLDER_DROP_INDICATOR_BASE_LEFT_PX;
 
 const createFolderMap = (rootFolders: FolderTreeNode[], getChildFolders: (folderId: string) => FolderTreeNode[]): Map<string, FolderTreeNode> => {
   const map = new Map<string, FolderTreeNode>();
@@ -155,8 +162,10 @@ const createFolderDragPreview = (sourceElement: HTMLElement): HTMLElement => {
   preview.style.opacity = "0.92";
   preview.style.background = "rgba(255,255,255,0.96)";
   preview.style.boxShadow = "0 10px 28px rgba(0,0,0,0.16)";
+  preview.style.border = "1px solid rgba(0,0,0,0.08)";
   preview.style.borderRadius = "8px";
   preview.style.zIndex = "2147483647";
+  preview.style.transform = "scale(1.01)";
   document.body.append(preview);
   return preview;
 };
@@ -167,22 +176,14 @@ const applyFolderDragPreview = (event: ReactDragEvent<HTMLElement>) => {
   requestAnimationFrame(() => preview.remove());
 };
 
-const applyFolderAutoScroll = (event: ReactDragEvent<HTMLElement>, scrollContainerRef: RefObject<HTMLDivElement | null>) => {
-  const scrollContainer = scrollContainerRef.current;
-  if (!scrollContainer) return;
-
+const getFolderAutoScrollStep = (clientY: number, scrollContainer: HTMLDivElement): number => {
   const rect = scrollContainer.getBoundingClientRect();
-  const topDistance = event.clientY - rect.top;
-  const bottomDistance = rect.bottom - event.clientY;
+  const topDistance = clientY - rect.top;
+  const bottomDistance = rect.bottom - clientY;
 
-  if (topDistance < FOLDER_AUTO_SCROLL_EDGE_PX) {
-    scrollContainer.scrollTop -= Math.ceil((1 - Math.max(0, topDistance) / FOLDER_AUTO_SCROLL_EDGE_PX) * FOLDER_AUTO_SCROLL_MAX_STEP);
-    return;
-  }
-
-  if (bottomDistance < FOLDER_AUTO_SCROLL_EDGE_PX) {
-    scrollContainer.scrollTop += Math.ceil((1 - Math.max(0, bottomDistance) / FOLDER_AUTO_SCROLL_EDGE_PX) * FOLDER_AUTO_SCROLL_MAX_STEP);
-  }
+  if (topDistance < FOLDER_AUTO_SCROLL_EDGE_PX) return -Math.ceil((1 - Math.max(0, topDistance) / FOLDER_AUTO_SCROLL_EDGE_PX) * FOLDER_AUTO_SCROLL_MAX_STEP);
+  if (bottomDistance < FOLDER_AUTO_SCROLL_EDGE_PX) return Math.ceil((1 - Math.max(0, bottomDistance) / FOLDER_AUTO_SCROLL_EDGE_PX) * FOLDER_AUTO_SCROLL_MAX_STEP);
+  return 0;
 };
 
 const isFolderRowEventTarget = (target: EventTarget | null): boolean => target instanceof HTMLElement && target.closest(FOLDER_TREE_ROW_SELECTOR) !== null;
@@ -269,8 +270,46 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
   const folderMap = useMemo(() => createFolderMap(rootFolders, getChildFolders), [getChildFolders, rootFolders]);
   const autoExpandTimerRef = useRef<number | null>(null);
   const autoExpandTargetRef = useRef<string | null>(null);
+  const autoScrollFrameRef = useRef<number | null>(null);
+  const autoScrollStepRef = useRef(0);
   const [draggingFolderId, setDraggingFolderId] = useState<string | null>(null);
   const [dropInstruction, setDropInstruction] = useState<FolderDropInstruction | null>(null);
+
+  const stopAutoScroll = useCallback(() => {
+    autoScrollStepRef.current = 0;
+    if (autoScrollFrameRef.current !== null) {
+      window.cancelAnimationFrame(autoScrollFrameRef.current);
+      autoScrollFrameRef.current = null;
+    }
+  }, []);
+
+  const scheduleAutoScroll = useCallback((event: ReactDragEvent<HTMLElement>) => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const step = getFolderAutoScrollStep(event.clientY, scrollContainer);
+    autoScrollStepRef.current = step;
+
+    if (step === 0) {
+      stopAutoScroll();
+      return;
+    }
+
+    if (autoScrollFrameRef.current !== null) return;
+
+    const tick = () => {
+      const currentScrollContainer = scrollContainerRef.current;
+      const currentStep = autoScrollStepRef.current;
+      if (!currentScrollContainer || currentStep === 0) {
+        autoScrollFrameRef.current = null;
+        return;
+      }
+      currentScrollContainer.scrollTop += currentStep;
+      autoScrollFrameRef.current = window.requestAnimationFrame(tick);
+    };
+
+    autoScrollFrameRef.current = window.requestAnimationFrame(tick);
+  }, [scrollContainerRef, stopAutoScroll]);
 
   const clearAutoExpandTimer = useCallback(() => {
     if (autoExpandTimerRef.current !== null) {
@@ -282,9 +321,10 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
 
   const clearDragState = useCallback(() => {
     clearAutoExpandTimer();
+    stopAutoScroll();
     setDraggingFolderId(null);
     setDropInstruction(null);
-  }, [clearAutoExpandTimer]);
+  }, [clearAutoExpandTimer, stopAutoScroll]);
 
   const clearDropTarget = useCallback(() => {
     clearAutoExpandTimer();
@@ -366,7 +406,7 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
   }, []);
 
   const handleFolderDragOver = useCallback((event: ReactDragEvent<HTMLElement>, targetId: string) => {
-    applyFolderAutoScroll(event, scrollContainerRef);
+    scheduleAutoScroll(event);
     const instruction = getValidDropInstruction(event, targetId);
     event.stopPropagation();
 
@@ -379,7 +419,7 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
     event.dataTransfer.dropEffect = "move";
     scheduleAutoExpand(instruction);
     setDropInstruction((current) => isDropInstructionEqual(current, instruction) ? current : instruction);
-  }, [clearDropTarget, getValidDropInstruction, scheduleAutoExpand, scrollContainerRef]);
+  }, [clearDropTarget, getValidDropInstruction, scheduleAutoExpand, scheduleAutoScroll]);
 
   const handleFolderDragLeave = useCallback((event: ReactDragEvent<HTMLElement>, targetId: string) => {
     const relatedTarget = event.relatedTarget;
@@ -398,17 +438,18 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
 
     if (!instruction) {
       clearDropTarget();
+      stopAutoScroll();
       return;
     }
 
     event.preventDefault();
     setDropInstruction(null);
     void commitFolderDrop(instruction).finally(clearDragState);
-  }, [clearDragState, clearDropTarget, commitFolderDrop, getValidDropInstruction]);
+  }, [clearDragState, clearDropTarget, commitFolderDrop, getValidDropInstruction, stopAutoScroll]);
 
   const handleFolderListDragOver = useCallback((event: ReactDragEvent<HTMLElement>) => {
     if (isFolderRowEventTarget(event.target)) return;
-    applyFolderAutoScroll(event, scrollContainerRef);
+    scheduleAutoScroll(event);
     const instruction = getValidAppendDropInstruction();
     if (!instruction) return;
 
@@ -417,7 +458,14 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
     event.dataTransfer.dropEffect = "move";
     clearAutoExpandTimer();
     setDropInstruction((current) => isDropInstructionEqual(current, instruction) ? current : instruction);
-  }, [clearAutoExpandTimer, getValidAppendDropInstruction, scrollContainerRef]);
+  }, [clearAutoExpandTimer, getValidAppendDropInstruction, scheduleAutoScroll]);
+
+  const handleFolderListDragLeave = useCallback((event: ReactDragEvent<HTMLElement>) => {
+    const relatedTarget = event.relatedTarget;
+    if (relatedTarget instanceof Node && event.currentTarget.contains(relatedTarget)) return;
+    clearDropTarget();
+    stopAutoScroll();
+  }, [clearDropTarget, stopAutoScroll]);
 
   const handleFolderListDrop = useCallback((event: ReactDragEvent<HTMLElement>) => {
     if (isFolderRowEventTarget(event.target)) return;
@@ -430,10 +478,20 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
     void commitFolderDrop(instruction).finally(clearDragState);
   }, [clearDragState, commitFolderDrop, getValidAppendDropInstruction]);
 
-  useEffect(() => clearAutoExpandTimer, [clearAutoExpandTimer]);
+  useEffect(() => () => {
+    clearAutoExpandTimer();
+    stopAutoScroll();
+  }, [clearAutoExpandTimer, stopAutoScroll]);
 
-  return { dragState: { draggingFolderId, dropInstruction }, handleFolderDragStart, handleFolderDragOver, handleFolderDragLeave, handleFolderDrop, handleFolderDragEnd: clearDragState, handleFolderListDragOver, handleFolderListDrop };
+  return { dragState: { draggingFolderId, dropInstruction }, handleFolderDragStart, handleFolderDragOver, handleFolderDragLeave, handleFolderDrop, handleFolderDragEnd: clearDragState, handleFolderListDragOver, handleFolderListDragLeave, handleFolderListDrop };
 };
+
+const FolderDropIndicator = ({ position, left, className }: FolderDropIndicatorProps) => (
+  <span aria-hidden="true" className={cn("pointer-events-none absolute left-0 right-2 z-10 flex h-0.5 items-center", position === "before" && "top-0", position === "after" && "bottom-0", position === "append" && "relative right-auto my-1", className)} style={{ paddingLeft: left }}>
+    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#8f8f8f]" />
+    <span className="h-0.5 min-w-0 flex-1 rounded-full bg-[#8f8f8f]" />
+  </span>
+);
 
 const DirectoryTreeNode = ({ folder, level, isRootProject, selectedFolderId, expandedFolderIds, dragState, getChildFolders, onToggleFolder, onSelectFolder, onOpenContextMenu, onFolderDragStart, onFolderDragOver, onFolderDragLeave, onFolderDrop, onFolderDragEnd }: DirectoryTreeNodeProps) => {
   const folderId = getFolderId(folder);
@@ -446,7 +504,8 @@ const DirectoryTreeNode = ({ folder, level, isRootProject, selectedFolderId, exp
   const isDragging = dragState.draggingFolderId === folderId;
   const dropPosition = dragState.dropInstruction?.targetId === folderId ? dragState.dropInstruction.position : null;
   const folderName = getFolderName(folder, isRootProject);
-  const rowPaddingLeft = Math.max(0, level - ROOT_LEVEL) * 14;
+  const rowPaddingLeft = Math.max(0, level - ROOT_LEVEL) * FOLDER_TREE_INDENT_PX;
+  const dropIndicatorLeft = getFolderDropIndicatorLeft(level);
   const Icon = isRootProject ? IconProjectFolder : ExplorerChromeFolderIcon;
   const handleToggleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -463,9 +522,9 @@ const DirectoryTreeNode = ({ folder, level, isRootProject, selectedFolderId, exp
 
   return (
     <div data-folder-id={folderId}>
-      <div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} aria-grabbed={isDragging || undefined} draggable data-folder-tree-row="true" onDragStart={(event) => onFolderDragStart(event, folderId)} onDragOver={(event) => onFolderDragOver(event, folderId)} onDragLeave={(event) => onFolderDragLeave(event, folderId)} onDrop={(event) => onFolderDrop(event, folderId)} onDragEnd={onFolderDragEnd} onContextMenu={handleContextMenu} data-folder-drop-position={dropPosition ?? undefined} className={cn("group/directory-tree-row relative flex h-8 items-center gap-2 rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)] transition-[background,opacity] hover:bg-[#eeeeee]", isSelected && "bg-[#e9e9e9]", isDragging && "opacity-45", dropPosition === "inside" && "bg-[#e2e2e2] ring-1 ring-[#c7c7c7]")} style={{ paddingLeft: rowPaddingLeft }}>
-        {dropPosition === "before" ? <span aria-hidden="true" className="pointer-events-none absolute left-2 right-2 top-0 h-0.5 rounded-full bg-[#8f8f8f]" /> : null}
-        {dropPosition === "after" ? <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-[#8f8f8f]" /> : null}
+      <div role="treeitem" aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} aria-grabbed={isDragging || undefined} draggable data-folder-tree-row="true" onDragStart={(event) => onFolderDragStart(event, folderId)} onDragEnter={(event) => onFolderDragOver(event, folderId)} onDragOver={(event) => onFolderDragOver(event, folderId)} onDragLeave={(event) => onFolderDragLeave(event, folderId)} onDrop={(event) => onFolderDrop(event, folderId)} onDragEnd={onFolderDragEnd} onContextMenu={handleContextMenu} data-folder-drop-position={dropPosition ?? undefined} className={cn("group/directory-tree-row relative flex h-8 cursor-grab items-center gap-2 rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)] transition-[background,box-shadow,opacity,transform] duration-150 hover:bg-[#eeeeee] active:cursor-grabbing", isSelected && "bg-[#e9e9e9]", isDragging && "scale-[0.995] opacity-35", dropPosition === "inside" && "bg-[#e2e2e2] shadow-[inset_0_0_0_1px_#c7c7c7]")} style={{ paddingLeft: rowPaddingLeft }}>
+        {dropPosition === "before" ? <FolderDropIndicator position="before" left={dropIndicatorLeft} /> : null}
+        {dropPosition === "after" ? <FolderDropIndicator position="after" left={dropIndicatorLeft} /> : null}
         {hasChildren ? <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} className="relative flex h-8 w-4 shrink-0 items-center justify-center rounded-[4px] text-[var(--app-sidebar-icon)]"><Icon className="layered-directory-row-icon absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 transition-opacity group-hover/directory-tree-row:opacity-0" /><IconChevronRight className={cn("absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 opacity-0 transition-opacity group-hover/directory-tree-row:opacity-100", isExpanded && "rotate-90")} /></button> : <span className="flex h-8 w-4 shrink-0 items-center justify-center text-[var(--app-sidebar-icon)]"><Icon className="layered-directory-row-icon h-4 w-4" /></span>}
         <button type="button" onClick={handleRowClick} title={folderName} className="flex h-8 min-w-0 flex-1 items-center text-left leading-[20px] text-inherit"><span className="min-w-0 flex-1 truncate">{folderName}</span></button>
       </div>
@@ -483,7 +542,7 @@ const ProjectListSidebar = () => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(() => new Set());
   const { contextMenuElement, openContextMenu } = useFolderContextMenu({ createFolder, updateFolder, deleteFolder, createCardSet, getNextOrderIndex, setExpandedFolderIds });
-  const { dragState, handleFolderDragStart, handleFolderDragOver, handleFolderDragLeave, handleFolderDrop, handleFolderDragEnd, handleFolderListDragOver, handleFolderListDrop } = useFolderDragDrop({ rootFolders, rootDropParentId: null, scrollContainerRef, getChildFolders, updateFolder, setExpandedFolderIds });
+  const { dragState, handleFolderDragStart, handleFolderDragOver, handleFolderDragLeave, handleFolderDrop, handleFolderDragEnd, handleFolderListDragOver, handleFolderListDragLeave, handleFolderListDrop } = useFolderDragDrop({ rootFolders, rootDropParentId: null, scrollContainerRef, getChildFolders, updateFolder, setExpandedFolderIds });
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const selectedFolderId = activeTab?.kind === "explorer" && !activeTab.explorerState.isSectionListMode ? activeTab.explorerState.selectedFolderId : null;
   const handleToggleFolder = useCallback((folderId: string) => setExpandedFolderIds((current) => { const next = new Set(current); if (next.has(folderId)) next.delete(folderId); else next.add(folderId); return next; }), []);
@@ -493,7 +552,7 @@ const ProjectListSidebar = () => {
   if (loading) return <aside aria-label="Project list explorer" className="h-full min-h-0 overflow-y-auto px-3 py-1 text-[13px] text-[#9aa1ad]">読み込み中...</aside>;
   if (error) return <aside aria-label="Project list explorer" className="h-full min-h-0 overflow-y-auto px-3 py-1 text-[13px] text-[#b48a8a]">{error}</aside>;
 
-  return <><aside aria-label="Project list explorer" className="h-full min-h-0 overflow-hidden"><div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto px-3 pb-3 pt-1"><div role="tree" aria-label="プロジェクト" className="flex min-h-full flex-col gap-0.5" onDragOver={handleFolderListDragOver} onDrop={handleFolderListDrop}>{rootFolders.length > 0 ? rootFolders.map((folder) => <DirectoryTreeNode key={getFolderId(folder)} folder={folder} level={ROOT_LEVEL} isRootProject selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} dragState={dragState} getChildFolders={getChildFolders} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onOpenContextMenu={openContextMenu} onFolderDragStart={handleFolderDragStart} onFolderDragOver={handleFolderDragOver} onFolderDragLeave={handleFolderDragLeave} onFolderDrop={handleFolderDrop} onFolderDragEnd={handleFolderDragEnd} />) : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">フォルダがありません</p>}{isAppendingToRoot ? <span aria-hidden="true" className="pointer-events-none mx-2 mt-1 h-0.5 rounded-full bg-[#8f8f8f]" /> : null}<div aria-hidden="true" className="min-h-8 flex-1" /></div></div></aside>{contextMenuElement}</>;
+  return <><aside aria-label="Project list explorer" className="h-full min-h-0 overflow-hidden"><div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto px-3 pb-3 pt-1"><div role="tree" aria-label="プロジェクト" className="flex min-h-full flex-col gap-0.5" onDragOver={handleFolderListDragOver} onDragLeave={handleFolderListDragLeave} onDrop={handleFolderListDrop}>{rootFolders.length > 0 ? rootFolders.map((folder) => <DirectoryTreeNode key={getFolderId(folder)} folder={folder} level={ROOT_LEVEL} isRootProject selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} dragState={dragState} getChildFolders={getChildFolders} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onOpenContextMenu={openContextMenu} onFolderDragStart={handleFolderDragStart} onFolderDragOver={handleFolderDragOver} onFolderDragLeave={handleFolderDragLeave} onFolderDrop={handleFolderDrop} onFolderDragEnd={handleFolderDragEnd} />) : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">フォルダがありません</p>}{isAppendingToRoot ? <FolderDropIndicator position="append" left={FOLDER_DROP_INDICATOR_ROOT_LEFT_PX} className="mx-2" /> : null}<div aria-hidden="true" className="min-h-8 flex-1" /></div></div></aside>{contextMenuElement}</>;
 };
 
 const LibraryHierarchySidebar = ({ projectRootId = null }: LibraryHierarchySidebarProps) => {
@@ -507,11 +566,12 @@ const LibraryHierarchySidebar = ({ projectRootId = null }: LibraryHierarchySideb
   const { contextMenuElement, openContextMenu } = useFolderContextMenu({ createFolder, updateFolder, deleteFolder, createCardSet, getNextOrderIndex, setExpandedFolderIds });
   const visibleRootFolders = useMemo(() => projectRootId ? getChildFolders(projectRootId) : rootFolders, [getChildFolders, projectRootId, rootFolders]);
   const rootDropParentId = projectRootId ?? null;
-  const { dragState, handleFolderDragStart, handleFolderDragOver, handleFolderDragLeave, handleFolderDrop, handleFolderDragEnd, handleFolderListDragOver, handleFolderListDrop } = useFolderDragDrop({ rootFolders, rootDropParentId, scrollContainerRef, getChildFolders, updateFolder, setExpandedFolderIds });
+  const { dragState, handleFolderDragStart, handleFolderDragOver, handleFolderDragLeave, handleFolderDrop, handleFolderDragEnd, handleFolderListDragOver, handleFolderListDragLeave, handleFolderListDrop } = useFolderDragDrop({ rootFolders, rootDropParentId, scrollContainerRef, getChildFolders, updateFolder, setExpandedFolderIds });
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const selectedFolderId = activeTab?.kind === "explorer" && !activeTab.explorerState.isSectionListMode ? activeTab.explorerState.selectedFolderId : null;
   const emptyMessage = projectRootId ? "フォルダがありません" : "フォルダがありません";
   const firstLevel = projectRootId ? ROOT_LEVEL + 1 : ROOT_LEVEL;
+  const appendIndicatorLeft = getFolderDropIndicatorLeft(firstLevel);
   const isAppendingToCurrentList = isAppendDropTarget(dragState, rootDropParentId);
 
   useEffect(() => {
@@ -535,7 +595,7 @@ const LibraryHierarchySidebar = ({ projectRootId = null }: LibraryHierarchySideb
   if (loading) return <aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-y-auto px-3 py-1 text-[13px] text-[#9aa1ad]">読み込み中...</aside>;
   if (error) return <aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-y-auto px-3 py-1 text-[13px] text-[#b48a8a]">{error}</aside>;
 
-  return <><aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-hidden"><div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto px-3 pb-3 pt-1"><div role="tree" aria-label="ライブラリ" className="flex min-h-full flex-col gap-0.5" onDragOver={handleFolderListDragOver} onDrop={handleFolderListDrop}>{visibleRootFolders.length > 0 ? visibleRootFolders.map((folder) => <DirectoryTreeNode key={getFolderId(folder)} folder={folder} level={firstLevel} isRootProject={!projectRootId} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} dragState={dragState} getChildFolders={getChildFolders} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onOpenContextMenu={openContextMenu} onFolderDragStart={handleFolderDragStart} onFolderDragOver={handleFolderDragOver} onFolderDragLeave={handleFolderDragLeave} onFolderDrop={handleFolderDrop} onFolderDragEnd={handleFolderDragEnd} />) : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">{emptyMessage}</p>}{isAppendingToCurrentList ? <span aria-hidden="true" className="pointer-events-none mx-2 mt-1 h-0.5 rounded-full bg-[#8f8f8f]" /> : null}<div aria-hidden="true" className="min-h-8 flex-1" /></div></div></aside>{contextMenuElement}</>;
+  return <><aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-hidden"><div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto px-3 pb-3 pt-1"><div role="tree" aria-label="ライブラリ" className="flex min-h-full flex-col gap-0.5" onDragOver={handleFolderListDragOver} onDragLeave={handleFolderListDragLeave} onDrop={handleFolderListDrop}>{visibleRootFolders.length > 0 ? visibleRootFolders.map((folder) => <DirectoryTreeNode key={getFolderId(folder)} folder={folder} level={firstLevel} isRootProject={!projectRootId} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} dragState={dragState} getChildFolders={getChildFolders} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onOpenContextMenu={openContextMenu} onFolderDragStart={handleFolderDragStart} onFolderDragOver={handleFolderDragOver} onFolderDragLeave={handleFolderDragLeave} onFolderDrop={handleFolderDrop} onFolderDragEnd={handleFolderDragEnd} />) : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">{emptyMessage}</p>}{isAppendingToCurrentList ? <FolderDropIndicator position="append" left={appendIndicatorLeft} className="mx-2" /> : null}<div aria-hidden="true" className="min-h-8 flex-1" /></div></div></aside>{contextMenuElement}</>;
 };
 
 export { LibraryHierarchySidebar, ProjectListSidebar };
