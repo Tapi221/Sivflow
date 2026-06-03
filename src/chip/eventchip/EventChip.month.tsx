@@ -43,7 +43,7 @@ const CalendarEventChipMonth = memo(({ event, showTimeLabel = true, tooltipDisab
 
   return (
     <HoverMonthEventTooltip title={titleLabel} timeLabel={showTimeLabel ? timeLabel : null} accentColor={tokens.border} className="w-full min-w-0" disabled={tooltipDisabled}>
-      <div data-calendar-event-chip="month" className={cn(eventChipAllDayClass, "calendar-event-chip-month flex w-full min-w-0 items-center gap-1", !event.isAllDay && "calendar-event-chip-month-timed")} style={chipStyle}>
+      <div data-calendar-event-chip="month" className={cn(eventChipAllDayClass, "calendar-event-chip-month flex w-full min-w-0 items-center gap-1", !event.isAllDay && "calendar-event-chip-month-timed", !showTimeLabel && "translate-y-px")} style={chipStyle}>
         {showTimeLabel && <span className="shrink-0 tabular-nums opacity-80">{timeLabel}</span>}
 
         <span className="event-chip-month-title min-w-0 flex-1 overflow-hidden whitespace-nowrap">{titleLabel}</span>
