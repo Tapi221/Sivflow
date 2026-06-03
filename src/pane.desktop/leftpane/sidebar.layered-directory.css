@@ -7,7 +7,7 @@
   padding: 0 !important;
   border-right: 1px solid rgba(0, 0, 0, 0.04) !important;
   background: transparent !important;
-  color: #566579 !important;
+  color: #85827e !important;
   font-family: var(--app-font-family-sidebar) !important;
   font-size: 12px !important;
   font-weight: 500 !important;
@@ -217,7 +217,7 @@
   width: 15px;
   height: 15px;
   min-width: 15px;
-  color: #6d737c;
+  color: #85827e;
 }
 
 .app-layered-directory__section-chevron {
@@ -259,7 +259,7 @@
 .app-layered-directory__empty-message {
   margin: 0;
   padding-right: 12px;
-  color: #8f99a8;
+  color: #85827e;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -281,7 +281,7 @@
   height: 28px !important;
   min-height: 28px !important;
   border-radius: 7px !important;
-  color: #566579 !important;
+  color: #85827e !important;
   font-size: 13px !important;
   line-height: 28px !important;
 }
@@ -311,5 +311,5 @@
   width: 16px !important;
   min-width: 16px !important;
   height: 16px !important;
-  color: #627086 !important;
+  color: #85827e !important;
 }
