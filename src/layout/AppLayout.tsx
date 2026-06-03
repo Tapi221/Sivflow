@@ -12,6 +12,7 @@ import "./AppLayout.css";
 
 type AppLayoutOutletContext = {
   isLeftPanelCollapsed: boolean;
+  onToggleLeftPanel: () => void;
 };
 
 const AppLayout = () => {
@@ -24,7 +25,8 @@ const AppLayout = () => {
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
   const mainRef = useRef<HTMLElement | null>(null);
-  const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed }), [isLeftPanelCollapsed]);
+  const handleToggleLeftPanel = () => setIsLeftPanelCollapsed((current) => !current);
+  const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed, onToggleLeftPanel: handleToggleLeftPanel }), [isLeftPanelCollapsed]);
 
   useHotKeyDesktop({
     onToggleRightSidebar: () => {
@@ -50,7 +52,7 @@ const AppLayout = () => {
       {shouldRenderDesktopSidebar && (
         <Sidebar
           isLeftPanelCollapsed={isLeftPanelCollapsed}
-          onToggleLeftPanel={() => setIsLeftPanelCollapsed((current) => !current)}
+          onToggleLeftPanel={handleToggleLeftPanel}
         />
       )}
 
