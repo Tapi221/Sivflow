@@ -218,7 +218,7 @@ const CalendarSidebar = (props: CalendarSidebarProps) => {
   const isLibrarySidebarActive = activeTab?.sectionKey === "library";
 
   if (isLibrarySidebarActive) return <SidebarLayeredDirectory />;
-  return (<aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-0 pl-0 text-[#2f2f2f]"><CalendarSidebarContent {...props} className="pr-3 pt-2" /></aside>);
+  return <SidebarLayeredDirectory calendarContent={<CalendarSidebarContent {...props} className="px-0 pt-2" />} />;
 };
 
 export { CalendarSidebar, CalendarSidebarContent };
