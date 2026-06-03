@@ -85,7 +85,7 @@ const flattenVisibleTagTree = (nodes: TagTreeNode[], expandedTagIds: Set<string>
 
 const TagTreeRow = ({ item, selectedTagNames, onToggleTag, onSelectTag }: TagTreeRowProps) => {
   const isSelected = selectedTagNames.has(item.name);
-  const rowPaddingLeft = 6 + Math.max(0, item.level - ROOT_LEVEL) * 14;
+  const rowPaddingLeft = Math.max(0, item.level - ROOT_LEVEL) * 14;
 
   const handleToggleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -101,7 +101,7 @@ const TagTreeRow = ({ item, selectedTagNames, onToggleTag, onSelectTag }: TagTre
     if (item.hasChildren && !item.isExpanded) onToggleTag(item.id);
   };
 
-  return <div data-tag-id={item.id}><div role="treeitem" aria-level={item.level} aria-expanded={item.hasChildren ? item.isExpanded : undefined} aria-selected={isSelected} className={cn("flex h-7 min-h-7 items-center rounded-[7px] pr-2 text-[13px] font-medium leading-7 text-[#85827e]", isSelected && "bg-[#e9e9e9]")} style={{ paddingLeft: rowPaddingLeft }}>{item.hasChildren ? <button type="button" onClick={handleToggleClick} aria-label={item.isExpanded ? `${item.name} を閉じる` : `${item.name} を開く`} className="flex h-7 w-4 shrink-0 items-center justify-center rounded-[7px] text-[#9aa1ad] hover:bg-[#eeeeee]"><IconChevronRight className={cn("h-3.5 w-3.5 transition-transform", item.isExpanded && "rotate-90")} /></button> : null}<button type="button" onClick={handleRowClick} title={item.name} className="flex h-7 min-h-7 min-w-0 flex-1 items-center gap-[7px] rounded-[7px] text-left text-inherit hover:bg-[#eeeeee]"><StratisTagIcon className="layered-directory-row-icon" /><span className="min-w-0 flex-1 truncate">{item.name}</span></button></div></div>;
+  return <div data-tag-id={item.id}><div role="treeitem" aria-level={item.level} aria-expanded={item.hasChildren ? item.isExpanded : undefined} aria-selected={isSelected} className={cn("flex h-8 items-center gap-1 rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)]", isSelected && "bg-[#e9e9e9]")} style={{ paddingLeft: rowPaddingLeft }}><button type="button" onClick={handleToggleClick} aria-label={item.isExpanded ? `${item.name} を閉じる` : `${item.name} を開く`} aria-disabled={!item.hasChildren} disabled={!item.hasChildren} className="library-tree-marker"><IconChevronRight className={cn("h-3.5 w-3.5 transition-transform", item.hasChildren ? "opacity-100" : "opacity-0", item.isExpanded && "rotate-90")} /></button><button type="button" onClick={handleRowClick} title={item.name} className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[8px] text-left text-inherit hover:bg-[#eeeeee]"><StratisTagIcon className="layered-directory-row-icon" /><span className="min-w-0 flex-1 truncate">{item.name}</span></button></div></div>;
 };
 
 const TagTreeSidebar = () => {
@@ -148,7 +148,7 @@ const TagTreeSidebar = () => {
     openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
   }, [clearTagFilter, openExplorerTab, setTagFilter, tagFilter]);
 
-  return <aside aria-label="Tag tree explorer" className="h-full min-h-0 overflow-hidden"><div className="h-full min-h-0 overflow-y-auto px-4 pb-3 pt-1"><div role="tree" aria-label="タグツリー" className="flex flex-col gap-px">{visibleTagItems.length > 0 ? visibleTagItems.map((item) => <TagTreeRow key={item.id} item={item} selectedTagNames={selectedTagNames} onToggleTag={handleToggleTag} onSelectTag={handleSelectTag} />) : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">タグがありません</p>}</div></div></aside>;
+  return <aside aria-label="Tag tree explorer" className="h-full min-h-0 overflow-hidden"><div className="h-full min-h-0 overflow-y-auto px-3 pb-3 pt-1"><div role="tree" aria-label="タグツリー" className="flex flex-col gap-0.5">{visibleTagItems.length > 0 ? visibleTagItems.map((item) => <TagTreeRow key={item.id} item={item} selectedTagNames={selectedTagNames} onToggleTag={handleToggleTag} onSelectTag={handleSelectTag} />) : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">タグがありません</p>}</div></div></aside>;
 };
 
 export { TagTreeSidebar };
