@@ -52,6 +52,8 @@ const SAMPLE_EVENT_DEFINITIONS: readonly SampleEventDefinition[] = [
   { id: "reading-block", title: "PDF 読解", startsAt: new Date(2026, 5, 3, 13, 0), endsAt: new Date(2026, 5, 3, 14, 30), accentColor: "#f97316" },
   { id: "dense-a", title: "復習予定 A", startsAt: new Date(2026, 5, 3, 13, 15), endsAt: new Date(2026, 5, 3, 15, 0), accentColor: "#ec4899" },
   { id: "dense-b", title: "復習予定 B", startsAt: new Date(2026, 5, 3, 13, 45), endsAt: new Date(2026, 5, 3, 14, 15), accentColor: "#eab308" },
+  { id: "adjacent-trim-a", title: "精読.25", startsAt: new Date(2026, 5, 5, 13, 56), endsAt: new Date(2026, 5, 5, 14, 11), accentColor: "#2563eb" },
+  { id: "adjacent-trim-b", title: "きめる現.小復習", startsAt: new Date(2026, 5, 5, 14, 11), endsAt: new Date(2026, 5, 5, 14, 25), accentColor: "#ef4444" },
   { id: "all-day-note", title: "終日イベント移動テスト", startsAt: new Date(2026, 5, 4, 0, 0), endsAt: new Date(2026, 5, 5, 0, 0), isAllDay: true, accentColor: "#14b8a6" },
   { id: "month-only-a", title: "月表示: 日付移動 A", startsAt: new Date(2026, 5, 10, 8, 30), endsAt: new Date(2026, 5, 10, 9, 30), accentColor: "#6366f1" },
   { id: "month-only-b", title: "月表示: 午後移動 B", startsAt: new Date(2026, 5, 18, 15, 0), endsAt: new Date(2026, 5, 18, 16, 0), accentColor: "#f43f5e" },
