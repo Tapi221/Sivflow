@@ -24,6 +24,7 @@ const getEventChipStyle = (entry: CalendarTimeGridLayoutEntry): CSSProperties =>
   return {
     background: `linear-gradient(135deg, ${color}33, ${color}14)`,
     borderColor: `${color}99`,
+    borderLeftColor: color,
     height: `calc(${entry.style.height}% - 4px)`,
     left: `${entry.style.xOffset}%`,
     top: `${entry.style.top}%`,
@@ -37,7 +38,7 @@ const CalendarEventChip = memo(({ entry }: CalendarEventChipProperties) => {
 
   return (
     <article
-      className="absolute min-h-6 overflow-hidden rounded-xl border px-2 py-1 text-left text-xs leading-tight text-white shadow-lg shadow-black/20"
+      className="absolute min-h-6 overflow-hidden rounded-xl border border-l-4 px-2 py-1 text-left text-xs leading-tight text-white shadow-lg shadow-black/20"
       style={getEventChipStyle(entry)}
       title={`${timeLabel} ${title}`}
     >
