@@ -15,8 +15,8 @@ type SourceRowMarkerProps = {
 };
 
 const GOOGLE_SOURCE_ROW_CLASS_NAME = "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
-const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#5f6672]";
-const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#b3b7be]";
+const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#85827e]";
+const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#85827e] opacity-70";
 const SOURCE_ROW_MARKER_CLASS_NAME = "relative flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[4px] border";
 const SOURCE_ROW_MARKER_CHECK_CLASS_NAME = "h-2 w-1.5 translate-y-[-1px] rotate-45 border-b-[1.6px] border-r-[1.6px] border-current";
 const SOURCE_ROW_UNCHECKED_MARKER_COLOR = "#c7c7cc";
