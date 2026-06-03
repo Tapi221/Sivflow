@@ -108,11 +108,10 @@
 }
 
 .app-layered-directory__notion-nav {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  display: flex;
   align-items: center;
-  justify-items: center;
-  gap: 0;
+  justify-content: flex-start;
+  gap: 10px;
   width: 100%;
 }
 
