@@ -109,9 +109,11 @@
 
 .app-layered-directory__notion-nav {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(4, 34px);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
-  gap: 6px;
+  justify-items: center;
+  gap: 0;
+  width: 100%;
 }
 
 .app-layered-directory__notion-home,
@@ -119,10 +121,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
   min-height: 34px;
   padding: 0;
   border: 0;
-  border-radius: 16px;
+  border-radius: 17px;
   background: transparent;
   color: #85827e;
   font: inherit;
@@ -130,17 +135,12 @@
 }
 
 .app-layered-directory__notion-home {
-  justify-content: flex-start;
-  min-width: 0;
-  gap: 8px;
-  padding: 0 14px;
+  gap: 0;
   color: #2f343b;
-  font-size: 14px;
-  font-weight: 520;
-  letter-spacing: -0.016em;
 }
 
 .app-layered-directory__notion-home.is-active,
+.app-layered-directory__notion-action.is-active,
 .app-layered-directory__notion-home:hover,
 .app-layered-directory__notion-home:focus-visible,
 .app-layered-directory__notion-action:hover:not(:disabled),
