@@ -22,6 +22,7 @@ const TIME_LABEL_FONT_CLASS = "font-medium";
 const ALL_DAY_LABEL_RIGHT_PADDING_CLASS = "pr-3";
 const ALL_DAY_ACCENT_COLOR = "#34c759";
 const NEXT_DAY_PREVIEW_HEIGHT_STYLE = "calc(0.5 * var(--calendar-hour-row-height))";
+const FULL_WIDTH_EVENT_STYLE = "calc(100% - 2px)";
 
 vi.mock("@/chip/eventchip/EventChip.weekday", () => ({
   CalendarEventChipWeekday: ({ event, compact = false }: MockCalendarEventChipWeekdayProps) => <div data-accent-color={event.accentColor} data-compact={String(compact)} data-ends-at={event.endsAt.toISOString()} data-testid="weekday-event-chip">{event.title}</div>,
@@ -124,6 +125,15 @@ const getFirstDayColumn = (): HTMLElement => {
   return firstDayColumn as HTMLElement;
 };
 
+const getTimedEventWrapper = (title: string): HTMLElement => {
+  const chip = screen.getByText(title);
+  const wrapper = chip.parentElement as HTMLElement | null;
+
+  expect(wrapper).not.toBeNull();
+
+  return wrapper as HTMLElement;
+};
+
 describe("CalendarWeekDayGrid", () => {
   afterEach(() => {
     cleanup();
@@ -182,6 +192,16 @@ describe("CalendarWeekDayGrid", () => {
     const previewChip = within(previewSpacer).getByTestId("weekday-event-chip");
 
     expect(previewChip.getAttribute("data-ends-at")).toBe(new Date(2026, 0, 2, 1, 30).toISOString());
+  });
+
+  it("短時間eventは最低表示高さではなく実時刻の重なりだけで横並び判定する", () => {
+    renderWeekDayGrid([
+      createEvent({ id: "short-a", title: "Short A", startsAt: new Date(2026, 0, 1, 9, 0), endsAt: new Date(2026, 0, 1, 9, 5) }),
+      createEvent({ id: "short-b", title: "Short B", startsAt: new Date(2026, 0, 1, 9, 6), endsAt: new Date(2026, 0, 1, 9, 11) }),
+    ]);
+
+    expect(getTimedEventWrapper("Short A").style.width).toBe(FULL_WIDTH_EVENT_STYLE);
+    expect(getTimedEventWrapper("Short B").style.width).toBe(FULL_WIDTH_EVENT_STYLE);
   });
 
   it("時刻ラベルの色、背景、数字用スタイルを維持する", () => {
