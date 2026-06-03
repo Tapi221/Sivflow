@@ -29,6 +29,7 @@ type WeekdayTimedEventHorizontalInsets = {
 const EVENT_COLUMN_OUTER_INSET_PX = 1;
 const EVENT_COLUMN_OVERLAP_GAP_PX = 2;
 const EVENT_COLUMN_OVERLAP_SIDE_GAP_PX = EVENT_COLUMN_OVERLAP_GAP_PX / 2;
+const EVENT_COLUMN_VERTICAL_TRIM_PX = 0.5;
 export const WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX = 18;
 const PERCENT_MAX = 100;
 const SHORT_RANGE_CARRY_OVER_HIDE_THRESHOLD_HOURS = 1;
@@ -42,6 +43,8 @@ const normalizeTimeGridNumber = (value: number): number => {
 };
 
 const getPercentAsHourSpan = (percent: number, rangeHours: number): number => normalizeTimeGridNumber((percent / PERCENT_MAX) * rangeHours);
+
+const getTrimmedEventLengthPx = (lengthPx: number): number => Math.max(0, lengthPx - EVENT_COLUMN_VERTICAL_TRIM_PX);
 
 const getWeekdayTimedEventHorizontalInsets = (frame: WeekdayTimedEventFrame): WeekdayTimedEventHorizontalInsets => {
   const rightPercent = frame.leftPercent + frame.widthPercent;
@@ -69,8 +72,8 @@ export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutE
     left: `calc(${frame.leftPercent}% + ${horizontalInsets.leftPx}px)`,
     top: `calc(${frame.topHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
     width: `calc(${frame.widthPercent}% - ${horizontalInsets.leftPx + horizontalInsets.rightPx}px)`,
-    height: shouldHideEvent ? "0px" : `calc(${frame.heightHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
-    minHeight: shouldHideEvent || options.suppressMinHeight ? "0px" : `${WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX}px`,
+    height: shouldHideEvent ? "0px" : `calc(${frame.heightHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}) - ${EVENT_COLUMN_VERTICAL_TRIM_PX}px)`,
+    minHeight: shouldHideEvent || options.suppressMinHeight ? "0px" : `${getTrimmedEventLengthPx(WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX)}px`,
     overflow: shouldHideEvent ? "hidden" : undefined,
     pointerEvents: shouldHideEvent ? "none" : undefined,
   };
