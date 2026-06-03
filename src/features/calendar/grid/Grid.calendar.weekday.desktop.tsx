@@ -54,7 +54,6 @@ const NEXT_DAY_PREVIEW_MINUTES = 30;
 const NEXT_DAY_PREVIEW_HOURS = NEXT_DAY_PREVIEW_MINUTES / GRID.WEEKDAY_MINUTES_PER_HOUR;
 const WEEKDAY_TIMELINE_RANGE_HOURS = GRID.WEEKDAY_HOURS + NEXT_DAY_PREVIEW_HOURS;
 const WEEKDAY_TIMELINE_RANGE_MINUTES = GRID.WEEKDAY_HOURS * GRID.WEEKDAY_MINUTES_PER_HOUR + NEXT_DAY_PREVIEW_MINUTES;
-const WEEKDAY_TIMED_EVENT_MIN_LAYOUT_MINUTES = Math.ceil((WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX / C.DEFAULT_HOUR_ROW_HEIGHT) * GRID.WEEKDAY_MINUTES_PER_HOUR);
 const WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME = "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-colors duration-150";
 const WEEKDAY_HEADER_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const WEEKDAY_TIME_LABEL_CLASS_NAME = "text-[11px] font-medium tabular-nums text-[#b8bcc5]";
@@ -238,7 +237,6 @@ const createTimedLayoutEventsForRange = (events: GoogleCalendarEvent[], rangeSta
     rangeStart,
     rangeEnd,
     layoutMode: "no-overlap",
-    minimumEventDurationMinutes: WEEKDAY_TIMED_EVENT_MIN_LAYOUT_MINUTES,
   });
 };
 
