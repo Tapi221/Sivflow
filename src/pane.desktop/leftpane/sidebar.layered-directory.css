@@ -2,14 +2,14 @@
    Keep the Craft-like rail typography, row rhythm, and muted navigation tone here. */
 
 .app-layered-directory {
-  width: 248px !important;
-  min-width: 248px !important;
+  width: 232px !important;
+  min-width: 232px !important;
   padding: 0 !important;
   border-right: 1px solid rgba(0, 0, 0, 0.04) !important;
   background: transparent !important;
   color: #4f5968 !important;
   font-family: var(--app-font-family-sidebar) !important;
-  font-size: 13px !important;
+  font-size: 12px !important;
   font-weight: 500 !important;
   letter-spacing: -0.012em !important;
 }
@@ -17,27 +17,27 @@
 .app-layered-directory__primary-nav {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 18px 12px 16px;
+  gap: 10px;
+  padding: 14px 10px 12px;
 }
 
 .app-layered-directory__workspace-header {
   display: flex;
   align-items: center;
-  min-height: 30px;
-  gap: 8px;
+  min-height: 26px;
+  gap: 6px;
 }
 
 .app-layered-directory__workspace-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  min-width: 28px;
-  height: 28px;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
   padding: 0;
   border: 0;
-  border-radius: 7px;
+  border-radius: 6px;
   background: transparent;
   color: #9a9a9a;
   outline: none;
@@ -54,8 +54,8 @@
 }
 
 .app-layered-directory__workspace-toggle-icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   color: currentColor;
 }
 
@@ -64,17 +64,17 @@
   align-items: center;
   min-width: 0;
   flex: 1;
-  gap: 10px;
-  padding: 2px 4px;
+  gap: 8px;
+  padding: 1px 3px;
   border: 0;
-  border-radius: 7px;
+  border-radius: 6px;
   background: transparent;
   color: #111111;
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 650;
   letter-spacing: -0.018em;
-  line-height: 20px;
+  line-height: 18px;
   text-align: left;
   outline: none;
 }
@@ -88,13 +88,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  min-width: 22px;
-  height: 22px;
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
   border-radius: 5px;
   background: #efeeee;
   color: #6b6b6b;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1;
 }
@@ -112,7 +112,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
 }
 
@@ -121,13 +121,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
-  min-height: 34px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
   padding: 0;
   border: 0;
-  border-radius: 17px;
+  border-radius: 15px;
   background: transparent;
   color: #85827e;
   font: inherit;
@@ -154,45 +154,45 @@
 }
 
 .app-layered-directory__notion-icon {
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
   color: currentColor;
 }
 
 .app-layered-directory__section-strip {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 2px 0 6px;
+  gap: 14px;
+  padding: 1px 0 4px;
 }
 
 .app-layered-directory__section {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  gap: 10px;
+  gap: 8px;
 }
 
 .app-layered-directory__section--favorites {
-  padding: 0 10px;
+  padding: 0 9px;
 }
 
 .app-layered-directory__section-heading-row {
   display: flex;
   align-items: center;
-  min-height: 26px;
-  gap: 4px;
-  padding: 0 10px;
+  min-height: 22px;
+  gap: 3px;
+  padding: 0 9px;
 }
 
 .app-layered-directory__section-heading {
   margin: 0;
   color: #111111;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: -0.018em;
-  line-height: 18px;
+  line-height: 16px;
 }
 
 .app-layered-directory__section-heading-button {
@@ -200,30 +200,30 @@
   align-items: center;
   min-width: 0;
   flex: 1;
-  gap: 8px;
+  gap: 6px;
   padding: 0;
   border: 0;
   background: transparent;
   color: #111111;
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: -0.018em;
-  line-height: 18px;
+  line-height: 16px;
   text-align: left;
 }
 
 .app-layered-directory__section-leading-icon {
-  width: 16px;
-  height: 16px;
-  min-width: 16px;
+  width: 15px;
+  height: 15px;
+  min-width: 15px;
   color: #6d737c;
 }
 
 .app-layered-directory__section-chevron {
-  width: 14px;
-  height: 14px;
-  min-width: 14px;
+  width: 13px;
+  height: 13px;
+  min-width: 13px;
   color: #9a9a9a;
 }
 
@@ -231,12 +231,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  min-width: 22px;
-  height: 22px;
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
   padding: 0;
   border: 0;
-  border-radius: 11px;
+  border-radius: 10px;
   background: transparent;
   color: #85827e;
   line-height: 1;
@@ -244,9 +244,9 @@
 }
 
 .app-layered-directory__add-button > svg {
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
+  width: 15px;
+  height: 15px;
+  min-width: 15px;
   color: currentColor;
 }
 
@@ -258,10 +258,55 @@
 
 .app-layered-directory__empty-message {
   margin: 0;
-  padding-right: 18px;
+  padding-right: 12px;
   color: #a1a1a1;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 16px;
+  line-height: 15px;
+}
+
+.app-layered-directory [aria-label="Project list explorer"] > div,
+.app-layered-directory [aria-label="Library hierarchy explorer"] > div {
+  padding: 0 10px 10px !important;
+}
+
+.app-layered-directory [aria-label="Project list explorer"] [role="tree"],
+.app-layered-directory [aria-label="Library hierarchy explorer"] [role="tree"] {
+  gap: 1px !important;
+}
+
+.app-layered-directory [aria-label="Project list explorer"] [role="treeitem"],
+.app-layered-directory [aria-label="Library hierarchy explorer"] [role="treeitem"] {
+  height: 28px !important;
+  min-height: 28px !important;
+  border-radius: 7px !important;
+  font-size: 13px !important;
+  line-height: 28px !important;
+}
+
+.app-layered-directory [aria-label="Project list explorer"] [role="treeitem"] > button,
+.app-layered-directory [aria-label="Library hierarchy explorer"] [role="treeitem"] > button {
+  height: 28px !important;
+  min-height: 28px !important;
+  gap: 7px !important;
+  border-radius: 7px !important;
+}
+
+.app-layered-directory .library-tree-marker {
+  width: 12px !important;
+  min-width: 12px !important;
+  height: 12px !important;
+  flex-basis: 12px !important;
+}
+
+.app-layered-directory .library-tree-marker > svg {
+  width: 12px !important;
+  height: 12px !important;
+}
+
+.app-layered-directory .layered-directory-row-icon {
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
 }
