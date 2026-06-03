@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from "react";
-import { CalendarIcon, GalleryIcon, HomeIcon } from "@/chip/icons/icons.sidebar";
+import { CalendarIcon, GalleryIcon, HomeIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { RightClickPanelSurface } from "@/chip/rightclickpanel.desktop/rightClickPanelCommon";
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
@@ -70,7 +70,6 @@ const EMPTY_COLLECTION: never[] = [];
 
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 const IconChevronDown = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M4 6.25L8 10.25L12 6.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
-const IconDoubleChevronLeft = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M12.5 5L7.5 10L12.5 15" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" /><path d="M16.5 5L11.5 10L16.5 15" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" /></svg>);
 
 const getFolderName = (folder: FolderTreeNode): string => {
   const name = folder.folderName ?? folder.folder_name;
@@ -233,12 +232,12 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
     <div className="app-layered-directory flex h-full min-h-0 w-[240px] shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased">
       <div className="app-layered-directory__primary-nav">
         <div className="app-layered-directory__workspace-header">
+          <button type="button" className="app-layered-directory__workspace-toggle" onClick={onToggleLeftPanel} aria-label="サイドバーを閉じる" disabled={!onToggleLeftPanel}>
+            <SidebarOpenIcon className="app-layered-directory__workspace-toggle-icon" />
+          </button>
           <button type="button" className="app-layered-directory__workspace-button" onClick={handleOpenProjectList} aria-label={`${workspaceName}を開く`}>
             <span className="app-layered-directory__workspace-avatar" aria-hidden="true">{workspaceInitial}</span>
             <span className="app-layered-directory__workspace-name">{workspaceName}</span>
-          </button>
-          <button type="button" className="app-layered-directory__workspace-collapse" onClick={onToggleLeftPanel} aria-label="サイドバーを閉じる" disabled={!onToggleLeftPanel}>
-            <IconDoubleChevronLeft className="app-layered-directory__workspace-collapse-icon" />
           </button>
         </div>
         <nav className="app-layered-directory__notion-nav" aria-label="ワークスペースナビゲーション">
