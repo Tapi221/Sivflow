@@ -89,6 +89,17 @@ const WorkspaceScreen = () => {
 
   if (libraryExplorerState) return <ExplorerWorkspaceContent explorerState={libraryExplorerState} explorerTabId={explorerTabId} isLeftPanelCollapsed={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />;
 
+  if (isLeftPanelCollapsed) {
+    return (
+      <div className="relative flex h-full min-h-0 w-full overflow-hidden bg-transparent">
+        <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />
+        <div className="min-w-0 flex-1">
+          <CalendarScheduleScreen isLeftPanelCollapsed={isLeftPanelCollapsed} />
+        </div>
+      </div>
+    );
+  }
+
   return <CalendarScheduleScreen isLeftPanelCollapsed={isLeftPanelCollapsed} />;
 };
 
