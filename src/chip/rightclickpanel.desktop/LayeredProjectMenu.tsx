@@ -37,7 +37,7 @@ type LayeredProjectMenuProps = {
 
 export const LAYERED_PROJECT_MENU_PANEL_ID = "layered-project-context-menu";
 
-const LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT = 7;
+const LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT = 5;
 
 const LAYERED_PROJECT_MENU_ITEM_DEFINITIONS: readonly LayeredProjectMenuItemDefinition[] = [
   { id: "change-color", label: "色を変更", submenu: true },
@@ -77,8 +77,8 @@ const LAYERED_PROJECT_MENU_STYLE = `
 .layered-project-menu-separator {
   flex: 0 0 auto;
   height: 1px;
-  margin: 3px 0;
-  background: rgba(0, 0, 0, 0.1);
+  margin: 2px 10px;
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .layered-project-menu-item-chevron {
@@ -100,7 +100,11 @@ const LAYERED_PROJECT_MENU_STYLE = `
 
 const getLayeredProjectMenuAction = (actions: LayeredProjectMenuAction[], id: LayeredProjectMenuActionId) => actions.find((action) => action.id === id);
 
-const getLayeredProjectMenuSubmenuAnchor = (index: number): LayeredProjectMenuSubmenuAnchor => ({ itemOffsetY: RIGHT_CLICK_PANEL_SURFACE_PADDING + index * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT });
+const getLayeredProjectMenuSubmenuAnchor = (index: number): LayeredProjectMenuSubmenuAnchor => {
+  const separatorOffset = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.slice(0, index).filter((item) => item.separatorBefore).length * LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT;
+
+  return { itemOffsetY: RIGHT_CLICK_PANEL_SURFACE_PADDING + index * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + separatorOffset };
+};
 
 const LayeredProjectMenuBase = ({
   x,
