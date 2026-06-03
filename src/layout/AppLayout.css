@@ -62,7 +62,7 @@
   /* 左上の直角そのものを丸める */
   border-radius: 18px 10px 0 0;
 
-  background: var(--app-active-tab-bg);
+  background: transparent;
   background-clip: padding-box;
 }
 
@@ -103,5 +103,5 @@
 
   padding: 0 0 0 var(--workspace-content-gutter);
 
-  background: var(--app-active-tab-bg);
+  background: transparent;
 }
