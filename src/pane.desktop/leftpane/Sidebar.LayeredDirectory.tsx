@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from "react";
-import { CalendarIcon, GalleryIcon, HomeIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
+import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { RightClickPanelSurface } from "@/chip/rightclickpanel.desktop/rightClickPanelCommon";
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
@@ -53,6 +53,7 @@ const WORKSPACE_LIBRARY_LABEL = "ライブラリ";
 const WORKSPACE_TAGS_LABEL = "タグ";
 const WORKSPACE_SCHEDULE_LABEL = "カレンダー";
 const WORKSPACE_EXPLORE_LABEL = "Explore";
+const WORKSPACE_SETTINGS_LABEL = "設定";
 const FAVORITE_SECTION_LABEL = "お気に入り";
 const FAVORITE_EMPTY_MESSAGE = "プロジェクトをお気に入りに追加すると、ここからすぐ開けます";
 const PROJECT_SECTION_LABEL = "プロジェクト";
@@ -175,6 +176,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   const isFolderActive = activeTab?.sectionKey === "library" && folderTagMode === "folder";
   const isTagActive = activeTab?.sectionKey === "library" && folderTagMode === "tag";
   const isScheduleActive = activeTab?.sectionKey === "schedule";
+  const isSettingsActive = activeTab?.sectionKey === "settings";
   const shouldShowCalendarContent = isScheduleActive && calendarContent !== undefined;
   const shouldShowDirectoryContent = !shouldShowCalendarContent;
   const { fileInputRef, handleToolbarAddDocument, currentFileAccept, handleToolbarFileInputChange } = useFolderDocumentUpload({ actionFolderId: selectedProjectId, getNextOrderIndex, setExpandedFolders: setProjectAddExpandedFolderIds });
@@ -228,6 +230,10 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
     openSearch();
   }, [openSearch]);
 
+  const handleOpenSettings = useCallback(() => {
+    openSectionTab("settings");
+  }, [openSectionTab]);
+
   return (
     <div className="app-layered-directory flex h-full min-h-0 w-[240px] shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased">
       <div className="app-layered-directory__primary-nav">
@@ -255,6 +261,9 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
           </button>
           <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenExplore} aria-label={WORKSPACE_EXPLORE_LABEL} title={WORKSPACE_EXPLORE_LABEL}>
             <GalleryIcon className="app-layered-directory__notion-icon" />
+          </button>
+          <button type="button" className={`app-layered-directory__notion-action${isSettingsActive ? " is-active" : ""}`} onClick={handleOpenSettings} aria-current={isSettingsActive ? "page" : undefined} aria-label={WORKSPACE_SETTINGS_LABEL} title={WORKSPACE_SETTINGS_LABEL}>
+            <SettingIcon className="app-layered-directory__notion-icon" />
           </button>
         </nav>
       </div>
