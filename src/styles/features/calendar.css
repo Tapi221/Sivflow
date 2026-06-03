@@ -31,7 +31,7 @@
   .calendar-print-screen-content div:has(> .calendar-timeline-scroll) > div:first-child > .grid > div:first-child,
   .calendar-print-screen-content div:has(> .calendar-timeline-scroll) > div:nth-child(2) > .grid > div:first-child,
   .calendar-timeline-scroll > .grid > div:first-child {
-    background: var(--backpane-bg, #fafafa) !important;
+    background: transparent !important;
     box-shadow: none !important;
     filter: none !important;
     text-shadow: none !important;
