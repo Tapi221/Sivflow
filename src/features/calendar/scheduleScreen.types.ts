@@ -35,6 +35,7 @@ export type CalendarEventLabelStyle = CSSProperties & {
 export type ScheduleScreenProps = {
   isLeftPanelCollapsed?: boolean;
   onClose?: () => void;
+  onToggleLeftPanel?: () => void;
 };
 
 export type AppCalendarItem = {
@@ -50,6 +51,7 @@ export type ProjectCalendarLink = {
   provider: CalendarProvider;
   accountId: string;
   externalCalendarId: string;
+  externalEventId: string;
   externalCalendarName: string;
   syncDirection: ProjectCalendarSyncDirection;
   createdByApp: boolean;
@@ -124,6 +126,7 @@ export type CalendarSidebarProps = {
   onChangeGoogleCalendarColor: (accountId: string, calendarId: string, color: string) => void;
   onReconnectAccount: (accountId: string) => void;
   onToggleCalendar: (accountId: string, calendarId: string) => void;
+  onToggleLeftPanel?: () => void;
 };
 
 export type CalendarWeekDayGridProps = {
