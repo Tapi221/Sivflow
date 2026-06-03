@@ -60,18 +60,6 @@
     opacity: 1;
   }
 
-  .calendar-month-weekday-header,
-  .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7 {
-    border-color: var(--mf-explorer-border, #e2e8f0) !important;
-    background: var(--backpane-bg, var(--app-sidebar-bg, var(--mf-explorer-sidebar-bg, #f8fafc))) !important;
-  }
-
-  .calendar-month-weekday-header > .calendar-month-weekday-cell,
-  .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7 > .calendar-month-weekday-cell {
-    background: transparent !important;
-    color: var(--app-sidebar-text-muted, var(--mf-explorer-text-muted, #64748b)) !important;
-  }
-
   .calendar-month-weekday-header::before,
   .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7::before {
     content: "" !important;
@@ -82,13 +70,12 @@
     z-index: 2;
     height: 1px;
     pointer-events: none;
-    background: var(--mf-explorer-border, #e2e8f0);
+    background: #eeeeee;
     background-image: none !important;
   }
 
   .calendar-month-weekday-header::after,
   .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7::after {
     z-index: 1;
-    background: linear-gradient(to bottom, color-mix(in srgb, var(--backpane-bg, var(--app-sidebar-bg, var(--mf-explorer-sidebar-bg, #f8fafc))) 82%, transparent), transparent) !important;
   }
 }
