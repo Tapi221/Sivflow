@@ -38,6 +38,19 @@
       transform 140ms ease;
   }
 
+  .app-layered-directory {
+    --app-sidebar-text: #6d6d6d;
+    --app-sidebar-text-strong: #666666;
+    --app-sidebar-text-muted: #777777;
+    --app-sidebar-icon: #6d6d6d;
+  }
+
+  .app-layered-directory .layered-directory-row-icon,
+  .app-layered-directory .app-layered-directory__notion-icon,
+  .app-layered-directory .app-layered-directory__workspace-toggle-icon {
+    color: var(--app-sidebar-icon, #6d6d6d);
+  }
+
   .sidebar-row:hover,
   .sidebar-row[data-selected="true"] {
     --explorer-chrome-cardset-stroke: currentColor;
