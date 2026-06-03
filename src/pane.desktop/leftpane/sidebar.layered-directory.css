@@ -17,45 +17,147 @@
 .app-layered-directory__primary-nav {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 16px 10px 16px;
+  gap: 12px;
+  padding: 18px 12px 16px;
 }
 
-.app-layered-directory__primary-item {
+.app-layered-directory__workspace-header {
   display: flex;
   align-items: center;
-  width: 100%;
-  min-height: 26px;
+  min-height: 30px;
   gap: 8px;
+}
+
+.app-layered-directory__workspace-button {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+  gap: 10px;
   padding: 2px 4px;
   border: 0;
   border-radius: 7px;
   background: transparent;
-  color: #2f343b;
+  color: #111111;
   font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: -0.012em;
-  line-height: 18px;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.018em;
+  line-height: 20px;
   text-align: left;
   outline: none;
 }
 
-.app-layered-directory__primary-item:hover:not(:disabled),
-.app-layered-directory__primary-item:focus-visible:not(:disabled) {
+.app-layered-directory__workspace-button:hover,
+.app-layered-directory__workspace-button:focus-visible {
   background: #eeeeee;
 }
 
-.app-layered-directory__primary-item:disabled {
-  cursor: default;
+.app-layered-directory__workspace-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: #efeeee;
+  color: #6b6b6b;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.app-layered-directory__workspace-name {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: #111111;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-layered-directory__workspace-collapse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #9a9a9a;
+  outline: none;
+}
+
+.app-layered-directory__workspace-collapse:hover:not(:disabled),
+.app-layered-directory__workspace-collapse:focus-visible:not(:disabled) {
+  background: #eeeeee;
+  color: #6f6f6f;
+}
+
+.app-layered-directory__workspace-collapse:disabled {
+  opacity: 0.55;
+}
+
+.app-layered-directory__workspace-collapse-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.app-layered-directory__notion-nav {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(4, 34px);
+  align-items: center;
+  gap: 6px;
+}
+
+.app-layered-directory__notion-home,
+.app-layered-directory__notion-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: #85827e;
+  font: inherit;
+  outline: none;
+}
+
+.app-layered-directory__notion-home {
+  justify-content: flex-start;
+  min-width: 0;
+  gap: 8px;
+  padding: 0 14px;
+  color: #2f343b;
+  font-size: 14px;
+  font-weight: 520;
+  letter-spacing: -0.016em;
+}
+
+.app-layered-directory__notion-home.is-active,
+.app-layered-directory__notion-home:hover,
+.app-layered-directory__notion-home:focus-visible,
+.app-layered-directory__notion-action:hover:not(:disabled),
+.app-layered-directory__notion-action:focus-visible:not(:disabled) {
+  background: #eeeeee;
   color: #2f343b;
 }
 
-.app-layered-directory__primary-icon {
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
-  color: #5f666f;
+.app-layered-directory__notion-action:disabled {
+  cursor: default;
+}
+
+.app-layered-directory__notion-icon {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  color: currentColor;
 }
 
 .app-layered-directory__section-strip {
