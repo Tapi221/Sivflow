@@ -20,12 +20,13 @@ type CalendarEventChipMonthStyle = CSSProperties & {
   printColorAdjust: "exact";
 };
 
-const createCalendarEventChipMonthStyle = (backgroundColor: string, accentColor: string, textColor: string): CalendarEventChipMonthStyle => ({
+const createCalendarEventChipMonthStyle = (backgroundColor: string, accentColor: string, textColor: string, borderLeft?: string): CalendarEventChipMonthStyle => ({
   "--calendar-event-chip-accent": accentColor,
   "--calendar-event-chip-bg": backgroundColor,
   WebkitPrintColorAdjust: "exact",
   printColorAdjust: "exact",
   background: backgroundColor,
+  borderLeft,
   color: textColor,
 });
 
@@ -37,7 +38,8 @@ const CalendarEventChipMonth = memo(({ event, showTimeLabel = true, tooltipDisab
   }, [event.isAllDay, event.startsAt]);
 
   const titleLabel = event.title || "Untitled";
-  const chipStyle = useMemo(() => createCalendarEventChipMonthStyle(tokens.bg, tokens.border, tokens.text), [tokens.bg, tokens.border, tokens.text]);
+  const chipBorderLeft = event.isAllDay ? undefined : `3px solid ${tokens.border}`;
+  const chipStyle = useMemo(() => createCalendarEventChipMonthStyle(tokens.bg, tokens.border, tokens.text, chipBorderLeft), [chipBorderLeft, tokens.bg, tokens.border, tokens.text]);
 
   return (
     <HoverMonthEventTooltip title={titleLabel} timeLabel={showTimeLabel ? timeLabel : null} accentColor={tokens.border} className="w-full min-w-0" disabled={tooltipDisabled}>
