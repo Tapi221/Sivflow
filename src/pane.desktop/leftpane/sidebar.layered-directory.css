@@ -424,3 +424,21 @@
   font-weight: 500 !important;
   opacity: 1 !important;
 }
+
+.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child button[aria-pressed] > span:first-child {
+  background-color: currentColor !important;
+  mask-image: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M7.25%206V5.1A1.85%201.85%200%200%201%209.1%203.25h1.8a1.85%201.85%200%200%201%201.85%201.85V6%22%20stroke%3D%22black%22%20stroke-width%3D%221.35%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M4.75%206.25h10.5A2.25%202.25%200%200%201%2017.5%208.5v5.25A2.25%202.25%200%200%201%2015.25%2016H4.75a2.25%202.25%200%200%201-2.25-2.25V8.5a2.25%202.25%200%200%201%202.25-2.25Z%22%20stroke%3D%22black%22%20stroke-width%3D%221.35%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M2.75%2010.25h14.5%22%20stroke%3D%22black%22%20stroke-width%3D%221.35%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8.9%2010.25h2.2v1.45H8.9v-1.45Z%22%20stroke%3D%22black%22%20stroke-width%3D%221.35%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E") !important;
+  mask-position: center !important;
+  mask-repeat: no-repeat !important;
+  mask-size: 16px 16px !important;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M7.25%206V5.1A1.85%201.85%200%200%201%209.1%203.25h1.8a1.85%201.85%200%200%201%201.85%201.85V6%22%20stroke%3D%22black%22%20stroke-width%3D%221.35%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M4.75%206.25h10.5A2.25%202.25%200%200%201%2017.5%208.5v5.25A2.25%202.25%200%200%201%2015.25%2016H4.75a2.25%202.25%200%200%201-2.25-2.25V8.5a2.25%202.25%200%200%201%202.25-2.25Z%22%20stroke%3D%22black%22%20stroke-width%3D%221.35%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M2.75%2010.25h14.5%22%20stroke%3D%22black%22%20stroke-width%3D%221.35%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8.9%2010.25h2.2v1.45H8.9v-1.45Z%22%20stroke%3D%22black%22%20stroke-width%3D%221.35%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E") !important;
+  -webkit-mask-position: center !important;
+  -webkit-mask-repeat: no-repeat !important;
+  -webkit-mask-size: 16px 16px !important;
+}
+
+.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child button[aria-pressed] > span:first-child::before,
+.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child button[aria-pressed] > span:first-child::after {
+  content: none !important;
+  display: none !important;
+}
