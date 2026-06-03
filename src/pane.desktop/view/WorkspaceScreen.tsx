@@ -15,6 +15,7 @@ type ExplorerWorkspaceContentProps = {
   explorerState: ExplorerRouteState;
   explorerTabId: WorkspaceExplorerTab["id"] | null;
   isLeftPanelCollapsed: boolean;
+  onToggleLeftPanel: () => void;
 };
 
 const createFolderRouteState = (folderId: string | null): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: folderId === null, selectedFolderId: folderId, selectedItem: null });
@@ -41,7 +42,7 @@ const getExplorerTabId = (tab: WorkspaceTab | null): WorkspaceExplorerTab["id"] 
   return tab?.kind === "explorer" ? tab.id : null;
 };
 
-const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCollapsed }: ExplorerWorkspaceContentProps) => {
+const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCollapsed, onToggleLeftPanel }: ExplorerWorkspaceContentProps) => {
   const { folders, loading, error } = useFoldersRead();
   const updateExplorerTabState = useWorkspaceTabsStore((state) => state.updateExplorerTabState);
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
@@ -70,21 +71,21 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
 
   return (
     <div className="relative flex h-full min-h-0 w-full overflow-hidden bg-transparent">
-      {!isLeftPanelCollapsed && <SidebarLayeredDirectory />}
+      {!isLeftPanelCollapsed && <SidebarLayeredDirectory onToggleLeftPanel={onToggleLeftPanel} />}
       <CarvePanel className="min-w-0"><TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} /></CarvePanel>
     </div>
   );
 };
 
 const WorkspaceScreen = () => {
-  const { isLeftPanelCollapsed = false } = useOutletContext<AppLayoutOutletContext>();
+  const { isLeftPanelCollapsed = false, onToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const libraryExplorerState = useMemo(() => getLibraryExplorerState(activeTab), [activeTab]);
   const explorerTabId = useMemo(() => getExplorerTabId(activeTab), [activeTab]);
 
-  if (libraryExplorerState) return <ExplorerWorkspaceContent explorerState={libraryExplorerState} explorerTabId={explorerTabId} isLeftPanelCollapsed={isLeftPanelCollapsed} />;
+  if (libraryExplorerState) return <ExplorerWorkspaceContent explorerState={libraryExplorerState} explorerTabId={explorerTabId} isLeftPanelCollapsed={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />;
 
   return <CalendarScheduleScreen isLeftPanelCollapsed={isLeftPanelCollapsed} />;
 };
