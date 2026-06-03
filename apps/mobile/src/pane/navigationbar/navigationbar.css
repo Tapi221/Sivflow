@@ -3,6 +3,7 @@
   --mobile-navigation-bar-active-size: 48px;
   --mobile-navigation-bar-icon-size: 20px;
   --mobile-navigation-bar-green: #62b278;
+  --mobile-navigation-bar-icon-inactive: #b7b7b7;
   --mobile-navigation-bar-surface: linear-gradient(90deg, #f9fff5 0%, #f4fff9 100%);
 
   position: fixed;
@@ -61,7 +62,7 @@
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: var(--mobile-navigation-bar-green);
+  color: var(--mobile-navigation-bar-icon-inactive);
   outline: none;
   place-items: center;
   -webkit-tap-highlight-color: transparent;
