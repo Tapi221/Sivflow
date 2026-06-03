@@ -17,11 +17,11 @@ type ToggleCalendarViewModeProps = {
 };
 
 const CALENDAR_VIEW_MODE_INDICATOR_ID = "calendar-view-mode-indicator";
-const CALENDAR_VIEW_MODE_ACTIVE_TEXT_CLASS = "text-[#8c8c8c]";
-const CALENDAR_VIEW_MODE_INACTIVE_TEXT_CLASS = "text-[#d5d5d5]";
-const CALENDAR_VIEW_MODE_HOVER_TEXT_CLASS = "hover:text-[#8c8c8c]";
-const CALENDAR_VIEW_MODE_DISABLED_TEXT_CLASS = "cursor-not-allowed text-[#e4e4e4]";
-const CALENDAR_VIEW_MODE_INDICATOR_CLASS = "pointer-events-none absolute inset-0 z-0 rounded-[8px] border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]";
+const CALENDAR_VIEW_MODE_ACTIVE_TEXT_CLASS = "text-[#2f343b]";
+const CALENDAR_VIEW_MODE_INACTIVE_TEXT_CLASS = "text-[#85827e]";
+const CALENDAR_VIEW_MODE_HOVER_TEXT_CLASS = "hover:bg-[#eeeeee] hover:text-[#2f343b]";
+const CALENDAR_VIEW_MODE_DISABLED_TEXT_CLASS = "cursor-not-allowed text-[#c8c5c0]";
+const CALENDAR_VIEW_MODE_INDICATOR_CLASS = "pointer-events-none absolute inset-0 z-0 rounded-[7px] bg-[#eeeeee] shadow-none";
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
 const STATIC_TIMETABLE_VIEW_MODE = "timetable" satisfies CalendarViewMode;
@@ -132,10 +132,10 @@ const ToggleCalendarViewMode = ({
         disabled={isDisabled}
         onClick={() => handleChange(option.value)}
         className={cn(
-          "relative isolate z-10 flex h-6 min-h-0 min-w-7 items-center justify-center rounded-[8px] px-1.5",
-          "appearance-none select-none text-[11px] font-semibold leading-none tracking-[-0.01em]",
-          "outline-none ring-0 transition-colors duration-100 ease-out motion-reduce:transition-none",
-          "focus:outline-none focus:ring-0 focus-visible:outline-none",
+          "relative isolate z-10 flex h-7 min-h-0 min-w-7 items-center justify-center rounded-[7px] px-2",
+          "appearance-none select-none text-[12px] font-semibold leading-none tracking-[-0.012em]",
+          "outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out motion-reduce:transition-none motion-reduce:active:scale-100",
+          "active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] focus-visible:outline-none",
           isDisabled
             ? CALENDAR_VIEW_MODE_DISABLED_TEXT_CLASS
             : isActive
@@ -166,7 +166,7 @@ const ToggleCalendarViewMode = ({
       role="group"
       aria-label="表示形式"
       className={cn(
-        "relative inline-grid h-7 w-max grid-flow-col items-center gap-1 rounded-[10px] bg-[#f7f7f7] p-0.5",
+        "relative inline-grid h-7 w-max grid-flow-col items-center gap-1 rounded-none bg-transparent p-0",
         className,
       )}
     >
@@ -177,10 +177,10 @@ const ToggleCalendarViewMode = ({
           aria-disabled={true}
           tabIndex={-1}
           className={cn(
-            "relative isolate z-10 flex h-6 min-h-0 min-w-7 cursor-default items-center justify-center rounded-[8px] px-1.5",
-            "appearance-none select-none text-[11px] font-semibold leading-none tracking-[-0.01em]",
+            "relative isolate z-10 flex h-7 min-h-0 min-w-7 cursor-default items-center justify-center rounded-[7px] px-2",
+            "appearance-none select-none text-[12px] font-semibold leading-none tracking-[-0.012em]",
             "outline-none ring-0",
-            CALENDAR_VIEW_MODE_INACTIVE_TEXT_CLASS,
+            CALENDAR_VIEW_MODE_DISABLED_TEXT_CLASS,
           )}
         >
           <span className="relative z-10">{t.viewTimetable}</span>
