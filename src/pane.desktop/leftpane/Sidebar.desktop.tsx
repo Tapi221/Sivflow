@@ -1,5 +1,5 @@
 import { type MouseEvent, type ReactNode } from "react";
-import { ClockIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
+import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
@@ -63,7 +63,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "calendar",
     labelKey: "sidebarSchedule",
-    icon: <ClockIcon className="app-sidebar__nav-icon" />,
+    icon: <CalendarIcon className="app-sidebar__nav-icon" />,
     sectionKey: "schedule",
   },
   {
@@ -148,6 +148,10 @@ const Sidebar = ({
     ...item,
     onClick: () => {
       item.onClick?.();
+
+      if (item.id === "calendar" && isLeftPanelCollapsed) {
+        onToggleLeftPanel?.();
+      }
 
       if (item.id === "explore") {
         openSearch();
