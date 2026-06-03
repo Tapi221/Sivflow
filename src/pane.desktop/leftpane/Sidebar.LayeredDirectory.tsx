@@ -45,7 +45,7 @@ type SidebarLayeredDirectoryProps = {
 };
 
 const WORKSPACE_OWNER_FALLBACK_NAME = "Akari T";
-const WORKSPACE_NAME_SUFFIX = "のNotion";
+const WORKSPACE_NAME_SUFFIX = "のWorkspace";
 const WORKSPACE_AVATAR_FALLBACK = "A";
 const WORKSPACE_HOME_LABEL = "ホーム";
 const WORKSPACE_LIBRARY_LABEL = "ライブラリ";
