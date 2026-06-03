@@ -181,7 +181,7 @@
   display: flex;
   align-items: center;
   min-height: 26px;
-  gap: 6px;
+  gap: 4px;
   padding: 0 10px;
 }
 
@@ -230,15 +230,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  min-width: 24px;
-  height: 24px;
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
   padding: 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: 11px;
   background: transparent;
-  color: #8f949b;
+  color: #85827e;
+  line-height: 1;
   outline: none;
+}
+
+.app-layered-directory__add-button > svg {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  color: currentColor;
+  transform: translateY(1px);
 }
 
 .app-layered-directory__add-button:hover,
