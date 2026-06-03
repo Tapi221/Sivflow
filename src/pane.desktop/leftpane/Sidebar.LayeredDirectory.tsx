@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type RefObject } from "react";
-import { HomeIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
+import { ClockIcon, GalleryIcon, HomeIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { RightClickPanelSurface } from "@/chip/rightclickpanel.desktop/rightClickPanelCommon";
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
+import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_PROJECT_NAME, getFolderId, getParentFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
@@ -13,6 +14,7 @@ import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
 import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
 import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+import { StratisTagIcon } from "@/ui/icons/stratis";
 
 type IconProps = {
   className?: string;
@@ -46,10 +48,10 @@ const WORKSPACE_OWNER_FALLBACK_NAME = "Akari T";
 const WORKSPACE_NAME_SUFFIX = "のNotion";
 const WORKSPACE_AVATAR_FALLBACK = "A";
 const WORKSPACE_HOME_LABEL = "ホーム";
-const WORKSPACE_COMMENTS_LABEL = "コメント";
-const WORKSPACE_NEW_DOCUMENT_LABEL = "新しいドキュメント";
-const WORKSPACE_ALL_DOCUMENTS_LABEL = "すべてのドキュメント";
-const WORKSPACE_SEARCH_LABEL = "検索";
+const WORKSPACE_LIBRARY_LABEL = "ライブラリ";
+const WORKSPACE_TAGS_LABEL = "タグ";
+const WORKSPACE_SCHEDULE_LABEL = "カレンダー";
+const WORKSPACE_EXPLORE_LABEL = "Explore";
 const FAVORITE_SECTION_LABEL = "お気に入り";
 const FAVORITE_EMPTY_MESSAGE = "プロジェクトをお気に入りに追加すると、ここからすぐ開けます";
 const PROJECT_SECTION_LABEL = "プロジェクト";
@@ -68,10 +70,6 @@ const EMPTY_COLLECTION: never[] = [];
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 const IconChevronDown = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M4 6.25L8 10.25L12 6.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
 const IconDoubleChevronLeft = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M12.5 5L7.5 10L12.5 15" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" /><path d="M16.5 5L11.5 10L16.5 15" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" /></svg>);
-const IconComment = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M10 3.25c-4.1 0-7.25 2.78-7.25 6.2 0 1.72.8 3.26 2.08 4.38l-.46 2.24c-.07.36.31.63.61.43l2.2-1.42c.86.36 1.81.56 2.82.56 4.1 0 7.25-2.78 7.25-6.19 0-3.42-3.15-6.2-7.25-6.2Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round" /></svg>);
-const IconQuickDocument = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M6 2.75h5.15c.4 0 .78.16 1.06.44l2.6 2.6c.28.28.44.66.44 1.06V15A2.25 2.25 0 0 1 13 17.25H6A2.25 2.25 0 0 1 3.75 15V5A2.25 2.25 0 0 1 6 2.75Z" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" /><path d="M11 3v3.1c0 .5.4.9.9.9H15" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" /><path d="M8 11.25h4M10 9.25v4" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" /></svg>);
-const IconTray = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M4.75 7.75h10.5l1.4 6.3c.15.67-.36 1.3-1.04 1.3H4.39c-.68 0-1.19-.63-1.04-1.3l1.4-6.3Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round" /><path d="M7.5 11.25h1.05c.45 0 .84.28.98.7.15.43.54.72.99.72h.96c.45 0 .84-.29.99-.72.14-.42.53-.7.98-.7h1.05" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" strokeLinejoin="round" /><path d="M6.5 7.75V5.9c0-.69.56-1.25 1.25-1.25h4.5c.69 0 1.25.56 1.25 1.25v1.85" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" /></svg>);
-const IconSearch = ({ className }: IconProps) => (<svg viewBox="0 0 20 20" fill="none" className={className}><path d="M9.15 15.05a5.9 5.9 0 1 0 0-11.8 5.9 5.9 0 0 0 0 11.8Z" stroke="currentColor" strokeWidth="1.55" /><path d="m13.55 13.55 3.2 3.2" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" /></svg>);
 
 const getFolderName = (folder: FolderTreeNode): string => {
   const name = folder.folderName ?? folder.folder_name;
@@ -142,6 +140,7 @@ const resolveRootProjectId = (folderId: string | null | undefined, folderById: R
 const SidebarLayeredDirectory = ({ onToggleLeftPanel }: SidebarLayeredDirectoryProps) => {
   const { currentUser } = useAuthSession();
   const folderTagMode = useFolderTagModeStore((state) => state.folderTagMode);
+  const setFolderTagMode = useFolderTagModeStore((state) => state.setFolderTagMode);
   const { createFolder } = useFolderCommands();
   const { folders } = useFoldersRead();
   const openSearch = useSearchStore((state) => state.open);
@@ -173,6 +172,9 @@ const SidebarLayeredDirectory = ({ onToggleLeftPanel }: SidebarLayeredDirectoryP
   const workspaceName = `${workspaceOwnerName}${WORKSPACE_NAME_SUFFIX}`;
   const workspaceInitial = useMemo(() => getWorkspaceInitial(workspaceOwnerName), [workspaceOwnerName]);
   const isHomeActive = activeTab?.sectionKey === "home";
+  const isFolderActive = activeTab?.sectionKey === "library" && folderTagMode === "folder";
+  const isTagActive = activeTab?.sectionKey === "library" && folderTagMode === "tag";
+  const isScheduleActive = activeTab?.sectionKey === "schedule";
   const { fileInputRef, handleToolbarAddDocument, currentFileAccept, handleToolbarFileInputChange } = useFolderDocumentUpload({ actionFolderId: selectedProjectId, getNextOrderIndex, setExpandedFolders: setProjectAddExpandedFolderIds });
 
   const closeProjectAddMenu = useCallback(() => {
@@ -190,8 +192,14 @@ const SidebarLayeredDirectory = ({ onToggleLeftPanel }: SidebarLayeredDirectoryP
   }, [openSectionTab]);
 
   const handleOpenProjectList = useCallback(() => {
+    setFolderTagMode("folder");
     openExplorerTab({ title: "Library", explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
-  }, [openExplorerTab]);
+  }, [openExplorerTab, setFolderTagMode]);
+
+  const handleOpenTagTree = useCallback(() => {
+    setFolderTagMode("tag");
+    openExplorerTab({ title: "Library", explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
+  }, [openExplorerTab, setFolderTagMode]);
 
   const handleOpenProjectAddMenu = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -210,18 +218,11 @@ const SidebarLayeredDirectory = ({ onToggleLeftPanel }: SidebarLayeredDirectoryP
     closeProjectAddMenu();
   }, [closeProjectAddMenu, handleToolbarAddDocument]);
 
-  const handleOpenNewDocument = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
+  const handleOpenSchedule = useCallback(() => {
+    openSectionTab("schedule");
+  }, [openSectionTab]);
 
-    if (selectedProjectId) {
-      handleOpenProjectAddMenu(event);
-      return;
-    }
-
-    handleCreateRootFolder();
-  }, [handleCreateRootFolder, handleOpenProjectAddMenu, selectedProjectId]);
-
-  const handleOpenSearch = useCallback(() => {
+  const handleOpenExplore = useCallback(() => {
     openSearch();
   }, [openSearch]);
 
@@ -238,20 +239,20 @@ const SidebarLayeredDirectory = ({ onToggleLeftPanel }: SidebarLayeredDirectoryP
           </button>
         </div>
         <nav className="app-layered-directory__notion-nav" aria-label="ワークスペースナビゲーション">
-          <button type="button" className={`app-layered-directory__notion-home${isHomeActive ? " is-active" : ""}`} onClick={handleOpenHome} aria-current={isHomeActive ? "page" : undefined} aria-label={WORKSPACE_HOME_LABEL} title={WORKSPACE_HOME_LABEL}>
+          <button type="button" className={`app-layered-directory__notion-action${isHomeActive ? " is-active" : ""}`} onClick={handleOpenHome} aria-current={isHomeActive ? "page" : undefined} aria-label={WORKSPACE_HOME_LABEL} title={WORKSPACE_HOME_LABEL}>
             <HomeIcon className="app-layered-directory__notion-icon" />
           </button>
-          <button type="button" className="app-layered-directory__notion-action" disabled aria-label={WORKSPACE_COMMENTS_LABEL} title={WORKSPACE_COMMENTS_LABEL}>
-            <IconComment className="app-layered-directory__notion-icon" />
+          <button type="button" className={`app-layered-directory__notion-action${isFolderActive ? " is-active" : ""}`} onClick={handleOpenProjectList} aria-current={isFolderActive ? "page" : undefined} aria-label={WORKSPACE_LIBRARY_LABEL} title={WORKSPACE_LIBRARY_LABEL}>
+            <ExplorerChromeFolderIcon className="app-layered-directory__notion-icon" />
           </button>
-          <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenNewDocument} aria-label={WORKSPACE_NEW_DOCUMENT_LABEL} title={WORKSPACE_NEW_DOCUMENT_LABEL}>
-            <IconQuickDocument className="app-layered-directory__notion-icon" />
+          <button type="button" className={`app-layered-directory__notion-action${isTagActive ? " is-active" : ""}`} onClick={handleOpenTagTree} aria-current={isTagActive ? "page" : undefined} aria-label={WORKSPACE_TAGS_LABEL} title={WORKSPACE_TAGS_LABEL}>
+            <StratisTagIcon className="app-layered-directory__notion-icon" />
           </button>
-          <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenProjectList} aria-label={WORKSPACE_ALL_DOCUMENTS_LABEL} title={WORKSPACE_ALL_DOCUMENTS_LABEL}>
-            <IconTray className="app-layered-directory__notion-icon" />
+          <button type="button" className={`app-layered-directory__notion-action${isScheduleActive ? " is-active" : ""}`} onClick={handleOpenSchedule} aria-current={isScheduleActive ? "page" : undefined} aria-label={WORKSPACE_SCHEDULE_LABEL} title={WORKSPACE_SCHEDULE_LABEL}>
+            <ClockIcon className="app-layered-directory__notion-icon" />
           </button>
-          <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenSearch} aria-label={WORKSPACE_SEARCH_LABEL} title={WORKSPACE_SEARCH_LABEL}>
-            <IconSearch className="app-layered-directory__notion-icon" />
+          <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenExplore} aria-label={WORKSPACE_EXPLORE_LABEL} title={WORKSPACE_EXPLORE_LABEL}>
+            <GalleryIcon className="app-layered-directory__notion-icon" />
           </button>
         </nav>
       </div>
