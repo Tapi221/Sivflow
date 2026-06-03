@@ -46,7 +46,7 @@ const getSelectedViewPanelVisibleDays = ({ viewMode, selectedDate, visibleDays }
 
 const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, visibleDays, virtualRail, events, appProjects, googleAccounts, headerScrollRef, allDayScrollRef, scrollContainerRef, calendarGridStyle, allDayEventOrder, onCalendarScroll, onSelectDate, onVisibleMonthChange, onVisibleDateChange, onMoveCalendarEvent, onReorderAllDayEvents }: CalendarSelectedViewPanelProps): ReactNode => {
   if (viewMode === "list") {
-    return <CalendarListView days={visibleDays} virtualRail={virtualRail} events={events} selectedDate={selectedDate} onSelectDate={onSelectDate} onVisibleMonthChange={onVisibleMonthChange} autoScrollToSelectedDate={false} className="h-full" />;
+    return <CalendarListView days={visibleDays} virtualRail={virtualRail} events={events} selectedDate={selectedDate} onSelectDate={onSelectDate} onVisibleMonthChange={onVisibleMonthChange} scrollTargetDate={visibleDays[0] ?? selectedDate} className="h-full" />;
   }
 
   if (viewMode === "pieChart") {
