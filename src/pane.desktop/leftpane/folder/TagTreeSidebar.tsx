@@ -3,6 +3,7 @@ import { useTags, type Tag as TagRecord } from "@/features/settings/hooks/useTag
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+import { StratisTagIcon } from "@/ui/icons/stratis";
 
 type TagTreeNode = {
   id: string;
@@ -30,8 +31,6 @@ const LIBRARY_TITLE = "Library";
 const ROOT_LEVEL = 1;
 
 const IconChevronRight = ({ className }: { className?: string }) => (<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
-
-const IconTag = ({ className }: { className?: string }) => (<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("h-[18px] w-[18px] shrink-0", className)}><path d="M3.5 5.5V9.4c0 .4.16.78.44 1.06l5.6 5.6a1.5 1.5 0 0 0 2.12 0l4.4-4.4a1.5 1.5 0 0 0 0-2.12l-5.6-5.6A1.5 1.5 0 0 0 9.4 3.5H5.5a2 2 0 0 0-2 2Z" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" /><circle cx="7" cy="7" r="1.1" fill="currentColor" /></svg>);
 
 const getTagName = (tag: TagRecord): string => {
   const name = tag.name.trim();
@@ -102,7 +101,7 @@ const TagTreeRow = ({ item, selectedTagNames, onToggleTag, onSelectTag }: TagTre
     if (item.hasChildren && !item.isExpanded) onToggleTag(item.id);
   };
 
-  return <div data-tag-id={item.id}><div role="treeitem" aria-level={item.level} aria-expanded={item.hasChildren ? item.isExpanded : undefined} aria-selected={isSelected} className={cn("flex h-8 items-center rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)]", isSelected && "bg-[#e9e9e9]")} style={{ paddingLeft: rowPaddingLeft }}>{item.hasChildren ? <button type="button" onClick={handleToggleClick} aria-label={item.isExpanded ? `${item.name} を閉じる` : `${item.name} を開く`} className="flex h-8 w-4 shrink-0 items-center justify-center rounded-[8px] text-[#9aa1ad] hover:bg-[#eeeeee]"><IconChevronRight className={cn("h-3.5 w-3.5 transition-transform", item.isExpanded && "rotate-90")} /></button> : null}<button type="button" onClick={handleRowClick} title={item.name} className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[8px] text-left text-inherit hover:bg-[#eeeeee]"><IconTag className="layered-directory-row-icon" /><span className="min-w-0 flex-1 truncate">{item.name}</span></button></div></div>;
+  return <div data-tag-id={item.id}><div role="treeitem" aria-level={item.level} aria-expanded={item.hasChildren ? item.isExpanded : undefined} aria-selected={isSelected} className={cn("flex h-8 items-center rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)]", isSelected && "bg-[#e9e9e9]")} style={{ paddingLeft: rowPaddingLeft }}>{item.hasChildren ? <button type="button" onClick={handleToggleClick} aria-label={item.isExpanded ? `${item.name} を閉じる` : `${item.name} を開く`} className="flex h-8 w-4 shrink-0 items-center justify-center rounded-[8px] text-[#9aa1ad] hover:bg-[#eeeeee]"><IconChevronRight className={cn("h-3.5 w-3.5 transition-transform", item.isExpanded && "rotate-90")} /></button> : null}<button type="button" onClick={handleRowClick} title={item.name} className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[8px] text-left text-inherit hover:bg-[#eeeeee]"><StratisTagIcon className="layered-directory-row-icon" /><span className="min-w-0 flex-1 truncate">{item.name}</span></button></div></div>;
 };
 
 const TagTreeSidebar = () => {
