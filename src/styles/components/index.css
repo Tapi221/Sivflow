@@ -25,10 +25,10 @@
     --sidebar-hover-bg: rgba(0, 0, 0, 0.045);
     --sidebar-row-hover-bg: rgba(0, 0, 0, 0.045);
     --sidebar-row-selected-bg: rgba(0, 0, 0, 0.065);
-    --app-sidebar-text: #626262;
-    --app-sidebar-text-strong: #4f4f4f;
-    --app-sidebar-text-muted: #8a8a8a;
-    --app-sidebar-icon: #8a8a8a;
+    --app-sidebar-text: var(--mf-explorer-text, #0f172a);
+    --app-sidebar-text-strong: #020617;
+    --app-sidebar-text-muted: var(--mf-explorer-text-secondary, #334155);
+    --app-sidebar-icon: var(--mf-explorer-text-muted, #64748b);
     --explorer-chrome-folder-fill: transparent;
     --explorer-chrome-folder-stroke: currentColor;
     --explorer-chrome-folder-highlight: transparent;
