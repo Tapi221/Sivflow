@@ -19,6 +19,7 @@ type CalendarListViewProps = {
   dayHeights?: Record<string, number>;
   scrollViewportRef?: MutableRefObject<HTMLDivElement | null>;
   onScrollTopChange?: (scrollTop: number) => void;
+  autoScrollToSelectedDate?: boolean;
   className?: string;
 };
 
@@ -272,7 +273,7 @@ const CalendarListDaySection = memo(CalendarListDaySectionComponent);
 
 CalendarListDaySection.displayName = "CalendarListDaySection";
 
-const CalendarListViewComponent = ({ virtualRail, events, selectedDate, onSelectDate, onVisibleMonthChange, dayHeights, scrollViewportRef: externalRef, onScrollTopChange, className }: CalendarListViewProps) => {
+const CalendarListViewComponent = ({ virtualRail, events, selectedDate, onSelectDate, onVisibleMonthChange, dayHeights, scrollViewportRef: externalRef, onScrollTopChange, autoScrollToSelectedDate = true, className }: CalendarListViewProps) => {
   const localRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = externalRef ?? localRef;
   const rail = useMemo(() => virtualRail ?? createRail(selectedDate), [selectedDate, virtualRail]);
@@ -297,7 +298,7 @@ const CalendarListViewComponent = ({ virtualRail, events, selectedDate, onSelect
   const updateVisibleDate = useCallback((element: HTMLDivElement | null) => { if (!element || !onVisibleMonthChange) return; const index = getDayIndexAtOffset(metrics, rail.totalDayCount, element.scrollTop + Math.min(ANCHOR_OFFSET, element.clientHeight / 2)); const date = getScheduleVirtualRailDate(rail, index); if (!date) return; const key = getMonthVisibilityKey(date); if (lastVisibleRef.current === key) return; lastVisibleRef.current = key; onVisibleMonthChange(date); }, [metrics, onVisibleMonthChange, rail]);
   const scheduleScrollWork = useCallback((element: HTMLDivElement) => { userScrollBlockUntilRef.current = Date.now() + USER_SCROLL_AUTO_SCROLL_BLOCK_MS; pendingRef.current = element; if (frameRef.current !== null) return; frameRef.current = window.requestAnimationFrame(() => { frameRef.current = null; const pending = pendingRef.current; pendingRef.current = null; if (!pending) return; updateRange(pending); updateVisibleDate(pending); onScrollTopChange?.(pending.scrollTop); }); }, [onScrollTopChange, updateRange, updateVisibleDate]);
 
-  useLayoutEffect(() => { const element = scrollRef.current; if (!element || lastSelectedRef.current === selectedDateKey || selectedDateIndex < 0 || selectedDateIndex >= rail.totalDayCount) return; lastSelectedRef.current = selectedDateKey; if (Date.now() < userScrollBlockUntilRef.current) return; element.scrollTop = getSelectedDateScrollTop(metrics, selectedDateIndex, rail.totalDayCount); updateRange(element, true); }, [metrics, rail.totalDayCount, scrollRef, selectedDateIndex, selectedDateKey, updateRange]);
+  useLayoutEffect(() => { const element = scrollRef.current; if (!element || lastSelectedRef.current === selectedDateKey || selectedDateIndex < 0 || selectedDateIndex >= rail.totalDayCount) return; const isInitialSelectedDate = lastSelectedRef.current === null; lastSelectedRef.current = selectedDateKey; if (!isInitialSelectedDate && !autoScrollToSelectedDate) return; if (Date.now() < userScrollBlockUntilRef.current) return; element.scrollTop = getSelectedDateScrollTop(metrics, selectedDateIndex, rail.totalDayCount); updateRange(element, true); }, [autoScrollToSelectedDate, metrics, rail.totalDayCount, scrollRef, selectedDateIndex, selectedDateKey, updateRange]);
   useLayoutEffect(() => { updateRange(scrollRef.current, true); }, [scrollRef, updateRange]);
   useEffect(() => { const element = scrollRef.current; if (!element) return; const handleScroll = () => scheduleScrollWork(element); element.addEventListener("scroll", handleScroll, { passive: true }); return () => element.removeEventListener("scroll", handleScroll); }, [scheduleScrollWork, scrollRef]);
   useEffect(() => () => { if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current); }, []);
