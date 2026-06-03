@@ -37,6 +37,7 @@ const CHIP_MEASUREMENT_BASE_CLASS = "pointer-events-none invisible absolute inse
 const CHIP_MEASUREMENT_TOLERANCE_PX = 1;
 const INLINE_TIME_GAP_PX = 4;
 const DEFAULT_TITLE_LINE_CLAMP = 1;
+const GOOGLE_CALENDAR_EVENT_EDIT_URL = "https://calendar.google.com/calendar/u/0/r/eventedit";
 const DEFAULT_CHIP_LAYOUT_STATE: ChipLayoutState = {
   showTimeLabel: false,
   titleLineClamp: DEFAULT_TITLE_LINE_CLAMP,
@@ -126,6 +127,29 @@ const createCalendarEventChipWeekdayStyle = (backgroundColor: string, accentColo
   color: textColor,
 });
 
+const encodeBase64Url = (value: string): string | null => {
+  if (typeof window === "undefined") return null;
+
+  const bytes = new TextEncoder().encode(value);
+  let binaryValue = "";
+
+  for (const byte of bytes) {
+    binaryValue += String.fromCharCode(byte);
+  }
+
+  return window.btoa(binaryValue).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+};
+
+const createGoogleCalendarEventEditUrl = (event: GoogleCalendarEvent): string | null => {
+  const eventId = event.externalId ?? event.id;
+  if (!eventId || !event.calendarId) return null;
+
+  const encodedEventPayload = encodeBase64Url(`${eventId} ${event.calendarId}`);
+  if (!encodedEventPayload) return null;
+
+  return `${GOOGLE_CALENDAR_EVENT_EDIT_URL}?eid=${encodedEventPayload}`;
+};
+
 const getChipClassName = (useInlineTimeLayout: boolean): string => [CHIP_BASE_CLASS, useInlineTimeLayout ? CHIP_INLINE_CLASS : CHIP_NORMAL_CLASS].join(" ");
 
 const getMeasurementClassName = (): string => [CHIP_MEASUREMENT_BASE_CLASS, CHIP_NORMAL_CLASS].join(" ");
@@ -141,6 +165,8 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
   const timeLabel = event.isAllDay ? "終日" : `${format(startsAt, "H:mm")} ~ ${format(endsAt, "H:mm")}`;
   const titleLabel = event.title || "Untitled";
   const chipStyle = createCalendarEventChipWeekdayStyle(tokens.bg, tokens.border, tokens.text);
+  const editUrl = createGoogleCalendarEventEditUrl(event);
+  const handleEdit = editUrl ? () => { window.open(editUrl, "_blank", "noopener,noreferrer"); } : undefined;
 
   useLayoutEffect(() => {
     const layoutMeasurement = layoutMeasurementRef.current;
@@ -187,7 +213,7 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
   }, [timeLabel, titleLabel]);
 
   return (
-    <HoverEventTooltip title={titleLabel} subtitle={timeLabel} accentColor={tokens.border} className="h-full min-h-0 w-full" disabled={tooltipDisabled}>
+    <HoverEventTooltip title={titleLabel} subtitle={timeLabel} accentColor={tokens.border} className="h-full min-h-0 w-full" disabled={tooltipDisabled} onEdit={handleEdit}>
       <div className={CHIP_ROOT_CLASS}>
         <div aria-hidden="true" className={CHIP_LINE_MASK_CLASS} />
         <div data-calendar-event-chip="weekday" className={getChipClassName(chipLayout.useInlineTimeLayout)} style={chipStyle}>
