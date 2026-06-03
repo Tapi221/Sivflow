@@ -51,7 +51,6 @@ export type ProjectCalendarLink = {
   provider: CalendarProvider;
   accountId: string;
   externalCalendarId: string;
-  externalEventId: string;
   externalCalendarName: string;
   syncDirection: ProjectCalendarSyncDirection;
   createdByApp: boolean;
