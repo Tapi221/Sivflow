@@ -154,31 +154,29 @@
     align-items: center;
     justify-content: center;
     border: 0;
-    border-radius: 9999px;
+    border-radius: 4px;
     padding: 0;
-    color: var(--sidebar-folder-mark-color, #c7c7cc);
-    background: color-mix(in srgb, currentColor 13%, white 87%);
+    color: var(--sidebar-folder-mark-color, #a8a8a8);
+    background: transparent;
     background-image: none;
     box-shadow: none;
   }
 
   .library-tree-marker::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 6px;
-    height: 6px;
-    border-radius: 9999px;
-    background: color-mix(in srgb, currentColor 34%, transparent);
-    transform: translate(-50%, -50%);
+    display: none;
   }
 
   button.library-tree-marker {
     cursor: pointer;
   }
 
+  button.library-tree-marker:hover:not(:disabled),
+  button.library-tree-marker:focus-visible:not(:disabled) {
+    background: rgba(15, 23, 42, 0.06);
+  }
+
   button.library-tree-marker[aria-disabled="true"] {
+    visibility: hidden;
     cursor: default;
   }
 
