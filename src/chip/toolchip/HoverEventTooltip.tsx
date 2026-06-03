@@ -26,9 +26,12 @@ type HoverEventTooltipProps = {
   className?: string;
   accentColor?: string;
   disabled?: boolean;
+  editLabel?: string;
+  onEdit?: () => void;
 };
 
 const TOOLTIP_SURFACE_CLASS_NAME = "relative flex max-w-[260px] flex-col gap-1.5 overflow-visible rounded-[14px] border border-white/70 bg-[rgba(255,255,255,0.84)] px-3 py-2.5 text-[#46515f] shadow-[0_14px_34px_rgba(74,90,110,0.16),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-2xl";
+const TOOLTIP_EDIT_BUTTON_CLASS_NAME = "absolute right-2 top-2 inline-flex h-6 items-center justify-center rounded-full bg-white/75 px-2 text-[10px] font-bold leading-none text-[#6b8294] shadow-[0_2px_8px_rgba(74,90,110,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] transition hover:bg-white hover:text-[#405162] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8db9ff]/40";
 const TOOLTIP_ARROW_CLASS_NAME = "absolute h-2.5 w-2.5 rotate-45 border-white/70 bg-[rgba(255,255,255,0.84)] backdrop-blur-2xl";
 const TOOLTIP_VIEWPORT_MARGIN = 12;
 const TOOLTIP_BOUNDARY_GAP = 8;
@@ -144,6 +147,8 @@ const HoverEventTooltip = ({
   className,
   accentColor = "#8db9ff",
   disabled = false,
+  editLabel = "編集",
+  onEdit,
 }: HoverEventTooltipProps) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -161,6 +166,11 @@ const HoverEventTooltip = ({
   };
 
   const hideTooltip = () => {
+    setPosition(null);
+  };
+
+  const handleEditButtonClick = () => {
+    onEdit?.();
     setPosition(null);
   };
 
@@ -209,7 +219,7 @@ const HoverEventTooltip = ({
         ref={anchorRef}
         className={cn("relative flex", className)}
         onMouseEnter={showTooltip}
-        onMouseLeave={hideTooltip}
+        onMouseLeave={onEdit ? undefined : hideTooltip}
       >
         {children}
       </div>
@@ -226,14 +236,20 @@ const HoverEventTooltip = ({
               left: position.x,
               top: position.y,
               zIndex: 9999,
-              pointerEvents: "none",
+              pointerEvents: onEdit ? "auto" : "none",
             }}
             className={cn(
               "animate-in fade-in-0 zoom-in-[0.98] duration-150 ease-out",
               !position.measured && "opacity-0",
             )}
           >
-            <div className={TOOLTIP_SURFACE_CLASS_NAME}>
+            <div className={cn(TOOLTIP_SURFACE_CLASS_NAME, onEdit && "pr-14")}>
+              {onEdit && (
+                <button type="button" className={TOOLTIP_EDIT_BUTTON_CLASS_NAME} aria-label={editLabel} onClick={handleEditButtonClick}>
+                  {editLabel}
+                </button>
+              )}
+
               <div className="flex min-w-0 items-start gap-2">
                 <span
                   aria-hidden="true"
