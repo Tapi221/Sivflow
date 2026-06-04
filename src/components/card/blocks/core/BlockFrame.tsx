@@ -15,7 +15,7 @@ type BlockFrameProps = React.HTMLAttributes<HTMLDivElement> & {
 };
 
 const SELECTED_BLOCK_OUTLINE_COLOR = "rgba(37, 99, 235, 0.82)";
-const SELECTED_BLOCK_OUTLINE_WIDTH = "var(--block-selected-outline-width, var(--card-ruled-line-px, 1px))";
+const SELECTED_BLOCK_OUTLINE_WIDTH = "1px";
 
 export const BlockFrame = ({
   children,
