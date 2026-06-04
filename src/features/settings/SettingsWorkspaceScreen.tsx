@@ -75,6 +75,7 @@ type SettingsWorkspaceCopy = {
   accountProfileTitle: string;
   accountProfileDescription: string;
   emailUnset: string;
+  emptyAccountLabel: string;
   logout: string;
   statusLabel: string;
   signedIn: string;
@@ -125,59 +126,60 @@ type SettingsWorkspaceCopy = {
   aboutDescription: string;
   aboutWorkspaceDescription: string;
   aboutSearchDescription: string;
+  aboutLocalFirstTitle: string;
   aboutLocalFirstDescription: string;
 };
 
 const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "about"];
-const EMPTY_ACCOUNT_LABEL = "Not signed in";
 const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> = {
   ja: {
     ariaLabel: "設定",
     navAriaLabel: "設定カテゴリ",
     sections: {
-      account: { label: "Account", description: "プロフィールとセッション" },
-      preferences: { label: "Preferences", description: "表示と基本動作" },
-      study: { label: "Study", description: "復習の挙動" },
-      editor: { label: "Editor", description: "カード編集" },
-      audio: { label: "Audio", description: "音声と効果音" },
-      about: { label: "About", description: "アプリ情報" },
+      account: { label: "アカウント", description: "プロフィールとセッション" },
+      preferences: { label: "環境設定", description: "表示と基本動作" },
+      study: { label: "学習", description: "復習の挙動" },
+      editor: { label: "エディター", description: "カード編集" },
+      audio: { label: "音声", description: "音声と効果音" },
+      about: { label: "このアプリについて", description: "アプリ情報" },
     },
     languageOptions: {
-      ja: { label: "日本語", caption: "Japanese" },
-      en: { label: "English", caption: "English" },
-      zh: { label: "中文", caption: "Chinese" },
+      ja: { label: "日本語", caption: "日本語" },
+      en: { label: "English", caption: "英語" },
+      zh: { label: "中文", caption: "中国語" },
     },
     weekStartOptions: {
-      monday: { label: "月曜日", caption: "Monday" },
-      sunday: { label: "日曜日", caption: "Sunday" },
+      monday: { label: "月曜日", caption: "月曜日" },
+      sunday: { label: "日曜日", caption: "日曜日" },
     },
     questionDisplayOptions: {
-      tap_to_reveal: { label: "タップで表示", caption: "Tap to reveal" },
-      always: { label: "常に表示", caption: "Always visible" },
+      tap_to_reveal: { label: "タップで表示", caption: "タップで表示" },
+      always: { label: "常に表示", caption: "常に表示" },
     },
     markdownTabOptions: {
-      2: { label: "2", caption: "compact" },
-      4: { label: "4", caption: "standard" },
-      8: { label: "8", caption: "wide" },
+      2: { label: "2", caption: "コンパクト" },
+      4: { label: "4", caption: "標準" },
+      8: { label: "8", caption: "広め" },
     },
-    accountProfileTitle: "Profile",
+    accountProfileTitle: "プロフィール",
     accountProfileDescription: "現在のログインセッションです。",
     emailUnset: "メールアドレス未設定",
+    emptyAccountLabel: "未ログイン",
     logout: "ログアウト",
-    statusLabel: "Status",
-    signedIn: "Signed in",
-    guest: "Guest",
-    providerLabel: "Provider",
-    userIdLabel: "User ID",
-    preferencesTitle: "Preferences",
+    statusLabel: "状態",
+    signedIn: "ログイン中",
+    guest: "ゲスト",
+    providerLabel: "プロバイダー",
+    userIdLabel: "ユーザー ID",
+    preferencesTitle: "環境設定",
     preferencesDescription: "画面表示と日付の基本設定です。",
-    languageLabel: "Language",
+    languageLabel: "言語",
     languageDescription: "UI の表示言語を切り替えます。",
-    weekStartLabel: "Week starts on",
+    weekStartLabel: "週の開始曜日",
     weekStartDescription: "カレンダー週の開始曜日です。",
-    notificationsLabel: "Notifications",
+    notificationsLabel: "通知",
     notificationsDescription: "復習通知を有効にします。",
-    studyTitle: "Study",
+    studyTitle: "学習",
     studyDescription: "復習カードの表示と日送りの挙動です。",
     showHardLabel: "Hard を表示",
     showHardDescription: "復習結果に Hard を表示します。",
@@ -189,30 +191,31 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     delayBonusDescription: "遅れて復習したカードの間隔補正を使います。",
     reviewStartNextDayLabel: "翌日から復習開始",
     reviewStartNextDayDescription: "新規カードの復習を翌日から開始します。",
-    editorTitle: "Editor",
+    editorTitle: "エディター",
     editorDescription: "カード編集画面の入力補助です。",
-    questionDisplayLabel: "Question display",
+    questionDisplayLabel: "問題文の表示",
     questionDisplayDescription: "カード閲覧時の問題文表示方法です。",
-    markdownTabLabel: "Markdown tab size",
+    markdownTabLabel: "Markdown タブ幅",
     markdownTabDescription: "Markdown 編集時のインデント幅です。",
-    previewDefaultLabel: "Preview by default",
+    previewDefaultLabel: "プレビューを初期表示",
     previewDefaultDescription: "カード本文のプレビューを初期表示します。",
-    autoDraftLabel: "Auto draft",
+    autoDraftLabel: "下書きの自動保持",
     autoDraftDescription: "編集中の下書きを自動で保持します。",
-    autoSaveLabel: "Auto save",
+    autoSaveLabel: "自動保存",
     autoSaveDescription: "編集内容を自動保存します。",
-    audioTitle: "Audio",
+    audioTitle: "音声",
     audioDescription: "学習時の音声再生と効果音です。",
-    soundEffectsLabel: "Sound effects",
+    soundEffectsLabel: "効果音",
     soundEffectsDescription: "操作音と復習結果音を有効にします。",
-    questionVoiceLabel: "Question voice",
+    questionVoiceLabel: "問題文の音声",
     questionVoiceDescription: "問題文を自動音声再生します。",
-    answerVoiceLabel: "Answer voice",
+    answerVoiceLabel: "解答文の音声",
     answerVoiceDescription: "解答文を自動音声再生します。",
-    aboutTitle: "About FlashCard Master",
+    aboutTitle: "FlashCard Master について",
     aboutDescription: "このワークスペースで使われている基本情報です。",
-    aboutWorkspaceDescription: "FlashCard Master workspace",
-    aboutSearchDescription: "Search in Workspace",
+    aboutWorkspaceDescription: "FlashCard Master ワークスペース",
+    aboutSearchDescription: "ワークスペース内検索",
+    aboutLocalFirstTitle: "ローカル優先",
     aboutLocalFirstDescription: "LocalDB と同期キューを使用",
   },
   en: {
@@ -247,6 +250,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     accountProfileTitle: "Profile",
     accountProfileDescription: "Current login session.",
     emailUnset: "No email address",
+    emptyAccountLabel: "Not signed in",
     logout: "Log out",
     statusLabel: "Status",
     signedIn: "Signed in",
@@ -297,6 +301,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     aboutDescription: "Basic information used in this workspace.",
     aboutWorkspaceDescription: "FlashCard Master workspace",
     aboutSearchDescription: "Search in Workspace",
+    aboutLocalFirstTitle: "Local first",
     aboutLocalFirstDescription: "Uses LocalDB and sync queue",
   },
   zh: {
@@ -316,12 +321,12 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
       zh: { label: "中文", caption: "中文" },
     },
     weekStartOptions: {
-      monday: { label: "星期一", caption: "Monday" },
-      sunday: { label: "星期日", caption: "Sunday" },
+      monday: { label: "星期一", caption: "星期一" },
+      sunday: { label: "星期日", caption: "星期日" },
     },
     questionDisplayOptions: {
-      tap_to_reveal: { label: "点击显示", caption: "Tap to reveal" },
-      always: { label: "始终显示", caption: "Always visible" },
+      tap_to_reveal: { label: "点击显示", caption: "点击显示" },
+      always: { label: "始终显示", caption: "始终显示" },
     },
     markdownTabOptions: {
       2: { label: "2", caption: "紧凑" },
@@ -331,6 +336,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     accountProfileTitle: "个人资料",
     accountProfileDescription: "当前登录会话。",
     emailUnset: "未设置邮箱地址",
+    emptyAccountLabel: "未登录",
     logout: "退出登录",
     statusLabel: "状态",
     signedIn: "已登录",
@@ -381,6 +387,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     aboutDescription: "此工作区使用的基本信息。",
     aboutWorkspaceDescription: "FlashCard Master 工作区",
     aboutSearchDescription: "在工作区中搜索",
+    aboutLocalFirstTitle: "本地优先",
     aboutLocalFirstDescription: "使用 LocalDB 和同步队列",
   },
 };
@@ -389,14 +396,14 @@ const getSupportedLocale = (language: SettingsLanguage): Locale => language === 
 
 const buildSettingsSections = (copy: SettingsWorkspaceCopy): SettingsSectionDefinition[] => SETTINGS_SECTION_IDS.map((id) => ({ id, ...copy.sections[id] }));
 
-const getAccountDisplayName = (displayName: string | null | undefined, email: string | null | undefined): string => {
+const getAccountDisplayName = (displayName: string | null | undefined, email: string | null | undefined, fallbackLabel: string): string => {
   const trimmedDisplayName = displayName?.trim();
   if (trimmedDisplayName) return trimmedDisplayName;
 
   const emailLocalPart = email?.split("@")[0]?.trim();
   if (emailLocalPart) return emailLocalPart;
 
-  return EMPTY_ACCOUNT_LABEL;
+  return fallbackLabel;
 };
 
 const getAccountInitial = (displayName: string): string => {
@@ -499,7 +506,7 @@ const SettingsWorkspaceScreen = () => {
     { value: 4, ...copy.markdownTabOptions[4] },
     { value: 8, ...copy.markdownTabOptions[8] },
   ] as const satisfies readonly SettingOption<MarkdownTabSize>[]), [copy]);
-  const accountName = getAccountDisplayName(currentUser?.displayName, currentUser?.email);
+  const accountName = getAccountDisplayName(currentUser?.displayName, currentUser?.email, copy.emptyAccountLabel);
   const accountInitial = getAccountInitial(accountName);
   const weekStartDay = settings?.weekStartDay ?? "monday";
   const questionDisplayMode = settings?.questionDisplayMode ?? "tap_to_reveal";
@@ -599,7 +606,7 @@ const SettingsWorkspaceScreen = () => {
               <div className="settings-workspace__about-grid">
                 <div className="settings-workspace__about-card"><Settings2 size={20} /><strong>Manifolia</strong><span>{copy.aboutWorkspaceDescription}</span></div>
                 <div className="settings-workspace__about-card"><Keyboard size={20} /><strong>⌘K / Ctrl K</strong><span>{copy.aboutSearchDescription}</span></div>
-                <div className="settings-workspace__about-card"><Code size={20} /><strong>Local first</strong><span>{copy.aboutLocalFirstDescription}</span></div>
+                <div className="settings-workspace__about-card"><Code size={20} /><strong>{copy.aboutLocalFirstTitle}</strong><span>{copy.aboutLocalFirstDescription}</span></div>
               </div>
             </SettingsSectionBlock>
           ) : null}
