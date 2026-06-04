@@ -1,8 +1,24 @@
+// @vitest-environment jsdom
+
+import { cleanup, renderHook, waitFor } from "@testing-library/react";
 import { addDays, endOfDay, endOfYear, startOfDay, startOfYear, subDays } from "date-fns";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import { buildCalendarEventPrioritySyncRange, buildCalendarEventSyncRange } from "@/sync/googlecalendar-sync/calendarEventSyncRange";
+import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
+
+vi.mock("firebase/auth", () => ({
+  onAuthStateChanged: vi.fn(() => vi.fn()),
+}));
+
+vi.mock("@/services/firebase", () => ({
+  auth: { currentUser: null },
+}));
+
+vi.mock("@/sync/googlecalendar-sync/useGoogleCalendarPushSync", () => ({
+  useGoogleCalendarPushSync: vi.fn(),
+}));
 
 const expectSameTime = (actual: Date | undefined, expected: Date) => {
   expect(actual?.getTime()).toBe(expected.getTime());
@@ -96,5 +112,40 @@ describe("buildCalendarEventSyncRange", () => {
 
     expectSameTime(range.rangeStart, startOfDay(subDays(firstVisibleDay, 7)));
     expectSameTime(range.rangeEnd, endOfDay(addDays(lastVisibleDay, 7)));
+  });
+});
+
+describe("useCalendarEventSync", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("同じ範囲の再レンダーでは forceSyncRange を再実行しない", async () => {
+    const forceSyncRange = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
+    const createOptions = () => ({
+      selectedViewMode: "week" as const,
+      visibleDays: Array.from({ length: 7 }, (_, index) => new Date(2026, 4, 4 + index)),
+      monthTitleDate: new Date(2026, 4, 1),
+      monthRenderedRange: null,
+      yearRenderedRange: null,
+      yearSyncRange: null,
+      googleCalendar: {
+        selectedCalendarIds: new Set(["primary"]),
+        forceSyncRange,
+      },
+    });
+
+    const { rerender } = renderHook((options) => useCalendarEventSync(options), {
+      initialProps: createOptions(),
+    });
+
+    await waitFor(() => {
+      expect(forceSyncRange).toHaveBeenCalledTimes(1);
+    });
+
+    rerender(createOptions());
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+
+    expect(forceSyncRange).toHaveBeenCalledTimes(1);
   });
 });

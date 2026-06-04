@@ -20,6 +20,17 @@ const PREFETCH_SYNC_DELAY_MS = 250;
 
 const isSameCalendarEventSyncRange = (left: CalendarEventSyncRange, right: CalendarEventSyncRange): boolean => left.rangeStart.getTime() === right.rangeStart.getTime() && left.rangeEnd.getTime() === right.rangeEnd.getTime();
 
+const toCalendarEventSyncRangeKey = (range: CalendarEventSyncRange): string => `${range.rangeStart.toISOString()}|${range.rangeEnd.toISOString()}`;
+
+const fromCalendarEventSyncRangeKey = (key: string): CalendarEventSyncRange => {
+  const [rangeStart, rangeEnd] = key.split("|");
+
+  return {
+    rangeStart: new Date(rangeStart),
+    rangeEnd: new Date(rangeEnd),
+  };
+};
+
 export const useCalendarEventSync = ({
   selectedViewMode,
   visibleDays,
@@ -57,14 +68,8 @@ export const useCalendarEventSync = ({
     });
   }, [monthRenderedRange, monthTitleDate, selectedViewMode, visibleDays, yearSyncRange]);
 
-  const syncRangeKey = useMemo(
-    () => `${syncRange.rangeStart.toISOString()}|${syncRange.rangeEnd.toISOString()}`,
-    [syncRange],
-  );
-  const prioritySyncRangeKey = useMemo(
-    () => `${prioritySyncRange.rangeStart.toISOString()}|${prioritySyncRange.rangeEnd.toISOString()}`,
-    [prioritySyncRange],
-  );
+  const syncRangeKey = useMemo(() => toCalendarEventSyncRangeKey(syncRange), [syncRange]);
+  const prioritySyncRangeKey = useMemo(() => toCalendarEventSyncRangeKey(prioritySyncRange), [prioritySyncRange]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -82,12 +87,15 @@ export const useCalendarEventSync = ({
     let prefetchTimeoutId: number | null = null;
 
     void (async () => {
-      await forceSyncRange(prioritySyncRange);
-      if (cancelled || isSameCalendarEventSyncRange(prioritySyncRange, syncRange)) return;
+      const currentPrioritySyncRange = fromCalendarEventSyncRangeKey(prioritySyncRangeKey);
+      const currentSyncRange = fromCalendarEventSyncRangeKey(syncRangeKey);
+
+      await forceSyncRange(currentPrioritySyncRange);
+      if (cancelled || isSameCalendarEventSyncRange(currentPrioritySyncRange, currentSyncRange)) return;
 
       prefetchTimeoutId = window.setTimeout(() => {
         if (cancelled) return;
-        void forceSyncRange(syncRange);
+        void forceSyncRange(currentSyncRange);
       }, PREFETCH_SYNC_DELAY_MS);
     })();
 
@@ -98,7 +106,7 @@ export const useCalendarEventSync = ({
         window.clearTimeout(prefetchTimeoutId);
       }
     };
-  }, [calendarKey, forceSyncRange, prioritySyncRange, prioritySyncRangeKey, syncRange, syncRangeKey]);
+  }, [calendarKey, forceSyncRange, prioritySyncRangeKey, syncRangeKey]);
 
   useGoogleCalendarPushSync({
     userId,
