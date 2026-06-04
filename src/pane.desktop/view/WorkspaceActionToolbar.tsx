@@ -1,4 +1,5 @@
 import { memo, type CSSProperties, type SVGProps } from "react";
+import { StratisTagIcon } from "@/ui/icons/stratis";
 
 type WorkspaceActionToolbarProps = {
   className?: string;
@@ -47,13 +48,6 @@ const ClockIcon = (props: ToolbarIconProps) => (
   </svg>
 );
 
-const TagIcon = (props: ToolbarIconProps) => (
-  <svg {...props} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M4.75 5.35H11.85C12.38 5.35 12.89 5.56 13.27 5.94L19.25 11.92C20.03 12.7 20.03 13.97 19.25 14.75L14.75 19.25C13.97 20.03 12.7 20.03 11.92 19.25L5.94 13.27C5.56 12.89 5.35 12.38 5.35 11.85V4.75" stroke="currentColor" strokeWidth={ICON_STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="9" cy="9" r="1.15" stroke="currentColor" strokeWidth={ICON_STROKE_WIDTH} />
-  </svg>
-);
-
 const StarIcon = (props: ToolbarIconProps) => (
   <svg {...props} viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path d="M12 3.35L14.72 8.86L20.8 9.74L16.4 14.03L17.44 20.09L12 17.23L6.56 20.09L7.6 14.03L3.2 9.74L9.28 8.86L12 3.35Z" stroke="currentColor" strokeWidth={ICON_STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round" />
@@ -76,7 +70,7 @@ const renderActionIcon = (action: WorkspaceAction) => {
   if (action.key === "share") return <ShareIcon className={ICON_CLASS_NAME} />;
   if (action.key === "comment") return <CommentIcon className={ICON_CLASS_NAME} />;
   if (action.key === "history") return <ClockIcon className={ICON_CLASS_NAME} />;
-  if (action.key === "tag") return <TagIcon className={ICON_CLASS_NAME} />;
+  if (action.key === "tag") return <StratisTagIcon className={ICON_CLASS_NAME} />;
   if (action.key === "favorite") return <StarIcon className={ICON_CLASS_NAME} />;
   return <MoreIcon className={ICON_CLASS_NAME} />;
 };
