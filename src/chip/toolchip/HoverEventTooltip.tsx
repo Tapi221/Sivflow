@@ -269,7 +269,7 @@ const HoverEventTooltip = ({
 
                 {onEdit && (
                   <button type="button" className={TOOLTIP_EDIT_BUTTON_CLASS_NAME} aria-label={editLabel} title={editLabel} onClick={handleEditButtonClick}>
-                    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M11 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-4" />
                       <path d="M18.5 3.5a2.1 2.1 0 0 1 3 3L12 16l-4 1 1-4 9.5-9.5Z" />
                       <path d="M15.5 6.5l2 2" />
