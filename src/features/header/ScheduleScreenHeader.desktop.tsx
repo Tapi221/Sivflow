@@ -6,8 +6,7 @@ import { TogglePlanResult, type PlanResultMode } from "@/chip/toggle/Toggle.plan
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarPrintRangeMode, CalendarPrintRangeState } from "@/features/calendar/print/calendarPrint.types";
 import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/scheduleScreen.types";
-import { useSearchStore } from "@/features/search/store/useSearchStore";
-import { Check, ChevronDown, Download, Minus, Plus, Search } from "@/ui/icons";
+import { Check, ChevronDown, Download, Minus, Plus } from "@/ui/icons";
 import { useT } from "@shared/i18n/useT";
 
 type ScheduleScreenHeaderViewOption = {
@@ -55,8 +54,6 @@ const CALENDAR_PRINT_RANGE_DATE_INPUT_CLASS_NAME = "h-7 w-full rounded-[7px] bor
 const CALENDAR_PRINT_POPOVER_ACTION_CLASS_NAME = "mt-1 flex h-7 w-full items-center justify-center gap-1 rounded-[7px] border-0 bg-transparent px-2 text-[12px] font-semibold leading-none tracking-[-0.012em] text-[#85827e] outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
 const MONTH_EVENT_COUNT_CONTROL_CLASS_NAME = "flex h-7 shrink-0 items-center overflow-hidden rounded-[9px] border border-[#eeeeee] bg-white text-[11px] font-semibold leading-none tracking-[-0.01em] text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.06)]";
 const MONTH_EVENT_COUNT_BUTTON_CLASS_NAME = "flex h-7 w-7 items-center justify-center text-[#8c8c8c] outline-none transition-colors duration-200 hover:bg-[#f7f7f8] hover:text-[#4b5563] focus:outline-none focus:ring-0 focus-visible:bg-[#f7f7f8] disabled:cursor-not-allowed disabled:opacity-40";
-const HEADER_SEARCH_BUTTON_CLASS_NAME = "flex h-9 w-[268px] shrink-0 items-center gap-2 rounded-[10px] border border-[#e5e7eb] bg-white px-3 text-left text-[13px] font-medium leading-none text-[#8e8e93] shadow-[0_1px_2px_rgba(15,23,42,0.04)] outline-none ring-0 transition-[background-color,border-color,box-shadow] duration-150 ease-out hover:border-[#d7dbe2] hover:bg-[#fbfbfc] focus:outline-none focus:ring-0 focus-visible:border-[#c7d2fe] focus-visible:shadow-[0_0_0_3px_rgba(99,102,241,0.12)]";
-const HEADER_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-[22px] min-w-[34px] items-center justify-center rounded-[6px] border border-[#e6e6e8] bg-[#f7f7f8] px-1.5 text-[11px] font-semibold leading-none tracking-[-0.02em] text-[#8e8e93] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 const DEFAULT_CALENDAR_PRINT_RANGE: CalendarPrintRangeState = { mode: "current", customStartDate: "", customEndDate: "" };
 
 const clampMonthVisibleEventCount = (value: number): number => Math.min(C.MONTH_VISIBLE_EVENT_COUNT_MAX, Math.max(C.MONTH_VISIBLE_EVENT_COUNT_MIN, Math.round(value)));
@@ -83,7 +80,6 @@ const ScheduleScreenHeaderDesktop = ({
   className,
 }: ScheduleScreenHeaderDesktopProps) => {
   const t = useT();
-  const openSearch = useSearchStore((state) => state.open);
   const printButtonRef = useRef<HTMLButtonElement | null>(null);
   const printPopoverRef = useRef<HTMLDivElement | null>(null);
   const [fallbackPrintRange, setFallbackPrintRange] = useState<CalendarPrintRangeState>(DEFAULT_CALENDAR_PRINT_RANGE);
@@ -99,9 +95,6 @@ const ScheduleScreenHeaderDesktop = ({
     { value: "month", label: t.printRangeMonth },
     { value: "custom", label: t.printRangeCustom },
   ];
-  const handleOpenSearch = useCallback(() => {
-    openSearch();
-  }, [openSearch]);
   const handlePrintCalendar = useCallback(() => {
     setIsPrintPopoverOpen(false);
     onPrintCalendar?.();
@@ -157,12 +150,6 @@ const ScheduleScreenHeaderDesktop = ({
       </h1>
 
       <div className="ml-auto flex shrink-0 items-center gap-2">
-        <button type="button" className={HEADER_SEARCH_BUTTON_CLASS_NAME} aria-label="検索を開く" aria-keyshortcuts="Meta+K Control+K" title="検索を開く" onClick={handleOpenSearch}>
-          <Search className="h-4 w-4 shrink-0 text-[#8e8e93]" />
-          <span className="min-w-0 truncate text-[#7a7f88]">検索...</span>
-          <kbd className={HEADER_SEARCH_SHORTCUT_CLASS_NAME}>⌘K</kbd>
-        </button>
-
         <TodayBar
           onPrevious={onPrevious}
           onNext={onNext}
