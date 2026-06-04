@@ -14,6 +14,7 @@ import type { WorkspaceExplorerTab, WorkspaceTab } from "@/pane.desktop/tab.desk
 import { Search } from "@/ui/icons";
 import type { SelectedExplorerItem } from "@/types";
 import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
+import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
 
 type ExplorerWorkspaceContentProps = {
   explorerState: ExplorerRouteState;
@@ -24,6 +25,7 @@ type ExplorerWorkspaceContentProps = {
 
 const FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME = "absolute right-4 top-3 z-30 flex h-8 w-[220px] shrink-0 items-center gap-1.5 rounded-[9px] border border-[rgba(0,0,0,0.04)] bg-[#efeeee]/95 px-2.5 text-left text-[12px] font-medium leading-none tracking-[-0.012em] text-[#85827e] shadow-none outline-none ring-0 backdrop-blur-xl transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.04)] hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.99] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
 const FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-5 min-w-[31px] items-center justify-center rounded-[5px] border border-[rgba(0,0,0,0.04)] bg-[#eeeeee] px-1.5 text-[10px] font-semibold leading-none tracking-[-0.02em] text-[#85827e]";
+const WORKSPACE_ACTION_TOOLBAR_CLASS_NAME = "absolute right-4 top-[58px] z-30";
 
 const createFolderRouteState = (folderId: string | null): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: folderId === null, selectedFolderId: folderId, selectedItem: null });
 
@@ -90,6 +92,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
           <span className="min-w-0 truncate">Search in Workspace...</span>
           <kbd className={FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME}>⌘K</kbd>
         </button>
+        <WorkspaceActionToolbar className={WORKSPACE_ACTION_TOOLBAR_CLASS_NAME} />
       </CarvePanel>
     </div>
   );
