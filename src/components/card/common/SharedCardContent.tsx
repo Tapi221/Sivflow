@@ -8,6 +8,7 @@ import { CONTENT_TYPO } from "@shared/design-tokens/typography";
 
 type SharedCardContentRootProps = Readonly<{
   className?: string;
+  isTextSelectable?: boolean;
   children: React.ReactNode;
 }>;
 
@@ -16,6 +17,7 @@ const SHARED_CARD_CONTENT_ROOT_CLASS_NAME =
 
 const SharedCardContentRootComponent = ({
   className,
+  isTextSelectable = false,
   children,
 }: SharedCardContentRootProps) => (
   <div
@@ -24,6 +26,7 @@ const SharedCardContentRootComponent = ({
       CONTENT_TYPO,
       className,
     )}
+    data-card-text-selectable={isTextSelectable ? "true" : undefined}
     style={{
       paddingTop: `var(--card-content-padding-top, ${CARD_CONTENT_TOP_PX}px)`,
     }}
@@ -42,7 +45,10 @@ const SharedCardContentSceneComponent = (props: SharedCardContentProps) => {
 
 const SharedCardContentInner = (props: SharedCardContentProps) => {
   return (
-    <SharedCardContentRoot className={props.className}>
+    <SharedCardContentRoot
+      className={props.className}
+      isTextSelectable={props.mode === "view"}
+    >
       <SharedCardContentScene {...props} />
     </SharedCardContentRoot>
   );
