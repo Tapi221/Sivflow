@@ -66,6 +66,7 @@
   font-size: 12px !important;
   font-weight: 500 !important;
   letter-spacing: -0.012em !important;
+  line-height: 16px !important;
 }
 
 .settings-workspace-dialog .settings-workspace__nav-list::before {
@@ -74,6 +75,7 @@
   font-size: 12px !important;
   font-weight: 500 !important;
   letter-spacing: -0.012em !important;
+  line-height: 16px !important;
 }
 
 .settings-workspace-dialog .settings-workspace__nav-item {
@@ -82,6 +84,7 @@
   font-size: 12px !important;
   font-weight: 500 !important;
   letter-spacing: -0.012em !important;
+  line-height: 16px !important;
 }
 
 .settings-workspace-dialog .settings-workspace__nav-item:hover,
@@ -97,6 +100,7 @@
 
 .settings-workspace-dialog .settings-workspace__nav-icon {
   color: var(--app-sidebar-icon) !important;
+  line-height: 16px !important;
 }
 
 .settings-workspace-dialog .settings-workspace__nav-item.is-active .settings-workspace__nav-icon {
@@ -109,6 +113,7 @@
   font-size: 12px !important;
   font-weight: 500 !important;
   letter-spacing: -0.012em !important;
+  line-height: 16px !important;
 }
 
 .settings-workspace-dialog .settings-workspace__nav-copy small {
@@ -117,4 +122,5 @@
   font-size: 11px !important;
   font-weight: 500 !important;
   letter-spacing: -0.012em !important;
+  line-height: 14px !important;
 }
