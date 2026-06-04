@@ -446,7 +446,7 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
   }, [clearAutoExpandTimer]);
 
   const handleFolderDrop = useCallback((event: ReactDragEvent<HTMLElement>, targetId: string) => {
-    const instruction = getValidDropInstruction(event, targetId);
+    const instruction = dropInstruction?.targetId === targetId ? dropInstruction : getValidDropInstruction(event, targetId);
     event.stopPropagation();
 
     if (!instruction) {
@@ -458,7 +458,7 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
     event.preventDefault();
     setDropInstruction(null);
     void commitFolderDrop(instruction).finally(clearDragState);
-  }, [clearDragState, clearDropTarget, commitFolderDrop, getValidDropInstruction, stopAutoScroll]);
+  }, [clearDragState, clearDropTarget, commitFolderDrop, dropInstruction, getValidDropInstruction, stopAutoScroll]);
 
   const handleFolderListDragOver = useCallback((event: ReactDragEvent<HTMLElement>) => {
     if (isFolderRowEventTarget(event.target)) return;
@@ -482,14 +482,14 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
 
   const handleFolderListDrop = useCallback((event: ReactDragEvent<HTMLElement>) => {
     if (isFolderRowEventTarget(event.target)) return;
-    const instruction = getValidAppendDropInstruction();
+    const instruction = dropInstruction?.position === "append" && dropInstruction.parentFolderId === rootDropParentId ? dropInstruction : getValidAppendDropInstruction();
     if (!instruction) return;
 
     event.preventDefault();
     event.stopPropagation();
     setDropInstruction(null);
     void commitFolderDrop(instruction).finally(clearDragState);
-  }, [clearDragState, commitFolderDrop, getValidAppendDropInstruction]);
+  }, [clearDragState, commitFolderDrop, dropInstruction, getValidAppendDropInstruction, rootDropParentId]);
 
   useEffect(() => () => {
     clearAutoExpandTimer();
