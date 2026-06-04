@@ -121,22 +121,6 @@ export default defineConfig([
   },
 
   {
-    files: ["src/components/folder/components/views/FolderTreeWithCards.tsx"],
-    rules: {
-      "react-hooks/immutability": "off",
-      "unused-imports/no-unused-vars": [
-        "warn",
-        {
-          vars: "all",
-          varsIgnorePattern: "^(?:_|fileInputRef|currentFileAccept|handleToolbarFileInputChange|handleCreateCardSetFromRootPanel)$",
-          args: "after-used",
-          argsIgnorePattern: "^_",
-        },
-      ],
-    },
-  },
-
-  {
     files: ["src/features/calendar/grid/Grid.calendar.month.desktop.tsx"],
     rules: {
       "react-hooks/immutability": "off",
@@ -224,39 +208,12 @@ export default defineConfig([
         {
           patterns: [
             {
-              group: [
-                "@/components/**",
-                "@/layout/**",
-                "@/routes/**",
-                "@/ui/**",
-                "@/presentation/**",
-              ],
-              message: "Application layer must not import UI modules.",
+              group: ["@/components/*", "@/components/**", "@/features/*", "@/features/**", "@/hooks/*", "@/hooks/**", "@/layout/*", "@/layout/**", "@/pane.desktop/*", "@/pane.desktop/**", "@/routes/*", "@/routes/**", "@/ui/*", "@/ui/**"],
+              message: "Application layer must not import UI or React layers.",
             },
           ],
         },
       ],
-    },
-  },
-
-  {
-    files: [
-      "tests/**/*.{ts,tsx}",
-      "scripts/**/*.{ts,tsx}",
-      "functions/**/*.{ts,tsx}",
-    ],
-    extends: [js.configs.recommended, tseslint.configs.recommended],
-    plugins: {
-      "@stylistic": stylistic,
-      "unused-imports": unusedImports,
-    },
-    rules: {
-      "@stylistic/quotes": ["error", "double", { avoidEscape: true }],
-      "@stylistic/semi": ["error", "always"],
-      "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": "off",
-      "unused-imports/no-unused-imports": "error",
-      "unused-imports/no-unused-vars": ["warn", { vars: "all", varsIgnorePattern: "^_", args: "after-used", argsIgnorePattern: "^_" }],
     },
   },
 ]);
