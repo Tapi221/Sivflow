@@ -1,4 +1,5 @@
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
+import { buildRuledTextareaStyle } from "@/components/card/blocks/core/ruledTextareaStyle";
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/typography";
@@ -19,9 +20,6 @@ type TextBlockContentProps =
     zoom?: number;
   };
 
-const RULED_TEXTAREA_BACKGROUND_IMAGE =
-  "linear-gradient(to bottom, transparent calc(100% - var(--card-ruled-line-px, 1px)), var(--card-ruled-color, rgba(0,0,0,0.05)) calc(100% - var(--card-ruled-line-px, 1px)))";
-
 const normalizeTextBlockContent = (content: string) =>
   String(content ?? "").replace(/\r\n/g, "\n");
 
@@ -36,13 +34,10 @@ const buildTextBlockPresentation = (zoom?: number) => {
   return {
     textStyle,
     ruledRowPx,
-    editorTextStyle: mergeStyles(textStyle, {
-      backgroundImage: RULED_TEXTAREA_BACKGROUND_IMAGE,
-      backgroundSize: `100% ${ruledRowPx}px`,
-      backgroundPosition: "0 0",
-      backgroundRepeat: "repeat-y",
-      backgroundAttachment: "local",
-    }),
+    editorTextStyle: mergeStyles(
+      textStyle,
+      buildRuledTextareaStyle({ rowPx: ruledRowPx }),
+    ),
   };
 };
 
