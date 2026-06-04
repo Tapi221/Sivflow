@@ -1,11 +1,8 @@
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
-import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from "./textBlockStyles";
-import { buildTypographyStyle, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
+import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/typography";
-
-const normalizeTextBlockContent = (content: string) =>
-  String(content ?? "").replace(/\r\n/g, "\n");
+import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from "./textBlockStyles";
 
 type TextBlockContentProps =
   | {
@@ -22,16 +19,34 @@ type TextBlockContentProps =
     zoom?: number;
   };
 
-const buildTextBlockPresentation = (zoom?: number) => ({
-  textStyle: buildTypographyStyle({
+const RULED_TEXTAREA_BACKGROUND_IMAGE =
+  "linear-gradient(to bottom, transparent calc(100% - var(--card-ruled-line-px, 1px)), var(--card-ruled-color, rgba(0,0,0,0.05)) calc(100% - var(--card-ruled-line-px, 1px)))";
+
+const normalizeTextBlockContent = (content: string) =>
+  String(content ?? "").replace(/\r\n/g, "\n");
+
+const buildTextBlockPresentation = (zoom?: number) => {
+  const textStyle = buildTypographyStyle({
     fontSizePx: TYPOGRAPHY_FONT_SIZE_PX.md,
     lineHeightPx: TEXT_BLOCK_LINE_HEIGHT_PX,
     zoom,
-  }),
-  ruledRowPx: scaleTypographyNumberPx(TEXT_BLOCK_LINE_HEIGHT_PX, zoom),
-});
+  });
+  const ruledRowPx = scaleTypographyNumberPx(TEXT_BLOCK_LINE_HEIGHT_PX, zoom);
 
-export const TextBlockContent = (props: TextBlockContentProps) => {
+  return {
+    textStyle,
+    ruledRowPx,
+    editorTextStyle: mergeStyles(textStyle, {
+      backgroundImage: RULED_TEXTAREA_BACKGROUND_IMAGE,
+      backgroundSize: `100% ${ruledRowPx}px`,
+      backgroundPosition: "0 0",
+      backgroundRepeat: "repeat-y",
+      backgroundAttachment: "local",
+    }),
+  };
+};
+
+const TextBlockContent = (props: TextBlockContentProps) => {
   const normalizedContent = normalizeTextBlockContent(props.content);
   const presentation = buildTextBlockPresentation(props.zoom);
 
@@ -66,8 +81,10 @@ export const TextBlockContent = (props: TextBlockContentProps) => {
       lineHeight={presentation.ruledRowPx}
       allowInternalScroll={false}
       autoFocus={props.autoFocus}
-      style={presentation.textStyle}
+      style={presentation.editorTextStyle}
       className={`${TEXT_BLOCK_CONTENT_CLASS} placeholder:text-slate-300 focus-visible:ring-0 focus-visible:ring-offset-0`}
     />
   );
 };
+
+export { TextBlockContent };
