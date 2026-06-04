@@ -283,6 +283,7 @@ export const DesktopEmbeddedCardEditorSurface = ({
   const selectedCardEntity = isCardEntity(selectedCard) ? selectedCard : null;
   const frontBlocks = draft?.frontBlocks ?? [];
   const backBlocks = draft?.backBlocks ?? [];
+  const faceAnchorClassName = displayMode === "fluid" && cardLayoutMode === "split" ? "min-w-0 h-full" : "min-w-0";
 
   const iconPxFromScale = useCallback((headerIconVisualScale: number) => {
     const safeScale =
@@ -370,55 +371,59 @@ export const DesktopEmbeddedCardEditorSurface = ({
   }
 
   const questionFace = (
-    <EmbeddedEditorFace
-      side="question"
-      blocks={frontBlocks}
-      onBlocksChange={handleQuestionBlocksChange}
-      accentColor={controllerSettings?.accentColor}
-      duplicateToOpposite={controllerSettings?.duplicateToOpposite}
-      settings={controllerSettings}
-      displayMode={displayMode}
-      fixedScale={metrics.sideFixedScale}
-      contentZoom={metrics.sideContentZoom}
-      actionsTopLeft={splitCornerActions}
-      actionsTopRight={
-        <EmbeddedEditorHeaderRight mediaActions={questionMediaActions} />
-      }
-      editorCardHeightPx={editorCardHeightPx}
-      enableHeightResize={displayMode !== "fluid"}
-      showResizeHandle={isInteractive}
-      showToolbar={isInteractive}
-      onHeightChange={handleEditorHeightChange}
-      onMinHeightChange={layout.handleQuestionMinHeightChange}
-      onResizeStart={handleResizeStart}
-      onResizeEnd={handleResizeEnd}
-    />
+    <div data-card-face="question" className={faceAnchorClassName}>
+      <EmbeddedEditorFace
+        side="question"
+        blocks={frontBlocks}
+        onBlocksChange={handleQuestionBlocksChange}
+        accentColor={controllerSettings?.accentColor}
+        duplicateToOpposite={controllerSettings?.duplicateToOpposite}
+        settings={controllerSettings}
+        displayMode={displayMode}
+        fixedScale={metrics.sideFixedScale}
+        contentZoom={metrics.sideContentZoom}
+        actionsTopLeft={splitCornerActions}
+        actionsTopRight={
+          <EmbeddedEditorHeaderRight mediaActions={questionMediaActions} />
+        }
+        editorCardHeightPx={editorCardHeightPx}
+        enableHeightResize={displayMode !== "fluid"}
+        showResizeHandle={isInteractive}
+        showToolbar={isInteractive}
+        onHeightChange={handleEditorHeightChange}
+        onMinHeightChange={layout.handleQuestionMinHeightChange}
+        onResizeStart={handleResizeStart}
+        onResizeEnd={handleResizeEnd}
+      />
+    </div>
   );
 
   const answerFace = (
-    <EmbeddedEditorFace
-      side="answer"
-      blocks={backBlocks}
-      onBlocksChange={handleAnswerBlocksChange}
-      accentColor={controllerSettings?.accentColor}
-      duplicateToOpposite={controllerSettings?.duplicateToOpposite}
-      settings={controllerSettings}
-      displayMode={displayMode}
-      fixedScale={metrics.sideFixedScale}
-      contentZoom={metrics.sideContentZoom}
-      actionsTopLeft={splitCornerActions}
-      actionsTopRight={
-        <EmbeddedEditorHeaderRight mediaActions={answerMediaActions} />
-      }
-      editorCardHeightPx={editorCardHeightPx}
-      enableHeightResize={displayMode !== "fluid"}
-      showResizeHandle={isInteractive}
-      showToolbar={isInteractive}
-      onHeightChange={handleEditorHeightChange}
-      onMinHeightChange={layout.handleAnswerMinHeightChange}
-      onResizeStart={handleResizeStart}
-      onResizeEnd={handleResizeEnd}
-    />
+    <div data-card-face="answer" className={faceAnchorClassName}>
+      <EmbeddedEditorFace
+        side="answer"
+        blocks={backBlocks}
+        onBlocksChange={handleAnswerBlocksChange}
+        accentColor={controllerSettings?.accentColor}
+        duplicateToOpposite={controllerSettings?.duplicateToOpposite}
+        settings={controllerSettings}
+        displayMode={displayMode}
+        fixedScale={metrics.sideFixedScale}
+        contentZoom={metrics.sideContentZoom}
+        actionsTopLeft={splitCornerActions}
+        actionsTopRight={
+          <EmbeddedEditorHeaderRight mediaActions={answerMediaActions} />
+        }
+        editorCardHeightPx={editorCardHeightPx}
+        enableHeightResize={displayMode !== "fluid"}
+        showResizeHandle={isInteractive}
+        showToolbar={isInteractive}
+        onHeightChange={handleEditorHeightChange}
+        onMinHeightChange={layout.handleAnswerMinHeightChange}
+        onResizeStart={handleResizeStart}
+        onResizeEnd={handleResizeEnd}
+      />
+    </div>
   );
 
   const activeFlipSide: Side = isFlipped ? "answer" : "question";
@@ -435,39 +440,41 @@ export const DesktopEmbeddedCardEditorSurface = ({
       : layout.handleAnswerMinHeightChange;
 
   const flipFace = (
-    <EmbeddedEditorFace
-      side={activeFlipSide}
-      blocks={flipBlocks}
-      onBlocksChange={handleFlipBlocksChange}
-      accentColor={controllerSettings?.accentColor}
-      duplicateToOpposite={controllerSettings?.duplicateToOpposite}
-      settings={controllerSettings}
-      displayMode={displayMode}
-      fixedScale={metrics.baseFixedScale}
-      contentZoom={metrics.baseContentZoom}
-      actionsTopLeft={flipCornerActions}
-      editorCardHeightPx={editorCardHeightPx}
-      enableHeightResize={displayMode !== "fluid"}
-      showResizeHandle={isInteractive}
-      showToolbar={isInteractive}
-      overlayTopRight={
-        <>
-          {faceSwitchBadge}
-          {flipMediaActions ? (
-            <div
-              className="flex max-w-full justify-end"
-              data-card-no-flip="true"
-            >
-              {flipMediaActions}
-            </div>
-          ) : null}
-        </>
-      }
-      onHeightChange={handleEditorHeightChange}
-      onMinHeightChange={handleFlipMinHeightChange}
-      onResizeStart={handleResizeStart}
-      onResizeEnd={handleResizeEnd}
-    />
+    <div data-card-face={activeFlipSide} className={faceAnchorClassName}>
+      <EmbeddedEditorFace
+        side={activeFlipSide}
+        blocks={flipBlocks}
+        onBlocksChange={handleFlipBlocksChange}
+        accentColor={controllerSettings?.accentColor}
+        duplicateToOpposite={controllerSettings?.duplicateToOpposite}
+        settings={controllerSettings}
+        displayMode={displayMode}
+        fixedScale={metrics.baseFixedScale}
+        contentZoom={metrics.baseContentZoom}
+        actionsTopLeft={flipCornerActions}
+        editorCardHeightPx={editorCardHeightPx}
+        enableHeightResize={displayMode !== "fluid"}
+        showResizeHandle={isInteractive}
+        showToolbar={isInteractive}
+        overlayTopRight={
+          <>
+            {faceSwitchBadge}
+            {flipMediaActions ? (
+              <div
+                className="flex max-w-full justify-end"
+                data-card-no-flip="true"
+              >
+                {flipMediaActions}
+              </div>
+            ) : null}
+          </>
+        }
+        onHeightChange={handleEditorHeightChange}
+        onMinHeightChange={handleFlipMinHeightChange}
+        onResizeStart={handleResizeStart}
+        onResizeEnd={handleResizeEnd}
+      />
+    </div>
   );
 
   return (
