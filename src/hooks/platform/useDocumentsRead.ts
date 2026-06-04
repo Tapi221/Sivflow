@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/AuthContext";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { getLocalDb } from "@/services/localDB";
 import type { DocumentItem } from "@/types";
 
@@ -19,7 +20,12 @@ export const useDocumentsRead = (
   const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
   const [error, setError] = useState<string | null>(null);
-  const enabled = options?.enabled ?? true;
+  const isActiveWorkspaceCardSetSelected = useWorkspaceTabsStore((state) => {
+    const activeTab = state.tabs.find((tab) => tab.id === state.activeTabId);
+    return activeTab?.kind === "explorer" && activeTab.explorerState.selectedItem?.type === "cardSet";
+  });
+  const isUnscopedRead = !folderId;
+  const enabled = (options?.enabled ?? true) && !(isUnscopedRead && isActiveWorkspaceCardSetSelected);
 
   const rawDocuments = useLiveQuery(async () => {
     try {
