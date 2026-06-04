@@ -253,7 +253,7 @@ const PdfDocumentPage = ({ pageNumber, pdfDocument, scale, currentPage, register
   const isCurrent = pageNumber === currentPage;
 
   return (
-    <div ref={(element) => registerPageElement(pageNumber, element)} data-pdf-page-number={pageNumber} className={cn("relative rounded-[12px] border bg-white p-3 shadow-[0_18px_48px_rgba(0,0,0,0.28)]", isCurrent ? "border-[#d8d3c9]" : "border-black/20")} style={shouldRender ? undefined : { height: Math.round(PDF_PAGE_PLACEHOLDER_HEIGHT * scale) }}>
+    <div ref={(element) => registerPageElement(pageNumber, element)} data-pdf-page-number={pageNumber} className={cn("relative rounded-[12px] border bg-white p-3 shadow-[0_18px_48px_rgba(15,23,42,0.12)]", isCurrent ? "border-[#cfc9bf]" : "border-[#e4ded4]")} style={shouldRender ? undefined : { height: Math.round(PDF_PAGE_PLACEHOLDER_HEIGHT * scale) }}>
       <div className="mb-2 flex items-center justify-between text-[11px] font-semibold text-[#6f6a5f]">
         <span>Page {pageNumber}</span>
         {!shouldRender ? <span>省メモリ表示</span> : null}
@@ -450,21 +450,21 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
   }, [currentPage, handleGoBack, handleGoForward, handleJumpToMark, handleSetMark, handleToggleBookmark, handleZoomIn, handleZoomOut, scrollToPage]);
 
   return (
-    <div className={cn("flex h-full min-h-0 min-w-0 bg-[#151515] text-[#f4f1ea]", className)}>
+    <div className={cn("flex h-full min-h-0 min-w-0 bg-[#f7f7f5] text-[#2f2f2f]", className)}>
       <main className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <div className="flex h-12 shrink-0 items-center gap-2 border-b border-white/10 bg-[#202020] px-3">
-          <div className="min-w-0 flex-1 truncate text-[13px] font-medium text-[#d8d3c9]">{documentTitle}</div>
-          {pageCount > 0 ? <button type="button" onClick={handleToggleBookmark} className="rounded-[8px] border border-white/10 px-3 py-1.5 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10">{bookmarkPages.includes(currentPage) ? "ブックマーク解除" : "ブックマーク"}</button> : null}
-          <button type="button" onClick={handleZoomOut} className="rounded-[8px] border border-white/10 px-3 py-1.5 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10">−</button>
-          <div className="w-12 text-center text-[12px] font-semibold text-[#d8d3c9]">{Math.round(scale * 100)}%</div>
-          <button type="button" onClick={handleZoomIn} className="rounded-[8px] border border-white/10 px-3 py-1.5 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10">＋</button>
-          {sourceUrl ? <a href={sourceUrl} target="_blank" rel="noreferrer" className="rounded-[8px] border border-white/10 px-3 py-1.5 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10">別ウィンドウで開く</a> : null}
+        <div className="flex h-12 shrink-0 items-center gap-2 border-b border-[#e6e1d8] bg-[#f8f7f4] px-3">
+          <div className="min-w-0 flex-1 truncate text-[13px] font-medium text-[#2f2f2f]">{documentTitle}</div>
+          {pageCount > 0 ? <button type="button" onClick={handleToggleBookmark} className="rounded-[8px] border border-[#d9d4cc] px-3 py-1.5 text-[12px] font-semibold text-[#4a4640] transition-colors hover:bg-[#eeece7]">{bookmarkPages.includes(currentPage) ? "ブックマーク解除" : "ブックマーク"}</button> : null}
+          <button type="button" onClick={handleZoomOut} className="rounded-[8px] border border-[#d9d4cc] px-3 py-1.5 text-[12px] font-semibold text-[#4a4640] transition-colors hover:bg-[#eeece7]">−</button>
+          <div className="w-12 text-center text-[12px] font-semibold text-[#4a4640]">{Math.round(scale * 100)}%</div>
+          <button type="button" onClick={handleZoomIn} className="rounded-[8px] border border-[#d9d4cc] px-3 py-1.5 text-[12px] font-semibold text-[#4a4640] transition-colors hover:bg-[#eeece7]">＋</button>
+          {sourceUrl ? <a href={sourceUrl} target="_blank" rel="noreferrer" className="rounded-[8px] border border-[#d9d4cc] px-3 py-1.5 text-[12px] font-semibold text-[#4a4640] transition-colors hover:bg-[#eeece7]">別ウィンドウで開く</a> : null}
         </div>
-        <div ref={scrollContainerRef} className="min-h-0 flex-1 overflow-y-auto bg-[#2b2b2b] p-5">
-          {isLoading ? <div className="flex h-full items-center justify-center text-[13px] text-[#bdb8ad]">PDFを読み込み中...</div> : null}
-          {!isLoading && loadError ? <div className="flex h-full items-center justify-center p-6 text-center text-[13px] leading-6 text-[#d8d3c9]"><div className="max-w-md rounded-[14px] border border-white/10 bg-[#1f1f1f] px-5 py-4">{loadError}</div></div> : null}
+        <div ref={scrollContainerRef} className="min-h-0 flex-1 overflow-y-auto bg-[#f4f3f0] p-5">
+          {isLoading ? <div className="flex h-full items-center justify-center text-[13px] text-[#6d6d6d]">PDFを読み込み中...</div> : null}
+          {!isLoading && loadError ? <div className="flex h-full items-center justify-center p-6 text-center text-[13px] leading-6 text-[#4a4640]"><div className="max-w-md rounded-[14px] border border-[#ded8cf] bg-white px-5 py-4 shadow-sm">{loadError}</div></div> : null}
           {!isLoading && !loadError && pdfDocument ? <div className="flex min-w-max flex-col items-center gap-5">{pageNumbers.map((pageNumber) => <PdfDocumentPageSlot key={pageNumber} pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} currentPage={currentPage} registerPageElement={registerPageElement} shouldRender={shouldRenderNearbyPage(pageNumber, currentPage, PDF_PAGE_RENDER_RADIUS)} />)}</div> : null}
-          {!isLoading && !loadError && !pdfDocument ? <div className="flex h-full items-center justify-center text-[13px] text-[#bdb8ad]">表示できるPDFソースがありません。</div> : null}
+          {!isLoading && !loadError && !pdfDocument ? <div className="flex h-full items-center justify-center text-[13px] text-[#6d6d6d]">表示できるPDFソースがありません。</div> : null}
         </div>
       </main>
     </div>
