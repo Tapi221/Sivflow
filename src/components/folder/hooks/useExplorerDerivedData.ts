@@ -5,7 +5,7 @@ import { getEntityTime, getFolderId, getParentFolderId, isSameFolder, normalizeF
 import { compareOrderableEntities } from "@/lib/orderableEntity";
 import type { Card, CardSet, DocumentItem, ExplorerItem } from "@/types";
 
-type LegacyEntityFields = { isDeleted?: boolean; is_deleted?: boolean; folder_id?: string | null; card_set_id?: string | null; orderIndex?: number };
+type LegacyEntityFields = { isDeleted?: boolean; is_deleted?: boolean; folder_id?: string | null; card_set_id?: string | null; orderIndex?: number; order_index?: number };
 
 type DraftFolderFields = { __draft?: boolean; __optimistic?: boolean };
 
@@ -25,6 +25,10 @@ const isDraftFolder = (folder: FolderTreeNode) => {
 };
 
 const withLegacy = <T extends object>(v: T): T & LegacyEntityFields => v as T & LegacyEntityFields;
+
+const getCardSetFolderId = (cardSet: CardSet): string | null | undefined => cardSet.folderId ?? withLegacy(cardSet).folder_id;
+
+const getOrderIndex = (entity: object, fallback = Number.MAX_SAFE_INTEGER): number => withLegacy(entity).orderIndex ?? withLegacy(entity).order_index ?? fallback;
 
 const getFolderOrder = (folder: FolderTreeNode) => {
   return ((folder as { orderIndex?: number; order_index?: number }).orderIndex ?? (folder as { orderIndex?: number; order_index?: number }).order_index ?? 0) as number;
@@ -130,8 +134,8 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
 
     for (const list of map.values()) {
       list.sort((a, b) => {
-        const orderA = withLegacy(a.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
-        const orderB = withLegacy(b.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
+        const orderA = getOrderIndex(a.data);
+        const orderB = getOrderIndex(b.data);
         if (orderA !== orderB) return orderA - orderB;
         const timeA = getEntityTime((a.data as { updatedAt?: unknown }).updatedAt);
         const timeB = getEntityTime((b.data as { updatedAt?: unknown }).updatedAt);
@@ -192,14 +196,14 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
       if (isSoftDeleted(withLegacy(card))) continue;
       const cardFolderId = resolveTreeFolderId(resolveCardFolderIdStrict(card, cardSetById));
       if (!isSameFolder(cardFolderId, targetFolderId)) continue;
-      const order = withLegacy(card).orderIndex ?? -1;
+      const order = getOrderIndex(card, -1);
       if (order > maxOrder) maxOrder = order;
     }
     for (const doc of documents) {
       if (isSoftDeleted(withLegacy(doc))) continue;
       const docFolderId = resolveTreeFolderId(doc.folderId ?? withLegacy(doc).folder_id);
       if (!isSameFolder(docFolderId, targetFolderId)) continue;
-      const order = withLegacy(doc).orderIndex ?? -1;
+      const order = getOrderIndex(doc, -1);
       if (order > maxOrder) maxOrder = order;
     }
     return maxOrder + 1;
@@ -209,12 +213,12 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
     const map = new Map<string, CardSet[]>();
     for (const cs of cardSets) {
       if (isSoftDeleted(withLegacy(cs))) continue;
-      const key = normalizeFolderId(cs.folderId);
+      const key = normalizeFolderId(getCardSetFolderId(cs));
       const list = map.get(key);
       if (list) list.push(cs);
       else map.set(key, [cs]);
     }
-    for (const list of map.values()) list.sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
+    for (const list of map.values()) list.sort((a, b) => getOrderIndex(a, 0) - getOrderIndex(b, 0));
     return map;
   }, [cardSets]);
 
@@ -270,8 +274,8 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
     }
     for (const list of map.values()) {
       list.sort((a, b) => {
-        const orderA = withLegacy(a.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
-        const orderB = withLegacy(b.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
+        const orderA = getOrderIndex(a.data);
+        const orderB = getOrderIndex(b.data);
         return orderA - orderB;
       });
     }
