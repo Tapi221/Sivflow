@@ -5,7 +5,11 @@ import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { StratisTagIcon } from "@/ui/icons/stratis";
-import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_LEVEL, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LayeredTreeDropIndicator, getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget, useLayeredTreeDragDrop, type LayeredTreeDragState } from "./layeredTreeDnd";
+import { LayeredTreeDropIndicator } from "./layeredTreeDnd";
+import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LAYERED_TREE_ROOT_LEVEL } from "./layeredTreeDnd.constants";
+import { getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget } from "./layeredTreeDnd.utils";
+import type { LayeredTreeDragState } from "./layeredTreeDnd.types";
+import { useLayeredTreeDragDrop } from "./useLayeredTreeDragDrop";
 
 type TagTreeNode = {
   id: string;
