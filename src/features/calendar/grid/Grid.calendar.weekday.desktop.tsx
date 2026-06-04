@@ -8,7 +8,7 @@ import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import type { CalendarAllDayEventOrderMap, CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarAllDayEventOrderMap, CalendarGridStyle, CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 import { CALENDAR_EVENT_DRAGGING_STYLE, areSameCalendarEventTimes, createCalendarEventDragPointerSnapshot, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragAutoScroll, useCalendarEventDragBodyStyle } from "./calendarEventDrag.shared";
@@ -148,6 +148,18 @@ const getEventInRange = (event: GoogleCalendarEvent, rangeStart: Date, rangeEnd:
 
 const getWeekdayTimelineRangeEnd = (day: Date): Date => addMinutes(addDays(startOfDay(day), 1), NEXT_DAY_PREVIEW_MINUTES);
 
+const getCalendarGridHourRowHeightPx = (calendarGridStyle: CalendarGridStyle): number => {
+  const parsedValue = Number.parseFloat(calendarGridStyle[GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT]);
+
+  return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : C.DEFAULT_HOUR_ROW_HEIGHT;
+};
+
+const getMinimumVisibleHeightPercent = (hourRowHeightPx: number, rangeHours: number): number => {
+  const rangeHeightPx = hourRowHeightPx * rangeHours;
+
+  return rangeHeightPx > 0 ? (WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX / rangeHeightPx) * 100 : 0;
+};
+
 const getHourRowHeightPx = (element: HTMLElement): number => {
   const computedValue = window.getComputedStyle(element).getPropertyValue(GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT);
   const parsedValue = Number.parseFloat(computedValue);
@@ -244,7 +256,7 @@ const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]): WeekdayE
   return { allDayEvents };
 };
 
-const createTimedLayoutEventsForRange = (events: GoogleCalendarEvent[], rangeStart: Date, rangeEnd: Date): CalendarTimeGridLayoutEntry[] => {
+const createTimedLayoutEventsForRange = (events: GoogleCalendarEvent[], rangeStart: Date, rangeEnd: Date, minimumVisibleHeightPercent: number): CalendarTimeGridLayoutEntry[] => {
   const rangeEvents = events.flatMap((event) => {
     if (event.isAllDay) return [];
     const eventInRange = getEventInRange(event, rangeStart, rangeEnd);
@@ -257,14 +269,15 @@ const createTimedLayoutEventsForRange = (events: GoogleCalendarEvent[], rangeSta
     rangeStart,
     rangeEnd,
     layoutMode: "no-overlap",
+    minimumVisibleHeightPercent,
   });
 };
 
-const createTimedLayoutEvents = (events: GoogleCalendarEvent[], day: Date): CalendarTimeGridLayoutEntry[] => {
+const createTimedLayoutEvents = (events: GoogleCalendarEvent[], day: Date, minimumVisibleHeightPercent: number): CalendarTimeGridLayoutEntry[] => {
   const rangeStart = startOfDay(day);
   const rangeEnd = getWeekdayTimelineRangeEnd(day);
 
-  return createTimedLayoutEventsForRange(events, rangeStart, rangeEnd);
+  return createTimedLayoutEventsForRange(events, rangeStart, rangeEnd, minimumVisibleHeightPercent);
 };
 
 const createAllDayRenderItems = (events: GoogleCalendarEvent[], dayKey: string, allDayEventOrder: CalendarAllDayEventOrderMap | undefined, dragState: WeekdayEventDragState | null, dragPreviewEvent: GoogleCalendarEvent | null, dragPreviewDayKey: string | null): WeekdayAllDayRenderItem[] => {
@@ -303,6 +316,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
   const dragPreviewDayKey = dragState ? getDragPreviewDayKey(dragState) : null;
   const gridTemplateColumns = getViewportGridTemplateColumns(visibleDays.length);
   const timelineGridStyle = { [GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT]: calendarGridStyle[GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT], gridTemplateColumns } as CSSProperties;
+  const minimumVisibleHeightPercent = getMinimumVisibleHeightPercent(getCalendarGridHourRowHeightPx(calendarGridStyle), WEEKDAY_TIMELINE_RANGE_HOURS);
   const currentDayKey = getCalendarDateKey(now);
   const currentDayIndex = visibleDays.findIndex((day) => getCalendarDateKey(day) === currentDayKey);
   const shouldRenderCurrentTime = currentDayIndex !== -1;
@@ -590,7 +604,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
 
           {visibleDays.map((day, dayIndex) => {
             const dayKey = getCalendarDateKey(day);
-            const events = createTimedLayoutEvents(visibleEvents, day);
+            const events = createTimedLayoutEvents(visibleEvents, day, minimumVisibleHeightPercent);
             const shouldRenderDragPreview = dragState && dragPreviewEvent && !dragState.previewIsAllDay && dragState.previewColumnDayKey === dayKey;
 
             return (
