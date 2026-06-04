@@ -26,7 +26,7 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
     <div className="codeBlockOuter">
       <RowSnappedRoot
         rowPx={CARD_ROW_PX}
-        className={`codeBlockRoot codeBlockRoot--${variant} relative group overflow-hidden`}
+        className={`codeBlockRoot codeBlockRoot--${variant} relative group/code-block overflow-hidden`}
       >
         {showLangLabel && (
           <div
