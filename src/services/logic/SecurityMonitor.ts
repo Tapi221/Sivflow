@@ -1,6 +1,7 @@
 import type { DocumentData, FirestoreError, QueryDocumentSnapshot, QuerySnapshot, Unsubscribe } from "firebase/firestore";
 import { addDoc, collection, doc, onSnapshot, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { firestoreDb, requireFirestoreDb } from "@/infrastructure/firebase/client";
+import type { SecurityState as SyncSecurityState } from "@/services/interfaces/ISyncService";
 import { getSecurityEventCatalogEntry } from "./securityEventCatalog";
 import type { SecurityEventType, SecurityLog, SecurityMetadata } from "@/types/domain/telemetry";
 
@@ -46,6 +47,16 @@ export class SecurityMonitor {
     metadata: SecurityMetadata = {},
   ): Promise<void> {
     await this.sendSecurityLog(type, metadata);
+  }
+
+  subscribe(callback: (state: SyncSecurityState) => void): () => void {
+    this.startMonitoring((state) => {
+      callback(state as SyncSecurityState);
+    });
+
+    return () => {
+      this.stopMonitoring();
+    };
   }
 
   /**
