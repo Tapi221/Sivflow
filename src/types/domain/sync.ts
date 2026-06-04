@@ -77,6 +77,7 @@ export type TagSyncPayload = {
   deletedAt?: Date | null;
   categoryId?: string;
   parentId?: string;
+  orderIndex?: number;
 };
 
 export type SyncPayloadByEntity = {
