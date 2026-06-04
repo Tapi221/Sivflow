@@ -5,8 +5,8 @@ import { MathBlockContent } from "@/components/card/blocks/math/MathBlockContent
 import { BlockRenderer } from "@/components/card/blocks/render/BlockRenderer";
 import type { CardBlock } from "@/types/domain/card";
 
-describe("Math block consistency", () => {
-  it("viewer and editor-preview path both use mathBlockRoot frame", () => {
+describe("数式ブロックの表示構造の一貫性", () => {
+  it("閲覧側とエディタープレビュー側の両方で mathBlockRoot フレームを使う", () => {
     const view = render(
       <BlockRenderer
         blocks={[
