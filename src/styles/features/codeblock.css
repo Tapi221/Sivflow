@@ -202,7 +202,7 @@
   }
 
   /* ===== Editor (react-simple-code-editor) =====
-     ここでスクロール責務を握って、内側は基本 overflow を増やしすぎない
+     textarea を表示レイヤーにして、選択対象と見えている文字を一致させる
    */
 
   .code-editor-no-scroll {
@@ -237,6 +237,7 @@
   .code-editor-no-scroll pre {
     display: inline-block !important;
     min-width: 100%;
+    visibility: hidden;
   }
 
   /* react-simple-code-editor の既定 pre-wrap を打ち消して、常に横スクロールを正とする */
@@ -267,23 +268,9 @@
     box-shadow: none;
     resize: none;
     background: transparent;
-
-    /* 入力文字は pre 側で描画するので透明にする */
-    color: transparent;
-
-    /* テーマ対応: 変数で渡す。無ければ code-fg */
-    caret-color: var(--code-caret, var(--code-fg));
-  }
-
-  .code-editor-no-scroll textarea::selection,
-  .code-editor-no-scroll .npm__react-simple-code-editor__textarea::selection {
-    color: var(--code-fg);
+    color: var(--code-fg) !important;
     -webkit-text-fill-color: var(--code-fg);
-  }
-
-  .code-editor-no-scroll textarea::-moz-selection,
-  .code-editor-no-scroll .npm__react-simple-code-editor__textarea::-moz-selection {
-    color: var(--code-fg);
+    caret-color: var(--code-caret, var(--code-fg));
   }
 
   .code-editor-no-scroll pre {
