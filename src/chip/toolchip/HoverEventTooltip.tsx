@@ -31,7 +31,7 @@ type HoverEventTooltipProps = {
 };
 
 const TOOLTIP_SURFACE_CLASS_NAME = "relative flex max-w-[260px] flex-col gap-1.5 overflow-visible rounded-[14px] border border-white/70 bg-[rgba(255,255,255,0.84)] px-3 py-2.5 text-[#46515f] shadow-[0_14px_34px_rgba(74,90,110,0.16),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-2xl";
-const TOOLTIP_EDIT_BUTTON_CLASS_NAME = "absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/75 text-[#6b8294] shadow-[0_2px_8px_rgba(74,90,110,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] transition hover:bg-white hover:text-[#405162] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8db9ff]/40";
+const TOOLTIP_EDIT_BUTTON_CLASS_NAME = "absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-md bg-transparent text-[#111111] transition hover:bg-white/65 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8db9ff]/40";
 const TOOLTIP_ARROW_CLASS_NAME = "absolute h-2.5 w-2.5 rotate-45 border-white/70 bg-[rgba(255,255,255,0.84)] backdrop-blur-2xl";
 const TOOLTIP_VIEWPORT_MARGIN = 12;
 const TOOLTIP_BOUNDARY_GAP = 8;
@@ -246,9 +246,10 @@ const HoverEventTooltip = ({
             <div className={cn(TOOLTIP_SURFACE_CLASS_NAME, onEdit && "pr-12")}>
               {onEdit && (
                 <button type="button" className={TOOLTIP_EDIT_BUTTON_CLASS_NAME} aria-label={editLabel} title={editLabel} onClick={handleEditButtonClick}>
-                  <svg aria-hidden="true" viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 13.5V16h2.5L15 7.5 12.5 5 4 13.5Z" />
-                    <path d="M11.5 6 14 8.5" />
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-4" />
+                    <path d="M18.5 3.5a2.1 2.1 0 0 1 3 3L12 16l-4 1 1-4 9.5-9.5Z" />
+                    <path d="M15.5 6.5l2 2" />
                   </svg>
                 </button>
               )}
