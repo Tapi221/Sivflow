@@ -1,0 +1,13 @@
+export const LAYERED_TREE_ROOT_LEVEL = 1;
+export const LAYERED_TREE_INDENT_PX = 14;
+export const LAYERED_TREE_DROP_INDICATOR_BASE_LEFT_PX = 18;
+export const LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX = 8;
+export const LAYERED_TREE_DND_MIME_TYPE = "application/x-manifolia-layered-tree-id";
+export const LAYERED_TREE_ROW_SELECTOR = "[data-layered-tree-row='true']";
+export const LAYERED_TREE_DROP_EDGE_RATIO = 0.24;
+export const LAYERED_TREE_DROP_INSIDE_INTENT_OFFSET_PX = 76;
+export const LAYERED_TREE_AUTO_EXPAND_DELAY_MS = 520;
+export const LAYERED_TREE_DRAG_IMAGE_OFFSET_X = 18;
+export const LAYERED_TREE_DRAG_IMAGE_OFFSET_Y = 16;
+export const LAYERED_TREE_AUTO_SCROLL_EDGE_PX = 42;
+export const LAYERED_TREE_AUTO_SCROLL_MAX_STEP = 18;
