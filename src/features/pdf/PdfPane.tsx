@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
 import type { PdfViewerState } from "@/types";
@@ -121,6 +121,8 @@ const PDF_PAGE_RENDER_RADIUS = 3;
 const PDF_THUMBNAIL_RENDER_RADIUS = 8;
 const PDF_PAGE_PLACEHOLDER_HEIGHT = 920;
 const PDF_SEARCH_SNIPPET_MARGIN = 24;
+const PDF_HISTORY_LIMIT = 80;
+const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
 const OUTLINE_EMPTY_MESSAGE = "このPDFには目次情報がありません。";
 const BOOKMARK_EMPTY_MESSAGE = "ブックマークはまだありません。";
 const HIGHLIGHTS_EMPTY_MESSAGE = "検索語を入力すると、該当箇所をページ上にハイライトします。";
@@ -154,6 +156,21 @@ const getPageNumbers = (pageCount: number): number[] => {
 
 const getNormalizedSearchQuery = (value: string): string => {
   return value.trim().toLowerCase();
+};
+
+const getSortedMarkEntries = (markPages: Record<string, number>): [string, number][] => {
+  return Object.entries(markPages).sort(([leftKey], [rightKey]) => leftKey.localeCompare(rightKey));
+};
+
+const getTrimmedHistory = (pages: number[]): number[] => {
+  return pages.slice(-PDF_HISTORY_LIMIT);
+};
+
+const shouldHandlePdfKeyboardEvent = (event: KeyboardEvent): boolean => {
+  const target = event.target as HTMLElement | null;
+  if (!target) return true;
+  const tagName = target.tagName.toLowerCase();
+  return tagName !== "input" && tagName !== "textarea" && !target.isContentEditable;
 };
 
 const shouldRenderNearbyPage = (pageNumber: number, currentPage: number, radius: number): boolean => {
@@ -367,16 +384,23 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
   const [outlineEntries, setOutlineEntries] = useState<PdfOutlineEntry[]>([]);
   const [pageTextMap, setPageTextMap] = useState<Map<number, string>>(() => new Map());
   const [searchQuery, setSearchQuery] = useState("");
+  const [pageJumpValue, setPageJumpValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isTextLoading, setIsTextLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const pageJumpInputRef = useRef<HTMLInputElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const pageElementsRef = useRef<Map<number, HTMLDivElement>>(new Map());
   const pageCount = pdfDocument?.numPages ?? 0;
   const currentPage = getSafePageNumber(viewerState?.currentPage, pageCount);
   const bookmarkPages = viewerState?.bookmarkPages ?? [];
+  const markPages = viewerState?.markPages ?? {};
+  const historyBackPages = viewerState?.historyBackPages ?? [];
+  const historyForwardPages = viewerState?.historyForwardPages ?? [];
   const pageNumbers = useMemo(() => getPageNumbers(pageCount), [pageCount]);
   const searchResults = useMemo(() => buildPdfSearchResults(pageTextMap, searchQuery), [pageTextMap, searchQuery]);
+  const markEntries = useMemo(() => getSortedMarkEntries(markPages), [markPages]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -423,6 +447,25 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
     };
   }, [doc, persistedUrl, viewerOptions]);
 
+  const updateViewerState = useCallback((patch: PdfViewerState) => {
+    void onDocumentUpdate?.({ viewerState: { ...viewerState, ...patch } });
+  }, [onDocumentUpdate, viewerState]);
+
+  const registerPageElement = useCallback((pageNumber: number, element: HTMLDivElement | null) => {
+    if (element) pageElementsRef.current.set(pageNumber, element);
+    else pageElementsRef.current.delete(pageNumber);
+  }, []);
+
+  const scrollToPage = useCallback((pageNumber: number, options?: { recordHistory?: boolean }) => {
+    const safePageNumber = getSafePageNumber(pageNumber, pageCount);
+    const shouldRecordHistory = options?.recordHistory ?? true;
+    const nextBackPages = shouldRecordHistory && safePageNumber !== currentPage ? getTrimmedHistory([...historyBackPages, currentPage]) : historyBackPages;
+    updateViewerState({ currentPage: safePageNumber, historyBackPages: nextBackPages, historyForwardPages: shouldRecordHistory ? [] : historyForwardPages });
+    window.requestAnimationFrame(() => {
+      pageElementsRef.current.get(safePageNumber)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [currentPage, historyBackPages, historyForwardPages, pageCount, updateViewerState]);
+
   useEffect(() => {
     if (!pdfDocument || !scrollContainerRef.current) return;
     const observer = new IntersectionObserver((entries) => {
@@ -436,39 +479,130 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
     return () => observer.disconnect();
   }, [currentPage, onDocumentUpdate, pdfDocument, viewerState]);
 
-  const registerPageElement = useCallback((pageNumber: number, element: HTMLDivElement | null) => {
-    if (element) pageElementsRef.current.set(pageNumber, element);
-    else pageElementsRef.current.delete(pageNumber);
-  }, []);
-
-  const updateViewerState = useCallback((patch: PdfViewerState) => {
-    void onDocumentUpdate?.({ viewerState: { ...viewerState, ...patch } });
-  }, [onDocumentUpdate, viewerState]);
-
-  const scrollToPage = useCallback((pageNumber: number) => {
-    const safePageNumber = getSafePageNumber(pageNumber, pageCount);
-    updateViewerState({ currentPage: safePageNumber });
-    window.requestAnimationFrame(() => {
-      pageElementsRef.current.get(safePageNumber)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }, [pageCount, updateViewerState]);
-
   const handleSidePanelTabSelect = (sidePanelTab: NonNullable<PdfViewerState["sidePanelTab"]>) => {
     updateViewerState({ sidePanelTab });
   };
 
-  const handleZoomIn = () => {
+  const handleZoomIn = useCallback(() => {
     updateViewerState({ scale: clampPdfScale(scale + PDF_SCALE_STEP), fitMode: "manual" });
-  };
+  }, [scale, updateViewerState]);
 
-  const handleZoomOut = () => {
+  const handleZoomOut = useCallback(() => {
     updateViewerState({ scale: clampPdfScale(scale - PDF_SCALE_STEP), fitMode: "manual" });
-  };
+  }, [scale, updateViewerState]);
 
-  const handleToggleBookmark = () => {
+  const handleToggleBookmark = useCallback(() => {
     const nextBookmarkPages = bookmarkPages.includes(currentPage) ? bookmarkPages.filter((pageNumber) => pageNumber !== currentPage) : [...bookmarkPages, currentPage].sort((a, b) => a - b);
     updateViewerState({ bookmarkPages: nextBookmarkPages });
+  }, [bookmarkPages, currentPage, updateViewerState]);
+
+  const handleGoBack = useCallback(() => {
+    const targetPage = historyBackPages.at(-1);
+    if (!targetPage) return;
+    updateViewerState({ currentPage: targetPage, historyBackPages: historyBackPages.slice(0, -1), historyForwardPages: getTrimmedHistory([...historyForwardPages, currentPage]) });
+    window.requestAnimationFrame(() => {
+      pageElementsRef.current.get(targetPage)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [currentPage, historyBackPages, historyForwardPages, updateViewerState]);
+
+  const handleGoForward = useCallback(() => {
+    const targetPage = historyForwardPages.at(-1);
+    if (!targetPage) return;
+    updateViewerState({ currentPage: targetPage, historyBackPages: getTrimmedHistory([...historyBackPages, currentPage]), historyForwardPages: historyForwardPages.slice(0, -1) });
+    window.requestAnimationFrame(() => {
+      pageElementsRef.current.get(targetPage)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [currentPage, historyBackPages, historyForwardPages, updateViewerState]);
+
+  const handleSetMark = useCallback(() => {
+    const rawKey = window.prompt("現在ページに設定する mark キーを入力してください（a-z / 0-9）", "a")?.trim().slice(0, 1).toLowerCase();
+    if (!rawKey || !PDF_MARK_KEY_PATTERN.test(rawKey)) return;
+    updateViewerState({ markPages: { ...markPages, [rawKey]: currentPage } });
+  }, [currentPage, markPages, updateViewerState]);
+
+  const handleJumpToMark = useCallback(() => {
+    const rawKey = window.prompt("移動する mark キーを入力してください", "a")?.trim().slice(0, 1).toLowerCase();
+    if (!rawKey) return;
+    const targetPage = markPages[rawKey];
+    if (!targetPage) return;
+    scrollToPage(targetPage);
+  }, [markPages, scrollToPage]);
+
+  const handlePageJump = useCallback(() => {
+    const pageNumber = Number(pageJumpValue);
+    if (!Number.isFinite(pageNumber)) return;
+    scrollToPage(pageNumber);
+    setPageJumpValue("");
+  }, [pageJumpValue, scrollToPage]);
+
+  const handlePageJumpKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    handlePageJump();
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!shouldHandlePdfKeyboardEvent(event)) return;
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "f") {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+        return;
+      }
+      if ((event.altKey || event.metaKey) && event.key === "ArrowLeft") {
+        event.preventDefault();
+        handleGoBack();
+        return;
+      }
+      if ((event.altKey || event.metaKey) && event.key === "ArrowRight") {
+        event.preventDefault();
+        handleGoForward();
+        return;
+      }
+      if (event.key === "ArrowRight" || event.key === "j") {
+        event.preventDefault();
+        scrollToPage(currentPage + 1);
+        return;
+      }
+      if (event.key === "ArrowLeft" || event.key === "k") {
+        event.preventDefault();
+        scrollToPage(currentPage - 1);
+        return;
+      }
+      if (event.key === "+" || event.key === "=") {
+        event.preventDefault();
+        handleZoomIn();
+        return;
+      }
+      if (event.key === "-") {
+        event.preventDefault();
+        handleZoomOut();
+        return;
+      }
+      if (event.key === "b") {
+        event.preventDefault();
+        handleToggleBookmark();
+        return;
+      }
+      if (event.key === "g") {
+        event.preventDefault();
+        pageJumpInputRef.current?.focus();
+        return;
+      }
+      if (event.key === "m") {
+        event.preventDefault();
+        handleSetMark();
+        return;
+      }
+      if (event.key === "'") {
+        event.preventDefault();
+        handleJumpToMark();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentPage, handleGoBack, handleGoForward, handleJumpToMark, handleSetMark, handleToggleBookmark, handleZoomIn, handleZoomOut, scrollToPage]);
 
   return (
     <div className={cn("flex h-full min-h-0 min-w-0 bg-[#151515] text-[#f4f1ea]", className)}>
@@ -484,13 +618,30 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
           ))}
         </div>
         <div className="border-b border-white/10 p-3">
-          <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="PDF内を検索" className="h-8 w-full rounded-[8px] border border-white/10 bg-[#151515] px-3 text-[12px] font-medium text-[#f4f1ea] outline-none placeholder:text-[#77736b] focus:border-[#d8d3c9]/55" />
+          <input ref={searchInputRef} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="PDF内を検索 / ⌘F" className="h-8 w-full rounded-[8px] border border-white/10 bg-[#151515] px-3 text-[12px] font-medium text-[#f4f1ea] outline-none placeholder:text-[#77736b] focus:border-[#d8d3c9]/55" />
           {searchQuery.trim() ? <div className="mt-1 text-[10px] text-[#9f9b93]">{isTextLoading ? SEARCHING_MESSAGE : `${searchResults.length}件`}</div> : null}
+        </div>
+        <div className="border-b border-white/10 p-3">
+          <div className="flex gap-2">
+            <input ref={pageJumpInputRef} value={pageJumpValue} onChange={(event) => setPageJumpValue(event.target.value)} onKeyDown={handlePageJumpKeyDown} inputMode="numeric" placeholder="ページ" className="h-8 min-w-0 flex-1 rounded-[8px] border border-white/10 bg-[#151515] px-3 text-[12px] font-medium text-[#f4f1ea] outline-none placeholder:text-[#77736b] focus:border-[#d8d3c9]/55" />
+            <button type="button" onClick={handlePageJump} className="h-8 rounded-[8px] border border-white/10 px-3 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10">移動</button>
+          </div>
+          <div className="mt-2 flex gap-2">
+            <button type="button" onClick={handleGoBack} disabled={historyBackPages.length === 0} className="h-8 flex-1 rounded-[8px] border border-white/10 px-2 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10 disabled:text-[#77736b] disabled:hover:bg-transparent">戻る</button>
+            <button type="button" onClick={handleGoForward} disabled={historyForwardPages.length === 0} className="h-8 flex-1 rounded-[8px] border border-white/10 px-2 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10 disabled:text-[#77736b] disabled:hover:bg-transparent">進む</button>
+          </div>
+          <div className="mt-2 flex gap-2">
+            <button type="button" onClick={handleSetMark} className="h-8 flex-1 rounded-[8px] border border-white/10 px-2 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10">mark</button>
+            <button type="button" onClick={handleJumpToMark} className="h-8 flex-1 rounded-[8px] border border-white/10 px-2 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10">jump mark</button>
+          </div>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 text-[12px] leading-5 text-[#aaa59b]">
           {activeSidePanelTab === "outline" && outlineEntries.length === 0 ? <p className="px-1">{OUTLINE_EMPTY_MESSAGE}</p> : null}
           {activeSidePanelTab === "outline" ? outlineEntries.map((entry) => <button key={entry.id} type="button" disabled={!entry.pageNumber} onClick={() => entry.pageNumber ? scrollToPage(entry.pageNumber) : undefined} className="block w-full rounded-[7px] px-2 py-1.5 text-left text-[#d8d3c9] transition-colors hover:bg-white/10 disabled:text-[#77736b] disabled:hover:bg-transparent" style={{ paddingLeft: 8 + entry.level * 14 }}><span className="block truncate">{entry.title}</span>{entry.pageNumber ? <span className="text-[10px] text-[#88837a]">Page {entry.pageNumber}</span> : null}</button>) : null}
-          {activeSidePanelTab === "bookmarks" && bookmarkPages.length === 0 ? <p className="px-1">{BOOKMARK_EMPTY_MESSAGE}</p> : null}
+          {activeSidePanelTab === "bookmarks" && bookmarkPages.length === 0 && markEntries.length === 0 ? <p className="px-1">{BOOKMARK_EMPTY_MESSAGE}</p> : null}
+          {activeSidePanelTab === "bookmarks" && markEntries.length > 0 ? <div className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#77736b]">Marks</div> : null}
+          {activeSidePanelTab === "bookmarks" ? markEntries.map(([key, pageNumber]) => <button key={key} type="button" onClick={() => scrollToPage(pageNumber)} className="block w-full rounded-[7px] px-2 py-1.5 text-left text-[#d8d3c9] transition-colors hover:bg-white/10"><span className="font-semibold">{key}</span><span className="ml-2 text-[#88837a]">Page {pageNumber}</span></button>) : null}
+          {activeSidePanelTab === "bookmarks" && bookmarkPages.length > 0 ? <div className="mb-2 mt-3 px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#77736b]">Bookmarks</div> : null}
           {activeSidePanelTab === "bookmarks" ? bookmarkPages.map((pageNumber) => <button key={pageNumber} type="button" onClick={() => scrollToPage(pageNumber)} className="block w-full rounded-[7px] px-2 py-1.5 text-left text-[#d8d3c9] transition-colors hover:bg-white/10">Page {pageNumber}</button>) : null}
           {activeSidePanelTab === "highlights" && searchResults.length === 0 ? <p className="px-1">{HIGHLIGHTS_EMPTY_MESSAGE}</p> : null}
           {activeSidePanelTab === "highlights" ? searchResults.map((result) => <button key={result.id} type="button" onClick={() => scrollToPage(result.pageNumber)} className="block w-full rounded-[7px] px-2 py-1.5 text-left transition-colors hover:bg-white/10"><span className="block text-[10px] font-semibold text-[#88837a]">Page {result.pageNumber}</span><span className="block text-[#d8d3c9]">{result.snippet}</span></button>) : null}
