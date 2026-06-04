@@ -1,10 +1,10 @@
 import { Timestamp } from "firebase/firestore";
 import type { InkDocument } from "@core/domain/card/ink/inkDocument";
-import type { UploadedImage, UploadedPdf } from "./assets";
+import type { UploadedImage } from "./assets";
 import type { BaseEntity, CardState, MathBlockData, ReferenceBlockData, ReviewLog, SubjectiveScoreValue } from "./base";
 import type { CodeBlockData } from "@/types/core/code-block";
 
-export type { UploadedImage, UploadedPdf };
+export type { UploadedImage };
 
 export type CardBlock = {
   id: string;
@@ -16,8 +16,7 @@ export type CardBlock = {
     | "audio"
     | "reference"
     | "math"
-    | "markdown"
-    | "pdf";
+    | "markdown";
   orderIndex: number;
   rowOffset?: number;
   offsetRows?: number;
@@ -31,8 +30,6 @@ export type CardBlock = {
   references?: ReferenceBlockData[];
   math?: MathBlockData;
   markdown?: string;
-  pdf?: UploadedPdf | null;
-  pdfPageNumber?: number;
 };
 
 export type CardFaceAttachmentAudio = {
