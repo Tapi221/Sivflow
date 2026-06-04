@@ -18,6 +18,7 @@ const ACTION_BUTTON_CLASS_NAME = "flex h-8 w-8 items-center justify-center round
 const SHARE_BUTTON_CLASS_NAME = "flex h-8 items-center gap-1.5 rounded-[10px] border border-[rgba(0,0,0,0.06)] bg-white/75 px-3 text-[13px] font-medium leading-none tracking-[-0.015em] text-[#7d7b78] shadow-[0_1px_2px_rgba(0,0,0,0.03)] outline-none backdrop-blur-xl transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.08)] hover:bg-[#f7f6f4] hover:text-[#3a3a38] active:scale-[0.98] focus-visible:border-[rgba(0,0,0,0.10)] focus-visible:bg-[#f7f6f4] focus-visible:text-[#3a3a38] motion-reduce:transition-none motion-reduce:active:scale-100";
 const ICON_CLASS_NAME = "h-[18px] w-[18px] shrink-0";
 const ICON_STROKE_WIDTH = 1.5;
+const CLOCK_ICON_STROKE_WIDTH = 1.3;
 const ACTIONS: readonly WorkspaceAction[] = [
   { key: "share", label: "共有", text: "共有" },
   { key: "comment", label: "コメント" },
@@ -40,8 +41,8 @@ const CommentIcon = (props: ToolbarIconProps) => (
 
 const ClockIcon = (props: ToolbarIconProps) => (
   <svg {...props} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <circle cx="12" cy="12" r="8.25" stroke="currentColor" strokeWidth={ICON_STROKE_WIDTH} />
-    <path d="M12 7.75V12.5L15.2 14.1" stroke="currentColor" strokeWidth={ICON_STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="12" cy="12" r="8.25" stroke="currentColor" strokeWidth={CLOCK_ICON_STROKE_WIDTH} />
+    <path d="M12 7.75V12.5L15.2 14.1" stroke="currentColor" strokeWidth={CLOCK_ICON_STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
