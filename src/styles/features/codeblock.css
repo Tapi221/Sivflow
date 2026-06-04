@@ -88,6 +88,16 @@
     white-space: pre;
   }
 
+  .codeBlockPre::selection,
+  .codeBlockPre *::selection {
+    background-color: rgba(var(--color-primary-600), 0.14);
+  }
+
+  .codeBlockPre::-moz-selection,
+  .codeBlockPre *::-moz-selection {
+    background-color: rgba(var(--color-primary-600), 0.14);
+  }
+
   .codeBlockLang {
     max-width: 120px;
     overflow: hidden;
