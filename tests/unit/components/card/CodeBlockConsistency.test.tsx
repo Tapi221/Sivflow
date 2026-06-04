@@ -13,8 +13,8 @@ afterEach(() => {
 
 const LONG_LINE = `const veryLongLine = "${"x".repeat(240)}";`;
 
-describe("Code block consistency", () => {
-  it("long single-line code keeps no-wrap and horizontal scroll classes", () => {
+describe("コードブロックの表示構造の一貫性", () => {
+  it("長い1行コードは折り返さず横スクロール用クラスを維持する", () => {
     const { container } = render(
       <BlockRenderer
         blocks={[
@@ -41,7 +41,7 @@ describe("Code block consistency", () => {
     expect(code?.textContent ?? "").toContain(LONG_LINE);
   });
 
-  it("editor/view/preview use the same CodeBlockFrame structure", () => {
+  it("編集・表示・プレビューで同じ CodeBlockFrame 構造を使う", () => {
     const edit = render(
       <CodeBlockEditor
         value={{ language: "javascript", code: "const a = 1;" }}
@@ -92,7 +92,7 @@ describe("Code block consistency", () => {
     expect(edit.container.querySelector(".codeBlockLang")).toBeNull();
   });
 
-  it("editor contract keeps width-expanding host (no w-full) for horizontal scroll parity", () => {
+  it("横スクロールの一致のためエディターホストは w-full なしで幅を広げられる", () => {
     const { container } = render(
       <CodeBlockEditor
         value={{ language: "javascript", code: LONG_LINE }}
@@ -110,7 +110,7 @@ describe("Code block consistency", () => {
     expect(textarea?.className ?? "").toContain("code-no-wrap");
   });
 
-  it("code block item keeps outer wrapper spacing neutralized", () => {
+  it("コードブロック項目は外側ラッパーの余白を無効化したままにする", () => {
     const { container } = render(
       <CodeBlockItem
         data={{ language: "javascript", code: "const z = 1;" }}
@@ -126,7 +126,7 @@ describe("Code block consistency", () => {
     expect(wrapper?.className ?? "").toContain("border-0");
   });
 
-  it("viewer code block is not clipped by block wrapper overflow", () => {
+  it("閲覧側コードブロックはブロックラッパーの overflow で切り抜かれない", () => {
     const { container } = render(
       <BlockRenderer
         blocks={[
