@@ -24,7 +24,6 @@ export type CalendarTimeGridLayoutOptions = {
   rangeEnd: Date;
   layoutMode?: CalendarTimeGridLayoutMode;
   includeAllDayEvents?: boolean;
-  minimumEventDurationMinutes?: number;
   minimumStartDifferenceMinutes?: number;
 };
 
@@ -54,9 +53,9 @@ type NoOverlapLayoutEntry = CalendarTimeGridLayoutEntry & {
   size?: number;
 };
 
-const DEFAULT_MINIMUM_EVENT_DURATION_MINUTES = 1;
 const DEFAULT_MINIMUM_START_DIFFERENCE_MINUTES = 30;
 const MINUTES_IN_MS = 60_000;
+const MINIMUM_EVENT_DURATION_MS = 1;
 const PERCENT_MAX = 100;
 
 const getDateTime = (date: Date): number => date instanceof Date ? date.getTime() : Number.NaN;
@@ -86,24 +85,13 @@ const compareEventsForLayout = (a: CalendarEvent, b: CalendarEvent): number => {
   return compareText(`${a.calendarId}:${a.id}`, `${b.calendarId}:${b.id}`);
 };
 
-const createTimeGridProxy = ({
-  event,
-  rangeStartMs,
-  rangeEndMs,
-  minimumEventDurationMinutes,
-}: {
-  event: CalendarEvent;
-  rangeStartMs: number;
-  rangeEndMs: number;
-  minimumEventDurationMinutes: number;
-}): TimeGridLayoutProxy | null => {
+const createTimeGridProxy = ({ event, rangeStartMs, rangeEndMs }: { event: CalendarEvent; rangeStartMs: number; rangeEndMs: number }): TimeGridLayoutProxy | null => {
   const rawStartMs = getDateTime(event.startsAt);
   const rawEndMs = getDateTime(event.endsAt);
 
   if (!isFiniteTime(rawStartMs) || !isFiniteTime(rawEndMs)) return null;
 
-  const minimumDurationMs = Math.max(1, minimumEventDurationMinutes) * MINUTES_IN_MS;
-  const normalizedEndMs = Math.max(rawEndMs, rawStartMs + minimumDurationMs);
+  const normalizedEndMs = Math.max(rawEndMs, rawStartMs + MINIMUM_EVENT_DURATION_MS);
 
   if (rawStartMs >= rangeEndMs || normalizedEndMs <= rangeStartMs) return null;
 
@@ -400,7 +388,6 @@ export const layoutCalendarTimeGridEvents = ({
   rangeEnd,
   layoutMode = "overlap",
   includeAllDayEvents = false,
-  minimumEventDurationMinutes = DEFAULT_MINIMUM_EVENT_DURATION_MINUTES,
   minimumStartDifferenceMinutes = DEFAULT_MINIMUM_START_DIFFERENCE_MINUTES,
 }: CalendarTimeGridLayoutOptions): CalendarTimeGridLayoutEntry[] => {
   const rangeStartMs = getDateTime(rangeStart);
@@ -417,7 +404,6 @@ export const layoutCalendarTimeGridEvents = ({
         event,
         rangeStartMs,
         rangeEndMs,
-        minimumEventDurationMinutes,
       }),
     )
     .filter((proxy): proxy is TimeGridLayoutProxy => proxy !== null);
