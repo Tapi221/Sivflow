@@ -1,0 +1,7 @@
+@layer components {
+  @media print {
+    @page {
+      size: portrait;
+    }
+  }
+}
