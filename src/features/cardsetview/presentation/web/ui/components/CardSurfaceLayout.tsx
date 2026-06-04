@@ -21,8 +21,8 @@ export type CardSurfaceLayoutProps = {
 
 const SPLIT_INNER_SHADOW_CLIP_PX = 120;
 const STACK_INNER_SHADOW_CLIP_PX = 120;
-const SPLIT_DIVIDER_COVER_WIDTH_PX = 2;
-const SPLIT_DIVIDER_LINE_WIDTH_PX = 0.5;
+const SURFACE_DIVIDER_COVER_SIZE_PX = 2;
+const SURFACE_DIVIDER_LINE_SIZE_PX = 0.5;
 
 export const CardSurfaceFaceAnchor = ({
   face,
@@ -91,6 +91,25 @@ export const CardSurfaceLayout = ({
         {questionNode}
       </div>
 
+      {!isSplitLayout ? (
+        <div
+          aria-hidden
+          className="pointer-events-none relative z-30 w-full bg-white"
+          style={{
+            height: `${SURFACE_DIVIDER_COVER_SIZE_PX}px`,
+            marginBlock: `-${SURFACE_DIVIDER_COVER_SIZE_PX / 2}px`,
+          }}
+        >
+          <div
+            className="absolute inset-x-0 top-1/2 -translate-y-1/2"
+            style={{
+              height: `${SURFACE_DIVIDER_LINE_SIZE_PX}px`,
+              background: "var(--card-border-default, rgba(15, 23, 42, 0.08))",
+            }}
+          />
+        </div>
+      ) : null}
+
       <div
         className="card-surface-layout__slot card-surface-layout__slot--answer relative min-w-0 overflow-visible"
         style={rightSlotStyle}
@@ -102,12 +121,12 @@ export const CardSurfaceLayout = ({
         <div
           aria-hidden
           className="pointer-events-none absolute inset-y-0 left-1/2 z-30 -translate-x-1/2 bg-white"
-          style={{ width: `${SPLIT_DIVIDER_COVER_WIDTH_PX}px` }}
+          style={{ width: `${SURFACE_DIVIDER_COVER_SIZE_PX}px` }}
         >
           <div
             className="absolute inset-y-0 left-1/2 -translate-x-1/2"
             style={{
-              width: `${SPLIT_DIVIDER_LINE_WIDTH_PX}px`,
+              width: `${SURFACE_DIVIDER_LINE_SIZE_PX}px`,
               background: "var(--card-border-default, rgba(15, 23, 42, 0.08))",
             }}
           />
