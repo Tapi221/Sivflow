@@ -16,6 +16,15 @@ type UseCardsReadOptions = {
 
 type CardSetById = ReturnType<typeof buildCardSetById>;
 
+type CardsReadSnapshot = {
+  key: string;
+  rawCards: unknown[];
+};
+
+const buildCardsReadKey = ({ enabled, userId, folderId, cardSetId }: { enabled: boolean; userId: string | null; folderId?: string; cardSetId?: string }) => {
+  return JSON.stringify([enabled, userId, folderId ?? null, cardSetId ?? null]);
+};
+
 const isCardDeleted = (
   card: Partial<Card> & {
     is_deleted?: boolean;
@@ -124,17 +133,18 @@ export const useCardsRead = (
   const isUnscopedRead = !folderId && !cardSetId;
   const shouldSkipUnscopedRead = isUnscopedRead && (hasCardSetRouteParam(search) || isActiveWorkspaceCardSetSelected);
   const enabled = (options?.enabled ?? true) && !shouldSkipUnscopedRead;
+  const readKey = useMemo(() => buildCardsReadKey({ enabled, userId, folderId, cardSetId }), [cardSetId, enabled, folderId, userId]);
 
-  const rawCards = useLiveQuery(async () => {
+  const cardsSnapshot = useLiveQuery(async (): Promise<CardsReadSnapshot | undefined> => {
     try {
-      if (!enabled) return [];
+      if (!enabled) return { key: readKey, rawCards: [] };
       if (!userId) return undefined;
 
       const db = await getLocalDb(userId);
 
       if (cardSetId) {
         try {
-          return await db.cards.where("cardSetId").equals(cardSetId).toArray();
+          return { key: readKey, rawCards: await db.cards.where("cardSetId").equals(cardSetId).toArray() };
         } catch (indexError) {
           console.warn(
             "[useCardsRead] cardSetId index query failed. Falling back to full scan.",
@@ -156,13 +166,10 @@ export const useCardsRead = (
           const siblingSetIds = siblingSets.map((set) => set.id);
 
           if (siblingSetIds.length === 0) {
-            return [];
+            return { key: readKey, rawCards: [] };
           }
 
-          return await db.cards
-            .where("cardSetId")
-            .anyOf(siblingSetIds)
-            .toArray();
+          return { key: readKey, rawCards: await db.cards.where("cardSetId").anyOf(siblingSetIds).toArray() };
         } catch (indexError) {
           console.warn(
             "[useCardsRead] folder/cardSet index query failed. Falling back to full scan.",
@@ -171,14 +178,15 @@ export const useCardsRead = (
         }
       }
 
-      return await db.getAllCards();
+      return { key: readKey, rawCards: await db.getAllCards() };
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       console.error(`[useCardsRead] Error: ${message}`);
-      return [];
+      return { key: readKey, rawCards: [] };
     }
-  }, [userId, folderId, cardSetId, enabled]);
+  }, [userId, folderId, cardSetId, enabled, readKey]);
 
+  const rawCards = cardsSnapshot?.key === readKey ? cardsSnapshot.rawCards : undefined;
   const shouldReadCardSets = enabled && !cardSetId && Boolean(folderId);
 
   const rawCardSets = useLiveQuery(
