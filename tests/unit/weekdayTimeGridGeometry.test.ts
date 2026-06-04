@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle } from "../../src/features/calendar/grid/weekdayTimeGridGeometry";
-import { DEFAULT_HOUR_ROW_HEIGHT } from "../../src/features/calendar/calendar.constants.desktop";
+import { getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle } from "../../src/features/calendar/grid/weekdayTimeGridGeometry";
 import { WEEKDAY_HOURS, WEEKDAY_MINUTES_PER_HOUR } from "../../src/features/calendar/grid/grid.layout.constants.desktop";
 import { layoutCalendarTimeGridEvents } from "../../packages/core/src/calendar/timeGridLayout";
 import type { CalendarEvent } from "../../packages/core/src/calendar/calendarEvent.types";
 import type { CalendarTimeGridLayoutEntry } from "../../packages/core/src/calendar/timeGridLayout";
 
-const WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES = Math.ceil((WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX / DEFAULT_HOUR_ROW_HEIGHT) * WEEKDAY_MINUTES_PER_HOUR);
 const NEXT_DAY_PREVIEW_MINUTES = 30;
 const NEXT_DAY_PREVIEW_HOURS = NEXT_DAY_PREVIEW_MINUTES / WEEKDAY_MINUTES_PER_HOUR;
+const DEFAULT_MIN_HEIGHT_STYLE = "17.5px";
 
 const buildEvent = ({
   id,
@@ -49,7 +48,6 @@ describe("weekday time grid geometry", () => {
       rangeStart: new Date(2026, 3, 12, 0, 0),
       rangeEnd: new Date(2026, 3, 13, 0, 0),
       layoutMode: "no-overlap",
-      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
     });
 
     const frame = getWeekdayTimedEventFrame(entry);
@@ -59,7 +57,7 @@ describe("weekday time grid geometry", () => {
     expect(entry.endsAfterRange).toBe(true);
     expect(frame.topHours).toBeCloseTo(23 + 55 / 60, 6);
     expect(frame.heightHours).toBeCloseTo(5 / 60, 6);
-    expect(defaultStyle.minHeight).toBe("18px");
+    expect(defaultStyle.minHeight).toBe(DEFAULT_MIN_HEIGHT_STYLE);
     expect(suppressedStyle.minHeight).toBe("0px");
   });
 
@@ -75,7 +73,6 @@ describe("weekday time grid geometry", () => {
       rangeStart: new Date(2026, 3, 13, 0, 0),
       rangeEnd: new Date(2026, 3, 13, 0, 30),
       layoutMode: "no-overlap",
-      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
     });
 
     const frame = getWeekdayTimedEventFrame(entry, NEXT_DAY_PREVIEW_HOURS);
@@ -86,8 +83,8 @@ describe("weekday time grid geometry", () => {
     expect(frame.topHours).toBe(0);
     expect(frame.heightHours).toBeCloseTo(0.5, 6);
     expect(style.top).toBe("calc(0 * var(--calendar-hour-row-height))");
-    expect(style.height).toBe("calc(0.5 * var(--calendar-hour-row-height))");
-    expect(style.minHeight).toBe("18px");
+    expect(style.height).toBe("calc(0.5 * var(--calendar-hour-row-height) - 0.5px)");
+    expect(style.minHeight).toBe(DEFAULT_MIN_HEIGHT_STYLE);
   });
 
   it("24:00 以降プレビューは前日から継続する event を高さ 0 にして重複表示しない", () => {
@@ -102,7 +99,6 @@ describe("weekday time grid geometry", () => {
       rangeStart: new Date(2026, 3, 13, 0, 0),
       rangeEnd: new Date(2026, 3, 13, 0, 30),
       layoutMode: "no-overlap",
-      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
     });
 
     const frame = getWeekdayTimedEventFrame(entry, NEXT_DAY_PREVIEW_HOURS);
@@ -130,7 +126,6 @@ describe("weekday time grid geometry", () => {
       rangeStart: new Date(2026, 3, 12, 0, 0),
       rangeEnd: new Date(2026, 3, 13, 0, 0),
       layoutMode: "no-overlap",
-      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
     });
     const [afterMidnightEntry] = layoutCalendarTimeGridEvents({
       events: [
@@ -143,7 +138,6 @@ describe("weekday time grid geometry", () => {
       rangeStart: new Date(2026, 3, 13, 0, 0),
       rangeEnd: new Date(2026, 3, 13, 0, 30),
       layoutMode: "no-overlap",
-      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
     });
 
     const beforeMidnightFrame = getWeekdayTimedEventFrame(beforeMidnightEntry);
@@ -168,10 +162,27 @@ describe("weekday time grid geometry", () => {
       rangeStart: new Date(2026, 3, 13, 0, 0),
       rangeEnd: new Date(2026, 3, 13, 0, 30),
       layoutMode: "no-overlap",
-      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
     });
 
     expect(entries).toEqual([]);
+  });
+
+  it("次の event までの隙間が小さい場合は minHeight をその範囲内に制限する", () => {
+    const [entry] = layoutCalendarTimeGridEvents({
+      events: [
+        buildEvent({
+          id: "short-a",
+          startsAt: new Date(2026, 3, 12, 9, 0),
+          endsAt: new Date(2026, 3, 12, 9, 5),
+        }),
+      ],
+      rangeStart: new Date(2026, 3, 12, 0, 0),
+      rangeEnd: new Date(2026, 3, 13, 0, 0),
+      layoutMode: "no-overlap",
+    });
+    const style = getWeekdayTimedEventPositionStyle(entry, WEEKDAY_HOURS, { maxMinHeightHours: 6 / WEEKDAY_MINUTES_PER_HOUR });
+
+    expect(style.minHeight).toBe("max(0px, min(17.5px, calc(0.1 * var(--calendar-hour-row-height) - 0.5px)))");
   });
 
   it("24:00 前後の overlap event は同じ横並び column を割り当てる", () => {
@@ -191,7 +202,6 @@ describe("weekday time grid geometry", () => {
       rangeStart: new Date(2026, 3, 12, 0, 0),
       rangeEnd: new Date(2026, 3, 13, 0, 0),
       layoutMode: "no-overlap",
-      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
     });
     const afterMidnightEntries = layoutCalendarTimeGridEvents({
       events: [
@@ -209,7 +219,6 @@ describe("weekday time grid geometry", () => {
       rangeStart: new Date(2026, 3, 13, 0, 0),
       rangeEnd: new Date(2026, 3, 13, 0, 30),
       layoutMode: "no-overlap",
-      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
     });
 
     const beforeA = getEntryById(beforeMidnightEntries, "before-a");
