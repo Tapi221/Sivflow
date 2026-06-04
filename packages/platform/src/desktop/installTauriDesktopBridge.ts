@@ -55,6 +55,9 @@ const desktopApi: DesktopBridgeApi = {
       };
     },
   },
+  pdf: {
+    openInSioyek: (input) => invoke("pdf_open_in_sioyek", { input }),
+  },
   oauth: {
     start: (authorizeUrl: string) => invoke<void>("oauth_start", { authorizeUrl }),
     cancel: () => invoke<void>("oauth_cancel"),
