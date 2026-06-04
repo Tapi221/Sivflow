@@ -15,7 +15,7 @@ import { CALENDAR_EVENT_DRAGGING_STYLE, areSameCalendarEventTimes, createCalenda
 import type { CalendarEventDragPointerSnapshot } from "./calendarEventDrag.shared";
 import * as COLOR from "./grid.color.constants.desktop";
 import * as GRID from "./grid.layout.constants.desktop";
-import { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventPositionStyle } from "./weekdayTimeGridGeometry";
+import { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle } from "./weekdayTimeGridGeometry";
 
 export type CalendarWeekDayGridRef = { scrollToHour: (hour: number) => void };
 
@@ -95,7 +95,27 @@ const getHeaderDateNumberClassName = (isSelected: boolean, isToday: boolean): st
 
 const getViewportGridTemplateColumns = (dayCount: number): string => `${C.TIME_COLUMN_WIDTH}px repeat(${dayCount}, minmax(0, 1fr))`;
 
-const getTimedEntryPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours: number): CSSProperties => getWeekdayTimedEventPositionStyle(entry, rangeHours, { suppressMinHeight: shouldSuppressEntryMinHeight(entry) });
+const doEntriesOverlapHorizontally = (entry: CalendarTimeGridLayoutEntry, nextEntry: CalendarTimeGridLayoutEntry): boolean => {
+  const entryLeft = entry.style.xOffset;
+  const entryRight = entry.style.xOffset + entry.style.width;
+  const nextEntryLeft = nextEntry.style.xOffset;
+  const nextEntryRight = nextEntry.style.xOffset + nextEntry.style.width;
+
+  return entryLeft < nextEntryRight && nextEntryLeft < entryRight;
+};
+
+const getTimedEntryMaxMinHeightHours = (entry: CalendarTimeGridLayoutEntry, entries: readonly CalendarTimeGridLayoutEntry[], rangeHours: number): number | undefined => {
+  const frame = getWeekdayTimedEventFrame(entry, rangeHours);
+  const nextEntry = entries
+    .filter((candidate) => candidate !== entry && doEntriesOverlapHorizontally(entry, candidate))
+    .map((candidate) => getWeekdayTimedEventFrame(candidate, rangeHours))
+    .filter((candidateFrame) => candidateFrame.topHours > frame.topHours)
+    .sort((a, b) => a.topHours - b.topHours)[0];
+
+  return nextEntry ? Math.max(0, nextEntry.topHours - frame.topHours) : undefined;
+};
+
+const getTimedEntryPositionStyle = (entry: CalendarTimeGridLayoutEntry, entries: readonly CalendarTimeGridLayoutEntry[], rangeHours: number): CSSProperties => getWeekdayTimedEventPositionStyle(entry, rangeHours, { maxMinHeightHours: getTimedEntryMaxMinHeightHours(entry, entries, rangeHours), suppressMinHeight: shouldSuppressEntryMinHeight(entry) });
 
 const getAllDayEventWrapperClassName = (isDraggable: boolean, isDragging: boolean, isPreview = false): string => cn(WEEKDAY_ALL_DAY_EVENT_WRAPPER_CLASS_NAME, isDraggable ? "touch-none cursor-grab select-none active:cursor-grabbing" : null, isDragging ? "opacity-35" : null, isPreview ? "pointer-events-none transition-none" : null);
 
@@ -586,7 +606,7 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
                   const isDraggable = isCalendarEventDraggable(entry.event, onMoveCalendarEvent);
 
                   return (
-                    <div key={eventKey} className={getTimedEventWrapperClassName(isDraggable, isDragging)} style={getTimedEntryPositionStyle(entry, WEEKDAY_TIMELINE_RANGE_HOURS)} onPointerDown={isDraggable ? (event) => handleTimedEventPointerDown(event, entry.event, day) : undefined}>
+                    <div key={eventKey} className={getTimedEventWrapperClassName(isDraggable, isDragging)} style={getTimedEntryPositionStyle(entry, events, WEEKDAY_TIMELINE_RANGE_HOURS)} onPointerDown={isDraggable ? (event) => handleTimedEventPointerDown(event, entry.event, day) : undefined}>
                       <CalendarEventChipWeekday event={entry.event} tooltipDisabled={isDragging} />
                     </div>
                   );
