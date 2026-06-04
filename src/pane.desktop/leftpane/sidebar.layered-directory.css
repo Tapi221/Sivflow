@@ -289,7 +289,10 @@
   min-height: 28px !important;
   border-radius: 7px !important;
   color: var(--app-layered-directory-muted-text) !important;
-  font-size: 13px !important;
+  font-family: var(--app-font-family-sidebar) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
   line-height: 28px !important;
 }
 
@@ -300,6 +303,14 @@
   gap: 7px !important;
   border-radius: 7px !important;
   color: inherit !important;
+}
+
+.app-layered-directory [aria-label="Project list explorer"] [role="treeitem"] > button:last-child > span,
+.app-layered-directory [aria-label="Library hierarchy explorer"] [role="treeitem"] > button:last-child > span {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 15px !important;
 }
 
 .app-layered-directory .library-tree-marker {
