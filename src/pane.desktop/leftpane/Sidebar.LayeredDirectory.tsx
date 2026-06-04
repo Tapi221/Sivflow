@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
+import { TagFilterPopover } from "@/chip/popover/TagFilterPopover";
 import { RightClickPanelSurface } from "@/chip/rightclickpanel.desktop/rightClickPanelCommon";
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
@@ -66,6 +67,7 @@ const DEFAULT_NEW_TAG_NAME = "新規タグ";
 const ADD_PROJECT_ARIA_LABEL = "プロジェクトを追加";
 const ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL = "選択中のフォルダに追加";
 const ADD_TAG_ARIA_LABEL = "タグを追加";
+const FILTER_ARIA_LABEL = "絞り込みを開く";
 const PROJECT_ADD_MENU_PANEL_ID = "layered-project-add-menu";
 const PROJECT_ADD_MENU_ITEM_DEFINITIONS: readonly ProjectAddMenuItemDefinition[] = [
   { id: "create-folder", label: "新規フォルダ" },
@@ -307,6 +309,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
                 ) : (
                   <h2 className="app-layered-directory__section-heading">{sectionLabel}</h2>
                 )}
+                <TagFilterPopover allTags={existingTagNames} ariaLabel={FILTER_ARIA_LABEL} className="app-layered-directory__add-button" />
                 {folderTagMode === "tag" ? (
                   <button type="button" onClick={handleCreateRootTag} aria-label={ADD_TAG_ARIA_LABEL} title={ADD_TAG_ARIA_LABEL} className="app-layered-directory__add-button">
                     <IconPlus className="h-4 w-4" />
