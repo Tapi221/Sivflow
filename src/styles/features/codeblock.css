@@ -275,6 +275,16 @@
     caret-color: var(--code-caret, var(--code-fg));
   }
 
+  .code-editor-no-scroll textarea::selection {
+    background: rgba(var(--color-primary-600), 0.18);
+    color: transparent;
+  }
+
+  .code-editor-no-scroll textarea::-moz-selection {
+    background: rgba(var(--color-primary-600), 0.18);
+    color: transparent;
+  }
+
   .code-editor-no-scroll pre {
     background: transparent;
     pointer-events: none;
