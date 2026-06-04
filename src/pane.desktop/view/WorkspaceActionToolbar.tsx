@@ -1,10 +1,11 @@
-import { memo, type SVGProps } from "react";
+import { memo, type CSSProperties, type SVGProps } from "react";
 
 import { Clock, Star } from "@/ui/icons";
 
 
 type WorkspaceActionToolbarProps = {
   className?: string;
+  style?: CSSProperties;
 };
 
 type ToolbarIconProps = SVGProps<SVGSVGElement>;
@@ -67,9 +68,9 @@ const renderActionIcon = (action: WorkspaceAction) => {
   return <MoreIcon className={ICON_CLASS_NAME} />;
 };
 
-const WorkspaceActionToolbarComponent = ({ className }: WorkspaceActionToolbarProps) => {
+const WorkspaceActionToolbarComponent = ({ className, style }: WorkspaceActionToolbarProps) => {
   return (
-    <div className={getToolbarClassName(className)} aria-label="ワークスペース操作" role="toolbar">
+    <div className={getToolbarClassName(className)} style={style} aria-label="ワークスペース操作" role="toolbar">
       {ACTIONS.map((action) => (
         <button key={action.key} type="button" className={action.key === "share" ? SHARE_BUTTON_CLASS_NAME : ACTION_BUTTON_CLASS_NAME} aria-label={action.label} title={action.label}>
           {renderActionIcon(action)}
