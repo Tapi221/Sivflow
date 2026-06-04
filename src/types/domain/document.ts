@@ -3,7 +3,7 @@ import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 
 export type DocumentKind = "pdf";
 export type PdfPageLayoutMode = "single" | "double";
-export type PdfSidePanelTab = "bookmarks" | "outline" | "ocr" | "thumbnails";
+export type PdfSidePanelTab = "bookmarks" | "highlights" | "ocr" | "outline" | "thumbnails";
 
 export interface PdfViewerState {
   currentPage?: number;
