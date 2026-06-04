@@ -10,7 +10,7 @@
     --task-checkbox-fill-color: var(--markdown-text-color);
     --task-checkbox-check-color: var(--card-surface, #ffffff);
     --task-checkbox-offset-y: 1px;
-    --markdown-blank-line-height: 24px;
+    --markdown-blank-line-height: 0.5px;
   }
 
   .markdownBlockCardView > :where(* + *) {
