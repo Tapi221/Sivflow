@@ -1,12 +1,12 @@
-import { LOCALDB_ERROR_MESSAGE_LIMIT } from "@constants/shared/storage";
 import { applyInMemorySyncCompat } from "./applyInMemorySyncCompat";
 import type { LocalDBFallbackReasonCode } from "@/services/localDBRuntimeState";
 
-applyInMemorySyncCompat();
+type UnknownRecord = Record<string, unknown>;
 
+const LOCALDB_ERROR_MESSAGE_LIMIT = 400;
 const MAX_ERROR_NESTING_DEPTH = 4;
 
-type UnknownRecord = Record<string, unknown>;
+applyInMemorySyncCompat();
 
 const isObject = (value: unknown): value is UnknownRecord =>
   typeof value === "object" && value !== null;
