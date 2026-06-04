@@ -13,6 +13,7 @@ export const isRowPositionableType = (type: CardBlock["type"]) =>
   type === "question" ||
   type === "code" ||
   type === "image" ||
+  type === "pdf" ||
   type === "math" ||
   type === "markdown";
 
