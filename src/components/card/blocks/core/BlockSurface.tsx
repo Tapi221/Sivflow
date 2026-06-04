@@ -1,5 +1,6 @@
 import React from "react";
 import { RuledLayer } from "@/components/card/frame/RuledLayer";
+import type { RuledStyleKind } from "@/components/card/frame/ruledStyles";
 import { cn } from "@/lib/utils";
 
 type CSSVarStyle = React.CSSProperties &
@@ -14,6 +15,7 @@ type BlockSurfaceProps = {
   padLeftRows?: number;
   padRightRows?: number;
   ruled?: boolean;
+  ruledKind?: RuledStyleKind;
   ruledRowPx?: number;
   ruledOpacity?: number | string;
   ruledOffsetPx?: number;
@@ -32,6 +34,7 @@ export const BlockSurface = ({
   padLeftRows = 0,
   padRightRows = 0,
   ruled = true,
+  ruledKind = "repeat-only",
   ruledRowPx = 24,
   ruledOpacity,
   ruledOffsetPx = 0,
@@ -74,7 +77,7 @@ export const BlockSurface = ({
     >
       {ruled ? (
         <RuledLayer
-          kind="repeat-only"
+          kind={ruledKind}
           ruledOpacity={ruledOpacity}
           ruledRowPx={ruledRowPx}
           ruledOffsetPx={ruledOffsetPx}
