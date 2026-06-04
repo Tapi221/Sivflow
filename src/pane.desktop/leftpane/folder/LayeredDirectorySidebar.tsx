@@ -47,6 +47,7 @@ const LAYERED_PROJECT_MENU_DIMENSIONS = { width: LAYERED_PROJECT_MENU_WIDTH, hei
 const LAYERED_PROJECT_SUBMENU_OVERLAP_PX = 6;
 const FOLDER_DND_MIME_TYPE = "application/x-manifolia-folder-id";
 const FOLDER_DROP_EDGE_RATIO = 0.24;
+const FOLDER_DROP_INSIDE_INTENT_OFFSET_PX = 76;
 const FOLDER_AUTO_EXPAND_DELAY_MS = 520;
 const FOLDER_DRAG_IMAGE_OFFSET_X = 18;
 const FOLDER_DRAG_IMAGE_OFFSET_Y = 16;
@@ -85,13 +86,20 @@ const getRootFolderIds = (rootFolders: FolderTreeNode[]): string[] => rootFolder
 
 const isDropInstructionEqual = (left: FolderDropInstruction | null, right: FolderDropInstruction | null): boolean => left?.sourceId === right?.sourceId && left?.targetId === right?.targetId && left?.position === right?.position && left?.parentFolderId === right?.parentFolderId;
 
+const getFolderDropInlineOffset = (element: HTMLElement): number => {
+  const paddingLeft = Number.parseFloat(element.style.paddingLeft);
+  return Number.isFinite(paddingLeft) ? paddingLeft : 0;
+};
+
 const getFolderDropPosition = (event: ReactDragEvent<HTMLElement>): FolderDropPosition => {
   const rect = event.currentTarget.getBoundingClientRect();
   const offsetY = event.clientY - rect.top;
+  const offsetX = event.clientX - rect.left;
+  const insideIntentX = getFolderDropInlineOffset(event.currentTarget) + FOLDER_DROP_INSIDE_INTENT_OFFSET_PX;
+  const isInsideIntent = offsetX >= insideIntentX && offsetY > rect.height * FOLDER_DROP_EDGE_RATIO && offsetY < rect.height * (1 - FOLDER_DROP_EDGE_RATIO);
 
-  if (offsetY <= rect.height * FOLDER_DROP_EDGE_RATIO) return "before";
-  if (offsetY >= rect.height * (1 - FOLDER_DROP_EDGE_RATIO)) return "after";
-  return "inside";
+  if (isInsideIntent) return "inside";
+  return offsetY < rect.height / 2 ? "before" : "after";
 };
 
 const getFolderDropParentId = (targetFolder: FolderTreeNode, targetId: string, position: FolderDropPosition): string | null => position === "inside" ? targetId : getParentFolderId(targetFolder);
@@ -272,6 +280,7 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
   const autoExpandTargetRef = useRef<string | null>(null);
   const autoScrollFrameRef = useRef<number | null>(null);
   const autoScrollStepRef = useRef(0);
+  const draggingFolderIdRef = useRef<string | null>(null);
   const [draggingFolderId, setDraggingFolderId] = useState<string | null>(null);
   const [dropInstruction, setDropInstruction] = useState<FolderDropInstruction | null>(null);
 
@@ -320,6 +329,7 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
   }, []);
 
   const clearDragState = useCallback(() => {
+    draggingFolderIdRef.current = null;
     clearAutoExpandTimer();
     stopAutoScroll();
     setDraggingFolderId(null);
@@ -330,6 +340,8 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
     clearAutoExpandTimer();
     setDropInstruction(null);
   }, [clearAutoExpandTimer]);
+
+  const getDraggingFolderId = useCallback(() => draggingFolderIdRef.current ?? draggingFolderId, [draggingFolderId]);
 
   const scheduleAutoExpand = useCallback((instruction: FolderDropInstruction) => {
     if (instruction.position !== "inside" || !instruction.targetId) {
@@ -347,7 +359,7 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
   }, [clearAutoExpandTimer, setExpandedFolderIds]);
 
   const getValidDropInstruction = useCallback((event: ReactDragEvent<HTMLElement>, targetId: string): FolderDropInstruction | null => {
-    const sourceId = draggingFolderId;
+    const sourceId = getDraggingFolderId();
     if (!sourceId || sourceId === targetId) return null;
 
     const sourceFolder = folderMap.get(sourceId);
@@ -359,15 +371,15 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
     if (isFolderAncestorOf(sourceId, parentFolderId, getChildFolders)) return null;
 
     return { sourceId, targetId, position, parentFolderId };
-  }, [draggingFolderId, folderMap, getChildFolders]);
+  }, [folderMap, getChildFolders, getDraggingFolderId]);
 
   const getValidAppendDropInstruction = useCallback((): FolderDropInstruction | null => {
-    const sourceId = draggingFolderId;
+    const sourceId = getDraggingFolderId();
     if (!sourceId) return null;
     if (!folderMap.has(sourceId)) return null;
     if (isFolderAncestorOf(sourceId, rootDropParentId, getChildFolders)) return null;
     return { sourceId, targetId: null, position: "append", parentFolderId: rootDropParentId };
-  }, [draggingFolderId, folderMap, getChildFolders, rootDropParentId]);
+  }, [folderMap, getChildFolders, getDraggingFolderId, rootDropParentId]);
 
   const commitFolderDrop = useCallback(async (instruction: FolderDropInstruction) => {
     const sourceFolder = folderMap.get(instruction.sourceId);
@@ -402,6 +414,7 @@ const useFolderDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, 
     event.dataTransfer.setData(FOLDER_DND_MIME_TYPE, folderId);
     event.dataTransfer.setData("text/plain", folderId);
     applyFolderDragPreview(event);
+    draggingFolderIdRef.current = folderId;
     setDraggingFolderId(folderId);
   }, []);
 
