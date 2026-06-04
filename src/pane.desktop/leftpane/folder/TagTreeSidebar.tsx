@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from "react";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent as ReactDragEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from "react";
+import { useTagTreeCommands } from "@/features/settings/hooks/useTagTreeCommands";
 import { useTags, type Tag as TagRecord } from "@/features/settings/hooks/useTags";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
-import { getLocalDb } from "@/services/localDB";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { StratisTagIcon } from "@/ui/icons/stratis";
 import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_LEVEL, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LayeredTreeDropIndicator, getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget, useLayeredTreeDragDrop, type LayeredTreeDragState } from "./layeredTreeDnd";
@@ -32,11 +31,11 @@ type TagTreeRowProps = {
   dragState: LayeredTreeDragState;
   onToggleTag: (tagId: string) => void;
   onSelectTag: (tagName: string) => void;
-  onTagDragStart: ReturnType<typeof useLayeredTreeDragDrop<TagTreeNode>>["handleItemDragStart"];
-  onTagDragOver: ReturnType<typeof useLayeredTreeDragDrop<TagTreeNode>>["handleItemDragOver"];
-  onTagDragLeave: ReturnType<typeof useLayeredTreeDragDrop<TagTreeNode>>["handleItemDragLeave"];
-  onTagDrop: ReturnType<typeof useLayeredTreeDragDrop<TagTreeNode>>["handleItemDrop"];
-  onTagDragEnd: ReturnType<typeof useLayeredTreeDragDrop<TagTreeNode>>["handleItemDragEnd"];
+  onTagDragStart: (event: ReactDragEvent<HTMLElement>, tagId: string) => void;
+  onTagDragOver: (event: ReactDragEvent<HTMLElement>, tagId: string) => void;
+  onTagDragLeave: (event: ReactDragEvent<HTMLElement>, tagId: string) => void;
+  onTagDrop: (event: ReactDragEvent<HTMLElement>, tagId: string) => void;
+  onTagDragEnd: () => void;
 };
 
 type TagMovePatch = {
@@ -56,10 +55,7 @@ const getTagName = (tag: TagRecord): string => {
 
 const getTagParentId = (tag: TagRecord): string | null => typeof tag.parentId === "string" && tag.parentId.trim().length > 0 ? tag.parentId : null;
 
-const getTagOrderIndex = (tag: TagRecord): number => {
-  const orderIndex = (tag as TagRecord & { orderIndex?: unknown }).orderIndex;
-  return typeof orderIndex === "number" && Number.isFinite(orderIndex) ? orderIndex : 0;
-};
+const getTagOrderIndex = (tag: TagRecord): number => typeof tag.orderIndex === "number" && Number.isFinite(tag.orderIndex) ? tag.orderIndex : 0;
 
 const compareTagTreeNodes = (left: TagTreeNode, right: TagTreeNode): number => {
   if (left.orderIndex !== right.orderIndex) return left.orderIndex - right.orderIndex;
@@ -156,21 +152,12 @@ const TagTreeRow = ({ item, selectedTagNames, dragState, onToggleTag, onSelectTa
     selectTag();
   };
 
-  return (
-    <div data-tag-id={item.id}>
-      <div role="treeitem" tabIndex={0} aria-level={item.level} aria-expanded={item.hasChildren ? item.isExpanded : undefined} aria-selected={isSelected} aria-grabbed={isDragging || undefined} draggable data-layered-tree-row="true" onClick={handleRowClick} onKeyDown={handleRowKeyDown} onDragStart={(event) => onTagDragStart(event, item.id)} onDragEnter={(event) => onTagDragOver(event, item.id)} onDragOver={(event) => onTagDragOver(event, item.id)} onDragLeave={(event) => onTagDragLeave(event, item.id)} onDrop={(event) => onTagDrop(event, item.id)} onDragEnd={onTagDragEnd} data-tag-drop-position={dropPosition ?? undefined} className={cn("group/directory-tree-row relative flex h-8 cursor-grab items-center gap-2 rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)] transition-[background,box-shadow,opacity,transform] duration-150 hover:bg-[#eeeeee] active:cursor-grabbing focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]", isSelected && "bg-[#e9e9e9]", isDragging && "scale-[0.995] opacity-35", dropPosition === "inside" && "bg-[#e2e2e2] shadow-[inset_0_0_0_1px_#c7c7c7]")} style={{ paddingLeft: rowPaddingLeft }}>
-        {dropPosition === "before" ? <LayeredTreeDropIndicator position="before" left={dropIndicatorLeft} /> : null}
-        {dropPosition === "after" ? <LayeredTreeDropIndicator position="after" left={dropIndicatorLeft} /> : null}
-        {item.hasChildren ? <button type="button" onClick={handleToggleClick} aria-label={item.isExpanded ? `${item.name} を閉じる` : `${item.name} を開く`} className="relative flex h-8 w-4 shrink-0 items-center justify-center rounded-[4px] text-[var(--app-sidebar-icon)]"><StratisTagIcon className="layered-directory-row-icon absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 transition-opacity group-hover/directory-tree-row:opacity-0" /><IconChevronRight className={cn("absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 opacity-0 transition-opacity group-hover/directory-tree-row:opacity-100", item.isExpanded && "rotate-90")} /></button> : <span className="flex h-8 w-4 shrink-0 items-center justify-center text-[var(--app-sidebar-icon)]"><StratisTagIcon className="layered-directory-row-icon h-4 w-4" /></span>}
-        <span title={item.name} className="flex h-8 min-w-0 flex-1 items-center text-left leading-[20px] text-inherit"><span className="min-w-0 flex-1 truncate">{item.name}</span></span>
-      </div>
-    </div>
-  );
+  return <div data-tag-id={item.id}><div role="treeitem" tabIndex={0} aria-level={item.level} aria-expanded={item.hasChildren ? item.isExpanded : undefined} aria-selected={isSelected} aria-grabbed={isDragging || undefined} draggable data-layered-tree-row="true" onClick={handleRowClick} onKeyDown={handleRowKeyDown} onDragStart={(event) => onTagDragStart(event, item.id)} onDragEnter={(event) => onTagDragOver(event, item.id)} onDragOver={(event) => onTagDragOver(event, item.id)} onDragLeave={(event) => onTagDragLeave(event, item.id)} onDrop={(event) => onTagDrop(event, item.id)} onDragEnd={onTagDragEnd} data-tag-drop-position={dropPosition ?? undefined} className={cn("group/directory-tree-row relative flex h-8 cursor-grab items-center gap-2 rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)] transition-[background,box-shadow,opacity,transform] duration-150 hover:bg-[#eeeeee] active:cursor-grabbing focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]", isSelected && "bg-[#e9e9e9]", isDragging && "scale-[0.995] opacity-35", dropPosition === "inside" && "bg-[#e2e2e2] shadow-[inset_0_0_0_1px_#c7c7c7]")} style={{ paddingLeft: rowPaddingLeft }}>{dropPosition === "before" ? <LayeredTreeDropIndicator position="before" left={dropIndicatorLeft} /> : null}{dropPosition === "after" ? <LayeredTreeDropIndicator position="after" left={dropIndicatorLeft} /> : null}{item.hasChildren ? <button type="button" onClick={handleToggleClick} aria-label={item.isExpanded ? `${item.name} を閉じる` : `${item.name} を開く`} className="relative flex h-8 w-4 shrink-0 items-center justify-center rounded-[4px] text-[var(--app-sidebar-icon)]"><StratisTagIcon className="layered-directory-row-icon absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 transition-opacity group-hover/directory-tree-row:opacity-0" /><IconChevronRight className={cn("absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 opacity-0 transition-opacity group-hover/directory-tree-row:opacity-100", item.isExpanded && "rotate-90")} /></button> : <span className="flex h-8 w-4 shrink-0 items-center justify-center text-[var(--app-sidebar-icon)]"><StratisTagIcon className="layered-directory-row-icon h-4 w-4" /></span>}<span title={item.name} className="flex h-8 min-w-0 flex-1 items-center text-left leading-[20px] text-inherit"><span className="min-w-0 flex-1 truncate">{item.name}</span></span></div></div>;
 };
 
 const TagTreeSidebar = () => {
-  const { currentUser } = useAuthSession();
-  const { tags } = useTags();
+  const { tags, tagById } = useTags();
+  const { setTagTreePosition } = useTagTreeCommands(tagById);
   const tagFilter = useExplorerStore((state) => state.tagFilter);
   const setTagFilter = useExplorerStore((state) => state.setTagFilter);
   const clearTagFilter = useExplorerStore((state) => state.clearTagFilter);
@@ -200,14 +187,7 @@ const TagTreeSidebar = () => {
   const getChildTagNodes = useCallback((tagId: string): TagTreeNode[] => tagNodeById.get(tagId)?.children ?? [], [tagNodeById]);
   const getTagNodeParentId = useCallback((node: TagTreeNode): string | null => node.parentId, []);
   const getTagNodeOrderIndex = useCallback((node: TagTreeNode): number => node.orderIndex, []);
-
-  const updateTagTreeNode = useCallback(async (tagId: string, patch: TagMovePatch) => {
-    if (!currentUser) return;
-
-    const db = await getLocalDb(currentUser.uid);
-    await db.updateItem("tagRecords", tagId, { parentId: patch.parentId ?? undefined, orderIndex: patch.orderIndex, updatedAt: new Date() });
-  }, [currentUser]);
-
+  const updateTagTreeNode = useCallback((tagId: string, patch: TagMovePatch) => setTagTreePosition(tagId, patch), [setTagTreePosition]);
   const { dragState, handleItemDragStart, handleItemDragOver, handleItemDragLeave, handleItemDrop, handleItemDragEnd, handleListDragOver, handleListDragLeave, handleListDrop } = useLayeredTreeDragDrop({ rootItems: tagTreeNodes, rootDropParentId: null, scrollContainerRef, getChildItems: getChildTagNodes, getParentId: getTagNodeParentId, getOrderIndex: getTagNodeOrderIndex, updateItem: updateTagTreeNode, setExpandedIds: setExpandedTagIds });
   const visibleTagItems = useMemo(() => flattenVisibleTagTree(tagTreeNodes, expandedTagIds), [expandedTagIds, tagTreeNodes]);
   const isAppendingToRoot = isLayeredTreeAppendDropTarget(dragState, null);
