@@ -36,7 +36,7 @@ const buildTextBlockPresentation = (zoom?: number) => {
     ruledRowPx,
     editorTextStyle: mergeStyles(
       textStyle,
-      buildRuledTextareaStyle({ rowPx: ruledRowPx }),
+      buildRuledTextareaStyle({ rowPx: ruledRowPx, includeBottomLine: true }),
     ),
   };
 };
