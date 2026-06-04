@@ -18,6 +18,7 @@ const TOOLBAR_CLASS_NAME = "pointer-events-auto flex h-9 items-center gap-2 roun
 const ACTION_BUTTON_CLASS_NAME = "flex h-8 w-8 items-center justify-center rounded-[10px] border border-transparent bg-transparent text-[#8a8986] outline-none transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.04)] hover:bg-[#f4f3f1] hover:text-[#3a3a38] active:scale-[0.98] focus-visible:border-[rgba(0,0,0,0.08)] focus-visible:bg-[#f4f3f1] focus-visible:text-[#3a3a38] motion-reduce:transition-none motion-reduce:active:scale-100";
 const SHARE_BUTTON_CLASS_NAME = "flex h-8 items-center gap-1.5 rounded-[10px] border border-[rgba(0,0,0,0.06)] bg-white/75 px-3 text-[13px] font-medium leading-none tracking-[-0.015em] text-[#7d7b78] shadow-[0_1px_2px_rgba(0,0,0,0.03)] outline-none backdrop-blur-xl transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.08)] hover:bg-[#f7f6f4] hover:text-[#3a3a38] active:scale-[0.98] focus-visible:border-[rgba(0,0,0,0.10)] focus-visible:bg-[#f7f6f4] focus-visible:text-[#3a3a38] motion-reduce:transition-none motion-reduce:active:scale-100";
 const ICON_CLASS_NAME = "h-[18px] w-[18px] shrink-0";
+const ICON_STROKE_WIDTH = 1.5;
 const ACTIONS: readonly WorkspaceAction[] = [
   { key: "share", label: "共有", text: "共有" },
   { key: "comment", label: "コメント" },
@@ -29,7 +30,7 @@ const ACTIONS: readonly WorkspaceAction[] = [
 const ShareIcon = (props: ToolbarIconProps) => {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M3.6 18.95C5.55 13.2 10.15 9.35 15.45 7.85V4.35L21.35 12L15.45 19.65V16.15C10.15 15.7 6.45 16.5 3.6 18.95Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3.6 18.95C5.55 13.2 10.15 9.35 15.45 7.85V4.35L21.35 12L15.45 19.65V16.15C10.15 15.7 6.45 16.5 3.6 18.95Z" stroke="currentColor" strokeWidth={ICON_STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 };
@@ -37,7 +38,7 @@ const ShareIcon = (props: ToolbarIconProps) => {
 const CommentIcon = (props: ToolbarIconProps) => {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M6.75 5.25H17.25C18.77 5.25 20 6.48 20 8V13.75C20 15.27 18.77 16.5 17.25 16.5H11.35L7.2 19.5V16.5H6.75C5.23 16.5 4 15.27 4 13.75V8C4 6.48 5.23 5.25 6.75 5.25Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6.75 5.25H17.25C18.77 5.25 20 6.48 20 8V13.75C20 15.27 18.77 16.5 17.25 16.5H11.35L7.2 19.5V16.5H6.75C5.23 16.5 4 15.27 4 13.75V8C4 6.48 5.23 5.25 6.75 5.25Z" stroke="currentColor" strokeWidth={ICON_STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 };
@@ -59,8 +60,8 @@ const getToolbarClassName = (className?: string): string => {
 const renderActionIcon = (action: WorkspaceAction) => {
   if (action.key === "share") return <ShareIcon className={ICON_CLASS_NAME} />;
   if (action.key === "comment") return <CommentIcon className={ICON_CLASS_NAME} />;
-  if (action.key === "history") return <Clock className={ICON_CLASS_NAME} />;
-  if (action.key === "favorite") return <Star className={ICON_CLASS_NAME} />;
+  if (action.key === "history") return <Clock className={ICON_CLASS_NAME} strokeWidth={ICON_STROKE_WIDTH} />;
+  if (action.key === "favorite") return <Star className={ICON_CLASS_NAME} strokeWidth={ICON_STROKE_WIDTH} />;
   return <MoreIcon className={ICON_CLASS_NAME} />;
 };
 
