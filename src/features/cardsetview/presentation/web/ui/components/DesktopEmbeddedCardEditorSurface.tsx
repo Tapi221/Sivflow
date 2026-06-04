@@ -285,15 +285,6 @@ export const DesktopEmbeddedCardEditorSurface = ({
   const backBlocks = draft?.backBlocks ?? [];
   const faceAnchorClassName = displayMode === "fluid" && cardLayoutMode === "split" ? "min-w-0 h-full" : "min-w-0";
 
-  const iconPxFromScale = useCallback((headerIconVisualScale: number) => {
-    const safeScale =
-      Number.isFinite(headerIconVisualScale) && headerIconVisualScale > 0
-        ? headerIconVisualScale
-        : 1;
-
-    return 14 / safeScale;
-  }, []);
-
   const splitCornerActions = useMemo(
     () =>
       selectedCardEntity ? (
@@ -303,13 +294,12 @@ export const DesktopEmbeddedCardEditorSurface = ({
           helpActive={selectedCardEntity.hasUncertainty ?? false}
           starActive={selectedCardEntity.isBookmarked ?? false}
           disabled={!isInteractive}
-          iconPx={iconPxFromScale(metrics.sideHeaderIconVisualScale)}
+          visualScale={metrics.sideHeaderIconVisualScale}
         />
       ) : undefined,
     [
       handleToggleBookmark,
       handleToggleUncertainty,
-      iconPxFromScale,
       isInteractive,
       metrics.sideHeaderIconVisualScale,
       selectedCardEntity,
@@ -325,13 +315,12 @@ export const DesktopEmbeddedCardEditorSurface = ({
           helpActive={selectedCardEntity.hasUncertainty ?? false}
           starActive={selectedCardEntity.isBookmarked ?? false}
           disabled={!isInteractive}
-          iconPx={iconPxFromScale(metrics.baseHeaderIconVisualScale)}
+          visualScale={metrics.baseHeaderIconVisualScale}
         />
       ) : undefined,
     [
       handleToggleBookmark,
       handleToggleUncertainty,
-      iconPxFromScale,
       isInteractive,
       metrics.baseHeaderIconVisualScale,
       selectedCardEntity,
