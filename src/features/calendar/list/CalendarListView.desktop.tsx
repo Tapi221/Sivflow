@@ -280,7 +280,6 @@ const CalendarListViewComponent = ({ virtualRail, events, selectedDate, onSelect
   const rail = useMemo(() => virtualRail ?? createRail(resolvedScrollTargetDate), [resolvedScrollTargetDate, virtualRail]);
   const eventsByDateKey = useMemo(() => buildCalendarListEventIndex(rail, rail.totalDayCount, events), [events, rail]);
   const metrics = useMemo(() => buildCalendarListVirtualMetrics(rail, rail.totalDayCount, eventsByDateKey, dayHeights), [dayHeights, eventsByDateKey, rail]);
-  const selectedDateKey = useMemo(() => getCalendarDateKey(selectedDate), [selectedDate]);
   const scrollTargetDateKey = useMemo(() => getCalendarDateKey(resolvedScrollTargetDate), [resolvedScrollTargetDate]);
   const scrollTargetIndex = useMemo(() => getIndexForDate(rail, resolvedScrollTargetDate), [rail, resolvedScrollTargetDate]);
   const initialRange = useMemo(() => getSelectedDateRange(metrics, scrollTargetIndex, rail.totalDayCount), [metrics, rail.totalDayCount, scrollTargetIndex]);
