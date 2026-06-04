@@ -27,12 +27,12 @@ export const ExplorerChromeCardSetIcon = ({
       rx="2.1"
       fill="var(--explorer-chrome-cardset-fill, #f0efe9)"
       stroke="var(--explorer-chrome-cardset-stroke, #8b8a84)"
-      strokeWidth="1.2"
+      strokeWidth="1.5"
     />
     <path
       d="M5.4 6.1H14.6"
       stroke="var(--explorer-chrome-cardset-highlight, #fbfaf6)"
-      strokeWidth="1.2"
+      strokeWidth="1.5"
       strokeLinecap="round"
       opacity="0.9"
     />
@@ -44,7 +44,7 @@ export const ExplorerChromeCardSetIcon = ({
       rx="2.1"
       fill="var(--explorer-chrome-cardset-fill, #f0efe9)"
       stroke="var(--explorer-chrome-cardset-stroke, #8b8a84)"
-      strokeWidth="1.2"
+      strokeWidth="1.5"
       opacity="0.9"
     />
   </svg>
