@@ -6,6 +6,7 @@ import { areExplorerBreadcrumbContextsEqual, EMPTY_EXPLORER_BREADCRUMB_CONTEXT, 
 import { buildFolderPathCrumbs } from "@/features/breadcrumbs/builders";
 import { WorkspaceBreadcrumbs } from "@/features/breadcrumbs/components/WorkspaceBreadcrumbs";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
+import { SettingsWorkspaceScreen } from "@/features/settings/SettingsWorkspaceScreen";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
@@ -33,6 +34,11 @@ type SidebarInteractionRegionStyle = CSSProperties & {
 
 type SidebarInteractionRegionProps = {
   children: ReactNode;
+};
+
+type SettingsWorkspaceContentProps = {
+  isLeftPanelCollapsed: boolean;
+  onToggleLeftPanel: () => void;
 };
 
 const FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME = "absolute right-4 top-3 z-30 flex h-8 w-[220px] shrink-0 items-center gap-1.5 rounded-[9px] border border-[rgba(0,0,0,0.04)] bg-[#efeeee]/95 px-2.5 text-left text-[12px] font-medium leading-none tracking-[-0.012em] text-[#85827e] shadow-none outline-none ring-0 backdrop-blur-xl transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.04)] hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.99] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
@@ -151,6 +157,19 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
   );
 };
 
+const SettingsWorkspaceContent = ({ isLeftPanelCollapsed, onToggleLeftPanel }: SettingsWorkspaceContentProps) => {
+  return (
+    <div className="relative flex h-full min-h-0 w-full overflow-hidden bg-transparent">
+      <SidebarInteractionRegion>
+        {isLeftPanelCollapsed ? <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} /> : <SidebarLayeredDirectory onToggleLeftPanel={onToggleLeftPanel} />}
+      </SidebarInteractionRegion>
+      <CarvePanel className="relative min-w-0">
+        <SettingsWorkspaceScreen />
+      </CarvePanel>
+    </div>
+  );
+};
+
 const WorkspaceScreen = () => {
   const { isLeftPanelCollapsed = false, onToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
@@ -160,6 +179,8 @@ const WorkspaceScreen = () => {
   const explorerTabId = useMemo(() => getExplorerTabId(activeTab), [activeTab]);
 
   if (libraryExplorerState) return <ExplorerWorkspaceContent explorerState={libraryExplorerState} explorerTabId={explorerTabId} isLeftPanelCollapsed={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />;
+
+  if (activeTab?.sectionKey === "settings") return <SettingsWorkspaceContent isLeftPanelCollapsed={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />;
 
   if (isLeftPanelCollapsed) {
     return (
