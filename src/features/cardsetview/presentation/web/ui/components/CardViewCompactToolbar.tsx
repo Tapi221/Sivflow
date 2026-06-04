@@ -9,6 +9,7 @@ import { OverlayToolbarZoomControl } from "@/chip/overlay-toolbar/OverlayToolbar
 import { CARD_LAYOUT_MODE_LABELS, type CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+import { Edit } from "@/ui/icons";
 
 type ZoomControlProps = {
   value: number;
@@ -27,9 +28,11 @@ type CardIndexNavigatorProps = {
 type CardViewCompactToolbarProps = {
   displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
+  isEditing?: boolean;
   disabledCardLayoutModes?: Partial<Record<CardLayoutMode, boolean>>;
   onChangeDisplayMode: (mode: CardDisplayMode) => void;
   onChangeCardLayoutMode: (mode: CardLayoutMode) => void;
+  onToggleEditing?: () => void;
   zoom?: ZoomControlProps | null;
   indexNavigator?: CardIndexNavigatorProps | null;
 };
@@ -81,9 +84,11 @@ const ModeButton = ({
 const CardViewCompactToolbar = ({
   displayMode,
   cardLayoutMode,
+  isEditing = false,
   disabledCardLayoutModes,
   onChangeDisplayMode,
   onChangeCardLayoutMode,
+  onToggleEditing,
   zoom = null,
   indexNavigator = null,
 }: CardViewCompactToolbarProps) => {
@@ -95,6 +100,10 @@ const CardViewCompactToolbar = ({
       ? "カード表示。タップで最大表示に切り替え"
       : "最大表示。タップでカード表示に切り替え";
 
+  const editingToggleLabel = isEditing
+    ? "編集モード。タップで閲覧モードに切り替え"
+    : "閲覧モード。タップで編集モードに切り替え";
+
   const resolvedStep = React.useMemo(() => {
     if (!zoom?.step || !Number.isFinite(zoom.step) || zoom.step <= 0) {
       return CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT;
@@ -105,6 +114,20 @@ const CardViewCompactToolbar = ({
 
   return (
     <OverlayToolbar className={CARD_VIEW_COMPACT_TOOLBAR_CLASS_NAME}>
+      {onToggleEditing ? (
+        <>
+          <ModeButton
+            isActive={isEditing}
+            onClick={onToggleEditing}
+            label={editingToggleLabel}
+          >
+            <Edit size={14} />
+          </ModeButton>
+
+          <OverlayToolbarDivider className={CARD_VIEW_COMPACT_DIVIDER_CLASS_NAME} />
+        </>
+      ) : null}
+
       <ModeButton
         isActive={displayMode === "fluid"}
         onClick={() => onChangeDisplayMode(nextDisplayMode)}
