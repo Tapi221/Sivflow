@@ -46,6 +46,7 @@ type ProjectAddMenuProps = {
 type SidebarLayeredDirectoryProps = {
   calendarContent?: ReactNode;
   onToggleLeftPanel?: () => void;
+  onOpenSettings?: () => void;
 };
 
 const WORKSPACE_OWNER_FALLBACK_NAME = "Akari T";
@@ -154,7 +155,7 @@ const getProjectAddMenuPosition = (event: ReactMouseEvent<HTMLElement>): Project
   return clampRightClickPanelPosition(rect.right - PROJECT_ADD_MENU_WIDTH, rect.bottom + 6, { width: PROJECT_ADD_MENU_WIDTH, height: PROJECT_ADD_MENU_HEIGHT });
 };
 
-const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: SidebarLayeredDirectoryProps) => {
+const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSettings }: SidebarLayeredDirectoryProps) => {
   const navigate = useNavigate();
   const { onToggleLeftPanel: outletToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
   const { currentUser } = useAuthSession();
@@ -188,7 +189,6 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   const isFolderActive = activeTab?.sectionKey === "library" && folderTagMode === "folder";
   const isTagActive = activeTab?.sectionKey === "library" && folderTagMode === "tag";
   const isScheduleActive = activeTab?.sectionKey === "schedule";
-  const isSettingsActive = activeTab?.sectionKey === "settings";
   const shouldShowCalendarContent = isScheduleActive && calendarContent !== undefined;
   const shouldShowDirectoryContent = !shouldShowCalendarContent;
   const resolvedOnToggleLeftPanel = onToggleLeftPanel ?? outletToggleLeftPanel;
@@ -252,8 +252,8 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   }, [openSearch]);
 
   const handleOpenSettings = useCallback(() => {
-    openSectionTab("settings");
-  }, [openSectionTab]);
+    onOpenSettings?.();
+  }, [onOpenSettings]);
 
   return (
     <div className="app-layered-directory flex h-full min-h-0 shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased">
@@ -283,7 +283,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
           <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenExplore} aria-label={WORKSPACE_EXPLORE_LABEL} title={WORKSPACE_EXPLORE_LABEL}>
             <GalleryIcon className="app-layered-directory__notion-icon" />
           </button>
-          <button type="button" className={`app-layered-directory__notion-action${isSettingsActive ? " is-active" : ""}`} onClick={handleOpenSettings} aria-current={isSettingsActive ? "page" : undefined} aria-label={WORKSPACE_SETTINGS_LABEL} title={WORKSPACE_SETTINGS_LABEL}>
+          <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenSettings} aria-label={WORKSPACE_SETTINGS_LABEL} title={WORKSPACE_SETTINGS_LABEL}>
             <SettingIcon className="app-layered-directory__notion-icon" />
           </button>
         </nav>
