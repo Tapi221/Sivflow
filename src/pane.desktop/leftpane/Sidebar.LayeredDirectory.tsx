@@ -172,7 +172,6 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   const isFolderActive = activeTab?.sectionKey === "library" && folderTagMode === "folder";
   const isTagActive = activeTab?.sectionKey === "library" && folderTagMode === "tag";
   const isScheduleActive = activeTab?.sectionKey === "schedule";
-  const isSettingsActive = activeTab?.sectionKey === "settings";
   const shouldShowCalendarContent = isScheduleActive && calendarContent !== undefined;
   const shouldShowDirectoryContent = !shouldShowCalendarContent;
   const resolvedOnToggleLeftPanel = onToggleLeftPanel ?? outletToggleLeftPanel;
@@ -227,10 +226,6 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
     openSearch();
   }, [openSearch]);
 
-  const handleOpenSettings = useCallback(() => {
-    openSectionTab("settings");
-  }, [openSectionTab]);
-
   return (
     <div className="app-layered-directory flex h-full min-h-0 shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased">
       <div className="app-layered-directory__primary-nav">
@@ -259,7 +254,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
           <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenExplore} aria-label={WORKSPACE_EXPLORE_LABEL} title={WORKSPACE_EXPLORE_LABEL}>
             <GalleryIcon className="app-layered-directory__notion-icon" />
           </button>
-          <button type="button" className={`app-layered-directory__notion-action${isSettingsActive ? " is-active" : ""}`} onClick={handleOpenSettings} aria-current={isSettingsActive ? "page" : undefined} aria-label={WORKSPACE_SETTINGS_LABEL} title={WORKSPACE_SETTINGS_LABEL}>
+          <button type="button" className="app-layered-directory__notion-action" aria-label={WORKSPACE_SETTINGS_LABEL} title={WORKSPACE_SETTINGS_LABEL} disabled>
             <SettingIcon className="app-layered-directory__notion-icon" />
           </button>
         </nav>
