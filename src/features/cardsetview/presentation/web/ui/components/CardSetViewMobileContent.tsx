@@ -6,6 +6,10 @@ export const CardSetViewMobileContent = ({
 }: CardSetViewContentProps) => {
   const { data, settings, state } = controller;
 
+  const handleCreateCard = async () => {
+    await state.createAndFocusCard();
+  };
+
   return (
     <CardSetViewMobile
       cardsForPager={state.cardsForPager}
@@ -19,7 +23,7 @@ export const CardSetViewMobileContent = ({
       onIndexChange={state.setCurrentIndex}
       onFlip={state.handleFlip}
       onEdit={state.handleEdit}
-      onCreateCard={state.createAndFocusCard}
+      onCreateCard={handleCreateCard}
       onToggleUncertainty={state.handleToggleUncertainty}
       onToggleBookmark={state.handleToggleBookmark}
     />
