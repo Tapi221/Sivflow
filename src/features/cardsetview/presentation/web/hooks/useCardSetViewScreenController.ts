@@ -3,12 +3,6 @@ import { CARD_PANE_WIDTH_STEP_PX, CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT, CARD_VIEW
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
 import { CARD_LAYOUT_MODE_LABELS, type CardLayoutMode, type CardSetInteractionMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { clampCardIndex } from "@/features/cardsetview/domain/cardSetViewState";
-import { useCardSetViewData } from "./useCardSetViewData";
-import { useCardSetViewPaneWidth } from "./useCardSetViewPaneWidth";
-import { useCardSetViewState } from "./useCardSetViewState";
-import { useCardSetViewWindowEvents } from "./useCardSetViewWindowEvents";
-import { useCardSetViewZoom } from "./useCardSetViewZoom";
-import { useCardSetViewZoomInput } from "./useCardSetViewZoomInput";
 import { useCardSetViewBreadcrumbs } from "@/features/cardsetview/presentation/web/infra/useCardSetViewBreadcrumbs";
 import { useCardSetViewParams } from "@/features/cardsetview/presentation/web/infra/useCardSetViewParams";
 import { buildWidthControl } from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
@@ -17,17 +11,29 @@ import { useToast } from "@/contexts/ToastContext";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutFallbackPreferences";
+import { useCardSetViewData } from "./useCardSetViewData";
+import { useCardSetViewPaneWidth } from "./useCardSetViewPaneWidth";
+import { useCardSetViewState } from "./useCardSetViewState";
+import { useCardSetViewWindowEvents } from "./useCardSetViewWindowEvents";
+import { useCardSetViewZoom } from "./useCardSetViewZoom";
+import { useCardSetViewZoomInput } from "./useCardSetViewZoomInput";
 
 type ScrollAnchorFace = "question" | "answer";
 
-export const useCardSetViewScreenController = () => {
+type UseCardSetViewScreenControllerParams = {
+  cardSetId?: string | null;
+};
+
+export const useCardSetViewScreenController = (params: UseCardSetViewScreenControllerParams = {}) => {
   const setExtraCrumbs = useSetBreadcrumbCrumbs();
   const { error: toastError } = useToast();
   const presentationTarget = usePresentationTarget();
   const isDesktop = presentationTarget === "desktop";
   const { settings } = useUserSettings();
-
-  const { cardSetId, initialIndex, targetCardId } = useCardSetViewParams();
+  const routeParams = useCardSetViewParams();
+  const cardSetId = params.cardSetId ?? routeParams.cardSetId;
+  const initialIndex = routeParams.initialIndex;
+  const targetCardId = routeParams.targetCardId;
 
   const data = useCardSetViewData({ cardSetId });
 
@@ -45,31 +51,15 @@ export const useCardSetViewScreenController = () => {
     deviceScope: presentationTarget,
   });
 
-  const [activeScrollAnchorFace, setActiveScrollAnchorFace] =
-    useState<ScrollAnchorFace | null>(null);
+  const [activeScrollAnchorFace, setActiveScrollAnchorFace] = useState<ScrollAnchorFace | null>(null);
+  const [layoutTransitionScrollAnchorRevision, setLayoutTransitionScrollAnchorRevision] = useState(0);
+  const [scrollToActiveIndexRequestKey, setScrollToActiveIndexRequestKey] = useState(0);
 
-  const [
-    layoutTransitionScrollAnchorRevision,
-    setLayoutTransitionScrollAnchorRevision,
-  ] = useState(0);
-  const [scrollToActiveIndexRequestKey, setScrollToActiveIndexRequestKey] =
-    useState(0);
+  const paneWidth = useCardSetViewPaneWidth({ isGlobalEditing: state.isGlobalEditing, isDesktop, settings, cardSetId });
 
-  const paneWidth = useCardSetViewPaneWidth({
-    isGlobalEditing: state.isGlobalEditing,
-    isDesktop,
-    settings,
-    cardSetId,
-  });
+  const layoutInteractionMode: CardSetInteractionMode = state.isGlobalEditing ? "edit" : "view";
 
-  const layoutInteractionMode: CardSetInteractionMode = state.isGlobalEditing
-    ? "edit"
-    : "view";
-
-  const splitFallbackLayoutMode = useMemo(
-    () => resolveSplitFallbackLayoutModePreference(presentationTarget),
-    [presentationTarget],
-  );
+  const splitFallbackLayoutMode = useMemo(() => resolveSplitFallbackLayoutModePreference(presentationTarget), [presentationTarget]);
 
   const zoom = useCardSetViewZoom({
     deviceScope: presentationTarget,
@@ -95,18 +85,9 @@ export const useCardSetViewScreenController = () => {
     onZoomPercentChange: zoom.setZoomPercent,
   });
 
-  useCardSetViewBreadcrumbs({
-    selectedCardSet: data.selectedCardSet,
-    selectedCard: state.selectedCard,
-    sortedCards: data.sortedCards,
-    folders: data.folders,
-    setExtraCrumbs,
-  });
+  useCardSetViewBreadcrumbs({ selectedCardSet: data.selectedCardSet, selectedCard: state.selectedCard, sortedCards: data.sortedCards, folders: data.folders, setExtraCrumbs });
 
-  useCardSetViewWindowEvents({
-    handleToggleViewMode: state.handleToggleViewMode,
-    createAndFocusCard: state.createAndFocusCard,
-  });
+  useCardSetViewWindowEvents({ handleToggleViewMode: state.handleToggleViewMode, createAndFocusCard: state.createAndFocusCard });
 
   const widthControl = buildWidthControl({
     isDesktop,
@@ -114,8 +95,7 @@ export const useCardSetViewScreenController = () => {
     activePaneWidthPx: paneWidth.activePaneWidthPx,
     activePaneMinWidthPx: paneWidth.activePaneMinWidthPx,
     activePaneMaxWidthPx: paneWidth.activePaneMaxWidthPx,
-    activePaneDisplayedDefaultWidthPx:
-      paneWidth.activePaneDisplayedDefaultWidthPx,
+    activePaneDisplayedDefaultWidthPx: paneWidth.activePaneDisplayedDefaultWidthPx,
     previewPaneWidth: paneWidth.previewPaneWidth,
     persistPaneWidth: paneWidth.persistPaneWidth,
     stepPaneWidth: paneWidth.stepPaneWidth,
@@ -136,111 +116,54 @@ export const useCardSetViewScreenController = () => {
     }
     : null;
 
-  const disabledCardLayoutModes = useMemo(
-    () => ({
-      stack: false,
-      flip: false,
-      split: !zoom.canUseSplit,
-    }),
-    [zoom.canUseSplit],
-  );
+  const disabledCardLayoutModes = useMemo(() => ({ stack: false, flip: false, split: !zoom.canUseSplit }), [zoom.canUseSplit]);
 
   const layoutConstraintIndicatorLabel = useMemo(() => {
-    if (!zoom.showConstraintIndicator) {
-      return null;
-    }
+    if (!zoom.showConstraintIndicator) return null;
 
-    if (
-      state.currentCardLayoutMode === "split" &&
-      zoom.effectiveCardLayoutMode !== "split"
-    ) {
+    if (state.currentCardLayoutMode === "split" && zoom.effectiveCardLayoutMode !== "split") {
       return `画面制約で${CARD_LAYOUT_MODE_LABELS[zoom.effectiveCardLayoutMode]}表示中`;
     }
 
     return "画面制約で縮小中";
-  }, [
-    state.currentCardLayoutMode,
-    zoom.effectiveCardLayoutMode,
-    zoom.showConstraintIndicator,
-  ]);
+  }, [state.currentCardLayoutMode, zoom.effectiveCardLayoutMode, zoom.showConstraintIndicator]);
 
-  const {
-    cardsForPager,
-    currentCardLayoutMode,
-    currentDisplayMode,
-    isFlipped,
-    setCurrentCardFace,
-    setCurrentCardLayoutMode,
-    setCurrentIndex,
-  } = state;
-
+  const { cardsForPager, currentCardLayoutMode, currentDisplayMode, isFlipped, setCurrentCardFace, setCurrentCardLayoutMode, setCurrentIndex } = state;
   const totalCardsForPager = cardsForPager.length;
 
   const handleSaveCurrentDisplayMode = useCallback(async () => {
-    if (!cardSetId) {
-      return;
-    }
+    if (!cardSetId) return;
 
     try {
-      await saveDefaultDisplayMode({
-        cardSetId,
-        currentDisplayMode,
-        updateCardSet: data.updateCardSet,
-      });
+      await saveDefaultDisplayMode({ cardSetId, currentDisplayMode, updateCardSet: data.updateCardSet });
     } catch (error) {
       console.error("[CardSetView] Failed to save default display mode", error);
       toastError("表示モードの保存に失敗しました");
     }
   }, [cardSetId, currentDisplayMode, data.updateCardSet, toastError]);
 
-  const handleActiveScrollAnchorFaceChange = useCallback(
-    (face: ScrollAnchorFace | null) => {
-      setActiveScrollAnchorFace(face);
-    },
-    [],
-  );
+  const handleActiveScrollAnchorFaceChange = useCallback((face: ScrollAnchorFace | null) => {
+    setActiveScrollAnchorFace(face);
+  }, []);
 
-  const handleJumpToCard = useCallback(
-    (nextOneBasedIndex: number) => {
-      if (totalCardsForPager <= 0) {
-        return;
-      }
+  const handleJumpToCard = useCallback((nextOneBasedIndex: number) => {
+    if (totalCardsForPager <= 0) return;
 
-      const nextZeroBasedIndex = clampCardIndex(
-        nextOneBasedIndex - 1,
-        totalCardsForPager,
-      );
+    const nextZeroBasedIndex = clampCardIndex(nextOneBasedIndex - 1, totalCardsForPager);
+    setCurrentIndex(nextZeroBasedIndex);
+    setScrollToActiveIndexRequestKey((currentKey) => currentKey + 1);
+  }, [setCurrentIndex, totalCardsForPager]);
 
-      setCurrentIndex(nextZeroBasedIndex);
-      setScrollToActiveIndexRequestKey((currentKey) => currentKey + 1);
-    },
-    [setCurrentIndex, totalCardsForPager],
-  );
+  const handleChangeCardLayoutMode = useCallback((nextMode: CardLayoutMode) => {
+    if (nextMode === currentCardLayoutMode) return;
 
-  const handleChangeCardLayoutMode = useCallback(
-    (nextMode: CardLayoutMode) => {
-      if (nextMode === currentCardLayoutMode) {
-        return;
-      }
+    if (nextMode === "flip" && currentCardLayoutMode !== "flip") {
+      setCurrentCardFace(activeScrollAnchorFace ?? (isFlipped ? "answer" : "question"));
+      setLayoutTransitionScrollAnchorRevision((prev) => prev + 1);
+    }
 
-      if (nextMode === "flip" && currentCardLayoutMode !== "flip") {
-        setCurrentCardFace(
-          activeScrollAnchorFace ?? (isFlipped ? "answer" : "question"),
-        );
-        setLayoutTransitionScrollAnchorRevision((prev) => prev + 1);
-      }
-
-      setCurrentCardLayoutMode(nextMode);
-    },
-    [
-      activeScrollAnchorFace,
-      currentCardLayoutMode,
-      isFlipped,
-      setCurrentCardFace,
-      setCurrentCardLayoutMode,
-      setLayoutTransitionScrollAnchorRevision,
-    ],
-  );
+    setCurrentCardLayoutMode(nextMode);
+  }, [activeScrollAnchorFace, currentCardLayoutMode, isFlipped, setCurrentCardFace, setCurrentCardLayoutMode, setLayoutTransitionScrollAnchorRevision]);
 
   return {
     cardSetId,
