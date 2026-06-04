@@ -16,7 +16,7 @@
     padding-bottom: calc(var(--code-root-base-pad-b) + var(--snap-pad-b, 0px));
   }
 
-  [data-block-frame-variant="editor"] .codeBlockRoot {
+  [data-block-selected="true"] .codeBlockRoot {
     border-color: rgba(37, 99, 235, 0.82);
   }
 
