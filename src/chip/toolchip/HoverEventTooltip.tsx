@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
+import { emitHoverTooltipOpen, subscribeHoverTooltipOpen } from "./hoverTooltipEvents";
 
 type TooltipSide = "top" | "bottom";
 
@@ -154,6 +155,7 @@ const HoverEventTooltip = ({
   const anchorRef = useRef<HTMLDivElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const closeTimerRef = useRef<number | null>(null);
+  const tooltipIdRef = useRef(Symbol("hover-event-tooltip"));
   const [position, setPosition] = useState<TooltipPosition | null>(null);
 
   const tooltipTitle = title.trim();
@@ -183,6 +185,8 @@ const HoverEventTooltip = ({
   const showTooltip = () => {
     clearCloseTimer();
     if (disabled || !hasContent || !anchorRef.current) return;
+
+    emitHoverTooltipOpen(tooltipIdRef.current);
 
     const rect = anchorRef.current.getBoundingClientRect();
     setPosition(getInitialPosition(rect, side, offset));
@@ -215,6 +219,14 @@ const HoverEventTooltip = ({
       return nextPosition;
     });
   }, [offset, position, side]);
+
+  useEffect(() => {
+    return subscribeHoverTooltipOpen((tooltipId) => {
+      if (tooltipId === tooltipIdRef.current) return;
+
+      hideTooltip();
+    });
+  }, []);
 
   useEffect(() => {
     if (!position) return;
