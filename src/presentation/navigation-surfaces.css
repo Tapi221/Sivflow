@@ -239,8 +239,14 @@
   }
 
   .ds-filter-row:hover,
-  .ds-filter-row--active {
-    background: var(--ds-semantic-color-action-primary-soft);
-    color: var(--ds-semantic-color-text-strong);
+  .ds-floating-panel__row:hover {
+    background: var(--app-sidebar-hover-bg, rgba(0, 0, 0, 0.05));
+    color: var(--app-sidebar-text-hover, var(--ds-semantic-color-text-strong));
+  }
+
+  .ds-filter-row--active,
+  .ds-floating-panel__row--active {
+    background: var(--app-sidebar-active-bg, rgba(0, 0, 0, 0.07));
+    color: var(--app-sidebar-text-strong, var(--ds-semantic-color-text-strong));
   }
 }
