@@ -60,6 +60,20 @@
     border-bottom-left-radius: 0;
   }
 
+  .card-surface-layout--stack
+    > .card-surface-layout__slot--question
+    :where(.card-active-chrome, .card-shell) {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  .card-surface-layout--stack
+    > .card-surface-layout__slot--answer
+    :where(.card-active-chrome, .card-shell) {
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+  }
+
   .card-shell--resizable {
     padding-bottom: 0;
     min-height: var(--card-resize-height, 144px);
