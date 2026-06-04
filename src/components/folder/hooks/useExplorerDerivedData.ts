@@ -1,7 +1,8 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { getEntityTime, getFolderId, getParentFolderId, isSameFolder, normalizeFolderId, ROOT_FOLDER_ID } from "@/components/folder/explorer/model/utils";
+import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { compareOrderableEntities } from "@/lib/orderableEntity";
 import type { Card, CardSet, DocumentItem, ExplorerItem } from "@/types";
 
@@ -17,6 +18,8 @@ interface Params {
   isFiltering: boolean;
 }
 
+const ORPHAN_DOCUMENT_CLEANUP_LOG_PREFIX = "[useExplorerDerivedData] orphan PDF cleanup";
+
 const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean } | null) => Boolean(entity?.isDeleted ?? entity?.is_deleted);
 
 const isDraftFolder = (folder: FolderTreeNode) => {
@@ -27,6 +30,8 @@ const isDraftFolder = (folder: FolderTreeNode) => {
 const withLegacy = <T extends object>(v: T): T & LegacyEntityFields => v as T & LegacyEntityFields;
 
 const getCardSetFolderId = (cardSet: CardSet): string | null | undefined => cardSet.folderId ?? withLegacy(cardSet).folder_id;
+
+const getDocumentFolderId = (document: DocumentItem): string | null | undefined => document.folderId ?? withLegacy(document).folder_id;
 
 const getOrderIndex = (entity: object, fallback = Number.MAX_SAFE_INTEGER): number => withLegacy(entity).orderIndex ?? withLegacy(entity).order_index ?? fallback;
 
@@ -48,7 +53,18 @@ const compareFolders = (a: FolderTreeNode, b: FolderTreeNode) => {
   });
 };
 
+const isOrphanDocument = (document: DocumentItem, visibleFolderIdSet: Set<string>): boolean => {
+  if (document.kind !== "pdf") return false;
+  if (isSoftDeleted(withLegacy(document))) return false;
+  const normalizedFolderId = normalizeFolderId(getDocumentFolderId(document));
+  if (normalizedFolderId === ROOT_FOLDER_ID) return true;
+  return !visibleFolderIdSet.has(normalizedFolderId);
+};
+
 export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], documents, isFiltering }: Params) => {
+  const { deleteDocument } = useDocumentCommands();
+  const orphanCleanupInFlightRef = useRef<Set<string>>(new Set());
+
   const cardSetById = useMemo(() => {
     const activeCardSets = cardSets.filter((cardSet) => !isSoftDeleted(withLegacy(cardSet)));
     return buildCardSetById(activeCardSets);
@@ -63,6 +79,34 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
     }
     return set;
   }, [treeFolders]);
+
+  const orphanDocumentIds = useMemo(() => {
+    if (visibleFolderIdSet.size === 0) return [];
+    return documents.filter((document) => isOrphanDocument(document, visibleFolderIdSet)).map((document) => document.id);
+  }, [documents, visibleFolderIdSet]);
+
+  useEffect(() => {
+    if (orphanDocumentIds.length === 0) return;
+    let isCancelled = false;
+
+    void (async () => {
+      for (const documentId of orphanDocumentIds) {
+        if (isCancelled) return;
+        if (orphanCleanupInFlightRef.current.has(documentId)) continue;
+        orphanCleanupInFlightRef.current.add(documentId);
+        try {
+          await deleteDocument(documentId);
+        } catch (error) {
+          orphanCleanupInFlightRef.current.delete(documentId);
+          console.error(`${ORPHAN_DOCUMENT_CLEANUP_LOG_PREFIX} failed`, { documentId, error });
+        }
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [deleteDocument, orphanDocumentIds]);
 
   const childFoldersByParentId = useMemo(() => {
     const map = new Map<string, FolderTreeNode[]>();
@@ -128,8 +172,8 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
     for (const doc of documents) {
       if (doc.kind !== "pdf") continue;
       if (isSoftDeleted(withLegacy(doc))) continue;
-      if (!hasValidFolderBinding(doc.folderId ?? withLegacy(doc).folder_id)) continue;
-      pushItem(resolveTreeFolderId(doc.folderId ?? withLegacy(doc).folder_id), { type: "document", data: doc });
+      if (!hasValidFolderBinding(getDocumentFolderId(doc))) continue;
+      pushItem(resolveTreeFolderId(getDocumentFolderId(doc)), { type: "document", data: doc });
     }
 
     for (const list of map.values()) {
@@ -201,7 +245,7 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
     }
     for (const doc of documents) {
       if (isSoftDeleted(withLegacy(doc))) continue;
-      const docFolderId = resolveTreeFolderId(doc.folderId ?? withLegacy(doc).folder_id);
+      const docFolderId = resolveTreeFolderId(getDocumentFolderId(doc));
       if (!isSameFolder(docFolderId, targetFolderId)) continue;
       const order = getOrderIndex(doc, -1);
       if (order > maxOrder) maxOrder = order;
