@@ -2,7 +2,7 @@ import type { BlockConfig } from "@/types/domain/base";
 
 export type EditorBlockType = Extract<
   BlockConfig["type"],
-  "text" | "question" | "code" | "image" | "math" | "markdown" | "pdf"
+  "text" | "question" | "code" | "image" | "math" | "markdown"
 >;
 
 export type EditorBlockIconName =
@@ -77,14 +77,6 @@ const EDITOR_BLOCK_DEFINITIONS = [
     icon: "NotebookPen",
     isVisible: true,
     orderIndex: 5,
-  },
-  {
-    id: "pdf",
-    type: "pdf",
-    label: "PDF",
-    icon: "NotebookPen",
-    isVisible: true,
-    orderIndex: 6,
   },
 ] as const satisfies readonly EditorBlockDefinition[];
 
