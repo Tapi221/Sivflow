@@ -55,6 +55,21 @@
     background-position: 0 0;
   }
 
+  [data-card-text-selectable="true"],
+  [data-card-text-selectable="true"] * {
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  [data-card-text-selectable="true"] button,
+  [data-card-text-selectable="true"] img,
+  [data-card-text-selectable="true"] [role="button"] {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
   .workspace-surface--plain {
     background: transparent;
   }
