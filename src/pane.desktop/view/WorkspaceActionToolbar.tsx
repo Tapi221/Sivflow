@@ -1,5 +1,4 @@
 import { memo, type CSSProperties, type SVGProps } from "react";
-import { Clock, Star } from "@/ui/icons";
 
 type WorkspaceActionToolbarProps = {
   className?: string;
@@ -39,6 +38,19 @@ const CommentIcon = (props: ToolbarIconProps) => (
   </svg>
 );
 
+const ClockIcon = (props: ToolbarIconProps) => (
+  <svg {...props} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <circle cx="12" cy="12" r="8.25" stroke="currentColor" strokeWidth={ICON_STROKE_WIDTH} />
+    <path d="M12 7.75V12.5L15.2 14.1" stroke="currentColor" strokeWidth={ICON_STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const StarIcon = (props: ToolbarIconProps) => (
+  <svg {...props} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 3.35L14.72 8.86L20.8 9.74L16.4 14.03L17.44 20.09L12 17.23L6.56 20.09L7.6 14.03L3.2 9.74L9.28 8.86L12 3.35Z" stroke="currentColor" strokeWidth={ICON_STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 const MoreIcon = (props: ToolbarIconProps) => (
   <svg {...props} viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <circle cx="6.5" cy="12" r="1.35" fill="currentColor" />
@@ -54,8 +66,8 @@ const getToolbarClassName = (className?: string): string => {
 const renderActionIcon = (action: WorkspaceAction) => {
   if (action.key === "share") return <ShareIcon className={ICON_CLASS_NAME} />;
   if (action.key === "comment") return <CommentIcon className={ICON_CLASS_NAME} />;
-  if (action.key === "history") return <Clock className={ICON_CLASS_NAME} strokeWidth={ICON_STROKE_WIDTH} />;
-  if (action.key === "favorite") return <Star className={ICON_CLASS_NAME} strokeWidth={ICON_STROKE_WIDTH} />;
+  if (action.key === "history") return <ClockIcon className={ICON_CLASS_NAME} />;
+  if (action.key === "favorite") return <StarIcon className={ICON_CLASS_NAME} />;
   return <MoreIcon className={ICON_CLASS_NAME} />;
 };
 
