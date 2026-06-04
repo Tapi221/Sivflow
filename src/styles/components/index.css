@@ -184,4 +184,9 @@
   .explorer-workspace-tab-close svg path {
     stroke-width: 2.4 !important;
   }
+
+  .relative.z-20.shrink-0.overflow-hidden.border-b.bg-white > .grid.min-w-0 > div:has(> .flex.min-w-0.flex-col) {
+    padding-top: 0.5px !important;
+    padding-bottom: 0.5px !important;
+  }
 }
