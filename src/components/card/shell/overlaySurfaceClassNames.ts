@@ -1,5 +1,5 @@
 export const overlayGlassToolbarClassName =
-  "pointer-events-auto flex items-center gap-1.5 rounded-[18px] border border-[#d9e0e8] bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,249,252,0.94)_100%)] px-2.5 py-1 text-[#66758a] shadow-[0_10px_26px_rgba(31,41,55,0.07),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-[14px]";
+  "pointer-events-auto flex translate-y-1 items-center gap-1.5 rounded-[18px] border border-[#d9e0e8] bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,249,252,0.94)_100%)] px-2.5 py-1 text-[#66758a] opacity-0 shadow-[0_10px_26px_rgba(31,41,55,0.07),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-[14px] transition-[opacity,transform] duration-150 hover:translate-y-0 hover:opacity-100 focus-within:translate-y-0 focus-within:opacity-100";
 
 export const overlayGlassPillClassName =
   "pointer-events-auto inline-flex h-8 items-center gap-1.5 rounded-[14px] border border-[#d9e0e8] bg-[rgba(247,249,252,0.94)] px-3 text-xs font-medium text-[#1f2937] shadow-[0_8px_20px_rgba(31,41,55,0.06),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-[14px]";
