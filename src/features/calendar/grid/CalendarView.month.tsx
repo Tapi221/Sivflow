@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useMemo, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import type { CSSProperties } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
@@ -62,10 +62,8 @@ const CalendarMonthView = ({
     onVisibleMonthChange,
   });
 
-  useEffect(() => {
-    startTransition(() => {
-      onRenderedRangeChange?.(scroll.visibleWeekRange);
-    });
+  useLayoutEffect(() => {
+    onRenderedRangeChange?.(scroll.visibleWeekRange);
   }, [onRenderedRangeChange, scroll.visibleWeekRange]);
 
   return (
