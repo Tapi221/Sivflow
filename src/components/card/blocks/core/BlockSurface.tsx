@@ -23,8 +23,6 @@ type BlockSurfaceProps = {
   children: React.ReactNode;
 };
 
-const CONTENT_VERTICAL_OFFSET_ROW_RATIO = 0.0625;
-
 export const BlockSurface = ({
   className,
   contentClassName,
@@ -51,7 +49,6 @@ export const BlockSurface = ({
     ...(style ?? {}),
     "--card-row-px": `${Math.max(8, ruledRowPx)}px`,
     "--card-line-height": `${Math.max(8, ruledRowPx)}px`,
-    "--card-content-vertical-offset-px": `calc(var(--card-row-px) * ${CONTENT_VERTICAL_OFFSET_ROW_RATIO})`,
     ...(topRows !== 0
       ? { paddingTop: `calc(var(--card-row-px) * ${topRows})` }
       : {}),
@@ -84,10 +81,7 @@ export const BlockSurface = ({
           ruledBottomOffsetPx={ruledBottomOffsetPx}
         />
       ) : null}
-      <div
-        className={cn("blockSurfaceContent", contentClassName)}
-        style={{ transform: "translateY(var(--card-content-vertical-offset-px))" }}
-      >
+      <div className={cn("blockSurfaceContent", contentClassName)}>
         {children}
       </div>
     </div>
