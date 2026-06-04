@@ -2,8 +2,8 @@
 import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import { ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
 
@@ -41,6 +41,7 @@ vi.mock("@/pane.desktop/tab.desktopnative/hooks/useTabsStore", () => ({ useWorks
 
 const FOLDER_SOURCE_PATH = resolve(process.cwd(), "src/pane.desktop/leftpane/folder/LayeredDirectorySidebar.tsx");
 const SIDEBAR_SOURCE_PATH = resolve(process.cwd(), "src/pane.desktop/leftpane/Sidebar.LayeredDirectory.tsx");
+const originalRequestAnimationFrame = window.requestAnimationFrame;
 
 const getFunctionSource = (source: string, functionName: string): string => {
   const marker = `const ${functionName} =`;
@@ -56,12 +57,47 @@ const getFunctionSource = (source: string, functionName: string): string => {
 
 const getTree = () => screen.getByRole("tree", { name: "ライブラリ" });
 
+const getFolderRow = (name: string): HTMLElement => {
+  const row = screen.getByText(name).closest("[data-folder-tree-row='true']");
+  expect(row).not.toBeNull();
+  return row as HTMLElement;
+};
+
+const mockRowRect = (row: HTMLElement, rect: Partial<DOMRect> = {}) => {
+  const nextRect = { x: 0, y: 0, left: 0, top: 0, right: 240, bottom: 32, width: 240, height: 32, toJSON: () => ({}) } as DOMRect;
+  Object.assign(nextRect, rect);
+  Object.defineProperty(row, "getBoundingClientRect", { configurable: true, value: () => nextRect });
+};
+
+const createDataTransfer = (): DataTransfer => {
+  const entries = new Map<string, string>();
+  return {
+    dropEffect: "none",
+    effectAllowed: "all",
+    files: [] as unknown as FileList,
+    items: [] as unknown as DataTransferItemList,
+    types: [],
+    clearData: vi.fn((format?: string) => { if (format) entries.delete(format); else entries.clear(); }),
+    getData: vi.fn((format: string) => entries.get(format) ?? ""),
+    setData: vi.fn((format: string, data: string) => { entries.set(format, data); }),
+    setDragImage: vi.fn(),
+  } as unknown as DataTransfer;
+};
+
 const resetWorkspaceSelection = (selectedFolderId: string | null) => {
   mocks.workspaceState.tabs = [{ id: "tab-1", kind: "explorer", sectionKey: "library", explorerState: { isHomeOnlyMode: false, isSectionListMode: selectedFolderId === null, selectedFolderId, selectedItem: null } }];
   mocks.workspaceState.activeTabId = "tab-1";
 };
 
+beforeEach(() => {
+  window.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    callback(0);
+    return 1;
+  }) as typeof window.requestAnimationFrame;
+});
+
 afterEach(() => {
+  window.requestAnimationFrame = originalRequestAnimationFrame;
   cleanup();
   vi.clearAllMocks();
   resetWorkspaceSelection(null);
@@ -171,5 +207,44 @@ describe("LayeredDirectorySidebar project list", () => {
     fireEvent.contextMenu(screen.getByText("Project Alpha"), { clientX: 160, clientY: 180 });
 
     expect(screen.getByRole("menuitem", { name: "お気に入りに追加" })).toBeDisabled();
+  });
+
+  it("persists a dragged folder before the target project with synced parent and order fields", async () => {
+    render(React.createElement(ProjectListSidebar));
+    fireEvent.click(screen.getByText("Project Alpha"));
+
+    const sourceRow = getFolderRow("Javascript");
+    const targetRow = getFolderRow("Project Alpha");
+    mockRowRect(sourceRow);
+    mockRowRect(targetRow);
+    const dataTransfer = createDataTransfer();
+
+    fireEvent.dragStart(sourceRow, { dataTransfer });
+    fireEvent.dragOver(targetRow, { clientX: 12, clientY: 4, dataTransfer });
+    fireEvent.drop(targetRow, { clientX: 12, clientY: 4, dataTransfer });
+
+    await waitFor(() => {
+      expect(mocks.updateFolder).toHaveBeenCalledWith("folder-js", { parentFolderId: null, orderIndex: 0 });
+      expect(mocks.updateFolder).toHaveBeenCalledWith("project-1", { parentFolderId: null, orderIndex: 1 });
+    });
+  });
+
+  it("persists a dragged folder after the target project without relying on delayed drag state", async () => {
+    render(React.createElement(ProjectListSidebar));
+    fireEvent.click(screen.getByText("Project Alpha"));
+
+    const sourceRow = getFolderRow("Javascript");
+    const targetRow = getFolderRow("Project Alpha");
+    mockRowRect(sourceRow);
+    mockRowRect(targetRow);
+    const dataTransfer = createDataTransfer();
+
+    fireEvent.dragStart(sourceRow, { dataTransfer });
+    fireEvent.dragOver(targetRow, { clientX: 12, clientY: 28, dataTransfer });
+    fireEvent.drop(targetRow, { clientX: 12, clientY: 28, dataTransfer });
+
+    await waitFor(() => {
+      expect(mocks.updateFolder).toHaveBeenCalledWith("folder-js", { parentFolderId: null, orderIndex: 1 });
+    });
   });
 });
