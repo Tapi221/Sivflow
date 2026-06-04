@@ -14,7 +14,11 @@ import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { CardSet, DocumentItem, SelectedExplorerItem } from "@/types";
-import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_LEVEL, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LayeredTreeDropIndicator, getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget, useLayeredTreeDragDrop, type LayeredTreeDragState } from "./layeredTreeDnd";
+import { LayeredTreeDropIndicator } from "./layeredTreeDnd";
+import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LAYERED_TREE_ROOT_LEVEL } from "./layeredTreeDnd.constants";
+import type { LayeredTreeDragState } from "./layeredTreeDnd.types";
+import { getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget } from "./layeredTreeDnd.utils";
+import { useLayeredTreeDragDrop } from "./useLayeredTreeDragDrop";
 
 type FolderCommandSet = ReturnType<typeof useFolderCommands>;
 
