@@ -17,12 +17,12 @@ const WORKSPACE_BREADCRUMBS_NO_DRAG_STYLE: NoDragStyle = {
   WebkitAppRegion: "no-drag",
 };
 
-const WORKSPACE_BREADCRUMBS_CLASS_NAME = "pointer-events-auto absolute left-8 top-[15px] z-30 flex h-7 max-w-[calc(100%-604px)] min-w-0 items-center overflow-hidden font-[var(--app-font-family-sidebar)] text-[14px] font-medium leading-none tracking-[-0.018em] text-[#7d7b78]";
-const WORKSPACE_BREADCRUMBS_LIST_CLASS_NAME = "flex min-w-0 items-center gap-[5px] overflow-hidden";
-const WORKSPACE_BREADCRUMB_ITEM_CLASS_NAME = "flex min-w-0 items-center gap-[5px]";
+const WORKSPACE_BREADCRUMBS_CLASS_NAME = "pointer-events-auto absolute left-8 top-[15px] z-30 flex h-6 max-w-[calc(100%-604px)] min-w-0 items-center overflow-hidden font-[var(--app-font-family-sidebar)] text-[13px] font-medium leading-none tracking-[-0.018em] text-[#7d7b78]";
+const WORKSPACE_BREADCRUMBS_LIST_CLASS_NAME = "flex min-w-0 items-center gap-1 overflow-hidden";
+const WORKSPACE_BREADCRUMB_ITEM_CLASS_NAME = "flex min-w-0 items-center gap-1";
 const WORKSPACE_BREADCRUMB_BUTTON_CLASS_NAME = "min-w-0 truncate border-0 bg-transparent p-0 text-left font-inherit leading-none text-[#7d7b78] outline-none transition-colors duration-150 ease-out hover:text-[#6f6d6a] focus-visible:text-[#6f6d6a]";
 const WORKSPACE_BREADCRUMB_LABEL_CLASS_NAME = "min-w-0 truncate p-0 leading-none text-[#7d7b78]";
-const WORKSPACE_BREADCRUMB_SEPARATOR_CLASS_NAME = "h-3.5 w-3.5 shrink-0 text-[#7d7b78]";
+const WORKSPACE_BREADCRUMB_SEPARATOR_CLASS_NAME = "h-3 w-3 shrink-0 text-[#7d7b78]";
 
 const getBreadcrumbLabel = (crumb: BreadcrumbCrumb): string => {
   const label = crumb.label.trim();
