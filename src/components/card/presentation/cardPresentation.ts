@@ -34,7 +34,7 @@ export const resolveCardPresentationState = (
     isInteractiveCard,
     showEditingOutline:
       context.isEditing && isActiveCard && !context.isStandaloneEditor,
-    showActiveChrome: isActiveCard,
+    showActiveChrome: context.inPager && isActiveCard,
   };
 };
 
