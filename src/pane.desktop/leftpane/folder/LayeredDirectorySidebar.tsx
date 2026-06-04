@@ -28,7 +28,7 @@ type DirectoryTreeNodeProps = { folder: FolderTreeNode; level: number; isRootPro
 
 type FolderDropIndicatorProps = { position: Exclude<FolderDropPosition, "inside">; left: number; className?: string; };
 
-type LibraryHierarchySidebarProps = { projectRootId?: string | null; };
+type LibraryHierarchySidebarProps = { parentFolderId?: string | null; };
 
 type FolderContextMenuState = { folderId: string; folderName: string; folderColor: string | null; isFavorite: boolean; isRootProject: boolean; x: number; y: number; };
 
@@ -555,7 +555,7 @@ const ProjectListSidebar = () => {
   return <><aside aria-label="Project list explorer" className="h-full min-h-0 overflow-hidden"><div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto px-3 pb-3 pt-1"><div role="tree" aria-label="プロジェクト" className="flex min-h-full flex-col gap-0.5" onDragOver={handleFolderListDragOver} onDragLeave={handleFolderListDragLeave} onDrop={handleFolderListDrop}>{rootFolders.length > 0 ? rootFolders.map((folder) => <DirectoryTreeNode key={getFolderId(folder)} folder={folder} level={ROOT_LEVEL} isRootProject selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} dragState={dragState} getChildFolders={getChildFolders} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onOpenContextMenu={openContextMenu} onFolderDragStart={handleFolderDragStart} onFolderDragOver={handleFolderDragOver} onFolderDragLeave={handleFolderDragLeave} onFolderDrop={handleFolderDrop} onFolderDragEnd={handleFolderDragEnd} />) : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">フォルダがありません</p>}{isAppendingToRoot ? <FolderDropIndicator position="append" left={FOLDER_DROP_INDICATOR_ROOT_LEFT_PX} className="mx-2" /> : null}<div aria-hidden="true" className="min-h-8 flex-1" /></div></div></aside>{contextMenuElement}</>;
 };
 
-const LibraryHierarchySidebar = ({ projectRootId = null }: LibraryHierarchySidebarProps) => {
+const LibraryHierarchySidebar = ({ parentFolderId = null }: LibraryHierarchySidebarProps) => {
   const { rootFolders, getChildFolders, getNextOrderIndex, createCardSet, loading, error } = useLibraryHierarchyData();
   const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
@@ -564,13 +564,13 @@ const LibraryHierarchySidebar = ({ projectRootId = null }: LibraryHierarchySideb
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(() => new Set(getRootFolderIds(rootFolders)));
   const { contextMenuElement, openContextMenu } = useFolderContextMenu({ createFolder, updateFolder, deleteFolder, createCardSet, getNextOrderIndex, setExpandedFolderIds });
-  const visibleRootFolders = useMemo(() => projectRootId ? getChildFolders(projectRootId) : rootFolders, [getChildFolders, projectRootId, rootFolders]);
-  const rootDropParentId = projectRootId ?? null;
+  const visibleFolders = useMemo(() => parentFolderId ? getChildFolders(parentFolderId) : rootFolders, [getChildFolders, parentFolderId, rootFolders]);
+  const rootDropParentId = parentFolderId ?? null;
   const { dragState, handleFolderDragStart, handleFolderDragOver, handleFolderDragLeave, handleFolderDrop, handleFolderDragEnd, handleFolderListDragOver, handleFolderListDragLeave, handleFolderListDrop } = useFolderDragDrop({ rootFolders, rootDropParentId, scrollContainerRef, getChildFolders, updateFolder, setExpandedFolderIds });
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const selectedFolderId = activeTab?.kind === "explorer" && !activeTab.explorerState.isSectionListMode ? activeTab.explorerState.selectedFolderId : null;
-  const emptyMessage = projectRootId ? "フォルダがありません" : "フォルダがありません";
-  const firstLevel = projectRootId ? ROOT_LEVEL + 1 : ROOT_LEVEL;
+  const emptyMessage = parentFolderId ? "フォルダがありません" : "フォルダがありません";
+  const firstLevel = parentFolderId ? ROOT_LEVEL + 1 : ROOT_LEVEL;
   const appendIndicatorLeft = getFolderDropIndicatorLeft(firstLevel);
   const isAppendingToCurrentList = isAppendDropTarget(dragState, rootDropParentId);
 
@@ -595,7 +595,7 @@ const LibraryHierarchySidebar = ({ projectRootId = null }: LibraryHierarchySideb
   if (loading) return <aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-y-auto px-3 py-1 text-[13px] text-[#9aa1ad]">読み込み中...</aside>;
   if (error) return <aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-y-auto px-3 py-1 text-[13px] text-[#b48a8a]">{error}</aside>;
 
-  return <><aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-hidden"><div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto px-3 pb-3 pt-1"><div role="tree" aria-label="ライブラリ" className="flex min-h-full flex-col gap-0.5" onDragOver={handleFolderListDragOver} onDragLeave={handleFolderListDragLeave} onDrop={handleFolderListDrop}>{visibleRootFolders.length > 0 ? visibleRootFolders.map((folder) => <DirectoryTreeNode key={getFolderId(folder)} folder={folder} level={firstLevel} isRootProject={!projectRootId} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} dragState={dragState} getChildFolders={getChildFolders} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onOpenContextMenu={openContextMenu} onFolderDragStart={handleFolderDragStart} onFolderDragOver={handleFolderDragOver} onFolderDragLeave={handleFolderDragLeave} onFolderDrop={handleFolderDrop} onFolderDragEnd={handleFolderDragEnd} />) : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">{emptyMessage}</p>}{isAppendingToCurrentList ? <FolderDropIndicator position="append" left={appendIndicatorLeft} className="mx-2" /> : null}<div aria-hidden="true" className="min-h-8 flex-1" /></div></div></aside>{contextMenuElement}</>;
+  return <><aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-hidden"><div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto px-3 pb-3 pt-1"><div role="tree" aria-label="ライブラリ" className="flex min-h-full flex-col gap-0.5" onDragOver={handleFolderListDragOver} onDragLeave={handleFolderListDragLeave} onDrop={handleFolderListDrop}>{visibleFolders.length > 0 ? visibleFolders.map((folder) => <DirectoryTreeNode key={getFolderId(folder)} folder={folder} level={firstLevel} isRootProject={!parentFolderId} selectedFolderId={selectedFolderId} expandedFolderIds={expandedFolderIds} dragState={dragState} getChildFolders={getChildFolders} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onOpenContextMenu={openContextMenu} onFolderDragStart={handleFolderDragStart} onFolderDragOver={handleFolderDragOver} onFolderDragLeave={handleFolderDragLeave} onFolderDrop={handleFolderDrop} onFolderDragEnd={handleFolderDragEnd} />) : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">{emptyMessage}</p>}{isAppendingToCurrentList ? <FolderDropIndicator position="append" left={appendIndicatorLeft} className="mx-2" /> : null}<div aria-hidden="true" className="min-h-8 flex-1" /></div></div></aside>{contextMenuElement}</>;
 };
 
 export { LibraryHierarchySidebar, ProjectListSidebar };
