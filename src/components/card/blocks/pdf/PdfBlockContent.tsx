@@ -1,17 +1,13 @@
 import React from "react";
-import { GlobalWorkerOptions, getDocument, type PDFDocumentProxy } from "pdfjs-dist";
-import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { resolveCardImageUrl } from "@/services/cardImageResolver";
 import { getOrCreateImageBlobUrl, removeImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
-import { deleteImageBlob, putImageBlob } from "@/services/imageFileStore";
+import { deleteImageBlob, getImageBlob, putImageBlob } from "@/services/imageFileStore";
 import { getLocalDb } from "@/services/localDB";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
-import { FileText, Minus, Plus, Upload, X } from "@/ui/icons";
+import { ExternalLink, FileText, Upload, X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import type { AssetRecord, UploadedPdf } from "@/types/domain/assets";
-
-GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 type PdfBlockContentProps =
   | Readonly<{
@@ -37,18 +33,12 @@ type ResolvedPdf = UploadedPdf & {
   status: "pending" | "uploading" | "ready" | "failed";
 };
 
-type PdfCanvasViewerProps = Readonly<{
+type PdfNativeViewerProps = Readonly<{
   pdf: ResolvedPdf;
   pageNumber: number;
-  onPageNumberChange?: (pageNumber: number) => void;
   displayMode: "fixed" | "fluid";
   zoom: number;
-}>;
-
-type PdfPageCanvasProps = Readonly<{
-  document: PDFDocumentProxy;
-  pageNumber: number;
-  zoom: number;
+  userId: string | null;
 }>;
 
 type LocalAssetRecordLike = {
@@ -57,24 +47,11 @@ type LocalAssetRecordLike = {
 };
 
 const PDF_DROPZONE_CLASS_NAME = "rounded-2xl border-2 border-dashed border-slate-200 bg-white/70 px-4 py-6 text-center text-slate-500 transition hover:border-slate-300 hover:bg-slate-50";
-const PDF_VIEWER_MAX_WIDTH_PX = 780;
 const PDF_VIEWER_FIXED_HEIGHT_PX = 520;
 const PDF_VIEWER_FLUID_HEIGHT_PX = 640;
-const PDF_PAGE_FALLBACK_WIDTH_PX = 680;
-const PDF_MIN_ZOOM = 0.6;
-const PDF_MAX_ZOOM = 2.4;
-const PDF_ZOOM_STEP = 0.15;
 
 const isNonEmptyString = (value: unknown): value is string => {
   return typeof value === "string" && value.trim().length > 0;
-};
-
-const clamp = (value: number, min: number, max: number): number => {
-  return Math.min(max, Math.max(min, value));
-};
-
-const clampPageNumber = (value: number, pageCount: number): number => {
-  return clamp(Math.round(value || 1), 1, Math.max(1, pageCount));
 };
 
 const formatBytes = (size: number | null | undefined): string => {
@@ -114,142 +91,58 @@ const resolvePdf = async (pdf: UploadedPdf, userId: string | null): Promise<Reso
   };
 };
 
-const PdfPageCanvas = ({ document, pageNumber, zoom }: PdfPageCanvasProps) => {
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
-  const [containerWidth, setContainerWidth] = React.useState(PDF_PAGE_FALLBACK_WIDTH_PX);
-  const [isRendering, setIsRendering] = React.useState(false);
-  const [renderError, setRenderError] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    const element = containerRef.current;
-    if (!element || typeof ResizeObserver === "undefined") return;
-
-    const updateWidth = () => {
-      const width = element.getBoundingClientRect().width;
-      if (Number.isFinite(width) && width > 0) {
-        setContainerWidth(Math.max(240, Math.min(PDF_VIEWER_MAX_WIDTH_PX, width)));
-      }
-    };
-    const observer = new ResizeObserver(updateWidth);
-    observer.observe(element);
-    updateWidth();
-
-    return () => observer.disconnect();
-  }, []);
-
-  React.useEffect(() => {
-    let cancelled = false;
-    let renderTask: { promise: Promise<unknown>; cancel: () => void } | null = null;
-
-    const run = async () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      setIsRendering(true);
-      setRenderError(null);
-
-      try {
-        const page = await document.getPage(pageNumber);
-        if (cancelled) return;
-
-        const baseViewport = page.getViewport({ scale: 1 });
-        const baseScale = containerWidth / Math.max(1, baseViewport.width);
-        const viewport = page.getViewport({ scale: baseScale * zoom });
-        const outputScale = typeof window === "undefined" ? 1 : Math.min(window.devicePixelRatio || 1, 2);
-        const context = canvas.getContext("2d");
-        if (!context) throw new Error("Canvas context is unavailable");
-
-        canvas.width = Math.max(1, Math.floor(viewport.width * outputScale));
-        canvas.height = Math.max(1, Math.floor(viewport.height * outputScale));
-        canvas.style.width = `${viewport.width}px`;
-        canvas.style.height = `${viewport.height}px`;
-        context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
-        context.clearRect(0, 0, viewport.width, viewport.height);
-
-        renderTask = page.render({ canvasContext: context, viewport });
-        await renderTask.promise;
-      } catch (error) {
-        if (!cancelled) {
-          setRenderError(error instanceof Error ? error.message : "PDFページを描画できません");
-        }
-      } finally {
-        if (!cancelled) {
-          setIsRendering(false);
-        }
-      }
-    };
-
-    void run();
-
-    return () => {
-      cancelled = true;
-      renderTask?.cancel();
-    };
-  }, [containerWidth, document, pageNumber, zoom]);
-
-  return (
-    <div ref={containerRef} className="relative flex w-full justify-center overflow-auto bg-neutral-950/5 px-2 py-3">
-      {isRendering ? (
-        <div className="pointer-events-none absolute right-3 top-3 rounded-full bg-white/85 px-2 py-1 text-[10px] font-semibold text-slate-500 shadow-sm">Rendering</div>
-      ) : null}
-      {renderError ? (
-        <div className="rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs text-rose-700">{renderError}</div>
-      ) : (
-        <canvas ref={canvasRef} className="max-w-full rounded-sm bg-white shadow-sm" aria-label={`PDF page ${pageNumber}`} />
-      )}
-    </div>
-  );
+const blobToNumberArray = async (blob: Blob): Promise<number[]> => {
+  return Array.from(new Uint8Array(await blob.arrayBuffer()));
 };
 
-const PdfCanvasViewer = ({ pdf, pageNumber, onPageNumberChange, displayMode, zoom }: PdfCanvasViewerProps) => {
-  const [document, setDocument] = React.useState<PDFDocumentProxy | null>(null);
-  const [loadError, setLoadError] = React.useState<string | null>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [localZoom, setLocalZoom] = React.useState(1);
-  const viewerHeight = displayMode === "fluid" ? PDF_VIEWER_FLUID_HEIGHT_PX : PDF_VIEWER_FIXED_HEIGHT_PX;
-  const effectiveZoom = clamp(localZoom * zoom, PDF_MIN_ZOOM, PDF_MAX_ZOOM);
-  const pageCount = document?.numPages ?? 1;
-  const safePageNumber = clampPageNumber(pageNumber, pageCount);
-
-  React.useEffect(() => {
-    if (!pdf.url) return;
-
-    let cancelled = false;
-    const loadingTask = getDocument({ url: pdf.url });
-    setIsLoading(true);
-    setLoadError(null);
-    setDocument(null);
-
-    void loadingTask.promise
-      .then((nextDocument) => {
-        if (cancelled) return;
-        setDocument(nextDocument);
-      })
-      .catch((error) => {
-        if (cancelled) return;
-        setLoadError(error instanceof Error ? error.message : "PDFを読み込めません");
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-      void loadingTask.destroy();
-    };
-  }, [pdf.url]);
-
-  React.useEffect(() => {
-    if (!document) return;
-    if (safePageNumber !== pageNumber) {
-      onPageNumberChange?.(safePageNumber);
+const readPdfBlob = async (pdf: UploadedPdf, userId: string | null): Promise<Blob | null> => {
+  const assetKey = getPdfAssetKey(pdf);
+  if (assetKey && userId) {
+    const db = await getLocalDb(userId);
+    const record = (await db.images.get(assetKey)) as LocalAssetRecordLike | undefined;
+    const localBlobId = getLocalBlobIdFromRecord(record) ?? getLocalBlobIdFromRecord(pdf);
+    if (localBlobId) {
+      const blob = await getImageBlob(localBlobId, { userId });
+      if (blob) return blob;
     }
-  }, [document, onPageNumberChange, pageNumber, safePageNumber]);
+  }
 
-  const movePage = (delta: number) => {
-    onPageNumberChange?.(clampPageNumber(safePageNumber + delta, pageCount));
-  };
+  if (!pdf.remoteUrl) return null;
+  const response = await fetch(pdf.remoteUrl);
+  if (!response.ok) return null;
+  return response.blob();
+};
+
+const PdfNativeViewer = ({ pdf, pageNumber, displayMode, zoom, userId }: PdfNativeViewerProps) => {
+  const [error, setError] = React.useState<string | null>(null);
+  const [isOpening, setIsOpening] = React.useState(false);
+  const viewerHeight = displayMode === "fluid" ? PDF_VIEWER_FLUID_HEIGHT_PX : PDF_VIEWER_FIXED_HEIGHT_PX;
+  const objectUrl = pdf.url ? `${pdf.url}#page=${Math.max(1, Math.round(pageNumber || 1))}&zoom=${Math.max(50, Math.round(100 * zoom))}` : null;
+  const canOpenSioyek = typeof window !== "undefined" && Boolean(window.desktop?.pdf?.openInSioyek);
+
+  const openInSioyek = React.useCallback(async () => {
+    if (!canOpenSioyek) {
+      setError("デスクトップ版でSioyek連携を利用できます");
+      return;
+    }
+
+    setIsOpening(true);
+    setError(null);
+
+    try {
+      const blob = await readPdfBlob(pdf, userId);
+      if (!blob) throw new Error("PDFデータを取得できません");
+      await window.desktop?.pdf.openInSioyek({
+        fileName: pdf.filename || "document.pdf",
+        data: await blobToNumberArray(blob),
+        pageNumber: Math.max(1, Math.round(pageNumber || 1)),
+      });
+    } catch (openError) {
+      setError(openError instanceof Error ? openError.message : "SioyekでPDFを開けません");
+    } finally {
+      setIsOpening(false);
+    }
+  }, [canOpenSioyek, pageNumber, pdf, userId]);
 
   return (
     <section className="w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm" onClick={(event) => event.stopPropagation()}>
@@ -259,19 +152,15 @@ const PdfCanvasViewer = ({ pdf, pageNumber, onPageNumberChange, displayMode, zoo
           <span className="truncate font-semibold text-slate-700">{pdf.filename || "PDF"}</span>
           {formatBytes(pdf.sizeBytes ?? pdf.size) ? <span className="shrink-0 text-[11px] text-slate-400">{formatBytes(pdf.sizeBytes ?? pdf.size)}</span> : null}
         </div>
-        <div className="flex items-center gap-1">
-          <button type="button" className="rounded-md border border-slate-200 bg-white px-2 py-1 font-semibold disabled:opacity-40" disabled={safePageNumber <= 1} onClick={() => movePage(-1)}>前</button>
-          <span className="min-w-[72px] text-center font-semibold">{safePageNumber} / {pageCount}</span>
-          <button type="button" className="rounded-md border border-slate-200 bg-white px-2 py-1 font-semibold disabled:opacity-40" disabled={safePageNumber >= pageCount} onClick={() => movePage(1)}>次</button>
-          <button type="button" className="rounded-md border border-slate-200 bg-white p-1.5 disabled:opacity-40" disabled={localZoom <= PDF_MIN_ZOOM} onClick={() => setLocalZoom((value) => clamp(value - PDF_ZOOM_STEP, PDF_MIN_ZOOM, PDF_MAX_ZOOM))} aria-label="PDFを縮小"><Minus className="h-3.5 w-3.5" /></button>
-          <button type="button" className="rounded-md border border-slate-200 bg-white p-1.5 disabled:opacity-40" disabled={localZoom >= PDF_MAX_ZOOM} onClick={() => setLocalZoom((value) => clamp(value + PDF_ZOOM_STEP, PDF_MIN_ZOOM, PDF_MAX_ZOOM))} aria-label="PDFを拡大"><Plus className="h-3.5 w-3.5" /></button>
-        </div>
+        <button type="button" className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-600 shadow-sm disabled:opacity-50" onClick={openInSioyek} disabled={isOpening}>
+          <ExternalLink className="h-3.5 w-3.5" />
+          {isOpening ? "起動中" : "Sioyekで開く"}
+        </button>
       </div>
-      <div className="overflow-auto" style={{ maxHeight: viewerHeight }}>
-        {isLoading ? <div className="flex h-48 items-center justify-center text-xs font-semibold text-slate-400">PDFを読み込み中...</div> : null}
-        {loadError ? <div className="m-3 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs text-rose-700">{loadError}</div> : null}
-        {document ? <PdfPageCanvas document={document} pageNumber={safePageNumber} zoom={effectiveZoom} /> : null}
+      <div className="bg-neutral-950/5" style={{ height: viewerHeight }}>
+        {objectUrl ? <object data={objectUrl} type="application/pdf" className="h-full w-full"><iframe src={objectUrl} title={pdf.filename || "PDF"} className="h-full w-full border-0" /></object> : <div className="flex h-full items-center justify-center text-xs font-semibold text-slate-400">PDFを表示できません</div>}
       </div>
+      {error ? <div className="border-t border-rose-100 bg-rose-50 px-3 py-2 text-xs text-rose-700">{error}</div> : null}
     </section>
   );
 };
@@ -428,7 +317,7 @@ const PdfBlockContentInner = (props: PdfBlockContentProps) => {
           </button>
         </div>
       ) : null}
-      <PdfCanvasViewer pdf={resolvedPdf} pageNumber={pageNumber} onPageNumberChange={props.onPageNumberChange} displayMode={displayMode} zoom={zoom} />
+      <PdfNativeViewer pdf={resolvedPdf} pageNumber={pageNumber} displayMode={displayMode} zoom={zoom} userId={currentUserId} />
       {error ? <p className="px-1 text-[11px] text-rose-600">{error}</p> : null}
     </div>
   );
