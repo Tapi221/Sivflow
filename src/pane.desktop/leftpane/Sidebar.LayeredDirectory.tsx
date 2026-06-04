@@ -282,7 +282,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
           </div>
           <input ref={fileInputRef} type="file" accept={currentFileAccept} className="hidden" tabIndex={-1} onChange={handleToolbarFileInputChange} />
           <div className="min-h-0 flex-1">
-            {folderTagMode === "tag" ? <TagTreeSidebar /> : selectedNavigationFolderId ? <LibraryHierarchySidebar projectRootId={selectedNavigationFolderId} /> : <ProjectListSidebar />}
+            {folderTagMode === "tag" ? <TagTreeSidebar /> : selectedNavigationFolderId ? <LibraryHierarchySidebar parentFolderId={selectedNavigationFolderId} /> : <ProjectListSidebar />}
           </div>
         </>
       ) : null}
