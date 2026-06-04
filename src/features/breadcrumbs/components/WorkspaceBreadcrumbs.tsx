@@ -17,6 +17,13 @@ const WORKSPACE_BREADCRUMBS_NO_DRAG_STYLE: NoDragStyle = {
   WebkitAppRegion: "no-drag",
 };
 
+const WORKSPACE_BREADCRUMBS_CLASS_NAME = "pointer-events-auto absolute left-8 top-[15px] z-30 flex h-7 max-w-[calc(100%-604px)] min-w-0 items-center overflow-hidden font-[var(--app-font-family-sidebar)] text-[14px] font-[650] leading-none tracking-[-0.018em] text-[#111111]";
+const WORKSPACE_BREADCRUMBS_LIST_CLASS_NAME = "flex min-w-0 items-center gap-[5px] overflow-hidden";
+const WORKSPACE_BREADCRUMB_ITEM_CLASS_NAME = "flex min-w-0 items-center gap-[5px]";
+const WORKSPACE_BREADCRUMB_BUTTON_CLASS_NAME = "min-w-0 truncate border-0 bg-transparent p-0 text-left font-inherit leading-none text-[#6f6f6f] outline-none transition-colors duration-150 ease-out hover:text-[#111111] focus-visible:text-[#111111]";
+const WORKSPACE_BREADCRUMB_LABEL_CLASS_NAME = "min-w-0 truncate p-0 leading-none";
+const WORKSPACE_BREADCRUMB_SEPARATOR_CLASS_NAME = "h-3.5 w-3.5 shrink-0 text-[#b7b7b7]";
+
 const getBreadcrumbLabel = (crumb: BreadcrumbCrumb): string => {
   const label = crumb.label.trim();
   return label.length > 0 ? label : "無題";
@@ -41,13 +48,10 @@ const WorkspaceBreadcrumbs = ({ className }: WorkspaceBreadcrumbsProps) => {
   return (
     <nav
       aria-label="パンくず"
-      className={cn(
-        "pointer-events-auto absolute left-5 top-3 z-30 flex h-8 max-w-[calc(100%-560px)] min-w-0 items-center overflow-hidden text-[13px] font-semibold leading-none tracking-[-0.018em] text-[#2f343b]",
-        className,
-      )}
+      className={cn(WORKSPACE_BREADCRUMBS_CLASS_NAME, className)}
       style={WORKSPACE_BREADCRUMBS_NO_DRAG_STYLE}
     >
-      <ol className="flex min-w-0 items-center gap-1 overflow-hidden">
+      <ol className={WORKSPACE_BREADCRUMBS_LIST_CLASS_NAME}>
         {crumbs.map((crumb, index) => {
           const label = getBreadcrumbLabel(crumb);
           const isLast = index === crumbs.length - 1;
@@ -56,12 +60,12 @@ const WorkspaceBreadcrumbs = ({ className }: WorkspaceBreadcrumbsProps) => {
           return (
             <li
               key={getBreadcrumbKey(crumb, index)}
-              className="flex min-w-0 items-center gap-1"
+              className={WORKSPACE_BREADCRUMB_ITEM_CLASS_NAME}
             >
               {isClickable ? (
                 <button
                   type="button"
-                  className="min-w-0 truncate rounded-[6px] px-1.5 py-1 text-left text-[#4f5359] outline-none transition-colors hover:bg-[#eeeeee] hover:text-[#2f343b] focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b]"
+                  className={WORKSPACE_BREADCRUMB_BUTTON_CLASS_NAME}
                   title={label}
                   onClick={() => {
                     navigate(crumb.to ?? "/schedule");
@@ -72,8 +76,8 @@ const WorkspaceBreadcrumbs = ({ className }: WorkspaceBreadcrumbsProps) => {
               ) : (
                 <span
                   className={cn(
-                    "min-w-0 truncate px-1.5 py-1",
-                    isLast ? "text-[#111111]" : "text-[#4f5359]",
+                    WORKSPACE_BREADCRUMB_LABEL_CLASS_NAME,
+                    isLast ? "text-[#111111]" : "text-[#6f6f6f]",
                   )}
                   title={label}
                   aria-current={isLast ? "page" : undefined}
@@ -83,7 +87,7 @@ const WorkspaceBreadcrumbs = ({ className }: WorkspaceBreadcrumbsProps) => {
               )}
 
               {!isLast ? (
-                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[#9a9a9a]" />
+                <ChevronRight className={WORKSPACE_BREADCRUMB_SEPARATOR_CLASS_NAME} />
               ) : null}
             </li>
           );
