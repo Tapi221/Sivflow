@@ -9,14 +9,15 @@ import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDer
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
+import { useTags } from "@/features/settings/hooks/useTags";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { StratisTagIcon } from "@/ui/icons/stratis";
-import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
-import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
+import { LibraryHierarchySidebar, ProjectListSidebar } from "./folder/LayeredDirectorySidebar";
+import { TagTreeSidebar } from "./folder/TagTreeSidebar";
 
 type IconProps = {
   className?: string;
@@ -60,8 +61,10 @@ const FAVORITE_SECTION_LABEL = "お気に入り";
 const FAVORITE_EMPTY_MESSAGE = "プロジェクトをお気に入りに追加すると、ここからすぐ開けます";
 const PROJECT_SECTION_LABEL = "プロジェクト";
 const TAG_SECTION_LABEL = "タグツリー";
+const DEFAULT_NEW_TAG_NAME = "新規タグ";
 const ADD_PROJECT_ARIA_LABEL = "プロジェクトを追加";
 const ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL = "選択中のフォルダに追加";
+const ADD_TAG_ARIA_LABEL = "タグを追加";
 const PROJECT_ADD_MENU_PANEL_ID = "layered-project-add-menu";
 const PROJECT_ADD_MENU_ITEM_DEFINITIONS: readonly ProjectAddMenuItemDefinition[] = [
   { id: "create-folder", label: "新規フォルダ" },
@@ -77,6 +80,16 @@ const IconChevronDown = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" 
 const getFolderName = (folder: FolderTreeNode): string => {
   const name = folder.folderName ?? folder.folder_name;
   return typeof name === "string" && name.trim() ? name.trim() : "無題のフォルダ";
+};
+
+const getUniqueTagName = (baseName: string, tagNames: readonly string[]): string => {
+  const usedTagNameSet = new Set(tagNames.map((tagName) => tagName.trim().toLowerCase()).filter((tagName) => tagName.length > 0));
+  const normalizedBaseName = baseName.toLowerCase();
+  if (!usedTagNameSet.has(normalizedBaseName)) return baseName;
+
+  let suffix = 2;
+  while (usedTagNameSet.has(`${normalizedBaseName} ${suffix}`)) suffix += 1;
+  return `${baseName} ${suffix}`;
 };
 
 const createFolderLookup = (rootFolders: FolderTreeNode[], getChildFolders: (folderId: string) => FolderTreeNode[]): Map<string, FolderTreeNode> => {
@@ -146,6 +159,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   const { currentUser } = useAuthSession();
   const folderTagMode = useFolderTagModeStore((state) => state.folderTagMode);
   const setFolderTagMode = useFolderTagModeStore((state) => state.setFolderTagMode);
+  const { addTag, tags } = useTags();
   const { createFolder } = useFolderCommands();
   const { folders } = useFoldersRead();
   const openSearch = useSearchStore((state) => state.open);
@@ -165,6 +179,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   const selectedNavigationFolderId = selectedFolderId;
   const sectionLabel = folderTagMode === "tag" ? TAG_SECTION_LABEL : selectedFolder ? getFolderName(selectedFolder) : PROJECT_SECTION_LABEL;
   const shouldShowFavoriteSection = !selectedFolderId;
+  const existingTagNames = useMemo(() => tags.map((tag) => tag.name), [tags]);
   const workspaceOwnerName = useMemo(() => getWorkspaceOwnerName(currentUser?.displayName, currentUser?.email), [currentUser?.displayName, currentUser?.email]);
   const workspaceName = `${workspaceOwnerName}${WORKSPACE_NAME_SUFFIX}`;
   const workspaceInitial = useMemo(() => getWorkspaceInitial(workspaceOwnerName), [workspaceOwnerName]);
@@ -172,6 +187,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   const isFolderActive = activeTab?.sectionKey === "library" && folderTagMode === "folder";
   const isTagActive = activeTab?.sectionKey === "library" && folderTagMode === "tag";
   const isScheduleActive = activeTab?.sectionKey === "schedule";
+  const isSettingsActive = activeTab?.sectionKey === "settings";
   const shouldShowCalendarContent = isScheduleActive && calendarContent !== undefined;
   const shouldShowDirectoryContent = !shouldShowCalendarContent;
   const resolvedOnToggleLeftPanel = onToggleLeftPanel ?? outletToggleLeftPanel;
@@ -186,6 +202,10 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   const handleCreateRootFolder = useCallback(() => {
     void createFolder(DEFAULT_NEW_PROJECT_NAME);
   }, [createFolder]);
+
+  const handleCreateRootTag = useCallback(() => {
+    void addTag(getUniqueTagName(DEFAULT_NEW_TAG_NAME, existingTagNames));
+  }, [addTag, existingTagNames]);
 
   const handleOpenHome = useCallback(() => {
     openSectionTab("home");
@@ -226,6 +246,10 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
     openSearch();
   }, [openSearch]);
 
+  const handleOpenSettings = useCallback(() => {
+    openSectionTab("settings");
+  }, [openSectionTab]);
+
   return (
     <div className="app-layered-directory flex h-full min-h-0 shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased">
       <div className="app-layered-directory__primary-nav">
@@ -254,7 +278,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
           <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenExplore} aria-label={WORKSPACE_EXPLORE_LABEL} title={WORKSPACE_EXPLORE_LABEL}>
             <GalleryIcon className="app-layered-directory__notion-icon" />
           </button>
-          <button type="button" className="app-layered-directory__notion-action" aria-label={WORKSPACE_SETTINGS_LABEL} title={WORKSPACE_SETTINGS_LABEL} disabled>
+          <button type="button" className={`app-layered-directory__notion-action${isSettingsActive ? " is-active" : ""}`} onClick={handleOpenSettings} aria-current={isSettingsActive ? "page" : undefined} aria-label={WORKSPACE_SETTINGS_LABEL} title={WORKSPACE_SETTINGS_LABEL}>
             <SettingIcon className="app-layered-directory__notion-icon" />
           </button>
         </nav>
@@ -278,11 +302,15 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
                 ) : (
                   <h2 className="app-layered-directory__section-heading">{sectionLabel}</h2>
                 )}
-                {folderTagMode !== "tag" ? (
+                {folderTagMode === "tag" ? (
+                  <button type="button" onClick={handleCreateRootTag} aria-label={ADD_TAG_ARIA_LABEL} title={ADD_TAG_ARIA_LABEL} className="app-layered-directory__add-button">
+                    <IconPlus className="h-4 w-4" />
+                  </button>
+                ) : (
                   <button type="button" onClick={selectedFolder ? handleOpenProjectAddMenu : handleCreateRootFolder} aria-label={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} title={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} className="app-layered-directory__add-button">
                     <IconPlus className="h-4 w-4" />
                   </button>
-                ) : null}
+                )}
               </div>
             </section>
           </div>
