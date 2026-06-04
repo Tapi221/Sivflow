@@ -21,6 +21,8 @@ export type CardSurfaceLayoutProps = {
 
 const SPLIT_INNER_SHADOW_CLIP_PX = 120;
 const STACK_INNER_SHADOW_CLIP_PX = 120;
+const SPLIT_DIVIDER_COVER_WIDTH_PX = 2;
+const SPLIT_DIVIDER_LINE_WIDTH_PX = 0.5;
 
 export const CardSurfaceFaceAnchor = ({
   face,
@@ -75,7 +77,7 @@ export const CardSurfaceLayout = ({
   return (
     <div
       className={cn(
-        "card-surface-layout w-full min-w-0 max-w-full overflow-visible",
+        "card-surface-layout relative w-full min-w-0 max-w-full overflow-visible",
         isSplitLayout
           ? "card-surface-layout--split grid grid-cols-2 gap-0"
           : "card-surface-layout--stack flex flex-col gap-0",
@@ -95,6 +97,22 @@ export const CardSurfaceLayout = ({
       >
         {answerNode}
       </div>
+
+      {isSplitLayout ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 left-1/2 z-30 -translate-x-1/2 bg-white"
+          style={{ width: `${SPLIT_DIVIDER_COVER_WIDTH_PX}px` }}
+        >
+          <div
+            className="absolute inset-y-0 left-1/2 -translate-x-1/2"
+            style={{
+              width: `${SPLIT_DIVIDER_LINE_WIDTH_PX}px`,
+              background: "var(--card-border-default, rgba(15, 23, 42, 0.08))",
+            }}
+          />
+        </div>
+      ) : null}
     </div>
   );
 };

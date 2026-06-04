@@ -89,13 +89,13 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
     deviceScope: presentationTarget,
   });
 
+  const paneWidth = useCardSetViewPaneWidth({ isGlobalEditing: state.isGlobalEditing, isDesktop, settings, cardSetId });
+
   const [activeScrollAnchorFace, setActiveScrollAnchorFace] = useState<ScrollAnchorFace | null>(null);
   const [layoutTransitionScrollAnchorRevision, setLayoutTransitionScrollAnchorRevision] = useState(0);
   const [scrollToActiveIndexRequestKey, setScrollToActiveIndexRequestKey] = useState(0);
   const interactionModeScrollSnapshotRef = useRef<CardSetViewScrollSnapshot | null>(null);
   const scrollRestoreAnimationFrameRef = useRef<number | null>(null);
-
-  const paneWidth = useCardSetViewPaneWidth({ isGlobalEditing: state.isGlobalEditing, isDesktop, settings, cardSetId });
 
   const layoutInteractionMode: CardSetInteractionMode = state.isGlobalEditing ? "edit" : "view";
 
