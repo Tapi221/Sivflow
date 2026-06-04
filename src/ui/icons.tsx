@@ -28,6 +28,9 @@ type GlyphKind =
   | "pin"
   | "plus"
   | "search"
+  | "settings"
+  | "shield"
+  | "user"
   | "x"
   | "default";
 
@@ -46,6 +49,9 @@ const glyphPaths: Record<GlyphKind, string[]> = {
   pin: ["M12 17v5", "M5 7h14", "M7 7l2-4h6l2 4", "M8 7v6l-2 4h12l-2-4V7"],
   plus: ["M12 5v14", "M5 12h14"],
   search: ["M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z", "m20 20-3.5-3.5"],
+  settings: ["M4 7h5", "M13 7h7", "M11 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z", "M4 17h7", "M15 17h5", "M13 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"],
+  shield: ["M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"],
+  user: ["M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2", "M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"],
   x: ["m6 6 12 12", "m18 6-12 12"],
   default: ["M6 6h12v12H6z"],
 };
@@ -69,6 +75,9 @@ const glyphByIconName: Record<string, GlyphKind> = {
   Plus: "plus",
   Search: "search",
   SearchX: "search",
+  Settings2: "settings",
+  Shield: "shield",
+  User: "user",
   X: "x",
   XCircle: "x",
 };
