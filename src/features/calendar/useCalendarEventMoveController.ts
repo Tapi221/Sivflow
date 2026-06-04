@@ -14,7 +14,6 @@ type UseCalendarEventMoveControllerReturn = { calendarEventMoveOverrides: Map<st
 const EVENT_MOVE_ROLLBACK_MS = 1200;
 const EVENT_MOVE_SAVING_TOAST_DURATION_MS = Number.POSITIVE_INFINITY;
 const EVENT_MOVE_TOAST_DURATION_MS = 5000;
-const EVENT_MOVE_SAVING_TOAST_DESCRIPTION = "変更を保存しています";
 const EVENT_MOVE_SUCCESS_TOAST_DESCRIPTION = "元に戻すことができます";
 const EVENT_MOVE_UNDO_SUCCESS_TOAST_DESCRIPTION = "移動前の日時に戻しました";
 const EVENT_MOVE_UNDO_ERROR_TOAST_DESCRIPTION = "予定は移動後の日時のままです";
@@ -62,7 +61,7 @@ const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalend
     });
 
     const movePromise = updateGoogleCalendarEvent(accountId, createCalendarEventUpdateInput(event, nextOverride));
-    const toastId = toast.success("予定を移動しました", { description: EVENT_MOVE_SAVING_TOAST_DESCRIPTION, duration: EVENT_MOVE_SAVING_TOAST_DURATION_MS });
+    const toastId = toast.success("予定を移動しました", { duration: EVENT_MOVE_SAVING_TOAST_DURATION_MS });
 
     try {
       await movePromise;
