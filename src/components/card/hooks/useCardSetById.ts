@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import { getLocalDb } from "@/services/localDB";
 import { type CardDisplayMode, type CardSet, DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode } from "@/types/domain/cardSet";
 
@@ -26,21 +26,24 @@ const normalizeCardSetRecord = (
 };
 
 export const useCardSetById = (cardSetId: string | null) => {
-  const { currentUser } = useAuthSession();
-  const currentUserId = currentUser?.uid ?? null;
+  const userId = useEffectiveLocalUserId();
 
   const cardSet = useLiveQuery(async () => {
-    if (!currentUserId || !cardSetId) {
+    if (!cardSetId) {
       return null;
     }
 
-    const db = await getLocalDb(currentUserId);
+    if (!userId) {
+      return undefined;
+    }
+
+    const db = await getLocalDb(userId);
     const row = await db.cardSets.get(cardSetId);
 
     return normalizeCardSetRecord(
       (row as RawCardSetRecord | undefined | null) ?? null,
     );
-  }, [currentUserId, cardSetId]);
+  }, [userId, cardSetId]);
 
   const updateCardSet = useCallback(
     async (
@@ -52,23 +55,23 @@ export const useCardSetById = (cardSetId: string | null) => {
         >
       >,
     ): Promise<void> => {
-      if (!currentUserId) {
+      if (!userId) {
         throw new Error("認証が必要です");
       }
 
-      const db = await getLocalDb(currentUserId);
+      const db = await getLocalDb(userId);
 
       await db.cardSets.update(id, {
         ...data,
         updatedAt: new Date(),
       });
     },
-    [currentUserId],
+    [userId],
   );
 
   return {
     cardSet: cardSet ?? null,
-    loading: Boolean(currentUserId && cardSetId) && cardSet === undefined,
+    loading: Boolean(cardSetId) && cardSet === undefined,
     updateCardSet,
   };
 };
