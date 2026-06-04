@@ -52,18 +52,6 @@
   padding-right: 12px;
 }
 
-.settings-workspace__nav-list::before {
-  content: "General";
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 8px;
-  color: #8f8a84;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 22px;
-}
-
 .settings-workspace__nav-item {
   display: flex;
   align-items: center;
@@ -494,10 +482,6 @@
     flex-direction: row;
     overflow-x: auto;
     overflow-y: hidden;
-  }
-
-  .settings-workspace__nav-list::before {
-    display: none;
   }
 
   .settings-workspace__nav-item {
