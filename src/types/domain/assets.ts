@@ -94,6 +94,26 @@ export interface UploadedImage {
   updatedAt?: Date | Timestamp | null;
 }
 
+export interface UploadedPdf {
+  id: string;
+  assetId?: string | null;
+  filename: string;
+  localUrl?: BlobUrl | null;
+  remoteUrl?: StorageUrl | null;
+  storagePath?: string | null;
+  localFileId?: string | null;
+  status: UploadedImageStatus;
+  progress?: number;
+  contentType?: string | null;
+  size?: number | null;
+  sizeBytes?: number | null;
+  retryCount?: number;
+  error?: string;
+  source?: UploadSource;
+  fallbackReason?: UploadFallbackReason;
+  updatedAt?: Date | Timestamp | null;
+}
+
 export interface UploadedFile {
   id: string;
   name: string;
