@@ -11,8 +11,7 @@ export type EditorBlockIconName =
   | "Code"
   | "Image"
   | "Sigma"
-  | "NotebookPen"
-  | "FileText";
+  | "NotebookPen";
 
 export type EditorBlockDefinition = Readonly<{
   id: EditorBlockType;
@@ -83,7 +82,7 @@ const EDITOR_BLOCK_DEFINITIONS = [
     id: "pdf",
     type: "pdf",
     label: "PDF",
-    icon: "FileText",
+    icon: "NotebookPen",
     isVisible: true,
     orderIndex: 6,
   },
