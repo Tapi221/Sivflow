@@ -13,6 +13,9 @@ export interface PdfViewerState {
   bookmarkPages?: number[];
   sidePanelTab?: PdfSidePanelTab;
   thumbnailOrder?: number[];
+  markPages?: Record<string, number>;
+  historyBackPages?: number[];
+  historyForwardPages?: number[];
 }
 
 export interface DocumentItem extends BaseEntity {
