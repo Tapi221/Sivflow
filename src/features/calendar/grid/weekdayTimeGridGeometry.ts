@@ -18,6 +18,7 @@ export type WeekdayTimedEventFrame = {
 };
 
 export type WeekdayTimedEventPositionOptions = {
+  maxMinHeightHours?: number;
   suppressMinHeight?: boolean;
 };
 
@@ -54,6 +55,18 @@ const getWeekdayTimedEventHorizontalInsets = (frame: WeekdayTimedEventFrame): We
   return { leftPx, rightPx };
 };
 
+const createMinHeightStyle = ({ maxMinHeightHours, shouldHideEvent, suppressMinHeight }: { maxMinHeightHours?: number; shouldHideEvent: boolean; suppressMinHeight?: boolean }): string => {
+  if (shouldHideEvent || suppressMinHeight) return "0px";
+
+  const minHeightPx = getTrimmedEventLengthPx(WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX);
+
+  if (maxMinHeightHours === undefined) return `${minHeightPx}px`;
+
+  const normalizedMaxMinHeightHours = normalizeTimeGridNumber(Math.max(0, maxMinHeightHours));
+
+  return `max(0px, min(${minHeightPx}px, calc(${normalizedMaxMinHeightHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}) - ${EVENT_COLUMN_VERTICAL_TRIM_PX}px)))`;
+};
+
 const shouldHideCarryOverEventInShortRange = (entry: CalendarTimeGridLayoutEntry, rangeHours: number): boolean => entry.startsBeforeRange && rangeHours <= SHORT_RANGE_CARRY_OVER_HIDE_THRESHOLD_HOURS;
 
 export const getWeekdayTimedEventFrame = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS): WeekdayTimedEventFrame => ({
@@ -73,7 +86,7 @@ export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutE
     top: `calc(${frame.topHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
     width: `calc(${frame.widthPercent}% - ${horizontalInsets.leftPx + horizontalInsets.rightPx}px)`,
     height: shouldHideEvent ? "0px" : `calc(${frame.heightHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}) - ${EVENT_COLUMN_VERTICAL_TRIM_PX}px)`,
-    minHeight: shouldHideEvent || options.suppressMinHeight ? "0px" : `${getTrimmedEventLengthPx(WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX)}px`,
+    minHeight: createMinHeightStyle({ maxMinHeightHours: options.maxMinHeightHours, shouldHideEvent, suppressMinHeight: options.suppressMinHeight }),
     overflow: shouldHideEvent ? "hidden" : undefined,
     pointerEvents: shouldHideEvent ? "none" : undefined,
   };
