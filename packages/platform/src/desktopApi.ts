@@ -17,12 +17,27 @@ export interface DesktopImportFileReadResult {
   data: ArrayBuffer | Uint8Array | number[];
 }
 
+export interface DesktopPdfOpenInput {
+  fileName: string;
+  data: ArrayBuffer | Uint8Array | number[];
+  pageNumber?: number;
+}
+
+export interface DesktopPdfOpenResult {
+  path: string;
+  openedWith: string;
+}
+
 export type DesktopImportFileOpenHandler = (payload: DesktopImportFileOpenPayload) => void;
 
 export interface DesktopFileApi {
   readImportFile(filePath: string): Promise<DesktopImportFileReadResult>;
   selectImportFiles(): Promise<string[]>;
   onImportFileOpen(handler: DesktopImportFileOpenHandler): () => void;
+}
+
+export interface DesktopPdfApi {
+  openInSioyek(input: DesktopPdfOpenInput): Promise<DesktopPdfOpenResult>;
 }
 
 export interface DesktopOauthCallbackPayload {
@@ -65,6 +80,7 @@ export type DesktopOauthApi = PlatformOauthApi;
 export interface DesktopBridgeApi extends PlatformApi {
   files: DesktopFileApi;
   oauth: DesktopOauthApi;
+  pdf: DesktopPdfApi;
   window: DesktopWindowApi;
 }
 
