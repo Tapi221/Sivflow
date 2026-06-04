@@ -1,4 +1,5 @@
 import { type MouseEvent, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
@@ -87,6 +88,7 @@ const SidebarNavLink = ({
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
+  const navigate = useNavigate();
 
   const activeTab =
     activeTabId === null
@@ -105,12 +107,16 @@ const SidebarNavLink = ({
     item.onClick?.();
 
     if (item.folderTagMode) {
+      navigate("/schedule");
       setFolderTagMode(item.folderTagMode);
       openExplorerTab({ title: "Library", explorerState: LIBRARY_EXPLORER_STATE });
       return;
     }
 
     if (item.sectionKey) {
+      if (item.sectionKey !== "settings") {
+        navigate("/schedule");
+      }
       openSectionTab(item.sectionKey);
     }
   };
