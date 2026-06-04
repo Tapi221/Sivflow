@@ -189,3 +189,8 @@
     }
   }
 }
+
+.app-layered-directory [aria-label="Project list explorer"] p,
+.app-layered-directory [aria-label="Library hierarchy explorer"] p {
+  color: var(--app-sidebar-text-muted, #777777);
+}
