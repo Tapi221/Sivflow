@@ -164,7 +164,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   const selectedFolder = selectedFolderId ? folderById.get(selectedFolderId) ?? null : null;
   const selectedNavigationFolderId = selectedFolderId;
   const sectionLabel = folderTagMode === "tag" ? TAG_SECTION_LABEL : selectedFolder ? getFolderName(selectedFolder) : PROJECT_SECTION_LABEL;
-  const shouldShowFavoriteSection = folderTagMode !== "tag" && !selectedFolderId;
+  const shouldShowFavoriteSection = !selectedFolderId;
   const workspaceOwnerName = useMemo(() => getWorkspaceOwnerName(currentUser?.displayName, currentUser?.email), [currentUser?.displayName, currentUser?.email]);
   const workspaceName = `${workspaceOwnerName}${WORKSPACE_NAME_SUFFIX}`;
   const workspaceInitial = useMemo(() => getWorkspaceInitial(workspaceOwnerName), [workspaceOwnerName]);
