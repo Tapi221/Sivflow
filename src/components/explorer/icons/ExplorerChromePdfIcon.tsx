@@ -23,13 +23,13 @@ export const ExplorerChromePdfIcon = ({
       d="M6.2 2.8H12.2L16.8 7.4V16.3C16.8 17.5 15.8 18.5 14.6 18.5H6.2C5 18.5 4 17.5 4 16.3V5C4 3.8 5 2.8 6.2 2.8Z"
       fill="var(--explorer-chrome-pdf-fill, #f0efe9)"
       stroke="var(--explorer-chrome-pdf-stroke, #8b8a84)"
-      strokeWidth="1.2"
+      strokeWidth="1.5"
       strokeLinejoin="round"
     />
     <path
       d="M12.2 2.8V7.4H16.8"
       stroke="var(--explorer-chrome-pdf-stroke, #8b8a84)"
-      strokeWidth="1.2"
+      strokeWidth="1.5"
       strokeLinejoin="round"
     />
     <rect
@@ -44,7 +44,7 @@ export const ExplorerChromePdfIcon = ({
     <path
       d="M6.6 10.4H13.4"
       stroke="var(--explorer-chrome-pdf-highlight, #fbfaf6)"
-      strokeWidth="1.2"
+      strokeWidth="1.5"
       strokeLinecap="round"
       opacity="0.85"
     />
