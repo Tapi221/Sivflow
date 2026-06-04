@@ -40,6 +40,8 @@ export const BlockFrame = ({
   return (
     <div
       {...props}
+      data-block-accent-color={accentColor || undefined}
+      data-block-frame-variant={variant}
       className={cn(
         "group relative overflow-visible bg-transparent py-0 px-1.5",
         raiseZIndex && "z-40",
