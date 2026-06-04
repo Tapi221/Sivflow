@@ -1,6 +1,7 @@
 :root {
   /* コードブロック基本色 */
-  --code-bg: #f3f4f6;
+  --code-bg: #f0f0f2;
+  --code-bg: color-mix(in srgb, var(--ds-semantic-color-background-sidebar, #ececee) 88%, white 12%);
   --code-fg: #2f2a36;
   --code-border: rgba(47, 42, 54, 0.12);
   --code-selection: rgba(139, 95, 191, 0.14);
