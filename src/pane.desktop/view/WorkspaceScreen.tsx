@@ -2,6 +2,7 @@ import { useCallback, useMemo, type CSSProperties, type ReactNode } from "react"
 import { useOutletContext } from "react-router-dom";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
+import { WorkspaceBreadcrumbs } from "@/features/breadcrumbs/components/WorkspaceBreadcrumbs";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
@@ -11,8 +12,8 @@ import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.Layered
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceExplorerTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
-import { Search } from "@/ui/icons";
 import type { SelectedExplorerItem } from "@/types";
+import { Search } from "@/ui/icons";
 import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
 import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
 
@@ -107,6 +108,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
       </SidebarInteractionRegion>
       <CarvePanel className="relative min-w-0">
         <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} />
+        <WorkspaceBreadcrumbs />
         <WorkspaceActionToolbar className={WORKSPACE_ACTION_TOOLBAR_CLASS_NAME} style={WORKSPACE_ACTION_TOOLBAR_STYLE} />
         <button type="button" className={FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME} aria-label="検索を開く" aria-keyshortcuts="Meta+K Control+K" title="検索を開く" onClick={handleOpenSearch}>
           <Search className="h-3.5 w-3.5 shrink-0 text-[#85827e]" />
