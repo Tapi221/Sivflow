@@ -4,7 +4,26 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
+const optimizedDependencyIncludes = [
+  "@radix-ui/react-alert-dialog",
+  "@radix-ui/react-checkbox",
+  "@radix-ui/react-collapsible",
+  "@radix-ui/react-dialog",
+  "@radix-ui/react-dropdown-menu",
+  "@radix-ui/react-hover-card",
+  "@radix-ui/react-label",
+  "@radix-ui/react-popover",
+  "@radix-ui/react-progress",
+  "@radix-ui/react-radio-group",
+  "@radix-ui/react-scroll-area",
+  "@radix-ui/react-select",
+  "@radix-ui/react-slider",
+  "@radix-ui/react-slot",
+  "@radix-ui/react-switch",
+];
+
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+
 const resolveFromRoot = (relativePath: string) => path.resolve(repoRoot, relativePath);
 
 // https://vite.dev/config/
@@ -66,6 +85,9 @@ export default defineConfig(({ command }) => ({
       "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
       "Cross-Origin-Embedder-Policy": "unsafe-none",
     },
+  },
+  optimizeDeps: {
+    include: optimizedDependencyIncludes,
   },
   esbuild: command === "build" ? { drop: ["console", "debugger"] } : undefined,
   build: {
