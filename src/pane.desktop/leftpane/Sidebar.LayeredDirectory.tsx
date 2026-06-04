@@ -15,8 +15,8 @@ import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { StratisTagIcon } from "@/ui/icons/stratis";
-import { LibraryHierarchySidebar, ProjectListSidebar } from "./folder/LayeredDirectorySidebar";
-import { TagTreeSidebar } from "./folder/TagTreeSidebar";
+import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
+import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
 
 type IconProps = {
   className?: string;
