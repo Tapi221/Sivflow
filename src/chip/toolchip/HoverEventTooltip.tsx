@@ -36,6 +36,7 @@ const TOOLTIP_ARROW_CLASS_NAME = "absolute h-2.5 w-2.5 rotate-45 border-white/70
 const TOOLTIP_VIEWPORT_MARGIN = 12;
 const TOOLTIP_BOUNDARY_GAP = 8;
 const TOOLTIP_ARROW_MARGIN = 18;
+const TOOLTIP_CLOSE_DELAY_MS = 120;
 
 const clampNumber = (value: number, min: number, max: number) => {
   if (max < min) return min;
@@ -152,26 +153,44 @@ const HoverEventTooltip = ({
 }: HoverEventTooltipProps) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const closeTimerRef = useRef<number | null>(null);
   const [position, setPosition] = useState<TooltipPosition | null>(null);
 
   const tooltipTitle = title.trim();
   const tooltipSubtitle = subtitle?.trim();
   const hasContent = tooltipTitle.length > 0 || !!tooltipSubtitle;
 
+  const clearCloseTimer = () => {
+    if (closeTimerRef.current === null) return;
+
+    window.clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = null;
+  };
+
+  const hideTooltip = () => {
+    clearCloseTimer();
+    setPosition(null);
+  };
+
+  const scheduleHideTooltip = () => {
+    clearCloseTimer();
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = null;
+      setPosition(null);
+    }, TOOLTIP_CLOSE_DELAY_MS);
+  };
+
   const showTooltip = () => {
+    clearCloseTimer();
     if (disabled || !hasContent || !anchorRef.current) return;
 
     const rect = anchorRef.current.getBoundingClientRect();
     setPosition(getInitialPosition(rect, side, offset));
   };
 
-  const hideTooltip = () => {
-    setPosition(null);
-  };
-
   const handleEditButtonClick = () => {
     onEdit?.();
-    setPosition(null);
+    hideTooltip();
   };
 
   useLayoutEffect(() => {
@@ -201,7 +220,7 @@ const HoverEventTooltip = ({
     if (!position) return;
 
     const closeTooltip = () => {
-      setPosition(null);
+      hideTooltip();
     };
 
     window.addEventListener("scroll", closeTooltip, true);
@@ -213,13 +232,25 @@ const HoverEventTooltip = ({
     };
   }, [position]);
 
+  useEffect(() => {
+    if (!disabled && hasContent) return;
+
+    hideTooltip();
+  }, [disabled, hasContent]);
+
+  useEffect(() => {
+    return () => {
+      clearCloseTimer();
+    };
+  }, []);
+
   return (
     <>
       <div
         ref={anchorRef}
         className={cn("relative flex", className)}
         onMouseEnter={showTooltip}
-        onMouseLeave={onEdit ? undefined : hideTooltip}
+        onMouseLeave={onEdit ? scheduleHideTooltip : hideTooltip}
       >
         {children}
       </div>
@@ -242,6 +273,8 @@ const HoverEventTooltip = ({
               "animate-in fade-in-0 zoom-in-[0.98] duration-150 ease-out",
               !position.measured && "opacity-0",
             )}
+            onMouseEnter={onEdit ? clearCloseTimer : undefined}
+            onMouseLeave={onEdit ? hideTooltip : undefined}
           >
             <div className={TOOLTIP_SURFACE_CLASS_NAME}>
               <div className="flex min-w-0 items-start justify-between gap-3">
