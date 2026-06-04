@@ -6,12 +6,20 @@ import { chunkCloudSyncChangesBySize } from "@/application/usecases/cloudSyncBat
 import { getChangeId, getChangeParts, sanitizeSyncDataForCloud } from "@/application/usecases/cloudSyncShared";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
 
+type SyncChangeWithOperation = SyncChange & {
+  operationType?: unknown;
+};
+
 const cloudUpdatedAt = (): FieldValue | Timestamp => {
   const fn = (Firestore as Record<string, unknown>).serverTimestamp;
   if (typeof fn === "function") {
     return (fn as () => FieldValue)();
   }
   return Timestamp.now();
+};
+
+const isDeleteSyncChange = (change: SyncChange): boolean => {
+  return (change as SyncChangeWithOperation).operationType === "delete";
 };
 
 export const pushCloudSyncBatch = async (
@@ -41,6 +49,15 @@ export const pushCloudSyncBatch = async (
         }
 
         const { type, id, data } = parts;
+        const documentRef = getPushDocumentRef(firestore, userId, type, id);
+
+        if (isDeleteSyncChange(change)) {
+          console.log(`   - Deleting from batch: ${type}/${id}`);
+          batch.delete(documentRef);
+          chunkIds.push(id);
+          continue;
+        }
+
         console.log(`   - Adding to batch: ${type}/${id}`);
 
         const sanitized = sanitizeSyncDataForCloud(type, data);
@@ -49,7 +66,7 @@ export const pushCloudSyncBatch = async (
         }
 
         batch.set(
-          getPushDocumentRef(firestore, userId, type, id),
+          documentRef,
           {
             ...sanitized,
             updatedAt: cloudUpdatedAt(),
