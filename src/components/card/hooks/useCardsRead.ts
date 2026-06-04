@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useLocation } from "react-router-dom";
 import { normalizeCardFolderId } from "@/domain/card/normalizers/cardShape";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { buildCardSetById, filterCardsByFolderId } from "@/domain/card/selectors/cardFolder";
 import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { getLocalDb } from "@/services/localDB";
 import type { Card } from "@/types";
 import { toMillis } from "@/utils/toMillis";
@@ -74,6 +76,10 @@ const compareCards = (left: Card, right: Card): number => {
   return left.id.localeCompare(right.id);
 };
 
+const hasCardSetRouteParam = (search: string): boolean => {
+  return new URLSearchParams(search).has("cardSetId");
+};
+
 const resolveVisibleCards = ({
   rawCards,
   folderId,
@@ -108,9 +114,16 @@ export const useCardsRead = (
   cardSetId?: string,
   options?: UseCardsReadOptions,
 ) => {
+  const { search } = useLocation();
   const userId = useEffectiveLocalUserId();
+  const isActiveWorkspaceCardSetSelected = useWorkspaceTabsStore((state) => {
+    const activeTab = state.tabs.find((tab) => tab.id === state.activeTabId);
+    return activeTab?.kind === "explorer" && activeTab.explorerState.selectedItem?.type === "cardSet";
+  });
   const [error] = useState<string | null>(null);
-  const enabled = options?.enabled ?? true;
+  const isUnscopedRead = !folderId && !cardSetId;
+  const shouldSkipUnscopedRead = isUnscopedRead && (hasCardSetRouteParam(search) || isActiveWorkspaceCardSetSelected);
+  const enabled = (options?.enabled ?? true) && !shouldSkipUnscopedRead;
 
   const rawCards = useLiveQuery(async () => {
     try {
