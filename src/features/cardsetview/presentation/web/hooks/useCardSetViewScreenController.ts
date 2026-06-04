@@ -45,12 +45,14 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
   const data = useCardSetViewData({ cardSetId });
 
   const navigationPreference = useMemo(() => getCardSetViewNavigationPreference({ deviceScope: presentationTarget, cardSetId }), [cardSetId, presentationTarget]);
+  const navigationPreferenceCardId = navigationPreference?.cardId;
+  const navigationScrollTop = navigationPreference?.scrollTop ?? 0;
 
   const restoredInitialIndex = useMemo(() => {
-    if (targetCardId || !navigationPreference?.cardId) return initialIndex;
+    if (targetCardId || !navigationPreferenceCardId) return initialIndex;
 
-    return data.cardIndexById.get(navigationPreference.cardId) ?? initialIndex;
-  }, [data.cardIndexById, initialIndex, navigationPreference?.cardId, targetCardId]);
+    return data.cardIndexById.get(navigationPreferenceCardId) ?? initialIndex;
+  }, [data.cardIndexById, initialIndex, navigationPreferenceCardId, targetCardId]);
 
   const state = useCardSetViewState({
     initialIndex: restoredInitialIndex,
@@ -210,7 +212,7 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
     zoom,
     widthControl,
     topLeftZoomControl,
-    navigationScrollTop: navigationPreference?.scrollTop ?? 0,
+    navigationScrollTop,
     navigationScrollRestorationKey,
     handleActiveScrollAnchorFaceChange,
     handleNavigationScrollTopChange,
