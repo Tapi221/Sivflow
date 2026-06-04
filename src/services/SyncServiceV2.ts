@@ -430,6 +430,7 @@ export class SyncServiceV2 implements ISyncService {
               type: task.entity,
               id: payloadId,
               data: task.payload,
+              operationType: task.operationType,
             },
           ]);
 
@@ -818,198 +819,129 @@ export class SyncServiceV2 implements ISyncService {
             "Security Alert: Access attempt from revoked device",
             { deviceId: currentDeviceId },
           );
-
-          await this.securityMonitor.logEvent("ACCESS_DENIED_REVOKED");
-
-          throw new Error(
-            "DEVICE_REVOKED: This device has been removed from the account.",
-          );
+          await this.securityMonitor.logEvent("REVOKED_DEVICE_ACCESS", {
+            deviceId: currentDeviceId,
+          });
+          throw new Error("This device has been revoked. Please re-authenticate.");
         }
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      if (message.includes("DEVICE_REVOKED")) {
-        throw error;
-      }
+      if (error instanceof Error && error.message.includes("revoked")) throw error;
+      this.telemetry.log(
+        "warn",
+        "Could not check device status",
+        { deviceId: currentDeviceId },
+        error as Error,
+      );
     }
   }
 
   async updateDeviceName(deviceId: string, newName: string): Promise<void> {
-    this.telemetry.log("info", "Updating device name", { deviceId, newName });
     const db = requireFirestoreDb();
     const deviceRef = doc(
       db,
       `sync_metadata/${this.userId}/devices/${deviceId}`,
     );
-    await updateDoc(deviceRef, { deviceName: newName });
+
+    await updateDoc(deviceRef, {
+      deviceName: newName,
+      lastSeen: Timestamp.now(),
+    });
   }
 
   async cleanupInactiveDevices(): Promise<number> {
-    this.telemetry.log("info", "Cleaning up inactive devices");
     const db = requireFirestoreDb();
-    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+    const devicesRef = collection(db, `sync_metadata/${this.userId}/devices`);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+
     const q = query(
-      collection(db, `sync_metadata/${this.userId}/devices`),
-      where("lastSyncTime", "<", Timestamp.fromDate(sixtyDaysAgo)),
+      devicesRef,
+      where("lastSeen", "<", Timestamp.fromDate(cutoff)),
+      where("isActive", "==", false),
     );
 
     const snapshot = await getDocs(q);
-    let count = 0;
-    for (const deviceDoc of snapshot.docs) {
-      const data = deviceDoc.data();
-      if (data.status === "revoked") continue;
+    const deletePromises = snapshot.docs.map((deviceDoc) => deleteDoc(deviceDoc.ref));
+    await Promise.all(deletePromises);
 
-      await deleteDoc(deviceDoc.ref);
-      count += 1;
-    }
-    return count;
+    return snapshot.size;
   }
 
   async getSyncStats(): Promise<SyncStats> {
-    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const [{ histories, errors }, queueDepth] = await Promise.all([
-      this.localDB.getSyncStatsSince(sevenDaysAgo),
+    const [queueDepth, histories, errors] = await Promise.all([
       this.queueManager.getQueueDepth(),
+      this.localDB.getRecentSyncHistory(20),
+      this.localDB.syncErrors.toArray(),
     ]);
 
-    const lastHistory = [...histories].sort(
-      (a, b) => b.finishedAt - a.finishedAt,
-    )[0];
-    const lastSuccess = [...histories]
-      .filter((history) => history.result === "success")
-      .sort((a, b) => b.finishedAt - a.finishedAt)[0];
-    const lastError = [...errors].sort(
-      (a, b) => b.occurredAt - a.occurredAt,
-    )[0];
-    const durations = histories.map(
-      (history) => history.finishedAt - history.startedAt,
-    );
-    const avgDurationMs =
-      durations.length > 0
-        ? durations.reduce((total, duration) => total + duration, 0) /
-          durations.length
-        : 0;
-    const recentSuccessRate =
-      histories.length > 0
-        ? histories.filter((history) => history.result === "success").length /
-          histories.length
-        : 1;
+    const lastAttempt = histories[0];
+    const lastSuccess = histories.find((history) => history.status === "success");
 
     return {
-      lastAttemptAt: lastHistory?.finishedAt,
-      lastSuccessAt: lastSuccess?.finishedAt,
-      lastErrorMessage: lastError?.message,
-      avgDurationMs,
-      recentSuccessRate,
       queueDepth,
+      isSyncing: this.isSyncing,
+      lastAttemptAt: lastAttempt?.startedAt,
+      lastSuccessAt: lastSuccess?.completedAt,
+      lastServerTime: (await this.localDB.getLastSyncTime(this.userId))?.getTime(),
+      lastErrorMessage: errors[0]?.errorMessage,
+      recentSuccessRate: histories.length
+        ? histories.filter((history) => history.status === "success").length /
+        histories.length
+        : 1,
     };
   }
 
   async getUnresolvedConflicts(): Promise<SyncConflict[]> {
     const conflicts = await this.localDB.getConflicts();
-    return conflicts.map((conflict) => {
-      const local = Object.fromEntries(
-        Object.entries(conflict.conflicts).map(([key, value]) => [
-          key,
-          value.local,
-        ]),
-      );
-      const remote = Object.fromEntries(
-        Object.entries(conflict.conflicts).map(([key, value]) => [
-          key,
-          value.remote,
-        ]),
-      );
-
-      return {
-        id: conflict.id,
-        entity: conflict.entityType,
-        targetId: conflict.entityId,
-        local,
-        remote,
-        createdAt: conflict.detectedAt,
-      };
-    });
+    return conflicts.map((conflict) => ({
+      id: conflict.id,
+      entity: conflict.entityType,
+      targetId: conflict.entityId,
+      local: conflict.localVersion,
+      remote: conflict.remoteVersion,
+      createdAt: conflict.detectedAt,
+    }));
   }
 
   async loadSettings(): Promise<UserSettingsSnapshot> {
-    const settings = await this.localDB.getSyncSettings("default");
+    const settings = await this.localDB.userSettings.get(this.userId);
     return {
       version: 1,
       updatedAt: Date.now(),
-      data: settings
-        ? {
-          id: settings.id,
-          autoSync: settings.autoSync,
-          intervalMinutes: settings.intervalMinutes,
-          wifiOnly: settings.wifiOnly,
-          autoCleanupDevices: settings.autoCleanupDevices,
-        }
-        : {
-          autoSync: true,
-          intervalMinutes: 30,
-          wifiOnly: false,
-          autoCleanupDevices: true,
-        },
+      data: settings ?? {},
     };
   }
 
   async performFullSync(): Promise<void> {
-    return this.sync("force_resync");
+    await this.sync("user_initiated");
   }
 
-  async processQueue(): Promise<{
-    processed: number;
-    errors: SyncProcessingError[];
-  }> {
-    const before = await this.queueManager.getQueueDepth();
+  async processQueue(): Promise<{ processed: number; errors: SyncProcessingError[] }> {
+    const tasks = await this.queueManager.peekBatch({
+      maxSize: 100,
+      concurrency: 1,
+      timeoutMs: 30000,
+    });
+    const errors: SyncProcessingError[] = [];
 
-    try {
-      await this.sync("background");
-      const after = await this.queueManager.getQueueDepth();
-      return {
-        processed: Math.max(before - after, 0),
-        errors: [],
-      };
-    } catch (error: unknown) {
-      return {
-        processed: 0,
-        errors: [
-          {
-            message: error instanceof Error ? error.message : String(error),
-            retryable: true,
-            cause: error,
-          },
-        ],
-      };
+    for (const task of tasks) {
+      try {
+        await this.processBatch([task]);
+      } catch (error: unknown) {
+        errors.push({
+          taskId: task.id,
+          message: error instanceof Error ? error.message : String(error),
+          retryable: true,
+        });
+      }
     }
+
+    return { processed: tasks.length - errors.length, errors };
   }
 
   monitorSecurity(callback: (state: SecurityState) => void): () => void {
-    this.securityMonitor.startMonitoring((state) => {
-      const alerts: SecurityAlert[] = state.alerts.map((alert) => {
-        const record = alert as Record<string, unknown>;
-        return {
-          id: String(record.id ?? crypto.randomUUID()),
-          type:
-            typeof record.type === "string" ? record.type : "SECURITY_ALERT",
-          createdAt:
-            typeof record.createdAt === "number"
-              ? record.createdAt
-              : Date.now(),
-          message:
-            typeof record.message === "string" ? record.message : undefined,
-          data: record,
-        };
-      });
-
-      callback({
-        isLocked: state.isLocked,
-        requires2FA: state.requires2FA,
-        alerts,
-      });
-    });
-    return () => this.securityMonitor.stopMonitoring();
+    return this.securityMonitor.subscribe(callback);
   }
 
   async dismissSecurityAlert(alertId: string): Promise<void> {
