@@ -23,6 +23,8 @@ type ScrollAnchorFace = "question" | "answer";
 
 type CardSetViewScrollSnapshot = {
   scrollTop: number;
+  anchorSelector: string | null;
+  offsetWithinAnchorPx: number | null;
 };
 
 type UseCardSetViewScreenControllerParams = {
@@ -31,6 +33,8 @@ type UseCardSetViewScreenControllerParams = {
 
 const CARD_SET_VIEW_SCROLL_RESTORE_STABILIZATION_MS = 320;
 const SCROLLABLE_OVERFLOW_Y_VALUES = new Set(["auto", "scroll", "overlay"]);
+const ACTIVE_CARD_SELECTOR = "[data-card-active=\"true\"]";
+const CARD_FACE_SELECTOR = "[data-card-face]";
 
 const resolveNowMs = () => typeof performance !== "undefined" ? performance.now() : Date.now();
 
@@ -61,6 +65,95 @@ const clampElementScrollTop = (scrollTop: number, element: HTMLElement) => {
   const safeScrollTop = Number.isFinite(scrollTop) ? scrollTop : 0;
 
   return Math.min(Math.max(0, safeScrollTop), maxScrollTop);
+};
+
+const resolveElementTopWithinContainer = (container: HTMLElement, element: HTMLElement) => {
+  const containerRect = container.getBoundingClientRect();
+  const elementRect = element.getBoundingClientRect();
+
+  return container.scrollTop + (elementRect.top - containerRect.top);
+};
+
+const buildCardFaceSelector = (face: ScrollAnchorFace | null) => {
+  return face ? `[data-card-face="${face}"]` : null;
+};
+
+const resolveCardFaceFromElement = (element: HTMLElement | null): ScrollAnchorFace | null => {
+  const face = element?.getAttribute("data-card-face") ?? null;
+  return face === "question" || face === "answer" ? face : null;
+};
+
+const resolveActiveCardElement = (scrollElement: HTMLElement) => {
+  return scrollElement.querySelector<HTMLElement>(ACTIVE_CARD_SELECTOR);
+};
+
+const resolveAnchorElement = ({ activeCardElement, anchorSelector }: { activeCardElement: HTMLElement; anchorSelector: string | null }) => {
+  if (!anchorSelector) return activeCardElement;
+
+  return activeCardElement.querySelector<HTMLElement>(anchorSelector) ?? activeCardElement;
+};
+
+const resolveAutoAnchorElement = ({ scrollElement, activeCardElement }: { scrollElement: HTMLElement; activeCardElement: HTMLElement }) => {
+  const faceElements = Array.from(activeCardElement.querySelectorAll<HTMLElement>(CARD_FACE_SELECTOR));
+  if (faceElements.length === 0) return activeCardElement;
+
+  const viewportTop = scrollElement.scrollTop + 1;
+  let selectedElement = faceElements[0];
+
+  for (const faceElement of faceElements) {
+    const faceTop = resolveElementTopWithinContainer(scrollElement, faceElement);
+    if (faceTop <= viewportTop) {
+      selectedElement = faceElement;
+      continue;
+    }
+
+    break;
+  }
+
+  return selectedElement;
+};
+
+const captureCardSetViewScrollSnapshot = ({ viewport, activeFace }: { viewport: HTMLDivElement | null; activeFace: ScrollAnchorFace | null }): CardSetViewScrollSnapshot | null => {
+  const scrollElement = resolvePrimaryScrollableElement(viewport);
+  if (!scrollElement) return null;
+
+  const activeCardElement = resolveActiveCardElement(scrollElement);
+  if (!activeCardElement) {
+    return {
+      scrollTop: scrollElement.scrollTop,
+      anchorSelector: null,
+      offsetWithinAnchorPx: null,
+    };
+  }
+
+  const requestedFaceSelector = buildCardFaceSelector(activeFace);
+  const requestedFaceElement = requestedFaceSelector ? activeCardElement.querySelector<HTMLElement>(requestedFaceSelector) : null;
+  const anchorElement = requestedFaceElement ?? resolveAutoAnchorElement({ scrollElement, activeCardElement });
+  const resolvedFaceSelector = buildCardFaceSelector(resolveCardFaceFromElement(anchorElement));
+  const anchorTopWithinContainerPx = resolveElementTopWithinContainer(scrollElement, anchorElement);
+
+  return {
+    scrollTop: scrollElement.scrollTop,
+    anchorSelector: resolvedFaceSelector,
+    offsetWithinAnchorPx: Math.max(0, scrollElement.scrollTop - anchorTopWithinContainerPx),
+  };
+};
+
+const restoreCardSetViewScrollSnapshot = ({ viewport, snapshot }: { viewport: HTMLDivElement | null; snapshot: CardSetViewScrollSnapshot }) => {
+  const scrollElement = resolvePrimaryScrollableElement(viewport);
+  if (!scrollElement) return;
+
+  const activeCardElement = resolveActiveCardElement(scrollElement);
+  if (!activeCardElement || snapshot.offsetWithinAnchorPx == null) {
+    scrollElement.scrollTop = clampElementScrollTop(snapshot.scrollTop, scrollElement);
+    return;
+  }
+
+  const anchorElement = resolveAnchorElement({ activeCardElement, anchorSelector: snapshot.anchorSelector });
+  const anchorTopWithinContainerPx = resolveElementTopWithinContainer(scrollElement, anchorElement);
+  const nextScrollTop = anchorTopWithinContainerPx + snapshot.offsetWithinAnchorPx;
+
+  scrollElement.scrollTop = clampElementScrollTop(nextScrollTop, scrollElement);
 };
 
 const buildNavigationScopeKey = ({ deviceScope, cardSetId }: { deviceScope: string; cardSetId: string | null }) => {
@@ -145,25 +238,14 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
   useCardSetViewBreadcrumbs({ selectedCardSet: data.selectedCardSet, selectedCard: state.selectedCard, sortedCards: data.sortedCards, folders: data.folders, setExtraCrumbs });
 
   const captureInteractionModeScrollSnapshot = useCallback(() => {
-    const scrollElement = resolvePrimaryScrollableElement(paneWidth.contentViewportRef.current);
-
-    if (!scrollElement) {
-      interactionModeScrollSnapshotRef.current = null;
-      return;
-    }
-
-    interactionModeScrollSnapshotRef.current = {
-      scrollTop: scrollElement.scrollTop,
-    };
-  }, [paneWidth.contentViewportRef]);
+    interactionModeScrollSnapshotRef.current = captureCardSetViewScrollSnapshot({ viewport: paneWidth.contentViewportRef.current, activeFace: activeScrollAnchorFace });
+  }, [activeScrollAnchorFace, paneWidth.contentViewportRef]);
 
   const restoreInteractionModeScrollSnapshot = useCallback(() => {
     const snapshot = interactionModeScrollSnapshotRef.current;
-    const scrollElement = resolvePrimaryScrollableElement(paneWidth.contentViewportRef.current);
+    if (!snapshot) return;
 
-    if (!snapshot || !scrollElement) return;
-
-    scrollElement.scrollTop = clampElementScrollTop(snapshot.scrollTop, scrollElement);
+    restoreCardSetViewScrollSnapshot({ viewport: paneWidth.contentViewportRef.current, snapshot });
   }, [paneWidth.contentViewportRef]);
 
   const handleToggleViewMode = useCallback(() => {
