@@ -22,8 +22,8 @@ type ExplorerWorkspaceContentProps = {
   onToggleLeftPanel: () => void;
 };
 
-const FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME = "absolute right-4 top-3 z-30 flex h-8 w-[220px] shrink-0 items-center gap-1.5 rounded-[9px] border border-[rgba(0,0,0,0.05)] bg-[#f6f5f3]/90 px-2.5 text-left text-[12px] font-medium leading-none tracking-[-0.012em] text-[#85827e] shadow-none outline-none ring-0 backdrop-blur-xl transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.06)] hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.99] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
-const FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-5 min-w-[31px] items-center justify-center rounded-[5px] border border-[rgba(0,0,0,0.04)] bg-[#efeeee] px-1.5 text-[10px] font-semibold leading-none tracking-[-0.02em] text-[#85827e]";
+const FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME = "absolute right-4 top-3 z-30 flex h-8 w-[220px] shrink-0 items-center gap-1.5 rounded-[9px] border border-[rgba(0,0,0,0.04)] bg-[#efeeee]/95 px-2.5 text-left text-[12px] font-medium leading-none tracking-[-0.012em] text-[#85827e] shadow-none outline-none ring-0 backdrop-blur-xl transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.04)] hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.99] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
+const FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-5 min-w-[31px] items-center justify-center rounded-[5px] border border-[rgba(0,0,0,0.04)] bg-[#eeeeee] px-1.5 text-[10px] font-semibold leading-none tracking-[-0.02em] text-[#85827e]";
 
 const createFolderRouteState = (folderId: string | null): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: folderId === null, selectedFolderId: folderId, selectedItem: null });
 
