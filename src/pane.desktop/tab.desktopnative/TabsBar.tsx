@@ -6,10 +6,10 @@ import { WORKSPACE_TAB_CONTEXT_MENU_HEIGHT, WORKSPACE_TAB_CONTEXT_MENU_MARGIN, W
 import { useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { WorkspaceTabDndItem, WorkspaceTabDndList } from "@/features/dnd/tab/WorkspaceTabDnd";
 import { useWorkspaceTabDnd } from "@/features/dnd/tab/useWorkspaceTabDnd";
-import type { WorkspaceSidebarSection, WorkspaceTab } from "./Tab";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
 import { FileText, Layers, X } from "@/ui/icons";
+import type { WorkspaceSidebarSection, WorkspaceTab } from "./Tab";
 
 type TabsBarVariant = "workspace" | "titlebar";
 
@@ -31,9 +31,7 @@ type TabContextMenuState = {
   y: number;
 };
 
-type TabContextMenuTriggerEvent =
-  | ReactMouseEvent<HTMLElement>
-  | ReactPointerEvent<HTMLElement>;
+type TabContextMenuTriggerEvent = ReactMouseEvent<HTMLElement> | ReactPointerEvent<HTMLElement>;
 
 const TABS_NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
@@ -55,16 +53,14 @@ const ACTIVE_TAB_SURFACE_STYLE: CSSProperties = {
 const ACTIVE_TAB_JOIN_STYLE: CSSProperties = {};
 
 const ACTIVE_TAB_LEFT_CURVE_STYLE: CSSProperties = {
-  ...ACTIVE_TAB_SURFACE_STYLE,
-  WebkitMask:
-    "radial-gradient(circle at 0 0, transparent 0 16px, #000 16.5px)",
+  background: "transparent",
+  WebkitMask: "radial-gradient(circle at 0 0, transparent 0 16px, #000 16.5px)",
   mask: "radial-gradient(circle at 0 0, transparent 0 16px, #000 16.5px)",
 };
 
 const ACTIVE_TAB_RIGHT_CURVE_STYLE: CSSProperties = {
-  ...ACTIVE_TAB_SURFACE_STYLE,
-  WebkitMask:
-    "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
+  background: "transparent",
+  WebkitMask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
   mask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
 };
 
@@ -102,10 +98,15 @@ const TAB_OPEN_ANIMATION_STYLE = `
 }
 `;
 
+const SIDEBAR_ROUTE_TAB_ICONS = {
+  home: HomeIcon,
+  review: InboxIcon,
+  schedule: ClockIcon,
+  settings: SettingIcon,
+} satisfies Partial<Record<WorkspaceSidebarSection, TabIconComponent>>;
+
 const resolveTabsSurfaceStyle = (isTitlebar: boolean): CSSProperties => ({
-  background: isTitlebar
-    ? "var(--app-titlebar-bg, var(--app-sidebar-bg))"
-    : "var(--app-sidebar-bg)",
+  background: isTitlebar ? "var(--app-titlebar-bg, var(--app-sidebar-bg))" : "var(--app-sidebar-bg)",
 });
 
 const resolveCloseButtonClassName = (isTitlebar: boolean): string => {
@@ -136,10 +137,7 @@ const resolveAddButtonClassName = (isTitlebar: boolean): string => {
   );
 };
 
-const resolveTabSlotLayoutStyle = (
-  tab: WorkspaceTab,
-  interactiveStyle: AppRegionStyle,
-): AppRegionStyle => {
+const resolveTabSlotLayoutStyle = (tab: WorkspaceTab, interactiveStyle: AppRegionStyle): AppRegionStyle => {
   const style: AppRegionStyle = { ...interactiveStyle };
 
   if (tab.kind === "route") {
@@ -150,35 +148,15 @@ const resolveTabSlotLayoutStyle = (
   return style;
 };
 
-const clampContextMenuPosition = (
-  clientX: number,
-  clientY: number,
-): { x: number; y: number } => {
-  const maxX = Math.max(
-    WORKSPACE_TAB_CONTEXT_MENU_MARGIN,
-    window.innerWidth -
-      WORKSPACE_TAB_CONTEXT_MENU_WIDTH -
-      WORKSPACE_TAB_CONTEXT_MENU_MARGIN,
-  );
-  const maxY = Math.max(
-    WORKSPACE_TAB_CONTEXT_MENU_MARGIN,
-    window.innerHeight -
-      WORKSPACE_TAB_CONTEXT_MENU_HEIGHT -
-      WORKSPACE_TAB_CONTEXT_MENU_MARGIN,
-  );
+const clampContextMenuPosition = (clientX: number, clientY: number): { x: number; y: number } => {
+  const maxX = Math.max(WORKSPACE_TAB_CONTEXT_MENU_MARGIN, window.innerWidth - WORKSPACE_TAB_CONTEXT_MENU_WIDTH - WORKSPACE_TAB_CONTEXT_MENU_MARGIN);
+  const maxY = Math.max(WORKSPACE_TAB_CONTEXT_MENU_MARGIN, window.innerHeight - WORKSPACE_TAB_CONTEXT_MENU_HEIGHT - WORKSPACE_TAB_CONTEXT_MENU_MARGIN);
 
   return {
     x: Math.min(Math.max(clientX, WORKSPACE_TAB_CONTEXT_MENU_MARGIN), maxX),
     y: Math.min(Math.max(clientY, WORKSPACE_TAB_CONTEXT_MENU_MARGIN), maxY),
   };
 };
-
-const SIDEBAR_ROUTE_TAB_ICONS = {
-  home: HomeIcon,
-  review: InboxIcon,
-  schedule: ClockIcon,
-  settings: SettingIcon,
-} satisfies Partial<Record<WorkspaceSidebarSection, TabIconComponent>>;
 
 const resolveTabIcon = (tab: WorkspaceTab): TabIconComponent => {
   if (tab.kind === "route") {
@@ -191,29 +169,18 @@ const resolveTabIcon = (tab: WorkspaceTab): TabIconComponent => {
   return FileText;
 };
 
-export const TabsBar = ({
-  variant = "workspace",
-  className,
-  noDragStyle,
-}: TabsBarProps) => {
+const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps) => {
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
-  const lastOpenedTabId = useWorkspaceTabsStore(
-    (state) => state.lastOpenedTabId,
-  );
+  const lastOpenedTabId = useWorkspaceTabsStore((state) => state.lastOpenedTabId);
   const selectTab = useWorkspaceTabsStore((state) => state.selectTab);
   const closeTab = useWorkspaceTabsStore((state) => state.closeTab);
   const reorderTabs = useWorkspaceTabsStore((state) => state.reorderTabs);
-  const createExplorerTab = useWorkspaceTabsStore(
-    (state) => state.createExplorerTab,
-  );
+  const createExplorerTab = useWorkspaceTabsStore((state) => state.createExplorerTab);
 
   const contextMenuRef = useRef<HTMLDivElement | null>(null);
-  const [openingTabId, setOpeningTabId] = useState<WorkspaceTab["id"] | null>(
-    lastOpenedTabId,
-  );
-  const [contextMenu, setContextMenu] =
-    useState<TabContextMenuState | null>(null);
+  const [openingTabId, setOpeningTabId] = useState<WorkspaceTab["id"] | null>(lastOpenedTabId);
+  const [contextMenu, setContextMenu] = useState<TabContextMenuState | null>(null);
   const isTitlebar = variant === "titlebar";
   const interactiveStyle = noDragStyle ?? TABS_NO_DRAG_STYLE;
   const tabsSurfaceStyle = resolveTabsSurfaceStyle(isTitlebar);
@@ -233,9 +200,7 @@ export const TabsBar = ({
     reorderTabs,
     onDragStart: () => setContextMenu(null),
   });
-  const contextMenuTab = contextMenu
-    ? orderedTabs.find((tab) => tab.id === contextMenu.tabId)
-    : undefined;
+  const contextMenuTab = contextMenu ? orderedTabs.find((tab) => tab.id === contextMenu.tabId) : undefined;
 
   useEffect(() => {
     let cancelled = false;
@@ -252,9 +217,7 @@ export const TabsBar = ({
     }
 
     const timeoutId = window.setTimeout(() => {
-      setOpeningTabId((currentTabId) =>
-        currentTabId === lastOpenedTabId ? null : currentTabId,
-      );
+      setOpeningTabId((currentTabId) => (currentTabId === lastOpenedTabId ? null : currentTabId));
     }, TAB_OPEN_ANIMATION_MS);
 
     return () => {
@@ -263,21 +226,13 @@ export const TabsBar = ({
     };
   }, [lastOpenedTabId]);
 
-  useRightClickPanelDismiss(
-    WORKSPACE_TAB_CONTEXT_PANEL_ID,
-    contextMenu !== null,
-    contextMenuRef,
-    () => setContextMenu(null),
-  );
+  useRightClickPanelDismiss(WORKSPACE_TAB_CONTEXT_PANEL_ID, contextMenu !== null, contextMenuRef, () => setContextMenu(null));
 
   const closeWorkspaceTabs = (tabsToClose: WorkspaceTab[]) => {
     tabsToClose.forEach((tab) => closeTab(tab.id));
   };
 
-  const openTabContextMenu = (
-    event: TabContextMenuTriggerEvent,
-    tab: WorkspaceTab,
-  ) => {
+  const openTabContextMenu = (event: TabContextMenuTriggerEvent, tab: WorkspaceTab) => {
     event.preventDefault();
     event.stopPropagation();
     suppressNextTabClick();
@@ -300,37 +255,21 @@ export const TabsBar = ({
       {
         id: "close-others",
         label: "他を閉じる",
-        disabled:
-          orderedTabs.filter(
-            (tab) => tab.id !== contextMenuTab.id && tab.isClosable,
-          ).length === 0,
+        disabled: orderedTabs.filter((tab) => tab.id !== contextMenuTab.id && tab.isClosable).length === 0,
         onSelect: () => {
           setContextMenu(null);
           selectTab(contextMenuTab.id);
-          closeWorkspaceTabs(
-            orderedTabs.filter(
-              (tab) => tab.id !== contextMenuTab.id && tab.isClosable,
-            ),
-          );
+          closeWorkspaceTabs(orderedTabs.filter((tab) => tab.id !== contextMenuTab.id && tab.isClosable));
         },
       },
       {
         id: "close-after",
         label: "このタブ以降を閉じる",
-        disabled:
-          orderedTabs
-            .slice(
-              orderedTabs.findIndex((tab) => tab.id === contextMenuTab.id),
-            )
-            .filter((tab) => tab.isClosable).length === 0,
+        disabled: orderedTabs.slice(orderedTabs.findIndex((tab) => tab.id === contextMenuTab.id)).filter((tab) => tab.isClosable).length === 0,
         onSelect: () => {
           setContextMenu(null);
-          const contextMenuTabIndex = orderedTabs.findIndex(
-            (tab) => tab.id === contextMenuTab.id,
-          );
-          const tabsToClose = orderedTabs
-            .slice(Math.max(0, contextMenuTabIndex))
-            .filter((tab) => tab.isClosable);
+          const contextMenuTabIndex = orderedTabs.findIndex((tab) => tab.id === contextMenuTab.id);
+          const tabsToClose = orderedTabs.slice(Math.max(0, contextMenuTabIndex)).filter((tab) => tab.isClosable);
           closeWorkspaceTabs(tabsToClose);
         },
       },
@@ -347,13 +286,7 @@ export const TabsBar = ({
     : [];
 
   const contextMenuElement = contextMenu ? (
-    <WorkspaceTabContextMenu
-      x={contextMenu.x}
-      y={contextMenu.y}
-      actions={contextMenuActions}
-      menuRef={contextMenuRef}
-      noDragStyle={interactiveStyle}
-    />
+    <WorkspaceTabContextMenu x={contextMenu.x} y={contextMenu.y} actions={contextMenuActions} menuRef={contextMenuRef} noDragStyle={interactiveStyle} />
   ) : null;
 
   return (
@@ -367,36 +300,24 @@ export const TabsBar = ({
         }}
         className={cn(
           "explorer-chrome-font explorer-tab-bar explorer-workspace-tabs-bar relative z-30 flex shrink-0 items-end gap-0 overflow-visible border-b-0",
-          isTitlebar
-            ? "h-full min-w-0 flex-1 px-0 pt-0"
-            : "h-[40px] w-full min-w-0 px-1.5 pt-0",
+          isTitlebar ? "h-full min-w-0 flex-1 px-0 pt-0" : "h-[40px] w-full min-w-0 px-1.5 pt-0",
           className,
         )}
       >
-        <WorkspaceTabDndList
-          tabsListRef={tabsListRef}
-          orderedTabs={orderedTabs}
-          onReorderTabs={handleReorderTabs}
-          className="explorer-tab-list explorer-workspace-tabs-list relative flex min-w-0 items-end gap-0 overflow-visible"
-        >
+        <WorkspaceTabDndList tabsListRef={tabsListRef} orderedTabs={orderedTabs} onReorderTabs={handleReorderTabs} className="explorer-tab-list explorer-workspace-tabs-list relative flex min-w-0 items-end gap-0 overflow-visible">
           {orderedTabs.map((tab) => {
             const selected = tab.id === activeTabId;
             const isOpening = tab.id === openingTabId;
             const Icon = resolveTabIcon(tab);
 
-            let tabStateClassName = cn(
-              "explorer-workspace-tab--inactive",
-              INACTIVE_TAB_TEXT_CLASS_NAME,
-            );
+            let tabStateClassName = cn("explorer-workspace-tab--inactive", INACTIVE_TAB_TEXT_CLASS_NAME);
             let iconStateClassName = INACTIVE_TAB_ICON_CLASS_NAME;
             let closeButtonStateClassName = INACTIVE_TAB_CLOSE_BUTTON_CLASS_NAME;
 
             if (selected) {
-              tabStateClassName =
-                "z-[3] text-[var(--app-titlebar-bg,var(--app-sidebar-bg))] shadow-none";
+              tabStateClassName = "z-[3] text-[var(--app-titlebar-bg,var(--app-sidebar-bg))] shadow-none";
               iconStateClassName = "text-[#8c8c8c]";
-              closeButtonStateClassName =
-                "opacity-100 !text-[#6f7681] hover:!bg-black/5 hover:!text-[#2f3640]";
+              closeButtonStateClassName = "opacity-100 !text-[#6f7681] hover:!bg-black/5 hover:!text-[#2f3640]";
             }
 
             return (
@@ -410,9 +331,7 @@ export const TabsBar = ({
                 style={resolveTabSlotLayoutStyle(tab, interactiveStyle)}
                 className={cn(
                   "explorer-workspace-tab-slot relative flex min-w-[92px] max-w-[180px] flex-[1_1_150px] items-end overflow-visible",
-                  canReorderTabs
-                    ? "cursor-grab active:cursor-grabbing"
-                    : "cursor-default",
+                  canReorderTabs ? "cursor-grab active:cursor-grabbing" : "cursor-default",
                 )}
                 data-workspace-tab-slot-active={selected ? "true" : undefined}
                 onPointerDownCapture={(event) => {
@@ -450,17 +369,9 @@ export const TabsBar = ({
                         "motion-reduce:transition-none",
                       )}
                     >
-                      <span
-                        aria-hidden="true"
-                        className="absolute bottom-[-1px] left-[-16px] h-[18px] w-[18px]"
-                        style={ACTIVE_TAB_LEFT_CURVE_STYLE}
-                      />
+                      <span aria-hidden="true" className="absolute bottom-[-1px] left-[-16px] h-[18px] w-[18px]" style={ACTIVE_TAB_LEFT_CURVE_STYLE} />
 
-                      <span
-                        aria-hidden="true"
-                        className="absolute bottom-[-1px] right-[-16px] h-[18px] w-[18px]"
-                        style={ACTIVE_TAB_RIGHT_CURVE_STYLE}
-                      />
+                      <span aria-hidden="true" className="absolute bottom-[-1px] right-[-16px] h-[18px] w-[18px]" style={ACTIVE_TAB_RIGHT_CURVE_STYLE} />
                     </div>
                   ) : null}
 
@@ -481,12 +392,7 @@ export const TabsBar = ({
                       selectTab(tab.id);
                     }}
                   >
-                    <Icon
-                      className={cn(
-                        "h-4 w-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)]",
-                        iconStateClassName,
-                      )}
-                    />
+                    <Icon className={cn("h-4 w-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)]", iconStateClassName)} />
 
                     <span className="min-w-0 flex-1 truncate">{tab.title}</span>
                   </button>
@@ -495,11 +401,7 @@ export const TabsBar = ({
                     <button
                       type="button"
                       style={interactiveStyle}
-                      className={cn(
-                        "relative z-[2]",
-                        closeButtonClassName,
-                        closeButtonStateClassName,
-                      )}
+                      className={cn("relative z-[2]", closeButtonClassName, closeButtonStateClassName)}
                       aria-label={`${tab.title} を閉じる`}
                       title="閉じる"
                       onClick={(event) => {
@@ -532,14 +434,12 @@ export const TabsBar = ({
           <PlusLineIcon className="h-4 w-4" />
         </button>
 
-        <div
-          className="h-full min-w-0 flex-1"
-          style={TABS_DRAG_SPACER_STYLE}
-          aria-hidden="true"
-        />
+        <div className="h-full min-w-0 flex-1" style={TABS_DRAG_SPACER_STYLE} aria-hidden="true" />
       </div>
 
       {contextMenuElement ? createPortal(contextMenuElement, document.body) : null}
     </>
   );
 };
+
+export { TabsBar };
