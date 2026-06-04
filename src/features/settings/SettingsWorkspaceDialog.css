@@ -48,8 +48,73 @@
 .settings-workspace-dialog .settings-workspace {
   height: 100%;
   flex: 1;
+  --app-sidebar-hover-bg: rgba(0, 0, 0, 0.05);
+  --app-sidebar-active-bg: rgba(0, 0, 0, 0.07);
+  --app-sidebar-text: #606060;
+  --app-sidebar-text-strong: #2f2f2f;
+  --app-sidebar-text-muted: #9a9a9a;
+  --app-sidebar-text-hover: #2f2f2f;
+  --app-sidebar-icon: #8a8a8a;
+  --app-sidebar-icon-active: #707070;
+  font-family: var(--app-font-family-sidebar) !important;
 }
 
 .settings-workspace-dialog .settings-workspace__nav {
   background: var(--backpane-bg) !important;
+  color: var(--app-sidebar-text) !important;
+  font-family: var(--app-font-family-sidebar) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.012em !important;
+}
+
+.settings-workspace-dialog .settings-workspace__nav-list::before {
+  color: var(--app-sidebar-text-muted) !important;
+  font-family: var(--app-font-family-sidebar) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.012em !important;
+}
+
+.settings-workspace-dialog .settings-workspace__nav-item {
+  color: var(--app-sidebar-text) !important;
+  font-family: var(--app-font-family-sidebar) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.012em !important;
+}
+
+.settings-workspace-dialog .settings-workspace__nav-item:hover,
+.settings-workspace-dialog .settings-workspace__nav-item:focus-visible {
+  background: var(--app-sidebar-hover-bg) !important;
+  color: var(--app-sidebar-text-hover) !important;
+}
+
+.settings-workspace-dialog .settings-workspace__nav-item.is-active {
+  background: var(--app-sidebar-active-bg) !important;
+  color: var(--app-sidebar-text-strong) !important;
+}
+
+.settings-workspace-dialog .settings-workspace__nav-icon {
+  color: var(--app-sidebar-icon) !important;
+}
+
+.settings-workspace-dialog .settings-workspace__nav-item.is-active .settings-workspace__nav-icon {
+  color: var(--app-sidebar-icon-active) !important;
+}
+
+.settings-workspace-dialog .settings-workspace__nav-copy span {
+  color: inherit !important;
+  font-family: var(--app-font-family-sidebar) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.012em !important;
+}
+
+.settings-workspace-dialog .settings-workspace__nav-copy small {
+  color: var(--app-sidebar-text-muted) !important;
+  font-family: var(--app-font-family-sidebar) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.012em !important;
 }
