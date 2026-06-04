@@ -338,7 +338,7 @@ export const buildCardPatchForToggle = (
   field: CardToggleField,
 ): CardPatch => {
   return {
-    [field]: !Boolean(card[field]),
+    [field]: !card[field],
   } as CardPatch;
 };
 
