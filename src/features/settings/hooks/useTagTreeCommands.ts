@@ -34,16 +34,16 @@ const queueTagUpsert = async (db: Awaited<ReturnType<typeof getLocalDb>>, tagId:
 export const useTagTreeCommands = (tagById: ReadonlyMap<string, TagRecord>) => {
   const { currentUser } = useAuthSession();
 
-  const setTagTreePosition = useCallback(async (tagId: string, patch: TagTreePositionPatch): Promise<void | { error: string }> => {
-    if (!currentUser) return { error: "ログイン状態を確認してください。" };
+  const setTagTreePosition = useCallback(async (tagId: string, patch: TagTreePositionPatch): Promise<void> => {
+    if (!currentUser) return;
 
     const tag = tagById.get(tagId);
-    if (!tag) return { error: "対象のタグが見つかりません。" };
+    if (!tag) return;
 
     const normalizedParentId = getNormalizedParentId(patch.parentId);
-    if (normalizedParentId === tagId) return { error: "自分自身を親にはできません。" };
-    if (normalizedParentId && !tagById.has(normalizedParentId)) return { error: "親タグが見つかりません。" };
-    if (isTagAncestorOf(tagId, normalizedParentId, tagById)) return { error: "循環は禁止です。" };
+    if (normalizedParentId === tagId) return;
+    if (normalizedParentId && !tagById.has(normalizedParentId)) return;
+    if (isTagAncestorOf(tagId, normalizedParentId, tagById)) return;
 
     const db = await getLocalDb(currentUser.uid);
     await db.tagRecords.update(tagId, { parentId: normalizedParentId, orderIndex: patch.orderIndex, updatedAt: new Date() });
