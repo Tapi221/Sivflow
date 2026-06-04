@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
+import { WorkspaceScreen as DesktopScheduleScreen } from "@/pane.desktop/view/WorkspaceScreen";
 
 const MOBILE_SCHEDULE_MEDIA_QUERY = "(max-width: 767px)";
-const DesktopScheduleScreen = lazy(() => import("@/pane.desktop/view/WorkspaceScreen").then(({ WorkspaceScreen }) => ({ default: WorkspaceScreen })));
 const MobileScheduleScreen = lazy(() => import("@/pane.desktop/view/ScheduleScreen.mobile").then(({ ScheduleScreen }) => ({ default: ScheduleScreen })));
 
 const useIsMobileSchedule = () => {
