@@ -1,7 +1,23 @@
 import { describe, expect, it } from "vitest";
+import codeBlockCss from "@/styles/features/codeblock.css?raw";
+
+const BODY_SELECTOR = "codeBlockBody";
+
+const readBodyRule = () => {
+  const start = codeBlockCss.indexOf(BODY_SELECTOR);
+  const end = start >= 0 ? codeBlockCss.indexOf("}", start) : -1;
+
+  return start >= 0 && end >= 0 ? codeBlockCss.slice(start, end) : "";
+};
 
 describe("code block scroll containment", () => {
-  it("has a regression test placeholder", () => {
-    expect(true).toBe(true);
+  it("keeps vertical wheel scrolling available to the card pager", () => {
+    const rule = readBodyRule();
+
+    expect(rule).toContain("overflow-x: auto;");
+    expect(rule).toContain("overflow-y: hidden;");
+    expect(rule).toContain("overscroll-behavior-x: contain;");
+    expect(rule).toContain("overscroll-behavior-y: auto;");
+    expect(rule).not.toContain("overscroll-behavior: contain;");
   });
 });
