@@ -1,8 +1,9 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::path::PathBuf;
+use std::process::Command;
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager, State};
 use url::Url;
@@ -12,11 +13,20 @@ const DESKTOP_OAUTH_PORT: u16 = 42813;
 const DESKTOP_OAUTH_PATH: &str = "/";
 const DESKTOP_GOOGLE_OAUTH_REDIRECT_URI: &str = "http://127.0.0.1:42813";
 const MAX_DESKTOP_IMPORT_FILE_BYTES: u64 = 128 * 1024 * 1024;
+const MAX_DESKTOP_PDF_FILE_BYTES: usize = 512 * 1024 * 1024;
 const SUPPORTED_IMPORT_FILE_EXTENSIONS: [&str; 2] = ["mfdeck", "mfcard"];
 
 #[derive(Default)]
 struct AuthLoopbackState {
     pending_url: Mutex<Option<String>>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopPdfOpenInput {
+    file_name: String,
+    data: Vec<u8>,
+    page_number: Option<u32>,
 }
 
 #[derive(Serialize, Clone)]
@@ -38,6 +48,13 @@ struct DesktopImportFileReadResult {
     data: Vec<u8>,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopPdfOpenResult {
+    path: String,
+    opened_with: String,
+}
+
 #[derive(Serialize, Clone)]
 struct DesktopImportFileOpenPayload {
     paths: Vec<String>,
@@ -47,6 +64,66 @@ fn can_open_external(raw_url: &str) -> bool {
     Url::parse(raw_url)
         .map(|url| matches!(url.scheme(), "http" | "https" | "mailto"))
         .unwrap_or(false)
+}
+
+fn sanitize_pdf_file_name(file_name: &str) -> String {
+    let trimmed = file_name.trim();
+    let fallback = "document.pdf";
+    let name = if trimmed.is_empty() { fallback } else { trimmed };
+    let sanitized: String = name
+        .chars()
+        .map(|character| match character {
+            '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
+            _ => character,
+        })
+        .collect();
+
+    if sanitized.to_ascii_lowercase().ends_with(".pdf") {
+        sanitized
+    } else {
+        format!("{}.pdf", sanitized)
+    }
+}
+
+fn get_pdf_cache_dir(app_handle: &AppHandle) -> Result<PathBuf, String> {
+    let mut dir = app_handle
+        .path()
+        .app_cache_dir()
+        .map_err(|error| error.to_string())?;
+    dir.push("pdf");
+    fs::create_dir_all(&dir).map_err(|error| error.to_string())?;
+    Ok(dir)
+}
+
+fn write_pdf_cache_file(app_handle: &AppHandle, input: &DesktopPdfOpenInput) -> Result<PathBuf, String> {
+    if input.data.is_empty() {
+        return Err("PDF data is empty".to_string());
+    }
+    if input.data.len() > MAX_DESKTOP_PDF_FILE_BYTES {
+        return Err("PDF file is too large".to_string());
+    }
+
+    let mut path = get_pdf_cache_dir(app_handle)?;
+    let hash = input.data.iter().fold(0xcbf29ce484222325u64, |acc, byte| {
+        (acc ^ (*byte as u64)).wrapping_mul(0x100000001b3)
+    });
+    path.push(format!("{:016x}-{}", hash, sanitize_pdf_file_name(&input.file_name)));
+    fs::write(&path, &input.data).map_err(|error| error.to_string())?;
+    Ok(path)
+}
+
+fn open_pdf_with_sioyek(path: &PathBuf, page_number: Option<u32>) -> Result<(), String> {
+    let page = page_number.unwrap_or(1).max(1).to_string();
+    let status = Command::new("sioyek")
+        .arg("--reuse-window")
+        .arg("--page")
+        .arg(page)
+        .arg(path)
+        .spawn()
+        .map_err(|error| format!("Sioyekを起動できません。sioyekコマンドをPATHに追加してください: {}", error))?;
+
+    drop(status);
+    Ok(())
 }
 
 fn normalize_desktop_import_file_path(raw_file_path: &str) -> Result<PathBuf, String> {
@@ -224,6 +301,17 @@ fn desktop_import_select_files() -> Vec<String> {
 }
 
 #[tauri::command]
+fn pdf_open_in_sioyek(input: DesktopPdfOpenInput, app_handle: AppHandle) -> Result<DesktopPdfOpenResult, String> {
+    let path = write_pdf_cache_file(&app_handle, &input)?;
+    open_pdf_with_sioyek(&path, input.page_number)?;
+
+    Ok(DesktopPdfOpenResult {
+        path: path.to_string_lossy().to_string(),
+        opened_with: "sioyek".to_string(),
+    })
+}
+
+#[tauri::command]
 fn oauth_start(authorize_url: String, app_handle: AppHandle) -> Result<(), String> {
     ensure_auth_loopback_redirect(&authorize_url)?;
     let listener = TcpListener::bind((DESKTOP_OAUTH_HOST, DESKTOP_OAUTH_PORT)).map_err(|error| error.to_string())?;
@@ -307,6 +395,7 @@ fn main() {
             shell_open_external,
             desktop_import_read_file,
             desktop_import_select_files,
+            pdf_open_in_sioyek,
             oauth_start,
             oauth_cancel,
             oauth_take_pending_callback,
