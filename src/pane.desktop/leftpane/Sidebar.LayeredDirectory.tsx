@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { RightClickPanelSurface } from "@/chip/rightclickpanel.desktop/rightClickPanelCommon";
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
@@ -155,6 +155,7 @@ const getProjectAddMenuPosition = (event: ReactMouseEvent<HTMLElement>): Project
 };
 
 const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: SidebarLayeredDirectoryProps) => {
+  const navigate = useNavigate();
   const { onToggleLeftPanel: outletToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
   const { currentUser } = useAuthSession();
   const folderTagMode = useFolderTagModeStore((state) => state.folderTagMode);
@@ -208,18 +209,21 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   }, [addTag, existingTagNames]);
 
   const handleOpenHome = useCallback(() => {
+    navigate("/schedule");
     openSectionTab("home");
-  }, [openSectionTab]);
+  }, [navigate, openSectionTab]);
 
   const handleOpenProjectList = useCallback(() => {
+    navigate("/schedule");
     setFolderTagMode("folder");
     openExplorerTab({ title: "Library", explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
-  }, [openExplorerTab, setFolderTagMode]);
+  }, [navigate, openExplorerTab, setFolderTagMode]);
 
   const handleOpenTagTree = useCallback(() => {
+    navigate("/schedule");
     setFolderTagMode("tag");
     openExplorerTab({ title: "Library", explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
-  }, [openExplorerTab, setFolderTagMode]);
+  }, [navigate, openExplorerTab, setFolderTagMode]);
 
   const handleOpenProjectAddMenu = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -239,8 +243,9 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   }, [closeProjectAddMenu, handleToolbarAddDocument]);
 
   const handleOpenSchedule = useCallback(() => {
+    navigate("/schedule");
     openSectionTab("schedule");
-  }, [openSectionTab]);
+  }, [navigate, openSectionTab]);
 
   const handleOpenExplore = useCallback(() => {
     openSearch();
