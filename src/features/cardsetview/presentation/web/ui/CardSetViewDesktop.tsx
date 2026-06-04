@@ -79,8 +79,9 @@ export const CardSetViewDesktop = ({
   onToggleBookmark,
 }: CardSetViewDesktopProps) => {
   const effectiveCardWidthPx = currentDisplayMode === "fluid" ? Math.max(1, Math.floor(fluidAvailableWidthPx)) : Math.max(1, fixedCardWidthPx);
+  const interactionModeKey = isGlobalEditing ? "edit" : "view";
 
-  const preserveScrollAnchorKey = useMemo(() => [currentDisplayMode, Math.round(viewZoomScale * 1000), effectiveCardWidthPx, Math.round(fluidAvailableWidthPx), layoutTransitionScrollAnchorRevision].join(":"), [currentDisplayMode, effectiveCardWidthPx, fluidAvailableWidthPx, layoutTransitionScrollAnchorRevision, viewZoomScale]);
+  const preserveScrollAnchorKey = useMemo(() => [currentDisplayMode, interactionModeKey, Math.round(viewZoomScale * 1000), effectiveCardWidthPx, Math.round(fluidAvailableWidthPx), layoutTransitionScrollAnchorRevision].join(":"), [currentDisplayMode, effectiveCardWidthPx, fluidAvailableWidthPx, interactionModeKey, layoutTransitionScrollAnchorRevision, viewZoomScale]);
 
   const getScrollAnchorSelector = useCallback((card: Card, _idx: number, isActive: boolean) => {
     if (!isActive || currentCardLayoutMode !== "flip") return null;
