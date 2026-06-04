@@ -14,7 +14,6 @@ type BlockFrameProps = React.HTMLAttributes<HTMLDivElement> & {
 };
 
 const SELECTED_BLOCK_OUTLINE_COLOR = "rgba(37, 99, 235, 0.82)";
-const SELECTED_BLOCK_OUTLINE_WIDTH = "2px";
 
 export const BlockFrame = ({
   children,
@@ -29,7 +28,7 @@ export const BlockFrame = ({
 }: BlockFrameProps) => {
   const neutralOutline =
     "inset 0 0 0 var(--card-ruled-line-px, 1px) var(--card-ruled-color, rgba(0,0,0,0.05))";
-  const editorOutline = `inset 0 0 0 ${SELECTED_BLOCK_OUTLINE_WIDTH} ${SELECTED_BLOCK_OUTLINE_COLOR}`;
+  const editorOutline = `inset 0 0 0 var(--card-ruled-line-px, 1px) ${SELECTED_BLOCK_OUTLINE_COLOR}`;
 
   const boxShadow =
     variant === "none"
@@ -41,8 +40,6 @@ export const BlockFrame = ({
   return (
     <div
       {...props}
-      data-block-accent-color={accentColor || undefined}
-      data-block-frame-variant={variant}
       className={cn(
         "group relative overflow-visible bg-transparent py-0 px-1.5",
         raiseZIndex && "z-40",
