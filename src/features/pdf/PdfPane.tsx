@@ -606,48 +606,6 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
 
   return (
     <div className={cn("flex h-full min-h-0 min-w-0 bg-[#151515] text-[#f4f1ea]", className)}>
-      <aside className="flex w-[292px] shrink-0 flex-col border-r border-white/10 bg-[#1f1f1f]">
-        <div className="border-b border-white/10 px-4 py-3">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9f9b93]">PDF</div>
-          <div title={documentTitle} className="mt-1 truncate text-[14px] font-semibold text-[#f4f1ea]">{documentTitle}</div>
-          {pageCount > 0 ? <div className="mt-1 text-[11px] text-[#9f9b93]">{currentPage} / {pageCount}</div> : null}
-        </div>
-        <div className="flex gap-1 border-b border-white/10 p-2">
-          {PDF_SIDE_PANEL_TABS.map((tab) => (
-            <button key={tab.id} type="button" onClick={() => handleSidePanelTabSelect(tab.id)} className={cn("min-w-0 flex-1 rounded-[7px] px-2 py-1.5 text-[11px] font-semibold text-[#aaa59b] transition-colors hover:bg-white/10 hover:text-[#f4f1ea]", activeSidePanelTab === tab.id && "bg-white/12 text-[#f4f1ea]")}>{tab.label}</button>
-          ))}
-        </div>
-        <div className="border-b border-white/10 p-3">
-          <input ref={searchInputRef} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="PDF内を検索 / ⌘F" className="h-8 w-full rounded-[8px] border border-white/10 bg-[#151515] px-3 text-[12px] font-medium text-[#f4f1ea] outline-none placeholder:text-[#77736b] focus:border-[#d8d3c9]/55" />
-          {searchQuery.trim() ? <div className="mt-1 text-[10px] text-[#9f9b93]">{isTextLoading ? SEARCHING_MESSAGE : `${searchResults.length}件`}</div> : null}
-        </div>
-        <div className="border-b border-white/10 p-3">
-          <div className="flex gap-2">
-            <input ref={pageJumpInputRef} value={pageJumpValue} onChange={(event) => setPageJumpValue(event.target.value)} onKeyDown={handlePageJumpKeyDown} inputMode="numeric" placeholder="ページ" className="h-8 min-w-0 flex-1 rounded-[8px] border border-white/10 bg-[#151515] px-3 text-[12px] font-medium text-[#f4f1ea] outline-none placeholder:text-[#77736b] focus:border-[#d8d3c9]/55" />
-            <button type="button" onClick={handlePageJump} className="h-8 rounded-[8px] border border-white/10 px-3 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10">移動</button>
-          </div>
-          <div className="mt-2 flex gap-2">
-            <button type="button" onClick={handleGoBack} disabled={historyBackPages.length === 0} className="h-8 flex-1 rounded-[8px] border border-white/10 px-2 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10 disabled:text-[#77736b] disabled:hover:bg-transparent">戻る</button>
-            <button type="button" onClick={handleGoForward} disabled={historyForwardPages.length === 0} className="h-8 flex-1 rounded-[8px] border border-white/10 px-2 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10 disabled:text-[#77736b] disabled:hover:bg-transparent">進む</button>
-          </div>
-          <div className="mt-2 flex gap-2">
-            <button type="button" onClick={handleSetMark} className="h-8 flex-1 rounded-[8px] border border-white/10 px-2 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10">mark</button>
-            <button type="button" onClick={handleJumpToMark} className="h-8 flex-1 rounded-[8px] border border-white/10 px-2 text-[12px] font-semibold text-[#d8d3c9] transition-colors hover:bg-white/10">jump mark</button>
-          </div>
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 text-[12px] leading-5 text-[#aaa59b]">
-          {activeSidePanelTab === "outline" && outlineEntries.length === 0 ? <p className="px-1">{OUTLINE_EMPTY_MESSAGE}</p> : null}
-          {activeSidePanelTab === "outline" ? outlineEntries.map((entry) => <button key={entry.id} type="button" disabled={!entry.pageNumber} onClick={() => entry.pageNumber ? scrollToPage(entry.pageNumber) : undefined} className="block w-full rounded-[7px] px-2 py-1.5 text-left text-[#d8d3c9] transition-colors hover:bg-white/10 disabled:text-[#77736b] disabled:hover:bg-transparent" style={{ paddingLeft: 8 + entry.level * 14 }}><span className="block truncate">{entry.title}</span>{entry.pageNumber ? <span className="text-[10px] text-[#88837a]">Page {entry.pageNumber}</span> : null}</button>) : null}
-          {activeSidePanelTab === "bookmarks" && bookmarkPages.length === 0 && markEntries.length === 0 ? <p className="px-1">{BOOKMARK_EMPTY_MESSAGE}</p> : null}
-          {activeSidePanelTab === "bookmarks" && markEntries.length > 0 ? <div className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#77736b]">Marks</div> : null}
-          {activeSidePanelTab === "bookmarks" ? markEntries.map(([key, pageNumber]) => <button key={key} type="button" onClick={() => scrollToPage(pageNumber)} className="block w-full rounded-[7px] px-2 py-1.5 text-left text-[#d8d3c9] transition-colors hover:bg-white/10"><span className="font-semibold">{key}</span><span className="ml-2 text-[#88837a]">Page {pageNumber}</span></button>) : null}
-          {activeSidePanelTab === "bookmarks" && bookmarkPages.length > 0 ? <div className="mb-2 mt-3 px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#77736b]">Bookmarks</div> : null}
-          {activeSidePanelTab === "bookmarks" ? bookmarkPages.map((pageNumber) => <button key={pageNumber} type="button" onClick={() => scrollToPage(pageNumber)} className="block w-full rounded-[7px] px-2 py-1.5 text-left text-[#d8d3c9] transition-colors hover:bg-white/10">Page {pageNumber}</button>) : null}
-          {activeSidePanelTab === "highlights" && searchResults.length === 0 ? <p className="px-1">{HIGHLIGHTS_EMPTY_MESSAGE}</p> : null}
-          {activeSidePanelTab === "highlights" ? searchResults.map((result) => <button key={result.id} type="button" onClick={() => scrollToPage(result.pageNumber)} className="block w-full rounded-[7px] px-2 py-1.5 text-left transition-colors hover:bg-white/10"><span className="block text-[10px] font-semibold text-[#88837a]">Page {result.pageNumber}</span><span className="block text-[#d8d3c9]">{result.snippet}</span></button>) : null}
-          {activeSidePanelTab === "thumbnails" && pdfDocument ? <div className="grid grid-cols-2 gap-2">{pageNumbers.map((pageNumber) => <button key={pageNumber} type="button" onClick={() => scrollToPage(pageNumber)} className={cn("min-h-[112px] rounded-[8px] border p-1 text-left transition-colors hover:bg-white/10", pageNumber === currentPage ? "border-[#d8d3c9]" : "border-white/10")}>{shouldRenderNearbyPage(pageNumber, currentPage, PDF_THUMBNAIL_RENDER_RADIUS) ? <PdfThumbnailCanvas pageNumber={pageNumber} pdfDocument={pdfDocument} scale={PDF_THUMBNAIL_SCALE} className="mx-auto max-w-full bg-white" /> : <div className="flex h-[88px] items-center justify-center rounded-[6px] bg-white/5 text-[10px] text-[#77736b]">未描画</div>}<span className="mt-1 block text-center text-[10px] text-[#aaa59b]">{pageNumber}</span></button>)}</div> : null}
-        </div>
-      </aside>
       <main className="flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="flex h-12 shrink-0 items-center gap-2 border-b border-white/10 bg-[#202020] px-3">
           <div className="min-w-0 flex-1 truncate text-[13px] font-medium text-[#d8d3c9]">{documentTitle}</div>
