@@ -1,17 +1,17 @@
 export const overlayGlassToolbarClassName =
-  "pointer-events-auto flex items-center gap-1.5 rounded-[20px] border border-[#eeeeee] bg-[rgba(250,250,250,0.92)] px-2.5 py-1 shadow-[0_8px_22px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,0.94)] backdrop-blur-[12px]";
+  "pointer-events-auto flex items-center gap-1.5 rounded-[18px] border border-[#d9e0e8] bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,249,252,0.94)_100%)] px-2.5 py-1 text-[#66758a] shadow-[0_10px_26px_rgba(31,41,55,0.07),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-[14px]";
 
 export const overlayGlassPillClassName =
-  "pointer-events-auto inline-flex h-8 items-center gap-1.5 rounded-full border border-[#eeeeee] bg-[rgba(250,250,250,0.92)] px-3 text-xs font-medium text-[#4c5361] shadow-[0_6px_18px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-[12px]";
+  "pointer-events-auto inline-flex h-8 items-center gap-1.5 rounded-[14px] border border-[#d9e0e8] bg-[rgba(247,249,252,0.94)] px-3 text-xs font-medium text-[#1f2937] shadow-[0_8px_20px_rgba(31,41,55,0.06),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-[14px]";
 
 export const overlayGlassIconButtonClassName =
-  "pointer-events-auto grid h-8 w-8 place-items-center rounded-full border border-[#eeeeee] bg-[rgba(250,250,250,0.88)] text-[#8f929c] shadow-[0_4px_12px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-[12px] transition hover:bg-white hover:text-[#4c5361]";
+  "pointer-events-auto grid h-8 w-8 place-items-center rounded-[10px] border border-[#d9e0e8] bg-[rgba(247,249,252,0.88)] text-[#66758a] shadow-[0_4px_12px_rgba(31,41,55,0.05),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-[14px] transition-[background-color,border-color,color,box-shadow] duration-150 hover:border-[#c9d3de] hover:bg-[#f5f9fe] hover:text-[#1f2937]";
 
 export const overlayGlassActionButtonActiveClassName =
-  "border-[#e5e5e5] bg-white text-[#4c5361] shadow-[0_1px_2px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(143,146,156,0.08)]";
+  "border-[#c9d3de] bg-[#e8f1fd] text-[#1f2937] shadow-[inset_0_0_0_1px_rgba(79,141,247,0.18),0_1px_2px_rgba(31,41,55,0.05)]";
 
 export const overlayGlassActionButtonDisabledClassName =
-  "border-[#eeeeee] bg-[rgba(250,250,250,0.62)] text-[#c7c7cc] hover:bg-[rgba(250,250,250,0.62)] hover:text-[#c7c7cc]";
+  "border-transparent bg-transparent text-[#aeb8c5] hover:bg-transparent hover:text-[#aeb8c5]";
 
 export const overlayGlassActionButtonClassName =
-  "grid h-7 w-7 place-items-center rounded-full border border-[#eeeeee] bg-[rgba(250,250,250,0.86)] text-[#8f929c] shadow-[inset_0_1px_0_rgba(255,255,255,0.92)] transition hover:bg-white hover:text-[#4c5361] disabled:cursor-not-allowed disabled:opacity-35";
+  "grid h-7 w-7 place-items-center rounded-[10px] border border-transparent bg-transparent text-[#66758a] shadow-none transition-[background-color,border-color,color,box-shadow,transform] duration-150 hover:border-[#d9e0e8] hover:bg-[#f5f9fe] hover:text-[#1f2937] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45";
