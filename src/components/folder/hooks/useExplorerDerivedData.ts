@@ -18,7 +18,7 @@ interface Params {
   isFiltering: boolean;
 }
 
-const ORPHAN_DOCUMENT_CLEANUP_LOG_PREFIX = "[useExplorerDerivedData] orphan PDF cleanup";
+const ORPHAN_DOCUMENT_CLEANUP_LOG_PREFIX = "[useExplorerDerivedData] orphan PDF purge";
 
 const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean } | null) => Boolean(entity?.isDeleted ?? entity?.is_deleted);
 
@@ -62,7 +62,7 @@ const isOrphanDocument = (document: DocumentItem, visibleFolderIdSet: Set<string
 };
 
 export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], documents, isFiltering }: Params) => {
-  const { deleteDocument } = useDocumentCommands();
+  const { purgeDocument } = useDocumentCommands();
   const orphanCleanupInFlightRef = useRef<Set<string>>(new Set());
 
   const cardSetById = useMemo(() => {
@@ -95,7 +95,7 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
         if (orphanCleanupInFlightRef.current.has(documentId)) continue;
         orphanCleanupInFlightRef.current.add(documentId);
         try {
-          await deleteDocument(documentId);
+          await purgeDocument(documentId);
         } catch (error) {
           orphanCleanupInFlightRef.current.delete(documentId);
           console.error(`${ORPHAN_DOCUMENT_CLEANUP_LOG_PREFIX} failed`, { documentId, error });
@@ -106,7 +106,7 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
     return () => {
       isCancelled = true;
     };
-  }, [deleteDocument, orphanDocumentIds]);
+  }, [orphanDocumentIds, purgeDocument]);
 
   const childFoldersByParentId = useMemo(() => {
     const map = new Map<string, FolderTreeNode[]>();
