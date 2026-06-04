@@ -79,6 +79,24 @@ const getFolderName = (folder: FolderTreeNode): string => {
   return typeof name === "string" && name.trim() ? name.trim() : "無題のフォルダ";
 };
 
+const createFolderLookup = (rootFolders: FolderTreeNode[], getChildFolders: (folderId: string) => FolderTreeNode[]): Map<string, FolderTreeNode> => {
+  const map = new Map<string, FolderTreeNode>();
+  const stack = [...rootFolders];
+
+  while (stack.length > 0) {
+    const folder = stack.pop();
+    if (!folder) continue;
+
+    const folderId = getFolderId(folder);
+    if (!folderId || map.has(folderId)) continue;
+
+    map.set(folderId, folder);
+    stack.push(...getChildFolders(folderId));
+  }
+
+  return map;
+};
+
 const getWorkspaceOwnerName = (displayName: string | null | undefined, email: string | null | undefined): string => {
   const trimmedDisplayName = displayName?.trim();
   if (trimmedDisplayName) return trimmedDisplayName;
@@ -140,15 +158,8 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   const [projectAddMenu, setProjectAddMenu] = useState<ProjectAddMenuState | null>(null);
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const treeFolders = useMemo(() => folders as FolderTreeNode[], [folders]);
-  const { rootFolders, getNextOrderIndex } = useExplorerDerivedData({ treeFolders, treeCards: EMPTY_COLLECTION, cardSets: EMPTY_COLLECTION, documents: EMPTY_COLLECTION, isFiltering: false });
-  const folderById = useMemo(() => {
-    const map = new Map<string, FolderTreeNode>();
-    treeFolders.forEach((folder) => {
-      const folderId = getFolderId(folder);
-      if (folderId) map.set(folderId, folder);
-    });
-    return map;
-  }, [treeFolders]);
+  const { rootFolders, getChildFolders, getNextOrderIndex } = useExplorerDerivedData({ treeFolders, treeCards: EMPTY_COLLECTION, cardSets: EMPTY_COLLECTION, documents: EMPTY_COLLECTION, isFiltering: false });
+  const folderById = useMemo(() => createFolderLookup(rootFolders, getChildFolders), [getChildFolders, rootFolders]);
   const selectedFolderId = activeTab?.kind === "explorer" && !activeTab.explorerState.isSectionListMode ? activeTab.explorerState.selectedFolderId : null;
   const selectedFolder = selectedFolderId ? folderById.get(selectedFolderId) ?? null : null;
   const selectedNavigationFolderId = selectedFolder ? selectedFolderId : null;
