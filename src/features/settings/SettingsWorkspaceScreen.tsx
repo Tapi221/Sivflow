@@ -81,7 +81,6 @@ type SettingsWorkspaceCopy = {
   signedIn: string;
   guest: string;
   providerLabel: string;
-  userIdLabel: string;
   preferencesTitle: string;
   preferencesDescription: string;
   languageLabel: string;
@@ -170,7 +169,6 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     signedIn: "ログイン中",
     guest: "ゲスト",
     providerLabel: "プロバイダー",
-    userIdLabel: "ユーザー ID",
     preferencesTitle: "環境設定",
     preferencesDescription: "画面表示と日付の基本設定です。",
     languageLabel: "言語",
@@ -256,7 +254,6 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     signedIn: "Signed in",
     guest: "Guest",
     providerLabel: "Provider",
-    userIdLabel: "User ID",
     preferencesTitle: "Preferences",
     preferencesDescription: "Basic display and date settings.",
     languageLabel: "Language",
@@ -342,7 +339,6 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     signedIn: "已登录",
     guest: "访客",
     providerLabel: "提供商",
-    userIdLabel: "用户 ID",
     preferencesTitle: "偏好设置",
     preferencesDescription: "显示和日期的基本设置。",
     languageLabel: "语言",
@@ -566,7 +562,6 @@ const SettingsWorkspaceScreen = () => {
               </div>
               <SettingKeyValue label={copy.statusLabel} value={currentUser ? copy.signedIn : copy.guest} />
               <SettingKeyValue label={copy.providerLabel} value={currentUser?.providerData.at(0)?.providerId ?? "-"} />
-              <SettingKeyValue label={copy.userIdLabel} value={<code>{currentUser?.uid ?? "-"}</code>} />
             </SettingsSectionBlock>
           ) : null}
           {activeSectionId === "preferences" ? (
