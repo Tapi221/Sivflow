@@ -54,57 +54,6 @@ export const RuledLayer = ({
       ? String(clamp01(ruledOpacity))
       : (ruledOpacity ?? "var(--card-ruled-opacity, 1)");
 
-  // repeat+bottom の場合はレイヤーを分離して、繰り返し線と最下線の重なりを防ぐ。
-  if (kind === "repeat+bottom") {
-    const repeatStyle: CSSVars = {
-      "--card-row-px": `${rowPx}px`,
-      "--card-ruled-phase-px": `${ruledPhasePx}px`,
-      ...insetBase,
-      bottom: `${bottomPx + ruledLinePx}px`,
-      opacity: opacityValue,
-      ...getRuledStyle({
-        kind: "repeat-only",
-        rowPx,
-        phasePx: ruledPhasePx,
-        color: ruledColor,
-        linePx: ruledLinePx,
-        bottomLinePx: null,
-      }),
-    };
-
-    const bottomStyle: CSSVars = {
-      "--card-row-px": `${rowPx}px`,
-      "--card-ruled-phase-px": `${ruledPhasePx}px`,
-      ...insetBase,
-      bottom: `${bottomPx}px`,
-      opacity: opacityValue,
-      ...getRuledStyle({
-        kind: "bottom-only",
-        rowPx,
-        phasePx: ruledPhasePx,
-        color: ruledColor,
-        linePx: ruledLinePx,
-        bottomLinePx: null,
-      }),
-    };
-
-    return (
-      <>
-        <div
-          className={cn(
-            "ruledLayer pointer-events-none absolute z-0",
-            className,
-          )}
-          style={repeatStyle}
-        />
-        <div
-          className="ruledLayer pointer-events-none absolute z-0"
-          style={bottomStyle}
-        />
-      </>
-    );
-  }
-
   const layerStyle: CSSVars = {
     "--card-row-px": `${rowPx}px`,
     "--card-ruled-phase-px": `${ruledPhasePx}px`,
