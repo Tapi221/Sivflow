@@ -36,8 +36,6 @@ const getEntryById = (entries: readonly CalendarTimeGridLayoutEntry[], id: strin
   return entry;
 };
 
-const getDayPercent = (minutes: number): number => (minutes / (WEEKDAY_HOURS * WEEKDAY_MINUTES_PER_HOUR)) * 100;
-
 describe("weekday time grid geometry", () => {
   it("24:00 をまたぐ当日側 event は minHeight を抑制して下端からはみ出さない", () => {
     const [entry] = layoutCalendarTimeGridEvents({
@@ -263,11 +261,15 @@ describe("weekday time grid geometry", () => {
     const secondEntry = getEntryById(entries, "adjustable-b");
 
     expect(firstEntry.columnCount).toBe(1);
+    expect(firstEntry.style.xOffset).toBe(0);
+    expect(firstEntry.style.width).toBe(100);
+    expect(firstEntry.style.top).toBeCloseTo(37.5, 6);
+    expect(firstEntry.style.height).toBeCloseTo(0.3472222222222222, 6);
     expect(secondEntry.columnCount).toBe(1);
     expect(secondEntry.style.xOffset).toBe(0);
     expect(secondEntry.style.width).toBe(100);
-    expect(secondEntry.style.top).toBeCloseTo(getDayPercent(9 * WEEKDAY_MINUTES_PER_HOUR + DEFAULT_MINIMUM_START_DIFFERENCE_MINUTES), 6);
-    expect(secondEntry.style.height).toBeCloseTo(getDayPercent(50), 6);
+    expect(secondEntry.style.top).toBeCloseTo(39.583333333333336, 6);
+    expect(secondEntry.style.height).toBeCloseTo(3.4722222222222223, 6);
   });
 
   it("最低高さの event が下の event に食い込み、下の event が最低高さを保てない場合は横並び column にする", () => {
@@ -294,12 +296,14 @@ describe("weekday time grid geometry", () => {
     const secondEntry = getEntryById(entries, "minimum-b");
 
     expect(firstEntry.columnCount).toBe(2);
-    expect(secondEntry.columnCount).toBe(2);
     expect(firstEntry.style.xOffset).toBe(0);
     expect(firstEntry.style.width).toBe(50);
+    expect(firstEntry.style.top).toBeCloseTo(37.5, 6);
+    expect(firstEntry.style.height).toBeCloseTo(0.3472222222222222, 6);
+    expect(secondEntry.columnCount).toBe(2);
     expect(secondEntry.style.xOffset).toBe(50);
     expect(secondEntry.style.width).toBe(50);
-    expect(secondEntry.style.top).toBeCloseTo(getDayPercent(9 * WEEKDAY_MINUTES_PER_HOUR + 20), 6);
-    expect(secondEntry.style.height).toBeCloseTo(getDayPercent(25), 6);
+    expect(secondEntry.style.top).toBeCloseTo(38.88888888888889, 6);
+    expect(secondEntry.style.height).toBeCloseTo(1.7361111111111112, 6);
   });
 });
