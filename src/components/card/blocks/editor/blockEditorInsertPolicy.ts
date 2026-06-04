@@ -37,16 +37,13 @@ export const createEditorBlock = ({
     code: type === "code" ? { language: "javascript", code: "" } : undefined,
     math: type === "math" ? { latex: "", displayMode: "block" } : undefined,
     markdown: type === "markdown" ? "" : undefined,
-    pdf: type === "pdf" ? null : undefined,
-    pdfPageNumber: type === "pdf" ? 1 : undefined,
     questionTitle: type === "question" ? "" : undefined,
     questionAnswer: type === "question" ? "" : undefined,
     rowOffset:
       type === "text" ||
       type === "question" ||
       type === "image" ||
-      type === "markdown" ||
-      type === "pdf"
+      type === "markdown"
         ? rowOffset
         : undefined,
     offsetRows:
