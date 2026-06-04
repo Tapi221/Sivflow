@@ -37,7 +37,7 @@ const ShareIcon = (props: ToolbarIconProps) => {
 const CommentIcon = (props: ToolbarIconProps) => {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M6.75 5.25H17.25C18.77 5.25 20 6.48 20 8V13.75C20 15.27 18.77 16.5 17.25 16.5H11.35L7.2 19.5V16.5H6.75C5.23 16.5 4 15.27 4 13.75V8C4 6.48 5.23 5.25 6.75 5.25Z" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6.75 5.25H17.25C18.77 5.25 20 6.48 20 8V13.75C20 15.27 18.77 16.5 17.25 16.5H11.35L7.2 19.5V16.5H6.75C5.23 16.5 4 15.27 4 13.75V8C4 6.48 5.23 5.25 6.75 5.25Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 };
