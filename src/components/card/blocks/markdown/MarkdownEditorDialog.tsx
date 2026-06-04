@@ -5,12 +5,6 @@ import { cn } from "@/lib/utils";
 
 type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;
 
-const EDITOR_LINE_HEIGHT = 24;
-const EDITOR_MIN_ROWS = 10;
-const EDITOR_MAX_HEIGHT = 520;
-
-const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
-
 interface MarkdownEditorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -21,6 +15,12 @@ interface MarkdownEditorDialogProps {
   accentColor?: string;
   error?: string | null;
 }
+
+const EDITOR_LINE_HEIGHT = 24;
+const EDITOR_MIN_ROWS = 10;
+const EDITOR_MAX_HEIGHT = 520;
+
+const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
 
 export const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({
   open,
@@ -64,7 +64,7 @@ export const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({
             autoFocus
             textareaClassName="font-serif"
             className={cn(
-              "w-full font-serif text-base font-medium leading-[24px] text-slate-700 placeholder:text-slate-300",
+              "markdownBlockEditorTextarea w-full font-serif text-base font-medium leading-[24px] text-slate-700 placeholder:text-slate-300",
               "border border-slate-200 rounded-xl px-3 py-2 transition-all duration-300",
               "focus-visible:ring-2 focus-visible:ring-offset-0 bg-white focus:border-slate-300",
               "shadow-inner focus:shadow-sm resize-none whitespace-pre-wrap",
