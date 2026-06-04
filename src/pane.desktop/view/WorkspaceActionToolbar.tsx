@@ -29,8 +29,7 @@ const ACTIONS: readonly WorkspaceAction[] = [
 const ShareIcon = (props: ToolbarIconProps) => {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M5.5 17.25V14.2C5.5 11.38 7.78 9.1 10.6 9.1H18.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M15.05 5.95L18.2 9.1L15.05 12.25" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3.6 18.95C5.55 13.2 10.15 9.35 15.45 7.85V4.35L21.35 12L15.45 19.65V16.15C10.15 15.7 6.45 16.5 3.6 18.95Z" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 };
