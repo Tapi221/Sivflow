@@ -1,21 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle } from "../../src/features/calendar/grid/weekdayTimeGridGeometry";
-import { DEFAULT_HOUR_ROW_HEIGHT } from "../../src/features/calendar/calendar.constants.desktop";
-import { WEEKDAY_MINUTES_PER_HOUR } from "../../src/features/calendar/grid/grid.layout.constants.desktop";
+import { getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle } from "../../src/features/calendar/grid/weekdayTimeGridGeometry";
 import { getCalendarEventLevels, getCalendarEventSegment } from "../../packages/core/src/calendar/eventLevels";
 import { layoutCalendarTimeGridEvents } from "../../packages/core/src/calendar/timeGridLayout";
 import type { CalendarEvent } from "../../packages/core/src/calendar/calendarEvent.types";
 import type { CalendarTimeGridLayoutEntry } from "../../packages/core/src/calendar/timeGridLayout";
-
-type TimeGridVisualFrame = {
-  left: number;
-  right: number;
-  top: number;
-  bottom: number;
-};
-
-const WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES = Math.ceil((WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX / DEFAULT_HOUR_ROW_HEIGHT) * WEEKDAY_MINUTES_PER_HOUR);
-const PERCENT_MAX = 100;
 
 const buildEvent = ({
   id,
@@ -43,20 +31,6 @@ const getEntryById = (entries: readonly CalendarTimeGridLayoutEntry[], id: strin
   if (!entry) throw new Error(`Missing layout entry: ${id}`);
 
   return entry;
-};
-
-const getVisualFrame = (entry: CalendarTimeGridLayoutEntry): TimeGridVisualFrame => ({
-  left: entry.style.xOffset,
-  right: entry.style.xOffset + entry.style.width,
-  top: entry.style.top,
-  bottom: entry.style.top + entry.style.height,
-});
-
-const doVisualFramesOverlap = (leftFrame: TimeGridVisualFrame, rightFrame: TimeGridVisualFrame): boolean => {
-  const overlapsVertically = leftFrame.top < rightFrame.bottom && rightFrame.top < leftFrame.bottom;
-  const overlapsHorizontally = leftFrame.left < rightFrame.right && rightFrame.left < leftFrame.right;
-
-  return overlapsVertically && overlapsHorizontally;
 };
 
 describe("layoutCalendarTimeGridEvents", () => {
@@ -95,7 +69,7 @@ describe("layoutCalendarTimeGridEvents", () => {
     expect(entry.style.height).toBeCloseTo(15 / 1_440 * 100, 6);
   });
 
-  it("weekday 表示の chip 高さは実時間を使い、最低表示高さはタイトル 1 行分にする", () => {
+  it("weekday 表示の chip 高さは実時間を使い、最低表示高さは描画 style だけで扱う", () => {
     const [shortEntry, longEntry] = layoutCalendarTimeGridEvents({
       events: [
         buildEvent({
@@ -122,10 +96,10 @@ describe("layoutCalendarTimeGridEvents", () => {
     expect(shortFrame.heightHours).toBeCloseTo(15 / 60, 6);
     expect(longFrame.heightHours).toBeCloseTo(107 / 60, 6);
     expect(longFrame.heightHours / shortFrame.heightHours).toBeCloseTo(107 / 15, 6);
-    expect(shortStyle.height).toBe("calc(0.25 * var(--calendar-hour-row-height))");
-    expect(shortStyle.minHeight).toBe("18px");
-    expect(longStyle.height).toBe("calc(1.7833333333333332 * var(--calendar-hour-row-height))");
-    expect(longStyle.minHeight).toBe("18px");
+    expect(shortStyle.height).toBe("calc(0.25 * var(--calendar-hour-row-height) - 0.5px)");
+    expect(shortStyle.minHeight).toBe("17.5px");
+    expect(longStyle.height).toBe("calc(1.7833333333333332 * var(--calendar-hour-row-height) - 0.5px)");
+    expect(longStyle.minHeight).toBe("17.5px");
   });
 
   it("weekday 表示の chip top を開始時刻と同じ時間位置にする", () => {
@@ -234,7 +208,7 @@ describe("layoutCalendarTimeGridEvents", () => {
     expect(entries[1].style.xOffset).toBe(50);
   });
 
-  it("weekday の最低表示高さで見た目が重なる event も横並びにして視覚的な重なりを作らない", () => {
+  it("実時刻が重ならない短時間 event は同じ column のままにする", () => {
     const entries = layoutCalendarTimeGridEvents({
       events: [
         buildEvent({
@@ -256,20 +230,13 @@ describe("layoutCalendarTimeGridEvents", () => {
       rangeStart: new Date(2026, 3, 12, 0, 0),
       rangeEnd: new Date(2026, 3, 13, 0, 0),
       layoutMode: "no-overlap",
-      minimumEventDurationMinutes: WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES,
     });
 
     expect(entries).toHaveLength(3);
 
     for (const entry of entries) {
-      expect(entry.columnCount).toBeGreaterThan(1);
-      expect(entry.style.height).toBeCloseTo(WEEKDAY_VISUAL_MIN_LAYOUT_MINUTES / 1_440 * PERCENT_MAX, 6);
-    }
-
-    for (let index = 0; index < entries.length - 1; index += 1) {
-      for (let nextIndex = index + 1; nextIndex < entries.length; nextIndex += 1) {
-        expect(doVisualFramesOverlap(getVisualFrame(entries[index]), getVisualFrame(entries[nextIndex]))).toBe(false);
-      }
+      expect(entry.columnCount).toBe(1);
+      expect(entry.style.width).toBe(100);
     }
   });
 
