@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
 import type { PdfViewerState } from "@/types";
@@ -42,24 +42,6 @@ type PdfDocumentProxy = Awaited<ReturnType<typeof pdfjsLib.getDocument>["promise
 
 type PdfPageProxy = Awaited<ReturnType<PdfDocumentProxy["getPage"]>>;
 
-type PdfOutlineItem = {
-  title?: string;
-  dest?: string | unknown[] | null;
-  items?: PdfOutlineItem[];
-};
-
-type PdfOutlineEntry = {
-  id: string;
-  title: string;
-  level: number;
-  pageNumber: number | null;
-};
-
-type PdfSidePanelTabDefinition = {
-  id: NonNullable<PdfViewerState["sidePanelTab"]>;
-  label: string;
-};
-
 type PdfCanvasPageProps = {
   pageNumber: number;
   pdfDocument: PdfDocumentProxy;
@@ -78,55 +60,33 @@ type PdfTextSpan = {
   id: string;
   text: string;
   style: CSSProperties;
-  isSearchMatch: boolean;
 };
 
 type PdfTextLayerProps = {
   pageNumber: number;
   pdfDocument: PdfDocumentProxy;
   scale: number;
-  searchQuery: string;
 };
 
 type PdfDocumentPageProps = PdfCanvasPageProps & {
   currentPage: number;
   registerPageElement: (pageNumber: number, element: HTMLDivElement | null) => void;
-  searchQuery: string;
   shouldRender: boolean;
 };
 
 type PdfDocumentPageSlotProps = PdfDocumentPageProps;
 
-type PdfSearchResult = {
-  id: string;
-  pageNumber: number;
-  snippet: string;
-};
-
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
-const PDF_SIDE_PANEL_TABS: readonly PdfSidePanelTabDefinition[] = [
-  { id: "outline", label: "目次" },
-  { id: "bookmarks", label: "ブックマーク" },
-  { id: "highlights", label: "ハイライト" },
-  { id: "thumbnails", label: "サムネイル" },
-];
 const DEFAULT_PDF_PAGE = 1;
 const DEFAULT_PDF_SCALE = 1;
 const MIN_PDF_SCALE = 0.5;
 const MAX_PDF_SCALE = 3;
 const PDF_SCALE_STEP = 0.15;
-const PDF_THUMBNAIL_SCALE = 0.18;
 const PDF_PAGE_RENDER_RADIUS = 3;
-const PDF_THUMBNAIL_RENDER_RADIUS = 8;
 const PDF_PAGE_PLACEHOLDER_HEIGHT = 920;
-const PDF_SEARCH_SNIPPET_MARGIN = 24;
 const PDF_HISTORY_LIMIT = 80;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
-const OUTLINE_EMPTY_MESSAGE = "このPDFには目次情報がありません。";
-const BOOKMARK_EMPTY_MESSAGE = "ブックマークはまだありません。";
-const HIGHLIGHTS_EMPTY_MESSAGE = "検索語を入力すると、該当箇所をページ上にハイライトします。";
-const SEARCHING_MESSAGE = "テキストを解析中...";
 
 const resolveDocumentTitle = (doc: PdfPaneDoc): string => {
   return doc.title?.trim() || doc.fileName?.trim() || doc.name?.trim() || "PDF";
@@ -154,14 +114,6 @@ const getPageNumbers = (pageCount: number): number[] => {
   return Array.from({ length: pageCount }, (_, index) => index + 1);
 };
 
-const getNormalizedSearchQuery = (value: string): string => {
-  return value.trim().toLowerCase();
-};
-
-const getSortedMarkEntries = (markPages: Record<string, number>): [string, number][] => {
-  return Object.entries(markPages).sort(([leftKey], [rightKey]) => leftKey.localeCompare(rightKey));
-};
-
 const getTrimmedHistory = (pages: number[]): number[] => {
   return pages.slice(-PDF_HISTORY_LIMIT);
 };
@@ -180,17 +132,6 @@ const shouldRenderNearbyPage = (pageNumber: number, currentPage: number, radius:
 const getTextContentItemText = (item: unknown): string => {
   const textItem = item as PdfTextItem;
   return typeof textItem.str === "string" ? textItem.str : "";
-};
-
-const createSearchSnippet = (text: string, query: string): string => {
-  const normalizedText = text.toLowerCase();
-  const matchIndex = normalizedText.indexOf(query);
-  if (matchIndex < 0) return text.slice(0, PDF_SEARCH_SNIPPET_MARGIN * 2).trim();
-  const startIndex = Math.max(0, matchIndex - PDF_SEARCH_SNIPPET_MARGIN);
-  const endIndex = Math.min(text.length, matchIndex + query.length + PDF_SEARCH_SNIPPET_MARGIN);
-  const prefix = startIndex > 0 ? "…" : "";
-  const suffix = endIndex < text.length ? "…" : "";
-  return `${prefix}${text.slice(startIndex, endIndex).trim()}${suffix}`;
 };
 
 const multiplyPdfTransform = (left: number[], right: number[]): number[] => {
@@ -228,47 +169,6 @@ const loadLocalPdfObjectUrl = async (doc: PdfPaneDoc): Promise<string> => {
 
 const loadPdfDocument = async (sourceUrl: string, viewerOptions: PdfPaneProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
   return pdfjsLib.getDocument({ url: sourceUrl, enableXfa: viewerOptions?.enableXfa, useSystemFonts: viewerOptions?.useSystemFonts ?? true, cMapUrl: viewerOptions?.cMapUrl, standardFontDataUrl: viewerOptions?.standardFontDataUrl }).promise;
-};
-
-const loadPdfPageTextMap = async (pdfDocument: PdfDocumentProxy): Promise<Map<number, string>> => {
-  const map = new Map<number, string>();
-  for (let pageNumber = 1; pageNumber <= pdfDocument.numPages; pageNumber += 1) {
-    const page = await pdfDocument.getPage(pageNumber);
-    const textContent = await page.getTextContent();
-    const text = textContent.items.map(getTextContentItemText).filter(Boolean).join(" ");
-    map.set(pageNumber, text);
-  }
-  return map;
-};
-
-const buildPdfSearchResults = (pageTextMap: Map<number, string>, searchQuery: string): PdfSearchResult[] => {
-  const query = getNormalizedSearchQuery(searchQuery);
-  if (!query) return [];
-  return Array.from(pageTextMap.entries()).flatMap(([pageNumber, text]) => {
-    const normalizedText = text.toLowerCase();
-    if (!normalizedText.includes(query)) return [];
-    return [{ id: `${pageNumber}-${normalizedText.indexOf(query)}`, pageNumber, snippet: createSearchSnippet(text, query) }];
-  });
-};
-
-const resolveOutlinePageNumber = async (pdfDocument: PdfDocumentProxy, item: PdfOutlineItem): Promise<number | null> => {
-  if (!item.dest) return null;
-  const destination = typeof item.dest === "string" ? await pdfDocument.getDestination(item.dest) : item.dest;
-  const pageRef = Array.isArray(destination) ? destination[0] : null;
-  if (!pageRef) return null;
-  const pageIndex = await pdfDocument.getPageIndex(pageRef);
-  return pageIndex + 1;
-};
-
-const flattenOutlineItems = async (pdfDocument: PdfDocumentProxy, items: readonly PdfOutlineItem[], level = 0, prefix = "outline"): Promise<PdfOutlineEntry[]> => {
-  const entries = await Promise.all(items.map(async (item, index) => {
-    const id = `${prefix}-${index}`;
-    const pageNumber = await resolveOutlinePageNumber(pdfDocument, item).catch(() => null);
-    const title = item.title?.trim() || "無題";
-    const childEntries = item.items?.length ? await flattenOutlineItems(pdfDocument, item.items, level + 1, id) : [];
-    return [{ id, title, level, pageNumber }, ...childEntries];
-  }));
-  return entries.flat();
 };
 
 const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasPageProps) => {
@@ -311,9 +211,8 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
   return <canvas ref={canvasRef} className={className} />;
 };
 
-const PdfTextLayer = ({ pageNumber, pdfDocument, scale, searchQuery }: PdfTextLayerProps) => {
+const PdfTextLayer = ({ pageNumber, pdfDocument, scale }: PdfTextLayerProps) => {
   const [textSpans, setTextSpans] = useState<PdfTextSpan[]>([]);
-  const normalizedSearchQuery = getNormalizedSearchQuery(searchQuery);
 
   useEffect(() => {
     let isCancelled = false;
@@ -330,7 +229,6 @@ const PdfTextLayer = ({ pageNumber, pdfDocument, scale, searchQuery }: PdfTextLa
           id: `${pageNumber}-${index}`,
           text,
           style: createTextSpanStyle(viewport.transform, textItem),
-          isSearchMatch: normalizedSearchQuery.length > 0 && text.toLowerCase().includes(normalizedSearchQuery),
         };
       }).filter((span) => span.text.length > 0));
     };
@@ -342,16 +240,16 @@ const PdfTextLayer = ({ pageNumber, pdfDocument, scale, searchQuery }: PdfTextLa
     return () => {
       isCancelled = true;
     };
-  }, [normalizedSearchQuery, pageNumber, pdfDocument, scale]);
+  }, [pageNumber, pdfDocument, scale]);
 
   return (
     <div className="pointer-events-none absolute inset-3 overflow-hidden text-transparent selection:bg-[#d5b14b]/35 selection:text-transparent" aria-hidden="true">
-      {textSpans.map((span) => <span key={span.id} className={cn("pointer-events-auto absolute origin-left whitespace-pre", span.isSearchMatch && "rounded-[2px] bg-[#f1c94b]/45 ring-1 ring-[#c79722]/55")} style={span.style}>{span.text}</span>)}
+      {textSpans.map((span) => <span key={span.id} className="pointer-events-auto absolute origin-left whitespace-pre" style={span.style}>{span.text}</span>)}
     </div>
   );
 };
 
-const PdfDocumentPage = ({ pageNumber, pdfDocument, scale, currentPage, registerPageElement, searchQuery, shouldRender }: PdfDocumentPageProps) => {
+const PdfDocumentPage = ({ pageNumber, pdfDocument, scale, currentPage, registerPageElement, shouldRender }: PdfDocumentPageProps) => {
   const isCurrent = pageNumber === currentPage;
 
   return (
@@ -360,7 +258,7 @@ const PdfDocumentPage = ({ pageNumber, pdfDocument, scale, currentPage, register
         <span>Page {pageNumber}</span>
         {!shouldRender ? <span>省メモリ表示</span> : null}
       </div>
-      {shouldRender ? <div className="relative"><PdfCanvasPage pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} /><PdfTextLayer pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} searchQuery={searchQuery} /></div> : null}
+      {shouldRender ? <div className="relative"><PdfCanvasPage pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} /><PdfTextLayer pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} /></div> : null}
     </div>
   );
 };
@@ -369,27 +267,15 @@ const PdfDocumentPageSlot = (props: PdfDocumentPageSlotProps) => {
   return <PdfDocumentPage {...props} />;
 };
 
-const PdfThumbnailCanvas = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasPageProps) => {
-  return <PdfCanvasPage pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} className={className} />;
-};
-
 const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPaneProps) => {
   const documentTitle = useMemo(() => resolveDocumentTitle(doc), [doc]);
   const persistedUrl = useMemo(() => resolvePersistedUrl(doc), [doc]);
   const viewerState = doc.viewerState ?? null;
-  const activeSidePanelTab = viewerState?.sidePanelTab ?? "outline";
   const scale = clampPdfScale(viewerState?.scale ?? DEFAULT_PDF_SCALE);
   const [sourceUrl, setSourceUrl] = useState<string | null>(null);
   const [pdfDocument, setPdfDocument] = useState<PdfDocumentProxy | null>(null);
-  const [outlineEntries, setOutlineEntries] = useState<PdfOutlineEntry[]>([]);
-  const [pageTextMap, setPageTextMap] = useState<Map<number, string>>(() => new Map());
-  const [searchQuery, setSearchQuery] = useState("");
-  const [pageJumpValue, setPageJumpValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isTextLoading, setIsTextLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const searchInputRef = useRef<HTMLInputElement | null>(null);
-  const pageJumpInputRef = useRef<HTMLInputElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const pageElementsRef = useRef<Map<number, HTMLDivElement>>(new Map());
   const pageCount = pdfDocument?.numPages ?? 0;
@@ -399,8 +285,6 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
   const historyBackPages = viewerState?.historyBackPages ?? [];
   const historyForwardPages = viewerState?.historyForwardPages ?? [];
   const pageNumbers = useMemo(() => getPageNumbers(pageCount), [pageCount]);
-  const searchResults = useMemo(() => buildPdfSearchResults(pageTextMap, searchQuery), [pageTextMap, searchQuery]);
-  const markEntries = useMemo(() => getSortedMarkEntries(markPages), [markPages]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -408,11 +292,8 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
 
     setSourceUrl(null);
     setPdfDocument(null);
-    setOutlineEntries([]);
-    setPageTextMap(new Map());
     setLoadError(null);
     setIsLoading(true);
-    setIsTextLoading(false);
 
     const load = async () => {
       const nextSourceUrl = persistedUrl ?? await loadLocalPdfObjectUrl(doc);
@@ -422,21 +303,12 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
       const nextPdfDocument = await loadPdfDocument(nextSourceUrl, viewerOptions);
       if (isCancelled) return;
       setPdfDocument(nextPdfDocument);
-      const outline = await nextPdfDocument.getOutline() as PdfOutlineItem[] | null;
-      if (isCancelled) return;
-      setOutlineEntries(outline ? await flattenOutlineItems(nextPdfDocument, outline) : []);
-      setIsTextLoading(true);
-      const nextPageTextMap = await loadPdfPageTextMap(nextPdfDocument);
-      if (isCancelled) return;
-      setPageTextMap(nextPageTextMap);
-      setIsTextLoading(false);
     };
 
     void load().catch((error: unknown) => {
       if (isCancelled) return;
       const message = error instanceof Error ? error.message : String(error);
       setLoadError(message || "PDFファイルの読み込みに失敗しました。");
-      setIsTextLoading(false);
     }).finally(() => {
       if (!isCancelled) setIsLoading(false);
     });
@@ -478,10 +350,6 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
     pageElementsRef.current.forEach((element) => observer.observe(element));
     return () => observer.disconnect();
   }, [currentPage, onDocumentUpdate, pdfDocument, viewerState]);
-
-  const handleSidePanelTabSelect = (sidePanelTab: NonNullable<PdfViewerState["sidePanelTab"]>) => {
-    updateViewerState({ sidePanelTab });
-  };
 
   const handleZoomIn = useCallback(() => {
     updateViewerState({ scale: clampPdfScale(scale + PDF_SCALE_STEP), fitMode: "manual" });
@@ -528,27 +396,9 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
     scrollToPage(targetPage);
   }, [markPages, scrollToPage]);
 
-  const handlePageJump = useCallback(() => {
-    const pageNumber = Number(pageJumpValue);
-    if (!Number.isFinite(pageNumber)) return;
-    scrollToPage(pageNumber);
-    setPageJumpValue("");
-  }, [pageJumpValue, scrollToPage]);
-
-  const handlePageJumpKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
-    if (event.key !== "Enter") return;
-    event.preventDefault();
-    handlePageJump();
-  };
-
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!shouldHandlePdfKeyboardEvent(event)) return;
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "f") {
-        event.preventDefault();
-        searchInputRef.current?.focus();
-        return;
-      }
       if ((event.altKey || event.metaKey) && event.key === "ArrowLeft") {
         event.preventDefault();
         handleGoBack();
@@ -584,11 +434,6 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
         handleToggleBookmark();
         return;
       }
-      if (event.key === "g") {
-        event.preventDefault();
-        pageJumpInputRef.current?.focus();
-        return;
-      }
       if (event.key === "m") {
         event.preventDefault();
         handleSetMark();
@@ -618,7 +463,7 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
         <div ref={scrollContainerRef} className="min-h-0 flex-1 overflow-y-auto bg-[#2b2b2b] p-5">
           {isLoading ? <div className="flex h-full items-center justify-center text-[13px] text-[#bdb8ad]">PDFを読み込み中...</div> : null}
           {!isLoading && loadError ? <div className="flex h-full items-center justify-center p-6 text-center text-[13px] leading-6 text-[#d8d3c9]"><div className="max-w-md rounded-[14px] border border-white/10 bg-[#1f1f1f] px-5 py-4">{loadError}</div></div> : null}
-          {!isLoading && !loadError && pdfDocument ? <div className="flex min-w-max flex-col items-center gap-5">{pageNumbers.map((pageNumber) => <PdfDocumentPageSlot key={pageNumber} pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} currentPage={currentPage} registerPageElement={registerPageElement} searchQuery={searchQuery} shouldRender={shouldRenderNearbyPage(pageNumber, currentPage, PDF_PAGE_RENDER_RADIUS)} />)}</div> : null}
+          {!isLoading && !loadError && pdfDocument ? <div className="flex min-w-max flex-col items-center gap-5">{pageNumbers.map((pageNumber) => <PdfDocumentPageSlot key={pageNumber} pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} currentPage={currentPage} registerPageElement={registerPageElement} shouldRender={shouldRenderNearbyPage(pageNumber, currentPage, PDF_PAGE_RENDER_RADIUS)} />)}</div> : null}
           {!isLoading && !loadError && !pdfDocument ? <div className="flex h-full items-center justify-center text-[13px] text-[#bdb8ad]">表示できるPDFソースがありません。</div> : null}
         </div>
       </main>
