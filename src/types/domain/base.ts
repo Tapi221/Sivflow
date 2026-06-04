@@ -37,7 +37,8 @@ export interface BlockConfig {
     | "reference"
     | "math"
     | "markdown"
-    | "question";
+    | "question"
+    | "pdf";
   label: string;
   isVisible: boolean;
   orderIndex: number;
