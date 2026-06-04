@@ -63,8 +63,12 @@
   }
 
   [data-card-text-selectable="true"] button,
+  [data-card-text-selectable="true"] button *,
   [data-card-text-selectable="true"] img,
-  [data-card-text-selectable="true"] [role="button"] {
+  [data-card-text-selectable="true"] [role="button"],
+  [data-card-text-selectable="true"] [role="button"] *,
+  [data-card-text-selectable="true"] [data-card-text-selection-excluded="true"],
+  [data-card-text-selectable="true"] [data-card-text-selection-excluded="true"] * {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
