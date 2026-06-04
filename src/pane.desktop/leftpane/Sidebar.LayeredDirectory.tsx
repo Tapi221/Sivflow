@@ -160,11 +160,11 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   const treeFolders = useMemo(() => folders as FolderTreeNode[], [folders]);
   const { rootFolders, getChildFolders, getNextOrderIndex } = useExplorerDerivedData({ treeFolders, treeCards: EMPTY_COLLECTION, cardSets: EMPTY_COLLECTION, documents: EMPTY_COLLECTION, isFiltering: false });
   const folderById = useMemo(() => createFolderLookup(rootFolders, getChildFolders), [getChildFolders, rootFolders]);
-  const selectedFolderId = activeTab?.kind === "explorer" && !activeTab.explorerState.isSectionListMode ? activeTab.explorerState.selectedFolderId : null;
+  const selectedFolderId = activeTab?.kind === "explorer" ? activeTab.explorerState.selectedFolderId : null;
   const selectedFolder = selectedFolderId ? folderById.get(selectedFolderId) ?? null : null;
-  const selectedNavigationFolderId = selectedFolder ? selectedFolderId : null;
+  const selectedNavigationFolderId = selectedFolderId;
   const sectionLabel = folderTagMode === "tag" ? TAG_SECTION_LABEL : selectedFolder ? getFolderName(selectedFolder) : PROJECT_SECTION_LABEL;
-  const shouldShowFavoriteSection = folderTagMode !== "tag" && !selectedFolder;
+  const shouldShowFavoriteSection = folderTagMode !== "tag" && !selectedFolderId;
   const workspaceOwnerName = useMemo(() => getWorkspaceOwnerName(currentUser?.displayName, currentUser?.email), [currentUser?.displayName, currentUser?.email]);
   const workspaceName = `${workspaceOwnerName}${WORKSPACE_NAME_SUFFIX}`;
   const workspaceInitial = useMemo(() => getWorkspaceInitial(workspaceOwnerName), [workspaceOwnerName]);
