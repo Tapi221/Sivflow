@@ -2,6 +2,7 @@
 @import "../features/codeblock.css";
 @import "../features/mathblock.css";
 @import "../features/calendar.css";
+@import "../features/calendar-print-page.css";
 @import "../features/calendar-month-weekday-header.css";
 @import "../features/sidebar.css";
 @import "./common.css";
