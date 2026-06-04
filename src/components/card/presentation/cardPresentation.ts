@@ -16,35 +16,24 @@ export type CardPresentationState = {
   showActiveChrome: boolean;
 };
 
-export type CardPresentationContextInput = Partial<
-  Pick<
-    CardPresentationContext,
-    "isCurrentCard" | "isStandaloneEditor" | "hasFocusWithin"
-  >
->;
+export type CardPresentationContextInput = Partial<Pick<CardPresentationContext, "isCurrentCard" | "isStandaloneEditor" | "hasFocusWithin">>;
 
-export const resolveCardPresentationState = (
-  context: CardPresentationContext,
-): CardPresentationState => {
+export const resolveCardPresentationState = (context: CardPresentationContext): CardPresentationState => {
   const isActiveCard = context.isStandaloneEditor || context.isCurrentCard;
   const isInteractiveCard = isActiveCard || context.hasFocusWithin;
 
   return {
     isActiveCard,
     isInteractiveCard,
-    showEditingOutline:
-      context.isEditing && isActiveCard && !context.isStandaloneEditor,
+    showEditingOutline: context.isEditing && isActiveCard && !context.isStandaloneEditor,
     showActiveChrome: context.inPager && isActiveCard,
   };
 };
 
-export const buildCardShellClassName = (
-  state: CardPresentationState,
-  className?: string,
-) =>
+export const buildCardShellClassName = (state: CardPresentationState, className?: string) =>
   cn(
     CARD_SHELL_COMMON_CLASS_NAME,
-    state.isActiveCard && "card-shell--active",
+    state.showActiveChrome && "card-shell--active",
     state.showEditingOutline && "card-shell--editing",
     className,
   );
