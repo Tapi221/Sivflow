@@ -4,7 +4,7 @@ import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } fro
 import { RightClickPanelSurface } from "@/chip/rightclickpanel.desktop/rightClickPanelCommon";
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
-import { DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_PROJECT_NAME, getFolderId, getParentFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_PROJECT_NAME, getFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
@@ -13,10 +13,10 @@ import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
-import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
-import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { StratisTagIcon } from "@/ui/icons/stratis";
+import { LibraryHierarchySidebar, ProjectListSidebar } from "./folder/LayeredDirectorySidebar";
+import { TagTreeSidebar } from "./folder/TagTreeSidebar";
 
 type IconProps = {
   className?: string;
@@ -61,7 +61,7 @@ const FAVORITE_EMPTY_MESSAGE = "プロジェクトをお気に入りに追加す
 const PROJECT_SECTION_LABEL = "プロジェクト";
 const TAG_SECTION_LABEL = "タグツリー";
 const ADD_PROJECT_ARIA_LABEL = "プロジェクトを追加";
-const ADD_PROJECT_CONTENT_ARIA_LABEL = "プロジェクトに追加";
+const ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL = "選択中のフォルダに追加";
 const PROJECT_ADD_MENU_PANEL_ID = "layered-project-add-menu";
 const PROJECT_ADD_MENU_ITEM_DEFINITIONS: readonly ProjectAddMenuItemDefinition[] = [
   { id: "create-folder", label: "新規フォルダ" },
@@ -123,23 +123,6 @@ const getProjectAddMenuPosition = (event: ReactMouseEvent<HTMLElement>): Project
   return clampRightClickPanelPosition(rect.right - PROJECT_ADD_MENU_WIDTH, rect.bottom + 6, { width: PROJECT_ADD_MENU_WIDTH, height: PROJECT_ADD_MENU_HEIGHT });
 };
 
-const resolveRootProjectId = (folderId: string | null | undefined, folderById: ReadonlyMap<string, FolderTreeNode>, rootFolderIds: ReadonlySet<string>): string | null => {
-  if (!folderId) return null;
-
-  let currentId: string | null = folderId;
-  const visited = new Set<string>();
-
-  while (currentId && !visited.has(currentId)) {
-    if (rootFolderIds.has(currentId)) return currentId;
-    visited.add(currentId);
-    const folder = folderById.get(currentId);
-    if (!folder) return null;
-    currentId = getParentFolderId(folder);
-  }
-
-  return null;
-};
-
 const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: SidebarLayeredDirectoryProps) => {
   const { onToggleLeftPanel: outletToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
   const { currentUser } = useAuthSession();
@@ -166,12 +149,11 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
     });
     return map;
   }, [treeFolders]);
-  const rootFolderIds = useMemo(() => new Set(rootFolders.map(getFolderId).filter(Boolean)), [rootFolders]);
   const selectedFolderId = activeTab?.kind === "explorer" && !activeTab.explorerState.isSectionListMode ? activeTab.explorerState.selectedFolderId : null;
-  const selectedProjectId = useMemo(() => resolveRootProjectId(selectedFolderId, folderById, rootFolderIds), [folderById, rootFolderIds, selectedFolderId]);
-  const selectedProject = selectedProjectId ? folderById.get(selectedProjectId) ?? null : null;
-  const sectionLabel = folderTagMode === "tag" ? TAG_SECTION_LABEL : selectedProject ? getFolderName(selectedProject) : PROJECT_SECTION_LABEL;
-  const shouldShowFavoriteSection = folderTagMode !== "tag" && !selectedProject;
+  const selectedFolder = selectedFolderId ? folderById.get(selectedFolderId) ?? null : null;
+  const selectedNavigationFolderId = selectedFolder ? selectedFolderId : null;
+  const sectionLabel = folderTagMode === "tag" ? TAG_SECTION_LABEL : selectedFolder ? getFolderName(selectedFolder) : PROJECT_SECTION_LABEL;
+  const shouldShowFavoriteSection = folderTagMode !== "tag" && !selectedFolder;
   const workspaceOwnerName = useMemo(() => getWorkspaceOwnerName(currentUser?.displayName, currentUser?.email), [currentUser?.displayName, currentUser?.email]);
   const workspaceName = `${workspaceOwnerName}${WORKSPACE_NAME_SUFFIX}`;
   const workspaceInitial = useMemo(() => getWorkspaceInitial(workspaceOwnerName), [workspaceOwnerName]);
@@ -183,7 +165,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
   const shouldShowCalendarContent = isScheduleActive && calendarContent !== undefined;
   const shouldShowDirectoryContent = !shouldShowCalendarContent;
   const resolvedOnToggleLeftPanel = onToggleLeftPanel ?? outletToggleLeftPanel;
-  const { fileInputRef, handleToolbarAddDocument, currentFileAccept, handleToolbarFileInputChange } = useFolderDocumentUpload({ actionFolderId: selectedProjectId, getNextOrderIndex, setExpandedFolders: setProjectAddExpandedFolderIds });
+  const { fileInputRef, handleToolbarAddDocument, currentFileAccept, handleToolbarFileInputChange } = useFolderDocumentUpload({ actionFolderId: selectedNavigationFolderId, getNextOrderIndex, setExpandedFolders: setProjectAddExpandedFolderIds });
 
   const closeProjectAddMenu = useCallback(() => {
     setProjectAddMenu(null);
@@ -215,13 +197,13 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
     setProjectAddMenu(getProjectAddMenuPosition(event));
   }, []);
 
-  const handleCreateProjectFolder = useCallback(() => {
-    if (!selectedProjectId) return;
+  const handleCreateSelectedFolderChild = useCallback(() => {
+    if (!selectedNavigationFolderId) return;
     closeProjectAddMenu();
-    void createFolder(DEFAULT_NEW_FOLDER_NAME, selectedProjectId);
-  }, [closeProjectAddMenu, createFolder, selectedProjectId]);
+    void createFolder(DEFAULT_NEW_FOLDER_NAME, selectedNavigationFolderId);
+  }, [closeProjectAddMenu, createFolder, selectedNavigationFolderId]);
 
-  const handleImportProjectPdf = useCallback(() => {
+  const handleImportSelectedFolderPdf = useCallback(() => {
     handleToolbarAddDocument();
     closeProjectAddMenu();
   }, [closeProjectAddMenu, handleToolbarAddDocument]);
@@ -282,7 +264,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
             ) : null}
             <section className="app-layered-directory__section" aria-label={sectionLabel}>
               <div className="app-layered-directory__section-heading-row">
-                {folderTagMode !== "tag" && selectedProject ? (
+                {folderTagMode !== "tag" && selectedFolder ? (
                   <button type="button" className="app-layered-directory__section-heading-button" onClick={handleOpenProjectList} aria-label="プロジェクト一覧を開く">
                     <span className="block truncate">{sectionLabel}</span>
                     <IconChevronDown className="app-layered-directory__section-chevron" />
@@ -291,7 +273,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
                   <h2 className="app-layered-directory__section-heading">{sectionLabel}</h2>
                 )}
                 {folderTagMode !== "tag" ? (
-                  <button type="button" onClick={selectedProject ? handleOpenProjectAddMenu : handleCreateRootFolder} aria-label={selectedProject ? ADD_PROJECT_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} title={selectedProject ? ADD_PROJECT_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} className="app-layered-directory__add-button">
+                  <button type="button" onClick={selectedFolder ? handleOpenProjectAddMenu : handleCreateRootFolder} aria-label={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} title={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} className="app-layered-directory__add-button">
                     <IconPlus className="h-4 w-4" />
                   </button>
                 ) : null}
@@ -300,12 +282,12 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel }: Sidebar
           </div>
           <input ref={fileInputRef} type="file" accept={currentFileAccept} className="hidden" tabIndex={-1} onChange={handleToolbarFileInputChange} />
           <div className="min-h-0 flex-1">
-            {folderTagMode === "tag" ? <TagTreeSidebar /> : selectedProjectId ? <LibraryHierarchySidebar projectRootId={selectedProjectId} /> : <ProjectListSidebar />}
+            {folderTagMode === "tag" ? <TagTreeSidebar /> : selectedNavigationFolderId ? <LibraryHierarchySidebar parentFolderId={selectedNavigationFolderId} /> : <ProjectListSidebar />}
           </div>
         </>
       ) : null}
       {shouldShowCalendarContent ? <div className="min-h-0 flex-1">{calendarContent}</div> : null}
-      {shouldShowDirectoryContent && projectAddMenu ? <ProjectAddMenu x={projectAddMenu.x} y={projectAddMenu.y} menuRef={projectAddMenuRef} onCreateFolder={handleCreateProjectFolder} onImportPdf={handleImportProjectPdf} /> : null}
+      {shouldShowDirectoryContent && projectAddMenu ? <ProjectAddMenu x={projectAddMenu.x} y={projectAddMenu.y} menuRef={projectAddMenuRef} onCreateFolder={handleCreateSelectedFolderChild} onImportPdf={handleImportSelectedFolderPdf} /> : null}
     </div>
   );
 };
