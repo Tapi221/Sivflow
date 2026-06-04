@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, type CSSProperties, type ReactNode } from "react";
 import { useOutletContext } from "react-router-dom";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
@@ -23,10 +23,19 @@ type ExplorerWorkspaceContentProps = {
   onToggleLeftPanel: () => void;
 };
 
+type SidebarInteractionRegionStyle = CSSProperties & {
+  WebkitAppRegion?: "no-drag";
+};
+
+type SidebarInteractionRegionProps = {
+  children: ReactNode;
+};
+
 const FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME = "absolute right-4 top-3 z-30 flex h-8 w-[220px] shrink-0 items-center gap-1.5 rounded-[9px] border border-[rgba(0,0,0,0.04)] bg-[#efeeee]/95 px-2.5 text-left text-[12px] font-medium leading-none tracking-[-0.012em] text-[#85827e] shadow-none outline-none ring-0 backdrop-blur-xl transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.04)] hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.99] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
 const FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-5 min-w-[31px] items-center justify-center rounded-[5px] border border-[rgba(0,0,0,0.04)] bg-[#eeeeee] px-1.5 text-[10px] font-semibold leading-none tracking-[-0.02em] text-[#85827e]";
 const WORKSPACE_ACTION_TOOLBAR_CLASS_NAME = "absolute z-30";
 const WORKSPACE_ACTION_TOOLBAR_STYLE = { right: "252px", top: "12px" };
+const SIDEBAR_INTERACTION_REGION_STYLE: SidebarInteractionRegionStyle = { WebkitAppRegion: "no-drag" };
 
 const createFolderRouteState = (folderId: string | null): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: folderId === null, selectedFolderId: folderId, selectedItem: null });
 
@@ -50,6 +59,14 @@ const getLibraryExplorerState = (tab: WorkspaceTab | null): ExplorerRouteState |
 
 const getExplorerTabId = (tab: WorkspaceTab | null): WorkspaceExplorerTab["id"] | null => {
   return tab?.kind === "explorer" ? tab.id : null;
+};
+
+const SidebarInteractionRegion = ({ children }: SidebarInteractionRegionProps) => {
+  return (
+    <div className="relative z-40 flex h-full min-h-0 shrink-0" style={SIDEBAR_INTERACTION_REGION_STYLE}>
+      {children}
+    </div>
+  );
 };
 
 const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCollapsed, onToggleLeftPanel }: ExplorerWorkspaceContentProps) => {
@@ -85,7 +102,9 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
 
   return (
     <div className="relative flex h-full min-h-0 w-full overflow-hidden bg-transparent">
-      {isLeftPanelCollapsed ? <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} /> : <SidebarLayeredDirectory onToggleLeftPanel={onToggleLeftPanel} />}
+      <SidebarInteractionRegion>
+        {isLeftPanelCollapsed ? <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} /> : <SidebarLayeredDirectory onToggleLeftPanel={onToggleLeftPanel} />}
+      </SidebarInteractionRegion>
       <CarvePanel className="relative min-w-0">
         <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} />
         <WorkspaceActionToolbar className={WORKSPACE_ACTION_TOOLBAR_CLASS_NAME} style={WORKSPACE_ACTION_TOOLBAR_STYLE} />
@@ -112,7 +131,9 @@ const WorkspaceScreen = () => {
   if (isLeftPanelCollapsed) {
     return (
       <div className="relative flex h-full min-h-0 w-full overflow-hidden bg-transparent">
-        <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />
+        <SidebarInteractionRegion>
+          <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />
+        </SidebarInteractionRegion>
         <div className="min-w-0 flex-1">
           <CalendarScheduleScreen isLeftPanelCollapsed={isLeftPanelCollapsed} />
         </div>
