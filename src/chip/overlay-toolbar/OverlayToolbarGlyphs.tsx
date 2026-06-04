@@ -100,7 +100,7 @@ export const FlipGlyph = () => (
       height="5.5"
       rx="1.35"
       stroke="currentColor"
-      strokeWidth="1.25"
+      strokeWidth="1.5"
       opacity="0.45"
     />
     <rect
@@ -115,14 +115,14 @@ export const FlipGlyph = () => (
     <path
       d="M4.25 12.25c1.15.95 2.55 1.35 4.2 1.35 1.25 0 2.35-.22 3.3-.68"
       stroke="currentColor"
-      strokeWidth="1.15"
+      strokeWidth="1.5"
       strokeLinecap="round"
       opacity="0.7"
     />
     <path
       d="M11.1 11.65l1.85 1.2-1.95.9"
       stroke="currentColor"
-      strokeWidth="1.15"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
       opacity="0.7"
@@ -139,7 +139,7 @@ export const SplitGlyph = () => (
       height="10.5"
       rx="2"
       stroke="currentColor"
-      strokeWidth="1.25"
+      strokeWidth="1.5"
       opacity="0.32"
     />
     <rect
