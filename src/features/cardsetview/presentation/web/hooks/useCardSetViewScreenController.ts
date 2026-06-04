@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { CARD_PANE_WIDTH_STEP_PX, CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT, CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT, CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT } from "@constants/shared/flashcard";
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
 import { CARD_LAYOUT_MODE_LABELS, type CardLayoutMode, type CardSetInteractionMode } from "@/features/cardsetview/domain/cardLayoutMode";
@@ -11,6 +11,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutFallbackPreferences";
+import { getCardSetViewNavigationPreference, setCardSetViewNavigationPreference } from "@/services/cardSetViewNavigationPreferences";
 import { useCardSetViewData } from "./useCardSetViewData";
 import { useCardSetViewPaneWidth } from "./useCardSetViewPaneWidth";
 import { useCardSetViewState } from "./useCardSetViewState";
@@ -29,6 +30,7 @@ type UseCardSetViewScreenControllerParams = {
 };
 
 const CARD_SET_VIEW_SCROLL_RESTORE_STABILIZATION_MS = 320;
+const CARD_SET_VIEW_NAVIGATION_SCROLL_RESTORE_STABILIZATION_MS = 520;
 const SCROLLABLE_OVERFLOW_Y_VALUES = new Set(["auto", "scroll", "overlay"]);
 
 const resolveNowMs = () => typeof performance !== "undefined" ? performance.now() : Date.now();
@@ -62,6 +64,12 @@ const clampElementScrollTop = (scrollTop: number, element: HTMLElement) => {
   return Math.min(Math.max(0, safeScrollTop), maxScrollTop);
 };
 
+const buildNavigationScopeKey = ({ deviceScope, cardSetId }: { deviceScope: string; cardSetId: string | null }) => {
+  if (!cardSetId) return null;
+
+  return [deviceScope, cardSetId].join("::");
+};
+
 export const useCardSetViewScreenController = (params: UseCardSetViewScreenControllerParams = {}) => {
   const setExtraCrumbs = useSetBreadcrumbCrumbs();
   const { error: toastError } = useToast();
@@ -75,8 +83,16 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
 
   const data = useCardSetViewData({ cardSetId });
 
+  const navigationPreference = useMemo(() => getCardSetViewNavigationPreference({ deviceScope: presentationTarget, cardSetId }), [cardSetId, presentationTarget]);
+
+  const restoredInitialIndex = useMemo(() => {
+    if (targetCardId || !navigationPreference?.cardId) return initialIndex;
+
+    return data.cardIndexById.get(navigationPreference.cardId) ?? initialIndex;
+  }, [data.cardIndexById, initialIndex, navigationPreference?.cardId, targetCardId]);
+
   const state = useCardSetViewState({
-    initialIndex,
+    initialIndex: restoredInitialIndex,
     targetCardId,
     cardSetId,
     cardSetById: data.cardSetById,
@@ -96,10 +112,15 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
   const [scrollToActiveIndexRequestKey, setScrollToActiveIndexRequestKey] = useState(0);
   const interactionModeScrollSnapshotRef = useRef<CardSetViewScrollSnapshot | null>(null);
   const scrollRestoreAnimationFrameRef = useRef<number | null>(null);
+  const navigationScrollRestoreAnimationFrameRef = useRef<number | null>(null);
+  const navigationScrollPersistenceAnimationFrameRef = useRef<number | null>(null);
+  const restoredNavigationScopeKeyRef = useRef<string | null>(null);
 
   const layoutInteractionMode: CardSetInteractionMode = state.isGlobalEditing ? "edit" : "view";
 
   const splitFallbackLayoutMode = useMemo(() => resolveSplitFallbackLayoutModePreference(presentationTarget), [presentationTarget]);
+
+  const navigationScopeKey = useMemo(() => buildNavigationScopeKey({ deviceScope: presentationTarget, cardSetId }), [cardSetId, presentationTarget]);
 
   const zoom = useCardSetViewZoom({
     deviceScope: presentationTarget,
@@ -149,6 +170,14 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
     scrollElement.scrollTop = clampElementScrollTop(snapshot.scrollTop, scrollElement);
   }, [paneWidth.contentViewportRef]);
 
+  const restoreNavigationScrollTop = useCallback((scrollTop: number) => {
+    const scrollElement = resolvePrimaryScrollableElement(paneWidth.contentViewportRef.current);
+
+    if (!scrollElement) return;
+
+    scrollElement.scrollTop = clampElementScrollTop(scrollTop, scrollElement);
+  }, [paneWidth.contentViewportRef]);
+
   const handleToggleViewMode = useCallback(() => {
     captureInteractionModeScrollSnapshot();
     state.handleToggleViewMode();
@@ -192,6 +221,75 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
       scrollRestoreAnimationFrameRef.current = null;
     };
   }, [restoreInteractionModeScrollSnapshot, state.isGlobalEditing]);
+
+  useLayoutEffect(() => {
+    if (!navigationScopeKey || data.isLoading || state.cardsForPager.length === 0) return;
+    if (restoredNavigationScopeKeyRef.current === navigationScopeKey) return;
+
+    restoredNavigationScopeKeyRef.current = navigationScopeKey;
+
+    const scrollTop = navigationPreference?.scrollTop ?? 0;
+    if (scrollTop <= 0) return;
+
+    restoreNavigationScrollTop(scrollTop);
+
+    if (typeof window === "undefined") return;
+
+    const startedAt = resolveNowMs();
+
+    const stabilizeScrollPosition = () => {
+      restoreNavigationScrollTop(scrollTop);
+
+      if (resolveNowMs() - startedAt >= CARD_SET_VIEW_NAVIGATION_SCROLL_RESTORE_STABILIZATION_MS) {
+        navigationScrollRestoreAnimationFrameRef.current = null;
+        return;
+      }
+
+      navigationScrollRestoreAnimationFrameRef.current = window.requestAnimationFrame(stabilizeScrollPosition);
+    };
+
+    navigationScrollRestoreAnimationFrameRef.current = window.requestAnimationFrame(stabilizeScrollPosition);
+
+    return () => {
+      if (navigationScrollRestoreAnimationFrameRef.current == null) return;
+
+      window.cancelAnimationFrame(navigationScrollRestoreAnimationFrameRef.current);
+      navigationScrollRestoreAnimationFrameRef.current = null;
+    };
+  }, [data.isLoading, navigationPreference?.scrollTop, navigationScopeKey, restoreNavigationScrollTop, state.cardsForPager.length]);
+
+  useEffect(() => {
+    if (!cardSetId || data.isLoading || state.cardsForPager.length === 0 || !state.selectedCard?.id) return;
+
+    setCardSetViewNavigationPreference({ deviceScope: presentationTarget, cardSetId }, { cardId: state.selectedCard.id });
+  }, [cardSetId, data.isLoading, presentationTarget, state.cardsForPager.length, state.selectedCard?.id]);
+
+  useEffect(() => {
+    if (!cardSetId || data.isLoading || state.cardsForPager.length === 0 || typeof window === "undefined") return;
+
+    const scrollElement = resolvePrimaryScrollableElement(paneWidth.contentViewportRef.current);
+    if (!scrollElement) return;
+
+    const handleScroll = () => {
+      if (navigationScrollPersistenceAnimationFrameRef.current != null) return;
+
+      navigationScrollPersistenceAnimationFrameRef.current = window.requestAnimationFrame(() => {
+        navigationScrollPersistenceAnimationFrameRef.current = null;
+        setCardSetViewNavigationPreference({ deviceScope: presentationTarget, cardSetId }, { scrollTop: scrollElement.scrollTop });
+      });
+    };
+
+    scrollElement.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      scrollElement.removeEventListener("scroll", handleScroll);
+
+      if (navigationScrollPersistenceAnimationFrameRef.current == null) return;
+
+      window.cancelAnimationFrame(navigationScrollPersistenceAnimationFrameRef.current);
+      navigationScrollPersistenceAnimationFrameRef.current = null;
+    };
+  }, [cardSetId, data.isLoading, paneWidth.contentViewportRef, presentationTarget, state.cardsForPager.length]);
 
   useCardSetViewWindowEvents({ handleToggleViewMode, createAndFocusCard: state.createAndFocusCard });
 
