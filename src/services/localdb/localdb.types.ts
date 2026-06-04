@@ -38,6 +38,7 @@ export type TagRecord = {
   deletedAt?: Date | null;
   categoryId?: string;
   parentId?: string;
+  orderIndex?: number;
 };
 
 export type LocalDBTableMap = {
