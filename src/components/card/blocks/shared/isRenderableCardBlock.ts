@@ -13,6 +13,8 @@ export const isRenderableCardBlock = (block: CardBlock): boolean => {
       return (block.code?.code ?? "").trim() !== "";
     case "image":
       return (block.images?.length ?? 0) > 0;
+    case "pdf":
+      return Boolean(block.pdf);
     case "audio":
       return (block.audios?.length ?? 0) > 0;
     case "math":
