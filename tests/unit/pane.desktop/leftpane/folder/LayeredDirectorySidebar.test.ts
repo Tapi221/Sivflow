@@ -2,13 +2,18 @@
 import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import { ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
 
 const mocks = vi.hoisted(() => {
-  const rootFolders = [{ id: "project-1", folderName: "Project Alpha", folderColor: "#bdebd0" }];
+  const rootFolders = [{ id: "project-1", folderName: "Project Alpha", folderColor: "#bdebd0", isFavorite: undefined as boolean | undefined }];
+  const childrenByParentId: Record<string, Array<{ id: string; folderName: string; folderColor?: string; isFavorite?: boolean }>> = {
+    "project-1": [{ id: "folder-js", folderName: "Javascript" }],
+    "folder-js": [{ id: "folder-es6", folderName: "ES6" }],
+  };
+  const getChildFolders = vi.fn((folderId: string) => childrenByParentId[folderId] ?? []);
   const openExplorerTab = vi.fn();
   const createFolder = vi.fn();
   const updateFolder = vi.fn();
@@ -16,14 +21,17 @@ const mocks = vi.hoisted(() => {
   const createCardSet = vi.fn();
   const handleToolbarAddDocument = vi.fn();
   const handleToolbarFileInputChange = vi.fn();
-  const workspaceState = { tabs: [{ id: "tab-1", kind: "explorer", explorerState: { isSectionListMode: false, selectedFolderId: null } }], activeTabId: "tab-1", openExplorerTab };
+  const workspaceState = { tabs: [{ id: "tab-1", kind: "explorer", sectionKey: "library", explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: null, selectedItem: null } }], activeTabId: "tab-1", openExplorerTab, openSectionTab: vi.fn() };
 
-  return { rootFolders, workspaceState, openExplorerTab, createFolder, updateFolder, deleteFolder, createCardSet, handleToolbarAddDocument, handleToolbarFileInputChange };
+  return { rootFolders, childrenByParentId, getChildFolders, workspaceState, openExplorerTab, createFolder, updateFolder, deleteFolder, createCardSet, handleToolbarAddDocument, handleToolbarFileInputChange };
 });
 
+vi.mock("react-router-dom", () => ({ useOutletContext: () => ({ onToggleLeftPanel: undefined }) }));
 vi.mock("@/components/card/hooks/useCardSets", () => ({ useCardSets: () => ({ cardSets: [], loading: false, createCardSet: mocks.createCardSet }) }));
-vi.mock("@/components/folder/hooks/useExplorerDerivedData", () => ({ useExplorerDerivedData: () => ({ rootFolders: mocks.rootFolders, getChildFolders: () => [], getFolderContentCount: () => 3, getNextOrderIndex: () => 0 }) }));
+vi.mock("@/components/folder/hooks/useExplorerDerivedData", () => ({ useExplorerDerivedData: () => ({ rootFolders: mocks.rootFolders, getChildFolders: mocks.getChildFolders, getFolderContentCount: () => 3, getNextOrderIndex: () => 0 }) }));
 vi.mock("@/components/folder/hooks/useFolderDocumentUpload", () => ({ useFolderDocumentUpload: () => ({ fileInputRef: { current: null }, handleToolbarAddDocument: mocks.handleToolbarAddDocument, currentFileAccept: "application/pdf", handleToolbarFileInputChange: mocks.handleToolbarFileInputChange }) }));
+vi.mock("@/contexts/auth/useAuthSession", () => ({ useAuthSession: () => ({ currentUser: { displayName: "Akari T", email: "akari@example.com" } }) }));
+vi.mock("@/features/search/store/useSearchStore", () => ({ useSearchStore: (selector: (state: unknown) => unknown) => selector({ open: vi.fn() }) }));
 vi.mock("@/hooks/folder/useFolderCommands", () => ({ useFolderCommands: () => ({ createFolder: mocks.createFolder, updateFolder: mocks.updateFolder, deleteFolder: mocks.deleteFolder }) }));
 vi.mock("@/hooks/folder/useFoldersRead", () => ({ useFoldersRead: () => ({ folders: mocks.rootFolders, loading: false, error: null }) }));
 vi.mock("@/hooks/folder/useFolderTagModeStore", () => ({ useFolderTagModeStore: (selector: (state: unknown) => unknown) => selector({ folderTagMode: "folder", setFolderTagMode: vi.fn() }) }));
@@ -31,7 +39,8 @@ vi.mock("@/hooks/platform/useDocumentsRead", () => ({ useDocumentsRead: () => ({
 vi.mock("@/pane.desktop/leftpane/folder/TagTreeSidebar", () => ({ TagTreeSidebar: () => React.createElement("aside", { "data-testid": "tag-tree-sidebar" }) }));
 vi.mock("@/pane.desktop/tab.desktopnative/hooks/useTabsStore", () => ({ useWorkspaceTabsStore: (selector: (state: unknown) => unknown) => selector(mocks.workspaceState) }));
 
-const SOURCE_PATH = resolve(process.cwd(), "src/pane.desktop/leftpane/folder/LayeredDirectorySidebar.tsx");
+const FOLDER_SOURCE_PATH = resolve(process.cwd(), "src/pane.desktop/leftpane/folder/LayeredDirectorySidebar.tsx");
+const SIDEBAR_SOURCE_PATH = resolve(process.cwd(), "src/pane.desktop/leftpane/Sidebar.LayeredDirectory.tsx");
 
 const getFunctionSource = (source: string, functionName: string): string => {
   const marker = `const ${functionName} =`;
@@ -45,54 +54,61 @@ const getFunctionSource = (source: string, functionName: string): string => {
   return source.slice(start, end);
 };
 
+const getTree = () => screen.getByRole("tree", { name: "ライブラリ" });
+
+const resetWorkspaceSelection = (selectedFolderId: string | null) => {
+  mocks.workspaceState.tabs = [{ id: "tab-1", kind: "explorer", sectionKey: "library", explorerState: { isHomeOnlyMode: false, isSectionListMode: selectedFolderId === null, selectedFolderId, selectedItem: null } }];
+  mocks.workspaceState.activeTabId = "tab-1";
+};
+
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
-  mocks.workspaceState.tabs = [{ id: "tab-1", kind: "explorer", explorerState: { isSectionListMode: false, selectedFolderId: null } }];
-  mocks.workspaceState.activeTabId = "tab-1";
+  resetWorkspaceSelection(null);
   mocks.rootFolders[0].isFavorite = undefined;
 });
 
 describe("LayeredDirectorySidebar project list", () => {
-  it("uses the flat project list for MY PROJECTS instead of the hierarchy tree", () => {
-    const source = readFileSync(resolve(process.cwd(), "src/pane.desktop/leftpane/Sidebar.LayeredDirectory.tsx"), "utf8");
+  it("switches from the project list to the selected folder child list", () => {
+    const source = readFileSync(SIDEBAR_SOURCE_PATH, "utf8");
     const sidebarSource = getFunctionSource(source, "SidebarLayeredDirectory");
 
     expect(sidebarSource).toContain("<ProjectListSidebar />");
-    expect(sidebarSource).toContain("<LibraryHierarchySidebar projectRootId={selectedProjectId} />");
+    expect(sidebarSource).toContain("<LibraryHierarchySidebar parentFolderId={selectedNavigationFolderId} />");
+    expect(sidebarSource).not.toContain("projectRootId");
   });
 
   it("does not render the removed folder tag toggle", () => {
-    const source = readFileSync(resolve(process.cwd(), "src/pane.desktop/leftpane/Sidebar.LayeredDirectory.tsx"), "utf8");
+    const source = readFileSync(SIDEBAR_SOURCE_PATH, "utf8");
     const sidebarSource = getFunctionSource(source, "SidebarLayeredDirectory");
 
     expect(source).not.toContain("ToggleFolderTag");
     expect(sidebarSource).not.toContain("folder-tag-toggle");
   });
 
-  it("shows a selected project name above its child hierarchy", () => {
-    mocks.workspaceState.tabs = [{ id: "tab-1", kind: "explorer", explorerState: { isSectionListMode: false, selectedFolderId: "project-1" } }];
+  it("resolves a nested selected folder and shows only that folder's children", () => {
+    resetWorkspaceSelection("folder-js");
 
     render(React.createElement(SidebarLayeredDirectory));
 
-    expect(screen.getByRole("button", { name: "プロジェクト一覧を開く" }).textContent).toContain("Project Alpha");
-    expect(screen.getByText("フォルダがありません")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "プロジェクト一覧を開く" }).textContent).toContain("Javascript");
+    expect(within(getTree()).getByText("ES6")).toBeTruthy();
+    expect(within(getTree()).queryByText("Project Alpha")).toBeNull();
+    expect(within(getTree()).queryByText("Javascript")).toBeNull();
   });
 
   it("does not render project content count badges", () => {
-    const source = readFileSync(SOURCE_PATH, "utf8");
-    const projectListItemSource = getFunctionSource(source, "ProjectListItem");
+    const source = readFileSync(FOLDER_SOURCE_PATH, "utf8");
     const projectListSidebarSource = getFunctionSource(source, "ProjectListSidebar");
 
-    expect(projectListItemSource).not.toContain("contentCount");
-    expect(projectListItemSource).not.toContain("rounded-full");
+    expect(source).not.toContain("contentCount");
     expect(projectListSidebarSource).not.toContain("getFolderContentCount");
   });
 
   it("opens the selected project in explorer mode on click", () => {
     render(React.createElement(ProjectListSidebar));
 
-    fireEvent.click(screen.getByRole("button", { name: "Project Alpha" }));
+    fireEvent.click(screen.getByText("Project Alpha"));
 
     expect(mocks.openExplorerTab).toHaveBeenCalledWith({
       title: "Library",
@@ -105,10 +121,27 @@ describe("LayeredDirectorySidebar project list", () => {
     });
   });
 
+  it("opens a nested folder in explorer mode on click", () => {
+    render(React.createElement(ProjectListSidebar));
+
+    fireEvent.click(screen.getByText("Project Alpha"));
+    fireEvent.click(screen.getByText("Javascript"));
+
+    expect(mocks.openExplorerTab).toHaveBeenLastCalledWith({
+      title: "Library",
+      explorerState: {
+        isHomeOnlyMode: false,
+        isSectionListMode: false,
+        selectedFolderId: "folder-js",
+        selectedItem: null,
+      },
+    });
+  });
+
   it("opens the layered project context menu on right-click", () => {
     render(React.createElement(ProjectListSidebar));
 
-    fireEvent.contextMenu(screen.getByRole("button", { name: "Project Alpha" }), { clientX: 160, clientY: 180 });
+    fireEvent.contextMenu(screen.getByText("Project Alpha"), { clientX: 160, clientY: 180 });
 
     expect(screen.getByRole("menu", { name: "layered project context menu" })).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: "色を変更" })).toBeTruthy();
@@ -124,7 +157,7 @@ describe("LayeredDirectorySidebar project list", () => {
   it("marks the selected project as favorite from the context menu", () => {
     render(React.createElement(ProjectListSidebar));
 
-    fireEvent.contextMenu(screen.getByRole("button", { name: "Project Alpha" }), { clientX: 160, clientY: 180 });
+    fireEvent.contextMenu(screen.getByText("Project Alpha"), { clientX: 160, clientY: 180 });
     fireEvent.click(screen.getByRole("menuitem", { name: "お気に入りに追加" }));
 
     expect(mocks.updateFolder).toHaveBeenCalledWith("project-1", { isFavorite: true });
@@ -135,7 +168,7 @@ describe("LayeredDirectorySidebar project list", () => {
 
     render(React.createElement(ProjectListSidebar));
 
-    fireEvent.contextMenu(screen.getByRole("button", { name: "Project Alpha" }), { clientX: 160, clientY: 180 });
+    fireEvent.contextMenu(screen.getByText("Project Alpha"), { clientX: 160, clientY: 180 });
 
     expect(screen.getByRole("menuitem", { name: "お気に入りに追加" })).toBeDisabled();
   });
