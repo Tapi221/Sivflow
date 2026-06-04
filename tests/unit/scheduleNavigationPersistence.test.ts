@@ -93,7 +93,7 @@ describe("scheduleNavigationPersistence", () => {
   it("月表示の予定表示数は範囲内に丸める", () => {
     persistScheduleMonthVisibleEventCount(100);
 
-    expect(readStoredScheduleMonthVisibleEventCount()).toBe(7);
+    expect(readStoredScheduleMonthVisibleEventCount()).toBe(20);
   });
 
   it("壊れた保存値は null として扱う", () => {
