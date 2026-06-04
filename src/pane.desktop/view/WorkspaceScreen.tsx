@@ -1,10 +1,13 @@
-import { useCallback, useMemo, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useOutletContext } from "react-router-dom";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
+import { areExplorerBreadcrumbContextsEqual, EMPTY_EXPLORER_BREADCRUMB_CONTEXT, type BreadcrumbCrumb, type ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
+import { buildFolderPathCrumbs } from "@/features/breadcrumbs/builders";
 import { WorkspaceBreadcrumbs } from "@/features/breadcrumbs/components/WorkspaceBreadcrumbs";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
+import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { Sidebar } from "@/pane.desktop/leftpane/Sidebar.desktop";
@@ -12,7 +15,7 @@ import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.Layered
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceExplorerTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
-import type { SelectedExplorerItem } from "@/types";
+import type { Folder, SelectedExplorerItem } from "@/types";
 import { Search } from "@/ui/icons";
 import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
 import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
@@ -37,6 +40,17 @@ const FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-5 min-w-[31px] ite
 const WORKSPACE_ACTION_TOOLBAR_CLASS_NAME = "absolute z-30";
 const WORKSPACE_ACTION_TOOLBAR_STYLE = { right: "252px", top: "12px" };
 const SIDEBAR_INTERACTION_REGION_STYLE: SidebarInteractionRegionStyle = { WebkitAppRegion: "no-drag" };
+
+const buildWorkspaceBreadcrumbCrumbs = (context: ExplorerBreadcrumbContext, folders: Folder[]): BreadcrumbCrumb[] => {
+  const folderById = new Map(folders.map((folder) => [folder.id, folder]));
+  const crumbs = buildFolderPathCrumbs({ folderId: context.folderId, folderById });
+
+  if (context.cardSet) {
+    crumbs.push({ label: context.cardSet.label });
+  }
+
+  return crumbs;
+};
 
 const createFolderRouteState = (folderId: string | null): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: folderId === null, selectedFolderId: folderId, selectedItem: null });
 
@@ -73,10 +87,13 @@ const SidebarInteractionRegion = ({ children }: SidebarInteractionRegionProps) =
 const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCollapsed, onToggleLeftPanel }: ExplorerWorkspaceContentProps) => {
   const { folders, loading, error } = useFoldersRead();
   const openSearch = useSearchStore((state) => state.open);
+  const setExtraCrumbs = useSetBreadcrumbCrumbs();
   const updateExplorerTabState = useWorkspaceTabsStore((state) => state.updateExplorerTabState);
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
   const selectedCardId = useMemo(() => getSelectedCardId(explorerState.selectedItem), [explorerState.selectedItem]);
   const selectedDocumentId = useMemo(() => getSelectedDocumentId(explorerState.selectedItem), [explorerState.selectedItem]);
+  const [explorerBreadcrumbContext, setExplorerBreadcrumbContext] = useState<ExplorerBreadcrumbContext>(EMPTY_EXPLORER_BREADCRUMB_CONTEXT);
+  const extraCrumbs = useMemo(() => buildWorkspaceBreadcrumbCrumbs(explorerBreadcrumbContext, folders), [explorerBreadcrumbContext, folders]);
 
   const handleOpenSearch = useCallback(() => {
     openSearch();
@@ -98,6 +115,20 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
     updateLibraryExplorerState(createItemRouteState(explorerState, item));
   }, [explorerState, updateLibraryExplorerState]);
 
+  const handleBreadcrumbContextChange = useCallback((context: ExplorerBreadcrumbContext) => {
+    setExplorerBreadcrumbContext((currentContext) => areExplorerBreadcrumbContextsEqual(currentContext, context) ? currentContext : context);
+  }, []);
+
+  useLayoutEffect(() => {
+    setExtraCrumbs(extraCrumbs);
+  }, [extraCrumbs, setExtraCrumbs]);
+
+  useLayoutEffect(() => {
+    return () => {
+      setExtraCrumbs([]);
+    };
+  }, [setExtraCrumbs]);
+
   if (loading) return <div className="h-full w-full bg-white" />;
   if (error) return <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{error}</div>;
 
@@ -107,7 +138,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
         {isLeftPanelCollapsed ? <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} /> : <SidebarLayeredDirectory onToggleLeftPanel={onToggleLeftPanel} />}
       </SidebarInteractionRegion>
       <CarvePanel className="relative min-w-0">
-        <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} />
+        <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} onBreadcrumbContextChange={handleBreadcrumbContextChange} folderSelectionNonce={0} navigateToSectionListToken={0} />
         <WorkspaceBreadcrumbs />
         <WorkspaceActionToolbar className={WORKSPACE_ACTION_TOOLBAR_CLASS_NAME} style={WORKSPACE_ACTION_TOOLBAR_STYLE} />
         <button type="button" className={FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME} aria-label="検索を開く" aria-keyshortcuts="Meta+K Control+K" title="検索を開く" onClick={handleOpenSearch}>
