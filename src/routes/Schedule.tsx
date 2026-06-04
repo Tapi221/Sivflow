@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { WorkspaceScreen as DesktopScheduleScreen } from "@/pane.desktop/view/WorkspaceScreen";
-import { ScheduleScreen as MobileScheduleScreen } from "@/pane.desktop/view/ScheduleScreen.mobile";
+import { lazy, Suspense, useEffect, useState } from "react";
 
 const MOBILE_SCHEDULE_MEDIA_QUERY = "(max-width: 767px)";
+const DesktopScheduleScreen = lazy(() => import("@/pane.desktop/view/WorkspaceScreen").then(({ WorkspaceScreen }) => ({ default: WorkspaceScreen })));
+const MobileScheduleScreen = lazy(() => import("@/pane.desktop/view/ScheduleScreen.mobile").then(({ ScheduleScreen }) => ({ default: ScheduleScreen })));
 
 const useIsMobileSchedule = () => {
   const [isMobile, setIsMobile] = useState(() => {
@@ -31,7 +31,9 @@ const Calendar = () => {
 
   return (
     <div className="h-full min-h-0 w-full">
-      <ActiveScheduleScreen />
+      <Suspense fallback={null}>
+        <ActiveScheduleScreen />
+      </Suspense>
     </div>
   );
 };
