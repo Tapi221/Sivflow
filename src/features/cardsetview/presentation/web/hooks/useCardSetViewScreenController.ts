@@ -30,7 +30,6 @@ type UseCardSetViewScreenControllerParams = {
 };
 
 const CARD_SET_VIEW_SCROLL_RESTORE_STABILIZATION_MS = 320;
-const CARD_SET_VIEW_NAVIGATION_SCROLL_RESTORE_STABILIZATION_MS = 520;
 const SCROLLABLE_OVERFLOW_Y_VALUES = new Set(["auto", "scroll", "overlay"]);
 
 const resolveNowMs = () => typeof performance !== "undefined" ? performance.now() : Date.now();
@@ -112,15 +111,12 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
   const [scrollToActiveIndexRequestKey, setScrollToActiveIndexRequestKey] = useState(0);
   const interactionModeScrollSnapshotRef = useRef<CardSetViewScrollSnapshot | null>(null);
   const scrollRestoreAnimationFrameRef = useRef<number | null>(null);
-  const navigationScrollRestoreAnimationFrameRef = useRef<number | null>(null);
-  const navigationScrollPersistenceAnimationFrameRef = useRef<number | null>(null);
-  const restoredNavigationScopeKeyRef = useRef<string | null>(null);
 
   const layoutInteractionMode: CardSetInteractionMode = state.isGlobalEditing ? "edit" : "view";
 
   const splitFallbackLayoutMode = useMemo(() => resolveSplitFallbackLayoutModePreference(presentationTarget), [presentationTarget]);
 
-  const navigationScopeKey = useMemo(() => buildNavigationScopeKey({ deviceScope: presentationTarget, cardSetId }), [cardSetId, presentationTarget]);
+  const navigationScrollRestorationKey = useMemo(() => buildNavigationScopeKey({ deviceScope: presentationTarget, cardSetId }), [cardSetId, presentationTarget]);
 
   const zoom = useCardSetViewZoom({
     deviceScope: presentationTarget,
@@ -170,18 +166,16 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
     scrollElement.scrollTop = clampElementScrollTop(snapshot.scrollTop, scrollElement);
   }, [paneWidth.contentViewportRef]);
 
-  const restoreNavigationScrollTop = useCallback((scrollTop: number) => {
-    const scrollElement = resolvePrimaryScrollableElement(paneWidth.contentViewportRef.current);
-
-    if (!scrollElement) return;
-
-    scrollElement.scrollTop = clampElementScrollTop(scrollTop, scrollElement);
-  }, [paneWidth.contentViewportRef]);
-
   const handleToggleViewMode = useCallback(() => {
     captureInteractionModeScrollSnapshot();
     state.handleToggleViewMode();
   }, [captureInteractionModeScrollSnapshot, state.handleToggleViewMode]);
+
+  const handleNavigationScrollTopChange = useCallback((scrollTop: number) => {
+    if (!cardSetId) return;
+
+    setCardSetViewNavigationPreference({ deviceScope: presentationTarget, cardSetId }, { scrollTop });
+  }, [cardSetId, presentationTarget]);
 
   useLayoutEffect(() => {
     if (!interactionModeScrollSnapshotRef.current) return;
@@ -222,74 +216,11 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
     };
   }, [restoreInteractionModeScrollSnapshot, state.isGlobalEditing]);
 
-  useLayoutEffect(() => {
-    if (!navigationScopeKey || data.isLoading || state.cardsForPager.length === 0) return;
-    if (restoredNavigationScopeKeyRef.current === navigationScopeKey) return;
-
-    restoredNavigationScopeKeyRef.current = navigationScopeKey;
-
-    const scrollTop = navigationPreference?.scrollTop ?? 0;
-    if (scrollTop <= 0) return;
-
-    restoreNavigationScrollTop(scrollTop);
-
-    if (typeof window === "undefined") return;
-
-    const startedAt = resolveNowMs();
-
-    const stabilizeScrollPosition = () => {
-      restoreNavigationScrollTop(scrollTop);
-
-      if (resolveNowMs() - startedAt >= CARD_SET_VIEW_NAVIGATION_SCROLL_RESTORE_STABILIZATION_MS) {
-        navigationScrollRestoreAnimationFrameRef.current = null;
-        return;
-      }
-
-      navigationScrollRestoreAnimationFrameRef.current = window.requestAnimationFrame(stabilizeScrollPosition);
-    };
-
-    navigationScrollRestoreAnimationFrameRef.current = window.requestAnimationFrame(stabilizeScrollPosition);
-
-    return () => {
-      if (navigationScrollRestoreAnimationFrameRef.current == null) return;
-
-      window.cancelAnimationFrame(navigationScrollRestoreAnimationFrameRef.current);
-      navigationScrollRestoreAnimationFrameRef.current = null;
-    };
-  }, [data.isLoading, navigationPreference?.scrollTop, navigationScopeKey, restoreNavigationScrollTop, state.cardsForPager.length]);
-
   useEffect(() => {
     if (!cardSetId || data.isLoading || state.cardsForPager.length === 0 || !state.selectedCard?.id) return;
 
     setCardSetViewNavigationPreference({ deviceScope: presentationTarget, cardSetId }, { cardId: state.selectedCard.id });
   }, [cardSetId, data.isLoading, presentationTarget, state.cardsForPager.length, state.selectedCard?.id]);
-
-  useEffect(() => {
-    if (!cardSetId || data.isLoading || state.cardsForPager.length === 0 || typeof window === "undefined") return;
-
-    const scrollElement = resolvePrimaryScrollableElement(paneWidth.contentViewportRef.current);
-    if (!scrollElement) return;
-
-    const handleScroll = () => {
-      if (navigationScrollPersistenceAnimationFrameRef.current != null) return;
-
-      navigationScrollPersistenceAnimationFrameRef.current = window.requestAnimationFrame(() => {
-        navigationScrollPersistenceAnimationFrameRef.current = null;
-        setCardSetViewNavigationPreference({ deviceScope: presentationTarget, cardSetId }, { scrollTop: scrollElement.scrollTop });
-      });
-    };
-
-    scrollElement.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      scrollElement.removeEventListener("scroll", handleScroll);
-
-      if (navigationScrollPersistenceAnimationFrameRef.current == null) return;
-
-      window.cancelAnimationFrame(navigationScrollPersistenceAnimationFrameRef.current);
-      navigationScrollPersistenceAnimationFrameRef.current = null;
-    };
-  }, [cardSetId, data.isLoading, paneWidth.contentViewportRef, presentationTarget, state.cardsForPager.length]);
 
   useCardSetViewWindowEvents({ handleToggleViewMode, createAndFocusCard: state.createAndFocusCard });
 
@@ -381,7 +312,10 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
     zoom,
     widthControl,
     topLeftZoomControl,
+    navigationScrollTop: navigationPreference?.scrollTop ?? 0,
+    navigationScrollRestorationKey,
     handleActiveScrollAnchorFaceChange,
+    handleNavigationScrollTopChange,
     handleJumpToCard,
     handleToggleViewMode,
     handleChangeCardLayoutMode,
