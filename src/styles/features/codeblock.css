@@ -88,16 +88,6 @@
     white-space: pre;
   }
 
-  .codeBlockPre::selection,
-  .codeBlockPre *::selection {
-    background-color: rgba(var(--color-primary-600), 0.14);
-  }
-
-  .codeBlockPre::-moz-selection,
-  .codeBlockPre *::-moz-selection {
-    background-color: rgba(var(--color-primary-600), 0.14);
-  }
-
   .codeBlockLang {
     max-width: 120px;
     overflow: hidden;
@@ -287,14 +277,12 @@
 
   .code-editor-no-scroll textarea::selection,
   .code-editor-no-scroll .npm__react-simple-code-editor__textarea::selection {
-    background-color: rgba(var(--color-primary-600), 0.14);
     color: var(--code-fg);
     -webkit-text-fill-color: var(--code-fg);
   }
 
   .code-editor-no-scroll textarea::-moz-selection,
   .code-editor-no-scroll .npm__react-simple-code-editor__textarea::-moz-selection {
-    background-color: rgba(var(--color-primary-600), 0.14);
     color: var(--code-fg);
   }
 
