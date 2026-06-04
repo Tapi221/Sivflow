@@ -11,6 +11,7 @@ type BlockFrameProps = React.HTMLAttributes<HTMLDivElement> & {
   accentColor?: string;
   variant?: BlockFrameVariant;
   raiseZIndex?: boolean;
+  selectionActive?: boolean;
 };
 
 const SELECTED_BLOCK_OUTLINE_COLOR = "rgba(37, 99, 235, 0.82)";
@@ -23,6 +24,7 @@ export const BlockFrame = ({
   accentColor,
   variant = "neutral",
   raiseZIndex = false,
+  selectionActive = variant === "editor",
   style,
   ...props
 }: BlockFrameProps) => {
@@ -42,6 +44,7 @@ export const BlockFrame = ({
       {...props}
       data-block-accent-color={accentColor || undefined}
       data-block-frame-variant={variant}
+      data-block-selected={selectionActive ? "true" : undefined}
       className={cn(
         "group relative overflow-visible bg-transparent py-0 px-1.5",
         raiseZIndex && "z-40",
