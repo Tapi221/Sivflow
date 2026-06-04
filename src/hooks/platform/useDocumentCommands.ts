@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useAuthSession } from "@/contexts/AuthContext";
+import { deleteDocumentBlob } from "@/services/documentFileStore";
 import { getLocalDb } from "@/services/localDB";
 import { normalizeDate } from "@/shared/codec/date";
 import type { DocumentItem } from "@/types";
@@ -8,10 +9,22 @@ type UpdateDocumentOptions = {
   touchUpdatedAt?: boolean;
 };
 
+type SyncDeleteCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
+  queueDeleteSync?: (args: { entity: "document"; targetId: string; priority?: "critical" | "high" | "medium" | "low" }) => Promise<void>;
+};
+
 const normalizeUpdatedAt = (
   value: DocumentItem["updatedAt"] | undefined,
 ): Date | undefined => {
   return normalizeDate(value) ?? undefined;
+};
+
+const resolveDocumentFileId = (
+  documentId: string,
+  document: Pick<DocumentItem, "localFileId"> | undefined,
+): string => {
+  const localFileId = typeof document?.localFileId === "string" ? document.localFileId.trim() : "";
+  return localFileId.length > 0 ? localFileId : documentId;
 };
 
 export const useDocumentCommands = () => {
@@ -77,8 +90,32 @@ export const useDocumentCommands = () => {
     [updateDocument],
   );
 
+  const purgeDocument = useCallback(
+    async (documentId: string): Promise<void> => {
+      if (!currentUser) throw new Error("User not authenticated");
+
+      const db = await getLocalDb(currentUser.uid);
+      const document = await db.documents.get(documentId);
+      const localFileId = resolveDocumentFileId(documentId, document);
+
+      await db.runSyncTransaction(async () => {
+        await db.table("documentFiles").delete(localFileId);
+        await db.documents.delete(documentId);
+      });
+
+      const syncDb = db as SyncDeleteCapableDb;
+      if (typeof syncDb.queueDeleteSync === "function") {
+        await syncDb.queueDeleteSync({ entity: "document", targetId: documentId, priority: "high" });
+      }
+
+      await deleteDocumentBlob(localFileId, { userId: currentUser.uid }).catch(() => undefined);
+    },
+    [currentUser],
+  );
+
   return {
     updateDocument,
     deleteDocument,
+    purgeDocument,
   };
 };
