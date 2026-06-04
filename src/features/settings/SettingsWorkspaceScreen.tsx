@@ -1,7 +1,7 @@
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import { Check, Code, Globe, Keyboard, Settings2, Shield, Type, User, Volume2 } from "@/ui/icons";
 import type { UserSettings } from "@/types";
+import { Check, Code, Globe, Keyboard, Settings2, Shield, Type, User, Volume2 } from "@/ui/icons";
 import { useUserSettings } from "./hooks/useUserSettings";
 import "./SettingsWorkspaceScreen.css";
 
@@ -165,7 +165,6 @@ const SettingsWorkspaceScreen = () => {
   const { currentUser, loading, logout } = useAuthSession();
   const { settings, updateSettings } = useUserSettings();
   const [activeSectionId, setActiveSectionId] = useState<SettingsSectionId>("account");
-  const activeSection = useMemo(() => SETTINGS_SECTIONS.find((section) => section.id === activeSectionId) ?? SETTINGS_SECTIONS[0], [activeSectionId]);
   const accountName = getAccountDisplayName(currentUser?.displayName, currentUser?.email);
   const accountInitial = getAccountInitial(accountName);
   const language = settings?.language ?? "ja";
@@ -182,10 +181,6 @@ const SettingsWorkspaceScreen = () => {
   return (
     <div className="settings-workspace" aria-label="設定">
       <aside className="settings-workspace__nav" aria-label="設定カテゴリ">
-        <div className="settings-workspace__nav-header">
-          <span className="settings-workspace__eyebrow">Settings</span>
-          <h2>設定</h2>
-        </div>
         <nav className="settings-workspace__nav-list">
           {SETTINGS_SECTIONS.map((section) => {
             const isActive = section.id === activeSectionId;
@@ -202,13 +197,6 @@ const SettingsWorkspaceScreen = () => {
         </nav>
       </aside>
       <main className="settings-workspace__main">
-        <header className="settings-workspace__hero">
-          <div>
-            <span className="settings-workspace__eyebrow">{activeSection.label}</span>
-            <h1>{activeSection.label === "Account" ? "アカウント" : activeSection.label}</h1>
-            <p>{activeSection.description}</p>
-          </div>
-        </header>
         <div className="settings-workspace__content-scroll">
           {activeSectionId === "account" ? (
             <SettingsSectionBlock title="Profile" description="現在のログインセッションです。">
