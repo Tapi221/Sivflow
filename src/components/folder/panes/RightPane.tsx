@@ -1,14 +1,14 @@
-import { PdfPane } from "@/features/pdf/PdfPane";
 import { FolderDashboard } from "@/components/folder/components/views/FolderDashboard";
-import { CardPane } from "./CardPane";
+import { CardSetViewScreen } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewScreen";
+import { PdfPane } from "@/features/pdf/PdfPane";
 import type { Card, DocumentItem, SelectedExplorerItem } from "@/types";
+import { CardPane } from "./CardPane";
 
-type PdfPaneUpdateHandler = NonNullable<
-  React.ComponentProps<typeof PdfPane>["onDocumentUpdate"]
->;
+type PdfPaneUpdateHandler = NonNullable<React.ComponentProps<typeof PdfPane>["onDocumentUpdate"]>;
+
 type PdfPaneUpdates = Parameters<PdfPaneUpdateHandler>[0];
 
-interface RightPaneProps {
+type RightPaneProps = {
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
   selectedDocument: DocumentItem | null;
@@ -16,10 +16,7 @@ interface RightPaneProps {
   selectedFolderName: string;
   folderCards: Card[];
   onCardUpdated: () => void;
-  onDocumentUpdated?: (
-    documentId: string,
-    updates: Partial<DocumentItem>,
-  ) => Promise<void> | void;
+  onDocumentUpdated?: (documentId: string, updates: Partial<DocumentItem>) => Promise<void> | void;
   onRenameFolder?: (newName: string) => Promise<void>;
   handlers: {
     onStartStudy: () => void;
@@ -27,7 +24,7 @@ interface RightPaneProps {
     onCreateCard: () => void;
   };
   folderSelectionNonce: number;
-}
+};
 
 const UnsupportedDocumentPane = () => {
   return (
@@ -62,6 +59,10 @@ export const RightPane = ({
     return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
   }
 
+  if (selectedItem?.type === "cardSet") {
+    return <CardSetViewScreen cardSetId={selectedItem.id} />;
+  }
+
   if (selectedDocument) {
     if (selectedDocument.kind !== "pdf") {
       return <UnsupportedDocumentPane />;
@@ -73,10 +74,7 @@ export const RightPane = ({
         onDocumentUpdate={
           onDocumentUpdated
             ? async (updates: PdfPaneUpdates) => {
-              await onDocumentUpdated(
-                selectedDocument.id,
-                updates as Partial<DocumentItem>,
-              );
+              await onDocumentUpdated(selectedDocument.id, updates as Partial<DocumentItem>);
             }
             : undefined
         }
@@ -85,9 +83,7 @@ export const RightPane = ({
   }
 
   if (selectedCardId) {
-    return (
-      <CardPane selectedCardId={selectedCardId} onCardUpdated={onCardUpdated} />
-    );
+    return <CardPane selectedCardId={selectedCardId} onCardUpdated={onCardUpdated} />;
   }
 
   if (selectedFolderId) {
