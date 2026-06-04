@@ -7,7 +7,7 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 
 type Deferred<T> = { promise: Promise<T>; resolve: (value: T) => void; reject: (reason?: unknown) => void };
 
-type ToastOptions = { action?: { onClick?: () => void }; duration?: number; description?: string; id?: string };
+type ToastOptions = { action?: { label?: string; onClick?: () => void }; duration?: number; description?: string; id?: string };
 
 const { toastMock, toastErrorMock, toastSuccessMock } = vi.hoisted(() => ({ toastMock: vi.fn(), toastErrorMock: vi.fn(), toastSuccessMock: vi.fn(() => "move-toast-id") }));
 
@@ -52,7 +52,7 @@ describe("useCalendarEventMoveController", () => {
     vi.clearAllMocks();
   });
 
-  it("optimistically moves the event, keeps a saving toast, then replaces it with the undoable saved toast", async () => {
+  it("optimistically moves the event, keeps a plain pending toast, then replaces it with the undoable saved toast", async () => {
     const movedEvent = { ...createGoogleCalendarEvent(), startsAt: MOVED_START, endsAt: MOVED_END, isAllDay: false };
     const moveDeferred = createDeferred<GoogleCalendarEvent>();
     const updateGoogleCalendarEvent = vi.fn(() => moveDeferred.promise);
@@ -65,7 +65,7 @@ describe("useCalendarEventMoveController", () => {
     });
 
     expect(updateGoogleCalendarEvent).toHaveBeenCalledWith(ACCOUNT_ID, { calendarId: CALENDAR_ID, eventId: "external-event-1", startsAt: MOVED_START, endsAt: MOVED_END, isAllDay: false });
-    expect(toastSuccessMock).toHaveBeenCalledWith("予定を移動しました", { description: "変更を保存しています", duration: EVENT_MOVE_SAVING_TOAST_DURATION_MS });
+    expect(toastSuccessMock).toHaveBeenCalledWith("予定を移動しました", { duration: EVENT_MOVE_SAVING_TOAST_DURATION_MS });
     expect(applyCalendarEventMoveOverrides([event], result.current.calendarEventMoveOverrides)[0]?.startsAt).toBe(MOVED_START);
 
     await act(async () => {
@@ -90,7 +90,7 @@ describe("useCalendarEventMoveController", () => {
     });
   });
 
-  it("does not expose the undo action until the move update is saved", async () => {
+  it("does not expose a saving description or undo action until the move update is saved", async () => {
     const movedEvent = { ...createGoogleCalendarEvent(), startsAt: MOVED_START, endsAt: MOVED_END, isAllDay: false };
     const moveDeferred = createDeferred<GoogleCalendarEvent>();
     const updateGoogleCalendarEvent = vi.fn(() => moveDeferred.promise);
@@ -102,10 +102,10 @@ describe("useCalendarEventMoveController", () => {
       moveTask = result.current.handleMoveCalendarEvent({ event, startsAt: MOVED_START, endsAt: MOVED_END, isAllDay: false }) as Promise<void>;
     });
 
-    const savingToastOptions = toastSuccessMock.mock.calls[0]?.[1] as ToastOptions;
+    const pendingToastOptions = toastSuccessMock.mock.calls[0]?.[1] as ToastOptions;
 
-    expect(savingToastOptions.description).toBe("変更を保存しています");
-    expect(savingToastOptions.action).toBeUndefined();
+    expect(pendingToastOptions.description).toBeUndefined();
+    expect(pendingToastOptions.action).toBeUndefined();
 
     await act(async () => {
       moveDeferred.resolve(movedEvent);
@@ -118,7 +118,7 @@ describe("useCalendarEventMoveController", () => {
     expect(savedToastOptions.action?.label).toBe("元に戻す");
   });
 
-  it("keeps a rollback override and replaces the saving toast with an error toast when moving fails", async () => {
+  it("keeps a rollback override and replaces the pending toast with an error toast when moving fails", async () => {
     const updateGoogleCalendarEvent = vi.fn(async () => {
       throw new Error("move failed");
     });
@@ -129,10 +129,11 @@ describe("useCalendarEventMoveController", () => {
       await result.current.handleMoveCalendarEvent({ event, startsAt: MOVED_START, endsAt: MOVED_END, isAllDay: false });
     });
 
-    const savingToastOptions = toastSuccessMock.mock.calls[0]?.[1] as ToastOptions;
+    const pendingToastOptions = toastSuccessMock.mock.calls[0]?.[1] as ToastOptions;
 
-    expect(savingToastOptions.action).toBeUndefined();
-    expect(toastSuccessMock).toHaveBeenCalledWith("予定を移動しました", { description: "変更を保存しています", duration: EVENT_MOVE_SAVING_TOAST_DURATION_MS });
+    expect(pendingToastOptions.description).toBeUndefined();
+    expect(pendingToastOptions.action).toBeUndefined();
+    expect(toastSuccessMock).toHaveBeenCalledWith("予定を移動しました", { duration: EVENT_MOVE_SAVING_TOAST_DURATION_MS });
     expect(toastErrorMock).toHaveBeenCalledWith("予定の移動に失敗しました", { id: "move-toast-id", description: "移動前の日時に戻しました", duration: EVENT_MOVE_TOAST_DURATION_MS });
     expect(applyCalendarEventMoveOverrides([{ ...event, startsAt: MOVED_START, endsAt: MOVED_END }], result.current.calendarEventMoveOverrides)[0]?.startsAt).toBe(ORIGINAL_START);
   });
