@@ -25,7 +25,8 @@ type ExplorerWorkspaceContentProps = {
 
 const FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME = "absolute right-4 top-3 z-30 flex h-8 w-[220px] shrink-0 items-center gap-1.5 rounded-[9px] border border-[rgba(0,0,0,0.04)] bg-[#efeeee]/95 px-2.5 text-left text-[12px] font-medium leading-none tracking-[-0.012em] text-[#85827e] shadow-none outline-none ring-0 backdrop-blur-xl transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.04)] hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.99] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
 const FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-5 min-w-[31px] items-center justify-center rounded-[5px] border border-[rgba(0,0,0,0.04)] bg-[#eeeeee] px-1.5 text-[10px] font-semibold leading-none tracking-[-0.02em] text-[#85827e]";
-const WORKSPACE_ACTION_TOOLBAR_CLASS_NAME = "absolute right-[252px] top-3 z-30";
+const WORKSPACE_ACTION_TOOLBAR_CLASS_NAME = "absolute z-30";
+const WORKSPACE_ACTION_TOOLBAR_STYLE = { right: "252px", top: "12px" };
 
 const createFolderRouteState = (folderId: string | null): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: folderId === null, selectedFolderId: folderId, selectedItem: null });
 
@@ -87,7 +88,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
       {isLeftPanelCollapsed ? <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} /> : <SidebarLayeredDirectory onToggleLeftPanel={onToggleLeftPanel} />}
       <CarvePanel className="relative min-w-0">
         <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} folderSelectionNonce={0} navigateToSectionListToken={0} />
-        <WorkspaceActionToolbar className={WORKSPACE_ACTION_TOOLBAR_CLASS_NAME} />
+        <WorkspaceActionToolbar className={WORKSPACE_ACTION_TOOLBAR_CLASS_NAME} style={WORKSPACE_ACTION_TOOLBAR_STYLE} />
         <button type="button" className={FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME} aria-label="検索を開く" aria-keyshortcuts="Meta+K Control+K" title="検索を開く" onClick={handleOpenSearch}>
           <Search className="h-3.5 w-3.5 shrink-0 text-[#85827e]" />
           <span className="min-w-0 truncate">Search in Workspace...</span>
