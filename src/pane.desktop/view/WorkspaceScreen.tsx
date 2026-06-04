@@ -187,7 +187,7 @@ const WorkspaceScreen = () => {
           <SidebarInteractionRegion>
             <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={handleOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />
           </SidebarInteractionRegion>
-          <div className="min-w-0 flex-1">
+          <div className="min-h-0 min-w-0 flex-1">
             <CalendarScheduleScreen isLeftPanelCollapsed={isLeftPanelCollapsed} />
           </div>
         </div>
@@ -197,8 +197,7 @@ const WorkspaceScreen = () => {
 
   return (
     <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
-      <div className="relative h-full min-h-0 w-full">
-        <SidebarLayeredDirectory onOpenSettings={handleOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />
+      <div className="relative h-full min-h-0 w-full overflow-hidden">
         <CalendarScheduleScreen isLeftPanelCollapsed={isLeftPanelCollapsed} />
       </div>
     </SettingsDialogHost>
