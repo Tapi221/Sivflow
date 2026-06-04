@@ -3,7 +3,7 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { UserSettings } from "@/types";
 import { Check, Code, Globe, Keyboard, Settings2, Shield, Type, User, Volume2 } from "@/ui/icons";
 import { useLocaleStore, type Locale } from "@shared/i18n/locale.store";
-import { useUserSettings } from "./hooks/useUserSettings";
+import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import "./SettingsWorkspaceScreen.css";
 
 type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "about";
