@@ -3,6 +3,14 @@ import React from "react";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { cn } from "@/lib/utils";
 
+export type CardSurfaceFace = "question" | "answer";
+
+export type CardSurfaceFaceAnchorProps = {
+  face: CardSurfaceFace;
+  fillHeight?: boolean;
+  children: React.ReactNode;
+};
+
 export type CardSurfaceLayoutProps = {
   cardLayoutMode: CardLayoutMode;
   questionNode: React.ReactNode;
@@ -13,6 +21,21 @@ export type CardSurfaceLayoutProps = {
 
 const SPLIT_INNER_SHADOW_CLIP_PX = 120;
 const STACK_INNER_SHADOW_CLIP_PX = 120;
+
+export const CardSurfaceFaceAnchor = ({
+  face,
+  fillHeight = false,
+  children,
+}: CardSurfaceFaceAnchorProps) => {
+  return (
+    <div
+      data-card-face={face}
+      className={cn("min-w-0", fillHeight && "h-full")}
+    >
+      {children}
+    </div>
+  );
+};
 
 export const CardSurfaceLayout = ({
   cardLayoutMode,
