@@ -6,6 +6,7 @@ type RuledTextareaStyleParams = Readonly<{
   offsetPx?: number;
   color?: string;
   linePx?: number;
+  includeBottomLine?: boolean;
 }>;
 
 const DEFAULT_RULED_TEXTAREA_COLOR = "rgba(0,0,0,0.05)";
@@ -19,17 +20,24 @@ const buildRuledTextareaStyle = ({
   offsetPx = 0,
   color = DEFAULT_RULED_TEXTAREA_COLOR,
   linePx = DEFAULT_RULED_TEXTAREA_LINE_PX,
-}: RuledTextareaStyleParams): CSSProperties => ({
-  ...getRuledStyle({
-    kind: "repeat-only",
+  includeBottomLine = false,
+}: RuledTextareaStyleParams): CSSProperties => {
+  const style = getRuledStyle({
+    kind: includeBottomLine ? "repeat+bottom" : "repeat-only",
     rowPx,
     phasePx: 0,
     color,
     linePx,
     bottomLinePx: null,
-  }),
-  backgroundPosition: toBackgroundOffset(offsetPx),
-  backgroundAttachment: "local",
-});
+  });
+
+  return {
+    ...style,
+    backgroundPosition: includeBottomLine
+      ? `0 calc(100% - ${linePx}px), ${toBackgroundOffset(offsetPx)}`
+      : toBackgroundOffset(offsetPx),
+    backgroundAttachment: "local",
+  };
+};
 
 export { buildRuledTextareaStyle };
