@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
+import { emitHoverTooltipOpen, subscribeHoverTooltipOpen } from "./hoverTooltipEvents";
 
 type TooltipSide = "top" | "bottom";
 
@@ -150,6 +151,7 @@ const HoverMonthEventTooltip = ({
 }: HoverMonthEventTooltipProps) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const tooltipIdRef = useRef(Symbol("hover-month-event-tooltip"));
   const [position, setPosition] = useState<TooltipPosition | null>(null);
 
   const tooltipTitle = title.trim();
@@ -158,6 +160,8 @@ const HoverMonthEventTooltip = ({
 
   const showTooltip = () => {
     if (disabled || !hasContent || !anchorRef.current) return;
+
+    emitHoverTooltipOpen(tooltipIdRef.current);
 
     const rect = anchorRef.current.getBoundingClientRect();
     setPosition(getInitialPosition(rect, side, offset));
@@ -191,6 +195,14 @@ const HoverMonthEventTooltip = ({
   }, [offset, position, side]);
 
   useEffect(() => {
+    return subscribeHoverTooltipOpen((tooltipId) => {
+      if (tooltipId === tooltipIdRef.current) return;
+
+      hideTooltip();
+    });
+  }, []);
+
+  useEffect(() => {
     if (!position) return;
 
     const closeTooltip = () => {
@@ -205,6 +217,12 @@ const HoverMonthEventTooltip = ({
       window.removeEventListener("resize", closeTooltip);
     };
   }, [position]);
+
+  useEffect(() => {
+    if (!disabled && hasContent) return;
+
+    hideTooltip();
+  }, [disabled, hasContent]);
 
   return (
     <>
