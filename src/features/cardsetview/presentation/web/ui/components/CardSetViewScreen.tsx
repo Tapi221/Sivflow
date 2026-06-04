@@ -41,9 +41,11 @@ export const CardSetViewScreen = ({ cardSetId: controlledCardSetId = null }: Car
     <CardViewCompactToolbar
       displayMode={state.currentDisplayMode}
       cardLayoutMode={effectiveCardLayoutMode}
+      isEditing={state.isGlobalEditing}
       disabledCardLayoutModes={disabledCardLayoutModes}
       onChangeDisplayMode={state.setCurrentDisplayMode}
       onChangeCardLayoutMode={handleChangeCardLayoutMode}
+      onToggleEditing={state.handleToggleViewMode}
       indexNavigator={indexNavigator}
       zoom={topLeftZoomControl ? { value: topLeftZoomControl.value, min: topLeftZoomControl.min, max: topLeftZoomControl.max, step: topLeftZoomControl.step, onChange: topLeftZoomControl.onChange } : null}
     />
