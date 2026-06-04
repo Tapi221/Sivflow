@@ -79,6 +79,15 @@ const getPullCollectionDiffErrorMessage = (
 const getPullDiffErrorMessage = (error: unknown): string =>
   `❌ [CloudSyncAdapter] 差分取得に失敗しました: ${getLocalizedCloudSyncErrorDetail(error)}`;
 
+const createPullCollectionError = (
+  type: PullableEntityType,
+  error: unknown,
+): Error => {
+  const message = getPullCollectionDiffErrorMessage(type, error);
+  const causeMessage = error instanceof Error ? error.message : String(error);
+  return new Error(`${message} ${causeMessage}`);
+};
+
 export const pullCloudSyncDiff = async (
   userId: string,
   since: number,
@@ -89,6 +98,7 @@ export const pullCloudSyncDiff = async (
   });
 
   const changes: SyncChange[] = [];
+  const collectionErrors: Error[] = [];
   const firestore = requireCloudSyncFirestore();
 
   try {
@@ -138,12 +148,20 @@ export const pullCloudSyncDiff = async (
           `[CloudSyncAdapter] Remote ${COLLECTION_BY_TYPE[type]} found: ${total}`,
         );
       } catch (error) {
-        console.error(getPullCollectionDiffErrorMessage(type, error));
+        const collectionError = createPullCollectionError(type, error);
+        console.error(collectionError.message);
+        collectionErrors.push(collectionError);
       }
     };
 
     for (const type of PULLABLE_ENTITY_TYPES) {
       await pullCollectionDiff(type);
+    }
+
+    if (collectionErrors.length > 0) {
+      throw new Error(
+        `クラウド同期の一部取得に失敗したため、差分同期を中断しました。failedCollections=${collectionErrors.length}`,
+      );
     }
 
     const snap = await getDoc(getUserSettingsRef(firestore, userId));
