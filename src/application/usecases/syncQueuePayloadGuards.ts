@@ -68,6 +68,9 @@ const toRequiredString = (value: unknown): string | null =>
 const toOptionalString = (value: unknown): string | undefined =>
   typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
 
+const toOptionalNumber = (value: unknown): number | undefined =>
+  typeof value === "number" && Number.isFinite(value) ? value : undefined;
+
 const toDateOrNull = (value: unknown): Date | null => {
   if (value instanceof Date && Number.isFinite(value.getTime())) return value;
   if (isRecord(value) && typeof value.toDate === "function") {
@@ -104,6 +107,7 @@ const normalizeTagPayload = (value: unknown): TagSyncPayload | null => {
     deletedAt,
     categoryId: toOptionalString(value.categoryId),
     parentId: toOptionalString(value.parentId),
+    orderIndex: toOptionalNumber(value.orderIndex),
   };
   return tagPayload;
 };
