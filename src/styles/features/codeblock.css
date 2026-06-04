@@ -201,8 +201,8 @@
     color: var(--code-token-number);
   }
 
-  /* ===== Editor (react-simple-code-editor) =====
-     textarea を表示レイヤーにして、選択対象と見えている文字を一致させる
+  /* ===== Editor =====
+     contenteditable な code 自体を表示・選択レイヤーにする
    */
 
   .code-editor-no-scroll {
@@ -215,39 +215,18 @@
     font-variant-ligatures: none;
   }
 
-  .code-editor-no-scroll textarea,
-  .code-editor-no-scroll pre {
-    width: max-content;
+  .code-editor-content {
+    display: block;
     min-width: 100%;
-    font-family: inherit !important;
-    font-size: inherit !important;
-    line-height: inherit !important;
-    padding: var(--code-padding-top) var(--code-padding-inline)
-      var(--code-padding-bottom) var(--code-padding-inline) !important;
-    letter-spacing: normal !important;
-    tab-size: inherit !important;
-    white-space: pre !important;
-    word-break: normal !important;
-    overflow-wrap: normal !important;
-    margin: 0 !important;
-    text-align: left;
-    font-variant-ligatures: inherit !important;
+    min-height: inherit;
+    outline: none;
+    border: none;
+    background: transparent;
+    caret-color: var(--code-caret, var(--code-fg));
   }
 
-  .code-editor-no-scroll pre {
-    display: inline-block !important;
-    min-width: 100%;
-    visibility: hidden;
-  }
-
-  /* react-simple-code-editor の既定 pre-wrap を打ち消して、常に横スクロールを正とする */
-  .code-editor-no-scroll .npm__react-simple-code-editor__textarea {
-    width: max-content !important;
-    min-width: 100% !important;
-    white-space: pre !important;
-    word-break: normal !important;
-    overflow-wrap: normal !important;
-    overflow-x: hidden !important;
+  .code-editor-content:empty::before {
+    content: "\00a0";
   }
 
   /* generic safeguard: code block content should never soft-wrap */
@@ -260,21 +239,5 @@
   .codeBlockBody,
   .codeBlockBody * {
     font-family: var(--code-font-family);
-  }
-
-  .code-editor-no-scroll textarea {
-    border: none;
-    outline: none;
-    box-shadow: none;
-    resize: none;
-    background: transparent;
-    color: var(--code-fg) !important;
-    -webkit-text-fill-color: var(--code-fg);
-    caret-color: var(--code-caret, var(--code-fg));
-  }
-
-  .code-editor-no-scroll pre {
-    background: transparent;
-    pointer-events: none;
   }
 }
