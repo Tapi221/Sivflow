@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
-import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_ACTIVE_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "@constants/shared/flashcard";
-import { CircleHelp, Star } from "@/ui/icons";
+import { CARD_ACTION_BG_CLASS, CARD_ACTION_BUTTON_PX, CARD_ACTION_COLOR_ACTIVE_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS, CARD_ACTION_ICON_PX } from "@constants/shared/flashcard";
 import { cn } from "@/lib/utils";
+import { CircleHelp, Star } from "@/ui/icons";
 
 interface CardCornerActionsProps {
   onHelp?: () => void;
@@ -28,7 +28,7 @@ const resolveSafeIconPx = (value?: number) => {
   return value;
 };
 
-export const CardCornerActions = ({
+const CardCornerActions = ({
   onHelp,
   onStar,
   helpActive = false,
@@ -46,8 +46,8 @@ export const CardCornerActions = ({
 
   const safeVisualScale = resolveSafeVisualScale(visualScale);
   const explicitIconPx = resolveSafeIconPx(iconPx);
-  const resolvedIconPx = explicitIconPx ?? 14 / safeVisualScale;
-  const resolvedButtonPx = explicitIconPx ? resolvedIconPx * 2 : 28 / safeVisualScale;
+  const resolvedIconPx = explicitIconPx ?? CARD_ACTION_ICON_PX / safeVisualScale;
+  const resolvedButtonPx = CARD_ACTION_BUTTON_PX / safeVisualScale;
 
   const buttonBaseClass =
     "rounded-full min-h-0 min-w-0 flex items-center justify-center bg-transparent hover:bg-transparent " +
@@ -130,3 +130,5 @@ export const CardCornerActions = ({
     </div>
   );
 };
+
+export { CardCornerActions };
