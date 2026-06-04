@@ -8,7 +8,6 @@ import type { CalendarTimeGridLayoutEntry } from "../../packages/core/src/calend
 const NEXT_DAY_PREVIEW_MINUTES = 30;
 const NEXT_DAY_PREVIEW_HOURS = NEXT_DAY_PREVIEW_MINUTES / WEEKDAY_MINUTES_PER_HOUR;
 const DEFAULT_MIN_HEIGHT_STYLE = "21.5px";
-const DEFAULT_MINIMUM_START_DIFFERENCE_MINUTES = 30;
 
 const buildEvent = ({
   id,
@@ -237,16 +236,16 @@ describe("weekday time grid geometry", () => {
     expect(beforeB.style.xOffset).toBe(afterB.style.xOffset);
   });
 
-  it("最低高さの event が下の event に食い込む場合、下の event が最低高さを保てるなら下へ詰めて高さを削る", () => {
+  it("実時間で重ならない短い event は固定分数で横並びにしない", () => {
     const entries = layoutCalendarTimeGridEvents({
       events: [
         buildEvent({
-          id: "minimum-a",
+          id: "short-a",
           startsAt: new Date(2026, 3, 12, 9, 0),
           endsAt: new Date(2026, 3, 12, 9, 5),
         }),
         buildEvent({
-          id: "adjustable-b",
+          id: "later-b",
           startsAt: new Date(2026, 3, 12, 9, 20),
           endsAt: new Date(2026, 3, 12, 10, 20),
         }),
@@ -254,11 +253,10 @@ describe("weekday time grid geometry", () => {
       rangeStart: new Date(2026, 3, 12, 0, 0),
       rangeEnd: new Date(2026, 3, 13, 0, 0),
       layoutMode: "no-overlap",
-      minimumStartDifferenceMinutes: DEFAULT_MINIMUM_START_DIFFERENCE_MINUTES,
     });
 
-    const firstEntry = getEntryById(entries, "minimum-a");
-    const secondEntry = getEntryById(entries, "adjustable-b");
+    const firstEntry = getEntryById(entries, "short-a");
+    const secondEntry = getEntryById(entries, "later-b");
 
     expect(firstEntry.columnCount).toBe(1);
     expect(firstEntry.style.xOffset).toBe(0);
@@ -268,20 +266,20 @@ describe("weekday time grid geometry", () => {
     expect(secondEntry.columnCount).toBe(1);
     expect(secondEntry.style.xOffset).toBe(0);
     expect(secondEntry.style.width).toBe(100);
-    expect(secondEntry.style.top).toBeCloseTo(39.583333333333336, 6);
-    expect(secondEntry.style.height).toBeCloseTo(3.4722222222222223, 6);
+    expect(secondEntry.style.top).toBeCloseTo(38.88888888888889, 6);
+    expect(secondEntry.style.height).toBeCloseTo(4.166666666666666, 6);
   });
 
-  it("最低高さの event が下の event に食い込み、下の event が最低高さを保てない場合は横並び column にする", () => {
+  it("実時間で重なる event は横並び column にする", () => {
     const entries = layoutCalendarTimeGridEvents({
       events: [
         buildEvent({
-          id: "minimum-a",
+          id: "overlap-a",
           startsAt: new Date(2026, 3, 12, 9, 0),
-          endsAt: new Date(2026, 3, 12, 9, 5),
+          endsAt: new Date(2026, 3, 12, 9, 30),
         }),
         buildEvent({
-          id: "minimum-b",
+          id: "overlap-b",
           startsAt: new Date(2026, 3, 12, 9, 20),
           endsAt: new Date(2026, 3, 12, 9, 45),
         }),
@@ -289,17 +287,16 @@ describe("weekday time grid geometry", () => {
       rangeStart: new Date(2026, 3, 12, 0, 0),
       rangeEnd: new Date(2026, 3, 13, 0, 0),
       layoutMode: "no-overlap",
-      minimumStartDifferenceMinutes: DEFAULT_MINIMUM_START_DIFFERENCE_MINUTES,
     });
 
-    const firstEntry = getEntryById(entries, "minimum-a");
-    const secondEntry = getEntryById(entries, "minimum-b");
+    const firstEntry = getEntryById(entries, "overlap-a");
+    const secondEntry = getEntryById(entries, "overlap-b");
 
     expect(firstEntry.columnCount).toBe(2);
     expect(firstEntry.style.xOffset).toBe(0);
     expect(firstEntry.style.width).toBe(50);
     expect(firstEntry.style.top).toBeCloseTo(37.5, 6);
-    expect(firstEntry.style.height).toBeCloseTo(0.3472222222222222, 6);
+    expect(firstEntry.style.height).toBeCloseTo(2.083333333333333, 6);
     expect(secondEntry.columnCount).toBe(2);
     expect(secondEntry.style.xOffset).toBe(50);
     expect(secondEntry.style.width).toBe(50);
