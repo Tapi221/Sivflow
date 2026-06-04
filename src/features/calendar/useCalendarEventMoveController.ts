@@ -13,7 +13,6 @@ type UseCalendarEventMoveControllerReturn = { calendarEventMoveOverrides: Map<st
 
 const EVENT_MOVE_ROLLBACK_MS = 1200;
 const EVENT_MOVE_TOAST_DURATION_MS = 5000;
-const EVENT_MOVE_LOADING_TOAST_DESCRIPTION = "変更を保存しています";
 const EVENT_MOVE_SUCCESS_TOAST_DESCRIPTION = "元に戻すことができます";
 const EVENT_MOVE_UNDO_SUCCESS_TOAST_DESCRIPTION = "移動前の日時に戻しました";
 const EVENT_MOVE_UNDO_ERROR_TOAST_DESCRIPTION = "予定は移動後の日時のままです";
@@ -60,23 +59,19 @@ const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalend
       return next;
     });
 
-    const toastId = toast.loading("予定を移動しています", { description: EVENT_MOVE_LOADING_TOAST_DESCRIPTION });
-
-    try {
-      await updateGoogleCalendarEvent(accountId, createCalendarEventUpdateInput(event, nextOverride));
-      clearMatchingCalendarEventMoveOverride(overrideKey, nextOverride);
-      toast.success("予定を移動しました", {
-        id: toastId,
-        description: EVENT_MOVE_SUCCESS_TOAST_DESCRIPTION,
-        duration: EVENT_MOVE_TOAST_DURATION_MS,
-        action: {
-          label: "元に戻す",
-          onClick: () => {
-            setCalendarEventMoveOverrides((overrides) => {
-              const next = new Map(overrides);
-              next.set(overrideKey, rollbackOverride);
-              return next;
-            });
+    const movePromise = updateGoogleCalendarEvent(accountId, createCalendarEventUpdateInput(event, nextOverride));
+    const toastId = toast.success("予定を移動しました", {
+      description: EVENT_MOVE_SUCCESS_TOAST_DESCRIPTION,
+      duration: EVENT_MOVE_TOAST_DURATION_MS,
+      action: {
+        label: "元に戻す",
+        onClick: () => {
+          setCalendarEventMoveOverrides((overrides) => {
+            const next = new Map(overrides);
+            next.set(overrideKey, rollbackOverride);
+            return next;
+          });
+          void movePromise.then(() => {
             void updateGoogleCalendarEvent(accountId, createCalendarEventUpdateInput(event, rollbackOverride)).then(() => {
               clearMatchingCalendarEventMoveOverride(overrideKey, rollbackOverride);
               toast.success("予定を元に戻しました", { description: EVENT_MOVE_UNDO_SUCCESS_TOAST_DESCRIPTION, duration: EVENT_MOVE_TOAST_DURATION_MS });
@@ -89,9 +84,14 @@ const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalend
               });
               toast.error("予定を元に戻せませんでした", { description: EVENT_MOVE_UNDO_ERROR_TOAST_DESCRIPTION, duration: EVENT_MOVE_TOAST_DURATION_MS });
             });
-          },
+          }).catch(() => undefined);
         },
-      });
+      },
+    });
+
+    try {
+      await movePromise;
+      clearMatchingCalendarEventMoveOverride(overrideKey, nextOverride);
     } catch (error) {
       console.warn("[ScheduleScreen] calendar event move failed", error);
       toast.error("予定の移動に失敗しました", { id: toastId, description: EVENT_MOVE_ERROR_TOAST_DESCRIPTION, duration: EVENT_MOVE_TOAST_DURATION_MS });
