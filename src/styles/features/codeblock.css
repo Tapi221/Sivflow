@@ -38,7 +38,8 @@
   .codeBlockBody {
     overflow-x: auto;
     overflow-y: hidden;
-    overscroll-behavior: contain;
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: auto;
     white-space: pre;
     scrollbar-gutter: auto;
     scrollbar-width: none;
