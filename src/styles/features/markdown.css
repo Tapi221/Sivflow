@@ -5,12 +5,23 @@
   }
 
   .markdownBlockCardView {
-    --markdown-text-color: currentColor;
+    --markdown-text-color: #222222;
     --task-checkbox-border-color: var(--markdown-text-color);
     --task-checkbox-fill-color: var(--markdown-text-color);
     --task-checkbox-check-color: var(--card-surface, #ffffff);
-    --task-checkbox-offset-y: 1px;
-    --markdown-blank-line-height: 24px;
+    --task-checkbox-offset-y: calc((var(--card-row-px, 24px) - 16px) / 2);
+    --markdown-blank-line-height: var(--card-row-px, 24px);
+    color: var(--markdown-text-color);
+    font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    font-size: var(--ds-typography-font-size-md);
+    font-weight: 500;
+    line-height: var(--card-row-px, 24px);
+    text-align: center;
+  }
+
+  .markdownBlockCardView :is(p, li) {
+    min-height: var(--card-row-px, 24px);
+    line-height: var(--card-row-px, 24px);
   }
 
   .markdownBlockCardView > :where(* + *) {
