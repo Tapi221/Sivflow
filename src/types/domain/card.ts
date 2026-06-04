@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase/firestore";
 import type { InkDocument } from "@core/domain/card/ink/inkDocument";
-import type { UploadedImage } from "./assets";
+import type { UploadedImage, UploadedPdf } from "./assets";
 import type { BaseEntity, CardState, MathBlockData, ReferenceBlockData, ReviewLog, SubjectiveScoreValue } from "./base";
 import type { CodeBlockData } from "@/types/core/code-block";
 
@@ -13,6 +13,7 @@ export type CardBlock = {
     | "question"
     | "code"
     | "image"
+    | "pdf"
     | "audio"
     | "reference"
     | "math"
@@ -26,6 +27,8 @@ export type CardBlock = {
   content?: string;
   code?: CodeBlockData;
   images?: UploadedImage[];
+  pdf?: UploadedPdf;
+  pdfPageNumber?: number;
   audios?: Array<{ url: string; filename: string; order: number }>;
   references?: ReferenceBlockData[];
   math?: MathBlockData;
