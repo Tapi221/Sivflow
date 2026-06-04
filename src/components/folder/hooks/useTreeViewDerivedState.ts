@@ -111,9 +111,18 @@ export const useTreeViewDerivedState = ({
     [activeCardSets],
   );
 
+  const shouldBuildFolderCardIndex = selectedItem?.type !== "cardSet";
+
   const folderCardIndex = useMemo(() => {
     const cardsByFolderId = new Map<string, Card[]>();
     const statsByFolderId = new Map<string, FolderStats>();
+
+    if (!shouldBuildFolderCardIndex) {
+      return {
+        cardsByFolderId,
+        statsByFolderId,
+      };
+    }
 
     const today = new Date();
     const todayDate = new Date(
@@ -180,7 +189,7 @@ export const useTreeViewDerivedState = ({
       cardsByFolderId,
       statsByFolderId,
     };
-  }, [autoCarryOver, cardSetById, cards]);
+  }, [autoCarryOver, cardSetById, cards, shouldBuildFolderCardIndex]);
 
   const folderCards = useMemo(() => {
     if (!selectedFolderId) return [];
