@@ -109,6 +109,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
   const selectedCardId = useMemo(() => getSelectedCardId(explorerState.selectedItem), [explorerState.selectedItem]);
   const selectedDocumentId = useMemo(() => getSelectedDocumentId(explorerState.selectedItem), [explorerState.selectedItem]);
+  const showWorkspaceHeader = selectedDocumentId === null;
   const [explorerBreadcrumbContext, setExplorerBreadcrumbContext] = useState<ExplorerBreadcrumbContext>(EMPTY_EXPLORER_BREADCRUMB_CONTEXT);
   const extraCrumbs = useMemo(() => buildWorkspaceBreadcrumbCrumbs(explorerBreadcrumbContext, folders), [explorerBreadcrumbContext, folders]);
 
@@ -156,13 +157,15 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
       </SidebarInteractionRegion>
       <CarvePanel className="relative min-w-0">
         <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} onBreadcrumbContextChange={handleBreadcrumbContextChange} folderSelectionNonce={0} navigateToSectionListToken={0} />
-        <WorkspaceBreadcrumbs />
-        <WorkspaceActionToolbar className={WORKSPACE_ACTION_TOOLBAR_CLASS_NAME} style={WORKSPACE_ACTION_TOOLBAR_STYLE} />
-        <button type="button" className={FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME} aria-label="検索を開く" aria-keyshortcuts="Meta+K Control+K" title="検索を開く" onClick={handleOpenSearch}>
-          <Search className="h-3.5 w-3.5 shrink-0 text-[#85827e]" />
-          <span className="min-w-0 truncate">Search in Workspace...</span>
-          <kbd className={FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME}>⌘K</kbd>
-        </button>
+        {showWorkspaceHeader ? <WorkspaceBreadcrumbs /> : null}
+        {showWorkspaceHeader ? <WorkspaceActionToolbar className={WORKSPACE_ACTION_TOOLBAR_CLASS_NAME} style={WORKSPACE_ACTION_TOOLBAR_STYLE} /> : null}
+        {showWorkspaceHeader ? (
+          <button type="button" className={FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME} aria-label="検索を開く" aria-keyshortcuts="Meta+K Control+K" title="検索を開く" onClick={handleOpenSearch}>
+            <Search className="h-3.5 w-3.5 shrink-0 text-[#85827e]" />
+            <span className="min-w-0 truncate">Search in Workspace...</span>
+            <kbd className={FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME}>⌘K</kbd>
+          </button>
+        ) : null}
       </CarvePanel>
     </div>
   );
