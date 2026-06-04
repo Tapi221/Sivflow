@@ -9,13 +9,105 @@ import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { resolveCardImageUrl } from "@/services/cardImageResolver";
 import type { ResolvableImageRef } from "@/types/domain/assets";
 
-const IMAGE_BLOCK_INSET_PX = 4;
-const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
-  CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
-
 interface AudioPlayerProps {
   urls: string[];
 }
+
+interface ImageGalleryProps {
+  urls: string[];
+  items?: ImageGalleryItem[];
+  onFullscreenChange?: (isFullscreen: boolean) => void;
+  displayMode?: "fixed" | "fluid";
+  zoom?: number;
+}
+
+type DisplayImage = {
+  key: string;
+  url: string | null;
+  layout?: ResolvableImageRef["layout"];
+  scale?: number | null;
+  x?: number | null;
+  naturalW?: number | null;
+  naturalH?: number | null;
+};
+
+type NormalizedDisplayImage = DisplayImage & {
+  ref?: ResolvableImageRef;
+};
+
+type DisplayImagesState = {
+  key: string;
+  images: DisplayImage[];
+};
+
+type FailedImagesState = {
+  key: string;
+  indices: Set<number>;
+};
+
+const IMAGE_BLOCK_INSET_PX = 4;
+const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
+  CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
+const EMPTY_FAILED_IMAGE_INDICES = new Set<number>();
+
+const hasDisplayImageUrl = (url: string | null): url is string =>
+  typeof url === "string" && url.trim().length > 0;
+
+const getInlineDisplayImageUrl = (entry: ResolvableImageRef): string | null => {
+  for (const value of [entry.url, entry.remoteUrl, entry.localUrl]) {
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+
+  return null;
+};
+
+const getDisplayImageKey = (
+  entry: ResolvableImageRef,
+  index: number,
+): string => {
+  for (const value of [
+    entry.assetId,
+    entry.id,
+    entry.localFileId,
+    entry.remoteUrl,
+    entry.localUrl,
+    entry.url,
+  ]) {
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+
+  return `image-${index}`;
+};
+
+const toDisplayImage = (item: NormalizedDisplayImage): DisplayImage => ({
+  key: item.key,
+  url: item.url,
+  layout: item.layout ?? null,
+  scale: item.scale ?? 1,
+  x: item.x ?? 0,
+  naturalW: item.naturalW ?? null,
+  naturalH: item.naturalH ?? null,
+});
+
+const getNormalizedItemsKey = (items: NormalizedDisplayImage[]) =>
+  items
+    .map((item) =>
+      JSON.stringify([
+        item.key,
+        item.url ?? "",
+        item.layout?.baseWidthPx ?? null,
+        item.layout?.cropX ?? null,
+        item.scale ?? null,
+        item.x ?? null,
+        item.naturalW ?? null,
+        item.naturalH ?? null,
+      ]),
+    )
+    .join("\n");
 
 export const AudioPlayer = ({ urls }: AudioPlayerProps) => {
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
@@ -69,56 +161,21 @@ export const AudioPlayer = ({ urls }: AudioPlayerProps) => {
   );
 };
 
-interface ImageGalleryProps {
-  urls: string[];
-  items?: ImageGalleryItem[];
-  onFullscreenChange?: (isFullscreen: boolean) => void;
-  displayMode?: "fixed" | "fluid";
-  zoom?: number;
-}
-
-type DisplayImage = {
-  key: string;
-  url: string | null;
-  layout?: ResolvableImageRef["layout"];
-  scale?: number | null;
-  x?: number | null;
-  naturalW?: number | null;
-  naturalH?: number | null;
-};
-
-const getDisplayImageKey = (
-  entry: ResolvableImageRef,
-  index: number,
-): string => {
-  for (const value of [
-    entry.assetId,
-    entry.id,
-    entry.localFileId,
-    entry.remoteUrl,
-    entry.localUrl,
-    entry.url,
-  ]) {
-    if (typeof value === "string" && value.trim().length > 0) {
-      return value.trim();
-    }
-  }
-
-  return `image-${index}`;
-};
-
 export const ImageGallery = ({
   items,
   displayMode = "fixed",
   zoom = 1,
 }: ImageGalleryProps) => {
   const { currentUser } = useAuthSession();
-  const [displayImages, setDisplayImages] = useState<DisplayImage[]>([]);
-  const [failedImages, setFailedImages] = useState<Set<number>>(
-    () => new Set(),
-  );
+  const [displayImagesState, setDisplayImagesState] =
+    useState<DisplayImagesState>(() => ({ key: "", images: [] }));
+  const [failedImagesState, setFailedImagesState] =
+    useState<FailedImagesState>(() => ({
+      key: "",
+      indices: new Set(),
+    }));
 
-  const normalizedItems = useMemo(() => {
+  const normalizedItems = useMemo<NormalizedDisplayImage[]>(() => {
     return (items ?? []).map((entry, index) => {
       if (typeof entry === "string") {
         return {
@@ -129,12 +186,12 @@ export const ImageGallery = ({
           x: 0,
           naturalW: null,
           naturalH: null,
-        } satisfies DisplayImage;
+        };
       }
 
       return {
         key: getDisplayImageKey(entry, index),
-        url: null,
+        url: getInlineDisplayImageUrl(entry),
         layout: entry.layout ?? null,
         scale: entry.scale ?? 1,
         x: entry.x ?? 0,
@@ -145,13 +202,22 @@ export const ImageGallery = ({
     });
   }, [items]);
 
+  const normalizedItemsKey = useMemo(
+    () => getNormalizedItemsKey(normalizedItems),
+    [normalizedItems],
+  );
+  const imageResolutionKey = useMemo(
+    () => `${currentUser?.uid ?? ""}\n${normalizedItemsKey}`,
+    [currentUser?.uid, normalizedItemsKey],
+  );
+
   useEffect(() => {
     let cancelled = false;
 
     const run = async () => {
       const resolved = await Promise.all(
         normalizedItems.map(async (item) => {
-          if (typeof item.url === "string") return item;
+          if (hasDisplayImageUrl(item.url) || !item.ref) return toDisplayImage(item);
           const result = await resolveCardImageUrl(item.ref, currentUser?.uid);
           return {
             key: item.key,
@@ -166,8 +232,8 @@ export const ImageGallery = ({
       );
 
       if (!cancelled) {
-        setDisplayImages(resolved);
-        setFailedImages(new Set());
+        setDisplayImagesState({ key: imageResolutionKey, images: resolved });
+        setFailedImagesState({ key: imageResolutionKey, indices: new Set() });
       }
     };
 
@@ -175,7 +241,7 @@ export const ImageGallery = ({
     return () => {
       cancelled = true;
     };
-  }, [currentUser?.uid, normalizedItems]);
+  }, [currentUser?.uid, imageResolutionKey, normalizedItems]);
 
   const copyImage = async (imageUrl: string) => {
     try {
@@ -220,7 +286,16 @@ export const ImageGallery = ({
     URL.revokeObjectURL(objectUrl);
   };
 
-  if (!displayImages || displayImages.length === 0) return null;
+  const displayImages =
+    displayImagesState.key === imageResolutionKey
+      ? displayImagesState.images
+      : normalizedItems.map(toDisplayImage).filter((item) => hasDisplayImageUrl(item.url));
+  const failedImages =
+    failedImagesState.key === imageResolutionKey
+      ? failedImagesState.indices
+      : EMPTY_FAILED_IMAGE_INDICES;
+
+  if (displayImages.length === 0) return null;
 
   return (
     <div className="w-full">
@@ -245,10 +320,12 @@ export const ImageGallery = ({
                 className="bg-transparent"
                 imgClassName="cursor-pointer pointer-events-none"
                 onError={() => {
-                  setFailedImages((prev) => {
-                    const next = new Set(prev);
+                  setFailedImagesState((prev) => {
+                    const next = new Set(
+                      prev.key === imageResolutionKey ? prev.indices : undefined,
+                    );
                     next.add(index);
-                    return next;
+                    return { key: imageResolutionKey, indices: next };
                   });
                 }}
               />
