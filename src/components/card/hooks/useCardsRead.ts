@@ -193,7 +193,7 @@ export const useCardsRead = (
   }, [rawCardSets, shouldReadCardSets]);
 
   const cards = useMemo(() => {
-    if (!rawCards || rawCards.length === 0) {
+    if (!enabled || !rawCards || rawCards.length === 0) {
       return [];
     }
 
@@ -203,7 +203,7 @@ export const useCardsRead = (
       cardSetId,
       cardSetById,
     });
-  }, [cardSetById, cardSetId, folderId, rawCards]);
+  }, [cardSetById, cardSetId, enabled, folderId, rawCards]);
 
   const loading = enabled && rawCards === undefined;
 
