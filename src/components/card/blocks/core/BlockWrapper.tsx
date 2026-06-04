@@ -1,5 +1,4 @@
 import React from "react";
-import { BlockEditModeContext } from "./BlockEditModeContext";
 import { BlockFrame } from "./BlockFrame";
 import { Copy, GripVertical, Trash2 } from "@/ui/icons";
 import { cn } from "@/lib/utils";
@@ -65,8 +64,6 @@ export const BlockWrapper = ({
     if (!(target instanceof HTMLElement)) return false;
     return Boolean(target.closest("input, textarea, [contenteditable]"));
   };
-
-  const inEditMode = React.useContext(BlockEditModeContext);
 
   const stepDragRef = React.useRef<{
     pointerId: number;
@@ -207,8 +204,7 @@ export const BlockWrapper = ({
   ) : null;
 
   const shouldHighlightSelection =
-    mode === "editor" &&
-    (inEditMode || Boolean(isBlockSelected || isEditingWithin));
+    mode === "editor" && Boolean(isBlockSelected || isEditingWithin);
 
   const frameVariant =
     visualMode === "viewer"
@@ -227,6 +223,7 @@ export const BlockWrapper = ({
       overlay={overlay}
       variant={frameVariant}
       raiseZIndex={isEditingWithin}
+      selectionActive={shouldHighlightSelection}
       onFocusCapture={(event) => {
         setIsEditingWithin(isEditableFocusTarget(event.target));
       }}
