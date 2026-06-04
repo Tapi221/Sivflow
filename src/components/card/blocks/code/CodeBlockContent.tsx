@@ -114,10 +114,10 @@ export const CodeBlockContent = (props: CodeBlockContentProps) => {
       }}
       className={cn(
         "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium",
-        "opacity-100 supports-[hover:hover]:opacity-0 group-hover/code-block:opacity-100 focus-visible:opacity-100 transition-opacity duration-150",
+        "opacity-0 group-hover/code-block:opacity-100 focus-visible:opacity-100 transition-opacity duration-150",
         "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-900/5",
         "focus:outline-none",
-        copied && "opacity-100 text-emerald-600 hover:text-emerald-600",
+        copied && "!opacity-100 text-emerald-600 hover:text-emerald-600",
       )}
       aria-label="コードをコピー"
       type="button"
@@ -172,7 +172,7 @@ export const CodeBlockContent = (props: CodeBlockContentProps) => {
                     style={mergeStyles(
                       {
                         color: style.color,
-                        backgroundColor: style.backgroundColor,
+                        backgroundColor: "transparent",
                       },
                       viewerTypographyStyle,
                     )}
