@@ -1,5 +1,4 @@
 import { type MouseEvent as ReactMouseEvent } from "react";
-import { X } from "@/ui/icons";
 import { SettingsWorkspaceScreen } from "./SettingsWorkspaceScreen";
 import "./SettingsWorkspaceDialog.css";
 
@@ -19,9 +18,6 @@ const SettingsWorkspaceDialog = ({ open, onOpenChange }: SettingsWorkspaceDialog
   return (
     <div className="settings-workspace-dialog__backdrop" onMouseDown={handleBackdropMouseDown}>
       <section className="settings-workspace-dialog" aria-label="Settings">
-        <button type="button" className="settings-workspace-dialog__close" aria-label="設定を閉じる" onClick={handleClose}>
-          <X size={16} />
-        </button>
         <SettingsWorkspaceScreen />
       </section>
     </div>
