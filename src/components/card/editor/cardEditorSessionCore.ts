@@ -1,13 +1,27 @@
+import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
 import { getCardBlocks } from "@/domain/card/content";
 import { LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from "@/domain/card/extraRows";
-import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
+import { resolveCardTagNames } from "@/features/settings/hooks/useTags";
+import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 import { waitForDraftImageUploads } from "./cardImageUploadSaveBarrier";
 import { type EditorDraft, makeEmptyCardFaceAttachments, normalizeOrderIndex, sanitizeReferences } from "./cardEditorUtils";
-import { resolveCardTagNames } from "@/features/settings/hooks/useTags";
-export { toDateOrNull } from "@/utils/toMillis";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { Card, CardBlock, CardFaceAttachments, CardPatch } from "@/types/domain/card";
-import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
+
+export { toDateOrNull } from "@/utils/toMillis";
+
+type BuildSavePayloadParams = {
+  draft: EditorDraft;
+  addTag: (name: string) => Promise<{ id: string }>;
+};
+
+type CreatePanelCardParams = {
+  selectedCard: Card | null;
+  draft: EditorDraft | null;
+  isEditing: boolean;
+};
+
+type CardToggleField = "isBookmarked" | "hasUncertainty";
 
 export const NEW_SENTINEL = "__new__" as const;
 export const AUTOSAVE_DELAY_MS = 700;
@@ -19,6 +33,63 @@ export type PersistOperation = "created" | "updated" | "noop";
 export type PersistResult =
   | { ok: true; operation: PersistOperation; saved: boolean }
   | { ok: false; message: string };
+
+const createDraftPanelBaseCard = (): Card => {
+  const now = new Date();
+
+  return {
+    id: NEW_SENTINEL,
+    userId: "",
+    deviceId: "",
+    createdAt: now,
+    updatedAt: now,
+    isDeleted: false,
+    cardSetId: "",
+    orderIndex: 0,
+    questionNumber: "",
+    title: "",
+    tagIds: [],
+    tags: [],
+    front: {
+      blocks: [],
+      attachments: makeEmptyCardFaceAttachments(),
+    },
+    back: {
+      blocks: [],
+      attachments: makeEmptyCardFaceAttachments(),
+    },
+    isDraft: false,
+    hasUncertainty: false,
+    isBookmarked: false,
+    isCompleted: false,
+    isSilent: false,
+    memoryStability: 0,
+    nextReviewDate: null,
+    layoutRows: normalizeLayoutRows(undefined),
+  };
+};
+
+const resolveTagIdsForSave = async (
+  tags: string[],
+  addTag: BuildSavePayloadParams["addTag"],
+): Promise<string[]> => {
+  const tagIds: string[] = [];
+  const seen = new Set<string>();
+
+  for (const rawTag of tags) {
+    const tagName = rawTag.trim();
+    if (!tagName) continue;
+
+    const tag = await addTag(tagName);
+    const tagId = tag.id.trim();
+    if (!tagId || seen.has(tagId)) continue;
+
+    seen.add(tagId);
+    tagIds.push(tagId);
+  }
+
+  return tagIds;
+};
 
 export const cloneBlock = (block: CardBlock): CardBlock => {
   return {
@@ -251,4 +322,51 @@ export const prepareDraftForPersist = async (
   draft: EditorDraft,
 ): Promise<EditorDraft> => {
   return waitForDraftImageUploads(draft);
+};
+
+export const buildSavePayload = async ({
+  draft,
+  addTag,
+}: BuildSavePayloadParams): Promise<CardPatch> => {
+  const persistedDraft = await prepareDraftForPersist(draft);
+  const tagIds = await resolveTagIdsForSave(persistedDraft.tags, addTag);
+  return buildPatchFromDraft({ ...persistedDraft, tags: tagIds });
+};
+
+export const buildCardPatchForToggle = (
+  card: Card,
+  field: CardToggleField,
+): CardPatch => {
+  return {
+    [field]: !Boolean(card[field]),
+  } as CardPatch;
+};
+
+export const createPanelCard = ({
+  selectedCard,
+  draft,
+  isEditing,
+}: CreatePanelCardParams): Card | null => {
+  if (!isEditing || !draft) return selectedCard;
+
+  const baseCard = selectedCard ?? createDraftPanelBaseCard();
+
+  return {
+    ...baseCard,
+    title: draft.title,
+    tagIds: draft.tags,
+    tags: draft.tags,
+    isDraft: draft.isDraft,
+    front: {
+      ...baseCard.front,
+      blocks: draft.frontBlocks,
+      attachments: draft.frontAttachments,
+    },
+    back: {
+      ...baseCard.back,
+      blocks: draft.backBlocks,
+      attachments: draft.backAttachments,
+    },
+    layoutRows: normalizeLayoutRows(draft.layoutRows),
+  };
 };
