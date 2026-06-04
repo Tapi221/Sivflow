@@ -34,9 +34,6 @@ const buildTextBlockPresentation = (zoom?: number) => {
   return {
     textStyle,
     ruledRowPx,
-    viewTextStyle: mergeStyles(textStyle, {
-      borderBottom: "var(--card-ruled-line-px, 1px) solid var(--card-ruled-color, rgba(0,0,0,0.05))",
-    }),
     editorTextStyle: mergeStyles(
       textStyle,
       buildRuledTextareaStyle({ rowPx: ruledRowPx, includeBottomLine: true }),
@@ -55,12 +52,13 @@ const TextBlockContent = (props: TextBlockContentProps) => {
     return (
       <BlockSurface
         ruled={true}
+        ruledKind="repeat+bottom"
         ruledRowPx={presentation.ruledRowPx}
         className="flex-1"
       >
         <div
           className={`${TEXT_BLOCK_CONTENT_CLASS} whitespace-pre-wrap`}
-          style={presentation.viewTextStyle}
+          style={presentation.textStyle}
         >
           {displayText}
         </div>
