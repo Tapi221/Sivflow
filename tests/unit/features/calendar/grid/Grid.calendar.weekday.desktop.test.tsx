@@ -20,6 +20,9 @@ const TIME_LABEL_COLOR_CLASS = "text-[#b8bcc5]";
 const TIME_LABEL_BACKGROUND_CLASS = "bg-white";
 const TIME_LABEL_FONT_CLASS = "font-medium";
 const ALL_DAY_LABEL_RIGHT_PADDING_CLASS = "pr-3";
+const ALL_DAY_EVENT_VERTICAL_PADDING_CLASS = "py-[0.5px]";
+const OLD_ALL_DAY_EVENT_PADDING_TOP_CLASS = "pt-[2px]";
+const OLD_ALL_DAY_EVENT_PADDING_BOTTOM_CLASS = "pb-1";
 const ALL_DAY_ACCENT_COLOR = "#34c759";
 const NEXT_DAY_PREVIEW_HEIGHT_STYLE = "calc(0.5 * var(--calendar-hour-row-height))";
 const FULL_WIDTH_EVENT_STYLE = "calc(100% - 2px)";
@@ -222,6 +225,16 @@ describe("CalendarWeekDayGrid", () => {
     expect(allDayLabel.className).toContain("tabular-nums");
     expect(allDayLabel.className).toContain(ALL_DAY_LABEL_RIGHT_PADDING_CLASS);
     expect(allDayLabel.className).not.toContain("px-2");
+  });
+
+  it("終日イベントセルの上下paddingを0.5pxにする", () => {
+    renderWeekDayGrid();
+
+    const allDayEventCell = getAllDayEventCell();
+
+    expect(allDayEventCell.className).toContain(ALL_DAY_EVENT_VERTICAL_PADDING_CLASS);
+    expect(allDayEventCell.className).not.toContain(OLD_ALL_DAY_EVENT_PADDING_TOP_CLASS);
+    expect(allDayEventCell.className).not.toContain(OLD_ALL_DAY_EVENT_PADDING_BOTTOM_CLASS);
   });
 
   it("日付ヘッダーと時刻ラベル境界には縦線を入れず、日付間だけ縦線を入れる", () => {
