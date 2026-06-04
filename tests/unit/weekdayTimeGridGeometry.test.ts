@@ -8,6 +8,9 @@ import type { CalendarTimeGridLayoutEntry } from "../../packages/core/src/calend
 const NEXT_DAY_PREVIEW_MINUTES = 30;
 const NEXT_DAY_PREVIEW_HOURS = NEXT_DAY_PREVIEW_MINUTES / WEEKDAY_MINUTES_PER_HOUR;
 const DEFAULT_MIN_HEIGHT_STYLE = "21.5px";
+const DEFAULT_HOUR_ROW_HEIGHT_PX = 80;
+const DEFAULT_MINIMUM_VISIBLE_HEIGHT_PX = 22;
+const DEFAULT_MINIMUM_VISIBLE_HEIGHT_PERCENT = (DEFAULT_MINIMUM_VISIBLE_HEIGHT_PX / (DEFAULT_HOUR_ROW_HEIGHT_PX * WEEKDAY_HOURS)) * 100;
 
 const buildEvent = ({
   id,
@@ -236,7 +239,7 @@ describe("weekday time grid geometry", () => {
     expect(beforeB.style.xOffset).toBe(afterB.style.xOffset);
   });
 
-  it("実時間で重ならない短い event は固定分数で横並びにしない", () => {
+  it("実時間で重ならず最低高さぶんの間隔も足りる短い event は横並びにしない", () => {
     const entries = layoutCalendarTimeGridEvents({
       events: [
         buildEvent({
@@ -246,13 +249,14 @@ describe("weekday time grid geometry", () => {
         }),
         buildEvent({
           id: "later-b",
-          startsAt: new Date(2026, 3, 12, 9, 20),
+          startsAt: new Date(2026, 3, 12, 9, 17),
           endsAt: new Date(2026, 3, 12, 10, 20),
         }),
       ],
       rangeStart: new Date(2026, 3, 12, 0, 0),
       rangeEnd: new Date(2026, 3, 13, 0, 0),
       layoutMode: "no-overlap",
+      minimumVisibleHeightPercent: DEFAULT_MINIMUM_VISIBLE_HEIGHT_PERCENT,
     });
 
     const firstEntry = getEntryById(entries, "short-a");
@@ -266,8 +270,43 @@ describe("weekday time grid geometry", () => {
     expect(secondEntry.columnCount).toBe(1);
     expect(secondEntry.style.xOffset).toBe(0);
     expect(secondEntry.style.width).toBe(100);
-    expect(secondEntry.style.top).toBeCloseTo(38.88888888888889, 6);
-    expect(secondEntry.style.height).toBeCloseTo(4.166666666666666, 6);
+    expect(secondEntry.style.top).toBeCloseTo(38.68055555555556, 6);
+    expect(secondEntry.style.height).toBeCloseTo(4.375, 6);
+  });
+
+  it("実時間で重ならなくても最低高さぶん伸ばすと被る event は横並び column にする", () => {
+    const entries = layoutCalendarTimeGridEvents({
+      events: [
+        buildEvent({
+          id: "short-a",
+          startsAt: new Date(2026, 3, 12, 9, 0),
+          endsAt: new Date(2026, 3, 12, 9, 5),
+        }),
+        buildEvent({
+          id: "too-close-b",
+          startsAt: new Date(2026, 3, 12, 9, 15),
+          endsAt: new Date(2026, 3, 12, 10, 20),
+        }),
+      ],
+      rangeStart: new Date(2026, 3, 12, 0, 0),
+      rangeEnd: new Date(2026, 3, 13, 0, 0),
+      layoutMode: "no-overlap",
+      minimumVisibleHeightPercent: DEFAULT_MINIMUM_VISIBLE_HEIGHT_PERCENT,
+    });
+
+    const firstEntry = getEntryById(entries, "short-a");
+    const secondEntry = getEntryById(entries, "too-close-b");
+
+    expect(firstEntry.columnCount).toBe(2);
+    expect(firstEntry.style.xOffset).toBe(0);
+    expect(firstEntry.style.width).toBe(50);
+    expect(firstEntry.style.top).toBeCloseTo(37.5, 6);
+    expect(firstEntry.style.height).toBeCloseTo(0.3472222222222222, 6);
+    expect(secondEntry.columnCount).toBe(2);
+    expect(secondEntry.style.xOffset).toBe(50);
+    expect(secondEntry.style.width).toBe(50);
+    expect(secondEntry.style.top).toBeCloseTo(38.541666666666664, 6);
+    expect(secondEntry.style.height).toBeCloseTo(4.513888888888889, 6);
   });
 
   it("実時間で重なる event は横並び column にする", () => {
