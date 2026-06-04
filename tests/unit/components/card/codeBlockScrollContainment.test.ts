@@ -10,8 +10,8 @@ const readBodyRule = () => {
   return start >= 0 && end >= 0 ? codeBlockCss.slice(start, end) : "";
 };
 
-describe("code block scroll containment", () => {
-  it("keeps vertical wheel scrolling available to the card pager", () => {
+describe("コードブロックのスクロール伝播", () => {
+  it("縦ホイールはカード一覧へ流し、横スクロールだけコードブロック内に閉じる", () => {
     const rule = readBodyRule();
 
     expect(rule).toContain("overflow-x: auto;");
