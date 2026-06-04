@@ -37,6 +37,17 @@
   user-select: none;
 }
 
+.app-sidebar button,
+.app-layered-directory button {
+  pointer-events: auto;
+  -webkit-app-region: no-drag;
+}
+
+.app-sidebar svg,
+.app-layered-directory svg {
+  pointer-events: none;
+}
+
 .app-right-sidebar {
   position: sticky;
   top: 0;
