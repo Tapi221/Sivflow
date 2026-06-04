@@ -8,7 +8,7 @@ type WorkspaceActionToolbarProps = {
 type ToolbarIconProps = SVGProps<SVGSVGElement>;
 
 type WorkspaceAction = {
-  key: "share" | "comment" | "history" | "favorite" | "more";
+  key: "share" | "comment" | "history" | "tag" | "favorite" | "more";
   label: string;
   text?: string;
 };
@@ -18,11 +18,12 @@ const ACTION_BUTTON_CLASS_NAME = "flex h-8 w-8 items-center justify-center round
 const SHARE_BUTTON_CLASS_NAME = "flex h-8 items-center gap-1.5 rounded-[10px] border border-[rgba(0,0,0,0.06)] bg-white/75 px-3 text-[13px] font-medium leading-none tracking-[-0.015em] text-[#7d7b78] shadow-[0_1px_2px_rgba(0,0,0,0.03)] outline-none backdrop-blur-xl transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.08)] hover:bg-[#f7f6f4] hover:text-[#3a3a38] active:scale-[0.98] focus-visible:border-[rgba(0,0,0,0.10)] focus-visible:bg-[#f7f6f4] focus-visible:text-[#3a3a38] motion-reduce:transition-none motion-reduce:active:scale-100";
 const ICON_CLASS_NAME = "h-[18px] w-[18px] shrink-0";
 const ICON_STROKE_WIDTH = 1.5;
-const CLOCK_ICON_STROKE_WIDTH = 1.4;
+const CLOCK_ICON_STROKE_WIDTH = 1.45;
 const ACTIONS: readonly WorkspaceAction[] = [
   { key: "share", label: "共有", text: "共有" },
   { key: "comment", label: "コメント" },
   { key: "history", label: "履歴" },
+  { key: "tag", label: "タグ" },
   { key: "favorite", label: "お気に入り" },
   { key: "more", label: "その他" },
 ];
@@ -43,6 +44,13 @@ const ClockIcon = (props: ToolbarIconProps) => (
   <svg {...props} viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <circle cx="12" cy="12" r="8.25" stroke="currentColor" strokeWidth={CLOCK_ICON_STROKE_WIDTH} />
     <path d="M12 7.75V12.5L15.2 14.1" stroke="currentColor" strokeWidth={CLOCK_ICON_STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const TagIcon = (props: ToolbarIconProps) => (
+  <svg {...props} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M4.75 5.35H11.85C12.38 5.35 12.89 5.56 13.27 5.94L19.25 11.92C20.03 12.7 20.03 13.97 19.25 14.75L14.75 19.25C13.97 20.03 12.7 20.03 11.92 19.25L5.94 13.27C5.56 12.89 5.35 12.38 5.35 11.85V4.75" stroke="currentColor" strokeWidth={ICON_STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="9" cy="9" r="1.15" stroke="currentColor" strokeWidth={ICON_STROKE_WIDTH} />
   </svg>
 );
 
@@ -68,6 +76,7 @@ const renderActionIcon = (action: WorkspaceAction) => {
   if (action.key === "share") return <ShareIcon className={ICON_CLASS_NAME} />;
   if (action.key === "comment") return <CommentIcon className={ICON_CLASS_NAME} />;
   if (action.key === "history") return <ClockIcon className={ICON_CLASS_NAME} />;
+  if (action.key === "tag") return <TagIcon className={ICON_CLASS_NAME} />;
   if (action.key === "favorite") return <StarIcon className={ICON_CLASS_NAME} />;
   return <MoreIcon className={ICON_CLASS_NAME} />;
 };
