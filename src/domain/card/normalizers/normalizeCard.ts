@@ -8,6 +8,7 @@ import { normalizeDate } from "@/shared/codec/date";
 import { toArrayOr, toBoolOr, toFiniteNumber, toStringOr } from "@/shared/codec/primitives";
 import { makeFallbackId } from "@/shared/lib/fallbackId";
 import { asRecord, pick, type UnknownRecord } from "@/shared/lib/records";
+import type { UploadedPdf } from "@/types/domain/assets";
 import type { SubjectiveScoreValue } from "@/types/domain/base";
 import type { Card, CardBlock } from "@/types/domain/card";
 
@@ -22,6 +23,7 @@ const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "reference",
   "math",
   "markdown",
+  "pdf",
 ]);
 
 const SUBJECTIVE_SCORE_VALUES = new Set<SubjectiveScoreValue>([0, 1, 2, 3]);
@@ -34,7 +36,8 @@ const isGridBlockType = (value: unknown): value is GridBlockType => {
     value === "image" ||
     value === "audio" ||
     value === "reference" ||
-    value === "math"
+    value === "math" ||
+    value === "pdf"
   );
 };
 
@@ -79,6 +82,47 @@ const resolveFallbackTextContent = (block: UnknownRecord): string => {
   }
 
   return "";
+};
+
+const normalizeUploadedPdf = (value: unknown): UploadedPdf | null => {
+  const pdf = asRecord(value);
+  if (!pdf) return null;
+
+  const id = toStringOr(pick(pdf.id, pdf.assetId, pdf.localFileId), "").trim();
+  const assetId = toStringOr(pdf.assetId, "").trim();
+  const localFileId = toStringOr(pdf.localFileId, "").trim();
+  const remoteUrl = toStringOr(pdf.remoteUrl, "").trim();
+  const localUrl = toStringOr(pdf.localUrl, "").trim();
+  const storagePath = toStringOr(pdf.storagePath, "").trim();
+  const hasSource = Boolean(id || assetId || localFileId || remoteUrl || localUrl || storagePath);
+  if (!hasSource) return null;
+
+  const status =
+    pdf.status === "pending" ||
+    pdf.status === "uploading" ||
+    pdf.status === "ready" ||
+    pdf.status === "failed"
+      ? pdf.status
+      : "ready";
+  const filename = toStringOr(pick(pdf.filename, pdf.name), "").trim() || "PDF";
+
+  return {
+    id: id || assetId || localFileId || makeFallbackId(),
+    assetId: assetId || null,
+    filename,
+    localUrl: (localUrl || null) as UploadedPdf["localUrl"],
+    remoteUrl: (remoteUrl || null) as UploadedPdf["remoteUrl"],
+    storagePath: storagePath || null,
+    localFileId: localFileId || null,
+    status,
+    contentType: toStringOr(pdf.contentType, "application/pdf") || "application/pdf",
+    size: normalizeOptionalNumber(pdf.size),
+    sizeBytes: normalizeOptionalNumber(pdf.sizeBytes),
+    retryCount: normalizeOptionalNumber(pdf.retryCount),
+    error: toStringOr(pdf.error, "") || undefined,
+    source: pdf.source === "cloud" || pdf.source === "local_fallback" ? pdf.source : undefined,
+    updatedAt: normalizeDate(pdf.updatedAt),
+  };
 };
 
 const normalizeBlockOffsets = (blockRaw: unknown) => {
@@ -170,6 +214,13 @@ const normalizeCardBlock = (
       const images = normalizeUploadedImages(block.images ?? []) as NonNullable<CardBlock["images"]>;
       if (images.length === 0) return null;
       normalized.images = images;
+      break;
+    }
+    case "pdf": {
+      const pdf = normalizeUploadedPdf(block.pdf);
+      if (!pdf) return null;
+      normalized.pdf = pdf;
+      normalized.pdfPageNumber = Math.max(1, Math.round(toFiniteNumber(block.pdfPageNumber, 1)));
       break;
     }
     case "audio": {
