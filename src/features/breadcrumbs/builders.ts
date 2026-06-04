@@ -5,43 +5,6 @@ import type { CardSet } from "@/types/domain/cardSet";
 
 type FolderLike = Pick<Folder, "id" | "folderName" | "parentFolderId">;
 
-const PAGE_LABELS: Record<string, string> = {
-  library: "ライブラリ",
-  calendar: "カレンダー",
-  gallery: "ギャラリー",
-  trash: "ゴミ箱",
-  study: "学習モード",
-  cardedit: "カード編集",
-  cardsetview: "カード閲覧",
-  directory: "ディレクトリ",
-  dictionary: "辞書",
-  questions: "疑問集",
-};
-
-const HOME_ROUTE = "/library?home=1";
-const FOLDER_LIST_ROUTE = "/library?view=section-list";
-
-const buildFolderRoute = (folderId: string | null | undefined): string => {
-  if (!folderId) {
-    return FOLDER_LIST_ROUTE;
-  }
-
-  const searchParams = new URLSearchParams();
-  searchParams.set("folderId", folderId);
-
-  return `/library?${searchParams.toString()}`;
-};
-
-const resolveTitleBarFolderListRoute = (
-  extraCrumbs: BreadcrumbCrumb[],
-): string => {
-  const currentFolderCrumb = [...extraCrumbs]
-    .reverse()
-    .find((crumb) => crumb.folderId !== undefined);
-
-  return buildFolderRoute(currentFolderCrumb?.folderId);
-};
-
 export const areBreadcrumbCrumbsEqual = (
   a: BreadcrumbCrumb[],
   b: BreadcrumbCrumb[],
@@ -57,85 +20,6 @@ export const areBreadcrumbCrumbsEqual = (
       crumb.folderId === other.folderId
     );
   });
-};
-
-export const buildRouteBreadcrumbs = ({
-  pathname,
-  search,
-}: {
-  pathname: string;
-  search: string;
-}): BreadcrumbCrumb[] => {
-  const searchParams = new URLSearchParams(search);
-  const isHomeOnlyMode =
-    pathname.toLowerCase() === "/library" && searchParams.get("home") === "1";
-
-  if (isHomeOnlyMode) {
-    return [{ label: "ホーム", to: undefined }];
-  }
-
-  const segments = pathname.split("/").filter(Boolean);
-  const crumbs: BreadcrumbCrumb[] = [{ label: "ホーム", to: HOME_ROUTE }];
-
-  segments.forEach((segment, index) => {
-    const label = PAGE_LABELS[segment.toLowerCase()] ?? segment;
-    const to = "/" + segments.slice(0, index + 1).join("/");
-    crumbs.push({ label, to });
-  });
-
-  if (crumbs.length > 1) {
-    crumbs[crumbs.length - 1] = {
-      label: crumbs[crumbs.length - 1].label,
-      to: undefined,
-    };
-  }
-
-  return crumbs;
-};
-
-export const mergeTitleBarBreadcrumbs = ({
-  pathname,
-  baseCrumbs,
-  extraCrumbs,
-}: {
-  pathname: string;
-  baseCrumbs: BreadcrumbCrumb[];
-  extraCrumbs: BreadcrumbCrumb[];
-}): BreadcrumbCrumb[] => {
-  if (extraCrumbs.length === 0) {
-    return baseCrumbs;
-  }
-
-  const normalizedPathname = pathname.toLowerCase();
-  const isCardSetViewPath = normalizedPathname.startsWith("/cardsetview");
-  const isLibraryPath = normalizedPathname.startsWith("/library");
-  const shouldUseFolderListRoute = isCardSetViewPath || isLibraryPath;
-  const folderListRoute = isLibraryPath
-    ? FOLDER_LIST_ROUTE
-    : isCardSetViewPath
-      ? resolveTitleBarFolderListRoute(extraCrumbs)
-      : FOLDER_LIST_ROUTE;
-  const shouldReplaceBaseCrumbs =
-    shouldUseFolderListRoute && baseCrumbs.length > 1;
-  const baseCrumbsForMerge = shouldReplaceBaseCrumbs
-    ? [baseCrumbs[0], { label: "フォルダ一覧", to: folderListRoute }]
-    : baseCrumbs;
-
-  const defaultLastBaseRoute = shouldUseFolderListRoute
-    ? folderListRoute
-    : HOME_ROUTE;
-
-  const clickableBaseCrumbs = baseCrumbsForMerge.map((crumb, index) =>
-    index === baseCrumbsForMerge.length - 1
-      ? { ...crumb, to: crumb.to ?? defaultLastBaseRoute }
-      : crumb,
-  );
-
-  const normalizedExtraCrumbs = extraCrumbs.map((crumb, index) =>
-    index === extraCrumbs.length - 1 ? { ...crumb, to: undefined } : crumb,
-  );
-
-  return [...clickableBaseCrumbs, ...normalizedExtraCrumbs];
 };
 
 export const buildFolderPathCrumbs = ({
