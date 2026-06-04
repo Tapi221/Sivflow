@@ -24,6 +24,7 @@ export type CalendarTimeGridLayoutOptions = {
   rangeEnd: Date;
   layoutMode?: CalendarTimeGridLayoutMode;
   includeAllDayEvents?: boolean;
+  minimumVisibleHeightPercent?: number;
 };
 
 type TimeGridLayoutProxy = {
@@ -50,8 +51,14 @@ type NoOverlapLayoutEntry = CalendarTimeGridLayoutEntry & {
   size?: number;
 };
 
+type NoOverlapHorizontalFrame = {
+  left: number;
+  right: number;
+};
+
 const MINIMUM_EVENT_DURATION_MS = 1;
 const PERCENT_MAX = 100;
+const LAYOUT_EPSILON = 0.000001;
 
 const getDateTime = (date: Date): number => date instanceof Date ? date.getTime() : Number.NaN;
 
@@ -303,6 +310,13 @@ const assignNoOverlapColumns = (entries: NoOverlapLayoutEntry[]): NoOverlapLayou
   return entries;
 };
 
+const resetNoOverlapColumns = (entries: NoOverlapLayoutEntry[]): void => {
+  for (const entry of entries) {
+    entry.idx = undefined;
+    entry.size = undefined;
+  }
+};
+
 const addNoOverlapFriend = (entry: NoOverlapLayoutEntry, friend: NoOverlapLayoutEntry): boolean => {
   if (entry === friend || entry.friends.includes(friend)) return false;
 
@@ -312,10 +326,73 @@ const addNoOverlapFriend = (entry: NoOverlapLayoutEntry, friend: NoOverlapLayout
   return true;
 };
 
+const getNoOverlapHorizontalFrame = (entry: NoOverlapLayoutEntry): NoOverlapHorizontalFrame => {
+  const width = entry.size ?? entry.style.width;
+  const left = entry.idx !== undefined && entry.size !== undefined ? entry.idx * entry.size : entry.style.xOffset;
+
+  return {
+    left,
+    right: left + width,
+  };
+};
+
+const noOverlapEntriesOverlapHorizontally = (entry: NoOverlapLayoutEntry, nextEntry: NoOverlapLayoutEntry): boolean => {
+  const frame = getNoOverlapHorizontalFrame(entry);
+  const nextFrame = getNoOverlapHorizontalFrame(nextEntry);
+
+  return frame.left < nextFrame.right - LAYOUT_EPSILON && nextFrame.left < frame.right - LAYOUT_EPSILON;
+};
+
+const isMinimumVisibleHeightEntry = (entry: NoOverlapLayoutEntry, minimumVisibleHeightPercent: number): boolean => entry.style.height < minimumVisibleHeightPercent - LAYOUT_EPSILON;
+
+const getNextMinimumVisibleHeightConflictEntry = (entry: NoOverlapLayoutEntry, sortedEntries: NoOverlapLayoutEntry[], startIndex: number, minimumVisibleHeightPercent: number): NoOverlapLayoutEntry | null => {
+  const entryVisibleEnd = entry.style.top + minimumVisibleHeightPercent;
+
+  for (let index = startIndex + 1; index < sortedEntries.length; index += 1) {
+    const nextEntry = sortedEntries[index];
+
+    if (nextEntry.style.top >= entryVisibleEnd - LAYOUT_EPSILON) return null;
+    if (timeGridEntriesOverlap(entry, nextEntry)) continue;
+    if (!noOverlapEntriesOverlapHorizontally(entry, nextEntry)) continue;
+
+    return nextEntry;
+  }
+
+  return null;
+};
+
+const resolveMinimumVisibleHeightConflicts = (entries: NoOverlapLayoutEntry[], minimumVisibleHeightPercent: number): void => {
+  if (minimumVisibleHeightPercent <= 0) return;
+
+  for (let iteration = 0; iteration < entries.length; iteration += 1) {
+    let changed = false;
+
+    resetNoOverlapColumns(entries);
+    assignNoOverlapColumns(entries);
+
+    const sortedEntries = [...entries].sort((a, b) => a.style.top - b.style.top || compareEventsForLayout(a.event, b.event));
+
+    for (let index = 0; index < sortedEntries.length - 1; index += 1) {
+      const entry = sortedEntries[index];
+
+      if (!isMinimumVisibleHeightEntry(entry, minimumVisibleHeightPercent)) continue;
+
+      const nextEntry = getNextMinimumVisibleHeightConflictEntry(entry, sortedEntries, index, minimumVisibleHeightPercent);
+      if (!nextEntry) continue;
+
+      changed = addNoOverlapFriend(entry, nextEntry) || changed;
+    }
+
+    if (!changed) return;
+  }
+};
+
 const layoutNoOverlapEvents = ({
   proxies,
+  minimumVisibleHeightPercent = 0,
 }: {
   proxies: TimeGridLayoutProxy[];
+  minimumVisibleHeightPercent?: number;
 }): CalendarTimeGridLayoutEntry[] => {
   const entries: NoOverlapLayoutEntry[] = layoutOverlapEvents({
     proxies,
@@ -343,6 +420,8 @@ const layoutNoOverlapEvents = ({
     }
   }
 
+  resolveMinimumVisibleHeightConflicts(entries, minimumVisibleHeightPercent);
+  resetNoOverlapColumns(entries);
   assignNoOverlapColumns(entries);
 
   return entries.map((entry): CalendarTimeGridLayoutEntry => {
@@ -374,6 +453,7 @@ export const layoutCalendarTimeGridEvents = ({
   rangeEnd,
   layoutMode = "overlap",
   includeAllDayEvents = false,
+  minimumVisibleHeightPercent = 0,
 }: CalendarTimeGridLayoutOptions): CalendarTimeGridLayoutEntry[] => {
   const rangeStartMs = getDateTime(rangeStart);
   const rangeEndMs = getDateTime(rangeEnd);
@@ -394,7 +474,7 @@ export const layoutCalendarTimeGridEvents = ({
     .filter((proxy): proxy is TimeGridLayoutProxy => proxy !== null);
 
   if (layoutMode === "no-overlap") {
-    return layoutNoOverlapEvents({ proxies });
+    return layoutNoOverlapEvents({ proxies, minimumVisibleHeightPercent });
   }
 
   return layoutOverlapEvents({ proxies });
