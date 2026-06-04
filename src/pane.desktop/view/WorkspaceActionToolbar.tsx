@@ -1,7 +1,5 @@
 import { memo, type CSSProperties, type SVGProps } from "react";
-
 import { Clock, Star } from "@/ui/icons";
-
 
 type WorkspaceActionToolbarProps = {
   className?: string;
@@ -31,9 +29,8 @@ const ACTIONS: readonly WorkspaceAction[] = [
 const ShareIcon = (props: ToolbarIconProps) => {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M7.25 16.5C7.25 12.62 10.1 9.75 15.25 9.75H19" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M15.75 6.5L19 9.75L15.75 13" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M5 19.25C5.72 15.35 7.45 12.5 10.25 10.85" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6.25 17.25C6.25 13.45 8.95 10.75 13.35 10.75H18.35" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M15.15 7.55L18.35 10.75L15.15 13.95" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 };
