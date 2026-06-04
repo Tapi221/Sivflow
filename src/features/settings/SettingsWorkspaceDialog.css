@@ -49,3 +49,7 @@
   height: 100%;
   flex: 1;
 }
+
+.settings-workspace-dialog .settings-workspace__nav {
+  background: var(--backpane-bg) !important;
+}
