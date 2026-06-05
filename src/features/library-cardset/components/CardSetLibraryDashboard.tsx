@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { PdfLibraryWorkspaceToolbar } from "@/features/library-pdf/components/PdfLibraryWorkspaceToolbar";
 import { buildCardSetDashboardRows, type CardSetDashboardRow } from "@/features/library-cardset/model/cardSetLibraryRow";
 import { useTags } from "@/features/settings/hooks/useTags";
-import { cn } from "@/lib/utils";
 import type { Card, CardSet, Folder } from "@/types";
 
 type CardSetLibraryDashboardProps = {
