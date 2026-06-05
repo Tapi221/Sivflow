@@ -1,13 +1,9 @@
-import type { ComponentProps } from "react";
 import { useMemo } from "react";
 import { CardPane } from "@/components/folder/panes/CardPane";
-import { PdfPane } from "@/features/pdf/PdfPane";
-import type { WorkspaceEntityTab } from "./Tab";
+import { PdfDocumentPane } from "@/features/pdf/PdfDocumentPane";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import type { Card, DocumentItem } from "@/types";
-
-type PdfPaneUpdateHandler = NonNullable<ComponentProps<typeof PdfPane>["onDocumentUpdate"]>;
-type PdfPaneUpdates = Parameters<PdfPaneUpdateHandler>[0];
+import type { WorkspaceEntityTab } from "./Tab";
 
 type WorkspaceTabPanelProps = {
   activeTab: WorkspaceEntityTab;
@@ -18,11 +14,11 @@ type WorkspaceTabPanelProps = {
   onCardUpdated: () => void;
 };
 
+const workspaceTabPanelTextClassName = "text-[18px] leading-6";
+
 const buildMapById = <TEntity extends { id: string }>(entities: TEntity[]) => {
   return new Map(entities.map((entity) => [entity.id, entity]));
 };
-
-const workspaceTabPanelTextClassName = "text-[18px] leading-6";
 
 const WorkspacePanelStatus = ({ title }: { title: string }) => {
   return (
@@ -57,13 +53,13 @@ export const WorkspaceTabPanel = ({
       return <WorkspacePanelStatus title="この文書形式は表示できません" />;
     }
 
-    const handleDocumentUpdate = async (updates: PdfPaneUpdates) => {
-      await updateDocument(document.id, updates as Partial<DocumentItem>);
+    const handleDocumentUpdate = async (updates: Partial<DocumentItem>) => {
+      await updateDocument(document.id, updates);
     };
 
     return (
       <div className={`relative h-full min-h-0 w-full overflow-hidden bg-white ${workspaceTabPanelTextClassName}`}>
-        <PdfPane doc={document} className="h-full min-h-0" onDocumentUpdate={handleDocumentUpdate} />
+        <PdfDocumentPane document={document} className="h-full min-h-0" onDocumentUpdate={handleDocumentUpdate} />
       </div>
     );
   }
