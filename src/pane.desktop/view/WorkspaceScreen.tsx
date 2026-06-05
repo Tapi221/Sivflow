@@ -12,7 +12,6 @@ import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
-import { Sidebar } from "@/pane.desktop/leftpane/Sidebar.desktop";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
@@ -49,7 +48,6 @@ const FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-5 min-w-[31px] ite
 const WORKSPACE_ACTION_TOOLBAR_CLASS_NAME = "absolute z-30";
 const WORKSPACE_ACTION_TOOLBAR_STYLE = { right: "252px", top: "12px" };
 const WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME = "max-w-[calc(100%-96px)]";
-const WORKSPACE_MAIN_CONTENT_CLASS_NAME = "relative z-0 isolate min-h-0 min-w-0 flex-1";
 const WORKSPACE_MAIN_PANEL_CLASS_NAME = "relative z-0 isolate min-w-0";
 const SIDEBAR_INTERACTION_REGION_STYLE: SidebarInteractionRegionStyle = { WebkitAppRegion: "no-drag" };
 
@@ -162,9 +160,11 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
 
   return (
     <div className="relative isolate flex h-full min-h-0 w-full overflow-hidden bg-transparent">
-      <SidebarInteractionRegion>
-        {isLeftPanelCollapsed ? <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} /> : <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />}
-      </SidebarInteractionRegion>
+      {isLeftPanelCollapsed ? null : (
+        <SidebarInteractionRegion>
+          <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />
+        </SidebarInteractionRegion>
+      )}
       <CarvePanel className={WORKSPACE_MAIN_PANEL_CLASS_NAME}>
         {loading ? <div className="h-full w-full bg-white" /> : error ? <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{error}</div> : <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} onBreadcrumbContextChange={handleBreadcrumbContextChange} folderSelectionNonce={0} navigateToSectionListToken={0} />}
         {showWorkspaceBreadcrumbs ? <WorkspaceBreadcrumbs className={selectedDocumentId ? WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME : undefined} /> : null}
@@ -192,21 +192,6 @@ const WorkspaceScreen = () => {
   const handleOpenSettings = useCallback(() => setIsSettingsDialogOpen(true), []);
 
   if (libraryExplorerState) return <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}><ExplorerWorkspaceContent explorerState={libraryExplorerState} explorerTabId={explorerTabId} isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={handleOpenSettings} onToggleLeftPanel={onToggleLeftPanel} /></SettingsDialogHost>;
-
-  if (isLeftPanelCollapsed) {
-    return (
-      <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
-        <div className="relative isolate flex h-full min-h-0 w-full overflow-hidden bg-transparent">
-          <SidebarInteractionRegion>
-            <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={handleOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />
-          </SidebarInteractionRegion>
-          <div className={WORKSPACE_MAIN_CONTENT_CLASS_NAME}>
-            <CalendarScheduleScreen isLeftPanelCollapsed={isLeftPanelCollapsed} />
-          </div>
-        </div>
-      </SettingsDialogHost>
-    );
-  }
 
   return (
     <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
