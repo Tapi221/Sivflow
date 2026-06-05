@@ -5,7 +5,6 @@ export type CloudEntityType =
   | "document"
   | "tag"
   | "asset"
-  | "projectMap"
   | "userSetting";
 
 export type PullableEntityType = Exclude<CloudEntityType, "userSetting">;
@@ -19,19 +18,9 @@ export const COLLECTION_BY_TYPE: Record<CloudEntityType, string> = {
   document: "documents",
   tag: CURRENT_TAG_COLLECTION,
   asset: "images",
-  projectMap: "projectMaps",
   userSetting: "userSettings",
 };
 
-export const PULLABLE_ENTITY_TYPES: ReadonlyArray<PullableEntityType> = [
-  "card",
-  "folder",
-  "cardSet",
-  "document",
-  "tag",
-  "asset",
-  "projectMap",
-];
+export const PULLABLE_ENTITY_TYPES: readonly PullableEntityType[] = ["card", "folder", "cardSet", "document", "tag", "asset"];
 
-export const isCloudEntityType = (value: unknown): value is CloudEntityType =>
-  typeof value === "string" && value in COLLECTION_BY_TYPE;
+export const isCloudEntityType = (value: unknown): value is CloudEntityType => typeof value === "string" && value in COLLECTION_BY_TYPE;
