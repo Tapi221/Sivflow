@@ -1,35 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
 import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/web/pdf_viewer.mjs";
 import "pdfjs-dist/web/pdf_viewer.css";
 import type { PdfViewerState } from "@/types";
-import type { BlobUrl } from "@/types/core/branded";
 import { cn } from "@/lib/utils";
-import { getDocumentBlob } from "@/services/documentFileStore";
-
-type PdfPaneDoc = {
-  id: string;
-  userId?: string;
-  name?: string;
-  title?: string;
-  fileName?: string;
-  remoteUrl?: string | null;
-  blobUrl?: BlobUrl | null;
-  localUrl?: BlobUrl | null;
-  localFileId?: string | null;
-  downloadUrl?: string | null;
-  googleDriveWebViewLink?: string | null;
-  googleDriveWebContentLink?: string | null;
-  uploadStatus?: "pending" | "queued" | "uploading" | "ready" | "failed" | null;
-  updatedAt?: unknown;
-  mimeType?: string;
-  viewerState?: PdfViewerState | null;
-};
 
 type PdfPaneProps = {
-  doc: PdfPaneDoc;
+  sourceUrl: string | null;
   className?: string;
+  viewerState?: PdfViewerState | null;
   viewerOptions?: {
     enableXfa?: boolean;
     useSystemFonts?: boolean;
@@ -37,18 +17,10 @@ type PdfPaneProps = {
     standardFontDataUrl?: string;
     opaqueCanvas?: boolean;
   };
-  onDocumentUpdate?: (updates: Partial<PdfPaneDoc>) => Promise<void> | void;
+  onViewerStateChange?: (viewerState: PdfViewerState) => Promise<void> | void;
 };
 
 type PdfDocumentProxy = Awaited<ReturnType<typeof pdfjsLib.getDocument>["promise"]>;
-
-type PdfSourceDescriptor = {
-  localFileId: string;
-  userId?: string;
-  persistedUrl: string | null;
-};
-
-type LoadedPdfSource = { kind: "data"; data: Uint8Array } | { kind: "url"; url: string };
 
 type PdfViewerInstance = InstanceType<typeof PDFViewer>;
 
@@ -82,22 +54,6 @@ const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
-
-const resolvePersistedUrl = (doc: PdfPaneDoc): string | null => {
-  return doc.blobUrl ?? doc.localUrl ?? doc.downloadUrl ?? doc.googleDriveWebContentLink ?? doc.remoteUrl ?? doc.googleDriveWebViewLink ?? null;
-};
-
-const resolveDocumentFileId = (doc: PdfPaneDoc): string => {
-  return doc.localFileId?.trim() || doc.id;
-};
-
-const resolvePdfSourceDescriptor = (doc: PdfPaneDoc): PdfSourceDescriptor => {
-  return {
-    localFileId: resolveDocumentFileId(doc),
-    userId: doc.userId,
-    persistedUrl: resolvePersistedUrl(doc),
-  };
-};
 
 const clampPdfScale = (scale: number): number => {
   if (!Number.isFinite(scale)) return DEFAULT_PDF_SCALE;
@@ -146,30 +102,10 @@ const createPdfDocumentLoadOptions = (viewerOptions: PdfPaneProps["viewerOptions
   };
 };
 
-const loadLocalPdfData = async (source: PdfSourceDescriptor): Promise<Uint8Array | null> => {
-  const blob = await getDocumentBlob(source.localFileId, { userId: source.userId });
-  if (!blob) return null;
-  return new Uint8Array(await blob.arrayBuffer());
-};
-
-const loadPdfSource = async (source: PdfSourceDescriptor): Promise<LoadedPdfSource> => {
-  let localError: unknown = null;
-
-  try {
-    const data = await loadLocalPdfData(source);
-    if (data) return { kind: "data", data };
-  } catch (error) {
-    localError = error;
-  }
-
-  if (source.persistedUrl) return { kind: "url", url: source.persistedUrl };
-  if (localError instanceof Error) throw localError;
-  throw new Error("表示できるPDFソースがありません。");
-};
-
-const loadPdfDocument = async (source: LoadedPdfSource, viewerOptions: PdfPaneProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
-  const options = createPdfDocumentLoadOptions(viewerOptions);
-  return source.kind === "data" ? pdfjsLib.getDocument({ ...options, data: source.data }).promise : pdfjsLib.getDocument({ ...options, url: source.url }).promise;
+const loadPdfDocument = async (sourceUrl: string | null, viewerOptions: PdfPaneProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
+  const normalizedSourceUrl = sourceUrl?.trim();
+  if (!normalizedSourceUrl) throw new Error("表示できるPDFソースがありません。");
+  return pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions), url: normalizedSourceUrl }).promise;
 };
 
 const releasePdfViewerDocument = (pdfViewer: PdfViewerInstance, linkService: PdfLinkServiceInstance, pdfDocument: PdfDocumentProxy | null): void => {
@@ -200,13 +136,11 @@ const addPdfViewerEventListener = (eventBus: PdfEventBusLike, eventName: string,
   };
 };
 
-const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPaneProps) => {
-  const sourceDescriptor = useMemo(() => resolvePdfSourceDescriptor(doc), [doc.blobUrl, doc.downloadUrl, doc.googleDriveWebContentLink, doc.googleDriveWebViewLink, doc.id, doc.localFileId, doc.localUrl, doc.remoteUrl, doc.userId]);
+const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onViewerStateChange }: PdfPaneProps) => {
   const viewerEnableXfa = viewerOptions?.enableXfa;
   const viewerUseSystemFonts = viewerOptions?.useSystemFonts;
   const viewerCMapUrl = viewerOptions?.cMapUrl;
   const viewerStandardFontDataUrl = viewerOptions?.standardFontDataUrl;
-  const viewerState = doc.viewerState ?? null;
   const bookmarkPages = viewerState?.bookmarkPages ?? [];
   const markPages = viewerState?.markPages ?? {};
   const historyBackPages = viewerState?.historyBackPages ?? [];
@@ -225,8 +159,8 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
   const updateViewerState = useCallback((patch: PdfViewerState) => {
     const nextViewerState = { ...(viewerStateRef.current ?? {}), ...patch };
     viewerStateRef.current = nextViewerState;
-    void onDocumentUpdate?.({ viewerState: nextViewerState });
-  }, [onDocumentUpdate]);
+    void onViewerStateChange?.(nextViewerState);
+  }, [onViewerStateChange]);
 
   const setViewerPage = useCallback((pageNumber: number, options?: { recordHistory?: boolean }) => {
     const pdfViewer = pdfViewerRef.current;
@@ -337,10 +271,7 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
       updateViewerState({ scale: clampPdfScale(scale), fitMode: "manual" });
     }));
 
-    const load = async () => {
-      const nextSource = await loadPdfSource(sourceDescriptor);
-      if (isCancelled) return;
-      const nextPdfDocument = await loadPdfDocument(nextSource, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl });
+    void loadPdfDocument(sourceUrl, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then((nextPdfDocument) => {
       if (isCancelled) {
         void nextPdfDocument.destroy();
         return;
@@ -349,9 +280,7 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
       loadedPdfDocument = nextPdfDocument;
       pdfViewer.setDocument(nextPdfDocument);
       linkService.setDocument(nextPdfDocument, null);
-    };
-
-    void load().catch((error: unknown) => {
+    }).catch((error: unknown) => {
       if (isCancelled) return;
       const message = error instanceof Error ? error.message : String(error);
       setLoadError(message || "PDFファイルの読み込みに失敗しました。");
@@ -366,7 +295,7 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
       viewerElement.replaceChildren();
       if (pdfViewerRef.current === pdfViewer) pdfViewerRef.current = null;
     };
-  }, [sourceDescriptor, updateViewerState, viewerCMapUrl, viewerEnableXfa, viewerStandardFontDataUrl, viewerUseSystemFonts]);
+  }, [sourceUrl, updateViewerState, viewerCMapUrl, viewerEnableXfa, viewerStandardFontDataUrl, viewerUseSystemFonts]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -446,3 +375,4 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
 };
 
 export { PdfPane };
+export type { PdfPaneProps };
