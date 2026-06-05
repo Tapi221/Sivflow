@@ -26,6 +26,7 @@ export const CardSetViewDesktopContent = ({ controller }: CardSetViewContentProp
       onFlip={state.handleFlip}
       onActiveScrollAnchorFaceChange={controller.handleActiveScrollAnchorFaceChange}
       onCreateCard={state.createAndFocusCard}
+      onReorderCards={controller.handleReorderCards}
       onToggleUncertainty={state.handleToggleUncertainty}
       onToggleBookmark={state.handleToggleBookmark}
     />
