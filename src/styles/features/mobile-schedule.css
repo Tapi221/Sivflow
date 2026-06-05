@@ -50,6 +50,26 @@
       left: var(--mobile-calendar-time-column-width) !important;
     }
 
+    #mobile-schedule-sidebar {
+      max-height: 100dvh;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+    }
+
+    #mobile-schedule-sidebar .app-layered-directory {
+      max-height: 100%;
+      min-height: 0;
+    }
+
+    #mobile-schedule-sidebar .app-layered-directory [class*="overflow-y-auto"] {
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+    }
+
     div:has(> div > div > button[aria-controls="mobile-schedule-sidebar"]) {
       padding-top: 10px !important;
       padding-bottom: 8px !important;
