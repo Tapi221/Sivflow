@@ -1,16 +1,50 @@
-import type { ISyncService } from "@/services/interfaces/ISyncService";
-import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from "./localDB";
+import type { ICloudSyncAdapter, ISyncService, SyncChange } from "@/services/interfaces/ISyncService";
 import { CloudSyncAdapter } from "@/services/logic/CloudSyncAdapter";
 import { DiffEngine } from "@/services/logic/DiffEngine";
 import { NetworkMonitor } from "@/services/logic/NetworkMonitor";
 import { QueueManager } from "@/services/logic/QueueManager";
 import { TelemetryService } from "@/services/logic/TelemetryService";
-import { SyncServiceV2 } from "./SyncServiceV2";
 import type { SyncContextSource } from "@/types/domain/telemetry";
+import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from "./localDB";
+import type { LocalDBLike } from "./localDB";
+import { SyncServiceV2 } from "./SyncServiceV2";
+
+type SyncServiceInternals = {
+  cloudAdapter: ICloudSyncAdapter;
+  localDB: LocalDBLike;
+  userId: string;
+};
+
+const isProjectMapChange = (change: SyncChange): boolean => change.type === "projectMap";
+
+const toProjectMapRecord = (userId: string, change: SyncChange): Record<string, unknown> => {
+  const data = change.data && typeof change.data === "object" ? { ...(change.data as Record<string, unknown>) } : {};
+  data.id = typeof data.id === "string" && data.id.length > 0 ? data.id : change.id;
+  data.userId = typeof data.userId === "string" && data.userId.length > 0 ? data.userId : userId;
+  return data;
+};
 
 class ResilientSyncService extends SyncServiceV2 {
   private isSyncRunActive = false;
   private shouldRunAgain = false;
+
+  public override async forceFullResync(): Promise<void> {
+    await super.forceFullResync();
+
+    const { cloudAdapter, localDB, userId } = this as unknown as SyncServiceInternals;
+    const diff = await cloudAdapter.pullDiff(0);
+    const projectMapChanges = diff.changes.filter(isProjectMapChange);
+
+    if (projectMapChanges.length === 0) return;
+
+    await localDB.runSyncTransaction(async () => {
+      await localDB.clearSyncTables(["projectMaps"]);
+
+      for (const change of projectMapChanges) {
+        await localDB.putSyncRecord("projectMaps", toProjectMapRecord(userId, change) as never);
+      }
+    });
+  }
 
   public override async sync(source: SyncContextSource): Promise<void> {
     if (this.isSyncRunActive) {
@@ -72,9 +106,7 @@ export class SyncServiceFactory {
     return nextPromise;
   };
 
-  private static createInstance = async (
-    userId: string,
-  ): Promise<ISyncService> => {
+  private static createInstance = async (userId: string): Promise<ISyncService> => {
     return this.createV2(userId);
   };
 
@@ -92,22 +124,12 @@ export class SyncServiceFactory {
         localdb_mode: localDbTelemetry.localdb_mode,
         localdb_reason_code: localDbTelemetry.localdb_reason_code,
         localdb_fallback_reason: localDbTelemetry.localdb_fallback_reason,
-        localdb_generation_bumped: String(
-          localDbTelemetry.localdb_generation_bumped,
-        ),
+        localdb_generation_bumped: String(localDbTelemetry.localdb_generation_bumped),
         localdb_reset_failed: String(localDbTelemetry.localdb_reset_failed),
       });
     }
 
-    return new ResilientSyncService(
-      userId,
-      db,
-      queueManager,
-      networkMonitor,
-      diffEngine,
-      cloudAdapter,
-      telemetry,
-    );
+    return new ResilientSyncService(userId, db, queueManager, networkMonitor, diffEngine, cloudAdapter, telemetry);
   };
 
   public static resetInstance = (userId?: string): void => {
