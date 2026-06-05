@@ -1,4 +1,4 @@
-import { type DragEvent, useCallback, useMemo, useState } from "react";
+import { type DragEvent, useCallback, useEffect, useMemo, useState } from "react";
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
 import { CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS, CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS, CARD_SET_VIEW_PAGER_PADDING_BLOCK, CARD_SET_VIEW_PAGER_PADDING_INLINE } from "@constants/shared/flashcard";
@@ -14,6 +14,7 @@ type DragState = {
   draggedCardId: string;
   targetCardId: string;
   placement: DropPlacement;
+  sourceCardIds: string[];
 };
 
 type CardSetViewDesktopProps = {
@@ -69,13 +70,25 @@ type ReorderableCardSurfaceProps = {
   onToggleBookmark: (card: Card) => void | Promise<void>;
 };
 
-const DRAG_HANDLE_LABEL = "Open block menu";
+type CardReorderDragPayload = {
+  cardId: string;
+  cardIds: string[];
+};
+
+const CARD_REORDER_DRAG_MIME_TYPE = "application/x-manifolia-card-reorder";
+const CARD_REORDER_HANDLE_LABEL = "カードを並び替え";
+const CARD_REORDER_HANDLE_CLASS_NAME = "absolute left-[-44px] top-4 z-20 flex h-9 w-7 items-center justify-center rounded-full border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.88)] text-[#8b96a3] opacity-0 shadow-[0_10px_30px_rgba(15,23,42,0.10)] backdrop-blur-xl transition-[opacity,background-color,color,transform] duration-150 ease-out cursor-grab active:cursor-grabbing group-hover/card-reorder:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cfd6df] hover:bg-white hover:text-[#3f4853] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
+const CARD_REORDER_HANDLE_ICON_CLASS_NAME = "text-[18px] leading-none";
 
 const resolveDropPlacement = (event: DragEvent<HTMLElement>): DropPlacement => {
   const rect = event.currentTarget.getBoundingClientRect();
   const relativeY = event.clientY - rect.top;
 
   return relativeY < rect.height / 2 ? "before" : "after";
+};
+
+const getCardIds = (cards: Card[]) => {
+  return cards.map((card) => card.id).filter((id): id is string => Boolean(id));
 };
 
 const moveCardId = ({ cardIds, draggedCardId, targetCardId, placement }: { cardIds: string[]; draggedCardId: string; targetCardId: string; placement: DropPlacement }) => {
@@ -91,6 +104,44 @@ const moveCardId = ({ cardIds, draggedCardId, targetCardId, placement }: { cardI
 
   const insertIndex = placement === "before" ? targetIndex : targetIndex + 1;
   return [...withoutDragged.slice(0, insertIndex), draggedCardId, ...withoutDragged.slice(insertIndex)];
+};
+
+const normalizeSourceCardIds = (sourceCardIds: string[], currentCardIds: string[]) => {
+  const currentCardIdSet = new Set(currentCardIds);
+  const sourceCardIdSet = new Set(sourceCardIds);
+  const liveSourceCardIds = sourceCardIds.filter((cardId) => currentCardIdSet.has(cardId));
+  const appendedCardIds = currentCardIds.filter((cardId) => !sourceCardIdSet.has(cardId));
+
+  return [...liveSourceCardIds, ...appendedCardIds];
+};
+
+const orderCardsByIds = (cards: Card[], orderedCardIds: string[]) => {
+  const cardById = new Map(cards.map((card) => [card.id, card]));
+  const orderedCardIdSet = new Set(orderedCardIds);
+  const orderedCards = orderedCardIds.map((cardId) => cardById.get(cardId)).filter((card): card is Card => Boolean(card));
+  const remainingCards = cards.filter((card) => !orderedCardIdSet.has(card.id));
+
+  return [...orderedCards, ...remainingCards];
+};
+
+const parseCardReorderDragPayload = (event: DragEvent<HTMLElement>): CardReorderDragPayload | null => {
+  const rawPayload = event.dataTransfer.getData(CARD_REORDER_DRAG_MIME_TYPE);
+  if (!rawPayload) return null;
+
+  try {
+    const payload = JSON.parse(rawPayload) as Partial<CardReorderDragPayload>;
+    if (typeof payload.cardId !== "string") return null;
+    if (!Array.isArray(payload.cardIds)) return null;
+
+    const cardIds = payload.cardIds.filter((cardId): cardId is string => typeof cardId === "string" && cardId.length > 0);
+    return { cardId: payload.cardId, cardIds };
+  } catch {
+    return null;
+  }
+};
+
+const hasCardReorderDragType = (event: DragEvent<HTMLElement>) => {
+  return Array.from(event.dataTransfer.types).includes(CARD_REORDER_DRAG_MIME_TYPE);
 };
 
 const isSameCardOrder = (left: string[], right: string[]) => {
@@ -147,11 +198,9 @@ const ReorderableCardSurface = ({
   return (
     <div className="group/card-reorder relative w-full" onDragOver={(event) => onDragOverCard(cardId, event)} onDrop={(event) => onDropCard(cardId, event)} onDragEnd={onDragEnd}>
       {isGlobalEditing ? (
-        <div className="bn-side-menu absolute left-[-44px] top-4 z-20 opacity-0 transition-opacity group-hover/card-reorder:opacity-100 focus-within:opacity-100">
-          <button type="button" draggable aria-label={DRAG_HANDLE_LABEL} title={DRAG_HANDLE_LABEL} onClick={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()} onDragStart={(event) => onDragStart(cardId, event)} onDragEnd={onDragEnd} className="bn-button cursor-grab active:cursor-grabbing">
-            <span aria-hidden className="text-[18px] leading-none">⠿</span>
-          </button>
-        </div>
+        <button type="button" draggable aria-label={CARD_REORDER_HANDLE_LABEL} title={CARD_REORDER_HANDLE_LABEL} data-card-no-flip="true" data-card-reorder-handle="true" onClick={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()} onPointerDown={(event) => event.stopPropagation()} onDragStart={(event) => onDragStart(cardId, event)} onDragEnd={onDragEnd} className={CARD_REORDER_HANDLE_CLASS_NAME}>
+          <span aria-hidden className={CARD_REORDER_HANDLE_ICON_CLASS_NAME}>⠿</span>
+        </button>
       ) : null}
 
       {isDropTarget ? (
@@ -206,8 +255,33 @@ export const CardSetViewDesktop = ({
   onToggleBookmark,
 }: CardSetViewDesktopProps) => {
   const [dragState, setDragState] = useState<DragState | null>(null);
+  const currentCardIds = useMemo(() => getCardIds(cardsForPager), [cardsForPager]);
   const effectiveCardWidthPx = currentDisplayMode === "fluid" ? Math.max(1, Math.floor(fluidAvailableWidthPx)) : Math.max(1, fixedCardWidthPx);
   const interactionModeKey = isGlobalEditing ? "edit" : "view";
+
+  const previewCardIds = useMemo(() => {
+    if (!dragState) return null;
+
+    const sourceCardIds = normalizeSourceCardIds(dragState.sourceCardIds, currentCardIds);
+    return moveCardId({
+      cardIds: sourceCardIds,
+      draggedCardId: dragState.draggedCardId,
+      targetCardId: dragState.targetCardId,
+      placement: dragState.placement,
+    });
+  }, [currentCardIds, dragState]);
+
+  const renderedCardsForPager = useMemo(() => {
+    return previewCardIds ? orderCardsByIds(cardsForPager, previewCardIds) : cardsForPager;
+  }, [cardsForPager, previewCardIds]);
+
+  const activeCardId = cardsForPager[safeCurrentIndex]?.id ?? null;
+  const renderedSafeCurrentIndex = useMemo(() => {
+    if (!activeCardId) return safeCurrentIndex;
+
+    const nextIndex = renderedCardsForPager.findIndex((card) => card.id === activeCardId);
+    return nextIndex >= 0 ? nextIndex : safeCurrentIndex;
+  }, [activeCardId, renderedCardsForPager, safeCurrentIndex]);
 
   const preserveScrollAnchorKey = useMemo(() => [currentDisplayMode, interactionModeKey, Math.round(viewZoomScale * 1000), effectiveCardWidthPx, Math.round(fluidAvailableWidthPx), layoutTransitionScrollAnchorRevision].join(":"), [currentDisplayMode, effectiveCardWidthPx, fluidAvailableWidthPx, interactionModeKey, layoutTransitionScrollAnchorRevision, viewZoomScale]);
 
@@ -222,24 +296,49 @@ export const CardSetViewDesktop = ({
     setDragState(null);
   }, []);
 
+  useEffect(() => {
+    if (isGlobalEditing) return;
+    clearDragState();
+  }, [clearDragState, isGlobalEditing]);
+
+  useEffect(() => {
+    if (!dragState) return;
+
+    const currentCardIdSet = new Set(currentCardIds);
+    const hasAllDraggedSourceCards = dragState.sourceCardIds.every((cardId) => currentCardIdSet.has(cardId));
+    if (!hasAllDraggedSourceCards) {
+      clearDragState();
+    }
+  }, [clearDragState, currentCardIds, dragState]);
+
   const handleDragStart = useCallback((cardId: string, event: DragEvent<HTMLButtonElement>) => {
-    if (!cardId || !isGlobalEditing) {
+    const sourceCardIds = getCardIds(cardsForPager);
+    if (!cardId || !isGlobalEditing || !sourceCardIds.includes(cardId)) {
       event.preventDefault();
       return;
     }
 
     event.stopPropagation();
     event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData(CARD_REORDER_DRAG_MIME_TYPE, JSON.stringify({ cardId, cardIds: sourceCardIds }));
     event.dataTransfer.setData("text/plain", cardId);
     setDragState({
       draggedCardId: cardId,
       targetCardId: cardId,
       placement: "after",
+      sourceCardIds,
     });
-  }, [isGlobalEditing]);
+  }, [cardsForPager, isGlobalEditing]);
 
   const handleDragOverCard = useCallback((cardId: string, event: DragEvent<HTMLDivElement>) => {
-    if (!dragState || !cardId || dragState.draggedCardId === cardId) {
+    if (!isGlobalEditing || !cardId || (!dragState && !hasCardReorderDragType(event))) {
+      return;
+    }
+
+    const payload = dragState ? null : parseCardReorderDragPayload(event);
+    const draggedCardId = dragState?.draggedCardId ?? payload?.cardId ?? null;
+    const sourceCardIds = dragState?.sourceCardIds ?? payload?.cardIds ?? [];
+    if (!draggedCardId || sourceCardIds.length === 0) {
       return;
     }
 
@@ -247,42 +346,50 @@ export const CardSetViewDesktop = ({
     event.stopPropagation();
     event.dataTransfer.dropEffect = "move";
 
-    const placement = resolveDropPlacement(event);
-    if (dragState.targetCardId === cardId && dragState.placement === placement) {
+    const placement = draggedCardId === cardId ? "after" : resolveDropPlacement(event);
+    if (dragState?.targetCardId === cardId && dragState.placement === placement) {
       return;
     }
 
     setDragState({
-      draggedCardId: dragState.draggedCardId,
+      draggedCardId,
       targetCardId: cardId,
       placement,
+      sourceCardIds,
     });
-  }, [dragState]);
+  }, [dragState, isGlobalEditing]);
 
   const handleDropCard = useCallback((cardId: string, event: DragEvent<HTMLDivElement>) => {
-    if (!dragState || !cardId) {
+    if (!isGlobalEditing || !cardId || (!dragState && !hasCardReorderDragType(event))) {
+      return;
+    }
+
+    const payload = dragState ? null : parseCardReorderDragPayload(event);
+    const draggedCardId = dragState?.draggedCardId ?? payload?.cardId ?? null;
+    const sourceCardIds = normalizeSourceCardIds(dragState?.sourceCardIds ?? payload?.cardIds ?? [], getCardIds(cardsForPager));
+    if (!draggedCardId || sourceCardIds.length === 0) {
       return;
     }
 
     event.preventDefault();
     event.stopPropagation();
 
-    const currentCardIds = cardsForPager.map((card) => card.id).filter((id): id is string => Boolean(id));
+    const placement = dragState?.targetCardId === cardId ? dragState.placement : resolveDropPlacement(event);
     const nextCardIds = moveCardId({
-      cardIds: currentCardIds,
-      draggedCardId: dragState.draggedCardId,
+      cardIds: sourceCardIds,
+      draggedCardId,
       targetCardId: cardId,
-      placement: dragState.targetCardId === cardId ? dragState.placement : resolveDropPlacement(event),
+      placement,
     });
 
     clearDragState();
 
-    if (isSameCardOrder(currentCardIds, nextCardIds)) {
+    if (isSameCardOrder(sourceCardIds, nextCardIds)) {
       return;
     }
 
     void onReorderCards(nextCardIds);
-  }, [cardsForPager, clearDragState, dragState, onReorderCards]);
+  }, [cardsForPager, clearDragState, dragState, isGlobalEditing, onReorderCards]);
 
   const renderCard = useCallback((card: Card, _idx: number, isActive: boolean) => {
     return (
@@ -297,7 +404,7 @@ export const CardSetViewDesktop = ({
         viewZoomScale={viewZoomScale}
         folderId={folderId}
         cardSetId={cardSetId}
-        cardsOverride={isGlobalEditing ? cardsForPager : undefined}
+        cardsOverride={isGlobalEditing ? renderedCardsForPager : undefined}
         dragState={dragState}
         onFlip={onFlip}
         onDragStart={handleDragStart}
@@ -308,7 +415,7 @@ export const CardSetViewDesktop = ({
         onToggleBookmark={onToggleBookmark}
       />
     );
-  }, [cardSetId, cardsForPager, clearDragState, currentCardLayoutMode, currentDisplayMode, dragState, flippedCardIds, folderId, handleDragOverCard, handleDragStart, handleDropCard, isGlobalEditing, onFlip, onToggleBookmark, onToggleUncertainty, settings, viewZoomScale]);
+  }, [cardSetId, clearDragState, currentCardLayoutMode, currentDisplayMode, dragState, flippedCardIds, folderId, handleDragOverCard, handleDragStart, handleDropCard, isGlobalEditing, onFlip, onToggleBookmark, onToggleUncertainty, renderedCardsForPager, settings, viewZoomScale]);
 
   if (isLoading) {
     return <div className="h-full min-h-0 w-full" />;
@@ -320,8 +427,8 @@ export const CardSetViewDesktop = ({
 
   return (
     <VerticalCardPager
-      cards={cardsForPager}
-      activeIndex={safeCurrentIndex}
+      cards={renderedCardsForPager}
+      activeIndex={renderedSafeCurrentIndex}
       onActiveIndexChange={onActiveIndexChange}
       onFlip={onFlip}
       paddingInlinePx={CARD_SET_VIEW_PAGER_PADDING_INLINE}
@@ -330,7 +437,7 @@ export const CardSetViewDesktop = ({
       disableItemChrome={isGlobalEditing}
       getCardWidthSpec={() => currentDisplayMode === "fluid" ? { mode: "stretch" as const } : { mode: "fixed" as const, widthPx: effectiveCardWidthPx }}
       getKey={(card) => card.id}
-      disableVirtualization={false}
+      disableVirtualization={Boolean(dragState)}
       onActiveScrollAnchorFaceChange={onActiveScrollAnchorFaceChange}
       getScrollAnchorSelector={getScrollAnchorSelector}
       preserveScrollAnchorKey={preserveScrollAnchorKey}
