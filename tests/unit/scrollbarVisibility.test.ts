@@ -2,33 +2,64 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
+type CssRule = { selectors: string[]; body: string };
+
 const SCROLLBAR_STYLE_PATHS = [
   "src/styles/index.css",
   "src/styles/base/base.css",
 ] as const;
+const HIDDEN_SCROLLBAR_SELECTORS = [".scrollbar-hidden", ".calendar-year-view"] as const;
+const HIDDEN_WEBKIT_SCROLLBAR_SELECTORS = [".scrollbar-hidden::-webkit-scrollbar", ".calendar-year-view::-webkit-scrollbar"] as const;
 
 const readStyleFile = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8");
 
-const extractRuleBody = (css: string, selector: string) => {
-  const rulePattern = new RegExp(`${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`);
-  const match = css.match(rulePattern);
+const parseCssRules = (css: string): CssRule[] => {
+  const rules = css.match(/[^{}]+\{[^{}]*\}/g) ?? [];
 
-  return match?.[1]?.trim() ?? "";
+  return rules.map((rule) => {
+    const bodyStartIndex = rule.indexOf("{");
+    const bodyEndIndex = rule.lastIndexOf("}");
+    const selectorText = rule.slice(0, Math.max(0, bodyStartIndex)).trim();
+    const body = rule.slice(bodyStartIndex + 1, bodyEndIndex).trim();
+
+    return {
+      selectors: selectorText.split(",").map((selector) => selector.trim()).filter(Boolean),
+      body,
+    };
+  });
 };
 
+const extractRuleBody = (css: string, selector: string) => parseCssRules(css).find((rule) => rule.selectors.length === 1 && rule.selectors[0] === selector)?.body ?? "";
+
+const extractRuleBodiesBySelector = (css: string, selector: string) => parseCssRules(css).filter((rule) => rule.selectors.includes(selector)).map((rule) => rule.body);
+
 const extractCustomPropertyValue = (css: string, propertyName: string) => {
-  const propertyPattern = new RegExp(`${propertyName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*:\\s*([^;]+);`);
+  const propertyPattern = new RegExp(`${propertyName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\s*:\s*([^;]+);`);
   const match = css.match(propertyPattern);
 
   return match?.[1]?.trim() ?? "";
 };
 
-const extractRuleSelectors = (css: string, declaration: string) => {
-  const rules = css.match(/[^{}]+\{[^{}]*\}/g) ?? [];
+const extractRuleSelectors = (css: string, declaration: string) => parseCssRules(css).filter((rule) => rule.body.includes(declaration)).flatMap((rule) => rule.selectors);
 
-  return rules
-    .filter((rule) => rule.includes(declaration))
-    .map((rule) => rule.slice(0, Math.max(0, rule.indexOf("{"))).trim());
+const expectSelectorRuleBodiesToContain = (css: string, selector: string, declarations: readonly string[]) => {
+  const ruleBodies = extractRuleBodiesBySelector(css, selector);
+  const ruleBody = ruleBodies.join("\n");
+
+  expect(ruleBodies.length).toBeGreaterThan(0);
+  for (const declaration of declarations) {
+    expect(ruleBody).toContain(declaration);
+  }
+};
+
+const expectHiddenScrollbarSelectorToNotReserveGutter = (css: string, selector: string) => {
+  const ruleBodies = extractRuleBodiesBySelector(css, selector);
+  const ruleBody = ruleBodies.join("\n");
+
+  expect(ruleBodies.length).toBeGreaterThan(0);
+  expect(ruleBody).toContain("scrollbar-gutter: auto;");
+  expect(ruleBody).toContain("scrollbar-width: none;");
+  expect(ruleBody).not.toContain("scrollbar-gutter: stable;");
 };
 
 const expectScrollbarRevealSelectorsToUseHoverOnly = (css: string) => {
@@ -70,15 +101,13 @@ describe("グローバルCSSではネイティブスクロールバーを 1px �
 
   it("非表示スクロールバーはスクロールバー溝を予約しない共通レイアウトにする", () => {
     const css = readStyleFile("src/styles/index.css");
-    const hiddenRuleBody = extractRuleBody(css, ".scrollbar-hidden,\n.calendar-year-view");
-    const hiddenWebkitRuleBody = extractRuleBody(css, ".scrollbar-hidden::-webkit-scrollbar,\n.calendar-year-view::-webkit-scrollbar");
 
-    expect(hiddenRuleBody).toContain("scrollbar-gutter: auto;");
-    expect(hiddenRuleBody).toContain("scrollbar-width: none;");
-    expect(hiddenRuleBody).not.toContain("scrollbar-gutter: stable;");
-    expect(hiddenWebkitRuleBody).toContain("display: none;");
-    expect(hiddenWebkitRuleBody).toContain("width: 0;");
-    expect(hiddenWebkitRuleBody).toContain("height: 0;");
+    for (const selector of HIDDEN_SCROLLBAR_SELECTORS) {
+      expectHiddenScrollbarSelectorToNotReserveGutter(css, selector);
+    }
+    for (const selector of HIDDEN_WEBKIT_SCROLLBAR_SELECTORS) {
+      expectSelectorRuleBodiesToContain(css, selector, ["display: none;", "width: 0;", "height: 0;"]);
+    }
   });
 
   it("コードブロックは専用CSSを維持し、共通 scrollbar-hidden を付けない", () => {
