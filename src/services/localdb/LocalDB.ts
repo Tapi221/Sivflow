@@ -261,6 +261,14 @@ export class LocalDB extends Dexie {
     return this.cardSets.where("userId").equals(userId).toArray();
   }
 
+  async addCardSet(cardSet: CardSet): Promise<void> {
+    await this.cardSets.put(cardSet);
+  }
+
+  async updateCardById(id: string, changes: Partial<Card>): Promise<number> {
+    return this.cards.update(id, changes);
+  }
+
   async getSyncSettings(id: string): Promise<SyncSettings | undefined> {
     return this.syncSettings.get(id);
   }
@@ -277,67 +285,137 @@ export class LocalDB extends Dexie {
     await this.syncErrors.put(error);
   }
 
+  async clearSyncErrors(): Promise<void> {
+    await this.syncErrors.clear();
+  }
+
   async getRetryableSyncErrors(): Promise<SyncError[]> {
-    return this.syncErrors.where("retryable").equals(1).toArray();
+    return this.syncErrors.toArray();
   }
 
   async findQueueProcessingErrorsByTargetId(targetId: string): Promise<SyncError[]> {
-    return this.syncErrors.filter((error) => {
-      const metadata = error.metadata as { targetId?: string } | undefined;
-      return metadata?.targetId === targetId && error.phase === "queue_dlq";
-    }).toArray();
+    return this.syncErrors.where("targetId").equals(targetId).toArray();
   }
 
   async putSyncHistory(history: SyncHistory): Promise<void> {
     await this.syncHistory.put(history);
   }
 
-  async getRecentSyncHistory(limit = 10): Promise<SyncHistory[]> {
-    const rows = await this.syncHistory.toArray();
-    return rows.sort(compareSyncHistoryNewestFirst).slice(0, limit);
+  async getRecentSyncHistory(limit = 50): Promise<SyncHistory[]> {
+    const histories = await this.syncHistory.toArray();
+    return histories.sort(compareSyncHistoryNewestFirst).slice(0, limit);
   }
 
   async getSyncStatsSince(timestamp: number): Promise<{ histories: SyncHistory[]; errors: SyncError[] }> {
-    const [histories, errors] = await Promise.all([this.syncHistory.toArray(), this.syncErrors.toArray()]);
-    return {
-      histories: histories.filter((history) => history.startedAt >= timestamp).sort(compareSyncHistoryNewestFirst),
-      errors: errors.filter((error) => error.occurredAt >= timestamp),
-    };
+    const histories = (await this.syncHistory.toArray()).filter((history) => history.startedAt >= timestamp);
+    const errors = await this.syncErrors.toArray();
+    return { histories, errors };
   }
 
   async getSyncQueueCount(): Promise<number> {
-    return this.syncQueue.where("status").equals("pending").count();
+    return this.syncQueue.count();
+  }
+
+  async getQueuedItemsOldestFirst(): Promise<SyncQueueItem[]> {
+    const items = await this.syncQueue.toArray();
+    return items.sort(compareSyncQueueOldestFirst);
+  }
+
+  async trimSyncQueueToLimit(limit: number): Promise<void> {
+    const all = await this.getQueuedItemsOldestFirst();
+    if (all.length > limit) {
+      await this.syncQueue.bulkDelete(all.slice(0, all.length - limit).map((item) => item.id));
+    }
+  }
+
+  async putSyncQueueItem(item: SyncQueueItem): Promise<void> {
+    await this.syncQueue.put(item);
+  }
+
+  async removeSyncQueueItem(id: string): Promise<void> {
+    await this.syncQueue.delete(id);
+  }
+
+  async putConflict(conflict: SyncConflict): Promise<void> {
+    await this.conflicts.put(conflict);
+  }
+
+  async getConflict(id: string): Promise<SyncConflict | undefined> {
+    return this.conflicts.get(id);
+  }
+
+  async getConflicts(): Promise<SyncConflict[]> {
+    return this.conflicts.toArray();
+  }
+
+  async removeConflict(id: string): Promise<void> {
+    await this.conflicts.delete(id);
+  }
+
+  async getImageRecord(id: string): Promise<AssetRecord | UploadedImage | undefined> {
+    return this.images.get(id);
+  }
+
+  async putImageRecord(record: AssetRecord | UploadedImage): Promise<void> {
+    await this.images.put(record);
+  }
+
+  async updateImageRecord(id: string, changes: Partial<AssetRecord & UploadedImage>): Promise<number> {
+    return this.images.update(id, changes);
   }
 
   async queueUpsertSync<TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high" }: { entity: TEntity; operationType: "create" | "update"; payload: SyncPayloadByEntity[TEntity]; priority?: SyncPriority }): Promise<void> {
     await this.syncQueue.put(createUpsertQueueItem({ entity, operationType, payload, priority }));
-    this.triggerSync();
+    this.emitSyncTrigger();
   }
 
   async queueDeleteSync({ entity, targetId, priority = "high" }: { entity: DeleteEntity; targetId: string; priority?: SyncPriority }): Promise<void> {
     await this.syncQueue.put(createDeleteQueueItem({ entity, targetId, priority }));
-    this.triggerSync();
+    this.emitSyncTrigger();
   }
 
-  private async enqueueSync(table: string, operationType: SyncDirection, payload: unknown): Promise<void> {
-    if (!isSyncableTableName(table)) return;
-    const entity = entityNameMap[table];
-    const targetId = getPayloadId(payload);
-    if (!targetId) return;
+  async enqueueSync(tableName: string, type: SyncDirection, payload: unknown): Promise<void> {
+    if (!isSyncableTableName(tableName)) return;
 
-    if ((payload as Record<string, unknown>).isDeleted === true && entity !== "userSetting") {
-      await this.queueDeleteSync({ entity: entity as DeleteEntity, targetId, priority: "high" });
-      return;
+    const entity = entityNameMap[tableName];
+    const payloadId = getPayloadId(payload) ?? nanoid();
+    const task = type === "upload"
+      ? createUpsertQueueItem({ entity: entity as UpsertEntity, operationType: "update", payload: payload as never, priority: "high" })
+      : createDeleteQueueItem({ entity: entity as DeleteEntity, targetId: payloadId, priority: "high" });
+
+    await this.syncQueue.add(task);
+
+    if (tableName === "cards" && type === "upload") {
+      await this.cards.update(payloadId, { syncState: "pending" } satisfies Partial<Card>);
     }
 
-    if (operationType === "download") return;
-    await this.queueUpsertSync({ entity: entity as UpsertEntity, operationType: "update", payload: payload as never, priority: "high" });
+    this.emitSyncTrigger();
   }
 
-  private triggerSync(): void {
+  private emitSyncTrigger(): void {
     if (!this.syncTrigger) return;
     setTimeout(() => this.syncTrigger?.(), 0);
   }
+
+  static getDatabaseNameForUser(userId: string = "anonymous"): string {
+    return _getDatabaseNameForUser(userId);
+  }
+
+  static async getInstance(userId?: string): Promise<LocalDB> {
+    return getInstanceImpl(userId) as unknown as Promise<LocalDB>;
+  }
+
+  static async resetForLogout(userId?: string): Promise<void> {
+    return resetLocalDBForLogout(userId);
+  }
+
+  static getInstanceUserId(): string | null {
+    return getInstanceUserIdImpl();
+  }
+
+  static clearInstance(): void {
+    clearInstanceImpl();
+  }
 }
 
-export { clearInstanceImpl as clearInstance, getInstanceImpl as getInstance, getInstanceUserIdImpl as getInstanceUserId, getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };
+export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };
