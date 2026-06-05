@@ -19,6 +19,9 @@ const GLOBAL_SEARCH_TRIGGER_CLASS_NAME = "absolute right-5 top-4 z-30 flex h-9 w
 const GLOBAL_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-[22px] min-w-[34px] items-center justify-center rounded-[6px] border border-[#e6e6e8] bg-[#f7f7f8] px-1.5 text-[11px] font-semibold leading-none tracking-[-0.02em] text-[#8e8e93] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
 const LEFT_PANEL_COLLAPSED_STORAGE_VALUE = "collapsed";
+const MOBILE_SCHEDULE_SIDEBAR_SELECTOR = "#mobile-schedule-sidebar";
+const MOBILE_SCHEDULE_SIDEBAR_TOGGLE_SELECTOR = ".app-layered-directory__workspace-toggle";
+const MOBILE_SCHEDULE_SIDEBAR_CLOSE_BUTTON_SELECTOR = 'button[aria-label="サイドバーを閉じる"]';
 
 const readStoredLeftPanelCollapsed = (): boolean => {
   if (typeof window === "undefined") return false;
@@ -45,6 +48,14 @@ const persistLeftPanelCollapsed = (isCollapsed: boolean) => {
   }
 };
 
+const getMobileScheduleSidebarCloseButton = (target: EventTarget | null): HTMLButtonElement | null => {
+  if (!(target instanceof Element)) return null;
+  if (!target.closest(MOBILE_SCHEDULE_SIDEBAR_TOGGLE_SELECTOR)) return null;
+
+  const mobileScheduleSidebar = target.closest(MOBILE_SCHEDULE_SIDEBAR_SELECTOR);
+  return mobileScheduleSidebar?.parentElement?.querySelector<HTMLButtonElement>(MOBILE_SCHEDULE_SIDEBAR_CLOSE_BUTTON_SELECTOR) ?? null;
+};
+
 const AppLayout = () => {
   const { pathname, isFoldersRoute, isScheduleRoute, isScrollLocked } = useLayoutRouteStateDesktop();
 
@@ -66,12 +77,28 @@ const AppLayout = () => {
     bumpWorkspaceLayoutRevision();
     setIsRightSidebarOpen((current) => !current);
   }, [bumpWorkspaceLayoutRevision]);
+  const handleMobileScheduleSidebarToggle = useCallback((event: MouseEvent) => {
+    const closeButton = getMobileScheduleSidebarCloseButton(event.target);
+    if (!closeButton) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    closeButton.click();
+  }, []);
   const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed, onToggleLeftPanel: handleToggleLeftPanel }), [handleToggleLeftPanel, isLeftPanelCollapsed]);
   const showGlobalSearchTrigger = !isScheduleRoute;
 
   useEffect(() => {
     persistLeftPanelCollapsed(isLeftPanelCollapsed);
   }, [isLeftPanelCollapsed]);
+
+  useEffect(() => {
+    document.addEventListener("click", handleMobileScheduleSidebarToggle, true);
+
+    return () => {
+      document.removeEventListener("click", handleMobileScheduleSidebarToggle, true);
+    };
+  }, [handleMobileScheduleSidebarToggle]);
 
   useHotKeyDesktop({
     onToggleRightSidebar: handleToggleRightSidebar,
