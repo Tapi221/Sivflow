@@ -205,17 +205,16 @@ export const useLayeredTreeDragDrop = <TItem extends LayeredTreeItem>({ rootItem
   }, [clearDragState, clearDropTarget, commitDrop, getValidDropInstruction, stopAutoScroll]);
 
   const handleListDragOver = useCallback((event: ReactDragEvent<HTMLElement>) => {
-    if (isLayeredTreeRowEventTarget(event.target)) return;
     scheduleAutoScroll(event);
-    const instruction = getValidAppendDropInstruction();
+    const instruction = getResolvedDropInstruction(event) ?? getValidAppendDropInstruction();
     if (!instruction) return;
 
     event.preventDefault();
     event.stopPropagation();
     event.dataTransfer.dropEffect = "move";
-    clearAutoExpandTimer();
+    scheduleAutoExpand(instruction);
     setDropInstruction((current) => isLayeredTreeDropInstructionEqual(current, instruction) ? current : instruction);
-  }, [clearAutoExpandTimer, getValidAppendDropInstruction, scheduleAutoScroll]);
+  }, [getResolvedDropInstruction, getValidAppendDropInstruction, scheduleAutoExpand, scheduleAutoScroll]);
 
   const handleListDragLeave = useCallback((event: ReactDragEvent<HTMLElement>) => {
     const relatedTarget = event.relatedTarget;
@@ -225,15 +224,14 @@ export const useLayeredTreeDragDrop = <TItem extends LayeredTreeItem>({ rootItem
   }, [clearDropTarget, stopAutoScroll]);
 
   const handleListDrop = useCallback((event: ReactDragEvent<HTMLElement>) => {
-    if (isLayeredTreeRowEventTarget(event.target)) return;
-    const instruction = getValidAppendDropInstruction();
+    const instruction = getResolvedDropInstruction(event) ?? getValidAppendDropInstruction();
     if (!instruction) return;
 
     event.preventDefault();
     event.stopPropagation();
     setDropInstruction(null);
     void commitDrop(instruction).finally(clearDragState);
-  }, [clearDragState, commitDrop, getValidAppendDropInstruction]);
+  }, [clearDragState, commitDrop, getResolvedDropInstruction, getValidAppendDropInstruction]);
 
   useEffect(() => {
     if (!draggingId && !dropInstruction) return;
