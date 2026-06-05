@@ -352,7 +352,7 @@ describe("weekday event chip inline time layout", () => {
 
   it("横並び表示に切り替わっても測定基準を変えず、タイトル下表示へ発振しない", async () => {
     const observerCallbacks: ResizeObserverCallback[] = [];
-    const resizeObserverConstructor = vi.fn((callback: ResizeObserverCallback): ResizeObserverMock => {
+    const resizeObserverConstructor = vi.fn(function (callback: ResizeObserverCallback): ResizeObserverMock {
       observerCallbacks.push(callback);
 
       return {
