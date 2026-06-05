@@ -52,8 +52,10 @@ const CALENDAR_PRINT_POPOVER_FIELD_CLASS_NAME = "flex flex-col gap-1";
 const CALENDAR_PRINT_POPOVER_LABEL_CLASS_NAME = "px-1 text-[10px] font-semibold leading-none tracking-[-0.01em] text-[#9a9691]";
 const CALENDAR_PRINT_RANGE_DATE_INPUT_CLASS_NAME = "h-7 w-full rounded-[7px] border border-transparent bg-[#f7f7f8] px-1.5 text-[11px] font-semibold leading-none tracking-[-0.01em] text-[#4b5563] outline-none ring-0 focus:border-[#dedede] focus:bg-white focus:outline-none focus:ring-0 focus-visible:outline-none";
 const CALENDAR_PRINT_POPOVER_ACTION_CLASS_NAME = "mt-1 flex h-7 w-full items-center justify-center gap-1 rounded-[7px] border-0 bg-transparent px-2 text-[12px] font-semibold leading-none tracking-[-0.012em] text-[#85827e] outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
-const MONTH_EVENT_COUNT_CONTROL_CLASS_NAME = "flex h-7 shrink-0 items-center overflow-hidden rounded-[9px] border border-[#eeeeee] bg-white text-[11px] font-semibold leading-none tracking-[-0.01em] text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.06)]";
-const MONTH_EVENT_COUNT_BUTTON_CLASS_NAME = "flex h-7 w-7 items-center justify-center text-[#8c8c8c] outline-none transition-colors duration-200 hover:bg-[#f7f7f8] hover:text-[#4b5563] focus:outline-none focus:ring-0 focus-visible:bg-[#f7f7f8] disabled:cursor-not-allowed disabled:opacity-40";
+const MONTH_EVENT_COUNT_CONTROL_CLASS_NAME = "relative inline-grid h-7 w-max shrink-0 grid-flow-col items-center gap-1 rounded-none bg-transparent p-0 text-[12px] font-semibold leading-none tracking-[-0.012em]";
+const MONTH_EVENT_COUNT_LABEL_CLASS_NAME = "relative z-10 flex h-7 min-h-0 items-center justify-center px-1 text-[12px] font-semibold leading-none tracking-[-0.012em] text-[#85827e]";
+const MONTH_EVENT_COUNT_BUTTON_CLASS_NAME = "relative z-10 flex h-7 min-h-0 w-7 min-w-0 shrink-0 items-center justify-center rounded-[7px] p-0 text-[#85827e] outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.94] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100";
+const MONTH_EVENT_COUNT_VALUE_CLASS_NAME = "relative z-10 flex h-7 min-w-[18px] items-center justify-center px-0.5 text-center text-[12px] font-semibold leading-none tracking-[-0.012em] text-[#2f343b]";
 const DEFAULT_CALENDAR_PRINT_RANGE: CalendarPrintRangeState = { mode: "current", customStartDate: "", customEndDate: "" };
 
 const clampMonthVisibleEventCount = (value: number): number => Math.min(C.MONTH_VISIBLE_EVENT_COUNT_MAX, Math.max(C.MONTH_VISIBLE_EVENT_COUNT_MIN, Math.round(value)));
@@ -171,11 +173,11 @@ const ScheduleScreenHeaderDesktop = ({
 
         {showMonthEventCountControl && (
           <div className={MONTH_EVENT_COUNT_CONTROL_CLASS_NAME} role="group" aria-label={t.monthEventCountLabel} title={t.monthEventCountLabel}>
-            <span className="px-2 text-[10px] text-[#9ca3af]">{t.monthEventCountShortLabel}</span>
+            <span className={MONTH_EVENT_COUNT_LABEL_CLASS_NAME}>{t.monthEventCountShortLabel}</span>
             <button type="button" className={MONTH_EVENT_COUNT_BUTTON_CLASS_NAME} aria-label={t.monthEventCountDecreaseLabel} title={t.monthEventCountDecreaseLabel} disabled={!canDecreaseMonthEventCount} onClick={handleDecreaseMonthVisibleEventCount}>
               <Minus className="h-3.5 w-3.5" />
             </button>
-            <span className="min-w-[18px] text-center text-[11px] text-[#4b5563]" aria-live="polite">{monthVisibleEventCount}</span>
+            <span className={MONTH_EVENT_COUNT_VALUE_CLASS_NAME} aria-live="polite">{monthVisibleEventCount}</span>
             <button type="button" className={MONTH_EVENT_COUNT_BUTTON_CLASS_NAME} aria-label={t.monthEventCountIncreaseLabel} title={t.monthEventCountIncreaseLabel} disabled={!canIncreaseMonthEventCount} onClick={handleIncreaseMonthVisibleEventCount}>
               <Plus className="h-3.5 w-3.5" />
             </button>
