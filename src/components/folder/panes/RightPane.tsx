@@ -1,12 +1,8 @@
 import { FolderDashboard } from "@/components/folder/components/views/FolderDashboard";
 import { CardSetViewScreen } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewScreen";
-import { PdfPane } from "@/features/pdf/PdfPane";
+import { PdfDocumentPane } from "@/features/pdf/PdfDocumentPane";
 import type { Card, DocumentItem, SelectedExplorerItem } from "@/types";
 import { CardPane } from "./CardPane";
-
-type PdfPaneUpdateHandler = NonNullable<React.ComponentProps<typeof PdfPane>["onDocumentUpdate"]>;
-
-type PdfPaneUpdates = Parameters<PdfPaneUpdateHandler>[0];
 
 type RightPaneProps = {
   selectedItem: SelectedExplorerItem;
@@ -69,12 +65,12 @@ export const RightPane = ({
     }
 
     return (
-      <PdfPane
-        doc={selectedDocument}
+      <PdfDocumentPane
+        document={selectedDocument}
         onDocumentUpdate={
           onDocumentUpdated
-            ? async (updates: PdfPaneUpdates) => {
-              await onDocumentUpdated(selectedDocument.id, updates as Partial<DocumentItem>);
+            ? async (updates: Partial<DocumentItem>) => {
+              await onDocumentUpdated(selectedDocument.id, updates);
             }
             : undefined
         }
