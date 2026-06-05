@@ -3,6 +3,8 @@ import { useCardSetViewViewState } from "./useCardSetViewViewState";
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
+type ReorderCardsInCardSet = (cardSetId: string, cardIds: string[]) => Promise<void>;
+
 interface UseCardSetViewStateOptions {
   initialIndex: number;
   targetCardId: string | null;
@@ -14,6 +16,7 @@ interface UseCardSetViewStateOptions {
     cardData: Partial<Card> & { cardSetId: string },
   ) => Promise<unknown>;
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
+  reorderCardsInCardSet: ReorderCardsInCardSet;
   selectedCardSet: CardSet | null;
   toastError: (msg: string) => void;
   deviceScope: string;
@@ -28,6 +31,7 @@ export const useCardSetViewState = ({
   cardIndexById,
   createCard,
   updateCard,
+  reorderCardsInCardSet,
   selectedCardSet,
   toastError,
   deviceScope,
@@ -71,6 +75,7 @@ export const useCardSetViewState = ({
     setInteractionMode: viewState.setInteractionMode,
     selectedCard: viewState.selectedCard,
     cardsForPager: viewState.cardsForPager,
+    reorderCardsInCardSet,
     createAndFocusCard: actions.createAndFocusCard,
     setCurrentCardFace: viewState.setCurrentCardFace,
     handleEdit: actions.handleEdit,
