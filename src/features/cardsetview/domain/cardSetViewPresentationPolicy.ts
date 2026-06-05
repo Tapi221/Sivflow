@@ -8,6 +8,13 @@ type ResolveZoomWidthArgs = {
   cardLayoutMode: CardLayoutMode;
 };
 
+type ResolveCardSetViewDevicePresentationArgs = {
+  deviceScope: string;
+};
+
+const MOBILE_CARD_SET_VIEW_DEVICE_SCOPE = "mobile";
+const MOBILE_CARD_SET_VIEW_ZOOM_PERCENT = 100;
+
 // zoom semantics must remain identical between view/edit.
 // interactionMode-dependent behavior belongs outside this policy layer.
 const clampZoomPercentRange = (value: number) => {
@@ -30,6 +37,26 @@ const roundToStep = (value: number, stepPercent: number): number => {
     Math.round(safeValue / safeStepPercent) * safeStepPercent;
 
   return Number(roundedValue.toFixed(4));
+};
+
+const isMobileCardSetViewDevicePresentation = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
+  return deviceScope === MOBILE_CARD_SET_VIEW_DEVICE_SCOPE;
+};
+
+export const resolveCardSetViewUsesViewportWidth = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
+  return isMobileCardSetViewDevicePresentation({ deviceScope });
+};
+
+export const resolveCardSetViewUsesZoomPreference = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
+  return !isMobileCardSetViewDevicePresentation({ deviceScope });
+};
+
+export const resolveCardSetViewZoomPercentOverride = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
+  return isMobileCardSetViewDevicePresentation({ deviceScope }) ? MOBILE_CARD_SET_VIEW_ZOOM_PERCENT : null;
+};
+
+export const resolveCardSetViewShowsConstraintIndicator = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
+  return !isMobileCardSetViewDevicePresentation({ deviceScope });
 };
 
 export const clampNormalizedZoomPercent = (
@@ -122,6 +149,23 @@ export const resolveUsablePresentationWidthPx = ({
   return Math.max(0, Math.floor(viewportWidthPx - scrollbarReservePx));
 };
 
+export const resolveCardSetViewUsablePresentationWidthPx = ({
+  deviceScope,
+  viewportWidthPx,
+}: ResolveCardSetViewDevicePresentationArgs & {
+  viewportWidthPx: number;
+}) => {
+  if (resolveCardSetViewUsesViewportWidth({ deviceScope })) {
+    if (!Number.isFinite(viewportWidthPx) || viewportWidthPx <= 0) {
+      return 0;
+    }
+
+    return Math.max(0, Math.floor(viewportWidthPx));
+  }
+
+  return resolveUsablePresentationWidthPx({ viewportWidthPx });
+};
+
 export const resolvePresentationMaxWidthPx = ({
   usableWidthPx,
   displayMode,
@@ -144,6 +188,40 @@ export const resolvePresentationMaxWidthPx = ({
     1,
     Math.floor(usableWidthPx - fixedAllowancePx - splitAllowancePx),
   );
+};
+
+export const resolveCardSetViewMaxPresentationWidthPx = ({
+  deviceScope,
+  usableWidthPx,
+  displayMode,
+  cardLayoutMode,
+}: ResolveCardSetViewDevicePresentationArgs & {
+  usableWidthPx: number;
+  displayMode: CardDisplayMode;
+  cardLayoutMode: CardLayoutMode;
+}) => {
+  if (resolveCardSetViewUsesViewportWidth({ deviceScope })) {
+    return Math.max(1, Math.floor(usableWidthPx));
+  }
+
+  return resolvePresentationMaxWidthPx({ usableWidthPx, displayMode, cardLayoutMode });
+};
+
+export const resolveCardSetViewDefaultZoomPercent = ({
+  deviceScope,
+  cardLayoutMode,
+  maxPresentationWidthPx,
+  canonicalCardWidthPx = CANONICAL_CARD_WIDTH,
+}: ResolveCardSetViewDevicePresentationArgs & ResolveZoomWidthArgs & {
+  maxPresentationWidthPx: number;
+  canonicalCardWidthPx?: number;
+}) => {
+  const zoomPercentOverride = resolveCardSetViewZoomPercentOverride({ deviceScope });
+  if (zoomPercentOverride != null) {
+    return zoomPercentOverride;
+  }
+
+  return resolveZoomDefaultPercent({ cardLayoutMode, maxPresentationWidthPx, canonicalCardWidthPx });
 };
 
 export const resolveSplitMinimumRequiredWidthPx = ({
@@ -171,6 +249,18 @@ export const resolveCanUseSplitLayout = ({
   displayMode: CardDisplayMode;
 }) => {
   const usableWidthPx = resolveUsablePresentationWidthPx({ viewportWidthPx });
+  return usableWidthPx >= resolveSplitMinimumRequiredWidthPx({ displayMode });
+};
+
+export const resolveCardSetViewCanUseSplitLayout = ({
+  deviceScope,
+  viewportWidthPx,
+  displayMode,
+}: ResolveCardSetViewDevicePresentationArgs & {
+  viewportWidthPx: number;
+  displayMode: CardDisplayMode;
+}) => {
+  const usableWidthPx = resolveCardSetViewUsablePresentationWidthPx({ deviceScope, viewportWidthPx });
   return usableWidthPx >= resolveSplitMinimumRequiredWidthPx({ displayMode });
 };
 
