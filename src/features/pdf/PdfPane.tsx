@@ -86,6 +86,17 @@ type ActivePdfCanvasRender = {
   done: Promise<void>;
 };
 
+type PdfSourceDescriptor = {
+  localFileId: string;
+  userId?: string;
+  persistedUrl: string | null;
+};
+
+type LoadedPdfSource = {
+  url: string;
+  revokeOnCleanup: boolean;
+};
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const DEFAULT_PDF_PAGE = 1;
@@ -97,6 +108,7 @@ const PDF_PAGE_RENDER_RADIUS = 3;
 const PDF_PAGE_PLACEHOLDER_HEIGHT = 920;
 const PDF_HISTORY_LIMIT = 80;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
+const PDF_CANVAS_BACKGROUND = "#ffffff";
 const activePdfCanvasRenders = new WeakMap<HTMLCanvasElement, ActivePdfCanvasRender>();
 
 const resolvePersistedUrl = (doc: PdfPaneDoc): string | null => {
@@ -105,6 +117,14 @@ const resolvePersistedUrl = (doc: PdfPaneDoc): string | null => {
 
 const resolveDocumentFileId = (doc: PdfPaneDoc): string => {
   return doc.localFileId?.trim() || doc.id;
+};
+
+const resolvePdfSourceDescriptor = (doc: PdfPaneDoc): PdfSourceDescriptor => {
+  return {
+    localFileId: resolveDocumentFileId(doc),
+    userId: doc.userId,
+    persistedUrl: resolvePersistedUrl(doc),
+  };
 };
 
 const clampPdfScale = (scale: number): number => {
@@ -190,10 +210,24 @@ const createTextSpanStyle = (viewportTransform: number[], item: PdfTextItem): CS
   };
 };
 
-const loadLocalPdfObjectUrl = async (doc: PdfPaneDoc): Promise<string> => {
-  const blob = await getDocumentBlob(resolveDocumentFileId(doc), { userId: doc.userId });
-  if (!blob) throw new Error("PDFファイル本体がローカルストアに見つかりません。");
-  return URL.createObjectURL(blob);
+const loadLocalPdfObjectUrl = async (source: PdfSourceDescriptor): Promise<string | null> => {
+  const blob = await getDocumentBlob(source.localFileId, { userId: source.userId });
+  return blob ? URL.createObjectURL(blob) : null;
+};
+
+const loadPdfSource = async (source: PdfSourceDescriptor): Promise<LoadedPdfSource> => {
+  let localError: unknown = null;
+
+  try {
+    const localObjectUrl = await loadLocalPdfObjectUrl(source);
+    if (localObjectUrl) return { url: localObjectUrl, revokeOnCleanup: true };
+  } catch (error) {
+    localError = error;
+  }
+
+  if (source.persistedUrl) return { url: source.persistedUrl, revokeOnCleanup: false };
+  if (localError instanceof Error) throw localError;
+  throw new Error("表示できるPDFソースがありません。");
 };
 
 const loadPdfDocument = async (sourceUrl: string, viewerOptions: PdfPaneProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
@@ -218,12 +252,13 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
       const devicePixelRatio = window.devicePixelRatio || 1;
       const context = canvas.getContext("2d");
       if (!context) return;
-      canvas.width = Math.floor(viewport.width * devicePixelRatio);
-      canvas.height = Math.floor(viewport.height * devicePixelRatio);
+      canvas.width = Math.max(1, Math.floor(viewport.width * devicePixelRatio));
+      canvas.height = Math.max(1, Math.floor(viewport.height * devicePixelRatio));
       canvas.style.width = `${viewport.width}px`;
       canvas.style.height = `${viewport.height}px`;
-      context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-      renderTask = page.render({ canvas, canvasContext: context, viewport });
+      context.setTransform(1, 0, 0, 1, 0, 0);
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      renderTask = page.render({ canvasContext: context, viewport, transform: devicePixelRatio === 1 ? undefined : [devicePixelRatio, 0, 0, devicePixelRatio, 0, 0], background: PDF_CANVAS_BACKGROUND });
       const done = renderTask.promise.then(() => undefined).catch((error: unknown) => {
         if (!isPdfRenderCancellationError(error)) throw error;
       }).finally(() => {
@@ -248,7 +283,7 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
     };
   }, [pageNumber, pdfDocument, scale]);
 
-  return <canvas ref={canvasRef} className={className} />;
+  return <canvas ref={canvasRef} className={cn("block bg-white", className)} />;
 };
 
 const PdfTextLayer = ({ pageNumber, pdfDocument, scale }: PdfTextLayerProps) => {
@@ -308,7 +343,11 @@ const PdfDocumentPageSlot = (props: PdfDocumentPageSlotProps) => {
 };
 
 const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPaneProps) => {
-  const persistedUrl = useMemo(() => resolvePersistedUrl(doc), [doc]);
+  const sourceDescriptor = useMemo(() => resolvePdfSourceDescriptor(doc), [doc.blobUrl, doc.downloadUrl, doc.googleDriveWebContentLink, doc.googleDriveWebViewLink, doc.id, doc.localFileId, doc.localUrl, doc.remoteUrl, doc.userId]);
+  const viewerEnableXfa = viewerOptions?.enableXfa;
+  const viewerUseSystemFonts = viewerOptions?.useSystemFonts;
+  const viewerCMapUrl = viewerOptions?.cMapUrl;
+  const viewerStandardFontDataUrl = viewerOptions?.standardFontDataUrl;
   const viewerState = doc.viewerState ?? null;
   const scale = clampPdfScale(viewerState?.scale ?? DEFAULT_PDF_SCALE);
   const [pdfDocument, setPdfDocument] = useState<PdfDocumentProxy | null>(null);
@@ -327,17 +366,25 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
   useEffect(() => {
     let isCancelled = false;
     let objectUrl: string | null = null;
+    let loadedPdfDocument: PdfDocumentProxy | null = null;
 
     setPdfDocument(null);
     setLoadError(null);
     setIsLoading(true);
 
     const load = async () => {
-      const nextSourceUrl = persistedUrl ?? await loadLocalPdfObjectUrl(doc);
-      if (!persistedUrl) objectUrl = nextSourceUrl;
-      if (isCancelled) return;
-      const nextPdfDocument = await loadPdfDocument(nextSourceUrl, viewerOptions);
-      if (isCancelled) return;
+      const nextSource = await loadPdfSource(sourceDescriptor);
+      if (isCancelled) {
+        if (nextSource.revokeOnCleanup) URL.revokeObjectURL(nextSource.url);
+        return;
+      }
+      if (nextSource.revokeOnCleanup) objectUrl = nextSource.url;
+      const nextPdfDocument = await loadPdfDocument(nextSource.url, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl });
+      if (isCancelled) {
+        void nextPdfDocument.destroy();
+        return;
+      }
+      loadedPdfDocument = nextPdfDocument;
       setPdfDocument(nextPdfDocument);
     };
 
@@ -351,9 +398,10 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
 
     return () => {
       isCancelled = true;
+      if (loadedPdfDocument) void loadedPdfDocument.destroy();
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [doc, persistedUrl, viewerOptions]);
+  }, [sourceDescriptor, viewerCMapUrl, viewerEnableXfa, viewerStandardFontDataUrl, viewerUseSystemFonts]);
 
   const updateViewerState = useCallback((patch: PdfViewerState) => {
     void onDocumentUpdate?.({ viewerState: { ...viewerState, ...patch } });
