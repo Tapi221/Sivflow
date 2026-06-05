@@ -47,12 +47,12 @@ vi.mock("sonner", () => ({
   toast: Object.assign(toastMock, { error: toastErrorMock, success: toastSuccessMock }),
 }));
 
-describe("useCalendarEventMoveController", () => {
+describe("カレンダー予定移動コントローラー", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("optimistically moves the event, keeps a plain pending toast, then replaces it with the undoable saved toast", async () => {
+  it("予定を楽観的に移動し、保存中は通常の pending toast を維持してから、元に戻せる保存済み toast に置き換える", async () => {
     const movedEvent = { ...createGoogleCalendarEvent(), startsAt: MOVED_START, endsAt: MOVED_END, isAllDay: false };
     const moveDeferred = createDeferred<GoogleCalendarEvent>();
     const updateGoogleCalendarEvent = vi.fn(() => moveDeferred.promise);
@@ -90,7 +90,7 @@ describe("useCalendarEventMoveController", () => {
     });
   });
 
-  it("does not expose a saving description or undo action until the move update is saved", async () => {
+  it("移動更新が保存されるまで、保存中の説明文や元に戻す操作を出さない", async () => {
     const movedEvent = { ...createGoogleCalendarEvent(), startsAt: MOVED_START, endsAt: MOVED_END, isAllDay: false };
     const moveDeferred = createDeferred<GoogleCalendarEvent>();
     const updateGoogleCalendarEvent = vi.fn(() => moveDeferred.promise);
@@ -118,7 +118,7 @@ describe("useCalendarEventMoveController", () => {
     expect(savedToastOptions.action?.label).toBe("元に戻す");
   });
 
-  it("keeps a rollback override and replaces the pending toast with an error toast when moving fails", async () => {
+  it("移動に失敗したとき、ロールバック用 override を維持し、pending toast を error toast に置き換える", async () => {
     const updateGoogleCalendarEvent = vi.fn(async () => {
       throw new Error("move failed");
     });
