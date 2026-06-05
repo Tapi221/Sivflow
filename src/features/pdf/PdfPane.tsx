@@ -362,11 +362,11 @@ const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onVi
   }, [handleGoBack, handleGoForward, handleJumpToMark, handleSetMark, handleToggleBookmark, handleZoomIn, handleZoomOut, setViewerPage]);
 
   return (
-    <div className={cn("flex h-full min-h-0 min-w-0 bg-[#f6f3ee] text-[#2f2f2f]", className)}>
+    <div className={cn("flex h-full min-h-0 min-w-0 bg-white text-[#2f2f2f]", className)}>
       <main className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-        <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto bg-[#f6f3ee] px-4 py-5">
+        <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto bg-white px-4 py-5">
           <div ref={pdfViewerElementRef} className="pdfViewer" />
-          {isLoading ? <div className="absolute inset-0 flex items-center justify-center bg-[#f6f3ee]/80 text-[13px] text-[#6d6d6d]">PDFを読み込み中...</div> : null}
+          {isLoading ? <div className="absolute inset-0 flex items-center justify-center bg-white/80 text-[13px] text-[#6d6d6d]">PDFを読み込み中...</div> : null}
           {!isLoading && loadError ? <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-[13px] leading-6 text-[#4a4640]"><div className="max-w-md rounded-[14px] border border-[#ded8cf] bg-white px-5 py-4 shadow-sm">{loadError}</div></div> : null}
         </div>
       </main>
