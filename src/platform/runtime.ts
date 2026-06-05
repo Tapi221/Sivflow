@@ -1,1 +1,0 @@
-export { hasDesktopBridge, hasDesktopRuntime, isDesktopRuntime } from "@platform/runtime";

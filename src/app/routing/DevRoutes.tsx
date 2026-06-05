@@ -1,1 +1,0 @@
-export { getDevRouteElements, getDevStandaloneRouteElement } from "@web-renderer/app/routing/DevRoutes";

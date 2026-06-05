@@ -1,1 +1,0 @@
-export type { SearchIconKind as GlobalSearchIconKind, SearchItem as GlobalSearchItem, SearchItemKind as GlobalSearchItemKind, SearchSource as GlobalSearchSource } from "@/features/search/model/searchTypes";

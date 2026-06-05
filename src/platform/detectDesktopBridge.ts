@@ -1,1 +1,0 @@
-export { hasDesktopBridge, hasDesktopRuntime, hasWindowDesktopBridge } from "@platform/detectDesktopBridge";
