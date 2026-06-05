@@ -4,7 +4,7 @@ import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
-import { WorkspaceLayoutRevisionProvider } from "./workspaceLayoutRevisionContext";
+import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContext";
 import { Search } from "@/ui/icons";
 import "@/styles/backpane.css";
 import { WorkspaceShell } from "./WorkspaceShell";
@@ -41,7 +41,6 @@ const persistLeftPanelCollapsed = (isCollapsed: boolean) => {
 
     window.localStorage.removeItem(LEFT_PANEL_COLLAPSED_STORAGE_KEY);
   } catch {
-    // localStorage が使えない環境では React state の状態だけ維持する。
   }
 };
 
@@ -102,7 +101,7 @@ const AppLayout = () => {
           <button type="button" className={GLOBAL_SEARCH_TRIGGER_CLASS_NAME} aria-label="検索を開く" aria-keyshortcuts="Meta+K Control+K" title="検索を開く" onClick={handleOpenSearch}>
             <Search className="h-4 w-4 shrink-0 text-[#8e8e93]" />
             <span className="min-w-0 truncate text-[#7a7f88]">Search in Workspace...</span>
-            <kbd className={GLOBAL_SEARCH_SHORTCUT_CLASS_NAME}>⌘K</kbd>
+            <kbd className={GLOBAL_SEARCH_SHORTCUT_CLASS_NAME}>Cmd+K</kbd>
           </button>
         )}
       </div>
