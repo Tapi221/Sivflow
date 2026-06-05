@@ -1,5 +1,6 @@
 import { type TouchEvent as ReactTouchEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, endOfDay, format, startOfDay, subDays } from "date-fns";
+import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
@@ -38,6 +39,7 @@ const MOBILE_SCHEDULE_PANEL_CLASS = "!m-0 h-full min-h-0 !rounded-none !border-0
 const MOBILE_SCHEDULE_HEADER_CLASS = "flex shrink-0 flex-col px-4 pb-3 pt-4";
 const MOBILE_SCHEDULE_SURFACE_CLASS = "schedule-mobile-calendar-surface mx-0 flex min-h-0 flex-1 flex-col overflow-hidden !rounded-none !border-0";
 const MOBILE_TODAY_BUTTON_CLASS = "flex h-8 shrink-0 items-center justify-center rounded-full bg-[#f7f7f7] px-3 text-[13px] font-semibold tracking-[-0.02em] text-[#8e8e93] shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition hover:bg-[#efeff4] hover:text-[#6e6e73] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
+const MOBILE_SIDEBAR_OPEN_ICON_CLASS = "h-5 w-5 shrink-0 [transform:scaleX(-1)]";
 const MOBILE_SIDEBAR_SWIPE_DISTANCE = 56;
 const MOBILE_SIDEBAR_SWIPE_HORIZONTAL_INTENT = 12;
 const MOBILE_SIDEBAR_SWIPE_VERTICAL_LIMIT = 72;
@@ -388,10 +390,7 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2 pt-1">
           <button type="button" className="flex h-10 w-10 shrink-0 items-center justify-center bg-transparent text-[#111111] transition hover:text-[#111111] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]" onClick={handleOpenSidebar} aria-label="サイドバーを開く" aria-controls="mobile-schedule-sidebar" aria-expanded={isSidebarOpen}>
-            <span aria-hidden="true" className="flex h-7 w-8 flex-col justify-center gap-[7px]">
-              <span className="block h-[2px] w-full rounded-full bg-current" />
-              <span className="block h-[2px] w-full rounded-full bg-current" />
-            </span>
+            <SidebarOpenIcon className={MOBILE_SIDEBAR_OPEN_ICON_CLASS} />
           </button>
           <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]" onClick={handlePrevious} aria-label={t.previousLabel}>‹</button>
           <h1 className="truncate text-[19px] font-bold tracking-[-0.03em] text-[#1c1c1e]">{format(headerTitleDate, headerTitleFormat, { locale: dateFnsLocale })}</h1>
