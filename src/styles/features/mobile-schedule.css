@@ -37,6 +37,15 @@
       white-space: nowrap;
     }
 
+    .schedule-mobile-calendar-surface .calendar-timeline-scroll > .grid > div:first-child > [data-testid="weekday-time-bottom-spacer"] > span {
+      font-size: 0 !important;
+    }
+
+    .schedule-mobile-calendar-surface .calendar-timeline-scroll > .grid > div:first-child > [data-testid="weekday-time-bottom-spacer"] > span::after {
+      content: "24";
+      font-size: 11px;
+    }
+
     .schedule-mobile-calendar-surface .calendar-timeline-scroll > .grid > div[class*="absolute"][class*="z-20"] {
       left: var(--mobile-calendar-time-column-width) !important;
     }
