@@ -223,7 +223,7 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
       canvas.style.width = `${viewport.width}px`;
       canvas.style.height = `${viewport.height}px`;
       context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-      renderTask = page.render({ canvasContext: context, viewport });
+      renderTask = page.render({ canvas, canvasContext: context, viewport });
       const done = renderTask.promise.then(() => undefined).catch((error: unknown) => {
         if (!isPdfRenderCancellationError(error)) throw error;
       }).finally(() => {
