@@ -9,9 +9,9 @@ export const DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE: SplitFallbackCardLayoutMod
   "flip";
 
 export const resolveDefaultCardLayoutMode = (
-  interactionMode: CardSetInteractionMode,
+  _interactionMode: CardSetInteractionMode,
 ): CardLayoutMode => {
-  return interactionMode === "edit" ? "split" : "flip";
+  return DEFAULT_CARD_LAYOUT_MODE;
 };
 
 export const normalizeCardLayoutMode = (value: unknown): CardLayoutMode => {
