@@ -1,12 +1,17 @@
 import { deleteDoc, doc, Timestamp, updateDoc } from "firebase/firestore";
 import type { TrashRepository } from "@core/usecases/trash";
+import { COLLECTION_BY_TYPE } from "@/application/usecases/cloudSyncEntityMetadata";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { firestoreDb } from "@/services/firebase";
 import { cardDocPathSegments, folderDocPathSegments } from "@/services/firestorePaths";
 import { getLocalDb } from "@/services/localDB";
-import type { Card, Folder } from "@/types";
+import type { Card, CardSet, Document, Folder } from "@/types";
+
+type CloudCollectionEntity = "cardSet" | "document";
+
+const getCloudEntityPathSegments = (userId: string, entity: CloudCollectionEntity, id: string): [string, string, string, string] => ["users", userId, COLLECTION_BY_TYPE[entity], id];
 
 const maybeUpdateFirestoreDeletedState = async ({
   pathSegments,
@@ -35,13 +40,14 @@ const maybeDeleteFirestoreDoc = async (pathSegments: string[]): Promise<void> =>
   await deleteDoc(targetRef);
 };
 
-export const createWebTrashRepository = (): TrashRepository<Folder, Card> => ({
+export const createWebTrashRepository = (): TrashRepository<Folder, Card, CardSet, Document> => ({
   loadContext: async (userId) => {
     const db = await getLocalDb(userId);
-    const [rawFolders, rawCards, rawCardSets] = await Promise.all([
+    const [rawFolders, rawCards, rawCardSets, rawDocuments] = await Promise.all([
       db.getAllFolders(),
       db.getAllCards(),
       db.cardSets.where("userId").equals(userId).toArray(),
+      db.documents.where("userId").equals(userId).toArray(),
     ]);
     const folders = rawFolders.map(normalizeFolder);
     const cards = rawCards.map(normalizeCard);
@@ -50,6 +56,8 @@ export const createWebTrashRepository = (): TrashRepository<Folder, Card> => ({
     return {
       folders,
       cards,
+      cardSets: rawCardSets,
+      documents: rawDocuments,
       resolveCardFolderId: (card) => resolveCardFolderIdStrict(card, cardSetById),
     };
   },
@@ -66,6 +74,22 @@ export const createWebTrashRepository = (): TrashRepository<Folder, Card> => ({
     await db.restore("cards", cardId);
     await maybeUpdateFirestoreDeletedState({
       pathSegments: cardDocPathSegments(userId, cardId),
+      isDeleted: false,
+    });
+  },
+  restoreCardSet: async (userId, cardSetId) => {
+    const db = await getLocalDb(userId);
+    await db.restore("cardSets", cardSetId);
+    await maybeUpdateFirestoreDeletedState({
+      pathSegments: getCloudEntityPathSegments(userId, "cardSet", cardSetId),
+      isDeleted: false,
+    });
+  },
+  restoreDocument: async (userId, documentId) => {
+    const db = await getLocalDb(userId);
+    await db.restore("documents", documentId);
+    await maybeUpdateFirestoreDeletedState({
+      pathSegments: getCloudEntityPathSegments(userId, "document", documentId),
       isDeleted: false,
     });
   },
@@ -87,6 +111,26 @@ export const createWebTrashRepository = (): TrashRepository<Folder, Card> => ({
       await maybeDeleteFirestoreDoc(cardDocPathSegments(userId, cardId));
     } catch (error) {
       console.warn(`Firestore delete failed for card ${cardId}:`, error);
+    }
+  },
+  purgeCardSet: async (userId, cardSetId) => {
+    const db = await getLocalDb(userId);
+    await db.purge("cardSets", cardSetId);
+
+    try {
+      await maybeDeleteFirestoreDoc(getCloudEntityPathSegments(userId, "cardSet", cardSetId));
+    } catch (error) {
+      console.warn(`Firestore delete failed for card set ${cardSetId}:`, error);
+    }
+  },
+  purgeDocument: async (userId, documentId) => {
+    const db = await getLocalDb(userId);
+    await db.purge("documents", documentId);
+
+    try {
+      await maybeDeleteFirestoreDoc(getCloudEntityPathSegments(userId, "document", documentId));
+    } catch (error) {
+      console.warn(`Firestore delete failed for document ${documentId}:`, error);
     }
   },
 });
