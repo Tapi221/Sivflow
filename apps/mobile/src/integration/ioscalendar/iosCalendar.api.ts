@@ -13,6 +13,9 @@ const IOS_CALENDAR_DEFAULT_COLOR = "#3478f6";
 const IOS_CALENDAR_NO_TITLE = "(No title)";
 const IOS_CALENDAR_NOT_FOUND_ERROR = "iOSカレンダーが見つかりません";
 const IOS_CALENDAR_READONLY_ERROR = "このiOSカレンダーは編集できません";
+const IOS_CALENDAR_CALENDAR_ID_ERROR = "iOSカレンダーIDが必要です";
+const IOS_CALENDAR_EVENT_ID_ERROR = "iOSカレンダー予定IDが必要です";
+const IOS_CALENDAR_DATE_ERROR = "iOSカレンダー予定の日時が不正です";
 
 const normalizePermissionStatus = (response: PermissionResponse): IosCalendarPermissionStatus => {
   if (response.granted || response.status === "granted") return "granted";
@@ -27,7 +30,36 @@ const toValidDate = (value: Date | string | number | undefined | null): Date | n
   return Number.isFinite(date.getTime()) ? date : null;
 };
 
+const isValidDate = (value: Date | undefined): boolean => value instanceof Date && Number.isFinite(value.getTime());
+
 const isValidRange = (rangeStart: Date, rangeEnd: Date): boolean => Number.isFinite(rangeStart.getTime()) && Number.isFinite(rangeEnd.getTime()) && rangeStart < rangeEnd;
+
+const requireNonEmpty = (value: string, message: string): void => {
+  if (value.trim().length === 0) throw new Error(message);
+};
+
+const validateWritableEventRange = (startsAt: Date, endsAt: Date): void => {
+  if (!isValidDate(startsAt) || !isValidDate(endsAt) || startsAt >= endsAt) throw new Error(IOS_CALENDAR_DATE_ERROR);
+};
+
+const validateWritableEventInput = (event: IosCalendarWritableEventInput): void => {
+  requireNonEmpty(event.calendarId, IOS_CALENDAR_CALENDAR_ID_ERROR);
+  validateWritableEventRange(event.startsAt, event.endsAt);
+};
+
+const validateWritableEventUpdateInput = (event: IosCalendarWritableEventUpdateInput): void => {
+  requireNonEmpty(event.calendarId, IOS_CALENDAR_CALENDAR_ID_ERROR);
+  requireNonEmpty(event.eventId, IOS_CALENDAR_EVENT_ID_ERROR);
+
+  if (event.startsAt !== undefined && !isValidDate(event.startsAt)) throw new Error(IOS_CALENDAR_DATE_ERROR);
+  if (event.endsAt !== undefined && !isValidDate(event.endsAt)) throw new Error(IOS_CALENDAR_DATE_ERROR);
+  if (event.startsAt !== undefined && event.endsAt !== undefined) validateWritableEventRange(event.startsAt, event.endsAt);
+};
+
+const validateWritableEventDeleteInput = (event: IosCalendarWritableEventDeleteInput): void => {
+  requireNonEmpty(event.calendarId, IOS_CALENDAR_CALENDAR_ID_ERROR);
+  requireNonEmpty(event.eventId, IOS_CALENDAR_EVENT_ID_ERROR);
+};
 
 const buildCompositeEventId = (calendarId: string, eventId: string): string => `${IOS_CALENDAR_EVENT_ID_PREFIX}:${calendarId}:${eventId}`;
 
@@ -163,6 +195,7 @@ export const fetchIosEvents = async ({ calendarIds, calendars, rangeStart, range
 };
 
 export const createIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventInput; calendars: IosCalendarListItem[] }): Promise<IosCalendarEvent> => {
+  validateWritableEventInput(event);
   getWritableCalendar(event.calendarId, calendars);
 
   const eventId = await ExpoCalendar.createEventAsync(event.calendarId, toExpoEventPayload(event) as ExpoCalendarCreateEventDetails);
@@ -171,6 +204,7 @@ export const createIosCalendarEvent = async ({ event, calendars }: { event: IosC
 };
 
 export const updateIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventUpdateInput; calendars: IosCalendarListItem[] }): Promise<IosCalendarEvent> => {
+  validateWritableEventUpdateInput(event);
   getWritableCalendar(event.calendarId, calendars);
 
   const eventId = resolveExternalEventId(event.calendarId, event.eventId);
@@ -180,6 +214,7 @@ export const updateIosCalendarEvent = async ({ event, calendars }: { event: IosC
 };
 
 export const deleteIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventDeleteInput; calendars: IosCalendarListItem[] }): Promise<void> => {
+  validateWritableEventDeleteInput(event);
   getWritableCalendar(event.calendarId, calendars);
 
   await ExpoCalendar.deleteEventAsync(resolveExternalEventId(event.calendarId, event.eventId));
