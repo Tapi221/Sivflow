@@ -67,14 +67,5 @@
   },
   "storage": {
     "rules": "storage.rules"
-  },
-  "emulators": {
-    "auth": { "port": 9099, "host": "localhost" },
-    "firestore": { "port": 8080, "host": "localhost" },
-    "hosting": { "port": 5000, "host": "localhost" },
-    "storage": { "port": 9199, "host": "localhost" },
-    "ui": { "enabled": true, "port": 4000, "host": "localhost" },
-    "singleProjectMode": true,
-    "functions": { "port": 5001, "host": "localhost" }
   }
 }
