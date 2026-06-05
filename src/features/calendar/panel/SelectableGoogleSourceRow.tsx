@@ -17,8 +17,8 @@ type SourceRowMarkerProps = {
 const GOOGLE_SOURCE_ROW_CLASS_NAME = "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
 const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#85827e]";
 const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#85827e] opacity-70";
-const SOURCE_ROW_MARKER_CLASS_NAME = "relative flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition-all duration-150";
-const SOURCE_ROW_MARKER_CHECK_CLASS_NAME = "h-3 w-3 text-white transition-opacity duration-150";
+const SOURCE_ROW_MARKER_CLASS_NAME = "relative flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[3.5px] border transition-all duration-150";
+const SOURCE_ROW_MARKER_CHECK_CLASS_NAME = "h-2.5 w-2.5 text-white transition-opacity duration-150";
 const SOURCE_ROW_UNCHECKED_MARKER_COLOR = "#c7c7cc";
 
 const createSourceRowMarkerStyle = (color: string, checked: boolean): CSSProperties => ({
