@@ -1,8 +1,0 @@
-@layer components {
-  .mathBlockRoot {
-    position: relative;
-    --math-padding-bottom: 0px;
-    --math-root-base-pad-b: var(--math-padding-bottom);
-    padding-bottom: calc(var(--math-root-base-pad-b) + var(--snap-pad-b, 0px));
-  }
-}

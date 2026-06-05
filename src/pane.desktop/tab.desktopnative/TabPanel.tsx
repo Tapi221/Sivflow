@@ -1,1 +1,0 @@
-export { WorkspaceTabPanel } from "./WorkspaceTabPanel";

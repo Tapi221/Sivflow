@@ -1,7 +1,0 @@
-{
-  "projects": {
-    "default": "anki-70f73",
-    "staging": "anki-70f73",
-    "prod": "anki-70f73"
-  }
-}

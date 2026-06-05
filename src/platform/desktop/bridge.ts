@@ -1,1 +1,0 @@
-export { getDesktopBridge } from "@platform/desktop/bridge";

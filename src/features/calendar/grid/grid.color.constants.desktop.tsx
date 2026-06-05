@@ -11,5 +11,5 @@ export const WEEKDAY_COLOR_TEXT_PRIMARY = "#24231f";
 export const WEEKDAY_COLOR_TEXT_SECONDARY = "#8f929c";
 export const WEEKDAY_COLOR_TEXT_MUTED = "#b0b4be";
 
-export const WEEKDAY_COLOR_BORDER_MAIN = "#e5e7eb";
-export const WEEKDAY_COLOR_BORDER_SUB = "#eef0f3";
+export const WEEKDAY_COLOR_BORDER_MAIN = "#eeeeee";
+export const WEEKDAY_COLOR_BORDER_SUB = "#f4f4f4";
