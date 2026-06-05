@@ -63,6 +63,7 @@ const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalend
     const movePromise = updateGoogleCalendarEvent(accountId, createCalendarEventUpdateInput(event, nextOverride));
     let isUndoRequested = false;
     let isMoveSaved = false;
+    // eslint-disable-next-line prefer-const
     let toastId: string | number | undefined;
 
     const handleUndoCalendarEventMove = () => {
