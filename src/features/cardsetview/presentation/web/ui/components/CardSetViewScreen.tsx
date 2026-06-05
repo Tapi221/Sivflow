@@ -70,7 +70,7 @@ export const CardSetViewScreen = ({ cardSetId: controlledCardSetId = null }: Car
       overlayTopInsetPx={desktopOverlayTopInsetPx}
       isMetaOpen={false}
       viewportRef={paneWidth.contentViewportRef}
-      viewportClassName={state.isGlobalEditing || isDesktopPresentation ? "px-0 py-0" : "px-4 py-0"}
+      viewportClassName="px-0 py-0"
     >
       <Content controller={controller} />
     </CardWorkspaceShell>
