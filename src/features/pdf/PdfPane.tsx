@@ -76,6 +76,16 @@ type PdfDocumentPageProps = PdfCanvasPageProps & {
 
 type PdfDocumentPageSlotProps = PdfDocumentPageProps;
 
+type PdfRenderTask = {
+  cancel: () => void;
+  promise: Promise<unknown>;
+};
+
+type ActivePdfCanvasRender = {
+  cancel: () => void;
+  done: Promise<void>;
+};
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const DEFAULT_PDF_PAGE = 1;
@@ -87,6 +97,7 @@ const PDF_PAGE_RENDER_RADIUS = 3;
 const PDF_PAGE_PLACEHOLDER_HEIGHT = 920;
 const PDF_HISTORY_LIMIT = 80;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
+const activePdfCanvasRenders = new WeakMap<HTMLCanvasElement, ActivePdfCanvasRender>();
 
 const resolvePersistedUrl = (doc: PdfPaneDoc): string | null => {
   return doc.blobUrl ?? doc.localUrl ?? doc.downloadUrl ?? doc.googleDriveWebContentLink ?? doc.remoteUrl ?? doc.googleDriveWebViewLink ?? null;
@@ -123,6 +134,28 @@ const shouldHandlePdfKeyboardEvent = (event: KeyboardEvent): boolean => {
 
 const shouldRenderNearbyPage = (pageNumber: number, currentPage: number, radius: number): boolean => {
   return Math.abs(pageNumber - currentPage) <= radius || pageNumber === DEFAULT_PDF_PAGE;
+};
+
+const isPdfRenderCancellationError = (error: unknown): boolean => {
+  if (!(error instanceof Error)) return false;
+  const name = error.name.toLowerCase();
+  const message = error.message.toLowerCase();
+  return name.includes("renderingcancelled") || message.includes("cancel");
+};
+
+const cancelPdfRenderTask = (task: { cancel: () => void }): void => {
+  try {
+    task.cancel();
+  } catch {
+    // PDF.js can throw when a render task has already settled.
+  }
+};
+
+const waitForPreviousCanvasRender = async (canvas: HTMLCanvasElement): Promise<void> => {
+  const previousRender = activePdfCanvasRenders.get(canvas);
+  if (!previousRender) return;
+  cancelPdfRenderTask(previousRender);
+  await previousRender.done.catch(() => undefined);
 };
 
 const getTextContentItemText = (item: unknown): string => {
@@ -172,11 +205,13 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
 
   useEffect(() => {
     let isCancelled = false;
-    let renderTask: { cancel: () => void; promise: Promise<unknown> } | null = null;
+    let renderTask: PdfRenderTask | null = null;
 
     const renderPage = async () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
+      await waitForPreviousCanvasRender(canvas);
+      if (isCancelled) return;
       const page: PdfPageProxy = await pdfDocument.getPage(pageNumber);
       if (isCancelled) return;
       const viewport = page.getViewport({ scale });
@@ -189,9 +224,18 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
       canvas.style.height = `${viewport.height}px`;
       context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
       renderTask = page.render({ canvasContext: context, viewport });
-      await renderTask.promise.catch((error: unknown) => {
-        if (!isCancelled) throw error;
+      const done = renderTask.promise.then(() => undefined).catch((error: unknown) => {
+        if (!isPdfRenderCancellationError(error)) throw error;
+      }).finally(() => {
+        if (activePdfCanvasRenders.get(canvas)?.done === done) {
+          activePdfCanvasRenders.delete(canvas);
+        }
       });
+      activePdfCanvasRenders.set(canvas, {
+        cancel: () => cancelPdfRenderTask(renderTask!),
+        done,
+      });
+      await done;
     };
 
     void renderPage().catch((error: unknown) => {
@@ -200,7 +244,7 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
 
     return () => {
       isCancelled = true;
-      renderTask?.cancel();
+      if (renderTask) cancelPdfRenderTask(renderTask);
     };
   }, [pageNumber, pdfDocument, scale]);
 
