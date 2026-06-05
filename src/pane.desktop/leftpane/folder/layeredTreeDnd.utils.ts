@@ -1,26 +1,41 @@
 import type { DragEvent as ReactDragEvent } from "react";
-import { LAYERED_TREE_AUTO_SCROLL_EDGE_PX, LAYERED_TREE_AUTO_SCROLL_MAX_STEP, LAYERED_TREE_DROP_EDGE_RATIO, LAYERED_TREE_DROP_INDICATOR_BASE_LEFT_PX, LAYERED_TREE_DROP_INSIDE_INTENT_OFFSET_PX, LAYERED_TREE_DRAG_IMAGE_OFFSET_X, LAYERED_TREE_DRAG_IMAGE_OFFSET_Y, LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_LEVEL, LAYERED_TREE_ROW_SELECTOR } from "./layeredTreeDnd.constants";
+import { LAYERED_TREE_AUTO_SCROLL_EDGE_PX, LAYERED_TREE_AUTO_SCROLL_MAX_STEP, LAYERED_TREE_DROP_EDGE_RATIO, LAYERED_TREE_DROP_HIT_TEST_VERTICAL_TOLERANCE_PX, LAYERED_TREE_DROP_INDICATOR_BASE_LEFT_PX, LAYERED_TREE_DROP_INSIDE_INTENT_OFFSET_PX, LAYERED_TREE_DRAG_IMAGE_OFFSET_X, LAYERED_TREE_DRAG_IMAGE_OFFSET_Y, LAYERED_TREE_FOLDER_ID_ATTRIBUTE, LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_LEVEL, LAYERED_TREE_ROW_SELECTOR, LAYERED_TREE_TAG_ID_ATTRIBUTE } from "./layeredTreeDnd.constants";
 import type { LayeredTreeDragState, LayeredTreeDropInstruction, LayeredTreeDropPosition, LayeredTreeItem } from "./layeredTreeDnd.types";
 
-export const getLayeredTreeDropIndicatorLeft = (level: number): number => Math.max(0, level - LAYERED_TREE_ROOT_LEVEL) * LAYERED_TREE_INDENT_PX + LAYERED_TREE_DROP_INDICATOR_BASE_LEFT_PX;
+type LayeredTreeEventDropTarget = { id: string; rowElement: HTMLElement };
 
-export const isLayeredTreeAppendDropTarget = (dragState: LayeredTreeDragState, parentId: string | null): boolean => dragState.dropInstruction?.position === "append" && dragState.dropInstruction.parentId === parentId;
+const LAYERED_TREE_ITEM_ID_ATTRIBUTES = [LAYERED_TREE_FOLDER_ID_ATTRIBUTE, LAYERED_TREE_TAG_ID_ATTRIBUTE] as const;
+
+const getLayeredTreeItemId = (rowElement: HTMLElement): string | null => {
+  for (const attributeName of LAYERED_TREE_ITEM_ID_ATTRIBUTES) {
+    const itemId = rowElement.closest(`[${attributeName}]`)?.getAttribute(attributeName)?.trim();
+    if (itemId) return itemId;
+  }
+
+  return null;
+};
 
 const getLayeredTreeDropInlineOffset = (element: HTMLElement): number => {
   const paddingLeft = Number.parseFloat(element.style.paddingLeft);
   return Number.isFinite(paddingLeft) ? paddingLeft : 0;
 };
 
-export const getLayeredTreeDropPosition = (event: ReactDragEvent<HTMLElement>): LayeredTreeDropPosition => {
-  const rect = event.currentTarget.getBoundingClientRect();
+const getLayeredTreeDropPositionForRow = (event: ReactDragEvent<HTMLElement>, rowElement: HTMLElement): LayeredTreeDropPosition => {
+  const rect = rowElement.getBoundingClientRect();
   const offsetY = event.clientY - rect.top;
   const offsetX = event.clientX - rect.left;
-  const insideIntentX = getLayeredTreeDropInlineOffset(event.currentTarget) + LAYERED_TREE_DROP_INSIDE_INTENT_OFFSET_PX;
+  const insideIntentX = getLayeredTreeDropInlineOffset(rowElement) + LAYERED_TREE_DROP_INSIDE_INTENT_OFFSET_PX;
   const isInsideIntent = offsetX >= insideIntentX && offsetY > rect.height * LAYERED_TREE_DROP_EDGE_RATIO && offsetY < rect.height * (1 - LAYERED_TREE_DROP_EDGE_RATIO);
 
   if (isInsideIntent) return "inside";
   return offsetY < rect.height / 2 ? "before" : "after";
 };
+
+export const getLayeredTreeDropIndicatorLeft = (level: number): number => Math.max(0, level - LAYERED_TREE_ROOT_LEVEL) * LAYERED_TREE_INDENT_PX + LAYERED_TREE_DROP_INDICATOR_BASE_LEFT_PX;
+
+export const isLayeredTreeAppendDropTarget = (dragState: LayeredTreeDragState, parentId: string | null): boolean => dragState.dropInstruction?.position === "append" && dragState.dropInstruction.parentId === parentId;
+
+export const getLayeredTreeDropPosition = (event: ReactDragEvent<HTMLElement>): LayeredTreeDropPosition => getLayeredTreeDropPositionForRow(event, event.currentTarget);
 
 export const getLayeredTreeDropParentId = <TItem extends LayeredTreeItem>(targetItem: TItem, targetId: string, position: LayeredTreeDropPosition, getParentId: (item: TItem) => string | null): string | null => position === "inside" ? targetId : getParentId(targetItem);
 
@@ -109,5 +124,23 @@ export const getLayeredTreeAutoScrollStep = (clientY: number, scrollContainer: H
 };
 
 export const isLayeredTreeRowEventTarget = (target: EventTarget | null): boolean => target instanceof HTMLElement && target.closest(LAYERED_TREE_ROW_SELECTOR) !== null;
+
+export const resolveLayeredTreeEventDropTarget = (event: ReactDragEvent<HTMLElement>, itemMap: Map<string, LayeredTreeItem>): LayeredTreeEventDropTarget | null => {
+  const targetElement = event.target instanceof HTMLElement ? event.target : null;
+  const rows = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(LAYERED_TREE_ROW_SELECTOR));
+  const targetRow = targetElement?.closest<HTMLElement>(LAYERED_TREE_ROW_SELECTOR) ?? null;
+  const rowElement = targetRow && event.currentTarget.contains(targetRow) ? targetRow : rows.find((row) => {
+    const rect = row.getBoundingClientRect();
+    return event.clientY >= rect.top - LAYERED_TREE_DROP_HIT_TEST_VERTICAL_TOLERANCE_PX && event.clientY <= rect.bottom + LAYERED_TREE_DROP_HIT_TEST_VERTICAL_TOLERANCE_PX;
+  }) ?? null;
+  if (!rowElement) return null;
+
+  const id = getLayeredTreeItemId(rowElement);
+  if (!id || !itemMap.has(id)) return null;
+
+  return { id, rowElement };
+};
+
+export const getLayeredTreeDropPositionFromTarget = (event: ReactDragEvent<HTMLElement>, target: LayeredTreeEventDropTarget): LayeredTreeDropPosition => getLayeredTreeDropPositionForRow(event, target.rowElement);
 
 export const isLayeredTreeDropInstructionEqual = (left: LayeredTreeDropInstruction | null, right: LayeredTreeDropInstruction | null): boolean => left?.sourceId === right?.sourceId && left?.targetId === right?.targetId && left?.position === right?.position && left?.parentId === right?.parentId;
