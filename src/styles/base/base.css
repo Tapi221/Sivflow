@@ -74,6 +74,18 @@
     user-select: none;
   }
 
+  [data-pdf-page-number] .text-transparent,
+  [data-pdf-page-number] .text-transparent * {
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  [data-pdf-page-number] .text-transparent {
+    cursor: text;
+    pointer-events: auto;
+  }
+
   .workspace-surface--plain {
     background: transparent;
   }
