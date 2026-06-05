@@ -88,7 +88,7 @@ const getExplorerTabId = (tab: WorkspaceTab | null): WorkspaceExplorerTab["id"] 
 
 const SidebarInteractionRegion = ({ children }: SidebarInteractionRegionProps) => {
   return (
-    <div className="relative z-40 flex h-full min-h-0 shrink-0" style={SIDEBAR_INTERACTION_REGION_STYLE}>
+    <div className="pointer-events-auto relative z-[80] flex h-full min-h-0 shrink-0" style={SIDEBAR_INTERACTION_REGION_STYLE}>
       {children}
     </div>
   );
@@ -111,7 +111,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
   const selectedCardId = useMemo(() => getSelectedCardId(explorerState.selectedItem), [explorerState.selectedItem]);
   const selectedDocumentId = useMemo(() => getSelectedDocumentId(explorerState.selectedItem), [explorerState.selectedItem]);
-  const showWorkspaceHeader = selectedDocumentId === null;
+  const showWorkspaceHeader = selectedDocumentId === null && !loading && !error;
   const [explorerBreadcrumbContext, setExplorerBreadcrumbContext] = useState<ExplorerBreadcrumbContext>(EMPTY_EXPLORER_BREADCRUMB_CONTEXT);
   const extraCrumbs = useMemo(() => buildWorkspaceBreadcrumbCrumbs(explorerBreadcrumbContext, folders), [explorerBreadcrumbContext, folders]);
 
@@ -149,16 +149,13 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
     };
   }, [setExtraCrumbs]);
 
-  if (loading) return <div className="h-full w-full bg-white" />;
-  if (error) return <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{error}</div>;
-
   return (
-    <div className="relative flex h-full min-h-0 w-full overflow-hidden bg-transparent">
+    <div className="relative isolate flex h-full min-h-0 w-full overflow-hidden bg-transparent">
       <SidebarInteractionRegion>
         {isLeftPanelCollapsed ? <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} /> : <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />}
       </SidebarInteractionRegion>
       <CarvePanel className={WORKSPACE_MAIN_PANEL_CLASS_NAME}>
-        <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} onBreadcrumbContextChange={handleBreadcrumbContextChange} folderSelectionNonce={0} navigateToSectionListToken={0} />
+        {loading ? <div className="h-full w-full bg-white" /> : error ? <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{error}</div> : <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} onBreadcrumbContextChange={handleBreadcrumbContextChange} folderSelectionNonce={0} navigateToSectionListToken={0} />}
         {showWorkspaceHeader ? <WorkspaceBreadcrumbs /> : null}
         {showWorkspaceHeader ? <WorkspaceActionToolbar className={WORKSPACE_ACTION_TOOLBAR_CLASS_NAME} style={WORKSPACE_ACTION_TOOLBAR_STYLE} /> : null}
         {showWorkspaceHeader ? (
@@ -188,7 +185,7 @@ const WorkspaceScreen = () => {
   if (isLeftPanelCollapsed) {
     return (
       <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
-        <div className="relative flex h-full min-h-0 w-full overflow-hidden bg-transparent">
+        <div className="relative isolate flex h-full min-h-0 w-full overflow-hidden bg-transparent">
           <SidebarInteractionRegion>
             <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={handleOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />
           </SidebarInteractionRegion>
