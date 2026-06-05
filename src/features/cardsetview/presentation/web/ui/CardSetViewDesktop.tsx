@@ -1,4 +1,6 @@
 import { type DragEvent, useCallback, useMemo, useState } from "react";
+import "@blocknote/core/fonts/inter.css";
+import "@blocknote/mantine/style.css";
 import { CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS, CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS, CARD_SET_VIEW_PAGER_PADDING_BLOCK, CARD_SET_VIEW_PAGER_PADDING_INLINE } from "@constants/shared/flashcard";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { DesktopCardSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopCardSurface";
@@ -67,7 +69,7 @@ type ReorderableCardSurfaceProps = {
   onToggleBookmark: (card: Card) => void | Promise<void>;
 };
 
-const DRAG_HANDLE_LABEL = "カードを並び替え";
+const DRAG_HANDLE_LABEL = "Open block menu";
 
 const resolveDropPlacement = (event: DragEvent<HTMLElement>): DropPlacement => {
   const rect = event.currentTarget.getBoundingClientRect();
@@ -145,13 +147,15 @@ const ReorderableCardSurface = ({
   return (
     <div className="group/card-reorder relative w-full" onDragOver={(event) => onDragOverCard(cardId, event)} onDrop={(event) => onDropCard(cardId, event)} onDragEnd={onDragEnd}>
       {isGlobalEditing ? (
-        <button type="button" draggable aria-label={DRAG_HANDLE_LABEL} title={DRAG_HANDLE_LABEL} onClick={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()} onDragStart={(event) => onDragStart(cardId, event)} onDragEnd={onDragEnd} className="absolute left-[-44px] top-4 z-20 flex h-9 w-8 cursor-grab items-center justify-center rounded-xl border border-[#e3e0d8] bg-white/90 text-[#9a958b] opacity-0 shadow-[0_12px_30px_rgba(15,23,42,0.10)] backdrop-blur transition hover:bg-[#f4f2ed] hover:text-[#4f4b45] active:cursor-grabbing group-hover/card-reorder:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cfc8b7]">
-          <span className="leading-none tracking-[-0.2em]">⋮⋮</span>
-        </button>
+        <div className="bn-side-menu absolute left-[-44px] top-4 z-20 opacity-0 transition-opacity group-hover/card-reorder:opacity-100 focus-within:opacity-100">
+          <button type="button" draggable aria-label={DRAG_HANDLE_LABEL} title={DRAG_HANDLE_LABEL} onClick={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()} onDragStart={(event) => onDragStart(cardId, event)} onDragEnd={onDragEnd} className="bn-button cursor-grab active:cursor-grabbing">
+            <span aria-hidden className="text-[18px] leading-none">⠿</span>
+          </button>
+        </div>
       ) : null}
 
       {isDropTarget ? (
-        <div aria-hidden className={`pointer-events-none absolute left-[-18px] right-[-18px] z-30 h-[3px] rounded-full bg-[#b9ab8f] shadow-[0_0_0_3px_rgba(185,171,143,0.16)] ${dragState?.placement === "before" ? "top-[-10px]" : "bottom-[-10px]"}`} />
+        <div aria-hidden className={`pointer-events-none absolute left-[-18px] right-[-18px] z-30 h-[3px] rounded-full bg-current text-[var(--app-sidebar-text-muted,#777777)] opacity-35 ${dragState?.placement === "before" ? "top-[-10px]" : "bottom-[-10px]"}`} />
       ) : null}
 
       <div className={isDragged ? "opacity-45" : undefined}>
