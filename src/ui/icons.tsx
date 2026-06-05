@@ -24,6 +24,7 @@ type GlyphKind =
   | "chevron-up"
   | "circle"
   | "copy"
+  | "download"
   | "minus"
   | "pin"
   | "plus"
@@ -45,6 +46,7 @@ const glyphPaths: Record<GlyphKind, string[]> = {
   "chevron-up": ["m18 15-6-6-6 6"],
   circle: ["M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"],
   copy: ["M9 9h10v10H9z", "M5 15H4V5h10v1"],
+  download: ["M12 3v12", "m7 10 5 5 5-5", "M5 21h14"],
   minus: ["M5 12h14"],
   pin: ["M12 17v5", "M5 7h14", "M7 7l2-4h6l2 4", "M8 7v6l-2 4h12l-2-4V7"],
   plus: ["M12 5v14", "M5 12h14"],
@@ -70,6 +72,7 @@ const glyphByIconName: Record<string, GlyphKind> = {
   ChevronUp: "chevron-up",
   Circle: "circle",
   Copy: "copy",
+  Download: "download",
   Minus: "minus",
   Pin: "pin",
   Plus: "plus",
