@@ -26,24 +26,24 @@ type CarvePanelShellProps = {
 };
 
 const CARVE_PANEL_SHELL_CLASS =
-  "relative flex h-full min-h-0 w-full flex-col bg-[var(--app-workspace-surface)]";
+  "relative flex h-full min-h-0 w-full flex-col bg-[var(--carvepanel-surface)]";
 
 const CARVE_PANEL_BODY_CLASS =
-  "relative flex min-h-0 flex-1 bg-[var(--app-workspace-surface)]";
+  "relative flex min-h-0 flex-1 bg-[var(--carvepanel-surface)]";
 
 const CARVE_PANEL_TOOLBAR_SPACER_CLASS =
-  "h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 bg-[var(--app-workspace-surface)]";
+  "h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 bg-[var(--carvepanel-surface)]";
 
 const CARVE_PANEL_LEFT_SPACER_CLASS = "w-[220px] shrink-0";
 const CARVE_PANEL_LEFT_PANEL_CLASS = "w-[220px] shrink-0 overflow-hidden";
 
 const CARVE_PANEL_VIEWPORT_BASE_CLASS =
-  "flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--app-workspace-surface)]";
+  "flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--carvepanel-surface)]";
 
 const CARVE_PANEL_VIEWPORT_CLASS = "pl-0 pr-0 pt-0 pb-0";
 
 const CARVE_PANEL_BASE_CLASS =
-  "flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-[#eeeeee] bg-[var(--app-workspace-surface)] backdrop-blur-xl shadow-[0_18px_48px_rgba(15,23,42,0.10),0_1px_0_rgba(255,255,255,0.85)_inset]";
+  "flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-[#eeeeee] bg-[var(--carvepanel-surface)] backdrop-blur-xl shadow-[0_18px_48px_rgba(15,23,42,0.10),0_1px_0_rgba(255,255,255,0.85)_inset]";
 
 const CARVE_PANEL_CLASS =
   "rounded-tl-[28px] rounded-tr-none border-r-0";
