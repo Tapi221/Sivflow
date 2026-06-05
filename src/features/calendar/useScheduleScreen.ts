@@ -1,6 +1,7 @@
 import type { RefObject, UIEvent } from "react";
 import { useCallback, useMemo, useState } from "react";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
+import { createInitialMonthVisibleWeekRange } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
 import { useCalendarLayout } from "@/features/calendar/layout/useCalendarLayout.desktop";
 import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
 import type { GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -31,7 +32,7 @@ export type UseScheduleScreenReturn = {
   visibleDays: Date[];
   displayDays: Date[];
   virtualRail: ScheduleVirtualRail;
-  monthRenderedRange: CalendarDateRange | null;
+  monthRenderedRange: CalendarDateRange;
   yearRenderedRange: CalendarDateRange | null;
 
   titleDate: Date;
@@ -71,9 +72,19 @@ export type UseScheduleScreenReturn = {
   setMonthTitleDate: (date: Date) => void;
 };
 
+type MonthRenderedRangeSnapshot = CalendarDateRange & {
+  scrollTargetToken: number;
+};
+
 const getGoogleCalendarEventDedupeKey = (event: GoogleCalendarEvent): string => event.id;
 
 const isSameCalendarDateRange = (left: CalendarDateRange | null, right: CalendarDateRange): boolean => left?.start.getTime() === right.start.getTime() && left.end.getTime() === right.end.getTime();
+
+const createMonthRenderedRangeSnapshot = (range: CalendarDateRange, scrollTargetToken: number): MonthRenderedRangeSnapshot => ({
+  start: range.start,
+  end: range.end,
+  scrollTargetToken,
+});
 
 const dedupeGoogleCalendarEvents = (events: GoogleCalendarEvent[]): GoogleCalendarEvent[] => {
   const seenKeys = new Set<string>();
@@ -90,13 +101,25 @@ const dedupeGoogleCalendarEvents = (events: GoogleCalendarEvent[]): GoogleCalend
 
 export const useScheduleScreen = ({ allowMultiSelectViewMode = true }: UseScheduleScreenOptions = {}): UseScheduleScreenReturn => {
   const navigation = useCalendarNavigation({ allowMultiSelectViewMode });
-  const [monthRenderedRange, setMonthRenderedRange] = useState<CalendarDateRange | null>(null);
+  const [monthRenderedRangeSnapshot, setMonthRenderedRangeSnapshot] = useState<MonthRenderedRangeSnapshot | null>(null);
   const [yearRenderedRange, setYearRenderedRange] = useState<CalendarDateRange | null>(null);
   const [yearSyncRange, setYearSyncRange] = useState<CalendarDateRange | null>(null);
 
+  const monthRenderedRange = useMemo(() => {
+    if (monthRenderedRangeSnapshot?.scrollTargetToken === navigation.monthScrollTargetToken) return monthRenderedRangeSnapshot;
+
+    return createInitialMonthVisibleWeekRange(navigation.currentDate);
+  }, [monthRenderedRangeSnapshot, navigation.currentDate, navigation.monthScrollTargetToken]);
+
   const handleMonthRenderedRangeChange = useCallback((range: CalendarDateRange) => {
-    setMonthRenderedRange((prev) => isSameCalendarDateRange(prev, range) ? prev : range);
-  }, []);
+    const scrollTargetToken = navigation.monthScrollTargetToken;
+
+    setMonthRenderedRangeSnapshot((prev) => {
+      if (prev?.scrollTargetToken === scrollTargetToken && isSameCalendarDateRange(prev, range)) return prev;
+
+      return createMonthRenderedRangeSnapshot(range, scrollTargetToken);
+    });
+  }, [navigation.monthScrollTargetToken]);
 
   const handleYearRenderedRangeChange = useCallback((range: CalendarDateRange) => {
     setYearRenderedRange((prev) => isSameCalendarDateRange(prev, range) ? prev : range);
