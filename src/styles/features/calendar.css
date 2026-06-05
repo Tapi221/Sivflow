@@ -28,6 +28,15 @@
     height: 0;
   }
 
+  div:has(> .calendar-timeline-scroll) > div:nth-child(2) > .grid > div {
+    min-height: 24px !important;
+  }
+
+  div:has(> .calendar-timeline-scroll) > div:nth-child(2) > .grid > div:first-child {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
   .calendar-print-screen-content div:has(> .calendar-timeline-scroll) > div:first-child > .grid > div:first-child,
   .calendar-print-screen-content div:has(> .calendar-timeline-scroll) > div:nth-child(2) > .grid > div:first-child,
   .calendar-timeline-scroll > .grid > div:first-child {
@@ -258,68 +267,5 @@
 
   .calendar-month-day-cell-hoverable:hover {
     background: #fafafa !important;
-  }
-
-  .calendar-month-day-cell:focus-within {
-    box-shadow: none;
-  }
-
-  .calendar-print-range-view {
-    display: none;
-  }
-
-  .task-chip-compact-ellipsis {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-family: var(--app-font-family-numeric), var(--app-font-family-ui);
-    font-feature-settings:
-      "palt" 1,
-      "halt" 1,
-      "kern" 1;
-    font-variant-east-asian: proportional-width;
-  }
-
-  @supports (text-overflow: "...") {
-    .task-chip-compact-ellipsis {
-      text-overflow: "...";
-    }
-  }
-
-  @media print {
-    @page {
-      size: landscape;
-      margin: 8mm;
-    }
-
-    html,
-    body,
-    #root {
-      height: auto !important;
-      min-height: 0 !important;
-      overflow: visible !important;
-      background: #ffffff !important;
-    }
-
-    body.calendar-printing * {
-      visibility: hidden !important;
-    }
-
-    body.calendar-printing .calendar-print-panel,
-    body.calendar-printing .calendar-print-panel * {
-      visibility: visible !important;
-    }
-
-    body.calendar-printing .calendar-print-panel {
-      position: static !important;
-      width: 100% !important;
-      height: auto !important;
-      min-height: 0 !important;
-      overflow: visible !important;
-      border: 0 !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      background: #ffffff !important;
-    }
   }
 }
