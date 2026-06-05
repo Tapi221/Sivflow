@@ -17,15 +17,15 @@ type SourceRowMarkerProps = {
 const GOOGLE_SOURCE_ROW_CLASS_NAME = "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
 const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#85827e]";
 const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#85827e] opacity-70";
-const SOURCE_ROW_MARKER_CLASS_NAME = "relative flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[4px] border";
-const SOURCE_ROW_MARKER_CHECK_CLASS_NAME = "h-2 w-1.5 translate-y-[-1px] rotate-45 border-b-[1.6px] border-r-[1.6px] border-current";
+const SOURCE_ROW_MARKER_CLASS_NAME = "relative flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] border transition-all duration-150";
+const SOURCE_ROW_MARKER_CHECK_CLASS_NAME = "h-[14px] w-[14px] text-white transition-opacity duration-150";
 const SOURCE_ROW_UNCHECKED_MARKER_COLOR = "#c7c7cc";
 
 const createSourceRowMarkerStyle = (color: string, checked: boolean): CSSProperties => ({
   "--source-row-marker-color": checked ? color : SOURCE_ROW_UNCHECKED_MARKER_COLOR,
-  backgroundColor: checked ? "color-mix(in srgb, var(--source-row-marker-color) 12%, white 88%)" : "transparent",
-  borderColor: checked ? "color-mix(in srgb, var(--source-row-marker-color) 52%, white 48%)" : "color-mix(in srgb, var(--source-row-marker-color) 38%, white 62%)",
-  color: checked ? "color-mix(in srgb, var(--source-row-marker-color) 78%, #4f5663 22%)" : "transparent",
+  backgroundColor: checked ? "color-mix(in srgb, var(--source-row-marker-color) 58%, white 42%)" : "transparent",
+  borderColor: checked ? "transparent" : "color-mix(in srgb, var(--source-row-marker-color) 38%, white 62%)",
+  color: checked ? "#ffffff" : "transparent",
 } as CSSProperties);
 
 const SourceRowMarker = ({ checked, color }: SourceRowMarkerProps) => {
@@ -35,7 +35,9 @@ const SourceRowMarker = ({ checked, color }: SourceRowMarkerProps) => {
       style={createSourceRowMarkerStyle(color, checked)}
       aria-hidden="true"
     >
-      <span className={cn(SOURCE_ROW_MARKER_CHECK_CLASS_NAME, !checked && "opacity-0")} />
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn(SOURCE_ROW_MARKER_CHECK_CLASS_NAME, !checked && "opacity-0")}>
+        <path d="M3.25 8.35L6.55 11.55L12.9 4.65" stroke="currentColor" strokeWidth="2.35" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
     </span>
   );
 };
