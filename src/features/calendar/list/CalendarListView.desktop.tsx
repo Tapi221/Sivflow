@@ -65,6 +65,7 @@ const LIST_MATERIALIZE_OVERSCAN_PX = 8_000;
 const LIST_MAX_RANGE_UPDATE_GUARD_PX = 8_000;
 const DATE_KEY_PART_COUNT = 3;
 const LIST_DAY_RAIL_CLASS_NAME = "pointer-events-none absolute -bottom-2 left-[67px] top-0 w-px -translate-x-1/2 bg-[#eceff3]";
+const LIST_GLOBAL_RAIL_CLASS_NAME = "pointer-events-none absolute bottom-0 left-[143px] top-0 w-px -translate-x-1/2 bg-[#eceff3] md:left-[183px]";
 const DAY_DATE_NUMBER_CLASS_NAME = "flex h-8 w-8 items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-all duration-150";
 const DAY_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const SELECTED_DAY_DATE_NUMBER_CLASS_NAME = "border-0 bg-[var(--ds-color-tag-sky-bg)] text-[var(--ds-color-tag-sky-fg)] shadow-none ring-0";
@@ -307,7 +308,7 @@ const CalendarListViewComponent = ({ virtualRail, events, selectedDate, onSelect
   useEffect(() => { const element = scrollRef.current; if (!element) return; const handleScroll = () => scheduleScrollWork(element); element.addEventListener("scroll", handleScroll, { passive: true }); return () => element.removeEventListener("scroll", handleScroll); }, [scheduleScrollWork, scrollRef]);
   useEffect(() => () => { if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current); }, []);
 
-  return <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}><div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-2 pb-6 pt-2 scrollbar-hidden md:px-4"><div className="mx-auto w-full max-w-[940px]"><div className="relative w-full" style={{ height: totalHeight }}>{days.map((day, offset) => { const dayIndex = range.start + offset; const height = getRenderedDayHeight(dayHeights, day); return <div key={day.dateKey} className="absolute left-0 right-0 top-0" style={createVirtualDayStyle(metrics, dayIndex, height)}><CalendarListDaySection day={day} onSelectDate={onSelectDate} /></div>; })}</div></div></div></div>;
+  return <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}><div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-2 pb-6 pt-2 scrollbar-hidden md:px-4"><div className="mx-auto w-full max-w-[940px]"><div className="relative w-full" style={{ height: totalHeight }}><span className={LIST_GLOBAL_RAIL_CLASS_NAME} aria-hidden="true" />{days.map((day, offset) => { const dayIndex = range.start + offset; const height = getRenderedDayHeight(dayHeights, day); return <div key={day.dateKey} className="absolute left-0 right-0 top-0" style={createVirtualDayStyle(metrics, dayIndex, height)}><CalendarListDaySection day={day} onSelectDate={onSelectDate} /></div>; })}</div></div></div></div>;
 };
 
 const CalendarListView = memo(CalendarListViewComponent);
