@@ -62,8 +62,8 @@ export const BlockFrame = ({
   }, []);
 
   const shouldShowSelection = selectionActive && isLatestSelection;
-  const neutralOutline = "inset 0 0 0 var(--card-ruled-line-px, 1px) var(--card-ruled-color, rgba(0,0,0,0.05))";
-  const editorOutline = `inset 0 0 0 ${SELECTED_BLOCK_OUTLINE_WIDTH} ${SELECTED_BLOCK_OUTLINE_COLOR}`;
+  const neutralOutline = "0 0 0 var(--card-ruled-line-px, 1px) var(--card-ruled-color, rgba(0,0,0,0.05))";
+  const editorOutline = `0 0 0 ${SELECTED_BLOCK_OUTLINE_WIDTH} ${SELECTED_BLOCK_OUTLINE_COLOR}`;
 
   const boxShadow = variant === "none" ? undefined : variant === "editor" && shouldShowSelection ? editorOutline : neutralOutline;
 
