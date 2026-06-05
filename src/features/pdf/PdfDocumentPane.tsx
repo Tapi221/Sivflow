@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { MobilePdfPages } from "./MobilePdfPages";
 import { PdfPane } from "./PdfPane";
+import { createPdfDocumentDataSource, createPdfDocumentUrlSource } from "./pdfDocumentSource";
 import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
-import type { PdfViewerState, DocumentItem } from "@/types";
 import { getDocumentBlob } from "@/services/documentFileStore";
+import type { PdfViewerState, DocumentItem } from "@/types";
+import type { PdfDocumentSource } from "./pdfDocumentSource";
 
 type PdfDocumentPaneProps = {
   document: DocumentItem;
@@ -13,7 +15,7 @@ type PdfDocumentPaneProps = {
 
 type LocalPdfSourceState = {
   isResolved: boolean;
-  url: string | null;
+  source: PdfDocumentSource | null;
 };
 
 type LegacyMediaQueryList = MediaQueryList & {
@@ -25,12 +27,12 @@ const MOBILE_PDF_VIEWPORT_MEDIA_QUERY = "(max-width: 767px)";
 
 const createPendingLocalPdfSourceState = (): LocalPdfSourceState => ({
   isResolved: false,
-  url: null,
+  source: null,
 });
 
-const createResolvedLocalPdfSourceState = (url: string | null): LocalPdfSourceState => ({
+const createResolvedLocalPdfSourceState = (source: PdfDocumentSource | null): LocalPdfSourceState => ({
   isResolved: true,
-  url,
+  source,
 });
 
 const resolveDocumentFileId = (document: Pick<DocumentItem, "id" | "localFileId">): string => {
@@ -52,19 +54,27 @@ const addMobilePdfViewportChangeListener = (mediaQueryList: MediaQueryList, list
   return () => legacyMediaQueryList.removeListener?.(listener);
 };
 
+const createPersistedPdfDocumentSource = (url: string | null): PdfDocumentSource | null => {
+  return url ? createPdfDocumentUrlSource(url) : null;
+};
+
+const readBlobAsPdfDocumentSource = async (blob: Blob): Promise<PdfDocumentSource> => {
+  return createPdfDocumentDataSource(new Uint8Array(await blob.arrayBuffer()));
+};
+
 const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentPaneProps) => {
   const persistedSourceUrl = useMemo(() => resolvePdfDocumentSourceUrl(document), [document.blobUrl, document.downloadUrl, document.googleDriveWebContentLink, document.googleDriveWebViewLink, document.localUrl, document.remoteUrl]);
+  const persistedSource = useMemo(() => createPersistedPdfDocumentSource(persistedSourceUrl), [persistedSourceUrl]);
   const [localSource, setLocalSource] = useState<LocalPdfSourceState>(createPendingLocalPdfSourceState);
   const [isMobilePdfViewport, setIsMobilePdfViewport] = useState(getIsMobilePdfViewport);
-  const sourceUrl = localSource.url ?? (localSource.isResolved ? persistedSourceUrl : null);
+  const source = localSource.source ?? (localSource.isResolved ? persistedSource : persistedSource);
 
   useEffect(() => {
     let isCancelled = false;
-    let objectUrl: string | null = null;
 
     setLocalSource(createPendingLocalPdfSourceState());
 
-    const loadLocalObjectUrl = async () => {
+    const loadLocalSource = async () => {
       const blob = await getDocumentBlob(resolveDocumentFileId(document), { userId: document.userId });
       if (isCancelled) return;
 
@@ -73,11 +83,12 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
         return;
       }
 
-      objectUrl = URL.createObjectURL(blob);
-      setLocalSource(createResolvedLocalPdfSourceState(objectUrl));
+      const nextSource = await readBlobAsPdfDocumentSource(blob);
+      if (isCancelled) return;
+      setLocalSource(createResolvedLocalPdfSourceState(nextSource));
     };
 
-    void loadLocalObjectUrl().catch((error: unknown) => {
+    void loadLocalSource().catch((error: unknown) => {
       if (isCancelled) return;
       console.error("[PdfDocumentPane] local PDF source failed", error);
       setLocalSource(createResolvedLocalPdfSourceState(null));
@@ -85,7 +96,6 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
 
     return () => {
       isCancelled = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [document.id, document.localFileId, document.userId]);
 
@@ -99,17 +109,17 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     return addMobilePdfViewportChangeListener(mediaQueryList, updateMobilePdfViewport);
   }, []);
 
-  if (!localSource.isResolved && !sourceUrl) {
+  if (!localSource.isResolved && !source) {
     return <div className={className ?? "flex h-full min-h-0 min-w-0 items-center justify-center bg-[var(--carvepanel-surface)] text-[13px] text-[#6d6d6d]"}>PDFを読み込み中...</div>;
   }
 
   const handleViewerStateChange = (viewerState: PdfViewerState) => onDocumentUpdate?.({ viewerState });
 
   if (isMobilePdfViewport) {
-    return <MobilePdfPages sourceUrl={sourceUrl} className={className} viewerState={document.viewerState ?? null} onViewerStateChange={handleViewerStateChange} />;
+    return <MobilePdfPages source={source} className={className} viewerState={document.viewerState ?? null} onViewerStateChange={handleViewerStateChange} />;
   }
 
-  return <PdfPane sourceUrl={sourceUrl} className={className} viewerState={document.viewerState ?? null} onViewerStateChange={handleViewerStateChange} />;
+  return <PdfPane source={source} className={className} viewerState={document.viewerState ?? null} onViewerStateChange={handleViewerStateChange} />;
 };
 
 export { PdfDocumentPane };
