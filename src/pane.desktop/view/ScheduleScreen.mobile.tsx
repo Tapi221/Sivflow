@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
 import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
+import { MobileCalendarEventComposer } from "./MobileCalendarEventComposer";
 
 type CalendarEventDisplayRange = { start: Date; end: Date };
 type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange | null; yearRenderedRange: CalendarDateRange | null };
@@ -39,7 +40,11 @@ const MOBILE_SCHEDULE_PANEL_CLASS = "!m-0 h-full min-h-0 !rounded-none !border-0
 const MOBILE_SCHEDULE_HEADER_CLASS = "flex shrink-0 flex-col px-4 pb-3 pt-4";
 const MOBILE_SCHEDULE_SURFACE_CLASS = "schedule-mobile-calendar-surface mx-0 flex min-h-0 flex-1 flex-col overflow-hidden !rounded-none !border-0";
 const MOBILE_TODAY_BUTTON_CLASS = "flex h-8 shrink-0 items-center justify-center rounded-full bg-[#f7f7f7] px-3 text-[13px] font-semibold tracking-[-0.02em] text-[#8e8e93] shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition hover:bg-[#efeff4] hover:text-[#6e6e73] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
+<<<<<<< HEAD
 const MOBILE_SIDEBAR_OPEN_ICON_CLASS = "h-5 w-5 shrink-0 [transform:scaleX(-1)]";
+=======
+const MOBILE_ADD_EVENT_BUTTON_CLASS = "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[30px] font-light leading-none text-[#ff3b30] shadow-[0_1px_6px_rgba(0,0,0,0.08)] ring-1 ring-black/5 transition hover:bg-[#f7f7f7] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
+>>>>>>> 4fcdc38350dfcf84d865c5cb3b4b91f8c5e7876e
 const MOBILE_SIDEBAR_SWIPE_DISTANCE = 56;
 const MOBILE_SIDEBAR_SWIPE_HORIZONTAL_INTENT = 12;
 const MOBILE_SIDEBAR_SWIPE_VERTICAL_LIMIT = 72;
@@ -194,9 +199,10 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
   const sidebarSwipeRef = useRef<MobileSidebarSwipeState | null>(null);
   const { appProjects, loading: rootFolderProjectsLoading, createRootFolderProject, findProjectByLabel, setProjectVisibility, toggleProject, updateRootFolderProjectColor } = useRootFolderProjects();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isEventComposerOpen, setIsEventComposerOpen] = useState(false);
   const [projectCalendarLinks, setProjectCalendarLinks] = useState<ProjectCalendarLink[]>(readStoredProjectCalendarLinks);
   const [googleCalendarColorOverrides, setGoogleCalendarColorOverrides] = useState<GoogleCalendarColorOverrideMap>(readStoredGoogleCalendarColorOverrides);
-  const { selectedViewMode, primaryViewMode, currentDate, selectedDate, titleDate, monthTitleDate, monthScrollTargetToken, visibleDays, virtualRail, yearRenderedRange, googleCalendarEvents, googleAccounts, isAnyCalendarConnecting, calendarGridStyle, headerScrollRef, allDayScrollRef, scrollContainerRef, contentViewportRef, handleCalendarScroll, handleSelectViewMode, handleSidebarSelectDate, handleVisibleDateChange, handleVisibleMonthChange, handlePrevious, handleNext, handleToday, handleMonthCellSelectDate, handleMonthRenderedRangeChange, handleYearRenderedRangeChange, handleYearSyncRangeChange, addGoogleCalendar, reconnectGoogleAccount, toggleGoogleCalendar, updateGoogleCalendarEvent } = pane;
+  const { selectedViewMode, primaryViewMode, currentDate, selectedDate, titleDate, monthTitleDate, monthScrollTargetToken, visibleDays, virtualRail, yearRenderedRange, googleCalendarEvents, googleAccounts, isAnyCalendarConnecting, calendarGridStyle, headerScrollRef, allDayScrollRef, scrollContainerRef, contentViewportRef, handleCalendarScroll, handleSelectViewMode, handleSidebarSelectDate, handleVisibleDateChange, handleVisibleMonthChange, handlePrevious, handleNext, handleToday, handleMonthCellSelectDate, handleMonthRenderedRangeChange, handleYearRenderedRangeChange, handleYearSyncRangeChange, addGoogleCalendar, reconnectGoogleAccount, toggleGoogleCalendar, createGoogleCalendarEvent, updateGoogleCalendarEvent } = pane;
   const { calendarEventMoveOverrides, handleMoveCalendarEvent } = useCalendarEventMoveController({ updateGoogleCalendarEvent });
   const viewOptions = useMemo(() => [{ value: "year", label: t.viewYear }, { value: "month", label: t.viewMonth }, { value: "week", label: t.viewWeek }, { value: "threeDays", label: t.viewThreeDays }, { value: "days", label: t.viewDay }, { value: "list", label: t.viewList }, { value: "timetable", label: t.viewTimetable }, { value: "pieChart", label: t.viewPieChart }] as const, [t.viewDay, t.viewList, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewTimetable, t.viewWeek, t.viewYear]);
 
@@ -253,6 +259,14 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
 
   const handleCloseSidebar = useCallback(() => {
     setIsSidebarOpen(false);
+  }, []);
+
+  const handleOpenEventComposer = useCallback(() => {
+    setIsEventComposerOpen(true);
+  }, []);
+
+  const handleCloseEventComposer = useCallback(() => {
+    setIsEventComposerOpen(false);
   }, []);
 
   const handleSidebarSwipeStart = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
@@ -397,7 +411,10 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
           <button type="button" className={MOBILE_TODAY_BUTTON_CLASS} onClick={handleToday} aria-label={t.todayButton}>{t.todayButton}</button>
           <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]" onClick={handleNext} aria-label={t.nextLabel}>›</button>
         </div>
-        <MobileViewModeDropdown value={selectedViewMode} onChange={handleSelectViewMode} options={viewOptions} />
+        <div className="flex shrink-0 items-center gap-2">
+          <button type="button" className={MOBILE_ADD_EVENT_BUTTON_CLASS} onClick={handleOpenEventComposer} aria-label="新規予定を追加">＋</button>
+          <MobileViewModeDropdown value={selectedViewMode} onChange={handleSelectViewMode} options={viewOptions} />
+        </div>
       </div>
     </div>
   );
@@ -435,7 +452,7 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
     return <CarvePanel className={MOBILE_SCHEDULE_PANEL_CLASS}>{renderViewHeader(MOBILE_SCHEDULE_HEADER_CLASS)}<div className={cn(MOBILE_SCHEDULE_SURFACE_CLASS, IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={mainCalendarEvents} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} /></div></CarvePanel>;
   };
 
-  return <div ref={contentViewportRef} className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]"><style>{MOBILE_SCHEDULE_STYLE}</style>{renderMobileSidebar()}<main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white p-0">{renderCalendarContent()}</main></div>;
+  return <div ref={contentViewportRef} className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]"><style>{MOBILE_SCHEDULE_STYLE}</style>{renderMobileSidebar()}<MobileCalendarEventComposer isOpen={isEventComposerOpen} selectedDate={selectedDate} accounts={googleAccountsWithColorOverrides} projectCalendarLinks={projectCalendarLinks} onClose={handleCloseEventComposer} onAddCalendar={addGoogleCalendar} onCreateEvent={createGoogleCalendarEvent} /><main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white p-0">{renderCalendarContent()}</main></div>;
 };
 
 export { ScheduleScreen };

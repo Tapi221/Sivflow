@@ -1,7 +1,8 @@
-import { LOCALDB_GENERATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME, SHARED_STORAGE_KEYS } from "@constants/shared/storage";
+import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 import { collection, doc, getDocs, writeBatch } from "firebase/firestore";
 import { LocalDB, getLocalDb, getLocalDbSync } from "./LocalDB";
+import { LOCALDB_GENERATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME } from "./localdb.constants";
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { auditAndRepairTags } from "@/services/localdb/audit/tags";
 import { auth } from "@/services/firebase";
