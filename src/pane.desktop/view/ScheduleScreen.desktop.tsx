@@ -33,7 +33,7 @@ import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 
 type CalendarEventDisplayRange = { start: Date; end: Date };
 
-type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange | null; yearRenderedRange: CalendarDateRange | null };
+type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange; yearRenderedRange: CalendarDateRange | null };
 
 type CreateGoogleProjectCalendarLinkInput = { project: AppCalendarItem; accountId: string; calendar: GoogleCalendarListItem; color: string; createdByApp: boolean };
 
@@ -45,7 +45,6 @@ const DEFAULT_PLAN_RESULT_MODES: readonly PlanResultMode[] = ["plan", "actual"];
 const PLAN_RESULT_TOGGLE_VIEW_MODES = new Set(["threeDays", "days", "pieChart"]);
 const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const WEEKDAY_EVENT_BUFFER_DAYS = 1;
-const MONTH_EVENT_BUFFER_DAYS = 18 * 7;
 
 const isHexColor = (value: string): boolean => /^#[0-9a-f]{6}$/i.test(value);
 
@@ -117,7 +116,7 @@ const buildCalendarDateDisplayRange = (range: CalendarDateRange): CalendarEventD
 
 const getScheduleEventDisplayRange = ({ primaryViewMode, currentDate, selectedDate, visibleDays, monthRenderedRange, yearRenderedRange }: CalendarEventDisplayRangeOptions): CalendarEventDisplayRange => {
   if (primaryViewMode === "year") return buildYearDisplayRange(currentDate, yearRenderedRange);
-  if (primaryViewMode === "month") return monthRenderedRange ? buildCalendarDateDisplayRange(monthRenderedRange) : buildDaysDisplayRange(visibleDays, currentDate, MONTH_EVENT_BUFFER_DAYS);
+  if (primaryViewMode === "month") return buildCalendarDateDisplayRange(monthRenderedRange);
   if (primaryViewMode === "list" || primaryViewMode === "pieChart") return buildDaysDisplayRange(visibleDays, selectedDate, LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS);
   return buildDaysDisplayRange(visibleDays, selectedDate, WEEKDAY_EVENT_BUFFER_DAYS);
 };
