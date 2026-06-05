@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, type ReactNode } from "react";
 
 type WorkspaceLayoutRevisionProviderProps = {
   children: ReactNode;
@@ -7,12 +7,8 @@ type WorkspaceLayoutRevisionProviderProps = {
 
 const WorkspaceLayoutRevisionContext = createContext(0);
 
-const useWorkspaceLayoutRevision = () => {
-  return useContext(WorkspaceLayoutRevisionContext);
-};
-
 const WorkspaceLayoutRevisionProvider = ({ children, revision }: WorkspaceLayoutRevisionProviderProps) => {
   return <WorkspaceLayoutRevisionContext.Provider value={revision}>{children}</WorkspaceLayoutRevisionContext.Provider>;
 };
 
-export { WorkspaceLayoutRevisionProvider, useWorkspaceLayoutRevision };
+export { WorkspaceLayoutRevisionProvider };
