@@ -3,7 +3,6 @@ import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
 import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/web/pdf_viewer.mjs";
 import "pdfjs-dist/web/pdf_viewer.css";
-import { MobilePdfPages } from "./MobilePdfPages";
 import type { PdfViewerState } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -55,7 +54,6 @@ const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
-const MOBILE_PDF_MEDIA_QUERY = "(hover: none) and (pointer: coarse), (max-width: 767px)";
 
 const clampPdfScale = (scale: number): number => {
   if (!Number.isFinite(scale)) return DEFAULT_PDF_SCALE;
@@ -84,11 +82,6 @@ const getPdfViewerPageCount = (pdfViewer: PdfViewerInstance): number => {
 const getPdfViewerStateScaleValue = (viewerState: PdfViewerState | null): string => {
   if (viewerState?.fitMode === "manual" && typeof viewerState.scale === "number") return String(clampPdfScale(viewerState.scale));
   return "page-width";
-};
-
-const getInitialMobilePdfPreference = (): boolean => {
-  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
-  return window.matchMedia(MOBILE_PDF_MEDIA_QUERY).matches;
 };
 
 const shouldHandlePdfKeyboardEvent = (event: KeyboardEvent): boolean => {
@@ -143,7 +136,12 @@ const addPdfViewerEventListener = (eventBus: PdfEventBusLike, eventName: string,
   };
 };
 
-const DesktopPdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onViewerStateChange }: PdfPaneProps) => {
+const updatePdfViewerResponsiveScale = (pdfViewer: PdfViewerInstance, viewerState: PdfViewerState | null): void => {
+  if (viewerState?.fitMode === "manual") return;
+  pdfViewer.currentScaleValue = "page-width";
+};
+
+const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onViewerStateChange }: PdfPaneProps) => {
   const viewerEnableXfa = viewerOptions?.enableXfa;
   const viewerUseSystemFonts = viewerOptions?.useSystemFonts;
   const viewerCMapUrl = viewerOptions?.cMapUrl;
@@ -247,10 +245,20 @@ const DesktopPdfPane = ({ sourceUrl, className, viewerState = null, viewerOption
 
     let isCancelled = false;
     let loadedPdfDocument: PdfDocumentProxy | null = null;
+    let resizeFrame: number | null = null;
     const eventBus = new EventBus() as PdfEventBusLike;
     const linkService = new PDFLinkService({ eventBus });
     const pdfViewer = new PDFViewer({ container, eventBus, linkService, viewer: viewerElement });
     const removeEventListeners: Array<() => void> = [];
+
+    const requestResponsiveScaleUpdate = () => {
+      if (resizeFrame !== null) return;
+      resizeFrame = window.requestAnimationFrame(() => {
+        resizeFrame = null;
+        if (isCancelled || !loadedPdfDocument) return;
+        updatePdfViewerResponsiveScale(pdfViewer, viewerStateRef.current);
+      });
+    };
 
     pdfViewerRef.current = pdfViewer;
     linkService.setViewer(pdfViewer);
@@ -258,10 +266,15 @@ const DesktopPdfPane = ({ sourceUrl, className, viewerState = null, viewerOption
     setLoadError(null);
     setIsLoading(true);
 
+    const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestResponsiveScaleUpdate);
+    resizeObserver?.observe(container);
+    window.addEventListener("orientationchange", requestResponsiveScaleUpdate);
+
     removeEventListeners.push(addPdfViewerEventListener(eventBus, "pagesinit", () => {
       if (isCancelled || !loadedPdfDocument) return;
       pdfViewer.currentScaleValue = getPdfViewerStateScaleValue(viewerStateRef.current);
       pdfViewer.currentPageNumber = getSafePageNumber(viewerStateRef.current?.currentPage, loadedPdfDocument.numPages);
+      requestResponsiveScaleUpdate();
     }));
 
     removeEventListeners.push(addPdfViewerEventListener(eventBus, "pagechanging", (event: unknown) => {
@@ -297,6 +310,9 @@ const DesktopPdfPane = ({ sourceUrl, className, viewerState = null, viewerOption
 
     return () => {
       isCancelled = true;
+      if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
+      resizeObserver?.disconnect();
+      window.removeEventListener("orientationchange", requestResponsiveScaleUpdate);
       removeEventListeners.forEach((removeEventListener) => removeEventListener());
       releasePdfViewerDocument(pdfViewer, linkService, loadedPdfDocument);
       viewerElement.replaceChildren();
@@ -369,9 +385,9 @@ const DesktopPdfPane = ({ sourceUrl, className, viewerState = null, viewerOption
   }, [handleGoBack, handleGoForward, handleJumpToMark, handleSetMark, handleToggleBookmark, handleZoomIn, handleZoomOut, setViewerPage]);
 
   return (
-    <div className={cn("flex h-full min-h-0 min-w-0 bg-[var(--carvepanel-surface)] text-[#2f2f2f]", className)}>
+    <div className={cn("flex h-full min-h-0 min-w-0 bg-[var(--carvepanel-surface)] text-[#2f2f2f] max-sm:min-h-[100dvh]", className)}>
       <main className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-        <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto bg-[var(--carvepanel-surface)] px-4 py-5">
+        <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto overscroll-contain bg-[var(--carvepanel-surface)] px-3 py-4 [-webkit-overflow-scrolling:touch] sm:px-4 sm:py-5">
           <div ref={pdfViewerElementRef} className="pdfViewer" />
           {isLoading ? <div className="absolute inset-0 flex items-center justify-center bg-[var(--carvepanel-surface)] text-[13px] text-[#6d6d6d]">PDFを読み込み中...</div> : null}
           {!isLoading && loadError ? <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-[13px] leading-6 text-[#4a4640]"><div className="max-w-md rounded-[14px] border border-[#ded8cf] bg-white px-5 py-4 shadow-sm">{loadError}</div></div> : null}
@@ -379,27 +395,6 @@ const DesktopPdfPane = ({ sourceUrl, className, viewerState = null, viewerOption
       </main>
     </div>
   );
-};
-
-const PdfPane = (props: PdfPaneProps) => {
-  const [isMobilePdfPreferred, setIsMobilePdfPreferred] = useState(getInitialMobilePdfPreference);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
-
-    const mediaQuery = window.matchMedia(MOBILE_PDF_MEDIA_QUERY);
-    const handleChange = () => setIsMobilePdfPreferred(mediaQuery.matches);
-
-    handleChange();
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
-  if (isMobilePdfPreferred) {
-    return <MobilePdfPages {...props} />;
-  }
-
-  return <DesktopPdfPane {...props} />;
 };
 
 export { PdfPane };
