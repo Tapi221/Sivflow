@@ -86,6 +86,18 @@
     pointer-events: auto;
   }
 
+  [data-pdf-page-number] .text-transparent::sel\65 ction,
+  [data-pdf-page-number] .text-transparent *::sel\65 ction {
+    background-color: var(--app-highlight-bg) !important;
+    color: transparent !important;
+  }
+
+  [data-pdf-page-number] .text-transparent::-moz-sel\65 ction,
+  [data-pdf-page-number] .text-transparent *::-moz-sel\65 ction {
+    background-color: var(--app-highlight-bg) !important;
+    color: transparent !important;
+  }
+
   .workspace-surface--plain {
     background: transparent;
   }
