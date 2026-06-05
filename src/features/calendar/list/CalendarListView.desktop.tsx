@@ -64,10 +64,13 @@ const LIST_VIRTUAL_BASE_DAY_BLOCK_HEIGHT_PX = LIST_VIRTUAL_BASE_DAY_HEIGHT_PX + 
 const LIST_MATERIALIZE_OVERSCAN_PX = 8_000;
 const LIST_MAX_RANGE_UPDATE_GUARD_PX = 8_000;
 const DATE_KEY_PART_COUNT = 3;
-const LIST_DAY_RAIL_CLASS_NAME = "pointer-events-none absolute -bottom-2 left-[43px] top-0 w-px -translate-x-1/2 bg-[#eceff3] md:left-[67px]";
+const LIST_DAY_RAIL_CLASS_NAME = "pointer-events-none absolute -bottom-2 left-[67px] top-0 w-px -translate-x-1/2 bg-[#eceff3]";
 const DAY_DATE_NUMBER_CLASS_NAME = "flex h-8 w-8 items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-all duration-150";
 const DAY_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const SELECTED_DAY_DATE_NUMBER_CLASS_NAME = "border-0 bg-[var(--ds-color-tag-sky-bg)] text-[var(--ds-color-tag-sky-fg)] shadow-none ring-0";
+const EMPTY_DAY_ROW_CLASS_NAME = "grid h-full min-h-[38px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch";
+const EMPTY_DAY_LINE_CLASS_NAME = "absolute top-0 -bottom-1.5 left-1/2 w-px -translate-x-1/2 bg-[#eceff3]";
+const EMPTY_DAY_DOT_CLASS_NAME = "relative mt-2 h-2 w-2 rounded-full border-2 border-[#dedede] bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)]";
 
 const createRail = (selectedDate: Date): ScheduleVirtualRail => ({ startDate: subDays(startOfMonth(selectedDate), LOCAL_DAYS), anchorIndex: LOCAL_DAYS, totalDayCount: LOCAL_DAYS * 2 + getDaysInMonth(selectedDate) });
 
@@ -265,7 +268,7 @@ const createVirtualDayStyle = (metrics: CalendarListVirtualMetrics, dayIndex: nu
 
 const getDayDateNumberClassName = (day: CalendarListDay): string => cn(DAY_DATE_NUMBER_CLASS_NAME, day.isSelected ? SELECTED_DAY_DATE_NUMBER_CLASS_NAME : day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
 
-const EmptyDayCard = () => <div className="grid h-full min-h-[38px] grid-cols-[30px_26px_minmax(0,1fr)] items-stretch md:grid-cols-[54px_26px_minmax(0,1fr)]"><div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[#b3b3b3]">—</div><div className="relative flex justify-center"><span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#dedede]" aria-hidden="true" /><span className="relative mt-[8px] h-2 w-2 rounded-full border border-[#dedede] bg-white" aria-hidden="true" /></div><div className="flex h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">{EMPTY_DAY_LABEL}</div></div>;
+const EmptyDayCard = () => <div className={EMPTY_DAY_ROW_CLASS_NAME}><div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[#b3b3b3]">—</div><div className="relative flex justify-center"><span className={EMPTY_DAY_LINE_CLASS_NAME} aria-hidden="true" /><span className={EMPTY_DAY_DOT_CLASS_NAME} aria-hidden="true" /></div><div className="flex h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">{EMPTY_DAY_LABEL}</div></div>;
 
 const CalendarListDaySectionComponent = ({ day, onSelectDate }: CalendarListDaySectionProps) => <section className="grid h-full grid-cols-[72px_minmax(0,1fr)] gap-1 md:grid-cols-[108px_minmax(0,1fr)] md:gap-2" aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}><button type="button" className="group mt-0.5 flex h-8 items-center justify-end gap-1 rounded-[10px] pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25" onClick={() => onSelectDate?.(day.date)}><span className={getDayDateNumberClassName(day)}>{format(day.date, "d")}</span><span className={DAY_WEEKDAY_CLASS_NAME}>{format(day.date, "EEE", { locale: ja })}</span></button><div className="relative h-full overflow-visible"><span className={LIST_DAY_RAIL_CLASS_NAME} aria-hidden="true" /><div className="relative h-full space-y-1.5 overflow-hidden">{day.events.length > 0 ? day.events.map((event) => <CalendarEventChipList key={getEventInstanceKey(day.dateKey, event)} event={event} />) : <EmptyDayCard />}</div></div></section>;
 
