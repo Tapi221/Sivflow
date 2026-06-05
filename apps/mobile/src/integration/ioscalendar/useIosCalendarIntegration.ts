@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { fetchIosCalendars, fetchIosEvents, getIosCalendarPermissionStatus, isIosCalendarSupported, requestIosCalendarPermission } from "./iosCalendar.api";
+import { AppState } from "react-native";
+import { createIosCalendarEvent, deleteIosCalendarEvent, fetchIosCalendars, fetchIosEvents, getIosCalendarPermissionStatus, isIosCalendarSupported, requestIosCalendarPermission, updateIosCalendarEvent } from "./iosCalendar.api";
 import type { GoogleCalendarEvent } from "@core/calendar/calendarEvent.types";
-import type { IosCalendarConnectionStatus, IosCalendarListItem, IosCalendarPermissionStatus, IosCalendarRange } from "./iosCalendar.types";
+import type { IosCalendarConnectionStatus, IosCalendarEvent, IosCalendarListItem, IosCalendarPermissionStatus, IosCalendarRange, IosCalendarWritableEventDeleteInput, IosCalendarWritableEventInput, IosCalendarWritableEventUpdateInput } from "./iosCalendar.types";
 
 type LoadEventsInput = {
   calendarIds: string[];
@@ -11,6 +12,9 @@ type LoadEventsInput = {
 
 const IOS_CALENDAR_PERMISSION_ERROR = "iOSカレンダーへのアクセス許可が必要です";
 const IOS_CALENDAR_UNSUPPORTED_ERROR = "iOSカレンダー連携はiOS端末でのみ利用できます";
+const IOS_CALENDAR_CREATE_ERROR = "iOSカレンダー予定の作成に失敗しました";
+const IOS_CALENDAR_UPDATE_ERROR = "iOSカレンダー予定の更新に失敗しました";
+const IOS_CALENDAR_DELETE_ERROR = "iOSカレンダー予定の削除に失敗しました";
 
 const normalizeRange = (range: IosCalendarRange): IosCalendarRange => range.rangeStart <= range.rangeEnd
   ? range
@@ -30,6 +34,10 @@ const getConnectionStatus = ({ error, isEnabled, permissionStatus, supported }: 
   return "connected";
 };
 
+const toErrorMessage = (error: unknown, fallback: string): string => error instanceof Error ? error.message : fallback;
+
+const buildSelectedCalendarIdList = (ids: Set<string>): string[] => Array.from(ids);
+
 export const useIosCalendarIntegration = () => {
   const supported = isIosCalendarSupported();
   const [permissionStatus, setPermissionStatus] = useState<IosCalendarPermissionStatus>("undetermined");
@@ -40,11 +48,16 @@ export const useIosCalendarIntegration = () => {
   const [range, setRange] = useState<IosCalendarRange | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
+  const [isWritingEvent, setIsWritingEvent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
+  const calendarsRef = useRef<IosCalendarListItem[]>([]);
+  const isEnabledRef = useRef(false);
+  const permissionStatusRef = useRef<IosCalendarPermissionStatus>("undetermined");
   const rangeRef = useRef<IosCalendarRange | null>(null);
   const isMountedRef = useRef(true);
-  const selectedCalendarIdList = useMemo(() => Array.from(selectedCalendarIds), [selectedCalendarIds]);
+  const selectedCalendarIdsRef = useRef<Set<string>>(new Set());
+  const selectedCalendarIdList = useMemo(() => buildSelectedCalendarIdList(selectedCalendarIds), [selectedCalendarIds]);
   const connectionStatus = getConnectionStatus({
     error,
     isEnabled,
@@ -57,6 +70,22 @@ export const useIosCalendarIntegration = () => {
       isMountedRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    calendarsRef.current = calendars;
+  }, [calendars]);
+
+  useEffect(() => {
+    isEnabledRef.current = isEnabled;
+  }, [isEnabled]);
+
+  useEffect(() => {
+    permissionStatusRef.current = permissionStatus;
+  }, [permissionStatus]);
+
+  useEffect(() => {
+    selectedCalendarIdsRef.current = selectedCalendarIds;
+  }, [selectedCalendarIds]);
 
   const loadEvents = useCallback(async ({ calendarIds, calendars: nextCalendars, range: nextRange }: LoadEventsInput) => {
     if (!supported || !nextRange || calendarIds.length === 0) {
@@ -82,7 +111,7 @@ export const useIosCalendarIntegration = () => {
     } catch (err) {
       if (!isMountedRef.current) return;
 
-      setError(err instanceof Error ? err.message : "iOSカレンダーの予定取得に失敗しました");
+      setError(toErrorMessage(err, "iOSカレンダーの予定取得に失敗しました"));
       setEvents([]);
     } finally {
       if (isMountedRef.current) {
@@ -95,6 +124,9 @@ export const useIosCalendarIntegration = () => {
     const nextCalendars = await fetchIosCalendars();
     const nextSelectedCalendarIds = getDefaultSelectedCalendarIds(nextCalendars);
 
+    calendarsRef.current = nextCalendars;
+    selectedCalendarIdsRef.current = new Set(nextSelectedCalendarIds);
+
     if (!isMountedRef.current) return nextCalendars;
 
     setCalendars(nextCalendars);
@@ -102,6 +134,37 @@ export const useIosCalendarIntegration = () => {
 
     return nextCalendars;
   }, []);
+
+  const syncCurrentRange = useCallback(async (nextCalendars: IosCalendarListItem[] = calendarsRef.current) => {
+    await loadEvents({
+      calendarIds: buildSelectedCalendarIdList(selectedCalendarIdsRef.current),
+      calendars: nextCalendars,
+      range: rangeRef.current,
+    });
+  }, [loadEvents]);
+
+  const ensureWritableCalendars = useCallback(async (): Promise<IosCalendarListItem[]> => {
+    if (!supported) throw new Error(IOS_CALENDAR_UNSUPPORTED_ERROR);
+
+    let status = permissionStatusRef.current;
+
+    if (status !== "granted") {
+      status = await requestIosCalendarPermission();
+      permissionStatusRef.current = status;
+      setPermissionStatus(status);
+    }
+
+    if (status !== "granted") {
+      isEnabledRef.current = false;
+      setIsEnabled(false);
+      throw new Error(IOS_CALENDAR_PERMISSION_ERROR);
+    }
+
+    isEnabledRef.current = true;
+    setIsEnabled(true);
+
+    return calendarsRef.current.length > 0 ? calendarsRef.current : loadCalendars();
+  }, [loadCalendars, supported]);
 
   useEffect(() => {
     let cancelled = false;
@@ -115,10 +178,12 @@ export const useIosCalendarIntegration = () => {
       const status = await getIosCalendarPermissionStatus();
       if (cancelled || !isMountedRef.current) return;
 
+      permissionStatusRef.current = status;
       setPermissionStatus(status);
 
       if (status !== "granted") return;
 
+      isEnabledRef.current = true;
       setIsEnabled(true);
 
       const nextCalendars = await loadCalendars();
@@ -157,14 +222,17 @@ export const useIosCalendarIntegration = () => {
 
     try {
       const status = await requestIosCalendarPermission();
+      permissionStatusRef.current = status;
       setPermissionStatus(status);
 
       if (status !== "granted") {
+        isEnabledRef.current = false;
         setIsEnabled(false);
         setError(IOS_CALENDAR_PERMISSION_ERROR);
         return;
       }
 
+      isEnabledRef.current = true;
       setIsEnabled(true);
 
       const nextCalendars = await loadCalendars();
@@ -174,13 +242,16 @@ export const useIosCalendarIntegration = () => {
         range: rangeRef.current,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "iOSカレンダー連携に失敗しました");
+      setError(toErrorMessage(err, "iOSカレンダー連携に失敗しました"));
     } finally {
       setIsConnecting(false);
     }
   }, [loadCalendars, loadEvents, supported]);
 
   const disconnect = useCallback(() => {
+    calendarsRef.current = [];
+    isEnabledRef.current = false;
+    selectedCalendarIdsRef.current = new Set();
     setIsEnabled(false);
     setCalendars([]);
     setSelectedCalendarIds(new Set());
@@ -199,6 +270,7 @@ export const useIosCalendarIntegration = () => {
         nextIds.add(calendarId);
       }
 
+      selectedCalendarIdsRef.current = nextIds;
       return nextIds;
     });
   }, []);
@@ -221,34 +293,106 @@ export const useIosCalendarIntegration = () => {
     }
 
     await loadEvents({
-      calendarIds: selectedCalendarIdList,
-      calendars,
+      calendarIds: buildSelectedCalendarIdList(selectedCalendarIdsRef.current),
+      calendars: calendarsRef.current,
       range: requestedRange,
     });
-  }, [calendars, loadEvents, selectedCalendarIdList]);
+  }, [loadEvents]);
 
   const refresh = useCallback(async () => {
-    if (permissionStatus !== "granted") {
+    if (permissionStatusRef.current !== "granted") {
       await connect();
       return;
     }
 
+    isEnabledRef.current = true;
     setIsEnabled(true);
 
     const nextCalendars = await loadCalendars();
-    const nextCalendarIds = selectedCalendarIdList.length > 0 ? selectedCalendarIdList : getDefaultSelectedCalendarIds(nextCalendars);
+    const currentSelectedCalendarIds = buildSelectedCalendarIdList(selectedCalendarIdsRef.current);
+    const nextCalendarIds = currentSelectedCalendarIds.length > 0 ? currentSelectedCalendarIds : getDefaultSelectedCalendarIds(nextCalendars);
 
     await loadEvents({
       calendarIds: nextCalendarIds,
       calendars: nextCalendars,
       range: rangeRef.current,
     });
-  }, [connect, loadCalendars, loadEvents, permissionStatus, selectedCalendarIdList]);
+  }, [connect, loadCalendars, loadEvents]);
+
+  const createEvent = useCallback(async (event: IosCalendarWritableEventInput): Promise<IosCalendarEvent> => {
+    setIsWritingEvent(true);
+    setError(null);
+
+    try {
+      const nextCalendars = await ensureWritableCalendars();
+      const created = await createIosCalendarEvent({ event, calendars: nextCalendars });
+      await syncCurrentRange(nextCalendars);
+      return created;
+    } catch (err) {
+      const message = toErrorMessage(err, IOS_CALENDAR_CREATE_ERROR);
+      if (isMountedRef.current) setError(message);
+      throw err;
+    } finally {
+      if (isMountedRef.current) setIsWritingEvent(false);
+    }
+  }, [ensureWritableCalendars, syncCurrentRange]);
+
+  const updateEvent = useCallback(async (event: IosCalendarWritableEventUpdateInput): Promise<IosCalendarEvent> => {
+    setIsWritingEvent(true);
+    setError(null);
+
+    try {
+      const nextCalendars = await ensureWritableCalendars();
+      const updated = await updateIosCalendarEvent({ event, calendars: nextCalendars });
+      await syncCurrentRange(nextCalendars);
+      return updated;
+    } catch (err) {
+      const message = toErrorMessage(err, IOS_CALENDAR_UPDATE_ERROR);
+      if (isMountedRef.current) setError(message);
+      throw err;
+    } finally {
+      if (isMountedRef.current) setIsWritingEvent(false);
+    }
+  }, [ensureWritableCalendars, syncCurrentRange]);
+
+  const deleteEvent = useCallback(async (event: IosCalendarWritableEventDeleteInput): Promise<void> => {
+    setIsWritingEvent(true);
+    setError(null);
+
+    try {
+      const nextCalendars = await ensureWritableCalendars();
+      await deleteIosCalendarEvent({ event, calendars: nextCalendars });
+      await syncCurrentRange(nextCalendars);
+    } catch (err) {
+      const message = toErrorMessage(err, IOS_CALENDAR_DELETE_ERROR);
+      if (isMountedRef.current) setError(message);
+      throw err;
+    } finally {
+      if (isMountedRef.current) setIsWritingEvent(false);
+    }
+  }, [ensureWritableCalendars, syncCurrentRange]);
+
+  useEffect(() => {
+    if (!supported) return;
+
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state !== "active") return;
+      if (permissionStatusRef.current !== "granted" || !isEnabledRef.current) return;
+
+      void refresh();
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [refresh, supported]);
 
   return {
     calendars,
     connect,
     connectionStatus,
+    createEvent,
+    deleteEvent,
     disconnect,
     error,
     events,
@@ -256,6 +400,7 @@ export const useIosCalendarIntegration = () => {
     isConnected: connectionStatus === "connected",
     isConnecting,
     isLoadingEvents,
+    isWritingEvent,
     lastSyncedAt,
     permissionStatus,
     refresh,
@@ -263,5 +408,6 @@ export const useIosCalendarIntegration = () => {
     selectedCalendarIds,
     syncRange,
     toggleCalendar,
+    updateEvent,
   };
 };
