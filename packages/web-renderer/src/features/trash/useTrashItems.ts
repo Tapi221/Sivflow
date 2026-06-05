@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { emptyTrash, getTrashItems, permanentlyDeleteTrashItems, restoreTrashItems } from "@core/usecases/trash";
+import { emptyTrash, getTrashItems, permanentlyDeleteTrashItems, purgeExpiredTrashItems, restoreTrashItems } from "@core/usecases/trash";
 import { createWebTrashRepository } from "@platform/storage/trashRepository.web";
 import type { Card, Folder } from "@/types";
 
@@ -33,6 +33,7 @@ export const useTrashItems = (userId: string | null | undefined) => {
     setErrorMessage(null);
 
     try {
+      await purgeExpiredTrashItems({ userId, repository });
       const nextItems = await getTrashItems({ userId, repository });
       setItems(nextItems);
       setStatus("ready");
