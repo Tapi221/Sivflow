@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { CARD_ACTION_BG_CLASS, CARD_ACTION_BUTTON_PX, CARD_ACTION_COLOR_ACTIVE_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS, CARD_ACTION_ICON_PX } from "@constants/shared/flashcard";
 import { cn } from "@/lib/utils";
-import { CircleHelp, Star } from "@/ui/icons";
+import { CircleHelp, Star, Tag } from "@/ui/icons";
 
 interface CardCornerActionsProps {
   onHelp?: () => void;
@@ -126,6 +126,28 @@ const CardCornerActions = ({
             style={iconSizeStyle}
           />
         </button>
+      ) : null}
+
+      {onStar ? (
+        <span
+          aria-hidden="true"
+          className={cn(
+            buttonBaseClass,
+            disabledClass,
+            CARD_ACTION_BG_CLASS,
+            CARD_ACTION_COLOR_IDLE_CLASS,
+          )}
+          style={buttonSizeStyle}
+          onPointerDown={stop}
+          onMouseDown={stop}
+          onClick={stop}
+        >
+          <Tag
+            strokeWidth={1.2}
+            className={CARD_ACTION_ICON_CLASS}
+            style={iconSizeStyle}
+          />
+        </span>
       ) : null}
     </div>
   );
