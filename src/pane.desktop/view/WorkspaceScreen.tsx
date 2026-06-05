@@ -10,13 +10,14 @@ import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDi
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
+import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { Sidebar } from "@/pane.desktop/leftpane/Sidebar.desktop";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceExplorerTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
-import type { Folder, SelectedExplorerItem } from "@/types";
+import type { DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { Search } from "@/ui/icons";
 import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
 import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
@@ -47,16 +48,23 @@ const FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME = "absolute right-4 top-3 z-30 flex h
 const FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-5 min-w-[31px] items-center justify-center rounded-[5px] border border-[rgba(0,0,0,0.04)] bg-[#eeeeee] px-1.5 text-[10px] font-semibold leading-none tracking-[-0.02em] text-[#85827e]";
 const WORKSPACE_ACTION_TOOLBAR_CLASS_NAME = "absolute z-30";
 const WORKSPACE_ACTION_TOOLBAR_STYLE = { right: "252px", top: "12px" };
+const WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME = "max-w-[calc(100%-96px)]";
 const WORKSPACE_MAIN_CONTENT_CLASS_NAME = "relative z-0 isolate min-h-0 min-w-0 flex-1";
 const WORKSPACE_MAIN_PANEL_CLASS_NAME = "relative z-0 isolate min-w-0";
 const SIDEBAR_INTERACTION_REGION_STYLE: SidebarInteractionRegionStyle = { WebkitAppRegion: "no-drag" };
 
-const buildWorkspaceBreadcrumbCrumbs = (context: ExplorerBreadcrumbContext, folders: Folder[]): BreadcrumbCrumb[] => {
+const getDocumentBreadcrumbLabel = (document: DocumentItem): string => document.title.trim() || document.fileName.trim() || "PDF";
+
+const buildWorkspaceBreadcrumbCrumbs = (context: ExplorerBreadcrumbContext, folders: Folder[], selectedDocument: DocumentItem | null): BreadcrumbCrumb[] => {
   const folderById = new Map(folders.map((folder) => [folder.id, folder]));
   const crumbs = buildFolderPathCrumbs({ folderId: context.folderId, folderById });
 
   if (context.cardSet) {
     crumbs.push({ label: context.cardSet.label });
+  }
+
+  if (selectedDocument) {
+    crumbs.push({ label: getDocumentBreadcrumbLabel(selectedDocument) });
   }
 
   return crumbs;
@@ -111,9 +119,12 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
   const selectedCardId = useMemo(() => getSelectedCardId(explorerState.selectedItem), [explorerState.selectedItem]);
   const selectedDocumentId = useMemo(() => getSelectedDocumentId(explorerState.selectedItem), [explorerState.selectedItem]);
-  const showWorkspaceHeader = selectedDocumentId === null && !loading && !error;
+  const { documents } = useDocumentsRead(undefined, { enabled: selectedDocumentId !== null });
+  const selectedDocument = useMemo(() => selectedDocumentId ? (documents.find((document) => document.id === selectedDocumentId) ?? null) : null, [documents, selectedDocumentId]);
+  const showWorkspaceBreadcrumbs = !loading && !error;
+  const showWorkspaceActions = selectedDocumentId === null && !loading && !error;
   const [explorerBreadcrumbContext, setExplorerBreadcrumbContext] = useState<ExplorerBreadcrumbContext>(EMPTY_EXPLORER_BREADCRUMB_CONTEXT);
-  const extraCrumbs = useMemo(() => buildWorkspaceBreadcrumbCrumbs(explorerBreadcrumbContext, folders), [explorerBreadcrumbContext, folders]);
+  const extraCrumbs = useMemo(() => buildWorkspaceBreadcrumbCrumbs(explorerBreadcrumbContext, folders, selectedDocument), [explorerBreadcrumbContext, folders, selectedDocument]);
 
   const handleOpenSearch = useCallback(() => {
     openSearch();
@@ -156,9 +167,9 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
       </SidebarInteractionRegion>
       <CarvePanel className={WORKSPACE_MAIN_PANEL_CLASS_NAME}>
         {loading ? <div className="h-full w-full bg-white" /> : error ? <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{error}</div> : <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} onBreadcrumbContextChange={handleBreadcrumbContextChange} folderSelectionNonce={0} navigateToSectionListToken={0} />}
-        {showWorkspaceHeader ? <WorkspaceBreadcrumbs /> : null}
-        {showWorkspaceHeader ? <WorkspaceActionToolbar className={WORKSPACE_ACTION_TOOLBAR_CLASS_NAME} style={WORKSPACE_ACTION_TOOLBAR_STYLE} /> : null}
-        {showWorkspaceHeader ? (
+        {showWorkspaceBreadcrumbs ? <WorkspaceBreadcrumbs className={selectedDocumentId ? WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME : undefined} /> : null}
+        {showWorkspaceActions ? <WorkspaceActionToolbar className={WORKSPACE_ACTION_TOOLBAR_CLASS_NAME} style={WORKSPACE_ACTION_TOOLBAR_STYLE} /> : null}
+        {showWorkspaceActions ? (
           <button type="button" className={FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME} aria-label="検索を開く" aria-keyshortcuts="Meta+K Control+K" title="検索を開く" onClick={handleOpenSearch}>
             <Search className="h-3.5 w-3.5 shrink-0 text-[#85827e]" />
             <span className="min-w-0 truncate">Search in Workspace...</span>
