@@ -63,6 +63,7 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
     cardIndexById: data.cardIndexById,
     createCard: data.createCard,
     updateCard: data.updateCard,
+    reorderCardsInCardSet: data.reorderCardsInCardSet,
     selectedCardSet: data.selectedCardSet,
     toastError,
     deviceScope: presentationTarget,
@@ -200,6 +201,17 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
     setCurrentCardLayoutMode(nextMode);
   }, [activeScrollAnchorFace, currentCardLayoutMode, isFlipped, setCurrentCardFace, setCurrentCardLayoutMode, setLayoutTransitionScrollAnchorRevision]);
 
+  const handleReorderCards = useCallback(async (orderedCardIds: string[]) => {
+    if (!cardSetId) return;
+
+    try {
+      await state.reorderCardsInCardSet(cardSetId, orderedCardIds);
+    } catch (error) {
+      console.error("[CardSetView] Failed to reorder cards", error);
+      toastError("カードの並び替えに失敗しました");
+    }
+  }, [cardSetId, state.reorderCardsInCardSet, toastError]);
+
   return {
     cardSetId,
     folderId: data.selectedCardSet?.folderId ?? null,
@@ -219,6 +231,7 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
     handleJumpToCard,
     handleToggleViewMode,
     handleChangeCardLayoutMode,
+    handleReorderCards,
     layoutTransitionScrollAnchorRevision,
     scrollToActiveIndexRequestKey,
     handleSaveCurrentDisplayMode,
