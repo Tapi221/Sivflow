@@ -16,7 +16,7 @@ export type RightClickPanelDimensions = {
 
 export type RightClickPanelId = string;
 
-type RightClickPanelDismissIgnoredRef = RefObject<HTMLElement | null>;
+type RightClickPanelDismissIgnoredRef = RefObject<Element | null>;
 
 type RightClickPanelDismissOptions = {
   closeOnScroll?: boolean;
@@ -125,7 +125,7 @@ export const RIGHT_CLICK_PANEL_STYLE = `
 }
 `;
 
-const isRightClickPanelDismissIgnoredTarget = (eventTarget: EventTarget | null, panelRef: RefObject<HTMLElement | null>, ignoredRefs: readonly RightClickPanelDismissIgnoredRef[]): boolean => {
+const isRightClickPanelDismissIgnoredTarget = (eventTarget: EventTarget | null, panelRef: RefObject<Element | null>, ignoredRefs: readonly RightClickPanelDismissIgnoredRef[]): boolean => {
   if (!(eventTarget instanceof Node)) return false;
   if (panelRef.current?.contains(eventTarget)) return true;
   return ignoredRefs.some((ignoredRef) => ignoredRef.current?.contains(eventTarget));
@@ -191,7 +191,7 @@ export const clampRightClickPanelPosition = (
 export const useRightClickPanelDismiss = (
   panelId: RightClickPanelId,
   isOpen: boolean,
-  panelRef: RefObject<HTMLElement | null>,
+  panelRef: RefObject<Element | null>,
   onClose: () => void,
   options: RightClickPanelDismissOptions = EMPTY_RIGHT_CLICK_PANEL_DISMISS_OPTIONS,
 ) => {
