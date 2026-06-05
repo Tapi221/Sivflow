@@ -41,7 +41,7 @@ const MOBILE_SCHEDULE_HEADER_CLASS = "flex shrink-0 flex-col px-4 pb-3 pt-4";
 const MOBILE_SCHEDULE_SURFACE_CLASS = "schedule-mobile-calendar-surface mx-0 flex min-h-0 flex-1 flex-col overflow-hidden !rounded-none !border-0";
 const MOBILE_TODAY_BUTTON_CLASS = "flex h-8 shrink-0 items-center justify-center rounded-full bg-[#f7f7f7] px-3 text-[13px] font-semibold tracking-[-0.02em] text-[#8e8e93] shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition hover:bg-[#efeff4] hover:text-[#6e6e73] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
 const MOBILE_SIDEBAR_OPEN_ICON_CLASS = "h-5 w-5 shrink-0 [transform:scaleX(-1)]";
-const MOBILE_ADD_EVENT_BUTTON_CLASS = "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#efeeee] text-[24px] font-light leading-none text-[#6b6b6b] shadow-[0_1px_6px_rgba(47,52,59,0.08)] ring-1 ring-[rgba(47,52,59,0.08)] transition hover:bg-[#e8e6e2] hover:text-[#2f343b] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d7d3ce]";
+const MOBILE_ADD_EVENT_BUTTON_CLASS = "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#efeeee] text-[22px] font-light leading-none text-[#6b6b6b] shadow-[0_1px_6px_rgba(47,52,59,0.08)] ring-1 ring-[rgba(47,52,59,0.08)] transition hover:bg-[#e8e6e2] hover:text-[#2f343b] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d7d3ce]";
 const MOBILE_SIDEBAR_SWIPE_DISTANCE = 56;
 const MOBILE_SIDEBAR_SWIPE_HORIZONTAL_INTENT = 12;
 const MOBILE_SIDEBAR_SWIPE_VERTICAL_LIMIT = 72;
@@ -54,7 +54,7 @@ const isHexColor = (value: string): boolean => /^#[0-9a-f]{6}$/i.test(value);
 
 const createGoogleCalendarColorOverrideKey = (accountId: string, calendarId: string): string => `${accountId}:${calendarId}`;
 
-const readStoredGoogleCalendarColorOverrides = (): GoogleCalendarColorMap => {
+const readStoredGoogleCalendarColorOverrides = (): GoogleCalendarColorOverrideMap => {
   if (typeof window === "undefined") return {};
   try {
     const raw = window.localStorage.getItem(GOOGLE_CALENDAR_COLOR_OVERRIDES_STORAGE_KEY);
