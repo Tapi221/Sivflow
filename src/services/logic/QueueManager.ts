@@ -3,6 +3,10 @@ import type { BatchConstraint, IQueueManager, SyncTask } from "@/services/interf
 import type { LocalDBLike } from "@/services/localdb";
 import type { SyncQueueItem } from "@/types/domain/sync";
 
+type QueueReadableLocalDB = LocalDBLike & {
+  getQueuedItemsOldestFirst?: () => Promise<SyncQueueItem[]>;
+};
+
 const PRIORITY_ORDER: Record<SyncTask["priority"], number> = {
   critical: 0,
   high: 1,
@@ -15,7 +19,7 @@ export class QueueManager implements IQueueManager {
   private readonly BASE_RETRY_DELAY_MS = 5_000;
   private readonly MAX_RETRY_DELAY_MS = 5 * 60_000;
 
-  constructor(private readonly localDB: LocalDBLike) {}
+  constructor(private readonly localDB: QueueReadableLocalDB) {}
 
   private readonly isReadyForProcessing = (
     item: SyncQueueItem,
@@ -40,6 +44,14 @@ export class QueueManager implements IQueueManager {
     });
   };
 
+  private readonly getQueuedItems = async (): Promise<SyncQueueItem[]> => {
+    if (typeof this.localDB.getQueuedItemsOldestFirst === "function") {
+      return this.localDB.getQueuedItemsOldestFirst();
+    }
+
+    return [];
+  };
+
   private readonly computeRetryDelayMs = (retryCount: number): number => {
     const exponent = Math.max(0, retryCount - 1);
     const delay = this.BASE_RETRY_DELAY_MS * 2 ** exponent;
@@ -60,7 +72,7 @@ export class QueueManager implements IQueueManager {
 
   public enqueue = async (task: SyncTask): Promise<void> => {
     const queueItem = createQueueItemFromSyncTask(task);
-    const queuedItems = await this.localDB.getQueuedItemsOldestFirst();
+    const queuedItems = await this.getQueuedItems();
 
     const duplicate = queuedItems.some(
       (item) => item.idempotencyKey === queueItem.idempotencyKey,
@@ -77,7 +89,7 @@ export class QueueManager implements IQueueManager {
     const now = Date.now();
 
     return this.localDB.runSyncTransaction(async () => {
-      const queuedItems = await this.localDB.getQueuedItemsOldestFirst();
+      const queuedItems = await this.getQueuedItems();
       const readyItems = this.sortQueueItems(
         queuedItems.filter((item) => this.isReadyForProcessing(item, now)),
       );
@@ -119,7 +131,7 @@ export class QueueManager implements IQueueManager {
     const now = Date.now();
 
     await this.localDB.runSyncTransaction(async () => {
-      const queuedItems = await this.localDB.getQueuedItemsOldestFirst();
+      const queuedItems = await this.getQueuedItems();
       const queuedItemById = new Map(
         queuedItems.map((item) => [item.id, item]),
       );
@@ -161,7 +173,11 @@ export class QueueManager implements IQueueManager {
   };
 
   public getQueueDepth = async (): Promise<number> => {
-    const queuedItems = await this.localDB.getQueuedItemsOldestFirst();
+    const queuedItems = await this.getQueuedItems();
+
+    if (queuedItems.length === 0) {
+      return this.localDB.getSyncQueueCount();
+    }
 
     return queuedItems.filter((item) => item.status === "pending").length;
   };
