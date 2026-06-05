@@ -343,7 +343,7 @@ const PdfTextLayer = ({ pageNumber, pdfDocument, scale }: PdfTextLayerProps) => 
   }, [pageNumber, pdfDocument, scale]);
 
   return (
-    <div className="pointer-events-none absolute inset-3 overflow-hidden text-transparent selection:bg-[#d5b14b]/35 selection:text-transparent" aria-hidden="true">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden text-transparent selection:bg-[#d5b14b]/35 selection:text-transparent" aria-hidden="true">
       {textSpans.map((span) => <span key={span.id} className="pointer-events-auto absolute origin-left whitespace-pre" style={span.style}>{span.text}</span>)}
     </div>
   );
@@ -353,11 +353,7 @@ const PdfDocumentPage = ({ pageNumber, pdfDocument, scale, currentPage, register
   const isCurrent = pageNumber === currentPage;
 
   return (
-    <div ref={(element) => registerPageElement(pageNumber, element)} data-pdf-page-number={pageNumber} className={cn("relative rounded-[12px] border bg-white p-3 shadow-[0_18px_48px_rgba(15,23,42,0.12)]", isCurrent ? "border-[#cfc9bf]" : "border-[#e4ded4]")} style={shouldRender ? undefined : { height: Math.round(PDF_PAGE_PLACEHOLDER_HEIGHT * scale) }}>
-      <div className="mb-2 flex items-center justify-between text-[11px] font-semibold text-[#6f6a5f]">
-        <span>Page {pageNumber}</span>
-        {!shouldRender ? <span>省メモリ表示</span> : null}
-      </div>
+    <div ref={(element) => registerPageElement(pageNumber, element)} data-pdf-page-number={pageNumber} className={cn("relative overflow-hidden rounded-[12px] border bg-white shadow-[0_18px_48px_rgba(15,23,42,0.12)]", isCurrent ? "border-[#cfc9bf]" : "border-[#e4ded4]")} style={shouldRender ? undefined : { height: Math.round(PDF_PAGE_PLACEHOLDER_HEIGHT * scale) }}>
       {shouldRender ? <div className="relative"><PdfCanvasPage pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} /><PdfTextLayer pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} /></div> : null}
     </div>
   );
