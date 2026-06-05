@@ -20,6 +20,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["apps/web/vite.config.ts"],
+  "include": ["apps/web/vite.config.ts", "vitest.config.ts"],
   "exclude": ["node_modules", "dist", "build", ".firebase", "coverage", "tmp"]
 }
