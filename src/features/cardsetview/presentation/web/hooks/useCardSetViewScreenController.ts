@@ -92,7 +92,7 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
 
   useCardSetViewZoomInput({
     containerRef: paneWidth.contentViewportRef,
-    enabled: isDesktop,
+    enabled: isDesktop && state.cardsForPager.length > 0,
     zoomPercent: zoom.zoomPercent,
     minZoomPercent: zoom.minZoomPercent,
     maxZoomPercent: zoom.maxZoomPercent,
