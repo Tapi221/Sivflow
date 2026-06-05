@@ -1,10 +1,9 @@
-import { FIREBASE_EMULATORS } from "@constants/shared/firebase";
 import { initializeApp } from "firebase/app";
-import { connectAuthEmulator, getAuth } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import type { Firestore } from "firebase/firestore";
-import { collection, connectFirestoreEmulator, getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
-import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
-import { connectStorageEmulator, getStorage } from "firebase/storage";
+import { collection, getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
+import { getFunctions } from "firebase/functions";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -88,46 +87,6 @@ export const requireFirestoreDb = (): Firestore => {
     "[Firebase] Firestore initialization failed. Firestore-dependent flow cannot continue.",
   );
 };
-
-if (typeof window !== "undefined") {
-  const useEmulators = import.meta.env.VITE_USE_FIREBASE_EMULATOR === "true";
-  const isLocalhost =
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1";
-
-  if (useEmulators && isLocalhost) {
-    try {
-      connectAuthEmulator(auth, FIREBASE_EMULATORS.auth.url);
-
-      if (firestoreDbInternal) {
-        connectFirestoreEmulator(
-          firestoreDbInternal,
-          FIREBASE_EMULATORS.firestore.host,
-          FIREBASE_EMULATORS.firestore.port,
-        );
-      }
-
-      connectStorageEmulator(
-        storage,
-        FIREBASE_EMULATORS.storage.host,
-        FIREBASE_EMULATORS.storage.port,
-      );
-      connectFunctionsEmulator(
-        functionsClient,
-        FIREBASE_EMULATORS.functions.host,
-        FIREBASE_EMULATORS.functions.port,
-      );
-
-      console.log(
-        `Firebase Emulators: Connected (Auth:${FIREBASE_EMULATORS.auth.port}, Firestore:${FIREBASE_EMULATORS.firestore.port}, Storage:${FIREBASE_EMULATORS.storage.port}, Functions:${FIREBASE_EMULATORS.functions.port})`,
-      );
-    } catch (error) {
-      console.error("Firebase Emulators connection error:", error);
-    }
-  } else if (isLocalhost) {
-    console.log("Firebase: Connecting to Production (Emulators disabled)");
-  }
-}
 
 const debugFirebase = (): void => {
   console.log("=== Firebase Debug Info ===");
