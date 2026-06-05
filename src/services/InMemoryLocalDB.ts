@@ -502,7 +502,7 @@ class InMemoryTable<T extends object, TKey = string> {
   public readonly toCollection = (): InMemoryCollection<T, TKey> => new InMemoryCollection<T, TKey>(this);
 }
 
-const SYNCABLE_TABLES = new Set(["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "images", "userSettings"] as const);
+const SYNCABLE_TABLES = new Set(["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "images", "userSettings", "projectMaps"] as const);
 
 const ENTITY_BY_TABLE: Record<string, QueueEntity> = {
   cards: "card",
@@ -512,9 +512,10 @@ const ENTITY_BY_TABLE: Record<string, QueueEntity> = {
   [CURRENT_TAG_STORE]: "tag",
   images: "asset",
   userSettings: "userSetting",
+  projectMaps: "projectMap",
 };
 
-const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>(["card", "folder", "cardSet", "document", "tag", "asset"]);
+const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>(["card", "folder", "cardSet", "document", "tag", "asset", "projectMap"]);
 
 const createPayloadId = (payload: object): string => {
   const record = asRecord(payload);
