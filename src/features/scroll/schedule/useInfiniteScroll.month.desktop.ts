@@ -100,6 +100,8 @@ const buildVirtualMonthWeeks = (baseWeekStart: Date, virtualWindow: MonthVirtual
 
 const getMonthVirtualSpacerHeight = (): number => MONTH_VIRTUAL_SPACER_HEIGHT;
 
+export const createInitialMonthVisibleWeekRange = (currentDate: Date): CalendarDateRange => buildWindowDateRange(getWeekStart(currentDate), createWindowAroundWeekOffset(0));
+
 export const useMonthInfiniteScroll = ({
   currentDate,
   scrollTargetToken,
