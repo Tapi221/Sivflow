@@ -79,6 +79,7 @@ export const useCardSetViewZoom = ({
 
   const initialMeasurementCompleteRef = useRef<boolean>(false);
   const indicatorTimeoutRef = useRef<number | null>(null);
+  const isMobileDeviceScope = deviceScope === "mobile";
 
   const triggerConstraintIndicator = useCallback(() => {
     setShowConstraintIndicator(true);
@@ -201,41 +202,58 @@ export const useCardSetViewZoom = ({
   );
 
   const usableWidthPx = useMemo(
-    () => resolveUsablePresentationWidthPx({ viewportWidthPx }),
-    [viewportWidthPx],
+    () => {
+      if (isMobileDeviceScope) {
+        return Math.max(0, Math.floor(viewportWidthPx));
+      }
+
+      return resolveUsablePresentationWidthPx({ viewportWidthPx });
+    },
+    [isMobileDeviceScope, viewportWidthPx],
   );
 
   const maxPresentationWidthPx = useMemo(
-    () =>
-      resolvePresentationMaxWidthPx({
+    () => {
+      if (isMobileDeviceScope) {
+        return Math.max(1, Math.floor(usableWidthPx));
+      }
+
+      return resolvePresentationMaxWidthPx({
         usableWidthPx,
         displayMode,
         cardLayoutMode: effectiveCardLayoutMode,
-      }),
-    [displayMode, effectiveCardLayoutMode, usableWidthPx],
+      });
+    },
+    [displayMode, effectiveCardLayoutMode, isMobileDeviceScope, usableWidthPx],
   );
 
   const defaultZoomPercent = useMemo(
-    () =>
-      resolveZoomDefaultPercent({
+    () => {
+      if (isMobileDeviceScope) {
+        return 100;
+      }
+
+      return resolveZoomDefaultPercent({
         cardLayoutMode: effectiveCardLayoutMode,
         maxPresentationWidthPx,
         canonicalCardWidthPx: CANONICAL_CARD_WIDTH,
-      }),
-    [effectiveCardLayoutMode, maxPresentationWidthPx],
+      });
+    },
+    [effectiveCardLayoutMode, isMobileDeviceScope, maxPresentationWidthPx],
   );
 
   const storedPreferredPercent = useMemo(() => {
-    if (!cardSetId) {
+    if (!cardSetId || isMobileDeviceScope) {
       return null;
     }
 
     return getCardSetViewZoomPreference(zoomPreferenceLookupScope) ?? null;
-  }, [cardSetId, zoomPreferenceLookupScope]);
+  }, [cardSetId, isMobileDeviceScope, zoomPreferenceLookupScope]);
 
-  const preferredZoomPercent =
-    zoomPreferenceState.scopeKey === zoomSourceKey &&
-    zoomPreferenceState.preferredPercent != null
+  const preferredZoomPercent = isMobileDeviceScope
+    ? 100
+    : zoomPreferenceState.scopeKey === zoomSourceKey &&
+      zoomPreferenceState.preferredPercent != null
       ? zoomPreferenceState.preferredPercent
       : (storedPreferredPercent ?? defaultZoomPercent);
 
@@ -246,6 +264,7 @@ export const useCardSetViewZoom = ({
 
   useEffect(() => {
     if (
+      isMobileDeviceScope ||
       !cardSetId ||
       zoomPreferenceState.scopeKey !== zoomSourceKey ||
       zoomPreferenceState.preferredPercent == null
@@ -257,6 +276,7 @@ export const useCardSetViewZoom = ({
   }, [
     cardSetId,
     currentZoomScope,
+    isMobileDeviceScope,
     zoomPercent,
     zoomPreferenceState.preferredPercent,
     zoomPreferenceState.scopeKey,
@@ -284,12 +304,16 @@ export const useCardSetViewZoom = ({
 
   const setZoomPercent = useCallback(
     (nextPercent: number) => {
+      if (isMobileDeviceScope) {
+        return;
+      }
+
       setZoomPreferenceState({
         scopeKey: zoomSourceKey,
         preferredPercent: clampZoomPercentRange(nextPercent),
       });
     },
-    [zoomSourceKey],
+    [isMobileDeviceScope, zoomSourceKey],
   );
 
   const stepUp = useCallback(() => {
@@ -314,7 +338,7 @@ export const useCardSetViewZoom = ({
     stepDown,
     canUseSplit,
     effectiveCardLayoutMode,
-    showConstraintIndicator,
+    showConstraintIndicator: isMobileDeviceScope ? false : showConstraintIndicator,
     presentationWidthPx,
     maxPresentationWidthPx,
   };
