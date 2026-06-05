@@ -1,5 +1,46 @@
 @layer utilities {
   @media (max-width: 767px) {
+    .schedule-mobile-calendar-surface {
+      --mobile-calendar-time-column-width: 24px;
+    }
+
+    .schedule-mobile-calendar-surface > div:has(.calendar-timeline-scroll) > div:first-child > .grid:has(> div:nth-child(2):last-child),
+    .schedule-mobile-calendar-surface > div:has(.calendar-timeline-scroll) > div:nth-child(2) > .grid:has(> div:nth-child(2):last-child),
+    .schedule-mobile-calendar-surface .calendar-timeline-scroll > .grid:has(> div:nth-child(2):last-child) {
+      grid-template-columns: var(--mobile-calendar-time-column-width) repeat(1, minmax(0, 1fr)) !important;
+    }
+
+    .schedule-mobile-calendar-surface > div:has(.calendar-timeline-scroll) > div:first-child > .grid:has(> div:nth-child(4):last-child),
+    .schedule-mobile-calendar-surface > div:has(.calendar-timeline-scroll) > div:nth-child(2) > .grid:has(> div:nth-child(4):last-child),
+    .schedule-mobile-calendar-surface .calendar-timeline-scroll > .grid:has(> div:nth-child(4):last-child) {
+      grid-template-columns: var(--mobile-calendar-time-column-width) repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    .schedule-mobile-calendar-surface > div:has(.calendar-timeline-scroll) > div:first-child > .grid:has(> div:nth-child(8):last-child),
+    .schedule-mobile-calendar-surface > div:has(.calendar-timeline-scroll) > div:nth-child(2) > .grid:has(> div:nth-child(8):last-child),
+    .schedule-mobile-calendar-surface .calendar-timeline-scroll > .grid:has(> div:nth-child(8):last-child) {
+      grid-template-columns: var(--mobile-calendar-time-column-width) repeat(7, minmax(0, 1fr)) !important;
+    }
+
+    .schedule-mobile-calendar-surface > div:has(.calendar-timeline-scroll) > div:nth-child(2) > .grid > div:first-child {
+      justify-content: center !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    .schedule-mobile-calendar-surface .calendar-timeline-scroll > .grid > div:first-child > div > span {
+      right: 2px !important;
+      width: 2ch;
+      overflow: hidden;
+      padding-left: 0;
+      padding-right: 0;
+      white-space: nowrap;
+    }
+
+    .schedule-mobile-calendar-surface .calendar-timeline-scroll > .grid > div[class*="absolute"][class*="z-20"] {
+      left: var(--mobile-calendar-time-column-width) !important;
+    }
+
     div:has(> div > div > button[aria-controls="mobile-schedule-sidebar"]) {
       padding-top: 10px !important;
       padding-bottom: 8px !important;
