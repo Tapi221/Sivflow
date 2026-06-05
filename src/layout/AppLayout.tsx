@@ -4,7 +4,7 @@ import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
-import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContext";
+import { WorkspaceLayoutRevisionProvider } from "./workspaceLayoutRevisionContext";
 import { Search } from "@/ui/icons";
 import "@/styles/backpane.css";
 import { WorkspaceShell } from "./WorkspaceShell";
