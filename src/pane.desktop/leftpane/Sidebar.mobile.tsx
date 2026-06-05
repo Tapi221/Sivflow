@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { CalendarIcon, ChevronDownIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
+import { ChevronDownIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
@@ -8,12 +8,11 @@ type SidebarNavItem = {
   id: string;
   label: string;
   icon: ReactNode;
-  sectionKey?: "home" | "review" | "library" | "schedule" | "settings";
+  sectionKey?: "home" | "review" | "library" | "settings";
   onClick?: () => void;
 };
 
 type SidebarMobileProps = {
-  onClose?: () => void;
   onOpenSettings?: () => void;
 };
 
@@ -31,19 +30,13 @@ const mainNavItems: SidebarNavItem[] = [
     sectionKey: "library",
   },
   {
-    id: "calendar",
-    label: "Calendar",
-    icon: <CalendarIcon className="sidebar-nav-icon" />,
-    sectionKey: "schedule",
-  },
-  {
     id: "explore",
     label: "探す",
     icon: <GalleryIcon className="sidebar-nav-icon" />,
   },
 ];
 
-const SidebarMobile = ({ onClose, onOpenSettings }: SidebarMobileProps) => {
+const SidebarMobile = ({ onOpenSettings }: SidebarMobileProps) => {
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
   const [selectedLibraryChild, setSelectedLibraryChild] = useState("pdf");
 
@@ -55,32 +48,25 @@ const SidebarMobile = ({ onClose, onOpenSettings }: SidebarMobileProps) => {
 
     if (item.id === "library") {
       setIsLibraryOpen((v) => !v);
-      openSectionTab("library");
-      return;
     }
 
     if (item.id === "explore") {
       openSearch();
-      onClose?.();
-      return;
     }
 
     if (item.sectionKey) {
       openSectionTab(item.sectionKey);
-      onClose?.();
     }
   };
 
   const openLibraryChild = (type: string) => {
     setSelectedLibraryChild(type);
     openSectionTab("library");
-    onClose?.();
   };
 
   const openSettings = () => {
     onOpenSettings?.();
     openSectionTab("settings");
-    onClose?.();
   };
 
   return (
@@ -88,7 +74,7 @@ const SidebarMobile = ({ onClose, onOpenSettings }: SidebarMobileProps) => {
       <nav className="sidebar-nav">
         {mainNavItems.map((item) => (
           <div key={item.id}>
-            <button type="button" className="sidebar-nav-link" onClick={() => handleClick(item)}>
+            <button className="sidebar-nav-link" onClick={() => handleClick(item)}>
               <span className="sidebar-nav-icon-slot">{item.icon}</span>
               <span className="sidebar-nav-label">{item.label}</span>
 
@@ -98,7 +84,7 @@ const SidebarMobile = ({ onClose, onOpenSettings }: SidebarMobileProps) => {
             {item.id === "library" && isLibraryOpen && (
               <div className="sidebar-library-children">
                 {["pdf", "flashcards", "notes"].map((type) => (
-                  <button type="button" key={type} className={cn(selectedLibraryChild === type && "is-active")} onClick={() => openLibraryChild(type)}>
+                  <button key={type} className={cn(selectedLibraryChild === type && "is-active")} onClick={() => openLibraryChild(type)}>
                     {type}
                   </button>
                 ))}
@@ -108,7 +94,7 @@ const SidebarMobile = ({ onClose, onOpenSettings }: SidebarMobileProps) => {
         ))}
       </nav>
 
-      <button type="button" className="sidebar-nav-link" onClick={openSettings}>
+      <button className="sidebar-nav-link" onClick={openSettings}>
         <span className="sidebar-nav-icon-slot">
           <SettingIcon className="sidebar-nav-icon" />
         </span>
