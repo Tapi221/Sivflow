@@ -111,12 +111,12 @@ export const CardSetViewDesktop = ({
     );
   }, [cardSetId, cardsForPager, currentCardLayoutMode, currentDisplayMode, flippedCardIds, folderId, isGlobalEditing, onFlip, onToggleBookmark, onToggleUncertainty, settings, viewZoomScale]);
 
-  if (cardsForPager.length === 0) {
-    return <CardSetViewEmptyState cardSetName={cardSetName} onCreateCard={onCreateCard} />;
-  }
-
   if (isLoading) {
     return <div className="h-full min-h-0 w-full" />;
+  }
+
+  if (cardsForPager.length === 0) {
+    return <CardSetViewEmptyState cardSetName={cardSetName} onCreateCard={onCreateCard} />;
   }
 
   return (
