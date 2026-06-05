@@ -79,7 +79,7 @@ export const CardSurfaceLayout = ({
       className={cn(
         "card-surface-layout relative w-full min-w-0 max-w-full overflow-visible",
         isSplitLayout
-          ? "card-surface-layout--split grid grid-cols-2 gap-0"
+          ? "card-surface-layout--split grid grid-cols-2 gap-0 [&>.card-surface-layout__slot--question_.card-shell]:!border-r-0 [&>.card-surface-layout__slot--answer_.card-shell]:!border-l-0"
           : "card-surface-layout--stack flex flex-col gap-0",
         className,
       )}
@@ -116,6 +116,19 @@ export const CardSurfaceLayout = ({
       >
         {answerNode}
       </div>
+
+      {isSplitLayout ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 z-30 -translate-x-1/2"
+          style={{
+            top: `${SURFACE_DIVIDER_COVER_SIZE_PX / 2}px`,
+            bottom: `${SURFACE_DIVIDER_COVER_SIZE_PX / 2}px`,
+            width: `${SURFACE_DIVIDER_LINE_SIZE_PX}px`,
+            background: "var(--card-border-default, rgba(15, 23, 42, 0.08))",
+          }}
+        />
+      ) : null}
     </div>
   );
 };
