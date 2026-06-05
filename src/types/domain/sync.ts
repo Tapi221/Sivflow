@@ -54,7 +54,8 @@ export type SyncEntity =
   | "document"
   | "tag"
   | "userSetting"
-  | "asset";
+  | "asset"
+  | "projectMap";
 
 export type SyncOperationType = "create" | "update" | "delete";
 export type SyncDirection = "upload" | "download";
@@ -63,6 +64,18 @@ export type SyncQueueStatus = "pending" | "processing" | "completed" | "failed";
 
 export type AssetSyncPayload = Pick<AssetRecord, "id"> &
   Partial<Omit<AssetRecord, "id">>;
+
+export type ProjectMapSyncPayload = {
+  id: string;
+  userId: string;
+  folderId?: string;
+  name?: string;
+  updatedAt?: Date;
+  createdAt?: Date;
+  isDeleted?: boolean;
+  deletedAt?: Date | null;
+  [key: string]: unknown;
+};
 
 export type TagSyncPayload = {
   id: string;
@@ -88,6 +101,7 @@ export type SyncPayloadByEntity = {
   tag: TagSyncPayload;
   userSetting: UserSettings;
   asset: AssetSyncPayload;
+  projectMap: ProjectMapSyncPayload;
 };
 
 export type SyncDeletePayload = { id: string };
@@ -133,7 +147,8 @@ type SyncDeleteEntity =
   | "cardSet"
   | "document"
   | "tag"
-  | "asset";
+  | "asset"
+  | "projectMap";
 
 type SyncDeleteQueueItem<TEntity extends SyncDeleteEntity> = SyncQueueItemBase<
   TEntity,
@@ -149,12 +164,14 @@ export type SyncQueueItem =
   | SyncUpsertQueueItem<"tag">
   | SyncUpsertQueueItem<"userSetting">
   | SyncUpsertQueueItem<"asset">
+  | SyncUpsertQueueItem<"projectMap">
   | SyncDeleteQueueItem<"card">
   | SyncDeleteQueueItem<"folder">
   | SyncDeleteQueueItem<"cardSet">
   | SyncDeleteQueueItem<"document">
   | SyncDeleteQueueItem<"tag">
-  | SyncDeleteQueueItem<"asset">;
+  | SyncDeleteQueueItem<"asset">
+  | SyncDeleteQueueItem<"projectMap">;
 
 export interface SyncConflict {
   id: string;
