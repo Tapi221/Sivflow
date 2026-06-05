@@ -41,11 +41,17 @@ type PdfPaneProps = {
 
 type PdfDocumentProxy = Awaited<ReturnType<typeof pdfjsLib.getDocument>["promise"]>;
 
+type PdfViewportSize = {
+  width: number;
+  height: number;
+};
+
 type PdfCanvasPageProps = {
   pageNumber: number;
   pdfDocument: PdfDocumentProxy;
   scale: number;
   className?: string;
+  onViewportSizeChange?: (pageNumber: number, size: PdfViewportSize) => void;
 };
 
 type PdfTextItem = {
@@ -71,6 +77,8 @@ type PdfDocumentPageProps = PdfCanvasPageProps & {
   currentPage: number;
   registerPageElement: (pageNumber: number, element: HTMLDivElement | null) => void;
   shouldRender: boolean;
+  pageSize: PdfViewportSize | null;
+  fallbackPageSize: PdfViewportSize;
 };
 
 type PdfDocumentPageSlotProps = PdfDocumentPageProps;
@@ -101,6 +109,7 @@ const MIN_PDF_SCALE = 0.5;
 const MAX_PDF_SCALE = 3;
 const PDF_SCALE_STEP = 0.15;
 const PDF_PAGE_RENDER_RADIUS = 3;
+const PDF_PAGE_PLACEHOLDER_WIDTH = 650;
 const PDF_PAGE_PLACEHOLDER_HEIGHT = 920;
 const PDF_HISTORY_LIMIT = 80;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
@@ -146,6 +155,27 @@ const getPageNumbers = (pageCount: number): number[] => {
 
 const getTrimmedHistory = (pages: number[]): number[] => {
   return pages.slice(-PDF_HISTORY_LIMIT);
+};
+
+const getScaledPlaceholderPageSize = (scale: number): PdfViewportSize => {
+  return {
+    width: Math.round(PDF_PAGE_PLACEHOLDER_WIDTH * scale),
+    height: Math.round(PDF_PAGE_PLACEHOLDER_HEIGHT * scale),
+  };
+};
+
+const getPdfPageViewportStyle = (pageSize: PdfViewportSize | null, fallbackPageSize: PdfViewportSize): CSSProperties => {
+  const size = pageSize ?? fallbackPageSize;
+
+  return {
+    width: `${Math.max(1, Math.round(size.width))}px`,
+    minWidth: `${Math.max(1, Math.round(size.width))}px`,
+    height: `${Math.max(1, Math.round(size.height))}px`,
+  };
+};
+
+const isSamePdfViewportSize = (left: PdfViewportSize | undefined, right: PdfViewportSize): boolean => {
+  return Boolean(left) && Math.round(left.width) === Math.round(right.width) && Math.round(left.height) === Math.round(right.height);
 };
 
 const shouldHandlePdfKeyboardEvent = (event: KeyboardEvent): boolean => {
@@ -250,7 +280,7 @@ const loadPdfDocument = async (source: LoadedPdfSource, viewerOptions: PdfPanePr
   return source.kind === "data" ? pdfjsLib.getDocument({ ...options, data: source.data }).promise : pdfjsLib.getDocument({ ...options, url: source.url }).promise;
 };
 
-const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasPageProps) => {
+const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className, onViewportSizeChange }: PdfCanvasPageProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [renderError, setRenderError] = useState<string | null>(null);
 
@@ -267,6 +297,7 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
       const page = await pdfDocument.getPage(pageNumber);
       if (isCancelled) return;
       const viewport = page.getViewport({ scale });
+      onViewportSizeChange?.(pageNumber, { width: viewport.width, height: viewport.height });
       const backingStore = resolvePdfRenderBackingStore({
         viewportWidthPx: viewport.width,
         viewportHeightPx: viewport.height,
@@ -310,7 +341,7 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
       isCancelled = true;
       if (renderTask) cancelPdfRenderTask(renderTask);
     };
-  }, [pageNumber, pdfDocument, scale]);
+  }, [onViewportSizeChange, pageNumber, pdfDocument, scale]);
 
   return (
     <div className="relative">
@@ -358,12 +389,13 @@ const PdfTextLayer = ({ pageNumber, pdfDocument, scale }: PdfTextLayerProps) => 
   );
 };
 
-const PdfDocumentPage = ({ pageNumber, pdfDocument, scale, currentPage, registerPageElement, shouldRender }: PdfDocumentPageProps) => {
+const PdfDocumentPage = ({ pageNumber, pdfDocument, scale, currentPage, registerPageElement, shouldRender, pageSize, fallbackPageSize, onViewportSizeChange }: PdfDocumentPageProps) => {
   const isCurrent = pageNumber === currentPage;
+  const pageStyle = getPdfPageViewportStyle(pageSize, fallbackPageSize);
 
   return (
-    <div ref={(element) => registerPageElement(pageNumber, element)} data-pdf-page-number={pageNumber} className={cn("relative overflow-hidden rounded-[12px] border bg-white shadow-[0_18px_48px_rgba(15,23,42,0.12)]", isCurrent ? "border-[#cfc9bf]" : "border-[#e4ded4]")} style={shouldRender ? undefined : { height: Math.round(PDF_PAGE_PLACEHOLDER_HEIGHT * scale) }}>
-      {shouldRender ? <div className="relative"><PdfCanvasPage pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} /><PdfTextLayer pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} /></div> : null}
+    <div ref={(element) => registerPageElement(pageNumber, element)} data-pdf-page-number={pageNumber} className={cn("relative overflow-hidden rounded-[12px] border bg-white shadow-[0_18px_48px_rgba(15,23,42,0.12)]", isCurrent ? "border-[#cfc9bf]" : "border-[#e4ded4]")} style={pageStyle}>
+      {shouldRender ? <div className="relative"><PdfCanvasPage pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} onViewportSizeChange={onViewportSizeChange} /><PdfTextLayer pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} /></div> : null}
     </div>
   );
 };
@@ -381,6 +413,7 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
   const viewerState = doc.viewerState ?? null;
   const scale = clampPdfScale(viewerState?.scale ?? DEFAULT_PDF_SCALE);
   const [pdfDocument, setPdfDocument] = useState<PdfDocumentProxy | null>(null);
+  const [pageViewportSizes, setPageViewportSizes] = useState<Record<number, PdfViewportSize>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -392,12 +425,14 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
   const historyBackPages = viewerState?.historyBackPages ?? [];
   const historyForwardPages = viewerState?.historyForwardPages ?? [];
   const pageNumbers = useMemo(() => getPageNumbers(pageCount), [pageCount]);
+  const fallbackPageSize = useMemo(() => pageViewportSizes[currentPage] ?? pageViewportSizes[DEFAULT_PDF_PAGE] ?? getScaledPlaceholderPageSize(scale), [currentPage, pageViewportSizes, scale]);
 
   useEffect(() => {
     let isCancelled = false;
     let loadedPdfDocument: PdfDocumentProxy | null = null;
 
     setPdfDocument(null);
+    setPageViewportSizes({});
     setLoadError(null);
     setIsLoading(true);
 
@@ -434,6 +469,13 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
   const registerPageElement = useCallback((pageNumber: number, element: HTMLDivElement | null) => {
     if (element) pageElementsRef.current.set(pageNumber, element);
     else pageElementsRef.current.delete(pageNumber);
+  }, []);
+
+  const handleViewportSizeChange = useCallback((pageNumber: number, size: PdfViewportSize) => {
+    setPageViewportSizes((previousSizes) => {
+      if (isSamePdfViewportSize(previousSizes[pageNumber], size)) return previousSizes;
+      return { ...previousSizes, [pageNumber]: size };
+    });
   }, []);
 
   const scrollToPage = useCallback((pageNumber: number, options?: { recordHistory?: boolean }) => {
@@ -560,10 +602,10 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
   return (
     <div className={cn("flex h-full min-h-0 min-w-0 bg-[#ffffff] text-[#2f2f2f]", className)}>
       <main className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <div ref={scrollContainerRef} className="min-h-0 flex-1 overflow-y-auto bg-[#ffffff] p-5">
+        <div ref={scrollContainerRef} className="min-h-0 flex-1 overflow-auto bg-[#ffffff] p-5">
           {isLoading ? <div className="flex h-full items-center justify-center text-[13px] text-[#6d6d6d]">PDFを読み込み中...</div> : null}
           {!isLoading && loadError ? <div className="flex h-full items-center justify-center p-6 text-center text-[13px] leading-6 text-[#4a4640]"><div className="max-w-md rounded-[14px] border border-[#ded8cf] bg-white px-5 py-4 shadow-sm">{loadError}</div></div> : null}
-          {!isLoading && !loadError && pdfDocument ? <div className="flex min-w-max flex-col items-center gap-5">{pageNumbers.map((pageNumber) => <PdfDocumentPageSlot key={pageNumber} pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} currentPage={currentPage} registerPageElement={registerPageElement} shouldRender={shouldRenderNearbyPage(pageNumber, currentPage, PDF_PAGE_RENDER_RADIUS)} />)}</div> : null}
+          {!isLoading && !loadError && pdfDocument ? <div className="flex min-w-max flex-col items-center gap-5">{pageNumbers.map((pageNumber) => <PdfDocumentPageSlot key={pageNumber} pageNumber={pageNumber} pdfDocument={pdfDocument} scale={scale} currentPage={currentPage} registerPageElement={registerPageElement} shouldRender={shouldRenderNearbyPage(pageNumber, currentPage, PDF_PAGE_RENDER_RADIUS)} pageSize={pageViewportSizes[pageNumber] ?? null} fallbackPageSize={fallbackPageSize} onViewportSizeChange={handleViewportSizeChange} />)}</div> : null}
           {!isLoading && !loadError && !pdfDocument ? <div className="flex h-full items-center justify-center text-[13px] text-[#6d6d6d]">表示できるPDFソースがありません。</div> : null}
         </div>
       </main>
