@@ -74,6 +74,12 @@
     user-select: none;
   }
 
+  [data-pdf-page-number] {
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
   [data-pdf-page-number] .text-transparent,
   [data-pdf-page-number] .text-transparent * {
     -webkit-touch-callout: default;
