@@ -14,6 +14,7 @@ type ChipLayoutState = {
   showTimeLabel: boolean;
   titleLineClamp: number;
   useInlineTimeLayout: boolean;
+  useLastLineTimeLayout: boolean;
 };
 
 type CalendarEventChipWeekdayStyle = CSSProperties & {
@@ -29,7 +30,9 @@ const CHIP_BASE_CLASS = "relative z-10 flex h-full min-h-0 w-full overflow-hidde
 const CHIP_NORMAL_CLASS = "flex-col gap-[0.5px] py-[2px] pl-1 pr-[1px]";
 const CHIP_INLINE_CLASS = "flex-col py-[1px] pl-1 pr-[1px]";
 const CHIP_TITLE_CLASS = "overflow-hidden whitespace-normal break-words text-[12px] font-medium leading-[17px]";
+const CHIP_TITLE_WITH_TIME_CLASS = `${CHIP_TITLE_CLASS} tabular-nums`;
 const CHIP_TIME_CLASS = "overflow-hidden whitespace-normal break-words text-[11px] font-semibold leading-[16px] tabular-nums opacity-80";
+const CHIP_LAST_LINE_TIME_CLASS = "ml-1 inline-block whitespace-nowrap text-[11px] font-semibold leading-[16px] tabular-nums opacity-80";
 const CHIP_INLINE_ROW_CLASS = "flex min-w-0 items-baseline gap-1 overflow-hidden";
 const CHIP_INLINE_TITLE_CLASS = "min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-medium leading-[17px]";
 const CHIP_INLINE_TIME_CLASS = "shrink-0 overflow-hidden whitespace-nowrap text-[11px] font-semibold leading-[16px] tabular-nums opacity-80";
@@ -42,6 +45,7 @@ const DEFAULT_CHIP_LAYOUT_STATE: ChipLayoutState = {
   showTimeLabel: false,
   titleLineClamp: DEFAULT_TITLE_LINE_CLAMP,
   useInlineTimeLayout: false,
+  useLastLineTimeLayout: false,
 };
 
 const getPixelValue = (value: string) => {
@@ -81,23 +85,27 @@ const calculateTitleLineClamp = (availableHeight: number, fullTitleHeight: numbe
   return Math.max(DEFAULT_TITLE_LINE_CLAMP, Math.min(fullTitleLineCount, visibleLineCount));
 };
 
-const calculateChipLayout = (layoutMeasurement: HTMLDivElement, titleMeasurement: HTMLSpanElement, timeMeasurement: HTMLSpanElement): ChipLayoutState => {
+const calculateChipLayout = (layoutMeasurement: HTMLDivElement, titleMeasurement: HTMLSpanElement, timeMeasurement: HTMLSpanElement, titleWithTimeMeasurement: HTMLSpanElement): ChipLayoutState => {
   const layoutStyles = window.getComputedStyle(layoutMeasurement);
   const contentHeight = Math.max(0, layoutMeasurement.clientHeight - getPixelValue(layoutStyles.paddingTop) - getPixelValue(layoutStyles.paddingBottom));
   const contentWidth = Math.max(0, layoutMeasurement.clientWidth - getPixelValue(layoutStyles.paddingLeft) - getPixelValue(layoutStyles.paddingRight));
   const titleLineHeight = getElementLineHeight(titleMeasurement);
   const fullTitleHeight = titleMeasurement.scrollHeight;
   const timeHeight = timeMeasurement.scrollHeight;
+  const titleWithTimeHeight = titleWithTimeMeasurement.scrollHeight;
   const rowGap = getPixelValue(layoutStyles.rowGap || layoutStyles.gap);
   const canShowTimeLabel = fullTitleHeight + rowGap + timeHeight <= contentHeight + CHIP_MEASUREMENT_TOLERANCE_PX;
   const titleAvailableHeight = canShowTimeLabel ? contentHeight - rowGap - timeHeight : contentHeight;
   const inlineContentWidth = getElementTextWidth(titleMeasurement) + INLINE_TIME_GAP_PX + getElementTextWidth(timeMeasurement);
   const canUseInlineTimeLayout = !canShowTimeLabel && inlineContentWidth <= contentWidth + CHIP_MEASUREMENT_TOLERANCE_PX;
+  const canUseLastLineTimeLayout = !canShowTimeLabel && !canUseInlineTimeLayout && titleWithTimeHeight <= contentHeight + CHIP_MEASUREMENT_TOLERANCE_PX;
+  const titleLineClampSourceHeight = canUseLastLineTimeLayout ? titleWithTimeHeight : fullTitleHeight;
 
   return {
     showTimeLabel: canShowTimeLabel,
-    titleLineClamp: calculateTitleLineClamp(titleAvailableHeight, fullTitleHeight, titleLineHeight),
+    titleLineClamp: calculateTitleLineClamp(titleAvailableHeight, titleLineClampSourceHeight, titleLineHeight),
     useInlineTimeLayout: canUseInlineTimeLayout,
+    useLastLineTimeLayout: canUseLastLineTimeLayout,
   };
 };
 
@@ -158,6 +166,7 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
   const layoutMeasurementRef = useRef<HTMLDivElement>(null);
   const titleMeasurementRef = useRef<HTMLSpanElement>(null);
   const timeMeasurementRef = useRef<HTMLSpanElement>(null);
+  const titleWithTimeMeasurementRef = useRef<HTMLSpanElement>(null);
   const [chipLayout, setChipLayout] = useState<ChipLayoutState>(DEFAULT_CHIP_LAYOUT_STATE);
   const tokens = generateColorTokens(event.accentColor);
   const startsAt = event.startsAt instanceof Date ? event.startsAt : new Date(event.startsAt);
@@ -172,18 +181,19 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
     const layoutMeasurement = layoutMeasurementRef.current;
     const titleMeasurement = titleMeasurementRef.current;
     const timeMeasurement = timeMeasurementRef.current;
+    const titleWithTimeMeasurement = titleWithTimeMeasurementRef.current;
 
-    if (!layoutMeasurement || !titleMeasurement || !timeMeasurement) return;
+    if (!layoutMeasurement || !titleMeasurement || !timeMeasurement || !titleWithTimeMeasurement) return;
 
     let frameId = 0;
 
     const updateChipLayout = () => {
       window.cancelAnimationFrame(frameId);
       frameId = window.requestAnimationFrame(() => {
-        const nextLayout = calculateChipLayout(layoutMeasurement, titleMeasurement, timeMeasurement);
+        const nextLayout = calculateChipLayout(layoutMeasurement, titleMeasurement, timeMeasurement, titleWithTimeMeasurement);
 
         setChipLayout((previousLayout) => {
-          if (previousLayout.showTimeLabel === nextLayout.showTimeLabel && previousLayout.titleLineClamp === nextLayout.titleLineClamp && previousLayout.useInlineTimeLayout === nextLayout.useInlineTimeLayout) {
+          if (previousLayout.showTimeLabel === nextLayout.showTimeLabel && previousLayout.titleLineClamp === nextLayout.titleLineClamp && previousLayout.useInlineTimeLayout === nextLayout.useInlineTimeLayout && previousLayout.useLastLineTimeLayout === nextLayout.useLastLineTimeLayout) {
             return previousLayout;
           }
 
@@ -222,6 +232,11 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
               <span className={CHIP_INLINE_TITLE_CLASS}>{titleLabel}</span>
               <span className={CHIP_INLINE_TIME_CLASS}>{timeLabel}</span>
             </div>
+          ) : chipLayout.useLastLineTimeLayout ? (
+            <span className={CHIP_TITLE_WITH_TIME_CLASS} style={createTitleClampStyle(chipLayout.titleLineClamp)}>
+              {titleLabel}
+              <span className={CHIP_LAST_LINE_TIME_CLASS}>{timeLabel}</span>
+            </span>
           ) : (
             <>
               <span className={CHIP_TITLE_CLASS} style={createTitleClampStyle(chipLayout.titleLineClamp)}>
@@ -238,6 +253,10 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
             </span>
             <span ref={timeMeasurementRef} className={CHIP_TIME_CLASS}>
               {timeLabel}
+            </span>
+            <span ref={titleWithTimeMeasurementRef} className={CHIP_TITLE_WITH_TIME_CLASS}>
+              {titleLabel}
+              <span className={CHIP_LAST_LINE_TIME_CLASS}>{timeLabel}</span>
             </span>
           </div>
         </div>
