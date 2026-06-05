@@ -2,6 +2,7 @@ export type TrashEntityBase = {
   [key: string]: unknown;
   id: string;
   isDeleted?: boolean;
+  deletedAt?: unknown;
 };
 
 export type TrashFolderBase = TrashEntityBase & {
