@@ -15,6 +15,7 @@ type UseCardsReadOptions = {
 };
 
 type CardSetById = ReturnType<typeof buildCardSetById>;
+type LocalDbInstance = Awaited<ReturnType<typeof getLocalDb>>;
 
 type CardsReadSnapshot = {
   key: string;
@@ -56,6 +57,15 @@ const normalizeFolderId = (value: string | null | undefined) => {
   return trimmed.length > 0 ? trimmed : null;
 };
 
+const normalizeCardSetId = (value: unknown): string | null => {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
 const toTime = (value: unknown): number => {
   return toMillis(value);
 };
@@ -87,6 +97,33 @@ const compareCards = (left: Card, right: Card): number => {
 
 const hasCardSetRouteParam = (search: string): boolean => {
   return new URLSearchParams(search).has("cardSetId");
+};
+
+const hasMatchingCardSetId = (rawCard: unknown, cardSetId: string): boolean => {
+  if (!rawCard || typeof rawCard !== "object") {
+    return false;
+  }
+
+  const record = rawCard as { cardSetId?: unknown; card_set_id?: unknown };
+  return normalizeCardSetId(record.cardSetId) === cardSetId || normalizeCardSetId(record.card_set_id) === cardSetId;
+};
+
+const readRawCardsByCardSetId = async (db: LocalDbInstance, cardSetId: string): Promise<unknown[]> => {
+  try {
+    const indexedCards = await db.cards.where("cardSetId").equals(cardSetId).toArray();
+    if (indexedCards.length > 0) {
+      return indexedCards;
+    }
+  } catch (indexError) {
+    console.warn(
+      "[useCardsRead] cardSetId index query failed. Falling back to full scan.",
+      indexError,
+    );
+    return await db.getAllCards();
+  }
+
+  const allCards = await db.getAllCards();
+  return allCards.filter((rawCard) => hasMatchingCardSetId(rawCard, cardSetId));
 };
 
 const resolveVisibleCards = ({
@@ -143,14 +180,7 @@ export const useCardsRead = (
       const db = await getLocalDb(userId);
 
       if (cardSetId) {
-        try {
-          return { key: readKey, rawCards: await db.cards.where("cardSetId").equals(cardSetId).toArray() };
-        } catch (indexError) {
-          console.warn(
-            "[useCardsRead] cardSetId index query failed. Falling back to full scan.",
-            indexError,
-          );
-        }
+        return { key: readKey, rawCards: await readRawCardsByCardSetId(db, cardSetId) };
       } else if (folderId) {
         try {
           const targetFolderId = normalizeFolderId(
