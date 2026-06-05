@@ -182,10 +182,45 @@
 
   @media (max-width: 767px) {
     #mobile-schedule-sidebar {
+      width: min(88vw, 360px) !important;
+      min-width: min(288px, 88vw) !important;
+      max-width: 360px !important;
       border-top-right-radius: 0 !important;
       border-bottom-right-radius: 0 !important;
       border-right: 1px solid #e5e5ea;
       box-shadow: none !important;
+    }
+
+    #mobile-schedule-sidebar .app-layered-directory {
+      --row-height-normal: 32px;
+      --row-height-dense: 30px;
+      --font-size-body: 14px;
+      --font-size-section: 12px;
+    }
+
+    #mobile-schedule-sidebar .app-layered-directory__notion-action {
+      width: 36px !important;
+      height: 36px !important;
+    }
+
+    #mobile-schedule-sidebar .app-layered-directory__notion-icon {
+      width: 19px !important;
+      height: 19px !important;
+    }
+
+    #mobile-schedule-sidebar .app-layered-directory__section-heading,
+    #mobile-schedule-sidebar .app-layered-directory__section-heading-button {
+      font-size: 12px !important;
+      line-height: 18px !important;
+    }
+
+    #mobile-schedule-sidebar .app-layered-directory [aria-pressed] {
+      min-height: 30px !important;
+      height: 30px !important;
+    }
+
+    #mobile-schedule-sidebar .app-layered-directory [aria-pressed] > span:last-child {
+      font-size: 13px !important;
     }
   }
 }
