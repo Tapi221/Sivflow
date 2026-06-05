@@ -1,17 +1,21 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
+import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
-import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContext";
+import { SidebarMobile } from "@/pane.desktop/leftpane/Sidebar.mobile";
+import { cn } from "@/lib/utils";
 import { Search } from "@/ui/icons";
-import "@/styles/backpane.css";
+import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContext";
 import { WorkspaceShell } from "./WorkspaceShell";
+import "@/styles/backpane.css";
 import "./AppLayout.css";
 
 type AppLayoutOutletContext = {
   isLeftPanelCollapsed: boolean;
+  onOpenMobileSidebar: () => void;
   onToggleLeftPanel: () => void;
 };
 
@@ -27,9 +31,8 @@ const GLOBAL_SEARCH_TRIGGER_CLASS_NAME = "absolute right-5 top-4 z-30 hidden h-9
 const GLOBAL_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-[22px] min-w-[34px] items-center justify-center rounded-[6px] border border-[#e6e6e8] bg-[#f7f7f8] px-1.5 text-[11px] font-semibold leading-none tracking-[-0.02em] text-[#8e8e93] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
 const LEFT_PANEL_COLLAPSED_STORAGE_VALUE = "collapsed";
-const MOBILE_SCHEDULE_SIDEBAR_SELECTOR = "#mobile-schedule-sidebar";
-const MOBILE_SCHEDULE_SIDEBAR_TOGGLE_SELECTOR = ".app-layered-directory__workspace-toggle";
-const MOBILE_SCHEDULE_SIDEBAR_CLOSE_BUTTON_SELECTOR = 'button[aria-label="サイドバーを閉じる"]';
+const MOBILE_SIDEBAR_OPEN_BUTTON_CLASS_NAME = "fixed left-3 top-[calc(var(--app-top-inset,0px)+12px)] z-[70] flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(0,0,0,0.05)] bg-[rgba(255,255,255,0.86)] p-0 text-[#8c8c8c] shadow-[0_1px_2px_rgba(15,23,42,0.08)] outline-none backdrop-blur-xl transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] md:hidden";
+const MOBILE_SIDEBAR_OPEN_ICON_CLASS_NAME = "h-5 w-5 shrink-0 [transform:scaleX(-1)]";
 const SIDEBAR_LONG_PRESS_CONTEXT_MENU_TARGET_SELECTOR = ".app-layered-directory [role='treeitem']";
 const SIDEBAR_LONG_PRESS_DELAY_MS = 520;
 const SIDEBAR_LONG_PRESS_MOVE_TOLERANCE_PX = 10;
@@ -59,14 +62,6 @@ const persistLeftPanelCollapsed = (isCollapsed: boolean) => {
   }
 };
 
-const getMobileScheduleSidebarCloseButton = (target: EventTarget | null): HTMLButtonElement | null => {
-  if (!(target instanceof Element)) return null;
-  if (!target.closest(MOBILE_SCHEDULE_SIDEBAR_TOGGLE_SELECTOR)) return null;
-
-  const mobileScheduleSidebar = target.closest(MOBILE_SCHEDULE_SIDEBAR_SELECTOR);
-  return mobileScheduleSidebar?.parentElement?.querySelector<HTMLButtonElement>(MOBILE_SCHEDULE_SIDEBAR_CLOSE_BUTTON_SELECTOR) ?? null;
-};
-
 const getSidebarLongPressContextMenuTarget = (target: EventTarget | null): HTMLElement | null => {
   if (!(target instanceof Element)) return null;
 
@@ -81,6 +76,7 @@ const AppLayout = () => {
   const { pathname, isFoldersRoute, isScheduleRoute, isScrollLocked } = useLayoutRouteStateDesktop();
 
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(readStoredLeftPanelCollapsed);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const [workspaceLayoutRevision, setWorkspaceLayoutRevision] = useState(0);
 
@@ -96,6 +92,12 @@ const AppLayout = () => {
     bumpWorkspaceLayoutRevision();
     setIsLeftPanelCollapsed((current) => !current);
   }, [bumpWorkspaceLayoutRevision]);
+  const handleOpenMobileSidebar = useCallback(() => {
+    setIsMobileSidebarOpen(true);
+  }, []);
+  const handleCloseMobileSidebar = useCallback(() => {
+    setIsMobileSidebarOpen(false);
+  }, []);
   const handleToggleRightSidebar = useCallback(() => {
     bumpWorkspaceLayoutRevision();
     setIsRightSidebarOpen((current) => !current);
@@ -155,15 +157,7 @@ const AppLayout = () => {
     event.stopPropagation();
     event.stopImmediatePropagation();
   }, []);
-  const handleMobileScheduleSidebarToggle = useCallback((event: MouseEvent) => {
-    const closeButton = getMobileScheduleSidebarCloseButton(event.target);
-    if (!closeButton) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    closeButton.click();
-  }, []);
-  const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed, onToggleLeftPanel: handleToggleLeftPanel }), [handleToggleLeftPanel, isLeftPanelCollapsed]);
+  const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed, onOpenMobileSidebar: handleOpenMobileSidebar, onToggleLeftPanel: handleToggleLeftPanel }), [handleOpenMobileSidebar, handleToggleLeftPanel, isLeftPanelCollapsed]);
   const showGlobalSearchTrigger = !isScheduleRoute;
 
   useEffect(() => {
@@ -188,12 +182,20 @@ const AppLayout = () => {
   }, [clearSidebarLongPress, handleSidebarLongPressClickCapture, handleSidebarLongPressPointerDown, handleSidebarLongPressPointerEnd, handleSidebarLongPressPointerMove]);
 
   useEffect(() => {
-    document.addEventListener("click", handleMobileScheduleSidebarToggle, true);
+    if (!isMobileSidebarOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+
+      setIsMobileSidebarOpen(false);
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.removeEventListener("click", handleMobileScheduleSidebarToggle, true);
+      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleMobileScheduleSidebarToggle]);
+  }, [isMobileSidebarOpen]);
 
   useHotKeyDesktop({
     onToggleRightSidebar: handleToggleRightSidebar,
@@ -219,6 +221,17 @@ const AppLayout = () => {
             <Outlet context={outletContext} />
           </Suspense>
         </WorkspaceShell>
+
+        <button type="button" className={MOBILE_SIDEBAR_OPEN_BUTTON_CLASS_NAME} onClick={handleOpenMobileSidebar} aria-label="サイドバーを開く" aria-controls="mobile-app-sidebar" aria-expanded={isMobileSidebarOpen}>
+          <SidebarOpenIcon className={MOBILE_SIDEBAR_OPEN_ICON_CLASS_NAME} />
+        </button>
+
+        <div className={cn("fixed inset-0 z-[80] transition md:hidden", isMobileSidebarOpen ? "pointer-events-auto" : "pointer-events-none")} aria-hidden={!isMobileSidebarOpen}>
+          <button type="button" className={cn("absolute inset-0 bg-black/35 transition-opacity", isMobileSidebarOpen ? "opacity-100" : "opacity-0")} onClick={handleCloseMobileSidebar} aria-label="サイドバーを閉じる" />
+          <div id="mobile-app-sidebar" className={cn("absolute left-0 top-0 h-full w-[82vw] max-w-[320px] min-w-[260px] overflow-hidden bg-white transition-transform duration-200 ease-out", isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full")}>
+            <SidebarMobile onClose={handleCloseMobileSidebar} />
+          </div>
+        </div>
 
         {showGlobalSearchTrigger && (
           <button type="button" className={GLOBAL_SEARCH_TRIGGER_CLASS_NAME} aria-label="検索を開く" aria-keyshortcuts="Meta+K Control+K" title="検索を開く" onClick={handleOpenSearch}>
