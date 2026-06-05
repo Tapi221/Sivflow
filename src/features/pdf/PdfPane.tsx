@@ -106,6 +106,10 @@ const PDF_PAGE_PLACEHOLDER_HEIGHT = 920;
 const PDF_HISTORY_LIMIT = 80;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
 const PDF_CANVAS_BACKGROUND = "#ffffff";
+const PDFJS_ASSET_BASE_URL = "/pdfjs/";
+const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
+const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
+const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
 const activePdfCanvasRenders = new WeakMap<HTMLCanvasElement, ActivePdfCanvasRender>();
 
 const resolvePersistedUrl = (doc: PdfPaneDoc): string | null => {
@@ -207,6 +211,17 @@ const createTextSpanStyle = (viewportTransform: number[], item: PdfTextItem): CS
   };
 };
 
+const createPdfDocumentLoadOptions = (viewerOptions: PdfPaneProps["viewerOptions"]) => {
+  return {
+    enableXfa: viewerOptions?.enableXfa,
+    useSystemFonts: viewerOptions?.useSystemFonts ?? true,
+    cMapUrl: viewerOptions?.cMapUrl ?? PDFJS_CMAP_URL,
+    cMapPacked: true,
+    standardFontDataUrl: viewerOptions?.standardFontDataUrl ?? PDFJS_STANDARD_FONT_DATA_URL,
+    wasmUrl: PDFJS_WASM_URL,
+  };
+};
+
 const loadLocalPdfData = async (source: PdfSourceDescriptor): Promise<Uint8Array | null> => {
   const blob = await getDocumentBlob(source.localFileId, { userId: source.userId });
   if (!blob) return null;
@@ -229,18 +244,20 @@ const loadPdfSource = async (source: PdfSourceDescriptor): Promise<LoadedPdfSour
 };
 
 const loadPdfDocument = async (source: LoadedPdfSource, viewerOptions: PdfPaneProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
-  const options = { enableXfa: viewerOptions?.enableXfa, useSystemFonts: viewerOptions?.useSystemFonts ?? true, cMapUrl: viewerOptions?.cMapUrl, standardFontDataUrl: viewerOptions?.standardFontDataUrl };
+  const options = createPdfDocumentLoadOptions(viewerOptions);
   return source.kind === "data" ? pdfjsLib.getDocument({ ...options, data: source.data }).promise : pdfjsLib.getDocument({ ...options, url: source.url }).promise;
 };
 
 const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasPageProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [renderError, setRenderError] = useState<string | null>(null);
 
   useEffect(() => {
     let isCancelled = false;
     let renderTask: PdfRenderTask | null = null;
 
     const renderPage = async () => {
+      setRenderError(null);
       const canvas = canvasRef.current;
       if (!canvas) return;
       await waitForPreviousCanvasRender(canvas);
@@ -249,14 +266,15 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
       if (isCancelled) return;
       const viewport = page.getViewport({ scale });
       const devicePixelRatio = window.devicePixelRatio || 1;
-      const context = canvas.getContext("2d");
-      if (!context) return;
+      const context = canvas.getContext("2d", { alpha: false });
+      if (!context) throw new Error("PDF描画用のCanvas contextを取得できませんでした。");
       canvas.width = Math.max(1, Math.floor(viewport.width * devicePixelRatio));
       canvas.height = Math.max(1, Math.floor(viewport.height * devicePixelRatio));
       canvas.style.width = `${viewport.width}px`;
       canvas.style.height = `${viewport.height}px`;
       context.setTransform(1, 0, 0, 1, 0, 0);
-      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.fillStyle = PDF_CANVAS_BACKGROUND;
+      context.fillRect(0, 0, canvas.width, canvas.height);
       renderTask = page.render({ canvas, canvasContext: context, viewport, transform: devicePixelRatio === 1 ? undefined : [devicePixelRatio, 0, 0, devicePixelRatio, 0, 0], background: PDF_CANVAS_BACKGROUND });
       const done = renderTask.promise.then(() => undefined).catch((error: unknown) => {
         if (!isPdfRenderCancellationError(error)) throw error;
@@ -273,7 +291,10 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
     };
 
     void renderPage().catch((error: unknown) => {
-      if (!isCancelled) console.error("[PdfPane] page render failed", error);
+      if (isCancelled) return;
+      const message = error instanceof Error ? error.message : String(error);
+      setRenderError(message || "PDFページの描画に失敗しました。");
+      console.error("[PdfPane] page render failed", error);
     });
 
     return () => {
@@ -282,7 +303,12 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
     };
   }, [pageNumber, pdfDocument, scale]);
 
-  return <canvas ref={canvasRef} className={cn("block bg-white", className)} />;
+  return (
+    <div className="relative">
+      <canvas ref={canvasRef} className={cn("block bg-white", className)} />
+      {renderError ? <div className="absolute inset-0 flex items-center justify-center bg-white/95 p-6 text-center text-[12px] leading-5 text-[#7a2f2f]"><div className="max-w-sm rounded-[12px] border border-[#ecd1d1] bg-white px-4 py-3 shadow-sm">{renderError}</div></div> : null}
+    </div>
+  );
 };
 
 const PdfTextLayer = ({ pageNumber, pdfDocument, scale }: PdfTextLayerProps) => {
