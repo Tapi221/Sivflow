@@ -177,9 +177,14 @@ export const purgeExpiredTrashItems = async <
   retentionDays?: number;
   now?: number;
 }): Promise<TrashItems<TFolder, TCard>> => {
-  const { folders, cards } = await getTrashItems({ userId, repository });
+  const context = await repository.loadContext(userId);
+  const { folders, cards } = getDeletedItems(context);
   const expiredFolders = folders.filter((folder) => isExpiredTrashItem(folder, retentionDays, now));
-  const expiredCards = cards.filter((card) => isExpiredTrashItem(card, retentionDays, now));
+  const expiredFolderIdSet = new Set(expiredFolders.map((folder) => folder.id));
+  const expiredCards = cards.filter((card) => {
+    const folderId = context.resolveCardFolderId(card);
+    return isExpiredTrashItem(card, retentionDays, now) || (folderId ? expiredFolderIdSet.has(folderId) : false);
+  });
 
   await permanentlyDeleteTrashItems({
     userId,
