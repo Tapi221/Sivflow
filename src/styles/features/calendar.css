@@ -28,13 +28,13 @@
     height: 0;
   }
 
-  div:has(> .calendar-timeline-scroll) > div:nth-child(2) > .grid > div {
-    min-height: 24px !important;
+  div:has(+ .calendar-timeline-scroll) > .grid > div {
+    min-height: 0 !important;
   }
 
-  div:has(> .calendar-timeline-scroll) > div:nth-child(2) > .grid > div:first-child {
-    padding-top: 4px !important;
-    padding-bottom: 4px !important;
+  div:has(+ .calendar-timeline-scroll) > .grid > div:first-child {
+    padding-top: 0.5px !important;
+    padding-bottom: 0.5px !important;
   }
 
   .calendar-print-screen-content div:has(> .calendar-timeline-scroll) > div:first-child > .grid > div:first-child,
