@@ -1,13 +1,31 @@
+import { invoke } from "@tauri-apps/api/core";
+
+type TauriClipboardImageInput = {
+  mimeType: string;
+  data: number[];
+};
+
 const DEFAULT_IMAGE_MIME_TYPE = "image/png";
 
 const isTauriRuntime = (): boolean => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
+const arrayBufferToNumberArray = (buffer: ArrayBuffer): number[] => Array.from(new Uint8Array(buffer));
+
+const createTauriClipboardImageInput = async (blob: Blob): Promise<TauriClipboardImageInput> => ({
+  mimeType: blob.type || DEFAULT_IMAGE_MIME_TYPE,
+  data: arrayBufferToNumberArray(await blob.arrayBuffer()),
+});
+
 const writeImageBlobToTauriClipboard = async (blob: Blob): Promise<boolean> => {
   if (!isTauriRuntime()) return false;
 
-  const { writeImage } = await import("@tauri-apps/plugin-clipboard-manager");
-  await writeImage(await blob.arrayBuffer());
-  return true;
+  try {
+    await invoke<void>("clipboard_write_image", { input: await createTauriClipboardImageInput(blob) });
+    return true;
+  } catch (error) {
+    console.warn("[clipboardImage] Tauri image clipboard failed", error);
+    return false;
+  }
 };
 
 export const copyImageBlobToClipboard = async (blob: Blob): Promise<void> => {
