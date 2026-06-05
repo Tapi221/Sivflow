@@ -15,6 +15,14 @@ type AppLayoutOutletContext = {
   onToggleLeftPanel: () => void;
 };
 
+type SidebarLongPressState = {
+  pointerId: number;
+  target: HTMLElement;
+  clientX: number;
+  clientY: number;
+  timerId: number;
+};
+
 const GLOBAL_SEARCH_TRIGGER_CLASS_NAME = "absolute right-5 top-4 z-30 hidden h-9 w-[268px] shrink-0 items-center gap-2 rounded-[10px] border border-[#e5e7eb] bg-white px-3 text-left text-[13px] font-medium leading-none text-[#8e8e93] shadow-[0_1px_2px_rgba(15,23,42,0.04)] outline-none ring-0 transition-[background-color,border-color,box-shadow] duration-150 ease-out hover:border-[#d7dbe2] hover:bg-[#fbfbfc] focus:outline-none focus:ring-0 focus-visible:border-[#c7d2fe] focus-visible:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] md:flex";
 const GLOBAL_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-[22px] min-w-[34px] items-center justify-center rounded-[6px] border border-[#e6e6e8] bg-[#f7f7f8] px-1.5 text-[11px] font-semibold leading-none tracking-[-0.02em] text-[#8e8e93] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
@@ -22,6 +30,9 @@ const LEFT_PANEL_COLLAPSED_STORAGE_VALUE = "collapsed";
 const MOBILE_SCHEDULE_SIDEBAR_SELECTOR = "#mobile-schedule-sidebar";
 const MOBILE_SCHEDULE_SIDEBAR_TOGGLE_SELECTOR = ".app-layered-directory__workspace-toggle";
 const MOBILE_SCHEDULE_SIDEBAR_CLOSE_BUTTON_SELECTOR = 'button[aria-label="サイドバーを閉じる"]';
+const SIDEBAR_LONG_PRESS_CONTEXT_MENU_TARGET_SELECTOR = ".app-layered-directory [role='treeitem']";
+const SIDEBAR_LONG_PRESS_DELAY_MS = 520;
+const SIDEBAR_LONG_PRESS_MOVE_TOLERANCE_PX = 10;
 
 const readStoredLeftPanelCollapsed = (): boolean => {
   if (typeof window === "undefined") return false;
@@ -56,6 +67,16 @@ const getMobileScheduleSidebarCloseButton = (target: EventTarget | null): HTMLBu
   return mobileScheduleSidebar?.parentElement?.querySelector<HTMLButtonElement>(MOBILE_SCHEDULE_SIDEBAR_CLOSE_BUTTON_SELECTOR) ?? null;
 };
 
+const getSidebarLongPressContextMenuTarget = (target: EventTarget | null): HTMLElement | null => {
+  if (!(target instanceof Element)) return null;
+
+  return target.closest<HTMLElement>(SIDEBAR_LONG_PRESS_CONTEXT_MENU_TARGET_SELECTOR);
+};
+
+const isSidebarLongPressPointerEvent = (event: PointerEvent): boolean => (event.pointerType === "touch" || event.pointerType === "pen") && event.button === 0;
+
+const getSidebarLongPressPointerDistance = (event: PointerEvent, state: SidebarLongPressState): number => Math.hypot(event.clientX - state.clientX, event.clientY - state.clientY);
+
 const AppLayout = () => {
   const { pathname, isFoldersRoute, isScheduleRoute, isScrollLocked } = useLayoutRouteStateDesktop();
 
@@ -65,6 +86,8 @@ const AppLayout = () => {
 
   const openSearch = useSearchStore((state) => state.open);
   const mainRef = useRef<HTMLElement | null>(null);
+  const sidebarLongPressStateRef = useRef<SidebarLongPressState | null>(null);
+  const shouldSuppressSidebarLongPressClickRef = useRef(false);
   const handleOpenSearch = useCallback(() => openSearch(), [openSearch]);
   const bumpWorkspaceLayoutRevision = useCallback(() => {
     setWorkspaceLayoutRevision((current) => current + 1);
@@ -77,6 +100,61 @@ const AppLayout = () => {
     bumpWorkspaceLayoutRevision();
     setIsRightSidebarOpen((current) => !current);
   }, [bumpWorkspaceLayoutRevision]);
+  const clearSidebarLongPress = useCallback(() => {
+    const state = sidebarLongPressStateRef.current;
+    if (!state) return;
+
+    window.clearTimeout(state.timerId);
+    sidebarLongPressStateRef.current = null;
+  }, []);
+  const handleSidebarLongPressPointerDown = useCallback((event: PointerEvent) => {
+    if (!isSidebarLongPressPointerEvent(event)) return;
+
+    const target = getSidebarLongPressContextMenuTarget(event.target);
+    if (!target) return;
+
+    clearSidebarLongPress();
+
+    const state: SidebarLongPressState = {
+      pointerId: event.pointerId,
+      target,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      timerId: window.setTimeout(() => {
+        const current = sidebarLongPressStateRef.current;
+        if (!current) return;
+
+        shouldSuppressSidebarLongPressClickRef.current = true;
+        current.target.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, button: 2, buttons: 0, clientX: current.clientX, clientY: current.clientY, view: window }));
+        clearSidebarLongPress();
+      }, SIDEBAR_LONG_PRESS_DELAY_MS),
+    };
+
+    sidebarLongPressStateRef.current = state;
+  }, [clearSidebarLongPress]);
+  const handleSidebarLongPressPointerMove = useCallback((event: PointerEvent) => {
+    const state = sidebarLongPressStateRef.current;
+    if (!state || state.pointerId !== event.pointerId) return;
+    if (getSidebarLongPressPointerDistance(event, state) <= SIDEBAR_LONG_PRESS_MOVE_TOLERANCE_PX) return;
+
+    clearSidebarLongPress();
+  }, [clearSidebarLongPress]);
+  const handleSidebarLongPressPointerEnd = useCallback((event: PointerEvent) => {
+    const state = sidebarLongPressStateRef.current;
+    if (!state || state.pointerId !== event.pointerId) return;
+
+    clearSidebarLongPress();
+  }, [clearSidebarLongPress]);
+  const handleSidebarLongPressClickCapture = useCallback((event: MouseEvent) => {
+    if (!shouldSuppressSidebarLongPressClickRef.current) return;
+
+    shouldSuppressSidebarLongPressClickRef.current = false;
+    if (!getSidebarLongPressContextMenuTarget(event.target)) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }, []);
   const handleMobileScheduleSidebarToggle = useCallback((event: MouseEvent) => {
     const closeButton = getMobileScheduleSidebarCloseButton(event.target);
     if (!closeButton) return;
@@ -91,6 +169,23 @@ const AppLayout = () => {
   useEffect(() => {
     persistLeftPanelCollapsed(isLeftPanelCollapsed);
   }, [isLeftPanelCollapsed]);
+
+  useEffect(() => {
+    document.addEventListener("pointerdown", handleSidebarLongPressPointerDown, true);
+    document.addEventListener("pointermove", handleSidebarLongPressPointerMove, true);
+    document.addEventListener("pointerup", handleSidebarLongPressPointerEnd, true);
+    document.addEventListener("pointercancel", handleSidebarLongPressPointerEnd, true);
+    document.addEventListener("click", handleSidebarLongPressClickCapture, true);
+
+    return () => {
+      clearSidebarLongPress();
+      document.removeEventListener("pointerdown", handleSidebarLongPressPointerDown, true);
+      document.removeEventListener("pointermove", handleSidebarLongPressPointerMove, true);
+      document.removeEventListener("pointerup", handleSidebarLongPressPointerEnd, true);
+      document.removeEventListener("pointercancel", handleSidebarLongPressPointerEnd, true);
+      document.removeEventListener("click", handleSidebarLongPressClickCapture, true);
+    };
+  }, [clearSidebarLongPress, handleSidebarLongPressClickCapture, handleSidebarLongPressPointerDown, handleSidebarLongPressPointerEnd, handleSidebarLongPressPointerMove]);
 
   useEffect(() => {
     document.addEventListener("click", handleMobileScheduleSidebarToggle, true);
