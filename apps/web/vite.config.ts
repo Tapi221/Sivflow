@@ -1,7 +1,8 @@
+import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "path";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 const optimizedDependencyIncludes = [
@@ -23,8 +24,59 @@ const optimizedDependencyIncludes = [
 ];
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const pdfjsAssetRoute = "/pdfjs/";
+const pdfjsAssetDirectories = ["cmaps", "standard_fonts", "wasm"];
 
 const resolveFromRoot = (relativePath: string) => path.resolve(repoRoot, relativePath);
+
+const resolvePdfjsDistPath = (relativePath: string) => resolveFromRoot(path.join("node_modules/pdfjs-dist", relativePath));
+
+const getPdfjsAssetContentType = (filePath: string): string => {
+  if (filePath.endsWith(".bcmap")) return "application/octet-stream";
+  if (filePath.endsWith(".wasm")) return "application/wasm";
+  if (filePath.endsWith(".pfb")) return "application/octet-stream";
+  if (filePath.endsWith(".ttf")) return "font/ttf";
+  return "application/octet-stream";
+};
+
+const createPdfjsAssetsPlugin = (): Plugin => {
+  return {
+    name: "serve-pdfjs-assets",
+    configureServer(server) {
+      server.middlewares.use(async (request, response, next) => {
+        const requestUrl = request.url ?? "";
+        if (!requestUrl.startsWith(pdfjsAssetRoute)) {
+          next();
+          return;
+        }
+
+        try {
+          const rawRelativePath = decodeURIComponent(requestUrl.slice(pdfjsAssetRoute.length).split("?")[0] ?? "");
+          const assetFilePath = resolvePdfjsDistPath(rawRelativePath);
+          const assetRootPath = resolvePdfjsDistPath("");
+          if (!assetFilePath.startsWith(assetRootPath)) {
+            response.statusCode = 403;
+            response.end();
+            return;
+          }
+
+          const file = await fs.readFile(assetFilePath);
+          response.setHeader("Content-Type", getPdfjsAssetContentType(assetFilePath));
+          response.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+          response.end(file);
+        } catch {
+          response.statusCode = 404;
+          response.end();
+        }
+      });
+    },
+    async writeBundle() {
+      const outputRoot = resolveFromRoot("dist/pdfjs");
+      await fs.mkdir(outputRoot, { recursive: true });
+      await Promise.all(pdfjsAssetDirectories.map((directory) => fs.cp(resolvePdfjsDistPath(directory), path.join(outputRoot, directory), { recursive: true })));
+    },
+  };
+};
 
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
@@ -33,6 +85,7 @@ export default defineConfig(({ command }) => ({
   publicDir: resolveFromRoot("public"),
   plugins: [
     react(),
+    createPdfjsAssetsPlugin(),
     VitePWA({
       strategies: "injectManifest",
       srcDir: resolveFromRoot("apps/web/src"),
