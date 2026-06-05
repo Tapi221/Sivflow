@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from "react";
+import { useCallback, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { TagFilterPopover } from "@/chip/popover/TagFilterPopover";
@@ -80,6 +80,7 @@ const PROJECT_ADD_MENU_ITEM_DEFINITIONS: readonly ProjectAddMenuItemDefinition[]
 const PROJECT_ADD_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_ADD_MENU_ITEM_DEFINITIONS.map((item) => item.label), 132);
 const PROJECT_ADD_MENU_HEIGHT = PROJECT_ADD_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 const EMPTY_COLLECTION: never[] = [];
+const CARD_SET_ENTITY_SELECTOR = "[data-directory-entity-kind='cardSet']";
 
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 const IconChevronDown = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M4 6.25L8 10.25L12 6.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
@@ -135,6 +136,15 @@ const getWorkspaceInitial = (workspaceOwnerName: string): string => {
 const getProjectAddMenuPosition = (event: ReactMouseEvent<HTMLElement>): ProjectAddMenuState => {
   const rect = event.currentTarget.getBoundingClientRect();
   return clampRightClickPanelPosition(rect.right - PROJECT_ADD_MENU_WIDTH, rect.bottom + 6, { width: PROJECT_ADD_MENU_WIDTH, height: PROJECT_ADD_MENU_HEIGHT });
+};
+
+const isCardSetEntityEventTarget = (target: EventTarget | null): boolean => {
+  return target instanceof HTMLElement && target.closest(CARD_SET_ENTITY_SELECTOR) !== null;
+};
+
+const scheduleLeftPanelClose = (onToggleLeftPanel?: () => void) => {
+  if (!onToggleLeftPanel) return;
+  window.setTimeout(onToggleLeftPanel, 0);
 };
 
 const ProjectAddMenu = ({ x, y, menuRef, onCreateNote, onCreateFolder, onImportPdf }: ProjectAddMenuProps) => {
@@ -273,8 +283,19 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
     onOpenSettings?.();
   }, [onOpenSettings]);
 
+  const handleDirectoryClickCapture = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
+    if (!isCardSetEntityEventTarget(event.target)) return;
+    scheduleLeftPanelClose(resolvedOnToggleLeftPanel);
+  }, [resolvedOnToggleLeftPanel]);
+
+  const handleDirectoryKeyDownCapture = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    if (!isCardSetEntityEventTarget(event.target)) return;
+    scheduleLeftPanelClose(resolvedOnToggleLeftPanel);
+  }, [resolvedOnToggleLeftPanel]);
+
   return (
-    <div className="app-layered-directory flex h-full min-h-0 shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased">
+    <div className="app-layered-directory flex h-full min-h-0 shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased" onClickCapture={handleDirectoryClickCapture} onKeyDownCapture={handleDirectoryKeyDownCapture}>
       <div className="app-layered-directory__primary-nav">
         <div className="app-layered-directory__workspace-header">
           <button type="button" className="app-layered-directory__workspace-toggle" onClick={resolvedOnToggleLeftPanel} aria-label="サイドバーを閉じる" disabled={!resolvedOnToggleLeftPanel}>
