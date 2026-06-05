@@ -49,6 +49,8 @@ const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
 const EMPTY_FAILED_IMAGE_INDICES = new Set<number>();
+const IMAGE_ACTION_BAR_CLASS_NAME = "absolute top-1 right-1 z-[999] pointer-events-auto flex items-center gap-1 rounded-md bg-white/85 p-0.5 opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100";
+const IMAGE_ACTION_BUTTON_CLASS_NAME = "flex h-6 w-6 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-900/5 hover:text-zinc-600 focus:outline-none";
 
 const hasDisplayImageUrl = (url: string | null): url is string =>
   typeof url === "string" && url.trim().length > 0;
@@ -330,33 +332,31 @@ export const ImageGallery = ({
                 }}
               />
 
-              <div className="absolute top-1 left-1 z-[999] pointer-events-auto flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 supports-[hover:none]:opacity-100">
-                <Button
+              <div className={IMAGE_ACTION_BAR_CLASS_NAME}>
+                <button
                   type="button"
-                  variant="secondary"
-                  size="icon"
-                  className="h-6 w-6 bg-white/90"
+                  className={IMAGE_ACTION_BUTTON_CLASS_NAME}
+                  onPointerDown={(event) => event.stopPropagation()}
                   onClick={(event) => {
                     event.stopPropagation();
                     void copyImage(item.url!);
                   }}
                   aria-label="画像をコピー"
                 >
-                  <Copy className="w-2.5 h-2.5" />
-                </Button>
-                <Button
+                  <Copy className="h-[11px] w-[11px]" />
+                </button>
+                <button
                   type="button"
-                  variant="secondary"
-                  size="icon"
-                  className="h-6 w-6 bg-white/90"
+                  className={IMAGE_ACTION_BUTTON_CLASS_NAME}
+                  onPointerDown={(event) => event.stopPropagation()}
                   onClick={(event) => {
                     event.stopPropagation();
                     void downloadImage(item.url!, index);
                   }}
                   aria-label="画像をダウンロード"
                 >
-                  <Download className="w-2.5 h-2.5" />
-                </Button>
+                  <Download className="h-[11px] w-[11px]" />
+                </button>
               </div>
             </>
           ) : (
