@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import * as pdfjsLib from "pdfjs-dist";
-import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
 import type { PdfViewerState } from "@/types";
 import { cn } from "@/lib/utils";
 
