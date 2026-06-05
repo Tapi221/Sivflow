@@ -1,15 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
-import type { PdfPaneProps } from "./PdfPane";
 import type { PdfViewerState } from "@/types";
 import { cn } from "@/lib/utils";
+
+type MobilePdfPagesProps = {
+  sourceUrl: string | null;
+  className?: string;
+  viewerState?: PdfViewerState | null;
+  viewerOptions?: {
+    enableXfa?: boolean;
+    useSystemFonts?: boolean;
+    cMapUrl?: string;
+    standardFontDataUrl?: string;
+    opaqueCanvas?: boolean;
+  };
+  onViewerStateChange?: (viewerState: PdfViewerState) => Promise<void> | void;
+};
 
 type PdfDocumentProxy = Awaited<ReturnType<typeof pdfjsLib.getDocument>["promise"]>;
 
 type PdfPageProxy = Awaited<ReturnType<PdfDocumentProxy["getPage"]>>;
-
-type MobilePdfPagesProps = Pick<PdfPaneProps, "sourceUrl" | "className" | "viewerState" | "viewerOptions" | "onViewerStateChange">;
 
 type MobilePdfPageRecord = {
   pageNumber: number;
@@ -28,7 +39,7 @@ const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
 
-const createPdfDocumentLoadOptions = (viewerOptions: PdfPaneProps["viewerOptions"]) => {
+const createPdfDocumentLoadOptions = (viewerOptions: MobilePdfPagesProps["viewerOptions"]) => {
   return {
     enableXfa: viewerOptions?.enableXfa,
     useSystemFonts: viewerOptions?.useSystemFonts ?? true,
@@ -39,7 +50,7 @@ const createPdfDocumentLoadOptions = (viewerOptions: PdfPaneProps["viewerOptions
   };
 };
 
-const loadPdfDocument = async (sourceUrl: string | null, viewerOptions: PdfPaneProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
+const loadPdfDocument = async (sourceUrl: string | null, viewerOptions: MobilePdfPagesProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
   const normalizedSourceUrl = sourceUrl?.trim();
   if (!normalizedSourceUrl) throw new Error("表示できるPDFソースがありません。");
   return pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions), url: normalizedSourceUrl }).promise;
