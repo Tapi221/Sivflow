@@ -3,6 +3,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
 import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/web/pdf_viewer.mjs";
 import "pdfjs-dist/web/pdf_viewer.css";
+import { MobilePdfPages } from "./MobilePdfPages";
 import type { PdfViewerState } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +55,7 @@ const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
+const MOBILE_PDF_MEDIA_QUERY = "(hover: none) and (pointer: coarse), (max-width: 767px)";
 
 const clampPdfScale = (scale: number): number => {
   if (!Number.isFinite(scale)) return DEFAULT_PDF_SCALE;
@@ -82,6 +84,11 @@ const getPdfViewerPageCount = (pdfViewer: PdfViewerInstance): number => {
 const getPdfViewerStateScaleValue = (viewerState: PdfViewerState | null): string => {
   if (viewerState?.fitMode === "manual" && typeof viewerState.scale === "number") return String(clampPdfScale(viewerState.scale));
   return "page-width";
+};
+
+const getInitialMobilePdfPreference = (): boolean => {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
+  return window.matchMedia(MOBILE_PDF_MEDIA_QUERY).matches;
 };
 
 const shouldHandlePdfKeyboardEvent = (event: KeyboardEvent): boolean => {
@@ -136,7 +143,7 @@ const addPdfViewerEventListener = (eventBus: PdfEventBusLike, eventName: string,
   };
 };
 
-const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onViewerStateChange }: PdfPaneProps) => {
+const DesktopPdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onViewerStateChange }: PdfPaneProps) => {
   const viewerEnableXfa = viewerOptions?.enableXfa;
   const viewerUseSystemFonts = viewerOptions?.useSystemFonts;
   const viewerCMapUrl = viewerOptions?.cMapUrl;
@@ -372,6 +379,27 @@ const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onVi
       </main>
     </div>
   );
+};
+
+const PdfPane = (props: PdfPaneProps) => {
+  const [isMobilePdfPreferred, setIsMobilePdfPreferred] = useState(getInitialMobilePdfPreference);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+
+    const mediaQuery = window.matchMedia(MOBILE_PDF_MEDIA_QUERY);
+    const handleChange = () => setIsMobilePdfPreferred(mediaQuery.matches);
+
+    handleChange();
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  if (isMobilePdfPreferred) {
+    return <MobilePdfPages {...props} />;
+  }
+
+  return <DesktopPdfPane {...props} />;
 };
 
 export { PdfPane };
