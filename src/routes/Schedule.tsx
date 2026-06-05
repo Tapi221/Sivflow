@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { WorkspaceScreen as DesktopScheduleScreen } from "@/pane.desktop/view/WorkspaceScreen";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 
 const MOBILE_SCHEDULE_MEDIA_QUERY = "(max-width: 767px)";
 const MobileScheduleScreen = lazy(() => import("@/pane.desktop/view/ScheduleScreen.mobile").then(({ ScheduleScreen }) => ({ default: ScheduleScreen })));
@@ -27,7 +28,9 @@ const useIsMobileSchedule = () => {
 
 const Calendar = () => {
   const isMobile = useIsMobileSchedule();
-  const ActiveScheduleScreen = isMobile ? MobileScheduleScreen : DesktopScheduleScreen;
+  const activeSectionKey = useWorkspaceTabsStore((state) => state.tabs.find((tab) => tab.id === state.activeTabId)?.sectionKey ?? null);
+  const shouldUseMobileScheduleScreen = isMobile && activeSectionKey !== "library";
+  const ActiveScheduleScreen = shouldUseMobileScheduleScreen ? MobileScheduleScreen : DesktopScheduleScreen;
 
   return (
     <div className="h-full min-h-0 w-full">
