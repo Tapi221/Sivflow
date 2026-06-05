@@ -217,6 +217,29 @@ export const useLayeredTreeDragDrop = <TItem extends LayeredTreeItem>({ rootItem
     void commitDrop(instruction).finally(clearDragState);
   }, [clearDragState, commitDrop, getValidAppendDropInstruction]);
 
+  useEffect(() => {
+    if (!draggingId && !dropInstruction) return;
+
+    const handleGlobalDragEnd = () => {
+      clearDragState();
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") clearDragState();
+    };
+
+    window.addEventListener("dragend", handleGlobalDragEnd);
+    window.addEventListener("drop", handleGlobalDragEnd);
+    window.addEventListener("blur", handleGlobalDragEnd);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("dragend", handleGlobalDragEnd);
+      window.removeEventListener("drop", handleGlobalDragEnd);
+      window.removeEventListener("blur", handleGlobalDragEnd);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [clearDragState, draggingId, dropInstruction]);
+
   useEffect(() => () => {
     clearAutoExpandTimer();
     stopAutoScroll();
