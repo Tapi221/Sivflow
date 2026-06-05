@@ -53,9 +53,13 @@
 
   .app-layered-directory [role="treeitem"][aria-level="1"] .layered-directory-row-icon {
     display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-left: -2px;
+    margin-right: -2px;
     background-color: currentColor;
-    -webkit-mask: url("data:image/svg+xml,%3Csvg%20viewBox%3D'0%200%2020%2020'%20fill%3D'none'%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%3E%3Cpath%20d%3D'M3.25%206.4C3.25%205.6268%203.8768%205%204.65%205H8.24C8.57%205%208.89%205.117%209.14%205.33L10.18%206.22C10.44%206.44%2010.76%206.56%2011.1%206.56H15.35C16.1232%206.56%2016.75%207.1868%2016.75%207.96V14.15C16.75%2014.9232%2016.1232%2015.55%2015.35%2015.55H4.65C3.8768%2015.55%203.25%2014.9232%203.25%2014.15V6.4Z'%20stroke%3D'black'%20stroke-width%3D'1.45'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%2F%3E%3C%2Fsvg%3E") center / 18px 18px no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg%20viewBox%3D'0%200%2020%2020'%20fill%3D'none'%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%3E%3Cpath%20d%3D'M3.25%206.4C3.25%205.6268%203.8768%205%204.65%205H8.24C8.57%205%208.89%205.117%209.14%205.33L10.18%206.22C10.44%206.44%2010.76%206.56%2011.1%206.56H15.35C16.1232%206.56%2016.75%207.1868%2016.75%207.96V14.15C16.75%2014.9232%2016.1232%2015.55%2015.35%2015.55H4.65C3.8768%2015.55%203.25%2014.9232%203.25%2014.15V6.4Z'%20stroke%3D'black'%20stroke-width%3D'1.45'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%2F%3E%3C%2Fsvg%3E") center / 18px 18px no-repeat;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3.7 7.2C3.7 6.37 4.37 5.7 5.2 5.7H8.45C8.82 5.7 9.18 5.84 9.45 6.09L10.65 7.18H15.2C16.03 7.18 16.7 7.85 16.7 8.68V10.3' stroke='black' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M3.45 10.4C3.45 9.74 3.99 9.2 4.65 9.2H8.3C8.7 9.2 9.08 9.02 9.34 8.72L10.2 7.72C10.46 7.42 10.84 7.25 11.24 7.25H15.85C16.78 7.25 17.48 8.09 17.3 9L16.05 15.25C15.9 16 15.24 16.55 14.48 16.55H5.05C4.17 16.55 3.45 15.83 3.45 14.95V10.4Z' stroke='black' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 20px 20px no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3.7 7.2C3.7 6.37 4.37 5.7 5.2 5.7H8.45C8.82 5.7 9.18 5.84 9.45 6.09L10.65 7.18H15.2C16.03 7.18 16.7 7.85 16.7 8.68V10.3' stroke='black' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M3.45 10.4C3.45 9.74 3.99 9.2 4.65 9.2H8.3C8.7 9.2 9.08 9.02 9.34 8.72L10.2 7.72C10.46 7.42 10.84 7.25 11.24 7.25H15.85C16.78 7.25 17.48 8.09 17.3 9L16.05 15.25C15.9 16 15.24 16.55 14.48 16.55H5.05C4.17 16.55 3.45 15.83 3.45 14.95V10.4Z' stroke='black' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 20px 20px no-repeat;
   }
 
   .app-layered-directory [role="treeitem"][aria-level="1"] .layered-directory-row-icon path {
