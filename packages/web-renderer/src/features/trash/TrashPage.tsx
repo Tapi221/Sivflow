@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import type { Card, Folder } from "@/types";
+import type { Card, CardSet, Document, Folder } from "@/types";
 import { useTrashItems } from "./useTrashItems";
+
+type TrashItemKind = "folder" | "card" | "cardSet" | "document";
 
 type TrashItemRow = {
   id: string;
-  kind: "folder" | "card";
+  kind: TrashItemKind;
   title: string;
   subtitle: string;
 };
@@ -17,6 +19,14 @@ const getFolderTitle = (folder: Folder): string => {
 
 const getCardTitle = (card: Card): string => {
   return card.title || card.questionNumber || "無題のカード";
+};
+
+const getCardSetTitle = (cardSet: CardSet): string => {
+  return cardSet.name || "無題のカードセット";
+};
+
+const getDocumentTitle = (document: Document): string => {
+  return document.title || document.fileName || "無題のドキュメント";
 };
 
 const createFolderRows = (folders: Folder[]): TrashItemRow[] => {
@@ -37,6 +47,31 @@ const createCardRows = (cards: Card[]): TrashItemRow[] => {
   }));
 };
 
+const createCardSetRows = (cardSets: CardSet[]): TrashItemRow[] => {
+  return cardSets.map((cardSet) => ({
+    id: cardSet.id,
+    kind: "cardSet",
+    title: getCardSetTitle(cardSet),
+    subtitle: "カードセット",
+  }));
+};
+
+const createDocumentRows = (documents: Document[]): TrashItemRow[] => {
+  return documents.map((document) => ({
+    id: document.id,
+    kind: "document",
+    title: getDocumentTitle(document),
+    subtitle: "ドキュメント",
+  }));
+};
+
+const toTrashItemIds = (row: TrashItemRow) => ({
+  folderIds: row.kind === "folder" ? [row.id] : [],
+  cardIds: row.kind === "card" ? [row.id] : [],
+  cardSetIds: row.kind === "cardSet" ? [row.id] : [],
+  documentIds: row.kind === "document" ? [row.id] : [],
+});
+
 const TrashPage = () => {
   const { currentUser, loading } = useAuthSession();
   const userId = currentUser?.uid ?? null;
@@ -44,8 +79,13 @@ const TrashPage = () => {
   const [pendingActionId, setPendingActionId] = useState<string | null>(null);
 
   const rows = useMemo(() => {
-    return [...createFolderRows(items.folders), ...createCardRows(items.cards)];
-  }, [items.cards, items.folders]);
+    return [
+      ...createFolderRows(items.folders),
+      ...createCardSetRows(items.cardSets),
+      ...createCardRows(items.cards),
+      ...createDocumentRows(items.documents),
+    ];
+  }, [items.cards, items.cardSets, items.documents, items.folders]);
 
   const isBusy = status === "loading" || pendingActionId !== null;
   const hasItems = rows.length > 0;
@@ -60,10 +100,7 @@ const TrashPage = () => {
     setPendingActionId(actionId);
 
     try {
-      await restore({
-        folderIds: row.kind === "folder" ? [row.id] : [],
-        cardIds: row.kind === "card" ? [row.id] : [],
-      });
+      await restore(toTrashItemIds(row));
     } finally {
       setPendingActionId(null);
     }
@@ -74,10 +111,7 @@ const TrashPage = () => {
     setPendingActionId(actionId);
 
     try {
-      await permanentlyDelete({
-        folderIds: row.kind === "folder" ? [row.id] : [],
-        cardIds: row.kind === "card" ? [row.id] : [],
-      });
+      await permanentlyDelete(toTrashItemIds(row));
     } finally {
       setPendingActionId(null);
     }
@@ -100,7 +134,7 @@ const TrashPage = () => {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Trash</p>
             <h1 className="mt-2 text-2xl font-semibold text-slate-950">ゴミ箱</h1>
-            <p className="mt-2 text-sm text-slate-600">削除済みのフォルダとカードを復元、または完全に削除します。</p>
+            <p className="mt-2 text-sm text-slate-600">削除済みのフォルダ、カードセット、カード、ドキュメントを復元、または完全に削除します。</p>
           </div>
 
           <div className="flex flex-wrap gap-2">
