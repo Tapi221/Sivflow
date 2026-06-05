@@ -16,6 +16,13 @@ export type RightClickPanelDimensions = {
 
 export type RightClickPanelId = string;
 
+type RightClickPanelDismissIgnoredRef = RefObject<HTMLElement | null>;
+
+type RightClickPanelDismissOptions = {
+  closeOnScroll?: boolean;
+  ignoredRefs?: readonly RightClickPanelDismissIgnoredRef[];
+};
+
 type RightClickPanelOpenEventDetail = {
   panelId: RightClickPanelId;
 };
@@ -40,6 +47,8 @@ const RIGHT_CLICK_PANEL_MEASURE_FONT_FAMILY =
   "\"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, BlinkMacSystemFont, \"Yu Gothic UI\", \"Hiragino Sans\", sans-serif";
 
 const RIGHT_CLICK_PANEL_MEASURE_FONT = `400 ${RIGHT_CLICK_PANEL_TEXT_FONT_SIZE}px ${RIGHT_CLICK_PANEL_MEASURE_FONT_FAMILY}`;
+const EMPTY_RIGHT_CLICK_PANEL_DISMISS_REFS: readonly RightClickPanelDismissIgnoredRef[] = [];
+const EMPTY_RIGHT_CLICK_PANEL_DISMISS_OPTIONS: RightClickPanelDismissOptions = {};
 
 let rightClickPanelMeasureCanvas: HTMLCanvasElement | null = null;
 
@@ -116,6 +125,12 @@ export const RIGHT_CLICK_PANEL_STYLE = `
 }
 `;
 
+const isRightClickPanelDismissIgnoredTarget = (eventTarget: EventTarget | null, panelRef: RefObject<HTMLElement | null>, ignoredRefs: readonly RightClickPanelDismissIgnoredRef[]): boolean => {
+  if (!(eventTarget instanceof Node)) return false;
+  if (panelRef.current?.contains(eventTarget)) return true;
+  return ignoredRefs.some((ignoredRef) => ignoredRef.current?.contains(eventTarget));
+};
+
 export const announceRightClickPanelOpen = (panelId: RightClickPanelId) => {
   window.dispatchEvent(
     new CustomEvent<RightClickPanelOpenEventDetail>(RIGHT_CLICK_PANEL_OPEN_EVENT, {
@@ -178,12 +193,16 @@ export const useRightClickPanelDismiss = (
   isOpen: boolean,
   panelRef: RefObject<HTMLElement | null>,
   onClose: () => void,
+  options: RightClickPanelDismissOptions = EMPTY_RIGHT_CLICK_PANEL_DISMISS_OPTIONS,
 ) => {
+  const ignoredRefs = options.ignoredRefs ?? EMPTY_RIGHT_CLICK_PANEL_DISMISS_REFS;
+  const closeOnScroll = options.closeOnScroll ?? true;
+
   useEffect(() => {
     if (!isOpen) return;
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (panelRef.current?.contains(event.target as Node)) return;
+      if (isRightClickPanelDismissIgnoredTarget(event.target, panelRef, ignoredRefs)) return;
       onClose();
     };
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -203,17 +222,21 @@ export const useRightClickPanelDismiss = (
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener(RIGHT_CLICK_PANEL_OPEN_EVENT, handleOtherPanelOpen);
     window.addEventListener("resize", onClose, { once: true });
-    window.addEventListener("scroll", onClose, {
-      capture: true,
-      once: true,
-    });
+    if (closeOnScroll) {
+      window.addEventListener("scroll", onClose, {
+        capture: true,
+        once: true,
+      });
+    }
 
     return () => {
       window.removeEventListener("pointerdown", handlePointerDown, { capture: true });
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener(RIGHT_CLICK_PANEL_OPEN_EVENT, handleOtherPanelOpen);
       window.removeEventListener("resize", onClose);
-      window.removeEventListener("scroll", onClose, { capture: true });
+      if (closeOnScroll) {
+        window.removeEventListener("scroll", onClose, { capture: true });
+      }
     };
-  }, [isOpen, onClose, panelId, panelRef]);
+  }, [closeOnScroll, ignoredRefs, isOpen, onClose, panelId, panelRef]);
 };
