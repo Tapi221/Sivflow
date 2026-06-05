@@ -61,40 +61,59 @@ const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalend
     });
 
     const movePromise = updateGoogleCalendarEvent(accountId, createCalendarEventUpdateInput(event, nextOverride));
-    const toastId = toast.success("予定を移動しました", { duration: EVENT_MOVE_SAVING_TOAST_DURATION_MS });
+    let isUndoRequested = false;
+    let isMoveSaved = false;
+    let toastId: string | number | undefined;
+
+    const handleUndoCalendarEventMove = () => {
+      if (isUndoRequested) return;
+      isUndoRequested = true;
+      setCalendarEventMoveOverrides((overrides) => {
+        const next = new Map(overrides);
+        next.set(overrideKey, rollbackOverride);
+        return next;
+      });
+      void (async () => {
+        try {
+          await movePromise;
+          isMoveSaved = true;
+          await updateGoogleCalendarEvent(accountId, createCalendarEventUpdateInput(event, rollbackOverride));
+          clearMatchingCalendarEventMoveOverride(overrideKey, rollbackOverride);
+          toast.success("予定を元に戻しました", { id: toastId, description: EVENT_MOVE_UNDO_SUCCESS_TOAST_DESCRIPTION, duration: EVENT_MOVE_TOAST_DURATION_MS });
+        } catch (undoError: unknown) {
+          if (!isMoveSaved) return;
+          console.warn("[ScheduleScreen] calendar event move undo failed", undoError);
+          setCalendarEventMoveOverrides((overrides) => {
+            const next = new Map(overrides);
+            next.set(overrideKey, nextOverride);
+            return next;
+          });
+          toast.error("予定を元に戻せませんでした", { id: toastId, description: EVENT_MOVE_UNDO_ERROR_TOAST_DESCRIPTION, duration: EVENT_MOVE_TOAST_DURATION_MS });
+        }
+      })();
+    };
+
+    const undoToastAction = { label: "元に戻す", onClick: handleUndoCalendarEventMove };
+    toastId = toast.success("予定を移動しました", { description: EVENT_MOVE_SUCCESS_TOAST_DESCRIPTION, duration: EVENT_MOVE_SAVING_TOAST_DURATION_MS, action: undoToastAction });
 
     try {
       await movePromise;
+      isMoveSaved = true;
+      if (isUndoRequested) return;
       clearMatchingCalendarEventMoveOverride(overrideKey, nextOverride);
       toast.success("予定を移動しました", {
         id: toastId,
         description: EVENT_MOVE_SUCCESS_TOAST_DESCRIPTION,
         duration: EVENT_MOVE_TOAST_DURATION_MS,
-        action: {
-          label: "元に戻す",
-          onClick: () => {
-            setCalendarEventMoveOverrides((overrides) => {
-              const next = new Map(overrides);
-              next.set(overrideKey, rollbackOverride);
-              return next;
-            });
-            void updateGoogleCalendarEvent(accountId, createCalendarEventUpdateInput(event, rollbackOverride)).then(() => {
-              clearMatchingCalendarEventMoveOverride(overrideKey, rollbackOverride);
-              toast.success("予定を元に戻しました", { description: EVENT_MOVE_UNDO_SUCCESS_TOAST_DESCRIPTION, duration: EVENT_MOVE_TOAST_DURATION_MS });
-            }).catch((undoError: unknown) => {
-              console.warn("[ScheduleScreen] calendar event move undo failed", undoError);
-              setCalendarEventMoveOverrides((overrides) => {
-                const next = new Map(overrides);
-                next.set(overrideKey, nextOverride);
-                return next;
-              });
-              toast.error("予定を元に戻せませんでした", { description: EVENT_MOVE_UNDO_ERROR_TOAST_DESCRIPTION, duration: EVENT_MOVE_TOAST_DURATION_MS });
-            });
-          },
-        },
+        action: undoToastAction,
       });
     } catch (error) {
       console.warn("[ScheduleScreen] calendar event move failed", error);
+      if (isUndoRequested) {
+        clearMatchingCalendarEventMoveOverride(overrideKey, rollbackOverride);
+        toast.error("予定の移動に失敗しました", { id: toastId, description: EVENT_MOVE_ERROR_TOAST_DESCRIPTION, duration: EVENT_MOVE_TOAST_DURATION_MS });
+        return;
+      }
       toast.error("予定の移動に失敗しました", { id: toastId, description: EVENT_MOVE_ERROR_TOAST_DESCRIPTION, duration: EVENT_MOVE_TOAST_DURATION_MS });
       setCalendarEventMoveOverrides((overrides) => {
         const next = new Map(overrides);
