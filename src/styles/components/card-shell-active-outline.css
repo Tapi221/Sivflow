@@ -1,9 +1,0 @@
-@layer components {
-  .card-shell,
-  .card-active-chrome,
-  .card-pager-item {
-    --card-selected-outline-accent: transparent;
-    --card-selected-surface: #ffffff;
-    --card-focus-ring-shadow: 0 0 0 1px rgba(84, 95, 105, 0.18);
-  }
-}
