@@ -307,7 +307,6 @@
     outline: none;
     border-color: var(--card-border-selected, rgba(15, 23, 42, 0.2));
     box-shadow:
-      var(--card-focus-ring-shadow, 0 0 0 2px rgba(122, 166, 161, 0.25)),
       var(
         --card-shadow-selected,
         0 0 3px rgba(15, 23, 42, 0.05),
@@ -375,10 +374,7 @@
 
   .card-active-chrome:focus-within,
   .card-pager-item:focus-within {
-    box-shadow: var(
-      --card-focus-ring-shadow,
-      0 0 0 2px rgba(122, 166, 161, 0.25)
-    );
+    box-shadow: none;
     opacity: 1;
   }
 
