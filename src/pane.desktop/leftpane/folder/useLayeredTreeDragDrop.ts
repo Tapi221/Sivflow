@@ -102,6 +102,24 @@ export const useLayeredTreeDragDrop = <TItem extends LayeredTreeItem>({ rootItem
     return { sourceId, targetId, position, parentId };
   }, [getChildItems, getDraggingItemId, getParentId, itemMap]);
 
+  const getResolvedDropInstruction = useCallback((event: ReactDragEvent<HTMLElement>): LayeredTreeDropInstruction | null => {
+    const target = resolveLayeredTreeEventDropTarget(event, itemMap);
+    if (!target) return null;
+
+    const sourceId = getDraggingItemId();
+    const targetId = target.id;
+    if (!sourceId || sourceId === targetId) return null;
+
+    const targetItem = itemMap.get(targetId);
+    if (!itemMap.has(sourceId) || !targetItem) return null;
+
+    const position = getLayeredTreeDropPositionFromTarget(event, target);
+    const parentId = getLayeredTreeDropParentId(targetItem, targetId, position, getParentId);
+    if (isLayeredTreeItemAncestorOf(sourceId, parentId, getChildItems)) return null;
+
+    return { sourceId, targetId, position, parentId };
+  }, [getChildItems, getDraggingItemId, getParentId, itemMap]);
+
   const getValidAppendDropInstruction = useCallback((): LayeredTreeDropInstruction | null => {
     const sourceId = getDraggingItemId();
     if (!sourceId) return null;
