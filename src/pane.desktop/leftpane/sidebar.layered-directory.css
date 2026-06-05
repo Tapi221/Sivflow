@@ -2,6 +2,9 @@
    Keep the Craft-like rail typography, row rhythm, and muted navigation tone here. */
 
 .app-layered-directory {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
   width: 232px !important;
   min-width: 232px !important;
   padding: 0 !important;
@@ -11,8 +14,27 @@
   font-size: 12px !important;
   font-weight: 500 !important;
   letter-spacing: -0.012em !important;
+  pointer-events: auto !important;
+  -webkit-app-region: no-drag;
   --app-layered-directory-content-inset: 16px;
   --app-layered-directory-muted-text: #85827e;
+}
+
+.app-layered-directory *,
+.app-layered-directory button,
+.app-layered-directory [role="button"],
+.app-layered-directory [role="treeitem"] {
+  -webkit-app-region: no-drag;
+}
+
+.app-layered-directory button,
+.app-layered-directory [role="button"],
+.app-layered-directory [role="treeitem"] {
+  pointer-events: auto;
+}
+
+.app-layered-directory svg {
+  pointer-events: none;
 }
 
 .app-layered-directory__primary-nav {
