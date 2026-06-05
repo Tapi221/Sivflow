@@ -10,8 +10,10 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 type WeekdayChipLayoutStubOptions = {
   chipHeight: number;
   chipWidth: number;
+  titleHeight?: number;
   titleText: string;
   titleTextWidth: number;
+  titleWithTimeHeight?: number;
   timeTextWidth: number;
 };
 
@@ -58,8 +60,13 @@ const isWeekdayChipElement = (element: HTMLElement): boolean => element.classNam
 const isWeekdayMeasurementElement = (element: HTMLElement): boolean => element.className.includes("invisible") && element.className.includes("absolute") && element.className.includes("rounded-md");
 
 const createLayoutStyles = (element: Element) => ({
-  ...window.getComputedStyle(element),
+  fontFamily: "sans-serif",
+  fontSize: element.className.includes("text-[11px]") ? "11px" : "12px",
+  fontStyle: "normal",
+  fontVariant: "normal",
+  fontWeight: element.className.includes("font-semibold") ? "600" : "500",
   gap: element.className.includes("gap-[0.5px]") ? "0.5px" : "0px",
+  lineHeight: element.className.includes("leading-[16px]") ? "16px" : element.className.includes("leading-[17px]") ? "17px" : "normal",
   paddingBottom: element.className.includes("py-[2px]") ? "2px" : element.className.includes("py-[1px]") ? "1px" : "0px",
   paddingLeft: element.className.includes("pl-1") ? "4px" : "0px",
   paddingRight: element.className.includes("pr-[1px]") ? "1px" : "0px",
@@ -76,6 +83,31 @@ const findClosestWeekdayChipElement = (element: Element | null): HTMLElement | n
   }
 
   return null;
+};
+
+const getWeekdayRenderedChipElement = (container: HTMLElement): HTMLElement => {
+  const chipElement = container.querySelector('[data-calendar-event-chip="weekday"]');
+
+  if (!(chipElement instanceof HTMLElement)) throw new Error("weekday event chip was not rendered");
+
+  return chipElement;
+};
+
+const getWeekdayVisibleContentText = (container: HTMLElement): string => {
+  const chipElement = getWeekdayRenderedChipElement(container);
+
+  return Array.from(chipElement.children).filter((element) => !element.className.includes("invisible")).map((element) => element.textContent ?? "").join("");
+};
+
+const getWeekdayVisibleLastLineTimeElement = (container: HTMLElement): HTMLElement | null => {
+  const chipElement = getWeekdayRenderedChipElement(container);
+  const titleElement = Array.from(chipElement.children).find((element): element is HTMLElement => element instanceof HTMLElement && element.tagName.toLowerCase() === "span" && !element.className.includes("invisible"));
+
+  if (!(titleElement instanceof HTMLElement)) return null;
+
+  const timeElement = Array.from(titleElement.querySelectorAll("span")).find((element) => element.className.includes("tabular-nums") && element.textContent?.includes("~"));
+
+  return timeElement instanceof HTMLElement ? timeElement : null;
 };
 
 const getWeekdayChipElement = (title = TIMED_EVENT.title): HTMLElement => {
@@ -134,7 +166,7 @@ const getWeekdayInlineRowElement = (title: string): HTMLElement | null => {
   return inlineRowElement instanceof HTMLElement ? inlineRowElement : null;
 };
 
-const stubWeekdayChipLayout = ({ chipHeight, chipWidth, titleText, titleTextWidth, timeTextWidth }: WeekdayChipLayoutStubOptions) => {
+const stubWeekdayChipLayout = ({ chipHeight, chipWidth, titleHeight = 17, titleText, titleTextWidth, titleWithTimeHeight = titleHeight, timeTextWidth }: WeekdayChipLayoutStubOptions) => {
   vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(function (this: HTMLElement) {
     return isWeekdayChipElement(this) || isWeekdayMeasurementElement(this) ? chipHeight : 0;
   });
@@ -142,7 +174,8 @@ const stubWeekdayChipLayout = ({ chipHeight, chipWidth, titleText, titleTextWidt
     return isWeekdayChipElement(this) || isWeekdayMeasurementElement(this) ? chipWidth : 0;
   });
   vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(function (this: HTMLElement) {
-    if (this.className.includes("text-[12px]")) return 17;
+    if (this.className.includes("text-[12px]") && this.textContent?.includes("~")) return titleWithTimeHeight;
+    if (this.className.includes("text-[12px]")) return titleHeight;
     if (this.className.includes("text-[11px]")) return 16;
 
     return 0;
@@ -342,5 +375,35 @@ describe("weekday event chip inline time layout", () => {
     await waitFor(() => expect(getWeekdayInlineRowElement(SHORT_TITLE_EVENT.title)).not.toBeNull());
     expect(getWeekdayChipElement(SHORT_TITLE_EVENT.title).className).toContain("py-[1px]");
     expect(getWeekdayChipElement(SHORT_TITLE_EVENT.title).textContent).toContain("~");
+  });
+});
+
+describe("weekday event chip last-line time layout", () => {
+  it("タイトル下にも横並びにも時刻を置けない時、タイトル最終行に収まるなら時刻を表示する", () => {
+    vi.spyOn(window, "getComputedStyle").mockImplementation((element) => createLayoutStyles(element));
+    stubWeekdayChipLayout({ chipHeight: 21, chipWidth: 70, titleText: TIMED_EVENT.title, titleTextWidth: 72, titleWithTimeHeight: 17, timeTextWidth: 42 });
+
+    const { container } = render(<CalendarEventChipWeekday event={TIMED_EVENT} />);
+    const chipElement = getWeekdayRenderedChipElement(container);
+    const lastLineTimeElement = getWeekdayVisibleLastLineTimeElement(container);
+
+    expect(Array.from(chipElement.children).some((element) => element.className.includes("items-baseline"))).toBe(false);
+    expect(getWeekdayVisibleContentText(container)).toContain(TIMED_EVENT.title);
+    expect(getWeekdayVisibleContentText(container)).toContain("~");
+    expect(lastLineTimeElement).not.toBeNull();
+    expect(lastLineTimeElement?.className).toContain("ml-1");
+    expect(lastLineTimeElement?.className).toContain("inline-block");
+    expect(lastLineTimeElement?.className).toContain("whitespace-nowrap");
+  });
+
+  it("タイトル最終行にも時刻が収まらない場合は時刻を表示しない", () => {
+    vi.spyOn(window, "getComputedStyle").mockImplementation((element) => createLayoutStyles(element));
+    stubWeekdayChipLayout({ chipHeight: 21, chipWidth: 70, titleText: TIMED_EVENT.title, titleTextWidth: 72, titleWithTimeHeight: 34, timeTextWidth: 42 });
+
+    const { container } = render(<CalendarEventChipWeekday event={TIMED_EVENT} />);
+
+    expect(getWeekdayVisibleContentText(container)).toContain(TIMED_EVENT.title);
+    expect(getWeekdayVisibleContentText(container)).not.toContain("~");
+    expect(getWeekdayVisibleLastLineTimeElement(container)).toBeNull();
   });
 });
