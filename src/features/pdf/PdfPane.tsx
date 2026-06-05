@@ -92,10 +92,7 @@ type PdfSourceDescriptor = {
   persistedUrl: string | null;
 };
 
-type LoadedPdfSource = {
-  url: string;
-  revokeOnCleanup: boolean;
-};
+type LoadedPdfSource = { kind: "data"; data: Uint8Array } | { kind: "url"; url: string };
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -210,28 +207,30 @@ const createTextSpanStyle = (viewportTransform: number[], item: PdfTextItem): CS
   };
 };
 
-const loadLocalPdfObjectUrl = async (source: PdfSourceDescriptor): Promise<string | null> => {
+const loadLocalPdfData = async (source: PdfSourceDescriptor): Promise<Uint8Array | null> => {
   const blob = await getDocumentBlob(source.localFileId, { userId: source.userId });
-  return blob ? URL.createObjectURL(blob) : null;
+  if (!blob) return null;
+  return new Uint8Array(await blob.arrayBuffer());
 };
 
 const loadPdfSource = async (source: PdfSourceDescriptor): Promise<LoadedPdfSource> => {
   let localError: unknown = null;
 
   try {
-    const localObjectUrl = await loadLocalPdfObjectUrl(source);
-    if (localObjectUrl) return { url: localObjectUrl, revokeOnCleanup: true };
+    const data = await loadLocalPdfData(source);
+    if (data) return { kind: "data", data };
   } catch (error) {
     localError = error;
   }
 
-  if (source.persistedUrl) return { url: source.persistedUrl, revokeOnCleanup: false };
+  if (source.persistedUrl) return { kind: "url", url: source.persistedUrl };
   if (localError instanceof Error) throw localError;
   throw new Error("表示できるPDFソースがありません。");
 };
 
-const loadPdfDocument = async (sourceUrl: string, viewerOptions: PdfPaneProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
-  return pdfjsLib.getDocument({ url: sourceUrl, enableXfa: viewerOptions?.enableXfa, useSystemFonts: viewerOptions?.useSystemFonts ?? true, cMapUrl: viewerOptions?.cMapUrl, standardFontDataUrl: viewerOptions?.standardFontDataUrl }).promise;
+const loadPdfDocument = async (source: LoadedPdfSource, viewerOptions: PdfPaneProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
+  const options = { enableXfa: viewerOptions?.enableXfa, useSystemFonts: viewerOptions?.useSystemFonts ?? true, cMapUrl: viewerOptions?.cMapUrl, standardFontDataUrl: viewerOptions?.standardFontDataUrl };
+  return source.kind === "data" ? pdfjsLib.getDocument({ ...options, data: source.data }).promise : pdfjsLib.getDocument({ ...options, url: source.url }).promise;
 };
 
 const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasPageProps) => {
@@ -258,7 +257,7 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
       canvas.style.height = `${viewport.height}px`;
       context.setTransform(1, 0, 0, 1, 0, 0);
       context.clearRect(0, 0, canvas.width, canvas.height);
-      renderTask = page.render({ canvasContext: context, viewport, transform: devicePixelRatio === 1 ? undefined : [devicePixelRatio, 0, 0, devicePixelRatio, 0, 0], background: PDF_CANVAS_BACKGROUND });
+      renderTask = page.render({ canvas, canvasContext: context, viewport, transform: devicePixelRatio === 1 ? undefined : [devicePixelRatio, 0, 0, devicePixelRatio, 0, 0], background: PDF_CANVAS_BACKGROUND });
       const done = renderTask.promise.then(() => undefined).catch((error: unknown) => {
         if (!isPdfRenderCancellationError(error)) throw error;
       }).finally(() => {
@@ -365,7 +364,6 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
 
   useEffect(() => {
     let isCancelled = false;
-    let objectUrl: string | null = null;
     let loadedPdfDocument: PdfDocumentProxy | null = null;
 
     setPdfDocument(null);
@@ -374,12 +372,8 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
 
     const load = async () => {
       const nextSource = await loadPdfSource(sourceDescriptor);
-      if (isCancelled) {
-        if (nextSource.revokeOnCleanup) URL.revokeObjectURL(nextSource.url);
-        return;
-      }
-      if (nextSource.revokeOnCleanup) objectUrl = nextSource.url;
-      const nextPdfDocument = await loadPdfDocument(nextSource.url, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl });
+      if (isCancelled) return;
+      const nextPdfDocument = await loadPdfDocument(nextSource, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl });
       if (isCancelled) {
         void nextPdfDocument.destroy();
         return;
@@ -399,7 +393,6 @@ const PdfPane = ({ doc, className, viewerOptions, onDocumentUpdate }: PdfPanePro
     return () => {
       isCancelled = true;
       if (loadedPdfDocument) void loadedPdfDocument.destroy();
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [sourceDescriptor, viewerCMapUrl, viewerEnableXfa, viewerStandardFontDataUrl, viewerUseSystemFonts]);
 
