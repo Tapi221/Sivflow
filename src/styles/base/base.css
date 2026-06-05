@@ -88,13 +88,15 @@
 
   [data-pdf-page-number] .text-transparent::sel\65 ction,
   [data-pdf-page-number] .text-transparent *::sel\65 ction {
-    background-color: var(--app-highlight-bg) !important;
+    background-color: rgba(213, 238, 253, 0.42) !important;
+    background-color: color-mix(in srgb, var(--app-highlight-bg) 42%, transparent) !important;
     color: transparent !important;
   }
 
   [data-pdf-page-number] .text-transparent::-moz-sel\65 ction,
   [data-pdf-page-number] .text-transparent *::-moz-sel\65 ction {
-    background-color: var(--app-highlight-bg) !important;
+    background-color: rgba(213, 238, 253, 0.42) !important;
+    background-color: color-mix(in srgb, var(--app-highlight-bg) 42%, transparent) !important;
     color: transparent !important;
   }
 
