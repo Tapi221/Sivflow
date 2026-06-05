@@ -1,8 +1,8 @@
 import { type ReactNode, useCallback } from "react";
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
-import { CardCarousel3D } from "@/features/review/presentation/web/ui/components/CardCarousel3D";
 import { Flashcard, type FlashcardCardLike } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
+import { VerticalCardPager } from "@/features/review/VerticalCardPager";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
@@ -27,6 +27,10 @@ interface CardSetViewMobileEmptyStateProps {
   cardSetName: string | null;
   onCreateCard: () => void | Promise<void>;
 }
+
+const MOBILE_CARD_PAGER_PADDING_INLINE_PX = 0;
+const MOBILE_CARD_PAGER_PADDING_BLOCK = "22px";
+const MOBILE_CARD_PAGER_NATURAL_INDEX_COMMIT_DELAY_MS = 80;
 
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
@@ -92,14 +96,14 @@ export const CardSetViewMobile = ({
     [],
   );
 
-  const renderCenter = useCallback(
-    (card: Card, idx: number) => {
+  const renderCard = useCallback(
+    (card: Card, idx: number, isActive: boolean) => {
       const flashcardCard = toFlashcardCardLike(card);
 
       return wrapCard(
         <Flashcard
           card={flashcardCard}
-          isFlipped={isFlipped}
+          isFlipped={isActive ? isFlipped : false}
           displayMode={currentDisplayMode}
           showInkLayer={currentDisplayMode === "fixed"}
           inkEditingEnabled={currentDisplayMode === "fixed"}
@@ -110,12 +114,6 @@ export const CardSetViewMobile = ({
           onToggleBookmark={() => {
             void onToggleBookmark(card);
           }}
-          onPrev={() => idx > 0 && onIndexChange(idx - 1)}
-          onNext={() =>
-            idx < cardsForPager.length - 1 && onIndexChange(idx + 1)
-          }
-          hasNext={idx < cardsForPager.length - 1}
-          hasPrev={idx > 0}
           currentIndex={idx}
           totalCards={cardsForPager.length}
         />,
@@ -126,28 +124,10 @@ export const CardSetViewMobile = ({
       currentDisplayMode,
       isFlipped,
       onFlip,
-      onIndexChange,
       onToggleBookmark,
       onToggleUncertainty,
       wrapCard,
     ],
-  );
-
-  const renderPreview = useCallback(
-    (card: Card) => {
-      const flashcardCard = toFlashcardCardLike(card);
-
-      return wrapCard(
-        <Flashcard
-          card={flashcardCard}
-          isFlipped={false}
-          previewMode={true}
-          displayMode={currentDisplayMode}
-          showInkLayer={currentDisplayMode === "fixed"}
-        />,
-      );
-    },
-    [currentDisplayMode, wrapCard],
   );
 
   if (isLoading) {
@@ -159,12 +139,17 @@ export const CardSetViewMobile = ({
   }
 
   return (
-    <CardCarousel3D
+    <VerticalCardPager
       cards={cardsForPager}
-      syncIndex={safeCurrentIndex}
-      onIndexChange={onIndexChange}
-      renderCenter={renderCenter}
-      renderPreview={renderPreview}
+      activeIndex={safeCurrentIndex}
+      onActiveIndexChange={onIndexChange}
+      onFlip={onFlip}
+      paddingInlinePx={MOBILE_CARD_PAGER_PADDING_INLINE_PX}
+      paddingBlock={MOBILE_CARD_PAGER_PADDING_BLOCK}
+      naturalIndexCommitDelayMs={MOBILE_CARD_PAGER_NATURAL_INDEX_COMMIT_DELAY_MS}
+      getCardWidthSpec={() => ({ mode: "stretch" })}
+      getKey={(card) => card.id}
+      renderCard={renderCard}
     />
   );
 };
