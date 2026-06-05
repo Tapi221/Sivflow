@@ -22,6 +22,7 @@ export type ProjectMap = {
   updatedAt?: Date;
   createdAt?: Date;
   isDeleted?: boolean;
+  deletedAt?: Date | null;
   [key: string]: unknown;
 };
 
@@ -51,6 +52,7 @@ export type LocalDBTableMap = {
   images: AssetRecord | UploadedImage;
   userSettings: UserSettings;
   userStats: UserStats;
+  projectMaps: ProjectMap;
 };
 
 export type SyncableEntityTable = keyof LocalDBTableMap;
@@ -66,16 +68,10 @@ export interface QueryableCollection<T extends object, TKey = string> {
   first(): Promise<T | undefined>;
   count(): Promise<number>;
   delete(): Promise<number>;
-  modify(
-    changes:
-      | Partial<T>
-      | ((item: T, ctx?: { value: T; primKey: TKey }) => boolean | void),
-  ): Promise<number>;
+  modify(changes: Partial<T> | ((item: T, ctx?: { value: T; primKey: TKey }) => boolean | void)): Promise<number>;
   sortBy(field: keyof T | string): Promise<T[]>;
   primaryKeys(): Promise<TKey[]>;
-  each(
-    callback: (item: T, cursor?: { primaryKey: TKey }) => void | Promise<void>,
-  ): Promise<void>;
+  each(callback: (item: T, cursor?: { primaryKey: TKey }) => void | Promise<void>): Promise<void>;
 }
 
 export interface QueryableWhereClause<T extends object, TKey = string> {
@@ -84,12 +80,7 @@ export interface QueryableWhereClause<T extends object, TKey = string> {
   aboveOrEqual(value: unknown): QueryableCollection<T, TKey>;
   below(value: unknown): QueryableCollection<T, TKey>;
   belowOrEqual(value: unknown): QueryableCollection<T, TKey>;
-  between(
-    lowerValue: unknown,
-    upperValue: unknown,
-    includeLower?: boolean,
-    includeUpper?: boolean,
-  ): QueryableCollection<T, TKey>;
+  between(lowerValue: unknown, upperValue: unknown, includeLower?: boolean, includeUpper?: boolean): QueryableCollection<T, TKey>;
   startsWith(prefix: string): QueryableCollection<T, TKey>;
   anyOf(values: readonly unknown[]): QueryableCollection<T, TKey>;
 }
@@ -105,13 +96,7 @@ export interface QueryableTable<T extends object, TKey = string> {
   get(key: unknown): Promise<T | undefined>;
   put(record: T): Promise<unknown>;
   add(record: T): Promise<unknown>;
-  update(
-    key: unknown,
-    changes:
-      | Partial<T>
-      | Record<string, unknown>
-      | ((item: T, ctx?: { value: T; primKey: TKey }) => boolean | void),
-  ): Promise<number>;
+  update(key: unknown, changes: Partial<T> | Record<string, unknown> | ((item: T, ctx?: { value: T; primKey: TKey }) => boolean | void)): Promise<number>;
   delete(key: unknown): Promise<void>;
   clear(): Promise<void>;
   toArray(): Promise<T[]>;
@@ -129,23 +114,10 @@ export interface LocalDBSyncApi {
   folders: QueryableTable<Folder, string>;
   notes: QueryableTable<Note, string>;
 
-  getItem<TTable extends SyncableEntityTable>(
-    table: TTable,
-    id: string,
-  ): Promise<LocalDBTableMap[TTable] | undefined>;
-  getAllItems<TTable extends SyncableEntityTable>(
-    table: TTable,
-  ): Promise<Array<LocalDBTableMap[TTable]>>;
-  getDirtyItems<TTable extends SyncableEntityTable>(
-    table: TTable,
-    userId: string,
-    lastSyncTime: Date,
-  ): Promise<Array<LocalDBTableMap[TTable]>>;
-  upsert<TTable extends SyncableEntityTable>(
-    tableName: TTable,
-    data: LocalDBTableMap[TTable],
-    skipSync?: boolean,
-  ): Promise<void>;
+  getItem<TTable extends SyncableEntityTable>(table: TTable, id: string): Promise<LocalDBTableMap[TTable] | undefined>;
+  getAllItems<TTable extends SyncableEntityTable>(table: TTable): Promise<Array<LocalDBTableMap[TTable]>>;
+  getDirtyItems<TTable extends SyncableEntityTable>(table: TTable, userId: string, lastSyncTime: Date): Promise<Array<LocalDBTableMap[TTable]>>;
+  upsert<TTable extends SyncableEntityTable>(tableName: TTable, data: LocalDBTableMap[TTable], skipSync?: boolean): Promise<void>;
   queueUpsertSync<TEntity extends UpsertEntity>(args: {
     entity: TEntity;
     operationType: "create" | "update";
