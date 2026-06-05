@@ -1,5 +1,6 @@
 import { useCallback, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useOutletContext } from "react-router-dom";
+import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import { areExplorerBreadcrumbContextsEqual, EMPTY_EXPLORER_BREADCRUMB_CONTEXT, type BreadcrumbCrumb, type ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
@@ -37,12 +38,19 @@ type SidebarInteractionRegionProps = {
   children: ReactNode;
 };
 
+type CollapsedSidebarToggleProps = {
+  isVisible: boolean;
+  onToggleLeftPanel: () => void;
+};
+
 type SettingsDialogHostProps = {
   children: ReactNode;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
+const COLLAPSED_SIDEBAR_TOGGLE_CLASS_NAME = "pointer-events-auto absolute left-3 top-3 z-[90] flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(0,0,0,0.05)] bg-[rgba(255,255,255,0.82)] p-0 text-[#8c8c8c] shadow-[0_1px_2px_rgba(15,23,42,0.08)] outline-none backdrop-blur-xl transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
+const COLLAPSED_SIDEBAR_TOGGLE_ICON_CLASS_NAME = "h-5 w-5 shrink-0 [transform:scaleX(-1)]";
 const FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME = "absolute right-4 top-3 z-30 flex h-8 w-[220px] shrink-0 items-center gap-1.5 rounded-[9px] border border-[rgba(0,0,0,0.04)] bg-[#efeeee]/95 px-2.5 text-left text-[12px] font-medium leading-none tracking-[-0.012em] text-[#85827e] shadow-none outline-none ring-0 backdrop-blur-xl transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.04)] hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.99] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
 const FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-5 min-w-[31px] items-center justify-center rounded-[5px] border border-[rgba(0,0,0,0.04)] bg-[#eeeeee] px-1.5 text-[10px] font-semibold leading-none tracking-[-0.02em] text-[#85827e]";
 const WORKSPACE_ACTION_TOOLBAR_CLASS_NAME = "absolute z-30";
@@ -97,6 +105,16 @@ const SidebarInteractionRegion = ({ children }: SidebarInteractionRegionProps) =
     <div className="pointer-events-auto relative z-[80] flex h-full min-h-0 shrink-0" style={SIDEBAR_INTERACTION_REGION_STYLE}>
       {children}
     </div>
+  );
+};
+
+const CollapsedSidebarToggle = ({ isVisible, onToggleLeftPanel }: CollapsedSidebarToggleProps) => {
+  if (!isVisible) return null;
+
+  return (
+    <button type="button" className={COLLAPSED_SIDEBAR_TOGGLE_CLASS_NAME} onClick={onToggleLeftPanel} aria-label="サイドバーを開く" title="サイドバーを開く">
+      <SidebarOpenIcon className={COLLAPSED_SIDEBAR_TOGGLE_ICON_CLASS_NAME} />
+    </button>
   );
 };
 
@@ -160,6 +178,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
 
   return (
     <div className="relative isolate flex h-full min-h-0 w-full overflow-hidden bg-transparent">
+      <CollapsedSidebarToggle isVisible={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />
       {isLeftPanelCollapsed ? null : (
         <SidebarInteractionRegion>
           <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />
@@ -196,6 +215,7 @@ const WorkspaceScreen = () => {
   return (
     <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
       <div className="relative h-full min-h-0 w-full overflow-hidden">
+        <CollapsedSidebarToggle isVisible={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />
         <CalendarScheduleScreen isLeftPanelCollapsed={isLeftPanelCollapsed} />
       </div>
     </SettingsDialogHost>
