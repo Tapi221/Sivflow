@@ -116,22 +116,6 @@ export const CardSurfaceLayout = ({
       >
         {answerNode}
       </div>
-
-      {isSplitLayout ? (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-y-0 left-1/2 z-30 -translate-x-1/2 bg-white"
-          style={{ width: `${SURFACE_DIVIDER_COVER_SIZE_PX}px` }}
-        >
-          <div
-            className="absolute inset-y-0 left-1/2 -translate-x-1/2"
-            style={{
-              width: `${SURFACE_DIVIDER_LINE_SIZE_PX}px`,
-              background: "var(--card-border-default, rgba(15, 23, 42, 0.08))",
-            }}
-          />
-        </div>
-      ) : null}
     </div>
   );
 };
