@@ -39,7 +39,7 @@ type LocalDbGlobal = typeof globalThis & {
 type SyncDirection = "upload" | "download";
 type CrudPayload = Record<string, unknown>;
 
-const syncableTables = ["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "userSettings", "images"] as const;
+const syncableTables = ["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "userSettings", "images", "projectMaps"] as const;
 
 type SyncableTableName = (typeof syncableTables)[number];
 
@@ -53,6 +53,7 @@ const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   [CURRENT_TAG_STORE]: "tag",
   userSettings: "userSetting",
   images: "asset",
+  projectMaps: "projectMap",
 };
 
 const getLocalDbGlobal = (): LocalDbGlobal => globalThis as LocalDbGlobal;
