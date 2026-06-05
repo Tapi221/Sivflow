@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { type CSSProperties, type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, addHours, format, startOfDay } from "date-fns";
 import type { GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
 import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -12,6 +12,8 @@ type MobileCalendarEventComposerProps = { isOpen: boolean; selectedDate: Date; a
 const MOBILE_EVENT_COMPOSER_DEFAULT_START_HOUR = 9;
 const MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS = 1;
 const MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR = "#34c759";
+const MOBILE_EVENT_COMPOSER_TOP_GAP = 34;
+const MOBILE_EVENT_COMPOSER_DISMISS_DRAG_DISTANCE = 96;
 
 const isSameLocalDate = (left: Date, right: Date): boolean => left.getFullYear() === right.getFullYear() && left.getMonth() === right.getMonth() && left.getDate() === right.getDate();
 
@@ -111,13 +113,18 @@ const createInitialEventFormState = (selectedDate: Date, calendarOptions: Mobile
 
 const getErrorMessage = (error: unknown): string => error instanceof Error ? error.message : "予定の追加に失敗しました";
 
+const isInteractiveComposerSwipeTarget = (target: EventTarget | null): boolean => target instanceof HTMLElement && Boolean(target.closest("button,input,select,textarea,a"));
+
 const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, projectCalendarLinks, onClose, onAddCalendar, onCreateEvent }: MobileCalendarEventComposerProps) => {
   const calendarOptions = useMemo(() => buildMobileCalendarOptions(accounts, projectCalendarLinks), [accounts, projectCalendarLinks]);
   const [form, setForm] = useState<MobileCalendarEventFormState>(() => createInitialEventFormState(selectedDate, calendarOptions));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
+  const dragStartYRef = useRef<number | null>(null);
   const selectedCalendarOption = useMemo(() => calendarOptions.find((option) => option.key === form.calendarKey) ?? null, [calendarOptions, form.calendarKey]);
   const isSubmitDisabled = isSubmitting || !form.title.trim() || !selectedCalendarOption;
+  const sheetStyle = useMemo<CSSProperties>(() => ({ transform: `translateY(${dragOffset}px)`, transition: dragStartYRef.current === null ? "transform 180ms ease-out" : "none" }), [dragOffset]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -125,6 +132,8 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, projectCa
     setForm(createInitialEventFormState(selectedDate, calendarOptions));
     setIsSubmitting(false);
     setError(null);
+    setDragOffset(0);
+    dragStartYRef.current = null;
   }, [calendarOptions, isOpen, selectedDate]);
 
   useEffect(() => {
@@ -185,12 +194,37 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, projectCa
       });
   }, [form, isSubmitDisabled, onClose, onCreateEvent, selectedCalendarOption]);
 
+  const handleSheetPointerDown = useCallback((event: ReactPointerEvent<HTMLElement>) => {
+    if (isSubmitting || isInteractiveComposerSwipeTarget(event.target)) return;
+
+    dragStartYRef.current = event.clientY;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }, [isSubmitting]);
+
+  const handleSheetPointerMove = useCallback((event: ReactPointerEvent<HTMLElement>) => {
+    if (dragStartYRef.current === null) return;
+
+    setDragOffset(Math.max(0, event.clientY - dragStartYRef.current));
+  }, []);
+
+  const handleSheetPointerEnd = useCallback(() => {
+    if (dragStartYRef.current === null) return;
+
+    dragStartYRef.current = null;
+    if (dragOffset >= MOBILE_EVENT_COMPOSER_DISMISS_DRAG_DISTANCE) {
+      handleClose();
+      return;
+    }
+
+    setDragOffset(0);
+  }, [dragOffset, handleClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/25" role="presentation">
-      <section role="dialog" aria-modal="true" aria-labelledby="mobile-calendar-event-composer-title" className="flex h-[min(92vh,760px)] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[26px] bg-[#f2f2f7] shadow-[0_-12px_40px_rgba(0,0,0,0.20)]">
-        <header className="flex h-[58px] shrink-0 items-center justify-between border-b border-[#d1d1d6] bg-white/80 px-4 backdrop-blur">
+    <div className="fixed inset-x-0 bottom-0 z-[90] flex justify-center bg-black/25" role="presentation" style={{ top: MOBILE_EVENT_COMPOSER_TOP_GAP }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="mobile-calendar-event-composer-title" className="flex h-full w-full max-w-[720px] flex-col overflow-hidden rounded-t-[26px] bg-[#f2f2f7] shadow-[0_-12px_40px_rgba(0,0,0,0.20)]" style={sheetStyle}>
+        <header className="flex h-[58px] shrink-0 touch-none items-center justify-between border-b border-[#d1d1d6] bg-white/80 px-4 backdrop-blur" onPointerDown={handleSheetPointerDown} onPointerMove={handleSheetPointerMove} onPointerUp={handleSheetPointerEnd} onPointerCancel={handleSheetPointerEnd}>
           <button type="button" className="text-[17px] font-medium tracking-[-0.03em] text-[#ff3b30] disabled:text-[#c7c7cc]" onClick={handleClose} disabled={isSubmitting}>キャンセル</button>
           <h2 id="mobile-calendar-event-composer-title" className="text-[17px] font-bold tracking-[-0.03em] text-[#111111]">新規イベント</h2>
           <button type="button" className="text-[17px] font-semibold tracking-[-0.03em] text-[#ff3b30] disabled:text-[#c7c7cc]" onClick={handleSubmit} disabled={isSubmitDisabled}>{isSubmitting ? "追加中" : "追加"}</button>
