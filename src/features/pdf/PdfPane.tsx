@@ -54,6 +54,7 @@ const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
+const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 767;
 
 const clampPdfScale = (scale: number): number => {
   if (!Number.isFinite(scale)) return DEFAULT_PDF_SCALE;
@@ -79,8 +80,12 @@ const getPdfViewerPageCount = (pdfViewer: PdfViewerInstance): number => {
   return Number.isFinite(pageCount) ? pageCount : 0;
 };
 
-const getPdfViewerStateScaleValue = (viewerState: PdfViewerState | null): string => {
-  if (viewerState?.fitMode === "manual" && typeof viewerState.scale === "number") return String(clampPdfScale(viewerState.scale));
+const isCompactPdfViewport = (container: HTMLDivElement): boolean => {
+  return container.clientWidth <= PDF_COMPACT_VIEWPORT_MAX_WIDTH;
+};
+
+const getPdfViewerStateScaleValue = (viewerState: PdfViewerState | null, forcePageWidth: boolean): string => {
+  if (!forcePageWidth && viewerState?.fitMode === "manual" && typeof viewerState.scale === "number") return String(clampPdfScale(viewerState.scale));
   return "page-width";
 };
 
@@ -136,11 +141,6 @@ const addPdfViewerEventListener = (eventBus: PdfEventBusLike, eventName: string,
   };
 };
 
-const updatePdfViewerResponsiveScale = (pdfViewer: PdfViewerInstance, viewerState: PdfViewerState | null): void => {
-  if (viewerState?.fitMode === "manual") return;
-  pdfViewer.currentScaleValue = "page-width";
-};
-
 const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onViewerStateChange }: PdfPaneProps) => {
   const viewerEnableXfa = viewerOptions?.enableXfa;
   const viewerUseSystemFonts = viewerOptions?.useSystemFonts;
@@ -156,6 +156,7 @@ const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onVi
   const pdfViewerElementRef = useRef<HTMLDivElement | null>(null);
   const pdfViewerRef = useRef<PdfViewerInstance | null>(null);
   const viewerStateRef = useRef<PdfViewerState | null>(viewerState);
+  const isApplyingFitScaleRef = useRef(false);
 
   useEffect(() => {
     viewerStateRef.current = viewerState;
@@ -251,12 +252,18 @@ const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onVi
     const pdfViewer = new PDFViewer({ container, eventBus, linkService, viewer: viewerElement });
     const removeEventListeners: Array<() => void> = [];
 
+    const setFitScale = () => {
+      isApplyingFitScaleRef.current = true;
+      pdfViewer.currentScaleValue = "page-width";
+    };
+
     const requestResponsiveScaleUpdate = () => {
       if (resizeFrame !== null) return;
       resizeFrame = window.requestAnimationFrame(() => {
         resizeFrame = null;
         if (isCancelled || !loadedPdfDocument) return;
-        updatePdfViewerResponsiveScale(pdfViewer, viewerStateRef.current);
+        if (!isCompactPdfViewport(container) && viewerStateRef.current?.fitMode === "manual") return;
+        setFitScale();
       });
     };
 
@@ -272,7 +279,12 @@ const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onVi
 
     removeEventListeners.push(addPdfViewerEventListener(eventBus, "pagesinit", () => {
       if (isCancelled || !loadedPdfDocument) return;
-      pdfViewer.currentScaleValue = getPdfViewerStateScaleValue(viewerStateRef.current);
+      const scaleValue = getPdfViewerStateScaleValue(viewerStateRef.current, isCompactPdfViewport(container));
+      if (scaleValue === "page-width") {
+        setFitScale();
+      } else {
+        pdfViewer.currentScaleValue = scaleValue;
+      }
       pdfViewer.currentPageNumber = getSafePageNumber(viewerStateRef.current?.currentPage, loadedPdfDocument.numPages);
       requestResponsiveScaleUpdate();
     }));
@@ -288,7 +300,9 @@ const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onVi
       if (isCancelled) return;
       const scale = (event as PdfScaleChangingEvent).scale;
       if (!Number.isFinite(scale)) return;
-      updateViewerState({ scale: clampPdfScale(scale), fitMode: "manual" });
+      const fitMode = isApplyingFitScaleRef.current ? "width" : "manual";
+      isApplyingFitScaleRef.current = false;
+      updateViewerState({ scale: clampPdfScale(scale), fitMode });
     }));
 
     void loadPdfDocument(sourceUrl, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then((nextPdfDocument) => {
@@ -310,6 +324,7 @@ const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onVi
 
     return () => {
       isCancelled = true;
+      isApplyingFitScaleRef.current = false;
       if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
       resizeObserver?.disconnect();
       window.removeEventListener("orientationchange", requestResponsiveScaleUpdate);
