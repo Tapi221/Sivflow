@@ -45,7 +45,7 @@ const DEFAULT_PLAN_RESULT_MODES: readonly PlanResultMode[] = ["plan", "actual"];
 const PLAN_RESULT_TOGGLE_VIEW_MODES = new Set(["threeDays", "days", "pieChart"]);
 const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const WEEKDAY_EVENT_BUFFER_DAYS = 1;
-const MONTH_EVENT_BUFFER_DAYS = 14;
+const MONTH_EVENT_BUFFER_DAYS = 18 * 7;
 
 const isHexColor = (value: string): boolean => /^#[0-9a-f]{6}$/i.test(value);
 
