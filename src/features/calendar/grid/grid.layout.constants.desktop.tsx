@@ -1,5 +1,7 @@
 import { hasDesktopRuntime } from "@/platform/detectDesktopBridge";
 
+type WeekdayHourLabelMode = "full" | "integer";
+
 //Month
 export const MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS = "h-8";
 export const MONTH_GRID_DAY_NUMBER_POSITION_CLASS = "left-0 top-0 md:left-3 md:top-1";
@@ -21,13 +23,13 @@ export const DAY_DETAIL_CURRENT_TIME_LABEL_CLASS = "-translate-y-1/2 text-[10px]
 // WeekDay
 
 // time / grid
-const WEEKDAY_DESKTOP_HOUR_LABEL_FORMAT = "HH:mm";
-const WEEKDAY_MOBILE_WEB_HOUR_LABEL_FORMAT = "H";
+const WEEKDAY_DESKTOP_HOUR_LABEL_MODE: WeekdayHourLabelMode = "full";
+const WEEKDAY_MOBILE_WEB_HOUR_LABEL_MODE: WeekdayHourLabelMode = "integer";
 const IS_MOBILE_WEB_VIEWPORT = typeof window !== "undefined" && window.innerWidth <= 767;
 
 export const WEEKDAY_HOURS = 24;
 export const WEEKDAY_MINUTES_PER_HOUR = 60;
-export const WEEKDAY_HOUR_LABEL_FORMAT = hasDesktopRuntime() || !IS_MOBILE_WEB_VIEWPORT ? WEEKDAY_DESKTOP_HOUR_LABEL_FORMAT : WEEKDAY_MOBILE_WEB_HOUR_LABEL_FORMAT;
+export const WEEKDAY_HOUR_LABEL_MODE = hasDesktopRuntime() || !IS_MOBILE_WEB_VIEWPORT ? WEEKDAY_DESKTOP_HOUR_LABEL_MODE : WEEKDAY_MOBILE_WEB_HOUR_LABEL_MODE;
 export const WEEKDAY_DAY_FORMAT = "E";
 export const WEEKDAY_DATE_FORMAT = "d";
 
