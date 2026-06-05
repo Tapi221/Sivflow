@@ -71,7 +71,7 @@ const isSameCalendarDate = (left: Date, right: Date): boolean => getCalendarDate
 
 const shouldSuppressEntryMinHeight = (entry: CalendarTimeGridLayoutEntry): boolean => entry.endsAfterRange;
 
-const formatHourLabel = (hour: number): string => GRID.WEEKDAY_HOUR_LABEL_FORMAT === "H" ? String(hour) : `${String(hour).padStart(2, "0")}:00`;
+const formatHourLabel = (hour: number): string => GRID.WEEKDAY_HOUR_LABEL_MODE === "integer" ? String(hour) : `${String(hour).padStart(2, "0")}:00`;
 
 const getCurrentTimeTopStyle = (now: Date): CSSProperties => ({
   top: `calc(${(now.getHours() * GRID.WEEKDAY_MINUTES_PER_HOUR + now.getMinutes()) / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
