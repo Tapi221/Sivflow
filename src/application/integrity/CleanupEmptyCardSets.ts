@@ -1,8 +1,10 @@
+import { createWebTrashRepository } from "@platform/storage/trashRepository.web";
 import type { LocalDB } from "@/services/localdb/LocalDB";
 import type { Card, CardSet } from "@/types";
 
 export type CleanupEmptyCardSetsResult = {
   deletedCardSetIds: string[];
+  skippedCardSetIds: string[];
 };
 
 type DeletableRecord = {
@@ -36,6 +38,19 @@ const hasActiveCardsInCardSet = async (
   return cards.some(isActiveRecord);
 };
 
+const isCardSetStillEmpty = async (
+  db: LocalDB,
+  cardSetId: string,
+  activeCardSetIds: ReadonlySet<string>,
+): Promise<boolean> => {
+  const currentCardSet = await db.cardSets.get(cardSetId);
+  if (!currentCardSet || !shouldDeleteCardSet(currentCardSet, activeCardSetIds)) {
+    return false;
+  }
+
+  return !(await hasActiveCardsInCardSet(db, cardSetId));
+};
+
 export const cleanupEmptyCardSets = async (
   db: LocalDB,
   userId: string,
@@ -55,35 +70,24 @@ export const cleanupEmptyCardSets = async (
     shouldDeleteCardSet(cardSet, activeCardSetIds),
   );
 
-  if (candidates.length === 0) return { deletedCardSetIds: [] };
+  if (candidates.length === 0) {
+    return { deletedCardSetIds: [], skippedCardSetIds: [] };
+  }
 
-  const now = new Date();
+  const trashRepository = createWebTrashRepository();
   const deletedCardSetIds: string[] = [];
+  const skippedCardSetIds: string[] = [];
 
-  await db.runSyncTransaction(async () => {
-    for (const cardSet of candidates) {
-      const currentCardSet = await db.cardSets.get(cardSet.id);
-      if (!currentCardSet || !shouldDeleteCardSet(currentCardSet, activeCardSetIds)) {
-        continue;
-      }
-
-      if (await hasActiveCardsInCardSet(db, cardSet.id)) {
-        continue;
-      }
-
-      await db.cardSets.update(cardSet.id, {
-        isDeleted: true,
-        deletedAt: now,
-        updatedAt: now,
-      });
-      await db.queueDeleteSync({
-        entity: "cardSet",
-        targetId: cardSet.id,
-        priority: "high",
-      });
-      deletedCardSetIds.push(cardSet.id);
+  for (const cardSet of candidates) {
+    if (!(await isCardSetStillEmpty(db, cardSet.id, activeCardSetIds))) {
+      skippedCardSetIds.push(cardSet.id);
+      continue;
     }
-  });
 
-  return { deletedCardSetIds };
+    await trashRepository.purgeCardSet(userId, cardSet.id);
+    await db.syncQueue.where("targetId").equals(cardSet.id).delete();
+    deletedCardSetIds.push(cardSet.id);
+  }
+
+  return { deletedCardSetIds, skippedCardSetIds };
 };
