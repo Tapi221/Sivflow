@@ -1,5 +1,33 @@
 import type { TrashCardBase, TrashFolderBase, TrashItemIds, TrashItems, TrashUseCaseInput } from "./trashTypes";
 
+export const TRASH_RETENTION_DAYS = 30;
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+const getDeletedAtTime = (value: unknown): number | null => {
+  if (value instanceof Date) return value.getTime();
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  if (value && typeof value === "object") {
+    const timestamp = value as { toMillis?: () => number; toDate?: () => Date; seconds?: number; _seconds?: number };
+    if (typeof timestamp.toMillis === "function") return timestamp.toMillis();
+    if (typeof timestamp.toDate === "function") return timestamp.toDate().getTime();
+    if (typeof timestamp.seconds === "number") return timestamp.seconds * 1000;
+    if (typeof timestamp._seconds === "number") return timestamp._seconds * 1000;
+  }
+  return null;
+};
+
+const isExpiredTrashItem = (item: TrashFolderBase | TrashCardBase, retentionDays: number, now: number): boolean => {
+  if (item.isDeleted !== true) return false;
+  const deletedAt = getDeletedAtTime(item.deletedAt);
+  if (deletedAt === null) return false;
+  return deletedAt <= now - retentionDays * MS_PER_DAY;
+};
+
 const getDeletedItems = <
   TFolder extends TrashFolderBase,
   TCard extends TrashCardBase,
@@ -135,6 +163,35 @@ export const permanentlyDeleteTrashItems = async <
   for (const cardId of cardIds) {
     await repository.purgeCard(userId, cardId);
   }
+};
+
+export const purgeExpiredTrashItems = async <
+  TFolder extends TrashFolderBase,
+  TCard extends TrashCardBase,
+>({
+  userId,
+  repository,
+  retentionDays = TRASH_RETENTION_DAYS,
+  now = Date.now(),
+}: TrashUseCaseInput<TFolder, TCard> & {
+  retentionDays?: number;
+  now?: number;
+}): Promise<TrashItems<TFolder, TCard>> => {
+  const { folders, cards } = await getTrashItems({ userId, repository });
+  const expiredFolders = folders.filter((folder) => isExpiredTrashItem(folder, retentionDays, now));
+  const expiredCards = cards.filter((card) => isExpiredTrashItem(card, retentionDays, now));
+
+  await permanentlyDeleteTrashItems({
+    userId,
+    repository,
+    folderIds: expiredFolders.map((folder) => folder.id),
+    cardIds: expiredCards.map((card) => card.id),
+  });
+
+  return {
+    folders: expiredFolders,
+    cards: expiredCards,
+  };
 };
 
 export const emptyTrash = async <
