@@ -47,6 +47,8 @@ const FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME = "absolute right-4 top-3 z-30 flex h
 const FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-5 min-w-[31px] items-center justify-center rounded-[5px] border border-[rgba(0,0,0,0.04)] bg-[#eeeeee] px-1.5 text-[10px] font-semibold leading-none tracking-[-0.02em] text-[#85827e]";
 const WORKSPACE_ACTION_TOOLBAR_CLASS_NAME = "absolute z-30";
 const WORKSPACE_ACTION_TOOLBAR_STYLE = { right: "252px", top: "12px" };
+const WORKSPACE_MAIN_CONTENT_CLASS_NAME = "relative z-0 isolate min-h-0 min-w-0 flex-1";
+const WORKSPACE_MAIN_PANEL_CLASS_NAME = "relative z-0 isolate min-w-0";
 const SIDEBAR_INTERACTION_REGION_STYLE: SidebarInteractionRegionStyle = { WebkitAppRegion: "no-drag" };
 
 const buildWorkspaceBreadcrumbCrumbs = (context: ExplorerBreadcrumbContext, folders: Folder[]): BreadcrumbCrumb[] => {
@@ -155,7 +157,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
       <SidebarInteractionRegion>
         {isLeftPanelCollapsed ? <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} /> : <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />}
       </SidebarInteractionRegion>
-      <CarvePanel className="relative min-w-0">
+      <CarvePanel className={WORKSPACE_MAIN_PANEL_CLASS_NAME}>
         <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} onBreadcrumbContextChange={handleBreadcrumbContextChange} folderSelectionNonce={0} navigateToSectionListToken={0} />
         {showWorkspaceHeader ? <WorkspaceBreadcrumbs /> : null}
         {showWorkspaceHeader ? <WorkspaceActionToolbar className={WORKSPACE_ACTION_TOOLBAR_CLASS_NAME} style={WORKSPACE_ACTION_TOOLBAR_STYLE} /> : null}
@@ -190,7 +192,7 @@ const WorkspaceScreen = () => {
           <SidebarInteractionRegion>
             <Sidebar isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={handleOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />
           </SidebarInteractionRegion>
-          <div className="min-h-0 min-w-0 flex-1">
+          <div className={WORKSPACE_MAIN_CONTENT_CLASS_NAME}>
             <CalendarScheduleScreen isLeftPanelCollapsed={isLeftPanelCollapsed} />
           </div>
         </div>
