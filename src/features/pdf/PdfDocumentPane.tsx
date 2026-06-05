@@ -16,6 +16,11 @@ type LocalPdfSourceState = {
   url: string | null;
 };
 
+type LegacyMediaQueryList = MediaQueryList & {
+  addListener?: (listener: (event: MediaQueryListEvent) => void) => void;
+  removeListener?: (listener: (event: MediaQueryListEvent) => void) => void;
+};
+
 const MOBILE_PDF_VIEWPORT_MEDIA_QUERY = "(max-width: 767px)";
 
 const createPendingLocalPdfSourceState = (): LocalPdfSourceState => ({
@@ -34,6 +39,17 @@ const resolveDocumentFileId = (document: Pick<DocumentItem, "id" | "localFileId"
 
 const getIsMobilePdfViewport = (): boolean => {
   return typeof window !== "undefined" && window.matchMedia(MOBILE_PDF_VIEWPORT_MEDIA_QUERY).matches;
+};
+
+const addMobilePdfViewportChangeListener = (mediaQueryList: MediaQueryList, listener: (event: MediaQueryListEvent) => void): (() => void) => {
+  if (typeof mediaQueryList.addEventListener === "function") {
+    mediaQueryList.addEventListener("change", listener);
+    return () => mediaQueryList.removeEventListener("change", listener);
+  }
+
+  const legacyMediaQueryList = mediaQueryList as LegacyMediaQueryList;
+  legacyMediaQueryList.addListener?.(listener);
+  return () => legacyMediaQueryList.removeListener?.(listener);
 };
 
 const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentPaneProps) => {
@@ -80,9 +96,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     const updateMobilePdfViewport = () => setIsMobilePdfViewport(mediaQueryList.matches);
 
     updateMobilePdfViewport();
-    mediaQueryList.addEventListener("change", updateMobilePdfViewport);
-
-    return () => mediaQueryList.removeEventListener("change", updateMobilePdfViewport);
+    return addMobilePdfViewportChangeListener(mediaQueryList, updateMobilePdfViewport);
   }, []);
 
   if (!localSource.isResolved && !sourceUrl) {
