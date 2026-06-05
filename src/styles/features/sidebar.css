@@ -196,111 +196,14 @@
   }
 
   @media (max-width: 767px) {
-    #mobile-app-sidebar,
     #mobile-schedule-sidebar {
       width: min(88vw, 360px) !important;
       min-width: min(288px, 88vw) !important;
       max-width: 360px !important;
-      max-height: 100dvh;
-      overflow-x: hidden !important;
-      overflow-y: auto !important;
       border-top-right-radius: 0 !important;
       border-bottom-right-radius: 0 !important;
       border-right: 1px solid #e5e5ea;
       box-shadow: none !important;
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-y;
-    }
-
-    #mobile-app-sidebar .sidebar--mobile {
-      display: flex;
-      width: 100%;
-      min-height: 100%;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: calc(var(--app-top-inset, 0px) + 14px) 12px 18px;
-      background: var(--backpane-bg);
-      color: var(--app-sidebar-text, #606060);
-      font-family: var(--app-font-family-sidebar);
-    }
-
-    #mobile-app-sidebar .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    #mobile-app-sidebar .sidebar-nav-link {
-      display: flex;
-      width: 100%;
-      min-height: 42px;
-      align-items: center;
-      gap: 12px;
-      border-radius: 12px;
-      padding: 0 12px;
-      color: var(--app-sidebar-text, #606060);
-      font-size: 15px;
-      font-weight: 560;
-      letter-spacing: -0.02em;
-      text-align: left;
-      transition: none;
-    }
-
-    #mobile-app-sidebar .sidebar-nav-link:hover,
-    #mobile-app-sidebar .sidebar-nav-link:focus-visible {
-      background: rgba(0, 0, 0, 0.05);
-      color: var(--app-sidebar-text-strong, #2f2f2f);
-      outline: none;
-    }
-
-    #mobile-app-sidebar .sidebar-nav-icon-slot {
-      display: flex;
-      width: 22px;
-      min-width: 22px;
-      height: 22px;
-      align-items: center;
-      justify-content: center;
-      color: var(--app-sidebar-icon, #8a8a8a);
-    }
-
-    #mobile-app-sidebar .sidebar-nav-icon {
-      width: 21px;
-      height: 21px;
-      flex-shrink: 0;
-    }
-
-    #mobile-app-sidebar .sidebar-nav-label {
-      min-width: 0;
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    #mobile-app-sidebar .sidebar-library-children {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      padding: 2px 0 6px 46px;
-    }
-
-    #mobile-app-sidebar .sidebar-library-children button {
-      min-height: 32px;
-      border-radius: 9px;
-      padding: 0 10px;
-      color: var(--app-sidebar-text-muted, #9a9a9a);
-      font-size: 13px;
-      font-weight: 520;
-      text-align: left;
-    }
-
-    #mobile-app-sidebar .sidebar-library-children button.is-active,
-    #mobile-app-sidebar .sidebar-library-children button:hover,
-    #mobile-app-sidebar .sidebar-library-children button:focus-visible {
-      background: rgba(0, 0, 0, 0.045);
-      color: var(--app-sidebar-text-strong, #2f2f2f);
-      outline: none;
     }
 
     #mobile-schedule-sidebar .app-layered-directory {
@@ -308,14 +211,6 @@
       --row-height-dense: 30px;
       --font-size-body: 14px;
       --font-size-section: 12px;
-      max-height: 100%;
-      min-height: 0;
-    }
-
-    #mobile-schedule-sidebar .app-layered-directory [class*="overflow-y-auto"] {
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-y;
     }
 
     #mobile-schedule-sidebar .app-layered-directory__notion-action {
