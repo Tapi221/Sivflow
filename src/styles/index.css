@@ -33,7 +33,7 @@
   --scrollbar-thumb-inset: 0px;
   --ds-motion-transition-interactive: 0ms ease;
   --ds-semantic-motion-interactive: 0ms ease;
-  --app-workspace-surface: #ffffff;
+  --carvepanel-surface: #ffffff;
 }
 
 * {
