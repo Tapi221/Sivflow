@@ -1,5 +1,5 @@
 import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
-import type { AssetRecord, Card, CardSet, DocumentItem as Document, Folder, SyncConflict, SyncError, SyncHistory, SyncQueueItem, SyncSettings, UploadedImage, UserSettings, UserStats } from "@/types";
+import type { AssetRecord, Card, CardSet, DocumentItem as Document, Folder, Note, SyncConflict, SyncError, SyncHistory, SyncQueueItem, SyncSettings, UploadedImage, UserSettings, UserStats } from "@/types";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 
 export type CardRelation = {
@@ -46,6 +46,7 @@ export type LocalDBTableMap = {
   folders: Folder;
   cardSets: CardSet;
   documents: Document;
+  notes: Note;
   tagRecords: TagRecord;
   images: AssetRecord | UploadedImage;
   userSettings: UserSettings;
@@ -126,6 +127,7 @@ export interface QueryableTable<T extends object, TKey = string> {
 export interface LocalDBSyncApi {
   cards: QueryableTable<Card, string>;
   folders: QueryableTable<Folder, string>;
+  notes: QueryableTable<Note, string>;
 
   getItem<TTable extends SyncableEntityTable>(
     table: TTable,
@@ -178,80 +180,4 @@ export interface LocalDBSyncApi {
   }>;
 
   getSyncQueueCount(): Promise<number>;
-  getQueuedItemsOldestFirst(): Promise<SyncQueueItem[]>;
-  trimSyncQueueToLimit(limit: number): Promise<void>;
-  putSyncQueueItem(item: SyncQueueItem): Promise<void>;
-  removeSyncQueueItem(id: string): Promise<void>;
-
-  putConflict(conflict: SyncConflict): Promise<void>;
-  getConflict(id: string): Promise<SyncConflict | undefined>;
-  getConflicts(): Promise<SyncConflict[]>;
-  removeConflict(id: string): Promise<void>;
-
-  getImageRecord(id: string): Promise<AssetRecord | UploadedImage | undefined>;
-  putImageRecord(record: AssetRecord | UploadedImage): Promise<void>;
-  updateImageRecord(
-    id: string,
-    changes: Partial<AssetRecord & UploadedImage>,
-  ): Promise<number>;
 }
-
-export interface LocalDBSyncStore extends LocalDBSyncApi {
-  readonly name: string;
-  cards: QueryableTable<Card, string>;
-  folders: QueryableTable<Folder, string>;
-  cardSets: QueryableTable<CardSet, string>;
-  documents: QueryableTable<Document, string>;
-  tagRecords: QueryableTable<TagRecord, string>;
-  images: QueryableTable<AssetRecord | UploadedImage, string>;
-  userSettings: QueryableTable<UserSettings, string>;
-  userStats: QueryableTable<UserStats, string>;
-  levelHistories: QueryableTable<Record<string, unknown>, string>;
-  cardRelations: QueryableTable<CardRelation, string>;
-  deviceMeta: QueryableTable<Record<string, unknown>, string>;
-  syncErrors: QueryableTable<SyncError, string>;
-  syncHistory: QueryableTable<SyncHistory, string>;
-  syncSettings: QueryableTable<SyncSettings, string>;
-  syncQueue: QueryableTable<SyncQueueItem, string>;
-  conflicts: QueryableTable<SyncConflict, string>;
-  metadata: QueryableTable<Record<string, unknown>, string>;
-
-  table<T extends object, TKey = string>(name: string): QueryableTable<T, TKey>;
-  transaction<T>(mode: string, ...args: unknown[]): Promise<T>;
-  isOpen(): boolean;
-  close(): void;
-  delete(): Promise<void>;
-
-  addItem(table: string, item: unknown, skipSync?: boolean): Promise<string>;
-  updateItem(
-    table: string,
-    id: string,
-    changes: Record<string, unknown>,
-    skipSync?: boolean,
-  ): Promise<number>;
-  deleteItem(table: string, id: string): Promise<void>;
-  softDelete(table: string, id: string): Promise<number>;
-  restore(table: string, id: string): Promise<number>;
-  bulkUpsert(table: string, items: unknown[], skipSync?: boolean): Promise<void>;
-
-  getAllCards(): Promise<Card[]>;
-  getAllFolders(): Promise<Folder[]>;
-  listCardsByUser(userId: string): Promise<Card[]>;
-  listFoldersByUser(userId: string): Promise<Folder[]>;
-  listCardSetsByUser(userId: string): Promise<CardSet[]>;
-  addCardSet(cardSet: CardSet): Promise<void>;
-  updateCardById(id: string, changes: Partial<Card>): Promise<number>;
-  runSyncTransaction<T>(scope: () => Promise<T>): Promise<T>;
-  clearSyncTables(tables: readonly SyncableEntityTable[]): Promise<void>;
-  putSyncRecord<TTable extends SyncableEntityTable>(
-    table: TTable,
-    data: LocalDBTableMap[TTable],
-  ): Promise<void>;
-
-  cleanupSyncHistory(): Promise<void>;
-  cleanupSyncErrors(): Promise<void>;
-  setSyncTrigger(callback: () => void): void;
-}
-
-export type LocalDBLike = LocalDBSyncStore;
-export type LocalDBInstance = LocalDBSyncStore;
