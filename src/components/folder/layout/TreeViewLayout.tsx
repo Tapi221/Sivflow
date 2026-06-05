@@ -44,8 +44,35 @@ interface TreeViewLayoutProps {
   folderSelectionNonce?: number;
 }
 
+const MOBILE_DETAIL_MEDIA_QUERY = "(max-width: 767px)";
+
 const isExternalFileDragEvent = (event: DragEvent<HTMLDivElement>) => {
   return Array.from(event.dataTransfer.types).includes("Files");
+};
+
+const readIsMobileViewport = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia(MOBILE_DETAIL_MEDIA_QUERY).matches;
+};
+
+const useIsMobileViewport = (): boolean => {
+  const [isMobileViewport, setIsMobileViewport] = useState(readIsMobileViewport);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQueryList = window.matchMedia(MOBILE_DETAIL_MEDIA_QUERY);
+    const handleChange = () => setIsMobileViewport(mediaQueryList.matches);
+
+    handleChange();
+    mediaQueryList.addEventListener("change", handleChange);
+
+    return () => {
+      mediaQueryList.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  return isMobileViewport;
 };
 
 const TreeViewLayout = ({
@@ -70,6 +97,7 @@ const TreeViewLayout = ({
   const { createCard, moveCardToSet, reorderCardsInCardSet } =
     useCardCommands();
   const { documents = [], loading: documentsLoading } = useDocumentsRead();
+  const isMobileViewport = useIsMobileViewport();
 
   const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(
     null,
@@ -192,7 +220,7 @@ const TreeViewLayout = ({
       selectedCardId,
       selectedDocumentId,
       autoCarryOver: settings?.autoCarryOver ?? true,
-      isMobile: false,
+      isMobile: isMobileViewport,
     });
 
   const tagFilter = useExplorerStore((state) => state.tagFilter);
