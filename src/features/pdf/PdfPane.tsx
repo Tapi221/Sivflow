@@ -5,6 +5,7 @@ import type { PdfViewerState } from "@/types";
 import type { BlobUrl } from "@/types/core/branded";
 import { cn } from "@/lib/utils";
 import { getDocumentBlob } from "@/services/documentFileStore";
+import { resolvePdfRenderBackingStore } from "./pdfRenderQuality";
 
 type PdfPaneDoc = {
   id: string;
@@ -39,8 +40,6 @@ type PdfPaneProps = {
 };
 
 type PdfDocumentProxy = Awaited<ReturnType<typeof pdfjsLib.getDocument>["promise"]>;
-
-type PdfPageProxy = Awaited<ReturnType<PdfDocumentProxy["getPage"]>>;
 
 type PdfCanvasPageProps = {
   pageNumber: number;
@@ -106,6 +105,9 @@ const PDF_PAGE_PLACEHOLDER_HEIGHT = 920;
 const PDF_HISTORY_LIMIT = 80;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
 const PDF_CANVAS_BACKGROUND = "#ffffff";
+const PDF_MIN_RENDER_DEVICE_PIXEL_RATIO = 2;
+const PDF_MAX_RENDER_DEVICE_PIXEL_RATIO = 3;
+const PDF_MAX_RENDER_CANVAS_PIXELS = 16_777_216;
 const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
@@ -262,20 +264,27 @@ const PdfCanvasPage = ({ pageNumber, pdfDocument, scale, className }: PdfCanvasP
       if (!canvas) return;
       await waitForPreviousCanvasRender(canvas);
       if (isCancelled) return;
-      const page: PdfPageProxy = await pdfDocument.getPage(pageNumber);
+      const page = await pdfDocument.getPage(pageNumber);
       if (isCancelled) return;
       const viewport = page.getViewport({ scale });
-      const devicePixelRatio = window.devicePixelRatio || 1;
+      const backingStore = resolvePdfRenderBackingStore({
+        viewportWidthPx: viewport.width,
+        viewportHeightPx: viewport.height,
+        devicePixelRatio: window.devicePixelRatio,
+        minimumDevicePixelRatio: PDF_MIN_RENDER_DEVICE_PIXEL_RATIO,
+        maximumDevicePixelRatio: PDF_MAX_RENDER_DEVICE_PIXEL_RATIO,
+        maximumCanvasPixels: PDF_MAX_RENDER_CANVAS_PIXELS,
+      });
       const context = canvas.getContext("2d", { alpha: false });
       if (!context) throw new Error("PDF描画用のCanvas contextを取得できませんでした。");
-      canvas.width = Math.max(1, Math.floor(viewport.width * devicePixelRatio));
-      canvas.height = Math.max(1, Math.floor(viewport.height * devicePixelRatio));
+      canvas.width = backingStore.canvasWidthPx;
+      canvas.height = backingStore.canvasHeightPx;
       canvas.style.width = `${viewport.width}px`;
       canvas.style.height = `${viewport.height}px`;
       context.setTransform(1, 0, 0, 1, 0, 0);
       context.fillStyle = PDF_CANVAS_BACKGROUND;
       context.fillRect(0, 0, canvas.width, canvas.height);
-      renderTask = page.render({ canvas, canvasContext: context, viewport, transform: devicePixelRatio === 1 ? undefined : [devicePixelRatio, 0, 0, devicePixelRatio, 0, 0], background: PDF_CANVAS_BACKGROUND });
+      renderTask = page.render({ canvas, canvasContext: context, viewport, transform: backingStore.scaleX === 1 && backingStore.scaleY === 1 ? undefined : [backingStore.scaleX, 0, 0, backingStore.scaleY, 0, 0], background: PDF_CANVAS_BACKGROUND });
       const done = renderTask.promise.then(() => undefined).catch((error: unknown) => {
         if (!isPdfRenderCancellationError(error)) throw error;
       }).finally(() => {
