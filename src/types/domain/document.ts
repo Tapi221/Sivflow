@@ -9,3 +9,5 @@ export type LegacyDocumentFields = { folder_id?: string | null; file_name?: stri
 export interface PdfViewerState {
   currentPage?: number;
   scale?: number;
+  fitMode?: "width" | "manual";
+  pageLayoutMode?: PdfPageLayoutMode;
