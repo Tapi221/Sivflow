@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MobilePdfPages } from "./MobilePdfPages";
 import { PdfPane } from "./PdfPane";
-import { createPdfDocumentDataSource, createPdfDocumentUrlSource } from "./pdfDocumentSource";
+import { createPdfDocumentUrlSource } from "./pdfDocumentSource";
 import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getDocumentBlob } from "@/services/documentFileStore";
@@ -17,6 +17,11 @@ type PdfDocumentPaneProps = {
 type LocalPdfSourceState = {
   isResolved: boolean;
   source: PdfDocumentSource | null;
+};
+
+type LocalPdfBlobSource = {
+  source: PdfDocumentSource;
+  objectUrl: string;
 };
 
 type LegacyMediaQueryList = MediaQueryList & {
@@ -68,8 +73,12 @@ const createPersistedPdfDocumentSource = (url: string | null): PdfDocumentSource
   return url ? createPdfDocumentUrlSource(url) : null;
 };
 
-const readBlobAsPdfDocumentSource = async (blob: Blob): Promise<PdfDocumentSource> => {
-  return createPdfDocumentDataSource(new Uint8Array(await blob.arrayBuffer()));
+const createLocalPdfBlobSource = (blob: Blob): LocalPdfBlobSource => {
+  const objectUrl = URL.createObjectURL(blob);
+  return {
+    source: createPdfDocumentUrlSource(objectUrl),
+    objectUrl,
+  };
 };
 
 const findLocalPdfBlob = async (document: Pick<DocumentItem, "id" | "localFileId" | "userId">, currentUserId: string | null | undefined): Promise<Blob | null> => {
@@ -93,10 +102,16 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   const persistedSource = useMemo(() => createPersistedPdfDocumentSource(persistedSourceUrl), [persistedSourceUrl]);
   const [localSource, setLocalSource] = useState<LocalPdfSourceState>(createPendingLocalPdfSourceState);
   const [isMobilePdfViewport, setIsMobilePdfViewport] = useState(getIsMobilePdfViewport);
+  const localObjectUrlRef = useRef<string | null>(null);
   const source = localSource.source ?? persistedSource;
 
   useEffect(() => {
     let isCancelled = false;
+
+    if (localObjectUrlRef.current) {
+      URL.revokeObjectURL(localObjectUrlRef.current);
+      localObjectUrlRef.current = null;
+    }
 
     setLocalSource(createPendingLocalPdfSourceState());
 
@@ -109,9 +124,14 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
         return;
       }
 
-      const nextSource = await readBlobAsPdfDocumentSource(blob);
-      if (isCancelled) return;
-      setLocalSource(createResolvedLocalPdfSourceState(nextSource));
+      const nextSource = createLocalPdfBlobSource(blob);
+      if (isCancelled) {
+        URL.revokeObjectURL(nextSource.objectUrl);
+        return;
+      }
+
+      localObjectUrlRef.current = nextSource.objectUrl;
+      setLocalSource(createResolvedLocalPdfSourceState(nextSource.source));
     };
 
     void loadLocalSource().catch((error: unknown) => {
@@ -122,6 +142,10 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
 
     return () => {
       isCancelled = true;
+      if (localObjectUrlRef.current) {
+        URL.revokeObjectURL(localObjectUrlRef.current);
+        localObjectUrlRef.current = null;
+      }
     };
   }, [currentUserId, document.id, document.localFileId, document.userId]);
 
