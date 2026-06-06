@@ -1,6 +1,8 @@
 @layer components {
   @media print {
     @page { size: portrait; }
-    body.calendar-printing { margin: 0 !important; overflow: visible !important; background: #ffffff !important; }
+    body.calendar-printing { margin: 0 !important; background: #ffffff !important; }
     body.calendar-printing > :not(.calendar-print-panel) { display: none !important; }
-    body.calendar-printing .calendar-print-panel { display: block !important; position: absolute !important; left: 
+    body.calendar-printing .calendar-print-panel { display: block !important; }
+  }
+}
