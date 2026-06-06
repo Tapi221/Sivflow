@@ -2,6 +2,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { Outlet } from "react-router-dom";
 import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
+import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
 import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContext";
@@ -12,6 +13,7 @@ import "./AppLayout.css";
 
 type AppLayoutOutletContext = {
   isLeftPanelCollapsed: boolean;
+  onOpenSettings: () => void;
   onToggleLeftPanel: () => void;
 };
 
@@ -82,6 +84,7 @@ const AppLayout = () => {
 
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(readStoredLeftPanelCollapsed);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const [workspaceLayoutRevision, setWorkspaceLayoutRevision] = useState(0);
 
   const openSearch = useSearchStore((state) => state.open);
@@ -89,6 +92,9 @@ const AppLayout = () => {
   const sidebarLongPressStateRef = useRef<SidebarLongPressState | null>(null);
   const shouldSuppressSidebarLongPressClickRef = useRef(false);
   const handleOpenSearch = useCallback(() => openSearch(), [openSearch]);
+  const handleOpenSettings = useCallback(() => {
+    setIsSettingsDialogOpen(true);
+  }, []);
   const bumpWorkspaceLayoutRevision = useCallback(() => {
     setWorkspaceLayoutRevision((current) => current + 1);
   }, []);
@@ -163,7 +169,7 @@ const AppLayout = () => {
     event.stopPropagation();
     closeButton.click();
   }, []);
-  const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed, onToggleLeftPanel: handleToggleLeftPanel }), [handleToggleLeftPanel, isLeftPanelCollapsed]);
+  const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed, onOpenSettings: handleOpenSettings, onToggleLeftPanel: handleToggleLeftPanel }), [handleOpenSettings, handleToggleLeftPanel, isLeftPanelCollapsed]);
   const showGlobalSearchTrigger = !isScheduleRoute;
 
   useEffect(() => {
@@ -219,6 +225,8 @@ const AppLayout = () => {
             <Outlet context={outletContext} />
           </Suspense>
         </WorkspaceShell>
+
+        <SettingsWorkspaceDialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen} />
 
         {showGlobalSearchTrigger && (
           <button type="button" className={GLOBAL_SEARCH_TRIGGER_CLASS_NAME} aria-label="検索を開く" aria-keyshortcuts="Meta+K Control+K" title="検索を開く" onClick={handleOpenSearch}>
