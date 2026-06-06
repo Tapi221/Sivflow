@@ -1,13 +1,12 @@
-import type { WorkspaceExplorerTab, WorkspaceTab } from "./Tab";
-
-const EXPLORER_TAB_ID_PREFIX = "explorer:";
-const WORKSPACE_ENTITY_ROUTE_PREFIX = {
-  explorer: "/library/explorer",
-  document: "/library/documents",
-  card: "/library/cards",
-} as const;
+import type { WorkspaceTab } from "./Tab";
 
 const encodeRouteSegment = (value: string): string => encodeURIComponent(value);
 
-const resolveExplorerRouteSegment = (tab: WorkspaceExplorerTab): string => {
-  const explorerId =
+export const resolveWorkspaceTabRoute = (tab: WorkspaceTab): string => {
+  switch (tab.kind) {
+    case "route":
+      return tab.routePath;
+    case "explorer":
+      return `/library/explorer/${encodeRouteSegment(tab.id.replace(/^explorer:/, ""))}`;
+    case "document":
+      return `/library/documents
