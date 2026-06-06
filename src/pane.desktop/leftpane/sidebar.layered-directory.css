@@ -392,6 +392,12 @@
   color: #2f343b !important;
 }
 
+.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:nth-child(2) .app-layered-directory__section-heading {
+  font-kerning: normal !important;
+  font-variant-ligatures: none !important;
+  letter-spacing: 0 !important;
+}
+
 .app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child {
   padding: 0 var(--app-layered-directory-content-inset) 4px !important;
 }
