@@ -17,7 +17,7 @@ const LOGSEQ_REFERENCES: LogseqReference[] = [
   },
   {
     title: "Plugin API",
-    description: "将来 Manifolia に拡張機構を入れる場合の設計比較に使う。",
+    description: "将来 Sivflow に拡張機構を入れる場合の設計比較に使う。",
     href: "https://plugins-doc.logseq.com/",
   },
 ];
@@ -39,10 +39,10 @@ const LogseqSandboxPage = () => {
             Logseq Sandbox
           </p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">
-            Manifolia 向け Logseq 参考ページ
+            Sivflow 向け Logseq 参考ページ
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
-            Logseq を Manifolia に組み込むのではなく、block、link、tag、graph、plugin API の設計を確認するための sandbox です。
+            Logseq を Sivflow に組み込むのではなく、block、link、tag、graph、plugin API の設計を確認するための sandbox です。
             BlockNote はエディタ実装、Logseq は知識ベース構造の参考として分けて扱います。
           </p>
         </section>
@@ -60,7 +60,7 @@ const LogseqSandboxPage = () => {
           </div>
 
           <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
-            <h2 className="text-xl font-semibold text-white">Manifolia で見る観点</h2>
+            <h2 className="text-xl font-semibold text-white">Sivflow で見る観点</h2>
             <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-50">
               ノートやPDFからカードを作る導線、カード同士の関連、タグ検索、復習ログを日次ノート的に表示する設計を比較対象にする。
             </div>

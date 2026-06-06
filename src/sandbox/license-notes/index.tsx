@@ -20,7 +20,7 @@ const LINKS = [
     href: "https://github.com/tldraw/tldraw",
   },
   {
-    title: "Manifolia sandbox README",
+    title: "Sivflow sandbox README",
     description: "sandbox route の一覧を確認する。",
     href: "/sandbox/README.md",
   },
@@ -33,7 +33,7 @@ const LicenseNotesSandboxPage = () => {
       title="注意付きで参考にするOSS"
       description="Outline と tldraw は設計参考として有用ですが、組み込み前にライセンスと利用条件を確認する対象です。"
       focusItems={FOCUS_ITEMS}
-      note="Manifolia では依存として入れる前に、OSS としての利用可否、商用利用、production use、ライセンス変更条件を確認する。"
+      note="Sivflow では依存として入れる前に、OSS としての利用可否、商用利用、production use、ライセンス変更条件を確認する。"
       links={LINKS}
     />
   );

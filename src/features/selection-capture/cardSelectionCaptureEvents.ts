@@ -23,7 +23,7 @@ export type DispatchedCardSelectionCaptureEvent = {
   tasks: Promise<CardSelectionCaptureTaskResult>[];
 };
 
-export const CARD_SELECTION_CAPTURE_EVENT = "manifolia:card-selection-capture";
+export const CARD_SELECTION_CAPTURE_EVENT = "sivflow:card-selection-capture";
 
 export const dispatchCardSelectionCaptureEvent = (
   payload: CardSelectionCaptureEventPayload,

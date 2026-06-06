@@ -22,7 +22,7 @@ apps/
       navigation/
       screens/
     ios/
-      Manifolia/
+      Sivflow/
         NativeModules/
           InkDocumentExporter.swift
           InkSessionBridge.swift

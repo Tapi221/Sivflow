@@ -33,7 +33,7 @@ const EditorEnginesSandboxPage = () => {
       title="Tiptap / Plate / Milkdown の比較"
       description="BlockNote を継続する前提でも、schema、extension、serialization、UI plugin の設計差分を見るための sandbox です。"
       focusItems={FOCUS_ITEMS}
-      note="Manifolia ではカード面の block 構造、Markdown 変換、slash command、toolbar、media block の拡張方式を比較する。"
+      note="Sivflow ではカード面の block 構造、Markdown 変換、slash command、toolbar、media block の拡張方式を比較する。"
       links={LINKS}
     />
   );
