@@ -11,7 +11,4 @@ type UseCalendarPrintControllerReturn = {
   requestPrint: () => void;
 };
 
-const CALENDAR_PRINTING_CLASS = "calendar-printing";
-const CALENDAR_PRINT_PANEL_CLASS = "calendar-print-panel";
-
-export function useCalendarPrintController
+const CALENDAR_PRINTING_CLASS
