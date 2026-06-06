@@ -111,7 +111,7 @@ const IconPlus = ({ className }: { className?: string }) => (
 );
 
 const GoogleCalendarHeadingSvg = () => (
-  <svg aria-hidden="true" className="block h-4 w-[101px] text-[#111111]" viewBox="0 0 101 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg aria-hidden="true" className="block h-4 w-[118px] text-[#111111]" viewBox="0 0 118 16" fill="none" xmlns="http://www.w3.org/2000/svg">
     <text x="0" y="13" fill="currentColor" fontFamily="var(--app-font-family-sidebar)" fontSize="13" fontWeight="700" letterSpacing="0" textRendering="geometricPrecision">{GOOGLE_CALENDAR_SECTION_LABEL}</text>
   </svg>
 );
