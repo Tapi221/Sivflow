@@ -1,20 +1,6 @@
 @layer components {
   @media print {
-    @page {
-      size: portrait;
-    }
-
-    body.calendar-printing {
-      margin: 0 !important;
-      overflow: visible !important;
-      background: #ffffff !important;
-    }
-
-    body.calendar-printing * {
-      visibility: hidden !important;
-    }
-
-    body.calendar-printing .calendar-print-panel {
-      position: absolute !important;
-      inset: 0 auto auto 0 !important;
-     
+    @page { size: portrait; }
+    body.calendar-printing { margin: 0 !important; overflow: visible !important; background: #ffffff !important; }
+    body.calendar-printing * { visibility: hidden !important; }
+    body.calendar-printing .calendar-print-panel { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; min-height: auto !important; overflow: visible !important; visibility
