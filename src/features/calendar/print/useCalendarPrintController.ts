@@ -1,14 +1,11 @@
 import { useCallback, useLayoutEffect, useState } from "react";
 
-type UseCalendarPrintControllerOptions = {
-  onBeforePrint?: () => Promise<void> | void;
-  onPrintError?: (error: unknown) => void;
-};
+type Options = { onBeforePrint?: () => Promise<void> | void; onPrintError?: (error: unknown) => void };
 
-type UseCalendarPrintControllerReturn = {
-  isPrintPanelActive: boolean;
-  printPanelClassName: string | null;
-  requestPrint: () => void;
-};
+const BODY_CLASS = "calendar-printing";
+const PANEL_CLASS = "calendar-print-panel";
 
-const CALENDAR_PRINTING_CLASS
+export function useCalendarPrintController({ onBeforePrint, onPrintError }: Options = {}) {
+  const [isPrintPanelActive, setIsPrintPanelActive] = useState(false);
+  useLayoutEffect(() => {
+    document
