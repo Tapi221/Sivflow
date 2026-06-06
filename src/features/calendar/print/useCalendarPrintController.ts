@@ -11,4 +11,4 @@ type UseCalendarPrintControllerReturn = {
   requestPrint: () => void;
 };
 
-const CALENDAR_PRINTING_CLASS = "calendar
+const CAL
