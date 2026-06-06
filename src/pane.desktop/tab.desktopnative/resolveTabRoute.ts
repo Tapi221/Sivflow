@@ -10,4 +10,4 @@ const WORKSPACE_ENTITY_ROUTE_PREFIX = {
 const encodeRouteSegment = (value: string): string => encodeURIComponent(value);
 
 const resolveExplorerRouteSegment = (tab: WorkspaceExplorerTab): string => {
-  const explorerId = tab.id.startsWith
+  const explorerId =
