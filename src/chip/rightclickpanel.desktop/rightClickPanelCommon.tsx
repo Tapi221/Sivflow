@@ -10,4 +10,5 @@ type RightClickPanelSurfaceProps = {
   className?: string;
   role?: string;
   ariaLabel?: string;
-  panelId?: RightClickPanelId
+  panelId?: RightClickPanelId;
+  children?: React
