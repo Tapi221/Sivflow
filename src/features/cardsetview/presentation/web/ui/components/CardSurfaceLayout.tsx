@@ -10,5 +10,6 @@ type CardSurfaceLayoutProps = {
   flipNode?: React.ReactNode;
 };
 
-export type CardSurfaceFaceAnchorProps = {
-  face
+export const CardSurfaceLayout = ({ cardLayoutMode, questionNode, answerNode, flipNode }: CardSurfaceLayoutProps) => {
+  if (cardLayoutMode === "split") {
+    return
