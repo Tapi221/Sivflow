@@ -1,11 +1,14 @@
+import { useEffect, useState } from "react";
+import { getDocumentBlob } from "@/services/documentFileStore";
+import type { DocumentItem, PdfViewerState } from "@/types";
+import { createPdfDocumentUrlSource } from "./pdfDocumentSource";
 import { PdfPane } from "./PdfPane";
-import type { DocumentItem } from "@/types";
+import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
+import type { PdfDocumentSource } from "./pdfDocumentSource";
 
 type PdfDocumentPaneProps = {
   document: DocumentItem;
   onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
 };
 
-const PdfDocumentPane = ({ document, onDocumentUpdate }: PdfDocumentPaneProps) => <PdfPane document={document} onDocumentUpdate={onDocumentUpdate} />;
-
-export { PdfDocumentPane };
+type Res
