@@ -21,5 +21,4 @@ const RIGHT_CLICK_PANEL_COMMON_STYLE = `
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  padding: ${RIGHT_CLICK_PANEL_SURFACE_PADDING}px;
-  border: 1px solid rgba(0, 0, 0, 0
+  padding: ${RIGHT_CLICK_PANEL_SUR
