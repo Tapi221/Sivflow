@@ -7,8 +7,4 @@ type RightClickPanelSurfaceProps = {
   width: number;
   panelRef: RefObject<HTMLDivElement | null>;
   noDragStyle?: CSSProperties;
-  className?: string;
-  role?: string;
-  ariaLabel?: string;
-  panelId?: RightClickPanelId;
-  children?: React
+  class
