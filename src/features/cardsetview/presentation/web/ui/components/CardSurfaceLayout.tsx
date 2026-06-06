@@ -10,4 +10,3 @@ type CardSurfaceLayoutProps = {
   flipNode?: React.ReactNode;
 };
 
-export const CardSurfaceLayout = ({ cardLayoutMode, questionNode, answerNode, flipNode }: CardSurfaceLayoutProps
