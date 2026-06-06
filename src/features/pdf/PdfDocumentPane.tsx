@@ -1,14 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getDocumentBlob } from "@/services/documentFileStore";
 import type { DocumentItem, PdfViewerState } from "@/types";
-import { createPdfDocumentUrlSource } from "./pdfDocumentSource";
+import { createPdfDocumentDataSource, createPdfDocumentUrlSource } from "./pdfDocumentSource";
 import { PdfPane } from "./PdfPane";
 import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
-import type { PdfDocumentSource } from "./pdfDocumentSource";
-
-type PdfDocumentPaneProps = {
-  document: DocumentItem;
-  onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
-};
-
-type Res
+import type { PdfDocumentSource } from "./
