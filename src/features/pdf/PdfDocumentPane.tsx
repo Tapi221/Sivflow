@@ -5,4 +5,5 @@ import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
 
 type PdfDocumentPaneProps = { document: DocumentItem; onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void };
 
-const PdfDocumentPane = ({ document, onDocumentUpdate }: PdfDocumentPaneProps) =>
+function PdfDocumentPane(props: PdfDocumentPaneProps) {
+  const url = resolvePdfDocumentSource
