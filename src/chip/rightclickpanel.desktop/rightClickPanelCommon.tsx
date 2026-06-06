@@ -9,4 +9,5 @@ type RightClickPanelSurfaceProps = {
   noDragStyle?: CSSProperties;
   className?: string;
   role?: string;
- 
+  ariaLabel?: string;
+  panelId?: RightClickPanel
