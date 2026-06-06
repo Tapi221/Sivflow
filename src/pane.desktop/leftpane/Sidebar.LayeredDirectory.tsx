@@ -11,7 +11,6 @@ import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDer
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
-import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
@@ -179,7 +178,7 @@ const ProjectAddMenu = ({ x, y, menuRef, onCreateNote, onCreateFolder, onImportP
 
 const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSettings }: SidebarLayeredDirectoryProps) => {
   const navigate = useNavigate();
-  const { onToggleLeftPanel: outletToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
+  const { onOpenSettings: outletOpenSettings, onToggleLeftPanel: outletToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
   const { currentUser } = useAuthSession();
   const folderTagMode = useFolderTagModeStore((state) => state.folderTagMode);
   const setFolderTagMode = useFolderTagModeStore((state) => state.setFolderTagMode);
@@ -195,7 +194,6 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   const [, setProjectAddExpandedFolderIds] = useState<Set<string>>(() => new Set());
   const projectAddMenuRef = useRef<HTMLDivElement | null>(null);
   const [projectAddMenu, setProjectAddMenu] = useState<ProjectAddMenuState | null>(null);
-  const [isLocalSettingsDialogOpen, setIsLocalSettingsDialogOpen] = useState(false);
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const treeFolders = useMemo(() => folders as FolderTreeNode[], [folders]);
   const { rootFolders, getChildFolders, getNextOrderIndex } = useExplorerDerivedData({ treeFolders, treeCards: EMPTY_COLLECTION, cardSets: EMPTY_COLLECTION, documents: EMPTY_COLLECTION, isFiltering: false });
@@ -215,6 +213,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   const isScheduleActive = activeTab?.sectionKey === "schedule";
   const shouldShowCalendarContent = isScheduleActive && calendarContent !== undefined;
   const shouldShowDirectoryContent = !shouldShowCalendarContent;
+  const resolvedOnOpenSettings = onOpenSettings ?? outletOpenSettings;
   const resolvedOnToggleLeftPanel = onToggleLeftPanel ?? outletToggleLeftPanel;
   const { fileInputRef, handleToolbarAddDocument, currentFileAccept, handleToolbarFileInputChange } = useFolderDocumentUpload({ actionFolderId: selectedNavigationFolderId, getNextOrderIndex, setExpandedFolders: setProjectAddExpandedFolderIds });
 
@@ -282,13 +281,8 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   }, [openSearch]);
 
   const handleOpenSettings = useCallback(() => {
-    if (onOpenSettings) {
-      onOpenSettings();
-      return;
-    }
-
-    setIsLocalSettingsDialogOpen(true);
-  }, [onOpenSettings]);
+    resolvedOnOpenSettings();
+  }, [resolvedOnOpenSettings]);
 
   const handleDirectoryClickCapture = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
     if (!isCardSetEntityEventTarget(event.target)) return;
@@ -302,82 +296,79 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   }, [resolvedOnToggleLeftPanel]);
 
   return (
-    <>
-      <div className="app-layered-directory flex h-full min-h-0 shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased" onClickCapture={handleDirectoryClickCapture} onKeyDownCapture={handleDirectoryKeyDownCapture}>
-        <div className="app-layered-directory__primary-nav">
-          <div className="app-layered-directory__workspace-header">
-            <button type="button" className="app-layered-directory__workspace-toggle" onClick={resolvedOnToggleLeftPanel} aria-label="サイドバーを閉じる" disabled={!resolvedOnToggleLeftPanel}>
-              <SidebarOpenIcon className="app-layered-directory__workspace-toggle-icon" />
-            </button>
-            <button type="button" className="app-layered-directory__workspace-button" onClick={handleOpenProjectList} aria-label={`${workspaceName}を開く`}>
-              <span className="app-layered-directory__workspace-avatar" aria-hidden="true">{workspaceInitial}</span>
-              <span className="app-layered-directory__workspace-name">{workspaceName}</span>
-            </button>
-          </div>
-          <nav className="app-layered-directory__notion-nav" aria-label="ワークスペースナビゲーション">
-            <button type="button" className={`app-layered-directory__notion-action${isHomeActive ? " is-active" : ""}`} onClick={handleOpenHome} aria-current={isHomeActive ? "page" : undefined} aria-label={WORKSPACE_HOME_LABEL} title={WORKSPACE_HOME_LABEL}>
-              <HomeIcon className="app-layered-directory__notion-icon" />
-            </button>
-            <button type="button" className={`app-layered-directory__notion-action${isFolderActive ? " is-active" : ""}`} onClick={handleOpenProjectList} aria-current={isFolderActive ? "page" : undefined} aria-label={WORKSPACE_LIBRARY_LABEL} title={WORKSPACE_LIBRARY_LABEL}>
-              <ExplorerChromeFolderIcon className="app-layered-directory__notion-icon" />
-            </button>
-            <button type="button" className={`app-layered-directory__notion-action${isTagActive ? " is-active" : ""}`} onClick={handleOpenTagTree} aria-current={isTagActive ? "page" : undefined} aria-label={WORKSPACE_TAGS_LABEL} title={WORKSPACE_TAGS_LABEL}>
-              <StratisTagIcon className="app-layered-directory__notion-icon" />
-            </button>
-            <button type="button" className={`app-layered-directory__notion-action${isScheduleActive ? " is-active" : ""}`} onClick={handleOpenSchedule} aria-current={isScheduleActive ? "page" : undefined} aria-label={WORKSPACE_SCHEDULE_LABEL} title={WORKSPACE_SCHEDULE_LABEL}>
-              <CalendarIcon className="app-layered-directory__notion-icon" />
-            </button>
-            <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenExplore} aria-label={WORKSPACE_EXPLORE_LABEL} title={WORKSPACE_EXPLORE_LABEL}>
-              <GalleryIcon className="app-layered-directory__notion-icon" />
-            </button>
-            <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenSettings} aria-label={WORKSPACE_SETTINGS_LABEL} title={WORKSPACE_SETTINGS_LABEL}>
-              <SettingIcon className="app-layered-directory__notion-icon" />
-            </button>
-          </nav>
+    <div className="app-layered-directory flex h-full min-h-0 shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased" onClickCapture={handleDirectoryClickCapture} onKeyDownCapture={handleDirectoryKeyDownCapture}>
+      <div className="app-layered-directory__primary-nav">
+        <div className="app-layered-directory__workspace-header">
+          <button type="button" className="app-layered-directory__workspace-toggle" onClick={resolvedOnToggleLeftPanel} aria-label="サイドバーを閉じる" disabled={!resolvedOnToggleLeftPanel}>
+            <SidebarOpenIcon className="app-layered-directory__workspace-toggle-icon" />
+          </button>
+          <button type="button" className="app-layered-directory__workspace-button" onClick={handleOpenProjectList} aria-label={`${workspaceName}を開く`}>
+            <span className="app-layered-directory__workspace-avatar" aria-hidden="true">{workspaceInitial}</span>
+            <span className="app-layered-directory__workspace-name">{workspaceName}</span>
+          </button>
         </div>
-        {shouldShowDirectoryContent ? (
-          <>
-            <div className="app-layered-directory__section-strip">
-              {shouldShowFavoriteSection ? (
-                <section className="app-layered-directory__section app-layered-directory__section--favorites" aria-label={FAVORITE_SECTION_LABEL}>
-                  <h2 className="app-layered-directory__section-heading">{FAVORITE_SECTION_LABEL}</h2>
-                  <p className="app-layered-directory__empty-message">{FAVORITE_EMPTY_MESSAGE}</p>
-                </section>
-              ) : null}
-              <section className="app-layered-directory__section" aria-label={sectionLabel}>
-                <div className="app-layered-directory__section-heading-row">
-                  {folderTagMode !== "tag" && selectedFolder ? (
-                    <button type="button" className="app-layered-directory__section-heading-button" onClick={handleOpenProjectList} aria-label="プロジェクト一覧を開く">
-                      <span className="block truncate">{sectionLabel}</span>
-                      <IconChevronDown className="app-layered-directory__section-chevron" />
-                    </button>
-                  ) : (
-                    <h2 className="app-layered-directory__section-heading">{sectionLabel}</h2>
-                  )}
-                  <TagFilterPopover allTags={existingTagNames} ariaLabel={FILTER_ARIA_LABEL} className="app-layered-directory__add-button" />
-                  {folderTagMode === "tag" ? (
-                    <button type="button" onClick={handleCreateRootTag} aria-label={ADD_TAG_ARIA_LABEL} title={ADD_TAG_ARIA_LABEL} className="app-layered-directory__add-button">
-                      <IconPlus className="h-4 w-4" />
-                    </button>
-                  ) : (
-                    <button type="button" onClick={selectedFolder ? handleOpenProjectAddMenu : handleCreateRootFolder} aria-label={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} title={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} className="app-layered-directory__add-button">
-                      <IconPlus className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </section>
-            </div>
-            <input ref={fileInputRef} type="file" accept={currentFileAccept} className="hidden" tabIndex={-1} onChange={handleToolbarFileInputChange} />
-            <div className="min-h-0 flex-1">
-              {folderTagMode === "tag" ? <TagTreeSidebar /> : selectedNavigationFolderId ? <LibraryHierarchySidebar parentFolderId={selectedNavigationFolderId} /> : <ProjectListSidebar />}
-            </div>
-          </>
-        ) : null}
-        {shouldShowCalendarContent ? <div className="min-h-0 flex-1">{calendarContent}</div> : null}
-        {shouldShowDirectoryContent && projectAddMenu ? <ProjectAddMenu x={projectAddMenu.x} y={projectAddMenu.y} menuRef={projectAddMenuRef} onCreateNote={handleCreateSelectedFolderNote} onCreateFolder={handleCreateSelectedFolderChild} onImportPdf={handleImportSelectedFolderPdf} /> : null}
+        <nav className="app-layered-directory__notion-nav" aria-label="ワークスペースナビゲーション">
+          <button type="button" className={`app-layered-directory__notion-action${isHomeActive ? " is-active" : ""}`} onClick={handleOpenHome} aria-current={isHomeActive ? "page" : undefined} aria-label={WORKSPACE_HOME_LABEL} title={WORKSPACE_HOME_LABEL}>
+            <HomeIcon className="app-layered-directory__notion-icon" />
+          </button>
+          <button type="button" className={`app-layered-directory__notion-action${isFolderActive ? " is-active" : ""}`} onClick={handleOpenProjectList} aria-current={isFolderActive ? "page" : undefined} aria-label={WORKSPACE_LIBRARY_LABEL} title={WORKSPACE_LIBRARY_LABEL}>
+            <ExplorerChromeFolderIcon className="app-layered-directory__notion-icon" />
+          </button>
+          <button type="button" className={`app-layered-directory__notion-action${isTagActive ? " is-active" : ""}`} onClick={handleOpenTagTree} aria-current={isTagActive ? "page" : undefined} aria-label={WORKSPACE_TAGS_LABEL} title={WORKSPACE_TAGS_LABEL}>
+            <StratisTagIcon className="app-layered-directory__notion-icon" />
+          </button>
+          <button type="button" className={`app-layered-directory__notion-action${isScheduleActive ? " is-active" : ""}`} onClick={handleOpenSchedule} aria-current={isScheduleActive ? "page" : undefined} aria-label={WORKSPACE_SCHEDULE_LABEL} title={WORKSPACE_SCHEDULE_LABEL}>
+            <CalendarIcon className="app-layered-directory__notion-icon" />
+          </button>
+          <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenExplore} aria-label={WORKSPACE_EXPLORE_LABEL} title={WORKSPACE_EXPLORE_LABEL}>
+            <GalleryIcon className="app-layered-directory__notion-icon" />
+          </button>
+          <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenSettings} aria-label={WORKSPACE_SETTINGS_LABEL} title={WORKSPACE_SETTINGS_LABEL}>
+            <SettingIcon className="app-layered-directory__notion-icon" />
+          </button>
+        </nav>
       </div>
-      <SettingsWorkspaceDialog open={isLocalSettingsDialogOpen} onOpenChange={setIsLocalSettingsDialogOpen} />
-    </>
+      {shouldShowDirectoryContent ? (
+        <>
+          <div className="app-layered-directory__section-strip">
+            {shouldShowFavoriteSection ? (
+              <section className="app-layered-directory__section app-layered-directory__section--favorites" aria-label={FAVORITE_SECTION_LABEL}>
+                <h2 className="app-layered-directory__section-heading">{FAVORITE_SECTION_LABEL}</h2>
+                <p className="app-layered-directory__empty-message">{FAVORITE_EMPTY_MESSAGE}</p>
+              </section>
+            ) : null}
+            <section className="app-layered-directory__section" aria-label={sectionLabel}>
+              <div className="app-layered-directory__section-heading-row">
+                {folderTagMode !== "tag" && selectedFolder ? (
+                  <button type="button" className="app-layered-directory__section-heading-button" onClick={handleOpenProjectList} aria-label="プロジェクト一覧を開く">
+                    <span className="block truncate">{sectionLabel}</span>
+                    <IconChevronDown className="app-layered-directory__section-chevron" />
+                  </button>
+                ) : (
+                  <h2 className="app-layered-directory__section-heading">{sectionLabel}</h2>
+                )}
+                <TagFilterPopover allTags={existingTagNames} ariaLabel={FILTER_ARIA_LABEL} className="app-layered-directory__add-button" />
+                {folderTagMode === "tag" ? (
+                  <button type="button" onClick={handleCreateRootTag} aria-label={ADD_TAG_ARIA_LABEL} title={ADD_TAG_ARIA_LABEL} className="app-layered-directory__add-button">
+                    <IconPlus className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <button type="button" onClick={selectedFolder ? handleOpenProjectAddMenu : handleCreateRootFolder} aria-label={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} title={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} className="app-layered-directory__add-button">
+                    <IconPlus className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            </section>
+          </div>
+          <input ref={fileInputRef} type="file" accept={currentFileAccept} className="hidden" tabIndex={-1} onChange={handleToolbarFileInputChange} />
+          <div className="min-h-0 flex-1">
+            {folderTagMode === "tag" ? <TagTreeSidebar /> : selectedNavigationFolderId ? <LibraryHierarchySidebar parentFolderId={selectedNavigationFolderId} /> : <ProjectListSidebar />}
+          </div>
+        </>
+      ) : null}
+      {shouldShowCalendarContent ? <div className="min-h-0 flex-1">{calendarContent}</div> : null}
+      {shouldShowDirectoryContent && projectAddMenu ? <ProjectAddMenu x={projectAddMenu.x} y={projectAddMenu.y} menuRef={projectAddMenuRef} onCreateNote={handleCreateSelectedFolderNote} onCreateFolder={handleCreateSelectedFolderChild} onImportPdf={handleImportSelectedFolderPdf} /> : null}
+    </div>
   );
 };
 
