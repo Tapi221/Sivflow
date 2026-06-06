@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MobilePdfPages } from "./MobilePdfPages";
 import { PdfPane } from "./PdfPane";
+import { resolvePdfDocumentBlob } from "./resolvePdfDocumentBlob";
 import { createPdfDocumentUrlSource } from "./pdfDocumentSource";
 import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
 import { useAuthSession } from "@/contexts/AuthContext";
-import { getDocumentBlob } from "@/services/documentFileStore";
 import type { DocumentItem, PdfViewerState } from "@/types";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
 
@@ -41,19 +41,6 @@ const createResolvedLocalPdfSourceState = (source: PdfDocumentSource | null): Lo
   source,
 });
 
-const getUniqueValues = (values: Array<string | null | undefined>): string[] => {
-  return [...new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value)))];
-};
-
-const resolveDocumentFileIds = (document: Pick<DocumentItem, "id" | "localFileId">): string[] => {
-  return getUniqueValues([document.localFileId, document.id]);
-};
-
-const resolveDocumentBlobUserIds = (documentUserId: string | null | undefined, currentUserId: string | null | undefined): Array<string | undefined> => {
-  const userIds = getUniqueValues([documentUserId, currentUserId]);
-  return [...userIds, undefined];
-};
-
 const getIsMobilePdfViewport = (): boolean => {
   return typeof window !== "undefined" && window.matchMedia(MOBILE_PDF_VIEWPORT_MEDIA_QUERY).matches;
 };
@@ -81,20 +68,6 @@ const createLocalPdfBlobSource = (blob: Blob): LocalPdfBlobSource => {
   };
 };
 
-const findLocalPdfBlob = async (document: Pick<DocumentItem, "id" | "localFileId" | "userId">, currentUserId: string | null | undefined): Promise<Blob | null> => {
-  const fileIds = resolveDocumentFileIds(document);
-  const userIds = resolveDocumentBlobUserIds(document.userId, currentUserId);
-
-  for (const userId of userIds) {
-    for (const fileId of fileIds) {
-      const blob = await getDocumentBlob(fileId, { userId });
-      if (blob) return blob;
-    }
-  }
-
-  return null;
-};
-
 const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentPaneProps) => {
   const { currentUser } = useAuthSession();
   const currentUserId = currentUser?.uid ?? null;
@@ -116,7 +89,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     setLocalSource(createPendingLocalPdfSourceState());
 
     const loadLocalSource = async () => {
-      const blob = await findLocalPdfBlob(document, currentUserId);
+      const blob = await resolvePdfDocumentBlob(document, currentUserId);
       if (isCancelled) return;
 
       if (!blob) {
@@ -147,7 +120,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
         localObjectUrlRef.current = null;
       }
     };
-  }, [currentUserId, document.id, document.localFileId, document.userId]);
+  }, [currentUserId, document.googleDriveFileId, document.id, document.localFileId, document.userId]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
