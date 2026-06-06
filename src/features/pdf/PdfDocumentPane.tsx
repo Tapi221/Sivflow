@@ -5,4 +5,5 @@ import { createPdfDocumentDataSource, createPdfDocumentUrlSource } from "./pdfDo
 import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getDocumentBlob } from "@/services/documentFileStore";
-import
+import type { DocumentItem, PdfViewerState } from "@/types";
+import type {
