@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
+import { toPdfDocumentLoadSource } from "./pdfDocumentSource";
 import type { PdfViewerState } from "@/types";
 import { cn } from "@/lib/utils";
+import type { PdfDocumentSource } from "./pdfDocumentSource";
 
 type MobilePdfPagesProps = {
-  sourceUrl: string | null;
+  source: PdfDocumentSource | null;
   className?: string;
   viewerState?: PdfViewerState | null;
   viewerOptions?: {
@@ -50,10 +52,9 @@ const createPdfDocumentLoadOptions = (viewerOptions: MobilePdfPagesProps["viewer
   };
 };
 
-const loadPdfDocument = async (sourceUrl: string | null, viewerOptions: MobilePdfPagesProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
-  const normalizedSourceUrl = sourceUrl?.trim();
-  if (!normalizedSourceUrl) throw new Error("表示できるPDFソースがありません。");
-  return pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions), url: normalizedSourceUrl }).promise;
+const loadPdfDocument = async (source: PdfDocumentSource | null, viewerOptions: MobilePdfPagesProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
+  if (!source) throw new Error("表示できるPDFソースがありません。");
+  return pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions), ...toPdfDocumentLoadSource(source) }).promise;
 };
 
 const getSafePageNumber = (pageNumber: number | null | undefined, pageCount: number): number => {
@@ -123,7 +124,7 @@ const resolveVisiblePageNumber = (container: HTMLDivElement, pageRecords: Mobile
   return nearestPageNumber;
 };
 
-const MobilePdfPages = ({ sourceUrl, className, viewerState = null, viewerOptions, onViewerStateChange }: MobilePdfPagesProps) => {
+const MobilePdfPages = ({ source, className, viewerState = null, viewerOptions, onViewerStateChange }: MobilePdfPagesProps) => {
   const viewerEnableXfa = viewerOptions?.enableXfa;
   const viewerUseSystemFonts = viewerOptions?.useSystemFonts;
   const viewerCMapUrl = viewerOptions?.cMapUrl;
@@ -217,7 +218,7 @@ const MobilePdfPages = ({ sourceUrl, className, viewerState = null, viewerOption
     setLoadError(null);
     setIsLoading(true);
 
-    void loadPdfDocument(sourceUrl, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then(async (nextPdfDocument) => {
+    void loadPdfDocument(source, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then(async (nextPdfDocument) => {
       if (isCancelled) {
         void nextPdfDocument.destroy();
         return;
@@ -264,7 +265,7 @@ const MobilePdfPages = ({ sourceUrl, className, viewerState = null, viewerOption
         scrollFrameRef.current = null;
       }
     };
-  }, [layoutRevision, scheduleCurrentPageUpdate, sourceUrl, viewerCMapUrl, viewerEnableXfa, viewerStandardFontDataUrl, viewerUseSystemFonts]);
+  }, [layoutRevision, scheduleCurrentPageUpdate, source, viewerCMapUrl, viewerEnableXfa, viewerStandardFontDataUrl, viewerUseSystemFonts]);
 
   return (
     <div className={cn("flex h-full min-h-[100dvh] min-w-0 bg-[var(--carvepanel-surface)] text-[#2f2f2f]", className)}>
