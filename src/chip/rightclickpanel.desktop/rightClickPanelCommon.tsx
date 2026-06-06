@@ -8,4 +8,6 @@ type RightClickPanelSurfaceProps = {
   panelRef: RefObject<HTMLDivElement | null>;
   noDragStyle?: CSSProperties;
   className?: string;
-  role?:
+  role?: string;
+  ariaLabel?: string;
+  panelId?: Right
