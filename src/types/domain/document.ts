@@ -7,7 +7,3 @@ export type PdfSidePanelTab = "bookmarks" | "highlights" | "ocr" | "outline" | "
 export type LegacyDocumentFields = { folder_id?: string | null; file_name?: string | null; order_index?: number; };
 
 export interface PdfViewerState {
-  currentPage?: number;
-  scale?: number;
-  fitMode?: "width" | "manual";
-  pageLayoutMode?: PdfPageLayoutMode;
