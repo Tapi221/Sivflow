@@ -39,6 +39,7 @@ type GoogleAccountSectionProps = { account: GoogleAccountDisplay; projectCalenda
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 const ADD_PROJECT_EMPTY_MESSAGE = "プロジェクト名を入力してください";
 const PROJECT_LINKED_GOOGLE_CALENDARS_LABEL = "プロジェクトに追加したカレンダー";
+const GOOGLE_CALENDAR_SECTION_LABEL = "Google Calendar";
 const ADD_GOOGLE_CALENDAR_LABEL = "Googleカレンダーを追加";
 const CONNECTING_GOOGLE_CALENDAR_LABEL = "接続中...";
 const CALENDAR_CONTEXT_MENU_DIMENSIONS = { width: CALENDAR_LIST_MENU_WIDTH, height: CALENDAR_LIST_MENU_HEIGHT };
@@ -238,7 +239,7 @@ const GoogleAccountsSection = ({ accounts, isConnecting, projectCalendarLinks, g
   }, [isConnecting, onAddCalendar]);
 
   return (
-    <div className="mt-2">
+    <div className="mt-0.5">
       {accounts.length === 0 ? (
         <button type="button" className="ml-2 flex h-7 items-center gap-1.5 rounded-[10px] px-1.5 text-left text-[11px] font-semibold text-[#8c9099] transition hover:bg-[#f7f7f7] hover:text-[#5f6574] active:bg-[#f1f1f1] disabled:cursor-not-allowed disabled:opacity-60" onClick={handleAddCalendar} disabled={isConnecting}>
           <GoogleIcon className="size-[16px] shrink-0 text-[#5f6368]" label="Google" />
@@ -265,6 +266,11 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
   const handleStartAddingProject = useCallback(() => {
     setIsAddingProject(true);
   }, []);
+
+  const handleAddGoogleCalendar = useCallback(() => {
+    if (isAnyCalendarConnecting) return;
+    onAddCalendar();
+  }, [isAnyCalendarConnecting, onAddCalendar]);
 
   const handleOpenCalendarContextMenu = useCallback((event: ContextMenuTriggerEvent, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem) => {
     event.preventDefault();
@@ -325,8 +331,16 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
           <div className="max-h-[55%] shrink-0 overflow-y-auto pb-1">
             <AppProjectsSection projects={appProjects} isAdding={isAddingProject} onAddProject={onAddProject} onToggleProject={onToggleProject} onOpenProjectLinksContextMenu={handleOpenProjectLinksContextMenu} onAddingChange={setIsAddingProject} />
           </div>
+          <div className="shrink-0 pt-2">
+            <div className="app-layered-directory__section-heading-row">
+              <h2 className="app-layered-directory__section-heading">{GOOGLE_CALENDAR_SECTION_LABEL}</h2>
+              <button type="button" className="app-layered-directory__add-button" onClick={handleAddGoogleCalendar} disabled={isAnyCalendarConnecting} aria-label={ADD_GOOGLE_CALENDAR_LABEL} title={ADD_GOOGLE_CALENDAR_LABEL}>
+                <IconPlus className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
           <div className="min-h-0 flex-1 overflow-y-auto pt-1">
-            <GoogleAccountsSection accounts={googleAccounts} isConnecting={isAnyCalendarConnecting} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} onAddCalendar={onAddCalendar} onToggleCalendar={onToggleCalendar} onOpenCalendarContextMenu={handleOpenCalendarContextMenu} onReconnectAccount={onReconnectAccount} />
+            <GoogleAccountsSection accounts={googleAccounts} isConnecting={isAnyCalendarConnecting} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} onAddCalendar={handleAddGoogleCalendar} onToggleCalendar={onToggleCalendar} onOpenCalendarContextMenu={handleOpenCalendarContextMenu} onReconnectAccount={onReconnectAccount} />
           </div>
         </div>
       </nav>
