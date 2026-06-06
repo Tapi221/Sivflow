@@ -6,8 +6,6 @@ type PdfDocumentPaneProps = {
   onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
 };
 
-const PdfDocumentPane = ({ document, onDocumentUpdate }: PdfDocumentPaneProps) => {
-  return <PdfPane document={document} onDocumentUpdate={onDocumentUpdate} />;
-};
+const PdfDocumentPane = ({ document, onDocumentUpdate }: PdfDocumentPaneProps) => <PdfPane document={document} onDocumentUpdate={onDocumentUpdate} />;
 
-export { PdfDocument
+export { PdfDocumentPane };
