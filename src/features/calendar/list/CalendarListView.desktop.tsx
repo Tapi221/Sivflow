@@ -1,5 +1,6 @@
-import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MutableRefObject, type UIEvent } from "react";
-import { differenceInCalendarDays, format } from "date-fns";
+import { memo, useMemo, type MutableRefObject } from "react";
+import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
-import { areListVirtualRangesEqual, buildListPlacementDays, buildListVirtualMetrics, getEventInstanceKey, get
+import { buildListPlacementDays, getEventInstanceKey, type CalendarListPlacementDay } from "@/chip/eventchip/EventChip.list.placement";
+import type { ScheduleVirtualRail } from "@/features
