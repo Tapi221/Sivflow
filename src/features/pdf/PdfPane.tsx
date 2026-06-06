@@ -116,13 +116,13 @@ const loadPdfDocument = async (source: PdfDocumentSource | null, viewerOptions: 
 
 const releasePdfViewerDocument = (pdfViewer: PdfViewerInstance, linkService: PdfLinkServiceInstance, pdfDocument: PdfDocumentProxy | null): void => {
   try {
-    pdfViewer.setDocument(null);
+    pdfViewer.cleanup();
   } catch {
     // PDF.js viewer cleanup should not block React unmount.
   }
 
   try {
-    linkService.setDocument(null);
+    linkService.setDocument(null, null);
   } catch {
     // PDF.js link service cleanup should not block React unmount.
   }
@@ -299,7 +299,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
 
     removeEventListeners.push(addPdfViewerEventListener(eventBus, "scalechanging", (event: unknown) => {
       if (isCancelled) return;
-      const scale = (event as PdfScaleChangingEvent).scale;
+      const scale = Number((event as PdfScaleChangingEvent).scale);
       if (!Number.isFinite(scale)) return;
       const fitMode = isApplyingFitScaleRef.current ? "width" : "manual";
       isApplyingFitScaleRef.current = false;
