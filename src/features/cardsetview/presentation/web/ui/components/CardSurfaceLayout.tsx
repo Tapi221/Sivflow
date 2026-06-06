@@ -5,5 +5,4 @@ export type CardSurfaceFace = "question" | "answer";
 
 type CardSurfaceLayoutProps = { cardLayoutMode: CardLayoutMode; questionNode: ReactNode; answerNode: ReactNode; flipNode?: ReactNode };
 
-export function CardSurfaceLayout(props: CardSurfaceLayoutProps): ReactNode {
-  if (props.cardLayoutMode === "split") return [props
+export const CardSurfaceLayout = ({ cardLayoutMode, questionNode, answerNode, flipNode }: CardSurfaceLayoutProps) => cardLayoutMode === "split
