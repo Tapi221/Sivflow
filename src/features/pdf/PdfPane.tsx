@@ -3,11 +3,13 @@ import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
 import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/web/pdf_viewer.mjs";
 import "pdfjs-dist/web/pdf_viewer.css";
+import { toPdfDocumentLoadSource } from "./pdfDocumentSource";
 import type { PdfViewerState } from "@/types";
 import { cn } from "@/lib/utils";
+import type { PdfDocumentSource } from "./pdfDocumentSource";
 
 type PdfPaneProps = {
-  sourceUrl: string | null;
+  source: PdfDocumentSource | null;
   className?: string;
   viewerState?: PdfViewerState | null;
   viewerOptions?: {
@@ -107,10 +109,9 @@ const createPdfDocumentLoadOptions = (viewerOptions: PdfPaneProps["viewerOptions
   };
 };
 
-const loadPdfDocument = async (sourceUrl: string | null, viewerOptions: PdfPaneProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
-  const normalizedSourceUrl = sourceUrl?.trim();
-  if (!normalizedSourceUrl) throw new Error("表示できるPDFソースがありません。");
-  return pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions), url: normalizedSourceUrl }).promise;
+const loadPdfDocument = async (source: PdfDocumentSource | null, viewerOptions: PdfPaneProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
+  if (!source) throw new Error("表示できるPDFソースがありません。");
+  return pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions), ...toPdfDocumentLoadSource(source) }).promise;
 };
 
 const releasePdfViewerDocument = (pdfViewer: PdfViewerInstance, linkService: PdfLinkServiceInstance, pdfDocument: PdfDocumentProxy | null): void => {
@@ -141,7 +142,7 @@ const addPdfViewerEventListener = (eventBus: PdfEventBusLike, eventName: string,
   };
 };
 
-const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onViewerStateChange }: PdfPaneProps) => {
+const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewerStateChange }: PdfPaneProps) => {
   const viewerEnableXfa = viewerOptions?.enableXfa;
   const viewerUseSystemFonts = viewerOptions?.useSystemFonts;
   const viewerCMapUrl = viewerOptions?.cMapUrl;
@@ -305,7 +306,7 @@ const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onVi
       updateViewerState({ scale: clampPdfScale(scale), fitMode });
     }));
 
-    void loadPdfDocument(sourceUrl, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then((nextPdfDocument) => {
+    void loadPdfDocument(source, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then((nextPdfDocument) => {
       if (isCancelled) {
         void nextPdfDocument.destroy();
         return;
@@ -333,7 +334,7 @@ const PdfPane = ({ sourceUrl, className, viewerState = null, viewerOptions, onVi
       viewerElement.replaceChildren();
       if (pdfViewerRef.current === pdfViewer) pdfViewerRef.current = null;
     };
-  }, [sourceUrl, updateViewerState, viewerCMapUrl, viewerEnableXfa, viewerStandardFontDataUrl, viewerUseSystemFonts]);
+  }, [source, updateViewerState, viewerCMapUrl, viewerEnableXfa, viewerStandardFontDataUrl, viewerUseSystemFonts]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
