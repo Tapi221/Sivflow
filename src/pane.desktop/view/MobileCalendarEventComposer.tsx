@@ -238,8 +238,8 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, projectCa
           <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
             <div className="flex min-h-[52px] items-center justify-between border-b border-[#e2e8f0] px-4">
               <span className="text-[17px] tracking-[-0.03em] text-[#111827]">終日</span>
-              <button type="button" role="switch" aria-checked={form.isAllDay} className={cn("relative h-[31px] w-[51px] rounded-full transition", form.isAllDay ? "bg-[#4f6f9f]" : "bg-[#d8dee8]")} onClick={() => setFormValue({ isAllDay: !form.isAllDay })}>
-                <span className={cn("absolute top-[2px] h-[27px] w-[27px] rounded-full bg-white shadow-[0_2px_4px_rgba(33,43,61,0.22)] transition-transform", form.isAllDay ? "translate-x-[22px]" : "translate-x-[2px]")} />
+              <button type="button" role="switch" aria-checked={form.isAllDay} aria-label="終日" className={cn("relative h-[31px] w-[51px] shrink-0 overflow-hidden rounded-full border-0 p-0 transition appearance-none", form.isAllDay ? "bg-[#4f6f9f]" : "bg-[#d8dee8]")} onClick={() => setFormValue({ isAllDay: !form.isAllDay })}>
+                <span className={cn("absolute left-0 top-[2px] h-[27px] w-[27px] rounded-full bg-white shadow-[0_2px_4px_rgba(33,43,61,0.22)] transition-transform", form.isAllDay ? "translate-x-[22px]" : "translate-x-[2px]")} />
               </button>
             </div>
             <label className="flex min-h-[52px] items-center justify-between gap-3 border-b border-[#e2e8f0] px-4">
