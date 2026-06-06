@@ -1,10 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
-type Options = { onBeforePrint?: () => void; onPrintError?: (error: unknown) => void };
-
-const PANEL_CLASS = "calendar-print-panel";
-
-export function useCalendarPrintController(_options: Options = {}) {
-  const [isPrintPanelActive] = useState(false);
+export function useCalendarPrintController() {
   const requestPrint = useCallback(() => window.print(), []);
-  return { isPrintPanelActive, printPanelClassName: PANEL
+  return { isPrintPanelActive: false, printPanelClassName: "calendar-print-panel", requestPrint };
+}
