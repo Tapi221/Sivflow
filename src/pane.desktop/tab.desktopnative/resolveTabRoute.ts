@@ -1,6 +1,7 @@
 import type { WorkspaceTab } from "./Tab";
 
-const encodeRouteSegment = (value: string): string => encodeURIComponent(value);
-const getExplorerRouteId = (tabId: string): string => tabId.startsWith("explorer:") ? tabId.slice("explorer:".length) : tabId;
-
-export const resolveWorkspaceTabRoute = (tab: WorkspaceTab): string => tab.kind === "route" ? tab.route
+export const resolveWorkspaceTabRoute = (tab: WorkspaceTab): string => {
+  if (tab.kind === "route") return tab.routePath;
+  if (tab.kind === "explorer") return "/library/explorer/" + encodeURIComponent(tab.id.replace("explorer:", ""));
+  if (tab.kind === "document") return "/library/documents/" + encodeURIComponent(tab.documentId);
+ 
