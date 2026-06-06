@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useLayoutEffect, useMemo, type CSSProperties, type ReactNode } from "react";
 import { useOutletContext } from "react-router-dom";
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
@@ -7,7 +7,6 @@ import { areExplorerBreadcrumbContextsEqual, EMPTY_EXPLORER_BREADCRUMB_CONTEXT, 
 import { buildFolderPathCrumbs } from "@/features/breadcrumbs/builders";
 import { WorkspaceBreadcrumbs } from "@/features/breadcrumbs/components/WorkspaceBreadcrumbs";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
-import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
@@ -42,12 +41,6 @@ type SidebarInteractionRegionProps = {
 type CollapsedSidebarToggleProps = {
   isVisible: boolean;
   onToggleLeftPanel: () => void;
-};
-
-type SettingsDialogHostProps = {
-  children: ReactNode;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
 };
 
 const COLLAPSED_SIDEBAR_TOGGLE_CLASS_NAME = "pointer-events-auto absolute left-3 top-3 z-[90] flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(0,0,0,0.05)] bg-[rgba(255,255,255,0.82)] p-0 text-[#8c8c8c] shadow-[0_1px_2px_rgba(15,23,42,0.08)] outline-none backdrop-blur-xl transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
@@ -116,15 +109,6 @@ const CollapsedSidebarToggle = ({ isVisible, onToggleLeftPanel }: CollapsedSideb
     <button type="button" className={COLLAPSED_SIDEBAR_TOGGLE_CLASS_NAME} onClick={onToggleLeftPanel} aria-label="サイドバーを開く" title="サイドバーを開く">
       <SidebarOpenIcon className={COLLAPSED_SIDEBAR_TOGGLE_ICON_CLASS_NAME} />
     </button>
-  );
-};
-
-const SettingsDialogHost = ({ children, open, onOpenChange }: SettingsDialogHostProps) => {
-  return (
-    <>
-      {children}
-      <SettingsWorkspaceDialog open={open} onOpenChange={onOpenChange} />
-    </>
   );
 };
 
@@ -202,24 +186,20 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
 };
 
 const WorkspaceScreen = () => {
-  const { isLeftPanelCollapsed = false, onToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
+  const { isLeftPanelCollapsed = false, onOpenSettings, onToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
-  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const libraryExplorerState = useMemo(() => getLibraryExplorerState(activeTab), [activeTab]);
   const explorerTabId = useMemo(() => getExplorerTabId(activeTab), [activeTab]);
-  const handleOpenSettings = useCallback(() => setIsSettingsDialogOpen(true), []);
 
-  if (libraryExplorerState) return <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}><ExplorerWorkspaceContent explorerState={libraryExplorerState} explorerTabId={explorerTabId} isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={handleOpenSettings} onToggleLeftPanel={onToggleLeftPanel} /></SettingsDialogHost>;
+  if (libraryExplorerState) return <ExplorerWorkspaceContent explorerState={libraryExplorerState} explorerTabId={explorerTabId} isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />;
 
   return (
-    <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
-      <div className="relative h-full min-h-0 w-full overflow-hidden">
-        <CollapsedSidebarToggle isVisible={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />
-        <CalendarScheduleScreen isLeftPanelCollapsed={isLeftPanelCollapsed} />
-      </div>
-    </SettingsDialogHost>
+    <div className="relative h-full min-h-0 w-full overflow-hidden">
+      <CollapsedSidebarToggle isVisible={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />
+      <CalendarScheduleScreen isLeftPanelCollapsed={isLeftPanelCollapsed} />
+    </div>
   );
 };
 
