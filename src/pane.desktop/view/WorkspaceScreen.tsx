@@ -15,6 +15,7 @@ import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
+import "@/pane.desktop/leftpane/sidebar.calendar-sidebar-scroll.css";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceExplorerTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import type { DocumentItem, Folder, SelectedExplorerItem } from "@/types";
