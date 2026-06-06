@@ -16,7 +16,7 @@ type MockCalendarEventChipWeekdayProps = {
 };
 
 const HOUR_ROW_HEIGHT_PX = 72;
-const TIME_LABEL_COLOR_CLASS = "text-[#b8bcc5]";
+const TIME_LABEL_COLOR_CLASS = "text-[var(--calendar-time-label-color)]";
 const TIME_LABEL_BACKGROUND_CLASS = "bg-white";
 const TIME_LABEL_FONT_CLASS = "font-medium";
 const ALL_DAY_LABEL_RIGHT_PADDING_CLASS = "pr-3";
