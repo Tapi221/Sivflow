@@ -7,14 +7,4 @@ const SONNER_TOAST_CLASS_NAMES = {
   actionButton: "!rounded-[7px] !bg-transparent !text-[#111111]",
 } as const;
 
-const SONNER_TOAST_STYLE = {
-  width: "236px",
-  minHeight: "36px",
-  padding: "8px 10px",
-} as const;
-
-const AppSonnerToaster = () => (
-  <Toaster
-    position="bottom-right"
-    visibleToasts={3}
-    gap={6}
+const AppSonnerToaster = () => <Toaster position="bottom-right" toastOptions={{ classNames: SONNER_TOAST_CLASS
