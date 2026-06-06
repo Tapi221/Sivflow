@@ -3,9 +3,6 @@ import { PdfPane } from "./PdfPane";
 import { createPdfDocumentUrlSource } from "./pdfDocumentSource";
 import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
 
-type PdfDocumentPaneProps = {
-  document: DocumentItem;
-  onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
-};
+type PdfDocumentPaneProps = { document: DocumentItem; onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void };
 
-const PdfDocumentPane = ({ document, onDocumentUpdate }: PdfDocumentPaneProps
+const PdfDocumentPane = ({ document, onDocumentUpdate }: PdfDocumentPaneProps) =>
