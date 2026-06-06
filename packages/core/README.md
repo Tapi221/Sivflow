@@ -1,4 +1,4 @@
-# @manifolia/core
+# @sivflow/core
 
 全 JS 系で共有する純粋ロジックを置く。
 

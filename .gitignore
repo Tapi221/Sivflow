@@ -54,7 +54,6 @@ debug_*.txt
 *.sw?
 
 # Nested workspace folder (avoid separate repo/worktree)
-FlashCard-Master/
 
 # Legacy local duplicate workspace folder
 package/
