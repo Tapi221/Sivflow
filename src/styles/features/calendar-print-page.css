@@ -15,4 +15,6 @@
     }
 
     body.calendar-printing .calendar-print-panel {
-      position: absolute !
+      position: absolute !important;
+      inset: 0 auto auto 0 !important;
+     
