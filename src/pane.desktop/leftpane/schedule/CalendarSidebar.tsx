@@ -110,6 +110,12 @@ const IconPlus = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const GoogleCalendarHeadingSvg = () => (
+  <svg aria-hidden="true" className="block h-4 w-[101px] text-[#111111]" viewBox="0 0 101 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <text x="0" y="13" fill="currentColor" fontFamily="var(--app-font-family-sidebar)" fontSize="13" fontWeight="700" letterSpacing="0" textRendering="geometricPrecision">{GOOGLE_CALENDAR_SECTION_LABEL}</text>
+  </svg>
+);
+
 const GoogleCalendarSourceRow = ({ account, calendar, color, onToggleCalendar, onOpenCalendarContextMenu }: GoogleCalendarSourceRowProps) => (
   <div onContextMenu={(event) => onOpenCalendarContextMenu(event, account, calendar)}>
     <SelectableGoogleSourceRow id={calendar.id} label={calendar.summary} checked={account.selectedCalendarIds.has(calendar.id)} color={color} onToggle={onToggleCalendar} />
@@ -333,7 +339,9 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
           </div>
           <div className="shrink-0 pt-2">
             <div className="app-layered-directory__section-heading-row">
-              <h2 className="app-layered-directory__section-heading">{GOOGLE_CALENDAR_SECTION_LABEL}</h2>
+              <h2 className="app-layered-directory__section-heading" aria-label={GOOGLE_CALENDAR_SECTION_LABEL}>
+                <GoogleCalendarHeadingSvg />
+              </h2>
               <button type="button" className="app-layered-directory__add-button" onClick={handleAddGoogleCalendar} disabled={isAnyCalendarConnecting} aria-label={ADD_GOOGLE_CALENDAR_LABEL} title={ADD_GOOGLE_CALENDAR_LABEL}>
                 <IconPlus className="h-4 w-4" />
               </button>
