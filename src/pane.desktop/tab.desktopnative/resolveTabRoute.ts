@@ -1,7 +1,3 @@
-import type { WorkspaceTab } from "./Tab";
-
-export const resolveWorkspaceTabRoute = (tab: WorkspaceTab): string => {
-  if (tab.kind === "route") return tab.routePath;
-  if (tab.kind === "explorer") return "/library/explorer/" + encodeURIComponent(tab.id.replace("explorer:", ""));
-  if (tab.kind === "document") return "/library/documents/" + encodeURIComponent(tab.documentId);
- 
+import{type WorkspaceTab as T}from"./Tab";
+const e=encodeURIComponent;
+export const resolveWorkspaceTabRoute=(t:T)=>t.kind=="route"?t.routePath:t.kind=="explorer"?"/library/explorer/"+e(t.id.slice(9)):t.kind=="document"?"/library/documents/"+e(t.documentId):"/library/cards/"+e(t.cardId);
