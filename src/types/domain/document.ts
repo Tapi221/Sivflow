@@ -4,44 +4,4 @@ import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 export type DocumentKind = "pdf";
 export type PdfPageLayoutMode = "single" | "double";
 export type PdfSidePanelTab = "bookmarks" | "highlights" | "ocr" | "outline" | "thumbnails";
-
-export interface PdfViewerState {
-  currentPage?: number;
-  scale?: number;
-  fitMode?: "width" | "manual";
-  pageLayoutMode?: PdfPageLayoutMode;
-  bookmarkPages?: number[];
-  sidePanelTab?: PdfSidePanelTab;
-  thumbnailOrder?: number[];
-  markPages?: Record<string, number>;
-  historyBackPages?: number[];
-  historyForwardPages?: number[];
-}
-
-export interface DocumentItem extends BaseEntity {
-  kind: DocumentKind;
-  folderId: string;
-  orderIndex: number;
-  title: string;
-  fileName: string;
-  mimeType: string;
-  sizeBytes: number;
-  blobUrl?: BlobUrl | null;
-  localUrl?: BlobUrl | null;
-  remoteUrl?: StorageUrl | null;
-  localFileId?: string | null;
-  storagePath?: string | null;
-  downloadUrl?: string | null;
-  thumbnailUrl?: string;
-  tags?: string[];
-  pageCount?: number | null;
-  uploadStatus?: "pending" | "queued" | "uploading" | "ready" | "failed";
-  googleDriveFileId?: string | null;
-  googleDriveWebViewLink?: string | null;
-  googleDriveWebContentLink?: string | null;
-  documentId?: string;
-  viewerState?: PdfViewerState | null;
-}
-
-export type Document = DocumentItem;
-export type PdfDocument = DocumentItem;
+export type LegacyDocumentFields = { folder_id?: string | null; file_name?: string | null; order_index?: number
