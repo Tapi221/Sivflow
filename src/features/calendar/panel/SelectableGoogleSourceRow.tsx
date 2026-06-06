@@ -17,23 +17,22 @@ type SourceRowMarkerProps = {
 const GOOGLE_SOURCE_ROW_CLASS_NAME = "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
 const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#85827e]";
 const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#85827e] opacity-70";
-const SOURCE_ROW_MARKER_CLASS_NAME = "relative flex h-3 w-3 shrink-0 items-center justify-center rounded-[3px] border transition-all duration-150";
-const SOURCE_ROW_MARKER_CHECK_CLASS_NAME = "h-2 w-2 text-white transition-opacity duration-150";
-const SOURCE_ROW_UNCHECKED_MARKER_COLOR = "#c7c7cc";
+const SOURCE_ROW_MARKER_CLASS_NAME = "relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-white transition-all duration-150";
+const SOURCE_ROW_MARKER_DOT_CLASS_NAME = "h-2.5 w-2.5 rounded-full bg-white transition-all duration-150";
+const SOURCE_ROW_UNCHECKED_MARKER_COLOR = "#d8d8dc";
+const SOURCE_ROW_MARKER_SHADOW = "0 1px 2px rgba(15, 23, 42, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.72)";
 
 const createSourceRowMarkerStyle = (color: string, checked: boolean): CSSProperties => ({
-  "--source-row-marker-color": checked ? color : SOURCE_ROW_UNCHECKED_MARKER_COLOR,
-  backgroundColor: checked ? "color-mix(in srgb, var(--source-row-marker-color) 58%, white 42%)" : "transparent",
-  borderColor: checked ? "transparent" : "color-mix(in srgb, var(--source-row-marker-color) 38%, white 62%)",
-  color: checked ? "#ffffff" : "transparent",
+  "--source-row-marker-color": color,
+  backgroundColor: checked ? "var(--source-row-marker-color)" : "#ffffff",
+  borderColor: checked ? "var(--source-row-marker-color)" : SOURCE_ROW_UNCHECKED_MARKER_COLOR,
+  boxShadow: SOURCE_ROW_MARKER_SHADOW,
 } as CSSProperties);
 
 const SourceRowMarker = ({ checked, color }: SourceRowMarkerProps) => {
   return (
-    <span className={cn(SOURCE_ROW_MARKER_CLASS_NAME, !checked && "opacity-80")} style={createSourceRowMarkerStyle(color, checked)} aria-hidden="true">
-      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn(SOURCE_ROW_MARKER_CHECK_CLASS_NAME, !checked && "opacity-0")}>
-        <path d="M3.25 8.35L6.55 11.55L12.9 4.65" stroke="currentColor" strokeWidth="2.35" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+    <span className={SOURCE_ROW_MARKER_CLASS_NAME} style={createSourceRowMarkerStyle(color, checked)} aria-hidden="true">
+      <span className={cn(SOURCE_ROW_MARKER_DOT_CLASS_NAME, checked ? "scale-100 opacity-100" : "scale-75 opacity-0")} />
     </span>
   );
 };
