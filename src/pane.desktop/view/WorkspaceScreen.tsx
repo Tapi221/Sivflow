@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useOutletContext } from "react-router-dom";
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
