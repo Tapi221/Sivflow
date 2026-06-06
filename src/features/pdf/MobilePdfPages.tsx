@@ -67,11 +67,30 @@ const getMobilePdfRenderWidth = (container: HTMLDivElement): number => {
   return Math.min(MOBILE_PDF_MAX_RENDER_WIDTH_PX, Math.max(MOBILE_PDF_MIN_RENDER_WIDTH_PX, availableWidth));
 };
 
+const getMobilePdfPageRenderOrder = (pageCount: number, initialPage: number): number[] => {
+  const pageNumbers = Array.from({ length: pageCount }, (_, index) => index + 1);
+  if (initialPage <= DEFAULT_PDF_PAGE) return pageNumbers;
+  return [initialPage, ...pageNumbers.filter((pageNumber) => pageNumber !== initialPage)];
+};
+
+const waitForNextPaint = (): Promise<void> => {
+  return new Promise((resolve) => window.requestAnimationFrame(() => resolve()));
+};
+
 const createMobilePdfPageWrapper = (pageNumber: number): HTMLDivElement => {
   const wrapper = document.createElement("div");
   wrapper.dataset.pageNumber = String(pageNumber);
   wrapper.className = "mx-auto overflow-hidden rounded-[8px] border border-[#ded8cf] bg-white shadow-sm";
   return wrapper;
+};
+
+const createMobilePdfPageRecords = (pageCount: number, pagesContainer: HTMLDivElement): MobilePdfPageRecord[] => {
+  return Array.from({ length: pageCount }, (_, index) => {
+    const pageNumber = index + 1;
+    const wrapper = createMobilePdfPageWrapper(pageNumber);
+    pagesContainer.appendChild(wrapper);
+    return { pageNumber, wrapper };
+  });
 };
 
 const renderMobilePdfPage = async (page: PdfPageProxy, renderWidth: number, wrapper: HTMLDivElement): Promise<void> => {
@@ -92,7 +111,7 @@ const renderMobilePdfPage = async (page: PdfPageProxy, renderWidth: number, wrap
   canvas.style.width = `${Math.floor(viewport.width)}px`;
   canvas.style.height = `${Math.floor(viewport.height)}px`;
   wrapper.style.width = canvas.style.width;
-  wrapper.appendChild(canvas);
+  wrapper.replaceChildren(canvas);
 
   const transform = pixelRatio === 1 ? undefined : [pixelRatio, 0, 0, pixelRatio, 0, 0];
   await page.render({ canvas, canvasContext, viewport, transform } as Parameters<PdfPageProxy["render"]>[0]).promise;
@@ -226,26 +245,37 @@ const MobilePdfPages = ({ source, className, viewerState = null, viewerOptions, 
 
       loadedPdfDocument = nextPdfDocument;
       const renderWidth = getMobilePdfRenderWidth(container);
-      const pageRecords: MobilePdfPageRecord[] = [];
+      const initialPage = getSafePageNumber(viewerStateRef.current?.currentPage, nextPdfDocument.numPages);
+      const pageRecords = createMobilePdfPageRecords(nextPdfDocument.numPages, pagesContainer);
+      const renderOrder = getMobilePdfPageRenderOrder(nextPdfDocument.numPages, initialPage);
+      let hasRenderedFirstPage = false;
 
-      for (let pageNumber = 1; pageNumber <= nextPdfDocument.numPages; pageNumber += 1) {
+      pageRecordsRef.current = pageRecords;
+
+      for (const pageNumber of renderOrder) {
         if (isCancelled) return;
 
         const page = await nextPdfDocument.getPage(pageNumber);
         if (isCancelled) return;
 
-        const wrapper = createMobilePdfPageWrapper(pageNumber);
-        pagesContainer.appendChild(wrapper);
-        pageRecords.push({ pageNumber, wrapper });
+        const wrapper = pageRecords[pageNumber - 1]?.wrapper;
+        if (!wrapper) continue;
+
         await renderMobilePdfPage(page, renderWidth, wrapper);
+        if (isCancelled) return;
+
+        if (!hasRenderedFirstPage) {
+          hasRenderedFirstPage = true;
+          setIsLoading(false);
+          const initialWrapper = pageRecords[initialPage - 1]?.wrapper;
+          if (initialWrapper) initialWrapper.scrollIntoView({ block: "start" });
+        }
+
+        scheduleCurrentPageUpdate();
+        await waitForNextPaint();
       }
 
       if (isCancelled) return;
-
-      pageRecordsRef.current = pageRecords;
-      const initialPage = getSafePageNumber(viewerStateRef.current?.currentPage, nextPdfDocument.numPages);
-      const initialWrapper = pageRecords[initialPage - 1]?.wrapper;
-      if (initialWrapper) initialWrapper.scrollIntoView({ block: "start" });
       scheduleCurrentPageUpdate();
     }).catch((error: unknown) => {
       if (isCancelled) return;
