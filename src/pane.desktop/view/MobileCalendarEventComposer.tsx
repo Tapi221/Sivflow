@@ -224,10 +224,10 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, projectCa
   return (
     <div className="fixed inset-x-0 bottom-0 z-[90] flex justify-center bg-black/25" role="presentation" style={{ top: MOBILE_EVENT_COMPOSER_TOP_GAP }}>
       <section role="dialog" aria-modal="true" aria-labelledby="mobile-calendar-event-composer-title" className="flex h-full w-full max-w-[720px] flex-col overflow-hidden rounded-t-[26px] border border-[#d8e0ec] bg-[#eef2f7] shadow-[0_-12px_40px_rgba(33,43,61,0.20)]" style={sheetStyle}>
-        <header className="flex h-[58px] shrink-0 touch-none items-center justify-between border-b border-[#d9e1ee] bg-[#f8fafc]/90 px-4 backdrop-blur" onPointerDown={handleSheetPointerDown} onPointerMove={handleSheetPointerMove} onPointerUp={handleSheetPointerEnd} onPointerCancel={handleSheetPointerEnd}>
-          <button type="button" className="text-[17px] font-medium tracking-[-0.03em] text-[#4f6f9f] disabled:text-[#b7c0cc]" onClick={handleClose} disabled={isSubmitting}>キャンセル</button>
-          <h2 id="mobile-calendar-event-composer-title" className="text-[17px] font-bold tracking-[-0.03em] text-[#111827]">新規イベント</h2>
-          <button type="button" className="text-[17px] font-semibold tracking-[-0.03em] text-[#4f6f9f] disabled:text-[#b7c0cc]" onClick={handleSubmit} disabled={isSubmitDisabled}>{isSubmitting ? "追加中" : "追加"}</button>
+        <header className="relative flex h-[58px] shrink-0 touch-none items-center border-b border-[#d9e1ee] bg-[#f8fafc]/95 px-4 backdrop-blur" onPointerDown={handleSheetPointerDown} onPointerMove={handleSheetPointerMove} onPointerUp={handleSheetPointerEnd} onPointerCancel={handleSheetPointerEnd}>
+          <button type="button" className="relative z-10 mr-auto min-w-[88px] text-left text-[17px] font-medium tracking-[-0.03em] text-[#4f6f9f] disabled:text-[#b7c0cc]" onClick={handleClose} disabled={isSubmitting}>キャンセル</button>
+          <h2 id="mobile-calendar-event-composer-title" className="pointer-events-none absolute left-1/2 top-1/2 w-[180px] -translate-x-1/2 -translate-y-1/2 text-center text-[17px] font-bold tracking-[-0.03em] text-[#111827]">新規イベント</h2>
+          <button type="button" className="relative z-10 ml-auto min-w-[88px] text-right text-[17px] font-semibold tracking-[-0.03em] text-[#4f6f9f] disabled:text-[#b7c0cc]" onClick={handleSubmit} disabled={isSubmitDisabled}>{isSubmitting ? "追加中" : "追加"}</button>
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-4">
           <div className="overflow-hidden rounded-[14px] bg-white">
