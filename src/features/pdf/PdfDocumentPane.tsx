@@ -3,8 +3,9 @@ import { MobilePdfPages } from "./MobilePdfPages";
 import { PdfPane } from "./PdfPane";
 import { createPdfDocumentDataSource, createPdfDocumentUrlSource } from "./pdfDocumentSource";
 import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { getDocumentBlob } from "@/services/documentFileStore";
-import type { PdfViewerState, DocumentItem } from "@/types";
+import type { DocumentItem, PdfViewerState } from "@/types";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
 
 type PdfDocumentPaneProps = {
@@ -35,8 +36,17 @@ const createResolvedLocalPdfSourceState = (source: PdfDocumentSource | null): Lo
   source,
 });
 
-const resolveDocumentFileId = (document: Pick<DocumentItem, "id" | "localFileId">): string => {
-  return document.localFileId?.trim() || document.id;
+const getUniqueValues = (values: Array<string | null | undefined>): string[] => {
+  return [...new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value)))];
+};
+
+const resolveDocumentFileIds = (document: Pick<DocumentItem, "id" | "localFileId">): string[] => {
+  return getUniqueValues([document.localFileId, document.id]);
+};
+
+const resolveDocumentBlobUserIds = (documentUserId: string | null | undefined, currentUserId: string | null | undefined): Array<string | undefined> => {
+  const userIds = getUniqueValues([documentUserId, currentUserId]);
+  return [...userIds, undefined];
 };
 
 const getIsMobilePdfViewport = (): boolean => {
@@ -62,12 +72,28 @@ const readBlobAsPdfDocumentSource = async (blob: Blob): Promise<PdfDocumentSourc
   return createPdfDocumentDataSource(new Uint8Array(await blob.arrayBuffer()));
 };
 
+const findLocalPdfBlob = async (document: Pick<DocumentItem, "id" | "localFileId" | "userId">, currentUserId: string | null | undefined): Promise<Blob | null> => {
+  const fileIds = resolveDocumentFileIds(document);
+  const userIds = resolveDocumentBlobUserIds(document.userId, currentUserId);
+
+  for (const userId of userIds) {
+    for (const fileId of fileIds) {
+      const blob = await getDocumentBlob(fileId, { userId });
+      if (blob) return blob;
+    }
+  }
+
+  return null;
+};
+
 const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentPaneProps) => {
+  const { currentUser } = useAuthSession();
+  const currentUserId = currentUser?.uid ?? null;
   const persistedSourceUrl = useMemo(() => resolvePdfDocumentSourceUrl(document), [document.blobUrl, document.downloadUrl, document.googleDriveWebContentLink, document.googleDriveWebViewLink, document.localUrl, document.remoteUrl]);
   const persistedSource = useMemo(() => createPersistedPdfDocumentSource(persistedSourceUrl), [persistedSourceUrl]);
   const [localSource, setLocalSource] = useState<LocalPdfSourceState>(createPendingLocalPdfSourceState);
   const [isMobilePdfViewport, setIsMobilePdfViewport] = useState(getIsMobilePdfViewport);
-  const source = localSource.source ?? (localSource.isResolved ? persistedSource : persistedSource);
+  const source = localSource.source ?? persistedSource;
 
   useEffect(() => {
     let isCancelled = false;
@@ -75,7 +101,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     setLocalSource(createPendingLocalPdfSourceState());
 
     const loadLocalSource = async () => {
-      const blob = await getDocumentBlob(resolveDocumentFileId(document), { userId: document.userId });
+      const blob = await findLocalPdfBlob(document, currentUserId);
       if (isCancelled) return;
 
       if (!blob) {
@@ -97,7 +123,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     return () => {
       isCancelled = true;
     };
-  }, [document.id, document.localFileId, document.userId]);
+  }, [currentUserId, document.id, document.localFileId, document.userId]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
