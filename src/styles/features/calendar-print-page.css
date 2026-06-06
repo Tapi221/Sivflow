@@ -3,5 +3,16 @@
     @page {
       size: portrait;
     }
-  }
-}
+
+    body.calendar-printing {
+      margin: 0 !important;
+      overflow: visible !important;
+      background: #ffffff !important;
+    }
+
+    body.calendar-printing * {
+      visibility: hidden !important;
+    }
+
+    body.calendar-printing .calendar-print-panel {
+      position: absolute !
