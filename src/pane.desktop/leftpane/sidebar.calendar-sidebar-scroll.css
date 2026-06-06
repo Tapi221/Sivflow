@@ -1,0 +1,16 @@
+.app-layered-directory > .min-h-0.flex-1:has(nav[aria-label="カレンダー一覧"]) {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-layered-directory > .min-h-0.flex-1:has(nav[aria-label="カレンダー一覧"]) > div {
+  height: 100%;
+  min-height: 0;
+}
+
+.app-layered-directory nav[aria-label="カレンダー一覧"] {
+  height: 100%;
+  min-height: 0;
+}
