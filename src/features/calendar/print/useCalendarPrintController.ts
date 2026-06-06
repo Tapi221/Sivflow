@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useState } from "react";
 
 type UseCalendarPrintControllerOptions = {
   onBeforePrint?: () => Promise<void> | void;
@@ -11,4 +11,7 @@ type UseCalendarPrintControllerReturn = {
   requestPrint: () => void;
 };
 
-const CAL
+const CALENDAR_PRINTING_CLASS = "calendar-printing";
+const CALENDAR_PRINT_PANEL_CLASS = "calendar-print-panel";
+
+export function useCalendarPrintController
