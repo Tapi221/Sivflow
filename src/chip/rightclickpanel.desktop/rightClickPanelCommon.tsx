@@ -10,4 +10,8 @@ type RightClickPanelSurfaceProps = {
   className?: string;
   role?: string;
   ariaLabel?: string;
-  panelId?: RightClickPanel
+  panelId?: RightClickPanelId;
+  children?: ReactNode;
+};
+
+const RIGHT_CLICK_PANEL_COMMON_STYLE = `.right-click
