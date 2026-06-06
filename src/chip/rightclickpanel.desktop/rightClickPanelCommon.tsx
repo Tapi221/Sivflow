@@ -10,15 +10,4 @@ type RightClickPanelSurfaceProps = {
   className?: string;
   role?: string;
   ariaLabel?: string;
-  panelId?: RightClickPanelId;
-  children?: ReactNode;
-};
-
-const RIGHT_CLICK_PANEL_COMMON_STYLE = `
-.right-click-panel {
-  position: fixed;
-  z-index: 2147483647;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  padding: ${RIGHT_CLICK_PANEL_SUR
+  panel
