@@ -1,4 +1,8 @@
 @layer components {
+  :root {
+    --calendar-time-label-color: #85827e;
+  }
+
   header[class*="safe-area-inset-top"] > div:first-child {
     justify-content: flex-end;
   }
@@ -55,7 +59,7 @@
 
   .calendar-print-screen-content div:has(> .calendar-timeline-scroll) > div:nth-child(2) > .grid > div:first-child,
   .calendar-timeline-scroll > .grid > div:first-child > div > span {
-    color: #85827e !important;
+    color: var(--calendar-time-label-color) !important;
   }
 
   .calendar-timeline-scroll > .grid > div:first-child {
