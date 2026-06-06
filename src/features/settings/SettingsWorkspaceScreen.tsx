@@ -599,7 +599,7 @@ const SettingsWorkspaceScreen = () => {
           {activeSectionId === "about" ? (
             <SettingsSectionBlock title={copy.aboutTitle} description={copy.aboutDescription}>
               <div className="settings-workspace__about-grid">
-                <div className="settings-workspace__about-card"><Settings2 size={20} /><strong>Manifolia</strong><span>{copy.aboutWorkspaceDescription}</span></div>
+                <div className="settings-workspace__about-card"><Settings2 size={20} /><strong>Sivflow</strong><span>{copy.aboutWorkspaceDescription}</span></div>
                 <div className="settings-workspace__about-card"><Keyboard size={20} /><strong>⌘K / Ctrl K</strong><span>{copy.aboutSearchDescription}</span></div>
                 <div className="settings-workspace__about-card"><Code size={20} /><strong>{copy.aboutLocalFirstTitle}</strong><span>{copy.aboutLocalFirstDescription}</span></div>
               </div>

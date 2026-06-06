@@ -4,7 +4,7 @@ const FOCUS_ITEMS = [
   "Anki の note / card / deck model",
   "FSRS の scheduler と optimizer",
   "review log と記憶パラメータ",
-  "Manifolia の reviewProgressIncluded capability との対応",
+  "Sivflow の reviewProgressIncluded capability との対応",
   "復習間隔、難易度、忘却率の扱い",
 ] as const;
 
@@ -33,7 +33,7 @@ const AnkiFsrsSandboxPage = () => {
       title="復習スケジューラとカード設計の参考"
       description="Anki はフラッシュカード本体の設計、FSRS4Anki は復習間隔と記憶パラメータの最適化を見るための sandbox です。"
       focusItems={FOCUS_ITEMS}
-      note="Manifolia ではカード作成 UI だけでなく、復習履歴、次回出題日、難易度、忘却率を domain model として扱うための参考にする。"
+      note="Sivflow ではカード作成 UI だけでなく、復習履歴、次回出題日、難易度、忘却率を domain model として扱うための参考にする。"
       links={LINKS}
     />
   );

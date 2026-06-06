@@ -8,7 +8,7 @@ iOS native: React Native の ios/ 内で必要な箇所だけ Swift
 ```
 
 この構成では、**Swift 専用 app は作りません**。  
-Swift は `apps/mobile/ios/Manifolia/NativeModules` や `NativeViews` に入れます。React Native アプリの一部として扱います。
+Swift は `apps/mobile/ios/Sivflow/NativeModules` や `NativeViews` に入れます。React Native アプリの一部として扱います。
 
 ```text
 apps/web
@@ -151,8 +151,8 @@ iPad専用RN UI
   packages/mobile-renderer/src/components/ipad/ink/
 
 iOS native PencilKit
-  apps/mobile/ios/Manifolia/NativeViews/
-  apps/mobile/ios/Manifolia/NativeModules/
+  apps/mobile/ios/Sivflow/NativeViews/
+  apps/mobile/ios/Sivflow/NativeModules/
 
 Desktop/Tauri通信
   apps/desktop/src-tauri/src/
@@ -186,9 +186,9 @@ React Native の iPad 専用画面、接続中の Desktop session 表示、iPad 
 
 ### iOS native PencilKit
 
-PencilKit / `PKCanvasView` などの Swift 実装は `apps/mobile/ios/Manifolia/NativeViews/` に置く。
+PencilKit / `PKCanvasView` などの Swift 実装は `apps/mobile/ios/Sivflow/NativeViews/` に置く。
 
-PencilKit のデータ export、InkStroke への変換、session bridge など native module 的な処理は `apps/mobile/ios/Manifolia/NativeModules/` に置く。
+PencilKit のデータ export、InkStroke への変換、session bridge など native module 的な処理は `apps/mobile/ios/Sivflow/NativeModules/` に置く。
 
 Swift 専用 app は作らない。React Native アプリの一部として扱う。
 

@@ -2,7 +2,7 @@ export const LAYERED_TREE_ROOT_LEVEL = 1;
 export const LAYERED_TREE_INDENT_PX = 14;
 export const LAYERED_TREE_DROP_INDICATOR_BASE_LEFT_PX = 18;
 export const LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX = 8;
-export const LAYERED_TREE_DND_MIME_TYPE = "application/x-manifolia-layered-tree-id";
+export const LAYERED_TREE_DND_MIME_TYPE = "application/x-sivflow-layered-tree-id";
 export const LAYERED_TREE_ROW_SELECTOR = "[data-layered-tree-row='true']";
 export const LAYERED_TREE_FOLDER_ID_ATTRIBUTE = "data-folder-id";
 export const LAYERED_TREE_TAG_ID_ATTRIBUTE = "data-tag-id";

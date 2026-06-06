@@ -57,7 +57,7 @@ interface SectionListColumnPaneProps {
 }
 
 type ExplorerColumnPathWindow = Window & {
-  __manifoliaExplorerColumnPathCrumbs?: BreadcrumbCrumb[];
+  __sivflowExplorerColumnPathCrumbs?: BreadcrumbCrumb[];
 };
 
 type ExplorerColumnPathNavigateEventDetail = {
@@ -81,9 +81,9 @@ type ExternalPathSelectionSnapshot = {
 };
 
 const EXPLORER_COLUMN_PATH_CHANGE_EVENT =
-  "manifolia:explorer-column-path-change";
+  "sivflow:explorer-column-path-change";
 const EXPLORER_COLUMN_PATH_NAVIGATE_EVENT =
-  "manifolia:explorer-column-path-navigate";
+  "sivflow:explorer-column-path-navigate";
 
 const normalizeFolderParentId = (folder: FolderLike): string | null => {
   return folder.parentFolderId ?? folder.parent_folder_id ?? null;
@@ -187,7 +187,7 @@ const dispatchExplorerColumnPathChange = (crumbs: BreadcrumbCrumb[]) => {
   if (typeof window === "undefined") return;
 
   const stableCrumbs = crumbs.map((crumb) => ({ ...crumb }));
-  (window as ExplorerColumnPathWindow).__manifoliaExplorerColumnPathCrumbs =
+  (window as ExplorerColumnPathWindow).__sivflowExplorerColumnPathCrumbs =
     stableCrumbs;
 
   window.dispatchEvent(
@@ -204,7 +204,7 @@ const dispatchExplorerColumnPathInactive = () => {
   if (typeof window === "undefined") return;
 
   delete (window as ExplorerColumnPathWindow)
-    .__manifoliaExplorerColumnPathCrumbs;
+    .__sivflowExplorerColumnPathCrumbs;
 
   window.dispatchEvent(
     new CustomEvent<ExplorerColumnPathChangeEventDetail>(
