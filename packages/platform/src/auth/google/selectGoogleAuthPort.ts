@@ -1,23 +1,48 @@
-import type { RuntimeKind } from "@constants/shared/app";
-import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
+import { describe, expect, it, vi } from "vitest";
+import { selectGoogleAuthPort } from "@/services/auth/googleSignIn";
 
-export const selectGoogleAuthPort = ({
-  webAuth,
-  desktopAuth,
-  runtimeKind,
-}: {
-  webAuth: GoogleAuthPort;
-  desktopAuth: GoogleAuthPort;
-  runtimeKind: RuntimeKind;
-  userAgent: string;
-}): GoogleAuthPort => {
-  if (
-    runtimeKind === "desktop" ||
-    runtimeKind === "ios" ||
-    runtimeKind === "android"
-  ) {
-    return desktopAuth;
-  }
+const createAuthPort = () => ({ signIn: vi.fn() });
 
-  return webAuth;
-};
+describe("Google 認証ポート選択", () => {
+  it("デスクトップ実行時は desktopAuth を選択する", () => {
+    const webAuth = createAuthPort();
+    const desktopAuth = createAuthPort();
+
+    const selected = selectGoogleAuthPort({
+      webAuth,
+      desktopAuth,
+      runtimeKind: "desktop",
+      userAgent: "",
+    });
+
+    expect(selected).toBe(desktopAuth);
+  });
+
+  it("Tauri の userAgent がある場合は desktopAuth を選択する", () => {
+    const webAuth = createAuthPort();
+    const desktopAuth = createAuthPort();
+
+    const selected = selectGoogleAuthPort({
+      webAuth,
+      desktopAuth,
+      runtimeKind: "web",
+      userAgent: "Mozilla/5.0 Tauri",
+    });
+
+    expect(selected).toBe(desktopAuth);
+  });
+
+  it("Web 実行時は webAuth を選択する", () => {
+    const webAuth = createAuthPort();
+    const desktopAuth = createAuthPort();
+
+    const selected = selectGoogleAuthPort({
+      webAuth,
+      desktopAuth,
+      runtimeKind: "web",
+      userAgent: "Mozilla/5.0",
+    });
+
+    expect(selected).toBe(webAuth);
+  });
+});
