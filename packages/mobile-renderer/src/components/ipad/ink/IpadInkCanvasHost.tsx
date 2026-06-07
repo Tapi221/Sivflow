@@ -1,11 +1,20 @@
-import { memo, useCallback } from "react";
-import { Platform, requireNativeComponent, StyleSheet, Text, View } from "react-native";
-import type { NativeSyntheticEvent, ViewProps } from "react-native";
-import type { InkEditTool, InkStroke } from "@core/domain/card/ink/inkDocument";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
-type NativeInkStrokesChangeEvent = {
-  strokes: InkStroke[];
+type IpadInkCanvasHostProps = {
+  cardId: string;
 };
 
-type NativePencilKitCanvasProps = ViewProps & {
-  card
+const IpadInkCanvasHost = ({ cardId }: IpadInkCanvasHostProps) => {
+  return (
+    <View style={styles.container}>
+      <Text>{cardId}</Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
