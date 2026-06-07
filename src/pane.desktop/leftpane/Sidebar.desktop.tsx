@@ -4,4 +4,4 @@ import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } fro
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import { useSearchStore } from "@/features/search/store/useSearchStore"
+import { useSearchStore } from "@/features/search
