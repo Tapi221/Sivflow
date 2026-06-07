@@ -32,12 +32,12 @@ vi.mock("../IndexedDBMetadataService", () => ({
   },
 }));
 
-describe("IndexedDBRebuildOrchestrator", () => {
+describe("IndexedDB 再構築オーケストレーター", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("continues rebuild with degraded success when one item fails", async () => {
+  it("一部の item が失敗しても degraded success として再構築を継続する", async () => {
     const oldDb = { close: vi.fn(), name: "FlashcardMasterDB_user-1" };
     const upsert = vi.fn(async (_table: string, data: unknown) => {
       if (data?.id === "bad-card") {
