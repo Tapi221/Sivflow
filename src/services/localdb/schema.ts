@@ -1,6 +1,6 @@
 import type { LocalDB } from "./LocalDB";
 
-const CURRENT_LOCAL_DB_STORES = {
+const LOCAL_DB_STORES = {
   folders: "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
   cardSets: "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
-  cards: "id, userId, folderId, cardSetId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReview
+  cards: "id, userId, folderId, cardSetId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [
