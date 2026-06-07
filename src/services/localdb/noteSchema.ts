@@ -1,11 +1,20 @@
 import type { LocalDB } from "./LocalDB";
 
-type LocalDBStores = Record<string, string | null>;
+export const defineNoteSchema = (db: LocalDB): void => {
+  db.version(33).stores({
+    notes: "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+  });
 
-const CURRENT_LOCAL_DB_STORES: LocalDBStores = {
-  folders:
-    "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
-  cardSets:
-    "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
-  cards:
-    "id, userId, folderId, cardSetId, updatedAt, next
+  db.version(34)
+    .stores({
+      tags: null,
+      tags_v2: null,
+      tags_v3: null,
+    })
+    .upgrade(async (tx) => {
+      await tx.table("metadata").put({
+        key: "schemaCompaction.v34.completed",
+        completedAt: new Date(),
+      });
+    });
+};
