@@ -14,10 +14,4 @@
   *::before,
   *::after {
     box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-  }
-
-  html {
-    scroll-behavior: smooth;
-    font
+    -webkit-tap-highlight-color
