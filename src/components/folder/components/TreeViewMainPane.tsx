@@ -7,4 +7,5 @@ interface TreeViewMainPaneProps {
   hideOnSectionList?: boolean;
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
-  selectedDocument: DocumentItem | null
+  selectedDocument: DocumentItem | null;
+  selectedFolderId: string
