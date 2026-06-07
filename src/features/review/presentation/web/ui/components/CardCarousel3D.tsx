@@ -7,4 +7,4 @@ export type CardCarousel3DProps<T> = {
   initialIndex?: number;
   onIndexChange?: (index: number) => void;
   renderCenter: (card: T, index: number, isActive: boolean) => ReactNode;
-  renderPreview?: (card: T, index: number, isActive: boolean) =>
+  renderPreview?: (card: T, index: number, isActive: boolean
