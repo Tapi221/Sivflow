@@ -1,11 +1,10 @@
 import PencilKit
-import React
 import UIKit
 
 @objc(SivflowPencilKitCanvasView)
-final class SivflowPencilKitCanvasView: UIView, PKCanvasViewDelegate {
+final class SivflowPencilKitCanvasView: UIView {
   private let canvas = PKCanvasView()
-  @objc var onStrokeComplete: RCTBubblingEventBlock?
-  override init(frame: CGRect) { super.init(frame: frame); setup() }
-  required init?(coder: NSCoder) { super.init(coder: coder); setup() }
-  private func setup() { canvas.frame
+  override init(frame: CGRect) { super.init(frame: frame); addSubview(canvas) }
+  required init?(coder: NSCoder) { super.init(coder: coder); addSubview(canvas) }
+  override func layoutSubviews() { super.layoutSubviews(); canvas.frame = bounds }
+}
