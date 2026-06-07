@@ -9,9 +9,8 @@
     "ios": "expo start --offline --ios",
     "ios:dev": "expo run:ios",
     "android": "expo start --offline --android",
-    "android:dev": "expo run:android"
+    "android:dev": "expo run:android",
+    "typecheck": "tsc --noEmit --pretty false"
   },
   "dependencies": {
-    "expo": "^54.0.0"
-  }
-}
+    "@expo/metro-runtime": "~6.
