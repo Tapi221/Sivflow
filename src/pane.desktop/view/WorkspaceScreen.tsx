@@ -19,6 +19,7 @@ import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/us
 import type { WorkspaceExplorerTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import type { DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { Search } from "@/ui/icons";
+import { MobileSidebarDrawer } from "./MobileSidebarDrawer";
 import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
 import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
 
@@ -162,12 +163,15 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
   const handleOpenSearch = useCallback(() => {
     openSearch();
   }, [openSearch]);
+
   const handleOpenMobileSidebar = useCallback(() => {
     setIsMobileSidebarOpen(true);
   }, []);
+
   const handleCloseMobileSidebar = useCallback(() => {
     setIsMobileSidebarOpen(false);
   }, []);
+
   const updateLibraryExplorerState = useCallback((nextExplorerState: ExplorerRouteState) => {
     if (explorerTabId) {
       updateExplorerTabState(explorerTabId, nextExplorerState);
@@ -209,22 +213,6 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
     setIsMobileSidebarOpen(false);
   }, [explorerState.selectedFolderId, explorerState.selectedItem, explorerTabId, isMobileViewport]);
 
-  useEffect(() => {
-    if (!isMobileViewport || !isMobileSidebarOpen) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-
-      setIsMobileSidebarOpen(false);
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isMobileSidebarOpen, isMobileViewport]);
-
   const shouldRenderDesktopSidebar = !isMobileViewport && !isLeftPanelCollapsed;
   const shouldShowSidebarToggle = isMobileViewport ? !isMobileSidebarOpen : isLeftPanelCollapsed;
 
@@ -237,12 +225,9 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
         </SidebarInteractionRegion>
       ) : null}
       {isMobileViewport ? (
-        <div className={isMobileSidebarOpen ? "pointer-events-auto fixed inset-0 z-[80]" : "pointer-events-none fixed inset-0 z-[80]"} aria-hidden={!isMobileSidebarOpen}>
-          <button type="button" className={isMobileSidebarOpen ? "absolute inset-0 bg-black/35 opacity-100 transition-opacity" : "absolute inset-0 bg-black/35 opacity-0 transition-opacity"} onClick={handleCloseMobileSidebar} aria-label="サイドバーを閉じる" />
-          <div id={MOBILE_WORKSPACE_SIDEBAR_ID} className={isMobileSidebarOpen ? "absolute left-0 top-0 h-full w-[82vw] max-w-[320px] min-w-[260px] overflow-hidden rounded-r-[28px] bg-white transition-transform duration-200 ease-out translate-x-0" : "absolute left-0 top-0 h-full w-[82vw] max-w-[320px] min-w-[260px] overflow-hidden rounded-r-[28px] bg-white transition-transform duration-200 ease-out -translate-x-full"}>
-            <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={handleCloseMobileSidebar} />
-          </div>
-        </div>
+        <MobileSidebarDrawer id={MOBILE_WORKSPACE_SIDEBAR_ID} isOpen={isMobileSidebarOpen} onClose={handleCloseMobileSidebar}>
+          <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={handleCloseMobileSidebar} />
+        </MobileSidebarDrawer>
       ) : null}
       <CarvePanel className={WORKSPACE_MAIN_PANEL_CLASS_NAME}>
         {loading ? <div className="h-full w-full bg-white" /> : error ? <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{error}</div> : <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} onBreadcrumbContextChange={handleBreadcrumbContextChange} folderSelectionNonce={0} navigateToSectionListToken={0} />}
