@@ -1,8 +1,8 @@
-import { type ComponentType, memo, useEffect, useMemo, useState } from "react";
-import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { initialWindowMetrics, SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
+import { memo } from "react";
+import { Platform, Text, View } from "react-native";
 import HandwritingModeScreen from "./screens/ipad/handwriting/HandwritingModeScreen";
-import TrashScreen from "./screens/TrashScreen";
 
-type
+type ScheduleYearContentProps = { onSelectDate: (date: Date) => void; selectedDate: Date; yearDate: Date };
+type AppProps = { ScheduleYearComponent?: unknown };
+
+const App = () => <View style={{ flex: 1 }}>{Platform.OS === "ios
