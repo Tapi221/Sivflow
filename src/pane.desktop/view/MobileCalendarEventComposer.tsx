@@ -4,4 +4,4 @@ import type { GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calen
 import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
-type MobileCalendarWritableCalendarOption = {
+type MobileCalendar
