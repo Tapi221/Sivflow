@@ -1,8 +1,9 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { Platform, requireNativeComponent, Text, View } from "react-native";
+import type { ViewProps } from "react-native";
 
-type IpadInkCanvasHostProps = { cardId?: string | null };
+type Props = ViewProps & { cardId?: string | null; tool?: unknown; strokes?: unknown; onErasePoint?: unknown; onStrokeComplete?: unknown };
 
-const IpadInkCanvasHost = ({ cardId }: IpadInkCanvasHostProps) => <View><Text>{cardId ?? "iOS handwriting"}</Text></View>;
+const NativeInkCanvas = Platform.OS === "ios" ? requireNativeComponent<Props>("SivflowPencilKitCanvas") : null;
 
-export default React.memo(IpadInkCanvasHost);
+const I
