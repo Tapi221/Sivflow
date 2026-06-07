@@ -11,7 +11,3 @@ type ToolbarIconProps = SVGProps<SVGSVGElement>;
 type WorkspaceAction = {
   key: "share" | "comment" | "history" | "tag" | "favorite" | "more";
   label: string;
-  text?: string;
-};
-
-const TOOLBAR_CLASS_NAME
