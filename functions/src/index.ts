@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { getAdminAuth, getDb, serverTimestamp } from "./firebaseAdmin.js";
+import { googleCalendarWebhook } from "./gcal/googleCalendarWebhook.js";
 import { renewExpiredWatchChannels } from "./gcal/renewWatchChannels.js";
 import { classifyGoogleTokenEndpointFailure, type GoogleOAuthServerErrorReason } from "./gcal/tokenErrors.js";
 
@@ -203,7 +204,7 @@ const runGoogleCallable = async <T>(context: "exchangeGoogleCalendarCode" | "exc
 
 const buildAuthorizationCodeTokenParams = ({ code, codeVerifier, redirectUri }: { code: string; codeVerifier?: string; redirectUri: string }): URLSearchParams => {
   const params = new URLSearchParams({ client_id: safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration"), client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "GOOGLE_OAUTH_CLIENT_SECRET", "server_oauth_configuration"), code, grant_type: "authorization_code", redirect_uri: redirectUri });
-  if (codeVerifier) params.set("code_verifier", codeVerifier);
+  if (codeVerifier) params.set("code_verifier");
   return params;
 };
 
@@ -318,4 +319,4 @@ export const disconnectGoogleCalendarAccount = onCall({ region: REGION }, async 
   return { ok: true };
 });
 
-export { renewExpiredWatchChannels };
+export { googleCalendarWebhook, renewExpiredWatchChannels };

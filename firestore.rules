@@ -128,5 +128,14 @@ service cloud.firestore {
         allow read, write: if isAuthenticated() && isOwner(userId);
       }
     }
+
+    match /gcal_notifications/{userId}/calendars/{calendarId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow create, update, delete: if false;
+    }
+
+    match /gcal_watch_channels/{userId}/calendars/{calendarId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
   }
 }
