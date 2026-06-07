@@ -1,4 +1,5 @@
 import type { GCalRawIncrementalEvent, GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarApiCalendarResponse, GoogleCalendarApiEventsResponse, GoogleCalendarApiListResponse, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
+import { parseGoogleRecurrenceRule, serializeGoogleRecurrenceRule } from "./gcalRecurrence";
 import { createGoogleApiError } from "@/integration/google-integration/googleApiRetry";
 
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
@@ -126,6 +127,7 @@ const toGoogleCalendarEvent = ({ raw, accountId, calendarId, accentColor, projec
     startsAt,
     endsAt,
     isAllDay: Boolean(raw.start?.date && !raw.start?.dateTime),
+    recurrenceRule: parseGoogleRecurrenceRule(raw.recurrence),
   };
 };
 
@@ -146,6 +148,11 @@ const toGoogleEventPayload = (event: Partial<GCalWritableEventInput>): Record<st
     payload.end = { dateTime: event.endsAt.toISOString() };
   } else if (event.endsAt) {
     payload.end = { date: formatGoogleDateOnly(event.endsAt) };
+  }
+
+  if ("recurrenceRule" in event) {
+    const recurrenceRule = serializeGoogleRecurrenceRule(event.recurrenceRule);
+    payload.recurrence = recurrenceRule ? [recurrenceRule] : [];
   }
 
   return payload;

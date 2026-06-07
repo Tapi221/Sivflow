@@ -1,4 +1,4 @@
-import type { GoogleCalendarEvent } from "@core/calendar/calendarEvent.types";
+import type { CalendarRecurrenceRule, GoogleCalendarEvent } from "@core/calendar";
 
 export type IosCalendarPermissionStatus = "undetermined" | "granted" | "denied";
 
@@ -32,6 +32,7 @@ export type IosCalendarWritableEventInput = {
   endsAt: Date;
   isAllDay?: boolean;
   projectId?: string;
+  recurrenceRule?: CalendarRecurrenceRule | null;
 };
 
 export type IosCalendarWritableEventUpdateInput = Partial<Omit<IosCalendarWritableEventInput, "calendarId">> & {

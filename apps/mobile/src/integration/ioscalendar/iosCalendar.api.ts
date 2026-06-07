@@ -1,6 +1,8 @@
 import { Platform } from "react-native";
 import * as ExpoCalendar from "expo-calendar";
-import type { Calendar as ExpoCalendarItem, Event as ExpoCalendarEvent, PermissionResponse } from "expo-calendar";
+import type { Calendar as ExpoCalendarItem, Event as ExpoCalendarEvent, PermissionResponse, RecurrenceRule as ExpoRecurrenceRule } from "expo-calendar";
+import { normalizeCalendarRecurrenceRule } from "@core/calendar";
+import type { CalendarRecurrenceFrequency, CalendarRecurrenceRule, CalendarWeekday } from "@core/calendar";
 import type { IosCalendarEvent, IosCalendarListItem, IosCalendarPermissionStatus, IosCalendarWritableEventDeleteInput, IosCalendarWritableEventInput, IosCalendarWritableEventUpdateInput } from "./iosCalendar.types";
 
 type ExpoCalendarCreateEventDetails = NonNullable<Parameters<typeof ExpoCalendar.createEventAsync>[1]>;
@@ -16,6 +18,40 @@ const IOS_CALENDAR_READONLY_ERROR = "このiOSカレンダーは編集できま�
 const IOS_CALENDAR_CALENDAR_ID_ERROR = "iOSカレンダーIDが必要です";
 const IOS_CALENDAR_EVENT_ID_ERROR = "iOSカレンダー予定IDが必要です";
 const IOS_CALENDAR_DATE_ERROR = "iOSカレンダー予定の日時が不正です";
+
+const EXPO_FREQUENCY_BY_CALENDAR_FREQUENCY: Record<CalendarRecurrenceFrequency, ExpoCalendar.Frequency> = {
+  daily: ExpoCalendar.Frequency.DAILY,
+  monthly: ExpoCalendar.Frequency.MONTHLY,
+  weekly: ExpoCalendar.Frequency.WEEKLY,
+  yearly: ExpoCalendar.Frequency.YEARLY,
+};
+
+const CALENDAR_FREQUENCY_BY_EXPO_FREQUENCY: Record<string, CalendarRecurrenceFrequency> = {
+  [ExpoCalendar.Frequency.DAILY]: "daily",
+  [ExpoCalendar.Frequency.MONTHLY]: "monthly",
+  [ExpoCalendar.Frequency.WEEKLY]: "weekly",
+  [ExpoCalendar.Frequency.YEARLY]: "yearly",
+};
+
+const EXPO_DAY_BY_WEEKDAY: Record<CalendarWeekday, ExpoCalendar.DayOfTheWeek> = {
+  0: ExpoCalendar.DayOfTheWeek.Sunday,
+  1: ExpoCalendar.DayOfTheWeek.Monday,
+  2: ExpoCalendar.DayOfTheWeek.Tuesday,
+  3: ExpoCalendar.DayOfTheWeek.Wednesday,
+  4: ExpoCalendar.DayOfTheWeek.Thursday,
+  5: ExpoCalendar.DayOfTheWeek.Friday,
+  6: ExpoCalendar.DayOfTheWeek.Saturday,
+};
+
+const WEEKDAY_BY_EXPO_DAY: Record<number, CalendarWeekday> = {
+  [ExpoCalendar.DayOfTheWeek.Sunday]: 0,
+  [ExpoCalendar.DayOfTheWeek.Monday]: 1,
+  [ExpoCalendar.DayOfTheWeek.Tuesday]: 2,
+  [ExpoCalendar.DayOfTheWeek.Wednesday]: 3,
+  [ExpoCalendar.DayOfTheWeek.Thursday]: 4,
+  [ExpoCalendar.DayOfTheWeek.Friday]: 5,
+  [ExpoCalendar.DayOfTheWeek.Saturday]: 6,
+};
 
 const normalizePermissionStatus = (response: PermissionResponse): IosCalendarPermissionStatus => {
   if (response.granted || response.status === "granted") return "granted";
@@ -90,6 +126,43 @@ const getWritableCalendar = (calendarId: string, calendars: IosCalendarListItem[
   return calendar;
 };
 
+const toExpoRecurrenceRule = (rule: CalendarRecurrenceRule | null | undefined): ExpoRecurrenceRule | null => {
+  const normalized = normalizeCalendarRecurrenceRule(rule);
+  if (!normalized) return null;
+
+  const recurrenceRule: ExpoRecurrenceRule = {
+    frequency: EXPO_FREQUENCY_BY_CALENDAR_FREQUENCY[normalized.frequency],
+  };
+
+  if (normalized.interval) recurrenceRule.interval = normalized.interval;
+  if (normalized.endDate) recurrenceRule.endDate = normalized.endDate;
+  else if (normalized.occurrence) recurrenceRule.occurrence = normalized.occurrence;
+  if (normalized.daysOfWeek?.length) recurrenceRule.daysOfTheWeek = normalized.daysOfWeek.map((day) => ({ dayOfTheWeek: EXPO_DAY_BY_WEEKDAY[day] }));
+  if (normalized.daysOfMonth?.length) recurrenceRule.daysOfTheMonth = normalized.daysOfMonth;
+  if (normalized.monthsOfYear?.length) recurrenceRule.monthsOfTheYear = normalized.monthsOfYear as ExpoCalendar.MonthOfTheYear[];
+
+  return recurrenceRule;
+};
+
+const fromExpoRecurrenceRule = (rule: ExpoRecurrenceRule | null | undefined): CalendarRecurrenceRule | undefined => {
+  if (!rule) return undefined;
+
+  const frequency = CALENDAR_FREQUENCY_BY_EXPO_FREQUENCY[String(rule.frequency)];
+  if (!frequency) return undefined;
+
+  return normalizeCalendarRecurrenceRule({
+    frequency,
+    interval: rule.interval,
+    endDate: toValidDate(rule.endDate),
+    occurrence: rule.occurrence,
+    daysOfWeek: rule.daysOfTheWeek
+      ?.map((day) => WEEKDAY_BY_EXPO_DAY[day.dayOfTheWeek])
+      .filter((day): day is CalendarWeekday => day !== undefined),
+    daysOfMonth: rule.daysOfTheMonth,
+    monthsOfYear: rule.monthsOfTheYear,
+  });
+};
+
 const toExpoEventPayload = (event: Partial<IosCalendarWritableEventInput>): IosCalendarWritableEventDetails => {
   const payload: IosCalendarWritableEventDetails = {};
 
@@ -99,6 +172,7 @@ const toExpoEventPayload = (event: Partial<IosCalendarWritableEventInput>): IosC
   if (event.startsAt !== undefined) payload.startDate = event.startsAt;
   if (event.endsAt !== undefined) payload.endDate = event.endsAt;
   if (event.isAllDay !== undefined) payload.allDay = event.isAllDay;
+  if ("recurrenceRule" in event) payload.recurrenceRule = toExpoRecurrenceRule(event.recurrenceRule);
 
   return payload;
 };
@@ -133,6 +207,7 @@ const toIosCalendarEvent = (event: ExpoCalendarEvent, calendarsById: Map<string,
     startsAt,
     endsAt,
     isAllDay: Boolean(event.allDay),
+    recurrenceRule: fromExpoRecurrenceRule(event.recurrenceRule),
     source: "ios",
   };
 };
