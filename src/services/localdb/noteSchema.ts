@@ -8,4 +8,4 @@ const CURRENT_LOCAL_DB_STORES: LocalDBStores = {
   cardSets:
     "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
   cards:
-    "id, userId, folderId, cardSetId, updatedAt, nextReviewDate
+    "id, userId, folderId, cardSetId, updatedAt, next
