@@ -1,6 +1,7 @@
 import { type CSSProperties, type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, addHours, format, startOfDay } from "date-fns";
 import type { GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
+<<<<<<< HEAD
 import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
@@ -327,3 +328,6 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, projectCa
 };
 
 export { MobileCalendarEventComposer };
+=======
+import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcal
+>>>>>>> 353deaf376ea07ae8f8b6abc73e1954561581ec3
