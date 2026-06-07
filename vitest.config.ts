@@ -1,11 +1,13 @@
 import { fileURLToPath } from "node:url";
 import path from "path";
+import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
 const repoRoot = path.dirname(fileURLToPath(import.meta.url));
 const resolveFromRoot = (relativePath: string) => path.resolve(repoRoot, relativePath);
 
 export default defineConfig({
+  plugins: [react()],
   resolve: {
     alias: [
       { find: /^@\/services\/localDB$/, replacement: resolveFromRoot("src/services/localdb/index.ts") },
@@ -19,6 +21,6 @@ export default defineConfig({
     ],
   },
   test: {
-    environment: "node",
+    environment: "jsdom",
   },
 });
