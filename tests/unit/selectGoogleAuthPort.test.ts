@@ -13,4 +13,9 @@ describe("Google 認証ポート選択", () => {
       desktopAuth,
       runtimeKind: "desktop",
       userAgent: "",
-   
+    });
+
+    expect(selected).toBe(desktopAuth);
+  });
+
+  it("デ
