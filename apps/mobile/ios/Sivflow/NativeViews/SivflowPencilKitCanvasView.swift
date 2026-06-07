@@ -6,11 +6,5 @@ import UIKit
 final class SivflowPencilKitCanvasView: UIView {
   @objc var onStrokeComplete: RCTDirectEventBlock?
   private let canvas = PKCanvasView()
-
-  override init(frame: CGRect) {
-    super.init(frame: frame)
-    addSubview(canvas)
-  }
-
-  required init?(coder: NSCoder) {
-    super.init(coder:
+  override init(frame: CGRect) { super.init(frame: frame); addSubview(canvas) }
+  required init?(coder: NSCoder) { super.init(coder: coder); addSubview(canvas) }
