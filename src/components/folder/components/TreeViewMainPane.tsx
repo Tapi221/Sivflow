@@ -7,4 +7,12 @@ type TreeViewMainPaneProps = {
   hideOnSectionList?: boolean;
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
-  selectedDocument: DocumentItem
+  selectedDocument: DocumentItem | null;
+  selectedFolderId: string | null;
+  selectedFolderName: string;
+  folders: Folder[];
+  cards: Card[];
+  documents: DocumentItem[];
+  folderCards: Card[];
+  onCardUpdated: () => void;
+  onDocumentUpdated: (documentId
