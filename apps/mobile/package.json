@@ -1,1 +1,19 @@
-{"name":"sivflow-mobile","private":true,"version":"0.0.0","main":"index.ts","scripts":{"start":"expo start --offline","start:dev":"expo start --offline --dev-client","ios":"expo start --offline --ios","ios:dev":"expo run:ios","android":"expo start --offline --android","android:dev":"expo run:android"}}
+{
+  "name": "sivflow-mobile",
+  "private": true,
+  "version": "0.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start --offline",
+    "start:dev": "expo start --offline --dev-client",
+    "ios": "expo start --offline --ios",
+    "ios:dev": "expo run:ios",
+    "android": "expo start --offline --android",
+    "android:dev": "expo run:android"
+  },
+  "dependencies": {
+    "expo": "~54.0.35",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
+  }
+}
