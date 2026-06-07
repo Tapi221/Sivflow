@@ -1,8 +1,8 @@
 import React from "react";
 import { Platform, requireNativeComponent } from "react-native";
 
-type IpadInkCanvasHostProps = { cardId?: string; tool?: unknown; strokes?: unknown[]; onErasePoint?: unknown; onStrokeComplete?: unknown };
-
 const NativeInkCanvas = Platform.OS === "ios" ? requireNativeComponent("SivflowPencilKitCanvas") : null;
 
-const
+const IpadInkCanvasHost = (_props: any) => NativeInkCanvas ? React.createElement(NativeInkCanvas, { style: { flex: 1 } }) : null;
+
+export default React.memo(IpadInkCanvasHost);
