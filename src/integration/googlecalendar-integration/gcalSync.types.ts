@@ -1,5 +1,5 @@
 import type { Auth } from "firebase/auth";
-import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
+import type { CalendarEvent, CalendarRecurrenceRule } from "@core/calendar";
 
 export type GoogleCalendarEvent = CalendarEvent;
 
@@ -46,6 +46,7 @@ export type GCalWritableEventInput = {
   endsAt: Date;
   isAllDay?: boolean;
   projectId?: string;
+  recurrenceRule?: CalendarRecurrenceRule | null;
 };
 
 export type GCalWritableEventUpdateInput = Partial<Omit<GCalWritableEventInput, "calendarId">> & {
@@ -64,6 +65,7 @@ export type GCalRawIncrementalEvent = {
   description?: string;
   location?: string;
   status?: "confirmed" | "tentative" | "cancelled";
+  recurrence?: string[];
   start?: {
     date?: string;
     dateTime?: string;
