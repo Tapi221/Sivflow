@@ -19,4 +19,5 @@
   min-height: 0;
   flex: 1 1 auto;
   overflow-y: auto;
-  padding
+  padding-bottom: 12px;
+}
