@@ -1,8 +1,10 @@
 import { memo } from "react";
-import { Platform, Text, View } from "react-native";
+import { Platform, View } from "react-native";
 import HandwritingModeScreen from "./screens/ipad/handwriting/HandwritingModeScreen";
 
-type ScheduleYearContentProps = { onSelectDate: (date: Date) => void; selectedDate: Date; yearDate: Date };
-type AppProps = { ScheduleYearComponent?: unknown };
+const App = () => <View style={{ flex: 1 }}>{Platform.OS === "ios" ? <HandwritingModeScreen /> : null}</View>;
 
-const App = () => <View style={{ flex: 1 }}>{Platform.OS === "ios
+const MemoizedApp = memo(App);
+
+export { MemoizedApp as App };
+export default MemoizedApp;
