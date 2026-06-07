@@ -349,15 +349,8 @@
     z-index: -1;
   }
 
-  .card-active-chrome--hoverable:hover,
-  .card-pager-item[data-card-hoverable="true"]:hover {
+  .card-active-chrome--hoverable:hover {
     opacity: 0.9;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
-  }
-
-  .card-active-chrome--hoverable:hover::before,
-  .card-pager-item[data-card-hoverable="true"]:hover::before {
-    opacity: 1;
   }
 
   .card-active-chrome--active,
@@ -370,12 +363,6 @@
     .card-shell.card-shell--editing::before {
     content: none;
     display: none;
-  }
-
-  .card-active-chrome:focus-within,
-  .card-pager-item:focus-within {
-    box-shadow: none;
-    opacity: 1;
   }
 
   .card-active-chrome--plain,
