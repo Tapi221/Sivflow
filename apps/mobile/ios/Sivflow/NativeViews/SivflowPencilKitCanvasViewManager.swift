@@ -1,5 +1,5 @@
-import Foundation
 import React
+import UIKit
 
 @objc(SivflowPencilKitCanvasManager)
 final class SivflowPencilKitCanvasManager: RCTViewManager {
