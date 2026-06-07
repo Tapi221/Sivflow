@@ -4,4 +4,4 @@ import type { InkEditTool, InkPoint, InkStroke } from "@core/domain/card/ink/ink
 
 type IpadInkCanvasHostProps = { cardId?: string | null; tool: InkEditTool; strokes: readonly InkStroke[]; onErasePoint: (point: InkPoint) => void; onStrokeComplete: (stroke: InkStroke) => void; };
 
-const IpadInkCanvasHost
+function IpadInkCanvasHost({ cardId, strokes
