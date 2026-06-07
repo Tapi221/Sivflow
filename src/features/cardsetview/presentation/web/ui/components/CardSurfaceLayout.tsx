@@ -12,4 +12,6 @@ type CardSurfaceLayoutProps = {
   className?: string;
 };
 
-export const CardSurface
+export const CardSurfaceLayout = ({ cardLayoutMode, questionNode, answerNode, flipNode, className }: CardSurfaceLayoutProps) => {
+  if (cardLayoutMode === "split") {
+    return <div className={cn("grid min-w-0 grid-cols-2 items
