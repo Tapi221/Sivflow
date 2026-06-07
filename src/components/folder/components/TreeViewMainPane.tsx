@@ -2,7 +2,7 @@ import { RightPane } from "@/components/folder/panes/RightPane";
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
-type TreeViewMainPaneProps = {
+interface TreeViewMainPaneProps {
   showMobileDetail: boolean;
   hideOnSectionList?: boolean;
   selectedItem: SelectedExplorerItem;
@@ -12,4 +12,17 @@ type TreeViewMainPaneProps = {
   selectedFolderName: string;
   folders: Folder[];
   cards: Card[];
-  documents
+  documents: DocumentItem[];
+  folderCards: Card[];
+  onCardUpdated: () => void;
+  onDocumentUpdated: (documentId: string, updates: Partial<DocumentItem>) => Promise<void> | void;
+  onRenameFolder?: (newName: string) => Promise<void>;
+  handlers: {
+    onStartStudy: () => void;
+    onViewCards: () => void;
+    onCreateCard: () => void;
+  };
+  folderSelectionNonce: number;
+}
+
+const TreeViewMainPane = ({ showMobileDetail, hideOnSectionList = false, selectedItem, selectedCardId, selectedDocument, selectedFolderId, selectedFolder
