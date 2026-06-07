@@ -1,8 +1,22 @@
 import { forwardRef, memo, type ReactNode, type Ref } from "react";
+import { cn } from "@/lib/utils";
 
-type P={children:ReactNode;className?:string};
-type S=P&{toolbar?:ReactNode;overlay?:ReactNode;leftPanel?:ReactNode;isLeftPanelCollapsed?:boolean;reserveToolbar?:boolean;reserveLeftPanel?:boolean;viewportRef?:Ref<HTMLDivElement>;bodyClassName?:string;viewportClassName?:string};
+type CarvePanelProps = {
+  children: ReactNode;
+  className?: string;
+};
 
-const side="w-[232px] shrink-0";
+type CarvePanelViewportProps = {
+  children: ReactNode;
+  className?: string;
+};
 
-const CarvePanelViewport
+type CarvePanelShellProps = {
+  children: ReactNode;
+  toolbar?: ReactNode;
+  overlay?: ReactNode;
+  leftPanel?: ReactNode;
+  isLeftPanelCollapsed?: boolean;
+  reserveToolbar?: boolean;
+  reserveLeftPanel?: boolean;
+  viewportRef?: Ref<HTML
