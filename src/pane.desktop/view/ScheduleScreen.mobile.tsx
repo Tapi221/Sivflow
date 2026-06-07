@@ -3,7 +3,6 @@ import { addDays, endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDay
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
-<<<<<<< HEAD
 import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
 import { createCalendarYearEventDisplayResolver } from "@/features/calendar/calendarEventSourcePriority";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
@@ -248,6 +247,3 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
 };
 
 export { ScheduleScreen };
-=======
-import { attach
->>>>>>> 7d95297359159de48f873202bd9002bee9913745
