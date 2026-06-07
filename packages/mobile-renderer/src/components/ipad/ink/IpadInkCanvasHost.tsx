@@ -1,15 +1,6 @@
-import React from "react";
-import { Text, View } from "react-native";
+import React, { memo, useCallback } from "react";
+import { Platform, requireNativeComponent, StyleSheet, Text, View } from "react-native";
+import type { NativeSyntheticEvent, ViewProps } from "react-native";
+import type { InkEditTool, InkPoint, InkStroke } from "@core/domain/card/ink/inkDocument";
 
-type IpadInkCanvasHostProps = {
-  cardId: string;
-};
-
-const IpadInkCanvasHost = ({ cardId }: IpadInkCanvasHostProps) => (
-  <View>
-    <Text>{cardId}</Text>
-  </View>
-);
-
-export default React.memo(IpadInkCanvasHost);
-export type { IpadInkCanvasHostProps };
+type NativeInkChangeEvent = { strokes: InkStroke[] };
