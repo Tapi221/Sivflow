@@ -3,9 +3,7 @@ import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMod
 
 export type CardSurfaceFace = "question" | "answer";
 
-type CardSurfaceLayoutProps = {
-  cardLayoutMode: CardLayoutMode;
-  questionNode: React.ReactNode;
-  answerNode: React.ReactNode;
-  flipNode?: React.ReactNode;
-  className?: string;
+type CardSurfaceLayoutProps = { cardLayoutMode: CardLayoutMode; questionNode: React.ReactNode; answerNode: React.ReactNode; flipNode?: React.ReactNode; className?: string };
+
+export const CardSurfaceLayout = (props: CardSurfaceLayoutProps) => {
+  const content
