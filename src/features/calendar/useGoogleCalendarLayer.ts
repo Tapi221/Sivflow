@@ -9,6 +9,8 @@ import { useServerStoredGoogleAccountBootstrap } from "@/integration/googlecalen
 
 export type { GoogleAccountEntry };
 
+const RECURRENCE_REFRESH_FUTURE_DAYS = 366;
+
 const resolveExternalEventId = (accountId: string, calendarId: string, eventId: string): string => {
   const accountPrefix = `${accountId}:${calendarId}:`;
   const calendarPrefix = `${calendarId}:`;
@@ -19,12 +21,22 @@ const resolveExternalEventId = (accountId: string, calendarId: string, eventId: 
   return eventId;
 };
 
-const buildRefreshRange = (startsAt?: Date, endsAt?: Date) => {
+const addDays = (date: Date, days: number): Date => {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+};
+
+const buildRefreshRange = (event: Pick<GoogleCalendarEvent, "startsAt" | "endsAt" | "recurrenceRule"> | { startsAt?: Date; endsAt?: Date; recurrenceRule?: GoogleCalendarEvent["recurrenceRule"] }) => {
+  const { startsAt, endsAt, recurrenceRule } = event;
   if (!startsAt || !endsAt) return null;
 
-  return startsAt <= endsAt
-    ? { rangeStart: startsAt, rangeEnd: endsAt }
-    : { rangeStart: endsAt, rangeEnd: startsAt };
+  const rangeStart = startsAt <= endsAt ? startsAt : endsAt;
+  const eventRangeEnd = startsAt <= endsAt ? endsAt : startsAt;
+  const recurrenceRangeEnd = recurrenceRule?.endDate ?? (recurrenceRule ? addDays(rangeStart, RECURRENCE_REFRESH_FUTURE_DAYS) : null);
+  const rangeEnd = recurrenceRangeEnd && recurrenceRangeEnd > eventRangeEnd ? recurrenceRangeEnd : eventRangeEnd;
+
+  return { rangeStart, rangeEnd };
 };
 
 export const useGoogleCalendarLayer = () => {
@@ -88,7 +100,7 @@ export const useGoogleCalendarLayer = () => {
       event,
     });
 
-    const range = buildRefreshRange(created.startsAt, created.endsAt);
+    const range = buildRefreshRange(created);
     if (range) await forceSyncRange(range);
 
     return created;
@@ -107,7 +119,7 @@ export const useGoogleCalendarLayer = () => {
       },
     });
 
-    const range = buildRefreshRange(updated.startsAt, updated.endsAt);
+    const range = buildRefreshRange(updated);
     if (range) await forceSyncRange(range);
 
     return updated;
