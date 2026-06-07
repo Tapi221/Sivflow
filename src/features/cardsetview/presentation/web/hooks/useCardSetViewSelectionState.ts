@@ -1,4 +1,17 @@
 import { type SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { clampCardIndex, createCardSetViewSourceKey, resolveCardIndexById, resolveCardsForPager, toggleFlippedCardId } from "@/features/cardsetview/domain/cardSetViewState";
 import { useCardEntity } from "@/components/card/hooks/useCardEntity";
-import { getCardSetViewFlippedCardIds, setCardSet
+import { getCardSetViewFlippedCardIds, setCardSetViewFlippedCardIds } from "@/services/cardSetViewFlippedFacePreferences";
+import type { Card } from "@/types";
+
+type KeyedNumberState = {
+  sourceKey: string;
+  value: number | null;
+};
+
+type KeyedStringState = {
+  sourceKey: string;
+  value: string | null;
+};
+
+type KeyedFlipState =
