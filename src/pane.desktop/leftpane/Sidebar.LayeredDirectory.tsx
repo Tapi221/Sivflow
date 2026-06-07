@@ -1,3 +1,4 @@
+import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
 import { useCallback, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
