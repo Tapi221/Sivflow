@@ -14,4 +14,4 @@ type WorkspaceAction = {
   text?: string;
 };
 
-const TOOLBAR_CLASS_NAME = "pointer-events-auto flex h-9 items-center gap-2 rounded-[14px
+const TOOLBAR_CLASS_NAME
