@@ -12,5 +12,4 @@
     "android:dev": "expo run:android",
     "typecheck": "tsc --noEmit --pretty false"
   },
-  "dependencies": {
-    "
+  "dependencies
