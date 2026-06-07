@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { collection, onSnapshot, query, type Unsubscribe } from "firebase/firestore";
 import { firestoreDb } from "@/services/firebase";
 
@@ -19,7 +19,7 @@ const isPermissionDeniedError = (error: unknown): boolean => {
   );
 };
 
-const useGoogleCalendarPushSync = ({
+export const useGoogleCalendarPushSync = ({
   userId,
   selectedCalendarIds,
   onNotification,
@@ -29,7 +29,9 @@ const useGoogleCalendarPushSync = ({
   const listenerDisabledRef = useRef(false);
   const pendingNotificationTimersRef = useRef(new Map<string, ReturnType<typeof setTimeout>>());
 
-  const calendarKey = Array.from(selectedCalendarIds).slice().sort().join("|");
+  const calendarKey = useMemo(() => {
+    return Array.from(selectedCalendarIds).slice().sort().join("|");
+  }, [selectedCalendarIds]);
 
   useEffect(() => {
     onNotificationRef.current = onNotification;
@@ -46,7 +48,7 @@ const useGoogleCalendarPushSync = ({
   useEffect(() => {
     if (
       !userId ||
-      selectedCalendarIdsRef.current.size === 0 ||
+      calendarKey.length === 0 ||
       !firestoreDb ||
       listenerDisabledRef.current
     ) {
@@ -117,7 +119,5 @@ const useGoogleCalendarPushSync = ({
       pendingNotificationTimersRef.current.forEach((timer) => clearTimeout(timer));
       pendingNotificationTimersRef.current.clear();
     };
-  }, [calendarKey, userId]);
+  }, [userId, calendarKey]);
 };
-
-export { useGoogleCalendarPushSync };
