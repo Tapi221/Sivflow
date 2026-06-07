@@ -136,7 +136,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
   const selectedCardId = useMemo(() => getSelectedCardId(explorerState.selectedItem), [explorerState.selectedItem]);
   const selectedDocumentId = useMemo(() => getSelectedDocumentId(explorerState.selectedItem), [explorerState.selectedItem]);
   const { documents } = useDocumentsRead(undefined, { enabled: selectedDocumentId !== null });
-  const selectedDocument = useMemo(() => selectedDocumentId ? (documents.find((document) => document.id === selectedDocumentId) ?? null) : null, [documents, selectedDocumentId]);
+  const selectedDocument = useMemo(() => selectedDocumentId ? (documents.find((document: DocumentItem) => document.id === selectedDocumentId) ?? null) : null, [documents, selectedDocumentId]);
   const showWorkspaceBreadcrumbs = !loading && !error;
   const showWorkspaceActions = selectedDocumentId === null && !loading && !error;
   const [explorerBreadcrumbContext, setExplorerBreadcrumbContext] = useState<ExplorerBreadcrumbContext>(EMPTY_EXPLORER_BREADCRUMB_CONTEXT);
