@@ -1,9 +1,17 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { Platform, requireNativeComponent, Text, View } from "react-native";
+import type { ViewProps } from "react-native";
+import type { InkEditTool, InkPoint, InkStroke } from "@core/domain/card/ink/inkDocument";
 
-type IpadInkCanvasHostProps = { cardId?: string | null };
+type IpadInkCanvasHostProps = {
+  cardId?: string | null;
+  tool?: InkEditTool;
+  strokes?: InkStroke[];
+  onErasePoint?: (point: InkPoint) => void;
+  onStrokeComplete?: (stroke: InkStroke) => void;
+};
 
-const IpadInkCanvasHost = ({ cardId }: IpadInkCanvasHostProps) => <View><Text>{cardId ?? "iOS handwriting"}</Text></View>;
-
-export default React.memo(IpadInkCanvasHost);
-export type { IpadInkCanvasHostProps };
+type NativeProps = ViewProps & {
+  cardId?: string | null;
+  tool?: InkEditTool;
+ 
