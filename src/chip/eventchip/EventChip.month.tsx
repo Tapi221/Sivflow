@@ -5,14 +5,3 @@ import { eventChipAllDayClass } from "./eventchip.allday.styles";
 import { HoverMonthEventTooltip } from "@/chip/toolchip/HoverMonthEventTooltip";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { cn } from "@/lib/utils";
-
-type CalendarEventChipMonthProps = {
-  event: GoogleCalendarEvent;
-  showTimeLabel?: boolean;
-  tooltipDisabled?: boolean;
-};
-
-type CalendarEventChipMonthStyle = CSSProperties & {
-  "--calendar-event-chip-accent": string;
-  "--calendar-event-chip-bg": string;
