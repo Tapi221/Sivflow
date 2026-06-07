@@ -11,7 +11,6 @@ type KeyedNumberState = {
 
 type KeyedStringState = {
   sourceKey: string;
-<<<<<<< HEAD
   value: string | null;
 };
 
@@ -336,6 +335,3 @@ export const useCardSetViewSelectionState = ({
     handlePagerIndexChange,
   };
 };
-=======
-  value: string
->>>>>>> 23df3b3de96d6e541d822f2f38c34916274db2ea
