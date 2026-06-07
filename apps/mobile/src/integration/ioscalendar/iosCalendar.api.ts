@@ -153,7 +153,7 @@ const fromExpoRecurrenceRule = (rule: ExpoRecurrenceRule | null | undefined): Ca
   return normalizeCalendarRecurrenceRule({
     frequency,
     interval: rule.interval,
-    endDate: toValidDate(rule.endDate),
+    endDate: toValidDate(rule.endDate) ?? undefined,
     occurrence: rule.occurrence,
     daysOfWeek: rule.daysOfTheWeek
       ?.map((day) => WEEKDAY_BY_EXPO_DAY[day.dayOfTheWeek])
