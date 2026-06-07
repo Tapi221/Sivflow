@@ -16,8 +16,8 @@ const mobileDevice: HandwritingDeviceInfo = {
   platform: "ios",
 };
 
-describe("handwritingSessionLifecycle", () => {
-  it("creates a waiting desktop handwriting session", () => {
+describe("手書きセッションのライフサイクル", () => {
+  it("待機中のデスクトップ手書きセッションを作成する", () => {
     const session = createDesktopHandwritingSession({ id: "session-1", userId: "user-1", cardId: "card-1", side: "question", desktopDevice, now: 100 });
 
     expect(session).toEqual({
@@ -32,7 +32,7 @@ describe("handwritingSessionLifecycle", () => {
     });
   });
 
-  it("attaches a mobile device and marks the session connected", () => {
+  it("モバイル端末を紐づけてセッションを接続済みにする", () => {
     const session = createDesktopHandwritingSession({ id: "session-1", userId: "user-1", cardId: "card-1", side: "answer", desktopDevice, now: 100 });
     const connected = attachMobileDeviceToHandwritingSession({ session, mobileDevice, now: 200 });
 
@@ -42,7 +42,7 @@ describe("handwritingSessionLifecycle", () => {
     expect(connected.updatedAt).toBe(200);
   });
 
-  it("updates session status without changing identity fields", () => {
+  it("識別子系フィールドを変えずにセッションステータスを更新する", () => {
     const session = createDesktopHandwritingSession({ id: "session-1", userId: "user-1", cardId: "card-1", side: "question", desktopDevice, now: 100 });
     const updated = updateHandwritingSessionStatus({ session, status: "closed", now: 300 });
 
@@ -52,14 +52,14 @@ describe("handwritingSessionLifecycle", () => {
     expect(updated.updatedAt).toBe(300);
   });
 
-  it("closes or fails a session", () => {
+  it("セッションを終了または失敗状態にする", () => {
     const session = createDesktopHandwritingSession({ id: "session-1", userId: "user-1", cardId: "card-1", side: "question", desktopDevice, now: 100 });
 
     expect(closeHandwritingSession(session, 200).status).toBe("closed");
     expect(failHandwritingSession(session, 300).status).toBe("error");
   });
 
-  it("treats waiting and connected sessions as active", () => {
+  it("待機中と接続済みのセッションをアクティブとして扱う", () => {
     expect(isHandwritingSessionActive({ status: "idle" })).toBe(false);
     expect(isHandwritingSessionActive({ status: "waiting" })).toBe(true);
     expect(isHandwritingSessionActive({ status: "connected" })).toBe(true);
