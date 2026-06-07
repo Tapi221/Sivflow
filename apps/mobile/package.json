@@ -10,4 +10,7 @@
     "ios:dev": "expo run:ios",
     "android": "expo start --offline --android",
     "android:dev": "expo run:android",
-    "typecheck": "tsc --noEmit --
+    "typecheck": "tsc --noEmit --pretty false"
+  },
+  "dependencies": {
+    "@s
