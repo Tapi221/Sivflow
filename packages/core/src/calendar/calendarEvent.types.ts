@@ -1,3 +1,5 @@
+import type { CalendarRecurrenceRule } from "./calendarRecurrence";
+
 export type CalendarEvent = {
   id: string;
   externalId?: string;
@@ -11,6 +13,7 @@ export type CalendarEvent = {
   endsAt: Date;
   isAllDay: boolean;
   accentColor: string;
+  recurrenceRule?: CalendarRecurrenceRule;
 };
 
 export type GoogleCalendarEvent = CalendarEvent;
