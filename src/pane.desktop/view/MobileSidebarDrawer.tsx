@@ -8,3 +8,7 @@ type MobileSidebarDrawerProps = { id: string; isOpen: boolean; onClose: () => vo
 const SWIPE_DISTANCE = 56;
 const SWIPE_HORIZONTAL_INTENT = 12;
 const SWIPE_VERTICAL_LIMIT = 72;
+
+const getTouchPoint = (event: ReactTouchEvent<HTMLElement>) => {
+  const touch = event.touches[0] ?? event.changedTouches[0];
+  if (!touch) return null;
