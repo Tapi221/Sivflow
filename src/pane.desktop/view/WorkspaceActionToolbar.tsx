@@ -14,4 +14,4 @@ type WorkspaceAction = {
   text?: string;
 };
 
-const TOOLBAR_CLASS_NAME
+const ACTION
