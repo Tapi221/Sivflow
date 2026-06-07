@@ -1,4 +1,4 @@
-package com.sivflow
+package com.sivflow.mobile
 
 import android.app.Application
 import android.content.res.Configuration
