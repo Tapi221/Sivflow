@@ -8,4 +8,13 @@ interface TreeViewMainPaneProps {
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
   selectedDocument: DocumentItem | null;
-  selected
+  selectedFolderId: string | null;
+  selectedFolderName: string;
+  folders: Folder[];
+  cards: Card[];
+  documents: DocumentItem[];
+  folderCards: Card[];
+  onCardUpdated: () => void;
+  onDocumentUpdated: (documentId: string, updates: Partial<DocumentItem>) => Promise<void> | void;
+  onRenameFolder?: (newName: string) => Promise<void>;
+  handlers: { onStartStudy: () => void; onViewCards: () => void; onCreate
