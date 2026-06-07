@@ -1,20 +1,15 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 type IpadInkCanvasHostProps = {
   cardId: string;
 };
 
-const IpadInkCanvasHost = ({ cardId }: IpadInkCanvasHostProps) => {
-  return (
-    <View style={styles.container}>
-      <Text>{cardId}</Text>
-    </View>
-  );
-};
+const IpadInkCanvasHost = ({ cardId }: IpadInkCanvasHostProps) => (
+  <View>
+    <Text>{cardId}</Text>
+  </View>
+);
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+export default React.memo(IpadInkCanvasHost);
+export type { IpadInkCanvasHostProps };
