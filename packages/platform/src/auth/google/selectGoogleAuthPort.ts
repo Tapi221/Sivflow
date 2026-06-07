@@ -12,18 +12,4 @@ const TAURI_USER_AGENT_MARKER = "Tauri";
 
 const hasTauriUserAgent = (userAgent: string): boolean => userAgent.includes(TAURI_USER_AGENT_MARKER);
 
-const selectGoogleAuthPort = ({
-  webAuth,
-  desktopAuth,
-  runtimeKind,
-  userAgent,
-}: SelectGoogleAuthPortInput): GoogleAuthPort => {
-  if (runtimeKind === RUNTIME_KINDS.desktop || hasTauriUserAgent(userAgent)) {
-    return desktopAuth;
-  }
-
-  return webAuth;
-};
-
-export { selectGoogleAuthPort };
-export
+const selectGoogle
