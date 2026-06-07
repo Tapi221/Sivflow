@@ -1,10 +1,7 @@
-import { memo, useCallback } from "react";
-import { Platform, StyleSheet, Text, View, requireNativeComponent } from "react-native";
-import type { ViewProps } from "react-native";
-import type { InkEditTool, InkStroke } from "@core/domain/card/ink/inkDocument";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { type GestureResponderEvent, type LayoutChangeEvent, PanResponder, StyleSheet, Text, View } from "react-native";
+import { INK_PAPER_H, INK_PAPER_W, type InkEditTool, type InkPoint, type InkStroke, type InkTool } from "@core/domain/card/ink/inkDocument";
 
 type IpadInkCanvasHostProps = {
   cardId?: string | null;
-  clearRevision: number;
-  tool: InkEditTool;
-  strokes: readonly InkStroke[];
+  tool: InkEditTool
