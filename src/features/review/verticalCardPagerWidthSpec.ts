@@ -13,5 +13,4 @@ type ResolveVerticalCardPagerItemWidthSpecOptions<T> = {
   getCardWidthSpec?: (
     card: T,
     idx: number,
-    isActive: boolean,
-  ) => VerticalCardPagerItemWidthSpec;
+   
