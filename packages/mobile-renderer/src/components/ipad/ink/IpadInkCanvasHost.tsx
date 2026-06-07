@@ -7,4 +7,5 @@ type IpadInkCanvasHostProps = {
   tool: InkEditTool;
   strokes: readonly InkStroke[];
   onErasePoint: (point: InkPoint) => void;
-  onStrokeComplete: (stroke: Ink
+  onStrokeComplete: (stroke: InkStroke) => void;
+};
