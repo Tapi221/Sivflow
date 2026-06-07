@@ -8,8 +8,4 @@ interface TreeViewMainPaneProps {
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
   selectedDocument: DocumentItem | null;
-  selectedFolderId: string | null;
-  selectedFolderName: string;
-  folders: Folder[];
-  cards: Card[];
-  documents:
+  selectedFolderId
