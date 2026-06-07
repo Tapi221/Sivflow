@@ -16,12 +16,4 @@
 
 .app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) {
   display: block;
-  min-height: 0;
-  flex: 1 1 auto;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding-bottom: 14px;
-}
-
-.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child,
-.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:nth-child
+  min
