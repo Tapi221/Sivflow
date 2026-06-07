@@ -1,21 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
-import { selectGoogleAuthPort } from "@/services/auth/googleSignIn";
+import { describe, expect, it } from "vitest";
+import { selectGoogleAuthPort } from "@platform/auth/google/selectGoogleAuthPort";
 
-const createAuthPort = () => ({ signIn: vi.fn() });
+const webAuth = { signIn: async () => undefined };
+const desktopAuth = { signIn: async () => undefined };
 
-describe("Google 認証ポート選択", () => {
-  it("デスクトップ実行時は desktopAuth を選択する", () => {
-    const webAuth = createAuthPort();
-    const desktopAuth = createAuthPort();
-
-    const selected = selectGoogleAuthPort({
-      webAuth,
-      desktopAuth,
-      runtimeKind: "desktop",
-      userAgent: "",
-    });
-
-    expect(selected).toBe(desktopAuth);
-  });
-
-  it("デ
+describe("selectGoogleAuthPort", () => {
+  it("selects desktop auth for desktop runtime", () => {
+    expect(selectGoogleAuthPort({ webAuth, desktopAuth, runtimeKind: "desktop
