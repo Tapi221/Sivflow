@@ -1,3 +1,10 @@
-import { useCallback, useLayoutEffect, useState } from "react";
-import { canGoToNextCardCarouselItem, canGoToPreviousCardCarouselItem, clampCardCarouselIndex, isNearCardCarouselItem, shouldNotifyCardCarouselIndexChange } from "@/features/review/domain/cardCarouselIndexRules";
-import { useCardCarousel3DWebBridge } from "@/features/review/infra/web/useCardCarousel3DWebBridge";
+import type { ReactNode } from "react";
+import { VerticalCardPager } from "@/features/review/VerticalCardPager";
+
+export type CardCarousel3DProps<T> = {
+  cards: T[];
+  syncIndex?: number;
+  initialIndex?: number;
+  onIndexChange?: (index: number) => void;
+  renderCenter: (card: T, index: number, isActive: boolean) => ReactNode;
+  renderPreview?: (card: T, index: number, isActive: boolean) =>
