@@ -8,8 +8,4 @@ type CardSurfaceLayoutProps = {
   cardLayoutMode: CardLayoutMode;
   questionNode: React.ReactNode;
   answerNode: React.ReactNode;
-  flipNode?: React.ReactNode;
-  className?: string;
-};
-
-export const CardSurface
+  flipNode?: React
