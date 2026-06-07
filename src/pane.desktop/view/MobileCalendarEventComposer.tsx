@@ -1,8 +1,5 @@
-import type { GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
-import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+type MobileCalendarEventComposerProps = { isOpen: boolean; selectedDate: Date; accounts: unknown[]; projectCalendarLinks: unknown[]; existingEvents: unknown[]; onClose: () => void; onCreateEvent: (accountId: string, input: unknown) => unknown };
 
-type MobileCalendarEventComposerProps = {
-  isOpen: boolean;
-  selectedDate: Date;
-  accounts: GoogleAccountDisplay[];
-  projectCalendarLinks: ProjectCalendarLink
+const MobileCalendarEventComposer = (_props: MobileCalendarEventComposerProps) => null;
+
+export { MobileCalendarEventComposer };
