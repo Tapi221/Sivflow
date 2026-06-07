@@ -26,8 +26,26 @@ const createPdfDocumentUrlSource = (url: string): PdfDocumentSource => ({
   url,
 });
 
+const readBlobArrayBuffer = (blob: Blob): Promise<ArrayBuffer> => {
+  if (typeof blob.arrayBuffer === "function") return blob.arrayBuffer();
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      if (reader.result instanceof ArrayBuffer) {
+        resolve(reader.result);
+        return;
+      }
+
+      reject(new Error("PDF Blobを読み取れませんでした。"));
+    });
+    reader.addEventListener("error", () => reject(reader.error ?? new Error("PDF Blobを読み取れませんでした。")));
+    reader.readAsArrayBuffer(blob);
+  });
+};
+
 const createPdfDocumentDataSourceFromBlob = async (blob: Blob): Promise<PdfDocumentSource> => {
-  return createPdfDocumentDataSource(new Uint8Array(await blob.arrayBuffer()));
+  return createPdfDocumentDataSource(new Uint8Array(await readBlobArrayBuffer(blob)));
 };
 
 const toPdfDocumentLoadSource = (source: PdfDocumentSource): PdfDocumentLoadSource => {
