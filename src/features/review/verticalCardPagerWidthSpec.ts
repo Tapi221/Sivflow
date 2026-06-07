@@ -1,8 +1,6 @@
 import type React from "react";
 
-export type VerticalCardPagerItemWidthSpec =
-  | { mode: "fixed"; widthPx: number }
-  | { mode: "stretch" };
+export type VerticalCardPagerItemWidthSpec = { mode: "fixed"; widthPx: number } | { mode: "stretch" };
 
 type ResolveVerticalCardPagerItemWidthSpecOptions<T> = {
   card: T;
@@ -10,7 +8,9 @@ type ResolveVerticalCardPagerItemWidthSpecOptions<T> = {
   isActive: boolean;
   cardWidth: number;
   getCardWidth?: (card: T, idx: number, isActive: boolean) => number;
-  getCardWidthSpec?: (
-    card: T,
-    idx: number,
-   
+  getCardWidthSpec?: (card: T, idx: number, isActive: boolean) => VerticalCardPagerItemWidthSpec;
+};
+
+const MIN_CARD_WIDTH_PX = 1;
+
+const normalizeFixedWidth = (widthPx: number): number => Math.max(MIN_CARD_WIDTH_PX, widthPx
