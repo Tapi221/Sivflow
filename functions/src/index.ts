@@ -204,7 +204,7 @@ const runGoogleCallable = async <T>(context: "exchangeGoogleCalendarCode" | "exc
 
 const buildAuthorizationCodeTokenParams = ({ code, codeVerifier, redirectUri }: { code: string; codeVerifier?: string; redirectUri: string }): URLSearchParams => {
   const params = new URLSearchParams({ client_id: safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration"), client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "GOOGLE_OAUTH_CLIENT_SECRET", "server_oauth_configuration"), code, grant_type: "authorization_code", redirect_uri: redirectUri });
-  if (codeVerifier) params.set("code_verifier");
+  if (codeVerifier) params.set("code_verifier", codeVerifier);
   return params;
 };
 
