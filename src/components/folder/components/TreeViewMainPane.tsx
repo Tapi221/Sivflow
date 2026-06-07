@@ -9,10 +9,4 @@ type TreeViewMainPaneProps = {
   selectedCardId: string | null;
   selectedDocument: DocumentItem | null;
   selectedFolderId: string | null;
-  selectedFolderName: string;
-  folders: Folder[];
-  cards: Card[];
-  documents: DocumentItem[];
-  folderCards: Card[];
-  onCardUpdated: () => void;
-  onDocumentUpdated: (documentId: string, updates: Partial
+  selected
