@@ -5,4 +5,17 @@ import type { GCalForceSyncOptions, GCalWritableEventDeleteInput, GCalWritableEv
 
 type EngineContext = {
   accessToken: string;
-  selectedCalendarIds
+  selectedCalendarIds: Set<string>;
+  calendars: GoogleCalendarListItem[];
+};
+
+type EngineState = {
+  token: string;
+  calIds: string;
+  calendars: string;
+};
+
+export class GoogleCalendarEngineManager {
+  private engines = new Map<string, GoogleCalendarSyncEngine>();
+
+  private state = new Map<string, EngineState
