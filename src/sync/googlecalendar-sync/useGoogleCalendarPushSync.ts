@@ -1,13 +1,123 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { collection, onSnapshot, query, type Unsubscribe } from "firebase/firestore";
 import { firestoreDb } from "@/services/firebase";
 
-type UseGoogleCalendarPushSyncOptions = { userId: string | null; selectedCalendarIds: Set<string>; onNotification: (calendarId: string) => void };
+type UseGoogleCalendarPushSyncOptions = {
+  userId: string | null;
+  selectedCalendarIds: Set<string>;
+  onNotification: (calendarId: string) => void;
+};
 
-<<<<<<< HEAD
-const PUSH_SYNC_DEBOUNCE_MS = 250;
-=======
-type DebounceTimer = ReturnType<typeof setTimeout>;
+const NOTIFICATION_DEBOUNCE_MS = 250;
 
-const NOTIFICATION_DEBO
->>>>>>> da9ae81fae5856219806c56b2586862d62485f4e
+const isPermissionDeniedError = (error: unknown): boolean => {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "permission-denied"
+  );
+};
+
+const useGoogleCalendarPushSync = ({
+  userId,
+  selectedCalendarIds,
+  onNotification,
+}: UseGoogleCalendarPushSyncOptions): void => {
+  const onNotificationRef = useRef(onNotification);
+  const selectedCalendarIdsRef = useRef(selectedCalendarIds);
+  const listenerDisabledRef = useRef(false);
+  const pendingNotificationTimersRef = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+
+  const calendarKey = Array.from(selectedCalendarIds).slice().sort().join("|");
+
+  useEffect(() => {
+    onNotificationRef.current = onNotification;
+  }, [onNotification]);
+
+  useEffect(() => {
+    selectedCalendarIdsRef.current = selectedCalendarIds;
+  }, [selectedCalendarIds]);
+
+  useEffect(() => {
+    listenerDisabledRef.current = false;
+  }, [userId]);
+
+  useEffect(() => {
+    if (
+      !userId ||
+      selectedCalendarIdsRef.current.size === 0 ||
+      !firestoreDb ||
+      listenerDisabledRef.current
+    ) {
+      return;
+    }
+
+    const colRef = collection(
+      firestoreDb,
+      "gcal_notifications",
+      userId,
+      "calendars",
+    );
+
+    let isInitialSnapshot = true;
+
+    const unsubscribe: Unsubscribe = onSnapshot(
+      query(colRef),
+
+      (snapshot) => {
+        if (isInitialSnapshot) {
+          isInitialSnapshot = false;
+          return;
+        }
+
+        snapshot.docChanges().forEach((change) => {
+          if (change.type !== "added" && change.type !== "modified") {
+            return;
+          }
+
+          const calendarId = change.doc.id;
+
+          if (!selectedCalendarIdsRef.current.has(calendarId)) {
+            return;
+          }
+
+          console.info(`[PushSync] ${calendarId} の変更通知を受信 → 即時同期`);
+
+          const existingTimer = pendingNotificationTimersRef.current.get(calendarId);
+          if (existingTimer) {
+            clearTimeout(existingTimer);
+          }
+
+          const timer = setTimeout(() => {
+            pendingNotificationTimersRef.current.delete(calendarId);
+            onNotificationRef.current(calendarId);
+          }, NOTIFICATION_DEBOUNCE_MS);
+
+          pendingNotificationTimersRef.current.set(calendarId, timer);
+        });
+      },
+
+      (error) => {
+        if (isPermissionDeniedError(error)) {
+          listenerDisabledRef.current = true;
+          console.info(
+            "[PushSync] Firestore listener disabled because the current user cannot read gcal_notifications.",
+          );
+          unsubscribe();
+          return;
+        }
+
+        console.warn("[PushSync] Firestoreリスナーエラー:", error);
+      },
+    );
+
+    return () => {
+      unsubscribe();
+      pendingNotificationTimersRef.current.forEach((timer) => clearTimeout(timer));
+      pendingNotificationTimersRef.current.clear();
+    };
+  }, [calendarKey, userId]);
+};
+
+export { useGoogleCalendarPushSync };
