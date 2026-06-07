@@ -1,6 +1,5 @@
-import { createElement, memo } from "react";
-import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+import { createElement as h, memo } from "react";
 
-type Props = { event: GoogleCalendarEvent; showTimeLabel?: boolean; tooltipDisabled?: boolean };
+const CalendarEventChipMonth = memo(({ event }: any) => h("div", { className: "calendar-event-chip-month flex w-full min-w-0 items-center", "data-calendar-event-chip": "month" }, event.title));
 
-const CalendarEventChipMonth = memo(({ event }: Props) => createElement("div", { className: "calendar-event-chip-month flex w-full min-w-0 items-center", "data-calendar-event-chip":
+export { CalendarEventChipMonth };
