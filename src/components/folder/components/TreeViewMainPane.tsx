@@ -18,11 +18,4 @@ type TreeViewMainPaneProps = {
   onDocumentUpdated: (documentId: string, updates: Partial<DocumentItem>) => Promise<void> | void;
   onRenameFolder?: (newName: string) => Promise<void>;
   handlers: {
-    onStartStudy: () => void;
-    onViewCards: () => void;
-    onCreateCard: () => void;
-  };
-  folderSelectionNonce: number;
-};
-
-const TreeViewMainPane = ({ showMobileDetail, hideOnSectionList = false, selectedItem, selectedCardId, selectedDocument, selected
+    onStartStudy
