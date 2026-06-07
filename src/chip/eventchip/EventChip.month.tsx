@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import { memo, useMemo } from "react";
 import { format } from "date-fns";
 import { eventChipAllDayClass } from "./eventchip.allday.styles";
