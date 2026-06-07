@@ -438,6 +438,7 @@ export const CardSetViewDesktop = ({
       getCardWidthSpec={() => currentDisplayMode === "fluid" ? { mode: "stretch" as const } : { mode: "fixed" as const, widthPx: effectiveCardWidthPx }}
       getKey={(card) => card.id}
       disableVirtualization={Boolean(dragState)}
+      freezeActiveIndex={Boolean(dragState)}
       onActiveScrollAnchorFaceChange={onActiveScrollAnchorFaceChange}
       getScrollAnchorSelector={getScrollAnchorSelector}
       preserveScrollAnchorKey={preserveScrollAnchorKey}
