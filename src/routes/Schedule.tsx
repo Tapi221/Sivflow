@@ -31,10 +31,13 @@ const Calendar = () => {
   const activeSectionKey = useWorkspaceTabsStore((state) => state.tabs.find((tab) => tab.id === state.activeTabId)?.sectionKey ?? null);
   const shouldUseMobileScheduleScreen = isMobile && activeSectionKey !== "library";
   const ActiveScheduleScreen = shouldUseMobileScheduleScreen ? MobileScheduleScreen : DesktopScheduleScreen;
+  const suspenseFallback = shouldUseMobileScheduleScreen
+    ? <div className="h-full min-h-0 w-full" data-testid="mobile-schedule-screen" />
+    : null;
 
   return (
     <div className="h-full min-h-0 w-full">
-      <Suspense fallback={null}>
+      <Suspense fallback={suspenseFallback}>
         <ActiveScheduleScreen />
       </Suspense>
     </div>
