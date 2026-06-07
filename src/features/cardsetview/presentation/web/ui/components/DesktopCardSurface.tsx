@@ -39,6 +39,7 @@ const areDesktopCardSurfacePropsEqual = (
   if (prev.viewZoomScale !== next.viewZoomScale) return false;
   if (prev.folderId !== next.folderId) return false;
   if (prev.cardSetId !== next.cardSetId) return false;
+  if (prev.cardsOverride !== next.cardsOverride) return false;
   if (prev.onFlip !== next.onFlip) return false;
   if (prev.onToggleUncertainty !== next.onToggleUncertainty) return false;
   if (prev.onToggleBookmark !== next.onToggleBookmark) {
