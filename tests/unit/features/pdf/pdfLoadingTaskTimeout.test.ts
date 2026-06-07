@@ -10,14 +10,18 @@ describe("waitForPdfLoadingTask", () => {
 
   it("ロードが完了しなければタスクを破棄してタイムアウトする", async () => {
     vi.useFakeTimers();
-    const destroy = vi.fn();
-    const pending = new Promise<string>(() => undefined);
-    const result = waitForPdfLoadingTask({ promise: pending, destroy }, 50);
+    try {
+      const destroy = vi.fn();
+      const pending = new Promise<string>(() => undefined);
+      const result = waitForPdfLoadingTask({ promise: pending, destroy }, 50);
+      const expectation = expect(result).rejects.toThrow(PDF_LOAD_TIMEOUT_ERROR_MESSAGE);
 
-    await vi.advanceTimersByTimeAsync(50);
+      await vi.advanceTimersByTimeAsync(50);
 
-    await expect(result).rejects.toThrow(PDF_LOAD_TIMEOUT_ERROR_MESSAGE);
-    expect(destroy).toHaveBeenCalledTimes(1);
-    vi.useRealTimers();
+      await expectation;
+      expect(destroy).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
