@@ -1,7 +1,16 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
-import { useOutletContext } from "react-router-dom";
-import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
-import { areExplorerBreadcrumbContextsEqual, EMPTY_EXPLORER_BREADCRUMB_CONTEXT, type BreadcrumbCrumb, type ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
-import { buildFolderPath
+import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
+
+const WorkspaceScreen = () => {
+  const { folders } = useFoldersRead();
+
+  return (
+    <CarvePanel>
+      <TreeViewLayout
+        folders={folders}
+        isSectionListMode={true}
+        selectedFolderId={null}
+        selectedItem={null}
+        selectedCardId={null}
+        selectedDocumentId={null
