@@ -27,6 +27,7 @@ type ScheduleScreenHeaderDesktopProps = {
   onChangePlanResultModes: (value: PlanResultMode[]) => void;
   onChangeMonthVisibleEventCount: (value: number) => void;
   onChangePrintRange?: (value: CalendarPrintRangeState) => void;
+  onAddEvent?: () => void;
   onPrintCalendar?: () => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -52,6 +53,7 @@ const CALENDAR_PRINT_POPOVER_FIELD_CLASS_NAME = "flex flex-col gap-1";
 const CALENDAR_PRINT_POPOVER_LABEL_CLASS_NAME = "px-1 text-[10px] font-semibold leading-none tracking-[-0.01em] text-[#9a9691]";
 const CALENDAR_PRINT_RANGE_DATE_INPUT_CLASS_NAME = "h-7 w-full rounded-[7px] border border-transparent bg-[#f7f7f8] px-1.5 text-[11px] font-semibold leading-none tracking-[-0.01em] text-[#4b5563] outline-none ring-0 focus:border-[#dedede] focus:bg-white focus:outline-none focus:ring-0 focus-visible:outline-none";
 const CALENDAR_PRINT_POPOVER_ACTION_CLASS_NAME = "mt-1 flex h-7 w-full items-center justify-center gap-1 rounded-[7px] border-0 bg-transparent px-2 text-[12px] font-semibold leading-none tracking-[-0.012em] text-[#85827e] outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
+const CALENDAR_ADD_EVENT_BUTTON_CLASS_NAME = "relative z-10 flex h-7 min-h-0 min-w-[64px] shrink-0 items-center justify-center gap-1 rounded-[7px] border-0 bg-transparent px-2 text-[12px] font-semibold leading-none tracking-[-0.012em] text-[#85827e] shadow-none outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
 const MONTH_EVENT_COUNT_CONTROL_CLASS_NAME = "relative inline-grid h-7 w-max shrink-0 grid-flow-col items-center gap-0 rounded-[9px] border border-[#eeeeee] bg-[#f7f7f8] p-0.5 text-[12px] font-semibold leading-none tracking-[-0.012em] shadow-none";
 const MONTH_EVENT_COUNT_LABEL_CLASS_NAME = "relative z-10 flex h-6 min-h-0 items-center justify-center border-r border-[#e5e5e7] px-2 text-[11px] font-semibold leading-none tracking-[-0.01em] text-[#85827e]";
 const MONTH_EVENT_COUNT_BUTTON_CLASS_NAME = "relative z-10 flex h-6 min-h-0 w-6 min-w-0 shrink-0 items-center justify-center rounded-[7px] p-0 text-[#85827e] outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-white hover:text-[#2f343b] active:scale-[0.94] focus:outline-none focus:ring-0 focus-visible:bg-white focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100";
@@ -75,6 +77,7 @@ const ScheduleScreenHeaderDesktop = ({
   onChangePlanResultModes,
   onChangeMonthVisibleEventCount,
   onChangePrintRange,
+  onAddEvent,
   onPrintCalendar,
   onPrevious,
   onNext,
@@ -182,6 +185,13 @@ const ScheduleScreenHeaderDesktop = ({
               <Plus className="h-3.5 w-3.5" />
             </button>
           </div>
+        )}
+
+        {onAddEvent && (
+          <button type="button" className={CALENDAR_ADD_EVENT_BUTTON_CLASS_NAME} aria-label="予定を追加" title="予定を追加" onClick={onAddEvent}>
+            <Plus className="h-3.5 w-3.5" />
+            <span className="min-w-0 truncate whitespace-nowrap">追加</span>
+          </button>
         )}
 
         <div className={CALENDAR_PRINT_MENU_CLASS_NAME}>
