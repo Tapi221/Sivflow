@@ -1,8 +1,10 @@
 import { type ReactNode, type TouchEvent as ReactTouchEvent, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
-type MobileTouchPoint = { clientX: number; clientY: number };
+type SwipeState = { startX: number; startY: number; latestX: number; latestY: number; horizontal: boolean };
 
-type MobileSidebarSwipeState = { startX: number; startY: number; latestX: number; latestY: number; isHorizontal: boolean };
+type MobileSidebarDrawerProps = { id: string; isOpen: boolean; onClose: () => void; closeLabel?: string; children: ReactNode };
 
-type MobileSidebarDrawerProps = { id: string; isOpen: boolean; onClose
+const SWIPE_DISTANCE = 56;
+const SWIPE_HORIZONTAL_INTENT = 12;
+const SWIPE_VERTICAL_LIMIT = 72;
