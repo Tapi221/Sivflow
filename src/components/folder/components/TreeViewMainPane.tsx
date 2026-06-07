@@ -8,4 +8,4 @@ type TreeViewMainPaneProps = {
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
   selectedDocument: DocumentItem | null;
-  selectedFolderId: string |
+  selected
