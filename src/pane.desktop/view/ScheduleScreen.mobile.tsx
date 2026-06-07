@@ -1,6 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { addDays, endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDays } from "date-fns";
-import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
-import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
-import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
-import { attachCalendarEventDisplay
+import type { ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
+
+const ScheduleScreen = (_props: ScheduleScreenProps) => {
+  return (
+    <div className="flex h-full min-h-0 w-full items-center justify-center bg-white text-sm text-[#6d6d6d]" data-testid="mobile-schedule-screen">
+      モバイルスケジュール
+    </div>
+  );
+};
+
+export { ScheduleScreen };
