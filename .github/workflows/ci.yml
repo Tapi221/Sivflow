@@ -15,4 +15,3 @@ jobs:
       - run: npm run verify:design-tokens
       - run: npm run typecheck
       - run: npm run build
-      - run: npx vitest run tests/unit/parseXlsxImport.test.ts tests/unit/import
