@@ -9,4 +9,5 @@ type TreeViewMainPaneProps = {
   selectedCardId: string | null;
   selectedDocument: DocumentItem | null;
   selectedFolderId: string | null;
-  selected
+  selectedFolderName: string;
+  folders: Folder[];
