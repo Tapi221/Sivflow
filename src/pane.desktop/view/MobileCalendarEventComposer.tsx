@@ -43,7 +43,12 @@ type MobileCalendarEventComposerProps = {
   onCreateEvent: (accountId: string, event: GCalWritableEventInput) => Promise<GoogleCalendarEvent>;
 };
 
-const SHEET_CLOSE_THRESHOLD_PX = 120;
+const MOBILE_EVENT_COMPOSER_DEFAULT_START_HOUR = 9;
+const MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS = 1;
+const MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR = "#34c759";
+const MOBILE_EVENT_COMPOSER_TOP_GAP = 34;
+const MOBILE_EVENT_COMPOSER_DISMISS_DRAG_DISTANCE = 96;
+const MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX = "現在地";
 
 const createMobileCalendarOptionKey = (accountId: string, calendarId: string): string => JSON.stringify([accountId, calendarId]);
 
@@ -66,10 +71,10 @@ const buildMobileCalendarOptions = (accounts: GoogleAccountDisplay[], projectCal
       key,
       accountId: account.accountId,
       calendarId: calendar.id,
-      label: linkedProject?.externalCalendarName?.trim() || calendar.summary?.trim() || "Untitled calendar",
+      label: linkedProject?.externalCalendarName?.trim() || calendar.summary?.trim() || "カレンダー",
       accountLabel: account.name?.trim() || account.email?.trim() || "Google Calendar",
-      calendarLabel: calendar.summary?.trim() || "Untitled calendar",
-      color: calendar.backgroundColor ?? "#185FA5",
+      calendarLabel: calendar.summary?.trim() || "カレンダー",
+      color: calendar.backgroundColor ?? MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR,
       projectId: linkedProject?.projectId,
     };
   }));
@@ -94,7 +99,7 @@ const buildMobileEventDates = (form: MobileCalendarEventFormState): MobileEventD
   }
 
   const startsAt = startDate;
-  const endsAt = endDate.getTime() > startDate.getTime() ? endDate : addHours(startDate, 1);
+  const endsAt = endDate.getTime() > startDate.getTime() ? endDate : addHours(startDate, MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS);
 
   return {
     startsAt,
@@ -104,8 +109,8 @@ const buildMobileEventDates = (form: MobileCalendarEventFormState): MobileEventD
 };
 
 const createInitialEventFormState = (selectedDate: Date, calendarOptions: MobileCalendarWritableCalendarOption[]): MobileCalendarEventFormState => {
-  const startsAt = addHours(startOfDay(selectedDate), 9);
-  const endsAt = addHours(startsAt, 1);
+  const startsAt = addHours(startOfDay(selectedDate), MOBILE_EVENT_COMPOSER_DEFAULT_START_HOUR);
+  const endsAt = addHours(startsAt, MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS);
 
   return {
     title: "",
@@ -120,19 +125,28 @@ const createInitialEventFormState = (selectedDate: Date, calendarOptions: Mobile
   };
 };
 
+const getErrorMessage = (error: unknown): string => error instanceof Error ? error.message : "予定の作成に失敗しました。";
+
+const isInteractiveComposerSwipeTarget = (target: EventTarget | null): boolean => target instanceof HTMLElement && Boolean(target.closest("button,input,select,textarea,a"));
+
 const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, projectCalendarLinks, onClose, onAddCalendar, onCreateEvent }: MobileCalendarEventComposerProps) => {
   const calendarOptions = useMemo(() => buildMobileCalendarOptions(accounts, projectCalendarLinks), [accounts, projectCalendarLinks]);
   const [form, setForm] = useState<MobileCalendarEventFormState>(() => createInitialEventFormState(selectedDate, calendarOptions));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState(0);
+  const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
   const dragStartYRef = useRef<number | null>(null);
+  const selectedCalendarOption = useMemo(() => calendarOptions.find((option) => option.key === form.calendarKey) ?? null, [calendarOptions, form.calendarKey]);
+  const isSubmitDisabled = isSubmitting || !form.title.trim() || !selectedCalendarOption;
+  const sheetStyle = useMemo<CSSProperties>(() => ({ transform: `translateY(${dragOffset}px)`, transition: dragStartYRef.current === null ? "transform 180ms ease-out" : "none" }), [dragOffset]);
 
   useEffect(() => {
     if (!isOpen) {
       setDragOffset(0);
       setErrorMessage(null);
       setIsSubmitting(false);
+      setIsLocationSheetOpen(false);
       return;
     }
 
@@ -142,8 +156,16 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, projectCa
   useEffect(() => {
     if (!isOpen) return;
 
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
+
+      if (isLocationSheetOpen) {
+        setIsLocationSheetOpen(false);
+        return;
+      }
 
       onClose();
     };
@@ -151,26 +173,36 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, projectCa
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
+      document.body.style.overflow = originalOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, onClose]);
-
-  const selectedCalendarOption = useMemo(() => calendarOptions.find((option) => option.key === form.calendarKey) ?? null, [calendarOptions, form.calendarKey]);
-  const sheetStyle = useMemo<CSSProperties>(() => ({
-    transform: `translateY(${dragOffset}px)`,
-    transition: dragStartYRef.current === null ? "transform 180ms ease-out" : "none",
-  }), [dragOffset]);
+  }, [isLocationSheetOpen, isOpen, onClose]);
 
   const setFormValue = useCallback((patch: Partial<MobileCalendarEventFormState>) => {
     setForm((currentForm) => ({ ...currentForm, ...patch }));
+    setErrorMessage(null);
   }, []);
 
-  const handlePointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+  const handleClose = useCallback(() => {
+    if (isSubmitting) return;
+
+    onClose();
+  }, [isSubmitting, onClose]);
+
+  const handleAddCalendar = useCallback(() => {
+    void onAddCalendar().catch((error) => {
+      setErrorMessage(getErrorMessage(error));
+    });
+  }, [onAddCalendar]);
+
+  const handlePointerDown = useCallback((event: ReactPointerEvent<HTMLElement>) => {
+    if (isSubmitting || isInteractiveComposerSwipeTarget(event.target)) return;
+
     dragStartYRef.current = event.clientY;
     event.currentTarget.setPointerCapture(event.pointerId);
-  }, []);
+  }, [isSubmitting]);
 
-  const handlePointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+  const handlePointerMove = useCallback((event: ReactPointerEvent<HTMLElement>) => {
     if (dragStartYRef.current === null) return;
 
     setDragOffset(Math.max(0, event.clientY - dragStartYRef.current));
@@ -182,14 +214,51 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, projectCa
   }, []);
 
   const handlePointerEnd = useCallback(() => {
-    if (dragOffset >= SHEET_CLOSE_THRESHOLD_PX) {
+    if (dragStartYRef.current === null) return;
+
+    if (dragOffset >= MOBILE_EVENT_COMPOSER_DISMISS_DRAG_DISTANCE) {
       resetDragState();
-      onClose();
+      handleClose();
       return;
     }
 
     resetDragState();
-  }, [dragOffset, onClose, resetDragState]);
+  }, [dragOffset, handleClose, resetDragState]);
+
+  const handleOpenLocationSheet = useCallback(() => {
+    setIsLocationSheetOpen(true);
+  }, []);
+
+  const handleCloseLocationSheet = useCallback(() => {
+    setIsLocationSheetOpen(false);
+  }, []);
+
+  const handleSelectFaceTime = useCallback(() => {
+    setFormValue({ location: "FaceTime" });
+    setIsLocationSheetOpen(false);
+  }, [setFormValue]);
+
+  const handleSelectCurrentLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setFormValue({ location: MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX });
+      setIsLocationSheetOpen(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latitude = position.coords.latitude.toFixed(5);
+        const longitude = position.coords.longitude.toFixed(5);
+        setFormValue({ location: `${MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX}（${latitude}, ${longitude}）` });
+        setIsLocationSheetOpen(false);
+      },
+      () => {
+        setFormValue({ location: MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX });
+        setIsLocationSheetOpen(false);
+      },
+      { enableHighAccuracy: true, maximumAge: 30000, timeout: 8000 },
+    );
+  }, [setFormValue]);
 
   const handleSubmit = useCallback(async () => {
     if (!selectedCalendarOption) {
@@ -213,21 +282,25 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, projectCa
     setErrorMessage(null);
 
     try {
-      await onCreateEvent(selectedCalendarOption.accountId, {
+      const writableEvent: GCalWritableEventInput = {
         calendarId: selectedCalendarOption.calendarId,
         title,
-        location: form.location.trim() || undefined,
-        description: form.description.trim() || undefined,
         startsAt: eventDates.startsAt,
         endsAt: eventDates.endsAt,
         isAllDay: eventDates.isAllDay,
-        projectId: selectedCalendarOption.projectId,
-      });
+      };
 
+      const trimmedLocation = form.location.trim();
+      const trimmedDescription = form.description.trim();
+      if (trimmedLocation) writableEvent.location = trimmedLocation;
+      if (trimmedDescription) writableEvent.description = trimmedDescription;
+      if (selectedCalendarOption.projectId) writableEvent.projectId = selectedCalendarOption.projectId;
+
+      await onCreateEvent(selectedCalendarOption.accountId, writableEvent);
       onClose();
     } catch (error) {
       console.warn("[MobileCalendarEventComposer] Failed to create event", error);
-      setErrorMessage("予定の作成に失敗しました。");
+      setErrorMessage(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -236,92 +309,135 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, projectCa
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/35 px-0 pb-0 pt-10" aria-hidden={!isOpen}>
-      <button type="button" className="absolute inset-0" onClick={onClose} aria-label="予定作成を閉じる" />
-      <section role="dialog" aria-modal="true" aria-labelledby="mobile-calendar-event-composer-title" className="relative flex h-full max-h-[92dvh] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[26px] border border-[#d8e0ec] bg-[#eef2f7] shadow-[0_-12px_40px_rgba(33,43,61,0.20)]" style={sheetStyle}>
-        <div className="flex justify-center pb-2 pt-3">
-          <div className="h-1.5 w-12 rounded-full bg-[#cad3df]" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerEnd} onPointerCancel={handlePointerEnd} />
-        </div>
-        <header className="flex items-center justify-between border-b border-[#d8e0ec] px-5 pb-4 pt-1">
-          <div>
-            <h2 id="mobile-calendar-event-composer-title" className="text-[18px] font-semibold tracking-[-0.02em] text-[#1c1c1e]">新規予定</h2>
-            <p className="mt-1 text-[12px] text-[#6e6e73]">{format(selectedDate, "yyyy年M月d日")}</p>
-          </div>
-          <button type="button" className="rounded-full px-3 py-1.5 text-[13px] font-semibold text-[#6e6e73] transition hover:bg-white/70 hover:text-[#1c1c1e]" onClick={onClose}>閉じる</button>
+    <div className="fixed inset-x-0 bottom-0 z-[90] flex justify-center bg-black/25" role="presentation" style={{ top: MOBILE_EVENT_COMPOSER_TOP_GAP }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="mobile-calendar-event-composer-title" className="flex h-full w-full max-w-[720px] flex-col overflow-hidden rounded-t-[26px] border border-[#d8e0ec] bg-[#f2f2f7] shadow-[0_-12px_40px_rgba(33,43,61,0.20)]" style={sheetStyle}>
+        <header className="relative flex h-[58px] shrink-0 touch-none items-center bg-[#f2f2f7] px-4" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerEnd} onPointerCancel={handlePointerEnd}>
+          <button type="button" className="relative z-10 mr-auto min-w-[88px] text-left text-[17px] font-normal tracking-[-0.03em] text-[#ff3b30] disabled:text-[#c7c7cc]" onClick={handleClose} disabled={isSubmitting}>キャンセル</button>
+          <h2 id="mobile-calendar-event-composer-title" className="pointer-events-none absolute left-1/2 top-1/2 w-[180px] -translate-x-1/2 -translate-y-1/2 text-center text-[17px] font-bold tracking-[-0.03em] text-[#111111]">新規イベント</h2>
+          <button type="button" className="relative z-10 ml-auto min-w-[88px] text-right text-[17px] font-semibold tracking-[-0.03em] text-[#ff3b30] disabled:text-[#c7c7cc]" onClick={() => { void handleSubmit(); }} disabled={isSubmitDisabled}>{isSubmitting ? "追加中" : "追加"}</button>
         </header>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 py-4">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-4">
           {calendarOptions.length === 0 ? (
-            <div className="rounded-[18px] border border-dashed border-[#ccd6e2] bg-white/70 p-5 text-center">
-              <p className="text-[14px] font-medium text-[#1c1c1e]">書き込み可能な Google カレンダーがありません。</p>
-              <button type="button" className="mt-4 rounded-full bg-[#1c1c1e] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#2c2c2e]" onClick={() => { void onAddCalendar(); }}>Google カレンダーを追加</button>
+            <div className="overflow-hidden rounded-[14px] bg-white px-4 py-5 text-center">
+              <p className="text-[15px] font-medium tracking-[-0.03em] text-[#111111]">書き込み可能な Google カレンダーがありません。</p>
+              <button type="button" className="mt-4 rounded-full bg-[#f2f2f7] px-4 py-2 text-[15px] font-semibold tracking-[-0.03em] text-[#ff3b30]" onClick={handleAddCalendar}>Google カレンダーを追加</button>
             </div>
           ) : (
             <>
-              <label className="flex flex-col gap-2">
-                <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#6e6e73]">タイトル</span>
-                <input value={form.title} onChange={(event) => setFormValue({ title: event.target.value })} placeholder="予定名" className="h-11 rounded-[14px] border border-[#d8e0ec] bg-white px-4 text-[15px] text-[#1c1c1e] outline-none transition focus:border-[#9db5d1]" />
-              </label>
+              <div className="overflow-hidden rounded-[14px] bg-white">
+                <input className="h-[56px] w-full border-0 border-b border-[#d1d1d6] bg-transparent px-4 text-[21px] font-normal tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#c7c7cc]" value={form.title} onChange={(event) => setFormValue({ title: event.target.value })} placeholder="タイトル" inputMode="text" />
+                <button type="button" className={cn("flex h-[48px] w-full items-center px-4 text-left text-[17px] tracking-[-0.03em] outline-none", form.location.trim() ? "text-[#111111]" : "text-[#c7c7cc]")} onClick={handleOpenLocationSheet}>
+                  <span className="min-w-0 flex-1 truncate">{form.location.trim() || "場所またはビデオ通話"}</span>
+                </button>
+              </div>
 
-              <label className="flex flex-col gap-2">
-                <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#6e6e73]">カレンダー</span>
-                <select value={form.calendarKey} onChange={(event) => setFormValue({ calendarKey: event.target.value })} className="h-11 rounded-[14px] border border-[#d8e0ec] bg-white px-4 text-[15px] text-[#1c1c1e] outline-none transition focus:border-[#9db5d1]">
-                  {calendarOptions.map((option) => (
-                    <option key={option.key} value={option.key}>{option.calendarLabel} / {option.accountLabel}</option>
-                  ))}
-                </select>
-              </label>
+              <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
+                <div className="flex min-h-[52px] items-center justify-between border-b border-[#d1d1d6] px-4">
+                  <span className="text-[17px] tracking-[-0.03em] text-[#111111]">終日</span>
+                  <button type="button" role="switch" aria-checked={form.isAllDay} aria-label="終日" className={cn("relative h-[31px] w-[51px] shrink-0 overflow-hidden rounded-full border-0 p-0 transition appearance-none", form.isAllDay ? "bg-[#34c759]" : "bg-[#e9e9eb]")} onClick={() => setFormValue({ isAllDay: !form.isAllDay })}>
+                    <span className={cn("absolute left-0 top-[2px] h-[27px] w-[27px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.22)] transition-transform", form.isAllDay ? "translate-x-[22px]" : "translate-x-[2px]")} />
+                  </button>
+                </div>
+                <label className="flex min-h-[52px] items-center justify-between gap-3 border-b border-[#d1d1d6] px-4">
+                  <span className="text-[17px] tracking-[-0.03em] text-[#111111]">開始</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <input type="date" className="h-9 rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.startDate} onChange={(event) => setFormValue({ startDate: event.target.value })} />
+                    {!form.isAllDay && <input type="time" className="h-9 w-[92px] rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.startTime} onChange={(event) => setFormValue({ startTime: event.target.value })} />}
+                  </span>
+                </label>
+                <label className="flex min-h-[52px] items-center justify-between gap-3 border-b border-[#d1d1d6] px-4">
+                  <span className="text-[17px] tracking-[-0.03em] text-[#111111]">終了</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <input type="date" className="h-9 rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.endDate} onChange={(event) => setFormValue({ endDate: event.target.value })} />
+                    {!form.isAllDay && <input type="time" className="h-9 w-[92px] rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.endTime} onChange={(event) => setFormValue({ endTime: event.target.value })} />}
+                  </span>
+                </label>
+                <div className="flex min-h-[52px] items-center justify-between px-4">
+                  <span className="text-[17px] tracking-[-0.03em] text-[#111111]">移動時間</span>
+                  <span className="text-[17px] tracking-[-0.03em] text-[#8e8e93]">なし⌄</span>
+                </div>
+              </div>
 
-              <label className="flex items-center gap-3 rounded-[16px] border border-[#d8e0ec] bg-white px-4 py-3">
-                <input type="checkbox" checked={form.isAllDay} onChange={(event) => setFormValue({ isAllDay: event.target.checked })} className="h-4 w-4 rounded border-[#c7d2e0]" />
-                <span className="text-[14px] font-medium text-[#1c1c1e]">終日</span>
-              </label>
-
-              <div className="grid grid-cols-2 gap-3">
-                <label className="flex flex-col gap-2">
-                  <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#6e6e73]">開始日</span>
-                  <input type="date" value={form.startDate} onChange={(event) => setFormValue({ startDate: event.target.value })} className="h-11 rounded-[14px] border border-[#d8e0ec] bg-white px-4 text-[15px] text-[#1c1c1e] outline-none transition focus:border-[#9db5d1]" />
-                </label>
-                <label className={cn("flex flex-col gap-2", form.isAllDay && "opacity-50")}>
-                  <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#6e6e73]">開始時刻</span>
-                  <input type="time" value={form.startTime} disabled={form.isAllDay} onChange={(event) => setFormValue({ startTime: event.target.value })} className="h-11 rounded-[14px] border border-[#d8e0ec] bg-white px-4 text-[15px] text-[#1c1c1e] outline-none transition focus:border-[#9db5d1] disabled:bg-[#f3f4f6]" />
-                </label>
-                <label className="flex flex-col gap-2">
-                  <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#6e6e73]">終了日</span>
-                  <input type="date" value={form.endDate} onChange={(event) => setFormValue({ endDate: event.target.value })} className="h-11 rounded-[14px] border border-[#d8e0ec] bg-white px-4 text-[15px] text-[#1c1c1e] outline-none transition focus:border-[#9db5d1]" />
-                </label>
-                <label className={cn("flex flex-col gap-2", form.isAllDay && "opacity-50")}>
-                  <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#6e6e73]">終了時刻</span>
-                  <input type="time" value={form.endTime} disabled={form.isAllDay} onChange={(event) => setFormValue({ endTime: event.target.value })} className="h-11 rounded-[14px] border border-[#d8e0ec] bg-white px-4 text-[15px] text-[#1c1c1e] outline-none transition focus:border-[#9db5d1] disabled:bg-[#f3f4f6]" />
+              <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
+                <label className="flex min-h-[52px] items-center justify-between gap-4 border-b border-[#d1d1d6] px-4">
+                  <span className="text-[17px] tracking-[-0.03em] text-[#111111]">繰り返し</span>
+                  <span className="text-[17px] tracking-[-0.03em] text-[#8e8e93]">しない⌄</span>
                 </label>
               </div>
 
-              <label className="flex flex-col gap-2">
-                <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#6e6e73]">場所</span>
-                <input value={form.location} onChange={(event) => setFormValue({ location: event.target.value })} placeholder="任意" className="h-11 rounded-[14px] border border-[#d8e0ec] bg-white px-4 text-[15px] text-[#1c1c1e] outline-none transition focus:border-[#9db5d1]" />
-              </label>
+              <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
+                <label className="flex min-h-[52px] items-center justify-between gap-4 border-b border-[#d1d1d6] px-4">
+                  <span className="text-[17px] tracking-[-0.03em] text-[#111111]">カレンダー</span>
+                  <span className="flex min-w-0 flex-1 items-center justify-end gap-2">
+                    <span aria-hidden="true" className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: selectedCalendarOption?.color ?? MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR }} />
+                    <select className="min-w-0 max-w-[70%] bg-transparent text-right text-[17px] tracking-[-0.03em] text-[#8e8e93] outline-none" value={form.calendarKey} onChange={(event) => setFormValue({ calendarKey: event.target.value })}>
+                      {calendarOptions.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
+                    </select>
+                  </span>
+                </label>
+                <div className="flex min-h-[52px] items-center justify-between gap-4 px-4">
+                  <span className="text-[17px] tracking-[-0.03em] text-[#111111]">予定出席者</span>
+                  <span className="text-[17px] tracking-[-0.03em] text-[#8e8e93]">なし ›</span>
+                </div>
+              </div>
 
-              <label className="flex min-h-[132px] flex-col gap-2">
-                <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#6e6e73]">説明</span>
-                <textarea value={form.description} onChange={(event) => setFormValue({ description: event.target.value })} placeholder="メモ" className="min-h-[132px] rounded-[14px] border border-[#d8e0ec] bg-white px-4 py-3 text-[15px] text-[#1c1c1e] outline-none transition focus:border-[#9db5d1]" />
-              </label>
+              <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
+                <div className="flex min-h-[52px] items-center justify-between gap-4 px-4">
+                  <span className="text-[17px] tracking-[-0.03em] text-[#111111]">通知</span>
+                  <span className="text-[17px] tracking-[-0.03em] text-[#8e8e93]">なし⌄</span>
+                </div>
+              </div>
+
+              <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
+                <textarea className="h-[132px] w-full resize-none border-0 bg-transparent px-4 py-3 text-[17px] leading-6 tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#c7c7cc]" value={form.description} onChange={(event) => setFormValue({ description: event.target.value })} placeholder="メモ" />
+              </div>
+
+              <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
+                <button type="button" className="flex min-h-[52px] w-full items-center px-4 text-left text-[17px] tracking-[-0.03em] text-[#111111]">添付ファイルを追加...</button>
+              </div>
             </>
           )}
-        </div>
 
-        <footer className="border-t border-[#d8e0ec] px-5 pb-[calc(20px+env(safe-area-inset-bottom))] pt-4">
-          {selectedCalendarOption ? (
-            <div className="mb-3 flex items-center gap-2 text-[12px] text-[#6e6e73]">
-              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: selectedCalendarOption.color }} />
-              <span>{selectedCalendarOption.calendarLabel} / {selectedCalendarOption.accountLabel}</span>
-            </div>
-          ) : null}
-          {errorMessage ? <p className="mb-3 text-[12px] font-medium text-[#c2410c]">{errorMessage}</p> : null}
-          <button type="button" disabled={isSubmitting || calendarOptions.length === 0} className="h-12 w-full rounded-[16px] bg-[#1c1c1e] text-[15px] font-semibold text-white transition hover:bg-[#2c2c2e] disabled:cursor-not-allowed disabled:bg-[#9ca3af]" onClick={() => { void handleSubmit(); }}>
-            {isSubmitting ? "作成中..." : "予定を作成"}
-          </button>
-        </footer>
+          {errorMessage ? <p className="mt-3 px-1 text-[14px] leading-5 tracking-[-0.03em] text-[#d94a56]">{errorMessage}</p> : null}
+        </div>
       </section>
+
+      {isLocationSheetOpen ? (
+        <div className="fixed inset-x-0 bottom-0 z-[100] flex justify-center bg-black/10" role="presentation" style={{ top: MOBILE_EVENT_COMPOSER_TOP_GAP + 18 }}>
+          <section role="dialog" aria-modal="true" aria-label="場所" className="flex h-full w-full max-w-[720px] flex-col overflow-hidden rounded-t-[18px] bg-white shadow-[0_-12px_40px_rgba(0,0,0,0.18)]">
+            <header className="relative flex h-[72px] shrink-0 items-center px-4">
+              <h3 className="pointer-events-none absolute left-1/2 top-1/2 w-[180px] -translate-x-1/2 -translate-y-1/2 text-center text-[19px] font-bold tracking-[-0.03em] text-[#111111]">場所</h3>
+              <button type="button" className="ml-auto min-w-[88px] text-right text-[17px] font-normal tracking-[-0.03em] text-[#ff3b30]" onClick={handleCloseLocationSheet}>キャンセル</button>
+            </header>
+
+            <div className="px-4 pb-3">
+              <label className="flex h-[44px] items-center rounded-[12px] bg-[#f2f2f7] px-3">
+                <span aria-hidden="true" className="mr-2 text-[22px] leading-none text-[#8e8e93]">⌕</span>
+                <input autoFocus className="min-w-0 flex-1 border-0 bg-transparent text-[17px] tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#8e8e93]" value={form.location} onChange={(event) => setFormValue({ location: event.target.value })} onKeyDown={(event) => { if (event.key === "Enter") setIsLocationSheetOpen(false); }} placeholder="場所またはビデオ通話を入力" inputMode="text" />
+              </label>
+            </div>
+
+            <div className="h-px bg-[#d1d1d6]" />
+
+            <div className="min-h-0 flex-1 overflow-y-auto bg-white">
+              <button type="button" className="flex min-h-[72px] w-full items-center gap-4 border-b border-[#d1d1d6] px-4 text-left" onClick={handleSelectCurrentLocation}>
+                <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-[#d8d8dd] text-[24px] text-[#007aff]">➤</span>
+                <span className="text-[18px] tracking-[-0.03em] text-[#111111]">現在地</span>
+              </button>
+
+              <div className="border-b border-[#d1d1d6] bg-[#f7f7f7] px-4 pb-3 pt-7">
+                <span className="text-[16px] font-bold tracking-[-0.03em] text-[#8e8e93]">ビデオ通話</span>
+              </div>
+
+              <button type="button" className="flex min-h-[72px] w-full items-center gap-4 border-b border-[#d1d1d6] px-4 text-left" onClick={handleSelectFaceTime}>
+                <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[8px] bg-[#30d158] text-[22px] text-white">▰</span>
+                <span className="text-[18px] tracking-[-0.03em] text-[#111111]">FaceTime</span>
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 };
