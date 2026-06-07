@@ -5,10 +5,4 @@ import type { CalendarEventMoveHandler } from "./scheduleScreen.types";
 
 type CalendarEventMoveOverride = { startsAt: Date; endsAt: Date; isAllDay: boolean };
 
-type CalendarEventUpdateHandler = (accountId: string, event: GCalWritableEventUpdateInput) => Promise<GoogleCalendarEvent>;
-
-type UseCalendarEventMoveControllerOptions = { updateGoogleCalendarEvent: CalendarEventUpdateHandler };
-
-type UseCalendarEventMoveControllerReturn = { calendarEventMoveOverrides: Map<string, CalendarEventMoveOverride>; handleMoveCalendarEvent: CalendarEventMoveHandler };
-
-const EVENT_MOVE_SAVE_DELAY_MS = 1200;
+type CalendarEventUpdateHandler = (accountId: string, event: GCalWritableEventUpdateInput) => Promise<Google
