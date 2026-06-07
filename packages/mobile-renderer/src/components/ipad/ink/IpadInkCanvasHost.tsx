@@ -9,3 +9,6 @@ type IpadInkCanvasHostProps = {
   onErasePoint: (point: InkPoint) => void;
   onStrokeComplete: (stroke: InkStroke) => void;
 };
+
+const IpadInkCanvasHost = ({ cardId, strokes }: IpadInkCanvasHostProps) => {
+  return (
