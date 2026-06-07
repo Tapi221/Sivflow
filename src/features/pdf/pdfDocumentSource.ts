@@ -26,10 +26,14 @@ const createPdfDocumentUrlSource = (url: string): PdfDocumentSource => ({
   url,
 });
 
+const createPdfDocumentDataSourceFromBlob = async (blob: Blob): Promise<PdfDocumentSource> => {
+  return createPdfDocumentDataSource(new Uint8Array(await blob.arrayBuffer()));
+};
+
 const toPdfDocumentLoadSource = (source: PdfDocumentSource): PdfDocumentLoadSource => {
   if (source.type === "data") return { data: source.data.slice() };
   return { url: source.url };
 };
 
-export { createPdfDocumentDataSource, createPdfDocumentUrlSource, toPdfDocumentLoadSource };
+export { createPdfDocumentDataSource, createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, toPdfDocumentLoadSource };
 export type { PdfDocumentSource };

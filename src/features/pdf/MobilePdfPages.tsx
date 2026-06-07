@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
 import { toPdfDocumentLoadSource } from "./pdfDocumentSource";
+import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
 import type { PdfViewerState } from "@/types";
 import { cn } from "@/lib/utils";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
@@ -54,7 +55,7 @@ const createPdfDocumentLoadOptions = (viewerOptions: MobilePdfPagesProps["viewer
 
 const loadPdfDocument = async (source: PdfDocumentSource | null, viewerOptions: MobilePdfPagesProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
   if (!source) throw new Error("表示できるPDFソースがありません。");
-  return pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions), ...toPdfDocumentLoadSource(source) }).promise;
+  return waitForPdfLoadingTask(pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions), ...toPdfDocumentLoadSource(source) }));
 };
 
 const getSafePageNumber = (pageNumber: number | null | undefined, pageCount: number): number => {

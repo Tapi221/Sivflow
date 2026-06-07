@@ -1,6 +1,7 @@
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
 import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
+import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
 
 export type PdfDocumentProxy = Awaited<ReturnType<typeof pdfjsLib.getDocument>["promise"]>;
 
@@ -35,7 +36,7 @@ const createPdfDocumentLoadOptions = (viewerOptions: PdfViewerOptions | null | u
 const loadPdfDocument = async (sourceUrl: string | null, viewerOptions: PdfViewerOptions | null | undefined): Promise<PdfDocumentProxy> => {
   const normalizedSourceUrl = sourceUrl?.trim();
   if (!normalizedSourceUrl) throw new Error("表示できるPDFソースがありません。");
-  return pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions), url: normalizedSourceUrl }).promise;
+  return waitForPdfLoadingTask(pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions), url: normalizedSourceUrl }));
 };
 
 export { EventBus, PDFLinkService, PDFViewer, loadPdfDocument };

@@ -4,6 +4,7 @@ import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
 import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/web/pdf_viewer.mjs";
 import "pdfjs-dist/web/pdf_viewer.css";
 import { toPdfDocumentLoadSource } from "./pdfDocumentSource";
+import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
 import type { PdfViewerState } from "@/types";
 import { cn } from "@/lib/utils";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
@@ -111,7 +112,7 @@ const createPdfDocumentLoadOptions = (viewerOptions: PdfPaneProps["viewerOptions
 
 const loadPdfDocument = async (source: PdfDocumentSource | null, viewerOptions: PdfPaneProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
   if (!source) throw new Error("表示できるPDFソースがありません。");
-  return pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions), ...toPdfDocumentLoadSource(source) }).promise;
+  return waitForPdfLoadingTask(pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions), ...toPdfDocumentLoadSource(source) }));
 };
 
 const releasePdfViewerDocument = (pdfViewer: PdfViewerInstance, linkService: PdfLinkServiceInstance, pdfDocument: PdfDocumentProxy | null): void => {
