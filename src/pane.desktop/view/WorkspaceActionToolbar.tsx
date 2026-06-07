@@ -1,8 +1,13 @@
 import { type CSSProperties } from "react";
 import { Tag } from "@/ui/icons";
 
-type Props = { className?: string; style?: CSSProperties };
+type WorkspaceActionToolbarProps = { className?: string; style?: CSSProperties };
 
-const WorkspaceActionToolbar = ({ className, style }: Props) => <div className={className} style={style}><Tag /></div>;
+type WorkspaceAction = { key: string; label: string; text?: string };
 
-export { WorkspaceActionToolbar };
+const ACTIONS: readonly WorkspaceAction[] = [
+  { key: "share", label: "共有", text: "共有" },
+  { key: "comment", label: "コメント" },
+  { key: "history", label: "履歴" },
+  { key: "tag", label: "タグ" },
+  { key: "favorite", label: "お気
