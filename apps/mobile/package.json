@@ -13,4 +13,8 @@
     "typecheck": "tsc --noEmit --pretty false"
   },
   "dependencies": {
-    "@expo/metro-runtime": "~6.
+    "date-fns": "^4.1.0",
+    "expo": "~54.0.0",
+    "expo-calendar": "~15.0.6",
+    "expo-status-bar": "~3.0.9",
+    "react": "^19.2.
