@@ -1,8 +1,11 @@
-type StoreSchema = Record<string, string | null>;
+import { AUX_STORES } from "./schemaStores.aux";
+import { CARD_STORES } from "./schemaStores.cards";
+import { CORE_STORES } from "./schemaStores.core";
+import { SYNC_STORES } from "./schemaStores.sync";
 
-const joinIndexes = (indexes: string[]): string => indexes.join(", ");
-
-export const LOCAL_DB_STORES: StoreSchema = {
-  folders: joinIndexes(["id", "userId", "parentFolderId", "updatedAt", "cloudSyncEnabled", "isDeleted", "[userId+updatedAt]", "[userId+isDeleted]"]),
-  cardSets: joinIndexes(["id", "userId", "folderId", "updatedAt", "isDeleted", "[userId+updatedAt]", "[userId+folderId]"]),
-  cards: joinIndexes(["id", "userId", "folderId", "cardSetId", "
+export const LOCAL_DB_STORES = {
+  ...CORE_STORES,
+  ...CARD_STORES,
+  ...SYNC_STORES,
+  ...AUX_STORES,
+};
