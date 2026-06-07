@@ -5,5 +5,5 @@ const NativeInkCanvas = Platform.OS === "ios" ? requireNativeComponent("SivflowP
 
 export default function IpadInkCanvasHost(props: any) {
   if (!NativeInkCanvas) return React.createElement(View, { style: props.style });
-  return React.createElement(NativeInkCanvas, { style: props.style });
+  return React.createElement(NativeInkCanvas, { style: props.style, onStrokeComplete: props.onStrokeComplete });
 }
