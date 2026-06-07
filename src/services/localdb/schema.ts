@@ -1,9 +1,6 @@
 import type { LocalDB } from "./LocalDB";
+import { LOCAL_DB_STORES } from "./schemaStores";
 
-type StoreSchema = Record<string, string | null>;
-
-const joinIndexes = (indexes: string[]): string => indexes.join(", ");
-
-const LOCAL_DB_STORES: StoreSchema = {
-  folders: joinIndexes(["id", "userId", "parentFolderId", "updatedAt", "cloudSyncEnabled", "isDeleted", "[userId+updatedAt]", "[userId+isDeleted]"]),
-  cardSets: joinIndexes(["id", "userId", "folderId", "updatedAt", "isDeleted", "[userId+updatedAt]", "[userId+folderId]"]),
+export const defineSchema = (db: LocalDB): void => {
+  db.version(34).stores(LOCAL_DB_STORES);
+};
