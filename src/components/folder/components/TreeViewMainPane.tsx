@@ -9,4 +9,3 @@ interface TreeViewMainPaneProps {
   selectedCardId: string | null;
   selectedDocument: DocumentItem | null;
   selectedFolderId: string | null;
-  selectedFolderName:
