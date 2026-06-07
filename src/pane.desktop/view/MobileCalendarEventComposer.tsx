@@ -5,6 +5,4 @@ import type { CalendarRecurrenceFrequency, CalendarRecurrenceRule, CalendarWeekd
 import type { GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-type RecurrencePreset = "none" | "daily" | "weekly" | "biweekly" | "monthly" | "yearly" | "custom";
-
-type PickerOption = { value: string; label: string };
+type RecurrencePreset = "none" | "daily" | "weekly" | "
