@@ -20,7 +20,7 @@ import type { WorkspaceExplorerTab, WorkspaceTab } from "@/pane.desktop/tab.desk
 import type { DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { Search } from "@/ui/icons";
 import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
-import { MobileScheduleSidebar, MobileScheduleSidebarOpenButton } from "./MobileScheduleSidebar";
+import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "./MobileCalendarSidebar";
 import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
 
 type ExplorerWorkspaceContentProps = {
@@ -229,8 +229,8 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
     <div className="relative isolate flex h-full min-h-0 w-full overflow-hidden bg-transparent">
       {isMobileWorkspace ? (
         <>
-          <MobileScheduleSidebarOpenButton isOpen={isMobileSidebarOpen} onOpen={handleOpenMobileSidebar} className={MOBILE_WORKSPACE_SIDEBAR_OPEN_BUTTON_CLASS_NAME} />
-          <MobileScheduleSidebar isOpen={isMobileSidebarOpen} onClose={handleCloseMobileSidebar} onOpenSettings={onOpenSettings} />
+          <MobileCalendarSidebarOpenButton isOpen={isMobileSidebarOpen} onOpen={handleOpenMobileSidebar} className={MOBILE_WORKSPACE_SIDEBAR_OPEN_BUTTON_CLASS_NAME} />
+          <MobileCalendarSidebar isOpen={isMobileSidebarOpen} onClose={handleCloseMobileSidebar} onOpenSettings={onOpenSettings} />
         </>
       ) : (
         <>
