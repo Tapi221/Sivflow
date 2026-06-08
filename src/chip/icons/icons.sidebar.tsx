@@ -7,6 +7,46 @@ type IconShellProps = SidebarIconProps & {
   children: ReactNode;
 };
 
+//IOS
+export const SidebarOpenIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <rect
+      x="3"
+      y="4"
+      width="18"
+      height="16"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <path
+      d="M8 4V20"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5.5 8H6.5M5.5 11H6.5M5.5 14H6.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 const IconShell = ({ children, className, ...props }: IconShellProps) => (
   <svg
     className={className}
@@ -17,36 +57,6 @@ const IconShell = ({ children, className, ...props }: IconShellProps) => (
   >
     {children}
   </svg>
-);
-
-export const SidebarOpenIcon = ({
-  className,
-  label: _label,
-  size: _size,
-  title: _title,
-  ...props
-}: IconProps) => (
-  <IconShell className={className} {...props}>
-    <path
-      d="M5.75 5.25H18.25C19.0784 5.25 19.75 5.92157 19.75 6.75V17.25C19.75 18.0784 19.0784 18.75 18.25 18.75H5.75C4.92157 18.75 4.25 18.0784 4.25 17.25V6.75C4.25 5.92157 4.92157 5.25 5.75 5.25Z"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M9 5.25V18.75"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-    <path
-      d="M14.25 9.5L11.75 12L14.25 14.5"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </IconShell>
 );
 
 export const ClockIcon = ({ className, ...props }: SidebarIconProps) => (
