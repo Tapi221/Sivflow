@@ -1,4 +1,4 @@
-import { type DragEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { type CSSProperties, type DragEvent, useCallback, useEffect, useMemo, useState } from "react";
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
 import { CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS, CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS, CARD_SET_VIEW_PAGER_PADDING_BLOCK, CARD_SET_VIEW_PAGER_PADDING_INLINE } from "@constants/shared/flashcard";
@@ -45,6 +45,8 @@ type CardSetViewDesktopProps = {
 
 type CardSetViewEmptyStateProps = {
   cardSetName: string | null;
+  currentDisplayMode: CardDisplayMode;
+  effectiveCardWidthPx: number;
   onCreateCard: () => void | Promise<void>;
 };
 
@@ -152,19 +154,39 @@ const isSameCardOrder = (left: string[], right: string[]) => {
   return left.every((cardId, index) => cardId === right[index]);
 };
 
-const CardSetViewEmptyState = ({ cardSetName, onCreateCard }: CardSetViewEmptyStateProps) => {
+const buildEmptyStateShellStyle = ({ currentDisplayMode, effectiveCardWidthPx }: { currentDisplayMode: CardDisplayMode; effectiveCardWidthPx: number }): CSSProperties => {
+  if (currentDisplayMode === "fluid") {
+    return {
+      width: "100%",
+      maxWidth: "100%",
+    };
+  }
+
+  return {
+    width: `${effectiveCardWidthPx}px`,
+    maxWidth: "100%",
+  };
+};
+
+const CardSetViewEmptyState = ({ cardSetName, currentDisplayMode, effectiveCardWidthPx, onCreateCard }: CardSetViewEmptyStateProps) => {
+  const shellStyle = buildEmptyStateShellStyle({ currentDisplayMode, effectiveCardWidthPx });
+
   const handleCreateCard = () => {
     void onCreateCard();
   };
 
   return (
-    <div className="flex h-full min-h-0 w-full items-center justify-center px-8 py-10">
-      <div className="flex max-w-[420px] flex-col items-center rounded-[28px] border border-[#e7e5de] bg-white px-8 py-7 text-center shadow-[0_18px_70px_rgba(15,23,42,0.08)]">
-        <div className="mb-2 max-w-full truncate text-[15px] font-semibold tracking-[-0.02em] text-[#242424]">{cardSetName ?? "カードセット"}</div>
-        <p className="text-[13px] font-medium leading-6 text-[#7b7b7b]">このカードセットにはまだカードがありません。</p>
-        <button type="button" onClick={handleCreateCard} className="mt-5 rounded-full border border-[#d8d6cf] bg-[#f6f5f2] px-4 py-2 text-[12px] font-semibold text-[#2f343b] transition-colors hover:bg-[#eeeeea] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]">
-          カードを追加
-        </button>
+    <div className="h-full min-h-0 w-full overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
+      <div className="flex min-w-0 flex-col items-center" style={{ paddingBlock: CARD_SET_VIEW_PAGER_PADDING_BLOCK, paddingInline: CARD_SET_VIEW_PAGER_PADDING_INLINE }}>
+        <div className="card-active-chrome card-active-chrome--active card-pager-item w-full rounded-[40px]" style={shellStyle}>
+          <div className="flex min-h-[180px] w-full min-w-0 flex-col items-center justify-center rounded-[28px] border border-[#e7e5de] bg-white px-8 py-7 text-center shadow-[0_18px_70px_rgba(15,23,42,0.08)]">
+            <div className="mb-2 max-w-full truncate text-[15px] font-semibold tracking-[-0.02em] text-[#242424]">{cardSetName ?? "カードセット"}</div>
+            <p className="text-[13px] font-medium leading-6 text-[#7b7b7b]">このカードセットにはまだカードがありません。</p>
+            <button type="button" onClick={handleCreateCard} className="mt-5 rounded-full border border-[#d8d6cf] bg-[#f6f5f2] px-4 py-2 text-[12px] font-semibold text-[#2f343b] transition-colors hover:bg-[#eeeeea] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]">
+              カードを追加
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -422,7 +444,7 @@ export const CardSetViewDesktop = ({
   }
 
   if (cardsForPager.length === 0) {
-    return <CardSetViewEmptyState cardSetName={cardSetName} onCreateCard={onCreateCard} />;
+    return <CardSetViewEmptyState cardSetName={cardSetName} currentDisplayMode={currentDisplayMode} effectiveCardWidthPx={effectiveCardWidthPx} onCreateCard={onCreateCard} />;
   }
 
   return (
