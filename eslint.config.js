@@ -20,6 +20,10 @@ const IMPORT_PATH_RESTRICTED_PATHS = [
     name: "@/utils",
     message: "Do not add new imports from '@/utils'. Use domain/shared modules instead.",
   },
+  {
+    name: "@constants",
+    message: "Do not import from @constants. Move values to their responsibility module.",
+  },
 ];
 const IMPORT_PATH_RESTRICTED_PATTERNS = [
   {
@@ -29,6 +33,10 @@ const IMPORT_PATH_RESTRICTED_PATTERNS = [
   {
     group: ["./*/**"],
     message: "Use an alias for child-folder imports. Same-directory imports may use ./.",
+  },
+  {
+    group: ["@constants/*", "@constants/**"],
+    message: "Do not import from @constants. Move values to their responsibility module.",
   },
 ];
 const UI_RESTRICTED_IMPORT_PATTERNS = [
