@@ -1,4 +1,12 @@
-import { CONTEXT_STORAGE_KEY_PREFIXES, CONTEXT_SYNC_THRESHOLDS } from "@constants/web/app";
+const CONTEXT_STORAGE_KEY_PREFIXES = {
+  lastInit: "last_init_",
+  errorFlag: "error_flag_",
+  lastSync: "last_sync_",
+} as const;
+
+const CONTEXT_SYNC_THRESHOLDS = {
+  offlineRecoveryMs: 60 * 60 * 1000,
+} as const;
 
 /**
  * コンテキストサービス
