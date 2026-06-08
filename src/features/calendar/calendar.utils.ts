@@ -39,25 +39,25 @@ const DEFAULT_TODAY_DESCRIPTION_LABELS: Pick<Translations, "todayDescriptionEmpt
   todayDescriptionDue: "今日の復習があります",
 };
 
-export const toDate = (value: CalendarTimestampLike): Date | null => {
+const toDate = (value: CalendarTimestampLike): Date | null => {
   return normalizeDate(value);
 };
 
-export const toDateKey = (value: Date) => {
+const toDateKey = (value: Date) => {
   return format(value, "yyyy-MM-dd");
 };
 
-export const normalizeDateOnly = (value: Date) => {
+const normalizeDateOnly = (value: Date) => {
   return new Date(value.getFullYear(), value.getMonth(), value.getDate());
 };
 
-export const getWeekDays = (weekStartDay: CalendarWeekStartDay) => {
+const getWeekDays = (weekStartDay: CalendarWeekStartDay) => {
   return weekStartDay === "sunday"
     ? [...CALENDAR_WEEK_DAYS_SUNDAY]
     : [...CALENDAR_WEEK_DAYS_MONDAY];
 };
 
-export const getArrowDayDiff = (key: string): number | null => {
+const getArrowDayDiff = (key: string): number | null => {
   if (!(key in CALENDAR_ARROW_DIFF_MAP)) {
     return null;
   }
@@ -65,19 +65,19 @@ export const getArrowDayDiff = (key: string): number | null => {
   return CALENDAR_ARROW_DIFF_MAP[key as CalendarArrowKey];
 };
 
-export const getCalendarIntensity = (count: number) => {
+const getCalendarIntensity = (count: number) => {
   if (count <= 0) return 0;
   return Math.min(5, Math.ceil(count / 5));
 };
 
-export const getTodayDescription = (
+const getTodayDescription = (
   todayDueCount: number,
   t: Pick<Translations, "todayDescriptionEmpty" | "todayDescriptionDue"> = DEFAULT_TODAY_DESCRIPTION_LABELS,
 ) => {
   return todayDueCount === 0 ? t.todayDescriptionEmpty : t.todayDescriptionDue;
 };
 
-export const isFocusableInputTarget = (target: EventTarget | null) => {
+const isFocusableInputTarget = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) {
     return false;
   }
@@ -88,12 +88,12 @@ export const isFocusableInputTarget = (target: EventTarget | null) => {
   );
 };
 
-export const getLogDate = (log: CalendarStudyLogLike): Date | null => {
+const getLogDate = (log: CalendarStudyLogLike): Date | null => {
   const raw = log.studiedAt ?? log.createdAt;
   return toDate(raw);
 };
 
-export const buildStudyDateSet = (logs: CalendarStudyLogLike[]) => {
+const buildStudyDateSet = (logs: CalendarStudyLogLike[]) => {
   return new Set(
     logs
       .map(getLogDate)
@@ -102,7 +102,7 @@ export const buildStudyDateSet = (logs: CalendarStudyLogLike[]) => {
   );
 };
 
-export const getStreakFromLogs = (logs: CalendarStudyLogLike[]) => {
+const getStreakFromLogs = (logs: CalendarStudyLogLike[]) => {
   if (logs.length === 0) return 0;
 
   const dateSet = buildStudyDateSet(logs);
@@ -126,3 +126,5 @@ export const getStreakFromLogs = (logs: CalendarStudyLogLike[]) => {
 
   return count;
 };
+
+export { buildStudyDateSet, getArrowDayDiff, getCalendarIntensity, getLogDate, getStreakFromLogs, getTodayDescription, getWeekDays, isFocusableInputTarget, normalizeDateOnly, toDate, toDateKey };
