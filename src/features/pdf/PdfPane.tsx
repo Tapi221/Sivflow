@@ -3,6 +3,7 @@ import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
 import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
 import "pdfjs-dist/legacy/web/pdf_viewer.css";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
 import { toPdfDocumentLoadSource } from "./pdfDocumentSource";
@@ -427,7 +428,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
       <main className="relative flex min-h-0 min-w-0 flex-1 flex-col">
         <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto overscroll-contain bg-[var(--carvepanel-surface)] px-3 py-4 [-webkit-overflow-scrolling:touch] sm:px-4 sm:py-5">
           <div ref={pdfViewerElementRef} className="pdfViewer" />
-          {isLoading ? <div className="absolute inset-0 flex items-center justify-center bg-[var(--carvepanel-surface)] text-[13px] text-[#6d6d6d]">PDFを読み込み中...</div> : null}
+          {isLoading ? <LoadingSpinner className="absolute inset-0 bg-[var(--carvepanel-surface)] text-[#6d6d6d]" label="PDFを読み込み中" /> : null}
         </div>
       </main>
     </div>
