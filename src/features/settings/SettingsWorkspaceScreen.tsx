@@ -1,7 +1,8 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { UserSettings } from "@/types";
-import { Check, Globe, Keyboard, Settings2, Shield, Type, User, Volume2 } from "@/ui/icons";
+import { Check, ChevronDown, Globe, Keyboard, Settings2, Shield, Type, User, Volume2 } from "@/ui/icons";
 import { useLocaleStore, type Locale } from "@shared/i18n/locale.store";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import "./SettingsWorkspaceScreen.css";
@@ -34,6 +35,14 @@ type SettingToggleProps = {
 };
 
 type SettingSegmentProps<T extends string | number> = {
+  label: string;
+  description?: string;
+  value: T;
+  options: readonly SettingOption<T>[];
+  onChange: (value: T) => void;
+};
+
+type SettingDropdownProps<T extends string | number> = {
   label: string;
   description?: string;
   value: T;
@@ -469,6 +478,42 @@ const SettingSegment = <T extends string | number>({ label, description, value, 
   );
 };
 
+const SettingDropdown = <T extends string | number>({ label, description, value, options, onChange }: SettingDropdownProps<T>) => {
+  const selectedOption = options.find((option) => option.value === value) ?? options[0];
+
+  return (
+    <div className="settings-workspace__row settings-workspace__row--stacked">
+      <div className="settings-workspace__row-copy">
+        <span className="settings-workspace__row-title">{label}</span>
+        {description ? <span className="settings-workspace__row-description">{description}</span> : null}
+      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button type="button" className="settings-workspace__segment is-selected w-full cursor-pointer" aria-label={label}>
+            <span className="settings-workspace__segment-label">{selectedOption?.label ?? String(value)}</span>
+            {selectedOption?.caption ? <span className="settings-workspace__segment-caption">{selectedOption.caption}</span> : null}
+            <ChevronDown className="settings-workspace__segment-check" size={14} />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="min-w-[var(--radix-dropdown-menu-trigger-width)]">
+          {options.map((option) => {
+            const isSelected = option.value === value;
+            return (
+              <DropdownMenuItem key={String(option.value)} className="min-h-10 cursor-pointer gap-3 py-2" onSelect={() => onChange(option.value)}>
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="settings-workspace__segment-label">{option.label}</span>
+                  {option.caption ? <span className="settings-workspace__segment-caption">{option.caption}</span> : null}
+                </span>
+                {isSelected ? <Check size={14} /> : null}
+              </DropdownMenuItem>
+            );
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+};
+
 const SettingKeyValue = ({ label, value }: SettingKeyValueProps) => {
   return (
     <div className="settings-workspace__key-value">
@@ -570,7 +615,7 @@ const SettingsWorkspaceScreen = () => {
           ) : null}
           {activeSectionId === "preferences" ? (
             <SettingsSectionBlock title={copy.preferencesTitle} description={copy.preferencesDescription}>
-              <SettingSegment label={copy.languageLabel} description={copy.languageDescription} value={language} options={languageOptions} onChange={handleLanguageChange} />
+              <SettingDropdown label={copy.languageLabel} description={copy.languageDescription} value={language} options={languageOptions} onChange={handleLanguageChange} />
               <SettingSegment label={copy.weekStartLabel} description={copy.weekStartDescription} value={weekStartDay} options={weekStartOptions} onChange={(value) => void updateSettings({ weekStartDay: value })} />
               <SettingToggle label={copy.notificationsLabel} description={copy.notificationsDescription} checked={settings?.notificationsEnabled ?? false} onChange={(checked) => updateBooleanSetting("notificationsEnabled", checked)} />
             </SettingsSectionBlock>
