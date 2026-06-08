@@ -69,15 +69,6 @@
   line-height: 16px !important;
 }
 
-.settings-workspace-dialog .settings-workspace__nav-list::before {
-  color: var(--app-sidebar-text-muted) !important;
-  font-family: var(--app-font-family-sidebar) !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  letter-spacing: -0.012em !important;
-  line-height: 16px !important;
-}
-
 .settings-workspace-dialog .settings-workspace__nav-item {
   color: var(--app-sidebar-text) !important;
   font-family: var(--app-font-family-sidebar) !important;
@@ -114,13 +105,4 @@
   font-weight: 500 !important;
   letter-spacing: -0.012em !important;
   line-height: 16px !important;
-}
-
-.settings-workspace-dialog .settings-workspace__nav-copy small {
-  color: var(--app-sidebar-text-muted) !important;
-  font-family: var(--app-font-family-sidebar) !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  letter-spacing: -0.012em !important;
-  line-height: 14px !important;
 }
