@@ -9,15 +9,6 @@
       "金",
       "土"
     ],
-    "miniCalendarWeekdays": [
-      "日",
-      "月",
-      "火",
-      "水",
-      "木",
-      "金",
-      "土"
-    ],
     "calendarMonthWeekdays": [
       "日",
       "月",
@@ -108,15 +99,6 @@
       "Fri",
       "Sat"
     ],
-    "miniCalendarWeekdays": [
-      "S",
-      "M",
-      "T",
-      "W",
-      "T",
-      "F",
-      "S"
-    ],
     "calendarMonthWeekdays": [
       "S",
       "M",
@@ -206,15 +188,6 @@
       "周四",
       "周五",
       "周六"
-    ],
-    "miniCalendarWeekdays": [
-      "日",
-      "一",
-      "二",
-      "三",
-      "四",
-      "五",
-      "六"
     ],
     "calendarMonthWeekdays": [
       "日",
