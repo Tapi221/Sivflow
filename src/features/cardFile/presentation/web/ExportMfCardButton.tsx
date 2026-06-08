@@ -1,26 +1,27 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/contexts/ToastContext";
 import { exportMfCardBytes } from "@/features/cardFile/application/exportMfCard";
 import { MfCardExportError } from "@/features/cardFile/domain/mfCard.types";
 import { downloadBytesAsMfCard } from "@/features/cardFile/infra/web/downloadMfCard";
 import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/contexts/ToastContext";
+import { Loader2 } from "@/ui/icons";
 import type { Card } from "@/types";
 
-export type ExportMfCardButtonProps = {
+type ExportMfCardButtonProps = {
   card: Card | null | undefined;
   tagById?: MfDeckTagLookup;
   disabled?: boolean;
 };
 
-export const ExportMfCardButton = ({
+const ExportMfCardButton = ({
   card,
   tagById,
   disabled = false,
 }: ExportMfCardButtonProps) => {
   const toast = useToast();
   const [isExporting, setIsExporting] = useState(false);
-  const label = isExporting ? "書き出し中..." : ".mfcard 書き出し";
+  const label = ".mfcard 書き出し";
 
   const handleExport = async () => {
     if (!card) {
@@ -64,10 +65,17 @@ export const ExportMfCardButton = ({
       onClick={handleExport}
       disabled={disabled || isExporting || !card}
       title={label}
-      aria-label={label}
+      aria-label={isExporting ? "MFCardを書き出し中" : label}
       className="min-w-0 max-w-[150px] overflow-hidden rounded-full bg-white/85 shadow-sm backdrop-blur"
     >
-      <span className="min-w-0 truncate whitespace-nowrap">{label}</span>
+      {isExporting ? (
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+      ) : (
+        <span className="min-w-0 truncate whitespace-nowrap">{label}</span>
+      )}
     </Button>
   );
 };
+
+export { ExportMfCardButton };
+export type { ExportMfCardButtonProps };
