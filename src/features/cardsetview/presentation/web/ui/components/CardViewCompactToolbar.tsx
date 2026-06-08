@@ -1,5 +1,5 @@
 import React from "react";
-import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@constants/shared/flashcard";
+import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@/features/cardsetview/domain/cardSetView.constants";
 import { OverlayToolbar } from "@/chip/overlay-toolbar/OverlayToolbar";
 import { OverlayToolbarButton } from "@/chip/overlay-toolbar/OverlayToolbarButton";
 import { OverlayToolbarDivider } from "@/chip/overlay-toolbar/OverlayToolbarDivider";
