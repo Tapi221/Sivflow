@@ -68,6 +68,13 @@ const CalendarDndSandboxPage = DEV_MODE
       })),
     )
   : null;
+const EventChipEditorSandboxPage = DEV_MODE
+  ? lazy(() =>
+      import("@/sandbox/eventchip-editor").then(({ EventChipEditorSandboxPage }) => ({
+        default: EventChipEditorSandboxPage,
+      })),
+    )
+  : null;
 
 const withDevRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
@@ -164,6 +171,13 @@ export const getDevRouteElements = () => {
         <Route
           path="sandbox/calendar-dnd/*"
           element={withDevRouteFallback(<CalendarDndSandboxPage />)}
+        />
+      ) : null}
+
+      {EventChipEditorSandboxPage ? (
+        <Route
+          path="sandbox/eventchip-editor/*"
+          element={withDevRouteFallback(<EventChipEditorSandboxPage />)}
         />
       ) : null}
     </>
