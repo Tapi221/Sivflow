@@ -1,4 +1,4 @@
-import type { PlatformApi } from "../desktopApi";
+import type { PlatformApi } from "@platform/desktopApi";
 
 const WEB_APP_VERSION = import.meta.env.VITE_BUILD_VERSION ?? import.meta.env.MODE;
 
