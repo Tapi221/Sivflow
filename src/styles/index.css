@@ -52,6 +52,10 @@ button[role="switch"].h-7.w-\[48px\][aria-checked="true"] > span {
   transform: translateX(20px);
 }
 
+.pdfViewer + .absolute.inset-0.flex.items-center.justify-center.p-6 {
+  display: none;
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
@@ -76,22 +80,4 @@ a:hover,
 *::-webkit-scrollbar {
   width: var(--scrollbar-size);
   height: var(--scrollbar-size);
-}
-
-::-webkit-scrollbar-button,
-*::-webkit-scrollbar-button {
-  display: none !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  min-width: 0 !important;
-  max-width: 0 !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  max-height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  color: transparent !important;
-  background: none !important;
-  background-color: transparent !important;
 }
