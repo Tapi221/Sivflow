@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
@@ -260,13 +260,23 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
 
 const WorkspaceScreen = () => {
   const { isLeftPanelCollapsed = false, onToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
+  const navigate = useNavigate();
+  const isMobileWorkspace = useIsMobileWorkspaceViewport();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const libraryExplorerState = useMemo(() => getLibraryExplorerState(activeTab), [activeTab]);
   const explorerTabId = useMemo(() => getExplorerTabId(activeTab), [activeTab]);
-  const handleOpenSettings = useCallback(() => setIsSettingsDialogOpen(true), []);
+  const handleOpenSettings = useCallback(() => {
+    if (isMobileWorkspace) {
+      setIsSettingsDialogOpen(false);
+      navigate("/settings");
+      return;
+    }
+
+    setIsSettingsDialogOpen(true);
+  }, [isMobileWorkspace, navigate]);
 
   if (libraryExplorerState) return <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}><ExplorerWorkspaceContent explorerState={libraryExplorerState} explorerTabId={explorerTabId} isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={handleOpenSettings} onToggleLeftPanel={onToggleLeftPanel} /></SettingsDialogHost>;
 
