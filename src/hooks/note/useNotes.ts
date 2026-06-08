@@ -13,6 +13,8 @@ type CreateNoteOptions = {
   orderIndex?: number;
 };
 
+const NOTE_CONTENT_TYPE = "affine-document";
+
 const createId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -22,7 +24,7 @@ const isDeletedNote = (note: Note & { isDeleted?: boolean; is_deleted?: boolean 
 
 const getNoteOrderIndex = (note: Note & { order_index?: number }): number => note.orderIndex ?? note.order_index ?? 0;
 
-const createDefaultNoteContent = (): NoteBlockContent => [{ type: "affine-document", text: "", updatedAt: new Date().toISOString() }];
+const createDefaultNoteContent = (): NoteBlockContent => [{ type: NOTE_CONTENT_TYPE, blocks: [{ type: "paragraph", text: "" }], text: "", snapshot: null, updatedAt: new Date().toISOString() }];
 
 const sortNotes = (notes: Note[]): Note[] => [...notes].sort((left, right) => {
   const orderDiff = getNoteOrderIndex(left) - getNoteOrderIndex(right);
