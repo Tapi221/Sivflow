@@ -1,4 +1,4 @@
-import { type SVGProps, useCallback, useEffect, useMemo, useState } from "react";
+import { type SVGProps, type UIEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, addHours, format, startOfDay } from "date-fns";
 import type { GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
 import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -7,6 +7,9 @@ import { cn } from "@/lib/utils";
 type MobileCalendarWritableCalendarOption = { key: string; accountId: string; calendarId: string; label: string; accountLabel: string; calendarLabel: string; color: string; projectId?: string; isSelected: boolean };
 type MobileCalendarEventFormState = { title: string; location: string; isAllDay: boolean; startDate: string; startTime: string; endDate: string; endTime: string; calendarKey: string; description: string };
 type MobileEventDates = { startsAt: Date; endsAt: Date; isAllDay: boolean };
+type MobileCalendarTimeFieldName = "startTime" | "endTime";
+type MobileCalendarTimeButtonProps = { label: string; value: string; isActive: boolean; onClick: () => void };
+type MobileCalendarInlineTimeWheelProps = { value: string; onChange: (value: string) => void };
 type MobileCalendarEventComposerProps = {
   isOpen: boolean;
   selectedDate: Date;
@@ -22,6 +25,10 @@ const MOBILE_EVENT_COMPOSER_DEFAULT_START_HOUR = 9;
 const MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS = 1;
 const MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR = "#34c759";
 const MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX = "現在地";
+const MOBILE_EVENT_TIME_WHEEL_ROW_HEIGHT = 44;
+const MOBILE_EVENT_TIME_WHEEL_PADDING_HEIGHT = MOBILE_EVENT_TIME_WHEEL_ROW_HEIGHT * 2;
+const MOBILE_EVENT_TIME_WHEEL_HOURS = Array.from({ length: 24 }, (_, hour) => hour);
+const MOBILE_EVENT_TIME_WHEEL_MINUTES = Array.from({ length: 60 }, (_, minute) => minute);
 const EMPTY_GOOGLE_ACCOUNTS: GoogleAccountDisplay[] = [];
 
 const isSameLocalDate = (left: Date, right: Date): boolean => left.getFullYear() === right.getFullYear() && left.getMonth() === right.getMonth() && left.getDate() === right.getDate();
@@ -122,6 +129,14 @@ const createInitialEventFormState = (selectedDate: Date, calendarOptions: Mobile
 
 const getErrorMessage = (error: unknown): string => error instanceof Error ? error.message : "予定の追加に失敗しました";
 
+const formatTimeUnit = (value: number): string => String(value).padStart(2, "0");
+
+const createTimeInputValue = (hours: number, minutes: number): string => `${formatTimeUnit(hours)}:${formatTimeUnit(minutes)}`;
+
+const getTimeInputParts = (value: string): { hours: number; minutes: number } => parseTimeInputValue(value) ?? { hours: 0, minutes: 0 };
+
+const clampTimeWheelIndex = (value: number, max: number): number => Math.max(0, Math.min(max, value));
+
 const MobileCalendarSearchIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
     <path fill="currentColor" d="M10.8 4.4a6.4 6.4 0 0 1 5.05 10.33l3.51 3.51a.78.78 0 0 1-1.1 1.1l-3.51-3.51A6.4 6.4 0 1 1 10.8 4.4Zm0 1.56a4.84 4.84 0 1 0 0 9.68 4.84 4.84 0 0 0 0-9.68Z" />
@@ -142,6 +157,58 @@ const MobileCalendarFaceTimeIcon = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const MobileCalendarTimeButton = ({ label, value, isActive, onClick }: MobileCalendarTimeButtonProps) => (
+  <button type="button" className={cn("h-9 w-[92px] rounded-[10px] px-2 text-right text-[17px] tracking-[-0.03em] outline-none transition tabular-nums", isActive ? "bg-[#ffe9e7] text-[#ff3b30]" : "bg-[#f2f2f7] text-[#111111]")} aria-label={label} aria-pressed={isActive} onClick={onClick}>{value}</button>
+);
+
+const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInlineTimeWheelProps) => {
+  const { hours, minutes } = getTimeInputParts(value);
+  const hourWheelRef = useRef<HTMLDivElement>(null);
+  const minuteWheelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    hourWheelRef.current?.scrollTo({ top: hours * MOBILE_EVENT_TIME_WHEEL_ROW_HEIGHT, behavior: "auto" });
+    minuteWheelRef.current?.scrollTo({ top: minutes * MOBILE_EVENT_TIME_WHEEL_ROW_HEIGHT, behavior: "auto" });
+  }, [hours, minutes]);
+
+  const handleHourScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
+    const nextHours = clampTimeWheelIndex(Math.round(event.currentTarget.scrollTop / MOBILE_EVENT_TIME_WHEEL_ROW_HEIGHT), 23);
+    if (nextHours !== hours) onChange(createTimeInputValue(nextHours, minutes));
+  }, [hours, minutes, onChange]);
+
+  const handleMinuteScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
+    const nextMinutes = clampTimeWheelIndex(Math.round(event.currentTarget.scrollTop / MOBILE_EVENT_TIME_WHEEL_ROW_HEIGHT), 59);
+    if (nextMinutes !== minutes) onChange(createTimeInputValue(hours, nextMinutes));
+  }, [hours, minutes, onChange]);
+
+  return (
+    <div className="border-t border-[#e5e5ea] px-4 py-3">
+      <div className="relative overflow-hidden rounded-[22px] bg-[#fbfbfd] px-5 py-3 shadow-[inset_0_0_0_1px_rgba(60,60,67,0.12)]" role="group" aria-label="時刻">
+        <div aria-hidden="true" className="pointer-events-none absolute left-5 right-5 top-1/2 z-0 h-[44px] -translate-y-1/2 rounded-[13px] bg-[#f2f2f7]" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[72px] bg-gradient-to-b from-[#fbfbfd] to-transparent" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[72px] bg-gradient-to-t from-[#fbfbfd] to-transparent" />
+        <div className="relative z-10 grid h-[220px] grid-cols-[1fr_32px_1fr] items-center">
+          <div ref={hourWheelRef} className="h-[220px] snap-y snap-mandatory overflow-y-auto overscroll-contain px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" onScroll={handleHourScroll} aria-label="時">
+            <div aria-hidden="true" style={{ height: MOBILE_EVENT_TIME_WHEEL_PADDING_HEIGHT }} />
+            {MOBILE_EVENT_TIME_WHEEL_HOURS.map((hour) => (
+              <button key={hour} type="button" className={cn("block h-[44px] w-full snap-center rounded-[10px] text-center tracking-[-0.04em] transition tabular-nums", hour === hours ? "text-[30px] font-semibold text-[#111111]" : "text-[25px] font-normal text-[#8e8e93]")} onClick={() => onChange(createTimeInputValue(hour, minutes))}>{formatTimeUnit(hour)}</button>
+            ))}
+            <div aria-hidden="true" style={{ height: MOBILE_EVENT_TIME_WHEEL_PADDING_HEIGHT }} />
+          </div>
+          <div className="pointer-events-none flex h-[44px] items-center justify-center text-[30px] font-semibold tracking-[-0.04em] text-[#111111]">:</div>
+          <div ref={minuteWheelRef} className="h-[220px] snap-y snap-mandatory overflow-y-auto overscroll-contain px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" onScroll={handleMinuteScroll} aria-label="分">
+            <div aria-hidden="true" style={{ height: MOBILE_EVENT_TIME_WHEEL_PADDING_HEIGHT }} />
+            {MOBILE_EVENT_TIME_WHEEL_MINUTES.map((minute) => (
+              <button key={minute} type="button" className={cn("block h-[44px] w-full snap-center rounded-[10px] text-center tracking-[-0.04em] transition tabular-nums", minute === minutes ? "text-[30px] font-semibold text-[#111111]" : "text-[25px] font-normal text-[#8e8e93]")} onClick={() => onChange(createTimeInputValue(hours, minute))}>{formatTimeUnit(minute)}</button>
+            ))}
+            <div aria-hidden="true" style={{ height: MOBILE_EVENT_TIME_WHEEL_PADDING_HEIGHT }} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAccounts, projectCalendarLinks = [], onClose, onAddCalendar, onCreateEvent }: MobileCalendarEventComposerProps) => {
   const calendarAccounts = accounts ?? googleAccounts ?? EMPTY_GOOGLE_ACCOUNTS;
   const calendarOptions = useMemo(() => buildMobileCalendarOptions(calendarAccounts, projectCalendarLinks), [calendarAccounts, projectCalendarLinks]);
@@ -149,6 +216,7 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
+  const [activeTimeField, setActiveTimeField] = useState<MobileCalendarTimeFieldName | null>(null);
   const selectedCalendarOption = useMemo(() => calendarOptions.find((option) => option.key === form.calendarKey) ?? null, [calendarOptions, form.calendarKey]);
   const isSubmitDisabled = isSubmitting || !form.title.trim() || !selectedCalendarOption;
 
@@ -159,6 +227,7 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
     setIsSubmitting(false);
     setError(null);
     setIsLocationSheetOpen(false);
+    setActiveTimeField(null);
   }, [calendarOptions, isOpen, selectedDate]);
 
   useEffect(() => {
@@ -258,7 +327,7 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
           <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-4">
             <div className="overflow-hidden rounded-[14px] bg-white">
               <input className="h-[56px] w-full border-0 border-b border-[#e5e5ea] bg-transparent px-4 text-[21px] font-normal tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#c7c7cc]" value={form.title} onChange={(event) => setFormValue({ title: event.target.value })} placeholder="タイトル" inputMode="text" />
-              <button type="button" className={cn("flex h-[48px] w-full items-center px-4 text-left text-[17px] tracking-[-0.03em] outline-none", form.location.trim() ? "text-[#111111]" : "text-[#c7c7cc]")} onClick={() => setIsLocationSheetOpen(true)}>
+              <button type="button" className={cn("flex h-[48px] w-full items-center px-4 text-left text-[17px] tracking-[-0.03em] outline-none", form.location.trim() ? "text-[#111111]" : "text-[#c7c7cc]")} onClick={() => { setActiveTimeField(null); setIsLocationSheetOpen(true); }}>
                 <span className="min-w-0 flex-1 truncate">{form.location.trim() || "場所またはビデオ通話"}</span>
               </button>
             </div>
@@ -266,24 +335,30 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
             <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
               <div className="flex min-h-[52px] items-center justify-between border-b border-[#e5e5ea] px-4">
                 <span className="text-[17px] tracking-[-0.03em] text-[#111111]">終日</span>
-                <button type="button" role="switch" aria-checked={form.isAllDay} className={cn("relative h-[31px] w-[51px] rounded-full transition", form.isAllDay ? "bg-[#34c759]" : "bg-[#e5e5ea]")} onClick={() => setFormValue({ isAllDay: !form.isAllDay })}>
+                <button type="button" role="switch" aria-checked={form.isAllDay} className={cn("relative h-[31px] w-[51px] rounded-full transition", form.isAllDay ? "bg-[#34c759]" : "bg-[#e5e5ea]")} onClick={() => { setFormValue({ isAllDay: !form.isAllDay }); setActiveTimeField(null); }}>
                   <span className={cn("absolute top-[2px] h-[27px] w-[27px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.22)] transition-transform", form.isAllDay ? "translate-x-[22px]" : "translate-x-[2px]")} />
                 </button>
               </div>
-              <label className="flex min-h-[52px] items-center justify-between gap-3 border-b border-[#e5e5ea] px-4">
-                <span className="text-[17px] tracking-[-0.03em] text-[#111111]">開始</span>
-                <span className="flex min-w-0 items-center gap-2">
-                  <input type="date" className="h-9 rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.startDate} onChange={(event) => setFormValue({ startDate: event.target.value })} />
-                  {!form.isAllDay && <input type="time" className="h-9 w-[92px] rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.startTime} onChange={(event) => setFormValue({ startTime: event.target.value })} />}
-                </span>
-              </label>
-              <label className="flex min-h-[52px] items-center justify-between gap-3 border-b border-[#e5e5ea] px-4">
-                <span className="text-[17px] tracking-[-0.03em] text-[#111111]">終了</span>
-                <span className="flex min-w-0 items-center gap-2">
-                  <input type="date" className="h-9 rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.endDate} onChange={(event) => setFormValue({ endDate: event.target.value })} />
-                  {!form.isAllDay && <input type="time" className="h-9 w-[92px] rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.endTime} onChange={(event) => setFormValue({ endTime: event.target.value })} />}
-                </span>
-              </label>
+              <div className="border-b border-[#e5e5ea]">
+                <div className="flex min-h-[52px] items-center justify-between gap-3 px-4">
+                  <span className="text-[17px] tracking-[-0.03em] text-[#111111]">開始</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <input type="date" className="h-9 rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.startDate} onChange={(event) => setFormValue({ startDate: event.target.value })} onFocus={() => setActiveTimeField(null)} />
+                    {!form.isAllDay && <MobileCalendarTimeButton label="開始時刻" value={form.startTime} isActive={activeTimeField === "startTime"} onClick={() => setActiveTimeField((current) => current === "startTime" ? null : "startTime")} />}
+                  </span>
+                </div>
+                {!form.isAllDay && activeTimeField === "startTime" ? <MobileCalendarInlineTimeWheel value={form.startTime} onChange={(startTime) => setFormValue({ startTime })} /> : null}
+              </div>
+              <div className="border-b border-[#e5e5ea]">
+                <div className="flex min-h-[52px] items-center justify-between gap-3 px-4">
+                  <span className="text-[17px] tracking-[-0.03em] text-[#111111]">終了</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <input type="date" className="h-9 rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.endDate} onChange={(event) => setFormValue({ endDate: event.target.value })} onFocus={() => setActiveTimeField(null)} />
+                    {!form.isAllDay && <MobileCalendarTimeButton label="終了時刻" value={form.endTime} isActive={activeTimeField === "endTime"} onClick={() => setActiveTimeField((current) => current === "endTime" ? null : "endTime")} />}
+                  </span>
+                </div>
+                {!form.isAllDay && activeTimeField === "endTime" ? <MobileCalendarInlineTimeWheel value={form.endTime} onChange={(endTime) => setFormValue({ endTime })} /> : null}
+              </div>
               <div className="flex min-h-[52px] items-center justify-between px-4">
                 <span className="text-[17px] tracking-[-0.03em] text-[#111111]">移動時間</span>
                 <span className="text-[17px] tracking-[-0.03em] text-[#8e8e93]">なし</span>
