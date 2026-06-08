@@ -482,29 +482,25 @@ const SettingDropdown = <T extends string | number>({ label, description, value,
   const selectedOption = options.find((option) => option.value === value) ?? options[0];
 
   return (
-    <div className="settings-workspace__row settings-workspace__row--stacked">
+    <div className="settings-workspace__row settings-workspace__row--inline">
       <div className="settings-workspace__row-copy">
         <span className="settings-workspace__row-title">{label}</span>
         {description ? <span className="settings-workspace__row-description">{description}</span> : null}
       </div>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-          <button type="button" className="settings-workspace__segment is-selected w-full cursor-pointer" aria-label={label} onClick={(event) => event.stopPropagation()}>
-            <span className="settings-workspace__segment-label">{selectedOption?.label ?? String(value)}</span>
-            {selectedOption?.caption ? <span className="settings-workspace__segment-caption">{selectedOption.caption}</span> : null}
-            <ChevronDown className="settings-workspace__segment-check" size={14} />
+          <button type="button" className="settings-workspace__dropdown-trigger" aria-label={label} onClick={(event) => event.stopPropagation()}>
+            <span className="settings-workspace__dropdown-trigger-label">{selectedOption?.label ?? String(value)}</span>
+            <ChevronDown className="settings-workspace__dropdown-trigger-icon" size={14} />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" sideOffset={6} collisionPadding={16} className="min-w-[var(--radix-dropdown-menu-trigger-width)] z-[200]">
+        <DropdownMenuContent align="end" sideOffset={6} collisionPadding={16} className="settings-workspace__dropdown-content z-[200]">
           {options.map((option) => {
             const isSelected = option.value === value;
             return (
-              <DropdownMenuItem key={String(option.value)} className="min-h-10 cursor-pointer gap-3 py-2" onSelect={() => onChange(option.value)}>
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="settings-workspace__segment-label">{option.label}</span>
-                  {option.caption ? <span className="settings-workspace__segment-caption">{option.caption}</span> : null}
-                </span>
-                {isSelected ? <Check size={14} /> : null}
+              <DropdownMenuItem key={String(option.value)} className="settings-workspace__dropdown-item" onSelect={() => onChange(option.value)}>
+                <span className="settings-workspace__dropdown-item-label">{option.label}</span>
+                {isSelected ? <Check className="settings-workspace__dropdown-item-check" size={14} /> : null}
               </DropdownMenuItem>
             );
           })}
