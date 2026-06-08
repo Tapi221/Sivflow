@@ -3,6 +3,9 @@ import type { CSSProperties } from "react";
 import { addDays, addYears, eachMonthOfInterval, endOfDay, endOfYear, format, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import { getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
+import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+import { getCalendarWeekStartsOn, rotateCalendarWeekdayLabels } from "@/features/calendar/calendarWeekStart";
+import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 import { useDateFnsLocale, useT } from "@shared/i18n/useT";
@@ -22,6 +25,7 @@ export type CalendarYearEventDisplayResolver = (event: GoogleCalendarEvent) => C
 type CalendarYearViewProps = {
   yearDate: Date;
   selectedDate: Date;
+  weekStartDay?: CalendarWeekStartDay;
   visibleEvents?: GoogleCalendarEvent[];
   eventDisplayResolver?: CalendarYearEventDisplayResolver;
   onSelectDate: (date: Date) => void;
@@ -153,9 +157,9 @@ const buildEventsByDay = (events: GoogleCalendarEvent[], eventDisplayResolver: C
   return eventsByDay;
 };
 
-const buildMonthDays = (monthDate: Date, eventsByDay: Map<string, CalendarYearDayEvents>): CalendarYearDay[] => {
+const buildMonthDays = (monthDate: Date, eventsByDay: Map<string, CalendarYearDayEvents>, weekStartDay: CalendarWeekStartDay): CalendarYearDay[] => {
   const monthStart = startOfMonth(monthDate);
-  const gridStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+  const gridStart = startOfWeek(monthStart, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) });
 
   return Array.from({ length: YEAR_MONTH_GRID_DAY_COUNT }, (_, index) => {
     const date = addDays(gridStart, index);
@@ -221,6 +225,7 @@ const getDayButtonStyle = (day: CalendarYearDay, selected: boolean): CSSProperti
 const CalendarYearViewComponent = ({
   yearDate,
   selectedDate,
+  weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY,
   visibleEvents = EMPTY_YEAR_EVENTS,
   eventDisplayResolver,
   onSelectDate,
@@ -232,6 +237,7 @@ const CalendarYearViewComponent = ({
   const today = useMemo(() => new Date(), []);
   const todayKey = useMemo(() => getCalendarDateKey(today), [today]);
   const selectedDateKey = useMemo(() => getCalendarDateKey(selectedDate), [selectedDate]);
+  const weekdayLabels = useMemo(() => rotateCalendarWeekdayLabels(t.calendarMonthWeekdays, weekStartDay), [t.calendarMonthWeekdays, weekStartDay]);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const syncRangeNotifyTimeoutRef = useRef<number | null>(null);
   const syncRangeScrollTimeoutRef = useRef<number | null>(null);
@@ -254,7 +260,7 @@ const CalendarYearViewComponent = ({
         end: endOfYear(targetYear),
       }).map((monthDate) => {
         const monthKey = format(monthDate, "yyyy-MM");
-        const days = buildMonthDays(monthDate, eventsByDay);
+        const days = buildMonthDays(monthDate, eventsByDay, weekStartDay);
 
         return {
           key: monthKey,
@@ -264,7 +270,7 @@ const CalendarYearViewComponent = ({
         };
       });
     },
-    [dateFnsLocale, eventsByDay, t.dateFnsLocaleKey],
+    [dateFnsLocale, eventsByDay, t.dateFnsLocaleKey, weekStartDay],
   );
 
   const years = useMemo<CalendarYearBlock[]>(() => {
@@ -480,7 +486,7 @@ const CalendarYearViewComponent = ({
                   </h3>
 
                   <div className="grid grid-cols-7 gap-y-1 text-center text-[11px] font-semibold leading-none text-[#8e8e93]">
-                    {t.calendarMonthWeekdays.map((weekday, index) => (
+                    {weekdayLabels.map((weekday, index) => (
                       <div key={`${weekday}-${index}`} className="flex h-5 items-center justify-center">
                         {weekday}
                       </div>
