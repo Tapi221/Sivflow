@@ -1,0 +1,31 @@
+@layer components {
+  aside[aria-label="Project list explorer"][class*="text-[#9aa1ad]"],
+  aside[aria-label="Library hierarchy explorer"][class*="text-[#9aa1ad]"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9aa1ad;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    text-indent: -9999px;
+  }
+
+  aside[aria-label="Project list explorer"][class*="text-[#9aa1ad]"]::before,
+  aside[aria-label="Library hierarchy explorer"][class*="text-[#9aa1ad]"]::before {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 9999px;
+    content: "";
+    animation: layered-directory-loading-spin 1s linear infinite;
+    text-indent: 0;
+  }
+
+  @keyframes layered-directory-loading-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
