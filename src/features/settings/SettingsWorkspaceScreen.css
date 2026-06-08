@@ -416,11 +416,6 @@
   white-space: nowrap;
 }
 
-.settings-workspace__segment-caption,
-.settings-workspace__segment-check {
-  display: none;
-}
-
 .settings-workspace__profile-card {
   min-height: 72px;
 }
