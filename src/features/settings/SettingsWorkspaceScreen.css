@@ -218,15 +218,6 @@
   border-bottom-color: #ececf0;
 }
 
-.settings-workspace__row--inline {
-  min-height: 50px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
 .settings-workspace__row-copy {
   display: flex;
   min-width: 0;
@@ -476,14 +467,6 @@
 }
 
 @media (max-width: 520px) {
-  .settings-workspace__row--inline {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 10px;
-    padding-top: 12px;
-    padding-bottom: 12px;
-  }
-
   .settings-workspace__row--stacked {
     padding-right: 16px;
     padding-left: 16px;
