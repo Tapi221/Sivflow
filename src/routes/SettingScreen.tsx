@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { UserSettings } from "@/types";
 import { ChevronRight, Globe, Keyboard, Shield, Trophy, Type, Volume2 } from "@/ui/icons";
-import { useLocaleStore, type Locale } from "@shared/i18n/locale.store";
 
 type SettingsSectionId = "account" | "general" | "study" | "editor" | "audio" | "hotkey";
 
@@ -263,8 +262,6 @@ const MARKDOWN_TAB_OPTIONS: readonly SettingChoiceOption<NonNullable<UserSetting
   { value: 8, label: "8" },
 ];
 
-const getSupportedLocale = (language: SettingsLanguage): Locale => language === "ja" ? "ja" : "en";
-
 const getAccountDisplayName = (displayName: string | null | undefined, email: string | null | undefined, fallbackLabel: string): string => {
   const trimmedDisplayName = displayName?.trim();
   if (trimmedDisplayName) return trimmedDisplayName;
@@ -333,7 +330,6 @@ const SettingValueRow = ({ label, value }: SettingValueRowProps) => (
 const SettingScreen = () => {
   const { currentUser, loading, logout } = useAuthSession();
   const { settings, updateSettings } = useUserSettings();
-  const setLocale = useLocaleStore((state) => state.setLocale);
   const language = settings?.language ?? "ja";
   const copy = SETTINGS_COPY[language];
   const accountName = getAccountDisplayName(currentUser?.displayName, currentUser?.email, copy.emptyAccountLabel);
@@ -351,17 +347,12 @@ const SettingScreen = () => {
   };
 
   const handleLanguageChange = (nextLanguage: SettingsLanguage) => {
-    setLocale(getSupportedLocale(nextLanguage));
     void updateSettings({ language: nextLanguage });
   };
 
   const handleLogout = () => {
     void logout();
   };
-
-  useEffect(() => {
-    setLocale(getSupportedLocale(language));
-  }, [language, setLocale]);
 
   return (
     <main className="h-full min-h-0 w-full overflow-y-auto text-[#1c1c1e]" style={{ paddingTop: "max(18px, env(safe-area-inset-top))", paddingBottom: "max(96px, calc(env(safe-area-inset-bottom) + 76px))", background: "var(--backpane-bg)" }} aria-label={copy.title}>
