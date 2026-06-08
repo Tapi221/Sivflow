@@ -1,8 +1,8 @@
 import { memo, useCallback, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { InkEditTool, InkPoint, InkSide, InkStroke } from "@core/domain/card/ink/inkDocument";
-import IpadInkCanvasHost from "../../../components/ipad/ink/IpadInkCanvasHost";
-import IpadInkToolbar from "../../../components/ipad/ink/IpadInkToolbar";
+import IpadInkCanvasHost from "@mobile-renderer/components/ipad/ink/IpadInkCanvasHost";
+import IpadInkToolbar from "@mobile-renderer/components/ipad/ink/IpadInkToolbar";
 
 type HandwritingModeSession = {
   id: string;
