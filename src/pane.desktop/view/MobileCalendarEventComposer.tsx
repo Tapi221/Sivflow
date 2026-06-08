@@ -214,6 +214,8 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
   const calendarAccounts = accounts ?? googleAccounts ?? EMPTY_GOOGLE_ACCOUNTS;
   const calendarProjectCalendarLinks = projectCalendarLinks ?? EMPTY_PROJECT_CALENDAR_LINKS;
   const calendarOptions = useMemo(() => buildMobileCalendarOptions(calendarAccounts, calendarProjectCalendarLinks), [calendarAccounts, calendarProjectCalendarLinks]);
+  const calendarOptionsRef = useRef(calendarOptions);
+  const selectedDateTime = selectedDate.getTime();
   const [form, setForm] = useState<MobileCalendarEventFormState>(() => createInitialEventFormState(selectedDate, calendarOptions));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -223,14 +225,31 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
   const isSubmitDisabled = isSubmitting || !form.title.trim() || !selectedCalendarOption;
 
   useEffect(() => {
+    calendarOptionsRef.current = calendarOptions;
+  }, [calendarOptions]);
+
+  useEffect(() => {
     if (!isOpen) return;
 
-    setForm(createInitialEventFormState(selectedDate, calendarOptions));
+    setForm(createInitialEventFormState(new Date(selectedDateTime), calendarOptionsRef.current));
     setIsSubmitting(false);
     setError(null);
     setIsLocationSheetOpen(false);
     setActiveTimeField(null);
-  }, [calendarOptions, isOpen, selectedDate]);
+  }, [isOpen, selectedDateTime]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setForm((current) => {
+      if (current.calendarKey && calendarOptions.some((option) => option.key === current.calendarKey)) return current;
+
+      const calendarKey = calendarOptions[0]?.key ?? "";
+      if (current.calendarKey === calendarKey) return current;
+
+      return { ...current, calendarKey };
+    });
+  }, [calendarOptions, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
