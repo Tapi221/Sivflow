@@ -1,15 +1,8 @@
-/**
- * useCardImagePreloader
- *
- * カード一覧の「表示前プリロード」を担うフック。
- */
-
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
 import { getCardImages } from "@/domain/card/content";
 import { storage } from "@/services/firebase";
-import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
-import { getBlobCacheStats } from "@/services/imageBlobUrlSessionCache";
+import { getBlobCacheStats, getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 import { getCachedRemoteUrl, getPreloadCacheStats, isUrlDecoded, markUrlDecoded, setCachedRemoteUrl } from "@/services/imagePreloadCache";
 import { getLocalDb } from "@/services/localDB";
 import type { Card, UploadedImage } from "@/types/domain/card";
@@ -49,7 +42,7 @@ const extractImages = (card: Card) => {
   return imgs;
 };
 
-export const cardHasImages = (card: Card) => {
+const cardHasImages = (card: Card) => {
   return extractImages(card).length > 0;
 };
 
@@ -207,7 +200,7 @@ const resolvePreloadWindow = ({
   };
 };
 
-export const useCardImagePreloader = (
+const useCardImagePreloader = (
   cards: Card[],
   activeIndex: number,
   userId: string | null,
@@ -489,3 +482,5 @@ export const useCardImagePreloader = (
 
   return readySet;
 };
+
+export { cardHasImages, useCardImagePreloader };
