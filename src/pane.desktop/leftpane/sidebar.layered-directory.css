@@ -412,7 +412,7 @@
   min-height: 28px !important;
   gap: 7px !important;
   border-radius: 7px !important;
-  padding: 0 8px 0 6px !important;
+  padding: 0 8px 0 0 !important;
   color: var(--app-layered-directory-muted-text) !important;
   font-size: 13px !important;
   font-weight: 500 !important;
