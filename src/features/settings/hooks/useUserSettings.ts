@@ -4,6 +4,7 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { createDefaultEditorBlockSettings, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
 import { getLocalDb } from "@/services/localDB";
 import type { UserSettings } from "@/types";
+import { useLocaleStore, type Locale } from "@shared/i18n/locale.store";
 
 const LEGACY_SETTING_KEYS = [
   "displayName",
@@ -16,6 +17,12 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const toRecord = (value: unknown): Record<string, unknown> | undefined =>
   isRecord(value) ? value : undefined;
+
+const toLocale = (language: UserSettings["language"] | undefined): Locale => {
+  if (language === "en") return "en";
+  if (language === "zh") return "zh";
+  return "ja";
+};
 
 export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   language: "ja",
@@ -94,6 +101,7 @@ export const useUserSettings = () => {
   const { currentUser } = useAuthSession();
   const currentUserId = currentUser?.uid ?? null;
   const bootSettings = useMemo(() => buildBootSettingsSnapshot(), []);
+  const setLocale = useLocaleStore((state) => state.setLocale);
 
   const settings = useLiveQuery(
     async () => {
@@ -110,6 +118,10 @@ export const useUserSettings = () => {
     [bootSettings, currentUserId],
     bootSettings,
   );
+
+  useEffect(() => {
+    setLocale(toLocale(settings?.language));
+  }, [settings?.language, setLocale]);
 
   useEffect(() => {
     if (!currentUserId) return;
@@ -155,6 +167,10 @@ export const useUserSettings = () => {
 
   const updateSettings = useCallback(
     async (newSettings: Partial<UserSettings>) => {
+      if (newSettings.language) {
+        setLocale(toLocale(newSettings.language));
+      }
+
       if (!currentUserId) return;
 
       const db = await getLocalDb(currentUserId);
@@ -195,7 +211,7 @@ export const useUserSettings = () => {
         updatedAt: new Date(),
       } as UserSettings);
     },
-    [currentUserId],
+    [currentUserId, setLocale],
   );
 
   return {
