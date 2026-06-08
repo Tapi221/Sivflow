@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { type SVGProps, useCallback, useEffect, useMemo, useState } from "react";
 import { addDays, addHours, format, startOfDay } from "date-fns";
 import type { GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
 import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -21,6 +21,7 @@ type MobileCalendarEventComposerProps = {
 const MOBILE_EVENT_COMPOSER_DEFAULT_START_HOUR = 9;
 const MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS = 1;
 const MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR = "#34c759";
+const MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX = "現在地";
 const EMPTY_GOOGLE_ACCOUNTS: GoogleAccountDisplay[] = [];
 
 const isSameLocalDate = (left: Date, right: Date): boolean => left.getFullYear() === right.getFullYear() && left.getMonth() === right.getMonth() && left.getDate() === right.getDate();
@@ -121,12 +122,33 @@ const createInitialEventFormState = (selectedDate: Date, calendarOptions: Mobile
 
 const getErrorMessage = (error: unknown): string => error instanceof Error ? error.message : "予定の追加に失敗しました";
 
+const MobileCalendarSearchIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+    <path fill="currentColor" d="M10.8 4.4a6.4 6.4 0 0 1 5.05 10.33l3.51 3.51a.78.78 0 0 1-1.1 1.1l-3.51-3.51A6.4 6.4 0 1 1 10.8 4.4Zm0 1.56a4.84 4.84 0 1 0 0 9.68 4.84 4.84 0 0 0 0-9.68Z" />
+  </svg>
+);
+
+const MobileCalendarCurrentLocationIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 40 40" aria-hidden="true" {...props}>
+    <circle cx="20" cy="20" r="20" fill="#d8d8dd" />
+    <path fill="#007aff" d="M30.44 9.84 11.06 18.1c-1.56.67-1.44 2.94.18 3.42l7.02 2.08 2.08 7.02c.48 1.62 2.75 1.74 3.42.18l8.26-19.38c.47-1.1-.48-2.05-1.58-1.58Z" />
+  </svg>
+);
+
+const MobileCalendarFaceTimeIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 600 600" aria-hidden="true" {...props}>
+    <path fill="#20d64d" d="M137.7 0h324.6C538.6 0 600 61.4 600 137.7v324.6c0 76.3-61.4 137.7-137.7 137.7H137.7C61.4 600 0 538.6 0 462.3V137.7C0 61.4 61.4 0 137.7 0z" />
+    <path fill="#fff" d="M91.5 227.3v146.1c0 31.9 25.9 57.7 57.7 57.7H325c31.9 0 57.7-25.9 57.7-57.7V227.3c0-31.9-25.9-57.7-57.7-57.7H149.3c-31.9-.1-57.8 25.8-57.8 57.7zm379.3-39.1-66.2 54.6c-5.9 4.9-9.3 12.1-9.3 19.7v75.6c0 7.6 3.3 14.7 9.1 19.6l66.2 55.6c15.1 12.6 38 1.9 38-17.7V206c.1-19.5-22.7-30.3-37.8-17.8z" />
+  </svg>
+);
+
 const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAccounts, projectCalendarLinks = [], onClose, onAddCalendar, onCreateEvent }: MobileCalendarEventComposerProps) => {
   const calendarAccounts = accounts ?? googleAccounts ?? EMPTY_GOOGLE_ACCOUNTS;
   const calendarOptions = useMemo(() => buildMobileCalendarOptions(calendarAccounts, projectCalendarLinks), [calendarAccounts, projectCalendarLinks]);
   const [form, setForm] = useState<MobileCalendarEventFormState>(() => createInitialEventFormState(selectedDate, calendarOptions));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
   const selectedCalendarOption = useMemo(() => calendarOptions.find((option) => option.key === form.calendarKey) ?? null, [calendarOptions, form.calendarKey]);
   const isSubmitDisabled = isSubmitting || !form.title.trim() || !selectedCalendarOption;
 
@@ -136,6 +158,7 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
     setForm(createInitialEventFormState(selectedDate, calendarOptions));
     setIsSubmitting(false);
     setError(null);
+    setIsLocationSheetOpen(false);
   }, [calendarOptions, isOpen, selectedDate]);
 
   useEffect(() => {
@@ -167,6 +190,29 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
       setError(getErrorMessage(caughtError));
     });
   }, [onAddCalendar]);
+
+  const handleSelectFaceTime = useCallback(() => {
+    setFormValue({ location: "FaceTime" });
+    setIsLocationSheetOpen(false);
+  }, [setFormValue]);
+
+  const handleSelectCurrentLocation = useCallback(() => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setFormValue({ location: MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX });
+      setIsLocationSheetOpen(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition((position) => {
+      const latitude = position.coords.latitude.toFixed(5);
+      const longitude = position.coords.longitude.toFixed(5);
+      setFormValue({ location: `${MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX}（${latitude}, ${longitude}）` });
+      setIsLocationSheetOpen(false);
+    }, () => {
+      setFormValue({ location: MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX });
+      setIsLocationSheetOpen(false);
+    }, { enableHighAccuracy: true, maximumAge: 30000, timeout: 8000 });
+  }, [setFormValue]);
 
   const handleSubmit = useCallback(() => {
     if (isSubmitDisabled || !selectedCalendarOption) return;
@@ -201,73 +247,113 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/25" role="presentation">
-      <section role="dialog" aria-modal="true" aria-labelledby="mobile-calendar-event-composer-title" className="flex h-[min(92vh,760px)] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[26px] bg-[#f2f2f7] shadow-[0_-12px_40px_rgba(0,0,0,0.20)]">
-        <header className="flex h-[58px] shrink-0 items-center justify-between border-b border-[#d1d1d6] bg-white/80 px-4 backdrop-blur">
-          <button type="button" className="text-[17px] font-medium tracking-[-0.03em] text-[#ff3b30] disabled:text-[#c7c7cc]" onClick={handleClose} disabled={isSubmitting}>キャンセル</button>
-          <h2 id="mobile-calendar-event-composer-title" className="text-[17px] font-bold tracking-[-0.03em] text-[#111111]">新規イベント</h2>
-          <button type="button" className="text-[17px] font-semibold tracking-[-0.03em] text-[#ff3b30] disabled:text-[#c7c7cc]" onClick={handleSubmit} disabled={isSubmitDisabled}>{isSubmitting ? "追加中" : "追加"}</button>
-        </header>
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-4">
-          <div className="overflow-hidden rounded-[14px] bg-white">
-            <input className="h-[56px] w-full border-0 border-b border-[#e5e5ea] bg-transparent px-4 text-[21px] font-normal tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#c7c7cc]" value={form.title} onChange={(event) => setFormValue({ title: event.target.value })} placeholder="タイトル" inputMode="text" />
-            <input className="h-[48px] w-full border-0 bg-transparent px-4 text-[17px] tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#c7c7cc]" value={form.location} onChange={(event) => setFormValue({ location: event.target.value })} placeholder="場所またはビデオ通話" inputMode="text" />
-          </div>
-
-          <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
-            <div className="flex min-h-[52px] items-center justify-between border-b border-[#e5e5ea] px-4">
-              <span className="text-[17px] tracking-[-0.03em] text-[#111111]">終日</span>
-              <button type="button" role="switch" aria-checked={form.isAllDay} className={cn("relative h-[31px] w-[51px] rounded-full transition", form.isAllDay ? "bg-[#34c759]" : "bg-[#e5e5ea]")} onClick={() => setFormValue({ isAllDay: !form.isAllDay })}>
-                <span className={cn("absolute top-[2px] h-[27px] w-[27px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.22)] transition-transform", form.isAllDay ? "translate-x-[22px]" : "translate-x-[2px]")} />
+    <>
+      <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/25" role="presentation">
+        <section role="dialog" aria-modal="true" aria-labelledby="mobile-calendar-event-composer-title" className="flex h-[min(92vh,760px)] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[26px] bg-[#f2f2f7] shadow-[0_-12px_40px_rgba(0,0,0,0.20)]">
+          <header className="flex h-[58px] shrink-0 items-center justify-between border-b border-[#d1d1d6] bg-white/80 px-4 backdrop-blur">
+            <button type="button" className="text-[17px] font-medium tracking-[-0.03em] text-[#ff3b30] disabled:text-[#c7c7cc]" onClick={handleClose} disabled={isSubmitting}>キャンセル</button>
+            <h2 id="mobile-calendar-event-composer-title" className="text-[17px] font-bold tracking-[-0.03em] text-[#111111]">新規イベント</h2>
+            <button type="button" className="text-[17px] font-semibold tracking-[-0.03em] text-[#ff3b30] disabled:text-[#c7c7cc]" onClick={handleSubmit} disabled={isSubmitDisabled}>{isSubmitting ? "追加中" : "追加"}</button>
+          </header>
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-4">
+            <div className="overflow-hidden rounded-[14px] bg-white">
+              <input className="h-[56px] w-full border-0 border-b border-[#e5e5ea] bg-transparent px-4 text-[21px] font-normal tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#c7c7cc]" value={form.title} onChange={(event) => setFormValue({ title: event.target.value })} placeholder="タイトル" inputMode="text" />
+              <button type="button" className={cn("flex h-[48px] w-full items-center px-4 text-left text-[17px] tracking-[-0.03em] outline-none", form.location.trim() ? "text-[#111111]" : "text-[#c7c7cc]")} onClick={() => setIsLocationSheetOpen(true)}>
+                <span className="min-w-0 flex-1 truncate">{form.location.trim() || "場所またはビデオ通話"}</span>
               </button>
             </div>
-            <label className="flex min-h-[52px] items-center justify-between gap-3 border-b border-[#e5e5ea] px-4">
-              <span className="text-[17px] tracking-[-0.03em] text-[#111111]">開始</span>
-              <span className="flex min-w-0 items-center gap-2">
-                <input type="date" className="h-9 rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.startDate} onChange={(event) => setFormValue({ startDate: event.target.value })} />
-                {!form.isAllDay && <input type="time" className="h-9 w-[92px] rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.startTime} onChange={(event) => setFormValue({ startTime: event.target.value })} />}
-              </span>
-            </label>
-            <label className="flex min-h-[52px] items-center justify-between gap-3 border-b border-[#e5e5ea] px-4">
-              <span className="text-[17px] tracking-[-0.03em] text-[#111111]">終了</span>
-              <span className="flex min-w-0 items-center gap-2">
-                <input type="date" className="h-9 rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.endDate} onChange={(event) => setFormValue({ endDate: event.target.value })} />
-                {!form.isAllDay && <input type="time" className="h-9 w-[92px] rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.endTime} onChange={(event) => setFormValue({ endTime: event.target.value })} />}
-              </span>
-            </label>
-            <div className="flex min-h-[52px] items-center justify-between px-4">
-              <span className="text-[17px] tracking-[-0.03em] text-[#111111]">移動時間</span>
-              <span className="text-[17px] tracking-[-0.03em] text-[#8e8e93]">なし</span>
-            </div>
-          </div>
 
-          <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
-            {calendarOptions.length > 0 ? (
-              <label className="flex min-h-[52px] items-center justify-between gap-4 px-4">
-                <span className="text-[17px] tracking-[-0.03em] text-[#111111]">カレンダー</span>
-                <span className="flex min-w-0 flex-1 items-center justify-end gap-2">
-                  <span aria-hidden="true" className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: selectedCalendarOption?.color ?? MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR }} />
-                  <select className="min-w-0 max-w-[70%] bg-transparent text-right text-[17px] tracking-[-0.03em] text-[#8e8e93] outline-none" value={form.calendarKey} onChange={(event) => setFormValue({ calendarKey: event.target.value })}>
-                    {calendarOptions.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
-                  </select>
+            <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
+              <div className="flex min-h-[52px] items-center justify-between border-b border-[#e5e5ea] px-4">
+                <span className="text-[17px] tracking-[-0.03em] text-[#111111]">終日</span>
+                <button type="button" role="switch" aria-checked={form.isAllDay} className={cn("relative h-[31px] w-[51px] rounded-full transition", form.isAllDay ? "bg-[#34c759]" : "bg-[#e5e5ea]")} onClick={() => setFormValue({ isAllDay: !form.isAllDay })}>
+                  <span className={cn("absolute top-[2px] h-[27px] w-[27px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.22)] transition-transform", form.isAllDay ? "translate-x-[22px]" : "translate-x-[2px]")} />
+                </button>
+              </div>
+              <label className="flex min-h-[52px] items-center justify-between gap-3 border-b border-[#e5e5ea] px-4">
+                <span className="text-[17px] tracking-[-0.03em] text-[#111111]">開始</span>
+                <span className="flex min-w-0 items-center gap-2">
+                  <input type="date" className="h-9 rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.startDate} onChange={(event) => setFormValue({ startDate: event.target.value })} />
+                  {!form.isAllDay && <input type="time" className="h-9 w-[92px] rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.startTime} onChange={(event) => setFormValue({ startTime: event.target.value })} />}
                 </span>
               </label>
-            ) : (
-              <div className="flex min-h-[84px] items-center justify-between gap-4 px-4 py-3">
-                <p className="min-w-0 text-[15px] leading-5 tracking-[-0.03em] text-[#6e6e73]">Google カレンダーを接続すると予定を追加できます。</p>
-                <button type="button" className="shrink-0 rounded-full bg-[#f2f2f7] px-3 py-2 text-[14px] font-semibold tracking-[-0.03em] text-[#ff3b30]" onClick={handleAddCalendar}>接続</button>
+              <label className="flex min-h-[52px] items-center justify-between gap-3 border-b border-[#e5e5ea] px-4">
+                <span className="text-[17px] tracking-[-0.03em] text-[#111111]">終了</span>
+                <span className="flex min-w-0 items-center gap-2">
+                  <input type="date" className="h-9 rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.endDate} onChange={(event) => setFormValue({ endDate: event.target.value })} />
+                  {!form.isAllDay && <input type="time" className="h-9 w-[92px] rounded-[10px] bg-[#f2f2f7] px-2 text-right text-[17px] tracking-[-0.03em] text-[#111111] outline-none" value={form.endTime} onChange={(event) => setFormValue({ endTime: event.target.value })} />}
+                </span>
+              </label>
+              <div className="flex min-h-[52px] items-center justify-between px-4">
+                <span className="text-[17px] tracking-[-0.03em] text-[#111111]">移動時間</span>
+                <span className="text-[17px] tracking-[-0.03em] text-[#8e8e93]">なし</span>
               </div>
-            )}
-          </div>
+            </div>
 
-          <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
-            <textarea className="h-[176px] w-full resize-none border-0 bg-transparent px-4 py-3 text-[17px] leading-6 tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#c7c7cc]" value={form.description} onChange={(event) => setFormValue({ description: event.target.value })} placeholder="メモ" />
-          </div>
+            <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
+              {calendarOptions.length > 0 ? (
+                <label className="flex min-h-[52px] items-center justify-between gap-4 px-4">
+                  <span className="text-[17px] tracking-[-0.03em] text-[#111111]">カレンダー</span>
+                  <span className="flex min-w-0 flex-1 items-center justify-end gap-2">
+                    <span aria-hidden="true" className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: selectedCalendarOption?.color ?? MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR }} />
+                    <select className="min-w-0 max-w-[70%] bg-transparent text-right text-[17px] tracking-[-0.03em] text-[#8e8e93] outline-none" value={form.calendarKey} onChange={(event) => setFormValue({ calendarKey: event.target.value })}>
+                      {calendarOptions.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
+                    </select>
+                  </span>
+                </label>
+              ) : (
+                <div className="flex min-h-[84px] items-center justify-between gap-4 px-4 py-3">
+                  <p className="min-w-0 text-[15px] leading-5 tracking-[-0.03em] text-[#6e6e73]">Google カレンダーを接続すると予定を追加できます。</p>
+                  <button type="button" className="shrink-0 rounded-full bg-[#f2f2f7] px-3 py-2 text-[14px] font-semibold tracking-[-0.03em] text-[#ff3b30]" onClick={handleAddCalendar}>接続</button>
+                </div>
+              )}
+            </div>
 
-          {error && <p className="mt-3 px-1 text-[14px] leading-5 tracking-[-0.03em] text-[#ff3b30]">{error}</p>}
+            <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
+              <textarea className="h-[176px] w-full resize-none border-0 bg-transparent px-4 py-3 text-[17px] leading-6 tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#c7c7cc]" value={form.description} onChange={(event) => setFormValue({ description: event.target.value })} placeholder="メモ" />
+            </div>
+
+            {error && <p className="mt-3 px-1 text-[14px] leading-5 tracking-[-0.03em] text-[#ff3b30]">{error}</p>}
+          </div>
+        </section>
+      </div>
+
+      {isLocationSheetOpen ? (
+        <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/10" role="presentation">
+          <section role="dialog" aria-modal="true" aria-label="場所" className="flex h-[min(88vh,720px)] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[13px] bg-white shadow-[0_-12px_40px_rgba(0,0,0,0.18)] [text-size-adjust:100%] [-webkit-text-size-adjust:100%]">
+            <header className="relative flex h-[58px] shrink-0 items-center px-[32px]">
+              <h3 className="pointer-events-none absolute left-1/2 top-1/2 w-[180px] -translate-x-1/2 -translate-y-1/2 text-center text-[18px] font-bold tracking-[-0.03em] text-[#111111]">場所</h3>
+              <button type="button" className="ml-auto min-w-[92px] text-right text-[18px] font-normal tracking-[-0.03em] text-[#ff3b30]" onClick={() => setIsLocationSheetOpen(false)}>キャンセル</button>
+            </header>
+
+            <div className="px-[32px] pb-[28px] pt-[8px]">
+              <label className="flex h-[68px] items-center rounded-[12px] bg-[#f1f1f3] px-[12px]">
+                <MobileCalendarSearchIcon className="mr-[8px] h-[30px] w-[30px] shrink-0 text-[#8e8e93]" />
+                <input autoFocus className="min-w-0 flex-1 border-0 bg-transparent text-[19px] leading-none tracking-[-0.04em] text-[#111111] outline-none placeholder:text-[#8e8e93]" value={form.location} onChange={(event) => setFormValue({ location: event.target.value })} onKeyDown={(event) => { if (event.key === "Enter") setIsLocationSheetOpen(false); }} placeholder="場所またはビデオ通話を入力" inputMode="text" />
+              </label>
+            </div>
+
+            <div className="h-px bg-[#d1d1d6]" />
+
+            <div className="min-h-0 flex-1 overflow-y-auto bg-white">
+              <button type="button" className="flex min-h-[106px] w-full items-center gap-[20px] border-b border-[#d1d1d6] px-[32px] text-left" onClick={handleSelectCurrentLocation}>
+                <MobileCalendarCurrentLocationIcon className="h-[56px] w-[56px] shrink-0" />
+                <span className="text-[22px] tracking-[-0.04em] text-[#111111]">現在地</span>
+              </button>
+
+              <div className="border-b border-[#d1d1d6] bg-[#fafafa] px-[32px] pb-[13px] pt-[55px]">
+                <span className="text-[21px] font-bold tracking-[-0.04em] text-[#8e8e93]">ビデオ通話</span>
+              </div>
+
+              <button type="button" className="flex min-h-[123px] w-full items-center gap-[20px] border-b border-[#d1d1d6] px-[32px] text-left" onClick={handleSelectFaceTime}>
+                <MobileCalendarFaceTimeIcon className="h-[66px] w-[66px] shrink-0" />
+                <span className="text-[22px] tracking-[-0.04em] text-[#111111]">FaceTime</span>
+              </button>
+            </div>
+          </section>
         </div>
-      </section>
-    </div>
+      ) : null}
+    </>
   );
 };
 
