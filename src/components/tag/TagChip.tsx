@@ -13,7 +13,7 @@ interface TagChipProps {
   removeAriaLabel?: string;
 }
 
-export const TagChip = ({
+const TagChip = ({
   label,
   colorKey,
   className,
@@ -33,3 +33,6 @@ export const TagChip = ({
     />
   );
 };
+
+export { TagChip };
+export type { TagChipProps };
