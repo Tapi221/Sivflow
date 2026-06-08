@@ -8,6 +8,7 @@
     --app-loading-spinner-track: rgba(148, 163, 184, 0.18);
     --app-loading-spinner-indicator: rgba(100, 116, 139, 0.64);
     --app-highlight-bg: #d5eefd;
+    --app-pdf-selection-bg: rgba(73, 154, 218, 0.28);
   }
 
   *,
@@ -127,12 +128,14 @@
 
   .pdfViewer .textLayer ::sel\65 ction,
   .pdfViewer .textLayer::sel\65 ction {
-    background-color: var(--app-highlight-bg) !important;
+    background-color: var(--app-pdf-selection-bg) !important;
+    color: transparent !important;
   }
 
   .pdfViewer .textLayer ::-moz-sel\65 ction,
   .pdfViewer .textLayer::-moz-sel\65 ction {
-    background-color: var(--app-highlight-bg) !important;
+    background-color: var(--app-pdf-selection-bg) !important;
+    color: transparent !important;
   }
 
   .workspace-surface--plain {
