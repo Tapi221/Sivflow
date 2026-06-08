@@ -75,30 +75,6 @@
     user-select: none;
   }
 
-  [data-pdf-page-number] .text-transparent,
-  [data-pdf-page-number] .text-transparent * {
-    -webkit-touch-callout: default;
-    -webkit-user-select: text;
-    user-select: text;
-  }
-
-  [data-pdf-page-number] .text-transparent {
-    cursor: text;
-    pointer-events: auto;
-  }
-
-  [data-pdf-page-number] .text-transparent::sel\65 ction,
-  [data-pdf-page-number] .text-transparent *::sel\65 ction {
-    background-color: var(--app-highlight-bg) !important;
-    color: transparent !important;
-  }
-
-  [data-pdf-page-number] .text-transparent::-moz-sel\65 ction,
-  [data-pdf-page-number] .text-transparent *::-moz-sel\65 ction {
-    background-color: var(--app-highlight-bg) !important;
-    color: transparent !important;
-  }
-
   .pdfViewer,
   .pdfViewer .textLayer,
   .pdfViewer .textLayer * {
