@@ -1,6 +1,6 @@
-export type ImportSheetName = "blocks";
+type ImportSheetName = "blocks";
 
-export type ImportColumnKey =
+type ImportColumnKey =
   | "cardId"
   | "side"
   | "blockOrder"
@@ -11,33 +11,33 @@ export type ImportColumnKey =
   | "title"
   | "note";
 
-export type ImportBlockType = "text" | "markdown" | "math" | "code" | "image";
+type ImportBlockType = "text" | "markdown" | "math" | "code" | "image";
 
-export type ImportSide = "front" | "back";
+type ImportSide = "front" | "back";
 
-export type ImportBlock = {
+type ImportBlock = {
   type: ImportBlockType;
   order: number;
   content?: string;
   language?: string;
 };
 
-export type ImportCard = {
+type ImportCard = {
   cardId: string;
   title?: string;
   frontBlocks: ImportBlock[];
   backBlocks: ImportBlock[];
 };
 
-export type ImportPayload = {
+type ImportPayload = {
   version: 1;
   source: "xlsx";
   cards: ImportCard[];
 };
 
-export type ImportIssueLevel = "error" | "warning";
+type ImportIssueLevel = "error" | "warning";
 
-export type ImportIssueCode =
+type ImportIssueCode =
   | "missing_sheet"
   | "missing_required_header"
   | "missing_required_cell"
@@ -50,7 +50,7 @@ export type ImportIssueCode =
   | "unsupported_image_cell"
   | "unexpected_value";
 
-export type ImportIssue = {
+type ImportIssue = {
   level: ImportIssueLevel;
   code: ImportIssueCode;
   sheetName: string;
@@ -59,12 +59,12 @@ export type ImportIssue = {
   message: string;
 };
 
-export type ImportParseResult = {
+type ImportParseResult = {
   payload: ImportPayload | null;
   issues: ImportIssue[];
 };
 
-export type ParsedImportRow = {
+type ParsedImportRow = {
   sheetName: ImportSheetName;
   rowNumber: number;
   cardId: string;
@@ -73,9 +73,9 @@ export type ParsedImportRow = {
   block: ImportBlock;
 };
 
-export const IMPORT_SHEET_NAME: ImportSheetName = "blocks";
+const IMPORT_SHEET_NAME: ImportSheetName = "blocks";
 
-export const IMPORT_BLOCK_TYPES: ImportBlockType[] = [
+const IMPORT_BLOCK_TYPES: ImportBlockType[] = [
   "text",
   "markdown",
   "math",
@@ -83,17 +83,17 @@ export const IMPORT_BLOCK_TYPES: ImportBlockType[] = [
   "image",
 ];
 
-export const IMPORT_SIDES: ImportSide[] = ["front", "back"];
+const IMPORT_SIDES: ImportSide[] = ["front", "back"];
 
-export const isImportBlockType = (value: string): value is ImportBlockType => {
+const isImportBlockType = (value: string): value is ImportBlockType => {
   return IMPORT_BLOCK_TYPES.includes(value as ImportBlockType);
 };
 
-export const isImportSide = (value: string): value is ImportSide => {
+const isImportSide = (value: string): value is ImportSide => {
   return IMPORT_SIDES.includes(value as ImportSide);
 };
 
-export const formatImportCellLabel = (issue: ImportIssue) => {
+const formatImportCellLabel = (issue: ImportIssue) => {
   const locationParts = [issue.sheetName];
 
   if (typeof issue.rowNumber === "number") {
@@ -107,7 +107,10 @@ export const formatImportCellLabel = (issue: ImportIssue) => {
   return locationParts.join(":");
 };
 
-export const hasImportBlockingError = (result: ImportParseResult | null) => {
+const hasImportBlockingError = (result: ImportParseResult | null) => {
   if (!result) return true;
   return result.issues.some((issue) => issue.level === "error");
 };
+
+export { IMPORT_BLOCK_TYPES, IMPORT_SHEET_NAME, IMPORT_SIDES, formatImportCellLabel, hasImportBlockingError, isImportBlockType, isImportSide };
+export type { ImportBlock, ImportBlockType, ImportCard, ImportColumnKey, ImportIssue, ImportIssueCode, ImportIssueLevel, ImportParseResult, ImportPayload, ImportSheetName, ImportSide, ParsedImportRow };
