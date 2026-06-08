@@ -306,6 +306,10 @@
   border-color: #d8d8d5;
 }
 
+.settings-workspace__row--stacked > .settings-workspace__segment.w-full {
+  width: min(240px, 100%) !important;
+}
+
 .settings-workspace__segment-label {
   font-size: 13px;
   font-weight: 500;
@@ -453,5 +457,11 @@
   .settings-workspace__nav-item {
     width: auto;
     min-width: 140px;
+  }
+}
+
+@media (max-width: 520px) {
+  .settings-workspace__row--stacked > .settings-workspace__segment.w-full {
+    width: 100% !important;
   }
 }
