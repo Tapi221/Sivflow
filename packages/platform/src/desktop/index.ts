@@ -1,5 +1,5 @@
 import { getDesktopBridge } from "./bridge";
-import type { PlatformApi } from "../desktopApi";
+import type { PlatformApi } from "@platform/desktopApi";
 
 export const desktopPlatform: PlatformApi = {
   app: {
