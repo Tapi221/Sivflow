@@ -74,7 +74,7 @@ export type RawTranslations = {
   settingLanguageTitle: string;
   langJapanese: string;
   langEnglish: string;
-  dateFnsLocaleKey: "ja" | "en-US";
+  dateFnsLocaleKey: "ja" | "en-US" | "zh-CN";
 };
 
 export type Translations = Omit<RawTranslations, "overflowEvents"> & {
@@ -94,4 +94,5 @@ export const RAW_TRANSLATIONS = rawTranslations as Record<Locale, RawTranslation
 export const TRANSLATIONS: Record<Locale, Translations> = {
   ja: toTranslations(RAW_TRANSLATIONS.ja),
   en: toTranslations(RAW_TRANSLATIONS.en),
+  zh: toTranslations(RAW_TRANSLATIONS.zh),
 };
