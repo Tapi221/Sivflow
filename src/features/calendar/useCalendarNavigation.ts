@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays, subMonths, subYears } from "date-fns";
 import type { CalendarWeekStartDay } from "./calendar.types";
 import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
-import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
+import { getCalendarWeekStartsOn } from "./calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import { createCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
 import { persistScheduleNavigationState, readStoredScheduleNavigationState, type ScheduleNavigationState } from "./scheduleNavigationPersistence";
