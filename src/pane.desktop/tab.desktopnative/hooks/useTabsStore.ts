@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { WEB_STORAGE_KEYS } from "@constants/web/storage";
+import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { createDefaultExplorerRouteState, resolveRouteTabBySection, WORKSPACE_DEFAULT_EXPLORER_TAB_ID, type WorkspaceCardTab, type WorkspaceDocumentTab, type WorkspaceExplorerTab, type WorkspaceNoteTab, type WorkspaceRouteTab, type WorkspaceSidebarSection, type WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 
