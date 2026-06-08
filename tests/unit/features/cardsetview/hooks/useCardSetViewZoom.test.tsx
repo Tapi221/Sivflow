@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
+import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 import { act, renderHook } from "@testing-library/react";
 import type { RefObject } from "react";
 import { beforeEach, describe, expect, it } from "vitest";

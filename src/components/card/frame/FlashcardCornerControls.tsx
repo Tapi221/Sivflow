@@ -1,5 +1,5 @@
 import React from "react";
-import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "@/components/card/frame/cardAction.constants";
+import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "./cardAction.constants";
 import { Image as ImageIcon, Link, Volume2 } from "@/ui/icons";
 import { CardCornerActions } from "./CardCornerActions";
 import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcard.types";
