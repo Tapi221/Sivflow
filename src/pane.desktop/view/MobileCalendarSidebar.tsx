@@ -20,6 +20,8 @@ const MOBILE_CALENDAR_SIDEBAR_DRAWER_CONTENT_CLASS_NAME = "h-full min-h-0 w-full
 const DEFAULT_MOBILE_CALENDAR_SIDEBAR_OPEN_BUTTON_CLASS_NAME = "flex h-10 w-10 shrink-0 items-center justify-center bg-transparent text-[#111111] transition hover:text-[#111111] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
 
 const MobileCalendarSidebarOpenButton = ({ isOpen, onOpen, className = DEFAULT_MOBILE_CALENDAR_SIDEBAR_OPEN_BUTTON_CLASS_NAME }: MobileCalendarSidebarOpenButtonProps) => {
+  if (isOpen) return null;
+
   return (
     <button type="button" className={className} onClick={onOpen} aria-label="サイドバーを開く" aria-controls={MOBILE_CALENDAR_SIDEBAR_ID} aria-expanded={isOpen}>
       <SidebarOpenIcon className={MOBILE_CALENDAR_SIDEBAR_OPEN_ICON_CLASS_NAME} />
