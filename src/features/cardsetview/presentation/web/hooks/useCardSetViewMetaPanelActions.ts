@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
+import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewEvents.constants";
 import { type CardSetViewEditingDraftPatch, dispatchCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { createLatestReviewLogPatch, createReviewPatchFromRating } from "@/services/reviewAlgorithm";
 import type { Card, ReviewLog, UserSettings } from "@/types";

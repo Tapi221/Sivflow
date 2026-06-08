@@ -1,6 +1,6 @@
-import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
-import { CARD_SET_VIEW_DEFAULT_ZOOM_SCALE, CARD_SET_VIEW_FIXED_LAYOUT_SAFETY_ALLOWANCE_PX, CARD_SET_VIEW_SCROLLBAR_RESERVE_PX, CARD_SET_VIEW_SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX, CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX, CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX } from "@constants/shared/flashcard";
-import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@constants/shared/flashcard";
+import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
+import { CARD_SET_VIEW_DEFAULT_ZOOM_SCALE, CARD_SET_VIEW_FIXED_LAYOUT_SAFETY_ALLOWANCE_PX, CARD_SET_VIEW_SCROLLBAR_RESERVE_PX, CARD_SET_VIEW_SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX, CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX, CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX } from "@/features/cardsetview/domain/cardSetViewPresentation.constants";
+import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@/features/cardsetview/domain/cardSetView.constants";
 import type { CardLayoutMode } from "./cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CANONICAL_CARD_WIDTH, CARD_ROW_PX, layoutRowsToCardHeightPx } from "@constants/shared/flashcard";
+import { CANONICAL_CARD_WIDTH, CARD_ROW_PX, layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import { resolveEditorCardFitScale } from "@/domain/card/resolveEditorCardFitScale";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";

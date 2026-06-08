@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
+import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
 import type { ImageGalleryItem } from "./types";
 import { Button } from "@/components/ui/button";

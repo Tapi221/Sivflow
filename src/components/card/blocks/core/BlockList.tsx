@@ -1,5 +1,5 @@
 import type { HTMLAttributes, ReactNode, Ref } from "react";
-import { CARD_ROW_PX } from "@constants/shared/flashcard";
+import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
 import { shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 import { BlockSeparator } from "./BlockSeparator";
 import { getNormalizedGridOffsetRows, getNormalizedRowOffset, getRowOffsetStyle, isGridOffsetType, isRowPositionableType } from "@/components/card/frame/rowOffset";

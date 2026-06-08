@@ -1,6 +1,5 @@
 import { type DependencyList, useCallback, useEffect, useRef, useState } from "react";
-import { type CardPaneMode, clampPaneWidthPx } from "@constants/shared/flashcard";
-
+import { type CardPaneMode, clampPaneWidthPx } from "@/components/card/frame/cardPane.constants";
 type PaneWidthMap<T> = {
   view: T;
   edit: T;

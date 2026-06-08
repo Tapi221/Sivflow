@@ -1,5 +1,5 @@
 import React from "react";
-import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
+import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewEvents.constants";
 import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 import { type CardSetViewEditingDraftPatch, subscribeCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { useCardEditorContentController } from "@/components/card/editor/useCardEditorContentController";

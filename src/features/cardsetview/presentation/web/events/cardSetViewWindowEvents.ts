@@ -1,5 +1,4 @@
-import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
-
+import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewEvents.constants";
 export type CardSetViewEditingDraftPatch = {
   cardId: string;
   patch: {

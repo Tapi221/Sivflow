@@ -1,5 +1,5 @@
 import { type ReactNode, useCallback } from "react";
-import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
+import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import { Flashcard, type FlashcardCardLike } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 import { VerticalCardPager } from "@/features/review/VerticalCardPager";

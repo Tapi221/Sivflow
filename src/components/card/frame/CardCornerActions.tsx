@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { CARD_ACTION_BG_CLASS, CARD_ACTION_BUTTON_PX, CARD_ACTION_COLOR_ACTIVE_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS, CARD_ACTION_ICON_PX } from "@constants/shared/flashcard";
+import { CARD_ACTION_BG_CLASS, CARD_ACTION_BUTTON_PX, CARD_ACTION_COLOR_ACTIVE_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS, CARD_ACTION_ICON_PX } from "@/components/card/frame/cardAction.constants";
 import { cn } from "@/lib/utils";
 import { CircleHelp, Star, Tag } from "@/ui/icons";
 
