@@ -1,12 +1,19 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { UserSettings } from "@/types";
 import { Globe, Keyboard, Shield, Type, User, Volume2 } from "@/ui/icons";
-import { useLocaleStore, type Locale } from "@shared/i18n/locale.store";
-import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import "./SettingsWorkspaceScreen.css";
 
 type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "hotkey";
+
+type SettingsLanguage = UserSettings["language"];
+
+type BooleanSettingsKey = "notificationsEnabled" | "soundEnabled" | "showReviewHard" | "showReviewEasy" | "autoCarryOver" | "delayBonusEnabled" | "reviewStartNextDay" | "defaultPreviewEnabled" | "autoDraftEnabled" | "autoSaveEnabled" | "autoVoiceQuestion" | "autoVoiceAnswer";
+
+type QuestionDisplayMode = NonNullable<UserSettings["questionDisplayMode"]>;
+
+type MarkdownTabSize = NonNullable<UserSettings["markdownTabSize"]>;
 
 type SettingsSectionDefinition = {
   id: SettingsSectionId;
@@ -43,36 +50,15 @@ type SettingKeyValueProps = {
   value: ReactNode;
 };
 
-type BooleanSettingsKey = "notificationsEnabled" | "soundEnabled" | "showReviewHard" | "showReviewEasy" | "autoCarryOver" | "delayBonusEnabled" | "reviewStartNextDay" | "defaultPreviewEnabled" | "autoDraftEnabled" | "autoSaveEnabled" | "autoVoiceQuestion" | "autoVoiceAnswer";
-
-type SettingsLanguage = UserSettings["language"];
-
-type QuestionDisplayMode = NonNullable<UserSettings["questionDisplayMode"]>;
-
-type MarkdownTabSize = NonNullable<UserSettings["markdownTabSize"]>;
-
-type SettingsSectionCopy = {
-  label: string;
-};
-
-type SettingOptionCopy = {
-  label: string;
-};
-
-type HotkeyCopy = {
-  label: string;
-  keys: string;
-};
-
 type SettingsWorkspaceCopy = {
   ariaLabel: string;
   navAriaLabel: string;
-  sections: Record<SettingsSectionId, SettingsSectionCopy>;
-  languageOptions: Record<SettingsLanguage, SettingOptionCopy>;
-  weekStartOptions: Record<UserSettings["weekStartDay"], SettingOptionCopy>;
-  questionDisplayOptions: Record<QuestionDisplayMode, SettingOptionCopy>;
-  markdownTabOptions: Record<MarkdownTabSize, SettingOptionCopy>;
-  hotkeys: readonly HotkeyCopy[];
+  sections: Record<SettingsSectionId, { label: string }>;
+  languageOptions: Record<SettingsLanguage, { label: string }>;
+  weekStartOptions: Record<UserSettings["weekStartDay"], { label: string }>;
+  questionDisplayOptions: Record<QuestionDisplayMode, { label: string }>;
+  markdownTabOptions: Record<MarkdownTabSize, { label: string }>;
+  hotkeys: readonly { label: string; keys: string }[];
   accountProfileTitle: string;
   accountProfileDescription: string;
   emailUnset: string;
@@ -122,43 +108,17 @@ type SettingsWorkspaceCopy = {
 };
 
 const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "hotkey"];
+
 const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> = {
   ja: {
     ariaLabel: "設定",
     navAriaLabel: "設定カテゴリ",
-    sections: {
-      account: { label: "アカウント" },
-      preferences: { label: "環境設定" },
-      study: { label: "学習" },
-      editor: { label: "エディター" },
-      audio: { label: "音声" },
-      hotkey: { label: "Hotkey" },
-    },
-    languageOptions: {
-      ja: { label: "日本語" },
-      en: { label: "English" },
-      zh: { label: "中文" },
-    },
-    weekStartOptions: {
-      monday: { label: "月曜日" },
-      sunday: { label: "日曜日" },
-    },
-    questionDisplayOptions: {
-      tap_to_reveal: { label: "タップで表示" },
-      always: { label: "常に表示" },
-    },
-    markdownTabOptions: {
-      2: { label: "2" },
-      4: { label: "4" },
-      8: { label: "8" },
-    },
-    hotkeys: [
-      { label: "検索を開く", keys: "⌘K / Ctrl K" },
-      { label: "左サイドバーを切り替え", keys: "⌘B / Ctrl B" },
-      { label: "右サイドバーを切り替え", keys: "⌘⇧B / Ctrl Shift B" },
-      { label: "カードを裏返す", keys: "Space / Enter" },
-      { label: "前後のカードへ移動", keys: "↑ / ↓" },
-    ],
+    sections: { account: { label: "アカウント" }, preferences: { label: "環境設定" }, study: { label: "学習" }, editor: { label: "エディター" }, audio: { label: "音声" }, hotkey: { label: "Hotkey" } },
+    languageOptions: { ja: { label: "日本語" }, en: { label: "English" }, zh: { label: "中文" } },
+    weekStartOptions: { monday: { label: "月曜日" }, sunday: { label: "日曜日" } },
+    questionDisplayOptions: { tap_to_reveal: { label: "タップで表示" }, always: { label: "常に表示" } },
+    markdownTabOptions: { 2: { label: "2" }, 4: { label: "4" }, 8: { label: "8" } },
+    hotkeys: [{ label: "検索を開く", keys: "⌘K / Ctrl K" }, { label: "左サイドバーを切り替え", keys: "⌘B / Ctrl B" }, { label: "右サイドバーを切り替え", keys: "⌘⇧B / Ctrl Shift B" }, { label: "カードを裏返す", keys: "Space / Enter" }, { label: "前後のカードへ移動", keys: "↑ / ↓" }],
     accountProfileTitle: "プロフィール",
     accountProfileDescription: "現在のログインセッションです。",
     emailUnset: "メールアドレス未設定",
@@ -209,39 +169,12 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
   en: {
     ariaLabel: "Settings",
     navAriaLabel: "Settings categories",
-    sections: {
-      account: { label: "Account" },
-      preferences: { label: "Preferences" },
-      study: { label: "Study" },
-      editor: { label: "Editor" },
-      audio: { label: "Audio" },
-      hotkey: { label: "Hotkey" },
-    },
-    languageOptions: {
-      ja: { label: "日本語" },
-      en: { label: "English" },
-      zh: { label: "中文" },
-    },
-    weekStartOptions: {
-      monday: { label: "Monday" },
-      sunday: { label: "Sunday" },
-    },
-    questionDisplayOptions: {
-      tap_to_reveal: { label: "Tap to reveal" },
-      always: { label: "Always visible" },
-    },
-    markdownTabOptions: {
-      2: { label: "2" },
-      4: { label: "4" },
-      8: { label: "8" },
-    },
-    hotkeys: [
-      { label: "Open search", keys: "⌘K / Ctrl K" },
-      { label: "Toggle left sidebar", keys: "⌘B / Ctrl B" },
-      { label: "Toggle right sidebar", keys: "⌘⇧B / Ctrl Shift B" },
-      { label: "Flip card", keys: "Space / Enter" },
-      { label: "Move between cards", keys: "↑ / ↓" },
-    ],
+    sections: { account: { label: "Account" }, preferences: { label: "Preferences" }, study: { label: "Study" }, editor: { label: "Editor" }, audio: { label: "Audio" }, hotkey: { label: "Hotkey" } },
+    languageOptions: { ja: { label: "日本語" }, en: { label: "English" }, zh: { label: "中文" } },
+    weekStartOptions: { monday: { label: "Monday" }, sunday: { label: "Sunday" } },
+    questionDisplayOptions: { tap_to_reveal: { label: "Tap to reveal" }, always: { label: "Always visible" } },
+    markdownTabOptions: { 2: { label: "2" }, 4: { label: "4" }, 8: { label: "8" } },
+    hotkeys: [{ label: "Open search", keys: "⌘K / Ctrl K" }, { label: "Toggle left sidebar", keys: "⌘B / Ctrl B" }, { label: "Toggle right sidebar", keys: "⌘⇧B / Ctrl Shift B" }, { label: "Flip card", keys: "Space / Enter" }, { label: "Move between cards", keys: "↑ / ↓" }],
     accountProfileTitle: "Profile",
     accountProfileDescription: "Current login session.",
     emailUnset: "No email address",
@@ -292,39 +225,12 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
   zh: {
     ariaLabel: "设置",
     navAriaLabel: "设置分类",
-    sections: {
-      account: { label: "账号" },
-      preferences: { label: "偏好设置" },
-      study: { label: "学习" },
-      editor: { label: "编辑器" },
-      audio: { label: "音频" },
-      hotkey: { label: "Hotkey" },
-    },
-    languageOptions: {
-      ja: { label: "日本語" },
-      en: { label: "English" },
-      zh: { label: "中文" },
-    },
-    weekStartOptions: {
-      monday: { label: "星期一" },
-      sunday: { label: "星期日" },
-    },
-    questionDisplayOptions: {
-      tap_to_reveal: { label: "点击显示" },
-      always: { label: "始终显示" },
-    },
-    markdownTabOptions: {
-      2: { label: "2" },
-      4: { label: "4" },
-      8: { label: "8" },
-    },
-    hotkeys: [
-      { label: "打开搜索", keys: "⌘K / Ctrl K" },
-      { label: "切换左侧边栏", keys: "⌘B / Ctrl B" },
-      { label: "切换右侧边栏", keys: "⌘⇧B / Ctrl Shift B" },
-      { label: "翻转卡片", keys: "Space / Enter" },
-      { label: "在卡片之间移动", keys: "↑ / ↓" },
-    ],
+    sections: { account: { label: "账号" }, preferences: { label: "偏好设置" }, study: { label: "学习" }, editor: { label: "编辑器" }, audio: { label: "音频" }, hotkey: { label: "Hotkey" } },
+    languageOptions: { ja: { label: "日本語" }, en: { label: "English" }, zh: { label: "中文" } },
+    weekStartOptions: { monday: { label: "星期一" }, sunday: { label: "星期日" } },
+    questionDisplayOptions: { tap_to_reveal: { label: "点击显示" }, always: { label: "始终显示" } },
+    markdownTabOptions: { 2: { label: "2" }, 4: { label: "4" }, 8: { label: "8" } },
+    hotkeys: [{ label: "打开搜索", keys: "⌘K / Ctrl K" }, { label: "切换左侧边栏", keys: "⌘B / Ctrl B" }, { label: "切换右侧边栏", keys: "⌘⇧B / Ctrl Shift B" }, { label: "翻转卡片", keys: "Space / Enter" }, { label: "在卡片之间移动", keys: "↑ / ↓" }],
     accountProfileTitle: "个人资料",
     accountProfileDescription: "当前登录会话。",
     emailUnset: "未设置邮箱地址",
@@ -373,8 +279,6 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     hotkeyDescription: "键盘操作",
   },
 };
-
-const getSupportedLocale = (language: SettingsLanguage): Locale => language === "ja" ? "ja" : "en";
 
 const buildSettingsSections = (copy: SettingsWorkspaceCopy): SettingsSectionDefinition[] => SETTINGS_SECTION_IDS.map((id) => ({ id, label: copy.sections[id].label }));
 
@@ -459,51 +363,34 @@ const SettingKeyValue = ({ label, value }: SettingKeyValueProps) => {
 const SettingsWorkspaceScreen = () => {
   const { currentUser, loading, logout } = useAuthSession();
   const { settings, updateSettings } = useUserSettings();
-  const setLocale = useLocaleStore((state) => state.setLocale);
   const persistedLanguage = settings?.language ?? "ja";
   const [activeSectionId, setActiveSectionId] = useState<SettingsSectionId>("account");
   const [pendingLanguage, setPendingLanguage] = useState<SettingsLanguage | null>(null);
   const language = pendingLanguage ?? persistedLanguage;
   const copy = SETTINGS_WORKSPACE_COPY[language];
   const sections = useMemo(() => buildSettingsSections(copy), [copy]);
-  const languageOptions = useMemo(() => ([
-    { value: "ja", ...copy.languageOptions.ja },
-    { value: "en", ...copy.languageOptions.en },
-    { value: "zh", ...copy.languageOptions.zh },
-  ] as const satisfies readonly SettingOption<SettingsLanguage>[]), [copy]);
-  const weekStartOptions = useMemo(() => ([
-    { value: "monday", ...copy.weekStartOptions.monday },
-    { value: "sunday", ...copy.weekStartOptions.sunday },
-  ] as const satisfies readonly SettingOption<UserSettings["weekStartDay"]>[]), [copy]);
-  const questionDisplayOptions = useMemo(() => ([
-    { value: "tap_to_reveal", ...copy.questionDisplayOptions.tap_to_reveal },
-    { value: "always", ...copy.questionDisplayOptions.always },
-  ] as const satisfies readonly SettingOption<QuestionDisplayMode>[]), [copy]);
-  const markdownTabOptions = useMemo(() => ([
-    { value: 2, ...copy.markdownTabOptions[2] },
-    { value: 4, ...copy.markdownTabOptions[4] },
-    { value: 8, ...copy.markdownTabOptions[8] },
-  ] as const satisfies readonly SettingOption<MarkdownTabSize>[]), [copy]);
+  const languageOptions = useMemo(() => ([{ value: "ja", ...copy.languageOptions.ja }, { value: "en", ...copy.languageOptions.en }, { value: "zh", ...copy.languageOptions.zh }] as const satisfies readonly SettingOption<SettingsLanguage>[]), [copy]);
+  const weekStartOptions = useMemo(() => ([{ value: "monday", ...copy.weekStartOptions.monday }, { value: "sunday", ...copy.weekStartOptions.sunday }] as const satisfies readonly SettingOption<UserSettings["weekStartDay"]>[]), [copy]);
+  const questionDisplayOptions = useMemo(() => ([{ value: "tap_to_reveal", ...copy.questionDisplayOptions.tap_to_reveal }, { value: "always", ...copy.questionDisplayOptions.always }] as const satisfies readonly SettingOption<QuestionDisplayMode>[]), [copy]);
+  const markdownTabOptions = useMemo(() => ([{ value: 2, ...copy.markdownTabOptions[2] }, { value: 4, ...copy.markdownTabOptions[4] }, { value: 8, ...copy.markdownTabOptions[8] }] as const satisfies readonly SettingOption<MarkdownTabSize>[]), [copy]);
   const accountName = getAccountDisplayName(currentUser?.displayName, currentUser?.email, copy.emptyAccountLabel);
   const accountInitial = getAccountInitial(accountName);
   const weekStartDay = settings?.weekStartDay ?? "monday";
   const questionDisplayMode = settings?.questionDisplayMode ?? "tap_to_reveal";
   const markdownTabSize = settings?.markdownTabSize ?? 2;
+
   const updateBooleanSetting = (key: BooleanSettingsKey, checked: boolean) => {
     void updateSettings({ [key]: checked } as Partial<UserSettings>);
   };
+
   const handleLanguageChange = (nextLanguage: SettingsLanguage) => {
     setPendingLanguage(nextLanguage);
-    setLocale(getSupportedLocale(nextLanguage));
     void updateSettings({ language: nextLanguage });
   };
+
   const handleLogout = () => {
     void logout();
   };
-
-  useEffect(() => {
-    setLocale(getSupportedLocale(persistedLanguage));
-  }, [persistedLanguage, setLocale]);
 
   useEffect(() => {
     if (pendingLanguage === null || pendingLanguage !== persistedLanguage) return;
@@ -519,9 +406,7 @@ const SettingsWorkspaceScreen = () => {
             return (
               <button key={section.id} type="button" className={`settings-workspace__nav-item${isActive ? " is-active" : ""}`} onClick={() => setActiveSectionId(section.id)} aria-current={isActive ? "page" : undefined}>
                 <span className="settings-workspace__nav-icon">{getSectionIcon(section.id, "settings-workspace__nav-icon-svg")}</span>
-                <span className="settings-workspace__nav-copy">
-                  <span>{section.label}</span>
-                </span>
+                <span className="settings-workspace__nav-copy"><span>{section.label}</span></span>
               </button>
             );
           })}
@@ -532,13 +417,8 @@ const SettingsWorkspaceScreen = () => {
           {activeSectionId === "account" ? (
             <SettingsSectionBlock title={copy.accountProfileTitle} description={copy.accountProfileDescription}>
               <div className="settings-workspace__profile-card">
-                <div className="settings-workspace__avatar" aria-hidden="true">
-                  {currentUser?.photoURL ? <img src={currentUser.photoURL} alt="" /> : <span>{accountInitial}</span>}
-                </div>
-                <div className="settings-workspace__profile-copy">
-                  <strong>{accountName}</strong>
-                  <span>{currentUser?.email ?? copy.emailUnset}</span>
-                </div>
+                <div className="settings-workspace__avatar" aria-hidden="true">{currentUser?.photoURL ? <img src={currentUser.photoURL} alt="" /> : <span>{accountInitial}</span>}</div>
+                <div className="settings-workspace__profile-copy"><strong>{accountName}</strong><span>{currentUser?.email ?? copy.emailUnset}</span></div>
                 <button type="button" className="settings-workspace__secondary-button" onClick={handleLogout} disabled={loading || !currentUser}>{copy.logout}</button>
               </div>
               <SettingKeyValue label={copy.statusLabel} value={currentUser ? copy.signedIn : copy.guest} />
