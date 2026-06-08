@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
 import type { Note, NoteBlockContent } from "@/types";
 
 type AffineDocumentEditorProps = {
@@ -6,82 +7,65 @@ type AffineDocumentEditorProps = {
   onChange: (changes: Pick<Note, "content" | "contentText" | "contentVersion" | "editor">) => void | Promise<void>;
 };
 
-type NoteParagraphBlock = {
-  type: "paragraph";
+type NoteBlockType = "paragraph" | "heading1" | "heading2" | "heading3" | "bulleted-list" | "numbered-list" | "quote" | "code" | "divider";
+
+type NoteSerializedBlock = {
+  type: NoteBlockType;
   text: string;
 };
 
 type NoteAffineRecord = {
   type: "affine-document";
-  blocks: NoteParagraphBlock[];
+  blocks: NoteSerializedBlock[];
+  html: string;
   text: string;
   snapshot: unknown;
   updatedAt: string;
 };
 
-type BlocksuiteRuntime = {
-  EditorContainer: new () => BlocksuiteEditorContainer;
-  AffineSchemas: unknown[];
-  DocCollection: new (options: { schema: BlocksuiteSchema }) => BlocksuiteDocCollection;
-  Schema: new () => BlocksuiteSchema;
-  Text: new (text?: string) => unknown;
-};
-
-type BlocksuiteSchema = {
-  register: (schemas: unknown[]) => void;
-};
-
-type BlocksuiteDocCollection = {
-  createDoc: (options: { id: string }) => BlocksuiteDoc;
-  meta?: {
-    initialize?: () => void;
-  };
-};
-
-type BlocksuiteDoc = {
-  addBlock: (flavour: string, props: Record<string, unknown>, parent?: string) => string;
-  getBlockByFlavour?: (flavour: string) => unknown[];
-  load: (initializer?: () => void) => Promise<void> | void;
-  toJSON?: () => unknown;
-};
-
-type BlocksuiteEditorContainer = HTMLElement & {
-  doc?: BlocksuiteDoc;
-  mode?: "page" | "edgeless";
-};
-
-type BlocksuiteBlockModel = {
-  text?: unknown;
+type ToolbarCommand = {
+  label: string;
+  title: string;
+  blockType: NoteBlockType;
 };
 
 const NOTE_SAVE_DEBOUNCE_MS = 500;
 const NOTE_CONTENT_TYPE = "affine-document";
 const LEGACY_TEXT_CONTENT_TYPE = "sivflow-text-document";
-const NOTE_EDITOR_ROOT_CLASS_NAME = "h-full min-h-0 w-full overflow-hidden bg-white text-[#202124]";
-const NOTE_EDITOR_HOST_CLASS_NAME = "h-full min-h-0 w-full";
-const NOTE_EDITOR_CONTAINER_CLASS_NAME = "block h-full min-h-0 w-full bg-white";
-const NOTE_EDITOR_DEFAULT_TITLE = "Untitled";
+const NOTE_EDITOR_ROOT_CLASS_NAME = "relative h-full min-h-0 w-full overflow-hidden bg-white px-8 pb-10 pt-14 text-[#202124]";
+const NOTE_EDITOR_INNER_CLASS_NAME = "mx-auto flex h-full min-h-0 w-full max-w-[980px] flex-col gap-3";
+const NOTE_EDITOR_TOOLBAR_CLASS_NAME = "flex min-h-10 shrink-0 flex-wrap items-center gap-1 rounded-[12px] border border-[rgba(32,33,36,0.08)] bg-[#f7f7f5]/95 px-2 py-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-xl";
+const NOTE_EDITOR_TOOLBAR_BUTTON_CLASS_NAME = "flex h-7 min-w-7 items-center justify-center rounded-[8px] px-2 text-[12px] font-semibold leading-none tracking-[-0.01em] text-[#55524e] transition hover:bg-white hover:text-[#202124] active:scale-[0.98]";
+const NOTE_EDITOR_BODY_CLASS_NAME = "relative min-h-0 flex-1 overflow-y-auto rounded-[18px] border border-[rgba(32,33,36,0.08)] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)]";
+const NOTE_EDITOR_CONTENT_CLASS_NAME = "min-h-full w-full px-10 py-9 text-[16px] leading-7 tracking-[-0.01em] text-[#202124] outline-none [&_blockquote]:my-3 [&_blockquote]:border-l-4 [&_blockquote]:border-[#d9d9d6] [&_blockquote]:pl-4 [&_blockquote]:text-[#5f6368] [&_code]:rounded [&_code]:bg-[#f1f3f4] [&_code]:px-1 [&_h1]:mb-4 [&_h1]:mt-2 [&_h1]:text-[34px] [&_h1]:font-bold [&_h1]:leading-tight [&_h1]:tracking-[-0.04em] [&_h2]:mb-3 [&_h2]:mt-6 [&_h2]:text-[26px] [&_h2]:font-bold [&_h2]:leading-tight [&_h2]:tracking-[-0.035em] [&_h3]:mb-2 [&_h3]:mt-5 [&_h3]:text-[20px] [&_h3]:font-semibold [&_h3]:leading-tight [&_h3]:tracking-[-0.025em] [&_hr]:my-5 [&_hr]:border-0 [&_hr]:border-t [&_hr]:border-[#e5e5e1] [&_li]:my-1 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-2 [&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-[12px] [&_pre]:bg-[#f7f7f5] [&_pre]:p-4 [&_pre]:font-mono [&_pre]:text-[13px] [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-6";
+const NOTE_EDITOR_PLACEHOLDER_CLASS_NAME = "pointer-events-none absolute left-10 top-9 text-[16px] leading-7 tracking-[-0.01em] text-[#a6a6a2]";
+const NOTE_EDITOR_SLASH_MENU_CLASS_NAME = "absolute left-6 top-16 z-20 w-[240px] rounded-[14px] border border-[rgba(32,33,36,0.08)] bg-white p-1.5 shadow-[0_10px_30px_rgba(15,23,42,0.14)]";
+const NOTE_EDITOR_SLASH_ITEM_CLASS_NAME = "flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left text-[13px] font-medium text-[#3c4043] hover:bg-[#f7f7f5]";
+const NOTE_EDITOR_PLACEHOLDER = "本文を入力。/ で見出し・リスト・引用・コードを追加";
+const EMPTY_PARAGRAPH_HTML = "<p><br></p>";
 
-let blocksuiteRuntimePromise: Promise<BlocksuiteRuntime> | null = null;
+const TOOLBAR_COMMANDS: ToolbarCommand[] = [
+  { label: "Text", title: "本文", blockType: "paragraph" },
+  { label: "H1", title: "見出し1", blockType: "heading1" },
+  { label: "H2", title: "見出し2", blockType: "heading2" },
+  { label: "H3", title: "見出し3", blockType: "heading3" },
+  { label: "•", title: "箇条書き", blockType: "bulleted-list" },
+  { label: "1.", title: "番号リスト", blockType: "numbered-list" },
+  { label: "Quote", title: "引用", blockType: "quote" },
+  { label: "Code", title: "コード", blockType: "code" },
+  { label: "—", title: "区切り線", blockType: "divider" },
+];
 
-const loadBlocksuiteRuntime = async (): Promise<BlocksuiteRuntime> => {
-  blocksuiteRuntimePromise ??= Promise.all([import("@blocksuite/blocks"), import("@blocksuite/presets"), import("@blocksuite/store")]).then(([blocks, presets, store]) => {
-    const runtime = { ...blocks, ...presets, ...store } as Record<string, unknown>;
-    const EditorContainer = runtime.AffineEditorContainer ?? runtime.EditorContainer;
-    const AffineSchemas = runtime.AffineSchemas;
-    const DocCollection = runtime.DocCollection;
-    const Schema = runtime.Schema;
-    const Text = runtime.Text;
-
-    if (typeof EditorContainer !== "function" || !Array.isArray(AffineSchemas) || typeof DocCollection !== "function" || typeof Schema !== "function" || typeof Text !== "function") {
-      throw new Error("BlockSuite AFFiNE runtime is incomplete.");
-    }
-
-    return { EditorContainer, AffineSchemas, DocCollection, Schema, Text } as BlocksuiteRuntime;
-  });
-
-  return blocksuiteRuntimePromise;
+const BLOCK_TAG_BY_TYPE: Partial<Record<NoteBlockType, string>> = {
+  paragraph: "p",
+  heading1: "h1",
+  heading2: "h2",
+  heading3: "h3",
+  quote: "blockquote",
+  code: "pre",
 };
+
+const escapeHtml = (value: string): string => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 
 const getRecordText = (content: NoteBlockContent | undefined): string => {
   const record = Array.isArray(content) ? content[0] : null;
@@ -92,137 +76,224 @@ const getRecordText = (content: NoteBlockContent | undefined): string => {
   return record.blocks.map((block) => block && typeof block === "object" && "text" in block ? String((block as { text?: unknown }).text ?? "") : "").join("\n");
 };
 
-const createParagraphBlocks = (text: string): NoteParagraphBlock[] => {
+const isNoteBlockType = (value: unknown): value is NoteBlockType => typeof value === "string" && ["paragraph", "heading1", "heading2", "heading3", "bulleted-list", "numbered-list", "quote", "code", "divider"].includes(value);
+
+const getRecordBlocks = (content: NoteBlockContent | undefined): NoteSerializedBlock[] => {
+  const record = Array.isArray(content) ? content[0] : null;
+  if (!record || typeof record !== "object") return [];
+  if (record.type !== NOTE_CONTENT_TYPE && record.type !== LEGACY_TEXT_CONTENT_TYPE) return [];
+  if (!Array.isArray(record.blocks)) return [];
+
+  return record.blocks.map((block) => {
+    if (!block || typeof block !== "object") return null;
+    const blockRecord = block as Record<string, unknown>;
+    const type = isNoteBlockType(blockRecord.type) ? blockRecord.type : "paragraph";
+    const text = typeof blockRecord.text === "string" ? blockRecord.text : "";
+    return { type, text } satisfies NoteSerializedBlock;
+  }).filter((block): block is NoteSerializedBlock => block !== null);
+};
+
+const createFallbackBlocks = (text: string): NoteSerializedBlock[] => {
   const lines = text.split("\n");
   return lines.length > 0 ? lines.map((line) => ({ type: "paragraph", text: line })) : [{ type: "paragraph", text: "" }];
 };
 
-const getBlockModel = (block: unknown): BlocksuiteBlockModel | null => {
-  if (!block || typeof block !== "object") return null;
-  const blockRecord = block as Record<string, unknown>;
-  const model = blockRecord.model;
-  if (model && typeof model === "object") return model as BlocksuiteBlockModel;
-  return blockRecord as BlocksuiteBlockModel;
+const createBlockHtml = (block: NoteSerializedBlock): string => {
+  const text = escapeHtml(block.text);
+  const content = text.length > 0 ? text : "<br>";
+
+  if (block.type === "heading1") return `<h1>${content}</h1>`;
+  if (block.type === "heading2") return `<h2>${content}</h2>`;
+  if (block.type === "heading3") return `<h3>${content}</h3>`;
+  if (block.type === "bulleted-list") return `<ul><li>${content}</li></ul>`;
+  if (block.type === "numbered-list") return `<ol><li>${content}</li></ol>`;
+  if (block.type === "quote") return `<blockquote>${content}</blockquote>`;
+  if (block.type === "code") return `<pre><code>${content}</code></pre>`;
+  if (block.type === "divider") return "<hr>";
+  return `<p>${content}</p>`;
 };
 
-const getBlockText = (block: unknown): string => {
-  const model = getBlockModel(block);
-  if (!model || model.text === undefined || model.text === null) return "";
-  if (typeof model.text === "string") return model.text;
-  if (typeof model.text === "object" && "toString" in model.text && typeof model.text.toString === "function") return model.text.toString();
-  return String(model.text);
+const createEditorHtml = (blocks: NoteSerializedBlock[]): string => {
+  if (blocks.length === 0) return EMPTY_PARAGRAPH_HTML;
+  return blocks.map(createBlockHtml).join("");
 };
 
-const getEditorText = (doc: BlocksuiteDoc, host: HTMLDivElement): string => {
-  const paragraphBlocks = doc.getBlockByFlavour?.("affine:paragraph") ?? [];
-  const paragraphText = paragraphBlocks.map(getBlockText).join("\n").trimEnd();
-  if (paragraphText.length > 0) return paragraphText;
-  return host.innerText.trimEnd();
+const getElementText = (element: Element): string => element.textContent?.replace(/\u00a0/g, " ").trimEnd() ?? "";
+
+const serializeElement = (element: Element): NoteSerializedBlock[] => {
+  const tagName = element.tagName.toLowerCase();
+  if (tagName === "h1") return [{ type: "heading1", text: getElementText(element) }];
+  if (tagName === "h2") return [{ type: "heading2", text: getElementText(element) }];
+  if (tagName === "h3") return [{ type: "heading3", text: getElementText(element) }];
+  if (tagName === "blockquote") return [{ type: "quote", text: getElementText(element) }];
+  if (tagName === "pre") return [{ type: "code", text: getElementText(element) }];
+  if (tagName === "hr") return [{ type: "divider", text: "" }];
+  if (tagName === "ul") return Array.from(element.querySelectorAll(":scope > li")).map((item) => ({ type: "bulleted-list", text: getElementText(item) }));
+  if (tagName === "ol") return Array.from(element.querySelectorAll(":scope > li")).map((item) => ({ type: "numbered-list", text: getElementText(item) }));
+  return [{ type: "paragraph", text: getElementText(element) }];
 };
 
-const createNoteContent = (doc: BlocksuiteDoc, text: string): NoteBlockContent => [{ type: NOTE_CONTENT_TYPE, blocks: createParagraphBlocks(text), text, snapshot: doc.toJSON?.() ?? null, updatedAt: new Date().toISOString() } satisfies NoteAffineRecord];
-
-const initializeCollection = (collection: BlocksuiteDocCollection): void => {
-  collection.meta?.initialize?.();
+const serializeEditorBlocks = (root: HTMLElement): NoteSerializedBlock[] => {
+  const blocks = Array.from(root.children).flatMap(serializeElement).filter((block) => block.type === "divider" || block.text.trim().length > 0);
+  if (blocks.length > 0) return blocks;
+  const text = root.innerText.trimEnd();
+  return text.length > 0 ? createFallbackBlocks(text) : [{ type: "paragraph", text: "" }];
 };
 
-const loadDocWithInitialText = async (runtime: BlocksuiteRuntime, doc: BlocksuiteDoc, note: Note): Promise<void> => {
-  const text = getRecordText(note.content);
-  const title = note.title.trim() || NOTE_EDITOR_DEFAULT_TITLE;
-  const loadResult = doc.load(() => {
-    const pageId = doc.addBlock("affine:page", { title: new runtime.Text(title) });
-    doc.addBlock("affine:surface", {}, pageId);
-    const noteId = doc.addBlock("affine:note", {}, pageId);
-    for (const block of createParagraphBlocks(text)) {
-      doc.addBlock("affine:paragraph", { text: new runtime.Text(block.text) }, noteId);
-    }
-  });
+const createNoteContent = (blocks: NoteSerializedBlock[]): NoteBlockContent => {
+  const text = blocks.filter((block) => block.type !== "divider").map((block) => block.text).join("\n").trimEnd();
+  const html = createEditorHtml(blocks);
+  return [{ type: NOTE_CONTENT_TYPE, blocks, html, text, snapshot: null, updatedAt: new Date().toISOString() } satisfies NoteAffineRecord];
+};
 
-  await Promise.resolve(loadResult);
+const getEditorText = (blocks: NoteSerializedBlock[]): string => blocks.filter((block) => block.type !== "divider").map((block) => block.text).join("\n").trimEnd();
+
+const getInitialBlocks = (note: Note): NoteSerializedBlock[] => {
+  const blocks = getRecordBlocks(note.content);
+  if (blocks.length > 0) return blocks;
+  return createFallbackBlocks(note.contentText ?? getRecordText(note.content));
+};
+
+const focusEditor = (root: HTMLDivElement | null): void => {
+  root?.focus();
+};
+
+const executeEditorCommand = (root: HTMLDivElement | null, blockType: NoteBlockType): void => {
+  if (!root) return;
+  focusEditor(root);
+
+  if (blockType === "bulleted-list") {
+    document.execCommand("insertUnorderedList");
+    return;
+  }
+
+  if (blockType === "numbered-list") {
+    document.execCommand("insertOrderedList");
+    return;
+  }
+
+  if (blockType === "divider") {
+    document.execCommand("insertHTML", false, "<hr><p><br></p>");
+    return;
+  }
+
+  const tagName = BLOCK_TAG_BY_TYPE[blockType] ?? "p";
+  document.execCommand("formatBlock", false, tagName);
 };
 
 const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => {
-  const hostRef = useRef<HTMLDivElement | null>(null);
-  const docRef = useRef<BlocksuiteDoc | null>(null);
-  const latestSavedTextRef = useRef<string>(getRecordText(note.content));
+  const editorRef = useRef<HTMLDivElement | null>(null);
   const onChangeRef = useRef(onChange);
   const saveTimerRef = useRef<number | null>(null);
+  const latestSavedTextRef = useRef<string>("");
+  const [isEmpty, setIsEmpty] = useState(true);
+  const [isSlashMenuOpen, setIsSlashMenuOpen] = useState(false);
 
   onChangeRef.current = onChange;
 
-  const scheduleSave = useCallback(() => {
-    const host = hostRef.current;
-    const doc = docRef.current;
-    if (!host || !doc) return;
+  const updateEmptyState = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    setIsEmpty(editor.innerText.trim().length === 0 && !editor.querySelector("hr"));
+  }, []);
 
+  const saveNow = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const blocks = serializeEditorBlocks(editor);
+    const contentText = getEditorText(blocks);
+    if (contentText === latestSavedTextRef.current) return;
+    latestSavedTextRef.current = contentText;
+    void onChangeRef.current({ content: createNoteContent(blocks), contentText, contentVersion: 2, editor: "affine" });
+  }, []);
+
+  const scheduleSave = useCallback(() => {
     if (saveTimerRef.current !== null) {
       window.clearTimeout(saveTimerRef.current);
     }
 
-    saveTimerRef.current = window.setTimeout(() => {
-      const contentText = getEditorText(doc, host);
-      if (contentText === latestSavedTextRef.current) return;
-      latestSavedTextRef.current = contentText;
-      void onChangeRef.current({ content: createNoteContent(doc, contentText), contentText, contentVersion: 2, editor: "affine" });
-    }, NOTE_SAVE_DEBOUNCE_MS);
+    saveTimerRef.current = window.setTimeout(saveNow, NOTE_SAVE_DEBOUNCE_MS);
+  }, [saveNow]);
+
+  const handleInput = useCallback(() => {
+    updateEmptyState();
+    scheduleSave();
+  }, [scheduleSave, updateEmptyState]);
+
+  const handleCommand = useCallback((blockType: NoteBlockType) => {
+    executeEditorCommand(editorRef.current, blockType);
+    setIsSlashMenuOpen(false);
+    updateEmptyState();
+    scheduleSave();
+  }, [scheduleSave, updateEmptyState]);
+
+  const handleToolbarMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>, blockType: NoteBlockType) => {
+    event.preventDefault();
+    handleCommand(blockType);
+  }, [handleCommand]);
+
+  const handleKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "/") {
+      window.setTimeout(() => setIsSlashMenuOpen(true), 0);
+      return;
+    }
+
+    if (event.key === "Escape") {
+      setIsSlashMenuOpen(false);
+    }
   }, []);
 
+  const handlePaste = useCallback((event: React.ClipboardEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const text = event.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
+    handleInput();
+  }, [handleInput]);
+
   useEffect(() => {
-    const host = hostRef.current;
-    if (!host) return;
+    const editor = editorRef.current;
+    if (!editor) return;
+    const blocks = getInitialBlocks(note);
+    latestSavedTextRef.current = getEditorText(blocks);
+    editor.innerHTML = createEditorHtml(blocks);
+    updateEmptyState();
+  }, [note.id, updateEmptyState]);
 
-    let isDisposed = false;
-    const abortController = new AbortController();
-    const mutationObserver = new MutationObserver(scheduleSave);
-
-    host.replaceChildren();
-    latestSavedTextRef.current = getRecordText(note.content);
-
-    void loadBlocksuiteRuntime().then(async (runtime) => {
-      if (isDisposed) return;
-
-      const schema = new runtime.Schema();
-      schema.register(runtime.AffineSchemas);
-      const collection = new runtime.DocCollection({ schema });
-      initializeCollection(collection);
-      const doc = collection.createDoc({ id: note.id });
-      await loadDocWithInitialText(runtime, doc, note);
-      if (isDisposed) return;
-
-      const editor = new runtime.EditorContainer();
-      editor.doc = doc;
-      editor.mode = "page";
-      editor.className = NOTE_EDITOR_CONTAINER_CLASS_NAME;
-      docRef.current = doc;
-      host.replaceChildren(editor);
-      mutationObserver.observe(host, { attributes: true, characterData: true, childList: true, subtree: true });
-      host.addEventListener("input", scheduleSave, { signal: abortController.signal });
-      host.addEventListener("keyup", scheduleSave, { signal: abortController.signal });
-      host.addEventListener("paste", scheduleSave, { signal: abortController.signal });
-      host.addEventListener("drop", scheduleSave, { signal: abortController.signal });
-    }).catch(() => {
-      if (!isDisposed) {
-        docRef.current = null;
-        host.replaceChildren();
-      }
-    });
-
+  useEffect(() => {
     return () => {
-      isDisposed = true;
-      abortController.abort();
-      mutationObserver.disconnect();
       if (saveTimerRef.current !== null) {
         window.clearTimeout(saveTimerRef.current);
         saveTimerRef.current = null;
       }
-      docRef.current = null;
-      host.replaceChildren();
+      saveNow();
     };
-  }, [note.id, note.title, scheduleSave]);
+  }, [saveNow]);
 
   return (
     <div className={NOTE_EDITOR_ROOT_CLASS_NAME}>
-      <div ref={hostRef} className={NOTE_EDITOR_HOST_CLASS_NAME} />
+      <div className={NOTE_EDITOR_INNER_CLASS_NAME}>
+        <div className={NOTE_EDITOR_TOOLBAR_CLASS_NAME} aria-label="AFFiNE note block toolbar">
+          {TOOLBAR_COMMANDS.map((command) => (
+            <button key={command.blockType} type="button" className={NOTE_EDITOR_TOOLBAR_BUTTON_CLASS_NAME} title={command.title} onMouseDown={(event) => handleToolbarMouseDown(event, command.blockType)}>
+              {command.label}
+            </button>
+          ))}
+        </div>
+        <div className={NOTE_EDITOR_BODY_CLASS_NAME}>
+          {isEmpty ? <div className={NOTE_EDITOR_PLACEHOLDER_CLASS_NAME}>{NOTE_EDITOR_PLACEHOLDER}</div> : null}
+          {isSlashMenuOpen ? (
+            <div className={NOTE_EDITOR_SLASH_MENU_CLASS_NAME} role="menu" aria-label="ブロックメニュー">
+              {TOOLBAR_COMMANDS.map((command) => (
+                <button key={command.blockType} type="button" className={NOTE_EDITOR_SLASH_ITEM_CLASS_NAME} onMouseDown={(event) => handleToolbarMouseDown(event, command.blockType)}>
+                  <span>{command.title}</span>
+                  <span className="text-[11px] text-[#9aa0a6]">{command.label}</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+          <div ref={editorRef} className={NOTE_EDITOR_CONTENT_CLASS_NAME} contentEditable suppressContentEditableWarning role="textbox" aria-multiline="true" aria-label="AFFiNE note editor" onInput={handleInput} onKeyDown={handleKeyDown} onPaste={handlePaste} />
+        </div>
+      </div>
     </div>
   );
 };
