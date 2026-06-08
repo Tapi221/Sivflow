@@ -1,7 +1,10 @@
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
+import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
+import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
-import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 type EventChipEditorValues = {
   accentColor: string;
@@ -52,15 +55,10 @@ type NumberControlProps = {
   onChange: (value: number) => void;
 };
 
-type PreviewTokens = {
-  background: string;
-  border: string;
-  text: string;
-};
-
-type PreviewProps = {
+type RealPreviewProps = {
   values: EventChipEditorValues;
-  tokens: PreviewTokens;
+  event: GoogleCalendarEvent;
+  allDayEvent: GoogleCalendarEvent;
 };
 
 type AutosaveState = "idle" | "saving" | "saved" | "failed";
@@ -71,9 +69,10 @@ const CONTROL_PANEL_CLASS_NAME = "rounded-3xl border border-slate-200 bg-white/9
 const CONTROL_LABEL_CLASS_NAME = "text-[12px] font-semibold text-slate-600";
 const CONTROL_INPUT_CLASS_NAME = "h-9 w-20 rounded-lg border border-slate-200 bg-white px-2 text-right text-[12px] font-semibold text-slate-700 outline-none focus:border-sky-300 focus:ring-2 focus:ring-sky-100";
 const PREVIEW_CARD_CLASS_NAME = "rounded-3xl border border-slate-200 bg-white p-5 shadow-sm";
-const SAMPLE_TITLE = "講義・波動復習";
-const SAMPLE_TIME_LABEL = "17:07 ~ 19:14";
-const SAMPLE_ALL_DAY_TITLE = "燃えないごみ";
+const SAMPLE_EVENT_START = new Date("2026-06-08T17:07:00+09:00");
+const SAMPLE_EVENT_END = new Date("2026-06-08T19:14:00+09:00");
+const SAMPLE_ALL_DAY_START = new Date("2026-06-08T00:00:00+09:00");
+const SAMPLE_ALL_DAY_END = new Date("2026-06-09T00:00:00+09:00");
 
 const getInitialValues = (): EventChipEditorValues => ({
   accentColor: "#2f9f6b",
@@ -116,23 +115,11 @@ const getInitialValues = (): EventChipEditorValues => ({
 
 const formatEditorJson = (values: EventChipEditorValues): string => JSON.stringify(values, null, 2);
 
-const createPreviewTokens = (values: EventChipEditorValues): PreviewTokens => {
-  const tokens = generateColorTokens(values.accentColor);
-  const match = /^#?([0-9a-fA-F]{6})$/.exec(values.accentColor.trim());
-  if (!match) return { background: tokens.bg, border: tokens.border, text: tokens.text };
-
-  const hex = match[1];
-  const red = Number.parseInt(hex.slice(0, 2), 16);
-  const green = Number.parseInt(hex.slice(2, 4), 16);
-  const blue = Number.parseInt(hex.slice(4, 6), 16);
-
-  return { background: `rgba(${red}, ${green}, ${blue}, ${values.backgroundAlpha})`, border: tokens.border, text: tokens.text };
-};
-
 const NumberControl = ({ label, value, min, max, step = 1, unit = "px", onChange }: NumberControlProps) => {
   const handleChange = (nextValue: string) => {
     const parsedValue = Number.parseFloat(nextValue);
     if (!Number.isFinite(parsedValue)) return;
+
     onChange(parsedValue);
   };
 
@@ -150,19 +137,49 @@ const NumberControl = ({ label, value, min, max, step = 1, unit = "px", onChange
   );
 };
 
-const MonthPreview = ({ values, tokens }: PreviewProps) => {
-  const chipStyle: CSSProperties = { alignItems: "center", background: tokens.background, borderLeft: `${values.monthBorderWidth}px solid ${tokens.border}`, borderRadius: values.monthRadius, color: tokens.text, display: "flex", height: values.monthHeight, minWidth: 0, overflow: "hidden", padding: `${values.monthPaddingYWithTime}px ${values.monthPaddingRight}px ${values.monthPaddingYWithTime}px ${values.monthPaddingLeft}px`, width: "100%" };
-  const allDayStyle: CSSProperties = { ...chipStyle, paddingBottom: values.monthPaddingYCompact, paddingTop: values.monthPaddingYCompact, transform: `translateY(${values.monthAllDayOffset}px)` };
+const createSampleEvent = (accentColor: string): GoogleCalendarEvent => ({
+  id: "eventchip-editor-sample",
+  calendarId: "eventchip-editor-calendar",
+  title: "講義・波動復習",
+  startsAt: SAMPLE_EVENT_START,
+  endsAt: SAMPLE_EVENT_END,
+  isAllDay: false,
+  accentColor,
+});
 
+const createSampleAllDayEvent = (accentColor: string): GoogleCalendarEvent => ({
+  id: "eventchip-editor-all-day-sample",
+  calendarId: "eventchip-editor-calendar",
+  title: "燃えないごみ",
+  startsAt: SAMPLE_ALL_DAY_START,
+  endsAt: SAMPLE_ALL_DAY_END,
+  isAllDay: true,
+  accentColor,
+});
+
+const RealMonthPreview = ({ values, event, allDayEvent }: RealPreviewProps) => {
   return (
     <section className={PREVIEW_CARD_CLASS_NAME}>
-      <h2 className="text-base font-semibold text-slate-900">Month chip</h2>
-      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-3">
-        <div className="relative h-[156px] overflow-hidden rounded-xl border border-slate-100 bg-white">
-          <div className="absolute left-3 top-1 text-[13px] font-bold text-slate-900">8 <span className="text-[12px] font-semibold text-slate-400">6月</span></div>
-          <div className="absolute inset-x-px top-8 flex flex-col" style={{ gap: values.monthGap }}>
-            <div style={chipStyle}><span style={{ flex: 1, fontSize: values.monthTitleFontSize, fontWeight: 600, letterSpacing: "-0.01em", lineHeight: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{SAMPLE_TITLE}</span><span style={{ flexShrink: 0, fontSize: values.monthTimeFontSize, fontWeight: 600, lineHeight: 1, marginLeft: 4, opacity: 0.8, whiteSpace: "nowrap" }}>{SAMPLE_TIME_LABEL}</span></div>
-            <div style={allDayStyle}><span style={{ flex: 1, fontSize: values.monthTitleFontSize, fontWeight: 600, lineHeight: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{SAMPLE_ALL_DAY_TITLE}</span></div>
+      <div className="mb-4 flex items-baseline justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Real component</p>
+          <h2 className="text-base font-semibold text-slate-900">CalendarEventChipMonth</h2>
+        </div>
+        <span className="text-[11px] font-medium text-slate-400">gap {values.monthGap}px</span>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3">
+          <p className="mb-2 text-[11px] font-semibold text-slate-400">desktop month / time shown</p>
+          <div className="flex w-full flex-col" style={{ gap: values.monthGap }}>
+            <CalendarEventChipMonth event={event} showTimeLabel tooltipDisabled />
+            <CalendarEventChipMonth event={allDayEvent} showTimeLabel={false} tooltipDisabled />
+          </div>
+        </div>
+        <div className="w-[390px] max-w-full rounded-2xl border border-slate-200 bg-white p-3">
+          <p className="mb-2 text-[11px] font-semibold text-slate-400">mobile month / time hidden</p>
+          <div className="flex w-full flex-col" style={{ gap: values.monthGap }}>
+            <CalendarEventChipMonth event={event} showTimeLabel={false} tooltipDisabled />
+            <CalendarEventChipMonth event={allDayEvent} showTimeLabel={false} tooltipDisabled />
           </div>
         </div>
       </div>
@@ -170,27 +187,55 @@ const MonthPreview = ({ values, tokens }: PreviewProps) => {
   );
 };
 
-const WeekdayPreview = ({ values, tokens }: PreviewProps) => {
-  const chipStyle: CSSProperties = { background: tokens.background, borderLeft: `${values.weekdayBorderWidth}px solid ${tokens.border}`, borderRadius: values.weekdayRadius, color: tokens.text, display: "flex", flexDirection: "column", gap: values.weekdayGap, height: values.weekdayHeight, minHeight: 0, overflow: "hidden", padding: `${values.weekdayPaddingY}px ${values.weekdayPaddingRight}px ${values.weekdayPaddingY}px ${values.weekdayPaddingLeft}px`, width: "100%" };
+const RealWeekdayPreview = ({ values, event }: RealPreviewProps) => {
+  const desktopFrameStyle: CSSProperties = { height: values.weekdayHeight, width: 220 };
+  const mobileFrameStyle: CSSProperties = { height: values.weekdayHeight, width: 88 };
+  const narrowFrameStyle: CSSProperties = { height: 24, width: 72 };
 
   return (
     <section className={PREVIEW_CARD_CLASS_NAME}>
-      <h2 className="text-base font-semibold text-slate-900">Weekday chip</h2>
-      <div className="mt-4 grid grid-cols-[48px_minmax(0,1fr)] rounded-2xl border border-slate-200 bg-white">
-        <div className="border-r border-slate-100 p-2 text-right text-[11px] font-medium text-slate-400">17:00</div>
-        <div className="relative min-h-[180px] bg-white"><div className="h-[72px] border-b border-slate-100" /><div className="h-[72px] border-b border-slate-100" /><div className="absolute left-1 right-1 top-6"><div className="relative isolate"><div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-white" style={{ borderRadius: values.weekdayRadius }} /><div style={chipStyle}><span style={{ fontSize: values.weekdayTitleFontSize, fontWeight: 500, lineHeight: `${values.weekdayTitleLineHeight}px`, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{SAMPLE_TITLE}</span><span style={{ fontSize: values.weekdayTimeFontSize, fontWeight: 600, lineHeight: `${values.weekdayTimeLineHeight}px`, opacity: 0.8, whiteSpace: "nowrap" }}>{SAMPLE_TIME_LABEL}</span></div></div></div></div>
+      <div className="mb-4 flex items-baseline justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Real component</p>
+          <h2 className="text-base font-semibold text-slate-900">CalendarEventChipWeekday</h2>
+        </div>
+        <span className="text-[11px] font-medium text-slate-400">desktop / mobile width</span>
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3">
+          <p className="mb-2 text-[11px] font-semibold text-slate-400">desktop day column</p>
+          <div className="relative isolate" style={desktopFrameStyle}>
+            <CalendarEventChipWeekday event={event} tooltipDisabled />
+          </div>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-3">
+          <p className="mb-2 text-[11px] font-semibold text-slate-400">mobile narrow column</p>
+          <div className="relative isolate" style={mobileFrameStyle}>
+            <CalendarEventChipWeekday event={event} tooltipDisabled />
+          </div>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-3">
+          <p className="mb-2 text-[11px] font-semibold text-slate-400">short event fallback</p>
+          <div className="relative isolate" style={narrowFrameStyle}>
+            <CalendarEventChipWeekday event={event} tooltipDisabled />
+          </div>
+        </div>
       </div>
     </section>
   );
 };
 
-const ListPreview = ({ values, tokens }: PreviewProps) => {
-  const chipStyle: CSSProperties = { background: tokens.background, borderLeft: `${values.listBorderWidth}px solid ${tokens.border}`, borderRadius: values.listRadius, color: tokens.text, height: values.listChipHeight, overflow: "hidden", padding: "2px 8px 2px 6px", width: "100%" };
-
+const RealListPreview = ({ event, allDayEvent }: RealPreviewProps) => {
   return (
     <section className={PREVIEW_CARD_CLASS_NAME}>
-      <h2 className="text-base font-semibold text-slate-900">List chip</h2>
-      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-3"><div className="grid grid-cols-[54px_26px_minmax(0,1fr)] items-stretch" style={{ height: values.listRowHeight }}><div className="justify-self-end bg-white px-1 pt-2.5 text-right text-[11px] font-medium tabular-nums text-slate-400">17:07</div><div className="relative flex justify-center"><span aria-hidden="true" className="absolute -bottom-1.5 top-0 left-1/2 w-px -translate-x-1/2 bg-slate-200" /><span aria-hidden="true" className="relative mt-2 h-2 w-2 rounded-full border-2 bg-white" style={{ borderColor: tokens.border, boxShadow: `0 0 0 3px ${tokens.background}` }} /></div><div style={chipStyle}><div style={{ fontSize: values.listTimeFontSize, fontWeight: 600, opacity: 0.8, whiteSpace: "nowrap" }}>17:07 - 19:14（2時間7分）</div><div style={{ fontSize: values.listTitleFontSize, fontWeight: 600, lineHeight: 1.375, marginTop: values.listTitleGap }}>{SAMPLE_TITLE}</div></div></div></div>
+      <div className="mb-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Real component</p>
+        <h2 className="text-base font-semibold text-slate-900">CalendarEventChipList</h2>
+      </div>
+      <div className="rounded-2xl border border-slate-200 bg-white p-3">
+        <CalendarEventChipList event={event} />
+        <CalendarEventChipList event={allDayEvent} />
+      </div>
     </section>
   );
 };
@@ -198,19 +243,34 @@ const ListPreview = ({ values, tokens }: PreviewProps) => {
 const EventChipEditorSandboxPage = () => {
   const [values, setValues] = useState<EventChipEditorValues>(getInitialValues);
   const [autosaveState, setAutosaveState] = useState<AutosaveState>("idle");
-  const tokens = useMemo(() => createPreviewTokens(values), [values]);
+  const event = useMemo(() => createSampleEvent(values.accentColor), [values.accentColor]);
+  const allDayEvent = useMemo(() => createSampleAllDayEvent(values.accentColor), [values.accentColor]);
   const designJson = useMemo(() => formatEditorJson(values), [values]);
 
   useEffect(() => {
     const abortController = new AbortController();
     const timer = window.setTimeout(() => {
       setAutosaveState("saving");
-      fetch(AUTOSAVE_ENDPOINT, { body: JSON.stringify(values), headers: { "Content-Type": "application/json" }, method: "PUT", signal: abortController.signal })
-        .then((response) => { if (!response.ok) throw new Error(`Failed to save EventChip design: ${response.status}`); setAutosaveState("saved"); })
-        .catch((error: unknown) => { if (error instanceof DOMException && error.name === "AbortError") return; setAutosaveState("failed"); });
+      fetch(AUTOSAVE_ENDPOINT, {
+        body: JSON.stringify(values),
+        headers: { "Content-Type": "application/json" },
+        method: "PUT",
+        signal: abortController.signal,
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error(`Failed to save EventChip design: ${response.status}`);
+          setAutosaveState("saved");
+        })
+        .catch((error: unknown) => {
+          if (error instanceof DOMException && error.name === "AbortError") return;
+          setAutosaveState("failed");
+        });
     }, AUTOSAVE_DELAY_MS);
 
-    return () => { abortController.abort(); window.clearTimeout(timer); };
+    return () => {
+      abortController.abort();
+      window.clearTimeout(timer);
+    };
   }, [values]);
 
   const updateValue = <Key extends keyof EventChipEditorValues>(key: Key, value: EventChipEditorValues[Key]) => {
@@ -221,15 +281,94 @@ const EventChipEditorSandboxPage = () => {
   return (
     <div className="min-h-screen bg-[#f4f7fb] px-6 py-8 text-slate-900">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <section className="rounded-[32px] border border-slate-200 bg-white/95 p-6 shadow-sm"><p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-sky-500">EventChip Sandbox</p><div className="mt-3 flex flex-wrap items-end justify-between gap-4"><div><h1 className="text-3xl font-bold tracking-[-0.03em] text-slate-950">EventChip design editor</h1><p className="mt-2 max-w-3xl text-sm leading-7 text-slate-500">変更は dev server 経由で src/chip/eventchip/eventChipDesign.generated.ts に自動保存され、実 EventChip がその値を読みます。</p></div><span className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-[12px] font-semibold text-slate-600">{autosaveState === "saving" ? "Saving..." : autosaveState === "saved" ? "Saved to source" : autosaveState === "failed" ? "Save failed" : "Autosave ready"}</span></div></section>
+        <section className="rounded-[32px] border border-slate-200 bg-white/95 p-6 shadow-sm">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-sky-500">EventChip Sandbox</p>
+          <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-[-0.03em] text-slate-950">EventChip design editor</h1>
+              <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-500">プレビューは実際の EventChip コンポーネントを使います。変更は src/chip/eventchip/eventChipDesign.generated.ts に自動保存されます。</p>
+            </div>
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-[12px] font-semibold text-slate-600">{autosaveState === "saving" ? "Saving..." : autosaveState === "saved" ? "Saved to source" : autosaveState === "failed" ? "Save failed" : "Autosave ready"}</span>
+          </div>
+        </section>
+
         <div className="grid gap-6 xl:grid-cols-[390px_minmax(0,1fr)]">
           <aside className="flex flex-col gap-4 xl:sticky xl:top-6 xl:max-h-[calc(100vh-48px)] xl:overflow-auto xl:pr-1">
-            <section className={CONTROL_PANEL_CLASS_NAME}><h2 className="text-sm font-bold text-slate-900">Color</h2><div className="mt-4 grid gap-4"><label className="flex flex-col gap-2"><span className={CONTROL_LABEL_CLASS_NAME}>Preview accent color</span><input className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700" value={values.accentColor} onChange={(event) => updateValue("accentColor", event.target.value)} /></label><NumberControl label="Background alpha" min={0.04} max={0.5} step={0.01} unit="" value={values.backgroundAlpha} onChange={(value) => updateValue("backgroundAlpha", value)} /></div></section>
-            <section className={CONTROL_PANEL_CLASS_NAME}><h2 className="text-sm font-bold text-slate-900">Month</h2><div className="mt-4 grid gap-4"><NumberControl label="Height" min={12} max={34} step={0.1} value={values.monthHeight} onChange={(value) => updateValue("monthHeight", value)} /><NumberControl label="Gap" min={0} max={10} step={0.5} value={values.monthGap} onChange={(value) => updateValue("monthGap", value)} /><NumberControl label="Radius" min={0} max={14} value={values.monthRadius} onChange={(value) => updateValue("monthRadius", value)} /><NumberControl label="Left border" min={0} max={8} value={values.monthBorderWidth} onChange={(value) => updateValue("monthBorderWidth", value)} /><NumberControl label="Padding left" min={0} max={12} value={values.monthPaddingLeft} onChange={(value) => updateValue("monthPaddingLeft", value)} /><NumberControl label="Padding right" min={0} max={12} value={values.monthPaddingRight} onChange={(value) => updateValue("monthPaddingRight", value)} /><NumberControl label="Padding Y time" min={0} max={8} value={values.monthPaddingYWithTime} onChange={(value) => updateValue("monthPaddingYWithTime", value)} /><NumberControl label="Padding Y compact" min={0} max={8} value={values.monthPaddingYCompact} onChange={(value) => updateValue("monthPaddingYCompact", value)} /><NumberControl label="All day offset" min={-4} max={6} value={values.monthAllDayOffset} onChange={(value) => updateValue("monthAllDayOffset", value)} /><NumberControl label="Title font" min={8} max={16} value={values.monthTitleFontSize} onChange={(value) => updateValue("monthTitleFontSize", value)} /><NumberControl label="Time font" min={7} max={14} value={values.monthTimeFontSize} onChange={(value) => updateValue("monthTimeFontSize", value)} /></div></section>
-            <section className={CONTROL_PANEL_CLASS_NAME}><h2 className="text-sm font-bold text-slate-900">Weekday</h2><div className="mt-4 grid gap-4"><NumberControl label="Preview height" min={20} max={140} value={values.weekdayHeight} onChange={(value) => updateValue("weekdayHeight", value)} /><NumberControl label="Radius" min={0} max={18} value={values.weekdayRadius} onChange={(value) => updateValue("weekdayRadius", value)} /><NumberControl label="Left border" min={0} max={8} value={values.weekdayBorderWidth} onChange={(value) => updateValue("weekdayBorderWidth", value)} /><NumberControl label="Padding left" min={0} max={14} value={values.weekdayPaddingLeft} onChange={(value) => updateValue("weekdayPaddingLeft", value)} /><NumberControl label="Padding right" min={0} max={14} value={values.weekdayPaddingRight} onChange={(value) => updateValue("weekdayPaddingRight", value)} /><NumberControl label="Padding Y" min={0} max={10} value={values.weekdayPaddingY} onChange={(value) => updateValue("weekdayPaddingY", value)} /><NumberControl label="Inline Padding Y" min={0} max={10} value={values.weekdayInlinePaddingY} onChange={(value) => updateValue("weekdayInlinePaddingY", value)} /><NumberControl label="Gap" min={0} max={6} step={0.5} value={values.weekdayGap} onChange={(value) => updateValue("weekdayGap", value)} /><NumberControl label="Title font" min={8} max={18} value={values.weekdayTitleFontSize} onChange={(value) => updateValue("weekdayTitleFontSize", value)} /><NumberControl label="Title line-height" min={10} max={26} value={values.weekdayTitleLineHeight} onChange={(value) => updateValue("weekdayTitleLineHeight", value)} /><NumberControl label="Time font" min={8} max={16} value={values.weekdayTimeFontSize} onChange={(value) => updateValue("weekdayTimeFontSize", value)} /><NumberControl label="Time line-height" min={10} max={24} value={values.weekdayTimeLineHeight} onChange={(value) => updateValue("weekdayTimeLineHeight", value)} /></div></section>
-            <section className={CONTROL_PANEL_CLASS_NAME}><h2 className="text-sm font-bold text-slate-900">List / Tooltip</h2><div className="mt-4 grid gap-4"><NumberControl label="List row" min={32} max={80} value={values.listRowHeight} onChange={(value) => updateValue("listRowHeight", value)} /><NumberControl label="List chip" min={24} max={70} value={values.listChipHeight} onChange={(value) => updateValue("listChipHeight", value)} /><NumberControl label="All day row" min={24} max={60} value={values.listAllDayRowHeight} onChange={(value) => updateValue("listAllDayRowHeight", value)} /><NumberControl label="All day chip" min={18} max={50} value={values.listAllDayChipHeight} onChange={(value) => updateValue("listAllDayChipHeight", value)} /><NumberControl label="List radius" min={0} max={18} value={values.listRadius} onChange={(value) => updateValue("listRadius", value)} /><NumberControl label="List left border" min={0} max={8} value={values.listBorderWidth} onChange={(value) => updateValue("listBorderWidth", value)} /><NumberControl label="List title font" min={8} max={16} value={values.listTitleFontSize} onChange={(value) => updateValue("listTitleFontSize", value)} /><NumberControl label="List time font" min={8} max={16} value={values.listTimeFontSize} onChange={(value) => updateValue("listTimeFontSize", value)} /><NumberControl label="List title gap" min={0} max={8} step={0.5} value={values.listTitleGap} onChange={(value) => updateValue("listTitleGap", value)} /><NumberControl label="Month tooltip radius" min={0} max={24} value={values.tooltipMonthRadius} onChange={(value) => updateValue("tooltipMonthRadius", value)} /><NumberControl label="Weekday tooltip radius" min={0} max={28} value={values.tooltipWeekdayRadius} onChange={(value) => updateValue("tooltipWeekdayRadius", value)} /></div></section>
+            <section className={CONTROL_PANEL_CLASS_NAME}>
+              <h2 className="text-sm font-bold text-slate-900">Color</h2>
+              <div className="mt-4 grid gap-4">
+                <label className="flex flex-col gap-2">
+                  <span className={CONTROL_LABEL_CLASS_NAME}>Preview accent color</span>
+                  <input className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700 outline-none focus:border-sky-300 focus:ring-2 focus:ring-sky-100" value={values.accentColor} onChange={(event) => updateValue("accentColor", event.target.value)} />
+                </label>
+                <NumberControl label="Background alpha" min={0.04} max={0.5} step={0.01} unit="" value={values.backgroundAlpha} onChange={(value) => updateValue("backgroundAlpha", value)} />
+              </div>
+            </section>
+
+            <section className={CONTROL_PANEL_CLASS_NAME}>
+              <h2 className="text-sm font-bold text-slate-900">Month</h2>
+              <div className="mt-4 grid gap-4">
+                <NumberControl label="Height" min={12} max={34} step={0.1} value={values.monthHeight} onChange={(value) => updateValue("monthHeight", value)} />
+                <NumberControl label="Gap" min={0} max={10} step={0.5} value={values.monthGap} onChange={(value) => updateValue("monthGap", value)} />
+                <NumberControl label="Radius" min={0} max={14} value={values.monthRadius} onChange={(value) => updateValue("monthRadius", value)} />
+                <NumberControl label="Left border" min={0} max={8} value={values.monthBorderWidth} onChange={(value) => updateValue("monthBorderWidth", value)} />
+                <NumberControl label="Padding left" min={0} max={12} value={values.monthPaddingLeft} onChange={(value) => updateValue("monthPaddingLeft", value)} />
+                <NumberControl label="Padding right" min={0} max={12} value={values.monthPaddingRight} onChange={(value) => updateValue("monthPaddingRight", value)} />
+                <NumberControl label="Padding Y time" min={0} max={8} value={values.monthPaddingYWithTime} onChange={(value) => updateValue("monthPaddingYWithTime", value)} />
+                <NumberControl label="Padding Y compact" min={0} max={8} value={values.monthPaddingYCompact} onChange={(value) => updateValue("monthPaddingYCompact", value)} />
+                <NumberControl label="All day offset" min={-4} max={6} value={values.monthAllDayOffset} onChange={(value) => updateValue("monthAllDayOffset", value)} />
+                <NumberControl label="Title font" min={8} max={16} value={values.monthTitleFontSize} onChange={(value) => updateValue("monthTitleFontSize", value)} />
+                <NumberControl label="Time font" min={7} max={14} value={values.monthTimeFontSize} onChange={(value) => updateValue("monthTimeFontSize", value)} />
+              </div>
+            </section>
+
+            <section className={CONTROL_PANEL_CLASS_NAME}>
+              <h2 className="text-sm font-bold text-slate-900">Weekday</h2>
+              <div className="mt-4 grid gap-4">
+                <NumberControl label="Preview height" min={20} max={140} value={values.weekdayHeight} onChange={(value) => updateValue("weekdayHeight", value)} />
+                <NumberControl label="Radius" min={0} max={18} value={values.weekdayRadius} onChange={(value) => updateValue("weekdayRadius", value)} />
+                <NumberControl label="Left border" min={0} max={8} value={values.weekdayBorderWidth} onChange={(value) => updateValue("weekdayBorderWidth", value)} />
+                <NumberControl label="Padding left" min={0} max={14} value={values.weekdayPaddingLeft} onChange={(value) => updateValue("weekdayPaddingLeft", value)} />
+                <NumberControl label="Padding right" min={0} max={14} value={values.weekdayPaddingRight} onChange={(value) => updateValue("weekdayPaddingRight", value)} />
+                <NumberControl label="Padding Y" min={0} max={10} value={values.weekdayPaddingY} onChange={(value) => updateValue("weekdayPaddingY", value)} />
+                <NumberControl label="Inline Padding Y" min={0} max={10} value={values.weekdayInlinePaddingY} onChange={(value) => updateValue("weekdayInlinePaddingY", value)} />
+                <NumberControl label="Gap" min={0} max={6} step={0.5} value={values.weekdayGap} onChange={(value) => updateValue("weekdayGap", value)} />
+                <NumberControl label="Title font" min={8} max={18} value={values.weekdayTitleFontSize} onChange={(value) => updateValue("weekdayTitleFontSize", value)} />
+                <NumberControl label="Title line-height" min={10} max={26} value={values.weekdayTitleLineHeight} onChange={(value) => updateValue("weekdayTitleLineHeight", value)} />
+                <NumberControl label="Time font" min={8} max={16} value={values.weekdayTimeFontSize} onChange={(value) => updateValue("weekdayTimeFontSize", value)} />
+                <NumberControl label="Time line-height" min={10} max={24} value={values.weekdayTimeLineHeight} onChange={(value) => updateValue("weekdayTimeLineHeight", value)} />
+              </div>
+            </section>
+
+            <section className={CONTROL_PANEL_CLASS_NAME}>
+              <h2 className="text-sm font-bold text-slate-900">List / Tooltip</h2>
+              <div className="mt-4 grid gap-4">
+                <NumberControl label="List row" min={32} max={80} value={values.listRowHeight} onChange={(value) => updateValue("listRowHeight", value)} />
+                <NumberControl label="List chip" min={24} max={70} value={values.listChipHeight} onChange={(value) => updateValue("listChipHeight", value)} />
+                <NumberControl label="All day row" min={24} max={60} value={values.listAllDayRowHeight} onChange={(value) => updateValue("listAllDayRowHeight", value)} />
+                <NumberControl label="All day chip" min={18} max={50} value={values.listAllDayChipHeight} onChange={(value) => updateValue("listAllDayChipHeight", value)} />
+                <NumberControl label="List radius" min={0} max={18} value={values.listRadius} onChange={(value) => updateValue("listRadius", value)} />
+                <NumberControl label="List left border" min={0} max={8} value={values.listBorderWidth} onChange={(value) => updateValue("listBorderWidth", value)} />
+                <NumberControl label="List title font" min={8} max={16} value={values.listTitleFontSize} onChange={(value) => updateValue("listTitleFontSize", value)} />
+                <NumberControl label="List time font" min={8} max={16} value={values.listTimeFontSize} onChange={(value) => updateValue("listTimeFontSize", value)} />
+                <NumberControl label="List title gap" min={0} max={8} step={0.5} value={values.listTitleGap} onChange={(value) => updateValue("listTitleGap", value)} />
+                <NumberControl label="Month tooltip radius" min={0} max={24} value={values.tooltipMonthRadius} onChange={(value) => updateValue("tooltipMonthRadius", value)} />
+                <NumberControl label="Weekday tooltip radius" min={0} max={28} value={values.tooltipWeekdayRadius} onChange={(value) => updateValue("tooltipWeekdayRadius", value)} />
+              </div>
+            </section>
           </aside>
-          <main className="grid gap-5"><div className="grid gap-5 lg:grid-cols-2"><MonthPreview values={values} tokens={tokens} /><WeekdayPreview values={values} tokens={tokens} /></div><div className="grid gap-5 lg:grid-cols-2"><ListPreview values={values} tokens={tokens} /><section className={PREVIEW_CARD_CLASS_NAME}><h2 className="text-base font-semibold text-slate-900">Generated source values</h2><textarea className="mt-4 h-80 w-full resize-none rounded-2xl border border-slate-200 bg-slate-950 p-4 font-mono text-[12px] leading-5 text-slate-100 outline-none" readOnly value={designJson} /></section></div></main>
+
+          <main className="grid gap-5">
+            <RealWeekdayPreview values={values} event={event} allDayEvent={allDayEvent} />
+            <div className="grid gap-5 lg:grid-cols-2">
+              <RealMonthPreview values={values} event={event} allDayEvent={allDayEvent} />
+              <RealListPreview values={values} event={event} allDayEvent={allDayEvent} />
+            </div>
+            <section className={PREVIEW_CARD_CLASS_NAME}>
+              <h2 className="text-base font-semibold text-slate-900">Generated source values</h2>
+              <textarea className="mt-4 h-80 w-full resize-none rounded-2xl border border-slate-200 bg-slate-950 p-4 font-mono text-[12px] leading-5 text-slate-100 outline-none" readOnly value={designJson} />
+            </section>
+          </main>
         </div>
       </div>
     </div>
