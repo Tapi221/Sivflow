@@ -16,7 +16,6 @@ export default defineConfig({
       { find: "@platform", replacement: resolveFromRoot("packages/platform/src") },
       { find: "@web-renderer", replacement: resolveFromRoot("packages/web-renderer/src") },
       { find: "@shared", replacement: resolveFromRoot("shared") },
-      { find: "@constants", replacement: resolveFromRoot("constants") },
       { find: "@", replacement: resolveFromRoot("src") },
     ],
   },
