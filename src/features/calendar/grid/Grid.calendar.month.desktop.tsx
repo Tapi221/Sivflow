@@ -6,7 +6,9 @@ import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
 import { computeMonthEventsByDay, EMPTY_MONTH_DAY_EVENTS } from "@/chip/eventchip/EventChip.month.placement";
 import type { CalendarMonthDayEvents } from "@/chip/eventchip/EventChip.month.placement";
 import { CalendarDayNumberCircle } from "@/chip/icons/CalendarDayNumberCircle";
-import * as T from "@/features/calendar/calendar.text";
+import { WEEKDAY_LABELS } from "@/features/calendar/calendar.text";
+import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+import { rotateCalendarWeekdayLabels } from "@/features/calendar/calendarWeekStart";
 import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
@@ -30,6 +32,7 @@ type MonthEventRenderItem = { event: GoogleCalendarEvent; eventKey: string; rend
 type GridCalendarMonthDesktopProps = {
   today: Date;
   selectedDate: Date;
+  weekStartDay: CalendarWeekStartDay;
   visibleEvents: GoogleCalendarEvent[];
   monthWeeks: CalendarMonthGridWeek[];
   monthRowHeight: number;
@@ -270,11 +273,12 @@ const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDay
 
 CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 
-const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWeeks, monthRowHeight, maxVisibleEventCount, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, showEventTimeLabel = true, monthScrollContainerRef, onSelectDate, onMoveCalendarEvent }: GridCalendarMonthDesktopProps) => {
+const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEvents, monthWeeks, monthRowHeight, maxVisibleEventCount, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, showEventTimeLabel = true, monthScrollContainerRef, onSelectDate, onMoveCalendarEvent }: GridCalendarMonthDesktopProps) => {
   const dayCellRefs = useRef(new Map<string, HTMLDivElement>());
   const dragElementRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<MonthEventDragState | null>(null);
   const [dragState, setDragState] = useState<MonthEventDragState | null>(null);
+  const weekdayLabels = useMemo(() => rotateCalendarWeekdayLabels(WEEKDAY_LABELS, weekStartDay), [weekStartDay]);
   const selectedDayKey = useMemo(() => getDayKey(selectedDate), [selectedDate]);
   const todayDayKey = useMemo(() => getDayKey(today), [today]);
   const eventsByDay = useMemo(() => computeMonthEventsByDay({ visibleEvents, monthWeeks, monthRowHeight, maxVisibleEventCount }), [maxVisibleEventCount, monthRowHeight, monthWeeks, visibleEvents]);
@@ -422,8 +426,8 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, visibleEvents, monthWee
   return (
     <>
       <div className={cn("sticky top-0 z-30 grid grid-cols-7 overflow-hidden border-b bg-white shadow-none", GD.MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS)} style={MONTH_GRID_BORDER_STYLE}>
-        {T.WEEKDAY_LABELS.map((label: string) => (
-          <div key={label} className="calendar-month-weekday-cell flex items-center justify-center text-[11px] leading-none font-semibold tracking-[0.03em] text-[#8e8e93]">
+        {weekdayLabels.map((label: string, index: number) => (
+          <div key={`${label}-${index}`} className="calendar-month-weekday-cell flex items-center justify-center text-[11px] leading-none font-semibold tracking-[0.03em] text-[#8e8e93]">
             {label}
           </div>
         ))}
