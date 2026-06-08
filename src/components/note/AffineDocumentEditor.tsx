@@ -40,6 +40,12 @@ type BlocksuiteBlockModel = {
   text?: unknown;
 };
 
+type NoteRecordBlock = {
+  rows?: unknown;
+  text?: unknown;
+  type?: unknown;
+};
+
 const NOTE_SAVE_DEBOUNCE_MS = 500;
 const NOTE_CONTENT_TYPE = "affine-document";
 const LEGACY_TEXT_CONTENT_TYPE = "sivflow-text-document";
@@ -52,11 +58,12 @@ const NOTE_PARAGRAPH_FLAVOUR = "affine:paragraph";
 const NOTE_PAGE_FLAVOUR = "affine:page";
 const NOTE_SURFACE_FLAVOUR = "affine:surface";
 const NOTE_NOTE_FLAVOUR = "affine:note";
+const NOTE_FALLBACK_MESSAGE = "AFFiNE を起動できませんでした";
 
 let blocksuiteRuntimePromise: Promise<BlocksuiteRuntime> | null = null;
 
 const loadBlocksuiteRuntime = async (): Promise<BlocksuiteRuntime> => {
-  blocksuiteRuntimePromise ??= Promise.all([import("@blocksuite/blocks"), import("@blocksuite/presets"), import("@blocksuite/store")]).then(([blocks, _presets, store]) => {
+  blocksuiteRuntimePromise ??= Promise.all([import("@blocksuite/blocks"), import("@blocksuite/presets"), import("@blocksuite/store")]).then(async ([blocks, , store]) => {
     const blockExports = blocks as Record<string, unknown>;
     const storeExports = store as Record<string, unknown>;
     const AffineSchemas = blockExports.AffineSchemas;
@@ -68,10 +75,24 @@ const loadBlocksuiteRuntime = async (): Promise<BlocksuiteRuntime> => {
       throw new Error("BlockSuite AFFiNE runtime is incomplete.");
     }
 
+    if (typeof customElements !== "undefined" && customElements.get(NOTE_EDITOR_CONTAINER_TAG_NAME)) {
+      await customElements.whenDefined(NOTE_EDITOR_CONTAINER_TAG_NAME);
+    }
+
     return { AffineSchemas, DocCollection, Schema, Text } as BlocksuiteRuntime;
   });
 
   return blocksuiteRuntimePromise;
+};
+
+const getRowsText = (rows: unknown): string => {
+  if (!Array.isArray(rows)) return "";
+  return rows.map((row) => Array.isArray(row) ? row.map((cell) => String(cell ?? "")).join("\t") : "").filter(Boolean).join("\n");
+};
+
+const getBlockText = (block: NoteRecordBlock): string => {
+  if (typeof block.text === "string") return block.text;
+  return getRowsText(block.rows);
 };
 
 const getRecordText = (content: NoteBlockContent | undefined): string => {
@@ -80,7 +101,7 @@ const getRecordText = (content: NoteBlockContent | undefined): string => {
   if (record.type !== NOTE_CONTENT_TYPE && record.type !== LEGACY_TEXT_CONTENT_TYPE) return "";
   if (typeof record.text === "string") return record.text;
   if (!Array.isArray(record.blocks)) return "";
-  return record.blocks.map((block) => block && typeof block === "object" && "text" in block ? String((block as { text?: unknown }).text ?? "") : "").filter(Boolean).join("\n");
+  return record.blocks.map((block) => block && typeof block === "object" ? getBlockText(block as NoteRecordBlock) : "").filter(Boolean).join("\n");
 };
 
 const getInitialParagraphs = (note: Note): string[] => {
@@ -109,7 +130,7 @@ const getBlocksuiteBlockText = (block: unknown): string => {
   return model ? getTextValue(model.text) : "";
 };
 
-const createNoteContent = (doc: BlocksuiteDoc, contentText: string): NoteBlockContent => [{ type: NOTE_CONTENT_TYPE, text: contentText, snapshot: doc.toJSON?.() ?? null, updatedAt: new Date().toISOString() }];
+const createNoteContent = (doc: BlocksuiteDoc, host: HTMLDivElement, contentText: string): NoteBlockContent => [{ type: NOTE_CONTENT_TYPE, text: contentText, snapshot: doc.toJSON?.() ?? null, html: host.innerHTML, updatedAt: new Date().toISOString() }];
 
 const initializeCollection = (collection: BlocksuiteDocCollection): void => {
   collection.meta?.initialize?.();
@@ -162,7 +183,7 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
     const contentText = getEditorText(doc, host);
     if (contentText === latestSavedTextRef.current) return;
     latestSavedTextRef.current = contentText;
-    void onChangeRef.current({ content: createNoteContent(doc, contentText), contentText, contentVersion: 2, editor: "affine" });
+    void onChangeRef.current({ content: createNoteContent(doc, host, contentText), contentText, contentVersion: 2, editor: "affine" });
   }, []);
 
   const scheduleSave = useCallback(() => {
@@ -206,6 +227,11 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
       host.addEventListener("keyup", scheduleSave, { signal: abortController.signal });
       host.addEventListener("paste", scheduleSave, { signal: abortController.signal });
       host.addEventListener("drop", scheduleSave, { signal: abortController.signal });
+    }).catch(() => {
+      if (isDisposed) return;
+      docRef.current = null;
+      host.className = NOTE_EDITOR_LOADING_CLASS_NAME;
+      host.textContent = NOTE_FALLBACK_MESSAGE;
     });
 
     return () => {
