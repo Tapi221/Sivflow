@@ -3,10 +3,10 @@ import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
 import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/web/pdf_viewer.mjs";
 import "pdfjs-dist/web/pdf_viewer.css";
+import { cn } from "@/lib/utils";
+import type { PdfViewerState } from "@/types";
 import { toPdfDocumentLoadSource } from "./pdfDocumentSource";
 import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
-import type { PdfViewerState } from "@/types";
-import { cn } from "@/lib/utils";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
 
 type PdfPaneProps = {
@@ -42,6 +42,11 @@ type PdfPageChangingEvent = {
 
 type PdfScaleChangingEvent = {
   scale?: number;
+};
+
+type NativePdfViewerState = {
+  url: string;
+  objectUrl: string | null;
 };
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
@@ -143,6 +148,15 @@ const addPdfViewerEventListener = (eventBus: PdfEventBusLike, eventName: string,
   };
 };
 
+const createNativePdfViewerState = (source: PdfDocumentSource | null): NativePdfViewerState | null => {
+  if (!source) return null;
+  if (source.type === "url") return { url: source.url, objectUrl: null };
+  if (typeof URL === "undefined" || typeof Blob === "undefined") return null;
+
+  const objectUrl = URL.createObjectURL(new Blob([source.data.slice()], { type: "application/pdf" }));
+  return { url: objectUrl, objectUrl };
+};
+
 const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewerStateChange }: PdfPaneProps) => {
   const viewerEnableXfa = viewerOptions?.enableXfa;
   const viewerUseSystemFonts = viewerOptions?.useSystemFonts;
@@ -154,15 +168,26 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
   const historyForwardPages = viewerState?.historyForwardPages ?? [];
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [nativeViewer, setNativeViewer] = useState<NativePdfViewerState | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const pdfViewerElementRef = useRef<HTMLDivElement | null>(null);
   const pdfViewerRef = useRef<PdfViewerInstance | null>(null);
   const viewerStateRef = useRef<PdfViewerState | null>(viewerState);
   const isApplyingFitScaleRef = useRef(false);
+  const shouldShowNativeViewer = nativeViewer !== null && (isLoading || Boolean(loadError));
 
   useEffect(() => {
     viewerStateRef.current = viewerState;
   }, [viewerState]);
+
+  useEffect(() => {
+    const nextNativeViewer = createNativePdfViewerState(source);
+    setNativeViewer(nextNativeViewer);
+
+    return () => {
+      if (nextNativeViewer?.objectUrl) URL.revokeObjectURL(nextNativeViewer.objectUrl);
+    };
+  }, [source]);
 
   const updateViewerState = useCallback((patch: PdfViewerState) => {
     const nextViewerState = { ...(viewerStateRef.current ?? {}), ...patch };
@@ -405,9 +430,10 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
     <div className={cn("flex h-full min-h-0 min-w-0 bg-[var(--carvepanel-surface)] text-[#2f2f2f] max-sm:min-h-[100dvh]", className)}>
       <main className="relative flex min-h-0 min-w-0 flex-1 flex-col">
         <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto overscroll-contain bg-[var(--carvepanel-surface)] px-3 py-4 [-webkit-overflow-scrolling:touch] sm:px-4 sm:py-5">
-          <div ref={pdfViewerElementRef} className="pdfViewer" />
-          {isLoading ? <div className="absolute inset-0 flex items-center justify-center bg-[var(--carvepanel-surface)] text-[13px] text-[#6d6d6d]">PDFを読み込み中...</div> : null}
-          {!isLoading && loadError ? <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-[13px] leading-6 text-[#4a4640]"><div className="max-w-md rounded-[14px] border border-[#ded8cf] bg-white px-5 py-4 shadow-sm">{loadError}</div></div> : null}
+          <div ref={pdfViewerElementRef} className={cn("pdfViewer", shouldShowNativeViewer && "hidden")} />
+          {shouldShowNativeViewer ? <iframe title="PDF preview" src={nativeViewer.url} className="absolute inset-0 h-full w-full border-0 bg-white" /> : null}
+          {isLoading && !shouldShowNativeViewer ? <div className="absolute inset-0 flex items-center justify-center bg-[var(--carvepanel-surface)] text-[13px] text-[#6d6d6d]">PDFを読み込み中...</div> : null}
+          {!isLoading && loadError && !shouldShowNativeViewer ? <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-[13px] leading-6 text-[#4a4640]"><div className="max-w-md rounded-[14px] border border-[#ded8cf] bg-white px-5 py-4 shadow-sm">{loadError}</div></div> : null}
         </div>
       </main>
     </div>
