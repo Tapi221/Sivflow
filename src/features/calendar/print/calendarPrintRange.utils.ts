@@ -1,5 +1,8 @@
 import { endOfDay, endOfMonth, endOfWeek, format, isValid, parseISO, startOfDay, startOfMonth, startOfWeek } from "date-fns";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
+import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
+import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 import type { CalendarPrintRangeState } from "./calendarPrint.types";
 
@@ -10,9 +13,8 @@ type CalendarPrintRangeInput = {
   selectedDate: Date;
   visibleDays: Date[];
   currentDisplayRange: CalendarDateRange;
+  weekStartDay?: CalendarWeekStartDay;
 };
-
-const CALENDAR_PRINT_WEEK_STARTS_ON = 0;
 
 const normalizeRange = (left: Date, right: Date): CalendarDateRange => {
   if (left.getTime() <= right.getTime()) {
@@ -44,11 +46,13 @@ const getCurrentRangeLabel = (primaryViewMode: CalendarViewMode): string => {
 
 export const createCalendarPrintDateInputValue = (date: Date): string => format(date, "yyyy-MM-dd");
 
-export const getCalendarPrintRange = ({ printRange, primaryViewMode, currentDate, selectedDate, visibleDays, currentDisplayRange }: CalendarPrintRangeInput): CalendarDateRange => {
+export const getCalendarPrintRange = ({ printRange, primaryViewMode, currentDate, selectedDate, visibleDays, currentDisplayRange, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY }: CalendarPrintRangeInput): CalendarDateRange => {
   if (printRange.mode === "day") return normalizeRange(selectedDate, selectedDate);
 
   if (printRange.mode === "week") {
-    return normalizeRange(startOfWeek(selectedDate, { weekStartsOn: CALENDAR_PRINT_WEEK_STARTS_ON }), endOfWeek(selectedDate, { weekStartsOn: CALENDAR_PRINT_WEEK_STARTS_ON }));
+    const weekStartsOn = getCalendarWeekStartsOn(weekStartDay);
+
+    return normalizeRange(startOfWeek(selectedDate, { weekStartsOn }), endOfWeek(selectedDate, { weekStartsOn }));
   }
 
   if (printRange.mode === "month") {
