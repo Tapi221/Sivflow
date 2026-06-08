@@ -487,15 +487,15 @@ const SettingDropdown = <T extends string | number>({ label, description, value,
         <span className="settings-workspace__row-title">{label}</span>
         {description ? <span className="settings-workspace__row-description">{description}</span> : null}
       </div>
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-          <button type="button" className="settings-workspace__segment is-selected w-full cursor-pointer" aria-label={label}>
+          <button type="button" className="settings-workspace__segment is-selected w-full cursor-pointer" aria-label={label} onClick={(event) => event.stopPropagation()}>
             <span className="settings-workspace__segment-label">{selectedOption?.label ?? String(value)}</span>
             {selectedOption?.caption ? <span className="settings-workspace__segment-caption">{selectedOption.caption}</span> : null}
             <ChevronDown className="settings-workspace__segment-check" size={14} />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="min-w-[var(--radix-dropdown-menu-trigger-width)]">
+        <DropdownMenuContent align="start" sideOffset={6} collisionPadding={16} className="min-w-[var(--radix-dropdown-menu-trigger-width)] z-[200]">
           {options.map((option) => {
             const isSelected = option.value === value;
             return (
