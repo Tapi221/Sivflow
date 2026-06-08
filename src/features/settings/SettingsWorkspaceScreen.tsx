@@ -11,7 +11,6 @@ type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio
 type SettingsSectionDefinition = {
   id: SettingsSectionId;
   label: string;
-  description: string;
 };
 
 type SettingOption<T extends string | number> = {
@@ -54,7 +53,6 @@ type MarkdownTabSize = NonNullable<UserSettings["markdownTabSize"]>;
 
 type SettingsSectionCopy = {
   label: string;
-  description: string;
 };
 
 type SettingOptionCopy = {
@@ -120,6 +118,7 @@ type SettingsWorkspaceCopy = {
   questionVoiceDescription: string;
   answerVoiceLabel: string;
   answerVoiceDescription: string;
+  hotkeyDescription: string;
 };
 
 const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "hotkey"];
@@ -128,12 +127,12 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     ariaLabel: "設定",
     navAriaLabel: "設定カテゴリ",
     sections: {
-      account: { label: "アカウント", description: "プロフィールとセッション" },
-      preferences: { label: "環境設定", description: "表示と基本動作" },
-      study: { label: "学習", description: "復習の挙動" },
-      editor: { label: "エディター", description: "カード編集" },
-      audio: { label: "音声", description: "音声と効果音" },
-      hotkey: { label: "Hotkey", description: "キーボード操作" },
+      account: { label: "アカウント" },
+      preferences: { label: "環境設定" },
+      study: { label: "学習" },
+      editor: { label: "エディター" },
+      audio: { label: "音声" },
+      hotkey: { label: "Hotkey" },
     },
     languageOptions: {
       ja: { label: "日本語" },
@@ -205,17 +204,18 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     questionVoiceDescription: "問題文を自動音声再生します。",
     answerVoiceLabel: "解答文の音声",
     answerVoiceDescription: "解答文を自動音声再生します。",
+    hotkeyDescription: "キーボード操作",
   },
   en: {
     ariaLabel: "Settings",
     navAriaLabel: "Settings categories",
     sections: {
-      account: { label: "Account", description: "Profile and session" },
-      preferences: { label: "Preferences", description: "Display and basic behavior" },
-      study: { label: "Study", description: "Review behavior" },
-      editor: { label: "Editor", description: "Card editing" },
-      audio: { label: "Audio", description: "Voice and sound effects" },
-      hotkey: { label: "Hotkey", description: "Keyboard controls" },
+      account: { label: "Account" },
+      preferences: { label: "Preferences" },
+      study: { label: "Study" },
+      editor: { label: "Editor" },
+      audio: { label: "Audio" },
+      hotkey: { label: "Hotkey" },
     },
     languageOptions: {
       ja: { label: "日本語" },
@@ -287,17 +287,18 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     questionVoiceDescription: "Automatically play question text audio.",
     answerVoiceLabel: "Answer voice",
     answerVoiceDescription: "Automatically play answer text audio.",
+    hotkeyDescription: "Keyboard controls",
   },
   zh: {
     ariaLabel: "设置",
     navAriaLabel: "设置分类",
     sections: {
-      account: { label: "账号", description: "个人资料和会话" },
-      preferences: { label: "偏好设置", description: "显示和基本行为" },
-      study: { label: "学习", description: "复习行为" },
-      editor: { label: "编辑器", description: "卡片编辑" },
-      audio: { label: "音频", description: "语音和音效" },
-      hotkey: { label: "Hotkey", description: "键盘操作" },
+      account: { label: "账号" },
+      preferences: { label: "偏好设置" },
+      study: { label: "学习" },
+      editor: { label: "编辑器" },
+      audio: { label: "音频" },
+      hotkey: { label: "Hotkey" },
     },
     languageOptions: {
       ja: { label: "日本語" },
@@ -369,12 +370,13 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     questionVoiceDescription: "自动播放问题文本语音。",
     answerVoiceLabel: "答案语音",
     answerVoiceDescription: "自动播放答案文本语音。",
+    hotkeyDescription: "键盘操作",
   },
 };
 
 const getSupportedLocale = (language: SettingsLanguage): Locale => language === "ja" ? "ja" : "en";
 
-const buildSettingsSections = (copy: SettingsWorkspaceCopy): SettingsSectionDefinition[] => SETTINGS_SECTION_IDS.map((id) => ({ id, ...copy.sections[id] }));
+const buildSettingsSections = (copy: SettingsWorkspaceCopy): SettingsSectionDefinition[] => SETTINGS_SECTION_IDS.map((id) => ({ id, label: copy.sections[id].label }));
 
 const getAccountDisplayName = (displayName: string | null | undefined, email: string | null | undefined, fallbackLabel: string): string => {
   const trimmedDisplayName = displayName?.trim();
@@ -521,7 +523,6 @@ const SettingsWorkspaceScreen = () => {
                 <span className="settings-workspace__nav-icon">{getSectionIcon(section.id, "settings-workspace__nav-icon-svg")}</span>
                 <span className="settings-workspace__nav-copy">
                   <span>{section.label}</span>
-                  <small>{section.description}</small>
                 </span>
               </button>
             );
@@ -579,7 +580,7 @@ const SettingsWorkspaceScreen = () => {
             </SettingsSectionBlock>
           ) : null}
           {activeSectionId === "hotkey" ? (
-            <SettingsSectionBlock title={copy.sections.hotkey.label} description={copy.sections.hotkey.description}>
+            <SettingsSectionBlock title={copy.sections.hotkey.label} description={copy.hotkeyDescription}>
               {copy.hotkeys.map((hotkey) => <SettingKeyValue key={hotkey.keys} label={hotkey.label} value={<code>{hotkey.keys}</code>} />)}
             </SettingsSectionBlock>
           ) : null}
