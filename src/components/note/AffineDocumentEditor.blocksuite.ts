@@ -117,14 +117,8 @@ const getTextValue = (value: unknown): string => {
   return String(value);
 };
 
-const createBlocksuiteAffineEditor = async (note: Note): Promise<BlocksuiteAffineEditor> => {
-  const runtime = await loadRuntime();
-  const schema = new runtime.Schema();
-  schema.register(runtime.AffineSchemas);
-  const collection = new runtime.DocCollection({ schema });
-  collection.meta?.initialize?.();
-  const doc = collection.createDoc({ id: note.id });
-  const loadResult = doc.load(() => {
+const initializeBlocksuiteDoc = (runtime: BlocksuiteRuntime, doc: BlocksuiteDoc, note: Note): void => {
+  doc.load(() => {
     const pageId = doc.addBlock(NOTE_PAGE_FLAVOUR, { title: new runtime.Text(note.title.trim() || NOTE_EDITOR_DEFAULT_TITLE) });
     doc.addBlock(NOTE_SURFACE_FLAVOUR, {}, pageId);
     const noteId = doc.addBlock(NOTE_NOTE_FLAVOUR, {}, pageId);
@@ -132,7 +126,16 @@ const createBlocksuiteAffineEditor = async (note: Note): Promise<BlocksuiteAffin
       doc.addBlock(NOTE_PARAGRAPH_FLAVOUR, { text: new runtime.Text(paragraph) }, noteId);
     }
   });
-  await Promise.resolve(loadResult);
+};
+
+const createBlocksuiteAffineEditor = async (note: Note): Promise<BlocksuiteAffineEditor> => {
+  const runtime = await loadRuntime();
+  const schema = new runtime.Schema();
+  schema.register(runtime.AffineSchemas);
+  const collection = new runtime.DocCollection({ schema });
+  collection.meta?.initialize?.();
+  const doc = collection.createDoc({ id: note.id });
+  initializeBlocksuiteDoc(runtime, doc, note);
   const editor = new runtime.EditorContainer();
   Object.assign(editor.style, NOTE_EDITOR_STYLE);
   editor.doc = doc;
