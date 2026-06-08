@@ -21,9 +21,9 @@ type NoteAffineRecord = {
 };
 
 type BlocksuiteRuntime = {
+  AffineEditorContainer: new () => BlocksuiteEditorContainer;
   AffineSchemas: unknown[];
   DocCollection: new (options: { schema: BlocksuiteSchema }) => BlocksuiteDocCollection;
-  EditorContainer: new () => BlocksuiteEditorContainer;
   Schema: new () => BlocksuiteSchema;
   Text: new (text?: string) => unknown;
 };
@@ -62,24 +62,23 @@ const NOTE_EDITOR_ROOT_CLASS_NAME = "h-full min-h-0 w-full overflow-hidden bg-wh
 const NOTE_EDITOR_HOST_CLASS_NAME = "h-full min-h-0 w-full";
 const NOTE_EDITOR_CONTAINER_CLASS_NAME = "block h-full min-h-0 w-full bg-white";
 const NOTE_EDITOR_DEFAULT_TITLE = "Untitled";
-const NOTE_BLOCK_NOTE_XYWH = "[0,0,820,640]";
 
 let blocksuiteRuntimePromise: Promise<BlocksuiteRuntime> | null = null;
 
 const loadBlocksuiteRuntime = async (): Promise<BlocksuiteRuntime> => {
   blocksuiteRuntimePromise ??= Promise.all([import("@blocksuite/blocks/models"), import("@blocksuite/presets"), import("@blocksuite/store")]).then(([models, presets, store]) => {
     const runtime = { ...models, ...presets, ...store } as Record<string, unknown>;
+    const AffineEditorContainer = runtime.AffineEditorContainer;
     const AffineSchemas = runtime.AffineSchemas;
     const DocCollection = runtime.DocCollection;
-    const EditorContainer = runtime.EditorContainer;
     const Schema = runtime.Schema;
     const Text = runtime.Text;
 
-    if (!Array.isArray(AffineSchemas) || typeof DocCollection !== "function" || typeof EditorContainer !== "function" || typeof Schema !== "function" || typeof Text !== "function") {
+    if (typeof AffineEditorContainer !== "function" || !Array.isArray(AffineSchemas) || typeof DocCollection !== "function" || typeof Schema !== "function" || typeof Text !== "function") {
       throw new Error("BlockSuite AFFiNE runtime is incomplete.");
     }
 
-    return { AffineSchemas, DocCollection, EditorContainer, Schema, Text } as BlocksuiteRuntime;
+    return { AffineEditorContainer, AffineSchemas, DocCollection, Schema, Text } as BlocksuiteRuntime;
   });
 
   return blocksuiteRuntimePromise;
@@ -134,7 +133,7 @@ const loadDocWithInitialText = async (runtime: BlocksuiteRuntime, doc: Blocksuit
   const loadResult = doc.load(() => {
     const pageId = doc.addBlock("affine:page", { title: new runtime.Text(title) });
     doc.addBlock("affine:surface", {}, pageId);
-    const noteId = doc.addBlock("affine:note", { xywh: NOTE_BLOCK_NOTE_XYWH }, pageId);
+    const noteId = doc.addBlock("affine:note", {}, pageId);
     for (const block of createParagraphBlocks(text)) {
       doc.addBlock("affine:paragraph", { text: new runtime.Text(block.text) }, noteId);
     }
@@ -191,7 +190,7 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
       await loadDocWithInitialText(runtime, doc, note);
       if (isDisposed) return;
 
-      const editor = new runtime.EditorContainer();
+      const editor = new runtime.AffineEditorContainer();
       editor.doc = doc;
       editor.mode = "page";
       editor.className = NOTE_EDITOR_CONTAINER_CLASS_NAME;
