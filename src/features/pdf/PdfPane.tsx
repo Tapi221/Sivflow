@@ -20,7 +20,13 @@ type PdfPaneProps = {
     standardFontDataUrl?: string;
     opaqueCanvas?: boolean;
   };
-  onViewerStateChange?: (viewerState: PdfViewerState) => Promise<void> | void;
+  onViewerStateChange?: (viewerState: PdfViewerState, options?: PdfViewerStateChangeOptions) => Promise<void> | void;
+};
+
+type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
+
+type PdfViewerStateChangeOptions = {
+  persistence?: PdfViewerStateChangePersistence;
 };
 
 type PdfDocumentProxy = Awaited<ReturnType<typeof pdfjsLib.getDocument>["promise"]>;
@@ -61,6 +67,7 @@ const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 767;
+const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 1_000;
 
 const getSafePageNumber = (pageNumber: number | null | undefined, pageCount: number): number => {
   const normalizedPageNumber = Math.floor(pageNumber ?? DEFAULT_PDF_PAGE);
@@ -151,10 +158,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
   const viewerUseSystemFonts = viewerOptions?.useSystemFonts;
   const viewerCMapUrl = viewerOptions?.cMapUrl;
   const viewerStandardFontDataUrl = viewerOptions?.standardFontDataUrl;
-  const bookmarkPages = viewerState?.bookmarkPages ?? [];
-  const markPages = viewerState?.markPages ?? {};
-  const historyBackPages = viewerState?.historyBackPages ?? [];
-  const historyForwardPages = viewerState?.historyForwardPages ?? [];
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -163,6 +166,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
   const viewerStateRef = useRef<PdfViewerState | null>(viewerState);
   const onViewerStateChangeRef = useRef(onViewerStateChange);
   const isApplyingFitScaleRef = useRef(false);
+  const lastExplicitZoomAtRef = useRef(0);
 
   useEffect(() => {
     viewerStateRef.current = viewerState;
@@ -172,10 +176,10 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
     onViewerStateChangeRef.current = onViewerStateChange;
   }, [onViewerStateChange]);
 
-  const updateViewerState = useCallback((patch: PdfViewerState) => {
+  const updateViewerState = useCallback((patch: PdfViewerState, options?: PdfViewerStateChangeOptions) => {
     const nextViewerState = { ...(viewerStateRef.current ?? {}), ...patch };
     viewerStateRef.current = nextViewerState;
-    void onViewerStateChangeRef.current?.(nextViewerState);
+    void onViewerStateChangeRef.current?.(nextViewerState, options);
   }, []);
 
   const setViewerPage = useCallback((pageNumber: number, options?: { recordHistory?: boolean }) => {
@@ -188,62 +192,74 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
     const currentViewerState = viewerStateRef.current ?? {};
     const nextBackPages = shouldRecordHistory && safePageNumber !== currentPage ? getTrimmedHistory([...(currentViewerState.historyBackPages ?? []), currentPage]) : currentViewerState.historyBackPages;
     pdfViewer.currentPageNumber = safePageNumber;
-    updateViewerState({ currentPage: safePageNumber, historyBackPages: nextBackPages, historyForwardPages: shouldRecordHistory ? [] : currentViewerState.historyForwardPages });
+    updateViewerState({ currentPage: safePageNumber, historyBackPages: nextBackPages, historyForwardPages: shouldRecordHistory ? [] : currentViewerState.historyForwardPages }, { persistence: "deferred" });
   }, [updateViewerState]);
 
   const handleZoomIn = useCallback(() => {
     const pdfViewer = pdfViewerRef.current;
     if (!pdfViewer) return;
+    lastExplicitZoomAtRef.current = Date.now();
     applyPdfViewerZoom(pdfViewer, "in");
   }, []);
 
   const handleZoomOut = useCallback(() => {
     const pdfViewer = pdfViewerRef.current;
     if (!pdfViewer) return;
+    lastExplicitZoomAtRef.current = Date.now();
     applyPdfViewerZoom(pdfViewer, "out");
   }, []);
 
   const handleToggleBookmark = useCallback(() => {
     const pdfViewer = pdfViewerRef.current;
     if (!pdfViewer) return;
+    const currentViewerState = viewerStateRef.current ?? {};
+    const bookmarkPages = currentViewerState.bookmarkPages ?? [];
     const currentPage = getSafePageNumber(pdfViewer.currentPageNumber, getPdfViewerPageCount(pdfViewer));
     const nextBookmarkPages = bookmarkPages.includes(currentPage) ? bookmarkPages.filter((pageNumber) => pageNumber !== currentPage) : [...bookmarkPages, currentPage].sort((a, b) => a - b);
-    updateViewerState({ bookmarkPages: nextBookmarkPages });
-  }, [bookmarkPages, updateViewerState]);
+    updateViewerState({ bookmarkPages: nextBookmarkPages }, { persistence: "immediate" });
+  }, [updateViewerState]);
 
   const handleGoBack = useCallback(() => {
     const pdfViewer = pdfViewerRef.current;
+    const currentViewerState = viewerStateRef.current ?? {};
+    const historyBackPages = currentViewerState.historyBackPages ?? [];
+    const historyForwardPages = currentViewerState.historyForwardPages ?? [];
     const targetPage = historyBackPages.at(-1);
     if (!pdfViewer || !targetPage) return;
     const currentPage = getSafePageNumber(pdfViewer.currentPageNumber, getPdfViewerPageCount(pdfViewer));
     pdfViewer.currentPageNumber = targetPage;
-    updateViewerState({ currentPage: targetPage, historyBackPages: historyBackPages.slice(0, -1), historyForwardPages: getTrimmedHistory([...historyForwardPages, currentPage]) });
-  }, [historyBackPages, historyForwardPages, updateViewerState]);
+    updateViewerState({ currentPage: targetPage, historyBackPages: historyBackPages.slice(0, -1), historyForwardPages: getTrimmedHistory([...historyForwardPages, currentPage]) }, { persistence: "deferred" });
+  }, [updateViewerState]);
 
   const handleGoForward = useCallback(() => {
     const pdfViewer = pdfViewerRef.current;
+    const currentViewerState = viewerStateRef.current ?? {};
+    const historyBackPages = currentViewerState.historyBackPages ?? [];
+    const historyForwardPages = currentViewerState.historyForwardPages ?? [];
     const targetPage = historyForwardPages.at(-1);
     if (!pdfViewer || !targetPage) return;
     const currentPage = getSafePageNumber(pdfViewer.currentPageNumber, getPdfViewerPageCount(pdfViewer));
     pdfViewer.currentPageNumber = targetPage;
-    updateViewerState({ currentPage: targetPage, historyBackPages: getTrimmedHistory([...historyBackPages, currentPage]), historyForwardPages: historyForwardPages.slice(0, -1) });
-  }, [historyBackPages, historyForwardPages, updateViewerState]);
+    updateViewerState({ currentPage: targetPage, historyBackPages: getTrimmedHistory([...historyBackPages, currentPage]), historyForwardPages: historyForwardPages.slice(0, -1) }, { persistence: "deferred" });
+  }, [updateViewerState]);
 
   const handleSetMark = useCallback(() => {
     const pdfViewer = pdfViewerRef.current;
     if (!pdfViewer) return;
+    const markPages = viewerStateRef.current?.markPages ?? {};
     const rawKey = window.prompt("現在ページに設定する mark キーを入力してください（a-z / 0-9）", "a")?.trim().slice(0, 1).toLowerCase();
     if (!rawKey || !PDF_MARK_KEY_PATTERN.test(rawKey)) return;
-    updateViewerState({ markPages: { ...markPages, [rawKey]: getSafePageNumber(pdfViewer.currentPageNumber, getPdfViewerPageCount(pdfViewer)) } });
-  }, [markPages, updateViewerState]);
+    updateViewerState({ markPages: { ...markPages, [rawKey]: getSafePageNumber(pdfViewer.currentPageNumber, getPdfViewerPageCount(pdfViewer)) } }, { persistence: "immediate" });
+  }, [updateViewerState]);
 
   const handleJumpToMark = useCallback(() => {
+    const markPages = viewerStateRef.current?.markPages ?? {};
     const rawKey = window.prompt("移動する mark キーを入力してください", "a")?.trim().slice(0, 1).toLowerCase();
     if (!rawKey) return;
     const targetPage = markPages[rawKey];
     if (!targetPage) return;
     setViewerPage(targetPage);
-  }, [markPages, setViewerPage]);
+  }, [setViewerPage]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -299,7 +315,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
       if (isCancelled) return;
       const pageNumber = (event as PdfPageChangingEvent).pageNumber;
       if (!Number.isFinite(pageNumber)) return;
-      updateViewerState({ currentPage: pageNumber });
+      if (viewerStateRef.current?.currentPage === pageNumber) return;
+      updateViewerState({ currentPage: pageNumber }, { persistence: "deferred" });
     }));
 
     removeEventListeners.push(addPdfViewerEventListener(eventBus, "scalechanging", (event: unknown) => {
@@ -307,8 +324,11 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
       const scale = Number((event as PdfScaleChangingEvent).scale);
       if (!Number.isFinite(scale) || scale <= 0) return;
       const fitMode = isApplyingFitScaleRef.current ? "width" : "manual";
+      const isExplicitZoom = Date.now() - lastExplicitZoomAtRef.current <= PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS;
       isApplyingFitScaleRef.current = false;
-      updateViewerState({ scale, fitMode });
+      if (isExplicitZoom) lastExplicitZoomAtRef.current = 0;
+      if (viewerStateRef.current?.scale === scale && viewerStateRef.current?.fitMode === fitMode) return;
+      updateViewerState({ scale, fitMode }, { persistence: isExplicitZoom ? "immediate" : "none" });
     }));
 
     void loadPdfDocument(source, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then((nextPdfDocument) => {
@@ -419,4 +439,4 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
 };
 
 export { PdfPane };
-export type { PdfPaneProps };
+export type { PdfPaneProps, PdfViewerStateChangeOptions };
