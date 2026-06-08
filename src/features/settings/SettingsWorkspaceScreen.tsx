@@ -6,7 +6,7 @@ import { useLocaleStore, type Locale } from "@shared/i18n/locale.store";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import "./SettingsWorkspaceScreen.css";
 
-type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "about";
+type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "hotkey" | "about";
 
 type SettingsSectionDefinition = {
   id: SettingsSectionId;
@@ -64,6 +64,11 @@ type LanguageOptionCopy = {
   caption: string;
 };
 
+type HotkeyCopy = {
+  label: string;
+  keys: string;
+};
+
 type SettingsWorkspaceCopy = {
   ariaLabel: string;
   navAriaLabel: string;
@@ -72,6 +77,7 @@ type SettingsWorkspaceCopy = {
   weekStartOptions: Record<UserSettings["weekStartDay"], LanguageOptionCopy>;
   questionDisplayOptions: Record<QuestionDisplayMode, LanguageOptionCopy>;
   markdownTabOptions: Record<MarkdownTabSize, LanguageOptionCopy>;
+  hotkeys: readonly HotkeyCopy[];
   accountProfileTitle: string;
   accountProfileDescription: string;
   emailUnset: string;
@@ -129,7 +135,7 @@ type SettingsWorkspaceCopy = {
   aboutLocalFirstDescription: string;
 };
 
-const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "about"];
+const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "hotkey", "about"];
 const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> = {
   ja: {
     ariaLabel: "設定",
@@ -140,6 +146,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
       study: { label: "学習", description: "復習の挙動" },
       editor: { label: "エディター", description: "カード編集" },
       audio: { label: "音声", description: "音声と効果音" },
+      hotkey: { label: "Hotkey", description: "キーボード操作" },
       about: { label: "このアプリについて", description: "アプリ情報" },
     },
     languageOptions: {
@@ -160,6 +167,13 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
       4: { label: "4", caption: "標準" },
       8: { label: "8", caption: "広め" },
     },
+    hotkeys: [
+      { label: "検索を開く", keys: "⌘K / Ctrl K" },
+      { label: "左サイドバーを切り替え", keys: "⌘B / Ctrl B" },
+      { label: "右サイドバーを切り替え", keys: "⌘⇧B / Ctrl Shift B" },
+      { label: "カードを裏返す", keys: "Space / Enter" },
+      { label: "前後のカードへ移動", keys: "↑ / ↓" },
+    ],
     accountProfileTitle: "プロフィール",
     accountProfileDescription: "現在のログインセッションです。",
     emailUnset: "メールアドレス未設定",
@@ -225,6 +239,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
       study: { label: "Study", description: "Review behavior" },
       editor: { label: "Editor", description: "Card editing" },
       audio: { label: "Audio", description: "Voice and sound effects" },
+      hotkey: { label: "Hotkey", description: "Keyboard controls" },
       about: { label: "About", description: "App information" },
     },
     languageOptions: {
@@ -245,6 +260,13 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
       4: { label: "4", caption: "standard" },
       8: { label: "8", caption: "wide" },
     },
+    hotkeys: [
+      { label: "Open search", keys: "⌘K / Ctrl K" },
+      { label: "Toggle left sidebar", keys: "⌘B / Ctrl B" },
+      { label: "Toggle right sidebar", keys: "⌘⇧B / Ctrl Shift B" },
+      { label: "Flip card", keys: "Space / Enter" },
+      { label: "Move between cards", keys: "↑ / ↓" },
+    ],
     accountProfileTitle: "Profile",
     accountProfileDescription: "Current login session.",
     emailUnset: "No email address",
@@ -310,6 +332,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
       study: { label: "学习", description: "复习行为" },
       editor: { label: "编辑器", description: "卡片编辑" },
       audio: { label: "音频", description: "语音和音效" },
+      hotkey: { label: "Hotkey", description: "键盘操作" },
       about: { label: "关于", description: "应用信息" },
     },
     languageOptions: {
@@ -330,6 +353,13 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
       4: { label: "4", caption: "标准" },
       8: { label: "8", caption: "宽" },
     },
+    hotkeys: [
+      { label: "打开搜索", keys: "⌘K / Ctrl K" },
+      { label: "切换左侧边栏", keys: "⌘B / Ctrl B" },
+      { label: "切换右侧边栏", keys: "⌘⇧B / Ctrl Shift B" },
+      { label: "翻转卡片", keys: "Space / Enter" },
+      { label: "在卡片之间移动", keys: "↑ / ↓" },
+    ],
     accountProfileTitle: "个人资料",
     accountProfileDescription: "当前登录会话。",
     emailUnset: "未设置邮箱地址",
@@ -413,6 +443,7 @@ const getSectionIcon = (sectionId: SettingsSectionId, className: string): ReactN
   if (sectionId === "study") return <Shield className={className} size={17} />;
   if (sectionId === "editor") return <Type className={className} size={17} />;
   if (sectionId === "audio") return <Volume2 className={className} size={17} />;
+  if (sectionId === "hotkey") return <Keyboard className={className} size={17} />;
   return <Settings2 className={className} size={17} />;
 };
 
@@ -594,6 +625,11 @@ const SettingsWorkspaceScreen = () => {
               <SettingToggle label={copy.soundEffectsLabel} description={copy.soundEffectsDescription} checked={settings?.soundEnabled ?? true} onChange={(checked) => updateBooleanSetting("soundEnabled", checked)} />
               <SettingToggle label={copy.questionVoiceLabel} description={copy.questionVoiceDescription} checked={settings?.autoVoiceQuestion ?? false} onChange={(checked) => updateBooleanSetting("autoVoiceQuestion", checked)} />
               <SettingToggle label={copy.answerVoiceLabel} description={copy.answerVoiceDescription} checked={settings?.autoVoiceAnswer ?? false} onChange={(checked) => updateBooleanSetting("autoVoiceAnswer", checked)} />
+            </SettingsSectionBlock>
+          ) : null}
+          {activeSectionId === "hotkey" ? (
+            <SettingsSectionBlock title={copy.sections.hotkey.label} description={copy.sections.hotkey.description}>
+              {copy.hotkeys.map((hotkey) => <SettingKeyValue key={hotkey.keys} label={hotkey.label} value={<code>{hotkey.keys}</code>} />)}
             </SettingsSectionBlock>
           ) : null}
           {activeSectionId === "about" ? (
