@@ -1,11 +1,10 @@
-import { type KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type KeyboardEvent, type MouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import { getTagColorKey, type TagColorKey } from "@/chip/tag/tagColor";
 import { FilterPanelShell } from "@/components/panel/FilterPanelShell";
 import { PanelEmptyState } from "@/components/panel/PanelEmptyState";
 import { SegmentedControlGroup, type SegmentedOption } from "@/components/panel/SegmentedControlGroup";
 import { TagBadge } from "@/components/tag/TagBadge";
 import { SurfaceButton } from "@/components/ui/surface-button";
-import { Switch } from "@/components/ui/switch";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
@@ -38,11 +37,17 @@ type VisibleTagTreeItem = {
   depth: number;
 };
 
-interface TagFilterPanelProps {
+type TagFilterPanelProps = {
   allTags: string[];
   isOpen?: boolean;
   className?: string;
-}
+};
+
+type TagFilterSelectionSwitchProps = {
+  label: string;
+  checked: boolean;
+  onToggle: () => void;
+};
 
 const TAG_MATCH_MODE_OPTIONS = [
   { label: "いずれか (OR)", value: "any" },
@@ -193,6 +198,19 @@ const buildVisibleTagTreeItems = (
     : tagTreeNodes;
 
   return flattenTagTreeNodes(visibleNodes, 0);
+};
+
+const TagFilterSelectionSwitch = ({ label, checked, onToggle }: TagFilterSelectionSwitchProps) => {
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    onToggle();
+  };
+
+  return (
+    <button type="button" role="switch" aria-checked={checked} aria-label={`${label} を${checked ? "除外" : "追加"}`} onClick={handleClick} className={cn("mr-2 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d7d7d7]", checked ? "border-[color:var(--ds-semantic-color-action-primary)] bg-[color:var(--ds-semantic-color-action-primary)]" : "border-[color:var(--ds-semantic-color-border-default)] bg-[color:var(--ds-semantic-color-background-app)] shadow-[var(--ds-semantic-elevation-control-inset)]")}>
+      <span className={cn("h-2 w-2 rounded-full bg-white transition-opacity duration-150", checked ? "opacity-100" : "opacity-0")} />
+    </button>
+  );
 };
 
 export const TagFilterPanel = ({
@@ -387,13 +405,7 @@ export const TagFilterPanel = ({
                     "ds-floating-panel__row--active ds-filter-row--active",
                 )}
               >
-                <Switch
-                  checked={isSelected}
-                  onCheckedChange={() => toggleTag(item.name)}
-                  onClick={(event) => event.stopPropagation()}
-                  className="mr-2"
-                  aria-label={`${item.name} を${isSelected ? "除外" : "追加"}`}
-                />
+                <TagFilterSelectionSwitch label={item.name} checked={isSelected} onToggle={() => toggleTag(item.name)} />
 
                 <div className="min-w-0 flex-1">
                   <TagBadge
