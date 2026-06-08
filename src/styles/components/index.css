@@ -5,6 +5,7 @@
 @import "../features/calendar-print-page.css";
 @import "../features/calendar-month-weekday-header.css";
 @import "../features/sidebar.css";
+@import "../features/layered-directory-loading.css";
 @import "./common.css";
 @import "../features/markdown.css";
 @import "../features/explorer-chrome-polish.css";
@@ -41,7 +42,6 @@
     --explorer-chrome-card-highlight: transparent;
     --explorer-chrome-pdf-fill: transparent;
     --explorer-chrome-pdf-stroke: currentColor;
-    --explorer-chrome-pdf-highlight: transparent;
     --explorer-chrome-pdf-accent: currentColor;
     position: relative;
     padding: 6px 10px 12px;
