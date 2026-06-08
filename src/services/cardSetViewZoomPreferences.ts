@@ -1,4 +1,4 @@
-import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
+import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 import type { CardLayoutMode, CardSetInteractionMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
@@ -209,7 +209,7 @@ const writeStore = (store: CardSetViewZoomPreferencesStore) => {
       window.localStorage.removeItem(legacyKey);
     }
   } catch {
-    // ignore local persistence failures
+    return;
   }
 };
 
