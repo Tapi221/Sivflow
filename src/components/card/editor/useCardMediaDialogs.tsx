@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "@constants/shared/flashcard";
+import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "@/components/card/frame/cardAction.constants";
 import { sanitizeReferences } from "./cardEditorUtils";
 import { Image as ImageIcon, Link as LinkIcon } from "@/ui/icons";
 import { cn } from "@/lib/utils";

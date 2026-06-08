@@ -1,5 +1,5 @@
 import React from "react";
-import { layoutRowsToCardHeightPx } from "@constants/shared/flashcard";
+import { layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { CardSurfaceLayout } from "./CardSurfaceLayout";
 import { buildCardSurfaceMetrics } from "./cardSurfacePresentation";

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { CARD_ROW_PX } from "@constants/shared/flashcard";
+import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
 import { hasRuledLine } from "@/components/card/blocks/core/blockDisplayPolicy";
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
