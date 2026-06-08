@@ -57,8 +57,6 @@ type PdfScaleChangingEvent = {
   scale?: number;
 };
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
-
 const DEFAULT_PDF_PAGE = 1;
 const PDF_HISTORY_LIMIT = 80;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
@@ -68,6 +66,8 @@ const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 767;
 const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 1_000;
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const getSafePageNumber = (pageNumber: number | null | undefined, pageCount: number): number => {
   const normalizedPageNumber = Math.floor(pageNumber ?? DEFAULT_PDF_PAGE);
