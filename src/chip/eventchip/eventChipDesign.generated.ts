@@ -26,6 +26,14 @@ export type EventChipDesign = {
     timeFontSizePx: number;
     timeLineHeightPx: number;
   };
+  weekdayGrid: {
+    timedOuterInsetPx: number;
+    timedOverlapGapPx: number;
+    timedVerticalTrimPx: number;
+    timedMinHeightPx: number;
+    allDayColumnInsetPx: number;
+    allDayEventGapPx: number;
+  };
   list: {
     rowHeightPx: number;
     chipHeightPx: number;
@@ -70,6 +78,14 @@ export const eventChipDesign: EventChipDesign = {
     titleLineHeightPx: 17,
     timeFontSizePx: 11,
     timeLineHeightPx: 16,
+  },
+  weekdayGrid: {
+    timedOuterInsetPx: 1,
+    timedOverlapGapPx: 2,
+    timedVerticalTrimPx: 0.5,
+    timedMinHeightPx: 22,
+    allDayColumnInsetPx: 0.5,
+    allDayEventGapPx: 1,
   },
   list: {
     rowHeightPx: 52,
