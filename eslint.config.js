@@ -8,11 +8,15 @@ import tseslint from "typescript-eslint";
 import stylistic from "@stylistic/eslint-plugin";
 import { defineConfig, globalIgnores } from "eslint/config";
 
+const TYPESCRIPT_SOURCE_FILES = ["src/**/*.{ts,tsx}", "apps/web/src/**/*.{ts,tsx}", "apps/mobile/src/**/*.{ts,tsx}", "packages/*/src/**/*.{ts,tsx}"];
+const UI_SOURCE_FILES = ["src/components/**/*.{ts,tsx}", "src/layout/**/*.{ts,tsx}", "src/routes/**/*.{ts,tsx}", "src/ui/**/*.{ts,tsx}", "src/presentation/**/*.{ts,tsx}", "src/features/**/*.{ts,tsx}", "packages/web-renderer/src/**/*.{ts,tsx}", "packages/mobile-renderer/src/**/*.{ts,tsx}"];
+const APPLICATION_SOURCE_FILES = ["src/application/**/*.{ts,tsx}"];
+
 export default defineConfig([
   globalIgnores(["dist"]),
 
   {
-    files: ["src/**/*.{ts,tsx}"],
+    files: TYPESCRIPT_SOURCE_FILES,
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
@@ -63,11 +67,11 @@ export default defineConfig([
                 "../../../../*",
                 "../../../../../*",
               ],
-              message: "Use @/ alias for cross-folder imports inside src.",
+              message: "Use an alias for cross-folder imports. Same-directory imports may use ./.",
             },
             {
               group: ["./*/**"],
-              message: "Use @/ alias for child-folder imports inside src. Same-directory imports may use ./.",
+              message: "Use an alias for child-folder imports. Same-directory imports may use ./.",
             },
           ],
         },
@@ -76,27 +80,27 @@ export default defineConfig([
         "error",
         {
           selector: String.raw`ImportDeclaration[source.value=/^\.\.\//]`,
-          message: "Use @/ alias for cross-folder imports inside src.",
+          message: "Use an alias for cross-folder imports. Same-directory imports may use ./.",
         },
         {
           selector: String.raw`ExportNamedDeclaration[source.value=/^\.\.\//]`,
-          message: "Use @/ alias for cross-folder exports inside src.",
+          message: "Use an alias for cross-folder exports. Same-directory exports may use ./.",
         },
         {
           selector: String.raw`ExportAllDeclaration[source.value=/^\.\.\//]`,
-          message: "Use @/ alias for cross-folder exports inside src.",
+          message: "Use an alias for cross-folder exports. Same-directory exports may use ./.",
         },
         {
           selector: String.raw`ImportDeclaration[source.value=/^\.\/[^/]+\//]`,
-          message: "Use @/ alias for child-folder imports inside src. Same-directory imports may use ./.",
+          message: "Use an alias for child-folder imports. Same-directory imports may use ./.",
         },
         {
           selector: String.raw`ExportNamedDeclaration[source.value=/^\.\/[^/]+\//]`,
-          message: "Use @/ alias for child-folder exports inside src. Same-directory exports may use ./.",
+          message: "Use an alias for child-folder exports. Same-directory exports may use ./.",
         },
         {
           selector: String.raw`ExportAllDeclaration[source.value=/^\.\/[^/]+\//]`,
-          message: "Use @/ alias for child-folder exports inside src. Same-directory exports may use ./.",
+          message: "Use an alias for child-folder exports. Same-directory exports may use ./.",
         },
       ],
       "react-hooks/exhaustive-deps": "off",
@@ -153,7 +157,7 @@ export default defineConfig([
   },
 
   {
-    files: ["src/**/*.{ts,tsx}"],
+    files: TYPESCRIPT_SOURCE_FILES,
     ignores: [
       "src/domain/card/selectors/cardFolder.ts",
       "src/services/legacyCardSetMigrationBackfill.ts",
@@ -173,14 +177,7 @@ export default defineConfig([
   },
 
   {
-    files: [
-      "src/components/**/*.{ts,tsx}",
-      "src/layout/**/*.{ts,tsx}",
-      "src/routes/**/*.{ts,tsx}",
-      "src/ui/**/*.{ts,tsx}",
-      "src/presentation/**/*.{ts,tsx}",
-      "src/features/**/*.{ts,tsx}",
-    ],
+    files: UI_SOURCE_FILES,
     rules: {
       "no-restricted-imports": [
         "error",
@@ -201,7 +198,7 @@ export default defineConfig([
   },
 
   {
-    files: ["src/application/**/*.{ts,tsx}"],
+    files: APPLICATION_SOURCE_FILES,
     rules: {
       "no-restricted-imports": [
         "error",
