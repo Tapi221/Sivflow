@@ -364,7 +364,7 @@ const SettingScreen = () => {
   }, [language, setLocale]);
 
   return (
-    <main className="h-full min-h-0 w-full overflow-y-auto bg-[#f7f5f8] text-[#1c1c1e]" style={{ paddingTop: "max(18px, env(safe-area-inset-top))", paddingBottom: "max(96px, calc(env(safe-area-inset-bottom) + 76px))" }} aria-label={copy.title}>
+    <main className="h-full min-h-0 w-full overflow-y-auto text-[#1c1c1e]" style={{ paddingTop: "max(18px, env(safe-area-inset-top))", paddingBottom: "max(96px, calc(env(safe-area-inset-bottom) + 76px))", background: "var(--backpane-bg)" }} aria-label={copy.title}>
       <div className="mx-auto flex min-h-full w-full max-w-[520px] flex-col gap-5 px-5 pb-7 pt-3">
         <h1 className="pb-2 pt-2 text-center text-[18px] font-bold tracking-[-0.03em] text-[#111111]">{copy.title}</h1>
 
