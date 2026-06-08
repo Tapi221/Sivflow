@@ -209,15 +209,17 @@ const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScroll
   return (
     <div ref={setDayCellRef(day.key)} data-calendar-month-day-key={day.key} className={cn("calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible bg-white text-left", hasLeadingBorder && "border-l", isToday && "bg-[#f7fbff]", selected && !isToday && "bg-[#f7f7f8]", !selected && !isToday && "calendar-month-day-cell-hoverable", isScrollHovered && !selected && !isToday && "calendar-month-day-cell-scroll-hovered bg-[#fafafa]")} style={MONTH_GRID_BORDER_STYLE}>
       <button type="button" aria-label={getDayAriaLabel(day.date)} aria-pressed={selected} className="relative h-full w-full overflow-hidden text-left outline-none focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#c7c7cc]" onClick={() => onSelectDate(day.date)}>
-        <CalendarDayNumberCircle isToday={isToday} isSelected={selected} isCurrentMonth={day.isCurrentMonth} className={cn("absolute", GD.MONTH_GRID_DAY_NUMBER_POSITION_CLASS)}>
-          {day.dayOfMonth}
-        </CalendarDayNumberCircle>
+        <span className={cn("absolute flex items-center gap-0.5 whitespace-nowrap", GD.MONTH_GRID_DAY_HEADER_POSITION_CLASS)}>
+          <CalendarDayNumberCircle isToday={isToday} isSelected={selected} isCurrentMonth={day.isCurrentMonth}>
+            {day.dayOfMonth}
+          </CalendarDayNumberCircle>
 
-        {monthAnnotation && (
-          <span className={cn("absolute text-[12px] font-semibold text-[#8e8e93]", GD.MONTH_GRID_MONTH_ANNOTATION_POSITION_CLASS)}>
-            {monthAnnotation}
-          </span>
-        )}
+          {monthAnnotation && (
+            <span className="shrink-0 text-[12px] font-semibold text-[#8e8e93]">
+              {monthAnnotation}
+            </span>
+          )}
+        </span>
 
         {renderItems.length > 0 && (
           <div className={cn("absolute flex flex-col", GD.MONTH_GRID_EVENTS_CONTAINER_POSITION_CLASS, GD.MONTH_GRID_EVENTS_GAP_CLASS)}>
