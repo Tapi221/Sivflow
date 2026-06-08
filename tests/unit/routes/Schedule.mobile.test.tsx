@@ -67,10 +67,12 @@ describe("Schedule mobile web route", () => {
     const workspaceSource = readFileSync(WORKSPACE_SCREEN_SOURCE_PATH, "utf8");
     const layeredDirectorySource = readFileSync(LAYERED_DIRECTORY_SOURCE_PATH, "utf8");
 
-    expect(scheduleSource).toContain("CalendarSidebar");
+    expect(scheduleSource).toContain("MobileSidebarDrawer");
+    expect(scheduleSource).toContain("useProjectCalendarActions");
     expect(workspaceSource).toContain("MobileSidebarDrawer");
-    expect(workspaceSource).toContain("MOBILE_LIBRARY_SIDEBAR_ID");
+    expect(workspaceSource).toContain("MOBILE_WORKSPACE_SIDEBAR_ID");
     expect(workspaceSource).toContain("CalendarSidebarController onOpenSettings={onOpenSettings} onToggleLeftPanel={handleCloseMobileSidebar}");
+    expect(workspaceSource).not.toContain("MOBILE_LIBRARY_SIDEBAR_ID");
     expect(layeredDirectorySource).toContain("const shouldShowCalendarContent = calendarContent !== undefined");
   });
 });
