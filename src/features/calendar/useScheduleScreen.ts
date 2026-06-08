@@ -30,6 +30,7 @@ export type UseScheduleScreenReturn = {
 
   selectedViewMode: CalendarViewModeSelection;
   primaryViewMode: CalendarViewMode;
+  weekStartDay: CalendarWeekStartDay;
 
   visibleDays: Date[];
   displayDays: Date[];
@@ -169,6 +170,7 @@ export const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDa
     selectedViewMode: navigation.primaryViewMode,
     visibleDays,
     monthTitleDate: navigation.monthTitleDate,
+    weekStartDay: effectiveWeekStartDay,
     monthRenderedRange,
     yearRenderedRange,
     yearSyncRange,
@@ -213,6 +215,7 @@ export const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDa
     monthScrollTargetToken: navigation.monthScrollTargetToken,
     selectedViewMode: navigation.selectedViewMode,
     primaryViewMode: navigation.primaryViewMode,
+    weekStartDay: effectiveWeekStartDay,
     visibleDays,
     displayDays,
     virtualRail,
