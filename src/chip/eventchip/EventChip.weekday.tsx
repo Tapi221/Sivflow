@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { HoverEventTooltip } from "@/chip/toolchip/HoverEventTooltip";
+import { eventChipDesign } from "./eventChipDesign.generated";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
@@ -125,14 +126,54 @@ const createTitleClampStyle = (lineClamp: number): CSSProperties => {
   };
 };
 
-const createCalendarEventChipWeekdayStyle = (backgroundColor: string, accentColor: string, textColor: string): CalendarEventChipWeekdayStyle => ({
+const createCalendarEventChipWeekdayStyle = (backgroundColor: string, accentColor: string, textColor: string, useInlineTimeLayout: boolean): CalendarEventChipWeekdayStyle => ({
   "--calendar-event-chip-accent": accentColor,
   "--calendar-event-chip-bg": backgroundColor,
   WebkitPrintColorAdjust: "exact",
   printColorAdjust: "exact",
   background: backgroundColor,
-  borderLeft: `3px solid ${accentColor}`,
+  borderLeft: `${eventChipDesign.weekday.borderWidthPx}px solid ${accentColor}`,
+  borderRadius: eventChipDesign.weekday.radiusPx,
   color: textColor,
+  gap: useInlineTimeLayout ? undefined : eventChipDesign.weekday.gapPx,
+  paddingBottom: useInlineTimeLayout ? eventChipDesign.weekday.inlinePaddingYPx : eventChipDesign.weekday.paddingYPx,
+  paddingLeft: eventChipDesign.weekday.paddingLeftPx,
+  paddingRight: eventChipDesign.weekday.paddingRightPx,
+  paddingTop: useInlineTimeLayout ? eventChipDesign.weekday.inlinePaddingYPx : eventChipDesign.weekday.paddingYPx,
+});
+
+const createLineMaskStyle = (): CSSProperties => ({
+  borderRadius: eventChipDesign.weekday.radiusPx,
+});
+
+const createMeasurementStyle = (): CSSProperties => ({
+  borderRadius: eventChipDesign.weekday.radiusPx,
+  gap: eventChipDesign.weekday.gapPx,
+  paddingBottom: eventChipDesign.weekday.paddingYPx,
+  paddingLeft: eventChipDesign.weekday.paddingLeftPx,
+  paddingRight: eventChipDesign.weekday.paddingRightPx,
+  paddingTop: eventChipDesign.weekday.paddingYPx,
+});
+
+const createTitleStyle = (lineClamp: number): CSSProperties => ({
+  ...createTitleClampStyle(lineClamp),
+  fontSize: eventChipDesign.weekday.titleFontSizePx,
+  lineHeight: `${eventChipDesign.weekday.titleLineHeightPx}px`,
+});
+
+const createTitleMeasurementStyle = (): CSSProperties => ({
+  fontSize: eventChipDesign.weekday.titleFontSizePx,
+  lineHeight: `${eventChipDesign.weekday.titleLineHeightPx}px`,
+});
+
+const createTimeStyle = (): CSSProperties => ({
+  fontSize: eventChipDesign.weekday.timeFontSizePx,
+  lineHeight: `${eventChipDesign.weekday.timeLineHeightPx}px`,
+});
+
+const createLastLineTimeStyle = (): CSSProperties => ({
+  fontSize: eventChipDesign.weekday.timeFontSizePx,
+  lineHeight: `${eventChipDesign.weekday.timeLineHeightPx}px`,
 });
 
 const encodeBase64Url = (value: string): string | null => {
@@ -173,7 +214,7 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
   const endsAt = event.endsAt instanceof Date ? event.endsAt : new Date(event.endsAt ?? event.startsAt);
   const timeLabel = event.isAllDay ? "終日" : `${format(startsAt, "H:mm")} ~ ${format(endsAt, "H:mm")}`;
   const titleLabel = event.title || "Untitled";
-  const chipStyle = createCalendarEventChipWeekdayStyle(tokens.bg, tokens.border, tokens.text);
+  const chipStyle = createCalendarEventChipWeekdayStyle(tokens.bg, tokens.border, tokens.text, chipLayout.useInlineTimeLayout);
   const editUrl = createGoogleCalendarEventEditUrl(event);
   const handleEdit = editUrl ? () => { window.open(editUrl, "_blank", "noopener,noreferrer"); } : undefined;
 
@@ -225,38 +266,38 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
   return (
     <HoverEventTooltip title={titleLabel} subtitle={timeLabel} accentColor={tokens.border} className="h-full min-h-0 w-full" disabled={tooltipDisabled} onEdit={handleEdit}>
       <div className={CHIP_ROOT_CLASS}>
-        <div aria-hidden="true" className={CHIP_LINE_MASK_CLASS} />
+        <div aria-hidden="true" className={CHIP_LINE_MASK_CLASS} style={createLineMaskStyle()} />
         <div data-calendar-event-chip="weekday" className={getChipClassName(chipLayout.useInlineTimeLayout)} style={chipStyle}>
           {chipLayout.useInlineTimeLayout ? (
             <div className={CHIP_INLINE_ROW_CLASS}>
-              <span className={CHIP_INLINE_TITLE_CLASS}>{titleLabel}</span>
-              <span className={CHIP_INLINE_TIME_CLASS}>{timeLabel}</span>
+              <span className={CHIP_INLINE_TITLE_CLASS} style={createTitleMeasurementStyle()}>{titleLabel}</span>
+              <span className={CHIP_INLINE_TIME_CLASS} style={createTimeStyle()}>{timeLabel}</span>
             </div>
           ) : chipLayout.useLastLineTimeLayout ? (
-            <span className={CHIP_TITLE_WITH_TIME_CLASS} style={createTitleClampStyle(chipLayout.titleLineClamp)}>
+            <span className={CHIP_TITLE_WITH_TIME_CLASS} style={createTitleStyle(chipLayout.titleLineClamp)}>
               {titleLabel}
-              <span className={CHIP_LAST_LINE_TIME_CLASS}>{timeLabel}</span>
+              <span className={CHIP_LAST_LINE_TIME_CLASS} style={createLastLineTimeStyle()}>{timeLabel}</span>
             </span>
           ) : (
             <>
-              <span className={CHIP_TITLE_CLASS} style={createTitleClampStyle(chipLayout.titleLineClamp)}>
+              <span className={CHIP_TITLE_CLASS} style={createTitleStyle(chipLayout.titleLineClamp)}>
                 {titleLabel}
               </span>
 
-              {chipLayout.showTimeLabel ? <span className={CHIP_TIME_CLASS}>{timeLabel}</span> : null}
+              {chipLayout.showTimeLabel ? <span className={CHIP_TIME_CLASS} style={createTimeStyle()}>{timeLabel}</span> : null}
             </>
           )}
 
-          <div ref={layoutMeasurementRef} aria-hidden="true" className={getMeasurementClassName()}>
-            <span ref={titleMeasurementRef} className={CHIP_TITLE_CLASS}>
+          <div ref={layoutMeasurementRef} aria-hidden="true" className={getMeasurementClassName()} style={createMeasurementStyle()}>
+            <span ref={titleMeasurementRef} className={CHIP_TITLE_CLASS} style={createTitleMeasurementStyle()}>
               {titleLabel}
             </span>
-            <span ref={timeMeasurementRef} className={CHIP_TIME_CLASS}>
+            <span ref={timeMeasurementRef} className={CHIP_TIME_CLASS} style={createTimeStyle()}>
               {timeLabel}
             </span>
-            <span ref={titleWithTimeMeasurementRef} className={CHIP_TITLE_WITH_TIME_CLASS}>
+            <span ref={titleWithTimeMeasurementRef} className={CHIP_TITLE_WITH_TIME_CLASS} style={createTitleMeasurementStyle()}>
               {titleLabel}
-              <span className={CHIP_LAST_LINE_TIME_CLASS}>{timeLabel}</span>
+              <span className={CHIP_LAST_LINE_TIME_CLASS} style={createLastLineTimeStyle()}>{timeLabel}</span>
             </span>
           </div>
         </div>
