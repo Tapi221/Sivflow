@@ -27,6 +27,13 @@ type PdfDocumentProxy = Awaited<ReturnType<typeof pdfjsLib.getDocument>["promise
 
 type PdfViewerInstance = InstanceType<typeof PDFViewer>;
 
+type PdfViewerZoomDirection = "in" | "out";
+
+type PdfViewerWithZoomMethods = PdfViewerInstance & {
+  increaseScale: () => void;
+  decreaseScale: () => void;
+};
+
 type PdfLinkServiceInstance = InstanceType<typeof PDFLinkService>;
 
 type PdfEventBusInstance = InstanceType<typeof EventBus>;
@@ -47,10 +54,6 @@ type PdfScaleChangingEvent = {
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const DEFAULT_PDF_PAGE = 1;
-const DEFAULT_PDF_SCALE = 1;
-const MIN_PDF_SCALE = 0.5;
-const MAX_PDF_SCALE = 3;
-const PDF_SCALE_STEP = 0.15;
 const PDF_HISTORY_LIMIT = 80;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
 const PDFJS_ASSET_BASE_URL = "/pdfjs/";
@@ -59,11 +62,6 @@ const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 767;
 
-const clampPdfScale = (scale: number): number => {
-  if (!Number.isFinite(scale)) return DEFAULT_PDF_SCALE;
-  return Math.min(MAX_PDF_SCALE, Math.max(MIN_PDF_SCALE, scale));
-};
-
 const getSafePageNumber = (pageNumber: number | null | undefined, pageCount: number): number => {
   const normalizedPageNumber = Math.floor(pageNumber ?? DEFAULT_PDF_PAGE);
   return Math.min(Math.max(normalizedPageNumber, DEFAULT_PDF_PAGE), Math.max(pageCount, DEFAULT_PDF_PAGE));
@@ -71,11 +69,6 @@ const getSafePageNumber = (pageNumber: number | null | undefined, pageCount: num
 
 const getTrimmedHistory = (pages: number[]): number[] => {
   return pages.slice(-PDF_HISTORY_LIMIT);
-};
-
-const getPdfViewerScale = (pdfViewer: PdfViewerInstance): number => {
-  const scale = Number(pdfViewer.currentScale);
-  return Number.isFinite(scale) && scale > 0 ? clampPdfScale(scale) : DEFAULT_PDF_SCALE;
 };
 
 const getPdfViewerPageCount = (pdfViewer: PdfViewerInstance): number => {
@@ -88,7 +81,7 @@ const isCompactPdfViewport = (container: HTMLDivElement): boolean => {
 };
 
 const getPdfViewerStateScaleValue = (viewerState: PdfViewerState | null, forcePageWidth: boolean): string => {
-  if (!forcePageWidth && viewerState?.fitMode === "manual" && typeof viewerState.scale === "number") return String(clampPdfScale(viewerState.scale));
+  if (!forcePageWidth && viewerState?.fitMode === "manual" && typeof viewerState.scale === "number" && Number.isFinite(viewerState.scale) && viewerState.scale > 0) return String(viewerState.scale);
   return "page-width";
 };
 
@@ -143,6 +136,16 @@ const addPdfViewerEventListener = (eventBus: PdfEventBusLike, eventName: string,
   };
 };
 
+const applyPdfViewerZoom = (pdfViewer: PdfViewerInstance, direction: PdfViewerZoomDirection): void => {
+  const zoomableViewer = pdfViewer as PdfViewerWithZoomMethods;
+  if (direction === "in") {
+    zoomableViewer.increaseScale();
+    return;
+  }
+
+  zoomableViewer.decreaseScale();
+};
+
 const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewerStateChange }: PdfPaneProps) => {
   const viewerEnableXfa = viewerOptions?.enableXfa;
   const viewerUseSystemFonts = viewerOptions?.useSystemFonts;
@@ -191,18 +194,14 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
   const handleZoomIn = useCallback(() => {
     const pdfViewer = pdfViewerRef.current;
     if (!pdfViewer) return;
-    const nextScale = clampPdfScale(getPdfViewerScale(pdfViewer) + PDF_SCALE_STEP);
-    pdfViewer.currentScaleValue = String(nextScale);
-    updateViewerState({ scale: nextScale, fitMode: "manual" });
-  }, [updateViewerState]);
+    applyPdfViewerZoom(pdfViewer, "in");
+  }, []);
 
   const handleZoomOut = useCallback(() => {
     const pdfViewer = pdfViewerRef.current;
     if (!pdfViewer) return;
-    const nextScale = clampPdfScale(getPdfViewerScale(pdfViewer) - PDF_SCALE_STEP);
-    pdfViewer.currentScaleValue = String(nextScale);
-    updateViewerState({ scale: nextScale, fitMode: "manual" });
-  }, [updateViewerState]);
+    applyPdfViewerZoom(pdfViewer, "out");
+  }, []);
 
   const handleToggleBookmark = useCallback(() => {
     const pdfViewer = pdfViewerRef.current;
@@ -306,10 +305,10 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
     removeEventListeners.push(addPdfViewerEventListener(eventBus, "scalechanging", (event: unknown) => {
       if (isCancelled) return;
       const scale = Number((event as PdfScaleChangingEvent).scale);
-      if (!Number.isFinite(scale)) return;
+      if (!Number.isFinite(scale) || scale <= 0) return;
       const fitMode = isApplyingFitScaleRef.current ? "width" : "manual";
       isApplyingFitScaleRef.current = false;
-      updateViewerState({ scale: clampPdfScale(scale), fitMode });
+      updateViewerState({ scale, fitMode });
     }));
 
     void loadPdfDocument(source, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then((nextPdfDocument) => {
