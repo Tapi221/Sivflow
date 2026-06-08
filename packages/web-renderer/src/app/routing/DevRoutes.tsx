@@ -12,10 +12,10 @@ const CardLayoutConsistencyTest = DEV_MODE
 const SelectionCaptureSandboxPage = DEV_MODE
   ? lazy(() => import("@/sandbox/2").then(({ SelectionCaptureSandboxPage }) => ({ default: SelectionCaptureSandboxPage })))
   : null;
-const BlockNoteSandboxPage = DEV_MODE
+const AffineSandboxPage = DEV_MODE
   ? lazy(() =>
-      import("@/sandbox/blocknote").then(({ BlockNoteSandboxPage }) => ({
-        default: BlockNoteSandboxPage,
+      import("@/sandbox/affine").then(({ AffineSandboxPage }) => ({
+        default: AffineSandboxPage,
       })),
     )
   : null;
@@ -118,10 +118,10 @@ export const getDevRouteElements = () => {
         />
       ) : null}
 
-      {BlockNoteSandboxPage ? (
+      {AffineSandboxPage ? (
         <Route
-          path="sandbox/blocknote/*"
-          element={withDevRouteFallback(<BlockNoteSandboxPage />)}
+          path="sandbox/affine/*"
+          element={withDevRouteFallback(<AffineSandboxPage />)}
         />
       ) : null}
 
