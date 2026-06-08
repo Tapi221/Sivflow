@@ -48,6 +48,11 @@ type SplitDay = {
   isToday: boolean;
 };
 
+type SplitDayEventBucket = {
+  eventsByDateKey: Map<string, GoogleCalendarEvent[]>;
+  eventCountByIndex: Map<number, number>;
+};
+
 type SplitDaySectionProps = {
   day: SplitDay;
   onSelectDate?: (date: Date) => void;
@@ -73,7 +78,7 @@ const SPLIT_DAY_MIN_HEIGHT_PX = LIST_DAY_SECTION_MIN_HEIGHT_PX;
 const SPLIT_DAY_GAP_PX = LIST_DAY_GAP_PX;
 const SPLIT_DAY_BLOCK_BASE_HEIGHT_PX = SPLIT_DAY_MIN_HEIGHT_PX + SPLIT_DAY_GAP_PX;
 const LOCAL_DAYS = 3650;
-const OVERSCAN = 5000;
+const OVERSCAN = 12000;
 const ANCHOR_OFFSET = 160;
 const SELECTED_OFFSET = 8;
 const USER_SCROLL_AUTO_SCROLL_BLOCK_MS = 350;
@@ -111,11 +116,49 @@ const getSplitDayHeightFromEventCount = (eventCount: number): number => Math.max
 
 const getSplitDayHeight = (day: SplitDay): number => getSplitDayHeightFromEventCount(day.events.length);
 
-const addExtraHeightForDateKey = (extraHeightByIndex: Map<number, number>, rail: ScheduleVirtualRail, totalDayCount: number, dateKey: string, height: number) => {
-  const date = parseCalendarDateKey(dateKey);
-  if (!date) return;
+const createEmptySplitDayEventBucket = (): SplitDayEventBucket => ({ eventsByDateKey: new Map<string, GoogleCalendarEvent[]>(), eventCountByIndex: new Map<number, number>() });
 
-  const index = getIndexForDate(rail, date);
+const appendEventToSplitDayBucket = (bucket: SplitDayEventBucket, dateKey: string, dayIndex: number, event: GoogleCalendarEvent) => {
+  const dayEvents = bucket.eventsByDateKey.get(dateKey) ?? [];
+
+  if (!bucket.eventsByDateKey.has(dateKey)) {
+    bucket.eventsByDateKey.set(dateKey, dayEvents);
+  }
+
+  dayEvents.push(event);
+  bucket.eventCountByIndex.set(dayIndex, (bucket.eventCountByIndex.get(dayIndex) ?? 0) + 1);
+};
+
+const buildSplitDayEventBucket = (rail: ScheduleVirtualRail, totalDayCount: number, events: GoogleCalendarEvent[]): SplitDayEventBucket => {
+  const bucket = createEmptySplitDayEventBucket();
+  if (totalDayCount <= 0) return bucket;
+
+  events.forEach((event) => {
+    getEventDateKeys(event).forEach((dateKey) => {
+      const date = parseCalendarDateKey(dateKey);
+      if (!date) return;
+
+      const index = getIndexForDate(rail, date);
+      if (index < 0 || index >= totalDayCount) return;
+
+      if (event.isAllDay) {
+        appendEventToSplitDayBucket(bucket, dateKey, index, event);
+        return;
+      }
+
+      const clippedEvent = clipEventToDay(event, date);
+      if (clippedEvent) {
+        appendEventToSplitDayBucket(bucket, dateKey, index, clippedEvent);
+      }
+    });
+  });
+
+  bucket.eventsByDateKey.forEach((dayEvents) => dayEvents.sort(compareCalendarEvents));
+
+  return bucket;
+};
+
+const addExtraHeightForDayIndex = (extraHeightByIndex: Map<number, number>, totalDayCount: number, index: number, height: number) => {
   if (index < 0 || index >= totalDayCount) return;
 
   const extraHeight = Math.max(0, height - SPLIT_DAY_MIN_HEIGHT_PX);
@@ -124,20 +167,13 @@ const addExtraHeightForDateKey = (extraHeightByIndex: Map<number, number>, rail:
   extraHeightByIndex.set(index, Math.max(extraHeightByIndex.get(index) ?? 0, extraHeight));
 };
 
-const buildSplitVirtualMetrics = (rail: ScheduleVirtualRail, totalDayCount: number, events: GoogleCalendarEvent[]): SplitVirtualMetrics => {
+const buildSplitVirtualMetrics = (totalDayCount: number, eventCountByIndex: Map<number, number>): SplitVirtualMetrics => {
   if (totalDayCount <= 0) return { dynamicHeightEntries: [], totalHeight: 0 };
 
-  const eventCountByDateKey = new Map<string, number>();
   const extraHeightByIndex = new Map<number, number>();
 
-  events.forEach((event) => {
-    getEventDateKeys(event).forEach((dateKey) => {
-      eventCountByDateKey.set(dateKey, (eventCountByDateKey.get(dateKey) ?? 0) + 1);
-    });
-  });
-
-  eventCountByDateKey.forEach((eventCount, dateKey) => {
-    addExtraHeightForDateKey(extraHeightByIndex, rail, totalDayCount, dateKey, getSplitDayHeightFromEventCount(eventCount));
+  eventCountByIndex.forEach((eventCount, index) => {
+    addExtraHeightForDayIndex(extraHeightByIndex, totalDayCount, index, getSplitDayHeightFromEventCount(eventCount));
   });
 
   let accumulatedExtraHeight = 0;
@@ -205,6 +241,14 @@ const getRange = (metrics: SplitVirtualMetrics, scrollTop: number, viewportHeigh
   return { start, end: Math.max(start, end) };
 };
 
+const getInitialRange = (rail: ScheduleVirtualRail): VirtualRange => {
+  if (rail.totalDayCount <= 0) return { start: 0, end: 0 };
+
+  const start = Math.max(0, Math.min(rail.totalDayCount - 1, rail.anchorIndex));
+
+  return { start, end: Math.min(rail.totalDayCount, start + 2) };
+};
+
 const sameRange = (left: VirtualRange, right: VirtualRange) => left.start === right.start && left.end === right.end;
 
 const getEventInstanceKey = (dateKey: string, event: GoogleCalendarEvent): string => `${dateKey}:${event.id}:${new Date(event.startsAt).getTime()}:${new Date(event.endsAt).getTime()}`;
@@ -248,35 +292,13 @@ const buildSegments = (events: GoogleCalendarEvent[], appProjects: AppCalendarIt
   return Array.from(segments.values());
 };
 
-const buildDays = (dates: Date[], events: GoogleCalendarEvent[], selectedDate: Date, appProjects: AppCalendarItem[], googleAccounts: GoogleAccountDisplay[]): SplitDay[] => {
+const buildDays = (dates: Date[], eventsByDateKey: Map<string, GoogleCalendarEvent[]>, selectedDate: Date, appProjects: AppCalendarItem[], calendarLabels: Map<string, string>): SplitDay[] => {
   const today = new Date();
-  const eventsByDay = new Map<string, GoogleCalendarEvent[]>();
-  const dayByKey = new Map<string, Date>();
-  const calendarLabels = getCalendarLabelMap(googleAccounts);
-
-  dates.forEach((date) => {
-    const key = getCalendarDateKey(date);
-    eventsByDay.set(key, []);
-    dayByKey.set(key, date);
-  });
-
-  events.forEach((event) => getEventDateKeys(event).forEach((key) => {
-    const date = dayByKey.get(key);
-    const dayEvents = eventsByDay.get(key);
-    if (!date || !dayEvents) return;
-    if (event.isAllDay) {
-      dayEvents.push(event);
-      return;
-    }
-    const clipped = clipEventToDay(event, date);
-    if (clipped) dayEvents.push(clipped);
-  }));
 
   return dates.map((date) => {
     const key = getCalendarDateKey(date);
-    const dayEvents = eventsByDay.get(key) ?? [];
+    const dayEvents = eventsByDateKey.get(key) ?? [];
     const segments = buildSegments(dayEvents, appProjects, calendarLabels);
-    dayEvents.sort(compareCalendarEvents);
     return { date, key, events: dayEvents, segments, minutes: segments.reduce((sum, segment) => sum + segment.minutes, 0), isSelected: isSameDay(date, selectedDate), isToday: isSameDay(date, today) };
   });
 };
@@ -353,10 +375,12 @@ const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, eve
   const pendingRef = useRef<HTMLDivElement | null>(null);
   const userScrollBlockUntilRef = useRef(0);
   const rail = useMemo(() => virtualRail ?? createRail(selectedDate), [selectedDate, virtualRail]);
-  const metrics = useMemo(() => buildSplitVirtualMetrics(rail, rail.totalDayCount, events), [events, rail]);
-  const [range, setRange] = useState<VirtualRange>({ start: 0, end: 1 });
+  const dayEventBucket = useMemo(() => buildSplitDayEventBucket(rail, rail.totalDayCount, events), [events, rail]);
+  const metrics = useMemo(() => buildSplitVirtualMetrics(rail.totalDayCount, dayEventBucket.eventCountByIndex), [dayEventBucket.eventCountByIndex, rail.totalDayCount]);
+  const [range, setRange] = useState<VirtualRange>(() => getInitialRange(rail));
   const dates = useMemo(() => buildScheduleVirtualRailDays(rail, range.start, range.end), [rail, range.end, range.start]);
-  const days = useMemo(() => buildDays(dates, events, selectedDate, appProjects, googleAccounts), [appProjects, dates, events, googleAccounts, selectedDate]);
+  const calendarLabels = useMemo(() => getCalendarLabelMap(googleAccounts), [googleAccounts]);
+  const days = useMemo(() => buildDays(dates, dayEventBucket.eventsByDateKey, selectedDate, appProjects, calendarLabels), [appProjects, calendarLabels, dates, dayEventBucket.eventsByDateKey, selectedDate]);
   const totalHeight = metrics.totalHeight;
 
   const updateRange = useCallback((element: HTMLDivElement | null) => {
