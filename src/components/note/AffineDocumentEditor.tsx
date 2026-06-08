@@ -18,7 +18,7 @@ type AffineSnapshotRecord = {
 
 type AffineDocRuntime = {
   id?: string;
-  load?: (init: () => void) => void;
+  load?: (init?: () => void) => AffineDocRuntime;
   addBlock?: (flavour: string, props?: Record<string, unknown>, parent?: string) => string;
   resetHistory?: () => void;
   slots?: Record<string, { on?: (callback: () => void) => { dispose?: () => void } | (() => void) }>;
@@ -27,9 +27,14 @@ type AffineDocRuntime = {
 };
 
 type AffineCollectionRuntime = {
-  createDoc: (options?: { id?: string }) => AffineDocRuntime;
-  importDocSnapshot?: (snapshot: unknown) => AffineDocRuntime;
+  createDoc: (options?: { id?: string }) => AffineDocRuntime | null;
+  getDoc?: (docId: string) => AffineDocRuntime | null;
+  importDocSnapshot?: (snapshot: unknown) => AffineDocRuntime | null;
   exportDocSnapshot?: (docId: string) => unknown;
+  meta?: { initialize?: () => void };
+  start?: () => void;
+  forceStop?: () => void;
+  dispose?: () => void;
 };
 
 type AffineEditorElement = HTMLElement & {
@@ -46,6 +51,11 @@ const AFFINE_CONTENT_TYPE = "affine-document";
 
 const createAffineSchema = () => new Schema().register(AffineSchemas);
 
+const initializeAffineCollection = (collection: AffineCollectionRuntime): void => {
+  collection.meta?.initialize?.();
+  collection.start?.();
+};
+
 const getInitialAffineRecord = (content: NoteBlockContent | undefined): AffineSnapshotRecord | null => {
   const record = Array.isArray(content) ? content[0] : null;
   if (!record || typeof record !== "object") return null;
@@ -54,7 +64,9 @@ const getInitialAffineRecord = (content: NoteBlockContent | undefined): AffineSn
 };
 
 const createEmptyAffineDoc = (collection: AffineCollectionRuntime, noteId: string): AffineDocRuntime => {
-  const doc = collection.createDoc({ id: noteId });
+  const doc = collection.createDoc({ id: noteId }) ?? collection.getDoc?.(noteId) ?? null;
+  if (!doc) throw new Error("BlockSuite document creation failed");
+
   const init = () => {
     const pageId = doc.addBlock?.("affine:page", {}) ?? "";
     doc.addBlock?.("affine:surface", {}, pageId);
@@ -63,10 +75,7 @@ const createEmptyAffineDoc = (collection: AffineCollectionRuntime, noteId: strin
     doc.resetHistory?.();
   };
 
-  if (typeof doc.load === "function") {
-    doc.load(init);
-    return doc;
-  }
+  if (typeof doc.load === "function") return doc.load(init);
 
   init();
   return doc;
@@ -74,8 +83,9 @@ const createEmptyAffineDoc = (collection: AffineCollectionRuntime, noteId: strin
 
 const createAffineRuntime = (note: Note): AffineRuntime => {
   const collection = new DocCollection({ schema: createAffineSchema() }) as AffineCollectionRuntime;
+  initializeAffineCollection(collection);
   const initialRecord = getInitialAffineRecord(note.content);
-  const doc = initialRecord?.snapshot && typeof collection.importDocSnapshot === "function" ? collection.importDocSnapshot(initialRecord.snapshot) : createEmptyAffineDoc(collection, note.id);
+  const doc = initialRecord?.snapshot && typeof collection.importDocSnapshot === "function" ? collection.importDocSnapshot(initialRecord.snapshot) ?? createEmptyAffineDoc(collection, note.id) : createEmptyAffineDoc(collection, note.id);
   return { collection, doc };
 };
 
@@ -139,6 +149,13 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
       host.removeEventListener("keyup", captureChange);
       host.removeEventListener("paste", captureChange);
       host.replaceChildren();
+    };
+  }, [runtime]);
+
+  useEffect(() => {
+    return () => {
+      runtime.collection.forceStop?.();
+      runtime.collection.dispose?.();
     };
   }, [runtime]);
 
