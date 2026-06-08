@@ -1,10 +1,8 @@
-import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
 import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
-import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
-import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
+import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
 import type { CalendarGridStyle } from "@/features/calendar/scheduleScreen.types";
@@ -67,7 +65,11 @@ type NumberControlProps = Control & { value: number; onChange: (key: NumberKey, 
 
 type ControlPanelProps = { section: Section; values: EditorValues; onChange: (key: NumberKey, value: number) => void };
 
-type PreviewProps = { values: EditorValues; event: GoogleCalendarEvent; allDayEvent: GoogleCalendarEvent };
+type MonthPreviewProps = { values: EditorValues; event: GoogleCalendarEvent; allDayEvent: GoogleCalendarEvent };
+
+type RealWeekdayGridPreviewProps = { title: string; heightClassName: string; gridStyle: CalendarGridStyle; visibleEvents: GoogleCalendarEvent[] };
+
+type ListPreviewProps = { event: GoogleCalendarEvent; allDayEvent: GoogleCalendarEvent };
 
 const AUTOSAVE_ENDPOINT = "/__sivflow/eventchip-design";
 const AUTOSAVE_DELAY_MS = 450;
@@ -75,21 +77,17 @@ const PANEL_CLASS = "rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-
 const LABEL_CLASS = "text-[12px] font-semibold text-slate-600";
 const INPUT_CLASS = "h-9 w-20 rounded-lg border border-slate-200 bg-white px-2 text-right text-[12px] font-semibold text-slate-700 outline-none focus:border-sky-300 focus:ring-2 focus:ring-sky-100";
 const CARD_CLASS = "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm";
-const WEEKDAY_FRAME_CLASS = "relative isolate overflow-hidden border bg-white";
-const WEEKDAY_ALL_DAY_COLUMN_CLASS = "border bg-white";
-const WEEKDAY_PANEL_CLASS = "rounded-2xl border bg-white p-3";
+const REAL_GRID_FRAME_CLASS = "overflow-hidden rounded-2xl border border-slate-200 bg-white";
 const START = new Date("2026-06-08T17:07:00+09:00");
 const END = new Date("2026-06-08T19:14:00+09:00");
 const ALL_DAY_START = new Date("2026-06-08T00:00:00+09:00");
 const ALL_DAY_END = new Date("2026-06-09T00:00:00+09:00");
 const PREVIEW_DATE = new Date("2026-06-08T00:00:00+09:00");
-const PREVIEW_HOUR_ROW_HEIGHT_PX = 24;
-const WEEKDAY_PANEL_STYLE: CSSProperties = { borderColor: COLOR.WEEKDAY_COLOR_BORDER_MAIN };
-const WEEKDAY_FRAME_LINE_STYLE: CSSProperties = { backgroundImage: `repeating-linear-gradient(to bottom, transparent 0, transparent ${PREVIEW_HOUR_ROW_HEIGHT_PX - 1}px, ${COLOR.WEEKDAY_COLOR_BORDER_SUB} ${PREVIEW_HOUR_ROW_HEIGHT_PX - 1}px, ${COLOR.WEEKDAY_COLOR_BORDER_SUB} ${PREVIEW_HOUR_ROW_HEIGHT_PX}px)`, backgroundSize: `100% ${PREVIEW_HOUR_ROW_HEIGHT_PX}px`, borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB };
-const PREVIEW_CALENDAR_GRID_STYLE = { [GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT]: `${PREVIEW_HOUR_ROW_HEIGHT_PX}px` } as CalendarGridStyle;
+const DESKTOP_WEEKDAY_GRID_STYLE = { [GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT]: `${C.DEFAULT_HOUR_ROW_HEIGHT}px` } as CalendarGridStyle;
+const MOBILE_WEEK_WEEKDAY_GRID_STYLE = { [GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT]: `${C.DEFAULT_HOUR_ROW_HEIGHT / 2}px` } as CalendarGridStyle;
 const SECTIONS: readonly Section[] = [
   { title: "月表示", controls: [{ valueKey: "monthHeight", label: "高さ", min: 12, max: 34, step: 0.1 }, { valueKey: "monthGap", label: "予定どうしの間隔", min: 0, max: 10, step: 0.5 }, { valueKey: "monthRadius", label: "角丸", min: 0, max: 14 }, { valueKey: "monthBorderWidth", label: "左の色線", min: 0, max: 8 }, { valueKey: "monthPaddingLeft", label: "左余白", min: 0, max: 12 }, { valueKey: "monthPaddingRight", label: "右余白", min: 0, max: 12 }, { valueKey: "monthPaddingYWithTime", label: "時刻あり上下余白", min: 0, max: 8 }, { valueKey: "monthPaddingYCompact", label: "時刻なし上下余白", min: 0, max: 8 }, { valueKey: "monthAllDayOffset", label: "終日位置補正", min: -4, max: 6 }, { valueKey: "monthTitleFontSize", label: "タイトル文字", min: 8, max: 16 }, { valueKey: "monthTimeFontSize", label: "時刻文字", min: 7, max: 14 }] },
-  { title: "週・日表示チップ", controls: [{ valueKey: "weekdayHeight", label: "プレビュー高さ", min: 20, max: 140 }, { valueKey: "weekdayRadius", label: "角丸", min: 0, max: 18 }, { valueKey: "weekdayBorderWidth", label: "左の色線", min: 0, max: 8 }, { valueKey: "weekdayPaddingLeft", label: "左余白", min: 0, max: 14 }, { valueKey: "weekdayPaddingRight", label: "右余白", min: 0, max: 14 }, { valueKey: "weekdayPaddingY", label: "上下余白", min: 0, max: 10 }, { valueKey: "weekdayInlinePaddingY", label: "横並び時の上下余白", min: 0, max: 10 }, { valueKey: "weekdayGap", label: "タイトルと時刻の間隔", min: 0, max: 6, step: 0.5 }, { valueKey: "weekdayTitleFontSize", label: "タイトル文字", min: 8, max: 18 }, { valueKey: "weekdayTitleLineHeight", label: "タイトル行高", min: 10, max: 26 }, { valueKey: "weekdayTimeFontSize", label: "時刻文字", min: 8, max: 16 }, { valueKey: "weekdayTimeLineHeight", label: "時刻行高", min: 10, max: 24 }] },
+  { title: "週・日表示チップ", controls: [{ valueKey: "weekdayRadius", label: "角丸", min: 0, max: 18 }, { valueKey: "weekdayBorderWidth", label: "左の色線", min: 0, max: 8 }, { valueKey: "weekdayPaddingLeft", label: "左余白", min: 0, max: 14 }, { valueKey: "weekdayPaddingRight", label: "右余白", min: 0, max: 14 }, { valueKey: "weekdayPaddingY", label: "上下余白", min: 0, max: 10 }, { valueKey: "weekdayInlinePaddingY", label: "横並び時の上下余白", min: 0, max: 10 }, { valueKey: "weekdayGap", label: "タイトルと時刻の間隔", min: 0, max: 6, step: 0.5 }, { valueKey: "weekdayTitleFontSize", label: "タイトル文字", min: 8, max: 18 }, { valueKey: "weekdayTitleLineHeight", label: "タイトル行高", min: 10, max: 26 }, { valueKey: "weekdayTimeFontSize", label: "時刻文字", min: 8, max: 16 }, { valueKey: "weekdayTimeLineHeight", label: "時刻行高", min: 10, max: 24 }] },
   { title: "週・日グリッド余白", controls: [{ valueKey: "weekdayTimedOuterInset", label: "罫線との左右余白", min: 0, max: 10, step: 0.5 }, { valueKey: "weekdayTimedOverlapGap", label: "重なり予定の横間隔", min: 0, max: 12, step: 0.5 }, { valueKey: "weekdayTimedVerticalTrim", label: "下端の詰め", min: 0, max: 8, step: 0.5 }, { valueKey: "weekdayTimedMinHeight", label: "短い予定の最小高さ", min: 8, max: 48 }, { valueKey: "weekdayAllDayColumnInset", label: "終日欄の内側余白", min: 0, max: 8, step: 0.5 }, { valueKey: "weekdayAllDayEventGap", label: "終日予定の縦間隔", min: 0, max: 8, step: 0.5 }] },
   { title: "リスト・ツールチップ", controls: [{ valueKey: "listRowHeight", label: "リスト行高", min: 32, max: 80 }, { valueKey: "listChipHeight", label: "リストチップ高さ", min: 24, max: 70 }, { valueKey: "listAllDayRowHeight", label: "終日行高", min: 24, max: 60 }, { valueKey: "listAllDayChipHeight", label: "終日チップ高さ", min: 18, max: 50 }, { valueKey: "listRadius", label: "リスト角丸", min: 0, max: 18 }, { valueKey: "listBorderWidth", label: "リスト左線", min: 0, max: 8 }, { valueKey: "listTitleFontSize", label: "リストタイトル文字", min: 8, max: 16 }, { valueKey: "listTimeFontSize", label: "リスト時刻文字", min: 8, max: 16 }, { valueKey: "listTitleGap", label: "リストタイトル上余白", min: 0, max: 8, step: 0.5 }, { valueKey: "tooltipMonthRadius", label: "月ツールチップ角丸", min: 0, max: 24 }, { valueKey: "tooltipWeekdayRadius", label: "週・日ツールチップ角丸", min: 0, max: 28 }] },
 ];
@@ -102,12 +100,6 @@ const makeAllDayEvent = (accentColor: string): GoogleCalendarEvent => ({ id: "ev
 
 const getAutosaveLabel = (state: AutosaveState): string => state === "saving" ? "保存中" : state === "saved" ? "保存済み" : state === "failed" ? "保存失敗" : "自動保存";
 
-const getFrameStyle = (baseStyle: CSSProperties): CSSProperties => ({ ...baseStyle, ...WEEKDAY_FRAME_LINE_STYLE });
-
-const getEventInsetStyle = (height: number, values: EditorValues): CSSProperties => ({ height: height - values.weekdayTimedVerticalTrim, left: values.weekdayTimedOuterInset, minHeight: Math.max(0, values.weekdayTimedMinHeight - values.weekdayTimedVerticalTrim), right: values.weekdayTimedOuterInset });
-
-const getAllDayColumnStyle = (values: EditorValues): CSSProperties => ({ borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB, padding: values.weekdayAllDayColumnInset });
-
 const NumberControl = ({ valueKey, label, value, min, max, step = 1, unit = "px", onChange }: NumberControlProps) => {
   const handleChange = (inputValue: string) => {
     const nextValue = Number.parseFloat(inputValue);
@@ -119,36 +111,25 @@ const NumberControl = ({ valueKey, label, value, min, max, step = 1, unit = "px"
 
 const ControlPanel = ({ section, values, onChange }: ControlPanelProps) => <section className={PANEL_CLASS}><h2 className="text-sm font-bold text-slate-900">{section.title}</h2><div className="mt-4 grid gap-4">{section.controls.map((control) => <NumberControl key={control.valueKey} {...control} value={values[control.valueKey]} onChange={onChange} />)}</div></section>;
 
-const RealWeekdayGridPreview = ({ event, allDayEvent }: { event: GoogleCalendarEvent; allDayEvent: GoogleCalendarEvent }) => {
+const RealWeekdayGridPreview = ({ title, heightClassName, gridStyle, visibleEvents }: RealWeekdayGridPreviewProps) => {
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const visibleDays = useMemo(() => [PREVIEW_DATE], []);
-  const visibleEvents = useMemo(() => [event, allDayEvent], [allDayEvent, event]);
 
-  return <div className="flex h-[420px] overflow-hidden rounded-2xl border bg-white" style={WEEKDAY_PANEL_STYLE}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={visibleEvents} calendarGridStyle={PREVIEW_CALENDAR_GRID_STYLE} selectedDate={PREVIEW_DATE} /></div>;
+  return <section className={CARD_CLASS}><div className="mb-4"><p className="text-[11px] font-semibold tracking-[0.22em] text-slate-400">実グリッド</p><h2 className="text-base font-semibold text-slate-900">{title}</h2></div><div className={`${REAL_GRID_FRAME_CLASS} ${heightClassName}`}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={visibleEvents} calendarGridStyle={gridStyle} selectedDate={PREVIEW_DATE} /></div></section>;
 };
 
-const MonthPreview = ({ values, event, allDayEvent }: PreviewProps) => <section className={CARD_CLASS}><div className="mb-4 flex items-baseline justify-between gap-3"><div><p className="text-[11px] font-semibold tracking-[0.22em] text-slate-400">実コンポーネント</p><h2 className="text-base font-semibold text-slate-900">月表示チップ</h2></div><span className="text-[11px] font-medium text-slate-400">間隔 {values.monthGap}px</span></div><div className="grid gap-4 md:grid-cols-2"><div className={WEEKDAY_PANEL_CLASS} style={WEEKDAY_PANEL_STYLE}><p className="mb-2 text-[11px] font-semibold text-slate-400">PC 月表示 / 時刻あり</p><div className="flex w-full flex-col" style={{ gap: values.monthGap }}><CalendarEventChipMonth event={event} showTimeLabel tooltipDisabled /><CalendarEventChipMonth event={allDayEvent} showTimeLabel={false} tooltipDisabled /></div></div><div className={`${WEEKDAY_PANEL_CLASS} w-[390px] max-w-full`} style={WEEKDAY_PANEL_STYLE}><p className="mb-2 text-[11px] font-semibold text-slate-400">モバイル月表示 / 時刻なし</p><div className="flex w-full flex-col" style={{ gap: values.monthGap }}><CalendarEventChipMonth event={event} showTimeLabel={false} tooltipDisabled /><CalendarEventChipMonth event={allDayEvent} showTimeLabel={false} tooltipDisabled /></div></div></div></section>;
+const MonthPreview = ({ values, event, allDayEvent }: MonthPreviewProps) => <section className={CARD_CLASS}><div className="mb-4 flex items-baseline justify-between gap-3"><div><p className="text-[11px] font-semibold tracking-[0.22em] text-slate-400">実コンポーネント</p><h2 className="text-base font-semibold text-slate-900">月表示チップ</h2></div><span className="text-[11px] font-medium text-slate-400">間隔 {values.monthGap}px</span></div><div className="grid gap-4 md:grid-cols-2"><div className="rounded-2xl border border-slate-200 bg-white p-3"><p className="mb-2 text-[11px] font-semibold text-slate-400">PC 月表示 / 時刻あり</p><div className="flex w-full flex-col" style={{ gap: values.monthGap }}><CalendarEventChipMonth event={event} showTimeLabel tooltipDisabled /><CalendarEventChipMonth event={allDayEvent} showTimeLabel={false} tooltipDisabled /></div></div><div className="w-[390px] max-w-full rounded-2xl border border-slate-200 bg-white p-3"><p className="mb-2 text-[11px] font-semibold text-slate-400">モバイル月表示 / 時刻なし</p><div className="flex w-full flex-col" style={{ gap: values.monthGap }}><CalendarEventChipMonth event={event} showTimeLabel={false} tooltipDisabled /><CalendarEventChipMonth event={allDayEvent} showTimeLabel={false} tooltipDisabled /></div></div></div></section>;
 
-const WeekdayPreview = ({ values, event, allDayEvent }: PreviewProps) => {
-  const tallFrame = getFrameStyle({ height: values.weekdayHeight, width: 220 });
-  const mobileFrame = getFrameStyle({ height: values.weekdayHeight, width: 88 });
-  const shortFrame = getFrameStyle({ height: 24, width: 72 });
-  const eventInset = getEventInsetStyle(values.weekdayHeight, values);
-  const shortInset = getEventInsetStyle(24, values);
-  const allDayColumn = getAllDayColumnStyle(values);
-
-  return <section className={CARD_CLASS}><div className="mb-4 flex items-baseline justify-between gap-3"><div><p className="text-[11px] font-semibold tracking-[0.22em] text-slate-400">実グリッド</p><h2 className="text-base font-semibold text-slate-900">週・日チップ / グリッド余白</h2></div><span className="text-[11px] font-medium text-slate-400">外側余白 {values.weekdayTimedOuterInset}px</span></div><RealWeekdayGridPreview event={event} allDayEvent={allDayEvent} /><div className="mt-4 grid gap-4 md:grid-cols-3"><div className={WEEKDAY_PANEL_CLASS} style={WEEKDAY_PANEL_STYLE}><p className="mb-2 text-[11px] font-semibold text-slate-400">幅別確認 / PC</p><div className={WEEKDAY_FRAME_CLASS} style={tallFrame}><div className="absolute top-0" style={eventInset}><CalendarEventChipWeekday event={event} tooltipDisabled /></div></div></div><div className={WEEKDAY_PANEL_CLASS} style={WEEKDAY_PANEL_STYLE}><p className="mb-2 text-[11px] font-semibold text-slate-400">幅別確認 / モバイル</p><div className={WEEKDAY_FRAME_CLASS} style={mobileFrame}><div className="absolute top-0" style={eventInset}><CalendarEventChipWeekday event={event} tooltipDisabled /></div></div></div><div className={WEEKDAY_PANEL_CLASS} style={WEEKDAY_PANEL_STYLE}><p className="mb-2 text-[11px] font-semibold text-slate-400">短い予定</p><div className={WEEKDAY_FRAME_CLASS} style={shortFrame}><div className="absolute top-0" style={shortInset}><CalendarEventChipWeekday event={event} tooltipDisabled /></div></div></div></div><div className="mt-4 rounded-2xl border bg-white p-3" style={WEEKDAY_PANEL_STYLE}><p className="mb-2 text-[11px] font-semibold text-slate-400">終日欄の余白・間隔</p><div className="grid grid-cols-2"><div className={WEEKDAY_ALL_DAY_COLUMN_CLASS} style={allDayColumn}><div className="flex flex-col" style={{ gap: values.weekdayAllDayEventGap }}><CalendarEventChipMonth event={allDayEvent} showTimeLabel={false} tooltipDisabled /><CalendarEventChipMonth event={allDayEvent} showTimeLabel={false} tooltipDisabled /></div></div><div className={WEEKDAY_ALL_DAY_COLUMN_CLASS} style={allDayColumn}><CalendarEventChipMonth event={allDayEvent} showTimeLabel={false} tooltipDisabled /></div></div></div></section>;
-};
-
-const ListPreview = ({ event, allDayEvent }: { event: GoogleCalendarEvent; allDayEvent: GoogleCalendarEvent }) => <section className={CARD_CLASS}><div className="mb-4"><p className="text-[11px] font-semibold tracking-[0.22em] text-slate-400">実コンポーネント</p><h2 className="text-base font-semibold text-slate-900">リスト表示チップ</h2></div><div className={WEEKDAY_PANEL_CLASS} style={WEEKDAY_PANEL_STYLE}><CalendarEventChipList event={event} /><CalendarEventChipList event={allDayEvent} /></div></section>;
+const ListPreview = ({ event, allDayEvent }: ListPreviewProps) => <section className={CARD_CLASS}><div className="mb-4"><p className="text-[11px] font-semibold tracking-[0.22em] text-slate-400">実コンポーネント</p><h2 className="text-base font-semibold text-slate-900">リスト表示チップ</h2></div><div className="rounded-2xl border border-slate-200 bg-white p-3"><CalendarEventChipList event={event} /><CalendarEventChipList event={allDayEvent} /></div></section>;
 
 const EventChipEditorSandboxPage = () => {
   const [values, setValues] = useState(getInitialValues);
   const [autosaveState, setAutosaveState] = useState<AutosaveState>("idle");
   const event = useMemo(() => makeEvent(values.accentColor), [values.accentColor]);
   const allDayEvent = useMemo(() => makeAllDayEvent(values.accentColor), [values.accentColor]);
+  const visibleEvents = useMemo(() => [event, allDayEvent], [allDayEvent, event]);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -171,7 +152,7 @@ const EventChipEditorSandboxPage = () => {
     setAutosaveState("idle");
   };
 
-  return <div className="min-h-screen bg-[#f4f7fb] px-4 py-4 text-slate-900"><div className="mx-auto flex max-w-[1180px] flex-col gap-4"><section className="rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-sm"><div className="flex items-center justify-between gap-3"><div className="min-w-0"><p className="text-[10px] font-semibold tracking-[0.18em] text-sky-500">イベントチップ調整</p><h1 className="mt-1 text-xl font-bold tracking-[-0.03em] text-slate-950">表示調整</h1></div><span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-slate-600">{getAutosaveLabel(autosaveState)}</span></div></section><div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]"><aside className="flex flex-col gap-4 xl:sticky xl:top-4 xl:max-h-[calc(100vh-32px)] xl:overflow-auto xl:pr-1"><section className={PANEL_CLASS}><h2 className="text-sm font-bold text-slate-900">色</h2><div className="mt-4 grid gap-4"><label className="flex flex-col gap-2"><span className={LABEL_CLASS}>サンプル色</span><input className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700 outline-none focus:border-sky-300 focus:ring-2 focus:ring-sky-100" value={values.accentColor} onChange={(inputEvent) => { setValues((currentValues) => ({ ...currentValues, accentColor: inputEvent.target.value })); setAutosaveState("idle"); }} /></label><NumberControl valueKey="backgroundAlpha" label="背景の濃さ" min={0.04} max={0.5} step={0.01} unit="" value={values.backgroundAlpha} onChange={updateNumberValue} /></div></section>{SECTIONS.map((section) => <ControlPanel key={section.title} section={section} values={values} onChange={updateNumberValue} />)}</aside><main className="grid gap-4"><WeekdayPreview values={values} event={event} allDayEvent={allDayEvent} /><div className="grid gap-4 lg:grid-cols-2"><MonthPreview values={values} event={event} allDayEvent={allDayEvent} /><ListPreview event={event} allDayEvent={allDayEvent} /></div></main></div></div></div>;
+  return <div className="min-h-screen bg-[#f4f7fb] px-4 py-4 text-slate-900"><div className="mx-auto flex max-w-[1180px] flex-col gap-4"><section className="rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-sm"><div className="flex items-center justify-between gap-3"><div className="min-w-0"><p className="text-[10px] font-semibold tracking-[0.18em] text-sky-500">イベントチップ調整</p><h1 className="mt-1 text-xl font-bold tracking-[-0.03em] text-slate-950">表示調整</h1></div><span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-slate-600">{getAutosaveLabel(autosaveState)}</span></div></section><div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]"><aside className="flex flex-col gap-4 xl:sticky xl:top-4 xl:max-h-[calc(100vh-32px)] xl:overflow-auto xl:pr-1"><section className={PANEL_CLASS}><h2 className="text-sm font-bold text-slate-900">色</h2><div className="mt-4 grid gap-4"><label className="flex flex-col gap-2"><span className={LABEL_CLASS}>サンプル色</span><input className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700 outline-none focus:border-sky-300 focus:ring-2 focus:ring-sky-100" value={values.accentColor} onChange={(inputEvent) => { setValues((currentValues) => ({ ...currentValues, accentColor: inputEvent.target.value })); setAutosaveState("idle"); }} /></label><NumberControl valueKey="backgroundAlpha" label="背景の濃さ" min={0.04} max={0.5} step={0.01} unit="" value={values.backgroundAlpha} onChange={updateNumberValue} /></div></section>{SECTIONS.map((section) => <ControlPanel key={section.title} section={section} values={values} onChange={updateNumberValue} />)}</aside><main className="grid gap-4"><RealWeekdayGridPreview title="PC の週・日グリッド" heightClassName="h-[720px]" gridStyle={DESKTOP_WEEKDAY_GRID_STYLE} visibleEvents={visibleEvents} /><RealWeekdayGridPreview title="モバイル週表示グリッド" heightClassName="h-[520px]" gridStyle={MOBILE_WEEK_WEEKDAY_GRID_STYLE} visibleEvents={visibleEvents} /><div className="grid gap-4 lg:grid-cols-2"><MonthPreview values={values} event={event} allDayEvent={allDayEvent} /><ListPreview event={event} allDayEvent={allDayEvent} /></div></main></div></div></div>;
 };
 
 export { EventChipEditorSandboxPage };
