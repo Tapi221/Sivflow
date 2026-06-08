@@ -25,23 +25,6 @@
   background: #f5f5f3;
 }
 
-.settings-workspace__nav-header {
-  padding: 0 8px;
-}
-
-.settings-workspace__eyebrow {
-  display: none;
-}
-
-.settings-workspace__nav-header h2 {
-  margin: 0;
-  color: #1f2328;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 22px;
-}
-
 .settings-workspace__nav-list {
   display: flex;
   min-height: 0;
@@ -133,10 +116,6 @@
   flex: 1;
   flex-direction: column;
   background: #ffffff;
-}
-
-.settings-workspace__hero {
-  display: none;
 }
 
 .settings-workspace__content-scroll {
@@ -253,10 +232,6 @@
   font-weight: 400;
   letter-spacing: 0;
   line-height: 18px;
-}
-
-.settings-workspace__row--stacked .settings-workspace__row-description {
-  display: none;
 }
 
 .settings-workspace__switch {
