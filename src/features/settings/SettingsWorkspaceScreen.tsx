@@ -469,7 +469,6 @@ const SettingSegment = <T extends string | number>({ label, description, value, 
             <button key={String(option.value)} type="button" className={`settings-workspace__segment${isSelected ? " is-selected" : ""}`} role="radio" aria-checked={isSelected} onClick={() => onChange(option.value)}>
               <span className="settings-workspace__segment-label">{option.label}</span>
               {option.caption ? <span className="settings-workspace__segment-caption">{option.caption}</span> : null}
-              {isSelected ? <Check className="settings-workspace__segment-check" size={14} /> : null}
             </button>
           );
         })}
