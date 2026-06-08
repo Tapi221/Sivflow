@@ -210,12 +210,12 @@
 }
 
 .settings-workspace__row--stacked {
-  min-height: 50px;
-  align-items: center;
+  min-height: 54px;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 24px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom-color: #ececf0;
 }
 
 .settings-workspace__row--inline {
@@ -235,11 +235,24 @@
   gap: 2px;
 }
 
+.settings-workspace__row--stacked .settings-workspace__row-copy {
+  flex: 1 1 auto;
+}
+
 .settings-workspace__row-title {
   color: #232323;
   font-size: 13px;
   font-weight: 500;
   letter-spacing: -0.01em;
+  line-height: 20px;
+}
+
+.settings-workspace__row--stacked .settings-workspace__row-title {
+  padding-top: 4px;
+  color: #1c1c1e;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
   line-height: 20px;
 }
 
@@ -249,6 +262,10 @@
   font-weight: 400;
   letter-spacing: 0;
   line-height: 18px;
+}
+
+.settings-workspace__row--stacked .settings-workspace__row-description {
+  display: none;
 }
 
 .settings-workspace__switch {
@@ -286,46 +303,40 @@
 
 .settings-workspace__segmented {
   display: flex;
-  min-width: 0;
-  max-width: 100%;
+  max-width: 58%;
   flex-shrink: 0;
-  align-items: center;
+  flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 8px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-}
-
-.settings-workspace__segmented::-webkit-scrollbar {
-  display: none;
+  gap: 6px;
 }
 
 .settings-workspace__segment {
   display: inline-flex;
-  height: 46px;
-  min-width: 46px;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  padding: 0 18px;
+  padding: 6px 12px;
   border: 0;
   border-radius: 999px;
-  background: #f4f4f8;
-  color: #8f8a96;
+  background: #f0f0f4;
+  color: #6e6e73;
   font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
   text-align: center;
   outline: none;
   cursor: pointer;
+  transition: background-color 90ms ease-out, color 90ms ease-out;
 }
 
 .settings-workspace__segment:hover,
 .settings-workspace__segment:focus-visible {
-  background: #ececf2;
+  background: #e7e7ee;
 }
 
 .settings-workspace__segment.is-selected {
-  background: #1a181f;
+  background: #1c1c1e;
   color: #ffffff;
 }
 
@@ -399,10 +410,9 @@
 }
 
 .settings-workspace__segment-label {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 17px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
   white-space: nowrap;
 }
 
@@ -549,16 +559,12 @@
   }
 
   .settings-workspace__row--stacked {
-    gap: 10px;
     padding-right: 16px;
     padding-left: 16px;
   }
 
-  .settings-workspace__segment {
-    height: 42px;
-    min-width: 42px;
-    padding-right: 14px;
-    padding-left: 14px;
+  .settings-workspace__segmented {
+    max-width: 58%;
   }
 
   .settings-workspace__dropdown-trigger {
