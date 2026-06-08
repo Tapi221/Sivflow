@@ -30,6 +30,7 @@ const MOBILE_EVENT_TIME_WHEEL_PADDING_HEIGHT = MOBILE_EVENT_TIME_WHEEL_ROW_HEIGH
 const MOBILE_EVENT_TIME_WHEEL_HOURS = Array.from({ length: 24 }, (_, hour) => hour);
 const MOBILE_EVENT_TIME_WHEEL_MINUTES = Array.from({ length: 60 }, (_, minute) => minute);
 const EMPTY_GOOGLE_ACCOUNTS: GoogleAccountDisplay[] = [];
+const EMPTY_PROJECT_CALENDAR_LINKS: ProjectCalendarLink[] = [];
 
 const isSameLocalDate = (left: Date, right: Date): boolean => left.getFullYear() === right.getFullYear() && left.getMonth() === right.getMonth() && left.getDate() === right.getDate();
 
@@ -209,9 +210,10 @@ const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInline
   );
 };
 
-const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAccounts, projectCalendarLinks = [], onClose, onAddCalendar, onCreateEvent }: MobileCalendarEventComposerProps) => {
+const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAccounts, projectCalendarLinks, onClose, onAddCalendar, onCreateEvent }: MobileCalendarEventComposerProps) => {
   const calendarAccounts = accounts ?? googleAccounts ?? EMPTY_GOOGLE_ACCOUNTS;
-  const calendarOptions = useMemo(() => buildMobileCalendarOptions(calendarAccounts, projectCalendarLinks), [calendarAccounts, projectCalendarLinks]);
+  const calendarProjectCalendarLinks = projectCalendarLinks ?? EMPTY_PROJECT_CALENDAR_LINKS;
+  const calendarOptions = useMemo(() => buildMobileCalendarOptions(calendarAccounts, calendarProjectCalendarLinks), [calendarAccounts, calendarProjectCalendarLinks]);
   const [form, setForm] = useState<MobileCalendarEventFormState>(() => createInitialEventFormState(selectedDate, calendarOptions));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
