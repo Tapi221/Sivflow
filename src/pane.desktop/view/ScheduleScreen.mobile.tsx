@@ -36,7 +36,7 @@ const MOBILE_SCHEDULE_PANEL_CLASS = "!m-0 h-full min-h-0 !rounded-none !border-0
 const MOBILE_SCHEDULE_HEADER_CLASS = "flex shrink-0 flex-col px-4 pb-3 pt-4";
 const MOBILE_SCHEDULE_SURFACE_CLASS = "schedule-mobile-calendar-surface mx-0 flex min-h-0 flex-1 flex-col overflow-hidden !rounded-none !border-0";
 const MOBILE_TODAY_BUTTON_CLASS = "flex h-8 shrink-0 items-center justify-center rounded-full bg-[#f7f7f7] px-3 text-[13px] font-semibold tracking-[-0.02em] text-[#8e8e93] shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition hover:bg-[#efeff4] hover:text-[#6e6e73] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
-const MOBILE_ADD_EVENT_BUTTON_CLASS = "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#efeeee] text-[22px] font-light leading-none text-[#6b6b6b] shadow-[0_1px_6px_rgba(47,52,59,0.08)] ring-1 ring-[rgba(47,52,59,0.08)] transition hover:bg-[#e8e6e2] hover:text-[#2f343b] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d7d3ce]";
+const MOBILE_ADD_EVENT_BUTTON_CLASS = "fixed bottom-[calc(env(safe-area-inset-bottom)+96px)] right-6 z-40 flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-full border border-[rgba(60,60,67,0.08)] bg-white text-[34px] font-light leading-none text-[#3478f6] shadow-[0_4px_16px_rgba(60,60,67,0.16),0_1px_3px_rgba(60,60,67,0.12)] transition active:scale-[0.97] hover:bg-[#fdfdfd] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3478f6]/30";
 const MOBILE_LIST_VIEW_CLASS = "schedule-mobile-list-view";
 const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const WEEKDAY_EVENT_BUFFER_DAYS = 1;
@@ -195,7 +195,6 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
           <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]" onClick={handleNext} aria-label={t.nextLabel}>›</button>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <button type="button" className={MOBILE_ADD_EVENT_BUTTON_CLASS} onClick={handleOpenEventComposer} aria-label="新規予定を追加">＋</button>
           <MobileViewModeDropdown value={selectedViewMode} onChange={handleSelectViewMode} options={viewOptions} />
         </div>
       </div>
@@ -211,7 +210,7 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
     return <CarvePanel className={MOBILE_SCHEDULE_PANEL_CLASS}>{renderViewHeader(MOBILE_SCHEDULE_HEADER_CLASS)}<div className={cn(MOBILE_SCHEDULE_SURFACE_CLASS, IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={mainCalendarEvents} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} /></div></CarvePanel>;
   };
 
-  return <div ref={contentViewportRef} className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]"><style>{MOBILE_SCHEDULE_STYLE}</style><MobileCalendarSidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} /><MobileCalendarEventComposer isOpen={isEventComposerOpen} selectedDate={selectedDate} accounts={googleAccountsWithColorOverridesForSidebar} projectCalendarLinks={projectCalendarLinks} onClose={handleCloseEventComposer} onAddCalendar={addGoogleCalendar} onCreateEvent={createGoogleCalendarEvent} /><main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white p-0">{renderCalendarContent()}</main></div>;
+  return <div ref={contentViewportRef} className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]"><style>{MOBILE_SCHEDULE_STYLE}</style><MobileCalendarSidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} /><MobileCalendarEventComposer isOpen={isEventComposerOpen} selectedDate={selectedDate} accounts={googleAccountsWithColorOverridesForSidebar} projectCalendarLinks={projectCalendarLinks} onClose={handleCloseEventComposer} onAddCalendar={addGoogleCalendar} onCreateEvent={createGoogleCalendarEvent} /><button type="button" className={MOBILE_ADD_EVENT_BUTTON_CLASS} onClick={handleOpenEventComposer} aria-label="新規予定を追加"><span aria-hidden="true" className="-mt-[3px]">＋</span></button><main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white p-0">{renderCalendarContent()}</main></div>;
 };
 
 export { ScheduleScreen };
