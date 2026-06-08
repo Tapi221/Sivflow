@@ -20,7 +20,7 @@ type NoteAffineRecord = {
 };
 
 type BlocksuiteRuntime = {
-  AffineEditorContainer: new () => BlocksuiteEditorContainer;
+  EditorContainer: new () => BlocksuiteEditorContainer;
   AffineSchemas: unknown[];
   DocCollection: new (options: { schema: BlocksuiteSchema }) => BlocksuiteDocCollection;
   Schema: new () => BlocksuiteSchema;
@@ -65,19 +65,19 @@ const NOTE_EDITOR_DEFAULT_TITLE = "Untitled";
 let blocksuiteRuntimePromise: Promise<BlocksuiteRuntime> | null = null;
 
 const loadBlocksuiteRuntime = async (): Promise<BlocksuiteRuntime> => {
-  blocksuiteRuntimePromise ??= Promise.all([import("@blocksuite/blocks/models"), import("@blocksuite/presets"), import("@blocksuite/store")]).then(([models, presets, store]) => {
-    const runtime = { ...models, ...presets, ...store } as Record<string, unknown>;
-    const AffineEditorContainer = runtime.AffineEditorContainer;
+  blocksuiteRuntimePromise ??= Promise.all([import("@blocksuite/blocks"), import("@blocksuite/presets"), import("@blocksuite/store")]).then(([blocks, presets, store]) => {
+    const runtime = { ...blocks, ...presets, ...store } as Record<string, unknown>;
+    const EditorContainer = runtime.AffineEditorContainer ?? runtime.EditorContainer;
     const AffineSchemas = runtime.AffineSchemas;
     const DocCollection = runtime.DocCollection;
     const Schema = runtime.Schema;
     const Text = runtime.Text;
 
-    if (typeof AffineEditorContainer !== "function" || !Array.isArray(AffineSchemas) || typeof DocCollection !== "function" || typeof Schema !== "function" || typeof Text !== "function") {
+    if (typeof EditorContainer !== "function" || !Array.isArray(AffineSchemas) || typeof DocCollection !== "function" || typeof Schema !== "function" || typeof Text !== "function") {
       throw new Error("BlockSuite AFFiNE runtime is incomplete.");
     }
 
-    return { AffineEditorContainer, AffineSchemas, DocCollection, Schema, Text } as BlocksuiteRuntime;
+    return { EditorContainer, AffineSchemas, DocCollection, Schema, Text } as BlocksuiteRuntime;
   });
 
   return blocksuiteRuntimePromise;
@@ -189,7 +189,7 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
       await loadDocWithInitialText(runtime, doc, note);
       if (isDisposed) return;
 
-      const editor = new runtime.AffineEditorContainer();
+      const editor = new runtime.EditorContainer();
       editor.doc = doc;
       editor.mode = "page";
       editor.className = NOTE_EDITOR_CONTAINER_CLASS_NAME;
