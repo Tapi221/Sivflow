@@ -26,7 +26,7 @@ export type WorkspaceRouteTabId =
 /**
  * タブ種別
  */
-export type WorkspaceTabKind = "route" | "explorer" | "document" | "card";
+export type WorkspaceTabKind = "route" | "explorer" | "document" | "card" | "note";
 
 /**
  * 全タブ共通ベース
@@ -77,13 +77,24 @@ export type WorkspaceCardTab = WorkspaceTabBase & {
 };
 
 /**
+ * ノートタブ
+ */
+export type WorkspaceNoteTab = WorkspaceTabBase & {
+  id: `note:${string}`;
+  kind: "note";
+  noteId: string;
+  folderId: string | null;
+};
+
+/**
  * 全タブユニオン
  */
 export type WorkspaceTab =
   | WorkspaceRouteTab
   | WorkspaceExplorerTab
   | WorkspaceDocumentTab
-  | WorkspaceCardTab;
+  | WorkspaceCardTab
+  | WorkspaceNoteTab;
 
 /**
  * エンティティ系タブ（ルート・explorer除外）
