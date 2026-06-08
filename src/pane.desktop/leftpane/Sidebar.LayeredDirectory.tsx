@@ -16,6 +16,7 @@ import { useTags } from "@/features/settings/hooks/useTags";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
+import { useNotes } from "@/hooks/note/useNotes";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
 import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
@@ -84,7 +85,7 @@ const PROJECT_ADD_MENU_ITEM_DEFINITIONS: readonly ProjectAddMenuItemDefinition[]
 const PROJECT_ADD_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_ADD_MENU_ITEM_DEFINITIONS.map((item) => item.label), 132);
 const PROJECT_ADD_MENU_HEIGHT = PROJECT_ADD_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 const EMPTY_COLLECTION: never[] = [];
-const OPENABLE_ENTITY_SELECTOR = "[data-directory-entity-kind='cardSet'], [data-directory-entity-kind='document']";
+const OPENABLE_ENTITY_SELECTOR = "[data-directory-entity-kind='cardSet'], [data-directory-entity-kind='document'], [data-directory-entity-kind='note']";
 
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 const IconChevronDown = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M4 6.25L8 10.25L12 6.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
@@ -145,7 +146,7 @@ const getProjectAddMenuPosition = (event: ReactMouseEvent<HTMLElement>): Project
 const getActiveLibraryFolderId = (tab: WorkspaceTab | null): string | null => {
   if (!tab || tab.sectionKey !== "library") return null;
   if (tab.kind === "explorer") return tab.explorerState.selectedFolderId;
-  if (tab.kind === "document" || tab.kind === "card") return tab.folderId;
+  if (tab.kind === "document" || tab.kind === "card" || tab.kind === "note") return tab.folderId;
   return null;
 };
 
@@ -201,11 +202,13 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   const { addTag, tags } = useTags();
   const { createCardSet } = useCardSets(undefined, { enabled: false });
   const { createFolder } = useFolderCommands();
+  const { createNote } = useNotes(undefined, { enabled: false });
   const { folders } = useFoldersRead();
   const openSearch = useSearchStore((state) => state.open);
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
+  const openNoteTab = useWorkspaceTabsStore((state) => state.openNoteTab);
   const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
   const [, setProjectAddExpandedFolderIds] = useState<Set<string>>(() => new Set());
   const projectAddMenuRef = useRef<HTMLDivElement | null>(null);
@@ -273,8 +276,11 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   const handleCreateSelectedFolderNote = useCallback(() => {
     if (!selectedNavigationFolderId) return;
     closeProjectAddMenu();
-    void createCardSet(DEFAULT_NEW_NOTE_NAME, selectedNavigationFolderId);
-  }, [closeProjectAddMenu, createCardSet, selectedNavigationFolderId]);
+    void (async () => {
+      const note = await createNote(DEFAULT_NEW_NOTE_NAME, selectedNavigationFolderId, { orderIndex: getNextOrderIndex(selectedNavigationFolderId) });
+      openNoteTab({ noteId: note.id, title: note.title, folderId: note.folderId });
+    })();
+  }, [closeProjectAddMenu, createNote, getNextOrderIndex, openNoteTab, selectedNavigationFolderId]);
 
   const handleCreateSelectedFolderCardSet = useCallback(() => {
     if (!selectedNavigationFolderId) return;
