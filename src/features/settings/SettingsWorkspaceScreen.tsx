@@ -1,8 +1,7 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { UserSettings } from "@/types";
-import { Check, ChevronDown, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/ui/icons";
+import { Globe, Keyboard, Shield, Type, User, Volume2 } from "@/ui/icons";
 import { useLocaleStore, type Locale } from "@shared/i18n/locale.store";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import "./SettingsWorkspaceScreen.css";
@@ -18,7 +17,6 @@ type SettingsSectionDefinition = {
 type SettingOption<T extends string | number> = {
   value: T;
   label: string;
-  caption?: string;
 };
 
 type SettingsSectionBlockProps = {
@@ -35,14 +33,6 @@ type SettingToggleProps = {
 };
 
 type SettingSegmentProps<T extends string | number> = {
-  label: string;
-  description?: string;
-  value: T;
-  options: readonly SettingOption<T>[];
-  onChange: (value: T) => void;
-};
-
-type SettingDropdownProps<T extends string | number> = {
   label: string;
   description?: string;
   value: T;
@@ -68,9 +58,8 @@ type SettingsSectionCopy = {
   description: string;
 };
 
-type LanguageOptionCopy = {
+type SettingOptionCopy = {
   label: string;
-  caption: string;
 };
 
 type HotkeyCopy = {
@@ -82,10 +71,10 @@ type SettingsWorkspaceCopy = {
   ariaLabel: string;
   navAriaLabel: string;
   sections: Record<SettingsSectionId, SettingsSectionCopy>;
-  languageOptions: Record<SettingsLanguage, LanguageOptionCopy>;
-  weekStartOptions: Record<UserSettings["weekStartDay"], LanguageOptionCopy>;
-  questionDisplayOptions: Record<QuestionDisplayMode, LanguageOptionCopy>;
-  markdownTabOptions: Record<MarkdownTabSize, LanguageOptionCopy>;
+  languageOptions: Record<SettingsLanguage, SettingOptionCopy>;
+  weekStartOptions: Record<UserSettings["weekStartDay"], SettingOptionCopy>;
+  questionDisplayOptions: Record<QuestionDisplayMode, SettingOptionCopy>;
+  markdownTabOptions: Record<MarkdownTabSize, SettingOptionCopy>;
   hotkeys: readonly HotkeyCopy[];
   accountProfileTitle: string;
   accountProfileDescription: string;
@@ -152,22 +141,22 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
       hotkey: { label: "Hotkey", description: "キーボード操作" },
     },
     languageOptions: {
-      ja: { label: "日本語", caption: "日本語" },
-      en: { label: "English", caption: "英語" },
-      zh: { label: "中文", caption: "中国語" },
+      ja: { label: "日本語" },
+      en: { label: "English" },
+      zh: { label: "中文" },
     },
     weekStartOptions: {
-      monday: { label: "月曜日", caption: "月曜日" },
-      sunday: { label: "日曜日", caption: "日曜日" },
+      monday: { label: "月曜日" },
+      sunday: { label: "日曜日" },
     },
     questionDisplayOptions: {
-      tap_to_reveal: { label: "タップで表示", caption: "タップで表示" },
-      always: { label: "常に表示", caption: "常に表示" },
+      tap_to_reveal: { label: "タップで表示" },
+      always: { label: "常に表示" },
     },
     markdownTabOptions: {
-      2: { label: "2", caption: "コンパクト" },
-      4: { label: "4", caption: "標準" },
-      8: { label: "8", caption: "広め" },
+      2: { label: "2" },
+      4: { label: "4" },
+      8: { label: "8" },
     },
     hotkeys: [
       { label: "検索を開く", keys: "⌘K / Ctrl K" },
@@ -238,22 +227,22 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
       hotkey: { label: "Hotkey", description: "Keyboard controls" },
     },
     languageOptions: {
-      ja: { label: "日本語", caption: "Japanese" },
-      en: { label: "English", caption: "English" },
-      zh: { label: "中文", caption: "Chinese" },
+      ja: { label: "日本語" },
+      en: { label: "English" },
+      zh: { label: "中文" },
     },
     weekStartOptions: {
-      monday: { label: "Monday", caption: "Monday" },
-      sunday: { label: "Sunday", caption: "Sunday" },
+      monday: { label: "Monday" },
+      sunday: { label: "Sunday" },
     },
     questionDisplayOptions: {
-      tap_to_reveal: { label: "Tap to reveal", caption: "Tap to reveal" },
-      always: { label: "Always visible", caption: "Always visible" },
+      tap_to_reveal: { label: "Tap to reveal" },
+      always: { label: "Always visible" },
     },
     markdownTabOptions: {
-      2: { label: "2", caption: "compact" },
-      4: { label: "4", caption: "standard" },
-      8: { label: "8", caption: "wide" },
+      2: { label: "2" },
+      4: { label: "4" },
+      8: { label: "8" },
     },
     hotkeys: [
       { label: "Open search", keys: "⌘K / Ctrl K" },
@@ -324,22 +313,22 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
       hotkey: { label: "Hotkey", description: "键盘操作" },
     },
     languageOptions: {
-      ja: { label: "日本語", caption: "日语" },
-      en: { label: "English", caption: "英语" },
-      zh: { label: "中文", caption: "中文" },
+      ja: { label: "日本語" },
+      en: { label: "English" },
+      zh: { label: "中文" },
     },
     weekStartOptions: {
-      monday: { label: "星期一", caption: "星期一" },
-      sunday: { label: "星期日", caption: "星期日" },
+      monday: { label: "星期一" },
+      sunday: { label: "星期日" },
     },
     questionDisplayOptions: {
-      tap_to_reveal: { label: "点击显示", caption: "点击显示" },
-      always: { label: "始终显示", caption: "始终显示" },
+      tap_to_reveal: { label: "点击显示" },
+      always: { label: "始终显示" },
     },
     markdownTabOptions: {
-      2: { label: "2", caption: "紧凑" },
-      4: { label: "4", caption: "标准" },
-      8: { label: "8", caption: "宽" },
+      2: { label: "2" },
+      4: { label: "4" },
+      8: { label: "8" },
     },
     hotkeys: [
       { label: "打开搜索", keys: "⌘K / Ctrl K" },
@@ -476,38 +465,6 @@ const SettingSegment = <T extends string | number>({ label, description, value, 
   );
 };
 
-const SettingDropdown = <T extends string | number>({ label, description, value, options, onChange }: SettingDropdownProps<T>) => {
-  const selectedOption = options.find((option) => option.value === value) ?? options[0];
-
-  return (
-    <div className="settings-workspace__row settings-workspace__row--inline">
-      <div className="settings-workspace__row-copy">
-        <span className="settings-workspace__row-title">{label}</span>
-        {description ? <span className="settings-workspace__row-description">{description}</span> : null}
-      </div>
-      <DropdownMenu modal={false}>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className="settings-workspace__dropdown-trigger" aria-label={label} onClick={(event) => event.stopPropagation()}>
-            <span className="settings-workspace__dropdown-trigger-label">{selectedOption?.label ?? String(value)}</span>
-            <ChevronDown className="settings-workspace__dropdown-trigger-icon" size={14} />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" sideOffset={6} collisionPadding={16} className="settings-workspace__dropdown-content z-[200]">
-          {options.map((option) => {
-            const isSelected = option.value === value;
-            return (
-              <DropdownMenuItem key={String(option.value)} className="settings-workspace__dropdown-item" onSelect={() => onChange(option.value)}>
-                <span className="settings-workspace__dropdown-item-label">{option.label}</span>
-                {isSelected ? <Check className="settings-workspace__dropdown-item-check" size={14} /> : null}
-              </DropdownMenuItem>
-            );
-          })}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
-};
-
 const SettingKeyValue = ({ label, value }: SettingKeyValueProps) => {
   return (
     <div className="settings-workspace__key-value">
@@ -609,7 +566,7 @@ const SettingsWorkspaceScreen = () => {
           ) : null}
           {activeSectionId === "preferences" ? (
             <SettingsSectionBlock title={copy.preferencesTitle} description={copy.preferencesDescription}>
-              <SettingDropdown label={copy.languageLabel} description={copy.languageDescription} value={language} options={languageOptions} onChange={handleLanguageChange} />
+              <SettingSegment label={copy.languageLabel} description={copy.languageDescription} value={language} options={languageOptions} onChange={handleLanguageChange} />
               <SettingSegment label={copy.weekStartLabel} description={copy.weekStartDescription} value={weekStartDay} options={weekStartOptions} onChange={(value) => void updateSettings({ weekStartDay: value })} />
               <SettingToggle label={copy.notificationsLabel} description={copy.notificationsDescription} checked={settings?.notificationsEnabled ?? false} onChange={(checked) => updateBooleanSetting("notificationsEnabled", checked)} />
             </SettingsSectionBlock>
