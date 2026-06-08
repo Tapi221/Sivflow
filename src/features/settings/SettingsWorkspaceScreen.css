@@ -184,7 +184,7 @@
   border-bottom: 0;
 }
 
-.settings-workspace__row--stacked {
+.settings-workspace__row--choice {
   min-height: 54px;
   align-items: flex-start;
   justify-content: space-between;
@@ -201,10 +201,6 @@
   gap: 2px;
 }
 
-.settings-workspace__row--stacked .settings-workspace__row-copy {
-  flex: 1 1 auto;
-}
-
 .settings-workspace__row-title {
   color: #232323;
   font-size: 13px;
@@ -213,7 +209,7 @@
   line-height: 20px;
 }
 
-.settings-workspace__row--stacked .settings-workspace__row-title {
+.settings-workspace__row--choice .settings-workspace__row-title {
   padding-top: 4px;
   color: #1c1c1e;
   font-size: 15px;
@@ -426,7 +422,7 @@
 }
 
 @media (max-width: 520px) {
-  .settings-workspace__row--stacked {
+  .settings-workspace__row--choice {
     padding-right: 16px;
     padding-left: 16px;
   }
