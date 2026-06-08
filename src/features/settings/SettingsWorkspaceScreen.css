@@ -105,10 +105,6 @@
   white-space: nowrap;
 }
 
-.settings-workspace__nav-copy small {
-  display: none;
-}
-
 .settings-workspace__main {
   display: flex;
   min-width: 0;
@@ -296,21 +292,9 @@
   transition: background-color 90ms ease-out, color 90ms ease-out;
 }
 
-.settings-workspace__segment:hover,
-.settings-workspace__segment:focus-visible {
-  background: #e7e7ee;
-}
-
 .settings-workspace__segment.is-selected {
   background: #1c1c1e;
   color: #ffffff;
-}
-
-.settings-workspace__segment-label {
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 16px;
-  white-space: nowrap;
 }
 
 .settings-workspace__profile-card {
