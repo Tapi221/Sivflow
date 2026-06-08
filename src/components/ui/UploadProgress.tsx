@@ -77,9 +77,8 @@ const UploadProgress = ({
       </div>
 
       {status === "uploading" && (
-        <div className="flex items-center gap-2 text-xs text-slate-400">
+        <div className="flex items-center gap-2 text-xs text-slate-400" role="status" aria-label="アップロード中">
           <Loader2 className="w-3 h-3 animate-spin" />
-          <span>アップロード中...</span>
         </div>
       )}
 
