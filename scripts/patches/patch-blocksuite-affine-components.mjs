@@ -3,6 +3,10 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+const checkboxIconImportReplacement = {
+  broken: /import\s*\{\s*CheckBoxCkeckSolidIcon,\s*CheckBoxUnIcon\s*\}\s*from\s*['"]@blocksuite\/icons\/lit['"];?/g,
+  patched: "import { CheckBoxUnIcon as CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';",
+};
 const patches = [
   {
     label: "@blocksuite/affine-components context-menu checkbox icon import",
@@ -17,12 +21,12 @@ const patches = [
   {
     label: "@blocksuite/data-view boolean group checkbox icon import",
     targetPath: join(repoRoot, "node_modules", "@blocksuite", "data-view", "dist", "core", "group-by", "renderer", "boolean-group.js"),
-    replacements: [
-      {
-        broken: /import\s*\{\s*CheckBoxCkeckSolidIcon,\s*CheckBoxUnIcon\s*\}\s*from\s*['"]@blocksuite\/icons\/lit['"];?/g,
-        patched: "import { CheckBoxUnIcon as CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';",
-      },
-    ],
+    replacements: [checkboxIconImportReplacement],
+  },
+  {
+    label: "@blocksuite/data-view checkbox cell renderer checkbox icon import",
+    targetPath: join(repoRoot, "node_modules", "@blocksuite", "data-view", "dist", "property-presets", "checkbox", "cell-renderer.js"),
+    replacements: [checkboxIconImportReplacement],
   },
 ];
 
