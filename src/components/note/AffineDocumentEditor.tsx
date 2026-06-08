@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import "@blocksuite/presets/themes/affine.css";
 import type { Note, NoteBlockContent } from "@/types";
 
@@ -34,6 +34,9 @@ type BlocksuiteSchema = {
 
 type BlocksuiteDocCollection = {
   createDoc: (options: { id: string }) => BlocksuiteDoc;
+  meta?: {
+    initialize?: () => void;
+  };
 };
 
 type BlocksuiteDoc = {
@@ -64,8 +67,8 @@ const NOTE_BLOCK_NOTE_XYWH = "[0,0,820,640]";
 let blocksuiteRuntimePromise: Promise<BlocksuiteRuntime> | null = null;
 
 const loadBlocksuiteRuntime = async (): Promise<BlocksuiteRuntime> => {
-  blocksuiteRuntimePromise ??= Promise.all([import("@blocksuite/blocks"), import("@blocksuite/presets"), import("@blocksuite/store")]).then(([blocks, presets, store]) => {
-    const runtime = { ...blocks, ...presets, ...store } as Record<string, unknown>;
+  blocksuiteRuntimePromise ??= Promise.all([import("@blocksuite/blocks/models"), import("@blocksuite/presets"), import("@blocksuite/store")]).then(([models, presets, store]) => {
+    const runtime = { ...models, ...presets, ...store } as Record<string, unknown>;
     const AffineSchemas = runtime.AffineSchemas;
     const DocCollection = runtime.DocCollection;
     const EditorContainer = runtime.EditorContainer;
@@ -121,6 +124,10 @@ const getEditorText = (doc: BlocksuiteDoc, host: HTMLDivElement): string => {
 
 const createNoteContent = (doc: BlocksuiteDoc, text: string): NoteBlockContent => [{ type: NOTE_CONTENT_TYPE, blocks: createParagraphBlocks(text), text, snapshot: doc.toJSON?.() ?? null, updatedAt: new Date().toISOString() } satisfies NoteAffineRecord];
 
+const initializeCollection = (collection: BlocksuiteDocCollection): void => {
+  collection.meta?.initialize?.();
+};
+
 const loadDocWithInitialText = async (runtime: BlocksuiteRuntime, doc: BlocksuiteDoc, note: Note): Promise<void> => {
   const text = getRecordText(note.content);
   const title = note.title.trim() || NOTE_EDITOR_DEFAULT_TITLE;
@@ -142,7 +149,6 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
   const latestSavedTextRef = useRef<string>(getRecordText(note.content));
   const onChangeRef = useRef(onChange);
   const saveTimerRef = useRef<number | null>(null);
-  const [mountNonce, setMountNonce] = useState(0);
 
   onChangeRef.current = onChange;
 
@@ -180,6 +186,7 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
       const schema = new runtime.Schema();
       schema.register(runtime.AffineSchemas);
       const collection = new runtime.DocCollection({ schema });
+      initializeCollection(collection);
       const doc = collection.createDoc({ id: note.id });
       await loadDocWithInitialText(runtime, doc, note);
       if (isDisposed) return;
@@ -213,11 +220,7 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
       docRef.current = null;
       host.replaceChildren();
     };
-  }, [mountNonce, note.id, scheduleSave]);
-
-  useEffect(() => {
-    setMountNonce((nonce) => nonce + 1);
-  }, [note.title]);
+  }, [note.id, note.title, scheduleSave]);
 
   return (
     <div className={NOTE_EDITOR_ROOT_CLASS_NAME}>
