@@ -137,6 +137,7 @@ export const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDa
     currentDate: navigation.currentDate,
     selectedViewMode: navigation.primaryViewMode,
     calendarBuffer: navigation.calendarBuffer,
+    weekStartDay,
   });
   const visibleDays = visibleRange.interactionDays;
   const displayDays = visibleRange.displayDays;
