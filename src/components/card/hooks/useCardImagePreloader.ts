@@ -5,7 +5,6 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CARD_IMAGE_PRELOAD, CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY } from "@constants/web/app";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
 import { getCardImages } from "@/domain/card/content";
 import { storage } from "@/services/firebase";
@@ -14,6 +13,30 @@ import { getBlobCacheStats } from "@/services/imageBlobUrlSessionCache";
 import { getCachedRemoteUrl, getPreloadCacheStats, isUrlDecoded, markUrlDecoded, setCachedRemoteUrl } from "@/services/imagePreloadCache";
 import { getLocalDb } from "@/services/localDB";
 import type { Card, UploadedImage } from "@/types/domain/card";
+
+type IdleHandle = ReturnType<typeof setTimeout>;
+
+type RequestIdleCallback = (
+  cb: () => void,
+  opts?: { timeout: number },
+) => IdleHandle;
+
+type CancelIdleCallback = (id: IdleHandle) => void;
+
+type CardCatalogEntry = {
+  id: string;
+  signature: string;
+  hasImages: boolean;
+};
+
+const CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY = "sivflow_preload_debug";
+
+const CARD_IMAGE_PRELOAD = {
+  eagerRadiusFallback: 8,
+  eagerBuffer: 2,
+  idleExtra: 12,
+  maxEagerConcurrent: 5,
+} as const;
 
 const isDebug = (): boolean =>
   typeof localStorage !== "undefined" &&
@@ -115,21 +138,6 @@ const preloadCard = async (
       await decodeUrl(url);
     }),
   );
-};
-
-type IdleHandle = ReturnType<typeof setTimeout>;
-
-type RequestIdleCallback = (
-  cb: () => void,
-  opts?: { timeout: number },
-) => IdleHandle;
-
-type CancelIdleCallback = (id: IdleHandle) => void;
-
-type CardCatalogEntry = {
-  id: string;
-  signature: string;
-  hasImages: boolean;
 };
 
 const getRequestIdleCallback = (): RequestIdleCallback | null => {
