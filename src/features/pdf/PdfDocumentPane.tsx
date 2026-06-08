@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import type { DocumentItem, PdfViewerState } from "@/types";
@@ -177,7 +178,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   }, [flushPendingViewerStateSave]);
 
   if (!localSource.isResolved && !source) {
-    return <div className={statusClassName}>PDFを読み込み中...</div>;
+    return <LoadingSpinner className={cn(PDF_DOCUMENT_PANE_CLASS_NAME, "bg-[var(--carvepanel-surface)] px-6 text-[#6d6d6d]", className)} label="PDFを読み込み中" />;
   }
 
   if (localSource.isResolved && !source) {
