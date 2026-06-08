@@ -7,7 +7,7 @@ import { RightClickPanelSurface } from "@/chip/rightclickpanel.desktop/rightClic
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
 import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
-import { DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_PROJECT_NAME, getFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { DEFAULT_NEW_CARD_SET_NAME, DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_PROJECT_NAME, getFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
@@ -26,7 +26,7 @@ type IconProps = {
   className?: string;
 };
 
-type ProjectAddMenuActionId = "create-note" | "create-folder" | "import-pdf";
+type ProjectAddMenuActionId = "create-note" | "create-card-set" | "create-folder" | "import-pdf";
 
 type ProjectAddMenuItemDefinition = {
   id: ProjectAddMenuActionId;
@@ -43,6 +43,7 @@ type ProjectAddMenuProps = {
   y: number;
   menuRef: RefObject<HTMLDivElement | null>;
   onCreateNote: () => void;
+  onCreateCardSet: () => void;
   onCreateFolder: () => void;
   onImportPdf: () => void;
 };
@@ -75,6 +76,7 @@ const FILTER_ARIA_LABEL = "絞り込みを開く";
 const PROJECT_ADD_MENU_PANEL_ID = "layered-project-add-menu";
 const PROJECT_ADD_MENU_ITEM_DEFINITIONS: readonly ProjectAddMenuItemDefinition[] = [
   { id: "create-note", label: DEFAULT_NEW_NOTE_NAME },
+  { id: "create-card-set", label: DEFAULT_NEW_CARD_SET_NAME },
   { id: "create-folder", label: "新規フォルダ" },
   { id: "import-pdf", label: "PDFを追加" },
 ];
@@ -148,13 +150,18 @@ const scheduleLeftPanelClose = (onToggleLeftPanel?: () => void) => {
   window.setTimeout(onToggleLeftPanel, 0);
 };
 
-const ProjectAddMenu = ({ x, y, menuRef, onCreateNote, onCreateFolder, onImportPdf }: ProjectAddMenuProps) => {
+const ProjectAddMenu = ({ x, y, menuRef, onCreateNote, onCreateCardSet, onCreateFolder, onImportPdf }: ProjectAddMenuProps) => {
   const handleItemClick = (event: ReactMouseEvent<HTMLButtonElement>, id: ProjectAddMenuActionId) => {
     event.preventDefault();
     event.stopPropagation();
 
     if (id === "create-note") {
       onCreateNote();
+      return;
+    }
+
+    if (id === "create-card-set") {
+      onCreateCardSet();
       return;
     }
 
@@ -259,6 +266,12 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
     if (!selectedNavigationFolderId) return;
     closeProjectAddMenu();
     void createCardSet(DEFAULT_NEW_NOTE_NAME, selectedNavigationFolderId);
+  }, [closeProjectAddMenu, createCardSet, selectedNavigationFolderId]);
+
+  const handleCreateSelectedFolderCardSet = useCallback(() => {
+    if (!selectedNavigationFolderId) return;
+    closeProjectAddMenu();
+    void createCardSet(DEFAULT_NEW_CARD_SET_NAME, selectedNavigationFolderId);
   }, [closeProjectAddMenu, createCardSet, selectedNavigationFolderId]);
 
   const handleCreateSelectedFolderChild = useCallback(() => {
@@ -368,7 +381,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
         </>
       ) : null}
       {shouldShowCalendarContent ? <div className="min-h-0 flex-1">{calendarContent}</div> : null}
-      {shouldShowDirectoryContent && projectAddMenu ? <ProjectAddMenu x={projectAddMenu.x} y={projectAddMenu.y} menuRef={projectAddMenuRef} onCreateNote={handleCreateSelectedFolderNote} onCreateFolder={handleCreateSelectedFolderChild} onImportPdf={handleImportSelectedFolderPdf} /> : null}
+      {shouldShowDirectoryContent && projectAddMenu ? <ProjectAddMenu x={projectAddMenu.x} y={projectAddMenu.y} menuRef={projectAddMenuRef} onCreateNote={handleCreateSelectedFolderNote} onCreateCardSet={handleCreateSelectedFolderCardSet} onCreateFolder={handleCreateSelectedFolderChild} onImportPdf={handleImportSelectedFolderPdf} /> : null}
     </div>
   );
 };
