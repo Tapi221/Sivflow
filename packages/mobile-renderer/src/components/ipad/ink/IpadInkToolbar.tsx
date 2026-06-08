@@ -17,21 +17,6 @@ const TOOL_ITEMS: readonly ToolItem[] = [
   { label: "Marker", value: "highlighter" },
   { label: "Clear", value: "eraser" },
 ];
-
-const IpadInkToolbar = ({ tool, onToolChange }: IpadInkToolbarProps) => (
-  <View style={styles.container}>
-    {TOOL_ITEMS.map((item) => {
-      const isActive = item.value === tool;
-
-      return (
-        <Pressable key={item.value} accessibilityRole="button" accessibilityState={{ selected: isActive }} onPress={() => onToolChange(item.value)} style={[styles.toolButton, isActive && styles.toolButtonActive]}>
-          <Text style={[styles.toolButtonText, isActive && styles.toolButtonTextActive]}>{item.label}</Text>
-        </Pressable>
-      );
-    })}
-  </View>
-);
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
@@ -59,6 +44,20 @@ const styles = StyleSheet.create({
     color: "#2563eb",
   },
 });
+
+const IpadInkToolbar = ({ tool, onToolChange }: IpadInkToolbarProps) => (
+  <View style={styles.container}>
+    {TOOL_ITEMS.map((item) => {
+      const isActive = item.value === tool;
+
+      return (
+        <Pressable key={item.value} accessibilityRole="button" accessibilityState={{ selected: isActive }} onPress={() => onToolChange(item.value)} style={[styles.toolButton, isActive && styles.toolButtonActive]}>
+          <Text style={[styles.toolButtonText, isActive && styles.toolButtonTextActive]}>{item.label}</Text>
+        </Pressable>
+      );
+    })}
+  </View>
+);
 
 const MemoizedIpadInkToolbar = memo(IpadInkToolbar);
 
