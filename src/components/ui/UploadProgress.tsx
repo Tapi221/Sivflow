@@ -3,7 +3,7 @@ import { Progress } from "./progress";
 import { CheckCircle2, FileText, Loader2, X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 
-export interface UploadProgressProps {
+interface UploadProgressProps {
   fileName: string;
   progress: number;
   status: "idle" | "uploading" | "completed" | "failed";
@@ -13,7 +13,7 @@ export interface UploadProgressProps {
   showIcon?: boolean;
 }
 
-export const UploadProgress = ({
+const UploadProgress = ({
   fileName,
   progress,
   status,
@@ -56,15 +56,7 @@ export const UploadProgress = ({
       <Progress
         value={progress}
         className={cn("h-1.5", status === "failed" ? "bg-red-100" : "")}
-        // shadcn Progress 'indicator' override via child selector style if needed or use custom styles
-        // Assuming standard shadcn implementation, we can target the indicator using [&>div]
-        // But for safety, let's just stick to default or simple overrides.
-        // If we really want color, we can wrap or use style.
-        // For now, remove indicatorClassName which caused error.
       />
-      {/* We can force color via style if needed, but let's see default first. 
-          Actually, we can use [&>div]:bg-red-500 utility class on the root if convenient.
-      */}
       <div
         className={cn(
           "h-1.5 w-full bg-slate-100 rounded-full overflow-hidden mt-2",
@@ -119,3 +111,6 @@ export const UploadProgress = ({
     </div>
   );
 };
+
+export { UploadProgress };
+export type { UploadProgressProps };
