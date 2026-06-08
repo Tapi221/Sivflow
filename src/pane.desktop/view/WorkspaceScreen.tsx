@@ -14,14 +14,13 @@ import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
-import { CalendarSidebarController } from "@/pane.desktop/leftpane/schedule/CalendarSidebarController";
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceExplorerTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import type { DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { Search } from "@/ui/icons";
 import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
-import { MobileSidebarDrawer } from "./MobileSidebarDrawer";
+import { MobileScheduleSidebar, MobileScheduleSidebarOpenButton } from "./MobileScheduleSidebar";
 import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
 
 type ExplorerWorkspaceContentProps = {
@@ -52,10 +51,7 @@ type SettingsDialogHostProps = {
 };
 
 const MOBILE_WORKSPACE_MEDIA_QUERY = "(max-width: 767px)";
-const MOBILE_WORKSPACE_SIDEBAR_ID = "mobile-workspace-sidebar";
 const MOBILE_WORKSPACE_SIDEBAR_OPEN_BUTTON_CLASS_NAME = "pointer-events-auto absolute left-3 top-3 z-[90] flex h-10 w-10 items-center justify-center bg-transparent p-0 text-[#111111] outline-none transition hover:text-[#111111] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
-const MOBILE_WORKSPACE_SIDEBAR_OPEN_ICON_CLASS_NAME = "h-5 w-5 shrink-0 [transform:scaleX(-1)]";
-const MOBILE_WORKSPACE_DRAWER_CONTENT_CLASS_NAME = "h-full min-h-0 w-full [&_.app-layered-directory]:!min-w-0 [&_.app-layered-directory]:!w-full";
 const MOBILE_WORKSPACE_MAIN_PANEL_CLASS_NAME = "!rounded-none !border-0 !shadow-none";
 const COLLAPSED_SIDEBAR_TOGGLE_CLASS_NAME = "pointer-events-auto absolute left-3 top-3 z-[90] flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(0,0,0,0.05)] bg-[rgba(255,255,255,0.82)] p-0 text-[#8c8c8c] shadow-[0_1px_2px_rgba(15,23,42,0.08)] outline-none backdrop-blur-xl transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
 const COLLAPSED_SIDEBAR_TOGGLE_ICON_CLASS_NAME = "h-5 w-5 shrink-0 [transform:scaleX(-1)]";
@@ -233,14 +229,8 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
     <div className="relative isolate flex h-full min-h-0 w-full overflow-hidden bg-transparent">
       {isMobileWorkspace ? (
         <>
-          <button type="button" className={MOBILE_WORKSPACE_SIDEBAR_OPEN_BUTTON_CLASS_NAME} onClick={handleOpenMobileSidebar} aria-label="サイドバーを開く" aria-controls={MOBILE_WORKSPACE_SIDEBAR_ID} aria-expanded={isMobileSidebarOpen}>
-            <SidebarOpenIcon className={MOBILE_WORKSPACE_SIDEBAR_OPEN_ICON_CLASS_NAME} />
-          </button>
-          <MobileSidebarDrawer id={MOBILE_WORKSPACE_SIDEBAR_ID} isOpen={isMobileSidebarOpen} onClose={handleCloseMobileSidebar}>
-            <div className={MOBILE_WORKSPACE_DRAWER_CONTENT_CLASS_NAME}>
-              <CalendarSidebarController onOpenSettings={onOpenSettings} onToggleLeftPanel={handleCloseMobileSidebar} />
-            </div>
-          </MobileSidebarDrawer>
+          <MobileScheduleSidebarOpenButton isOpen={isMobileSidebarOpen} onOpen={handleOpenMobileSidebar} className={MOBILE_WORKSPACE_SIDEBAR_OPEN_BUTTON_CLASS_NAME} />
+          <MobileScheduleSidebar isOpen={isMobileSidebarOpen} onClose={handleCloseMobileSidebar} onOpenSettings={onOpenSettings} />
         </>
       ) : (
         <>
