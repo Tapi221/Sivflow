@@ -98,6 +98,43 @@
     color: transparent !important;
   }
 
+  .pdfViewer,
+  .pdfViewer .textLayer,
+  .pdfViewer .textLayer * {
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  .pdfViewer .textLayer {
+    cursor: text;
+    pointer-events: auto;
+  }
+
+  .pdfViewer .textLayer span,
+  .pdfViewer .textLayer br {
+    cursor: text;
+    pointer-events: auto;
+  }
+
+  .pdfViewer canvas,
+  .pdfViewer .annotationLayer,
+  .pdfViewer .annotationLayer * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .pdfViewer .textLayer ::sel\65 ction,
+  .pdfViewer .textLayer::sel\65 ction {
+    background-color: var(--app-highlight-bg) !important;
+  }
+
+  .pdfViewer .textLayer ::-moz-sel\65 ction,
+  .pdfViewer .textLayer::-moz-sel\65 ction {
+    background-color: var(--app-highlight-bg) !important;
+  }
+
   .workspace-surface--plain {
     background: transparent;
   }
