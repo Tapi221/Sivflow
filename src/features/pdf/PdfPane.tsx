@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import * as pdfjsLib from "pdfjs-dist";
-import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
-import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/web/pdf_viewer.mjs";
-import "pdfjs-dist/web/pdf_viewer.css";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
+import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
+import "pdfjs-dist/legacy/web/pdf_viewer.css";
 import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
 import { toPdfDocumentLoadSource } from "./pdfDocumentSource";
@@ -61,6 +61,7 @@ const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 767;
+const PDF_VIEWER_LOAD_ERROR_MESSAGE = "PDFファイルの読み込みに失敗しました。";
 
 const getSafePageNumber = (pageNumber: number | null | undefined, pageCount: number): number => {
   const normalizedPageNumber = Math.floor(pageNumber ?? DEFAULT_PDF_PAGE);
@@ -83,6 +84,19 @@ const isCompactPdfViewport = (container: HTMLDivElement): boolean => {
 const getPdfViewerStateScaleValue = (viewerState: PdfViewerState | null, forcePageWidth: boolean): string => {
   if (!forcePageWidth && viewerState?.fitMode === "manual" && typeof viewerState.scale === "number" && Number.isFinite(viewerState.scale) && viewerState.scale > 0) return String(viewerState.scale);
   return "page-width";
+};
+
+const getPdfErrorMessage = (error: unknown): string => {
+  return error instanceof Error && error.message ? error.message : PDF_VIEWER_LOAD_ERROR_MESSAGE;
+};
+
+const clearPdfViewerElement = (viewerElement: HTMLDivElement): void => {
+  if (typeof viewerElement.replaceChildren === "function") {
+    viewerElement.replaceChildren();
+    return;
+  }
+
+  viewerElement.textContent = "";
 };
 
 const shouldHandlePdfKeyboardEvent = (event: KeyboardEvent): boolean => {
@@ -253,12 +267,13 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
     let isCancelled = false;
     let loadedPdfDocument: PdfDocumentProxy | null = null;
     let resizeFrame: number | null = null;
-    const eventBus = new EventBus() as PdfEventBusLike;
-    const linkService = new PDFLinkService({ eventBus });
-    const pdfViewer = new PDFViewer({ container, eventBus, linkService, viewer: viewerElement });
+    let resizeObserver: ResizeObserver | null = null;
+    let pdfViewer: PdfViewerInstance | null = null;
+    let linkService: PdfLinkServiceInstance | null = null;
     const removeEventListeners: Array<() => void> = [];
 
     const setFitScale = () => {
+      if (!pdfViewer) return;
       isApplyingFitScaleRef.current = true;
       pdfViewer.currentScaleValue = "page-width";
     };
@@ -267,52 +282,76 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
       if (resizeFrame !== null) return;
       resizeFrame = window.requestAnimationFrame(() => {
         resizeFrame = null;
-        if (isCancelled || !loadedPdfDocument) return;
+        if (isCancelled || !loadedPdfDocument || !pdfViewer) return;
         if (!isCompactPdfViewport(container) && viewerStateRef.current?.fitMode === "manual") return;
         setFitScale();
       });
     };
 
-    pdfViewerRef.current = pdfViewer;
-    linkService.setViewer(pdfViewer);
-    viewerElement.replaceChildren();
-    setLoadError(null);
-    setIsLoading(true);
-
-    const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestResponsiveScaleUpdate);
-    resizeObserver?.observe(container);
-    window.addEventListener("orientationchange", requestResponsiveScaleUpdate);
-
-    removeEventListeners.push(addPdfViewerEventListener(eventBus, "pagesinit", () => {
-      if (isCancelled || !loadedPdfDocument) return;
-      const scaleValue = getPdfViewerStateScaleValue(viewerStateRef.current, isCompactPdfViewport(container));
-      if (scaleValue === "page-width") {
-        setFitScale();
-      } else {
-        pdfViewer.currentScaleValue = scaleValue;
-      }
-      pdfViewer.currentPageNumber = getSafePageNumber(viewerStateRef.current?.currentPage, loadedPdfDocument.numPages);
-      requestResponsiveScaleUpdate();
-    }));
-
-    removeEventListeners.push(addPdfViewerEventListener(eventBus, "pagechanging", (event: unknown) => {
-      if (isCancelled) return;
-      const pageNumber = (event as PdfPageChangingEvent).pageNumber;
-      if (!Number.isFinite(pageNumber)) return;
-      updateViewerState({ currentPage: pageNumber });
-    }));
-
-    removeEventListeners.push(addPdfViewerEventListener(eventBus, "scalechanging", (event: unknown) => {
-      if (isCancelled) return;
-      const scale = Number((event as PdfScaleChangingEvent).scale);
-      if (!Number.isFinite(scale) || scale <= 0) return;
-      const fitMode = isApplyingFitScaleRef.current ? "width" : "manual";
+    const cleanupPdfViewer = () => {
+      isCancelled = true;
       isApplyingFitScaleRef.current = false;
-      updateViewerState({ scale, fitMode });
-    }));
+      if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
+      resizeObserver?.disconnect();
+      window.removeEventListener("orientationchange", requestResponsiveScaleUpdate);
+      removeEventListeners.forEach((removeEventListener) => removeEventListener());
+      if (pdfViewer && linkService) releasePdfViewerDocument(pdfViewer, linkService, loadedPdfDocument);
+      clearPdfViewerElement(viewerElement);
+      if (pdfViewerRef.current === pdfViewer) pdfViewerRef.current = null;
+    };
+
+    try {
+      const eventBus = new EventBus() as PdfEventBusLike;
+      const nextLinkService = new PDFLinkService({ eventBus });
+      const nextPdfViewer = new PDFViewer({ container, eventBus, linkService: nextLinkService, viewer: viewerElement });
+
+      pdfViewer = nextPdfViewer;
+      linkService = nextLinkService;
+      pdfViewerRef.current = nextPdfViewer;
+      nextLinkService.setViewer(nextPdfViewer);
+      clearPdfViewerElement(viewerElement);
+      setLoadError(null);
+      setIsLoading(true);
+
+      resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestResponsiveScaleUpdate);
+      resizeObserver?.observe(container);
+      window.addEventListener("orientationchange", requestResponsiveScaleUpdate);
+
+      removeEventListeners.push(addPdfViewerEventListener(eventBus, "pagesinit", () => {
+        if (isCancelled || !loadedPdfDocument || !pdfViewer) return;
+        const scaleValue = getPdfViewerStateScaleValue(viewerStateRef.current, isCompactPdfViewport(container));
+        if (scaleValue === "page-width") {
+          setFitScale();
+        } else {
+          pdfViewer.currentScaleValue = scaleValue;
+        }
+        pdfViewer.currentPageNumber = getSafePageNumber(viewerStateRef.current?.currentPage, loadedPdfDocument.numPages);
+        requestResponsiveScaleUpdate();
+      }));
+
+      removeEventListeners.push(addPdfViewerEventListener(eventBus, "pagechanging", (event: unknown) => {
+        if (isCancelled) return;
+        const pageNumber = (event as PdfPageChangingEvent).pageNumber;
+        if (!Number.isFinite(pageNumber)) return;
+        updateViewerState({ currentPage: pageNumber });
+      }));
+
+      removeEventListeners.push(addPdfViewerEventListener(eventBus, "scalechanging", (event: unknown) => {
+        if (isCancelled) return;
+        const scale = Number((event as PdfScaleChangingEvent).scale);
+        if (!Number.isFinite(scale) || scale <= 0) return;
+        const fitMode = isApplyingFitScaleRef.current ? "width" : "manual";
+        isApplyingFitScaleRef.current = false;
+        updateViewerState({ scale, fitMode });
+      }));
+    } catch (error: unknown) {
+      setLoadError(getPdfErrorMessage(error));
+      setIsLoading(false);
+      return cleanupPdfViewer;
+    }
 
     void loadPdfDocument(source, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then((nextPdfDocument) => {
-      if (isCancelled) {
+      if (isCancelled || !pdfViewer || !linkService) {
         void nextPdfDocument.destroy();
         return;
       }
@@ -322,23 +361,12 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
       linkService.setDocument(nextPdfDocument, null);
     }).catch((error: unknown) => {
       if (isCancelled) return;
-      const message = error instanceof Error ? error.message : String(error);
-      setLoadError(message || "PDFファイルの読み込みに失敗しました。");
+      setLoadError(getPdfErrorMessage(error));
     }).finally(() => {
       if (!isCancelled) setIsLoading(false);
     });
 
-    return () => {
-      isCancelled = true;
-      isApplyingFitScaleRef.current = false;
-      if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
-      resizeObserver?.disconnect();
-      window.removeEventListener("orientationchange", requestResponsiveScaleUpdate);
-      removeEventListeners.forEach((removeEventListener) => removeEventListener());
-      releasePdfViewerDocument(pdfViewer, linkService, loadedPdfDocument);
-      viewerElement.replaceChildren();
-      if (pdfViewerRef.current === pdfViewer) pdfViewerRef.current = null;
-    };
+    return cleanupPdfViewer;
   }, [source, updateViewerState, viewerCMapUrl, viewerEnableXfa, viewerStandardFontDataUrl, viewerUseSystemFonts]);
 
   useEffect(() => {
