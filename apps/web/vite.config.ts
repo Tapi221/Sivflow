@@ -93,6 +93,12 @@ const createEventChipDesignSource = (payload: Record<string, unknown>): string =
     weekdayTitleLineHeight: getFiniteNumber(payload, "weekdayTitleLineHeight", 17),
     weekdayTimeFontSize: getFiniteNumber(payload, "weekdayTimeFontSize", 11),
     weekdayTimeLineHeight: getFiniteNumber(payload, "weekdayTimeLineHeight", 16),
+    weekdayTimedOuterInset: getFiniteNumber(payload, "weekdayTimedOuterInset", 1),
+    weekdayTimedOverlapGap: getFiniteNumber(payload, "weekdayTimedOverlapGap", 2),
+    weekdayTimedVerticalTrim: getFiniteNumber(payload, "weekdayTimedVerticalTrim", 0.5),
+    weekdayTimedMinHeight: getFiniteNumber(payload, "weekdayTimedMinHeight", 22),
+    weekdayAllDayColumnInset: getFiniteNumber(payload, "weekdayAllDayColumnInset", 0.5),
+    weekdayAllDayEventGap: getFiniteNumber(payload, "weekdayAllDayEventGap", 1),
     listRowHeight: getFiniteNumber(payload, "listRowHeight", 52),
     listChipHeight: getFiniteNumber(payload, "listChipHeight", 46),
     listAllDayRowHeight: getFiniteNumber(payload, "listAllDayRowHeight", 34),
@@ -133,6 +139,14 @@ const createEventChipDesignSource = (payload: Record<string, unknown>): string =
     titleLineHeightPx: number;
     timeFontSizePx: number;
     timeLineHeightPx: number;
+  };
+  weekdayGrid: {
+    timedOuterInsetPx: number;
+    timedOverlapGapPx: number;
+    timedVerticalTrimPx: number;
+    timedMinHeightPx: number;
+    allDayColumnInsetPx: number;
+    allDayEventGapPx: number;
   };
   list: {
     rowHeightPx: number;
@@ -178,6 +192,14 @@ export const eventChipDesign: EventChipDesign = {
     titleLineHeightPx: ${values.weekdayTitleLineHeight},
     timeFontSizePx: ${values.weekdayTimeFontSize},
     timeLineHeightPx: ${values.weekdayTimeLineHeight},
+  },
+  weekdayGrid: {
+    timedOuterInsetPx: ${values.weekdayTimedOuterInset},
+    timedOverlapGapPx: ${values.weekdayTimedOverlapGap},
+    timedVerticalTrimPx: ${values.weekdayTimedVerticalTrim},
+    timedMinHeightPx: ${values.weekdayTimedMinHeight},
+    allDayColumnInsetPx: ${values.weekdayAllDayColumnInset},
+    allDayEventGapPx: ${values.weekdayAllDayEventGap},
   },
   list: {
     rowHeightPx: ${values.listRowHeight},
