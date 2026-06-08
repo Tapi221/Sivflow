@@ -2,6 +2,9 @@ import { memo } from "react";
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ja } from "date-fns/locale";
 import { getTagColorStyle, type TagColorKey } from "@/chip/tag/tagColor";
+import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
+import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import { cn } from "@/lib/utils";
 
 type TimetablePeriod = { label: string; startTime: string; endTime: string };
@@ -12,15 +15,11 @@ type TimetableSlot = { dayIndex: number; periodIndex: number };
 
 type CalendarTimetableDensity = "default" | "compact";
 
-type CalendarTimetableViewProps = { weekDate: Date; density?: CalendarTimetableDensity; className?: string };
+type CalendarTimetableViewProps = { weekDate: Date; weekStartDay?: CalendarWeekStartDay; density?: CalendarTimetableDensity; className?: string };
 
-const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金"] as const;
+const TIMETABLE_VISIBLE_DAY_COUNT = 5;
 const TIMETABLE_GRID_TEMPLATE_COLUMNS = "56px repeat(5, 112px)";
 const TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS = "34px repeat(5, minmax(0, 1fr))";
-const TIMETABLE_WEEK_STARTS_ON = 1;
-const TIMETABLE_SUNDAY_INDEX = 0;
-const TIMETABLE_SATURDAY_INDEX = 6;
-const TIMETABLE_WEEKEND_REFERENCE_OFFSET_DAYS = 7;
 const TIMETABLE_PERIODS: readonly TimetablePeriod[] = [
   { label: "1", startTime: "8:50", endTime: "10:20" },
   { label: "2", startTime: "10:30", endTime: "12:00" },
@@ -57,16 +56,9 @@ const TIMETABLE_ENTRIES: readonly TimetableEntry[] = [
 
 const createTimetableSlotKey = ({ dayIndex, periodIndex }: TimetableSlot): string => `${dayIndex}:${periodIndex}`;
 
-const buildTimetableWeekDays = (weekDate: Date): Date[] => Array.from({ length: TIMETABLE_DAY_LABELS.length }, (_, index) => addDays(startOfWeek(weekDate, { weekStartsOn: TIMETABLE_WEEK_STARTS_ON }), index));
+const buildTimetableWeekDays = (weekDate: Date, weekStartDay: CalendarWeekStartDay): Date[] => Array.from({ length: TIMETABLE_VISIBLE_DAY_COUNT }, (_, index) => addDays(startOfWeek(weekDate, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) }), index));
 
-const isWeekendDate = (date: Date): boolean => {
-  const dayIndex = date.getDay();
-  return dayIndex === TIMETABLE_SUNDAY_INDEX || dayIndex === TIMETABLE_SATURDAY_INDEX;
-};
-
-const getTimetableReferenceDate = (date: Date): Date => isWeekendDate(date) ? addDays(date, TIMETABLE_WEEKEND_REFERENCE_OFFSET_DAYS) : date;
-
-const buildCurrentTimetableWeekDays = (today: Date): Date[] => buildTimetableWeekDays(getTimetableReferenceDate(today));
+const getTimetableEntryDayIndex = (date: Date): number => (date.getDay() + 6) % 7;
 
 const createTimetableEntryMap = () => {
   const map = new Map<string, TimetableEntry>();
@@ -82,9 +74,9 @@ const getTimetableGridTemplateColumns = (density: CalendarTimetableDensity): str
 
 const TIMETABLE_ENTRY_MAP = createTimetableEntryMap();
 
-const CalendarTimetableViewComponent = ({ density = "default", className }: CalendarTimetableViewProps) => {
+const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, density = "default", className }: CalendarTimetableViewProps) => {
   const today = new Date();
-  const weekDays = buildCurrentTimetableWeekDays(today);
+  const weekDays = buildTimetableWeekDays(weekDate, weekStartDay);
   const weekRangeLabel = formatTimetableWeekRange(weekDays);
   const registeredCountLabel = `${TIMETABLE_ENTRIES.length}コマ`;
   const isCompact = density === "compact";
@@ -94,7 +86,7 @@ const CalendarTimetableViewComponent = ({ density = "default", className }: Cale
       <div className={cn("flex shrink-0 flex-wrap items-center justify-between gap-3 pb-3 pt-1", isCompact ? "px-4" : "px-5")}>
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <span className={cn("rounded-full border border-[#eeeeee] bg-[#f8f8f9] font-semibold tabular-nums text-[#6e6e73]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{weekRangeLabel}</span>
-          <span className={cn("rounded-full border border-[#eeeeee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>平日5日 / 7限</span>
+          <span className={cn("rounded-full border border-[#eeeeee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>5日 / 7限</span>
           <span className={cn("rounded-full border border-[#eeeeee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{registeredCountLabel}配置済み</span>
         </div>
         <button type="button" aria-label="時間割設定" className={cn("flex shrink-0 items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 w-8 text-[14px]" : "h-9 w-9 text-[15px]")}>⚙︎</button>
@@ -103,11 +95,11 @@ const CalendarTimetableViewComponent = ({ density = "default", className }: Cale
       <div className={cn("min-h-0 flex-1 text-center scrollbar-hidden", isCompact ? "overflow-y-auto overflow-x-hidden px-4 pb-3" : "overflow-auto px-5 pb-5")}>
         <div className={cn("gap-y-2 text-left", isCompact ? "grid w-full min-w-0 gap-x-1" : "inline-grid w-max gap-x-2")} style={{ gridTemplateColumns: getTimetableGridTemplateColumns(density) }}>
           <div aria-hidden="true" className={isCompact ? "h-7" : "h-8"} />
-          {weekDays.map((day, dayIndex) => {
+          {weekDays.map((day) => {
             const isToday = isSameDay(day, today);
             return (
               <div key={day.toISOString()} className={cn("flex min-w-0 items-center justify-center text-center", isCompact ? "h-7 gap-1" : "h-8 gap-1.5")}>
-                <span className={cn("font-bold tracking-[-0.02em]", isCompact ? "text-[11px]" : "text-[13px]", isToday ? "text-[#007aff]" : "text-[#1c1c1e]")}>{TIMETABLE_DAY_LABELS[dayIndex]}</span>
+                <span className={cn("font-bold tracking-[-0.02em]", isCompact ? "text-[11px]" : "text-[13px]", isToday ? "text-[#007aff]" : "text-[#1c1c1e]")}>{format(day, "E", { locale: ja })}</span>
                 <span className={cn("rounded-full font-semibold tabular-nums", isCompact ? "px-1 py-0.5 text-[9px]" : "px-1.5 py-0.5 text-[10px]", isToday ? "bg-[#e8f2ff] text-[#007aff]" : "bg-[#f7f7f8] text-[#8f929c]")}>{format(day, "M/d", { locale: ja })}</span>
               </div>
             );
@@ -124,8 +116,8 @@ const CalendarTimetableViewComponent = ({ density = "default", className }: Cale
                   </div>
                 </div>
               </div>
-              {weekDays.map((day, dayIndex) => {
-                const slot = { dayIndex, periodIndex } satisfies TimetableSlot;
+              {weekDays.map((day) => {
+                const slot = { dayIndex: getTimetableEntryDayIndex(day), periodIndex } satisfies TimetableSlot;
                 const entry = TIMETABLE_ENTRY_MAP.get(createTimetableSlotKey(slot)) ?? null;
                 return (
                   <button key={`${day.toISOString()}-${period.label}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "min-h-[48px] rounded-[14px]" : "min-h-[52px] rounded-[18px]", entry ? (isCompact ? "border px-1.5 py-1" : "border px-2.5 py-1") : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.colorKey) : undefined}>
