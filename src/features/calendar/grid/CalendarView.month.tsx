@@ -2,6 +2,8 @@ import { useLayoutEffect, useMemo, useRef } from "react";
 import type { CSSProperties } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
+import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
 import { useMonthInfiniteScroll } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -10,6 +12,7 @@ import { GridCalendarMonthDesktop } from "./Grid.calendar.month.desktop";
 type CalendarMonthViewProps = {
   currentDate: Date;
   selectedDate: Date;
+  weekStartDay?: CalendarWeekStartDay;
   scrollTargetToken?: number;
   visibleEvents?: GoogleCalendarEvent[];
   showEventTimeLabel?: boolean;
@@ -42,6 +45,7 @@ const createMonthViewStyle = (monthRowHeight: number): MonthViewStyle => ({
 const CalendarMonthView = ({
   currentDate,
   selectedDate,
+  weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY,
   scrollTargetToken = 0,
   visibleEvents = [],
   showEventTimeLabel = true,
@@ -59,6 +63,7 @@ const CalendarMonthView = ({
     currentDate,
     scrollTargetToken,
     monthRowHeight,
+    weekStartDay,
     onVisibleMonthChange,
   });
 
@@ -72,6 +77,7 @@ const CalendarMonthView = ({
         <GridCalendarMonthDesktop
           today={todayRef.current}
           selectedDate={selectedDate}
+          weekStartDay={weekStartDay}
           visibleEvents={visibleEvents}
           monthWeeks={scroll.monthWeeks}
           monthRowHeight={monthRowHeight}
