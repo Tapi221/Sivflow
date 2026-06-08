@@ -1,8 +1,8 @@
-import { BlockNoteView } from "@blocknote/mantine";
-import { useCreateBlockNote } from "@blocknote/react";
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
+import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/react/style.css";
+import { useCreateBlockNote } from "@blocknote/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Note, NoteBlockContent } from "@/types";
 
@@ -14,7 +14,7 @@ type BlockNoteDocumentEditorProps = {
 const NOTE_SAVE_DEBOUNCE_MS = 500;
 
 const toInitialContent = (content: NoteBlockContent | undefined) => {
-  return Array.isArray(content) && content.length > 0 ? content : undefined;
+  return Array.isArray(content) && content.length > 0 ? content as never : undefined;
 };
 
 const getPlainText = (blocks: unknown[]): string => blocks.map((block) => {
@@ -25,7 +25,7 @@ const getPlainText = (blocks: unknown[]): string => blocks.map((block) => {
 }).filter(Boolean).join("\n");
 
 const BlockNoteDocumentEditor = ({ note, onChange }: BlockNoteDocumentEditorProps) => {
-  const initialContent = useMemo(() => toInitialContent(note.content), [note.id]);
+  const initialContent = useMemo(() => toInitialContent(note.content), [note.id, note.content]);
   const editor = useCreateBlockNote({ initialContent });
   const latestChangeRef = useRef<Pick<Note, "content" | "contentText" | "contentVersion" | "editor"> | null>(null);
   const [saveRevision, setSaveRevision] = useState(0);
