@@ -430,41 +430,6 @@
   white-space: nowrap;
 }
 
-.settings-workspace__about-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-  padding: 16px 24px;
-}
-
-.settings-workspace__about-card {
-  display: flex;
-  min-height: 78px;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px;
-  border: 1px solid #e7e7e5;
-  border-radius: 8px;
-  background: #fafaf9;
-  color: #232323;
-}
-
-.settings-workspace__about-card strong {
-  margin-top: 2px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 20px;
-}
-
-.settings-workspace__about-card span {
-  color: #8f8a84;
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 18px;
-}
-
 @media (max-width: 920px) {
   .settings-workspace {
     flex-direction: column;
