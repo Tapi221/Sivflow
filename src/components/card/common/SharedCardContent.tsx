@@ -1,5 +1,5 @@
 import React from "react";
-import { CARD_CONTENT_TOP_PX } from "@constants/shared/flashcard";
+import { CARD_CONTENT_TOP_PX } from "@/domain/card/cardGeometry.constants";
 import type { SharedCardContentProps } from "./SharedCardContent.types";
 import { SharedCardEditScene } from "./SharedCardEditScene";
 import { SharedCardViewScene } from "./SharedCardViewScene";
