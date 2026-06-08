@@ -11,6 +11,37 @@ import { defineConfig, globalIgnores } from "eslint/config";
 const TYPESCRIPT_SOURCE_FILES = ["src/**/*.{ts,tsx}", "apps/web/src/**/*.{ts,tsx}", "apps/mobile/src/**/*.{ts,tsx}", "packages/*/src/**/*.{ts,tsx}"];
 const UI_SOURCE_FILES = ["src/components/**/*.{ts,tsx}", "src/layout/**/*.{ts,tsx}", "src/routes/**/*.{ts,tsx}", "src/ui/**/*.{ts,tsx}", "src/presentation/**/*.{ts,tsx}", "src/features/**/*.{ts,tsx}", "packages/web-renderer/src/**/*.{ts,tsx}", "packages/mobile-renderer/src/**/*.{ts,tsx}"];
 const APPLICATION_SOURCE_FILES = ["src/application/**/*.{ts,tsx}"];
+const IMPORT_PATH_RESTRICTED_PATHS = [
+  {
+    name: "@/types/branded",
+    message: "Use '@/types/core/branded' instead.",
+  },
+  {
+    name: "@/utils",
+    message: "Do not add new imports from '@/utils'. Use domain/shared modules instead.",
+  },
+];
+const IMPORT_PATH_RESTRICTED_PATTERNS = [
+  {
+    group: ["../*", "../../*", "../../../*", "../../../../*", "../../../../../*"],
+    message: "Use an alias for cross-folder imports. Same-directory imports may use ./.",
+  },
+  {
+    group: ["./*/**"],
+    message: "Use an alias for child-folder imports. Same-directory imports may use ./.",
+  },
+];
+const UI_RESTRICTED_IMPORT_PATTERNS = [
+  ...IMPORT_PATH_RESTRICTED_PATTERNS,
+  {
+    group: ["@/infrastructure/*", "@/infrastructure/**"],
+    message: "UI layer must not import infrastructure.",
+  },
+  {
+    group: ["@/platform/desktop/*", "@/platform/desktop/**"],
+    message: "UI layer must not import desktop bridge.",
+  },
+];
 
 export default defineConfig([
   globalIgnores(["dist"]),
@@ -48,32 +79,8 @@ export default defineConfig([
       "no-restricted-imports": [
         "error",
         {
-          paths: [
-            {
-              name: "@/types/branded",
-              message: "Use '@/types/core/branded' instead.",
-            },
-            {
-              name: "@/utils",
-              message: "Do not add new imports from '@/utils'. Use domain/shared modules instead.",
-            },
-          ],
-          patterns: [
-            {
-              group: [
-                "../*",
-                "../../*",
-                "../../../*",
-                "../../../../*",
-                "../../../../../*",
-              ],
-              message: "Use an alias for cross-folder imports. Same-directory imports may use ./.",
-            },
-            {
-              group: ["./*/**"],
-              message: "Use an alias for child-folder imports. Same-directory imports may use ./.",
-            },
-          ],
+          paths: IMPORT_PATH_RESTRICTED_PATHS,
+          patterns: IMPORT_PATH_RESTRICTED_PATTERNS,
         },
       ],
       "no-restricted-syntax": [
@@ -182,16 +189,8 @@ export default defineConfig([
       "no-restricted-imports": [
         "error",
         {
-          patterns: [
-            {
-              group: ["@/infrastructure/*", "@/infrastructure/**"],
-              message: "UI layer must not import infrastructure.",
-            },
-            {
-              group: ["@/platform/desktop/*", "@/platform/desktop/**"],
-              message: "UI layer must not import desktop bridge.",
-            },
-          ],
+          paths: IMPORT_PATH_RESTRICTED_PATHS,
+          patterns: UI_RESTRICTED_IMPORT_PATTERNS,
         },
       ],
     },
@@ -203,7 +202,9 @@ export default defineConfig([
       "no-restricted-imports": [
         "error",
         {
+          paths: IMPORT_PATH_RESTRICTED_PATHS,
           patterns: [
+            ...IMPORT_PATH_RESTRICTED_PATTERNS,
             {
               group: ["@/components/*", "@/components/**", "@/features/*", "@/features/**", "@/hooks/*", "@/hooks/**", "@/layout/*", "@/layout/**", "@/pane.desktop/*", "@/pane.desktop/**", "@/routes/*", "@/routes/**", "@/ui/*", "@/ui/**"],
               message: "Application layer must not import UI or React layers.",
