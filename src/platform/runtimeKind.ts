@@ -1,4 +1,4 @@
-import { RUNTIME_KINDS, type RuntimeKind } from "@constants/shared/app";
+import { RUNTIME_KINDS, type RuntimeKind } from "@platform/runtime/runtime.constants";
 import { hasDesktopRuntime } from "./detectDesktopBridge";
 
 export const getRuntimeKind = (): RuntimeKind => {
