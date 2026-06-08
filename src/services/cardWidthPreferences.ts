@@ -1,4 +1,4 @@
-import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
+import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
 export type CardWidthPaneMode = "view" | "edit";
 
@@ -69,7 +69,7 @@ const writeStore = (store: CardWidthPreferencesStore) => {
       JSON.stringify(store),
     );
   } catch {
-    // ignore
+    return;
   }
 };
 
