@@ -170,7 +170,8 @@ const AppLayout = () => {
     closeButton.click();
   }, []);
   const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed, onOpenSettings: handleOpenSettings, onToggleLeftPanel: handleToggleLeftPanel }), [handleOpenSettings, handleToggleLeftPanel, isLeftPanelCollapsed]);
-  const showGlobalSearchTrigger = !isScheduleRoute;
+  const isSandboxRoute = pathname.startsWith("/sandbox");
+  const showGlobalSearchTrigger = !isScheduleRoute && !isSandboxRoute;
 
   useEffect(() => {
     persistLeftPanelCollapsed(isLeftPanelCollapsed);
@@ -240,4 +241,4 @@ const AppLayout = () => {
   );
 };
 
-export { AppLayout, type AppLayoutOutletContext };
+export { AppLayout };
