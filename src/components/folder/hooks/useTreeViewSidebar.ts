@@ -1,11 +1,15 @@
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useRef, useState } from "react";
-import { SIDEBAR_WIDTH_LIMITS } from "@constants/web/app";
-import { WEB_STORAGE_KEYS } from "@constants/web/storage";
+import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 import { useTreeViewSidebarHotkey } from "@/features/hotkey/useTreeViewSidebarHotkey";
 
 export const TREE_VIEW_SIDEBAR_TOGGLE_EVENT =
   "sivflow:treeview-sidebar-toggle";
 
+const SIDEBAR_WIDTH_LIMITS = {
+  min: 260,
+  max: 320,
+  default: 292,
+} as const;
 const SECTION_LIST_PANE_LEFT_VAR = "--sivflow-section-list-pane-left";
 
 const clampSidebarWidth = (width: number) =>
