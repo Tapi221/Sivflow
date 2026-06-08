@@ -1,4 +1,5 @@
 import type { ReactNode, RefObject, UIEvent } from "react";
+import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
@@ -12,6 +13,7 @@ type CalendarSelectedViewsSplitViewProps = {
   selectedViewModes: readonly CalendarViewMode[];
   currentDate: Date;
   selectedDate: Date;
+  weekStartDay: CalendarWeekStartDay;
   visibleDays: Date[];
   virtualRail?: ScheduleVirtualRail;
   events: GoogleCalendarEvent[];
@@ -44,7 +46,7 @@ const getSelectedViewPanelVisibleDays = ({ viewMode, selectedDate, visibleDays }
   return visibleDays;
 };
 
-const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, visibleDays, virtualRail, events, appProjects, googleAccounts, headerScrollRef, allDayScrollRef, scrollContainerRef, calendarGridStyle, allDayEventOrder, onCalendarScroll, onSelectDate, onVisibleMonthChange, onVisibleDateChange, onMoveCalendarEvent, onReorderAllDayEvents }: CalendarSelectedViewPanelProps): ReactNode => {
+const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, weekStartDay, visibleDays, virtualRail, events, appProjects, googleAccounts, headerScrollRef, allDayScrollRef, scrollContainerRef, calendarGridStyle, allDayEventOrder, onCalendarScroll, onSelectDate, onVisibleMonthChange, onVisibleDateChange, onMoveCalendarEvent, onReorderAllDayEvents }: CalendarSelectedViewPanelProps): ReactNode => {
   if (viewMode === "list") {
     return <CalendarListView days={visibleDays} virtualRail={virtualRail} events={events} selectedDate={selectedDate} onSelectDate={onSelectDate} onVisibleMonthChange={onVisibleMonthChange} scrollTargetDate={visibleDays[0] ?? selectedDate} className="h-full" />;
   }
@@ -54,7 +56,7 @@ const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, v
   }
 
   if (viewMode === "timetable") {
-    return <CalendarTimetableView weekDate={currentDate} density="compact" className="h-full" />;
+    return <CalendarTimetableView weekDate={currentDate} weekStartDay={weekStartDay} density="compact" className="h-full" />;
   }
 
   const panelVisibleDays = getSelectedViewPanelVisibleDays({ viewMode, selectedDate, visibleDays });
