@@ -2,30 +2,39 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useState, type CSSPro
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
+import { BlockNoteDocumentEditor } from "@/components/note/BlockNoteDocumentEditor";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
+import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import { areExplorerBreadcrumbContextsEqual, EMPTY_EXPLORER_BREADCRUMB_CONTEXT, type BreadcrumbCrumb, type ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
 import { buildFolderPathCrumbs } from "@/features/breadcrumbs/builders";
 import { WorkspaceBreadcrumbs } from "@/features/breadcrumbs/components/WorkspaceBreadcrumbs";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
-import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
-import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
+import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
+import { useNotes } from "@/hooks/note/useNotes";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import type { WorkspaceExplorerTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
-import type { DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+import type { WorkspaceExplorerTab, WorkspaceNoteTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
+import type { DocumentItem, Folder, Note, SelectedExplorerItem } from "@/types";
 import { Search } from "@/ui/icons";
-import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
 import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "./MobileCalendarSidebar";
+import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
 import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
 
 type ExplorerWorkspaceContentProps = {
   explorerState: ExplorerRouteState;
   explorerTabId: WorkspaceExplorerTab["id"] | null;
+  isLeftPanelCollapsed: boolean;
+  onOpenSettings: () => void;
+  onToggleLeftPanel: () => void;
+};
+
+type NoteWorkspaceContentProps = {
+  noteTab: WorkspaceNoteTab;
   isLeftPanelCollapsed: boolean;
   onOpenSettings: () => void;
   onToggleLeftPanel: () => void;
@@ -65,6 +74,8 @@ const SIDEBAR_INTERACTION_REGION_STYLE: SidebarInteractionRegionStyle = { Webkit
 
 const getDocumentBreadcrumbLabel = (document: DocumentItem): string => document.title.trim() || document.fileName.trim() || "PDF";
 
+const getNoteBreadcrumbLabel = (note: Note): string => note.title.trim() || "ノート";
+
 const buildWorkspaceBreadcrumbCrumbs = (context: ExplorerBreadcrumbContext, folders: Folder[], selectedDocument: DocumentItem | null): BreadcrumbCrumb[] => {
   const folderById = new Map(folders.map((folder) => [folder.id, folder]));
   const crumbs = buildFolderPathCrumbs({ folderId: context.folderId, folderById });
@@ -75,6 +86,17 @@ const buildWorkspaceBreadcrumbCrumbs = (context: ExplorerBreadcrumbContext, fold
 
   if (selectedDocument) {
     crumbs.push({ label: getDocumentBreadcrumbLabel(selectedDocument) });
+  }
+
+  return crumbs;
+};
+
+const buildNoteBreadcrumbCrumbs = (folders: Folder[], note: Note | null): BreadcrumbCrumb[] => {
+  const folderById = new Map(folders.map((folder) => [folder.id, folder]));
+  const crumbs = buildFolderPathCrumbs({ folderId: note?.folderId ?? null, folderById });
+
+  if (note) {
+    crumbs.push({ label: getNoteBreadcrumbLabel(note) });
   }
 
   return crumbs;
@@ -94,6 +116,7 @@ const createCardRouteState = (tab: Extract<WorkspaceTab, { kind: "card" }>): Exp
 
 const getLibraryExplorerState = (tab: WorkspaceTab | null): ExplorerRouteState | null => {
   if (!tab || tab.sectionKey !== "library") return null;
+  if (tab.kind === "note") return null;
   if (tab.kind === "explorer") return tab.explorerState;
   if (tab.kind === "document") return createDocumentRouteState(tab);
   if (tab.kind === "card") return createCardRouteState(tab);
@@ -102,6 +125,10 @@ const getLibraryExplorerState = (tab: WorkspaceTab | null): ExplorerRouteState |
 
 const getExplorerTabId = (tab: WorkspaceTab | null): WorkspaceExplorerTab["id"] | null => {
   return tab?.kind === "explorer" ? tab.id : null;
+};
+
+const getNoteTab = (tab: WorkspaceTab | null): WorkspaceNoteTab | null => {
+  return tab?.kind === "note" ? tab : null;
 };
 
 const readIsMobileWorkspaceViewport = (): boolean => {
@@ -258,6 +285,75 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
   );
 };
 
+const NoteWorkspaceContent = ({ noteTab, isLeftPanelCollapsed, onOpenSettings, onToggleLeftPanel }: NoteWorkspaceContentProps) => {
+  const { folders, loading: foldersLoading, error: foldersError } = useFoldersRead();
+  const { notes, loading: notesLoading, updateNote } = useNotes();
+  const isMobileWorkspace = useIsMobileWorkspaceViewport();
+  const setExtraCrumbs = useSetBreadcrumbCrumbs();
+  const updateTabTitle = useWorkspaceTabsStore((state) => state.updateTabTitle);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const note = useMemo(() => notes.find((item) => item.id === noteTab.noteId) ?? null, [noteTab.noteId, notes]);
+  const extraCrumbs = useMemo(() => buildNoteBreadcrumbCrumbs(folders, note), [folders, note]);
+  const mainPanelClassName = joinClassNames(WORKSPACE_MAIN_PANEL_CLASS_NAME, isMobileWorkspace && MOBILE_WORKSPACE_MAIN_PANEL_CLASS_NAME);
+  const isLoading = foldersLoading || notesLoading;
+
+  const handleOpenMobileSidebar = useCallback(() => {
+    setIsMobileSidebarOpen(true);
+  }, []);
+
+  const handleCloseMobileSidebar = useCallback(() => {
+    setIsMobileSidebarOpen(false);
+  }, []);
+
+  const handleNoteChange = useCallback((changes: Pick<Note, "content" | "contentText" | "contentVersion" | "editor">) => {
+    void updateNote(noteTab.noteId, changes);
+  }, [noteTab.noteId, updateNote]);
+
+  useLayoutEffect(() => {
+    setExtraCrumbs(extraCrumbs);
+  }, [extraCrumbs, setExtraCrumbs]);
+
+  useLayoutEffect(() => {
+    return () => {
+      setExtraCrumbs([]);
+    };
+  }, [setExtraCrumbs]);
+
+  useEffect(() => {
+    if (!note) return;
+    updateTabTitle(noteTab.id, getNoteBreadcrumbLabel(note));
+  }, [note, noteTab.id, updateTabTitle]);
+
+  useEffect(() => {
+    if (isMobileWorkspace) return;
+    setIsMobileSidebarOpen(false);
+  }, [isMobileWorkspace]);
+
+  return (
+    <div className="relative isolate flex h-full min-h-0 w-full overflow-hidden bg-transparent">
+      {isMobileWorkspace ? (
+        <>
+          <MobileCalendarSidebarOpenButton isOpen={isMobileSidebarOpen} onOpen={handleOpenMobileSidebar} className={MOBILE_WORKSPACE_SIDEBAR_OPEN_BUTTON_CLASS_NAME} />
+          <MobileCalendarSidebar isOpen={isMobileSidebarOpen} onClose={handleCloseMobileSidebar} onOpenSettings={onOpenSettings} />
+        </>
+      ) : (
+        <>
+          <CollapsedSidebarToggle isVisible={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />
+          {isLeftPanelCollapsed ? null : (
+            <SidebarInteractionRegion>
+              <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />
+            </SidebarInteractionRegion>
+          )}
+        </>
+      )}
+      <CarvePanel className={mainPanelClassName}>
+        {isLoading ? <div className="h-full w-full bg-white" /> : foldersError ? <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{foldersError}</div> : note ? <BlockNoteDocumentEditor note={note} onChange={handleNoteChange} /> : <div className="h-full w-full bg-white p-4 text-[12px] text-[#8a8a8a]">ノートが見つかりません</div>}
+        {!isLoading && !foldersError ? <WorkspaceBreadcrumbs className={WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME} isLeftPanelCollapsed={isLeftPanelCollapsed} /> : null}
+      </CarvePanel>
+    </div>
+  );
+};
+
 const WorkspaceScreen = () => {
   const { isLeftPanelCollapsed = false, onToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
   const navigate = useNavigate();
@@ -266,6 +362,7 @@ const WorkspaceScreen = () => {
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
+  const noteTab = useMemo(() => getNoteTab(activeTab), [activeTab]);
   const libraryExplorerState = useMemo(() => getLibraryExplorerState(activeTab), [activeTab]);
   const explorerTabId = useMemo(() => getExplorerTabId(activeTab), [activeTab]);
   const handleOpenSettings = useCallback(() => {
@@ -277,6 +374,8 @@ const WorkspaceScreen = () => {
 
     setIsSettingsDialogOpen(true);
   }, [isMobileWorkspace, navigate]);
+
+  if (noteTab) return <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}><NoteWorkspaceContent noteTab={noteTab} isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={handleOpenSettings} onToggleLeftPanel={onToggleLeftPanel} /></SettingsDialogHost>;
 
   if (libraryExplorerState) return <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}><ExplorerWorkspaceContent explorerState={libraryExplorerState} explorerTabId={explorerTabId} isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={handleOpenSettings} onToggleLeftPanel={onToggleLeftPanel} /></SettingsDialogHost>;
 
