@@ -1,5 +1,32 @@
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
-import { DEVICE_LABELS, DEVICE_STANDALONE_MEDIA_QUERY, DEVICE_USER_AGENT_PATTERNS } from "@constants/web/app";
+
+const DEVICE_LABELS = {
+  server: "Server",
+  webBrowser: "Web Browser",
+  android: "Android",
+  ios: "iOS",
+  windowsPc: "Windows PC",
+  mac: "Mac",
+  linuxPc: "Linux PC",
+  app: "App",
+  edge: "Edge",
+  chrome: "Chrome",
+  safari: "Safari",
+  firefox: "Firefox",
+  browser: "Browser",
+} as const;
+const DEVICE_USER_AGENT_PATTERNS = {
+  android: /Android/i,
+  ios: /iPhone|iPad|iPod/i,
+  windows: /Windows/i,
+  mac: /Macintosh/i,
+  linux: /Linux/i,
+  edge: /Edg\//i,
+  chrome: /Chrome/i,
+  safari: /Safari/i,
+  firefox: /Firefox/i,
+} as const;
+const DEVICE_STANDALONE_MEDIA_QUERY = "(display-mode: standalone)";
 
 const resolveDeviceOsLabel = (userAgent: string) => {
   if (DEVICE_USER_AGENT_PATTERNS.android.test(userAgent)) {
