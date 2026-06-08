@@ -70,6 +70,10 @@ const getPdfViewerStatePersistence = (options?: PdfViewerStateChangeOptions) => 
   return options?.persistence ?? "immediate";
 };
 
+const isBrowserPageHidden = (): boolean => {
+  return typeof globalThis.document !== "undefined" && globalThis.document.visibilityState === "hidden";
+};
+
 const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentPaneProps) => {
   const { currentUser } = useAuthSession();
   const currentUserId = currentUser?.uid ?? null;
@@ -153,6 +157,24 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
       flushPendingViewerStateSave();
     };
   }, [document.id, flushPendingViewerStateSave]);
+
+  useEffect(() => {
+    const handlePageHide = () => {
+      flushPendingViewerStateSave();
+    };
+
+    const handleVisibilityChange = () => {
+      if (isBrowserPageHidden()) flushPendingViewerStateSave();
+    };
+
+    globalThis.addEventListener("pagehide", handlePageHide);
+    globalThis.document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      globalThis.removeEventListener("pagehide", handlePageHide);
+      globalThis.document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [flushPendingViewerStateSave]);
 
   if (!localSource.isResolved && !source) {
     return <div className={statusClassName}>PDFを読み込み中...</div>;
