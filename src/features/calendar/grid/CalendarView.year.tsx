@@ -480,7 +480,7 @@ const CalendarYearViewComponent = ({
                   </h3>
 
                   <div className="grid grid-cols-7 gap-y-1 text-center text-[11px] font-semibold leading-none text-[#8e8e93]">
-                    {t.miniCalendarWeekdays.map((weekday, index) => (
+                    {t.calendarMonthWeekdays.map((weekday, index) => (
                       <div key={`${weekday}-${index}`} className="flex h-5 items-center justify-center">
                         {weekday}
                       </div>
