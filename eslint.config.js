@@ -70,7 +70,7 @@ export default defineConfig([
       "@stylistic/semi": ["error", "always"],
       "@stylistic/max-len": "off",
       "@stylistic/object-curly-newline": [
-        "warn",
+        "error",
         {
           ImportDeclaration: "never",
           ExportDeclaration: "never",
