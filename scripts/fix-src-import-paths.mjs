@@ -2,14 +2,20 @@ import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "
 import path from "node:path";
 
 const ROOT_DIR = process.cwd();
-const SRC_DIR = path.join(ROOT_DIR, "src");
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
 const RESOLVABLE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".json", ".css", ".scss", ".sass", ".less"];
 const IMPORT_PATTERNS = [
-  /(\bfrom\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+)(["'])/g,
-  /(\bimport\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+)(["'])/g,
-  /(\bimport\s*\(\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+)(["']\s*\))/g,
-  /(\bexport\s+[^;]*?\s+from\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+)(["'])/g,
+  /(\bfrom\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+)(["'])/g,
+  /(\bimport\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+)(["'])/g,
+  /(\bimport\s*\(\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+)(["']\s*\))/g,
+  /(\bexport\s+[^;]*?\s+from\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+)(["'])/g,
+];
+const ALIAS_ROOTS = [
+  { directory: path.join(ROOT_DIR, "src"), prefix: "@" },
+  { directory: path.join(ROOT_DIR, "packages/core/src"), prefix: "@core" },
+  { directory: path.join(ROOT_DIR, "packages/platform/src"), prefix: "@platform" },
+  { directory: path.join(ROOT_DIR, "packages/web-renderer/src"), prefix: "@web-renderer" },
+  { directory: path.join(ROOT_DIR, "packages/mobile-renderer/src"), prefix: "@mobile-renderer" },
 ];
 
 const walkSourceFiles = (directory) => {
@@ -70,8 +76,14 @@ const resolveExistingModulePath = (basePath) => {
   return null;
 };
 
+const findAliasRootByPrefix = (specifier) => ALIAS_ROOTS.find(({ prefix }) => specifier.startsWith(`${prefix}/`));
+
+const findAliasRootByFilePath = (filePath) => ALIAS_ROOTS.find(({ directory }) => isInsideDirectory(filePath, directory));
+
 const resolveSpecifierPath = (importerDir, specifier) => {
-  if (specifier.startsWith("@/")) return resolveExistingModulePath(path.join(SRC_DIR, specifier.slice(2)));
+  const aliasRoot = findAliasRootByPrefix(specifier);
+
+  if (aliasRoot) return resolveExistingModulePath(path.join(aliasRoot.directory, specifier.slice(aliasRoot.prefix.length + 1)));
   if (specifier.startsWith(".")) return resolveExistingModulePath(path.resolve(importerDir, specifier));
 
   return null;
@@ -85,21 +97,21 @@ const toSameDirectoryRelativeSpecifier = (importerDir, targetFilePath, originalS
   return modulePath.startsWith(".") ? modulePath : `./${modulePath}`;
 };
 
-const toSrcAliasSpecifier = (targetFilePath, originalSpecifier) => {
+const toAliasSpecifier = (targetFilePath, aliasRoot, originalSpecifier) => {
   const originalHadKnownExtension = hasKnownExtension(originalSpecifier);
-  const relativeToSrc = toPosix(path.relative(SRC_DIR, targetFilePath));
-  const modulePath = originalHadKnownExtension ? relativeToSrc : stripTrailingIndex(stripKnownExtension(relativeToSrc));
+  const relativeToAliasRoot = toPosix(path.relative(aliasRoot.directory, targetFilePath));
+  const modulePath = originalHadKnownExtension ? relativeToAliasRoot : stripTrailingIndex(stripKnownExtension(relativeToAliasRoot));
 
-  return `@/${modulePath}`;
+  return `${aliasRoot.prefix}/${modulePath}`;
 };
 
-const toFallbackSrcAliasSpecifier = (importerDir, specifier) => {
+const toFallbackAliasSpecifier = (importerDir, specifier) => {
   const targetPath = path.resolve(importerDir, specifier);
-  const relativeToSrc = path.relative(SRC_DIR, targetPath);
+  const aliasRoot = findAliasRootByFilePath(targetPath);
 
-  if (relativeToSrc.startsWith("..") || path.isAbsolute(relativeToSrc)) return specifier;
+  if (!aliasRoot) return specifier;
 
-  return `@/${toPosix(relativeToSrc)}`;
+  return `${aliasRoot.prefix}/${toPosix(path.relative(aliasRoot.directory, targetPath))}`;
 };
 
 const normalizeSpecifier = (filePath, specifier) => {
@@ -110,16 +122,18 @@ const normalizeSpecifier = (filePath, specifier) => {
   const targetFilePath = resolveSpecifierPath(importerDir, specifier);
 
   if (!targetFilePath) {
-    if (specifier.startsWith(".")) return toFallbackSrcAliasSpecifier(importerDir, specifier);
+    if (specifier.startsWith(".")) return toFallbackAliasSpecifier(importerDir, specifier);
 
     return specifier;
   }
 
   const targetDir = path.dirname(targetFilePath);
   if (targetDir === importerDir) return toSameDirectoryRelativeSpecifier(importerDir, targetFilePath, specifier);
-  if (!isInsideDirectory(targetFilePath, SRC_DIR)) return specifier;
 
-  return toSrcAliasSpecifier(targetFilePath, specifier);
+  const aliasRoot = findAliasRootByFilePath(targetFilePath);
+  if (!aliasRoot) return specifier;
+
+  return toAliasSpecifier(targetFilePath, aliasRoot, specifier);
 };
 
 const normalizeImportSpecifiers = (filePath, source) => IMPORT_PATTERNS.reduce((nextSource, pattern) => nextSource.replace(pattern, (match, prefix, specifier, suffix) => {
@@ -154,7 +168,7 @@ const updateFile = (filePath) => {
   return true;
 };
 
-const updatedFiles = walkSourceFiles(SRC_DIR).filter(updateFile);
+const updatedFiles = ALIAS_ROOTS.flatMap(({ directory }) => walkSourceFiles(directory)).filter(updateFile);
 
 if (updatedFiles.length > 0) {
   console.log(`Normalized lint paths in ${updatedFiles.length} file(s).`);
