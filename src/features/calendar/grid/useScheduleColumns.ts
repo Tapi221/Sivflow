@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 import type { ScheduleColumnBuffer } from "./ScheduleColumn.shared";
 import { buildScheduleDisplayDays, buildScheduleInteractionDays, buildScheduleVirtualRail } from "./ScheduleColumn.shared";
@@ -7,6 +8,7 @@ type UseScheduleDaysParams = {
   anchorDate: Date;
   viewMode: CalendarViewMode;
   buffer: ScheduleColumnBuffer;
+  weekStartDay: CalendarWeekStartDay;
 };
 
 const VIRTUAL_RAIL_VIEW_MODES = new Set<CalendarViewMode>([
@@ -22,17 +24,19 @@ export const useScheduleDays = ({
   anchorDate,
   viewMode,
   buffer,
+  weekStartDay,
 }: UseScheduleDaysParams) => {
   return useMemo(() => {
-    const displayDays = buildScheduleDisplayDays(anchorDate, viewMode);
+    const displayDays = buildScheduleDisplayDays(anchorDate, viewMode, weekStartDay);
     const interactionDays = VIRTUAL_RAIL_VIEW_MODES.has(viewMode)
       ? displayDays
       : buildScheduleInteractionDays(
         anchorDate,
         viewMode,
         buffer,
+        weekStartDay,
       );
-    const virtualRail = buildScheduleVirtualRail(anchorDate, viewMode, buffer);
+    const virtualRail = buildScheduleVirtualRail(anchorDate, viewMode, buffer, weekStartDay);
 
     return {
       displayDays,
@@ -43,5 +47,5 @@ export const useScheduleDays = ({
         end: interactionDays[interactionDays.length - 1],
       },
     };
-  }, [anchorDate, buffer, viewMode]);
+  }, [anchorDate, buffer, viewMode, weekStartDay]);
 };
