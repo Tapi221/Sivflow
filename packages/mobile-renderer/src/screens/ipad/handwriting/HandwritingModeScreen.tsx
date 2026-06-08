@@ -15,61 +15,6 @@ type HandwritingModeScreenProps = {
 };
 
 const ERASE_RADIUS = 44;
-
-const hasPointNear = (stroke: InkStroke, point: InkPoint) => {
-  return stroke.points.some((candidate) => {
-    const dx = candidate.x - point.x;
-    const dy = candidate.y - point.y;
-    return Math.sqrt(dx * dx + dy * dy) <= ERASE_RADIUS;
-  });
-};
-
-const HandwritingModeScreen = ({ session }: HandwritingModeScreenProps) => {
-  const [tool, setTool] = useState<InkEditTool>("pen");
-  const [strokes, setStrokes] = useState<InkStroke[]>([]);
-
-  const handleStrokeComplete = useCallback((stroke: InkStroke) => {
-    setStrokes((current) => [...current, stroke]);
-  }, []);
-
-  const handleErasePoint = useCallback((point: InkPoint) => {
-    setStrokes((current) => current.filter((stroke) => !hasPointNear(stroke, point)));
-  }, []);
-
-  const handleClear = useCallback(() => {
-    setStrokes([]);
-  }, []);
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.eyebrow}>iPad only</Text>
-        <Text style={styles.title}>手書きモード</Text>
-        <Text style={styles.description}>Desktopで開いているカードに接続して、Apple Pencil用の手書きUIを表示します。スマホにはこの画面を表示しません。</Text>
-      </View>
-
-      <View style={styles.sessionCard}>
-        <View style={styles.sessionTextBlock}>
-          <Text style={styles.sessionLabel}>Session</Text>
-          <Text style={styles.sessionValue}>{session?.id ?? "未接続"}</Text>
-          <Text style={styles.sessionMeta}>{session ? `${session.cardId} / ${session.side}` : "Desktop側のsession待ち"}</Text>
-        </View>
-        <Text style={styles.strokeCount}>{strokes.length} strokes</Text>
-      </View>
-
-      <IpadInkCanvasHost cardId={session?.cardId} tool={tool} strokes={strokes} onErasePoint={handleErasePoint} onStrokeComplete={handleStrokeComplete} />
-      <View style={styles.toolbarRow}>
-        <View style={styles.toolbarHost}>
-          <IpadInkToolbar tool={tool} onToolChange={setTool} />
-        </View>
-        <Pressable accessibilityRole="button" onPress={handleClear} style={styles.clearButton}>
-          <Text style={styles.clearButtonText}>Reset</Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-};
-
 const styles = StyleSheet.create({
   clearButton: {
     alignItems: "center",
@@ -155,6 +100,60 @@ const styles = StyleSheet.create({
     gap: 8,
   },
 });
+
+const hasPointNear = (stroke: InkStroke, point: InkPoint) => {
+  return stroke.points.some((candidate) => {
+    const dx = candidate.x - point.x;
+    const dy = candidate.y - point.y;
+    return Math.sqrt(dx * dx + dy * dy) <= ERASE_RADIUS;
+  });
+};
+
+const HandwritingModeScreen = ({ session }: HandwritingModeScreenProps) => {
+  const [tool, setTool] = useState<InkEditTool>("pen");
+  const [strokes, setStrokes] = useState<InkStroke[]>([]);
+
+  const handleStrokeComplete = useCallback((stroke: InkStroke) => {
+    setStrokes((current) => [...current, stroke]);
+  }, []);
+
+  const handleErasePoint = useCallback((point: InkPoint) => {
+    setStrokes((current) => current.filter((stroke) => !hasPointNear(stroke, point)));
+  }, []);
+
+  const handleClear = useCallback(() => {
+    setStrokes([]);
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.eyebrow}>iPad only</Text>
+        <Text style={styles.title}>手書きモード</Text>
+        <Text style={styles.description}>Desktopで開いているカードに接続して、Apple Pencil用の手書きUIを表示します。スマホにはこの画面を表示しません。</Text>
+      </View>
+
+      <View style={styles.sessionCard}>
+        <View style={styles.sessionTextBlock}>
+          <Text style={styles.sessionLabel}>Session</Text>
+          <Text style={styles.sessionValue}>{session?.id ?? "未接続"}</Text>
+          <Text style={styles.sessionMeta}>{session ? `${session.cardId} / ${session.side}` : "Desktop側のsession待ち"}</Text>
+        </View>
+        <Text style={styles.strokeCount}>{strokes.length} strokes</Text>
+      </View>
+
+      <IpadInkCanvasHost cardId={session?.cardId} tool={tool} strokes={strokes} onErasePoint={handleErasePoint} onStrokeComplete={handleStrokeComplete} />
+      <View style={styles.toolbarRow}>
+        <View style={styles.toolbarHost}>
+          <IpadInkToolbar tool={tool} onToolChange={setTool} />
+        </View>
+        <Pressable accessibilityRole="button" onPress={handleClear} style={styles.clearButton}>
+          <Text style={styles.clearButtonText}>Reset</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+};
 
 const MemoizedHandwritingModeScreen = memo(HandwritingModeScreen);
 
