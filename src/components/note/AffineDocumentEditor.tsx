@@ -12,7 +12,9 @@ const NOTE_EDITOR_ROOT_CLASS_NAME = "relative h-full min-h-0 w-full overflow-hid
 const NOTE_EDITOR_HOST_CLASS_NAME = "h-full min-h-0 w-full overflow-hidden bg-white";
 const NOTE_EDITOR_LOADING_CLASS_NAME = "flex h-full w-full items-center justify-center bg-white text-[#9aa0a6]";
 const NOTE_EDITOR_LOADING_SPINNER_CLASS_NAME = "h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent";
+const NOTE_EDITOR_ERROR_CLASS_NAME = "flex h-full w-full items-center justify-center bg-white px-6 text-center text-[12px] font-medium text-[#9aa0a6]";
 const NOTE_LOADING_LABEL = "AFFiNE を読み込み中";
+const NOTE_ERROR_LABEL = "AFFiNE エディタを起動できませんでした。Console の BlockSuite エラーを確認してください。";
 
 const renderLoadingSpinner = (host: HTMLDivElement): void => {
   const spinner = document.createElement("span");
@@ -25,6 +27,14 @@ const renderLoadingSpinner = (host: HTMLDivElement): void => {
   host.setAttribute("role", "status");
   host.setAttribute("aria-label", NOTE_LOADING_LABEL);
   host.replaceChildren(spinner, label);
+};
+
+const renderEditorError = (host: HTMLDivElement, error: unknown): void => {
+  console.error("[AFFiNE note editor] Failed to mount BlockSuite editor", error);
+  host.className = NOTE_EDITOR_ERROR_CLASS_NAME;
+  host.removeAttribute("role");
+  host.removeAttribute("aria-label");
+  host.textContent = NOTE_ERROR_LABEL;
 };
 
 const mountEditor = (host: HTMLDivElement, editor: BlocksuiteAffineEditor["editor"]): void => {
@@ -82,6 +92,9 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
       host.addEventListener("keyup", scheduleSave, { signal: abortController.signal });
       host.addEventListener("paste", scheduleSave, { signal: abortController.signal });
       host.addEventListener("drop", scheduleSave, { signal: abortController.signal });
+    }).catch((error: unknown) => {
+      if (isDisposed) return;
+      renderEditorError(host, error);
     });
 
     return () => {
