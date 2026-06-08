@@ -30,9 +30,8 @@ const MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR = "#34c759";
 const MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX = "現在地";
 const MOBILE_EVENT_TIME_WHEEL_ROW_HEIGHT = 44;
 const MOBILE_EVENT_TIME_WHEEL_PADDING_HEIGHT = MOBILE_EVENT_TIME_WHEEL_ROW_HEIGHT * 2;
-const MOBILE_EVENT_DATE_PICKER_YEARS_BEFORE = 60;
-const MOBILE_EVENT_DATE_PICKER_YEAR_COUNT = 121;
-const MOBILE_EVENT_DATE_PICKER_MONTHS = Array.from({ length: 12 }, (_, index) => index + 1);
+const MOBILE_EVENT_DATE_GRID_CELL_COUNT = 42;
+const MOBILE_EVENT_DATE_WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 const MOBILE_EVENT_TIME_WHEEL_HOURS = Array.from({ length: 24 }, (_, hour) => hour);
 const MOBILE_EVENT_TIME_WHEEL_MINUTES = Array.from({ length: 60 }, (_, minute) => minute);
 const EMPTY_GOOGLE_ACCOUNTS: GoogleAccountDisplay[] = [];
@@ -145,8 +144,6 @@ const formatDateUnit = (value: number): string => String(value).padStart(2, "0")
 
 const formatTimeUnit = (value: number): string => String(value).padStart(2, "0");
 
-const getDaysInMonth = (year: number, month: number): number => new Date(year, month, 0).getDate();
-
 const createDateInputValue = (year: number, month: number, day: number): string => `${year}-${formatDateUnit(month)}-${formatDateUnit(day)}`;
 
 const createTimeInputValue = (hours: number, minutes: number): string => `${formatTimeUnit(hours)}:${formatTimeUnit(minutes)}`;
@@ -160,7 +157,19 @@ const getTimeInputParts = (value: string): { hours: number; minutes: number } =>
 
 const clampTimeWheelIndex = (value: number, max: number): number => Math.max(0, Math.min(max, value));
 
-const clampDateDay = (year: number, month: number, day: number): number => Math.max(1, Math.min(getDaysInMonth(year, month), day));
+const createMonthDateGrid = (year: number, month: number): Date[] => {
+  const firstDate = new Date(year, month - 1, 1);
+  const gridStartDate = addDays(firstDate, -firstDate.getDay());
+
+  return Array.from({ length: MOBILE_EVENT_DATE_GRID_CELL_COUNT }, (_, index) => addDays(gridStartDate, index));
+};
+
+const createShiftedMonthParts = (year: number, month: number, offset: number): { year: number; month: number } => {
+  const shiftedDate = new Date(year, month - 1 + offset, 1);
+  return { year: shiftedDate.getFullYear(), month: shiftedDate.getMonth() + 1 };
+};
+
+const isDateInMonth = (date: Date, year: number, month: number): boolean => date.getFullYear() === year && date.getMonth() === month - 1;
 
 const MobileCalendarSearchIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
@@ -192,23 +201,46 @@ const MobileCalendarTimeButton = ({ label, value, isActive, onClick }: MobileCal
 
 const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlineDatePickerProps) => {
   const { year, month, day } = getDateInputParts(value);
-  const years = useMemo(() => Array.from({ length: MOBILE_EVENT_DATE_PICKER_YEAR_COUNT }, (_, index) => year - MOBILE_EVENT_DATE_PICKER_YEARS_BEFORE + index), [year]);
-  const days = useMemo(() => Array.from({ length: getDaysInMonth(year, month) }, (_, index) => index + 1), [month, year]);
-  const updateDate = useCallback((nextYear: number, nextMonth: number, nextDay: number) => onChange(createDateInputValue(nextYear, nextMonth, clampDateDay(nextYear, nextMonth, nextDay))), [onChange]);
+  const selectedDate = useMemo(() => new Date(year, month - 1, day), [day, month, year]);
+  const today = useMemo(() => new Date(), []);
+  const [visibleMonth, setVisibleMonth] = useState(() => ({ year, month }));
+  const visibleDates = useMemo(() => createMonthDateGrid(visibleMonth.year, visibleMonth.month), [visibleMonth.month, visibleMonth.year]);
+
+  useEffect(() => {
+    setVisibleMonth({ year, month });
+  }, [month, year]);
+
+  const handleMoveMonth = useCallback((offset: number) => {
+    setVisibleMonth((current) => createShiftedMonthParts(current.year, current.month, offset));
+  }, []);
+
+  const handleSelectDate = useCallback((date: Date) => {
+    onChange(createDateInputValue(date.getFullYear(), date.getMonth() + 1, date.getDate()));
+  }, [onChange]);
 
   return (
     <div className="border-t border-[#e5e5ea] px-4 py-3">
-      <div className="rounded-[22px] bg-[#fbfbfd] p-3 shadow-[inset_0_0_0_1px_rgba(60,60,67,0.12)]">
-        <div className="grid grid-cols-[1.2fr_1fr_1fr] gap-2">
-          <select className="h-[154px] rounded-[16px] bg-[#f2f2f7] px-1 text-center text-[22px] font-semibold tracking-[-0.04em] text-[#111111] outline-none [text-align-last:center]" size={5} value={year} onChange={(event) => updateDate(Number(event.target.value), month, day)} aria-label="年">
-            {years.map((wheelYear) => <option key={wheelYear} value={wheelYear}>{wheelYear}年</option>)}
-          </select>
-          <select className="h-[154px] rounded-[16px] bg-[#f2f2f7] px-1 text-center text-[22px] font-semibold tracking-[-0.04em] text-[#111111] outline-none [text-align-last:center]" size={5} value={month} onChange={(event) => updateDate(year, Number(event.target.value), day)} aria-label="月">
-            {MOBILE_EVENT_DATE_PICKER_MONTHS.map((wheelMonth) => <option key={wheelMonth} value={wheelMonth}>{wheelMonth}月</option>)}
-          </select>
-          <select className="h-[154px] rounded-[16px] bg-[#f2f2f7] px-1 text-center text-[22px] font-semibold tracking-[-0.04em] text-[#111111] outline-none [text-align-last:center]" size={5} value={day} onChange={(event) => updateDate(year, month, Number(event.target.value))} aria-label="日">
-            {days.map((wheelDay) => <option key={wheelDay} value={wheelDay}>{wheelDay}日</option>)}
-          </select>
+      <div className="rounded-[22px] bg-[#fbfbfd] px-4 pb-4 pt-3 shadow-[inset_0_0_0_1px_rgba(60,60,67,0.12)]">
+        <div className="mb-2 flex h-[36px] items-center justify-between">
+          <button type="button" className="flex h-[36px] w-[36px] items-center justify-center rounded-full text-[15px] font-semibold text-[#ff3b30] active:bg-[#f2f2f7]" aria-label="前の月" onClick={() => handleMoveMonth(-1)}>前</button>
+          <div className="text-[17px] font-semibold tracking-[-0.03em] text-[#111111]">{visibleMonth.year}年{visibleMonth.month}月</div>
+          <button type="button" className="flex h-[36px] w-[36px] items-center justify-center rounded-full text-[15px] font-semibold text-[#ff3b30] active:bg-[#f2f2f7]" aria-label="次の月" onClick={() => handleMoveMonth(1)}>次</button>
+        </div>
+        <div className="grid grid-cols-7 pb-1">
+          {MOBILE_EVENT_DATE_WEEKDAY_LABELS.map((label, index) => <div key={label} className={cn("h-7 text-center text-[13px] font-semibold leading-7 tracking-[-0.02em]", index === 0 ? "text-[#ff3b30]" : "text-[#8e8e93]")}>{label}</div>)}
+        </div>
+        <div className="grid grid-cols-7 gap-y-1">
+          {visibleDates.map((date) => {
+            const isSelected = isSameLocalDate(date, selectedDate);
+            const isToday = isSameLocalDate(date, today);
+            const isCurrentMonth = isDateInMonth(date, visibleMonth.year, visibleMonth.month);
+
+            return (
+              <button key={date.toISOString()} type="button" className="flex h-9 items-center justify-center rounded-full outline-none" onClick={() => handleSelectDate(date)}>
+                <span className={cn("flex h-[32px] w-[32px] items-center justify-center rounded-full text-[17px] tracking-[-0.03em] tabular-nums", isSelected ? "bg-[#ff3b30] font-semibold text-white" : isToday ? "font-semibold text-[#ff3b30]" : isCurrentMonth ? "text-[#111111]" : "text-[#c7c7cc]")}>{date.getDate()}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
