@@ -1,7 +1,9 @@
 import { addDays, endOfDay, endOfMonth, endOfWeek, startOfDay, startOfMonth, startOfWeek, subDays } from "date-fns";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import type { CalendarViewMode } from "@/features/calendar/calendar.types";
+import type { CalendarViewMode, CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
+import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
+import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 
 export type CalendarEventSyncRange = {
   rangeStart: Date;
@@ -12,6 +14,7 @@ export type BuildCalendarEventSyncRangeOptions = {
   selectedViewMode: CalendarViewMode;
   visibleDays: Date[];
   monthTitleDate: Date;
+  weekStartDay?: CalendarWeekStartDay;
   monthRenderedRange?: CalendarDateRange | null;
   yearRenderedRange?: CalendarDateRange | null;
   yearSyncRange?: CalendarDateRange | null;
@@ -22,9 +25,10 @@ const WEEKDAY_SYNC_BUFFER_DAYS = 21;
 const WEEKDAY_PRIORITY_SYNC_BUFFER_DAYS = 7;
 const DEFAULT_VISIBLE_DAY_BUFFER_DAYS = 2;
 
-const buildCurrentMonthGridCalendarEventSyncRange = (monthTitleDate: Date): CalendarEventSyncRange => {
-  const gridStart = startOfWeek(startOfMonth(monthTitleDate), { weekStartsOn: 0 });
-  const gridEnd = endOfWeek(endOfMonth(monthTitleDate), { weekStartsOn: 0 });
+const buildMiniCalendarMonthRange = (monthTitleDate: Date, weekStartDay: CalendarWeekStartDay): CalendarEventSyncRange => {
+  const weekStartsOn = getCalendarWeekStartsOn(weekStartDay);
+  const gridStart = startOfWeek(startOfMonth(monthTitleDate), { weekStartsOn });
+  const gridEnd = endOfWeek(endOfMonth(monthTitleDate), { weekStartsOn });
 
   return {
     rangeStart: startOfDay(gridStart),
@@ -54,9 +58,10 @@ const buildYearCalendarEventSyncRange = (visibleDays: Date[], monthTitleDate: Da
   };
 };
 
-const buildMonthCalendarEventSyncRange = (monthTitleDate: Date): CalendarEventSyncRange => {
-  const gridStart = startOfWeek(startOfMonth(monthTitleDate), { weekStartsOn: C.WEEK_STARTS_ON_MONDAY });
-  const gridEnd = endOfWeek(endOfMonth(monthTitleDate), { weekStartsOn: C.WEEK_STARTS_ON_MONDAY });
+const buildMonthCalendarEventSyncRange = (monthTitleDate: Date, weekStartDay: CalendarWeekStartDay): CalendarEventSyncRange => {
+  const weekStartsOn = getCalendarWeekStartsOn(weekStartDay);
+  const gridStart = startOfWeek(startOfMonth(monthTitleDate), { weekStartsOn });
+  const gridEnd = endOfWeek(endOfMonth(monthTitleDate), { weekStartsOn });
 
   return {
     rangeStart: startOfDay(subDays(gridStart, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS)),
@@ -96,22 +101,24 @@ export const buildCalendarEventSyncRange = ({
   selectedViewMode,
   visibleDays,
   monthTitleDate,
+  weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY,
   yearSyncRange,
 }: BuildCalendarEventSyncRangeOptions): CalendarEventSyncRange => {
-  const currentMonthGridRange = buildCurrentMonthGridCalendarEventSyncRange(monthTitleDate);
+  const miniCalendarRange = buildMiniCalendarMonthRange(monthTitleDate, weekStartDay);
   const viewRange = selectedViewMode === "year"
     ? buildYearCalendarEventSyncRange(visibleDays, monthTitleDate, yearSyncRange)
     : selectedViewMode === "month"
-      ? buildMonthCalendarEventSyncRange(monthTitleDate)
+      ? buildMonthCalendarEventSyncRange(monthTitleDate, weekStartDay)
       : buildDefaultCalendarEventSyncRange(selectedViewMode, visibleDays, monthTitleDate);
 
-  return mergeCalendarEventSyncRanges(viewRange, currentMonthGridRange);
+  return mergeCalendarEventSyncRanges(viewRange, miniCalendarRange);
 };
 
 export const buildCalendarEventPrioritySyncRange = ({
   selectedViewMode,
   visibleDays,
   monthTitleDate,
+  weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY,
   monthRenderedRange,
   yearSyncRange,
 }: BuildCalendarEventSyncRangeOptions): CalendarEventSyncRange => {
@@ -123,6 +130,7 @@ export const buildCalendarEventPrioritySyncRange = ({
     selectedViewMode,
     visibleDays,
     monthTitleDate,
+    weekStartDay,
     monthRenderedRange,
     yearSyncRange,
   });
