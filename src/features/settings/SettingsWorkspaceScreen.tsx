@@ -34,7 +34,6 @@ type SettingToggleProps = {
 
 type SettingSegmentProps<T extends string | number> = {
   label: string;
-  description?: string;
   value: T;
   options: readonly SettingOption<T>[];
   onChange: (value: T) => void;
@@ -88,9 +87,7 @@ type SettingsWorkspaceCopy = {
   preferencesTitle: string;
   preferencesDescription: string;
   languageLabel: string;
-  languageDescription: string;
   weekStartLabel: string;
-  weekStartDescription: string;
   notificationsLabel: string;
   notificationsDescription: string;
   studyTitle: string;
@@ -108,9 +105,7 @@ type SettingsWorkspaceCopy = {
   editorTitle: string;
   editorDescription: string;
   questionDisplayLabel: string;
-  questionDisplayDescription: string;
   markdownTabLabel: string;
-  markdownTabDescription: string;
   previewDefaultLabel: string;
   previewDefaultDescription: string;
   autoDraftLabel: string;
@@ -177,9 +172,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     preferencesTitle: "環境設定",
     preferencesDescription: "画面表示と日付の基本設定です。",
     languageLabel: "言語",
-    languageDescription: "UI の表示言語を切り替えます。",
     weekStartLabel: "週の開始曜日",
-    weekStartDescription: "カレンダー週の開始曜日です。",
     notificationsLabel: "通知",
     notificationsDescription: "復習通知を有効にします。",
     studyTitle: "学習",
@@ -197,9 +190,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     editorTitle: "エディター",
     editorDescription: "カード編集画面の入力補助です。",
     questionDisplayLabel: "問題文の表示",
-    questionDisplayDescription: "カード閲覧時の問題文表示方法です。",
     markdownTabLabel: "Markdown タブ幅",
-    markdownTabDescription: "Markdown 編集時のインデント幅です。",
     previewDefaultLabel: "プレビューを初期表示",
     previewDefaultDescription: "カード本文のプレビューを初期表示します。",
     autoDraftLabel: "下書きの自動保持",
@@ -263,9 +254,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     preferencesTitle: "Preferences",
     preferencesDescription: "Basic display and date settings.",
     languageLabel: "Language",
-    languageDescription: "Change the UI language.",
     weekStartLabel: "Week starts on",
-    weekStartDescription: "First day of the calendar week.",
     notificationsLabel: "Notifications",
     notificationsDescription: "Enable review notifications.",
     studyTitle: "Study",
@@ -283,9 +272,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     editorTitle: "Editor",
     editorDescription: "Input assistance for card editing.",
     questionDisplayLabel: "Question display",
-    questionDisplayDescription: "How questions are displayed while viewing cards.",
     markdownTabLabel: "Markdown tab size",
-    markdownTabDescription: "Indent width for Markdown editing.",
     previewDefaultLabel: "Preview by default",
     previewDefaultDescription: "Show the card body preview by default.",
     autoDraftLabel: "Auto draft",
@@ -349,9 +336,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     preferencesTitle: "偏好设置",
     preferencesDescription: "显示和日期的基本设置。",
     languageLabel: "语言",
-    languageDescription: "切换 UI 显示语言。",
     weekStartLabel: "一周开始于",
-    weekStartDescription: "日历周的开始日。",
     notificationsLabel: "通知",
     notificationsDescription: "启用复习通知。",
     studyTitle: "学习",
@@ -369,9 +354,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     editorTitle: "编辑器",
     editorDescription: "卡片编辑界面的输入辅助。",
     questionDisplayLabel: "问题显示",
-    questionDisplayDescription: "查看卡片时的问题显示方式。",
     markdownTabLabel: "Markdown 缩进宽度",
-    markdownTabDescription: "Markdown 编辑时的缩进宽度。",
     previewDefaultLabel: "默认预览",
     previewDefaultDescription: "默认显示卡片正文预览。",
     autoDraftLabel: "自动草稿",
@@ -444,12 +427,11 @@ const SettingToggle = ({ label, description, checked, onChange }: SettingToggleP
   );
 };
 
-const SettingSegment = <T extends string | number>({ label, description, value, options, onChange }: SettingSegmentProps<T>) => {
+const SettingSegment = <T extends string | number>({ label, value, options, onChange }: SettingSegmentProps<T>) => {
   return (
     <div className="settings-workspace__row settings-workspace__row--stacked">
       <div className="settings-workspace__row-copy">
         <span className="settings-workspace__row-title">{label}</span>
-        {description ? <span className="settings-workspace__row-description">{description}</span> : null}
       </div>
       <div className="settings-workspace__segmented" role="radiogroup" aria-label={label}>
         {options.map((option) => {
@@ -566,8 +548,8 @@ const SettingsWorkspaceScreen = () => {
           ) : null}
           {activeSectionId === "preferences" ? (
             <SettingsSectionBlock title={copy.preferencesTitle} description={copy.preferencesDescription}>
-              <SettingSegment label={copy.languageLabel} description={copy.languageDescription} value={language} options={languageOptions} onChange={handleLanguageChange} />
-              <SettingSegment label={copy.weekStartLabel} description={copy.weekStartDescription} value={weekStartDay} options={weekStartOptions} onChange={(value) => void updateSettings({ weekStartDay: value })} />
+              <SettingSegment label={copy.languageLabel} value={language} options={languageOptions} onChange={handleLanguageChange} />
+              <SettingSegment label={copy.weekStartLabel} value={weekStartDay} options={weekStartOptions} onChange={(value) => void updateSettings({ weekStartDay: value })} />
               <SettingToggle label={copy.notificationsLabel} description={copy.notificationsDescription} checked={settings?.notificationsEnabled ?? false} onChange={(checked) => updateBooleanSetting("notificationsEnabled", checked)} />
             </SettingsSectionBlock>
           ) : null}
@@ -582,8 +564,8 @@ const SettingsWorkspaceScreen = () => {
           ) : null}
           {activeSectionId === "editor" ? (
             <SettingsSectionBlock title={copy.editorTitle} description={copy.editorDescription}>
-              <SettingSegment label={copy.questionDisplayLabel} description={copy.questionDisplayDescription} value={questionDisplayMode} options={questionDisplayOptions} onChange={(value) => void updateSettings({ questionDisplayMode: value })} />
-              <SettingSegment label={copy.markdownTabLabel} description={copy.markdownTabDescription} value={markdownTabSize} options={markdownTabOptions} onChange={(value) => void updateSettings({ markdownTabSize: value })} />
+              <SettingSegment label={copy.questionDisplayLabel} value={questionDisplayMode} options={questionDisplayOptions} onChange={(value) => void updateSettings({ questionDisplayMode: value })} />
+              <SettingSegment label={copy.markdownTabLabel} value={markdownTabSize} options={markdownTabOptions} onChange={(value) => void updateSettings({ markdownTabSize: value })} />
               <SettingToggle label={copy.previewDefaultLabel} description={copy.previewDefaultDescription} checked={settings?.defaultPreviewEnabled ?? false} onChange={(checked) => updateBooleanSetting("defaultPreviewEnabled", checked)} />
               <SettingToggle label={copy.autoDraftLabel} description={copy.autoDraftDescription} checked={settings?.autoDraftEnabled ?? true} onChange={(checked) => updateBooleanSetting("autoDraftEnabled", checked)} />
               <SettingToggle label={copy.autoSaveLabel} description={copy.autoSaveDescription} checked={settings?.autoSaveEnabled ?? true} onChange={(checked) => updateBooleanSetting("autoSaveEnabled", checked)} />
