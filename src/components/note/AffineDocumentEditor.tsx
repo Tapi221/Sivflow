@@ -9,6 +9,7 @@ type AffineDocumentEditorProps = {
 type BlocksuiteRuntime = {
   AffineSchemas: unknown[];
   DocCollection: new (options: { schema: BlocksuiteSchema }) => BlocksuiteDocCollection;
+  EditorContainer?: new () => BlocksuiteEditorElement;
   Schema: new () => BlocksuiteSchema;
   Text: new (text?: string) => unknown;
 };
@@ -59,15 +60,32 @@ const NOTE_PAGE_FLAVOUR = "affine:page";
 const NOTE_SURFACE_FLAVOUR = "affine:surface";
 const NOTE_NOTE_FLAVOUR = "affine:note";
 const NOTE_FALLBACK_MESSAGE = "AFFiNE を起動できませんでした";
+const NOTE_CUSTOM_ELEMENT_TIMEOUT_MS = 2500;
 
 let blocksuiteRuntimePromise: Promise<BlocksuiteRuntime> | null = null;
 
+const wait = (milliseconds: number): Promise<false> => new Promise((resolve) => window.setTimeout(() => resolve(false), milliseconds));
+
+const waitForEditorElementDefinition = async (): Promise<boolean> => {
+  if (typeof customElements === "undefined") return false;
+  if (customElements.get(NOTE_EDITOR_CONTAINER_TAG_NAME)) return true;
+  await Promise.race([customElements.whenDefined(NOTE_EDITOR_CONTAINER_TAG_NAME).then(() => true), wait(NOTE_CUSTOM_ELEMENT_TIMEOUT_MS)]);
+  return Boolean(customElements.get(NOTE_EDITOR_CONTAINER_TAG_NAME));
+};
+
+const getEditorContainerConstructor = (presets: Record<string, unknown>): BlocksuiteRuntime["EditorContainer"] => {
+  const editorContainer = presets.AffineEditorContainer ?? presets.EditorContainer;
+  return typeof editorContainer === "function" ? editorContainer as BlocksuiteRuntime["EditorContainer"] : undefined;
+};
+
 const loadBlocksuiteRuntime = async (): Promise<BlocksuiteRuntime> => {
-  blocksuiteRuntimePromise ??= Promise.all([import("@blocksuite/blocks"), import("@blocksuite/presets"), import("@blocksuite/store")]).then(async ([blocks, , store]) => {
+  blocksuiteRuntimePromise ??= Promise.all([import("@blocksuite/blocks"), import("@blocksuite/presets"), import("@blocksuite/store")]).then(async ([blocks, presets, store]) => {
     const blockExports = blocks as Record<string, unknown>;
+    const presetExports = presets as Record<string, unknown>;
     const storeExports = store as Record<string, unknown>;
     const AffineSchemas = blockExports.AffineSchemas;
     const DocCollection = storeExports.DocCollection;
+    const EditorContainer = getEditorContainerConstructor(presetExports);
     const Schema = storeExports.Schema;
     const Text = storeExports.Text;
 
@@ -75,11 +93,11 @@ const loadBlocksuiteRuntime = async (): Promise<BlocksuiteRuntime> => {
       throw new Error("BlockSuite AFFiNE runtime is incomplete.");
     }
 
-    if (typeof customElements !== "undefined" && customElements.get(NOTE_EDITOR_CONTAINER_TAG_NAME)) {
-      await customElements.whenDefined(NOTE_EDITOR_CONTAINER_TAG_NAME);
+    if (!EditorContainer && !await waitForEditorElementDefinition()) {
+      throw new Error("BlockSuite AFFiNE editor element is not registered.");
     }
 
-    return { AffineSchemas, DocCollection, Schema, Text } as BlocksuiteRuntime;
+    return { AffineSchemas, DocCollection, EditorContainer, Schema, Text } as BlocksuiteRuntime;
   });
 
   return blocksuiteRuntimePromise;
@@ -136,8 +154,8 @@ const initializeCollection = (collection: BlocksuiteDocCollection): void => {
   collection.meta?.initialize?.();
 };
 
-const createEditorElement = (): BlocksuiteEditorElement => {
-  const editor = document.createElement(NOTE_EDITOR_CONTAINER_TAG_NAME) as BlocksuiteEditorElement;
+const createEditorElement = (runtime: BlocksuiteRuntime): BlocksuiteEditorElement => {
+  const editor = runtime.EditorContainer ? new runtime.EditorContainer() : document.createElement(NOTE_EDITOR_CONTAINER_TAG_NAME) as BlocksuiteEditorElement;
   editor.style.display = "block";
   editor.style.height = "100%";
   editor.style.minHeight = "0";
@@ -216,7 +234,7 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
       const doc = collection.createDoc({ id: note.id });
       await loadDocWithInitialContent(runtime, doc, note);
       if (isDisposed) return;
-      const editor = createEditorElement();
+      const editor = createEditorElement(runtime);
       editor.doc = doc;
       editor.mode = "page";
       docRef.current = doc;
