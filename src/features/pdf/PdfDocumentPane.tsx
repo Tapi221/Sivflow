@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import type { DocumentItem, PdfViewerState } from "@/types";
-import { MobilePdfPages } from "./MobilePdfPages";
 import { PdfPane } from "./PdfPane";
 import { createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource } from "./pdfDocumentSource";
 import { resolvePdfDocumentBlob } from "./resolvePdfDocumentBlob";
@@ -21,12 +20,6 @@ type LocalPdfSourceState = {
   error: string | null;
 };
 
-type LegacyMediaQueryList = MediaQueryList & {
-  addListener?: (listener: (event: MediaQueryListEvent) => void) => void;
-  removeListener?: (listener: (event: MediaQueryListEvent) => void) => void;
-};
-
-const MOBILE_PDF_VIEWPORT_MEDIA_QUERY = "(max-width: 767px)";
 const PDF_SOURCE_RESOLUTION_TIMEOUT_MS = 15_000;
 const PDF_SOURCE_TIMEOUT_ERROR_MESSAGE = "PDFデータの取得がタイムアウトしました。もう一度開き直してください。";
 const PDF_SOURCE_MISSING_ERROR_MESSAGE = "表示できるPDFデータが見つかりません。PDFを再インポートしてください。";
@@ -44,21 +37,6 @@ const createResolvedLocalPdfSourceState = (source: PdfDocumentSource | null, err
   source,
   error,
 });
-
-const getIsMobilePdfViewport = (): boolean => {
-  return typeof window !== "undefined" && window.matchMedia(MOBILE_PDF_VIEWPORT_MEDIA_QUERY).matches;
-};
-
-const addMobilePdfViewportChangeListener = (mediaQueryList: MediaQueryList, listener: (event: MediaQueryListEvent) => void): (() => void) => {
-  if (typeof mediaQueryList.addEventListener === "function") {
-    mediaQueryList.addEventListener("change", listener);
-    return () => mediaQueryList.removeEventListener("change", listener);
-  }
-
-  const legacyMediaQueryList = mediaQueryList as LegacyMediaQueryList;
-  legacyMediaQueryList.addListener?.(listener);
-  return () => legacyMediaQueryList.removeListener?.(listener);
-};
 
 const createPersistedPdfDocumentSource = (url: string | null): PdfDocumentSource | null => {
   return url ? createPdfDocumentUrlSource(url) : null;
@@ -87,7 +65,6 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   const persistedSourceUrl = useMemo(() => resolvePdfDocumentSourceUrl(document), [document.blobUrl, document.downloadUrl, document.googleDriveWebContentLink, document.googleDriveWebViewLink, document.localUrl, document.remoteUrl]);
   const persistedSource = useMemo(() => createPersistedPdfDocumentSource(persistedSourceUrl), [persistedSourceUrl]);
   const [localSource, setLocalSource] = useState<LocalPdfSourceState>(createPendingLocalPdfSourceState);
-  const [isMobilePdfViewport, setIsMobilePdfViewport] = useState(getIsMobilePdfViewport);
   const source = localSource.source ?? persistedSource;
   const paneClassName = cn(PDF_DOCUMENT_PANE_CLASS_NAME, className);
   const statusClassName = cn(PDF_DOCUMENT_STATUS_CLASS_NAME, className);
@@ -122,16 +99,6 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     };
   }, [currentUserId, document.googleDriveFileId, document.id, document.localFileId, document.userId]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const mediaQueryList = window.matchMedia(MOBILE_PDF_VIEWPORT_MEDIA_QUERY);
-    const updateMobilePdfViewport = () => setIsMobilePdfViewport(mediaQueryList.matches);
-
-    updateMobilePdfViewport();
-    return addMobilePdfViewportChangeListener(mediaQueryList, updateMobilePdfViewport);
-  }, []);
-
   if (!localSource.isResolved && !source) {
     return <div className={statusClassName}>PDFを読み込み中...</div>;
   }
@@ -141,10 +108,6 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   }
 
   const handleViewerStateChange = (viewerState: PdfViewerState) => onDocumentUpdate?.({ viewerState });
-
-  if (isMobilePdfViewport) {
-    return <MobilePdfPages source={source} className={paneClassName} viewerState={document.viewerState ?? null} onViewerStateChange={handleViewerStateChange} />;
-  }
 
   return <PdfPane source={source} className={paneClassName} viewerState={document.viewerState ?? null} onViewerStateChange={handleViewerStateChange} />;
 };
