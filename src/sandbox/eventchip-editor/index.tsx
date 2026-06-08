@@ -113,8 +113,6 @@ const getInitialValues = (): EventChipEditorValues => ({
   tooltipWeekdayRadius: eventChipDesign.tooltip.weekdayRadiusPx,
 });
 
-const formatEditorJson = (values: EventChipEditorValues): string => JSON.stringify(values, null, 2);
-
 const NumberControl = ({ label, value, min, max, step = 1, unit = "px", onChange }: NumberControlProps) => {
   const handleChange = (nextValue: string) => {
     const parsedValue = Number.parseFloat(nextValue);
@@ -245,7 +243,6 @@ const EventChipEditorSandboxPage = () => {
   const [autosaveState, setAutosaveState] = useState<AutosaveState>("idle");
   const event = useMemo(() => createSampleEvent(values.accentColor), [values.accentColor]);
   const allDayEvent = useMemo(() => createSampleAllDayEvent(values.accentColor), [values.accentColor]);
-  const designJson = useMemo(() => formatEditorJson(values), [values]);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -364,10 +361,6 @@ const EventChipEditorSandboxPage = () => {
               <RealMonthPreview values={values} event={event} allDayEvent={allDayEvent} />
               <RealListPreview values={values} event={event} allDayEvent={allDayEvent} />
             </div>
-            <section className={PREVIEW_CARD_CLASS_NAME}>
-              <h2 className="text-base font-semibold text-slate-900">Generated source values</h2>
-              <textarea className="mt-4 h-80 w-full resize-none rounded-2xl border border-slate-200 bg-slate-950 p-4 font-mono text-[12px] leading-5 text-slate-100 outline-none" readOnly value={designJson} />
-            </section>
           </main>
         </div>
       </div>
