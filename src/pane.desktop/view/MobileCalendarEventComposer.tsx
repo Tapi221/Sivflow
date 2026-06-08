@@ -1,5 +1,6 @@
 import { type SVGProps, type UIEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, addHours, format, startOfDay } from "date-fns";
+import { Switch } from "@/components/ui/switch";
 import type { GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
 import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
@@ -356,9 +357,7 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
             <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
               <div className="flex min-h-[52px] items-center justify-between border-b border-[#e5e5ea] px-4">
                 <span className="text-[17px] tracking-[-0.03em] text-[#111111]">終日</span>
-                <button type="button" role="switch" aria-checked={form.isAllDay} className={cn("relative h-[31px] w-[51px] rounded-full transition", form.isAllDay ? "bg-[#34c759]" : "bg-[#e5e5ea]")} onClick={() => { setFormValue({ isAllDay: !form.isAllDay }); setActiveTimeField(null); }}>
-                  <span className={cn("absolute top-[2px] h-[27px] w-[27px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.22)] transition-transform", form.isAllDay ? "translate-x-[22px]" : "translate-x-[2px]")} />
-                </button>
+                <Switch checked={form.isAllDay} onCheckedChange={(checked) => { setFormValue({ isAllDay: checked }); setActiveTimeField(null); }} aria-label="終日" />
               </div>
               <div className="border-b border-[#e5e5ea]">
                 <div className="flex min-h-[52px] items-center justify-between gap-3 px-4">
