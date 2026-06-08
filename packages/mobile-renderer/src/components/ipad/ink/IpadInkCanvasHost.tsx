@@ -1,12 +1,18 @@
 import React from "react";
 import { Platform, requireNativeComponent, View } from "react-native";
+import type { StyleProp, ViewStyle } from "react-native";
 
-const NativeInkCanvas = Platform.OS === "ios" ? requireNativeComponent("SivflowPencilKitCanvas") : null;
+type IpadInkCanvasHostProps = {
+  onStrokeComplete?: () => void;
+  style?: StyleProp<ViewStyle>;
+};
 
-const IpadInkCanvasHost = (props: any) => {
-  if (!NativeInkCanvas) return React.createElement(View, { style: props.style });
+const NativeInkCanvas = Platform.OS === "ios" ? requireNativeComponent<IpadInkCanvasHostProps>("SivflowPencilKitCanvas") : null;
 
-  return React.createElement(NativeInkCanvas, { style: props.style, onStrokeComplete: props.onStrokeComplete });
+const IpadInkCanvasHost = ({ onStrokeComplete, style }: IpadInkCanvasHostProps) => {
+  if (!NativeInkCanvas) return React.createElement(View, { style });
+
+  return React.createElement(NativeInkCanvas, { onStrokeComplete, style });
 };
 
 export default IpadInkCanvasHost;
