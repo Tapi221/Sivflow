@@ -7,7 +7,7 @@ import { NotificationProvider } from "@/components/notifications/NotificationPro
 import { AppSonnerToaster } from "@/components/notifications/AppSonnerToaster";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
-import { ToastProvider } from "../contexts/ToastContext";
+import { ToastProvider } from "@web-renderer/contexts/ToastContext";
 
 type AppProvidersProps = {
   children: ReactNode;
