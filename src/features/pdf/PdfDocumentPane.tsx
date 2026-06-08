@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import type { DocumentItem, PdfViewerState } from "@/types";
@@ -6,6 +6,7 @@ import { PdfPane } from "./PdfPane";
 import { createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource } from "./pdfDocumentSource";
 import { resolvePdfDocumentBlob } from "./resolvePdfDocumentBlob";
 import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
+import type { PdfViewerStateChangeOptions } from "./PdfPane";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
 
 type PdfDocumentPaneProps = {
@@ -20,7 +21,13 @@ type LocalPdfSourceState = {
   error: string | null;
 };
 
+type PendingPdfViewerStateSave = {
+  viewerState: PdfViewerState;
+  onDocumentUpdate: NonNullable<PdfDocumentPaneProps["onDocumentUpdate"]>;
+};
+
 const PDF_SOURCE_RESOLUTION_TIMEOUT_MS = 15_000;
+const PDF_VIEWER_STATE_SAVE_DEBOUNCE_MS = 800;
 const PDF_SOURCE_TIMEOUT_ERROR_MESSAGE = "PDFデータの取得がタイムアウトしました。もう一度開き直してください。";
 const PDF_SOURCE_MISSING_ERROR_MESSAGE = "表示できるPDFデータが見つかりません。PDFを再インポートしてください。";
 const PDF_DOCUMENT_PANE_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1";
@@ -59,6 +66,10 @@ const waitForPdfSourceResolution = async <T,>(promise: Promise<T>): Promise<T> =
   }
 };
 
+const getPdfViewerStatePersistence = (options?: PdfViewerStateChangeOptions) => {
+  return options?.persistence ?? "immediate";
+};
+
 const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentPaneProps) => {
   const { currentUser } = useAuthSession();
   const currentUserId = currentUser?.uid ?? null;
@@ -68,6 +79,44 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   const source = localSource.source ?? persistedSource;
   const paneClassName = cn(PDF_DOCUMENT_PANE_CLASS_NAME, className);
   const statusClassName = cn(PDF_DOCUMENT_STATUS_CLASS_NAME, className);
+  const pendingViewerStateSaveRef = useRef<PendingPdfViewerStateSave | null>(null);
+  const viewerStateSaveTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
+
+  const clearViewerStateSaveTimer = useCallback(() => {
+    if (viewerStateSaveTimerRef.current === null) return;
+    globalThis.clearTimeout(viewerStateSaveTimerRef.current);
+    viewerStateSaveTimerRef.current = null;
+  }, []);
+
+  const persistViewerState = useCallback((pendingSave: PendingPdfViewerStateSave) => {
+    void pendingSave.onDocumentUpdate({ viewerState: pendingSave.viewerState });
+  }, []);
+
+  const flushPendingViewerStateSave = useCallback(() => {
+    clearViewerStateSaveTimer();
+    const pendingSave = pendingViewerStateSaveRef.current;
+    pendingViewerStateSaveRef.current = null;
+    if (!pendingSave) return;
+    persistViewerState(pendingSave);
+  }, [clearViewerStateSaveTimer, persistViewerState]);
+
+  const handleViewerStateChange = useCallback((viewerState: PdfViewerState, options?: PdfViewerStateChangeOptions) => {
+    if (!onDocumentUpdate) return;
+
+    const persistence = getPdfViewerStatePersistence(options);
+    if (persistence === "none") return;
+
+    if (persistence === "immediate") {
+      pendingViewerStateSaveRef.current = null;
+      clearViewerStateSaveTimer();
+      persistViewerState({ viewerState, onDocumentUpdate });
+      return;
+    }
+
+    pendingViewerStateSaveRef.current = { viewerState, onDocumentUpdate };
+    clearViewerStateSaveTimer();
+    viewerStateSaveTimerRef.current = globalThis.setTimeout(flushPendingViewerStateSave, PDF_VIEWER_STATE_SAVE_DEBOUNCE_MS);
+  }, [clearViewerStateSaveTimer, flushPendingViewerStateSave, onDocumentUpdate, persistViewerState]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -99,6 +148,12 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     };
   }, [currentUserId, document.googleDriveFileId, document.id, document.localFileId, document.userId]);
 
+  useEffect(() => {
+    return () => {
+      flushPendingViewerStateSave();
+    };
+  }, [document.id, flushPendingViewerStateSave]);
+
   if (!localSource.isResolved && !source) {
     return <div className={statusClassName}>PDFを読み込み中...</div>;
   }
@@ -106,8 +161,6 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   if (localSource.isResolved && !source) {
     return <div className={statusClassName}>{localSource.error ?? PDF_SOURCE_MISSING_ERROR_MESSAGE}</div>;
   }
-
-  const handleViewerStateChange = (viewerState: PdfViewerState) => onDocumentUpdate?.({ viewerState });
 
   return <PdfPane source={source} className={paneClassName} viewerState={document.viewerState ?? null} onViewerStateChange={handleViewerStateChange} />;
 };

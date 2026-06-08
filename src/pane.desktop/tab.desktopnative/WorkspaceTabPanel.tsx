@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { CardPane } from "@/components/folder/panes/CardPane";
 import { PdfDocumentPane } from "@/features/pdf/PdfDocumentPane";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
@@ -30,7 +30,7 @@ const WorkspacePanelStatus = ({ title }: { title: string }) => {
   );
 };
 
-export const WorkspaceTabPanel = ({
+const WorkspaceTabPanel = ({
   activeTab,
   cards,
   documents,
@@ -41,6 +41,9 @@ export const WorkspaceTabPanel = ({
   const { updateDocument } = useDocumentCommands();
   const documentById = useMemo(() => buildMapById(documents), [documents]);
   const cardById = useMemo(() => buildMapById(cards), [cards]);
+  const handleDocumentUpdate = useCallback(async (documentId: string, updates: Partial<DocumentItem>) => {
+    await updateDocument(documentId, updates);
+  }, [updateDocument]);
 
   if (activeTab.kind === "document") {
     const document = documentById.get(activeTab.documentId);
@@ -53,13 +56,9 @@ export const WorkspaceTabPanel = ({
       return <WorkspacePanelStatus title="この文書形式は表示できません" />;
     }
 
-    const handleDocumentUpdate = async (updates: Partial<DocumentItem>) => {
-      await updateDocument(document.id, updates);
-    };
-
     return (
       <div className={`relative h-full min-h-0 w-full overflow-hidden bg-white ${workspaceTabPanelTextClassName}`}>
-        <PdfDocumentPane document={document} className="h-full min-h-0" onDocumentUpdate={handleDocumentUpdate} />
+        <PdfDocumentPane document={document} className="h-full min-h-0" onDocumentUpdate={(updates) => handleDocumentUpdate(document.id, updates)} />
       </div>
     );
   }
@@ -80,3 +79,5 @@ export const WorkspaceTabPanel = ({
 
   return null;
 };
+
+export { WorkspaceTabPanel };
