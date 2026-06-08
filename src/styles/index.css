@@ -36,6 +36,22 @@
   --carvepanel-surface: #ffffff;
 }
 
+button[role="switch"].h-7.w-\[48px\] {
+  display: flex;
+  align-items: center;
+  padding: 3px;
+}
+
+button[role="switch"].h-7.w-\[48px\] > span {
+  position: static;
+  transform: translateX(0);
+  transition-property: transform;
+}
+
+button[role="switch"].h-7.w-\[48px\][aria-checked="true"] > span {
+  transform: translateX(20px);
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
@@ -78,218 +94,4 @@ a:hover,
   color: transparent !important;
   background: none !important;
   background-color: transparent !important;
-  background-image: none !important;
-  background-size: 0 0 !important;
-  box-shadow: none !important;
-  opacity: 0 !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
-}
-
-::-webkit-scrollbar-button:single-button,
-*::-webkit-scrollbar-button:single-button,
-::-webkit-scrollbar-button:vertical,
-*::-webkit-scrollbar-button:vertical,
-::-webkit-scrollbar-button:horizontal,
-*::-webkit-scrollbar-button:horizontal,
-::-webkit-scrollbar-button:start,
-*::-webkit-scrollbar-button:start,
-::-webkit-scrollbar-button:end,
-*::-webkit-scrollbar-button:end,
-::-webkit-scrollbar-button:increment,
-*::-webkit-scrollbar-button:increment,
-::-webkit-scrollbar-button:decrement,
-*::-webkit-scrollbar-button:decrement,
-::-webkit-scrollbar-button:vertical:start:decrement,
-*::-webkit-scrollbar-button:vertical:start:decrement,
-::-webkit-scrollbar-button:vertical:end:increment,
-*::-webkit-scrollbar-button:vertical:end:increment,
-::-webkit-scrollbar-button:horizontal:start:decrement,
-*::-webkit-scrollbar-button:horizontal:start:decrement,
-::-webkit-scrollbar-button:horizontal:end:increment,
-*::-webkit-scrollbar-button:horizontal:end:increment {
-  display: none !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  min-width: 0 !important;
-  max-width: 0 !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  max-height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  color: transparent !important;
-  background: none !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  background-size: 0 0 !important;
-  box-shadow: none !important;
-  opacity: 0 !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
-}
-
-*::-webkit-scrollbar-track,
-*::-webkit-scrollbar-track-piece,
-*::-webkit-scrollbar-track-piece:start,
-*::-webkit-scrollbar-track-piece:end {
-  background: transparent;
-  border: 0;
-}
-
-*::-webkit-scrollbar-thumb {
-  border: var(--scrollbar-thumb-inset) solid transparent;
-  border-radius: var(--scrollbar-radius);
-  background-color: transparent;
-  background-clip: padding-box;
-  transition: background-color 0ms ease;
-}
-
-*:hover::-webkit-scrollbar-thumb {
-  background-color: var(--scrollbar-thumb);
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background-color: var(--scrollbar-thumb-hover);
-}
-
-*::-webkit-scrollbar-thumb:active {
-  background-color: var(--scrollbar-thumb-active);
-}
-
-*::-webkit-scrollbar-corner {
-  background: transparent;
-}
-
-.scrollbar-hidden,
-.calendar-year-view {
-  -ms-overflow-style: none;
-  scrollbar-gutter: auto;
-  scrollbar-width: none;
-}
-
-.scrollbar-hidden::-webkit-scrollbar,
-.calendar-year-view::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
-}
-
-@media (max-width: 767px) {
-  .schedule-mobile-calendar-surface .calendar-timeline-scroll > .grid > div:first-child > div > span {
-    width: 2ch;
-    overflow: hidden;
-    padding-left: 0;
-    padding-right: 0;
-    white-space: nowrap;
-  }
-}
-
-[aria-label="Project list explorer"] [role="tree"],
-[aria-label="Project list explorer"] [role="treeitem"],
-[aria-label="Library hierarchy explorer"] [role="tree"],
-[aria-label="Library hierarchy explorer"] [role="treeitem"],
-[aria-label="Tag tree explorer"] [role="tree"],
-[aria-label="Tag tree explorer"] [role="treeitem"] {
-  overflow-anchor: none;
-}
-
-[aria-label="Project list explorer"] .truncate,
-[aria-label="Library hierarchy explorer"] .truncate,
-[aria-label="Tag tree explorer"] .truncate {
-  overflow: hidden;
-  text-overflow: clip;
-  white-space: nowrap;
-  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%);
-  mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%);
-}
-
-[aria-label="Project list explorer"] [aria-hidden="true"][class*="bg-[#eeeeee]"],
-[aria-label="Library hierarchy explorer"] [aria-hidden="true"][class*="bg-[#eeeeee]"] {
-  z-index: 2;
-}
-
-[aria-label="Project list explorer"] [role="treeitem"] > .library-tree-marker,
-[aria-label="Library hierarchy explorer"] [role="treeitem"] > .library-tree-marker {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 13px;
-  height: 13px;
-  padding: 0;
-  border: 0;
-}
-
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) {
-  color: #25211a;
-  background: #f7f6f2;
-}
-
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="bg-[#1f1f1f]"],
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="bg-[#202020]"],
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="bg-[#2b2b2b]"],
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="bg-[#151515]"] {
-  background: #f7f6f2;
-}
-
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="border-white/10"] {
-  border-color: #e4dfd6;
-}
-
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="text-[#f4f1ea]"],
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="text-[#d8d3c9]"] {
-  color: #25211a;
-}
-
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="text-[#aaa59b]"],
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="text-[#9f9b93]"],
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="text-[#88837a]"],
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="text-[#77736b]"] {
-  color: #777066;
-}
-
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) input {
-  color: #25211a;
-  background: #ffffff;
-  border-color: #ddd7cc;
-}
-
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) input::placeholder {
-  color: #9b9488;
-}
-
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="bg-white/12"] {
-  background: #ece8df;
-}
-
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="hover:bg-white/10"]:hover {
-  background: #efebe3;
-}
-
-div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF内を検索 / ⌘F"]) [class~="bg-white/5"] {
-  background: #f0ede6;
-}
-
-.h-\[min\(92vh\,760px\)\] {
-  height: min(92dvh, 760px);
-  max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-}
-
-.h-\[min\(88vh\,720px\)\] {
-  height: min(88dvh, 720px);
-  max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-}
-
-@supports not (height: 100dvh) {
-  .h-\[min\(92vh\,760px\)\] {
-    height: min(92vh, 760px);
-    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  }
-
-  .h-\[min\(88vh\,720px\)\] {
-    height: min(88vh, 720px);
-    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  }
 }
