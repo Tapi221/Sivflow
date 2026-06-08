@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { Card, CardSet, Document, Folder } from "@/types";
@@ -160,8 +161,8 @@ const TrashPage = () => {
         ) : null}
 
         {currentUser && status === "loading" ? (
-          <section className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-600">
-            読み込み中です。
+          <section className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-10 text-slate-600">
+            <LoadingSpinner label="ゴミ箱を読み込み中" />
           </section>
         ) : null}
 
