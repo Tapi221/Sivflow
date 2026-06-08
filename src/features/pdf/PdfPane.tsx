@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
 import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
 import "pdfjs-dist/legacy/web/pdf_viewer.css";
 import { cn } from "@/lib/utils";
@@ -65,6 +66,8 @@ const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 767;
 const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 1_000;
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const getSafePageNumber = (pageNumber: number | null | undefined, pageCount: number): number => {
   const normalizedPageNumber = Math.floor(pageNumber ?? DEFAULT_PDF_PAGE);
@@ -335,7 +338,10 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
       loadedPdfDocument = nextPdfDocument;
       pdfViewer.setDocument(nextPdfDocument);
       linkService.setDocument(nextPdfDocument, null);
-    }).catch(() => undefined).finally(() => {
+    }).catch((error: unknown) => {
+      if (isCancelled) return;
+      console.warn("[PdfPane] PDF load failed", error);
+    }).finally(() => {
       if (!isCancelled) setIsLoading(false);
     });
 
