@@ -9,7 +9,6 @@ type AffineDocumentEditorProps = {
 type BlocksuiteRuntime = {
   AffineSchemas: unknown[];
   DocCollection: new (options: { schema: BlocksuiteSchema }) => BlocksuiteDocCollection;
-  EditorContainer?: new () => BlocksuiteEditorElement;
   Schema: new () => BlocksuiteSchema;
   Text: new (text?: string) => unknown;
 };
@@ -52,40 +51,25 @@ const NOTE_CONTENT_TYPE = "affine-document";
 const LEGACY_TEXT_CONTENT_TYPE = "sivflow-text-document";
 const NOTE_EDITOR_ROOT_CLASS_NAME = "relative h-full min-h-0 w-full overflow-hidden bg-white text-[#202124]";
 const NOTE_EDITOR_HOST_CLASS_NAME = "h-full min-h-0 w-full overflow-hidden bg-white";
-const NOTE_EDITOR_LOADING_CLASS_NAME = "flex h-full w-full items-center justify-center bg-white text-[12px] font-medium text-[#9aa0a6]";
+const NOTE_EDITOR_LOADING_CLASS_NAME = "flex h-full w-full items-center justify-center bg-white text-[#9aa0a6]";
+const NOTE_EDITOR_LOADING_SPINNER_CLASS_NAME = "h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent";
 const NOTE_EDITOR_CONTAINER_TAG_NAME = "affine-editor-container";
 const NOTE_EDITOR_DEFAULT_TITLE = "Untitled";
 const NOTE_PARAGRAPH_FLAVOUR = "affine:paragraph";
 const NOTE_PAGE_FLAVOUR = "affine:page";
 const NOTE_SURFACE_FLAVOUR = "affine:surface";
 const NOTE_NOTE_FLAVOUR = "affine:note";
+const NOTE_LOADING_LABEL = "AFFiNE を読み込み中";
 const NOTE_FALLBACK_MESSAGE = "AFFiNE を起動できませんでした";
-const NOTE_CUSTOM_ELEMENT_TIMEOUT_MS = 2500;
 
 let blocksuiteRuntimePromise: Promise<BlocksuiteRuntime> | null = null;
 
-const wait = (milliseconds: number): Promise<false> => new Promise((resolve) => window.setTimeout(() => resolve(false), milliseconds));
-
-const waitForEditorElementDefinition = async (): Promise<boolean> => {
-  if (typeof customElements === "undefined") return false;
-  if (customElements.get(NOTE_EDITOR_CONTAINER_TAG_NAME)) return true;
-  await Promise.race([customElements.whenDefined(NOTE_EDITOR_CONTAINER_TAG_NAME).then(() => true), wait(NOTE_CUSTOM_ELEMENT_TIMEOUT_MS)]);
-  return Boolean(customElements.get(NOTE_EDITOR_CONTAINER_TAG_NAME));
-};
-
-const getEditorContainerConstructor = (presets: Record<string, unknown>): BlocksuiteRuntime["EditorContainer"] => {
-  const editorContainer = presets.AffineEditorContainer ?? presets.EditorContainer;
-  return typeof editorContainer === "function" ? editorContainer as BlocksuiteRuntime["EditorContainer"] : undefined;
-};
-
 const loadBlocksuiteRuntime = async (): Promise<BlocksuiteRuntime> => {
-  blocksuiteRuntimePromise ??= Promise.all([import("@blocksuite/blocks"), import("@blocksuite/presets"), import("@blocksuite/store")]).then(async ([blocks, presets, store]) => {
+  blocksuiteRuntimePromise ??= Promise.all([import("@blocksuite/blocks"), import("@blocksuite/presets"), import("@blocksuite/store")]).then(async ([blocks, , store]) => {
     const blockExports = blocks as Record<string, unknown>;
-    const presetExports = presets as Record<string, unknown>;
     const storeExports = store as Record<string, unknown>;
     const AffineSchemas = blockExports.AffineSchemas;
     const DocCollection = storeExports.DocCollection;
-    const EditorContainer = getEditorContainerConstructor(presetExports);
     const Schema = storeExports.Schema;
     const Text = storeExports.Text;
 
@@ -93,11 +77,11 @@ const loadBlocksuiteRuntime = async (): Promise<BlocksuiteRuntime> => {
       throw new Error("BlockSuite AFFiNE runtime is incomplete.");
     }
 
-    if (!EditorContainer && !await waitForEditorElementDefinition()) {
-      throw new Error("BlockSuite AFFiNE editor element is not registered.");
+    if (typeof customElements !== "undefined" && customElements.get(NOTE_EDITOR_CONTAINER_TAG_NAME)) {
+      await customElements.whenDefined(NOTE_EDITOR_CONTAINER_TAG_NAME);
     }
 
-    return { AffineSchemas, DocCollection, EditorContainer, Schema, Text } as BlocksuiteRuntime;
+    return { AffineSchemas, DocCollection, Schema, Text } as BlocksuiteRuntime;
   });
 
   return blocksuiteRuntimePromise;
@@ -154,13 +138,26 @@ const initializeCollection = (collection: BlocksuiteDocCollection): void => {
   collection.meta?.initialize?.();
 };
 
-const createEditorElement = (runtime: BlocksuiteRuntime): BlocksuiteEditorElement => {
-  const editor = runtime.EditorContainer ? new runtime.EditorContainer() : document.createElement(NOTE_EDITOR_CONTAINER_TAG_NAME) as BlocksuiteEditorElement;
+const createEditorElement = (): BlocksuiteEditorElement => {
+  const editor = document.createElement(NOTE_EDITOR_CONTAINER_TAG_NAME) as BlocksuiteEditorElement;
   editor.style.display = "block";
   editor.style.height = "100%";
   editor.style.minHeight = "0";
   editor.style.width = "100%";
   return editor;
+};
+
+const renderLoadingSpinner = (host: HTMLDivElement): void => {
+  const spinner = document.createElement("span");
+  const label = document.createElement("span");
+  spinner.setAttribute("aria-hidden", "true");
+  spinner.className = NOTE_EDITOR_LOADING_SPINNER_CLASS_NAME;
+  label.className = "sr-only";
+  label.textContent = NOTE_LOADING_LABEL;
+  host.className = NOTE_EDITOR_LOADING_CLASS_NAME;
+  host.setAttribute("role", "status");
+  host.setAttribute("aria-label", NOTE_LOADING_LABEL);
+  host.replaceChildren(spinner, label);
 };
 
 const loadDocWithInitialContent = async (runtime: BlocksuiteRuntime, doc: BlocksuiteDoc, note: Note): Promise<void> => {
@@ -220,9 +217,7 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
     const abortController = new AbortController();
     const mutationObserver = new MutationObserver(scheduleSave);
 
-    host.replaceChildren();
-    host.className = NOTE_EDITOR_LOADING_CLASS_NAME;
-    host.textContent = "AFFiNE を読み込み中";
+    renderLoadingSpinner(host);
     latestSavedTextRef.current = note.contentText ?? getRecordText(note.content);
 
     void loadBlocksuiteRuntime().then(async (runtime) => {
@@ -234,11 +229,13 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
       const doc = collection.createDoc({ id: note.id });
       await loadDocWithInitialContent(runtime, doc, note);
       if (isDisposed) return;
-      const editor = createEditorElement(runtime);
+      const editor = createEditorElement();
       editor.doc = doc;
       editor.mode = "page";
       docRef.current = doc;
       host.className = NOTE_EDITOR_HOST_CLASS_NAME;
+      host.removeAttribute("role");
+      host.removeAttribute("aria-label");
       host.replaceChildren(editor);
       mutationObserver.observe(host, { attributes: true, characterData: true, childList: true, subtree: true });
       host.addEventListener("input", scheduleSave, { signal: abortController.signal });
@@ -249,6 +246,8 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
       if (isDisposed) return;
       docRef.current = null;
       host.className = NOTE_EDITOR_LOADING_CLASS_NAME;
+      host.removeAttribute("role");
+      host.removeAttribute("aria-label");
       host.textContent = NOTE_FALLBACK_MESSAGE;
     });
 
