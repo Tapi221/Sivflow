@@ -51,16 +51,13 @@ const buildMobileCalendarOptions = (accounts: GoogleAccountDisplay[], projectCal
   const includeAccountLabel = accounts.length > 1;
   const options = accounts.flatMap((account) => {
     const accountLabel = getGoogleAccountLabel(account);
-
     return account.calendars.map((calendar) => {
       const calendarLabel = getGoogleCalendarLabel(calendar.summaryOverride ?? calendar.summary);
       const key = createMobileCalendarOptionKey(account.accountId, calendar.id);
       const label = includeAccountLabel ? `${calendarLabel}（${accountLabel}）` : calendarLabel;
-
       return { key, accountId: account.accountId, calendarId: calendar.id, label, accountLabel, calendarLabel, color: calendar.backgroundColor ?? MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR, projectId: findProjectIdForGoogleCalendar(projectCalendarLinks, account.accountId, calendar.id), isSelected: account.selectedCalendarIds.has(calendar.id) };
     });
   });
-
   return [...options.filter((option) => option.isSelected), ...options.filter((option) => !option.isSelected)];
 };
 
@@ -72,20 +69,16 @@ const createDateAtTime = (date: Date, hour: number, minute = 0): Date => {
 
 const createDefaultTimedEventStart = (selectedDate: Date): Date => {
   const now = new Date();
-
   if (isSameLocalDate(now, selectedDate)) return createDateAtTime(selectedDate, now.getHours() + 1, 0);
-
   return createDateAtTime(selectedDate, MOBILE_EVENT_COMPOSER_DEFAULT_START_HOUR, 0);
 };
 
 const toInputDateValue = (date: Date): string => format(date, "yyyy-MM-dd");
-
 const toInputTimeValue = (date: Date): string => format(date, "HH:mm");
 
 const parseDateInputValue = (value: string): Date | null => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) return null;
-
   const [, year, month, day] = match;
   const date = new Date(Number(year), Number(month) - 1, Number(day));
   return Number.isNaN(date.getTime()) ? null : date;
@@ -94,7 +87,6 @@ const parseDateInputValue = (value: string): Date | null => {
 const parseTimeInputValue = (value: string): { hours: number; minutes: number } | null => {
   const match = /^(\d{2}):(\d{2})$/.exec(value);
   if (!match) return null;
-
   const [, hours, minutes] = match;
   return { hours: Number(hours), minutes: Number(minutes) };
 };
@@ -103,7 +95,6 @@ const buildTimedDate = (dateValue: string, timeValue: string): Date | null => {
   const date = parseDateInputValue(dateValue);
   const time = parseTimeInputValue(timeValue);
   if (!date || !time) return null;
-
   date.setHours(time.hours, time.minutes, 0, 0);
   return date;
 };
@@ -111,25 +102,20 @@ const buildTimedDate = (dateValue: string, timeValue: string): Date | null => {
 const buildMobileEventDates = (form: MobileCalendarEventFormState): MobileEventDates | null => {
   const startDate = parseDateInputValue(form.startDate);
   if (!startDate) return null;
-
   if (form.isAllDay) {
     const parsedEndDate = parseDateInputValue(form.endDate) ?? startDate;
     const endDate = parsedEndDate < startDate ? startDate : parsedEndDate;
-
     return { startsAt: startOfDay(startDate), endsAt: startOfDay(addDays(endDate, 1)), isAllDay: true };
   }
-
   const startsAt = buildTimedDate(form.startDate, form.startTime);
   const rawEndsAt = buildTimedDate(form.endDate, form.endTime);
   if (!startsAt || !rawEndsAt) return null;
-
   return { startsAt, endsAt: rawEndsAt <= startsAt ? addHours(startsAt, MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS) : rawEndsAt, isAllDay: false };
 };
 
 const createInitialEventFormState = (selectedDate: Date, calendarOptions: MobileCalendarWritableCalendarOption[]): MobileCalendarEventFormState => {
   const startsAt = createDefaultTimedEventStart(selectedDate);
   const endsAt = addHours(startsAt, MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS);
-
   return { title: "", location: "", isAllDay: false, startDate: toInputDateValue(startsAt), startTime: toInputTimeValue(startsAt), endDate: toInputDateValue(endsAt), endTime: toInputTimeValue(endsAt), calendarKey: calendarOptions[0]?.key ?? "", description: "" };
 };
 
@@ -141,11 +127,8 @@ const formatDateButtonValue = (value: string): string => {
 };
 
 const formatDateUnit = (value: number): string => String(value).padStart(2, "0");
-
 const formatTimeUnit = (value: number): string => String(value).padStart(2, "0");
-
 const createDateInputValue = (year: number, month: number, day: number): string => `${year}-${formatDateUnit(month)}-${formatDateUnit(day)}`;
-
 const createTimeInputValue = (hours: number, minutes: number): string => `${formatTimeUnit(hours)}:${formatTimeUnit(minutes)}`;
 
 const getDateInputParts = (value: string): { year: number; month: number; day: number } => {
@@ -160,7 +143,6 @@ const clampTimeWheelIndex = (value: number, max: number): number => Math.max(0, 
 const createMonthDateGrid = (year: number, month: number): Date[] => {
   const firstDate = new Date(year, month - 1, 1);
   const gridStartDate = addDays(firstDate, -firstDate.getDay());
-
   return Array.from({ length: MOBILE_EVENT_DATE_GRID_CELL_COUNT }, (_, index) => addDays(gridStartDate, index));
 };
 
@@ -170,6 +152,8 @@ const createShiftedMonthParts = (year: number, month: number, offset: number): {
 };
 
 const isDateInMonth = (date: Date, year: number, month: number): boolean => date.getFullYear() === year && date.getMonth() === month - 1;
+
+// ─── Icons ────────────────────────────────────────────────────────────────────
 
 const MobileCalendarSearchIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
@@ -191,13 +175,51 @@ const MobileCalendarFaceTimeIcon = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-const MobileCalendarDateButton = ({ label, value, isActive, onClick }: MobileCalendarDateButtonProps) => (
-  <button type="button" className={cn("h-9 min-w-[142px] rounded-[10px] px-2 text-right text-[17px] tracking-[-0.03em] outline-none transition tabular-nums", isActive ? "bg-[#ffe9e7] text-[#ff3b30]" : "bg-[#f2f2f7] text-[#111111]")} aria-label={label} aria-pressed={isActive} onClick={onClick}>{formatDateButtonValue(value)}</button>
+const ChevronRightIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+    <path fill="currentColor" d="M9.29 6.71a1 1 0 0 0 0 1.41L13.17 12l-3.88 3.88a1 1 0 1 0 1.41 1.41l4.59-4.59a1 1 0 0 0 0-1.41L10.7 6.71a1 1 0 0 0-1.41 0Z" />
+  </svg>
 );
 
-const MobileCalendarTimeButton = ({ label, value, isActive, onClick }: MobileCalendarTimeButtonProps) => (
-  <button type="button" className={cn("h-9 w-[92px] rounded-[10px] px-2 text-right text-[17px] tracking-[-0.03em] outline-none transition tabular-nums", isActive ? "bg-[#ffe9e7] text-[#ff3b30]" : "bg-[#f2f2f7] text-[#111111]")} aria-label={label} aria-pressed={isActive} onClick={onClick}>{value}</button>
+// ─── Date Button ──────────────────────────────────────────────────────────────
+
+const MobileCalendarDateButton = ({ label, value, isActive, onClick }: MobileCalendarDateButtonProps) => (
+  <button
+    type="button"
+    className={cn(
+      "h-9 min-w-[142px] rounded-[10px] px-3 text-right text-[17px] tracking-[-0.03em] outline-none transition-colors tabular-nums font-medium",
+      isActive
+        ? "bg-[#ff3b30]/10 text-[#ff3b30]"
+        : "bg-[#f2f2f7] text-[#111111]"
+    )}
+    aria-label={label}
+    aria-pressed={isActive}
+    onClick={onClick}
+  >
+    {formatDateButtonValue(value)}
+  </button>
 );
+
+// ─── Time Button ──────────────────────────────────────────────────────────────
+
+const MobileCalendarTimeButton = ({ label, value, isActive, onClick }: MobileCalendarTimeButtonProps) => (
+  <button
+    type="button"
+    className={cn(
+      "h-9 w-[80px] rounded-[10px] px-2 text-right text-[17px] tracking-[-0.03em] outline-none transition-colors tabular-nums font-medium",
+      isActive
+        ? "bg-[#ff3b30]/10 text-[#ff3b30]"
+        : "bg-[#f2f2f7] text-[#111111]"
+    )}
+    aria-label={label}
+    aria-pressed={isActive}
+    onClick={onClick}
+  >
+    {value}
+  </button>
+);
+
+// ─── Inline Date Picker ───────────────────────────────────────────────────────
 
 const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlineDatePickerProps) => {
   const { year, month, day } = getDateInputParts(value);
@@ -219,25 +241,84 @@ const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlin
   }, [onChange]);
 
   return (
-    <div className="border-t border-[#e5e5ea] px-4 py-3">
-      <div className="rounded-[22px] bg-[#fbfbfd] px-4 pb-4 pt-3 shadow-[inset_0_0_0_1px_rgba(60,60,67,0.12)]">
-        <div className="mb-2 flex h-[36px] items-center justify-between">
-          <button type="button" className="flex h-[36px] w-[36px] items-center justify-center rounded-full text-[15px] font-semibold text-[#ff3b30] active:bg-[#f2f2f7]" aria-label="前の月" onClick={() => handleMoveMonth(-1)}>前</button>
-          <div className="text-[17px] font-semibold tracking-[-0.03em] text-[#111111]">{visibleMonth.year}年{visibleMonth.month}月</div>
-          <button type="button" className="flex h-[36px] w-[36px] items-center justify-center rounded-full text-[15px] font-semibold text-[#ff3b30] active:bg-[#f2f2f7]" aria-label="次の月" onClick={() => handleMoveMonth(1)}>次</button>
+    <div className="border-t border-[#e5e5ea] px-4 py-3 animate-in slide-in-from-top-1 duration-200">
+      <div className="rounded-[18px] bg-[#fbfbfd] px-4 pb-4 pt-3 shadow-[inset_0_0_0_0.5px_rgba(60,60,67,0.18)]">
+        {/* Month navigation */}
+        <div className="mb-2 flex h-9 items-center justify-between">
+          <button
+            type="button"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-[#007aff] transition-colors active:bg-[#f2f2f7]"
+            aria-label="前の月"
+            onClick={() => handleMoveMonth(-1)}
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+              <path fill="currentColor" d="M14.71 6.71a1 1 0 0 0-1.41 0L8.71 11.3a1 1 0 0 0 0 1.41l4.59 4.59a1 1 0 1 0 1.41-1.41L10.83 12l3.88-3.88a1 1 0 0 0 0-1.41Z" />
+            </svg>
+          </button>
+          <div className="text-[15px] font-semibold tracking-[-0.02em] text-[#111111]">
+            {visibleMonth.year}年{visibleMonth.month}月
+          </div>
+          <button
+            type="button"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-[#007aff] transition-colors active:bg-[#f2f2f7]"
+            aria-label="次の月"
+            onClick={() => handleMoveMonth(1)}
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+              <path fill="currentColor" d="M9.29 6.71a1 1 0 0 0 0 1.41L13.17 12l-3.88 3.88a1 1 0 1 0 1.41 1.41l4.59-4.59a1 1 0 0 0 0-1.41L10.7 6.71a1 1 0 0 0-1.41 0Z" />
+            </svg>
+          </button>
         </div>
+
+        {/* Weekday labels */}
         <div className="grid grid-cols-7 pb-1">
-          {MOBILE_EVENT_DATE_WEEKDAY_LABELS.map((label, index) => <div key={label} className={cn("h-7 text-center text-[13px] font-semibold leading-7 tracking-[-0.02em]", index === 0 ? "text-[#ff3b30]" : "text-[#8e8e93]")}>{label}</div>)}
+          {MOBILE_EVENT_DATE_WEEKDAY_LABELS.map((label, index) => (
+            <div
+              key={label}
+              className={cn(
+                "h-7 text-center text-[12px] font-semibold leading-7 tracking-[-0.01em]",
+                index === 0 ? "text-[#ff3b30]" : index === 6 ? "text-[#007aff]" : "text-[#8e8e93]"
+              )}
+            >
+              {label}
+            </div>
+          ))}
         </div>
-        <div className="grid grid-cols-7 gap-y-1">
+
+        {/* Day grid */}
+        <div className="grid grid-cols-7 gap-y-0.5">
           {visibleDates.map((date) => {
             const isSelected = isSameLocalDate(date, selectedDate);
             const isToday = isSameLocalDate(date, today);
             const isCurrentMonth = isDateInMonth(date, visibleMonth.year, visibleMonth.month);
+            const isSunday = date.getDay() === 0;
+            const isSaturday = date.getDay() === 6;
 
             return (
-              <button key={date.toISOString()} type="button" className="flex h-9 items-center justify-center rounded-full outline-none" onClick={() => handleSelectDate(date)}>
-                <span className={cn("flex h-[32px] w-[32px] items-center justify-center rounded-full text-[17px] tracking-[-0.03em] tabular-nums", isSelected ? "bg-[#ff3b30] font-semibold text-white" : isToday ? "font-semibold text-[#ff3b30]" : isCurrentMonth ? "text-[#111111]" : "text-[#c7c7cc]")}>{date.getDate()}</span>
+              <button
+                key={date.toISOString()}
+                type="button"
+                className="flex h-9 items-center justify-center rounded-full outline-none"
+                onClick={() => handleSelectDate(date)}
+              >
+                <span
+                  className={cn(
+                    "flex h-[34px] w-[34px] items-center justify-center rounded-full text-[15px] tracking-[-0.02em] tabular-nums transition-colors",
+                    isSelected
+                      ? "bg-[#ff3b30] font-semibold text-white"
+                      : isToday
+                      ? "font-semibold text-[#ff3b30]"
+                      : !isCurrentMonth
+                      ? "text-[#c7c7cc]"
+                      : isSunday
+                      ? "text-[#ff3b30]"
+                      : isSaturday
+                      ? "text-[#007aff]"
+                      : "text-[#111111]"
+                  )}
+                >
+                  {date.getDate()}
+                </span>
               </button>
             );
           })}
@@ -246,6 +327,8 @@ const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlin
     </div>
   );
 };
+
+// ─── Inline Time Wheel ────────────────────────────────────────────────────────
 
 const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInlineTimeWheelProps) => {
   const { hours, minutes } = getTimeInputParts(value);
@@ -268,24 +351,75 @@ const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInline
   }, [hours, minutes, onChange]);
 
   return (
-    <div className="border-t border-[#e5e5ea] px-4 py-3">
-      <div className="relative overflow-hidden rounded-[22px] bg-[#fbfbfd] px-5 py-3 shadow-[inset_0_0_0_1px_rgba(60,60,67,0.12)]" role="group" aria-label="時刻">
-        <div aria-hidden="true" className="pointer-events-none absolute left-5 right-5 top-1/2 z-0 h-[44px] -translate-y-1/2 rounded-[13px] bg-[#f2f2f7]" />
+    <div className="border-t border-[#e5e5ea] px-4 py-3 animate-in slide-in-from-top-1 duration-200">
+      <div
+        className="relative overflow-hidden rounded-[18px] bg-[#fbfbfd] px-5 py-3 shadow-[inset_0_0_0_0.5px_rgba(60,60,67,0.18)]"
+        role="group"
+        aria-label="時刻"
+      >
+        {/* Selection highlight */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-5 right-5 top-1/2 z-0 h-[44px] -translate-y-1/2 rounded-[11px] bg-[#f2f2f7]"
+        />
+        {/* Fade overlays */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[72px] bg-gradient-to-b from-[#fbfbfd] to-transparent" />
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[72px] bg-gradient-to-t from-[#fbfbfd] to-transparent" />
-        <div className="relative z-10 grid h-[220px] grid-cols-[1fr_32px_1fr] items-center">
-          <div ref={hourWheelRef} className="h-[220px] snap-y snap-mandatory overflow-y-auto overscroll-contain px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" onScroll={handleHourScroll} aria-label="時">
+
+        <div className="relative z-10 grid h-[220px] grid-cols-[1fr_28px_1fr] items-center">
+          {/* Hour wheel */}
+          <div
+            ref={hourWheelRef}
+            className="h-[220px] snap-y snap-mandatory overflow-y-auto overscroll-contain px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            onScroll={handleHourScroll}
+            aria-label="時"
+          >
             <div aria-hidden="true" style={{ height: MOBILE_EVENT_TIME_WHEEL_PADDING_HEIGHT }} />
             {MOBILE_EVENT_TIME_WHEEL_HOURS.map((hour) => (
-              <button key={hour} type="button" className={cn("block h-[44px] w-full snap-center rounded-[10px] text-center tracking-[-0.04em] transition tabular-nums", hour === hours ? "text-[30px] font-semibold text-[#111111]" : "text-[25px] font-normal text-[#8e8e93]")} onClick={() => onChange(createTimeInputValue(hour, minutes))}>{formatTimeUnit(hour)}</button>
+              <button
+                key={hour}
+                type="button"
+                className={cn(
+                  "block h-[44px] w-full snap-center rounded-[10px] text-center tracking-[-0.04em] transition-all tabular-nums",
+                  hour === hours
+                    ? "text-[30px] font-semibold text-[#111111]"
+                    : "text-[24px] font-normal text-[#8e8e93]"
+                )}
+                onClick={() => onChange(createTimeInputValue(hour, minutes))}
+              >
+                {formatTimeUnit(hour)}
+              </button>
             ))}
             <div aria-hidden="true" style={{ height: MOBILE_EVENT_TIME_WHEEL_PADDING_HEIGHT }} />
           </div>
-          <div className="pointer-events-none flex h-[44px] items-center justify-center text-[30px] font-semibold tracking-[-0.04em] text-[#111111]">:</div>
-          <div ref={minuteWheelRef} className="h-[220px] snap-y snap-mandatory overflow-y-auto overscroll-contain px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" onScroll={handleMinuteScroll} aria-label="分">
+
+          {/* Colon separator */}
+          <div className="pointer-events-none flex h-[44px] items-center justify-center text-[28px] font-semibold tracking-[-0.04em] text-[#111111]">
+            :
+          </div>
+
+          {/* Minute wheel */}
+          <div
+            ref={minuteWheelRef}
+            className="h-[220px] snap-y snap-mandatory overflow-y-auto overscroll-contain px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            onScroll={handleMinuteScroll}
+            aria-label="分"
+          >
             <div aria-hidden="true" style={{ height: MOBILE_EVENT_TIME_WHEEL_PADDING_HEIGHT }} />
             {MOBILE_EVENT_TIME_WHEEL_MINUTES.map((minute) => (
-              <button key={minute} type="button" className={cn("block h-[44px] w-full snap-center rounded-[10px] text-center tracking-[-0.04em] transition tabular-nums", minute === minutes ? "text-[30px] font-semibold text-[#111111]" : "text-[25px] font-normal text-[#8e8e93]")} onClick={() => onChange(createTimeInputValue(hours, minute))}>{formatTimeUnit(minute)}</button>
+              <button
+                key={minute}
+                type="button"
+                className={cn(
+                  "block h-[44px] w-full snap-center rounded-[10px] text-center tracking-[-0.04em] transition-all tabular-nums",
+                  minute === minutes
+                    ? "text-[30px] font-semibold text-[#111111]"
+                    : "text-[24px] font-normal text-[#8e8e93]"
+                )}
+                onClick={() => onChange(createTimeInputValue(hours, minute))}
+              >
+                {formatTimeUnit(minute)}
+              </button>
             ))}
             <div aria-hidden="true" style={{ height: MOBILE_EVENT_TIME_WHEEL_PADDING_HEIGHT }} />
           </div>
@@ -295,27 +429,37 @@ const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInline
   );
 };
 
-const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAccounts, projectCalendarLinks, onClose, onAddCalendar, onCreateEvent }: MobileCalendarEventComposerProps) => {
+// ─── Main Composer ────────────────────────────────────────────────────────────
+
+const MobileCalendarEventComposer = ({
+  isOpen,
+  selectedDate,
+  accounts,
+  googleAccounts,
+  projectCalendarLinks,
+  onClose,
+  onAddCalendar,
+  onCreateEvent,
+}: MobileCalendarEventComposerProps) => {
   const calendarAccounts = accounts ?? googleAccounts ?? EMPTY_GOOGLE_ACCOUNTS;
   const calendarProjectCalendarLinks = projectCalendarLinks ?? EMPTY_PROJECT_CALENDAR_LINKS;
   const calendarOptions = useMemo(() => buildMobileCalendarOptions(calendarAccounts, calendarProjectCalendarLinks), [calendarAccounts, calendarProjectCalendarLinks]);
   const calendarOptionsRef = useRef(calendarOptions);
   const selectedDateTime = selectedDate.getTime();
+
   const [form, setForm] = useState<MobileCalendarEventFormState>(() => createInitialEventFormState(selectedDate, calendarOptions));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
   const [activePickerField, setActivePickerField] = useState<MobileCalendarPickerFieldName | null>(null);
+
   const selectedCalendarOption = useMemo(() => calendarOptions.find((option) => option.key === form.calendarKey) ?? null, [calendarOptions, form.calendarKey]);
   const isSubmitDisabled = isSubmitting || !form.title.trim() || !selectedCalendarOption;
 
-  useEffect(() => {
-    calendarOptionsRef.current = calendarOptions;
-  }, [calendarOptions]);
+  useEffect(() => { calendarOptionsRef.current = calendarOptions; }, [calendarOptions]);
 
   useEffect(() => {
     if (!isOpen) return;
-
     setForm(createInitialEventFormState(new Date(selectedDateTime), calendarOptionsRef.current));
     setIsSubmitting(false);
     setError(null);
@@ -325,26 +469,19 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
 
   useEffect(() => {
     if (!isOpen) return;
-
     setForm((current) => {
       if (current.calendarKey && calendarOptions.some((option) => option.key === current.calendarKey)) return current;
-
       const calendarKey = calendarOptions[0]?.key ?? "";
       if (current.calendarKey === calendarKey) return current;
-
       return { ...current, calendarKey };
     });
   }, [calendarOptions, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
-
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
+    return () => { document.body.style.overflow = originalOverflow; };
   }, [isOpen]);
 
   const setFormValue = useCallback((patch: Partial<MobileCalendarEventFormState>) => {
@@ -354,16 +491,12 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
 
   const handleClose = useCallback(() => {
     if (isSubmitting) return;
-
     onClose();
   }, [isSubmitting, onClose]);
 
   const handleAddCalendar = useCallback(() => {
     if (!onAddCalendar) return;
-
-    void onAddCalendar().catch((caughtError) => {
-      setError(getErrorMessage(caughtError));
-    });
+    void onAddCalendar().catch((caughtError) => { setError(getErrorMessage(caughtError)); });
   }, [onAddCalendar]);
 
   const handleSelectFaceTime = useCallback(() => {
@@ -377,28 +510,35 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
       setIsLocationSheetOpen(false);
       return;
     }
-
-    navigator.geolocation.getCurrentPosition((position) => {
-      const latitude = position.coords.latitude.toFixed(5);
-      const longitude = position.coords.longitude.toFixed(5);
-      setFormValue({ location: `${MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX}（${latitude}, ${longitude}）` });
-      setIsLocationSheetOpen(false);
-    }, () => {
-      setFormValue({ location: MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX });
-      setIsLocationSheetOpen(false);
-    }, { enableHighAccuracy: true, maximumAge: 30000, timeout: 8000 });
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latitude = position.coords.latitude.toFixed(5);
+        const longitude = position.coords.longitude.toFixed(5);
+        setFormValue({ location: `${MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX}（${latitude}, ${longitude}）` });
+        setIsLocationSheetOpen(false);
+      },
+      () => {
+        setFormValue({ location: MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX });
+        setIsLocationSheetOpen(false);
+      },
+      { enableHighAccuracy: true, maximumAge: 30000, timeout: 8000 }
+    );
   }, [setFormValue]);
 
   const handleSubmit = useCallback(() => {
     if (isSubmitDisabled || !selectedCalendarOption) return;
-
     const eventDates = buildMobileEventDates(form);
     if (!eventDates) {
       setError("開始日時と終了日時を確認してください");
       return;
     }
-
-    const writableEvent: GCalWritableEventInput = { calendarId: selectedCalendarOption.calendarId, title: form.title.trim(), startsAt: eventDates.startsAt, endsAt: eventDates.endsAt, isAllDay: eventDates.isAllDay };
+    const writableEvent: GCalWritableEventInput = {
+      calendarId: selectedCalendarOption.calendarId,
+      title: form.title.trim(),
+      startsAt: eventDates.startsAt,
+      endsAt: eventDates.endsAt,
+      isAllDay: eventDates.isAllDay,
+    };
     const trimmedLocation = form.location.trim();
     const trimmedDescription = form.description.trim();
     if (trimmedLocation) writableEvent.location = trimmedLocation;
@@ -408,132 +548,285 @@ const MobileCalendarEventComposer = ({ isOpen, selectedDate, accounts, googleAcc
     setIsSubmitting(true);
     setError(null);
     void onCreateEvent(selectedCalendarOption.accountId, writableEvent)
-      .then(() => {
-        onClose();
-      })
-      .catch((caughtError) => {
-        setError(getErrorMessage(caughtError));
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+      .then(() => { onClose(); })
+      .catch((caughtError) => { setError(getErrorMessage(caughtError)); })
+      .finally(() => { setIsSubmitting(false); });
   }, [form, isSubmitDisabled, onClose, onCreateEvent, selectedCalendarOption]);
 
   if (!isOpen) return null;
 
   return (
     <>
-      <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/25" role="presentation">
-        <section role="dialog" aria-modal="true" aria-labelledby="mobile-calendar-event-composer-title" className="flex h-[min(92vh,760px)] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[26px] bg-[#f2f2f7] shadow-[0_-12px_40px_rgba(0,0,0,0.20)]">
-          <header className="flex h-[58px] shrink-0 items-center justify-between border-b border-[#d1d1d6] bg-white/80 px-4 backdrop-blur">
-            <button type="button" className="text-[17px] font-medium tracking-[-0.03em] text-[#ff3b30] disabled:text-[#c7c7cc]" onClick={handleClose} disabled={isSubmitting}>キャンセル</button>
-            <h2 id="mobile-calendar-event-composer-title" className="text-[17px] font-bold tracking-[-0.03em] text-[#111111]">新規イベント</h2>
-            <button type="button" className="text-[17px] font-semibold tracking-[-0.03em] text-[#ff3b30] disabled:text-[#c7c7cc]" onClick={handleSubmit} disabled={isSubmitDisabled}>{isSubmitting ? "追加中" : "追加"}</button>
+      {/* ── Backdrop + Sheet ── */}
+      <div
+        className="fixed inset-0 z-[90] flex items-end justify-center bg-black/30 backdrop-blur-[2px]"
+        role="presentation"
+      >
+        <section
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="mobile-calendar-event-composer-title"
+          className="flex h-[min(92vh,760px)] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[20px] bg-[#f2f2f7] shadow-[0_-2px_32px_rgba(0,0,0,0.18)]"
+        >
+          {/* Header */}
+          <header className="flex h-[56px] shrink-0 items-center justify-between border-b border-[#c6c6c8] bg-[#f2f2f7]/90 px-4 backdrop-blur-xl">
+            <button
+              type="button"
+              className="text-[17px] font-normal tracking-[-0.03em] text-[#007aff] disabled:text-[#c7c7cc] active:opacity-60 transition-opacity"
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
+              キャンセル
+            </button>
+            <h2
+              id="mobile-calendar-event-composer-title"
+              className="text-[17px] font-semibold tracking-[-0.03em] text-[#111111]"
+            >
+              新規イベント
+            </h2>
+            <button
+              type="button"
+              className="text-[17px] font-semibold tracking-[-0.03em] text-[#007aff] disabled:text-[#c7c7cc] active:opacity-60 transition-opacity"
+              onClick={handleSubmit}
+              disabled={isSubmitDisabled}
+            >
+              {isSubmitting ? "追加中…" : "追加"}
+            </button>
           </header>
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-4">
-            <div className="overflow-hidden rounded-[14px] bg-white">
-              <input className="h-[56px] w-full border-0 border-b border-[#e5e5ea] bg-transparent px-4 text-[21px] font-normal tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#c7c7cc]" value={form.title} onChange={(event) => setFormValue({ title: event.target.value })} placeholder="タイトル" inputMode="text" />
-              <button type="button" className={cn("flex h-[48px] w-full items-center px-4 text-left text-[17px] tracking-[-0.03em] outline-none", form.location.trim() ? "text-[#111111]" : "text-[#c7c7cc]")} onClick={() => { setActivePickerField(null); setIsLocationSheetOpen(true); }}>
+
+          {/* Scrollable body */}
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-5 space-y-5">
+
+            {/* ── Card 1: Title & Location ── */}
+            <div className="overflow-hidden rounded-[14px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
+              <input
+                className="h-[54px] w-full border-0 border-b border-[#e5e5ea] bg-transparent px-4 text-[20px] font-normal tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#c7c7cc]"
+                value={form.title}
+                onChange={(event) => setFormValue({ title: event.target.value })}
+                placeholder="タイトル"
+                inputMode="text"
+              />
+              <button
+                type="button"
+                className={cn(
+                  "flex h-[46px] w-full items-center px-4 text-left text-[17px] tracking-[-0.03em] outline-none",
+                  form.location.trim() ? "text-[#111111]" : "text-[#c7c7cc]"
+                )}
+                onClick={() => { setActivePickerField(null); setIsLocationSheetOpen(true); }}
+              >
                 <span className="min-w-0 flex-1 truncate">{form.location.trim() || "場所またはビデオ通話"}</span>
+                {form.location.trim() && (
+                  <ChevronRightIcon className="h-[18px] w-[18px] shrink-0 text-[#c7c7cc]" />
+                )}
               </button>
             </div>
 
-            <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
-              <div className="flex min-h-[52px] items-center justify-between border-b border-[#e5e5ea] px-4">
+            {/* ── Card 2: Date & Time ── */}
+            <div className="overflow-hidden rounded-[14px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
+              {/* All-day toggle */}
+              <div className="flex min-h-[50px] items-center justify-between border-b border-[#e5e5ea] px-4">
                 <span className="text-[17px] tracking-[-0.03em] text-[#111111]">終日</span>
-                <Switch checked={form.isAllDay} onCheckedChange={(checked) => { setFormValue({ isAllDay: checked }); setActivePickerField(null); }} aria-label="終日" />
+                <Switch
+                  checked={form.isAllDay}
+                  onCheckedChange={(checked) => { setFormValue({ isAllDay: checked }); setActivePickerField(null); }}
+                  aria-label="終日"
+                />
               </div>
+
+              {/* Start */}
               <div className="border-b border-[#e5e5ea]">
-                <div className="flex min-h-[52px] items-center justify-between gap-3 px-4">
+                <div className="flex min-h-[50px] items-center justify-between gap-3 px-4">
                   <span className="text-[17px] tracking-[-0.03em] text-[#111111]">開始</span>
                   <span className="flex min-w-0 items-center gap-2">
-                    <MobileCalendarDateButton label="開始日" value={form.startDate} isActive={activePickerField === "startDate"} onClick={() => setActivePickerField((current) => current === "startDate" ? null : "startDate")} />
-                    {!form.isAllDay && <MobileCalendarTimeButton label="開始時刻" value={form.startTime} isActive={activePickerField === "startTime"} onClick={() => setActivePickerField((current) => current === "startTime" ? null : "startTime")} />}
+                    <MobileCalendarDateButton
+                      label="開始日"
+                      value={form.startDate}
+                      isActive={activePickerField === "startDate"}
+                      onClick={() => setActivePickerField((current) => current === "startDate" ? null : "startDate")}
+                    />
+                    {!form.isAllDay && (
+                      <MobileCalendarTimeButton
+                        label="開始時刻"
+                        value={form.startTime}
+                        isActive={activePickerField === "startTime"}
+                        onClick={() => setActivePickerField((current) => current === "startTime" ? null : "startTime")}
+                      />
+                    )}
                   </span>
                 </div>
-                {activePickerField === "startDate" ? <MobileCalendarInlineDatePicker value={form.startDate} onChange={(startDate) => setFormValue({ startDate })} /> : null}
-                {!form.isAllDay && activePickerField === "startTime" ? <MobileCalendarInlineTimeWheel value={form.startTime} onChange={(startTime) => setFormValue({ startTime })} /> : null}
+                {activePickerField === "startDate" && (
+                  <MobileCalendarInlineDatePicker value={form.startDate} onChange={(startDate) => setFormValue({ startDate })} />
+                )}
+                {!form.isAllDay && activePickerField === "startTime" && (
+                  <MobileCalendarInlineTimeWheel value={form.startTime} onChange={(startTime) => setFormValue({ startTime })} />
+                )}
               </div>
+
+              {/* End */}
               <div className="border-b border-[#e5e5ea]">
-                <div className="flex min-h-[52px] items-center justify-between gap-3 px-4">
+                <div className="flex min-h-[50px] items-center justify-between gap-3 px-4">
                   <span className="text-[17px] tracking-[-0.03em] text-[#111111]">終了</span>
                   <span className="flex min-w-0 items-center gap-2">
-                    <MobileCalendarDateButton label="終了日" value={form.endDate} isActive={activePickerField === "endDate"} onClick={() => setActivePickerField((current) => current === "endDate" ? null : "endDate")} />
-                    {!form.isAllDay && <MobileCalendarTimeButton label="終了時刻" value={form.endTime} isActive={activePickerField === "endTime"} onClick={() => setActivePickerField((current) => current === "endTime" ? null : "endTime")} />}
+                    <MobileCalendarDateButton
+                      label="終了日"
+                      value={form.endDate}
+                      isActive={activePickerField === "endDate"}
+                      onClick={() => setActivePickerField((current) => current === "endDate" ? null : "endDate")}
+                    />
+                    {!form.isAllDay && (
+                      <MobileCalendarTimeButton
+                        label="終了時刻"
+                        value={form.endTime}
+                        isActive={activePickerField === "endTime"}
+                        onClick={() => setActivePickerField((current) => current === "endTime" ? null : "endTime")}
+                      />
+                    )}
                   </span>
                 </div>
-                {activePickerField === "endDate" ? <MobileCalendarInlineDatePicker value={form.endDate} onChange={(endDate) => setFormValue({ endDate })} /> : null}
-                {!form.isAllDay && activePickerField === "endTime" ? <MobileCalendarInlineTimeWheel value={form.endTime} onChange={(endTime) => setFormValue({ endTime })} /> : null}
+                {activePickerField === "endDate" && (
+                  <MobileCalendarInlineDatePicker value={form.endDate} onChange={(endDate) => setFormValue({ endDate })} />
+                )}
+                {!form.isAllDay && activePickerField === "endTime" && (
+                  <MobileCalendarInlineTimeWheel value={form.endTime} onChange={(endTime) => setFormValue({ endTime })} />
+                )}
               </div>
-              <div className="flex min-h-[52px] items-center justify-between px-4">
+
+              {/* Travel time */}
+              <div className="flex min-h-[50px] items-center justify-between px-4">
                 <span className="text-[17px] tracking-[-0.03em] text-[#111111]">移動時間</span>
                 <span className="text-[17px] tracking-[-0.03em] text-[#8e8e93]">なし</span>
               </div>
             </div>
 
-            <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
+            {/* ── Card 3: Calendar selector ── */}
+            <div className="overflow-hidden rounded-[14px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
               {calendarOptions.length > 0 ? (
-                <label className="flex min-h-[52px] items-center justify-between gap-4 px-4">
+                <label className="flex min-h-[50px] items-center justify-between gap-4 px-4">
                   <span className="text-[17px] tracking-[-0.03em] text-[#111111]">カレンダー</span>
                   <span className="flex min-w-0 flex-1 items-center justify-end gap-2">
-                    <span aria-hidden="true" className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: selectedCalendarOption?.color ?? MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR }} />
-                    <select className="min-w-0 max-w-[70%] bg-transparent text-right text-[17px] tracking-[-0.03em] text-[#8e8e93] outline-none" value={form.calendarKey} onChange={(event) => setFormValue({ calendarKey: event.target.value })}>
-                      {calendarOptions.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
+                    <span
+                      aria-hidden="true"
+                      className="h-3 w-3 shrink-0 rounded-full"
+                      style={{ backgroundColor: selectedCalendarOption?.color ?? MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR }}
+                    />
+                    <select
+                      className="min-w-0 max-w-[70%] bg-transparent text-right text-[17px] tracking-[-0.03em] text-[#8e8e93] outline-none"
+                      value={form.calendarKey}
+                      onChange={(event) => setFormValue({ calendarKey: event.target.value })}
+                    >
+                      {calendarOptions.map((option) => (
+                        <option key={option.key} value={option.key}>{option.label}</option>
+                      ))}
                     </select>
                   </span>
                 </label>
               ) : (
                 <div className="flex min-h-[84px] items-center justify-between gap-4 px-4 py-3">
-                  <p className="min-w-0 text-[15px] leading-5 tracking-[-0.03em] text-[#6e6e73]">Google カレンダーを接続すると予定を追加できます。</p>
-                  <button type="button" className="shrink-0 rounded-full bg-[#f2f2f7] px-3 py-2 text-[14px] font-semibold tracking-[-0.03em] text-[#ff3b30]" onClick={handleAddCalendar}>接続</button>
+                  <p className="min-w-0 text-[15px] leading-5 tracking-[-0.03em] text-[#6e6e73]">
+                    Google カレンダーを接続すると予定を追加できます。
+                  </p>
+                  <button
+                    type="button"
+                    className="shrink-0 rounded-full bg-[#007aff] px-4 py-2 text-[14px] font-semibold tracking-[-0.03em] text-white active:opacity-80 transition-opacity"
+                    onClick={handleAddCalendar}
+                  >
+                    接続
+                  </button>
                 </div>
               )}
             </div>
 
-            <div className="mt-5 overflow-hidden rounded-[14px] bg-white">
-              <textarea className="h-[176px] w-full resize-none border-0 bg-transparent px-4 py-3 text-[17px] leading-6 tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#c7c7cc]" value={form.description} onChange={(event) => setFormValue({ description: event.target.value })} placeholder="メモ" />
+            {/* ── Card 4: Memo ── */}
+            <div className="overflow-hidden rounded-[14px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
+              <textarea
+                className="h-[140px] w-full resize-none border-0 bg-transparent px-4 py-3 text-[17px] leading-6 tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#c7c7cc]"
+                value={form.description}
+                onChange={(event) => setFormValue({ description: event.target.value })}
+                placeholder="メモ"
+              />
             </div>
 
-            {error && <p className="mt-3 px-1 text-[14px] leading-5 tracking-[-0.03em] text-[#ff3b30]">{error}</p>}
+            {/* Error */}
+            {error && (
+              <p className="px-1 text-[13px] leading-5 tracking-[-0.02em] text-[#ff3b30]">{error}</p>
+            )}
           </div>
         </section>
       </div>
 
-      {isLocationSheetOpen ? (
-        <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/10" role="presentation">
-          <section role="dialog" aria-modal="true" aria-label="場所" className="flex h-[min(88vh,720px)] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[13px] bg-white shadow-[0_-12px_40px_rgba(0,0,0,0.18)] [text-size-adjust:100%] [-webkit-text-size-adjust:100%]">
-            <header className="relative flex h-[58px] shrink-0 items-center px-[32px]">
-              <h3 className="pointer-events-none absolute left-1/2 top-1/2 w-[180px] -translate-x-1/2 -translate-y-1/2 text-center text-[18px] font-bold tracking-[-0.03em] text-[#111111]">場所</h3>
-              <button type="button" className="ml-auto min-w-[92px] text-right text-[18px] font-normal tracking-[-0.03em] text-[#ff3b30]" onClick={() => setIsLocationSheetOpen(false)}>キャンセル</button>
+      {/* ── Location Sheet ── */}
+      {isLocationSheetOpen && (
+        <div
+          className="fixed inset-0 z-[120] flex items-end justify-center bg-black/20 backdrop-blur-[1px]"
+          role="presentation"
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-label="場所"
+            className="flex h-[min(88vh,720px)] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[13px] bg-white shadow-[0_-2px_32px_rgba(0,0,0,0.15)]"
+          >
+            {/* Sheet header */}
+            <header className="relative flex h-[56px] shrink-0 items-center px-4 border-b border-[#e5e5ea]">
+              <h3 className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[17px] font-semibold tracking-[-0.03em] text-[#111111]">
+                場所
+              </h3>
+              <button
+                type="button"
+                className="ml-auto text-[17px] font-normal tracking-[-0.03em] text-[#007aff] active:opacity-60 transition-opacity"
+                onClick={() => setIsLocationSheetOpen(false)}
+              >
+                キャンセル
+              </button>
             </header>
 
-            <div className="px-[32px] pb-[28px] pt-[8px]">
-              <label className="flex h-[68px] items-center rounded-[12px] bg-[#f1f1f3] px-[12px]">
-                <MobileCalendarSearchIcon className="mr-[8px] h-[30px] w-[30px] shrink-0 text-[#8e8e93]" />
-                <input autoFocus className="min-w-0 flex-1 border-0 bg-transparent text-[19px] leading-none tracking-[-0.04em] text-[#111111] outline-none placeholder:text-[#8e8e93]" value={form.location} onChange={(event) => setFormValue({ location: event.target.value })} onKeyDown={(event) => { if (event.key === "Enter") setIsLocationSheetOpen(false); }} placeholder="場所またはビデオ通話を入力" inputMode="text" />
+            {/* Search field */}
+            <div className="px-4 pb-3 pt-3 border-b border-[#e5e5ea]">
+              <label className="flex h-[36px] items-center rounded-[10px] bg-[#f2f2f7] px-3 gap-2">
+                <MobileCalendarSearchIcon className="h-[18px] w-[18px] shrink-0 text-[#8e8e93]" />
+                <input
+                  autoFocus
+                  className="min-w-0 flex-1 border-0 bg-transparent text-[17px] leading-none tracking-[-0.03em] text-[#111111] outline-none placeholder:text-[#8e8e93]"
+                  value={form.location}
+                  onChange={(event) => setFormValue({ location: event.target.value })}
+                  onKeyDown={(event) => { if (event.key === "Enter") setIsLocationSheetOpen(false); }}
+                  placeholder="場所またはビデオ通話を入力"
+                  inputMode="text"
+                />
               </label>
             </div>
 
-            <div className="h-px bg-[#d1d1d6]" />
-
-            <div className="min-h-0 flex-1 overflow-y-auto bg-white">
-              <button type="button" className="flex min-h-[106px] w-full items-center gap-[20px] border-b border-[#d1d1d6] px-[32px] text-left" onClick={handleSelectCurrentLocation}>
-                <MobileCalendarCurrentLocationIcon className="h-[56px] w-[56px] shrink-0" />
-                <span className="text-[22px] tracking-[-0.04em] text-[#111111]">現在地</span>
+            {/* Location options */}
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              {/* Current location */}
+              <button
+                type="button"
+                className="flex min-h-[60px] w-full items-center gap-4 border-b border-[#e5e5ea] px-4 text-left active:bg-[#f2f2f7] transition-colors"
+                onClick={handleSelectCurrentLocation}
+              >
+                <MobileCalendarCurrentLocationIcon className="h-[36px] w-[36px] shrink-0" />
+                <span className="text-[17px] tracking-[-0.03em] text-[#111111]">現在地</span>
+                <ChevronRightIcon className="ml-auto h-[18px] w-[18px] shrink-0 text-[#c7c7cc]" />
               </button>
 
-              <div className="border-b border-[#d1d1d6] bg-[#fafafa] px-[32px] pb-[13px] pt-[55px]">
-                <span className="text-[21px] font-bold tracking-[-0.04em] text-[#8e8e93]">ビデオ通話</span>
+              {/* Video call section */}
+              <div className="border-b border-[#e5e5ea] bg-[#f2f2f7] px-4 py-2">
+                <span className="text-[13px] font-semibold uppercase tracking-[0.04em] text-[#8e8e93]">ビデオ通話</span>
               </div>
 
-              <button type="button" className="flex min-h-[123px] w-full items-center gap-[20px] border-b border-[#d1d1d6] px-[32px] text-left" onClick={handleSelectFaceTime}>
-                <MobileCalendarFaceTimeIcon className="h-[66px] w-[66px] shrink-0" />
-                <span className="text-[22px] tracking-[-0.04em] text-[#111111]">FaceTime</span>
+              <button
+                type="button"
+                className="flex min-h-[60px] w-full items-center gap-4 border-b border-[#e5e5ea] px-4 text-left active:bg-[#f2f2f7] transition-colors"
+                onClick={handleSelectFaceTime}
+              >
+                <MobileCalendarFaceTimeIcon className="h-[36px] w-[36px] shrink-0" />
+                <span className="text-[17px] tracking-[-0.03em] text-[#111111]">FaceTime</span>
+                <ChevronRightIcon className="ml-auto h-[18px] w-[18px] shrink-0 text-[#c7c7cc]" />
               </button>
             </div>
           </section>
         </div>
-      ) : null}
+      )}
     </>
   );
 };
