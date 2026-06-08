@@ -15,7 +15,7 @@ type CreateCard = (
   cardData: Partial<Card> & { cardSetId?: string },
 ) => Promise<Card>;
 
-export type ImportDestination =
+type ImportDestination =
   | {
     kind: "new-card-set";
     cardSetName?: string;
@@ -35,7 +35,7 @@ type ImportCardsFromPayloadParams = {
   destination: ImportDestination;
 };
 
-export const buildImportCardSetName = (fileName: string) => {
+const buildImportCardSetName = (fileName: string) => {
   const baseName = fileName.replace(/\.xlsx$/i, "").trim();
   const dateLabel = new Intl.DateTimeFormat("ja-JP", {
     year: "numeric",
@@ -99,7 +99,7 @@ const mapImportBlockToCardBlock = (block: ImportBlock): CardBlock => {
   throw new Error(`Unsupported import block type: ${block.type}`);
 };
 
-export const importCardsFromPayload = async ({
+const importCardsFromPayload = async ({
   payload,
   folderId,
   fileName,
@@ -155,3 +155,6 @@ export const importCardsFromPayload = async ({
     createdCount,
   };
 };
+
+export { buildImportCardSetName, importCardsFromPayload };
+export type { ImportDestination };
