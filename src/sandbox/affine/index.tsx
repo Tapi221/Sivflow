@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { AffineDocumentEditor } from "@/components/note/AffineDocumentEditor";
+import { NoteDocumentEditor } from "@/components/note/NoteDocumentEditor";
 import type { Note } from "@/types";
 
 const createSandboxNote = (): Note => ({
@@ -8,7 +8,7 @@ const createSandboxNote = (): Note => ({
   deviceId: "web",
   folderId: "sandbox",
   orderIndex: 0,
-  title: "Affine Sandbox",
+  title: "Note Sandbox",
   content: [],
   contentText: "",
   contentVersion: 2,
@@ -25,7 +25,7 @@ const AffineSandboxPage = () => {
     setNote((currentNote) => ({ ...currentNote, ...changes, updatedAt: new Date() }));
   }, []);
 
-  return <AffineDocumentEditor note={note} onChange={handleChange} />;
+  return <NoteDocumentEditor note={note} onChange={handleChange} />;
 };
 
 export { AffineSandboxPage };
