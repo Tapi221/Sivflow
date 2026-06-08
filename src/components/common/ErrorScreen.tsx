@@ -8,14 +8,14 @@ interface State {
   hasError: boolean;
 }
 
-export const ErrorScreen = () => {
+const ErrorScreen = () => {
   return <>error</>;
 };
 
 /**
  * 致命的なクラッシュをキャッチし、開発用の最小限のエラー表示を行うコンポーネント
  */
-export class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
   };
@@ -36,3 +36,5 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+export { ErrorBoundary, ErrorScreen };
