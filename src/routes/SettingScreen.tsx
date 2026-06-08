@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { UserSettings } from "@/types";
-import { Check, ChevronRight, Globe, Keyboard, Shield, Star, Trophy, Type, User, Volume2 } from "@/ui/icons";
+import { ChevronRight, Globe, Keyboard, Shield, Trophy, Type, Volume2 } from "@/ui/icons";
 import { useLocaleStore, type Locale } from "@shared/i18n/locale.store";
 
 type SettingsSectionId = "account" | "general" | "study" | "editor" | "audio" | "hotkey";
@@ -22,8 +22,6 @@ type SettingRouteCopy = {
   title: string;
   emailUnset: string;
   emptyAccountLabel: string;
-  levelBadge: string;
-  badgeCount: string;
   premiumTitle: string;
   premiumDescription: string;
   premiumAction: string;
@@ -107,8 +105,6 @@ const SETTINGS_COPY: Record<SettingsLanguage, SettingRouteCopy> = {
     title: "設定",
     emailUnset: "メールアドレス未設定",
     emptyAccountLabel: "未ログイン",
-    levelBadge: "Lv.1",
-    badgeCount: "1バッジ",
     premiumTitle: "プレミアムへのアップグレード",
     premiumDescription: "カレンダー表示とその他の機能を含む拡張の特典。",
     premiumAction: "今すぐアップグレード",
@@ -155,8 +151,6 @@ const SETTINGS_COPY: Record<SettingsLanguage, SettingRouteCopy> = {
     title: "Settings",
     emailUnset: "No email address",
     emptyAccountLabel: "Not signed in",
-    levelBadge: "Lv.1",
-    badgeCount: "1 badge",
     premiumTitle: "Upgrade to Premium",
     premiumDescription: "Extended benefits including calendar display and other features.",
     premiumAction: "Upgrade now",
@@ -203,8 +197,6 @@ const SETTINGS_COPY: Record<SettingsLanguage, SettingRouteCopy> = {
     title: "设置",
     emailUnset: "未设置邮箱地址",
     emptyAccountLabel: "未登录",
-    levelBadge: "Lv.1",
-    badgeCount: "1 徽章",
     premiumTitle: "升级到高级版",
     premiumDescription: "包含日历显示和其他功能的扩展权益。",
     premiumAction: "立即升级",
@@ -376,17 +368,13 @@ const SettingScreen = () => {
       <div className="mx-auto flex min-h-full w-full max-w-[520px] flex-col gap-5 px-5 pb-7 pt-3">
         <h1 className="pb-2 pt-2 text-center text-[18px] font-bold tracking-[-0.03em] text-[#111111]">{copy.title}</h1>
 
-        <button type="button" className={`${SETTINGS_CARD_CLASS_NAME} flex min-h-[116px] items-center gap-4 p-4 text-left`} onClick={() => setActiveSectionId("account")}>
+        <button type="button" className={`${SETTINGS_CARD_CLASS_NAME} flex min-h-[108px] items-center gap-4 p-4 text-left`} onClick={() => setActiveSectionId("account")}>
           <span className="relative flex h-[76px] w-[76px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f0f0f3] text-[28px] font-semibold text-[#c2c2c8]">
             {currentUser?.photoURL ? <img src={currentUser.photoURL} alt="" className="h-full w-full object-cover" /> : <span>{accountInitial}</span>}
             <span className="absolute right-0 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#a3a3aa] shadow-[0_2px_8px_rgba(0,0,0,0.10)]"><Trophy size={15} /></span>
           </span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[18px] font-semibold tracking-[-0.03em] text-[#1c1c1e]">{currentUser?.email ?? accountName}</span>
-            <span className="mt-3 flex min-w-0 flex-wrap gap-2">
-              <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-[#dff8e7] px-2.5 text-[13px] font-bold text-[#31b86a]"><Check size={14} />{copy.levelBadge}</span>
-              <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-[#e6e3f4] px-2.5 text-[13px] font-bold text-[#6f6ca7]"><Star size={14} />{copy.badgeCount}</span>
-            </span>
           </span>
           <ChevronRight className="shrink-0 text-[#a7a7ad]" size={22} />
         </button>
