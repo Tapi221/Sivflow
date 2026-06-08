@@ -12,6 +12,7 @@ vi.mock("@/pane.desktop/view/ScheduleScreen.mobile", () => ({ ScheduleScreen: ()
 
 const MOBILE_SCREEN_SOURCE_PATH = resolve(process.cwd(), "src/pane.desktop/view/ScheduleScreen.mobile.tsx");
 const WORKSPACE_SCREEN_SOURCE_PATH = resolve(process.cwd(), "src/pane.desktop/view/WorkspaceScreen.tsx");
+const LAYERED_DIRECTORY_SOURCE_PATH = resolve(process.cwd(), "src/pane.desktop/leftpane/Sidebar.LayeredDirectory.tsx");
 
 const installMatchMedia = (matches: boolean) => {
   Object.defineProperty(window, "matchMedia", {
@@ -61,13 +62,15 @@ describe("Schedule mobile web route", () => {
     expect(screen.queryByTestId("mobile-schedule-screen")).toBeNull();
   });
 
-  it("モバイルのライブラリ画面をカレンダー画面と同じドロワー構成にする", () => {
+  it("モバイルのライブラリ画面をカレンダー画面と同じサイドバー内容にする", () => {
     const scheduleSource = readFileSync(MOBILE_SCREEN_SOURCE_PATH, "utf8");
     const workspaceSource = readFileSync(WORKSPACE_SCREEN_SOURCE_PATH, "utf8");
+    const layeredDirectorySource = readFileSync(LAYERED_DIRECTORY_SOURCE_PATH, "utf8");
 
-    expect(scheduleSource).toContain("renderMobileSidebar");
+    expect(scheduleSource).toContain("CalendarSidebar");
     expect(workspaceSource).toContain("MobileSidebarDrawer");
     expect(workspaceSource).toContain("MOBILE_LIBRARY_SIDEBAR_ID");
-    expect(workspaceSource).toContain("SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={handleCloseMobileSidebar}");
+    expect(workspaceSource).toContain("CalendarSidebarController onOpenSettings={onOpenSettings} onToggleLeftPanel={handleCloseMobileSidebar}");
+    expect(layeredDirectorySource).toContain("const shouldShowCalendarContent = calendarContent !== undefined");
   });
 });
