@@ -1,4 +1,4 @@
-import { WEB_STORAGE_KEYS } from "@constants/web/storage";
+import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 
 export const getLastSelectedFolderId = (): string | null => {
   if (typeof window === "undefined") return null;
