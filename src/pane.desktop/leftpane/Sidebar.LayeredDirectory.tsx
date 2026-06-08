@@ -227,7 +227,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   const isFolderActive = activeTab?.sectionKey === "library" && folderTagMode === "folder";
   const isTagActive = activeTab?.sectionKey === "library" && folderTagMode === "tag";
   const isScheduleActive = activeTab?.sectionKey === "schedule";
-  const shouldShowCalendarContent = isScheduleActive && calendarContent !== undefined;
+  const shouldShowCalendarContent = calendarContent !== undefined;
   const shouldShowDirectoryContent = !shouldShowCalendarContent;
   const resolvedOnOpenSettings = onOpenSettings ?? outletOpenSettings;
   const resolvedOnToggleLeftPanel = onToggleLeftPanel ?? outletToggleLeftPanel;
