@@ -3,6 +3,7 @@ import { useProjectCalendarActions } from "@/features/calendar/useProjectCalenda
 import { useGoogleCalendarLayer } from "@/features/calendar/useGoogleCalendarLayer";
 import type { GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { CalendarSidebarContent } from "./CalendarSidebar";
 
 type CalendarSidebarControllerProps = {
@@ -34,12 +35,13 @@ const createGoogleAccountDisplays = (google: ReturnType<typeof useGoogleCalendar
 
 const CalendarSidebarController = ({ onOpenSettings, onToggleLeftPanel }: CalendarSidebarControllerProps) => {
   const google = useGoogleCalendarLayer();
+  const activeSectionKey = useWorkspaceTabsStore((state) => state.tabs.find((tab) => tab.id === state.activeTabId)?.sectionKey ?? null);
   const googleAccounts = useMemo(() => createGoogleAccountDisplays(google), [google]);
   const { appProjects, projectCalendarLinks, googleCalendarColorOverrides, googleAccountsWithColorOverrides, handleAddAppProject, handleToggleAppProject, handleLinkGoogleCalendarAsProject, handleLinkProjectToGoogleCalendar, handleCreateProjectGoogleCalendar, handleUnlinkProjectCalendar, handleChangeGoogleCalendarColor } = useProjectCalendarActions({ googleAccounts, reconnectGoogleAccount: google.reconnectAccount, toggleGoogleCalendar: google.toggleCalendar });
+  const shouldShowCalendarContent = activeSectionKey === null || activeSectionKey === "schedule";
+  const calendarContent = shouldShowCalendarContent ? <CalendarSidebarContent appProjects={appProjects} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} googleAccounts={googleAccountsWithColorOverrides} isAnyCalendarConnecting={google.isAnyConnecting} onAddCalendar={google.addAccount} onAddProject={handleAddAppProject} onToggleProject={handleToggleAppProject} onLinkGoogleCalendarAsProject={handleLinkGoogleCalendarAsProject} onLinkProjectToGoogleCalendar={handleLinkProjectToGoogleCalendar} onCreateProjectGoogleCalendar={handleCreateProjectGoogleCalendar} onUnlinkProjectCalendar={handleUnlinkProjectCalendar} onChangeGoogleCalendarColor={handleChangeGoogleCalendarColor} onReconnectAccount={(accountId) => { void google.reconnectAccount(accountId); }} onToggleCalendar={google.toggleCalendar} className="px-0 pt-2" /> : undefined;
 
-  return (
-    <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} calendarContent={<CalendarSidebarContent appProjects={appProjects} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} googleAccounts={googleAccountsWithColorOverrides} isAnyCalendarConnecting={google.isAnyConnecting} onAddCalendar={google.addAccount} onAddProject={handleAddAppProject} onToggleProject={handleToggleAppProject} onLinkGoogleCalendarAsProject={handleLinkGoogleCalendarAsProject} onLinkProjectToGoogleCalendar={handleLinkProjectToGoogleCalendar} onCreateProjectGoogleCalendar={handleCreateProjectGoogleCalendar} onUnlinkProjectCalendar={handleUnlinkProjectCalendar} onChangeGoogleCalendarColor={handleChangeGoogleCalendarColor} onReconnectAccount={(accountId) => { void google.reconnectAccount(accountId); }} onToggleCalendar={google.toggleCalendar} className="px-0 pt-2" />} />
-  );
+  return <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} calendarContent={calendarContent} />;
 };
 
 export { CalendarSidebarController };
