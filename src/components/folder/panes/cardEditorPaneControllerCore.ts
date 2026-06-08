@@ -1,4 +1,4 @@
-import { WEB_STORAGE_KEYS } from "@constants/web/storage";
+import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 import type { CardSetViewEditingDraftPatch } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { createLatestReviewLogPatch, createReviewPatchFromRating } from "@/services/reviewAlgorithm";
 import type { ReviewLog } from "@/types/domain/base";
