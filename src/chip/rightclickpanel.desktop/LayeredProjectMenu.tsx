@@ -10,7 +10,7 @@ type LayeredProjectMenuItemDefinition = {
   submenu?: boolean;
 };
 
-export type LayeredProjectMenuActionId = "change-color" | "rename" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
+export type LayeredProjectMenuActionId = "change-color" | "rename" | "create-note" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
 
 export type LayeredProjectMenuAction = {
   id: LayeredProjectMenuActionId;
@@ -42,6 +42,7 @@ const LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT = 5;
 const LAYERED_PROJECT_MENU_ITEM_DEFINITIONS: readonly LayeredProjectMenuItemDefinition[] = [
   { id: "change-color", label: "色を変更", submenu: true },
   { id: "rename", label: "名前を変更" },
+  { id: "create-note", label: "新規ノート" },
   { id: "create-card-set", label: "新規カードセット" },
   { id: "create-folder", label: "新規フォルダ" },
   { id: "import-pdf", label: "PDFをインポート" },
@@ -106,31 +107,11 @@ const getLayeredProjectMenuSubmenuAnchor = (index: number): LayeredProjectMenuSu
   return { itemOffsetY: RIGHT_CLICK_PANEL_SURFACE_PADDING + index * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + separatorOffset };
 };
 
-const LayeredProjectMenuBase = ({
-  x,
-  y,
-  actions,
-  menuRef,
-  noDragStyle,
-  panelId = LAYERED_PROJECT_MENU_PANEL_ID,
-  openSubmenuId,
-  submenuElement,
-  onOpenSubmenu,
-  onCloseSubmenu,
-}: LayeredProjectMenuProps) => {
+const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId = LAYERED_PROJECT_MENU_PANEL_ID, openSubmenuId, submenuElement, onOpenSubmenu, onCloseSubmenu }: LayeredProjectMenuProps) => {
   return (
     <>
       <style>{LAYERED_PROJECT_MENU_STYLE}</style>
-      <RightClickPanelSurface
-        x={x}
-        y={y}
-        width={LAYERED_PROJECT_MENU_WIDTH}
-        panelRef={menuRef}
-        noDragStyle={noDragStyle}
-        className="layered-project-menu-panel"
-        ariaLabel="layered project context menu"
-        panelId={panelId}
-      >
+      <RightClickPanelSurface x={x} y={y} width={LAYERED_PROJECT_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} className="layered-project-menu-panel" ariaLabel="layered project context menu" panelId={panelId}>
         {LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.map((item, index) => {
           const action = getLayeredProjectMenuAction(actions, item.id);
           const isDisabled = action?.disabled ?? false;
@@ -139,49 +120,10 @@ const LayeredProjectMenuBase = ({
           return (
             <Fragment key={item.id}>
               {item.separatorBefore ? <div className="layered-project-menu-separator" role="separator" /> : null}
-
-              <button
-                type="button"
-                disabled={isDisabled}
-                className={["right-click-panel-item", "layered-project-menu-item", item.danger ? "layered-project-menu-item--danger" : null, isSubmenuOpen ? "layered-project-menu-item--open" : null].filter(Boolean).join(" ")}
-                role="menuitem"
-                aria-haspopup={item.submenu ? "menu" : undefined}
-                aria-expanded={item.submenu ? isSubmenuOpen : undefined}
-                onMouseEnter={() => {
-                  if (isDisabled) return;
-                  if (item.submenu) {
-                    onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index));
-                    return;
-                  }
-                  onCloseSubmenu?.();
-                }}
-                onFocus={() => {
-                  if (isDisabled || !item.submenu) return;
-                  onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index));
-                }}
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-
-                  if (isDisabled) return;
-                  if (item.submenu) {
-                    if (onOpenSubmenu) {
-                      onOpenSubmenu(item.id, getLayeredProjectMenuSubmenuAnchor(index));
-                      return;
-                    }
-
-                    action?.onSelect();
-                    return;
-                  }
-
-                  action?.onSelect();
-                }}
-              >
+              <button type="button" disabled={isDisabled} className={["right-click-panel-item", "layered-project-menu-item", item.danger ? "layered-project-menu-item--danger" : null, isSubmenuOpen ? "layered-project-menu-item--open" : null].filter(Boolean).join(" ")} role="menuitem" aria-haspopup={item.submenu ? "menu" : undefined} aria-expanded={item.submenu ? isSubmenuOpen : undefined} onMouseEnter={() => { if (isDisabled) return; if (item.submenu) { onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index)); return; } onCloseSubmenu?.(); }} onFocus={() => { if (isDisabled || !item.submenu) return; onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index)); }} onClick={(event) => { event.preventDefault(); event.stopPropagation(); if (isDisabled) return; if (item.submenu) { if (onOpenSubmenu) { onOpenSubmenu(item.id, getLayeredProjectMenuSubmenuAnchor(index)); return; } action?.onSelect(); return; } action?.onSelect(); }}>
                 <span>{item.label}</span>
                 {item.submenu ? (
-                  <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className="layered-project-menu-item-chevron">
-                    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className="layered-project-menu-item-chevron"><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 ) : null}
               </button>
             </Fragment>
