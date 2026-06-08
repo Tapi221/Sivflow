@@ -5,9 +5,9 @@ import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
-import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContext";
 import { Search } from "@/ui/icons";
 import "@/styles/backpane.css";
+import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContext";
 import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
 
@@ -29,9 +29,9 @@ const GLOBAL_SEARCH_TRIGGER_CLASS_NAME = "absolute right-5 top-4 z-30 hidden h-9
 const GLOBAL_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-[22px] min-w-[34px] items-center justify-center rounded-[6px] border border-[#e6e6e8] bg-[#f7f7f8] px-1.5 text-[11px] font-semibold leading-none tracking-[-0.02em] text-[#8e8e93] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
 const LEFT_PANEL_COLLAPSED_STORAGE_VALUE = "collapsed";
-const MOBILE_SCHEDULE_SIDEBAR_SELECTOR = "#mobile-schedule-sidebar";
-const MOBILE_SCHEDULE_SIDEBAR_TOGGLE_SELECTOR = ".app-layered-directory__workspace-toggle";
-const MOBILE_SCHEDULE_SIDEBAR_CLOSE_BUTTON_SELECTOR = 'button[aria-label="サイドバーを閉じる"]';
+const MOBILE_CALENDAR_SIDEBAR_SELECTOR = "#mobile-calendar-sidebar";
+const MOBILE_CALENDAR_SIDEBAR_TOGGLE_SELECTOR = ".app-layered-directory__workspace-toggle";
+const MOBILE_CALENDAR_SIDEBAR_CLOSE_BUTTON_SELECTOR = 'button[aria-label="サイドバーを閉じる"]';
 const SIDEBAR_LONG_PRESS_CONTEXT_MENU_TARGET_SELECTOR = ".app-layered-directory [role='treeitem']";
 const SIDEBAR_LONG_PRESS_DELAY_MS = 520;
 const SIDEBAR_LONG_PRESS_MOVE_TOLERANCE_PX = 10;
@@ -61,12 +61,12 @@ const persistLeftPanelCollapsed = (isCollapsed: boolean) => {
   }
 };
 
-const getMobileScheduleSidebarCloseButton = (target: EventTarget | null): HTMLButtonElement | null => {
+const getMobileCalendarSidebarCloseButton = (target: EventTarget | null): HTMLButtonElement | null => {
   if (!(target instanceof Element)) return null;
-  if (!target.closest(MOBILE_SCHEDULE_SIDEBAR_TOGGLE_SELECTOR)) return null;
+  if (!target.closest(MOBILE_CALENDAR_SIDEBAR_TOGGLE_SELECTOR)) return null;
 
-  const mobileScheduleSidebar = target.closest(MOBILE_SCHEDULE_SIDEBAR_SELECTOR);
-  return mobileScheduleSidebar?.parentElement?.querySelector<HTMLButtonElement>(MOBILE_SCHEDULE_SIDEBAR_CLOSE_BUTTON_SELECTOR) ?? null;
+  const mobileCalendarSidebar = target.closest(MOBILE_CALENDAR_SIDEBAR_SELECTOR);
+  return mobileCalendarSidebar?.parentElement?.querySelector<HTMLButtonElement>(MOBILE_CALENDAR_SIDEBAR_CLOSE_BUTTON_SELECTOR) ?? null;
 };
 
 const getSidebarLongPressContextMenuTarget = (target: EventTarget | null): HTMLElement | null => {
@@ -81,31 +81,35 @@ const getSidebarLongPressPointerDistance = (event: PointerEvent, state: SidebarL
 
 const AppLayout = () => {
   const { pathname, isFoldersRoute, isScheduleRoute, isScrollLocked } = useLayoutRouteStateDesktop();
-
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(readStoredLeftPanelCollapsed);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const [workspaceLayoutRevision, setWorkspaceLayoutRevision] = useState(0);
-
   const openSearch = useSearchStore((state) => state.open);
   const mainRef = useRef<HTMLElement | null>(null);
   const sidebarLongPressStateRef = useRef<SidebarLongPressState | null>(null);
   const shouldSuppressSidebarLongPressClickRef = useRef(false);
+
   const handleOpenSearch = useCallback(() => openSearch(), [openSearch]);
+
   const handleOpenSettings = useCallback(() => {
     setIsSettingsDialogOpen(true);
   }, []);
+
   const bumpWorkspaceLayoutRevision = useCallback(() => {
     setWorkspaceLayoutRevision((current) => current + 1);
   }, []);
+
   const handleToggleLeftPanel = useCallback(() => {
     bumpWorkspaceLayoutRevision();
     setIsLeftPanelCollapsed((current) => !current);
   }, [bumpWorkspaceLayoutRevision]);
+
   const handleToggleRightSidebar = useCallback(() => {
     bumpWorkspaceLayoutRevision();
     setIsRightSidebarOpen((current) => !current);
   }, [bumpWorkspaceLayoutRevision]);
+
   const clearSidebarLongPress = useCallback(() => {
     const state = sidebarLongPressStateRef.current;
     if (!state) return;
@@ -113,6 +117,7 @@ const AppLayout = () => {
     window.clearTimeout(state.timerId);
     sidebarLongPressStateRef.current = null;
   }, []);
+
   const handleSidebarLongPressPointerDown = useCallback((event: PointerEvent) => {
     if (!isSidebarLongPressPointerEvent(event)) return;
 
@@ -138,6 +143,7 @@ const AppLayout = () => {
 
     sidebarLongPressStateRef.current = state;
   }, [clearSidebarLongPress]);
+
   const handleSidebarLongPressPointerMove = useCallback((event: PointerEvent) => {
     const state = sidebarLongPressStateRef.current;
     if (!state || state.pointerId !== event.pointerId) return;
@@ -145,12 +151,14 @@ const AppLayout = () => {
 
     clearSidebarLongPress();
   }, [clearSidebarLongPress]);
+
   const handleSidebarLongPressPointerEnd = useCallback((event: PointerEvent) => {
     const state = sidebarLongPressStateRef.current;
     if (!state || state.pointerId !== event.pointerId) return;
 
     clearSidebarLongPress();
   }, [clearSidebarLongPress]);
+
   const handleSidebarLongPressClickCapture = useCallback((event: MouseEvent) => {
     if (!shouldSuppressSidebarLongPressClickRef.current) return;
 
@@ -161,14 +169,16 @@ const AppLayout = () => {
     event.stopPropagation();
     event.stopImmediatePropagation();
   }, []);
-  const handleMobileScheduleSidebarToggle = useCallback((event: MouseEvent) => {
-    const closeButton = getMobileScheduleSidebarCloseButton(event.target);
+
+  const handleMobileCalendarSidebarToggle = useCallback((event: MouseEvent) => {
+    const closeButton = getMobileCalendarSidebarCloseButton(event.target);
     if (!closeButton) return;
 
     event.preventDefault();
     event.stopPropagation();
     closeButton.click();
   }, []);
+
   const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed, onOpenSettings: handleOpenSettings, onToggleLeftPanel: handleToggleLeftPanel }), [handleOpenSettings, handleToggleLeftPanel, isLeftPanelCollapsed]);
   const isSandboxRoute = pathname.startsWith("/sandbox");
   const showGlobalSearchTrigger = !isScheduleRoute && !isSandboxRoute;
@@ -195,12 +205,12 @@ const AppLayout = () => {
   }, [clearSidebarLongPress, handleSidebarLongPressClickCapture, handleSidebarLongPressPointerDown, handleSidebarLongPressPointerEnd, handleSidebarLongPressPointerMove]);
 
   useEffect(() => {
-    document.addEventListener("click", handleMobileScheduleSidebarToggle, true);
+    document.addEventListener("click", handleMobileCalendarSidebarToggle, true);
 
     return () => {
-      document.removeEventListener("click", handleMobileScheduleSidebarToggle, true);
+      document.removeEventListener("click", handleMobileCalendarSidebarToggle, true);
     };
-  }, [handleMobileScheduleSidebarToggle]);
+  }, [handleMobileCalendarSidebarToggle]);
 
   useHotKeyDesktop({
     onToggleRightSidebar: handleToggleRightSidebar,
@@ -241,4 +251,4 @@ const AppLayout = () => {
   );
 };
 
-export { AppLayout };
+export { AppLayout, type AppLayoutOutletContext };
