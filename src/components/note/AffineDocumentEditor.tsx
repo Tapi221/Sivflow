@@ -48,12 +48,24 @@ type AffineRuntime = {
 
 const NOTE_SAVE_DEBOUNCE_MS = 500;
 const AFFINE_CONTENT_TYPE = "affine-document";
+const AFFINE_EDITOR_CONTAINER_TAG_NAME = "affine-editor-container";
 
 const createAffineSchema = () => new Schema().register(AffineSchemas);
 
 const initializeAffineCollection = (collection: AffineCollectionRuntime): void => {
   collection.meta?.initialize?.();
   collection.start?.();
+};
+
+const ensureAffineEditorContainerDefined = (): void => {
+  if (typeof window === "undefined") return;
+  if (window.customElements.get(AFFINE_EDITOR_CONTAINER_TAG_NAME)) return;
+  window.customElements.define(AFFINE_EDITOR_CONTAINER_TAG_NAME, AffineEditorContainer);
+};
+
+const createAffineEditorElement = (): AffineEditorElement => {
+  ensureAffineEditorContainerDefined();
+  return document.createElement(AFFINE_EDITOR_CONTAINER_TAG_NAME) as AffineEditorElement;
 };
 
 const getInitialAffineRecord = (content: NoteBlockContent | undefined): AffineSnapshotRecord | null => {
@@ -128,7 +140,7 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
     if (!host) return;
 
     host.replaceChildren();
-    const editor = new AffineEditorContainer() as AffineEditorElement;
+    const editor = createAffineEditorElement();
     editor.doc = runtime.doc;
     editor.className = "block h-full min-h-[480px] w-full";
     host.appendChild(editor);
