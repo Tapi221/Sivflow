@@ -52,10 +52,6 @@ button[role="switch"].h-7.w-\[48px\][aria-checked="true"] > span {
   transform: translateX(20px);
 }
 
-.pdfViewer + .absolute.inset-0.flex.items-center.justify-center.p-6 {
-  display: none;
-}
-
 * {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
