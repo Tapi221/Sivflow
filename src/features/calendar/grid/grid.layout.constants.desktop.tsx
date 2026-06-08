@@ -4,8 +4,7 @@ type WeekdayHourLabelMode = "full" | "integer";
 
 //Month
 export const MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS = "h-8";
-export const MONTH_GRID_DAY_NUMBER_POSITION_CLASS = "left-0 top-0 md:left-3 md:top-1";
-export const MONTH_GRID_MONTH_ANNOTATION_POSITION_CLASS = "left-[28px] top-[5px] whitespace-nowrap md:left-[40px]";
+export const MONTH_GRID_DAY_HEADER_POSITION_CLASS = "left-0 top-0 md:left-3 md:top-1";
 export const MONTH_GRID_EVENTS_CONTAINER_POSITION_CLASS = "inset-x-px top-8";
 export const MONTH_GRID_EVENTS_GAP_CLASS = "gap-[3px]";
 export const MONTH_GRID_OVERFLOW_TEXT_CLASS = "w-full pr-3 text-right text-[11px] leading-none";
@@ -44,8 +43,6 @@ export const WEEKDAY_MS_PER_SECOND = 1000;
 export const WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT = "--calendar-hour-row-height" as const;
 export const WEEKDAY_CSS_VAR_EVENT_START_HOUR = "--calendar-event-start-hour" as const;
 export const WEEKDAY_CSS_VAR_EVENT_DURATION_HOURS = "--calendar-event-duration-hours" as const;
-
-// indicator
 export const WEEKDAY_CURRENT_TIME_INDICATOR_HEIGHT = 1.5;
 export const WEEKDAY_CURRENT_TIME_DASHED_STYLE = "1.5px dashed";
 
