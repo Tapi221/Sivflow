@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import { fileURLToPath } from "node:url";
 import path from "path";
 import react from "@vitejs/plugin-react";
@@ -26,6 +27,8 @@ const optimizedDependencyIncludes = [
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const pdfjsAssetRoute = "/pdfjs/";
 const pdfjsAssetDirectories = ["cmaps", "standard_fonts", "wasm"];
+const eventChipDesignRoute = "/__sivflow/eventchip-design";
+const eventChipDesignOutputPath = "src/chip/eventchip/eventChipDesign.generated.ts";
 
 const resolveFromRoot = (relativePath: string) => path.resolve(repoRoot, relativePath);
 
@@ -37,6 +40,162 @@ const getPdfjsAssetContentType = (filePath: string): string => {
   if (filePath.endsWith(".pfb")) return "application/octet-stream";
   if (filePath.endsWith(".ttf")) return "font/ttf";
   return "application/octet-stream";
+};
+
+const readRequestBody = (request: IncomingMessage): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+
+    request.on("data", (chunk: Buffer) => {
+      chunks.push(chunk);
+    });
+    request.on("end", () => {
+      resolve(Buffer.concat(chunks).toString("utf8"));
+    });
+    request.on("error", reject);
+  });
+};
+
+const writeJsonResponse = (response: ServerResponse, statusCode: number, payload: unknown) => {
+  response.statusCode = statusCode;
+  response.setHeader("Content-Type", "application/json");
+  response.end(JSON.stringify(payload));
+};
+
+const getFiniteNumber = (payload: Record<string, unknown>, key: string, fallback: number): number => {
+  const value = payload[key];
+
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+};
+
+const createEventChipDesignSource = (payload: Record<string, unknown>): string => {
+  const values = {
+    backgroundAlpha: getFiniteNumber(payload, "backgroundAlpha", 0.16),
+    monthHeight: getFiniteNumber(payload, "monthHeight", 18.3),
+    monthRadius: getFiniteNumber(payload, "monthRadius", 4),
+    monthBorderWidth: getFiniteNumber(payload, "monthBorderWidth", 3),
+    monthPaddingLeft: getFiniteNumber(payload, "monthPaddingLeft", 3),
+    monthPaddingRight: getFiniteNumber(payload, "monthPaddingRight", 2),
+    monthPaddingYWithTime: getFiniteNumber(payload, "monthPaddingYWithTime", 1),
+    monthPaddingYCompact: getFiniteNumber(payload, "monthPaddingYCompact", 2),
+    monthTitleFontSize: getFiniteNumber(payload, "monthTitleFontSize", 11),
+    monthTimeFontSize: getFiniteNumber(payload, "monthTimeFontSize", 9),
+    monthGap: getFiniteNumber(payload, "monthGap", 3),
+    monthAllDayOffset: getFiniteNumber(payload, "monthAllDayOffset", 1),
+    weekdayRadius: getFiniteNumber(payload, "weekdayRadius", 6),
+    weekdayBorderWidth: getFiniteNumber(payload, "weekdayBorderWidth", 3),
+    weekdayPaddingLeft: getFiniteNumber(payload, "weekdayPaddingLeft", 4),
+    weekdayPaddingRight: getFiniteNumber(payload, "weekdayPaddingRight", 1),
+    weekdayPaddingY: getFiniteNumber(payload, "weekdayPaddingY", 2),
+    weekdayInlinePaddingY: getFiniteNumber(payload, "weekdayInlinePaddingY", 1),
+    weekdayGap: getFiniteNumber(payload, "weekdayGap", 0.5),
+    weekdayTitleFontSize: getFiniteNumber(payload, "weekdayTitleFontSize", 12),
+    weekdayTitleLineHeight: getFiniteNumber(payload, "weekdayTitleLineHeight", 17),
+    weekdayTimeFontSize: getFiniteNumber(payload, "weekdayTimeFontSize", 11),
+    weekdayTimeLineHeight: getFiniteNumber(payload, "weekdayTimeLineHeight", 16),
+    listRowHeight: getFiniteNumber(payload, "listRowHeight", 52),
+    listChipHeight: getFiniteNumber(payload, "listChipHeight", 46),
+    listAllDayRowHeight: getFiniteNumber(payload, "listAllDayRowHeight", 34),
+    listAllDayChipHeight: getFiniteNumber(payload, "listAllDayChipHeight", 28),
+    listRadius: getFiniteNumber(payload, "listRadius", 6),
+    listBorderWidth: getFiniteNumber(payload, "listBorderWidth", 3),
+    listTitleFontSize: getFiniteNumber(payload, "listTitleFontSize", 11),
+    listTimeFontSize: getFiniteNumber(payload, "listTimeFontSize", 11),
+    listTitleGap: getFiniteNumber(payload, "listTitleGap", 0.5),
+    tooltipMonthRadius: getFiniteNumber(payload, "tooltipMonthRadius", 10),
+    tooltipWeekdayRadius: getFiniteNumber(payload, "tooltipWeekdayRadius", 14),
+  };
+
+  return `export type EventChipDesign = {
+  backgroundAlpha: number;
+  month: {
+    heightPx: number;
+    radiusPx: number;
+    borderWidthPx: number;
+    paddingLeftPx: number;
+    paddingRightPx: number;
+    paddingYWithTimePx: number;
+    paddingYCompactPx: number;
+    titleFontSizePx: number;
+    timeFontSizePx: number;
+    gapPx: number;
+    allDayOffsetPx: number;
+  };
+  weekday: {
+    radiusPx: number;
+    borderWidthPx: number;
+    paddingLeftPx: number;
+    paddingRightPx: number;
+    paddingYPx: number;
+    inlinePaddingYPx: number;
+    gapPx: number;
+    titleFontSizePx: number;
+    titleLineHeightPx: number;
+    timeFontSizePx: number;
+    timeLineHeightPx: number;
+  };
+  list: {
+    rowHeightPx: number;
+    chipHeightPx: number;
+    allDayRowHeightPx: number;
+    allDayChipHeightPx: number;
+    radiusPx: number;
+    borderWidthPx: number;
+    titleFontSizePx: number;
+    timeFontSizePx: number;
+    titleGapPx: number;
+  };
+  tooltip: {
+    monthRadiusPx: number;
+    weekdayRadiusPx: number;
+  };
+};
+
+export const eventChipDesign: EventChipDesign = {
+  backgroundAlpha: ${values.backgroundAlpha},
+  month: {
+    heightPx: ${values.monthHeight},
+    radiusPx: ${values.monthRadius},
+    borderWidthPx: ${values.monthBorderWidth},
+    paddingLeftPx: ${values.monthPaddingLeft},
+    paddingRightPx: ${values.monthPaddingRight},
+    paddingYWithTimePx: ${values.monthPaddingYWithTime},
+    paddingYCompactPx: ${values.monthPaddingYCompact},
+    titleFontSizePx: ${values.monthTitleFontSize},
+    timeFontSizePx: ${values.monthTimeFontSize},
+    gapPx: ${values.monthGap},
+    allDayOffsetPx: ${values.monthAllDayOffset},
+  },
+  weekday: {
+    radiusPx: ${values.weekdayRadius},
+    borderWidthPx: ${values.weekdayBorderWidth},
+    paddingLeftPx: ${values.weekdayPaddingLeft},
+    paddingRightPx: ${values.weekdayPaddingRight},
+    paddingYPx: ${values.weekdayPaddingY},
+    inlinePaddingYPx: ${values.weekdayInlinePaddingY},
+    gapPx: ${values.weekdayGap},
+    titleFontSizePx: ${values.weekdayTitleFontSize},
+    titleLineHeightPx: ${values.weekdayTitleLineHeight},
+    timeFontSizePx: ${values.weekdayTimeFontSize},
+    timeLineHeightPx: ${values.weekdayTimeLineHeight},
+  },
+  list: {
+    rowHeightPx: ${values.listRowHeight},
+    chipHeightPx: ${values.listChipHeight},
+    allDayRowHeightPx: ${values.listAllDayRowHeight},
+    allDayChipHeightPx: ${values.listAllDayChipHeight},
+    radiusPx: ${values.listRadius},
+    borderWidthPx: ${values.listBorderWidth},
+    titleFontSizePx: ${values.listTitleFontSize},
+    timeFontSizePx: ${values.listTimeFontSize},
+    titleGapPx: ${values.listTitleGap},
+  },
+  tooltip: {
+    monthRadiusPx: ${values.tooltipMonthRadius},
+    weekdayRadiusPx: ${values.tooltipWeekdayRadius},
+  },
+};
+`;
 };
 
 const createPdfjsAssetsPlugin = (): Plugin => {
@@ -78,6 +237,40 @@ const createPdfjsAssetsPlugin = (): Plugin => {
   };
 };
 
+const createEventChipDesignWriterPlugin = (): Plugin => {
+  return {
+    name: "event-chip-design-writer",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use(async (request, response, next) => {
+        const requestUrl = request.url?.split("?")[0] ?? "";
+        if (requestUrl !== eventChipDesignRoute) {
+          next();
+          return;
+        }
+
+        if (request.method !== "PUT") {
+          writeJsonResponse(response, 405, { ok: false, error: "Method not allowed" });
+          return;
+        }
+
+        try {
+          const body = await readRequestBody(request);
+          const payload = JSON.parse(body) as Record<string, unknown>;
+          const source = createEventChipDesignSource(payload);
+          const outputPath = resolveFromRoot(eventChipDesignOutputPath);
+
+          await fs.writeFile(outputPath, source, "utf8");
+          server.watcher.emit("change", outputPath);
+          writeJsonResponse(response, 200, { ok: true, path: eventChipDesignOutputPath });
+        } catch (error) {
+          writeJsonResponse(response, 400, { ok: false, error: error instanceof Error ? error.message : "Invalid request" });
+        }
+      });
+    },
+  };
+};
+
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
   root: resolveFromRoot("apps/web"),
@@ -86,6 +279,7 @@ export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     createPdfjsAssetsPlugin(),
+    createEventChipDesignWriterPlugin(),
     VitePWA({
       strategies: "injectManifest",
       srcDir: resolveFromRoot("apps/web/src"),
