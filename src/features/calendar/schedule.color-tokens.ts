@@ -1,3 +1,5 @@
+import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
+
 export type CalendarColorTokens = {
   bg: string;
   border: string;
@@ -11,7 +13,6 @@ type RgbColor = {
 };
 
 const FALLBACK_ACCENT_COLOR = "#185FA5";
-const EVENT_BACKGROUND_ALPHA = 0.16;
 const LIGHT_ACCENT_LUMINANCE_THRESHOLD = 0.8;
 const LIGHT_ACCENT_BORDER_MIX_AMOUNT = 0.28;
 const colorTokensCache = new Map<string, CalendarColorTokens>();
@@ -74,25 +75,25 @@ const getRelativeLuminance = ({ red, green, blue }: RgbColor) => {
 };
 
 export const generateColorTokens = (hex: string): CalendarColorTokens => {
-  const cacheKey = normalizeHexColor(hex) ?? FALLBACK_ACCENT_COLOR;
+  const cacheKey = `${normalizeHexColor(hex) ?? FALLBACK_ACCENT_COLOR}:${eventChipDesign.backgroundAlpha}`;
   const cachedTokens = colorTokensCache.get(cacheKey);
 
   if (cachedTokens) {
     return cachedTokens;
   }
 
-  const base = hexToRgb(cacheKey) ?? hexToRgb(FALLBACK_ACCENT_COLOR);
+  const base = hexToRgb(cacheKey.split(":")[0]) ?? hexToRgb(FALLBACK_ACCENT_COLOR);
   const accent = base ?? { red: 24, green: 95, blue: 165 };
   const luminance = getRelativeLuminance(accent);
   const isLightAccent = luminance > LIGHT_ACCENT_LUMINANCE_THRESHOLD;
   const border = isLightAccent
     ? rgbToHex(mixColors(accent, BLACK, LIGHT_ACCENT_BORDER_MIX_AMOUNT))
-    : cacheKey;
+    : cacheKey.split(":")[0];
   const textMixAmount = luminance > 0.55 ? 0.62 : 0.32;
   const text = mixColors(accent, BLACK, textMixAmount);
 
   const tokens = {
-    bg: rgbToRgba(accent, EVENT_BACKGROUND_ALPHA),
+    bg: rgbToRgba(accent, eventChipDesign.backgroundAlpha),
     border,
     text: rgbToHex(text),
   };
