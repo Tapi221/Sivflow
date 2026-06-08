@@ -210,9 +210,12 @@
 }
 
 .settings-workspace__row--stacked {
-  align-items: stretch;
-  flex-direction: column;
-  gap: 10px;
+  min-height: 50px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 .settings-workspace__row--inline {
@@ -282,37 +285,48 @@
 }
 
 .settings-workspace__segmented {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
   gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.settings-workspace__segmented::-webkit-scrollbar {
+  display: none;
 }
 
 .settings-workspace__segment {
-  position: relative;
-  display: flex;
-  min-height: 48px;
-  flex-direction: column;
-  align-items: flex-start;
+  display: inline-flex;
+  height: 46px;
+  min-width: 46px;
+  flex: 0 0 auto;
+  align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: 8px 30px 8px 10px;
-  border: 1px solid #e7e7e5;
-  border-radius: 8px;
-  background: #fafaf9;
-  color: #232323;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: #f4f4f8;
+  color: #8f8a96;
   font: inherit;
-  text-align: left;
+  text-align: center;
   outline: none;
+  cursor: pointer;
 }
 
 .settings-workspace__segment:hover,
-.settings-workspace__segment:focus-visible,
-.settings-workspace__segment.is-selected {
-  background: #f2f2f0;
+.settings-workspace__segment:focus-visible {
+  background: #ececf2;
 }
 
 .settings-workspace__segment.is-selected {
-  border-color: #d8d8d5;
+  background: #1a181f;
+  color: #ffffff;
 }
 
 .settings-workspace__dropdown-trigger {
@@ -386,24 +400,15 @@
 
 .settings-workspace__segment-label {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 17px;
+  white-space: nowrap;
 }
 
-.settings-workspace__segment-caption {
-  color: #8f8a84;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 14px;
-}
-
+.settings-workspace__segment-caption,
 .settings-workspace__segment-check {
-  position: absolute;
-  top: 9px;
-  right: 9px;
-  color: #202124;
+  display: none;
 }
 
 .settings-workspace__profile-card {
@@ -541,6 +546,19 @@
     gap: 10px;
     padding-top: 12px;
     padding-bottom: 12px;
+  }
+
+  .settings-workspace__row--stacked {
+    gap: 10px;
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .settings-workspace__segment {
+    height: 42px;
+    min-width: 42px;
+    padding-right: 14px;
+    padding-left: 14px;
   }
 
   .settings-workspace__dropdown-trigger {
