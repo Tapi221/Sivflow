@@ -22,6 +22,7 @@ export { StratisGlobe02Icon } from "./StratisGlobe02Icon";
 export { StratisHelpCircleContainedIcon } from "./StratisHelpCircleContainedIcon";
 export { StratisImageIcon } from "./StratisImageIcon";
 export { StratisInfoSquare01ContainedIcon } from "./StratisInfoSquare01ContainedIcon";
+export { StratisKeyboardIcon } from "./StratisKeyboardIcon";
 export { StratisLinkAngledIcon } from "./StratisLinkAngledIcon";
 export { StratisLinkExternalIcon } from "./StratisLinkExternalIcon";
 export { StratisLogout01Icon } from "./StratisLogout01Icon";
