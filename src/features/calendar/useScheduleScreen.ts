@@ -4,7 +4,6 @@ import type { CalendarWeekStartDay } from "./calendar.types";
 import type { CalendarDateRange } from "./calendarRange.types";
 import type { CalendarGridStyle, CalendarViewMode, CalendarViewModeSelection, GoogleAccountDisplay } from "./scheduleScreen.types";
 import { useCalendarLayout } from "@/features/calendar/layout/useCalendarLayout.desktop";
-import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
 import { createInitialMonthVisibleWeekRange } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
@@ -12,6 +11,7 @@ import type { GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritable
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
 import { useCalendarNavigation } from "./useCalendarNavigation";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
+import { useCalendarWeekStartSetting } from "./useCalendarWeekStartSetting";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 
 type UseScheduleScreenOptions = { allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay };
@@ -103,27 +103,28 @@ const dedupeGoogleCalendarEvents = (events: GoogleCalendarEvent[]): GoogleCalend
   });
 };
 
-export const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY }: UseScheduleScreenOptions = {}): UseScheduleScreenReturn => {
-  const navigation = useCalendarNavigation({ allowMultiSelectViewMode, weekStartDay });
+export const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDay }: UseScheduleScreenOptions = {}): UseScheduleScreenReturn => {
+  const effectiveWeekStartDay = useCalendarWeekStartSetting(weekStartDay);
+  const navigation = useCalendarNavigation({ allowMultiSelectViewMode, weekStartDay: effectiveWeekStartDay });
   const [monthRenderedRangeSnapshot, setMonthRenderedRangeSnapshot] = useState<MonthRenderedRangeSnapshot | null>(null);
   const [yearRenderedRange, setYearRenderedRange] = useState<CalendarDateRange | null>(null);
   const [yearSyncRange, setYearSyncRange] = useState<CalendarDateRange | null>(null);
 
   const monthRenderedRange = useMemo(() => {
-    if (monthRenderedRangeSnapshot?.scrollTargetToken === navigation.monthScrollTargetToken && monthRenderedRangeSnapshot.weekStartDay === weekStartDay) return monthRenderedRangeSnapshot;
+    if (monthRenderedRangeSnapshot?.scrollTargetToken === navigation.monthScrollTargetToken && monthRenderedRangeSnapshot.weekStartDay === effectiveWeekStartDay) return monthRenderedRangeSnapshot;
 
-    return createInitialMonthVisibleWeekRange(navigation.currentDate, weekStartDay);
-  }, [monthRenderedRangeSnapshot, navigation.currentDate, navigation.monthScrollTargetToken, weekStartDay]);
+    return createInitialMonthVisibleWeekRange(navigation.currentDate, effectiveWeekStartDay);
+  }, [effectiveWeekStartDay, monthRenderedRangeSnapshot, navigation.currentDate, navigation.monthScrollTargetToken]);
 
   const handleMonthRenderedRangeChange = useCallback((range: CalendarDateRange) => {
     const scrollTargetToken = navigation.monthScrollTargetToken;
 
     setMonthRenderedRangeSnapshot((prev) => {
-      if (prev?.scrollTargetToken === scrollTargetToken && prev.weekStartDay === weekStartDay && isSameCalendarDateRange(prev, range)) return prev;
+      if (prev?.scrollTargetToken === scrollTargetToken && prev.weekStartDay === effectiveWeekStartDay && isSameCalendarDateRange(prev, range)) return prev;
 
-      return createMonthRenderedRangeSnapshot(range, scrollTargetToken, weekStartDay);
+      return createMonthRenderedRangeSnapshot(range, scrollTargetToken, effectiveWeekStartDay);
     });
-  }, [navigation.monthScrollTargetToken, weekStartDay]);
+  }, [effectiveWeekStartDay, navigation.monthScrollTargetToken]);
 
   const handleYearRenderedRangeChange = useCallback((range: CalendarDateRange) => {
     setYearRenderedRange((prev) => isSameCalendarDateRange(prev, range) ? prev : range);
@@ -137,7 +138,7 @@ export const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDa
     currentDate: navigation.currentDate,
     selectedViewMode: navigation.primaryViewMode,
     calendarBuffer: navigation.calendarBuffer,
-    weekStartDay,
+    weekStartDay: effectiveWeekStartDay,
   });
   const visibleDays = visibleRange.interactionDays;
   const displayDays = visibleRange.displayDays;
