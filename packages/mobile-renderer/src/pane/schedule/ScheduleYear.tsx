@@ -5,9 +5,14 @@ import type { NativeScrollEvent, NativeSyntheticEvent, ViewStyle } from "react-n
 import { getCalendarDateKey, getEventDateKeys } from "@core/calendar/calendarEventRange";
 import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
 
+type CalendarWeekStartDay = "sunday" | "monday";
+
+type CalendarWeekStartsOn = 0 | 1;
+
 type ScheduleYearProps = {
   yearDate: Date;
   selectedDate: Date;
+  weekStartDay?: CalendarWeekStartDay;
   visibleEvents?: CalendarEvent[];
   onSelectDate: (date: Date) => void;
   onRenderedRangeChange?: (range: { start: Date; end: Date }) => void;
@@ -50,9 +55,18 @@ const MONTH_COLUMNS = 3;
 const MONTH_CELL_SIZE = 24;
 const MONTH_WEEKDAY_HEIGHT = 20;
 const YEAR_SECTION_GAP = 32;
+const DEFAULT_WEEK_START_DAY: CalendarWeekStartDay = "monday";
 const MINI_CALENDAR_WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"] as const;
 const MONTH_LABEL_FORMAT = "M月";
 const YEAR_LABEL_FORMAT = "yyyy年";
+
+const getCalendarWeekStartsOn = (weekStartDay: CalendarWeekStartDay): CalendarWeekStartsOn => weekStartDay === "sunday" ? 0 : 1;
+
+const rotateCalendarWeekdayLabels = <T,>(weekdayLabels: readonly T[], weekStartDay: CalendarWeekStartDay): readonly T[] => {
+  if (weekStartDay === "sunday") return weekdayLabels;
+
+  return [...weekdayLabels.slice(1), ...weekdayLabels.slice(0, 1)];
+};
 
 const normalizeColor = (color: string): string => {
   if (/^#[0-9a-f]{3}$/i.test(color)) {
@@ -101,9 +115,9 @@ const buildEventsByDay = (events: CalendarEvent[]): Map<string, ScheduleYearDayE
   return eventsByDay;
 };
 
-const buildMonthDays = (monthDate: Date, eventsByDay: Map<string, ScheduleYearDayEvents>): ScheduleYearDay[] => {
+const buildMonthDays = (monthDate: Date, eventsByDay: Map<string, ScheduleYearDayEvents>, weekStartDay: CalendarWeekStartDay): ScheduleYearDay[] => {
   const monthStart = startOfMonth(monthDate);
-  const gridStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+  const gridStart = startOfWeek(monthStart, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) });
 
   return Array.from({ length: YEAR_MONTH_GRID_DAY_COUNT }, (_, index) => {
     const date = addDays(gridStart, index);
@@ -147,8 +161,9 @@ const getMonthItemStyle = (monthIndex: number): ViewStyle => ({
   width: `${100 / MONTH_COLUMNS}%`,
 });
 
-const ScheduleYearComponent = ({ yearDate, selectedDate, visibleEvents = [], onSelectDate, onRenderedRangeChange }: ScheduleYearProps) => {
+const ScheduleYearComponent = ({ yearDate, selectedDate, weekStartDay = DEFAULT_WEEK_START_DAY, visibleEvents = [], onSelectDate, onRenderedRangeChange }: ScheduleYearProps) => {
   const today = useMemo(() => new Date(), []);
+  const weekdayLabels = useMemo(() => rotateCalendarWeekdayLabels(MINI_CALENDAR_WEEKDAYS, weekStartDay), [weekStartDay]);
   const [anchorYear, setAnchorYear] = useState(() => startOfYear(yearDate));
   const [yearOffsetRange, setYearOffsetRange] = useState(() => ({
     startOffset: -INITIAL_YEAR_BUFFER,
@@ -165,7 +180,7 @@ const ScheduleYearComponent = ({ yearDate, selectedDate, visibleEvents = [], onS
         start: startOfYear(date),
         end: endOfYear(date),
       }).map((monthDate) => {
-        const days = buildMonthDays(monthDate, eventsByDay);
+        const days = buildMonthDays(monthDate, eventsByDay, weekStartDay);
 
         return {
           key: format(monthDate, "yyyy-MM"),
@@ -182,7 +197,7 @@ const ScheduleYearComponent = ({ yearDate, selectedDate, visibleEvents = [], onS
         months,
       };
     });
-  }, [anchorYear, eventsByDay, yearOffsetRange.endOffset, yearOffsetRange.startOffset]);
+  }, [anchorYear, eventsByDay, weekStartDay, yearOffsetRange.endOffset, yearOffsetRange.startOffset]);
   const renderedRange = useMemo(() => getYearRange(anchorYear, yearOffsetRange.startOffset, yearOffsetRange.endOffset), [anchorYear, yearOffsetRange.endOffset, yearOffsetRange.startOffset]);
 
   useEffect(() => {
@@ -245,7 +260,7 @@ const ScheduleYearComponent = ({ yearDate, selectedDate, visibleEvents = [], onS
               <View key={month.key} accessibilityLabel={month.label} style={[styles.monthItem, getMonthItemStyle(monthIndex)]}>
                 <Text style={styles.monthLabel}>{month.label}</Text>
                 <View style={styles.weekdayRow}>
-                  {MINI_CALENDAR_WEEKDAYS.map((weekday, index) => (
+                  {weekdayLabels.map((weekday, index) => (
                     <Text key={`${month.key}-${weekday}-${index}`} style={styles.weekdayText}>
                       {weekday}
                     </Text>
@@ -377,4 +392,4 @@ const ScheduleYear = memo(ScheduleYearComponent);
 ScheduleYear.displayName = "ScheduleYear";
 
 export { ScheduleYear };
-export type { ScheduleYearProps };
+export type { CalendarWeekStartDay, ScheduleYearProps };
