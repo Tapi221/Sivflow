@@ -2,7 +2,7 @@ import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { UserSettings } from "@/types";
-import { Check, ChevronDown, Globe, Keyboard, Settings2, Shield, Type, User, Volume2 } from "@/ui/icons";
+import { Check, ChevronDown, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/ui/icons";
 import { useLocaleStore, type Locale } from "@shared/i18n/locale.store";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import "./SettingsWorkspaceScreen.css";
@@ -426,7 +426,7 @@ const getSectionIcon = (sectionId: SettingsSectionId, className: string): ReactN
   if (sectionId === "editor") return <Type className={className} size={17} />;
   if (sectionId === "audio") return <Volume2 className={className} size={17} />;
   if (sectionId === "hotkey") return <Keyboard className={className} size={17} />;
-  return <Settings2 className={className} size={17} />;
+  return null;
 };
 
 const SettingsSectionBlock = ({ title, description, children }: SettingsSectionBlockProps) => {
