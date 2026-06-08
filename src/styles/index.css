@@ -272,34 +272,23 @@ div[class~="bg-[#151515]"][class~="text-[#f4f1ea]"]:has(input[placeholder="PDF�
   background: #f0ede6;
 }
 
-[role="presentation"]:has(> [aria-labelledby="mobile-calendar-event-composer-title"]),
-[role="presentation"]:has(> [aria-label="場所"][role="dialog"]) {
-  top: auto;
-  height: 100dvh;
-}
-
-[aria-labelledby="mobile-calendar-event-composer-title"] {
+.h-\[min\(92vh\,760px\)\] {
   height: min(92dvh, 760px);
   max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
 }
 
-[aria-label="場所"][role="dialog"] {
+.h-\[min\(88vh\,720px\)\] {
   height: min(88dvh, 720px);
   max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
 }
 
 @supports not (height: 100dvh) {
-  [role="presentation"]:has(> [aria-labelledby="mobile-calendar-event-composer-title"]),
-  [role="presentation"]:has(> [aria-label="場所"][role="dialog"]) {
-    height: 100vh;
-  }
-
-  [aria-labelledby="mobile-calendar-event-composer-title"] {
+  .h-\[min\(92vh\,760px\)\] {
     height: min(92vh, 760px);
     max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 
-  [aria-label="場所"][role="dialog"] {
+  .h-\[min\(88vh\,720px\)\] {
     height: min(88vh, 720px);
     max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
