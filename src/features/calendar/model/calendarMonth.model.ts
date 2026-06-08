@@ -1,5 +1,7 @@
 import { addDays, addMonths, addWeeks, differenceInCalendarDays, endOfMonth, endOfWeek, format, isSameMonth, startOfMonth, startOfWeek } from "date-fns";
 import { ja } from "date-fns/locale";
+import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 
 export type CalendarMonthGridDay = {
   date: Date;
@@ -24,16 +26,16 @@ export type CalendarMonthWeek = {
 };
 
 export const CALENDAR_MONTH_GRID_CELL_COUNT = 42;
-export const CALENDAR_MONTH_WEEK_STARTS_ON = 0;
 export const CALENDAR_MONTH_WEEK_DAY_COUNT = 7;
+export const DEFAULT_CALENDAR_MONTH_WEEK_START_DAY: CalendarWeekStartDay = "monday";
 
 export const getCalendarMonthKey = (date: Date): string => {
   return format(startOfMonth(date), "yyyy-MM");
 };
 
-export const getCalendarWeekKey = (date: Date): string => {
+export const getCalendarWeekKey = (date: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY): string => {
   return format(
-    startOfWeek(date, { weekStartsOn: CALENDAR_MONTH_WEEK_STARTS_ON }),
+    startOfWeek(date, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) }),
     "yyyy-MM-dd",
   );
 };
@@ -61,10 +63,11 @@ const resolveVisibleMonthDateForWeek = (weekStart: Date): Date => {
 
 export const buildCalendarMonthGridDays = (
   baseDate: Date,
+  weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY,
 ): CalendarMonthGridDay[] => {
   const monthStart = startOfMonth(baseDate);
   const gridStart = startOfWeek(monthStart, {
-    weekStartsOn: CALENDAR_MONTH_WEEK_STARTS_ON,
+    weekStartsOn: getCalendarWeekStartsOn(weekStartDay),
   });
 
   return Array.from({ length: CALENDAR_MONTH_GRID_CELL_COUNT }, (_, index) => {
@@ -73,14 +76,14 @@ export const buildCalendarMonthGridDays = (
   });
 };
 
-export const buildCalendarMonthPage = (baseDate: Date): CalendarMonthPage => {
+export const buildCalendarMonthPage = (baseDate: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY): CalendarMonthPage => {
   const monthStart = startOfMonth(baseDate);
 
   return {
     key: getCalendarMonthKey(monthStart),
     monthStart,
     label: format(monthStart, "yyyy年 M月", { locale: ja }),
-    days: buildCalendarMonthGridDays(monthStart),
+    days: buildCalendarMonthGridDays(monthStart, weekStartDay),
   };
 };
 
@@ -88,16 +91,18 @@ export const buildCalendarMonthPages = ({
   anchorDate,
   startOffset,
   endOffset,
+  weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY,
 }: {
   anchorDate: Date;
   startOffset: number;
   endOffset: number;
+  weekStartDay?: CalendarWeekStartDay;
 }): CalendarMonthPage[] => {
   const anchorMonth = startOfMonth(anchorDate);
   const pageCount = Math.max(0, endOffset - startOffset + 1);
 
   return Array.from({ length: pageCount }, (_, index) =>
-    buildCalendarMonthPage(addCalendarMonths(anchorMonth, startOffset + index)),
+    buildCalendarMonthPage(addCalendarMonths(anchorMonth, startOffset + index), weekStartDay),
   );
 };
 
@@ -105,21 +110,24 @@ export const buildCalendarMonthWeeks = ({
   anchorDate,
   startOffset,
   endOffset,
+  weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY,
 }: {
   anchorDate: Date;
   startOffset: number;
   endOffset: number;
+  weekStartDay?: CalendarWeekStartDay;
 }): CalendarMonthWeek[] => {
   if (endOffset < startOffset) return [];
 
+  const weekStartsOn = getCalendarWeekStartsOn(weekStartDay);
   const anchorMonth = startOfMonth(anchorDate);
   const firstMonth = addCalendarMonths(anchorMonth, startOffset);
   const lastMonth = addCalendarMonths(anchorMonth, endOffset);
   const rangeStart = startOfWeek(startOfMonth(firstMonth), {
-    weekStartsOn: CALENDAR_MONTH_WEEK_STARTS_ON,
+    weekStartsOn,
   });
   const rangeEnd = endOfWeek(endOfMonth(lastMonth), {
-    weekStartsOn: CALENDAR_MONTH_WEEK_STARTS_ON,
+    weekStartsOn,
   });
   const weekCount =
     Math.floor(differenceInCalendarDays(rangeEnd, rangeStart) / 7) + 1;
@@ -129,7 +137,7 @@ export const buildCalendarMonthWeeks = ({
     const visibleMonthDate = resolveVisibleMonthDateForWeek(weekStart);
 
     return {
-      key: getCalendarWeekKey(weekStart),
+      key: getCalendarWeekKey(weekStart, weekStartDay),
       weekStart,
       visibleMonthDate,
       days: Array.from(
