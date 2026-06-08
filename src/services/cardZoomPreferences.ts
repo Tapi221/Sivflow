@@ -1,4 +1,4 @@
-import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
+import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
 interface CardZoomPreferencesStore {
   version: 1;
