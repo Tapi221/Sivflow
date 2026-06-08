@@ -93,7 +93,7 @@ const TagHashIcon = ({ className }: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const TagBadge = ({
+const TagBadge = ({
   label,
   colorKey,
   selected = false,
@@ -167,3 +167,6 @@ export const TagBadge = ({
     </span>
   );
 };
+
+export { TagBadge };
+export type { TagBadgeProps };
