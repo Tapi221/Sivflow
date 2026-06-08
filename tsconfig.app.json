@@ -20,7 +20,6 @@
       "@platform/*": ["packages/platform/src/*"],
       "@web-renderer/*": ["packages/web-renderer/src/*"],
       "@/*": ["src/*"],
-      "@constants/*": ["constants/*"],
       "@shared/*": ["shared/*"]
     }
   },
@@ -30,7 +29,6 @@
     "packages/core/src",
     "packages/platform/src",
     "src",
-    "constants",
     "shared"
   ],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "tests/**"]
