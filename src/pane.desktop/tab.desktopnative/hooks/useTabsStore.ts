@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
-import { createDefaultExplorerRouteState, resolveRouteTabBySection, WORKSPACE_DEFAULT_EXPLORER_TAB_ID, type WorkspaceCardTab, type WorkspaceDocumentTab, type WorkspaceExplorerTab, type WorkspaceRouteTab, type WorkspaceSidebarSection, type WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
+import { createDefaultExplorerRouteState, resolveRouteTabBySection, WORKSPACE_DEFAULT_EXPLORER_TAB_ID, type WorkspaceCardTab, type WorkspaceDocumentTab, type WorkspaceExplorerTab, type WorkspaceNoteTab, type WorkspaceRouteTab, type WorkspaceSidebarSection, type WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 
 type OpenExplorerTabParams = {
   id?: WorkspaceExplorerTab["id"];
@@ -23,6 +23,12 @@ type OpenCardTabParams = {
   folderId: string | null;
 };
 
+type OpenNoteTabParams = {
+  noteId: string;
+  title: string;
+  folderId: string | null;
+};
+
 type WorkspaceTabsState = {
   tabs: WorkspaceTab[];
   activeTabId: WorkspaceTab["id"] | null;
@@ -31,6 +37,7 @@ type WorkspaceTabsState = {
   createExplorerTab: (explorerState?: ExplorerRouteState) => WorkspaceExplorerTab["id"];
   openDocumentTab: (params: OpenDocumentTabParams) => WorkspaceDocumentTab["id"];
   openCardTab: (params: OpenCardTabParams) => WorkspaceCardTab["id"];
+  openNoteTab: (params: OpenNoteTabParams) => WorkspaceNoteTab["id"];
   openSectionTab: (sectionKey: WorkspaceSidebarSection) => WorkspaceTab["id"];
   selectTab: (tabId: WorkspaceTab["id"]) => void;
   closeTab: (tabId: WorkspaceTab["id"]) => void;
@@ -298,6 +305,38 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>()(
           kind: "card",
           title,
           cardId,
+          folderId,
+          isClosable: true,
+          sectionKey: "library",
+        };
+
+        set((state) => ({
+          tabs: [...state.tabs, nextTab],
+          activeTabId: nextTab.id,
+          lastOpenedTabId: nextTab.id,
+        }));
+
+        return id;
+      },
+
+      openNoteTab: ({ noteId, title, folderId }) => {
+        const id = `note:${noteId}` as const;
+        const existing = get().tabs.find((tab) => tab.id === id);
+
+        if (existing) {
+          set((state) => ({
+            tabs: upsertTab(state.tabs, existing),
+            activeTabId: id,
+          }));
+
+          return id;
+        }
+
+        const nextTab: WorkspaceNoteTab = {
+          id,
+          kind: "note",
+          title,
+          noteId,
           folderId,
           isClosable: true,
           sectionKey: "library",
