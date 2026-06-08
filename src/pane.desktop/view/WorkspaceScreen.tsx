@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useOutletContext } from "react-router-dom";
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
@@ -20,6 +20,7 @@ import type { WorkspaceExplorerTab, WorkspaceTab } from "@/pane.desktop/tab.desk
 import type { DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { Search } from "@/ui/icons";
 import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
+import { MobileSidebarDrawer } from "./MobileSidebarDrawer";
 import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
 
 type ExplorerWorkspaceContentProps = {
@@ -49,6 +50,12 @@ type SettingsDialogHostProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+const MOBILE_WORKSPACE_MEDIA_QUERY = "(max-width: 767px)";
+const MOBILE_LIBRARY_SIDEBAR_ID = "mobile-library-sidebar";
+const MOBILE_LIBRARY_SIDEBAR_OPEN_BUTTON_CLASS_NAME = "pointer-events-auto absolute left-3 top-3 z-[90] flex h-10 w-10 items-center justify-center bg-transparent p-0 text-[#111111] outline-none transition hover:text-[#111111] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
+const MOBILE_LIBRARY_SIDEBAR_OPEN_ICON_CLASS_NAME = "h-5 w-5 shrink-0 [transform:scaleX(-1)]";
+const MOBILE_LIBRARY_DRAWER_CONTENT_CLASS_NAME = "h-full min-h-0 w-full [&_.app-layered-directory]:!min-w-0 [&_.app-layered-directory]:!w-full";
+const MOBILE_WORKSPACE_MAIN_PANEL_CLASS_NAME = "!rounded-none !border-0 !shadow-none";
 const COLLAPSED_SIDEBAR_TOGGLE_CLASS_NAME = "pointer-events-auto absolute left-3 top-3 z-[90] flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(0,0,0,0.05)] bg-[rgba(255,255,255,0.82)] p-0 text-[#8c8c8c] shadow-[0_1px_2px_rgba(15,23,42,0.08)] outline-none backdrop-blur-xl transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
 const COLLAPSED_SIDEBAR_TOGGLE_ICON_CLASS_NAME = "h-5 w-5 shrink-0 [transform:scaleX(-1)]";
 const FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME = "absolute right-4 top-3 z-30 flex h-8 w-[220px] shrink-0 items-center gap-1.5 rounded-[9px] border border-[rgba(0,0,0,0.04)] bg-[#efeeee]/95 px-2.5 text-left text-[12px] font-medium leading-none tracking-[-0.012em] text-[#85827e] shadow-none outline-none ring-0 backdrop-blur-xl transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.04)] hover:bg-[#eeeeee] hover:text-[#2f343b] active:scale-[0.99] focus:outline-none focus:ring-0 focus-visible:bg-[#eeeeee] focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
@@ -76,7 +83,7 @@ const buildWorkspaceBreadcrumbCrumbs = (context: ExplorerBreadcrumbContext, fold
   return crumbs;
 };
 
-const createFolderRouteState = (folderId: string | null): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: folderId === null, selectedFolderId: folderId, selectedItem: null });
+const createFolderRouteState = (folderId: string | null): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: folderId, selectedItem: null });
 
 const createItemRouteState = (current: ExplorerRouteState, item: SelectedExplorerItem): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: current.selectedFolderId, selectedItem: item });
 
@@ -98,6 +105,33 @@ const getLibraryExplorerState = (tab: WorkspaceTab | null): ExplorerRouteState |
 
 const getExplorerTabId = (tab: WorkspaceTab | null): WorkspaceExplorerTab["id"] | null => {
   return tab?.kind === "explorer" ? tab.id : null;
+};
+
+const readIsMobileWorkspaceViewport = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia(MOBILE_WORKSPACE_MEDIA_QUERY).matches;
+};
+
+const joinClassNames = (...classNames: Array<string | false | null | undefined>): string => classNames.filter(Boolean).join(" ");
+
+const useIsMobileWorkspaceViewport = (): boolean => {
+  const [isMobileWorkspaceViewport, setIsMobileWorkspaceViewport] = useState(readIsMobileWorkspaceViewport);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQueryList = window.matchMedia(MOBILE_WORKSPACE_MEDIA_QUERY);
+    const handleChange = () => setIsMobileWorkspaceViewport(mediaQueryList.matches);
+
+    handleChange();
+    mediaQueryList.addEventListener("change", handleChange);
+
+    return () => {
+      mediaQueryList.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  return isMobileWorkspaceViewport;
 };
 
 const SidebarInteractionRegion = ({ children }: SidebarInteractionRegionProps) => {
@@ -129,6 +163,7 @@ const SettingsDialogHost = ({ children, open, onOpenChange }: SettingsDialogHost
 
 const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCollapsed, onOpenSettings, onToggleLeftPanel }: ExplorerWorkspaceContentProps) => {
   const { folders, loading, error } = useFoldersRead();
+  const isMobileWorkspace = useIsMobileWorkspaceViewport();
   const openSearch = useSearchStore((state) => state.open);
   const setExtraCrumbs = useSetBreadcrumbCrumbs();
   const updateExplorerTabState = useWorkspaceTabsStore((state) => state.updateExplorerTabState);
@@ -140,11 +175,18 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
   const showWorkspaceBreadcrumbs = !loading && !error;
   const showWorkspaceActions = selectedDocumentId === null && !loading && !error;
   const [explorerBreadcrumbContext, setExplorerBreadcrumbContext] = useState<ExplorerBreadcrumbContext>(EMPTY_EXPLORER_BREADCRUMB_CONTEXT);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const extraCrumbs = useMemo(() => buildWorkspaceBreadcrumbCrumbs(explorerBreadcrumbContext, folders, selectedDocument), [explorerBreadcrumbContext, folders, selectedDocument]);
 
   const handleOpenSearch = useCallback(() => {
     openSearch();
   }, [openSearch]);
+  const handleOpenMobileSidebar = useCallback(() => {
+    setIsMobileSidebarOpen(true);
+  }, []);
+  const handleCloseMobileSidebar = useCallback(() => {
+    setIsMobileSidebarOpen(false);
+  }, []);
   const updateLibraryExplorerState = useCallback((nextExplorerState: ExplorerRouteState) => {
     if (explorerTabId) {
       updateExplorerTabState(explorerTabId, nextExplorerState);
@@ -176,15 +218,38 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
     };
   }, [setExtraCrumbs]);
 
+  useEffect(() => {
+    if (isMobileWorkspace) return;
+
+    setIsMobileSidebarOpen(false);
+  }, [isMobileWorkspace]);
+
+  const mainPanelClassName = joinClassNames(WORKSPACE_MAIN_PANEL_CLASS_NAME, isMobileWorkspace && MOBILE_WORKSPACE_MAIN_PANEL_CLASS_NAME);
+
   return (
     <div className="relative isolate flex h-full min-h-0 w-full overflow-hidden bg-transparent">
-      <CollapsedSidebarToggle isVisible={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />
-      {isLeftPanelCollapsed ? null : (
-        <SidebarInteractionRegion>
-          <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />
-        </SidebarInteractionRegion>
+      {isMobileWorkspace ? (
+        <>
+          <button type="button" className={MOBILE_LIBRARY_SIDEBAR_OPEN_BUTTON_CLASS_NAME} onClick={handleOpenMobileSidebar} aria-label="サイドバーを開く" aria-controls={MOBILE_LIBRARY_SIDEBAR_ID} aria-expanded={isMobileSidebarOpen}>
+            <SidebarOpenIcon className={MOBILE_LIBRARY_SIDEBAR_OPEN_ICON_CLASS_NAME} />
+          </button>
+          <MobileSidebarDrawer id={MOBILE_LIBRARY_SIDEBAR_ID} isOpen={isMobileSidebarOpen} onClose={handleCloseMobileSidebar}>
+            <div className={MOBILE_LIBRARY_DRAWER_CONTENT_CLASS_NAME}>
+              <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={handleCloseMobileSidebar} />
+            </div>
+          </MobileSidebarDrawer>
+        </>
+      ) : (
+        <>
+          <CollapsedSidebarToggle isVisible={isLeftPanelCollapsed} onToggleLeftPanel={onToggleLeftPanel} />
+          {isLeftPanelCollapsed ? null : (
+            <SidebarInteractionRegion>
+              <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} />
+            </SidebarInteractionRegion>
+          )}
+        </>
       )}
-      <CarvePanel className={WORKSPACE_MAIN_PANEL_CLASS_NAME}>
+      <CarvePanel className={mainPanelClassName}>
         {loading ? <div className="h-full w-full bg-white" /> : error ? <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{error}</div> : <TreeViewLayout folders={folders} isSectionListMode={explorerState.isSectionListMode} selectedFolderId={explorerState.selectedFolderId} selectedItem={explorerState.selectedItem} selectedCardId={selectedCardId} selectedDocumentId={selectedDocumentId} onFolderSelect={handleFolderSelect} onItemSelect={handleItemSelect} onCardUpdated={() => undefined} onBreadcrumbContextChange={handleBreadcrumbContextChange} folderSelectionNonce={0} navigateToSectionListToken={0} />}
         {showWorkspaceBreadcrumbs ? <WorkspaceBreadcrumbs className={selectedDocumentId ? WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME : undefined} /> : null}
         {showWorkspaceActions ? <WorkspaceActionToolbar className={WORKSPACE_ACTION_TOOLBAR_CLASS_NAME} style={WORKSPACE_ACTION_TOOLBAR_STYLE} /> : null}
