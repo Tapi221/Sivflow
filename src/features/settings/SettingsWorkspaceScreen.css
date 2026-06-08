@@ -157,9 +157,9 @@
 
 .settings-workspace__section-card {
   width: 100%;
-  overflow: hidden;
-  border: 1px solid #e7e7e5;
-  border-radius: 12px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
   background: #ffffff;
   box-shadow: none;
 }
