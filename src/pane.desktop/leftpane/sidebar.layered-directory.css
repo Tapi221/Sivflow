@@ -407,7 +407,7 @@
   margin-top: 0 !important;
 }
 
-.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child button[aria-pressed] {
+.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed] {
   height: 28px !important;
   min-height: 28px !important;
   gap: 7px !important;
@@ -419,12 +419,12 @@
   line-height: 28px !important;
 }
 
-.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child button[aria-pressed]:hover,
-.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child button[aria-pressed]:focus-visible {
+.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed]:hover,
+.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed]:focus-visible {
   background: #eeeeee !important;
 }
 
-.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child button[aria-pressed] > span:first-child {
+.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed] > button:first-child {
   position: relative !important;
   width: 16px !important;
   min-width: 16px !important;
@@ -436,7 +436,7 @@
   opacity: 1 !important;
 }
 
-.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child button[aria-pressed] > span:first-child::before {
+.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed] > button:first-child::before {
   content: "";
   position: absolute;
   left: 1.5px;
@@ -447,7 +447,7 @@
   border-radius: 2px;
 }
 
-.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child button[aria-pressed] > span:first-child::after {
+.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed] > button:first-child::after {
   content: "";
   position: absolute;
   left: 5px;
@@ -459,6 +459,6 @@
   border-radius: 2px 2px 0 0;
 }
 
-.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child button[aria-pressed] > span:first-child > span {
+.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed] > button:first-child > span {
   display: none !important;
 }
