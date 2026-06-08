@@ -22,7 +22,7 @@ const WEEKDAY_SYNC_BUFFER_DAYS = 21;
 const WEEKDAY_PRIORITY_SYNC_BUFFER_DAYS = 7;
 const DEFAULT_VISIBLE_DAY_BUFFER_DAYS = 2;
 
-const buildMiniCalendarMonthRange = (monthTitleDate: Date): CalendarEventSyncRange => {
+const buildCurrentMonthGridCalendarEventSyncRange = (monthTitleDate: Date): CalendarEventSyncRange => {
   const gridStart = startOfWeek(startOfMonth(monthTitleDate), { weekStartsOn: 0 });
   const gridEnd = endOfWeek(endOfMonth(monthTitleDate), { weekStartsOn: 0 });
 
@@ -98,14 +98,14 @@ export const buildCalendarEventSyncRange = ({
   monthTitleDate,
   yearSyncRange,
 }: BuildCalendarEventSyncRangeOptions): CalendarEventSyncRange => {
-  const miniCalendarRange = buildMiniCalendarMonthRange(monthTitleDate);
+  const currentMonthGridRange = buildCurrentMonthGridCalendarEventSyncRange(monthTitleDate);
   const viewRange = selectedViewMode === "year"
     ? buildYearCalendarEventSyncRange(visibleDays, monthTitleDate, yearSyncRange)
     : selectedViewMode === "month"
       ? buildMonthCalendarEventSyncRange(monthTitleDate)
       : buildDefaultCalendarEventSyncRange(selectedViewMode, visibleDays, monthTitleDate);
 
-  return mergeCalendarEventSyncRanges(viewRange, miniCalendarRange);
+  return mergeCalendarEventSyncRanges(viewRange, currentMonthGridRange);
 };
 
 export const buildCalendarEventPrioritySyncRange = ({
