@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays, subMonths, subYears } from "date-fns";
-import { createCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
+import type { CalendarWeekStartDay } from "./calendar.types";
 import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
+import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
+import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
+import { createCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
 import { persistScheduleNavigationState, readStoredScheduleNavigationState, type ScheduleNavigationState } from "./scheduleNavigationPersistence";
 
-type CalendarNavigationOptions = { allowMultiSelectViewMode?: boolean };
+type CalendarNavigationOptions = { allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay };
 
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
@@ -33,22 +36,22 @@ const getPreviousDate = (current: Date, viewMode: CalendarViewMode) => {
   return subDays(current, 1);
 };
 
-const normalizeWeek = (date: Date) => startOfWeek(date, { weekStartsOn: 1 });
+const normalizeWeek = (date: Date, weekStartDay: CalendarWeekStartDay) => startOfWeek(date, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) });
 
 const getThreeDaysStartDate = (date: Date) => subDays(startOfDay(date), 1);
 
-const normalizeViewDate = (date: Date, viewMode: CalendarViewMode) => {
+const normalizeViewDate = (date: Date, viewMode: CalendarViewMode, weekStartDay: CalendarWeekStartDay) => {
   if (viewMode === "year") return startOfYear(date);
   if (viewMode === "list") return startOfMonth(date);
   if (viewMode === "pieChart") return startOfDay(date);
-  if (viewMode === "week" || viewMode === "timetable") return normalizeWeek(date);
+  if (viewMode === "week" || viewMode === "timetable") return normalizeWeek(date, weekStartDay);
   return date;
 };
 
-const normalizeCurrentDateForSelectedDate = (date: Date, viewMode: CalendarViewMode) => {
+const normalizeCurrentDateForSelectedDate = (date: Date, viewMode: CalendarViewMode, weekStartDay: CalendarWeekStartDay) => {
   if (viewMode === "list") return startOfMonth(date);
   if (viewMode === "threeDays") return getThreeDaysStartDate(date);
-  return normalizeViewDate(date, viewMode);
+  return normalizeViewDate(date, viewMode, weekStartDay);
 };
 
 const getSelectedDateStepViewMode = (selection: CalendarViewModeSelection, primaryViewMode: CalendarViewMode): CalendarViewMode => isMultiSelectViewModeSelection(selection) ? "pieChart" : primaryViewMode;
@@ -72,7 +75,7 @@ const resolveNextViewModeSelection = (currentSelection: CalendarViewModeSelectio
   return next;
 };
 
-const createInitialScheduleNavigationState = ({ allowMultiSelectViewMode }: Required<CalendarNavigationOptions>): ScheduleNavigationState => {
+const createInitialScheduleNavigationState = ({ allowMultiSelectViewMode, weekStartDay }: Required<CalendarNavigationOptions>): ScheduleNavigationState => {
   const now = new Date();
   const stored = readStoredScheduleNavigationState();
   const selectedDate = stored?.selectedDate ?? now;
@@ -81,19 +84,19 @@ const createInitialScheduleNavigationState = ({ allowMultiSelectViewMode }: Requ
   const primaryViewMode = getPrimaryViewMode(selectedViewMode);
 
   return {
-    currentDate: stored?.currentDate ?? normalizeCurrentDateForSelectedDate(selectedDate, primaryViewMode),
+    currentDate: stored?.currentDate ?? normalizeCurrentDateForSelectedDate(selectedDate, primaryViewMode, weekStartDay),
     selectedDate,
     monthTitleDate: stored?.monthTitleDate ?? startOfMonth(selectedDate),
     selectedViewMode,
   };
 };
 
-export const useCalendarNavigation = ({ allowMultiSelectViewMode = true }: CalendarNavigationOptions = {}) => {
+export const useCalendarNavigation = ({ allowMultiSelectViewMode = true, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY }: CalendarNavigationOptions = {}) => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const initialNavigationStateRef = useRef<ScheduleNavigationState | null>(null);
-  if (!initialNavigationStateRef.current) initialNavigationStateRef.current = createInitialScheduleNavigationState({ allowMultiSelectViewMode });
+  if (!initialNavigationStateRef.current) initialNavigationStateRef.current = createInitialScheduleNavigationState({ allowMultiSelectViewMode, weekStartDay });
   const initialNavigationState = initialNavigationStateRef.current;
   const [currentDate, setCurrentDate] = useState(() => initialNavigationState.currentDate);
   const [selectedDate, setSelectedDate] = useState(() => initialNavigationState.selectedDate);
@@ -139,6 +142,13 @@ export const useCalendarNavigation = ({ allowMultiSelectViewMode = true }: Calen
     persistScheduleNavigationState({ currentDate, selectedDate, monthTitleDate, selectedViewMode });
   }, [currentDate, monthTitleDate, selectedDate, selectedViewMode]);
 
+  useEffect(() => {
+    if (primaryViewMode !== "week" && primaryViewMode !== "timetable") return;
+
+    setCurrentDate((date) => normalizeCurrentDateForSelectedDate(date, primaryViewMode, weekStartDay));
+    resetCalendarPosition(primaryViewMode);
+  }, [primaryViewMode, resetCalendarPosition, weekStartDay]);
+
   const handleSelectViewMode = useCallback((next: CalendarViewMode) => {
     if (next !== "month") {
       const projectedViewportWidth = getProjectedViewportWidth(false);
@@ -147,7 +157,7 @@ export const useCalendarNavigation = ({ allowMultiSelectViewMode = true }: Calen
 
     const resolvedNext = resolveNextViewModeSelection(selectedViewMode, primaryViewMode, next, allowMultiSelectViewMode);
     const primaryNext = getPrimaryViewMode(resolvedNext);
-    const normalized = normalizeCurrentDateForSelectedDate(selectedDate, primaryNext);
+    const normalized = normalizeCurrentDateForSelectedDate(selectedDate, primaryNext, weekStartDay);
 
     setSelectedViewMode(resolvedNext);
     setCurrentDate(normalized);
@@ -156,7 +166,7 @@ export const useCalendarNavigation = ({ allowMultiSelectViewMode = true }: Calen
     if (primaryNext === "month") requestMonthScrollTarget();
 
     resetCalendarPosition(primaryNext);
-  }, [allowMultiSelectViewMode, getProjectedViewportWidth, primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, selectedDate, selectedViewMode]);
+  }, [allowMultiSelectViewMode, getProjectedViewportWidth, primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, selectedDate, selectedViewMode, weekStartDay]);
 
   const handleSelectDateViewMode = useCallback((date: Date, next: CalendarViewMode) => {
     if (next !== "month") {
@@ -165,51 +175,51 @@ export const useCalendarNavigation = ({ allowMultiSelectViewMode = true }: Calen
     }
 
     setSelectedViewMode(next);
-    setCurrentDate(normalizeCurrentDateForSelectedDate(date, next));
+    setCurrentDate(normalizeCurrentDateForSelectedDate(date, next, weekStartDay));
     setSelectedDate(date);
     setMonthTitleDate(startOfMonth(date));
 
     if (next === "month") requestMonthScrollTarget();
 
     resetCalendarPosition(next);
-  }, [getProjectedViewportWidth, requestMonthScrollTarget, resetCalendarPosition]);
+  }, [getProjectedViewportWidth, requestMonthScrollTarget, resetCalendarPosition, weekStartDay]);
 
   const handleToday = useCallback(() => {
     const now = new Date();
-    const nextSelectedDate = primaryViewMode === "list" ? now : normalizeViewDate(now, primaryViewMode);
-    const nextCurrentDate = normalizeCurrentDateForSelectedDate(nextSelectedDate, primaryViewMode);
+    const nextSelectedDate = primaryViewMode === "list" ? now : normalizeViewDate(now, primaryViewMode, weekStartDay);
+    const nextCurrentDate = normalizeCurrentDateForSelectedDate(nextSelectedDate, primaryViewMode, weekStartDay);
     setCurrentDate(nextCurrentDate);
     setSelectedDate(nextSelectedDate);
     setMonthTitleDate(startOfMonth(nextSelectedDate));
     requestMonthScrollTarget();
     resetCalendarPosition(primaryViewMode);
-  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition]);
+  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, weekStartDay]);
 
   const handlePrevious = useCallback(() => {
     setCurrentDate((c) => {
       const baseDate = selectedDateStepViewMode === "pieChart" || selectedDateStepViewMode === "threeDays" ? selectedDate : c;
-      const nextSelectedDate = normalizeViewDate(getPreviousDate(baseDate, selectedDateStepViewMode), selectedDateStepViewMode);
-      const nextCurrentDate = normalizeCurrentDateForSelectedDate(nextSelectedDate, primaryViewMode);
+      const nextSelectedDate = normalizeViewDate(getPreviousDate(baseDate, selectedDateStepViewMode), selectedDateStepViewMode, weekStartDay);
+      const nextCurrentDate = normalizeCurrentDateForSelectedDate(nextSelectedDate, primaryViewMode, weekStartDay);
       setSelectedDate(nextSelectedDate);
       setMonthTitleDate(startOfMonth(nextSelectedDate));
       return nextCurrentDate;
     });
     requestMonthScrollTarget();
     resetCalendarPosition(primaryViewMode);
-  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, selectedDate, selectedDateStepViewMode]);
+  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, selectedDate, selectedDateStepViewMode, weekStartDay]);
 
   const handleNext = useCallback(() => {
     setCurrentDate((c) => {
       const baseDate = selectedDateStepViewMode === "pieChart" || selectedDateStepViewMode === "threeDays" ? selectedDate : c;
-      const nextSelectedDate = normalizeViewDate(getNextDate(baseDate, selectedDateStepViewMode), selectedDateStepViewMode);
-      const nextCurrentDate = normalizeCurrentDateForSelectedDate(nextSelectedDate, primaryViewMode);
+      const nextSelectedDate = normalizeViewDate(getNextDate(baseDate, selectedDateStepViewMode), selectedDateStepViewMode, weekStartDay);
+      const nextCurrentDate = normalizeCurrentDateForSelectedDate(nextSelectedDate, primaryViewMode, weekStartDay);
       setSelectedDate(nextSelectedDate);
       setMonthTitleDate(startOfMonth(nextSelectedDate));
       return nextCurrentDate;
     });
     requestMonthScrollTarget();
     resetCalendarPosition(primaryViewMode);
-  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, selectedDate, selectedDateStepViewMode]);
+  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, selectedDate, selectedDateStepViewMode, weekStartDay]);
 
   const handleSidebarPreviousMonth = useCallback(() => {
     setCurrentDate((c) => {
@@ -234,12 +244,12 @@ export const useCalendarNavigation = ({ allowMultiSelectViewMode = true }: Calen
   }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition]);
 
   const handleSidebarSelectDate = useCallback((date: Date) => {
-    setCurrentDate(normalizeCurrentDateForSelectedDate(date, primaryViewMode));
+    setCurrentDate(normalizeCurrentDateForSelectedDate(date, primaryViewMode, weekStartDay));
     setSelectedDate(date);
     setMonthTitleDate(startOfMonth(date));
     requestMonthScrollTarget();
     resetCalendarPosition(primaryViewMode);
-  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition]);
+  }, [primaryViewMode, requestMonthScrollTarget, resetCalendarPosition, weekStartDay]);
 
   const handleVisibleDateChange = useCallback((date: Date) => setMonthTitleDate(startOfMonth(startOfDay(date))), []);
 
@@ -248,7 +258,7 @@ export const useCalendarNavigation = ({ allowMultiSelectViewMode = true }: Calen
   const handleMonthCellSelectDate = useCallback((date: Date) => {
     if (primaryViewMode === "year") {
       setSelectedViewMode("days");
-      setCurrentDate(normalizeCurrentDateForSelectedDate(date, "days"));
+      setCurrentDate(normalizeCurrentDateForSelectedDate(date, "days", weekStartDay));
       setSelectedDate(date);
       setMonthTitleDate(startOfMonth(date));
       resetCalendarPosition("days");
@@ -257,7 +267,7 @@ export const useCalendarNavigation = ({ allowMultiSelectViewMode = true }: Calen
 
     setSelectedDate(date);
     setCurrentDate(date);
-  }, [primaryViewMode, resetCalendarPosition]);
+  }, [primaryViewMode, resetCalendarPosition, weekStartDay]);
 
   return {
     contentViewportRef,
