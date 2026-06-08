@@ -35,6 +35,7 @@ export const useCalendarEventSync = ({
   selectedViewMode,
   visibleDays,
   monthTitleDate,
+  weekStartDay,
   monthRenderedRange,
   yearSyncRange,
   googleCalendar,
@@ -54,19 +55,21 @@ export const useCalendarEventSync = ({
       selectedViewMode,
       visibleDays,
       monthTitleDate,
+      weekStartDay,
       monthRenderedRange,
       yearSyncRange,
     });
-  }, [monthRenderedRange, monthTitleDate, selectedViewMode, visibleDays, yearSyncRange]);
+  }, [monthRenderedRange, monthTitleDate, selectedViewMode, visibleDays, weekStartDay, yearSyncRange]);
   const prioritySyncRange = useMemo(() => {
     return buildCalendarEventPrioritySyncRange({
       selectedViewMode,
       visibleDays,
       monthTitleDate,
+      weekStartDay,
       monthRenderedRange,
       yearSyncRange,
     });
-  }, [monthRenderedRange, monthTitleDate, selectedViewMode, visibleDays, yearSyncRange]);
+  }, [monthRenderedRange, monthTitleDate, selectedViewMode, visibleDays, weekStartDay, yearSyncRange]);
 
   const syncRangeKey = useMemo(() => toCalendarEventSyncRangeKey(syncRange), [syncRange]);
   const prioritySyncRangeKey = useMemo(() => toCalendarEventSyncRangeKey(prioritySyncRange), [prioritySyncRange]);
