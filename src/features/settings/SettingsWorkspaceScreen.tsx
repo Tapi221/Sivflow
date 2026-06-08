@@ -31,7 +31,7 @@ type SettingToggleProps = {
   onChange: (checked: boolean) => void;
 };
 
-type SettingSegmentProps<T extends string | number> = {
+type SettingChoiceRowProps<T extends string | number> = {
   label: string;
   value: T;
   options: readonly SettingOption<T>[];
@@ -429,15 +429,15 @@ const SettingToggle = ({ label, description, checked, onChange }: SettingToggleP
   );
 };
 
-const SettingSegment = <T extends string | number>({ label, value, options, onChange }: SettingSegmentProps<T>) => {
+const SettingChoiceRow = <T extends string | number>({ label, value, options, onChange }: SettingChoiceRowProps<T>) => {
   return (
     <div className="settings-workspace__row settings-workspace__row--choice">
       <span className="settings-workspace__row-title">{label}</span>
-      <div className="settings-workspace__segmented" role="radiogroup" aria-label={label}>
+      <div className="settings-workspace__choice-options">
         {options.map((option) => {
           const isSelected = option.value === value;
           return (
-            <button key={String(option.value)} type="button" className={`settings-workspace__segment${isSelected ? " is-selected" : ""}`} role="radio" aria-checked={isSelected} onClick={() => onChange(option.value)}>
+            <button key={String(option.value)} type="button" className={`settings-workspace__choice-option${isSelected ? " is-selected" : ""}`} onClick={() => onChange(option.value)}>
               {option.label}
             </button>
           );
@@ -547,8 +547,8 @@ const SettingsWorkspaceScreen = () => {
           ) : null}
           {activeSectionId === "preferences" ? (
             <SettingsSectionBlock title={copy.preferencesTitle} description={copy.preferencesDescription}>
-              <SettingSegment label={copy.languageLabel} value={language} options={languageOptions} onChange={handleLanguageChange} />
-              <SettingSegment label={copy.weekStartLabel} value={weekStartDay} options={weekStartOptions} onChange={(value) => void updateSettings({ weekStartDay: value })} />
+              <SettingChoiceRow label={copy.languageLabel} value={language} options={languageOptions} onChange={handleLanguageChange} />
+              <SettingChoiceRow label={copy.weekStartLabel} value={weekStartDay} options={weekStartOptions} onChange={(value) => void updateSettings({ weekStartDay: value })} />
               <SettingToggle label={copy.notificationsLabel} description={copy.notificationsDescription} checked={settings?.notificationsEnabled ?? false} onChange={(checked) => updateBooleanSetting("notificationsEnabled", checked)} />
             </SettingsSectionBlock>
           ) : null}
@@ -563,8 +563,8 @@ const SettingsWorkspaceScreen = () => {
           ) : null}
           {activeSectionId === "editor" ? (
             <SettingsSectionBlock title={copy.editorTitle} description={copy.editorDescription}>
-              <SettingSegment label={copy.questionDisplayLabel} value={questionDisplayMode} options={questionDisplayOptions} onChange={(value) => void updateSettings({ questionDisplayMode: value })} />
-              <SettingSegment label={copy.markdownTabLabel} value={markdownTabSize} options={markdownTabOptions} onChange={(value) => void updateSettings({ markdownTabSize: value })} />
+              <SettingChoiceRow label={copy.questionDisplayLabel} value={questionDisplayMode} options={questionDisplayOptions} onChange={(value) => void updateSettings({ questionDisplayMode: value })} />
+              <SettingChoiceRow label={copy.markdownTabLabel} value={markdownTabSize} options={markdownTabOptions} onChange={(value) => void updateSettings({ markdownTabSize: value })} />
               <SettingToggle label={copy.previewDefaultLabel} description={copy.previewDefaultDescription} checked={settings?.defaultPreviewEnabled ?? false} onChange={(checked) => updateBooleanSetting("defaultPreviewEnabled", checked)} />
               <SettingToggle label={copy.autoDraftLabel} description={copy.autoDraftDescription} checked={settings?.autoDraftEnabled ?? true} onChange={(checked) => updateBooleanSetting("autoDraftEnabled", checked)} />
               <SettingToggle label={copy.autoSaveLabel} description={copy.autoSaveDescription} checked={settings?.autoSaveEnabled ?? true} onChange={(checked) => updateBooleanSetting("autoSaveEnabled", checked)} />
