@@ -104,7 +104,7 @@ const dedupeGoogleCalendarEvents = (events: GoogleCalendarEvent[]): GoogleCalend
 };
 
 export const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY }: UseScheduleScreenOptions = {}): UseScheduleScreenReturn => {
-  const navigation = useCalendarNavigation({ allowMultiSelectViewMode });
+  const navigation = useCalendarNavigation({ allowMultiSelectViewMode, weekStartDay });
   const [monthRenderedRangeSnapshot, setMonthRenderedRangeSnapshot] = useState<MonthRenderedRangeSnapshot | null>(null);
   const [yearRenderedRange, setYearRenderedRange] = useState<CalendarDateRange | null>(null);
   const [yearSyncRange, setYearSyncRange] = useState<CalendarDateRange | null>(null);
