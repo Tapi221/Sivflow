@@ -1,4 +1,4 @@
-import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
+import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
 type CardSetViewFlippedFaceScope = {
   deviceScope: string;
@@ -42,7 +42,7 @@ const writeLocalValue = (key: string, value: string | null) => {
 
     window.localStorage.setItem(key, value);
   } catch {
-    // Ignore local persistence failures and keep in-memory state working.
+    return;
   }
 };
 
