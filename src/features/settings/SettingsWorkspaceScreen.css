@@ -307,10 +307,13 @@
 }
 
 .settings-workspace__row--stacked:has(> .settings-workspace__segment.w-full) {
+  min-height: 50px;
   align-items: center;
   flex-direction: row;
   justify-content: space-between;
   gap: 24px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 .settings-workspace__row--stacked:has(> .settings-workspace__segment.w-full) > .settings-workspace__row-copy {
@@ -320,10 +323,11 @@
 .settings-workspace__row--stacked > .settings-workspace__segment.w-full {
   width: min(220px, 42%) !important;
   min-width: 180px;
-  min-height: 34px;
-  height: 34px;
+  min-height: 32px;
+  height: 32px;
   flex-direction: row;
   align-items: center;
+  justify-content: flex-start;
   padding: 0 32px 0 10px;
 }
 
@@ -501,6 +505,8 @@
     align-items: stretch;
     flex-direction: column;
     gap: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
   }
 
   .settings-workspace__row--stacked > .settings-workspace__segment.w-full {
