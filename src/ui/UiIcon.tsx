@@ -1,11 +1,11 @@
 import type { SVGProps } from "react";
 
-export type UiIconProps = SVGProps<SVGSVGElement> & {
+type UiIconProps = SVGProps<SVGSVGElement> & {
   size?: number;
   strokeWidth?: number | string;
 };
 
-export const UiIcon = ({
+const UiIcon = ({
   size = 20,
   strokeWidth = 1.5,
   style,
@@ -31,3 +31,6 @@ export const UiIcon = ({
     />
   );
 };
+
+export { UiIcon };
+export type { UiIconProps };
