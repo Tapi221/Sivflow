@@ -1,10 +1,38 @@
-import { CALENDAR_ARROW_DIFF_MAP, CALENDAR_WEEK_DAYS_MONDAY, CALENDAR_WEEK_DAYS_SUNDAY } from "@constants/shared/calendar";
 import { format } from "date-fns";
 import type { CalendarStudyLogLike, CalendarTimestampLike, CalendarWeekStartDay } from "./calendar.types";
 import { normalizeDate } from "@/shared/codec/date";
 import type { Translations } from "@shared/i18n/translations";
 
-type CalendarArrowKey = keyof typeof CALENDAR_ARROW_DIFF_MAP;
+type CalendarArrowKey = "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown";
+
+type CalendarWeekDayLabel = "SUN" | "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT";
+
+const CALENDAR_WEEK_DAYS_SUNDAY: CalendarWeekDayLabel[] = [
+  "SUN",
+  "MON",
+  "TUE",
+  "WED",
+  "THU",
+  "FRI",
+  "SAT",
+];
+
+const CALENDAR_WEEK_DAYS_MONDAY: CalendarWeekDayLabel[] = [
+  "MON",
+  "TUE",
+  "WED",
+  "THU",
+  "FRI",
+  "SAT",
+  "SUN",
+];
+
+const CALENDAR_ARROW_DIFF_MAP: Record<CalendarArrowKey, number> = {
+  ArrowLeft: -1,
+  ArrowRight: 1,
+  ArrowUp: -7,
+  ArrowDown: 7,
+};
 
 const DEFAULT_TODAY_DESCRIPTION_LABELS: Pick<Translations, "todayDescriptionEmpty" | "todayDescriptionDue"> = {
   todayDescriptionEmpty: "今日の復習はありません",
