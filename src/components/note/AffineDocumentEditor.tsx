@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef } from "react";
-import "@blocksuite/presets/themes/affine.css";
 import type { Note, NoteBlockContent } from "@/types";
 
 type AffineDocumentEditorProps = {
