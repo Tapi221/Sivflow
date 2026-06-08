@@ -1,32 +1,34 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const patches = [
   {
     label: "@blocksuite/affine-components context-menu checkbox icon import",
-    targetPath: join(process.cwd(), "node_modules", "@blocksuite", "affine-components", "dist", "context-menu", "button.js"),
+    targetPath: join(repoRoot, "node_modules", "@blocksuite", "affine-components", "dist", "context-menu", "button.js"),
     replacements: [
       {
-        broken: "import { CheckBoxCkeckSolidIcon, CheckBoxUnIcon, DoneIcon, } from '@blocksuite/icons/lit';",
-        patched: "import { CheckBoxUnIcon as CheckBoxCkeckSolidIcon, CheckBoxUnIcon, DoneIcon, } from '@blocksuite/icons/lit';",
+        broken: /import\s*\{\s*CheckBoxCkeckSolidIcon,\s*CheckBoxUnIcon,\s*DoneIcon,?\s*\}\s*from\s*['"]@blocksuite\/icons\/lit['"];?/g,
+        patched: "import { CheckBoxUnIcon as CheckBoxCkeckSolidIcon, CheckBoxUnIcon, DoneIcon } from '@blocksuite/icons/lit';",
       },
     ],
   },
   {
     label: "@blocksuite/data-view boolean group checkbox icon import",
-    targetPath: join(process.cwd(), "node_modules", "@blocksuite", "data-view", "dist", "core", "group-by", "renderer", "boolean-group.js"),
+    targetPath: join(repoRoot, "node_modules", "@blocksuite", "data-view", "dist", "core", "group-by", "renderer", "boolean-group.js"),
     replacements: [
       {
-        broken: "import { CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from'@blocksuite/icons/lit';",
-        patched: "import { CheckBoxUnIcon as CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from'@blocksuite/icons/lit';",
-      },
-      {
-        broken: "import { CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';",
+        broken: /import\s*\{\s*CheckBoxCkeckSolidIcon,\s*CheckBoxUnIcon\s*\}\s*from\s*['"]@blocksuite\/icons\/lit['"];?/g,
         patched: "import { CheckBoxUnIcon as CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';",
       },
     ],
   },
 ];
+
+const applyReplacements = (source, replacements) => {
+  return replacements.reduce((nextSource, replacement) => nextSource.replace(replacement.broken, replacement.patched), source);
+};
 
 let patchedCount = 0;
 
@@ -35,12 +37,8 @@ for (const patch of patches) {
     continue;
   }
 
-  let source = readFileSync(patch.targetPath, "utf8");
-  let nextSource = source;
-
-  for (const replacement of patch.replacements) {
-    nextSource = nextSource.replace(replacement.broken, replacement.patched);
-  }
+  const source = readFileSync(patch.targetPath, "utf8");
+  const nextSource = applyReplacements(source, patch.replacements);
 
   if (nextSource === source) {
     continue;
