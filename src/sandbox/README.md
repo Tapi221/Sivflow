@@ -1,28 +1,28 @@
 # Sandbox routes
 
-開発用の sandbox ページ一覧です。パスを忘れたときはこのファイルを見る。
+Development sandbox route list.
 
 ## Routes
 
-| Route | Source | 用途 |
+| Route | Source | Purpose |
 | --- | --- | --- |
-| `/sandbox/2` | `src/sandbox/2` | selection capture の範囲選択・PNGコピー確認 |
-| `/sandbox/blocknote` | `src/sandbox/blocknote` | BlockNote の表示・操作確認 |
-| `/sandbox/logseq` | `src/sandbox/logseq` | Logseq の設計参考メモ |
-| `/sandbox/anki-fsrs` | `src/sandbox/anki-fsrs` | Anki / FSRS4Anki の復習設計参考 |
-| `/sandbox/excalidraw` | `src/sandbox/excalidraw` | Excalidraw の手書き・図解 UI 参考 |
-| `/sandbox/editor-engines` | `src/sandbox/editor-engines` | Tiptap / Plate / Milkdown のエディタ設計比較 |
-| `/sandbox/license-notes` | `src/sandbox/license-notes` | Outline / tldraw などライセンス注意付き参考 |
-| `/sandbox/calendar-time-grid` | `src/sandbox/calendar-time-grid` | time-grid event chip の重なり表示確認 |
+| `/sandbox/2` | `src/sandbox/2` | Selection capture sandbox |
+| `/sandbox/affine` | `src/sandbox/affine` | AFFiNE / BlockSuite editor sandbox |
+| `/sandbox/logseq` | `src/sandbox/logseq` | Logseq reference notes |
+| `/sandbox/anki-fsrs` | `src/sandbox/anki-fsrs` | Anki / FSRS4Anki review design notes |
+| `/sandbox/excalidraw` | `src/sandbox/excalidraw` | Excalidraw handwriting and diagram UI reference |
+| `/sandbox/editor-engines` | `src/sandbox/editor-engines` | Tiptap / Plate / Milkdown editor comparison |
+| `/sandbox/license-notes` | `src/sandbox/license-notes` | License notes for reference OSS |
+| `/sandbox/calendar-time-grid` | `src/sandbox/calendar-time-grid` | Time-grid event chip overlap sandbox |
 
 ## Shared components
 
-| Source | 用途 |
+| Source | Purpose |
 | --- | --- |
-| `src/sandbox/reference/ReferenceSandboxPage.tsx` | 参考OSS sandboxページの共通レイアウト |
+| `src/sandbox/reference/ReferenceSandboxPage.tsx` | Shared reference sandbox layout |
 
 ## Notes
 
-- sandbox route は開発モード用です。
-- route 定義は `packages/web-renderer/src/app/routing/DevRoutes.tsx` にあります。
-- 通常 route から schedule にリダイレクトされる場合は、`packages/web-renderer/src/app/routing/AppRoutes.tsx` の `REDIRECT_TO_SCHEDULE_ROUTES` を確認する。
+- Sandbox routes are for development mode.
+- Route definitions live in `packages/web-renderer/src/app/routing/DevRoutes.tsx`.
+- If normal routes redirect to schedule, check `REDIRECT_TO_SCHEDULE_ROUTES` in `packages/web-renderer/src/app/routing/AppRoutes.tsx`.
