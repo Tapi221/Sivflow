@@ -120,7 +120,9 @@ export const useUserSettings = () => {
   );
 
   useEffect(() => {
-    setLocale(toLocale(settings?.language));
+    queueMicrotask(() => {
+      setLocale(toLocale(settings?.language));
+    });
   }, [settings?.language, setLocale]);
 
   useEffect(() => {
