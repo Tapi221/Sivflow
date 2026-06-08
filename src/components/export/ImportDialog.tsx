@@ -1,15 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
+import { toAssetRecordFromSnapshotAsset } from "@/application/snapshot/snapshotAssetManifest";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { AlertTriangle, ArrowRight, CheckCircle, Loader2 } from "@/ui/icons";
-import { Upload } from "@/ui/icons";
-import { FileJson } from "@/ui/icons";
-import { toAssetRecordFromSnapshotAsset } from "@/application/snapshot/snapshotAssetManifest";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb, getLocalDBRuntimeStatus, subscribeLocalDBRuntimeStatus } from "@/services/localDB";
 import { snapshotService } from "@/services/SnapshotService";
+import { AlertTriangle, ArrowRight, CheckCircle, FileJson, Loader2, Upload } from "@/ui/icons";
 import type { Card, Folder } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 import type { AppSnapshot, SnapshotComparison } from "@/types/domain/snapshot";
@@ -345,21 +343,14 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
         )}
 
         {step === "processing" && (
-          <div className="py-8 text-center">
-            <Loader2 className="w-12 h-12 mx-auto mb-4 text-primary-600 animate-spin" />
-            <p className="text-sm text-gray-600">インポート中...</p>
+          <div className="py-8 text-center" role="status" aria-label="インポート中">
+            <Loader2 className="w-12 h-12 mx-auto text-primary-600 animate-spin" aria-hidden="true" />
           </div>
         )}
 
         {step === "complete" && (
-          <div className="py-8 text-center">
-            <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />
-            <p className="text-lg font-medium text-gray-900">
-              インポート完了！
-            </p>
-            <p className="text-sm text-gray-500 mt-1">
-              ページをリロードしています...
-            </p>
+          <div className="py-8 text-center" role="status" aria-label="ページをリロード中">
+            <Loader2 className="w-12 h-12 mx-auto text-primary-600 animate-spin" aria-hidden="true" />
           </div>
         )}
 
