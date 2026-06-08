@@ -1,3 +1,6 @@
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import PdfWorker from "pdfjs-dist/legacy/build/pdf.worker.mjs?worker";
+
 type PdfDocumentDataSource = {
   type: "data";
   data: Uint8Array;
@@ -16,6 +19,10 @@ type PdfDocumentLoadSource = {
   url: string;
 };
 
+type PdfWorkerConstructor = new (options?: WorkerOptions) => Worker;
+
+let pdfWorkerPort: Worker | null = null;
+
 const createPdfDocumentDataSource = (data: Uint8Array): PdfDocumentSource => ({
   type: "data",
   data,
@@ -25,6 +32,14 @@ const createPdfDocumentUrlSource = (url: string): PdfDocumentSource => ({
   type: "url",
   url,
 });
+
+const ensurePdfWorkerPort = (): void => {
+  if (typeof Worker === "undefined") return;
+  if (pdfjsLib.GlobalWorkerOptions.workerPort) return;
+
+  pdfWorkerPort ??= new (PdfWorker as PdfWorkerConstructor)({ type: "module" });
+  pdfjsLib.GlobalWorkerOptions.workerPort = pdfWorkerPort;
+};
 
 const readBlobArrayBuffer = (blob: Blob): Promise<ArrayBuffer> => {
   if (typeof blob.arrayBuffer === "function") return blob.arrayBuffer();
@@ -49,6 +64,7 @@ const createPdfDocumentDataSourceFromBlob = async (blob: Blob): Promise<PdfDocum
 };
 
 const toPdfDocumentLoadSource = (source: PdfDocumentSource): PdfDocumentLoadSource => {
+  ensurePdfWorkerPort();
   if (source.type === "data") return { data: source.data.slice() };
   return { url: source.url };
 };
