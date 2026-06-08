@@ -13,7 +13,6 @@ const importPatterns = [
 
 const aliasRoots = [
   { dir: path.join(projectRoot, "src"), prefix: "@" },
-  { dir: path.join(projectRoot, "constants"), prefix: "@constants" },
 ];
 
 const files = fg.sync(["**/*.{ts,tsx,js,jsx,mjs,cjs}"], {
@@ -80,17 +79,22 @@ const toSameDirRelative = (importerDir, targetFilePath, originalSpec) => {
   const originalHadSourceExtension = hasKnownSourceExtension(originalSpec);
   const relativeFromImporter = normalizePath(path.relative(importerDir, targetFilePath));
   const modulePath = originalHadSourceExtension ? relativeFromImporter : stripTrailingIndex(stripKnownSourceExtension(relativeFromImporter));
+
   return modulePath.startsWith(".") ? modulePath : `./${modulePath}`;
 };
 
-const toAliasPath = (targetFilePath, aliasRoot, originalSpec) => {
+const toAliasSpec = (targetFilePath, aliasRoot, originalSpec) => {
   const originalHadSourceExtension = hasKnownSourceExtension(originalSpec);
-  const relativeFromRoot = normalizePath(path.relative(aliasRoot.dir, targetFilePath));
-  const modulePath = originalHadSourceExtension ? relativeFromRoot : stripTrailingIndex(stripKnownSourceExtension(relativeFromRoot));
+  const relativeToRoot = normalizePath(path.relative(aliasRoot.dir, targetFilePath));
+  const modulePath = originalHadSourceExtension ? relativeToRoot : stripTrailingIndex(stripKnownSourceExtension(relativeToRoot));
+
   return `${aliasRoot.prefix}/${modulePath}`;
 };
 
-const normalizeSpecifier = (importerDir, spec) => {
+const convertSpecifier = (filePath, spec) => {
+  if (spec.startsWith("./") && !spec.slice(2).includes("/")) return spec;
+
+  const importerDir = path.dirname(filePath);
   const targetFilePath = resolveExistingModulePath(importerDir, spec);
   if (!targetFilePath) return spec;
 
@@ -100,27 +104,22 @@ const normalizeSpecifier = (importerDir, spec) => {
   const aliasRoot = findAliasRoot(targetFilePath);
   if (!aliasRoot) return spec;
 
-  return toAliasPath(targetFilePath, aliasRoot, spec);
+  return toAliasSpec(targetFilePath, aliasRoot, spec);
 };
 
-let changedFileCount = 0;
+let changedCount = 0;
 
-for (const filePath of files) {
-  const importerDir = path.dirname(filePath);
-  const originalContent = fs.readFileSync(filePath, "utf8");
-  let nextContent = originalContent;
+for (const file of files) {
+  const original = fs.readFileSync(file, "utf8");
+  const next = importPatterns.reduce((source, pattern) => source.replace(pattern, (match, prefix, spec, suffix) => {
+    const converted = convertSpecifier(file, spec);
+    return converted === spec ? match : `${prefix}${converted}${suffix}`;
+  }), original);
 
-  for (const pattern of importPatterns) {
-    nextContent = nextContent.replace(pattern, (match, prefix, spec, suffix) => {
-      const nextSpec = normalizeSpecifier(importerDir, spec);
-      return nextSpec === spec ? match : `${prefix}${nextSpec}${suffix}`;
-    });
-  }
-
-  if (nextContent !== originalContent) {
-    fs.writeFileSync(filePath, nextContent);
-    changedFileCount += 1;
+  if (next !== original) {
+    fs.writeFileSync(file, next);
+    changedCount += 1;
   }
 }
 
-console.log(`Done: normalized import paths in ${changedFileCount} file(s). Same-directory imports use ./, cross-directory imports use aliases.`);
+console.log(`Updated ${changedCount} import path(s).`);
