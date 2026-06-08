@@ -4,7 +4,7 @@ import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { getEntityTime, getFolderId, getParentFolderId, isSameFolder, normalizeFolderId, ROOT_FOLDER_ID } from "@/components/folder/explorer/model/utils";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { compareOrderableEntities } from "@/lib/orderableEntity";
-import type { Card, CardSet, DocumentItem, ExplorerItem } from "@/types";
+import type { Card, CardSet, DocumentItem, ExplorerItem, Note } from "@/types";
 
 type LegacyEntityFields = { isDeleted?: boolean; is_deleted?: boolean; folder_id?: string | null; card_set_id?: string | null; orderIndex?: number; order_index?: number };
 
@@ -15,6 +15,7 @@ interface Params {
   treeCards: Card[];
   cardSets?: CardSet[];
   documents: DocumentItem[];
+  notes?: Note[];
   isFiltering: boolean;
 }
 
@@ -32,6 +33,8 @@ const withLegacy = <T extends object>(v: T): T & LegacyEntityFields => v as T & 
 const getCardSetFolderId = (cardSet: CardSet): string | null | undefined => cardSet.folderId ?? withLegacy(cardSet).folder_id;
 
 const getDocumentFolderId = (document: DocumentItem): string | null | undefined => document.folderId ?? withLegacy(document).folder_id;
+
+const getNoteFolderId = (note: Note): string | null | undefined => note.folderId ?? withLegacy(note).folder_id;
 
 const getOrderIndex = (entity: object, fallback = Number.MAX_SAFE_INTEGER): number => withLegacy(entity).orderIndex ?? withLegacy(entity).order_index ?? fallback;
 
@@ -61,7 +64,7 @@ const isOrphanDocument = (document: DocumentItem, visibleFolderIdSet: Set<string
   return !visibleFolderIdSet.has(normalizedFolderId);
 };
 
-export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], documents, isFiltering }: Params) => {
+export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], documents, notes = [], isFiltering }: Params) => {
   const { purgeDocument } = useDocumentCommands();
   const orphanCleanupInFlightRef = useRef<Set<string>>(new Set());
 
@@ -176,6 +179,12 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
       pushItem(resolveTreeFolderId(getDocumentFolderId(doc)), { type: "document", data: doc });
     }
 
+    for (const note of notes) {
+      if (isSoftDeleted(withLegacy(note))) continue;
+      if (!hasValidFolderBinding(getNoteFolderId(note))) continue;
+      pushItem(resolveTreeFolderId(getNoteFolderId(note)), { type: "note", data: note });
+    }
+
     for (const list of map.values()) {
       list.sort((a, b) => {
         const orderA = getOrderIndex(a.data);
@@ -187,7 +196,7 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
       });
     }
     return map;
-  }, [treeCards, documents, resolveTreeFolderId, hasValidFolderBinding, cardSetById]);
+  }, [treeCards, documents, notes, resolveTreeFolderId, hasValidFolderBinding, cardSetById]);
 
   const getFolderItems = useCallback((folderId: string | null): ExplorerItem[] => itemsByFolderId.get(normalizeFolderId(folderId)) ?? [], [itemsByFolderId]);
 
@@ -250,8 +259,15 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
       const order = getOrderIndex(doc, -1);
       if (order > maxOrder) maxOrder = order;
     }
+    for (const note of notes) {
+      if (isSoftDeleted(withLegacy(note))) continue;
+      const noteFolderId = resolveTreeFolderId(getNoteFolderId(note));
+      if (!isSameFolder(noteFolderId, targetFolderId)) continue;
+      const order = getOrderIndex(note, -1);
+      if (order > maxOrder) maxOrder = order;
+    }
     return maxOrder + 1;
-  }, [treeCards, documents, resolveTreeFolderId, cardSetById]);
+  }, [treeCards, documents, notes, resolveTreeFolderId, cardSetById]);
 
   const cardSetsByFolderId = useMemo(() => {
     const map = new Map<string, CardSet[]>();
@@ -278,13 +294,13 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
       if (visiting.has(folderId)) return 0;
       visiting.add(folderId);
 
-      const documentCount = getFolderItems(folderId).filter((item) => item.type === "document").length;
+      const itemCount = getFolderItems(folderId).filter((item) => item.type === "document" || item.type === "note").length;
       const cardSetCount = getCardSets(folderId).length;
       const childFolderContentCount = getChildFolders(folderId).reduce((total, childFolder) => {
         const childFolderId = getFolderId(childFolder);
         return childFolderId ? total + countFolderContent(childFolderId) : total;
       }, 0);
-      const total = documentCount + cardSetCount + childFolderContentCount;
+      const total = itemCount + cardSetCount + childFolderContentCount;
 
       counts.set(folderId, total);
       visiting.delete(folderId);
