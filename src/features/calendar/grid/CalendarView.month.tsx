@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
-import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
+import { useCalendarWeekStartSetting } from "@/features/calendar/useCalendarWeekStartSetting";
 import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
 import { useMonthInfiniteScroll } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -45,7 +45,7 @@ const createMonthViewStyle = (monthRowHeight: number): MonthViewStyle => ({
 const CalendarMonthView = ({
   currentDate,
   selectedDate,
-  weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY,
+  weekStartDay,
   scrollTargetToken = 0,
   visibleEvents = [],
   showEventTimeLabel = true,
@@ -55,6 +55,7 @@ const CalendarMonthView = ({
   onRenderedRangeChange,
   onMoveCalendarEvent,
 }: CalendarMonthViewProps) => {
+  const effectiveWeekStartDay = useCalendarWeekStartSetting(weekStartDay);
   const todayRef = useRef(new Date());
   const monthRowHeight = getMonthRowHeight(monthVisibleEventCount);
   const monthViewStyle = useMemo(() => createMonthViewStyle(monthRowHeight), [monthRowHeight]);
@@ -63,7 +64,7 @@ const CalendarMonthView = ({
     currentDate,
     scrollTargetToken,
     monthRowHeight,
-    weekStartDay,
+    weekStartDay: effectiveWeekStartDay,
     onVisibleMonthChange,
   });
 
@@ -77,7 +78,7 @@ const CalendarMonthView = ({
         <GridCalendarMonthDesktop
           today={todayRef.current}
           selectedDate={selectedDate}
-          weekStartDay={weekStartDay}
+          weekStartDay={effectiveWeekStartDay}
           visibleEvents={visibleEvents}
           monthWeeks={scroll.monthWeeks}
           monthRowHeight={monthRowHeight}
