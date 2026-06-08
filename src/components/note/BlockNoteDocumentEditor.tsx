@@ -37,9 +37,8 @@ const getBlockNoteLanguage = (settingsLanguage: UserSettings["language"] | undef
 };
 
 const getBlockNoteDictionary = (language: BlockNoteLanguage): BlockNoteDictionary => {
-  if (language === "ja") return locales.ja;
-  if (language === "zh" && "zh" in locales) return locales.zh as BlockNoteDictionary;
-  return locales.en;
+  const blockNoteLocales = locales as Record<string, BlockNoteDictionary>;
+  return blockNoteLocales[language] ?? locales.en;
 };
 
 const BlockNoteDocumentEditor = ({ note, onChange }: BlockNoteDocumentEditorProps) => {
