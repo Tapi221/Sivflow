@@ -6,9 +6,9 @@
     "paths": {
       "@/*": ["../../src/*"],
       "@core/*": ["../../packages/core/src/*"],
+      "@platform/*": ["../../packages/platform/src/*"],
       "@mobile/*": ["src/*"],
       "@mobile-renderer/*": ["../../packages/mobile-renderer/src/*"],
-      "@constants/*": ["../../constants/*"],
       "@shared/*": ["../../shared/*"]
     }
   },
@@ -16,6 +16,7 @@
     "index.ts",
     "src",
     "../../packages/core/src",
+    "../../packages/platform/src",
     "../../packages/mobile-renderer/src",
     "../../src/pane.mobilenative",
     "../../src/integration/googlecalendar-integration/gcalSync.types.ts",
