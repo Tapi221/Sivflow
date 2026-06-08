@@ -1,6 +1,31 @@
-import { TAB_PRESENCE_STORAGE_KEYS, TAB_PRESENCE_TIMINGS } from "@constants/web/app";
-
 type PresenceMap = Record<string, number>;
+
+type TabPresenceStorageKeys = {
+  presenceMap: string;
+  started: string;
+  tabId: string;
+};
+
+type TabPresenceTimings = {
+  heartbeatMs: number;
+  staleMs: number;
+};
+
+const TAB_PRESENCE_STORAGE_KEYS: TabPresenceStorageKeys = {
+  presenceMap: "sivflow:tab-presence:map",
+  started: "__sivflowTabPresenceStarted",
+  tabId: "sivflow:tab-presence:tab-id",
+};
+
+const TAB_PRESENCE_TIMINGS: TabPresenceTimings = {
+  heartbeatMs: 5000,
+  staleMs: 15000,
+};
+
+const createTabId = (): string => {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  return String(Math.random()).slice(2);
+};
 
 const readMap = () => {
   try {
@@ -13,10 +38,7 @@ const readMap = () => {
 
 const writeMap = (map: PresenceMap) => {
   try {
-    localStorage.setItem(
-      TAB_PRESENCE_STORAGE_KEYS.presenceMap,
-      JSON.stringify(map),
-    );
+    localStorage.setItem(TAB_PRESENCE_STORAGE_KEYS.presenceMap, JSON.stringify(map));
   } catch {
     // ignore
   }
@@ -40,9 +62,7 @@ export const startTabPresence = () => {
   if (startedHost[TAB_PRESENCE_STORAGE_KEYS.started]) return;
   startedHost[TAB_PRESENCE_STORAGE_KEYS.started] = true;
 
-  const id =
-    sessionStorage.getItem(TAB_PRESENCE_STORAGE_KEYS.tabId) ??
-    (crypto?.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
+  const id = sessionStorage.getItem(TAB_PRESENCE_STORAGE_KEYS.tabId) ?? createTabId();
 
   sessionStorage.setItem(TAB_PRESENCE_STORAGE_KEYS.tabId, id);
 
