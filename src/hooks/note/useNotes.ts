@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getLocalDb } from "@/services/localdb/LocalDB";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+import { getLocalDb } from "@/services/localdb/LocalDB";
 import type { Note, NoteBlockContent } from "@/types";
 
 type UseNotesOptions = {
@@ -13,7 +13,7 @@ type CreateNoteOptions = {
   orderIndex?: number;
 };
 
-const DEFAULT_NOTE_CONTENT: NoteBlockContent = [];
+const DEFAULT_NOTE_CONTENT: NoteBlockContent = [{ type: "affine-document", text: "", updatedAt: "" }];
 
 const createId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -23,6 +23,8 @@ const createId = (): string => {
 const isDeletedNote = (note: Note & { isDeleted?: boolean; is_deleted?: boolean }): boolean => Boolean(note.isDeleted ?? note.is_deleted);
 
 const getNoteOrderIndex = (note: Note & { order_index?: number }): number => note.orderIndex ?? note.order_index ?? 0;
+
+const createDefaultNoteContent = (): NoteBlockContent => [{ type: "affine-document", text: "", updatedAt: new Date().toISOString() }];
 
 const sortNotes = (notes: Note[]): Note[] => [...notes].sort((left, right) => {
   const orderDiff = getNoteOrderIndex(left) - getNoteOrderIndex(right);
@@ -56,10 +58,10 @@ const useNotes = (folderId?: string | null, options?: UseNotesOptions) => {
       folderId: targetFolderId,
       orderIndex: opts?.orderIndex ?? 0,
       title,
-      content: DEFAULT_NOTE_CONTENT,
+      content: createDefaultNoteContent(),
       contentText: "",
-      contentVersion: 1,
-      editor: "blocknote",
+      contentVersion: 2,
+      editor: "affine",
       isDeleted: false,
       createdAt: now,
       updatedAt: now,
