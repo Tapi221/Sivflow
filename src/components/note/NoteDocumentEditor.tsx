@@ -45,7 +45,7 @@ const NoteDocumentEditor = ({ note, onChange }: NoteDocumentEditorProps) => {
 
   const handleInput = useCallback(() => {
     const contentText = editorRef.current?.textContent ?? "";
-    latestChangeRef.current = { content: toNoteContent(contentText), contentText, contentVersion: 2, editor: "sivflow-text" };
+    latestChangeRef.current = { content: toNoteContent(contentText), contentText, contentVersion: 2, editor: "affine" };
     setSaveRevision((revision) => revision + 1);
   }, []);
 
