@@ -18,7 +18,7 @@ import { createCalendarEventsScopeKey, useTransientEmptyCalendarEvents } from "@
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
-import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
+import { CalendarSidebarController } from "@/pane.desktop/leftpane/schedule/CalendarSidebarController";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 import { MobileCalendarEventComposer } from "./MobileCalendarEventComposer";
 import { MobileSidebarDrawer } from "./MobileSidebarDrawer";
@@ -143,8 +143,8 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
   const monthLabelFormat = useMonthLabelFormat();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isEventComposerOpen, setIsEventComposerOpen] = useState(false);
-  const { selectedViewMode, primaryViewMode, currentDate, selectedDate, titleDate, monthTitleDate, monthScrollTargetToken, visibleDays, virtualRail, yearRenderedRange, googleCalendarEvents, googleAccounts, isAnyCalendarConnecting, calendarGridStyle, headerScrollRef, allDayScrollRef, scrollContainerRef, contentViewportRef, handleCalendarScroll, handleSelectViewMode, handleSidebarSelectDate, handleVisibleDateChange, handleVisibleMonthChange, handlePrevious, handleNext, handleToday, handleMonthCellSelectDate, handleMonthRenderedRangeChange, handleYearRenderedRangeChange, handleYearSyncRangeChange, addGoogleCalendar, reconnectGoogleAccount, toggleGoogleCalendar, createGoogleCalendarEvent, updateGoogleCalendarEvent } = pane;
-  const { appProjects, projectCalendarLinks, googleCalendarColorOverrides, googleAccountsWithColorOverrides, handleAddAppProject, handleToggleAppProject, handleLinkGoogleCalendarAsProject, handleLinkProjectToGoogleCalendar, handleCreateProjectGoogleCalendar, handleUnlinkProjectCalendar, handleChangeGoogleCalendarColor } = useProjectCalendarActions({ googleAccounts, reconnectGoogleAccount, toggleGoogleCalendar });
+  const { selectedViewMode, primaryViewMode, currentDate, selectedDate, titleDate, monthTitleDate, monthScrollTargetToken, visibleDays, virtualRail, yearRenderedRange, googleCalendarEvents, googleAccounts, calendarGridStyle, headerScrollRef, allDayScrollRef, scrollContainerRef, contentViewportRef, handleCalendarScroll, handleSelectViewMode, handleSidebarSelectDate, handleVisibleDateChange, handleVisibleMonthChange, handlePrevious, handleNext, handleToday, handleMonthCellSelectDate, handleMonthRenderedRangeChange, handleYearRenderedRangeChange, handleYearSyncRangeChange, addGoogleCalendar, reconnectGoogleAccount, toggleGoogleCalendar, createGoogleCalendarEvent, updateGoogleCalendarEvent } = pane;
+  const { appProjects, projectCalendarLinks, googleCalendarColorOverrides, googleAccountsWithColorOverrides } = useProjectCalendarActions({ googleAccounts, reconnectGoogleAccount, toggleGoogleCalendar });
   const { calendarEventMoveOverrides, handleMoveCalendarEvent } = useCalendarEventMoveController({ updateGoogleCalendarEvent });
   const viewOptions = useMemo(() => [{ value: "year", label: t.viewYear }, { value: "month", label: t.viewMonth }, { value: "week", label: t.viewWeek }, { value: "threeDays", label: t.viewThreeDays }, { value: "days", label: t.viewDay }, { value: "list", label: t.viewList }, { value: "timetable", label: t.viewTimetable }, { value: "pieChart", label: t.viewPieChart }] as const, [t.viewDay, t.viewList, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewTimetable, t.viewWeek, t.viewYear]);
   const googleAccountsWithColorOverridesForSidebar = googleAccountsWithColorOverrides;
@@ -212,7 +212,7 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
   const renderMobileSidebar = () => (
     <MobileSidebarDrawer id={MOBILE_SIDEBAR_ID} isOpen={isSidebarOpen} onClose={handleCloseSidebar}>
       <div className={MOBILE_SIDEBAR_DRAWER_CONTENT_CLASS}>
-        <CalendarSidebar appProjects={appProjects} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} googleAccounts={googleAccountsWithColorOverridesForSidebar} isAnyCalendarConnecting={isAnyCalendarConnecting} onAddCalendar={addGoogleCalendar} onAddProject={handleAddAppProject} onToggleProject={handleToggleAppProject} onLinkGoogleCalendarAsProject={handleLinkGoogleCalendarAsProject} onLinkProjectToGoogleCalendar={handleLinkProjectToGoogleCalendar} onCreateProjectGoogleCalendar={handleCreateProjectGoogleCalendar} onUnlinkProjectCalendar={handleUnlinkProjectCalendar} onChangeGoogleCalendarColor={handleChangeGoogleCalendarColor} onReconnectAccount={(accountId) => { void reconnectGoogleAccount(accountId); }} onToggleCalendar={toggleGoogleCalendar} />
+        <CalendarSidebarController onToggleLeftPanel={handleCloseSidebar} />
       </div>
     </MobileSidebarDrawer>
   );
