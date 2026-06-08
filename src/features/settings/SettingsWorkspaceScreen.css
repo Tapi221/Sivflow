@@ -259,7 +259,7 @@
   transform: translateX(16px);
 }
 
-.settings-workspace__segmented {
+.settings-workspace__choice-options {
   display: flex;
   max-width: 58%;
   flex-shrink: 0;
@@ -268,7 +268,7 @@
   gap: 6px;
 }
 
-.settings-workspace__segment {
+.settings-workspace__choice-option {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
@@ -288,7 +288,7 @@
   transition: background-color 90ms ease-out, color 90ms ease-out;
 }
 
-.settings-workspace__segment.is-selected {
+.settings-workspace__choice-option.is-selected {
   background: #1c1c1e;
   color: #ffffff;
 }
@@ -427,7 +427,7 @@
     padding-left: 16px;
   }
 
-  .settings-workspace__segmented {
+  .settings-workspace__choice-options {
     max-width: 58%;
   }
 }
