@@ -14,6 +14,7 @@ import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
+import { CalendarSidebarController } from "@/pane.desktop/leftpane/schedule/CalendarSidebarController";
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceExplorerTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
@@ -235,7 +236,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
           </button>
           <MobileSidebarDrawer id={MOBILE_LIBRARY_SIDEBAR_ID} isOpen={isMobileSidebarOpen} onClose={handleCloseMobileSidebar}>
             <div className={MOBILE_LIBRARY_DRAWER_CONTENT_CLASS_NAME}>
-              <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={handleCloseMobileSidebar} />
+              <CalendarSidebarController onOpenSettings={onOpenSettings} onToggleLeftPanel={handleCloseMobileSidebar} />
             </div>
           </MobileSidebarDrawer>
         </>
