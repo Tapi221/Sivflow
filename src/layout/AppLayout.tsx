@@ -1,5 +1,5 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
@@ -32,6 +32,7 @@ const LEFT_PANEL_COLLAPSED_STORAGE_VALUE = "collapsed";
 const MOBILE_CALENDAR_SIDEBAR_SELECTOR = "#mobile-calendar-sidebar";
 const MOBILE_CALENDAR_SIDEBAR_TOGGLE_SELECTOR = ".app-layered-directory__workspace-toggle";
 const MOBILE_CALENDAR_SIDEBAR_CLOSE_BUTTON_SELECTOR = 'button[aria-label="サイドバーを閉じる"]';
+const MOBILE_SETTINGS_ROUTE_MEDIA_QUERY = "(max-width: 767px)";
 const SIDEBAR_LONG_PRESS_CONTEXT_MENU_TARGET_SELECTOR = ".app-layered-directory [role='treeitem']";
 const SIDEBAR_LONG_PRESS_DELAY_MS = 520;
 const SIDEBAR_LONG_PRESS_MOVE_TOLERANCE_PX = 10;
@@ -44,6 +45,11 @@ const readStoredLeftPanelCollapsed = (): boolean => {
   } catch {
     return false;
   }
+};
+
+const readIsMobileSettingsRouteViewport = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia(MOBILE_SETTINGS_ROUTE_MEDIA_QUERY).matches;
 };
 
 const persistLeftPanelCollapsed = (isCollapsed: boolean) => {
@@ -79,8 +85,30 @@ const isSidebarLongPressPointerEvent = (event: PointerEvent): boolean => (event.
 
 const getSidebarLongPressPointerDistance = (event: PointerEvent, state: SidebarLongPressState): number => Math.hypot(event.clientX - state.clientX, event.clientY - state.clientY);
 
+const useIsMobileSettingsRouteViewport = (): boolean => {
+  const [isMobileSettingsRouteViewport, setIsMobileSettingsRouteViewport] = useState(readIsMobileSettingsRouteViewport);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQueryList = window.matchMedia(MOBILE_SETTINGS_ROUTE_MEDIA_QUERY);
+    const handleChange = () => setIsMobileSettingsRouteViewport(mediaQueryList.matches);
+
+    handleChange();
+    mediaQueryList.addEventListener("change", handleChange);
+
+    return () => {
+      mediaQueryList.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  return isMobileSettingsRouteViewport;
+};
+
 const AppLayout = () => {
   const { pathname, isFoldersRoute, isScheduleRoute, isScrollLocked } = useLayoutRouteStateDesktop();
+  const navigate = useNavigate();
+  const isMobileSettingsRouteViewport = useIsMobileSettingsRouteViewport();
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(readStoredLeftPanelCollapsed);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
@@ -93,8 +121,14 @@ const AppLayout = () => {
   const handleOpenSearch = useCallback(() => openSearch(), [openSearch]);
 
   const handleOpenSettings = useCallback(() => {
+    if (isMobileSettingsRouteViewport) {
+      setIsSettingsDialogOpen(false);
+      navigate("/settings");
+      return;
+    }
+
     setIsSettingsDialogOpen(true);
-  }, []);
+  }, [isMobileSettingsRouteViewport, navigate]);
 
   const bumpWorkspaceLayoutRevision = useCallback(() => {
     setWorkspaceLayoutRevision((current) => current + 1);
