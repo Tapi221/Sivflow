@@ -431,10 +431,8 @@ const SettingToggle = ({ label, description, checked, onChange }: SettingToggleP
 
 const SettingSegment = <T extends string | number>({ label, value, options, onChange }: SettingSegmentProps<T>) => {
   return (
-    <div className="settings-workspace__row settings-workspace__row--stacked">
-      <div className="settings-workspace__row-copy">
-        <span className="settings-workspace__row-title">{label}</span>
-      </div>
+    <div className="settings-workspace__row settings-workspace__row--choice">
+      <span className="settings-workspace__row-title">{label}</span>
       <div className="settings-workspace__segmented" role="radiogroup" aria-label={label}>
         {options.map((option) => {
           const isSelected = option.value === value;
