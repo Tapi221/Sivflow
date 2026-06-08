@@ -1,3 +1,4 @@
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Plus } from "@/ui/icons";
 
@@ -6,7 +7,7 @@ type NewCardIdleStateProps = {
   onCancel: () => void;
 };
 
-export const NewCardIdleState = ({
+const NewCardIdleState = ({
   onStartEditing,
   onCancel,
 }: NewCardIdleStateProps) => {
@@ -40,10 +41,8 @@ export const NewCardIdleState = ({
   );
 };
 
-export const CardEditorLoadingState = () => {
-  return (
-    <div className="flex h-full min-h-[400px] items-center justify-center text-slate-400">
-      <p className="text-xs font-medium">カードを読み込み中...</p>
-    </div>
-  );
+const CardEditorLoadingState = () => {
+  return <LoadingSpinner className="h-full min-h-[400px] text-slate-400" label="カードを読み込み中" />;
 };
+
+export { CardEditorLoadingState, NewCardIdleState };
