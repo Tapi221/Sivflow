@@ -1,0 +1,8 @@
+const CARD_ACTION_ICON_CLASS = "stroke-[1.6]";
+const CARD_ACTION_BUTTON_PX = 28;
+const CARD_ACTION_ICON_PX = 16;
+const CARD_ACTION_COLOR_IDLE_CLASS = "text-[#b7b7b7] hover:text-[#8c8c8c]";
+const CARD_ACTION_COLOR_ACTIVE_CLASS = "text-[#8c8c8c] hover:text-[#8c8c8c]";
+const CARD_ACTION_BG_CLASS = "bg-transparent hover:bg-transparent shadow-none";
+
+export { CARD_ACTION_BG_CLASS, CARD_ACTION_BUTTON_PX, CARD_ACTION_COLOR_ACTIVE_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS, CARD_ACTION_ICON_PX };
