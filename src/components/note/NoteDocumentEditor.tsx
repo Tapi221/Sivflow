@@ -20,6 +20,7 @@ type NoteTextRecord = {
 
 const NOTE_SAVE_DEBOUNCE_MS = 500;
 const NOTE_CONTENT_TYPE = "sivflow-text-document";
+const LEGACY_AFFINE_CONTENT_TYPE = "affine-document";
 const NOTE_EDITOR_HINT = "本文をクリックして入力。変更は自動保存されます。";
 const NOTE_EDITOR_PLACEHOLDER = "ここにノートを書き始める";
 const NOTE_EDITOR_SAVED_LABEL = "自動保存";
@@ -40,8 +41,9 @@ const getTextBlocks = (text: string): NoteTextBlock[] => {
 const getInitialText = (content: NoteBlockContent | undefined): string => {
   const record = Array.isArray(content) ? content[0] : null;
   if (!record || typeof record !== "object") return "";
-  if (record.type !== NOTE_CONTENT_TYPE) return "";
+  if (record.type !== NOTE_CONTENT_TYPE && record.type !== LEGACY_AFFINE_CONTENT_TYPE) return "";
   if (typeof record.text === "string") return record.text;
+  if (record.type === LEGACY_AFFINE_CONTENT_TYPE) return "";
   if (!Array.isArray(record.blocks)) return "";
   return record.blocks.map((block) => block && typeof block === "object" && "text" in block ? String((block as { text?: unknown }).text ?? "") : "").join("\n");
 };
