@@ -6,6 +6,7 @@ import { layoutCalendarTimeGridEvents } from "@core/calendar";
 import type { CalendarTimeGridLayoutEntry } from "@core/calendar";
 import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
+import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarAllDayEventOrderMap, CalendarGridStyle, CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
@@ -64,6 +65,15 @@ const WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME = "relative overflow-hidden";
 const WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES = 15;
 const WEEKDAY_TIMED_EVENT_DRAG_FALLBACK_MINUTES = 30;
 const MINUTE_MS = 60 * 1000;
+
+const getAllDayColumnStyle = (): CSSProperties => ({
+  padding: eventChipDesign.weekdayGrid.allDayColumnInsetPx,
+  ...WEEKDAY_COLUMN_BORDER_STYLE,
+});
+
+const getAllDayStackStyle = (): CSSProperties => ({
+  gap: eventChipDesign.weekdayGrid.allDayEventGapPx,
+});
 
 const isUnshiftedHourLabel = (hour: number): boolean => hour === 0;
 
@@ -138,158 +148,118 @@ const getEventInRange = (event: GoogleCalendarEvent, rangeStart: Date, rangeEnd:
 
   const startTime = startsAt.getTime();
   const endTime = endsAt.getTime();
-  const normalizedEndTime = endTime > startTime ? endTime : startTime + 1;
+  const rangeStartTime = rangeStart.getTime();
+  const rangeEndTime = rangeEnd.getTime();
 
-  if (startTime >= rangeEnd.getTime() || normalizedEndTime <= rangeStart.getTime()) return null;
+  if (endTime <= rangeStartTime || startTime >= rangeEndTime) return null;
 
-  return event;
-};
-
-const getWeekdayTimelineRangeEnd = (day: Date): Date => addMinutes(addDays(startOfDay(day), 1), NEXT_DAY_PREVIEW_MINUTES);
-
-const getCalendarGridHourRowHeightPx = (calendarGridStyle: CalendarGridStyle): number => {
-  const parsedValue = Number.parseFloat(calendarGridStyle[GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT]);
-
-  return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : C.DEFAULT_HOUR_ROW_HEIGHT;
-};
-
-const getMinimumVisibleHeightPercent = (hourRowHeightPx: number, rangeHours: number): number => {
-  const rangeHeightPx = hourRowHeightPx * rangeHours;
-
-  return rangeHeightPx > 0 ? (WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX / rangeHeightPx) * 100 : 0;
-};
-
-const getHourRowHeightPx = (element: HTMLElement): number => {
-  const computedValue = window.getComputedStyle(element).getPropertyValue(GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT);
-  const parsedValue = Number.parseFloat(computedValue);
-
-  return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : C.DEFAULT_HOUR_ROW_HEIGHT;
-};
-
-const snapMinutes = (minutes: number): number => Math.round(minutes / WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES) * WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES;
-
-const clampMinutes = (minutes: number, maxMinutes: number): number => Math.max(0, Math.min(maxMinutes, minutes));
-
-const areSameEventKeyOrder = (left: string[], right: string[]): boolean => left.length === right.length && left.every((key, index) => key === right[index]);
-
-const getDragPreviewDayKey = (state: WeekdayEventDragState): string => getCalendarDateKey(state.previewStartsAt);
-
-const getDragPreviewStyle = (state: WeekdayEventDragState, day: Date): CSSProperties => {
-  const dayStart = startOfDay(day);
-  const startMinutes = clampMinutes(differenceInMinutes(state.previewStartsAt, dayStart), WEEKDAY_TIMELINE_RANGE_MINUTES);
-  const durationMinutes = Math.max(1, state.durationMs / MINUTE_MS);
-  const maxVisibleDurationMinutes = Math.max(1, WEEKDAY_TIMELINE_RANGE_MINUTES - startMinutes);
-  const visibleDurationMinutes = Math.min(durationMinutes, maxVisibleDurationMinutes);
+  if (startTime >= rangeStartTime && endTime <= rangeEndTime) return event;
 
   return {
-    left: "3px",
-    top: `calc(${startMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
-    width: "calc(100% - 7px)",
-    height: `calc(${visibleDurationMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}))`,
-    minHeight: `${WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX}px`,
-    pointerEvents: "none",
-    ...CALENDAR_EVENT_DRAGGING_STYLE,
+    ...event,
+    startsAt: new Date(Math.max(startTime, rangeStartTime)),
+    endsAt: new Date(Math.min(endTime, rangeEndTime)),
   };
 };
 
-const getOrderedAllDayEvents = (events: GoogleCalendarEvent[], dayKey: string, order?: CalendarAllDayEventOrderMap): GoogleCalendarEvent[] => {
-  const sortedEvents = [...events].sort(compareCalendarEvents);
-  const orderedKeys = order?.[dayKey] ?? [];
+const getMinimumVisibleHeightPercent = (hourRowHeightPx: number, rangeHours: number): number => {
+  if (hourRowHeightPx <= 0 || rangeHours <= 0) return 0;
 
-  if (orderedKeys.length === 0) return sortedEvents;
-
-  const eventByKey = new Map(sortedEvents.map((event) => [createCalendarEventKey(event), event]));
-  const orderedEvents = orderedKeys.flatMap((key) => {
-    const event = eventByKey.get(key);
-    return event ? [event] : [];
-  });
-  const usedKeys = new Set(orderedEvents.map(createCalendarEventKey));
-
-  return [...orderedEvents, ...sortedEvents.filter((event) => !usedKeys.has(createCalendarEventKey(event)))];
+  return (WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX / (hourRowHeightPx * rangeHours)) * 100;
 };
 
-const getAllDayDropIndex = (element: HTMLDivElement, clientY: number): number => {
-  const itemElements = Array.from(element.querySelectorAll<HTMLElement>("[data-calendar-all-day-event-item='true']"));
-  const insertIndex = itemElements.findIndex((itemElement) => {
-    const rect = itemElement.getBoundingClientRect();
-    return clientY < rect.top + rect.height / 2;
-  });
+const createTimedLayoutEvents = (events: GoogleCalendarEvent[], day: Date, minimumVisibleHeightPercent: number): CalendarTimeGridLayoutEntry[] => {
+  const dayStart = startOfDay(day);
+  const dayEnd = addMinutes(dayStart, WEEKDAY_TIMELINE_RANGE_MINUTES);
+  const timedEvents = events
+    .filter((event) => !event.isAllDay)
+    .map((event) => getEventInRange(event, dayStart, dayEnd))
+    .filter((event): event is GoogleCalendarEvent => Boolean(event));
 
-  return insertIndex === -1 ? itemElements.length : insertIndex;
-};
-
-const insertEventKeyAtIndex = (eventKeys: string[], eventKey: string, index: number): string[] => {
-  const withoutEvent = eventKeys.filter((key) => key !== eventKey);
-  const insertIndex = Math.max(0, Math.min(index, withoutEvent.length));
-
-  return [...withoutEvent.slice(0, insertIndex), eventKey, ...withoutEvent.slice(insertIndex)];
+  return layoutCalendarTimeGridEvents(timedEvents, { minimumVisibleHeightPercent, rangeEnd: dayEnd, rangeStart: dayStart });
 };
 
 const groupEventsByDay = (events: GoogleCalendarEvent[], days: Date[]): WeekdayEventsByDay => {
-  const dayKeys = new Set(days.map(getCalendarDateKey));
   const allDayEvents = new Map<string, GoogleCalendarEvent[]>();
 
-  for (const day of days) {
-    const key = getCalendarDateKey(day);
-    allDayEvents.set(key, []);
-  }
+  days.forEach((day) => allDayEvents.set(getCalendarDateKey(day), []));
 
-  for (const event of events) {
-    if (!event.isAllDay) continue;
+  events.forEach((event) => {
+    if (!event.isAllDay) return;
 
-    const keys = getEventDateKeys(event).filter((key) => dayKeys.has(key));
+    getEventDateKeys(event).forEach((dayKey) => {
+      const dayEvents = allDayEvents.get(dayKey);
+      if (!dayEvents) return;
 
-    for (const key of keys) {
-      const day = days.find((candidate) => getCalendarDateKey(candidate) === key);
-      if (!day) continue;
-      const clippedEvent = clipEventToDay(event, day);
-      if (!clippedEvent) continue;
-      allDayEvents.set(key, [...(allDayEvents.get(key) ?? []), clippedEvent]);
-    }
-  }
+      dayEvents.push(event);
+    });
+  });
 
-  for (const [key, values] of allDayEvents) {
-    allDayEvents.set(key, [...values].sort(compareCalendarEvents));
-  }
+  allDayEvents.forEach((dayEvents) => dayEvents.sort(compareCalendarEvents));
 
   return { allDayEvents };
 };
 
-const createTimedLayoutEventsForRange = (events: GoogleCalendarEvent[], rangeStart: Date, rangeEnd: Date, minimumVisibleHeightPercent: number): CalendarTimeGridLayoutEntry[] => {
-  const rangeEvents = events.flatMap((event) => {
-    if (event.isAllDay) return [];
-    const eventInRange = getEventInRange(event, rangeStart, rangeEnd);
+const areSameEventKeyOrder = (left: readonly string[], right: readonly string[]): boolean => {
+  if (left.length !== right.length) return false;
 
-    return eventInRange ? [eventInRange] : [];
-  });
-
-  return layoutCalendarTimeGridEvents({
-    events: rangeEvents,
-    rangeStart,
-    rangeEnd,
-    layoutMode: "no-overlap",
-    minimumVisibleHeightPercent,
-  });
+  return left.every((eventKey, index) => eventKey === right[index]);
 };
 
-const createTimedLayoutEvents = (events: GoogleCalendarEvent[], day: Date, minimumVisibleHeightPercent: number): CalendarTimeGridLayoutEntry[] => {
-  const rangeStart = startOfDay(day);
-  const rangeEnd = getWeekdayTimelineRangeEnd(day);
+const getOrderedAllDayEvents = (events: GoogleCalendarEvent[], dayKey: string, orderMap: CalendarAllDayEventOrderMap | undefined): GoogleCalendarEvent[] => {
+  if (!orderMap) return events;
 
-  return createTimedLayoutEventsForRange(events, rangeStart, rangeEnd, minimumVisibleHeightPercent);
+  const orderedEventKeys = orderMap[dayKey];
+  if (!orderedEventKeys?.length) return events;
+
+  const eventIndexByKey = new Map(events.map((event) => [createCalendarEventKey(event), event]));
+  const seenKeys = new Set<string>();
+  const orderedEvents: GoogleCalendarEvent[] = [];
+
+  orderedEventKeys.forEach((eventKey) => {
+    const event = eventIndexByKey.get(eventKey);
+    if (!event) return;
+
+    orderedEvents.push(event);
+    seenKeys.add(eventKey);
+  });
+
+  events.forEach((event) => {
+    if (seenKeys.has(createCalendarEventKey(event))) return;
+
+    orderedEvents.push(event);
+  });
+
+  return orderedEvents;
 };
 
-const createAllDayRenderItems = (events: GoogleCalendarEvent[], dayKey: string, allDayEventOrder: CalendarAllDayEventOrderMap | undefined, dragState: WeekdayEventDragState | null, dragPreviewEvent: GoogleCalendarEvent | null, dragPreviewDayKey: string | null): WeekdayAllDayRenderItem[] => {
-  const shouldInsertPreview = Boolean(dragState && dragPreviewEvent && dragState.previewIsAllDay && dragPreviewDayKey === dayKey);
-  const orderedEvents = getOrderedAllDayEvents(events, dayKey, allDayEventOrder);
-  const visibleEvents = shouldInsertPreview && dragState && dragPreviewEvent ? insertEventKeyAtIndex(orderedEvents.map(createCalendarEventKey), dragState.eventKey, dragState.previewAllDayIndex ?? orderedEvents.length).flatMap((key) => key === dragState.eventKey ? [dragPreviewEvent] : orderedEvents.filter((event) => createCalendarEventKey(event) === key)) : orderedEvents;
-  const previewEventKey = shouldInsertPreview && dragPreviewEvent ? createCalendarEventKey(dragPreviewEvent) : null;
+const getAllDayDropIndex = (column: HTMLDivElement, clientY: number): number => {
+  const eventItems = Array.from(column.querySelectorAll<HTMLElement>('[data-calendar-all-day-event-item="true"]'));
+  if (eventItems.length === 0) return 0;
 
-  return visibleEvents.map((event) => {
-    const eventKey = createCalendarEventKey(event);
+  const targetIndex = eventItems.findIndex((element) => clientY < element.getBoundingClientRect().top + element.getBoundingClientRect().height / 2);
 
-    return { event, eventKey, isDragPreview: Boolean(previewEventKey && eventKey === previewEventKey) };
-  });
+  return targetIndex === -1 ? eventItems.length : targetIndex;
+};
+
+const snapMinutes = (minutes: number): number => Math.round(minutes / WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES) * WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES;
+
+const clampMinutes = (minutes: number, maxMinutes: number): number => Math.max(0, Math.min(minutes, maxMinutes));
+
+const getHourRowHeightPx = (element: HTMLElement): number => {
+  const raw = window.getComputedStyle(element).getPropertyValue(GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT).trim();
+  const parsed = Number.parseFloat(raw);
+
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : GRID.WEEKDAY_HOUR_ROW_HEIGHT;
+};
+
+const getCalendarGridHourRowHeightPx = (calendarGridStyle: CalendarGridStyle): number => {
+  const value = calendarGridStyle[GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT];
+  if (typeof value === "number") return value;
+
+  const parsed = Number.parseFloat(String(value));
+
+  return Number.isFinite(parsed) ? parsed : GRID.WEEKDAY_HOUR_ROW_HEIGHT;
 };
 
 const useCurrentTime = () => {
@@ -297,6 +267,7 @@ const useCurrentTime = () => {
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), CURRENT_TIME_TICK_MS);
+
     return () => window.clearInterval(timer);
   }, []);
 
@@ -569,8 +540,8 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
             const events = createAllDayRenderItems(allDayEvents.get(dayKey) ?? [], dayKey, allDayEventOrder, dragState, dragPreviewEvent, dragPreviewDayKey);
 
             return (
-              <div key={dayKey} ref={setAllDayColumnRef(dayKey)} className={cn("min-h-10 min-w-0 px-[0.5px] py-[0.5px]", dayIndex === 0 ? null : "border-l")} style={WEEKDAY_COLUMN_BORDER_STYLE}>
-                <div className="flex min-w-0 flex-col gap-[1px]">
+              <div key={dayKey} ref={setAllDayColumnRef(dayKey)} className={cn("min-h-10 min-w-0", dayIndex === 0 ? null : "border-l")} style={getAllDayColumnStyle()}>
+                <div className="flex min-w-0 flex-col" style={getAllDayStackStyle()}>
                   {events.map(({ event, eventKey, isDragPreview }) => {
                     const isDragging = dragState?.eventKey === eventKey;
                     const isDraggable = isCalendarEventDraggable(event, onMoveCalendarEvent);
