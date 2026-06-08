@@ -20,6 +20,7 @@ import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
 import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import { StratisTagIcon } from "@/ui/icons/stratis";
 
 type IconProps = {
@@ -83,7 +84,7 @@ const PROJECT_ADD_MENU_ITEM_DEFINITIONS: readonly ProjectAddMenuItemDefinition[]
 const PROJECT_ADD_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_ADD_MENU_ITEM_DEFINITIONS.map((item) => item.label), 132);
 const PROJECT_ADD_MENU_HEIGHT = PROJECT_ADD_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 const EMPTY_COLLECTION: never[] = [];
-const CARD_SET_ENTITY_SELECTOR = "[data-directory-entity-kind='cardSet']";
+const OPENABLE_ENTITY_SELECTOR = "[data-directory-entity-kind='cardSet'], [data-directory-entity-kind='document']";
 
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 const IconChevronDown = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M4 6.25L8 10.25L12 6.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
@@ -141,8 +142,15 @@ const getProjectAddMenuPosition = (event: ReactMouseEvent<HTMLElement>): Project
   return clampRightClickPanelPosition(rect.right - PROJECT_ADD_MENU_WIDTH, rect.bottom + 6, { width: PROJECT_ADD_MENU_WIDTH, height: PROJECT_ADD_MENU_HEIGHT });
 };
 
-const isCardSetEntityEventTarget = (target: EventTarget | null): boolean => {
-  return target instanceof HTMLElement && target.closest(CARD_SET_ENTITY_SELECTOR) !== null;
+const getActiveLibraryFolderId = (tab: WorkspaceTab | null): string | null => {
+  if (!tab || tab.sectionKey !== "library") return null;
+  if (tab.kind === "explorer") return tab.explorerState.selectedFolderId;
+  if (tab.kind === "document" || tab.kind === "card") return tab.folderId;
+  return null;
+};
+
+const isOpenableEntityEventTarget = (target: EventTarget | null): boolean => {
+  return target instanceof HTMLElement && target.closest(OPENABLE_ENTITY_SELECTOR) !== null;
 };
 
 const scheduleLeftPanelClose = (onToggleLeftPanel?: () => void) => {
@@ -206,7 +214,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   const treeFolders = useMemo(() => folders as FolderTreeNode[], [folders]);
   const { rootFolders, getChildFolders, getNextOrderIndex } = useExplorerDerivedData({ treeFolders, treeCards: EMPTY_COLLECTION, cardSets: EMPTY_COLLECTION, documents: EMPTY_COLLECTION, isFiltering: false });
   const folderById = useMemo(() => createFolderLookup(rootFolders, getChildFolders), [getChildFolders, rootFolders]);
-  const selectedFolderId = activeTab?.kind === "explorer" ? activeTab.explorerState.selectedFolderId : null;
+  const selectedFolderId = useMemo(() => getActiveLibraryFolderId(activeTab), [activeTab]);
   const selectedFolder = selectedFolderId ? folderById.get(selectedFolderId) ?? null : null;
   const selectedNavigationFolderId = selectedFolderId;
   const sectionLabel = folderTagMode === "tag" ? TAG_SECTION_LABEL : selectedFolder ? getFolderName(selectedFolder) : PROJECT_SECTION_LABEL;
@@ -299,13 +307,13 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   }, [resolvedOnOpenSettings]);
 
   const handleDirectoryClickCapture = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
-    if (!isCardSetEntityEventTarget(event.target)) return;
+    if (!isOpenableEntityEventTarget(event.target)) return;
     scheduleLeftPanelClose(resolvedOnToggleLeftPanel);
   }, [resolvedOnToggleLeftPanel]);
 
   const handleDirectoryKeyDownCapture = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key !== "Enter" && event.key !== " ") return;
-    if (!isCardSetEntityEventTarget(event.target)) return;
+    if (!isOpenableEntityEventTarget(event.target)) return;
     scheduleLeftPanelClose(resolvedOnToggleLeftPanel);
   }, [resolvedOnToggleLeftPanel]);
 
