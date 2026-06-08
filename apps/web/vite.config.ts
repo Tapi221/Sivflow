@@ -343,7 +343,6 @@ export default defineConfig(({ command }) => ({
       { find: "@web-renderer", replacement: resolveFromRoot("packages/web-renderer/src") },
       { find: "@shared", replacement: resolveFromRoot("shared") },
       { find: "@", replacement: resolveFromRoot("src") },
-      { find: "@constants", replacement: resolveFromRoot("constants") },
     ],
   },
   server: {
