@@ -10,7 +10,6 @@ const IMPORT_PATTERNS = [
   /(\bimport\s*\(\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+)(["']\s*\))/g,
   /(\bexport\s+[^;]*?\s+from\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+)(["'])/g,
 ];
-const CONSTANTS_IMPORT_PATTERN = /import\s+(type\s+)?\{([\s\S]*?)\}\s+from\s+["']@constants(?:\/[^"']*)?["'];?/g;
 const ALIAS_ROOTS = [
   { directory: path.join(ROOT_DIR, "src"), prefix: "@" },
   { directory: path.join(ROOT_DIR, "apps/mobile/src"), prefix: "@mobile" },
@@ -19,82 +18,6 @@ const ALIAS_ROOTS = [
   { directory: path.join(ROOT_DIR, "packages/web-renderer/src"), prefix: "@web-renderer" },
   { directory: path.join(ROOT_DIR, "packages/mobile-renderer/src"), prefix: "@mobile-renderer" },
 ];
-const CONSTANT_SYMBOL_TARGETS = new Map(Object.entries({
-  CARD_BASE_WIDTH: "@/domain/card/cardGeometry.constants",
-  CARD_DISPLAY_SCALE: "@/domain/card/cardGeometry.constants",
-  CANONICAL_CARD_WIDTH: "@/domain/card/cardGeometry.constants",
-  CARD_SAFE_PADDING_PX: "@/domain/card/cardGeometry.constants",
-  CARD_ROW_PX: "@/domain/card/cardGeometry.constants",
-  CARD_CONTENT_TOP_PX: "@/domain/card/cardGeometry.constants",
-  CARD_RULED_OFFSET_TOP_PX: "@/domain/card/cardGeometry.constants",
-  CARD_RULED_OFFSET_BOTTOM_PX: "@/domain/card/cardGeometry.constants",
-  CARD_HEIGHT_PHASE_PX: "@/domain/card/cardGeometry.constants",
-  layoutRowsToCardHeightPx: "@/domain/card/cardGeometry.constants",
-  cardHeightPxToLayoutRows: "@/domain/card/cardGeometry.constants",
-  minCardHeightPxToLayoutRows: "@/domain/card/cardGeometry.constants",
-  snapMinCardHeightPx: "@/domain/card/cardGeometry.constants",
-  CardPaneMode: "@/components/card/frame/cardPane.constants",
-  CARD_PANE_VIEW_DEFAULT_WIDTH_PX: "@/components/card/frame/cardPane.constants",
-  CARD_PANE_EDIT_DEFAULT_WIDTH_PX: "@/components/card/frame/cardPane.constants",
-  CARD_PANE_VIEW_MIN_WIDTH_PX: "@/components/card/frame/cardPane.constants",
-  CARD_PANE_EDIT_MIN_WIDTH_PX: "@/components/card/frame/cardPane.constants",
-  CARD_PANE_EDITOR_DEFAULT_WIDTH_PX: "@/components/card/frame/cardPane.constants",
-  CARD_PANE_EDITOR_DOCKED_DEFAULT_WIDTH_PX: "@/components/card/frame/cardPane.constants",
-  CARD_PANE_WIDTH_STEP_PX: "@/components/card/frame/cardPane.constants",
-  CARD_PANE_AUTO_MAX_SCALE: "@/components/card/frame/cardPane.constants",
-  CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX: "@/components/card/frame/cardPane.constants",
-  clampPaneWidthPx: "@/components/card/frame/cardPane.constants",
-  DISPLAY_MODE_LABELS: "@/features/cardsetview/domain/cardDisplayMode.constants",
-  DISPLAY_MODE_TRIGGER_LABELS: "@/features/cardsetview/domain/cardDisplayMode.constants",
-  CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX: "@/features/cardsetview/domain/cardSetViewPresentation.constants",
-  CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX: "@/features/cardsetview/domain/cardSetViewPresentation.constants",
-  CARD_SET_VIEW_DEFAULT_ZOOM_SCALE: "@/features/cardsetview/domain/cardSetViewPresentation.constants",
-  CARD_SET_VIEW_SCROLLBAR_RESERVE_PX: "@/features/cardsetview/domain/cardSetViewPresentation.constants",
-  CARD_SET_VIEW_FIXED_LAYOUT_SAFETY_ALLOWANCE_PX: "@/features/cardsetview/domain/cardSetViewPresentation.constants",
-  CARD_SET_VIEW_SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX: "@/features/cardsetview/domain/cardSetViewPresentation.constants",
-  CARD_SET_VIEW_META_PANEL_BASE_WIDTH_PX: "@/features/cardsetview/domain/cardSetViewPresentation.constants",
-  CARD_SET_VIEW_LAYOUT_CONSTRAINT_INDICATOR_DURATION_MS: "@/features/cardsetview/domain/cardSetViewPresentation.constants",
-  CARD_ACTION_ICON_CLASS: "@/components/card/frame/cardAction.constants",
-  CARD_ACTION_BUTTON_PX: "@/components/card/frame/cardAction.constants",
-  CARD_ACTION_ICON_PX: "@/components/card/frame/cardAction.constants",
-  CARD_ACTION_COLOR_IDLE_CLASS: "@/components/card/frame/cardAction.constants",
-  CARD_ACTION_COLOR_ACTIVE_CLASS: "@/components/card/frame/cardAction.constants",
-  CARD_ACTION_BG_CLASS: "@/components/card/frame/cardAction.constants",
-  CARD_SET_VIEW_PAGER_PADDING_INLINE: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_SET_VIEW_PAGER_PADDING_BLOCK: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS: "@/features/cardsetview/domain/cardSetView.constants",
-  CardViewZoomInteractionSource: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_VIEW_ZOOM_STEP_PERCENT_BY_SOURCE: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_VIEW_ZOOM_BUTTON_STEP_PERCENT: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_VIEW_ZOOM_STEP_PERCENT: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_VIEW_ZOOM_DEFAULT_PERCENT: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_VIEW_ZOOM_MIN_PERCENT: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_VIEW_DEFAULT_ZOOM_PERCENT: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_VIEW_MIN_ZOOM_PERCENT: "@/features/cardsetview/domain/cardSetView.constants",
-  CARD_SET_VIEW_EVENTS: "@/features/cardsetview/events/cardSetViewEvents.constants",
-  CALENDAR_RESISTANCE_LEGEND: "@/features/calendar/calendar.constants",
-  CALENDAR_WEEK_DAYS_SUNDAY: "@/features/calendar/calendar.constants",
-  CALENDAR_WEEK_DAYS_MONDAY: "@/features/calendar/calendar.constants",
-  CALENDAR_ARROW_DIFF_MAP: "@/features/calendar/calendar.constants",
-  SHARED_STORAGE_KEYS: "@platform/storage/storageKeys.constants",
-  WEB_STORAGE_KEYS: "@platform/storage/webStorageKeys.constants",
-  LOCALDB_SCHEMA_VERSION_FOR_NAME: "@/services/localdb/localdb.constants",
-  LOCALDB_GENERATION_MAX: "@/services/localdb/localdb.constants",
-  LOCALDB_RECOVERY_GUIDE_URL: "@/services/localdb/localdb.constants",
-  LOCALDB_GENERATION_KEY_PREFIX: "@/services/localdb/localdb.constants",
-  LOCALDB_ERROR_MESSAGE_LIMIT: "@/services/localdb/localdb.constants",
-  LOCALDB_NAME_PREFIX: "@/services/localdb/localdb.constants",
-  CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY: "@/components/card/hooks/cardImagePreload.constants",
-  CARD_IMAGE_PRELOAD: "@/components/card/hooks/cardImagePreload.constants",
-  CODE_BLOCK_RECENT_LANGUAGE_STORAGE_KEY: "@/components/card/blocks/code/codeBlock.constants",
-  CODE_BLOCK_MAX_RECENT_LANGUAGES: "@/components/card/blocks/code/codeBlock.constants",
-  CODE_BLOCK_SUPPORTED_LANGUAGES: "@/components/card/blocks/code/codeBlock.constants",
-  CODE_BLOCK_SUPPORTED_LANGUAGE_VALUES: "@/components/card/blocks/code/codeBlock.constants",
-}));
 
 const walkSourceFiles = (directory) => {
   if (!existsSync(directory)) return [];
@@ -214,40 +137,11 @@ const normalizeSpecifier = (filePath, specifier) => {
   return toAliasSpecifier(targetFilePath, aliasRoot, specifier);
 };
 
-const getImportedName = (specifier) => {
-  const withoutType = specifier.startsWith("type ") ? specifier.slice("type ".length).trim() : specifier;
-  return withoutType.split(/\s+as\s+/u)[0].trim();
-};
-
-const parseImportSpecifiers = (rawSpecifiers) => rawSpecifiers.split(",").map((specifier) => specifier.trim()).filter(Boolean);
-
-const groupConstantSpecifiersByTarget = (specifiers, isTypeOnlyImport) => {
-  const grouped = new Map();
-
-  for (const specifier of specifiers) {
-    const target = CONSTANT_SYMBOL_TARGETS.get(getImportedName(specifier));
-    if (!target) throw new Error(`No responsibility target registered for @constants export: ${getImportedName(specifier)}`);
-
-    const normalizedSpecifier = isTypeOnlyImport && !specifier.startsWith("type ") ? `type ${specifier}` : specifier;
-    const current = grouped.get(target) ?? [];
-    current.push(normalizedSpecifier);
-    grouped.set(target, current);
-  }
-
-  return grouped;
-};
-
-const rewriteConstantsImports = (source) => source.replace(CONSTANTS_IMPORT_PATTERN, (_match, typePrefix, rawSpecifiers) => {
-  const grouped = groupConstantSpecifiersByTarget(parseImportSpecifiers(rawSpecifiers), Boolean(typePrefix));
-
-  return Array.from(grouped.entries()).map(([target, specifiers]) => `import { ${specifiers.join(", ")} } from "${target}";`).join("\n");
-});
-
 const normalizeImportSpecifiers = (filePath, source) => IMPORT_PATTERNS.reduce((nextSource, pattern) => nextSource.replace(pattern, (match, prefix, specifier, suffix) => {
   const nextSpecifier = normalizeSpecifier(filePath, specifier);
 
   return nextSpecifier === specifier ? match : `${prefix}${nextSpecifier}${suffix}`;
-}), rewriteConstantsImports(source));
+}), source);
 
 const applyTargetedLintFixes = (filePath, source) => {
   const relativePath = toPosix(path.relative(ROOT_DIR, filePath));
