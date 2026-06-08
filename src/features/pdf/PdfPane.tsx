@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
-import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
 import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
 import "pdfjs-dist/legacy/web/pdf_viewer.css";
 import { cn } from "@/lib/utils";
@@ -66,8 +65,6 @@ const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 767;
 const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 1_000;
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const getSafePageNumber = (pageNumber: number | null | undefined, pageCount: number): number => {
   const normalizedPageNumber = Math.floor(pageNumber ?? DEFAULT_PDF_PAGE);
@@ -159,7 +156,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
   const viewerCMapUrl = viewerOptions?.cMapUrl;
   const viewerStandardFontDataUrl = viewerOptions?.standardFontDataUrl;
   const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const pdfViewerElementRef = useRef<HTMLDivElement | null>(null);
   const pdfViewerRef = useRef<PdfViewerInstance | null>(null);
@@ -292,7 +288,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
     pdfViewerRef.current = pdfViewer;
     linkService.setViewer(pdfViewer);
     viewerElement.replaceChildren();
-    setLoadError(null);
     setIsLoading(true);
 
     const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestResponsiveScaleUpdate);
@@ -340,11 +335,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
       loadedPdfDocument = nextPdfDocument;
       pdfViewer.setDocument(nextPdfDocument);
       linkService.setDocument(nextPdfDocument, null);
-    }).catch((error: unknown) => {
-      if (isCancelled) return;
-      const message = error instanceof Error ? error.message : String(error);
-      setLoadError(message || "PDFファイルの読み込みに失敗しました。");
-    }).finally(() => {
+    }).catch(() => undefined).finally(() => {
       if (!isCancelled) setIsLoading(false);
     });
 
@@ -431,7 +422,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
         <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto overscroll-contain bg-[var(--carvepanel-surface)] px-3 py-4 [-webkit-overflow-scrolling:touch] sm:px-4 sm:py-5">
           <div ref={pdfViewerElementRef} className="pdfViewer" />
           {isLoading ? <div className="absolute inset-0 flex items-center justify-center bg-[var(--carvepanel-surface)] text-[13px] text-[#6d6d6d]">PDFを読み込み中...</div> : null}
-          {!isLoading && loadError ? <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-[13px] leading-6 text-[#4a4640]"><div className="max-w-md rounded-[14px] border border-[#ded8cf] bg-white px-5 py-4 shadow-sm">{loadError}</div></div> : null}
         </div>
       </main>
     </div>
