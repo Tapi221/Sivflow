@@ -65,7 +65,7 @@ const symbolTargets = new Map(Object.entries({
   CARD_SET_VIEW_EVENTS: "@/features/cardsetview/events/cardSetViewEvents.constants",
 }));
 
-const flashcardImportPattern = /import\s+(type\s+)?\{([\s\S]*?)\}\s+from\s+["']@constants\/shared\/flashcard["'];?/g;
+const flashcardImportPattern = /^import\s+(type\s+)?\{([^{}]*?)\}\s+from\s+["']@constants\/shared\/flashcard["'];?\s*$/gm;
 
 const parseImportSpecifiers = (rawSpecifiers) => rawSpecifiers.split(",").map((specifier) => specifier.trim()).filter(Boolean);
 
