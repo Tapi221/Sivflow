@@ -1,12 +1,12 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { UserSettings } from "@/types";
-import { Check, Code, Globe, Keyboard, Settings2, Shield, Type, User, Volume2 } from "@/ui/icons";
+import { Check, Globe, Keyboard, Settings2, Shield, Type, User, Volume2 } from "@/ui/icons";
 import { useLocaleStore, type Locale } from "@shared/i18n/locale.store";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import "./SettingsWorkspaceScreen.css";
 
-type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "hotkey" | "about";
+type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "hotkey";
 
 type SettingsSectionDefinition = {
   id: SettingsSectionId;
@@ -127,15 +127,9 @@ type SettingsWorkspaceCopy = {
   questionVoiceDescription: string;
   answerVoiceLabel: string;
   answerVoiceDescription: string;
-  aboutTitle: string;
-  aboutDescription: string;
-  aboutWorkspaceDescription: string;
-  aboutSearchDescription: string;
-  aboutLocalFirstTitle: string;
-  aboutLocalFirstDescription: string;
 };
 
-const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "hotkey", "about"];
+const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "hotkey"];
 const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> = {
   ja: {
     ariaLabel: "設定",
@@ -147,7 +141,6 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
       editor: { label: "エディター", description: "カード編集" },
       audio: { label: "音声", description: "音声と効果音" },
       hotkey: { label: "Hotkey", description: "キーボード操作" },
-      about: { label: "このアプリについて", description: "アプリ情報" },
     },
     languageOptions: {
       ja: { label: "日本語", caption: "日本語" },
@@ -223,12 +216,6 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     questionVoiceDescription: "問題文を自動音声再生します。",
     answerVoiceLabel: "解答文の音声",
     answerVoiceDescription: "解答文を自動音声再生します。",
-    aboutTitle: "FlashCard Master について",
-    aboutDescription: "このワークスペースで使われている基本情報です。",
-    aboutWorkspaceDescription: "FlashCard Master ワークスペース",
-    aboutSearchDescription: "ワークスペース内検索",
-    aboutLocalFirstTitle: "ローカル優先",
-    aboutLocalFirstDescription: "LocalDB と同期キューを使用",
   },
   en: {
     ariaLabel: "Settings",
@@ -240,7 +227,6 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
       editor: { label: "Editor", description: "Card editing" },
       audio: { label: "Audio", description: "Voice and sound effects" },
       hotkey: { label: "Hotkey", description: "Keyboard controls" },
-      about: { label: "About", description: "App information" },
     },
     languageOptions: {
       ja: { label: "日本語", caption: "Japanese" },
@@ -316,12 +302,6 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     questionVoiceDescription: "Automatically play question text audio.",
     answerVoiceLabel: "Answer voice",
     answerVoiceDescription: "Automatically play answer text audio.",
-    aboutTitle: "About FlashCard Master",
-    aboutDescription: "Basic information used in this workspace.",
-    aboutWorkspaceDescription: "FlashCard Master workspace",
-    aboutSearchDescription: "Search in Workspace",
-    aboutLocalFirstTitle: "Local first",
-    aboutLocalFirstDescription: "Uses LocalDB and sync queue",
   },
   zh: {
     ariaLabel: "设置",
@@ -333,7 +313,6 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
       editor: { label: "编辑器", description: "卡片编辑" },
       audio: { label: "音频", description: "语音和音效" },
       hotkey: { label: "Hotkey", description: "键盘操作" },
-      about: { label: "关于", description: "应用信息" },
     },
     languageOptions: {
       ja: { label: "日本語", caption: "日语" },
@@ -409,12 +388,6 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     questionVoiceDescription: "自动播放问题文本语音。",
     answerVoiceLabel: "答案语音",
     answerVoiceDescription: "自动播放答案文本语音。",
-    aboutTitle: "关于 FlashCard Master",
-    aboutDescription: "此工作区使用的基本信息。",
-    aboutWorkspaceDescription: "FlashCard Master 工作区",
-    aboutSearchDescription: "在工作区中搜索",
-    aboutLocalFirstTitle: "本地优先",
-    aboutLocalFirstDescription: "使用 LocalDB 和同步队列",
   },
 };
 
@@ -630,15 +603,6 @@ const SettingsWorkspaceScreen = () => {
           {activeSectionId === "hotkey" ? (
             <SettingsSectionBlock title={copy.sections.hotkey.label} description={copy.sections.hotkey.description}>
               {copy.hotkeys.map((hotkey) => <SettingKeyValue key={hotkey.keys} label={hotkey.label} value={<code>{hotkey.keys}</code>} />)}
-            </SettingsSectionBlock>
-          ) : null}
-          {activeSectionId === "about" ? (
-            <SettingsSectionBlock title={copy.aboutTitle} description={copy.aboutDescription}>
-              <div className="settings-workspace__about-grid">
-                <div className="settings-workspace__about-card"><Settings2 size={20} /><strong>Sivflow</strong><span>{copy.aboutWorkspaceDescription}</span></div>
-                <div className="settings-workspace__about-card"><Keyboard size={20} /><strong>⌘K / Ctrl K</strong><span>{copy.aboutSearchDescription}</span></div>
-                <div className="settings-workspace__about-card"><Code size={20} /><strong>{copy.aboutLocalFirstTitle}</strong><span>{copy.aboutLocalFirstDescription}</span></div>
-              </div>
             </SettingsSectionBlock>
           ) : null}
         </div>
