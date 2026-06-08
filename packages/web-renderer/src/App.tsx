@@ -1,5 +1,5 @@
-import { AppContent } from "./app/AppContent";
-import { AppProviders } from "./app/AppProviders";
+import { AppContent } from "@web-renderer/app/AppContent";
+import { AppProviders } from "@web-renderer/app/AppProviders";
 
 const App = () => (
   <AppProviders>

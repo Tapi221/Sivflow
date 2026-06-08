@@ -1,5 +1,5 @@
-import { hasDesktopBridge } from "../runtime";
-import type { DesktopBridgeApi } from "../desktopApi";
+import { hasDesktopBridge } from "@platform/runtime";
+import type { DesktopBridgeApi } from "@platform/desktopApi";
 
 const hasWindowDesktop = (): boolean => typeof window !== "undefined" && typeof window.desktop !== "undefined";
 
