@@ -38,6 +38,10 @@ const desktopApi: DesktopBridgeApi = {
   },
   ai: {
     generateOllama: (input) => invoke("ollama_generate", { input }),
+    listOllamaModels: async (input) => {
+      const result = await invoke<{ models: string[] }>("ollama_list_models", { input });
+      return result.models;
+    },
   },
   files: {
     readImportFile: (filePath: string) => invoke("desktop_import_read_file", { filePath }),
