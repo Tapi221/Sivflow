@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { CardPane } from "@/components/folder/panes/CardPane";
 import { PdfDocumentPane } from "@/features/pdf/PdfDocumentPane";
-import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
+import { useDocumentCommands } from "@/features/document/hooks/useDocumentCommands";
 import type { Card, DocumentItem } from "@/types";
 import type { WorkspaceEntityTab } from "./Tab";
 
