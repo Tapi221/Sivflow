@@ -13,13 +13,11 @@ const MONTH_START = startOfMonth(SELECTED_DATE);
 const MONTH_DAYS = Array.from({ length: 30 }, (_, index) =>
   addDays(MONTH_START, index),
 );
-
 const VIRTUAL_RAIL: ScheduleVirtualRail = {
   startDate: MONTH_START,
   anchorIndex: 0,
   totalDayCount: MONTH_DAYS.length,
 };
-
 const TIMED_EVENT: GoogleCalendarEvent = {
   id: "event-1",
   calendarId: "calendar-1",
@@ -30,18 +28,33 @@ const TIMED_EVENT: GoogleCalendarEvent = {
   accentColor: "#2f9f6b",
 };
 
+const renderCalendarListView = () =>
+  render(
+    <CalendarListView
+      days={MONTH_DAYS}
+      virtualRail={VIRTUAL_RAIL}
+      events={[TIMED_EVENT]}
+      selectedDate={SELECTED_DATE}
+    />,
+  );
+
 describe("CalendarListView", () => {
   it("イベント日と空日の両方を描画する", () => {
-    render(
-      <CalendarListView
-        days={MONTH_DAYS}
-        virtualRail={VIRTUAL_RAIL}
-        events={[TIMED_EVENT]}
-        selectedDate={SELECTED_DATE}
-      />,
-    );
+    renderCalendarListView();
 
     expect(screen.getByText("設計レビュー")).toBeTruthy();
     expect(screen.getAllByText("予定なし").length).toBeGreaterThan(0);
+  });
+
+  it("リスト表示のスクロール領域はスクロールバー非表示で右側の溝を予約しない", () => {
+    const { container } = renderCalendarListView();
+    const scrollViewport = container.querySelector(".scrollbar-hidden.overflow-y-auto");
+
+    expect(scrollViewport).toBeInstanceOf(HTMLDivElement);
+    expect(scrollViewport).toHaveClass("scrollbar-hidden");
+    expect(scrollViewport).not.toHaveClass("pr-1");
+    expect(scrollViewport).not.toHaveClass("pr-2");
+    expect(scrollViewport).not.toHaveClass("scrollbar-gutter-stable");
+    expect(scrollViewport).not.toHaveClass("[scrollbar-gutter:stable]");
   });
 });
