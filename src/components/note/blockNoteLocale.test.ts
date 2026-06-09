@@ -25,4 +25,11 @@ describe("blockNoteLocale", () => {
     expect(dictionary.slash_menu.check_list.title).toBe("チェック");
     expect(dictionary.slash_menu.check_list.subtext).toBe("チェックリスト");
   });
+
+  it("英語指定では日本語 slash menu 補正を適用しない", () => {
+    const dictionary = resolveBlockNoteDictionary({ documentLanguage: "en", navigatorLanguages: [], navigatorLanguage: undefined }) as { slash_menu: { heading: { subtext: string }; check_list: { title: string } } };
+
+    expect(dictionary.slash_menu.heading.subtext).not.toBe("大見出し");
+    expect(dictionary.slash_menu.check_list.title).not.toBe("チェック");
+  });
 });
