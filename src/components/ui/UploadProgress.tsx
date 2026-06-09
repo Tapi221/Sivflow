@@ -1,6 +1,7 @@
+import { LoadingSpinner } from "../common/LoadingSpinner";
 import { Button } from "./button";
 import { Progress } from "./progress";
-import { CheckCircle2, FileText, Loader2, X } from "@/ui/icons";
+import { CheckCircle2, FileText, X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 
 interface UploadProgressProps {
@@ -78,7 +79,7 @@ const UploadProgress = ({
 
       {status === "uploading" && (
         <div className="flex items-center gap-2 text-xs text-slate-400" role="status" aria-label="アップロード中">
-          <Loader2 className="w-3 h-3 animate-spin" />
+          <LoadingSpinner iconClassName="h-3 w-3 border" label="アップロード中" />
         </div>
       )}
 
