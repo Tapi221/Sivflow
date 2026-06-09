@@ -15,13 +15,6 @@ const PdfPerformanceTest = DEV_MODE
 const SelectionCaptureSandboxPage = DEV_MODE
   ? lazy(() => import("@/sandbox/2").then(({ SelectionCaptureSandboxPage }) => ({ default: SelectionCaptureSandboxPage })))
   : null;
-const BlockNoteSandboxPage = DEV_MODE
-  ? lazy(() =>
-    import("@/sandbox/blocknote").then(({ BlockNoteSandboxPage }) => ({
-      default: BlockNoteSandboxPage,
-    })),
-  )
-  : null;
 const KnowledgeSandboxPage = DEV_MODE
   ? lazy(() =>
     import("@/sandbox/logseq").then(({ LogseqSandboxPage }) => ({
@@ -133,13 +126,6 @@ export const getDevRouteElements = () => {
         <Route
           path="sandbox/2/*"
           element={withDevRouteFallback(<SelectionCaptureSandboxPage />)}
-        />
-      ) : null}
-
-      {BlockNoteSandboxPage ? (
-        <Route
-          path="sandbox/blocknote/*"
-          element={withDevRouteFallback(<BlockNoteSandboxPage />)}
         />
       ) : null}
 
