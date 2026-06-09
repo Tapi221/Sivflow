@@ -4,12 +4,28 @@ import { describe, expect, it } from "vitest";
 
 type CssRule = { selectors: string[]; body: string };
 
+type HiddenScrollbarStyleTarget = {
+  path: string;
+  selectors: readonly string[];
+  webkitSelectors: readonly string[];
+};
+
 const SCROLLBAR_STYLE_PATHS = [
   "src/styles/index.css",
   "src/styles/base/base.css",
 ] as const;
-const HIDDEN_SCROLLBAR_SELECTORS = [".scrollbar-hidden", ".calendar-year-view"] as const;
-const HIDDEN_WEBKIT_SCROLLBAR_SELECTORS = [".scrollbar-hidden::-webkit-scrollbar", ".calendar-year-view::-webkit-scrollbar"] as const;
+const HIDDEN_SCROLLBAR_STYLE_TARGETS: readonly HiddenScrollbarStyleTarget[] = [
+  {
+    path: "src/styles/base/utilities.css",
+    selectors: [".scrollbar-hidden"],
+    webkitSelectors: [".scrollbar-hidden::-webkit-scrollbar"],
+  },
+  {
+    path: "src/styles/features/calendar.css",
+    selectors: [".calendar-year-view"],
+    webkitSelectors: [".calendar-year-view::-webkit-scrollbar"],
+  },
+] as const;
 
 const readStyleFile = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8");
 
@@ -57,9 +73,9 @@ const expectHiddenScrollbarSelectorToNotReserveGutter = (css: string, selector: 
   const ruleBody = ruleBodies.join("\n");
 
   expect(ruleBodies.length).toBeGreaterThan(0);
-  expect(ruleBody).toContain("scrollbar-gutter: auto;");
-  expect(ruleBody).toContain("scrollbar-width: none;");
-  expect(ruleBody).not.toContain("scrollbar-gutter: stable;");
+  expect(ruleBody).toContain("scrollbar-gutter: auto");
+  expect(ruleBody).toContain("scrollbar-width: none");
+  expect(ruleBody).not.toContain("scrollbar-gutter: stable");
 };
 
 const expectScrollbarRevealSelectorsToUseHoverOnly = (css: string) => {
@@ -100,13 +116,15 @@ describe("グローバルCSSではネイティブスクロールバーを 1px �
   });
 
   it("非表示スクロールバーはスクロールバー溝を予約しない共通レイアウトにする", () => {
-    const css = readStyleFile("src/styles/index.css");
+    for (const target of HIDDEN_SCROLLBAR_STYLE_TARGETS) {
+      const css = readStyleFile(target.path);
 
-    for (const selector of HIDDEN_SCROLLBAR_SELECTORS) {
-      expectHiddenScrollbarSelectorToNotReserveGutter(css, selector);
-    }
-    for (const selector of HIDDEN_WEBKIT_SCROLLBAR_SELECTORS) {
-      expectSelectorRuleBodiesToContain(css, selector, ["display: none;", "width: 0;", "height: 0;"]);
+      for (const selector of target.selectors) {
+        expectHiddenScrollbarSelectorToNotReserveGutter(css, selector);
+      }
+      for (const selector of target.webkitSelectors) {
+        expectSelectorRuleBodiesToContain(css, selector, ["display: none;", "width: 0;", "height: 0;"]);
+      }
     }
   });
 
