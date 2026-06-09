@@ -38,7 +38,7 @@ const getLanguagePreferences = (preferences: BlockNoteLanguagePreferences = {}):
   const navigatorLanguages = preferences.navigatorLanguages ?? getNavigatorLanguages();
   const navigatorLanguage = preferences.navigatorLanguage ?? getNavigatorLanguage();
 
-  return toDefinedLanguages([documentLanguage, ...navigatorLanguages, navigatorLanguage]);
+  return toDefinedLanguages([...navigatorLanguages, navigatorLanguage, documentLanguage]);
 };
 
 const findBlockNoteLocale = (value: string): BlockNoteLocaleCode | undefined => {
