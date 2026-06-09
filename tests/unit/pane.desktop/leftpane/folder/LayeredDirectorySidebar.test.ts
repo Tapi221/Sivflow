@@ -35,7 +35,7 @@ vi.mock("@/features/search/store/useSearchStore", () => ({ useSearchStore: (sele
 vi.mock("@/hooks/folder/useFolderCommands", () => ({ useFolderCommands: () => ({ createFolder: mocks.createFolder, updateFolder: mocks.updateFolder, deleteFolder: mocks.deleteFolder }) }));
 vi.mock("@/hooks/folder/useFoldersRead", () => ({ useFoldersRead: () => ({ folders: mocks.rootFolders, loading: false, error: null }) }));
 vi.mock("@/pane.desktop/leftpane/folder/useFolderTagModeStore", () => ({ useFolderTagModeStore: (selector: (state: unknown) => unknown) => selector({ folderTagMode: "folder", setFolderTagMode: vi.fn() }) }));
-vi.mock("@/hooks/platform/useDocumentsRead", () => ({ useDocumentsRead: () => ({ documents: [], loading: false, error: null }) }));
+vi.mock("@/features/document/hooks/useDocumentsRead", () => ({ useDocumentsRead: () => ({ documents: [], loading: false, error: null }) }));
 vi.mock("@/pane.desktop/leftpane/folder/TagTreeSidebar", () => ({ TagTreeSidebar: () => React.createElement("aside", { "data-testid": "tag-tree-sidebar" }) }));
 vi.mock("@/pane.desktop/tab.desktopnative/hooks/useTabsStore", () => ({ useWorkspaceTabsStore: (selector: (state: unknown) => unknown) => selector(mocks.workspaceState) }));
 
