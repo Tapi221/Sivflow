@@ -7,9 +7,11 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
 import { releasePdfDocumentSource, toPdfDocumentLoadSource } from "./pdfDocumentSource";
-import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "./pdfPerformance";
 import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
+import { getPdfPageWindowKeepSet, getSafePdfPageNumber } from "./pdfPageWindow";
+import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "./pdfPerformance";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
+import type { PdfPageWindowMetric } from "./pdfPageWindow";
 import "./PdfPane.css";
 
 type PdfPaneProps = {
@@ -82,7 +84,12 @@ type NavigatorWithDeviceMemory = Navigator & {
 
 type PdfScrollEventName = "scroll" | "wheel" | "touchmove";
 
-const DEFAULT_PDF_PAGE = 1;
+type PdfPageElement = HTMLElement & {
+  dataset: HTMLElement["dataset"] & {
+    pageNumber?: string;
+  };
+};
+
 const PDF_HISTORY_LIMIT = 80;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
 const PDFJS_ASSET_BASE_URL = "/pdfjs/";
@@ -97,17 +104,14 @@ const PDF_DEFAULT_DEVICE_MEMORY_GB = 8;
 const PDF_RANGE_CHUNK_SIZE = 256 * 1024;
 const PDF_SCROLL_IDLE_DELAY_MS = 160;
 const PDF_VISIBLE_PAGE_CACHE_SIZE = 6;
-const PDF_VISIBLE_PAGE_CACHE_RADIUS = 2;
+const PDF_VISIBLE_PAGE_CACHE_OVERSCAN = 1;
 const PDF_SCROLLING_CLASS_NAME = "pdf-pane--scrolling";
 const PDF_SCROLL_CONTAINER_CLASS_NAME = "pdf-pane__scroll-container";
 const PDF_VIEWER_CLASS_NAME = "pdf-pane__viewer";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
-const getSafePageNumber = (pageNumber: number | null | undefined, pageCount: number): number => {
-  const normalizedPageNumber = Math.floor(pageNumber ?? DEFAULT_PDF_PAGE);
-  return Math.min(Math.max(normalizedPageNumber, DEFAULT_PDF_PAGE), Math.max(pageCount, DEFAULT_PDF_PAGE));
-};
+const getSafePageNumber = getSafePdfPageNumber;
 
 const getTrimmedHistory = (pages: number[]): number[] => {
   return pages.slice(-PDF_HISTORY_LIMIT);
@@ -140,22 +144,26 @@ const getApproxDeviceMemory = (): number => {
   return typeof deviceMemory === "number" && Number.isFinite(deviceMemory) ? deviceMemory : PDF_DEFAULT_DEVICE_MEMORY_GB;
 };
 
-const getPdfPageBufferKeepSet = (pageNumber: number, pageCount: number): Set<number> => {
-  const safePageNumber = getSafePageNumber(pageNumber, pageCount);
-  const firstPage = Math.max(DEFAULT_PDF_PAGE, safePageNumber - PDF_VISIBLE_PAGE_CACHE_RADIUS);
-  const lastPage = Math.min(Math.max(pageCount, DEFAULT_PDF_PAGE), safePageNumber + PDF_VISIBLE_PAGE_CACHE_RADIUS);
-  const idsToKeep = new Set<number>();
-
-  for (let page = firstPage; page <= lastPage; page += 1) idsToKeep.add(page);
-  return idsToKeep;
+const getPdfPageNumberFromElement = (element: PdfPageElement): number | null => {
+  const pageNumber = Number(element.dataset.pageNumber);
+  return Number.isFinite(pageNumber) ? pageNumber : null;
 };
 
-const resizePdfViewerPageBuffer = (pdfViewer: PdfViewerInstance, pageNumber: number = pdfViewer.currentPageNumber): void => {
+const getPdfVisiblePageMetrics = (viewerElement: HTMLElement): PdfPageWindowMetric[] => {
+  return [...viewerElement.querySelectorAll<PdfPageElement>(".page")].map((element) => ({
+    pageNumber: getPdfPageNumberFromElement(element) ?? 0,
+    offsetTop: element.offsetTop,
+    offsetHeight: element.offsetHeight,
+  }));
+};
+
+const resizePdfViewerPageBuffer = (pdfViewer: PdfViewerInstance, container?: HTMLElement | null, viewerElement?: HTMLElement | null, pageNumber: number = pdfViewer.currentPageNumber): void => {
   const pageCount = getPdfViewerPageCount(pdfViewer);
   if (pageCount <= 0) return;
   const pageBuffer = (pdfViewer as PdfViewerWithPageBuffer)._buffer;
   if (typeof pageBuffer?.resize !== "function") return;
-  pageBuffer.resize(Math.min(PDF_VISIBLE_PAGE_CACHE_SIZE, pageCount), getPdfPageBufferKeepSet(pageNumber, pageCount));
+  const idsToKeep = getPdfPageWindowKeepSet(viewerElement ? getPdfVisiblePageMetrics(viewerElement) : [], container?.scrollTop ?? 0, container?.clientHeight ?? 0, pageCount, { fallbackPageNumber: pageNumber, overscanPageCount: PDF_VISIBLE_PAGE_CACHE_OVERSCAN });
+  pageBuffer.resize(Math.min(Math.max(PDF_VISIBLE_PAGE_CACHE_SIZE, idsToKeep.size), pageCount), idsToKeep);
 };
 
 const createPdfViewerRuntimeOptions = (): PdfViewerRuntimeOptions => {
@@ -277,6 +285,12 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     void onViewerStateChangeRef.current?.(nextViewerState, options);
   }, []);
 
+  const resizeActivePdfViewerPageBuffer = useCallback((pageNumber?: number) => {
+    const pdfViewer = pdfViewerRef.current;
+    if (!pdfViewer) return;
+    resizePdfViewerPageBuffer(pdfViewer, scrollContainerRef.current, pdfViewerElementRef.current, pageNumber);
+  }, []);
+
   const setViewerPage = useCallback((pageNumber: number, options?: { recordHistory?: boolean }) => {
     const pdfViewer = pdfViewerRef.current;
     if (!pdfViewer) return;
@@ -287,9 +301,9 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const currentViewerState = viewerStateRef.current ?? {};
     const nextBackPages = shouldRecordHistory && safePageNumber !== currentPage ? getTrimmedHistory([...(currentViewerState.historyBackPages ?? []), currentPage]) : currentViewerState.historyBackPages;
     pdfViewer.currentPageNumber = safePageNumber;
-    resizePdfViewerPageBuffer(pdfViewer, safePageNumber);
+    resizeActivePdfViewerPageBuffer(safePageNumber);
     updateViewerState({ currentPage: safePageNumber, historyBackPages: nextBackPages, historyForwardPages: shouldRecordHistory ? [] : currentViewerState.historyForwardPages }, { persistence: "deferred" });
-  }, [updateViewerState]);
+  }, [resizeActivePdfViewerPageBuffer, updateViewerState]);
 
   const handleZoomIn = useCallback(() => {
     const pdfViewer = pdfViewerRef.current;
@@ -324,9 +338,9 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     if (!pdfViewer || !targetPage) return;
     const currentPage = getSafePageNumber(pdfViewer.currentPageNumber, getPdfViewerPageCount(pdfViewer));
     pdfViewer.currentPageNumber = targetPage;
-    resizePdfViewerPageBuffer(pdfViewer, targetPage);
+    resizeActivePdfViewerPageBuffer(targetPage);
     updateViewerState({ currentPage: targetPage, historyBackPages: historyBackPages.slice(0, -1), historyForwardPages: getTrimmedHistory([...historyForwardPages, currentPage]) }, { persistence: "deferred" });
-  }, [updateViewerState]);
+  }, [resizeActivePdfViewerPageBuffer, updateViewerState]);
 
   const handleGoForward = useCallback(() => {
     const pdfViewer = pdfViewerRef.current;
@@ -337,9 +351,9 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     if (!pdfViewer || !targetPage) return;
     const currentPage = getSafePageNumber(pdfViewer.currentPageNumber, getPdfViewerPageCount(pdfViewer));
     pdfViewer.currentPageNumber = targetPage;
-    resizePdfViewerPageBuffer(pdfViewer, targetPage);
+    resizeActivePdfViewerPageBuffer(targetPage);
     updateViewerState({ currentPage: targetPage, historyBackPages: getTrimmedHistory([...historyBackPages, currentPage]), historyForwardPages: historyForwardPages.slice(0, -1) }, { persistence: "deferred" });
-  }, [updateViewerState]);
+  }, [resizeActivePdfViewerPageBuffer, updateViewerState]);
 
   const handleSetMark = useCallback(() => {
     const pdfViewer = pdfViewerRef.current;
@@ -393,6 +407,10 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       });
     };
 
+    const resizeVisiblePageBuffer = (pageNumber?: number) => {
+      resizePdfViewerPageBuffer(pdfViewer, container, viewerElement, pageNumber);
+    };
+
     const setScrollOptimizationActive = (isActive: boolean) => {
       if (isScrollOptimizationActive === isActive) return;
       isScrollOptimizationActive = isActive;
@@ -410,7 +428,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       scrollIdleTimer = null;
       if (isCancelled) return;
       setScrollOptimizationActive(false);
-      resizePdfViewerPageBuffer(pdfViewer);
+      resizeVisiblePageBuffer();
     };
 
     const scheduleScrollIdle = () => {
@@ -428,7 +446,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         scrollFrame = null;
         if (isCancelled) return;
         setScrollOptimizationActive(true);
-        resizePdfViewerPageBuffer(pdfViewer);
+        resizeVisiblePageBuffer();
         scheduleScrollIdle();
       });
     };
@@ -439,7 +457,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       const pageNumber = pendingPageNumber;
       pendingPageNumber = null;
       if (viewerStateRef.current?.currentPage !== pageNumber) updateViewerState({ currentPage: pageNumber }, { persistence: "deferred" });
-      resizePdfViewerPageBuffer(pdfViewer, pageNumber);
+      resizeVisiblePageBuffer(pageNumber);
     };
 
     const requestPageChangeUpdate = (pageNumber: number) => {
@@ -473,7 +491,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       }
       const initialPageNumber = getSafePageNumber(viewerStateRef.current?.currentPage, loadedPdfDocument.numPages);
       pdfViewer.currentPageNumber = initialPageNumber;
-      resizePdfViewerPageBuffer(pdfViewer, initialPageNumber);
+      resizeVisiblePageBuffer(initialPageNumber);
       requestResponsiveScaleUpdate();
     }));
 
@@ -496,7 +514,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       if (isExplicitZoom) lastExplicitZoomAtRef.current = 0;
       if (viewerStateRef.current?.scale === scale && viewerStateRef.current?.fitMode === fitMode) return;
       updateViewerState({ scale, fitMode }, { persistence: isExplicitZoom ? "immediate" : "none" });
-      resizePdfViewerPageBuffer(pdfViewer);
+      resizeVisiblePageBuffer();
     }));
 
     void loadPdfDocument(source, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then((nextPdfDocument) => {
