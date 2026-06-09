@@ -118,7 +118,7 @@ export const useIosCalendarIntegration = () => {
         setIsLoadingEvents(false);
       }
     }
-  }, [supported]);
+  }, [setError, setEvents, setIsLoadingEvents, setLastSyncedAt, supported]);
 
   const loadCalendars = useCallback(async (): Promise<IosCalendarListItem[]> => {
     const nextCalendars = await fetchIosCalendars();
@@ -141,7 +141,7 @@ export const useIosCalendarIntegration = () => {
       calendars: nextCalendars,
       range: rangeRef.current,
     });
-  }, [loadEvents]);
+  }, [loadEvents, setRange]);
 
   const ensureWritableCalendars = useCallback(async (): Promise<IosCalendarListItem[]> => {
     if (!supported) throw new Error(IOS_CALENDAR_UNSUPPORTED_ERROR);
@@ -164,7 +164,7 @@ export const useIosCalendarIntegration = () => {
     setIsEnabled(true);
 
     return calendarsRef.current.length > 0 ? calendarsRef.current : loadCalendars();
-  }, [loadCalendars, supported]);
+  }, [loadCalendars, setIsEnabled, setPermissionStatus, supported]);
 
   useEffect(() => {
     let cancelled = false;
@@ -317,7 +317,7 @@ export const useIosCalendarIntegration = () => {
       calendars: nextCalendars,
       range: rangeRef.current,
     });
-  }, [connect, loadCalendars, loadEvents]);
+  }, [connect, loadCalendars, loadEvents, setIsEnabled]);
 
   const createEvent = useCallback(async (event: IosCalendarWritableEventInput): Promise<IosCalendarEvent> => {
     setIsWritingEvent(true);
@@ -335,7 +335,7 @@ export const useIosCalendarIntegration = () => {
     } finally {
       if (isMountedRef.current) setIsWritingEvent(false);
     }
-  }, [ensureWritableCalendars, syncCurrentRange]);
+  }, [ensureWritableCalendars, setError, setIsWritingEvent, syncCurrentRange]);
 
   const updateEvent = useCallback(async (event: IosCalendarWritableEventUpdateInput): Promise<IosCalendarEvent> => {
     setIsWritingEvent(true);
@@ -353,7 +353,7 @@ export const useIosCalendarIntegration = () => {
     } finally {
       if (isMountedRef.current) setIsWritingEvent(false);
     }
-  }, [ensureWritableCalendars, syncCurrentRange]);
+  }, [ensureWritableCalendars, setError, setIsWritingEvent, syncCurrentRange]);
 
   const deleteEvent = useCallback(async (event: IosCalendarWritableEventDeleteInput): Promise<void> => {
     setIsWritingEvent(true);
@@ -370,7 +370,7 @@ export const useIosCalendarIntegration = () => {
     } finally {
       if (isMountedRef.current) setIsWritingEvent(false);
     }
-  }, [ensureWritableCalendars, syncCurrentRange]);
+  }, [ensureWritableCalendars, setError, setIsWritingEvent, syncCurrentRange]);
 
   useEffect(() => {
     if (!supported) return;
