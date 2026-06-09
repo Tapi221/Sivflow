@@ -36,10 +36,18 @@ const createPdfDocumentUrlSource = (url: string): PdfDocumentSource => ({
 
 const createPdfDocumentObjectUrlSourceFromBlob = (blob: Blob): PdfDocumentSource => {
   const url = URL.createObjectURL(blob);
+  let isRevoked = false;
+
+  const revoke = () => {
+    if (isRevoked) return;
+    isRevoked = true;
+    URL.revokeObjectURL(url);
+  };
+
   return {
     type: "url",
     url,
-    revoke: () => URL.revokeObjectURL(url),
+    revoke,
   };
 };
 
