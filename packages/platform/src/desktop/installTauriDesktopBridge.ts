@@ -36,6 +36,9 @@ const desktopApi: DesktopBridgeApi = {
   shell: {
     openExternal: (url: string) => invoke<void>("shell_open_external", { url }),
   },
+  ai: {
+    generateOllama: (input) => invoke("ollama_generate", { input }),
+  },
   files: {
     readImportFile: (filePath: string) => invoke("desktop_import_read_file", { filePath }),
     selectImportFiles: () => invoke<string[]>("desktop_import_select_files"),
