@@ -36,7 +36,7 @@
   .app-modal-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 80;
+    z-index: 100;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -45,6 +45,7 @@
   }
 
   .app-modal-content-frame {
+    z-index: 100;
     padding: 50px;
   }
 
