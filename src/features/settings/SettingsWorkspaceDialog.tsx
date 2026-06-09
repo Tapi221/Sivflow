@@ -16,8 +16,8 @@ const SettingsWorkspaceDialog = ({ open, onOpenChange }: SettingsWorkspaceDialog
   if (!open) return null;
 
   return (
-    <div className="settings-workspace-dialog__backdrop" onMouseDown={handleBackdropMouseDown}>
-      <section className="settings-workspace-dialog" aria-label="Settings">
+    <div className="app-modal-backdrop settings-workspace-dialog__backdrop" onMouseDown={handleBackdropMouseDown}>
+      <section className="app-modal-surface settings-workspace-dialog" aria-label="Settings">
         <SettingsWorkspaceScreen />
       </section>
     </div>
