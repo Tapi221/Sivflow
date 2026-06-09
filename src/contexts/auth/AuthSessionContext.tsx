@@ -1,11 +1,11 @@
 import { onAuthStateChanged, signOut, type User as FirebaseUser } from "firebase/auth";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { bootstrapUser } from "@/hooks/bootstrap/useUserBootstrap";
 import { hydrateServerStoredGoogleCalendarAccounts } from "@/integration/googlecalendar-integration/gcal.server-account-list";
 import { auth } from "@/services/firebase";
 import { initializeDB, resetLocalDBForLogout } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import { AuthSessionContext, type AuthSessionProviderProps, type AuthSessionContextType } from "./AuthSessionContextCore";
+import { bootstrapUser } from "./bootstrapUser";
 
 const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
