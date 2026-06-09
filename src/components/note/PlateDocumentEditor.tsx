@@ -32,18 +32,6 @@ const NOTE_SAVE_DEBOUNCE_MS = 500;
 const NOTE_CONTENT_VERSION = 2;
 const EMPTY_TEXT_NODE: PlateTextNode = { text: "" };
 const SUPPORTED_PLATE_BLOCK_TYPES = new Set(["p", "h1", "h2", "h3", "blockquote"]);
-const NOTE_PLATE_COMPONENTS = {
-  blockquote: BlockquoteElement,
-  bold: StrongLeaf,
-  code: CodeLeaf,
-  h1: H1Element,
-  h2: H2Element,
-  h3: H3Element,
-  italic: ItalicLeaf,
-  p: ParagraphElement,
-  strikethrough: StrikethroughLeaf,
-  underline: UnderlineLeaf,
-};
 const NOTE_PLATE_PLUGINS = [ParagraphPlugin, BasicBlocksPlugin, BasicMarksPlugin];
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -158,6 +146,19 @@ const UnderlineLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="u" />
 const StrikethroughLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="s" />;
 
 const CodeLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="code" className="rounded-[5px] bg-[#f1f1f4] px-1 py-0.5 font-mono text-[0.92em] text-[#111827]" />;
+
+const NOTE_PLATE_COMPONENTS = {
+  blockquote: BlockquoteElement,
+  bold: StrongLeaf,
+  code: CodeLeaf,
+  h1: H1Element,
+  h2: H2Element,
+  h3: H3Element,
+  italic: ItalicLeaf,
+  p: ParagraphElement,
+  strikethrough: StrikethroughLeaf,
+  underline: UnderlineLeaf,
+};
 
 const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
   const initialValue = useMemo(() => toInitialPlateValue(note.content), [note.content]);
