@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createBlocksuiteAffineEditor, createBlocksuiteNoteContent, readBlocksuiteText, type BlocksuiteAffineEditor } from "./AffineDocumentEditor.blocksuite";
 import type { Note } from "@/types";
 
@@ -54,7 +54,7 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
   const onChangeRef = useRef(onChange);
   const saveTimerRef = useRef<number | null>(null);
   const latestSavedTextRef = useRef<string>(note.contentText ?? "");
-  const [isEmpty, setIsEmpty] = useMemo(() => [!hasNoteContent(note), (nextIsEmpty: boolean) => void nextIsEmpty] as const, [note]);
+  const [isEmpty, setIsEmpty] = useState(() => !hasNoteContent(note));
 
   onChangeRef.current = onChange;
 
@@ -67,7 +67,7 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
     if (contentText === latestSavedTextRef.current) return;
     latestSavedTextRef.current = contentText;
     void onChangeRef.current({ content: createBlocksuiteNoteContent(editor.doc, host, contentText), contentText, contentVersion: 2, editor: "affine" });
-  }, [setIsEmpty]);
+  }, []);
 
   const scheduleSave = useCallback(() => {
     if (saveTimerRef.current !== null) {
@@ -88,6 +88,7 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
     editorRef.current = null;
     renderLoadingSpinner(host);
     latestSavedTextRef.current = note.contentText ?? "";
+    setIsEmpty(!hasNoteContent(note));
 
     void createBlocksuiteAffineEditor(note).then((editor) => {
       if (isDisposed) return;
