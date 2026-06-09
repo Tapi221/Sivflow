@@ -22,6 +22,7 @@ type PdfPaneProps = {
     standardFontDataUrl?: string;
     opaqueCanvas?: boolean;
   };
+  onLoadError?: (error: unknown) => void;
   onViewerStateChange?: (viewerState: PdfViewerState, options?: PdfViewerStateChangeOptions) => Promise<void> | void;
 };
 
@@ -183,7 +184,7 @@ const applyPdfViewerZoom = (pdfViewer: PdfViewerInstance, direction: PdfViewerZo
   zoomableViewer.decreaseScale();
 };
 
-const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewerStateChange }: PdfPaneProps) => {
+const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadError, onViewerStateChange }: PdfPaneProps) => {
   const viewerEnableXfa = viewerOptions?.enableXfa;
   const viewerUseSystemFonts = viewerOptions?.useSystemFonts;
   const viewerCMapUrl = viewerOptions?.cMapUrl;
@@ -193,6 +194,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
   const pdfViewerElementRef = useRef<HTMLDivElement | null>(null);
   const pdfViewerRef = useRef<PdfViewerInstance | null>(null);
   const viewerStateRef = useRef<PdfViewerState | null>(viewerState);
+  const onLoadErrorRef = useRef(onLoadError);
   const onViewerStateChangeRef = useRef(onViewerStateChange);
   const isApplyingFitScaleRef = useRef(false);
   const lastExplicitZoomAtRef = useRef(0);
@@ -200,6 +202,10 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
   useEffect(() => {
     viewerStateRef.current = viewerState;
   }, [viewerState]);
+
+  useEffect(() => {
+    onLoadErrorRef.current = onLoadError;
+  }, [onLoadError]);
 
   useEffect(() => {
     onViewerStateChangeRef.current = onViewerStateChange;
@@ -381,6 +387,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
       recordPdfPerformanceMeasure(`${performanceTraceName}.toError`, `${performanceTraceName}.start`, `${performanceTraceName}.error`);
       if (isCancelled) return;
       console.warn("[PdfPane] PDF load failed", error);
+      onLoadErrorRef.current?.(error);
     }).finally(() => {
       if (!isCancelled) setIsLoading(false);
     });
