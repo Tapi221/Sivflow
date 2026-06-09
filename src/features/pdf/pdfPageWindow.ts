@@ -22,10 +22,46 @@ const getNormalizedPdfPageWindowOverscan = (overscanPageCount: number | null | u
   return Math.max(0, Math.floor(overscanPageCount));
 };
 
+const isValidPdfPageWindowMetric = (metric: PdfPageWindowMetric, pageCount: number): boolean => {
+  return Number.isFinite(metric.pageNumber) && Number.isFinite(metric.offsetTop) && Number.isFinite(metric.offsetHeight) && metric.offsetHeight > 0 && metric.pageNumber >= DEFAULT_PDF_PAGE && metric.pageNumber <= pageCount;
+};
+
 const isPdfPageMetricVisible = (metric: PdfPageWindowMetric, viewportTop: number, viewportBottom: number): boolean => {
-  if (metric.offsetHeight <= 0) return false;
   const pageBottom = metric.offsetTop + metric.offsetHeight;
   return pageBottom >= viewportTop && metric.offsetTop <= viewportBottom;
+};
+
+const getPdfPageWindowScanStartIndex = (pageMetrics: PdfPageWindowMetric[], viewportTop: number): number => {
+  let low = 0;
+  let high = pageMetrics.length;
+
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    const metric = pageMetrics[middle];
+    const pageBottom = metric.offsetTop + metric.offsetHeight;
+
+    if (pageBottom < viewportTop) {
+      low = middle + 1;
+    } else {
+      high = middle;
+    }
+  }
+
+  return low;
+};
+
+const getPdfVisiblePageNumbers = (pageMetrics: PdfPageWindowMetric[], viewportTop: number, viewportBottom: number, pageCount: number): number[] => {
+  const visiblePageNumbers: number[] = [];
+  const startIndex = getPdfPageWindowScanStartIndex(pageMetrics, viewportTop);
+
+  for (let index = startIndex; index < pageMetrics.length; index += 1) {
+    const metric = pageMetrics[index];
+    if (!isValidPdfPageWindowMetric(metric, pageCount)) continue;
+    if (metric.offsetTop > viewportBottom) break;
+    if (isPdfPageMetricVisible(metric, viewportTop, viewportBottom)) visiblePageNumbers.push(getSafePdfPageNumber(metric.pageNumber, pageCount));
+  }
+
+  return visiblePageNumbers;
 };
 
 const getPdfPageWindowKeepSet = (pageMetrics: PdfPageWindowMetric[], viewportTop: number, viewportHeight: number, pageCount: number, options: PdfPageWindowOptions = {}): Set<number> => {
@@ -33,11 +69,7 @@ const getPdfPageWindowKeepSet = (pageMetrics: PdfPageWindowMetric[], viewportTop
   const safeViewportTop = Number.isFinite(viewportTop) ? viewportTop : 0;
   const safeViewportHeight = Number.isFinite(viewportHeight) ? Math.max(0, viewportHeight) : 0;
   const viewportBottom = safeViewportTop + safeViewportHeight;
-  const visiblePageNumbers = pageMetrics
-    .filter((metric) => Number.isFinite(metric.pageNumber) && Number.isFinite(metric.offsetTop) && Number.isFinite(metric.offsetHeight))
-    .filter((metric) => metric.pageNumber >= DEFAULT_PDF_PAGE && metric.pageNumber <= safePageCount)
-    .filter((metric) => isPdfPageMetricVisible(metric, safeViewportTop, viewportBottom))
-    .map((metric) => getSafePdfPageNumber(metric.pageNumber, safePageCount));
+  const visiblePageNumbers = getPdfVisiblePageNumbers(pageMetrics, safeViewportTop, viewportBottom, safePageCount);
 
   if (visiblePageNumbers.length === 0) return new Set([getSafePdfPageNumber(options.fallbackPageNumber, safePageCount)]);
 
