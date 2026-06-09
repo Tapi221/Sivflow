@@ -1,6 +1,6 @@
-import { memo, useCallback, useMemo, useRef, useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { memo, useCallback, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/contexts/ToastContext";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
@@ -138,7 +138,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
     void handleCreateCardFromAnswer(question, "");
   }, [appendMessages, handleCreateCardFromAnswer, isCreating, pendingQuestion]);
 
-  const handleInputKeyDown = useCallback((event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleInputKeyDown = useCallback((event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
 
     event.preventDefault();
