@@ -6,7 +6,7 @@ import "pdfjs-dist/legacy/web/pdf_viewer.css";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
-import { toPdfDocumentLoadSource } from "./pdfDocumentSource";
+import { releasePdfDocumentSource, toPdfDocumentLoadSource } from "./pdfDocumentSource";
 import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
 
@@ -58,6 +58,16 @@ type PdfScaleChangingEvent = {
   scale?: number;
 };
 
+type PdfViewerRuntimeOptions = {
+  enableOptimizedPartialRendering: boolean;
+  maxCanvasPixels?: number;
+  removePageBorders: boolean;
+};
+
+type NavigatorWithDeviceMemory = Navigator & {
+  deviceMemory?: number;
+};
+
 const DEFAULT_PDF_PAGE = 1;
 const PDF_HISTORY_LIMIT = 80;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
@@ -67,6 +77,9 @@ const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 767;
 const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 1_000;
+const PDF_LOW_MEMORY_DEVICE_MAX_GB = 4;
+const PDF_LOW_MEMORY_MAX_CANVAS_PIXELS = 16 * 1024 * 1024;
+const PDF_DEFAULT_DEVICE_MEMORY_GB = 8;
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -98,6 +111,21 @@ const shouldHandlePdfKeyboardEvent = (event: KeyboardEvent): boolean => {
   if (!target) return true;
   const tagName = target.tagName.toLowerCase();
   return tagName !== "input" && tagName !== "textarea" && !target.isContentEditable;
+};
+
+const getApproxDeviceMemory = (): number => {
+  const navigatorLike = globalThis.navigator as NavigatorWithDeviceMemory | undefined;
+  const deviceMemory = navigatorLike?.deviceMemory;
+  return typeof deviceMemory === "number" && Number.isFinite(deviceMemory) ? deviceMemory : PDF_DEFAULT_DEVICE_MEMORY_GB;
+};
+
+const createPdfViewerRuntimeOptions = (): PdfViewerRuntimeOptions => {
+  const isLowMemoryDevice = getApproxDeviceMemory() <= PDF_LOW_MEMORY_DEVICE_MAX_GB;
+  return {
+    enableOptimizedPartialRendering: true,
+    maxCanvasPixels: isLowMemoryDevice ? PDF_LOW_MEMORY_MAX_CANVAS_PIXELS : undefined,
+    removePageBorders: true,
+  };
 };
 
 const createPdfDocumentLoadOptions = (viewerOptions: PdfPaneProps["viewerOptions"]) => {
@@ -271,7 +299,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
     let resizeFrame: number | null = null;
     const eventBus = new EventBus() as PdfEventBusLike;
     const linkService = new PDFLinkService({ eventBus });
-    const pdfViewer = new PDFViewer({ container, eventBus, linkService, viewer: viewerElement });
+    const pdfViewer = new PDFViewer({ container, eventBus, linkService, viewer: viewerElement, ...createPdfViewerRuntimeOptions() });
     const removeEventListeners: Array<() => void> = [];
 
     const setFitScale = () => {
@@ -354,6 +382,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onViewe
       window.removeEventListener("orientationchange", requestResponsiveScaleUpdate);
       removeEventListeners.forEach((removeEventListener) => removeEventListener());
       releasePdfViewerDocument(pdfViewer, linkService, loadedPdfDocument);
+      releasePdfDocumentSource(source);
       viewerElement.replaceChildren();
       if (pdfViewerRef.current === pdfViewer) pdfViewerRef.current = null;
     };
