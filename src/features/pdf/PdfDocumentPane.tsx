@@ -83,7 +83,9 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   const { currentUser } = useAuthSession();
   const currentUserId = currentUser?.uid ?? null;
   const persistedSourceUrl = useMemo(() => resolvePdfDocumentSourceUrl(document), [document.blobUrl, document.downloadUrl, document.googleDriveWebContentLink, document.googleDriveWebViewLink, document.localUrl, document.remoteUrl]);
-  const persistedSource = useMemo(() => createPersistedPdfDocumentSource(persistedSourceUrl), [persistedSourceUrl]);
+  const [failedPersistedSourceUrl, setFailedPersistedSourceUrl] = useState<string | null>(null);
+  const activePersistedSourceUrl = persistedSourceUrl && persistedSourceUrl !== failedPersistedSourceUrl ? persistedSourceUrl : null;
+  const persistedSource = useMemo(() => createPersistedPdfDocumentSource(activePersistedSourceUrl), [activePersistedSourceUrl]);
   const [localSource, setLocalSource] = useState<LocalPdfSourceState>(() => createPendingLocalPdfSourceState(document.id));
   const isLocalSourceForCurrentDocument = localSource.documentId === document.id;
   const activeLocalSource = isLocalSourceForCurrentDocument ? localSource : createPendingLocalPdfSourceState(document.id);
@@ -128,6 +130,16 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     clearViewerStateSaveTimer();
     viewerStateSaveTimerRef.current = globalThis.setTimeout(flushPendingViewerStateSave, PDF_VIEWER_STATE_SAVE_DEBOUNCE_MS);
   }, [clearViewerStateSaveTimer, flushPendingViewerStateSave, onDocumentUpdate, persistViewerState]);
+
+  const handlePdfLoadError = useCallback((error: unknown) => {
+    if (!activePersistedSourceUrl) return;
+    recordPdfPerformanceMark("viewer.load.persistedSourceFailed", { detail: { documentId: document.id, message: getErrorMessage(error, PDF_SOURCE_MISSING_ERROR_MESSAGE), sourceUrl: activePersistedSourceUrl, sizeBytes: document.sizeBytes ?? null } });
+    setFailedPersistedSourceUrl(activePersistedSourceUrl);
+  }, [activePersistedSourceUrl, document.id, document.sizeBytes]);
+
+  useEffect(() => {
+    setFailedPersistedSourceUrl(null);
+  }, [document.id, persistedSourceUrl]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -215,7 +227,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     return <div className={statusClassName}>{activeLocalSource.error ?? PDF_SOURCE_MISSING_ERROR_MESSAGE}</div>;
   }
 
-  return <PdfPane source={source} className={paneClassName} viewerState={document.viewerState ?? null} onViewerStateChange={handleViewerStateChange} />;
+  return <PdfPane source={source} className={paneClassName} viewerState={document.viewerState ?? null} onLoadError={handlePdfLoadError} onViewerStateChange={handleViewerStateChange} />;
 };
 
 export { PdfDocumentPane };
