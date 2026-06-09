@@ -20,7 +20,8 @@ type BlocksuiteDocCollection = {
 
 type BlocksuiteDoc = {
   addBlock: (flavour: string, props: Record<string, unknown>, parent?: string) => string;
-  getBlockByFlavour?: (flavour: string) => unknown[];
+  getBlockByFlavour?: (flavour: string | string[]) => unknown[];
+  getBlocksByFlavour?: (flavour: string | string[]) => unknown[];
   load: (initializer?: () => void) => Promise<void> | void;
   toJSON?: () => unknown;
 };
@@ -31,13 +32,19 @@ type BlocksuiteEditorElement = HTMLElement & {
 };
 
 type BlocksuiteBlockModel = {
+  children?: unknown[];
+  flavour?: string;
+  props?: unknown;
   text?: unknown;
 };
 
 type NoteRecordBlock = {
   rows?: unknown;
   text?: unknown;
+  type?: unknown;
 };
+
+type SerializableNoteBlock = { text: string; type: "paragraph" } | { rows: string[][]; type: "table" };
 
 type BlocksuiteAffineEditor = {
   doc: BlocksuiteDoc;
@@ -52,6 +59,7 @@ const NOTE_PARAGRAPH_FLAVOUR = "affine:paragraph";
 const NOTE_PAGE_FLAVOUR = "affine:page";
 const NOTE_SURFACE_FLAVOUR = "affine:surface";
 const NOTE_NOTE_FLAVOUR = "affine:note";
+const NOTE_TABLE_FLAVOUR = "affine:table";
 const NOTE_EDITOR_STYLE = { display: "block", height: "100%", minHeight: "0", width: "100%" };
 
 let runtimePromise: Promise<BlocksuiteRuntime> | null = null;
@@ -60,10 +68,14 @@ const asArray = (value: unknown): unknown[] | null => Array.isArray(value) ? val
 
 const asConstructor = <T>(value: unknown): T | null => typeof value === "function" ? value as T : null;
 
-const getRowsText = (rows: unknown): string => {
-  if (!Array.isArray(rows)) return "";
-  return rows.map((row) => Array.isArray(row) ? row.map((cell) => String(cell ?? "")).join("\t") : "").filter(Boolean).join("\n");
+const asRecord = (value: unknown): Record<string, unknown> | null => value && typeof value === "object" ? value as Record<string, unknown> : null;
+
+const normalizeRows = (rows: unknown): string[][] => {
+  if (!Array.isArray(rows)) return [];
+  return rows.map((row) => Array.isArray(row) ? row.map((cell) => String(cell ?? "")) : [String(row ?? "")]).filter((row) => row.some((cell) => cell.trim().length > 0));
 };
+
+const getRowsText = (rows: unknown): string => normalizeRows(rows).map((row) => row.join("\t")).filter(Boolean).join("\n");
 
 const getRecordBlockText = (block: NoteRecordBlock): string => typeof block.text === "string" ? block.text : getRowsText(block.rows);
 
@@ -99,26 +111,71 @@ const loadRuntime = async (): Promise<BlocksuiteRuntime> => {
   return runtimePromise;
 };
 
-const getRecordText = (content: NoteBlockContent | undefined): string => {
-  const record = Array.isArray(content) ? content[0] : null;
-  if (!record || typeof record !== "object") return "";
-  if (record.type !== NOTE_CONTENT_TYPE && record.type !== LEGACY_TEXT_CONTENT_TYPE) return "";
-  if (typeof record.text === "string") return record.text;
-  if (!Array.isArray(record.blocks)) return "";
-  return record.blocks.map((block) => block && typeof block === "object" ? getRecordBlockText(block as NoteRecordBlock) : "").filter(Boolean).join("\n");
+const getRecordBlocks = (content: NoteBlockContent | undefined): SerializableNoteBlock[] | null => {
+  const record = Array.isArray(content) ? asRecord(content[0]) : null;
+  if (!record || (record.type !== NOTE_CONTENT_TYPE && record.type !== LEGACY_TEXT_CONTENT_TYPE) || !Array.isArray(record.blocks)) return null;
+  const blocks = record.blocks.flatMap((block): SerializableNoteBlock[] => {
+    const blockRecord = asRecord(block) as NoteRecordBlock | null;
+    if (!blockRecord) return [];
+    const rows = normalizeRows(blockRecord.rows);
+    if (blockRecord.type === "table" || rows.length > 0) return [{ rows, type: "table" }];
+    return [{ text: getRecordBlockText(blockRecord), type: "paragraph" }];
+  });
+  return blocks.length > 0 ? blocks : null;
 };
 
-const getInitialParagraphs = (note: Note): string[] => {
+const getRecordText = (content: NoteBlockContent | undefined): string => {
+  const record = Array.isArray(content) ? asRecord(content[0]) : null;
+  if (!record || (record.type !== NOTE_CONTENT_TYPE && record.type !== LEGACY_TEXT_CONTENT_TYPE)) return "";
+  if (typeof record.text === "string") return record.text;
+  if (!Array.isArray(record.blocks)) return "";
+  return record.blocks.map((block) => {
+    const blockRecord = asRecord(block) as NoteRecordBlock | null;
+    return blockRecord ? getRecordBlockText(blockRecord) : "";
+  }).filter(Boolean).join("\n");
+};
+
+const getInitialBlocks = (note: Note): SerializableNoteBlock[] => {
+  const recordBlocks = getRecordBlocks(note.content);
+  if (recordBlocks) return recordBlocks;
   const text = note.contentText ?? getRecordText(note.content);
-  const paragraphs = text.split("\n").map((line) => line.trimEnd());
-  return paragraphs.length > 0 ? paragraphs : [""];
+  return text.split("\n").map((line) => ({ text: line.trimEnd(), type: "paragraph" }));
+};
+
+const getOrder = (index: number): string => String(index).padStart(6, "0");
+
+const getTableProps = (runtime: BlocksuiteRuntime, rows: string[][]): Record<string, unknown> => {
+  const normalizedRows = rows.length > 0 ? rows : [[""]];
+  const columnCount = Math.max(1, ...normalizedRows.map((row) => row.length));
+  const rowRecords: Record<string, Record<string, string>> = {};
+  const columnRecords: Record<string, Record<string, string>> = {};
+  const cells: Record<string, Record<string, unknown>> = {};
+  for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) {
+    const columnId = `column-${columnIndex}`;
+    columnRecords[columnId] = { columnId, order: getOrder(columnIndex) };
+  }
+  normalizedRows.forEach((row, rowIndex) => {
+    const rowId = `row-${rowIndex}`;
+    rowRecords[rowId] = { order: getOrder(rowIndex), rowId };
+    for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) {
+      const columnId = `column-${columnIndex}`;
+      cells[`${rowId}:${columnId}`] = { text: new runtime.Text(row[columnIndex] ?? "") };
+    }
+  });
+  return { rows: rowRecords, columns: columnRecords, cells };
 };
 
 const getBlockModel = (block: unknown): BlocksuiteBlockModel | null => {
-  if (!block || typeof block !== "object") return null;
-  const blockRecord = block as Record<string, unknown>;
+  const blockRecord = asRecord(block);
+  if (!blockRecord) return null;
   const model = blockRecord.model;
-  return model && typeof model === "object" ? model as BlocksuiteBlockModel : blockRecord as BlocksuiteBlockModel;
+  return asRecord(model) ? model as BlocksuiteBlockModel : blockRecord as BlocksuiteBlockModel;
+};
+
+const getBlockProps = (block: unknown): Record<string, unknown> => {
+  const model = getBlockModel(block);
+  if (!model) return {};
+  return asRecord(model.props) ?? model as Record<string, unknown>;
 };
 
 const getTextValue = (value: unknown): string => {
@@ -128,13 +185,45 @@ const getTextValue = (value: unknown): string => {
   return String(value);
 };
 
+const getBlocksByFlavour = (doc: BlocksuiteDoc, flavour: string | string[]): unknown[] => doc.getBlocksByFlavour?.(flavour) ?? doc.getBlockByFlavour?.(flavour) ?? [];
+
+const getSortedRecords = (value: unknown, idKey: string): Record<string, unknown>[] => Object.values(asRecord(value) ?? {}).map((item) => asRecord(item)).filter((item): item is Record<string, unknown> => Boolean(item)).sort((first, second) => String(first.order ?? first[idKey] ?? "").localeCompare(String(second.order ?? second[idKey] ?? "")));
+
+const getTableRowsFromModel = (model: BlocksuiteBlockModel): string[][] => {
+  const props = getBlockProps(model);
+  const rows = getSortedRecords(props.rows, "rowId");
+  const columns = getSortedRecords(props.columns, "columnId");
+  const cells = asRecord(props.cells) ?? {};
+  return rows.map((row) => columns.map((column) => {
+    const cell = asRecord(cells[`${String(row.rowId ?? "")}:${String(column.columnId ?? "")}`]);
+    return getTextValue(cell?.text);
+  }));
+};
+
+const getNoteChildModels = (doc: BlocksuiteDoc): BlocksuiteBlockModel[] => {
+  const note = getBlocksByFlavour(doc, NOTE_NOTE_FLAVOUR).map(getBlockModel).find(Boolean);
+  return Array.isArray(note?.children) ? note.children.map(getBlockModel).filter((model): model is BlocksuiteBlockModel => Boolean(model)) : [];
+};
+
+const serializeBlocksuiteBlocks = (doc: BlocksuiteDoc): SerializableNoteBlock[] => {
+  return getNoteChildModels(doc).flatMap((model): SerializableNoteBlock[] => {
+    if (model.flavour === NOTE_TABLE_FLAVOUR) return [{ rows: getTableRowsFromModel(model), type: "table" }];
+    const props = getBlockProps(model);
+    return [{ text: getTextValue(props.text ?? model.text), type: "paragraph" }];
+  });
+};
+
 const initializeBlocksuiteDoc = async (runtime: BlocksuiteRuntime, doc: BlocksuiteDoc, note: Note): Promise<void> => {
   await doc.load(() => {
     const pageId = doc.addBlock(NOTE_PAGE_FLAVOUR, { title: new runtime.Text(note.title.trim() || NOTE_EDITOR_DEFAULT_TITLE) });
     doc.addBlock(NOTE_SURFACE_FLAVOUR, {}, pageId);
     const noteId = doc.addBlock(NOTE_NOTE_FLAVOUR, {}, pageId);
-    for (const paragraph of getInitialParagraphs(note)) {
-      doc.addBlock(NOTE_PARAGRAPH_FLAVOUR, { text: new runtime.Text(paragraph) }, noteId);
+    for (const block of getInitialBlocks(note)) {
+      if (block.type === "table") {
+        doc.addBlock(NOTE_TABLE_FLAVOUR, getTableProps(runtime, block.rows), noteId);
+      } else {
+        doc.addBlock(NOTE_PARAGRAPH_FLAVOUR, { text: new runtime.Text(block.text) }, noteId);
+      }
     }
   });
 };
@@ -159,12 +248,11 @@ const createBlocksuiteAffineEditor = async (note: Note): Promise<BlocksuiteAffin
 };
 
 const readBlocksuiteText = (doc: BlocksuiteDoc, host: HTMLDivElement): string => {
-  const paragraphBlocks = doc.getBlockByFlavour?.(NOTE_PARAGRAPH_FLAVOUR) ?? [];
-  const paragraphText = paragraphBlocks.map((block) => getTextValue(getBlockModel(block)?.text)).join("\n").trimEnd();
-  return paragraphText.length > 0 ? paragraphText : host.innerText.trimEnd();
+  const text = serializeBlocksuiteBlocks(doc).map((block) => block.type === "table" ? block.rows.map((row) => row.join("\t")).join("\n") : block.text).filter(Boolean).join("\n").trimEnd();
+  return text.length > 0 ? text : host.innerText.trimEnd();
 };
 
-const createBlocksuiteNoteContent = (doc: BlocksuiteDoc, host: HTMLDivElement, contentText: string): NoteBlockContent => [{ type: NOTE_CONTENT_TYPE, text: contentText, snapshot: doc.toJSON?.() ?? null, html: host.innerHTML, updatedAt: new Date().toISOString() }];
+const createBlocksuiteNoteContent = (doc: BlocksuiteDoc, _host: HTMLDivElement, contentText: string): NoteBlockContent => [{ type: NOTE_CONTENT_TYPE, text: contentText, blocks: serializeBlocksuiteBlocks(doc), snapshot: doc.toJSON?.() ?? null, updatedAt: new Date().toISOString() }];
 
 export { createBlocksuiteAffineEditor, createBlocksuiteNoteContent, readBlocksuiteText };
 export type { BlocksuiteAffineEditor, BlocksuiteDoc };
