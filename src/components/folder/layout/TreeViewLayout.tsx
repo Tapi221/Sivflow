@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
 import { MfCardImportDialog } from "@/features/cardFile/presentation/web/MfCardImportDialog";
 import { MfDeckImportDialog } from "@/features/deckFile/presentation/web/MfDeckImportDialog";
+import { useDocumentCommands } from "@/features/document/hooks/useDocumentCommands";
+import { useDocumentsRead } from "@/features/document/hooks/useDocumentsRead";
 import { ExplorerSearchSourceBridge } from "@/features/global-search/components/ExplorerSearchSourceBridge";
 import { readDesktopImportFiles, subscribeDesktopImportFileOpen } from "@/features/import/desktop/desktopImportFiles";
 import { detectImportFileKind, getPortableImportFiles, getSupportedImportFiles, isPortableImportFileKind, isSupportedImportFileKind } from "@/features/import/domain/importFileKind";
@@ -21,8 +23,6 @@ import { useCardsRead } from "@/components/card/hooks/useCardsRead";
 import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
-import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
-import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { cn } from "@/lib/utils";
@@ -806,4 +806,3 @@ const TreeViewLayout = ({
 };
 
 export default TreeViewLayout;
-
