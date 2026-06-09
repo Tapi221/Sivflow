@@ -4,7 +4,7 @@ import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import type { DocumentItem, PdfViewerState } from "@/types";
 import { PdfPane } from "./PdfPane";
-import { createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource } from "./pdfDocumentSource";
+import { createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource } from "./pdfDocumentSource";
 import { resolvePdfDocumentBlob } from "./resolvePdfDocumentBlob";
 import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
 import type { PdfViewerStateChangeOptions } from "./PdfPane";
@@ -125,6 +125,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
 
   useEffect(() => {
     let isCancelled = false;
+    let resolvedSource: PdfDocumentSource | null = null;
 
     setLocalSource(createPendingLocalPdfSourceState());
 
@@ -138,7 +139,12 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
       }
 
       const nextSource = await waitForPdfSourceResolution(createPdfDocumentDataSourceFromBlob(blob));
-      if (isCancelled) return;
+      if (isCancelled) {
+        releasePdfDocumentSource(nextSource);
+        return;
+      }
+
+      resolvedSource = nextSource;
       setLocalSource(createResolvedLocalPdfSourceState(nextSource));
     };
 
@@ -150,6 +156,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
 
     return () => {
       isCancelled = true;
+      releasePdfDocumentSource(resolvedSource);
     };
   }, [currentUserId, document.googleDriveFileId, document.id, document.localFileId, document.userId]);
 
