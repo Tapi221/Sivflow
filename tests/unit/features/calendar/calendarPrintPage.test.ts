@@ -45,4 +45,12 @@ describe("calendar print page style", () => {
     expect(calendarImportIndex).toBeGreaterThanOrEqual(0);
     expect(printPageImportIndex).toBeGreaterThan(calendarImportIndex);
   });
+
+  it("React root を非表示にせず印刷用 range view だけを出す", () => {
+    expect(calendarPrintPageCss).not.toContain("body.calendar-printing > :not(.calendar-print-panel)");
+    expect(calendarPrintPageCss).toContain("body.calendar-printing .calendar-print-panel");
+    expect(calendarPrintPageCss).toContain("body.calendar-printing .calendar-print-range-view");
+    expect(calendarPrintPageCss).toContain("body.calendar-printing [data-calendar-print-toolbar]");
+    expect(calendarPrintPageCss).toContain("body.calendar-printing .calendar-print-panel > .calendar-print-screen-content");
+  });
 });
