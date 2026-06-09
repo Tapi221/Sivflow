@@ -13,7 +13,7 @@ type CreateNoteOptions = {
   orderIndex?: number;
 };
 
-const NOTE_CONTENT_TYPE = "affine-document";
+const DEFAULT_NOTE_CONTENT: NoteBlockContent = [];
 
 const createId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -23,8 +23,6 @@ const createId = (): string => {
 const isDeletedNote = (note: Note & { isDeleted?: boolean; is_deleted?: boolean }): boolean => Boolean(note.isDeleted ?? note.is_deleted);
 
 const getNoteOrderIndex = (note: Note & { order_index?: number }): number => note.orderIndex ?? note.order_index ?? 0;
-
-const createDefaultNoteContent = (): NoteBlockContent => [{ type: NOTE_CONTENT_TYPE, blocks: [{ type: "paragraph", text: "" }], text: "", snapshot: null, updatedAt: new Date().toISOString() }];
 
 const sortNotes = (notes: Note[]): Note[] => [...notes].sort((left, right) => {
   const orderDiff = getNoteOrderIndex(left) - getNoteOrderIndex(right);
@@ -58,10 +56,10 @@ const useNotes = (folderId?: string | null, options?: UseNotesOptions) => {
       folderId: targetFolderId,
       orderIndex: opts?.orderIndex ?? 0,
       title,
-      content: createDefaultNoteContent(),
+      content: DEFAULT_NOTE_CONTENT,
       contentText: "",
-      contentVersion: 2,
-      editor: "affine",
+      contentVersion: 1,
+      editor: "blocknote",
       isDeleted: false,
       createdAt: now,
       updatedAt: now,
