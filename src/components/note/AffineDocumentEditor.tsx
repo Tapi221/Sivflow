@@ -14,13 +14,9 @@ const NOTE_EDITOR_LOADING_CLASS_NAME = "flex h-full w-full items-center justify-
 const NOTE_EDITOR_LOADING_SPINNER_CLASS_NAME = "h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent";
 const NOTE_EDITOR_ERROR_CLASS_NAME = "flex h-full w-full items-center justify-center bg-white px-6 text-center text-[12px] font-medium text-[#9aa0a6]";
 const NOTE_EDITOR_PLACEHOLDER_CLASS_NAME = "pointer-events-none absolute left-[72px] top-[72px] z-10 select-none text-[15px] font-medium tracking-[-0.01em] text-[#9aa0a6]";
-const NOTE_EDITOR_TOOLBAR_CLASS_NAME = "absolute right-4 top-4 z-20 flex items-center gap-1 rounded-[10px] border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.9)] p-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-xl";
-const NOTE_EDITOR_TOOLBAR_BUTTON_CLASS_NAME = "flex h-7 items-center justify-center rounded-[7px] px-2.5 text-[12px] font-semibold leading-none tracking-[-0.01em] text-[#4f5661] outline-none transition hover:bg-[#f1f3f4] hover:text-[#202124] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d7dbe0]";
 const NOTE_LOADING_LABEL = "AFFiNE を読み込み中";
 const NOTE_ERROR_LABEL = "AFFiNE エディタを起動できませんでした。Console の BlockSuite エラーを確認してください。";
-const NOTE_EMPTY_PLACEHOLDER_LABEL = "ここから入力";
-const NOTE_INSERT_TABLE_LABEL = "表";
-const NOTE_TABLE_SLASH_FILTER = "/table";
+const NOTE_EMPTY_PLACEHOLDER_LABEL = "「/」でブロックを追加";
 
 const hasNoteContent = (note: Note): boolean => Boolean(note.contentText?.trim());
 
@@ -52,31 +48,9 @@ const mountEditor = (host: HTMLDivElement, editor: BlocksuiteAffineEditor["edito
   host.replaceChildren(editor);
 };
 
-const getEditableElement = (editor: BlocksuiteAffineEditor["editor"]): HTMLElement => editor.querySelector<HTMLElement>("[contenteditable='true']") ?? editor;
-
-const placeCaretAtEnd = (target: HTMLElement): void => {
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount > 0) return;
-  const range = document.createRange();
-  range.selectNodeContents(target);
-  range.collapse(false);
-  selection.removeAllRanges();
-  selection.addRange(range);
-};
-
-const insertTextAtCurrentSelection = (text: string): boolean => document.execCommand("insertText", false, text);
-
-const openBlocksuiteSlashMenu = (editor: BlocksuiteAffineEditor["editor"], filterText: string): void => {
-  const target = getEditableElement(editor);
-  target.focus({ preventScroll: true });
-
-  window.setTimeout(() => {
-    target.focus({ preventScroll: true });
-    placeCaretAtEnd(target);
-    if (insertTextAtCurrentSelection(filterText)) return;
-    target.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, cancelable: true, data: filterText, inputType: "insertText" }));
-    target.dispatchEvent(new InputEvent("input", { bubbles: true, data: filterText, inputType: "insertText" }));
-  }, 0);
+const focusEditor = (editor: BlocksuiteAffineEditor["editor"]): void => {
+  const editableElement = editor.querySelector<HTMLElement>("[contenteditable='true']");
+  (editableElement ?? editor).focus({ preventScroll: true });
 };
 
 const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => {
@@ -108,12 +82,11 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
     saveTimerRef.current = window.setTimeout(saveNow, NOTE_SAVE_DEBOUNCE_MS);
   }, [saveNow]);
 
-  const handleOpenTableSlashMenu = useCallback(() => {
+  const handleEditorPointerDown = useCallback(() => {
     const editor = editorRef.current?.editor;
     if (!editor) return;
-    openBlocksuiteSlashMenu(editor, NOTE_TABLE_SLASH_FILTER);
-    scheduleSave();
-  }, [scheduleSave]);
+    focusEditor(editor);
+  }, []);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -157,13 +130,8 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
   }, [note, saveNow, scheduleSave]);
 
   return (
-    <div className={NOTE_EDITOR_ROOT_CLASS_NAME}>
+    <div className={NOTE_EDITOR_ROOT_CLASS_NAME} onPointerDown={handleEditorPointerDown}>
       <div ref={hostRef} className={NOTE_EDITOR_HOST_CLASS_NAME} />
-      <div className={NOTE_EDITOR_TOOLBAR_CLASS_NAME} aria-label="ノート挿入ツール">
-        <button type="button" className={NOTE_EDITOR_TOOLBAR_BUTTON_CLASS_NAME} onClick={handleOpenTableSlashMenu} title="/table で表ブロックを検索">
-          {NOTE_INSERT_TABLE_LABEL}
-        </button>
-      </div>
       {isEmpty ? <div className={NOTE_EDITOR_PLACEHOLDER_CLASS_NAME}>{NOTE_EMPTY_PLACEHOLDER_LABEL}</div> : null}
     </div>
   );
