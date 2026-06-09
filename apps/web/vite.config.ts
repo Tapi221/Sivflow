@@ -22,6 +22,7 @@ const optimizedDependencyIncludes = [
   "@radix-ui/react-slider",
   "@radix-ui/react-slot",
   "@radix-ui/react-switch",
+  "platejs/react",
 ];
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
