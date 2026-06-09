@@ -8,12 +8,12 @@ import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import { areExplorerBreadcrumbContextsEqual, EMPTY_EXPLORER_BREADCRUMB_CONTEXT, type BreadcrumbCrumb, type ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
 import { buildFolderPathCrumbs } from "@/features/breadcrumbs/builders";
 import { WorkspaceBreadcrumbs } from "@/features/breadcrumbs/components/WorkspaceBreadcrumbs";
+import { useDocumentsRead } from "@/features/document/hooks/useDocumentsRead";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
+import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
-import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import { useNotes } from "@/hooks/note/useNotes";
-import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
@@ -390,4 +390,3 @@ const WorkspaceScreen = () => {
 };
 
 export { WorkspaceScreen };
-
