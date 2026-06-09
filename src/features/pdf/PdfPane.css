@@ -1,9 +1,18 @@
 .pdf-pane__scroll-container {
+  contain: layout paint style;
+  overscroll-behavior: contain;
   scrollbar-gutter: stable;
   scroll-behavior: auto;
+  touch-action: pan-x pan-y pinch-zoom;
+  will-change: scroll-position;
+}
+
+.pdf-pane__viewer {
+  contain: layout paint style;
 }
 
 .pdf-pane__viewer .page {
+  contain: layout paint style;
   content-visibility: auto;
   contain-intrinsic-size: 1120px 792px;
 }
