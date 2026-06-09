@@ -1,14 +1,15 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { useToast } from "@/contexts/ToastContext";
 import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { getLocalDb } from "@/services/localDB";
 import type { Card, CardBlock } from "@/types/domain/card";
-import { Link, Loader2, Plus } from "@/ui/icons";
+import { Link, Plus } from "@/ui/icons";
 
 type CardQuestionLinksPanelProps = {
   selectedCardId: string | null;
@@ -40,7 +41,6 @@ const TERM_STOP_WORDS = new Set(["card", "cards", "qa", "q", "a", "これ", "そ
 
 const isCardRelationRecord = (value: unknown): value is CardRelationRecord => {
   if (!value || typeof value !== "object") return false;
-
   const record = value as Partial<CardRelationRecord>;
   return typeof record.id === "string" && typeof record.userId === "string";
 };
@@ -61,7 +61,6 @@ const isUsefulTerm = (term: string): boolean => {
 
 const extractQuestionTerms = (card: Card | null): string[] => {
   if (!card) return [];
-
   const sourceText = [card.title, ...card.front.blocks.map(getBlockText), ...card.back.blocks.map(getBlockText)]
     .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
     .join(" ");
@@ -72,7 +71,6 @@ const extractQuestionTerms = (card: Card | null): string[] => {
     const term = normalizeTerm(match[0] ?? "");
     const key = term.toLowerCase();
     if (!isUsefulTerm(term) || usedTerms.has(key)) continue;
-
     usedTerms.add(key);
     terms.push(term);
     if (terms.length >= MAX_CANDIDATE_TERMS) break;
@@ -97,11 +95,9 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
 
   const snapshot = useLiveQuery(async (): Promise<QuestionLinksSnapshot | null> => {
     if (!userId || !selectedCardId) return null;
-
     const db = await getLocalDb(userId);
     const rawCard = await db.cards.get(selectedCardId);
     if (!rawCard) return null;
-
     const card = normalizeCard(rawCard);
     const [rawOutgoingRelations, rawIncomingRelations] = await Promise.all([
       db.cardRelations.where("fromCardId").equals(selectedCardId).toArray(),
@@ -111,7 +107,6 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
     const incomingRelations = rawIncomingRelations.filter(isCardRelationRecord).filter((relation) => !relation.isDeleted);
     const linkedCardIds = Array.from(new Set([...outgoingRelations.map((relation) => relation.toCardId), ...incomingRelations.map((relation) => relation.fromCardId)].filter((id): id is string => typeof id === "string" && id.length > 0)));
     const linkedCards = linkedCardIds.length > 0 ? (await db.cards.bulkGet(linkedCardIds)).filter((item): item is Card => Boolean(item)).map(normalizeCard).filter((item) => !item.isDeleted) : [];
-
     return { card, outgoingRelations, incomingRelations, linkedCards };
   }, [userId, selectedCardId, refreshNonce], null);
 
@@ -121,7 +116,6 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
   const handleCreateLinkedQuestion = useCallback(async (rawTerm: string) => {
     const term = sanitizeCustomTerm(rawTerm);
     if (!term || !snapshot?.card || !userId || creatingTerm) return;
-
     setCreatingTerm(term);
 
     try {
@@ -132,28 +126,12 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
         cardSetId: snapshot.card.cardSetId,
         isDraft: true,
         hasUncertainty: true,
-        front: {
-          blocks: [{ id: crypto.randomUUID(), type: "question", orderIndex: 0, questionTitle, questionAnswer: "" }],
-        },
-        back: {
-          blocks: [{ id: crypto.randomUUID(), type: "text", orderIndex: 0, content: "" }],
-        },
+        front: { blocks: [{ id: crypto.randomUUID(), type: "question", orderIndex: 0, questionTitle, questionAnswer: "" }] },
+        back: { blocks: [{ id: crypto.randomUUID(), type: "text", orderIndex: 0, content: "" }] },
       });
       const db = await getLocalDb(userId);
       const now = new Date();
-
-      await db.addItem("cardRelations", {
-        id: crypto.randomUUID(),
-        userId,
-        fromCardId: snapshot.card.id,
-        toCardId: createdCard.id,
-        term,
-        reason: "unknown-term",
-        createdAt: now,
-        updatedAt: now,
-        isDeleted: false,
-      }, true);
-
+      await db.addItem("cardRelations", { id: crypto.randomUUID(), userId, fromCardId: snapshot.card.id, toCardId: createdCard.id, term, reason: "unknown-term", createdAt: now, updatedAt: now, isDeleted: false }, true);
       setCustomTerm("");
       setIsOpen(true);
       setRefreshNonce((value) => value + 1);
@@ -185,7 +163,6 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
           <span className="min-w-0 flex-1 truncate">疑問リンク</span>
           <span className="rounded-full border border-[#dddcd5] bg-[#f7f6f2] px-2 py-1 text-[10px] leading-none text-[#77736d]">{linkedCount}</span>
         </button>
-
         {isOpen ? (
           <div className="border-t border-[#eceae4] px-3 pb-3 pt-2">
             <div className="space-y-2">
@@ -194,19 +171,17 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
                 <div className="flex flex-wrap gap-1.5">
                   {candidateTerms.length > 0 ? candidateTerms.map((term) => (
                     <button key={term} type="button" className="inline-flex h-7 max-w-[180px] items-center gap-1 rounded-[8px] border border-[#dddcd5] bg-[#f7f6f2] px-2 text-[11px] font-medium text-[#5f5f5f] transition hover:bg-[#eeeeee] disabled:opacity-60" onClick={() => void handleCreateLinkedQuestion(term)} disabled={creatingTerm !== null} title={`${term} から疑問を作る`}>
-                      {creatingTerm === term ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                      {creatingTerm === term ? <LoadingSpinner iconClassName="h-3 w-3" label="疑問リンクを作成中" /> : <Plus className="h-3 w-3" />}
                       <span className="truncate">{term}</span>
                     </button>
                   )) : <span className="text-[11px] text-[#9a9690]">候補語句がありません。</span>}
                 </div>
               </div>
-
               <div className="flex gap-1.5">
                 <input value={customTerm} onChange={(event) => setCustomTerm(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") handleCreateCustomQuestion(); }} placeholder="語句を入力して疑問にする" className="h-8 min-w-0 flex-1 rounded-[9px] border border-[#dddcd5] bg-white px-2.5 text-[12px] text-[#343434] outline-none transition placeholder:text-[#aaa49d] focus:border-[#c8c6bf]" maxLength={MAX_CUSTOM_TERM_LENGTH} />
                 <button type="button" className="inline-flex h-8 shrink-0 items-center justify-center rounded-[9px] border border-[#dddcd5] bg-[#f7f6f2] px-2.5 text-[11px] font-semibold text-[#5f5f5f] transition hover:bg-[#eeeeee] disabled:opacity-60" onClick={handleCreateCustomQuestion} disabled={!sanitizeCustomTerm(customTerm) || creatingTerm !== null}>追加</button>
               </div>
             </div>
-
             <div className="mt-3 border-t border-[#eceae4] pt-2">
               <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a9690]">つながっている疑問</p>
               {snapshot.linkedCards.length > 0 ? (
@@ -217,9 +192,7 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
                     </button>
                   ))}
                 </div>
-              ) : (
-                <p className="text-[11px] leading-relaxed text-[#9a9690]">まだリンクはありません。回答内の語句から疑問を作ると、ここに表示されます。</p>
-              )}
+              ) : <p className="text-[11px] leading-relaxed text-[#9a9690]">まだリンクはありません。回答内の語句から疑問を作ると、ここに表示されます。</p>}
             </div>
           </div>
         ) : null}
