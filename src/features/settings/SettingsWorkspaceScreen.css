@@ -193,6 +193,11 @@
   border-bottom-color: #ececf0;
 }
 
+.settings-workspace__row--input {
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
 .settings-workspace__row-copy {
   display: flex;
   min-width: 0;
@@ -291,6 +296,32 @@
 .settings-workspace__choice-option.is-selected {
   background: #1c1c1e;
   color: #ffffff;
+}
+
+.settings-workspace__text-input {
+  width: min(280px, 50%);
+  min-width: 180px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #e2e2df;
+  border-radius: 8px;
+  background: #fafaf9;
+  color: #232323;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 20px;
+  outline: none;
+}
+
+.settings-workspace__text-input:focus {
+  border-color: #c9c7c1;
+  background: #ffffff;
+}
+
+.settings-workspace__text-input::placeholder {
+  color: #aaa49d;
 }
 
 .settings-workspace__profile-card {
@@ -395,6 +426,14 @@
   white-space: nowrap;
 }
 
+.settings-workspace__status-actions {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 @media (max-width: 920px) {
   .settings-workspace {
     flex-direction: column;
@@ -422,12 +461,18 @@
 }
 
 @media (max-width: 520px) {
-  .settings-workspace__row--choice {
+  .settings-workspace__row--choice,
+  .settings-workspace__row--input {
     padding-right: 16px;
     padding-left: 16px;
   }
 
   .settings-workspace__choice-options {
     max-width: 58%;
+  }
+
+  .settings-workspace__text-input {
+    width: min(220px, 52%);
+    min-width: 140px;
   }
 }
