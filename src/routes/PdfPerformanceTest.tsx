@@ -97,7 +97,7 @@ const PdfPerformanceTest = () => {
   if (!canRender) return null;
 
   return (
-    <main className="h-screen min-h-0 bg-[var(--carvepanel-surface)]" data-testid="pdf-performance-root">
+    <main className="h-screen min-h-0 w-full min-w-0 flex-1 bg-[var(--carvepanel-surface)]" data-testid="pdf-performance-root">
       <div className="flex h-12 items-center gap-3 border-b border-black/10 px-4 text-xs text-[#2f2f2f]">
         <button className="rounded border border-black/20 px-3 py-1" data-testid="pdf-performance-toggle" type="button" onClick={() => setIsViewerVisible((current) => !current)}>
           {isViewerVisible ? "Close PDF" : "Open PDF"}

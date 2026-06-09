@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
 type PdfPerformanceMetrics = {
+  firstPageWidth: number;
   longTaskCount: number;
   loadedPageCount: number;
   markNames: string[];
@@ -42,7 +43,9 @@ const readPdfPerformanceMetrics = async (page: Page): Promise<PdfPerformanceMetr
   return page.evaluate(() => {
     const markNames = performance.getEntriesByType("mark").map((entry) => entry.name).filter((name) => name.startsWith("sivflow.pdf."));
     const scrollContainer = document.querySelector<HTMLElement>("[data-testid='pdf-pane-scroll-container']");
+    const firstPage = document.querySelector<HTMLElement>(".pdfViewer .page");
     return {
+      firstPageWidth: firstPage?.getBoundingClientRect().width ?? 0,
       loadedPageCount: document.querySelectorAll(".pdfViewer .page[data-loaded='true']").length,
       longTaskCount: window.__sivflowPdfLongTaskDurations?.length ?? 0,
       markNames,
@@ -94,6 +97,7 @@ test.describe("PDF性能スモーク", () => {
     expect(metrics.markNames).toContainEqual(expect.stringMatching(/^sivflow\.pdf\.viewer\.load\.\d+\.pagechanging$/));
     expect(metrics.markNames).toContainEqual(expect.stringMatching(/^sivflow\.pdf\.viewer\.load\.\d+\.scrollActive$/));
     expect(metrics.loadedPageCount).toBeGreaterThan(0);
+    expect(metrics.firstPageWidth).toBeGreaterThan(500);
     expect(metrics.renderedCanvasCount).toBeGreaterThan(0);
     expect(metrics.scrollTop).toBeGreaterThan(0);
     expect(metrics.longTaskCount).toBeLessThanOrEqual(PDF_PERFORMANCE_LONG_TASK_LIMIT);
@@ -122,6 +126,7 @@ test.describe("PDF性能スモーク", () => {
     expect(metrics.markNames).toContainEqual(expect.stringMatching(/^sivflow\.pdf\.viewer\.load\.\d+\.cleanup$/));
     expect(metrics.markNames).toContainEqual(expect.stringMatching(/^sivflow\.pdf\.viewer\.load\.\d+\.pagesinit$/));
     expect(metrics.loadedPageCount).toBeGreaterThan(0);
+    expect(metrics.firstPageWidth).toBeGreaterThan(500);
     expect(metrics.renderedCanvasCount).toBeGreaterThan(0);
   });
 });

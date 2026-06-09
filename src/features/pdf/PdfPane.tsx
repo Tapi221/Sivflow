@@ -747,7 +747,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   }, [handleGoBack, handleGoForward, handleJumpToMark, handleSetMark, handleToggleBookmark, handleZoomIn, handleZoomOut, setViewerPage]);
 
   return (
-    <div className={cn("flex h-full min-h-0 min-w-0 bg-[var(--carvepanel-surface)] text-[#2f2f2f] max-sm:min-h-[100dvh]", className)}>
+    <div className={cn("flex h-full min-h-0 w-full min-w-0 bg-[var(--carvepanel-surface)] text-[#2f2f2f] max-sm:min-h-[100dvh]", className)}>
       <main className="relative flex min-h-0 min-w-0 flex-1 flex-col">
         <div ref={scrollContainerRef} className={cn(PDF_SCROLL_CONTAINER_CLASS_NAME, "absolute inset-0 overflow-auto overscroll-contain bg-[var(--carvepanel-surface)] px-3 py-4 [-webkit-overflow-scrolling:touch] sm:px-4 sm:py-5")} data-testid="pdf-pane-scroll-container">
           <div ref={pdfViewerElementRef} className={cn("pdfViewer", PDF_VIEWER_CLASS_NAME)} />
