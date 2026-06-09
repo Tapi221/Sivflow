@@ -5,10 +5,10 @@ const ROOT_DIR = process.cwd();
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
 const RESOLVABLE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".json", ".css", ".scss", ".sass", ".less"];
 const IMPORT_PATTERNS = [
-  /(\bfrom\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+)(["'])/g,
-  /(\bimport\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+)(["'])/g,
-  /(\bimport\s*\(\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+)(["']\s*\))/g,
-  /(\bexport\s+[^;]*?\s+from\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+)(["'])/g,
+  /(\bfrom\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+)(["'])/g,
+  /(\bimport\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+)(["'])/g,
+  /(\bimport\s*\(\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+)(["']\s*\))/g,
+  /(\bexport\s+[^;]*?\s+from\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+)(["'])/g,
 ];
 const ALIAS_ROOTS = [
   { directory: path.join(ROOT_DIR, "src"), prefix: "@" },
@@ -17,6 +17,7 @@ const ALIAS_ROOTS = [
   { directory: path.join(ROOT_DIR, "packages/platform/src"), prefix: "@platform" },
   { directory: path.join(ROOT_DIR, "packages/web-renderer/src"), prefix: "@web-renderer" },
   { directory: path.join(ROOT_DIR, "packages/mobile-renderer/src"), prefix: "@mobile-renderer" },
+  { directory: path.join(ROOT_DIR, "shared"), prefix: "@shared" },
 ];
 
 const walkSourceFiles = (directory) => {
@@ -188,3 +189,5 @@ const updatedFiles = ALIAS_ROOTS.flatMap(({ directory }) => walkSourceFiles(dire
 if (updatedFiles.length > 0) {
   console.log(`Normalized lint paths in ${updatedFiles.length} file(s).`);
 }
+
+await import("./verify/verify-source-conventions.mjs");
