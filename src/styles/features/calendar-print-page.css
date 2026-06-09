@@ -1,8 +1,118 @@
 @layer components {
   @media print {
     @page { size: portrait; }
-    body.calendar-printing { margin: 0 !important; background: #ffffff !important; }
-    body.calendar-printing > :not(.calendar-print-panel) { display: none !important; }
-    body.calendar-printing .calendar-print-panel { display: block !important; }
+
+    html,
+    body,
+    #root {
+      width: auto !important;
+      height: auto !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+      background: #ffffff !important;
+    }
+
+    body.calendar-printing {
+      margin: 0 !important;
+      background: #ffffff !important;
+    }
+
+    body.calendar-printing .calendar-print-panel {
+      display: flex !important;
+      width: 100% !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+      background: #ffffff !important;
+    }
+
+    body.calendar-printing [data-calendar-print-toolbar],
+    body.calendar-printing .calendar-print-panel > .calendar-print-screen-content,
+    body.calendar-printing .calendar-print-panel > .calendar-print-screen-content + :not(.calendar-print-range-view) {
+      display: none !important;
+    }
+
+    body.calendar-printing .calendar-print-range-view {
+      display: block !important;
+      width: 100% !important;
+      min-height: 0 !important;
+      padding: 10mm !important;
+      background: #ffffff !important;
+      color: #1c1c1e !important;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    body.calendar-printing .calendar-print-range-header {
+      margin-bottom: 6mm;
+    }
+
+    body.calendar-printing .calendar-print-range-title {
+      margin: 0;
+      font-size: 18pt;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+
+    body.calendar-printing .calendar-print-range-subtitle {
+      margin: 2mm 0 0;
+      font-size: 9pt;
+      font-weight: 500;
+      color: #6b7280;
+    }
+
+    body.calendar-printing .calendar-print-range-grid {
+      display: grid !important;
+      grid-template-columns: repeat(var(--calendar-print-range-column-count), minmax(0, 1fr));
+      gap: 2mm;
+      align-items: stretch;
+    }
+
+    body.calendar-printing .calendar-print-range-day {
+      min-height: 32mm;
+      break-inside: avoid;
+      overflow: hidden;
+      border: 0.5px solid #d8dce2;
+      border-radius: 3mm;
+      background: #ffffff;
+      padding: 2mm;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    body.calendar-printing .calendar-print-range-day-outside {
+      background: #f8f9fb;
+    }
+
+    body.calendar-printing .calendar-print-range-day-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 2mm;
+      color: #1c1c1e;
+    }
+
+    body.calendar-printing .calendar-print-range-day-number {
+      font-size: 12pt;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    body.calendar-printing .calendar-print-range-weekday {
+      font-size: 8pt;
+      font-weight: 600;
+      color: #85827e;
+    }
+
+    body.calendar-printing .calendar-print-range-events {
+      display: flex;
+      min-height: 0;
+      flex-direction: column;
+      gap: 1mm;
+    }
+
+    body.calendar-printing .calendar-print-range-events [data-calendar-event-chip="month"] {
+      min-height: 16px;
+    }
   }
 }
