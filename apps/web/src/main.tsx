@@ -10,6 +10,7 @@ import "@/styles/index.css";
 import "@/features/scroll/schedule/weekdayHeaderScrollBridge";
 import "@/services/localDB";
 import { ErrorBoundary } from "@/components/common/ErrorScreen";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
 import { queryClient } from "@/runtime/queryClient";
 
@@ -55,11 +56,7 @@ const isPdfPerformanceStandaloneRoute = (): boolean => {
   return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "::1";
 };
 
-const StartupLoadingScreen = () => (
-  <main aria-label={STARTUP_LOADING_LABEL} className="flex min-h-dvh w-full items-center justify-center bg-white text-slate-400">
-    <span aria-hidden="true" className="h-6 w-6 animate-spin rounded-full border-2 border-current border-t-transparent" />
-  </main>
-);
+const StartupLoadingScreen = () => <LoadingSpinner className="min-h-dvh w-full bg-white text-slate-400" iconClassName="h-6 w-6" label={STARTUP_LOADING_LABEL} />;
 
 const StartupFailureScreen = ({ message }: StartupFailureScreenProps) => (
   <main className="flex min-h-dvh w-full items-center justify-center bg-white px-6 text-slate-900">
