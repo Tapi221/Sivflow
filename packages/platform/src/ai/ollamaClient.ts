@@ -48,10 +48,7 @@ const createAbortSignal = (): { signal: AbortSignal; cancel: () => void } => {
   };
 };
 
-export const generateOllamaAnswer = async ({ question, model = DEFAULT_OLLAMA_MODEL }: GenerateOllamaAnswerInput): Promise<GenerateOllamaAnswerResult> => {
-  const normalizedQuestion = normalizeQuestion(question);
-  if (!normalizedQuestion) throw new Error("QUESTION_REQUIRED");
-
+const generateOllamaAnswerWithBrowserFetch = async (model: string, prompt: string): Promise<string> => {
   const abort = createAbortSignal();
 
   try {
@@ -62,7 +59,7 @@ export const generateOllamaAnswer = async ({ question, model = DEFAULT_OLLAMA_MO
       },
       body: JSON.stringify({
         model,
-        prompt: buildQaPrompt(normalizedQuestion),
+        prompt,
         stream: false,
       }),
       signal: abort.signal,
@@ -73,11 +70,19 @@ export const generateOllamaAnswer = async ({ question, model = DEFAULT_OLLAMA_MO
     }
 
     const data: unknown = await response.json();
-    const answer = parseOllamaGenerateResponse(data);
-    if (!answer) throw new Error("OLLAMA_EMPTY_RESPONSE");
-
-    return { answer, model };
+    return parseOllamaGenerateResponse(data);
   } finally {
     abort.cancel();
   }
+};
+
+export const generateOllamaAnswer = async ({ question, model = DEFAULT_OLLAMA_MODEL }: GenerateOllamaAnswerInput): Promise<GenerateOllamaAnswerResult> => {
+  const normalizedQuestion = normalizeQuestion(question);
+  if (!normalizedQuestion) throw new Error("QUESTION_REQUIRED");
+
+  const prompt = buildQaPrompt(normalizedQuestion);
+  const answer = window.desktop?.ai ? parseOllamaGenerateResponse(await window.desktop.ai.generateOllama({ model, prompt })) : await generateOllamaAnswerWithBrowserFetch(model, prompt);
+  if (!answer) throw new Error("OLLAMA_EMPTY_RESPONSE");
+
+  return { answer, model };
 };
