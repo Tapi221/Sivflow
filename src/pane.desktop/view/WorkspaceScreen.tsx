@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
-import { BlockNoteDocumentEditor } from "@/components/note/BlockNoteDocumentEditor";
+import { NoteDocumentEditor } from "@/components/note/NoteDocumentEditor";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
@@ -347,7 +347,7 @@ const NoteWorkspaceContent = ({ noteTab, isLeftPanelCollapsed, onOpenSettings, o
         </>
       )}
       <CarvePanel className={mainPanelClassName}>
-        {isLoading ? <div className="h-full w-full bg-white" /> : foldersError ? <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{foldersError}</div> : note ? <BlockNoteDocumentEditor note={note} onChange={handleNoteChange} /> : <div className="h-full w-full bg-white p-4 text-[12px] text-[#8a8a8a]">ノートが見つかりません</div>}
+        {isLoading ? <div className="h-full w-full bg-white" /> : foldersError ? <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{foldersError}</div> : note ? <NoteDocumentEditor note={note} onChange={handleNoteChange} /> : <div className="h-full w-full bg-white p-4 text-[12px] text-[#8a8a8a]">ノートが見つかりません</div>}
         {!isLoading && !foldersError ? <WorkspaceBreadcrumbs className={WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME} isLeftPanelCollapsed={isLeftPanelCollapsed} /> : null}
       </CarvePanel>
     </div>
