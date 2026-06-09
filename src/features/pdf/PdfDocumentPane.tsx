@@ -89,7 +89,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   const [localSource, setLocalSource] = useState<LocalPdfSourceState>(() => createPendingLocalPdfSourceState(document.id));
   const isLocalSourceForCurrentDocument = localSource.documentId === document.id;
   const activeLocalSource = isLocalSourceForCurrentDocument ? localSource : createPendingLocalPdfSourceState(document.id);
-  const source = activeLocalSource.source ?? persistedSource;
+  const source = activeLocalSource.isResolved ? activeLocalSource.source ?? persistedSource : null;
   const paneClassName = cn(PDF_DOCUMENT_PANE_CLASS_NAME, className);
   const statusClassName = cn(PDF_DOCUMENT_STATUS_CLASS_NAME, className);
   const pendingViewerStateSaveRef = useRef<PendingPdfViewerStateSave | null>(null);
