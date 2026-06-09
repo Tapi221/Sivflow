@@ -1,4 +1,3 @@
-import "@blocknote/core/fonts/inter.css";
 import { locales } from "@blocknote/core/locales";
 import "@blocknote/mantine/style.css";
 import { BlockNoteView } from "@blocknote/mantine";
