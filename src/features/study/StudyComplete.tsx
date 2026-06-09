@@ -2,7 +2,7 @@ import React from "react";
 import { RatingCountTiles } from "./RatingCountTiles";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { PracticeFilterRating } from "@/hooks/study/usePracticeMode";
+import type { PracticeFilterRating } from "@/features/study/hooks/usePracticeMode";
 
 type Tile = { rating: PracticeFilterRating; score: number; Icon: unknown };
 
