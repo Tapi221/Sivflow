@@ -1,6 +1,6 @@
 import { BasicBlocksPlugin, BasicMarksPlugin } from "@platejs/basic-nodes/react";
 import { Plate, PlateContainer, PlateContent, PlateElement, PlateLeaf, ParagraphPlugin, usePlateEditor, type PlateElementProps, type PlateLeafProps } from "platejs/react";
-import { useCallback, useEffect, useMemo, useRef, type ChangeEvent, type MouseEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { Note, NoteBlockContent } from "@/types";
 
 type PlateDocumentEditorProps = {
@@ -28,45 +28,11 @@ type PlateChangePayload = unknown[] | {
   value?: unknown;
 };
 
-type PlateEditor = ReturnType<typeof usePlateEditor>;
-
-type PlateBlockType = "p" | "h1" | "h2" | "h3" | "blockquote";
-
-type PlateMarkType = "bold" | "italic" | "underline" | "strikethrough" | "code";
-
-type PlateCommandFallback = {
-  command: string;
-  value?: string;
-};
-
-type PlateToolbarButtonProps = {
-  label: string;
-  children: string;
-  onPress: () => void;
-  className?: string;
-};
-
 const NOTE_SAVE_DEBOUNCE_MS = 500;
 const NOTE_CONTENT_VERSION = 2;
 const EMPTY_TEXT_NODE: PlateTextNode = { text: "" };
 const SUPPORTED_PLATE_BLOCK_TYPES = new Set(["p", "h1", "h2", "h3", "blockquote"]);
 const NOTE_PLATE_PLUGINS = [ParagraphPlugin, BasicBlocksPlugin, BasicMarksPlugin];
-const PLATE_BLOCK_OPTIONS: readonly { label: string; value: PlateBlockType }[] = [
-  { label: "Text", value: "p" },
-  { label: "Heading 1", value: "h1" },
-  { label: "Heading 2", value: "h2" },
-  { label: "Heading 3", value: "h3" },
-  { label: "Quote", value: "blockquote" },
-];
-const PLATE_MARK_OPTIONS: readonly { fallback: PlateCommandFallback; label: string; mark: PlateMarkType; text: string }[] = [
-  { fallback: { command: "bold" }, label: "太字", mark: "bold", text: "B" },
-  { fallback: { command: "italic" }, label: "斜体", mark: "italic", text: "I" },
-  { fallback: { command: "underline" }, label: "下線", mark: "underline", text: "U" },
-  { fallback: { command: "strikeThrough" }, label: "取り消し線", mark: "strikethrough", text: "S" },
-  { fallback: { command: "formatBlock", value: "pre" }, label: "コード", mark: "code", text: "</>" },
-];
-const PLATE_TOOLBAR_BUTTON_CLASS_NAME = "inline-flex h-9 min-w-9 shrink-0 items-center justify-center rounded-lg px-2 text-[15px] font-semibold leading-none text-[#202124] transition-colors hover:bg-[#f1f3f4] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d5db]";
-const PLATE_TOOLBAR_SEPARATOR_CLASS_NAME = "mx-1 h-8 w-px shrink-0 bg-[#e5e7eb]";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
@@ -161,41 +127,6 @@ const getChangeValue = (change: PlateChangePayload): unknown[] | null => {
   return null;
 };
 
-const getPlateTransform = (editor: PlateEditor, transformName: string): ((...args: unknown[]) => unknown) | null => {
-  const transformTarget = editor as { tf?: Record<string, unknown> };
-  const transform = transformTarget.tf?.[transformName];
-
-  return typeof transform === "function" ? transform as (...args: unknown[]) => unknown : null;
-};
-
-const focusPlateEditor = (editor: PlateEditor) => {
-  getPlateTransform(editor, "focus")?.();
-};
-
-const runDocumentCommandFallback = (fallback: PlateCommandFallback) => {
-  document.execCommand(fallback.command, false, fallback.value);
-};
-
-const runPlateTransform = (editor: PlateEditor, transformName: string, args: unknown[], fallback: PlateCommandFallback) => {
-  const transform = getPlateTransform(editor, transformName);
-
-  if (transform) {
-    transform(...args);
-    focusPlateEditor(editor);
-    return;
-  }
-
-  runDocumentCommandFallback(fallback);
-};
-
-const togglePlateMark = (editor: PlateEditor, mark: PlateMarkType, fallback: PlateCommandFallback) => {
-  runPlateTransform(editor, "toggleMark", [mark], fallback);
-};
-
-const setPlateBlockType = (editor: PlateEditor, blockType: PlateBlockType) => {
-  runPlateTransform(editor, "setNodes", [{ type: blockType }, { match: (node: unknown) => isRecord(node) && Array.isArray(node.children) }], { command: "formatBlock", value: blockType === "p" ? "p" : blockType });
-};
-
 const ParagraphElement = (props: PlateElementProps) => <PlateElement {...props} as="p" className="my-2 min-h-[1.75rem] px-0 py-0 text-[17px] leading-8 text-[#202124]" />;
 
 const H1Element = (props: PlateElementProps) => <PlateElement {...props} as="h1" className="mb-4 mt-8 text-[34px] font-semibold leading-tight tracking-[-0.04em] text-[#202124]" />;
@@ -215,55 +146,6 @@ const UnderlineLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="u" />
 const StrikethroughLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="s" />;
 
 const CodeLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="code" className="rounded-[5px] bg-[#f1f1f4] px-1 py-0.5 font-mono text-[0.92em] text-[#111827]" />;
-
-const PlateToolbarButton = ({ label, children, onPress, className }: PlateToolbarButtonProps) => {
-  const handleMouseDown = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    onPress();
-  };
-
-  return (
-    <button type="button" aria-label={label} title={label} className={`${PLATE_TOOLBAR_BUTTON_CLASS_NAME}${className ? ` ${className}` : ""}`} onMouseDown={handleMouseDown}>
-      {children}
-    </button>
-  );
-};
-
-const PlateEditorToolbar = ({ editor }: { editor: PlateEditor }) => {
-  const handleBlockTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setPlateBlockType(editor, event.target.value as PlateBlockType);
-  };
-
-  return (
-    <div className="sticky top-0 z-30 flex min-h-14 w-full shrink-0 items-center border-b border-[#e5e7eb] bg-white/95 px-4 shadow-[0_1px_0_rgba(0,0,0,0.03)] backdrop-blur-xl">
-      <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto py-2">
-        <PlateToolbarButton label="元に戻す" onPress={() => runPlateTransform(editor, "undo", [], { command: "undo" })}>↶</PlateToolbarButton>
-        <PlateToolbarButton label="やり直す" onPress={() => runPlateTransform(editor, "redo", [], { command: "redo" })}>↷</PlateToolbarButton>
-
-        <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />
-
-        <select className="h-9 shrink-0 rounded-lg border border-transparent bg-white px-3 text-[15px] font-semibold text-[#202124] outline-none transition-colors hover:bg-[#f1f3f4] focus:border-[#d1d5db]" defaultValue="p" aria-label="ブロックタイプ" onChange={handleBlockTypeChange}>
-          {PLATE_BLOCK_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-        </select>
-
-        <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />
-
-        {PLATE_MARK_OPTIONS.map((option) => (
-          <PlateToolbarButton key={option.mark} label={option.label} className={option.mark === "italic" ? "italic" : option.mark === "underline" ? "underline" : option.mark === "strikethrough" ? "line-through" : ""} onPress={() => togglePlateMark(editor, option.mark, option.fallback)}>
-            {option.text}
-          </PlateToolbarButton>
-        ))}
-
-        <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />
-
-        <PlateToolbarButton label="引用" onPress={() => setPlateBlockType(editor, "blockquote")}>❝</PlateToolbarButton>
-        <PlateToolbarButton label="見出し1" onPress={() => setPlateBlockType(editor, "h1")}>H1</PlateToolbarButton>
-        <PlateToolbarButton label="見出し2" onPress={() => setPlateBlockType(editor, "h2")}>H2</PlateToolbarButton>
-        <PlateToolbarButton label="見出し3" onPress={() => setPlateBlockType(editor, "h3")}>H3</PlateToolbarButton>
-      </div>
-    </div>
-  );
-};
 
 const NOTE_PLATE_COMPONENTS = {
   blockquote: BlockquoteElement,
@@ -310,21 +192,18 @@ const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
   }, [flushPendingChange]);
 
   return (
-    <div className="h-full min-h-0 w-full overflow-y-auto bg-white text-[#202124]">
-      <Plate editor={editor} onChange={handleChange}>
-        <PlateEditorToolbar editor={editor} />
-        <div className="px-16 py-14">
-          <div className="mx-auto flex w-full max-w-[820px] flex-col gap-5">
-            <div className="min-w-0">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9ca3af]">Plate</p>
-              <h1 className="truncate text-[32px] font-semibold leading-tight tracking-[-0.04em] text-[#202124]">{note.title}</h1>
-            </div>
-            <PlateContainer className="relative w-full cursor-text select-text overflow-visible caret-[#202124] selection:bg-[#dbeafe]">
-              <PlateContent className="min-h-[420px] w-full overflow-x-hidden whitespace-pre-wrap break-words rounded-none border-0 bg-transparent px-0 py-5 text-[17px] leading-8 text-[#202124] outline-none focus:outline-none [&_strong]:font-bold" disableDefaultStyles placeholder="本文を入力" spellCheck />
-            </PlateContainer>
-          </div>
+    <div className="h-full min-h-0 w-full overflow-y-auto bg-white px-16 py-14 text-[#202124]">
+      <div className="mx-auto flex w-full max-w-[820px] flex-col gap-5">
+        <div className="min-w-0">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9ca3af]">Plate</p>
+          <h1 className="truncate text-[32px] font-semibold leading-tight tracking-[-0.04em] text-[#202124]">{note.title}</h1>
         </div>
-      </Plate>
+        <Plate editor={editor} onChange={handleChange}>
+          <PlateContainer className="relative w-full cursor-text select-text overflow-visible caret-[#202124] selection:bg-[#dbeafe]">
+            <PlateContent className="min-h-[420px] w-full overflow-x-hidden whitespace-pre-wrap break-words rounded-none border-0 bg-transparent px-0 py-5 text-[17px] leading-8 text-[#202124] outline-none focus:outline-none [&_strong]:font-bold" disableDefaultStyles placeholder="本文を入力" spellCheck />
+          </PlateContainer>
+        </Plate>
+      </div>
     </div>
   );
 };
