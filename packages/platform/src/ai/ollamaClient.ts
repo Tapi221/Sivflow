@@ -1,3 +1,5 @@
+import { getLocalAiSettings } from "./localAiSettings";
+
 export type GenerateOllamaAnswerInput = {
   question: string;
   model?: string;
@@ -8,8 +10,14 @@ export type GenerateOllamaAnswerResult = {
   model: string;
 };
 
-const DEFAULT_OLLAMA_MODEL = "llama3.2:3b";
-const OLLAMA_GENERATE_ENDPOINT = "http://localhost:11434/api/generate";
+export type TestOllamaConnectionResult = {
+  ok: boolean;
+  modelAvailable: boolean;
+  model: string;
+  baseUrl: string;
+  models: string[];
+};
+
 const OLLAMA_REQUEST_TIMEOUT_MS = 60_000;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
@@ -32,10 +40,20 @@ const buildQaPrompt = (question: string): string => {
 
 const normalizeQuestion = (value: string): string => value.trim().slice(0, 1000);
 
+const normalizeBaseUrl = (value: string): string => value.trim().replace(/\/+$/, "");
+
+const buildOllamaApiUrl = (baseUrl: string, path: string): string => `${normalizeBaseUrl(baseUrl)}${path}`;
+
 const parseOllamaGenerateResponse = (value: unknown): string => {
   if (!isRecord(value)) return "";
 
   return getString(value.response)?.trim() ?? "";
+};
+
+const parseOllamaTagsResponse = (value: unknown): string[] => {
+  if (!isRecord(value) || !Array.isArray(value.models)) return [];
+
+  return value.models.map((model) => isRecord(model) ? getString(model.name) : null).filter((name): name is string => Boolean(name));
 };
 
 const createAbortSignal = (): { signal: AbortSignal; cancel: () => void } => {
@@ -48,11 +66,11 @@ const createAbortSignal = (): { signal: AbortSignal; cancel: () => void } => {
   };
 };
 
-const generateOllamaAnswerWithBrowserFetch = async (model: string, prompt: string): Promise<string> => {
+const generateOllamaAnswerWithBrowserFetch = async (baseUrl: string, model: string, prompt: string): Promise<string> => {
   const abort = createAbortSignal();
 
   try {
-    const response = await fetch(OLLAMA_GENERATE_ENDPOINT, {
+    const response = await fetch(buildOllamaApiUrl(baseUrl, "/api/generate"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -76,13 +94,50 @@ const generateOllamaAnswerWithBrowserFetch = async (model: string, prompt: strin
   }
 };
 
-export const generateOllamaAnswer = async ({ question, model = DEFAULT_OLLAMA_MODEL }: GenerateOllamaAnswerInput): Promise<GenerateOllamaAnswerResult> => {
+const listOllamaModelsWithBrowserFetch = async (baseUrl: string): Promise<string[]> => {
+  const abort = createAbortSignal();
+
+  try {
+    const response = await fetch(buildOllamaApiUrl(baseUrl, "/api/tags"), {
+      method: "GET",
+      signal: abort.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`OLLAMA_TAGS_HTTP_${response.status}`);
+    }
+
+    const data: unknown = await response.json();
+    return parseOllamaTagsResponse(data);
+  } finally {
+    abort.cancel();
+  }
+};
+
+export const generateOllamaAnswer = async ({ question, model }: GenerateOllamaAnswerInput): Promise<GenerateOllamaAnswerResult> => {
+  const settings = getLocalAiSettings();
+  if (!settings.enabled) throw new Error("LOCAL_AI_DISABLED");
+
   const normalizedQuestion = normalizeQuestion(question);
   if (!normalizedQuestion) throw new Error("QUESTION_REQUIRED");
 
+  const selectedModel = model?.trim() || settings.model;
   const prompt = buildQaPrompt(normalizedQuestion);
-  const answer = window.desktop?.ai ? parseOllamaGenerateResponse(await window.desktop.ai.generateOllama({ model, prompt })) : await generateOllamaAnswerWithBrowserFetch(model, prompt);
+  const answer = window.desktop?.ai ? parseOllamaGenerateResponse(await window.desktop.ai.generateOllama({ baseUrl: settings.baseUrl, model: selectedModel, prompt })) : await generateOllamaAnswerWithBrowserFetch(settings.baseUrl, selectedModel, prompt);
   if (!answer) throw new Error("OLLAMA_EMPTY_RESPONSE");
 
-  return { answer, model };
+  return { answer, model: selectedModel };
+};
+
+export const testOllamaConnection = async (): Promise<TestOllamaConnectionResult> => {
+  const settings = getLocalAiSettings();
+  const models = window.desktop?.ai ? await window.desktop.ai.listOllamaModels({ baseUrl: settings.baseUrl }) : await listOllamaModelsWithBrowserFetch(settings.baseUrl);
+
+  return {
+    ok: true,
+    modelAvailable: models.includes(settings.model),
+    model: settings.model,
+    baseUrl: settings.baseUrl,
+    models,
+  };
 };
