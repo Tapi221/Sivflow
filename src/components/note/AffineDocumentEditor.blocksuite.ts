@@ -3,7 +3,6 @@ import type { Note, NoteBlockContent } from "@/types";
 type RuntimeModule = Record<string, unknown>;
 
 type AffineRuntime = {
-  AffineSchemas: unknown[];
   Awareness: new (doc: unknown) => unknown;
   AwarenessStore: new (awareness: unknown) => unknown;
   BlockStdScope: new (options: { extensions: unknown[]; store: BlocksuiteDoc }) => { get: (identifier: unknown) => { app$?: { value: string } }; render: () => unknown };
@@ -120,8 +119,6 @@ const getExport = <T>(module: RuntimeModule, name: string): T => {
   return value as T;
 };
 
-const getFirstArray = (...values: unknown[]): unknown[] => values.find((value): value is unknown[] => Array.isArray(value)) ?? [];
-
 const compactExtensions = (extensions: unknown[]): unknown[] => Array.from(new Set(extensions.filter(Boolean)));
 
 const normalizeRows = (rows: unknown): string[][] => {
@@ -176,7 +173,6 @@ const defineAffineEditorElement = (runtime: AffineRuntime): void => {
 
 const loadRuntime = async (): Promise<AffineRuntime> => {
   runtimePromise ??= Promise.all([
-    import("@blocksuite/affine/schemas"),
     import("@blocksuite/affine/store"),
     import("@blocksuite/affine/std"),
     import("@blocksuite/affine/shared/services"),
@@ -215,9 +211,8 @@ const loadRuntime = async (): Promise<AffineRuntime> => {
     import("@blocksuite/affine/inlines/link/view"),
     import("@blocksuite/affine/inlines/reference/view"),
   ]).then((modules) => {
-    const [schemas, store, std, services, litGlobals, lit, guardModule, yjs, awareness, rxjs, ...extensionModules] = modules as RuntimeModule[];
+    const [store, std, services, litGlobals, lit, guardModule, yjs, awareness, rxjs, ...extensionModules] = modules as RuntimeModule[];
     const runtime: AffineRuntime = {
-      AffineSchemas: getFirstArray(schemas.AffineSchemas),
       Awareness: getExport(awareness, "Awareness"),
       AwarenessStore: getExport(store, "AwarenessStore"),
       BlockStdScope: getExport(std, "BlockStdScope"),
