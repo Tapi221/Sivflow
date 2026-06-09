@@ -1,13 +1,12 @@
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import { CARD_PANE_AUTO_MAX_SCALE, CARD_PANE_EDIT_DEFAULT_WIDTH_PX, CARD_PANE_EDIT_MIN_WIDTH_PX, CARD_PANE_VIEW_DEFAULT_WIDTH_PX, CARD_PANE_VIEW_MIN_WIDTH_PX, CARD_PANE_WIDTH_STEP_PX } from "@/components/card/frame/cardPane.constants";
 
+type CardViewZoomInteractionSource = "slider" | "button" | "wheel" | "gesture";
+
 const CARD_SET_VIEW_PAGER_PADDING_INLINE = 0;
 const CARD_SET_VIEW_PAGER_PADDING_BLOCK = "50vh";
 const CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS = 0;
 const CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS = 0;
-
-type CardViewZoomInteractionSource = "slider" | "button" | "wheel" | "gesture";
-
 const CARD_VIEW_ZOOM_STEP_PERCENT_BY_SOURCE = {
   slider: 1,
   button: 5,
