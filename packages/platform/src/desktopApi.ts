@@ -6,6 +6,19 @@ export interface PlatformShellApi {
   openExternal(url: string): Promise<void>;
 }
 
+export interface DesktopAiGenerateInput {
+  model: string;
+  prompt: string;
+}
+
+export interface DesktopAiGenerateResult {
+  response: string;
+}
+
+export interface DesktopAiApi {
+  generateOllama(input: DesktopAiGenerateInput): Promise<DesktopAiGenerateResult>;
+}
+
 export interface DesktopImportFileOpenPayload {
   paths: string[];
 }
@@ -78,6 +91,7 @@ export interface PlatformApi {
 export type DesktopOauthApi = PlatformOauthApi;
 
 export interface DesktopBridgeApi extends PlatformApi {
+  ai: DesktopAiApi;
   files: DesktopFileApi;
   oauth: DesktopOauthApi;
   pdf: DesktopPdfApi;
