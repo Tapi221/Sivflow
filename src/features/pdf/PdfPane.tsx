@@ -478,9 +478,15 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     };
 
     const clearScrollIdleTimer = () => {
-      if (scrollIdleTimer === null) return;
-      globalThis.clearTimeout(scrollIdleTimer);
-      scrollIdleTimer = null;
+      if (scrollIdleTimer !== null) {
+        globalThis.clearTimeout(scrollIdleTimer);
+        scrollIdleTimer = null;
+      }
+
+      if (scrollIdleFrame !== null) {
+        window.cancelAnimationFrame(scrollIdleFrame);
+        scrollIdleFrame = null;
+      }
     };
 
     const markScrollIdle = () => {
@@ -501,7 +507,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
 
     const requestScrollOptimization = () => {
       scheduleScrollIdle();
-      if (scrollFrame !== null) return;
+      if (isScrollOptimizationActive || scrollFrame !== null) return;
 
       scrollFrame = window.requestAnimationFrame(() => {
         scrollFrame = null;
@@ -608,7 +614,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       if (scrollFrame !== null) window.cancelAnimationFrame(scrollFrame);
       if (pageChangeFrame !== null) window.cancelAnimationFrame(pageChangeFrame);
       if (pageMetricFrame !== null) window.cancelAnimationFrame(pageMetricFrame);
-      if (scrollIdleFrame !== null) window.cancelAnimationFrame(scrollIdleFrame);
       clearScrollIdleTimer();
       setPdfScrollOptimizationClass(container, viewerElement, false);
       resizeObserver?.disconnect();
