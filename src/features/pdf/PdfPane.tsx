@@ -6,7 +6,7 @@ import "pdfjs-dist/legacy/web/pdf_viewer.css";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
-import { releasePdfDocumentSource, toPdfDocumentLoadSource } from "./pdfDocumentSource";
+import { releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource } from "./pdfDocumentSource";
 import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
 import { getPdfPageWindowKeepSet, getSafePdfPageNumber } from "./pdfPageWindow";
 import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "./pdfPerformance";
@@ -415,6 +415,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const pdfViewer = new PDFViewer({ container, eventBus, linkService, viewer: viewerElement, ...createPdfViewerRuntimeOptions() });
     const removeEventListeners: Array<() => void> = [];
 
+    retainPdfDocumentSource(source);
+
     const refreshPageMetricCache = () => {
       pageMetricCache = getPdfVisiblePageMetrics(viewerElement);
       return pageMetricCache;
@@ -595,7 +597,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       window.removeEventListener("orientationchange", requestResponsiveScaleUpdate);
       removeEventListeners.forEach((removeEventListener) => removeEventListener());
       releasePdfViewerDocument(pdfViewer, linkService, loadedPdfDocument);
-      releasePdfDocumentSource(source);
+      releasePdfDocumentSourceSoon(source);
       recordPdfPerformanceMark(`${performanceTraceName}.cleanup`, { debugOnly: true, detail: { sourceType: source?.type ?? null } });
       viewerElement.replaceChildren();
       if (pdfViewerRef.current === pdfViewer) pdfViewerRef.current = null;

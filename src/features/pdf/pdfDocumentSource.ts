@@ -24,6 +24,7 @@ type PdfDocumentLoadSource = {
 type PdfWorkerConstructor = new (options?: WorkerOptions) => Worker;
 
 let pdfWorkerPort: Worker | null = null;
+const scheduledSourceReleaseTimers = new WeakMap<PdfDocumentUrlSource, ReturnType<typeof globalThis.setTimeout>>();
 
 const getPdfDocumentUrlSourceLocality = (url: string): PdfDocumentUrlSource["locality"] => {
   return url.startsWith("blob:") ? "local" : "remote";
@@ -106,10 +107,33 @@ const toPdfDocumentLoadSource = (source: PdfDocumentSource): PdfDocumentLoadSour
   return { url: source.url };
 };
 
+const retainPdfDocumentSource = (source: PdfDocumentSource | null | undefined): void => {
+  if (source?.type !== "url") return;
+  const releaseTimer = scheduledSourceReleaseTimers.get(source);
+  if (!releaseTimer) return;
+  globalThis.clearTimeout(releaseTimer);
+  scheduledSourceReleaseTimers.delete(source);
+};
+
 const releasePdfDocumentSource = (source: PdfDocumentSource | null | undefined): void => {
   if (source?.type !== "url") return;
+  retainPdfDocumentSource(source);
   source.revoke?.();
 };
 
-export { createPdfDocumentDataSource, createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource, toPdfDocumentLoadSource };
+const releasePdfDocumentSourceSoon = (source: PdfDocumentSource | null | undefined): void => {
+  if (source?.type !== "url") {
+    releasePdfDocumentSource(source);
+    return;
+  }
+
+  if (scheduledSourceReleaseTimers.has(source)) return;
+  const releaseTimer = globalThis.setTimeout(() => {
+    scheduledSourceReleaseTimers.delete(source);
+    releasePdfDocumentSource(source);
+  }, 0);
+  scheduledSourceReleaseTimers.set(source, releaseTimer);
+};
+
+export { createPdfDocumentDataSource, createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource, releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource };
 export type { PdfDocumentSource };

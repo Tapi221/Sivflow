@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createPdfDocumentDataSource, createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource, toPdfDocumentLoadSource } from "@/features/pdf/pdfDocumentSource";
+import { createPdfDocumentDataSource, createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource, releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource } from "@/features/pdf/pdfDocumentSource";
 
 describe("pdfDocumentSource", () => {
   afterEach(() => {
+    vi.useRealTimers();
     vi.unstubAllGlobals();
   });
 
@@ -45,6 +46,19 @@ describe("pdfDocumentSource", () => {
     releasePdfDocumentSource(source);
 
     expect(revokeObjectUrlMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("遅延解放は retain でキャンセルできる", async () => {
+    vi.useFakeTimers();
+    const revokeObjectUrlMock = vi.fn();
+    vi.stubGlobal("URL", { ...URL, createObjectURL: vi.fn(() => "blob:pdf-retain"), revokeObjectURL: revokeObjectUrlMock });
+    const source = await createPdfDocumentDataSourceFromBlob(new Blob([new Uint8Array([1])], { type: "application/pdf" }));
+
+    releasePdfDocumentSourceSoon(source);
+    retainPdfDocumentSource(source);
+    vi.runAllTimers();
+
+    expect(revokeObjectUrlMock).not.toHaveBeenCalled();
   });
 
   it("object URL が使えない環境では Blob を data ソースに変換する", async () => {
