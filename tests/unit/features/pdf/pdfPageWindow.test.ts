@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { getPdfPageWindowKeepSet, getSafePdfPageNumber } from "@/features/pdf/pdfPageWindow";
+import type { PdfPageWindowMetric } from "@/features/pdf/pdfPageWindow";
+
+const createPageMetrics = (pageCount: number, pageHeight: number): PdfPageWindowMetric[] => {
+  return Array.from({ length: pageCount }, (_, index) => ({
+    pageNumber: index + 1,
+    offsetTop: index * pageHeight,
+    offsetHeight: pageHeight,
+  }));
+};
 
 const toSortedPages = (pages: Set<number>): number[] => {
   return [...pages].sort((a, b) => a - b);
@@ -39,5 +48,11 @@ describe("getPdfPageWindowKeepSet", () => {
     ], 0, 500, 2, { overscanPageCount: 10 });
 
     expect(toSortedPages(pages)).toEqual([1, 2]);
+  });
+
+  it("巨大PDFでもviewportより前のページを走査対象から外す", () => {
+    const pages = getPdfPageWindowKeepSet(createPageMetrics(1_000, 100), 50_000, 100, 1_000, { overscanPageCount: 1 });
+
+    expect(toSortedPages(pages)).toEqual([500, 501, 502, 503]);
   });
 });
