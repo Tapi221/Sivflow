@@ -4,7 +4,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/contexts/ToastContext";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { MessageSquare, Plus, Sparkles } from "@/ui/icons";
+import { Loader2, MessageSquare, Plus, Sparkles } from "@/ui/icons";
 import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
 
 type QuickQaChatDialogProps = {
@@ -14,16 +14,10 @@ type QuickQaChatDialogProps = {
 
 type ChatStep = "question" | "answer";
 
-type ChatRole = "assistant" | "user";
-
 type ChatMessage = {
   id: string;
-  role: ChatRole;
+  role: "assistant" | "user";
   text: string;
-};
-
-type LoadingRingProps = {
-  className?: string;
 };
 
 type LoadingStatusPillProps = {
@@ -33,7 +27,11 @@ type LoadingStatusPillProps = {
 const MAX_QUESTION_LENGTH = 240;
 const MAX_ANSWER_LENGTH = 3000;
 
-const createChatMessage = (role: ChatRole, text: string): ChatMessage => ({ id: crypto.randomUUID(), role, text });
+const createChatMessage = (role: ChatMessage["role"], text: string): ChatMessage => ({
+  id: crypto.randomUUID(),
+  role,
+  text,
+});
 
 const createInitialMessages = (): ChatMessage[] => [createChatMessage("assistant", "疑問を入力してください。入力したら、次に回答を聞きます。")];
 
@@ -44,28 +42,16 @@ const createCardTitle = (question: string): string => {
   return normalized.length > 80 ? `${normalized.slice(0, 80)}…` : normalized;
 };
 
-const LoadingRing = ({ className }: LoadingRingProps) => (
-  <span className={cn("relative inline-flex h-4 w-4 shrink-0 items-center justify-center", className)} aria-hidden="true">
-    <span className="absolute inset-0 rounded-full border border-current opacity-25" />
-    <span className="absolute inset-0 animate-spin rounded-full border border-transparent border-t-current" />
-  </span>
-);
-
-const LoadingStatusPill = ({ label }: LoadingStatusPillProps) => (
-  <div className="flex justify-start">
-    <div role="status" aria-live="polite" className="inline-flex max-w-[84%] items-center gap-2.5 rounded-[18px] border border-[#e6e1d8] bg-white px-3 py-2 text-[12px] font-medium leading-relaxed text-[#6f675d] shadow-[0_12px_28px_rgba(35,31,26,0.08)]" style={{ background: "linear-gradient(135deg, #ffffff 0%, #f8f5ef 100%)" }}>
-      <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#f0ebe2] text-[#7f766a]">
-        <LoadingRing className="h-3.5 w-3.5" />
-      </span>
-      <span>{label}</span>
-      <span className="inline-flex items-center gap-0.5 pl-0.5" aria-hidden="true">
-        <span className="h-1 w-1 animate-pulse rounded-full bg-[#aaa196]" style={{ animationDelay: "0ms" }} />
-        <span className="h-1 w-1 animate-pulse rounded-full bg-[#aaa196]" style={{ animationDelay: "140ms" }} />
-        <span className="h-1 w-1 animate-pulse rounded-full bg-[#aaa196]" style={{ animationDelay: "280ms" }} />
-      </span>
+const LoadingStatusPill = ({ label }: LoadingStatusPillProps) => {
+  return (
+    <div className="flex justify-start">
+      <div className="inline-flex items-center gap-2 rounded-[18px] border border-[#eceae4] bg-white px-3 py-2 text-[12px] text-[#8a857f] shadow-sm">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        {label}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogProps) => {
   const toast = useToast();
@@ -139,6 +125,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
     if (!question || !canGenerateAiAnswer) return;
 
     setIsGeneratingAiAnswer(true);
+    appendMessages([createChatMessage("assistant", "ローカルAIで回答案を作成しています。")]);
 
     try {
       const result = await generateOllamaAnswer({ question });
@@ -197,7 +184,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent accessibleTitle="Q&Aチャット" accessibleDescription="チャット形式でQ&Aカードを作成します。" overlayClassName="app-modal-backdrop z-[100]" contentWrapperClassName="app-modal-content-frame" className="app-modal-surface max-w-[560px] gap-0 bg-[#fbfaf7] p-0" closeButtonClassName="right-4 top-4 text-[#85827e] hover:text-[#343434]">
+      <DialogContent accessibleTitle="Q&Aチャット" accessibleDescription="チャット形式でQ&Aカードを作成します。" overlayClassName="app-modal-backdrop z-[100]" contentWrapperClassName="app-modal-content-frame" className="app-modal-surface max-w-[560px] gap-0 p-0" closeButtonClassName="right-4 top-4 text-[#85827e] hover:text-[#343434]">
         <div className="border-b border-[#eceae4] px-5 py-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#dddcd5] bg-white text-[#85827e]">
@@ -230,7 +217,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
           <div className="flex items-end gap-2">
             <textarea ref={inputRef} value={inputValue} onChange={(event) => setInputValue(event.target.value.slice(0, inputMaxLength))} onKeyDown={handleInputKeyDown} placeholder={placeholder} rows={step === "question" ? 2 : 4} className="max-h-[160px] min-h-[42px] min-w-0 flex-1 resize-none rounded-[14px] border border-[#dddcd5] bg-white px-3 py-2 text-[13px] leading-relaxed text-[#343434] outline-none transition placeholder:text-[#aaa49d] focus:border-[#c8c6bf]" />
             <button type="button" className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-[#343434] bg-[#343434] px-4 text-[12px] font-semibold text-white transition hover:bg-[#1f1f1f] disabled:border-[#dddcd5] disabled:bg-[#eeeeee] disabled:text-[#aaa49d]" onClick={handleSend} disabled={!canSend}>
-              {isCreating ? <LoadingRing /> : "送信"}
+              {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : "送信"}
             </button>
           </div>
           <div className="mt-2 flex items-center justify-between gap-2">
@@ -238,7 +225,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
             <div className="flex items-center gap-3">
               {step === "answer" ? (
                 <button type="button" className="inline-flex items-center gap-1 text-[11px] font-medium text-[#8a857f] underline-offset-2 hover:text-[#343434] hover:underline disabled:opacity-60" onClick={handleGenerateAiAnswer} disabled={!canGenerateAiAnswer}>
-                  {isGeneratingAiAnswer ? <LoadingRing className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}
+                  {isGeneratingAiAnswer ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
                   AIで回答案
                 </button>
               ) : null}
