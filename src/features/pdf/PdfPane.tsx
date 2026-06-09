@@ -100,12 +100,25 @@ type ResizePdfPageBufferOptions = {
   viewerElement?: HTMLElement | null;
 };
 
+const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 640;
+const PDF_DEFAULT_DEVICE_MEMORY_GB = 4;
+const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 500;
 const PDF_HISTORY_LIMIT = 80;
+const PDF_LOW_MEMORY_DEVICE_MAX_GB = 4;
+const PDF_LOW_MEMORY_MAX_CANVAS_PIXELS = 5_000_000;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
+const PDF_RANGE_CHUNK_SIZE = 65_536;
+const PDF_SCROLL_CONTAINER_CLASS_NAME = "pdf-pane__scroll-container";
+const PDF_SCROLL_IDLE_DELAY_MS = 200;
+const PDF_SCROLLING_CLASS_NAME = "pdf-pane--scrolling";
+const PDF_VIEWER_CLASS_NAME = "pdf-pane__viewer";
+const PDF_VISIBLE_PAGE_CACHE_OVERSCAN = 2;
 const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const getSafePageNumber = getSafePdfPageNumber;
 
@@ -397,7 +410,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     let isScrollOptimizationActive = false;
     let pendingPageNumber: number | null = null;
     let pageMetricCache: PdfPageWindowMetric[] = [];
-    // メトリクスキャッシュの初期化完了フラグ（未初期化時のDOM同期読み取りを防止）
     let pageMetricCacheReady = false;
     const performanceTraceName = createPdfPerformanceTraceName("viewer.load");
     const eventBus = new EventBus() as PdfEventBusLike;
@@ -413,21 +425,18 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       return pageMetricCache;
     };
 
-    // contain-intrinsic-sizeのCSS変数を実際のページサイズから動的に設定
     const updateContainIntrinsicSizeFromPage = () => {
-      const firstPageElement = viewerElement.querySelector<HTMLElement>('.page');
+      const firstPageElement = viewerElement.querySelector<HTMLElement>(".page");
       if (!firstPageElement) return;
       const pageWidth = firstPageElement.offsetWidth;
       const pageHeight = firstPageElement.offsetHeight;
       if (pageWidth > 0 && pageHeight > 0) {
-        viewerElement.style.setProperty('--pdf-page-width', `${pageWidth}px`);
-        viewerElement.style.setProperty('--pdf-page-height', `${pageHeight}px`);
+        viewerElement.style.setProperty("--pdf-page-width", `${pageWidth}px`);
+        viewerElement.style.setProperty("--pdf-page-height", `${pageHeight}px`);
       }
     };
 
     const resizeVisiblePageBuffer = (pageNumber?: number, options: { refreshMetrics?: boolean } = {}) => {
-      // キャッシュ未初期化の場合はrefreshMetrics指定時のみDOM読み取りを許可
-      // スクロール中の意図しないDOM同期読み取り（Layout Thrashing）を防止
       const pageMetrics = options.refreshMetrics ? refreshPageMetricCache() : (pageMetricCacheReady ? pageMetricCache : []);
       resizePdfViewerPageBuffer(pdfViewer, container, { pageMetrics }, pageNumber);
     };
@@ -477,7 +486,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const markScrollIdle = () => {
       scrollIdleTimer = null;
       if (isCancelled) return;
-      // rAFでメトリクスリフレッシュとスタイル変更をペイントと同期し、レイアウトスラッシングを防止
       scrollIdleFrame = window.requestAnimationFrame(() => {
         scrollIdleFrame = null;
         if (isCancelled) return;
@@ -492,7 +500,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     };
 
     const requestScrollOptimization = () => {
-      // スクロール中はタイマーリセットのみ実行し、バッファリサイズを毎フレーム実行しない
       scheduleScrollIdle();
       if (scrollFrame !== null) return;
 
@@ -500,7 +507,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         scrollFrame = null;
         if (isCancelled) return;
         setScrollOptimizationActive(true);
-        // キャッシュ済みメトリクスでバッファリサイズ（DOM読み取りなし）
         resizeVisiblePageBuffer();
       });
     };
@@ -548,7 +554,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       const initialPageNumber = getSafePageNumber(viewerStateRef.current?.currentPage, loadedPdfDocument.numPages);
       pdfViewer.currentPageNumber = initialPageNumber;
       resizeVisiblePageBuffer(initialPageNumber, { refreshMetrics: true });
-      // 実際のページサイズからcontain-intrinsic-sizeのCSS変数を設定（スクロールバージャンプ防止）
       updateContainIntrinsicSizeFromPage();
       requestResponsiveScaleUpdate();
     }));
@@ -572,7 +577,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       if (isExplicitZoom) lastExplicitZoomAtRef.current = 0;
       if (viewerStateRef.current?.scale !== scale || viewerStateRef.current?.fitMode !== fitMode) updateViewerState({ scale, fitMode }, { persistence: isExplicitZoom ? "immediate" : "none" });
       requestPageMetricRefresh();
-      // スケール変更時にcontain-intrinsic-sizeのCSS変数を再計算
       updateContainIntrinsicSizeFromPage();
     }));
 
