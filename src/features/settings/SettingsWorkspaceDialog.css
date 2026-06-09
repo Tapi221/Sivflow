@@ -1,7 +1,3 @@
-.settings-workspace-dialog__backdrop {
-  z-index: 80;
-}
-
 .settings-workspace-dialog {
   display: flex;
   width: min(1280px, calc(100dvw - 100px));
