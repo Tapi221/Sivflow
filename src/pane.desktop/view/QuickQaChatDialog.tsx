@@ -135,7 +135,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
       focusInputSoon();
     } catch (error) {
       console.error("[QuickQaChatDialog] failed to generate AI answer", error);
-      appendMessages([createChatMessage("assistant", "Ollamaに接続できませんでした。Ollama起動後、llama3.2:3b などのモデルを用意してください。")]);
+      appendMessages([createChatMessage("assistant", "ローカルAIに接続できませんでした。設定画面のローカルAIで接続先URLとモデルを確認してください。")]);
       toast.error("ローカルAIに接続できませんでした。");
     } finally {
       setIsGeneratingAiAnswer(false);
@@ -192,7 +192,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
             </div>
             <div className="min-w-0">
               <p className="text-[14px] font-semibold tracking-[-0.02em] text-[#343434]">Q&Aチャット</p>
-              <p className="mt-0.5 text-[11px] text-[#8a857f]">OllamaのローカルAI回答案を使えます。</p>
+              <p className="mt-0.5 text-[11px] text-[#8a857f]">設定画面のローカルAI接続を使えます。</p>
             </div>
           </div>
         </div>
