@@ -6,11 +6,11 @@ import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { cn } from "@/lib/utils";
-import { useFolderTagModeStore, type FolderTagMode } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { LogOut } from "@/ui/icons";
 import { StratisTagIcon } from "@/ui/icons/stratis";
 import { useT } from "@shared/i18n/useT";
+import { useFolderTagModeStore, type FolderTagMode } from "./folder/useFolderTagModeStore";
 import "./sidebar.desktop.css";
 import "./sidebar.layered-directory.css";
 
