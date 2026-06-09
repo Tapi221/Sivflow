@@ -1,0 +1,29 @@
+.pdf-pane__scroll-container {
+  scrollbar-gutter: stable;
+  scroll-behavior: auto;
+}
+
+.pdf-pane__viewer .page {
+  content-visibility: auto;
+  contain-intrinsic-size: 1120px 792px;
+}
+
+.pdf-pane__viewer .canvasWrapper,
+.pdf-pane__viewer canvas {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.pdf-pane--scrolling .textLayer,
+.pdf-pane--scrolling .annotationLayer,
+.pdf-pane--scrolling .annotationEditorLayer,
+.pdf-pane--scrolling .xfaLayer,
+.pdf-pane--scrolling .structTreeLayer {
+  pointer-events: none;
+}
+
+.pdf-pane--scrolling .textLayer,
+.pdf-pane--scrolling .annotationLayer,
+.pdf-pane--scrolling .annotationEditorLayer {
+  visibility: hidden;
+}
