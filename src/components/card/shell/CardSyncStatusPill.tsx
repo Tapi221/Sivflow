@@ -1,8 +1,9 @@
 import React from "react";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { cn } from "@/lib/utils";
+import { RefreshCw } from "@/ui/icons";
 import { formatLastSyncedAt } from "./formatLastSyncedAt";
 import { overlayGlassPillClassName } from "./overlaySurfaceClassNames";
-import { RefreshCw } from "@/ui/icons";
-import { cn } from "@/lib/utils";
 
 interface CardSyncStatusPillProps {
   lastSyncedAtMs: number | null;
@@ -51,9 +52,11 @@ export const CardSyncStatusPill = ({
         aria-label="同期を再試行"
         title="同期を再試行"
       >
-        <RefreshCw
-          className={cn("h-3.5 w-3.5", isRetrying && "animate-spin")}
-        />
+        {isRetrying ? (
+          <LoadingSpinner iconClassName="h-3.5 w-3.5 border" label="同期を再試行中" />
+        ) : (
+          <RefreshCw className="h-3.5 w-3.5" />
+        )}
       </button>
     </div>
   );
