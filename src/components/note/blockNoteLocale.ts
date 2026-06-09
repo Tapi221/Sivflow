@@ -1,15 +1,17 @@
-import { locales } from "@blocknote/core/locales";
+import * as blockNoteLocales from "@blocknote/core/locales";
 
-type BlockNoteLocaleCode = keyof typeof locales;
-type BlockNoteDictionary = (typeof locales)[BlockNoteLocaleCode];
+type BlockNoteLocaleCode = string;
+type BlockNoteDictionary = (typeof blockNoteLocales)[keyof typeof blockNoteLocales];
 type BlockNoteLanguagePreferences = {
   documentLanguage?: string | null;
   navigatorLanguages?: readonly string[] | null;
   navigatorLanguage?: string | null;
 };
 
-const FALLBACK_BLOCKNOTE_LOCALE = "en" as BlockNoteLocaleCode;
-const BLOCKNOTE_LOCALE_CODES = Object.keys(locales) as BlockNoteLocaleCode[];
+const FALLBACK_BLOCKNOTE_LOCALE = "en";
+const BLOCKNOTE_LOCALE_MODULE = blockNoteLocales as unknown as Record<string, BlockNoteDictionary>;
+const BLOCKNOTE_LOCALE_REGISTRY = "default" in BLOCKNOTE_LOCALE_MODULE && Boolean(BLOCKNOTE_LOCALE_MODULE.default) && typeof BLOCKNOTE_LOCALE_MODULE.default === "object" && "en" in (BLOCKNOTE_LOCALE_MODULE.default as object) ? BLOCKNOTE_LOCALE_MODULE.default as unknown as Record<string, BlockNoteDictionary> : BLOCKNOTE_LOCALE_MODULE;
+const BLOCKNOTE_LOCALE_CODES = Object.keys(BLOCKNOTE_LOCALE_REGISTRY).filter((localeCode) => localeCode !== "default");
 
 const getDocumentLanguage = (): string | undefined => {
   if (typeof document === "undefined") return undefined;
@@ -27,6 +29,16 @@ const getNavigatorLanguage = (): string | undefined => {
   if (typeof navigator === "undefined") return undefined;
 
   return navigator.language;
+};
+
+const getFallbackBlockNoteDictionary = (): BlockNoteDictionary => {
+  const fallbackDictionary = BLOCKNOTE_LOCALE_REGISTRY[FALLBACK_BLOCKNOTE_LOCALE];
+  if (fallbackDictionary) return fallbackDictionary;
+
+  const firstLocaleCode = BLOCKNOTE_LOCALE_CODES[0];
+  if (firstLocaleCode) return BLOCKNOTE_LOCALE_REGISTRY[firstLocaleCode];
+
+  throw new Error("BlockNote locale dictionaries are unavailable.");
 };
 
 const toDefinedLanguages = (languages: readonly (string | null | undefined)[]): string[] => {
@@ -70,7 +82,7 @@ const resolveBlockNoteLocale = (preferences?: BlockNoteLanguagePreferences): Blo
 };
 
 const resolveBlockNoteDictionary = (preferences?: BlockNoteLanguagePreferences): BlockNoteDictionary => {
-  return locales[resolveBlockNoteLocale(preferences)];
+  return BLOCKNOTE_LOCALE_REGISTRY[resolveBlockNoteLocale(preferences)] ?? getFallbackBlockNoteDictionary();
 };
 
 export { resolveBlockNoteDictionary, resolveBlockNoteLocale };
