@@ -1,1 +1,1 @@
-export { AffineDocumentEditor as NoteDocumentEditor } from "./AffineDocumentEditor";
+export { BlockNoteDocumentEditor as NoteDocumentEditor } from "./BlockNoteDocumentEditor";
