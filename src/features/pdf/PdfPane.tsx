@@ -46,6 +46,11 @@ type PdfViewerWithZoomMethods = PdfViewerInstance & {
   decreaseScale: () => void;
 };
 
+type PdfViewerWithScale = PdfViewerInstance & {
+  currentScale: number;
+  currentScaleValue: string;
+};
+
 type PdfLinkServiceInstance = InstanceType<typeof PDFLinkService>;
 
 type PdfEventBusInstance = InstanceType<typeof EventBus>;
@@ -89,6 +94,14 @@ type NavigatorWithDeviceMemory = Navigator & {
 
 type PdfScrollEventName = "scroll" | "wheel" | "touchmove";
 
+type PdfGestureEventName = "gesturestart" | "gesturechange" | "gestureend";
+
+type PdfGestureEvent = Event & {
+  clientX?: number;
+  clientY?: number;
+  scale?: number;
+};
+
 type PdfPageElement = HTMLElement & {
   dataset: HTMLElement["dataset"] & {
     pageNumber?: string;
@@ -107,13 +120,20 @@ const PDF_HISTORY_LIMIT = 80;
 const PDF_LOW_MEMORY_DEVICE_MAX_GB = 4;
 const PDF_LOW_MEMORY_MAX_CANVAS_PIXELS = 5_000_000;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
+const PDF_MAX_SCALE = 5;
+const PDF_MIN_SCALE = 0.25;
 const PDF_RANGE_CHUNK_SIZE = 65_536;
+const PDF_SCALE_EPSILON = 0.001;
 const PDF_SCROLL_BUFFER_RESIZE_THROTTLE_MS = 120;
 const PDF_SCROLL_CONTAINER_CLASS_NAME = "pdf-pane__scroll-container";
 const PDF_SCROLL_IDLE_DELAY_MS = 200;
 const PDF_SCROLLING_CLASS_NAME = "pdf-pane--scrolling";
+const PDF_TRACKPAD_ZOOM_SENSITIVITY = 0.002;
 const PDF_VIEWER_CLASS_NAME = "pdf-pane__viewer";
 const PDF_VISIBLE_PAGE_CACHE_OVERSCAN = 2;
+const PDF_WHEEL_DELTA_LINE_HEIGHT_PX = 16;
+const PDF_WHEEL_DELTA_MODE_LINE = 1;
+const PDF_WHEEL_DELTA_MODE_PAGE = 2;
 const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
@@ -253,6 +273,16 @@ const addPassivePdfScrollListener = (element: HTMLElement, eventName: PdfScrollE
   return () => element.removeEventListener(eventName, listener);
 };
 
+const addPdfWheelZoomListener = (element: HTMLElement, listener: (event: WheelEvent) => void): (() => void) => {
+  element.addEventListener("wheel", listener, { passive: false });
+  return () => element.removeEventListener("wheel", listener);
+};
+
+const addPdfGestureZoomListener = (element: HTMLElement, eventName: PdfGestureEventName, listener: (event: PdfGestureEvent) => void): (() => void) => {
+  element.addEventListener(eventName, listener as EventListener, { passive: false });
+  return () => element.removeEventListener(eventName, listener as EventListener);
+};
+
 const setPdfScrollOptimizationClass = (container: HTMLElement, viewerElement: HTMLElement, isActive: boolean): void => {
   if (isActive) {
     container.classList.add(PDF_SCROLLING_CLASS_NAME);
@@ -262,6 +292,53 @@ const setPdfScrollOptimizationClass = (container: HTMLElement, viewerElement: HT
 
   container.classList.remove(PDF_SCROLLING_CLASS_NAME);
   viewerElement.classList.remove(PDF_SCROLLING_CLASS_NAME);
+};
+
+const clampPdfViewerScale = (scale: number): number => {
+  return Math.min(Math.max(scale, PDF_MIN_SCALE), PDF_MAX_SCALE);
+};
+
+const getPdfViewerCurrentScale = (pdfViewer: PdfViewerInstance): number => {
+  const currentScale = Number((pdfViewer as PdfViewerWithScale).currentScale);
+  return Number.isFinite(currentScale) && currentScale > 0 ? currentScale : 1;
+};
+
+const getNormalizedPdfWheelDeltaY = (event: WheelEvent, container: HTMLElement): number => {
+  if (event.deltaMode === PDF_WHEEL_DELTA_MODE_LINE) return event.deltaY * PDF_WHEEL_DELTA_LINE_HEIGHT_PX;
+  if (event.deltaMode === PDF_WHEEL_DELTA_MODE_PAGE) return event.deltaY * Math.max(container.clientHeight, 1);
+  return event.deltaY;
+};
+
+const isPdfTrackpadZoomWheelEvent = (event: WheelEvent): boolean => {
+  return event.ctrlKey || event.metaKey;
+};
+
+const getPdfZoomClientPoint = (container: HTMLElement, clientX?: number, clientY?: number): { clientX: number; clientY: number } => {
+  const containerRect = container.getBoundingClientRect();
+  return {
+    clientX: typeof clientX === "number" && Number.isFinite(clientX) ? clientX : containerRect.left + container.clientWidth / 2,
+    clientY: typeof clientY === "number" && Number.isFinite(clientY) ? clientY : containerRect.top + container.clientHeight / 2,
+  };
+};
+
+const applyPdfViewerScaleAtClientPoint = (pdfViewer: PdfViewerInstance, container: HTMLElement, scale: number, clientX?: number, clientY?: number): boolean => {
+  if (getPdfViewerPageCount(pdfViewer) <= 0) return false;
+  const currentScale = getPdfViewerCurrentScale(pdfViewer);
+  const nextScale = clampPdfViewerScale(scale);
+  if (Math.abs(nextScale - currentScale) < PDF_SCALE_EPSILON) return false;
+
+  const containerRect = container.getBoundingClientRect();
+  const clientPoint = getPdfZoomClientPoint(container, clientX, clientY);
+  const localX = Math.min(Math.max(clientPoint.clientX - containerRect.left, 0), container.clientWidth);
+  const localY = Math.min(Math.max(clientPoint.clientY - containerRect.top, 0), container.clientHeight);
+  const anchorX = container.scrollLeft + localX;
+  const anchorY = container.scrollTop + localY;
+  const scaleRatio = nextScale / currentScale;
+
+  (pdfViewer as PdfViewerWithScale).currentScaleValue = String(nextScale);
+  container.scrollLeft = Math.max(0, anchorX * scaleRatio - localX);
+  container.scrollTop = Math.max(0, anchorY * scaleRatio - localY);
+  return true;
 };
 
 const applyPdfViewerZoom = (pdfViewer: PdfViewerInstance, direction: PdfViewerZoomDirection): void => {
@@ -410,6 +487,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     let pageMetricFrame: number | null = null;
     let scrollIdleFrame: number | null = null;
     let scrollIdleTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
+    let gestureBaseScale: number | null = null;
     let isScrollOptimizationActive = false;
     let lastScrollBufferResizeAt = 0;
     let pendingScrollBufferPageNumber: number | null = null;
@@ -586,6 +664,51 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       pageChangeFrame = window.requestAnimationFrame(flushPendingPageChange);
     };
 
+    const markExplicitPdfZoom = () => {
+      lastExplicitZoomAtRef.current = Date.now();
+    };
+
+    const handleTrackpadZoomWheel = (event: WheelEvent) => {
+      if (isCancelled || !loadedPdfDocument || !isPdfTrackpadZoomWheelEvent(event)) return;
+      const normalizedDeltaY = getNormalizedPdfWheelDeltaY(event, container);
+      if (normalizedDeltaY === 0) return;
+      event.preventDefault();
+      markExplicitPdfZoom();
+      if (!applyPdfViewerScaleAtClientPoint(pdfViewer, container, getPdfViewerCurrentScale(pdfViewer) * Math.exp(-normalizedDeltaY * PDF_TRACKPAD_ZOOM_SENSITIVITY), event.clientX, event.clientY)) return;
+      requestPageMetricRefresh();
+      updateContainIntrinsicSizeFromPage();
+    };
+
+    const handleTrackpadZoomGestureStart = (event: PdfGestureEvent) => {
+      if (isCancelled || !loadedPdfDocument) return;
+      event.preventDefault();
+      gestureBaseScale = getPdfViewerCurrentScale(pdfViewer);
+      markExplicitPdfZoom();
+    };
+
+    const handleTrackpadZoomGestureChange = (event: PdfGestureEvent) => {
+      if (isCancelled || !loadedPdfDocument) return;
+      const gestureScale = Number(event.scale);
+      if (!Number.isFinite(gestureScale) || gestureScale <= 0) return;
+      event.preventDefault();
+      const baseScale = gestureBaseScale ?? getPdfViewerCurrentScale(pdfViewer);
+      markExplicitPdfZoom();
+      if (!applyPdfViewerScaleAtClientPoint(pdfViewer, container, baseScale * gestureScale, event.clientX, event.clientY)) return;
+      requestPageMetricRefresh();
+      updateContainIntrinsicSizeFromPage();
+    };
+
+    const handleTrackpadZoomGestureEnd = (event: PdfGestureEvent) => {
+      if (gestureBaseScale === null) return;
+      event.preventDefault();
+      gestureBaseScale = null;
+    };
+
+    const handleWheelScrollOptimization = (event: Event) => {
+      if (isPdfTrackpadZoomWheelEvent(event as WheelEvent)) return;
+      requestScrollOptimization();
+    };
+
     recordPdfPerformanceMark(`${performanceTraceName}.start`, { detail: { sourceType: source?.type ?? null } });
     pdfViewerRef.current = pdfViewer;
     linkService.setViewer(pdfViewer);
@@ -595,8 +718,12 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestResponsiveScaleUpdate);
     resizeObserver?.observe(container);
     window.addEventListener("orientationchange", requestResponsiveScaleUpdate);
+    removeEventListeners.push(addPdfWheelZoomListener(container, handleTrackpadZoomWheel));
+    removeEventListeners.push(addPdfGestureZoomListener(container, "gesturestart", handleTrackpadZoomGestureStart));
+    removeEventListeners.push(addPdfGestureZoomListener(container, "gesturechange", handleTrackpadZoomGestureChange));
+    removeEventListeners.push(addPdfGestureZoomListener(container, "gestureend", handleTrackpadZoomGestureEnd));
     removeEventListeners.push(addPassivePdfScrollListener(container, "scroll", requestScrollOptimization));
-    removeEventListeners.push(addPassivePdfScrollListener(container, "wheel", requestScrollOptimization));
+    removeEventListeners.push(addPassivePdfScrollListener(container, "wheel", handleWheelScrollOptimization));
     removeEventListeners.push(addPassivePdfScrollListener(container, "touchmove", requestScrollOptimization));
 
     removeEventListeners.push(addPdfViewerEventListener(eventBus, "pagesinit", () => {
@@ -664,6 +791,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     return () => {
       isCancelled = true;
       isApplyingFitScaleRef.current = false;
+      gestureBaseScale = null;
       if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
       if (scrollFrame !== null) window.cancelAnimationFrame(scrollFrame);
       clearPendingScrollBufferResize();
