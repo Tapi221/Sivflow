@@ -22,7 +22,7 @@ import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import { StratisTagIcon } from "@/ui/icons/stratis";
-import { useFolderTagModeStore } from "./folder/useFolderTagModeStore";
+import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 
 type IconProps = {
   className?: string;
