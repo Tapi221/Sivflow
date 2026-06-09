@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "@blocknote/mantine/style.css";
 import type { Note, NoteBlockContent } from "@/types";
 import { resolveBlockNoteDictionary } from "./blockNoteLocale";
+import "./blockNoteSuggestionMenu.css";
 
 type BlockNoteDocumentEditorProps = {
   note: Note;
