@@ -3,8 +3,9 @@ import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from "firebase
 import { deleteObject, ref } from "firebase/storage";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AlertCircle, Database, FileAudio, FileText, Image as ImageIcon, Loader2, Trash2 } from "@/ui/icons";
+import { AlertCircle, Database, FileAudio, FileText, Image as ImageIcon, Trash2 } from "@/ui/icons";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getFirebaseStorage, getFirestoreDb } from "@/services/firebaseGateway";
 import type { UploadMetadata } from "@/types";
@@ -152,7 +153,7 @@ export const StorageManager = () => {
   if (loading) {
     return (
       <div className="flex justify-center p-8">
-        <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+        <LoadingSpinner iconClassName="h-6 w-6" label="ストレージ使用量を読み込み中" />
       </div>
     );
   }
@@ -246,7 +247,7 @@ export const StorageManager = () => {
                     disabled={deletingId === file.id}
                   >
                     {deletingId === file.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <LoadingSpinner iconClassName="h-4 w-4" label="ファイルを削除中" />
                     ) : (
                       <Trash2 className="w-4 h-4" />
                     )}
@@ -259,11 +260,4 @@ export const StorageManager = () => {
       </div>
     </div>
   );
-};
-
-const getFileIcon = (mimeType: string): React.ReactNode => {
-  if (mimeType.startsWith("image/")) return <ImageIcon className="w-4 h-4" />;
-  if (mimeType.startsWith("audio/")) return <FileAudio className="w-4 h-4" />;
-  if (mimeType === "application/pdf") return <FileText className="w-4 h-4" />;
-  return <FileText className="w-4 h-4" />;
 };
