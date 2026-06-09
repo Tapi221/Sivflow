@@ -15,7 +15,6 @@ import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
-import { useFolderTagModeStore } from "@/hooks/folder/useFolderTagModeStore";
 import { useNotes } from "@/hooks/note/useNotes";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
@@ -23,6 +22,7 @@ import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import { StratisTagIcon } from "@/ui/icons/stratis";
+import { useFolderTagModeStore } from "./folder/useFolderTagModeStore";
 
 type IconProps = {
   className?: string;
