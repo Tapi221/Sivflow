@@ -4,7 +4,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/contexts/ToastContext";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { Loader2, MessageSquare, Plus, Sparkles } from "@/ui/icons";
+import { MessageSquare, Plus, Sparkles } from "@/ui/icons";
 import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
 
 type QuickQaChatDialogProps = {
@@ -14,22 +14,28 @@ type QuickQaChatDialogProps = {
 
 type ChatStep = "question" | "answer";
 
+type ChatRole = "assistant" | "user";
+
 type ChatMessage = {
   id: string;
-  role: "assistant" | "user";
+  role: ChatRole;
   text: string;
+};
+
+type LoadingRingProps = {
+  className?: string;
+};
+
+type LoadingStatusPillProps = {
+  label: string;
 };
 
 const MAX_QUESTION_LENGTH = 240;
 const MAX_ANSWER_LENGTH = 3000;
 
-const createInitialMessages = (): ChatMessage[] => [
-  {
-    id: crypto.randomUUID(),
-    role: "assistant",
-    text: "疑問を入力してください。入力したら、次に回答を聞きます。",
-  },
-];
+const createChatMessage = (role: ChatRole, text: string): ChatMessage => ({ id: crypto.randomUUID(), role, text });
+
+const createInitialMessages = (): ChatMessage[] => [createChatMessage("assistant", "疑問を入力してください。入力したら、次に回答を聞きます。")];
 
 const trimMessage = (value: string, maxLength: number): string => value.trim().slice(0, maxLength);
 
@@ -37,6 +43,29 @@ const createCardTitle = (question: string): string => {
   const normalized = question.replace(/\s+/g, " ").trim();
   return normalized.length > 80 ? `${normalized.slice(0, 80)}…` : normalized;
 };
+
+const LoadingRing = ({ className }: LoadingRingProps) => (
+  <span className={cn("relative inline-flex h-4 w-4 shrink-0 items-center justify-center", className)} aria-hidden="true">
+    <span className="absolute inset-0 rounded-full border border-current opacity-25" />
+    <span className="absolute inset-0 animate-spin rounded-full border border-transparent border-t-current" />
+  </span>
+);
+
+const LoadingStatusPill = ({ label }: LoadingStatusPillProps) => (
+  <div className="flex justify-start">
+    <div role="status" aria-live="polite" className="inline-flex max-w-[84%] items-center gap-2.5 rounded-[18px] border border-[#e6e1d8] bg-white px-3 py-2 text-[12px] font-medium leading-relaxed text-[#6f675d] shadow-[0_12px_28px_rgba(35,31,26,0.08)]" style={{ background: "linear-gradient(135deg, #ffffff 0%, #f8f5ef 100%)" }}>
+      <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#f0ebe2] text-[#7f766a]">
+        <LoadingRing className="h-3.5 w-3.5" />
+      </span>
+      <span>{label}</span>
+      <span className="inline-flex items-center gap-0.5 pl-0.5" aria-hidden="true">
+        <span className="h-1 w-1 animate-pulse rounded-full bg-[#aaa196]" style={{ animationDelay: "0ms" }} />
+        <span className="h-1 w-1 animate-pulse rounded-full bg-[#aaa196]" style={{ animationDelay: "140ms" }} />
+        <span className="h-1 w-1 animate-pulse rounded-full bg-[#aaa196]" style={{ animationDelay: "280ms" }} />
+      </span>
+    </div>
+  </div>
+);
 
 const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogProps) => {
   const toast = useToast();
@@ -88,16 +117,8 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
       });
 
       appendMessages([
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          text: `カードを作成しました: ${title}`,
-        },
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          text: "続けて次の疑問を入力できます。",
-        },
+        createChatMessage("assistant", `カードを作成しました: ${title}`),
+        createChatMessage("assistant", "続けて次の疑問を入力できます。"),
       ]);
       setStep("question");
       setPendingQuestion("");
@@ -118,17 +139,16 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
     if (!question || !canGenerateAiAnswer) return;
 
     setIsGeneratingAiAnswer(true);
-    appendMessages([{ id: crypto.randomUUID(), role: "assistant", text: "ローカルAIで回答案を作成しています。" }]);
 
     try {
       const result = await generateOllamaAnswer({ question });
       setInputValue(result.answer.slice(0, MAX_ANSWER_LENGTH));
-      appendMessages([{ id: crypto.randomUUID(), role: "assistant", text: `回答案を作成しました。モデル: ${result.model}` }]);
+      appendMessages([createChatMessage("assistant", `回答案を作成しました。モデル: ${result.model}`)]);
       toast.success("AI回答案を作成しました。");
       focusInputSoon();
     } catch (error) {
       console.error("[QuickQaChatDialog] failed to generate AI answer", error);
-      appendMessages([{ id: crypto.randomUUID(), role: "assistant", text: "Ollamaに接続できませんでした。Ollama起動後、llama3.2:3b などのモデルを用意してください。" }]);
+      appendMessages([createChatMessage("assistant", "Ollamaに接続できませんでした。Ollama起動後、llama3.2:3b などのモデルを用意してください。")]);
       toast.error("ローカルAIに接続できませんでした。");
     } finally {
       setIsGeneratingAiAnswer(false);
@@ -144,14 +164,14 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
       setStep("answer");
       setInputValue("");
       appendMessages([
-        { id: crypto.randomUUID(), role: "user", text: value },
-        { id: crypto.randomUUID(), role: "assistant", text: "回答を入力してください。AI回答案を使うこともできます。" },
+        createChatMessage("user", value),
+        createChatMessage("assistant", "回答を入力してください。AI回答案を使うこともできます。"),
       ]);
       focusInputSoon();
       return;
     }
 
-    appendMessages([{ id: crypto.randomUUID(), role: "user", text: value }]);
+    appendMessages([createChatMessage("user", value)]);
     void handleCreateCardFromAnswer(pendingQuestion, value);
   }, [appendMessages, focusInputSoon, handleCreateCardFromAnswer, inputMaxLength, inputValue, isCreating, isGeneratingAiAnswer, pendingQuestion, step]);
 
@@ -159,7 +179,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
     const question = trimMessage(pendingQuestion, MAX_QUESTION_LENGTH);
     if (!question || isCreating || isGeneratingAiAnswer) return;
 
-    appendMessages([{ id: crypto.randomUUID(), role: "assistant", text: "回答なしの下書きカードとして作成します。" }]);
+    appendMessages([createChatMessage("assistant", "回答なしの下書きカードとして作成します。")]);
     void handleCreateCardFromAnswer(question, "");
   }, [appendMessages, handleCreateCardFromAnswer, isCreating, isGeneratingAiAnswer, pendingQuestion]);
 
@@ -197,14 +217,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
                 <div className={cn("max-w-[84%] rounded-[18px] px-3 py-2 text-[12px] leading-relaxed shadow-sm", message.role === "user" ? "bg-[#343434] text-white" : "border border-[#eceae4] bg-white text-[#4b4b4b]")}>{message.text}</div>
               </div>
             ))}
-            {isCreating || isGeneratingAiAnswer ? (
-              <div className="flex justify-start">
-                <div className="inline-flex items-center gap-2 rounded-[18px] border border-[#eceae4] bg-white px-3 py-2 text-[12px] text-[#8a857f] shadow-sm">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  {isGeneratingAiAnswer ? "AI回答案を作成中" : "カード作成中"}
-                </div>
-              </div>
-            ) : null}
+            {isCreating || isGeneratingAiAnswer ? <LoadingStatusPill label={isGeneratingAiAnswer ? "AI回答案を作成中" : "カード作成中"} /> : null}
           </div>
         </div>
 
@@ -217,7 +230,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
           <div className="flex items-end gap-2">
             <textarea ref={inputRef} value={inputValue} onChange={(event) => setInputValue(event.target.value.slice(0, inputMaxLength))} onKeyDown={handleInputKeyDown} placeholder={placeholder} rows={step === "question" ? 2 : 4} className="max-h-[160px] min-h-[42px] min-w-0 flex-1 resize-none rounded-[14px] border border-[#dddcd5] bg-white px-3 py-2 text-[13px] leading-relaxed text-[#343434] outline-none transition placeholder:text-[#aaa49d] focus:border-[#c8c6bf]" />
             <button type="button" className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-[#343434] bg-[#343434] px-4 text-[12px] font-semibold text-white transition hover:bg-[#1f1f1f] disabled:border-[#dddcd5] disabled:bg-[#eeeeee] disabled:text-[#aaa49d]" onClick={handleSend} disabled={!canSend}>
-              {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : "送信"}
+              {isCreating ? <LoadingRing /> : "送信"}
             </button>
           </div>
           <div className="mt-2 flex items-center justify-between gap-2">
@@ -225,7 +238,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
             <div className="flex items-center gap-3">
               {step === "answer" ? (
                 <button type="button" className="inline-flex items-center gap-1 text-[11px] font-medium text-[#8a857f] underline-offset-2 hover:text-[#343434] hover:underline disabled:opacity-60" onClick={handleGenerateAiAnswer} disabled={!canGenerateAiAnswer}>
-                  {isGeneratingAiAnswer ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                  {isGeneratingAiAnswer ? <LoadingRing className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}
                   AIで回答案
                 </button>
               ) : null}
