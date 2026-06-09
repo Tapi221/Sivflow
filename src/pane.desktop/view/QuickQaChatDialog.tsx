@@ -184,7 +184,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent accessibleTitle="Q&Aチャット" accessibleDescription="チャット形式でQ&Aカードを作成します。" overlayClassName="app-modal-backdrop z-[100]" contentWrapperClassName="app-modal-content-frame" className="app-modal-surface max-w-[560px] gap-0 p-0" closeButtonClassName="right-4 top-4 text-[#85827e] hover:text-[#343434]">
+      <DialogContent accessibleTitle="Q&Aチャット" accessibleDescription="チャット形式でQ&Aカードを作成します。" overlayClassName="app-modal-backdrop" contentWrapperClassName="app-modal-content-frame" className="app-modal-surface max-w-[560px] gap-0 p-0" closeButtonClassName="right-4 top-4 text-[#85827e] hover:text-[#343434]">
         <div className="border-b border-[#eceae4] px-5 py-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#dddcd5] bg-white text-[#85827e]">
