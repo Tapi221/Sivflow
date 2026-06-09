@@ -1,7 +1,7 @@
 import type { BaseEntity } from "./base";
 
-export type NoteEditor = "affine";
-export type NoteContentVersion = 2;
+export type NoteEditor = "blocknote" | "affine";
+export type NoteContentVersion = 1 | 2;
 export type NoteBlockContent = Record<string, unknown>[];
 
 export interface Note extends BaseEntity {
