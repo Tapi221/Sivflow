@@ -1,4 +1,3 @@
-import React from "react";
 import { CardEditorPane } from "./CardEditorPane";
 import { CardQuestionLinksPanel } from "./CardQuestionLinksPanel";
 
