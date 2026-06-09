@@ -8,6 +8,7 @@ type PdfDocumentDataSource = {
 
 type PdfDocumentUrlSource = {
   type: "url";
+  locality: "local" | "remote";
   url: string;
   revoke?: () => void;
 };
@@ -24,6 +25,10 @@ type PdfWorkerConstructor = new (options?: WorkerOptions) => Worker;
 
 let pdfWorkerPort: Worker | null = null;
 
+const getPdfDocumentUrlSourceLocality = (url: string): PdfDocumentUrlSource["locality"] => {
+  return url.startsWith("blob:") ? "local" : "remote";
+};
+
 const createPdfDocumentDataSource = (data: Uint8Array): PdfDocumentSource => ({
   type: "data",
   data,
@@ -31,6 +36,7 @@ const createPdfDocumentDataSource = (data: Uint8Array): PdfDocumentSource => ({
 
 const createPdfDocumentUrlSource = (url: string): PdfDocumentSource => ({
   type: "url",
+  locality: getPdfDocumentUrlSourceLocality(url),
   url,
 });
 
@@ -46,6 +52,7 @@ const createPdfDocumentObjectUrlSourceFromBlob = (blob: Blob): PdfDocumentSource
 
   return {
     type: "url",
+    locality: "local",
     url,
     revoke,
   };
