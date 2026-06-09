@@ -5,6 +5,7 @@ use std::net::{TcpListener, TcpStream};
 use std::path::PathBuf;
 use std::process::Command;
 use std::sync::Mutex;
+use std::time::Duration;
 use tauri::{AppHandle, Emitter, Manager, State};
 use url::Url;
 
@@ -14,6 +15,8 @@ const DESKTOP_OAUTH_PATH: &str = "/";
 const DESKTOP_GOOGLE_OAUTH_REDIRECT_URI: &str = "http://127.0.0.1:42813";
 const MAX_DESKTOP_IMPORT_FILE_BYTES: u64 = 128 * 1024 * 1024;
 const MAX_DESKTOP_PDF_FILE_BYTES: usize = 512 * 1024 * 1024;
+const OLLAMA_GENERATE_ENDPOINT: &str = "http://127.0.0.1:11434/api/generate";
+const OLLAMA_REQUEST_TIMEOUT_SECONDS: u64 = 60;
 const SUPPORTED_IMPORT_FILE_EXTENSIONS: [&str; 2] = ["mfdeck", "mfcard"];
 
 #[derive(Default)]
@@ -27,6 +30,24 @@ struct DesktopPdfOpenInput {
     file_name: String,
     data: Vec<u8>,
     page_number: Option<u32>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopOllamaGenerateInput {
+    model: String,
+    prompt: String,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopOllamaGenerateResult {
+    response: String,
+}
+
+#[derive(Deserialize)]
+struct OllamaGenerateResponse {
+    response: Option<String>,
 }
 
 #[derive(Serialize, Clone)]
@@ -248,6 +269,15 @@ fn ensure_auth_loopback_redirect(authorize_url: &str) -> Result<(), String> {
     Ok(())
 }
 
+fn normalize_ollama_prompt(prompt: &str) -> Result<String, String> {
+    let value = prompt.trim();
+    if value.is_empty() {
+        return Err("Ollama prompt is empty".to_string());
+    }
+
+    Ok(value.chars().take(8000).collect())
+}
+
 #[tauri::command]
 fn app_get_version(app_handle: AppHandle) -> String {
     app_handle.package_info().version.to_string()
@@ -309,6 +339,31 @@ fn pdf_open_in_sioyek(input: DesktopPdfOpenInput, app_handle: AppHandle) -> Resu
         path: path.to_string_lossy().to_string(),
         opened_with: "sioyek".to_string(),
     })
+}
+
+#[tauri::command]
+fn ollama_generate(input: DesktopOllamaGenerateInput) -> Result<DesktopOllamaGenerateResult, String> {
+    let prompt = normalize_ollama_prompt(&input.prompt)?;
+    let model = input.model.trim();
+    if model.is_empty() {
+        return Err("Ollama model is empty".to_string());
+    }
+
+    let response = ureq::post(OLLAMA_GENERATE_ENDPOINT)
+        .timeout(Duration::from_secs(OLLAMA_REQUEST_TIMEOUT_SECONDS))
+        .send_json(serde_json::json!({
+            "model": model,
+            "prompt": prompt,
+            "stream": false,
+        }))
+        .map_err(|error| error.to_string())?;
+    let data: OllamaGenerateResponse = response.into_json().map_err(|error| error.to_string())?;
+    let answer = data.response.unwrap_or_default().trim().to_string();
+    if answer.is_empty() {
+        return Err("Ollama response is empty".to_string());
+    }
+
+    Ok(DesktopOllamaGenerateResult { response: answer })
 }
 
 #[tauri::command]
@@ -396,6 +451,7 @@ fn main() {
             desktop_import_read_file,
             desktop_import_select_files,
             pdf_open_in_sioyek,
+            ollama_generate,
             oauth_start,
             oauth_cancel,
             oauth_take_pending_callback,
