@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
-import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
 import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
 import "pdfjs-dist/legacy/web/pdf_viewer.css";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
@@ -11,7 +10,6 @@ import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
 import { getPdfPageWindowKeepSet, getSafePdfPageNumber } from "./pdfPageWindow";
 import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "./pdfPerformance";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
-import type { PdfPageWindowMetric } from "./pdfPageWindow";
 import "./PdfPane.css";
 
 type PdfPaneProps = {
@@ -102,17 +100,6 @@ type PdfGestureEvent = Event & {
   scale?: number;
 };
 
-type PdfPageElement = HTMLElement & {
-  dataset: HTMLElement["dataset"] & {
-    pageNumber?: string;
-  };
-};
-
-type ResizePdfPageBufferOptions = {
-  pageMetrics?: PdfPageWindowMetric[];
-  viewerElement?: HTMLElement | null;
-};
-
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 640;
 const PDF_DEFAULT_DEVICE_MEMORY_GB = 4;
 const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 500;
@@ -138,8 +125,6 @@ const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const getSafePageNumber = getSafePdfPageNumber;
 
@@ -174,32 +159,13 @@ const getApproxDeviceMemory = (): number => {
   return typeof deviceMemory === "number" && Number.isFinite(deviceMemory) ? deviceMemory : PDF_DEFAULT_DEVICE_MEMORY_GB;
 };
 
-const getPdfPageNumberFromElement = (element: PdfPageElement): number | null => {
-  const pageNumber = Number(element.dataset.pageNumber);
-  return Number.isFinite(pageNumber) ? pageNumber : null;
-};
-
-const getPdfVisiblePageMetrics = (viewerElement: HTMLElement): PdfPageWindowMetric[] => {
-  const pageMetrics: PdfPageWindowMetric[] = [];
-
-  viewerElement.querySelectorAll<PdfPageElement>(".page").forEach((element) => {
-    pageMetrics.push({
-      pageNumber: getPdfPageNumberFromElement(element) ?? 0,
-      offsetTop: element.offsetTop,
-      offsetHeight: element.offsetHeight,
-    });
-  });
-
-  return pageMetrics;
-};
-
-const resizePdfViewerPageBuffer = (pdfViewer: PdfViewerInstance, container?: HTMLElement | null, options: ResizePdfPageBufferOptions = {}, pageNumber: number = pdfViewer.currentPageNumber): void => {
+const resizePdfViewerPageBuffer = (pdfViewer: PdfViewerInstance, container?: HTMLElement | null, pageNumber: number = pdfViewer.currentPageNumber): void => {
   const pageCount = getPdfViewerPageCount(pdfViewer);
   if (pageCount <= 0) return;
   const pageBuffer = (pdfViewer as PdfViewerWithPageBuffer)._buffer;
   if (typeof pageBuffer?.resize !== "function") return;
-  const pageMetrics = options.pageMetrics ?? (options.viewerElement ? getPdfVisiblePageMetrics(options.viewerElement) : []);
-  const idsToKeep = getPdfPageWindowKeepSet(pageMetrics, container?.scrollTop ?? 0, container?.clientHeight ?? 0, pageCount, { fallbackPageNumber: pageNumber, overscanPageCount: PDF_VISIBLE_PAGE_CACHE_OVERSCAN });
+  const safePageNumber = getSafePageNumber(pageNumber, pageCount);
+  const idsToKeep = getPdfPageWindowKeepSet([], container?.scrollTop ?? 0, container?.clientHeight ?? 0, pageCount, { fallbackPageNumber: safePageNumber, overscanPageCount: PDF_VISIBLE_PAGE_CACHE_OVERSCAN });
   pageBuffer.resize(Math.min(Math.max(idsToKeep.size, 1), pageCount), idsToKeep);
 };
 
@@ -387,7 +353,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   const resizeActivePdfViewerPageBuffer = useCallback((pageNumber?: number) => {
     const pdfViewer = pdfViewerRef.current;
     if (!pdfViewer) return;
-    resizePdfViewerPageBuffer(pdfViewer, scrollContainerRef.current, { viewerElement: pdfViewerElementRef.current }, pageNumber);
+    resizePdfViewerPageBuffer(pdfViewer, scrollContainerRef.current, pageNumber);
   }, []);
 
   const setViewerPage = useCallback((pageNumber: number, options?: { recordHistory?: boolean }) => {
@@ -475,7 +441,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   useEffect(() => {
     const container = scrollContainerRef.current;
     const viewerElement = pdfViewerElementRef.current;
-    if (!container || !viewerElement) return;
+    if (!container || !viewerElement || !source) return;
 
     let isCancelled = false;
     let loadedPdfDocument: PdfDocumentProxy | null = null;
@@ -484,7 +450,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     let scrollBufferResizeFrame: number | null = null;
     let scrollBufferResizeTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
     let pageChangeFrame: number | null = null;
-    let pageMetricFrame: number | null = null;
     let scrollIdleFrame: number | null = null;
     let scrollIdleTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
     let gestureBaseScale: number | null = null;
@@ -492,8 +457,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     let lastScrollBufferResizeAt = 0;
     let pendingScrollBufferPageNumber: number | null = null;
     let pendingPageNumber: number | null = null;
-    let pageMetricCache: PdfPageWindowMetric[] = [];
-    let pageMetricCacheReady = false;
     const performanceTraceName = createPdfPerformanceTraceName("viewer.load");
     const eventBus = new EventBus() as PdfEventBusLike;
     const linkService = new PDFLinkService({ eventBus });
@@ -501,12 +464,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const removeEventListeners: Array<() => void> = [];
 
     retainPdfDocumentSource(source);
-
-    const refreshPageMetricCache = () => {
-      pageMetricCache = getPdfVisiblePageMetrics(viewerElement);
-      pageMetricCacheReady = true;
-      return pageMetricCache;
-    };
 
     const updateContainIntrinsicSizeFromPage = () => {
       const firstPageElement = viewerElement.querySelector<HTMLElement>(".page");
@@ -519,9 +476,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       }
     };
 
-    const resizeVisiblePageBuffer = (pageNumber?: number, options: { refreshMetrics?: boolean } = {}) => {
-      const pageMetrics = options.refreshMetrics ? refreshPageMetricCache() : (pageMetricCacheReady ? pageMetricCache : []);
-      resizePdfViewerPageBuffer(pdfViewer, container, { pageMetrics }, pageNumber);
+    const resizeVisiblePageBuffer = (pageNumber?: number) => {
+      resizePdfViewerPageBuffer(pdfViewer, container, pageNumber);
     };
 
     const clearPendingScrollBufferResize = () => {
@@ -572,19 +528,16 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       }, delayMs);
     };
 
-    const requestPageMetricRefresh = (pageNumber?: number) => {
-      if (pageMetricFrame !== null) return;
-      pageMetricFrame = window.requestAnimationFrame(() => {
-        pageMetricFrame = null;
-        if (isCancelled) return;
-        resizeVisiblePageBuffer(pageNumber, { refreshMetrics: true });
-      });
+    const requestPageBufferResize = (pageNumber?: number) => {
+      if (scrollBufferResizeFrame !== null || scrollBufferResizeTimer !== null) return;
+      pendingScrollBufferPageNumber = pageNumber ?? pendingScrollBufferPageNumber;
+      scrollBufferResizeFrame = window.requestAnimationFrame(runPendingScrollBufferResize);
     };
 
     const setFitScale = () => {
       isApplyingFitScaleRef.current = true;
       pdfViewer.currentScaleValue = "page-width";
-      requestPageMetricRefresh();
+      requestPageBufferResize();
     };
 
     const requestResponsiveScaleUpdate = () => {
@@ -593,7 +546,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         resizeFrame = null;
         if (isCancelled || !loadedPdfDocument) return;
         if (!isCompactPdfViewport(container) && viewerStateRef.current?.fitMode === "manual") {
-          requestPageMetricRefresh();
+          requestPageBufferResize();
           return;
         }
 
@@ -628,7 +581,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         if (isCancelled) return;
         setScrollOptimizationActive(false);
         clearPendingScrollBufferResize();
-        resizeVisiblePageBuffer(undefined, { refreshMetrics: true });
+        resizeVisiblePageBuffer();
       });
     };
 
@@ -675,7 +628,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       event.preventDefault();
       markExplicitPdfZoom();
       if (!applyPdfViewerScaleAtClientPoint(pdfViewer, container, getPdfViewerCurrentScale(pdfViewer) * Math.exp(-normalizedDeltaY * PDF_TRACKPAD_ZOOM_SENSITIVITY), event.clientX, event.clientY)) return;
-      requestPageMetricRefresh();
+      requestPageBufferResize();
       updateContainIntrinsicSizeFromPage();
     };
 
@@ -694,7 +647,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       const baseScale = gestureBaseScale ?? getPdfViewerCurrentScale(pdfViewer);
       markExplicitPdfZoom();
       if (!applyPdfViewerScaleAtClientPoint(pdfViewer, container, baseScale * gestureScale, event.clientX, event.clientY)) return;
-      requestPageMetricRefresh();
+      requestPageBufferResize();
       updateContainIntrinsicSizeFromPage();
     };
 
@@ -709,7 +662,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       requestScrollOptimization();
     };
 
-    recordPdfPerformanceMark(`${performanceTraceName}.start`, { detail: { sourceType: source?.type ?? null } });
+    recordPdfPerformanceMark(`${performanceTraceName}.start`, { detail: { sourceType: source.type } });
     pdfViewerRef.current = pdfViewer;
     linkService.setViewer(pdfViewer);
     viewerElement.replaceChildren();
@@ -728,19 +681,19 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
 
     removeEventListeners.push(addPdfViewerEventListener(eventBus, "pagesinit", () => {
       if (isCancelled || !loadedPdfDocument) return;
-      recordPdfPerformanceMark(`${performanceTraceName}.pagesinit`, { detail: { numPages: loadedPdfDocument.numPages, sourceType: source?.type ?? null } });
+      recordPdfPerformanceMark(`${performanceTraceName}.pagesinit`, { detail: { numPages: loadedPdfDocument.numPages, sourceType: source.type } });
       recordPdfPerformanceMeasure(`${performanceTraceName}.toPagesInit`, `${performanceTraceName}.start`, `${performanceTraceName}.pagesinit`);
+      const initialPageNumber = getSafePageNumber(viewerStateRef.current?.currentPage, loadedPdfDocument.numPages);
       const scaleValue = getPdfViewerStateScaleValue(viewerStateRef.current, isCompactPdfViewport(container));
+      pdfViewer.currentPageNumber = initialPageNumber;
       if (scaleValue === "page-width") {
         setFitScale();
       } else {
         pdfViewer.currentScaleValue = scaleValue;
-        requestPageMetricRefresh();
+        requestPageBufferResize(initialPageNumber);
       }
 
-      const initialPageNumber = getSafePageNumber(viewerStateRef.current?.currentPage, loadedPdfDocument.numPages);
-      pdfViewer.currentPageNumber = initialPageNumber;
-      resizeVisiblePageBuffer(initialPageNumber, { refreshMetrics: true });
+      resizeVisiblePageBuffer(initialPageNumber);
       updateContainIntrinsicSizeFromPage();
       requestResponsiveScaleUpdate();
     }));
@@ -763,12 +716,12 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       isApplyingFitScaleRef.current = false;
       if (isExplicitZoom) lastExplicitZoomAtRef.current = 0;
       if (viewerStateRef.current?.scale !== scale || viewerStateRef.current?.fitMode !== fitMode) updateViewerState({ scale, fitMode }, { persistence: isExplicitZoom ? "immediate" : "none" });
-      requestPageMetricRefresh();
+      requestPageBufferResize();
       updateContainIntrinsicSizeFromPage();
     }));
 
     void loadPdfDocument(source, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then((nextPdfDocument) => {
-      recordPdfPerformanceMark(`${performanceTraceName}.loaded`, { detail: { numPages: nextPdfDocument.numPages, sourceType: source?.type ?? null } });
+      recordPdfPerformanceMark(`${performanceTraceName}.loaded`, { detail: { numPages: nextPdfDocument.numPages, sourceType: source.type } });
       recordPdfPerformanceMeasure(`${performanceTraceName}.toLoaded`, `${performanceTraceName}.start`, `${performanceTraceName}.loaded`);
       if (isCancelled) {
         void nextPdfDocument.destroy();
@@ -779,7 +732,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       pdfViewer.setDocument(nextPdfDocument);
       linkService.setDocument(nextPdfDocument, null);
     }).catch((error: unknown) => {
-      recordPdfPerformanceMark(`${performanceTraceName}.error`, { detail: { message: error instanceof Error ? error.message : String(error), sourceType: source?.type ?? null } });
+      recordPdfPerformanceMark(`${performanceTraceName}.error`, { detail: { message: error instanceof Error ? error.message : String(error), sourceType: source.type } });
       recordPdfPerformanceMeasure(`${performanceTraceName}.toError`, `${performanceTraceName}.start`, `${performanceTraceName}.error`);
       if (isCancelled) return;
       console.warn("[PdfPane] PDF load failed", error);
@@ -796,7 +749,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       if (scrollFrame !== null) window.cancelAnimationFrame(scrollFrame);
       clearPendingScrollBufferResize();
       if (pageChangeFrame !== null) window.cancelAnimationFrame(pageChangeFrame);
-      if (pageMetricFrame !== null) window.cancelAnimationFrame(pageMetricFrame);
       clearScrollIdleTimer();
       setPdfScrollOptimizationClass(container, viewerElement, false);
       resizeObserver?.disconnect();
@@ -804,7 +756,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       removeEventListeners.forEach((removeEventListener) => removeEventListener());
       releasePdfViewerDocument(pdfViewer, linkService, loadedPdfDocument);
       releasePdfDocumentSourceSoon(source);
-      recordPdfPerformanceMark(`${performanceTraceName}.cleanup`, { debugOnly: true, detail: { sourceType: source?.type ?? null } });
+      recordPdfPerformanceMark(`${performanceTraceName}.cleanup`, { debugOnly: true, detail: { sourceType: source.type } });
       viewerElement.replaceChildren();
       if (pdfViewerRef.current === pdfViewer) pdfViewerRef.current = null;
     };
