@@ -1,1 +1,1 @@
-export { BlockNoteDocumentEditor as NoteDocumentEditor } from "./BlockNoteDocumentEditor";
+export { PlateDocumentEditor as NoteDocumentEditor } from "./PlateDocumentEditor";
