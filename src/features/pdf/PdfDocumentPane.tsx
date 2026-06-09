@@ -81,7 +81,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   const persistedSourceUrl = useMemo(() => resolvePdfDocumentSourceUrl(document), [document.blobUrl, document.downloadUrl, document.googleDriveWebContentLink, document.googleDriveWebViewLink, document.localUrl, document.remoteUrl]);
   const persistedSource = useMemo(() => createPersistedPdfDocumentSource(persistedSourceUrl), [persistedSourceUrl]);
   const [localSource, setLocalSource] = useState<LocalPdfSourceState>(createPendingLocalPdfSourceState);
-  const source = localSource.source ?? persistedSource;
+  const source = persistedSource ?? localSource.source;
   const paneClassName = cn(PDF_DOCUMENT_PANE_CLASS_NAME, className);
   const statusClassName = cn(PDF_DOCUMENT_STATUS_CLASS_NAME, className);
   const pendingViewerStateSaveRef = useRef<PendingPdfViewerStateSave | null>(null);
@@ -129,6 +129,13 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
 
     setLocalSource(createPendingLocalPdfSourceState());
 
+    if (persistedSource) {
+      setLocalSource(createResolvedLocalPdfSourceState(null));
+      return () => {
+        isCancelled = true;
+      };
+    }
+
     const loadLocalSource = async () => {
       const blob = await waitForPdfSourceResolution(resolvePdfDocumentBlob(document, currentUserId));
       if (isCancelled) return;
@@ -158,7 +165,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
       isCancelled = true;
       releasePdfDocumentSource(resolvedSource);
     };
-  }, [currentUserId, document.googleDriveFileId, document.id, document.localFileId, document.userId]);
+  }, [currentUserId, document.googleDriveFileId, document.id, document.localFileId, document.userId, persistedSource]);
 
   useEffect(() => {
     return () => {
