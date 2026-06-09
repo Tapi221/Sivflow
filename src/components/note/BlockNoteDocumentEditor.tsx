@@ -3,6 +3,7 @@ import { useCreateBlockNote } from "@blocknote/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "@blocknote/mantine/style.css";
 import type { Note, NoteBlockContent } from "@/types";
+import { useLocaleStore } from "@shared/i18n/locale.store";
 import { resolveBlockNoteDictionary } from "./blockNoteLocale";
 import "./blockNoteSuggestionMenu.css";
 
@@ -25,8 +26,9 @@ const getPlainText = (blocks: unknown[]): string => blocks.map((block) => {
 }).filter(Boolean).join("\n");
 
 const BlockNoteDocumentEditor = ({ note, onChange }: BlockNoteDocumentEditorProps) => {
+  const locale = useLocaleStore((state) => state.locale);
   const initialContent = useMemo(() => toInitialContent(note.content), [note.id, note.content]);
-  const blockNoteDictionary = useMemo(() => resolveBlockNoteDictionary(), []);
+  const blockNoteDictionary = useMemo(() => resolveBlockNoteDictionary({ documentLanguage: locale, navigatorLanguages: [], navigatorLanguage: undefined }), [locale]);
   const editor = useCreateBlockNote({ initialContent, dictionary: blockNoteDictionary }, [note.id, blockNoteDictionary]);
   const latestChangeRef = useRef<Pick<Note, "content" | "contentText" | "contentVersion" | "editor"> | null>(null);
   const [saveRevision, setSaveRevision] = useState(0);
