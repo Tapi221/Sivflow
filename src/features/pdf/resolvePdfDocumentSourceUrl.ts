@@ -19,16 +19,22 @@ const normalizePdfSourceUrl = (url: string | null | undefined): string | null =>
   return trimmedUrl;
 };
 
+const getPdfDocumentSourceUrlCandidates = (document: PdfDocumentSourceFields): Array<string | null | undefined> => [
+  document.remoteUrl,
+  document.downloadUrl,
+  document.googleDriveWebContentLink,
+  document.localUrl,
+  document.blobUrl,
+  document.googleDriveWebViewLink,
+];
+
 const resolvePdfDocumentSourceUrl = (document: PdfDocumentSourceFields): string | null => {
-  return normalizePdfSourceUrl(
-    document.remoteUrl ??
-      document.downloadUrl ??
-      document.googleDriveWebContentLink ??
-      document.localUrl ??
-      document.blobUrl ??
-      document.googleDriveWebViewLink ??
-      null,
-  );
+  for (const url of getPdfDocumentSourceUrlCandidates(document)) {
+    const normalizedUrl = normalizePdfSourceUrl(url);
+    if (normalizedUrl) return normalizedUrl;
+  }
+
+  return null;
 };
 
 export { resolvePdfDocumentSourceUrl };
