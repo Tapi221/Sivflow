@@ -7,7 +7,7 @@ import { LocalDBStatusBanner } from "@/components/security/LocalDBStatusBanner";
 import { SecurityAlertBanner } from "@/components/security/SecurityAlertBanner";
 import { AppLayout } from "@/layout/AppLayout";
 import { DesktopWindowControls } from "@/layout/DesktopWindowControls";
-import { useKatexLoader } from "@/hooks/platform/useKatexLoader";
+import { useKatexLoader } from "@/components/card/blocks/math/useKatexLoader";
 import { cn } from "@/lib/utils";
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
