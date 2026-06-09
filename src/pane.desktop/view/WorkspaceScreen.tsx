@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
-import { AffineDocumentEditor } from "@/components/note/AffineDocumentEditor";
 import { BlockNoteDocumentEditor } from "@/components/note/BlockNoteDocumentEditor";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
@@ -40,8 +39,6 @@ type NoteWorkspaceContentProps = {
   onOpenSettings: () => void;
   onToggleLeftPanel: () => void;
 };
-
-type NoteEditorChangeHandler = (changes: Pick<Note, "content" | "contentText" | "contentVersion" | "editor">) => void | Promise<void>;
 
 type SidebarInteractionRegionStyle = CSSProperties & {
   WebkitAppRegion?: "no-drag";
@@ -140,14 +137,6 @@ const readIsMobileWorkspaceViewport = (): boolean => {
 };
 
 const joinClassNames = (...classNames: Array<string | false | null | undefined>): string => classNames.filter(Boolean).join(" ");
-
-const renderNoteEditor = (note: Note, onChange: NoteEditorChangeHandler) => {
-  if (note.editor === "affine") {
-    return <AffineDocumentEditor note={note} onChange={onChange} />;
-  }
-
-  return <BlockNoteDocumentEditor note={note} onChange={onChange} />;
-};
 
 const useIsMobileWorkspaceViewport = (): boolean => {
   const [isMobileWorkspaceViewport, setIsMobileWorkspaceViewport] = useState(readIsMobileWorkspaceViewport);
@@ -358,7 +347,7 @@ const NoteWorkspaceContent = ({ noteTab, isLeftPanelCollapsed, onOpenSettings, o
         </>
       )}
       <CarvePanel className={mainPanelClassName}>
-        {isLoading ? <div className="h-full w-full bg-white" /> : foldersError ? <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{foldersError}</div> : note ? renderNoteEditor(note, handleNoteChange) : <div className="h-full w-full bg-white p-4 text-[12px] text-[#8a8a8a]">ノートが見つかりません</div>}
+        {isLoading ? <div className="h-full w-full bg-white" /> : foldersError ? <div className="h-full w-full bg-white p-4 text-[12px] text-[#b48a8a]">{foldersError}</div> : note ? <BlockNoteDocumentEditor note={note} onChange={handleNoteChange} /> : <div className="h-full w-full bg-white p-4 text-[12px] text-[#8a8a8a]">ノートが見つかりません</div>}
         {!isLoading && !foldersError ? <WorkspaceBreadcrumbs className={WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME} isLeftPanelCollapsed={isLeftPanelCollapsed} /> : null}
       </CarvePanel>
     </div>
