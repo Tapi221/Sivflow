@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AlertCircle, Database, FileAudio, FileText, Image as ImageIcon, Trash2 } from "@/ui/icons";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getFirebaseStorage, getFirestoreDb } from "@/services/firebaseGateway";
 import type { UploadMetadata } from "@/types";
+import { AlertCircle, Database, FileAudio, FileText, Image as ImageIcon, Trash2 } from "@/ui/icons";
 import { formatBytes } from "@/utils/fileUtils";
 import { toDateOrNull } from "@/utils/toMillis";
 
@@ -16,9 +16,7 @@ type StorageErrorLike = {
   code?: unknown;
 };
 
-const getErrorMessage = (error: unknown): string => {
-  return error instanceof Error ? error.message : "不明なエラーが発生しました";
-};
+const getErrorMessage = (error: unknown): string => error instanceof Error ? error.message : "不明なエラーが発生しました";
 
 const getStorageErrorCode = (error: unknown): string | null => {
   if (typeof error !== "object" || error === null) return null;
@@ -29,6 +27,12 @@ const getStorageErrorCode = (error: unknown): string | null => {
 const formatUploadDate = (value: unknown): string => {
   const date = toDateOrNull(value);
   return date ? date.toLocaleDateString() : "N/A";
+};
+
+const getFileIcon = (mimeType?: string) => {
+  if (mimeType?.startsWith("image/")) return <ImageIcon className="w-4 h-4" />;
+  if (mimeType?.startsWith("audio/")) return <FileAudio className="w-4 h-4" />;
+  return <FileText className="w-4 h-4" />;
 };
 
 export const StorageManager = () => {
@@ -48,22 +52,11 @@ export const StorageManager = () => {
       return;
     }
 
-    const uploadsQuery = query(
-      collection(db, `users/${currentUser.uid}/uploads`),
-      orderBy("uploadedAt", "desc"),
-    );
-
+    const uploadsQuery = query(collection(db, `users/${currentUser.uid}/uploads`), orderBy("uploadedAt", "desc"));
     const unsubscribe = onSnapshot(
       uploadsQuery,
       (snapshot) => {
-        const docs = snapshot.docs.map(
-          (docItem) =>
-            ({
-              id: docItem.id,
-              ...docItem.data(),
-            }) as UploadMetadata,
-        );
-        setUploads(docs);
+        setUploads(snapshot.docs.map((docItem) => ({ id: docItem.id, ...docItem.data() }) as UploadMetadata));
         setLoading(false);
       },
       (snapshotError) => {
@@ -77,26 +70,14 @@ export const StorageManager = () => {
   }, [currentUser]);
 
   const handleCleanup = async () => {
-    if (
-      !currentUser ||
-      !confirm(
-        "失敗した古いアップロード（24時間以上前）をクリーンアップしますか？",
-      )
-    )
-      return;
+    if (!currentUser || !window.confirm("失敗した古いアップロードを整理しますか？")) return;
 
     setLoading(true);
     try {
       const { cleanupFailedUploads } = await import("@/utils/storageCleanup");
       const result = await cleanupFailedUploads(currentUser.uid);
-      if (result.deleted > 0) {
-        alert(`${result.deleted} 件の不要なファイルを削除しました`);
-      } else {
-        alert("削除対象のファイルはありませんでした");
-      }
-      if (result.errors.length > 0) {
-        console.warn("Cleanup errors:", result.errors);
-      }
+      window.alert(result.deleted > 0 ? `${result.deleted} 件の不要なファイルを削除しました` : "削除対象のファイルはありませんでした");
+      if (result.errors.length > 0) console.warn("Cleanup errors:", result.errors);
     } catch (cleanupError: unknown) {
       console.error("Cleanup failed", cleanupError);
       setError(getErrorMessage(cleanupError));
@@ -106,26 +87,15 @@ export const StorageManager = () => {
   };
 
   const handleDelete = async (file: UploadMetadata) => {
-    if (
-      !currentUser ||
-      !confirm(
-        "このファイルを完全に削除しますか？\n(使用されている場所からは削除されません)",
-      )
-    )
-      return;
+    if (!currentUser || !window.confirm("このファイルを削除しますか？")) return;
 
     setDeletingId(file.id);
     try {
       if (file.storagePath) {
         try {
-          const storageRef = ref(getFirebaseStorage(), file.storagePath);
-          await deleteObject(storageRef);
+          await deleteObject(ref(getFirebaseStorage(), file.storagePath));
         } catch (storageError: unknown) {
-          if (
-            getStorageErrorCode(storageError) !== "storage/object-not-found"
-          ) {
-            console.warn("Storage delete failed", storageError);
-          }
+          if (getStorageErrorCode(storageError) !== "storage/object-not-found") console.warn("Storage delete failed", storageError);
         }
       }
 
@@ -133,9 +103,7 @@ export const StorageManager = () => {
       if (db) {
         await deleteDoc(doc(db, `users/${currentUser.uid}/uploads`, file.id));
       } else {
-        console.warn(
-          "[StorageManager] firestoreDb not initialized. Metadata remains.",
-        );
+        console.warn("[StorageManager] firestoreDb not initialized. Metadata remains.");
       }
     } catch (deleteError: unknown) {
       console.error("Delete failed", deleteError);
@@ -145,10 +113,7 @@ export const StorageManager = () => {
     }
   };
 
-  const totalSize = uploads.reduce(
-    (acc, curr) => acc + (curr.sizeBytes || 0),
-    0,
-  );
+  const totalSize = uploads.reduce((acc, curr) => acc + (curr.sizeBytes || 0), 0);
 
   if (loading) {
     return (
@@ -166,21 +131,13 @@ export const StorageManager = () => {
             <Database className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs md:text-sm font-bold text-slate-700">
-              クラウドストレージ使用量
-            </div>
-            <div className="text-xl md:text-2xl font-bold text-slate-900">
-              {formatBytes(totalSize)}
-            </div>
+            <div className="text-xs md:text-sm font-bold text-slate-700">クラウドストレージ使用量</div>
+            <div className="text-xl md:text-2xl font-bold text-slate-900">{formatBytes(totalSize)}</div>
           </div>
         </div>
         <div className="text-left sm:text-right">
-          <div className="text-[10px] md:text-xs text-slate-400">
-            ファイル数
-          </div>
-          <div className="font-bold text-slate-700 text-sm md:text-base">
-            {uploads.length} 個
-          </div>
+          <div className="text-[10px] md:text-xs text-slate-400">ファイル数</div>
+          <div className="font-bold text-slate-700 text-sm md:text-base">{uploads.length} 個</div>
         </div>
       </div>
 
@@ -196,16 +153,9 @@ export const StorageManager = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
           <h3 className="font-bold text-slate-700 flex items-center gap-2 text-sm md:text-base">
             アップロード済み
-            <span className="text-[10px] font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-              最新 {uploads.length} 件
-            </span>
+            <span className="text-[10px] font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">最新 {uploads.length} 件</span>
           </h3>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-amber-600 border-amber-200 hover:bg-amber-50 w-full sm:w-auto h-9 text-xs md:text-sm"
-            onClick={handleCleanup}
-          >
+          <Button variant="outline" size="sm" className="text-amber-600 border-amber-200 hover:bg-amber-50 w-full sm:w-auto h-9 text-xs md:text-sm" onClick={handleCleanup}>
             <Trash2 className="w-4 h-4 mr-2" />
             不要ファイルを整理
           </Button>
@@ -214,23 +164,14 @@ export const StorageManager = () => {
         <ScrollArea className="h-[300px] w-full rounded-md border border-slate-100">
           <div className="p-4 space-y-2">
             {uploads.length === 0 ? (
-              <div className="text-center py-8 text-slate-400 text-sm">
-                ファイルが見つかりません
-              </div>
+              <div className="text-center py-8 text-slate-400 text-sm">ファイルが見つかりません</div>
             ) : (
               uploads.map((file) => (
-                <div
-                  key={file.id}
-                  className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors group"
-                >
+                <div key={file.id} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors group">
                   <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="shrink-0 w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-500">
-                      {getFileIcon(file.mimeType)}
-                    </div>
+                    <div className="shrink-0 w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-500">{getFileIcon(file.mimeType)}</div>
                     <div className="min-w-0">
-                      <div className="font-bold text-sm text-slate-700 truncate max-w-[150px] md:max-w-[200px]">
-                        {file.originalFilename}
-                      </div>
+                      <div className="font-bold text-sm text-slate-700 truncate max-w-[150px] md:max-w-[200px]">{file.originalFilename}</div>
                       <div className="flex items-center gap-2 text-[10px] text-slate-400">
                         <span>{formatBytes(file.sizeBytes)}</span>
                         <span>•</span>
@@ -239,18 +180,8 @@ export const StorageManager = () => {
                     </div>
                   </div>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
-                    onClick={() => handleDelete(file)}
-                    disabled={deletingId === file.id}
-                  >
-                    {deletingId === file.id ? (
-                      <LoadingSpinner iconClassName="h-4 w-4" label="ファイルを削除中" />
-                    ) : (
-                      <Trash2 className="w-4 h-4" />
-                    )}
+                  <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all" onClick={() => handleDelete(file)} disabled={deletingId === file.id}>
+                    {deletingId === file.id ? <LoadingSpinner iconClassName="h-4 w-4" label="ファイルを削除中" /> : <Trash2 className="w-4 h-4" />}
                   </Button>
                 </div>
               ))
