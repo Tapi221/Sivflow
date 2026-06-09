@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import type { DocumentItem, PdfViewerState } from "@/types";
 import { PdfPane } from "./PdfPane";
 import { createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource } from "./pdfDocumentSource";
+import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "./pdfPerformance";
 import { resolvePdfDocumentBlob } from "./resolvePdfDocumentBlob";
 import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
 import type { PdfViewerStateChangeOptions } from "./PdfPane";
@@ -126,10 +127,14 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   useEffect(() => {
     let isCancelled = false;
     let resolvedSource: PdfDocumentSource | null = null;
+    const performanceTraceName = createPdfPerformanceTraceName("source.resolve");
 
+    recordPdfPerformanceMark(`${performanceTraceName}.start`, { detail: { documentId: document.id, hasPersistedSource: Boolean(persistedSource), sizeBytes: document.sizeBytes ?? null } });
     setLocalSource(createPendingLocalPdfSourceState());
 
     if (persistedSource) {
+      recordPdfPerformanceMark(`${performanceTraceName}.persisted`, { detail: { documentId: document.id, sourceType: persistedSource.type, sizeBytes: document.sizeBytes ?? null } });
+      recordPdfPerformanceMeasure(`${performanceTraceName}.duration`, `${performanceTraceName}.start`, `${performanceTraceName}.persisted`);
       setLocalSource(createResolvedLocalPdfSourceState(null));
       return () => {
         isCancelled = true;
@@ -138,14 +143,18 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
 
     const loadLocalSource = async () => {
       const blob = await waitForPdfSourceResolution(resolvePdfDocumentBlob(document, currentUserId));
+      recordPdfPerformanceMark(`${performanceTraceName}.blob`, { detail: { documentId: document.id, hasBlob: Boolean(blob), sizeBytes: blob?.size ?? document.sizeBytes ?? null } });
       if (isCancelled) return;
 
       if (!blob) {
+        recordPdfPerformanceMeasure(`${performanceTraceName}.duration`, `${performanceTraceName}.start`, `${performanceTraceName}.blob`);
         setLocalSource(createResolvedLocalPdfSourceState(null));
         return;
       }
 
       const nextSource = await waitForPdfSourceResolution(createPdfDocumentDataSourceFromBlob(blob));
+      recordPdfPerformanceMark(`${performanceTraceName}.source`, { detail: { documentId: document.id, sourceType: nextSource.type, sizeBytes: blob.size } });
+      recordPdfPerformanceMeasure(`${performanceTraceName}.duration`, `${performanceTraceName}.start`, `${performanceTraceName}.source`);
       if (isCancelled) {
         releasePdfDocumentSource(nextSource);
         return;
@@ -156,6 +165,8 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     };
 
     void loadLocalSource().catch((error: unknown) => {
+      recordPdfPerformanceMark(`${performanceTraceName}.error`, { detail: { documentId: document.id, message: getErrorMessage(error, PDF_SOURCE_MISSING_ERROR_MESSAGE), sizeBytes: document.sizeBytes ?? null } });
+      recordPdfPerformanceMeasure(`${performanceTraceName}.duration`, `${performanceTraceName}.start`, `${performanceTraceName}.error`);
       if (isCancelled) return;
       console.error("[PdfDocumentPane] local PDF source failed", error);
       setLocalSource(createResolvedLocalPdfSourceState(null, getErrorMessage(error, PDF_SOURCE_MISSING_ERROR_MESSAGE)));
@@ -165,7 +176,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
       isCancelled = true;
       releasePdfDocumentSource(resolvedSource);
     };
-  }, [currentUserId, document.googleDriveFileId, document.id, document.localFileId, document.userId, persistedSource]);
+  }, [currentUserId, document.googleDriveFileId, document.id, document.localFileId, document.sizeBytes, document.userId, persistedSource]);
 
   useEffect(() => {
     return () => {
