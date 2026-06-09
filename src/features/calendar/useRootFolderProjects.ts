@@ -2,8 +2,8 @@ import { useCallback, useMemo, useState } from "react";
 import { getFallbackProjectColor, getFolderProjectColor, isProjectColor } from "@/components/folder/explorer/model/projectColor";
 import { getFolderId, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
-import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
-import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
+import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
+import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import type { AppCalendarItem } from "./scheduleScreen.types";
 
 export type CreateRootFolderProjectInput = {
