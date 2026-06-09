@@ -3,7 +3,6 @@ import type { Note, NoteBlockContent } from "@/types";
 type BlocksuiteRuntime = {
   AffineSchemas: unknown[];
   DocCollection: new (options: { schema: BlocksuiteSchema }) => BlocksuiteDocCollection;
-  EditorContainer: new () => BlocksuiteEditorElement;
   Schema: new () => BlocksuiteSchema;
   Text: new (text?: string) => unknown;
 };
@@ -48,6 +47,7 @@ type BlocksuiteAffineEditor = {
 const NOTE_CONTENT_TYPE = "affine-document";
 const LEGACY_TEXT_CONTENT_TYPE = "sivflow-text-document";
 const NOTE_EDITOR_DEFAULT_TITLE = "Untitled";
+const NOTE_EDITOR_TAG_NAME = "affine-editor-container";
 const NOTE_PARAGRAPH_FLAVOUR = "affine:paragraph";
 const NOTE_PAGE_FLAVOUR = "affine:page";
 const NOTE_SURFACE_FLAVOUR = "affine:surface";
@@ -55,6 +55,8 @@ const NOTE_NOTE_FLAVOUR = "affine:note";
 const NOTE_EDITOR_STYLE = { display: "block", height: "100%", minHeight: "0", width: "100%" };
 
 let runtimePromise: Promise<BlocksuiteRuntime> | null = null;
+
+const asArray = (value: unknown): unknown[] | null => Array.isArray(value) ? value : null;
 
 const asConstructor = <T>(value: unknown): T | null => typeof value === "function" ? value as T : null;
 
@@ -71,15 +73,14 @@ const loadRuntime = async (): Promise<BlocksuiteRuntime> => {
     const presetExports = presets as Record<string, unknown>;
     const storeExports = store as Record<string, unknown>;
     const runtime = {
-      AffineSchemas: Array.isArray(blockExports.AffineSchemas) ? blockExports.AffineSchemas : null,
+      AffineSchemas: asArray(blockExports.AffineSchemas) ?? asArray(presetExports.AffineSchemas) ?? asArray(storeExports.AffineSchemas),
       DocCollection: asConstructor<BlocksuiteRuntime["DocCollection"]>(storeExports.DocCollection),
-      EditorContainer: asConstructor<BlocksuiteRuntime["EditorContainer"]>(presetExports.EditorContainer),
       Schema: asConstructor<BlocksuiteRuntime["Schema"]>(storeExports.Schema),
       Text: asConstructor<BlocksuiteRuntime["Text"]>(storeExports.Text),
     };
 
-    if (!runtime.AffineSchemas || !runtime.DocCollection || !runtime.EditorContainer || !runtime.Schema || !runtime.Text) {
-      throw new Error("Installed BlockSuite packages do not expose the AFFiNE editor runtime.");
+    if (!runtime.AffineSchemas || !runtime.DocCollection || !runtime.Schema || !runtime.Text) {
+      throw new Error("Installed BlockSuite packages do not expose the AFFiNE document runtime.");
     }
 
     return runtime as BlocksuiteRuntime;
@@ -128,6 +129,14 @@ const initializeBlocksuiteDoc = (runtime: BlocksuiteRuntime, doc: BlocksuiteDoc,
   });
 };
 
+const createEditorElement = (doc: BlocksuiteDoc): BlocksuiteEditorElement => {
+  const editor = document.createElement(NOTE_EDITOR_TAG_NAME) as BlocksuiteEditorElement;
+  Object.assign(editor.style, NOTE_EDITOR_STYLE);
+  editor.doc = doc;
+  editor.mode = "page";
+  return editor;
+};
+
 const createBlocksuiteAffineEditor = async (note: Note): Promise<BlocksuiteAffineEditor> => {
   const runtime = await loadRuntime();
   const schema = new runtime.Schema();
@@ -136,11 +145,7 @@ const createBlocksuiteAffineEditor = async (note: Note): Promise<BlocksuiteAffin
   collection.meta?.initialize?.();
   const doc = collection.createDoc({ id: note.id });
   initializeBlocksuiteDoc(runtime, doc, note);
-  const editor = new runtime.EditorContainer();
-  Object.assign(editor.style, NOTE_EDITOR_STYLE);
-  editor.doc = doc;
-  editor.mode = "page";
-  return { doc, editor };
+  return { doc, editor: createEditorElement(doc) };
 };
 
 const readBlocksuiteText = (doc: BlocksuiteDoc, host: HTMLDivElement): string => {
