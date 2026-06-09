@@ -297,7 +297,7 @@ export const useIosCalendarIntegration = () => {
       calendars: calendarsRef.current,
       range: requestedRange,
     });
-  }, [loadEvents]);
+  }, [loadEvents, setRange]);
 
   const refresh = useCallback(async () => {
     if (permissionStatusRef.current !== "granted") {

@@ -10,7 +10,7 @@ import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/us
 import { LogOut } from "@/ui/icons";
 import { StratisTagIcon } from "@/ui/icons/stratis";
 import { useT } from "@shared/i18n/useT";
-import { useFolderTagModeStore, type FolderTagMode } from "./folder/useFolderTagModeStore";
+import { useFolderTagModeStore, type FolderTagMode } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 import "./sidebar.desktop.css";
 import "./sidebar.layered-directory.css";
 
