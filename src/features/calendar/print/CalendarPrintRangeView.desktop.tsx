@@ -74,7 +74,7 @@ const CalendarPrintRangeView = ({ titleLabel, rangeLabel, focusDate, range, even
           const isOutsideFocusMonth = !isSameMonth(day.date, focusDate);
 
           return (
-            <article key={day.key} className={cn("calendar-print-range-day", isOutsideFocusMonth && "calendar-print-range-day-outside")}> 
+            <article key={day.key} className={cn("calendar-print-range-day", isOutsideFocusMonth && "calendar-print-range-day-outside")}>
               <div className="calendar-print-range-day-heading">
                 <span className="calendar-print-range-day-number">{format(day.date, "d")}</span>
                 <span className="calendar-print-range-weekday">{CALENDAR_PRINT_RANGE_WEEKDAY_LABELS[day.date.getDay()]}</span>
@@ -82,7 +82,7 @@ const CalendarPrintRangeView = ({ titleLabel, rangeLabel, focusDate, range, even
 
               <div className="calendar-print-range-events">
                 {(dayEvents.length > 0 ? dayEvents : CALENDAR_PRINT_RANGE_EMPTY_EVENTS).map((event) => (
-                  <CalendarEventChipMonth key={event.id} event={event} />
+                  <CalendarEventChipMonth key={event.id} event={event} tooltipDisabled />
                 ))}
               </div>
             </article>
