@@ -33,7 +33,7 @@ const ExcalidrawSandboxPage = () => {
       title="カード面の手書き・図解 UI の参考"
       description="Excalidraw は card face の ink、図解、教材への書き込み、ホワイトボード的な編集体験の参考にします。"
       focusItems={FOCUS_ITEMS}
-      note="Sivflow では BlockNote の block と、手書き・図解データを同じ card face に共存させる設計の比較対象にする。"
+      note="Sivflow では note editor の block と、手書き・図解データを同じ card face に共存させる設計の比較対象にする。"
       links={LINKS}
     />
   );
