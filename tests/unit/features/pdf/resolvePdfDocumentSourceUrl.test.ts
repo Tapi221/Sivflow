@@ -52,6 +52,16 @@ describe("resolvePdfDocumentSourceUrl", () => {
     expect(resolvePdfDocumentSourceUrl(document)).toBe("https://drive.google.com/uc?id=file-1&export=download");
   });
 
+  it("remoteUrl が Google Drive view URL の場合は次の有効な URL にフォールバックする", () => {
+    const document = createDocument({
+      remoteUrl: "https://drive.google.com/file/d/file-1/view?usp=drivesdk",
+      downloadUrl: "https://drive.google.com/uc?id=file-1&export=download",
+      localUrl: "blob:http://localhost/local-pdf",
+    });
+
+    expect(resolvePdfDocumentSourceUrl(document)).toBe("https://drive.google.com/uc?id=file-1&export=download");
+  });
+
   it("remoteUrl と downloadUrl がない場合は Google Drive の webContentLink を使う", () => {
     const document = createDocument({
       blobUrl: "blob:http://localhost/blob-pdf",
@@ -71,7 +81,7 @@ describe("resolvePdfDocumentSourceUrl", () => {
     expect(resolvePdfDocumentSourceUrl(document)).toBe("blob:http://localhost/local-pdf");
   });
 
-  it("Google Drive の view URL は PDF ソースとして使わない", () => {
+  it("Google Drive の view URL だけなら PDF ソースとして使わない", () => {
     const document = createDocument({
       downloadUrl: "https://drive.google.com/file/d/file-1/view?usp=drivesdk",
       googleDriveWebViewLink: "https://drive.google.com/file/d/file-1/view?usp=drivesdk",
