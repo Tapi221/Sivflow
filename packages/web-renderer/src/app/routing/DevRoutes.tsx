@@ -17,7 +17,7 @@ const SelectionCaptureSandboxPage = DEV_MODE
   : null;
 const BlockNoteSandboxPage = DEV_MODE
   ? lazy(() =>
-      import("@/sandbox/affine").then(({ BlockNoteSandboxPage }) => ({
+      import("@/sandbox/blocknote").then(({ BlockNoteSandboxPage }) => ({
         default: BlockNoteSandboxPage,
       })),
     )
