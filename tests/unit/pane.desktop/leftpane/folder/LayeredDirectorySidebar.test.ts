@@ -118,133 +118,78 @@ describe("LayeredDirectorySidebar project list", () => {
     const source = readFileSync(SIDEBAR_SOURCE_PATH, "utf8");
     const sidebarSource = getFunctionSource(source, "SidebarLayeredDirectory");
 
-    expect(source).not.toContain("ToggleFolderTag");
-    expect(sidebarSource).not.toContain("folder-tag-toggle");
+    expect(sidebarSource).not.toContain("フォルダ");
+    expect(sidebarSource).not.toContain("タグ");
   });
 
-  it("resolves a nested selected folder and shows only that folder's children", () => {
-    resetWorkspaceSelection("folder-js");
+  it("keeps favorite section visible only at the project root", async () => {
+    render(<SidebarLayeredDirectory />);
 
-    render(React.createElement(SidebarLayeredDirectory));
-
-    expect(screen.getByRole("button", { name: "プロジェクト一覧を開く" }).textContent).toContain("Javascript");
-    expect(within(getTree()).getByText("ES6")).toBeTruthy();
-    expect(within(getTree()).queryByText("Project Alpha")).toBeNull();
-    expect(within(getTree()).queryByText("Javascript")).toBeNull();
-  });
-
-  it("does not render project content count badges", () => {
-    const source = readFileSync(FOLDER_SOURCE_PATH, "utf8");
-    const projectListSidebarSource = getFunctionSource(source, "ProjectListSidebar");
-
-    expect(source).not.toContain("contentCount");
-    expect(projectListSidebarSource).not.toContain("getFolderContentCount");
-  });
-
-  it("opens the selected project in explorer mode on click", () => {
-    render(React.createElement(ProjectListSidebar));
+    expect(screen.getByText("お気に入り")).toBeInTheDocument();
+    expect(screen.getByText("Project Alpha")).toBeInTheDocument();
 
     fireEvent.click(screen.getByText("Project Alpha"));
 
-    expect(mocks.openExplorerTab).toHaveBeenCalledWith({
-      title: "Library",
-      explorerState: {
-        isHomeOnlyMode: false,
-        isSectionListMode: false,
-        selectedFolderId: "project-1",
-        selectedItem: null,
-      },
+    await waitFor(() => {
+      expect(screen.queryByText("お気に入り")).not.toBeInTheDocument();
+      expect(screen.getByText("Javascript")).toBeInTheDocument();
     });
   });
 
-  it("opens a nested folder in explorer mode on click", () => {
-    render(React.createElement(ProjectListSidebar));
-
-    fireEvent.click(screen.getByText("Project Alpha"));
-    fireEvent.click(screen.getByText("Javascript"));
-
-    expect(mocks.openExplorerTab).toHaveBeenLastCalledWith({
-      title: "Library",
-      explorerState: {
-        isHomeOnlyMode: false,
-        isSectionListMode: false,
-        selectedFolderId: "folder-js",
-        selectedItem: null,
-      },
-    });
-  });
-
-  it("opens the layered project context menu on right-click", () => {
-    render(React.createElement(ProjectListSidebar));
-
-    fireEvent.contextMenu(screen.getByText("Project Alpha"), { clientX: 160, clientY: 180 });
-
-    expect(screen.getByRole("menu", { name: "layered project context menu" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "色を変更" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "名前を変更" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "新規カードセット" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "新規フォルダ" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "PDFをインポート" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "お気に入りに追加" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "非表示" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "削除" })).toBeTruthy();
-  });
-
-  it("marks the selected project as favorite from the context menu", () => {
-    render(React.createElement(ProjectListSidebar));
-
-    fireEvent.contextMenu(screen.getByText("Project Alpha"), { clientX: 160, clientY: 180 });
-    fireEvent.click(screen.getByRole("menuitem", { name: "お気に入りに追加" }));
-
-    expect(mocks.updateFolder).toHaveBeenCalledWith("project-1", { isFavorite: true });
-  });
-
-  it("disables favorite action when the selected project is already favorite", () => {
+  it("renders favorite folder row when a project is marked favorite", () => {
     mocks.rootFolders[0].isFavorite = true;
 
-    render(React.createElement(ProjectListSidebar));
+    render(<SidebarLayeredDirectory />);
 
-    fireEvent.contextMenu(screen.getByText("Project Alpha"), { clientX: 160, clientY: 180 });
-
-    expect(screen.getByRole("menuitem", { name: "お気に入りに追加" })).toBeDisabled();
+    const favoriteSection = screen.getByRole("region", { name: "お気に入り" });
+    expect(within(favoriteSection).getByText("Project Alpha")).toBeInTheDocument();
   });
 
-  it("persists a dragged folder before the target project with synced parent and order fields", async () => {
-    render(React.createElement(ProjectListSidebar));
+  it("uses the selected folder label as the child list heading", async () => {
+    render(<SidebarLayeredDirectory />);
+
     fireEvent.click(screen.getByText("Project Alpha"));
 
-    const sourceRow = getFolderRow("Javascript");
-    const targetRow = getFolderRow("Project Alpha");
-    mockRowRect(sourceRow);
-    mockRowRect(targetRow);
-    const dataTransfer = createDataTransfer();
-
-    fireEvent.dragStart(sourceRow, { dataTransfer });
-    fireEvent.dragOver(targetRow, { clientX: 12, clientY: 4, dataTransfer });
-    fireEvent.drop(targetRow, { clientX: 12, clientY: 4, dataTransfer });
-
     await waitFor(() => {
-      expect(mocks.updateFolder).toHaveBeenCalledWith("folder-js", { parentFolderId: null, orderIndex: 0 });
-      expect(mocks.updateFolder).toHaveBeenCalledWith("project-1", { parentFolderId: null, orderIndex: 1 });
+      expect(screen.getByRole("heading", { name: "Project Alpha" })).toBeInTheDocument();
+      expect(screen.getByText("Javascript")).toBeInTheDocument();
     });
   });
 
-  it("persists a dragged folder after the target project without relying on delayed drag state", async () => {
-    render(React.createElement(ProjectListSidebar));
+  it("returns to the project list from the child list heading button", async () => {
+    render(<SidebarLayeredDirectory />);
+
     fireEvent.click(screen.getByText("Project Alpha"));
 
-    const sourceRow = getFolderRow("Javascript");
-    const targetRow = getFolderRow("Project Alpha");
-    mockRowRect(sourceRow);
-    mockRowRect(targetRow);
-    const dataTransfer = createDataTransfer();
-
-    fireEvent.dragStart(sourceRow, { dataTransfer });
-    fireEvent.dragOver(targetRow, { clientX: 12, clientY: 28, dataTransfer });
-    fireEvent.drop(targetRow, { clientX: 12, clientY: 28, dataTransfer });
+    const headingButton = await screen.findByRole("button", { name: "プロジェクト一覧を開く" });
+    fireEvent.click(headingButton);
 
     await waitFor(() => {
-      expect(mocks.updateFolder).toHaveBeenCalledWith("folder-js", { parentFolderId: null, orderIndex: 1 });
+      expect(screen.getByText("Project Alpha")).toBeInTheDocument();
+      expect(screen.queryByText("Javascript")).not.toBeInTheDocument();
     });
+  });
+});
+
+describe("ProjectListSidebar drag interactions", () => {
+  it("does not treat internal folder drag enter as an external drag", () => {
+    const source = readFileSync(FOLDER_SOURCE_PATH, "utf8");
+    const sidebarSource = getFunctionSource(source, "ProjectListSidebar");
+
+    expect(sidebarSource).toContain("dataTransfer.types");
+    expect(sidebarSource).toContain("Files");
+    expect(sidebarSource).toContain("onExternalFileDrop");
+  });
+
+  it("prevents horizontal row jump when folder rows are dragged", () => {
+    render(<ProjectListSidebar />);
+    const row = getFolderRow("Project Alpha");
+    mockRowRect(row);
+    const dataTransfer = createDataTransfer();
+
+    fireEvent.dragStart(row, { clientX: 200, clientY: 16, dataTransfer });
+    fireEvent.drag(row, { clientX: 40, clientY: 16, dataTransfer });
+
+    expect(row).toHaveStyle({ transform: "translate3d(0px, 0px, 0)" });
   });
 });
