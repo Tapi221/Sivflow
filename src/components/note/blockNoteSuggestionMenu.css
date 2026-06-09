@@ -1,0 +1,4 @@
+.bn-mantine .bn-suggestion-menu {
+  width: min(360px, calc(100vw - 32px));
+  max-width: min(360px, calc(100vw - 32px));
+}
