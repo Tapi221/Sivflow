@@ -74,7 +74,7 @@ const getRegisteredAffineEditorContainer = (): BlocksuiteRuntime["AffineEditorCo
 };
 
 const loadRuntime = async (): Promise<BlocksuiteRuntime> => {
-  runtimePromise ??= Promise.all([import("@blocksuite/blocks"), import("@blocksuite/presets"), import("@blocksuite/store"), import("@blocksuite/presets/themes/affine.css")]).then(([blocks, presets, store]) => {
+  runtimePromise ??= Promise.all([import("@blocksuite/blocks"), import("@blocksuite/presets"), import("@blocksuite/store")]).then(([blocks, presets, store]) => {
     const blockExports = blocks as Record<string, unknown>;
     const presetExports = presets as Record<string, unknown>;
     const storeExports = store as Record<string, unknown>;
