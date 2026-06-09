@@ -51,6 +51,16 @@ const createPdfDocumentObjectUrlSourceFromBlob = (blob: Blob): PdfDocumentSource
   };
 };
 
+const tryCreatePdfDocumentObjectUrlSourceFromBlob = (blob: Blob): PdfDocumentSource | null => {
+  if (typeof URL === "undefined" || typeof URL.createObjectURL !== "function") return null;
+
+  try {
+    return createPdfDocumentObjectUrlSourceFromBlob(blob);
+  } catch {
+    return null;
+  }
+};
+
 const ensurePdfWorkerPort = (): void => {
   if (typeof Worker === "undefined") return;
   if (pdfjsLib.GlobalWorkerOptions.workerPort) return;
@@ -78,7 +88,8 @@ const readBlobArrayBuffer = (blob: Blob): Promise<ArrayBuffer> => {
 };
 
 const createPdfDocumentDataSourceFromBlob = async (blob: Blob): Promise<PdfDocumentSource> => {
-  if (typeof URL !== "undefined" && typeof URL.createObjectURL === "function") return createPdfDocumentObjectUrlSourceFromBlob(blob);
+  const objectUrlSource = tryCreatePdfDocumentObjectUrlSourceFromBlob(blob);
+  if (objectUrlSource) return objectUrlSource;
   return createPdfDocumentDataSource(new Uint8Array(await readBlobArrayBuffer(blob)));
 };
 
