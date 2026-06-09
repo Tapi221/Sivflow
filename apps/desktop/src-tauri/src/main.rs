@@ -15,7 +15,6 @@ const DESKTOP_OAUTH_PATH: &str = "/";
 const DESKTOP_GOOGLE_OAUTH_REDIRECT_URI: &str = "http://127.0.0.1:42813";
 const MAX_DESKTOP_IMPORT_FILE_BYTES: u64 = 128 * 1024 * 1024;
 const MAX_DESKTOP_PDF_FILE_BYTES: usize = 512 * 1024 * 1024;
-const OLLAMA_GENERATE_ENDPOINT: &str = "http://127.0.0.1:11434/api/generate";
 const OLLAMA_REQUEST_TIMEOUT_SECONDS: u64 = 60;
 const SUPPORTED_IMPORT_FILE_EXTENSIONS: [&str; 2] = ["mfdeck", "mfcard"];
 
@@ -34,7 +33,14 @@ struct DesktopPdfOpenInput {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
+struct DesktopOllamaBaseInput {
+    base_url: String,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct DesktopOllamaGenerateInput {
+    base_url: String,
     model: String,
     prompt: String,
 }
@@ -45,9 +51,25 @@ struct DesktopOllamaGenerateResult {
     response: String,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopOllamaListModelsResult {
+    models: Vec<String>,
+}
+
 #[derive(Deserialize)]
 struct OllamaGenerateResponse {
     response: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct OllamaTagsResponse {
+    models: Vec<OllamaTagModel>,
+}
+
+#[derive(Deserialize)]
+struct OllamaTagModel {
+    name: Option<String>,
 }
 
 #[derive(Serialize, Clone)]
@@ -269,6 +291,21 @@ fn ensure_auth_loopback_redirect(authorize_url: &str) -> Result<(), String> {
     Ok(())
 }
 
+fn normalize_ollama_base_url(base_url: &str) -> Result<String, String> {
+    let value = base_url.trim().trim_end_matches('/');
+    let parsed = Url::parse(value).map_err(|_| "Ollama base URL is invalid".to_string())?;
+
+    if !matches!(parsed.scheme(), "http" | "https") {
+        return Err("Ollama base URL must use http or https".to_string());
+    }
+
+    Ok(value.to_string())
+}
+
+fn build_ollama_api_url(base_url: &str, path: &str) -> Result<String, String> {
+    Ok(format!("{}{}", normalize_ollama_base_url(base_url)?, path))
+}
+
 fn normalize_ollama_prompt(prompt: &str) -> Result<String, String> {
     let value = prompt.trim();
     if value.is_empty() {
@@ -349,7 +386,7 @@ fn ollama_generate(input: DesktopOllamaGenerateInput) -> Result<DesktopOllamaGen
         return Err("Ollama model is empty".to_string());
     }
 
-    let response = ureq::post(OLLAMA_GENERATE_ENDPOINT)
+    let response = ureq::post(&build_ollama_api_url(&input.base_url, "/api/generate")?)
         .timeout(Duration::from_secs(OLLAMA_REQUEST_TIMEOUT_SECONDS))
         .send_json(serde_json::json!({
             "model": model,
@@ -364,6 +401,18 @@ fn ollama_generate(input: DesktopOllamaGenerateInput) -> Result<DesktopOllamaGen
     }
 
     Ok(DesktopOllamaGenerateResult { response: answer })
+}
+
+#[tauri::command]
+fn ollama_list_models(input: DesktopOllamaBaseInput) -> Result<DesktopOllamaListModelsResult, String> {
+    let response = ureq::get(&build_ollama_api_url(&input.base_url, "/api/tags")?)
+        .timeout(Duration::from_secs(OLLAMA_REQUEST_TIMEOUT_SECONDS))
+        .call()
+        .map_err(|error| error.to_string())?;
+    let data: OllamaTagsResponse = response.into_json().map_err(|error| error.to_string())?;
+    let models = data.models.into_iter().filter_map(|model| model.name.map(|name| name.trim().to_string())).filter(|name| !name.is_empty()).collect();
+
+    Ok(DesktopOllamaListModelsResult { models })
 }
 
 #[tauri::command]
@@ -452,6 +501,7 @@ fn main() {
             desktop_import_select_files,
             pdf_open_in_sioyek,
             ollama_generate,
+            ollama_list_models,
             oauth_start,
             oauth_cancel,
             oauth_take_pending_callback,
