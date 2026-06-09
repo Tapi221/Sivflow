@@ -29,7 +29,7 @@ const installPdfPerformanceObservers = async (page: Page): Promise<void> => {
       });
       observer.observe({ entryTypes: ["longtask"] });
     } catch {
-      // Long task observation is a smoke-test signal and must not block the fixture route.
+      // long task 計測はスモークテスト用の補助情報なので、fixture 表示を止めない。
     }
   });
 };
@@ -44,10 +44,10 @@ const readPdfPerformanceMetrics = async (page: Page): Promise<PdfPerformanceMetr
   });
 };
 
-test.describe("PDF performance smoke", () => {
+test.describe("PDF性能スモーク", () => {
   const baseUrl = process.env.E2E_BASE_URL ?? "http://localhost:5173";
 
-  test("scrolling a generated PDF emits performance marks without excessive long tasks", async ({ page }) => {
+  test("生成したPDFを連続スクロールしても過剰なlong taskを発生させずperformance markを記録する", async ({ page }) => {
     test.setTimeout(120000);
     await installPdfPerformanceObservers(page);
     await page.setViewportSize({ width: 1280, height: 900 });
@@ -70,7 +70,7 @@ test.describe("PDF performance smoke", () => {
     expect(metrics.longTaskCount).toBeLessThanOrEqual(PDF_PERFORMANCE_LONG_TASK_LIMIT);
   });
 
-  test("open and close releases the PDF source path without leaving the fixture broken", async ({ page }) => {
+  test("PDFを開閉してもソース解放後にfixtureが壊れず再表示できる", async ({ page }) => {
     test.setTimeout(120000);
     await installPdfPerformanceObservers(page);
     await page.setViewportSize({ width: 1280, height: 900 });
