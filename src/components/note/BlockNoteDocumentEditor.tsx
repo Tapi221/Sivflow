@@ -1,5 +1,4 @@
-import { BlockNoteView } from "@blocknote/mantine";
-import { useCreateBlockNote } from "@blocknote/react";
+import { BlockNoteView, useCreateBlockNote } from "@blocknote/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Note, NoteBlockContent } from "@/types";
 
