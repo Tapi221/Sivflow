@@ -7,16 +7,26 @@ export interface PlatformShellApi {
 }
 
 export interface DesktopAiGenerateInput {
+  baseUrl: string;
   model: string;
   prompt: string;
+}
+
+export interface DesktopAiListModelsInput {
+  baseUrl: string;
 }
 
 export interface DesktopAiGenerateResult {
   response: string;
 }
 
+export interface DesktopAiListModelsResult {
+  models: string[];
+}
+
 export interface DesktopAiApi {
   generateOllama(input: DesktopAiGenerateInput): Promise<DesktopAiGenerateResult>;
+  listOllamaModels(input: DesktopAiListModelsInput): Promise<string[]>;
 }
 
 export interface DesktopImportFileOpenPayload {
