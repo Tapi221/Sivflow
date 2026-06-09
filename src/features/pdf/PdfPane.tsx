@@ -106,19 +106,6 @@ const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
-const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 767;
-const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 1_000;
-const PDF_LOW_MEMORY_DEVICE_MAX_GB = 4;
-const PDF_LOW_MEMORY_MAX_CANVAS_PIXELS = 16 * 1024 * 1024;
-const PDF_DEFAULT_DEVICE_MEMORY_GB = 8;
-const PDF_RANGE_CHUNK_SIZE = 256 * 1024;
-const PDF_SCROLL_IDLE_DELAY_MS = 160;
-const PDF_VISIBLE_PAGE_CACHE_OVERSCAN = 1;
-const PDF_SCROLLING_CLASS_NAME = "pdf-pane--scrolling";
-const PDF_SCROLL_CONTAINER_CLASS_NAME = "pdf-pane__scroll-container";
-const PDF_VIEWER_CLASS_NAME = "pdf-pane__viewer";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const getSafePageNumber = getSafePdfPageNumber;
 
@@ -405,10 +392,13 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     let scrollFrame: number | null = null;
     let pageChangeFrame: number | null = null;
     let pageMetricFrame: number | null = null;
+    let scrollIdleFrame: number | null = null;
     let scrollIdleTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
     let isScrollOptimizationActive = false;
     let pendingPageNumber: number | null = null;
     let pageMetricCache: PdfPageWindowMetric[] = [];
+    // メトリクスキャッシュの初期化完了フラグ（未初期化時のDOM同期読み取りを防止）
+    let pageMetricCacheReady = false;
     const performanceTraceName = createPdfPerformanceTraceName("viewer.load");
     const eventBus = new EventBus() as PdfEventBusLike;
     const linkService = new PDFLinkService({ eventBus });
@@ -419,11 +409,26 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
 
     const refreshPageMetricCache = () => {
       pageMetricCache = getPdfVisiblePageMetrics(viewerElement);
+      pageMetricCacheReady = true;
       return pageMetricCache;
     };
 
+    // contain-intrinsic-sizeのCSS変数を実際のページサイズから動的に設定
+    const updateContainIntrinsicSizeFromPage = () => {
+      const firstPageElement = viewerElement.querySelector<HTMLElement>('.page');
+      if (!firstPageElement) return;
+      const pageWidth = firstPageElement.offsetWidth;
+      const pageHeight = firstPageElement.offsetHeight;
+      if (pageWidth > 0 && pageHeight > 0) {
+        viewerElement.style.setProperty('--pdf-page-width', `${pageWidth}px`);
+        viewerElement.style.setProperty('--pdf-page-height', `${pageHeight}px`);
+      }
+    };
+
     const resizeVisiblePageBuffer = (pageNumber?: number, options: { refreshMetrics?: boolean } = {}) => {
-      const pageMetrics = options.refreshMetrics || pageMetricCache.length === 0 ? refreshPageMetricCache() : pageMetricCache;
+      // キャッシュ未初期化の場合はrefreshMetrics指定時のみDOM読み取りを許可
+      // スクロール中の意図しないDOM同期読み取り（Layout Thrashing）を防止
+      const pageMetrics = options.refreshMetrics ? refreshPageMetricCache() : (pageMetricCacheReady ? pageMetricCache : []);
       resizePdfViewerPageBuffer(pdfViewer, container, { pageMetrics }, pageNumber);
     };
 
@@ -472,8 +477,13 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const markScrollIdle = () => {
       scrollIdleTimer = null;
       if (isCancelled) return;
-      setScrollOptimizationActive(false);
-      resizeVisiblePageBuffer(undefined, { refreshMetrics: true });
+      // rAFでメトリクスリフレッシュとスタイル変更をペイントと同期し、レイアウトスラッシングを防止
+      scrollIdleFrame = window.requestAnimationFrame(() => {
+        scrollIdleFrame = null;
+        if (isCancelled) return;
+        setScrollOptimizationActive(false);
+        resizeVisiblePageBuffer(undefined, { refreshMetrics: true });
+      });
     };
 
     const scheduleScrollIdle = () => {
@@ -482,17 +492,16 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     };
 
     const requestScrollOptimization = () => {
-      if (scrollFrame !== null) {
-        scheduleScrollIdle();
-        return;
-      }
+      // スクロール中はタイマーリセットのみ実行し、バッファリサイズを毎フレーム実行しない
+      scheduleScrollIdle();
+      if (scrollFrame !== null) return;
 
       scrollFrame = window.requestAnimationFrame(() => {
         scrollFrame = null;
         if (isCancelled) return;
         setScrollOptimizationActive(true);
+        // キャッシュ済みメトリクスでバッファリサイズ（DOM読み取りなし）
         resizeVisiblePageBuffer();
-        scheduleScrollIdle();
       });
     };
 
@@ -539,6 +548,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       const initialPageNumber = getSafePageNumber(viewerStateRef.current?.currentPage, loadedPdfDocument.numPages);
       pdfViewer.currentPageNumber = initialPageNumber;
       resizeVisiblePageBuffer(initialPageNumber, { refreshMetrics: true });
+      // 実際のページサイズからcontain-intrinsic-sizeのCSS変数を設定（スクロールバージャンプ防止）
+      updateContainIntrinsicSizeFromPage();
       requestResponsiveScaleUpdate();
     }));
 
@@ -561,6 +572,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       if (isExplicitZoom) lastExplicitZoomAtRef.current = 0;
       if (viewerStateRef.current?.scale !== scale || viewerStateRef.current?.fitMode !== fitMode) updateViewerState({ scale, fitMode }, { persistence: isExplicitZoom ? "immediate" : "none" });
       requestPageMetricRefresh();
+      // スケール変更時にcontain-intrinsic-sizeのCSS変数を再計算
+      updateContainIntrinsicSizeFromPage();
     }));
 
     void loadPdfDocument(source, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then((nextPdfDocument) => {
@@ -591,6 +604,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       if (scrollFrame !== null) window.cancelAnimationFrame(scrollFrame);
       if (pageChangeFrame !== null) window.cancelAnimationFrame(pageChangeFrame);
       if (pageMetricFrame !== null) window.cancelAnimationFrame(pageMetricFrame);
+      if (scrollIdleFrame !== null) window.cancelAnimationFrame(scrollIdleFrame);
       clearScrollIdleTimer();
       setPdfScrollOptimizationClass(container, viewerElement, false);
       resizeObserver?.disconnect();
