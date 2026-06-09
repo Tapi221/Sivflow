@@ -20,11 +20,11 @@ const normalizePdfSourceUrl = (url: string | null | undefined): string | null =>
 };
 
 const getPdfDocumentSourceUrlCandidates = (document: PdfDocumentSourceFields): Array<string | null | undefined> => [
+  document.localUrl,
+  document.blobUrl,
   document.remoteUrl,
   document.downloadUrl,
   document.googleDriveWebContentLink,
-  document.localUrl,
-  document.blobUrl,
   document.googleDriveWebViewLink,
 ];
 
