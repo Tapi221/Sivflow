@@ -11,7 +11,7 @@ import { WorkspaceBreadcrumbs } from "@/features/breadcrumbs/components/Workspac
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
-import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
+import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import { useNotes } from "@/hooks/note/useNotes";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
@@ -390,3 +390,4 @@ const WorkspaceScreen = () => {
 };
 
 export { WorkspaceScreen };
+

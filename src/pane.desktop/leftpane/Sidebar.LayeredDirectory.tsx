@@ -13,8 +13,8 @@ import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocu
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useTags } from "@/features/settings/hooks/useTags";
-import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
-import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
+import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
+import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import { useNotes } from "@/hooks/note/useNotes";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
@@ -401,3 +401,4 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
 };
 
 export { LibraryHierarchySidebar, ProjectListSidebar, SidebarLayeredDirectory, TagTreeSidebar };
+

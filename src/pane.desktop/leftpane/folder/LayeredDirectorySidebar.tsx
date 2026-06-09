@@ -11,8 +11,8 @@ import { getFolderProjectColor } from "@/components/folder/explorer/model/projec
 import { DEFAULT_NEW_CARD_SET_NAME, DEFAULT_NEW_FOLDER_NAME, getFolderId, getParentFolderId, UNTITLED_FOLDER_NAME, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
-import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
-import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
+import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
+import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import { useNotes } from "@/hooks/note/useNotes";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
@@ -640,3 +640,4 @@ const LibraryHierarchySidebar = ({ parentFolderId = null, onOpenCardSet }: Libra
 };
 
 export { LibraryHierarchySidebar, ProjectListSidebar };
+
