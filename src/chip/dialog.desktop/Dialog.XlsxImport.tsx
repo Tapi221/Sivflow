@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/contexts/ToastContext";
 import type { CardSet } from "@/types";
 
-export type XlsxImportCompletedPayload = {
+type XlsxImportCompletedPayload = {
   cardSetId: string;
   cardSetName: string;
   folderId: string;
@@ -26,12 +26,13 @@ type XlsxImportDialogProps = {
   createCardSet: CreateCardSet;
   createCard: CreateCard;
 };
+
 const emptyState = {
   file: null as File | null,
   result: null as ImportParseResult | null,
 };
 
-export const XlsxImportDialog = ({
+const XlsxImportDialog = ({
   open,
   onOpenChange,
   folderId,
@@ -420,3 +421,6 @@ export const XlsxImportDialog = ({
     </Dialog>
   );
 };
+
+export { XlsxImportDialog };
+export type { XlsxImportCompletedPayload };
