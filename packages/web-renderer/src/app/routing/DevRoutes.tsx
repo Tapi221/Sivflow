@@ -15,10 +15,10 @@ const PdfPerformanceTest = DEV_MODE
 const SelectionCaptureSandboxPage = DEV_MODE
   ? lazy(() => import("@/sandbox/2").then(({ SelectionCaptureSandboxPage }) => ({ default: SelectionCaptureSandboxPage })))
   : null;
-const AffineSandboxPage = DEV_MODE
+const BlockNoteSandboxPage = DEV_MODE
   ? lazy(() =>
-      import("@/sandbox/affine").then(({ AffineSandboxPage }) => ({
-        default: AffineSandboxPage,
+      import("@/sandbox/affine").then(({ BlockNoteSandboxPage }) => ({
+        default: BlockNoteSandboxPage,
       })),
     )
   : null;
@@ -128,10 +128,10 @@ export const getDevRouteElements = () => {
         />
       ) : null}
 
-      {AffineSandboxPage ? (
+      {BlockNoteSandboxPage ? (
         <Route
-          path="sandbox/affine/*"
-          element={withDevRouteFallback(<AffineSandboxPage />)}
+          path="sandbox/blocknote/*"
+          element={withDevRouteFallback(<BlockNoteSandboxPage />)}
         />
       ) : null}
 
