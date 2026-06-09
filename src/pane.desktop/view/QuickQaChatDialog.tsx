@@ -4,7 +4,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/contexts/ToastContext";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { Loader2, MessageSquare, Plus } from "@/ui/icons";
+import { Loader2, MessageSquare, Plus, Sparkles } from "@/ui/icons";
+import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
 
 type QuickQaChatDialogProps = {
   open: boolean;
@@ -47,10 +48,12 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>(createInitialMessages);
   const [isCreating, setIsCreating] = useState(false);
+  const [isGeneratingAiAnswer, setIsGeneratingAiAnswer] = useState(false);
 
   const placeholder = step === "question" ? "例: GPUアクセラレーションって何？" : "回答を入力...";
   const inputMaxLength = step === "question" ? MAX_QUESTION_LENGTH : MAX_ANSWER_LENGTH;
-  const canSend = inputValue.trim().length > 0 && !isCreating;
+  const canSend = inputValue.trim().length > 0 && !isCreating && !isGeneratingAiAnswer;
+  const canGenerateAiAnswer = step === "answer" && pendingQuestion.trim().length > 0 && !isCreating && !isGeneratingAiAnswer;
 
   const resetChat = useCallback(() => {
     setStep("question");
@@ -110,9 +113,31 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
     }
   }, [appendMessages, createCard, focusInputSoon, openCardTab, toast]);
 
+  const handleGenerateAiAnswer = useCallback(async () => {
+    const question = trimMessage(pendingQuestion, MAX_QUESTION_LENGTH);
+    if (!question || !canGenerateAiAnswer) return;
+
+    setIsGeneratingAiAnswer(true);
+    appendMessages([{ id: crypto.randomUUID(), role: "assistant", text: "ローカルAIで回答案を作成しています。" }]);
+
+    try {
+      const result = await generateOllamaAnswer({ question });
+      setInputValue(result.answer.slice(0, MAX_ANSWER_LENGTH));
+      appendMessages([{ id: crypto.randomUUID(), role: "assistant", text: `回答案を作成しました。モデル: ${result.model}` }]);
+      toast.success("AI回答案を作成しました。");
+      focusInputSoon();
+    } catch (error) {
+      console.error("[QuickQaChatDialog] failed to generate AI answer", error);
+      appendMessages([{ id: crypto.randomUUID(), role: "assistant", text: "Ollamaに接続できませんでした。Ollama起動後、llama3.2:3b などのモデルを用意してください。" }]);
+      toast.error("ローカルAIに接続できませんでした。");
+    } finally {
+      setIsGeneratingAiAnswer(false);
+    }
+  }, [appendMessages, canGenerateAiAnswer, focusInputSoon, pendingQuestion, toast]);
+
   const handleSend = useCallback(() => {
     const value = trimMessage(inputValue, inputMaxLength);
-    if (!value || isCreating) return;
+    if (!value || isCreating || isGeneratingAiAnswer) return;
 
     if (step === "question") {
       setPendingQuestion(value);
@@ -120,7 +145,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
       setInputValue("");
       appendMessages([
         { id: crypto.randomUUID(), role: "user", text: value },
-        { id: crypto.randomUUID(), role: "assistant", text: "回答を入力してください。回答を入れると、そのままカードにします。" },
+        { id: crypto.randomUUID(), role: "assistant", text: "回答を入力してください。AI回答案を使うこともできます。" },
       ]);
       focusInputSoon();
       return;
@@ -128,15 +153,15 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
 
     appendMessages([{ id: crypto.randomUUID(), role: "user", text: value }]);
     void handleCreateCardFromAnswer(pendingQuestion, value);
-  }, [appendMessages, focusInputSoon, handleCreateCardFromAnswer, inputMaxLength, inputValue, isCreating, pendingQuestion, step]);
+  }, [appendMessages, focusInputSoon, handleCreateCardFromAnswer, inputMaxLength, inputValue, isCreating, isGeneratingAiAnswer, pendingQuestion, step]);
 
   const handleCreateDraftWithoutAnswer = useCallback(() => {
     const question = trimMessage(pendingQuestion, MAX_QUESTION_LENGTH);
-    if (!question || isCreating) return;
+    if (!question || isCreating || isGeneratingAiAnswer) return;
 
     appendMessages([{ id: crypto.randomUUID(), role: "assistant", text: "回答なしの下書きカードとして作成します。" }]);
     void handleCreateCardFromAnswer(question, "");
-  }, [appendMessages, handleCreateCardFromAnswer, isCreating, pendingQuestion]);
+  }, [appendMessages, handleCreateCardFromAnswer, isCreating, isGeneratingAiAnswer, pendingQuestion]);
 
   const handleInputKeyDown = useCallback((event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
@@ -160,7 +185,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
             </div>
             <div className="min-w-0">
               <p className="text-[14px] font-semibold tracking-[-0.02em] text-[#343434]">Q&Aチャット</p>
-              <p className="mt-0.5 text-[11px] text-[#8a857f]">AI Chat 風に、Q → A の順でカードを作ります。</p>
+              <p className="mt-0.5 text-[11px] text-[#8a857f]">OllamaのローカルAI回答案を使えます。</p>
             </div>
           </div>
         </div>
@@ -172,11 +197,11 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
                 <div className={cn("max-w-[84%] rounded-[18px] px-3 py-2 text-[12px] leading-relaxed shadow-sm", message.role === "user" ? "bg-[#343434] text-white" : "border border-[#eceae4] bg-white text-[#4b4b4b]")}>{message.text}</div>
               </div>
             ))}
-            {isCreating ? (
+            {isCreating || isGeneratingAiAnswer ? (
               <div className="flex justify-start">
                 <div className="inline-flex items-center gap-2 rounded-[18px] border border-[#eceae4] bg-white px-3 py-2 text-[12px] text-[#8a857f] shadow-sm">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  カード作成中
+                  {isGeneratingAiAnswer ? "AI回答案を作成中" : "カード作成中"}
                 </div>
               </div>
             ) : null}
@@ -196,13 +221,21 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
             </button>
           </div>
           <div className="mt-2 flex items-center justify-between gap-2">
-            <button type="button" className="text-[11px] font-medium text-[#8a857f] underline-offset-2 hover:text-[#343434] hover:underline" onClick={resetChat} disabled={isCreating}>リセット</button>
-            {step === "answer" ? (
-              <button type="button" className="inline-flex items-center gap-1 text-[11px] font-medium text-[#8a857f] underline-offset-2 hover:text-[#343434] hover:underline disabled:opacity-60" onClick={handleCreateDraftWithoutAnswer} disabled={isCreating || !pendingQuestion}>
-                <Plus className="h-3 w-3" />
-                回答なしで下書き作成
-              </button>
-            ) : null}
+            <button type="button" className="text-[11px] font-medium text-[#8a857f] underline-offset-2 hover:text-[#343434] hover:underline disabled:opacity-60" onClick={resetChat} disabled={isCreating || isGeneratingAiAnswer}>リセット</button>
+            <div className="flex items-center gap-3">
+              {step === "answer" ? (
+                <button type="button" className="inline-flex items-center gap-1 text-[11px] font-medium text-[#8a857f] underline-offset-2 hover:text-[#343434] hover:underline disabled:opacity-60" onClick={handleGenerateAiAnswer} disabled={!canGenerateAiAnswer}>
+                  {isGeneratingAiAnswer ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                  AIで回答案
+                </button>
+              ) : null}
+              {step === "answer" ? (
+                <button type="button" className="inline-flex items-center gap-1 text-[11px] font-medium text-[#8a857f] underline-offset-2 hover:text-[#343434] hover:underline disabled:opacity-60" onClick={handleCreateDraftWithoutAnswer} disabled={isCreating || isGeneratingAiAnswer || !pendingQuestion}>
+                  <Plus className="h-3 w-3" />
+                  回答なしで下書き作成
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
       </DialogContent>
