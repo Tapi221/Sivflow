@@ -1,28 +1,41 @@
+/* スクロールコンテナ最適化 */
 .pdf-pane__scroll-container {
   contain: layout paint style;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
   scroll-behavior: auto;
   touch-action: pan-x pan-y pinch-zoom;
-  will-change: scroll-position;
 }
 
+/* ビューア要素最適化 */
 .pdf-pane__viewer {
   contain: layout paint style;
 }
 
+/* 各ページの仮想化最適化 — CSS変数でページサイズに応じた推定サイズを設定 */
 .pdf-pane__viewer .page {
   contain: layout paint style;
   content-visibility: auto;
-  contain-intrinsic-size: 1120px 792px;
+  contain-intrinsic-size: var(--pdf-page-width, 816px) var(--pdf-page-height, 1056px);
 }
 
-.pdf-pane__viewer .canvasWrapper,
-.pdf-pane__viewer canvas {
+/* スクロール中のみGPU合成レイヤーを有効化（常時適用によるメモリ消費を防止） */
+.pdf-pane--scrolling .pdf-pane__scroll-container {
+  will-change: scroll-position;
+}
+
+.pdf-pane--scrolling .pdf-pane__viewer .canvasWrapper,
+.pdf-pane--scrolling .pdf-pane__viewer canvas {
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
+/* スクロール中はcontent-visibility:autoとPDF.jsバッファ管理の競合を防止 */
+.pdf-pane--scrolling .pdf-pane__viewer .page {
+  content-visibility: visible;
+}
+
+/* スクロール中のオーバーレイレイヤーのイベント無効化 */
 .pdf-pane--scrolling .textLayer,
 .pdf-pane--scrolling .annotationLayer,
 .pdf-pane--scrolling .annotationEditorLayer,
@@ -31,6 +44,7 @@
   pointer-events: none;
 }
 
+/* スクロール中のテキスト・注釈レイヤー非表示化（レンダリング負荷軽減） */
 .pdf-pane--scrolling .textLayer,
 .pdf-pane--scrolling .annotationLayer,
 .pdf-pane--scrolling .annotationEditorLayer {
