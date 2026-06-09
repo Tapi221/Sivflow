@@ -67,11 +67,13 @@ const getRowsText = (rows: unknown): string => {
 
 const getRecordBlockText = (block: NoteRecordBlock): string => typeof block.text === "string" ? block.text : getRowsText(block.rows);
 
-const assertAffineEditorElementRegistered = (): void => {
-  if (typeof customElements === "undefined") return;
-  if (!customElements.get(NOTE_EDITOR_TAG_NAME)) {
-    throw new Error("BlockSuite did not register the AFFiNE editor custom element.");
+const registerAffineEditorElement = (presetExports: Record<string, unknown>): void => {
+  if (typeof customElements === "undefined" || customElements.get(NOTE_EDITOR_TAG_NAME)) return;
+  const AffineEditorContainer = asConstructor<CustomElementConstructor>(presetExports.AffineEditorContainer);
+  if (!AffineEditorContainer) {
+    throw new Error("BlockSuite presets do not expose the AFFiNE editor custom element constructor.");
   }
+  customElements.define(NOTE_EDITOR_TAG_NAME, AffineEditorContainer);
 };
 
 const loadRuntime = async (): Promise<BlocksuiteRuntime> => {
@@ -90,7 +92,7 @@ const loadRuntime = async (): Promise<BlocksuiteRuntime> => {
       throw new Error("Installed BlockSuite packages do not expose the AFFiNE document runtime.");
     }
 
-    assertAffineEditorElementRegistered();
+    registerAffineEditorElement(presetExports);
     return runtime as BlocksuiteRuntime;
   });
 
