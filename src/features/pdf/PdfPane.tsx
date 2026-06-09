@@ -10,6 +10,7 @@ import { releasePdfDocumentSource, toPdfDocumentLoadSource } from "./pdfDocument
 import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "./pdfPerformance";
 import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
+import "./PdfPane.css";
 
 type PdfPaneProps = {
   source: PdfDocumentSource | null;
@@ -61,14 +62,25 @@ type PdfScaleChangingEvent = {
 };
 
 type PdfViewerRuntimeOptions = {
+  enableHWA: boolean;
   enableOptimizedPartialRendering: boolean;
   maxCanvasPixels?: number;
   removePageBorders: boolean;
 };
 
+type PdfViewerPageBuffer = {
+  resize?: (size: number, idsToKeep?: Set<number>) => void;
+};
+
+type PdfViewerWithPageBuffer = PdfViewerInstance & {
+  _buffer?: PdfViewerPageBuffer;
+};
+
 type NavigatorWithDeviceMemory = Navigator & {
   deviceMemory?: number;
 };
+
+type PdfScrollEventName = "scroll" | "wheel" | "touchmove";
 
 const DEFAULT_PDF_PAGE = 1;
 const PDF_HISTORY_LIMIT = 80;
@@ -82,6 +94,13 @@ const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 1_000;
 const PDF_LOW_MEMORY_DEVICE_MAX_GB = 4;
 const PDF_LOW_MEMORY_MAX_CANVAS_PIXELS = 16 * 1024 * 1024;
 const PDF_DEFAULT_DEVICE_MEMORY_GB = 8;
+const PDF_RANGE_CHUNK_SIZE = 256 * 1024;
+const PDF_SCROLL_IDLE_DELAY_MS = 160;
+const PDF_VISIBLE_PAGE_CACHE_SIZE = 6;
+const PDF_VISIBLE_PAGE_CACHE_RADIUS = 2;
+const PDF_SCROLLING_CLASS_NAME = "pdf-pane--scrolling";
+const PDF_SCROLL_CONTAINER_CLASS_NAME = "pdf-pane__scroll-container";
+const PDF_VIEWER_CLASS_NAME = "pdf-pane__viewer";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -121,29 +140,54 @@ const getApproxDeviceMemory = (): number => {
   return typeof deviceMemory === "number" && Number.isFinite(deviceMemory) ? deviceMemory : PDF_DEFAULT_DEVICE_MEMORY_GB;
 };
 
+const getPdfPageBufferKeepSet = (pageNumber: number, pageCount: number): Set<number> => {
+  const safePageNumber = getSafePageNumber(pageNumber, pageCount);
+  const firstPage = Math.max(DEFAULT_PDF_PAGE, safePageNumber - PDF_VISIBLE_PAGE_CACHE_RADIUS);
+  const lastPage = Math.min(Math.max(pageCount, DEFAULT_PDF_PAGE), safePageNumber + PDF_VISIBLE_PAGE_CACHE_RADIUS);
+  const idsToKeep = new Set<number>();
+
+  for (let page = firstPage; page <= lastPage; page += 1) idsToKeep.add(page);
+  return idsToKeep;
+};
+
+const resizePdfViewerPageBuffer = (pdfViewer: PdfViewerInstance, pageNumber: number = pdfViewer.currentPageNumber): void => {
+  const pageCount = getPdfViewerPageCount(pdfViewer);
+  if (pageCount <= 0) return;
+  const pageBuffer = (pdfViewer as PdfViewerWithPageBuffer)._buffer;
+  if (typeof pageBuffer?.resize !== "function") return;
+  pageBuffer.resize(Math.min(PDF_VISIBLE_PAGE_CACHE_SIZE, pageCount), getPdfPageBufferKeepSet(pageNumber, pageCount));
+};
+
 const createPdfViewerRuntimeOptions = (): PdfViewerRuntimeOptions => {
   const isLowMemoryDevice = getApproxDeviceMemory() <= PDF_LOW_MEMORY_DEVICE_MAX_GB;
   return {
+    enableHWA: true,
     enableOptimizedPartialRendering: true,
     maxCanvasPixels: isLowMemoryDevice ? PDF_LOW_MEMORY_MAX_CANVAS_PIXELS : undefined,
     removePageBorders: true,
   };
 };
 
-const createPdfDocumentLoadOptions = (viewerOptions: PdfPaneProps["viewerOptions"]) => {
+const createPdfDocumentLoadOptions = (viewerOptions: PdfPaneProps["viewerOptions"], source: PdfDocumentSource | null) => {
+  const isUrlSource = source?.type === "url";
   return {
+    disableAutoFetch: isUrlSource,
+    disableRange: false,
+    disableStream: false,
+    enableHWA: true,
     enableXfa: viewerOptions?.enableXfa,
     useSystemFonts: viewerOptions?.useSystemFonts ?? true,
     cMapUrl: viewerOptions?.cMapUrl ?? PDFJS_CMAP_URL,
     cMapPacked: true,
     standardFontDataUrl: viewerOptions?.standardFontDataUrl ?? PDFJS_STANDARD_FONT_DATA_URL,
     wasmUrl: PDFJS_WASM_URL,
+    rangeChunkSize: isUrlSource ? PDF_RANGE_CHUNK_SIZE : undefined,
   };
 };
 
 const loadPdfDocument = async (source: PdfDocumentSource | null, viewerOptions: PdfPaneProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
   if (!source) throw new Error("表示できるPDFソースがありません。");
-  return waitForPdfLoadingTask(pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions), ...toPdfDocumentLoadSource(source) }));
+  return waitForPdfLoadingTask(pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions, source), ...toPdfDocumentLoadSource(source) }));
 };
 
 const releasePdfViewerDocument = (pdfViewer: PdfViewerInstance, linkService: PdfLinkServiceInstance, pdfDocument: PdfDocumentProxy | null): void => {
@@ -172,6 +216,22 @@ const addPdfViewerEventListener = (eventBus: PdfEventBusLike, eventName: string,
 
     eventBus._off?.(eventName, listener);
   };
+};
+
+const addPassivePdfScrollListener = (element: HTMLElement, eventName: PdfScrollEventName, listener: EventListener): (() => void) => {
+  element.addEventListener(eventName, listener, { passive: true });
+  return () => element.removeEventListener(eventName, listener);
+};
+
+const setPdfScrollOptimizationClass = (container: HTMLElement, viewerElement: HTMLElement, isActive: boolean): void => {
+  if (isActive) {
+    container.classList.add(PDF_SCROLLING_CLASS_NAME);
+    viewerElement.classList.add(PDF_SCROLLING_CLASS_NAME);
+    return;
+  }
+
+  container.classList.remove(PDF_SCROLLING_CLASS_NAME);
+  viewerElement.classList.remove(PDF_SCROLLING_CLASS_NAME);
 };
 
 const applyPdfViewerZoom = (pdfViewer: PdfViewerInstance, direction: PdfViewerZoomDirection): void => {
@@ -227,6 +287,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const currentViewerState = viewerStateRef.current ?? {};
     const nextBackPages = shouldRecordHistory && safePageNumber !== currentPage ? getTrimmedHistory([...(currentViewerState.historyBackPages ?? []), currentPage]) : currentViewerState.historyBackPages;
     pdfViewer.currentPageNumber = safePageNumber;
+    resizePdfViewerPageBuffer(pdfViewer, safePageNumber);
     updateViewerState({ currentPage: safePageNumber, historyBackPages: nextBackPages, historyForwardPages: shouldRecordHistory ? [] : currentViewerState.historyForwardPages }, { persistence: "deferred" });
   }, [updateViewerState]);
 
@@ -263,6 +324,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     if (!pdfViewer || !targetPage) return;
     const currentPage = getSafePageNumber(pdfViewer.currentPageNumber, getPdfViewerPageCount(pdfViewer));
     pdfViewer.currentPageNumber = targetPage;
+    resizePdfViewerPageBuffer(pdfViewer, targetPage);
     updateViewerState({ currentPage: targetPage, historyBackPages: historyBackPages.slice(0, -1), historyForwardPages: getTrimmedHistory([...historyForwardPages, currentPage]) }, { persistence: "deferred" });
   }, [updateViewerState]);
 
@@ -275,6 +337,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     if (!pdfViewer || !targetPage) return;
     const currentPage = getSafePageNumber(pdfViewer.currentPageNumber, getPdfViewerPageCount(pdfViewer));
     pdfViewer.currentPageNumber = targetPage;
+    resizePdfViewerPageBuffer(pdfViewer, targetPage);
     updateViewerState({ currentPage: targetPage, historyBackPages: getTrimmedHistory([...historyBackPages, currentPage]), historyForwardPages: historyForwardPages.slice(0, -1) }, { persistence: "deferred" });
   }, [updateViewerState]);
 
@@ -304,6 +367,11 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     let isCancelled = false;
     let loadedPdfDocument: PdfDocumentProxy | null = null;
     let resizeFrame: number | null = null;
+    let scrollFrame: number | null = null;
+    let pageChangeFrame: number | null = null;
+    let scrollIdleTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
+    let isScrollOptimizationActive = false;
+    let pendingPageNumber: number | null = null;
     const performanceTraceName = createPdfPerformanceTraceName("viewer.load");
     const eventBus = new EventBus() as PdfEventBusLike;
     const linkService = new PDFLinkService({ eventBus });
@@ -325,6 +393,61 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       });
     };
 
+    const setScrollOptimizationActive = (isActive: boolean) => {
+      if (isScrollOptimizationActive === isActive) return;
+      isScrollOptimizationActive = isActive;
+      setPdfScrollOptimizationClass(container, viewerElement, isActive);
+      recordPdfPerformanceMark(`${performanceTraceName}.${isActive ? "scrollActive" : "scrollIdle"}`, { debugOnly: true, detail: { pageNumber: pdfViewer.currentPageNumber } });
+    };
+
+    const clearScrollIdleTimer = () => {
+      if (scrollIdleTimer === null) return;
+      globalThis.clearTimeout(scrollIdleTimer);
+      scrollIdleTimer = null;
+    };
+
+    const markScrollIdle = () => {
+      scrollIdleTimer = null;
+      if (isCancelled) return;
+      setScrollOptimizationActive(false);
+      resizePdfViewerPageBuffer(pdfViewer);
+    };
+
+    const scheduleScrollIdle = () => {
+      clearScrollIdleTimer();
+      scrollIdleTimer = globalThis.setTimeout(markScrollIdle, PDF_SCROLL_IDLE_DELAY_MS);
+    };
+
+    const requestScrollOptimization = () => {
+      if (scrollFrame !== null) {
+        scheduleScrollIdle();
+        return;
+      }
+
+      scrollFrame = window.requestAnimationFrame(() => {
+        scrollFrame = null;
+        if (isCancelled) return;
+        setScrollOptimizationActive(true);
+        resizePdfViewerPageBuffer(pdfViewer);
+        scheduleScrollIdle();
+      });
+    };
+
+    const flushPendingPageChange = () => {
+      pageChangeFrame = null;
+      if (isCancelled || pendingPageNumber === null) return;
+      const pageNumber = pendingPageNumber;
+      pendingPageNumber = null;
+      if (viewerStateRef.current?.currentPage !== pageNumber) updateViewerState({ currentPage: pageNumber }, { persistence: "deferred" });
+      resizePdfViewerPageBuffer(pdfViewer, pageNumber);
+    };
+
+    const requestPageChangeUpdate = (pageNumber: number) => {
+      pendingPageNumber = pageNumber;
+      if (pageChangeFrame !== null) return;
+      pageChangeFrame = window.requestAnimationFrame(flushPendingPageChange);
+    };
+
     recordPdfPerformanceMark(`${performanceTraceName}.start`, { detail: { sourceType: source?.type ?? null } });
     pdfViewerRef.current = pdfViewer;
     linkService.setViewer(pdfViewer);
@@ -334,6 +457,9 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestResponsiveScaleUpdate);
     resizeObserver?.observe(container);
     window.addEventListener("orientationchange", requestResponsiveScaleUpdate);
+    removeEventListeners.push(addPassivePdfScrollListener(container, "scroll", requestScrollOptimization));
+    removeEventListeners.push(addPassivePdfScrollListener(container, "wheel", requestScrollOptimization));
+    removeEventListeners.push(addPassivePdfScrollListener(container, "touchmove", requestScrollOptimization));
 
     removeEventListeners.push(addPdfViewerEventListener(eventBus, "pagesinit", () => {
       if (isCancelled || !loadedPdfDocument) return;
@@ -345,7 +471,9 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       } else {
         pdfViewer.currentScaleValue = scaleValue;
       }
-      pdfViewer.currentPageNumber = getSafePageNumber(viewerStateRef.current?.currentPage, loadedPdfDocument.numPages);
+      const initialPageNumber = getSafePageNumber(viewerStateRef.current?.currentPage, loadedPdfDocument.numPages);
+      pdfViewer.currentPageNumber = initialPageNumber;
+      resizePdfViewerPageBuffer(pdfViewer, initialPageNumber);
       requestResponsiveScaleUpdate();
     }));
 
@@ -354,8 +482,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       const pageNumber = (event as PdfPageChangingEvent).pageNumber;
       if (!Number.isFinite(pageNumber)) return;
       recordPdfPerformanceMark(`${performanceTraceName}.pagechanging`, { debugOnly: true, detail: { pageNumber } });
-      if (viewerStateRef.current?.currentPage === pageNumber) return;
-      updateViewerState({ currentPage: pageNumber }, { persistence: "deferred" });
+      requestPageChangeUpdate(pageNumber);
     }));
 
     removeEventListeners.push(addPdfViewerEventListener(eventBus, "scalechanging", (event: unknown) => {
@@ -369,6 +496,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       if (isExplicitZoom) lastExplicitZoomAtRef.current = 0;
       if (viewerStateRef.current?.scale === scale && viewerStateRef.current?.fitMode === fitMode) return;
       updateViewerState({ scale, fitMode }, { persistence: isExplicitZoom ? "immediate" : "none" });
+      resizePdfViewerPageBuffer(pdfViewer);
     }));
 
     void loadPdfDocument(source, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then((nextPdfDocument) => {
@@ -396,6 +524,10 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       isCancelled = true;
       isApplyingFitScaleRef.current = false;
       if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
+      if (scrollFrame !== null) window.cancelAnimationFrame(scrollFrame);
+      if (pageChangeFrame !== null) window.cancelAnimationFrame(pageChangeFrame);
+      clearScrollIdleTimer();
+      setPdfScrollOptimizationClass(container, viewerElement, false);
       resizeObserver?.disconnect();
       window.removeEventListener("orientationchange", requestResponsiveScaleUpdate);
       removeEventListeners.forEach((removeEventListener) => removeEventListener());
@@ -474,8 +606,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   return (
     <div className={cn("flex h-full min-h-0 min-w-0 bg-[var(--carvepanel-surface)] text-[#2f2f2f] max-sm:min-h-[100dvh]", className)}>
       <main className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-        <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto overscroll-contain bg-[var(--carvepanel-surface)] px-3 py-4 [-webkit-overflow-scrolling:touch] sm:px-4 sm:py-5">
-          <div ref={pdfViewerElementRef} className="pdfViewer" />
+        <div ref={scrollContainerRef} className={cn(PDF_SCROLL_CONTAINER_CLASS_NAME, "absolute inset-0 overflow-auto overscroll-contain bg-[var(--carvepanel-surface)] px-3 py-4 [-webkit-overflow-scrolling:touch] sm:px-4 sm:py-5")}>
+          <div ref={pdfViewerElementRef} className={cn("pdfViewer", PDF_VIEWER_CLASS_NAME)} />
           {isLoading ? <LoadingSpinner className="absolute inset-0 bg-[var(--carvepanel-surface)] text-[#6d6d6d]" label="PDFを読み込み中" /> : null}
         </div>
       </main>
