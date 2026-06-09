@@ -11,14 +11,14 @@ const createSandboxNote = (): Note => ({
   title: "Note Sandbox",
   content: [],
   contentText: "",
-  contentVersion: 2,
-  editor: "affine",
+  contentVersion: 1,
+  editor: "blocknote",
   isDeleted: false,
   createdAt: new Date(),
   updatedAt: new Date(),
 });
 
-const AffineSandboxPage = () => {
+const BlockNoteSandboxPage = () => {
   const [note, setNote] = useState<Note>(createSandboxNote);
 
   const handleChange = useCallback((changes: Pick<Note, "content" | "contentText" | "contentVersion" | "editor">) => {
@@ -28,4 +28,4 @@ const AffineSandboxPage = () => {
   return <NoteDocumentEditor note={note} onChange={handleChange} />;
 };
 
-export { AffineSandboxPage };
+export { BlockNoteSandboxPage };
