@@ -13,8 +13,17 @@ describe("pdfDocumentSource", () => {
     const source = await createPdfDocumentDataSourceFromBlob(new Blob([new Uint8Array([1, 2, 3])], { type: "application/pdf" }));
 
     expect(source.type).toBe("url");
+    expect(source.type === "url" ? source.locality : null).toBe("local");
     expect(toPdfDocumentLoadSource(source)).toEqual({ url: "blob:pdf-1" });
     expect(createObjectUrlMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("通常 URL ソースは remote として扱う", () => {
+    const source = createPdfDocumentUrlSource("https://example.test/document.pdf");
+
+    expect(source.type).toBe("url");
+    expect(source.type === "url" ? source.locality : null).toBe("remote");
+    expect(toPdfDocumentLoadSource(source)).toEqual({ url: "https://example.test/document.pdf" });
   });
 
   it("object URL ソースを解放する", async () => {
