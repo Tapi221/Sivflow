@@ -27,6 +27,7 @@ type BlocksuiteDoc = {
 };
 
 type BlocksuiteEditorElement = HTMLElement & {
+  autofocus?: boolean;
   doc?: BlocksuiteDoc;
   mode?: "page" | "edgeless";
 };
@@ -231,6 +232,7 @@ const initializeBlocksuiteDoc = async (runtime: BlocksuiteRuntime, doc: Blocksui
 const createEditorElement = (doc: BlocksuiteDoc): BlocksuiteEditorElement => {
   const editor = document.createElement(NOTE_EDITOR_TAG_NAME) as BlocksuiteEditorElement;
   Object.assign(editor.style, NOTE_EDITOR_STYLE);
+  editor.autofocus = true;
   editor.doc = doc;
   editor.mode = "page";
   return editor;
