@@ -9,6 +9,9 @@ const CodeBlockVisualTest = DEV_MODE
 const CardLayoutConsistencyTest = DEV_MODE
   ? lazy(() => import("@/routes/CardLayoutConsistencyTest"))
   : null;
+const PdfPerformanceTest = DEV_MODE
+  ? lazy(() => import("@/routes/PdfPerformanceTest"))
+  : null;
 const SelectionCaptureSandboxPage = DEV_MODE
   ? lazy(() => import("@/sandbox/2").then(({ SelectionCaptureSandboxPage }) => ({ default: SelectionCaptureSandboxPage })))
   : null;
@@ -108,6 +111,13 @@ export const getDevRouteElements = () => {
         <Route
           path="card-layout-test"
           element={withDevRouteFallback(<CardLayoutConsistencyTest />)}
+        />
+      ) : null}
+
+      {PdfPerformanceTest ? (
+        <Route
+          path="pdf-performance-test"
+          element={withDevRouteFallback(<PdfPerformanceTest />)}
         />
       ) : null}
 
