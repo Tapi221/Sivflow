@@ -30,8 +30,8 @@
   backface-visibility: hidden;
 }
 
-/* スクロール中はcontent-visibility:autoとPDF.jsバッファ管理の競合を防止 */
-.pdf-pane--scrolling .pdf-pane__viewer .page {
+/* スクロール中はPDF.jsが保持している描画済みページだけcontent-visibility:autoとの競合を防止 */
+.pdf-pane--scrolling .pdf-pane__viewer .page[data-loaded="true"] {
   content-visibility: visible;
 }
 
