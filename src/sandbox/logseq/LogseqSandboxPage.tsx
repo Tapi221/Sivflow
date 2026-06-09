@@ -43,7 +43,7 @@ const LogseqSandboxPage = () => {
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
             Logseq を Sivflow に組み込むのではなく、block、link、tag、graph、plugin API の設計を確認するための sandbox です。
-            BlockNote はエディタ実装、Logseq は知識ベース構造の参考として分けて扱います。
+            エディタ実装と知識ベース構造は分けて扱います。
           </p>
         </section>
 
