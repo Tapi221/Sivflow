@@ -2,10 +2,12 @@ import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { UserSettings } from "@/types";
-import { Globe, Keyboard, Shield, Type, User, Volume2 } from "@/ui/icons";
+import { Brain, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/ui/icons";
+import { getLocalAiSettings, setLocalAiSettings, type LocalAiSettings } from "@platform/ai/localAiSettings";
+import { testOllamaConnection } from "@platform/ai/ollamaClient";
 import "./SettingsWorkspaceScreen.css";
 
-type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "hotkey";
+type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "ai" | "hotkey";
 
 type SettingsLanguage = UserSettings["language"];
 
@@ -14,6 +16,8 @@ type BooleanSettingsKey = "notificationsEnabled" | "soundEnabled" | "showReviewH
 type QuestionDisplayMode = NonNullable<UserSettings["questionDisplayMode"]>;
 
 type MarkdownTabSize = NonNullable<UserSettings["markdownTabSize"]>;
+
+type LocalAiConnectionStatus = "idle" | "testing" | "connected" | "model-missing" | "failed";
 
 type SettingsSectionDefinition = {
   id: SettingsSectionId;
@@ -48,6 +52,14 @@ type SettingChoiceRowProps<T extends string | number> = {
 type SettingKeyValueProps = {
   label: string;
   value: ReactNode;
+};
+
+type SettingTextInputRowProps = {
+  label: string;
+  description?: string;
+  value: string;
+  placeholder?: string;
+  onChange: (value: string) => void;
 };
 
 type SettingsWorkspaceCopy = {
@@ -104,16 +116,32 @@ type SettingsWorkspaceCopy = {
   questionVoiceDescription: string;
   answerVoiceLabel: string;
   answerVoiceDescription: string;
+  aiTitle: string;
+  aiDescription: string;
+  localAiEnabledLabel: string;
+  localAiEnabledDescription: string;
+  localAiProviderLabel: string;
+  localAiBaseUrlLabel: string;
+  localAiBaseUrlDescription: string;
+  localAiModelLabel: string;
+  localAiModelDescription: string;
+  localAiConnectionLabel: string;
+  localAiTestButton: string;
+  localAiStatusIdle: string;
+  localAiStatusTesting: string;
+  localAiStatusConnected: string;
+  localAiStatusModelMissing: string;
+  localAiStatusFailed: string;
   hotkeyDescription: string;
 };
 
-const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "hotkey"];
+const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "ai", "hotkey"];
 
 const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> = {
   ja: {
     ariaLabel: "設定",
     navAriaLabel: "設定カテゴリ",
-    sections: { account: { label: "アカウント" }, preferences: { label: "環境設定" }, study: { label: "学習" }, editor: { label: "エディター" }, audio: { label: "音声" }, hotkey: { label: "Hotkey" } },
+    sections: { account: { label: "アカウント" }, preferences: { label: "環境設定" }, study: { label: "学習" }, editor: { label: "エディター" }, audio: { label: "音声" }, ai: { label: "ローカルAI" }, hotkey: { label: "Hotkey" } },
     languageOptions: { ja: { label: "日本語" }, en: { label: "English" }, zh: { label: "中文" } },
     weekStartOptions: { monday: { label: "月曜日" }, sunday: { label: "日曜日" } },
     questionDisplayOptions: { tap_to_reveal: { label: "タップで表示" }, always: { label: "常に表示" } },
@@ -164,12 +192,28 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     questionVoiceDescription: "問題文を自動音声再生します。",
     answerVoiceLabel: "解答文の音声",
     answerVoiceDescription: "解答文を自動音声再生します。",
+    aiTitle: "ローカルAI",
+    aiDescription: "Q&Aカード作成で使う端末ごとのローカルLLM接続です。この設定は同期しません。",
+    localAiEnabledLabel: "ローカルAI回答案",
+    localAiEnabledDescription: "Q&AチャットでローカルLLMを使った回答案作成を有効にします。",
+    localAiProviderLabel: "プロバイダー",
+    localAiBaseUrlLabel: "接続先 URL",
+    localAiBaseUrlDescription: "Ollama の base URL を入力します。例: http://127.0.0.1:11434",
+    localAiModelLabel: "モデル",
+    localAiModelDescription: "Ollama に pull 済みのモデル名を入力します。例: llama3.2:3b",
+    localAiConnectionLabel: "接続状態",
+    localAiTestButton: "接続テスト",
+    localAiStatusIdle: "未確認",
+    localAiStatusTesting: "確認中",
+    localAiStatusConnected: "接続済み",
+    localAiStatusModelMissing: "接続済み / モデル未検出",
+    localAiStatusFailed: "接続できませんでした",
     hotkeyDescription: "キーボード操作",
   },
   en: {
     ariaLabel: "Settings",
     navAriaLabel: "Settings categories",
-    sections: { account: { label: "Account" }, preferences: { label: "Preferences" }, study: { label: "Study" }, editor: { label: "Editor" }, audio: { label: "Audio" }, hotkey: { label: "Hotkey" } },
+    sections: { account: { label: "Account" }, preferences: { label: "Preferences" }, study: { label: "Study" }, editor: { label: "Editor" }, audio: { label: "Audio" }, ai: { label: "Local AI" }, hotkey: { label: "Hotkey" } },
     languageOptions: { ja: { label: "日本語" }, en: { label: "English" }, zh: { label: "中文" } },
     weekStartOptions: { monday: { label: "Monday" }, sunday: { label: "Sunday" } },
     questionDisplayOptions: { tap_to_reveal: { label: "Tap to reveal" }, always: { label: "Always visible" } },
@@ -220,12 +264,28 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     questionVoiceDescription: "Automatically play question text audio.",
     answerVoiceLabel: "Answer voice",
     answerVoiceDescription: "Automatically play answer text audio.",
+    aiTitle: "Local AI",
+    aiDescription: "Device-local LLM connection used by Q&A card creation. This setting is not synced.",
+    localAiEnabledLabel: "Local AI answers",
+    localAiEnabledDescription: "Enable local LLM answer drafts in Q&A chat.",
+    localAiProviderLabel: "Provider",
+    localAiBaseUrlLabel: "Base URL",
+    localAiBaseUrlDescription: "Enter the Ollama base URL. Example: http://127.0.0.1:11434",
+    localAiModelLabel: "Model",
+    localAiModelDescription: "Enter an installed Ollama model. Example: llama3.2:3b",
+    localAiConnectionLabel: "Connection",
+    localAiTestButton: "Test connection",
+    localAiStatusIdle: "Not checked",
+    localAiStatusTesting: "Checking",
+    localAiStatusConnected: "Connected",
+    localAiStatusModelMissing: "Connected / model not found",
+    localAiStatusFailed: "Connection failed",
     hotkeyDescription: "Keyboard controls",
   },
   zh: {
     ariaLabel: "设置",
     navAriaLabel: "设置分类",
-    sections: { account: { label: "账号" }, preferences: { label: "偏好设置" }, study: { label: "学习" }, editor: { label: "编辑器" }, audio: { label: "音频" }, hotkey: { label: "Hotkey" } },
+    sections: { account: { label: "账号" }, preferences: { label: "偏好设置" }, study: { label: "学习" }, editor: { label: "编辑器" }, audio: { label: "音频" }, ai: { label: "本地 AI" }, hotkey: { label: "Hotkey" } },
     languageOptions: { ja: { label: "日本語" }, en: { label: "English" }, zh: { label: "中文" } },
     weekStartOptions: { monday: { label: "星期一" }, sunday: { label: "星期日" } },
     questionDisplayOptions: { tap_to_reveal: { label: "点击显示" }, always: { label: "始终显示" } },
@@ -265,7 +325,7 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     previewDefaultLabel: "默认预览",
     previewDefaultDescription: "默认显示卡片正文预览。",
     autoDraftLabel: "自动草稿",
-    autoDraftDescription: "编辑时自动保留下稿。",
+    autoDraftDescription: "编辑时自动保留草稿。",
     autoSaveLabel: "自动保存",
     autoSaveDescription: "自动保存编辑内容。",
     audioTitle: "音频",
@@ -276,6 +336,22 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     questionVoiceDescription: "自动播放问题文本语音。",
     answerVoiceLabel: "答案语音",
     answerVoiceDescription: "自动播放答案文本语音。",
+    aiTitle: "本地 AI",
+    aiDescription: "Q&A 卡片创建使用的本机 LLM 连接。此设置不会同步。",
+    localAiEnabledLabel: "本地 AI 答案",
+    localAiEnabledDescription: "在 Q&A 聊天中启用本地 LLM 答案草稿。",
+    localAiProviderLabel: "提供商",
+    localAiBaseUrlLabel: "连接 URL",
+    localAiBaseUrlDescription: "输入 Ollama base URL。例: http://127.0.0.1:11434",
+    localAiModelLabel: "模型",
+    localAiModelDescription: "输入已安装的 Ollama 模型。例: llama3.2:3b",
+    localAiConnectionLabel: "连接状态",
+    localAiTestButton: "测试连接",
+    localAiStatusIdle: "未确认",
+    localAiStatusTesting: "确认中",
+    localAiStatusConnected: "已连接",
+    localAiStatusModelMissing: "已连接 / 未找到模型",
+    localAiStatusFailed: "连接失败",
     hotkeyDescription: "键盘操作",
   },
 };
@@ -297,12 +373,21 @@ const getAccountInitial = (displayName: string): string => {
   return initial ? initial.toUpperCase() : "M";
 };
 
+const getLocalAiConnectionStatusLabel = (status: LocalAiConnectionStatus, copy: SettingsWorkspaceCopy): string => {
+  if (status === "testing") return copy.localAiStatusTesting;
+  if (status === "connected") return copy.localAiStatusConnected;
+  if (status === "model-missing") return copy.localAiStatusModelMissing;
+  if (status === "failed") return copy.localAiStatusFailed;
+  return copy.localAiStatusIdle;
+};
+
 const getSectionIcon = (sectionId: SettingsSectionId, className: string): ReactNode => {
   if (sectionId === "account") return <User className={className} size={17} />;
   if (sectionId === "preferences") return <Globe className={className} size={17} />;
   if (sectionId === "study") return <Shield className={className} size={17} />;
   if (sectionId === "editor") return <Type className={className} size={17} />;
   if (sectionId === "audio") return <Volume2 className={className} size={17} />;
+  if (sectionId === "ai") return <Brain className={className} size={17} />;
   if (sectionId === "hotkey") return <Keyboard className={className} size={17} />;
   return null;
 };
@@ -351,6 +436,18 @@ const SettingChoiceRow = <T extends string | number>({ label, value, options, on
   );
 };
 
+const SettingTextInputRow = ({ label, description, value, placeholder, onChange }: SettingTextInputRowProps) => {
+  return (
+    <div className="settings-workspace__row settings-workspace__row--input">
+      <div className="settings-workspace__row-copy">
+        <span className="settings-workspace__row-title">{label}</span>
+        {description ? <span className="settings-workspace__row-description">{description}</span> : null}
+      </div>
+      <input className="settings-workspace__text-input" value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} />
+    </div>
+  );
+};
+
 const SettingKeyValue = ({ label, value }: SettingKeyValueProps) => {
   return (
     <div className="settings-workspace__key-value">
@@ -366,6 +463,8 @@ const SettingsWorkspaceScreen = () => {
   const persistedLanguage = settings?.language ?? "ja";
   const [activeSectionId, setActiveSectionId] = useState<SettingsSectionId>("account");
   const [pendingLanguage, setPendingLanguage] = useState<SettingsLanguage | null>(null);
+  const [localAiSettings, setLocalAiSettingsState] = useState<LocalAiSettings>(() => getLocalAiSettings());
+  const [localAiConnectionStatus, setLocalAiConnectionStatus] = useState<LocalAiConnectionStatus>("idle");
   const language = pendingLanguage ?? persistedLanguage;
   const copy = SETTINGS_WORKSPACE_COPY[language];
   const sections = useMemo(() => buildSettingsSections(copy), [copy]);
@@ -386,6 +485,23 @@ const SettingsWorkspaceScreen = () => {
   const handleLanguageChange = (nextLanguage: SettingsLanguage) => {
     setPendingLanguage(nextLanguage);
     void updateSettings({ language: nextLanguage });
+  };
+
+  const handleLocalAiSettingsChange = (nextSettings: LocalAiSettings) => {
+    const savedSettings = setLocalAiSettings(nextSettings);
+    setLocalAiSettingsState(savedSettings);
+    setLocalAiConnectionStatus("idle");
+  };
+
+  const handleLocalAiConnectionTest = async () => {
+    setLocalAiConnectionStatus("testing");
+
+    try {
+      const result = await testOllamaConnection();
+      setLocalAiConnectionStatus(result.modelAvailable ? "connected" : "model-missing");
+    } catch {
+      setLocalAiConnectionStatus("failed");
+    }
   };
 
   const handleLogout = () => {
@@ -455,6 +571,21 @@ const SettingsWorkspaceScreen = () => {
               <SettingToggle label={copy.soundEffectsLabel} description={copy.soundEffectsDescription} checked={settings?.soundEnabled ?? true} onChange={(checked) => updateBooleanSetting("soundEnabled", checked)} />
               <SettingToggle label={copy.questionVoiceLabel} description={copy.questionVoiceDescription} checked={settings?.autoVoiceQuestion ?? false} onChange={(checked) => updateBooleanSetting("autoVoiceQuestion", checked)} />
               <SettingToggle label={copy.answerVoiceLabel} description={copy.answerVoiceDescription} checked={settings?.autoVoiceAnswer ?? false} onChange={(checked) => updateBooleanSetting("autoVoiceAnswer", checked)} />
+            </SettingsSectionBlock>
+          ) : null}
+          {activeSectionId === "ai" ? (
+            <SettingsSectionBlock title={copy.aiTitle} description={copy.aiDescription}>
+              <SettingToggle label={copy.localAiEnabledLabel} description={copy.localAiEnabledDescription} checked={localAiSettings.enabled} onChange={(checked) => handleLocalAiSettingsChange({ ...localAiSettings, enabled: checked })} />
+              <SettingKeyValue label={copy.localAiProviderLabel} value="Ollama" />
+              <SettingTextInputRow label={copy.localAiBaseUrlLabel} description={copy.localAiBaseUrlDescription} value={localAiSettings.baseUrl} placeholder="http://127.0.0.1:11434" onChange={(value) => handleLocalAiSettingsChange({ ...localAiSettings, baseUrl: value })} />
+              <SettingTextInputRow label={copy.localAiModelLabel} description={copy.localAiModelDescription} value={localAiSettings.model} placeholder="llama3.2:3b" onChange={(value) => handleLocalAiSettingsChange({ ...localAiSettings, model: value })} />
+              <div className="settings-workspace__key-value">
+                <span>{copy.localAiConnectionLabel}</span>
+                <div className="settings-workspace__status-actions">
+                  <strong>{getLocalAiConnectionStatusLabel(localAiConnectionStatus, copy)}</strong>
+                  <button type="button" className="settings-workspace__secondary-button" onClick={handleLocalAiConnectionTest} disabled={localAiConnectionStatus === "testing"}>{copy.localAiTestButton}</button>
+                </div>
+              </div>
             </SettingsSectionBlock>
           ) : null}
           {activeSectionId === "hotkey" ? (
