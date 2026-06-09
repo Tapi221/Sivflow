@@ -64,9 +64,14 @@ type PdfScaleChangingEvent = {
 };
 
 type PdfViewerRuntimeOptions = {
+  annotationEditorMode: number;
+  annotationMode: number;
   enableHWA: boolean;
+  enableAutoLinking: boolean;
+  enableDetailCanvas: boolean;
   enableOptimizedPartialRendering: boolean;
   maxCanvasPixels?: number;
+  minDurationToUpdateCanvas: number;
   removePageBorders: boolean;
 };
 
@@ -180,17 +185,22 @@ const resizePdfViewerPageBuffer = (pdfViewer: PdfViewerInstance, container?: HTM
 const createPdfViewerRuntimeOptions = (): PdfViewerRuntimeOptions => {
   const isLowMemoryDevice = getApproxDeviceMemory() <= PDF_LOW_MEMORY_DEVICE_MAX_GB;
   return {
+    annotationEditorMode: pdfjsLib.AnnotationEditorType.DISABLE,
+    annotationMode: pdfjsLib.AnnotationMode.ENABLE,
     enableHWA: true,
+    enableAutoLinking: false,
+    enableDetailCanvas: false,
     enableOptimizedPartialRendering: true,
     maxCanvasPixels: isLowMemoryDevice ? PDF_LOW_MEMORY_MAX_CANVAS_PIXELS : undefined,
+    minDurationToUpdateCanvas: 0,
     removePageBorders: true,
   };
 };
 
 const createPdfDocumentLoadOptions = (viewerOptions: PdfPaneProps["viewerOptions"], source: PdfDocumentSource | null) => {
-  const isUrlSource = source?.type === "url";
+  const isRemoteUrlSource = source?.type === "url" && source.locality === "remote";
   return {
-    disableAutoFetch: isUrlSource,
+    disableAutoFetch: isRemoteUrlSource,
     disableRange: false,
     disableStream: false,
     enableHWA: true,
@@ -200,7 +210,7 @@ const createPdfDocumentLoadOptions = (viewerOptions: PdfPaneProps["viewerOptions
     cMapPacked: true,
     standardFontDataUrl: viewerOptions?.standardFontDataUrl ?? PDFJS_STANDARD_FONT_DATA_URL,
     wasmUrl: PDFJS_WASM_URL,
-    rangeChunkSize: isUrlSource ? PDF_RANGE_CHUNK_SIZE : undefined,
+    rangeChunkSize: isRemoteUrlSource ? PDF_RANGE_CHUNK_SIZE : undefined,
   };
 };
 
