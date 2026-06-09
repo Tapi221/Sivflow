@@ -20,7 +20,7 @@ import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { useCardsRead } from "@/components/card/hooks/useCardsRead";
 import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
-import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
+import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { useTags } from "@/features/settings/hooks/useTags";
@@ -806,3 +806,4 @@ const TreeViewLayout = ({
 };
 
 export default TreeViewLayout;
+
