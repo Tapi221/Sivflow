@@ -108,7 +108,6 @@ const PDF_LOW_MEMORY_MAX_CANVAS_PIXELS = 16 * 1024 * 1024;
 const PDF_DEFAULT_DEVICE_MEMORY_GB = 8;
 const PDF_RANGE_CHUNK_SIZE = 256 * 1024;
 const PDF_SCROLL_IDLE_DELAY_MS = 160;
-const PDF_VISIBLE_PAGE_CACHE_SIZE = 6;
 const PDF_VISIBLE_PAGE_CACHE_OVERSCAN = 1;
 const PDF_SCROLLING_CLASS_NAME = "pdf-pane--scrolling";
 const PDF_SCROLL_CONTAINER_CLASS_NAME = "pdf-pane__scroll-container";
@@ -175,7 +174,7 @@ const resizePdfViewerPageBuffer = (pdfViewer: PdfViewerInstance, container?: HTM
   if (typeof pageBuffer?.resize !== "function") return;
   const pageMetrics = options.pageMetrics ?? (options.viewerElement ? getPdfVisiblePageMetrics(options.viewerElement) : []);
   const idsToKeep = getPdfPageWindowKeepSet(pageMetrics, container?.scrollTop ?? 0, container?.clientHeight ?? 0, pageCount, { fallbackPageNumber: pageNumber, overscanPageCount: PDF_VISIBLE_PAGE_CACHE_OVERSCAN });
-  pageBuffer.resize(Math.min(Math.max(PDF_VISIBLE_PAGE_CACHE_SIZE, idsToKeep.size), pageCount), idsToKeep);
+  pageBuffer.resize(Math.min(Math.max(idsToKeep.size, 1), pageCount), idsToKeep);
 };
 
 const createPdfViewerRuntimeOptions = (): PdfViewerRuntimeOptions => {
