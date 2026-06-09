@@ -14,9 +14,9 @@ const NOTE_EDITOR_LOADING_CLASS_NAME = "flex h-full w-full items-center justify-
 const NOTE_EDITOR_LOADING_SPINNER_CLASS_NAME = "h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent";
 const NOTE_EDITOR_ERROR_CLASS_NAME = "flex h-full w-full items-center justify-center bg-white px-6 text-center text-[12px] font-medium text-[#9aa0a6]";
 const NOTE_EDITOR_PLACEHOLDER_CLASS_NAME = "pointer-events-none absolute left-[72px] top-[72px] z-10 select-none text-[15px] font-medium tracking-[-0.01em] text-[#9aa0a6]";
-const NOTE_LOADING_LABEL = "Loading AFFiNE";
-const NOTE_ERROR_LABEL = "AFFiNE editor failed to start. Check the BlockSuite console error.";
-const NOTE_EMPTY_PLACEHOLDER_LABEL = "Type / to add a block";
+const NOTE_LOADING_LABEL = "AFFiNE を読み込み中";
+const NOTE_ERROR_LABEL = "AFFiNE エディタを起動できませんでした。Console の BlockSuite エラーを確認してください。";
+const NOTE_EMPTY_PLACEHOLDER_LABEL = "「/」でブロックを追加";
 
 const hasNoteContent = (note: Note): boolean => Boolean(note.contentText?.trim());
 
@@ -78,6 +78,7 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
     if (saveTimerRef.current !== null) {
       window.clearTimeout(saveTimerRef.current);
     }
+
     saveTimerRef.current = window.setTimeout(saveNow, NOTE_SAVE_DEBOUNCE_MS);
   }, [saveNow]);
 
@@ -90,13 +91,16 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
+
     let isDisposed = false;
     const abortController = new AbortController();
     const mutationObserver = new MutationObserver(scheduleSave);
+
     editorRef.current = null;
     renderLoadingSpinner(host);
     latestSavedTextRef.current = note.contentText ?? "";
     setIsEmpty(!hasNoteContent(note));
+
     void createBlocksuiteAffineEditor(note).then((editor) => {
       if (isDisposed) return;
       editorRef.current = editor;
@@ -110,6 +114,7 @@ const AffineDocumentEditor = ({ note, onChange }: AffineDocumentEditorProps) => 
       if (isDisposed) return;
       renderEditorError(host, error);
     });
+
     return () => {
       saveNow();
       isDisposed = true;
