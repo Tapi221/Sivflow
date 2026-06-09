@@ -11,11 +11,11 @@ import { getFolderProjectColor } from "@/components/folder/explorer/model/projec
 import { DEFAULT_NEW_CARD_SET_NAME, DEFAULT_NEW_FOLDER_NAME, getFolderId, getParentFolderId, UNTITLED_FOLDER_NAME, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+import { useDocumentCommands } from "@/features/document/hooks/useDocumentCommands";
+import { useDocumentsRead } from "@/features/document/hooks/useDocumentsRead";
 import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import { useNotes } from "@/hooks/note/useNotes";
-import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
-import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
@@ -640,4 +640,3 @@ const LibraryHierarchySidebar = ({ parentFolderId = null, onOpenCardSet }: Libra
 };
 
 export { LibraryHierarchySidebar, ProjectListSidebar };
-
