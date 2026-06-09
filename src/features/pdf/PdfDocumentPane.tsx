@@ -144,6 +144,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   useEffect(() => {
     let isCancelled = false;
     let resolvedSource: PdfDocumentSource | null = null;
+    let isSourceHandedOff = false;
     const performanceTraceName = createPdfPerformanceTraceName("source.resolve");
 
     recordPdfPerformanceMark(`${performanceTraceName}.start`, { detail: { documentId: document.id, hasPersistedSource: Boolean(persistedSource), sizeBytes: document.sizeBytes ?? null } });
@@ -178,6 +179,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
       }
 
       resolvedSource = nextSource;
+      isSourceHandedOff = true;
       setLocalSource(createResolvedLocalPdfSourceState(document.id, nextSource));
     };
 
@@ -191,7 +193,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
 
     return () => {
       isCancelled = true;
-      releasePdfDocumentSource(resolvedSource);
+      if (!isSourceHandedOff) releasePdfDocumentSource(resolvedSource);
     };
   }, [currentUserId, document.googleDriveFileId, document.id, document.localFileId, document.sizeBytes, document.userId, persistedSource]);
 

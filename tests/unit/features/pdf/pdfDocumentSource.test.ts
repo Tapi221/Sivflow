@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createPdfDocumentDataSource, createPdfDocumentDataSourceFromBlob, releasePdfDocumentSource, toPdfDocumentLoadSource } from "@/features/pdf/pdfDocumentSource";
+import { createPdfDocumentDataSource, createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource, toPdfDocumentLoadSource } from "@/features/pdf/pdfDocumentSource";
 
 describe("pdfDocumentSource", () => {
   afterEach(() => {
