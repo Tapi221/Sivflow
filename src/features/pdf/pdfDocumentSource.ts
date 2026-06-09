@@ -9,6 +9,7 @@ type PdfDocumentDataSource = {
 type PdfDocumentUrlSource = {
   type: "url";
   url: string;
+  revoke?: () => void;
 };
 
 type PdfDocumentSource = PdfDocumentDataSource | PdfDocumentUrlSource;
@@ -32,6 +33,15 @@ const createPdfDocumentUrlSource = (url: string): PdfDocumentSource => ({
   type: "url",
   url,
 });
+
+const createPdfDocumentObjectUrlSourceFromBlob = (blob: Blob): PdfDocumentSource => {
+  const url = URL.createObjectURL(blob);
+  return {
+    type: "url",
+    url,
+    revoke: () => URL.revokeObjectURL(url),
+  };
+};
 
 const ensurePdfWorkerPort = (): void => {
   if (typeof Worker === "undefined") return;
@@ -60,14 +70,20 @@ const readBlobArrayBuffer = (blob: Blob): Promise<ArrayBuffer> => {
 };
 
 const createPdfDocumentDataSourceFromBlob = async (blob: Blob): Promise<PdfDocumentSource> => {
+  if (typeof URL !== "undefined" && typeof URL.createObjectURL === "function") return createPdfDocumentObjectUrlSourceFromBlob(blob);
   return createPdfDocumentDataSource(new Uint8Array(await readBlobArrayBuffer(blob)));
 };
 
 const toPdfDocumentLoadSource = (source: PdfDocumentSource): PdfDocumentLoadSource => {
   ensurePdfWorkerPort();
-  if (source.type === "data") return { data: source.data.slice() };
+  if (source.type === "data") return { data: source.data };
   return { url: source.url };
 };
 
-export { createPdfDocumentDataSource, createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, toPdfDocumentLoadSource };
+const releasePdfDocumentSource = (source: PdfDocumentSource | null | undefined): void => {
+  if (source?.type !== "url") return;
+  source.revoke?.();
+};
+
+export { createPdfDocumentDataSource, createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource, toPdfDocumentLoadSource };
 export type { PdfDocumentSource };
