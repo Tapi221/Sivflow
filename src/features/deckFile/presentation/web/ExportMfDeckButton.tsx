@@ -1,11 +1,11 @@
 import { useState } from "react";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/contexts/ToastContext";
 import { exportMfDeckBytes } from "@/features/deckFile/application/exportMfDeck";
 import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
 import { MfDeckExportError } from "@/features/deckFile/domain/mfDeck.types";
 import { downloadBytesAsMfDeck } from "@/features/deckFile/infra/web/downloadMfDeck";
-import { Loader2 } from "@/ui/icons";
 import type { Card, CardSet } from "@/types";
 
 type ExportMfDeckButtonProps = {
@@ -67,7 +67,7 @@ const ExportMfDeckButton = ({
       className="min-w-0 max-w-[150px] overflow-hidden rounded-full bg-white/85 shadow-sm backdrop-blur"
     >
       {isExporting ? (
-        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+        <LoadingSpinner iconClassName="h-4 w-4" label="MFDeckを書き出し中" />
       ) : (
         <span className="min-w-0 truncate whitespace-nowrap">{label}</span>
       )}
