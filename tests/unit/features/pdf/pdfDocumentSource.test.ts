@@ -27,6 +27,17 @@ describe("pdfDocumentSource", () => {
     expect(revokeObjectUrlMock).toHaveBeenCalledWith("blob:pdf-2");
   });
 
+  it("object URL ソースの解放は二重実行されない", async () => {
+    const revokeObjectUrlMock = vi.fn();
+    vi.stubGlobal("URL", { ...URL, createObjectURL: vi.fn(() => "blob:pdf-3"), revokeObjectURL: revokeObjectUrlMock });
+    const source = await createPdfDocumentDataSourceFromBlob(new Blob([new Uint8Array([1])], { type: "application/pdf" }));
+
+    releasePdfDocumentSource(source);
+    releasePdfDocumentSource(source);
+
+    expect(revokeObjectUrlMock).toHaveBeenCalledTimes(1);
+  });
+
   it("object URL が使えない環境では Blob を data ソースに変換する", async () => {
     vi.stubGlobal("URL", { ...URL, createObjectURL: undefined });
 
@@ -35,6 +46,16 @@ describe("pdfDocumentSource", () => {
     expect(source.type).toBe("data");
     const loadSource = toPdfDocumentLoadSource(source);
     expect("data" in loadSource ? Array.from(loadSource.data) : []).toEqual([1, 2, 3]);
+  });
+
+  it("object URL の作成に失敗した場合は Blob を data ソースに変換する", async () => {
+    vi.stubGlobal("URL", { ...URL, createObjectURL: vi.fn(() => { throw new Error("object URL unavailable"); }) });
+
+    const source = await createPdfDocumentDataSourceFromBlob(new Blob([new Uint8Array([7, 8, 9])], { type: "application/pdf" }));
+
+    expect(source.type).toBe("data");
+    const loadSource = toPdfDocumentLoadSource(source);
+    expect("data" in loadSource ? Array.from(loadSource.data) : []).toEqual([7, 8, 9]);
   });
 
   it("PDF.js に渡す data は追加コピーしない", () => {
