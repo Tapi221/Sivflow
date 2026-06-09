@@ -14,7 +14,6 @@
     "dev:tauri": "npm run dev:desktop",
     "dev:mobile": "npm --prefix apps/mobile start",
     "build": "npm run build:web",
-    "prebuild:web": "node scripts/patches/patch-blocksuite-affine-components.mjs",
     "build:web": "vite build --config apps/web/vite.config.ts",
     "build:desktop": "npm run tauri:build",
     "build:tauri": "npm run tauri:build",
@@ -23,7 +22,6 @@
     "mobile:ios": "npm --prefix apps/mobile run ios",
     "mobile:android": "npm --prefix apps/mobile run android",
     "mobile:typecheck": "npm --prefix apps/mobile run typecheck",
-    "postinstall": "node scripts/patches/patch-blocksuite-affine-components.mjs",
     "verify:icons": "node scripts/verify-icons-entry.mjs",
     "verify:sw": "node scripts/verify/verify-sw.mjs",
     "verify:source-conventions": "node scripts/verify/verify-source-conventions.mjs",
@@ -47,9 +45,6 @@
     "@blocknote/core": "^0.47.3",
     "@blocknote/mantine": "^0.47.3",
     "@blocknote/react": "^0.47.3",
-    "@blocksuite/blocks": "0.19.0",
-    "@blocksuite/presets": "0.19.0",
-    "@blocksuite/store": "0.19.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@mantine/core": "^8.3.18",
     "@mantine/hooks": "^8.3.18",
@@ -117,11 +112,6 @@
     "workbox-strategies": "^7.4.0",
     "xlsx": "^0.18.5",
     "zustand": "^5.0.11"
-  },
-  "overrides": {
-    "@blocksuite/affine-components": "0.19.0",
-    "@blocksuite/blocks": "0.19.0",
-    "@blocksuite/store": "0.19.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
