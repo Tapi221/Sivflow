@@ -1,10 +1,11 @@
 import { memo, useCallback, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/contexts/ToastContext";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { Loader2, MessageSquare, Plus, Sparkles } from "@/ui/icons";
+import { MessageSquare, Plus, Sparkles } from "@/ui/icons";
 import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
 
 type QuickQaChatDialogProps = {
@@ -46,7 +47,7 @@ const LoadingStatusPill = ({ label }: LoadingStatusPillProps) => {
   return (
     <div className="flex justify-start">
       <div className="inline-flex items-center gap-2 rounded-[18px] border border-[#eceae4] bg-white px-3 py-2 text-[12px] text-[#8a857f] shadow-sm">
-        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        <LoadingSpinner iconClassName="h-3.5 w-3.5" label={label} />
         {label}
       </div>
     </div>
@@ -135,7 +136,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
       focusInputSoon();
     } catch (error) {
       console.error("[QuickQaChatDialog] failed to generate AI answer", error);
-      appendMessages([createChatMessage("assistant", "ローカルAIに接続できませんでした。設定画面のローカルAIで接続先URLとモデルを確認してください。")]);
+      appendMessages([createChatMessage("assistant", "Ollamaに接続できませんでした。Ollama起動後、llama3.2:3b などのモデルを用意してください。")]);
       toast.error("ローカルAIに接続できませんでした。");
     } finally {
       setIsGeneratingAiAnswer(false);
@@ -192,7 +193,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
             </div>
             <div className="min-w-0">
               <p className="text-[14px] font-semibold tracking-[-0.02em] text-[#343434]">Q&Aチャット</p>
-              <p className="mt-0.5 text-[11px] text-[#8a857f]">設定画面のローカルAI接続を使えます。</p>
+              <p className="mt-0.5 text-[11px] text-[#8a857f]">OllamaのローカルAI回答案を使えます。</p>
             </div>
           </div>
         </div>
@@ -217,7 +218,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
           <div className="flex items-end gap-2">
             <textarea ref={inputRef} value={inputValue} onChange={(event) => setInputValue(event.target.value.slice(0, inputMaxLength))} onKeyDown={handleInputKeyDown} placeholder={placeholder} rows={step === "question" ? 2 : 4} className="max-h-[160px] min-h-[42px] min-w-0 flex-1 resize-none rounded-[14px] border border-[#dddcd5] bg-white px-3 py-2 text-[13px] leading-relaxed text-[#343434] outline-none transition placeholder:text-[#aaa49d] focus:border-[#c8c6bf]" />
             <button type="button" className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-[#343434] bg-[#343434] px-4 text-[12px] font-semibold text-white transition hover:bg-[#1f1f1f] disabled:border-[#dddcd5] disabled:bg-[#eeeeee] disabled:text-[#aaa49d]" onClick={handleSend} disabled={!canSend}>
-              {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : "送信"}
+              {isCreating ? <LoadingSpinner iconClassName="h-4 w-4" label="送信中" /> : "送信"}
             </button>
           </div>
           <div className="mt-2 flex items-center justify-between gap-2">
@@ -225,7 +226,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
             <div className="flex items-center gap-3">
               {step === "answer" ? (
                 <button type="button" className="inline-flex items-center gap-1 text-[11px] font-medium text-[#8a857f] underline-offset-2 hover:text-[#343434] hover:underline disabled:opacity-60" onClick={handleGenerateAiAnswer} disabled={!canGenerateAiAnswer}>
-                  {isGeneratingAiAnswer ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                  {isGeneratingAiAnswer ? <LoadingSpinner iconClassName="h-3 w-3" label="AI回答案を作成中" /> : <Sparkles className="h-3 w-3" />}
                   AIで回答案
                 </button>
               ) : null}
