@@ -17,66 +17,66 @@ const SelectionCaptureSandboxPage = DEV_MODE
   : null;
 const BlockNoteSandboxPage = DEV_MODE
   ? lazy(() =>
-      import("@/sandbox/blocknote").then(({ BlockNoteSandboxPage }) => ({
-        default: BlockNoteSandboxPage,
-      })),
-    )
+    import("@/sandbox/blocknote").then(({ BlockNoteSandboxPage }) => ({
+      default: BlockNoteSandboxPage,
+    })),
+  )
   : null;
 const KnowledgeSandboxPage = DEV_MODE
   ? lazy(() =>
-      import("@/sandbox/logseq").then(({ LogseqSandboxPage }) => ({
-        default: LogseqSandboxPage,
-      })),
-    )
+    import("@/sandbox/logseq").then(({ LogseqSandboxPage }) => ({
+      default: LogseqSandboxPage,
+    })),
+  )
   : null;
 const AnkiFsrsSandboxPage = DEV_MODE
   ? lazy(() =>
-      import("@/sandbox/anki-fsrs").then(({ AnkiFsrsSandboxPage }) => ({
-        default: AnkiFsrsSandboxPage,
-      })),
-    )
+    import("@/sandbox/anki-fsrs").then(({ AnkiFsrsSandboxPage }) => ({
+      default: AnkiFsrsSandboxPage,
+    })),
+  )
   : null;
 const ExcalidrawSandboxPage = DEV_MODE
   ? lazy(() =>
-      import("@/sandbox/excalidraw").then(({ ExcalidrawSandboxPage }) => ({
-        default: ExcalidrawSandboxPage,
-      })),
-    )
+    import("@/sandbox/excalidraw").then(({ ExcalidrawSandboxPage }) => ({
+      default: ExcalidrawSandboxPage,
+    })),
+  )
   : null;
 const EditorEnginesSandboxPage = DEV_MODE
   ? lazy(() =>
-      import("@/sandbox/editor-engines").then(({ EditorEnginesSandboxPage }) => ({
-        default: EditorEnginesSandboxPage,
-      })),
-    )
+    import("@/sandbox/editor-engines").then(({ EditorEnginesSandboxPage }) => ({
+      default: EditorEnginesSandboxPage,
+    })),
+  )
   : null;
 const LicenseNotesSandboxPage = DEV_MODE
   ? lazy(() =>
-      import("@/sandbox/license-notes").then(({ LicenseNotesSandboxPage }) => ({
-        default: LicenseNotesSandboxPage,
-      })),
-    )
+    import("@/sandbox/license-notes").then(({ LicenseNotesSandboxPage }) => ({
+      default: LicenseNotesSandboxPage,
+    })),
+  )
   : null;
 const CalendarTimeGridSandboxPage = DEV_MODE
   ? lazy(() =>
-      import("@/sandbox/calendar-time-grid").then(({ CalendarTimeGridSandboxPage }) => ({
-        default: CalendarTimeGridSandboxPage,
-      })),
-    )
+    import("@/sandbox/calendar-time-grid").then(({ CalendarTimeGridSandboxPage }) => ({
+      default: CalendarTimeGridSandboxPage,
+    })),
+  )
   : null;
 const CalendarDndSandboxPage = DEV_MODE
   ? lazy(() =>
-      import("@/sandbox/calendar-dnd").then(({ CalendarDndSandboxPage }) => ({
-        default: CalendarDndSandboxPage,
-      })),
-    )
+    import("@/sandbox/calendar-dnd").then(({ CalendarDndSandboxPage }) => ({
+      default: CalendarDndSandboxPage,
+    })),
+  )
   : null;
 const EventChipEditorSandboxPage = DEV_MODE
   ? lazy(() =>
-      import("@/sandbox/eventchip-editor").then(({ EventChipEditorSandboxPage }) => ({
-        default: EventChipEditorSandboxPage,
-      })),
-    )
+    import("@/sandbox/eventchip-editor").then(({ EventChipEditorSandboxPage }) => ({
+      default: EventChipEditorSandboxPage,
+    })),
+  )
   : null;
 
 const withDevRouteFallback = (element: ReactNode) => {
@@ -92,6 +92,14 @@ export const getDevStandaloneRouteElement = (
     window.location.pathname === "/codeblock-visual-test"
   ) {
     return withDevRouteFallback(<CodeBlockVisualTest />);
+  }
+
+  if (
+    PdfPerformanceTest &&
+    isTestBypass &&
+    window.location.pathname === "/pdf-performance-test"
+  ) {
+    return withDevRouteFallback(<PdfPerformanceTest />);
   }
 
   return null;

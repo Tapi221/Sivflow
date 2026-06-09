@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import "@/runtime/installProductionConsoleFilter";
 import "@/runtime/disableNativeTitleTooltips";
 import "@platform/desktop/installTauriDesktopBridge";
@@ -26,6 +27,7 @@ const STARTUP_LOADING_LABEL = "起動中";
 const STARTUP_FAILURE_TITLE = "起動設定が不足しています";
 const STARTUP_FAILURE_DESCRIPTION = "必要な設定を読み込めなかったため、画面を表示できません。";
 const FIREBASE_ENV_SETUP_GUIDE = ".env.example を .env.local にコピーして VITE_FIREBASE_* を設定し、dev server を再起動してください。";
+const TEST_BYPASS_SEARCH_PARAM = "test_bypass";
 
 const getStartupFailureMessage = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
@@ -44,6 +46,13 @@ const startAppRuntimeSafely = async (): Promise<void> => {
   } catch (error) {
     console.warn("[Startup] Runtime initialization failed", error);
   }
+};
+
+const isPdfPerformanceStandaloneRoute = (): boolean => {
+  if (!import.meta.env.DEV) return false;
+  if (window.location.pathname !== "/pdf-performance-test") return false;
+  if (new URLSearchParams(window.location.search).get(TEST_BYPASS_SEARCH_PARAM) !== "true") return false;
+  return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "::1";
 };
 
 const StartupLoadingScreen = () => (
@@ -67,6 +76,23 @@ const AppBootstrap = () => {
 
   useEffect(() => {
     let mounted = true;
+
+    if (isPdfPerformanceStandaloneRoute()) {
+      void import("@/routes/PdfPerformanceTest")
+        .then((module) => {
+          if (!mounted) return;
+          setState({ status: "ready", App: module.default });
+        })
+        .catch((error) => {
+          console.error("[Startup] PDF performance route loading failed", error);
+          if (!mounted) return;
+          setState({ status: "failed", message: getStartupFailureMessage(error) });
+        });
+
+      return () => {
+        mounted = false;
+      };
+    }
 
     void startAppRuntimeSafely();
     void import("@web-renderer/App")
