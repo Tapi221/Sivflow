@@ -90,6 +90,11 @@ type PdfPageElement = HTMLElement & {
   };
 };
 
+type ResizePdfPageBufferOptions = {
+  pageMetrics?: PdfPageWindowMetric[];
+  viewerElement?: HTMLElement | null;
+};
+
 const PDF_HISTORY_LIMIT = 80;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
 const PDFJS_ASSET_BASE_URL = "/pdfjs/";
@@ -150,19 +155,26 @@ const getPdfPageNumberFromElement = (element: PdfPageElement): number | null => 
 };
 
 const getPdfVisiblePageMetrics = (viewerElement: HTMLElement): PdfPageWindowMetric[] => {
-  return [...viewerElement.querySelectorAll<PdfPageElement>(".page")].map((element) => ({
-    pageNumber: getPdfPageNumberFromElement(element) ?? 0,
-    offsetTop: element.offsetTop,
-    offsetHeight: element.offsetHeight,
-  }));
+  const pageMetrics: PdfPageWindowMetric[] = [];
+
+  viewerElement.querySelectorAll<PdfPageElement>(".page").forEach((element) => {
+    pageMetrics.push({
+      pageNumber: getPdfPageNumberFromElement(element) ?? 0,
+      offsetTop: element.offsetTop,
+      offsetHeight: element.offsetHeight,
+    });
+  });
+
+  return pageMetrics;
 };
 
-const resizePdfViewerPageBuffer = (pdfViewer: PdfViewerInstance, container?: HTMLElement | null, viewerElement?: HTMLElement | null, pageNumber: number = pdfViewer.currentPageNumber): void => {
+const resizePdfViewerPageBuffer = (pdfViewer: PdfViewerInstance, container?: HTMLElement | null, options: ResizePdfPageBufferOptions = {}, pageNumber: number = pdfViewer.currentPageNumber): void => {
   const pageCount = getPdfViewerPageCount(pdfViewer);
   if (pageCount <= 0) return;
   const pageBuffer = (pdfViewer as PdfViewerWithPageBuffer)._buffer;
   if (typeof pageBuffer?.resize !== "function") return;
-  const idsToKeep = getPdfPageWindowKeepSet(viewerElement ? getPdfVisiblePageMetrics(viewerElement) : [], container?.scrollTop ?? 0, container?.clientHeight ?? 0, pageCount, { fallbackPageNumber: pageNumber, overscanPageCount: PDF_VISIBLE_PAGE_CACHE_OVERSCAN });
+  const pageMetrics = options.pageMetrics ?? (options.viewerElement ? getPdfVisiblePageMetrics(options.viewerElement) : []);
+  const idsToKeep = getPdfPageWindowKeepSet(pageMetrics, container?.scrollTop ?? 0, container?.clientHeight ?? 0, pageCount, { fallbackPageNumber: pageNumber, overscanPageCount: PDF_VISIBLE_PAGE_CACHE_OVERSCAN });
   pageBuffer.resize(Math.min(Math.max(PDF_VISIBLE_PAGE_CACHE_SIZE, idsToKeep.size), pageCount), idsToKeep);
 };
 
@@ -288,7 +300,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   const resizeActivePdfViewerPageBuffer = useCallback((pageNumber?: number) => {
     const pdfViewer = pdfViewerRef.current;
     if (!pdfViewer) return;
-    resizePdfViewerPageBuffer(pdfViewer, scrollContainerRef.current, pdfViewerElementRef.current, pageNumber);
+    resizePdfViewerPageBuffer(pdfViewer, scrollContainerRef.current, { viewerElement: pdfViewerElementRef.current }, pageNumber);
   }, []);
 
   const setViewerPage = useCallback((pageNumber: number, options?: { recordHistory?: boolean }) => {
@@ -383,18 +395,40 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     let resizeFrame: number | null = null;
     let scrollFrame: number | null = null;
     let pageChangeFrame: number | null = null;
+    let pageMetricFrame: number | null = null;
     let scrollIdleTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
     let isScrollOptimizationActive = false;
     let pendingPageNumber: number | null = null;
+    let pageMetricCache: PdfPageWindowMetric[] = [];
     const performanceTraceName = createPdfPerformanceTraceName("viewer.load");
     const eventBus = new EventBus() as PdfEventBusLike;
     const linkService = new PDFLinkService({ eventBus });
     const pdfViewer = new PDFViewer({ container, eventBus, linkService, viewer: viewerElement, ...createPdfViewerRuntimeOptions() });
     const removeEventListeners: Array<() => void> = [];
 
+    const refreshPageMetricCache = () => {
+      pageMetricCache = getPdfVisiblePageMetrics(viewerElement);
+      return pageMetricCache;
+    };
+
+    const resizeVisiblePageBuffer = (pageNumber?: number, options: { refreshMetrics?: boolean } = {}) => {
+      const pageMetrics = options.refreshMetrics || pageMetricCache.length === 0 ? refreshPageMetricCache() : pageMetricCache;
+      resizePdfViewerPageBuffer(pdfViewer, container, { pageMetrics }, pageNumber);
+    };
+
+    const requestPageMetricRefresh = (pageNumber?: number) => {
+      if (pageMetricFrame !== null) return;
+      pageMetricFrame = window.requestAnimationFrame(() => {
+        pageMetricFrame = null;
+        if (isCancelled) return;
+        resizeVisiblePageBuffer(pageNumber, { refreshMetrics: true });
+      });
+    };
+
     const setFitScale = () => {
       isApplyingFitScaleRef.current = true;
       pdfViewer.currentScaleValue = "page-width";
+      requestPageMetricRefresh();
     };
 
     const requestResponsiveScaleUpdate = () => {
@@ -402,13 +436,13 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       resizeFrame = window.requestAnimationFrame(() => {
         resizeFrame = null;
         if (isCancelled || !loadedPdfDocument) return;
-        if (!isCompactPdfViewport(container) && viewerStateRef.current?.fitMode === "manual") return;
+        if (!isCompactPdfViewport(container) && viewerStateRef.current?.fitMode === "manual") {
+          requestPageMetricRefresh();
+          return;
+        }
+
         setFitScale();
       });
-    };
-
-    const resizeVisiblePageBuffer = (pageNumber?: number) => {
-      resizePdfViewerPageBuffer(pdfViewer, container, viewerElement, pageNumber);
     };
 
     const setScrollOptimizationActive = (isActive: boolean) => {
@@ -428,7 +462,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       scrollIdleTimer = null;
       if (isCancelled) return;
       setScrollOptimizationActive(false);
-      resizeVisiblePageBuffer();
+      resizeVisiblePageBuffer(undefined, { refreshMetrics: true });
     };
 
     const scheduleScrollIdle = () => {
@@ -488,10 +522,12 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         setFitScale();
       } else {
         pdfViewer.currentScaleValue = scaleValue;
+        requestPageMetricRefresh();
       }
+
       const initialPageNumber = getSafePageNumber(viewerStateRef.current?.currentPage, loadedPdfDocument.numPages);
       pdfViewer.currentPageNumber = initialPageNumber;
-      resizeVisiblePageBuffer(initialPageNumber);
+      resizeVisiblePageBuffer(initialPageNumber, { refreshMetrics: true });
       requestResponsiveScaleUpdate();
     }));
 
@@ -512,9 +548,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       const isExplicitZoom = Date.now() - lastExplicitZoomAtRef.current <= PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS;
       isApplyingFitScaleRef.current = false;
       if (isExplicitZoom) lastExplicitZoomAtRef.current = 0;
-      if (viewerStateRef.current?.scale === scale && viewerStateRef.current?.fitMode === fitMode) return;
-      updateViewerState({ scale, fitMode }, { persistence: isExplicitZoom ? "immediate" : "none" });
-      resizeVisiblePageBuffer();
+      if (viewerStateRef.current?.scale !== scale || viewerStateRef.current?.fitMode !== fitMode) updateViewerState({ scale, fitMode }, { persistence: isExplicitZoom ? "immediate" : "none" });
+      requestPageMetricRefresh();
     }));
 
     void loadPdfDocument(source, { enableXfa: viewerEnableXfa, useSystemFonts: viewerUseSystemFonts, cMapUrl: viewerCMapUrl, standardFontDataUrl: viewerStandardFontDataUrl }).then((nextPdfDocument) => {
@@ -544,6 +579,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
       if (scrollFrame !== null) window.cancelAnimationFrame(scrollFrame);
       if (pageChangeFrame !== null) window.cancelAnimationFrame(pageChangeFrame);
+      if (pageMetricFrame !== null) window.cancelAnimationFrame(pageMetricFrame);
       clearScrollIdleTimer();
       setPdfScrollOptimizationClass(container, viewerElement, false);
       resizeObserver?.disconnect();
