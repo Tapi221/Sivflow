@@ -75,6 +75,7 @@ const PdfPerformanceTest = () => {
 
     let isCancelled = false;
     let resolvedSource: PdfDocumentSource | null = null;
+    let isSourceHandedOff = false;
 
     void createPdfDocumentDataSourceFromBlob(createSyntheticPdfBlob(PDF_PERFORMANCE_TEST_PAGE_COUNT)).then((nextSource) => {
       if (isCancelled) {
@@ -83,12 +84,13 @@ const PdfPerformanceTest = () => {
       }
 
       resolvedSource = nextSource;
+      isSourceHandedOff = true;
       setSource(nextSource);
     });
 
     return () => {
       isCancelled = true;
-      releasePdfDocumentSource(resolvedSource);
+      if (!isSourceHandedOff) releasePdfDocumentSource(resolvedSource);
     };
   }, [canRender, isViewerVisible]);
 
