@@ -204,7 +204,7 @@ describe("LayeredDirectorySidebar project list", () => {
 
     render(React.createElement(ProjectListSidebar));
 
-    fireEvent.contextMenu(screen.getByText("Project Alpha", { clientX: 160, clientY: 180 }));
+    fireEvent.contextMenu(screen.getByText("Project Alpha"), { clientX: 160, clientY: 180 });
 
     expect(screen.getByRole("menuitem", { name: "お気に入りに追加" })).toBeDisabled();
   });
