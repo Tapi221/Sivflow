@@ -108,6 +108,7 @@ const PDF_LOW_MEMORY_DEVICE_MAX_GB = 4;
 const PDF_LOW_MEMORY_MAX_CANVAS_PIXELS = 5_000_000;
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
 const PDF_RANGE_CHUNK_SIZE = 65_536;
+const PDF_SCROLL_BUFFER_RESIZE_THROTTLE_MS = 120;
 const PDF_SCROLL_CONTAINER_CLASS_NAME = "pdf-pane__scroll-container";
 const PDF_SCROLL_IDLE_DELAY_MS = 200;
 const PDF_SCROLLING_CLASS_NAME = "pdf-pane--scrolling";
@@ -403,11 +404,15 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     let loadedPdfDocument: PdfDocumentProxy | null = null;
     let resizeFrame: number | null = null;
     let scrollFrame: number | null = null;
+    let scrollBufferResizeFrame: number | null = null;
+    let scrollBufferResizeTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
     let pageChangeFrame: number | null = null;
     let pageMetricFrame: number | null = null;
     let scrollIdleFrame: number | null = null;
     let scrollIdleTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
     let isScrollOptimizationActive = false;
+    let lastScrollBufferResizeAt = 0;
+    let pendingScrollBufferPageNumber: number | null = null;
     let pendingPageNumber: number | null = null;
     let pageMetricCache: PdfPageWindowMetric[] = [];
     let pageMetricCacheReady = false;
@@ -439,6 +444,54 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const resizeVisiblePageBuffer = (pageNumber?: number, options: { refreshMetrics?: boolean } = {}) => {
       const pageMetrics = options.refreshMetrics ? refreshPageMetricCache() : (pageMetricCacheReady ? pageMetricCache : []);
       resizePdfViewerPageBuffer(pdfViewer, container, { pageMetrics }, pageNumber);
+    };
+
+    const clearPendingScrollBufferResize = () => {
+      if (scrollBufferResizeTimer !== null) {
+        globalThis.clearTimeout(scrollBufferResizeTimer);
+        scrollBufferResizeTimer = null;
+      }
+
+      if (scrollBufferResizeFrame !== null) {
+        window.cancelAnimationFrame(scrollBufferResizeFrame);
+        scrollBufferResizeFrame = null;
+      }
+
+      pendingScrollBufferPageNumber = null;
+    };
+
+    const runPendingScrollBufferResize = () => {
+      scrollBufferResizeFrame = null;
+      scrollBufferResizeTimer = null;
+      if (isCancelled) return;
+      lastScrollBufferResizeAt = performance.now();
+      const pageNumber = pendingScrollBufferPageNumber ?? undefined;
+      pendingScrollBufferPageNumber = null;
+      resizeVisiblePageBuffer(pageNumber);
+    };
+
+    const requestScrollBufferResize = (pageNumber?: number) => {
+      pendingScrollBufferPageNumber = pageNumber ?? pendingScrollBufferPageNumber;
+
+      if (!isScrollOptimizationActive) {
+        clearPendingScrollBufferResize();
+        lastScrollBufferResizeAt = performance.now();
+        resizeVisiblePageBuffer(pageNumber);
+        return;
+      }
+
+      if (scrollBufferResizeFrame !== null || scrollBufferResizeTimer !== null) return;
+
+      const delayMs = Math.max(0, PDF_SCROLL_BUFFER_RESIZE_THROTTLE_MS - (performance.now() - lastScrollBufferResizeAt));
+      if (delayMs <= 0) {
+        scrollBufferResizeFrame = window.requestAnimationFrame(runPendingScrollBufferResize);
+        return;
+      }
+
+      scrollBufferResizeTimer = globalThis.setTimeout(() => {
+        scrollBufferResizeTimer = null;
+        scrollBufferResizeFrame = window.requestAnimationFrame(runPendingScrollBufferResize);
+      }, delayMs);
     };
 
     const requestPageMetricRefresh = (pageNumber?: number) => {
@@ -496,6 +549,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         scrollIdleFrame = null;
         if (isCancelled) return;
         setScrollOptimizationActive(false);
+        clearPendingScrollBufferResize();
         resizeVisiblePageBuffer(undefined, { refreshMetrics: true });
       });
     };
@@ -513,7 +567,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         scrollFrame = null;
         if (isCancelled) return;
         setScrollOptimizationActive(true);
-        resizeVisiblePageBuffer();
+        requestScrollBufferResize();
       });
     };
 
@@ -523,7 +577,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       const pageNumber = pendingPageNumber;
       pendingPageNumber = null;
       if (viewerStateRef.current?.currentPage !== pageNumber) updateViewerState({ currentPage: pageNumber }, { persistence: "deferred" });
-      resizeVisiblePageBuffer(pageNumber);
+      requestScrollBufferResize(pageNumber);
     };
 
     const requestPageChangeUpdate = (pageNumber: number) => {
@@ -567,7 +621,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     removeEventListeners.push(addPdfViewerEventListener(eventBus, "pagechanging", (event: unknown) => {
       if (isCancelled) return;
       const pageNumber = (event as PdfPageChangingEvent).pageNumber;
-      if (!Number.isFinite(pageNumber)) return;
+      if (typeof pageNumber !== "number" || !Number.isFinite(pageNumber)) return;
       recordPdfPerformanceMark(`${performanceTraceName}.pagechanging`, { debugOnly: true, detail: { pageNumber } });
       requestPageChangeUpdate(pageNumber);
     }));
@@ -612,6 +666,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       isApplyingFitScaleRef.current = false;
       if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
       if (scrollFrame !== null) window.cancelAnimationFrame(scrollFrame);
+      clearPendingScrollBufferResize();
       if (pageChangeFrame !== null) window.cancelAnimationFrame(pageChangeFrame);
       if (pageMetricFrame !== null) window.cancelAnimationFrame(pageMetricFrame);
       clearScrollIdleTimer();
