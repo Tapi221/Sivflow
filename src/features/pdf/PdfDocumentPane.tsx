@@ -18,6 +18,7 @@ type PdfDocumentPaneProps = {
 };
 
 type LocalPdfSourceState = {
+  documentId: string;
   isResolved: boolean;
   source: PdfDocumentSource | null;
   error: string | null;
@@ -35,13 +36,15 @@ const PDF_SOURCE_MISSING_ERROR_MESSAGE = "表示できるPDFデータが見つ�
 const PDF_DOCUMENT_PANE_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1";
 const PDF_DOCUMENT_STATUS_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1 items-center justify-center bg-[var(--carvepanel-surface)] px-6 text-center text-[13px] leading-6 text-[#6d6d6d]";
 
-const createPendingLocalPdfSourceState = (): LocalPdfSourceState => ({
+const createPendingLocalPdfSourceState = (documentId: string): LocalPdfSourceState => ({
+  documentId,
   isResolved: false,
   source: null,
   error: null,
 });
 
-const createResolvedLocalPdfSourceState = (source: PdfDocumentSource | null, error: string | null = null): LocalPdfSourceState => ({
+const createResolvedLocalPdfSourceState = (documentId: string, source: PdfDocumentSource | null, error: string | null = null): LocalPdfSourceState => ({
+  documentId,
   isResolved: true,
   source,
   error,
@@ -81,8 +84,10 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   const currentUserId = currentUser?.uid ?? null;
   const persistedSourceUrl = useMemo(() => resolvePdfDocumentSourceUrl(document), [document.blobUrl, document.downloadUrl, document.googleDriveWebContentLink, document.googleDriveWebViewLink, document.localUrl, document.remoteUrl]);
   const persistedSource = useMemo(() => createPersistedPdfDocumentSource(persistedSourceUrl), [persistedSourceUrl]);
-  const [localSource, setLocalSource] = useState<LocalPdfSourceState>(createPendingLocalPdfSourceState);
-  const source = persistedSource ?? localSource.source;
+  const [localSource, setLocalSource] = useState<LocalPdfSourceState>(() => createPendingLocalPdfSourceState(document.id));
+  const isLocalSourceForCurrentDocument = localSource.documentId === document.id;
+  const activeLocalSource = isLocalSourceForCurrentDocument ? localSource : createPendingLocalPdfSourceState(document.id);
+  const source = persistedSource ?? activeLocalSource.source;
   const paneClassName = cn(PDF_DOCUMENT_PANE_CLASS_NAME, className);
   const statusClassName = cn(PDF_DOCUMENT_STATUS_CLASS_NAME, className);
   const pendingViewerStateSaveRef = useRef<PendingPdfViewerStateSave | null>(null);
@@ -130,12 +135,12 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     const performanceTraceName = createPdfPerformanceTraceName("source.resolve");
 
     recordPdfPerformanceMark(`${performanceTraceName}.start`, { detail: { documentId: document.id, hasPersistedSource: Boolean(persistedSource), sizeBytes: document.sizeBytes ?? null } });
-    setLocalSource(createPendingLocalPdfSourceState());
+    setLocalSource(createPendingLocalPdfSourceState(document.id));
 
     if (persistedSource) {
       recordPdfPerformanceMark(`${performanceTraceName}.persisted`, { detail: { documentId: document.id, sourceType: persistedSource.type, sizeBytes: document.sizeBytes ?? null } });
       recordPdfPerformanceMeasure(`${performanceTraceName}.duration`, `${performanceTraceName}.start`, `${performanceTraceName}.persisted`);
-      setLocalSource(createResolvedLocalPdfSourceState(null));
+      setLocalSource(createResolvedLocalPdfSourceState(document.id, null));
       return () => {
         isCancelled = true;
       };
@@ -148,7 +153,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
 
       if (!blob) {
         recordPdfPerformanceMeasure(`${performanceTraceName}.duration`, `${performanceTraceName}.start`, `${performanceTraceName}.blob`);
-        setLocalSource(createResolvedLocalPdfSourceState(null));
+        setLocalSource(createResolvedLocalPdfSourceState(document.id, null));
         return;
       }
 
@@ -161,7 +166,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
       }
 
       resolvedSource = nextSource;
-      setLocalSource(createResolvedLocalPdfSourceState(nextSource));
+      setLocalSource(createResolvedLocalPdfSourceState(document.id, nextSource));
     };
 
     void loadLocalSource().catch((error: unknown) => {
@@ -169,7 +174,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
       recordPdfPerformanceMeasure(`${performanceTraceName}.duration`, `${performanceTraceName}.start`, `${performanceTraceName}.error`);
       if (isCancelled) return;
       console.error("[PdfDocumentPane] local PDF source failed", error);
-      setLocalSource(createResolvedLocalPdfSourceState(null, getErrorMessage(error, PDF_SOURCE_MISSING_ERROR_MESSAGE)));
+      setLocalSource(createResolvedLocalPdfSourceState(document.id, null, getErrorMessage(error, PDF_SOURCE_MISSING_ERROR_MESSAGE)));
     });
 
     return () => {
@@ -202,12 +207,12 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     };
   }, [flushPendingViewerStateSave]);
 
-  if (!localSource.isResolved && !source) {
+  if (!activeLocalSource.isResolved && !source) {
     return <LoadingSpinner className={cn(PDF_DOCUMENT_PANE_CLASS_NAME, "bg-[var(--carvepanel-surface)] px-6 text-[#6d6d6d]", className)} label="PDFを読み込み中" />;
   }
 
-  if (localSource.isResolved && !source) {
-    return <div className={statusClassName}>{localSource.error ?? PDF_SOURCE_MISSING_ERROR_MESSAGE}</div>;
+  if (activeLocalSource.isResolved && !source) {
+    return <div className={statusClassName}>{activeLocalSource.error ?? PDF_SOURCE_MISSING_ERROR_MESSAGE}</div>;
   }
 
   return <PdfPane source={source} className={paneClassName} viewerState={document.viewerState ?? null} onViewerStateChange={handleViewerStateChange} />;
