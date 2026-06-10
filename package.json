@@ -34,6 +34,8 @@
     "verify:sw": "node scripts/verify/verify-sw.mjs",
     "verify:source-conventions": "node scripts/verify/verify-source-conventions.mjs",
     "watch:source-conventions": "node scripts/dev/watch-source-conventions.mjs",
+    "watch:source-conventions:fix": "node scripts/dev/watch-source-conventions.mjs --fix",
+    "fix:source-conventions:local-llm": "node scripts/dev/watch-source-conventions.mjs --fix --once",
     "sync:firebase-emulators": "npm exec tsx -- tools/firebase/sync-firebase-emulators.ts",
     "verify:firebase-emulators": "npx vitest run tests/unit/firebaseEmulatorConfigConsistency.test.ts",
     "verify:design-tokens": "node scripts/verify/verify-design-tokens.mjs",
