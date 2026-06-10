@@ -4,7 +4,7 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { getAdminAuth, getDb, serverTimestamp } from "#src/firebaseAdmin.js";
 import { googleCalendarWebhook } from "#src/gcal/googleCalendarWebhook.js";
 import { renewExpiredWatchChannels } from "#src/gcal/renewWatchChannels.js";
-import { cacheGoogleProfileImageDataUrl } from "#src/gcal/profileImageCache.js";
+import { cacheGoogleProfileImageUrl } from "#src/gcal/profileImageCache.js";
 import { classifyGoogleTokenEndpointFailure, type GoogleOAuthServerErrorReason } from "#src/gcal/tokenErrors.js";
 
 type StoredGoogleCalendarAccount = {
@@ -187,7 +187,7 @@ const verifyGoogleScopes = async (accessToken: string): Promise<void> => {
 const storeGoogleAccount = async (uid: string, refreshToken: string, profile: GoogleOAuthProfile) => {
   const now = await serverTimestamp();
   const encryptedRefreshToken = encryptRefreshToken(refreshToken);
-  const cachedPhotoUrl = await cacheGoogleProfileImageDataUrl(profile.accountPhotoUrl);
+  const cachedPhotoUrl = await cacheGoogleProfileImageUrl(uid, profile.accountPhotoUrl);
   const account: StoredGoogleCalendarAccount = { email: profile.accountEmail, name: profile.accountName, photoUrl: cachedPhotoUrl, encryptedRefreshToken, createdAt: now, updatedAt: now };
   const accountRef = (await getDb()).doc(`users/${uid}/googleCalendarAccounts/${profile.accountEmail}`);
   await accountRef.set(account, { merge: true });
