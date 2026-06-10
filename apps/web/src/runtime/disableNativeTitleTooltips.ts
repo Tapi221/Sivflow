@@ -1,8 +1,8 @@
 type NativeTitleTooltipGlobal = typeof globalThis & {
-  __flashcardMasterNativeTitleTooltipDisablerInstalled?: boolean;
+  __sivflowNativeTitleTooltipDisablerInstalled?: boolean;
 };
 
-const INSTALL_KEY = "__flashcardMasterNativeTitleTooltipDisablerInstalled";
+const INSTALL_KEY = "__sivflowNativeTitleTooltipDisablerInstalled";
 const TITLE_BACKUP_ATTRIBUTE = "data-native-title";
 
 const stripNativeTitle = (element: Element) => {
