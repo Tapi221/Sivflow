@@ -1,4 +1,5 @@
 import appIconSrc from "@shared/assets/icons/app-icon.svg";
+import { readStoredLocale, type Locale } from "@shared/i18n/locale.store";
 
 export type GoogleOAuthCallbackPayload = {
   type: "sivflow:google-oauth-callback";
@@ -11,15 +12,41 @@ export type GoogleOAuthCallbackPayload = {
 
 type StyleDeclarations = Record<string, string>;
 
+type OAuthCallbackText = {
+  title: string;
+  description: string;
+  linkPrefix: string;
+  linkText: string;
+  linkSuffix: string;
+};
+
 export const GOOGLE_OAUTH_CALLBACK_CHANNEL = "sivflow:google-oauth-callback";
 export const GOOGLE_OAUTH_CALLBACK_STORAGE_KEY = "sivflow.google-oauth-callback";
 
-const GOOGLE_OAUTH_CALLBACK_TITLE = "Launching Sivflow";
-const GOOGLE_OAUTH_CALLBACK_DESCRIPTION = "You will be redirected in a few moments.";
-const GOOGLE_OAUTH_CALLBACK_LINK_PREFIX = "If nothing happens, ";
-const GOOGLE_OAUTH_CALLBACK_LINK_TEXT = "open Sivflow in your browser";
-const GOOGLE_OAUTH_CALLBACK_LINK_SUFFIX = ".";
 const GOOGLE_OAUTH_CALLBACK_CLOSE_DELAY_MS = 1200;
+const GOOGLE_OAUTH_CALLBACK_TEXT_BY_LOCALE: Record<Locale, OAuthCallbackText> = {
+  ja: {
+    title: "Sivflow を起動しています",
+    description: "まもなく元の画面に戻ります。",
+    linkPrefix: "自動で戻らない場合は、",
+    linkText: "ブラウザで Sivflow を開く",
+    linkSuffix: "。",
+  },
+  en: {
+    title: "Launching Sivflow",
+    description: "You will be redirected in a few moments.",
+    linkPrefix: "If nothing happens, ",
+    linkText: "open Sivflow in your browser",
+    linkSuffix: ".",
+  },
+  zh: {
+    title: "正在启动 Sivflow",
+    description: "稍后将自动返回原来的页面。",
+    linkPrefix: "如果没有自动跳转，",
+    linkText: "在浏览器中打开 Sivflow",
+    linkSuffix: "。",
+  },
+};
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 
@@ -27,13 +54,15 @@ const isNullableString = (value: unknown): value is string | null => value === n
 
 const hasGoogleOAuthCallbackResult = (url: URL): boolean => Boolean(url.searchParams.get("state")) && (url.searchParams.has("code") || url.searchParams.has("error"));
 
+const getOAuthCallbackText = (): OAuthCallbackText => GOOGLE_OAUTH_CALLBACK_TEXT_BY_LOCALE[readStoredLocale() ?? "ja"];
+
 const applyStyles = (element: HTMLElement, styles: StyleDeclarations): void => {
   for (const [property, value] of Object.entries(styles)) {
     element.style.setProperty(property, value);
   }
 };
 
-const renderMessage = (): void => {
+const renderMessage = (text: OAuthCallbackText): void => {
   const root = document.getElementById("root");
   if (!root) return;
 
@@ -85,7 +114,7 @@ const renderMessage = (): void => {
     "line-height": "1.2",
     "margin": "0",
   });
-  title.textContent = GOOGLE_OAUTH_CALLBACK_TITLE;
+  title.textContent = text.title;
 
   const description = document.createElement("p");
   applyStyles(description, {
@@ -94,7 +123,7 @@ const renderMessage = (): void => {
     "line-height": "1.6",
     "margin": "18px 0 0",
   });
-  description.textContent = GOOGLE_OAUTH_CALLBACK_DESCRIPTION;
+  description.textContent = text.description;
 
   const hint = document.createElement("p");
   applyStyles(hint, {
@@ -112,9 +141,9 @@ const renderMessage = (): void => {
     "color": "#3b82f6",
     "text-decoration": "none",
   });
-  link.textContent = GOOGLE_OAUTH_CALLBACK_LINK_TEXT;
+  link.textContent = text.linkText;
 
-  hint.append(GOOGLE_OAUTH_CALLBACK_LINK_PREFIX, link, GOOGLE_OAUTH_CALLBACK_LINK_SUFFIX);
+  hint.append(text.linkPrefix, link, text.linkSuffix);
   logoFrame.append(logo);
   main.append(logoFrame, title, description, hint);
   root.replaceChildren(main);
@@ -192,8 +221,9 @@ export const renderGoogleOAuthCallback = (): boolean => {
   if (typeof window === "undefined") return false;
   const payload = createGoogleOAuthCallbackPayload(new URL(window.location.href));
   if (!payload) return false;
-  document.title = GOOGLE_OAUTH_CALLBACK_TITLE;
-  renderMessage();
+  const text = getOAuthCallbackText();
+  document.title = text.title;
+  renderMessage(text);
   notifyCallbackPayload(payload);
   return true;
 };
