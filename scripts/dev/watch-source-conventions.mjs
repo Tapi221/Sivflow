@@ -4,12 +4,16 @@ import { setTimeout as sleep } from "node:timers/promises";
 import { spawnSync } from "node:child_process";
 
 const ROOT_DIR = process.cwd();
+const CLI_ARGS = new Set(process.argv.slice(2));
 const DEFAULT_OLLAMA_URL = "http://localhost:11434/api/generate";
 const DEFAULT_MODEL = "llama3.2:3b";
 const WATCH_INTERVAL_MS = Number(process.env.SIVFLOW_LOCAL_LLM_WATCH_INTERVAL_MS ?? 5000);
 const DEBOUNCE_MS = Number(process.env.SIVFLOW_LOCAL_LLM_DEBOUNCE_MS ?? 1200);
 const MAX_FILES_PER_CYCLE = Number(process.env.SIVFLOW_LOCAL_LLM_MAX_FILES_PER_CYCLE ?? 3);
 const MAX_LLM_ATTEMPTS_PER_FILE = Number(process.env.SIVFLOW_LOCAL_LLM_ATTEMPTS_PER_FILE ?? 1);
+const SHOULD_FIX = CLI_ARGS.has("--fix") || process.env.SIVFLOW_LOCAL_LLM_FIX === "1";
+const SHOULD_TYPECHECK = CLI_ARGS.has("--typecheck") || process.env.SIVFLOW_LOCAL_LLM_TYPECHECK === "1";
+const SHOULD_RUN_ONCE = CLI_ARGS.has("--once");
 const VERIFY_COMMAND = ["npm", "run", "verify:source-conventions"];
 const FIX_IMPORTS_COMMAND = ["npm", "run", "lint:imports"];
 const TYPECHECK_COMMAND = ["npm", "run", "typecheck"];
@@ -175,9 +179,9 @@ const runFixCycle = async () => {
     return;
   }
 
-  if (process.env.SIVFLOW_LOCAL_LLM_FIX !== "1") {
+  if (!SHOULD_FIX) {
     console.error(firstVerify.output);
-    console.error("Set SIVFLOW_LOCAL_LLM_FIX=1 to allow local LLM file rewrites.");
+    console.error("Run npm run watch:source-conventions:fix to allow local LLM file rewrites.");
     return;
   }
 
@@ -196,15 +200,17 @@ const runFixCycle = async () => {
     return;
   }
 
-  if (process.env.SIVFLOW_LOCAL_LLM_TYPECHECK === "1") runTypecheck();
+  if (SHOULD_TYPECHECK) runTypecheck();
   console.log("Source conventions are clean after local LLM fixes.");
 };
 
 const main = async () => {
-  console.log("Watching Sivflow source conventions. Set SIVFLOW_LOCAL_LLM_FIX=1 to enable local LLM rewrites.");
+  console.log(SHOULD_FIX ? "Watching Sivflow source conventions with local LLM rewrites enabled." : "Watching Sivflow source conventions in verify-only mode.");
 
   let snapshot = getSourceSnapshot();
   await runFixCycle();
+
+  if (SHOULD_RUN_ONCE) return;
 
   while (true) {
     await sleep(WATCH_INTERVAL_MS);
