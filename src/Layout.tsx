@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SearchDialog } from "@/features/search/components/SearchDialog";
-import type { SearchItem } from "@/features/search/model/searchTypes";
+import type { SearchItem } from "@/features/search/model/search.types";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { LocalDBStatusBanner } from "@/components/security/LocalDBStatusBanner";
 import { SecurityAlertBanner } from "@/components/security/SecurityAlertBanner";
