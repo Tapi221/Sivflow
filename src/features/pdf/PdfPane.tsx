@@ -521,17 +521,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       }
     };
 
-    const updateContainIntrinsicSizeFromPage = () => {
-      const firstPageElement = viewerElement.querySelector<HTMLElement>(".page");
-      if (!firstPageElement) return;
-      const pageWidth = firstPageElement.offsetWidth;
-      const pageHeight = firstPageElement.offsetHeight;
-      if (pageWidth > 0 && pageHeight > 0) {
-        viewerElement.style.setProperty("--pdf-page-width", `${pageWidth}px`);
-        viewerElement.style.setProperty("--pdf-page-height", `${pageHeight}px`);
-      }
-    };
-
     const updateVisiblePageWindow = (pageNumber?: number) => {
       window.requestAnimationFrame(() => {
         if (isCancelled) return;
@@ -663,7 +652,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       pdfViewer.currentPageNumber = initialPageNumber;
       (pdfViewer as PdfViewerWithScale).currentScaleValue = scaleValue;
       updateVisiblePageWindow(initialPageNumber);
-      updateContainIntrinsicSizeFromPage();
       refreshPdfToolbarState();
       requestResponsiveScaleUpdate();
     }));
@@ -695,7 +683,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       if (isExplicitZoom) lastExplicitZoomAtRef.current = 0;
       if (viewerStateRef.current?.scale !== scale || viewerStateRef.current?.fitMode !== fitMode) updateViewerState({ scale, fitMode }, { persistence: isExplicitZoom ? "immediate" : "none" });
       updateVisiblePageWindow();
-      updateContainIntrinsicSizeFromPage();
       refreshPdfToolbarState();
     }));
 
