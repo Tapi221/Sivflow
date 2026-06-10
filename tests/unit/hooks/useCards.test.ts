@@ -14,7 +14,7 @@ vi.mock("@/services/localDB", () => ({
   getLocalDb: (...args: unknown[]) => getLocalDbMock(...args),
 }));
 
-vi.mock("@/contexts/AuthContext", () => ({
+vi.mock("@/contexts/auth/useAuthSession", () => ({
   useAuthSession: () => ({ currentUser: { uid: "user-1" } }),
 }));
 
