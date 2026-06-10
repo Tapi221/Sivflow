@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { getLocalDb, getLocalDBRuntimeStatus, subscribeLocalDBRuntimeStatus } from "@/services/localDB";
 import { snapshotService } from "@/services/SnapshotService";
 import type { Card, Folder } from "@/types";
