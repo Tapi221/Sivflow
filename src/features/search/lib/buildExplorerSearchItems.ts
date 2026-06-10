@@ -1,5 +1,5 @@
 import { buildCardSetById, resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
-import type { SearchItem } from "@/features/search/model/searchTypes";
+import type { SearchItem } from "@/features/search/model/search.types";
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 type BuildExplorerSearchItemsParams = {
