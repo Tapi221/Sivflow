@@ -3,7 +3,11 @@ import { deleteUserPersistentDatabases, getDatabaseNameForUser } from "./generat
 import { LocalDB } from "./LocalDB";
 import type { LocalDBSyncStore } from "./types";
 import { clearLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "@/services/localDBRuntimeState";
-import { createInMemoryLocalDB, type InMemoryLocalDB } from "@/services/InMemoryLocalDB";
+import { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
+
+type LocalDbGlobal = typeof globalThis & {
+  __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
+};
 
 let instance: LocalDB | null = null;
 let cachedInstance: LocalDB | InMemoryLocalDB | null = null;
@@ -13,10 +17,6 @@ let resettingPromise: Promise<void> | null = null;
 
 const fallbackInstances = new Map<string, InMemoryLocalDB>();
 const generationBumps = new Map<string, number>();
-
-type LocalDbGlobal = typeof globalThis & {
-  __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
-};
 
 const getLocalDbGlobal = (): LocalDbGlobal => globalThis as LocalDbGlobal;
 
@@ -57,7 +57,7 @@ const createFallbackInstance = (userId?: string, reason?: unknown): InMemoryLoca
   const existing = fallbackInstances.get(key);
   if (existing) return existing;
 
-  const db = createInMemoryLocalDB(userId, `${getDatabaseNameForUser(userId)}_fallback`);
+  const db = new InMemoryLocalDB(userId, `${getDatabaseNameForUser(userId)}_fallback`);
   fallbackInstances.set(key, db);
   cachedInstance = db;
   currentUserId = userId ?? "anonymous";
