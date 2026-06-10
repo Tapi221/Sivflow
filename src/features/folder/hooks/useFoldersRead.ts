@@ -31,17 +31,17 @@ export const useFoldersRead = () => {
       const rawFolders = await db.folders.toArray();
       return normalizeVisibleFolders(rawFolders);
     } catch (error) {
-      if (isDatabaseClosedError(error)) {
-        console.warn(
-          "[useFoldersRead] Closed DB detected. Returning empty result.",
-          {
-            userId,
-          },
-        );
-        return [];
-      }
+      const message = error instanceof Error ? error.message : String(error);
+      const logMethod = isDatabaseClosedError(error) ? console.warn : console.error;
 
-      throw error;
+      logMethod(
+        "[useFoldersRead] IndexedDB read failed. Returning empty result.",
+        {
+          error: message,
+          userId,
+        },
+      );
+      return [];
     }
   }, [userId]);
 
