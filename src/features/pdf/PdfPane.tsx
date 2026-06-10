@@ -617,6 +617,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     let scrollIdleTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
     let scrollIdleFrame: number | null = null;
     let resizeFrame: number | null = null;
+    let visiblePageWindowFrame: number | null = null;
+    let pendingVisiblePageWindowNumber: number | undefined;
     let zoomFrame: number | null = null;
     let zoomCommitTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
     let zoomSnapshotReleaseTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
@@ -688,9 +690,16 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     };
 
     const updateVisiblePageWindow = (pageNumber?: number) => {
-      window.requestAnimationFrame(() => {
+      pendingVisiblePageWindowNumber = pageNumber ?? pendingVisiblePageWindowNumber;
+      if (visiblePageWindowFrame !== null) return;
+
+      visiblePageWindowFrame = window.requestAnimationFrame(() => {
+        visiblePageWindowFrame = null;
+        const fallbackPageNumber = pendingVisiblePageWindowNumber;
+        pendingVisiblePageWindowNumber = undefined;
         if (isCancelled) return;
-        updatePdfViewerVisiblePageWindow(pdfViewer, container, viewerElement, pageNumber);
+        updatePdfViewerVisiblePageWindow(pdfViewer, container, viewerElement, fallbackPageNumber);
+        requestPdfViewerRenderUpdate(pdfViewer);
         refreshPdfToolbarState();
       });
     };
@@ -915,7 +924,9 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     return () => {
       isCancelled = true;
       pendingZoom = null;
+      pendingVisiblePageWindowNumber = undefined;
       if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
+      if (visiblePageWindowFrame !== null) window.cancelAnimationFrame(visiblePageWindowFrame);
       if (zoomFrame !== null) window.cancelAnimationFrame(zoomFrame);
       clearZoomCommitTimer();
       clearScrollIdleTimer();
