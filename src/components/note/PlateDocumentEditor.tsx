@@ -1,6 +1,7 @@
 import { Plate, PlateController, usePlateEditor } from "platejs/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { BaseEditorKit } from "@/registry/components/editor/editor-base-kit";
+import { AIKit } from "@/registry/components/editor/plugins/ai-kit";
 import { FixedToolbarKit } from "@/registry/components/editor/plugins/fixed-toolbar-kit";
 import { FloatingToolbarKit } from "@/registry/components/editor/plugins/floating-toolbar-kit";
 import { Editor, EditorContainer } from "@/registry/ui/editor";
@@ -32,6 +33,7 @@ type PlateChangePayload = unknown[] | {
 const NOTE_SAVE_DEBOUNCE_MS = 500;
 const NOTE_CONTENT_VERSION = 2;
 const NOTE_PLATE_PLUGINS = [
+  ...AIKit,
   ...BaseEditorKit,
   ...FixedToolbarKit,
   ...FloatingToolbarKit,
