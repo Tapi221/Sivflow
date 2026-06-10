@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node ../../scripts/dev/free-port.mjs 5173 && tauri dev",
-    "build": "tauri build"
+    "dev": "node ../../scripts/generate-desktop-icons.mjs && node ../../scripts/dev/free-port.mjs 5173 && tauri dev",
+    "build": "node ../../scripts/generate-desktop-icons.mjs && tauri build"
   }
 }
