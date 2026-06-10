@@ -12,11 +12,9 @@
   contain: layout paint style;
 }
 
-/* 各ページの仮想化最適化 — CSS変数でページサイズに応じた推定サイズを設定 */
+/* PDF.js の scale 再描画と content-visibility:auto は競合して白抜けを起こすため使わない */
 .pdf-pane__viewer .page {
   contain: layout paint style;
-  content-visibility: auto;
-  contain-intrinsic-size: var(--pdf-page-width, 816px) var(--pdf-page-height, 1056px);
 }
 
 /* DOMベースの表示ウィンドウ外では重いオーバーレイを止める */
@@ -38,11 +36,6 @@
 .pdf-pane__viewer.pdf-pane--scrolling canvas {
   transform: translateZ(0);
   backface-visibility: hidden;
-}
-
-/* スクロール中はPDF.jsが保持している描画済みページだけcontent-visibility:autoとの競合を防止 */
-.pdf-pane__viewer.pdf-pane--scrolling .page[data-loaded="true"] {
-  content-visibility: visible;
 }
 
 /* スクロール中のオーバーレイレイヤーのイベント無効化 */
