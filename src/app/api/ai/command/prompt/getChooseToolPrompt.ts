@@ -1,5 +1,7 @@
-import type { ChatMessage } from '@/registry/components/editor/use-chat';
+import type { ChatMessage } from '../types';
+
 import dedent from 'dedent';
+
 import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction } from '@/app/api/ai/command/utils';
 
 export function getChooseToolPrompt({
