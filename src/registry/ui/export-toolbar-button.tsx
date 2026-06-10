@@ -4,7 +4,6 @@ import * as React from 'react';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
-import { exportToDocx } from '@platejs/docx-io';
 import { MarkdownPlugin } from '@platejs/markdown';
 import { ArrowDownToLineIcon } from 'lucide-react';
 import type { SlatePlugin } from 'platejs';
@@ -71,7 +70,6 @@ export function ExportToolbarButton(props: DropdownMenuProps) {
     link.click();
     link.remove();
 
-    // Clean up the blob URL
     window.URL.revokeObjectURL(blobUrl);
   };
 
@@ -151,6 +149,7 @@ export function ExportToolbarButton(props: DropdownMenuProps) {
   };
 
   const exportToWord = async () => {
+    const { exportToDocx } = await import('@platejs/docx-io');
     const blob = await exportToDocx(editor.children, {
       editorPlugins: [...BaseEditorKit, ...DocxExportKit] as SlatePlugin[],
     });
