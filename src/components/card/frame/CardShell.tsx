@@ -22,7 +22,7 @@ interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
   lockHeight?: boolean;
 }
 
-export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
+const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
   (
     {
       actions,
@@ -410,3 +410,5 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
 );
 
 CardShell.displayName = "CardShell";
+
+export { CardShell };
