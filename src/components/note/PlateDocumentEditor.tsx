@@ -1,9 +1,30 @@
 import { Plate, PlateController, usePlateEditor } from "platejs/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { BaseEditorKit } from "@/registry/components/editor/editor-base-kit";
 import { AIKit } from "@/registry/components/editor/plugins/ai-kit";
+import { BaseAlignKit } from "@/registry/components/editor/plugins/align-base-kit";
+import { BasicBlocksKit } from "@/registry/components/editor/plugins/basic-blocks-kit";
+import { BasicMarksKit } from "@/registry/components/editor/plugins/basic-marks-kit";
+import { BaseCalloutKit } from "@/registry/components/editor/plugins/callout-base-kit";
+import { BaseCodeBlockKit } from "@/registry/components/editor/plugins/code-block-base-kit";
+import { BaseColumnKit } from "@/registry/components/editor/plugins/column-base-kit";
+import { CommentKit } from "@/registry/components/editor/plugins/comment-kit";
+import { BaseDateKit } from "@/registry/components/editor/plugins/date-base-kit";
+import { DiscussionKit } from "@/registry/components/editor/plugins/discussion-kit";
 import { FixedToolbarKit } from "@/registry/components/editor/plugins/fixed-toolbar-kit";
 import { FloatingToolbarKit } from "@/registry/components/editor/plugins/floating-toolbar-kit";
+import { BaseFontKit } from "@/registry/components/editor/plugins/font-base-kit";
+import { BaseFootnoteKit } from "@/registry/components/editor/plugins/footnote-base-kit";
+import { BaseLineHeightKit } from "@/registry/components/editor/plugins/line-height-base-kit";
+import { LinkKit } from "@/registry/components/editor/plugins/link-kit";
+import { ListKit } from "@/registry/components/editor/plugins/list-kit";
+import { MarkdownKit } from "@/registry/components/editor/plugins/markdown-kit";
+import { BaseMathKit } from "@/registry/components/editor/plugins/math-base-kit";
+import { MediaKit } from "@/registry/components/editor/plugins/media-kit";
+import { BaseMentionKit } from "@/registry/components/editor/plugins/mention-base-kit";
+import { SuggestionKit } from "@/registry/components/editor/plugins/suggestion-kit";
+import { TableKit } from "@/registry/components/editor/plugins/table-kit";
+import { BaseTocKit } from "@/registry/components/editor/plugins/toc-base-kit";
+import { BaseToggleKit } from "@/registry/components/editor/plugins/toggle-base-kit";
 import { Editor, EditorContainer } from "@/registry/ui/editor";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Note, NoteBlockContent } from "@/types";
@@ -34,7 +55,28 @@ const NOTE_SAVE_DEBOUNCE_MS = 500;
 const NOTE_CONTENT_VERSION = 2;
 const NOTE_PLATE_PLUGINS = [
   ...AIKit,
-  ...BaseEditorKit,
+  ...BasicBlocksKit,
+  ...BaseCodeBlockKit,
+  ...TableKit,
+  ...BaseToggleKit,
+  ...BaseTocKit,
+  ...MediaKit,
+  ...BaseCalloutKit,
+  ...BaseColumnKit,
+  ...BaseMathKit,
+  ...BaseDateKit,
+  ...LinkKit,
+  ...BaseMentionKit,
+  ...BasicMarksKit,
+  ...BaseFontKit,
+  ...ListKit,
+  ...BaseAlignKit,
+  ...BaseLineHeightKit,
+  ...DiscussionKit,
+  ...CommentKit,
+  ...SuggestionKit,
+  ...MarkdownKit,
+  ...BaseFootnoteKit,
   ...FixedToolbarKit,
   ...FloatingToolbarKit,
 ];
