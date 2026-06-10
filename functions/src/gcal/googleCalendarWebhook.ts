@@ -1,5 +1,5 @@
 import { onRequest } from "firebase-functions/v2/https";
-import { getDb, serverTimestamp } from "../firebaseAdmin.js";
+import { getDb, serverTimestamp } from "#src/firebaseAdmin.js";
 
 type GoogleCalendarWebhookToken = {
   userId: string;
@@ -119,10 +119,10 @@ export const googleCalendarWebhook = onRequest(
         {
           userId: token.userId,
           calendarId: token.calendarId,
+          resourceState,
           channelId,
           resourceId,
-          resourceState,
-          updatedAt: now,
+          receivedAt: now,
         },
         { merge: true },
       );
