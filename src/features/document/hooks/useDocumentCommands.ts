@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { deleteDocumentBlob } from "@/services/documentFileStore";
 import { getLocalDb } from "@/services/localdb";
 import { normalizeDate } from "@/shared/codec/date";
