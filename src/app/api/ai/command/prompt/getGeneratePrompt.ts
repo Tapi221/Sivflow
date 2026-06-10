@@ -1,7 +1,10 @@
-import type { ChatMessage } from '@/registry/components/editor/use-chat';
 import type { SlateEditor } from 'platejs';
+import type { ChatMessage } from '../types';
+
 import dedent from 'dedent';
+
 import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction, getMarkdownWithSelection, isMultiBlocks } from '@/app/api/ai/command/utils';
+
 import { commonGenerateRules } from './common';
 
 function buildGenerateFreeformPrompt(messages: ChatMessage[]) {
@@ -48,10 +51,7 @@ function buildGenerateFreeformPrompt(messages: ChatMessage[]) {
   });
 }
 
-function buildGenerateContextPrompt(
-  editor: SlateEditor,
-  messages: ChatMessage[]
-) {
+function buildGenerateContextPrompt(editor: SlateEditor, messages: ChatMessage[]) {
   if (!isMultiBlocks(editor)) {
     addSelection(editor);
   }
@@ -137,14 +137,10 @@ function buildGenerateContextPrompt(
   });
 }
 
-export function getGeneratePrompt(
-  editor: SlateEditor,
-  { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[] }
-) {
-  // Freeform generation: open-ended creation without context
+export function getGeneratePrompt(editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[] }) {
   if (!isSelecting) {
     return buildGenerateFreeformPrompt(messages);
   }
-  // Context-based generation: use selected text as context
+
   return buildGenerateContextPrompt(editor, messages);
 }
