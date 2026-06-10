@@ -13,6 +13,8 @@
     "types": ["vitest/globals", "node", "vite/client"],
     "baseUrl": ".",
     "paths": {
+      "#/src/*": ["functions/src/*"],
+      "#src/*": ["functions/src/*"],
       "@/services/localDB": ["src/services/localdb/index.ts"],
       "@/services/firebase": ["src/infrastructure/firebase/client.ts"],
       "@core/*": ["packages/core/src/*"],
