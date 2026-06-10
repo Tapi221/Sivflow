@@ -16,6 +16,7 @@ import { MarkToolbarButton } from "@/registry/ui/mark-toolbar-button";
 import { TableToolbarButton } from "@/registry/ui/table-toolbar-button";
 import { ToolbarSeparator } from "@/registry/ui/toolbar";
 import { TurnIntoToolbarButton } from "@/registry/ui/turn-into-toolbar-button";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Note, NoteBlockContent } from "@/types";
 
 type PlateDocumentEditorProps = {
@@ -180,18 +181,20 @@ const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
 
   return (
     <div className="h-full min-h-0 w-full overflow-y-auto bg-white text-[#18181b]">
-      <PlateController>
-        <Plate editor={editor} onChange={handleChange} primary>
-          <div className="px-4 py-10 lg:px-8">
-            <div className="mx-auto min-h-[650px] w-full max-w-[1120px] overflow-hidden rounded-xl border border-[#e4e4e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-              <MountedNotePlateToolbar />
-              <EditorContainer className="h-[650px]">
-                <Editor placeholder="本文を入力" spellCheck />
-              </EditorContainer>
+      <TooltipProvider delayDuration={300}>
+        <PlateController>
+          <Plate editor={editor} onChange={handleChange} primary>
+            <div className="px-4 py-10 lg:px-8">
+              <div className="mx-auto min-h-[650px] w-full max-w-[1120px] overflow-hidden rounded-xl border border-[#e4e4e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+                <MountedNotePlateToolbar />
+                <EditorContainer className="h-[650px]">
+                  <Editor placeholder="本文を入力" spellCheck />
+                </EditorContainer>
+              </div>
             </div>
-          </div>
-        </Plate>
-      </PlateController>
+          </Plate>
+        </PlateController>
+      </TooltipProvider>
     </div>
   );
 };
