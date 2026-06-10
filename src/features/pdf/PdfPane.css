@@ -88,6 +88,25 @@
   visibility: hidden;
 }
 
+.pdf-pane__scroll-container.pdf-pane--zooming.pdf-pane--scrolling {
+  will-change: auto;
+}
+
+.pdf-pane__viewer.pdf-pane--zooming.pdf-pane--scrolling .canvasWrapper,
+.pdf-pane__viewer.pdf-pane--zooming.pdf-pane--scrolling canvas {
+  transform: none;
+  backface-visibility: visible;
+}
+
+.pdf-pane__viewer.pdf-pane--zooming.pdf-pane--scrolling .textLayer,
+.pdf-pane__viewer.pdf-pane--zooming.pdf-pane--scrolling .annotationLayer,
+.pdf-pane__viewer.pdf-pane--zooming.pdf-pane--scrolling .annotationEditorLayer,
+.pdf-pane__viewer.pdf-pane--zooming.pdf-pane--scrolling .xfaLayer,
+.pdf-pane__viewer.pdf-pane--zooming.pdf-pane--scrolling .structTreeLayer {
+  pointer-events: auto;
+  visibility: visible;
+}
+
 .pdf-pane__viewer.pdf-pane--zooming .textLayer,
 .pdf-pane__viewer.pdf-pane--zooming .annotationLayer,
 .pdf-pane__viewer.pdf-pane--zooming .annotationEditorLayer,
