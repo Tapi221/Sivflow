@@ -65,8 +65,8 @@ const PLATE_MARK_OPTIONS: readonly { fallback: PlateCommandFallback; label: stri
   { fallback: { command: "strikeThrough" }, label: "取り消し線", mark: "strikethrough", text: "S" },
   { fallback: { command: "formatBlock", value: "pre" }, label: "コード", mark: "code", text: "</>" },
 ];
-const PLATE_TOOLBAR_BUTTON_CLASS_NAME = "inline-flex h-9 min-w-9 shrink-0 items-center justify-center rounded-lg px-2 text-[15px] font-semibold leading-none text-[#202124] transition-colors hover:bg-[#f1f3f4] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d5db]";
-const PLATE_TOOLBAR_SEPARATOR_CLASS_NAME = "mx-1 h-8 w-px shrink-0 bg-[#e5e7eb]";
+const PLATE_TOOLBAR_BUTTON_CLASS_NAME = "inline-flex h-9 min-w-9 shrink-0 items-center justify-center rounded-md px-2 text-[15px] font-medium leading-none text-[#18181b] transition-colors hover:bg-[#f4f4f5] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4d4d8]";
+const PLATE_TOOLBAR_SEPARATOR_CLASS_NAME = "mx-1 h-7 w-px shrink-0 bg-[#e4e4e7]";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
@@ -196,15 +196,15 @@ const setPlateBlockType = (editor: PlateEditor, blockType: PlateBlockType) => {
   runPlateTransform(editor, "setNodes", [{ type: blockType }, { match: (node: unknown) => isRecord(node) && Array.isArray(node.children) }], { command: "formatBlock", value: blockType === "p" ? "p" : blockType });
 };
 
-const ParagraphElement = (props: PlateElementProps) => <PlateElement {...props} as="p" className="my-2 min-h-[1.75rem] px-0 py-0 text-[17px] leading-8 text-[#202124]" />;
+const ParagraphElement = (props: PlateElementProps) => <PlateElement {...props} as="p" className="my-2 min-h-[1.75rem] px-0 py-0 text-[17px] leading-8 text-[#18181b]" />;
 
-const H1Element = (props: PlateElementProps) => <PlateElement {...props} as="h1" className="mb-4 mt-8 text-[34px] font-semibold leading-tight tracking-[-0.04em] text-[#202124]" />;
+const H1Element = (props: PlateElementProps) => <PlateElement {...props} as="h1" className="mb-4 mt-8 text-[34px] font-semibold leading-tight tracking-[-0.04em] text-[#09090b]" />;
 
-const H2Element = (props: PlateElementProps) => <PlateElement {...props} as="h2" className="mb-3 mt-7 text-[27px] font-semibold leading-tight tracking-[-0.035em] text-[#202124]" />;
+const H2Element = (props: PlateElementProps) => <PlateElement {...props} as="h2" className="mb-3 mt-7 text-[27px] font-semibold leading-tight tracking-[-0.035em] text-[#09090b]" />;
 
-const H3Element = (props: PlateElementProps) => <PlateElement {...props} as="h3" className="mb-2 mt-6 text-[22px] font-semibold leading-snug tracking-[-0.03em] text-[#202124]" />;
+const H3Element = (props: PlateElementProps) => <PlateElement {...props} as="h3" className="mb-2 mt-6 text-[22px] font-semibold leading-snug tracking-[-0.03em] text-[#09090b]" />;
 
-const BlockquoteElement = (props: PlateElementProps) => <PlateElement {...props} as="blockquote" className="my-4 border-l-4 border-[#d1d5db] pl-4 text-[#4b5563]" />;
+const BlockquoteElement = (props: PlateElementProps) => <PlateElement {...props} as="blockquote" className="my-4 border-l-4 border-[#d4d4d8] pl-4 text-[#52525b]" />;
 
 const StrongLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="strong" />;
 
@@ -214,7 +214,7 @@ const UnderlineLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="u" />
 
 const StrikethroughLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="s" />;
 
-const CodeLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="code" className="rounded-[5px] bg-[#f1f1f4] px-1 py-0.5 font-mono text-[0.92em] text-[#111827]" />;
+const CodeLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="code" className="rounded-[5px] bg-[#f4f4f5] px-1 py-0.5 font-mono text-[0.92em] text-[#18181b]" />;
 
 const PlateToolbarButton = ({ label, children, onPress, className }: PlateToolbarButtonProps) => {
   const handleMouseDown = (event: MouseEvent<HTMLButtonElement>) => {
@@ -235,16 +235,28 @@ const PlateEditorToolbar = ({ editor }: { editor: PlateEditor }) => {
   };
 
   return (
-    <div className="sticky top-0 z-30 flex min-h-14 w-full shrink-0 items-center border-b border-[#e5e7eb] bg-white/95 px-4 shadow-[0_1px_0_rgba(0,0,0,0.03)] backdrop-blur-xl">
-      <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto py-2">
+    <div className="sticky top-0 z-30 flex min-h-11 w-full shrink-0 items-center border-b border-[#e4e4e7] bg-white/95 px-3 backdrop-blur-xl">
+      <div className="scrollbar-hide flex min-w-0 flex-1 items-center gap-1 overflow-x-auto py-1.5">
         <PlateToolbarButton label="元に戻す" onPress={() => runPlateTransform(editor, "undo", [], { command: "undo" })}>↶</PlateToolbarButton>
         <PlateToolbarButton label="やり直す" onPress={() => runPlateTransform(editor, "redo", [], { command: "redo" })}>↷</PlateToolbarButton>
 
         <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />
 
-        <select className="h-9 shrink-0 rounded-lg border border-transparent bg-white px-3 text-[15px] font-semibold text-[#202124] outline-none transition-colors hover:bg-[#f1f3f4] focus:border-[#d1d5db]" defaultValue="p" aria-label="ブロックタイプ" onChange={handleBlockTypeChange}>
+        <PlateToolbarButton label="AI編集" onPress={() => focusPlateEditor(editor)}>⌘</PlateToolbarButton>
+        <PlateToolbarButton label="ダウンロード" onPress={() => focusPlateEditor(editor)}>↓</PlateToolbarButton>
+
+        <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />
+
+        <PlateToolbarButton label="追加" onPress={() => focusPlateEditor(editor)}>＋</PlateToolbarButton>
+        <select className="h-9 w-[132px] shrink-0 rounded-md border border-transparent bg-white px-3 text-[15px] font-medium text-[#18181b] outline-none transition-colors hover:bg-[#f4f4f5] focus:border-[#d4d4d8]" defaultValue="p" aria-label="ブロックタイプ" onChange={handleBlockTypeChange}>
           {PLATE_BLOCK_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
+
+        <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />
+
+        <PlateToolbarButton label="文字サイズを下げる" onPress={() => focusPlateEditor(editor)}>−</PlateToolbarButton>
+        <div className="flex h-9 min-w-11 shrink-0 items-center justify-center rounded-md px-2 text-[15px] font-medium text-[#18181b]">16</div>
+        <PlateToolbarButton label="文字サイズを上げる" onPress={() => focusPlateEditor(editor)}>＋</PlateToolbarButton>
 
         <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />
 
@@ -253,6 +265,22 @@ const PlateEditorToolbar = ({ editor }: { editor: PlateEditor }) => {
             {option.text}
           </PlateToolbarButton>
         ))}
+
+        <PlateToolbarButton label="文字色" onPress={() => focusPlateEditor(editor)}>A</PlateToolbarButton>
+        <PlateToolbarButton label="ハイライト" onPress={() => focusPlateEditor(editor)}>◒</PlateToolbarButton>
+
+        <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />
+
+        <PlateToolbarButton label="左揃え" onPress={() => focusPlateEditor(editor)}>☰</PlateToolbarButton>
+        <PlateToolbarButton label="リスト" onPress={() => focusPlateEditor(editor)}>≡</PlateToolbarButton>
+        <PlateToolbarButton label="チェックリスト" onPress={() => focusPlateEditor(editor)}>☑</PlateToolbarButton>
+        <PlateToolbarButton label="インデント" onPress={() => focusPlateEditor(editor)}>☷</PlateToolbarButton>
+
+        <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />
+
+        <PlateToolbarButton label="リンク" onPress={() => focusPlateEditor(editor)}>↗</PlateToolbarButton>
+        <PlateToolbarButton label="表" onPress={() => focusPlateEditor(editor)}>▦</PlateToolbarButton>
+        <PlateToolbarButton label="絵文字" onPress={() => focusPlateEditor(editor)}>☺</PlateToolbarButton>
 
         <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />
 
@@ -310,18 +338,24 @@ const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
   }, [flushPendingChange]);
 
   return (
-    <div className="h-full min-h-0 w-full overflow-y-auto bg-white text-[#202124]">
+    <div className="h-full min-h-0 w-full overflow-y-auto bg-white text-[#18181b]">
       <Plate editor={editor} onChange={handleChange}>
-        <PlateEditorToolbar editor={editor} />
-        <div className="px-16 py-14">
-          <div className="mx-auto flex w-full max-w-[820px] flex-col gap-5">
-            <div className="min-w-0">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9ca3af]">Plate</p>
-              <h1 className="truncate text-[32px] font-semibold leading-tight tracking-[-0.04em] text-[#202124]">{note.title}</h1>
+        <div className="px-6 py-12 lg:px-10">
+          <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-4">
+            <div className="flex min-w-0 flex-col gap-1 px-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#a1a1aa]">Plate</p>
+              <h1 className="truncate text-[28px] font-semibold leading-tight tracking-[-0.035em] text-[#09090b]">{note.title}</h1>
             </div>
-            <PlateContainer className="relative w-full cursor-text select-text overflow-visible caret-[#202124] selection:bg-[#dbeafe]">
-              <PlateContent className="min-h-[420px] w-full overflow-x-hidden whitespace-pre-wrap break-words rounded-none border-0 bg-transparent px-0 py-5 text-[17px] leading-8 text-[#202124] outline-none focus:outline-none [&_strong]:font-bold" disableDefaultStyles placeholder="本文を入力" spellCheck />
-            </PlateContainer>
+            <div className="min-h-[680px] overflow-hidden rounded-xl border border-[#e4e4e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+              <PlateEditorToolbar editor={editor} />
+              <div className="px-8 py-16 md:px-16 lg:px-24">
+                <div className="mx-auto w-full max-w-[760px]">
+                  <PlateContainer className="relative w-full cursor-text select-text overflow-visible caret-[#18181b] selection:bg-[#bfdbfe]">
+                    <PlateContent className="min-h-[480px] w-full overflow-x-hidden whitespace-pre-wrap break-words rounded-none border-0 bg-transparent px-0 py-0 text-[17px] leading-8 text-[#18181b] outline-none focus:outline-none [&_strong]:font-bold" disableDefaultStyles placeholder="本文を入力" spellCheck />
+                  </PlateContainer>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </Plate>
