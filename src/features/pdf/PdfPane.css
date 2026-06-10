@@ -8,6 +8,11 @@
   touch-action: pan-x pan-y;
 }
 
+.pdf-pane__scroll-container.pdf-pane--zooming {
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
 /* ビューア要素最適化 */
 .pdf-pane__viewer {
   contain: layout paint style;
@@ -81,4 +86,12 @@
 .pdf-pane__viewer.pdf-pane--scrolling .annotationLayer,
 .pdf-pane__viewer.pdf-pane--scrolling .annotationEditorLayer {
   visibility: hidden;
+}
+
+.pdf-pane__viewer.pdf-pane--zooming .textLayer,
+.pdf-pane__viewer.pdf-pane--zooming .annotationLayer,
+.pdf-pane__viewer.pdf-pane--zooming .annotationEditorLayer,
+.pdf-pane__viewer.pdf-pane--zooming .xfaLayer,
+.pdf-pane__viewer.pdf-pane--zooming .structTreeLayer {
+  visibility: visible;
 }
