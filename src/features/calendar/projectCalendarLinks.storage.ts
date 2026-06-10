@@ -14,8 +14,9 @@ export type CreateProjectCalendarLinkInput = {
 
 type StoredProjectCalendarLink = Partial<ProjectCalendarLink>;
 
-export const PROJECT_CALENDAR_LINKS_STORAGE_KEY = "flashcard-master:schedule:project-calendar-links";
+export const PROJECT_CALENDAR_LINKS_STORAGE_KEY = "sivflow:schedule:project-calendar-links";
 
+const LEGACY_PROJECT_CALENDAR_LINKS_STORAGE_KEY = "flashcard-master:schedule:project-calendar-links";
 const DEFAULT_SYNC_DIRECTION: ProjectCalendarSyncDirection = "twoWay";
 const SUPPORTED_CALENDAR_PROVIDERS = new Set<CalendarProvider>(["local", "google", "appleEventKit", "appleCalDav"]);
 const SUPPORTED_SYNC_DIRECTIONS = new Set<ProjectCalendarSyncDirection>(["importOnly", "exportOnly", "twoWay"]);
@@ -82,6 +83,18 @@ const normalizeStoredProjectCalendarLink = (item: unknown): ProjectCalendarLink 
   };
 };
 
+const readStoredProjectCalendarLinksRaw = (): string | null => {
+  const current = window.localStorage.getItem(PROJECT_CALENDAR_LINKS_STORAGE_KEY);
+  if (current) return current;
+
+  const legacy = window.localStorage.getItem(LEGACY_PROJECT_CALENDAR_LINKS_STORAGE_KEY);
+  if (!legacy) return null;
+
+  window.localStorage.setItem(PROJECT_CALENDAR_LINKS_STORAGE_KEY, legacy);
+  window.localStorage.removeItem(LEGACY_PROJECT_CALENDAR_LINKS_STORAGE_KEY);
+  return legacy;
+};
+
 export const buildProjectCalendarLinkId = (provider: CalendarProvider, accountId: string, externalCalendarId: string): string => ["project-calendar-link", encodeLinkIdPart(provider), encodeLinkIdPart(accountId), encodeLinkIdPart(externalCalendarId)].join(":");
 
 export const createProjectCalendarLink = ({
@@ -111,7 +124,7 @@ export const readStoredProjectCalendarLinks = (): ProjectCalendarLink[] => {
   if (typeof window === "undefined") return [];
 
   try {
-    const raw = window.localStorage.getItem(PROJECT_CALENDAR_LINKS_STORAGE_KEY);
+    const raw = readStoredProjectCalendarLinksRaw();
     if (!raw) return [];
 
     const parsed = JSON.parse(raw) as unknown;
@@ -137,6 +150,7 @@ export const persistProjectCalendarLinks = (links: ProjectCalendarLink[]) => {
 
   try {
     window.localStorage.setItem(PROJECT_CALENDAR_LINKS_STORAGE_KEY, JSON.stringify(links));
+    window.localStorage.removeItem(LEGACY_PROJECT_CALENDAR_LINKS_STORAGE_KEY);
   } catch {
     // localStorage が利用できない環境でも、画面上のリンク状態は維持する。
   }
