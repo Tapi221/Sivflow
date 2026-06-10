@@ -94,6 +94,8 @@ type PdfZoomPreview = {
   originY: number;
 };
 
+export type { PdfPaneProps, PdfViewerStateChangeOptions };
+
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 640;
 const PDF_DEFAULT_DEVICE_MEMORY_GB = 4;
 const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 500;
@@ -351,15 +353,17 @@ const releasePdfZoomSnapshots = (container: HTMLElement): void => {
   container.querySelectorAll(".pdf-pane__zoom-snapshot").forEach((snapshotElement) => snapshotElement.remove());
 };
 
-const runWithPdfZoomSnapshot = (container: HTMLElement, viewerElement: HTMLElement, updateViewerScale: () => void): void => {
+const runWithPdfZoomSnapshot = (container: HTMLElement, viewerElement: HTMLElement, updateViewerScale: () => void, releaseTimers?: Set<ReturnType<typeof globalThis.setTimeout>>): void => {
   const snapshotElement = createPdfZoomSnapshot(container, viewerElement);
   updateViewerScale();
   if (!snapshotElement) return;
 
   pinPdfZoomSnapshotToContainerViewport(container, snapshotElement);
-  globalThis.setTimeout(() => {
+  const releaseTimer = globalThis.setTimeout(() => {
+    releaseTimers?.delete(releaseTimer);
     snapshotElement.remove();
   }, PDF_ZOOM_SNAPSHOT_FALLBACK_RELEASE_MS);
+  releaseTimers?.add(releaseTimer);
 };
 
 const applyPdfViewerZoom = (pdfViewer: PdfViewerInstance, direction: "in" | "out"): void => {
@@ -436,6 +440,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   const onViewerStateChangeRef = useRef(onViewerStateChange);
   const isApplyingFitScaleRef = useRef(false);
   const lastExplicitZoomAtRef = useRef(0);
+  const zoomSnapshotReleaseTimersRef = useRef<Set<ReturnType<typeof globalThis.setTimeout>>>(new Set());
 
   const refreshPdfToolbarState = useCallback(() => {
     const nextToolbarState = createPdfToolbarState(pdfViewerRef.current, viewerStateRef.current);
@@ -463,6 +468,13 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   useEffect(() => {
     onViewerStateChangeRef.current = onViewerStateChange;
   }, [onViewerStateChange]);
+
+  useEffect(() => {
+    return () => {
+      zoomSnapshotReleaseTimersRef.current.forEach((releaseTimer) => globalThis.clearTimeout(releaseTimer));
+      zoomSnapshotReleaseTimersRef.current.clear();
+    };
+  }, []);
 
   const updateViewerState = useCallback((patch: PdfViewerState, options?: PdfViewerStateChangeOptions) => {
     const nextViewerState = { ...(viewerStateRef.current ?? {}), ...patch };
@@ -492,7 +504,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const viewerElement = pdfViewerElementRef.current;
     if (!pdfViewer || !container || !viewerElement) return;
     lastExplicitZoomAtRef.current = Date.now();
-    runWithPdfZoomSnapshot(container, viewerElement, () => applyPdfViewerZoom(pdfViewer, "in"));
+    runWithPdfZoomSnapshot(container, viewerElement, () => applyPdfViewerZoom(pdfViewer, "in"), zoomSnapshotReleaseTimersRef.current);
     updateActivePdfPageWindow();
     refreshPdfToolbarState();
   }, [refreshPdfToolbarState, updateActivePdfPageWindow]);
@@ -503,7 +515,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const viewerElement = pdfViewerElementRef.current;
     if (!pdfViewer || !container || !viewerElement) return;
     lastExplicitZoomAtRef.current = Date.now();
-    runWithPdfZoomSnapshot(container, viewerElement, () => applyPdfViewerZoom(pdfViewer, "out"));
+    runWithPdfZoomSnapshot(container, viewerElement, () => applyPdfViewerZoom(pdfViewer, "out"), zoomSnapshotReleaseTimersRef.current);
     updateActivePdfPageWindow();
     refreshPdfToolbarState();
   }, [refreshPdfToolbarState, updateActivePdfPageWindow]);
@@ -516,7 +528,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     isApplyingFitScaleRef.current = true;
     runWithPdfZoomSnapshot(container, viewerElement, () => {
       (pdfViewer as PdfViewerWithScale).currentScaleValue = "page-width";
-    });
+    }, zoomSnapshotReleaseTimersRef.current);
     updateActivePdfPageWindow();
     refreshPdfToolbarState();
   }, [refreshPdfToolbarState, updateActivePdfPageWindow]);
@@ -1017,4 +1029,3 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
 };
 
 export { PdfPane };
-export type { PdfPaneProps, PdfViewerStateChangeOptions };
