@@ -35,7 +35,7 @@ class PersistentOfflineQueue {
 
     const existing = await this.store.getQueueItem(payload.id);
     if (existing) {
-      console.info("[PersistentQueue] Deduplicating enqueue by document id", {
+      console.info("[PersistentQueue] ドキュメント ID が重複しているためキュー登録を上書きします", {
         id: payload.id,
         previousFileName: existing.fileName,
         incomingFileName: payload.fileName,
@@ -45,8 +45,8 @@ class PersistentOfflineQueue {
     await this.store.enqueue(payload);
     console.log(
       this.store.isMemoryFallbackActive()
-        ? `[PersistentQueue] Enqueued in memory fallback: ${file.name}`
-        : `[PersistentQueue] Enqueued: ${file.name}`,
+        ? `[PersistentQueue] メモリフォールバックに登録しました: ${file.name}`
+        : `[PersistentQueue] キューに登録しました: ${file.name}`,
     );
   };
 
@@ -67,7 +67,7 @@ class PersistentOfflineQueue {
     uploadItem: (item: QueueItem) => Promise<UploadedImage>,
   ): Promise<void> => {
     if (this.isProcessing) {
-      console.log("[PersistentQueue] Already processing");
+      console.log("[PersistentQueue] すでに処理中です");
       return;
     }
 
@@ -75,7 +75,7 @@ class PersistentOfflineQueue {
 
     try {
       const items = await this.store.getAllItems();
-      console.log(`[PersistentQueue] Processing ${items.length} items`);
+      console.log(`[PersistentQueue] ${items.length} 件の項目を処理します`);
 
       await processPersistentOfflineQueue(items, {
         uploadItem,
