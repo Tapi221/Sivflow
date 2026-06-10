@@ -1,4 +1,4 @@
-import type { Card } from "../src/types/index";
+import type { Card } from "@/types/index";
 
 // シミュレーション用：状態遷移・S・Iの変化をテスト
 function simulateCardScenario(
@@ -79,4 +79,4 @@ const testCard: Card = {
   isDeleted: false,
 };
 
-simulateCardScenario(testCard, ["success", "delay", "fail", "view", "success"]);
+simulateCardScenario(testCard, ["success", "delay", "fail", "success", "view"]);
