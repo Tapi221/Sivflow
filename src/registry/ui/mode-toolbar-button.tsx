@@ -2,29 +2,46 @@
 
 import * as React from 'react';
 
+import { DropdownMenuItemIndicator, type DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 import { SuggestionPlugin } from '@platejs/suggestion/react';
-import {
-  type DropdownMenuProps,
-  DropdownMenuItemIndicator,
-} from '@radix-ui/react-dropdown-menu';
 import { CheckIcon, EyeIcon, PencilLineIcon, PenIcon } from 'lucide-react';
-import {
-  useEditorReadOnly,
-  useEditorRef,
-  usePluginOption,
-} from 'platejs/react';
+import { useEditorReadOnly, useEditorRef, usePluginOption } from 'platejs/react';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from '@/registry/ui/shadcn/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/registry/ui/shadcn/dropdown-menu';
 
 import { ToolbarButton } from './toolbar';
 
-export function ModeToolbarButton(props: DropdownMenuProps) {
+type ModeToolbarItem = {
+  icon: React.ReactNode;
+  label: string;
+};
+
+const items: Record<string, ModeToolbarItem> = {
+  editing: {
+    icon: <PenIcon />,
+    label: 'Editing',
+  },
+  suggestion: {
+    icon: <PencilLineIcon />,
+    label: 'Suggestion',
+  },
+  viewing: {
+    icon: <EyeIcon />,
+    label: 'Viewing',
+  },
+};
+
+function Indicator() {
+  return (
+    <span className="pointer-events-none absolute right-2 flex size-3.5 items-center justify-center">
+      <DropdownMenuItemIndicator>
+        <CheckIcon />
+      </DropdownMenuItemIndicator>
+    </span>
+  );
+}
+
+function ModeToolbarButton(props: DropdownMenuProps) {
   const editor = useEditorRef();
   const readOnly = useEditorReadOnly();
   const [open, setOpen] = React.useState(false);
@@ -37,27 +54,12 @@ export function ModeToolbarButton(props: DropdownMenuProps) {
 
   if (isSuggesting) value = 'suggestion';
 
-  const item: Record<string, { icon: React.ReactNode; label: string }> = {
-    editing: {
-      icon: <PenIcon />,
-      label: 'Editing',
-    },
-    suggestion: {
-      icon: <PencilLineIcon />,
-      label: 'Suggestion',
-    },
-    viewing: {
-      icon: <EyeIcon />,
-      label: 'Viewing',
-    },
-  };
-
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
         <ToolbarButton pressed={open} tooltip="Editing mode" isDropdown>
-          {item[value].icon}
-          <span className="hidden lg:inline">{item[value].label}</span>
+          {items[value].icon}
+          <span className="hidden lg:inline">{items[value].label}</span>
         </ToolbarButton>
       </DropdownMenuTrigger>
 
@@ -80,37 +82,26 @@ export function ModeToolbarButton(props: DropdownMenuProps) {
 
             if (newValue === 'editing') {
               editor.tf.focus();
-
-              return;
             }
           }}
           value={value}
         >
-          <DropdownMenuRadioItem
-            className="pl-2 *:first:[span]:hidden *:[svg]:text-muted-foreground"
-            value="editing"
-          >
+          <DropdownMenuRadioItem className="pl-2 [&>span:first-child]:hidden *:[svg]:text-muted-foreground" value="editing">
             <Indicator />
-            {item.editing.icon}
-            {item.editing.label}
+            {items.editing.icon}
+            {items.editing.label}
           </DropdownMenuRadioItem>
 
-          <DropdownMenuRadioItem
-            className="pl-2 *:first:[span]:hidden *:[svg]:text-muted-foreground"
-            value="viewing"
-          >
+          <DropdownMenuRadioItem className="pl-2 [&>span:first-child]:hidden *:[svg]:text-muted-foreground" value="viewing">
             <Indicator />
-            {item.viewing.icon}
-            {item.viewing.label}
+            {items.viewing.icon}
+            {items.viewing.label}
           </DropdownMenuRadioItem>
 
-          <DropdownMenuRadioItem
-            className="pl-2 *:first:[span]:hidden *:[svg]:text-muted-foreground"
-            value="suggestion"
-          >
+          <DropdownMenuRadioItem className="pl-2 [&>span:first-child]:hidden *:[svg]:text-muted-foreground" value="suggestion">
             <Indicator />
-            {item.suggestion.icon}
-            {item.suggestion.label}
+            {items.suggestion.icon}
+            {items.suggestion.label}
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
@@ -118,12 +109,4 @@ export function ModeToolbarButton(props: DropdownMenuProps) {
   );
 }
 
-function Indicator() {
-  return (
-    <span className="pointer-events-none absolute right-2 flex size-3.5 items-center justify-center">
-      <DropdownMenuItemIndicator>
-        <CheckIcon />
-      </DropdownMenuItemIndicator>
-    </span>
-  );
-}
+export { ModeToolbarButton };
