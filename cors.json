@@ -4,6 +4,7 @@
       "https://anki-70f73.web.app",
       "https://anki-70f73.firebaseapp.com",
       "http://localhost:5173",
+      "app://sivflow",
       "app://flashcard-master"
     ],
     "method": ["GET", "PUT", "POST", "DELETE", "HEAD", "OPTIONS"],
