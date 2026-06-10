@@ -7,9 +7,11 @@
     "scheme": "sivflow",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "icon": "../../shared/assets/icons/app-icon.svg",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sivflow.mobile",
+      "icon": "../../shared/assets/icons/app-icon.svg",
       "infoPlist": {
         "NSCalendarsUsageDescription": "Sivflow uses calendar access to show and sync your schedule.",
         "NSCalendarsFullAccessUsageDescription": "Sivflow uses calendar access to show and sync your schedule."
@@ -18,6 +20,7 @@
     "android": {
       "package": "com.sivflow.mobile",
       "adaptiveIcon": {
+        "foregroundImage": "../../shared/assets/icons/app-icon.svg",
         "backgroundColor": "#F8FAFB"
       }
     }
