@@ -1,4 +1,4 @@
-import { PlateDocumentEditor } from "./PlateDocumentEditorOfficial";
+import { PlateDocumentEditor } from "./PlateDocumentEditorPlateOnly";
 import type { Note } from "@/types";
 
 type NoteDocumentEditorProps = {
