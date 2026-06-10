@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { cn } from "@/lib/utils";
 import type { DocumentItem, PdfViewerState } from "@/types";
 import { PdfPane } from "./PdfPane";
