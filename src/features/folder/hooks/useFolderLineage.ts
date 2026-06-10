@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { getLocalDb } from "@/services/localDB";
 import type { Folder } from "@/types/domain/folder";
@@ -31,23 +31,12 @@ export const useFolderLineage = (folderId: string | null) => {
 
       while (currentFolderId && !visited.has(currentFolderId)) {
         visited.add(currentFolderId);
+        const rawFolder = await db.folders.get(currentFolderId);
+        if (!rawFolder) break;
 
-        const row = await db.folders.get(currentFolderId);
-
-        if (!row) {
-          break;
-        }
-
-        const normalizedFolder = normalizeFolder(row);
-
-        if (normalizedFolder.isDeleted) {
-          break;
-        }
-
-        lineage.unshift(normalizedFolder);
-        currentFolderId = normalizeFolderId(
-          normalizedFolder.parentFolderId ?? null,
-        );
+        const folder = normalizeFolder(rawFolder);
+        lineage.unshift(folder);
+        currentFolderId = normalizeFolderId(folder.parentId);
       }
 
       return lineage;
@@ -56,8 +45,5 @@ export const useFolderLineage = (folderId: string | null) => {
     [],
   );
 
-  return {
-    folders: folders ?? [],
-    loading: Boolean(currentUserId && folderId) && folders === undefined,
-  };
+  return folders ?? [];
 };
