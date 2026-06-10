@@ -2,6 +2,12 @@
   "name": "flashcard-master-functions",
   "private": true,
   "type": "module",
+  "imports": {
+    "#src/*": {
+      "types": "./src/*",
+      "default": "./lib/*"
+    }
+  },
   "engines": {
     "node": "22"
   },
