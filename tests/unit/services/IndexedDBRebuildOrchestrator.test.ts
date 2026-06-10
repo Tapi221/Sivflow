@@ -26,7 +26,7 @@ vi.mock("dexie", () => ({
   },
 }));
 
-vi.mock("./IndexedDBMetadataService", () => ({
+vi.mock("@/services/IndexedDBMetadataService", () => ({
   IndexedDBMetadataService: class {
     markClean = markCleanMock;
   },
@@ -57,11 +57,9 @@ describe("IndexedDB 再構築オーケストレーター", () => {
       cardRelations: {},
       projectMaps: {},
       upsert,
-      transaction: vi.fn(
-        async (_mode: string, _tables: unknown[], fn: () => Promise<void>) => {
-          await fn();
-        },
-      ),
+      runSyncTransaction: vi.fn(async (fn: () => Promise<void>) => {
+        await fn();
+      }),
     };
 
     pullDiffMock.mockResolvedValue({
@@ -86,7 +84,7 @@ describe("IndexedDB 再構築オーケストレーター", () => {
 
     const result = await IndexedDBRebuildOrchestrator.rebuild("user-1", "test");
 
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
     expect(result.degraded).toBe(true);
     expect(result.failures).toHaveLength(1);
     expect(result.failures[0].id).toBe("bad-card");
