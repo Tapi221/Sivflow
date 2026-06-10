@@ -1,4 +1,4 @@
-import type { SearchItem } from "@/features/search/model/searchTypes";
+import type { SearchItem } from "@/features/search/model/search.types";
 import { toMillis } from "@/utils/toMillis";
 
 type RankSearchResultsParams = {
