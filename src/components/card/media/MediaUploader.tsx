@@ -4,7 +4,7 @@ import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Check, RotateCcw, Upload, X } from "@/ui/icons";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { resolveCardImageUrl, type ResolvedCardImage } from "@/services/cardImageResolver";
 import { getOrCreateImageBlobUrl, removeImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 import { deleteImageBlob, getImageBlob, putImageBlob } from "@/services/imageFileStore";
