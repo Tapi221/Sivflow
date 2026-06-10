@@ -26,7 +26,8 @@ export interface LocalDBTelemetrySnapshot {
   localdb_reset_failed: boolean;
 }
 
-const RESET_FAILED_REASON_KEY = "flashcard.localdb.resetFailedReason";
+const RESET_FAILED_REASON_KEY = "sivflow.localdb.resetFailedReason";
+const LEGACY_RESET_FAILED_REASON_KEY = "flashcard.localdb.resetFailedReason";
 
 const listeners = new Set<(status: LocalDBRuntimeStatus) => void>();
 const warnedKeys = new Set<string>();
@@ -54,6 +55,8 @@ const writeLocalStorage = (key: string, value: string | null) => {
   }
 };
 
+const readResetFailedReason = (): string | null => readLocalStorage(RESET_FAILED_REASON_KEY) ?? readLocalStorage(LEGACY_RESET_FAILED_REASON_KEY);
+
 let currentStatus: LocalDBRuntimeStatus = {
   mode: "persistent",
   userId: null,
@@ -61,7 +64,7 @@ let currentStatus: LocalDBRuntimeStatus = {
   fallbackReason: null,
   fallbackReasonCode: "none",
   generationBumped: false,
-  resetFailedReason: readLocalStorage(RESET_FAILED_REASON_KEY),
+  resetFailedReason: readResetFailedReason(),
   updatedAt: Date.now(),
 };
 
@@ -123,6 +126,7 @@ export const markLocalDBGenerationBumped = () => {
 
 export const saveLocalDBResetFailureReason = (reason: string | null) => {
   writeLocalStorage(RESET_FAILED_REASON_KEY, reason);
+  writeLocalStorage(LEGACY_RESET_FAILED_REASON_KEY, null);
   updateLocalDBRuntimeStatus({ resetFailedReason: reason });
 };
 
@@ -131,7 +135,7 @@ export const clearLocalDBResetFailureReason = () => {
 };
 
 export const getStoredLocalDBResetFailureReason = () => {
-  return readLocalStorage(RESET_FAILED_REASON_KEY);
+  return readResetFailedReason();
 };
 
 const toShortReason = (value: string | null): string => {
