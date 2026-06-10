@@ -139,7 +139,7 @@ export class IndexedDBRebuildOrchestrator {
       const dbName =
         typeof LocalDBClass.getDatabaseNameForUser === "function"
           ? LocalDBClass.getDatabaseNameForUser(userId)
-          : `FlashcardMasterDB_${userId}`;
+          : `SivflowDB_${userId}`;
 
       console.log(`[Rebuild] Deleting database: ${dbName}`);
       await Dexie.delete(dbName);
