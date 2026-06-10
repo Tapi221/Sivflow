@@ -153,7 +153,6 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: Sch
   const rawMainCalendarEvents = useMemo(() => filterEventsByDisplayRange(visibleGoogleCalendarEvents, mainDisplayRange), [mainDisplayRange, visibleGoogleCalendarEvents]);
   const mainCalendarEvents = useTransientEmptyCalendarEvents(rawMainCalendarEvents, mainDisplayRangeKey);
   const printCalendarEvents = useMemo(() => filterEventsByDisplayRange(visibleGoogleCalendarEvents, printDisplayRange), [printDisplayRange, visibleGoogleCalendarEvents]);
-  const isCalendarPrintRangeMode = printRange.mode !== "current";
   const isListCalendarView = selectedViewModes.includes("list");
   const isPieChartCalendarView = selectedViewModes.includes("pieChart");
   const isSplitCalendarView = selectedViewModes.length > 1;
@@ -173,12 +172,12 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: Sch
     console.warn("[ScheduleScreen] Google Calendar print sync failed", error);
   }, []);
 
-  const { isPrintPanelActive: isCalendarPrintPanelActive, printPanelClassName: calendarPrintPanelClassName, requestPrint: handlePrintCalendar } = useCalendarPrintController({ onBeforePrint: handleBeforePrintCalendar, onPrintError: handlePrintCalendarError });
+  const { isPrintPanelActive: isCalendarPrintPanelActive, requestPrint: handlePrintCalendar } = useCalendarPrintController({ onBeforePrint: handleBeforePrintCalendar, onPrintError: handlePrintCalendarError });
 
   return (
     <CarvePanelShell isLeftPanelCollapsed={isLeftPanelCollapsed} leftPanel={<CalendarSidebar appProjects={appProjects} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} googleAccounts={googleAccountsWithColorOverrides} isAnyCalendarConnecting={isAnyCalendarConnecting} onAddCalendar={addGoogleCalendar} onAddProject={handleAddAppProject} onToggleProject={handleToggleAppProject} onLinkGoogleCalendarAsProject={handleLinkGoogleCalendarAsProject} onLinkProjectToGoogleCalendar={handleLinkProjectToGoogleCalendar} onCreateProjectGoogleCalendar={handleCreateProjectGoogleCalendar} onUnlinkProjectCalendar={handleUnlinkProjectCalendar} onChangeGoogleCalendarColor={handleChangeGoogleCalendarColor} onReconnectAccount={(accountId) => { void reconnectGoogleAccount(accountId); }} onToggleCalendar={toggleGoogleCalendar} />} viewportRef={contentViewportRef}>
       <CarvePanel>
-        <div className={cn("flex min-h-0 flex-1 flex-col", calendarPrintPanelClassName, isCalendarPrintRangeMode && "calendar-print-range-mode")}>
+        <div className="flex min-h-0 flex-1 flex-col">
           <ScheduleScreenHeaderDesktop titleLabel={headerTitleLabel} selectedViewMode={selectedViewMode} viewOptions={viewOptions} planResultModes={planResultModes} showPlanResultToggle={canShowPlanResultToggle} showMonthEventCountControl={isMonthCalendarView} monthVisibleEventCount={monthVisibleEventCount} printRange={printRange} onSelectViewMode={handleSelectViewMode} onChangePlanResultModes={setPlanResultModes} onChangeMonthVisibleEventCount={handleChangeMonthVisibleEventCount} onChangePrintRange={setPrintRange} onAddEvent={handleOpenEventComposer} onPrintCalendar={handlePrintCalendar} onPrevious={handlePrevious} onNext={handleNext} onToday={handleToday} className="mb-2 flex shrink-0 items-center justify-between px-5 pt-4" />
           <div className="calendar-print-screen-content flex min-h-0 flex-1 flex-col">
             {isYearCalendarView ? (
