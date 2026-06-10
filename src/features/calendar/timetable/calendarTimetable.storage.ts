@@ -1,5 +1,6 @@
 import Dexie, { type Table } from "dexie";
-import type { CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetableDepartment, CalendarTimetableInstitution, CalendarTimetablePeriod, CalendarTimetableSettings, CalendarTimetableSlot, CalendarTimetableSyllabusCourse, CalendarTimetableSyllabusCourseDisplay, CalendarTimetableSyllabusCourseDraft, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "./calendarTimetable.types";
+import type { CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetableDepartment, CalendarTimetableInstitution, CalendarTimetablePeriod, CalendarTimetableSettings, CalendarTimetableSlot, CalendarTimetableSyllabusCourse, CalendarTimetableSyllabusCourseDisplay, CalendarTimetableSyllabusCourseDraft, CalendarTimetableVisibleDayCount } from "@core/domain/calendar/timetable/timetable.types";
+import { createCalendarTimetableSearchText as createSearchText, normalizeCalendarTimetableSlots as normalizeSlots, normalizeCalendarTimetableText as normalizeText, normalizeCalendarTimetableVisibleDayCount as normalizeVisibleDayCount, sortCalendarTimetablePeriods as sortPeriods } from "@core/domain/calendar/timetable/timetable.model";
 
 class CalendarTimetableDatabase extends Dexie {
   courses!: Table<CalendarTimetableCourse, string>;
@@ -55,40 +56,6 @@ const createPeriodId = (): string => `period-${Date.now().toString(36)}-${Math.r
 const createSyllabusCourseId = (): string => `syllabus-course-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 const createDefaultSettings = (): CalendarTimetableSettings => ({ id: TIMETABLE_SETTINGS_ID, activeSemesterId: DEFAULT_SEMESTER_ID, visibleDayCount: DEFAULT_VISIBLE_DAY_COUNT, updatedAt: createTimestamp() });
-
-const isValidWeekdayIndex = (value: number): value is CalendarTimetableWeekdayIndex => Number.isInteger(value) && value >= 0 && value <= 6;
-
-const normalizeText = (value: string): string => value.trim().replace(/\s+/g, " ");
-
-const createSearchText = (values: string[]): string => values.map((value) => normalizeText(value).toLowerCase()).filter(Boolean).join(" ");
-
-const normalizeVisibleDayCount = (value: number): CalendarTimetableVisibleDayCount => value <= 5 ? 5 : value === 6 ? 6 : 7;
-
-const normalizeSlot = (slot: CalendarTimetableSlot, periodIds: Set<string>): CalendarTimetableSlot | null => {
-  if (!isValidWeekdayIndex(slot.dayIndex) || !periodIds.has(slot.periodId)) return null;
-  return { dayIndex: slot.dayIndex, periodId: slot.periodId };
-};
-
-const normalizeSlots = (slots: CalendarTimetableSlot[], periods: CalendarTimetablePeriod[]): CalendarTimetableSlot[] => {
-  const periodIds = new Set(periods.map((period) => period.id));
-  const seenKeys = new Set<string>();
-  const normalizedSlots: CalendarTimetableSlot[] = [];
-
-  slots.forEach((slot) => {
-    const normalizedSlot = normalizeSlot(slot, periodIds);
-    if (!normalizedSlot) return;
-
-    const key = `${normalizedSlot.dayIndex}:${normalizedSlot.periodId}`;
-    if (seenKeys.has(key)) return;
-
-    seenKeys.add(key);
-    normalizedSlots.push(normalizedSlot);
-  });
-
-  return normalizedSlots;
-};
-
-const sortPeriods = (periods: CalendarTimetablePeriod[]): CalendarTimetablePeriod[] => [...periods].sort((left, right) => left.order - right.order);
 
 const findInstitutionByName = async (name: string): Promise<CalendarTimetableInstitution | null> => {
   const normalizedName = normalizeText(name);
