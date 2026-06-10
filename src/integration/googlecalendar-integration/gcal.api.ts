@@ -197,10 +197,10 @@ export const fetchCalendarList = async (accessToken: string): Promise<GoogleCale
     } while (pageToken);
 
     console.info("[GoogleCalendarAPI] カレンダー一覧の取得が完了しました", {
-      calendarCount: calendars.length,
-      calendarIds: calendars.map((calendar) => calendar.id),
-      defaultSelectedCalendarIds: calendars.filter((calendar) => calendar.primary || calendar.selected).map((calendar) => calendar.id),
-      primaryCalendarIds: calendars.filter((calendar) => calendar.primary).map((calendar) => calendar.id),
+      カレンダー数: calendars.length,
+      カレンダーID一覧: calendars.map((calendar) => calendar.id),
+      初期選択カレンダーID一覧: calendars.filter((calendar) => calendar.primary || calendar.selected).map((calendar) => calendar.id),
+      メインカレンダーID一覧: calendars.filter((calendar) => calendar.primary).map((calendar) => calendar.id),
     });
 
     return calendars;
@@ -247,10 +247,10 @@ export const fetchEventsForCalendar = async ({
   rangeEnd: Date;
 }): Promise<GoogleCalendarEvent[]> => {
   console.info("[GoogleCalendarAPI] 予定の取得を開始しました", {
-    accountId,
-    calendarId,
-    rangeEnd: rangeEnd.toISOString(),
-    rangeStart: rangeStart.toISOString(),
+    アカウントID: accountId,
+    カレンダーID: calendarId,
+    取得終了日時: rangeEnd.toISOString(),
+    取得開始日時: rangeStart.toISOString(),
   });
 
   try {
@@ -280,22 +280,22 @@ export const fetchEventsForCalendar = async ({
       .filter(Boolean) as GoogleCalendarEvent[];
 
     console.info("[GoogleCalendarAPI] 予定の取得が完了しました", {
-      accountId,
-      calendarId,
-      parsedEventCount: events.length,
-      rangeEnd: rangeEnd.toISOString(),
-      rangeStart: rangeStart.toISOString(),
-      rawEventCount: rawEvents.length,
+      アカウントID: accountId,
+      カレンダーID: calendarId,
+      解析済み予定数: events.length,
+      取得終了日時: rangeEnd.toISOString(),
+      取得開始日時: rangeStart.toISOString(),
+      取得元予定数: rawEvents.length,
     });
 
     return events;
   } catch (error) {
     console.error("[GoogleCalendarAPI] 予定の取得に失敗しました", {
-      accountId,
-      calendarId,
+      アカウントID: accountId,
+      カレンダーID: calendarId,
       error,
-      rangeEnd: rangeEnd.toISOString(),
-      rangeStart: rangeStart.toISOString(),
+      取得終了日時: rangeEnd.toISOString(),
+      取得開始日時: rangeStart.toISOString(),
     });
     throw error;
   }
