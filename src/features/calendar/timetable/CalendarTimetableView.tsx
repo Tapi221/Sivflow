@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { TagColorKey } from "@/chip/tag/tag.types";
+import type { CalendarTimetableColorKey, CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetablePeriod, CalendarTimetableSlot, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
 import { getTagColorStyle } from "@/chip/tag/tag.style";
 import { TAG_COLOR_KEYS } from "@/chip/tag/tag.constants";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
@@ -10,7 +10,6 @@ import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import { cn } from "@/lib/utils";
 import { CalendarTimetableSyllabusCatalogPanel } from "./CalendarTimetableSyllabusCatalogPanel";
-import type { CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetablePeriod, CalendarTimetableSlot, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "./calendarTimetable.types";
 import { normalizeVisibleDayCount } from "./calendarTimetable.storage";
 import { useCalendarTimetable } from "./useCalendarTimetable";
 
@@ -29,7 +28,7 @@ type CalendarTimetableGridStyle = CSSProperties & { "--calendar-timetable-day-co
 const TIMETABLE_GRID_TEMPLATE_COLUMNS = "56px repeat(var(--calendar-timetable-day-count), 112px)";
 const TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS = "34px repeat(var(--calendar-timetable-day-count), minmax(0, 1fr))";
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
-const DEFAULT_COURSE_COLOR_KEY: TagColorKey = "blue";
+const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
 const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
 
 const createTimetableSlotKey = ({ dayIndex, periodId }: TimetableSlot): string => `${dayIndex}:${periodId}`;
@@ -46,7 +45,7 @@ const createTimetableCourseSlotMap = (courses: CalendarTimetableCourse[]) => {
 
 const formatTimetableWeekRange = (weekDays: Date[]): string => `${format(weekDays[0], "M/d", { locale: ja })} - ${format(weekDays[weekDays.length - 1], "M/d", { locale: ja })}`;
 
-const getTimetableEntryStyle = (colorKey: TagColorKey) => getTagColorStyle(colorKey);
+const getTimetableEntryStyle = (colorKey: CalendarTimetableColorKey) => getTagColorStyle(colorKey);
 
 const getTimetableGridTemplateColumns = (density: CalendarTimetableDensity): string => density === "compact" ? TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS : TIMETABLE_GRID_TEMPLATE_COLUMNS;
 
@@ -102,7 +101,7 @@ const CalendarTimetableCourseEditor = ({ course, semesterId, initialSlot, period
   const [room, setRoom] = useState(course?.room ?? "");
   const [teacher, setTeacher] = useState(course?.teacher ?? "");
   const [memo, setMemo] = useState(course?.memo ?? "");
-  const [colorKey, setColorKey] = useState<TagColorKey>(course?.colorKey ?? DEFAULT_COURSE_COLOR_KEY);
+  const [colorKey, setColorKey] = useState<CalendarTimetableColorKey>(course?.colorKey ?? DEFAULT_COURSE_COLOR_KEY);
   const [slots, setSlots] = useState<CalendarTimetableSlot[]>(() => createEditorSlots(course, initialSlot));
 
   useEffect(() => {
