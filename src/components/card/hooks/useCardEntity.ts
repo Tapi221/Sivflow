@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useCards } from "./useCards";
 import { getLocalDb } from "@/services/localdb";
 import type { Card } from "@/types";
@@ -119,12 +119,6 @@ const readCardDraft = (cardId: string) => {
   }
 };
 
-/**
- * useCardEntity の責務:
- * - serverCard と draftCard を同じ normalize 経路で統合する
- * - 画面描画用に draft 優先の effectiveCard を返す
- * - 画面遷移前に flushDraft() で未保存 draft を server へ確定させる
- */
 export const useCardEntity = (cardId?: string | null) => {
   const { currentUser } = useAuthSession();
   const { updateCard } = useCards(undefined, undefined, { enabled: false });
