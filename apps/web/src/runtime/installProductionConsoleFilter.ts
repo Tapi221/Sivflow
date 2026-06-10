@@ -1,7 +1,7 @@
 type ConsoleMethodName = "debug" | "log" | "info" | "warn" | "error";
 type ConsoleMethod = (...data: unknown[]) => void;
 
-const JAPANESE_CONSOLE_LABELS_INSTALLED_KEY = "__flashcardMasterJapaneseConsoleLabelsInstalled";
+const JAPANESE_CONSOLE_LABELS_INSTALLED_KEY = "__sivflowJapaneseConsoleLabelsInstalled";
 
 const CONSOLE_MESSAGE_LABELS: Record<string, string> = {
   "[GoogleCalendarOAuth] reconnect diagnosis": "[GoogleCalendarOAuth] 再接続診断",
