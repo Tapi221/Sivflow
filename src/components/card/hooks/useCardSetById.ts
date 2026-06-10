@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import { type CardDisplayMode, type CardSet, DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode } from "@/types/domain/cardSet";
 
 type RawCardSetRecord = CardSet & {
@@ -9,9 +9,11 @@ type RawCardSetRecord = CardSet & {
   defaultDisplayMode?: CardDisplayMode | unknown;
 };
 
-const normalizeCardSetRecord = (
-  raw: RawCardSetRecord | undefined | null,
-): CardSet | null => {
+type CardSetUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
+  updateItem: (table: "cardSets", id: string, changes: Record<string, unknown>) => Promise<number>;
+};
+
+const normalizeCardSetRecord = (raw: RawCardSetRecord | undefined | null): CardSet | null => {
   if (!raw || raw.isDeleted) {
     return null;
   }
@@ -19,9 +21,7 @@ const normalizeCardSetRecord = (
   return {
     ...raw,
     folderId: raw.folderId ?? null,
-    defaultDisplayMode: normalizeCardDisplayMode(
-      raw.defaultDisplayMode ?? DEFAULT_CARD_DISPLAY_MODE,
-    ),
+    defaultDisplayMode: normalizeCardDisplayMode(raw.defaultDisplayMode ?? DEFAULT_CARD_DISPLAY_MODE),
   };
 };
 
@@ -40,28 +40,17 @@ export const useCardSetById = (cardSetId: string | null) => {
     const db = await getLocalDb(userId);
     const row = await db.cardSets.get(cardSetId);
 
-    return normalizeCardSetRecord(
-      (row as RawCardSetRecord | undefined | null) ?? null,
-    );
+    return normalizeCardSetRecord((row as RawCardSetRecord | undefined | null) ?? null);
   }, [userId, cardSetId]);
 
   const updateCardSet = useCallback(
-    async (
-      id: string,
-      data: Partial<
-        Pick<
-          CardSet,
-          "name" | "description" | "orderIndex" | "defaultDisplayMode"
-        >
-      >,
-    ): Promise<void> => {
+    async (id: string, data: Partial<Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode">>): Promise<void> => {
       if (!userId) {
         throw new Error("認証が必要です");
       }
 
-      const db = await getLocalDb(userId);
-
-      await db.cardSets.update(id, {
+      const db = (await getLocalDb(userId)) as CardSetUpdateCapableDb;
+      await db.updateItem("cardSets", id, {
         ...data,
         updatedAt: new Date(),
       });
