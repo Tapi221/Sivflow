@@ -234,4 +234,3 @@ export const createGoogleCalendarCustomToken = onCall({ region: REGION }, async 
 
 export { googleCalendarWebhook } from "#src/gcal/googleCalendarWebhook.js";
 export { renewExpiredWatchChannels } from "#src/gcal/renewWatchChannels.js";
-export { crawlTimetableSyllabusUrl, runTimetableSyllabusCatalogCrawl, upsertTimetableSyllabusSource } from "#src/timetable/syllabusCrawler.js";
