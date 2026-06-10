@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { type InkStroke } from "../../../packages/core/src/domain/card/ink/inkDocument";
-import { attachMobileDeviceToDesktopHandwritingSession, closeDesktopHandwritingSession, createDesktopHandwritingSessionManagerState, failDesktopHandwritingSession, getDesktopHandwritingDocumentKey, receiveDesktopHandwritingSessionManagerMessage, startDesktopHandwritingSession } from "../../../packages/platform/src/handwriting/desktopHandwritingSessionManager";
-import { createHandwritingStrokeDeltaMessage } from "../../../packages/platform/src/handwriting/handwritingStrokeMessages";
-import type { HandwritingDeviceInfo } from "../../../packages/platform/src/handwriting/handwritingSession.types";
+import { type InkStroke } from "@core/domain/card/ink/inkDocument";
+import type { HandwritingDeviceInfo } from "@platform/handwriting/handwritingSession.types";
+import { attachMobileDeviceToDesktopHandwritingSession, closeDesktopHandwritingSession, createDesktopHandwritingSessionManagerState, failDesktopHandwritingSession, getDesktopHandwritingDocumentKey, receiveDesktopHandwritingSessionManagerMessage, startDesktopHandwritingSession } from "@platform/handwriting/desktopHandwritingSessionManager";
+import { createHandwritingStrokeDeltaMessage } from "@platform/handwriting/handwritingStrokeMessages";
 
 const desktopDevice: HandwritingDeviceInfo = {
   id: "desktop-1",
