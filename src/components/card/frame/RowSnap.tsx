@@ -12,7 +12,7 @@ type RowSnapProps = {
 const EPSILON = 0.5;
 const SNAP_TOLERANCE_PX = 1;
 
-export const RowSnap = ({
+const RowSnap = ({
   rowPx,
   children,
   afterGapRows = 0,
@@ -90,3 +90,5 @@ export const RowSnap = ({
 
   return <>{children({ snapPaddingBottomPx, snapRef: setSnapRef })}</>;
 };
+
+export { RowSnap };
