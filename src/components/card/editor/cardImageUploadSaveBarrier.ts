@@ -1,5 +1,5 @@
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { EditorDraft } from "./cardEditorUtils";
