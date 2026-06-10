@@ -16,7 +16,7 @@ vi.mock("../localDB", () => ({
   getLocalDb: getLocalDbMock,
   LocalDB: {
     clearInstance: clearInstanceMock,
-    getDatabaseNameForUser: (userId: string) => `FlashcardMasterDB_${userId}`,
+    getDatabaseNameForUser: (userId: string) => `SivflowDB_${userId}`,
   },
 }));
 
@@ -38,7 +38,7 @@ describe("IndexedDB 再構築オーケストレーター", () => {
   });
 
   it("一部の item が失敗しても degraded success として再構築を継続する", async () => {
-    const oldDb = { close: vi.fn(), name: "FlashcardMasterDB_user-1" };
+    const oldDb = { close: vi.fn(), name: "SivflowDB_user-1" };
     const upsert = vi.fn(async (_table: string, data: unknown) => {
       if (data?.id === "bad-card") {
         throw new Error("bad payload");
