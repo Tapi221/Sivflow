@@ -29,7 +29,7 @@ const createDocument = (overrides: Partial<DocumentItem> = {}): DocumentItem => 
 });
 
 describe("resolvePdfDocumentSourceUrl", () => {
-  it("remote/download/webContent の順で stream 可能な URL を local/blob より優先する", () => {
+  it("local/blob を stream 可能な永続 URL より優先する", () => {
     const document = createDocument({
       blobUrl: "blob:http://localhost/blob-pdf",
       localUrl: "blob:http://localhost/local-pdf",
@@ -38,41 +38,37 @@ describe("resolvePdfDocumentSourceUrl", () => {
       googleDriveWebContentLink: "https://drive.google.com/uc?id=file-2&export=download",
     });
 
-    expect(resolvePdfDocumentSourceUrl(document)).toBe("https://firebasestorage.googleapis.com/v0/b/example.pdf");
+    expect(resolvePdfDocumentSourceUrl(document)).toBe("blob:http://localhost/local-pdf");
   });
 
-  it("remoteUrl がない場合は downloadUrl を local/blob より優先する", () => {
+  it("localUrl がない場合は blobUrl を優先する", () => {
     const document = createDocument({
       blobUrl: "blob:http://localhost/blob-pdf",
-      localUrl: "blob:http://localhost/local-pdf",
       downloadUrl: "https://drive.google.com/uc?id=file-1&export=download",
       googleDriveWebContentLink: "https://drive.google.com/uc?id=file-2&export=download",
     });
 
-    expect(resolvePdfDocumentSourceUrl(document)).toBe("https://drive.google.com/uc?id=file-1&export=download");
+    expect(resolvePdfDocumentSourceUrl(document)).toBe("blob:http://localhost/blob-pdf");
   });
 
-  it("remoteUrl が Google Drive view URL の場合は次の有効な URL にフォールバックする", () => {
+  it("local/blob がない場合は Google Drive view URL を避けて次の有効な URL にフォールバックする", () => {
     const document = createDocument({
       remoteUrl: "https://drive.google.com/file/d/file-1/view?usp=drivesdk",
       downloadUrl: "https://drive.google.com/uc?id=file-1&export=download",
-      localUrl: "blob:http://localhost/local-pdf",
     });
 
     expect(resolvePdfDocumentSourceUrl(document)).toBe("https://drive.google.com/uc?id=file-1&export=download");
   });
 
-  it("remoteUrl と downloadUrl がない場合は Google Drive の webContentLink を使う", () => {
+  it("local/blob と remote/download がない場合は Google Drive の webContentLink を使う", () => {
     const document = createDocument({
-      blobUrl: "blob:http://localhost/blob-pdf",
-      localUrl: "blob:http://localhost/local-pdf",
       googleDriveWebContentLink: "https://drive.google.com/uc?id=file-1&export=download",
     });
 
     expect(resolvePdfDocumentSourceUrl(document)).toBe("https://drive.google.com/uc?id=file-1&export=download");
   });
 
-  it("stream 可能な URL がない場合だけ local/blob を使う", () => {
+  it("localUrl があれば blobUrl より優先する", () => {
     const document = createDocument({
       blobUrl: "blob:http://localhost/blob-pdf",
       localUrl: "blob:http://localhost/local-pdf",
