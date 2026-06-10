@@ -2,17 +2,20 @@ type AssetQueueProcessor = {
   processAssetQueue: () => Promise<void>;
 };
 
-const AUTO_PROCESS_LISTENER_KEY =
-  "__flashcardPersistentQueueAutoProcessListenersBound";
+const AUTO_PROCESS_LISTENER_KEY = "__flashcardPersistentQueueAutoProcessListenersBound";
+
+const getAssetQueueProcessingReasonLabel = (reason: "load" | "online"): string => {
+  return reason === "load" ? "読み込み完了" : "オンライン復帰";
+};
 
 const triggerAssetQueueProcessing = (
   persistentQueue: AssetQueueProcessor,
   reason: "load" | "online",
 ): void => {
-  console.log(`[PersistentQueue] Trigger asset queue processing: ${reason}`);
+  console.log(`[PersistentQueue] アセットキュー処理を開始します: ${getAssetQueueProcessingReasonLabel(reason)}`);
   void persistentQueue.processAssetQueue().catch((error) => {
-    console.error("[PersistentQueue] Auto process failed", {
-      reason,
+    console.error("[PersistentQueue] 自動処理に失敗しました", {
+      reason: getAssetQueueProcessingReasonLabel(reason),
       error,
     });
   });
