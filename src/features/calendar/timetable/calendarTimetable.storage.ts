@@ -57,6 +57,18 @@ const createSyllabusCourseId = (): string => `syllabus-course-${Date.now().toStr
 
 const createDefaultSettings = (): CalendarTimetableSettings => ({ id: TIMETABLE_SETTINGS_ID, activeSemesterId: DEFAULT_SEMESTER_ID, visibleDayCount: DEFAULT_VISIBLE_DAY_COUNT, updatedAt: createTimestamp() });
 
+const createDefaultPeriods = (): CalendarTimetablePeriod[] => DEFAULT_TIMETABLE_PERIODS.map((period) => ({ ...period }));
+
+const getComparableTimestamp = (value: unknown): string => typeof value === "string" ? value : "";
+
+const getCourseSearchText = (course: CalendarTimetableSyllabusCourse): string => course.searchText || createSearchText([course.title, course.teacher, course.room, course.semesterLabel, course.credits, course.memo, course.syllabusUrl]);
+
+const restoreDefaultPeriods = async (): Promise<CalendarTimetablePeriod[]> => {
+  const periods = createDefaultPeriods();
+  await timetableDb.periods.bulkPut(periods);
+  return periods;
+};
+
 const findInstitutionByName = async (name: string): Promise<CalendarTimetableInstitution | null> => {
   const normalizedName = normalizeText(name);
   if (!normalizedName) return null;
@@ -84,17 +96,18 @@ const createCourseSlotsFromSyllabusCourse = (syllabusCourse: CalendarTimetableSy
 };
 
 const ensureCalendarTimetableSeedData = async (): Promise<void> => {
-  const [periodCount, settings] = await Promise.all([timetableDb.periods.count(), timetableDb.settings.get(TIMETABLE_SETTINGS_ID)]);
-
   await timetableDb.transaction("rw", timetableDb.periods, timetableDb.settings, async () => {
-    if (periodCount === 0) await timetableDb.periods.bulkPut(DEFAULT_TIMETABLE_PERIODS.map((period) => ({ ...period })));
+    const [periodCount, settings] = await Promise.all([timetableDb.periods.count(), timetableDb.settings.get(TIMETABLE_SETTINGS_ID)]);
+    if (periodCount === 0) await restoreDefaultPeriods();
     if (!settings) await timetableDb.settings.put(createDefaultSettings());
   });
 };
 
 const listCalendarTimetablePeriods = async (): Promise<CalendarTimetablePeriod[]> => {
   await ensureCalendarTimetableSeedData();
-  return sortPeriods(await timetableDb.periods.toArray());
+  const periods = sortPeriods(await timetableDb.periods.toArray());
+  if (periods.length > 0) return periods;
+  return sortPeriods(await restoreDefaultPeriods());
 };
 
 const listCalendarTimetableCourses = async (semesterId: string): Promise<CalendarTimetableCourse[]> => {
@@ -129,13 +142,13 @@ const searchCalendarTimetableSyllabusCourses = async (query: string, institution
   return courses
     .filter((course) => !institutionId || course.institutionId === institutionId)
     .filter((course) => !departmentId || course.departmentId === departmentId)
-    .filter((course) => words.length === 0 || words.every((word) => course.searchText.includes(word)))
-    .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
+    .filter((course) => words.length === 0 || words.every((word) => getCourseSearchText(course).includes(word)))
+    .sort((left, right) => getComparableTimestamp(right.updatedAt).localeCompare(getComparableTimestamp(left.updatedAt)))
     .slice(0, 80)
     .map((course) => {
       const institution = institutionMap.get(course.institutionId);
       const department = departmentMap.get(course.departmentId);
-      return { ...course, institutionName: institution?.name ?? "", departmentName: department?.name ?? "", facultyName: department?.facultyName ?? "" };
+      return { ...course, searchText: getCourseSearchText(course), institutionName: institution?.name ?? "", departmentName: department?.name ?? "", facultyName: department?.facultyName ?? "" };
     });
 };
 
