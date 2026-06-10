@@ -1,4 +1,5 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { addDays, differenceInCalendarDays, format, isSameMonth, startOfDay } from "date-fns";
 import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
@@ -22,6 +23,11 @@ type CalendarPrintRangeGridStyle = CSSProperties & {
   "--calendar-print-range-column-count": number;
 };
 
+type CalendarPrintDocumentPortalProps = {
+  children: ReactNode;
+};
+
+const CALENDAR_PRINT_DOCUMENT_HOST_CLASS_NAME = "calendar-print-document-host";
 const CALENDAR_PRINT_RANGE_MAX_COLUMNS = 7;
 const CALENDAR_PRINT_RANGE_WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 const CALENDAR_PRINT_RANGE_EMPTY_EVENTS: GoogleCalendarEvent[] = [];
@@ -57,39 +63,52 @@ const getEventsForDay = (events: GoogleCalendarEvent[], date: Date): GoogleCalen
   return events.filter((event) => eventOverlapsDay(event, date));
 };
 
+const CalendarPrintDocumentPortal = ({ children }: CalendarPrintDocumentPortalProps) => {
+  if (typeof document === "undefined" || !document.body) return null;
+
+  return createPortal(
+    <div className={CALENDAR_PRINT_DOCUMENT_HOST_CLASS_NAME} aria-hidden="true" data-calendar-print-document="">
+      {children}
+    </div>,
+    document.body,
+  );
+};
+
 const CalendarPrintRangeView = ({ titleLabel, rangeLabel, focusDate, range, events }: CalendarPrintRangeViewProps) => {
   const days = createPrintRangeDays(range);
   const gridStyle = createPrintGridStyle(days);
 
   return (
-    <section className="calendar-print-range-view" aria-hidden="true">
-      <div className="calendar-print-range-header">
-        <h1 className="calendar-print-range-title">{titleLabel}</h1>
-        <p className="calendar-print-range-subtitle">{rangeLabel}</p>
-      </div>
+    <CalendarPrintDocumentPortal>
+      <section className="calendar-print-range-view">
+        <div className="calendar-print-range-header">
+          <h1 className="calendar-print-range-title">{titleLabel}</h1>
+          <p className="calendar-print-range-subtitle">{rangeLabel}</p>
+        </div>
 
-      <div className="calendar-print-range-grid" style={gridStyle}>
-        {days.map((day) => {
-          const dayEvents = getEventsForDay(events, day.date);
-          const isOutsideFocusMonth = !isSameMonth(day.date, focusDate);
+        <div className="calendar-print-range-grid" style={gridStyle}>
+          {days.map((day) => {
+            const dayEvents = getEventsForDay(events, day.date);
+            const isOutsideFocusMonth = !isSameMonth(day.date, focusDate);
 
-          return (
-            <article key={day.key} className={cn("calendar-print-range-day", isOutsideFocusMonth && "calendar-print-range-day-outside")}>
-              <div className="calendar-print-range-day-heading">
-                <span className="calendar-print-range-day-number">{format(day.date, "d")}</span>
-                <span className="calendar-print-range-weekday">{CALENDAR_PRINT_RANGE_WEEKDAY_LABELS[day.date.getDay()]}</span>
-              </div>
+            return (
+              <article key={day.key} className={cn("calendar-print-range-day", isOutsideFocusMonth && "calendar-print-range-day-outside")}>
+                <div className="calendar-print-range-day-heading">
+                  <span className="calendar-print-range-day-number">{format(day.date, "d")}</span>
+                  <span className="calendar-print-range-weekday">{CALENDAR_PRINT_RANGE_WEEKDAY_LABELS[day.date.getDay()]}</span>
+                </div>
 
-              <div className="calendar-print-range-events">
-                {(dayEvents.length > 0 ? dayEvents : CALENDAR_PRINT_RANGE_EMPTY_EVENTS).map((event) => (
-                  <CalendarEventChipMonth key={event.id} event={event} tooltipDisabled />
-                ))}
-              </div>
-            </article>
-          );
-        })}
-      </div>
-    </section>
+                <div className="calendar-print-range-events">
+                  {(dayEvents.length > 0 ? dayEvents : CALENDAR_PRINT_RANGE_EMPTY_EVENTS).map((event) => (
+                    <CalendarEventChipMonth key={event.id} event={event} tooltipDisabled />
+                  ))}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    </CalendarPrintDocumentPortal>
   );
 };
 

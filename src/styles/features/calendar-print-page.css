@@ -3,6 +3,17 @@
     display: none;
   }
 
+  .calendar-print-document-host {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
   @media print {
     @page { size: portrait; }
 
@@ -21,18 +32,19 @@
       background: #ffffff !important;
     }
 
-    body.calendar-printing .calendar-print-panel {
-      display: flex !important;
-      width: 100% !important;
-      min-height: 0 !important;
-      overflow: visible !important;
-      background: #ffffff !important;
+    body.calendar-printing #root {
+      display: none !important;
     }
 
-    body.calendar-printing [data-calendar-print-toolbar],
-    body.calendar-printing .calendar-print-panel > .calendar-print-screen-content,
-    body.calendar-printing .calendar-print-panel > .calendar-print-screen-content + :not(.calendar-print-range-view) {
-      display: none !important;
+    body.calendar-printing .calendar-print-document-host {
+      position: static !important;
+      display: block !important;
+      width: auto !important;
+      height: auto !important;
+      overflow: visible !important;
+      pointer-events: auto !important;
+      visibility: visible !important;
+      background: #ffffff !important;
     }
 
     body.calendar-printing .calendar-print-range-view {

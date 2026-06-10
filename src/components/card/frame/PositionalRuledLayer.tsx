@@ -10,7 +10,7 @@ interface PositionalRuledLayerProps {
  * Must be inside a `position: relative` container.
  * y positions are relative to the container's top.
  */
-export const PositionalRuledLayer = ({
+const PositionalRuledLayer = ({
   visibleRules,
   color = "rgba(0,0,0,0.05)",
   insetX = 0,
@@ -39,3 +39,5 @@ export const PositionalRuledLayer = ({
     </>
   );
 };
+
+export { PositionalRuledLayer };
