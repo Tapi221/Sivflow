@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle } from "../../src/features/calendar/grid/weekdayTimeGridGeometry";
-import { WEEKDAY_HOURS, WEEKDAY_MINUTES_PER_HOUR } from "../../src/features/calendar/grid/grid.layout.constants.desktop";
-import { layoutCalendarTimeGridEvents } from "../../packages/core/src/calendar/timeGridLayout";
-import type { CalendarEvent } from "../../packages/core/src/calendar/calendarEvent.types";
-import type { CalendarTimeGridLayoutEntry } from "../../packages/core/src/calendar/timeGridLayout";
+import { getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle } from "@/features/calendar/grid/weekdayTimeGridGeometry";
+import { WEEKDAY_HOURS, WEEKDAY_MINUTES_PER_HOUR } from "@/features/calendar/grid/grid.layout.constants.desktop";
+import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
+import { layoutCalendarTimeGridEvents } from "@core/calendar/timeGridLayout";
+import type { CalendarTimeGridLayoutEntry } from "@core/calendar/timeGridLayout";
 
 const NEXT_DAY_PREVIEW_MINUTES = 30;
 const NEXT_DAY_PREVIEW_HOURS = NEXT_DAY_PREVIEW_MINUTES / WEEKDAY_MINUTES_PER_HOUR;
