@@ -21,14 +21,6 @@ import { cn } from '@/lib/utils';
 
 import { Toolbar } from './toolbar';
 
-const useOptionalPluginOption = <TValue,>(plugin: { key: string }, option: string, fallback: TValue): TValue => {
-  try {
-    return usePluginOption(plugin, option) as TValue;
-  } catch {
-    return fallback;
-  }
-};
-
 export function FloatingToolbar({
   children,
   className,
@@ -39,8 +31,8 @@ export function FloatingToolbar({
 }) {
   const editorId = useEditorId();
   const focusedEditorId = useEventEditorValue('focus');
-  const isFloatingLinkOpen = Boolean(useOptionalPluginOption({ key: KEYS.link }, 'mode', null));
-  const isAIChatOpen = Boolean(useOptionalPluginOption({ key: KEYS.aiChat }, 'open', false));
+  const isFloatingLinkOpen = !!usePluginOption({ key: KEYS.link }, 'mode');
+  const isAIChatOpen = usePluginOption({ key: KEYS.aiChat }, 'open');
 
   const floatingToolbarState = useFloatingToolbarState({
     editorId,
