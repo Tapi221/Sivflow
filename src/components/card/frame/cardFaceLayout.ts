@@ -1,20 +1,20 @@
-export type BlockLayoutKind = "ruled" | "non-ruled";
+type BlockLayoutKind = "ruled" | "non-ruled";
 
-export interface MeasuredBlock {
+interface MeasuredBlock {
   kind: BlockLayoutKind;
   /** y position relative to CardSurface top */
   top: number;
   height: number;
 }
 
-export interface CardFaceLayout {
+interface CardFaceLayout {
   /** y positions (CardSurface-relative) where ruled lines should be drawn */
   visibleRules: number[];
   usedHeight: number;
   bottomSlackPx: number;
 }
 
-export const buildCardFaceLayout = (
+const buildCardFaceLayout = (
   blocks: MeasuredBlock[],
   ruledTop: number,
   ruledBottom: number,
@@ -55,3 +55,6 @@ export const buildCardFaceLayout = (
     ),
   };
 };
+
+export { buildCardFaceLayout };
+export type { BlockLayoutKind, CardFaceLayout, MeasuredBlock };
