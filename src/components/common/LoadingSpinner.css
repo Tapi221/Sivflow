@@ -1,0 +1,12 @@
+.app-loading-spinner__icon {
+  position: relative;
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  color: var(--app-loading-spinner-indicator);
+}
+
+.app-loading-spinner__icon > .loadingIcon {
+  inset: 0;
+  margin: auto;
+}
