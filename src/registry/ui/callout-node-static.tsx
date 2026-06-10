@@ -6,11 +6,7 @@ import { SlateElement } from 'platejs/static';
 
 import { cn } from '@/lib/utils';
 
-export function CalloutElementStatic({
-  children,
-  className,
-  ...props
-}: SlateElementProps) {
+export function CalloutElementStatic({ children, className, ...props }: SlateElementProps) {
   return (
     <SlateElement
       className={cn('my-1 flex rounded-sm bg-muted p-4 pl-3', className)}
@@ -20,16 +16,8 @@ export function CalloutElementStatic({
       {...props}
     >
       <div className="flex w-full gap-2 rounded-md">
-        <div
-          className="size-6 select-none text-[18px]"
-          style={{
-            fontFamily:
-              '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", EmojiSymbols',
-          }}
-        >
-          <span data-plate-prevent-deserialization>
-            {(props.element.icon as any) || '💡'}
-          </span>
+        <div className="size-6 select-none text-[18px]">
+          <span data-plate-prevent-deserialization>{(props.element.icon as any) || '💡'}</span>
         </div>
         <div className="w-full">{children}</div>
       </div>
@@ -37,12 +25,8 @@ export function CalloutElementStatic({
   );
 }
 
-/**
- * DOCX-compatible callout component using table layout for side-by-side icon and content.
- */
 export function CalloutElementDocx({ children, ...props }: SlateElementProps) {
-  const backgroundColor =
-    (props.element.backgroundColor as string) || '#f4f4f5';
+  const backgroundColor = (props.element.backgroundColor as string) || '#f4f4f5';
   const icon = (props.element.icon as string) || '💡';
 
   return (
@@ -67,8 +51,6 @@ export function CalloutElementDocx({ children, ...props }: SlateElementProps) {
                 padding: '8px 4px 8px 8px',
                 border: 'none',
                 fontSize: '18px',
-                fontFamily:
-                  '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", EmojiSymbols',
               }}
             >
               <span data-plate-prevent-deserialization>{icon}</span>
