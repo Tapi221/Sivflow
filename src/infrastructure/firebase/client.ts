@@ -1,9 +1,26 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { initializeApp, type FirebaseApp } from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
 import type { Firestore } from "firebase/firestore";
 import { collection, getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
-import { getFunctions } from "firebase/functions";
-import { getStorage } from "firebase/storage";
+import { getFunctions, type Functions } from "firebase/functions";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
+
+type FirebaseClientState = {
+  app: FirebaseApp | null;
+  auth: Auth | null;
+  storage: FirebaseStorage | null;
+  functionsClient: Functions | null;
+  firestoreDb: Firestore | null;
+};
+
+const REQUIRED_FIREBASE_ENV_KEYS = [
+  "VITE_FIREBASE_API_KEY",
+  "VITE_FIREBASE_AUTH_DOMAIN",
+  "VITE_FIREBASE_PROJECT_ID",
+  "VITE_FIREBASE_STORAGE_BUCKET",
+  "VITE_FIREBASE_MESSAGING_SENDER_ID",
+  "VITE_FIREBASE_APP_ID",
+] as const;
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -14,73 +31,107 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const requireFirebaseConfig = (): void => {
-  const missing: string[] = [];
-
-  if (!firebaseConfig.apiKey?.trim()) missing.push("VITE_FIREBASE_API_KEY");
-  if (!firebaseConfig.authDomain?.trim())
-    missing.push("VITE_FIREBASE_AUTH_DOMAIN");
-  if (!firebaseConfig.projectId?.trim())
-    missing.push("VITE_FIREBASE_PROJECT_ID");
-  if (!firebaseConfig.storageBucket?.trim())
-    missing.push("VITE_FIREBASE_STORAGE_BUCKET");
-  if (!firebaseConfig.messagingSenderId?.trim())
-    missing.push("VITE_FIREBASE_MESSAGING_SENDER_ID");
-  if (!firebaseConfig.appId?.trim()) missing.push("VITE_FIREBASE_APP_ID");
-
-  if (missing.length > 0) {
-    throw new Error(
-      `[env] Missing required Firebase env vars: ${missing.join(
-        ", ",
-      )}. Copy .env.example to .env.local (or .env) and set values.`,
-    );
-  }
+const getFirebaseEnvValue = (key: (typeof REQUIRED_FIREBASE_ENV_KEYS)[number]) => {
+  return import.meta.env[key];
 };
 
-if (import.meta.env.MODE !== "test") {
-  requireFirebaseConfig();
-}
-
-const app = initializeApp(firebaseConfig);
-
-export const auth = getAuth(app);
-export const storage = getStorage(app);
-export const functionsClient = getFunctions(app, "asia-northeast1");
-
-let firestoreDbInternal: Firestore | null = null;
-
-try {
-  firestoreDbInternal = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-      tabManager: persistentMultipleTabManager(),
-    }),
+const getMissingFirebaseEnvVars = (): string[] => {
+  return REQUIRED_FIREBASE_ENV_KEYS.filter((key) => {
+    const value = getFirebaseEnvValue(key);
+    return typeof value !== "string" || value.trim().length === 0;
   });
-  console.log("[Firebase] Firestore initialized with persistent cache");
-} catch (error: unknown) {
-  const message = error instanceof Error ? error.message : String(error);
+};
 
-  console.warn(
-    "[Firebase] initializeFirestore failed, falling back to getFirestore:",
-    message,
-  );
+const createUnavailableState = (): FirebaseClientState => ({
+  app: null,
+  auth: null,
+  storage: null,
+  functionsClient: null,
+  firestoreDb: null,
+});
+
+export const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
+export const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
+
+const initializeFirebaseClient = (): FirebaseClientState => {
+  if (!isFirebaseClientAvailable) {
+    if (import.meta.env.DEV || import.meta.env.MODE === "test") {
+      console.warn(
+        `[Firebase] Firebase env is incomplete; starting in local-first mode without cloud services. Missing: ${missingFirebaseEnvVars.join(", ")}`,
+      );
+    }
+    return createUnavailableState();
+  }
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const storage = getStorage(app);
+  const functionsClient = getFunctions(app, "asia-northeast1");
+  let firestoreDb: Firestore | null = null;
 
   try {
-    firestoreDbInternal = getFirestore(app);
-    console.log("[Firebase] Fallback to getFirestore() successful");
-  } catch (fallbackError: unknown) {
-    console.error(
-      "[Firebase] All Firestore initialization attempts failed:",
-      fallbackError,
-    );
-  }
-}
+    firestoreDb = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    });
+    console.log("[Firebase] Firestore initialized with persistent cache");
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
 
-export const firestoreDb: Firestore | null = firestoreDbInternal;
-export const db: Firestore | null = firestoreDbInternal;
+    console.warn(
+      "[Firebase] initializeFirestore failed, falling back to getFirestore:",
+      message,
+    );
+
+    try {
+      firestoreDb = getFirestore(app);
+      console.log("[Firebase] Fallback to getFirestore() successful");
+    } catch (fallbackError: unknown) {
+      console.error(
+        "[Firebase] All Firestore initialization attempts failed:",
+        fallbackError,
+      );
+    }
+  }
+
+  return {
+    app,
+    auth,
+    storage,
+    functionsClient,
+    firestoreDb,
+  };
+};
+
+const firebaseClientState = initializeFirebaseClient();
+
+export const firebaseApp = firebaseClientState.app;
+export const auth = firebaseClientState.auth as Auth;
+export const storage = firebaseClientState.storage as FirebaseStorage;
+export const functionsClient = firebaseClientState.functionsClient as Functions;
+export const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
+export const db: Firestore | null = firebaseClientState.firestoreDb;
+
+export const requireFirebaseClient = (): FirebaseClientState => {
+  if (isFirebaseClientAvailable && firebaseClientState.app) {
+    return firebaseClientState;
+  }
+
+  throw new Error(
+    `[Firebase] Firebase client is unavailable. Missing env vars: ${missingFirebaseEnvVars.join(", ")}`,
+  );
+};
 
 export const requireFirestoreDb = (): Firestore => {
   if (firestoreDb) {
     return firestoreDb;
+  }
+
+  if (!isFirebaseClientAvailable) {
+    throw new Error(
+      `[Firebase] Firestore is unavailable because Firebase env is incomplete: ${missingFirebaseEnvVars.join(", ")}`,
+    );
   }
 
   throw new Error(
@@ -91,13 +142,21 @@ export const requireFirestoreDb = (): Firestore => {
 const debugFirebase = (): void => {
   console.log("=== Firebase Debug Info ===");
 
+  if (!firebaseClientState.app) {
+    console.log("App instance: unavailable");
+    console.log("Mode: local-first without cloud services");
+    console.log("Missing env vars:", missingFirebaseEnvVars.join(", "));
+    console.log("==========================");
+    return;
+  }
+
   try {
-    console.log("App name:", app.name);
-    console.log("DB instance:", firestoreDbInternal ? "exists" : "MISSING");
+    console.log("App name:", firebaseClientState.app.name);
+    console.log("DB instance:", firestoreDb ? "exists" : "MISSING");
     console.log("Functions instance:", functionsClient ? "exists" : "MISSING");
 
-    if (firestoreDbInternal) {
-      const testRef = collection(firestoreDbInternal, "test_connection");
+    if (firestoreDb) {
+      const testRef = collection(firestoreDb, "test_connection");
       console.log("collection() basic check passed:", testRef.path);
     }
   } catch (error) {
