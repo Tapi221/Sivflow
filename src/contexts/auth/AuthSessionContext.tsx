@@ -7,6 +7,11 @@ import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import { AuthSessionContext, type AuthSessionProviderProps, type AuthSessionContextType } from "./AuthSessionContextCore";
 import { bootstrapUser } from "./bootstrapUser";
 
+const refreshAuthProfile = async (user: FirebaseUser): Promise<FirebaseUser> => {
+  await user.reload();
+  return auth.currentUser ?? user;
+};
+
 const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,7 +37,7 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
         } catch (error) {
           console.error("[Auth] Fatal setup error:", error);
         } finally {
-          setCurrentUser(user);
+          setCurrentUser(await refreshAuthProfile(user));
           setLoading(false);
         }
         return;
