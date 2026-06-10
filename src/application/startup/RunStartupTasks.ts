@@ -28,7 +28,7 @@ const logIntegrityReport = (report: Awaited<ReturnType<typeof checkDataIntegrity
     );
 
     console.error(
-      "[Critical] Data integrity issues found:",
+      "[重大] データ整合性の問題を検出しました:",
       report.issues.length,
       sanitizeForLog(issueSummary),
     );
@@ -36,11 +36,11 @@ const logIntegrityReport = (report: Awaited<ReturnType<typeof checkDataIntegrity
   }
 
   console.log(
-    "[Safe] Data integrity check passed (0 errors). Healthy items:",
+    "[安全] データ整合性チェックは正常です（エラー 0 件）。正常な項目:",
     report.totalCards,
-    "cards,",
+    "カード,",
     report.totalFolders,
-    "folders.",
+    "フォルダー。",
   );
 };
 
@@ -70,7 +70,7 @@ export const runStartupTasks = async ({
     }
 
     console.log(
-      "[LegacyImageMigration] Startup migration finished",
+      "[レガシー画像移行] 起動時移行が完了しました",
       migrationSummary,
     );
 
@@ -81,7 +81,7 @@ export const runStartupTasks = async ({
     }
 
     if (didBackup) {
-      console.log("Auto backup completed on startup");
+      console.log("起動時の自動バックアップが完了しました");
     }
 
     const syncService = await SyncServiceFactory.getInstance(userId);
@@ -90,7 +90,7 @@ export const runStartupTasks = async ({
       return;
     }
 
-    console.log("[Sync] Startup sync initiated");
+    console.log("[同期] 起動時同期を開始しました");
     await syncService.performStartupSync();
 
     if (isDisposed()) {
@@ -105,6 +105,6 @@ export const runStartupTasks = async ({
 
     logIntegrityReport(report);
   } catch (error) {
-    console.error("[Critical] Startup tasks failed:", sanitizeForLog(error));
+    console.error("[重大] 起動時タスクに失敗しました:", sanitizeForLog(error));
   }
 };
