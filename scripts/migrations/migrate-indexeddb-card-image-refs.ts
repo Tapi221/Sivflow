@@ -4,7 +4,7 @@
  */
 
 import { normalizeCardImageRefs } from "@/domain/assets/cardImageRefNormalizer";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 
 const migrateIndexedDbCardImages = async (userId: string) => {
   const db = await getLocalDb(userId);
