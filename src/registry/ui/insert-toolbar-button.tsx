@@ -37,7 +37,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/registry/ui/shadcn/dropdown-menu';
 import {
   insertBlock,
   insertInlineElement,
