@@ -1,21 +1,10 @@
 import type { ChatMessage } from '@/registry/components/editor/use-chat';
 import type { SlateEditor } from 'platejs';
-
 import dedent from 'dedent';
-
-import {
-  addSelection,
-  buildStructuredPrompt,
-  formatTextFromMessages,
-  getLastUserInstruction,
-  getMarkdownWithSelection,
-  isMultiBlocks,
-  isSelectionInTable,
-  isSingleCellSelection,
-} from '@/app/api/ai/command/utils';
-
-import { buildEditTableMultiCellPrompt } from './getEditTablePrompt';
+import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction, getMarkdownWithSelection, isMultiBlocks, isSelectionInTable, isSingleCellSelection } from '@/app/api/ai/command/utils';
 import { commonEditRules } from './common';
+import { buildEditTableMultiCellPrompt } from './getEditTablePrompt';
+
 function buildEditMultiBlockPrompt(
   editor: SlateEditor,
   messages: ChatMessage[]
@@ -78,8 +67,8 @@ function buildEditMultiBlockPrompt(
       - Do not change heading levels, list markers, link URLs, or add/remove blank lines unless explicitly instructed.
     `,
     task: dedent`
-      The following <context> is user-provided Markdown content that needs improvement.
-      Your output should be a seamless replacement of the original content.
+      Rewrite the selected multi-block Markdown according to the latest user instruction.
+      Output only the rewritten Markdown.
     `,
   });
 }
