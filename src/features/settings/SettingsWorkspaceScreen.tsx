@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, type SyntheticEvent, useEffect, useMemo, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { UserSettings } from "@/types";
@@ -373,6 +373,10 @@ const getAccountInitial = (displayName: string): string => {
   return initial ? initial.toUpperCase() : "M";
 };
 
+const hideBrokenAccountImage = (event: SyntheticEvent<HTMLImageElement>): void => {
+  event.currentTarget.hidden = true;
+};
+
 const getLocalAiConnectionStatusLabel = (status: LocalAiConnectionStatus, copy: SettingsWorkspaceCopy): string => {
   if (status === "testing") return copy.localAiStatusTesting;
   if (status === "connected") return copy.localAiStatusConnected;
@@ -533,7 +537,7 @@ const SettingsWorkspaceScreen = () => {
           {activeSectionId === "account" ? (
             <SettingsSectionBlock title={copy.accountProfileTitle} description={copy.accountProfileDescription}>
               <div className="settings-workspace__profile-card">
-                <div className="settings-workspace__avatar" aria-hidden="true">{currentUser?.photoURL ? <img src={currentUser.photoURL} alt="" /> : <span>{accountInitial}</span>}</div>
+                <div className="settings-workspace__avatar" aria-hidden="true"><span>{accountInitial}</span>{currentUser?.photoURL ? <img src={currentUser.photoURL} alt="" referrerPolicy="no-referrer" onError={hideBrokenAccountImage} /> : null}</div>
                 <div className="settings-workspace__profile-copy"><strong>{accountName}</strong><span>{currentUser?.email ?? copy.emailUnset}</span></div>
                 <button type="button" className="settings-workspace__secondary-button" onClick={handleLogout} disabled={loading || !currentUser}>{copy.logout}</button>
               </div>
