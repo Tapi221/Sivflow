@@ -8,6 +8,10 @@ interface SecurityContextType {
   dismissSecurityAlert: (alertId: string) => Promise<void>;
 }
 
+interface SecurityProviderProps {
+  children: ReactNode;
+}
+
 const defaultSecurityState: SecurityState = {
   isLocked: false,
   requires2FA: false,
@@ -23,10 +27,6 @@ const SecurityContext = createContext<SecurityContextType>({
 export const useSecurity = () => {
   return useContext(SecurityContext);
 };
-
-interface SecurityProviderProps {
-  children: ReactNode;
-}
 
 export const SecurityProvider = ({ children }: SecurityProviderProps) => {
   const { currentUser } = useAuthSession();
@@ -54,7 +54,7 @@ export const SecurityProvider = ({ children }: SecurityProviderProps) => {
       if (!active) return;
 
       stopMonitoring = syncService.monitorSecurity((newState) => {
-        console.log("[Security] Security state updated:", newState);
+        console.log("[セキュリティ] セキュリティ状態を更新しました:", newState);
         setSecurityState(newState);
       });
     };
