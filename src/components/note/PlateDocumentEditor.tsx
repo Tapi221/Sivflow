@@ -343,7 +343,6 @@ const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
         <div className="px-6 py-12 lg:px-10">
           <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-4">
             <div className="flex min-w-0 flex-col gap-1 px-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#a1a1aa]">Plate</p>
               <h1 className="truncate text-[28px] font-semibold leading-tight tracking-[-0.035em] text-[#09090b]">{note.title}</h1>
             </div>
             <div className="min-h-[680px] overflow-hidden rounded-xl border border-[#e4e4e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
