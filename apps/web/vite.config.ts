@@ -339,7 +339,7 @@ export default defineConfig(({ command }) => ({
       includeAssets: ["favicon.ico", "icon.svg"],
       injectManifest: {
         globIgnores: ["**/index.html"],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
       },
       devOptions: {
         enabled: false,
