@@ -19,34 +19,44 @@
   contain-intrinsic-size: var(--pdf-page-width, 816px) var(--pdf-page-height, 1056px);
 }
 
+/* DOMベースの表示ウィンドウ外では重いオーバーレイを止める */
+.pdf-pane__viewer .page[data-window-retained="false"] .textLayer,
+.pdf-pane__viewer .page[data-window-retained="false"] .annotationLayer,
+.pdf-pane__viewer .page[data-window-retained="false"] .annotationEditorLayer,
+.pdf-pane__viewer .page[data-window-retained="false"] .xfaLayer,
+.pdf-pane__viewer .page[data-window-retained="false"] .structTreeLayer {
+  pointer-events: none;
+  visibility: hidden;
+}
+
 /* スクロール中のみGPU合成レイヤーを有効化（常時適用によるメモリ消費を防止） */
-.pdf-pane--scrolling .pdf-pane__scroll-container {
+.pdf-pane__scroll-container.pdf-pane--scrolling {
   will-change: scroll-position;
 }
 
-.pdf-pane--scrolling .pdf-pane__viewer .canvasWrapper,
-.pdf-pane--scrolling .pdf-pane__viewer canvas {
+.pdf-pane__viewer.pdf-pane--scrolling .canvasWrapper,
+.pdf-pane__viewer.pdf-pane--scrolling canvas {
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
 /* スクロール中はPDF.jsが保持している描画済みページだけcontent-visibility:autoとの競合を防止 */
-.pdf-pane--scrolling .pdf-pane__viewer .page[data-loaded="true"] {
+.pdf-pane__viewer.pdf-pane--scrolling .page[data-loaded="true"] {
   content-visibility: visible;
 }
 
 /* スクロール中のオーバーレイレイヤーのイベント無効化 */
-.pdf-pane--scrolling .textLayer,
-.pdf-pane--scrolling .annotationLayer,
-.pdf-pane--scrolling .annotationEditorLayer,
-.pdf-pane--scrolling .xfaLayer,
-.pdf-pane--scrolling .structTreeLayer {
+.pdf-pane__viewer.pdf-pane--scrolling .textLayer,
+.pdf-pane__viewer.pdf-pane--scrolling .annotationLayer,
+.pdf-pane__viewer.pdf-pane--scrolling .annotationEditorLayer,
+.pdf-pane__viewer.pdf-pane--scrolling .xfaLayer,
+.pdf-pane__viewer.pdf-pane--scrolling .structTreeLayer {
   pointer-events: none;
 }
 
 /* スクロール中のテキスト・注釈レイヤー非表示化（レンダリング負荷軽減） */
-.pdf-pane--scrolling .textLayer,
-.pdf-pane--scrolling .annotationLayer,
-.pdf-pane--scrolling .annotationEditorLayer {
+.pdf-pane__viewer.pdf-pane--scrolling .textLayer,
+.pdf-pane__viewer.pdf-pane--scrolling .annotationLayer,
+.pdf-pane__viewer.pdf-pane--scrolling .annotationEditorLayer {
   visibility: hidden;
 }
