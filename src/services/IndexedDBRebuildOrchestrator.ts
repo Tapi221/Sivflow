@@ -1,22 +1,22 @@
 import { Dexie } from "dexie";
-import { getLocalDb } from "./localDB";
+import { getLocalDb } from "@/services/localdb";
 import { CURRENT_TAG_STORE } from "@/services/localdb/tagStoreNames";
 import { CloudSyncAdapter } from "@/services/logic/CloudSyncAdapter";
 import { type BlobUrlFix, sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
-const REBUILD_TABLE_BY_TYPE = {
-  card: "cards",
-  folder: "folders",
-  cardSet: "cardSets",
-  document: "documents",
-  tag: CURRENT_TAG_STORE,
-  asset: "images",
-  userSetting: "userSettings",
-} as const;
+type RebuildTableByType = {
+  card: "cards";
+  folder: "folders";
+  cardSet: "cardSets";
+  document: "documents";
+  tag: typeof CURRENT_TAG_STORE;
+  asset: "images";
+  userSetting: "userSettings";
+};
 
-type RebuildSupportedType = keyof typeof REBUILD_TABLE_BY_TYPE;
-type RebuildTableName = (typeof REBUILD_TABLE_BY_TYPE)[RebuildSupportedType];
+type RebuildSupportedType = keyof RebuildTableByType;
+type RebuildTableName = RebuildTableByType[RebuildSupportedType];
 
 type PullChange = {
   type?: unknown;
@@ -29,6 +29,16 @@ type RebuildFailure = {
   id: string;
   error: string;
   fixes?: BlobUrlFix[];
+};
+
+const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
+  card: "cards",
+  folder: "folders",
+  cardSet: "cardSets",
+  document: "documents",
+  tag: CURRENT_TAG_STORE,
+  asset: "images",
+  userSetting: "userSettings",
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
@@ -133,7 +143,7 @@ export class IndexedDBRebuildOrchestrator {
         oldDb.close();
       }
 
-      const { LocalDB: LocalDBClass } = await import("./localDB");
+      const { LocalDB: LocalDBClass } = await import("@/services/localdb");
       LocalDBClass.clearInstance();
 
       const dbName =
@@ -224,8 +234,7 @@ export class IndexedDBRebuildOrchestrator {
       }
 
       try {
-        const { IndexedDBMetadataService } =
-          await import("./IndexedDBMetadataService");
+        const { IndexedDBMetadataService } = await import("./IndexedDBMetadataService");
         const metadataService = new IndexedDBMetadataService(newDb, userId);
         await metadataService.markClean();
       } catch (error) {
