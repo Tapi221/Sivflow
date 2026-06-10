@@ -1,8 +1,9 @@
+import { migrateLegacyLocalDbBrandIfNeeded } from "./brandMigration";
 import { deleteUserPersistentDatabases, getDatabaseNameForUser } from "./generation";
-import { createInMemoryLocalDB, type InMemoryLocalDB } from "@/services/InMemoryLocalDB";
 import { LocalDB } from "./LocalDB";
-import { clearLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "@/services/localDBRuntimeState";
 import type { LocalDBSyncStore } from "./types";
+import { clearLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "@/services/localDBRuntimeState";
+import { createInMemoryLocalDB, type InMemoryLocalDB } from "@/services/InMemoryLocalDB";
 
 let instance: LocalDB | null = null;
 let cachedInstance: LocalDB | InMemoryLocalDB | null = null;
@@ -104,6 +105,8 @@ export const getInstance = async (userId?: string): Promise<LocalDBSyncStore> =>
 
   try {
     clearLocalDBResetFailureReason();
+    const databaseName = getDatabaseNameForUser(targetUserId);
+    await migrateLegacyLocalDbBrandIfNeeded(targetUserId, databaseName);
     getLocalDbGlobal().__ALLOW_LOCAL_DB_CONSTRUCTION = true;
     const db = new LocalDB(targetUserId);
     await db.open();
