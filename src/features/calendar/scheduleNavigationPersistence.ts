@@ -17,8 +17,9 @@ export type ScheduleNavigationState = {
   selectedViewMode: CalendarViewModeSelection;
 };
 
-export const SCHEDULE_NAVIGATION_STORAGE_KEY = "flashcard-master:schedule:navigation";
+export const SCHEDULE_NAVIGATION_STORAGE_KEY = "sivflow:schedule:navigation";
 
+const LEGACY_SCHEDULE_NAVIGATION_STORAGE_KEY = "flashcard-master:schedule:navigation";
 const CALENDAR_VIEW_MODES = ["year", "month", "week", "threeDays", "days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const CALENDAR_VIEW_MODE_SET = new Set<CalendarViewMode>(CALENDAR_VIEW_MODES);
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
@@ -47,11 +48,23 @@ const readStoredSelectedViewMode = (value: unknown): CalendarViewModeSelection |
   return selection.length > 1 ? selection : selection[0] ?? null;
 };
 
+const readStoredScheduleNavigationRaw = (): string | null => {
+  const current = window.localStorage.getItem(SCHEDULE_NAVIGATION_STORAGE_KEY);
+  if (current) return current;
+
+  const legacy = window.localStorage.getItem(LEGACY_SCHEDULE_NAVIGATION_STORAGE_KEY);
+  if (!legacy) return null;
+
+  window.localStorage.setItem(SCHEDULE_NAVIGATION_STORAGE_KEY, legacy);
+  window.localStorage.removeItem(LEGACY_SCHEDULE_NAVIGATION_STORAGE_KEY);
+  return legacy;
+};
+
 const readStoredScheduleNavigationObject = (): StoredScheduleNavigationState | null => {
   if (typeof window === "undefined") return null;
 
   try {
-    const raw = window.localStorage.getItem(SCHEDULE_NAVIGATION_STORAGE_KEY);
+    const raw = readStoredScheduleNavigationRaw();
     if (!raw) return null;
 
     const parsed = JSON.parse(raw) as unknown;
@@ -66,6 +79,7 @@ const writeStoredScheduleNavigationObject = (state: StoredScheduleNavigationStat
 
   try {
     window.localStorage.setItem(SCHEDULE_NAVIGATION_STORAGE_KEY, JSON.stringify(state));
+    window.localStorage.removeItem(LEGACY_SCHEDULE_NAVIGATION_STORAGE_KEY);
   } catch {
     // localStorage が使えない環境では React state の状態だけ維持する。
   }
