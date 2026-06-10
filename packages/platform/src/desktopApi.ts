@@ -73,6 +73,10 @@ export interface DesktopOauthCallbackPayload {
 
 export type DesktopOauthCallbackHandler = (payload: DesktopOauthCallbackPayload) => void;
 
+export interface DesktopStartupApi {
+  finishSplash(): Promise<void>;
+}
+
 export interface PlatformOauthApi {
   start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
@@ -105,6 +109,7 @@ export interface DesktopBridgeApi extends PlatformApi {
   files: DesktopFileApi;
   oauth: DesktopOauthApi;
   pdf: DesktopPdfApi;
+  startup: DesktopStartupApi;
   window: DesktopWindowApi;
 }
 
