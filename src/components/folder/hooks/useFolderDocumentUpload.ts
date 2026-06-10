@@ -2,7 +2,7 @@ import React, { useCallback, useRef } from "react";
 import { uploadPdfToGoogleDrive } from "@/integration/google-integration/googleDrive.pdfUpload";
 import { requestGoogleDriveFileAccessToken } from "@/integration/google-integration/googleDrive.oauth";
 import { buildStoragePath, createDocumentId, extractPdfFiles } from "@/components/folder/explorer/model/utils";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { auth } from "@/services/firebase";
 import { saveDocumentWithBlob } from "@/services/documentFileStore";
 import { getLocalDb } from "@/services/localDB";
