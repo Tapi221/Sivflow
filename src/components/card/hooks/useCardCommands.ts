@@ -3,12 +3,16 @@ import { normalizeCardFolderId, resolveBlocksFromCardData, resolveExtraRowsFromC
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { DEFAULT_SETTINGS, useUserSettings } from "@/features/settings/hooks/useUserSettings";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import type { Card, CardPatch } from "@/types";
 
 type TimestampLike = { toDate?: () => Date; seconds?: number; nanoseconds?: number };
 
 type SortableTimestamp = Date | TimestampLike | string | number | undefined | null;
+
+type CardSetAddCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
+  addItem: (table: "cardSets", item: Record<string, unknown>) => Promise<string>;
+};
 
 const toDateMillis = (value: SortableTimestamp): number => {
   if (!value) return 0;
@@ -26,26 +30,17 @@ export const useCardCommands = (folderId?: string) => {
   const { currentUser } = useAuthSession();
   const { settings } = useUserSettings();
 
-  const createCard = async (
-    cardData: Partial<Card> & { cardSetId?: string },
-  ) => {
+  const createCard = async (cardData: Partial<Card> & { cardSetId?: string }) => {
     if (!currentUser) throw new Error("認証が必要です");
 
     const db = await getLocalDb(currentUser.uid);
     const effectiveSettings = { ...DEFAULT_SETTINGS, ...(settings || {}) };
     const startNextDay = effectiveSettings.reviewStartNextDay ?? true;
-
     const now = new Date();
+    const toNullableFolderId = (value: string): string | null => value.trim() === "" ? null : value;
 
-    const toNullableFolderId = (value: string): string | null =>
-      value.trim() === "" ? null : value;
-
-    const resolveCardSetForCreate = async (): Promise<{
-      cardSetId: string;
-      folderId: string | null;
-    }> => {
-      const requestedCardSetId =
-        typeof cardData.cardSetId === "string" ? cardData.cardSetId.trim() : "";
+    const resolveCardSetForCreate = async (): Promise<{ cardSetId: string; folderId: string | null }> => {
+      const requestedCardSetId = typeof cardData.cardSetId === "string" ? cardData.cardSetId.trim() : "";
       if (requestedCardSetId) {
         const cardSet = await db.cardSets.get(requestedCardSetId);
         if (cardSet && !cardSet.isDeleted) {
@@ -53,19 +48,10 @@ export const useCardCommands = (folderId?: string) => {
         }
       }
 
-      const targetFolderId = normalizeCardFolderId(
-        cardData.folderId ?? folderId ?? "",
-      );
+      const targetFolderId = normalizeCardFolderId(cardData.folderId ?? folderId ?? "");
       const targetFolderOrNull = toNullableFolderId(targetFolderId);
-
-      const siblingSets = (
-        await db.cardSets.where("userId").equals(currentUser.uid).toArray()
-      )
-        .filter(
-          (cardSet) =>
-            !cardSet.isDeleted &&
-            (cardSet.folderId ?? null) === targetFolderOrNull,
-        )
+      const siblingSets = (await db.cardSets.where("userId").equals(currentUser.uid).toArray())
+        .filter((cardSet) => !cardSet.isDeleted && (cardSet.folderId ?? null) === targetFolderOrNull)
         .sort((left, right) => {
           const orderLeft = left.orderIndex ?? 0;
           const orderRight = right.orderIndex ?? 0;
@@ -83,13 +69,9 @@ export const useCardCommands = (folderId?: string) => {
 
       const fallbackSetId = crypto.randomUUID();
       const fallbackSetName = "新規カードセット";
-      const fallbackSetOrder =
-        siblingSets.reduce(
-          (maxOrder, cardSet) => Math.max(maxOrder, cardSet.orderIndex ?? 0),
-          -1,
-        ) + 1;
-
-      await db.cardSets.add({
+      const fallbackSetOrder = siblingSets.reduce((maxOrder, cardSet) => Math.max(maxOrder, cardSet.orderIndex ?? 0), -1) + 1;
+      const syncDb = db as CardSetAddCapableDb;
+      await syncDb.addItem("cardSets", {
         id: fallbackSetId,
         userId: currentUser.uid,
         deviceId: cardData.deviceId || "web",
@@ -105,17 +87,9 @@ export const useCardCommands = (folderId?: string) => {
     };
 
     const resolvedCardSet = await resolveCardSetForCreate();
-
-    const orderIndex =
-      cardData.orderIndex ??
-      Date.now() * 10000 + Math.floor(Math.random() * 10000);
-
-    const cardSetCardCount = await db.cards
-      .where("cardSetId")
-      .equals(resolvedCardSet.cardSetId)
-      .count();
-    const questionNumber =
-      cardData.questionNumber ?? `Q${cardSetCardCount + 1}`;
+    const orderIndex = cardData.orderIndex ?? Date.now() * 10000 + Math.floor(Math.random() * 10000);
+    const cardSetCardCount = await db.cards.where("cardSetId").equals(resolvedCardSet.cardSetId).count();
+    const questionNumber = cardData.questionNumber ?? `Q${cardSetCardCount + 1}`;
     const id = crypto.randomUUID();
 
     const nextReviewDate = (() => {
@@ -129,20 +103,9 @@ export const useCardCommands = (folderId?: string) => {
       return nextDate;
     })();
 
-    const normalizedReviewLogs = Array.isArray(cardData.reviewLogs)
-      ? [...cardData.reviewLogs].sort(
-        (left, right) => toDateMillis(left.reviewedAt) - toDateMillis(right.reviewedAt),
-      )
-      : [];
-
-    const questionBlocks = resolveBlocksFromCardData(
-      cardData as Partial<Card> & Record<string, unknown>,
-      "question",
-    );
-    const answerBlocks = resolveBlocksFromCardData(
-      cardData as Partial<Card> & Record<string, unknown>,
-      "answer",
-    );
+    const normalizedReviewLogs = Array.isArray(cardData.reviewLogs) ? [...cardData.reviewLogs].sort((left, right) => toDateMillis(left.reviewedAt) - toDateMillis(right.reviewedAt)) : [];
+    const questionBlocks = resolveBlocksFromCardData(cardData as Partial<Card> & Record<string, unknown>, "question");
+    const answerBlocks = resolveBlocksFromCardData(cardData as Partial<Card> & Record<string, unknown>, "answer");
 
     const newCard: Card = {
       id,
@@ -160,37 +123,15 @@ export const useCardCommands = (folderId?: string) => {
       isSilent: cardData.isSilent ?? false,
       front: {
         blocks: questionBlocks,
-        ink: resolveInkFromCardData(
-          cardData as Partial<Card> & Record<string, unknown>,
-          "question",
-        ),
-        extraRows: resolveExtraRowsFromCardData(
-          cardData as Partial<Card> & Record<string, unknown>,
-          "question",
-        ),
+        ink: resolveInkFromCardData(cardData as Partial<Card> & Record<string, unknown>, "question"),
+        extraRows: resolveExtraRowsFromCardData(cardData as Partial<Card> & Record<string, unknown>, "question"),
       },
       back: {
         blocks: answerBlocks,
-        ink: resolveInkFromCardData(
-          cardData as Partial<Card> & Record<string, unknown>,
-          "answer",
-        ),
-        extraRows: resolveExtraRowsFromCardData(
-          cardData as Partial<Card> & Record<string, unknown>,
-          "answer",
-        ),
+        ink: resolveInkFromCardData(cardData as Partial<Card> & Record<string, unknown>, "answer"),
+        extraRows: resolveExtraRowsFromCardData(cardData as Partial<Card> & Record<string, unknown>, "answer"),
       },
-      layoutRows: normalizeLayoutRows(
-        (cardData as unknown as { layoutRows?: unknown; layout_rows?: unknown })
-          .layoutRows ??
-          (
-            cardData as unknown as {
-              layoutRows?: unknown;
-              layout_rows?: unknown;
-            }
-          ).layout_rows ??
-          DEFAULT_LAYOUT_ROWS,
-      ),
+      layoutRows: normalizeLayoutRows((cardData as unknown as { layoutRows?: unknown; layout_rows?: unknown }).layoutRows ?? (cardData as unknown as { layoutRows?: unknown; layout_rows?: unknown }).layout_rows ?? DEFAULT_LAYOUT_ROWS),
       memoryStability: 0,
       ...(cardData.currentLevel != null ? { currentLevel: cardData.currentLevel } : {}),
       nextReviewDate,
@@ -227,9 +168,7 @@ export const useCardCommands = (folderId?: string) => {
 
     const rawPatch = data as Record<string, unknown>;
     if (rawPatch.cardSetId !== undefined || rawPatch.folderId !== undefined) {
-      throw new Error(
-        "updateCard では cardSetId / folderId を直接更新できません。moveCardToSet を使用してください。",
-      );
+      throw new Error("updateCard では cardSetId / folderId を直接更新できません。moveCardToSet を使用してください。");
     }
 
     const patch = { ...data } as Partial<Card> & Record<string, unknown>;
@@ -263,9 +202,7 @@ export const useCardCommands = (folderId?: string) => {
     delete patch.backBlocks;
 
     if (Array.isArray(patch.reviewLogs)) {
-      patch.reviewLogs = [...patch.reviewLogs].sort(
-        (left, right) => toDateMillis(left.reviewedAt) - toDateMillis(right.reviewedAt),
-      );
+      patch.reviewLogs = [...patch.reviewLogs].sort((left, right) => toDateMillis(left.reviewedAt) - toDateMillis(right.reviewedAt));
     }
 
     await db.updateItem("cards", id, {
@@ -280,10 +217,7 @@ export const useCardCommands = (folderId?: string) => {
     await db.softDelete("cards", id);
   };
 
-  const toggleFlag = async (
-    id: string,
-    flag: "hasUncertainty" | "isCompleted" | "isSilent" | "isBookmarked",
-  ) => {
+  const toggleFlag = async (id: string, flag: "hasUncertainty" | "isCompleted" | "isSilent" | "isBookmarked") => {
     if (!currentUser) throw new Error("認証が必要です");
     const db = await getLocalDb(currentUser.uid);
     const rawCard = await db.cards.get(id);
@@ -299,21 +233,14 @@ export const useCardCommands = (folderId?: string) => {
   const moveCardToSet = async (cardId: string, targetCardSetId: string) => {
     if (!currentUser) throw new Error("認証が必要です");
     const db = await getLocalDb(currentUser.uid);
-
     const targetSet = await db.cardSets.get(targetCardSetId);
     if (!targetSet || targetSet.isDeleted) {
       throw new Error("移動先のカードセットが見つかりません");
     }
 
     const allCards = await db.getAllCards();
-    const targetCards = allCards.filter(
-      (card) => card.cardSetId === targetCardSetId && !card.isDeleted,
-    );
-
-    const maxOrderIndex = targetCards.reduce(
-      (maxOrder, card) => Math.max(maxOrder, card.orderIndex || 0),
-      0,
-    );
+    const targetCards = allCards.filter((card) => card.cardSetId === targetCardSetId && !card.isDeleted);
+    const maxOrderIndex = targetCards.reduce((maxOrder, card) => Math.max(maxOrder, card.orderIndex || 0), 0);
 
     await db.updateItem("cards", cardId, {
       cardSetId: targetCardSetId,
@@ -322,10 +249,7 @@ export const useCardCommands = (folderId?: string) => {
     });
   };
 
-  const reorderCardsInCardSet = async (
-    cardSetId: string,
-    cardIds: string[],
-  ) => {
+  const reorderCardsInCardSet = async (cardSetId: string, cardIds: string[]) => {
     if (!currentUser) throw new Error("認証が必要です");
     if (!cardSetId) throw new Error("カードセットIDが必要です");
 
@@ -333,27 +257,19 @@ export const useCardCommands = (folderId?: string) => {
     const targetCards = await db.cards.bulkGet(cardIds);
     const missingCardIndex = targetCards.findIndex((card) => !card);
     if (missingCardIndex >= 0) {
-      throw new Error(
-        `並び替え対象カードが見つかりません: ${cardIds[missingCardIndex]}`,
-      );
+      throw new Error(`並び替え対象カードが見つかりません: ${cardIds[missingCardIndex]}`);
     }
 
-    const outOfScopeCard = targetCards.find(
-      (card) => card?.cardSetId !== cardSetId,
-    );
+    const outOfScopeCard = targetCards.find((card) => card?.cardSetId !== cardSetId);
     if (outOfScopeCard) {
-      throw new Error(
-        `CardSet スコープ外カードが混入しています: ${outOfScopeCard.id}`,
-      );
+      throw new Error(`CardSet スコープ外カードが混入しています: ${outOfScopeCard.id}`);
     }
 
     await Promise.all(
-      cardIds.map((cardId, index) =>
-        db.updateItem("cards", cardId, {
-          orderIndex: index,
-          updatedAt: new Date(),
-        }),
-      ),
+      cardIds.map((cardId, index) => db.updateItem("cards", cardId, {
+        orderIndex: index,
+        updatedAt: new Date(),
+      })),
     );
   };
 
