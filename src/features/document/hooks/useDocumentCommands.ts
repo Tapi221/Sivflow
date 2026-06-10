@@ -18,7 +18,15 @@ type DocumentUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "documents", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
 
-type SyncDeleteCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
+type DocumentPurgeCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
+  documents: {
+    get: (id: string) => Promise<DocumentItem | undefined>;
+    delete: (id: string) => Promise<void>;
+  };
+  runSyncTransaction: <T>(scope: () => Promise<T>) => Promise<T>;
+  table: (tableName: "documentFiles") => {
+    delete: (id: string) => Promise<void>;
+  };
   queueDeleteSync: (args: { entity: "document"; targetId: string; priority?: "critical" | "high" | "medium" | "low" }) => Promise<void>;
 };
 
@@ -39,8 +47,7 @@ export const useDocumentCommands = () => {
       if (!currentUser) throw new Error("User not authenticated");
 
       try {
-        const db = await getLocalDb(currentUser.uid);
-        const syncDb = db as DocumentUpdateCapableDb;
+        const db = (await getLocalDb(currentUser.uid)) as DocumentUpdateCapableDb;
         const shouldTouchUpdatedAt = options.touchUpdatedAt ?? Object.keys(updates).some((key) => key !== "viewerState");
         const { updatedAt: requestedUpdatedAt, ...restUpdates } = updates;
         const payload: DocumentUpdatePayload = {
@@ -57,7 +64,7 @@ export const useDocumentCommands = () => {
           }
         }
 
-        await syncDb.updateItem("documents", documentId, payload);
+        await db.updateItem("documents", documentId, payload);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         console.error(`[useDocumentCommands] Update error: ${message}`, {
@@ -82,7 +89,7 @@ export const useDocumentCommands = () => {
     async (documentId: string): Promise<void> => {
       if (!currentUser) throw new Error("User not authenticated");
 
-      const db = await getLocalDb(currentUser.uid);
+      const db = (await getLocalDb(currentUser.uid)) as DocumentPurgeCapableDb;
       const document = await db.documents.get(documentId);
       const localFileId = resolveDocumentFileId(documentId, document);
 
@@ -91,8 +98,7 @@ export const useDocumentCommands = () => {
         await db.documents.delete(documentId);
       });
 
-      const syncDb = db as SyncDeleteCapableDb;
-      await syncDb.queueDeleteSync({ entity: "document", targetId: documentId, priority: "high" });
+      await db.queueDeleteSync({ entity: "document", targetId: documentId, priority: "high" });
       await deleteDocumentBlob(localFileId, { userId: currentUser.uid }).catch(() => undefined);
     },
     [currentUser],
