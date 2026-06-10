@@ -15,6 +15,8 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import remarkEmoji from 'remark-emoji';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
+
+import { SlashCommandKit } from '@/registry/components/editor/plugins/slash-command-kit';
 import type { Note, NoteBlockContent } from '@/types';
 
 type PlateDocumentEditorProps = {
@@ -72,6 +74,7 @@ const NOTE_PLATE_PLUGINS = [
   PlaceholderPlugin.configure({ options: { disableEmptyPlaceholder: true } }),
   CaptionPlugin.configure({ options: { query: { allow: [KEYS.img, KEYS.video, KEYS.audio, KEYS.file, KEYS.mediaEmbed] } } }),
   MarkdownPlugin.configure({ options: { plainMarks: [KEYS.suggestion, KEYS.comment], remarkPlugins: [remarkMath, remarkGfm, remarkEmoji as any, remarkMdx, remarkMention] } }),
+  ...SlashCommandKit,
 ];
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -153,8 +156,8 @@ const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
     <div className="h-full min-h-0 w-full bg-background text-foreground">
       <PlateController>
         <Plate editor={editor} onChange={handleChange} primary>
-          <PlateContainer className="relative h-[650px] w-full cursor-text select-text overflow-y-auto caret-primary selection:bg-brand/25 focus-visible:outline-none">
-            <PlateContent className="relative size-full w-full cursor-text select-text overflow-x-hidden whitespace-pre-wrap break-words px-16 pt-4 pb-72 text-base outline-none sm:px-[max(64px,calc(50%-350px))]" placeholder="本文を入力" spellCheck />
+          <PlateContainer>
+            <PlateContent className="min-h-full px-8 py-6 outline-none" placeholder="本文を入力" spellCheck />
           </PlateContainer>
         </Plate>
       </PlateController>
