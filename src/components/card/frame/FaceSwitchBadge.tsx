@@ -1,13 +1,13 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-export type FaceSwitchBadgeProps = Readonly<{
+type FaceSwitchBadgeProps = Readonly<{
   isFlipped: boolean;
   onShowFront: () => void;
   onShowBack: () => void;
 }>;
 
-export const FaceSwitchBadge = ({
+const FaceSwitchBadge = ({
   isFlipped,
   onShowFront,
   onShowBack,
@@ -63,3 +63,6 @@ export const FaceSwitchBadge = ({
     </div>
   );
 };
+
+export { FaceSwitchBadge };
+export type { FaceSwitchBadgeProps };
