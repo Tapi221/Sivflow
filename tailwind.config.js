@@ -1,5 +1,3 @@
-import scrollbarHide from "tailwind-scrollbar-hide";
-
 const appFontFamily = {
   ui: ["var(--app-font-family-ui)"],
   content: ["var(--app-font-family-content)"],
@@ -152,7 +150,7 @@ const config = {
       },
     },
   },
-  plugins: [scrollbarHide],
+  plugins: [],
 };
 
 export default config;
