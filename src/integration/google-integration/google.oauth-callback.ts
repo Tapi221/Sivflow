@@ -1,5 +1,7 @@
+import appIconSrc from "@shared/assets/icons/app-icon.svg";
+
 export type GoogleOAuthCallbackPayload = {
-  type: "flashcard-master:google-oauth-callback";
+  type: "sivflow:google-oauth-callback";
   url: string;
   state: string | null;
   code: string | null;
@@ -7,11 +9,17 @@ export type GoogleOAuthCallbackPayload = {
   errorDescription: string | null;
 };
 
-export const GOOGLE_OAUTH_CALLBACK_CHANNEL = "flashcard-master:google-oauth-callback";
-export const GOOGLE_OAUTH_CALLBACK_STORAGE_KEY = "flashcard-master.google-oauth-callback";
+type StyleDeclarations = Record<string, string>;
 
-const GOOGLE_OAUTH_CALLBACK_TITLE = "Google 連携を完了しています";
-const GOOGLE_OAUTH_CALLBACK_DESCRIPTION = "元の画面で処理を続行します。";
+export const GOOGLE_OAUTH_CALLBACK_CHANNEL = "sivflow:google-oauth-callback";
+export const GOOGLE_OAUTH_CALLBACK_STORAGE_KEY = "sivflow.google-oauth-callback";
+
+const GOOGLE_OAUTH_CALLBACK_TITLE = "Launching Sivflow";
+const GOOGLE_OAUTH_CALLBACK_DESCRIPTION = "You will be redirected in a few moments.";
+const GOOGLE_OAUTH_CALLBACK_LINK_PREFIX = "If nothing happens, ";
+const GOOGLE_OAUTH_CALLBACK_LINK_TEXT = "open Sivflow in your browser";
+const GOOGLE_OAUTH_CALLBACK_LINK_SUFFIX = ".";
+const GOOGLE_OAUTH_CALLBACK_CLOSE_DELAY_MS = 1200;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 
@@ -19,31 +27,96 @@ const isNullableString = (value: unknown): value is string | null => value === n
 
 const hasGoogleOAuthCallbackResult = (url: URL): boolean => Boolean(url.searchParams.get("state")) && (url.searchParams.has("code") || url.searchParams.has("error"));
 
+const applyStyles = (element: HTMLElement, styles: StyleDeclarations): void => {
+  for (const [property, value] of Object.entries(styles)) {
+    element.style.setProperty(property, value);
+  }
+};
+
 const renderMessage = (): void => {
   const root = document.getElementById("root");
   if (!root) return;
+
+  document.body.style.margin = "0";
+  document.body.style.background = "#ffffff";
+
   const main = document.createElement("main");
-  main.style.alignItems = "center";
-  main.style.boxSizing = "border-box";
-  main.style.display = "flex";
-  main.style.flexDirection = "column";
-  main.style.fontFamily = "system-ui, sans-serif";
-  main.style.justifyContent = "center";
-  main.style.minHeight = "100dvh";
-  main.style.padding = "24px";
-  main.style.textAlign = "center";
+  applyStyles(main, {
+    "align-items": "center",
+    "box-sizing": "border-box",
+    "color": "#475569",
+    "display": "flex",
+    "flex-direction": "column",
+    "font-family": "var(--app-font-family-ui), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    "justify-content": "center",
+    "min-height": "100dvh",
+    "padding": "24px",
+    "text-align": "center",
+  });
+
+  const logoFrame = document.createElement("div");
+  applyStyles(logoFrame, {
+    "align-items": "center",
+    "border-radius": "9999px",
+    "display": "flex",
+    "height": "176px",
+    "justify-content": "center",
+    "margin": "0 0 28px",
+    "width": "176px",
+  });
+
+  const logo = document.createElement("img");
+  logo.src = appIconSrc;
+  logo.alt = "Sivflow";
+  applyStyles(logo, {
+    "display": "block",
+    "filter": "drop-shadow(0 22px 42px rgba(14, 165, 233, 0.2))",
+    "height": "136px",
+    "object-fit": "contain",
+    "width": "136px",
+  });
 
   const title = document.createElement("h1");
-  title.style.fontSize = "18px";
-  title.style.margin = "0 0 8px";
+  applyStyles(title, {
+    "color": "#334155",
+    "font-size": "34px",
+    "font-weight": "400",
+    "letter-spacing": "-0.03em",
+    "line-height": "1.2",
+    "margin": "0",
+  });
   title.textContent = GOOGLE_OAUTH_CALLBACK_TITLE;
 
   const description = document.createElement("p");
-  description.style.fontSize = "14px";
-  description.style.margin = "0";
+  applyStyles(description, {
+    "color": "#a1a1aa",
+    "font-size": "17px",
+    "line-height": "1.6",
+    "margin": "18px 0 0",
+  });
   description.textContent = GOOGLE_OAUTH_CALLBACK_DESCRIPTION;
 
-  main.append(title, description);
+  const hint = document.createElement("p");
+  applyStyles(hint, {
+    "color": "#9ca3af",
+    "font-size": "15px",
+    "line-height": "1.6",
+    "margin": "42px 0 0",
+  });
+
+  const link = document.createElement("a");
+  link.href = window.location.origin;
+  link.rel = "noreferrer";
+  link.target = "_blank";
+  applyStyles(link, {
+    "color": "#3b82f6",
+    "text-decoration": "none",
+  });
+  link.textContent = GOOGLE_OAUTH_CALLBACK_LINK_TEXT;
+
+  hint.append(GOOGLE_OAUTH_CALLBACK_LINK_PREFIX, link, GOOGLE_OAUTH_CALLBACK_LINK_SUFFIX);
+  logoFrame.append(logo);
+  main.append(logoFrame, title, description, hint);
   root.replaceChildren(main);
 };
 
@@ -87,7 +160,7 @@ const closeCallbackWindow = (): void => {
     } catch {
       // 自動クローズできないブラウザではメッセージ表示を残す。
     }
-  }, 300);
+  }, GOOGLE_OAUTH_CALLBACK_CLOSE_DELAY_MS);
 };
 
 const notifyCallbackPayload = (payload: GoogleOAuthCallbackPayload): void => {
