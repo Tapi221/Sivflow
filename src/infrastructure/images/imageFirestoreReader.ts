@@ -22,7 +22,6 @@ export const getImageFromFirestore = async ({
 }: {
   imageId: string;
   userId?: string;
-  inFlightTouchMigrations: Set<string>;
 }): Promise<UploadedImage | null> => {
   const uid = userId?.trim() || auth.currentUser?.uid?.trim() || null;
   if (!uid) {
