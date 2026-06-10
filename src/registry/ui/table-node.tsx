@@ -79,7 +79,7 @@ import {
   DropdownMenuItem,
   DropdownMenuPortal,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/registry/ui/shadcn/dropdown-menu';
 import {
   Popover,
   PopoverAnchor,

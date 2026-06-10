@@ -18,7 +18,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/registry/ui/shadcn/dropdown-menu';
 import { BaseEditorKit } from '@/registry/components/editor/editor-base-kit';
 
 import { EditorStatic } from './editor-static';

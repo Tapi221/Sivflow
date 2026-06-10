@@ -44,7 +44,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/registry/ui/shadcn/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { BasicMarksKit } from '@/registry/components/editor/plugins/basic-marks-kit';
 import {
