@@ -1,14 +1,24 @@
 import { doc, getDoc } from "firebase/firestore";
-import { createImageDocRef, isImageFirestoreDiagnosticsEnabled } from "./imageFirestoreWriter";
-import { touchMigrateLegacyImageToUserScope } from "./imageLegacyTouchMigration";
 import { auth, requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { imageDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
 import type { UploadedImage } from "@/types";
 
+const FIRESTORE_DIAGNOSTIC_FLAG = "flashcard.firestore.diagnostics";
+
+const isImageFirestoreDiagnosticsEnabled = (): boolean => {
+  if (import.meta.env.DEV) return true;
+  if (typeof window === "undefined") return false;
+
+  try {
+    return window.localStorage.getItem(FIRESTORE_DIAGNOSTIC_FLAG) === "1";
+  } catch {
+    return false;
+  }
+};
+
 export const getImageFromFirestore = async ({
   imageId,
   userId,
-  inFlightTouchMigrations,
 }: {
   imageId: string;
   userId?: string;
@@ -23,22 +33,11 @@ export const getImageFromFirestore = async ({
   const target = imageDocPathSegments(uid, imageId);
 
   try {
-    const snapshot = await getDoc(createImageDocRef(db, target));
+    const snapshot = await getDoc(doc(db, target[0] ?? "", target[1] ?? "", target[2] ?? "", target[3] ?? ""));
     if (!snapshot.exists()) {
       const legacySnapshot = await getDoc(doc(db, "images", imageId));
       if (!legacySnapshot.exists()) return null;
-
-      const legacyData = legacySnapshot.data() as UploadedImage;
-      await touchMigrateLegacyImageToUserScope({
-        db,
-        imageId,
-        uid,
-        targetPathSegments: target,
-        legacyData,
-        inFlightTouchMigrations,
-      });
-
-      return legacyData;
+      return legacySnapshot.data() as UploadedImage;
     }
 
     return snapshot.data() as UploadedImage;
