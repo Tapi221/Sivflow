@@ -1,7 +1,7 @@
 import { onAuthStateChanged, signOut, type User as FirebaseUser } from "firebase/auth";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { isFirebaseClientAvailable, auth } from "@/infrastructure/firebase/client";
 import { hydrateServerStoredGoogleCalendarAccounts } from "@/integration/googlecalendar-integration/gcal.server-account-list";
-import { auth } from "@/infrastructure/firebase/client";
 import { initializeDB, resetLocalDBForLogout } from "@/services/localdb";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import { AuthSessionContext, type AuthSessionProviderProps, type AuthSessionContextType } from "./AuthSessionContextCore";
@@ -9,7 +9,7 @@ import { bootstrapUser } from "./bootstrapUser";
 
 const refreshAuthProfile = async (user: FirebaseUser): Promise<FirebaseUser> => {
   await user.reload();
-  return auth.currentUser ?? user;
+  return auth?.currentUser ?? user;
 };
 
 const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
@@ -18,6 +18,18 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   const lastKnownUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!isFirebaseClientAvailable || !auth) {
+      initializeDB("anonymous")
+        .catch((error) => {
+          console.warn("[Auth] Anonymous local DB initialization failed:", error);
+        })
+        .finally(() => {
+          setCurrentUser(null);
+          setLoading(false);
+        });
+      return undefined;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         lastKnownUserIdRef.current = user.uid;
@@ -61,6 +73,14 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   }, []);
 
   const logout = async () => {
+    if (!isFirebaseClientAvailable || !auth) {
+      await resetLocalDBForLogout(lastKnownUserIdRef.current || undefined);
+      await initializeDB("anonymous");
+      setCurrentUser(null);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     try {
