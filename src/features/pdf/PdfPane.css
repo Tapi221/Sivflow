@@ -2,6 +2,7 @@
 .pdf-pane__scroll-container {
   contain: layout paint style;
   overscroll-behavior: contain;
+  overflow-anchor: none;
   scrollbar-gutter: stable;
   scroll-behavior: auto;
   touch-action: pan-x pan-y;
@@ -10,6 +11,7 @@
 /* ビューア要素最適化 */
 .pdf-pane__viewer {
   contain: layout paint style;
+  overflow-anchor: none;
 }
 
 .pdf-pane__viewer.pdf-pane--zooming {
@@ -20,6 +22,7 @@
 /* PDF.js の scale 再描画と content-visibility:auto は競合して白抜けを起こすため使わない */
 .pdf-pane__viewer .page {
   contain: layout paint style;
+  overflow-anchor: none;
 }
 
 .pdf-pane__viewer.pdf-pane--zooming .page {
@@ -33,6 +36,7 @@
   pointer-events: none;
   contain: strict;
   background: transparent;
+  overflow-anchor: none;
 }
 
 .pdf-pane__zoom-snapshot img {
