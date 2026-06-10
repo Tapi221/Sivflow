@@ -27,7 +27,8 @@ type SidebarLongPressState = {
 
 const GLOBAL_SEARCH_TRIGGER_CLASS_NAME = "absolute right-5 top-4 z-30 hidden h-9 w-[268px] shrink-0 items-center gap-2 rounded-[10px] border border-[#e5e7eb] bg-white px-3 text-left text-[13px] font-medium leading-none text-[#8e8e93] shadow-[0_1px_2px_rgba(15,23,42,0.04)] outline-none ring-0 transition-[background-color,border-color,box-shadow] duration-150 ease-out hover:border-[#d7dbe2] hover:bg-[#fbfbfc] focus:outline-none focus:ring-0 focus-visible:border-[#c7d2fe] focus-visible:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] md:flex";
 const GLOBAL_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-[22px] min-w-[34px] items-center justify-center rounded-[6px] border border-[#e6e6e8] bg-[#f7f7f8] px-1.5 text-[11px] font-semibold leading-none tracking-[-0.02em] text-[#8e8e93] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
-const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
+const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "sivflow:layout:left-panel-collapsed";
+const LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
 const LEFT_PANEL_COLLAPSED_STORAGE_VALUE = "collapsed";
 const MOBILE_CALENDAR_SIDEBAR_SELECTOR = "#mobile-calendar-sidebar";
 const MOBILE_CALENDAR_SIDEBAR_TOGGLE_SELECTOR = ".app-layered-directory__workspace-toggle";
@@ -41,7 +42,15 @@ const readStoredLeftPanelCollapsed = (): boolean => {
   if (typeof window === "undefined") return false;
 
   try {
-    return window.localStorage.getItem(LEFT_PANEL_COLLAPSED_STORAGE_KEY) === LEFT_PANEL_COLLAPSED_STORAGE_VALUE;
+    const stored = window.localStorage.getItem(LEFT_PANEL_COLLAPSED_STORAGE_KEY);
+    if (stored === LEFT_PANEL_COLLAPSED_STORAGE_VALUE) return true;
+
+    const legacyStored = window.localStorage.getItem(LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY);
+    if (legacyStored !== LEFT_PANEL_COLLAPSED_STORAGE_VALUE) return false;
+
+    window.localStorage.setItem(LEFT_PANEL_COLLAPSED_STORAGE_KEY, LEFT_PANEL_COLLAPSED_STORAGE_VALUE);
+    window.localStorage.removeItem(LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY);
+    return true;
   } catch {
     return false;
   }
@@ -58,10 +67,12 @@ const persistLeftPanelCollapsed = (isCollapsed: boolean) => {
   try {
     if (isCollapsed) {
       window.localStorage.setItem(LEFT_PANEL_COLLAPSED_STORAGE_KEY, LEFT_PANEL_COLLAPSED_STORAGE_VALUE);
+      window.localStorage.removeItem(LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY);
       return;
     }
 
     window.localStorage.removeItem(LEFT_PANEL_COLLAPSED_STORAGE_KEY);
+    window.localStorage.removeItem(LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY);
   } catch {
     // localStorage が使えない環境では React state の状態だけ維持する。
   }
@@ -189,100 +200,60 @@ const AppLayout = () => {
   const handleSidebarLongPressPointerEnd = useCallback((event: PointerEvent) => {
     const state = sidebarLongPressStateRef.current;
     if (!state || state.pointerId !== event.pointerId) return;
-
     clearSidebarLongPress();
   }, [clearSidebarLongPress]);
 
-  const handleSidebarLongPressClickCapture = useCallback((event: MouseEvent) => {
+  const handleSuppressSidebarLongPressClick = useCallback((event: MouseEvent) => {
     if (!shouldSuppressSidebarLongPressClickRef.current) return;
-
     shouldSuppressSidebarLongPressClickRef.current = false;
-    if (!getSidebarLongPressContextMenuTarget(event.target)) return;
-
     event.preventDefault();
     event.stopPropagation();
-    event.stopImmediatePropagation();
   }, []);
-
-  const handleMobileCalendarSidebarToggle = useCallback((event: MouseEvent) => {
-    const closeButton = getMobileCalendarSidebarCloseButton(event.target);
-    if (!closeButton) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    closeButton.click();
-  }, []);
-
-  const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed, onOpenSettings: handleOpenSettings, onToggleLeftPanel: handleToggleLeftPanel }), [handleOpenSettings, handleToggleLeftPanel, isLeftPanelCollapsed]);
-  const isSandboxRoute = pathname.startsWith("/sandbox");
-  const showGlobalSearchTrigger = !isScheduleRoute && !isSandboxRoute;
 
   useEffect(() => {
     persistLeftPanelCollapsed(isLeftPanelCollapsed);
   }, [isLeftPanelCollapsed]);
 
   useEffect(() => {
-    document.addEventListener("pointerdown", handleSidebarLongPressPointerDown, true);
-    document.addEventListener("pointermove", handleSidebarLongPressPointerMove, true);
-    document.addEventListener("pointerup", handleSidebarLongPressPointerEnd, true);
-    document.addEventListener("pointercancel", handleSidebarLongPressPointerEnd, true);
-    document.addEventListener("click", handleSidebarLongPressClickCapture, true);
+    const main = mainRef.current;
+    if (!main) return;
+
+    main.addEventListener("pointerdown", handleSidebarLongPressPointerDown, true);
+    main.addEventListener("pointermove", handleSidebarLongPressPointerMove, true);
+    main.addEventListener("pointerup", handleSidebarLongPressPointerEnd, true);
+    main.addEventListener("pointercancel", handleSidebarLongPressPointerEnd, true);
+    main.addEventListener("click", handleSuppressSidebarLongPressClick, true);
 
     return () => {
+      main.removeEventListener("pointerdown", handleSidebarLongPressPointerDown, true);
+      main.removeEventListener("pointermove", handleSidebarLongPressPointerMove, true);
+      main.removeEventListener("pointerup", handleSidebarLongPressPointerEnd, true);
+      main.removeEventListener("pointercancel", handleSidebarLongPressPointerEnd, true);
+      main.removeEventListener("click", handleSuppressSidebarLongPressClick, true);
       clearSidebarLongPress();
-      document.removeEventListener("pointerdown", handleSidebarLongPressPointerDown, true);
-      document.removeEventListener("pointermove", handleSidebarLongPressPointerMove, true);
-      document.removeEventListener("pointerup", handleSidebarLongPressPointerEnd, true);
-      document.removeEventListener("pointercancel", handleSidebarLongPressPointerEnd, true);
-      document.removeEventListener("click", handleSidebarLongPressClickCapture, true);
     };
-  }, [clearSidebarLongPress, handleSidebarLongPressClickCapture, handleSidebarLongPressPointerDown, handleSidebarLongPressPointerEnd, handleSidebarLongPressPointerMove]);
+  }, [clearSidebarLongPress, handleSidebarLongPressPointerDown, handleSidebarLongPressPointerEnd, handleSidebarLongPressPointerMove, handleSuppressSidebarLongPressClick]);
 
-  useEffect(() => {
-    document.addEventListener("click", handleMobileCalendarSidebarToggle, true);
+  useResetWorkspaceScrollDesktop(mainRef, pathname);
 
-    return () => {
-      document.removeEventListener("click", handleMobileCalendarSidebarToggle, true);
-    };
-  }, [handleMobileCalendarSidebarToggle]);
-
-  useHotKeyDesktop({
-    onToggleRightSidebar: handleToggleRightSidebar,
-  });
-
-  useResetWorkspaceScrollDesktop({ pathname, mainRef });
-
-  const className = [
-    "app-layout",
-    isFoldersRoute ? "app-layout--folders" : "",
-    isScrollLocked ? "app-layout--scroll-locked" : "",
-    isLeftPanelCollapsed ? "app-layout--left-panel-collapsed" : "",
-    isRightSidebarOpen ? "app-layout--right-sidebar-open" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const isRightSidebarVisible = isScheduleRoute && isRightSidebarOpen;
+  const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed, onOpenSettings: handleOpenSettings, onToggleLeftPanel: handleToggleLeftPanel }), [handleOpenSettings, handleToggleLeftPanel, isLeftPanelCollapsed]);
 
   return (
-    <WorkspaceLayoutRevisionProvider revision={workspaceLayoutRevision}>
-      <div className={className}>
-        <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
-          <Suspense fallback={null}>
-            <Outlet context={outletContext} />
-          </Suspense>
-        </WorkspaceShell>
-
+    <WorkspaceLayoutRevisionProvider value={workspaceLayoutRevision}>
+      <WorkspaceShell isLeftPanelCollapsed={isLeftPanelCollapsed} isRightSidebarVisible={isRightSidebarVisible} isFoldersRoute={isFoldersRoute} isScheduleRoute={isScheduleRoute} isScrollLocked={isScrollLocked} mainRef={mainRef} onOpenSettings={handleOpenSettings} onToggleLeftPanel={handleToggleLeftPanel} onToggleRightSidebar={handleToggleRightSidebar}>
+        <button type="button" className={GLOBAL_SEARCH_TRIGGER_CLASS_NAME} onClick={handleOpenSearch} aria-label="検索を開く">
+          <Search size={16} />
+          <span>検索</span>
+          <span className={GLOBAL_SEARCH_SHORTCUT_CLASS_NAME}>⌘K</span>
+        </button>
+        <Suspense fallback={null}>
+          <Outlet context={outletContext} />
+        </Suspense>
         <SettingsWorkspaceDialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen} />
-
-        {showGlobalSearchTrigger && (
-          <button type="button" className={GLOBAL_SEARCH_TRIGGER_CLASS_NAME} aria-label="検索を開く" aria-keyshortcuts="Meta+K Control+K" title="検索を開く" onClick={handleOpenSearch}>
-            <Search className="h-4 w-4 shrink-0 text-[#8e8e93]" />
-            <span className="min-w-0 truncate text-[#7a7f88]">Search in Workspace...</span>
-            <kbd className={GLOBAL_SEARCH_SHORTCUT_CLASS_NAME}>⌘K</kbd>
-          </button>
-        )}
-      </div>
+      </WorkspaceShell>
     </WorkspaceLayoutRevisionProvider>
   );
 };
 
-export { AppLayout, type AppLayoutOutletContext };
+export { AppLayout };
