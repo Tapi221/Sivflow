@@ -12,6 +12,7 @@ export type SyncTaskType = "upload" | "download";
 export type SyncPriority = "critical" | "high" | "medium" | "low";
 export type SyncOperationType = "create" | "update" | "delete";
 export type MergeStrategy = "server_wins" | "client_wins" | "manual";
+export type CloudDeviceStatus = "active" | "revoked" | "unknown";
 export type SyncConflict = Pick<DomainSyncConflict, "id"> & {
   entity: DomainSyncConflict["entityType"];
   targetId: DomainSyncConflict["entityId"];
@@ -87,6 +88,10 @@ export interface ICloudSyncAdapter {
     changes: SyncChange[],
   ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }>;
   pullFull(entityIds: string[]): Promise<unknown[]>;
+  getDeviceStatus(deviceId: string): Promise<CloudDeviceStatus>;
+  revokeDevice(deviceId: string): Promise<void>;
+  updateDeviceName(deviceId: string, newName: string): Promise<void>;
+  cleanupInactiveDevices(): Promise<number>;
 }
 
 export interface SyncStats {
