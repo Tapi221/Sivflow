@@ -2,72 +2,46 @@ import * as React from 'react';
 import { generateReactHelpers } from '@uploadthing/react';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { createLocalMediaUrl, LOCAL_PLATE_MEDIA_USER_ID } from '@/registry/lib/local-media-url';
+import { putImageBlob } from '@/services/imageFileStore';
 import type { OurFileRouter } from '@/registry/lib/uploadthing';
 import type { ClientUploadedFileData, UploadFilesOptions } from 'uploadthing/types';
 
 export type UploadedFile<T = unknown> = ClientUploadedFileData<T>;
-
-type UploadedFileCandidate = Partial<UploadedFile> & {
-  appUrl?: string;
-  ufsUrl?: string;
-  url?: string;
-};
 
 interface UseUploadFileProps extends Pick<UploadFilesOptions<OurFileRouter['editorUploader']>, 'headers' | 'onUploadBegin' | 'onUploadProgress' | 'skipPolling'> {
   onUploadComplete?: (file: UploadedFile) => void;
   onUploadError?: (error: unknown) => void;
 }
 
-const LOCAL_UPLOAD_KEY_PREFIX = 'local-upload';
+const LOCAL_UPLOAD_KEY_PREFIX = 'plate-local-upload';
 const FALLBACK_PROGRESS_STEP = 8;
 const FALLBACK_PROGRESS_DELAY_MS = 20;
 
-const isNonEmptyString = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0;
-
 const isImageFile = (file: File): boolean => file.type.startsWith('image/');
 
-const readFileAsDataUrl = (file: File): Promise<string> => new Promise((resolve, reject) => {
-  const reader = new FileReader();
-  reader.addEventListener('load', () => {
-    if (typeof reader.result === 'string') {
-      resolve(reader.result);
-      return;
-    }
+const createAssetId = (): string => `${LOCAL_UPLOAD_KEY_PREFIX}-${crypto.randomUUID()}`;
 
-    reject(new Error('Failed to read file as data URL.'));
-  });
-  reader.addEventListener('error', () => reject(reader.error ?? new Error('Failed to read file.')));
-  reader.readAsDataURL(file);
-});
+const createObjectUrl = (file: File): string => URL.createObjectURL(file);
 
-const createLocalUrl = async (file: File): Promise<string> => isImageFile(file) ? readFileAsDataUrl(file) : URL.createObjectURL(file);
-
-const getCandidateUrl = (candidate: UploadedFileCandidate | undefined): string => {
-  if (isNonEmptyString(candidate?.url)) return candidate.url.trim();
-  if (isNonEmptyString(candidate?.ufsUrl)) return candidate.ufsUrl.trim();
-  if (isNonEmptyString(candidate?.appUrl)) return candidate.appUrl.trim();
-  return '';
-};
-
-const toUploadedFile = (file: File, candidate: UploadedFileCandidate | undefined, url: string): UploadedFile => ({
-  ...candidate,
-  appUrl: candidate?.appUrl ?? url,
-  key: candidate?.key ?? `${LOCAL_UPLOAD_KEY_PREFIX}-${crypto.randomUUID()}`,
-  name: candidate?.name ?? file.name,
-  size: candidate?.size ?? file.size,
-  type: candidate?.type ?? file.type,
+const toUploadedFile = (file: File, url: string, key: string): UploadedFile => ({
+  appUrl: url,
+  key,
+  name: file.name,
+  size: file.size,
+  type: file.type,
   url,
 }) as UploadedFile;
 
-const normalizeUploadedFile = async (file: File, candidate: UploadedFileCandidate | undefined): Promise<UploadedFile> => {
-  const candidateUrl = getCandidateUrl(candidate);
-  const url = candidateUrl || await createLocalUrl(file);
-  return toUploadedFile(file, candidate, url);
-};
+const createLocalUploadedFile = async (file: File): Promise<UploadedFile> => {
+  const key = createAssetId();
 
-const createFallbackUploadedFile = async (file: File): Promise<UploadedFile> => {
-  const url = await createLocalUrl(file);
-  return toUploadedFile(file, undefined, url);
+  if (isImageFile(file)) {
+    await putImageBlob(file, { assetId: key, userId: LOCAL_PLATE_MEDIA_USER_ID });
+    return toUploadedFile(file, createLocalMediaUrl(key), key);
+  }
+
+  return toUploadedFile(file, createObjectUrl(file), key);
 };
 
 const simulateFallbackProgress = async (setProgress: React.Dispatch<React.SetStateAction<number>>) => {
@@ -91,27 +65,17 @@ export function useUploadFile({ onUploadComplete, onUploadError, ...props }: Use
     setUploadingFile(file);
 
     try {
-      const res = await uploadFiles('editorUploader', {
-        ...props,
-        files: [file],
-        onUploadProgress: ({ progress }) => {
-          setProgress(Math.min(progress, 100));
-        },
-      });
-      const uploaded = await normalizeUploadedFile(file, res[0] as UploadedFileCandidate | undefined);
+      props.onUploadBegin?.({ file });
+      const uploaded = await createLocalUploadedFile(file);
 
+      await simulateFallbackProgress(setProgress);
       setUploadedFile(uploaded);
       onUploadComplete?.(uploaded);
 
       return uploaded;
     } catch (error) {
       onUploadError?.(error);
-      const fallbackUploadedFile = await createFallbackUploadedFile(file);
-
-      await simulateFallbackProgress(setProgress);
-      setUploadedFile(fallbackUploadedFile);
-
-      return fallbackUploadedFile;
+      throw error;
     } finally {
       setProgress(0);
       setIsUploading(false);
