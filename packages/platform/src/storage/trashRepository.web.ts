@@ -4,9 +4,9 @@ import { COLLECTION_BY_TYPE } from "@/application/usecases/cloudSyncEntityMetada
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
-import { firestoreDb } from "@/services/firebase";
+import { firestoreDb } from "@/infrastructure/firebase/client";
 import { cardDocPathSegments, folderDocPathSegments } from "@/services/firestorePaths";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import type { Card, CardSet, Document, Folder } from "@/types";
 
 type CloudCollectionEntity = "cardSet" | "document";
