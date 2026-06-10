@@ -19,7 +19,8 @@ type CardSetViewNavigationPreferencesStore = {
   byScope: Record<string, CardSetViewNavigationPreference>;
 };
 
-const CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY = "flashcard-master:cardsetview-navigation-preferences:v1";
+const CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY = "sivflow:cardsetview-navigation-preferences:v1";
+const LEGACY_CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY = "flashcard-master:cardsetview-navigation-preferences:v1";
 const NO_CARD_SET_SCOPE_KEY = "__no_card_set__";
 
 const emptyStore = (): CardSetViewNavigationPreferencesStore => ({
@@ -92,7 +93,7 @@ const readStore = (): CardSetViewNavigationPreferencesStore => {
   }
 
   try {
-    return parseStore(window.localStorage.getItem(CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY)) ?? emptyStore();
+    return parseStore(window.localStorage.getItem(CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY)) ?? parseStore(window.localStorage.getItem(LEGACY_CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY)) ?? emptyStore();
   } catch {
     return emptyStore();
   }
@@ -105,6 +106,7 @@ const writeStore = (store: CardSetViewNavigationPreferencesStore) => {
 
   try {
     window.localStorage.setItem(CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY, JSON.stringify(store));
+    window.localStorage.removeItem(LEGACY_CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY);
   } catch {
     // ignore local persistence failures
   }
