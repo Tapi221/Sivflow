@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { deleteDocumentBlob } from "@/services/documentFileStore";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import { normalizeDate } from "@/shared/codec/date";
 import type { DocumentItem } from "@/types";
 
@@ -9,20 +9,24 @@ type UpdateDocumentOptions = {
   touchUpdatedAt?: boolean;
 };
 
-type SyncDeleteCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
-  queueDeleteSync?: (args: { entity: "document"; targetId: string; priority?: "critical" | "high" | "medium" | "low" }) => Promise<void>;
+type DocumentUpdatePayload = Record<string, unknown> & {
+  deviceId: string;
+  updatedAt?: Date;
 };
 
-const normalizeUpdatedAt = (
-  value: DocumentItem["updatedAt"] | undefined,
-): Date | undefined => {
+type DocumentUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
+  updateItem: (table: "documents", id: string, changes: Record<string, unknown>) => Promise<number>;
+};
+
+type SyncDeleteCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
+  queueDeleteSync: (args: { entity: "document"; targetId: string; priority?: "critical" | "high" | "medium" | "low" }) => Promise<void>;
+};
+
+const normalizeUpdatedAt = (value: DocumentItem["updatedAt"] | undefined): Date | undefined => {
   return normalizeDate(value) ?? undefined;
 };
 
-const resolveDocumentFileId = (
-  documentId: string,
-  document: Pick<DocumentItem, "localFileId"> | undefined,
-): string => {
+const resolveDocumentFileId = (documentId: string, document: Pick<DocumentItem, "localFileId"> | undefined): string => {
   const localFileId = typeof document?.localFileId === "string" ? document.localFileId.trim() : "";
   return localFileId.length > 0 ? localFileId : documentId;
 };
@@ -31,41 +35,29 @@ export const useDocumentCommands = () => {
   const { currentUser } = useAuthSession();
 
   const updateDocument = useCallback(
-    async (
-      documentId: string,
-      updates: Partial<DocumentItem>,
-      options: UpdateDocumentOptions = {},
-    ): Promise<void> => {
+    async (documentId: string, updates: Partial<DocumentItem>, options: UpdateDocumentOptions = {}): Promise<void> => {
       if (!currentUser) throw new Error("User not authenticated");
 
       try {
         const db = await getLocalDb(currentUser.uid);
-
-        const shouldTouchUpdatedAt =
-          options.touchUpdatedAt ??
-          Object.keys(updates).some((key) => key !== "viewerState");
-
+        const syncDb = db as DocumentUpdateCapableDb;
+        const shouldTouchUpdatedAt = options.touchUpdatedAt ?? Object.keys(updates).some((key) => key !== "viewerState");
         const { updatedAt: requestedUpdatedAt, ...restUpdates } = updates;
-
-        const payload: Partial<Omit<DocumentItem, "updatedAt">> & {
-          deviceId: string;
-          updatedAt?: Date;
-        } = {
-          ...restUpdates,
+        const payload: DocumentUpdatePayload = {
+          ...(restUpdates as Record<string, unknown>),
           deviceId: currentUser.uid,
         };
 
         if (shouldTouchUpdatedAt) {
           payload.updatedAt = new Date();
         } else {
-          const normalizedRequestedUpdatedAt =
-            normalizeUpdatedAt(requestedUpdatedAt);
+          const normalizedRequestedUpdatedAt = normalizeUpdatedAt(requestedUpdatedAt);
           if (normalizedRequestedUpdatedAt) {
             payload.updatedAt = normalizedRequestedUpdatedAt;
           }
         }
 
-        await db.documents.update(documentId, payload);
+        await syncDb.updateItem("documents", documentId, payload);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         console.error(`[useDocumentCommands] Update error: ${message}`, {
@@ -81,11 +73,7 @@ export const useDocumentCommands = () => {
 
   const deleteDocument = useCallback(
     async (documentId: string): Promise<void> => {
-      await updateDocument(
-        documentId,
-        { isDeleted: true },
-        { touchUpdatedAt: true },
-      );
+      await updateDocument(documentId, { isDeleted: true }, { touchUpdatedAt: true });
     },
     [updateDocument],
   );
@@ -104,10 +92,7 @@ export const useDocumentCommands = () => {
       });
 
       const syncDb = db as SyncDeleteCapableDb;
-      if (typeof syncDb.queueDeleteSync === "function") {
-        await syncDb.queueDeleteSync({ entity: "document", targetId: documentId, priority: "high" });
-      }
-
+      await syncDb.queueDeleteSync({ entity: "document", targetId: documentId, priority: "high" });
       await deleteDocumentBlob(localFileId, { userId: currentUser.uid }).catch(() => undefined);
     },
     [currentUser],
