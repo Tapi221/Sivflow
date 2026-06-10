@@ -9,7 +9,6 @@ type MobileLoginPageStyles = {
   card: CSSProperties;
   brandBlock: CSSProperties;
   logoIcon: CSSProperties;
-  logoTitle: CSSProperties;
   tagline: CSSProperties;
   heading: CSSProperties;
   description: CSSProperties;
@@ -70,21 +69,13 @@ const styles: MobileLoginPageStyles = {
   },
   logoIcon: {
     display: "block",
-    width: "86px",
-    height: "86px",
+    width: "118px",
+    height: "118px",
     objectFit: "contain",
     filter: "drop-shadow(0 10px 20px rgba(5, 27, 52, 0.16))",
   },
-  logoTitle: {
-    margin: "10px 0 0",
-    fontSize: "45px",
-    lineHeight: 0.92,
-    fontWeight: 900,
-    letterSpacing: "-0.065em",
-    color: "#061947",
-  },
   tagline: {
-    margin: "12px 0 0",
+    margin: "14px 0 0",
     fontSize: "14px",
     lineHeight: 1,
     fontWeight: 600,
@@ -225,7 +216,6 @@ const MobileLoginPage = () => {
       <section style={styles.card}>
         <div style={styles.brandBlock}>
           <img src={appIconSrc} alt="Sivflow" style={styles.logoIcon} />
-          <h1 style={styles.logoTitle}>Sivflow</h1>
           <p style={styles.tagline}>Write. Connect. Evolve.</p>
         </div>
 
