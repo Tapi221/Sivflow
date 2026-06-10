@@ -28,7 +28,7 @@ const isValidPdfPageWindowMetric = (metric: PdfPageWindowMetric, pageCount: numb
 
 const isPdfPageMetricVisible = (metric: PdfPageWindowMetric, viewportTop: number, viewportBottom: number): boolean => {
   const pageBottom = metric.offsetTop + metric.offsetHeight;
-  return pageBottom >= viewportTop && metric.offsetTop <= viewportBottom;
+  return pageBottom > viewportTop && metric.offsetTop < viewportBottom;
 };
 
 const getPdfPageWindowScanStartIndex = (pageMetrics: PdfPageWindowMetric[], viewportTop: number): number => {
