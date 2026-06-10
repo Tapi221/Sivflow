@@ -5,11 +5,11 @@ import type { SecurityEventType } from "#src/security/policy";
 // Initialize Admin SDK
 process.env.FIRESTORE_EMULATOR_HOST = "localhost:8080";
 process.env.FIREBASE_AUTH_EMULATOR_HOST = "localhost:9099";
-process.env.GCLOUD_PROJECT = "flashcard-master"; // Adjust if needed
+process.env.GCLOUD_PROJECT = "sivflow"; // Adjust if needed
 
 if (!admin.apps.length) {
   admin.initializeApp({
-    projectId: "flashcard-master",
+    projectId: "sivflow",
   });
 }
 
