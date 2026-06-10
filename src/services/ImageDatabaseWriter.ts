@@ -3,11 +3,9 @@ import { getImageFromIndexedDb, saveImageToIndexedDb } from "@/infrastructure/im
 import type { UploadedImage } from "@/types";
 
 class ImageDatabaseWriter {
-  private readonly inFlightTouchMigrations = new Set<string>();
-
   saveToIndexedDB = async (image: UploadedImage): Promise<void> => saveImageToIndexedDb(image);
 
-  getFromFirestore = async (imageId: string, userId?: string): Promise<UploadedImage | null> => getImageFromFirestore({ imageId, userId, inFlightTouchMigrations: this.inFlightTouchMigrations });
+  getFromFirestore = async (imageId: string, userId?: string): Promise<UploadedImage | null> => getImageFromFirestore({ imageId, userId });
 
   getFromIndexedDB = async (imageId: string): Promise<UploadedImage | null> => getImageFromIndexedDb(imageId);
 }
