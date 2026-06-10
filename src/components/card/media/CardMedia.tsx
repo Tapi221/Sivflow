@@ -4,7 +4,7 @@ import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
 import type { ImageGalleryItem } from "./types";
 import { Button } from "@/components/ui/button";
 import { Copy, Download, Image as ImageIcon, Pause, Play, Volume2 } from "@/ui/icons";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { resolveCardImageUrl } from "@/services/cardImageResolver";
 import type { ResolvableImageRef } from "@/types/domain/assets";
