@@ -6,7 +6,7 @@ import { AIKit } from '@/registry/components/editor/plugins/ai-kit';
 import { BaseAlignKit } from '@/registry/components/editor/plugins/align-base-kit';
 import { BasicBlocksKit } from '@/registry/components/editor/plugins/basic-blocks-kit';
 import { BasicMarksKit } from '@/registry/components/editor/plugins/basic-marks-kit';
-import { BlockSelectionKit } from '@/registry/components/editor/plugins/block-selection-kit';
+import { BlockMenuKit } from '@/registry/components/editor/plugins/block-menu-kit';
 import { BaseCalloutKit } from '@/registry/components/editor/plugins/callout-base-kit';
 import { BaseCodeBlockKit } from '@/registry/components/editor/plugins/code-block-base-kit';
 import { BaseColumnKit } from '@/registry/components/editor/plugins/column-base-kit';
@@ -79,7 +79,7 @@ const NOTE_PLATE_PLUGINS = [
   ...DiscussionKit,
   ...CommentKit,
   ...SuggestionKit,
-  ...BlockSelectionKit,
+  ...BlockMenuKit,
   ...DndKit,
   ...EmojiKit,
   ...MarkdownKit,
