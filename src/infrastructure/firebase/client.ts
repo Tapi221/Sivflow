@@ -57,7 +57,7 @@ const initializeFirebaseClient = (): FirebaseClientState => {
   if (!isFirebaseClientAvailable) {
     if (import.meta.env.DEV || import.meta.env.MODE === "test") {
       console.warn(
-        `[Firebase] Firebase env is incomplete; starting in local-first mode without cloud services. Missing: ${missingFirebaseEnvVars.join(", ")}`,
+        `[Firebase] Firebase 環境変数が不足しているため、クラウド機能なしのローカル優先モードで起動します。不足: ${missingFirebaseEnvVars.join(", ")}`,
       );
     }
     return createUnavailableState();
@@ -75,21 +75,21 @@ const initializeFirebaseClient = (): FirebaseClientState => {
         tabManager: persistentMultipleTabManager(),
       }),
     });
-    console.log("[Firebase] Firestore initialized with persistent cache");
+    console.log("[Firebase] Firestore を永続キャッシュ付きで初期化しました");
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
 
     console.warn(
-      "[Firebase] initializeFirestore failed, falling back to getFirestore:",
+      "[Firebase] initializeFirestore に失敗しました。getFirestore にフォールバックします:",
       message,
     );
 
     try {
       firestoreDb = getFirestore(app);
-      console.log("[Firebase] Fallback to getFirestore() successful");
+      console.log("[Firebase] getFirestore() へのフォールバックに成功しました");
     } catch (fallbackError: unknown) {
       console.error(
-        "[Firebase] All Firestore initialization attempts failed:",
+        "[Firebase] Firestore の初期化にすべて失敗しました:",
         fallbackError,
       );
     }
@@ -119,7 +119,7 @@ export const requireFirebaseClient = (): FirebaseClientState => {
   }
 
   throw new Error(
-    `[Firebase] Firebase client is unavailable. Missing env vars: ${missingFirebaseEnvVars.join(", ")}`,
+    `[Firebase] Firebase クライアントを利用できません。不足している環境変数: ${missingFirebaseEnvVars.join(", ")}`,
   );
 };
 
@@ -130,40 +130,40 @@ export const requireFirestoreDb = (): Firestore => {
 
   if (!isFirebaseClientAvailable) {
     throw new Error(
-      `[Firebase] Firestore is unavailable because Firebase env is incomplete: ${missingFirebaseEnvVars.join(", ")}`,
+      `[Firebase] Firebase 環境変数が不足しているため Firestore を利用できません: ${missingFirebaseEnvVars.join(", ")}`,
     );
   }
 
   throw new Error(
-    "[Firebase] Firestore initialization failed. Firestore-dependent flow cannot continue.",
+    "[Firebase] Firestore の初期化に失敗しました。Firestore 依存の処理を続行できません。",
   );
 };
 
 const debugFirebase = (): void => {
-  console.log("=== Firebase Debug Info ===");
+  console.log("=== Firebase デバッグ情報 ===");
 
   if (!firebaseClientState.app) {
-    console.log("App instance: unavailable");
-    console.log("Mode: local-first without cloud services");
-    console.log("Missing env vars:", missingFirebaseEnvVars.join(", "));
-    console.log("==========================");
+    console.log("アプリインスタンス: 利用不可");
+    console.log("モード: クラウド機能なしのローカル優先");
+    console.log("不足している環境変数:", missingFirebaseEnvVars.join(", "));
+    console.log("=============================");
     return;
   }
 
   try {
-    console.log("App name:", firebaseClientState.app.name);
-    console.log("DB instance:", firestoreDb ? "exists" : "MISSING");
-    console.log("Functions instance:", functionsClient ? "exists" : "MISSING");
+    console.log("アプリ名:", firebaseClientState.app.name);
+    console.log("DB インスタンス:", firestoreDb ? "あり" : "なし");
+    console.log("Functions インスタンス:", functionsClient ? "あり" : "なし");
 
     if (firestoreDb) {
       const testRef = collection(firestoreDb, "test_connection");
-      console.log("collection() basic check passed:", testRef.path);
+      console.log("collection() 基本確認成功:", testRef.path);
     }
   } catch (error) {
-    console.error("debugFirebase error:", error);
+    console.error("debugFirebase でエラーが発生しました:", error);
   }
 
-  console.log("==========================");
+  console.log("=============================");
 };
 
 if (import.meta.env.DEV) {
