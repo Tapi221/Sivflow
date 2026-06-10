@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { getLocalDb } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import type { SyncSettings } from "@/types";
@@ -39,11 +39,10 @@ export const useSyncSettings = () => {
     }
 
     setLoading(true);
-
     try {
-      const syncService = await SyncServiceFactory.getInstance(currentUser.uid);
-      const snapshot = await syncService.loadSettings();
-      setSettings(normalizeSyncSettings(snapshot.data));
+      const db = await getLocalDb(currentUser.uid);
+      const savedSettings = await db.syncSettings.get(DEFAULT_SYNC_SETTINGS.id);
+      setSettings(normalizeSyncSettings(savedSettings));
     } catch (error) {
       console.error("[useSyncSettings] Failed to load settings:", error);
       setSettings(DEFAULT_SYNC_SETTINGS);
@@ -52,29 +51,23 @@ export const useSyncSettings = () => {
     }
   }, [currentUser]);
 
-  const updateSettings = useCallback(
-    async (newSettings: Partial<SyncSettings>) => {
-      if (!currentUser) return;
-
-      try {
-        const db = await getLocalDb(currentUser.uid);
-        const updated = normalizeSyncSettings({
-          ...settings,
-          ...newSettings,
-        });
-
-        await db.putSyncSettings(updated);
-        setSettings(updated);
-      } catch (error) {
-        console.error("[useSyncSettings] Failed to update settings:", error);
-      }
-    },
-    [currentUser, settings],
-  );
-
   useEffect(() => {
     void loadSettings();
   }, [loadSettings]);
 
-  return { settings, updateSettings, loading, refresh: loadSettings };
+  const updateSettings = useCallback(
+    async (updates: Partial<SyncSettings>) => {
+      if (!currentUser) return;
+
+      const nextSettings = normalizeSyncSettings({ ...settings, ...updates });
+      setSettings(nextSettings);
+
+      const db = await getLocalDb(currentUser.uid);
+      await db.syncSettings.put(nextSettings);
+      SyncServiceFactory.resetInstance(currentUser.uid);
+    },
+    [currentUser, settings],
+  );
+
+  return { settings, loading, updateSettings, reloadSettings: loadSettings };
 };
