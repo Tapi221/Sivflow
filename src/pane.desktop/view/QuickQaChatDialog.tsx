@@ -2,11 +2,11 @@ import { memo, useCallback, useMemo, useRef, useState, type KeyboardEvent } from
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useToast } from "@/contexts/ToastContext";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { MessageSquare, Plus, Sparkles } from "@/ui/icons";
 import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
+import { useToast } from "@web-renderer/contexts/ToastContext";
 
 type QuickQaChatDialogProps = {
   open: boolean;
