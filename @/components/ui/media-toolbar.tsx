@@ -4,60 +4,33 @@ import * as React from 'react';
 
 import type { WithRequiredKey } from 'platejs';
 
-import {
-  FloatingMedia as FloatingMediaPrimitive,
-  FloatingMediaStore,
-  useFloatingMediaValue,
-  useImagePreviewValue,
-} from '@platejs/media/react';
+import { FloatingMedia as FloatingMediaPrimitive, FloatingMediaStore, useFloatingMediaValue, useImagePreviewValue } from '@platejs/media/react';
 import { cva } from 'class-variance-authority';
 import { Link, Trash2Icon } from 'lucide-react';
-import {
-  useEditorRef,
-  useEditorSelector,
-  useElement,
-  useFocusedLast,
-  useReadOnly,
-  useRemoveNodeButton,
-  useSelected,
-} from 'platejs/react';
+import { useEditorRef, useEditorSelector, useElement, useFocusedLast, useReadOnly, useRemoveNodeButton, useSelected } from 'platejs/react';
 
-import { Button, buttonVariants } from '@/components/ui/button';
-import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
-} from '@/components/ui/popover';
-import { Separator } from '@/components/ui/separator';
-
+import { Button, buttonVariants } from './button';
 import { CaptionButton } from './caption';
+import { Popover, PopoverAnchor, PopoverContent } from './popover';
+import { Separator } from './separator';
+
+type MediaToolbarProps = {
+  children: React.ReactNode;
+  plugin: WithRequiredKey;
+};
 
 const inputVariants = cva(
   'flex h-[28px] w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-transparent md:text-sm'
 );
 
-export function MediaToolbar({
-  children,
-  plugin,
-}: {
-  children: React.ReactNode;
-  plugin: WithRequiredKey;
-}) {
+const MediaToolbar = ({ children, plugin }: MediaToolbarProps) => {
   const editor = useEditorRef();
   const readOnly = useReadOnly();
   const selected = useSelected();
   const isFocusedLast = useFocusedLast();
-  const selectionCollapsed = useEditorSelector(
-    (editor) => !editor.api.isExpanded(),
-    []
-  );
+  const selectionCollapsed = useEditorSelector((editor) => !editor.api.isExpanded(), []);
   const isImagePreviewOpen = useImagePreviewValue('isOpen', editor.id);
-  const open =
-    isFocusedLast &&
-    !readOnly &&
-    selected &&
-    selectionCollapsed &&
-    !isImagePreviewOpen;
+  const open = isFocusedLast && !readOnly && selected && selectionCollapsed && !isImagePreviewOpen;
   const isEditing = useFloatingMediaValue('isEditing');
 
   React.useEffect(() => {
@@ -114,4 +87,6 @@ export function MediaToolbar({
       </PopoverContent>
     </Popover>
   );
-}
+};
+
+export { MediaToolbar };
