@@ -1,15 +1,22 @@
-/** @type {import('tailwindcss').Config} */
+import scrollbarHide from "tailwind-scrollbar-hide";
+
 const appFontFamily = {
-    darkMode: ["class"],
-    ui: ["var(--app-font-family-ui)"],
+  ui: ["var(--app-font-family-ui)"],
   content: ["var(--app-font-family-content)"],
   numeric: ["var(--app-font-family-numeric)"],
   code: ["var(--app-font-family-code)"],
-    plugins: [tailwind-scrollbar-hide]
 };
 
-export default {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+/** @type {import('tailwindcss').Config} */
+const config = {
+  darkMode: ["class"],
+  content: [
+    "./apps/web/index.html",
+    "./apps/web/src/**/*.{js,ts,jsx,tsx}",
+    "./packages/web-renderer/src/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./@/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
     extend: {
       colors: {
@@ -145,5 +152,7 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [scrollbarHide],
 };
+
+export default config;
