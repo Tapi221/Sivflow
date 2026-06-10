@@ -90,12 +90,19 @@ const hasGoogleDriveFileId = (document: Pick<DocumentItem, "googleDriveFileId">)
   return Boolean(document.googleDriveFileId?.trim());
 };
 
+const hasLocalPdfBlobCandidate = (document: Pick<DocumentItem, "localFileId">): boolean => {
+  return Boolean(document.localFileId?.trim());
+};
+
+const isLocalPersistedPdfSource = (source: PdfDocumentSource | null): boolean => {
+  return source?.type === "url" && source.locality === "local";
+};
+
 const resolvePreferredPdfBlob = async (document: DocumentItem, currentUserId: string | null, hasPersistedSource: boolean): Promise<Blob | null> => {
   if (!hasPersistedSource) return resolvePdfDocumentBlob(document, currentUserId);
 
   const localBlob = await findLocalPdfBlob(document, currentUserId);
   if (localBlob) return localBlob;
-  if (hasGoogleDriveFileId(document)) return resolvePdfDocumentBlob(document, currentUserId);
   return null;
 };
 
@@ -109,7 +116,8 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   const [localSource, setLocalSource] = useState<LocalPdfSourceState>(() => createPendingLocalPdfSourceState(document.id));
   const isLocalSourceForCurrentDocument = localSource.documentId === document.id;
   const activeLocalSource = isLocalSourceForCurrentDocument ? localSource : createPendingLocalPdfSourceState(document.id);
-  const source = activeLocalSource.source ?? persistedSource;
+  const shouldWaitForLocalSource = hasLocalPdfBlobCandidate(document) && !isLocalPersistedPdfSource(persistedSource) && !activeLocalSource.isResolved;
+  const source = shouldWaitForLocalSource ? null : activeLocalSource.source ?? persistedSource;
   const paneClassName = cn(PDF_DOCUMENT_PANE_CLASS_NAME, className);
   const statusClassName = cn(PDF_DOCUMENT_STATUS_CLASS_NAME, className);
   const pendingViewerStateSaveRef = useRef<PendingPdfViewerStateSave | null>(null);
@@ -198,6 +206,11 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     setLocalSource(createPendingLocalPdfSourceState(document.id));
 
     const loadLocalSource = async () => {
+      if (isLocalPersistedPdfSource(persistedSource)) {
+        setLocalSource(createResolvedLocalPdfSourceState(document.id, null));
+        return;
+      }
+
       const blob = await waitForPdfSourceResolution(resolvePreferredPdfBlob(document, currentUserId, Boolean(persistedSource)));
       recordPdfPerformanceMark(`${performanceTraceName}.blob`, { detail: { documentId: document.id, hasBlob: Boolean(blob), hasPersistedSource: Boolean(persistedSource), sizeBytes: blob?.size ?? document.sizeBytes ?? null } });
       if (isCancelled) return;
