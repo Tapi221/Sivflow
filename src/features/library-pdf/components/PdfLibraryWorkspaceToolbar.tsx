@@ -6,7 +6,7 @@ import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 import type { IconProps } from "@/ui/icons";
 
-export type PdfLibraryWorkspaceSection = "flashcard" | "pdf";
+type PdfLibraryWorkspaceSection = "flashcard" | "pdf";
 
 type PdfLibraryWorkspaceToolbarProps = {
   activeSection: PdfLibraryWorkspaceSection;
@@ -24,7 +24,6 @@ const LIBRARY_TYPE_TABS = [
   { value: "flashcard", label: "Flashcard", icon: FlashCardIcon },
   { value: "pdf", label: "PDF", icon: PDFIcon },
 ] as const satisfies readonly LibraryTypeToolbarTab[];
-
 const TAB_INDICATOR_ID = "library-type-tab-indicator";
 const TAB_MOTION_TRANSITION: Transition = {
   type: "tween",
@@ -36,7 +35,7 @@ const resolveLibrarySectionRoute = (section: PdfLibraryWorkspaceSection): string
   return section === "flashcard" ? "/library/flashcard" : "/library/pdf";
 };
 
-export const PdfLibraryWorkspaceToolbar = ({ activeSection, onSelectSection, onAddPdf }: PdfLibraryWorkspaceToolbarProps) => {
+const PdfLibraryWorkspaceToolbar = ({ activeSection, onSelectSection, onAddPdf }: PdfLibraryWorkspaceToolbarProps) => {
   const navigate = useNavigate();
 
   const handleSelectSection = (section: PdfLibraryWorkspaceSection) => {
@@ -78,3 +77,6 @@ export const PdfLibraryWorkspaceToolbar = ({ activeSection, onSelectSection, onA
     </>
   );
 };
+
+export { PdfLibraryWorkspaceToolbar };
+export type { PdfLibraryWorkspaceSection };
