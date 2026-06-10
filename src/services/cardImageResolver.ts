@@ -2,7 +2,7 @@ import { getDownloadURL, ref as storageRef } from "firebase/storage";
 import { storage } from "@/services/firebase";
 import { getOrCreateImageBlobUrl } from "./imageBlobUrlSessionCache";
 import { getCachedRemoteUrl, setCachedRemoteUrl } from "./imagePreloadCache";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import type { AssetRecord, ResolvableImageRef, UploadedImage } from "@/types";
 
 type ImageRecordLike =
@@ -18,8 +18,11 @@ type ImageRecordLike =
   }
   | undefined;
 
-const isNonEmptyString = (value: unknown): value is string =>
-  typeof value === "string" && value.trim().length > 0;
+type ImageUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
+  updateItem: (table: "images", id: string, changes: Record<string, unknown>) => Promise<number>;
+};
+
+const isNonEmptyString = (value: unknown): value is string => typeof value === "string" && value.trim().length > 0;
 
 const getRemoteUrlFromRecord = (record: ImageRecordLike): string | null => {
   if (isNonEmptyString(record?.remoteUrlCache)) {
@@ -57,29 +60,18 @@ const getLocalBlobIdFromRecord = (record: ImageRecordLike): string | null => {
   return null;
 };
 
-const getResolvedStatusFromRecord = (
-  record: ImageRecordLike,
-): "pending" | "uploading" | "ready" | "failed" => {
+const getResolvedStatusFromRecord = (record: ImageRecordLike): "pending" | "uploading" | "ready" | "failed" => {
   if (!record) return "pending";
 
   if (record.remoteStatus === "failed" || record.status === "failed") {
     return "failed";
   }
 
-  if (
-    record.remoteStatus === "ready" ||
-    record.status === "ready" ||
-    isNonEmptyString(record.remoteUrlCache) ||
-    isNonEmptyString(record.remoteUrl)
-  ) {
+  if (record.remoteStatus === "ready" || record.status === "ready" || isNonEmptyString(record.remoteUrlCache) || isNonEmptyString(record.remoteUrl)) {
     return "ready";
   }
 
-  if (
-    record.remoteStatus === "uploading" ||
-    record.status === "uploading" ||
-    record.status === "pending"
-  ) {
+  if (record.remoteStatus === "uploading" || record.status === "uploading" || record.status === "pending") {
     return "uploading";
   }
 
@@ -112,10 +104,7 @@ const resolveDirectUrl = (image: ResolvableImageRef): string | null => {
   return null;
 };
 
-export const resolveCardImageUrl = async (
-  image: ResolvableImageRef,
-  userId?: string | null,
-): Promise<ResolvedCardImage> => {
+export const resolveCardImageUrl = async (image: ResolvableImageRef, userId?: string | null): Promise<ResolvedCardImage> => {
   const directUrl = resolveDirectUrl(image);
   if (directUrl) {
     return {
@@ -150,16 +139,11 @@ export const resolveCardImageUrl = async (
     };
   }
 
-  const db = await getLocalDb(userId ?? undefined);
-  const record = (await db.images.get(assetId)) as
-    | AssetRecord
-    | UploadedImage
-    | undefined;
+  const db = (await getLocalDb(userId ?? undefined)) as ImageUpdateCapableDb;
+  const record = (await db.images.get(assetId)) as AssetRecord | UploadedImage | undefined;
   const imageRecord = image as ImageRecordLike;
   const status = getResolvedStatusFromRecord(record ?? imageRecord);
-
-  const localBlobId =
-    getLocalBlobIdFromRecord(record) ?? getLocalBlobIdFromRecord(imageRecord);
+  const localBlobId = getLocalBlobIdFromRecord(record) ?? getLocalBlobIdFromRecord(imageRecord);
   if (localBlobId) {
     const blobUrl = await getOrCreateImageBlobUrl(localBlobId, {
       userId: userId ?? undefined,
@@ -176,8 +160,7 @@ export const resolveCardImageUrl = async (
     }
   }
 
-  const remoteUrl =
-    getRemoteUrlFromRecord(record) ?? getRemoteUrlFromRecord(imageRecord);
+  const remoteUrl = getRemoteUrlFromRecord(record) ?? getRemoteUrlFromRecord(imageRecord);
   if (remoteUrl) {
     setCachedRemoteUrl(assetId, remoteUrl);
     return {
@@ -189,14 +172,13 @@ export const resolveCardImageUrl = async (
     };
   }
 
-  const remoteKey =
-    getRemoteKeyFromRecord(record) ?? getRemoteKeyFromRecord(imageRecord);
+  const remoteKey = getRemoteKeyFromRecord(record) ?? getRemoteKeyFromRecord(imageRecord);
   if (remoteKey && status !== "failed") {
     try {
       const downloadUrl = await getDownloadURL(storageRef(storage, remoteKey));
       setCachedRemoteUrl(assetId, downloadUrl);
 
-      void db.images.update(assetId, {
+      void db.updateItem("images", assetId, {
         remoteUrlCache: downloadUrl,
         updatedAt: new Date(),
       });
