@@ -74,18 +74,16 @@
   min-width: 32px;
   height: 32px;
   padding: 0;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
+  border: 0;
+  background: transparent;
   color: #8c8c8c;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  box-shadow: none;
   outline: none;
-  backdrop-filter: blur(16px);
-  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  transition: color 160ms ease, transform 160ms ease;
 }
 
 .app-sidebar-collapsed-toggle:hover {
-  background: #eeeeee;
+  background: transparent;
   color: #2f343b;
 }
 
@@ -94,9 +92,9 @@
 }
 
 .app-sidebar-collapsed-toggle:focus-visible {
-  background: #eeeeee;
+  background: transparent;
   color: #2f343b;
-  box-shadow: 0 0 0 3px var(--app-sidebar-focus-ring);
+  box-shadow: none;
 }
 
 .app-sidebar-collapsed-toggle__icon {
