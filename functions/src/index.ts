@@ -4,6 +4,7 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { getAdminAuth, getDb, serverTimestamp } from "#src/firebaseAdmin.js";
 import { googleCalendarWebhook } from "#src/gcal/googleCalendarWebhook.js";
 import { renewExpiredWatchChannels } from "#src/gcal/renewWatchChannels.js";
+import { cacheGoogleProfileImageDataUrl } from "#src/gcal/profileImageCache.js";
 import { classifyGoogleTokenEndpointFailure, type GoogleOAuthServerErrorReason } from "#src/gcal/tokenErrors.js";
 
 type StoredGoogleCalendarAccount = {
@@ -186,7 +187,8 @@ const verifyGoogleScopes = async (accessToken: string): Promise<void> => {
 const storeGoogleAccount = async (uid: string, refreshToken: string, profile: GoogleOAuthProfile) => {
   const now = await serverTimestamp();
   const encryptedRefreshToken = encryptRefreshToken(refreshToken);
-  const account: StoredGoogleCalendarAccount = { email: profile.accountEmail, name: profile.accountName, photoUrl: profile.accountPhotoUrl, encryptedRefreshToken, createdAt: now, updatedAt: now };
+  const cachedPhotoUrl = await cacheGoogleProfileImageDataUrl(profile.accountPhotoUrl);
+  const account: StoredGoogleCalendarAccount = { email: profile.accountEmail, name: profile.accountName, photoUrl: cachedPhotoUrl, encryptedRefreshToken, createdAt: now, updatedAt: now };
   const accountRef = (await getDb()).doc(`users/${uid}/googleCalendarAccounts/${profile.accountEmail}`);
   await accountRef.set(account, { merge: true });
   return account;
@@ -210,7 +212,7 @@ export const connectGoogleCalendarAccount = onCall(
     const account = await storeGoogleAccount(uid, refreshToken, profile);
 
     try {
-      await getAdminAuth().updateUser(uid, { email: profile.accountEmail, displayName: profile.accountName ?? undefined, photoURL: profile.accountPhotoUrl ?? undefined });
+      await getAdminAuth().updateUser(uid, { email: profile.accountEmail, displayName: profile.accountName ?? undefined, photoURL: account.photoUrl ?? undefined });
     } catch (error) {
       console.error("[GoogleCalendarOAuth] failed to sync Firebase Auth profile", { uid, account: maskAccountId(profile.accountEmail), error: getErrorSummary(error) });
       throw new HttpsError("unavailable", "Google account was stored but Firebase Auth profile could not be updated.", { reason: "firebase_auth_user_sync_failed", reconnectRequired: false });
@@ -237,7 +239,7 @@ export const refreshGoogleCalendarAccessToken = onCall(
     if (!accessToken) throw new HttpsError("failed-precondition", "Google OAuth refresh response did not include an access token.", { reason: "google_token_invalid_response", reconnectRequired: true, userAction: "reconnect_google_account" });
 
     await verifyGoogleScopes(accessToken);
-    return { accessToken, expiresIn: data.expires_in ?? null, accountEmail };
+    return { accessToken, expiresIn: data.expires_in ?? null, accountEmail, accountName: account.name, accountPhotoUrl: account.photoUrl };
   },
 );
 
