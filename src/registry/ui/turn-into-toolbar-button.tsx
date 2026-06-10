@@ -6,41 +6,16 @@ import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 import type { TElement } from 'platejs';
 
 import { DropdownMenuItemIndicator } from '@radix-ui/react-dropdown-menu';
-import {
-  CheckIcon,
-  ChevronRightIcon,
-  Code2,
-  Columns3Icon,
-  FileCodeIcon,
-  Heading1Icon,
-  Heading2Icon,
-  Heading3Icon,
-  Heading4Icon,
-  Heading5Icon,
-  Heading6Icon,
-  ListIcon,
-  ListOrderedIcon,
-  PilcrowIcon,
-  QuoteIcon,
-  SquareIcon,
-} from 'lucide-react';
+import { CheckIcon, ChevronRightIcon, Code2, Columns3Icon, FileCodeIcon, Heading1Icon, Heading2Icon, Heading3Icon, Heading4Icon, Heading5Icon, Heading6Icon, ListIcon, ListOrderedIcon, PilcrowIcon, QuoteIcon, SquareIcon } from 'lucide-react';
 import { KEYS } from 'platejs';
 import { useEditorRef, useSelectionFragmentProp } from 'platejs/react';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from '@/registry/ui/shadcn/dropdown-menu';
-import {
-  getBlockType,
-  setBlockType,
-} from '@/registry/components/editor/transforms';
+import { getBlockType, setBlockType } from '@/registry/components/editor/transforms';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/registry/ui/shadcn/dropdown-menu';
 
 import { ToolbarButton, ToolbarMenuGroup } from './toolbar';
 
-export const turnIntoItems = [
+const turnIntoItems = [
   {
     icon: <PilcrowIcon />,
     keywords: ['paragraph'],
@@ -115,14 +90,7 @@ export const turnIntoItems = [
   },
   {
     icon: <Code2 />,
-    keywords: [
-      'code-drawing',
-      'diagram',
-      'plantuml',
-      'graphviz',
-      'flowchart',
-      'mermaid',
-    ],
+    keywords: ['code-drawing', 'diagram', 'plantuml', 'graphviz', 'flowchart', 'mermaid'],
     label: 'Code Drawing',
     value: KEYS.codeDrawing,
   },
@@ -139,7 +107,7 @@ export const turnIntoItems = [
   },
 ];
 
-export function TurnIntoToolbarButton(props: DropdownMenuProps) {
+function TurnIntoToolbarButton(props: DropdownMenuProps) {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
@@ -147,22 +115,12 @@ export function TurnIntoToolbarButton(props: DropdownMenuProps) {
     defaultValue: KEYS.p,
     getProp: (node) => getBlockType(node as TElement),
   });
-  const selectedItem = React.useMemo(
-    () =>
-      turnIntoItems.find((item) => item.value === (value ?? KEYS.p)) ??
-      turnIntoItems[0],
-    [value]
-  );
+  const selectedItem = React.useMemo(() => turnIntoItems.find((item) => item.value === (value ?? KEYS.p)) ?? turnIntoItems[0], [value]);
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton
-          className="min-w-[125px]"
-          pressed={open}
-          tooltip="Turn into"
-          isDropdown
-        >
+        <ToolbarButton className="min-w-[125px]" pressed={open} tooltip="Turn into" isDropdown>
           {selectedItem.label}
         </ToolbarButton>
       </DropdownMenuTrigger>
@@ -183,11 +141,7 @@ export function TurnIntoToolbarButton(props: DropdownMenuProps) {
           label="Turn into"
         >
           {turnIntoItems.map(({ icon, label, value: itemValue }) => (
-            <DropdownMenuRadioItem
-              key={itemValue}
-              className="min-w-[180px] pl-2 *:first:[span]:hidden"
-              value={itemValue}
-            >
+            <DropdownMenuRadioItem key={itemValue} className="min-w-[180px] pl-2 [&>span:first-child]:hidden" value={itemValue}>
               <span className="pointer-events-none absolute right-2 flex size-3.5 items-center justify-center">
                 <DropdownMenuItemIndicator>
                   <CheckIcon />
@@ -202,3 +156,5 @@ export function TurnIntoToolbarButton(props: DropdownMenuProps) {
     </DropdownMenu>
   );
 }
+
+export { TurnIntoToolbarButton };
