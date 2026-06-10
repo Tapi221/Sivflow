@@ -31,6 +31,7 @@ type PendingPdfViewerStateSave = {
 
 const PDF_SOURCE_RESOLUTION_TIMEOUT_MS = 15_000;
 const PDF_VIEWER_STATE_SAVE_DEBOUNCE_MS = 800;
+const PDF_VIEWER_STATE_SAVE_RETRY_DELAY_MS = 1_000;
 const PDF_SOURCE_TIMEOUT_ERROR_MESSAGE = "PDFデータの取得がタイムアウトしました。もう一度開き直してください。";
 const PDF_SOURCE_MISSING_ERROR_MESSAGE = "表示できるPDFデータが見つかりません。PDFを再インポートしてください。";
 const PDF_DOCUMENT_PANE_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1";
@@ -71,12 +72,31 @@ const waitForPdfSourceResolution = async <T,>(promise: Promise<T>): Promise<T> =
   }
 };
 
+const delay = (durationMs: number): Promise<void> => {
+  return new Promise((resolve) => {
+    globalThis.setTimeout(resolve, durationMs);
+  });
+};
+
 const getPdfViewerStatePersistence = (options?: PdfViewerStateChangeOptions) => {
   return options?.persistence ?? "immediate";
 };
 
 const isBrowserPageHidden = (): boolean => {
   return typeof globalThis.document !== "undefined" && globalThis.document.visibilityState === "hidden";
+};
+
+const hasGoogleDriveFileId = (document: Pick<DocumentItem, "googleDriveFileId">): boolean => {
+  return Boolean(document.googleDriveFileId?.trim());
+};
+
+const resolvePreferredPdfBlob = async (document: DocumentItem, currentUserId: string | null, hasPersistedSource: boolean): Promise<Blob | null> => {
+  if (!hasPersistedSource) return resolvePdfDocumentBlob(document, currentUserId);
+
+  const localBlob = await findLocalPdfBlob(document, currentUserId);
+  if (localBlob) return localBlob;
+  if (hasGoogleDriveFileId(document)) return resolvePdfDocumentBlob(document, currentUserId);
+  return null;
 };
 
 const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentPaneProps) => {
@@ -89,11 +109,13 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   const [localSource, setLocalSource] = useState<LocalPdfSourceState>(() => createPendingLocalPdfSourceState(document.id));
   const isLocalSourceForCurrentDocument = localSource.documentId === document.id;
   const activeLocalSource = isLocalSourceForCurrentDocument ? localSource : createPendingLocalPdfSourceState(document.id);
-  const source = activeLocalSource.isResolved ? activeLocalSource.source ?? persistedSource : null;
+  const source = activeLocalSource.source ?? persistedSource;
   const paneClassName = cn(PDF_DOCUMENT_PANE_CLASS_NAME, className);
   const statusClassName = cn(PDF_DOCUMENT_STATUS_CLASS_NAME, className);
   const pendingViewerStateSaveRef = useRef<PendingPdfViewerStateSave | null>(null);
   const viewerStateSaveTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
+  const viewerStateSaveChainRef = useRef<Promise<void>>(Promise.resolve());
+  const viewerStateSaveRevisionRef = useRef(0);
 
   const clearViewerStateSaveTimer = useCallback(() => {
     if (viewerStateSaveTimerRef.current === null) return;
@@ -102,7 +124,32 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
   }, []);
 
   const persistViewerState = useCallback((pendingSave: PendingPdfViewerStateSave) => {
-    void pendingSave.onDocumentUpdate({ viewerState: pendingSave.viewerState });
+    const revision = viewerStateSaveRevisionRef.current + 1;
+    viewerStateSaveRevisionRef.current = revision;
+
+    const runSave = async () => {
+      if (revision !== viewerStateSaveRevisionRef.current) return;
+
+      try {
+        await pendingSave.onDocumentUpdate({ viewerState: pendingSave.viewerState });
+        return;
+      } catch (error) {
+        if (revision !== viewerStateSaveRevisionRef.current) return;
+        console.warn("[PdfDocumentPane] viewer state save failed; retrying latest state", error);
+      }
+
+      await delay(PDF_VIEWER_STATE_SAVE_RETRY_DELAY_MS);
+      if (revision !== viewerStateSaveRevisionRef.current) return;
+
+      try {
+        await pendingSave.onDocumentUpdate({ viewerState: pendingSave.viewerState });
+      } catch (error) {
+        if (revision !== viewerStateSaveRevisionRef.current) return;
+        console.warn("[PdfDocumentPane] viewer state save failed after retry", error);
+      }
+    };
+
+    viewerStateSaveChainRef.current = viewerStateSaveChainRef.current.catch(() => undefined).then(runSave);
   }, []);
 
   const flushPendingViewerStateSave = useCallback(() => {
@@ -151,7 +198,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
     setLocalSource(createPendingLocalPdfSourceState(document.id));
 
     const loadLocalSource = async () => {
-      const blob = await waitForPdfSourceResolution(persistedSource ? findLocalPdfBlob(document, currentUserId) : resolvePdfDocumentBlob(document, currentUserId));
+      const blob = await waitForPdfSourceResolution(resolvePreferredPdfBlob(document, currentUserId, Boolean(persistedSource)));
       recordPdfPerformanceMark(`${performanceTraceName}.blob`, { detail: { documentId: document.id, hasBlob: Boolean(blob), hasPersistedSource: Boolean(persistedSource), sizeBytes: blob?.size ?? document.sizeBytes ?? null } });
       if (isCancelled) return;
 
@@ -178,7 +225,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
       recordPdfPerformanceMark(`${performanceTraceName}.error`, { detail: { documentId: document.id, hasPersistedSource: Boolean(persistedSource), message: getErrorMessage(error, PDF_SOURCE_MISSING_ERROR_MESSAGE), sizeBytes: document.sizeBytes ?? null } });
       recordPdfPerformanceMeasure(`${performanceTraceName}.duration`, `${performanceTraceName}.start`, `${performanceTraceName}.error`);
       if (isCancelled) return;
-      console.error("[PdfDocumentPane] local PDF source failed", error);
+      console.warn("[PdfDocumentPane] local PDF source failed", error);
       setLocalSource(createResolvedLocalPdfSourceState(document.id, null, persistedSource ? null : getErrorMessage(error, PDF_SOURCE_MISSING_ERROR_MESSAGE)));
     });
 
