@@ -1,4 +1,5 @@
 const LOCAL_MEDIA_URL_PREFIX = 'sivflow-local-image:';
+const LOCAL_PLATE_MEDIA_USER_ID = 'plate-note';
 
 const isNonEmptyString = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0;
 
@@ -19,4 +20,4 @@ const parseLocalMediaUrl = (url: unknown): string | null => {
   return decodeLocalMediaId(url.slice(LOCAL_MEDIA_URL_PREFIX.length));
 };
 
-export { createLocalMediaUrl, parseLocalMediaUrl };
+export { LOCAL_PLATE_MEDIA_USER_ID, createLocalMediaUrl, parseLocalMediaUrl };
