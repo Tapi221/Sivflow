@@ -1,20 +1,18 @@
 import { Dexie } from "dexie";
 import { safeStringifyError } from "./errors";
+import { LOCALDB_GENERATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_LEGACY_GENERATION_KEY_PREFIX, LOCALDB_LEGACY_NAME_PREFIX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME } from "./localdb.constants";
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
-
-const LOCALDB_SCHEMA_VERSION_FOR_NAME = 19;
-const LOCALDB_GENERATION_MAX = 3;
-const LOCALDB_GENERATION_KEY_PREFIX = "flashcard.localdb.generation.";
-const LOCALDB_NAME_PREFIX = "FlashcardMasterDB_";
 
 const getLocalDbGenerationStorageKey = (userId: string): string => `${LOCALDB_GENERATION_KEY_PREFIX}${userId}`;
 
-const makeGenerationDbPrefix = (userId: string): string => `${LOCALDB_NAME_PREFIX}${userId}_v${LOCALDB_SCHEMA_VERSION_FOR_NAME}_g`;
+const getLegacyLocalDbGenerationStorageKey = (userId: string): string => `${LOCALDB_LEGACY_GENERATION_KEY_PREFIX}${userId}`;
+
+const makeGenerationDbPrefix = (prefix: string, userId: string): string => `${prefix}${userId}_v${LOCALDB_SCHEMA_VERSION_FOR_NAME}_g`;
 
 const readGenerationFromStorage = (userId: string): number => {
   if (typeof window === "undefined") return 0;
   try {
-    const raw = window.localStorage.getItem(getLocalDbGenerationStorageKey(userId));
+    const raw = window.localStorage.getItem(getLocalDbGenerationStorageKey(userId)) ?? window.localStorage.getItem(getLegacyLocalDbGenerationStorageKey(userId));
     const parsed = Number(raw ?? "0");
     if (!Number.isFinite(parsed) || parsed < 0) return 0;
     return Math.min(Math.floor(parsed), LOCALDB_GENERATION_MAX);
@@ -27,6 +25,7 @@ const writeGenerationToStorage = (userId: string, generation: number): void => {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(getLocalDbGenerationStorageKey(userId), String(Math.min(Math.max(0, Math.floor(generation)), LOCALDB_GENERATION_MAX)));
+    window.localStorage.removeItem(getLegacyLocalDbGenerationStorageKey(userId));
   } catch {
     // ignore localStorage write failures
   }
@@ -38,19 +37,22 @@ const getGenerationForUser = (userId: string) => {
   return readGenerationFromStorage(userId);
 };
 
-export const isLocalDbGenerationStorageKey = (key: string): boolean => key.startsWith(LOCALDB_GENERATION_KEY_PREFIX);
+export const isLocalDbGenerationStorageKey = (key: string): boolean => key.startsWith(LOCALDB_GENERATION_KEY_PREFIX) || key.startsWith(LOCALDB_LEGACY_GENERATION_KEY_PREFIX);
 
-export const isLocalDbPersistentDatabaseName = (name: string): boolean => name.startsWith(LOCALDB_NAME_PREFIX);
+export const isLocalDbPersistentDatabaseName = (name: string): boolean => name.startsWith(LOCALDB_NAME_PREFIX) || name.startsWith(LOCALDB_LEGACY_NAME_PREFIX);
 
 export const getKnownLocalDbNamesForUser = (userId: string): string[] => {
   const names: string[] = [];
-  const generationPrefix = makeGenerationDbPrefix(userId);
+  const generationPrefix = makeGenerationDbPrefix(LOCALDB_NAME_PREFIX, userId);
+  const legacyGenerationPrefix = makeGenerationDbPrefix(LOCALDB_LEGACY_NAME_PREFIX, userId);
 
   for (let generation = 0; generation <= LOCALDB_GENERATION_MAX; generation += 1) {
     names.push(`${generationPrefix}${generation}`);
+    names.push(`${legacyGenerationPrefix}${generation}`);
   }
 
   names.push(`${LOCALDB_NAME_PREFIX}${userId}`);
+  names.push(`${LOCALDB_LEGACY_NAME_PREFIX}${userId}`);
   return names;
 };
 
@@ -73,12 +75,13 @@ export const getDatabaseNameForUser = (userId: string = "anonymous") => {
 };
 
 export const getFallbackDatabaseNameForUser = (userId: string) => {
-  return `FlashcardMasterDB_mem_${userId}`;
+  return `${LOCALDB_NAME_PREFIX}mem_${userId}`;
 };
 
 const listUserPersistentDbNames = async (userId: string) => {
   const names = new Set<string>(getKnownLocalDbNamesForUser(userId));
-  const generationPrefix = makeGenerationDbPrefix(userId);
+  const generationPrefix = makeGenerationDbPrefix(LOCALDB_NAME_PREFIX, userId);
+  const legacyGenerationPrefix = makeGenerationDbPrefix(LOCALDB_LEGACY_NAME_PREFIX, userId);
 
   if (typeof indexedDB !== "undefined" && typeof indexedDB.databases === "function") {
     try {
@@ -86,7 +89,7 @@ const listUserPersistentDbNames = async (userId: string) => {
       for (const db of dbs) {
         const name = db?.name;
         if (!name) continue;
-        if (name.startsWith(generationPrefix)) {
+        if (name.startsWith(generationPrefix) || name.startsWith(legacyGenerationPrefix)) {
           names.add(name);
         }
       }
