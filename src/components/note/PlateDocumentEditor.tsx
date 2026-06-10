@@ -1,14 +1,8 @@
-import { LinkPlugin } from "@platejs/link/react";
 import { Plate, PlateController, usePlateEditor } from "platejs/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { BasicNodesKit } from "@/registry/components/editor/plugins/basic-nodes-kit";
-import { BaseAlignKit } from "@/registry/components/editor/plugins/align-base-kit";
-import { BaseFontKit } from "@/registry/components/editor/plugins/font-base-kit";
+import { BaseEditorKit } from "@/registry/components/editor/editor-base-kit";
 import { FixedToolbarKit } from "@/registry/components/editor/plugins/fixed-toolbar-kit";
 import { FloatingToolbarKit } from "@/registry/components/editor/plugins/floating-toolbar-kit";
-import { BaseLineHeightKit } from "@/registry/components/editor/plugins/line-height-base-kit";
-import { ListKit } from "@/registry/components/editor/plugins/list-kit";
-import { TableKit } from "@/registry/components/editor/plugins/table-kit";
 import { Editor, EditorContainer } from "@/registry/ui/editor";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Note, NoteBlockContent } from "@/types";
@@ -38,13 +32,7 @@ type PlateChangePayload = unknown[] | {
 const NOTE_SAVE_DEBOUNCE_MS = 500;
 const NOTE_CONTENT_VERSION = 2;
 const NOTE_PLATE_PLUGINS = [
-  ...BasicNodesKit,
-  ...ListKit,
-  ...TableKit,
-  LinkPlugin,
-  ...BaseAlignKit,
-  ...BaseFontKit,
-  ...BaseLineHeightKit,
+  ...BaseEditorKit,
   ...FixedToolbarKit,
   ...FloatingToolbarKit,
 ];
@@ -125,17 +113,13 @@ const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
   }, [flushPendingChange]);
 
   return (
-    <div className="h-full min-h-0 w-full overflow-y-auto bg-white text-[#18181b]">
+    <div className="h-full min-h-0 w-full bg-background text-foreground">
       <TooltipProvider delayDuration={300}>
         <PlateController>
           <Plate editor={editor} onChange={handleChange} primary>
-            <div className="px-4 py-10 lg:px-8">
-              <div className="mx-auto min-h-[650px] w-full max-w-[1120px] overflow-hidden rounded-xl border border-[#e4e4e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-                <EditorContainer className="h-[650px]">
-                  <Editor placeholder="本文を入力" spellCheck />
-                </EditorContainer>
-              </div>
-            </div>
+            <EditorContainer variant="demo">
+              <Editor variant="demo" placeholder="本文を入力" spellCheck />
+            </EditorContainer>
           </Plate>
         </PlateController>
       </TooltipProvider>
