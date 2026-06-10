@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { SearchSource } from "@/features/search/model/searchTypes";
+import type { SearchSource } from "@/features/search/model/search.types";
 
 type SearchState = {
   isOpen: boolean;
