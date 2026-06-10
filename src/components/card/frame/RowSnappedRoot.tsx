@@ -9,7 +9,7 @@ type RowSnappedRootProps = {
   children: React.ReactNode;
 };
 
-export const RowSnappedRoot = ({
+const RowSnappedRoot = ({
   rowPx,
   className,
   style,
@@ -36,3 +36,5 @@ export const RowSnappedRoot = ({
     </RowSnap>
   );
 };
+
+export { RowSnappedRoot };

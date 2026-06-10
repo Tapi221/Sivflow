@@ -1,6 +1,7 @@
 import { type ReactNode, type SyntheticEvent, useEffect, useMemo, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
+import { readStoredAccounts, type StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import type { UserSettings } from "@/types";
 import { Brain, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/ui/icons";
 import { getLocalAiSettings, setLocalAiSettings, type LocalAiSettings } from "@platform/ai/localAiSettings";
@@ -10,6 +11,8 @@ import "./SettingsWorkspaceScreen.css";
 type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "ai" | "hotkey";
 
 type SettingsLanguage = UserSettings["language"];
+
+type AuthSessionUser = ReturnType<typeof useAuthSession>["currentUser"];
 
 type BooleanSettingsKey = "notificationsEnabled" | "soundEnabled" | "showReviewHard" | "showReviewEasy" | "autoCarryOver" | "delayBonusEnabled" | "reviewStartNextDay" | "defaultPreviewEnabled" | "autoDraftEnabled" | "autoSaveEnabled" | "autoVoiceQuestion" | "autoVoiceAnswer";
 
@@ -60,6 +63,13 @@ type SettingTextInputRowProps = {
   value: string;
   placeholder?: string;
   onChange: (value: string) => void;
+};
+
+type AccountProfile = {
+  displayName: string | null;
+  email: string | null;
+  photoUrl: string | null;
+  providerId: string | null;
 };
 
 type SettingsWorkspaceCopy = {
@@ -136,6 +146,8 @@ type SettingsWorkspaceCopy = {
 };
 
 const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "ai", "hotkey"];
+
+const GOOGLE_PROVIDER_ID = "google.com";
 
 const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> = {
   ja: {
@@ -358,6 +370,30 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
 
 const buildSettingsSections = (copy: SettingsWorkspaceCopy): SettingsSectionDefinition[] => SETTINGS_SECTION_IDS.map((id) => ({ id, label: copy.sections[id].label }));
 
+const normalizeAccountEmail = (email: string | null | undefined): string | null => {
+  const normalizedEmail = email?.trim().toLowerCase();
+  return normalizedEmail ? normalizedEmail : null;
+};
+
+const getStoredSignedInGoogleAccount = (currentUser: AuthSessionUser, storedAccounts: readonly StoredGoogleAccount[]): StoredGoogleAccount | null => {
+  const userEmail = normalizeAccountEmail(currentUser?.email);
+  if (!userEmail) return storedAccounts[0] ?? null;
+
+  return storedAccounts.find((account) => normalizeAccountEmail(account.email) === userEmail) ?? null;
+};
+
+const getAccountProfile = (currentUser: AuthSessionUser, storedAccounts: readonly StoredGoogleAccount[]): AccountProfile => {
+  const providerProfile = currentUser?.providerData.find((profile) => profile.providerId === GOOGLE_PROVIDER_ID) ?? currentUser?.providerData.at(0) ?? null;
+  const storedAccount = getStoredSignedInGoogleAccount(currentUser, storedAccounts);
+
+  return {
+    displayName: storedAccount?.name ?? providerProfile?.displayName ?? currentUser?.displayName ?? null,
+    email: storedAccount?.email ?? currentUser?.email ?? providerProfile?.email ?? null,
+    photoUrl: storedAccount?.photoUrl ?? providerProfile?.photoURL ?? currentUser?.photoURL ?? null,
+    providerId: providerProfile?.providerId ?? null,
+  };
+};
+
 const getAccountDisplayName = (displayName: string | null | undefined, email: string | null | undefined, fallbackLabel: string): string => {
   const trimmedDisplayName = displayName?.trim();
   if (trimmedDisplayName) return trimmedDisplayName;
@@ -472,11 +508,13 @@ const SettingsWorkspaceScreen = () => {
   const language = pendingLanguage ?? persistedLanguage;
   const copy = SETTINGS_WORKSPACE_COPY[language];
   const sections = useMemo(() => buildSettingsSections(copy), [copy]);
+  const storedGoogleAccounts = useMemo(() => readStoredAccounts(), [currentUser?.uid]);
+  const accountProfile = useMemo(() => getAccountProfile(currentUser, storedGoogleAccounts), [currentUser, storedGoogleAccounts]);
   const languageOptions = useMemo(() => ([{ value: "ja", ...copy.languageOptions.ja }, { value: "en", ...copy.languageOptions.en }, { value: "zh", ...copy.languageOptions.zh }] as const satisfies readonly SettingOption<SettingsLanguage>[]), [copy]);
   const weekStartOptions = useMemo(() => ([{ value: "monday", ...copy.weekStartOptions.monday }, { value: "sunday", ...copy.weekStartOptions.sunday }] as const satisfies readonly SettingOption<UserSettings["weekStartDay"]>[]), [copy]);
   const questionDisplayOptions = useMemo(() => ([{ value: "tap_to_reveal", ...copy.questionDisplayOptions.tap_to_reveal }, { value: "always", ...copy.questionDisplayOptions.always }] as const satisfies readonly SettingOption<QuestionDisplayMode>[]), [copy]);
   const markdownTabOptions = useMemo(() => ([{ value: 2, ...copy.markdownTabOptions[2] }, { value: 4, ...copy.markdownTabOptions[4] }, { value: 8, ...copy.markdownTabOptions[8] }] as const satisfies readonly SettingOption<MarkdownTabSize>[]), [copy]);
-  const accountName = getAccountDisplayName(currentUser?.displayName, currentUser?.email, copy.emptyAccountLabel);
+  const accountName = getAccountDisplayName(accountProfile.displayName, accountProfile.email, copy.emptyAccountLabel);
   const accountInitial = getAccountInitial(accountName);
   const weekStartDay = settings?.weekStartDay ?? "monday";
   const questionDisplayMode = settings?.questionDisplayMode ?? "tap_to_reveal";
@@ -537,12 +575,12 @@ const SettingsWorkspaceScreen = () => {
           {activeSectionId === "account" ? (
             <SettingsSectionBlock title={copy.accountProfileTitle} description={copy.accountProfileDescription}>
               <div className="settings-workspace__profile-card">
-                <div className="settings-workspace__avatar" aria-hidden="true"><span>{accountInitial}</span>{currentUser?.photoURL ? <img src={currentUser.photoURL} alt="" referrerPolicy="no-referrer" onError={hideBrokenAccountImage} /> : null}</div>
-                <div className="settings-workspace__profile-copy"><strong>{accountName}</strong><span>{currentUser?.email ?? copy.emailUnset}</span></div>
+                <div className="settings-workspace__avatar" aria-hidden="true">{accountProfile.photoUrl ? <img src={accountProfile.photoUrl} alt="" referrerPolicy="no-referrer" onError={hideBrokenAccountImage} /> : <span>{accountInitial}</span>}</div>
+                <div className="settings-workspace__profile-copy"><strong>{accountName}</strong><span>{accountProfile.email ?? copy.emailUnset}</span></div>
                 <button type="button" className="settings-workspace__secondary-button" onClick={handleLogout} disabled={loading || !currentUser}>{copy.logout}</button>
               </div>
               <SettingKeyValue label={copy.statusLabel} value={currentUser ? copy.signedIn : copy.guest} />
-              <SettingKeyValue label={copy.providerLabel} value={currentUser?.providerData.at(0)?.providerId ?? "-"} />
+              <SettingKeyValue label={copy.providerLabel} value={accountProfile.providerId ?? "-"} />
             </SettingsSectionBlock>
           ) : null}
           {activeSectionId === "preferences" ? (
