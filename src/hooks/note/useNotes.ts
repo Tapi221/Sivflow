@@ -30,19 +30,29 @@ const sortNotes = (notes: Note[]): Note[] => [...notes].sort((left, right) => {
   return right.updatedAt.getTime() - left.updatedAt.getTime();
 });
 
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  return String(error);
+};
+
 const useNotes = (folderId?: string | null, options?: UseNotesOptions) => {
   const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
   const enabled = options?.enabled ?? true;
 
   const notes = useLiveQuery(async () => {
-    if (!enabled || !userId) return [];
+    try {
+      if (!enabled || !userId) return [];
 
-    const db = await getLocalDb(userId);
-    const allNotes = await db.notes.where("userId").equals(userId).toArray();
-    const activeNotes = allNotes.filter((note) => !isDeletedNote(note));
-    const folderNotes = folderId === undefined ? activeNotes : activeNotes.filter((note) => note.folderId === folderId);
-    return sortNotes(folderNotes);
+      const db = await getLocalDb(userId);
+      const allNotes = await db.notes.where("userId").equals(userId).toArray();
+      const activeNotes = allNotes.filter((note) => !isDeletedNote(note));
+      const folderNotes = folderId === undefined ? activeNotes : activeNotes.filter((note) => note.folderId === folderId);
+      return sortNotes(folderNotes);
+    } catch (error) {
+      console.error(`[useNotes] Error: ${getErrorMessage(error)}`, error);
+      return [];
+    }
   }, [enabled, folderId, userId]);
 
   const createNote = useCallback(async (title: string, targetFolderId: string, opts?: CreateNoteOptions): Promise<Note> => {
