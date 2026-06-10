@@ -7,6 +7,10 @@ import { Check, Circle } from "@/ui/icons";
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
+const DropdownMenuGroup = DropdownMenuPrimitive.Group;
+const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
+const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
+const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
@@ -61,6 +65,56 @@ const DropdownMenuItem = React.forwardRef<
     {...props}
   />
 ));
+
+const DropdownMenuSubTrigger = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
+    inset?: boolean;
+  }
+>(({ className, inset, children, ...props }, ref) => (
+  <DropdownMenuPrimitive.SubTrigger
+    ref={ref}
+    className={cn(
+      "ds-floating-panel__row ds-menu__item relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm leading-none outline-none",
+      "data-[state=open]:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      inset && "pl-8",
+      className,
+    )}
+    {...props}
+  >
+    {children}
+  </DropdownMenuPrimitive.SubTrigger>
+));
+
+const DropdownMenuSubContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent> &
+    FloatingSurfaceVariantProps
+>(
+  (
+    { className, sideOffset = 6, surface, collisionPadding = 8, ...props },
+    ref,
+  ) => {
+    const resolvedSurface = surface ?? "menu";
+
+    return (
+      <DropdownMenuPrimitive.SubContent
+        ref={ref}
+        sideOffset={sideOffset}
+        collisionPadding={collisionPadding}
+        className={cn(
+          "ds-floating-panel__content ds-floating-panel__content--menu ds-menu__content z-50 min-w-[8rem] overflow-hidden p-1",
+          "data-[state=open]:animate-in data-[state=closed]:animate-out",
+          "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+          "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+          floatingSurfaceVariants({ surface: resolvedSurface }),
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
 
 const DropdownMenuCheckboxItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
@@ -177,6 +231,8 @@ const DropdownMenuItemLabel = ({
 
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
+DropdownMenuSubTrigger.displayName = DropdownMenuPrimitive.SubTrigger.displayName;
+DropdownMenuSubContent.displayName = DropdownMenuPrimitive.SubContent.displayName;
 DropdownMenuCheckboxItem.displayName = DropdownMenuPrimitive.CheckboxItem.displayName;
 DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName;
 DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName;
@@ -185,4 +241,22 @@ DropdownMenuShortcut.displayName = "DropdownMenuShortcut";
 DropdownMenuItemIcon.displayName = "DropdownMenuItemIcon";
 DropdownMenuItemLabel.displayName = "DropdownMenuItemLabel";
 
-export { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuItemIcon, DropdownMenuItemLabel, DropdownMenuSeparator, DropdownMenuTrigger };
+export {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuItemIcon,
+  DropdownMenuItemLabel,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+};
