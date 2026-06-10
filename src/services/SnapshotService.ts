@@ -74,7 +74,7 @@ export const snapshotService = {
     const localSnapshots = getStoredSnapshotsFromLocalStorage();
 
     if (localSnapshots.length === 0) {
-      console.log("[Snapshot] No local snapshots to migrate");
+      console.log("[スナップショット] 移行対象のローカルスナップショットはありません");
       return;
     }
 
@@ -84,6 +84,6 @@ export const snapshotService = {
     }
 
     localStorage.removeItem(SNAPSHOTS_KEY);
-    console.log("[Snapshot] Migration complete, LocalStorage cleared");
+    console.log("[スナップショット] 移行が完了しました。LocalStorage をクリアしました");
   },
 };
