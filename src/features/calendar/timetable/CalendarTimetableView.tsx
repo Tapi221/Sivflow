@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ja } from "date-fns/locale";
@@ -22,6 +23,8 @@ type CalendarTimetableCourseEditorProps = { course: CalendarTimetableCourse | nu
 
 type CalendarTimetableSettingsPanelProps = { periods: CalendarTimetablePeriod[]; visibleDayCount: CalendarTimetableVisibleDayCount; onChangeVisibleDayCount: (visibleDayCount: CalendarTimetableVisibleDayCount) => Promise<void>; onAddPeriod: () => Promise<void>; onUpdatePeriod: (period: CalendarTimetablePeriod) => Promise<void>; onDeletePeriod: (periodId: string) => Promise<void>; onClose: () => void };
 
+type CalendarTimetableGridStyle = CSSProperties & { "--calendar-timetable-day-count": CalendarTimetableVisibleDayCount };
+
 const TIMETABLE_GRID_TEMPLATE_COLUMNS = "56px repeat(var(--calendar-timetable-day-count), 112px)";
 const TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS = "34px repeat(var(--calendar-timetable-day-count), minmax(0, 1fr))";
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
@@ -45,6 +48,8 @@ const formatTimetableWeekRange = (weekDays: Date[]): string => `${format(weekDay
 const getTimetableEntryStyle = (colorKey: TagColorKey) => getTagColorStyle(colorKey);
 
 const getTimetableGridTemplateColumns = (density: CalendarTimetableDensity): string => density === "compact" ? TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS : TIMETABLE_GRID_TEMPLATE_COLUMNS;
+
+const createTimetableGridStyle = (density: CalendarTimetableDensity, visibleDayCount: CalendarTimetableVisibleDayCount): CalendarTimetableGridStyle => ({ gridTemplateColumns: getTimetableGridTemplateColumns(density), "--calendar-timetable-day-count": visibleDayCount });
 
 const isSameTimetableSlot = (left: CalendarTimetableSlot, right: CalendarTimetableSlot): boolean => left.dayIndex === right.dayIndex && left.periodId === right.periodId;
 
@@ -176,6 +181,7 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
   const weekRangeLabel = formatTimetableWeekRange(weekDays);
   const registeredCountLabel = `${courses.length}授業`;
   const isCompact = density === "compact";
+  const timetableGridStyle = useMemo(() => createTimetableGridStyle(density, visibleDayCount), [density, visibleDayCount]);
   const courseSlotMap = useMemo(() => createTimetableCourseSlotMap(courses), [courses]);
   const [editingCourse, setEditingCourse] = useState<CalendarTimetableCourse | null>(null);
   const [editingSlot, setEditingSlot] = useState<CalendarTimetableSlot | null>(null);
@@ -206,7 +212,7 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
       </div>
 
       <div className={cn("min-h-0 flex-1 text-center scrollbar-hidden", isCompact ? "overflow-y-auto overflow-x-hidden px-4 pb-3" : "overflow-auto px-5 pb-5")}>
-        <div className={cn("gap-y-2 text-left", isCompact ? "grid w-full min-w-0 gap-x-1" : "inline-grid w-max gap-x-2")} style={{ gridTemplateColumns: getTimetableGridTemplateColumns(density), "--calendar-timetable-day-count": visibleDayCount } as React.CSSProperties}>
+        <div className={cn("gap-y-2 text-left", isCompact ? "grid w-full min-w-0 gap-x-1" : "inline-grid w-max gap-x-2")} style={timetableGridStyle}>
           <div aria-hidden="true" className={isCompact ? "h-7" : "h-8"} />
           {weekDays.map((day) => {
             const isToday = isSameDay(day, today);
