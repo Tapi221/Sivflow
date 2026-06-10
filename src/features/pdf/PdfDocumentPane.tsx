@@ -86,10 +86,6 @@ const isBrowserPageHidden = (): boolean => {
   return typeof globalThis.document !== "undefined" && globalThis.document.visibilityState === "hidden";
 };
 
-const hasGoogleDriveFileId = (document: Pick<DocumentItem, "googleDriveFileId">): boolean => {
-  return Boolean(document.googleDriveFileId?.trim());
-};
-
 const hasLocalPdfBlobCandidate = (document: Pick<DocumentItem, "localFileId">): boolean => {
   return Boolean(document.localFileId?.trim());
 };
