@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
-import "@/runtime/installProductionConsoleFilter";
-import "@/runtime/disableNativeTitleTooltips";
+import "./runtime/installProductionConsoleFilter";
+import "./runtime/disableNativeTitleTooltips";
 import "@platform/desktop/installTauriDesktopBridge";
 import { StrictMode, useEffect, useState, type ComponentType } from "react";
 import { createRoot } from "react-dom/client";
@@ -39,7 +39,7 @@ const getStartupFailureMessage = (error: unknown): string => {
 
 const startAppRuntimeSafely = async (): Promise<void> => {
   try {
-    const { startAppRuntime } = await import("@/runtime/startAppRuntime");
+    const { startAppRuntime } = await import("./runtime/startAppRuntime");
     startAppRuntime();
   } catch (error) {
     console.warn("[Startup] Runtime initialization failed", error);
