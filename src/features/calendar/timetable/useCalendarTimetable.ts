@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { liveQuery } from "dexie";
 import type { CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetableDepartment, CalendarTimetableInstitution, CalendarTimetablePeriod, CalendarTimetableSettings, CalendarTimetableSyllabusCourse, CalendarTimetableSyllabusCourseDisplay, CalendarTimetableSyllabusCourseDraft, CalendarTimetableVisibleDayCount } from "@core/domain/calendar/timetable/timetable.types";
+import { createDefaultCalendarTimetablePeriods } from "@core/domain/calendar/timetable/timetable.model";
 import { addCalendarTimetableCourseFromSyllabus, addCalendarTimetablePeriod, deleteCalendarTimetableCourse, deleteCalendarTimetablePeriod, ensureCalendarTimetableSeedData, getCalendarTimetableSettings, listCalendarTimetableCourses, listCalendarTimetableDepartments, listCalendarTimetableInstitutions, listCalendarTimetablePeriods, saveCalendarTimetableCourse, saveCalendarTimetableSyllabusCourse, searchCalendarTimetableSyllabusCourses, updateCalendarTimetablePeriod, updateCalendarTimetableVisibleDayCount } from "./calendarTimetable.storage";
 
 type UseCalendarTimetableState = {
@@ -25,13 +26,16 @@ type UseCalendarTimetableReturn = UseCalendarTimetableState & {
   searchSyllabusCourses: (query: string, institutionId?: string | null, departmentId?: string | null) => Promise<CalendarTimetableSyllabusCourseDisplay[]>;
 };
 
-const createInitialState = (): UseCalendarTimetableState => ({ courses: [], departments: [], institutions: [], periods: [], settings: null, syllabusCourses: [], isLoading: true });
+const DEFAULT_SETTINGS: CalendarTimetableSettings = { id: "default", activeSemesterId: "default-semester", visibleDayCount: 5, updatedAt: "" };
+const DEFAULT_PERIODS = createDefaultCalendarTimetablePeriods();
+
+const createInitialState = (): UseCalendarTimetableState => ({ courses: [], departments: [], institutions: [], periods: DEFAULT_PERIODS, settings: DEFAULT_SETTINGS, syllabusCourses: [], isLoading: true });
 
 const loadCalendarTimetableState = async (): Promise<UseCalendarTimetableState> => {
   await ensureCalendarTimetableSeedData();
   const settings = await getCalendarTimetableSettings();
   const [periods, courses, institutions, departments, syllabusCourses] = await Promise.all([listCalendarTimetablePeriods(), listCalendarTimetableCourses(settings.activeSemesterId), listCalendarTimetableInstitutions(), listCalendarTimetableDepartments(""), searchCalendarTimetableSyllabusCourses("")]);
-  return { courses, departments, institutions, periods, settings, syllabusCourses, isLoading: false };
+  return { courses, departments, institutions, periods: periods.length > 0 ? periods : DEFAULT_PERIODS, settings, syllabusCourses, isLoading: false };
 };
 
 const useCalendarTimetable = (): UseCalendarTimetableReturn => {
@@ -40,7 +44,7 @@ const useCalendarTimetable = (): UseCalendarTimetableReturn => {
   useEffect(() => {
     const subscription = liveQuery(loadCalendarTimetableState).subscribe({
       next: setState,
-      error: () => setState((currentState) => ({ ...currentState, isLoading: false })),
+      error: () => setState((currentState) => ({ ...currentState, periods: currentState.periods.length > 0 ? currentState.periods : DEFAULT_PERIODS, settings: currentState.settings ?? DEFAULT_SETTINGS, isLoading: false })),
     });
 
     return () => {
