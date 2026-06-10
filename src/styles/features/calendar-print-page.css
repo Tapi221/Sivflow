@@ -1,4 +1,8 @@
 @layer components {
+  .calendar-print-range-view {
+    display: none;
+  }
+
   @media print {
     @page { size: portrait; }
 
