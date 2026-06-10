@@ -5,7 +5,7 @@ import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { firestoreDb } from "@/infrastructure/firebase/client";
-import { cardDocPathSegments, folderDocPathSegments } from "@/services/firestorePaths";
+import { cardDocPathSegments, folderDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
 import { getLocalDb } from "@/services/localdb";
 import type { Card, CardSet, Document, Folder } from "@/types";
 
