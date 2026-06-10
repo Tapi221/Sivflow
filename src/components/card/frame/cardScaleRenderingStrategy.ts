@@ -1,11 +1,10 @@
 import { detectCssZoomSupport, resolveScaleRenderingStrategy, type ResolveScaleRenderingStrategyArgs, type ScaleRenderingMode, type ScaleRenderingStrategy } from "@/shared/zoom/scaleRenderingStrategy";
 
-export type CardScaleRenderingMode = ScaleRenderingMode;
-export type ResolveCardScaleRenderingStrategyArgs =
-  ResolveScaleRenderingStrategyArgs;
-export type CardScaleRenderingStrategy = ScaleRenderingStrategy;
+type CardScaleRenderingMode = ScaleRenderingMode;
+type ResolveCardScaleRenderingStrategyArgs = ResolveScaleRenderingStrategyArgs;
+type CardScaleRenderingStrategy = ScaleRenderingStrategy;
 
-export const resolveCardScaleRenderingStrategy = ({
+const resolveCardScaleRenderingStrategy = ({
   disableScale,
   effectiveScale,
   supportsCssZoom,
@@ -17,4 +16,5 @@ export const resolveCardScaleRenderingStrategy = ({
   });
 };
 
-export { detectCssZoomSupport };
+export { detectCssZoomSupport, resolveCardScaleRenderingStrategy };
+export type { CardScaleRenderingMode, CardScaleRenderingStrategy, ResolveCardScaleRenderingStrategyArgs };
