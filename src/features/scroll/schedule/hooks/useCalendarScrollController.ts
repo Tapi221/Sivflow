@@ -25,6 +25,7 @@ type Props = {
 };
 
 const CALENDAR_TIMELINE_SCROLLED_CLASS_NAME = "calendar-timeline-scroll-scrolled";
+const SCHEDULE_SCROLL_POSITION_PERSIST_DELAY_MS = 200;
 
 const isWeekdayHorizontalViewMode = (viewMode: CalendarViewMode) =>
   viewMode === "days" ||
@@ -53,6 +54,8 @@ export const useCalendarScrollController = ({
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);
   const scrollRafRef = useRef<number | null>(null);
   const latestScrollerRef = useRef<HTMLDivElement | null>(null);
+  const pendingScrollTopRef = useRef<number | null>(null);
+  const persistScrollTimeoutRef = useRef<number | null>(null);
   const lastVisibleDateKeyRef = useRef<string | null>(null);
   const didRestoreScrollTopRef = useRef(false);
   const fixedRowScrollRefs = useMemo(() => [headerScrollRef, allDayScrollRef], []);
@@ -108,11 +111,31 @@ export const useCalendarScrollController = ({
     onVisibleDateChange(visibleDate);
   }, [calendarDayColumnWidth, onVisibleDateChange, selectedViewMode, virtualRail, visibleDays]);
 
-  const persistVerticalScrollPosition = useCallback((scroller: HTMLDivElement) => {
+  const flushPendingScrollTop = useCallback(() => {
+    if (persistScrollTimeoutRef.current !== null) {
+      window.clearTimeout(persistScrollTimeoutRef.current);
+      persistScrollTimeoutRef.current = null;
+    }
+
+    const pendingScrollTop = pendingScrollTopRef.current;
+    pendingScrollTopRef.current = null;
+
+    if (pendingScrollTop === null) return;
+
+    persistScheduleCalendarScrollTop(pendingScrollTop);
+  }, []);
+
+  const scheduleVerticalScrollPositionPersistence = useCallback((scroller: HTMLDivElement) => {
     if (!isRestorableVerticalScrollViewMode(selectedViewMode)) return;
 
-    persistScheduleCalendarScrollTop(scroller.scrollTop);
-  }, [selectedViewMode]);
+    pendingScrollTopRef.current = scroller.scrollTop;
+
+    if (persistScrollTimeoutRef.current !== null) {
+      window.clearTimeout(persistScrollTimeoutRef.current);
+    }
+
+    persistScrollTimeoutRef.current = window.setTimeout(flushPendingScrollTop, SCHEDULE_SCROLL_POSITION_PERSIST_DELAY_MS);
+  }, [flushPendingScrollTop, selectedViewMode]);
 
   const scheduleScrollWork = useCallback((scroller: HTMLDivElement) => {
     latestScrollerRef.current = scroller;
@@ -129,9 +152,9 @@ export const useCalendarScrollController = ({
 
       updateTimelineScrollFadeVisibility(latestScroller);
       syncVisibleDate(latestScroller);
-      persistVerticalScrollPosition(latestScroller);
+      scheduleVerticalScrollPositionPersistence(latestScroller);
     });
-  }, [persistVerticalScrollPosition, syncVisibleDate]);
+  }, [scheduleVerticalScrollPositionPersistence, syncVisibleDate]);
 
   useEffect(() => {
     const scroller = scrollContainerRef.current;
@@ -157,8 +180,9 @@ export const useCalendarScrollController = ({
       }
 
       latestScrollerRef.current = null;
+      flushPendingScrollTop();
     };
-  }, [scheduleScrollWork, syncVisibleDate]);
+  }, [flushPendingScrollTop, scheduleScrollWork, syncVisibleDate]);
 
   useEffect(() => {
     lastVisibleDateKeyRef.current = null;
