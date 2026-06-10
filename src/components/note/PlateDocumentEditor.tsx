@@ -1,36 +1,20 @@
-import { Plate, PlateController, usePlateEditor } from 'platejs/react';
+import { BlockquoteRules, BoldRules, CodeRules, HeadingRules, HighlightRules, HorizontalRuleRules, ItalicRules, MarkComboRules, StrikethroughRules, UnderlineRules } from '@platejs/basic-nodes';
+import { BlockquotePlugin, BoldPlugin, CodePlugin, H1Plugin, H2Plugin, H3Plugin, H4Plugin, H5Plugin, H6Plugin, HighlightPlugin, HorizontalRulePlugin, ItalicPlugin, StrikethroughPlugin, UnderlinePlugin } from '@platejs/basic-nodes/react';
+import { CaptionPlugin } from '@platejs/caption/react';
+import { IndentPlugin } from '@platejs/indent/react';
+import { LinkRules } from '@platejs/link';
+import { LinkPlugin } from '@platejs/link/react';
+import { BulletedListRules, OrderedListRules, TaskListRules } from '@platejs/list';
+import { ListPlugin } from '@platejs/list/react';
+import { MarkdownPlugin, remarkMdx, remarkMention } from '@platejs/markdown';
+import { AudioPlugin, FilePlugin, ImagePlugin, MediaEmbedPlugin, PlaceholderPlugin, VideoPlugin } from '@platejs/media/react';
+import { TableCellHeaderPlugin, TableCellPlugin, TablePlugin, TableRowPlugin } from '@platejs/table/react';
+import { KEYS } from 'platejs';
+import { ParagraphPlugin, Plate, PlateContainer, PlateContent, PlateController, usePlateEditor } from 'platejs/react';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { AIKit } from '@/registry/components/editor/plugins/ai-kit';
-import { BaseAlignKit } from '@/registry/components/editor/plugins/align-base-kit';
-import { BasicBlocksKit } from '@/registry/components/editor/plugins/basic-blocks-kit';
-import { BasicMarksKit } from '@/registry/components/editor/plugins/basic-marks-kit';
-import { BlockMenuKit } from '@/registry/components/editor/plugins/block-menu-kit';
-import { BaseCalloutKit } from '@/registry/components/editor/plugins/callout-base-kit';
-import { BaseCodeBlockKit } from '@/registry/components/editor/plugins/code-block-base-kit';
-import { BaseColumnKit } from '@/registry/components/editor/plugins/column-base-kit';
-import { CommentKit } from '@/registry/components/editor/plugins/comment-kit';
-import { BaseDateKit } from '@/registry/components/editor/plugins/date-base-kit';
-import { DiscussionKit } from '@/registry/components/editor/plugins/discussion-kit';
-import { DndKit } from '@/registry/components/editor/plugins/dnd-kit';
-import { EmojiKit } from '@/registry/components/editor/plugins/emoji-kit';
-import { FixedToolbarKit } from '@/registry/components/editor/plugins/fixed-toolbar-kit';
-import { FloatingToolbarKit } from '@/registry/components/editor/plugins/floating-toolbar-kit';
-import { BaseFontKit } from '@/registry/components/editor/plugins/font-base-kit';
-import { BaseFootnoteKit } from '@/registry/components/editor/plugins/footnote-base-kit';
-import { BaseLineHeightKit } from '@/registry/components/editor/plugins/line-height-base-kit';
-import { LinkKit } from '@/registry/components/editor/plugins/link-kit';
-import { ListKit } from '@/registry/components/editor/plugins/list-kit';
-import { MarkdownKit } from '@/registry/components/editor/plugins/markdown-kit';
-import { BaseMathKit } from '@/registry/components/editor/plugins/math-base-kit';
-import { MediaKit } from '@/registry/components/editor/plugins/media-kit';
-import { BaseMentionKit } from '@/registry/components/editor/plugins/mention-base-kit';
-import { SuggestionKit } from '@/registry/components/editor/plugins/suggestion-kit';
-import { TableKit } from '@/registry/components/editor/plugins/table-kit';
-import { BaseTocKit } from '@/registry/components/editor/plugins/toc-base-kit';
-import { BaseToggleKit } from '@/registry/components/editor/plugins/toggle-base-kit';
-import { Editor, EditorContainer } from '@/registry/ui/editor';
+import remarkEmoji from 'remark-emoji';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import type { Note, NoteBlockContent } from '@/types';
 
 type PlateDocumentEditorProps = {
@@ -58,34 +42,36 @@ type PlateChangePayload = unknown[] | {
 const NOTE_SAVE_DEBOUNCE_MS = 500;
 const NOTE_CONTENT_VERSION = 2;
 const NOTE_PLATE_PLUGINS = [
-  ...AIKit,
-  ...BasicBlocksKit,
-  ...BaseCodeBlockKit,
-  ...TableKit,
-  ...BaseToggleKit,
-  ...BaseTocKit,
-  ...MediaKit,
-  ...BaseCalloutKit,
-  ...BaseColumnKit,
-  ...BaseMathKit,
-  ...BaseDateKit,
-  ...LinkKit,
-  ...BaseMentionKit,
-  ...BasicMarksKit,
-  ...BaseFontKit,
-  ...ListKit,
-  ...BaseAlignKit,
-  ...BaseLineHeightKit,
-  ...DiscussionKit,
-  ...CommentKit,
-  ...SuggestionKit,
-  ...BlockMenuKit,
-  ...DndKit,
-  ...EmojiKit,
-  ...MarkdownKit,
-  ...BaseFootnoteKit,
-  ...FixedToolbarKit,
-  ...FloatingToolbarKit,
+  ParagraphPlugin,
+  H1Plugin.configure({ inputRules: [HeadingRules.markdown()], rules: { break: { empty: 'reset' } }, shortcuts: { toggle: { keys: 'mod+alt+1' } } }),
+  H2Plugin.configure({ inputRules: [HeadingRules.markdown()], rules: { break: { empty: 'reset' } }, shortcuts: { toggle: { keys: 'mod+alt+2' } } }),
+  H3Plugin.configure({ inputRules: [HeadingRules.markdown()], rules: { break: { empty: 'reset' } }, shortcuts: { toggle: { keys: 'mod+alt+3' } } }),
+  H4Plugin.configure({ inputRules: [HeadingRules.markdown()], rules: { break: { empty: 'reset' } }, shortcuts: { toggle: { keys: 'mod+alt+4' } } }),
+  H5Plugin.configure({ inputRules: [HeadingRules.markdown()], rules: { break: { empty: 'reset' } }, shortcuts: { toggle: { keys: 'mod+alt+5' } } }),
+  H6Plugin.configure({ inputRules: [HeadingRules.markdown()], rules: { break: { empty: 'reset' } }, shortcuts: { toggle: { keys: 'mod+alt+6' } } }),
+  BlockquotePlugin.configure({ inputRules: [BlockquoteRules.markdown()], shortcuts: { toggle: { keys: 'mod+shift+period' } } }),
+  HorizontalRulePlugin.configure({ inputRules: [HorizontalRuleRules.markdown({ variant: '-' }), HorizontalRuleRules.markdown({ variant: '_' })] }),
+  BoldPlugin.configure({ inputRules: [BoldRules.markdown({ variant: '*' }), BoldRules.markdown({ variant: '_' }), MarkComboRules.markdown({ variant: 'boldItalic' }), MarkComboRules.markdown({ variant: 'boldUnderline' }), MarkComboRules.markdown({ variant: 'boldItalicUnderline' }), MarkComboRules.markdown({ variant: 'italicUnderline' })] }),
+  ItalicPlugin.configure({ inputRules: [ItalicRules.markdown({ variant: '*' }), ItalicRules.markdown({ variant: '_' })] }),
+  UnderlinePlugin.configure({ inputRules: [UnderlineRules.markdown()] }),
+  CodePlugin.configure({ inputRules: [CodeRules.markdown()], shortcuts: { toggle: { keys: 'mod+e' } } }),
+  StrikethroughPlugin.configure({ inputRules: [StrikethroughRules.markdown()], shortcuts: { toggle: { keys: 'mod+shift+x' } } }),
+  HighlightPlugin.configure({ inputRules: [HighlightRules.markdown({ variant: '==' }), HighlightRules.markdown({ variant: '≡' })], shortcuts: { toggle: { keys: 'mod+shift+h' } } }),
+  IndentPlugin.configure({ inject: { targetPlugins: [...KEYS.heading, KEYS.p, KEYS.blockquote, KEYS.img] }, options: { offset: 24 } }),
+  ListPlugin.configure({ inputRules: [BulletedListRules.markdown({ variant: '-' }), BulletedListRules.markdown({ variant: '*' }), OrderedListRules.markdown({ variant: '.' }), OrderedListRules.markdown({ variant: ')' }), TaskListRules.markdown({ checked: false }), TaskListRules.markdown({ checked: true })] }),
+  LinkPlugin.configure({ inputRules: [LinkRules.markdown(), LinkRules.autolink({ variant: 'paste' }), LinkRules.autolink({ variant: 'space' }), LinkRules.autolink({ variant: 'break' })] }),
+  TablePlugin,
+  TableRowPlugin,
+  TableCellPlugin,
+  TableCellHeaderPlugin,
+  ImagePlugin.configure({ options: { disableUploadInsert: true } }),
+  MediaEmbedPlugin,
+  VideoPlugin,
+  AudioPlugin,
+  FilePlugin,
+  PlaceholderPlugin.configure({ options: { disableEmptyPlaceholder: true } }),
+  CaptionPlugin.configure({ options: { query: { allow: [KEYS.img, KEYS.video, KEYS.audio, KEYS.file, KEYS.mediaEmbed] } } }),
+  MarkdownPlugin.configure({ options: { plainMarks: [KEYS.suggestion, KEYS.comment], remarkPlugins: [remarkMath, remarkGfm, remarkEmoji as any, remarkMdx, remarkMention] } }),
 ];
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -165,15 +151,13 @@ const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
 
   return (
     <div className="h-full min-h-0 w-full bg-background text-foreground">
-      <TooltipProvider delayDuration={300}>
-        <PlateController>
-          <Plate editor={editor} onChange={handleChange} primary>
-            <EditorContainer variant="demo">
-              <Editor variant="demo" placeholder="本文を入力" spellCheck />
-            </EditorContainer>
-          </Plate>
-        </PlateController>
-      </TooltipProvider>
+      <PlateController>
+        <Plate editor={editor} onChange={handleChange} primary>
+          <PlateContainer className="relative h-[650px] w-full cursor-text select-text overflow-y-auto caret-primary selection:bg-brand/25 focus-visible:outline-none">
+            <PlateContent className="relative size-full w-full cursor-text select-text overflow-x-hidden whitespace-pre-wrap break-words px-16 pt-4 pb-72 text-base outline-none sm:px-[max(64px,calc(50%-350px))]" placeholder="本文を入力" spellCheck />
+          </PlateContainer>
+        </Plate>
+      </PlateController>
     </div>
   );
 };
