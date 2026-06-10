@@ -7,7 +7,8 @@ export type OpenAiSettings = {
   maxOutputTokens: number;
 };
 
-const STORAGE_KEY = "flashcard-master.openai.settings.v1";
+const STORAGE_KEY = "sivflow.openai.settings.v1";
+const LEGACY_STORAGE_KEY = "flashcard-master.openai.settings.v1";
 
 export const DEFAULT_OPEN_AI_SETTINGS: OpenAiSettings = {
   providerMode: "local-template",
@@ -35,13 +36,25 @@ const isOpenAiSettings = (value: unknown): value is OpenAiSettings => {
   );
 };
 
+const readStoredOpenAiSettings = (): string | null => {
+  const current = window.localStorage.getItem(STORAGE_KEY);
+  if (current) return current;
+
+  const legacy = window.localStorage.getItem(LEGACY_STORAGE_KEY);
+  if (!legacy) return null;
+
+  window.localStorage.setItem(STORAGE_KEY, legacy);
+  window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+  return legacy;
+};
+
 export const loadOpenAiSettings = (): OpenAiSettings => {
   if (typeof window === "undefined") {
     return DEFAULT_OPEN_AI_SETTINGS;
   }
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = readStoredOpenAiSettings();
 
     if (!raw) {
       return DEFAULT_OPEN_AI_SETTINGS;
@@ -79,6 +92,7 @@ export const saveOpenAiSettings = (settings: OpenAiSettings) => {
   };
 
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+  window.localStorage.removeItem(LEGACY_STORAGE_KEY);
 };
 
 export const clearOpenAiSettings = () => {
@@ -87,4 +101,5 @@ export const clearOpenAiSettings = () => {
   }
 
   window.localStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem(LEGACY_STORAGE_KEY);
 };
