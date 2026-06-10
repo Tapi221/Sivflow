@@ -5,7 +5,7 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { getFirebaseStorage, getFirestoreDb } from "@/services/firebaseGateway";
 import type { UploadMetadata } from "@/types";
 import { AlertCircle, Database, FileAudio, FileText, Image as ImageIcon, Trash2 } from "@/ui/icons";
