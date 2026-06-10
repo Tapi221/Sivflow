@@ -7,6 +7,8 @@ import type { SecurityEventType, SecurityLog, SecurityMetadata } from "@/types/d
 
 interface SecurityAlert {
   id: string;
+  type: string;
+  createdAt: number;
   [key: string]: unknown;
 }
 
@@ -51,7 +53,7 @@ export class SecurityMonitor {
 
   subscribe(callback: (state: SyncSecurityState) => void): () => void {
     this.startMonitoring((state) => {
-      callback(state as SyncSecurityState);
+      callback(state);
     });
 
     return () => {
@@ -143,10 +145,16 @@ export class SecurityMonitor {
       notificationQuery,
       (snapshot: QuerySnapshot<DocumentData>) => {
         this.internalState.alerts = snapshot.docs.map(
-          (docSnap: QueryDocumentSnapshot<DocumentData>): SecurityAlert => ({
-            id: docSnap.id,
-            ...docSnap.data(),
-          }),
+          (docSnap: QueryDocumentSnapshot<DocumentData>): SecurityAlert => {
+            const data = docSnap.data();
+            return {
+              id: docSnap.id,
+              ...data,
+              type: typeof data.type === "string" ? data.type : "SECURITY_ALERT",
+              createdAt:
+                typeof data.createdAt === "number" ? data.createdAt : Date.now(),
+            };
+          },
         );
 
         onStateChange({ ...this.internalState });

@@ -6,7 +6,7 @@ import { SecurityMonitor } from "@/services/logic/SecurityMonitor";
 import { TelemetryService } from "@/services/logic/TelemetryService";
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import type { Card, CardSet, Folder } from "@/types";
-import type { SyncConflict as StoredSyncConflict, SyncResult } from "@/types/domain/sync";
+import type { SyncConflict as StoredSyncConflict, SyncQueueItem, SyncResult } from "@/types/domain/sync";
 import type { SyncContextSource } from "@/types/domain/telemetry";
 
 const SYNC_TABLE_BY_TYPE = {
@@ -29,6 +29,31 @@ const FULL_RESYNC_TABLES = [
   "images",
 ] as const;
 
+type SyncableTableName = (typeof FULL_RESYNC_TABLES)[number];
+type SyncableRecord = Record<string, unknown> & {
+  id?: string;
+  isDeleted?: boolean;
+};
+
+const SYNC_ENTITY_BY_TABLE: Record<SyncableTableName, SyncTask["entity"]> = {
+  folders: "folder",
+  cardSets: "cardSet",
+  cards: "card",
+  documents: "document",
+  tagRecords: "tag",
+  userSettings: "userSetting",
+  images: "asset",
+};
+
+const DELETE_CAPABLE_SYNC_ENTITIES = new Set<SyncTask["entity"]>([
+  "folder",
+  "cardSet",
+  "card",
+  "document",
+  "tag",
+  "asset",
+]);
+
 const ROOT_FOLDER_KEY = "__root__";
 const DEFAULT_FOLDER_NAME = "インポート済みカード";
 
@@ -48,6 +73,16 @@ const getPayloadId = (payload: unknown) => {
     ? payload.id
     : null;
 };
+
+const getRecordId = (record: unknown): string | null => {
+  if (!isRecord(record)) return null;
+  return typeof record.id === "string" && record.id.trim().length > 0
+    ? record.id
+    : null;
+};
+
+const isDeletedRecord = (record: unknown): boolean =>
+  isRecord(record) && record.isDeleted === true;
 
 const normalizeFullResyncRecord = (
   userId: string,
@@ -206,6 +241,19 @@ const applyLocalCardSyncMetadata = (
   record.lastSyncedByDeviceId = getCurrentDeviceId();
 
   return record;
+};
+
+const toQueueEntity = (changeType: string): SyncTask["entity"] | null => {
+  if (changeType === "userSetting") return "userSetting";
+  const table = toSyncTableName(changeType);
+  return SYNC_ENTITY_BY_TABLE[table as SyncableTableName] ?? null;
+};
+
+const toLocalUpsertPayload = (record: unknown): Record<string, unknown> | null => {
+  if (!isRecord(record)) return null;
+  const id = getRecordId(record);
+  if (!id) return null;
+  return { ...record, id };
 };
 
 const repairMissingCardSetsAfterSync = async (
@@ -377,7 +425,9 @@ export class SyncServiceV2 implements ISyncService {
         return;
       }
 
-      this.telemetry.log("info", "Checking for remote changes (Pull)");
+      await this.processPendingLocalChanges(source);
+
+      this.telemetry.log("info", "Checking for remote replica changes (Pull)");
       const lastSyncTime = await this.localDB.getLastSyncTime(this.userId);
       const lastSyncTimestamp = lastSyncTime ? lastSyncTime.getTime() : 0;
 
@@ -389,13 +439,7 @@ export class SyncServiceV2 implements ISyncService {
         await this.applyRemoteChanges(changes);
       }
 
-      const constraint = this.networkMonitor.getBatchConstraint(source);
-      const tasks = await this.queueManager.peekBatch(constraint);
-
-      if (tasks.length > 0) {
-        this.telemetry.log("info", `Pushing ${tasks.length} local changes`);
-        await this.processBatch(tasks);
-      }
+      await this.processPendingLocalChanges(source);
 
       await this.localDB.updateLastSyncTime(this.userId, new Date(serverTime));
       transaction.end("success");
@@ -405,6 +449,16 @@ export class SyncServiceV2 implements ISyncService {
       throw error;
     } finally {
       this.isSyncing = false;
+    }
+  }
+
+  private async processPendingLocalChanges(source: SyncContextSource): Promise<void> {
+    const constraint = this.networkMonitor.getBatchConstraint(source);
+    const tasks = await this.queueManager.peekBatch(constraint);
+
+    if (tasks.length > 0) {
+      this.telemetry.log("info", `Backing up ${tasks.length} local changes`);
+      await this.processBatch(tasks);
     }
   }
 
@@ -547,7 +601,21 @@ export class SyncServiceV2 implements ISyncService {
     const transaction = this.telemetry.startTransaction("startup_sync");
 
     try {
-      this.telemetry.log("info", "Starting startup sync (Pull priorities)");
+      this.telemetry.log("info", "Starting startup sync (local replica first)");
+
+      if (this.networkMonitor.status === "offline") {
+        this.telemetry.log("warn", "Offline, startup sync deferred");
+        transaction.end("success");
+        return;
+      }
+
+      if (this.networkMonitor.status === "poor") {
+        this.telemetry.log("info", "Network poor, startup sync deferred");
+        transaction.end("success");
+        return;
+      }
+
+      await this.processPendingLocalChanges("system");
 
       const lastSyncTime = await this.localDB.getLastSyncTime(this.userId);
       const lastSyncTimestamp = lastSyncTime ? lastSyncTime.getTime() : 0;
@@ -560,12 +628,7 @@ export class SyncServiceV2 implements ISyncService {
         await this.applyRemoteChanges(changes);
       }
 
-      const constraint = this.networkMonitor.getBatchConstraint("system");
-      const tasks = await this.queueManager.peekBatch(constraint);
-      if (tasks.length > 0) {
-        this.telemetry.log("info", `Pushing ${tasks.length} local changes`);
-        await this.processBatch(tasks);
-      }
+      await this.processPendingLocalChanges("system");
 
       await this.localDB.updateLastSyncTime(this.userId, new Date(serverTime));
 
@@ -580,9 +643,82 @@ export class SyncServiceV2 implements ISyncService {
     }
   }
 
+  private async getQueuedReplicaTargetKeys(): Promise<Set<string>> {
+    const queueReadable = this.localDB as LocalDBLike & {
+      getQueuedItemsOldestFirst?: () => Promise<SyncQueueItem[]>;
+    };
+
+    if (typeof queueReadable.getQueuedItemsOldestFirst !== "function") {
+      return new Set();
+    }
+
+    const queuedItems = await queueReadable.getQueuedItemsOldestFirst();
+    return new Set(
+      queuedItems
+        .filter((item) => item.status !== "completed")
+        .map((item) => `${item.entity}:${item.targetId ?? getPayloadId(item.payload) ?? ""}`),
+    );
+  }
+
+  private async queueLocalReplicaWrite(
+    changeType: string,
+    record: unknown,
+  ): Promise<void> {
+    const entity = toQueueEntity(changeType);
+    const payload = toLocalUpsertPayload(record);
+    if (!entity || !payload) return;
+    const targetId = getRecordId(payload);
+    if (!targetId) return;
+
+    if (isDeletedRecord(payload) && DELETE_CAPABLE_SYNC_ENTITIES.has(entity)) {
+      await this.localDB.queueDeleteSync({
+        entity: entity as never,
+        targetId,
+        priority: "high",
+      });
+      return;
+    }
+
+    await this.localDB.queueUpsertSync({
+      entity: entity as never,
+      operationType: "update",
+      payload: payload as never,
+      priority: "high",
+    });
+  }
+
+  private async queueLocalReplicaSnapshot(): Promise<void> {
+    for (const table of FULL_RESYNC_TABLES) {
+      const entity = SYNC_ENTITY_BY_TABLE[table];
+      const records = await this.localDB.getAllItems(table);
+
+      for (const record of records as SyncableRecord[]) {
+        const id = getRecordId(record);
+        if (!id) continue;
+
+        if (record.isDeleted === true && DELETE_CAPABLE_SYNC_ENTITIES.has(entity)) {
+          await this.localDB.queueDeleteSync({
+            entity: entity as never,
+            targetId: id,
+            priority: "medium",
+          });
+          continue;
+        }
+
+        await this.localDB.queueUpsertSync({
+          entity: entity as never,
+          operationType: "update",
+          payload: { ...record, id } as never,
+          priority: "medium",
+        });
+      }
+    }
+  }
+
   private async applyRemoteChanges(changes: SyncChange[]): Promise<void> {
     const allFolders = await this.localDB.folders.toArray();
     const syncedAt = new Date();
+    const queuedReplicaTargets = await this.getQueuedReplicaTargetKeys();
 
     for (const change of changes) {
       const changeType = typeof change.type === "string" ? change.type : "";
@@ -642,6 +778,9 @@ export class SyncServiceV2 implements ISyncService {
       const localLookupId =
         changeType === "userSetting" ? this.userId : changeId || this.userId;
       const localData = await this.localDB.getItem(table, localLookupId);
+      const entity = toQueueEntity(changeType);
+      const targetKey = entity ? `${entity}:${localLookupId}` : "";
+      const hasQueuedLocalWrite = targetKey.length > 0 && queuedReplicaTargets.has(targetKey);
 
       if (!localData) {
         const nextRecord =
@@ -659,7 +798,7 @@ export class SyncServiceV2 implements ISyncService {
       const { merged, conflict } = this.diffEngine.merge(
         localData,
         remoteData,
-        "server_wins",
+        "client_wins",
       );
 
       const mergedWithLocalFields = preserveLocalOnlyFields(
@@ -679,10 +818,11 @@ export class SyncServiceV2 implements ISyncService {
       if (conflict) {
         this.telemetry.log(
           "warn",
-          "Conflict detected during applyRemoteChanges",
+          "Remote replica conflict detected; keeping local record authoritative",
           {
             entity: changeType,
             id: changeId,
+            hasQueuedLocalWrite,
           },
         );
 
@@ -691,14 +831,24 @@ export class SyncServiceV2 implements ISyncService {
           entityId: changeId || localLookupId,
           entityType: changeType as StoredSyncConflict["entityType"],
           autoMerged: mergedWithLocalFields,
-          conflicts: {},
+          conflicts: {
+            localFirst: {
+              local: localData,
+              remote: remoteData,
+            },
+          },
           detectedAt: Date.now(),
         };
 
         await this.localDB.putConflict(storedConflict);
+        await this.queueLocalReplicaWrite(changeType, mergedWithLocalFields);
       }
 
       await this.localDB.upsert(table, nextRecord as never, true);
+
+      if (!conflict && hasQueuedLocalWrite) {
+        await this.queueLocalReplicaWrite(changeType, nextRecord);
+      }
     }
 
     if (shouldRepairCardSets(changes)) {
@@ -712,7 +862,7 @@ export class SyncServiceV2 implements ISyncService {
   }
 
   async forceFullResync(): Promise<void> {
-    this.telemetry.log("warn", "Force full resync initiated");
+    this.telemetry.log("warn", "Force replica repair sync initiated");
 
     await this.securityMonitor.logEvent("SYNC_CONFLICT_EXCESS");
 
@@ -729,38 +879,8 @@ export class SyncServiceV2 implements ISyncService {
         changesCount: diff.changes.length,
       });
 
-      await this.localDB.runSyncTransaction(async () => {
-        await this.localDB.clearSyncTables(FULL_RESYNC_TABLES);
-
-        for (const change of diff.changes) {
-          const changeType = typeof change.type === "string" ? change.type : "";
-          if (!changeType) continue;
-
-          const tableName = toSyncTableName(changeType);
-          if (!(FULL_RESYNC_TABLES as readonly string[]).includes(tableName)) {
-            continue;
-          }
-
-          const data = normalizeFullResyncRecord(this.userId, {
-            type: changeType,
-            id: typeof change.id === "string" ? change.id : undefined,
-            data: change.data,
-          });
-
-          const nextRecord =
-            changeType === "card"
-              ? applyLocalCardSyncMetadata(data, {
-                syncedAt: resyncedAt,
-                syncState: "synced",
-              })
-              : data;
-
-          await this.localDB.putSyncRecord(
-            tableName as (typeof FULL_RESYNC_TABLES)[number],
-            nextRecord as never,
-          );
-        }
-      });
+      await this.applyRemoteChanges(diff.changes);
+      await this.queueLocalReplicaSnapshot();
 
       await repairMissingCardSetsAfterSync(this.localDB, this.userId);
 
@@ -773,7 +893,9 @@ export class SyncServiceV2 implements ISyncService {
         await this.localDB.updateLastSyncTime(this.userId, new Date());
       }
 
-      this.telemetry.log("info", "Full resync completed successfully");
+      this.telemetry.log("info", "Replica repair sync completed successfully", {
+        repairedAt: resyncedAt.getTime(),
+      });
     } catch (error) {
       this.telemetry.log("error", "Full resync failed", {}, error as Error);
       throw error;
@@ -802,9 +924,9 @@ export class SyncServiceV2 implements ISyncService {
   private async checkDeviceStatus(): Promise<void> {
     const currentDeviceId = localStorage.getItem("deviceId");
     if (!currentDeviceId) return;
-    const db = requireFirestoreDb();
 
     try {
+      const db = requireFirestoreDb();
       const deviceRef = doc(
         db,
         `sync_metadata/${this.userId}/devices/${currentDeviceId}`,
@@ -819,7 +941,7 @@ export class SyncServiceV2 implements ISyncService {
             "Security Alert: Access attempt from revoked device",
             { deviceId: currentDeviceId },
           );
-          await this.securityMonitor.logEvent("REVOKED_DEVICE_ACCESS", {
+          await this.securityMonitor.logEvent("ACCESS_DENIED_REVOKED", {
             deviceId: currentDeviceId,
           });
           throw new Error("This device has been revoked. Please re-authenticate.");
@@ -876,17 +998,17 @@ export class SyncServiceV2 implements ISyncService {
     ]);
 
     const lastAttempt = histories[0];
-    const lastSuccess = histories.find((history) => history.status === "success");
+    const lastSuccess = histories.find((history) => history.result === "success");
 
     return {
       queueDepth,
       isSyncing: this.isSyncing,
       lastAttemptAt: lastAttempt?.startedAt,
-      lastSuccessAt: lastSuccess?.completedAt,
+      lastSuccessAt: lastSuccess?.finishedAt,
       lastServerTime: (await this.localDB.getLastSyncTime(this.userId))?.getTime(),
-      lastErrorMessage: errors[0]?.errorMessage,
+      lastErrorMessage: errors[0]?.message,
       recentSuccessRate: histories.length
-        ? histories.filter((history) => history.status === "success").length /
+        ? histories.filter((history) => history.result === "success").length /
         histories.length
         : 1,
     };
@@ -898,8 +1020,8 @@ export class SyncServiceV2 implements ISyncService {
       id: conflict.id,
       entity: conflict.entityType,
       targetId: conflict.entityId,
-      local: conflict.localVersion,
-      remote: conflict.remoteVersion,
+      local: conflict.conflicts.localFirst?.local ?? conflict.autoMerged,
+      remote: conflict.conflicts.localFirst?.remote,
       createdAt: conflict.detectedAt,
     }));
   }
