@@ -171,16 +171,16 @@ const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
   return (
     <div className="h-full min-h-0 w-full overflow-y-auto bg-white text-[#18181b]">
       <PlateController>
-        <Plate editor={editor} onChange={handleChange}>
-          <div className="px-4 py-10 lg:px-8">
-            <div className="mx-auto min-h-[650px] w-full max-w-[1120px] overflow-hidden rounded-xl border border-[#e4e4e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-              <NotePlateToolbar />
+        <div className="px-4 py-10 lg:px-8">
+          <div className="mx-auto min-h-[650px] w-full max-w-[1120px] overflow-hidden rounded-xl border border-[#e4e4e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            <NotePlateToolbar />
+            <Plate editor={editor} onChange={handleChange} primary>
               <EditorContainer className="h-[650px]">
                 <Editor placeholder="本文を入力" spellCheck />
               </EditorContainer>
-            </div>
+            </Plate>
           </div>
-        </Plate>
+        </div>
       </PlateController>
     </div>
   );
