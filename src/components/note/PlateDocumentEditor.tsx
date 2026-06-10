@@ -1,7 +1,7 @@
 import { FontBackgroundColorPlugin, FontColorPlugin, FontSizePlugin, TextAlignPlugin } from "@platejs/basic-styles/react";
 import { LinkPlugin } from "@platejs/link/react";
 import { Plate, PlateController, usePlateEditor } from "platejs/react";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BasicNodesKit } from "@/registry/components/editor/plugins/basic-nodes-kit";
 import { ListKit } from "@/registry/components/editor/plugins/list-kit";
 import { TableKit } from "@/registry/components/editor/plugins/table-kit";
@@ -129,6 +129,16 @@ const NotePlateToolbar = () => (
   </FixedToolbar>
 );
 
+const MountedNotePlateToolbar = () => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  return mounted ? <NotePlateToolbar /> : null;
+};
+
 const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
   const initialValue = useMemo(() => toInitialValue(note.content), [note.content]);
   const editor = usePlateEditor({
@@ -173,7 +183,7 @@ const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
       <PlateController>
         <div className="px-4 py-10 lg:px-8">
           <div className="mx-auto min-h-[650px] w-full max-w-[1120px] overflow-hidden rounded-xl border border-[#e4e4e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-            <NotePlateToolbar />
+            <MountedNotePlateToolbar />
             <Plate editor={editor} onChange={handleChange} primary>
               <EditorContainer className="h-[650px]">
                 <Editor placeholder="本文を入力" spellCheck />
