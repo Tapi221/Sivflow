@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/contexts/ToastContext";
 import { exportMfCardBytes } from "@/features/cardFile/application/exportMfCard";
 import { MfCardExportError } from "@/features/cardFile/domain/mfCard.types";
 import { downloadBytesAsMfCard } from "@/features/cardFile/infra/web/downloadMfCard";
 import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
 import type { Card } from "@/types";
+import { useToast } from "@web-renderer/contexts/ToastContext";
 
 type ExportMfCardButtonProps = {
   card: Card | null | undefined;
