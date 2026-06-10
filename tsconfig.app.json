@@ -10,12 +10,9 @@
     "isolatedModules": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": false,
+    "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@/services/localDB": ["src/services/localdb/index.ts"],
-      "@/services/firebase": ["src/infrastructure/firebase/client.ts"],
-      "@/features/tab/Tab": ["src/pane.desktop/tab.desktopnative/Tab.ts"],
       "@core/*": ["packages/core/src/*"],
       "@platform/*": ["packages/platform/src/*"],
       "@web-renderer/*": ["packages/web-renderer/src/*"],
