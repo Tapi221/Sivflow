@@ -5,52 +5,19 @@ import * as React from 'react';
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
 import { PlaceholderPlugin } from '@platejs/media/react';
-import {
-  AudioLinesIcon,
-  FileUpIcon,
-  FilmIcon,
-  ImageIcon,
-  LinkIcon,
-} from 'lucide-react';
+import { AudioLinesIcon, FileUpIcon, FilmIcon, ImageIcon, LinkIcon } from 'lucide-react';
 import { isUrl, KEYS } from 'platejs';
 import { useEditorRef } from 'platejs/react';
 import { toast } from 'sonner';
 import { useFilePicker } from 'use-file-picker';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/registry/ui/shadcn/dropdown-menu';
-import { Input } from '@/components/ui/input';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/registry/ui/shadcn/dropdown-menu';
 
-import {
-  ToolbarSplitButton,
-  ToolbarSplitButtonPrimary,
-  ToolbarSplitButtonSecondary,
-} from './toolbar';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './alert-dialog';
+import { Input } from './input';
+import { ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from './toolbar';
 
-const MEDIA_CONFIG: Record<
-  string,
-  {
-    accept: string[];
-    icon: React.ReactNode;
-    title: string;
-    tooltip: string;
-  }
-> = {
+const MEDIA_CONFIG: Record<string, { accept: string[]; icon: React.ReactNode; title: string; tooltip: string }> = {
   [KEYS.audio]: {
     accept: ['audio/*'],
     icon: <AudioLinesIcon className="size-4" />,
@@ -77,10 +44,7 @@ const MEDIA_CONFIG: Record<
   },
 };
 
-export function MediaToolbarButton({
-  nodeType,
-  ...props
-}: DropdownMenuProps & { nodeType: string }) {
+export function MediaToolbarButton({ nodeType, ...props }: DropdownMenuProps & { nodeType: string }) {
   const currentConfig = MEDIA_CONFIG[nodeType];
 
   const editor = useEditorRef();
@@ -109,25 +73,14 @@ export function MediaToolbarButton({
         }}
         pressed={open}
       >
-        <ToolbarSplitButtonPrimary>
-          {currentConfig.icon}
-        </ToolbarSplitButtonPrimary>
+        <ToolbarSplitButtonPrimary>{currentConfig.icon}</ToolbarSplitButtonPrimary>
 
-        <DropdownMenu
-          open={open}
-          onOpenChange={setOpen}
-          modal={false}
-          {...props}
-        >
+        <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
           <DropdownMenuTrigger asChild>
             <ToolbarSplitButtonSecondary />
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent
-            onClick={(e) => e.stopPropagation()}
-            align="start"
-            alignOffset={-32}
-          >
+          <DropdownMenuContent onClick={(e) => e.stopPropagation()} align="start" alignOffset={-32}>
             <DropdownMenuGroup>
               <DropdownMenuItem onSelect={() => openFilePicker()}>
                 {currentConfig.icon}
@@ -149,26 +102,14 @@ export function MediaToolbarButton({
         }}
       >
         <AlertDialogContent className="gap-6">
-          <MediaUrlDialogContent
-            currentConfig={currentConfig}
-            nodeType={nodeType}
-            setOpen={setDialogOpen}
-          />
+          <MediaUrlDialogContent currentConfig={currentConfig} nodeType={nodeType} setOpen={setDialogOpen} />
         </AlertDialogContent>
       </AlertDialog>
     </>
   );
 }
 
-function MediaUrlDialogContent({
-  currentConfig,
-  nodeType,
-  setOpen,
-}: {
-  currentConfig: (typeof MEDIA_CONFIG)[string];
-  nodeType: string;
-  setOpen: (value: boolean) => void;
-}) {
+function MediaUrlDialogContent({ currentConfig, nodeType, setOpen }: { currentConfig: (typeof MEDIA_CONFIG)[string]; nodeType: string; setOpen: (value: boolean) => void }) {
   const editor = useEditorRef();
   const [url, setUrl] = React.useState('');
 
