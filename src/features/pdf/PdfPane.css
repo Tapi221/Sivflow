@@ -44,7 +44,8 @@
   overflow-anchor: none;
 }
 
-.pdf-pane__zoom-snapshot img {
+.pdf-pane__zoom-snapshot img,
+.pdf-pane__zoom-snapshot canvas {
   position: absolute;
   display: block;
   max-width: none;

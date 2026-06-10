@@ -308,6 +308,39 @@ const isRectVisibleInContainer = (rect: DOMRect, containerRect: DOMRect): boolea
   return rect.bottom > containerRect.top && rect.top < containerRect.bottom && rect.right > containerRect.left && rect.left < containerRect.right;
 };
 
+const appendPdfZoomSnapshotCanvas = (snapshotElement: HTMLElement, canvas: HTMLCanvasElement, rect: DOMRect, containerRect: DOMRect): boolean => {
+  const visibleLeft = Math.max(rect.left, containerRect.left);
+  const visibleTop = Math.max(rect.top, containerRect.top);
+  const visibleRight = Math.min(rect.right, containerRect.right);
+  const visibleBottom = Math.min(rect.bottom, containerRect.bottom);
+  const displayWidth = visibleRight - visibleLeft;
+  const displayHeight = visibleBottom - visibleTop;
+  if (displayWidth <= 0 || displayHeight <= 0 || canvas.width <= 0 || canvas.height <= 0) return false;
+
+  const sourceScaleX = canvas.width / rect.width;
+  const sourceScaleY = canvas.height / rect.height;
+  const sourceX = Math.max(0, (visibleLeft - rect.left) * sourceScaleX);
+  const sourceY = Math.max(0, (visibleTop - rect.top) * sourceScaleY);
+  const sourceWidth = Math.min(canvas.width - sourceX, displayWidth * sourceScaleX);
+  const sourceHeight = Math.min(canvas.height - sourceY, displayHeight * sourceScaleY);
+  if (sourceWidth <= 0 || sourceHeight <= 0) return false;
+
+  const snapshotCanvas = document.createElement("canvas");
+  snapshotCanvas.width = Math.max(1, Math.ceil(sourceWidth));
+  snapshotCanvas.height = Math.max(1, Math.ceil(sourceHeight));
+  snapshotCanvas.ariaHidden = "true";
+  snapshotCanvas.style.left = `${visibleLeft - containerRect.left}px`;
+  snapshotCanvas.style.top = `${visibleTop - containerRect.top}px`;
+  snapshotCanvas.style.width = `${displayWidth}px`;
+  snapshotCanvas.style.height = `${displayHeight}px`;
+
+  const context = snapshotCanvas.getContext("2d", { alpha: false });
+  if (!context) return false;
+  context.drawImage(canvas, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, snapshotCanvas.width, snapshotCanvas.height);
+  snapshotElement.append(snapshotCanvas);
+  return true;
+};
+
 const createPdfZoomSnapshot = (container: HTMLElement, viewerElement: HTMLElement): HTMLDivElement | null => {
   const containerRect = container.getBoundingClientRect();
   const snapshotElement = document.createElement("div");
@@ -322,15 +355,7 @@ const createPdfZoomSnapshot = (container: HTMLElement, viewerElement: HTMLElemen
     if (rect.width <= 0 || rect.height <= 0 || !isRectVisibleInContainer(rect, containerRect)) continue;
 
     try {
-      const imageElement = document.createElement("img");
-      imageElement.src = canvas.toDataURL("image/png");
-      imageElement.alt = "";
-      imageElement.draggable = false;
-      imageElement.style.left = `${rect.left - containerRect.left}px`;
-      imageElement.style.top = `${rect.top - containerRect.top}px`;
-      imageElement.style.width = `${rect.width}px`;
-      imageElement.style.height = `${rect.height}px`;
-      snapshotElement.append(imageElement);
+      appendPdfZoomSnapshotCanvas(snapshotElement, canvas, rect, containerRect);
     } catch {
       return null;
     }
