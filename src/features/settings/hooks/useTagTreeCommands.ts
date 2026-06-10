@@ -8,6 +8,10 @@ type TagTreePositionPatch = {
   orderIndex: number;
 };
 
+type TagUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
+  updateItem: (table: "tagRecords", id: string, changes: Record<string, unknown>) => Promise<number>;
+};
+
 const getNormalizedParentId = (parentId: string | null): string | undefined => typeof parentId === "string" && parentId.trim().length > 0 ? parentId : undefined;
 
 const isTagAncestorOf = (sourceId: string, candidateParentId: string | undefined, tagById: ReadonlyMap<string, TagRecord>): boolean => {
@@ -24,13 +28,6 @@ const isTagAncestorOf = (sourceId: string, candidateParentId: string | undefined
   return false;
 };
 
-const queueTagUpsert = async (db: Awaited<ReturnType<typeof getLocalDb>>, tagId: string): Promise<void> => {
-  const tag = await db.tagRecords.get(tagId);
-  if (!tag) return;
-
-  await db.queueUpsertSync({ entity: "tag", operationType: "update", payload: tag });
-};
-
 export const useTagTreeCommands = (tagById: ReadonlyMap<string, TagRecord>) => {
   const { currentUser } = useAuthSession();
 
@@ -45,9 +42,8 @@ export const useTagTreeCommands = (tagById: ReadonlyMap<string, TagRecord>) => {
     if (normalizedParentId && !tagById.has(normalizedParentId)) return;
     if (isTagAncestorOf(tagId, normalizedParentId, tagById)) return;
 
-    const db = await getLocalDb(currentUser.uid);
-    await db.tagRecords.update(tagId, { parentId: normalizedParentId, orderIndex: patch.orderIndex, updatedAt: new Date() });
-    await queueTagUpsert(db, tagId);
+    const db = (await getLocalDb(currentUser.uid)) as TagUpdateCapableDb;
+    await db.updateItem("tagRecords", tagId, { parentId: normalizedParentId, orderIndex: patch.orderIndex, updatedAt: new Date() });
   }, [currentUser, tagById]);
 
   return { setTagTreePosition };
