@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getTagColorKey as normalizeTagColorKey, TAG_COLOR_KEYS, type TagColorKey } from "@/chip/tag/tagColor";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import type { TagRecord } from "@/services/localdb/types";
 
 type Tag = TagRecord;
@@ -11,6 +11,11 @@ type UseCardEditorTagsResult = {
   tags: Tag[];
   tagById: Map<string, Tag>;
   addTag: (name: string) => Promise<Tag>;
+};
+
+type TagWriteCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
+  addItem: (table: "tagRecords", item: Record<string, unknown>) => Promise<string>;
+  updateItem: (table: "tagRecords", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
 
 const DEFAULT_TAG_COLOR_KEY: TagColorKey = TAG_COLOR_KEYS[0];
@@ -51,13 +56,9 @@ export const useCardEditorTags = (): UseCardEditorTagsResult => {
   const addTag = async (name: string): Promise<Tag> => {
     if (!currentUser) throw new Error("not authenticated");
 
-    const db = await getLocalDb(currentUser.uid);
+    const db = (await getLocalDb(currentUser.uid)) as TagWriteCapableDb;
     const nameLower = name.toLowerCase();
-    const existingCandidates = await db.tagRecords
-      .where("[userId+nameLower]")
-      .equals([currentUser.uid, nameLower])
-      .toArray();
-
+    const existingCandidates = await db.tagRecords.where("[userId+nameLower]").equals([currentUser.uid, nameLower]).toArray();
     const existing = existingCandidates.slice().sort((left, right) => {
       if (Boolean(left.isDeleted) !== Boolean(right.isDeleted)) {
         return Number(Boolean(left.isDeleted)) - Number(Boolean(right.isDeleted));
@@ -72,14 +73,8 @@ export const useCardEditorTags = (): UseCardEditorTagsResult => {
           deletedAt: null,
           updatedAt: new Date(),
         };
-        await db.tagRecords.update(existing.id, patch);
-        const revived = { ...existing, ...patch, color: normalizeTagColorKey(existing.color) };
-        await db.queueUpsertSync({
-          entity: "tag",
-          operationType: "update",
-          payload: revived,
-        });
-        return revived;
+        await db.updateItem("tagRecords", existing.id, patch as Record<string, unknown>);
+        return { ...existing, ...patch, color: normalizeTagColorKey(existing.color) };
       }
 
       return {
@@ -101,12 +96,7 @@ export const useCardEditorTags = (): UseCardEditorTagsResult => {
       deletedAt: null,
     };
 
-    await db.tagRecords.add(newTag);
-    await db.queueUpsertSync({
-      entity: "tag",
-      operationType: "create",
-      payload: newTag,
-    });
+    await db.addItem("tagRecords", newTag as unknown as Record<string, unknown>);
     return newTag;
   };
 
