@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useAuthSession } from "@/contexts/AuthContext";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import type { TagRecord } from "@/services/localdb/types";
 
 type TagTreePositionPatch = {
