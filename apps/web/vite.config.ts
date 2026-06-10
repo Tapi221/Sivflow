@@ -22,6 +22,12 @@ const optimizedDependencyIncludes = [
   "@radix-ui/react-slider",
   "@radix-ui/react-slot",
   "@radix-ui/react-switch",
+  "@platejs/basic-nodes/react",
+  "@platejs/basic-styles/react",
+  "@platejs/indent/react",
+  "@platejs/link/react",
+  "@platejs/list/react",
+  "@platejs/table/react",
   "platejs/react",
 ];
 
@@ -355,6 +361,13 @@ export default defineConfig(({ command }) => ({
     }),
   ],
   resolve: {
+    dedupe: [
+      "@platejs/core",
+      "@platejs/table",
+      "platejs",
+      "react",
+      "react-dom",
+    ],
     alias: [
       { find: /^@\/services\/localDB$/, replacement: resolveFromRoot("src/services/localdb/index.ts") },
       { find: /^@\/services\/firebase$/, replacement: resolveFromRoot("src/infrastructure/firebase/client.ts") },
