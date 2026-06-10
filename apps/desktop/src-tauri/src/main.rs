@@ -447,6 +447,19 @@ fn oauth_take_pending_callback(state: State<AuthLoopbackState>) -> Result<Option
 }
 
 #[tauri::command]
+fn startup_finish_splash(app_handle: AppHandle) -> Result<(), String> {
+    let main_window = app_handle.get_webview_window("main").ok_or_else(|| "Main window is not available".to_string())?;
+    main_window.show().map_err(|error| error.to_string())?;
+    main_window.set_focus().map_err(|error| error.to_string())?;
+
+    if let Some(splash_window) = app_handle.get_webview_window("splash") {
+        splash_window.close().map_err(|error| error.to_string())?;
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
 fn window_minimize(app_handle: AppHandle) -> Result<(), String> {
     let window = app_handle.get_webview_window("main").ok_or_else(|| "Main window is not available".to_string())?;
     window.minimize().map_err(|error| error.to_string())
@@ -505,6 +518,7 @@ fn main() {
             oauth_start,
             oauth_cancel,
             oauth_take_pending_callback,
+            startup_finish_splash,
             window_minimize,
             window_maximize_toggle,
             window_close,
