@@ -1,12 +1,15 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
+import { readStoredAccounts, type StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import type { UserSettings } from "@/types";
 import { ChevronRight, Globe, Keyboard, Shield, Trophy, Type, Volume2 } from "@/ui/icons";
 
 type SettingsSectionId = "account" | "general" | "study" | "editor" | "audio" | "hotkey";
 
 type SettingsLanguage = UserSettings["language"];
+
+type AuthSessionUser = ReturnType<typeof useAuthSession>["currentUser"];
 
 type BooleanSettingsKey = "notificationsEnabled" | "soundEnabled" | "showReviewHard" | "showReviewEasy" | "autoCarryOver" | "delayBonusEnabled" | "reviewStartNextDay" | "defaultPreviewEnabled" | "autoDraftEnabled" | "autoSaveEnabled" | "autoVoiceQuestion" | "autoVoiceAnswer";
 
@@ -94,10 +97,18 @@ type SettingValueRowProps = {
   value: ReactNode;
 };
 
+type AccountProfile = {
+  displayName: string | null;
+  email: string | null;
+  photoUrl: string | null;
+  providerId: string | null;
+};
+
 const SETTINGS_CARD_CLASS_NAME = "rounded-[18px] bg-white shadow-[0_8px_24px_rgba(16,24,40,0.06)] ring-1 ring-black/[0.03]";
 const SETTINGS_ROW_CLASS_NAME = "flex min-h-[57px] w-full items-center gap-4 px-4 text-left transition active:scale-[0.995]";
 const SETTINGS_ICON_CLASS_NAME = "flex h-8 w-8 shrink-0 items-center justify-center text-[#8b8b91]";
 const SETTINGS_DETAIL_ROW_CLASS_NAME = "flex min-h-[54px] items-center justify-between gap-4 border-b border-[#ececf0] px-4 py-3 last:border-b-0";
+const GOOGLE_PROVIDER_ID = "google.com";
 
 const SETTINGS_COPY: Record<SettingsLanguage, SettingRouteCopy> = {
   ja: {
@@ -262,6 +273,30 @@ const MARKDOWN_TAB_OPTIONS: readonly SettingChoiceOption<NonNullable<UserSetting
   { value: 8, label: "8" },
 ];
 
+const normalizeAccountEmail = (email: string | null | undefined): string | null => {
+  const normalizedEmail = email?.trim().toLowerCase();
+  return normalizedEmail ? normalizedEmail : null;
+};
+
+const getStoredSignedInGoogleAccount = (currentUser: AuthSessionUser, storedAccounts: readonly StoredGoogleAccount[]): StoredGoogleAccount | null => {
+  const userEmail = normalizeAccountEmail(currentUser?.email);
+  if (!userEmail) return storedAccounts[0] ?? null;
+
+  return storedAccounts.find((account) => normalizeAccountEmail(account.email) === userEmail) ?? null;
+};
+
+const getAccountProfile = (currentUser: AuthSessionUser, storedAccounts: readonly StoredGoogleAccount[]): AccountProfile => {
+  const providerProfile = currentUser?.providerData.find((profile) => profile.providerId === GOOGLE_PROVIDER_ID) ?? currentUser?.providerData.at(0) ?? null;
+  const storedAccount = getStoredSignedInGoogleAccount(currentUser, storedAccounts);
+
+  return {
+    displayName: storedAccount?.name ?? providerProfile?.displayName ?? currentUser?.displayName ?? null,
+    email: storedAccount?.email ?? currentUser?.email ?? providerProfile?.email ?? null,
+    photoUrl: storedAccount?.photoUrl ?? providerProfile?.photoURL ?? null,
+    providerId: providerProfile?.providerId ?? null,
+  };
+};
+
 const getAccountDisplayName = (displayName: string | null | undefined, email: string | null | undefined, fallbackLabel: string): string => {
   const trimmedDisplayName = displayName?.trim();
   if (trimmedDisplayName) return trimmedDisplayName;
@@ -332,7 +367,9 @@ const SettingScreen = () => {
   const { settings, updateSettings } = useUserSettings();
   const language = settings?.language ?? "ja";
   const copy = SETTINGS_COPY[language];
-  const accountName = getAccountDisplayName(currentUser?.displayName, currentUser?.email, copy.emptyAccountLabel);
+  const storedGoogleAccounts = useMemo(() => readStoredAccounts(), [currentUser?.uid]);
+  const accountProfile = useMemo(() => getAccountProfile(currentUser, storedGoogleAccounts), [currentUser, storedGoogleAccounts]);
+  const accountName = getAccountDisplayName(accountProfile.displayName, accountProfile.email, copy.emptyAccountLabel);
   const accountInitial = getAccountInitial(accountName);
   const [activeSectionId, setActiveSectionId] = useState<SettingsSectionId>("general");
   const weekStartDay = settings?.weekStartDay ?? "monday";
@@ -361,11 +398,11 @@ const SettingScreen = () => {
 
         <button type="button" className={`${SETTINGS_CARD_CLASS_NAME} flex min-h-[108px] items-center gap-4 p-4 text-left`} onClick={() => setActiveSectionId("account")}>
           <span className="relative flex h-[76px] w-[76px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f0f0f3] text-[28px] font-semibold text-[#c2c2c8]">
-            {currentUser?.photoURL ? <img src={currentUser.photoURL} alt="" className="h-full w-full object-cover" /> : <span>{accountInitial}</span>}
+            {accountProfile.photoUrl ? <img src={accountProfile.photoUrl} alt="" className="h-full w-full object-cover" /> : <span>{accountInitial}</span>}
             <span className="absolute right-0 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#a3a3aa] shadow-[0_2px_8px_rgba(0,0,0,0.10)]"><Trophy size={15} /></span>
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[18px] font-semibold tracking-[-0.03em] text-[#1c1c1e]">{currentUser?.email ?? accountName}</span>
+            <span className="block truncate text-[18px] font-semibold tracking-[-0.03em] text-[#1c1c1e]">{accountProfile.email ?? accountName}</span>
           </span>
           <ChevronRight className="shrink-0 text-[#a7a7ad]" size={22} />
         </button>
@@ -391,8 +428,8 @@ const SettingScreen = () => {
           {activeSectionId === "account" ? (
             <>
               <SettingValueRow label={copy.statusLabel} value={currentUser ? copy.signedIn : copy.guest} />
-              <SettingValueRow label={copy.providerLabel} value={currentUser?.providerData.at(0)?.providerId ?? "-"} />
-              <SettingValueRow label={copy.emailUnset} value={currentUser?.email ?? "-"} />
+              <SettingValueRow label={copy.providerLabel} value={accountProfile.providerId ?? "-"} />
+              <SettingValueRow label={copy.emailUnset} value={accountProfile.email ?? "-"} />
               <div className={SETTINGS_DETAIL_ROW_CLASS_NAME}>
                 <span className="text-[15px] font-medium tracking-[-0.02em] text-[#1c1c1e]">{copy.logout}</span>
                 <button type="button" className="rounded-full bg-[#f0f0f4] px-4 py-2 text-[13px] font-semibold text-[#6e6e73] disabled:opacity-50" disabled={loading || !currentUser} onClick={handleLogout}>{copy.logout}</button>
