@@ -5,6 +5,7 @@ import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/legacy/web/pdf_v
 import "pdfjs-dist/legacy/web/pdf_viewer.css";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
+import { hasDesktopRuntime } from "@/platform/detectDesktopBridge";
 import type { PdfViewerState } from "@/types";
 import { releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource } from "./pdfDocumentSource";
 import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
@@ -95,7 +96,6 @@ type PdfZoomPreview = {
 export type { PdfPaneProps, PdfViewerStateChangeOptions };
 
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 640;
-const PDF_DEFAULT_DEVICE_MEMORY_GB = 4;
 const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 500;
 const PDF_HISTORY_LIMIT = 80;
 const PDF_LOW_MEMORY_DEVICE_MAX_GB = 4;
@@ -108,6 +108,7 @@ const PDF_SCALE_EPSILON = 0.001;
 const PDF_SCROLL_CONTAINER_CLASS_NAME = "pdf-pane__scroll-container";
 const PDF_SCROLL_IDLE_DELAY_MS = 200;
 const PDF_SCROLLING_CLASS_NAME = "pdf-pane--scrolling";
+const PDF_STANDARD_MAX_CANVAS_PIXELS = 4096 * 8192;
 const PDF_TOOLBAR_BUTTON_CLASS_NAME = "inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-black/10 bg-white/90 px-2 text-[12px] font-medium text-[#4a4a4a] shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40";
 const PDF_TOOLBAR_INPUT_CLASS_NAME = "h-8 w-14 rounded-md border border-black/10 bg-white/90 px-2 text-center text-[12px] font-medium text-[#4a4a4a] shadow-sm outline-none focus:border-black/25";
 const PDF_TRACKPAD_ZOOM_SENSITIVITY = 0.0015;
@@ -140,22 +141,31 @@ const getPdfViewerCurrentScale = (pdfViewer: PdfViewerInstance): number => {
   return Number.isFinite(currentScale) && currentScale > 0 ? currentScale : 1;
 };
 
-const getApproxDeviceMemory = (): number => {
+const getReportedDeviceMemory = (): number | null => {
   const navigatorLike = globalThis.navigator as NavigatorWithDeviceMemory | undefined;
   const deviceMemory = navigatorLike?.deviceMemory;
-  return typeof deviceMemory === "number" && Number.isFinite(deviceMemory) ? deviceMemory : PDF_DEFAULT_DEVICE_MEMORY_GB;
+  return typeof deviceMemory === "number" && Number.isFinite(deviceMemory) ? deviceMemory : null;
+};
+
+const getPdfMaxCanvasPixels = (): number => {
+  const deviceMemory = getReportedDeviceMemory();
+  if (hasDesktopRuntime() || deviceMemory === null || deviceMemory > PDF_LOW_MEMORY_DEVICE_MAX_GB) return PDF_STANDARD_MAX_CANVAS_PIXELS;
+  return PDF_LOW_MEMORY_MAX_CANVAS_PIXELS;
+};
+
+const requestPdfViewerRenderUpdate = (pdfViewer: PdfViewerInstance): void => {
+  pdfViewer.update();
 };
 
 const createPdfViewerRuntimeOptions = () => {
-  const isLowMemoryDevice = getApproxDeviceMemory() <= PDF_LOW_MEMORY_DEVICE_MAX_GB;
   return {
     annotationEditorMode: pdfjsLib.AnnotationEditorType.DISABLE,
     annotationMode: pdfjsLib.AnnotationMode.ENABLE,
     enableHWA: true,
     enableAutoLinking: false,
-    enableDetailCanvas: false,
+    enableDetailCanvas: true,
     enableOptimizedPartialRendering: true,
-    maxCanvasPixels: isLowMemoryDevice ? PDF_LOW_MEMORY_MAX_CANVAS_PIXELS : undefined,
+    maxCanvasPixels: getPdfMaxCanvasPixels(),
     minDurationToUpdateCanvas: 0,
     removePageBorders: true,
   };
@@ -439,11 +449,12 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
 
   const updateActivePdfPageWindow = useCallback((pageNumber?: number) => {
     const pdfViewer = pdfViewerRef.current;
-    const container = scrollContainerRef.current;
-    const viewerElement = pdfViewerElementRef.current;
-    if (!pdfViewer || !container || !viewerElement) return;
-    updatePdfViewerVisiblePageWindow(pdfViewer, container, viewerElement, pageNumber);
-  }, []);
+  const container = scrollContainerRef.current;
+  const viewerElement = pdfViewerElementRef.current;
+  if (!pdfViewer || !container || !viewerElement) return;
+  updatePdfViewerVisiblePageWindow(pdfViewer, container, viewerElement, pageNumber);
+  requestPdfViewerRenderUpdate(pdfViewer);
+}, []);
 
   useEffect(() => {
     viewerStateRef.current = viewerState;
