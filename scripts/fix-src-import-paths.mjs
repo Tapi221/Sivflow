@@ -107,27 +107,13 @@ const toAliasSpecifier = (targetFilePath, aliasRoot, originalSpecifier) => {
   return `${aliasRoot.prefix}/${modulePath}`;
 };
 
-const toFallbackAliasSpecifier = (importerDir, specifier) => {
-  const targetPath = path.resolve(importerDir, specifier);
-  const aliasRoot = findAliasRootByFilePath(targetPath);
-
-  if (!aliasRoot) return specifier;
-
-  return `${aliasRoot.prefix}/${toPosix(path.relative(aliasRoot.directory, targetPath))}`;
-};
-
 const normalizeSpecifier = (filePath, specifier) => {
   const importerDir = path.dirname(filePath);
 
   if (specifier.startsWith("./") && !specifier.slice(2).includes("/")) return specifier;
 
   const targetFilePath = resolveSpecifierPath(importerDir, specifier);
-
-  if (!targetFilePath) {
-    if (specifier.startsWith(".")) return toFallbackAliasSpecifier(importerDir, specifier);
-
-    return specifier;
-  }
+  if (!targetFilePath) return specifier;
 
   const targetDir = path.dirname(targetFilePath);
   if (targetDir === importerDir) return toSameDirectoryRelativeSpecifier(importerDir, targetFilePath, specifier);
