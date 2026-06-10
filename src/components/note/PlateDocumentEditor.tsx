@@ -1,7 +1,8 @@
 import { BasicBlocksPlugin, BasicMarksPlugin } from "@platejs/basic-nodes/react";
 import { AlignLeft, ArrowUpToLine, Baseline, Bold, ChevronDown, CircleSlash, Code2, File, FileAudio, Film, Highlighter, Image, Indent, Italic, Link, List, ListOrdered, ListTodo, MessageSquare, Minus, MoreHorizontal, Outdent, PaintBucket, Plus, Redo2, Smile, Strikethrough, Table, Underline, Undo2, WandSparkles } from "lucide-react";
 import { Plate, PlateContainer, PlateContent, PlateElement, PlateLeaf, ParagraphPlugin, usePlateEditor, type PlateElementProps, type PlateLeafProps } from "platejs/react";
-import { useCallback, useEffect, useMemo, useRef, type CSSProperties, type ChangeEvent, type MouseEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ChangeEvent, type MouseEvent, type ReactNode } from "react";
+import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
 import type { Note, NoteBlockContent } from "@/types";
 
 type PlateDocumentEditorProps = {
@@ -9,20 +10,40 @@ type PlateDocumentEditorProps = {
   onChange: (changes: Pick<Note, "content" | "contentText" | "contentVersion" | "editor">) => void | Promise<void>;
 };
 
+type PlateAlignValue = "center" | "justify" | "left" | "right";
+
+type PlateMediaType = "audio" | "file" | "image" | "video";
+
 type PlateTextNode = {
   text: string;
+  backgroundColor?: string;
   bold?: boolean;
-  italic?: boolean;
-  underline?: boolean;
-  strikethrough?: boolean;
   code?: boolean;
+  color?: string;
+  comment?: string;
+  fontSize?: number;
+  highlight?: boolean;
+  italic?: boolean;
+  link?: string;
+  strikethrough?: boolean;
+  underline?: boolean;
+  [key: string]: unknown;
 };
 
 type PlateNode = PlateTextNode | PlateElementNode;
 
 type PlateElementNode = {
   type: string;
+  align?: PlateAlignValue;
+  checked?: boolean;
   children: PlateNode[];
+  indent?: number;
+  lineHeight?: number;
+  mimeType?: string;
+  name?: string;
+  src?: string;
+  url?: string;
+  [key: string]: unknown;
 };
 
 type PlateChangePayload = unknown[] | {
@@ -31,9 +52,9 @@ type PlateChangePayload = unknown[] | {
 
 type PlateEditor = ReturnType<typeof usePlateEditor>;
 
-type PlateBlockType = "p" | "h1" | "h2" | "h3" | "blockquote";
+type PlateBlockType = "blockquote" | "h1" | "h2" | "h3" | "p";
 
-type PlateMarkType = "bold" | "italic" | "underline" | "strikethrough" | "code";
+type PlateMarkType = "bold" | "code" | "italic" | "strikethrough" | "underline";
 
 type PlateCommandFallback = {
   command: string;
@@ -43,7 +64,7 @@ type PlateCommandFallback = {
 type PlateToolbarButtonProps = {
   label: string;
   children: ReactNode;
-  onPress: () => void;
+  onPress: () => Promise<void> | void;
   className?: string;
   disabled?: boolean;
 };
@@ -56,10 +77,27 @@ type AppRegionStyle = CSSProperties & {
   WebkitAppRegion?: "no-drag";
 };
 
+type PlateElementRendererProps = PlateElementProps & {
+  children?: ReactNode;
+  element?: unknown;
+};
+
+type PlateLeafRendererProps = PlateLeafProps & {
+  leaf?: unknown;
+};
+
 const NOTE_SAVE_DEBOUNCE_MS = 500;
 const NOTE_CONTENT_VERSION = 2;
 const EMPTY_TEXT_NODE: PlateTextNode = { text: "" };
-const SUPPORTED_PLATE_BLOCK_TYPES = new Set(["p", "h1", "h2", "h3", "blockquote"]);
+const DEFAULT_FONT_SIZE = 16;
+const MIN_FONT_SIZE = 10;
+const MAX_FONT_SIZE = 36;
+const FONT_SIZE_STEP = 1;
+const PLATE_INDENT_WIDTH_PX = 28;
+const PLATE_HIGHLIGHT_COLOR = "#fef08a";
+const PLATE_LINE_HEIGHT_OPTIONS = [1.5, 1.75, 2, 2.5] as const;
+const PLATE_ALIGN_OPTIONS = ["left", "center", "right", "justify"] as const;
+const SUPPORTED_PLATE_BLOCK_TYPES = new Set(["audio", "blockquote", "file", "h1", "h2", "h3", "hr", "image", "li", "ol", "p", "table", "td", "th", "todo", "tr", "ul", "video"]);
 const NOTE_PLATE_PLUGINS = [ParagraphPlugin, BasicBlocksPlugin, BasicMarksPlugin];
 const PLATE_BLOCK_OPTIONS: readonly { label: string; value: PlateBlockType }[] = [
   { label: "Text", value: "p" },
@@ -78,7 +116,7 @@ const PLATE_MARK_OPTIONS: readonly { fallback: PlateCommandFallback; icon: React
 const PLATE_TOOLBAR_BUTTON_CLASS_NAME = "inline-flex h-8 min-w-8 shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md bg-transparent px-1.5 text-sm font-medium text-[#18181b] outline-none transition-colors hover:bg-[#f4f4f5] hover:text-[#52525b] focus-visible:ring-2 focus-visible:ring-[#d4d4d8] disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-[#18181b] [&_svg]:pointer-events-none [&_svg]:shrink-0";
 const PLATE_TOOLBAR_SEPARATOR_CLASS_NAME = "mx-1.5 h-7 w-px shrink-0 bg-[#e4e4e7]";
 const PLATE_TOOLBAR_NO_DRAG_STYLE: AppRegionStyle = { WebkitAppRegion: "no-drag" };
-const PLATE_TOOLBAR_UNAVAILABLE_TITLE = "この操作はまだノートエディタに接続されていません";
+const PLATE_TOOLBAR_UNAVAILABLE_TITLE = "この操作は現在使用できません";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
@@ -141,13 +179,17 @@ const getNodeText = (node: unknown): string => {
 };
 
 const normalizePlateElementNode = (node: PlateElementNode): PlateElementNode => {
-  if (SUPPORTED_PLATE_BLOCK_TYPES.has(node.type)) return { type: node.type, children: node.children.map(clonePlateNode) };
+  if (SUPPORTED_PLATE_BLOCK_TYPES.has(node.type)) {
+    const children = node.children.map(clonePlateNode);
+
+    return { ...node, children: children.length > 0 ? children : [{ ...EMPTY_TEXT_NODE }] };
+  }
 
   const text = getNodeText(node);
 
   if (node.type === "code_block") return { type: "p", children: [{ text, code: true }] };
-  if (node.type === "bulleted-list") return { type: "p", children: [{ text: text ? `• ${text}` : "• " }] };
-  if (node.type === "numbered-list") return { type: "p", children: [{ text: text ? `1. ${text}` : "1. " }] };
+  if (node.type === "bulleted-list") return { type: "ul", children: [{ type: "li", children: [{ text }] }] };
+  if (node.type === "numbered-list") return { type: "ol", children: [{ type: "li", children: [{ text }] }] };
 
   return { type: "p", children: [{ text }] };
 };
@@ -185,12 +227,12 @@ const focusPlateEditor = (editor: PlateEditor) => {
 };
 
 const runDocumentCommandFallback = (fallback: PlateCommandFallback) => {
-  if (typeof document === "undefined" || typeof document.execCommand !== "function") return;
+  if (typeof document === "undefined" || typeof document.execCommand !== "function") return false;
 
-  document.execCommand(fallback.command, false, fallback.value);
+  return document.execCommand(fallback.command, false, fallback.value);
 };
 
-const runPlateTransform = (editor: PlateEditor, transformName: string, args: unknown[], fallback: PlateCommandFallback) => {
+const runPlateTransform = (editor: PlateEditor, transformName: string, args: unknown[], fallback?: PlateCommandFallback) => {
   focusPlateEditor(editor);
 
   const transform = getPlateTransform(editor, transformName);
@@ -198,44 +240,479 @@ const runPlateTransform = (editor: PlateEditor, transformName: string, args: unk
   if (transform) {
     transform(...args);
     focusPlateEditor(editor);
-    return;
+    return true;
   }
 
-  runDocumentCommandFallback(fallback);
+  if (fallback) {
+    const handled = runDocumentCommandFallback(fallback);
+    focusPlateEditor(editor);
+    return handled;
+  }
+
   focusPlateEditor(editor);
+  return false;
 };
 
 const togglePlateMark = (editor: PlateEditor, mark: PlateMarkType, fallback: PlateCommandFallback) => {
   runPlateTransform(editor, "toggleMark", [mark], fallback);
 };
 
-const setPlateBlockType = (editor: PlateEditor, blockType: PlateBlockType) => {
-  runPlateTransform(editor, "setNodes", [{ type: blockType }, { match: (node: unknown) => isRecord(node) && Array.isArray(node.children) }], { command: "formatBlock", value: blockType === "p" ? "p" : blockType });
-};
-
-const handleUnavailableToolbarAction = (editor: PlateEditor) => {
+const setPlateMark = (editor: PlateEditor, mark: string, value: unknown, fallback?: PlateCommandFallback) => {
   focusPlateEditor(editor);
+
+  const addMark = getPlateTransform(editor, "addMark");
+  if (addMark) {
+    addMark(mark, value);
+    focusPlateEditor(editor);
+    return true;
+  }
+
+  const setMarks = getPlateTransform(editor, "setMarks");
+  if (setMarks) {
+    setMarks({ [mark]: value });
+    focusPlateEditor(editor);
+    return true;
+  }
+
+  if (fallback) {
+    const handled = runDocumentCommandFallback(fallback);
+    focusPlateEditor(editor);
+    return handled;
+  }
+
+  focusPlateEditor(editor);
+  return false;
 };
 
-const ParagraphElement = (props: PlateElementProps) => <PlateElement {...props} as="p" className="my-2 min-h-[1.75rem] px-0 py-0 text-[17px] leading-8 text-[#18181b]" />;
+const removePlateMark = (editor: PlateEditor, mark: string) => {
+  const removeMark = getPlateTransform(editor, "removeMark");
+  if (!removeMark) return;
 
-const H1Element = (props: PlateElementProps) => <PlateElement {...props} as="h1" className="mb-4 mt-8 text-[34px] font-semibold leading-tight tracking-[-0.04em] text-[#09090b]" />;
+  removeMark(mark);
+};
 
-const H2Element = (props: PlateElementProps) => <PlateElement {...props} as="h2" className="mb-3 mt-7 text-[27px] font-semibold leading-tight tracking-[-0.035em] text-[#09090b]" />;
+const setPlateBlockData = (editor: PlateEditor, data: Partial<PlateElementNode>, fallback?: PlateCommandFallback) => {
+  runPlateTransform(editor, "setNodes", [data, { match: (node: unknown) => isRecord(node) && Array.isArray(node.children) }], fallback);
+};
 
-const H3Element = (props: PlateElementProps) => <PlateElement {...props} as="h3" className="mb-2 mt-6 text-[22px] font-semibold leading-snug tracking-[-0.03em] text-[#09090b]" />;
+const setPlateBlockType = (editor: PlateEditor, blockType: PlateBlockType) => {
+  setPlateBlockData(editor, { type: blockType }, { command: "formatBlock", value: blockType === "p" ? "p" : blockType });
+};
 
-const BlockquoteElement = (props: PlateElementProps) => <PlateElement {...props} as="blockquote" className="my-4 border-l-4 border-[#d4d4d8] pl-4 text-[#52525b]" />;
+const escapeHtml = (value: string): string => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 
-const StrongLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="strong" />;
+const normalizeUrl = (value: string): string => {
+  const trimmed = value.trim();
+  if (/^(blob:|data:|https?:\/\/|mailto:)/i.test(trimmed)) return trimmed;
 
-const ItalicLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="em" />;
+  return `https://${trimmed}`;
+};
 
-const UnderlineLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="u" />;
+const getPlateElementStyle = (element: unknown): CSSProperties | undefined => {
+  if (!isRecord(element)) return undefined;
 
-const StrikethroughLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="s" />;
+  const style: CSSProperties = {};
+  const align = typeof element.align === "string" && PLATE_ALIGN_OPTIONS.includes(element.align as PlateAlignValue) ? element.align : null;
 
-const CodeLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="code" className="rounded-[5px] bg-[#f4f4f5] px-1 py-0.5 font-mono text-[0.92em] text-[#18181b]" />;
+  if (align) style.textAlign = align as CSSProperties["textAlign"];
+  if (typeof element.indent === "number" && element.indent > 0) style.marginLeft = `${Math.min(element.indent, 8) * PLATE_INDENT_WIDTH_PX}px`;
+  if (typeof element.lineHeight === "number") style.lineHeight = String(element.lineHeight);
+
+  return Object.keys(style).length > 0 ? style : undefined;
+};
+
+const getPlateLeafStyle = (leaf: unknown): CSSProperties | undefined => {
+  if (!isRecord(leaf)) return undefined;
+
+  const style: CSSProperties = {};
+
+  if (typeof leaf.color === "string") style.color = leaf.color;
+  if (typeof leaf.backgroundColor === "string") style.backgroundColor = leaf.backgroundColor;
+  if (leaf.highlight === true && !style.backgroundColor) style.backgroundColor = PLATE_HIGHLIGHT_COLOR;
+  if (typeof leaf.fontSize === "number") style.fontSize = `${Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, leaf.fontSize))}px`;
+  if (typeof leaf.comment === "string" && leaf.comment.trim()) {
+    style.borderBottom = "1px dotted currentColor";
+    style.cursor = "help";
+  }
+
+  return Object.keys(style).length > 0 ? style : undefined;
+};
+
+const getLeafComment = (leaf: unknown): string | undefined => isRecord(leaf) && typeof leaf.comment === "string" ? leaf.comment : undefined;
+
+const getLeafLink = (leaf: unknown): string | null => isRecord(leaf) && typeof leaf.link === "string" && leaf.link.trim() ? normalizeUrl(leaf.link) : null;
+
+const serializeTextNodeToHtml = (node: PlateTextNode): string => {
+  let html = escapeHtml(node.text);
+  const style = getPlateLeafStyle(node);
+  const styleValue = style ? Object.entries(style).map(([key, value]) => `${key.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)}:${String(value)}`).join(";") : "";
+
+  if (node.code) html = `<code>${html}</code>`;
+  if (node.bold) html = `<strong>${html}</strong>`;
+  if (node.italic) html = `<em>${html}</em>`;
+  if (node.underline) html = `<u>${html}</u>`;
+  if (node.strikethrough) html = `<s>${html}</s>`;
+  if (styleValue) html = `<span style="${escapeHtml(styleValue)}">${html}</span>`;
+  if (typeof node.link === "string" && node.link.trim()) html = `<a href="${escapeHtml(normalizeUrl(node.link))}">${html}</a>`;
+
+  return html;
+};
+
+const serializePlateNodeToHtml = (node: PlateNode): string => {
+  if (isPlateTextNode(node)) return serializeTextNodeToHtml(node);
+
+  const children = node.children.map(serializePlateNodeToHtml).join("");
+  const style = getPlateElementStyle(node);
+  const styleValue = style ? Object.entries(style).map(([key, value]) => `${key.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)}:${String(value)}`).join(";") : "";
+  const styleAttribute = styleValue ? ` style="${escapeHtml(styleValue)}"` : "";
+
+  if (node.type === "blockquote") return `<blockquote${styleAttribute}>${children}</blockquote>`;
+  if (node.type === "h1") return `<h1${styleAttribute}>${children}</h1>`;
+  if (node.type === "h2") return `<h2${styleAttribute}>${children}</h2>`;
+  if (node.type === "h3") return `<h3${styleAttribute}>${children}</h3>`;
+  if (node.type === "ul") return `<ul${styleAttribute}>${children}</ul>`;
+  if (node.type === "ol") return `<ol${styleAttribute}>${children}</ol>`;
+  if (node.type === "li") return `<li${styleAttribute}>${children}</li>`;
+  if (node.type === "table") return `<table${styleAttribute}><tbody>${children}</tbody></table>`;
+  if (node.type === "tr") return `<tr>${children}</tr>`;
+  if (node.type === "td" || node.type === "th") return `<td>${children}</td>`;
+  if (node.type === "hr") return "<hr />";
+  if (typeof node.src === "string" && node.type === "image") return `<img src="${escapeHtml(node.src)}" alt="${escapeHtml(typeof node.name === "string" ? node.name : "")}" />`;
+  if (typeof node.src === "string" && node.type === "video") return `<video src="${escapeHtml(node.src)}" controls></video>`;
+  if (typeof node.src === "string" && node.type === "audio") return `<audio src="${escapeHtml(node.src)}" controls></audio>`;
+  if (typeof node.src === "string" && node.type === "file") return `<a href="${escapeHtml(node.src)}" download="${escapeHtml(typeof node.name === "string" ? node.name : "file")}">${escapeHtml(typeof node.name === "string" ? node.name : "file")}</a>`;
+
+  return `<p${styleAttribute}>${children}</p>`;
+};
+
+const serializePlateNodesToHtml = (nodes: PlateElementNode[]): string => nodes.map(serializePlateNodeToHtml).join("");
+
+const insertPlateNodes = (editor: PlateEditor, nodes: PlateElementNode | PlateElementNode[]) => {
+  const nextNodes = Array.isArray(nodes) ? nodes : [nodes];
+
+  return runPlateTransform(editor, "insertNodes", [Array.isArray(nodes) ? nextNodes : nextNodes[0]], { command: "insertHTML", value: serializePlateNodesToHtml(nextNodes) });
+};
+
+const insertPlateText = (editor: PlateEditor, text: string, marks?: Partial<PlateTextNode>) => {
+  const markEntries = Object.entries(marks ?? {}).filter(([, value]) => value !== undefined && value !== null);
+  const insertText = getPlateTransform(editor, "insertText");
+
+  focusPlateEditor(editor);
+
+  if (insertText) {
+    markEntries.forEach(([mark, value]) => setPlateMark(editor, mark, value));
+    insertText(text);
+    markEntries.forEach(([mark]) => removePlateMark(editor, mark));
+    focusPlateEditor(editor);
+    return true;
+  }
+
+  if (markEntries.length > 0) {
+    const node: PlateTextNode = { text, ...marks };
+    runDocumentCommandFallback({ command: "insertHTML", value: serializeTextNodeToHtml(node) });
+    focusPlateEditor(editor);
+    return true;
+  }
+
+  const handled = runDocumentCommandFallback({ command: "insertText", value: text });
+  focusPlateEditor(editor);
+  return handled;
+};
+
+const hasExpandedPlateSelection = (editor: PlateEditor): boolean => {
+  const api = (editor as { api?: { isExpanded?: () => boolean } }).api;
+  const isExpanded = api?.isExpanded;
+
+  if (typeof isExpanded === "function") return isExpanded();
+
+  if (typeof window === "undefined") return false;
+
+  return Boolean(window.getSelection()?.toString());
+};
+
+const clampFontSize = (value: number): number => Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, value));
+
+const readPositiveInteger = (value: string | null, fallback: number): number => {
+  const parsed = Number.parseInt(value ?? "", 10);
+
+  return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 12) : fallback;
+};
+
+const parseTableDimensions = (value: string | null): { columns: number; rows: number } => {
+  if (!value) return { columns: 3, rows: 3 };
+
+  const [rowsValue, columnsValue] = value.toLowerCase().split(/[x×,\s]+/).filter(Boolean);
+
+  return {
+    columns: readPositiveInteger(columnsValue, 3),
+    rows: readPositiveInteger(rowsValue, 3),
+  };
+};
+
+const createListNode = (type: "ol" | "ul"): PlateElementNode => ({ type, children: [{ type: "li", children: [{ text: "List item" }] }] });
+
+const createTodoNode = (): PlateElementNode => ({ type: "todo", checked: false, children: [{ text: "Todo" }] });
+
+const createTableNode = (rows: number, columns: number): PlateElementNode => ({
+  type: "table",
+  children: Array.from({ length: rows }, () => ({
+    type: "tr",
+    children: Array.from({ length: columns }, () => ({ type: "td", children: [{ type: "p", children: [{ text: "" }] }] })),
+  })),
+});
+
+const createMediaNode = (type: PlateMediaType, file: File, src: string): PlateElementNode => ({ type, children: [{ text: "" }], mimeType: file.type, name: file.name, src });
+
+const readFileAsDataUrl = (file: File): Promise<string> => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+
+  reader.addEventListener("load", () => {
+    if (typeof reader.result === "string") {
+      resolve(reader.result);
+      return;
+    }
+
+    reject(new Error("FILE_READER_RESULT_NOT_STRING"));
+  });
+  reader.addEventListener("error", () => reject(reader.error ?? new Error("FILE_READER_ERROR")));
+  reader.readAsDataURL(file);
+});
+
+const getEditorValue = (editor: PlateEditor): unknown[] => {
+  const children = (editor as { children?: unknown }).children;
+
+  return Array.isArray(children) ? children : [];
+};
+
+const downloadTextFile = (filename: string, text: string, type: string) => {
+  if (typeof document === "undefined") return;
+
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+};
+
+const runLocalAiCommand = async (editor: PlateEditor) => {
+  if (typeof window === "undefined") return;
+
+  const question = window.prompt("AIに渡す指示を入力");
+  const normalizedQuestion = question?.trim();
+  if (!normalizedQuestion) return;
+
+  try {
+    const result = await generateOllamaAnswer({ question: normalizedQuestion });
+    insertPlateNodes(editor, { type: "blockquote", children: [{ text: result.answer }] });
+  } catch {
+    window.alert("ローカルAIに接続できませんでした。Ollamaの起動状態とモデル設定を確認してください。");
+  }
+};
+
+const exportPlateDocument = (editor: PlateEditor) => {
+  const value = getEditorValue(editor);
+  const payload = {
+    content: value,
+    contentText: getPlainText(value),
+    contentVersion: NOTE_CONTENT_VERSION,
+    editor: "plate",
+  };
+
+  downloadTextFile(`sivflow-note-${Date.now()}.json`, JSON.stringify(payload, null, 2), "application/json;charset=utf-8");
+};
+
+const insertLink = (editor: PlateEditor) => {
+  if (typeof window === "undefined") return;
+
+  const rawUrl = window.prompt("リンクURL");
+  if (!rawUrl?.trim()) return;
+
+  const url = normalizeUrl(rawUrl);
+
+  if (hasExpandedPlateSelection(editor)) {
+    setPlateMark(editor, "link", url, { command: "createLink", value: url });
+    return;
+  }
+
+  const text = window.prompt("リンク文字", rawUrl) ?? rawUrl;
+  insertPlateText(editor, text, { link: url });
+};
+
+const setTextColor = (editor: PlateEditor) => {
+  if (typeof window === "undefined") return;
+
+  const color = window.prompt("文字色", "#18181b");
+  if (!color?.trim()) return;
+
+  setPlateMark(editor, "color", color.trim(), { command: "foreColor", value: color.trim() });
+};
+
+const setBackgroundColor = (editor: PlateEditor) => {
+  if (typeof window === "undefined") return;
+
+  const color = window.prompt("背景色", PLATE_HIGHLIGHT_COLOR);
+  if (!color?.trim()) return;
+
+  setPlateMark(editor, "backgroundColor", color.trim(), { command: "hiliteColor", value: color.trim() });
+};
+
+const addComment = (editor: PlateEditor) => {
+  if (typeof window === "undefined") return;
+
+  const comment = window.prompt("コメント");
+  if (!comment?.trim()) return;
+
+  setPlateMark(editor, "comment", comment.trim());
+};
+
+const clearFormatting = (editor: PlateEditor) => {
+  ["backgroundColor", "bold", "code", "color", "comment", "fontSize", "highlight", "italic", "link", "strikethrough", "underline"].forEach((mark) => removePlateMark(editor, mark));
+  setPlateBlockData(editor, { align: "left", indent: 0, lineHeight: PLATE_LINE_HEIGHT_OPTIONS[1], type: "p" }, { command: "removeFormat" });
+};
+
+const runMoreCommand = (editor: PlateEditor) => {
+  if (typeof window === "undefined") return;
+
+  const command = window.prompt("more: date / divider / clear / quote", "date")?.trim().toLowerCase();
+
+  if (command === "date") {
+    insertPlateText(editor, new Date().toLocaleString());
+    return;
+  }
+
+  if (command === "divider") {
+    insertPlateNodes(editor, { type: "hr", children: [{ text: "" }] });
+    return;
+  }
+
+  if (command === "clear") {
+    clearFormatting(editor);
+    return;
+  }
+
+  if (command === "quote") {
+    setPlateBlockType(editor, "blockquote");
+  }
+};
+
+const ParagraphElement = (props: PlateElementRendererProps) => <PlateElement {...props} as="p" className="my-2 min-h-[1.75rem] px-0 py-0 text-[17px] leading-8 text-[#18181b]" style={getPlateElementStyle(props.element)} />;
+
+const H1Element = (props: PlateElementRendererProps) => <PlateElement {...props} as="h1" className="mb-4 mt-8 text-[34px] font-semibold leading-tight tracking-[-0.04em] text-[#09090b]" style={getPlateElementStyle(props.element)} />;
+
+const H2Element = (props: PlateElementRendererProps) => <PlateElement {...props} as="h2" className="mb-3 mt-7 text-[27px] font-semibold leading-tight tracking-[-0.035em] text-[#09090b]" style={getPlateElementStyle(props.element)} />;
+
+const H3Element = (props: PlateElementRendererProps) => <PlateElement {...props} as="h3" className="mb-2 mt-6 text-[22px] font-semibold leading-snug tracking-[-0.03em] text-[#09090b]" style={getPlateElementStyle(props.element)} />;
+
+const BlockquoteElement = (props: PlateElementRendererProps) => <PlateElement {...props} as="blockquote" className="my-4 border-l-4 border-[#d4d4d8] pl-4 text-[#52525b]" style={getPlateElementStyle(props.element)} />;
+
+const UnorderedListElement = (props: PlateElementRendererProps) => <PlateElement {...props} as="ul" className="my-3 list-disc pl-7 text-[17px] leading-8 text-[#18181b]" style={getPlateElementStyle(props.element)} />;
+
+const OrderedListElement = (props: PlateElementRendererProps) => <PlateElement {...props} as="ol" className="my-3 list-decimal pl-7 text-[17px] leading-8 text-[#18181b]" style={getPlateElementStyle(props.element)} />;
+
+const ListItemElement = (props: PlateElementRendererProps) => <PlateElement {...props} as="li" className="pl-1" />;
+
+const TodoElement = (props: PlateElementRendererProps) => {
+  const checked = isRecord(props.element) && props.element.checked === true;
+
+  return (
+    <PlateElement {...props} as="div" className="my-2 flex items-start gap-2 text-[17px] leading-8 text-[#18181b]" style={getPlateElementStyle(props.element)}>
+      <input type="checkbox" checked={checked} readOnly className="mt-[0.45rem] size-4 shrink-0 accent-[#18181b]" contentEditable={false} />
+      <span className={checked ? "text-[#71717a] line-through" : undefined}>{props.children}</span>
+    </PlateElement>
+  );
+};
+
+const TableElement = (props: PlateElementRendererProps) => (
+  <PlateElement {...props} as="table" className="my-4 w-full border-collapse text-left text-[15px] text-[#18181b]" style={getPlateElementStyle(props.element)}>
+    <tbody>{props.children}</tbody>
+  </PlateElement>
+);
+
+const TableRowElement = (props: PlateElementRendererProps) => <PlateElement {...props} as="tr" className="border-b border-[#e4e4e7]" />;
+
+const TableCellElement = (props: PlateElementRendererProps) => <PlateElement {...props} as="td" className="min-w-24 border border-[#e4e4e7] px-3 py-2 align-top" />;
+
+const HorizontalRuleElement = (props: PlateElementRendererProps) => <PlateElement {...props} as="div" className="my-6 border-t border-[#d4d4d8]" contentEditable={false} />;
+
+const ImageElement = (props: PlateElementRendererProps) => {
+  const src = isRecord(props.element) && typeof props.element.src === "string" ? props.element.src : "";
+  const name = isRecord(props.element) && typeof props.element.name === "string" ? props.element.name : "image";
+
+  return (
+    <PlateElement {...props} as="figure" className="my-4 rounded-lg border border-[#e4e4e7] bg-[#fafafa] p-2">
+      <div contentEditable={false}>
+        {src ? <img src={src} alt={name} className="max-h-[420px] w-full rounded-md object-contain" /> : null}
+        <figcaption className="mt-2 text-center text-xs text-[#71717a]">{name}</figcaption>
+      </div>
+      {props.children}
+    </PlateElement>
+  );
+};
+
+const VideoElement = (props: PlateElementRendererProps) => {
+  const src = isRecord(props.element) && typeof props.element.src === "string" ? props.element.src : "";
+  const name = isRecord(props.element) && typeof props.element.name === "string" ? props.element.name : "video";
+
+  return (
+    <PlateElement {...props} as="div" className="my-4 rounded-lg border border-[#e4e4e7] bg-[#fafafa] p-2">
+      <div contentEditable={false}>
+        {src ? <video src={src} controls className="max-h-[420px] w-full rounded-md" /> : null}
+        <div className="mt-2 text-center text-xs text-[#71717a]">{name}</div>
+      </div>
+      {props.children}
+    </PlateElement>
+  );
+};
+
+const AudioElement = (props: PlateElementRendererProps) => {
+  const src = isRecord(props.element) && typeof props.element.src === "string" ? props.element.src : "";
+  const name = isRecord(props.element) && typeof props.element.name === "string" ? props.element.name : "audio";
+
+  return (
+    <PlateElement {...props} as="div" className="my-4 rounded-lg border border-[#e4e4e7] bg-[#fafafa] p-3">
+      <div contentEditable={false}>
+        <div className="mb-2 text-sm font-medium text-[#18181b]">{name}</div>
+        {src ? <audio src={src} controls className="w-full" /> : null}
+      </div>
+      {props.children}
+    </PlateElement>
+  );
+};
+
+const FileElement = (props: PlateElementRendererProps) => {
+  const src = isRecord(props.element) && typeof props.element.src === "string" ? props.element.src : "";
+  const name = isRecord(props.element) && typeof props.element.name === "string" ? props.element.name : "file";
+
+  return (
+    <PlateElement {...props} as="div" className="my-4 rounded-lg border border-[#e4e4e7] bg-[#fafafa] p-3">
+      <div contentEditable={false}>
+        {src ? <a href={src} download={name} className="inline-flex items-center gap-2 text-sm font-medium text-[#2563eb] underline underline-offset-4"><File className="size-4" />{name}</a> : <span className="text-sm text-[#71717a]">{name}</span>}
+      </div>
+      {props.children}
+    </PlateElement>
+  );
+};
+
+const StyledLeaf = (props: PlateLeafRendererProps) => <PlateLeaf {...props} as="span" style={getPlateLeafStyle(props.leaf)} title={getLeafComment(props.leaf)} />;
+
+const StrongLeaf = (props: PlateLeafRendererProps) => <PlateLeaf {...props} as="strong" style={getPlateLeafStyle(props.leaf)} title={getLeafComment(props.leaf)} />;
+
+const ItalicLeaf = (props: PlateLeafRendererProps) => <PlateLeaf {...props} as="em" style={getPlateLeafStyle(props.leaf)} title={getLeafComment(props.leaf)} />;
+
+const UnderlineLeaf = (props: PlateLeafRendererProps) => <PlateLeaf {...props} as="u" style={getPlateLeafStyle(props.leaf)} title={getLeafComment(props.leaf)} />;
+
+const StrikethroughLeaf = (props: PlateLeafRendererProps) => <PlateLeaf {...props} as="s" style={getPlateLeafStyle(props.leaf)} title={getLeafComment(props.leaf)} />;
+
+const CodeLeaf = (props: PlateLeafRendererProps) => <PlateLeaf {...props} as="code" className="rounded-[5px] bg-[#f4f4f5] px-1 py-0.5 font-mono text-[0.92em] text-[#18181b]" style={getPlateLeafStyle(props.leaf)} title={getLeafComment(props.leaf)} />;
+
+const LinkLeaf = (props: PlateLeafRendererProps) => {
+  const href = getLeafLink(props.leaf);
+
+  if (!href) return <StyledLeaf {...props} />;
+
+  return <PlateLeaf {...props} as="a" href={href} target="_blank" rel="noreferrer" className="text-[#2563eb] underline underline-offset-4" style={getPlateLeafStyle(props.leaf)} title={getLeafComment(props.leaf)} />;
+};
 
 const PlateToolbarButton = ({ label, children, onPress, className, disabled = false }: PlateToolbarButtonProps) => {
   const title = disabled ? `${label}: ${PLATE_TOOLBAR_UNAVAILABLE_TITLE}` : label;
@@ -244,7 +721,7 @@ const PlateToolbarButton = ({ label, children, onPress, className, disabled = fa
     event.preventDefault();
     if (disabled) return;
 
-    onPress();
+    void onPress();
   };
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -253,7 +730,7 @@ const PlateToolbarButton = ({ label, children, onPress, className, disabled = fa
     event.preventDefault();
     if (disabled) return;
 
-    onPress();
+    void onPress();
   };
 
   return (
@@ -280,95 +757,168 @@ const PlateToolbarBlockSelect = ({ editor }: PlateToolbarSelectProps) => {
   );
 };
 
-const PlateEditorToolbar = ({ editor }: { editor: PlateEditor }) => (
-  <div className="scrollbar-hide sticky left-0 top-0 z-50 flex min-h-10 w-full shrink-0 items-center justify-between overflow-x-auto rounded-t-lg border-b border-[#e4e4e7] bg-white/95 p-1 backdrop-blur-sm" style={PLATE_TOOLBAR_NO_DRAG_STYLE}>
-    <div className="flex min-w-max items-center">
-      <div className="flex items-center">
-        <PlateToolbarButton label="Undo" onPress={() => runPlateTransform(editor, "undo", [], { command: "undo" })}><Undo2 className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="Redo" onPress={() => runPlateTransform(editor, "redo", [], { command: "redo" })}><Redo2 className="size-4" /></PlateToolbarButton>
-      </div>
+const PlateEditorToolbar = ({ editor }: { editor: PlateEditor }) => {
+  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
+  const [alignIndex, setAlignIndex] = useState(0);
+  const [lineHeightIndex, setLineHeightIndex] = useState(1);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const videoInputRef = useRef<HTMLInputElement | null>(null);
+  const audioInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-      <PlateToolbarSeparator />
+  const updateFontSize = (delta: number) => {
+    const nextFontSize = clampFontSize(fontSize + delta);
+    setFontSize(nextFontSize);
+    setPlateMark(editor, "fontSize", nextFontSize, { command: "fontSize", value: String(nextFontSize) });
+  };
 
-      <div className="flex items-center">
-        <PlateToolbarButton label="AI commands" disabled onPress={() => handleUnavailableToolbarAction(editor)}><WandSparkles className="size-4" /></PlateToolbarButton>
-      </div>
+  const applyNextAlign = () => {
+    const nextIndex = (alignIndex + 1) % PLATE_ALIGN_OPTIONS.length;
+    const align = PLATE_ALIGN_OPTIONS[nextIndex];
+    setAlignIndex(nextIndex);
+    setPlateBlockData(editor, { align }, { command: align === "left" ? "justifyLeft" : align === "center" ? "justifyCenter" : align === "right" ? "justifyRight" : "justifyFull" });
+  };
 
-      <PlateToolbarSeparator />
+  const applyNextLineHeight = () => {
+    const nextIndex = (lineHeightIndex + 1) % PLATE_LINE_HEIGHT_OPTIONS.length;
+    const lineHeight = PLATE_LINE_HEIGHT_OPTIONS[nextIndex];
+    setLineHeightIndex(nextIndex);
+    setPlateBlockData(editor, { lineHeight });
+  };
 
-      <div className="flex items-center">
-        <PlateToolbarButton label="Export" disabled onPress={() => handleUnavailableToolbarAction(editor)}><ArrowUpToLine className="size-4" /></PlateToolbarButton>
-      </div>
+  const handleFileInputChange = async (type: PlateMediaType, event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    if (!file) return;
 
-      <PlateToolbarSeparator />
+    try {
+      const src = await readFileAsDataUrl(file);
+      insertPlateNodes(editor, createMediaNode(type, file, src));
+    } finally {
+      input.value = "";
+    }
+  };
 
-      <div className="flex items-center">
-        <PlateToolbarButton label="Insert" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Plus className="size-4" /></PlateToolbarButton>
-        <PlateToolbarBlockSelect editor={editor} />
-        <PlateToolbarButton label="Decrease font size" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Minus className="size-4" /></PlateToolbarButton>
-        <div className="flex h-8 min-w-10 shrink-0 items-center justify-center rounded-md px-2 text-sm font-medium text-[#18181b]" style={PLATE_TOOLBAR_NO_DRAG_STYLE}>16</div>
-        <PlateToolbarButton label="Increase font size" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Plus className="size-4" /></PlateToolbarButton>
-      </div>
+  const handleTableInsert = () => {
+    const dimensions = typeof window === "undefined" ? null : window.prompt("表のサイズ", "3x3");
+    const { columns, rows } = parseTableDimensions(dimensions);
+    insertPlateNodes(editor, createTableNode(rows, columns));
+  };
 
-      <PlateToolbarSeparator />
+  return (
+    <div className="scrollbar-hide sticky left-0 top-0 z-50 flex min-h-10 w-full shrink-0 items-center justify-between overflow-x-auto rounded-t-lg border-b border-[#e4e4e7] bg-white/95 p-1 backdrop-blur-sm" style={PLATE_TOOLBAR_NO_DRAG_STYLE}>
+      <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={(event) => void handleFileInputChange("image", event)} />
+      <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={(event) => void handleFileInputChange("video", event)} />
+      <input ref={audioInputRef} type="file" accept="audio/*" className="hidden" onChange={(event) => void handleFileInputChange("audio", event)} />
+      <input ref={fileInputRef} type="file" className="hidden" onChange={(event) => void handleFileInputChange("file", event)} />
 
-      <div className="flex items-center">
-        {PLATE_MARK_OPTIONS.map((option) => <PlateToolbarButton key={option.mark} label={option.label} onPress={() => togglePlateMark(editor, option.mark, option.fallback)}>{option.icon}</PlateToolbarButton>)}
-        <PlateToolbarButton label="Text color" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Baseline className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="Background color" disabled onPress={() => handleUnavailableToolbarAction(editor)}><PaintBucket className="size-4" /></PlateToolbarButton>
-      </div>
+      <div className="flex min-w-max items-center">
+        <div className="flex items-center">
+          <PlateToolbarButton label="Undo" onPress={() => runPlateTransform(editor, "undo", [], { command: "undo" })}><Undo2 className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="Redo" onPress={() => runPlateTransform(editor, "redo", [], { command: "redo" })}><Redo2 className="size-4" /></PlateToolbarButton>
+        </div>
 
-      <PlateToolbarSeparator />
+        <PlateToolbarSeparator />
 
-      <div className="flex items-center">
-        <PlateToolbarButton label="Align" disabled onPress={() => handleUnavailableToolbarAction(editor)}><AlignLeft className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="Numbered list" disabled onPress={() => handleUnavailableToolbarAction(editor)}><ListOrdered className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="Bulleted list" disabled onPress={() => handleUnavailableToolbarAction(editor)}><List className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="Todo list" disabled onPress={() => handleUnavailableToolbarAction(editor)}><ListTodo className="size-4" /></PlateToolbarButton>
-      </div>
+        <div className="flex items-center">
+          <PlateToolbarButton label="AI commands" onPress={() => runLocalAiCommand(editor)}><WandSparkles className="size-4" /></PlateToolbarButton>
+        </div>
 
-      <PlateToolbarSeparator />
+        <PlateToolbarSeparator />
 
-      <div className="flex items-center">
-        <PlateToolbarButton label="Link" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Link className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="Table" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Table className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="Emoji" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Smile className="size-4" /></PlateToolbarButton>
-      </div>
+        <div className="flex items-center">
+          <PlateToolbarButton label="Export" onPress={() => exportPlateDocument(editor)}><ArrowUpToLine className="size-4" /></PlateToolbarButton>
+        </div>
 
-      <PlateToolbarSeparator />
+        <PlateToolbarSeparator />
 
-      <div className="flex items-center">
-        <PlateToolbarButton label="Image" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Image className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="Video" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Film className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="Audio" disabled onPress={() => handleUnavailableToolbarAction(editor)}><FileAudio className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="File" disabled onPress={() => handleUnavailableToolbarAction(editor)}><File className="size-4" /></PlateToolbarButton>
-      </div>
+        <div className="flex items-center">
+          <PlateToolbarButton label="Insert paragraph" onPress={() => insertPlateNodes(editor, { type: "p", children: [{ text: "" }] })}><Plus className="size-4" /></PlateToolbarButton>
+          <PlateToolbarBlockSelect editor={editor} />
+          <PlateToolbarButton label="Decrease font size" onPress={() => updateFontSize(-FONT_SIZE_STEP)}><Minus className="size-4" /></PlateToolbarButton>
+          <div className="flex h-8 min-w-10 shrink-0 items-center justify-center rounded-md px-2 text-sm font-medium text-[#18181b]" style={PLATE_TOOLBAR_NO_DRAG_STYLE}>{fontSize}</div>
+          <PlateToolbarButton label="Increase font size" onPress={() => updateFontSize(FONT_SIZE_STEP)}><Plus className="size-4" /></PlateToolbarButton>
+        </div>
 
-      <PlateToolbarSeparator />
+        <PlateToolbarSeparator />
 
-      <div className="flex items-center">
-        <PlateToolbarButton label="Highlight" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Highlighter className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="Comment" disabled onPress={() => handleUnavailableToolbarAction(editor)}><MessageSquare className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="Line height" disabled onPress={() => handleUnavailableToolbarAction(editor)}><CircleSlash className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="Outdent" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Outdent className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="Indent" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Indent className="size-4" /></PlateToolbarButton>
-        <PlateToolbarButton label="More" disabled onPress={() => handleUnavailableToolbarAction(editor)}><MoreHorizontal className="size-4" /></PlateToolbarButton>
+        <div className="flex items-center">
+          {PLATE_MARK_OPTIONS.map((option) => <PlateToolbarButton key={option.mark} label={option.label} onPress={() => togglePlateMark(editor, option.mark, option.fallback)}>{option.icon}</PlateToolbarButton>)}
+          <PlateToolbarButton label="Text color" onPress={() => setTextColor(editor)}><Baseline className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="Background color" onPress={() => setBackgroundColor(editor)}><PaintBucket className="size-4" /></PlateToolbarButton>
+        </div>
+
+        <PlateToolbarSeparator />
+
+        <div className="flex items-center">
+          <PlateToolbarButton label="Align" onPress={applyNextAlign}><AlignLeft className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="Numbered list" onPress={() => insertPlateNodes(editor, createListNode("ol"))}><ListOrdered className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="Bulleted list" onPress={() => insertPlateNodes(editor, createListNode("ul"))}><List className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="Todo list" onPress={() => insertPlateNodes(editor, createTodoNode())}><ListTodo className="size-4" /></PlateToolbarButton>
+        </div>
+
+        <PlateToolbarSeparator />
+
+        <div className="flex items-center">
+          <PlateToolbarButton label="Link" onPress={() => insertLink(editor)}><Link className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="Table" onPress={handleTableInsert}><Table className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="Emoji" onPress={() => insertPlateText(editor, typeof window === "undefined" ? "😊" : window.prompt("絵文字", "😊") ?? "😊")}><Smile className="size-4" /></PlateToolbarButton>
+        </div>
+
+        <PlateToolbarSeparator />
+
+        <div className="flex items-center">
+          <PlateToolbarButton label="Image" onPress={() => imageInputRef.current?.click()}><Image className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="Video" onPress={() => videoInputRef.current?.click()}><Film className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="Audio" onPress={() => audioInputRef.current?.click()}><FileAudio className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="File" onPress={() => fileInputRef.current?.click()}><File className="size-4" /></PlateToolbarButton>
+        </div>
+
+        <PlateToolbarSeparator />
+
+        <div className="flex items-center">
+          <PlateToolbarButton label="Highlight" onPress={() => setPlateMark(editor, "backgroundColor", PLATE_HIGHLIGHT_COLOR, { command: "hiliteColor", value: PLATE_HIGHLIGHT_COLOR })}><Highlighter className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="Comment" onPress={() => addComment(editor)}><MessageSquare className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="Line height" onPress={applyNextLineHeight}><CircleSlash className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="Outdent" onPress={() => runPlateTransform(editor, "outdent", [], { command: "outdent" })}><Outdent className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="Indent" onPress={() => runPlateTransform(editor, "indent", [], { command: "indent" })}><Indent className="size-4" /></PlateToolbarButton>
+          <PlateToolbarButton label="More" onPress={() => runMoreCommand(editor)}><MoreHorizontal className="size-4" /></PlateToolbarButton>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const NOTE_PLATE_COMPONENTS = {
+  audio: AudioElement,
+  backgroundColor: StyledLeaf,
   blockquote: BlockquoteElement,
   bold: StrongLeaf,
   code: CodeLeaf,
+  color: StyledLeaf,
+  comment: StyledLeaf,
+  file: FileElement,
+  fontSize: StyledLeaf,
   h1: H1Element,
   h2: H2Element,
   h3: H3Element,
+  highlight: StyledLeaf,
+  hr: HorizontalRuleElement,
+  image: ImageElement,
   italic: ItalicLeaf,
+  li: ListItemElement,
+  link: LinkLeaf,
+  ol: OrderedListElement,
   p: ParagraphElement,
   strikethrough: StrikethroughLeaf,
+  table: TableElement,
+  td: TableCellElement,
+  th: TableCellElement,
+  todo: TodoElement,
+  tr: TableRowElement,
+  ul: UnorderedListElement,
   underline: UnderlineLeaf,
+  video: VideoElement,
 };
 
 const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
