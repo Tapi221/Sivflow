@@ -6,13 +6,13 @@ const dexieDeleteMock = vi.fn();
 const clearInstanceMock = vi.fn();
 const markCleanMock = vi.fn();
 
-vi.mock("../logic/CloudSyncAdapter", () => ({
+vi.mock("@/services/logic/CloudSyncAdapter", () => ({
   CloudSyncAdapter: class {
     pullDiff = pullDiffMock;
   },
 }));
 
-vi.mock("../localDB", () => ({
+vi.mock("@/services/localdb", () => ({
   getLocalDb: getLocalDbMock,
   LocalDB: {
     clearInstance: clearInstanceMock,
@@ -26,7 +26,7 @@ vi.mock("dexie", () => ({
   },
 }));
 
-vi.mock("../IndexedDBMetadataService", () => ({
+vi.mock("./IndexedDBMetadataService", () => ({
   IndexedDBMetadataService: class {
     markClean = markCleanMock;
   },
@@ -82,8 +82,7 @@ describe("IndexedDB 再構築オーケストレーター", () => {
       .mockResolvedValueOnce(oldDb as unknown)
       .mockResolvedValueOnce(newDb as unknown);
 
-    const { IndexedDBRebuildOrchestrator } =
-      await import("../IndexedDBRebuildOrchestrator");
+    const { IndexedDBRebuildOrchestrator } = await import("@/services/IndexedDBRebuildOrchestrator");
 
     const result = await IndexedDBRebuildOrchestrator.rebuild("user-1", "test");
 
