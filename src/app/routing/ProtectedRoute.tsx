@@ -1,1 +1,0 @@
-export { ProtectedRoute } from "@web-renderer/app/routing/ProtectedRoute";
