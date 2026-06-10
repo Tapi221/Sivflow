@@ -1,4 +1,4 @@
-export type { TagRecord } from "@/services/localdb/types";
+export type { TagRecord } from "@/services/localdb/localdb.types";
 export * from "@/types/domain/assets";
 export * from "@/types/domain/base";
 export * from "@/types/domain/card";
