@@ -1,15 +1,13 @@
 import { useState, type CSSProperties } from "react";
 import appIconSrc from "@shared/assets/icons/app-icon.svg";
+import authBackgroundSrc from "@shared/assets/backgrounds/sivflow-flow-background.svg";
 import { signInWithGoogle } from "@/services/auth/googleSignIn";
 
 type LoginPageStyles = {
   page: CSSProperties;
-  glowLeft: CSSProperties;
-  glowRight: CSSProperties;
+  backgroundOverlay: CSSProperties;
   card: CSSProperties;
   leftPanel: CSSProperties;
-  waveOne: CSSProperties;
-  waveTwo: CSSProperties;
   brandBlock: CSSProperties;
   logoIcon: CSSProperties;
   logoTitle: CSSProperties;
@@ -27,6 +25,7 @@ type LoginPageStyles = {
   bottomLine: CSSProperties;
   startRow: CSSProperties;
   startText: CSSProperties;
+  loadingDot: CSSProperties;
 };
 
 const styles: LoginPageStyles = {
@@ -41,29 +40,16 @@ const styles: LoginPageStyles = {
     padding: "40px 52px",
     boxSizing: "border-box",
     color: "#071947",
-    background: "radial-gradient(circle at 0% 100%, rgba(125, 174, 255, 0.28), transparent 36%), radial-gradient(circle at 100% 100%, rgba(255, 178, 229, 0.3), transparent 38%), linear-gradient(116deg, #eef7ff 0%, #ffffff 48%, #fff3fb 100%)",
+    backgroundImage: `url(${authBackgroundSrc})`,
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
     fontFamily: "var(--app-font-family-ui), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
-  glowLeft: {
+  backgroundOverlay: {
     position: "absolute",
-    left: "-120px",
-    bottom: "-120px",
-    width: "720px",
-    height: "520px",
-    borderRadius: "50%",
-    background: "linear-gradient(135deg, rgba(104, 160, 255, 0.22), rgba(183, 164, 255, 0.18), transparent 70%)",
-    transform: "rotate(-15deg)",
-    pointerEvents: "none",
-  },
-  glowRight: {
-    position: "absolute",
-    right: "-120px",
-    bottom: "-130px",
-    width: "700px",
-    height: "500px",
-    borderRadius: "50%",
-    background: "linear-gradient(135deg, transparent 22%, rgba(255, 190, 232, 0.24), rgba(255, 225, 246, 0.38))",
-    transform: "rotate(15deg)",
+    inset: 0,
+    background: "linear-gradient(90deg, rgba(244, 250, 255, 0.42) 0%, rgba(255, 255, 255, 0.2) 45%, rgba(255, 255, 255, 0.7) 100%)",
     pointerEvents: "none",
   },
   card: {
@@ -75,11 +61,11 @@ const styles: LoginPageStyles = {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     overflow: "hidden",
-    borderRadius: "28px",
-    border: "1px solid rgba(255, 255, 255, 0.88)",
-    background: "rgba(255, 255, 255, 0.86)",
-    boxShadow: "0 28px 80px rgba(61, 82, 121, 0.14)",
-    backdropFilter: "blur(18px)",
+    borderRadius: "30px",
+    border: "1px solid rgba(255, 255, 255, 0.58)",
+    background: "rgba(255, 255, 255, 0.38)",
+    boxShadow: "0 34px 90px rgba(6, 25, 71, 0.2)",
+    backdropFilter: "blur(20px) saturate(1.12)",
   },
   leftPanel: {
     position: "relative",
@@ -90,29 +76,8 @@ const styles: LoginPageStyles = {
     justifyContent: "center",
     padding: "56px 48px",
     boxSizing: "border-box",
-    borderRight: "1px solid rgba(221, 227, 238, 0.78)",
-    background: "linear-gradient(180deg, rgba(250, 251, 255, 0.94), rgba(248, 247, 253, 0.95))",
-  },
-  waveOne: {
-    position: "absolute",
-    left: "-82px",
-    bottom: "-78px",
-    width: "780px",
-    height: "330px",
-    borderRadius: "50%",
-    background: "linear-gradient(135deg, rgba(116, 174, 255, 0.22), rgba(180, 160, 255, 0.18), transparent 72%)",
-    transform: "rotate(-12deg)",
-  },
-  waveTwo: {
-    position: "absolute",
-    left: "-20px",
-    bottom: "-128px",
-    width: "760px",
-    height: "310px",
-    borderRadius: "50%",
-    borderTop: "1px solid rgba(255, 255, 255, 0.78)",
-    background: "linear-gradient(135deg, rgba(130, 197, 255, 0.18), rgba(221, 207, 255, 0.22), transparent 72%)",
-    transform: "rotate(-6deg)",
+    borderRight: "1px solid rgba(255, 255, 255, 0.44)",
+    background: "linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(236, 248, 255, 0.2))",
   },
   brandBlock: {
     position: "relative",
@@ -128,6 +93,7 @@ const styles: LoginPageStyles = {
     width: "250px",
     height: "250px",
     objectFit: "contain",
+    filter: "drop-shadow(0 18px 34px rgba(5, 27, 52, 0.18))",
   },
   logoTitle: {
     margin: "6px 0 0",
@@ -143,7 +109,7 @@ const styles: LoginPageStyles = {
     lineHeight: 1,
     fontWeight: 500,
     letterSpacing: "0.02em",
-    color: "#55637f",
+    color: "#43516a",
   },
   description: {
     margin: "34px 0 0",
@@ -151,7 +117,7 @@ const styles: LoginPageStyles = {
     lineHeight: 1.7,
     fontWeight: 500,
     letterSpacing: "0.02em",
-    color: "#66728d",
+    color: "#50607a",
   },
   rightPanel: {
     minHeight: "820px",
@@ -160,7 +126,7 @@ const styles: LoginPageStyles = {
     justifyContent: "center",
     padding: "56px 48px",
     boxSizing: "border-box",
-    background: "rgba(255, 255, 255, 0.88)",
+    background: "rgba(255, 255, 255, 0.58)",
   },
   form: {
     width: "100%",
@@ -185,14 +151,14 @@ const styles: LoginPageStyles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "22px",
-    borderRadius: "14px",
-    border: "1px solid #d9deea",
-    background: "#ffffff",
+    borderRadius: "16px",
+    border: "1px solid rgba(197, 211, 227, 0.82)",
+    background: "rgba(255, 255, 255, 0.86)",
     color: "#061947",
     fontSize: "28px",
     fontWeight: 800,
     cursor: "pointer",
-    boxShadow: "0 9px 24px rgba(15, 23, 42, 0.12)",
+    boxShadow: "0 14px 36px rgba(15, 23, 42, 0.13)",
   },
   divider: {
     width: "100%",
@@ -204,12 +170,12 @@ const styles: LoginPageStyles = {
   line: {
     height: "1px",
     flex: 1,
-    background: "#e3e8f0",
+    background: "rgba(163, 179, 201, 0.5)",
   },
   dividerText: {
     fontSize: "21px",
     fontWeight: 500,
-    color: "#7b88a3",
+    color: "#6b7892",
   },
   secureRow: {
     width: "100%",
@@ -218,7 +184,7 @@ const styles: LoginPageStyles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "30px",
-    color: "#72809b",
+    color: "#66758f",
   },
   secureText: {
     margin: 0,
@@ -231,7 +197,7 @@ const styles: LoginPageStyles = {
     width: "100%",
     height: "1px",
     marginTop: "94px",
-    background: "#dfe4ec",
+    background: "rgba(163, 179, 201, 0.46)",
   },
   startRow: {
     width: "100%",
@@ -240,7 +206,7 @@ const styles: LoginPageStyles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "22px",
-    color: "#72809b",
+    color: "#66758f",
   },
   startText: {
     margin: 0,
@@ -248,6 +214,12 @@ const styles: LoginPageStyles = {
     lineHeight: 1.6,
     fontWeight: 500,
     letterSpacing: "0.02em",
+  },
+  loadingDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 9999,
+    background: "#8794ad",
   },
 };
 
@@ -274,7 +246,7 @@ const ShieldIcon = () => (
 );
 
 const SparkleIcon = () => (
-  <svg style={{ width: 28, height: 28, color: "#5b9cff", flexShrink: 0 }} viewBox="0 0 32 32" fill="none" aria-hidden="true">
+  <svg style={{ width: 28, height: 28, color: "#4a9dff", flexShrink: 0 }} viewBox="0 0 32 32" fill="none" aria-hidden="true">
     <path d="M16 4.5c.4 4.3 1.4 6.8 2.8 8.2 1.4 1.4 3.9 2.4 8.2 2.8-4.3.4-6.8 1.4-8.2 2.8-1.4 1.4-2.4 3.9-2.8 8.2-.4-4.3-1.4-6.8-2.8-8.2-1.4-1.4-3.9-2.4-8.2-2.8 4.3-.4 6.8-1.4 8.2-2.8 1.4-1.4 2.4-3.9 2.8-8.2Z" fill="currentColor" />
     <path d="M25.5 5.5c.2 2.1.7 3.3 1.4 4 .7.7 1.9 1.2 4 1.4-2.1.2-3.3.7-4 1.4-.7.7-1.2 1.9-1.4 4-.2-2.1-.7-3.3-1.4-4-.7-.7-1.9-1.2-4-1.4 2.1-.2 3.3-.7 4-1.4.7-.7 1.2-1.9 1.4-4Z" fill="currentColor" opacity="0.7" />
   </svg>
@@ -304,14 +276,10 @@ const LoginPage = () => {
 
   return (
     <main style={styles.page}>
-      <div style={styles.glowLeft} />
-      <div style={styles.glowRight} />
+      <div style={styles.backgroundOverlay} />
 
       <section style={styles.card}>
         <div style={styles.leftPanel}>
-          <div style={styles.waveOne} />
-          <div style={styles.waveTwo} />
-
           <div style={styles.brandBlock}>
             <img src={appIconSrc} alt="Sivflow" style={styles.logoIcon} />
             <h1 style={styles.logoTitle}>Sivflow</h1>
@@ -331,7 +299,7 @@ const LoginPage = () => {
             <button type="button" onClick={handleGoogleLogin} disabled={isLoading} style={{ ...styles.button, opacity: isLoading ? 0.64 : 1 }}>
               {isLoading ? (
                 <>
-                  <span style={{ width: 12, height: 12, borderRadius: 9999, background: "#8794ad" }} />
+                  <span style={styles.loadingDot} />
                   ログイン中...
                 </>
               ) : (
