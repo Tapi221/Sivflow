@@ -26,6 +26,8 @@ const STARTUP_FAILURE_TITLE = "起動設定が不足しています";
 const STARTUP_FAILURE_DESCRIPTION = "必要な設定を読み込めなかったため、画面を表示できません。";
 const FIREBASE_ENV_SETUP_GUIDE = ".env.example を .env.local にコピーして VITE_FIREBASE_* を設定し、dev server を再起動してください。";
 const TEST_BYPASS_SEARCH_PARAM = "test_bypass";
+const DESKTOP_SPLASH_MINIMUM_VISIBLE_MS = 1450;
+const desktopSplashOpenedAt = performance.now();
 
 const getStartupFailureMessage = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
@@ -44,6 +46,20 @@ const startAppRuntimeSafely = async (): Promise<void> => {
   } catch (error) {
     console.warn("[Startup] Runtime initialization failed", error);
   }
+};
+
+const finishDesktopStartupSplashSafely = (): void => {
+  const finishSplash = window.desktop?.startup.finishSplash;
+  if (!finishSplash) return;
+
+  const elapsed = performance.now() - desktopSplashOpenedAt;
+  const delay = Math.max(0, DESKTOP_SPLASH_MINIMUM_VISIBLE_MS - elapsed);
+
+  window.setTimeout(() => {
+    void finishSplash().catch((error) => {
+      console.warn("[Startup] Failed to finish desktop splash", error);
+    });
+  }, delay);
 };
 
 const isPdfPerformanceStandaloneRoute = (): boolean => {
@@ -104,6 +120,11 @@ const AppBootstrap = () => {
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (state.status === "loading") return;
+    finishDesktopStartupSplashSafely();
+  }, [state.status]);
 
   if (state.status === "loading") {
     return <StartupLoadingScreen />;
