@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle } from "../../src/features/calendar/grid/weekdayTimeGridGeometry";
-import { getCalendarEventLevels, getCalendarEventSegment } from "../../packages/core/src/calendar/eventLevels";
-import { layoutCalendarTimeGridEvents } from "../../packages/core/src/calendar/timeGridLayout";
-import type { CalendarEvent } from "../../packages/core/src/calendar/calendarEvent.types";
-import type { CalendarTimeGridLayoutEntry } from "../../packages/core/src/calendar/timeGridLayout";
+import { getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle } from "@/features/calendar/grid/weekdayTimeGridGeometry";
+import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
+import { getCalendarEventLevels, getCalendarEventSegment } from "@core/calendar/eventLevels";
+import { layoutCalendarTimeGridEvents } from "@core/calendar/timeGridLayout";
+import type { CalendarTimeGridLayoutEntry } from "@core/calendar/timeGridLayout";
 
 const buildEvent = ({
   id,
