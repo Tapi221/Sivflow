@@ -329,6 +329,7 @@
 }
 
 .settings-workspace__avatar {
+  position: relative;
   display: flex;
   width: 36px;
   min-width: 36px;
@@ -342,6 +343,15 @@
   font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.02em;
+}
+
+.settings-workspace__avatar span,
+.settings-workspace__avatar img {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .settings-workspace__avatar img {
@@ -456,23 +466,6 @@
 
   .settings-workspace__nav-item {
     width: auto;
-    min-width: 140px;
-  }
-}
-
-@media (max-width: 520px) {
-  .settings-workspace__row--choice,
-  .settings-workspace__row--input {
-    padding-right: 16px;
-    padding-left: 16px;
-  }
-
-  .settings-workspace__choice-options {
-    max-width: 58%;
-  }
-
-  .settings-workspace__text-input {
-    width: min(220px, 52%);
     min-width: 140px;
   }
 }
