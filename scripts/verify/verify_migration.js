@@ -19,9 +19,9 @@
     if (window.indexedDB.databases) {
       const dbs = await window.indexedDB.databases();
       // userIdが含まれているDB、またはanonymousを探す
-      return dbs.find((d) => d.name && d.name.startsWith("FlashcardMasterDB_"));
+      return dbs.find((d) => d.name && d.name.startsWith("SivflowDB_"));
     }
-    return { name: "FlashcardMasterDB_anonymous" }; // Fallback
+    return { name: "SivflowDB_anonymous" }; // Fallback
   };
 
   // Helper: Open DB
@@ -97,7 +97,7 @@
     try {
       const dbInfo = await findDB();
       if (!dbInfo) {
-        log("FAIL: Could not find FlashcardMasterDB.", "error");
+        log("FAIL: Could not find SivflowDB.", "error");
         return;
       }
       log(`Opening DB: ${dbInfo.name}`);
