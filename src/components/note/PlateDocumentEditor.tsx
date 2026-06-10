@@ -10,6 +10,7 @@ import { BaseColumnKit } from "@/registry/components/editor/plugins/column-base-
 import { CommentKit } from "@/registry/components/editor/plugins/comment-kit";
 import { BaseDateKit } from "@/registry/components/editor/plugins/date-base-kit";
 import { DiscussionKit } from "@/registry/components/editor/plugins/discussion-kit";
+import { EmojiKit } from "@/registry/components/editor/plugins/emoji-kit";
 import { FixedToolbarKit } from "@/registry/components/editor/plugins/fixed-toolbar-kit";
 import { FloatingToolbarKit } from "@/registry/components/editor/plugins/floating-toolbar-kit";
 import { BaseFontKit } from "@/registry/components/editor/plugins/font-base-kit";
@@ -75,6 +76,7 @@ const NOTE_PLATE_PLUGINS = [
   ...DiscussionKit,
   ...CommentKit,
   ...SuggestionKit,
+  ...EmojiKit,
   ...MarkdownKit,
   ...BaseFootnoteKit,
   ...FixedToolbarKit,
