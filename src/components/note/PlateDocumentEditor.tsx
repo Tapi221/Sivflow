@@ -1,5 +1,5 @@
 import { BasicBlocksPlugin, BasicMarksPlugin } from "@platejs/basic-nodes/react";
-import { Bold, ChevronDown, Code2, Italic, Redo2, Strikethrough, Underline, Undo2 } from "lucide-react";
+import { AlignLeft, ArrowUpToLine, Baseline, Bold, ChevronDown, CircleSlash, Code2, File, FileAudio, Film, Highlighter, Image, Indent, Italic, Link, List, ListOrdered, ListTodo, MessageSquare, Minus, MoreHorizontal, Outdent, PaintBucket, Plus, Redo2, Smile, Strikethrough, Table, Underline, Undo2, WandSparkles } from "lucide-react";
 import { Plate, PlateContainer, PlateContent, PlateElement, PlateLeaf, ParagraphPlugin, usePlateEditor, type PlateElementProps, type PlateLeafProps } from "platejs/react";
 import { useCallback, useEffect, useMemo, useRef, type CSSProperties, type ChangeEvent, type MouseEvent, type ReactNode } from "react";
 import type { Note, NoteBlockContent } from "@/types";
@@ -45,6 +45,7 @@ type PlateToolbarButtonProps = {
   children: ReactNode;
   onPress: () => void;
   className?: string;
+  disabled?: boolean;
 };
 
 type PlateToolbarSelectProps = {
@@ -74,9 +75,10 @@ const PLATE_MARK_OPTIONS: readonly { fallback: PlateCommandFallback; icon: React
   { fallback: { command: "strikeThrough" }, icon: <Strikethrough className="size-4" />, label: "Strikethrough", mark: "strikethrough" },
   { fallback: { command: "formatBlock", value: "pre" }, icon: <Code2 className="size-4" />, label: "Code", mark: "code" },
 ];
-const PLATE_TOOLBAR_BUTTON_CLASS_NAME = "inline-flex h-8 min-w-8 shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md bg-transparent px-1.5 text-sm font-medium text-[#18181b] outline-none transition-colors hover:bg-[#f4f4f5] hover:text-[#52525b] focus-visible:ring-2 focus-visible:ring-[#d4d4d8] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0";
+const PLATE_TOOLBAR_BUTTON_CLASS_NAME = "inline-flex h-8 min-w-8 shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md bg-transparent px-1.5 text-sm font-medium text-[#18181b] outline-none transition-colors hover:bg-[#f4f4f5] hover:text-[#52525b] focus-visible:ring-2 focus-visible:ring-[#d4d4d8] disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-[#18181b] [&_svg]:pointer-events-none [&_svg]:shrink-0";
 const PLATE_TOOLBAR_SEPARATOR_CLASS_NAME = "mx-1.5 h-7 w-px shrink-0 bg-[#e4e4e7]";
 const PLATE_TOOLBAR_NO_DRAG_STYLE: AppRegionStyle = { WebkitAppRegion: "no-drag" };
+const PLATE_TOOLBAR_UNAVAILABLE_TITLE = "この操作はまだノートエディタに接続されていません";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
@@ -211,6 +213,10 @@ const setPlateBlockType = (editor: PlateEditor, blockType: PlateBlockType) => {
   runPlateTransform(editor, "setNodes", [{ type: blockType }, { match: (node: unknown) => isRecord(node) && Array.isArray(node.children) }], { command: "formatBlock", value: blockType === "p" ? "p" : blockType });
 };
 
+const handleUnavailableToolbarAction = (editor: PlateEditor) => {
+  focusPlateEditor(editor);
+};
+
 const ParagraphElement = (props: PlateElementProps) => <PlateElement {...props} as="p" className="my-2 min-h-[1.75rem] px-0 py-0 text-[17px] leading-8 text-[#18181b]" />;
 
 const H1Element = (props: PlateElementProps) => <PlateElement {...props} as="h1" className="mb-4 mt-8 text-[34px] font-semibold leading-tight tracking-[-0.04em] text-[#09090b]" />;
@@ -231,9 +237,13 @@ const StrikethroughLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="s
 
 const CodeLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="code" className="rounded-[5px] bg-[#f4f4f5] px-1 py-0.5 font-mono text-[0.92em] text-[#18181b]" />;
 
-const PlateToolbarButton = ({ label, children, onPress, className }: PlateToolbarButtonProps) => {
+const PlateToolbarButton = ({ label, children, onPress, className, disabled = false }: PlateToolbarButtonProps) => {
+  const title = disabled ? `${label}: ${PLATE_TOOLBAR_UNAVAILABLE_TITLE}` : label;
+
   const handleMouseDown = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
+    if (disabled) return;
+
     onPress();
   };
 
@@ -241,11 +251,13 @@ const PlateToolbarButton = ({ label, children, onPress, className }: PlateToolba
     if (event.detail !== 0) return;
 
     event.preventDefault();
+    if (disabled) return;
+
     onPress();
   };
 
   return (
-    <button type="button" aria-label={label} title={label} className={`${PLATE_TOOLBAR_BUTTON_CLASS_NAME}${className ? ` ${className}` : ""}`} style={PLATE_TOOLBAR_NO_DRAG_STYLE} onMouseDown={handleMouseDown} onClick={handleClick}>
+    <button type="button" aria-label={label} title={title} className={`${PLATE_TOOLBAR_BUTTON_CLASS_NAME}${className ? ` ${className}` : ""}`} style={PLATE_TOOLBAR_NO_DRAG_STYLE} disabled={disabled} onMouseDown={handleMouseDown} onClick={handleClick}>
       {children}
     </button>
   );
@@ -269,7 +281,7 @@ const PlateToolbarBlockSelect = ({ editor }: PlateToolbarSelectProps) => {
 };
 
 const PlateEditorToolbar = ({ editor }: { editor: PlateEditor }) => (
-  <div className="scrollbar-hide sticky left-0 top-0 z-50 flex min-h-10 w-full shrink-0 items-center overflow-x-auto rounded-t-lg border-b border-[#e4e4e7] bg-white/95 p-1 backdrop-blur-sm" style={PLATE_TOOLBAR_NO_DRAG_STYLE}>
+  <div className="scrollbar-hide sticky left-0 top-0 z-50 flex min-h-10 w-full shrink-0 items-center justify-between overflow-x-auto rounded-t-lg border-b border-[#e4e4e7] bg-white/95 p-1 backdrop-blur-sm" style={PLATE_TOOLBAR_NO_DRAG_STYLE}>
     <div className="flex min-w-max items-center">
       <div className="flex items-center">
         <PlateToolbarButton label="Undo" onPress={() => runPlateTransform(editor, "undo", [], { command: "undo" })}><Undo2 className="size-4" /></PlateToolbarButton>
@@ -279,13 +291,68 @@ const PlateEditorToolbar = ({ editor }: { editor: PlateEditor }) => (
       <PlateToolbarSeparator />
 
       <div className="flex items-center">
+        <PlateToolbarButton label="AI commands" disabled onPress={() => handleUnavailableToolbarAction(editor)}><WandSparkles className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        <PlateToolbarButton label="Export" disabled onPress={() => handleUnavailableToolbarAction(editor)}><ArrowUpToLine className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        <PlateToolbarButton label="Insert" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Plus className="size-4" /></PlateToolbarButton>
         <PlateToolbarBlockSelect editor={editor} />
+        <PlateToolbarButton label="Decrease font size" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Minus className="size-4" /></PlateToolbarButton>
+        <div className="flex h-8 min-w-10 shrink-0 items-center justify-center rounded-md px-2 text-sm font-medium text-[#18181b]" style={PLATE_TOOLBAR_NO_DRAG_STYLE}>16</div>
+        <PlateToolbarButton label="Increase font size" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Plus className="size-4" /></PlateToolbarButton>
       </div>
 
       <PlateToolbarSeparator />
 
       <div className="flex items-center">
         {PLATE_MARK_OPTIONS.map((option) => <PlateToolbarButton key={option.mark} label={option.label} onPress={() => togglePlateMark(editor, option.mark, option.fallback)}>{option.icon}</PlateToolbarButton>)}
+        <PlateToolbarButton label="Text color" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Baseline className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Background color" disabled onPress={() => handleUnavailableToolbarAction(editor)}><PaintBucket className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        <PlateToolbarButton label="Align" disabled onPress={() => handleUnavailableToolbarAction(editor)}><AlignLeft className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Numbered list" disabled onPress={() => handleUnavailableToolbarAction(editor)}><ListOrdered className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Bulleted list" disabled onPress={() => handleUnavailableToolbarAction(editor)}><List className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Todo list" disabled onPress={() => handleUnavailableToolbarAction(editor)}><ListTodo className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        <PlateToolbarButton label="Link" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Link className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Table" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Table className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Emoji" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Smile className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        <PlateToolbarButton label="Image" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Image className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Video" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Film className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Audio" disabled onPress={() => handleUnavailableToolbarAction(editor)}><FileAudio className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="File" disabled onPress={() => handleUnavailableToolbarAction(editor)}><File className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        <PlateToolbarButton label="Highlight" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Highlighter className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Comment" disabled onPress={() => handleUnavailableToolbarAction(editor)}><MessageSquare className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Line height" disabled onPress={() => handleUnavailableToolbarAction(editor)}><CircleSlash className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Outdent" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Outdent className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Indent" disabled onPress={() => handleUnavailableToolbarAction(editor)}><Indent className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="More" disabled onPress={() => handleUnavailableToolbarAction(editor)}><MoreHorizontal className="size-4" /></PlateToolbarButton>
       </div>
     </div>
   </div>
