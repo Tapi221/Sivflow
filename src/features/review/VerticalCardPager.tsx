@@ -1,10 +1,16 @@
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import { cn } from "@/lib/utils";
 import { isTypingTarget } from "@/utils/isTypingTarget";
 import { buildVerticalCardPagerItemStyle, resolveVerticalCardPagerItemWidthSpec, type VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
 
 type ScrollAnchorFace = "question" | "answer";
+
+type ScrollAnchorSnapshot = {
+  preserveKey: string | number | null;
+  cardKey: string | null;
+  relativeTop: number;
+};
 
 export type VerticalCardPagerProps<T> = {
   cards: T[];
@@ -38,6 +44,7 @@ const SCROLL_PADDING = "50vh";
 const CARD_RADIUS_SM = 32;
 const CARD_RADIUS_MD = 40;
 const SCROLL_IDLE_COMMIT_DELAY_MS = 110;
+const SCROLL_ANCHOR_SUPPRESSION_MS = 180;
 
 const resolveCardBaseRadius = () => {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -65,6 +72,14 @@ const resolveScrollAnchorFaceFromElement = (element: HTMLElement | null): Scroll
   return face === "question" || face === "answer" ? face : null;
 };
 
+const getCurrentTimeMs = () => {
+  if (typeof performance !== "undefined" && typeof performance.now === "function") {
+    return performance.now();
+  }
+
+  return Date.now();
+};
+
 const VerticalCardPagerFn = <T,>({
   cards,
   activeIndex,
@@ -83,6 +98,7 @@ const VerticalCardPagerFn = <T,>({
   freezeActiveIndex = false,
   disableItemChrome = false,
   onRenderRangeChange,
+  preserveScrollAnchorKey = null,
   scrollToActiveIndexRequestKey = null,
   scrollToActiveIndexBehavior = "auto",
 }: VerticalCardPagerProps<T>) => {
@@ -91,6 +107,8 @@ const VerticalCardPagerFn = <T,>({
   const activeIndexRef = useRef(activeIndex);
   const naturalIndexTimerRef = useRef<number | null>(null);
   const lastScrollToActiveIndexRequestKeyRef = useRef<string | number | null>(scrollToActiveIndexRequestKey);
+  const scrollAnchorSnapshotRef = useRef<ScrollAnchorSnapshot | null>(null);
+  const suppressNaturalIndexUntilRef = useRef(0);
 
   const stableCardKeys = useMemo(() => cards.map((card, idx) => buildStableCardKey(card, idx, getKey)), [cards, getKey]);
 
@@ -108,6 +126,56 @@ const VerticalCardPagerFn = <T,>({
       };
     });
   }, [activeIndex, cardWidth, cards, getCardWidth, getCardWidthSpec, stableCardKeys]);
+
+  const clearNaturalIndexTimer = useCallback(() => {
+    if (naturalIndexTimerRef.current == null) return;
+
+    window.clearTimeout(naturalIndexTimerRef.current);
+    naturalIndexTimerRef.current = null;
+  }, []);
+
+  const suppressNaturalIndexCommit = useCallback(() => {
+    suppressNaturalIndexUntilRef.current = getCurrentTimeMs() + SCROLL_ANCHOR_SUPPRESSION_MS;
+    clearNaturalIndexTimer();
+  }, [clearNaturalIndexTimer]);
+
+  const isNaturalIndexCommitSuppressed = useCallback(() => {
+    return getCurrentTimeMs() < suppressNaturalIndexUntilRef.current;
+  }, []);
+
+  const resolveActiveAnchorElement = useCallback(() => {
+    const container = containerRef.current;
+    const activeCard = cards[activeIndex];
+    const activeKey = stableCardKeys[activeIndex] ?? null;
+    const activeElement = activeKey ? itemRefs.current.get(activeKey) ?? null : null;
+    if (!container || !activeElement || !activeCard || !activeKey) {
+      return null;
+    }
+
+    const selector = getScrollAnchorSelector?.(activeCard, activeIndex, true) ?? null;
+    const anchorElement = selector ? activeElement.querySelector<HTMLElement>(selector) : activeElement;
+    if (!anchorElement) {
+      return null;
+    }
+
+    return { container, activeKey, anchorElement };
+  }, [activeIndex, cards, getScrollAnchorSelector, stableCardKeys]);
+
+  const readScrollAnchorSnapshot = useCallback((): ScrollAnchorSnapshot | null => {
+    const resolved = resolveActiveAnchorElement();
+    if (!resolved) {
+      return null;
+    }
+
+    const containerRect = resolved.container.getBoundingClientRect();
+    const anchorRect = resolved.anchorElement.getBoundingClientRect();
+
+    return {
+      preserveKey: preserveScrollAnchorKey,
+      cardKey: resolved.activeKey,
+      relativeTop: anchorRect.top - containerRect.top,
+    };
+  }, [preserveScrollAnchorKey, resolveActiveAnchorElement]);
 
   const scrollToIndex = useCallback((idx: number, behavior: ScrollBehavior = "smooth") => {
     const container = containerRef.current;
@@ -130,7 +198,7 @@ const VerticalCardPagerFn = <T,>({
 
   const commitNearestIndex = useCallback(() => {
     const container = containerRef.current;
-    if (!container || freezeActiveIndex || cards.length <= 0) return;
+    if (!container || freezeActiveIndex || cards.length <= 0 || isNaturalIndexCommitSuppressed()) return;
 
     const containerRect = container.getBoundingClientRect();
     const centerY = containerRect.top + containerRect.height / 2;
@@ -152,7 +220,7 @@ const VerticalCardPagerFn = <T,>({
     if (nearestIndex !== activeIndexRef.current) {
       onActiveIndexChange(nearestIndex);
     }
-  }, [cards.length, freezeActiveIndex, onActiveIndexChange, stableCardKeys]);
+  }, [cards.length, freezeActiveIndex, isNaturalIndexCommitSuppressed, onActiveIndexChange, stableCardKeys]);
 
   useEffect(() => {
     activeIndexRef.current = activeIndex;
@@ -161,6 +229,25 @@ const VerticalCardPagerFn = <T,>({
   useEffect(() => {
     onRenderRangeChange?.(cards.length > 0 ? { start: 0, end: cards.length - 1 } : null);
   }, [cards.length, onRenderRangeChange]);
+
+  useLayoutEffect(() => {
+    const previousSnapshot = scrollAnchorSnapshotRef.current;
+    const resolved = resolveActiveAnchorElement();
+
+    if (previousSnapshot && resolved && previousSnapshot.preserveKey !== preserveScrollAnchorKey && previousSnapshot.cardKey === resolved.activeKey) {
+      const containerRect = resolved.container.getBoundingClientRect();
+      const anchorRect = resolved.anchorElement.getBoundingClientRect();
+      const relativeTop = anchorRect.top - containerRect.top;
+      const scrollDelta = relativeTop - previousSnapshot.relativeTop;
+
+      if (Math.abs(scrollDelta) >= 0.5) {
+        suppressNaturalIndexCommit();
+        resolved.container.scrollTop += scrollDelta;
+      }
+    }
+
+    scrollAnchorSnapshotRef.current = readScrollAnchorSnapshot();
+  }, [preserveScrollAnchorKey, readScrollAnchorSnapshot, resolveActiveAnchorElement, suppressNaturalIndexCommit]);
 
   useEffect(() => {
     const activeCard = cards[activeIndex];
@@ -176,10 +263,12 @@ const VerticalCardPagerFn = <T,>({
     if (!container) return;
 
     const handleScroll = () => {
-      if (naturalIndexTimerRef.current != null) {
-        window.clearTimeout(naturalIndexTimerRef.current);
+      if (isNaturalIndexCommitSuppressed()) {
+        clearNaturalIndexTimer();
+        return;
       }
 
+      clearNaturalIndexTimer();
       naturalIndexTimerRef.current = window.setTimeout(() => {
         naturalIndexTimerRef.current = null;
         commitNearestIndex();
@@ -190,11 +279,9 @@ const VerticalCardPagerFn = <T,>({
 
     return () => {
       container.removeEventListener("scroll", handleScroll);
-      if (naturalIndexTimerRef.current != null) {
-        window.clearTimeout(naturalIndexTimerRef.current);
-      }
+      clearNaturalIndexTimer();
     };
-  }, [commitNearestIndex, naturalIndexCommitDelayMs]);
+  }, [clearNaturalIndexTimer, commitNearestIndex, isNaturalIndexCommitSuppressed, naturalIndexCommitDelayMs]);
 
   useEffect(() => {
     if (scrollToActiveIndexRequestKey == null) return;
