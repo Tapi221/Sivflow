@@ -1,3 +1,4 @@
+import { LinkPlugin } from "@platejs/link/react";
 import { Plate, PlateController, usePlateEditor } from "platejs/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { BasicNodesKit } from "@/registry/components/editor/plugins/basic-nodes-kit";
@@ -6,7 +7,6 @@ import { BaseFontKit } from "@/registry/components/editor/plugins/font-base-kit"
 import { FixedToolbarKit } from "@/registry/components/editor/plugins/fixed-toolbar-kit";
 import { FloatingToolbarKit } from "@/registry/components/editor/plugins/floating-toolbar-kit";
 import { BaseLineHeightKit } from "@/registry/components/editor/plugins/line-height-base-kit";
-import { BaseLinkKit } from "@/registry/components/editor/plugins/link-base-kit";
 import { ListKit } from "@/registry/components/editor/plugins/list-kit";
 import { TableKit } from "@/registry/components/editor/plugins/table-kit";
 import { Editor, EditorContainer } from "@/registry/ui/editor";
@@ -41,7 +41,7 @@ const NOTE_PLATE_PLUGINS = [
   ...BasicNodesKit,
   ...ListKit,
   ...TableKit,
-  ...BaseLinkKit,
+  LinkPlugin,
   ...BaseAlignKit,
   ...BaseFontKit,
   ...BaseLineHeightKit,
