@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
 import { releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource } from "./pdfDocumentSource";
 import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
-import { getPdfPageWindowKeepSet, getSafePdfPageNumber } from "./pdfPageWindow";
+import { getSafePdfPageNumber } from "./pdfPageWindow";
 import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "./pdfPerformance";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
 import "./PdfPane.css";
@@ -159,13 +159,22 @@ const getApproxDeviceMemory = (): number => {
   return typeof deviceMemory === "number" && Number.isFinite(deviceMemory) ? deviceMemory : PDF_DEFAULT_DEVICE_MEMORY_GB;
 };
 
-const resizePdfViewerPageBuffer = (pdfViewer: PdfViewerInstance, container?: HTMLElement | null, pageNumber: number = pdfViewer.currentPageNumber): void => {
+const getPdfFallbackPageWindowKeepSet = (pageNumber: number, pageCount: number): Set<number> => {
+  const safePageNumber = getSafePageNumber(pageNumber, pageCount);
+  const firstPage = Math.max(1, safePageNumber - PDF_VISIBLE_PAGE_CACHE_OVERSCAN);
+  const lastPage = Math.min(pageCount, safePageNumber + PDF_VISIBLE_PAGE_CACHE_OVERSCAN);
+  const idsToKeep = new Set<number>();
+
+  for (let page = firstPage; page <= lastPage; page += 1) idsToKeep.add(page);
+  return idsToKeep;
+};
+
+const resizePdfViewerPageBuffer = (pdfViewer: PdfViewerInstance, pageNumber: number = pdfViewer.currentPageNumber): void => {
   const pageCount = getPdfViewerPageCount(pdfViewer);
   if (pageCount <= 0) return;
   const pageBuffer = (pdfViewer as PdfViewerWithPageBuffer)._buffer;
   if (typeof pageBuffer?.resize !== "function") return;
-  const safePageNumber = getSafePageNumber(pageNumber, pageCount);
-  const idsToKeep = getPdfPageWindowKeepSet([], container?.scrollTop ?? 0, container?.clientHeight ?? 0, pageCount, { fallbackPageNumber: safePageNumber, overscanPageCount: PDF_VISIBLE_PAGE_CACHE_OVERSCAN });
+  const idsToKeep = getPdfFallbackPageWindowKeepSet(pageNumber, pageCount);
   pageBuffer.resize(Math.min(Math.max(idsToKeep.size, 1), pageCount), idsToKeep);
 };
 
@@ -353,7 +362,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   const resizeActivePdfViewerPageBuffer = useCallback((pageNumber?: number) => {
     const pdfViewer = pdfViewerRef.current;
     if (!pdfViewer) return;
-    resizePdfViewerPageBuffer(pdfViewer, scrollContainerRef.current, pageNumber);
+    resizePdfViewerPageBuffer(pdfViewer, pageNumber);
   }, []);
 
   const setViewerPage = useCallback((pageNumber: number, options?: { recordHistory?: boolean }) => {
@@ -455,6 +464,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     let gestureBaseScale: number | null = null;
     let isScrollOptimizationActive = false;
     let lastScrollBufferResizeAt = 0;
+    let pendingDeferredPageStateNumber: number | null = null;
     let pendingScrollBufferPageNumber: number | null = null;
     let pendingPageNumber: number | null = null;
     const performanceTraceName = createPdfPerformanceTraceName("viewer.load");
@@ -477,7 +487,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     };
 
     const resizeVisiblePageBuffer = (pageNumber?: number) => {
-      resizePdfViewerPageBuffer(pdfViewer, container, pageNumber);
+      resizePdfViewerPageBuffer(pdfViewer, pageNumber);
     };
 
     const clearPendingScrollBufferResize = () => {
@@ -582,6 +592,11 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         setScrollOptimizationActive(false);
         clearPendingScrollBufferResize();
         resizeVisiblePageBuffer();
+        if (pendingDeferredPageStateNumber !== null) {
+          const pageNumber = pendingDeferredPageStateNumber;
+          pendingDeferredPageStateNumber = null;
+          updateViewerState({ currentPage: pageNumber }, { persistence: "deferred" });
+        }
       });
     };
 
@@ -607,7 +622,14 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       if (isCancelled || pendingPageNumber === null) return;
       const pageNumber = pendingPageNumber;
       pendingPageNumber = null;
-      if (viewerStateRef.current?.currentPage !== pageNumber) updateViewerState({ currentPage: pageNumber }, { persistence: "deferred" });
+      if (viewerStateRef.current?.currentPage !== pageNumber) {
+        if (isScrollOptimizationActive) {
+          viewerStateRef.current = { ...(viewerStateRef.current ?? {}), currentPage: pageNumber };
+          pendingDeferredPageStateNumber = pageNumber;
+        } else {
+          updateViewerState({ currentPage: pageNumber }, { persistence: "deferred" });
+        }
+      }
       requestScrollBufferResize(pageNumber);
     };
 
@@ -745,6 +767,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       isCancelled = true;
       isApplyingFitScaleRef.current = false;
       gestureBaseScale = null;
+      pendingDeferredPageStateNumber = null;
       if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
       if (scrollFrame !== null) window.cancelAnimationFrame(scrollFrame);
       clearPendingScrollBufferResize();
