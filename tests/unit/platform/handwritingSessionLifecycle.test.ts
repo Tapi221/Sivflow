@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { attachMobileDeviceToHandwritingSession, closeHandwritingSession, createDesktopHandwritingSession, failHandwritingSession, isHandwritingSessionActive, updateHandwritingSessionStatus } from "../../../packages/platform/src/handwriting/handwritingSessionLifecycle";
-import type { HandwritingDeviceInfo } from "../../../packages/platform/src/handwriting/handwritingSession.types";
+import type { HandwritingDeviceInfo } from "@platform/handwriting/handwritingSession.types";
+import { attachMobileDeviceToHandwritingSession, closeHandwritingSession, createDesktopHandwritingSession, failHandwritingSession, isHandwritingSessionActive, updateHandwritingSessionStatus } from "@platform/handwriting/handwritingSessionLifecycle";
 
 const desktopDevice: HandwritingDeviceInfo = {
   id: "desktop-1",
