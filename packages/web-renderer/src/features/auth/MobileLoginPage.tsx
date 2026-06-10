@@ -1,11 +1,11 @@
 import { useState, type CSSProperties } from "react";
 import appIconSrc from "@shared/assets/icons/app-icon.svg";
+import authBackgroundSrc from "@shared/assets/backgrounds/sivflow-flow-background.svg";
 import { signInWithGoogle } from "@/services/auth/googleSignIn";
 
 type MobileLoginPageStyles = {
   page: CSSProperties;
-  glowTop: CSSProperties;
-  glowBottom: CSSProperties;
+  backgroundOverlay: CSSProperties;
   card: CSSProperties;
   brandBlock: CSSProperties;
   logoIcon: CSSProperties;
@@ -35,27 +35,16 @@ const styles: MobileLoginPageStyles = {
     padding: "max(22px, env(safe-area-inset-top)) 18px max(30px, env(safe-area-inset-bottom))",
     boxSizing: "border-box",
     color: "#071947",
-    background: "radial-gradient(circle at 0% 0%, rgba(125, 174, 255, 0.22), transparent 38%), radial-gradient(circle at 100% 100%, rgba(255, 178, 229, 0.28), transparent 40%), linear-gradient(145deg, #eef7ff 0%, #ffffff 52%, #fff3fb 100%)",
+    backgroundImage: `url(${authBackgroundSrc})`,
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
     fontFamily: "var(--app-font-family-ui), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
-  glowTop: {
+  backgroundOverlay: {
     position: "fixed",
-    top: "-150px",
-    right: "-170px",
-    width: "340px",
-    height: "340px",
-    borderRadius: "50%",
-    background: "rgba(141, 180, 255, 0.2)",
-    pointerEvents: "none",
-  },
-  glowBottom: {
-    position: "fixed",
-    left: "-160px",
-    bottom: "-170px",
-    width: "360px",
-    height: "360px",
-    borderRadius: "50%",
-    background: "rgba(255, 185, 231, 0.24)",
+    inset: 0,
+    background: "linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(238, 249, 255, 0.48))",
     pointerEvents: "none",
   },
   card: {
@@ -68,10 +57,10 @@ const styles: MobileLoginPageStyles = {
     padding: "30px 22px 28px",
     boxSizing: "border-box",
     borderRadius: "28px",
-    border: "1px solid rgba(255, 255, 255, 0.9)",
-    background: "rgba(255, 255, 255, 0.92)",
-    boxShadow: "0 22px 58px rgba(61, 82, 121, 0.14)",
-    backdropFilter: "blur(18px)",
+    border: "1px solid rgba(255, 255, 255, 0.62)",
+    background: "rgba(255, 255, 255, 0.62)",
+    boxShadow: "0 24px 60px rgba(6, 25, 71, 0.18)",
+    backdropFilter: "blur(20px) saturate(1.08)",
   },
   brandBlock: {
     display: "flex",
@@ -84,6 +73,7 @@ const styles: MobileLoginPageStyles = {
     width: "86px",
     height: "86px",
     objectFit: "contain",
+    filter: "drop-shadow(0 10px 20px rgba(5, 27, 52, 0.16))",
   },
   logoTitle: {
     margin: "10px 0 0",
@@ -99,7 +89,7 @@ const styles: MobileLoginPageStyles = {
     lineHeight: 1,
     fontWeight: 600,
     letterSpacing: "0.02em",
-    color: "#55637f",
+    color: "#43516a",
   },
   heading: {
     margin: "30px 0 0",
@@ -116,7 +106,7 @@ const styles: MobileLoginPageStyles = {
     fontWeight: 600,
     textAlign: "center",
     letterSpacing: "0.02em",
-    color: "#66728d",
+    color: "#50607a",
   },
   button: {
     marginTop: "28px",
@@ -127,13 +117,13 @@ const styles: MobileLoginPageStyles = {
     justifyContent: "center",
     gap: "12px",
     borderRadius: "16px",
-    border: "1px solid #d9deea",
-    background: "#ffffff",
+    border: "1px solid rgba(197, 211, 227, 0.84)",
+    background: "rgba(255, 255, 255, 0.9)",
     color: "#061947",
     fontSize: "16px",
     fontWeight: 800,
     cursor: "pointer",
-    boxShadow: "0 8px 20px rgba(15, 23, 42, 0.12)",
+    boxShadow: "0 9px 24px rgba(15, 23, 42, 0.12)",
   },
   loadingDot: {
     width: "10px",
@@ -151,12 +141,12 @@ const styles: MobileLoginPageStyles = {
   line: {
     height: "1px",
     flex: 1,
-    background: "#e3e8f0",
+    background: "rgba(163, 179, 201, 0.5)",
   },
   dividerText: {
     fontSize: "13px",
     fontWeight: 700,
-    color: "#7b88a3",
+    color: "#6b7892",
   },
   secureBox: {
     width: "100%",
@@ -167,8 +157,8 @@ const styles: MobileLoginPageStyles = {
     padding: "14px 16px",
     boxSizing: "border-box",
     borderRadius: "18px",
-    background: "rgba(247, 249, 253, 0.92)",
-    color: "#72809b",
+    background: "rgba(247, 249, 253, 0.76)",
+    color: "#66758f",
   },
   secureIcon: {
     width: "30px",
@@ -230,8 +220,7 @@ const MobileLoginPage = () => {
 
   return (
     <main style={styles.page}>
-      <div style={styles.glowTop} />
-      <div style={styles.glowBottom} />
+      <div style={styles.backgroundOverlay} />
 
       <section style={styles.card}>
         <div style={styles.brandBlock}>
