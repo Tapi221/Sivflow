@@ -4,8 +4,9 @@ import { IndexedDBMetadataService } from "./IndexedDBMetadataService";
 import { rebuildIndexedDb } from "./indexedDbRebuildCoordinator";
 import { ensureLegacyCardsBackfilled } from "./legacyCardSetMigrationBackfill";
 import { getLocalDb, getLocalDBRuntimeStatus, LOCALDB_RECOVERY_GUIDE_URL } from "./localDB";
-// NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 import { warnOncePerSession } from "./localDBRuntimeState";
+
+// NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 
 /**
  * アプリ起動時の初期化処理
@@ -44,7 +45,7 @@ export class AppInitializer {
   private static async doInitialize(
     userId: string,
   ): Promise<{ degraded: boolean; reason?: string; skippedFailures?: number }> {
-    console.log(`[AppInit:${userId}] Starting initialization...`);
+    console.log(`[アプリ初期化:${userId}] 初期化を開始しています...`);
     let degraded = false;
     let degradedReason: string | undefined;
     let skippedFailures = 0;
@@ -56,7 +57,7 @@ export class AppInitializer {
     if (dbStatus.mode === "fallback") {
       warnOncePerSession(
         "app-init:fallback-mode",
-        `[AppInit:${userId}] LocalDB is running in fallback mode. Skipping IndexedDB health/rebuild phases.`,
+        `[アプリ初期化:${userId}] LocalDB はフォールバックモードで動作中です。IndexedDB の健全性チェックと再構築をスキップします。`,
       );
 
       notifyLocalDbFallbackMode({
@@ -69,19 +70,19 @@ export class AppInitializer {
     const metaService = new IndexedDBMetadataService(db, userId);
 
     // 🔥 Phase 1: 健全性チェック（前回のセッションの状態を確認）
-    console.log(`[AppInit:${userId}] Phase1: Health check...`);
+    console.log(`[アプリ初期化:${userId}] フェーズ1: 健全性チェックを実行中...`);
     const { healthy, reason } = await metaService.checkHealth();
 
     if (!healthy) {
       console.warn(
-        `[AppInit:${userId}] Phase1: Health check FAILED - ${reason}`,
+        `[アプリ初期化:${userId}] フェーズ1: 健全性チェックに失敗しました - ${reason}`,
       );
 
       // エラーフラグを設定（次回は recovery コンテキスト）
       contextService.setErrorFlag(userId);
 
       // Phase 2: 再構築
-      console.log(`[AppInit:${userId}] Phase2: Rebuilding...`);
+      console.log(`[アプリ初期化:${userId}] フェーズ2: 再構築を実行中...`);
 
       // 再構築回数をチェック
       const rebuildCount = await metaService.getRebuildCount();
@@ -89,7 +90,7 @@ export class AppInitializer {
       if (rebuildCount >= 3) {
         // ERROR レベルの通知（続行不可）
         notifyRebuildLoopDetected({ userId });
-        throw new Error("Rebuild loop detected");
+        throw new Error("再構築ループを検出しました");
       }
 
       const rebuildResult = await rebuildIndexedDb(userId, reason);
@@ -98,64 +99,64 @@ export class AppInitializer {
         degradedReason = "rebuild_partial_failures";
         skippedFailures = rebuildResult.failures.length;
         notifyStartupDegraded();
-        console.warn("[AppInit] startup_degraded=true", {
+        console.warn("[アプリ初期化] 起動が一部制限された状態です", {
           userId,
           reason: degradedReason,
           skippedFailures,
         });
       }
-      console.log(`[AppInit:${userId}] Phase2: Rebuild complete ✓`);
+      console.log(`[アプリ初期化:${userId}] フェーズ2: 再構築が完了しました ✓`);
     } else {
-      console.log(`[AppInit:${userId}] Phase1: Health check OK ✓`);
+      console.log(`[アプリ初期化:${userId}] フェーズ1: 健全性チェックは正常です ✓`);
     }
 
     // 🔥 Phase 3: Snapshot 移行
-    console.log(`[AppInit:${userId}] Phase3: Snapshot migration...`);
+    console.log(`[アプリ初期化:${userId}] フェーズ3: スナップショット移行を実行中...`);
     try {
       const { snapshotService } = await import("./SnapshotService");
       await snapshotService.migrateFromLocalStorage(userId);
-      console.log(`[AppInit:${userId}] Phase3: Snapshot migration complete ✓`);
+      console.log(`[アプリ初期化:${userId}] フェーズ3: スナップショット移行が完了しました ✓`);
     } catch (error) {
       console.error(
-        `[AppInit:${userId}] Phase3: Snapshot migration FAILED (will retry next time)`,
+        `[アプリ初期化:${userId}] フェーズ3: スナップショット移行に失敗しました（次回起動時に再試行します）`,
         error,
       );
       // 移行失敗してもアプリは継続
     }
 
     // 🔥 Phase 4: CardSet 移行補完（cardSetId 未設定カードの救済）
-    console.log(`[AppInit:${userId}] Phase4: CardSet migration backfill...`);
+    console.log(`[アプリ初期化:${userId}] フェーズ4: カードセット移行補完を実行中...`);
     try {
       await ensureLegacyCardsBackfilled(userId);
       console.log(
-        `[AppInit:${userId}] Phase4: CardSet migration backfill complete ✓`,
+        `[アプリ初期化:${userId}] フェーズ4: カードセット移行補完が完了しました ✓`,
       );
     } catch (error) {
       console.error(
-        `[AppInit:${userId}] Phase4: CardSet migration backfill FAILED (will retry next time)`,
+        `[アプリ初期化:${userId}] フェーズ4: カードセット移行補完に失敗しました（次回起動時に再試行します）`,
         error,
       );
       // 補完失敗してもアプリは継続
     }
 
     // 🔥 Phase 5: 履歴圧縮（バックグラウンド）
-    console.log(`[AppInit:${userId}] Phase5: Scheduling compression...`);
+    console.log(`[アプリ初期化:${userId}] フェーズ5: 履歴圧縮を予約中...`);
     requestIdleCallback(() => {
       import("./HistoryCompressionService").then(
         ({ HistoryCompressionService }) => {
           console.log(
-            `[AppInit:${userId}] Phase5: Compression started (background)`,
+            `[アプリ初期化:${userId}] フェーズ5: 履歴圧縮を開始しました（バックグラウンド）`,
           );
           new HistoryCompressionService().compress(userId);
         },
       );
     });
-    console.log(`[AppInit:${userId}] Phase5: Compression scheduled ✓`);
+    console.log(`[アプリ初期化:${userId}] フェーズ5: 履歴圧縮を予約しました ✓`);
 
     // Phase 6: CLEAN マーク（再構築内で実行される）
 
     this.initialized = true;
-    console.log(`[AppInit:${userId}] ✅ Initialization complete (all phases)`);
+    console.log(`[アプリ初期化:${userId}] ✅ 初期化が完了しました（全フェーズ）`);
     return { degraded, reason: degradedReason, skippedFailures };
 
     // 初期化完了の通知は自動で消える（INFO レベル）
