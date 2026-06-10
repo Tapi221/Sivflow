@@ -86,19 +86,19 @@ function ModeToolbarButton(props: DropdownMenuProps) {
           }}
           value={value}
         >
-          <DropdownMenuRadioItem className="pl-2 [&>span:first-child]:hidden *:[svg]:text-muted-foreground" value="editing">
+          <DropdownMenuRadioItem className="*:[svg]:text-muted-foreground" value="editing" hideIndicator>
             <Indicator />
             {items.editing.icon}
             {items.editing.label}
           </DropdownMenuRadioItem>
 
-          <DropdownMenuRadioItem className="pl-2 [&>span:first-child]:hidden *:[svg]:text-muted-foreground" value="viewing">
+          <DropdownMenuRadioItem className="*:[svg]:text-muted-foreground" value="viewing" hideIndicator>
             <Indicator />
             {items.viewing.icon}
             {items.viewing.label}
           </DropdownMenuRadioItem>
 
-          <DropdownMenuRadioItem className="pl-2 [&>span:first-child]:hidden *:[svg]:text-muted-foreground" value="suggestion">
+          <DropdownMenuRadioItem className="*:[svg]:text-muted-foreground" value="suggestion" hideIndicator>
             <Indicator />
             {items.suggestion.icon}
             {items.suggestion.label}
