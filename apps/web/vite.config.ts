@@ -26,10 +26,13 @@ const optimizedDependencyIncludes = [
 ];
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const distOutputPath = "dist";
 const pdfjsAssetRoute = "/pdfjs/";
 const pdfjsAssetDirectories = ["cmaps", "standard_fonts", "wasm"];
 const eventChipDesignRoute = "/__sivflow/eventchip-design";
 const eventChipDesignOutputPath = "src/chip/eventchip/eventChipDesign.generated.ts";
+
+let hasCleanedDistOutput = false;
 
 const resolveFromRoot = (relativePath: string) => path.resolve(repoRoot, relativePath);
 
@@ -221,6 +224,22 @@ export const eventChipDesign: EventChipDesign = {
 `;
 };
 
+const createDistCleanerPlugin = (): Plugin => {
+  return {
+    name: "clean-dist-before-build",
+    apply: "build",
+    enforce: "pre",
+    async buildStart() {
+      if (hasCleanedDistOutput) {
+        return;
+      }
+
+      hasCleanedDistOutput = true;
+      await fs.rm(resolveFromRoot(distOutputPath), { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    },
+  };
+};
+
 const createPdfjsAssetsPlugin = (): Plugin => {
   return {
     name: "serve-pdfjs-assets",
@@ -253,7 +272,7 @@ const createPdfjsAssetsPlugin = (): Plugin => {
       });
     },
     async writeBundle() {
-      const outputRoot = resolveFromRoot("dist/pdfjs");
+      const outputRoot = resolveFromRoot(path.join(distOutputPath, "pdfjs"));
       await fs.mkdir(outputRoot, { recursive: true });
       await Promise.all(pdfjsAssetDirectories.map((directory) => fs.cp(resolvePdfjsDistPath(directory), path.join(outputRoot, directory), { recursive: true })));
     },
@@ -300,6 +319,7 @@ export default defineConfig(({ command }) => ({
   envDir: repoRoot,
   publicDir: resolveFromRoot("public"),
   plugins: [
+    createDistCleanerPlugin(),
     react(),
     createPdfjsAssetsPlugin(),
     createEventChipDesignWriterPlugin(),
@@ -360,8 +380,8 @@ export default defineConfig(({ command }) => ({
   },
   esbuild: command === "build" ? { drop: ["console", "debugger"] } : undefined,
   build: {
-    outDir: resolveFromRoot("dist"),
-    emptyOutDir: true,
+    outDir: resolveFromRoot(distOutputPath),
+    emptyOutDir: false,
     sourcemap: true,
     chunkSizeWarningLimit: 1000,
     rollupOptions: { output: {} },
