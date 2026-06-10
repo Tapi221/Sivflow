@@ -10,7 +10,6 @@ type LoginPageStyles = {
   leftPanel: CSSProperties;
   brandBlock: CSSProperties;
   logoIcon: CSSProperties;
-  logoTitle: CSSProperties;
   tagline: CSSProperties;
   description: CSSProperties;
   rightPanel: CSSProperties;
@@ -90,21 +89,13 @@ const styles: LoginPageStyles = {
   },
   logoIcon: {
     display: "block",
-    width: "250px",
-    height: "250px",
+    width: "320px",
+    height: "320px",
     objectFit: "contain",
     filter: "drop-shadow(0 18px 34px rgba(5, 27, 52, 0.18))",
   },
-  logoTitle: {
-    margin: "6px 0 0",
-    fontSize: "84px",
-    lineHeight: 0.92,
-    fontWeight: 900,
-    letterSpacing: "-0.065em",
-    color: "#061947",
-  },
   tagline: {
-    margin: "18px 0 0",
+    margin: "22px 0 0",
     fontSize: "25px",
     lineHeight: 1,
     fontWeight: 500,
@@ -282,7 +273,6 @@ const LoginPage = () => {
         <div style={styles.leftPanel}>
           <div style={styles.brandBlock}>
             <img src={appIconSrc} alt="Sivflow" style={styles.logoIcon} />
-            <h1 style={styles.logoTitle}>Sivflow</h1>
             <p style={styles.tagline}>Write. Connect. Evolve.</p>
             <p style={styles.description}>
               思考をつなぎ、学びを進化させる
