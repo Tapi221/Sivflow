@@ -33,6 +33,7 @@
     "verify:icons": "node scripts/verify-icons-entry.mjs",
     "verify:sw": "node scripts/verify/verify-sw.mjs",
     "verify:source-conventions": "node scripts/verify/verify-source-conventions.mjs",
+    "watch:source-conventions": "node scripts/dev/watch-source-conventions.mjs",
     "sync:firebase-emulators": "npm exec tsx -- tools/firebase/sync-firebase-emulators.ts",
     "verify:firebase-emulators": "npx vitest run tests/unit/firebaseEmulatorConfigConsistency.test.ts",
     "verify:design-tokens": "node scripts/verify/verify-design-tokens.mjs",
