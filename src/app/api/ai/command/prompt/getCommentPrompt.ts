@@ -1,23 +1,12 @@
-import type { ChatMessage } from '@/registry/components/editor/use-chat';
 import type { SlateEditor } from 'platejs';
+import type { ChatMessage } from '../types';
 
 import { getMarkdown } from '@platejs/ai';
 import dedent from 'dedent';
 
-import {
-  buildStructuredPrompt,
-  formatTextFromMessages,
-  getLastUserInstruction,
-} from '@/app/api/ai/command/utils';
+import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction } from '@/app/api/ai/command/utils';
 
-export function getCommentPrompt(
-  editor: SlateEditor,
-  {
-    messages,
-  }: {
-    messages: ChatMessage[];
-  }
-) {
+export function getCommentPrompt(editor: SlateEditor, { messages }: { messages: ChatMessage[] }) {
   const selectingMarkdown = getMarkdown(editor, {
     type: 'blockWithBlockId',
   });
@@ -25,7 +14,6 @@ export function getCommentPrompt(
   return buildStructuredPrompt({
     context: selectingMarkdown,
     examples: [
-      // 1) Basic single-block comment
       dedent`
         <instruction>
         Review this paragraph.
@@ -45,8 +33,6 @@ export function getCommentPrompt(
         ]
         </output>
       `,
-
-      // 2) Multiple comments within one long block
       dedent`
         <instruction>
         Add comments for this section.
@@ -71,8 +57,6 @@ export function getCommentPrompt(
         ]
         </output>
       `,
-
-      // 3) Multi-block comment (span across two related paragraphs)
       dedent`
         <instruction>
         Provide comments.
@@ -87,14 +71,12 @@ export function getCommentPrompt(
         [
           {
             "blockId": "3",
-            "content": "This policy aims to regulate AI-generated media.\\n\\nDevelopers must disclose when content is synthetically produced.",
+            "content": "This policy aims to regulate AI-generated media.\n\nDevelopers must disclose when content is synthetically produced.",
             "comments": "You could combine these ideas into a single, clearer statement on transparency."
           }
         ]
         </output>
       `,
-
-      // 4) With <Selection> – user highlighted part of a sentence
       dedent`
         <instruction>
         Give feedback on this highlighted phrase.
@@ -114,8 +96,6 @@ export function getCommentPrompt(
         ]
         </output>
       `,
-
-      // 5) With long <Selection> → multiple comments
       dedent`
         <instruction>
         Review the highlighted section.
@@ -153,7 +133,7 @@ export function getCommentPrompt(
       - The **content** field must be an exact verbatim substring copied from the <context> (no paraphrasing). Do not include <block> tags, but retain other MDX tags.
       - IMPORTANT: The **content** field must be flexible:
         - It can cover one full block, only part of a block, or multiple blocks.
-        - If multiple blocks are included, separate them with two \\n\\n.
+        - If multiple blocks are included, separate them with two \n\n.
         - Do NOT default to using the entire block—use the smallest relevant span instead.
       - At least one comment must be provided.
       - If a <Selection> exists, Your comments should come from the <Selection>, and if the <Selection> is too long, there should be more than one comment.
