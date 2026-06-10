@@ -159,7 +159,7 @@ const toGoogleEventPayload = (event: Partial<GCalWritableEventInput>): Record<st
 };
 
 export const fetchCalendarList = async (accessToken: string): Promise<GoogleCalendarListItem[]> => {
-  console.info("[GoogleCalendarAPI] calendar list fetch started");
+  console.info("[GoogleCalendarAPI] カレンダー一覧の取得を開始しました");
 
   try {
     const calendars: GoogleCalendarListItem[] = [];
@@ -196,7 +196,7 @@ export const fetchCalendarList = async (accessToken: string): Promise<GoogleCale
       pageToken = data.nextPageToken;
     } while (pageToken);
 
-    console.info("[GoogleCalendarAPI] calendar list fetch completed", {
+    console.info("[GoogleCalendarAPI] カレンダー一覧の取得が完了しました", {
       calendarCount: calendars.length,
       calendarIds: calendars.map((calendar) => calendar.id),
       defaultSelectedCalendarIds: calendars.filter((calendar) => calendar.primary || calendar.selected).map((calendar) => calendar.id),
@@ -205,7 +205,7 @@ export const fetchCalendarList = async (accessToken: string): Promise<GoogleCale
 
     return calendars;
   } catch (error) {
-    console.error("[GoogleCalendarAPI] calendar list fetch failed", error);
+    console.error("[GoogleCalendarAPI] カレンダー一覧の取得に失敗しました", error);
     throw error;
   }
 };
@@ -246,7 +246,7 @@ export const fetchEventsForCalendar = async ({
   rangeStart: Date;
   rangeEnd: Date;
 }): Promise<GoogleCalendarEvent[]> => {
-  console.info("[GoogleCalendarAPI] events fetch started", {
+  console.info("[GoogleCalendarAPI] 予定の取得を開始しました", {
     accountId,
     calendarId,
     rangeEnd: rangeEnd.toISOString(),
@@ -279,7 +279,7 @@ export const fetchEventsForCalendar = async ({
       .map((event) => toGoogleCalendarEvent({ raw: event, accountId, calendarId, accentColor }))
       .filter(Boolean) as GoogleCalendarEvent[];
 
-    console.info("[GoogleCalendarAPI] events fetch completed", {
+    console.info("[GoogleCalendarAPI] 予定の取得が完了しました", {
       accountId,
       calendarId,
       parsedEventCount: events.length,
@@ -290,7 +290,7 @@ export const fetchEventsForCalendar = async ({
 
     return events;
   } catch (error) {
-    console.error("[GoogleCalendarAPI] events fetch failed", {
+    console.error("[GoogleCalendarAPI] 予定の取得に失敗しました", {
       accountId,
       calendarId,
       error,
