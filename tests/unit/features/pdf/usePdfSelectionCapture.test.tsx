@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { usePdfSelectionCapture } from "@/features/pdf/hooks/usePdfSelectionCapture";
+import { CARD_SELECTION_CAPTURE_EVENT, type CardSelectionCaptureEventDetail } from "@/features/selection-capture/cardSelectionCaptureEvents";
 import type { SelectionCaptureArea } from "@/features/selection-capture/selectionCapture.types";
 
 const state = vi.hoisted(() => {
@@ -10,6 +12,16 @@ const state = vi.hoisted(() => {
     recognizeSelectionCaptureText: vi.fn(),
   };
 });
+
+const CAPTURE_AREA: SelectionCaptureArea = {
+  shape: "rectangle",
+  rect: {
+    x: 4,
+    y: 8,
+    width: 120,
+    height: 64,
+  },
+};
 
 vi.mock("@/features/pdf/pdfSelectionCapture", () => ({
   capturePdfViewerAreaToBlob: state.capturePdfViewerAreaToBlob,
@@ -22,19 +34,6 @@ vi.mock("@/features/selection-capture/clipboardImage", () => ({
 vi.mock("@/features/selection-capture/selectionCaptureOcr", () => ({
   recognizeSelectionCaptureText: state.recognizeSelectionCaptureText,
 }));
-
-import { usePdfSelectionCapture } from "@/features/pdf/hooks/usePdfSelectionCapture";
-import { CARD_SELECTION_CAPTURE_EVENT, type CardSelectionCaptureEventDetail } from "@/features/selection-capture/cardSelectionCaptureEvents";
-
-const CAPTURE_AREA: SelectionCaptureArea = {
-  shape: "rectangle",
-  rect: {
-    x: 4,
-    y: 8,
-    width: 120,
-    height: 64,
-  },
-};
 
 const createPngBlob = () => new Blob(["pdf-capture"], { type: "image/png" });
 

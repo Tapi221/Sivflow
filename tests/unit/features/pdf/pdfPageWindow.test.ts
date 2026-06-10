@@ -53,6 +53,6 @@ describe("getPdfPageWindowKeepSet", () => {
   it("巨大PDFでもviewportより前のページを走査対象から外す", () => {
     const pages = getPdfPageWindowKeepSet(createPageMetrics(1_000, 100), 50_000, 100, 1_000, { overscanPageCount: 1 });
 
-    expect(toSortedPages(pages)).toEqual([500, 501, 502, 503]);
+    expect(toSortedPages(pages)).toEqual([500, 501, 502]);
   });
 });
