@@ -79,7 +79,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
       setQueueCount(queue);
       setConflictCount(conflicts.length);
     } catch (error) {
-      console.error("[Sync] Failed to update counts:", error);
+      console.error("[同期] 件数の更新に失敗しました:", error);
     }
   }, [userId]);
 
@@ -89,20 +89,20 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
     if (!settings.autoSync || !navigator.onLine) return;
 
     const intervalMs = settings.intervalMinutes * 60 * 1000;
-    console.log(`[Sync] Setting up auto-sync interval: ${settings.intervalMinutes} minutes`);
+    console.log(`[同期] 自動同期間隔を設定しました: ${settings.intervalMinutes} 分`);
 
     syncIntervalRef.current = setInterval(async () => {
       if (!navigator.onLine || syncStatusRef.current === "syncing" || !userId) return;
 
       try {
-        console.log("[Sync] Running background sync...");
+        console.log("[同期] バックグラウンド同期を実行しています...");
         await service.synchronize();
         const db = await getLocalDb(userId);
         const currentLastSync = await db.getLastSyncTime(userId);
         setLastSyncTime(currentLastSync);
         await updateCounts(service);
       } catch (error) {
-        console.error("[Sync] Background sync failed:", error);
+        console.error("[同期] バックグラウンド同期に失敗しました:", error);
       }
     }, intervalMs);
   }, [clearSyncInterval, updateCounts, userId]);
@@ -118,7 +118,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
       syncSettingsRef.current = settings;
       configureAutoSync(service, settings);
     } catch (error) {
-      console.error("[Sync] Failed to reload sync settings:", error);
+      console.error("[同期] 同期設定の再読み込みに失敗しました:", error);
     }
   }, [configureAutoSync, userId]);
 
@@ -133,7 +133,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
       const currentLastSync = await db.getLastSyncTime(userId);
       setLastSyncTime(currentLastSync);
     } catch (error) {
-      console.error("[Sync] Failed to update last sync time:", error);
+      console.error("[同期] 最終同期時刻の更新に失敗しました:", error);
     }
   }, [userId]);
 
@@ -159,7 +159,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
       await updateCounts(service);
       await reloadSyncSettings();
     } catch (error) {
-      console.error("[Sync] Failed to initialize sync service:", error);
+      console.error("[同期] 同期サービスの初期化に失敗しました:", error);
       setSyncNotice("offline");
     }
   }, [clearSyncInterval, reloadSyncSettings, updateCounts, updateLastSyncTime, userId]);
@@ -189,7 +189,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
       await updateLastSyncTime();
       await updateCounts(service);
     } catch (error) {
-      console.error("[Sync] Manual sync failed:", error);
+      console.error("[同期] 手動同期に失敗しました:", error);
       setSyncNotice("error");
     } finally {
       setSyncStatus("idle");
@@ -203,7 +203,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
       const db = await getLocalDb(userId);
       return await db.getConflicts();
     } catch (error) {
-      console.error("[Sync] Failed to load conflicts:", error);
+      console.error("[同期] 競合の読み込みに失敗しました:", error);
       return [];
     }
   }, [userId]);
@@ -222,7 +222,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
       await db.removeConflict(conflict.id);
       await updateCounts();
     } catch (error) {
-      console.error("[Sync] Failed to resolve conflict:", error);
+      console.error("[同期] 競合の解決に失敗しました:", error);
     }
   }, [updateCounts, userId]);
 
@@ -233,7 +233,7 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
       const db = await getLocalDb(userId);
       await db.clearSyncErrors();
     } catch (error) {
-      console.error("[Sync] Failed to clear sync errors:", error);
+      console.error("[同期] 同期エラーのクリアに失敗しました:", error);
     }
   }, [userId]);
 
