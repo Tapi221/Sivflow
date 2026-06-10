@@ -11,7 +11,7 @@ import { appendSelectionCaptureBlocks, normalizeSelectionCaptureOcrText } from "
 import { createSelectionCaptureImageAsset } from "@/features/selection-capture/createSelectionCaptureImageAsset";
 import { CARD_SELECTION_CAPTURE_EVENT, type CardSelectionCaptureEventDetail } from "@/features/selection-capture/cardSelectionCaptureEvents";
 import { useToast } from "@/contexts/ToastContext";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useCards } from "@/components/card/hooks/useCards";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { Card, CardPatch, UserSettings } from "@/types";
