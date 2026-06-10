@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
 import { refreshCalendarAccessToken, requestCalendarAccessToken } from "@/integration/google-integration/google.oauth";
+import { auth } from "@/services/firebase";
+import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
 import { fetchCalendarList } from "./gcal.api";
 import { readCalendarIds, readEmail, readRefreshToken, readToken, readWasConnected, writeCalendarIds, writeEmail, writeRefreshToken, writeToken, writeWasConnected } from "./gcal.storage";
 import type { GCalForceSyncOptions, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem, UseGoogleCalendarIntegrationOptions } from "./gcalSync.types";
-import { auth } from "@/services/firebase";
 
 type EventsAction =
   | {
@@ -78,9 +78,7 @@ export const useGoogleCalendarIntegration = ({
     readEmail(),
   );
 
-  const [accountPhotoUrl, setAccountPhotoUrl] = useState<string | null>(() =>
-    authInstance.currentUser?.photoURL ?? null,
-  );
+  const [accountPhotoUrl, setAccountPhotoUrl] = useState<string | null>(null);
 
   const [selectedCalendarIds, setSelectedCalendarIds] = useState<Set<string>>(
     () => new Set(readCalendarIds()),
@@ -138,7 +136,7 @@ export const useGoogleCalendarIntegration = ({
 
       setAccessToken(result.accessToken);
 
-      setAccountPhotoUrl(authInstance.currentUser?.photoURL ?? null);
+      setAccountPhotoUrl(result.accountPhotoUrl ?? null);
 
       return true;
     } catch {
@@ -146,7 +144,7 @@ export const useGoogleCalendarIntegration = ({
       setError("Google Calendar の再連携が必要です");
       return false;
     }
-  }, [authInstance]);
+  }, []);
 
   const connect = useCallback(async () => {
     setIsConnecting(true);
@@ -170,7 +168,7 @@ export const useGoogleCalendarIntegration = ({
 
       setAccountEmail(result.accountEmail);
 
-      setAccountPhotoUrl(authInstance.currentUser?.photoURL ?? null);
+      setAccountPhotoUrl(result.accountPhotoUrl ?? null);
 
       const nextCalendars = await fetchCalendarList(result.accessToken);
 
@@ -378,11 +376,6 @@ export const useGoogleCalendarIntegration = ({
     lastSyncedAt,
 
     selectedCalendarIds,
-
-    selectedCalendarIdList: Array.from(selectedCalendarIds),
-
-    syncState,
-
     toggleCalendar,
   };
 };
