@@ -1,14 +1,14 @@
-import type { ChatMessage } from '@/registry/components/editor/use-chat';
 import type { SlateEditor } from 'platejs';
+import type { ChatMessage } from '../types';
+
 import dedent from 'dedent';
+
 import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction, getMarkdownWithSelection, isMultiBlocks, isSelectionInTable, isSingleCellSelection } from '@/app/api/ai/command/utils';
+
 import { commonEditRules } from './common';
 import { buildEditTableMultiCellPrompt } from './getEditTablePrompt';
 
-function buildEditMultiBlockPrompt(
-  editor: SlateEditor,
-  messages: ChatMessage[]
-) {
+function buildEditMultiBlockPrompt(editor: SlateEditor, messages: ChatMessage[]) {
   const selectingMarkdown = getMarkdownWithSelection(editor);
 
   return buildStructuredPrompt({
@@ -73,16 +73,12 @@ function buildEditMultiBlockPrompt(
   });
 }
 
-function buildEditSelectionPrompt(
-  editor: SlateEditor,
-  messages: ChatMessage[]
-) {
+function buildEditSelectionPrompt(editor: SlateEditor, messages: ChatMessage[]) {
   addSelection(editor);
 
   const selectingMarkdown = getMarkdownWithSelection(editor);
   const endIndex = selectingMarkdown.indexOf('<Selection>');
-  const prefilledResponse =
-    endIndex === -1 ? '' : selectingMarkdown.slice(0, endIndex);
+  const prefilledResponse = endIndex === -1 ? '' : selectingMarkdown.slice(0, endIndex);
 
   return buildStructuredPrompt({
     context: selectingMarkdown,
@@ -208,22 +204,16 @@ function buildEditSelectionPrompt(
   });
 }
 
-export function getEditPrompt(
-  editor: SlateEditor,
-  { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[] }
-): [string, 'table' | 'multi-block' | 'selection'] {
-  if (!isSelecting)
-    throw new Error('Edit tool is only available when selecting');
+export function getEditPrompt(editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[] }): [string, 'table' | 'multi-block' | 'selection'] {
+  if (!isSelecting) throw new Error('Edit tool is only available when selecting');
 
-  // Handle selection inside table cell
   if (isSelectionInTable(editor) && !isSingleCellSelection(editor)) {
     return [buildEditTableMultiCellPrompt(editor, messages), 'table'];
   }
-  // Handle multi-block selection
+
   if (isMultiBlocks(editor)) {
     return [buildEditMultiBlockPrompt(editor, messages), 'multi-block'];
   }
 
-  // Handle single block with selection
   return [buildEditSelectionPrompt(editor, messages), 'selection'];
 }
