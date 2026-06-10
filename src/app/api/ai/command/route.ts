@@ -1,34 +1,14 @@
-import type {
-  ChatMessage,
-  ToolName,
-} from '@/registry/components/editor/use-chat';
 import type { NextRequest } from 'next/server';
+import type { ChatMessage, ToolName } from './types';
 
 import { createGateway } from '@ai-sdk/gateway';
-import {
-  type LanguageModel,
-  type UIMessageStreamWriter,
-  createUIMessageStream,
-  createUIMessageStreamResponse,
-  generateText,
-  Output,
-  streamText,
-  tool,
-} from 'ai';
+import { type LanguageModel, type UIMessageStreamWriter, createUIMessageStream, createUIMessageStreamResponse, generateText, Output, streamText, tool } from 'ai';
 import { NextResponse } from 'next/server';
 import { type SlateEditor, createSlateEditor, nanoid } from 'platejs';
 import { z } from 'zod';
 
-import { BaseEditorKit } from '@/registry/components/editor/editor-base-kit';
-import { markdownJoinerTransform } from '@/registry/lib/markdown-joiner-transform';
-
-import {
-  buildEditTableMultiCellPrompt,
-  getChooseToolPrompt,
-  getCommentPrompt,
-  getEditPrompt,
-  getGeneratePrompt,
-} from './prompt';
+import { AI_COMMAND_PLATE_PLUGINS } from './editorKit';
+import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from './prompt';
 
 export async function POST(req: NextRequest) {
   const { apiKey: key, ctx, messages: messagesRaw, model } = await req.json();
@@ -36,7 +16,7 @@ export async function POST(req: NextRequest) {
   const { children, selection, toolName: toolNameParam } = ctx;
 
   const editor = createSlateEditor({
-    plugins: BaseEditorKit,
+    plugins: AI_COMMAND_PLATE_PLUGINS,
     selection,
     value: children,
   });
@@ -87,9 +67,7 @@ export async function POST(req: NextRequest) {
         }
 
         const stream = streamText({
-          experimental_transform: markdownJoinerTransform(),
           model: gatewayProvider(model || 'openai/gpt-4o-mini'),
-          // Not used
           prompt: '',
           tools: {
             comment: getCommentTool(editor, {
@@ -117,7 +95,6 @@ export async function POST(req: NextRequest) {
                 messages: messagesRaw,
               });
 
-              // Table editing uses the table tool
               if (editType === 'table') {
                 return {
                   ...step,
@@ -130,8 +107,7 @@ export async function POST(req: NextRequest) {
                 activeTools: [],
                 model:
                   editType === 'selection'
-                    ? //The selection task is more challenging, so we chose to use Gemini 2.5 Flash.
-                      gatewayProvider(model || 'google/gemini-2.5-flash')
+                    ? gatewayProvider(model || 'google/gemini-2.5-flash')
                     : gatewayProvider(model || 'openai/gpt-4o-mini'),
                 messages: [
                   {
