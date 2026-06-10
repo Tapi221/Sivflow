@@ -90,6 +90,7 @@ export interface ICloudSyncAdapter {
 }
 
 export interface SyncStats {
+  isSyncing?: boolean;
   lastAttemptAt?: number;
   lastSuccessAt?: number;
   lastServerTime?: number;

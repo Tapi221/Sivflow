@@ -153,3 +153,32 @@ export interface LocalDBSyncApi {
 
   getSyncQueueCount(): Promise<number>;
 }
+
+export type LocalDBInstance = LocalDBSyncApi;
+
+export type LocalDBLike = LocalDBSyncApi & {
+  cardSets: QueryableTable<CardSet, string>;
+  documents: QueryableTable<Document, string>;
+  tagRecords: QueryableTable<TagRecord, string>;
+  images: QueryableTable<AssetRecord | UploadedImage, string>;
+  userSettings: QueryableTable<UserSettings, string>;
+  syncErrors: QueryableTable<SyncError, string>;
+
+  runSyncTransaction<T>(scope: () => Promise<T>): Promise<T>;
+  clearSyncTables(tables: readonly SyncableEntityTable[]): Promise<void>;
+  putSyncRecord<TTable extends SyncableEntityTable>(
+    table: TTable,
+    data: LocalDBTableMap[TTable],
+  ): Promise<void>;
+  getQueuedItemsOldestFirst(): Promise<import("@/types/domain/sync").SyncQueueItem[]>;
+  removeSyncQueueItem(id: string): Promise<void>;
+  putSyncQueueItem(item: import("@/types/domain/sync").SyncQueueItem): Promise<void>;
+  getConflicts(): Promise<import("@/types/domain/sync").SyncConflict[]>;
+  putConflict(conflict: import("@/types/domain/sync").SyncConflict): Promise<void>;
+  listCardsByUser(userId: string): Promise<Card[]>;
+  listFoldersByUser(userId: string): Promise<Folder[]>;
+  listCardSetsByUser(userId: string): Promise<CardSet[]>;
+  addCardSet(cardSet: CardSet): Promise<void>;
+  updateCardById(id: string, changes: Partial<Card>): Promise<number>;
+  setSyncTrigger(trigger: () => void): void;
+};
