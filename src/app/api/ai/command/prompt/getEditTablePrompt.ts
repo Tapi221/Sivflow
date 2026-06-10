@@ -1,19 +1,12 @@
-import type { ChatMessage } from '@/registry/components/editor/use-chat';
 import type { SlateEditor } from 'platejs';
+import type { ChatMessage } from '../types';
 
 import { getMarkdown } from '@platejs/ai';
 import dedent from 'dedent';
 
-import {
-  buildStructuredPrompt,
-  formatTextFromMessages,
-  getLastUserInstruction,
-} from '@/app/api/ai/command/utils';
+import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction } from '@/app/api/ai/command/utils';
 
-export function buildEditTableMultiCellPrompt(
-  editor: SlateEditor,
-  messages: ChatMessage[]
-): string {
+export function buildEditTableMultiCellPrompt(editor: SlateEditor, messages: ChatMessage[]): string {
   const tableCellMarkdown = getMarkdown(editor, {
     type: 'tableCellWithId',
   });
@@ -21,7 +14,6 @@ export function buildEditTableMultiCellPrompt(
   return buildStructuredPrompt({
     context: tableCellMarkdown,
     examples: [
-      // 1) Simple text edit
       dedent`
         <instruction>
         Fix grammar
@@ -43,8 +35,6 @@ export function buildEditTableMultiCellPrompt(
         ]
         </output>
       `,
-
-      // 2) Multi-cell edit
       dedent`
         <instruction>
         Translate to Chinese
@@ -72,8 +62,6 @@ export function buildEditTableMultiCellPrompt(
         ]
         </output>
       `,
-
-      // 3) Multi-block content in cell
       dedent`
         <instruction>
         Add more details
@@ -103,7 +91,7 @@ export function buildEditTableMultiCellPrompt(
       - The actual content of each selected cell is in <Cell id="...">content</Cell> blocks after the table.
       - You must ONLY modify the content of the <Cell> blocks.
       - Output a JSON array where each object has "id" (the cell id) and "content" (the new content).
-      - The "content" field can contain multiple paragraphs separated by \\n\\n.
+      - The "content" field can contain multiple paragraphs separated by \n\n.
       - Do NOT output any <Cell>, <CellRef>, or table markdown - only the JSON array.
       - CRITICAL: Examples are for format reference only. NEVER output content from examples.
     `,
