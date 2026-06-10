@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { createEmptyInkDocument, type InkStroke } from "../../../packages/core/src/domain/card/ink/inkDocument";
-import { receiveDesktopHandwritingMessage, type DesktopHandwritingReceiverSession } from "../../../packages/platform/src/handwriting/desktopHandwritingReceiver";
-import { createHandwritingStrokeDeltaMessage } from "../../../packages/platform/src/handwriting/handwritingStrokeMessages";
+import { createEmptyInkDocument, type InkStroke } from "@core/domain/card/ink/inkDocument";
+import { receiveDesktopHandwritingMessage, type DesktopHandwritingReceiverSession } from "@platform/handwriting/desktopHandwritingReceiver";
+import { createHandwritingStrokeDeltaMessage } from "@platform/handwriting/handwritingStrokeMessages";
 
 const createSession = (): DesktopHandwritingReceiverSession => ({
   id: "session-1",
