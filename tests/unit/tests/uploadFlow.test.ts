@@ -8,8 +8,8 @@ vi.mock("@/services/firebase", () => ({
   db: {},
 }));
 
-vi.mock("@/contexts/AuthContext", () => ({
-  useAuth: () => ({ currentUser: { uid: "test-user-id" } }),
+vi.mock("@/contexts/auth/useAuthSession", () => ({
+  useAuthSession: () => ({ currentUser: { uid: "test-user-id" } }),
 }));
 
 describe("useReliableFileUpload", () => {
