@@ -3,12 +3,12 @@ import { uploadPdfToGoogleDrive } from "@/integration/google-integration/googleD
 import { requestGoogleDriveFileAccessToken } from "@/integration/google-integration/googleDrive.oauth";
 import { buildStoragePath, createDocumentId, extractPdfFiles } from "@/components/folder/explorer/model/utils";
 import { useAuthSession } from "@/contexts/AuthContext";
-import { useToast } from "@/contexts/ToastContext";
 import { auth } from "@/services/firebase";
 import { saveDocumentWithBlob } from "@/services/documentFileStore";
 import { getLocalDb } from "@/services/localDB";
 import type { DocumentItem } from "@/types";
 import { getOrCreateDeviceId } from "@/utils/device";
+import { useToast } from "@web-renderer/contexts/ToastContext";
 
 interface UseFolderDocumentUploadParams {
   actionFolderId: string | null;
