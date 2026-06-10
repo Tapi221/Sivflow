@@ -1,6 +1,6 @@
-export type RuledStyleKind = "repeat+bottom" | "repeat-only" | "bottom-only";
+type RuledStyleKind = "repeat+bottom" | "repeat-only" | "bottom-only";
 
-export interface RuledParams {
+interface RuledParams {
   kind: RuledStyleKind;
   /** 行間(px) */
   rowPx: number;
@@ -48,7 +48,7 @@ const makeLineSvg = (color: string, linePx: number) => {
  * ページ背景用の繰り返し罫線 backgroundImage 値を返す。
  * rowPx=24, linePx=1 をデフォルトとして使う。
  */
-export const getPageRuledBg = (
+const getPageRuledBg = (
   color = "rgba(0,0,0,0.03)",
   rowPx = 24,
   linePx = 1,
@@ -59,7 +59,7 @@ export const getPageRuledBg = (
   };
 };
 
-export const getRuledStyle = (params: RuledParams) => {
+const getRuledStyle = (params: RuledParams) => {
   const { kind, rowPx, phasePx, color, linePx, bottomLinePx } = params;
 
   const repeatUri = makeRepeatSvg(rowPx, phasePx, color, linePx);
@@ -100,3 +100,6 @@ export const getRuledStyle = (params: RuledParams) => {
     backgroundRepeat: "no-repeat, repeat-y",
   };
 };
+
+export { getPageRuledBg, getRuledStyle };
+export type { RuledParams, RuledStyleKind };
