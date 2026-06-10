@@ -9,7 +9,7 @@ import {
 import { ListPlugin } from '@platejs/list/react';
 import { KEYS } from 'platejs';
 
-import { IndentKit } from '@/registry/components/editor/plugins/indent-kit';
+import { IndentKit } from './indent-kit';
 import { BlockList } from '@/registry/ui/block-list';
 
 export const ListKit = [

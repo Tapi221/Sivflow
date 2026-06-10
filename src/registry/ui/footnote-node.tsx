@@ -41,7 +41,7 @@ import {
   InlineComboboxGroup,
   InlineComboboxInput,
   InlineComboboxItem,
-} from '@/registry/ui/inline-combobox';
+} from './inline-combobox';
 
 const NUMERIC_FOOTNOTE_QUERY = /^\d+$/;
 
