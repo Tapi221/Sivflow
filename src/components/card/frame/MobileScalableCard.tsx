@@ -2,6 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { CARD_BASE_WIDTH, CARD_DISPLAY_SCALE } from "@/domain/card/cardGeometry.constants";
 import { cn } from "@/lib/utils";
 
+interface MobileScalableCardProps {
+  children: React.ReactNode;
+  cardDesignWidth?: number;
+  safePadding?: number;
+  enableEditMode?: boolean;
+  className?: string;
+}
+
 const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
 
 /**
@@ -14,16 +22,7 @@ const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
  * @param safePadding - 左右の安全マージン（合計px）。デフォルト24px
  * @param enableEditMode - 編集モードを有効化するか（将来の拡張用）
  */
-
-interface MobileScalableCardProps {
-  children: React.ReactNode;
-  cardDesignWidth?: number;
-  safePadding?: number;
-  enableEditMode?: boolean;
-  className?: string;
-}
-
-export const MobileScalableCard = ({
+const MobileScalableCard = ({
   children,
   cardDesignWidth = CARD_DISPLAY_WIDTH,
   safePadding = 24,
@@ -177,3 +176,5 @@ export const MobileScalableCard = ({
     </>
   );
 };
+
+export { MobileScalableCard };
