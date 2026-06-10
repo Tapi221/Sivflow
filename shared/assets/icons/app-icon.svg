@@ -1,1 +1,44 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Sivflow logo"><defs><linearGradient id="sivflowOfficialTop" x1="46" y1="258" x2="486" y2="42" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00142d" /><stop offset="0.36" stop-color="#062849" /><stop offset="0.58" stop-color="#1f8bc4" /><stop offset="0.78" stop-color="#32bff1" /><stop offset="1" stop-color="#effcff" /></linearGradient><linearGradient id="sivflowOfficialMiddle" x1="133" y1="276" x2="428" y2="213" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00142d" /><stop offset="0.5" stop-color="#0b355d" /><stop offset="0.82" stop-color="#7ecde9" /><stop offset="1" stop-color="#f7fdff" /></linearGradient><linearGradient id="sivflowOfficialBottom" x1="24" y1="466" x2="476" y2="229" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00142d" /><stop offset="0.36" stop-color="#062345" /><stop offset="0.66" stop-color="#1daee6" /><stop offset="0.9" stop-color="#58cef3" /><stop offset="1" stop-color="#effcff" /></linearGradient><radialGradient id="sivflowOfficialTopGlow" cx="79%" cy="12%" r="48%"><stop offset="0" stop-color="#ffffff" stop-opacity="0.78" /><stop offset="0.35" stop-color="#b9efff" stop-opacity="0.36" /><stop offset="1" stop-color="#ffffff" stop-opacity="0" /></radialGradient><radialGradient id="sivflowOfficialBottomGlow" cx="78%" cy="76%" r="46%"><stop offset="0" stop-color="#ffffff" stop-opacity="0.5" /><stop offset="0.44" stop-color="#6edcff" stop-opacity="0.2" /><stop offset="1" stop-color="#ffffff" stop-opacity="0" /></radialGradient><filter id="sivflowOfficialShadow" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#001a38" flood-opacity="0.12" /></filter><clipPath id="sivflowOfficialClip"><path d="M 485.0 41.0 L 470.0 65.0 L 462.0 75.0 L 461.0 71.0 L 469.0 56.0 L 469.0 47.0 L 468.0 44.0 L 459.0 37.0 L 447.0 33.0 L 452.0 31.0 L 239.0 31.0 L 219.0 33.0 L 185.0 40.0 L 164.0 47.0 L 137.0 60.0 L 111.0 78.0 L 86.0 103.0 L 68.0 129.0 L 54.0 159.0 L 46.0 190.0 L 44.0 223.0 L 49.0 256.0 L 61.0 286.0 L 73.0 304.0 L 95.0 325.0 L 125.0 343.0 L 152.0 352.0 L 122.0 338.0 L 104.0 325.0 L 91.0 312.0 L 83.0 301.0 L 78.0 292.0 L 73.0 277.0 L 72.0 248.0 L 79.0 222.0 L 93.0 197.0 L 116.0 172.0 L 136.0 157.0 L 162.0 143.0 L 189.0 133.0 L 219.0 126.0 L 245.0 123.0 L 273.0 122.0 L 377.0 122.0 L 396.0 119.0 L 410.0 115.0 L 432.0 104.0 L 449.0 91.0 L 468.0 69.0 Z" /><path d="M 466.0 206.0 L 467.0 234.0 L 465.0 243.0 L 457.0 265.0 L 445.0 286.0 L 431.0 304.0 L 409.0 326.0 L 378.0 349.0 L 358.0 360.0 L 337.0 369.0 L 297.0 380.0 L 259.0 384.0 L 141.0 385.0 L 116.0 389.0 L 101.0 394.0 L 88.0 400.0 L 74.0 409.0 L 61.0 420.0 L 51.0 431.0 L 35.0 455.0 L 25.0 477.0 L 26.0 481.0 L 210.0 481.0 L 276.0 478.0 L 305.0 473.0 L 333.0 465.0 L 348.0 459.0 L 374.0 445.0 L 407.0 420.0 L 424.0 402.0 L 447.0 369.0 L 463.0 336.0 L 473.0 304.0 L 478.0 270.0 L 478.0 251.0 L 475.0 230.0 L 474.0 231.0 L 477.0 248.0 L 476.0 283.0 L 471.0 309.0 L 462.0 334.0 L 461.0 329.0 L 463.0 326.0 L 471.0 275.0 L 471.0 261.0 L 470.0 258.0 L 464.0 254.0 L 468.0 242.0 L 470.0 227.0 L 470.0 213.0 L 468.0 212.0 Z" /><path d="M 138.0 300.0 L 141.0 302.0 L 292.0 302.0 L 314.0 300.0 L 332.0 296.0 L 360.0 284.0 L 381.0 269.0 L 406.0 242.0 L 427.0 211.0 L 427.0 208.0 L 251.0 207.0 L 218.0 213.0 L 194.0 224.0 L 181.0 233.0 L 170.0 243.0 L 158.0 258.0 L 148.0 274.0 L 138.0 295.0 Z" /></clipPath></defs><g><path fill="url(#sivflowOfficialTop)" d="M 485.0 41.0 L 470.0 65.0 L 462.0 75.0 L 461.0 71.0 L 469.0 56.0 L 469.0 47.0 L 468.0 44.0 L 459.0 37.0 L 447.0 33.0 L 452.0 31.0 L 239.0 31.0 L 219.0 33.0 L 185.0 40.0 L 164.0 47.0 L 137.0 60.0 L 111.0 78.0 L 86.0 103.0 L 68.0 129.0 L 54.0 159.0 L 46.0 190.0 L 44.0 223.0 L 49.0 256.0 L 61.0 286.0 L 73.0 304.0 L 95.0 325.0 L 125.0 343.0 L 152.0 352.0 L 122.0 338.0 L 104.0 325.0 L 91.0 312.0 L 83.0 301.0 L 78.0 292.0 L 73.0 277.0 L 72.0 248.0 L 79.0 222.0 L 93.0 197.0 L 116.0 172.0 L 136.0 157.0 L 162.0 143.0 L 189.0 133.0 L 219.0 126.0 L 245.0 123.0 L 273.0 122.0 L 377.0 122.0 L 396.0 119.0 L 410.0 115.0 L 432.0 104.0 L 449.0 91.0 L 468.0 69.0 Z" filter="url(#sivflowOfficialShadow)" /><path fill="url(#sivflowOfficialBottom)" d="M 466.0 206.0 L 467.0 234.0 L 465.0 243.0 L 457.0 265.0 L 445.0 286.0 L 431.0 304.0 L 409.0 326.0 L 378.0 349.0 L 358.0 360.0 L 337.0 369.0 L 297.0 380.0 L 259.0 384.0 L 141.0 385.0 L 116.0 389.0 L 101.0 394.0 L 88.0 400.0 L 74.0 409.0 L 61.0 420.0 L 51.0 431.0 L 35.0 455.0 L 25.0 477.0 L 26.0 481.0 L 210.0 481.0 L 276.0 478.0 L 305.0 473.0 L 333.0 465.0 L 348.0 459.0 L 374.0 445.0 L 407.0 420.0 L 424.0 402.0 L 447.0 369.0 L 463.0 336.0 L 473.0 304.0 L 478.0 270.0 L 478.0 251.0 L 475.0 230.0 L 474.0 231.0 L 477.0 248.0 L 476.0 283.0 L 471.0 309.0 L 462.0 334.0 L 461.0 329.0 L 463.0 326.0 L 471.0 275.0 L 471.0 261.0 L 470.0 258.0 L 464.0 254.0 L 468.0 242.0 L 470.0 227.0 L 470.0 213.0 L 468.0 212.0 Z" filter="url(#sivflowOfficialShadow)" /><path fill="url(#sivflowOfficialMiddle)" d="M 138.0 300.0 L 141.0 302.0 L 292.0 302.0 L 314.0 300.0 L 332.0 296.0 L 360.0 284.0 L 381.0 269.0 L 406.0 242.0 L 427.0 211.0 L 427.0 208.0 L 251.0 207.0 L 218.0 213.0 L 194.0 224.0 L 181.0 233.0 L 170.0 243.0 L 158.0 258.0 L 148.0 274.0 L 138.0 295.0 Z" filter="url(#sivflowOfficialShadow)" /><rect width="512" height="512" fill="url(#sivflowOfficialTopGlow)" clip-path="url(#sivflowOfficialClip)" /><rect width="512" height="512" fill="url(#sivflowOfficialBottomGlow)" clip-path="url(#sivflowOfficialClip)" /></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Sivflow logo">
+  <defs>
+    <linearGradient id="sivflowOfficialTop" x1="46" y1="258" x2="486" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#00142d" />
+      <stop offset="0.36" stop-color="#062849" />
+      <stop offset="0.58" stop-color="#1f8bc4" />
+      <stop offset="0.78" stop-color="#32bff1" />
+      <stop offset="1" stop-color="#effcff" />
+    </linearGradient>
+    <linearGradient id="sivflowOfficialMiddle" x1="133" y1="276" x2="428" y2="213" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#00142d" />
+      <stop offset="0.5" stop-color="#0b355d" />
+      <stop offset="0.82" stop-color="#7ecde9" />
+      <stop offset="1" stop-color="#f7fdff" />
+    </linearGradient>
+    <linearGradient id="sivflowOfficialBottom" x1="24" y1="466" x2="476" y2="229" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#00142d" />
+      <stop offset="0.36" stop-color="#062345" />
+      <stop offset="0.66" stop-color="#1daee6" />
+      <stop offset="0.9" stop-color="#58cef3" />
+      <stop offset="1" stop-color="#effcff" />
+    </linearGradient>
+    <radialGradient id="sivflowOfficialTopGlow" cx="79%" cy="12%" r="48%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.78" />
+      <stop offset="0.35" stop-color="#b9efff" stop-opacity="0.36" />
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="sivflowOfficialBottomGlow" cx="78%" cy="76%" r="46%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.5" />
+      <stop offset="0.44" stop-color="#6edcff" stop-opacity="0.2" />
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+    <filter id="sivflowOfficialShadow" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#001a38" flood-opacity="0.12" />
+    </filter>
+  </defs>
+  <g filter="url(#sivflowOfficialShadow)">
+    <path fill="url(#sivflowOfficialTop)" d="M485 41C468 73 444 99 410 115C396 121 380 122 377 122H273C231 122 180 127 136 157C88 190 62 240 73 277C82 307 111 335 152 352C79 325 38 271 45 204C51 142 88 87 137 60C171 41 211 31 239 31H452C475 31 495 37 485 41Z" />
+    <path fill="url(#sivflowOfficialMiddle)" d="M138 300C149 268 164 246 194 224C214 210 238 207 251 207H427C409 238 389 263 360 284C333 303 298 302 292 302H141C139 302 138 301 138 300Z" />
+    <path fill="url(#sivflowOfficialBottom)" d="M466 206C485 252 481 315 463 336C442 388 405 430 348 459C318 474 279 481 210 481H26C25 480 25 478 25 477C46 427 79 397 116 389C126 386 136 385 141 385H259C317 384 369 370 409 326C442 290 461 245 466 206Z" />
+    <rect width="512" height="512" fill="url(#sivflowOfficialTopGlow)" opacity="0.9" />
+    <rect width="512" height="512" fill="url(#sivflowOfficialBottomGlow)" opacity="0.9" />
+  </g>
+</svg>
