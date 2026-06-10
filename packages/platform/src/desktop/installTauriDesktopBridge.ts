@@ -82,9 +82,6 @@ const desktopApi: DesktopBridgeApi = {
       };
     },
   },
-  startup: {
-    finishSplash: () => invoke<void>("startup_finish_splash"),
-  },
   window: {
     minimize: () => invoke<void>("window_minimize"),
     maximizeToggle: () => invoke<void>("window_maximize_toggle"),
