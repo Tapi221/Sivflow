@@ -21,6 +21,7 @@ const VISIBLE_DAYS = [
   new Date("2024-07-28T00:00:00.000Z"),
 ];
 const CALENDAR_BUFFER = { before: 0, after: 0 };
+const SCHEDULE_SCROLL_POSITION_PERSIST_DELAY_MS = 200;
 
 const TestHarness = ({ selectedViewMode = "week" }: TestHarnessProps) => {
   const { scrollContainerRef } = useCalendarScrollController({
@@ -38,6 +39,7 @@ const TestHarness = ({ selectedViewMode = "week" }: TestHarnessProps) => {
 
 describe("useCalendarScrollController", () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     window.localStorage.clear();
     Object.defineProperty(window, "requestAnimationFrame", {
       configurable: true,
@@ -55,6 +57,7 @@ describe("useCalendarScrollController", () => {
   afterEach(() => {
     cleanup();
     window.localStorage.clear();
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -66,12 +69,16 @@ describe("useCalendarScrollController", () => {
     expect(screen.getByTestId("calendar-scroll-container").scrollTop).toBe(480);
   });
 
-  it("週表示のスクロール時に縦スクロール位置を保存する", () => {
+  it("週表示のスクロール時に縦スクロール位置を遅延保存する", () => {
     render(React.createElement(TestHarness, { selectedViewMode: "week" }));
 
     const scroller = screen.getByTestId("calendar-scroll-container");
     scroller.scrollTop = 612;
     fireEvent.scroll(scroller);
+
+    expect(readStoredScheduleCalendarScrollTop()).toBe(null);
+
+    vi.advanceTimersByTime(SCHEDULE_SCROLL_POSITION_PERSIST_DELAY_MS);
 
     expect(readStoredScheduleCalendarScrollTop()).toBe(612);
   });
@@ -86,6 +93,7 @@ describe("useCalendarScrollController", () => {
 
     scroller.scrollTop = 240;
     fireEvent.scroll(scroller);
+    vi.advanceTimersByTime(SCHEDULE_SCROLL_POSITION_PERSIST_DELAY_MS);
 
     expect(readStoredScheduleCalendarScrollTop()).toBe(360);
   });
