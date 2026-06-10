@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
-import type { SecurityEventType } from "../../functions/src/security/policy";
+import type { SecurityEventType } from "#src/security/policy";
 
 // Initialize Admin SDK
 process.env.FIRESTORE_EMULATOR_HOST = "localhost:8080";
@@ -79,13 +79,10 @@ const verifySecuritySignal = async () => {
     await wait(500);
   }
 
-  setTimeout(() => {
-    console.error("❌ [TIMEOUT] Account was not locked in time.");
-    process.exit(1);
-  }, 10000);
+  console.log("[Verify] Waiting for trigger...");
+  await wait(5000);
+  console.error("❌ [FAIL] Timeout waiting for lock signal");
+  process.exit(1);
 };
 
-verifySecuritySignal().catch((err) => {
-  console.error("Error:", err);
-  process.exit(1);
-});
+void verifySecuritySignal();
