@@ -1,1 +1,0 @@
-export { AppRoutes } from "@web-renderer/app/routing/AppRoutes";
