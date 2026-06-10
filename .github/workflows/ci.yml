@@ -13,5 +13,6 @@ jobs:
           node-version: 20.19.0
       - run: npm install
       - run: npm run verify:design-tokens
+      - run: npm run verify:source-conventions
       - run: npm run typecheck
       - run: npm run build
