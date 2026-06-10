@@ -7,6 +7,7 @@ type PdfPerformanceMetrics = {
   loadedPageCount: number;
   markNames: string[];
   renderedCanvasCount: number;
+  scaleLabel: string | null;
   scrollTop: number;
 };
 
@@ -44,12 +45,14 @@ const readPdfPerformanceMetrics = async (page: Page): Promise<PdfPerformanceMetr
     const markNames = performance.getEntriesByType("mark").map((entry) => entry.name).filter((name) => name.startsWith("sivflow.pdf."));
     const scrollContainer = document.querySelector<HTMLElement>("[data-testid='pdf-pane-scroll-container']");
     const firstPage = document.querySelector<HTMLElement>(".pdfViewer .page");
+    const scaleLabel = document.querySelector<HTMLElement>("[data-testid='pdf-scale-label']");
     return {
       firstPageWidth: firstPage?.getBoundingClientRect().width ?? 0,
       loadedPageCount: document.querySelectorAll(".pdfViewer .page[data-loaded='true']").length,
       longTaskCount: window.__sivflowPdfLongTaskDurations?.length ?? 0,
       markNames,
       renderedCanvasCount: document.querySelectorAll(".pdfViewer canvas").length,
+      scaleLabel: scaleLabel?.textContent ?? null,
       scrollTop: scrollContainer?.scrollTop ?? 0,
     };
   });
@@ -78,6 +81,16 @@ test.describe("PDF性能スモーク", () => {
 
     await expect(page.getByTestId("pdf-performance-source-type")).toHaveText("url", { timeout: 30000 });
     await expect(page.locator(".pdfViewer .page").first()).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId("pdf-toolbar")).toBeVisible({ timeout: 30000 });
+    await expect(page.getByLabel("拡大")).toBeVisible();
+    await expect(page.getByLabel("縮小")).toBeVisible();
+    await expect(page.getByLabel("幅に合わせる")).toBeVisible();
+    await expect(page.getByLabel("ブックマーク切替")).toBeVisible();
+
+    await page.getByLabel("拡大").click();
+    await page.getByLabel("幅に合わせる").click();
+    await page.getByLabel("ブックマーク切替").click();
+    await expect(page.getByLabel("ブックマーク切替")).toHaveAttribute("aria-pressed", "true");
 
     const scrollContainer = page.getByTestId("pdf-pane-scroll-container");
     for (let index = 0; index < PDF_PERFORMANCE_SCROLL_STEPS; index += 1) {
@@ -99,6 +112,7 @@ test.describe("PDF性能スモーク", () => {
     expect(metrics.loadedPageCount).toBeGreaterThan(0);
     expect(metrics.firstPageWidth).toBeGreaterThan(500);
     expect(metrics.renderedCanvasCount).toBeGreaterThan(0);
+    expect(metrics.scaleLabel).toMatch(/%$/);
     expect(metrics.scrollTop).toBeGreaterThan(0);
     expect(metrics.longTaskCount).toBeLessThanOrEqual(PDF_PERFORMANCE_LONG_TASK_LIMIT);
   });
@@ -112,6 +126,7 @@ test.describe("PDF性能スモーク", () => {
 
     await expect(page.getByTestId("pdf-performance-source-type")).toHaveText("url", { timeout: 30000 });
     await expect(page.locator(".pdfViewer .page").first()).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId("pdf-toolbar")).toBeVisible({ timeout: 30000 });
 
     await page.getByTestId("pdf-performance-toggle").click();
     await expect(page.getByTestId("pdf-performance-source-type")).toHaveText("none", { timeout: 30000 });
@@ -120,6 +135,7 @@ test.describe("PDF性能スモーク", () => {
     await page.getByTestId("pdf-performance-toggle").click();
     await expect(page.getByTestId("pdf-performance-source-type")).toHaveText("url", { timeout: 30000 });
     await expect(page.locator(".pdfViewer .page").first()).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId("pdf-toolbar")).toBeVisible({ timeout: 30000 });
 
     const metrics = await readPdfPerformanceMetrics(page);
     expect(pageFailures).toEqual([]);
@@ -128,5 +144,6 @@ test.describe("PDF性能スモーク", () => {
     expect(metrics.loadedPageCount).toBeGreaterThan(0);
     expect(metrics.firstPageWidth).toBeGreaterThan(500);
     expect(metrics.renderedCanvasCount).toBeGreaterThan(0);
+    expect(metrics.scaleLabel).toMatch(/%$/);
   });
 });
