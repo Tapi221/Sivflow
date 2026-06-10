@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { Timestamp } from "firebase/firestore";
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import { computeNextReview, createReviewLogEntry } from "@/services/reviewAlgorithm";
 import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 import { normalizeMemoryStability } from "@/utils/reviewUtils";
