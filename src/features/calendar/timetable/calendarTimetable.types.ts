@@ -4,6 +4,10 @@ export type CalendarTimetableWeekdayIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export type CalendarTimetableVisibleDayCount = 5 | 6 | 7;
 
+export type CalendarTimetableInstitutionKind = "university" | "vocational" | "college" | "other";
+
+export type CalendarTimetableCatalogSource = "manual" | "userSubmitted" | "syllabus" | "cloud";
+
 export type CalendarTimetablePeriod = {
   id: string;
   label: string;
@@ -17,9 +21,73 @@ export type CalendarTimetableSlot = {
   periodId: string;
 };
 
+export type CalendarTimetableSyllabusSlot = {
+  dayIndex: CalendarTimetableWeekdayIndex;
+  periodLabel: string;
+};
+
+export type CalendarTimetableInstitution = {
+  id: string;
+  name: string;
+  kind: CalendarTimetableInstitutionKind;
+  region: string;
+  source: CalendarTimetableCatalogSource;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CalendarTimetableDepartment = {
+  id: string;
+  institutionId: string;
+  facultyName: string;
+  name: string;
+  source: CalendarTimetableCatalogSource;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CalendarTimetableSyllabusCourse = {
+  id: string;
+  institutionId: string;
+  departmentId: string;
+  title: string;
+  room: string;
+  teacher: string;
+  semesterLabel: string;
+  credits: string;
+  memo: string;
+  syllabusUrl: string;
+  colorKey: TagColorKey;
+  slots: CalendarTimetableSyllabusSlot[];
+  source: CalendarTimetableCatalogSource;
+  searchText: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CalendarTimetableSyllabusCourseDraft = {
+  institutionName: string;
+  institutionKind: CalendarTimetableInstitutionKind;
+  departmentName: string;
+  facultyName: string;
+  title: string;
+  room: string;
+  teacher: string;
+  semesterLabel: string;
+  credits: string;
+  memo: string;
+  syllabusUrl: string;
+  colorKey: TagColorKey;
+  slots: CalendarTimetableSyllabusSlot[];
+  source?: CalendarTimetableCatalogSource;
+};
+
 export type CalendarTimetableCourse = {
   id: string;
   semesterId: string;
+  syllabusCourseId?: string;
+  institutionId?: string;
+  departmentId?: string;
   title: string;
   room: string;
   teacher: string;
@@ -33,6 +101,9 @@ export type CalendarTimetableCourse = {
 export type CalendarTimetableCourseDraft = {
   id?: string;
   semesterId: string;
+  syllabusCourseId?: string;
+  institutionId?: string;
+  departmentId?: string;
   title: string;
   room: string;
   teacher: string;
@@ -47,4 +118,10 @@ export type CalendarTimetableSettings = {
   activeSemesterId: string;
   visibleDayCount: CalendarTimetableVisibleDayCount;
   updatedAt: string;
+};
+
+export type CalendarTimetableSyllabusCourseDisplay = CalendarTimetableSyllabusCourse & {
+  institutionName: string;
+  departmentName: string;
+  facultyName: string;
 };
