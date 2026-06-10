@@ -1,7 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { createCardSetUseCase, deleteCardSetWithCards, listCardSetsForFolder, moveCardSetToFolderUseCase, updateCardSetUseCase } from "@core/usecases/cardSet";
 import { createWebCardSetRepository } from "@platform/storage/cardSetRepository.web";
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { CardSet } from "@/types";
 import { DEFAULT_CARD_DISPLAY_MODE } from "@/types/domain/cardSet";
 
