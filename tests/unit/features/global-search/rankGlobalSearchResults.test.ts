@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { rankSearchResults } from "@/features/search/lib/rankSearchResults";
-import type { SearchItem } from "@/features/search/model/searchTypes";
+import type { SearchItem } from "@/features/search/model/search.types";
 
 const createSearchItem = (
   overrides: Partial<SearchItem>,
