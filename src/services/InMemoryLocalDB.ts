@@ -567,7 +567,7 @@ export class InMemoryLocalDB {
 
   constructor(userId?: string, name?: string) {
     this.userId = userId;
-    this.name = name ?? `FlashcardMasterDB_mem_${userId ?? "anonymous"}`;
+    this.name = name ?? `SivflowDB_mem_${userId ?? "anonymous"}`;
 
     this.folders = this.registerTable<Folder>("folders", "id");
     this.cardSets = this.registerTable<CardSet>("cardSets", "id");
@@ -632,150 +632,94 @@ export class InMemoryLocalDB {
   };
 
   public readonly queueUpsertSync = async <TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high" }: { entity: TEntity; operationType: "create" | "update"; payload: SyncPayloadByEntity[TEntity]; priority?: SyncPriority }): Promise<void> => {
-    await this.syncQueue.put(createUpsertQueueItem({ entity, operationType, payload, priority }));
+    const item = createUpsertQueueItem({ entity, operationType, payload, priority });
+    await this.syncQueue.put(item);
     this.emitSyncTrigger();
   };
 
-  public readonly queueDeleteSync = async ({ entity, targetId, priority = "high" }: { entity: DeleteEntity; targetId: string; priority?: SyncPriority }): Promise<void> => {
-    await this.syncQueue.put(createDeleteQueueItem({ entity, targetId, priority }));
+  public readonly queueDeleteSync = async <TEntity extends DeleteEntity>({ entity, id, userId, priority = "high" }: { entity: TEntity; id: string; userId: string; priority?: SyncPriority }): Promise<void> => {
+    const item = createDeleteQueueItem({ entity, id, userId, priority });
+    await this.syncQueue.put(item);
     this.emitSyncTrigger();
   };
 
-  private readonly enqueueSyncForTable = async (tableName: string, payload: object, operationType: "create" | "update"): Promise<void> => {
-    if (!SYNCABLE_TABLES.has(tableName as typeof SYNCABLE_TABLES extends Set<infer V> ? V : never)) return;
-    const entity = getQueueEntityForTable(tableName);
-    if (!entity) return;
-
-    const payloadId = createPayloadId(payload);
-    const record = asRecord(payload);
-    if (record.isDeleted === true && DELETE_CAPABLE_ENTITIES.has(entity as DeleteEntity)) {
-      await this.queueDeleteSync({ entity: entity as DeleteEntity, targetId: payloadId, priority: "high" });
-      return;
-    }
-
-    await this.queueUpsertSync({ entity: entity as UpsertEntity, operationType, payload: payload as never, priority: "high" });
-  };
-
-  public readonly getItem = async <TTable extends SyncableEntityTable>(tableName: TTable, id: string): Promise<LocalDBTableMap[TTable] | undefined> => {
-    const item = await this.table<LocalDBTableMap[TTable]>(tableName).get(id);
-    if (!item) return undefined;
-    if (tableName === "cards") return normalizeCard(item) as LocalDBTableMap[TTable];
-    if (tableName === "folders") return normalizeFolderWithSilent(item) as LocalDBTableMap[TTable];
+  public readonly getItem = async <TTable extends SyncableEntityTable>(table: TTable, id: string): Promise<LocalDBTableMap[TTable] | undefined> => {
+    const item = await this.table<LocalDBTableMap[TTable]>(table).get(id);
+    if (table === "cards") return (item ? normalizeCard(item as Card) : item) as LocalDBTableMap[TTable] | undefined;
+    if (table === "folders") return (item ? normalizeFolderWithSilent(item as Folder) : item) as LocalDBTableMap[TTable] | undefined;
     return item;
   };
 
-  public readonly getAllItems = async <TTable extends SyncableEntityTable>(tableName: TTable): Promise<Array<LocalDBTableMap[TTable]>> => {
-    const items = await this.table<LocalDBTableMap[TTable]>(tableName).toArray();
-    if (tableName === "cards") return items.map((item) => normalizeCard(item)) as Array<LocalDBTableMap[TTable]>;
-    if (tableName === "folders") return items.map((item) => normalizeFolderWithSilent(item)) as Array<LocalDBTableMap[TTable]>;
+  public readonly getAllItems = async <TTable extends SyncableEntityTable>(table: TTable): Promise<Array<LocalDBTableMap[TTable]>> => {
+    const items = await this.table<LocalDBTableMap[TTable]>(table).toArray();
+    if (table === "cards") return items.map((item) => normalizeCard(item as Card) as LocalDBTableMap[TTable]);
+    if (table === "folders") return items.map((item) => normalizeFolderWithSilent(item as Folder) as LocalDBTableMap[TTable]);
     return items;
   };
 
-  public readonly addItem = async (tableName: string, item: unknown, skipSync = false): Promise<string> => {
-    const payload = ensureObject((isRecord(item) ? item : {}) as ObjectRecord);
-    const id = createPayloadId(payload);
-    await this.table<ObjectRecord, string>(tableName).add(payload);
-    if (!skipSync) await this.enqueueSyncForTable(tableName, payload, "create");
-    return id;
-  };
-
-  public readonly updateItem = async (tableName: string, id: string, changes: Record<string, unknown>, skipSync = false): Promise<number> => {
-    const result = await this.table<Record<string, unknown>, string>(tableName).update(id, changes);
-    if (!skipSync && result > 0) {
-      const fullItem = await this.table<Record<string, unknown>, string>(tableName).get(id);
-      if (fullItem) await this.enqueueSyncForTable(tableName, fullItem, "update");
-    }
-    return result;
-  };
-
-  public readonly deleteItem = async (tableName: string, id: string): Promise<void> => {
-    await this.table(tableName).delete(id);
-  };
-  public readonly softDelete = async (tableName: string, id: string): Promise<number> => this.updateItem(tableName, id, { isDeleted: true, deletedAt: new Date(), updatedAt: new Date() });
-  public readonly restore = async (tableName: string, id: string): Promise<number> => this.updateItem(tableName, id, { isDeleted: false, deletedAt: null, updatedAt: new Date() });
-  public readonly purge = async (tableName: string, id: string): Promise<void> => await this.deleteItem(tableName, id);
-  public readonly bulkUpsert = async (tableName: string, items: unknown[], skipSync = false): Promise<void> => {
-    const payload = items.filter(isRecord).map((item) => ensureObject(item));
-    if (payload.length === 0) return;
-    await this.table<ObjectRecord, string>(tableName).bulkPut(payload);
-    if (!skipSync) {
-      for (const item of payload) await this.enqueueSyncForTable(tableName, item, "update");
-    }
-  };
-  public readonly upsert = async <TTable extends SyncableEntityTable>(tableName: TTable, data: LocalDBTableMap[TTable], skipSync = false): Promise<void> => {
-    await this.table<LocalDBTableMap[TTable], string>(tableName).put(data);
-    if (!skipSync) await this.enqueueSyncForTable(tableName, data, "update");
-  };
-  public readonly clearTable = async (tableName: string): Promise<void> => await this.table(tableName).clear();
-  public readonly clearAllData = async (): Promise<void> => await Promise.all(this.tables.map((table) => table.clear())).then(() => undefined);
-  public readonly clearSyncTables = async (tables: readonly SyncableEntityTable[]): Promise<void> => {
-    for (const table of tables) await this.table(table).clear();
-  };
-  public readonly putSyncRecord = async <TTable extends SyncableEntityTable>(table: TTable, data: LocalDBTableMap[TTable]): Promise<void> => await this.upsert(table, data, true);
-
-  public readonly getAllCards = async (): Promise<Card[]> => (await this.cards.toArray()).map((card) => normalizeCard(card)) as Card[];
-  public readonly getAllFolders = async (): Promise<Folder[]> => (await this.folders.toArray()).map((folder) => normalizeFolderWithSilent(folder)) as Folder[];
-  public readonly listCardsByUser = async (userId: string): Promise<Card[]> => (await this.cards.where("userId").equals(userId).toArray()).map((card) => normalizeCard(card)) as Card[];
-  public readonly listFoldersByUser = async (userId: string): Promise<Folder[]> => (await this.folders.where("userId").equals(userId).toArray()).map((folder) => normalizeFolderWithSilent(folder)) as Folder[];
-  public readonly listCardSetsByUser = async (userId: string): Promise<CardSet[]> => await this.cardSets.where("userId").equals(userId).toArray();
-  public readonly addCardSet = async (cardSet: CardSet): Promise<void> => {
-    await this.cardSets.put(cardSet);
-  };
-  public readonly updateCardById = async (id: string, changes: Partial<Card>): Promise<number> => await this.cards.update(id, changes);
-
-  public readonly getLastSyncTime = async (userId: string): Promise<Date | null> => {
-    const meta = await this.syncMetadata.get(userId);
-    if (!meta?.lastSyncTime) return null;
-    return toDateOrNull(meta.lastSyncTime);
-  };
-  public readonly updateLastSyncTime = async (userId: string, syncTime: Date): Promise<void> => {
-    await this.syncMetadata.put({ userId, deviceId: getOrCreateDeviceId(), deviceName: getDeviceName(), lastSyncTime: syncTime, lastHighResSync: null, isActive: true });
-  };
-  public readonly getDirtyItems = async <TTable extends SyncableEntityTable>(tableName: TTable, userId: string, lastSyncTime: Date): Promise<Array<LocalDBTableMap[TTable]>> => {
-    const rows = await this.table<LocalDBTableMap[TTable], string>(tableName).toArray();
-    const threshold = toTimestamp(lastSyncTime);
+  public readonly getDirtyItems = async <TTable extends SyncableEntityTable>(table: TTable, userId: string, lastSyncTime: Date): Promise<Array<LocalDBTableMap[TTable]>> => {
+    const rows = await this.table<LocalDBTableMap[TTable]>(table).toArray();
+    const threshold = lastSyncTime.getTime();
     return rows.filter((row) => {
-      const record = asRecord(row);
-      return typeof record.userId === "string" && record.userId === userId && toTimestamp(record.updatedAt) >= threshold;
+      const record = row as Record<string, unknown>;
+      return record.userId === userId && toTimestamp(record.updatedAt) >= threshold;
     });
   };
 
-  public readonly cleanupSyncHistory = async (): Promise<void> => {
-    const now = Date.now();
-    const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-    await this.syncHistory.where("finishedAt").below(now - thirtyDays).delete();
-    const all = await this.syncHistory.orderBy("finishedAt").toArray();
-    if (all.length > 100) await this.syncHistory.bulkDelete(all.slice(0, all.length - 100).map((item) => item.id));
+  public readonly getLastSyncTime = async (userId: string): Promise<Date | null> => {
+    const metadata = await this.syncMetadata.get(userId);
+    return metadata?.lastSyncTime ? new Date(toTimestamp(metadata.lastSyncTime)) : null;
   };
-  public readonly cleanupSyncErrors = async (): Promise<void> => await this.syncErrors.clear();
-  public readonly getSyncSettings = async (id: string): Promise<SyncSettings | undefined> => await this.syncSettings.get(id);
-  public readonly putSyncSettings = async (settings: SyncSettings): Promise<void> => await this.syncSettings.put(settings).then(() => undefined);
-  public readonly getSyncError = async (id: string): Promise<SyncError | undefined> => await this.syncErrors.get(id);
-  public readonly putSyncError = async (error: SyncError): Promise<void> => await this.syncErrors.put(error).then(() => undefined);
-  public readonly clearSyncErrors = async (): Promise<void> => await this.syncErrors.clear();
-  public readonly getRetryableSyncErrors = async (): Promise<SyncError[]> => await this.syncErrors.toArray();
-  public readonly findQueueProcessingErrorsByTargetId = async (targetId: string): Promise<SyncError[]> => await this.syncErrors.where("targetId").equals(targetId).toArray();
-  public readonly putSyncHistory = async (history: SyncHistory): Promise<void> => await this.syncHistory.put(history).then(() => undefined);
-  public readonly getRecentSyncHistory = async (limit = 50): Promise<SyncHistory[]> => await this.syncHistory.orderBy("startedAt").reverse().limit(limit).toArray();
-  public readonly getSyncStatsSince = async (timestamp: number): Promise<{ histories: SyncHistory[]; errors: SyncError[] }> => ({ histories: await this.syncHistory.where("startedAt").aboveOrEqual(timestamp).toArray(), errors: await this.syncErrors.toArray() });
-  public readonly getSyncQueueCount = async (): Promise<number> => await this.syncQueue.count();
-  public readonly getQueuedItemsOldestFirst = async (): Promise<SyncQueueItem[]> => await this.syncQueue.orderBy("createdAt").toArray();
-  public readonly trimSyncQueueToLimit = async (limit: number): Promise<void> => {
-    const all = await this.getQueuedItemsOldestFirst();
-    if (all.length > limit) await this.syncQueue.bulkDelete(all.slice(0, all.length - limit).map((item) => item.id));
+
+  public readonly updateLastSyncTime = async (userId: string, syncTime: Date): Promise<void> => {
+    await this.syncMetadata.put({ userId, deviceId: getOrCreateDeviceId(), deviceName: getDeviceName(), lastSyncTime: syncTime, lastHighResSync: null, isActive: true });
   };
-  public readonly putSyncQueueItem = async (item: SyncQueueItem): Promise<void> => await this.syncQueue.put(item).then(() => undefined);
-  public readonly removeSyncQueueItem = async (id: string): Promise<void> => await this.syncQueue.delete(id);
-  public readonly putConflict = async (conflict: SyncConflict): Promise<void> => await this.conflicts.put(conflict).then(() => undefined);
-  public readonly getConflict = async (id: string): Promise<SyncConflict | undefined> => await this.conflicts.get(id);
-  public readonly getConflicts = async (): Promise<SyncConflict[]> => await this.conflicts.toArray();
-  public readonly removeConflict = async (id: string): Promise<void> => await this.conflicts.delete(id);
-  public readonly getImageRecord = async (id: string): Promise<AssetRecord | UploadedImage | undefined> => await this.images.get(id);
-  public readonly putImageRecord = async (record: AssetRecord | UploadedImage): Promise<void> => await this.images.put(record).then(() => undefined);
-  public readonly updateImageRecord = async (id: string, changes: Partial<AssetRecord & UploadedImage>): Promise<number> => await this.images.update(id, changes);
+
+  public readonly getPendingSyncItems = async (userId: string): Promise<SyncQueueItem[]> => this.syncQueue.where("userId").equals(userId).toArray();
+
+  public readonly markSyncItemsCompleted = async (ids: string[]): Promise<void> => {
+    await this.syncQueue.bulkDelete(ids);
+  };
+
+  public readonly markSyncItemsFailed = async (ids: string[], error: string): Promise<void> => {
+    await Promise.all(ids.map((id) => this.syncQueue.update(id, { status: "failed", error, retryCount: 1 })));
+  };
+
+  public readonly clearSyncQueue = async (userId: string): Promise<void> => {
+    await this.syncQueue.where("userId").equals(userId).delete();
+  };
+
+  public readonly upsert = async <TTable extends SyncableEntityTable>(tableName: TTable, item: LocalDBTableMap[TTable], skipSync = false): Promise<void> => {
+    const table = this.table<LocalDBTableMap[TTable]>(tableName);
+    await table.put(item);
+    if (!skipSync && SYNCABLE_TABLES.has(tableName as never)) {
+      const entity = getQueueEntityForTable(tableName);
+      if (entity && entity !== "asset") {
+        await this.queueUpsertSync({ entity: entity as UpsertEntity, operationType: "update", payload: item as never });
+      }
+    }
+  };
+
+  public readonly deleteItem = async <TTable extends SyncableEntityTable>(tableName: TTable, id: string): Promise<void> => {
+    await this.table<LocalDBTableMap[TTable]>(tableName).delete(id);
+    const entity = getQueueEntityForTable(tableName);
+    if (entity && DELETE_CAPABLE_ENTITIES.has(entity as DeleteEntity)) {
+      await this.queueDeleteSync({ entity: entity as DeleteEntity, id, userId: this.userId ?? "anonymous" });
+    }
+  };
+
+  public readonly bulkUpsert = async <TTable extends SyncableEntityTable>(tableName: TTable, items: Array<LocalDBTableMap[TTable]>, skipSync = false): Promise<void> => {
+    await this.table<LocalDBTableMap[TTable]>(tableName).bulkPut(items);
+    if (!skipSync && SYNCABLE_TABLES.has(tableName as never)) {
+      await Promise.all(items.map((item) => {
+        const entity = getQueueEntityForTable(tableName);
+        if (!entity || entity === "asset") return Promise.resolve();
+        return this.queueUpsertSync({ entity: entity as UpsertEntity, operationType: "update", payload: item as never });
+      }));
+    }
+  };
+
   public readonly setSyncTrigger = (trigger: () => void): void => {
     this.syncTrigger = trigger;
   };
 }
-
-export const createInMemoryLocalDB = (userId?: string, name?: string): InMemoryLocalDB => new InMemoryLocalDB(userId, name);
