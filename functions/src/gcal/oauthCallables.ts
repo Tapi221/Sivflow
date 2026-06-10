@@ -119,7 +119,8 @@ const getTokenString = (data: Record<string, unknown>, key: string): string | nu
 const getTokenNumber = (data: Record<string, unknown>, key: string): number | null => typeof data[key] === "number" && Number.isFinite(data[key]) ? data[key] : null;
 
 const fetchGoogleJson = async (url: string, accessToken: string, context: "tokeninfo" | "userinfo") => {
-  const response = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  const options: RequestInit = context === "tokeninfo" ? {} : { headers: { Authorization: `Bearer ${accessToken}` } };
+  const response = await fetch(url, options);
   const data = await response.json() as Record<string, unknown>;
   if (!response.ok) throw new HttpsError("failed-precondition", `Google ${context} request failed.`, { reason: context === "tokeninfo" ? "google_token_invalid_response" : "google_userinfo_failed", reconnectRequired: true, userAction: "reconnect_google_account" });
   return data;
@@ -134,7 +135,8 @@ const readGoogleProfile = async (accessToken: string): Promise<GoogleOAuthProfil
 };
 
 const verifyGoogleScopes = async (accessToken: string): Promise<void> => {
-  const tokenInfo = await fetchGoogleJson(GOOGLE_TOKENINFO_ENDPOINT, accessToken, "tokeninfo");
+  const tokenInfoUrl = `${GOOGLE_TOKENINFO_ENDPOINT}?access_token=${encodeURIComponent(accessToken)}`;
+  const tokenInfo = await fetchGoogleJson(tokenInfoUrl, accessToken, "tokeninfo");
   const scopeValue = typeof tokenInfo.scope === "string" ? tokenInfo.scope : "";
   const scopes = new Set(scopeValue.split(" ").filter(Boolean));
   const missingScopes = REQUIRED_GOOGLE_SCOPES.filter((scope) => !scopes.has(scope));
@@ -229,3 +231,6 @@ export const createGoogleCalendarCustomToken = onCall({ region: REGION }, async 
   const uid = requireUid(request);
   return { customToken: await (await getAdminAuth()).createCustomToken(uid) };
 });
+
+export { googleCalendarWebhook } from "#src/gcal/googleCalendarWebhook.js";
+export { renewExpiredWatchChannels } from "#src/gcal/renewWatchChannels.js";
