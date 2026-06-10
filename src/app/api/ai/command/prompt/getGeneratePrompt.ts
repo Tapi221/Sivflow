@@ -10,7 +10,7 @@ import {
   getLastUserInstruction,
   getMarkdownWithSelection,
   isMultiBlocks,
-} from '../utils';
+} from '@/app/api/ai/command/utils';
 import { commonGenerateRules } from './common';
 
 function buildGenerateFreeformPrompt(messages: ChatMessage[]) {

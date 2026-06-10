@@ -8,7 +8,7 @@ import {
   buildStructuredPrompt,
   formatTextFromMessages,
   getLastUserInstruction,
-} from '../utils';
+} from '@/app/api/ai/command/utils';
 
 export function getCommentPrompt(
   editor: SlateEditor,
