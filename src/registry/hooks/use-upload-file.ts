@@ -1,17 +1,35 @@
 import * as React from 'react';
-import { generateReactHelpers } from '@uploadthing/react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { createLocalMediaUrl, LOCAL_PLATE_MEDIA_USER_ID } from '@/registry/lib/local-media-url';
 import { putImageBlob } from '@/services/imageFileStore';
-import type { OurFileRouter } from '@/registry/lib/uploadthing';
-import type { ClientUploadedFileData, UploadFilesOptions } from 'uploadthing/types';
 
-export type UploadedFile<T = unknown> = ClientUploadedFileData<T>;
+type UploadBeginEvent = {
+  file: string;
+};
 
-interface UseUploadFileProps extends Pick<UploadFilesOptions<OurFileRouter['editorUploader']>, 'headers' | 'onUploadBegin' | 'onUploadProgress' | 'skipPolling'> {
+type UploadProgressEvent = {
+  progress: number;
+};
+
+export type UploadedFile<T = unknown> = {
+  appUrl: string;
+  key: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+  customId?: string | null;
+  serverData?: T;
+};
+
+interface UseUploadFileProps {
+  headers?: HeadersInit;
+  onUploadBegin?: (event: UploadBeginEvent) => void;
   onUploadComplete?: (file: UploadedFile) => void;
   onUploadError?: (error: unknown) => void;
+  onUploadProgress?: (event: UploadProgressEvent) => void;
+  skipPolling?: boolean;
 }
 
 const LOCAL_UPLOAD_KEY_PREFIX = 'plate-local-upload';
@@ -31,7 +49,7 @@ const toUploadedFile = (file: File, url: string, key: string): UploadedFile => (
   size: file.size,
   type: file.type,
   url,
-}) as UploadedFile;
+});
 
 const createLocalUploadedFile = async (file: File): Promise<UploadedFile> => {
   const key = createAssetId();
@@ -44,17 +62,22 @@ const createLocalUploadedFile = async (file: File): Promise<UploadedFile> => {
   return toUploadedFile(file, createObjectUrl(file), key);
 };
 
-const simulateFallbackProgress = async (setProgress: React.Dispatch<React.SetStateAction<number>>) => {
+const simulateFallbackProgress = async (
+  setProgress: React.Dispatch<React.SetStateAction<number>>,
+  onUploadProgress: UseUploadFileProps['onUploadProgress'],
+) => {
   let progress = 0;
 
   while (progress < 100) {
     await new Promise((resolve) => setTimeout(resolve, FALLBACK_PROGRESS_DELAY_MS));
     progress += FALLBACK_PROGRESS_STEP;
-    setProgress(Math.min(progress, 100));
+    const nextProgress = Math.min(progress, 100);
+    setProgress(nextProgress);
+    onUploadProgress?.({ progress: nextProgress });
   }
 };
 
-export function useUploadFile({ onUploadComplete, onUploadError, ...props }: UseUploadFileProps = {}) {
+export function useUploadFile({ onUploadBegin, onUploadComplete, onUploadError, onUploadProgress }: UseUploadFileProps = {}) {
   const [uploadedFile, setUploadedFile] = React.useState<UploadedFile>();
   const [uploadingFile, setUploadingFile] = React.useState<File>();
   const [progress, setProgress] = React.useState<number>(0);
@@ -65,10 +88,10 @@ export function useUploadFile({ onUploadComplete, onUploadError, ...props }: Use
     setUploadingFile(file);
 
     try {
-      props.onUploadBegin?.({ file });
+      onUploadBegin?.({ file: file.name });
       const uploaded = await createLocalUploadedFile(file);
 
-      await simulateFallbackProgress(setProgress);
+      await simulateFallbackProgress(setProgress, onUploadProgress);
       setUploadedFile(uploaded);
       onUploadComplete?.(uploaded);
 
@@ -91,8 +114,6 @@ export function useUploadFile({ onUploadComplete, onUploadError, ...props }: Use
     uploadingFile,
   };
 }
-
-export const { uploadFiles, useUploadThing } = generateReactHelpers<OurFileRouter>();
 
 export function getErrorMessage(err: unknown) {
   const unknownError = 'Something went wrong, please try again later.';
