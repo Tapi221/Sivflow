@@ -19,26 +19,8 @@
         "minWidth": 1024,
         "minHeight": 700,
         "decorations": false,
-        "visible": false,
-        "center": true,
-        "backgroundColor": "#EEF3F6"
-      },
-      {
-        "label": "splash",
-        "title": "Sivflow",
-        "url": "/desktop-startup-splash.html",
-        "width": 420,
-        "height": 420,
-        "minWidth": 420,
-        "minHeight": 420,
-        "maxWidth": 420,
-        "maxHeight": 420,
-        "decorations": false,
-        "resizable": false,
         "visible": true,
         "center": true,
-        "alwaysOnTop": true,
-        "skipTaskbar": true,
         "backgroundColor": "#FFFFFF"
       }
     ],
