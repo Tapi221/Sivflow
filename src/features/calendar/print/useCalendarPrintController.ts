@@ -7,24 +7,24 @@ type UseCalendarPrintControllerOptions = {
 
 type UseCalendarPrintControllerReturn = {
   isPrintPanelActive: boolean;
-  printPanelClassName: string | null;
   requestPrint: () => void;
 };
 
 const CALENDAR_PRINTING_CLASS = "calendar-printing";
-const CALENDAR_PRINT_PANEL_CLASS = "calendar-print-panel";
 const CALENDAR_PRINT_CLEANUP_DELAY_MS = 30_000;
 
 const useCalendarPrintController = ({ onBeforePrint, onPrintError }: UseCalendarPrintControllerOptions = {}): UseCalendarPrintControllerReturn => {
   const printCleanupTimerRef = useRef<number | null>(null);
   const [isPrintPanelActive, setIsPrintPanelActive] = useState(false);
   const [printRequestToken, setPrintRequestToken] = useState(0);
+
   const clearPrintCleanupTimer = useCallback(() => {
     if (printCleanupTimerRef.current === null) return;
 
     window.clearTimeout(printCleanupTimerRef.current);
     printCleanupTimerRef.current = null;
   }, []);
+
   const requestPrint = useCallback(() => {
     void (async () => {
       try {
@@ -62,7 +62,6 @@ const useCalendarPrintController = ({ onBeforePrint, onPrintError }: UseCalendar
 
   return {
     isPrintPanelActive,
-    printPanelClassName: isPrintPanelActive ? CALENDAR_PRINT_PANEL_CLASS : null,
     requestPrint,
   };
 };
