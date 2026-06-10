@@ -4,14 +4,12 @@ import "@/runtime/disableNativeTitleTooltips";
 import "@platform/desktop/installTauriDesktopBridge";
 import { StrictMode, useEffect, useState, type ComponentType } from "react";
 import { createRoot } from "react-dom/client";
-import { QueryClientProvider } from "@tanstack/react-query";
 import "katex/dist/katex.min.css";
 import "@/styles/index.css";
 import "@/services/localDB";
 import { ErrorBoundary } from "@/components/common/ErrorScreen";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
-import { queryClient } from "@/runtime/queryClient";
 
 type AppBootstrapState =
   | { status: "loading" }
@@ -123,9 +121,7 @@ if (!renderGoogleOAuthCallback()) {
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <AppBootstrap />
-        </QueryClientProvider>
+        <AppBootstrap />
       </ErrorBoundary>
     </StrictMode>,
   );
