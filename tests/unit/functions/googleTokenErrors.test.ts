@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyGoogleTokenEndpointFailure } from "../../../functions/src/gcal/tokenErrors";
+import { classifyGoogleTokenEndpointFailure } from "#src/gcal/tokenErrors";
 
 describe("classifyGoogleTokenEndpointFailure", () => {
   it("classifies invalid_grant as reconnect-required failed-precondition", () => {
