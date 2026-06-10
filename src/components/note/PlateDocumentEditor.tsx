@@ -1,6 +1,7 @@
 import { BasicBlocksPlugin, BasicMarksPlugin } from "@platejs/basic-nodes/react";
+import { AlignLeft, ArrowUpToLine, Baseline, Bold, ChevronDown, CircleSlash, Code2, File, FileAudio, Film, Highlighter, Image, Indent, Italic, Link, List, ListOrdered, ListTodo, MessageSquare, Minus, MoreHorizontal, Outdent, PaintBucket, Plus, Redo2, Smile, Strikethrough, Table, Underline, Undo2, WandSparkles } from "lucide-react";
 import { Plate, PlateContainer, PlateContent, PlateElement, PlateLeaf, ParagraphPlugin, usePlateEditor, type PlateElementProps, type PlateLeafProps } from "platejs/react";
-import { useCallback, useEffect, useMemo, useRef, type ChangeEvent, type MouseEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, type ChangeEvent, type MouseEvent, type ReactNode } from "react";
 import type { Note, NoteBlockContent } from "@/types";
 
 type PlateDocumentEditorProps = {
@@ -41,9 +42,13 @@ type PlateCommandFallback = {
 
 type PlateToolbarButtonProps = {
   label: string;
-  children: string;
+  children: ReactNode;
   onPress: () => void;
   className?: string;
+};
+
+type PlateToolbarSelectProps = {
+  editor: PlateEditor;
 };
 
 const NOTE_SAVE_DEBOUNCE_MS = 500;
@@ -58,15 +63,15 @@ const PLATE_BLOCK_OPTIONS: readonly { label: string; value: PlateBlockType }[] =
   { label: "Heading 3", value: "h3" },
   { label: "Quote", value: "blockquote" },
 ];
-const PLATE_MARK_OPTIONS: readonly { fallback: PlateCommandFallback; label: string; mark: PlateMarkType; text: string }[] = [
-  { fallback: { command: "bold" }, label: "太字", mark: "bold", text: "B" },
-  { fallback: { command: "italic" }, label: "斜体", mark: "italic", text: "I" },
-  { fallback: { command: "underline" }, label: "下線", mark: "underline", text: "U" },
-  { fallback: { command: "strikeThrough" }, label: "取り消し線", mark: "strikethrough", text: "S" },
-  { fallback: { command: "formatBlock", value: "pre" }, label: "コード", mark: "code", text: "</>" },
+const PLATE_MARK_OPTIONS: readonly { fallback: PlateCommandFallback; icon: ReactNode; label: string; mark: PlateMarkType }[] = [
+  { fallback: { command: "bold" }, icon: <Bold className="size-4" />, label: "Bold", mark: "bold" },
+  { fallback: { command: "italic" }, icon: <Italic className="size-4" />, label: "Italic", mark: "italic" },
+  { fallback: { command: "underline" }, icon: <Underline className="size-4" />, label: "Underline", mark: "underline" },
+  { fallback: { command: "strikeThrough" }, icon: <Strikethrough className="size-4" />, label: "Strikethrough", mark: "strikethrough" },
+  { fallback: { command: "formatBlock", value: "pre" }, icon: <Code2 className="size-4" />, label: "Code", mark: "code" },
 ];
-const PLATE_TOOLBAR_BUTTON_CLASS_NAME = "inline-flex h-9 min-w-9 shrink-0 items-center justify-center rounded-lg px-2 text-[15px] font-semibold leading-none text-[#202124] transition-colors hover:bg-[#f1f3f4] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d5db]";
-const PLATE_TOOLBAR_SEPARATOR_CLASS_NAME = "mx-1 h-8 w-px shrink-0 bg-[#e5e7eb]";
+const PLATE_TOOLBAR_BUTTON_CLASS_NAME = "inline-flex h-8 min-w-8 shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md bg-transparent px-1.5 text-sm font-medium text-[#18181b] outline-none transition-colors hover:bg-[#f4f4f5] hover:text-[#52525b] focus-visible:ring-2 focus-visible:ring-[#d4d4d8] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0";
+const PLATE_TOOLBAR_SEPARATOR_CLASS_NAME = "mx-1.5 h-7 w-px shrink-0 bg-[#e4e4e7]";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
@@ -196,15 +201,15 @@ const setPlateBlockType = (editor: PlateEditor, blockType: PlateBlockType) => {
   runPlateTransform(editor, "setNodes", [{ type: blockType }, { match: (node: unknown) => isRecord(node) && Array.isArray(node.children) }], { command: "formatBlock", value: blockType === "p" ? "p" : blockType });
 };
 
-const ParagraphElement = (props: PlateElementProps) => <PlateElement {...props} as="p" className="my-2 min-h-[1.75rem] px-0 py-0 text-[17px] leading-8 text-[#202124]" />;
+const ParagraphElement = (props: PlateElementProps) => <PlateElement {...props} as="p" className="my-2 min-h-[1.75rem] px-0 py-0 text-[17px] leading-8 text-[#18181b]" />;
 
-const H1Element = (props: PlateElementProps) => <PlateElement {...props} as="h1" className="mb-4 mt-8 text-[34px] font-semibold leading-tight tracking-[-0.04em] text-[#202124]" />;
+const H1Element = (props: PlateElementProps) => <PlateElement {...props} as="h1" className="mb-4 mt-8 text-[34px] font-semibold leading-tight tracking-[-0.04em] text-[#09090b]" />;
 
-const H2Element = (props: PlateElementProps) => <PlateElement {...props} as="h2" className="mb-3 mt-7 text-[27px] font-semibold leading-tight tracking-[-0.035em] text-[#202124]" />;
+const H2Element = (props: PlateElementProps) => <PlateElement {...props} as="h2" className="mb-3 mt-7 text-[27px] font-semibold leading-tight tracking-[-0.035em] text-[#09090b]" />;
 
-const H3Element = (props: PlateElementProps) => <PlateElement {...props} as="h3" className="mb-2 mt-6 text-[22px] font-semibold leading-snug tracking-[-0.03em] text-[#202124]" />;
+const H3Element = (props: PlateElementProps) => <PlateElement {...props} as="h3" className="mb-2 mt-6 text-[22px] font-semibold leading-snug tracking-[-0.03em] text-[#09090b]" />;
 
-const BlockquoteElement = (props: PlateElementProps) => <PlateElement {...props} as="blockquote" className="my-4 border-l-4 border-[#d1d5db] pl-4 text-[#4b5563]" />;
+const BlockquoteElement = (props: PlateElementProps) => <PlateElement {...props} as="blockquote" className="my-4 border-l-4 border-[#d4d4d8] pl-4 text-[#52525b]" />;
 
 const StrongLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="strong" />;
 
@@ -214,7 +219,7 @@ const UnderlineLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="u" />
 
 const StrikethroughLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="s" />;
 
-const CodeLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="code" className="rounded-[5px] bg-[#f1f1f4] px-1 py-0.5 font-mono text-[0.92em] text-[#111827]" />;
+const CodeLeaf = (props: PlateLeafProps) => <PlateLeaf {...props} as="code" className="rounded-[5px] bg-[#f4f4f5] px-1 py-0.5 font-mono text-[0.92em] text-[#18181b]" />;
 
 const PlateToolbarButton = ({ label, children, onPress, className }: PlateToolbarButtonProps) => {
   const handleMouseDown = (event: MouseEvent<HTMLButtonElement>) => {
@@ -229,41 +234,100 @@ const PlateToolbarButton = ({ label, children, onPress, className }: PlateToolba
   );
 };
 
-const PlateEditorToolbar = ({ editor }: { editor: PlateEditor }) => {
+const PlateToolbarSeparator = () => <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />;
+
+const PlateToolbarBlockSelect = ({ editor }: PlateToolbarSelectProps) => {
   const handleBlockTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setPlateBlockType(editor, event.target.value as PlateBlockType);
   };
 
   return (
-    <div className="sticky top-0 z-30 flex min-h-14 w-full shrink-0 items-center border-b border-[#e5e7eb] bg-white/95 px-4 shadow-[0_1px_0_rgba(0,0,0,0.03)] backdrop-blur-xl">
-      <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto py-2">
-        <PlateToolbarButton label="元に戻す" onPress={() => runPlateTransform(editor, "undo", [], { command: "undo" })}>↶</PlateToolbarButton>
-        <PlateToolbarButton label="やり直す" onPress={() => runPlateTransform(editor, "redo", [], { command: "redo" })}>↷</PlateToolbarButton>
-
-        <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />
-
-        <select className="h-9 shrink-0 rounded-lg border border-transparent bg-white px-3 text-[15px] font-semibold text-[#202124] outline-none transition-colors hover:bg-[#f1f3f4] focus:border-[#d1d5db]" defaultValue="p" aria-label="ブロックタイプ" onChange={handleBlockTypeChange}>
-          {PLATE_BLOCK_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-        </select>
-
-        <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />
-
-        {PLATE_MARK_OPTIONS.map((option) => (
-          <PlateToolbarButton key={option.mark} label={option.label} className={option.mark === "italic" ? "italic" : option.mark === "underline" ? "underline" : option.mark === "strikethrough" ? "line-through" : ""} onPress={() => togglePlateMark(editor, option.mark, option.fallback)}>
-            {option.text}
-          </PlateToolbarButton>
-        ))}
-
-        <div className={PLATE_TOOLBAR_SEPARATOR_CLASS_NAME} />
-
-        <PlateToolbarButton label="引用" onPress={() => setPlateBlockType(editor, "blockquote")}>❝</PlateToolbarButton>
-        <PlateToolbarButton label="見出し1" onPress={() => setPlateBlockType(editor, "h1")}>H1</PlateToolbarButton>
-        <PlateToolbarButton label="見出し2" onPress={() => setPlateBlockType(editor, "h2")}>H2</PlateToolbarButton>
-        <PlateToolbarButton label="見出し3" onPress={() => setPlateBlockType(editor, "h3")}>H3</PlateToolbarButton>
-      </div>
+    <div className="relative flex h-8 shrink-0 items-center rounded-md hover:bg-[#f4f4f5]">
+      <select className="h-8 w-[132px] appearance-none rounded-md border border-transparent bg-transparent px-3 pr-7 text-sm font-medium text-[#18181b] outline-none" defaultValue="p" aria-label="Turn into" onChange={handleBlockTypeChange}>
+        {PLATE_BLOCK_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-2 size-3.5 text-[#71717a]" />
     </div>
   );
 };
+
+const PlateEditorToolbar = ({ editor }: { editor: PlateEditor }) => (
+  <div className="scrollbar-hide sticky left-0 top-0 z-50 flex min-h-10 w-full shrink-0 items-center justify-between overflow-x-auto rounded-t-lg border-b border-[#e4e4e7] bg-white/95 p-1 backdrop-blur-sm">
+    <div className="flex min-w-max items-center">
+      <div className="flex items-center">
+        <PlateToolbarButton label="Undo" onPress={() => runPlateTransform(editor, "undo", [], { command: "undo" })}><Undo2 className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Redo" onPress={() => runPlateTransform(editor, "redo", [], { command: "redo" })}><Redo2 className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        <PlateToolbarButton label="AI commands" onPress={() => focusPlateEditor(editor)}><WandSparkles className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        <PlateToolbarButton label="Export" onPress={() => focusPlateEditor(editor)}><ArrowUpToLine className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        <PlateToolbarButton label="Insert" onPress={() => focusPlateEditor(editor)}><Plus className="size-4" /></PlateToolbarButton>
+        <PlateToolbarBlockSelect editor={editor} />
+        <PlateToolbarButton label="Decrease font size" onPress={() => focusPlateEditor(editor)}><Minus className="size-4" /></PlateToolbarButton>
+        <div className="flex h-8 min-w-10 shrink-0 items-center justify-center rounded-md px-2 text-sm font-medium text-[#18181b]">16</div>
+        <PlateToolbarButton label="Increase font size" onPress={() => focusPlateEditor(editor)}><Plus className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        {PLATE_MARK_OPTIONS.map((option) => <PlateToolbarButton key={option.mark} label={option.label} onPress={() => togglePlateMark(editor, option.mark, option.fallback)}>{option.icon}</PlateToolbarButton>)}
+        <PlateToolbarButton label="Text color" onPress={() => focusPlateEditor(editor)}><Baseline className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Background color" onPress={() => focusPlateEditor(editor)}><PaintBucket className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        <PlateToolbarButton label="Align" onPress={() => focusPlateEditor(editor)}><AlignLeft className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Numbered list" onPress={() => focusPlateEditor(editor)}><ListOrdered className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Bulleted list" onPress={() => focusPlateEditor(editor)}><List className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Todo list" onPress={() => focusPlateEditor(editor)}><ListTodo className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        <PlateToolbarButton label="Link" onPress={() => focusPlateEditor(editor)}><Link className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Table" onPress={() => focusPlateEditor(editor)}><Table className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Emoji" onPress={() => focusPlateEditor(editor)}><Smile className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        <PlateToolbarButton label="Image" onPress={() => focusPlateEditor(editor)}><Image className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Video" onPress={() => focusPlateEditor(editor)}><Film className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Audio" onPress={() => focusPlateEditor(editor)}><FileAudio className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="File" onPress={() => focusPlateEditor(editor)}><File className="size-4" /></PlateToolbarButton>
+      </div>
+
+      <PlateToolbarSeparator />
+
+      <div className="flex items-center">
+        <PlateToolbarButton label="Highlight" onPress={() => togglePlateMark(editor, "bold", { command: "bold" })}><Highlighter className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Comment" onPress={() => focusPlateEditor(editor)}><MessageSquare className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Line height" onPress={() => focusPlateEditor(editor)}><CircleSlash className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Outdent" onPress={() => focusPlateEditor(editor)}><Outdent className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="Indent" onPress={() => focusPlateEditor(editor)}><Indent className="size-4" /></PlateToolbarButton>
+        <PlateToolbarButton label="More" onPress={() => focusPlateEditor(editor)}><MoreHorizontal className="size-4" /></PlateToolbarButton>
+      </div>
+    </div>
+  </div>
+);
 
 const NOTE_PLATE_COMPONENTS = {
   blockquote: BlockquoteElement,
@@ -310,18 +374,16 @@ const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
   }, [flushPendingChange]);
 
   return (
-    <div className="h-full min-h-0 w-full overflow-y-auto bg-white text-[#202124]">
+    <div className="h-full min-h-0 w-full overflow-y-auto bg-white text-[#18181b]">
       <Plate editor={editor} onChange={handleChange}>
-        <PlateEditorToolbar editor={editor} />
-        <div className="px-16 py-14">
-          <div className="mx-auto flex w-full max-w-[820px] flex-col gap-5">
-            <div className="min-w-0">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9ca3af]">Plate</p>
-              <h1 className="truncate text-[32px] font-semibold leading-tight tracking-[-0.04em] text-[#202124]">{note.title}</h1>
+        <div className="px-4 py-10 lg:px-8">
+          <div className="mx-auto min-h-[650px] w-full max-w-[1120px] overflow-hidden rounded-xl border border-[#e4e4e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            <PlateEditorToolbar editor={editor} />
+            <div className="h-[650px] overflow-y-auto">
+              <PlateContainer className="relative h-full w-full cursor-text select-text overflow-visible caret-[#18181b] selection:bg-[#bfdbfe]">
+                <PlateContent className="h-full w-full overflow-x-hidden whitespace-pre-wrap break-words rounded-none border-0 bg-transparent px-16 pb-72 pt-4 text-base leading-8 text-[#18181b] outline-none focus:outline-none sm:px-[max(64px,calc(50%-350px))] [&_strong]:font-bold" disableDefaultStyles placeholder="本文を入力" spellCheck />
+              </PlateContainer>
             </div>
-            <PlateContainer className="relative w-full cursor-text select-text overflow-visible caret-[#202124] selection:bg-[#dbeafe]">
-              <PlateContent className="min-h-[420px] w-full overflow-x-hidden whitespace-pre-wrap break-words rounded-none border-0 bg-transparent px-0 py-5 text-[17px] leading-8 text-[#202124] outline-none focus:outline-none [&_strong]:font-bold" disableDefaultStyles placeholder="本文を入力" spellCheck />
-            </PlateContainer>
           </div>
         </div>
       </Plate>
