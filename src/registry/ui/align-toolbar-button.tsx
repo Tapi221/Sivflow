@@ -6,21 +6,10 @@ import type { Alignment } from '@platejs/basic-styles';
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
 import { TextAlignPlugin } from '@platejs/basic-styles/react';
-import {
-  AlignCenterIcon,
-  AlignJustifyIcon,
-  AlignLeftIcon,
-  AlignRightIcon,
-} from 'lucide-react';
+import { AlignCenterIcon, AlignJustifyIcon, AlignLeftIcon, AlignRightIcon } from 'lucide-react';
 import { useEditorPlugin, useSelectionFragmentProp } from 'platejs/react';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from '@/registry/ui/shadcn/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/registry/ui/shadcn/dropdown-menu';
 
 import { ToolbarButton } from './toolbar';
 
@@ -43,17 +32,15 @@ const items = [
   },
 ];
 
-export function AlignToolbarButton(props: DropdownMenuProps) {
+function AlignToolbarButton(props: DropdownMenuProps) {
   const { editor, tf } = useEditorPlugin(TextAlignPlugin);
-  const value =
-    useSelectionFragmentProp({
-      defaultValue: 'start',
-      getProp: (node) => node.align,
-    }) ?? 'left';
+  const value = useSelectionFragmentProp({
+    defaultValue: 'start',
+    getProp: (node) => node.align,
+  }) ?? 'left';
 
   const [open, setOpen] = React.useState(false);
-  const IconValue =
-    items.find((item) => item.value === value)?.icon ?? AlignLeftIcon;
+  const IconValue = items.find((item) => item.value === value)?.icon ?? AlignLeftIcon;
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
@@ -72,11 +59,7 @@ export function AlignToolbarButton(props: DropdownMenuProps) {
           }}
         >
           {items.map(({ icon: Icon, value: itemValue }) => (
-            <DropdownMenuRadioItem
-              key={itemValue}
-              className="pl-2 data-[state=checked]:bg-accent *:first:[span]:hidden"
-              value={itemValue}
-            >
+            <DropdownMenuRadioItem key={itemValue} className="pl-2 data-[state=checked]:bg-accent [&>span:first-child]:hidden" value={itemValue}>
               <Icon />
             </DropdownMenuRadioItem>
           ))}
@@ -85,3 +68,5 @@ export function AlignToolbarButton(props: DropdownMenuProps) {
     </DropdownMenu>
   );
 }
+
+export { AlignToolbarButton };
