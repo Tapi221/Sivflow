@@ -337,11 +337,41 @@ const applyStatementOrderFixes = (filePath, source) => {
   return nextSource;
 };
 
+const getLeadingWhitespaceText = (source, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getFullStart());
+
+const getBlankLineCountBetweenStatements = (source, previousStatement, statement) => getLeadingWhitespaceText(source, previousStatement, statement).split("\n").length - 1;
+
+const applyBlockSpacingFix = (filePath, source) => {
+  if (!shouldCheckStatementOrder(filePath)) return source;
+
+  const sourceFile = createSourceFile(filePath, source);
+  const statements = [...sourceFile.statements];
+  if (statements.length < 2) return source;
+
+  const replacements = [];
+
+  for (let index = 1; index < statements.length; index += 1) {
+    const previousStatement = statements[index - 1];
+    const statement = statements[index];
+    if (isDirectiveStatement(previousStatement) || isDirectiveStatement(statement)) continue;
+    if (getStatementOrderCategory(previousStatement) === getStatementOrderCategory(statement)) continue;
+    if (getBlankLineCountBetweenStatements(source, previousStatement, statement) === 2) continue;
+
+    replacements.push({ end: statement.getFullStart(), start: previousStatement.getEnd(), text: "\n\n" });
+  }
+
+  return applyNonOverlappingReplacements(source, replacements);
+};
+
 const isJsxTagNamed = (tagName, name) => ts.isIdentifier(tagName) && tagName.text === name;
 
 const isReactFragmentTagName = (tagName) => ts.isPropertyAccessExpression(tagName) && ts.isIdentifier(tagName.expression) && tagName.expression.text === "React" && tagName.name.text === "Fragment";
 
 const isExplicitFragmentTagName = (tagName) => isJsxTagNamed(tagName, "Fragment") || isReactFragmentTagName(tagName);
+
+const isKeyAttribute = (property) => ts.isJsxAttribute(property) && property.name.text === "key";
+
+const hasOnlyKeyAttributes = (attributes) => attributes.properties.length > 0 && attributes.properties.every(isKeyAttribute);
 
 const getMeaningfulJsxChildren = (children) => children.filter((child) => {
   if (ts.isJsxText(child)) return child.getText().trim().length > 0;
@@ -357,6 +387,17 @@ const createTagReplacement = (opening, closing, openingText, closingText) => [
   { end: closing.getEnd(), start: closing.getStart(), text: closingText },
 ];
 
+const isWithinMapCall = (node) => {
+  let current = node.parent;
+
+  while (current) {
+    if (ts.isCallExpression(current) && isPropertyAccessNamed(current.expression, "map")) return true;
+    current = current.parent;
+  }
+
+  return false;
+};
+
 const collectJsxWrapperReplacements = (sourceFile, source) => {
   const replacements = [];
 
@@ -364,6 +405,11 @@ const collectJsxWrapperReplacements = (sourceFile, source) => {
     if (ts.isJsxElement(node)) {
       const opening = node.openingElement;
       const closing = node.closingElement;
+
+      if (isJsxTagNamed(opening.tagName, "div") && hasOnlyKeyAttributes(opening.attributes) && isWithinMapCall(node)) {
+        const openingText = source.slice(opening.getStart(sourceFile), opening.getEnd()).replace(/^<div\b/, "<Fragment");
+        replacements.push(...createTagReplacement(opening, closing, openingText, "</Fragment>"));
+      }
 
       if (isJsxTagNamed(opening.tagName, "div") && hasNoJsxAttributes(opening.attributes)) {
         replacements.push(...createTagReplacement(opening, closing, "<>", "</>"));
@@ -425,12 +471,30 @@ const removeUnusedFragmentNamedImport = (source) => {
     });
 };
 
+const insertFragmentNamedImport = (source) => {
+  if (!/\bFragment\b/.test(source)) return source;
+  if (/^import\s+[^;]*\bFragment\b[^;]*\s+from\s+["']react["'];/m.test(source)) return source;
+
+  if (/^import\s+([A-Za-z_$][\w$]*)\s+from\s+["']react["'];/m.test(source)) {
+    return source.replace(/^import\s+([A-Za-z_$][\w$]*)\s+from\s+["']react["'];/m, "import $1, { Fragment } from \"react\";");
+  }
+
+  if (/^import\s+\{\s*([^}]+)\s*\}\s+from\s+["']react["'];/m.test(source)) {
+    return source.replace(/^import\s+\{\s*([^}]+)\s*\}\s+from\s+["']react["'];/m, (match, namedSpecifiers) => {
+      const specifiers = namedSpecifiers.split(",").map((specifier) => specifier.trim()).filter(Boolean);
+      return `import { ${["Fragment", ...specifiers].join(", ")} } from "react";`;
+    });
+  }
+
+  return `import { Fragment } from "react";\n${source}`;
+};
+
 const applyJsxWrapperFixesOnce = (filePath, source) => {
   const sourceFile = createSourceFile(filePath, source);
   const replacements = collectJsxWrapperReplacements(sourceFile, source);
   if (replacements.length === 0) return source;
 
-  return removeUnusedFragmentNamedImport(applyNonOverlappingReplacements(source, replacements));
+  return insertFragmentNamedImport(removeUnusedFragmentNamedImport(applyNonOverlappingReplacements(source, replacements)));
 };
 
 const applyJsxWrapperFixes = (filePath, source) => {
@@ -500,7 +564,8 @@ const applySourceConventionFixes = (filePath, source) => {
   const collapsedSource = collapseMultilineImportExportDeclarations(normalizedSource);
   const targetedSource = applyTargetedLintFixes(filePath, collapsedSource);
   const orderedSource = applyStatementOrderFixes(filePath, targetedSource);
-  const wrapperFixedSource = applyJsxWrapperFixes(filePath, orderedSource);
+  const spacedSource = applyBlockSpacingFix(filePath, orderedSource);
+  const wrapperFixedSource = applyJsxWrapperFixes(filePath, spacedSource);
 
   return collapseMultilineImportExportDeclarations(wrapperFixedSource);
 };
@@ -517,9 +582,3 @@ const updateFile = (filePath) => {
 
 const sourceDirectories = [...new Set([...ALIAS_ROOTS.map(({ directory }) => directory), ...EXTRA_SOURCE_DIRECTORIES])];
 const updatedFiles = sourceDirectories.flatMap((directory) => walkSourceFiles(directory)).filter(updateFile);
-
-if (updatedFiles.length > 0) {
-  console.log(`Normalized source conventions in ${updatedFiles.length} file(s).`);
-}
-
-await import("./verify/verify-source-conventions.mjs");
