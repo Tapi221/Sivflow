@@ -10,6 +10,8 @@ export { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalize
 
 
 
+
+
 export const denormalizeCardForStorage = <T extends Record<string, unknown>>( card: T, ): T => { return card;
 };
 

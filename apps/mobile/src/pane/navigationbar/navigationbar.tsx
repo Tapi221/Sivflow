@@ -1,16 +1,24 @@
 import { memo, useCallback, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 
+
 import { GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
+
 
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 
+
 import type { WorkspaceSidebarSection } from "@/pane.desktop/tab.desktopnative/Tab";
+
 
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 
+
 import { cn } from "@/lib/utils";
 
+
 import "./navigationbar.css";
+
+
 
 
 
@@ -54,6 +62,8 @@ type NavigationBarMobileStyle = CSSProperties & {
 
 
 
+
+
 const DEFAULT_ACTIVE_ITEM_ID: NavigationBarItemId = "home";
 
 const NAVIGATION_BAR_ITEMS: readonly NavigationBarItem[] = [
@@ -73,12 +83,16 @@ const NAVIGATION_BAR_ITEMS: readonly NavigationBarItem[] = [
 
 
 
+
+
 const getNavigationBarItemIndex = (itemId: NavigationBarItemId) => {
   const itemIndex = NAVIGATION_BAR_ITEMS.findIndex((item) => item.id === itemId);
   return itemIndex >= 0 ? itemIndex : NAVIGATION_BAR_ITEMS.findIndex((item) => item.id === DEFAULT_ACTIVE_ITEM_ID);
 };
 
 const getNavigationBarActiveX = (itemIndex: number) => `${((itemIndex + 0.5) / NAVIGATION_BAR_ITEMS.length) * 100}%`;
+
+
 
 
 
@@ -160,11 +174,15 @@ const NavigationBarMobileComponent = ({ activeItemId, className, onItemSelect, o
 
 
 
+
+
 const NavigationBarMobile = memo(NavigationBarMobileComponent);
 
 NavigationBarMobile.displayName = "NavigationBarMobile";
 
 export { NavigationBarMobile };
+
+
 
 
 

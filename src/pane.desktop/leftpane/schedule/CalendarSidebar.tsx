@@ -1,26 +1,39 @@
 import { type ChangeEvent, type CSSProperties, type FormEvent, type KeyboardEvent, type MouseEvent as ReactMouseEvent, useCallback, useMemo, useRef, useState } from "react";
 
+
 import { createPortal } from "react-dom";
+
 
 import { GoogleIcon } from "@/chip/icons/icons.schedule";
 
+
 import { CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_PANEL_ID, CALENDAR_LIST_MENU_WIDTH, CalendarListMenu, type CalendarListMenuAction } from "@/chip/rightclickpanel.desktop/CalendarListMenu.desktop";
+
 
 import { getProjectCalendarLinksMenuHeight, PROJECT_CALENDAR_LINKS_MENU_PANEL_ID, PROJECT_CALENDAR_LINKS_MENU_WIDTH, ProjectCalendarLinksMenu, type ProjectCalendarLinksMenuAction } from "@/chip/rightclickpanel.desktop/ProjectCalendarLinksMenu.desktop";
 
+
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
+
 
 import { GOOGLE_SOURCE_ROW_CLASS_NAME, SelectableGoogleSourceRow } from "@/features/calendar/panel/SelectableGoogleSourceRow";
 
+
 import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
+
 
 import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 
+
 import { cn } from "@/lib/utils";
+
 
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 
+
 import { useT } from "@shared/i18n/useT";
+
+
 
 
 
@@ -64,6 +77,8 @@ type IconProps = { className?: string };
 
 
 
+
+
 const ADD_GOOGLE_CALENDAR_LABEL = "Googleカレンダーを追加";
 const ADD_PROJECT_EMPTY_MESSAGE = "プロジェクト名を入力してください";
 const CALENDAR_CONTEXT_MENU_DIMENSIONS = { width: CALENDAR_LIST_MENU_WIDTH, height: CALENDAR_LIST_MENU_HEIGHT };
@@ -72,6 +87,8 @@ const CONNECTING_GOOGLE_CALENDAR_LABEL = "接続中...";
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 const GOOGLE_CALENDAR_SECTION_LABEL = "Google Calendar";
 const PROJECT_LINKED_GOOGLE_CALENDARS_LABEL = "プロジェクトに追加したカレンダー";
+
+
 
 
 
@@ -134,6 +151,8 @@ const findMatchingGoogleCalendarsForProject = (project: AppCalendarItem, account
 const createGoogleProjectLinkActionLabel = (target: MatchingGoogleCalendarTarget, targetCount: number): string => targetCount <= 1 ? "既存Googleカレンダーにリンク" : `既存Googleカレンダーにリンク: ${getGoogleAccountLabel(target.account)}`;
 
 const createGoogleCalendarActionLabel = (account: GoogleAccountDisplay, accountCount: number): string => accountCount <= 1 ? "Googleカレンダーとして追加" : `Googleカレンダーとして追加: ${getGoogleAccountLabel(account)}`;
+
+
 
 
 
@@ -347,6 +366,8 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
 };
 
 const CalendarSidebar = (props: CalendarSidebarProps) => <SidebarLayeredDirectory calendarContent={<CalendarSidebarContent {...props} className="px-0 pt-2" />} />;
+
+
 
 
 

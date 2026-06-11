@@ -10,6 +10,8 @@ import type { LocalDBFallbackReasonCode } from "@/services/localDBRuntimeState";
 
 
 
+
+
 type UnknownRecord = Record<string, unknown>;
 
 type ErrorNameMessage = {
@@ -29,8 +31,12 @@ type ErrorNameMessage = {
 
 
 
+
+
 const LOCALDB_ERROR_MESSAGE_LIMIT = 400;
 const MAX_ERROR_NESTING_DEPTH = 4;
+
+
 
 
 

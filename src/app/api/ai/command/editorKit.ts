@@ -1,34 +1,51 @@
 import { BlockquoteRules, BoldRules, CodeRules, HeadingRules, HighlightRules, HorizontalRuleRules, ItalicRules, MarkComboRules, StrikethroughRules, UnderlineRules } from '@platejs/basic-nodes';
 
+
 import { BlockquotePlugin, BoldPlugin, CodePlugin, H1Plugin, H2Plugin, H3Plugin, H4Plugin, H5Plugin, H6Plugin, HighlightPlugin, HorizontalRulePlugin, ItalicPlugin, StrikethroughPlugin, UnderlinePlugin } from '@platejs/basic-nodes/react';
+
 
 import { CaptionPlugin } from '@platejs/caption/react';
 
+
 import { IndentPlugin } from '@platejs/indent/react';
+
 
 import { LinkRules } from '@platejs/link';
 
+
 import { LinkPlugin } from '@platejs/link/react';
+
 
 import { BulletedListRules, OrderedListRules, TaskListRules } from '@platejs/list';
 
+
 import { ListPlugin } from '@platejs/list/react';
+
 
 import { MarkdownPlugin, remarkMdx, remarkMention } from '@platejs/markdown';
 
+
 import { AudioPlugin, FilePlugin, ImagePlugin, MediaEmbedPlugin, PlaceholderPlugin, VideoPlugin } from '@platejs/media/react';
+
 
 import { TableCellHeaderPlugin, TableCellPlugin, TablePlugin, TableRowPlugin } from '@platejs/table/react';
 
+
 import { KEYS } from 'platejs';
+
 
 import { ParagraphPlugin } from 'platejs/react';
 
+
 import remarkEmoji from 'remark-emoji';
+
 
 import remarkGfm from 'remark-gfm';
 
+
 import remarkMath from 'remark-math';
+
+
 
 
 
@@ -72,6 +89,8 @@ const AI_COMMAND_PLATE_PLUGINS = [
   CaptionPlugin.configure({ options: { query: { allow: [KEYS.img, KEYS.video, KEYS.audio, KEYS.file, KEYS.mediaEmbed] } } }),
   MarkdownPlugin.configure({ options: { plainMarks: [KEYS.suggestion, KEYS.comment], remarkPlugins: [remarkMath, remarkGfm, remarkEmoji as never, remarkMdx, remarkMention] } }),
 ];
+
+
 
 
 

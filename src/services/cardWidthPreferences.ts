@@ -10,6 +10,8 @@ import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
 
 
+
+
 export type CardWidthPaneMode = "view" | "edit";
 
 interface CardWidthEntry {
@@ -21,6 +23,8 @@ interface CardWidthPreferencesStore {
   version: 1;
   byCardSet: Record<string, CardWidthEntry>;
 }
+
+
 
 
 

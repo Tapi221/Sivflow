@@ -1,6 +1,9 @@
 import type { ITelemetryService, LogContext, LogLevel, SyncLogEntry, TelemetryEventName } from "@/types/domain/telemetry";
 
+
 import { sanitizeForLog } from "@/utils/logSanitizer";
+
+
 
 
 
@@ -30,6 +33,8 @@ const TELEMETRY_MESSAGE_LABELS: Record<string, string> = {
   "Security Alert: Access attempt from revoked device": "セキュリティ警告: 取り消し済みデバイスからのアクセスを検出しました",
   "Could not check device status": "デバイス状態を確認できませんでした",
 };
+
+
 
 
 

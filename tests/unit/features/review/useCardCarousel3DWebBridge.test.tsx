@@ -1,11 +1,15 @@
 // @vitest-environment jsdom
 import React, { useLayoutEffect } from "react";
 
+
 import { flushSync } from "react-dom";
+
 
 import { createRoot } from "react-dom/client";
 
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 
 import { useCardCarousel3DWebBridge } from "@/features/review/infra/web/useCardCarousel3DWebBridge";
 

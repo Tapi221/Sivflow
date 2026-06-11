@@ -1,6 +1,9 @@
 import type { CSSProperties } from "react";
 
+
 import { cn } from "@/lib/utils";
+
+
 
 
 
@@ -35,7 +38,11 @@ export type AnimatedCheckboxBaseProps = { checked: boolean;
 
 
 
+
+
 const DEFAULT_CHECKBOX_STROKE_WIDTH = 1.4;
+
+
 
 
 
@@ -155,6 +162,8 @@ const AnimatedCheckboxBase = ({
     </span>
   );
 };
+
+
 
 
 

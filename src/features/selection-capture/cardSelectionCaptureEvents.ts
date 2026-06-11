@@ -10,6 +10,8 @@ import type { SelectionCaptureArea, SelectionCaptureRect } from "./selectionCapt
 
 
 
+
+
 export type CardSelectionCaptureSide = "question" | "answer";
 
 export type CardSelectionCaptureTaskResult = string | void;
@@ -40,7 +42,11 @@ export type DispatchedCardSelectionCaptureEvent = { handled: boolean;
 
 
 
+
+
 export const CARD_SELECTION_CAPTURE_EVENT = "sivflow:card-selection-capture";
+
+
 
 
 

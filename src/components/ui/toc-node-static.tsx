@@ -1,22 +1,30 @@
 import * as React from 'react';
 
 
+
 import type { SlateElementProps } from 'platejs/static';
+
 
 
 import { type Heading, BaseTocPlugin, isHeading } from '@platejs/toc';
 
 
+
 import { cva } from 'class-variance-authority';
+
 
 
 import { type SlateEditor, type TElement, NodeApi } from 'platejs';
 
 
+
 import { SlateElement } from 'platejs/static';
 
 
+
 import { Button } from './button';
+
+
 
 
 
@@ -60,6 +68,8 @@ const headingDepth: Record<string, number> = {
 
 
 
+
+
 const getHeadingList = (editor?: SlateEditor) => {
   if (!editor) return [];
 
@@ -91,6 +101,8 @@ const getHeadingList = (editor?: SlateEditor) => {
 
   return headingList;
 };
+
+
 
 
 

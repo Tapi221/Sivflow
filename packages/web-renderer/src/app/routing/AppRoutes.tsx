@@ -1,16 +1,24 @@
 import { lazy, Suspense } from "react";
 
+
 import type { ReactNode } from "react";
+
 
 import { Navigate, Route, Routes } from "react-router-dom";
 
+
 import Layout from "@/Layout";
+
 
 import Schedule from "@/routes/Schedule";
 
+
 import { getDevRouteElements } from "./DevRoutes";
 
+
 import { ProtectedRoute } from "./ProtectedRoute";
+
+
 
 
 
@@ -36,9 +44,13 @@ const REDIRECT_TO_SCHEDULE_ROUTES = ["calendar/*", "CardEdit/*", "CardSetView/*"
 
 
 
+
+
 const withRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
 };
+
+
 
 
 

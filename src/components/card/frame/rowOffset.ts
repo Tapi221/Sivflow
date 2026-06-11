@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 
+
 import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
+
 
 import type { CardBlock } from "@/types/domain/card";
 
@@ -14,8 +16,12 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
+
+
 const ROW_OFFSET_MIN = -999;
 const ROW_OFFSET_MAX = 999;
+
+
 
 
 
@@ -54,6 +60,8 @@ const getRowOffsetStyle = (
   if (rowOffsetPx === 0) return undefined;
   return { transform: `translateY(${rowOffsetPx}px)` };
 };
+
+
 
 
 

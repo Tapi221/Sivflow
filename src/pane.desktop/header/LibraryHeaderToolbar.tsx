@@ -1,10 +1,15 @@
 import { motion, type Transition } from "framer-motion";
 
+
 import { Fragment, type ComponentType, type ReactNode, type SVGProps } from "react";
+
 
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 
+
 import { cn } from "@/lib/utils";
+
+
 
 
 
@@ -60,6 +65,8 @@ type LibraryHeaderToolbarProps = {
 
 
 
+
+
 const WORKSPACE_TAB_INDICATOR_ID = "workspace-header-toolbar-tab-indicator";
 const WORKSPACE_TAB_MOTION_TRANSITION: Transition = {
   type: "tween",
@@ -81,6 +88,8 @@ const segmentedActionButtonClassName = cn(
 
 const segmentedActionIconClassName =
   "block h-4 w-4 shrink-0 text-current transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none";
+
+
 
 
 

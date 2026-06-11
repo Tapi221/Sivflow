@@ -1,8 +1,12 @@
 import React, { useMemo } from "react";
 
+
 import katex from "katex";
 
+
 import { cn } from "@/lib/utils";
+
+
 
 
 
@@ -32,6 +36,8 @@ interface MathRendererProps {
 
 
 
+
+
 const normalizeSingleLatex = (input: string): string => {
   if (!input) return "";
 
@@ -41,6 +47,8 @@ const normalizeSingleLatex = (input: string): string => {
     .replace(/\s*\$\$$/u, "")
     .trim();
 };
+
+
 
 
 
@@ -146,6 +154,8 @@ const MathRendererComponent: React.FC<MathRendererProps> = ({
     />
   );
 };
+
+
 
 
 

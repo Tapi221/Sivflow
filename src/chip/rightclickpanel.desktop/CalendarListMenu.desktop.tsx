@@ -1,8 +1,12 @@
 import { type CSSProperties, type RefObject } from "react";
 
+
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
+
 import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
+
+
 
 
 
@@ -39,6 +43,8 @@ type CalendarListMenuProps = {
 
 
 
+
+
 export const CALENDAR_LIST_MENU_PANEL_ID = "calendar-list-context-menu";
 
 const CALENDAR_LIST_MENU_LABELS = [
@@ -49,6 +55,8 @@ const CALENDAR_LIST_MENU_LABELS = [
 export const CALENDAR_LIST_MENU_WIDTH = resolveRightClickPanelTextWidth(CALENDAR_LIST_MENU_LABELS);
 export const CALENDAR_LIST_MENU_HEIGHT = CALENDAR_LIST_MENU_LABELS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 export const CALENDAR_LIST_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
+
+
 
 
 

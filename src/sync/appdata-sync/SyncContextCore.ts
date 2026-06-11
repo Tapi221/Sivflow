@@ -1,6 +1,9 @@
 import { createContext, type ReactNode } from "react";
 
+
 import type { SyncConflict } from "@/types/domain/sync";
+
+
 
 
 
@@ -30,6 +33,8 @@ export interface SyncContextType { syncStatus: SyncStatus;
 
 export interface SyncProviderProps { children: ReactNode;
 }
+
+
 
 
 

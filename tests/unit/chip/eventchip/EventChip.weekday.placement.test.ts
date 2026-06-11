@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+
 import { computeEventLayout, type LayoutEvent } from "@/chip/eventchip/EventChip.weekday.placement";
 
 const getLefts = (events: LayoutEvent[]) =>

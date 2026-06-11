@@ -1,10 +1,15 @@
 import { type RefObject, useCallback, useEffect, useRef } from "react";
 
+
 import { CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT, CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT } from "@/features/cardsetview/domain/cardSetView.constants";
+
 
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 
+
 import { computeNextCardSetViewZoomPercentFromGesture, computeNextCardSetViewZoomPercentFromWheel, shouldHandleCardSetViewZoomInputTarget } from "./cardSetViewZoomInputUtils";
+
+
 
 
 
@@ -29,6 +34,8 @@ interface UseCardSetViewZoomInputOptions {
   gestureZoomStepPercent?: number;
   onZoomPercentChange: (nextZoomPercent: number) => void;
 }
+
+
 
 
 

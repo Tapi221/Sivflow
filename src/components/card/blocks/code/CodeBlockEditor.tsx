@@ -1,16 +1,24 @@
 import { useCallback, useMemo, useState } from "react";
 
+
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 import { cn } from "@/lib/utils";
 
+
 import { CodeBlockContent } from "./CodeBlockContent";
+
 
 import { CODE_BLOCK_MAX_RECENT_LANGUAGES, CODE_BLOCK_RECENT_LANGUAGE_STORAGE_KEY, CODE_BLOCK_SUPPORTED_LANGUAGE_VALUES, CODE_BLOCK_SUPPORTED_LANGUAGES } from "./codeBlock.constants";
 
+
 import { normalizeEditorLanguage } from "./codeBlockLanguage";
 
+
 import type { CodeBlockData } from "@/types/core/code-block";
+
+
 
 
 
@@ -28,6 +36,8 @@ interface CodeBlockEditorProps {
   className?: string;
   zoom?: number;
 }
+
+
 
 
 
@@ -92,6 +102,8 @@ const pushRecentLang = (lang: string) => {
     // noop
   }
 };
+
+
 
 
 

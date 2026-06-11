@@ -1,26 +1,38 @@
 /* eslint-disable react-refresh/only-export-components */
 import "@/styles/index.css";
 
+
 import "@/services/localDB";
+
 
 import "@/../apps/web/src/runtime/disableNativeTitleTooltips";
 
+
 import "@/../apps/web/src/runtime/installProductionConsoleFilter";
+
 
 import "@platform/desktop/installTauriDesktopBridge";
 
+
 import "katex/dist/katex.min.css";
 
+
 import { StrictMode, useEffect, useState, type ComponentType } from "react";
+
 
 import { createRoot, type Root } from "react-dom/client";
 
 
+
 import { ErrorBoundary } from "@/components/common/ErrorScreen";
+
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 
+
 import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
+
+
 
 
 
@@ -47,6 +59,8 @@ declare global {
     __sivflowReactRootStore?: SivflowReactRootStore;
   }
 }
+
+
 
 
 
@@ -121,6 +135,8 @@ const STARTUP_LOGO_STYLE = `
 
 
 
+
+
 const getStartupFailureMessage = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
 
@@ -182,6 +198,8 @@ const getSivflowReactRoot = (): Root => {
 
   return root;
 };
+
+
 
 
 
@@ -298,6 +316,8 @@ const AppBootstrap = () => {
   const LoadedApp = state.App;
   return <LoadedApp />;
 };
+
+
 
 
 

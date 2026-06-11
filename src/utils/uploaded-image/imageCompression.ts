@@ -1,6 +1,9 @@
 import type { Base64DataUrl } from "@/types/core/branded";
 
+
 import { createBase64DataUrl } from "@/types/core/branded";
+
+
 
 
 
@@ -68,12 +71,16 @@ export const compressImageToBlob = async (file: File, maxWidth: number = 1920, m
 
 
 
+
+
 /**
  * @deprecated 後方互換性のため残すが、compressImageToBlob を使用すること
  *
  * @internal
  */
 export const compressAndConvertToBase64 = compressAndConvertToBase64Internal;
+
+
 
 
 

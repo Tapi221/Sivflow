@@ -1,6 +1,9 @@
 import { motion, type Transition } from "framer-motion";
 
+
 import { cn } from "@/lib/utils";
+
+
 
 
 
@@ -24,6 +27,8 @@ type TogglePlanResultProps = {
   onChange: (value: PlanResultMode[]) => void;
   className?: string;
 };
+
+
 
 
 
@@ -62,6 +67,8 @@ const PLAN_RESULT_OPTIONS: readonly PlanResultOption[] = [
 
 
 
+
+
 const togglePlanResultValue = (
   selectedValues: readonly PlanResultMode[],
   nextValue: PlanResultMode,
@@ -78,6 +85,8 @@ const togglePlanResultValue = (
     nextValueSet.has(optionValue),
   );
 };
+
+
 
 
 
@@ -130,6 +139,8 @@ const TogglePlanResult = ({ value, onChange, className }: TogglePlanResultProps)
     </div>
   );
 };
+
+
 
 
 

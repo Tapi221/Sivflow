@@ -1,10 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 
+
 import type { InkStroke } from "@core/domain/card/ink/inkDocument";
+
 
 import type { HandwritingSession } from "@platform/handwriting/handwritingSession.types";
 
+
 import { createInMemoryHandwritingSessionClientPair } from "@platform/handwriting/inMemoryHandwritingSessionClient";
+
 
 import { createHandwritingStrokeDeltaMessage } from "@platform/handwriting/handwritingStrokeMessages";
 

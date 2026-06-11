@@ -1,14 +1,21 @@
 import React from "react";
 
+
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
+
 
 import { cn } from "@/lib/utils";
 
+
 import { Code } from "@/ui/icons";
+
 
 import { CodeBlockEditor } from "./CodeBlockEditor";
 
+
 import type { CodeBlockData } from "@/types/core/code-block";
+
+
 
 
 
@@ -50,6 +57,8 @@ interface CodeBlockItemProps {
 
 
 
+
+
 const areCodeBlockItemPropsEqual = (
   prev: CodeBlockItemProps,
   next: CodeBlockItemProps,
@@ -63,6 +72,8 @@ const areCodeBlockItemPropsEqual = (
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
+
+
 
 
 
@@ -125,6 +136,8 @@ const CodeBlockItemInner = ({
     </BlockWrapper>
   );
 };
+
+
 
 
 

@@ -1,20 +1,30 @@
 import { memo, useCallback, useMemo, useRef, useState, type KeyboardEvent } from "react";
 
+
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
+
 
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
+
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+
 
 import { cn } from "@/lib/utils";
 
+
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+
 
 import { MessageSquare, Plus, Sparkles } from "@/ui/icons";
 
+
 import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
 
+
 import { useToast } from "@web-renderer/contexts/ToastContext";
+
+
 
 
 
@@ -53,8 +63,12 @@ type LoadingStatusPillProps = {
 
 
 
+
+
 const MAX_QUESTION_LENGTH = 240;
 const MAX_ANSWER_LENGTH = 3000;
+
+
 
 
 
@@ -80,6 +94,8 @@ const createCardTitle = (question: string): string => {
   const normalized = question.replace(/\s+/g, " ").trim();
   return normalized.length > 80 ? `${normalized.slice(0, 80)}…` : normalized;
 };
+
+
 
 
 
@@ -302,10 +318,14 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
 
 
 
+
+
 const QuickQaChatDialog = memo(QuickQaChatDialogComponent);
 QuickQaChatDialog.displayName = "QuickQaChatDialog";
 
 export { QuickQaChatDialog };
+
+
 
 
 

@@ -1,14 +1,21 @@
 import { useMemo } from "react";
 
+
 import { useLiveQuery } from "dexie-react-hooks";
+
 
 import { getTagColorKey as normalizeTagColorKey, TAG_COLOR_KEYS, type TagColorKey } from "@/chip/tag/tagColor";
 
+
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+
 
 import { getLocalDb } from "@/services/localdb";
 
+
 import type { TagRecord } from "@/services/localdb/types";
+
+
 
 
 
@@ -43,7 +50,11 @@ type TagWriteCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
 
 
 
+
+
 const DEFAULT_TAG_COLOR_KEY: TagColorKey = TAG_COLOR_KEYS[0];
+
+
 
 
 

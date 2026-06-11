@@ -1,17 +1,24 @@
 import * as React from 'react';
 
 
+
 import type { RenderStaticNodeWrapper, TListElement } from 'platejs';
+
 
 import type { SlateRenderElementProps } from 'platejs/static';
 
 
+
 import { isOrderedList } from '@platejs/list';
+
 
 import { CheckIcon } from 'lucide-react';
 
 
+
 import { cn } from '@/lib/utils';
+
+
 
 
 
@@ -35,6 +42,8 @@ const config: Record<
     Marker: TodoMarkerStatic,
   },
 };
+
+
 
 
 

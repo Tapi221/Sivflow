@@ -21,8 +21,12 @@ export type { PdfPageWindowMetric, PdfPageWindowOptions };
 
 
 
+
+
 const DEFAULT_PDF_PAGE = 1;
 const DEFAULT_PDF_PAGE_WINDOW_OVERSCAN = 1;
+
+
 
 
 
@@ -107,6 +111,8 @@ const getPdfPageWindowKeepSet = (pageMetrics: PdfPageWindowMetric[], viewportTop
   for (let page = firstPage; page <= lastPage; page += 1) idsToKeep.add(page);
   return idsToKeep;
 };
+
+
 
 
 

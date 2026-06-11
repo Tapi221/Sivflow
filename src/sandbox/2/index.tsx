@@ -1,13 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 
+
 import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboardImage";
+
 
 import { captureElementRectToBlob } from "@/features/selection-capture/domSelectionCapture";
 
+
 import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
 
+
 import type { SelectionCaptureArea, SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
+
 
 import { cn } from "@/lib/utils";
 

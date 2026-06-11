@@ -1,19 +1,26 @@
 import React from "react";
 
 
+
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
+
 
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 
+
 import { MathRenderer } from "./MathBlockContent";
+
 
 
 import { cn } from "@/lib/utils";
 
 
+
 import type { MathBlockData } from "@/types/domain/base";
+
+
 
 
 
@@ -46,6 +53,8 @@ interface MathEditorDialogProps {
 
 
 
+
+
 const EDITOR_LINE_HEIGHT = 24;
 
 const EDITOR_MIN_ROWS = 8;
@@ -64,7 +73,11 @@ const MAX_LATEX_LENGTH = 10000;
 
 
 
+
+
 const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
+
+
 
 
 

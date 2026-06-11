@@ -1,8 +1,12 @@
 import type { Firestore } from "firebase/firestore";
 
+
 import type { FirebaseStorage } from "firebase/storage";
 
+
 import { firestoreDb, requireFirestoreDb, storage } from "@/infrastructure/firebase/client";
+
+
 
 
 

@@ -1,18 +1,27 @@
 import React, { useState } from "react";
 
+
 import { getTagColorKey } from "@/chip/tag/tagColor";
+
 
 import { TagBadge } from "./TagBadge";
 
+
 import { Button } from "@/components/ui/button";
+
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
+
 import { Tag as TagIcon } from "@/ui/icons";
+
 
 import { useTags } from "@/features/settings/hooks/useTags";
 
+
 import { cn } from "@/lib/utils";
+
+
 
 
 
@@ -32,6 +41,8 @@ interface BulkTagDialogProps {
   folderId: string;
   folderName?: string;
 }
+
+
 
 
 
@@ -155,6 +166,8 @@ const BulkTagDialog = ({
     </Dialog>
   );
 };
+
+
 
 
 

@@ -11,6 +11,8 @@ type ConsoleMethod = (...data: unknown[]) => void;
 
 
 
+
+
 const JAPANESE_CONSOLE_LABELS_INSTALLED_KEY = "__sivflowJapaneseConsoleLabelsInstalled";
 
 const CONSOLE_MESSAGE_LABELS: Record<string, string> = {
@@ -26,6 +28,8 @@ const CONSOLE_MESSAGE_LABELS: Record<string, string> = {
   "[GoogleCalendar] reconnect failed": "[GoogleCalendar] 再接続に失敗しました",
   "[GoogleCalendar] connect failed": "[GoogleCalendar] 接続に失敗しました",
 };
+
+
 
 
 

@@ -1,6 +1,9 @@
 import { addDays, differenceInCalendarDays, isSameDay, max, min, startOfDay } from "date-fns";
 
+
 import type { CalendarEvent } from "./calendarEvent.types";
+
+
 
 
 
@@ -34,7 +37,11 @@ export type CalendarEventLevelsResult = { levels: CalendarEventSegment[][];
 
 
 
+
+
 const DAY_STEP = 1;
+
+
 
 
 

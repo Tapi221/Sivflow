@@ -1,12 +1,18 @@
 import { useMemo, useState } from "react";
 
+
 import { useLiveQuery } from "dexie-react-hooks";
+
 
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 
+
 import { getLocalDb } from "@/services/localdb";
 
+
 import type { Note } from "@/types";
+
+
 
 
 
@@ -25,6 +31,8 @@ type NoteWithLegacyDelete = Note & {
 type UseNotesReadOptions = {
   enabled?: boolean;
 };
+
+
 
 
 

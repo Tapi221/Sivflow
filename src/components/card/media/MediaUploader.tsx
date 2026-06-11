@@ -1,43 +1,58 @@
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 
 
+
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
+
 
 
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
 
 
+
 import { Button } from "@/components/ui/button";
+
 
 
 import { Slider } from "@/components/ui/slider";
 
 
+
 import { Check, RotateCcw, Upload, X } from "@/ui/icons";
+
 
 
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 
 
+
 import { resolveCardImageUrl, type ResolvedCardImage } from "@/services/cardImageResolver";
+
 
 
 import { getOrCreateImageBlobUrl, removeImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 
 
+
 import { deleteImageBlob, getImageBlob, putImageBlob } from "@/services/imageFileStore";
+
 
 
 import { getLocalDb } from "@/services/localDB";
 
 
+
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
+
 
 
 import type { AssetRecord, UploadedImage } from "@/types";
 
 
+
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize.utils";
+
+
 
 
 
@@ -124,6 +139,8 @@ type MediaUploaderProps = ImageMediaUploaderProps | AudioMediaUploaderProps;
 
 
 
+
+
 const IMAGE_BLOCK_INSET_PX = 4;
 
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
@@ -132,6 +149,8 @@ const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
 const EMPTY_IMAGE_URLS: UploadedImage[] = [];
 
 const EMPTY_AUDIO_URLS: string[] = [];
+
+
 
 
 
@@ -230,6 +249,8 @@ const getRetryFileName = (assetId: string, mime: string): string => {
 
   return `${assetId}.jpg`;
 };
+
+
 
 
 
@@ -826,6 +847,8 @@ const MediaUploader = (props: MediaUploaderProps) => {
     </div>
   );
 };
+
+
 
 
 

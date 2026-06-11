@@ -1,10 +1,15 @@
 import { type CSSProperties, type MouseEvent, useEffect, useState } from "react";
 
+
 import { windowControls } from "@/platform/capabilities/windowControls";
+
 
 import { hasDesktopBridge } from "@/platform/runtime";
 
+
 import "./DesktopWindowControls.css";
+
+
 
 
 
@@ -32,9 +37,13 @@ type WindowControlAction = () => Promise<void>;
 
 
 
+
+
 const NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
 };
+
+
 
 
 
@@ -60,6 +69,8 @@ const handleClickWindowAction = (
   event.stopPropagation();
   runWindowAction(action);
 };
+
+
 
 
 

@@ -1,10 +1,14 @@
 import { useEffect } from "react";
 
 
+
 import { useLocation } from "react-router-dom";
 
 
+
 import { useWorkspaceTabsStore } from "./useTabsStore";
+
+
 
 
 
@@ -30,7 +34,11 @@ type UseWorkspaceTabsRouteSyncOptions = {
 
 
 
+
+
 const SETTINGS_ROUTE_TAB_ID = "route:settings" as const;
+
+
 
 
 

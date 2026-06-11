@@ -1,20 +1,30 @@
 import { getCardBlocks, getCardText } from "@/domain/card/content";
 
+
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+
 
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 
+
 import { getLocalDb } from "@/infrastructure/persistence/indexeddb";
+
 
 import type { IntegrityIssue, IntegrityReport } from "@/services/dataIntegrity.types";
 
+
 import { normalizeDate } from "@/shared/codec/date";
+
 
 import type { Card } from "@/types/domain/card";
 
+
 import type { Folder } from "@/types/domain/folder";
 
+
 import { sanitizeForLog } from "@/utils/logSanitizer";
+
+
 
 
 
@@ -33,6 +43,8 @@ const TIMESTAMP_KEYS = [
   "nextReviewDate",
   "lastReviewAt",
 ] as const;
+
+
 
 
 

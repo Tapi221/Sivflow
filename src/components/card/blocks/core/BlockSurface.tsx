@@ -1,10 +1,15 @@
 import React from "react";
 
+
 import { RuledLayer } from "@/components/card/frame/RuledLayer";
+
 
 import type { RuledStyleKind } from "@/components/card/frame/ruledStyles";
 
+
 import { cn } from "@/lib/utils";
+
+
 
 
 
@@ -37,6 +42,8 @@ type BlockSurfaceProps = {
   bleedX?: boolean;
   children: React.ReactNode;
 };
+
+
 
 
 

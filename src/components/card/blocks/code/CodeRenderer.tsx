@@ -10,12 +10,16 @@ import { CodeBlockContent } from "./CodeBlockContent";
 
 
 
+
+
 interface CodeRendererProps {
   code: string;
   language?: string;
   className?: string;
   zoom?: number;
 }
+
+
 
 
 

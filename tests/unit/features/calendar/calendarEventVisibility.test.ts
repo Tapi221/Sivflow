@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+
 import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
 
+
 import type { AppCalendarItem, GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
+
 
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 

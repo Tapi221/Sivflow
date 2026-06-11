@@ -1,19 +1,27 @@
 import * as React from 'react';
 
 
+
 import type { TMentionElement } from 'platejs';
+
 
 import type { SlateElementProps } from 'platejs/static';
 
 
+
 import { KEYS } from 'platejs';
+
 
 import { SlateElement } from 'platejs/static';
 
 
+
 import { cn } from '@/lib/utils';
 
+
 import { inlineSuggestionVariants } from '@/lib/suggestion';
+
+
 
 
 

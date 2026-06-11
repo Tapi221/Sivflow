@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+
 import { resolveCardScaleRenderingStrategy } from "@/components/card/frame/cardScaleRenderingStrategy";
 
 describe("resolveCardScaleRenderingStrategy", () => {

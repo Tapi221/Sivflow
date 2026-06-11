@@ -1,10 +1,15 @@
 import { memo } from "react";
 
+
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
+
 
 import { useT } from "@shared/i18n/useT";
 
+
 import "./sidebar.desktop.css";
+
+
 
 
 
@@ -31,6 +36,8 @@ type SidebarCollapsedToggleProps = {
 
 
 
+
+
 const SidebarCollapsedToggleBase = ({ isVisible, onToggleLeftPanel }: SidebarCollapsedToggleProps) => {
   const t = useT();
 
@@ -42,6 +49,8 @@ const SidebarCollapsedToggleBase = ({ isVisible, onToggleLeftPanel }: SidebarCol
     </button>
   );
 };
+
+
 
 
 

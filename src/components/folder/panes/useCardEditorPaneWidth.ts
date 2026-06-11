@@ -1,25 +1,34 @@
 import { useMemo } from "react";
 
 
+
 import { CARD_PANE_EDIT_MIN_WIDTH_PX, CARD_PANE_EDITOR_DEFAULT_WIDTH_PX, CARD_PANE_EDITOR_DOCKED_DEFAULT_WIDTH_PX, CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX, clampPaneWidthPx } from "@/components/card/frame/cardPane.constants";
+
 
 
 import { CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX } from "@/features/cardsetview/domain/cardSetViewPresentation.constants";
 
 
+
 import { resolveEditorCardFitScale } from "@/domain/card/resolveEditorCardFitScale";
+
 
 
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 
 
+
 import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthState";
+
 
 
 import { getCardSetWidthPreference, setCardSetWidthPreference } from "@/services/cardWidthPreferences";
 
 
+
 import type { UserSettings } from "@/types";
+
+
 
 
 
@@ -57,10 +66,14 @@ interface UseCardEditorPaneWidthParams {
 
 
 
+
+
 const CARD_EDITOR_PAIR_GAP_PX = 0;
 
 const CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX =
   CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX;
+
+
 
 
 
@@ -236,6 +249,8 @@ export const useCardEditorPaneWidth = ({ settings, dockToolbarsToTop, embeddedIn
     resetActivePaneWidth,
   };
 };
+
+
 
 
 
