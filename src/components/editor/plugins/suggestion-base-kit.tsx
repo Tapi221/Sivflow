@@ -54,5 +54,4 @@ export const BaseSuggestionKit = [ BaseSuggestionPlugin.configure({ inject: { is
       belowRootNodes: VoidRemoveSuggestionOverlayStatic as any,
       node: SuggestionLeafStatic as any,
     },
-  }),
-];
+  }

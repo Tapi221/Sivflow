@@ -6,4 +6,4 @@ import { CursorOverlay } from '@/components/ui/cursor-overlay';
 
 
 
-export const CursorOverlayKit = [ CursorOverlayPlugin.configure({ render: { afterEditable: () => <CursorOverlay />, }, }), ];
+export const CursorOverlayKit = [ CursorOverlayPlugin.configure({ render: { afterEditable: () => <CursorOverlay />, }, }), 

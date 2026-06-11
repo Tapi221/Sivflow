@@ -3,11 +3,7 @@ import type { BreadcrumbCrumb, ExplorerBreadcrumbContext } from "./breadcrumbs.t
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
-
-
 type FolderLike = Pick<Folder, "id" | "folderName" | "parentFolderId">;
-
-
 
 export const areBreadcrumbCrumbsEqual = ( a: BreadcrumbCrumb[], b: BreadcrumbCrumb[], ): boolean => { if (a === b) return true;
   if (a.length !== b.length) return false;

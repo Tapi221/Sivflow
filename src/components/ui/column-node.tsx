@@ -304,5 +304,4 @@ const ColumnDragHandle = React.memo(function ColumnDragHandle() {
 
 
 
-export function ColumnGroupElement(props: PlateElementProps) { return ( <PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement> );
-}
+export function ColumnGroupElement(props: PlateElementProps) { return ( <PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingT

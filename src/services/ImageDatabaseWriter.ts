@@ -2,8 +2,6 @@ import type { UploadedImage } from "@/types";
 import { getImageFromFirestore } from "@/infrastructure/images/imageFirestoreReader";
 import { getImageFromIndexedDb, saveImageToIndexedDb } from "@/infrastructure/images/imageIndexedDbStore";
 
-
-
 const ImageDatabaseWriter = class {
   saveToIndexedDB = async (image: UploadedImage): Promise<void> => saveImageToIndexedDb(image);
 

@@ -136,4 +136,3 @@ export const SidebarTreeRow = ({ menuOpen, onMenuOpenChange, menuActions = [], h
       ) : null}
     </div>
   );
-};

@@ -75,4 +75,3 @@ export const SecurityAlertBanner: React.FC = () => { const { securityState, dism
       ))}
     </div>
   );
-};

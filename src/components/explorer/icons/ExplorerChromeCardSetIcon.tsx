@@ -26,4 +26,4 @@ const ExplorerChromeCardSetIcon = ({ size = 15, className, ...props }: ExplorerC
 
 
 
-export { ExplorerChromeCardSetIcon };
+export { ExplorerChromeCardSetI

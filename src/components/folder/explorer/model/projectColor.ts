@@ -23,4 +23,3 @@ export const getFolderProjectColor = (folder: FolderTreeNode): string => { const
   if (isProjectColor(folderColor)) return folderColor;
 
   return getFallbackProjectColor(getFolderId(folder));
-};

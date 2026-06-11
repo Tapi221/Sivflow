@@ -198,6 +198,4 @@ export function ExportToolbarButton(props: DropdownMenuProps) { const editor = u
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+    </Drop

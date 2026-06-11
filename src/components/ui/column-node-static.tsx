@@ -48,4 +48,3 @@ export function ColumnElementDocx(props: SlateElementProps<TColumnElement>) { co
  * DOCX-compatible column group component using table layout.
  */
 export function ColumnGroupElementDocx(props: SlateElementProps) { return ( <SlateElement {...props}> <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none', tableLayout: 'fixed', }} > <tbody> <tr>{props.children}</tr> </tbody> </table> </SlateElement> );
-}

@@ -135,4 +135,4 @@ const BulkTagDialog = ({
 
 
 
-export default BulkTagDialog;
+export default BulkTagDia

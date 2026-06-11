@@ -83,4 +83,3 @@ export const RightPane = ({ selectedItem, selectedCardId, selectedDocument, sele
   }
 
   return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
-};

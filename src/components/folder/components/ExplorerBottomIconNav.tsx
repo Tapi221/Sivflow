@@ -74,4 +74,3 @@ export const ExplorerBottomIconNav = () => { const { pathname } = useLocation();
       </div>
     </nav>
   );
-};

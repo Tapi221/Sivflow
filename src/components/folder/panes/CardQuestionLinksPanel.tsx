@@ -225,4 +225,4 @@ export { CardQuestionLinksPanel };
 
 
 
-export type { CardQuestionLinksPanelProps };
+export type { CardQuestionLinksPan

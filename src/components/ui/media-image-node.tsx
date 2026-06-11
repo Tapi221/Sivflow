@@ -78,6 +78,4 @@ export const ImageElement = withHOC( ResizableProvider, function ImageElement(pr
           {props.children}
         </PlateElement>
       </MediaToolbar>
-    );
-  }
-);
+  

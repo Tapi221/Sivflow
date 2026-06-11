@@ -65,4 +65,3 @@ export const resolveInkDocument = ( cardId: string | null | undefined, side: Ink
   }
 
   return cloneInkDocument(resolved);
-};

@@ -6,4 +6,4 @@ const AppSonnerToaster = () => <Toaster position="bottom-right" toastOptions={{ 
 
 
 
-export { AppSonnerToaster };
+export { AppSonnerToaster 

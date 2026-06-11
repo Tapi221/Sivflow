@@ -598,5 +598,4 @@ export const formatCommentDate = (date: Date) => { const now = new Date();
     return `${diffDays}d`;
   }
 
-  return format(date, 'MM/dd/yyyy');
-};
+  return format(

@@ -113,5 +113,4 @@ export {
   DialogHeader,
   DialogFooter,
   DialogTitle,
-  DialogDescription,
-}
+  DialogDescripti

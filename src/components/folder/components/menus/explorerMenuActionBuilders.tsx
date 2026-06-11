@@ -186,4 +186,3 @@ export const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCr
   }
 
   return actions;
-};

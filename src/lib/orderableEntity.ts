@@ -1,7 +1,5 @@
 import { toMillis } from "@/utils/toMillis";
 
-
-
 type OrderableEntitySelectors<T> = {
   getOrderIndex: (entity: T) => number | null | undefined;
   getUpdatedAt: (entity: T) => unknown;
@@ -9,8 +7,6 @@ type OrderableEntitySelectors<T> = {
   getName: (entity: T) => string | null | undefined;
   getId: (entity: T) => string | null | undefined;
 };
-
-
 
 const toTimestamp = (value: unknown): number => {
   return toMillis(value);

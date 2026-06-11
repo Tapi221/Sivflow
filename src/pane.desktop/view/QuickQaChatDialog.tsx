@@ -8,8 +8,6 @@ import { MessageSquare, Plus, Sparkles } from "@/ui/icons";
 import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
 import { useToast } from "@web-renderer/contexts/ToastContext";
 
-
-
 type QuickQaChatDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -24,12 +22,8 @@ type LoadingStatusPillProps = {
   label: string;
 };
 
-
-
 const MAX_QUESTION_LENGTH = 240;
 const MAX_ANSWER_LENGTH = 3000;
-
-
 
 const createChatMessage = (role: ChatMessage["role"], text: string): ChatMessage => ({
   id: crypto.randomUUID(),
@@ -42,8 +36,6 @@ const createCardTitle = (question: string): string => {
   const normalized = question.replace(/\s+/g, " ").trim();
   return normalized.length > 80 ? `${normalized.slice(0, 80)}…` : normalized;
 };
-
-
 
 const LoadingStatusPill = ({ label }: LoadingStatusPillProps) => {
   return (
@@ -245,12 +237,8 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
   );
 };
 
-
-
 const QuickQaChatDialog = memo(QuickQaChatDialogComponent);
 QuickQaChatDialog.displayName = "QuickQaChatDialog";
 export { QuickQaChatDialog };
-
-
 
 export type { QuickQaChatDialogProps };

@@ -7,4 +7,4 @@ const BaseTocKit = [BaseTocPlugin.withComponent(TocElementStatic)];
 
 
 
-export { BaseTocKit };
+export { BaseTocKit 

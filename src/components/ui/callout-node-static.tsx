@@ -56,4 +56,3 @@ export function CalloutElementDocx({ children, ...props }: SlateElementProps) { 
       </table>
     </SlateElement>
   );
-}

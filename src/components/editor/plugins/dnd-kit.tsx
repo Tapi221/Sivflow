@@ -21,5 +21,4 @@ export const DndKit = [ DndPlugin.configure({ options: { enableScroller: true, o
         <DndProvider backend={HTML5Backend}>{children}</DndProvider>
       ),
     },
-  }),
-];
+  }

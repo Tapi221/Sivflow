@@ -61,6 +61,4 @@ export const isFileDragEvent = ( event: React.DragEvent | DragEvent, ): boolean 
 export const extractPdfFiles = (fileList: FileList | null): File[] => { if (!fileList) return [];
   return Array.from(fileList).filter((file) => {
     const name = file.name?.toLowerCase() ?? "";
-    return file.type === "application/pdf" || name.endsWith(".pdf");
-  });
-};
+    return file.type === "application/pdf" || name.endsWith(".pdf");

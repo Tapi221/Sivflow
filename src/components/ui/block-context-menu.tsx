@@ -192,6 +192,4 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) { 
           </ContextMenuGroup>
         </ContextMenuContent>
       )}
-    </ContextMenu>
-  );
-}
+    </ContextMe

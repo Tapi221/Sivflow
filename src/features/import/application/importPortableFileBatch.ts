@@ -4,8 +4,6 @@ import { type CreateMfDeckCard, type CreateMfDeckCardSet, type EnsureMfDeckTagBy
 import { readMfDeckFile } from "@/features/deckFile/infra/web/readMfDeckFile";
 import { detectImportFileKind, IMPORT_FILE_LABELS, isPortableImportFileKind, type PortableImportFileKind } from "@/features/import/domain/importFileKind";
 
-
-
 export type PortableImportBatchItemStatus = | "queued" | "parsing" | "importing" | "imported" | "failed" | "skipped";
 export type PortableImportBatchItem = { id: string;
   file: File;
@@ -35,8 +33,6 @@ export type ImportPortableFileBatchParams = { files: File[];
   ensureTagByName?: EnsureMfDeckTagByName;
   onItemChange?: (item: PortableImportBatchItem) => void;
 };
-
-
 
 const genId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
