@@ -9,11 +9,15 @@ import type { LocalDBLike } from "./localDB";
 import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from "./localDB";
 import { SyncServiceV2 } from "./SyncServiceV2";
 
+
+
 type SyncServiceInternals = {
   cloudAdapter: ICloudSyncAdapter;
   localDB: LocalDBLike;
   userId: string;
 };
+
+
 
 const isProjectMapChange = (change: SyncChange): boolean => change.type === "projectMap";
 const toProjectMapRecord = (userId: string, change: SyncChange): Record<string, unknown> => {
@@ -139,5 +143,7 @@ class SyncServiceFactory { private static instances = new Map<string, ISyncServi
     SyncServiceFactory.pendingInstances.clear();
   };
 }
+
+
 
 export { SyncServiceFactory };

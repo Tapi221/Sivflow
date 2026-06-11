@@ -2,7 +2,11 @@
 
 import { createSlatePlugin, createTextSubstitutionInputRule, KEYS } from "platejs";
 
+
+
 type AutoformatTextSubstitutionPatterns = Parameters<typeof createTextSubstitutionInputRule>[0]["patterns"];
+
+
 
 const AUTOFORMAT_TEXT_SUBSTITUTION_PATTERN_GROUPS = [
   [
@@ -104,6 +108,7 @@ const AUTOFORMAT_TEXT_SUBSTITUTION_PATTERN_GROUPS = [
     { format: "⁻", match: "^-" },
   ],
 ] satisfies AutoformatTextSubstitutionPatterns[];
+
 const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
   key: "autoformatShortcuts",
   inputRules: AUTOFORMAT_TEXT_SUBSTITUTION_PATTERN_GROUPS.map((patterns) =>
@@ -118,6 +123,9 @@ const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
     }),
   ),
 });
+
 const AutoformatKit = [AUTOFORMAT_SHORTCUTS_PLUGIN];
+
+
 
 export { AutoformatKit };

@@ -1,6 +1,8 @@
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 import type { BaseEntity } from "./base";
 
+
+
 type DocumentKind = "pdf";
 type PdfPageLayoutMode = "single" | "double";
 type PdfSidePanelTab = "bookmarks" | "highlights" | "ocr" | "outline" | "thumbnails";
