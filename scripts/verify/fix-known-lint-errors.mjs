@@ -14,6 +14,7 @@ const CALENDAR_TIMETABLE_ICON_DECLARATIONS = "const StratisCheckIcon = resolveSt
 const SCHEDULE_SCREEN_ICON_DECLARATIONS = "const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);\nconst StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);\n";
 const PDF_PANE_ICON_DECLARATIONS = "const StratisBookmarkIcon = resolveStratisIcon(STRATIS_BOOKMARK_ICON_NAMES);\n";
 const PDF_DOCUMENT_SOURCE_RESOLUTION_REPLACEMENT = "const waitForPdfSourceResolution: PdfSourceResolutionWaiter = async (promise) => {";
+const STRATIS_ICON_DECLARATION_BLOCKS = [CALENDAR_TIMETABLE_ICON_DECLARATIONS, SCHEDULE_SCREEN_ICON_DECLARATIONS, PDF_PANE_ICON_DECLARATIONS];
 
 const normalizeLineEndings = (source) => source.split("\r\n").join("\n").split("\r").join("\n");
 
@@ -29,13 +30,15 @@ const removeBlock = (source, startText) => {
   return `${source.slice(0, startIndex)}${source.slice(endIndex + "\n};\n".length)}`;
 };
 
+const removeStratisIconDeclarations = (source) => STRATIS_ICON_DECLARATION_BLOCKS.reduce((currentSource, declarations) => replaceAll(currentSource, declarations, ""), source);
+
 const insertAfterResolveStratisIcon = (source, declarations) => {
-  if (source.includes(declarations.trim())) return source;
-  const match = source.match(RESOLVE_STRATIS_ICON_DECLARATION_PATTERN);
-  if (!match || match.index === undefined) return source;
+  const sourceWithoutDeclarations = removeStratisIconDeclarations(source);
+  const match = sourceWithoutDeclarations.match(RESOLVE_STRATIS_ICON_DECLARATION_PATTERN);
+  if (!match || match.index === undefined) return sourceWithoutDeclarations;
 
   const insertIndex = match.index + match[0].length;
-  return `${source.slice(0, insertIndex)}\n${declarations}${source.slice(insertIndex + (source[insertIndex] === "\n" ? 1 : 0))}`;
+  return `${sourceWithoutDeclarations.slice(0, insertIndex)}\n${declarations}${sourceWithoutDeclarations.slice(insertIndex + (sourceWithoutDeclarations[insertIndex] === "\n" ? 1 : 0))}`;
 };
 
 const applyPdfDocumentPaneFixes = (source) => {
