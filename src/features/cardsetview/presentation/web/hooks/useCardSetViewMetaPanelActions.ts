@@ -5,8 +5,6 @@ import type { CardSetViewEditingDraftPatch } from "@/features/cardsetview/presen
 import { createLatestReviewLogPatch, createReviewPatchFromRating } from "@/services/reviewAlgorithm";
 import type { Card, ReviewLog, UserSettings } from "@/types";
 
-
-
 type EditingDraftPatch = CardSetViewEditingDraftPatch["patch"];
 interface UseCardSetViewMetaPanelActionsOptions {
   selectedCard: Card | null;
@@ -14,8 +12,6 @@ interface UseCardSetViewMetaPanelActionsOptions {
   settings: UserSettings | undefined;
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
 }
-
-
 
 const normalizeReviewLogs = (reviewLogs: Card["reviewLogs"]): ReviewLog[] => {
   return reviewLogs ?? [];
@@ -238,7 +234,5 @@ const useCardSetViewMetaPanelActions = ({ selectedCard, isGlobalEditing, setting
     onUpdateTitle,
   };
 };
-
-
 
 export { useCardSetViewMetaPanelActions };
