@@ -37,7 +37,7 @@ const buildDeleteTombstone = (id: string, data: unknown): Record<string, unknown
 
 export const pushCloudSyncBatch = async ( userId: string, changes: SyncChange[], ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }> => {
   console.log(
-    `📤 [CloudSyncAdapter] pushBatch START. Count: ${changes.length}`,
+    `[CloudSyncAdapter] pushBatch START. Count: ${changes.length}`,
   );
 
   const successIds: string[] = [];
@@ -106,7 +106,7 @@ export const pushCloudSyncBatch = async ( userId: string, changes: SyncChange[],
         successIds.push(...chunkIds);
       } catch (error) {
         console.error(
-          "❌ [CloudSyncAdapter] pushBatch chunk commit ERROR:",
+          "[CloudSyncAdapter] pushBatch chunk commit ERROR:",
           error,
         );
         failedIds.push(...chunkIds);
@@ -118,10 +118,10 @@ export const pushCloudSyncBatch = async ( userId: string, changes: SyncChange[],
       return { successIds, failedIds, error: firstError };
     }
 
-    console.log("📤 [CloudSyncAdapter] pushBatch SUCCESS");
+    console.log("[CloudSyncAdapter] pushBatch SUCCESS");
     return { successIds, failedIds };
   } catch (error) {
-    console.error("❌ [CloudSyncAdapter] pushBatch ERROR:", error);
+    console.error("[CloudSyncAdapter] pushBatch ERROR:", error);
     return {
       successIds: [],
       failedIds: changes
