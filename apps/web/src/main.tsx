@@ -1,23 +1,15 @@
 /* eslint-disable react-refresh/only-export-components */
-import "./runtime/installProductionConsoleFilter";
-import "./runtime/disableNativeTitleTooltips";
-import "@platform/desktop/installTauriDesktopBridge";
-import { StrictMode, useEffect, useState, type ComponentType } from "react";
-import { createRoot } from "react-dom/client";
-import "katex/dist/katex.min.css";
 import "@/styles/index.css";
 import "@/services/localDB";
+import "@platform/desktop/installTauriDesktopBridge";
+import "@web-runtime/disableNativeTitleTooltips";
+import "@web-runtime/installProductionConsoleFilter";
+import "katex/dist/katex.min.css";
+import { StrictMode, useEffect, useState, type ComponentType } from "react";
+import { createRoot } from "react-dom/client";
+
 import { ErrorBoundary } from "@/components/common/ErrorScreen";
 import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
-
-type AppBootstrapState =
-  | { status: "loading" }
-  | { status: "ready"; App: ComponentType }
-  | { status: "failed"; message: string };
-
-type StartupFailureScreenProps = {
-  message: string;
-};
 
 const FIREBASE_ENV_FAILURE_MARKER = "[env] Missing required Firebase env vars";
 const STARTUP_FAILURE_TITLE = "起動設定が不足しています";
@@ -77,6 +69,15 @@ const STARTUP_LOGO_STYLE = `
 }
 `;
 
+type AppBootstrapState =
+  | { status: "loading" }
+  | { status: "ready"; App: ComponentType }
+  | { status: "failed"; message: string };
+
+type StartupFailureScreenProps = {
+  message: string;
+};
+
 const getStartupFailureMessage = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
 
@@ -89,7 +90,7 @@ const getStartupFailureMessage = (error: unknown): string => {
 
 const startAppRuntimeSafely = async (): Promise<void> => {
   try {
-    const { startAppRuntime } = await import("./runtime/startAppRuntime");
+    const { startAppRuntime } = await import("@web-runtime/startAppRuntime");
     startAppRuntime();
   } catch (error) {
     console.warn("[Startup] Runtime initialization failed", error);
