@@ -4,8 +4,6 @@ import dedent from "dedent";
 import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction, getMarkdownWithSelection, isMultiBlocks } from "@/app/api/ai/command/utils";
 import { commonGenerateRules } from "./common";
 
-
-
 function buildGenerateFreeformPrompt(messages: ChatMessage[]) {
   return buildStructuredPrompt({
     examples: [

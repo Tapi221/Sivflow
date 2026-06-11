@@ -1,7 +1,5 @@
 import type { QueueItem } from "./persistentOfflineQueueTypes";
 
-
-
 type DocumentLike = {
   uploadStatus?: string | null;
   remoteUrl?: string | null;
@@ -10,8 +8,6 @@ type DocumentLike = {
   localUrl?: string | null;
   blobUrl?: string | null;
 };
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -24,7 +20,8 @@ const getString = (
     ? value.trim()
     : null;
 };
-export const toDocumentLike = (value: unknown): DocumentLike => { if (!isRecord(value)) return {};
+export const toDocumentLike = (value: unknown): DocumentLike => {
+  if (!isRecord(value)) return {};
 
   return {
     uploadStatus: getString(value, "uploadStatus"),
@@ -37,10 +34,12 @@ export const toDocumentLike = (value: unknown): DocumentLike => { if (!isRecord(
 };
 export const isPdfQueueItem = (item: Pick<QueueItem, "fileType" | "fileName">): boolean => item.fileType === "application/pdf" || (typeof item.fileName === "string" && item.fileName.toLowerCase().endsWith(".pdf"));
 export const isDocumentQueueItem = (item: Pick<QueueItem, "fileType" | "fileName">): boolean => isPdfQueueItem(item);
-export const getDocumentKindLabel = (item: Pick<QueueItem, "fileType" | "fileName">): "PDF" | "DOC" => { if (isPdfQueueItem(item)) return "PDF";
+export const getDocumentKindLabel = (item: Pick<QueueItem, "fileType" | "fileName">): "PDF" | "DOC" => {
+  if (isPdfQueueItem(item)) return "PDF";
   return "DOC";
 };
-export const isDocumentUploadReady = (doc: unknown): boolean => { const snapshot = toDocumentLike(doc);
+export const isDocumentUploadReady = (doc: unknown): boolean => {
+  const snapshot = toDocumentLike(doc);
   if (snapshot.uploadStatus === "ready") return true;
 
   return (

@@ -4,8 +4,6 @@ import { MarkdownBlockContent, type MarkdownReplaceBlock, type MarkdownReplaceFo
 import { cn } from "@/lib/utils";
 import { NotebookPen } from "@/ui/icons";
 
-
-
 interface MarkdownBlockProps {
   markdown: string;
   onChange: (markdown: string) => void;
@@ -29,8 +27,6 @@ interface MarkdownBlockProps {
   zoom?: number;
 }
 
-
-
 const areMarkdownBlockPropsEqual = (
   prev: MarkdownBlockProps,
   next: MarkdownBlockProps,
@@ -43,8 +39,6 @@ const areMarkdownBlockPropsEqual = (
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
-
-
 
 const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
   markdown,
@@ -101,8 +95,6 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
     </BlockWrapper>
   );
 };
-
-
 
 const MarkdownBlock = React.memo(
   MarkdownBlockInner,

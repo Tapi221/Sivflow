@@ -29,8 +29,6 @@ import { cn } from "@/lib/utils";
 import { createAppDestination, createPageUrl } from "@/platform/web/navigation/toWebPath";
 import type { CardSet, Folder, SelectedExplorerItem } from "@/types";
 
-
-
 interface TreeViewLayoutProps {
   folders: Folder[];
   isSectionListMode: boolean;
@@ -46,11 +44,7 @@ interface TreeViewLayoutProps {
   folderSelectionNonce?: number;
 }
 
-
-
 const MOBILE_DETAIL_MEDIA_QUERY = "(max-width: 767px)";
-
-
 
 const isExternalFileDragEvent = (event: DragEvent<HTMLDivElement>) => {
   return Array.from(event.dataTransfer.types).includes("Files");
@@ -78,8 +72,6 @@ const useIsMobileViewport = (): boolean => {
 
   return isMobileViewport;
 };
-
-
 
 const TreeViewLayout = ({
   folders,
@@ -810,7 +802,5 @@ const TreeViewLayout = ({
     </div>
   );
 };
-
-
 
 export default TreeViewLayout;
