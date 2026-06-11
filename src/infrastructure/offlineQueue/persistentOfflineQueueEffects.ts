@@ -7,6 +7,8 @@ import { isDocumentQueueItem } from "@/application/usecases/persistentOfflineQue
 import type { QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
 import type { UploadedImage } from "@/types";
 
+
+
 const isAssetLikeImageQueueItem = (item: QueueItem): boolean =>
   !isDocumentQueueItem(item) && item.fileType.startsWith("image/");
 const handleQueuedUploadSuccess = async (
@@ -32,5 +34,7 @@ const handleQueuedUploadPermanentFailure = async (
     await handleQueuedAssetUploadFailure(item);
   }
 };
+
+
 
 export { handleQueuedUploadPermanentFailure, handleQueuedUploadSuccess, shouldSkipQueuedDocumentUpload };

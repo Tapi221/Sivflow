@@ -8,11 +8,15 @@ import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.typ
 import type { Card } from "@/types";
 import { useToast } from "@web-renderer/contexts/ToastContext";
 
+
+
 type ExportMfCardButtonProps = {
   card: Card | null | undefined;
   tagById?: MfDeckTagLookup;
   disabled?: boolean;
 };
+
+
 
 const ExportMfCardButton = ({
   card,
@@ -77,5 +81,9 @@ const ExportMfCardButton = ({
   );
 };
 
+
+
 export { ExportMfCardButton };
+
+
 export type { ExportMfCardButtonProps };
