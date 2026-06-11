@@ -49,7 +49,14 @@ const isExportedFunction = (node) => hasModifier(node, ts.SyntaxKind.ExportKeywo
 
 const isDefaultExportFunction = (node) => hasModifier(node, ts.SyntaxKind.DefaultKeyword);
 
-const getTypeParametersText = (node, sourceFile) => node.typeParameters ? `<${node.typeParameters.map((typeParameter) => typeParameter.getText(sourceFile)).join(", ")}>` : "";
+const shouldUseTsxGenericComma = (filePath, node) => getScriptKind(filePath) === ts.ScriptKind.TSX && node.typeParameters?.length === 1;
+
+const getTypeParametersText = (node, sourceFile, filePath) => {
+  if (!node.typeParameters) return "";
+
+  const typeParametersText = node.typeParameters.map((typeParameter) => typeParameter.getText(sourceFile)).join(", ");
+  return shouldUseTsxGenericComma(filePath, node) ? `<${typeParametersText},>` : `<${typeParametersText}>`;
+};
 
 const getParametersText = (node, sourceFile) => `(${node.parameters.map((parameter) => parameter.getText(sourceFile)).join(", ")})`;
 
@@ -57,21 +64,21 @@ const getReturnTypeText = (node, sourceFile) => node.type ? `: ${node.type.getTe
 
 const getFunctionBodyText = (node, sourceFile) => node.body?.getText(sourceFile) ?? "{}";
 
-const getArrowInitializerText = (node, sourceFile) => `${isAsyncFunction(node) ? "async " : ""}${getTypeParametersText(node, sourceFile)}${getParametersText(node, sourceFile)}${getReturnTypeText(node, sourceFile)} => ${getFunctionBodyText(node, sourceFile)}`;
+const getArrowInitializerText = (node, sourceFile, filePath) => `${isAsyncFunction(node) ? "async " : ""}${getTypeParametersText(node, sourceFile, filePath)}${getParametersText(node, sourceFile)}${getReturnTypeText(node, sourceFile)} => ${getFunctionBodyText(node, sourceFile)}`;
 
-const getFunctionDeclarationReplacementText = (node, sourceFile) => {
+const getFunctionDeclarationReplacementText = (node, sourceFile, filePath) => {
   if (!node.name || !node.body || node.asteriskToken) return null;
 
   const name = node.name.getText(sourceFile);
-  const declarationText = `${isDefaultExportFunction(node) ? "" : isExportedFunction(node) ? "export " : ""}const ${name} = ${getArrowInitializerText(node, sourceFile)};`;
+  const declarationText = `${isDefaultExportFunction(node) ? "" : isExportedFunction(node) ? "export " : ""}const ${name} = ${getArrowInitializerText(node, sourceFile, filePath)};`;
 
   return isDefaultExportFunction(node) ? `${declarationText}\nexport default ${name};` : declarationText;
 };
 
-const getFunctionExpressionReplacementText = (node, sourceFile) => {
+const getFunctionExpressionReplacementText = (node, sourceFile, filePath) => {
   if (!node.body || node.asteriskToken) return null;
 
-  return getArrowInitializerText(node, sourceFile);
+  return getArrowInitializerText(node, sourceFile, filePath);
 };
 
 const rangesOverlap = (left, right) => left.start < right.end && right.start < left.end;
@@ -88,18 +95,18 @@ const applyNonOverlappingReplacements = (source, replacements) => {
   return acceptedReplacements.reduce((nextSource, replacement) => `${nextSource.slice(0, replacement.start)}${replacement.text}${nextSource.slice(replacement.end)}`, source);
 };
 
-const collectConstArrowReplacements = (sourceFile) => {
+const collectConstArrowReplacements = (sourceFile, filePath) => {
   const replacements = [];
 
   const visit = (node) => {
     if (ts.isFunctionDeclaration(node)) {
-      const replacementText = getFunctionDeclarationReplacementText(node, sourceFile);
+      const replacementText = getFunctionDeclarationReplacementText(node, sourceFile, filePath);
       if (replacementText) replacements.push({ end: node.getEnd(), start: node.getStart(sourceFile), text: replacementText });
       return;
     }
 
     if (ts.isFunctionExpression(node)) {
-      const replacementText = getFunctionExpressionReplacementText(node, sourceFile);
+      const replacementText = getFunctionExpressionReplacementText(node, sourceFile, filePath);
       if (replacementText) replacements.push({ end: node.getEnd(), start: node.getStart(sourceFile), text: replacementText });
       return;
     }
@@ -113,7 +120,9 @@ const collectConstArrowReplacements = (sourceFile) => {
 
 const applyConstArrowFixOnce = (filePath, source) => {
   const sourceFile = createSourceFile(filePath, source);
-  const replacements = collectConstArrowReplacements(sourceFile);
+  if (sourceFile.parseDiagnostics.length > 0) return source;
+
+  const replacements = collectConstArrowReplacements(sourceFile, filePath);
 
   return replacements.length === 0 ? source : applyNonOverlappingReplacements(source, replacements);
 };
