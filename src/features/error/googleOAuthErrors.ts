@@ -3,6 +3,8 @@ import { getGoogleOAuthCallableErrorReason, isGoogleOAuthDeterministicErrorReaso
 
 
 
+
+
 type GoogleOAuthCooldownReason = GoogleOAuthCallableErrorReason | "auto_recovery_pending" | "internal";
 type GoogleOAuthCooldownEntry = { reason: GoogleOAuthCooldownReason;
   message: string;
@@ -11,7 +13,11 @@ type GoogleOAuthCooldownEntry = { reason: GoogleOAuthCooldownReason;
 
 
 
+
+
 const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
+
+
 
 
 
@@ -90,7 +96,11 @@ const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry): Error 
 
 
 
+
+
 export { GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS, getErrorStatus, isUnauthorizedError, getGoogleReason, isGooglePermissionError, getErrorCode, normalizeErrorCode, getGoogleOAuthErrorReason, isReconnectRequiredError, toErrorMessage, toGoogleCalendarAuthErrorMessage, shouldCooldownGoogleOAuthError, createGoogleOAuthCooldownError };
+
+
 
 
 export type { GoogleOAuthCooldownReason, GoogleOAuthCooldownEntry };

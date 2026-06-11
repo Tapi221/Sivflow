@@ -15,6 +15,8 @@ import { createEditorBlock, isEditorInsertableBlockType } from "./blockEditorIns
 
 
 
+
+
 type CssVars = React.CSSProperties & Record<`--${string}`, string>;
 interface BlockEditorProps {
   blocks: CardBlock[];
@@ -42,8 +44,12 @@ interface BlockEditorHandle { addBlock: (type: CardBlock["type"]) => void;
 
 
 
+
+
 const ROW_STEP_PX = CARD_ROW_PX;
 const EMPTY_HIDDEN_BLOCK_TYPES: CardBlock["type"][] = [];
+
+
 
 
 
@@ -51,6 +57,8 @@ const uid = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
+
+
 
 
 
@@ -622,8 +630,12 @@ const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>(({ blo
 
 
 
+
+
 BlockEditor.displayName = "BlockEditor";
 export { BlockEditor };
+
+
 
 
 export type { BlockEditorHandle };

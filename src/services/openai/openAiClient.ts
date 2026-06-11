@@ -4,6 +4,8 @@ import { DEFAULT_OPEN_AI_SETTINGS, loadOpenAiSettings } from "./openAiSettings";
 
 
 
+
+
 type GenerateTextOptions = { prompt: string;
   systemPrompt?: string;
   settings?: OpenAiSettings;
@@ -26,7 +28,11 @@ type OpenAiResponsesApiResponse = {
 
 
 
+
+
 const OPEN_AI_RESPONSES_API_URL = "https://api.openai.com/v1/responses";
+
+
 
 
 
@@ -116,7 +122,11 @@ const testOpenAiConnection = async (settings = loadOpenAiSettings()) => {
 
 
 
+
+
 export { generateTextWithOpenAi, testOpenAiConnection };
+
+
 
 
 export type { GenerateTextOptions, GenerateTextResult };

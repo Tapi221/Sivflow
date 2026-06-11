@@ -10,6 +10,8 @@ import { useUserSettings } from "./useUserSettings";
 
 
 
+
+
 type TagCategory = string;
 type Tag = TagRecord;
 type CardTagFields = {
@@ -24,8 +26,12 @@ type LocalDbInstance = Awaited<ReturnType<typeof getLocalDb>>;
 
 
 
+
+
 const DEFAULT_TAG_COLOR_KEYS: TagColorKey[] = [...TAG_COLOR_KEYS];
 const MAX_PATH_DEPTH = 12;
+
+
 
 
 
@@ -971,7 +977,11 @@ const useTags = () => {
 
 
 
+
+
 export { DEFAULT_TAG_COLOR_KEYS, resolveCardTagNames, useTags };
+
+
 
 
 export type { TagCategory, Tag };

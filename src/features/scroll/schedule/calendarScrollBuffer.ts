@@ -2,6 +2,8 @@ import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types"
 
 
 
+
+
 type CalendarScrollBufferSurface = "calendar";
 type CalendarScrollBuffer = { before: number;
   after: number;
@@ -11,6 +13,8 @@ type CalendarScrollBufferConfig = {
   initialScreens: CalendarScrollBuffer;
   maxUnits: CalendarScrollBuffer;
 };
+
+
 
 
 
@@ -64,6 +68,8 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
 
 
 
+
+
 const toUnitCount = (screenCount: number, unitsPerScreen: number) => Math.max(0, Math.round(screenCount * unitsPerScreen));
 const getCalendarScrollBufferConfig = (surface: CalendarScrollBufferSurface, viewMode: CalendarViewMode) => CALENDAR_SCROLL_BUFFER_CONFIG[surface][viewMode];
 const clampCalendarScrollBuffer = (buffer: CalendarScrollBuffer, maxUnits: CalendarScrollBuffer): CalendarScrollBuffer => ({
@@ -84,7 +90,11 @@ const createCalendarScrollBuffer = (surface: CalendarScrollBufferSurface, viewMo
 
 
 
+
+
 export { createCalendarScrollBuffer };
+
+
 
 
 export type { CalendarScrollBuffer };

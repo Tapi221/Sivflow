@@ -5,10 +5,14 @@ import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 
 
 
+
+
 type SidebarCollapsedToggleProps = {
   isVisible: boolean;
   onToggleLeftPanel: () => void;
 };
+
+
 
 
 
@@ -23,6 +27,8 @@ const SidebarCollapsedToggleBase = ({ isVisible, onToggleLeftPanel }: SidebarCol
     </button>
   );
 };
+
+
 
 
 

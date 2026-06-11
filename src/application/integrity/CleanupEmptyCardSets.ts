@@ -4,6 +4,8 @@ import type { Card, CardSet } from "@/types";
 
 
 
+
+
 type CleanupEmptyCardSetsResult = { deletedCardSetIds: string[];
   skippedCardSetIds: string[];
 };
@@ -11,6 +13,8 @@ type DeletableRecord = {
   isDeleted?: boolean;
   is_deleted?: boolean;
 };
+
+
 
 
 
@@ -85,7 +89,11 @@ const cleanupEmptyCardSets = async (db: LocalDB, userId: string): Promise<Cleanu
 
 
 
+
+
 export { cleanupEmptyCardSets };
+
+
 
 
 export type { CleanupEmptyCardSetsResult };

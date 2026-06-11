@@ -6,7 +6,11 @@ type PresentationCapabilities = { viewportWidth: number;
 
 
 
+
+
 const DESKTOP_PRESENTATION_MIN_WIDTH_PX = 1024;
+
+
 
 
 
@@ -31,7 +35,11 @@ const getPresentationTargetFromWindow = (): PresentationTarget => {
 
 
 
+
+
 export { DESKTOP_PRESENTATION_MIN_WIDTH_PX, getPresentationTarget, getPresentationTargetFromWindow };
+
+
 
 
 export type { PresentationTarget, PresentationCapabilities };

@@ -5,7 +5,11 @@ import { useIosCalendarIntegration } from "./useIosCalendarIntegration";
 
 
 
+
+
 type IosCalendarScheduleYearProps = Omit<ScheduleYearProps, "visibleEvents" | "onRenderedRangeChange">;
+
+
 
 
 
@@ -24,9 +28,13 @@ const IosCalendarScheduleYearComponent = (props: IosCalendarScheduleYearProps) =
 
 
 
+
+
 const IosCalendarScheduleYear = memo(IosCalendarScheduleYearComponent);
 IosCalendarScheduleYear.displayName = "IosCalendarScheduleYear";
 export { IosCalendarScheduleYear };
+
+
 
 
 export type { IosCalendarScheduleYearProps };

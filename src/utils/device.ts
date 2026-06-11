@@ -2,6 +2,8 @@ import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
 
 
+
+
 const DEVICE_LABELS = {
   server: "Server",
   webBrowser: "Web Browser",
@@ -29,6 +31,8 @@ const DEVICE_USER_AGENT_PATTERNS = {
   firefox: /Firefox/i,
 } as const;
 const DEVICE_STANDALONE_MEDIA_QUERY = "(display-mode: standalone)";
+
+
 
 
 
@@ -102,6 +106,8 @@ const getDeviceName = () => {
 
   return `${client} (${os})`;
 };
+
+
 
 
 

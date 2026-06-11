@@ -7,6 +7,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 
 
+
+
 type CalendarWeekStartDay = "sunday" | "monday";
 type CalendarWeekStartsOn = 0 | 1;
 type ScheduleYearProps = {
@@ -40,6 +42,8 @@ type ScheduleYearBlock = {
   label: string;
   months: ScheduleYearMonth[];
 };
+
+
 
 
 
@@ -156,6 +160,8 @@ const styles = StyleSheet.create({
 
 
 
+
+
 const rotateCalendarWeekdayLabels = <T,>(weekdayLabels: readonly T[], weekStartDay: CalendarWeekStartDay): readonly T[] => {
   if (weekStartDay === "sunday") return weekdayLabels;
 
@@ -247,6 +253,8 @@ const getMonthItemStyle = (monthIndex: number): ViewStyle => ({
   width: `${100 / MONTH_COLUMNS}%`,
 });
 const getCalendarWeekStartsOn = (weekStartDay: CalendarWeekStartDay): CalendarWeekStartsOn => weekStartDay === "sunday" ? 0 : 1;
+
+
 
 
 
@@ -381,9 +389,13 @@ const ScheduleYearComponent = ({ yearDate, selectedDate, weekStartDay = DEFAULT_
 
 
 
+
+
 const ScheduleYear = memo(ScheduleYearComponent);
 ScheduleYear.displayName = "ScheduleYear";
 export { ScheduleYear };
+
+
 
 
 export type { CalendarWeekStartDay, ScheduleYearProps };

@@ -6,6 +6,8 @@ import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
 
 
+
+
 interface FlashcardNavigationProps {
   onNext?: () => void;
   onPrev?: () => void;
@@ -14,6 +16,8 @@ interface FlashcardNavigationProps {
   currentIndex?: number;
   totalCards?: number;
 }
+
+
 
 
 
@@ -60,6 +64,8 @@ const FlashcardNavigation = ({ onNext, onPrev, hasNext, hasPrev, currentIndex, t
     </div>
   );
 };
+
+
 
 
 

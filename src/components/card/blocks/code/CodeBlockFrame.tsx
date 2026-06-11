@@ -4,6 +4,8 @@ import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
 
 
 
+
+
 type CodeBlockFrameProps = {
   variant?: "viewer" | "editor";
   languageLabel?: string;
@@ -13,6 +15,8 @@ type CodeBlockFrameProps = {
   headerRight?: React.ReactNode;
   children: React.ReactNode;
 };
+
+
 
 
 
@@ -75,6 +79,8 @@ const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({ variant = "viewer", lan
     </div>
   );
 };
+
+
 
 
 

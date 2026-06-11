@@ -6,6 +6,8 @@ import { CARD_SET_VIEW_DEFAULT_ZOOM_SCALE, CARD_SET_VIEW_FIXED_LAYOUT_SAFETY_ALL
 
 
 
+
+
 type ResolveZoomWidthArgs = {
   cardLayoutMode: CardLayoutMode;
 };
@@ -15,8 +17,12 @@ type ResolveCardSetViewDevicePresentationArgs = {
 
 
 
+
+
 const MOBILE_CARD_SET_VIEW_DEVICE_SCOPE = "mobile";
 const MOBILE_CARD_SET_VIEW_ZOOM_PERCENT = 100;
+
+
 
 
 
@@ -228,6 +234,8 @@ const resolveZoomScaleFromPresentationWidthPx = ({ presentationWidthPx, canonica
 
   return presentationWidthPx / canonicalCardWidthPx;
 };
+
+
 
 
 

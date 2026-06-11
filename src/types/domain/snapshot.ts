@@ -12,6 +12,8 @@ import type { CardSet } from "./cardSet";
 
 
 
+
+
 /** スナップショットのメタデータ */
 interface SnapshotMetadata { /** スキーマバージョン（マイグレーション用） */ schemaVersion: number;
 
@@ -87,6 +89,8 @@ interface SnapshotComparison { /** どちらが新しいか */ newerSnapshot: "l
 
 
 
+
+
 /** 現在のスキーマバージョン */
 const CURRENT_SCHEMA_VERSION = 3;
 /** アプリバージョン（package.jsonから取得すべきだが、ここでは固定） */
@@ -94,7 +98,11 @@ const APP_VERSION = "1.0.0";
 
 
 
+
+
 export { CURRENT_SCHEMA_VERSION, APP_VERSION };
+
+
 
 
 export type { SnapshotMetadata, ReviewLog, UserSettings, SnapshotAsset, SnapshotData, AppSnapshot, SnapshotComparison };

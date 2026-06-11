@@ -2,6 +2,8 @@ import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionS
 
 
 
+
+
 type HandwritingSessionUnsubscribe = () => void;
 type HandwritingSessionMessageHandler = (message: HandwritingSessionMessage) => void;
 type HandwritingSessionStatusHandler = (status: HandwritingSessionStatus) => void;

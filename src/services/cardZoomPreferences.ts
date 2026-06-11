@@ -2,10 +2,14 @@ import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
 
 
+
+
 interface CardZoomPreferencesStore {
   version: 1;
   byCardSet: Record<string, number>;
 }
+
+
 
 
 
@@ -70,6 +74,8 @@ const setCardSetZoomPreference = (cardSetId: string, zoomPercent: number) => {
   store.byCardSet[cardSetId] = Math.round(zoomPercent);
   writeStore(store);
 };
+
+
 
 
 

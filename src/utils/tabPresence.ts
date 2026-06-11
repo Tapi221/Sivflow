@@ -11,6 +11,8 @@ type TabPresenceTimings = {
 
 
 
+
+
 const TAB_PRESENCE_STORAGE_KEYS: TabPresenceStorageKeys = {
   presenceMap: "sivflow:tab-presence:map",
   started: "__sivflowTabPresenceStarted",
@@ -20,6 +22,8 @@ const TAB_PRESENCE_TIMINGS: TabPresenceTimings = {
   heartbeatMs: 5000,
   staleMs: 15000,
 };
+
+
 
 
 
@@ -97,6 +101,8 @@ const startTabPresence = () => {
     }
   });
 };
+
+
 
 
 

@@ -2,6 +2,8 @@ import { toMillis } from "@/utils/toMillis";
 
 
 
+
+
 type OrderableEntitySelectors<T> = {
   getOrderIndex: (entity: T) => number | null | undefined;
   getUpdatedAt: (entity: T) => unknown;
@@ -9,6 +11,8 @@ type OrderableEntitySelectors<T> = {
   getName: (entity: T) => string | null | undefined;
   getId: (entity: T) => string | null | undefined;
 };
+
+
 
 
 
@@ -43,6 +47,8 @@ const compareOrderableEntities = <T>(left: T, right: T, selectors: OrderableEnti
     "ja",
   );
 };
+
+
 
 
 

@@ -6,6 +6,8 @@ import { usePresentationTarget } from "@/platform/presentation/usePresentationTa
 
 
 
+
+
 const STUDY_REVIEW_COMPONENTS = {
   desktop: StudyReviewDesktop,
   mobile: StudyReviewMobile,
@@ -16,11 +18,15 @@ const STUDY_REVIEW_COMPONENTS = {
 
 
 
+
+
 const StudyReview = (props: StudyReviewProps) => {
   const presentationTarget = usePresentationTarget();
   const Component = STUDY_REVIEW_COMPONENTS[presentationTarget];
   return <Component {...props} />;
 };
+
+
 
 
 

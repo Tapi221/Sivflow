@@ -6,6 +6,8 @@ import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction }
 
 
 
+
+
 const buildEditTableMultiCellPrompt = (editor: SlateEditor, messages: ChatMessage[]): string => {
   const tableCellMarkdown = getMarkdown(editor, { type: "tableCellWithId" });
 
@@ -101,6 +103,8 @@ const buildEditTableMultiCellPrompt = (editor: SlateEditor, messages: ChatMessag
     `,
   });
 };
+
+
 
 
 

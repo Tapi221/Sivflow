@@ -4,7 +4,11 @@ type AssetQueueProcessor = {
 
 
 
+
+
 const AUTO_PROCESS_LISTENER_KEY = "__flashcardPersistentQueueAutoProcessListenersBound";
+
+
 
 
 
@@ -54,6 +58,8 @@ const bindPersistentQueueAutoProcessing = (persistentQueue: AssetQueueProcessor)
     triggerAssetQueueProcessing(persistentQueue, "load");
   }
 };
+
+
 
 
 

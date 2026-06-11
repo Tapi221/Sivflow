@@ -3,10 +3,14 @@ import type { CSSProperties, RefObject } from "react";
 
 
 
+
+
 type RightClickPanelPosition = { x: number; y: number; };
 type RightClickPanelNoDragStyle = CSSProperties & { WebkitAppRegion?: "drag" | "no-drag"; };
 type RightClickPanelDimensions = { width: number; height: number; };
 type RightClickPanelId = string;
+
+
 
 
 
@@ -21,6 +25,8 @@ const RIGHT_CLICK_PANEL_TEXT_HORIZONTAL_EDGE = 32;
 const RIGHT_CLICK_PANEL_FALLBACK_TEXT_WIDTH = 8;
 const RIGHT_CLICK_PANEL_FONT = "13px system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif";
 let rightClickPanelMeasureContext: CanvasRenderingContext2D | null | undefined;
+
+
 
 
 
@@ -104,7 +110,11 @@ const useRightClickPanelDismiss = (panelId: RightClickPanelId, isOpen: boolean, 
 
 
 
+
+
 export { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, RIGHT_CLICK_PANEL_OPEN_EVENT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, resolveRightClickPanelTextWidth, clampRightClickPanelPosition, useRightClickPanelDismiss };
+
+
 
 
 export type { RightClickPanelPosition, RightClickPanelNoDragStyle, RightClickPanelDimensions, RightClickPanelId };

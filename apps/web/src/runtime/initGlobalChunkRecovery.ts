@@ -5,7 +5,11 @@ import { isChunkLoadError, toErrorText } from "./runtimeErrorUtils";
 
 
 
+
+
 let started = false;
+
+
 
 
 
@@ -55,6 +59,8 @@ const initGlobalChunkRecovery = () => {
     hardReloadOnce(RUNTIME_RELOAD_KEYS.vitePreload);
   });
 };
+
+
 
 
 

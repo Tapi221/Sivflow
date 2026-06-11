@@ -26,7 +26,11 @@ import { Button } from "./button";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
+
+
 const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];
+
+
 
 const createDragPreviewElements = (
   editor: PlateEditor,
@@ -184,6 +188,8 @@ const calcDragButtonTop = (editor: PlateEditor, element: TElement): number => {
 
   return currentMarginTop;
 };
+
+
 
 const Gutter = ({
   children,
@@ -377,6 +383,8 @@ const Draggable = (props: PlateElementProps) => {
     </div>
   );
 };
+
+
 
 const DragHandle = React.memo(({
   isDragging,

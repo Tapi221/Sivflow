@@ -3,7 +3,11 @@ import type { RefObject } from "react";
 
 
 
+
+
 type WorkspaceScrollRef = RefObject<HTMLElement | null> | undefined;
+
+
 
 
 
@@ -46,6 +50,8 @@ const useResetWorkspaceScrollDesktop = (mainRef: WorkspaceScrollRef, pathname: s
     };
   }, [mainRef, pathname]);
 };
+
+
 
 
 

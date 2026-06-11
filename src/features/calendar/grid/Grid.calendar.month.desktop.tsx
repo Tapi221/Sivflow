@@ -19,6 +19,8 @@ import * as GD from "./grid.layout.constants.desktop";
 
 
 
+
+
 type CalendarMonthGridDay = { date: Date; key: string; dayOfMonth: number; isCurrentMonth: boolean; };
 type CalendarMonthGridWeek = { key: string; days: CalendarMonthGridDay[]; };
 type MonthEventDragState = { eventKey: string; event: GoogleCalendarEvent; pointerId: number; durationMs: number; sourceDayKey: string; previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; };
@@ -78,10 +80,14 @@ type CalendarMonthWeekRowProps = {
 
 
 
+
+
 const MONTH_GRID_BORDER_STYLE: CSSProperties = { borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB };
 const DEFAULT_MONTH_TIMED_EVENT_DURATION_MS = 30 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CALENDAR_EVENT_DRAG_FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
+
+
 
 
 
@@ -185,6 +191,8 @@ const createMonthEventRenderItems = (visibleEvents: GoogleCalendarEvent[], dayKe
 
   return didReplaceSource ? replacedItems : visibleItems;
 };
+
+
 
 
 
@@ -360,6 +368,8 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEv
     </>
   );
 };
+
+
 
 
 

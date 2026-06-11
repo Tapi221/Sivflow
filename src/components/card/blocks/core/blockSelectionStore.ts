@@ -2,12 +2,18 @@ import { useSyncExternalStore } from "react";
 
 
 
+
+
 type BlockSelectionListener = () => void;
+
+
 
 
 
 let selectedBlockId: string | null = null;
 const blockSelectionListeners = new Set<BlockSelectionListener>();
+
+
 
 
 
@@ -27,6 +33,8 @@ const setSelectedBlockId = (nextSelectedBlockId: string | null) => {
   emitBlockSelectionChange();
 };
 const useSelectedBlockId = () => useSyncExternalStore(subscribeSelectedBlockId, getSelectedBlockIdSnapshot, getSelectedBlockIdSnapshot);
+
+
 
 
 

@@ -5,6 +5,8 @@ import { getLocalDb } from "@/infrastructure/localdb/client";
 
 
 
+
+
 const handleQueuedAssetUploadFailure = async (item: QueueItem): Promise<void> => {
   try {
     const localDb = await getLocalDb();
@@ -36,6 +38,8 @@ const handleQueuedAssetUploadFailure = async (item: QueueItem): Promise<void> =>
     console.warn("[PersistentQueue] Failed to update asset status", assetErr);
   }
 };
+
+
 
 
 

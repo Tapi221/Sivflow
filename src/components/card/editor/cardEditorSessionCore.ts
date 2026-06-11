@@ -11,6 +11,8 @@ import { waitForDraftImageUploads } from "./cardImageUploadSaveBarrier";
 
 
 
+
+
 type BuildSavePayloadParams = {
   draft: EditorDraft;
   addTag: (name: string) => Promise<{ id: string; }>;
@@ -28,8 +30,12 @@ type PersistResult = | { ok: true; operation: PersistOperation; saved: boolean; 
 
 
 
+
+
 const NEW_SENTINEL = "__new__" as const;
 const AUTOSAVE_DELAY_MS = 700;
+
+
 
 
 
@@ -279,8 +285,12 @@ const createPanelCard = ({ selectedCard, draft, isEditing }: CreatePanelCardPara
 
 
 
+
+
 export { toDateOrNull } from "@/utils/toMillis";
 export { NEW_SENTINEL, AUTOSAVE_DELAY_MS, cloneBlock, cloneAttachments, snapshotDraft, draftSignature, sanitizeBlocksForSave, sanitizeAttachmentsForSave, hasMeaningfulBlock, hasMeaningfulAttachments, hasMeaningfulDraft, extractCreatedCardId, buildDraftFromCard, buildPatchFromDraft, prepareDraftForPersist, buildSavePayload, buildCardPatchForToggle, createPanelCard };
+
+
 
 
 export type { TagNameLookup, PersistOperation, PersistResult };

@@ -23,6 +23,8 @@ import { Code, HelpCircle, Link, NotebookPen, Sigma, Type, Volume2 } from "@/ui/
 
 
 
+
+
 type CardBlockLayoutReplaceBlock = MarkdownReplaceBlock;
 type ViewerProps = Readonly<{ questionDisplayMode: "always" | "tap_to_reveal";
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
@@ -82,6 +84,8 @@ type SceneProps = Readonly<{
 
 
 
+
+
 const NOOP = () => {};
 const SUPPORTED_LANGUAGES = [
   { value: "javascript", label: "JavaScript" },
@@ -104,6 +108,8 @@ const MAX_MATH_LATEX_LENGTH = 10000;
 
 
 
+
+
 const renderGridOffsetSpacer = (gridOffsetPx: number) => gridOffsetPx > 0 ? <div aria-hidden className="pointer-events-none" style={{ height: `${gridOffsetPx}px` }} /> : null;
 const renderEditorShellProps = (editorProps?: EditorProps) => ({
   accentColor: editorProps?.accentColor,
@@ -118,6 +124,8 @@ const renderEditorShellProps = (editorProps?: EditorProps) => ({
   canMoveDown: editorProps?.canMoveDown,
   dragHandleClassName: "js-block-drag-handle",
 });
+
+
 
 
 
@@ -234,7 +242,11 @@ const CardBlockSceneRenderer = (props: CardBlockSceneRendererProps) => {
 
 
 
+
+
 export { CardBlockSceneRenderer };
+
+
 
 
 export type { CardBlockLayoutReplaceBlock, ViewerProps, EditorProps };

@@ -10,7 +10,11 @@ type ExplorerBreadcrumbContext = { folderId: string | null;
 
 
 
+
+
 const EMPTY_EXPLORER_BREADCRUMB_CONTEXT: ExplorerBreadcrumbContext = { folderId: null, cardSet: null };
+
+
 
 
 
@@ -18,7 +22,11 @@ const areExplorerBreadcrumbContextsEqual = (a: ExplorerBreadcrumbContext, b: Exp
 
 
 
+
+
 export { EMPTY_EXPLORER_BREADCRUMB_CONTEXT, areExplorerBreadcrumbContextsEqual };
+
+
 
 
 export type { BreadcrumbCrumb, ExplorerBreadcrumbContext };

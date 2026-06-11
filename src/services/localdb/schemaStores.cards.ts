@@ -2,4 +2,6 @@ const CARD_STORES = { cardSets: "id, userId, folderId, updatedAt, isDeleted, [us
 
 
 
+
+
 export { CARD_STORES };

@@ -3,7 +3,11 @@ import platform from "@/platform";
 
 
 
+
+
 const externalNavigation: ExternalNavigationPort = { openExternal: (url: string) => platform.shell.openExternal(url) };
+
+
 
 
 

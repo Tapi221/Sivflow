@@ -4,10 +4,14 @@ import { AlertTriangle, ChevronDown, X } from "@/ui/icons";
 
 
 
+
+
 interface WarningDialogProps {
   notification: Notification;
   onDismiss: () => void;
 }
+
+
 
 
 
@@ -98,6 +102,8 @@ const WarningDialog: React.FC<WarningDialogProps> = ({ notification, onDismiss }
     </div>
   );
 };
+
+
 
 
 

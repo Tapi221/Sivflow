@@ -2,6 +2,8 @@ import type { SelectionCaptureRect } from "./selectionCapture.types";
 
 
 
+
+
 const toBlob = (canvas: HTMLCanvasElement): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -88,6 +90,8 @@ const captureElementRectToBlob = async (element: HTMLElement, rect: SelectionCap
     URL.revokeObjectURL(url);
   }
 };
+
+
 
 
 

@@ -10,6 +10,8 @@ import { useEditorRef } from "platejs/react";
 
 import { ToolbarButton } from "./toolbar";
 
+
+
 const InlineEquationToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => {
   const editor = useEditorRef();
 
@@ -25,5 +27,7 @@ const InlineEquationToolbarButton = (props: React.ComponentProps<typeof ToolbarB
     </ToolbarButton>
   );
 };
+
+
 
 export { InlineEquationToolbarButton };

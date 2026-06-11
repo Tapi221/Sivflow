@@ -14,6 +14,8 @@ import { Button } from "./button";
 
 import { EmojiPicker, EmojiPopover } from "./emoji-toolbar-button";
 
+
+
 const CalloutElement = ({ attributes, children, className, ...props }: React.ComponentProps<typeof PlateElement>) => {
   const { emojiPickerState, isOpen, setIsOpen } = useEmojiDropdownMenuState({ closeOnSelect: true });
 
@@ -59,5 +61,7 @@ const CalloutElement = ({ attributes, children, className, ...props }: React.Com
     </PlateElement>
   );
 };
+
+
 
 export { CalloutElement };

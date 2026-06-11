@@ -12,6 +12,8 @@ import { cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+
+
 const mediaResizeHandleVariants = cva(cn("top-0 flex w-6 select-none flex-col justify-center", "after:flex after:h-16 after:w-[3px] after:rounded-[6px] after:bg-ring after:opacity-0 after:content-['_'] group-hover:after:opacity-100"), { variants: { direction: { left: "-left-3 -ml-3 pl-3", right: "-right-3 -mr-3 items-end pr-3" } } });
 
 const resizeHandleVariants = cva("absolute z-40", {
@@ -35,6 +37,8 @@ const resizableVariants = cva("", {
   },
 });
 
+
+
 const ResizeHandle = ({ className, options, ...props }: React.ComponentProps<typeof ResizeHandlePrimitive> & VariantProps<typeof resizeHandleVariants>) => {
   const state = useResizeHandleState(options ?? {});
   const resizeHandle = useResizeHandle(state);
@@ -57,5 +61,7 @@ const ResizeHandle = ({ className, options, ...props }: React.ComponentProps<typ
 const Resizable = ({ align, className, ...props }: React.ComponentProps<typeof ResizablePrimitive> & VariantProps<typeof resizableVariants>) => {
   return (<ResizablePrimitive {...props} className={cn(resizableVariants({ align }), className)} />);
 };
+
+
 
 export { mediaResizeHandleVariants, ResizeHandle, Resizable };

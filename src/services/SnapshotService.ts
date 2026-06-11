@@ -11,6 +11,8 @@ import type { AppSnapshot } from "@/types/domain/snapshot";
 
 
 
+
+
 const SNAPSHOTS_KEY = "flashcard_snapshots";
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,
@@ -73,6 +75,8 @@ migrateFromLocalStorage: async (userId: string): Promise<void> => {
 
 
 
+
+
 const getStoredSnapshotsFromLocalStorage = (): AppSnapshot[] => {
   if (typeof window === "undefined") {
     return [];
@@ -81,6 +85,8 @@ const getStoredSnapshotsFromLocalStorage = (): AppSnapshot[] => {
   const storedJson = localStorage.getItem(SNAPSHOTS_KEY);
   return storedJson ? (JSON.parse(storedJson) as AppSnapshot[]) : [];
 };
+
+
 
 
 

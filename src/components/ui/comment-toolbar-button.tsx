@@ -10,6 +10,8 @@ import { commentPlugin } from "@/components/editor/plugins/comment-kit";
 
 import { ToolbarButton } from "./toolbar";
 
+
+
 const CommentToolbarButton = () => {
   const editor = useEditorRef();
 
@@ -25,5 +27,7 @@ const CommentToolbarButton = () => {
     </ToolbarButton>
   );
 };
+
+
 
 export { CommentToolbarButton };

@@ -5,6 +5,8 @@ import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 
 
 
+
+
 const useSync = () => {
   const { currentUser } = useAuthSession();
   const [syncProgress, setSyncProgress] = useState<string>("");
@@ -38,6 +40,8 @@ const useSync = () => {
 
   return { forceSync, syncProgress };
 };
+
+
 
 
 

@@ -2,6 +2,8 @@ import type { BaseEntity } from "./base";
 
 
 
+
+
 type NoteEditor = "plate";
 type NoteContentVersion = 2;
 type NoteBlockContent = Record<string, unknown>[];

@@ -6,6 +6,8 @@ import type { ReviewLog } from "@/types/domain/base";
 
 
 
+
+
 type CreateMetaPanelActionsArgs = {
   selectedCard: Card | null;
   settings?: Partial<UserSettings> | null;
@@ -23,7 +25,11 @@ type CreateMetaPanelActionsArgs = {
 
 
 
+
+
 const META_PANEL_OPEN_STORAGE_KEY = WEB_STORAGE_KEYS.cardEditorMetaPanelOpen;
+
+
 
 
 
@@ -200,6 +206,8 @@ const createMetaPanelActions = ({ selectedCard, settings, updateCard, onCardUpda
     onUpdateTitle: handleUpdateTitle,
   };
 };
+
+
 
 
 
