@@ -94,4 +94,4 @@ const getPdfPageWindowKeepSet = (pageMetrics: PdfPageWindowMetric[], viewportTop
 
 
 
-export { getPdfPageWindowKeepSet, getSafePdfPageNumbe
+export { getPdfPageWindowKeepSet, getSafePdfPageNumber };

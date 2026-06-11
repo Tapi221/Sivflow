@@ -30,4 +30,4 @@ const SettingsWorkspaceDialog = ({ open, onOpenChange }: SettingsWorkspaceDialog
 
 
 
-export { SettingsWorkspaceDialo
+export { SettingsWorkspaceDialog };

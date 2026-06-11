@@ -43,4 +43,4 @@ const resolvePdfDocumentSourceUrl = (document: PdfDocumentSourceFields): string 
 
 
 
-export { resolvePdfDocumentSourceUr
+export { resolvePdfDocumentSourceUrl };

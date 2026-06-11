@@ -646,4 +646,4 @@ const SettingsWorkspaceScreen = () => {
 
 
 
-export { SettingsWorkspaceS
+export { SettingsWorkspaceScreen };

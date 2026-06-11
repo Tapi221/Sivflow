@@ -7,6 +7,8 @@ import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { auditAndRepairTags } from "@/services/localdb/audit/tags";
 import { auth } from "@/services/firebase";
 
+
+
 type ClearDevModeCacheOptions = {
   userId?: string;
   reload?: boolean;
@@ -90,11 +92,15 @@ type WindowWithLocalDbDevtools = Window & {
   };
 };
 
+
+
 const REPAIR_TAGS_ALLOWLIST = (import.meta.env.VITE_REPAIR_TAGS_ALLOWLIST ?? import.meta.env.VITE_REPAIR_TAGS_ALLOWED_UIDS ?? "").split(",").map((uid) => uid.trim()).filter(Boolean);
 const DEV_INDEXED_DB_DELETE_TIMEOUT_MS = 2000;
 const DEFAULT_NEW_FOLDER_NAMES = ["新規フォルダ"] as const;
 const DEV_LOCAL_STORAGE_PREFIXES = [LOCALDB_GENERATION_KEY_PREFIX, "sivflow:", "sivflow.", "flashcard-master:", "flashcard-master.", "cardsetview.", "card-view.", "card-editor.", "folder_", "ui.", "workspace.", "app:"] as const;
 const DEV_LOCAL_STORAGE_EXTRA_KEYS = ["explorer-storage"] as const;
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 

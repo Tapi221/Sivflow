@@ -17,4 +17,5 @@ export function ToggleToolbarButton( props: React.ComponentProps<typeof ToolbarB
     <ToolbarButton {...props} {...buttonProps} tooltip="Toggle">
       <ListCollapseIcon />
     </ToolbarButton>
-  
+  );
+}

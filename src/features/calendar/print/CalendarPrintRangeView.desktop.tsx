@@ -122,4 +122,4 @@ const CalendarPrintRangeView = ({ titleLabel, rangeLabel, focusDate, range, even
 
 
 
-export { CalendarPrintRang
+export { CalendarPrintRangeView };

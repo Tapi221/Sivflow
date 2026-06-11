@@ -47,3 +47,4 @@ export const useFolderLineage = (folderId: string | null) => { const { currentUs
   );
 
   return folders ?? [];
+};

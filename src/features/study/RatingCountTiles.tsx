@@ -127,3 +127,4 @@ export const RatingCountTiles = ({ counts, compact = false, className = "", disa
       })}
     </div>
   );
+};

@@ -29,3 +29,4 @@ export const normalizeMemoryStability = ( value?: number | null, legacyLevel?: n
   }
 
   return 0;
+};

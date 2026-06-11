@@ -36,3 +36,4 @@ export const useSync = () => { const { currentUser } = useAuthSession();
   };
 
   return { forceSync, syncProgress };
+};

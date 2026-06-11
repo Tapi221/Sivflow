@@ -88,3 +88,4 @@ export const useCalendarScrollPositionSync = ({ selectedViewMode, calendarBuffer
       selectedViewMode,
     };
   }, [selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs]);
+};

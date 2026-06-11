@@ -377,3 +377,4 @@ export const useGoogleCalendarIntegration = ({ authInstance = auth, }: UseGoogle
     selectedCalendarIds,
     toggleCalendar,
   };
+};

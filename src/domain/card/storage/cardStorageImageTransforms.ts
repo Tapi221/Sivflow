@@ -18,3 +18,4 @@ export const sanitizeCardStorageBlockImages = ( blocks: unknown[] | undefined, )
       images: block.images.map((image) => sanitizeCardStorageImageRef(image)),
     };
   });
+};

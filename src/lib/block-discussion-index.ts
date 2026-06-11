@@ -485,4 +485,5 @@ export const useBlockDiscussionItems = (blockPath: Path) => { const editor = use
       resolvedDiscussions: index.discussionsByBlock.get(blockKey) ?? [],
       resolvedSuggestions: index.suggestionsByBlock.get(blockKey) ?? [],
     };
-  }, [blockPath, discussions, editor,
+  }, [blockPath, discussions, editor, version]);
+};

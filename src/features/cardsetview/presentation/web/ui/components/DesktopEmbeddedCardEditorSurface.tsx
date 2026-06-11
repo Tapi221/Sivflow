@@ -482,4 +482,5 @@ export const DesktopEmbeddedCardEditorSurface = ({ selectedCardId, folderId, car
         setReferenceItems={content.setReferenceItems}
       />
     </>
-  
+  );
+};

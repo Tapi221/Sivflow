@@ -72,3 +72,4 @@ export const useCalendarLayout = ({ viewportWidth, visibleDays, displayDays, sel
     titleDate,
     monthLabel,
   };
+};

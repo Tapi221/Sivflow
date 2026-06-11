@@ -224,3 +224,4 @@ export const ViewCardFaceScene = ({ card, side, displayMode, fixedScale, fixedHe
       />
     </>
   );
+};

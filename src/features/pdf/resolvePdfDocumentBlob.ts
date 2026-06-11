@@ -94,3 +94,4 @@ export const resolvePdfDocumentBlob = async (document: PdfDocumentBlobFields, cu
   }
 
   return downloadedBlob;
+};

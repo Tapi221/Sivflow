@@ -13,4 +13,5 @@ export function useImmediateVirtualScrollRange<E extends HTMLElement>(config: Ho
     config.onDeferredScroll?.(element);
   }, [config]);
 
-  return { handleScrollElement };
+  return { handleScrollElement };
+}

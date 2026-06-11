@@ -253,3 +253,4 @@ export const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDa
     handleYearSyncRangeChange,
     setMonthTitleDate: navigation.setMonthTitleDate,
   };
+};

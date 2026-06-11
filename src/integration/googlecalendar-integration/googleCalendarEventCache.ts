@@ -221,3 +221,4 @@ export const clearCachedGoogleCalendarAccount = async (accountId: string | undef
   if (!db) return;
 
   await db.googleCalendarEvents.where("accountId").equals(getResolvedAccountId(accountId)).delete();
+};

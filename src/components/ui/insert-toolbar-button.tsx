@@ -240,4 +240,6 @@ export function InsertToolbarButton(props: DropdownMenuProps) { const editor = u
           </ToolbarMenuGroup>
         ))}
       </DropdownMenuContent>
-    </Dropdown
+    </DropdownMenu>
+  );
+}

@@ -79,3 +79,4 @@ export const uploadPdfToGoogleDrive = async ({ accessToken, fileName, pdf, }: Go
     webViewLink: payload.webViewLink ?? null,
     webContentLink: payload.webContentLink ?? null,
   };
+};

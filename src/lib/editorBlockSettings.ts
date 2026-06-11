@@ -194,3 +194,4 @@ export const parseEditorBlockSettings = ( input: readonly unknown[] | null | und
   }
 
   return normalizeEditorBlockSettings(parsedItems);
+};

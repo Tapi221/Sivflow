@@ -127,3 +127,4 @@ export const parseGoogleRecurrenceRule = (recurrence: readonly string[] | undefi
     daysOfMonth: parseIntegerList(values.get("BYMONTHDAY")),
     monthsOfYear: parseIntegerList(values.get("BYMONTH")),
   });
+};

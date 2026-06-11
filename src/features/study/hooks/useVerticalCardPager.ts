@@ -307,3 +307,4 @@ export const useVerticalCardPager = ({ count, activeIndex, onActiveIndexChange, 
     goNext,
     goPrev,
   };
+};

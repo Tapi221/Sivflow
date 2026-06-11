@@ -125,3 +125,4 @@ export const useCloudStorageStats = ( userId: string | null | undefined, ): UseC
     rebuilding,
     refresh,
   };
+};

@@ -45,3 +45,4 @@ export const buildVerticalCardPagerItemStyle = (widthSpec: VerticalCardPagerItem
     minWidth: 0,
     alignSelf: "center",
   };
+};

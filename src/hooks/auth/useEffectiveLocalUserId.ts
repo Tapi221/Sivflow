@@ -11,3 +11,4 @@ export const useEffectiveLocalUserId = (): string | null => { const { currentUse
   if (currentUser?.uid) return currentUser.uid;
   if (loading) return null;
   return ANONYMOUS_USER_ID;
+};

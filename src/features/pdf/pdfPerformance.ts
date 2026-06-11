@@ -70,4 +70,4 @@ applyPdfViewerZoomPatch();
 
 
 
-export { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeas
+export { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure };

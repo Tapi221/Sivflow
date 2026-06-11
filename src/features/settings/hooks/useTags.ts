@@ -978,4 +978,5 @@ export const useTags = () => { const { currentUser } = useAuthSession();
     getTagPathString,
     getTagIdByName,
     getTagNameById,
-  }
+  };
+};

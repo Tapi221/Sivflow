@@ -50,4 +50,5 @@ export function H4ElementStatic( props: React.ComponentProps<typeof HeadingEleme
 export function H5ElementStatic( props: React.ComponentProps<typeof HeadingElementStatic> ) { return <HeadingElementStatic variant="h5" {...props} />;
 }
 
-export function H6ElementStatic( props: React.ComponentProps<typeof HeadingElementStatic> ) { return <HeadingElementStatic variant="h6" {...props} />
+export function H6ElementStatic( props: React.ComponentProps<typeof HeadingElementStatic> ) { return <HeadingElementStatic variant="h6" {...props} />;
+}

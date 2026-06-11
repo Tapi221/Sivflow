@@ -70,3 +70,5 @@ export function MoreToolbarButton(props: DropdownMenuProps) { const editor = use
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}

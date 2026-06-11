@@ -131,4 +131,5 @@ export const pullCloudSyncDiff = async (userId: string, since: number): Promise<
   return {
     changes,
     serverTime: Timestamp.now().toMillis(),
-  }
+  };
+};

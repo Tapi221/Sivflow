@@ -179,3 +179,4 @@ export const buildExplorerSearchItems = ({ folders, cards, cardSets, documents, 
   });
 
   return [...folderItems, ...cardSetItems, ...cardItems, ...documentItems];
+};

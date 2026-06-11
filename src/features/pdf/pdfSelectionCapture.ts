@@ -58,4 +58,4 @@ const capturePdfViewerAreaToBlob = async (target: HTMLElement, area: SelectionCa
 
 
 
-export { capturePdfViewerAreaToBlob
+export { capturePdfViewerAreaToBlob };

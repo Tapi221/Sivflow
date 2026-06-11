@@ -22,4 +22,4 @@ const useScheduleScreenStore = create<ScheduleScreenState>(
 
 
 
-export { useScheduleScreenStor
+export { useScheduleScreenStore };

@@ -84,3 +84,4 @@ export const useStudyCards = ({ folderId, allCards, cardSets, folders, foldersLo
     cardById,
     isEmpty: studyCards.length === 0,
   };
+};

@@ -71,3 +71,4 @@ export const requestGoogleDriveFileAccessToken = async (auth: Auth): Promise<str
   }
 
   return requestLocalGoogleDriveFileAccessToken(auth);
+};

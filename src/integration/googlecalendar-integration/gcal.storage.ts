@@ -174,4 +174,5 @@ export const writeWasConnected = (value: boolean): void => { try { if (!value) {
     localStorage.removeItem(LEGACY_PERSIST_WAS_CONNECTED_KEY);
   } catch {
     // ignore
-  }
+  }
+};

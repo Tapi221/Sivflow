@@ -305,4 +305,4 @@ const CalendarTimetableView = memo(CalendarTimetableViewComponent);
 
 CalendarTimetableView.displayName = "CalendarTimetableView";
 
-export { CalendarTimetabl
+export { CalendarTimetableView };

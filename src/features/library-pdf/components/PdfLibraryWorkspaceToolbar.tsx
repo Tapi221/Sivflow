@@ -92,4 +92,4 @@ export { PdfLibraryWorkspaceToolbar };
 
 
 
-export type { PdfLibraryWorkspace
+export type { PdfLibraryWorkspaceSection };

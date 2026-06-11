@@ -20,3 +20,4 @@ export const resolveSelectedCalendarIds = ( storedIds: string[], calendars: Goog
   return availableStoredIds.length > 0
     ? availableStoredIds
     : getDefaultCalendarIds(calendars);
+};

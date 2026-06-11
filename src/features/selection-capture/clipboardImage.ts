@@ -43,4 +43,5 @@ export const copyImageBlobToClipboard = async (blob: Blob): Promise<void> => { c
 
   await navigator.clipboard.write([
     new ClipboardItem({ [blob.type || DEFAULT_IMAGE_MIME_TYPE]: blob }),
-  ]
+  ]);
+};
