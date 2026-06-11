@@ -1,6 +1,5 @@
 import { type MouseEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { StratisTagIcon } from "stratis-ui-icons";
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
@@ -9,7 +8,7 @@ import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { cn } from "@/lib/utils";
 import { useFolderTagModeStore, type FolderTagMode } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { LogOut } from "@/ui/icons";
+import { LogOut, Tag } from "@/ui/icons";
 import { useT } from "@shared/i18n/useT";
 import "./sidebar.desktop.css";
 import "./sidebar.layered-directory.css";
@@ -58,7 +57,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "tags",
     labelKey: "sidebarTags",
-    icon: <StratisTagIcon className="app-sidebar__nav-icon" />,
+    icon: <Tag className="app-sidebar__nav-icon" />,
     sectionKey: "library",
     folderTagMode: "tag",
   },
