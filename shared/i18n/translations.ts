@@ -3,6 +3,8 @@ import type { Locale } from "./locale.store";
 
 
 
+
+
 export type RawTranslations = { weekdayLabels: string[];
   calendarMonthWeekdays: string[];
   monthRowResizeTitle: string;
@@ -79,6 +81,8 @@ export type RawTranslations = { weekdayLabels: string[];
 
 export type Translations = Omit<RawTranslations, "overflowEvents"> & { overflowEvents: (count: number) => string;
 };
+
+
 
 
 

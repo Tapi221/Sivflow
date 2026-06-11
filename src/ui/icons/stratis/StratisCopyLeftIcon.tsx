@@ -3,7 +3,11 @@ import { forwardRef } from "react";
 
 
 
+
+
 export type StratisCopyLeftIconProps = SVGProps<SVGSVGElement>;
+
+
 
 
 

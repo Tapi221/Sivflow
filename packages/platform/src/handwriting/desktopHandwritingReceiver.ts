@@ -4,6 +4,8 @@ import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionS
 
 
 
+
+
 export type DesktopHandwritingReceiverSession = Pick<HandwritingSession, "id" | "cardId" | "side" | "status">;
 
 export type ReceiveDesktopHandwritingMessageInput = { document: InkDocument | null | undefined;
@@ -19,6 +21,8 @@ export type ReceiveDesktopHandwritingMessageResult = { document: InkDocument;
   status: HandwritingSessionStatus;
   reason?: DesktopHandwritingReceiverReason;
 };
+
+
 
 
 

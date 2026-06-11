@@ -2,11 +2,17 @@ import type { BaseEntity } from "./base";
 
 
 
+
+
 export type CardDisplayMode = "fixed" | "fluid";
 
 
 
+
+
 export const DEFAULT_CARD_DISPLAY_MODE: CardDisplayMode = "fixed";
+
+
 
 
 

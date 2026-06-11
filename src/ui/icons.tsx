@@ -5,6 +5,8 @@ import { UiIcon } from "./UiIcon";
 
 
 
+
+
 export type IconProps = SVGProps<SVGSVGElement> & { size?: number;
   label?: string;
   title?: string;
@@ -33,6 +35,8 @@ type GlyphKind =
   | "user"
   | "x"
   | "default";
+
+
 
 
 
@@ -88,6 +92,8 @@ const glyphByIconName: Record<string, GlyphKind> = {
 
 
 
+
+
 const wrapStratisIcon = (BaseIcon: StratisIconComponent, name: string) => {
   const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) => {
     const resolvedLabel = label ?? rest["aria-label"];
@@ -120,6 +126,8 @@ const makeIcon = (name: string) => {
   Icon.displayName = name;
   return Icon;
 };
+
+
 
 
 
@@ -181,6 +189,8 @@ const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size =
     </UiIcon>
   );
 });
+
+
 
 
 
@@ -286,6 +296,8 @@ export const ImageIcon = Image;
 export const CircleHelp = HelpCircle;
 export const Sigma = SigmaIcon;
 export const NotebookPen = NotebookPenIcon;
+
+
 
 
 export { StratisFormulaIcon, StratisMarkdownIcon };
