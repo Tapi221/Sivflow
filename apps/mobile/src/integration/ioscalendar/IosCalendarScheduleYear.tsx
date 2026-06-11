@@ -5,7 +5,11 @@ import type { ScheduleYearProps } from "@mobile-renderer/pane/schedule/ScheduleY
 
 
 
+
+
 type IosCalendarScheduleYearProps = Omit<ScheduleYearProps, "visibleEvents" | "onRenderedRangeChange">;
+
+
 
 
 
@@ -21,6 +25,8 @@ const IosCalendarScheduleYearComponent = (props: IosCalendarScheduleYearProps) =
 
   return <ScheduleYear {...props} visibleEvents={events} onRenderedRangeChange={handleRenderedRangeChange} />;
 };
+
+
 
 
 

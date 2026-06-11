@@ -4,9 +4,13 @@ import type { DesktopBridgeApi, DesktopImportFileOpenPayload, DesktopOauthCallba
 
 
 
+
+
 const oauthCallbackHandlers = new Set<(payload: DesktopOauthCallbackPayload) => void>();
 
 let oauthCallbackListenerStarted = false;
+
+
 
 
 
@@ -108,6 +112,8 @@ const desktopApi: DesktopBridgeApi = {
     },
   },
 };
+
+
 
 
 

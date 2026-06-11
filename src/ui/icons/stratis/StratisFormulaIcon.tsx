@@ -4,7 +4,11 @@ import { STRATIS_INNER_STROKE_PATH_PROPS, StratisFrameIcon } from "./StratisFram
 
 
 
+
+
 export type StratisFormulaIconProps = SVGProps<SVGSVGElement>;
+
+
 
 
 

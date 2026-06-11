@@ -6,7 +6,11 @@ import { requestGoogleSignInServerCode } from "@/integration/google-integration/
 
 
 
+
+
 const exchangeGoogleSignInCodeCallable = httpsCallable<{ code: string; codeVerifier: string; redirectUri: string }, { firebaseToken: string }>(functionsClient, "exchangeGoogleSignInCode");
+
+
 
 
 

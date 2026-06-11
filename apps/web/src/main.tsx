@@ -13,6 +13,8 @@ import { renderGoogleOAuthCallback } from "@/integration/google-integration/goog
 
 
 
+
+
 type AppBootstrapState =
   | { status: "loading" }
   | { status: "ready"; App: ComponentType }
@@ -21,6 +23,8 @@ type AppBootstrapState =
 type StartupFailureScreenProps = {
   message: string;
 };
+
+
 
 
 
@@ -84,6 +88,8 @@ const STARTUP_LOGO_STYLE = `
 
 
 
+
+
 const getStartupFailureMessage = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
 
@@ -109,6 +115,8 @@ const isPdfPerformanceStandaloneRoute = (): boolean => {
   if (new URLSearchParams(window.location.search).get(TEST_BYPASS_SEARCH_PARAM) !== "true") return false;
   return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "::1";
 };
+
+
 
 
 

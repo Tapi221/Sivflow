@@ -3,6 +3,8 @@ import { createBase64DataUrl } from "@/types/core/branded";
 
 
 
+
+
 /**
  * 画像を圧縮してBase64 data URLに変換（内部使用のみ）
  *
@@ -76,6 +78,8 @@ export const compressImageToBlob = async ( file: File, maxWidth: number = 1920, 
  * @internal
  */
 export const compressAndConvertToBase64 = compressAndConvertToBase64Internal;
+
+
 
 
 

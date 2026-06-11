@@ -4,6 +4,8 @@ import { calculateRetentionProbability } from "./reviewMetrics";
 
 
 
+
+
 const PHASES: Array<{ min: number; phase: StabilityPhase }> = [
   {
     min: 0,
@@ -59,6 +61,8 @@ const PHASES: Array<{ min: number; phase: StabilityPhase }> = [
 
 
 
+
+
 export { normalizeMemoryStability, type SubjectiveScore };
 
 export type StabilityPhase = { key: "unstable" | "fragile" | "growing" | "stable" | "solid";
@@ -67,6 +71,8 @@ export type StabilityPhase = { key: "unstable" | "fragile" | "growing" | "stable
   colorClass: string;
   calendarClass: string;
 };
+
+
 
 
 
