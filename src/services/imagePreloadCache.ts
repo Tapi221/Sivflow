@@ -14,18 +14,18 @@ const getCachedRemoteUrl = (assetId: string) => {
 };
 const setCachedRemoteUrl = (assetId: string, url: string) => {
   if (remoteUrlCache.has(assetId)) {
-  const oldUrl = remoteUrlCache.get(assetId);
-  if (oldUrl && oldUrl !== url) {
-    decodedUrlSet.delete(oldUrl);
+    const oldUrl = remoteUrlCache.get(assetId);
+    if (oldUrl && oldUrl !== url) {
+      decodedUrlSet.delete(oldUrl);
+    }
+    remoteUrlCache.set(assetId, url);
+    return;
+  }
+  if (remoteUrlCache.size >= MAX_REMOTE_URL_CACHE) {
+    const oldest = remoteUrlCache.keys().next().value;
+    if (oldest !== undefined) remoteUrlCache.delete(oldest);
   }
   remoteUrlCache.set(assetId, url);
-  return;
-}
-if (remoteUrlCache.size >= MAX_REMOTE_URL_CACHE) {
-  const oldest = remoteUrlCache.keys().next().value;
-  if (oldest !== undefined) remoteUrlCache.delete(oldest);
-}
-remoteUrlCache.set(assetId, url);
 };
 const isUrlDecoded = (url: string) => {
   return decodedUrlSet.has(url);

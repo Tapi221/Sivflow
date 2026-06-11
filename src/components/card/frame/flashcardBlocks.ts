@@ -19,40 +19,40 @@ interface SideData {
 
 const resolveSideBlocks = (side: "question" | "answer", data: SideData) => {
   if (data.blocks.length > 0) {
-  return sortBlocksByOrderIndex(data.blocks);
-}
+    return sortBlocksByOrderIndex(data.blocks);
+  }
 
-const fallbackBlocks: CardBlock[] = [];
-let orderIndex = 0;
+  const fallbackBlocks: CardBlock[] = [];
+  let orderIndex = 0;
 
-if ((data.text ?? "").trim() !== "") {
-  fallbackBlocks.push({
-    id: `${side}-legacy-text`,
-    type: "text",
-    orderIndex: orderIndex++,
-    content: String(data.text),
-  } as CardBlock);
-}
+  if ((data.text ?? "").trim() !== "") {
+    fallbackBlocks.push({
+      id: `${side}-legacy-text`,
+      type: "text",
+      orderIndex: orderIndex++,
+      content: String(data.text),
+    } as CardBlock);
+  }
 
-if ((data.code?.code ?? "").trim() !== "") {
-  fallbackBlocks.push({
-    id: `${side}-legacy-code`,
-    type: "code",
-    orderIndex: orderIndex++,
-    code: data.code,
-  } as CardBlock);
-}
+  if ((data.code?.code ?? "").trim() !== "") {
+    fallbackBlocks.push({
+      id: `${side}-legacy-code`,
+      type: "code",
+      orderIndex: orderIndex++,
+      code: data.code,
+    } as CardBlock);
+  }
 
-if ((data.audios?.length ?? 0) > 0) {
-  fallbackBlocks.push({
-    id: `${side}-legacy-audio`,
-    type: "audio",
-    orderIndex,
-    audios: data.audios as unknown as CardBlock["audios"],
-  } as CardBlock);
-}
+  if ((data.audios?.length ?? 0) > 0) {
+    fallbackBlocks.push({
+      id: `${side}-legacy-audio`,
+      type: "audio",
+      orderIndex,
+      audios: data.audios as unknown as CardBlock["audios"],
+    } as CardBlock);
+  }
 
-return fallbackBlocks;
+  return fallbackBlocks;
 };
 
 export { resolveSideBlocks };

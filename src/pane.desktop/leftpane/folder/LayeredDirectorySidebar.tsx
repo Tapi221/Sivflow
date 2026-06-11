@@ -285,7 +285,7 @@ const useFolderContextMenu = ({ createFolder, updateFolder, deleteFolder, create
         const nextFolderName = window.prompt(isRootProject ? "プロジェクト名を変更" : "フォルダ名を変更", folderName)?.trim(); closeContextMenu(); if (nextFolderName && nextFolderName !== folderName) void updateFolder(folderId, { folderName: nextFolderName, name: nextFolderName }); } },
       { id: "create-note", onSelect: () => {
         closeContextMenu(); void (async () => {
-        const note = await createNote(DEFAULT_NEW_NOTE_NAME, folderId, { orderIndex: getNextOrderIndex(folderId) }); openNoteTab({ noteId: note.id, title: note.title, folderId: note.folderId }); })(); } },
+          const note = await createNote(DEFAULT_NEW_NOTE_NAME, folderId, { orderIndex: getNextOrderIndex(folderId) }); openNoteTab({ noteId: note.id, title: note.title, folderId: note.folderId }); })(); } },
       { id: "create-card-set", onSelect: () => {
         closeContextMenu(); void createCardSet(DEFAULT_NEW_CARD_SET_NAME, folderId); } },
       { id: "create-folder", onSelect: () => {

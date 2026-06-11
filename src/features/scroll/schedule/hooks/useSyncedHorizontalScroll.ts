@@ -25,66 +25,66 @@ const getUniqueElements = (
 };
 const useSyncedHorizontalScroll = ({ primaryRef, syncedRefs, syncKey }: Params) => {
   useEffect(() => {
-  const primary = primaryRef.current;
+    const primary = primaryRef.current;
 
-  if (!primary) return;
+    if (!primary) return;
 
-  const elements = getUniqueElements(primary, syncedRefs);
-  let syncingSource: HTMLElement | null = null;
-  let resetRafId: number | null = null;
+    const elements = getUniqueElements(primary, syncedRefs);
+    let syncingSource: HTMLElement | null = null;
+    let resetRafId: number | null = null;
 
-  const resetSyncingSource = () => {
-    if (resetRafId !== null) {
-      window.cancelAnimationFrame(resetRafId);
-    }
-
-    resetRafId = window.requestAnimationFrame(() => {
-      syncingSource = null;
-      resetRafId = null;
-    });
-  };
-
-  const syncFrom = (source: HTMLElement) => {
-    syncingSource = source;
-    const nextScrollLeft = source.scrollLeft;
-
-    elements.forEach((element) => {
-      if (element !== source && element.scrollLeft !== nextScrollLeft) {
-        element.scrollLeft = nextScrollLeft;
+    const resetSyncingSource = () => {
+      if (resetRafId !== null) {
+        window.cancelAnimationFrame(resetRafId);
       }
-    });
 
-    resetSyncingSource();
-  };
+      resetRafId = window.requestAnimationFrame(() => {
+        syncingSource = null;
+        resetRafId = null;
+      });
+    };
 
-  const handleScroll = (event: Event) => {
-    const source = event.currentTarget;
+    const syncFrom = (source: HTMLElement) => {
+      syncingSource = source;
+      const nextScrollLeft = source.scrollLeft;
 
-    if (!(source instanceof HTMLElement)) return;
+      elements.forEach((element) => {
+        if (element !== source && element.scrollLeft !== nextScrollLeft) {
+          element.scrollLeft = nextScrollLeft;
+        }
+      });
 
-    // プログラムで scrollLeft を合わせた要素から発火した scroll は無視しつつ、
-    // 実際に操作中の source からの連続 scroll は同じフレーム内でも同期し続ける。
-    if (syncingSource !== null && source !== syncingSource) return;
+      resetSyncingSource();
+    };
 
-    syncFrom(source);
-  };
+    const handleScroll = (event: Event) => {
+      const source = event.currentTarget;
 
-  syncFrom(primary);
+      if (!(source instanceof HTMLElement)) return;
 
-  elements.forEach((element) => {
-    element.addEventListener("scroll", handleScroll, { passive: true });
-  });
+      // プログラムで scrollLeft を合わせた要素から発火した scroll は無視しつつ、
+      // 実際に操作中の source からの連続 scroll は同じフレーム内でも同期し続ける。
+      if (syncingSource !== null && source !== syncingSource) return;
 
-  return () => {
+      syncFrom(source);
+    };
+
+    syncFrom(primary);
+
     elements.forEach((element) => {
-      element.removeEventListener("scroll", handleScroll);
+      element.addEventListener("scroll", handleScroll, { passive: true });
     });
 
-    if (resetRafId !== null) {
-      window.cancelAnimationFrame(resetRafId);
-    }
-  };
-}, [primaryRef, syncedRefs, syncKey]);
+    return () => {
+      elements.forEach((element) => {
+        element.removeEventListener("scroll", handleScroll);
+      });
+
+      if (resetRafId !== null) {
+        window.cancelAnimationFrame(resetRafId);
+      }
+    };
+  }, [primaryRef, syncedRefs, syncKey]);
 };
 
 export { useSyncedHorizontalScroll };

@@ -16,27 +16,27 @@ interface CardMutationTarget {
 
 const resolveCardMutationTarget = ({ cardSetId, cardSetById, selectedCardSet, selectedCard, currentCard }: ResolveCardMutationTargetOptions): CardMutationTarget => {
   const resolveTargetFolderId = (card: Card | null) => {
-  if (!card) return null;
-  return resolveCardFolderIdStrict(card, cardSetById);
-};
+    if (!card) return null;
+    return resolveCardFolderIdStrict(card, cardSetById);
+  };
 
-const targetCardSetId =
-  selectedCard?.cardSetId ??
+  const targetCardSetId =
+    selectedCard?.cardSetId ??
     currentCard?.cardSetId ??
     selectedCardSet?.id ??
     cardSetId ??
     null;
 
-const targetFolderId =
-  resolveTargetFolderId(selectedCard) ??
+  const targetFolderId =
+    resolveTargetFolderId(selectedCard) ??
     resolveTargetFolderId(currentCard) ??
     selectedCardSet?.folderId ??
     null;
 
-return {
-  targetCardSetId,
-  targetFolderId,
-};
+  return {
+    targetCardSetId,
+    targetFolderId,
+  };
 };
 
 export { resolveCardMutationTarget };

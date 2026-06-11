@@ -25,96 +25,96 @@ const overlapsRange = (
 ) => event.startsAt < rangeEnd && event.endsAt > rangeStart;
 const reduceGoogleCalendarEvents = (state: GoogleCalendarEventsState, action: GoogleCalendarEventsAction): GoogleCalendarEventsState => {
   switch (action.type) { case "UPSERT": {
-  const next = new Map(state);
-  const bucket = new Map(next.get(action.accountId) ?? []);
-
-  bucket.set(action.event.id, action.event);
-  next.set(action.accountId, bucket);
-
-  return next;
-}
-
-  case "DELETE": {
-    const next = new Map(state);
-    const bucket = next.get(action.accountId);
-
-    if (!bucket?.has(action.eventId)) return next;
-
-    const newBucket = new Map(bucket);
-
-    newBucket.delete(action.eventId);
-    next.set(action.accountId, newBucket);
-
-    return next;
-  }
-
-  case "REPLACE_RANGE": {
     const next = new Map(state);
     const bucket = new Map(next.get(action.accountId) ?? []);
 
-    for (const [eventId, event] of bucket) {
-      if (
-        event.calendarId === action.calendarId &&
-          overlapsRange(event, action.rangeStart, action.rangeEnd)
-      ) {
-        bucket.delete(eventId);
-      }
-    }
-
-    for (const event of action.events) {
-      bucket.set(event.id, event);
-    }
-
+    bucket.set(action.event.id, action.event);
     next.set(action.accountId, bucket);
 
     return next;
   }
 
-  case "APPLY_CALENDAR_COLORS": {
-    const bucket = state.get(action.accountId);
-    if (!bucket) return state;
+    case "DELETE": {
+      const next = new Map(state);
+      const bucket = next.get(action.accountId);
 
-    const colorByCalendarId = new Map(
-      action.calendars
-        .filter((calendar) => Boolean(calendar.backgroundColor))
-        .map((calendar) => [calendar.id, calendar.backgroundColor!]),
-    );
+      if (!bucket?.has(action.eventId)) return next;
 
-    if (colorByCalendarId.size === 0) return state;
+      const newBucket = new Map(bucket);
 
-    const newBucket = new Map<string, GoogleCalendarEvent>();
-    let hasChanged = false;
+      newBucket.delete(action.eventId);
+      next.set(action.accountId, newBucket);
 
-    for (const [eventId, event] of bucket) {
-      const color = colorByCalendarId.get(event.calendarId);
-
-      if (color && color !== event.accentColor) {
-        newBucket.set(eventId, { ...event, accentColor: color });
-        hasChanged = true;
-        continue;
-      }
-
-      newBucket.set(eventId, event);
+      return next;
     }
 
-    if (!hasChanged) return state;
+    case "REPLACE_RANGE": {
+      const next = new Map(state);
+      const bucket = new Map(next.get(action.accountId) ?? []);
 
-    const next = new Map(state);
-    next.set(action.accountId, newBucket);
-    return next;
+      for (const [eventId, event] of bucket) {
+        if (
+          event.calendarId === action.calendarId &&
+          overlapsRange(event, action.rangeStart, action.rangeEnd)
+        ) {
+          bucket.delete(eventId);
+        }
+      }
+
+      for (const event of action.events) {
+        bucket.set(event.id, event);
+      }
+
+      next.set(action.accountId, bucket);
+
+      return next;
+    }
+
+    case "APPLY_CALENDAR_COLORS": {
+      const bucket = state.get(action.accountId);
+      if (!bucket) return state;
+
+      const colorByCalendarId = new Map(
+        action.calendars
+          .filter((calendar) => Boolean(calendar.backgroundColor))
+          .map((calendar) => [calendar.id, calendar.backgroundColor!]),
+      );
+
+      if (colorByCalendarId.size === 0) return state;
+
+      const newBucket = new Map<string, GoogleCalendarEvent>();
+      let hasChanged = false;
+
+      for (const [eventId, event] of bucket) {
+        const color = colorByCalendarId.get(event.calendarId);
+
+        if (color && color !== event.accentColor) {
+          newBucket.set(eventId, { ...event, accentColor: color });
+          hasChanged = true;
+          continue;
+        }
+
+        newBucket.set(eventId, event);
+      }
+
+      if (!hasChanged) return state;
+
+      const next = new Map(state);
+      next.set(action.accountId, newBucket);
+      return next;
+    }
+
+    case "CLEAR_ACCOUNT": {
+      const next = new Map(state);
+
+      next.delete(action.accountId);
+
+      return next;
+    }
+
+    default:
+      return state;
   }
-
-  case "CLEAR_ACCOUNT": {
-    const next = new Map(state);
-
-    next.delete(action.accountId);
-
-    return next;
-  }
-
-  default:
-    return state;
-}
 };
 const selectVisibleGoogleCalendarEvents = (accounts: Array<{ id: string; selectedCalendarIds: Set<string>; }>,
   eventsState: GoogleCalendarEventsState,

@@ -60,20 +60,20 @@ const lookupUserSettingData = async (
 };
 const lookupCloudSyncEntityById = async (firestore: Firestore, userId: string, id: string): Promise<SyncChange | null> => {
   for (const descriptor of PULL_FULL_LOOKUP_ORDER) {
-  const context = { firestore, userId, id };
-  const data = await descriptor.resolveData(context);
-  if (!data) {
-    continue;
+    const context = { firestore, userId, id };
+    const data = await descriptor.resolveData(context);
+    if (!data) {
+      continue;
+    }
+
+    return {
+      type: descriptor.type,
+      id: descriptor.resolveSyncId(context),
+      data: sanitizeSyncDataFromCloud(descriptor.type, data),
+    };
   }
 
-  return {
-    type: descriptor.type,
-    id: descriptor.resolveSyncId(context),
-    data: sanitizeSyncDataFromCloud(descriptor.type, data),
-  };
-}
-
-return null;
+  return null;
 };
 
 export { lookupCloudSyncEntityById };

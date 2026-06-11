@@ -52,10 +52,10 @@ const isStoredTokenValid = (account: StoredGoogleAccount): boolean => {
 };
 const buildTokenExpiry = (expiresInSeconds?: number | null): number => {
   if (!expiresInSeconds) {
-  return Date.now() + TOKEN_LIFETIME_MS;
-}
+    return Date.now() + TOKEN_LIFETIME_MS;
+  }
 
-return Date.now() + Math.max(0, expiresInSeconds * 1000 - TOKEN_EXPIRY_SAFETY_MARGIN_MS);
+  return Date.now() + Math.max(0, expiresInSeconds * 1000 - TOKEN_EXPIRY_SAFETY_MARGIN_MS);
 };
 const shouldStripLocalRefreshTokensOnRead = (): boolean => {
   return !isDesktopLikeRuntime();
@@ -143,10 +143,10 @@ const hydratePendingLegacyDesktopRefreshTokens = (
 };
 const writeStoredAccounts = (accounts: StoredGoogleAccount[]): void => {
   try {
-  localStorage.setItem(MULTI_ACCOUNTS_KEY, JSON.stringify(stripLocalRefreshTokens(dedupeStoredAccounts(accounts), shouldStripLocalRefreshTokensOnWrite())));
-} catch {
+    localStorage.setItem(MULTI_ACCOUNTS_KEY, JSON.stringify(stripLocalRefreshTokens(dedupeStoredAccounts(accounts), shouldStripLocalRefreshTokensOnWrite())));
+  } catch {
   // ignore quota errors
-}
+  }
 };
 // ─────────────────────────────────────────────────────────────
 // Legacy migration
@@ -201,25 +201,25 @@ const migrateFromLegacy = (): StoredGoogleAccount[] => {
 // ─────────────────────────────────────────────────────────────
 const readStoredAccounts = (): StoredGoogleAccount[] => {
   try {
-  const raw = localStorage.getItem(MULTI_ACCOUNTS_KEY);
-  if (!raw) return migrateFromLegacy();
-  const parsed = JSON.parse(raw);
-  if (!Array.isArray(parsed)) return [];
+    const raw = localStorage.getItem(MULTI_ACCOUNTS_KEY);
+    if (!raw) return migrateFromLegacy();
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
 
-  const accounts = parsed as StoredGoogleAccount[];
-  const sanitizedAccounts = stripLocalRefreshTokens(accounts, shouldStripLocalRefreshTokensOnRead());
-  const dedupedAccounts = dedupeStoredAccounts(sanitizedAccounts);
-  const shouldPersistSanitizedAccounts = hasLocalRefreshToken(accounts) && shouldStripLocalRefreshTokensOnRead();
-  const shouldPersistDedupedAccounts = dedupedAccounts.length !== sanitizedAccounts.length;
+    const accounts = parsed as StoredGoogleAccount[];
+    const sanitizedAccounts = stripLocalRefreshTokens(accounts, shouldStripLocalRefreshTokensOnRead());
+    const dedupedAccounts = dedupeStoredAccounts(sanitizedAccounts);
+    const shouldPersistSanitizedAccounts = hasLocalRefreshToken(accounts) && shouldStripLocalRefreshTokensOnRead();
+    const shouldPersistDedupedAccounts = dedupedAccounts.length !== sanitizedAccounts.length;
 
-  if (shouldPersistSanitizedAccounts || shouldPersistDedupedAccounts) {
-    writeStoredAccounts(dedupedAccounts);
+    if (shouldPersistSanitizedAccounts || shouldPersistDedupedAccounts) {
+      writeStoredAccounts(dedupedAccounts);
+    }
+
+    return hydratePendingLegacyDesktopRefreshTokens(dedupedAccounts);
+  } catch {
+    return [];
   }
-
-  return hydratePendingLegacyDesktopRefreshTokens(dedupedAccounts);
-} catch {
-  return [];
-}
 };
 const upsertStoredAccount = (account: StoredGoogleAccount): void => {
   const accounts = readStoredAccounts();

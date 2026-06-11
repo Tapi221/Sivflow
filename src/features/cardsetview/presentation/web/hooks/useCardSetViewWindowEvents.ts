@@ -9,20 +9,20 @@ interface UseCardSetViewWindowEventsOptions {
 
 const useCardSetViewWindowEvents = ({ handleToggleViewMode, createAndFocusCard }: UseCardSetViewWindowEventsOptions) => {
   useEffect(() => {
-  return subscribeCardSetViewWindowEvent(CARD_SET_VIEW_EVENTS.toggleEditingRequest, () => {
-  handleToggleViewMode();
-},
-);
-}, [handleToggleViewMode]);
-
-useEffect(() => {
-  return subscribeCardSetViewWindowEvent(
-    CARD_SET_VIEW_EVENTS.createCardRequest,
-    () => {
-      void createAndFocusCard();
+    return subscribeCardSetViewWindowEvent(CARD_SET_VIEW_EVENTS.toggleEditingRequest, () => {
+      handleToggleViewMode();
     },
-  );
-}, [createAndFocusCard]);
+    );
+  }, [handleToggleViewMode]);
+
+  useEffect(() => {
+    return subscribeCardSetViewWindowEvent(
+      CARD_SET_VIEW_EVENTS.createCardRequest,
+      () => {
+        void createAndFocusCard();
+      },
+    );
+  }, [createAndFocusCard]);
 };
 
 export { useCardSetViewWindowEvents };

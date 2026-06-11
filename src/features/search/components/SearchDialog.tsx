@@ -115,7 +115,8 @@ const SearchDialog = () => {
             <CommandPrimitive.Input ref={inputRef} value={query} onValueChange={setQuery} placeholder="検索..." aria-label="検索" className="gs-searchbar__input" />
             {query.trim().length > 0 ? (
               <button type="button" className="gs-searchbar__clear" onClick={() => {
-                setQuery(""); inputRef.current?.focus(); }} aria-label="検索語をクリア">
+                setQuery(""); inputRef.current?.focus(); }} aria-label="検索語をクリア"
+              >
                 <X className="h-[18px] w-[18px]" />
               </button>
             ) : null}
@@ -129,7 +130,8 @@ const SearchDialog = () => {
 
                 return (
                   <CommandItem key={item.id} value={item.value} className={cn(EXPLORER_ROW_BASE_CLASS_NAME, EXPLORER_ENTITY_ROW_INTERACTIVE_CLASS, EXPLORER_ENTITY_ROW_SHELL_BASE_CLASS, EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS, "gs-row")} onSelect={() => {
-                    handleItemSelect(item); }}>
+                    handleItemSelect(item); }}
+                  >
                     <ExplorerRowContent
                       left={<span className={cn(EXPLORER_ROW_ICON_SLOT_CLASS, "gs-row__icon-slot")}><Icon className={cn(FOLDER_ROW_ICON_SIZE_CLASS, "gs-row__icon")} /></span>}
                       title={item.title}

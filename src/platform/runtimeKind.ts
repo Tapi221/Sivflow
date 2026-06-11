@@ -4,10 +4,10 @@ import { hasDesktopRuntime } from "./detectDesktopBridge";
 
 const getRuntimeKind = (): RuntimeKind => {
   if (hasDesktopRuntime()) {
-  return RUNTIME_KINDS.desktop;
-}
+    return RUNTIME_KINDS.desktop;
+  }
 
-return RUNTIME_KINDS.web;
+  return RUNTIME_KINDS.web;
 };
 const isDesktopLikeRuntime = (): boolean => getRuntimeKind() === RUNTIME_KINDS.desktop;
 const isHandheldNativeRuntime = (): boolean => {

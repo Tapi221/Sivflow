@@ -37,52 +37,52 @@ const getCalendarScrollLeft = ({
 };
 const useCalendarScrollPositionSync = ({ selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs }: Params) => {
   const lastRef = useRef<{ token: number | null;
-  viewportWidth: number;
-  selectedViewMode: CalendarViewMode | null;
-}>({
-  token: null,
-  viewportWidth: 0,
-  selectedViewMode: null,
-});
-
-useLayoutEffect(() => {
-  const scroller = scrollRef.current;
-  if (!scroller) return;
-  if (viewportWidth <= 0) return;
-
-  const currentToken = scrollTargetToken ?? 0;
-  const { token, viewportWidth: prevWidth, selectedViewMode: prevSelectedViewMode } = lastRef.current;
-  const tokenChanged = token !== currentToken;
-  const viewportChanged = token === currentToken && prevWidth !== viewportWidth;
-  const viewModeChanged = prevSelectedViewMode !== selectedViewMode;
-
-  if (!tokenChanged && !viewportChanged && !viewModeChanged) {
-    return;
-  }
-
-  const nextScrollLeft = getCalendarScrollLeft({
-    selectedViewMode,
-    calendarBufferBefore,
-    calendarDayColumnWidth,
-    viewportWidth,
+    viewportWidth: number;
+    selectedViewMode: CalendarViewMode | null;
+  }>({
+    token: null,
+    viewportWidth: 0,
+    selectedViewMode: null,
   });
 
-  scroller.scrollLeft = nextScrollLeft;
+  useLayoutEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    if (viewportWidth <= 0) return;
 
-  const fixedRowRefs = headerRefs ?? (headerRef ? [headerRef] : []);
+    const currentToken = scrollTargetToken ?? 0;
+    const { token, viewportWidth: prevWidth, selectedViewMode: prevSelectedViewMode } = lastRef.current;
+    const tokenChanged = token !== currentToken;
+    const viewportChanged = token === currentToken && prevWidth !== viewportWidth;
+    const viewModeChanged = prevSelectedViewMode !== selectedViewMode;
 
-  fixedRowRefs.forEach((fixedRowRef) => {
-    if (fixedRowRef.current) {
-      fixedRowRef.current.scrollLeft = nextScrollLeft;
+    if (!tokenChanged && !viewportChanged && !viewModeChanged) {
+      return;
     }
-  });
 
-  lastRef.current = {
-    token: currentToken,
-    viewportWidth,
-    selectedViewMode,
-  };
-}, [selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs]);
+    const nextScrollLeft = getCalendarScrollLeft({
+      selectedViewMode,
+      calendarBufferBefore,
+      calendarDayColumnWidth,
+      viewportWidth,
+    });
+
+    scroller.scrollLeft = nextScrollLeft;
+
+    const fixedRowRefs = headerRefs ?? (headerRef ? [headerRef] : []);
+
+    fixedRowRefs.forEach((fixedRowRef) => {
+      if (fixedRowRef.current) {
+        fixedRowRef.current.scrollLeft = nextScrollLeft;
+      }
+    });
+
+    lastRef.current = {
+      token: currentToken,
+      viewportWidth,
+      selectedViewMode,
+    };
+  }, [selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs]);
 };
 
 export { useCalendarScrollPositionSync };

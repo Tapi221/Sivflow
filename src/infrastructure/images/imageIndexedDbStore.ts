@@ -16,13 +16,13 @@ const saveImageToIndexedDb = async (image: UploadedImage): Promise<void> => {
 };
 const getImageFromIndexedDb = async (imageId: string): Promise<UploadedImage | null> => {
   try {
-  const db = await getLocalDb();
-  const image = await db.images.get(imageId);
-  return (image as UploadedImage | null) ?? null;
-} catch (error) {
-  console.error("[ImageDB] Failed to get from IndexedDB", error);
-  throw error;
-}
+    const db = await getLocalDb();
+    const image = await db.images.get(imageId);
+    return (image as UploadedImage | null) ?? null;
+  } catch (error) {
+    console.error("[ImageDB] Failed to get from IndexedDB", error);
+    throw error;
+  }
 };
 
 export { saveImageToIndexedDb, getImageFromIndexedDb };

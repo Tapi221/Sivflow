@@ -68,22 +68,22 @@ const extractErrorTexts = (
 };
 const safeStringifyError = (error: unknown): string => {
   try {
-  if (!error) return "unknown error";
+    if (!error) return "unknown error";
 
-  const { name, message } = getErrorNameMessage(error);
-  const maybeName = name ? `${name}: ` : "";
-  const fallback =
-    safeJsonStringify(error) ??
+    const { name, message } = getErrorNameMessage(error);
+    const maybeName = name ? `${name}: ` : "";
+    const fallback =
+      safeJsonStringify(error) ??
       (typeof error === "string" ? error : String(error));
-  const maybeMessage = message ?? fallback;
+    const maybeMessage = message ?? fallback;
 
-  return `${maybeName}${String(maybeMessage)}`.slice(
-    0,
-    LOCALDB_ERROR_MESSAGE_LIMIT,
-  );
-} catch {
-  return "unknown error";
-}
+    return `${maybeName}${String(maybeMessage)}`.slice(
+      0,
+      LOCALDB_ERROR_MESSAGE_LIMIT,
+    );
+  } catch {
+    return "unknown error";
+  }
 };
 const isBackingStoreOpenError = (error: unknown): boolean => {
   const texts: string[] = [];

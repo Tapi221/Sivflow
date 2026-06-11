@@ -7,11 +7,11 @@ type HookConfig<E extends HTMLElement> = {
 
 const useImmediateVirtualScrollRange = <E extends HTMLElement>(config: HookConfig<E>) => {
   const handleScrollElement = useCallback((element: E) => {
-  config.updateRange(element);
-  config.onDeferredScroll?.(element);
-}, [config]);
+    config.updateRange(element);
+    config.onDeferredScroll?.(element);
+  }, [config]);
 
-return { handleScrollElement };
+  return { handleScrollElement };
 };
 
 export { useImmediateVirtualScrollRange };

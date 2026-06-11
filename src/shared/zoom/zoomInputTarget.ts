@@ -13,14 +13,14 @@ const DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR = BASE_ZOOM_INPUT_IGNORE_SELECTORS.join
 
 const resolveEventTargetElement = (target: EventTarget | null): Element | null => {
   if (typeof Element !== "undefined" && target instanceof Element) {
-  return target;
-}
+    return target;
+  }
 
-if (typeof Node !== "undefined" && target instanceof Node) {
-  return target.parentElement;
-}
+  if (typeof Node !== "undefined" && target instanceof Node) {
+    return target.parentElement;
+  }
 
-return null;
+  return null;
 };
 const shouldHandleZoomInputTarget = ({ container, target, ignoreSelector = DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR }: { container: HTMLElement | null;
   target: EventTarget | null;

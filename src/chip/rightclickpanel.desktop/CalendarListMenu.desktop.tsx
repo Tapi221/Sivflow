@@ -28,19 +28,19 @@ const CALENDAR_LIST_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
 const CalendarListMenu = ({ x, y, actions, menuRef, noDragStyle, panelId = CALENDAR_LIST_MENU_PANEL_ID }: CalendarListMenuProps) => {
   return (<RightClickPanelSurface x={x} y={y} width={CALENDAR_LIST_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} ariaLabel="calendar list context menu" panelId={panelId} > {actions.map((action) => (<button key={action.id} type="button" disabled={action.disabled} className="right-click-panel-item" role="menuitem" onClick={(event) => {
-  event.preventDefault();
-  event.stopPropagation();
+    event.preventDefault();
+    event.stopPropagation();
 
-  if (action.disabled) return;
+    if (action.disabled) return;
 
-  action.onSelect();
-}}
->
-  {action.label}
-</button>
-))}
-</RightClickPanelSurface>
-);
+    action.onSelect();
+  }}
+  >
+    {action.label}
+  </button>
+  ))}
+  </RightClickPanelSurface>
+  );
 };
 
 export { CALENDAR_LIST_MENU_PANEL_ID, CALENDAR_LIST_MENU_WIDTH, CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_MARGIN, CalendarListMenu };

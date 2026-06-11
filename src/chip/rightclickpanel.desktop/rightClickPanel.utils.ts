@@ -54,46 +54,46 @@ const clampRightClickPanelPosition = (x: number, y: number, dimensions: RightCli
 };
 const useRightClickPanelDismiss = (panelId: RightClickPanelId, isOpen: boolean, panelRef: RefObject<HTMLElement | null>, onDismiss: () => void): void => {
   useEffect(() => {
-  if (!isOpen) return;
+    if (!isOpen) return;
 
-  const isPanelEvent = (event: Event): boolean => {
-    const panel = panelRef.current;
-    return panel !== null && event.target instanceof Node && panel.contains(event.target);
-  };
+    const isPanelEvent = (event: Event): boolean => {
+      const panel = panelRef.current;
+      return panel !== null && event.target instanceof Node && panel.contains(event.target);
+    };
 
-  const handlePointerDown = (event: PointerEvent) => {
-    if (isPanelEvent(event)) return;
-    onDismiss();
-  };
+    const handlePointerDown = (event: PointerEvent) => {
+      if (isPanelEvent(event)) return;
+      onDismiss();
+    };
 
-  const handleContextMenu = (event: MouseEvent) => {
-    if (isPanelEvent(event)) return;
-    onDismiss();
-  };
+    const handleContextMenu = (event: MouseEvent) => {
+      if (isPanelEvent(event)) return;
+      onDismiss();
+    };
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key !== "Escape") return;
-    onDismiss();
-  };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      onDismiss();
+    };
 
-  const handleOpenPanel = (event: Event) => {
-    if (!(event instanceof CustomEvent)) return;
-    if (event.detail?.panelId === panelId) return;
-    onDismiss();
-  };
+    const handleOpenPanel = (event: Event) => {
+      if (!(event instanceof CustomEvent)) return;
+      if (event.detail?.panelId === panelId) return;
+      onDismiss();
+    };
 
-  document.addEventListener("pointerdown", handlePointerDown, true);
-  document.addEventListener("contextmenu", handleContextMenu, true);
-  document.addEventListener("keydown", handleKeyDown, true);
-  window.addEventListener(RIGHT_CLICK_PANEL_OPEN_EVENT, handleOpenPanel);
+    document.addEventListener("pointerdown", handlePointerDown, true);
+    document.addEventListener("contextmenu", handleContextMenu, true);
+    document.addEventListener("keydown", handleKeyDown, true);
+    window.addEventListener(RIGHT_CLICK_PANEL_OPEN_EVENT, handleOpenPanel);
 
-  return () => {
-    document.removeEventListener("pointerdown", handlePointerDown, true);
-    document.removeEventListener("contextmenu", handleContextMenu, true);
-    document.removeEventListener("keydown", handleKeyDown, true);
-    window.removeEventListener(RIGHT_CLICK_PANEL_OPEN_EVENT, handleOpenPanel);
-  };
-}, [isOpen, onDismiss, panelId, panelRef]);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown, true);
+      document.removeEventListener("contextmenu", handleContextMenu, true);
+      document.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener(RIGHT_CLICK_PANEL_OPEN_EVENT, handleOpenPanel);
+    };
+  }, [isOpen, onDismiss, panelId, panelRef]);
 };
 
 export { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, RIGHT_CLICK_PANEL_OPEN_EVENT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, resolveRightClickPanelTextWidth, clampRightClickPanelPosition, useRightClickPanelDismiss };

@@ -11,21 +11,21 @@ type ResolveEditorCardFitScaleArgs = Readonly<{
 
 const resolveEditorCardFitScale = ({ availablePaneWidthPx, canonicalCardWidth = CANONICAL_CARD_WIDTH, cardLayoutMode, splitGapPx = 0 }: ResolveEditorCardFitScaleArgs) => {
   if (!Number.isFinite(availablePaneWidthPx) || availablePaneWidthPx <= 0) {
-  return 1;
-}
+    return 1;
+  }
 
-const editorCardTargetWidthPx =
-  cardLayoutMode === "split"
-    ? Math.max(1, (availablePaneWidthPx - splitGapPx) / 2)
-    : Math.max(1, availablePaneWidthPx);
+  const editorCardTargetWidthPx =
+    cardLayoutMode === "split"
+      ? Math.max(1, (availablePaneWidthPx - splitGapPx) / 2)
+      : Math.max(1, availablePaneWidthPx);
 
-return Math.max(
-  0.1,
-  Math.min(
-    CARD_PANE_AUTO_MAX_SCALE,
-    editorCardTargetWidthPx / Math.max(1, canonicalCardWidth),
-  ),
-);
+  return Math.max(
+    0.1,
+    Math.min(
+      CARD_PANE_AUTO_MAX_SCALE,
+      editorCardTargetWidthPx / Math.max(1, canonicalCardWidth),
+    ),
+  );
 };
 
 export { resolveEditorCardFitScale };

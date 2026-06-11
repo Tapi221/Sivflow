@@ -56,38 +56,38 @@ const TAG_COLOR_GRID_STYLE = `
 
 const TagColorRightClickPanel = ({ x, y, availableColors, currentColorKey, tagName, menuRef, noDragStyle, panelId, onSelectColor }: TagColorRightClickPanelProps) => {
   return (<> <style>{TAG_COLOR_GRID_STYLE}</style> <RightClickPanelSurface x={x} y={y} width={TAG_COLOR_CONTEXT_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} ariaLabel={`${tagName} tag color menu`} panelId={panelId} > <div className="right-click-panel-title">{TAG_COLOR_CONTEXT_MENU_TITLE}</div> <div className="tag-color-context-menu-grid"> {availableColors.map((colorKey) => {
-  const isSelected = colorKey === currentColorKey;
-  const colorLabel = TAG_COLOR_LABELS[colorKey] ?? colorKey;
+    const isSelected = colorKey === currentColorKey;
+    const colorLabel = TAG_COLOR_LABELS[colorKey] ?? colorKey;
 
-  return (
-    <button
-      key={colorKey}
-      type="button"
-      aria-label={`${tagName}の色を${colorLabel}に変更`}
-      aria-pressed={isSelected}
-      title={colorLabel}
-      className={cn(
-        "grid h-4 w-4 place-items-center rounded-full border transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35",
-        isSelected &&
+    return (
+      <button
+        key={colorKey}
+        type="button"
+        aria-label={`${tagName}の色を${colorLabel}に変更`}
+        aria-pressed={isSelected}
+        title={colorLabel}
+        className={cn(
+          "grid h-4 w-4 place-items-center rounded-full border transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35",
+          isSelected &&
           "ring-2 ring-primary-500/35 ring-offset-1 ring-offset-white",
-      )}
-      style={getTagColorSwatchStyle(colorKey)}
-      onClick={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        onSelectColor(colorKey);
-      }}
-    >
-      {isSelected && (
-        <span className="h-1.5 w-1.5 rounded-full bg-current" />
-      )}
-    </button>
+        )}
+        style={getTagColorSwatchStyle(colorKey)}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          onSelectColor(colorKey);
+        }}
+      >
+        {isSelected && (
+          <span className="h-1.5 w-1.5 rounded-full bg-current" />
+        )}
+      </button>
+    );
+  })}
+  </div>
+  </RightClickPanelSurface>
+  </>
   );
-})}
-</div>
-</RightClickPanelSurface>
-</>
-);
 };
 
 export { TAG_COLOR_CONTEXT_MENU_WIDTH, TAG_COLOR_CONTEXT_MENU_HEIGHT, TAG_COLOR_CONTEXT_MENU_MARGIN, TagColorRightClickPanel };

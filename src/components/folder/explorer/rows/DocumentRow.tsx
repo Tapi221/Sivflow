@@ -20,12 +20,12 @@ const DocumentRow = ({ treeNode, style, depth, isSelected, editingId, editingNam
   const isEditing = editingId === treeNode.rawId;
   const rowMenuActions = React.useMemo(() => buildRenameDeleteMenuActions({ onRename: canRename ? () => {
     onItemSelect({ type: "document", id: treeNode.rawId }); beginInlineRename({ id: treeNode.rawId, name: treeNode.name, closeMenu: () => {
-    setOpenRowMenuId(null); }, setEditingId, setEditingName }); } : undefined, onDelete: canDelete ? () => {
+      setOpenRowMenuId(null); }, setEditingId, setEditingName }); } : undefined, onDelete: canDelete ? () => {
     handleDelete(treeNode.rawId, "document"); } : undefined }), [canDelete, canRename, handleDelete, onItemSelect, setEditingId, setEditingName, setOpenRowMenuId, treeNode.name, treeNode.rawId]);
   const attachEditInputRef = React.useCallback((node: HTMLInputElement | null) => {
     editInputRef.current = node; if (!node || !isEditing) return; node.focus({ preventScroll: true }); node.select(); try {
-    node.setSelectionRange(0, node.value.length); } catch {
-    return; } }, [editInputRef, isEditing]);
+      node.setSelectionRange(0, node.value.length); } catch {
+      return; } }, [editInputRef, isEditing]);
 
   return (
     <SidebarEntityRow
@@ -54,9 +54,10 @@ const DocumentRow = ({ treeNode, style, depth, isSelected, editingId, editingNam
         e.preventDefault(); }} onChange={(e) => {
         setEditingName(e.target.value); }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => {
         const isComposing = e.nativeEvent.isComposing || e.keyCode === 229; if (e.key === "Enter" && isComposing) return; if (e.key === "Enter") {
-        e.preventDefault(); setEditingName(e.currentTarget.value); e.currentTarget.blur(); } if (e.key === "Escape") {
-        e.preventDefault(); e.stopPropagation(); renameCancelledRef.current = true; e.currentTarget.blur(); } }} onBlur={(e) => {
-        setEditingName(e.currentTarget.value); void handleRenameConfirm({ id: treeNode.rawId, type: "document" }); }} />}
+          e.preventDefault(); setEditingName(e.currentTarget.value); e.currentTarget.blur(); } if (e.key === "Escape") {
+          e.preventDefault(); e.stopPropagation(); renameCancelledRef.current = true; e.currentTarget.blur(); } }} onBlur={(e) => {
+        setEditingName(e.currentTarget.value); void handleRenameConfirm({ id: treeNode.rawId, type: "document" }); }}
+      />}
       onClick={(event) => {
         if (event.defaultPrevented) return; onItemSelect({ type: "document", id: treeNode.rawId }); }}
     />

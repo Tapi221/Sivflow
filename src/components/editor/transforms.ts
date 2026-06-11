@@ -98,8 +98,8 @@ const selectBlockquoteStart = (editor: PlateEditor, path: Path) => {
 };
 const insertInlineElement = (editor: PlateEditor, type: string) => {
   if (insertInlineMap[type]) {
-  insertInlineMap[type](editor, type);
-}
+    insertInlineMap[type](editor, type);
+  }
 };
 const setList = (
   editor: PlateEditor,
@@ -166,16 +166,16 @@ const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: Path; } 
 };
 const getBlockType = (block: TElement) => {
   if (block[KEYS.listType]) {
-  if (block[KEYS.listType] === KEYS.ol) {
-  return KEYS.ol;
-}
-if (block[KEYS.listType] === KEYS.listTodo) {
-  return KEYS.listTodo;
-}
-return KEYS.ul;
-}
+    if (block[KEYS.listType] === KEYS.ol) {
+      return KEYS.ol;
+    }
+    if (block[KEYS.listType] === KEYS.listTodo) {
+      return KEYS.listTodo;
+    }
+    return KEYS.ul;
+  }
 
-return block.type;
+  return block.type;
 };
 const insertBlock = (editor: PlateEditor, type: string, options: InsertBlockOptions = {}) => {
   const { upsert = false } = options;

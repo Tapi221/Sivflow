@@ -5,13 +5,13 @@ const hasTauriInternals = (): boolean =>
 const hasWindowDesktopBridge = (): boolean => typeof window !== "undefined" && typeof window.desktop !== "undefined";
 const hasDesktopBridge = (): boolean => {
   if (!hasWindowDesktopBridge()) {
-  return false;
-}
+    return false;
+  }
 
-const bridge = window.desktop;
+  const bridge = window.desktop;
 
-return Boolean(
-  bridge &&
+  return Boolean(
+    bridge &&
     hasMethod(bridge.app?.getVersion) &&
     hasMethod(bridge.shell?.openExternal) &&
     hasMethod(bridge.oauth?.start) &&
@@ -25,7 +25,7 @@ return Boolean(
     hasMethod(bridge.window?.close) &&
     hasMethod(bridge.window?.isMaximized) &&
     hasMethod(bridge.window?.onMaximizedStateChange),
-);
+  );
 };
 const hasDesktopRuntime = (): boolean => hasDesktopBridge() || hasTauriInternals();
 

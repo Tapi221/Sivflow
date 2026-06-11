@@ -59,10 +59,10 @@ const requestLocalGoogleDriveFileAccessToken = async (auth: Auth): Promise<strin
 };
 const requestGoogleDriveFileAccessToken = async (auth: Auth): Promise<string> => {
   if (isServerStoredGoogleOAuthEnabled()) {
-  return requestServerStoredGoogleDriveFileAccessToken(auth);
-}
+    return requestServerStoredGoogleDriveFileAccessToken(auth);
+  }
 
-return requestLocalGoogleDriveFileAccessToken(auth);
+  return requestLocalGoogleDriveFileAccessToken(auth);
 };
 
 export { requestGoogleDriveFileAccessToken };

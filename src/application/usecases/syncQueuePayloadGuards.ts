@@ -89,32 +89,32 @@ const isAssetPayload = (value: unknown): value is AssetSyncPayload => isRecord(v
 const isProjectMapPayload = (value: unknown): value is ProjectMapSyncPayload => isRecord(value) && hasString(value, "id") && hasString(value, "userId");
 const assertUpsertPayload = <TEntity extends UpsertEntity>(entity: TEntity, payload: unknown): SyncPayloadByEntity[TEntity] => {
   switch (entity) { case "card": if (isCardPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
-  break;
-  case "folder":
-    if (isFolderPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
     break;
-  case "cardSet":
-    if (isCardSetPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
-    break;
-  case "document":
-    if (isDocumentPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
-    break;
-  case "tag": {
-    const tagPayload = normalizeTagPayload(payload);
-    if (tagPayload) return tagPayload as SyncPayloadByEntity[TEntity];
-    break;
+    case "folder":
+      if (isFolderPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
+      break;
+    case "cardSet":
+      if (isCardSetPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
+      break;
+    case "document":
+      if (isDocumentPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
+      break;
+    case "tag": {
+      const tagPayload = normalizeTagPayload(payload);
+      if (tagPayload) return tagPayload as SyncPayloadByEntity[TEntity];
+      break;
+    }
+    case "userSetting":
+      if (isUserSettingPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
+      break;
+    case "asset":
+      if (isAssetPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
+      break;
+    case "projectMap":
+      if (isProjectMapPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
+      break;
   }
-  case "userSetting":
-    if (isUserSettingPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
-    break;
-  case "asset":
-    if (isAssetPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
-    break;
-  case "projectMap":
-    if (isProjectMapPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
-    break;
-}
-throw new Error(`Invalid payload for sync entity: ${entity}`);
+  throw new Error(`Invalid payload for sync entity: ${entity}`);
 };
 const assertDeletePayload = (payload: unknown): SyncDeletePayload => {
   if (isRecord(payload) && hasString(payload, "id")) return { id: String(payload.id) };

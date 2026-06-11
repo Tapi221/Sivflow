@@ -99,17 +99,17 @@ const buildCalendarEventSyncRange = ({ selectedViewMode, visibleDays, monthTitle
 };
 const buildCalendarEventPrioritySyncRange = ({ selectedViewMode, visibleDays, monthTitleDate, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, monthRenderedRange, yearSyncRange }: BuildCalendarEventSyncRangeOptions): CalendarEventSyncRange => {
   if (selectedViewMode === "days" || selectedViewMode === "threeDays" || selectedViewMode === "week" || selectedViewMode === "timetable") {
-  return buildVisibleDaysCalendarEventSyncRange(visibleDays, monthTitleDate, WEEKDAY_PRIORITY_SYNC_BUFFER_DAYS);
-}
+    return buildVisibleDaysCalendarEventSyncRange(visibleDays, monthTitleDate, WEEKDAY_PRIORITY_SYNC_BUFFER_DAYS);
+  }
 
-return buildCalendarEventSyncRange({
-  selectedViewMode,
-  visibleDays,
-  monthTitleDate,
-  weekStartDay,
-  monthRenderedRange,
-  yearSyncRange,
-});
+  return buildCalendarEventSyncRange({
+    selectedViewMode,
+    visibleDays,
+    monthTitleDate,
+    weekStartDay,
+    monthRenderedRange,
+    yearSyncRange,
+  });
 };
 
 export { buildCalendarEventSyncRange, buildCalendarEventPrioritySyncRange };

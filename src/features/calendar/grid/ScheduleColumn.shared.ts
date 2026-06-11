@@ -28,16 +28,16 @@ const getScheduleViewStart = (anchorDate: Date, viewMode: CalendarViewMode, week
 };
 const getScheduleViewDayCount = (anchorDate: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") {
-  const start = startOfYear(anchorDate);
-  const end = endOfYear(anchorDate);
+    const start = startOfYear(anchorDate);
+    const end = endOfYear(anchorDate);
 
-  return Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
-}
+    return Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
+  }
 
-if (viewMode === "month" || viewMode === "list") return getDaysInMonth(anchorDate);
-if (viewMode === "week" || viewMode === "timetable") return 7;
-if (viewMode === "threeDays") return 3;
-return 1;
+  if (viewMode === "month" || viewMode === "list") return getDaysInMonth(anchorDate);
+  if (viewMode === "week" || viewMode === "timetable") return 7;
+  if (viewMode === "threeDays") return 3;
+  return 1;
 };
 const buildScheduleDisplayDays = (anchorDate: Date, viewMode: CalendarViewMode, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY) => {
   const baseStart = getScheduleViewStart(anchorDate, viewMode, weekStartDay);

@@ -142,7 +142,8 @@ const AppProjectsSection = ({ projects, isAdding, onAddProject, onToggleProject,
         <div className="mx-2 ml-2 mt-1 flex flex-col gap-1">
           <form className="flex h-7 items-center gap-1.5" onSubmit={handleSubmit}>
             <input ref={inputRef} value={projectName} onChange={(event) => {
-              setProjectName(event.target.value); if (addError) setAddError(null); }} onKeyDown={handleProjectNameKeyDown} autoFocus placeholder="プロジェクト名" aria-label="プロジェクト名" aria-invalid={Boolean(addError)} aria-describedby={addError ? "app-project-add-error" : undefined} className={cn("min-w-0 flex-1 rounded-full bg-white px-3 py-1 text-[12px] font-medium text-[#2f2f2f] outline-none transition focus:ring-2", addError ? "border border-[#e08b8b] focus:border-[#e08b8b] focus:ring-[#f9e8e8]" : "border border-[#e6e6e6] focus:border-[#d7d7d7] focus:ring-[#f2f2f2]")} />
+              setProjectName(event.target.value); if (addError) setAddError(null); }} onKeyDown={handleProjectNameKeyDown} autoFocus placeholder="プロジェクト名" aria-label="プロジェクト名" aria-invalid={Boolean(addError)} aria-describedby={addError ? "app-project-add-error" : undefined} className={cn("min-w-0 flex-1 rounded-full bg-white px-3 py-1 text-[12px] font-medium text-[#2f2f2f] outline-none transition focus:ring-2", addError ? "border border-[#e08b8b] focus:border-[#e08b8b] focus:ring-[#f9e8e8]" : "border border-[#e6e6e6] focus:border-[#d7d7d7] focus:ring-[#f2f2f2]")}
+            />
             <button type="submit" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4f4f4] text-[#6d7380] transition hover:bg-[#ececec] active:scale-[0.94]" aria-label="プロジェクトを追加"><IconPlus className="h-3.5 w-3.5" /></button>
           </form>
           {addError ? <p id="app-project-add-error" className="px-3 text-[10px] font-semibold text-[#c25f5f]">{addError}</p> : null}
@@ -241,7 +242,7 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
         onLinkGoogleCalendarAsProject(calendarContextMenu.accountId, calendarContextMenu.calendarId); setCalendarContextMenu(null); } },
       { id: "change-color", label: "色を変更", onSelect: () => {
         setColorPickerTarget({ accountId: calendarContextMenu.accountId, calendarId: calendarContextMenu.calendarId }); window.setTimeout(() => {
-        if (!colorInputRef.current) return; colorInputRef.current.value = calendarContextMenu.color; colorInputRef.current.click(); }, 0); setCalendarContextMenu(null); } },
+          if (!colorInputRef.current) return; colorInputRef.current.value = calendarContextMenu.color; colorInputRef.current.click(); }, 0); setCalendarContextMenu(null); } },
     ];
   }, [calendarContextMenu, onLinkGoogleCalendarAsProject]);
 

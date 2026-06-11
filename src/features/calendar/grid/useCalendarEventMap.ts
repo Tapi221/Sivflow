@@ -7,25 +7,25 @@ type CalendarEventMap = Map<string, GoogleCalendarEvent[]>;
 
 const useCalendarEventMap = (visibleEvents: GoogleCalendarEvent[]): CalendarEventMap => {
   return useMemo(() => {
-  const map: CalendarEventMap = new Map();
+    const map: CalendarEventMap = new Map();
 
-  for (const event of visibleEvents) {
-    const key = toDateKey(event.startsAt);
+    for (const event of visibleEvents) {
+      const key = toDateKey(event.startsAt);
 
-    const arr = map.get(key);
-    if (arr) {
-      arr.push(event);
-    } else {
-      map.set(key, [event]);
+      const arr = map.get(key);
+      if (arr) {
+        arr.push(event);
+      } else {
+        map.set(key, [event]);
+      }
     }
-  }
 
-  for (const arr of map.values()) {
-    arr.sort(compareCalendarEvents);
-  }
+    for (const arr of map.values()) {
+      arr.sort(compareCalendarEvents);
+    }
 
-  return map;
-}, [visibleEvents]);
+    return map;
+  }, [visibleEvents]);
 };
 
 export { useCalendarEventMap };

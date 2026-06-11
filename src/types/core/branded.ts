@@ -52,9 +52,9 @@ const isBase64DataUrl = (url: string): url is Base64DataUrl => url.startsWith("d
  */
 const createBlobUrl = (url: string): BlobUrl => {
   if (!isBlobUrl(url)) {
-  throw new Error(`[BrandedType] Invalid BlobUrl: ${url}`);
-}
-return url as BlobUrl;
+    throw new Error(`[BrandedType] Invalid BlobUrl: ${url}`);
+  }
+  return url as BlobUrl;
 };
 /**
  * Storage URL を生成（実行時バリデーション付き）
@@ -62,9 +62,9 @@ return url as BlobUrl;
  */
 const createStorageUrl = (url: string): StorageUrl => {
   if (!isStorageUrl(url)) {
-  throw new Error(`[BrandedType] Invalid StorageUrl: ${url}`);
-}
-return url as StorageUrl;
+    throw new Error(`[BrandedType] Invalid StorageUrl: ${url}`);
+  }
+  return url as StorageUrl;
 };
 /**
  * Base64 Data URL を生成（実行時バリデーション付き）
@@ -75,9 +75,9 @@ return url as StorageUrl;
  */
 const createBase64DataUrl = (url: string): Base64DataUrl => {
   if (!isBase64DataUrl(url)) {
-  throw new Error(`[BrandedType] Invalid Base64DataUrl: ${url}`);
-}
-return url as Base64DataUrl;
+    throw new Error(`[BrandedType] Invalid Base64DataUrl: ${url}`);
+  }
+  return url as Base64DataUrl;
 };
 // ============================================
 // Utility Functions
