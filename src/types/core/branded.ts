@@ -28,18 +28,6 @@ export type StorageUrl = string & { readonly __brand: "StorageUrl" };
  */
 export type Base64DataUrl = string & { readonly __brand: "Base64DataUrl" };
 
-
-
-
-
-
-
-
-
-
-
-
-
 // ============================================
 // Type Guards（型判定）
 // ============================================
@@ -85,7 +73,7 @@ export const createStorageUrl = (url: string): StorageUrl => { if (!isStorageUrl
  * Base64 Data URL を生成（実行時バリデーション付き）
  * @throws {Error} 不正な URL の場合
  *
- * ⚠️ 警告: この関数は内部処理でのみ使用すること
+ * この関数は内部処理でのみ使用すること
  * DB や UploadedImage に Base64 を保存してはならない
  */
 export const createBase64DataUrl = (url: string): Base64DataUrl => { if (!isBase64DataUrl(url)) { throw new Error(`[BrandedType] Invalid Base64DataUrl: ${url}`);
