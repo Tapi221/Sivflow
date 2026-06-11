@@ -9,7 +9,7 @@ import { useEditorReadOnly, useEditorRef, usePluginOption } from "platejs/react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "./dropdown-menu";
 import { ToolbarButton } from "./toolbar";
 
-export function ModeToolbarButton(props: DropdownMenuProps) { const editor = useEditorRef();
+export const ModeToolbarButton = (props: DropdownMenuProps) => { const editor = useEditorRef();
   const readOnly = useEditorReadOnly();
   const [open, setOpen] = React.useState(false);
 
@@ -100,8 +100,8 @@ export function ModeToolbarButton(props: DropdownMenuProps) { const editor = use
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
-function Indicator() {
+};
+const Indicator = () => {
   return (
     <span className="pointer-events-none absolute right-2 flex size-3.5 items-center justify-center">
       <DropdownMenuItemIndicator>
@@ -109,4 +109,4 @@ function Indicator() {
       </DropdownMenuItemIndicator>
     </span>
   );
-}
+};

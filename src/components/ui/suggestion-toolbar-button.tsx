@@ -7,7 +7,7 @@ import { useEditorPlugin, usePluginOption } from "platejs/react";
 import { cn } from "@/lib/utils";
 import { ToolbarButton } from "./toolbar";
 
-export function SuggestionToolbarButton() { const { setOption } = useEditorPlugin(SuggestionPlugin);
+export const SuggestionToolbarButton = () => { const { setOption } = useEditorPlugin(SuggestionPlugin);
   const isSuggesting = usePluginOption(SuggestionPlugin, "isSuggesting");
 
   return (
@@ -20,4 +20,4 @@ export function SuggestionToolbarButton() { const { setOption } = useEditorPlugi
       <PencilLineIcon />
     </ToolbarButton>
   );
-}
+};

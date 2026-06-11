@@ -9,11 +9,11 @@ afterEach(() => {
   cleanup();
 });
 
-function StatefulMarkdownBlock({
+const StatefulMarkdownBlock = ({
   initialMarkdown,
 }: {
   initialMarkdown: string;
-}) {
+}) => {
   const [markdown, setMarkdown] = React.useState(initialMarkdown);
 
   return (
@@ -24,7 +24,7 @@ function StatefulMarkdownBlock({
       onDuplicate={() => {}}
     />
   );
-}
+};
 
 describe("MarkdownBlock", () => {
   it("初期状態はプレビューだけで、textarea/dialogは存在しない", () => {

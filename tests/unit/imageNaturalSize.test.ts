@@ -7,7 +7,7 @@ type MockImageOptions = {
   shouldError?: boolean;
 };
 
-function stubImage(options: MockImageOptions) {
+const stubImage = (options: MockImageOptions) => {
   class MockImage {
     onload: ((...args: unknown[]) => unknown) | null = null;
     onerror: ((...args: unknown[]) => unknown) | null = null;
@@ -34,7 +34,7 @@ function stubImage(options: MockImageOptions) {
   }
 
   vi.stubGlobal("Image", MockImage as unknown as typeof Image);
-}
+};
 
 describe("loadImageNaturalSize", () => {
   afterEach(() => {

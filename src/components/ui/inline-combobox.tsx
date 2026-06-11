@@ -272,7 +272,7 @@ const InlineComboboxContent: typeof ComboboxPopover = ({
   // Portal prevents CSS from leaking into popover
   const store = useComboboxContext();
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (!store) return;
 
     const state = store.getState();
@@ -289,7 +289,7 @@ const InlineComboboxContent: typeof ComboboxPopover = ({
       event.preventDefault();
       store.setActiveId(store.first());
     }
-  }
+  };
 
   return (
     <Portal>
@@ -373,10 +373,10 @@ const InlineComboboxEmpty = ({
     </div>
   );
 };
-function InlineComboboxGroup({
+const InlineComboboxGroup = ({
   className,
   ...props
-}: React.ComponentProps<typeof ComboboxGroup>) {
+}: React.ComponentProps<typeof ComboboxGroup>) => {
   return (
     <ComboboxGroup
       {...props}
@@ -386,11 +386,11 @@ function InlineComboboxGroup({
       )}
     />
   );
-}
-function InlineComboboxGroupLabel({
+};
+const InlineComboboxGroupLabel = ({
   className,
   ...props
-}: React.ComponentProps<typeof ComboboxGroupLabel>) {
+}: React.ComponentProps<typeof ComboboxGroupLabel>) => {
   return (
     <ComboboxGroupLabel
       {...props}
@@ -400,7 +400,7 @@ function InlineComboboxGroupLabel({
       )}
     />
   );
-}
+};
 
 InlineComboboxInput.displayName = "InlineComboboxInput";
 export { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxGroupLabel, InlineComboboxInput, InlineComboboxItem, InlineComboboxRow };

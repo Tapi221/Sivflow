@@ -11,13 +11,10 @@ import { useFilePicker } from "use-file-picker";
 import { cn } from "@/lib/utils";
 import { useUploadFile } from "@/hooks/use-upload-file";
 
-function formatBytes(
-  bytes: number,
-  opts: {
+const formatBytes = (bytes: number, opts: {
     decimals?: number;
     sizeType?: "accurate" | "normal";
-  } = {},
-) {
+  } = {}) => {
   const { decimals = 0, sizeType = "normal" } = opts;
 
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
@@ -31,7 +28,7 @@ function formatBytes(
     ? (accurateSizes[i] ?? "Bytest")
     : (sizes[i] ?? "Bytes")
     }`;
-}
+};
 
 const CONTENT: Record<
   string,
@@ -62,7 +59,7 @@ const CONTENT: Record<
     icon: <Film />,
   },
 };
-export const PlaceholderElement = withHOC(PlaceholderProvider, function PlaceholderElement(props: PlateElementProps<TPlaceholderElement>) { const { editor, element } = props;
+export const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElementProps<TPlaceholderElement>) => { const { editor, element } = props;
 
   const { api } = useEditorPlugin(PlaceholderPlugin);
 
@@ -189,11 +186,11 @@ export const PlaceholderElement = withHOC(PlaceholderProvider, function Placehol
   );
 },
 );
-export function ImageProgress({ className, file, imageRef, progress = 0 }: { file: File;
+export const ImageProgress = ({ className, file, imageRef, progress = 0 }: { file: File;
   className?: string;
   imageRef?: React.RefObject<HTMLImageElement | null>;
   progress?: number;
-}) {
+}) => {
   const [objectUrl, setObjectUrl] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -228,4 +225,4 @@ export function ImageProgress({ className, file, imageRef, progress = 0 }: { fil
       )}
     </div>
   );
-}
+};

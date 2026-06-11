@@ -6,19 +6,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Card } from "@/types";
 import { CardCarousel } from "@/features/study/CardCarousel";
 
-const scrollToMock = vi.fn(function scrollTo(
-  this: HTMLDivElement,
-  options: ScrollToOptions,
-) {
+const scrollToMock = vi.fn((this: HTMLDivElement, options: ScrollToOptions) => {
   this.scrollLeft = options.left ?? this.scrollLeft;
   this.dispatchEvent(new Event("scroll", { bubbles: true }));
 });
 
-function makeCard(id: string): Card {
+const makeCard = (id: string): Card => {
   return { id } as unknown as Card;
-}
+};
 
-function setup(element: React.ReactElement): HTMLDivElement {
+const setup = (element: React.ReactElement): HTMLDivElement => {
   container = document.createElement("div");
   document.body.appendChild(container);
   root = createRoot(container);
@@ -26,13 +23,13 @@ function setup(element: React.ReactElement): HTMLDivElement {
     root.render(element);
   });
   return container;
-}
+};
 
-function rerender(element: React.ReactElement) {
+const rerender = (element: React.ReactElement) => {
   flushSync(() => {
     root.render(element);
   });
-}
+};
 
 let container: HTMLDivElement;
 let root: ReturnType<typeof createRoot>;
@@ -45,10 +42,7 @@ class ResizeObserverMock {
 
 vi.mock("framer-motion", () => ({
   motion: {
-    div: React.forwardRef(function MotionDiv(
-      props: React.HTMLAttributes<HTMLDivElement> & Record<string, unknown>,
-      ref: React.Ref<HTMLDivElement>,
-    ) {
+    div: React.forwardRef((props: React.HTMLAttributes<HTMLDivElement> & Record<string, unknown>, ref: React.Ref<HTMLDivElement>) => {
       const rest = { ...props } as Record<string, unknown>;
       delete rest.animate;
       delete rest.transition;

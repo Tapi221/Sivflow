@@ -8,10 +8,7 @@ import { useCardCarousel3DWebBridge } from "@/features/review/infra/web/useCardC
 let container: HTMLDivElement;
 let root: ReturnType<typeof createRoot>;
 
-const scrollToMock = vi.fn(function scrollTo(
-  this: HTMLDivElement,
-  options: ScrollToOptions,
-) {
+const scrollToMock = vi.fn((this: HTMLDivElement, options: ScrollToOptions) => {
   this.scrollLeft = options.left ?? this.scrollLeft;
 });
 

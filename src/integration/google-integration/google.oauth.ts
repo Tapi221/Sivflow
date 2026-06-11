@@ -271,27 +271,27 @@ const waitForWebCode = (state: string, redirectUri: string): Promise<string> => 
     handleCallbackUrl({ rawUrl: payload.url, callbackState: payload.state, callbackCode: payload.code, callbackError: payload.error, errorDescription: payload.errorDescription });
   };
 
-  function handleMessage(event: MessageEvent<unknown>): void {
+  const handleMessage = (event: MessageEvent<unknown>): void => {
     if (event.origin !== expected.origin) return;
     handleCallbackPayload(event.data);
-  }
+  };
 
-  function handleStorage(event: StorageEvent): void {
+  const handleStorage = (event: StorageEvent): void => {
     if (event.key !== GOOGLE_OAUTH_CALLBACK_STORAGE_KEY || !event.newValue) return;
     try {
       handleCallbackPayload(JSON.parse(event.newValue));
     } catch {
       // 他の値は無視する。
     }
-  }
+  };
 
-  function handleStoredCallbackPayload(): void {
+  const handleStoredCallbackPayload = (): void => {
     handleCallbackPayload(parseStoredGoogleOAuthCallbackPayload());
-  }
+  };
 
-  function handleVisibilityChange(): void {
+  const handleVisibilityChange = (): void => {
     if (document.visibilityState === "visible") handleStoredCallbackPayload();
-  }
+  };
 
   timeoutTimer = window.setTimeout(() => {
     handleStoredCallbackPayload();

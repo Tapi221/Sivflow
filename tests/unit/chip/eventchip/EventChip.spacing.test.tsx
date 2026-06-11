@@ -168,13 +168,13 @@ const getWeekdayInlineRowElement = (title: string): HTMLElement | null => {
 };
 
 const stubWeekdayChipLayout = ({ chipHeight, chipWidth, titleHeight = 17, titleText, titleTextWidth, titleWithTimeHeight = titleHeight, timeTextWidth }: WeekdayChipLayoutStubOptions) => {
-  vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(function (this: HTMLElement) {
+  vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation((this: HTMLElement) => {
     return isWeekdayChipElement(this) || isWeekdayMeasurementElement(this) ? chipHeight : 0;
   });
-  vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(function (this: HTMLElement) {
+  vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation((this: HTMLElement) => {
     return isWeekdayChipElement(this) || isWeekdayMeasurementElement(this) ? chipWidth : 0;
   });
-  vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(function (this: HTMLElement) {
+  vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation((this: HTMLElement) => {
     if (this.className.includes("text-[12px]") && this.textContent?.includes("~")) return titleWithTimeHeight;
     if (this.className.includes("text-[12px]")) return titleHeight;
     if (this.className.includes("text-[11px]")) return 16;
@@ -353,7 +353,7 @@ describe("weekday event chip inline time layout", () => {
 
   it("横並び表示に切り替わっても測定基準を変えず、タイトル下表示へ発振しない", async () => {
     const observerCallbacks: ResizeObserverCallback[] = [];
-    const resizeObserverConstructor = vi.fn(function (callback: ResizeObserverCallback): ResizeObserverMock {
+    const resizeObserverConstructor = vi.fn((callback: ResizeObserverCallback): ResizeObserverMock => {
       observerCallbacks.push(callback);
 
       return {

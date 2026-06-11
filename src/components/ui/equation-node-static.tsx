@@ -7,7 +7,7 @@ import { SlateElement } from "platejs/static";
 import { cn } from "@/lib/utils";
 import { inlineSuggestionVariants } from "@/lib/suggestion";
 
-export function EquationElementStatic(props: SlateElementProps<TEquationElement>) { const { element } = props;
+export const EquationElementStatic = (props: SlateElementProps<TEquationElement>) => { const { element } = props;
 
   const html = getEquationHtml({
     element,
@@ -48,8 +48,8 @@ export function EquationElementStatic(props: SlateElementProps<TEquationElement>
       {props.children}
     </SlateElement>
   );
-}
-export function InlineEquationElementStatic(props: SlateElementProps<TEquationElement>) { const html = getEquationHtml({ element: props.element, options: { displayMode: true, errorColor: "#cc0000", fleqn: false, leqno: false, macros: { "\f": "#1f(#2)" }, output: "htmlAndMathml", strict: "warn", throwOnError: false, trust: false } });
+};
+export const InlineEquationElementStatic = (props: SlateElementProps<TEquationElement>) => { const html = getEquationHtml({ element: props.element, options: { displayMode: true, errorColor: "#cc0000", fleqn: false, leqno: false, macros: { "\f": "#1f(#2)" }, output: "htmlAndMathml", strict: "warn", throwOnError: false, trust: false } });
 
   return (
     <SlateElement
@@ -76,12 +76,12 @@ export function InlineEquationElementStatic(props: SlateElementProps<TEquationEl
       {props.children}
     </SlateElement>
   );
-}
+};
 /**
  * DOCX-compatible block equation component.
  * Displays LaTeX source code with styling.
  */
-export function EquationElementDocx(props: SlateElementProps<TEquationElement>) { const { element } = props;
+export const EquationElementDocx = (props: SlateElementProps<TEquationElement>) => { const { element } = props;
 
   if (!element.texExpression || element.texExpression.length === 0) {
     return (
@@ -107,12 +107,12 @@ export function EquationElementDocx(props: SlateElementProps<TEquationElement>) 
       {props.children}
     </SlateElement>
   );
-}
+};
 /**
  * DOCX-compatible inline equation component.
  * Displays LaTeX source code inline.
  */
-export function InlineEquationElementDocx(props: SlateElementProps<TEquationElement>) { const { element } = props;
+export const InlineEquationElementDocx = (props: SlateElementProps<TEquationElement>) => { const { element } = props;
 
   if (!element.texExpression || element.texExpression.length === 0) {
     return (
@@ -135,4 +135,4 @@ export function InlineEquationElementDocx(props: SlateElementProps<TEquationElem
       {props.children}
     </SlateElement>
   );
-}
+};

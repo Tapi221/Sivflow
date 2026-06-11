@@ -27,7 +27,7 @@ export const BlockList: RenderNodeWrapper = (props) => { if (!props.element.list
 
   return (props) => <List {...props} />;
 };
-function List(props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) {
+const List = (props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) => {
   const { listStart, listStyleType } = props.element as TListElement;
   const { Li, Marker } = config[listStyleType] ?? {};
   const List = isOrderedList(props.element) ? "ol" : "ul";
@@ -49,8 +49,8 @@ function List(props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) 
       )}
     </List>
   );
-}
-function TodoMarker(props: PlateElementProps) {
+};
+const TodoMarker = (props: PlateElementProps) => {
   const state = useTodoListElementState({ element: props.element });
   const { checkboxProps } = useTodoListElement(state);
   const readOnly = useReadOnly();
@@ -66,10 +66,8 @@ function TodoMarker(props: PlateElementProps) {
       />
     </div>
   );
-}
-function TodoLi(
-  props: PlateElementProps & { lineBreakBadge?: React.ReactNode; },
-) {
+};
+const TodoLi = (props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) => {
   return (
     <li
       className={cn(
@@ -82,4 +80,4 @@ function TodoLi(
       {props.lineBreakBadge}
     </li>
   );
-}
+};

@@ -57,7 +57,7 @@ const TableResizeContext = React.createContext<TableResizeContextValue | null>(
   null,
 );
 
-function useTableResizeContext() {
+const useTableResizeContext = () => {
   const context = React.useContext(TableResizeContext);
 
   if (!context) {
@@ -65,8 +65,8 @@ function useTableResizeContext() {
   }
 
   return context;
-}
-function useTableResizeController({
+};
+const useTableResizeController = ({
   deferColumnResize,
   dragIndicatorRef,
   hoverIndicatorRef,
@@ -84,7 +84,7 @@ function useTableResizeController({
   tablePath: number[];
   tableRef: React.RefObject<HTMLTableElement | null>;
   wrapperRef: React.RefObject<HTMLDivElement | null>;
-}) {
+}) => {
   const { editor, getOptions } = useEditorPlugin(TablePlugin);
   const { disableMarginLeft = false, minColumnWidth = 0 } = getOptions();
   const colSizes = useTableColSizes({
@@ -508,8 +508,8 @@ function useTableResizeController({
     }),
     [clearResizePreview, disableMarginLeft, setResizePreview, startResize],
   );
-}
-function useTableCellPresentation(element: TTableCellElement) {
+};
+const useTableCellPresentation = (element: TTableCellElement) => {
   const { api } = useEditorPlugin(TablePlugin);
   const borders = useTableCellBorders({ element });
   const { col, row } = useCellIndices();
@@ -533,9 +533,9 @@ function useTableCellPresentation(element: TTableCellElement) {
     rowSpan,
     width,
   };
-}
+};
 
-export const TableElement = withHOC(TableProvider, function TableElement({ children, ...props }: PlateElementProps<TTableElement>) { const readOnly = useReadOnly();
+export const TableElement = withHOC(TableProvider, ({ children, ...props }: PlateElementProps<TTableElement>) => { const readOnly = useReadOnly();
   const isSelectionAreaVisible = usePluginOption(
     BlockSelectionPlugin,
     "isSelectionAreaVisible",
@@ -683,10 +683,10 @@ export const TableElement = withHOC(TableProvider, function TableElement({ child
   return <TableFloatingToolbar>{content}</TableFloatingToolbar>;
 },
 );
-function TableFloatingToolbar({
+const TableFloatingToolbar = ({
   children,
   ...props
-}: React.ComponentProps<typeof PopoverContent>) {
+}: React.ComponentProps<typeof PopoverContent>) => {
   const selectedCellCount = useEditorSelector(
     (editor) =>
       editor.getApi(TablePlugin).table.getSelectedCellIds()?.length ?? 0,
@@ -737,10 +737,8 @@ function TableFloatingToolbar({
       )}
     </Popover>
   );
-}
-function ExpandedSelectionTableFloatingToolbarContent(
-  props: React.ComponentProps<typeof PopoverContent>,
-) {
+};
+const ExpandedSelectionTableFloatingToolbarContent = (props: React.ComponentProps<typeof PopoverContent>) => {
   const { tf } = useEditorPlugin(TablePlugin);
   const { canMerge, canSplit } = useTableMergeState();
 
@@ -755,10 +753,8 @@ function ExpandedSelectionTableFloatingToolbarContent(
       {...props}
     />
   );
-}
-function CollapsedTableFloatingToolbarContent(
-  props: React.ComponentProps<typeof PopoverContent>,
-) {
+};
+const CollapsedTableFloatingToolbarContent = (props: React.ComponentProps<typeof PopoverContent>) => {
   const { tf } = useEditorPlugin(TablePlugin);
   const element = useElement<TTableElement>();
   const { props: buttonProps } = useRemoveNodeButton({ element });
@@ -791,8 +787,8 @@ function CollapsedTableFloatingToolbarContent(
       {...props}
     />
   );
-}
-function TableFloatingToolbarContent({
+};
+const TableFloatingToolbarContent = ({
   buttonProps,
   canMerge = false,
   canSplit = false,
@@ -819,7 +815,7 @@ function TableFloatingToolbarContent({
   onInsertRowBefore?: () => void;
   onMerge?: () => void;
   onSplit?: () => void;
-}) {
+}) => {
   return (
     <PopoverContent
       asChild
@@ -929,10 +925,8 @@ function TableFloatingToolbarContent({
       </Toolbar>
     </PopoverContent>
   );
-}
-function TableBordersDropdownMenuContent(
-  props: React.ComponentProps<typeof DropdownMenuContent>,
-) {
+};
+const TableBordersDropdownMenuContent = (props: React.ComponentProps<typeof DropdownMenuContent>) => {
   const editor = useEditorRef();
   const {
     getOnSelectTableBorder,
@@ -1005,14 +999,14 @@ function TableBordersDropdownMenuContent(
       </DropdownMenuGroup>
     </DropdownMenuContent>
   );
-}
-function ColorDropdownMenu({
+};
+const ColorDropdownMenu = ({
   children,
   tooltip,
 }: {
   children: React.ReactNode;
   tooltip: string;
-}) {
+}) => {
   const [open, setOpen] = React.useState(false);
 
   const editor = useEditorRef();
@@ -1060,8 +1054,8 @@ function ColorDropdownMenu({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
-export function TableRowElement({ children, ...props }: PlateElementProps<TTableRowElement>) { const { element } = props;
+};
+export const TableRowElement = ({ children, ...props }: PlateElementProps<TTableRowElement>) => { const { element } = props;
   const readOnly = useReadOnly();
   const editor = useEditorRef();
   const rowIndex = useElementSelector(([, path]) => path.at(-1) as number, [], {
@@ -1125,8 +1119,8 @@ export function TableRowElement({ children, ...props }: PlateElementProps<TTable
       {children}
     </PlateElement>
   );
-}
-function RowDragHandle({ dragRef }: { dragRef: React.Ref<any>; }) {
+};
+const RowDragHandle = ({ dragRef }: { dragRef: React.Ref<any>; }) => {
   const editor = useEditorRef();
   const element = useElement();
 
@@ -1146,8 +1140,8 @@ function RowDragHandle({ dragRef }: { dragRef: React.Ref<any>; }) {
       <GripVertical className="text-muted-foreground" />
     </Button>
   );
-}
-function RowDropLine() {
+};
+const RowDropLine = () => {
   const { dropLine } = useDropLine();
 
   if (!dropLine) return null;
@@ -1160,9 +1154,9 @@ function RowDropLine() {
       )}
     />
   );
-}
-export function TableCellElement({ isHeader, ...props }: PlateElementProps<TTableCellElement> & { isHeader?: boolean;
-}) {
+};
+export const TableCellElement = ({ isHeader, ...props }: PlateElementProps<TTableCellElement> & { isHeader?: boolean;
+}) => {
   const readOnly = useReadOnly();
   const element = props.element;
 
@@ -1233,17 +1227,17 @@ export function TableCellElement({ isHeader, ...props }: PlateElementProps<TTabl
       )}
     </PlateElement>
   );
-}
-export function TableCellHeaderElement(props: React.ComponentProps<typeof TableCellElement>) { return <TableCellElement {...props} isHeader />;
-}
+};
+export const TableCellHeaderElement = (props: React.ComponentProps<typeof TableCellElement>) => { return <TableCellElement {...props} isHeader />;
+};
 
-const TableCellResizeControls = React.memo(function TableCellResizeControls({
+const TableCellResizeControls = React.memo(({
   colIndex,
   rowIndex,
 }: {
   colIndex: number;
   rowIndex: number;
-}) {
+}) => {
   const {
     clearResizePreview,
     disableMarginLeft,

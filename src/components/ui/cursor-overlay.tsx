@@ -9,19 +9,19 @@ import { RangeApi } from "platejs";
 import { useEditorRef, usePluginOption } from "platejs/react";
 import { cn } from "@/lib/utils";
 
-export function CursorOverlay() { const { cursors } = useCursorOverlay();
+export const CursorOverlay = () => { const { cursors } = useCursorOverlay();
 
   return cursors.map((cursor) => (
     <Cursor key={cursor.id} {...cursor} />
   ));
-}
-function Cursor({
+};
+const Cursor = ({
   id,
   caretPosition,
   data,
   selection,
   selectionRects,
-}: CursorOverlayState<CursorData>) {
+}: CursorOverlayState<CursorData>) => {
   const editor = useEditorRef();
   const streaming = usePluginOption(AIChatPlugin, "streaming");
   const { style, selectionStyle = style } = data ?? ({} as CursorData);
@@ -68,4 +68,4 @@ function Cursor({
       )}
     </>
   );
-}
+};

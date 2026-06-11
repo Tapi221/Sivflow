@@ -48,7 +48,7 @@ const MEDIA_CONFIG: Record<
   },
 };
 
-export function MediaToolbarButton({ nodeType, ...props }: DropdownMenuProps & { nodeType: string; }) {
+export const MediaToolbarButton = ({ nodeType, ...props }: DropdownMenuProps & { nodeType: string; }) => {
   const currentConfig = MEDIA_CONFIG[nodeType];
 
   const editor = useEditorRef();
@@ -126,8 +126,8 @@ export function MediaToolbarButton({ nodeType, ...props }: DropdownMenuProps & {
       </AlertDialog>
     </>
   );
-}
-function MediaUrlDialogContent({
+};
+const MediaUrlDialogContent = ({
   currentConfig,
   nodeType,
   setOpen,
@@ -135,7 +135,7 @@ function MediaUrlDialogContent({
   currentConfig: (typeof MEDIA_CONFIG)[string];
   nodeType: string;
   setOpen: (value: boolean) => void;
-}) {
+}) => {
   const editor = useEditorRef();
   const [url, setUrl] = React.useState("");
 
@@ -191,4 +191,4 @@ function MediaUrlDialogContent({
       </AlertDialogFooter>
     </>
   );
-}
+};

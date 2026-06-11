@@ -1,10 +1,7 @@
 import type { Card } from "@/types";
 
 // シミュレーション用：状態遷移・S・Iの変化をテスト
-function simulateCardScenario(
-  card: Card,
-  scenario: Array<"success" | "fail" | "delay" | "view">,
-) {
+const simulateCardScenario = (card: Card, scenario: Array<"success" | "fail" | "delay" | "view">) => {
   let S = card.memoryStability ?? 35;
   let state = card.state ?? "PRE-LEARN";
   let I = 1; // 初期間隔
@@ -47,7 +44,7 @@ function simulateCardScenario(
       `Event: ${event}, S: ${S.toFixed(2)}, state: ${state}, I: ${I.toFixed(2)}, nextReviewDate: ${nextReviewStr}`,
     );
   }
-}
+};
 
 // テスト例
 const testCard: Card = {

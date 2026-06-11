@@ -4,7 +4,7 @@ import type { SlateElementProps } from "platejs/static";
 import { NodeApi } from "platejs";
 import { SlateElement } from "platejs/static";
 
-export function VideoElementStatic(props: SlateElementProps<TVideoElement & TCaptionElement & TResizableProps>) { const { align = "center", caption, url, width } = props.element;
+export const VideoElementStatic = (props: SlateElementProps<TVideoElement & TCaptionElement & TResizableProps>) => { const { align = "center", caption, url, width } = props.element;
 
   return (
     <SlateElement className="py-2.5" {...props}>
@@ -24,4 +24,4 @@ export function VideoElementStatic(props: SlateElementProps<TVideoElement & TCap
       {props.children}
     </SlateElement>
   );
-}
+};

@@ -29,7 +29,7 @@ describe("LocalDB resilience", () => {
   it("同時 getInstance 呼び出しでは同じ in-flight promise を返す", async () => {
     const openSpy = vi
       .spyOn(Dexie.prototype, "open")
-      .mockImplementation(function mockOpen(this: Dexie) {
+      .mockImplementation((this: Dexie) => {
         return new Promise((resolve) => {
           setTimeout(() => resolve(this), 25);
         }) as unknown;
