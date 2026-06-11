@@ -17,12 +17,10 @@ type LocalPdfSourceState = {
   source: PdfDocumentSource | null;
   error: string | null;
 };
-
 type PendingPdfViewerStateSave = {
   viewerState: PdfViewerState;
   onDocumentUpdate: NonNullable<PdfDocumentPaneProps["onDocumentUpdate"]>;
 };
-
 type PdfDocumentPaneProps = {
   document: DocumentItem;
   className?: string;
@@ -43,22 +41,18 @@ const createPendingLocalPdfSourceState = (documentId: string): LocalPdfSourceSta
   source: null,
   error: null,
 });
-
 const createResolvedLocalPdfSourceState = (documentId: string, source: PdfDocumentSource | null, error: string | null = null): LocalPdfSourceState => ({
   documentId,
   isResolved: true,
   source,
   error,
 });
-
 const createPersistedPdfDocumentSource = (url: string | null): PdfDocumentSource | null => {
   return url ? createPdfDocumentUrlSource(url) : null;
 };
-
 const getErrorMessage = (error: unknown, fallback: string): string => {
   return error instanceof Error && error.message ? error.message : fallback;
 };
-
 const waitForPdfSourceResolution = async <T,>(promise: Promise<T>): Promise<T> => {
   let timeoutId: ReturnType<typeof globalThis.setTimeout> | null = null;
   const timeoutPromise = new Promise<never>((_, reject) => {
@@ -71,29 +65,23 @@ const waitForPdfSourceResolution = async <T,>(promise: Promise<T>): Promise<T> =
     if (timeoutId !== null) globalThis.clearTimeout(timeoutId);
   }
 };
-
 const delay = (durationMs: number): Promise<void> => {
   return new Promise((resolve) => {
     globalThis.setTimeout(resolve, durationMs);
   });
 };
-
 const getPdfViewerStatePersistence = (options?: PdfViewerStateChangeOptions) => {
   return options?.persistence ?? "immediate";
 };
-
 const isBrowserPageHidden = (): boolean => {
   return typeof globalThis.document !== "undefined" && globalThis.document.visibilityState === "hidden";
 };
-
 const hasLocalPdfBlobCandidate = (document: Pick<DocumentItem, "localFileId">): boolean => {
   return Boolean(document.localFileId?.trim());
 };
-
 const isLocalPersistedPdfSource = (source: PdfDocumentSource | null): boolean => {
   return source?.type === "url" && source.locality === "local";
 };
-
 const resolvePreferredPdfBlob = async (document: DocumentItem, currentUserId: string | null, hasPersistedSource: boolean): Promise<Blob | null> => {
   if (!hasPersistedSource) return resolvePdfDocumentBlob(document, currentUserId);
 
