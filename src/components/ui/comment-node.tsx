@@ -1,12 +1,20 @@
 "use client";
 
 import * as React from "react";
+
 import { getCommentCount } from "@platejs/comment";
+
 import type { TCommentText } from "platejs";
+
 import type { PlateLeafProps } from "platejs/react";
+
 import { PlateLeaf, useEditorPlugin, usePluginOption } from "platejs/react";
+
 import { commentPlugin } from "@/components/editor/plugins/comment-kit";
+
 import { cn } from "@/lib/utils";
+
+
 
 const CommentLeaf = (props: PlateLeafProps<TCommentText>) => {
   const { children, leaf } = props;
@@ -40,5 +48,7 @@ const CommentLeaf = (props: PlateLeafProps<TCommentText>) => {
     </PlateLeaf>
   );
 };
+
+
 
 export { CommentLeaf };

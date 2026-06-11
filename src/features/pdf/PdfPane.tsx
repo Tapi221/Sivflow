@@ -1,3 +1,5 @@
+import "pdfjs-dist/legacy/web/pdf_viewer.css";
+import "./PdfPane.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
@@ -14,8 +16,6 @@ import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
 import type { PdfPageWindowMetric } from "./pdfPageWindow";
 import { getPdfPageWindowKeepSet, getSafePdfPageNumber } from "./pdfPageWindow";
 import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_BUTTON_SCALE_FACTOR, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON } from "./pdfZoom.constants";
-import "pdfjs-dist/legacy/web/pdf_viewer.css";
-import "./PdfPane.css";
 
 type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
 type PdfViewerStateChangeOptions = {
