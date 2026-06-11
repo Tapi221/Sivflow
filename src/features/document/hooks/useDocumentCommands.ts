@@ -5,10 +5,6 @@ import { getLocalDb } from "@/services/localdb";
 import { normalizeDate } from "@/shared/codec/date";
 import type { DocumentItem } from "@/types";
 
-
-
-
-
 type UpdateDocumentOptions = {
   touchUpdatedAt?: boolean;
 };
@@ -19,7 +15,7 @@ type DocumentUpdatePayload = Record<string, unknown> & {
 };
 
 type DocumentUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
-  updateItem: (table: "documents", id: string, changes: Record<string, unknown>) => Promise<number>;
+  updateItem: (table: "documents", id: string, changes: Record<string, unknown>, skipSync?: boolean) => Promise<number>;
 };
 
 type DocumentPurgeCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
@@ -34,9 +30,7 @@ type DocumentPurgeCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   queueDeleteSync: (args: { entity: "document"; targetId: string; priority?: "critical" | "high" | "medium" | "low" }) => Promise<void>;
 };
 
-
-
-
+const VIEWER_STATE_UPDATE_KEYS = new Set(["viewerState", "updatedAt"]);
 
 const normalizeUpdatedAt = (value: DocumentItem["updatedAt"] | undefined): Date | undefined => {
   return normalizeDate(value) ?? undefined;
@@ -47,7 +41,18 @@ const resolveDocumentFileId = (documentId: string, document: Pick<DocumentItem, 
   return localFileId.length > 0 ? localFileId : documentId;
 };
 
-export const useDocumentCommands = () => { const { currentUser } = useAuthSession();
+const isViewerStateOnlyUpdate = (updates: Partial<DocumentItem>): boolean => {
+  const keys = Object.keys(updates);
+  return keys.includes("viewerState") && keys.every((key) => VIEWER_STATE_UPDATE_KEYS.has(key));
+};
+
+const shouldTouchUpdatedAtForUpdates = (updates: Partial<DocumentItem>, options: UpdateDocumentOptions): boolean => {
+  if (typeof options.touchUpdatedAt === "boolean") return options.touchUpdatedAt;
+  return Object.keys(updates).some((key) => !VIEWER_STATE_UPDATE_KEYS.has(key));
+};
+
+export const useDocumentCommands = () => {
+  const { currentUser } = useAuthSession();
 
   const updateDocument = useCallback(
     async (documentId: string, updates: Partial<DocumentItem>, options: UpdateDocumentOptions = {}): Promise<void> => {
@@ -55,7 +60,8 @@ export const useDocumentCommands = () => { const { currentUser } = useAuthSessio
 
       try {
         const db = (await getLocalDb(currentUser.uid)) as DocumentUpdateCapableDb;
-        const shouldTouchUpdatedAt = options.touchUpdatedAt ?? Object.keys(updates).some((key) => key !== "viewerState");
+        const skipSync = isViewerStateOnlyUpdate(updates);
+        const shouldTouchUpdatedAt = shouldTouchUpdatedAtForUpdates(updates, options);
         const { updatedAt: requestedUpdatedAt, ...restUpdates } = updates;
         const payload: DocumentUpdatePayload = {
           ...(restUpdates as Record<string, unknown>),
@@ -71,7 +77,7 @@ export const useDocumentCommands = () => { const { currentUser } = useAuthSessio
           }
         }
 
-        await db.updateItem("documents", documentId, payload);
+        await db.updateItem("documents", documentId, payload, skipSync);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         console.error(`[useDocumentCommands] Update error: ${message}`, {
