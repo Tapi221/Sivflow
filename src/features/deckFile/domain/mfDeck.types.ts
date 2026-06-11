@@ -38,6 +38,19 @@ type MfDeckCardV1 = { id: string;
   layoutRows?: unknown;
   flags?: MfDeckCardFlagsV1;
 };
+type MfDeckArchiveV1 = { manifest: MfDeckManifestV1;
+  cardsJson: MfDeckCardsJsonV1;
+  mediaManifest?: MfDeckMediaManifestV1;
+  media?: Record<string, Uint8Array>;
+};
+type MfDeckValidationResult = | { ok: true;
+  value: MfDeckArchiveV1;
+  issues: MfDeckIssue[];
+}
+  | {
+    ok: false;
+    issues: MfDeckIssue[];
+  };
 
 const MF_DECK_FORMAT = "sivflow.deck" as const;
 const MF_DECK_VERSION = 1 as const;
@@ -70,19 +83,6 @@ type MfDeckCardsJsonV1 = { format: "sivflow.deck.cards";
   version: typeof MF_DECK_VERSION;
   cards: MfDeckCardV1[];
 };
-type MfDeckArchiveV1 = { manifest: MfDeckManifestV1;
-  cardsJson: MfDeckCardsJsonV1;
-  mediaManifest?: MfDeckMediaManifestV1;
-  media?: Record<string, Uint8Array>;
-};
-type MfDeckValidationResult = | { ok: true;
-  value: MfDeckArchiveV1;
-  issues: MfDeckIssue[];
-}
-  | {
-    ok: false;
-    issues: MfDeckIssue[];
-  };
 
 const MF_DECK_MANIFEST_PATH = "manifest.json" as const;
 const MF_DECK_CARDS_PATH = "cards.json" as const;

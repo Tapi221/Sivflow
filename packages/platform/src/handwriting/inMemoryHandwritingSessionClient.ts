@@ -12,6 +12,9 @@ type InMemoryHandwritingSessionClientOptions = {
 const createHub = (): InMemoryHandwritingSessionHub => ({
   clients: new Set(),
 });
+
+const createInMemoryHandwritingSessionHub = createHub;
+
 class InMemoryHandwritingSessionClient implements HandwritingSessionClient { readonly session: HandwritingSession;
 
   private readonly hub: InMemoryHandwritingSessionHub;
@@ -81,9 +84,6 @@ class InMemoryHandwritingSessionClient implements HandwritingSessionClient { rea
     }
   }
 }
-
-const createInMemoryHandwritingSessionHub = createHub;
-
 const createInMemoryHandwritingSessionClientPair = (session: HandwritingSession): readonly [InMemoryHandwritingSessionClient, InMemoryHandwritingSessionClient] => { const hub = createHub();
   return [new InMemoryHandwritingSessionClient({ session, hub }), new InMemoryHandwritingSessionClient({ session, hub })];
 };
