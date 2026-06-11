@@ -1,15 +1,11 @@
 import { useEffect } from "react";
 import type { CardSyncStatus } from "./cardSyncStatus";
 
-
-
 type UseCardSyncStatusReporterOptions = Readonly<{
   status: CardSyncStatus;
   onSyncStatusChange?: ((status: CardSyncStatus | null) => void) | null;
   isEnabled?: boolean;
 }>;
-
-
 
 const useCardSyncStatusReporter = ({ status, onSyncStatusChange = null, isEnabled = true }: UseCardSyncStatusReporterOptions): void => {
   useEffect(() => {
@@ -36,7 +32,5 @@ const useCardSyncStatusReporter = ({ status, onSyncStatusChange = null, isEnable
     return () => onSyncStatusChange(null);
   }, [onSyncStatusChange]);
 };
-
-
 
 export { useCardSyncStatusReporter };

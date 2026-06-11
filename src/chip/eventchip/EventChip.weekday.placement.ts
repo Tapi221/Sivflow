@@ -6,8 +6,6 @@ type LayoutResult = { left: number;
   width: number;
 };
 
-
-
 const compareLayoutEvents = (a: LayoutEvent, b: LayoutEvent): number => {
   const startDiff = a.startMinutes - b.startMinutes;
 
@@ -107,9 +105,5 @@ const toLayoutEvent = (id: string, startsAt: Date, minutes: number, minimumDurat
   };
 };
 
-
-
 export { computeEventLayout, toLayoutEvent };
-
-
 export type { LayoutEvent, LayoutResult };
