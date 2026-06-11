@@ -1,11 +1,5 @@
 const MF_CARD_FILE_EXTENSION = ".mfcard";
 
-
-
-
-
-
-
 export const stripMfCardExtension = (value: string) => { return value.replace(/\.mfcard$/iu, "").trim();
 };
 

@@ -24,19 +24,7 @@ import { Button } from './button';
 
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem, } from './inline-combobox';
 
-
-
-
-
-
-
 const NUMERIC_FOOTNOTE_QUERY = /^\d+$/;
-
-
-
-
-
-
 
 const getNavigationAttributes = (
   attributes: PlateElementProps<TFootnoteElement>['attributes'],
@@ -88,12 +76,6 @@ const getReferenceContextLabel = (
     ? `${normalized.slice(0, 53).trimEnd()}...`
     : normalized;
 };
-
-
-
-
-
-
 
 export function FootnoteReferenceElement( props: PlateElementProps<TFootnoteElement> ) { const { editor, element } = props;
   const identifier = element.identifier ?? '';

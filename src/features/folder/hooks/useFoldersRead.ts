@@ -4,12 +4,6 @@ import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import { getLocalDb } from "@/services/localDB";
 import type { Folder } from "@/types";
 
-
-
-
-
-
-
 const isDatabaseClosedError = (error: unknown) => {
   if (!error || typeof error !== "object") {
     return false;

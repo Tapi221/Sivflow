@@ -8,12 +8,6 @@ import { CheckIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
-
-
-
-
-
-
 const config: Record<
   string,
   {
@@ -26,12 +20,6 @@ const config: Record<
     Marker: TodoMarkerStatic,
   },
 };
-
-
-
-
-
-
 
 export const BlockListStatic: RenderStaticNodeWrapper = (props) => { if (!props.element.listStyleType) return;
   if (!isOrderedList(props.element)) return;

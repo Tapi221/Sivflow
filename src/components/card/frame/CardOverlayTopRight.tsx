@@ -1,19 +1,7 @@
 import React from "react";
 
-
-
-
-
-
-
 export type CardOverlayTopRightProps = Readonly<{ children?: React.ReactNode;
 }>;
-
-
-
-
-
-
 
 export const CardOverlayTopRight = ({ children }: CardOverlayTopRightProps) => { if (!children) return null;
 

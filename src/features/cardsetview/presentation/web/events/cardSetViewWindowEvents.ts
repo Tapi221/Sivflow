@@ -1,10 +1,5 @@
 import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewEvents.constants";
 
-
-
-
-
-
 export type CardSetViewEditingDraftPatch = { cardId: string;
   patch: {
     title?: string;
@@ -22,12 +17,6 @@ export type CardSetViewWindowEventMap = { [CARD_SET_VIEW_EVENTS.editingChange]: 
 };
 
 type CardSetViewWindowEventName = keyof CardSetViewWindowEventMap;
-
-
-
-
-
-
 
 export const dispatchCardSetViewWindowEvent = < TEventName extends CardSetViewWindowEventName, >( eventName: TEventName, detail: CardSetViewWindowEventMap[TEventName], ) => { if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(eventName, { detail }));

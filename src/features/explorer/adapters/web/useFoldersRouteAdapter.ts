@@ -5,12 +5,6 @@ import { mapSearchParamsToExplorerRouteState } from "@/features/explorer/mappers
 import { getLastSelectedFolderId, setLastSelectedFolderId } from "./explorerStorage";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 
-
-
-
-
-
-
 export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 
 export type FoldersRouteAdapter = { routeKey: string;
@@ -21,12 +15,6 @@ export type FoldersRouteAdapter = { routeKey: string;
 
   getBaseSearchParams: () => URLSearchParams;
 };
-
-
-
-
-
-
 
 const isLibraryPath = (pathname: string): boolean =>
   pathname.toLowerCase() === "/library" ||

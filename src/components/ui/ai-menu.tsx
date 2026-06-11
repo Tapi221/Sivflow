@@ -30,12 +30,6 @@ import { commentPlugin } from '@/components/editor/plugins/comment-kit';
 
 import { cn } from '@/lib/utils';
 
-
-
-
-
-
-
 type EditorChatState =
   | 'cursorCommand'
   | 'cursorSuggestion'
@@ -71,12 +65,6 @@ type AIMenuItemsProps = {
   setInput: (value: string) => void;
   setValue: (value: string) => void;
 };
-
-
-
-
-
-
 
 const AI_COMMENT_ICON = (
   <svg
@@ -356,12 +344,6 @@ const MENU_STATE_ITEMS: Record<EditorChatState, MenuStateGroup[]> = {
     },
   ],
 };
-
-
-
-
-
-
 
 const AIMenu = () => {
   const { api, editor } = useEditorPlugin(AIChatPlugin);
@@ -701,11 +683,5 @@ const AILoadingBar = () => {
 
   return null;
 };
-
-
-
-
-
-
 
 export { AILoadingBar, AIMenu, AIMenuItems };

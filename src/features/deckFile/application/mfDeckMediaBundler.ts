@@ -2,12 +2,6 @@ import { buildMfDeckMediaManifest, buildMfDeckMediaPath, inferMfDeckMediaExtensi
 import type { MfDeckIssue, MfDeckMediaEntryV1, MfDeckMediaManifestV1 } from "@/features/deckFile/domain/mfDeck.types";
 import type { CardBlock } from "@/types";
 
-
-
-
-
-
-
 export type MfDeckMediaBundle = { media: Record<string, Uint8Array>;
   mediaManifest?: MfDeckMediaManifestV1;
   issues: MfDeckIssue[];
@@ -28,12 +22,6 @@ type BundleMediaInCardsParams<
 > = {
   cards: TCard[];
 };
-
-
-
-
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);

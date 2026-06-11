@@ -7,12 +7,6 @@ import { getCachedRemoteUrl, getPreloadCacheStats, isUrlDecoded, markUrlDecoded,
 import { getLocalDb } from "@/services/localDB";
 import type { Card, UploadedImage } from "@/types/domain/card";
 
-
-
-
-
-
-
 type IdleHandle = ReturnType<typeof setTimeout>;
 
 type RequestIdleCallback = (
@@ -28,12 +22,6 @@ type CardCatalogEntry = {
   hasImages: boolean;
 };
 
-
-
-
-
-
-
 const CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY = "sivflow_preload_debug";
 
 const CARD_IMAGE_PRELOAD = {
@@ -42,12 +30,6 @@ const CARD_IMAGE_PRELOAD = {
   idleExtra: 12,
   maxEagerConcurrent: 5,
 } as const;
-
-
-
-
-
-
 
 const isDebug = (): boolean =>
   typeof localStorage !== "undefined" &&
@@ -500,11 +482,5 @@ const useCardImagePreloader = (
 
   return readySet;
 };
-
-
-
-
-
-
 
 export { cardHasImages, useCardImagePreloader };

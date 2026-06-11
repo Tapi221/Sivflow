@@ -1,12 +1,6 @@
 import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
-
-
-
-
-
-
 export type AnimatedCheckboxShape = "circle" | "square";
 export type AnimatedCheckboxVariant = "filled" | "soft" | "outline" | "radio";
 
@@ -20,19 +14,7 @@ export type AnimatedCheckboxBaseProps = { checked: boolean;
   borderWidth?: number;
 };
 
-
-
-
-
-
-
 const DEFAULT_CHECKBOX_STROKE_WIDTH = 1.4;
-
-
-
-
-
-
 
 const AnimatedCheckboxBase = ({
   checked,
@@ -142,11 +124,5 @@ const AnimatedCheckboxBase = ({
     </span>
   );
 };
-
-
-
-
-
-
 
 export { AnimatedCheckboxBase };

@@ -10,12 +10,6 @@ import { BlockList } from '@/components/ui/block-list';
 
 import { IndentKit } from './indent-kit';
 
-
-
-
-
-
-
 const ListKit = [
   ...IndentKit,
   ListPlugin.configure({
@@ -58,11 +52,5 @@ const ListKit = [
     },
   }),
 ];
-
-
-
-
-
-
 
 export { ListKit };

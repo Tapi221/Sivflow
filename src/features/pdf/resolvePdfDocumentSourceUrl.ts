@@ -1,18 +1,6 @@
 import type { DocumentItem } from "@/types";
 
-
-
-
-
-
-
 type PdfDocumentSourceFields = Pick<DocumentItem, "blobUrl" | "downloadUrl" | "googleDriveWebContentLink" | "googleDriveWebViewLink" | "localUrl" | "remoteUrl">;
-
-
-
-
-
-
 
 const isGoogleDriveViewUrl = (url: string): boolean => {
   try {
@@ -48,11 +36,5 @@ const resolvePdfDocumentSourceUrl = (document: PdfDocumentSourceFields): string 
 
   return null;
 };
-
-
-
-
-
-
 
 export { resolvePdfDocumentSourceUrl };

@@ -1,11 +1,5 @@
 import type { TextStreamPart, ToolSet } from 'ai';
 
-
-
-
-
-
-
 const DEFAULT_DELAY_IN_MS = 10;
 
 const NEST_BLOCK_DELAY_IN_MS = 100;

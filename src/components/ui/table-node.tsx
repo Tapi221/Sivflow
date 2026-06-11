@@ -36,12 +36,6 @@ import { BorderAllIcon, BorderBottomIcon, BorderLeftIcon, BorderNoneIcon, Border
 
 import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarMenuGroup, } from './toolbar';
 
-
-
-
-
-
-
 type TableResizeDirection = 'bottom' | 'left' | 'right';
 
 type TableResizeStartOptions = {
@@ -73,12 +67,6 @@ type TableResizeContextValue = {
   ) => void;
 };
 
-
-
-
-
-
-
 const TABLE_CONTROL_COLUMN_WIDTH = 8;
 
 const TABLE_DEFAULT_COLUMN_WIDTH = 120;
@@ -90,12 +78,6 @@ const TABLE_MULTI_SELECTION_TOOLBAR_DELAY_MS = 150;
 const TableResizeContext = React.createContext<TableResizeContextValue | null>(
   null
 );
-
-
-
-
-
-
 
 function useTableResizeContext() {
   const context = React.useContext(TableResizeContext);
@@ -576,12 +558,6 @@ function useTableCellPresentation(element: TTableCellElement) {
     width,
   };
 }
-
-
-
-
-
-
 
 export const TableElement = withHOC( TableProvider, function TableElement({ children, ...props }: PlateElementProps<TTableElement>) { const readOnly = useReadOnly();
     const isSelectionAreaVisible = usePluginOption(
@@ -1296,12 +1272,6 @@ export function TableCellElement({ isHeader, ...props }: PlateElementProps<TTabl
 
 export function TableCellHeaderElement( props: React.ComponentProps<typeof TableCellElement> ) { return <TableCellElement {...props} isHeader />;
 }
-
-
-
-
-
-
 
 const TableCellResizeControls = React.memo(function TableCellResizeControls({
   colIndex,

@@ -3,12 +3,6 @@ import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import { cn } from "@/lib/utils";
 import { Circle } from "@/ui/icons";
 
-
-
-
-
-
-
 const RadioGroup = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
@@ -41,12 +35,6 @@ const RadioGroupItem = React.forwardRef<
     </RadioGroupPrimitive.Item>
   );
 });
-
-
-
-
-
-
 
 RadioGroup.displayName = RadioGroupPrimitive.Root.displayName;
 RadioGroupItem.displayName = RadioGroupPrimitive.Item.displayName;

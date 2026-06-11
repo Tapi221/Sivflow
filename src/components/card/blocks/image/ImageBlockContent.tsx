@@ -3,12 +3,6 @@ import MediaUploader from "@/components/card/media/MediaUploader";
 import type { ImageGalleryItem } from "@/components/card/media/types";
 import type { UploadedImage } from "@/types/domain/assets";
 
-
-
-
-
-
-
 type ImageBlockContentProps =
   | {
     mode: "view";
@@ -29,12 +23,6 @@ type ImageBlockContentProps =
     displayMode?: "fixed" | "fluid";
     zoom?: number;
   };
-
-
-
-
-
-
 
 export const ImageBlockContent = (props: ImageBlockContentProps) => { if (props.mode === "view") { return ( <ImageGallery urls={props.urls} items={props.items} onFullscreenChange={props.onFullscreenChange} displayMode={props.displayMode} zoom={props.zoom} /> );
   }

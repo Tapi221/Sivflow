@@ -1,11 +1,5 @@
 import type { SetStateAction } from "react";
 
-
-
-
-
-
-
 const ignoreMetaPanelStateUpdate = (_value: SetStateAction<boolean>) => {
   void _value;
 };

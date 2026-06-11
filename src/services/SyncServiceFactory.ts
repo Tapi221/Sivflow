@@ -9,23 +9,11 @@ import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from
 import type { LocalDBLike } from "./localDB";
 import { SyncServiceV2 } from "./SyncServiceV2";
 
-
-
-
-
-
-
 type SyncServiceInternals = {
   cloudAdapter: ICloudSyncAdapter;
   localDB: LocalDBLike;
   userId: string;
 };
-
-
-
-
-
-
 
 const isProjectMapChange = (change: SyncChange): boolean => change.type === "projectMap";
 

@@ -7,12 +7,6 @@ const PRIVATE_IPV4_PATTERNS = [
   /^192\.168\.\d{1,3}\.\d{1,3}$/,
 ];
 
-
-
-
-
-
-
 export const isLocalHost = (hostname: string): boolean => hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "[::1]";
 
 export const isPrivateNetworkHost = (hostname: string): boolean => PRIVATE_IPV4_PATTERNS.some((pattern) => pattern.test(hostname));

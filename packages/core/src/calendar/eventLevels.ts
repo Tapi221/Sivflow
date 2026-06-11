@@ -1,12 +1,6 @@
 import { addDays, differenceInCalendarDays, isSameDay, max, min, startOfDay } from "date-fns";
 import type { CalendarEvent } from "./calendarEvent.types";
 
-
-
-
-
-
-
 export type CalendarEventSegment = { event: CalendarEvent;
   span: number;
   left: number;
@@ -19,19 +13,7 @@ export type CalendarEventLevelsResult = { levels: CalendarEventSegment[][];
   extra: CalendarEventSegment[];
 };
 
-
-
-
-
-
-
 const DAY_STEP = 1;
-
-
-
-
-
-
 
 const findDateIndex = (range: readonly Date[], target: Date): number =>
   range.findIndex((date) => isSameDay(date, target));

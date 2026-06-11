@@ -3,12 +3,6 @@ import type { GCalConnectionStatus, GoogleCalendarEvent, GoogleCalendarListItem 
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 import type { CalendarViewMode, CalendarViewModeSelection } from "./calendar.types";
 
-
-
-
-
-
-
 export type { CalendarViewMode, CalendarViewModeSelection };
 
 export type CalendarProvider = "local" | "google" | "appleEventKit" | "appleCalDav";

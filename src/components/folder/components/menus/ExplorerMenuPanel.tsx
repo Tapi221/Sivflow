@@ -4,12 +4,6 @@ import { floatingPanelPresets } from "@/components/ui/menu-styles";
 import type { MenuAction } from "./menuActions";
 import { cn } from "@/lib/utils";
 
-
-
-
-
-
-
 export type ExplorerMenuPanelVariant = "default" | "create" | "folderContext";
 
 interface ExplorerMenuPanelProps extends React.ComponentPropsWithoutRef<
@@ -19,12 +13,6 @@ interface ExplorerMenuPanelProps extends React.ComponentPropsWithoutRef<
   closeMenu?: () => void;
   variant?: ExplorerMenuPanelVariant;
 }
-
-
-
-
-
-
 
 const DANGER_ITEM_CLASS =
   "ds-floating-panel__row--danger ds-menu__item--danger";

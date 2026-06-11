@@ -2,12 +2,6 @@
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useState } from "react";
 
-
-
-
-
-
-
 export interface Toast { id: string;
   type: "success" | "error" | "warning" | "info";
   message: string;
@@ -24,19 +18,7 @@ interface ToastContextType {
   info: (message: string) => void;
 }
 
-
-
-
-
-
-
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
-
-
-
-
-
-
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => { const [toasts, setToasts] = useState<Toast[]>([]);
 
@@ -98,8 +80,6 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => { const 
     </ToastContext.Provider>
   );
 };
-
-
 
 export const useToast = () => { const context = useContext(ToastContext);
   if (!context) {

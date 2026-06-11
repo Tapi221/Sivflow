@@ -4,12 +4,6 @@ import { BlockList } from "@/components/card/blocks/core/BlockList";
 import { CardBlockLayoutRenderer, type EditorProps, type ViewerProps } from "./CardBlockLayoutRenderer";
 import type { CardBlock } from "@/types/domain/card";
 
-
-
-
-
-
-
 type RowContainerProps = Readonly<Record<string, unknown>>;
 
 type GetRowRef = (
@@ -45,12 +39,6 @@ type CardBlocksSceneProps = SharedSceneProps &
     ) => CardBlocksSceneResolvedProps;
   }>;
 
-
-
-
-
-
-
 const CardBlocksSceneInner = ({
   blocks,
   getRowRef,
@@ -78,17 +66,10 @@ const CardBlocksSceneInner = ({
   );
 };
 
-
-
-
-
-
-
 const CardBlocksScene = React.memo(CardBlocksSceneInner);
 
 CardBlocksScene.displayName = "CardBlocksScene";
 
 export { CardBlocksScene };
-
 
 export type { CardBlocksSceneProps, CardBlocksSceneResolvedProps };

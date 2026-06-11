@@ -17,12 +17,6 @@ import type { CalendarEventDragPointerSnapshot } from "./calendarEventDrag.share
 import * as COLOR from "./grid.color.constants.desktop";
 import * as GD from "./grid.layout.constants.desktop";
 
-
-
-
-
-
-
 type CalendarMonthGridDay = { date: Date; key: string; dayOfMonth: number; isCurrentMonth: boolean };
 
 type CalendarMonthGridWeek = { key: string; days: CalendarMonthGridDay[] };
@@ -88,22 +82,10 @@ type CalendarMonthWeekRowProps = {
   onMoveCalendarEvent?: CalendarEventMoveHandler;
 };
 
-
-
-
-
-
-
 const MONTH_GRID_BORDER_STYLE: CSSProperties = { borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB };
 const DEFAULT_MONTH_TIMED_EVENT_DURATION_MS = 30 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CALENDAR_EVENT_DRAG_FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
-
-
-
-
-
-
 
 const getCanUseCalendarEventDragPointer = (): boolean => {
   if (typeof window === "undefined") return false;
@@ -221,12 +203,6 @@ const createMonthEventRenderItems = (visibleEvents: GoogleCalendarEvent[], dayKe
   return didReplaceSource ? replacedItems : visibleItems;
 };
 
-
-
-
-
-
-
 const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScrollHovered, hasLeadingBorder, dragState, dragPreviewEvent, dragPreviewDayKey, showEventTimeLabel, setDayCellRef, onSelectDate, onEventClick, onEventPointerDown, onMoveCalendarEvent }: CalendarMonthDayCellProps) => {
   const monthAnnotation = getMonthAnnotation(day.date);
   const { visibleEvents, totalCount } = dayEvents;
@@ -296,8 +272,6 @@ const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDay
 });
 
 CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
-
-
 
 const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEvents, monthWeeks, monthRowHeight, maxVisibleEventCount, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, showEventTimeLabel = true, monthScrollContainerRef, onSelectDate, onMoveCalendarEvent }: GridCalendarMonthDesktopProps) => {
   const dayCellRefs = useRef(new Map<string, HTMLDivElement>());
@@ -471,12 +445,6 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEv
     </>
   );
 };
-
-
-
-
-
-
 
 GridCalendarMonthDesktop.displayName = "GridCalendarMonthDesktop";
 

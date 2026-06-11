@@ -6,21 +6,9 @@ import { chunkCloudSyncChangesBySize } from "@/application/usecases/cloudSyncBat
 import { getChangeId, getChangeParts, sanitizeSyncDataForCloud } from "@/application/usecases/cloudSyncShared";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
 
-
-
-
-
-
-
 type SyncChangeWithOperation = SyncChange & {
   operationType?: unknown;
 };
-
-
-
-
-
-
 
 const cloudUpdatedAt = (): FieldValue | Timestamp => {
   const fn = (Firestore as Record<string, unknown>).serverTimestamp;

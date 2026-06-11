@@ -2,15 +2,7 @@ import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
-
-
-
-
-
-
 const NEW_SENTINEL = "__new__" as const;
-
-
 
 export type EditorDraft = { title: string;
   tags: string[];
@@ -21,12 +13,6 @@ export type EditorDraft = { title: string;
   backAttachments: CardFaceAttachments;
   layoutRows: number;
 };
-
-
-
-
-
-
 
 export const makeEmptyCardFaceAttachments = (): CardFaceAttachments => ({ images: [], audios: [], references: [], });
 

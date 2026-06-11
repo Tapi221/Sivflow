@@ -1,18 +1,6 @@
 import type { CalendarWeekStartDay } from "./calendar.types";
 
-
-
-
-
-
-
 type CalendarWeekStartsOn = 0 | 1;
-
-
-
-
-
-
 
 export const getCalendarWeekStartsOn = (weekStartDay: CalendarWeekStartDay): CalendarWeekStartsOn => weekStartDay === "sunday" ? 0 : 1;
 

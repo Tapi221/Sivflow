@@ -10,22 +10,10 @@ import { EditorKit } from './editor-kit';
 
 import { SettingsDialog } from './settings-dialog';
 
-
-
-
-
-
-
 type PlateEditorProps = {
   initialValue: Value;
   onChange: (change: unknown) => void;
 };
-
-
-
-
-
-
 
 const PlateEditor = ({ initialValue, onChange }: PlateEditorProps) => {
   const editor = usePlateEditor({
@@ -43,11 +31,5 @@ const PlateEditor = ({ initialValue, onChange }: PlateEditorProps) => {
     </Plate>
   );
 };
-
-
-
-
-
-
 
 export { PlateEditor };

@@ -22,19 +22,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, } from './tooltip';
 
 import { cn } from '@/lib/utils';
 
-
-
-
-
-
-
 const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];
-
-
-
-
-
-
 
 const createDragPreviewElements = (
   editor: PlateEditor,
@@ -192,12 +180,6 @@ const calcDragButtonTop = (editor: PlateEditor, element: TElement): number => {
 
   return currentMarginTop;
 };
-
-
-
-
-
-
 
 export const BlockDraggable: RenderNodeWrapper = (props) => { const { editor, element, path } = props;
 
@@ -390,12 +372,6 @@ function Gutter({
     </div>
   );
 }
-
-
-
-
-
-
 
 const DragHandle = React.memo(function DragHandle({
   isDragging,

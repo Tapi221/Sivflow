@@ -1,22 +1,10 @@
 import { INK_PAPER_H, INK_PAPER_W, type InkPoint } from "@core/domain/card/ink/inkDocument";
 
-
-
-
-
-
-
 export type RectLike = { left: number;
   top: number;
   width: number;
   height: number;
 };
-
-
-
-
-
-
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));

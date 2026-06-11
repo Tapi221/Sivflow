@@ -20,12 +20,6 @@ import { inlineSuggestionVariants } from '@/lib/suggestion';
 
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem, } from './inline-combobox';
 
-
-
-
-
-
-
 const onSelectItem = getMentionOnSelectItem();
 
 const MENTIONABLES = [
@@ -104,12 +98,6 @@ const MENTIONABLES = [
   { key: '48', text: 'Brendol Hux' },
   { key: '49', text: 'BT-1' },
 ];
-
-
-
-
-
-
 
 export function MentionElement( props: PlateElementProps<TMentionElement> & { prefix?: string;
   }

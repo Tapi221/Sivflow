@@ -4,29 +4,11 @@ import { useLocation } from "react-router-dom";
 
 import { useWorkspaceTabsStore } from "./useTabsStore";
 
-
-
-
-
-
-
 type UseWorkspaceTabsRouteSyncOptions = {
   enabled?: boolean;
 };
 
-
-
-
-
-
-
 const SETTINGS_ROUTE_TAB_ID = "route:settings" as const;
-
-
-
-
-
-
 
 const closeSettingsTabIfNeeded = (pathname: string) => {
   if (pathname === "/settings") return;

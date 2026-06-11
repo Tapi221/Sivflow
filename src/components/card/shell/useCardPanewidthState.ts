@@ -1,11 +1,6 @@
 import { type DependencyList, useCallback, useEffect, useRef, useState } from "react";
 import { type CardPaneMode, clampPaneWidthPx } from "@/components/card/frame/cardPane.constants";
 
-
-
-
-
-
 type PaneWidthMap<T> = {
   view: T;
   edit: T;
@@ -38,19 +33,7 @@ interface UseCardPaneWidthStateOptions {
   onPersist?: (mode: CardPaneMode, widthPx: number) => void;
 }
 
-
-
-
-
-
-
 const DEFAULT_INITIAL_VIEWPORT_WIDTH_PX = 1024;
-
-
-
-
-
-
 
 const defaultMeasureViewportWidth = (element: HTMLDivElement) =>
   Math.max(0, Math.round(element.clientWidth));

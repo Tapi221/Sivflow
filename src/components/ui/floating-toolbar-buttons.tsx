@@ -26,12 +26,6 @@ import { ToolbarGroup } from './toolbar';
 
 import { TurnIntoToolbarButton } from './turn-into-toolbar-button';
 
-
-
-
-
-
-
 export const FloatingToolbarButtons = () => { const readOnly = useEditorReadOnly();
 
   return (
