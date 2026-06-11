@@ -2,6 +2,8 @@ import { createCheckDataIntegrityUseCase } from "./CheckDataIntegrity";
 import { getLocalDb } from "@/infrastructure/persistence/indexeddb";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
+
+
 const createQuarantineOrphanedCardsUseCase = () => { const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
 
   const execute = async (): Promise<number> => {
@@ -35,5 +37,7 @@ const createQuarantineOrphanedCardsUseCase = () => { const checkDataIntegrityUse
     execute,
   };
 };
+
+
 
 export { createQuarantineOrphanedCardsUseCase };

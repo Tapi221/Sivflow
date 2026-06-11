@@ -4,6 +4,8 @@ import { getMarkdown } from "@platejs/ai";
 import dedent from "dedent";
 import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction } from "@/app/api/ai/command/utils";
 
+
+
 const buildEditTableMultiCellPrompt = (editor: SlateEditor, messages: ChatMessage[]): string => { const tableCellMarkdown = getMarkdown(editor, { type: "tableCellWithId" });
 
   return buildStructuredPrompt({
@@ -98,5 +100,7 @@ const buildEditTableMultiCellPrompt = (editor: SlateEditor, messages: ChatMessag
     `,
   });
 };
+
+
 
 export { buildEditTableMultiCellPrompt };

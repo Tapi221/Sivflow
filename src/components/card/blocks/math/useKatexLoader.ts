@@ -1,8 +1,12 @@
 import { useEffect } from "react";
 
+
+
 type WindowWithKatex = Window & {
   katex?: unknown;
 };
+
+
 
 const useKatexLoader = () => { useEffect(() => { if ((window as WindowWithKatex).katex) return;
 
@@ -24,5 +28,7 @@ const useKatexLoader = () => { useEffect(() => { if ((window as WindowWithKatex)
     };
   }, []);
 };
+
+
 
 export { useKatexLoader };
