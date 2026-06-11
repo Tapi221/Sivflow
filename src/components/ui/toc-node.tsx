@@ -5,7 +5,9 @@ import * as React from 'react';
 import type { PlateElementProps } from 'platejs/react';
 
 import { useTocElement, useTocElementState } from '@platejs/toc/react';
+
 import { cva } from 'class-variance-authority';
+
 import { PlateElement } from 'platejs/react';
 
 import { Button } from './button';

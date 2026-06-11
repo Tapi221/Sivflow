@@ -1,8 +1,11 @@
 'use client';
 
 import { PreviewImage, useImagePreview, useImagePreviewValue, useScaleInput, } from '@platejs/media/react';
+
 import { cva } from 'class-variance-authority';
+
 import { ArrowLeft, ArrowRight, Download, Minus, Plus, X } from 'lucide-react';
+
 import { useEditorRef } from 'platejs/react';
 
 import { cn } from '@/lib/utils';
@@ -20,7 +23,19 @@ const buttonVariants = cva('rounded bg-[rgba(0,0,0,0.5)] px-1', {
 });
 
 const SCROLL_SPEED = 4;
+
 const DEFAULT_DOWNLOAD_FILENAME = 'image';
+
+function getImageDownloadFilename(url: string) {
+  try {
+    const pathname = new URL(url, window.location.href).pathname;
+    const filename = pathname.split('/').filter(Boolean).pop();
+
+    return filename || DEFAULT_DOWNLOAD_FILENAME;
+  } catch {
+    return DEFAULT_DOWNLOAD_FILENAME;
+  }
+}
 
 export function MediaPreviewDialog() { const editor = useEditorRef();
   const isOpen = useImagePreviewValue('isOpen', editor.id);
@@ -165,15 +180,4 @@ function ScaleInput(props: React.ComponentProps<'input'>) {
   const { props: scaleInputProps, ref } = useScaleInput();
 
   return <input {...scaleInputProps} {...props} ref={ref} />;
-}
-
-function getImageDownloadFilename(url: string) {
-  try {
-    const pathname = new URL(url, window.location.href).pathname;
-    const filename = pathname.split('/').filter(Boolean).pop();
-
-    return filename || DEFAULT_DOWNLOAD_FILENAME;
-  } catch {
-    return DEFAULT_DOWNLOAD_FILENAME;
-  }
 }

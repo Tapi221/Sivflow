@@ -3,12 +3,17 @@
 import * as React from 'react';
 
 import type { TResolvedSuggestion } from '@platejs/suggestion';
+
 import type { PlateEditor } from 'platejs/react';
 
 import { CommentPlugin } from '@platejs/comment/react';
+
 import { getSuggestionKey, keyId2SuggestionId } from '@platejs/suggestion';
+
 import { SuggestionPlugin } from '@platejs/suggestion/react';
+
 import { type NodeEntry, NodeApi, type Path, type TCommentText, type TElement, type TSuggestionText, ElementApi, KEYS, PathApi, TextApi, } from 'platejs';
+
 import { useEditorRef, useEditorVersion, usePluginOption } from 'platejs/react';
 
 import { type TDiscussion, discussionPlugin, } from '@/components/editor/plugins/discussion-kit';
@@ -18,11 +23,10 @@ import type { TComment } from '@/components/comment';
 export interface ResolvedSuggestion extends TResolvedSuggestion { comments: TComment[];
 }
 
-export const BLOCK_SUGGESTION_TOKEN = '__block__';
-
 type BlockDiscussionEntry = NodeEntry<
   TCommentText | TElement | TSuggestionText
 >;
+
 type SuggestionEntry = NodeEntry<TElement | TSuggestionText>;
 
 type BlockDiscussionIndex = {
@@ -54,6 +58,8 @@ type BuildBlockDiscussionIndexOptions = {
   getSuggestionId: (node: TElement | TSuggestionText) => string | undefined;
   isBlockSuggestion: (node: TElement | TSuggestionText) => boolean;
 };
+
+export const BLOCK_SUGGESTION_TOKEN = '__block__';
 
 const discussionIndexCache = new WeakMap<
   PlateEditor,

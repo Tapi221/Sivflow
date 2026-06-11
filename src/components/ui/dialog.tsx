@@ -1,5 +1,7 @@
 import * as React from "react"
+
 import * as DialogPrimitive from "@radix-ui/react-dialog"
+
 import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -25,7 +27,6 @@ const DialogOverlay = React.forwardRef<
     {...props}
   />
 ))
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
@@ -49,7 +50,6 @@ const DialogContent = React.forwardRef<
     </DialogPrimitive.Content>
   </DialogPortal>
 ))
-DialogContent.displayName = DialogPrimitive.Content.displayName
 
 const DialogHeader = ({
   className,
@@ -63,7 +63,6 @@ const DialogHeader = ({
     {...props}
   />
 )
-DialogHeader.displayName = "DialogHeader"
 
 const DialogFooter = ({
   className,
@@ -77,7 +76,6 @@ const DialogFooter = ({
     {...props}
   />
 )
-DialogFooter.displayName = "DialogFooter"
 
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
@@ -92,7 +90,6 @@ const DialogTitle = React.forwardRef<
     {...props}
   />
 ))
-DialogTitle.displayName = DialogPrimitive.Title.displayName
 
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
@@ -104,6 +101,17 @@ const DialogDescription = React.forwardRef<
     {...props}
   />
 ))
+
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
+
+DialogContent.displayName = DialogPrimitive.Content.displayName
+
+DialogHeader.displayName = "DialogHeader"
+
+DialogFooter.displayName = "DialogFooter"
+
+DialogTitle.displayName = DialogPrimitive.Title.displayName
+
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
 export {

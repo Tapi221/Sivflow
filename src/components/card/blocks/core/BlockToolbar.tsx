@@ -1,11 +1,19 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+
 import { createPortal } from "react-dom";
+
 import { overlayGlassActionButtonClassName, overlayGlassPillClassName, overlayGlassToolbarClassName } from "@/components/card/shell/overlaySurfaceClassNames";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
 import type { IconProps } from "@/ui/icons";
+
 import { Plus } from "@/ui/icons";
+
 import { type EditorBlockIconName, type EditorBlockType, getEditorBlockDefinition, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
+
 import { cn } from "@/lib/utils";
+
 import type { CardBlock } from "@/types/domain/card";
 
 interface BlockToolbarProps {
@@ -24,6 +32,17 @@ type ToolbarBlockConfig = {
   isVisible: boolean;
   orderIndex: number;
 };
+
+const areBlockToolbarPropsEqual = (
+  prev: BlockToolbarProps,
+  next: BlockToolbarProps,
+) =>
+  prev.label === next.label &&
+  prev.onAddBlock === next.onAddBlock &&
+  prev.settings === next.settings &&
+  prev.hiddenBlockTypes === next.hiddenBlockTypes &&
+  prev.desktopLayout === next.desktopLayout &&
+  prev.className === next.className;
 
 const TextBlockGlyph = ({
   size = 16,
@@ -600,16 +619,6 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
   return renderToolbarShell();
 };
 
-const areBlockToolbarPropsEqual = (
-  prev: BlockToolbarProps,
-  next: BlockToolbarProps,
-) =>
-  prev.label === next.label &&
-  prev.onAddBlock === next.onAddBlock &&
-  prev.settings === next.settings &&
-  prev.hiddenBlockTypes === next.hiddenBlockTypes &&
-  prev.desktopLayout === next.desktopLayout &&
-  prev.className === next.className;
-
 export const BlockToolbar = React.memo( BlockToolbarInner, areBlockToolbarPropsEqual, );
+
 BlockToolbar.displayName = "BlockToolbar";

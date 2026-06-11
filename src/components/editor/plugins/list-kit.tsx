@@ -1,7 +1,9 @@
 'use client';
 
 import { BulletedListRules, isOrderedList, OrderedListRules, TaskListRules } from '@platejs/list';
+
 import { ListPlugin } from '@platejs/list/react';
+
 import { KEYS } from 'platejs';
 
 import { BlockList } from '@/components/block-list';

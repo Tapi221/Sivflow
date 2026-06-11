@@ -3,8 +3,11 @@
 import * as React from 'react';
 
 import { type FloatingToolbarState, flip, offset, useFloatingToolbar, useFloatingToolbarState, } from '@platejs/floating';
+
 import { useComposedRef } from '@udecode/cn';
+
 import { KEYS } from 'platejs';
+
 import { useEditorId, useEventEditorValue, usePluginOption, } from 'platejs/react';
 
 import { cn } from '@/lib/utils';

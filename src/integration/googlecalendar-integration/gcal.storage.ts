@@ -1,22 +1,34 @@
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 const LOCAL_TOKEN_KEY = "sivflow.gcal.access_token";
+
 const LOCAL_TOKEN_EXPIRY_KEY = "sivflow.gcal.access_token_expiry";
+
 const LOCAL_REFRESH_TOKEN_KEY = "sivflow.gcal.refresh_token";
+
 const LEGACY_LOCAL_TOKEN_KEY = "flashcard-master.gcal.access_token";
+
 const LEGACY_LOCAL_TOKEN_EXPIRY_KEY = "flashcard-master.gcal.access_token_expiry";
+
 const LEGACY_LOCAL_REFRESH_TOKEN_KEY = "flashcard-master.gcal.refresh_token";
+
 const PERSIST_EMAIL_KEY = "sivflow.gcal.account_email";
+
 const PERSIST_CALENDAR_IDS_KEY = "sivflow.gcal.selected_calendar_ids";
+
 const PERSIST_WAS_CONNECTED_KEY = "sivflow.gcal.was_connected";
+
 const LEGACY_PERSIST_EMAIL_KEY = "flashcard-master.gcal.account_email";
+
 const LEGACY_PERSIST_CALENDAR_IDS_KEY = "flashcard-master.gcal.selected_calendar_ids";
+
 const LEGACY_PERSIST_WAS_CONNECTED_KEY = "flashcard-master.gcal.was_connected";
+
 const TOKEN_LIFETIME_MS = 55 * 60 * 1000;
 
-const shouldStoreLocalRefreshToken = (): boolean => isDesktopLikeRuntime();
-
 let cachedToken: string | null = null;
+
+const shouldStoreLocalRefreshToken = (): boolean => isDesktopLikeRuntime();
 
 const readMigratedStorageItem = (key: string, legacyKey: string): string | null => {
   const current = localStorage.getItem(key);

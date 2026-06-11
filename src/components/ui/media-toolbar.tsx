@@ -5,12 +5,17 @@ import * as React from 'react';
 import type { WithRequiredKey } from 'platejs';
 
 import { FloatingMedia as FloatingMediaPrimitive, FloatingMediaStore, useFloatingMediaValue, useImagePreviewValue, } from '@platejs/media/react';
+
 import { cva } from 'class-variance-authority';
+
 import { Link, Trash2Icon } from 'lucide-react';
+
 import { useEditorRef, useEditorSelector, useElement, useFocusedLast, useReadOnly, useRemoveNodeButton, useSelected, } from 'platejs/react';
 
 import { Button, buttonVariants } from './button';
+
 import { Popover, PopoverAnchor, PopoverContent, } from './popover';
+
 import { Separator } from './separator';
 
 import { CaptionButton } from './caption';

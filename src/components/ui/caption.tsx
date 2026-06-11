@@ -5,10 +5,13 @@ import * as React from 'react';
 import type { VariantProps } from 'class-variance-authority';
 
 import { Caption as CaptionPrimitive, CaptionTextarea as CaptionTextareaPrimitive, useCaptionButton, useCaptionButtonState, } from '@platejs/caption/react';
+
 import { createPrimitiveComponent } from '@udecode/cn';
+
 import { cva } from 'class-variance-authority';
 
 import { Button } from './button';
+
 import { cn } from '@/lib/utils';
 
 const captionVariants = cva('max-w-full', {

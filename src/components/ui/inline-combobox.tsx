@@ -5,9 +5,13 @@ import * as React from 'react';
 import type { PointRef, TElement } from 'platejs';
 
 import { type ComboboxItemProps, Combobox, ComboboxGroup, ComboboxGroupLabel, ComboboxItem, ComboboxPopover, ComboboxProvider, ComboboxRow, Portal, useComboboxContext, useComboboxStore, } from '@ariakit/react';
+
 import { filterWords } from '@platejs/combobox';
+
 import { type UseComboboxInputResult, useComboboxInput, useHTMLInputCursorState, } from '@platejs/combobox/react';
+
 import { cva } from 'class-variance-authority';
+
 import { useComposedRef, useEditorRef } from 'platejs/react';
 
 import { cn } from '@/lib/utils';
@@ -27,9 +31,37 @@ type InlineComboboxContextValue = {
   setHasEmpty: (hasEmpty: boolean) => void;
 };
 
+type InlineComboboxProps = {
+  children: React.ReactNode;
+  element: TElement;
+  trigger: string;
+  filter?: FilterFn | false;
+  hideWhenNoValue?: boolean;
+  showTrigger?: boolean;
+  value?: string;
+  setValue?: (value: string) => void;
+};
+
 const InlineComboboxContext = React.createContext<InlineComboboxContextValue>(
   null as unknown as InlineComboboxContextValue
 );
+
+const comboboxItemVariants = cva(
+  'relative mx-1 flex h-[28px] select-none items-center rounded-sm px-2 text-foreground text-sm outline-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  {
+    defaultVariants: {
+      interactive: true,
+    },
+    variants: {
+      interactive: {
+        false: '',
+        true: 'cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground data-[active-item=true]:bg-accent data-[active-item=true]:text-accent-foreground',
+      },
+    },
+  }
+);
+
+const InlineComboboxRow = ComboboxRow;
 
 const defaultFilter: FilterFn = (
   { group, keywords = [], label, value },
@@ -42,17 +74,6 @@ const defaultFilter: FilterFn = (
   return Array.from(uniqueTerms).some((keyword) =>
     filterWords(keyword!, search)
   );
-};
-
-type InlineComboboxProps = {
-  children: React.ReactNode;
-  element: TElement;
-  trigger: string;
-  filter?: FilterFn | false;
-  hideWhenNoValue?: boolean;
-  showTrigger?: boolean;
-  value?: string;
-  setValue?: (value: string) => void;
 };
 
 const InlineCombobox = ({
@@ -255,8 +276,6 @@ const InlineComboboxInput = ({
   );
 };
 
-InlineComboboxInput.displayName = 'InlineComboboxInput';
-
 const InlineComboboxContent: typeof ComboboxPopover = ({
   className,
   ...props
@@ -296,21 +315,6 @@ const InlineComboboxContent: typeof ComboboxPopover = ({
     </Portal>
   );
 };
-
-const comboboxItemVariants = cva(
-  'relative mx-1 flex h-[28px] select-none items-center rounded-sm px-2 text-foreground text-sm outline-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
-  {
-    defaultVariants: {
-      interactive: true,
-    },
-    variants: {
-      interactive: {
-        false: '',
-        true: 'cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground data-[active-item=true]:bg-accent data-[active-item=true]:text-accent-foreground',
-      },
-    },
-  }
-);
 
 const InlineComboboxItem = ({
   className,
@@ -383,8 +387,6 @@ const InlineComboboxEmpty = ({
   );
 };
 
-const InlineComboboxRow = ComboboxRow;
-
 function InlineComboboxGroup({
   className,
   ...props
@@ -414,5 +416,7 @@ function InlineComboboxGroupLabel({
     />
   );
 }
+
+InlineComboboxInput.displayName = 'InlineComboboxInput';
 
 export { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxGroupLabel, InlineComboboxInput, InlineComboboxItem, InlineComboboxRow, };

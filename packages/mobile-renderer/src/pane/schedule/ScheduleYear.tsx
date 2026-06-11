@@ -1,8 +1,13 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+
 import { addDays, addYears, eachMonthOfInterval, endOfYear, format, isSameDay, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
+
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+
 import type { NativeScrollEvent, NativeSyntheticEvent, ViewStyle } from "react-native";
+
 import { getCalendarDateKey, getEventDateKeys } from "@core/calendar/calendarEventRange";
+
 import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
 
 type CalendarWeekStartDay = "sunday" | "monday";
@@ -46,19 +51,129 @@ type ScheduleYearBlock = {
 };
 
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
+
 const INITIAL_YEAR_BUFFER = 1;
+
 const YEAR_EXTEND_COUNT = 1;
+
 const YEAR_MAX_RENDERED_YEARS = 5;
+
 const YEAR_SCROLL_EDGE_THRESHOLD_PX = 240;
+
 const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
+
 const MONTH_COLUMNS = 3;
+
 const MONTH_CELL_SIZE = 24;
+
 const MONTH_WEEKDAY_HEIGHT = 20;
+
 const YEAR_SECTION_GAP = 32;
+
 const DEFAULT_WEEK_START_DAY: CalendarWeekStartDay = "monday";
+
 const MINI_CALENDAR_WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"] as const;
+
 const MONTH_LABEL_FORMAT = "M月";
+
 const YEAR_LABEL_FORMAT = "yyyy年";
+
+const styles = StyleSheet.create({
+  content: {
+    gap: YEAR_SECTION_GAP,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  dayButton: {
+    alignItems: "center",
+    borderRadius: MONTH_CELL_SIZE / 2,
+    height: MONTH_CELL_SIZE,
+    justifyContent: "center",
+    width: MONTH_CELL_SIZE,
+  },
+  dayText: {
+    color: "#5f6672",
+    fontSize: 12,
+    fontWeight: "500",
+    lineHeight: 16,
+  },
+  daysGrid: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 0,
+    marginTop: 4,
+    width: MONTH_CELL_SIZE * 7,
+  },
+  monthGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginHorizontal: -16,
+  },
+  monthItem: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  monthLabel: {
+    alignSelf: "flex-start",
+    color: "#1c1c1e",
+    fontSize: 15,
+    fontWeight: "600",
+    letterSpacing: -0.15,
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+  outsideMonthDayText: {
+    color: "#b8b8bd",
+  },
+  root: {
+    backgroundColor: "rgba(255, 255, 255, 0.92)",
+    flex: 1,
+  },
+  selectedDayButton: {
+    backgroundColor: "#3478f6",
+    shadowColor: "#3478f6",
+    shadowOffset: { height: 1, width: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+  },
+  selectedDayText: {
+    color: "#ffffff",
+  },
+  todayDayText: {
+    color: "#3478f6",
+  },
+  weekdayRow: {
+    flexDirection: "row",
+    height: MONTH_WEEKDAY_HEIGHT,
+    width: MONTH_CELL_SIZE * 7,
+  },
+  weekdayText: {
+    color: "#8e8e93",
+    fontSize: 11,
+    fontWeight: "600",
+    lineHeight: MONTH_WEEKDAY_HEIGHT,
+    textAlign: "center",
+    width: MONTH_CELL_SIZE,
+  },
+  yearLabel: {
+    color: "#1c1c1e",
+    fontSize: 17,
+    fontWeight: "600",
+    letterSpacing: -0.17,
+    lineHeight: 20,
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  yearSection: {
+    backgroundColor: "#ffffff",
+    minWidth: 0,
+  },
+});
 
 const getCalendarWeekStartsOn = (weekStartDay: CalendarWeekStartDay): CalendarWeekStartsOn => weekStartDay === "sunday" ? 0 : 1;
 
@@ -290,106 +405,10 @@ const ScheduleYearComponent = ({ yearDate, selectedDate, weekStartDay = DEFAULT_
   );
 };
 
-const styles = StyleSheet.create({
-  content: {
-    gap: YEAR_SECTION_GAP,
-    paddingBottom: 20,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  dayButton: {
-    alignItems: "center",
-    borderRadius: MONTH_CELL_SIZE / 2,
-    height: MONTH_CELL_SIZE,
-    justifyContent: "center",
-    width: MONTH_CELL_SIZE,
-  },
-  dayText: {
-    color: "#5f6672",
-    fontSize: 12,
-    fontWeight: "500",
-    lineHeight: 16,
-  },
-  daysGrid: {
-    alignItems: "center",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 0,
-    marginTop: 4,
-    width: MONTH_CELL_SIZE * 7,
-  },
-  monthGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginHorizontal: -16,
-  },
-  monthItem: {
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-    paddingBottom: 12,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-  },
-  monthLabel: {
-    alignSelf: "flex-start",
-    color: "#1c1c1e",
-    fontSize: 15,
-    fontWeight: "600",
-    letterSpacing: -0.15,
-    lineHeight: 18,
-    marginBottom: 12,
-  },
-  outsideMonthDayText: {
-    color: "#b8b8bd",
-  },
-  root: {
-    backgroundColor: "rgba(255, 255, 255, 0.92)",
-    flex: 1,
-  },
-  selectedDayButton: {
-    backgroundColor: "#3478f6",
-    shadowColor: "#3478f6",
-    shadowOffset: { height: 1, width: 0 },
-    shadowOpacity: 0.25,
-    shadowRadius: 2,
-  },
-  selectedDayText: {
-    color: "#ffffff",
-  },
-  todayDayText: {
-    color: "#3478f6",
-  },
-  weekdayRow: {
-    flexDirection: "row",
-    height: MONTH_WEEKDAY_HEIGHT,
-    width: MONTH_CELL_SIZE * 7,
-  },
-  weekdayText: {
-    color: "#8e8e93",
-    fontSize: 11,
-    fontWeight: "600",
-    lineHeight: MONTH_WEEKDAY_HEIGHT,
-    textAlign: "center",
-    width: MONTH_CELL_SIZE,
-  },
-  yearLabel: {
-    color: "#1c1c1e",
-    fontSize: 17,
-    fontWeight: "600",
-    letterSpacing: -0.17,
-    lineHeight: 20,
-    marginBottom: 16,
-    paddingHorizontal: 4,
-  },
-  yearSection: {
-    backgroundColor: "#ffffff",
-    minWidth: 0,
-  },
-});
-
 const ScheduleYear = memo(ScheduleYearComponent);
 
 ScheduleYear.displayName = "ScheduleYear";
 
 export { ScheduleYear };
+
 export type { CalendarWeekStartDay, ScheduleYearProps };

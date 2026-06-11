@@ -1,7 +1,11 @@
 import React from "react";
+
 import { MarkdownBlockDisplay } from "./MarkdownBlockDisplay";
+
 import { MarkdownEditorDialog } from "./MarkdownEditorDialog";
+
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
+
 import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownInsertionText, resolveMarkdownTabKeyText } from "@/utils/markdownWhitespace";
 
 export type MarkdownReplaceBlock = | { type: "markdown"; markdown: string }
@@ -29,6 +33,12 @@ type MarkdownBlockContentProps =
     accentColor?: string;
     zoom?: number;
   }>;
+
+type BlockRange = Readonly<{
+  start: number;
+  end: number;
+  type: MarkdownReplaceBlock["type"];
+}>;
 
 const MAX_LENGTH = 50000;
 
@@ -181,12 +191,6 @@ const extractPreTextFromHtml = (html: string) => {
     return "";
   }
 };
-
-type BlockRange = Readonly<{
-  start: number;
-  end: number;
-  type: MarkdownReplaceBlock["type"];
-}>;
 
 const pickBlockIndexByPos = (ranges: BlockRange[], pos: number) => {
   for (let index = 0; index < ranges.length; index += 1) {

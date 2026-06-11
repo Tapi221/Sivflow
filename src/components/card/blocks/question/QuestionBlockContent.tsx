@@ -1,7 +1,11 @@
 import React, { useMemo, useState } from "react";
+
 import { QuestionBlockLayout } from "./QuestionBlockLayout";
+
 import { QUESTION_BLOCK_ANSWER_TEXT_CLASS, QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX, QUESTION_BLOCK_TITLE_TEXT_CLASS } from "./questionBlockTextStyles";
+
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
+
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 
 type QuestionBlockContentProps =
@@ -27,16 +31,6 @@ type QuestionBlockContentProps =
     zoom?: number;
   };
 
-const buildQuestionFieldStyle = (zoom?: number) =>
-  buildTypographyStyle({
-    fontSizePx: 12,
-    lineHeightPx: QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
-    zoom,
-  });
-
-const resolveQuestionFieldLineHeight = (zoom?: number) =>
-  scaleTypographyNumberPx(QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX, zoom);
-
 type QuestionFieldProps =
   | Readonly<{
     mode: "view";
@@ -53,6 +47,34 @@ type QuestionFieldProps =
     placeholder: string;
     zoom?: number;
   }>;
+
+type QuestionBlockViewContentProps = {
+  questionTitle?: string;
+  questionAnswer?: string;
+  answerDisplayMode: "always" | "tap_to_reveal";
+  containerProps?: React.HTMLAttributes<HTMLDivElement>;
+  zoom?: number;
+};
+
+const buildQuestionFieldStyle = (zoom?: number) =>
+  buildTypographyStyle({
+    fontSizePx: 12,
+    lineHeightPx: QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
+    zoom,
+  });
+
+const resolveQuestionFieldLineHeight = (zoom?: number) =>
+  scaleTypographyNumberPx(QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX, zoom);
+
+const buildViewResetKey = ({
+  questionTitle,
+  questionAnswer,
+  answerDisplayMode,
+}: {
+  questionTitle?: string;
+  questionAnswer?: string;
+  answerDisplayMode: "always" | "tap_to_reveal";
+}) => [answerDisplayMode, questionTitle ?? "", questionAnswer ?? ""].join("::");
 
 const QuestionField = (props: QuestionFieldProps) => {
   const style = buildQuestionFieldStyle(props.zoom);
@@ -84,16 +106,6 @@ const QuestionField = (props: QuestionFieldProps) => {
     />
   );
 };
-
-const buildViewResetKey = ({
-  questionTitle,
-  questionAnswer,
-  answerDisplayMode,
-}: {
-  questionTitle?: string;
-  questionAnswer?: string;
-  answerDisplayMode: "always" | "tap_to_reveal";
-}) => [answerDisplayMode, questionTitle ?? "", questionAnswer ?? ""].join("::");
 
 export const QuestionBlockContent = (props: QuestionBlockContentProps) => { if (props.mode === "view") { const answerDisplayMode = props.answerDisplayMode ?? "tap_to_reveal";
     const viewResetKey = buildViewResetKey({
@@ -146,14 +158,6 @@ export const QuestionBlockContent = (props: QuestionBlockContentProps) => { if (
       }
     />
   );
-};
-
-type QuestionBlockViewContentProps = {
-  questionTitle?: string;
-  questionAnswer?: string;
-  answerDisplayMode: "always" | "tap_to_reveal";
-  containerProps?: React.HTMLAttributes<HTMLDivElement>;
-  zoom?: number;
 };
 
 const QuestionBlockViewContent = ({

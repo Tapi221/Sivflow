@@ -5,12 +5,17 @@ import * as React from 'react';
 import type { TElement } from 'platejs';
 
 import { toUnitLess } from '@platejs/basic-styles';
+
 import { FontSizePlugin } from '@platejs/basic-styles/react';
+
 import { Minus, Plus } from 'lucide-react';
+
 import { KEYS } from 'platejs';
+
 import { useEditorPlugin, useEditorSelector } from 'platejs/react';
 
 import { Popover, PopoverContent, PopoverTrigger, } from './popover';
+
 import { cn } from '@/lib/utils';
 
 import { ToolbarButton } from './toolbar';

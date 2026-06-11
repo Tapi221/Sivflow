@@ -1,6 +1,7 @@
 'use client';
 
 import { AIChatPlugin } from '@platejs/ai/react';
+
 import { type PlateElementProps, type PlateTextProps, PlateElement, PlateText, usePluginOption, } from 'platejs/react';
 
 import { cn } from '@/lib/utils';

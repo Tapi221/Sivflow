@@ -1,8 +1,24 @@
 import { type CSSProperties, type RefObject } from "react";
+
 import { getTagColorSwatchStyle, type TagColorKey } from "@/chip/tag/tagColor";
+
 import { cn } from "@/lib/utils";
+
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
+
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
+
+type TagColorRightClickPanelProps = {
+  x: number;
+  y: number;
+  availableColors: TagColorKey[];
+  currentColorKey: TagColorKey;
+  tagName: string;
+  menuRef: RefObject<HTMLDivElement | null>;
+  noDragStyle: CSSProperties;
+  panelId?: RightClickPanelId;
+  onSelectColor: (colorKey: TagColorKey) => void;
+};
 
 const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   gray: "グレー",
@@ -18,19 +34,28 @@ const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
 };
 
 const TAG_COLOR_CONTEXT_MENU_TITLE = "タグの色";
+
 const TAG_COLOR_GRID_COLUMNS = 5;
+
 const TAG_COLOR_SWATCH_SIZE = 16;
+
 const TAG_COLOR_GRID_GAP = 6;
+
 const TAG_COLOR_GRID_HORIZONTAL_PADDING = 8;
+
 const TAG_COLOR_GRID_TOP_PADDING = 4;
+
 const TAG_COLOR_GRID_BOTTOM_PADDING = 8;
+
 const TAG_COLOR_GRID_WIDTH =
   TAG_COLOR_GRID_COLUMNS * TAG_COLOR_SWATCH_SIZE +
   (TAG_COLOR_GRID_COLUMNS - 1) * TAG_COLOR_GRID_GAP +
   TAG_COLOR_GRID_HORIZONTAL_PADDING * 2;
 
 export const TAG_COLOR_CONTEXT_MENU_WIDTH = Math.ceil( Math.max( resolveRightClickPanelTextWidth([TAG_COLOR_CONTEXT_MENU_TITLE]), TAG_COLOR_GRID_WIDTH + RIGHT_CLICK_PANEL_SURFACE_PADDING * 2, ), );
+
 export const TAG_COLOR_CONTEXT_MENU_HEIGHT = 92;
+
 export const TAG_COLOR_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
 const TAG_COLOR_GRID_STYLE = `
@@ -42,18 +67,6 @@ const TAG_COLOR_GRID_STYLE = `
   padding: ${TAG_COLOR_GRID_TOP_PADDING}px ${TAG_COLOR_GRID_HORIZONTAL_PADDING}px ${TAG_COLOR_GRID_BOTTOM_PADDING}px;
 }
 `;
-
-type TagColorRightClickPanelProps = {
-  x: number;
-  y: number;
-  availableColors: TagColorKey[];
-  currentColorKey: TagColorKey;
-  tagName: string;
-  menuRef: RefObject<HTMLDivElement | null>;
-  noDragStyle: CSSProperties;
-  panelId?: RightClickPanelId;
-  onSelectColor: (colorKey: TagColorKey) => void;
-};
 
 export const TagColorRightClickPanel = ({ x, y, availableColors, currentColorKey, tagName, menuRef, noDragStyle, panelId, onSelectColor, }: TagColorRightClickPanelProps) => { return ( <> <style>{TAG_COLOR_GRID_STYLE}</style> <RightClickPanelSurface x={x} y={y} width={TAG_COLOR_CONTEXT_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} ariaLabel={`${tagName} tag color menu`} panelId={panelId} > <div className="right-click-panel-title">{TAG_COLOR_CONTEXT_MENU_TITLE}</div> <div className="tag-color-context-menu-grid"> {availableColors.map((colorKey) => { const isSelected = colorKey === currentColorKey;
             const colorLabel = TAG_COLOR_LABELS[colorKey] ?? colorKey;

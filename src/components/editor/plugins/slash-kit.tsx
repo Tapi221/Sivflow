@@ -1,6 +1,7 @@
 'use client';
 
 import { SlashInputPlugin, SlashPlugin } from '@platejs/slash-command/react';
+
 import { type SlateEditor, KEYS } from 'platejs';
 
 import { SlashInputElement } from '@/components/slash-node';

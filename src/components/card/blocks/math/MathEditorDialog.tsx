@@ -1,18 +1,16 @@
 import React from "react";
+
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 import { MathRenderer } from "./MathBlockContent";
+
 import { cn } from "@/lib/utils";
+
 import type { MathBlockData } from "@/types/domain/base";
 
 type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;
-
-const EDITOR_LINE_HEIGHT = 24;
-const EDITOR_MIN_ROWS = 8;
-const EDITOR_MAX_HEIGHT = 420;
-const MAX_LATEX_LENGTH = 10000;
-
-const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
 
 interface MathEditorDialogProps {
   open: boolean;
@@ -22,6 +20,16 @@ interface MathEditorDialogProps {
   accentColor?: string;
   error?: string | null;
 }
+
+const EDITOR_LINE_HEIGHT = 24;
+
+const EDITOR_MIN_ROWS = 8;
+
+const EDITOR_MAX_HEIGHT = 420;
+
+const MAX_LATEX_LENGTH = 10000;
+
+const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
 
 export const MathEditorDialog: React.FC<MathEditorDialogProps> = ({ open, onOpenChange, data, onChange, accentColor, error, }) => { const ringColor = accentColor && isHexColor(accentColor) ? `${accentColor}40` : "var(--primary-color-alpha-40)";
 

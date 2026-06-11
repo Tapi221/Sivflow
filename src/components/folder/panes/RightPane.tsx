@@ -29,10 +29,10 @@ const UnsupportedDocumentPane = () => {
         <div className="mb-2 text-base font-semibold text-slate-800">
           この形式は現在サポート対象外です
         </div>
-        <div>
+        <>
           PowerPoint の表示機能は廃止しました。必要な資料は PDF
           に変換して再アップロードしてください。
-        </div>
+        </>
       </div>
     </div>
   );

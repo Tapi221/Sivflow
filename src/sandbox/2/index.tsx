@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboardImage";
 import { captureElementRectToBlob } from "@/features/selection-capture/domSelectionCapture";
 import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
@@ -127,12 +128,12 @@ const SelectionCaptureSandboxPage = () => {
             Selection Capture Sandbox
           </p>
           <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
-            <div>
+            <>
               <h1 className="text-3xl font-bold tracking-tight text-white">/sandbox/2 capture 確認画面</h1>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
                 SelectionCaptureOverlay と captureElementRectToBlob を接続して、ドラッグ範囲を PNG 化してコピーする動作を確認します。
               </p>
-            </div>
+            </>
             <button
               type="button"
               data-selection-capture-ignore="true"

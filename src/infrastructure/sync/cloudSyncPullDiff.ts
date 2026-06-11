@@ -1,11 +1,14 @@
 import type { DocumentData, QueryConstraint, QueryDocumentSnapshot } from "firebase/firestore";
-import * as Firestore from "firebase/firestore";
-import { getDoc, getDocs, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
-import { getPullableCollectionRef, getUserSettingsRef, requireCloudSyncFirestore } from "./cloudSyncFirestoreRefs";
-import { getUpdatedAtMillis, PULLABLE_ENTITY_TYPES, type PullableEntityType, sanitizeSyncDataFromCloud } from "@/application/usecases/cloudSyncShared";
-import type { SyncChange } from "@/services/interfaces/ISyncService";
 
-const PAGE_SIZE = 500;
+import * as Firestore from "firebase/firestore";
+
+import { getDoc, getDocs, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
+
+import { getPullableCollectionRef, getUserSettingsRef, requireCloudSyncFirestore } from "./cloudSyncFirestoreRefs";
+
+import { getUpdatedAtMillis, PULLABLE_ENTITY_TYPES, type PullableEntityType, sanitizeSyncDataFromCloud } from "@/application/usecases/cloudSyncShared";
+
+import type { SyncChange } from "@/services/interfaces/ISyncService";
 
 type PullDiffChange = SyncChange & {
   type: PullableEntityType | "userSetting";
@@ -13,6 +16,8 @@ type PullDiffChange = SyncChange & {
   data: unknown;
   updatedAt: number;
 };
+
+const PAGE_SIZE = 500;
 
 const getStartAfterConstraint = (snapshot: QueryDocumentSnapshot<DocumentData>): QueryConstraint | null => {
   const fn = (Firestore as Record<string, unknown>).startAfter;

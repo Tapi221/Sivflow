@@ -3,6 +3,7 @@
 import { createPlatePlugin } from 'platejs/react';
 
 import type { TComment } from '@/components/ui/comment';
+
 import { BlockDiscussion } from '@/components/block-discussion';
 
 type TDiscussion = {
@@ -105,6 +106,24 @@ const discussionsData: TDiscussion[] = [
   },
 ];
 
+const discussionPlugin = createPlatePlugin({
+  key: 'discussion',
+  options: {
+    currentUserId: 'alice',
+    discussions: discussionsData,
+    users: usersData,
+  },
+})
+  .configure({
+    render: { aboveNodes: BlockDiscussion },
+  })
+  .extendSelectors(({ getOption }) => ({
+    currentUser: () => getOption('users')[getOption('currentUserId')],
+    user: (id: string) => getOption('users')[id],
+  }));
+
+const DiscussionKit = [discussionPlugin];
+
 const avatarUrl = (seed: string) =>
   `https://api.dicebear.com/9.x/glass/svg?seed=${seed}`;
 
@@ -162,23 +181,6 @@ const getDiscussionBlockClickTarget = ({
     target,
   });
 
-const discussionPlugin = createPlatePlugin({
-  key: 'discussion',
-  options: {
-    currentUserId: 'alice',
-    discussions: discussionsData,
-    users: usersData,
-  },
-})
-  .configure({
-    render: { aboveNodes: BlockDiscussion },
-  })
-  .extendSelectors(({ getOption }) => ({
-    currentUser: () => getOption('users')[getOption('currentUserId')],
-    user: (id: string) => getOption('users')[id],
-  }));
-
-const DiscussionKit = [discussionPlugin];
-
 export type { TDiscussion };
+
 export { DiscussionKit, discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget };

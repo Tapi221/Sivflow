@@ -1,7 +1,9 @@
 import * as React from "react"
+
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 
 import { cn } from "@/lib/utils"
+
 import { buttonVariants } from "./button"
 
 const AlertDialog = AlertDialogPrimitive.Root
@@ -23,7 +25,6 @@ const AlertDialogOverlay = React.forwardRef<
     ref={ref}
   />
 ))
-AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
 
 const AlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
@@ -41,7 +42,6 @@ const AlertDialogContent = React.forwardRef<
     />
   </AlertDialogPortal>
 ))
-AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
 
 const AlertDialogHeader = ({
   className,
@@ -55,7 +55,6 @@ const AlertDialogHeader = ({
     {...props}
   />
 )
-AlertDialogHeader.displayName = "AlertDialogHeader"
 
 const AlertDialogFooter = ({
   className,
@@ -69,7 +68,6 @@ const AlertDialogFooter = ({
     {...props}
   />
 )
-AlertDialogFooter.displayName = "AlertDialogFooter"
 
 const AlertDialogTitle = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Title>,
@@ -81,7 +79,6 @@ const AlertDialogTitle = React.forwardRef<
     {...props}
   />
 ))
-AlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName
 
 const AlertDialogDescription = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Description>,
@@ -93,8 +90,6 @@ const AlertDialogDescription = React.forwardRef<
     {...props}
   />
 ))
-AlertDialogDescription.displayName =
-  AlertDialogPrimitive.Description.displayName
 
 const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
@@ -106,7 +101,6 @@ const AlertDialogAction = React.forwardRef<
     {...props}
   />
 ))
-AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName
 
 const AlertDialogCancel = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
@@ -122,6 +116,22 @@ const AlertDialogCancel = React.forwardRef<
     {...props}
   />
 ))
+
+AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
+
+AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
+
+AlertDialogHeader.displayName = "AlertDialogHeader"
+
+AlertDialogFooter.displayName = "AlertDialogFooter"
+
+AlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName
+
+AlertDialogDescription.displayName =
+  AlertDialogPrimitive.Description.displayName
+
+AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName
+
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName
 
 export {

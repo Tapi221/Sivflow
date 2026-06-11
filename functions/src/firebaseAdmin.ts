@@ -8,9 +8,7 @@ let authModulePromise: Promise<typeof import("firebase-admin/auth")> | null = nu
 let firestoreModulePromise: Promise<typeof import("firebase-admin/firestore")> | null = null;
 let storageModulePromise: Promise<typeof import("firebase-admin/storage")> | null = null;
 
-export const ensureFirebaseAdmin = async (): Promise<App> => {
-  adminAppPromise ??= (async () => {
-    const { getApp, initializeApp } = await import("firebase-admin/app");
+export const ensureFirebaseAdmin = async (): Promise<App> => { adminAppPromise ??= (async () => { const { getApp, initializeApp } = await import("firebase-admin/app");
 
     try {
       return getApp();
@@ -37,25 +35,21 @@ const getStorageModule = async () => {
   return await storageModulePromise;
 };
 
-export const getAdminAuth = async (): Promise<Auth> => {
-  const app = await ensureFirebaseAdmin();
+export const getAdminAuth = async (): Promise<Auth> => { const app = await ensureFirebaseAdmin();
   const { getAuth } = await getAuthModule();
   return getAuth(app);
 };
 
-export const getDb = async (): Promise<Firestore> => {
-  const app = await ensureFirebaseAdmin();
+export const getDb = async (): Promise<Firestore> => { const app = await ensureFirebaseAdmin();
   const { getFirestore } = await getFirestoreModule();
   return getFirestore(app);
 };
 
-export const getAdminStorage = async (): Promise<Storage> => {
-  const app = await ensureFirebaseAdmin();
+export const getAdminStorage = async (): Promise<Storage> => { const app = await ensureFirebaseAdmin();
   const { getStorage } = await getStorageModule();
   return getStorage(app);
 };
 
-export const serverTimestamp = async (): Promise<FieldValue> => {
-  const { FieldValue } = await getFirestoreModule();
+export const serverTimestamp = async (): Promise<FieldValue> => { const { FieldValue } = await getFirestoreModule();
   return FieldValue.serverTimestamp();
 };

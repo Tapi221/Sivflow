@@ -1,4 +1,5 @@
 'use client';
+
 /* eslint-disable react-hooks/refs */
 
 import * as React from 'react';
@@ -6,14 +7,115 @@ import * as React from 'react';
 import type { Emoji } from '@emoji-mart/data';
 
 import { type EmojiCategoryList, type EmojiIconList, type GridRow, EmojiSettings, } from '@platejs/emoji';
+
 import { type EmojiDropdownMenuOptions, type UseEmojiPickerType, useEmojiDropdownMenuState, } from '@platejs/emoji/react';
+
 import * as Popover from '@radix-ui/react-popover';
+
 import { AppleIcon, ClockIcon, CompassIcon, FlagIcon, LeafIcon, LightbulbIcon, MusicIcon, SearchIcon, SmileIcon, StarIcon, XIcon, } from 'lucide-react';
 
 import { Button } from './button';
+
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from './tooltip';
+
 import { cn } from '@/lib/utils';
+
 import { ToolbarButton } from '@/components/toolbar';
+
+const emojiCategoryIcons: Record<
+  EmojiCategoryList,
+  {
+    outline: React.ReactElement;
+    solid: React.ReactElement; // Needed to add another solid variant - outline will be used for now
+  }
+> = {
+  activity: {
+    outline: (
+      <svg
+        className="size-full"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <path d="M2.1 13.4A10.1 10.1 0 0 0 13.4 2.1" />
+        <path d="m5 4.9 14 14.2" />
+        <path d="M21.9 10.6a10.1 10.1 0 0 0-11.3 11.3" />
+      </svg>
+    ),
+    solid: (
+      <svg
+        className="size-full"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <path d="M2.1 13.4A10.1 10.1 0 0 0 13.4 2.1" />
+        <path d="m5 4.9 14 14.2" />
+        <path d="M21.9 10.6a10.1 10.1 0 0 0-11.3 11.3" />
+      </svg>
+    ),
+  },
+
+  custom: {
+    outline: <StarIcon className="size-full" />,
+    solid: <StarIcon className="size-full" />,
+  },
+
+  flags: {
+    outline: <FlagIcon className="size-full" />,
+    solid: <FlagIcon className="size-full" />,
+  },
+
+  foods: {
+    outline: <AppleIcon className="size-full" />,
+    solid: <AppleIcon className="size-full" />,
+  },
+
+  frequent: {
+    outline: <ClockIcon className="size-full" />,
+    solid: <ClockIcon className="size-full" />,
+  },
+
+  nature: {
+    outline: <LeafIcon className="size-full" />,
+    solid: <LeafIcon className="size-full" />,
+  },
+
+  objects: {
+    outline: <LightbulbIcon className="size-full" />,
+    solid: <LightbulbIcon className="size-full" />,
+  },
+
+  people: {
+    outline: <SmileIcon className="size-full" />,
+    solid: <SmileIcon className="size-full" />,
+  },
+
+  places: {
+    outline: <CompassIcon className="size-full" />,
+    solid: <CompassIcon className="size-full" />,
+  },
+
+  symbols: {
+    outline: <MusicIcon className="size-full" />,
+    solid: <MusicIcon className="size-full" />,
+  },
+};
+
+const emojiSearchIcons = {
+  delete: <XIcon className="size-4 text-current" />,
+  loupe: <SearchIcon className="size-4 text-current" />,
+};
 
 export function EmojiToolbarButton({ options, ...props }: { options?: EmojiDropdownMenuOptions;
 } & React.ComponentPropsWithoutRef<typeof ToolbarButton>) {
@@ -101,6 +203,180 @@ export function EmojiPicker({ clearSearch, emoji, emojiLibrary, focusedCategory,
         isSearching={isSearching}
       />
     </div>
+  );
+}
+
+function EmojiPickerSearchBar({
+  children,
+  i18n,
+  searchValue,
+  setSearch,
+}: {
+  children: React.ReactNode;
+} & Pick<UseEmojiPickerType, 'i18n' | 'searchValue' | 'setSearch'>) {
+  return (
+    <div className="flex items-center px-2">
+      <div className="relative flex grow items-center">
+        <input
+          className="block w-full appearance-none rounded-full border-0 bg-muted px-10 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:outline-none"
+          value={searchValue}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder={i18n.search}
+          aria-label="Search"
+          autoComplete="off"
+          type="text"
+          autoFocus
+        />
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function EmojiPickerSearchAndClear({
+  clearSearch,
+  i18n,
+  searchValue,
+}: Pick<UseEmojiPickerType, 'clearSearch' | 'i18n' | 'searchValue'>) {
+  return (
+    <div className="flex items-center text-foreground">
+      <div
+        className={cn(
+          '-translate-y-1/2 absolute top-1/2 left-2.5 z-10 flex size-5 items-center justify-center text-foreground'
+        )}
+      >
+        {emojiSearchIcons.loupe}
+      </div>
+      {searchValue && (
+        <Button
+          size="icon"
+          variant="ghost"
+          className={cn(
+            '-translate-y-1/2 absolute top-1/2 right-0.5 flex size-8 cursor-pointer items-center justify-center rounded-full border-none bg-transparent text-popover-foreground hover:bg-transparent'
+          )}
+          onClick={clearSearch}
+          title={i18n.clear}
+          aria-label="Clear"
+          type="button"
+        >
+          {emojiSearchIcons.delete}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function EmojiPreview({ emoji }: Pick<UseEmojiPickerType, 'emoji'>) {
+  return (
+    <div className="flex h-14 max-h-14 min-h-14 items-center border-muted border-t p-2">
+      <div className="flex items-center justify-center text-2xl">
+        {emoji?.skins[0].native}
+      </div>
+      <div className="overflow-hidden pl-2">
+        <div className="truncate font-semibold text-sm">{emoji?.name}</div>
+        <div className="truncate text-sm">{`:${emoji?.id}:`}</div>
+      </div>
+    </div>
+  );
+}
+
+function NoEmoji({ i18n }: Pick<UseEmojiPickerType, 'i18n'>) {
+  return (
+    <div className="flex h-14 max-h-14 min-h-14 items-center border-muted border-t p-2">
+      <div className="flex items-center justify-center text-2xl">😢</div>
+      <div className="overflow-hidden pl-2">
+        <div className="truncate font-bold text-sm">
+          {i18n.searchNoResultsTitle}
+        </div>
+        <div className="truncate text-sm">{i18n.searchNoResultsSubtitle}</div>
+      </div>
+    </div>
+  );
+}
+
+function PickAnEmoji({ i18n }: Pick<UseEmojiPickerType, 'i18n'>) {
+  return (
+    <div className="flex h-14 max-h-14 min-h-14 items-center border-muted border-t p-2">
+      <div className="flex items-center justify-center text-2xl">☝️</div>
+      <div className="overflow-hidden pl-2">
+        <div className="truncate font-semibold text-sm">{i18n.pick}</div>
+      </div>
+    </div>
+  );
+}
+
+function EmojiPickerPreview({
+  emoji,
+  hasFound = true,
+  i18n,
+  isSearching = false,
+  ...props
+}: Pick<UseEmojiPickerType, 'emoji' | 'hasFound' | 'i18n' | 'isSearching'>) {
+  const showPickEmoji = !emoji && (!isSearching || hasFound);
+  const showNoEmoji = isSearching && !hasFound;
+  const showPreview = emoji && !showNoEmoji && !showNoEmoji;
+
+  return (
+    <>
+      {showPreview && <EmojiPreview emoji={emoji} {...props} />}
+      {showPickEmoji && <PickAnEmoji i18n={i18n} {...props} />}
+      {showNoEmoji && <NoEmoji i18n={i18n} {...props} />}
+    </>
+  );
+}
+
+function EmojiPickerNavigation({
+  emojiLibrary,
+  focusedCategory,
+  i18n,
+  icons,
+  onClick,
+}: {
+  onClick: (id: EmojiCategoryList) => void;
+} & Pick<
+  UseEmojiPickerType,
+  'emojiLibrary' | 'focusedCategory' | 'i18n' | 'icons'
+>) {
+  return (
+    <TooltipProvider delayDuration={500}>
+      <nav
+        id="emoji-nav"
+        className="mb-2.5 border-0 border-b border-b-border border-solid p-1.5"
+      >
+        <div className="relative flex items-center justify-evenly">
+          {emojiLibrary
+            .getGrid()
+            .sections()
+            .map(({ id }) => (
+              <Tooltip key={id}>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className={cn(
+                      'h-fit rounded-full fill-current p-1.5 text-muted-foreground hover:bg-muted hover:text-muted-foreground',
+                      id === focusedCategory &&
+                        'pointer-events-none bg-accent fill-current text-accent-foreground'
+                    )}
+                    onClick={() => {
+                      onClick(id);
+                    }}
+                    aria-label={i18n.categories[id]}
+                    type="button"
+                  >
+                    <span className="inline-flex size-5 items-center justify-center">
+                      {icons.categories[id].outline}
+                    </span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  {i18n.categories[id]}
+                </TooltipContent>
+              </Tooltip>
+            ))}
+        </div>
+      </nav>
+    </TooltipProvider>
   );
 }
 
@@ -299,272 +575,3 @@ function EmojiPickerContent({
     </div>
   );
 }
-
-function EmojiPickerSearchBar({
-  children,
-  i18n,
-  searchValue,
-  setSearch,
-}: {
-  children: React.ReactNode;
-} & Pick<UseEmojiPickerType, 'i18n' | 'searchValue' | 'setSearch'>) {
-  return (
-    <div className="flex items-center px-2">
-      <div className="relative flex grow items-center">
-        <input
-          className="block w-full appearance-none rounded-full border-0 bg-muted px-10 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:outline-none"
-          value={searchValue}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder={i18n.search}
-          aria-label="Search"
-          autoComplete="off"
-          type="text"
-          autoFocus
-        />
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function EmojiPickerSearchAndClear({
-  clearSearch,
-  i18n,
-  searchValue,
-}: Pick<UseEmojiPickerType, 'clearSearch' | 'i18n' | 'searchValue'>) {
-  return (
-    <div className="flex items-center text-foreground">
-      <div
-        className={cn(
-          '-translate-y-1/2 absolute top-1/2 left-2.5 z-10 flex size-5 items-center justify-center text-foreground'
-        )}
-      >
-        {emojiSearchIcons.loupe}
-      </div>
-      {searchValue && (
-        <Button
-          size="icon"
-          variant="ghost"
-          className={cn(
-            '-translate-y-1/2 absolute top-1/2 right-0.5 flex size-8 cursor-pointer items-center justify-center rounded-full border-none bg-transparent text-popover-foreground hover:bg-transparent'
-          )}
-          onClick={clearSearch}
-          title={i18n.clear}
-          aria-label="Clear"
-          type="button"
-        >
-          {emojiSearchIcons.delete}
-        </Button>
-      )}
-    </div>
-  );
-}
-
-function EmojiPreview({ emoji }: Pick<UseEmojiPickerType, 'emoji'>) {
-  return (
-    <div className="flex h-14 max-h-14 min-h-14 items-center border-muted border-t p-2">
-      <div className="flex items-center justify-center text-2xl">
-        {emoji?.skins[0].native}
-      </div>
-      <div className="overflow-hidden pl-2">
-        <div className="truncate font-semibold text-sm">{emoji?.name}</div>
-        <div className="truncate text-sm">{`:${emoji?.id}:`}</div>
-      </div>
-    </div>
-  );
-}
-
-function NoEmoji({ i18n }: Pick<UseEmojiPickerType, 'i18n'>) {
-  return (
-    <div className="flex h-14 max-h-14 min-h-14 items-center border-muted border-t p-2">
-      <div className="flex items-center justify-center text-2xl">😢</div>
-      <div className="overflow-hidden pl-2">
-        <div className="truncate font-bold text-sm">
-          {i18n.searchNoResultsTitle}
-        </div>
-        <div className="truncate text-sm">{i18n.searchNoResultsSubtitle}</div>
-      </div>
-    </div>
-  );
-}
-
-function PickAnEmoji({ i18n }: Pick<UseEmojiPickerType, 'i18n'>) {
-  return (
-    <div className="flex h-14 max-h-14 min-h-14 items-center border-muted border-t p-2">
-      <div className="flex items-center justify-center text-2xl">☝️</div>
-      <div className="overflow-hidden pl-2">
-        <div className="truncate font-semibold text-sm">{i18n.pick}</div>
-      </div>
-    </div>
-  );
-}
-
-function EmojiPickerPreview({
-  emoji,
-  hasFound = true,
-  i18n,
-  isSearching = false,
-  ...props
-}: Pick<UseEmojiPickerType, 'emoji' | 'hasFound' | 'i18n' | 'isSearching'>) {
-  const showPickEmoji = !emoji && (!isSearching || hasFound);
-  const showNoEmoji = isSearching && !hasFound;
-  const showPreview = emoji && !showNoEmoji && !showNoEmoji;
-
-  return (
-    <>
-      {showPreview && <EmojiPreview emoji={emoji} {...props} />}
-      {showPickEmoji && <PickAnEmoji i18n={i18n} {...props} />}
-      {showNoEmoji && <NoEmoji i18n={i18n} {...props} />}
-    </>
-  );
-}
-
-function EmojiPickerNavigation({
-  emojiLibrary,
-  focusedCategory,
-  i18n,
-  icons,
-  onClick,
-}: {
-  onClick: (id: EmojiCategoryList) => void;
-} & Pick<
-  UseEmojiPickerType,
-  'emojiLibrary' | 'focusedCategory' | 'i18n' | 'icons'
->) {
-  return (
-    <TooltipProvider delayDuration={500}>
-      <nav
-        id="emoji-nav"
-        className="mb-2.5 border-0 border-b border-b-border border-solid p-1.5"
-      >
-        <div className="relative flex items-center justify-evenly">
-          {emojiLibrary
-            .getGrid()
-            .sections()
-            .map(({ id }) => (
-              <Tooltip key={id}>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className={cn(
-                      'h-fit rounded-full fill-current p-1.5 text-muted-foreground hover:bg-muted hover:text-muted-foreground',
-                      id === focusedCategory &&
-                        'pointer-events-none bg-accent fill-current text-accent-foreground'
-                    )}
-                    onClick={() => {
-                      onClick(id);
-                    }}
-                    aria-label={i18n.categories[id]}
-                    type="button"
-                  >
-                    <span className="inline-flex size-5 items-center justify-center">
-                      {icons.categories[id].outline}
-                    </span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  {i18n.categories[id]}
-                </TooltipContent>
-              </Tooltip>
-            ))}
-        </div>
-      </nav>
-    </TooltipProvider>
-  );
-}
-
-const emojiCategoryIcons: Record<
-  EmojiCategoryList,
-  {
-    outline: React.ReactElement;
-    solid: React.ReactElement; // Needed to add another solid variant - outline will be used for now
-  }
-> = {
-  activity: {
-    outline: (
-      <svg
-        className="size-full"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <path d="M2.1 13.4A10.1 10.1 0 0 0 13.4 2.1" />
-        <path d="m5 4.9 14 14.2" />
-        <path d="M21.9 10.6a10.1 10.1 0 0 0-11.3 11.3" />
-      </svg>
-    ),
-    solid: (
-      <svg
-        className="size-full"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <path d="M2.1 13.4A10.1 10.1 0 0 0 13.4 2.1" />
-        <path d="m5 4.9 14 14.2" />
-        <path d="M21.9 10.6a10.1 10.1 0 0 0-11.3 11.3" />
-      </svg>
-    ),
-  },
-
-  custom: {
-    outline: <StarIcon className="size-full" />,
-    solid: <StarIcon className="size-full" />,
-  },
-
-  flags: {
-    outline: <FlagIcon className="size-full" />,
-    solid: <FlagIcon className="size-full" />,
-  },
-
-  foods: {
-    outline: <AppleIcon className="size-full" />,
-    solid: <AppleIcon className="size-full" />,
-  },
-
-  frequent: {
-    outline: <ClockIcon className="size-full" />,
-    solid: <ClockIcon className="size-full" />,
-  },
-
-  nature: {
-    outline: <LeafIcon className="size-full" />,
-    solid: <LeafIcon className="size-full" />,
-  },
-
-  objects: {
-    outline: <LightbulbIcon className="size-full" />,
-    solid: <LightbulbIcon className="size-full" />,
-  },
-
-  people: {
-    outline: <SmileIcon className="size-full" />,
-    solid: <SmileIcon className="size-full" />,
-  },
-
-  places: {
-    outline: <CompassIcon className="size-full" />,
-    solid: <CompassIcon className="size-full" />,
-  },
-
-  symbols: {
-    outline: <MusicIcon className="size-full" />,
-    solid: <MusicIcon className="size-full" />,
-  },
-};
-
-const emojiSearchIcons = {
-  delete: <XIcon className="size-4 text-current" />,
-  loupe: <SearchIcon className="size-4 text-current" />,
-};

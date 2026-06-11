@@ -1,14 +1,20 @@
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
-import { getCardBlocks } from "@/domain/card/content";
-import { LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from "@/domain/card/extraRows";
-import { resolveCardTagNames } from "@/features/settings/hooks/useTags";
-import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
-import { waitForDraftImageUploads } from "./cardImageUploadSaveBarrier";
-import { type EditorDraft, makeEmptyCardFaceAttachments, normalizeOrderIndex, sanitizeReferences } from "./cardEditorUtils";
-import type { UploadedImage } from "@/types/domain/assets";
-import type { Card, CardBlock, CardFaceAttachments, CardPatch } from "@/types/domain/card";
 
-export { toDateOrNull } from "@/utils/toMillis";
+import { getCardBlocks } from "@/domain/card/content";
+
+import { LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from "@/domain/card/extraRows";
+
+import { resolveCardTagNames } from "@/features/settings/hooks/useTags";
+
+import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
+
+import { waitForDraftImageUploads } from "./cardImageUploadSaveBarrier";
+
+import { type EditorDraft, makeEmptyCardFaceAttachments, normalizeOrderIndex, sanitizeReferences } from "./cardEditorUtils";
+
+import type { UploadedImage } from "@/types/domain/assets";
+
+import type { Card, CardBlock, CardFaceAttachments, CardPatch } from "@/types/domain/card";
 
 type BuildSavePayloadParams = {
   draft: EditorDraft;
@@ -22,16 +28,6 @@ type CreatePanelCardParams = {
 };
 
 type CardToggleField = "isBookmarked" | "hasUncertainty";
-
-export const NEW_SENTINEL = "__new__" as const;
-export const AUTOSAVE_DELAY_MS = 700;
-
-export type TagNameLookup = Parameters<typeof resolveCardTagNames>[1];
-
-export type PersistOperation = "created" | "updated" | "noop";
-
-export type PersistResult = | { ok: true; operation: PersistOperation; saved: boolean }
-  | { ok: false; message: string };
 
 const createDraftPanelBaseCard = (): Card => {
   const now = new Date();
@@ -89,6 +85,19 @@ const resolveTagIdsForSave = async (
 
   return tagIds;
 };
+
+export { toDateOrNull } from "@/utils/toMillis";
+
+export const NEW_SENTINEL = "__new__" as const;
+
+export const AUTOSAVE_DELAY_MS = 700;
+
+export type TagNameLookup = Parameters<typeof resolveCardTagNames>[1];
+
+export type PersistOperation = "created" | "updated" | "noop";
+
+export type PersistResult = | { ok: true; operation: PersistOperation; saved: boolean }
+  | { ok: false; message: string };
 
 export const cloneBlock = (block: CardBlock): CardBlock => { return { ...block, images: block.images?.map((image) => ({ ...image })), audios: block.audios?.map((audio) => ({ ...audio })), references: block.references?.map((reference) => ({ ...reference })), code: block.code ? { ...block.code } : undefined, math: block.math ? { ...block.math } : undefined, pdf: block.pdf ? { ...block.pdf } : block.pdf, };
 };

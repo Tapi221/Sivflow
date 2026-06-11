@@ -1,26 +1,30 @@
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
+
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
+
 import { Button } from "@/components/ui/button";
+
 import { Slider } from "@/components/ui/slider";
+
 import { Check, RotateCcw, Upload, X } from "@/ui/icons";
+
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+
 import { resolveCardImageUrl, type ResolvedCardImage } from "@/services/cardImageResolver";
+
 import { getOrCreateImageBlobUrl, removeImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
+
 import { deleteImageBlob, getImageBlob, putImageBlob } from "@/services/imageFileStore";
+
 import { getLocalDb } from "@/services/localDB";
+
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
+
 import type { AssetRecord, UploadedImage } from "@/types";
+
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize.utils";
-
-const clamp = (v: number, min: number, max: number) =>
-  Math.min(max, Math.max(min, v));
-const IMAGE_BLOCK_INSET_PX = 4;
-const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
-  CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
-
-const EMPTY_IMAGE_URLS: UploadedImage[] = [];
-const EMPTY_AUDIO_URLS: string[] = [];
 
 type ResolvedEditableImageStatus = "pending" | "uploading" | "ready" | "failed";
 
@@ -50,6 +54,54 @@ type ImageRecordLike =
 type ResolvedEditableImage = ResolvedCardImage & {
   status: ResolvedEditableImageStatus;
 };
+
+type ImageItemProps = {
+  item: ResolvedEditableImage;
+  index: number;
+  onRemove: (index: number) => void;
+  onRetry: (index: number) => void;
+  onUpdate: (index: number, patch: Partial<UploadedImage>) => void;
+  displayMode: "fixed" | "fluid";
+  zoom: number;
+};
+
+type ImageMediaUploaderProps = {
+  type?: "image";
+  urls?: UploadedImage[];
+  onChange: (urls: UploadedImage[]) => void;
+  maxFiles?: number;
+  initialFile?: File;
+  onConsumeInitialFile?: () => void;
+  onFilesExcess?: (files: File[]) => void;
+  autoOpenPicker?: boolean;
+  displayMode?: "fixed" | "fluid";
+  zoom?: number;
+};
+
+type AudioMediaUploaderProps = {
+  type: "audio";
+  urls?: string[];
+  onChange: (urls: string[]) => void;
+  maxFiles?: number;
+  initialFile?: File;
+  onConsumeInitialFile?: () => void;
+  onFilesExcess?: (files: File[]) => void;
+  autoOpenPicker?: boolean;
+};
+
+type MediaUploaderProps = ImageMediaUploaderProps | AudioMediaUploaderProps;
+
+const IMAGE_BLOCK_INSET_PX = 4;
+
+const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
+  CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
+
+const EMPTY_IMAGE_URLS: UploadedImage[] = [];
+
+const EMPTY_AUDIO_URLS: string[] = [];
+
+const clamp = (v: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, v));
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
@@ -134,16 +186,6 @@ const getRetryFileName = (assetId: string, mime: string): string => {
   if (normalized === "image/avif") return `${assetId}.avif`;
 
   return `${assetId}.jpg`;
-};
-
-type ImageItemProps = {
-  item: ResolvedEditableImage;
-  index: number;
-  onRemove: (index: number) => void;
-  onRetry: (index: number) => void;
-  onUpdate: (index: number, patch: Partial<UploadedImage>) => void;
-  displayMode: "fixed" | "fluid";
-  zoom: number;
 };
 
 const ImageItem = ({
@@ -273,32 +315,6 @@ const ImageItem = ({
     </div>
   );
 };
-
-type ImageMediaUploaderProps = {
-  type?: "image";
-  urls?: UploadedImage[];
-  onChange: (urls: UploadedImage[]) => void;
-  maxFiles?: number;
-  initialFile?: File;
-  onConsumeInitialFile?: () => void;
-  onFilesExcess?: (files: File[]) => void;
-  autoOpenPicker?: boolean;
-  displayMode?: "fixed" | "fluid";
-  zoom?: number;
-};
-
-type AudioMediaUploaderProps = {
-  type: "audio";
-  urls?: string[];
-  onChange: (urls: string[]) => void;
-  maxFiles?: number;
-  initialFile?: File;
-  onConsumeInitialFile?: () => void;
-  onFilesExcess?: (files: File[]) => void;
-  autoOpenPicker?: boolean;
-};
-
-type MediaUploaderProps = ImageMediaUploaderProps | AudioMediaUploaderProps;
 
 const MediaUploader = (props: MediaUploaderProps) => {
   const {

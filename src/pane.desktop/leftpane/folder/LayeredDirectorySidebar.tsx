@@ -1,29 +1,55 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type DragEvent as ReactDragEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type RefObject, type SetStateAction } from "react";
+
 import { CARD_SET_CONTEXT_MENU_HEIGHT, CARD_SET_CONTEXT_MENU_PANEL_ID, CARD_SET_CONTEXT_MENU_WIDTH, CardSetContextMenu, type CardSetContextMenuAction } from "@/chip/rightclickpanel.desktop/CardSetContextMenu.desktop";
+
 import { DOCUMENT_CONTEXT_MENU_HEIGHT, DOCUMENT_CONTEXT_MENU_PANEL_ID, DOCUMENT_CONTEXT_MENU_WIDTH, DocumentContextMenu, type DocumentContextMenuAction } from "@/chip/rightclickpanel.desktop/DocumentContextMenu.desktop";
+
 import { LAYERED_COLOR_MENU_HEIGHT, LAYERED_COLOR_MENU_WIDTH, LayeredColorMenu } from "@/chip/rightclickpanel.desktop/LayeredColorMenu.desktop";
+
 import { LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LayeredProjectMenu, type LayeredProjectMenuAction, type LayeredProjectMenuActionId, type LayeredProjectMenuSubmenuAnchor } from "@/chip/rightclickpanel.desktop/LayeredProjectMenu";
+
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
+
 import { useCardSets } from "@/components/card/hooks/useCardSets";
+
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+
 import { ExplorerChromeCardSetIcon, ExplorerChromeFolderIcon, ExplorerChromePdfIcon } from "@/components/explorer/icons";
+
 import { getFolderProjectColor } from "@/components/folder/explorer/model/projectColor";
+
 import { DEFAULT_NEW_CARD_SET_NAME, DEFAULT_NEW_FOLDER_NAME, getFolderId, getParentFolderId, UNTITLED_FOLDER_NAME, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
+
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+
 import { useDocumentCommands } from "@/features/document/hooks/useDocumentCommands";
+
 import { useDocumentsRead } from "@/features/document/hooks/useDocumentsRead";
+
 import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
+
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
+
 import { useNotes } from "@/hooks/note/useNotes";
+
 import { cn } from "@/lib/utils";
+
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
+
 import type { CardSet, DocumentItem, Note, SelectedExplorerItem } from "@/types";
+
 import { LayeredTreeDropIndicator } from "./layeredTreeDnd";
+
 import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LAYERED_TREE_ROOT_LEVEL } from "./layeredTreeDnd.constants";
+
 import type { LayeredTreeDragState } from "./layeredTreeDnd.types";
+
 import { getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget } from "./layeredTreeDnd.utils";
+
 import { useLayeredTreeDragDrop } from "./useLayeredTreeDragDrop";
 
 type FolderCommandSet = ReturnType<typeof useFolderCommands>;
@@ -180,36 +206,18 @@ type LegacyNoteFields = {
 };
 
 const DEFAULT_NEW_NOTE_NAME = "新規ノート";
+
 const EMPTY_COLLECTION: never[] = [];
+
 const LIBRARY_TITLE = "Library";
+
 const LAYERED_PROJECT_MENU_DIMENSIONS = { width: LAYERED_PROJECT_MENU_WIDTH, height: LAYERED_PROJECT_MENU_HEIGHT };
+
 const CARD_SET_CONTEXT_MENU_DIMENSIONS = { width: CARD_SET_CONTEXT_MENU_WIDTH, height: CARD_SET_CONTEXT_MENU_HEIGHT };
+
 const DOCUMENT_CONTEXT_MENU_DIMENSIONS = { width: DOCUMENT_CONTEXT_MENU_WIDTH, height: DOCUMENT_CONTEXT_MENU_HEIGHT };
+
 const LAYERED_PROJECT_SUBMENU_OVERLAP_PX = 6;
-
-const IconChevronRight = ({ className }: IconProps) => (
-  <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const IconProjectFolder = ({ className }: IconProps) => <ExplorerChromeFolderIcon className={className} />;
-
-const IconNote = ({ className }: IconProps) => (
-  <svg viewBox="0 0 16 16" fill="none" className={className}>
-    <path d="M4.5 2.75H9.8L12 4.95V13.25H4.5V2.75Z" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" />
-    <path d="M9.75 2.9V5H11.85" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" />
-    <path d="M6.25 7.25H10.25M6.25 9.5H10.25" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
-  </svg>
-);
-
-const SidebarLoadingState = ({ ariaLabel, label }: SidebarLoadingStateProps) => {
-  return (
-    <aside aria-label={ariaLabel} className="h-full min-h-0 overflow-y-auto px-3 py-1 text-[#9aa1ad]">
-      <LoadingSpinner className="h-full min-h-0" label={label} />
-    </aside>
-  );
-};
 
 const getFolderName = (folder: FolderTreeNode, isRootProject = false): string => {
   const name = folder.folderName ?? folder.folder_name;
@@ -287,107 +295,6 @@ const createDocumentContextMenuState = (event: ReactMouseEvent<HTMLElement>, doc
 
 const createNoteContextMenuState = (event: ReactMouseEvent<HTMLElement>, note: Note): NoteContextMenuState => {
   return { noteId: note.id, noteTitle: getNoteTitle(note), ...clampRightClickPanelPosition(event.clientX, event.clientY, DOCUMENT_CONTEXT_MENU_DIMENSIONS) };
-};
-
-const DirectoryEntityRow = ({ id, label, kind, level, isSelected, onSelect, onContextMenu }: DirectoryEntityRowProps) => {
-  const Icon = kind === "cardSet" ? ExplorerChromeCardSetIcon : kind === "document" ? ExplorerChromePdfIcon : IconNote;
-  const rowPaddingLeft = Math.max(0, level - LAYERED_TREE_ROOT_LEVEL) * LAYERED_TREE_INDENT_PX + 18;
-
-  const handleClick = (event: ReactMouseEvent<HTMLElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    onSelect();
-  };
-
-  const handleKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    event.preventDefault();
-    event.stopPropagation();
-    onSelect();
-  };
-
-  const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => {
-    if (!onContextMenu) return;
-    onContextMenu(event);
-  };
-
-  return (
-    <div role="treeitem" tabIndex={0} aria-level={level} aria-selected={isSelected} data-directory-entity-id={id} data-directory-entity-kind={kind} onClick={handleClick} onKeyDown={handleKeyDown} onContextMenu={handleContextMenu} className={cn("group/directory-tree-row relative flex h-8 cursor-default items-center gap-2 rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)] transition-[background,box-shadow,opacity,transform] duration-150 hover:bg-[#eeeeee] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]", isSelected && "bg-[#e9e9e9]")} style={{ paddingLeft: rowPaddingLeft }}>
-      <span className="flex h-8 w-4 shrink-0 items-center justify-center text-[var(--app-sidebar-icon)]"><Icon className="h-4 w-4" /></span>
-      <span title={label} className="flex h-8 min-w-0 flex-1 items-center text-left leading-[20px] text-inherit"><span className="min-w-0 flex-1 truncate">{label}</span></span>
-    </div>
-  );
-};
-
-const DirectoryTreeNode = ({ folder, level, isRootProject, selectedFolderId, selectedItem, expandedFolderIds, dragState, getChildFolders, getCardSets, getFolderDocuments, getFolderNotes, onToggleFolder, onSelectFolder, onSelectCardSet, onSelectDocument, onSelectNote, onOpenContextMenu, onOpenCardSetContextMenu, onOpenDocumentContextMenu, onOpenNoteContextMenu, onFolderDragStart, onFolderDragOver, onFolderDragLeave, onFolderDrop, onFolderDragEnd }: DirectoryTreeNodeProps) => {
-  const folderId = folder.id;
-  const childFolders = getChildFolders(folderId);
-  const childCardSets = getCardSets(folderId);
-  const childDocuments = getFolderDocuments(folderId);
-  const childNotes = getFolderNotes(folderId);
-  const hasChildren = childFolders.length > 0 || childCardSets.length > 0 || childDocuments.length > 0 || childNotes.length > 0;
-  const isExpanded = expandedFolderIds.has(folderId);
-  const isSelected = selectedFolderId === folderId;
-  const isDragging = dragState.draggingId === folderId;
-  const dropPosition = dragState.dropInstruction?.targetId === folderId ? dragState.dropInstruction.position : null;
-  const folderName = getFolderName(folder, isRootProject);
-  const rowPaddingLeft = Math.max(0, level - LAYERED_TREE_ROOT_LEVEL) * LAYERED_TREE_INDENT_PX;
-  const dropIndicatorLeft = getLayeredTreeDropIndicatorLeft(level);
-  const Icon = isRootProject ? IconProjectFolder : ExplorerChromeFolderIcon;
-
-  const selectFolder = () => {
-    onSelectFolder(folderId);
-    if (hasChildren && !isExpanded) onToggleFolder(folderId);
-  };
-
-  const handleToggleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (hasChildren) onToggleFolder(folderId);
-  };
-
-  const handleRowClick = (event: ReactMouseEvent<HTMLElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    selectFolder();
-  };
-
-  const handleRowKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    event.preventDefault();
-    event.stopPropagation();
-    selectFolder();
-  };
-
-  const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => {
-    onOpenContextMenu(event, folder, isRootProject);
-  };
-
-  return (
-    <div data-folder-id={folderId}>
-      <div role="treeitem" tabIndex={0} aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} aria-grabbed={isDragging || undefined} draggable data-layered-tree-row="true" data-folder-tree-row="true" onClick={handleRowClick} onKeyDown={handleRowKeyDown} onDragStart={(event) => onFolderDragStart(event, folderId)} onDragEnter={(event) => onFolderDragOver(event, folderId)} onDragOver={(event) => onFolderDragOver(event, folderId)} onDragLeave={(event) => onFolderDragLeave(event, folderId)} onDrop={(event) => onFolderDrop(event, folderId)} onDragEnd={onFolderDragEnd} onContextMenu={handleContextMenu} data-folder-drop-position={dropPosition ?? undefined} className={cn("group/directory-tree-row relative flex h-8 cursor-grab items-center gap-2 rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)] transition-[background,box-shadow,opacity,transform] duration-150 hover:bg-[#eeeeee] active:cursor-grabbing focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]", isSelected && "bg-[#e9e9e9]", isDragging && "scale-[0.995] opacity-35", dropPosition === "inside" && "bg-[#e2e2e2] shadow-[inset_0_0_0_1px_#c7c7c7]")} style={{ paddingLeft: rowPaddingLeft }}>
-        {dropPosition === "before" ? <LayeredTreeDropIndicator position="before" left={dropIndicatorLeft} /> : null}
-        {dropPosition === "after" ? <LayeredTreeDropIndicator position="after" left={dropIndicatorLeft} /> : null}
-        {hasChildren ? (
-          <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} className="relative flex h-8 w-4 shrink-0 items-center justify-center rounded-[4px] text-[var(--app-sidebar-icon)]">
-            <Icon className="layered-directory-row-icon absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 transition-opacity group-hover/directory-tree-row:opacity-0" />
-            <IconChevronRight className={cn("absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 opacity-0 transition-opacity group-hover/directory-tree-row:opacity-100", isExpanded && "rotate-90")} />
-          </button>
-        ) : (
-          <span className="flex h-8 w-4 shrink-0 items-center justify-center text-[var(--app-sidebar-icon)]"><Icon className="layered-directory-row-icon h-4 w-4" /></span>
-        )}
-        <span title={folderName} className="flex h-8 min-w-0 flex-1 items-center text-left leading-[20px] text-inherit"><span className="min-w-0 flex-1 truncate">{folderName}</span></span>
-      </div>
-      {hasChildren && isExpanded ? (
-        <div role="group" className="mt-0.5 flex flex-col gap-0.5">
-          {childFolders.map((childFolder) => <DirectoryTreeNode key={childFolder.id} folder={childFolder} level={level + 1} isRootProject={false} selectedFolderId={selectedFolderId} selectedItem={selectedItem} expandedFolderIds={expandedFolderIds} dragState={dragState} getChildFolders={getChildFolders} getCardSets={getCardSets} getFolderDocuments={getFolderDocuments} getFolderNotes={getFolderNotes} onToggleFolder={onToggleFolder} onSelectFolder={onSelectFolder} onSelectCardSet={onSelectCardSet} onSelectDocument={onSelectDocument} onSelectNote={onSelectNote} onOpenContextMenu={onOpenContextMenu} onOpenCardSetContextMenu={onOpenCardSetContextMenu} onOpenDocumentContextMenu={onOpenDocumentContextMenu} onOpenNoteContextMenu={onOpenNoteContextMenu} onFolderDragStart={onFolderDragStart} onFolderDragOver={onFolderDragOver} onFolderDragLeave={onFolderDragLeave} onFolderDrop={onFolderDrop} onFolderDragEnd={onFolderDragEnd} />)}
-          {childNotes.map((note) => <DirectoryEntityRow key={note.id} id={note.id} kind="note" label={getNoteTitle(note)} level={level + 1} isSelected={isSelectedExplorerItem(selectedItem, "note", note.id)} onSelect={() => onSelectNote(note)} onContextMenu={(event) => onOpenNoteContextMenu(event, note)} />)}
-          {childCardSets.map((cardSet) => <DirectoryEntityRow key={cardSet.id} id={cardSet.id} kind="cardSet" label={getCardSetName(cardSet)} level={level + 1} isSelected={isSelectedExplorerItem(selectedItem, "cardSet", cardSet.id)} onSelect={() => onSelectCardSet(cardSet)} onContextMenu={(event) => onOpenCardSetContextMenu(event, cardSet)} />)}
-          {childDocuments.map((document) => <DirectoryEntityRow key={document.id} id={document.id} kind="document" label={getDocumentName(document)} level={level + 1} isSelected={isSelectedExplorerItem(selectedItem, "document", document.id)} onSelect={() => onSelectDocument(document)} onContextMenu={(event) => onOpenDocumentContextMenu(event, document)} />)}
-        </div>
-      ) : null}
-    </div>
-  );
 };
 
 const useLibraryHierarchyData = () => {
@@ -548,6 +455,131 @@ const useFolderLayeredTreeDragDrop = ({ rootFolders, rootDropParentId, scrollCon
   const updateItem = useCallback((folderId: string, patch: { parentId: string | null; orderIndex: number }) => updateFolder(folderId, { parentFolderId: patch.parentId, orderIndex: patch.orderIndex }), [updateFolder]);
 
   return useLayeredTreeDragDrop({ rootItems: rootFolders, rootDropParentId, scrollContainerRef, getChildItems: getChildFolders, getParentId, getOrderIndex, updateItem, setExpandedIds: setExpandedFolderIds });
+};
+
+const IconChevronRight = ({ className }: IconProps) => (
+  <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const IconProjectFolder = ({ className }: IconProps) => <ExplorerChromeFolderIcon className={className} />;
+
+const IconNote = ({ className }: IconProps) => (
+  <svg viewBox="0 0 16 16" fill="none" className={className}>
+    <path d="M4.5 2.75H9.8L12 4.95V13.25H4.5V2.75Z" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" />
+    <path d="M9.75 2.9V5H11.85" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" />
+    <path d="M6.25 7.25H10.25M6.25 9.5H10.25" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+  </svg>
+);
+
+const SidebarLoadingState = ({ ariaLabel, label }: SidebarLoadingStateProps) => {
+  return (
+    <aside aria-label={ariaLabel} className="h-full min-h-0 overflow-y-auto px-3 py-1 text-[#9aa1ad]">
+      <LoadingSpinner className="h-full min-h-0" label={label} />
+    </aside>
+  );
+};
+
+const DirectoryEntityRow = ({ id, label, kind, level, isSelected, onSelect, onContextMenu }: DirectoryEntityRowProps) => {
+  const Icon = kind === "cardSet" ? ExplorerChromeCardSetIcon : kind === "document" ? ExplorerChromePdfIcon : IconNote;
+  const rowPaddingLeft = Math.max(0, level - LAYERED_TREE_ROOT_LEVEL) * LAYERED_TREE_INDENT_PX + 18;
+
+  const handleClick = (event: ReactMouseEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onSelect();
+  };
+
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    onSelect();
+  };
+
+  const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => {
+    if (!onContextMenu) return;
+    onContextMenu(event);
+  };
+
+  return (
+    <div role="treeitem" tabIndex={0} aria-level={level} aria-selected={isSelected} data-directory-entity-id={id} data-directory-entity-kind={kind} onClick={handleClick} onKeyDown={handleKeyDown} onContextMenu={handleContextMenu} className={cn("group/directory-tree-row relative flex h-8 cursor-default items-center gap-2 rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)] transition-[background,box-shadow,opacity,transform] duration-150 hover:bg-[#eeeeee] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]", isSelected && "bg-[#e9e9e9]")} style={{ paddingLeft: rowPaddingLeft }}>
+      <span className="flex h-8 w-4 shrink-0 items-center justify-center text-[var(--app-sidebar-icon)]"><Icon className="h-4 w-4" /></span>
+      <span title={label} className="flex h-8 min-w-0 flex-1 items-center text-left leading-[20px] text-inherit"><span className="min-w-0 flex-1 truncate">{label}</span></span>
+    </div>
+  );
+};
+
+const DirectoryTreeNode = ({ folder, level, isRootProject, selectedFolderId, selectedItem, expandedFolderIds, dragState, getChildFolders, getCardSets, getFolderDocuments, getFolderNotes, onToggleFolder, onSelectFolder, onSelectCardSet, onSelectDocument, onSelectNote, onOpenContextMenu, onOpenCardSetContextMenu, onOpenDocumentContextMenu, onOpenNoteContextMenu, onFolderDragStart, onFolderDragOver, onFolderDragLeave, onFolderDrop, onFolderDragEnd }: DirectoryTreeNodeProps) => {
+  const folderId = folder.id;
+  const childFolders = getChildFolders(folderId);
+  const childCardSets = getCardSets(folderId);
+  const childDocuments = getFolderDocuments(folderId);
+  const childNotes = getFolderNotes(folderId);
+  const hasChildren = childFolders.length > 0 || childCardSets.length > 0 || childDocuments.length > 0 || childNotes.length > 0;
+  const isExpanded = expandedFolderIds.has(folderId);
+  const isSelected = selectedFolderId === folderId;
+  const isDragging = dragState.draggingId === folderId;
+  const dropPosition = dragState.dropInstruction?.targetId === folderId ? dragState.dropInstruction.position : null;
+  const folderName = getFolderName(folder, isRootProject);
+  const rowPaddingLeft = Math.max(0, level - LAYERED_TREE_ROOT_LEVEL) * LAYERED_TREE_INDENT_PX;
+  const dropIndicatorLeft = getLayeredTreeDropIndicatorLeft(level);
+  const Icon = isRootProject ? IconProjectFolder : ExplorerChromeFolderIcon;
+
+  const selectFolder = () => {
+    onSelectFolder(folderId);
+    if (hasChildren && !isExpanded) onToggleFolder(folderId);
+  };
+
+  const handleToggleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (hasChildren) onToggleFolder(folderId);
+  };
+
+  const handleRowClick = (event: ReactMouseEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    selectFolder();
+  };
+
+  const handleRowKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    selectFolder();
+  };
+
+  const handleContextMenu = (event: ReactMouseEvent<HTMLElement>) => {
+    onOpenContextMenu(event, folder, isRootProject);
+  };
+
+  return (
+    <div data-folder-id={folderId}>
+      <div role="treeitem" tabIndex={0} aria-level={level} aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={isSelected} aria-grabbed={isDragging || undefined} draggable data-layered-tree-row="true" data-folder-tree-row="true" onClick={handleRowClick} onKeyDown={handleRowKeyDown} onDragStart={(event) => onFolderDragStart(event, folderId)} onDragEnter={(event) => onFolderDragOver(event, folderId)} onDragOver={(event) => onFolderDragOver(event, folderId)} onDragLeave={(event) => onFolderDragLeave(event, folderId)} onDrop={(event) => onFolderDrop(event, folderId)} onDragEnd={onFolderDragEnd} onContextMenu={handleContextMenu} data-folder-drop-position={dropPosition ?? undefined} className={cn("group/directory-tree-row relative flex h-8 cursor-grab items-center gap-2 rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)] transition-[background,box-shadow,opacity,transform] duration-150 hover:bg-[#eeeeee] active:cursor-grabbing focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]", isSelected && "bg-[#e9e9e9]", isDragging && "scale-[0.995] opacity-35", dropPosition === "inside" && "bg-[#e2e2e2] shadow-[inset_0_0_0_1px_#c7c7c7]")} style={{ paddingLeft: rowPaddingLeft }}>
+        {dropPosition === "before" ? <LayeredTreeDropIndicator position="before" left={dropIndicatorLeft} /> : null}
+        {dropPosition === "after" ? <LayeredTreeDropIndicator position="after" left={dropIndicatorLeft} /> : null}
+        {hasChildren ? (
+          <button type="button" onClick={handleToggleClick} aria-label={isExpanded ? `${folderName} を閉じる` : `${folderName} を開く`} className="relative flex h-8 w-4 shrink-0 items-center justify-center rounded-[4px] text-[var(--app-sidebar-icon)]">
+            <Icon className="layered-directory-row-icon absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 transition-opacity group-hover/directory-tree-row:opacity-0" />
+            <IconChevronRight className={cn("absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 opacity-0 transition-opacity group-hover/directory-tree-row:opacity-100", isExpanded && "rotate-90")} />
+          </button>
+        ) : (
+          <span className="flex h-8 w-4 shrink-0 items-center justify-center text-[var(--app-sidebar-icon)]"><Icon className="layered-directory-row-icon h-4 w-4" /></span>
+        )}
+        <span title={folderName} className="flex h-8 min-w-0 flex-1 items-center text-left leading-[20px] text-inherit"><span className="min-w-0 flex-1 truncate">{folderName}</span></span>
+      </div>
+      {hasChildren && isExpanded ? (
+        <div role="group" className="mt-0.5 flex flex-col gap-0.5">
+          {childFolders.map((childFolder) => <DirectoryTreeNode key={childFolder.id} folder={childFolder} level={level + 1} isRootProject={false} selectedFolderId={selectedFolderId} selectedItem={selectedItem} expandedFolderIds={expandedFolderIds} dragState={dragState} getChildFolders={getChildFolders} getCardSets={getCardSets} getFolderDocuments={getFolderDocuments} getFolderNotes={getFolderNotes} onToggleFolder={onToggleFolder} onSelectFolder={onSelectFolder} onSelectCardSet={onSelectCardSet} onSelectDocument={onSelectDocument} onSelectNote={onSelectNote} onOpenContextMenu={onOpenContextMenu} onOpenCardSetContextMenu={onOpenCardSetContextMenu} onOpenDocumentContextMenu={onOpenDocumentContextMenu} onOpenNoteContextMenu={onOpenNoteContextMenu} onFolderDragStart={onFolderDragStart} onFolderDragOver={onFolderDragOver} onFolderDragLeave={onFolderDragLeave} onFolderDrop={onFolderDrop} onFolderDragEnd={onFolderDragEnd} />)}
+          {childNotes.map((note) => <DirectoryEntityRow key={note.id} id={note.id} kind="note" label={getNoteTitle(note)} level={level + 1} isSelected={isSelectedExplorerItem(selectedItem, "note", note.id)} onSelect={() => onSelectNote(note)} onContextMenu={(event) => onOpenNoteContextMenu(event, note)} />)}
+          {childCardSets.map((cardSet) => <DirectoryEntityRow key={cardSet.id} id={cardSet.id} kind="cardSet" label={getCardSetName(cardSet)} level={level + 1} isSelected={isSelectedExplorerItem(selectedItem, "cardSet", cardSet.id)} onSelect={() => onSelectCardSet(cardSet)} onContextMenu={(event) => onOpenCardSetContextMenu(event, cardSet)} />)}
+          {childDocuments.map((document) => <DirectoryEntityRow key={document.id} id={document.id} kind="document" label={getDocumentName(document)} level={level + 1} isSelected={isSelectedExplorerItem(selectedItem, "document", document.id)} onSelect={() => onSelectDocument(document)} onContextMenu={(event) => onOpenDocumentContextMenu(event, document)} />)}
+        </div>
+      ) : null}
+    </div>
+  );
 };
 
 const ProjectListSidebar = ({ onOpenCardSet }: ProjectListSidebarProps) => {

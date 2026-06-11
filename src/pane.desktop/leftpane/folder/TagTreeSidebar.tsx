@@ -1,14 +1,25 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent as ReactDragEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from "react";
+
 import { useTagTreeCommands } from "@/features/settings/hooks/useTagTreeCommands";
+
 import { useTags, type Tag as TagRecord } from "@/features/settings/hooks/useTags";
+
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+
 import { cn } from "@/lib/utils";
+
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+
 import { StratisTagIcon } from "@/ui/icons/stratis";
+
 import { LayeredTreeDropIndicator } from "./layeredTreeDnd";
+
 import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LAYERED_TREE_ROOT_LEVEL } from "./layeredTreeDnd.constants";
+
 import { getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget } from "./layeredTreeDnd.utils";
+
 import type { LayeredTreeDragState } from "./layeredTreeDnd.types";
+
 import { useLayeredTreeDragDrop } from "./useLayeredTreeDragDrop";
 
 type TagTreeNode = {
@@ -48,9 +59,8 @@ type TagMovePatch = {
 };
 
 const LIBRARY_TITLE = "Library";
-const EMPTY_TAG_MESSAGE = "タグがありません";
 
-const IconChevronRight = ({ className }: { className?: string }) => (<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
+const EMPTY_TAG_MESSAGE = "タグがありません";
 
 const getTagName = (tag: TagRecord): string => {
   const name = tag.name.trim();
@@ -124,6 +134,8 @@ const flattenVisibleTagTree = (nodes: TagTreeNode[], expandedTagIds: Set<string>
 
   return [item, ...flattenVisibleTagTree(node.children, expandedTagIds, level + 1, nextVisitedTagIds)];
 });
+
+const IconChevronRight = ({ className }: { className?: string }) => (<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
 
 const TagTreeRow = ({ item, selectedTagNames, dragState, onToggleTag, onSelectTag, onTagDragStart, onTagDragOver, onTagDragLeave, onTagDrop, onTagDragEnd }: TagTreeRowProps) => {
   const isSelected = selectedTagNames.has(item.name);

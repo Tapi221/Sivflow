@@ -1,13 +1,23 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
+
 import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
+
 import { fetchCalendarList } from "./gcal.api";
+
 import { buildTokenExpiry, isStoredTokenValid, readStoredAccounts, removeStoredAccount, type StoredGoogleAccount, updateStoredAccountCalendarIds, updateStoredAccountToken, upsertStoredAccount } from "./gcal.multi-storage";
+
 import { refreshCalendarAccessToken, requestCalendarAccessToken, requestGoogleCalendarServerCode } from "@/integration/google-integration/google.oauth";
+
 import { disconnectServerStoredGoogleCalendarAccount, exchangeGoogleCalendarCode, getGoogleOAuthCallableErrorReason, getServerStoredGoogleCalendarAccessToken, isGoogleOAuthDeterministicErrorReason, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
+
 import type { GoogleOAuthCallableErrorReason } from "@/integration/google-integration/google.server-oauth";
+
 import type { GCalConnectionStatus, GCalForceSyncOptions, GCalSilentReconnectResult, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
+
 import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
+
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
+
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 export type GoogleAccountEntry = { id: string;
@@ -73,11 +83,6 @@ type EventsAction =
   }
   | { type: "CLEAR_ACCOUNT"; accountId: string };
 
-const useServerStoredTokens = isServerStoredGoogleOAuthEnabled();
-const useDesktopSecureRefreshTokens = isDesktopLikeRuntime() && !useServerStoredTokens;
-const CALENDAR_LIST_FOCUS_REFRESH_THROTTLE_MS = 10_000;
-export const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
-
 type GoogleOAuthCooldownReason = GoogleOAuthCallableErrorReason | "auto_recovery_pending" | "internal";
 
 type GoogleOAuthCooldownEntry = {
@@ -85,6 +90,14 @@ type GoogleOAuthCooldownEntry = {
   message: string;
   until: number;
 };
+
+const useServerStoredTokens = isServerStoredGoogleOAuthEnabled();
+
+const useDesktopSecureRefreshTokens = isDesktopLikeRuntime() && !useServerStoredTokens;
+
+const CALENDAR_LIST_FOCUS_REFRESH_THROTTLE_MS = 10_000;
+
+export const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
 
 const overlapsRange = (
   event: GoogleCalendarEvent,

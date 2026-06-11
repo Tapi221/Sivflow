@@ -3,8 +3,11 @@ import * as React from 'react';
 import type { SlateElementProps } from 'platejs/static';
 
 import { type Heading, BaseTocPlugin, isHeading } from '@platejs/toc';
+
 import { cva } from 'class-variance-authority';
+
 import { type SlateEditor, type TElement, NodeApi } from 'platejs';
+
 import { SlateElement } from 'platejs/static';
 
 import { Button } from './button';
@@ -21,35 +24,6 @@ const headingItemVariants = cva(
     },
   }
 );
-
-export function TocElementStatic(props: SlateElementProps) { const { editor } = props;
-  const headingList = getHeadingList(editor);
-
-  return (
-    <SlateElement {...props} className="mb-1 p-0">
-      <div>
-        {headingList.length > 0 ? (
-          headingList.map((item: Heading) => (
-            <Button
-              key={item.title}
-              variant="ghost"
-              className={headingItemVariants({
-                depth: item.depth as 1 | 2 | 3,
-              })}
-            >
-              {item.title}
-            </Button>
-          ))
-        ) : (
-          <div className="text-gray-500 text-sm">
-            Create a heading to display the table of contents.
-          </div>
-        )}
-      </div>
-      {props.children}
-    </SlateElement>
-  );
-}
 
 const headingDepth: Record<string, number> = {
   h1: 1,
@@ -91,6 +65,35 @@ const getHeadingList = (editor?: SlateEditor) => {
 
   return headingList;
 };
+
+export function TocElementStatic(props: SlateElementProps) { const { editor } = props;
+  const headingList = getHeadingList(editor);
+
+  return (
+    <SlateElement {...props} className="mb-1 p-0">
+      <>
+        {headingList.length > 0 ? (
+          headingList.map((item: Heading) => (
+            <Button
+              key={item.title}
+              variant="ghost"
+              className={headingItemVariants({
+                depth: item.depth as 1 | 2 | 3,
+              })}
+            >
+              {item.title}
+            </Button>
+          ))
+        ) : (
+          <div className="text-gray-500 text-sm">
+            Create a heading to display the table of contents.
+          </div>
+        )}
+      </>
+      {props.children}
+    </SlateElement>
+  );
+}
 
 /**
  * DOCX-compatible TOC component.
