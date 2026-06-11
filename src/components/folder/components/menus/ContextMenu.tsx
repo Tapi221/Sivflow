@@ -3,6 +3,8 @@ import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu
 import { ExplorerMenuPanel, type ExplorerMenuPanelVariant } from "./ExplorerMenuPanel";
 import type { MenuAction } from "./menuActions";
 
+
+
 interface ContextMenuProps {
   children?: ReactNode;
   anchorPoint?: { x: number; y: number } | null;
@@ -13,7 +15,11 @@ interface ContextMenuProps {
   variant?: ExplorerMenuPanelVariant;
 }
 
+
+
 const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
+
+
 
 
 

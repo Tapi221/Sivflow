@@ -1,9 +1,14 @@
 'use client';
 
 import * as React from 'react';
+
 import type { PlateElementProps } from 'platejs/react';
+
 import { type VariantProps, cva } from 'class-variance-authority';
+
 import { PlateElement } from 'platejs/react';
+
+
 
 const headingVariants = cva(
   'relative mb-1 data-[nav-target=true]:rounded-md data-[nav-target=true]:bg-(--color-highlight)',
@@ -20,6 +25,8 @@ const headingVariants = cva(
     },
   }
 );
+
+
 
 export const HeadingElement = ({ variant = 'h1', ...props }: PlateElementProps & VariantProps<typeof headingVariants>) => { return ( <PlateElement as={variant!} className={headingVariants({ variant })} {...props}> {props.children} </PlateElement> );
 };

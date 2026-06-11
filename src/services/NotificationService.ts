@@ -1,7 +1,11 @@
 import type { Notification, NotificationOptions } from "@/types/notification";
 import platform from "@/platform";
 
+
+
 type NotificationListener = (notification: Notification) => void;
+
+
 
 const createDismissedNotification = (id: string): Notification => {
   return {
@@ -15,6 +19,8 @@ const createDismissedNotification = (id: string): Notification => {
     duration: 0,
   };
 };
+
+
 
 const NotificationService = class {
   private readonly listeners = new Set<NotificationListener>();

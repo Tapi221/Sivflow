@@ -8,6 +8,8 @@ import { type EditorBlockIconName, type EditorBlockType, getEditorBlockDefinitio
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
 
+
+
 interface BlockToolbarProps {
   label: string;
   onAddBlock: (type: CardBlock["type"]) => void;
@@ -25,6 +27,8 @@ type ToolbarBlockConfig = {
   orderIndex: number;
 };
 
+
+
 const areBlockToolbarPropsEqual = (
   prev: BlockToolbarProps,
   next: BlockToolbarProps,
@@ -35,6 +39,8 @@ const areBlockToolbarPropsEqual = (
   prev.hiddenBlockTypes === next.hiddenBlockTypes &&
   prev.desktopLayout === next.desktopLayout &&
   prev.className === next.className;
+
+
 
 const TextBlockGlyph = ({
   size = 16,
@@ -279,6 +285,8 @@ const MarkdownBlockGlyph = ({
   );
 };
 
+
+
 const getIcon = (
   iconName: EditorBlockIconName,
 ): React.ComponentType<IconProps> => {
@@ -293,6 +301,8 @@ const getIcon = (
 
   return map[iconName];
 };
+
+
 
 const Tooltip = ({
   label,
@@ -610,6 +620,8 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
   return renderToolbarShell();
 };
+
+
 
 export const BlockToolbar = React.memo( BlockToolbarInner, areBlockToolbarPropsEqual, );
 

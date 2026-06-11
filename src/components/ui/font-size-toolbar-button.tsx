@@ -1,15 +1,26 @@
 'use client';
 
 import * as React from 'react';
+
 import type { TElement } from 'platejs';
+
 import { toUnitLess } from '@platejs/basic-styles';
+
 import { FontSizePlugin } from '@platejs/basic-styles/react';
+
 import { Minus, Plus } from 'lucide-react';
+
 import { KEYS } from 'platejs';
+
 import { useEditorPlugin, useEditorSelector } from 'platejs/react';
+
 import { Popover, PopoverContent, PopoverTrigger, } from './popover';
+
 import { cn } from '@/lib/utils';
+
 import { ToolbarButton } from './toolbar';
+
+
 
 const DEFAULT_FONT_SIZE = '16';
 
@@ -35,6 +46,8 @@ const FONT_SIZES = [
   '72',
   '96',
 ] as const;
+
+
 
 export function FontSizeToolbarButton() { const [inputValue, setInputValue] = React.useState(DEFAULT_FONT_SIZE);
   const [isFocused, setIsFocused] = React.useState(false);

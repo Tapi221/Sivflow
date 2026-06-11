@@ -14,6 +14,8 @@ import { CalendarTimetableSyllabusCatalogPanel } from "./CalendarTimetableSyllab
 import { normalizeVisibleDayCount } from "./calendarTimetable.storage";
 import { useCalendarTimetable } from "./useCalendarTimetable";
 
+
+
 type TimetableSlot = { dayIndex: CalendarTimetableWeekdayIndex; periodId: string };
 
 type CalendarTimetableDensity = "default" | "compact";
@@ -30,6 +32,8 @@ type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 type StratisOptionalIconProps = { names: readonly string[]; className?: string };
 
+
+
 const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
 const STRATIS_CHECK_ICON_NAMES = ["StratisCheckIcon", "StratisCheck01Icon", "StratisCheckCircleContainedIcon"] as const;
 const STRATIS_PLUS_ICON_NAMES = ["StratisPlus01Icon", "StratisPlusIcon"] as const;
@@ -40,6 +44,8 @@ const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] a
 const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
 const DEFAULT_TIMETABLE_ADD_REQUEST_TOKEN = 0;
 const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
+
+
 
 const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 
@@ -66,6 +72,8 @@ const createTimetableGridStyle = (density: CalendarTimetableDensity, visibleDayC
 const isSameTimetableSlot = (left: CalendarTimetableSlot, right: CalendarTimetableSlot): boolean => left.dayIndex === right.dayIndex && left.periodId === right.periodId;
 
 const createEditorSlots = (course: CalendarTimetableCourse | null, initialSlot: CalendarTimetableSlot | null): CalendarTimetableSlot[] => course?.slots ?? (initialSlot ? [initialSlot] : EMPTY_SLOT_LIST);
+
+
 
 const StratisOptionalIcon = ({ names, className }: StratisOptionalIconProps) => {
   const Icon = resolveStratisIcon(names);
@@ -290,6 +298,8 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
     </div>
   );
 };
+
+
 
 const CalendarTimetableView = memo(CalendarTimetableViewComponent);
 

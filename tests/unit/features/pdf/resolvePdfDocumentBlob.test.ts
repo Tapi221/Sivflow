@@ -1,11 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-
-
 import { findLocalPdfBlob, resolvePdfDocumentBlob } from "@/features/pdf/resolvePdfDocumentBlob";
-
-
-
 import type { DocumentItem } from "@/types";
 
 const {

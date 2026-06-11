@@ -12,6 +12,8 @@ export type CardSyncStatusSnapshot = Readonly<{ lastSyncedAtMs: number | null;
   canRetry: boolean;
 }>;
 
+
+
 export const toCardSyncStatusSnapshot = ( status: CardSyncStatus | null, ): CardSyncStatusSnapshot | null => { if (!status) { return null;
   }
 

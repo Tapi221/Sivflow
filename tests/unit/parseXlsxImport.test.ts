@@ -1,15 +1,6 @@
 import { describe, expect, it } from "vitest";
-
-
-
 import * as XLSX from "xlsx";
-
-
-
 import type { ImportIssue } from "@/features/import/domain/import.types";
-
-
-
 import { parseXlsxImport } from "@/features/import/infra/web/parseXlsxImport";
 
 /**

@@ -1,5 +1,7 @@
 import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionStatus, HandwritingStrokeDeltaMessage } from "./handwritingSession.types";
 
+
+
 export type HandwritingSessionUnsubscribe = () => void;
 
 export type HandwritingSessionMessageHandler = (message: HandwritingSessionMessage) => void;

@@ -3,6 +3,8 @@ import type { SlateElementProps } from 'platejs/static';
 import { type VariantProps, cva } from 'class-variance-authority';
 import { SlateElement } from 'platejs/static';
 
+
+
 const headingVariants = cva('relative mb-1', {
   variants: {
     variant: {
@@ -15,6 +17,8 @@ const headingVariants = cva('relative mb-1', {
     },
   },
 });
+
+
 
 export function HeadingElementStatic({ variant = 'h1', ...props }: SlateElementProps & VariantProps<typeof headingVariants>) { const id = props.element.id as string | undefined;
 

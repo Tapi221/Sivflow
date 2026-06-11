@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest";
-
-
-
 import { getPdfPageWindowKeepSet, getSafePdfPageNumber } from "@/features/pdf/pdfPageWindow";
-
-
-
 import type { PdfPageWindowMetric } from "@/features/pdf/pdfPageWindow";
 
 const createPageMetrics = (pageCount: number, pageHeight: number): PdfPageWindowMetric[] => {

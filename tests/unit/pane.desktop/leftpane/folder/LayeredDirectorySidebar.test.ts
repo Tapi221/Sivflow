@@ -1,28 +1,10 @@
 // @vitest-environment jsdom
 import React from "react";
-
-
-
 import { readFileSync } from "node:fs";
-
-
-
 import { resolve } from "node:path";
-
-
-
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-
-
-
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-
-
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
-
-
-
 import { ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
 
 const mocks = vi.hoisted(() => {

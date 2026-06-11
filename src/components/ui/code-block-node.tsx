@@ -1,15 +1,26 @@
 'use client';
 
 import * as React from 'react';
+
 import { formatCodeBlock, isLangSupported } from '@platejs/code-block';
+
 import { BracesIcon, Check, CheckIcon, CopyIcon } from 'lucide-react';
+
 import { type TCodeBlockElement, type TCodeSyntaxLeaf, NodeApi } from 'platejs';
+
 import { type PlateElementProps, type PlateLeafProps, PlateElement, PlateLeaf, } from 'platejs/react';
+
 import { useEditorRef, useElement, useReadOnly } from 'platejs/react';
+
 import { Button } from './button';
+
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, } from './command';
+
 import { Popover, PopoverContent, PopoverTrigger, } from './popover';
+
 import { cn } from '@/lib/utils';
+
+
 
 const languages: { label: string; value: string }[] = [
   { label: 'Auto', value: 'auto' },
@@ -102,6 +113,8 @@ const languages: { label: string; value: string }[] = [
   { label: 'XML', value: 'xml' },
   { label: 'YAML', value: 'yaml' },
 ];
+
+
 
 export function CodeBlockElement(props: PlateElementProps<TCodeBlockElement>) { const { editor, element } = props;
 

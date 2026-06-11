@@ -10,6 +10,8 @@ import type { DocumentItem } from "@/types";
 import { getOrCreateDeviceId } from "@/utils/device";
 import { useToast } from "@web-renderer/contexts/ToastContext";
 
+
+
 interface UseFolderDocumentUploadParams {
   actionFolderId: string | null;
   getNextOrderIndex: (folderId: string | null) => number;
@@ -17,6 +19,8 @@ interface UseFolderDocumentUploadParams {
 }
 
 type LegacyEntityFields = { blobUrl?: string | null };
+
+
 
 const withLegacyFields = <T extends object>(value: T): T & LegacyEntityFields => value as T & LegacyEntityFields;
 

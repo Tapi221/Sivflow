@@ -1,7 +1,4 @@
 import { execFileSync } from "node:child_process";
-
-
-
 import process from "node:process";
 
 const port = Number.parseInt(process.argv[2] ?? "5173", 10);

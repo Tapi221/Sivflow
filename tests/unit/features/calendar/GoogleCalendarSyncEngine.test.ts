@@ -1,17 +1,8 @@
 // @vitest-environment jsdom
 
 import { addDays } from "date-fns";
-
-
-
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-
-
 import type { GCalSilentReconnectResult, GCalSyncEngineOptions, GCalSyncStartContext, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
-
-
-
 import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
 
 const CALENDAR_ID = "primary";

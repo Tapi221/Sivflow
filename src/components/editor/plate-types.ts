@@ -2,6 +2,8 @@
 
 import type { EmptyText, KEYS, PlainText, TBasicMarks, TCaptionProps, TComboboxInputElement, TCommentText, TElement, TFontMarks, TImageElement, TLineHeightProps, TLinkElement, TListProps, TMediaEmbedElement, TMentionElement, TResizableProps, TTableElement, TText, TTextAlignProps, } from 'platejs';
 
+
+
 export interface MyBlockElement extends TElement, TListProps { id?: string;
 }
 

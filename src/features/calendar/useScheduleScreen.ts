@@ -14,6 +14,8 @@ import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
 import { useCalendarWeekStartSetting } from "./useCalendarWeekStartSetting";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 
+
+
 type UseScheduleScreenOptions = { allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay };
 
 export type UseScheduleScreenReturn = { contentViewportRef: RefObject<HTMLDivElement | null>;
@@ -78,6 +80,8 @@ type MonthRenderedRangeSnapshot = CalendarDateRange & {
   scrollTargetToken: number;
   weekStartDay: CalendarWeekStartDay;
 };
+
+
 
 const getGoogleCalendarEventDedupeKey = (event: GoogleCalendarEvent): string => event.id;
 

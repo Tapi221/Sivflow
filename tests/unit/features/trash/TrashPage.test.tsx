@@ -1,21 +1,9 @@
 // @vitest-environment jsdom
 
 import { render, screen, within } from "@testing-library/react";
-
-
-
 import userEvent from "@testing-library/user-event";
-
-
-
 import React from "react";
-
-
-
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-
-
 import TrashPage from "@web-renderer/features/trash/TrashPage";
 
 const { emptyMock, permanentlyDeleteMock, refreshMock, restoreMock, trashState } = vi.hoisted(() => ({

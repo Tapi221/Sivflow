@@ -3,15 +3,26 @@
 /* eslint-disable react-hooks/refs */
 
 import * as React from 'react';
+
 import type { Emoji } from '@emoji-mart/data';
+
 import { type EmojiCategoryList, type EmojiIconList, type GridRow, EmojiSettings, } from '@platejs/emoji';
+
 import { type EmojiDropdownMenuOptions, type UseEmojiPickerType, useEmojiDropdownMenuState, } from '@platejs/emoji/react';
+
 import * as Popover from '@radix-ui/react-popover';
+
 import { AppleIcon, ClockIcon, CompassIcon, FlagIcon, LeafIcon, LightbulbIcon, MusicIcon, SearchIcon, SmileIcon, StarIcon, XIcon, } from 'lucide-react';
+
 import { Button } from './button';
+
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from './tooltip';
+
 import { cn } from '@/lib/utils';
+
 import { ToolbarButton } from './toolbar';
+
+
 
 const emojiCategoryIcons: Record<
   EmojiCategoryList,
@@ -107,6 +118,8 @@ const emojiSearchIcons = {
   delete: <XIcon className="size-4 text-current" />,
   loupe: <SearchIcon className="size-4 text-current" />,
 };
+
+
 
 export function EmojiToolbarButton({ options, ...props }: { options?: EmojiDropdownMenuOptions;
 } & React.ComponentPropsWithoutRef<typeof ToolbarButton>) {
@@ -371,6 +384,8 @@ function EmojiPickerNavigation({
   );
 }
 
+
+
 const EmojiButton = React.memo(function EmojiButton({
   emoji,
   index,
@@ -436,6 +451,8 @@ const RowOfButtons = React.memo(function RowOfButtons({
     </div>
   );
 });
+
+
 
 function EmojiPickerContent({
   emojiLibrary,

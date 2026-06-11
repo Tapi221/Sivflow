@@ -1,11 +1,5 @@
 import { renderHook } from "@testing-library/react-hooks";
-
-
-
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-
-
 import { useReliableFileUpload } from "@/features/document/hooks/useReliableFileUpload";
 
 vi.mock("@/services/firebase", () => ({

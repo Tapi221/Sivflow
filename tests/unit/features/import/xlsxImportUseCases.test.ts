@@ -1,15 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-
-
 import { executeXlsxImport, loadXlsxImportFile } from "@/features/import/application/xlsxImportUseCases";
-
-
-
 import type { ImportParseResult, ImportPayload } from "@/features/import/domain/import.types";
-
-
-
 import type { CardSet } from "@/types";
 
 const {

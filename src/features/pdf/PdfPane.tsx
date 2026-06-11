@@ -16,6 +16,8 @@ import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerfo
 import type { PdfDocumentSource } from "./pdfDocumentSource";
 import "./PdfPane.css";
 
+
+
 type PdfPaneProps = {
   source: PdfDocumentSource | null;
   className?: string;
@@ -115,6 +117,8 @@ type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 type StratisOptionalIconProps = { names: readonly string[]; className?: string; active?: boolean };
 
+
+
 const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
 const STRATIS_BOOKMARK_ICON_NAMES = ["StratisBookmarkIcon", "StratisBookmark01Icon", "StratisBookOpenBookmarkIcon", "StratisStarIcon", "StratisStar01Icon", "StratisStar02Icon"] as const;
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 640;
@@ -139,6 +143,8 @@ const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
+
+
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -452,6 +458,8 @@ const createDefaultToolbarState = (): PdfToolbarState => ({
   scale: 1,
   isBookmarked: false,
 });
+
+
 
 const StratisFallbackBookmarkIcon = ({ className, active }: { className?: string; active?: boolean }) => (
   <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -1104,5 +1112,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     </section>
   );
 };
+
+
 
 export { PdfPane };
