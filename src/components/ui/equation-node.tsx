@@ -21,12 +21,12 @@ import {
   useSelected,
 } from 'platejs/react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from './button';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from './popover';
 import { cn } from '@/lib/utils';
 import { inlineSuggestionVariants } from '@/components/suggestion';
 
