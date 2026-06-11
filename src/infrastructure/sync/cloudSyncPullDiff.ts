@@ -1,17 +1,8 @@
-import type {
-  DocumentData,
-  QueryConstraint,
-  QueryDocumentSnapshot,
-} from "firebase/firestore";
+import type { DocumentData, QueryConstraint, QueryDocumentSnapshot } from "firebase/firestore";
 import * as Firestore from "firebase/firestore";
 import { getDoc, getDocs, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
 import { getPullableCollectionRef, getUserSettingsRef, requireCloudSyncFirestore } from "./cloudSyncFirestoreRefs";
-import {
-  getUpdatedAtMillis,
-  PULLABLE_ENTITY_TYPES,
-  type PullableEntityType,
-  sanitizeSyncDataFromCloud,
-} from "@/application/usecases/cloudSyncShared";
+import { getUpdatedAtMillis, PULLABLE_ENTITY_TYPES, type PullableEntityType, sanitizeSyncDataFromCloud } from "@/application/usecases/cloudSyncShared";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
 
 const PAGE_SIZE = 500;
@@ -23,9 +14,7 @@ type PullDiffChange = SyncChange & {
   updatedAt: number;
 };
 
-const getStartAfterConstraint = (
-  snapshot: QueryDocumentSnapshot<DocumentData>,
-): QueryConstraint | null => {
+const getStartAfterConstraint = (snapshot: QueryDocumentSnapshot<DocumentData>): QueryConstraint | null => {
   const fn = (Firestore as Record<string, unknown>).startAfter;
   if (typeof fn !== "function") {
     return null;
@@ -36,18 +25,12 @@ const getStartAfterConstraint = (
   );
 };
 
-const getChangeId = (
-  snapshot: QueryDocumentSnapshot<DocumentData>,
-  data: DocumentData,
-): string => {
+const getChangeId = (snapshot: QueryDocumentSnapshot<DocumentData>, data: DocumentData): string => {
   const value = data.id;
   return typeof value === "string" && value.length > 0 ? value : snapshot.id;
 };
 
-const toPullDiffChange = (
-  type: PullableEntityType,
-  snapshot: QueryDocumentSnapshot<DocumentData>,
-): PullDiffChange => {
+const toPullDiffChange = (type: PullableEntityType, snapshot: QueryDocumentSnapshot<DocumentData>): PullDiffChange => {
   const data = snapshot.data();
 
   return {
@@ -58,11 +41,7 @@ const toPullDiffChange = (
   };
 };
 
-const fetchPullableEntityDiff = async (
-  userId: string,
-  type: PullableEntityType,
-  sinceTimestamp: Timestamp,
-): Promise<PullDiffChange[]> => {
+const fetchPullableEntityDiff = async (userId: string, type: PullableEntityType, sinceTimestamp: Timestamp): Promise<PullDiffChange[]> => {
   const firestore = requireCloudSyncFirestore();
   const collectionRef = getPullableCollectionRef(firestore, userId, type);
   const changes: PullDiffChange[] = [];
@@ -98,10 +77,7 @@ const fetchPullableEntityDiff = async (
   return changes;
 };
 
-const fetchUserSettingsDiff = async (
-  userId: string,
-  since: number,
-): Promise<PullDiffChange[]> => {
+const fetchUserSettingsDiff = async (userId: string, since: number): Promise<PullDiffChange[]> => {
   const firestore = requireCloudSyncFirestore();
   const snapshot = await getDoc(getUserSettingsRef(firestore, userId));
   if (!snapshot.exists()) {
@@ -124,10 +100,7 @@ const fetchUserSettingsDiff = async (
   ];
 };
 
-export const pullCloudSyncDiff = async (
-  userId: string,
-  since: number,
-): Promise<{ changes: SyncChange[]; serverTime: number }> => {
+export const pullCloudSyncDiff = async (userId: string, since: number): Promise<{ changes: SyncChange[]; serverTime: number }> => {
   const sinceTimestamp = Timestamp.fromMillis(Math.max(0, since));
 
   const pullableResults = await Promise.all(
