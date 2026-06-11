@@ -1,7 +1,6 @@
 import "./sidebar.layered-directory.css";
 import { useCallback, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { StratisTagIcon } from "stratis-ui-icons";
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { TagFilterPopover } from "@/chip/popover/TagFilterPopover";
 import { RightClickPanelSurface } from "@/chip/rightclickpanel.desktop/rightClickPanelCommon";
@@ -23,6 +22,7 @@ import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
+import { Tag } from "@/ui/icons";
 
 
 
@@ -336,7 +336,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
             <ExplorerChromeFolderIcon className="app-layered-directory__notion-icon" />
           </button>
           <button type="button" className={`app-layered-directory__notion-action${isTagActive ? " is-active" : ""}`} onClick={handleOpenTagTree} aria-current={isTagActive ? "page" : undefined} aria-label={WORKSPACE_TAGS_LABEL} title={WORKSPACE_TAGS_LABEL}>
-            <StratisTagIcon className="app-layered-directory__notion-icon" />
+            <Tag className="app-layered-directory__notion-icon" />
           </button>
           <button type="button" className={`app-layered-directory__notion-action${isScheduleActive ? " is-active" : ""}`} onClick={handleOpenSchedule} aria-current={isScheduleActive ? "page" : undefined} aria-label={WORKSPACE_SCHEDULE_LABEL} title={WORKSPACE_SCHEDULE_LABEL}>
             <CalendarIcon className="app-layered-directory__notion-icon" />
