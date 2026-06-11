@@ -3,11 +3,9 @@
 import * as React from 'react';
 
 import type { VariantProps } from 'class-variance-authority';
-
 import type { PlateContentProps, PlateViewProps } from 'platejs/react';
 
 import { cva } from 'class-variance-authority';
-
 import { PlateContainer, PlateContent, PlateView } from 'platejs/react';
 
 import { cn } from '@/lib/utils';
@@ -58,11 +56,9 @@ const editorVariants = cva(
       },
       variant: {
         ai: 'w-full px-0 text-base md:text-sm',
-        aiChat:
-          'max-h-[min(70vh,320px)] w-full overflow-y-auto px-3 py-2 text-base md:text-sm',
+        aiChat: 'max-h-[min(70vh,320px)] w-full overflow-y-auto px-3 py-2 text-base md:text-sm',
         comment: cn('rounded-none border-none bg-transparent text-sm'),
-        default:
-          'size-full px-16 pt-4 pb-72 text-base sm:px-[max(64px,calc(50%-350px))]',
+        default: 'size-full px-16 pt-4 pb-72 text-base sm:px-[max(64px,calc(50%-350px))]',
         demo: 'size-full px-16 pt-4 pb-72 text-base sm:px-[max(64px,calc(50%-350px))]',
         fullWidth: 'size-full px-16 pt-4 pb-72 text-base sm:px-24',
         none: '',
@@ -72,16 +68,20 @@ const editorVariants = cva(
   }
 );
 
-export function EditorContainer({ className, variant, ...props }: React.ComponentProps<'div'> & VariantProps<typeof editorContainerVariants>) { return ( <PlateContainer className={cn( 'ignore-click-outside/toolbar', editorContainerVariants({ variant }), className )} {...props} /> );
-}
+export const EditorContainer = ({ className, variant, ...props }: React.ComponentProps<'div'> & VariantProps<typeof editorContainerVariants>) => {
+  return <PlateContainer className={cn('ignore-click-outside/toolbar', editorContainerVariants({ variant }), className)} {...props} />;
+};
 
 export type EditorProps = PlateContentProps & VariantProps<typeof editorVariants>;
 
-export const Editor = ({ className, disabled, focused, variant, ref, ...props }: EditorProps & { ref?: React.RefObject<HTMLDivElement | null> }) => ( <PlateContent ref={ref} className={cn( editorVariants({ disabled, focused, variant, }), className )} disabled={disabled} disableDefaultStyles {...props} /> );
+export const Editor = ({ className, disabled, focused, variant, ref, ...props }: EditorProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
+  return <PlateContent ref={ref} className={cn(editorVariants({ disabled, focused, variant }), className)} disabled={disabled} disableDefaultStyles {...props} />;
+};
 
 Editor.displayName = 'Editor';
 
-export function EditorView({ className, variant, ...props }: PlateViewProps & VariantProps<typeof editorVariants>) { return ( <PlateView {...props} className={cn(editorVariants({ variant }), className)} /> );
-}
+export const EditorView = ({ className, variant, ...props }: PlateViewProps & VariantProps<typeof editorVariants>) => {
+  return <PlateView {...props} className={cn(editorVariants({ variant }), className)} />;
+};
 
 EditorView.displayName = 'EditorView';
