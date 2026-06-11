@@ -33,7 +33,7 @@
     "verify:icons": "node scripts/verify-icons-entry.mjs",
     "verify:sw": "node scripts/verify/verify-sw.mjs",
     "verify:module-constant-names": "node scripts/verify/verify-module-constant-names.mjs",
-    "verify:source-conventions": "node scripts/verify/fix-source-convention-wrappers.mjs && node scripts/verify/verify-source-conventions.mjs && npm run verify:module-constant-names",
+    "verify:source-conventions": "node scripts/verify/fix-source-convention-wrappers.mjs && node scripts/verify/verify-source-conventions.mjs && node scripts/verify/verify-pdf-zoom-constants.mjs && npm run verify:module-constant-names",
     "watch:source-conventions": "node scripts/dev/watch-source-conventions.mjs",
     "watch:source-conventions:fix": "node scripts/dev/watch-source-conventions.mjs --fix",
     "fix:source-conventions:local-llm": "node scripts/dev/watch-source-conventions.mjs --fix --once",
