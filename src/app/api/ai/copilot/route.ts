@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { generateText } from 'ai';
 import { NextResponse } from 'next/server';
 
-export async function POST(req: NextRequest) {
+export const POST = async (req: NextRequest) => {
   const {
     apiKey: key,
     model = 'gpt-4o-mini',
@@ -41,4 +41,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+};
