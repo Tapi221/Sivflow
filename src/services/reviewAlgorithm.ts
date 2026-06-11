@@ -1,8 +1,9 @@
 import type { Timestamp } from "firebase/firestore";
-import { normalizeDate as toDate } from "@/shared/codec/date";
 import type { ReviewLog } from "@/types/domain/base";
-import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import type { SubjectiveScore } from "@/utils/reviewUtils";
+
+import { normalizeDate as toDate } from "@/shared/codec/date";
+import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import { toMillis } from "@/utils/toMillis";
 
 export type ReviewAlgorithmInput = {
@@ -33,11 +34,44 @@ export type ReviewAlgorithmResult = {
   difficulty: number;
 };
 
+export type MultipleChoiceConfidence = "high" | "mid" | "luck";
+
+export type MultipleChoiceReviewMeta = {
+  isCorrect: boolean;
+  isUnknown?: boolean;
+  confidence?: MultipleChoiceConfidence;
+  choiceTimeMs?: number;
+};
+
+type ReviewHistoryCard = ReviewAlgorithmInput["card"] & {
+  createdAt?: Date | Timestamp | null;
+  created_at?: Date | Timestamp | string | number | null;
+  reviewLogs?: ReviewLog[] | null;
+};
+
+type LatestReviewLogPatchParams =
+  | {
+    action: "update";
+    card: ReviewHistoryCard;
+    delayBonusEnabled?: boolean;
+    reviewLogs?: ReviewLog[] | null;
+    reviewStartNextDay?: boolean;
+    reviewedAt: Date;
+    rating: ReviewLog["rating"];
+    durationMinutes?: number | null;
+  }
+  | {
+    action: "delete";
+    card: ReviewHistoryCard;
+    delayBonusEnabled?: boolean;
+    reviewLogs?: ReviewLog[] | null;
+    reviewStartNextDay?: boolean;
+  };
+
 const MIN_STABILITY = 0.01;
 const MAX_STABILITY = 1.0;
 const MAX_INTERVAL_DAYS = 90;
 const INITIAL_REVIEW_INTERVAL_DAYS = 1;
-
 const MIN_DIFFICULTY = 0.0;
 const MAX_DIFFICULTY = 1.0;
 const DIFFICULTY_ALPHA = 0.1;
@@ -229,6 +263,176 @@ const applyDifficultyBrakeToInterval = (
   );
 };
 
+const invertUpdatedStability = (
+  currentStability: number,
+  score: SubjectiveScore,
+): number => {
+  switch (score) {
+    case 0:
+      return clampStability(currentStability / 0.5);
+    case 1:
+      return clampStability(currentStability / 0.8);
+    case 2:
+      return clampStability((currentStability - 0.1) / 0.9);
+    case 3:
+      return clampStability((currentStability - 0.25) / 0.75);
+    default:
+      return clampStability(currentStability);
+  }
+};
+
+const invertUpdatedDifficulty = (
+  currentDifficulty: number,
+  score: SubjectiveScore,
+): number => {
+  const failish = scoreToFailish(score);
+  const denominator = 1 - DIFFICULTY_ALPHA;
+
+  if (denominator <= 0) {
+    return clampDifficulty(currentDifficulty);
+  }
+
+  return clampDifficulty(
+    (currentDifficulty - failish * DIFFICULTY_ALPHA) / denominator,
+  );
+};
+
+const calculateDelayBonusFactor = (delayDays: number): number => {
+  if (delayDays <= 0) return 1;
+  return 1 + Math.log2(1 + delayDays);
+};
+
+const estimateIntervalDaysFromResistanceScore = (
+  resistanceScore: number,
+): number => {
+  const target = Math.max(0, Math.min(100, Math.round(resistanceScore)));
+  let bestDays = INITIAL_REVIEW_INTERVAL_DAYS;
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  for (let days = 1; days <= MAX_INTERVAL_DAYS; days += 1) {
+    const distance = Math.abs(calculateResistanceScore(days) - target);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestDays = days;
+    }
+  }
+
+  return bestDays;
+};
+
+const buildNextReviewDate = (reviewedAt: Date, intervalDays: number): Date => {
+  const nextReviewDate = new Date(reviewedAt);
+  nextReviewDate.setDate(nextReviewDate.getDate() + intervalDays);
+  nextReviewDate.setHours(0, 0, 0, 0);
+  return nextReviewDate;
+};
+
+const estimateInitialNextReviewDate = ({
+  card,
+  reviewStartNextDay,
+}: {
+  card: ReviewHistoryCard;
+  reviewStartNextDay: boolean;
+}): Date => {
+  const record = isRecord(card) ? card : {};
+  const createdAt =
+    toDate(
+      card.createdAt ??
+        (record["created_at"] as Date | Timestamp | string | number | null),
+    ) ?? new Date();
+
+  const nextReviewDate = new Date(createdAt);
+
+  if (reviewStartNextDay) {
+    nextReviewDate.setDate(nextReviewDate.getDate() + 1);
+  }
+
+  nextReviewDate.setHours(0, 0, 0, 0);
+  return nextReviewDate;
+};
+
+const buildCardStateBeforeLatestReview = ({
+  card,
+  reviewLogs,
+  delayBonusEnabled,
+  reviewStartNextDay,
+}: {
+  card: ReviewHistoryCard;
+  reviewLogs: ReviewLog[];
+  delayBonusEnabled: boolean;
+  reviewStartNextDay: boolean;
+}) => {
+  if (reviewLogs.length === 0) {
+    throw new Error("最新の学習記録がありません");
+  }
+
+  const previousLogs = reviewLogs.slice(0, -1);
+  const latestLog = reviewLogs.at(-1)!;
+  const previousLatestLog = previousLogs.at(-1) ?? null;
+  const record = isRecord(card) ? card : {};
+
+  const legacyLevel =
+    card.currentLevel ??
+    readNumber(record, "current_level") ??
+    card.level ??
+    readNumber(record, "level");
+
+  const latestReviewedAt =
+    toDate(latestLog.reviewedAt) ?? new Date(latestLog.reviewedAt);
+
+  const currentStability = getInitialStability(
+    card.memoryStability ?? readNumber(record, "memory_stability"),
+    legacyLevel,
+  );
+
+  const currentDifficulty = getInitialDifficulty(
+    card.difficulty ?? readNumber(record, "difficulty"),
+    currentStability,
+  );
+
+  const latestSubjectiveScore = ratingToSubjectiveScore(latestLog.rating);
+
+  const previousNextReviewDate = previousLatestLog
+    ? buildNextReviewDate(
+      toDate(previousLatestLog.reviewedAt) ??
+          new Date(previousLatestLog.reviewedAt),
+      estimateIntervalDaysFromResistanceScore(
+        previousLatestLog.resistanceScore,
+      ),
+    )
+    : estimateInitialNextReviewDate({ card, reviewStartNextDay });
+
+  const delayDays = delayBonusEnabled
+    ? Math.max(0, diffDays(latestReviewedAt, previousNextReviewDate))
+    : 0;
+
+  const stabilityBeforeDelayBonus = clampStability(
+    currentStability / calculateDelayBonusFactor(delayDays),
+  );
+
+  return {
+    ...card,
+    difficulty: invertUpdatedDifficulty(
+      currentDifficulty,
+      latestSubjectiveScore,
+    ),
+    lastReviewAt: previousLatestLog
+      ? new Date(previousLatestLog.reviewedAt)
+      : undefined,
+    lastSubjectiveScore: previousLatestLog
+      ? ratingToSubjectiveScore(previousLatestLog.rating)
+      : undefined,
+    memoryStability: invertUpdatedStability(
+      stabilityBeforeDelayBonus,
+      latestSubjectiveScore,
+    ),
+    nextReviewDate: previousNextReviewDate,
+    recoveryRemaining: 0,
+    reviewCount: previousLogs.length,
+    reviewLogs: previousLogs,
+  };
+};
+
 export const computeNextReview = ({
   card,
   subjectiveScore,
@@ -369,201 +573,6 @@ export const createReviewPatchFromRating = ({
   };
 };
 
-const invertUpdatedStability = (
-  currentStability: number,
-  score: SubjectiveScore,
-): number => {
-  switch (score) {
-    case 0:
-      return clampStability(currentStability / 0.5);
-    case 1:
-      return clampStability(currentStability / 0.8);
-    case 2:
-      return clampStability((currentStability - 0.1) / 0.9);
-    case 3:
-      return clampStability((currentStability - 0.25) / 0.75);
-    default:
-      return clampStability(currentStability);
-  }
-};
-
-const invertUpdatedDifficulty = (
-  currentDifficulty: number,
-  score: SubjectiveScore,
-): number => {
-  const failish = scoreToFailish(score);
-  const denominator = 1 - DIFFICULTY_ALPHA;
-
-  if (denominator <= 0) {
-    return clampDifficulty(currentDifficulty);
-  }
-
-  return clampDifficulty(
-    (currentDifficulty - failish * DIFFICULTY_ALPHA) / denominator,
-  );
-};
-
-const calculateDelayBonusFactor = (delayDays: number): number => {
-  if (delayDays <= 0) return 1;
-  return 1 + Math.log2(1 + delayDays);
-};
-
-const estimateIntervalDaysFromResistanceScore = (
-  resistanceScore: number,
-): number => {
-  const target = Math.max(0, Math.min(100, Math.round(resistanceScore)));
-  let bestDays = INITIAL_REVIEW_INTERVAL_DAYS;
-  let bestDistance = Number.POSITIVE_INFINITY;
-
-  for (let days = 1; days <= MAX_INTERVAL_DAYS; days += 1) {
-    const distance = Math.abs(calculateResistanceScore(days) - target);
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      bestDays = days;
-    }
-  }
-
-  return bestDays;
-};
-
-const buildNextReviewDate = (reviewedAt: Date, intervalDays: number): Date => {
-  const nextReviewDate = new Date(reviewedAt);
-  nextReviewDate.setDate(nextReviewDate.getDate() + intervalDays);
-  nextReviewDate.setHours(0, 0, 0, 0);
-  return nextReviewDate;
-};
-
-type ReviewHistoryCard = ReviewAlgorithmInput["card"] & {
-  createdAt?: Date | Timestamp | null;
-  created_at?: Date | Timestamp | string | number | null;
-  reviewLogs?: ReviewLog[] | null;
-};
-
-const estimateInitialNextReviewDate = ({
-  card,
-  reviewStartNextDay,
-}: {
-  card: ReviewHistoryCard;
-  reviewStartNextDay: boolean;
-}): Date => {
-  const record = isRecord(card) ? card : {};
-  const createdAt =
-    toDate(
-      card.createdAt ??
-        (record["created_at"] as Date | Timestamp | string | number | null),
-    ) ?? new Date();
-
-  const nextReviewDate = new Date(createdAt);
-
-  if (reviewStartNextDay) {
-    nextReviewDate.setDate(nextReviewDate.getDate() + 1);
-  }
-
-  nextReviewDate.setHours(0, 0, 0, 0);
-  return nextReviewDate;
-};
-
-const buildCardStateBeforeLatestReview = ({
-  card,
-  reviewLogs,
-  delayBonusEnabled,
-  reviewStartNextDay,
-}: {
-  card: ReviewHistoryCard;
-  reviewLogs: ReviewLog[];
-  delayBonusEnabled: boolean;
-  reviewStartNextDay: boolean;
-}) => {
-  if (reviewLogs.length === 0) {
-    throw new Error("最新の学習記録がありません");
-  }
-
-  const previousLogs = reviewLogs.slice(0, -1);
-  const latestLog = reviewLogs.at(-1)!;
-  const previousLatestLog = previousLogs.at(-1) ?? null;
-  const record = isRecord(card) ? card : {};
-
-  const legacyLevel =
-    card.currentLevel ??
-    readNumber(record, "current_level") ??
-    card.level ??
-    readNumber(record, "level");
-
-  const latestReviewedAt =
-    toDate(latestLog.reviewedAt) ?? new Date(latestLog.reviewedAt);
-
-  const currentStability = getInitialStability(
-    card.memoryStability ?? readNumber(record, "memory_stability"),
-    legacyLevel,
-  );
-
-  const currentDifficulty = getInitialDifficulty(
-    card.difficulty ?? readNumber(record, "difficulty"),
-    currentStability,
-  );
-
-  const latestSubjectiveScore = ratingToSubjectiveScore(latestLog.rating);
-
-  const previousNextReviewDate = previousLatestLog
-    ? buildNextReviewDate(
-      toDate(previousLatestLog.reviewedAt) ??
-          new Date(previousLatestLog.reviewedAt),
-      estimateIntervalDaysFromResistanceScore(
-        previousLatestLog.resistanceScore,
-      ),
-    )
-    : estimateInitialNextReviewDate({ card, reviewStartNextDay });
-
-  const delayDays = delayBonusEnabled
-    ? Math.max(0, diffDays(latestReviewedAt, previousNextReviewDate))
-    : 0;
-
-  const stabilityBeforeDelayBonus = clampStability(
-    currentStability / calculateDelayBonusFactor(delayDays),
-  );
-
-  return {
-    ...card,
-    difficulty: invertUpdatedDifficulty(
-      currentDifficulty,
-      latestSubjectiveScore,
-    ),
-    lastReviewAt: previousLatestLog
-      ? new Date(previousLatestLog.reviewedAt)
-      : undefined,
-    lastSubjectiveScore: previousLatestLog
-      ? ratingToSubjectiveScore(previousLatestLog.rating)
-      : undefined,
-    memoryStability: invertUpdatedStability(
-      stabilityBeforeDelayBonus,
-      latestSubjectiveScore,
-    ),
-    nextReviewDate: previousNextReviewDate,
-    recoveryRemaining: 0,
-    reviewCount: previousLogs.length,
-    reviewLogs: previousLogs,
-  };
-};
-
-type LatestReviewLogPatchParams =
-  | {
-    action: "update";
-    card: ReviewHistoryCard;
-    delayBonusEnabled?: boolean;
-    reviewLogs?: ReviewLog[] | null;
-    reviewStartNextDay?: boolean;
-    reviewedAt: Date;
-    rating: ReviewLog["rating"];
-    durationMinutes?: number | null;
-  }
-  | {
-    action: "delete";
-    card: ReviewHistoryCard;
-    delayBonusEnabled?: boolean;
-    reviewLogs?: ReviewLog[] | null;
-    reviewStartNextDay?: boolean;
-  };
-
 export const createLatestReviewLogPatch = (
   params: LatestReviewLogPatchParams,
 ) => {
@@ -626,13 +635,4 @@ export const createLatestReviewLogPatch = (
       reviewLogs: [...(previousCard.reviewLogs ?? []), reviewLog],
     },
   };
-};
-
-export type MultipleChoiceConfidence = "high" | "mid" | "luck";
-
-export type MultipleChoiceReviewMeta = {
-  isCorrect: boolean;
-  isUnknown?: boolean;
-  confidence?: MultipleChoiceConfidence;
-  choiceTimeMs?: number;
 };
