@@ -4,6 +4,25 @@ import type { SlateEditor } from 'platejs';
 
 import { createSlatePlugin, createTextSubstitutionInputRule, KEYS } from 'platejs';
 
+const AutoformatShortcutsPlugin = createSlatePlugin({
+  key: 'autoformatShortcuts',
+  inputRules: [
+    legalRule,
+    legalHtmlRule,
+    arrowsRule,
+    comparisonsRule,
+    equalityRule,
+    fractionsRule,
+    operatorsRule,
+    punctuationRule,
+    smartQuotesRule,
+    subscriptNumbersRule,
+    subscriptSymbolsRule,
+    superscriptNumbersRule,
+    superscriptSymbolsRule,
+  ],
+});
+
 const isTextSubstitutionBlocked = (editor: SlateEditor) =>
   editor.api.some({
     match: {
@@ -155,25 +174,6 @@ const superscriptSymbolsRule = createAutoformatTextSubstitutionRule({
     { format: '°', match: '^o' },
     { format: '⁺', match: '^+' },
     { format: '⁻', match: '^-' },
-  ],
-});
-
-const AutoformatShortcutsPlugin = createSlatePlugin({
-  key: 'autoformatShortcuts',
-  inputRules: [
-    legalRule,
-    legalHtmlRule,
-    arrowsRule,
-    comparisonsRule,
-    equalityRule,
-    fractionsRule,
-    operatorsRule,
-    punctuationRule,
-    smartQuotesRule,
-    subscriptNumbersRule,
-    subscriptSymbolsRule,
-    superscriptNumbersRule,
-    superscriptSymbolsRule,
   ],
 });
 
