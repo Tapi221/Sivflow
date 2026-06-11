@@ -2,12 +2,6 @@ import dedent from "dedent";
 import type { ChatMessage } from "@/app/api/ai/command/types";
 import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction } from "@/app/api/ai/command/utils";
 
-
-
-
-
-
-
 const getChooseToolPrompt = ({ isSelecting, messages }: { isSelecting: boolean;
   messages: ChatMessage[];
 }) => {
@@ -106,11 +100,5 @@ const getChooseToolPrompt = ({ isSelecting, messages }: { isSelecting: boolean;
     task,
   });
 };
-
-
-
-
-
-
 
 export { getChooseToolPrompt };

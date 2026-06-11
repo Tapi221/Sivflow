@@ -2,10 +2,6 @@ import { parseImportRows } from "@/features/import/application/parseImportRows";
 import type { ImportParseResult } from "@/features/import/domain/import.types";
 import { readXlsxImportRows } from "@/features/import/infra/xlsx/readXlsxImportRows";
 
-
-
-
-
 const parseXlsxImport = async (fileBuffer: ArrayBuffer): Promise<ImportParseResult> => {
   const readResult = readXlsxImportRows(fileBuffer);
 
@@ -15,9 +11,5 @@ const parseXlsxImport = async (fileBuffer: ArrayBuffer): Promise<ImportParseResu
 
   return parseImportRows(readResult);
 };
-
-
-
-
 
 export { parseXlsxImport };

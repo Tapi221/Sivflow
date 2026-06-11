@@ -5,10 +5,6 @@ import { collectMfDeckExportIssues, mapCardToMfDeckCard } from "@/features/deckF
 import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
 import type { Card } from "@/types";
 
-
-
-
-
 const buildMfCardFile = ({ card, tagById, appVersion }: { card: Card;
   tagById?: MfDeckTagLookup;
   appVersion?: string;
@@ -47,9 +43,5 @@ const exportMfCardBytes = (params: { card: Card;
 }) => {
   return encodeMfCardFile(buildMfCardFile(params));
 };
-
-
-
-
 
 export { buildMfCardFile, exportMfCardBytes };

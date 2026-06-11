@@ -9,10 +9,6 @@ import type { CardBlock } from "@/types/domain/card";
 import type { IconProps } from "@/ui/icons";
 import { Plus } from "@/ui/icons";
 
-
-
-
-
 interface BlockToolbarProps {
   label: string;
   onAddBlock: (type: CardBlock["type"]) => void;
@@ -28,10 +24,6 @@ type ToolbarBlockConfig = {
   isVisible: boolean;
   orderIndex: number;
 };
-
-
-
-
 
 const areBlockToolbarPropsEqual = (
   prev: BlockToolbarProps,
@@ -57,10 +49,6 @@ const getIcon = (
 
   return map[iconName];
 };
-
-
-
-
 
 const TextBlockGlyph = ({
   size = 16,
@@ -613,10 +601,6 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
   return renderToolbarShell();
 };
-
-
-
-
 
 const BlockToolbar = React.memo(BlockToolbarInner, areBlockToolbarPropsEqual);
 BlockToolbar.displayName = "BlockToolbar";

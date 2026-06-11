@@ -1,9 +1,5 @@
 const MF_CARD_FILE_EXTENSION = ".mfcard";
 
-
-
-
-
 const stripMfCardExtension = (value: string) => {
   return value.replace(/\.mfcard$/iu, "").trim();
 };
@@ -13,9 +9,5 @@ const formatCardFileDisplayName = (rawName: string | null | undefined) => {
 
   return `${baseName}${MF_CARD_FILE_EXTENSION}`;
 };
-
-
-
-
 
 export { stripMfCardExtension, formatCardFileDisplayName };

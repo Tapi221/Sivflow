@@ -8,8 +8,4 @@
  */
 const shouldDisableExplorerDrop = (..._args: unknown[]): boolean => true;
 
-
-
-
-
 export { shouldDisableExplorerDrop };

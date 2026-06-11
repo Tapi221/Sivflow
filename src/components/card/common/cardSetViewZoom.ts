@@ -1,15 +1,7 @@
 import type { CSSProperties } from "react";
 
-
-
-
-
 const MIN_CARD_SET_VIEW_ZOOM = 0.5;
 const MAX_CARD_SET_VIEW_ZOOM = 4;
-
-
-
-
 
 const clampNumber = (value: number, min: number, max: number) => {
   return Math.min(max, Math.max(min, value));
@@ -43,9 +35,5 @@ const mergeStyles = (...styles: Array<CSSProperties | undefined>): CSSProperties
     return { ...acc, ...style };
   }, {});
 };
-
-
-
-
 
 export { normalizeCardSetViewZoom, scaleTypographyValuePx, scaleTypographyNumberPx, buildTypographyStyle, mergeStyles };

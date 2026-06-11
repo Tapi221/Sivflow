@@ -53,5 +53,4 @@ const normalizeCalendarRecurrenceRule = (rule: CalendarRecurrenceRule | null | u
 };
 
 export { CALENDAR_RECURRENCE_FREQUENCIES, normalizeCalendarRecurrenceRule };
-
 export type { CalendarRecurrenceFrequency, CalendarWeekday, CalendarRecurrenceRule };

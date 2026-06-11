@@ -1,29 +1,11 @@
 import type { AutoBackupRecord, BackupStorePort } from "@/application/ports/BackupStorePort";
 
-
-
-
-
-
-
 interface PerformAutoBackupDependencies { backupStore: BackupStorePort;
   buildSnapshot?: (userId: string) => Promise<AutoBackupRecord>;
   collectUserData?: (userId: string) => Promise<unknown>;
 }
 
-
-
-
-
-
-
 const MAX_BACKUPS = 5;
-
-
-
-
-
-
 
 const defaultCollectUserData = async (userId: string): Promise<unknown> => {
   return {
@@ -82,17 +64,5 @@ const createPerformAutoBackupUseCase = ({ backupStore, buildSnapshot, collectUse
   };
 };
 
-
-
-
-
-
-
 export { createPerformAutoBackupUseCase };
-
-
-
-
-
-
 export type { PerformAutoBackupDependencies };

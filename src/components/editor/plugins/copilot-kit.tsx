@@ -1,15 +1,10 @@
 "use client";
 
 import { faker } from "@faker-js/faker";
-
 import { CopilotPlugin } from "@platejs/ai/react";
-
 import { serializeMd, stripMarkdown } from "@platejs/markdown";
-
 import type { TElement } from "platejs";
-
 import { GhostText } from "@/components/ui/ghost-text";
-
 import { MarkdownKit } from "./markdown-kit";
 
 const CopilotKit = [...MarkdownKit, CopilotPlugin.configure(({ api }) => ({ options: { completeOptions: { api: "/api/ai/copilot", body: { system: `You are an advanced AI writing assistant, similar to VSCode Copilot but for general text. Your task is to predict and generate the next part of the text based on the given context. Rules: - Continue the text naturally up to the next punctuation mark (.,,, ;, :, ?, or !).
