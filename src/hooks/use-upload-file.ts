@@ -21,17 +21,17 @@ interface UseUploadFileProps
   onUploadError?: (error: unknown) => void;
 }
 
-export function useUploadFile({
+export const useUploadFile = ({
   onUploadComplete,
   onUploadError,
   ...props
-}: UseUploadFileProps = {}) {
+}: UseUploadFileProps = {}) => {
   const [uploadedFile, setUploadedFile] = React.useState<UploadedFile>();
   const [uploadingFile, setUploadingFile] = React.useState<File>();
   const [progress, setProgress] = React.useState<number>(0);
   const [isUploading, setIsUploading] = React.useState(false);
 
-  async function uploadThing(file: File) {
+  const uploadThing = async (file: File) => {
     setIsUploading(true);
     setUploadingFile(file);
 
@@ -93,7 +93,7 @@ export function useUploadFile({
       setIsUploading(false);
       setUploadingFile(undefined);
     }
-  }
+  };
 
   return {
     isUploading,
@@ -102,12 +102,12 @@ export function useUploadFile({
     uploadFile: uploadThing,
     uploadingFile,
   };
-}
+};
 
 export const { uploadFiles, useUploadThing } =
   generateReactHelpers<OurFileRouter>();
 
-export function getErrorMessage(err: unknown) {
+export const getErrorMessage = (err: unknown) => {
   const unknownError = 'Something went wrong, please try again later.';
 
   if (err instanceof z.ZodError) {
@@ -119,10 +119,10 @@ export function getErrorMessage(err: unknown) {
     return err.message;
   }
   return unknownError;
-}
+};
 
-export function showErrorToast(err: unknown) {
+export const showErrorToast = (err: unknown) => {
   const errorMessage = getErrorMessage(err);
 
   return toast.error(errorMessage);
-}
+};
