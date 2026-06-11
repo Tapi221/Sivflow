@@ -4,52 +4,6 @@ import { createSlatePlugin, createTextSubstitutionInputRule, KEYS } from 'platej
 
 type AutoformatTextSubstitutionPatterns = Parameters<typeof createTextSubstitutionInputRule>[0]['patterns'];
 
-
-
-
-
-
-
-<<<<<<< HEAD
-const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
-  key: 'autoformatShortcuts',
-  inputRules: [
-    LEGAL_RULE,
-    LEGAL_HTML_RULE,
-    ARROWS_RULE,
-    COMPARISONS_RULE,
-    EQUALITY_RULE,
-    FRACTIONS_RULE,
-    OPERATORS_RULE,
-    PUNCTUATION_RULE,
-    SMART_QUOTES_RULE,
-    SUBSCRIPT_NUMBERS_RULE,
-    SUBSCRIPT_SYMBOLS_RULE,
-    SUPERSCRIPT_NUMBERS_RULE,
-    SUPERSCRIPT_SYMBOLS_RULE,
-  ],
-});
-
-const isTextSubstitutionBlocked = (editor: SlateEditor) =>
-  editor.api.some({
-    match: {
-      type: [editor.getType(KEYS.codeBlock)],
-    },
-  });
-
-const createAutoformatTextSubstitutionRule = ({
-  patterns,
-}: {
-  patterns: AutoformatTextSubstitutionPatterns;
-}) =>
-  createTextSubstitutionInputRule({
-    enabled: ({ editor }) => !isTextSubstitutionBlocked(editor),
-    patterns,
-  });
-
-const ARROWS_RULE = createAutoformatTextSubstitutionRule({
-  patterns: [
-=======
 const AUTOFORMAT_TEXT_SUBSTITUTION_PATTERN_GROUPS = [
   [
     { format: '™', match: ['(tm)', '(TM)'] },
@@ -63,7 +17,6 @@ const AUTOFORMAT_TEXT_SUBSTITUTION_PATTERN_GROUPS = [
     { format: '§', match: '&sect;' },
   ],
   [
->>>>>>> b18592653ae92caca45d69d570fd7a15262c5c87
     { format: '→', match: '->' },
     { format: '←', match: '<-' },
     { format: '⇒', match: '=>' },
@@ -150,13 +103,8 @@ const AUTOFORMAT_TEXT_SUBSTITUTION_PATTERN_GROUPS = [
     { format: '⁺', match: '^+' },
     { format: '⁻', match: '^-' },
   ],
+] satisfies AutoformatTextSubstitutionPatterns[];
 
-satisfies
-
-AutoformatTextSubstitutionPatterns[];
-
-<<<<<<< HEAD
-=======
 const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
   key: 'autoformatShortcuts',
   inputRules: AUTOFORMAT_TEXT_SUBSTITUTION_PATTERN_GROUPS.map((patterns) =>
@@ -172,5 +120,4 @@ const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
   ),
 });
 
->>>>>>> b18592653ae92caca45d69d570fd7a15262c5c87
 export const AutoformatKit = [AUTOFORMAT_SHORTCUTS_PLUGIN];
