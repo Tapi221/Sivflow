@@ -8,16 +8,14 @@ import { BulletedListRules, OrderedListRules, TaskListRules } from '@platejs/lis
 import { ListPlugin } from '@platejs/list/react';
 import { MarkdownPlugin, remarkMdx, remarkMention } from '@platejs/markdown';
 import { AudioPlugin, FilePlugin, ImagePlugin, MediaEmbedPlugin, PlaceholderPlugin, VideoPlugin } from '@platejs/media/react';
-import { SlashInputPlugin, SlashPlugin } from '@platejs/slash-command/react';
 import { TableCellHeaderPlugin, TableCellPlugin, TablePlugin, TableRowPlugin } from '@platejs/table/react';
-import { KEYS, type SlateEditor } from 'platejs';
+import { KEYS } from 'platejs';
 import { ParagraphPlugin, Plate, PlateContainer, PlateContent, PlateController, usePlateEditor } from 'platejs/react';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import remarkEmoji from 'remark-emoji';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 
-import { PlateSlashInputElement } from './PlateSlashInputElement';
 import type { Note, NoteBlockContent } from '@/types';
 
 type PlateDocumentEditorProps = {
@@ -75,8 +73,6 @@ const NOTE_PLATE_PLUGINS = [
   PlaceholderPlugin.configure({ options: { disableEmptyPlaceholder: true } }),
   CaptionPlugin.configure({ options: { query: { allow: [KEYS.img, KEYS.video, KEYS.audio, KEYS.file, KEYS.mediaEmbed] } } }),
   MarkdownPlugin.configure({ options: { plainMarks: [KEYS.suggestion, KEYS.comment], remarkPlugins: [remarkMath, remarkGfm, remarkEmoji as any, remarkMdx, remarkMention] } }),
-  SlashPlugin.configure({ options: { triggerQuery: (editor: SlateEditor) => !editor.api.some({ match: { type: editor.getType(KEYS.codeBlock) } }) } }),
-  SlashInputPlugin.withComponent(PlateSlashInputElement),
 ];
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
