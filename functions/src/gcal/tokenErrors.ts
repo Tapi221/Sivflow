@@ -2,6 +2,8 @@ import type { FunctionsErrorCode } from "firebase-functions/v2/https";
 
 
 
+
+
 type GoogleOAuthTokenErrorReason = | "invalid_grant" | "server_oauth_configuration" | "token_endpoint_failed";
 type ClassifiedGoogleTokenEndpointFailure = { code: FunctionsErrorCode;
   message: string;
@@ -18,11 +20,15 @@ type GoogleOAuthServerErrorReason = | GoogleOAuthTokenErrorReason | "token_encry
 
 
 
+
+
 const OAUTH_CLIENT_NOT_FOUND_PATTERNS = [
   "oauth client was not found",
   "client was not found",
   "oauth client not found",
 ];
+
+
 
 
 
@@ -108,7 +114,11 @@ const classifyGoogleTokenEndpointFailure = ({ context, status, googleError, desc
 
 
 
+
+
 export { isGoogleOAuthServerConfigurationError, classifyGoogleTokenEndpointFailure };
+
+
 
 
 export type { GoogleOAuthTokenErrorReason, ClassifiedGoogleTokenEndpointFailure, GoogleOAuthServerErrorReason };

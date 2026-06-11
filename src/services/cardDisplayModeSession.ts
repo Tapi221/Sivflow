@@ -3,7 +3,11 @@ import { DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode } from "@/types/dom
 
 
 
+
+
 const currentDisplayModeByCardSet = new Map<string, CardDisplayMode>();
+
+
 
 
 
@@ -21,6 +25,8 @@ const setCardSetSessionDisplayMode = (cardSetId: string | null | undefined, mode
   if (!cardSetId) return;
   currentDisplayModeByCardSet.set(cardSetId, mode);
 };
+
+
 
 
 

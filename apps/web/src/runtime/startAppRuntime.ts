@@ -3,7 +3,11 @@ import { initAppRuntime } from "./initAppRuntime";
 
 
 
+
+
 let started = false;
+
+
 
 
 
@@ -14,6 +18,8 @@ const startAppRuntime = () => {
   initAppRuntime();
   initPersistentQueue();
 };
+
+
 
 
 

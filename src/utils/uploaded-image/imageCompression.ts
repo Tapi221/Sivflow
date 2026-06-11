@@ -3,12 +3,16 @@ import { createBase64DataUrl } from "@/types/core/branded";
 
 
 
+
+
 /**
  * @deprecated 後方互換性のため残すが、compressImageToBlob を使用すること
  *
  * @internal
  */
 const compressAndConvertToBase64 = compressAndConvertToBase64Internal;
+
+
 
 
 
@@ -79,6 +83,8 @@ const compressImageToBlob = async (file: File, maxWidth: number = 1920, maxHeigh
 const uploadImageAsBase64 = async (file: File): Promise<string> => {
   return compressAndConvertToBase64Internal(file);
 };
+
+
 
 
 

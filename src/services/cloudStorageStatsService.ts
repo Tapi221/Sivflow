@@ -7,6 +7,8 @@ import type { CloudStorageStats } from "@/types";
 
 
 
+
+
 type RebuildStorageStatsResponse = {
   userId?: string;
   quotaBytes?: number;
@@ -17,8 +19,12 @@ type RebuildStorageStatsResponse = {
 
 
 
+
+
 const CLOUD_STORAGE_STATS_SCHEMA_VERSION = 1;
 const DEFAULT_CLOUD_STORAGE_QUOTA_BYTES = 500 * 1024 * 1024;
+
+
 
 
 
@@ -110,6 +116,8 @@ const rebuildCloudStorageStats = async (userId: string): Promise<CloudStorageSta
     lastRebuiltAt: new Date(),
   });
 };
+
+
 
 
 

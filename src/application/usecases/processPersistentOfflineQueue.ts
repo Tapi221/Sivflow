@@ -2,10 +2,6 @@ import type { UploadedImage } from "@/types";
 import { assertImageInvariant } from "@/utils/imageAssertions";
 import type { QueueItem } from "./persistentOfflineQueueModels";
 
-
-
-
-
 interface PersistentOfflineQueueProcessingDeps {
   uploadItem: (item: QueueItem) => Promise<UploadedImage>;
   shouldSkipItem: (item: QueueItem) => Promise<boolean>;
@@ -18,10 +14,6 @@ interface PersistentOfflineQueueProcessingDeps {
   incrementRetryCount: (id: string) => Promise<void>;
   yieldToUi?: () => Promise<void>;
 }
-
-
-
-
 
 const defaultYieldToUi = async (): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -78,9 +70,5 @@ const processPersistentOfflineQueue = async (items: QueueItem[], deps: Persisten
     await (deps.yieldToUi ?? defaultYieldToUi)();
   }
 };
-
-
-
-
 
 export { processPersistentOfflineQueue };

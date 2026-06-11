@@ -5,18 +5,10 @@ import type { ReferenceBlockData } from "@/types";
 import { Plus } from "@/ui/icons";
 import { Link } from "@/ui/icons";
 
-
-
-
-
 type LinkEditorProps = {
   items: ReferenceBlockData[];
   onChange: (items: ReferenceBlockData[]) => void;
 };
-
-
-
-
 
 const LinkEditor = ({ items, onChange }: LinkEditorProps) => {
   const refs = items ?? [];
@@ -105,9 +97,5 @@ const LinkEditor = ({ items, onChange }: LinkEditorProps) => {
     </div>
   );
 };
-
-
-
-
 
 export { LinkEditor };

@@ -4,7 +4,11 @@ import { auth } from "@/infrastructure/firebase/client";
 
 
 
+
+
 const googleAuthWebAdapter: GoogleAuthPort = { signIn };
+
+
 
 
 
@@ -14,6 +18,8 @@ const signIn: GoogleAuthPort["signIn"] = async () => {
   provider.addScope("profile");
   await signInWithPopup(auth, provider);
 };
+
+
 
 
 

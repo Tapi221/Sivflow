@@ -3,6 +3,8 @@ import type { Locale } from "./locale.store";
 
 
 
+
+
 type RawTranslations = { weekdayLabels: string[];
   calendarMonthWeekdays: string[];
   monthRowResizeTitle: string;
@@ -81,8 +83,12 @@ type Translations = Omit<RawTranslations, "overflowEvents"> & { overflowEvents: 
 
 
 
+
+
 const RAW_TRANSLATIONS = rawTranslations as Record<Locale, RawTranslations>;
 const TRANSLATIONS: Record<Locale, Translations> = { ja: toTranslations(RAW_TRANSLATIONS.ja), en: toTranslations(RAW_TRANSLATIONS.en), zh: toTranslations(RAW_TRANSLATIONS.zh), };
+
+
 
 
 
@@ -95,7 +101,11 @@ const toTranslations = (translations: RawTranslations): Translations => ({
 
 
 
+
+
 export { RAW_TRANSLATIONS, TRANSLATIONS };
+
+
 
 
 export type { RawTranslations, Translations };

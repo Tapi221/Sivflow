@@ -2,8 +2,12 @@ import type { TrashCardBase, TrashCardSetBase, TrashDocumentBase, TrashEntityBas
 
 
 
+
+
 const TRASH_RETENTION_DAYS = 30;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+
 
 
 
@@ -243,6 +247,8 @@ const emptyTrash = async <TFolder extends TrashFolderBase, TCard extends TrashCa
     documentIds: documents.map((document) => document.id),
   });
 };
+
+
 
 
 

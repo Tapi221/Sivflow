@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 
 
 
+
+
 interface Toast { id: string;
   type: "success" | "error" | "warning" | "info";
   message: string;
@@ -20,7 +22,11 @@ interface ToastContextType {
 
 
 
+
+
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
+
+
 
 
 
@@ -31,6 +37,8 @@ const useToast = () => {
   }
   return context;
 };
+
+
 
 
 
@@ -98,7 +106,11 @@ const ToastProvider = ({ children }: { children: ReactNode; }) => {
 
 
 
+
+
 export { ToastProvider, useToast };
+
+
 
 
 export type { Toast };

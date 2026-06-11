@@ -3,6 +3,8 @@ import type { DocumentItem } from "@/types";
 
 
 
+
+
 type BlobScopeOptions = {
   userId?: string | null;
 };
@@ -16,6 +18,8 @@ type SaveDocumentWithBlobParams = {
   document: DocumentItem;
   blob: Blob;
 };
+
+
 
 
 
@@ -68,6 +72,8 @@ const deleteDocumentBlobsByUser = async (userId: string): Promise<void> => {
   const db = await getLocalDb(userId);
   await getDocumentFilesTable(db).clear();
 };
+
+
 
 
 

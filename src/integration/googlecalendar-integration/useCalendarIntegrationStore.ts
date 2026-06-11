@@ -1,10 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-
-
-
-
 type CalendarIntegrationPersistedState = {
   wasConnected: boolean;
   accountEmail: string | null;
@@ -19,10 +15,6 @@ type CalendarIntegrationActions = {
   touch: () => void;
 };
 type CalendarIntegrationStore = CalendarIntegrationPersistedState & CalendarIntegrationActions;
-
-
-
-
 
 const useCalendarIntegrationStore = create<CalendarIntegrationStore>()(persist((set, get) => ({ wasConnected: false, accountEmail: null, selectedCalendarIds: [], lastChangedAt: Date.now(), markConnected: (email, calendarIds) => set({ wasConnected: true, accountEmail: email, selectedCalendarIds: calendarIds, lastChangedAt: Date.now() }), markDisconnected: () => set({ wasConnected: false, accountEmail: null, selectedCalendarIds: [], lastChangedAt: Date.now() }), setSelectedCalendarIds: (ids) => set({ selectedCalendarIds: ids, lastChangedAt: Date.now() }), toggleCalendarId: (id) => {
   const current = get().selectedCalendarIds;
@@ -46,8 +38,4 @@ touch: () => set({ lastChangedAt: Date.now() }),
 ),
 );
 
-
-
-
-
-export { useCalendarIntegrationStor
+export { useCalendarIntegrationStore };

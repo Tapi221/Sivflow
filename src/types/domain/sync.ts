@@ -8,6 +8,8 @@ import type { UserSettings } from "./user";
 
 
 
+
+
 /**
  * 同期システムの型定義
  */
@@ -146,11 +148,17 @@ interface SyncResult { success: boolean;
 
 
 
+
+
 const DEFAULT_SYNC_SETTINGS: SyncSettings = { id: "default", autoSync: true, intervalMinutes: 5, wifiOnly: false, autoCleanupDevices: true };
 
 
 
+
+
 export { DEFAULT_SYNC_SETTINGS };
+
+
 
 
 export type { SyncMetadata, SyncError, SyncHistory, SyncSettings, SyncEntity, SyncOperationType, SyncDirection, SyncPriority, SyncQueueStatus, AssetSyncPayload, ProjectMapSyncPayload, TagSyncPayload, SyncPayloadByEntity, SyncDeletePayload, SyncQueueItem, SyncConflict, DiffResult, SyncResult };

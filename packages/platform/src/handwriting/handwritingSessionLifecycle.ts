@@ -3,6 +3,8 @@ import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionStatu
 
 
 
+
+
 type CreateDesktopHandwritingSessionInput = { id: string;
   userId: string;
   cardId: string;
@@ -21,6 +23,8 @@ type UpdateHandwritingSessionStatusInput = { session: HandwritingSession;
 
 
 
+
+
 const createDesktopHandwritingSession = ({ id, userId, cardId, side, desktopDevice, now = Date.now() }: CreateDesktopHandwritingSessionInput): HandwritingSession => ({ id, userId, cardId, side, desktopDevice, status: "waiting", createdAt: now, updatedAt: now });
 const attachMobileDeviceToHandwritingSession = ({ session, mobileDevice, now = Date.now() }: AttachMobileDeviceToHandwritingSessionInput): HandwritingSession => ({ ...session, mobileDevice, status: "connected", updatedAt: now });
 const updateHandwritingSessionStatus = ({ session, status, now = Date.now() }: UpdateHandwritingSessionStatusInput): HandwritingSession => ({ ...session, status, updatedAt: now });
@@ -36,7 +40,11 @@ const isHandwritingSessionActive = (session: Pick<HandwritingSession, "status">)
 
 
 
+
+
 export { createDesktopHandwritingSession, attachMobileDeviceToHandwritingSession, updateHandwritingSessionStatus, closeHandwritingSession, failHandwritingSession, isHandwritingSessionActive };
+
+
 
 
 export type { CreateDesktopHandwritingSessionInput, AttachMobileDeviceToHandwritingSessionInput, UpdateHandwritingSessionStatusInput };

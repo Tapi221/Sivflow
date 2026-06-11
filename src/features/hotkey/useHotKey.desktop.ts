@@ -1,17 +1,9 @@
 import { useEffect } from "react";
 import { isPrimaryShiftShortcut, isTypingTarget } from "./hotkeyGuards";
 
-
-
-
-
 type UseHotKeyParams = {
   onToggleRightSidebar?: () => void;
 };
-
-
-
-
 
 const useHotKeyDesktop = ({ onToggleRightSidebar }: UseHotKeyParams) => {
   useEffect(() => {
@@ -32,8 +24,4 @@ const useHotKeyDesktop = ({ onToggleRightSidebar }: UseHotKeyParams) => {
   }, [onToggleRightSidebar]);
 };
 
-
-
-
-
-export { useHotKeyDeskto
+export { useHotKeyDesktop };

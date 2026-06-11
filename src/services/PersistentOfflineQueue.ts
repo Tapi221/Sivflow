@@ -8,7 +8,11 @@ import type { UploadedImage } from "@/types";
 
 
 
+
+
 const persistentQueue = new PersistentOfflineQueue();
+
+
 
 
 
@@ -100,7 +104,11 @@ class PersistentOfflineQueue {
 
 
 
+
+
 export { persistentQueue };
+
+
 
 
 export type { AssetUploadRequest };

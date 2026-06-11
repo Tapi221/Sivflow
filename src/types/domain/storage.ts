@@ -16,6 +16,8 @@ interface IndexedDBMetadata { key: "main"; // 固定キー
 
 
 
+
+
 /**
  * 現在のスキーマバージョン
  */
@@ -23,7 +25,11 @@ const CURRENT_SCHEMA_VERSION = 29;
 
 
 
+
+
 export { CURRENT_SCHEMA_VERSION };
+
+
 
 
 export type { IndexedDBMetadata };

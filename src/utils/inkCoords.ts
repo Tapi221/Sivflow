@@ -3,11 +3,15 @@ import { INK_PAPER_H, INK_PAPER_W } from "@core/domain/card/ink/inkDocument";
 
 
 
+
+
 type RectLike = { left: number;
   top: number;
   width: number;
   height: number;
 };
+
+
 
 
 
@@ -66,7 +70,11 @@ const squaredDistance = (a: Pick<InkPoint, "x" | "y">, b: Pick<InkPoint, "x" | "
 
 
 
+
+
 export { clientPointToPaperPoint, paperPointToCanvasPoint, squaredDistance };
+
+
 
 
 export type { RectLike };

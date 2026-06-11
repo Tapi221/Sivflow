@@ -8,9 +8,13 @@ const PRIVATE_IPV4_PATTERNS = [
 
 
 
+
+
 const isLocalHost = (hostname: string): boolean => hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "[::1]";
 const isPrivateNetworkHost = (hostname: string): boolean => PRIVATE_IPV4_PATTERNS.some((pattern) => pattern.test(hostname));
 const isLocalDevHost = (hostname: string): boolean => isLocalHost(hostname) || isPrivateNetworkHost(hostname);
+
+
 
 
 

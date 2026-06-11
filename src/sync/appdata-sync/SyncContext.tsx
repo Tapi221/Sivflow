@@ -11,6 +11,8 @@ import { SyncContext } from "./SyncContextCore";
 
 
 
+
+
 const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   card: "cards",
   folder: "folders",
@@ -20,6 +22,8 @@ const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   userSetting: "userSettings",
   asset: "images",
 };
+
+
 
 
 
@@ -46,6 +50,8 @@ const buildResolvedConflictRecord = (conflict: SyncConflict, resolvedData: unkno
     id: conflict.entityId,
   };
 };
+
+
 
 
 
@@ -260,6 +266,8 @@ const SyncProvider = ({ children }: SyncProviderProps) => {
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
 };
+
+
 
 
 

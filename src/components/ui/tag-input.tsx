@@ -12,10 +12,6 @@ import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from ".
 import { PlaceholderText } from "./placeholder-text";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
-
-
-
-
 interface TagInputProps {
   tags: string[];
   onChange: (tags: string[]) => void;
@@ -23,10 +19,6 @@ interface TagInputProps {
   className?: string;
   quietHover?: boolean;
 }
-
-
-
-
 
 const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", className, quietHover = false }: TagInputProps) => {
   const [open, setOpen] = React.useState(false);
@@ -284,8 +276,4 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
   );
 };
 
-
-
-
-
-export { TagInpu
+export { TagInput };

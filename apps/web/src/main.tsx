@@ -14,6 +14,8 @@ import { renderGoogleOAuthCallback } from "@/integration/google-integration/goog
 
 
 
+
+
 type AppBootstrapState =
   | { status: "loading"; }
   | { status: "ready"; App: ComponentType; }
@@ -30,6 +32,8 @@ declare global {
     __sivflowReactRootStore?: SivflowReactRootStore;
   }
 }
+
+
 
 
 
@@ -93,6 +97,8 @@ const STARTUP_LOGO_STYLE = `
   transform-origin: center;
 }
 `;
+
+
 
 
 
@@ -163,6 +169,8 @@ if (!renderGoogleOAuthCallback()) {
     </StrictMode>,
   );
 }
+
+
 
 
 

@@ -1,9 +1,5 @@
 import { cn } from "@/lib/utils";
 
-
-
-
-
 type FadeSkeletonProps = {
   ariaLabel?: string;
   className?: string;
@@ -15,15 +11,7 @@ type FadeSkeletonProps = {
   animated?: boolean;
 };
 
-
-
-
-
 const DEFAULT_WIDTHS = [80, 70, 60];
-
-
-
-
 
 const FadeSkeleton = ({ ariaLabel = "読み込み中", className, itemClassName, rowCount = 8, indentCycle = 4, indentStepPx = 14, widths = DEFAULT_WIDTHS, animated = false }: FadeSkeletonProps) => {
   const normalizedIndentCycle = Math.max(1, indentCycle);
@@ -40,8 +28,4 @@ const FadeSkeleton = ({ ariaLabel = "読み込み中", className, itemClassName,
   );
 };
 
-
-
-
-
-export { FadeSkele
+export { FadeSkeleton };

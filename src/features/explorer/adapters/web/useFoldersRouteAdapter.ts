@@ -5,10 +5,6 @@ import { mapSearchParamsToExplorerRouteState } from "@/features/explorer/mappers
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { getLastSelectedFolderId, setLastSelectedFolderId } from "./explorerStorage";
 
-
-
-
-
 type FoldersRouteAdapter = { routeKey: string;
   isDesktop: boolean;
   readRouteState: () => ExplorerRouteState;
@@ -17,10 +13,6 @@ type FoldersRouteAdapter = { routeKey: string;
 
   getBaseSearchParams: () => URLSearchParams;
 };
-
-
-
-
 
 const isLibraryPath = (pathname: string): boolean =>
   pathname.toLowerCase() === "/library" ||
@@ -103,14 +95,6 @@ const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
   );
 };
 
-
-
-
-
 export { useFoldersRouteAdapter };
-
-
-
-
 export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
-export type { FoldersRouteAdap
+export type { FoldersRouteAdapter };

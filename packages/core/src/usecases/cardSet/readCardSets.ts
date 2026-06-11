@@ -12,6 +12,8 @@ type CardSetQueryRepository<TCardSet extends CardSetQueryEntity = CardSetQueryEn
 
 
 
+
+
 const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean; }) => {
   return Boolean(entity.isDeleted ?? entity.is_deleted);
 };
@@ -82,7 +84,11 @@ const listCardSetsForFolder = async <TCardSet extends CardSetQueryEntity>({ user
 
 
 
+
+
 export { listCardSetsForFolder };
+
+
 
 
 export type { CardSetQueryEntity, CardSetQueryRepository };

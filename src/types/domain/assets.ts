@@ -3,6 +3,8 @@ import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 
 
 
+
+
 type UploadedImageStatus = "pending" | "uploading" | "ready" | "failed";
 /** @deprecated Use UploadedImageStatus instead */
 type UploadState = "pending" | "inProgress" | "completed" | "failed";

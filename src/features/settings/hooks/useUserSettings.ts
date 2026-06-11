@@ -7,20 +7,12 @@ import { createDefaultEditorBlockSettings, parseEditorBlockSettings } from "@/li
 import { getLocalDb } from "@/services/localdb";
 import type { UserSettings } from "@/types";
 
-
-
-
-
 const LEGACY_SETTING_KEYS = [
   "displayName",
   "profileImage",
   "folder" + "SidebarDisplayMode",
 ] as const;
 const DEFAULT_SETTINGS: Partial<UserSettings> = { language: "ja", weekStartDay: "monday", notificationsEnabled: false, soundEnabled: true, showReviewHard: true, showReviewEasy: true, autoCarryOver: true, delayBonusEnabled: false, reviewStartNextDay: true, defaultPreviewEnabled: false, autoDraftEnabled: true, autoSaveEnabled: true, autoVoiceQuestion: false, autoVoiceAnswer: false, cardEditorHeightPx: null, questionDisplayMode: "tap_to_reveal" as const, markdownTabSize: 2, editorBlockSettings: createDefaultEditorBlockSettings() };
-
-
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -203,8 +195,4 @@ const useUserSettings = () => {
   };
 };
 
-
-
-
-
-export { DEFAULT_SETTINGS, useUserSetting
+export { DEFAULT_SETTINGS, useUserSettings };

@@ -3,19 +3,11 @@ import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import type { ViewerProps } from "./CardBlockLayoutRenderer";
 
-
-
-
-
 type UseViewerScenePropsArgs = Readonly<{
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
   displayMode?: CardDisplayMode;
   zoom?: number;
 }>;
-
-
-
-
 
 const useViewerSceneProps = ({ onGalleryFullscreenChange, displayMode = "fixed", zoom = 1 }: UseViewerScenePropsArgs): ViewerProps => {
   const { settings } = useUserSettings();
@@ -44,9 +36,5 @@ const useViewerSceneProps = ({ onGalleryFullscreenChange, displayMode = "fixed",
     ],
   );
 };
-
-
-
-
 
 export { useViewerSceneProps };

@@ -1,19 +1,11 @@
 import { normalizeDate } from "@/shared/codec/date";
 import { asRecord, pick } from "@/shared/lib/records";
 
-
-
-
-
 type NormalizedReviewLog = { reviewedAt: string;
   rating: 1 | 2 | 3 | 4;
   resistanceScore: number;
   durationMinutes: number | null;
 };
-
-
-
-
 
 const pickNumber = (value: unknown): number | null => {
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
@@ -98,13 +90,5 @@ const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
     .filter((value): value is NormalizedReviewLog => value !== null);
 };
 
-
-
-
-
 export { normalizeReviewLogs };
-
-
-
-
-export type { NormalizedReview
+export type { NormalizedReviewLog };

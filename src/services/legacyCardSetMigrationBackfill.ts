@@ -3,6 +3,8 @@ import { getLocalDb } from "./localdb";
 
 
 
+
+
 type LocalFirstBackfillDb = Awaited<ReturnType<typeof getLocalDb>> & {
   addItem: (table: "cardSets", item: Record<string, unknown>) => Promise<string>;
   updateItem: (table: "cards" | "cardSets", id: string, changes: Record<string, unknown>) => Promise<number>;
@@ -10,7 +12,11 @@ type LocalFirstBackfillDb = Awaited<ReturnType<typeof getLocalDb>> & {
 
 
 
+
+
 const backfillPromiseByUserId = new Map<string, Promise<void>>();
+
+
 
 
 
@@ -168,6 +174,8 @@ const ensureLegacyCardsBackfilled = async (userId: string) => {
   backfillPromiseByUserId.set(userId, promise);
   await promise;
 };
+
+
 
 
 

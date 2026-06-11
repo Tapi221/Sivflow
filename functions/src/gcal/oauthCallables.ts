@@ -8,6 +8,8 @@ import type { GoogleOAuthServerErrorReason } from "#src/gcal/tokenErrors.js";
 
 
 
+
+
 type StoredGoogleCalendarAccount = {
   email: string;
   name: string | null;
@@ -21,6 +23,8 @@ type GoogleOAuthProfile = {
   accountName: string | null;
   accountPhotoUrl: string | null;
 };
+
+
 
 
 
@@ -78,6 +82,8 @@ const refreshGoogleCalendarAccessToken = onCall({ region: REGION, secrets: [GOOG
   const accountId = typeof request.data?.accountId === "string" ? request.data.accountId : typeof request.data?.accountEmail === "string" ? request.data.accountEmail : "";
   return await getStoredAccessToken(uid, accountId);
 });
+
+
 
 
 
@@ -212,6 +218,8 @@ const getStoredAccessToken = async (uid: string, accountId: string) => {
   await verifyGoogleScopes(accessToken);
   return toAccessResponse(accessToken, account, getTokenNumber(data, "expires_in"));
 };
+
+
 
 
 
