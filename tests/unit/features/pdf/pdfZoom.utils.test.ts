@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { PDF_TRACKPAD_ZOOM_SENSITIVITY } from "@/features/pdf/pdfZoom.constants";
 import { computeNextScaleFromGesture, computeNextScaleFromWheel, resolveTrackpadDeltaYForScaleRatio } from "@/features/pdf/pdfZoom.utils";
 
 describe("computeNextScaleFromWheel", () => {
@@ -32,14 +33,14 @@ describe("computeNextScaleFromGesture", () => {
 
 describe("resolveTrackpadDeltaYForScaleRatio", () => {
   it("PdfPane の Math.exp 式で同じ scale ratio になる deltaY を返す", () => {
-    const deltaY = resolveTrackpadDeltaYForScaleRatio({ scaleRatio: 1.2, sensitivity: 0.0015 });
+    const deltaY = resolveTrackpadDeltaYForScaleRatio({ scaleRatio: 1.2, sensitivity: PDF_TRACKPAD_ZOOM_SENSITIVITY });
 
     expect(deltaY).not.toBeNull();
-    expect(Math.exp(-(deltaY ?? 0) * 0.0015)).toBeCloseTo(1.2);
+    expect(Math.exp(-(deltaY ?? 0) * PDF_TRACKPAD_ZOOM_SENSITIVITY)).toBeCloseTo(1.2);
   });
 
   it("無効な scale ratio と sensitivity は null を返す", () => {
-    expect(resolveTrackpadDeltaYForScaleRatio({ scaleRatio: 0, sensitivity: 0.0015 })).toBeNull();
+    expect(resolveTrackpadDeltaYForScaleRatio({ scaleRatio: 0, sensitivity: PDF_TRACKPAD_ZOOM_SENSITIVITY })).toBeNull();
     expect(resolveTrackpadDeltaYForScaleRatio({ scaleRatio: 1.2, sensitivity: 0 })).toBeNull();
   });
 });
