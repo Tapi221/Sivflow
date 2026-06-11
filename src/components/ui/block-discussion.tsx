@@ -105,12 +105,12 @@ function BlockComment({ discussion, isLast }: { discussion: TDiscussion; isLast:
   const [editingId, setEditingId] = React.useState<string | null>(null);
 
   return (
-    <React.Fragment key={discussion.id}>
+    <>
       <div className="p-4">
         {discussion.comments.map((comment, index) => <Comment key={comment.id ?? index} comment={comment} discussionLength={discussion.comments.length} documentContent={discussion?.documentContent} editingId={editingId} index={index} setEditingId={setEditingId} showDocumentContent />)}
         <CommentCreateForm discussionId={discussion.id} />
       </div>
       {!isLast && <div className="h-px w-full bg-muted" />}
-    </React.Fragment>
+    </>
   );
 }
