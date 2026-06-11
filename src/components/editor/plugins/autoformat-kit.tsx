@@ -1,11 +1,10 @@
 'use client';
 
-import type { SlateEditor } from 'platejs';
-
 import { createSlatePlugin, createTextSubstitutionInputRule, KEYS } from 'platejs';
 
 type AutoformatTextSubstitutionPatterns = Parameters<typeof createTextSubstitutionInputRule>[0]['patterns'];
 
+<<<<<<< HEAD
 const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
   key: 'autoformatShortcuts',
   inputRules: [
@@ -44,15 +43,27 @@ const createAutoformatTextSubstitutionRule = ({
 
 const ARROWS_RULE = createAutoformatTextSubstitutionRule({
   patterns: [
+=======
+const AUTOFORMAT_TEXT_SUBSTITUTION_PATTERN_GROUPS = [
+  [
+    { format: '™', match: ['(tm)', '(TM)'] },
+    { format: '®', match: ['(r)', '(R)'] },
+    { format: '©', match: ['(c)', '(C)'] },
+  ],
+  [
+    { format: '™', match: '&trade;' },
+    { format: '®', match: '&reg;' },
+    { format: '©', match: '&copy;' },
+    { format: '§', match: '&sect;' },
+  ],
+  [
+>>>>>>> b18592653ae92caca45d69d570fd7a15262c5c87
     { format: '→', match: '->' },
     { format: '←', match: '<-' },
     { format: '⇒', match: '=>' },
     { format: '⇐', match: ['<=', '≤='] },
   ],
-});
-
-const COMPARISONS_RULE = createAutoformatTextSubstitutionRule({
-  patterns: [
+  [
     { format: '≯', match: '!>' },
     { format: '≮', match: '!<' },
     { format: '≥', match: '>=' },
@@ -60,20 +71,14 @@ const COMPARISONS_RULE = createAutoformatTextSubstitutionRule({
     { format: '≱', match: '!>=' },
     { format: '≰', match: '!<=' },
   ],
-});
-
-const EQUALITY_RULE = createAutoformatTextSubstitutionRule({
-  patterns: [
+  [
     { format: '≠', match: '!=' },
     { format: '≡', match: '==' },
     { format: '≢', match: ['!==', '≠='] },
     { format: '≈', match: '~=' },
     { format: '≉', match: '!~=' },
   ],
-});
-
-const FRACTIONS_RULE = createAutoformatTextSubstitutionRule({
-  patterns: [
+  [
     { format: '½', match: '1/2' },
     { format: '⅓', match: '1/3' },
     { format: '¼', match: '1/4' },
@@ -93,49 +98,20 @@ const FRACTIONS_RULE = createAutoformatTextSubstitutionRule({
     { format: '⅝', match: '5/8' },
     { format: '⅞', match: '7/8' },
   ],
-});
-
-const LEGAL_RULE = createAutoformatTextSubstitutionRule({
-  patterns: [
-    { format: '™', match: ['(tm)', '(TM)'] },
-    { format: '®', match: ['(r)', '(R)'] },
-    { format: '©', match: ['(c)', '(C)'] },
-  ],
-});
-
-const LEGAL_HTML_RULE = createAutoformatTextSubstitutionRule({
-  patterns: [
-    { format: '™', match: '&trade;' },
-    { format: '®', match: '&reg;' },
-    { format: '©', match: '&copy;' },
-    { format: '§', match: '&sect;' },
-  ],
-});
-
-const OPERATORS_RULE = createAutoformatTextSubstitutionRule({
-  patterns: [
+  [
     { format: '±', match: '+-' },
     { format: '‰', match: '%%' },
     { format: '‱', match: ['%%%', '‰%'] },
   ],
-});
-
-const PUNCTUATION_RULE = createAutoformatTextSubstitutionRule({
-  patterns: [
+  [
     { format: '»', match: '>>' },
     { format: '«', match: '<<' },
   ],
-});
-
-const SMART_QUOTES_RULE = createAutoformatTextSubstitutionRule({
-  patterns: [
+  [
     { format: ['“', '”'], match: '"' },
     { format: ['‘', '’'], match: "'" },
   ],
-});
-
-const SUBSCRIPT_NUMBERS_RULE = createAutoformatTextSubstitutionRule({
-  patterns: [
+  [
     { format: '₀', match: '~0' },
     { format: '₁', match: '~1' },
     { format: '₂', match: '~2' },
@@ -147,17 +123,11 @@ const SUBSCRIPT_NUMBERS_RULE = createAutoformatTextSubstitutionRule({
     { format: '₈', match: '~8' },
     { format: '₉', match: '~9' },
   ],
-});
-
-const SUBSCRIPT_SYMBOLS_RULE = createAutoformatTextSubstitutionRule({
-  patterns: [
+  [
     { format: '₊', match: '~+' },
     { format: '₋', match: '~-' },
   ],
-});
-
-const SUPERSCRIPT_NUMBERS_RULE = createAutoformatTextSubstitutionRule({
-  patterns: [
+  [
     { format: '⁰', match: '^0' },
     { format: '¹', match: '^1' },
     { format: '²', match: '^2' },
@@ -169,14 +139,29 @@ const SUPERSCRIPT_NUMBERS_RULE = createAutoformatTextSubstitutionRule({
     { format: '⁸', match: '^8' },
     { format: '⁹', match: '^9' },
   ],
-});
-
-const SUPERSCRIPT_SYMBOLS_RULE = createAutoformatTextSubstitutionRule({
-  patterns: [
+  [
     { format: '°', match: '^o' },
     { format: '⁺', match: '^+' },
     { format: '⁻', match: '^-' },
   ],
+] satisfies AutoformatTextSubstitutionPatterns[];
+
+<<<<<<< HEAD
+=======
+const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
+  key: 'autoformatShortcuts',
+  inputRules: AUTOFORMAT_TEXT_SUBSTITUTION_PATTERN_GROUPS.map((patterns) =>
+    createTextSubstitutionInputRule({
+      enabled: ({ editor }) =>
+        !editor.api.some({
+          match: {
+            type: [editor.getType(KEYS.codeBlock)],
+          },
+        }),
+      patterns,
+    }),
+  ),
 });
 
+>>>>>>> b18592653ae92caca45d69d570fd7a15262c5c87
 export const AutoformatKit = [AUTOFORMAT_SHORTCUTS_PLUGIN];
