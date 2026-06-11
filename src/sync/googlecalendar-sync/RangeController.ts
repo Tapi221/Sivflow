@@ -1,9 +1,5 @@
 import type { GoogleCalendarSyncEngine } from "./GoogleCalendarSyncEngine";
 
-
-
-
-
 type Range = {
   start: Date;
   end: Date;
@@ -12,10 +8,6 @@ type RangeState = {
   start: Date | null;
   end: Date | null;
 };
-
-
-
-
 
 class RangeController { private engineMap = new Map<string, GoogleCalendarSyncEngine>();
 
@@ -82,9 +74,5 @@ class RangeController { private engineMap = new Map<string, GoogleCalendarSyncEn
     await engine.ensureRange(range.start, range.end);
   }
 }
-
-
-
-
 
 export { RangeController };

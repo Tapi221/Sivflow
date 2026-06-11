@@ -1,19 +1,11 @@
 import DOMPurify from "dompurify";
 import TurndownService from "turndown";
 
-
-
-
-
 const turndown = new TurndownService({
   headingStyle: "atx",
   codeBlockStyle: "fenced",
   bulletListMarker: "-",
 });
-
-
-
-
 
 turndown.addRule("fencedCode", {
   filter: (node) => {
@@ -38,9 +30,5 @@ const sanitizeAndConvertToMarkdown = (html: string) => {
 
   return markdown.trim();
 };
-
-
-
-
 
 export { sanitizeAndConvertToMarkdown };

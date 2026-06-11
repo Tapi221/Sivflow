@@ -3,10 +3,6 @@ import { emptyTrash, getTrashItems, permanentlyDeleteTrashItems, purgeExpiredTra
 import { createWebTrashRepository } from "@platform/storage/trashRepository.web";
 import type { Card, CardSet, Document, Folder } from "@/types";
 
-
-
-
-
 type TrashLoadState = "idle" | "loading" | "ready" | "error";
 type TrashItemsState = { folders: Folder[];
   cards: Card[];
@@ -19,20 +15,12 @@ type TrashItemIdInput = { folderIds?: string[];
   documentIds?: string[];
 };
 
-
-
-
-
 const EMPTY_TRASH_ITEMS: TrashItemsState = {
   folders: [],
   cards: [],
   cardSets: [],
   documents: [],
 };
-
-
-
-
 
 const useTrashItems = (userId: string | null | undefined) => {
   const repository = useMemo(() => createWebTrashRepository(), []);
@@ -94,13 +82,5 @@ const useTrashItems = (userId: string | null | undefined) => {
   };
 };
 
-
-
-
-
 export { useTrashItems };
-
-
-
-
 export type { TrashLoadState, TrashItemsState, TrashItemIdInput };
