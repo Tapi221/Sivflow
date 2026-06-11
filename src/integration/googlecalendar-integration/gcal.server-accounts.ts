@@ -1,6 +1,8 @@
 import { httpsCallable } from "firebase/functions";
 import { auth, functionsClient } from "@/services/firebase";
 
+
+
 type ListGoogleCalendarAccountsOutput = {
   accounts: Array<{
     accountId: string;
@@ -10,7 +12,11 @@ type ListGoogleCalendarAccountsOutput = {
   }>;
 };
 
+
+
 const listGoogleCalendarAccountsCallable = httpsCallable<undefined, ListGoogleCalendarAccountsOutput>(functionsClient, "listGoogleCalendarAccounts");
+
+
 
 const waitForCallableAuth = async (): Promise<void> => {
   await auth.authStateReady();
@@ -25,4 +31,6 @@ const listServerStoredGoogleCalendarAccounts = async (): Promise<ListGoogleCalen
   return result.data.accounts;
 };
 
-export { listServerStoredGoogleCalendarAccounts };
+
+
+export { listServerStoredGoogleCalendarAccou

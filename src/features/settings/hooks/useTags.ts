@@ -1,12 +1,14 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getTagColorClassName as resolveTagColorClassName, getTagColorKey as normalizeTagColorKey, TAG_COLOR_KEYS } from "@/chip/tag/tagColor";
 import type { TagColorKey } from "@/chip/tag/tagColor";
+import { getTagColorClassName as resolveTagColorClassName, getTagColorKey as normalizeTagColorKey, TAG_COLOR_KEYS } from "@/chip/tag/tagColor";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import { useUserSettings } from "./useUserSettings";
 import { getLocalDb } from "@/services/localDB";
 import { auditAndRepairTags } from "@/services/localdb/audit/tags";
 import type { TagRecord } from "@/services/localdb/types";
+import { useUserSettings } from "./useUserSettings";
+
+
 
 type TagCategory = string;
 type Tag = TagRecord;
@@ -20,8 +22,12 @@ type CardTagFields = {
 };
 type LocalDbInstance = Awaited<ReturnType<typeof getLocalDb>>;
 
+
+
 const DEFAULT_TAG_COLOR_KEYS: TagColorKey[] = [...TAG_COLOR_KEYS];
 const MAX_PATH_DEPTH = 12;
+
+
 
 const genId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -963,5 +969,9 @@ const useTags = () => {
   };
 };
 
+
+
 export { DEFAULT_TAG_COLOR_KEYS, resolveCardTagNames, useTags };
+
+
 export type { TagCategory, Tag };

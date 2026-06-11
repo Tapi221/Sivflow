@@ -1,20 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
-import { CANONICAL_CARD_WIDTH, CARD_DISPLAY_SCALE, layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
-import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import type { InkDocument } from "@core/domain/card/ink/inkDocument";
+import { SharedCardContent } from "@/components/card/common/SharedCardContent";
+import { CANONICAL_CARD_WIDTH, CARD_DISPLAY_SCALE, layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
+import { cn } from "@/lib/utils";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { CardFrame } from "./CardFrame";
 import { CARD_SHELL_COMMON_CLASS_NAME } from "./cardShellClassNames";
+import type { FlashcardCardLike } from "./flashcard.types";
 import { useFlashcardCornerControls } from "./FlashcardCornerControls";
 import { FlashcardInkOverlay } from "./FlashcardInkOverlay";
 import { FlashcardMediaDialogs } from "./FlashcardMediaDialogs";
 import { FlashcardNavigation } from "./FlashcardNavigation";
-import type { FlashcardCardLike } from "./flashcard.types";
 import { useCardFlipBehavior } from "./useCardFlipBehavior";
 import { useFlashcardDerived } from "./useFlashcardDerived";
 import { useFlashcardInk } from "./useFlashcardInk";
 import { useFlashcardMediaState } from "./useFlashcardMediaState";
-import { cn } from "@/lib/utils";
-import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+
 
 interface FlashcardProps {
   card: FlashcardCardLike | null | undefined;
@@ -51,6 +53,8 @@ interface FlashcardProps {
   contentZoom?: number;
   headerIconVisualScale?: number;
 }
+
+
 
 const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
   if (prev.card !== next.card) return false;
@@ -108,6 +112,8 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
     prev.headerIconVisualScale === next.headerIconVisualScale
   );
 };
+
+
 
 const FlashcardInner = ({
   card,
@@ -339,7 +345,11 @@ const FlashcardInner = ({
   );
 };
 
+
+
 const Flashcard = React.memo(FlashcardInner, areFlashcardPropsEqual);
 Flashcard.displayName = "Flashcard";
 export { Flashcard };
+
+
 export type { FlashcardCardLike };

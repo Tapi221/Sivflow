@@ -3,11 +3,15 @@ import { createGoogleCalendarEvent, deleteGoogleCalendarEvent, updateGoogleCalen
 import type { GCalConnectionStatus, GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { GoogleAccountEntry } from "@/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
 import { usePersistentMultiAccountGoogleCalendar } from "@/integration/googlecalendar-integration/usePersistentMultiAccountGoogleCalendar";
+import { useServerStoredGoogleAccountBootstrap } from "@/integration/googlecalendar-integration/useServerStoredGoogleAccountBootstrap";
 import { useGoogleTaskLists } from "@/integration/googletask-integration/useGoogleTaskLists";
 import { useGoogleTasks } from "@/integration/googletask-integration/useGoogleTasks";
-import { useServerStoredGoogleAccountBootstrap } from "@/integration/googlecalendar-integration/useServerStoredGoogleAccountBootstrap";
+
+
 
 const RECURRENCE_REFRESH_FUTURE_DAYS = 366;
+
+
 
 const resolveExternalEventId = (accountId: string, calendarId: string, eventId: string): string => {
   const accountPrefix = `${accountId}:${calendarId}:`;
@@ -193,5 +197,9 @@ const useGoogleCalendarLayer = () => {
   };
 };
 
+
+
 export { useGoogleCalendarLayer };
+
+
 export type { GoogleAccountEntry };

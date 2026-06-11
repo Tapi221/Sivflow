@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { ClipboardEvent as ReactClipboardEvent, FormEvent as ReactFormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+import { codeTheme } from "@shared/design-tokens/codeTheme";
 import type { RenderProps } from "prism-react-renderer";
 import { Highlight } from "prism-react-renderer";
 import Prism from "prismjs";
+import type { ClipboardEvent as ReactClipboardEvent, FormEvent as ReactFormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
+import { cn } from "@/lib/utils";
+import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { Check, Copy } from "@/ui/icons";
+import { CodeBlockFrame } from "./CodeBlockFrame";
+import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "./codeBlockLanguage";
 import "prismjs/components/prism-bash";
 import "prismjs/components/prism-c";
 import "prismjs/components/prism-clike";
@@ -22,11 +27,8 @@ import "prismjs/components/prism-python";
 import "prismjs/components/prism-rust";
 import "prismjs/components/prism-sql";
 import "prismjs/components/prism-typescript";
-import { CodeBlockFrame } from "./CodeBlockFrame";
-import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "./codeBlockLanguage";
-import { cn } from "@/lib/utils";
-import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
-import { codeTheme } from "@shared/design-tokens/codeTheme";
+
+
 
 type CodeBlockContentProps =
   | {
@@ -51,7 +53,11 @@ type EditorTextSelection = {
 };
 type PrismGrammar = Parameters<typeof Prism.highlight>[1];
 
+
+
 const CODE_EDITOR_TAB_TEXT = "  ";
+
+
 
 const clampTextOffset = (offset: number, textLength: number) => {
   return Math.max(0, Math.min(offset, textLength));
@@ -144,6 +150,8 @@ const setHighlightedEditorCode = (
     editor.innerHTML = nextHtml;
   }
 };
+
+
 
 const CodeBlockContent = (props: CodeBlockContentProps) => {
   const [copied, setCopied] = useState(false);
@@ -421,5 +429,7 @@ const CodeBlockContent = (props: CodeBlockContentProps) => {
     </div>
   );
 };
+
+
 
 export { CodeBlockContent };

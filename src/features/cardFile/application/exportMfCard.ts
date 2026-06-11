@@ -1,9 +1,11 @@
-import { MF_CARD_FORMAT, MF_CARD_VERSION, MfCardExportError } from "@/features/cardFile/domain/mfCard.types";
 import type { MfCardFileV1 } from "@/features/cardFile/domain/mfCard.types";
+import { MF_CARD_FORMAT, MF_CARD_VERSION, MfCardExportError } from "@/features/cardFile/domain/mfCard.types";
 import { encodeMfCardFile } from "@/features/cardFile/infra/web/mfCardJsonCodec";
 import { collectMfDeckExportIssues, mapCardToMfDeckCard } from "@/features/deckFile/application/mapCardToMfDeck";
 import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
 import type { Card } from "@/types";
+
+
 
 const buildMfCardFile = ({ card, tagById, appVersion }: { card: Card;
   tagById?: MfDeckTagLookup;
@@ -43,5 +45,7 @@ const exportMfCardBytes = (params: { card: Card;
 }) => {
   return encodeMfCardFile(buildMfCardFile(params));
 };
+
+
 
 export { buildMfCardFile, exportMfCardBytes };

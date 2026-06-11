@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { GoogleCalendarEvent } from "@core/calendar/calendarEvent.types";
 import { AppState } from "react-native";
 import { createIosCalendarEvent, deleteIosCalendarEvent, fetchIosCalendars, fetchIosEvents, getIosCalendarPermissionStatus, isIosCalendarSupported, requestIosCalendarPermission, updateIosCalendarEvent } from "./iosCalendar.api";
-import type { GoogleCalendarEvent } from "@core/calendar/calendarEvent.types";
 import type { IosCalendarConnectionStatus, IosCalendarEvent, IosCalendarListItem, IosCalendarPermissionStatus, IosCalendarRange, IosCalendarWritableEventDeleteInput, IosCalendarWritableEventInput, IosCalendarWritableEventUpdateInput } from "./iosCalendar.types";
 
 type LoadEventsInput = {

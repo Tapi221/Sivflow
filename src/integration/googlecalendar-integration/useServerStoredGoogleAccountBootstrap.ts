@@ -1,10 +1,14 @@
 import { useEffect } from "react";
 import { isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
-import { readStoredAccounts, upsertStoredAccount } from "./gcal.multi-storage";
 import type { StoredGoogleAccount } from "./gcal.multi-storage";
+import { readStoredAccounts, upsertStoredAccount } from "./gcal.multi-storage";
 import { listServerStoredGoogleCalendarAccounts } from "./gcal.server-accounts";
 
+
+
 type ServerStoredGoogleCalendarAccount = Awaited<ReturnType<typeof listServerStoredGoogleCalendarAccounts>>[number];
+
+
 
 const createStoredAccountFromRemote = (remote: ServerStoredGoogleCalendarAccount): StoredGoogleAccount => ({
   id: remote.accountId,
@@ -47,4 +51,6 @@ const useServerStoredGoogleAccountBootstrap = (): void => {
   }, []);
 };
 
-export { useServerStoredGoogleAccountBootstrap };
+
+
+export { useServerStoredGoogleAccountBootstra

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
 import { addBusinessDays, startOfDay } from "date-fns";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { toast } from "sonner";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";

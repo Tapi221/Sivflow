@@ -1,16 +1,16 @@
+import { StrictMode, useEffect, useState } from "react";
+import type { Root } from "react-dom/client";
+import { createRoot } from "react-dom/client";
+import type { ComponentType } from "react";
+import { ErrorBoundary } from "@/components/common/ErrorScreen";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
 import "@/styles/index.css";
 import "@/services/localDB";
 import "@/../apps/web/src/runtime/disableNativeTitleTooltips";
 import "@/../apps/web/src/runtime/installProductionConsoleFilter";
 import "@platform/desktop/installTauriDesktopBridge";
 import "katex/dist/katex.min.css";
-import { StrictMode, useEffect, useState } from "react";
-import type { ComponentType } from "react";
-import { createRoot } from "react-dom/client";
-import type { Root } from "react-dom/client";
-import { ErrorBoundary } from "@/components/common/ErrorScreen";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
 
 type AppBootstrapState =
   | { status: "loading"; }

@@ -1,10 +1,12 @@
-import { Dexie } from "dexie";
 import type { Table } from "dexie";
+import { Dexie } from "dexie";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
 import { normalizeDate } from "@/shared/codec/date";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
+
+
 
 /** queries.ts が必要とする LocalDB プロパティの最小インターフェース */
 type QueryDb = Dexie & {
@@ -17,6 +19,8 @@ type MutableDocumentBlobFields = {
   localUrl?: string | null;
   blobUrl?: string | null;
 };
+
+
 
 const getItem = async (db: QueryDb, table: string, id: string) => {
   const item = await db.table(table).get(id);
@@ -83,4 +87,6 @@ const normalizeDocumentBlobUrlsForSession = async (db: QueryDb) => {
   }
 };
 
-export { getItem, getAllItems, getAllCards, getAllFolders, getDirtyItems, getUpdatedCards, getLastSyncTime, updateLastSyncTime, normalizeDocumentBlobUrlsForSession };
+
+
+export { getItem, getAllItems, getAllCards, getAllFolders, getDirtyItems, getUpdatedCards, getLastSyncTime, updateLastSyncTime, normalizeDocumentBlobUrlsForSessio

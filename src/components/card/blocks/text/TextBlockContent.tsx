@@ -1,9 +1,11 @@
+import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/typography";
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
 import { buildRuledTextareaStyle } from "@/components/card/blocks/core/ruledTextareaStyle";
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
-import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/typography";
 import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from "./textBlockStyles";
+
+
 
 type TextBlockContentProps =
   | {
@@ -19,6 +21,8 @@ type TextBlockContentProps =
     autoFocus?: boolean;
     zoom?: number;
   };
+
+
 
 const normalizeTextBlockContent = (content: string) =>
   String(content ?? "").replace(/\r\n/g, "\n");
@@ -39,6 +43,8 @@ const buildTextBlockPresentation = (zoom?: number) => {
     ),
   };
 };
+
+
 
 const TextBlockContent = (props: TextBlockContentProps) => {
   const normalizedContent = normalizeTextBlockContent(props.content);
@@ -81,5 +87,7 @@ const TextBlockContent = (props: TextBlockContentProps) => {
     />
   );
 };
+
+
 
 export { TextBlockContent };

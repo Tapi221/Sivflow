@@ -4,8 +4,10 @@
  * syncToken ベースの差分取得に必要な型をここに集約する。
  */
 
-import type { Auth } from "firebase/auth";
 import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
+import type { Auth } from "firebase/auth";
+
+
 
 // ─────────────────────────────────────────────────────────────
 // カレンダーイベント

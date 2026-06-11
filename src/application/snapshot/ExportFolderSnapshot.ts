@@ -1,16 +1,22 @@
-import { buildCardSetById, filterCardsByFolderId } from "@/domain/card/selectors/cardFolder";
-import { createCreateSnapshotUseCase } from "./CreateSnapshot";
 import type { JsonFileExportPort } from "@/application/ports/JsonFileExportPort";
+import { buildCardSetById, filterCardsByFolderId } from "@/domain/card/selectors/cardFolder";
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
 import type { Card } from "@/types";
 import type { AppSnapshot } from "@/types/domain/snapshot";
+import { createCreateSnapshotUseCase } from "./CreateSnapshot";
+
+
 
 interface ExportFolderSnapshotDependencies { fileExporter: JsonFileExportPort;
 }
 
+
+
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,
 });
+
+
 
 const collectAssetIdsFromCards = (cards: Card[]): Set<string> => {
   const assetIds = new Set<string>();
@@ -116,5 +122,9 @@ const createExportFolderSnapshotUseCase = ({ fileExporter }: ExportFolderSnapsho
   };
 };
 
+
+
 export { createExportFolderSnapshotUseCase };
+
+
 export type { ExportFolderSnapshotDependencies };

@@ -1,5 +1,7 @@
-import type { GoogleTaskItem, GoogleTaskListItem, GoogleTaskStatus, GoogleTasksApiTaskListsResponse, GoogleTasksApiTasksResponse } from "@/sync/googletask-sync/gtaskSync.types";
 import { createGoogleApiError, withGoogleApiRetry } from "@/integration/google-integration/googleApiRetry";
+import type { GoogleTaskItem, GoogleTaskListItem, GoogleTasksApiTaskListsResponse, GoogleTasksApiTasksResponse, GoogleTaskStatus } from "@/sync/googletask-sync/gtaskSync.types";
+
+
 
 type GoogleTaskPatch = {
   title?: string;
@@ -16,7 +18,11 @@ type GoogleTaskCreateInput = {
 };
 type RawGoogleTask = NonNullable<GoogleTasksApiTasksResponse["items"]>[number];
 
+
+
 const GOOGLE_TASKS_API_BASE = "https://tasks.googleapis.com/tasks/v1";
+
+
 
 const toApiTaskBody = (input: GoogleTaskPatch | GoogleTaskCreateInput) => {
   const body: Record<string, string | null> = {};
@@ -247,4 +253,6 @@ const deleteGoogleTask = async ({ accessToken, taskListId, taskId }: { accessTok
   );
 };
 
-export { fetchGoogleTaskLists, fetchGoogleTasks, createGoogleTask, patchGoogleTask, moveGoogleTask, deleteGoogleTask };
+
+
+export { fetchGoogleTaskLists, fetchGoogleTasks, createGoogleTask, patchGoogleTask, moveGoogleTask, deleteGoogleT

@@ -3,8 +3,10 @@ import { getDateDisplayLabel } from "@platejs/date";
 import type { TDateElement } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
-import { cn } from "@/lib/utils";
 import { inlineSuggestionVariants } from "@/lib/suggestion";
+import { cn } from "@/lib/utils";
+
+
 
 const DateElementStatic = (props: SlateElementProps<TDateElement>) => {
   const { element } = props;
@@ -27,5 +29,7 @@ const DateElementStatic = (props: SlateElementProps<TDateElement>) => {
     </SlateElement>
   );
 };
+
+
 
 export { DateElementStatic };

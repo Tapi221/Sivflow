@@ -1,7 +1,9 @@
-import type { TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText } from "platejs";
 import { BaseSuggestionPlugin } from "@platejs/suggestion";
+import type { TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText } from "platejs";
 import { KEYS, TextApi } from "platejs";
 import { SuggestionLeafStatic, VoidRemoveSuggestionOverlayStatic } from "@/components/ui/suggestion-node-static";
+
+
 
 const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.date,
@@ -32,6 +34,8 @@ render: {
 }),
 ];
 
+
+
 const getInlineSuggestionData = (editor: any, element: TElement) => {
   const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
   const data = suggestionApi.suggestionData(element) as
@@ -50,5 +54,7 @@ const getInlineSuggestionData = (editor: any, element: TElement) => {
     if (childData) return childData;
   }
 };
+
+
 
 export { BaseSuggestionKit };

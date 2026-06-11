@@ -1,6 +1,6 @@
 import { memo, useMemo } from "react";
-import { layoutCalendarTimeGridEvents } from "@core/calendar";
 import type { CalendarEvent, CalendarTimeGridLayoutMode } from "@core/calendar";
+import { layoutCalendarTimeGridEvents } from "@core/calendar";
 import { CalendarEventChip } from "./CalendarEventChip";
 
 type CalendarTimeGridProperties = {

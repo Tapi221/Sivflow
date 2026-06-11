@@ -4,10 +4,12 @@ import type { ISyncService, UserSettingsSnapshot } from "@/services/interfaces/I
 import { getLocalDb } from "@/services/localdb";
 import type { LocalDBTableMap, SyncableEntityTable } from "@/services/localdb/types";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-import { DEFAULT_SYNC_SETTINGS } from "@/types/domain/sync";
 import type { SyncConflict, SyncEntity, SyncSettings } from "@/types/domain/sync";
-import { SyncContext } from "./SyncContextCore";
+import { DEFAULT_SYNC_SETTINGS } from "@/types/domain/sync";
 import type { SyncContextType, SyncNotice, SyncProviderProps, SyncStatus } from "./SyncContextCore";
+import { SyncContext } from "./SyncContextCore";
+
+
 
 const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   card: "cards",
@@ -18,6 +20,8 @@ const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   userSetting: "userSettings",
   asset: "images",
 };
+
+
 
 const isSyncIntervalMinutes = (value: unknown): value is SyncSettings["intervalMinutes"] => {
   return value === 5 || value === 15 || value === 30 || value === 60;
@@ -42,6 +46,8 @@ const buildResolvedConflictRecord = (conflict: SyncConflict, resolvedData: unkno
     id: conflict.entityId,
   };
 };
+
+
 
 const SyncProvider = ({ children }: SyncProviderProps) => {
   const { currentUser } = useAuthSession();
@@ -255,4 +261,6 @@ const SyncProvider = ({ children }: SyncProviderProps) => {
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
 };
 
-export { SyncProvider };
+
+
+export { SyncProvi

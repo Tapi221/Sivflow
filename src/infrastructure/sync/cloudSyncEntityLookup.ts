@@ -1,9 +1,11 @@
-import { getDoc, getDocs } from "firebase/firestore";
 import type { DocumentData, Firestore } from "firebase/firestore";
-import { getUserSettingsRef, queryEntityById } from "./cloudSyncFirestoreRefs";
-import { COLLECTION_BY_TYPE, sanitizeSyncDataFromCloud } from "@/application/usecases/cloudSyncShared";
+import { getDoc, getDocs } from "firebase/firestore";
 import type { CloudEntityType, PullableEntityType } from "@/application/usecases/cloudSyncShared";
+import { COLLECTION_BY_TYPE, sanitizeSyncDataFromCloud } from "@/application/usecases/cloudSyncShared";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
+import { getUserSettingsRef, queryEntityById } from "./cloudSyncFirestoreRefs";
+
+
 
 type LookupContext = {
   firestore: Firestore;
@@ -15,6 +17,8 @@ type CloudSyncLookupDescriptor = {
   resolveData: (context: LookupContext) => Promise<DocumentData | null>;
   resolveSyncId: (context: LookupContext) => string;
 };
+
+
 
 const PULL_FULL_LOOKUP_ORDER: readonly CloudSyncLookupDescriptor[] = [
   createPullableLookupDescriptor("card"),
@@ -30,6 +34,8 @@ const PULL_FULL_LOOKUP_ORDER: readonly CloudSyncLookupDescriptor[] = [
     resolveSyncId: ({ userId }) => userId,
   },
 ];
+
+
 
 const lookupPullableEntityData = async (
   firestore: Firestore,
@@ -76,4 +82,6 @@ const lookupCloudSyncEntityById = async (firestore: Firestore, userId: string, i
   return null;
 };
 
-export { lookupCloudSyncEntityById };
+
+
+export { lookupCloudSyncEntityB

@@ -1,13 +1,13 @@
-import { MantineProvider } from "@mantine/core";
 import { Suspense } from "react";
-import { BrowserRouter } from "react-router-dom";
+import { MantineProvider } from "@mantine/core";
+import { ToastProvider } from "@web-renderer/contexts/ToastContext";
 import type { ReactNode } from "react";
-import "@mantine/core/styles.css";
-import { NotificationProvider } from "@/components/notifications/NotificationProvider";
+import { BrowserRouter } from "react-router-dom";
 import { AppSonnerToaster } from "@/components/notifications/AppSonnerToaster";
+import { NotificationProvider } from "@/components/notifications/NotificationProvider";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
-import { ToastProvider } from "@web-renderer/contexts/ToastContext";
+import "@mantine/core/styles.css";
 
 type AppProvidersProps = {
   children: ReactNode;

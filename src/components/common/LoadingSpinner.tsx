@@ -1,6 +1,8 @@
-import "pdfjs-dist/legacy/web/pdf_viewer.css";
 import { cn } from "@/lib/utils";
+import "pdfjs-dist/legacy/web/pdf_viewer.css";
 import "./LoadingSpinner.css";
+
+
 
 type LoadingSpinnerProps = {
   className?: string;
@@ -8,8 +10,12 @@ type LoadingSpinnerProps = {
   label?: string;
 };
 
+
+
 const DEFAULT_LOADING_LABEL = "読み込み中";
 const DEFAULT_LOADING_ICON_CLASS_NAME = "h-5 w-5";
+
+
 
 const LoadingSpinner = ({ className, iconClassName, label = DEFAULT_LOADING_LABEL }: LoadingSpinnerProps) => {
   return (
@@ -22,5 +28,9 @@ const LoadingSpinner = ({ className, iconClassName, label = DEFAULT_LOADING_LABE
   );
 };
 
+
+
 export { LoadingSpinner };
+
+
 export type { LoadingSpinnerProps };

@@ -5,15 +5,19 @@ import { NetworkMonitor } from "@/services/logic/NetworkMonitor";
 import { QueueManager } from "@/services/logic/QueueManager";
 import { TelemetryService } from "@/services/logic/TelemetryService";
 import type { SyncContextSource } from "@/types/domain/telemetry";
-import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from "./localDB";
 import type { LocalDBLike } from "./localDB";
+import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from "./localDB";
 import { SyncServiceV2 } from "./SyncServiceV2";
+
+
 
 type SyncServiceInternals = {
   cloudAdapter: ICloudSyncAdapter;
   localDB: LocalDBLike;
   userId: string;
 };
+
+
 
 const isProjectMapChange = (change: SyncChange): boolean => change.type === "projectMap";
 const toProjectMapRecord = (userId: string, change: SyncChange): Record<string, unknown> => {
@@ -140,4 +144,6 @@ class SyncServiceFactory { private static instances = new Map<string, ISyncServi
   };
 }
 
-export { SyncServiceFactory };
+
+
+export { SyncServiceFactor

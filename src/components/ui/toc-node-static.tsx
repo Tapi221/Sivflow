@@ -1,12 +1,14 @@
 import * as React from "react";
-import type { SlateElementProps } from "platejs/static";
-import { BaseTocPlugin, isHeading } from "@platejs/toc";
 import type { Heading } from "@platejs/toc";
+import { BaseTocPlugin, isHeading } from "@platejs/toc";
 import { cva } from "class-variance-authority";
-import { NodeApi } from "platejs";
 import type { SlateEditor, TElement } from "platejs";
+import { NodeApi } from "platejs";
+import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
 import { Button } from "./button";
+
+
 
 const headingItemVariants = cva(
   "block h-auto w-full cursor-pointer truncate rounded-none px-0.5 py-1.5 text-left font-medium text-muted-foreground underline decoration-[0.5px] underline-offset-4 hover:bg-accent hover:text-muted-foreground",
@@ -28,6 +30,8 @@ const headingDepth: Record<string, number> = {
   h5: 5,
   h6: 6,
 };
+
+
 
 const getHeadingList = (editor?: SlateEditor) => {
   if (!editor) return [];
@@ -60,6 +64,8 @@ const getHeadingList = (editor?: SlateEditor) => {
 
   return headingList;
 };
+
+
 
 const TocElementStatic = (props: SlateElementProps) => {
   const { editor } = props;
@@ -140,5 +146,7 @@ const TocElementDocx = (props: SlateElementProps) => {
     </SlateElement>
   );
 };
+
+
 
 export { TocElementStatic, TocElementDocx };

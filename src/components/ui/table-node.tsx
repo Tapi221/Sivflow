@@ -1,33 +1,56 @@
 "use client";
 
 import * as React from "react";
+
 import { useDraggable, useDropLine } from "@platejs/dnd";
-import { BlockSelectionPlugin, useBlockSelected } from "@platejs/selection/react";
+
 import { resizeLengthClampStatic } from "@platejs/resizable";
+
+import { BlockSelectionPlugin, useBlockSelected } from "@platejs/selection/react";
+
 import { getTableColumnCount, setCellBackground, setTableColSize, setTableMarginLeft, setTableRowSize } from "@platejs/table";
-import { TablePlugin, TableProvider, roundCellSizeToStep, useCellIndices, useOverrideColSize, useOverrideMarginLeft, useOverrideRowSize, useTableCellBorders, useTableBordersDropdownMenuContentState, useTableColSizes, useTableElement, useTableMergeState, useTableSelectionDom, useTableValue } from "@platejs/table/react";
+
+import { roundCellSizeToStep, TablePlugin, TableProvider, useCellIndices, useOverrideColSize, useOverrideMarginLeft, useOverrideRowSize, useTableBordersDropdownMenuContentState, useTableCellBorders, useTableColSizes, useTableElement, useTableMergeState, useTableSelectionDom, useTableValue } from "@platejs/table/react";
+
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, CombineIcon, EraserIcon, Grid2X2Icon, GripVertical, PaintBucketIcon, SquareSplitHorizontalIcon, Trash2Icon, XIcon } from "lucide-react";
-import { KEYS, PathApi } from "platejs";
+
 import type { TElement, TTableCellElement, TTableElement, TTableRowElement } from "platejs";
-import { PlateElement, useComposedRef, useEditorPlugin, useEditorRef, useEditorSelector, useElement, useFocusedLast, usePluginOption, useReadOnly, useRemoveNodeButton, useSelected, withHOC } from "platejs/react";
+
+import { KEYS, PathApi } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
+import { PlateElement, useComposedRef, useEditorPlugin, useEditorRef, useEditorSelector, useElement, useFocusedLast, usePluginOption, useReadOnly, useRemoveNodeButton, useSelected, withHOC } from "platejs/react";
+
 import { useElementSelector } from "platejs/react";
-import { Button } from "./button";
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuPortal, DropdownMenuTrigger } from "./dropdown-menu";
-import { Popover, PopoverAnchor, PopoverContent } from "./popover";
+
 import { cn } from "@/lib/utils";
+
 import { blockSelectionVariants } from "./block-selection";
+
+import { Button } from "./button";
+
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuPortal, DropdownMenuTrigger } from "./dropdown-menu";
+
 import { ColorDropdownMenuItems, DEFAULT_COLORS } from "./font-color-toolbar-button";
+
+import { Popover, PopoverAnchor, PopoverContent } from "./popover";
+
 import { BorderAllIcon, BorderBottomIcon, BorderLeftIcon, BorderNoneIcon, BorderRightIcon, BorderTopIcon } from "./table-icons";
+
 import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarMenuGroup } from "./toolbar";
 
+
+
 type TableResizeDirection = "bottom" | "left" | "right";
+
 type TableResizeStartOptions = {
   colIndex: number;
   direction: TableResizeDirection;
   handleKey: string;
   rowIndex: number;
 };
+
 type TableResizeDragState = {
   colIndex: number;
   direction: TableResizeDirection;
@@ -36,6 +59,7 @@ type TableResizeDragState = {
   marginLeft: number;
   rowIndex: number;
 };
+
 type TableResizeContextValue = {
   disableMarginLeft: boolean;
   clearResizePreview: (handleKey: string) => void;
@@ -49,13 +73,21 @@ type TableResizeContextValue = {
   ) => void;
 };
 
+
+
 const TABLE_CONTROL_COLUMN_WIDTH = 8;
+
 const TABLE_DEFAULT_COLUMN_WIDTH = 120;
+
 const TABLE_DEFERRED_COLUMN_RESIZE_CELL_COUNT = 1200;
+
 const TABLE_MULTI_SELECTION_TOOLBAR_DELAY_MS = 150;
+
 const TableResizeContext = React.createContext<TableResizeContextValue | null>(
   null,
 );
+
+
 
 const useTableResizeContext = () => {
   const context = React.useContext(TableResizeContext);
@@ -66,6 +98,7 @@ const useTableResizeContext = () => {
 
   return context;
 };
+
 const useTableResizeController = ({
   deferColumnResize,
   dragIndicatorRef,
@@ -509,6 +542,7 @@ const useTableResizeController = ({
     [clearResizePreview, disableMarginLeft, setResizePreview, startResize],
   );
 };
+
 const useTableCellPresentation = (element: TTableCellElement) => {
   const { api } = useEditorPlugin(TablePlugin);
   const borders = useTableCellBorders({ element });
@@ -534,6 +568,8 @@ const useTableCellPresentation = (element: TTableCellElement) => {
     width,
   };
 };
+
+
 
 const TableBordersDropdownMenuContent = (props: React.ComponentProps<typeof DropdownMenuContent>) => {
   const editor = useEditorRef();
@@ -609,6 +645,7 @@ const TableBordersDropdownMenuContent = (props: React.ComponentProps<typeof Drop
     </DropdownMenuContent>
   );
 };
+
 const ColorDropdownMenu = ({
   children,
   tooltip,
@@ -664,6 +701,7 @@ const ColorDropdownMenu = ({
     </DropdownMenu>
   );
 };
+
 const TableFloatingToolbarContent = ({
   buttonProps,
   canMerge = false,
@@ -802,6 +840,7 @@ const TableFloatingToolbarContent = ({
     </PopoverContent>
   );
 };
+
 const ExpandedSelectionTableFloatingToolbarContent = (props: React.ComponentProps<typeof PopoverContent>) => {
   const { tf } = useEditorPlugin(TablePlugin);
   const { canMerge, canSplit } = useTableMergeState();
@@ -818,6 +857,7 @@ const ExpandedSelectionTableFloatingToolbarContent = (props: React.ComponentProp
     />
   );
 };
+
 const CollapsedTableFloatingToolbarContent = (props: React.ComponentProps<typeof PopoverContent>) => {
   const { tf } = useEditorPlugin(TablePlugin);
   const element = useElement<TTableElement>();
@@ -852,6 +892,7 @@ const CollapsedTableFloatingToolbarContent = (props: React.ComponentProps<typeof
     />
   );
 };
+
 const TableFloatingToolbar = ({
   children,
   ...props
@@ -907,6 +948,7 @@ const TableFloatingToolbar = ({
     </Popover>
   );
 };
+
 const TableElement = withHOC(TableProvider, ({ children, ...props }: PlateElementProps<TTableElement>) => {
   const readOnly = useReadOnly();
   const isSelectionAreaVisible = usePluginOption(
@@ -1056,6 +1098,7 @@ const TableElement = withHOC(TableProvider, ({ children, ...props }: PlateElemen
   return <TableFloatingToolbar>{content}</TableFloatingToolbar>;
 },
 );
+
 const RowDragHandle = ({ dragRef }: { dragRef: React.Ref<any>; }) => {
   const editor = useEditorRef();
   const element = useElement();
@@ -1077,6 +1120,7 @@ const RowDragHandle = ({ dragRef }: { dragRef: React.Ref<any>; }) => {
     </Button>
   );
 };
+
 const RowDropLine = () => {
   const { dropLine } = useDropLine();
 
@@ -1091,6 +1135,7 @@ const RowDropLine = () => {
     />
   );
 };
+
 const TableRowElement = ({ children, ...props }: PlateElementProps<TTableRowElement>) => {
   const { element } = props;
   const readOnly = useReadOnly();
@@ -1157,9 +1202,11 @@ const TableRowElement = ({ children, ...props }: PlateElementProps<TTableRowElem
     </PlateElement>
   );
 };
+
 const TableCellHeaderElement = (props: React.ComponentProps<typeof TableCellElement>) => {
   return <TableCellElement {...props} isHeader />;
 };
+
 const TableCellElement = ({ isHeader, ...props }: PlateElementProps<TTableCellElement> & { isHeader?: boolean;
 }) => {
   const readOnly = useReadOnly();
@@ -1233,6 +1280,8 @@ const TableCellElement = ({ isHeader, ...props }: PlateElementProps<TTableCellEl
     </PlateElement>
   );
 };
+
+
 
 const TableCellResizeControls = React.memo(({
   colIndex,
@@ -1329,5 +1378,7 @@ const TableCellResizeControls = React.memo(({
     </div>
   );
 });
+
 TableCellResizeControls.displayName = "TableCellResizeControls";
+
 export { TableElement, TableRowElement, TableCellElement, TableCellHeaderElement };

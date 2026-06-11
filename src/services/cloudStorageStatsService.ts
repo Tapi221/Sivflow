@@ -1,9 +1,11 @@
 import type { Unsubscribe } from "firebase/firestore";
-import type { CloudStorageStats } from "@/types";
 import { doc, onSnapshot, Timestamp } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { functionsClient, requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { storageStatsDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
+import type { CloudStorageStats } from "@/types";
+
+
 
 type RebuildStorageStatsResponse = {
   userId?: string;
@@ -13,8 +15,12 @@ type RebuildStorageStatsResponse = {
   schemaVersion?: number;
 };
 
+
+
 const CLOUD_STORAGE_STATS_SCHEMA_VERSION = 1;
 const DEFAULT_CLOUD_STORAGE_QUOTA_BYTES = 500 * 1024 * 1024;
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -105,4 +111,6 @@ const rebuildCloudStorageStats = async (userId: string): Promise<CloudStorageSta
   });
 };
 
-export { CLOUD_STORAGE_STATS_SCHEMA_VERSION, DEFAULT_CLOUD_STORAGE_QUOTA_BYTES, isCloudStorageStatsOutdated, subscribeToCloudStorageStats, rebuildCloudStorageStats };
+
+
+export { CLOUD_STORAGE_STATS_SCHEMA_VERSION, DEFAULT_CLOUD_STORAGE_QUOTA_BYTES, isCloudStorageStatsOutdated, subscribeToCloudStorageStats, rebuildCloudStorageSt

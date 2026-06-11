@@ -1,5 +1,12 @@
 import { Dexie } from "dexie";
 import { nanoid } from "nanoid";
+import { createDeleteQueueItem, createUpsertQueueItem } from "@/application/usecases/syncQueueItemFactory";
+import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
+import type { AssetRecord, Card, CardSet, Document, Folder, Note, SyncConflict, SyncError, SyncHistory, SyncMetadata, SyncQueueItem, SyncSettings, UploadedImage, User, UserSettings, UserStats } from "@/types";
+import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
+import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 import * as crud from "./crud";
 import { getDatabaseNameForUser as _getDatabaseNameForUser } from "./generation";
 import { attachHooks } from "./hooks";
@@ -9,13 +16,8 @@ import { defineNoteSchema } from "./noteSchema";
 import { defineSchema } from "./schema";
 import { CURRENT_TAG_STORE } from "./tagStoreNames";
 import type { LocalDBTableMap, SyncableEntityTable, TagRecord } from "./types";
-import { createDeleteQueueItem, createUpsertQueueItem } from "@/application/usecases/syncQueueItemFactory";
-import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
-import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
-import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
-import type { AssetRecord, Card, CardSet, Document, Folder, Note, SyncConflict, SyncError, SyncHistory, SyncMetadata, SyncQueueItem, SyncSettings, UploadedImage, User, UserSettings, UserStats } from "@/types";
-import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
-import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
+
+
 
 declare global {
   interface GlobalThis {
@@ -29,6 +31,8 @@ type SyncDirection = "upload" | "download";
 type CrudPayload = Record<string, unknown>;
 type SyncableTableName = "cards" | "folders" | "cardSets" | "documents" | typeof CURRENT_TAG_STORE | "userSettings" | "images" | "projectMaps";
 
+
+
 const syncableTables: readonly SyncableTableName[] = ["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "userSettings", "images", "projectMaps"];
 const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   cards: "card",
@@ -40,6 +44,8 @@ const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   images: "asset",
   projectMaps: "projectMap",
 };
+
+
 
 const isSyncableTableName = (tableName: string): tableName is SyncableTableName => (syncableTables as readonly string[]).includes(tableName);
 const getLocalDbGlobal = (): LocalDbGlobal => globalThis as LocalDbGlobal;
@@ -403,6 +409,10 @@ class LocalDB extends Dexie { users!: Dexie.Table<User, string>;
   }
 }
 
+
+
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };
 export { LocalDB };
-export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "./types";
+
+
+export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from ".

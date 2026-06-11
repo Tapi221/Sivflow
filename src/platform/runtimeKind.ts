@@ -1,6 +1,8 @@
-import { RUNTIME_KINDS } from "@platform/runtime/runtime.constants";
 import type { RuntimeKind } from "@platform/runtime/runtime.constants";
+import { RUNTIME_KINDS } from "@platform/runtime/runtime.constants";
 import { hasDesktopRuntime } from "./detectDesktopBridge";
+
+
 
 const getRuntimeKind = (): RuntimeKind => {
   if (hasDesktopRuntime()) {
@@ -17,4 +19,6 @@ const isHandheldNativeRuntime = (): boolean => {
   );
 };
 
-export { getRuntimeKind, isDesktopLikeRuntime, isHandheldNativeRuntime };
+
+
+export { getRuntimeKind, isDesktopLikeRuntime, isHandheldNativeRuntime 
