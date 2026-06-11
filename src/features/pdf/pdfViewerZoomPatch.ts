@@ -242,8 +242,20 @@ const shouldSuppressPdfViewerScaleScroll = (pdfViewer: PatchedPdfViewerPrototype
   return Boolean(pdfViewer.__sivflowIsSettingScale || isPdfViewerZooming(pdfViewer) || isPdfViewerScaleScrollSuppressed(pdfViewer));
 };
 
+const getPdfViewerScaleDescriptor = (prototype: object, propertyName: (typeof PDF_VIEWER_SCALE_PROPERTY_NAMES)[number]): PdfViewerScaleDescriptor | null => {
+  let currentPrototype: object | null = prototype;
+
+  while (currentPrototype) {
+    const descriptor = Object.getOwnPropertyDescriptor(currentPrototype, propertyName) as PdfViewerScaleDescriptor | undefined;
+    if (descriptor) return descriptor;
+    currentPrototype = Object.getPrototypeOf(currentPrototype);
+  }
+
+  return null;
+};
+
 const patchPdfViewerScaleSetter = (prototype: PatchedPdfViewerPrototype, propertyName: (typeof PDF_VIEWER_SCALE_PROPERTY_NAMES)[number]): void => {
-  const descriptor = Object.getOwnPropertyDescriptor(prototype, propertyName) as PdfViewerScaleDescriptor | undefined;
+  const descriptor = getPdfViewerScaleDescriptor(prototype, propertyName);
   if (!descriptor?.set) return;
 
   Object.defineProperty(prototype, propertyName, {
