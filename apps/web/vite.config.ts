@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { fileURLToPath } from "node:url";
+import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
@@ -326,6 +327,7 @@ export default defineConfig(({ command }) => ({
   publicDir: resolveFromRoot("public"),
   plugins: [
     createDistCleanerPlugin(),
+    tailwindcss(),
     react(),
     createPdfjsAssetsPlugin(),
     createEventChipDesignWriterPlugin(),
