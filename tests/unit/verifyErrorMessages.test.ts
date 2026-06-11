@@ -8,6 +8,7 @@ const VERIFY_SCRIPT_PATHS = [
   "scripts/verify/verify-const-arrow-functions.mjs",
   "scripts/verify/verify-pdf-zoom-constants.mjs",
   "scripts/verify/verify-module-constant-names.mjs",
+  "scripts/verify/verify-strict-equality.mjs",
 ];
 const FORBIDDEN_ENGLISH_MESSAGES = [
   "Source convention violations:",
@@ -27,12 +28,14 @@ const FORBIDDEN_ENGLISH_MESSAGES = [
   "Use a const arrow function instead of function syntax.",
   "Missing shared PDF zoom constant",
   "Module-scope constants must use UPPER_SNAKE_CASE",
+  "Use === and !== instead of == and !=.",
 ];
 const REQUIRED_JAPANESE_MESSAGES = [
   "ソース規約違反:",
   "const arrow 関数規約違反:",
   "PDF ズーム定数規約違反:",
   "module 定数命名規約違反:",
+  "strict equality 規約違反:",
 ];
 
 const readVerifyScriptSources = () => VERIFY_SCRIPT_PATHS.map((scriptPath) => readFileSync(path.join(ROOT_DIR, scriptPath), "utf8"));
