@@ -12,8 +12,6 @@
 const GIS_SCRIPT_URL = "https://accounts.google.com/gsi/client";
 let _gisLoaded = false;
 
-
-
 const loadGisScript = (): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (_gisLoaded || (typeof window !== "undefined" && window.google?.accounts)) {
@@ -96,7 +94,5 @@ const requestWebAccessTokenViaGis = async ({ clientId, scope, silent = false, lo
     client.requestAccessToken(overrideConfig);
   });
 };
-
-
 
 export { requestWebAccessTokenViaGis };

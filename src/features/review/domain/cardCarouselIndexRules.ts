@@ -28,6 +28,4 @@ const shouldNotifyCardCarouselIndexChange = ({ nextIndex, previousIndex }: { nex
   return nextIndex !== previousIndex;
 };
 
-
-
 export { clampCardCarouselIndex, canGoToPreviousCardCarouselItem, canGoToNextCardCarouselItem, isNearCardCarouselItem, shouldNotifyCardCarouselIndexChange };

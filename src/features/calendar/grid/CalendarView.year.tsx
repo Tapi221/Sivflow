@@ -10,8 +10,6 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 import { cn } from "@/lib/utils";
 import { useDateFnsLocale, useT } from "@shared/i18n/useT";
 
-
-
 type CalendarYearEventPriority = { group: number;
   index: number;
 };
@@ -62,8 +60,6 @@ type YearVirtualWindow = {
   endOffset: number;
 };
 
-
-
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
 const YEAR_INITIAL_RENDERED_FUTURE_YEARS = 3;
 const YEAR_EXTEND_YEARS = 1;
@@ -76,8 +72,6 @@ const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
 const EMPTY_YEAR_EVENTS: GoogleCalendarEvent[] = [];
 const DEFAULT_YEAR_EVENT_PRIORITY: CalendarYearEventPriority = { group: Number.MAX_SAFE_INTEGER, index: Number.MAX_SAFE_INTEGER };
 const DEFAULT_YEAR_EVENT_DISPLAY: CalendarYearEventDisplay = { priority: DEFAULT_YEAR_EVENT_PRIORITY };
-
-
 
 const createDayAriaLabel = (date: Date, eventCount: number): string => {
   const baseLabel = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
@@ -203,8 +197,6 @@ const getDayButtonStyle = (day: CalendarYearDay, selected: boolean): CSSProperti
     transition: "none",
   };
 };
-
-
 
 const CalendarYearViewComponent = ({
   yearDate,
@@ -523,11 +515,7 @@ const CalendarYearViewComponent = ({
   );
 };
 
-
-
 const CalendarYearView = memo(CalendarYearViewComponent);
 CalendarYearView.displayName = "CalendarYearView";
 export { CalendarYearView };
-
-
 export type { CalendarYearEventPriority, CalendarYearEventDisplay, CalendarYearEventDisplayResolver };
