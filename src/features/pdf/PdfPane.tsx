@@ -1066,4 +1066,4 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
 
 
 
-export
+export { PdfPane };

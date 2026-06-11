@@ -26,6 +26,8 @@ type FolderCommandRepository<TFolder extends FolderCommandEntity = FolderCommand
   updateFolder: (userId: string, folderId: string, changes: Record<string, unknown>) => Promise<void>;
 };
 
+
+
 const toNullableParentId = (parentId?: string | null) => parentId ?? null;
 const createFolderUseCase = async <TFolder extends FolderCommandEntity>({ userId, name, parentId, options, repository }: { userId: string;
   name: string;
@@ -93,5 +95,9 @@ const reorderFoldersUseCase = async <TFolder extends FolderCommandEntity>({ user
   }
 };
 
+
+
 export { createFolderUseCase, updateFolderUseCase, reorderFoldersUseCase };
+
+
 export type { FolderCommandEntity, CreateFolderOptions, FolderCreateDraft, FolderCommandRepository };

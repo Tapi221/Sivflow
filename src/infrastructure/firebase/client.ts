@@ -9,6 +9,8 @@ import { getFunctions } from "firebase/functions";
 import type { FirebaseStorage } from "firebase/storage";
 import { getStorage } from "firebase/storage";
 
+
+
 type FirebaseClientState = {
   app: FirebaseApp | null;
   auth: Auth | null;
@@ -16,6 +18,8 @@ type FirebaseClientState = {
   functionsClient: Functions | null;
   firestoreDb: Firestore | null;
 };
+
+
 
 const REQUIRED_FIREBASE_ENV_KEYS = [
   "VITE_FIREBASE_API_KEY",
@@ -42,6 +46,8 @@ const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
 const db: Firestore | null = firebaseClientState.firestoreDb;
 const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
 const firebaseClientState = initializeFirebaseClient();
+
+
 
 const getFirebaseEnvValue = (key: (typeof REQUIRED_FIREBASE_ENV_KEYS)[number]) => {
   return import.meta.env[key];
@@ -162,5 +168,7 @@ const debugFirebase = (): void => {
 if (import.meta.env.DEV) {
   debugFirebase();
 }
+
+
 
 export { missingFirebaseEnvVars, isFirebaseClientAvailable, firebaseApp, auth, storage, functionsClient, firestoreDb, db, requireFirebaseClient, requireFirestoreDb };
