@@ -48,152 +48,56 @@ export function isVoidRemoveSuggestion(editor: PlateEditor, element: TElement) {
 export function VoidRemoveSuggestionOverlay({ editor, element, }: { editor: PlateEditor;
   element: TElement;
 }) {
-  const active =
-    editor.api.isVoid(element) &&
-    !editor.api.isInline(element) &&
-    isVoidRemoveSuggestion(editor, element);
+  const active = editor.api.isVoid(element) && !editor.api.isInline(element) && isVoidRemoveSuggestion(editor, element);
 
   if (!active) return null;
 
-  return (
-    <div
-      className={voidRemoveSuggestionOverlayVariants({ active })}
-      contentEditable={false}
-      data-slot="void-remove-suggestion"
-    />
-  );
+  return <div className={voidRemoveSuggestionOverlayVariants({ active })} contentEditable={false} data-slot="void-remove-suggestion" />;
 }
 
 export function SuggestionLineBreakAnchor({ badgeProps, children, className, }: { badgeProps?: React.ComponentProps<'span'>;
   children: React.ReactNode;
   className?: string;
 }) {
-  const badge = (
-    <span
-      {...badgeProps}
-      className={cn(
-        'inline-flex h-[calc(1lh+2px)] w-[1lh] shrink-0 items-center justify-center leading-none',
-        badgeProps?.className,
-        className
-      )}
-      contentEditable={false}
-    >
-      <CornerDownLeftIcon className="relative top-px size-4" />
-    </span>
-  );
+  const badge = <span {...badgeProps} className={cn('inline-flex h-[calc(1lh+2px)] w-[1lh] shrink-0 items-center justify-center leading-none', badgeProps?.className, className)} contentEditable={false}><CornerDownLeftIcon className="relative top-px size-4" /></span>;
 
-  return (
-    <>
-      {children}
-      {badge}
-    </>
-  );
+  return <>{children}{badge}</>;
 }
 
-function SuggestionLineBreakElementAnchor({
-  badgeProps,
-  children,
-  className,
-}: {
-  badgeProps?: React.ComponentProps<'span'>;
+function SuggestionLineBreakElementAnchor({ badgeProps, children, className, }: { badgeProps?: React.ComponentProps<'span'>;
   children: React.ReactElement<any>;
   className?: string;
 }) {
   if (!React.isValidElement(children)) return children;
-  const badge = (
-    <span
-      {...badgeProps}
-      className={cn(
-        'inline-flex h-[calc(1lh+2px)] w-[1lh] shrink-0 items-center justify-center leading-none',
-        badgeProps?.className,
-        className
-      )}
-      contentEditable={false}
-    >
-      <CornerDownLeftIcon className="relative top-px size-4" />
-    </span>
-  );
+  const badge = <span {...badgeProps} className={cn('inline-flex h-[calc(1lh+2px)] w-[1lh] shrink-0 items-center justify-center leading-none', badgeProps?.className, className)} contentEditable={false}><CornerDownLeftIcon className="relative top-px size-4" /></span>;
 
   if (children.type === 'ol' || children.type === 'ul') {
-    const childNodes = React.Children.toArray(
-      (children.props as { children?: React.ReactNode }).children
-    );
+    const childNodes = React.Children.toArray((children.props as { children?: React.ReactNode }).children);
     const lastIndex = childNodes.length - 1;
     const lastChild = childNodes[lastIndex];
-
-    if (!React.isValidElement(lastChild) || lastChild.type !== 'li') {
-      return children;
-    }
-
-    const nextLastChild = React.cloneElement(
-      lastChild as React.ReactElement<any>,
-      {
-        children: (
-          <>
-            {(lastChild.props as { children?: React.ReactNode }).children}
-            {badge}
-          </>
-        ),
-      }
-    );
-
-    return React.cloneElement(children as React.ReactElement<any>, {
-      children: [...childNodes.slice(0, lastIndex), nextLastChild],
-    });
+    if (!React.isValidElement(lastChild) || lastChild.type !== 'li') return children;
+    const nextLastChild = React.cloneElement(lastChild as React.ReactElement<any>, { children: <>{(lastChild.props as { children?: React.ReactNode }).children}{badge}</> });
+    return React.cloneElement(children as React.ReactElement<any>, { children: [...childNodes.slice(0, lastIndex), nextLastChild] });
   }
 
-  if (typeof children.type === 'string') {
-    return (
-      <>
-        {children}
-        {badge}
-      </>
-    );
-  }
+  if (typeof children.type === 'string') return <>{children}{badge}</>;
 
-  return React.cloneElement(children as React.ReactElement<any>, {
-    lineBreakBadge: badge,
-  });
+  return React.cloneElement(children as React.ReactElement<any>, { lineBreakBadge: badge });
 }
 
 export function SuggestionLeaf(props: PlateLeafProps<TSuggestionText>) { const { api, setOption } = useEditorPlugin(suggestionPlugin);
   const leaf = props.leaf;
-
   const leafId: string = api.suggestion.nodeId(leaf) ?? '';
   const activeSuggestionId = usePluginOption(suggestionPlugin, 'activeId');
   const hoverSuggestionId = usePluginOption(suggestionPlugin, 'hoverId');
   const dataList = api.suggestion.dataList(leaf);
-
   const hasRemove = dataList.some((data) => data.type === 'remove');
   const hasActive = dataList.some((data) => data.id === activeSuggestionId);
   const hasHover = dataList.some((data) => data.id === hoverSuggestionId);
-
   const diffOperation = { type: hasRemove ? 'delete' : 'insert' } as const;
+  const Component = ({ delete: 'del', insert: 'ins', update: 'span' } as const)[diffOperation.type];
 
-  const Component = ({ delete: 'del', insert: 'ins', update: 'span' } as const)[
-    diffOperation.type
-  ];
-
-  return (
-    <PlateLeaf
-      {...props}
-      as={Component}
-      className={cn(
-        suggestionVariants({
-          insertActive: hasActive || hasHover,
-          remove: hasRemove,
-          removeActive: (hasActive || hasHover) && hasRemove,
-        })
-      )}
-      attributes={{
-        ...props.attributes,
-        onMouseEnter: () => setOption('hoverId', leafId),
-        onMouseLeave: () => setOption('hoverId', null),
-      }}
-    >
-      {props.children}
-    </PlateLeaf>
-  );
+  return <PlateLeaf {...props} as={Component} className={cn(suggestionVariants({ insertActive: hasActive || hasHover, remove: hasRemove, removeActive: (hasActive || hasHover) && hasRemove }))} attributes={{ ...props.attributes, onMouseEnter: () => setOption('hoverId', leafId), onMouseLeave: () => setOption('hoverId', null) }}>{props.children}</PlateLeaf>;
 }
 
 export const SuggestionLineBreak: RenderNodeWrapper<AnyPluginConfig> = ({ api, element, }) => { if (!api.suggestion.isBlockSuggestion(element)) return;
@@ -201,14 +105,7 @@ export const SuggestionLineBreak: RenderNodeWrapper<AnyPluginConfig> = ({ api, e
   const suggestionData = element.suggestion as TSuggestionData;
 
   return function Component({ children }) {
-    return (
-      <SuggestionLineBreakContent
-        elementType={element.type}
-        suggestionData={suggestionData}
-      >
-        {children}
-      </SuggestionLineBreakContent>
-    );
+    return <SuggestionLineBreakContent elementType={element.type} suggestionData={suggestionData}>{children}</SuggestionLineBreakContent>;
   };
 };
 
@@ -219,88 +116,18 @@ export function SuggestionLineBreakContent({ children, elementType, suggestionDa
   const { isLineBreak, type } = suggestionData;
   const isRemove = type === 'remove';
   const isInsert = type === 'insert';
-
   const activeSuggestionId = usePluginOption(suggestionPlugin, 'activeId');
   const hoverSuggestionId = usePluginOption(suggestionPlugin, 'hoverId');
-
   const isActive = activeSuggestionId === suggestionData.id;
   const isHover = hoverSuggestionId === suggestionData.id;
-
   const { setOption } = useEditorPlugin(suggestionPlugin);
-  const lineBreakBadgeClassName = cn(
-    isInsert &&
-      'bg-transparent! text-emerald-700! transition-colors duration-200',
-    isInsert && (isActive || isHover) && 'bg-transparent! text-emerald-700!',
-    isRemove && 'bg-transparent! text-red-700! transition-colors duration-200',
-    isRemove && (isActive || isHover) && 'bg-transparent! text-red-700!'
-  );
+  const lineBreakBadgeClassName = cn(isInsert && 'bg-transparent! text-emerald-700! transition-colors duration-200', isInsert && (isActive || isHover) && 'bg-transparent! text-emerald-700!', isRemove && 'bg-transparent! text-red-700! transition-colors duration-200', isRemove && (isActive || isHover) && 'bg-transparent! text-red-700!');
 
-  return (
-    <>
-      {isLineBreak ? (
-        React.isValidElement(children) && typeof children.type !== 'string' ? (
-          <SuggestionLineBreakElementAnchor
-            badgeProps={{
-              onClick: (event) => {
-                event.stopPropagation();
-                setOption('activeId', suggestionData.id);
-              },
-              onMouseDown: (event) => {
-                event.preventDefault();
-              },
-            }}
-            className={lineBreakBadgeClassName}
-          >
-            {children}
-          </SuggestionLineBreakElementAnchor>
-        ) : React.isValidElement(children) &&
-          (children.type === 'ol' || children.type === 'ul') ? (
-          <SuggestionLineBreakElementAnchor
-            badgeProps={{
-              onClick: (event) => {
-                event.stopPropagation();
-                setOption('activeId', suggestionData.id);
-              },
-              onMouseDown: (event) => {
-                event.preventDefault();
-              },
-            }}
-            className={lineBreakBadgeClassName}
-          >
-            {children}
-          </SuggestionLineBreakElementAnchor>
-        ) : (
-          <SuggestionLineBreakAnchor
-            badgeProps={{
-              onClick: (event) => {
-                event.stopPropagation();
-                setOption('activeId', suggestionData.id);
-              },
-              onMouseDown: (event) => {
-                event.preventDefault();
-              },
-            }}
-            className={lineBreakBadgeClassName}
-          >
-            {children}
-          </SuggestionLineBreakAnchor>
-        )
-      ) : (
-        <div
-          className={getBlockSuggestionWrapperClassName({
-            elementType,
-            isActive,
-            isHover,
-            isInsert,
-            isRemove,
-          })}
-          onMouseEnter={() => setOption('hoverId', suggestionData.id)}
-          onMouseLeave={() => setOption('hoverId', null)}
-          data-block-suggestion="true"
-        >
-          {children}
-        </div>
-      )}
-    </>
-  );
+  if (isLineBreak) {
+    if (React.isValidElement(children) && typeof children.type !== 'string') return <SuggestionLineBreakElementAnchor badgeProps={{ onClick: (event) => { event.stopPropagation(); setOption('activeId', suggestionData.id); }, onMouseDown: (event) => { event.preventDefault(); } }} className={lineBreakBadgeClassName}>{children}</SuggestionLineBreakElementAnchor>;
+    if (React.isValidElement(children) && (children.type === 'ol' || children.type === 'ul')) return <SuggestionLineBreakElementAnchor badgeProps={{ onClick: (event) => { event.stopPropagation(); setOption('activeId', suggestionData.id); }, onMouseDown: (event) => { event.preventDefault(); } }} className={lineBreakBadgeClassName}>{children}</SuggestionLineBreakElementAnchor>;
+    return <SuggestionLineBreakAnchor badgeProps={{ onClick: (event) => { event.stopPropagation(); setOption('activeId', suggestionData.id); }, onMouseDown: (event) => { event.preventDefault(); } }} className={lineBreakBadgeClassName}>{children}</SuggestionLineBreakAnchor>;
+  }
+
+  return <div className={getBlockSuggestionWrapperClassName({ elementType, isActive, isHover, isInsert, isRemove })} onMouseEnter={() => setOption('hoverId', suggestionData.id)} onMouseLeave={() => setOption('hoverId', null)} data-block-suggestion="true">{children}</div>;
 }
