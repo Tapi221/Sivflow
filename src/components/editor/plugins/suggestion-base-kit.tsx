@@ -3,7 +3,7 @@ import type { TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText,
 import { BaseSuggestionPlugin } from '@platejs/suggestion';
 import { KEYS, TextApi } from 'platejs';
 
-import { SuggestionLeafStatic, VoidRemoveSuggestionOverlayStatic, } from '@/components/suggestion-node-static';
+import { SuggestionLeafStatic, VoidRemoveSuggestionOverlayStatic, } from '@/components/ui/suggestion-node-static';
 
 const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.date,

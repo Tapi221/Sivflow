@@ -6,7 +6,7 @@ import { BlockSelectionPlugin } from '@platejs/selection/react';
 
 import { getPluginTypes, isHotkey, KEYS } from 'platejs';
 
-import { BlockSelection } from '@/components/block-selection';
+import { BlockSelection } from '@/components/ui/block-selection';
 
 export const hasSelectableClass = ({ attributes, className, }: { attributes: { className?: string };
   className?: string;
