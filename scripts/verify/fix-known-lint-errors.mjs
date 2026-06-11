@@ -1,14 +1,21 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 const ROOT_DIR = process.cwd();
-const TARGET_FILE_PATHS = [
+const DEFAULT_TARGET_FILE_PATHS = [
   "src/features/calendar/timetable/CalendarTimetableView.tsx",
   "src/features/pdf/PdfDocumentPane.tsx",
   "src/features/pdf/PdfPane.tsx",
   "src/pane.desktop/view/ScheduleScreen.mobile.tsx",
   "src/components/editor/use-chat.ts",
+  "src/features/library-cardset/model/cardSetLibraryRow.ts",
+  "src/features/library-pdf/components/PdfLibraryDashboard.tsx",
+  "src/features/library-pdf/model/pdfLibraryRow.ts",
 ].map((filePath) => path.join(ROOT_DIR, filePath));
+const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
+const SIMPLE_MEMBER_EXPRESSION_PATTERN = String.raw`[A-Za-z_$][\w$]*(?:\?\.[A-Za-z_$][\w$]*|\.[A-Za-z_$][\w$]*|\[[^\]\n]+\])*`;
+const NUMBER_NULLISH_ZERO_PATTERN = new RegExp(String.raw`Number\((${SIMPLE_MEMBER_EXPRESSION_PATTERN})\) \?\? 0`, "gu");
+const JOIN_NULLISH_FALLBACK_PATTERN = new RegExp(String.raw`(${SIMPLE_MEMBER_EXPRESSION_PATTERN})\.join\(([^()\n]*)\) \?\? ("[^"\n]*"|'[^'\n]*')`, "gu");
 const RESOLVE_STRATIS_ICON_DECLARATION_PATTERN = /^const resolveStratisIcon = \(names: readonly string\[\]\): StratisIconComponent \| null => .*;$/mu;
 const CALENDAR_TIMETABLE_ICON_DECLARATIONS = "const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);\nconst StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);\nconst StratisSettingsIcon = resolveStratisIcon(STRATIS_SETTINGS_ICON_NAMES);\n";
 const SCHEDULE_SCREEN_ICON_DECLARATIONS = "const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);\nconst StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);\n";
@@ -19,6 +26,30 @@ const STRATIS_ICON_DECLARATION_BLOCKS = [CALENDAR_TIMETABLE_ICON_DECLARATIONS, S
 const normalizeLineEndings = (source) => source.split("\r\n").join("\n").split("\r").join("\n");
 
 const replaceAll = (source, searchValue, replaceValue) => source.split(searchValue).join(replaceValue);
+
+const toAbsolutePath = (filePath) => path.isAbsolute(filePath) ? filePath : path.join(ROOT_DIR, filePath);
+
+const walkTargetFiles = (targetPath) => {
+  if (!existsSync(targetPath)) return [];
+
+  const stat = statSync(targetPath);
+  if (stat.isFile()) return SOURCE_EXTENSIONS.has(path.extname(targetPath)) ? [targetPath] : [];
+  if (!stat.isDirectory()) return [];
+
+  return readdirSync(targetPath).flatMap((entry) => walkTargetFiles(path.join(targetPath, entry)));
+};
+
+const getTargetFilePaths = () => {
+  const targetValue = process.env.SOURCE_CONVENTION_TARGETS;
+  if (!targetValue) return DEFAULT_TARGET_FILE_PATHS;
+
+  return targetValue
+    .split(path.delimiter)
+    .map((targetPath) => targetPath.trim())
+    .filter(Boolean)
+    .map(toAbsolutePath)
+    .flatMap(walkTargetFiles);
+};
 
 const removeBlock = (source, startText) => {
   const startIndex = source.indexOf(startText);
@@ -39,6 +70,14 @@ const insertAfterResolveStratisIcon = (source, declarations) => {
 
   const insertIndex = match.index + match[0].length;
   return `${sourceWithoutDeclarations.slice(0, insertIndex)}\n${declarations}${sourceWithoutDeclarations.slice(insertIndex + (sourceWithoutDeclarations[insertIndex] === "\n" ? 1 : 0))}`;
+};
+
+const applyNoConstantBinaryExpressionFixes = (source) => {
+  let nextSource = source;
+  nextSource = nextSource.replace(NUMBER_NULLISH_ZERO_PATTERN, (_match, valueExpression) => `Number.isFinite(Number(${valueExpression})) ? Number(${valueExpression}) : 0`);
+  nextSource = nextSource.replace(JOIN_NULLISH_FALLBACK_PATTERN, (_match, arrayExpression, separatorExpression, fallbackExpression) => `${arrayExpression}.length > 0 ? ${arrayExpression}.join(${separatorExpression}) : ${fallbackExpression}`);
+
+  return nextSource;
 };
 
 const applyPdfDocumentPaneFixes = (source) => {
@@ -96,15 +135,16 @@ const applyPdfPaneFixes = (source) => {
 
 const applyKnownLintFixes = (filePath, source) => {
   const relativePath = path.relative(ROOT_DIR, filePath).split(path.sep).join("/");
-  const normalizedSource = normalizeLineEndings(source);
+  let nextSource = normalizeLineEndings(source);
+  nextSource = applyNoConstantBinaryExpressionFixes(nextSource);
 
-  if (relativePath === "src/features/calendar/timetable/CalendarTimetableView.tsx") return applyCalendarTimetableFixes(normalizedSource);
-  if (relativePath === "src/features/pdf/PdfDocumentPane.tsx") return applyPdfDocumentPaneFixes(normalizedSource);
-  if (relativePath === "src/features/pdf/PdfPane.tsx") return applyPdfPaneFixes(normalizedSource);
-  if (relativePath === "src/pane.desktop/view/ScheduleScreen.mobile.tsx") return applyScheduleScreenFixes(normalizedSource);
-  if (relativePath === "src/components/editor/use-chat.ts") return applyUseChatFixes(normalizedSource);
+  if (relativePath === "src/features/calendar/timetable/CalendarTimetableView.tsx") return applyCalendarTimetableFixes(nextSource);
+  if (relativePath === "src/features/pdf/PdfDocumentPane.tsx") return applyPdfDocumentPaneFixes(nextSource);
+  if (relativePath === "src/features/pdf/PdfPane.tsx") return applyPdfPaneFixes(nextSource);
+  if (relativePath === "src/pane.desktop/view/ScheduleScreen.mobile.tsx") return applyScheduleScreenFixes(nextSource);
+  if (relativePath === "src/components/editor/use-chat.ts") return applyUseChatFixes(nextSource);
 
-  return normalizedSource;
+  return nextSource;
 };
 
 const updateFile = (filePath) => {
@@ -119,7 +159,7 @@ const updateFile = (filePath) => {
   return true;
 };
 
-const updatedFiles = TARGET_FILE_PATHS.filter(updateFile);
+const updatedFiles = getTargetFilePaths().filter(updateFile);
 
 if (updatedFiles.length > 0) {
   console.log(`既知 lint エラーの自動修正を ${updatedFiles.length} file(s) 適用しました。`);
