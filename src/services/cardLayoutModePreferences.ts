@@ -5,11 +5,15 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 interface CardLayoutModePreferenceScope { deviceScope: string;
   cardSetId: string | null | undefined;
   displayMode: CardDisplayMode;
   interactionMode: CardSetInteractionMode;
 }
+
+
 
 
 
@@ -72,7 +76,11 @@ const setCardLayoutModePreference = (scope: CardLayoutModePreferenceScope, mode:
 
 
 
+
+
 export { getCardLayoutModePreference, resolveCardLayoutModePreference, setCardLayoutModePreference };
+
+
 
 
 export type { CardLayoutModePreferenceScope };

@@ -5,10 +5,6 @@ import type { ClientUploadedFileData, UploadFilesOptions } from "uploadthing/typ
 import { z } from "zod";
 import type { OurFileRouter } from "@/lib/uploadthing";
 
-
-
-
-
 type UploadedFile<T = unknown> = ClientUploadedFileData<T>;
 interface UseUploadFileProps
   extends Pick<
@@ -19,16 +15,8 @@ interface UseUploadFileProps
   onUploadError?: (error: unknown) => void;
 }
 
-
-
-
-
 const UNKNOWN_ERROR_MESSAGE = "Something went wrong, please try again later.";
 const { uploadFiles, useUploadThing } = generateReactHelpers<OurFileRouter>();
-
-
-
-
 
 const getErrorMessage = (err: unknown) => {
   if (err instanceof z.ZodError) {
@@ -118,13 +106,5 @@ const showErrorToast = (err: unknown) => {
   return toast.error(errorMessage);
 };
 
-
-
-
-
 export { uploadFiles, useUploadThing, useUploadFile, getErrorMessage, showErrorToast };
-
-
-
-
-export type { Uploade
+export type { UploadedFile };

@@ -11,9 +11,13 @@ import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 
 
 
+
+
 type AppProvidersProps = {
   children: ReactNode;
 };
+
+
 
 
 
@@ -36,7 +40,11 @@ const AppProviders = ({ children }: AppProvidersProps) => (
 
 
 
+
+
 export { AppProviders };
+
+
 
 
 export type { AppProvidersProps };

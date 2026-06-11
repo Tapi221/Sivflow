@@ -2,16 +2,8 @@ type GoogleDrivePdfDownloadInput = { accessToken: string;
   fileId: string;
 };
 
-
-
-
-
 const GOOGLE_DRIVE_DOWNLOAD_ENDPOINT = "https://www.googleapis.com/drive/v3/files";
 const PDF_MIME_TYPE = "application/pdf";
-
-
-
-
 
 const readGoogleDriveErrorMessage = async (response: Response): Promise<string> => {
   try {
@@ -46,13 +38,5 @@ const downloadPdfFromGoogleDrive = async ({ accessToken, fileId }: GoogleDrivePd
   return normalizePdfBlob(await response.blob());
 };
 
-
-
-
-
 export { downloadPdfFromGoogleDrive };
-
-
-
-
-export type { GoogleDrivePdfDownloadIn
+export type { GoogleDrivePdfDownloadInput };

@@ -5,15 +5,7 @@ import type { Card } from "@/types";
 import { cleanupLegacyCardStorageFields } from "./cardStorageFieldCleanup";
 import { sanitizeCardStorageBlockImages } from "./cardStorageImageTransforms";
 
-
-
-
-
 type StorageLike = Record<string, unknown>;
-
-
-
-
 
 const denormalizeCardForStorage = (value: Partial<Card> | StorageLike): StorageLike => {
   const record = cloneStorageRecord(value);
@@ -45,8 +37,4 @@ const denormalizeCardForStorage = (value: Partial<Card> | StorageLike): StorageL
 };
 const normalizeCardFromStorage = (value: unknown): Card => normalizeCard(value);
 
-
-
-
-
-export { denormalizeCardForStorage, normalizeCardFromStorag
+export { denormalizeCardForStorage, normalizeCardFromStorage };

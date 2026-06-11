@@ -3,6 +3,8 @@ import { hasDesktopBridge } from "@platform/runtime";
 
 
 
+
+
 const hasWindowDesktop = (): boolean => typeof window !== "undefined" && typeof window.desktop !== "undefined";
 const getDesktopBridge = (): DesktopBridgeApi => {
   if (!hasDesktopBridge() || !hasWindowDesktop()) throw new Error("Desktop bridge is not available");
@@ -13,6 +15,8 @@ const getDesktopBridge = (): DesktopBridgeApi => {
 
   return bridge;
 };
+
+
 
 
 

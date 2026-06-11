@@ -7,6 +7,8 @@ import { CURRENT_TAG_STORE } from "./tagStoreNames";
 
 
 
+
+
 type EnqueueSync = (table: string, type: "upload" | "download", payload: unknown) => Promise<void>;
 interface TableLike<T extends object> { add(item: T): PromiseLike<unknown> | unknown;
   get(id: unknown): PromiseLike<T | undefined> | T | undefined;
@@ -149,6 +151,8 @@ type Upsert = {
 
 
 
+
+
 const ENTITY_BY_TABLE = {
   cards: "card",
   folders: "folder",
@@ -166,6 +170,8 @@ const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>([
   "tag",
   "asset",
 ]);
+
+
 
 
 
@@ -547,7 +553,11 @@ const upsert: Upsert = async (db: DbLike, tableName: string, data: unknown, skip
 
 
 
+
+
 export { addItem, updateItem, deleteItem, softDelete, bulkUpsert, upsert };
+
+
 
 
 export type { EnqueueSync, TableLike, DbLike };

@@ -4,10 +4,6 @@ import { buildCardLayoutPreferenceScopeKey, resolveDefaultCardLayoutMode } from 
 import { resolveCardLayoutModePreference, setCardLayoutModePreference } from "@/services/cardLayoutModePreferences";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
-
-
 interface UseCardSetViewCardLayoutModeOptions {
   deviceScope: string;
   cardSetId: string | null;
@@ -19,10 +15,6 @@ type CardLayoutModeOverrideState = {
   scopeKey: string;
   mode: CardLayoutMode;
 } | null;
-
-
-
-
 
 const useCardSetViewCardLayoutMode = ({ deviceScope, cardSetId, displayMode, interactionMode, defaultCardLayoutMode }: UseCardSetViewCardLayoutModeOptions) => {
   const scopeKey = useMemo(() => buildCardLayoutPreferenceScopeKey({ deviceScope, cardSetId, displayMode, interactionMode }), [cardSetId, deviceScope, displayMode, interactionMode]);
@@ -81,8 +73,4 @@ const useCardSetViewCardLayoutMode = ({ deviceScope, cardSetId, displayMode, int
   };
 };
 
-
-
-
-
-export { useCardSetViewCardLayoutMod
+export { useCardSetViewCardLayoutMode };

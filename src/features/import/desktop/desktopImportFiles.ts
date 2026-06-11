@@ -1,9 +1,5 @@
 import { IMPORT_FILE_MIME_TYPES } from "@/features/import/domain/importFileKind";
 
-
-
-
-
 type DesktopImportFileOpenPayload = { paths: string[];
 };
 type DesktopImportFileReadResult = { path: string;
@@ -11,10 +7,6 @@ type DesktopImportFileReadResult = { path: string;
   size: number;
   data: ArrayBuffer | Uint8Array | number[];
 };
-
-
-
-
 
 const getImportFileMimeType = (fileName: string): string => {
   const normalizedFileName = fileName.trim().toLowerCase();
@@ -107,13 +99,5 @@ const selectDesktopImportFiles = async (): Promise<File[]> => {
   return readDesktopImportFiles(paths);
 };
 
-
-
-
-
 export { canUseDesktopImportFiles, subscribeDesktopImportFileOpen, readDesktopImportFile, selectDesktopImportFiles, readDesktopImportFiles };
-
-
-
-
-export type { DesktopImportFileOpenPayload, DesktopImportFileReadRes
+export type { DesktopImportFileOpenPayload, DesktopImportFileReadResult };

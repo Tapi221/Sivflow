@@ -1,9 +1,5 @@
 import type { Card } from "@/types";
 
-
-
-
-
 type FolderDashboardHandlers = {
   onStartStudy: () => void;
   onViewCards: () => void;
@@ -18,16 +14,8 @@ interface FolderDashboardProps {
   folderSelectionNonce?: number;
 }
 
-
-
-
-
 const FolderDashboard = (_: FolderDashboardProps) => {
   return <div className="h-full bg-transparent" />;
 };
-
-
-
-
 
 export { FolderDashboard };

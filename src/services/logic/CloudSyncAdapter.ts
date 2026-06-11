@@ -5,6 +5,8 @@ import type { CloudDeviceStatus, ICloudSyncAdapter, SyncChange } from "@/service
 
 
 
+
+
 const getDeviceMetadataPath = (userId: string, deviceId: string) => {
   return `sync_metadata/${userId}/devices/${deviceId}`;
 };
@@ -80,6 +82,8 @@ class CloudSyncAdapter implements ICloudSyncAdapter { private readonly userId: s
     return snapshot.size;
   };
 }
+
+
 
 
 

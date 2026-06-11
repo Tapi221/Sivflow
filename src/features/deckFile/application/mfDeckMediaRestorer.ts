@@ -2,10 +2,6 @@ import type { MfDeckIssue, MfDeckMediaManifestV1 } from "@/features/deckFile/dom
 import { isMfDeckMediaUri, pathFromMfDeckMediaUri } from "@/features/deckFile/domain/mfDeckMedia";
 import type { CardBlock } from "@/types";
 
-
-
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
@@ -166,8 +162,4 @@ const restoreMfDeckMediaInBlocks = (input: { blocks: CardBlock[];
   return input.blocks;
 };
 
-
-
-
-
-export { restoreMfDeckMediaInBlocks 
+export { restoreMfDeckMediaInBlocks };

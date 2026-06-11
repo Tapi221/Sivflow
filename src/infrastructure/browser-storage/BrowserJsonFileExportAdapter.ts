@@ -1,14 +1,6 @@
 import type { JsonFileExportPort } from "@/application/ports/JsonFileExportPort";
 
-
-
-
-
 const browserJsonFileExportAdapter: JsonFileExportPort = { exportJson };
-
-
-
-
 
 const exportJson: JsonFileExportPort["exportJson"] = async ({
   filename,
@@ -29,8 +21,4 @@ const exportJson: JsonFileExportPort["exportJson"] = async ({
   URL.revokeObjectURL(url);
 };
 
-
-
-
-
-export { browserJsonFileExportAdapte
+export { browserJsonFileExportAdapter };

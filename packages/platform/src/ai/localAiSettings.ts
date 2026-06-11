@@ -7,6 +7,8 @@ type LocalAiSettings = { enabled: boolean;
 
 
 
+
+
 const LOCAL_AI_SETTINGS_STORAGE_KEY = "sivflow.localAiSettings.v1";
 const DEFAULT_LOCAL_AI_SETTINGS: LocalAiSettings = {
   enabled: true,
@@ -14,6 +16,8 @@ const DEFAULT_LOCAL_AI_SETTINGS: LocalAiSettings = {
   baseUrl: "http://127.0.0.1:11434",
   model: "llama3.2:3b",
 };
+
+
 
 
 
@@ -67,7 +71,11 @@ const setLocalAiSettings = (settings: LocalAiSettings): LocalAiSettings => {
 
 
 
+
+
 export { getDefaultLocalAiSettings, getLocalAiSettings, setLocalAiSettings };
+
+
 
 
 export type { LocalAiProvider, LocalAiSettings };

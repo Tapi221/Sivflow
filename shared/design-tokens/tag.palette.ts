@@ -2,4 +2,6 @@ const TAG_COLOR_PALETTE = { gray: { fg: "#64748b", fgRgb: [100, 116, 139], borde
 
 
 
+
+
 export { TAG_COLOR_PALETTE };

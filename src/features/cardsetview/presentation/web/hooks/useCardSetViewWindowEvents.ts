@@ -2,18 +2,10 @@ import { useEffect } from "react";
 import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewEvents.constants";
 import { subscribeCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 
-
-
-
-
 interface UseCardSetViewWindowEventsOptions {
   handleToggleViewMode: () => void;
   createAndFocusCard: () => Promise<boolean>;
 }
-
-
-
-
 
 const useCardSetViewWindowEvents = ({ handleToggleViewMode, createAndFocusCard }: UseCardSetViewWindowEventsOptions) => {
   useEffect(() => {
@@ -33,8 +25,4 @@ const useCardSetViewWindowEvents = ({ handleToggleViewMode, createAndFocusCard }
   }, [createAndFocusCard]);
 };
 
-
-
-
-
-export { useCardSetViewWindowEvent
+export { useCardSetViewWindowEvents };

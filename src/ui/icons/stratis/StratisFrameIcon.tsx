@@ -4,8 +4,12 @@ import type { ReactNode, SVGProps } from "react";
 
 
 
+
+
 type StratisFrameIconProps = SVGProps<SVGSVGElement> & { children?: ReactNode;
 };
+
+
 
 
 
@@ -15,13 +19,19 @@ const FRAME_PATH =
 
 
 
+
+
 const StratisFrameIcon = forwardRef<SVGSVGElement, StratisFrameIconProps>(({ className, children, ...props }, ref) => {
   return (<svg ref={ref} {...props} viewBox="0 0 24 24" className={["block", className].filter(Boolean).join(" ")} xmlns="http://www.w3.org/2000/svg" > <path d={FRAME_PATH} fill="currentColor" /> {children} </svg>);
 });
 
 
 
+
+
 export { STRATIS_INNER_STROKE_PATH_PROPS, StratisFrameIcon };
+
+
 
 
 export type { StratisFrameIconProps };

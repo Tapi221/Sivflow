@@ -5,6 +5,8 @@ import { SafeIndexedDBWriter } from "./SafeIndexedDBWriter";
 
 
 
+
+
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };
@@ -268,6 +270,8 @@ class IndexedDBMetadataService { private readonly db: LocalDBLike;
     return meta?.rebuildCount ?? 0;
   };
 }
+
+
 
 
 

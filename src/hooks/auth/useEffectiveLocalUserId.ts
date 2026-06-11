@@ -1,14 +1,6 @@
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 
-
-
-
-
 const ANONYMOUS_USER_ID = "anonymous";
-
-
-
-
 
 const useEffectiveLocalUserId = (): string | null => {
   const { currentUser, loading } = useAuthSession();
@@ -18,8 +10,4 @@ const useEffectiveLocalUserId = (): string | null => {
   return ANONYMOUS_USER_ID;
 };
 
-
-
-
-
-export { useEffectiveLocalUserI
+export { useEffectiveLocalUserId };

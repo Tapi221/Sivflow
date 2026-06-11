@@ -6,10 +6,6 @@ import type { SlateEditor } from "platejs";
 import { KEYS, RangeApi } from "platejs";
 import type { ChatMessage } from "./types";
 
-
-
-
-
 type StructuredPromptSections = { context?: string;
   examples?: string[] | string;
   history?: string;
@@ -23,16 +19,8 @@ type StructuredPromptSections = { context?: string;
   tone?: string;
 };
 
-
-
-
-
 const SELECTION_START = "<Selection>";
 const SELECTION_END = "</Selection>";
-
-
-
-
 
 const tag = (tag: string, content?: string | null) => {
   if (!content) return "";
@@ -186,13 +174,5 @@ const isSingleCellSelection = (editor: SlateEditor): boolean => {
   return cells.length === 1;
 };
 
-
-
-
-
 export { tag, inlineTag, sections, list, buildStructuredPrompt, getTextFromMessage, formatTextFromMessages, getLastUserInstruction, addSelection, isMultiBlocks, getMarkdownWithSelection, isSelectionInTable, isSingleCellSelection };
-
-
-
-
 export type { StructuredPromptSections };

@@ -29,6 +29,8 @@ import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
 
 
 
+
+
 type ExplorerWorkspaceContentProps = {
   explorerState: ExplorerRouteState;
   explorerTabId: WorkspaceExplorerTab["id"] | null;
@@ -60,6 +62,8 @@ type SettingsDialogHostProps = {
 
 
 
+
+
 const MOBILE_WORKSPACE_MEDIA_QUERY = "(max-width: 767px)";
 const MOBILE_WORKSPACE_SIDEBAR_OPEN_BUTTON_CLASS_NAME = "pointer-events-auto absolute left-3 top-3 z-[90] flex h-10 w-10 items-center justify-center bg-transparent p-0 text-[#111] outline-none transition hover:text-[#111] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
 const MOBILE_WORKSPACE_MAIN_PANEL_CLASS_NAME = "!rounded-none !border-0 !shadow-none";
@@ -72,6 +76,8 @@ const WORKSPACE_ACTION_TOOLBAR_STYLE = { right: "252px", top: "12px" };
 const WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME = "max-w-[calc(100%-96px)]";
 const WORKSPACE_MAIN_PANEL_CLASS_NAME = "relative z-0 isolate min-w-0";
 const SIDEBAR_INTERACTION_REGION_STYLE: SidebarInteractionRegionStyle = { WebkitAppRegion: "no-drag" };
+
+
 
 
 
@@ -145,6 +151,8 @@ const useIsMobileWorkspaceViewport = (): boolean => {
 
   return isMobileWorkspaceViewport;
 };
+
+
 
 
 
@@ -373,6 +381,8 @@ const WorkspaceScreen = () => {
     </SettingsDialogHost>
   );
 };
+
+
 
 
 

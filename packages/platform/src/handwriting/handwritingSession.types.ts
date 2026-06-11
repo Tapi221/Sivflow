@@ -2,6 +2,8 @@ import type { InkSide, InkStroke } from "@core/domain/card/ink/inkDocument";
 
 
 
+
+
 type HandwritingSessionStatus = "idle" | "waiting" | "connected" | "closed" | "error";
 type HandwritingDeviceRole = "desktop" | "mobile";
 type HandwritingDeviceInfo = { id: string;

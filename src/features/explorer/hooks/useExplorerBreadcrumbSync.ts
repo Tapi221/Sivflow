@@ -4,10 +4,6 @@ import { buildExplorerBreadcrumbs } from "@/features/breadcrumbs/builders";
 import type { ExplorerBreadcrumbContext } from "@/features/explorer/contracts/explorerBreadcrumbContext";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
-
-
-
-
 type Params = {
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
@@ -16,10 +12,6 @@ type Params = {
   cardById: Map<string, Card>;
   documentById: Map<string, DocumentItem>;
 };
-
-
-
-
 
 const useExplorerBreadcrumbSync = ({ selectedFolderId, selectedItem, explorerBreadcrumbContext, folderById, cardById, documentById }: Params) => {
   const setExtraCrumbs = useSetBreadcrumbCrumbs();
@@ -49,8 +41,4 @@ const useExplorerBreadcrumbSync = ({ selectedFolderId, selectedItem, explorerBre
   }, [extraCrumbs, setExtraCrumbs]);
 };
 
-
-
-
-
-export { useExplorerBreadcrumbSyn
+export { useExplorerBreadcrumbSync };

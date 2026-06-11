@@ -6,6 +6,8 @@ import type { IosCalendarConnectionStatus, IosCalendarEvent, IosCalendarListItem
 
 
 
+
+
 type LoadEventsInput = {
   calendarIds: string[];
   calendars: IosCalendarListItem[];
@@ -14,11 +16,15 @@ type LoadEventsInput = {
 
 
 
+
+
 const IOS_CALENDAR_PERMISSION_ERROR = "iOSカレンダーへのアクセス許可が必要です";
 const IOS_CALENDAR_UNSUPPORTED_ERROR = "iOSカレンダー連携はiOS端末でのみ利用できます";
 const IOS_CALENDAR_CREATE_ERROR = "iOSカレンダー予定の作成に失敗しました";
 const IOS_CALENDAR_UPDATE_ERROR = "iOSカレンダー予定の更新に失敗しました";
 const IOS_CALENDAR_DELETE_ERROR = "iOSカレンダー予定の削除に失敗しました";
+
+
 
 
 
@@ -411,6 +417,8 @@ const useIosCalendarIntegration = () => {
     updateEvent,
   };
 };
+
+
 
 
 

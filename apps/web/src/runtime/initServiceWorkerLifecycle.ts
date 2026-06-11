@@ -5,7 +5,11 @@ import { toErrorText } from "./runtimeErrorUtils";
 
 
 
+
+
 let started = false;
+
+
 
 
 
@@ -93,6 +97,8 @@ const initServiceWorkerLifecycle = () => {
       });
   });
 };
+
+
 
 
 

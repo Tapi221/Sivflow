@@ -18,10 +18,6 @@ import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { Card, CardPatch, UserSettings } from "@/types";
 import { applyEditingDraftPatch, buildCardsById, createMetaPanelActions, resolveSelectedCardSnapshot } from "./cardEditorPaneControllerCore";
 
-
-
-
-
 type UseCardsResult = {
   cards: Card[];
   updateCard: (cardId: string, data: unknown) => void | Promise<void>;
@@ -37,10 +33,6 @@ type UseCardEditorPaneControllerParams = {
   onSelectCardId?: (cardId: string) => void;
   settingsOverride?: Partial<UserSettings> | null;
 };
-
-
-
-
 
 const useCardEditorPaneController = ({ selectedCardId, folderId, cardSetId, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, settingsOverride }: UseCardEditorPaneControllerParams) => {
   const { settings: settingsFromHook } = useUserSettings();
@@ -262,8 +254,4 @@ const useCardEditorPaneController = ({ selectedCardId, folderId, cardSetId, card
   };
 };
 
-
-
-
-
-export { useCardEditorPaneControlle
+export { useCardEditorPaneController };

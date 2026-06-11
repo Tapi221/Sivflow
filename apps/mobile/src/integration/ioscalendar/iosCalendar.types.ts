@@ -2,6 +2,8 @@ import type { CalendarRecurrenceRule, GoogleCalendarEvent } from "@core/calendar
 
 
 
+
+
 type IosCalendarPermissionStatus = "undetermined" | "granted" | "denied";
 type IosCalendarConnectionStatus = "connected" | "needsPermission" | "unsupported" | "error";
 type IosCalendarListItem = { id: string;

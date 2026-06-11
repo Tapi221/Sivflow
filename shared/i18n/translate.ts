@@ -4,9 +4,13 @@ import type { RawTranslations } from "./translations";
 
 
 
+
+
 type TranslationKey = keyof RawTranslations;
 type TranslationParams = { count?: number;
 };
+
+
 
 
 
@@ -24,7 +28,11 @@ const translate = (locale: Locale, key: TranslationKey, params?: TranslationPara
 
 
 
+
+
 export { translate };
+
+
 
 
 export type { TranslationKey, TranslationParams };

@@ -2,7 +2,11 @@ type SecurityEventType = | "LOGIN_SUCCESS" | "LOGIN_FAILED" | "DEVICE_REVOKED" |
 
 
 
+
+
 const SECURITY_EVENT_TYPES = ["LOGIN_SUCCESS", "LOGIN_FAILED", "DEVICE_REVOKED", "ACCESS_DENIED_REVOKED", "SYNC_AUTH_ERROR", "SENSITIVE_OP_REVOKED", "DEVICE_NEW_REGISTER", "LOCK_CONTENTION_EXCESS", "SYNC_CONFLICT_EXCESS", "ADMIN_DEVICE_REVOKE", "ADMIN_ACCOUNT_LOCK", "ADMIN_LOG_EXPORT",] as const satisfies readonly SecurityEventType[];
+
+
 
 
 
@@ -10,7 +14,11 @@ const isSupportedSecurityEventType = (value: string): value is SecurityEventType
 
 
 
+
+
 export { SECURITY_EVENT_TYPES, isSupportedSecurityEventType };
+
+
 
 
 export type { SecurityEventType };

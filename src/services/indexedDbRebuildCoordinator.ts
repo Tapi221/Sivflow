@@ -4,6 +4,8 @@ import { getLocalDb } from "./localDB";
 
 
 
+
+
 const rebuildIndexedDb = async (userId: string, reason?: string): Promise<{ degraded: boolean;
   failures: Array<{ type: string; id: string; error: string; }>;
 }> => {
@@ -45,6 +47,8 @@ const rebuildIndexedDb = async (userId: string, reason?: string): Promise<{ degr
     failures: rebuildResult.failures,
   };
 };
+
+
 
 
 

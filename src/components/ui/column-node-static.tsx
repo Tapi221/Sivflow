@@ -3,8 +3,6 @@ import type { TColumnElement } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
 
-
-
 const ColumnElementStatic = (props: SlateElementProps<TColumnElement>) => {
   const { width } = props.element;
 
@@ -52,6 +50,4 @@ const ColumnGroupElementDocx = (props: SlateElementProps) => {
   return (<SlateElement {...props}> <table style={{ width: "100%", borderCollapse: "collapse", border: "none", tableLayout: "fixed" }} > <tbody> <tr>{props.children}</tr> </tbody> </table> </SlateElement>);
 };
 
-
-
-export { ColumnElementStatic, ColumnGroupElementStatic, ColumnElementDocx, ColumnGroupElementDocx
+export { ColumnElementStatic, ColumnGroupElementStatic, ColumnElementDocx, ColumnGroupElementDocx };

@@ -2,6 +2,8 @@ import type { SecurityEventType } from "#src/security/contract.js";
 
 
 
+
+
 type SecurityRiskLevel = "normal" | "warning" | "high" | "critical";
 type DetectionOutcome = { triggered: boolean;
   scoreAdded: number;
@@ -10,6 +12,8 @@ type RiskScoreCalculation = { previousScore: number;
   nextScore: number;
   riskLevel: SecurityRiskLevel;
 };
+
+
 
 
 
@@ -29,6 +33,8 @@ const WINDOWED_EVENT_THRESHOLDS: Partial<Record<SecurityEventType, number>> = {
   LOCK_CONTENTION_EXCESS: 5,
 } as const;
 const RISK_DECAY_PER_HOUR = 3;
+
+
 
 
 
@@ -72,7 +78,11 @@ const calculateNextRiskScore = ({ persistedScore, lastUpdateMs, nowMs, scoreAdde
 
 
 
+
+
 export { RISK_SCORE_THRESHOLDS, getRiskLevel, resolveDetectionOutcome, applyRiskDecay, calculateNextRiskScore };
+
+
 
 
 export type { SecurityRiskLevel, DetectionOutcome, RiskScoreCalculation };

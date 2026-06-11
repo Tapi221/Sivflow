@@ -11,7 +11,11 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 
 
 
+
+
 const MOBILE_LOGIN_VIEWPORT_MAX_WIDTH = 767;
+
+
 
 
 
@@ -45,6 +49,8 @@ const useIsMobileLoginViewport = (): boolean => {
 
 
 
+
+
 const AppContent = () => {
   const { currentUser, loading } = useAuthSession();
   const isMobileLoginViewport = useIsMobileLoginViewport();
@@ -73,6 +79,8 @@ const AppContent = () => {
     </>
   );
 };
+
+
 
 
 

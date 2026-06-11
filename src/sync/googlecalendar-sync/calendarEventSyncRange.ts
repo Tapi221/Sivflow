@@ -7,6 +7,8 @@ import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model
 
 
 
+
+
 type CalendarEventSyncRange = { rangeStart: Date;
   rangeEnd: Date;
 };
@@ -21,10 +23,14 @@ type BuildCalendarEventSyncRangeOptions = { selectedViewMode: CalendarViewMode;
 
 
 
+
+
 const LIST_AND_PIE_CHART_SYNC_BUFFER_DAYS = 45;
 const WEEKDAY_SYNC_BUFFER_DAYS = 21;
 const WEEKDAY_PRIORITY_SYNC_BUFFER_DAYS = 7;
 const DEFAULT_VISIBLE_DAY_BUFFER_DAYS = 2;
+
+
 
 
 
@@ -120,7 +126,11 @@ const buildCalendarEventPrioritySyncRange = ({ selectedViewMode, visibleDays, mo
 
 
 
+
+
 export { buildCalendarEventSyncRange, buildCalendarEventPrioritySyncRange };
+
+
 
 
 export type { CalendarEventSyncRange, BuildCalendarEventSyncRangeOptions };

@@ -4,6 +4,8 @@ import { listen } from "@tauri-apps/api/event";
 
 
 
+
+
 const oauthCallbackHandlers = new Set<(payload: DesktopOauthCallbackPayload) => void>();
 let oauthCallbackListenerStarted = false;
 const desktopApi: DesktopBridgeApi = {
@@ -81,6 +83,8 @@ const desktopApi: DesktopBridgeApi = {
     },
   },
 };
+
+
 
 
 

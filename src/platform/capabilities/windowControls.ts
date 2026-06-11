@@ -4,6 +4,8 @@ import { hasDesktopBridge } from "@/platform/runtime";
 
 
 
+
+
 const windowControls: WindowControlsPort = { minimize: async () => {
   const api = getDesktopWindowApi();
   if (!api) return;
@@ -33,6 +35,8 @@ onMaximizedStateChange: (handler: (isMaximized: boolean) => void) =>
 
 
 
+
+
 const getDesktopWindowApi = () => {
   if (!hasDesktopBridge()) {
     return null;
@@ -40,6 +44,8 @@ const getDesktopWindowApi = () => {
 
   return getDesktopBridge().window;
 };
+
+
 
 
 

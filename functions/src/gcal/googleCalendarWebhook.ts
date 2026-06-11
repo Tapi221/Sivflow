@@ -3,6 +3,8 @@ import { getDb, serverTimestamp } from "#src/firebaseAdmin.js";
 
 
 
+
+
 type GoogleCalendarWebhookToken = {
   userId: string;
   calendarId: string;
@@ -13,6 +15,8 @@ type StoredGoogleCalendarWatchChannel = {
   calendarId?: unknown;
   userId?: unknown;
 };
+
+
 
 
 
@@ -92,6 +96,8 @@ const googleCalendarWebhook = onRequest({ region: REGION, }, async (request, res
 
 
 
+
+
 const getHeader = (
   request: { get: (name: string) => string | undefined; },
   name: string,
@@ -128,6 +134,8 @@ const isMatchingWatchChannel = (
     data.calendarId === expected.calendarId
   );
 };
+
+
 
 
 

@@ -12,10 +12,6 @@ import type { LoadMfDeckFileResult } from "@/features/deckFile/infra/web/readMfD
 import { readMfDeckFile } from "@/features/deckFile/infra/web/readMfDeckFile";
 import type { CardSet } from "@/types";
 
-
-
-
-
 type MfDeckImportCompletedPayload = { cardSetId: string;
   cardSetName: string;
   folderId: string;
@@ -36,19 +32,11 @@ type MfDeckImportDialogProps = {
   initialFileRevision?: number;
 };
 
-
-
-
-
 const emptyLoadedState = {
   file: null as File | null,
   loaded: null as LoadMfDeckFileResult | null,
 };
 const EMPTY_ISSUES: LoadMfDeckFileResult["issues"] = [];
-
-
-
-
 
 const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets, onImported, createCardSet, updateCardSet, createCard, ensureTagByName, initialFile = null, initialFileRevision = 0 }: MfDeckImportDialogProps) => {
   const toast = useToast();
@@ -444,13 +432,5 @@ const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
   );
 };
 
-
-
-
-
 export { MfDeckImportDialog };
-
-
-
-
-export type { MfDeckImportCompletedPa
+export type { MfDeckImportCompletedPayload };

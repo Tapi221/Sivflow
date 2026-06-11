@@ -26,6 +26,8 @@ const TEXT_COLORS = [
 
 
 
+
+
 /**
  * Generates a deterministic color pair (bg, text) from a string input (e.g. username)
  */
@@ -51,6 +53,8 @@ const getInitials = (name: string | undefined | null) => {
   if (!name) return "U";
   return name.charAt(0).toUpperCase();
 };
+
+
 
 
 

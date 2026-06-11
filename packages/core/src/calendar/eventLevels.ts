@@ -3,6 +3,8 @@ import type { CalendarEvent } from "./calendarEvent.types";
 
 
 
+
+
 type CalendarEventSegment = { event: CalendarEvent;
   span: number;
   left: number;
@@ -16,7 +18,11 @@ type CalendarEventLevelsResult = { levels: CalendarEventSegment[][];
 
 
 
+
+
 const DAY_STEP = 1;
+
+
 
 
 
@@ -88,7 +94,11 @@ const getCalendarEventLevels = (rowSegments: readonly CalendarEventSegment[], li
 
 
 
+
+
 export { getCalendarEventSegment, calendarEventSegmentsOverlap, getCalendarEventLevels };
+
+
 
 
 export type { CalendarEventSegment, CalendarEventLevelsResult };

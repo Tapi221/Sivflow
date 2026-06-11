@@ -10,8 +10,12 @@ type CacheEntry = {
 
 
 
+
+
 const MAX_CACHE_ENTRIES = 40;
 const cache = new Map<string, CacheEntry>();
+
+
 
 
 
@@ -137,6 +141,8 @@ const invalidateDocumentBlobUrl = (id: string | null | undefined, url: string | 
   revokeBlobUrl(entry.url);
   cache.delete(key);
 };
+
+
 
 
 
