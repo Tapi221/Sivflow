@@ -50,6 +50,118 @@ type CardStorageRow = AnyRow & {
 
 type DocumentUpdateChanges = Parameters<typeof cleanupBeforeDocumentUpdate>[2];
 
+type AddItem = {
+  (
+    db: DbLike,
+    table: "cards",
+    item: CardInput,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<string>;
+  (
+    db: DbLike,
+    table: "folders",
+    item: FolderInput,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<string>;
+  (
+    db: DbLike,
+    table: string,
+    item: Record<string, unknown>,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<string>;
+};
+
+type UpdateItem = {
+  (
+    db: DbLike,
+    table: "cards",
+    id: string,
+    changes: Partial<CardInput>,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<number>;
+  (
+    db: DbLike,
+    table: "folders",
+    id: string,
+    changes: Partial<FolderInput>,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<number>;
+  (
+    db: DbLike,
+    table: "documents",
+    id: string,
+    changes: DocumentUpdateChanges,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<number>;
+  (
+    db: DbLike,
+    table: string,
+    id: string,
+    changes: Record<string, unknown>,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<number>;
+};
+
+type DeleteItem = {
+  (db: DbLike, table: "documents", id: string): Promise<void>;
+  (db: DbLike, table: string, id: string): Promise<void>;
+};
+
+type BulkUpsert = {
+  (
+    db: DbLike,
+    table: "cards",
+    items: CardInput[],
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<void>;
+  (
+    db: DbLike,
+    table: "folders",
+    items: FolderInput[],
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<void>;
+  (
+    db: DbLike,
+    table: string,
+    items: Record<string, unknown>[],
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<void>;
+};
+
+type Upsert = {
+  (
+    db: DbLike,
+    tableName: "cards",
+    data: CardInput,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<void>;
+  (
+    db: DbLike,
+    tableName: "folders",
+    data: FolderInput,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<void>;
+  (
+    db: DbLike,
+    tableName: string,
+    data: Record<string, unknown>,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<void>;
+};
+
 const ENTITY_BY_TABLE = {
   cards: "card",
   folders: "folder",
@@ -184,30 +296,6 @@ const enqueueThroughSyncQueueApi = async (
   });
 };
 
-type AddItem = {
-  (
-    db: DbLike,
-    table: "cards",
-    item: CardInput,
-    skipSync: boolean,
-    enqueueSync: EnqueueSync,
-  ): Promise<string>;
-  (
-    db: DbLike,
-    table: "folders",
-    item: FolderInput,
-    skipSync: boolean,
-    enqueueSync: EnqueueSync,
-  ): Promise<string>;
-  (
-    db: DbLike,
-    table: string,
-    item: Record<string, unknown>,
-    skipSync: boolean,
-    enqueueSync: EnqueueSync,
-  ): Promise<string>;
-};
-
 export const addItem: AddItem = async (
   db: DbLike,
   table: string,
@@ -336,41 +424,6 @@ export const addItem: AddItem = async (
   }
 };
 
-type UpdateItem = {
-  (
-    db: DbLike,
-    table: "cards",
-    id: string,
-    changes: Partial<CardInput>,
-    skipSync: boolean,
-    enqueueSync: EnqueueSync,
-  ): Promise<number>;
-  (
-    db: DbLike,
-    table: "folders",
-    id: string,
-    changes: Partial<FolderInput>,
-    skipSync: boolean,
-    enqueueSync: EnqueueSync,
-  ): Promise<number>;
-  (
-    db: DbLike,
-    table: "documents",
-    id: string,
-    changes: DocumentUpdateChanges,
-    skipSync: boolean,
-    enqueueSync: EnqueueSync,
-  ): Promise<number>;
-  (
-    db: DbLike,
-    table: string,
-    id: string,
-    changes: Record<string, unknown>,
-    skipSync: boolean,
-    enqueueSync: EnqueueSync,
-  ): Promise<number>;
-};
-
 export const updateItem: UpdateItem = async (
   db: DbLike,
   table: string,
@@ -438,11 +491,6 @@ export const updateItem: UpdateItem = async (
   return result;
 };
 
-type DeleteItem = {
-  (db: DbLike, table: "documents", id: string): Promise<void>;
-  (db: DbLike, table: string, id: string): Promise<void>;
-};
-
 export const deleteItem: DeleteItem = async (
   db: DbLike,
   table: string,
@@ -499,30 +547,6 @@ export const softDelete = async (
   });
 };
 
-type BulkUpsert = {
-  (
-    db: DbLike,
-    table: "cards",
-    items: CardInput[],
-    skipSync: boolean,
-    enqueueSync: EnqueueSync,
-  ): Promise<void>;
-  (
-    db: DbLike,
-    table: "folders",
-    items: FolderInput[],
-    skipSync: boolean,
-    enqueueSync: EnqueueSync,
-  ): Promise<void>;
-  (
-    db: DbLike,
-    table: string,
-    items: Record<string, unknown>[],
-    skipSync: boolean,
-    enqueueSync: EnqueueSync,
-  ): Promise<void>;
-};
-
 export const bulkUpsert: BulkUpsert = async (
   db: DbLike,
   table: string,
@@ -560,30 +584,6 @@ export const bulkUpsert: BulkUpsert = async (
       await enqueueThroughSyncQueueApi(db, table, "update", item, enqueueSync);
     }
   }
-};
-
-type Upsert = {
-  (
-    db: DbLike,
-    tableName: "cards",
-    data: CardInput,
-    skipSync: boolean,
-    enqueueSync: EnqueueSync,
-  ): Promise<void>;
-  (
-    db: DbLike,
-    tableName: "folders",
-    data: FolderInput,
-    skipSync: boolean,
-    enqueueSync: EnqueueSync,
-  ): Promise<void>;
-  (
-    db: DbLike,
-    tableName: string,
-    data: Record<string, unknown>,
-    skipSync: boolean,
-    enqueueSync: EnqueueSync,
-  ): Promise<void>;
 };
 
 export const upsert: Upsert = async (
