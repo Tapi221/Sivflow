@@ -2,14 +2,10 @@ import React, { useState } from "react";
 import type { Notification } from "@/types/notification";
 import { AlertCircle, ChevronDown, X } from "@/ui/icons";
 
-
-
 interface ErrorDialogProps {
   notification: Notification;
   onDismiss?: () => void;
 }
-
-
 
 /**
  * ERROR レベルの通知
@@ -97,6 +93,4 @@ const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismiss }) =>
   );
 };
 
-
-
-export { ErrorDialo
+export { ErrorDialog };
