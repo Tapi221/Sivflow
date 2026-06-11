@@ -381,4 +381,4 @@ const useGoogleCalendarIntegration = ({ authInstance = auth }: UseGoogleCalendar
 
 
 
-export { useGoogleCalendarIntegratio
+export { useGoogleCalendarIntegration };

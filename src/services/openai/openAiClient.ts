@@ -119,4 +119,4 @@ const testOpenAiConnection = async (settings = loadOpenAiSettings()) => {
 export { generateTextWithOpenAi, testOpenAiConnection };
 
 
-export type { GenerateTextOptions, GenerateTextR
+export type { GenerateTextOptions, GenerateTextResult };

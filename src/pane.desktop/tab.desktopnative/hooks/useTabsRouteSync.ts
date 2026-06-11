@@ -81,4 +81,4 @@ const useWorkspaceTabsRouteSync = ({ enabled = true }: UseWorkspaceTabsRouteSync
 
 
 
-export { useWorkspaceTabsRouteS
+export { useWorkspaceTabsRouteSync };

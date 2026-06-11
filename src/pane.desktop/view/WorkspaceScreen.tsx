@@ -376,4 +376,4 @@ const WorkspaceScreen = () => {
 
 
 
-export { WorkspaceS
+export { WorkspaceScreen };

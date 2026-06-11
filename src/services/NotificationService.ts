@@ -121,4 +121,4 @@ const createDismissedNotification = (id: string): Notification => {
 
 
 
-export { notificationServ
+export { notificationService };

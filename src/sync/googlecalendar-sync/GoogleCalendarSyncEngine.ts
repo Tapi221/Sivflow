@@ -745,4 +745,4 @@ class GoogleCalendarSyncEngine { private readonly options: Required<Pick<GCalSyn
 
 
 
-export { GoogleCalendarSyncEngin
+export { GoogleCalendarSyncEngine };

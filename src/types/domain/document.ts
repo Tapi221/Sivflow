@@ -44,4 +44,4 @@ interface DocumentItem extends BaseEntity, LegacyDocumentFields { kind: Document
 type Document = DocumentItem;
 type PdfDocument = DocumentItem;
 
-export type { DocumentKind, PdfPageLayoutMode, PdfSidePanelTab, LegacyDocumentFields, PdfViewerState, DocumentItem, Document, PdfDocument }
+export type { DocumentKind, PdfPageLayoutMode, PdfSidePanelTab, LegacyDocumentFields, PdfViewerState, DocumentItem, Document, PdfDocument };

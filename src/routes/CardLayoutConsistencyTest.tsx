@@ -87,4 +87,4 @@ const CardLayoutConsistencyTest = () => {
 
 
 
-export default CardLayoutConsistencyT
+export default CardLayoutConsistencyTest;

@@ -121,4 +121,4 @@ const clearBackups = (): void => {
 
 
 
-export { localStorageBackupStor
+export { localStorageBackupStore };

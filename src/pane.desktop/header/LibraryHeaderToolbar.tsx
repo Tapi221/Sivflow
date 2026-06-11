@@ -291,4 +291,4 @@ const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions
 export { LibraryHeaderToolbar };
 
 
-export type { LibraryHeaderToolbarIconProps, LibraryHeaderToolbarActionRender
+export type { LibraryHeaderToolbarIconProps, LibraryHeaderToolbarActionRenderProps };

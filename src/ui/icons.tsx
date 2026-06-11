@@ -347,4 +347,4 @@ ExplorerFolderOutlineIcon.displayName = "ExplorerFolderOutlineIcon";
 export { AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, ArrowUpDown, BookOpen, Brain, Calendar, Camera, Check, CheckCheck, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, Clock, Cloud, CloudOff, Construction, Copy, Database, Download, Edit, Eraser, ExternalLink, FileAudio, FileEdit, FileJson, FileText, FileWarning, FileX, Filter, Flame, Folder, FolderInput, FolderTree, GitMerge, Globe, GripVertical, HardDrive, HelpCircle, History, Image, Info, Keyboard, Layers, Link, List, Loader2, LogOut, Merge, MessageSquare, Minus, MoreVertical, Move, Palette, Pause, PenLine, Pencil, Pin, Play, Plus, Redo2, RefreshCw, RotateCcw, Search, SearchX, Settings2, Shield, Smartphone, Sparkles, Star, Tag, Trash2, Trophy, Type, Undo2, Upload, User, Volume2, X, XCircle, Zap, Code, FolderIcon, FolderOutlineIcon, ImageIcon, CircleHelp, Sigma, NotebookPen };
 
 
-export type { Ic
+export type { IconProps };

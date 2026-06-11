@@ -117,4 +117,4 @@ const PdfPerformanceTest = () => {
 
 
 
-export default PdfPerforma
+export default PdfPerformanceTest;

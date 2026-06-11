@@ -39,4 +39,4 @@ const handleQueuedDocumentUploadSuccess = async (item: QueueItem, updatedImage: 
 
 
 
-export { handleQueuedDocumentUploadSuccess 
+export { handleQueuedDocumentUploadSuccess };

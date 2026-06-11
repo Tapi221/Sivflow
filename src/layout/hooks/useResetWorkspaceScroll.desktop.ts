@@ -49,4 +49,4 @@ const useResetWorkspaceScrollDesktop = (mainRef: WorkspaceScrollRef, pathname: s
 
 
 
-export { useResetWorkspaceScrollDeskto
+export { useResetWorkspaceScrollDesktop };

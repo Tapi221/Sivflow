@@ -173,4 +173,4 @@ const cleanupBeforeDocumentSoftDelete = async (db: DocDbCtx, id: string) => {
 export { cleanupBeforeDocumentUpdate, cleanupBeforeDocumentDelete, cleanupBeforeDocumentSoftDelete };
 
 
-export type { DocDb
+export type { DocDbCtx };

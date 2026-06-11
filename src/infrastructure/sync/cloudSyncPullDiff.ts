@@ -132,4 +132,4 @@ const pullCloudSyncDiff = async (userId: string, since: number): Promise<{ chang
 
 
 
-export { pullCloudSyncD
+export { pullCloudSyncDiff };

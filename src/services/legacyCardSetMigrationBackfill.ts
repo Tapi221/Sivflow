@@ -171,4 +171,4 @@ const ensureLegacyCardsBackfilled = async (userId: string) => {
 
 
 
-export { backfillLegacyCardsToCardSets, ensureLegacyCardsBackfil
+export { backfillLegacyCardsToCardSets, ensureLegacyCardsBackfilled };

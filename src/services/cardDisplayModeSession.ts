@@ -24,4 +24,4 @@ const setCardSetSessionDisplayMode = (cardSetId: string | null | undefined, mode
 
 
 
-export { getCardSetSessionDisplayMode, resolveCardSetDisplayMode, setCardSetSessionDisplayMod
+export { getCardSetSessionDisplayMode, resolveCardSetDisplayMode, setCardSetSessionDisplayMode };

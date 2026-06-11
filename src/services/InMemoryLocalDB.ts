@@ -710,4 +710,4 @@ class InMemoryLocalDB { public readonly name: string;
 
 
 
-export { InMemoryLoca
+export { InMemoryLocalDB };

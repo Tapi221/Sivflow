@@ -146,4 +146,4 @@ class SyncServiceFactory { private static instances = new Map<string, ISyncServi
 
 
 
-export { SyncServiceFactor
+export { SyncServiceFactory };

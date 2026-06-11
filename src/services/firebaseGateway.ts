@@ -10,4 +10,4 @@ const getFirebaseStorage = (): FirebaseStorage => storage;
 
 
 
-export { getFirestoreDb, requireAppFirestoreDb, getFirebaseStorage 
+export { getFirestoreDb, requireAppFirestoreDb, getFirebaseStorage };

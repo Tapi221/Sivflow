@@ -40,4 +40,4 @@ const Main = () => {
 
 
 
-export default M
+export default Main;

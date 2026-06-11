@@ -233,4 +233,4 @@ const resetLocalDBForLogout = async (userId?: string) => resetForLogout(userId);
 
 
 
-export { getLocalDb, getLocalDbSync, getInstanceUserId, getInstance, initializeDB, clearInstance, resetForLogout, resetLocalDBForLog
+export { getLocalDb, getLocalDbSync, getInstanceUserId, getInstance, initializeDB, clearInstance, resetForLogout, resetLocalDBForLogout };

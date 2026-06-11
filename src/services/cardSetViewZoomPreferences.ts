@@ -255,4 +255,4 @@ const setCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope, zoo
 export { buildCardSetViewZoomPreferenceScopeKey, getCardSetViewZoomPreference, setCardSetViewZoomPreference };
 
 
-export type { CardSetViewZoomPreferenceSc
+export type { CardSetViewZoomPreferenceScope };

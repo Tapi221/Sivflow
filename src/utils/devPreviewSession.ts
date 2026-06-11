@@ -65,4 +65,4 @@ const createDevPreviewUser = (): FirebaseUser => ({ ...createDevPreviewUserJson(
 
 
 
-export { isDevPreviewSessionEnabled, disableDevPreviewSession, createDevPreviewU
+export { isDevPreviewSessionEnabled, disableDevPreviewSession, createDevPreviewUser };

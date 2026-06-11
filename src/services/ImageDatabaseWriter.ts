@@ -15,4 +15,4 @@ const imageDB = new ImageDatabaseWriter();
 
 
 
-export { imageDB 
+export { imageDB };

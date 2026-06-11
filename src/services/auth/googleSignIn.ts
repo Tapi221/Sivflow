@@ -34,4 +34,4 @@ const signInWithGoogle = async (): Promise<void> => {
 
 
 
-export { selectGoogleAuthPort, signInWithGoogl
+export { selectGoogleAuthPort, signInWithGoogle };

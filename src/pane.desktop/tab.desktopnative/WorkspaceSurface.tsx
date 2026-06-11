@@ -26,4 +26,4 @@ const WorkspaceSurface = ({ children, tabs, className, bodyClassName, style }: W
 
 
 
-export { WorkspaceSurfac
+export { WorkspaceSurface };

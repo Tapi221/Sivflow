@@ -9,4 +9,4 @@ const initPersistentQueue = (): void => {
 
 
 
-export { initPersistentQueue 
+export { initPersistentQueue };

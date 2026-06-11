@@ -89,4 +89,4 @@ const WorkspaceTabPanel = ({
 
 
 
-export { WorkspaceTab
+export { WorkspaceTabPanel };

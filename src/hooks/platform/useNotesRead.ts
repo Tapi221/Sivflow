@@ -62,4 +62,4 @@ const useNotesRead = (folderId?: string | null, options?: UseNotesReadOptions) =
 
 
 
-export { useNotesRea
+export { useNotesRead };

@@ -2,6 +2,8 @@ import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueu
 import type { AssetRecord, Card, CardSet, DocumentItem as Document, Folder, Note, SyncError, SyncHistory, SyncSettings, UploadedImage, UserSettings, UserStats } from "@/types";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 
+
+
 type CardRelation = { id: string;
   userId: string;
   fromCardId?: string;

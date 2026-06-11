@@ -192,4 +192,4 @@ const Sidebar = ({ isLeftPanelCollapsed = false, onToggleLeftPanel, onOpenSettin
 
 
 
-export { Side
+export { Sidebar };

@@ -83,4 +83,4 @@ class CloudSyncAdapter implements ICloudSyncAdapter { private readonly userId: s
 
 
 
-export { CloudSyncAdapter 
+export { CloudSyncAdapter };

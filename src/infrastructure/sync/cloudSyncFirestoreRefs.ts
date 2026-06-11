@@ -14,4 +14,4 @@ const getUserSettingsRef = (firestore: Firestore, userId: string): DocumentRefer
 
 
 
-export { requireCloudSyncFirestore, getPullableCollectionRef, getPushDocumentRef, queryEntityById, getUserSettingsRef 
+export { requireCloudSyncFirestore, getPullableCollectionRef, getPushDocumentRef, queryEntityById, getUserSettingsRef };

@@ -21,4 +21,4 @@ hardDeleteOrphanedCards: async (userId: string, report: IntegrityReport) => {
 
 
 
-export { dataIntegrityService 
+export { dataIntegrityService };

@@ -113,4 +113,4 @@ const rebuildCloudStorageStats = async (userId: string): Promise<CloudStorageSta
 
 
 
-export { CLOUD_STORAGE_STATS_SCHEMA_VERSION, DEFAULT_CLOUD_STORAGE_QUOTA_BYTES, isCloudStorageStatsOutdated, subscribeToCloudStorageStats, rebuildCloudStorageSt
+export { CLOUD_STORAGE_STATS_SCHEMA_VERSION, DEFAULT_CLOUD_STORAGE_QUOTA_BYTES, isCloudStorageStatsOutdated, subscribeToCloudStorageStats, rebuildCloudStorageStats };

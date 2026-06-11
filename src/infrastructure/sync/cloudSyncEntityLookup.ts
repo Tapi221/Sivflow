@@ -84,4 +84,4 @@ const lookupCloudSyncEntityById = async (firestore: Firestore, userId: string, i
 
 
 
-export { lookupCloudSyncEntityB
+export { lookupCloudSyncEntityById };

@@ -115,4 +115,4 @@ const deleteUserPersistentDatabases = async (userId: string) => {
 
 
 
-export { isLocalDbGenerationStorageKey, isLocalDbPersistentDatabaseName, getKnownLocalDbNamesForUser, bumpGenerationForUser, getDatabaseNameForUser, getFallbackDatabaseNameForUser, deleteUserPersistentDatabase
+export { isLocalDbGenerationStorageKey, isLocalDbPersistentDatabaseName, getKnownLocalDbNamesForUser, bumpGenerationForUser, getDatabaseNameForUser, getFallbackDatabaseNameForUser, deleteUserPersistentDatabases };

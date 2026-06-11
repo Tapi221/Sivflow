@@ -151,4 +151,4 @@ const DayRow = memo(({ day, onSelectDate }: { day: DaySummary; onSelectDate?: (d
 DayRow.displayName = "DayRow";
 const CalendarPieChartView = memo(CalendarPieChartViewComponent);
 CalendarPieChartView.displayName = "CalendarPieChartView";
-export { CalendarPieChar
+export { CalendarPieChartView };

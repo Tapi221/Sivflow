@@ -1,7 +1,11 @@
 import { initPersistentQueue } from "@/platform/web/initPersistentQueue";
 import { initAppRuntime } from "./initAppRuntime";
 
+
+
 let started = false;
+
+
 
 const startAppRuntime = () => {
   if (started) return;
@@ -10,5 +14,7 @@ const startAppRuntime = () => {
   initAppRuntime();
   initPersistentQueue();
 };
+
+
 
 export { startAppRuntime };

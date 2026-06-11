@@ -36,4 +36,4 @@ const NotImplementedPlaceholder = () => {
 
 
 
-export default NotImplementedPlaceholde
+export default NotImplementedPlaceholder;

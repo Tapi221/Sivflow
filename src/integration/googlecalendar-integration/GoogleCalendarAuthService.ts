@@ -46,4 +46,4 @@ const silentReconnect = async (accountId: string): Promise<{ accessToken: string
 
 
 
-export { silentReconnect 
+export { silentReconnect };

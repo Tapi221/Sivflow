@@ -87,4 +87,4 @@ const CalendarSelectedViewsSplitView = ({ selectedViewModes, className, ...props
 
 
 
-export { CalendarSelectedViewsSpli
+export { CalendarSelectedViewsSplitView };

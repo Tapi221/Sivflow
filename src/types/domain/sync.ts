@@ -153,4 +153,4 @@ const DEFAULT_SYNC_SETTINGS: SyncSettings = { id: "default", autoSync: true, int
 export { DEFAULT_SYNC_SETTINGS };
 
 
-export type { SyncMetadata, SyncError, SyncHistory, SyncSettings, SyncEntity, SyncOperationType, SyncDirection, SyncPriority, SyncQueueStatus, AssetSyncPayload, ProjectMapSyncPayload, TagSyncPayload, SyncPayloadByEntity, SyncDeletePayload, SyncQueueItem, SyncConflict, DiffResult, SyncRes
+export type { SyncMetadata, SyncError, SyncHistory, SyncSettings, SyncEntity, SyncOperationType, SyncDirection, SyncPriority, SyncQueueStatus, AssetSyncPayload, ProjectMapSyncPayload, TagSyncPayload, SyncPayloadByEntity, SyncDeletePayload, SyncQueueItem, SyncConflict, DiffResult, SyncResult };

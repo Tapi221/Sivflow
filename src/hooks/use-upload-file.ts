@@ -117,4 +117,4 @@ const showErrorToast = (err: unknown) => {
 export { uploadFiles, useUploadThing, useUploadFile, getErrorMessage, showErrorToast };
 
 
-export type { Uploade
+export type { UploadedFile };

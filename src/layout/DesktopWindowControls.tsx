@@ -118,4 +118,4 @@ const DesktopWindowControls = () => {
 
 
 
-export { DesktopWindowCon
+export { DesktopWindowControls };

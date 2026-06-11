@@ -7,4 +7,4 @@ const useSyncContext = () => useContext(SyncContext);
 
 
 
-export { useSyncContext 
+export { useSyncContext };

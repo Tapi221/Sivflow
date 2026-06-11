@@ -498,3 +498,6 @@ const useBlockDiscussionItems = (blockPath: Path) => {
 
 export { BLOCK_SUGGESTION_TOKEN, buildBlockDiscussionIndex, useBlockDiscussionItems };
 
+
+
+export type { ResolvedSuggestion };

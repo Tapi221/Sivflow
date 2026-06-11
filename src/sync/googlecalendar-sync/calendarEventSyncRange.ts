@@ -123,4 +123,4 @@ const buildCalendarEventPrioritySyncRange = ({ selectedViewMode, visibleDays, mo
 export { buildCalendarEventSyncRange, buildCalendarEventPrioritySyncRange };
 
 
-export type { CalendarEventSyncRange, BuildCalendarEventSyncRangeOp
+export type { CalendarEventSyncRange, BuildCalendarEventSyncRangeOptions };

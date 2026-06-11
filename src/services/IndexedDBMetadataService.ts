@@ -271,4 +271,4 @@ class IndexedDBMetadataService { private readonly db: LocalDBLike;
 
 
 
-export { IndexedDBMetadataService 
+export { IndexedDBMetadataService };

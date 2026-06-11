@@ -277,4 +277,4 @@ const useGoogleTaskLists = (accounts: GoogleConnectedServiceAccountEntry[], onAc
 export { useGoogleTaskLists };
 
 
-export type { GoogleTaskListAccount
+export type { GoogleTaskListAccountState };

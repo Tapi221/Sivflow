@@ -84,4 +84,4 @@ const getStoredSnapshotsFromLocalStorage = (): AppSnapshot[] => {
 
 
 
-export { snapshotServic
+export { snapshotService };

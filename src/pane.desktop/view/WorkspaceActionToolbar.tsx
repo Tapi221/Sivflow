@@ -27,4 +27,4 @@ const WorkspaceActionToolbar = ({ className, style }: Props) => {
 
 
 
-export { WorkspaceActionToolba
+export { WorkspaceActionToolbar };

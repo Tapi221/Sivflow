@@ -583,4 +583,4 @@ const createLatestReviewLogPatch = (params: LatestReviewLogPatchParams) => {
 export { computeNextReview, ratingToSubjectiveScore, createReviewLogEntry, createReviewPatchFromRating, createLatestReviewLogPatch };
 
 
-export type { ReviewAlgorithmInput, ReviewAlgorithmResult, MultipleChoiceConfidence, MultipleChoiceRevie
+export type { ReviewAlgorithmInput, ReviewAlgorithmResult, MultipleChoiceConfidence, MultipleChoiceReviewMeta };

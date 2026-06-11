@@ -256,4 +256,4 @@ class IndexedDBRebuildOrchestrator { private static isRebuilding = false;
 
 
 
-export { IndexedDBRebuildOrchestra
+export { IndexedDBRebuildOrchestrator };

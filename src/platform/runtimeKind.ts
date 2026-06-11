@@ -21,4 +21,4 @@ const isHandheldNativeRuntime = (): boolean => {
 
 
 
-export { getRuntimeKind, isDesktopLikeRuntime, isHandheldNativeRuntime 
+export { getRuntimeKind, isDesktopLikeRuntime, isHandheldNativeRuntime };

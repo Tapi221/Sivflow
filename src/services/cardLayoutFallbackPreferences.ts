@@ -87,4 +87,4 @@ const setSplitFallbackLayoutModePreference = (deviceScope: string, mode: SplitFa
 
 
 
-export { resolveSplitFallbackLayoutModePreference, setSplitFallbackLayoutModePreferenc
+export { resolveSplitFallbackLayoutModePreference, setSplitFallbackLayoutModePreference };
