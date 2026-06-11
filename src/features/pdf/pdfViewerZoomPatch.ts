@@ -1,4 +1,5 @@
 import { PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
+import { PDF_TRACKPAD_ZOOM_SENSITIVITY } from "./pdfZoom.constants";
 import { computeNextScaleFromWheel, resolveTrackpadDeltaYForScaleRatio } from "./pdfZoom.utils";
 
 type PatchedPdfViewerConstructor = typeof PDFViewer & {
@@ -20,7 +21,6 @@ type PdfViewerScaleDescriptor = PropertyDescriptor & {
 };
 
 const PDF_SCALE_SCROLL_SUPPRESSION_WINDOW_MS = 800;
-const PDF_TRACKPAD_ZOOM_SENSITIVITY = 0.0015;
 const PDF_VIEWER_SCALE_PROPERTY_NAMES = ["currentScale", "currentScaleValue"] as const;
 const PDF_WHEEL_DELTA_LINE_HEIGHT_PX = 16;
 const PDF_WHEEL_DELTA_MODE_PIXEL = 0;
