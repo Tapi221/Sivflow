@@ -6,6 +6,8 @@ import { FileElementStatic } from "@/components/ui/media-file-node-static";
 import { ImageElementStatic } from "@/components/ui/media-image-node-static";
 import { VideoElementStatic } from "@/components/ui/media-video-node-static";
 
+
+
 const BaseMediaKit = [
   BaseImagePlugin.withComponent(ImageElementStatic),
   BaseVideoPlugin.withComponent(VideoElementStatic),
@@ -21,5 +23,7 @@ const BaseMediaKit = [
   BaseMediaEmbedPlugin,
   BasePlaceholderPlugin,
 ];
+
+
 
 export { BaseMediaKit };

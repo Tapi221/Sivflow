@@ -2,10 +2,14 @@ import React, { useState } from "react";
 import { AlertTriangle, ChevronDown, X } from "@/ui/icons";
 import type { Notification } from "@/types/notification";
 
+
+
 interface WarningDialogProps {
   notification: Notification;
   onDismiss: () => void;
 }
+
+
 
 /**
  * WARNING レベルの通知
@@ -93,5 +97,7 @@ const WarningDialog: React.FC<WarningDialogProps> = ({ notification, onDismiss }
     </div>
   );
 };
+
+
 
 export { WarningDialog };

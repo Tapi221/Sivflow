@@ -3,6 +3,8 @@ import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
 import { MarkdownBlockDisplay } from "./MarkdownBlockDisplay";
 import { cn } from "@/lib/utils";
 
+
+
 interface MarkdownBlockViewProps {
   md: string;
   align?: "left" | "center";
@@ -21,6 +23,8 @@ type MarkdownBlockPreviewProps = { markdown: string;
 interface MarkdownBlockPreviewSurfaceProps extends MarkdownBlockPreviewProps {
   contentClassName?: string;
 }
+
+
 
 const MarkdownBlockPreviewSurface: React.FC<
   MarkdownBlockPreviewSurfaceProps
@@ -54,5 +58,9 @@ const MarkdownBlockPreviewSurface: React.FC<
 const MarkdownBlockView: React.FC<MarkdownBlockViewProps> = ({ md, ...rest }) => { return <MarkdownBlockPreviewSurface markdown={md} {...rest} />;
 };
 
+
+
 export { MarkdownBlockView };
+
+
 export type { MarkdownBlockPreviewProps };
