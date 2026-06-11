@@ -50,6 +50,30 @@ const UI_RESTRICTED_IMPORT_PATTERNS = [
     message: "UI layer must not import desktop bridge.",
   },
 ];
+const STYLISTIC_FIXABLE_RULES = {
+  "@stylistic/array-bracket-spacing": ["warn", "never"],
+  "@stylistic/arrow-spacing": "warn",
+  "@stylistic/block-spacing": ["warn", "always"],
+  "@stylistic/comma-dangle": ["warn", "always-multiline"],
+  "@stylistic/comma-spacing": "warn",
+  "@stylistic/computed-property-spacing": ["warn", "never"],
+  "@stylistic/function-call-spacing": ["warn", "never"],
+  "@stylistic/indent": ["warn", 2, { SwitchCase: 1 }],
+  "@stylistic/jsx-closing-bracket-location": ["warn", "line-aligned"],
+  "@stylistic/jsx-curly-spacing": ["warn", "never"],
+  "@stylistic/jsx-equals-spacing": ["warn", "never"],
+  "@stylistic/jsx-indent": ["warn", 2],
+  "@stylistic/jsx-indent-props": ["warn", 2],
+  "@stylistic/jsx-tag-spacing": ["warn", { afterOpening: "never", beforeClosing: "allow", beforeSelfClosing: "always", closingSlash: "never" }],
+  "@stylistic/key-spacing": "warn",
+  "@stylistic/keyword-spacing": "warn",
+  "@stylistic/object-curly-spacing": ["warn", "always"],
+  "@stylistic/quotes": ["warn", "double", { avoidEscape: true }],
+  "@stylistic/semi": ["warn", "always"],
+  "@stylistic/space-before-blocks": "warn",
+  "@stylistic/space-before-function-paren": ["warn", { anonymous: "always", asyncArrow: "always", named: "never" }],
+  "@stylistic/space-in-parens": ["warn", "never"],
+};
 
 export default defineConfig([
   globalIgnores(["dist", "apps/desktop/src-tauri/target"]),
@@ -73,9 +97,7 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
-      "@stylistic/indent": "off",
-      "@stylistic/quotes": "off",
-      "@stylistic/semi": "off",
+      ...STYLISTIC_FIXABLE_RULES,
       "@stylistic/max-len": "off",
       "@stylistic/object-curly-newline": "off",
       "@typescript-eslint/no-explicit-any": "off",
