@@ -20,6 +20,8 @@ import { Caption, CaptionTextarea } from './caption';
 
 
 
+
+
 export const FileElement = withHOC( ResizableProvider, function FileElement(props: PlateElementProps<TFileElement>) { const readOnly = useReadOnly();
     const { name, unsafeUrl } = useMediaState();
 

@@ -32,9 +32,13 @@ import { type NodeEntry, type Path, type TElement, KEYS, PathApi, } from 'platej
 
 
 
+
+
 type InsertBlockOptions = {
   upsert?: boolean;
 };
+
+
 
 
 
@@ -52,6 +56,8 @@ const insertInlineMap: Record<
     insertInlineEquation(editor, '', { select: true }),
   [KEYS.link]: (editor) => triggerFloatingLink(editor, { focused: true }),
 };
+
+
 
 
 
@@ -110,6 +116,8 @@ const insertBlockMap: Record<
   [KEYS.toc]: (editor) => insertToc(editor, { select: true }),
   [KEYS.video]: (editor) => insertVideoPlaceholder(editor, { select: true }),
 };
+
+
 
 
 
@@ -195,6 +203,8 @@ const setBlockMap: Record<
   [ACTION_THREE_COLUMNS]: (editor) => toggleColumnGroup(editor, { columns: 3 }),
   [KEYS.codeBlock]: (editor) => toggleCodeBlock(editor),
 };
+
+
 
 
 

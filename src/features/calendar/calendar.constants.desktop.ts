@@ -18,6 +18,8 @@ export const MONTH_VISIBLE_EVENT_COUNT_MAX = 20;
 
 
 
+
+
 export const createInitialMonthOffsetRange = () => ({ startOffset: -INITIAL_MONTH_BUFFER, endOffset: INITIAL_MONTH_BUFFER, });
 
 //Timeline View

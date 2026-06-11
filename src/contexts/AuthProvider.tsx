@@ -5,9 +5,13 @@ import { SyncProvider } from "@/sync/appdata-sync/SyncContext";
 
 
 
+
+
 type AuthProviderProps = {
   children: ReactNode;
 };
+
+
 
 
 
@@ -20,6 +24,8 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     </AuthSessionProvider>
   );
 };
+
+
 
 
 

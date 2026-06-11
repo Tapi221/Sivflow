@@ -3,6 +3,8 @@ import { decodeMfCardFile } from "./mfCardJsonCodec";
 
 
 
+
+
 const MAX_MF_CARD_FILE_BYTES = 4 * 1024 * 1024;
 
 export type LoadMfCardFileResult = { file: File;
@@ -10,6 +12,8 @@ export type LoadMfCardFileResult = { file: File;
   issues: MfCardIssue[];
   suggestedCardSetName: string;
 };
+
+
 
 
 

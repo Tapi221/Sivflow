@@ -4,4 +4,6 @@ import { TableCellElementStatic, TableCellHeaderElementStatic, TableElementStati
 
 
 
+
+
 export const BaseTableKit = [ BaseTablePlugin.withComponent(TableElementStatic), BaseTableRowPlugin.withComponent(TableRowElementStatic), BaseTableCellPlugin.withComponent(TableCellElementStatic), BaseTableCellHeaderPlugin.withComponent(TableCellHeaderElementStatic), ];

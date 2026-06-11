@@ -4,6 +4,8 @@ import { getTagColorKey } from "./tag.parser";
 
 
 
+
+
 const getTagPalette = (input?: string) => {
   const colorKey = getTagColorKey(input);
   return { colorKey, palette: TAG_COLOR_PALETTE[colorKey] };

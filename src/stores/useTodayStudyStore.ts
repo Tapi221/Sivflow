@@ -11,6 +11,8 @@ import { persist } from "zustand/middleware";
 
 
 
+
+
 export type RatingKey = "forgot" | "vague" | "remembered" | "easy";
 
 type TodayStudyState = {
@@ -38,6 +40,8 @@ type TodayStudyActions = {
 
 
 
+
+
 const emptyRatings = (): Record<RatingKey, number> => ({
   forgot: 0,
   vague: 0,
@@ -52,6 +56,8 @@ const localDateKey = (): string => {
 };
 
 export type TodayStudyStore = TodayStudyState & TodayStudyActions;
+
+
 
 
 

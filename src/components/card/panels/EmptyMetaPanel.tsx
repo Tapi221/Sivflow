@@ -3,6 +3,8 @@ import { MetaPanelShell } from "./MetaPanelShell";
 
 
 
+
+
 type EmptyMetaPanelProps = {
   children?: ReactNode;
   className?: string;
@@ -10,6 +12,8 @@ type EmptyMetaPanelProps = {
   contentClassName?: string;
   style?: CSSProperties;
 };
+
+
 
 
 

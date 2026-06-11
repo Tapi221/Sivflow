@@ -3,11 +3,15 @@ import { asRecord, pick } from "@/shared/lib/records";
 
 
 
+
+
 export type NormalizedReviewLog = { reviewedAt: string;
   rating: 1 | 2 | 3 | 4;
   resistanceScore: number;
   durationMinutes: number | null;
 };
+
+
 
 
 

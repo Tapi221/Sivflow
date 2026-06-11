@@ -32,6 +32,8 @@ import { cn } from '@/lib/utils';
 
 
 
+
+
 type EditorChatState =
   | 'cursorCommand'
   | 'cursorSuggestion'
@@ -67,6 +69,8 @@ type AIMenuItemsProps = {
   setInput: (value: string) => void;
   setValue: (value: string) => void;
 };
+
+
 
 
 
@@ -348,6 +352,8 @@ const MENU_STATE_ITEMS: Record<EditorChatState, MenuStateGroup[]> = {
     },
   ],
 };
+
+
 
 
 
@@ -689,6 +695,8 @@ const AILoadingBar = () => {
 
   return null;
 };
+
+
 
 
 

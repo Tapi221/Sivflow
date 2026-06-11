@@ -26,6 +26,8 @@ import { ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecond
 
 
 
+
+
 const MEDIA_CONFIG: Record<
   string,
   {
@@ -60,6 +62,8 @@ const MEDIA_CONFIG: Record<
     tooltip: 'Video',
   },
 };
+
+
 
 
 

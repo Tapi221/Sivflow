@@ -16,6 +16,8 @@ import type { UserSettings } from "@/types";
 
 
 
+
+
 interface UseCardEditorPaneWidthParams {
   settings?: Partial<UserSettings> | null;
   dockToolbarsToTop: boolean;
@@ -34,10 +36,14 @@ interface UseCardEditorPaneWidthParams {
 
 
 
+
+
 const CARD_EDITOR_PAIR_GAP_PX = 0;
 
 const CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX =
   CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX;
+
+
 
 
 
@@ -205,6 +211,8 @@ export const useCardEditorPaneWidth = ({ settings, dockToolbarsToTop, embeddedIn
     resetActivePaneWidth,
   };
 };
+
+
 
 
 

@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface MobileScalableCardProps {
   children: React.ReactNode;
   cardDesignWidth?: number;
@@ -14,7 +16,11 @@ interface MobileScalableCardProps {
 
 
 
+
+
 const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
+
+
 
 
 
@@ -182,6 +188,8 @@ const MobileScalableCard = ({
     </>
   );
 };
+
+
 
 
 

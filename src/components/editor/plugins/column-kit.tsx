@@ -6,10 +6,14 @@ import { ColumnElement, ColumnGroupElement } from '@/components/ui/column-node';
 
 
 
+
+
 const ColumnKit = [
   ColumnPlugin.withComponent(ColumnGroupElement),
   ColumnItemPlugin.withComponent(ColumnElement),
 ];
+
+
 
 
 

@@ -3,6 +3,8 @@ import type { SnapshotAsset } from "@/types/domain/snapshot";
 
 
 
+
+
 type FirestoreTimestampLike = {
   toDate: () => Date;
 };
@@ -16,6 +18,8 @@ type SnapshotAssetSource = {
   createdAt?: unknown;
   updatedAt?: unknown;
 };
+
+
 
 
 

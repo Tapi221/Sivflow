@@ -4,7 +4,11 @@ import { createSlatePlugin, createTextSubstitutionInputRule, KEYS } from 'platej
 
 
 
+
+
 type AutoformatTextSubstitutionPatterns = Parameters<typeof createTextSubstitutionInputRule>[0]['patterns'];
+
+
 
 
 
@@ -27,6 +31,8 @@ const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
     SUPERSCRIPT_SYMBOLS_RULE,
   ],
 });
+
+
 
 
 

@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type OverlayToolbarZoomControlBaseProps = {
   value: number;
   min: number;
@@ -40,7 +42,11 @@ export type OverlayToolbarZoomControlProps = | OverlayToolbarZoomControlWithoutS
 
 
 
+
+
 const DEFAULT_FORMAT_VALUE = (value: number) => `${Math.round(value)}%`;
+
+
 
 
 

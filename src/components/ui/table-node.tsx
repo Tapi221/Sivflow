@@ -38,6 +38,8 @@ import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarMenuGroup, } from './toolb
 
 
 
+
+
 type TableResizeDirection = 'bottom' | 'left' | 'right';
 
 type TableResizeStartOptions = {
@@ -71,6 +73,8 @@ type TableResizeContextValue = {
 
 
 
+
+
 const TABLE_CONTROL_COLUMN_WIDTH = 8;
 
 const TABLE_DEFAULT_COLUMN_WIDTH = 120;
@@ -82,6 +86,8 @@ const TABLE_MULTI_SELECTION_TOOLBAR_DELAY_MS = 150;
 const TableResizeContext = React.createContext<TableResizeContextValue | null>(
   null
 );
+
+
 
 
 
@@ -564,6 +570,8 @@ function useTableCellPresentation(element: TTableCellElement) {
     width,
   };
 }
+
+
 
 
 
@@ -1280,6 +1288,8 @@ export function TableCellElement({ isHeader, ...props }: PlateElementProps<TTabl
 
 export function TableCellHeaderElement( props: React.ComponentProps<typeof TableCellElement> ) { return <TableCellElement {...props} isHeader />;
 }
+
+
 
 
 

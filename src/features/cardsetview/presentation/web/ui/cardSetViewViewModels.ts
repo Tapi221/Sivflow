@@ -4,6 +4,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 export type WidthControlViewModel = { modeLabel: string;
   value: number;
   min: number;
@@ -15,6 +17,8 @@ export type WidthControlViewModel = { modeLabel: string;
   onStepUp: () => void;
   onReset: () => void;
 };
+
+
 
 
 

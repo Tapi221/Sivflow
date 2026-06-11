@@ -5,7 +5,11 @@ import { hasOpenModalDialog } from "@/features/hotkey/modalGuards";
 
 
 
+
+
 export type { Card, DocumentItem };
+
+
 
 
 export { hasOpenModalDialog };
@@ -30,12 +34,16 @@ export type FolderTreeNode = { id?: string;
 
 
 
+
+
 export const ROOT_FOLDER_ID = "";
 export const DEFAULT_NEW_PROJECT_NAME = "新規プロジェクト";
 export const DEFAULT_NEW_FOLDER_NAME = "新規フォルダ";
 export const DEFAULT_NEW_CARD_SET_NAME = "新規カードセット";
 export const UNTITLED_PROJECT_NAME = "無題のプロジェクト";
 export const UNTITLED_FOLDER_NAME = "無題のフォルダ";
+
+
 
 
 

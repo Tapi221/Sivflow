@@ -26,10 +26,14 @@ import { cn } from '@/lib/utils';
 
 
 
+
+
 type Model = {
   label: string;
   value: string;
 };
+
+
 
 
 
@@ -153,7 +157,11 @@ const FALLBACK_MODEL: Model = { label: 'GPT-4o Mini', value: DEFAULT_MODEL_VALUE
 
 
 
+
+
 const getDefaultModel = () => models.find((model) => model.value === DEFAULT_MODEL_VALUE) ?? models[0] ?? FALLBACK_MODEL;
+
+
 
 
 
@@ -319,6 +327,8 @@ const SettingsDialog = () => {
     </Dialog>
   );
 };
+
+
 
 
 

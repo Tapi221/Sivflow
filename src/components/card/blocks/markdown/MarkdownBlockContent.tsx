@@ -10,6 +10,8 @@ import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownIn
 
 
 
+
+
 export type MarkdownReplaceBlock = | { type: "markdown"; markdown: string }
   | { type: "code"; code: { language: string; code: string } };
 
@@ -44,7 +46,11 @@ type BlockRange = Readonly<{
 
 
 
+
+
 const MAX_LENGTH = 50000;
+
+
 
 
 
@@ -346,6 +352,8 @@ const parseAndSplitFencesWithRanges = (
 
   return { blocks, ranges };
 };
+
+
 
 
 

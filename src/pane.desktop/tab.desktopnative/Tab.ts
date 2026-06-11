@@ -2,6 +2,8 @@ import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerR
 
 
 
+
+
 /**
  * 全タブ共通ベース
  */
@@ -10,6 +12,8 @@ type WorkspaceTabBase = {
   isClosable: boolean;
   sectionKey: WorkspaceSidebarSection;
 };
+
+
 
 
 
@@ -88,10 +92,14 @@ export type WorkspaceEntityTab = Exclude< WorkspaceTab, WorkspaceExplorerTab | W
 
 
 
+
+
 /**
  * ルートタブ定義
  */
 export const WORKSPACE_ROUTE_TABS = [ { id: "route:home", kind: "route", title: "Home", routePath: "/schedule", isClosable: true, sectionKey: "home", }, { id: "route:review", kind: "route", title: "Review", routePath: "/study", isClosable: true, sectionKey: "review", }, { id: "route:schedule", kind: "route", title: "Schedule", routePath: "/schedule", isClosable: true, sectionKey: "schedule", }, { id: "route:settings", kind: "route", title: "設定", routePath: "/settings", isClosable: true, sectionKey: "settings", }, ] as const satisfies readonly WorkspaceRouteTab[];
+
+
 
 
 

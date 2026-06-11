@@ -24,11 +24,15 @@ import { ToolbarButton, ToolbarMenuGroup } from './toolbar';
 
 
 
+
+
 type TColor = {
   isBrightColor: boolean;
   name: string;
   value: string;
 };
+
+
 
 
 
@@ -66,6 +70,8 @@ const DEFAULT_CUSTOM_COLORS = [
 
 
 
+
+
 function normalizeColor(color: string): string {
   return color.toLowerCase();
 }
@@ -100,6 +106,8 @@ function getEditorColorMarks(editor: PlateEditor, nodeType: string): string[] {
 
   return Array.from(usedColors);
 }
+
+
 
 
 
@@ -516,6 +524,8 @@ function ColorDropdownMenuItem({
     content
   );
 }
+
+
 
 
 

@@ -11,6 +11,8 @@ import { inlineSuggestionVariants } from '@/lib/suggestion';
 
 
 
+
+
 export function MentionElementStatic( props: SlateElementProps<TMentionElement> & { prefix?: string;
   }
 ) {

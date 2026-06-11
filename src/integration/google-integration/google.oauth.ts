@@ -7,6 +7,8 @@ import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoo
 
 
 
+
+
 export type GoogleCalendarAccess = { accessToken: string;
   accountEmail: string | null;
   accountName: string | null;
@@ -45,6 +47,8 @@ type GoogleOAuthCallbackLike = {
 
 
 
+
+
 const GOOGLE_SIGN_IN_SCOPE_PARAM = "openid email profile";
 const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 const GOOGLE_CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
@@ -70,6 +74,8 @@ const GOOGLE_SCOPES = GOOGLE_CONNECTED_SERVICE_SCOPES;
 const GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM = `${GOOGLE_SIGN_IN_SCOPE_PARAM} ${GOOGLE_SCOPES.join(" ")}`;
 
 let pendingGoogleCalendarServerCodeVerifier: string | null = null;
+
+
 
 
 
@@ -376,6 +382,8 @@ export const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCale
 
 
 
+
+
 export const requestGoogleSignInServerCode = async (): Promise<GoogleOAuthServerCode> => requestGoogleOAuthServerCode({ prompt: "select_account", scope: GOOGLE_SIGN_IN_SCOPE_PARAM });
 
 export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<GoogleOAuthServerCode> => { const result = await requestGoogleOAuthServerCode({ accessType: "offline", includeGrantedScopes: true, loginHint: auth.currentUser?.email ?? readEmail() ?? undefined, prompt: "consent select_account", scope: GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM });
@@ -396,6 +404,8 @@ export const requestCalendarAccessToken = async (auth: Auth, silent = false): Pr
 };
 
 export const requestConnectedServiceAccessToken = requestCalendarAccessToken;
+
+
 
 
 

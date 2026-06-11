@@ -16,6 +16,8 @@ import type { TagRecord } from "@/services/localdb/types";
 
 
 
+
+
 export type TagCategory = string;
 
 export type Tag = TagRecord;
@@ -33,9 +35,13 @@ type LocalDbInstance = Awaited<ReturnType<typeof getLocalDb>>;
 
 
 
+
+
 export const DEFAULT_TAG_COLOR_KEYS: TagColorKey[] = [...TAG_COLOR_KEYS];
 
 const MAX_PATH_DEPTH = 12;
+
+
 
 
 

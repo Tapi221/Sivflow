@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type CarvePanelProps = {
   children: ReactNode;
   className?: string;
@@ -30,6 +32,8 @@ type CarvePanelShellProps = {
 
 
 
+
+
 const CARVE_PANEL_SHELL_CLASS = "relative flex h-full min-h-0 w-full flex-col bg-[var(--carvepanel-surface)]";
 
 const CARVE_PANEL_BODY_CLASS = "relative isolate flex min-h-0 flex-1 bg-[var(--carvepanel-surface)]";
@@ -50,6 +54,8 @@ const CARVE_PANEL_CLASS = "rounded-tl-[28px] rounded-tr-none border-r-0";
 
 
 
+
+
 const CarvePanelViewportBase = forwardRef<HTMLDivElement, CarvePanelViewportProps>(({ children, className }, ref) => {
   return (
     <div ref={ref} className={cn(CARVE_PANEL_VIEWPORT_BASE_CLASS, CARVE_PANEL_VIEWPORT_CLASS, className)}>
@@ -61,6 +67,8 @@ const CarvePanelViewportBase = forwardRef<HTMLDivElement, CarvePanelViewportProp
 const CarvePanelBase = ({ children, className }: CarvePanelProps) => {
   return <div className={cn(CARVE_PANEL_BASE_CLASS, CARVE_PANEL_CLASS, className)}>{children}</div>;
 };
+
+
 
 
 
@@ -95,6 +103,8 @@ const CarvePanelShell = ({ children, toolbar = null, overlay = null, leftPanel =
     </div>
   );
 };
+
+
 
 
 

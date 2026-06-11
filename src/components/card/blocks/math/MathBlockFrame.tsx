@@ -4,10 +4,14 @@ import { RowSnappedRoot } from "@/components/card/frame/RowSnappedRoot";
 
 
 
+
+
 type MathBlockFrameProps = {
   className?: string;
   children: React.ReactNode;
 };
+
+
 
 
 

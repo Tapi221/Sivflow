@@ -36,6 +36,8 @@ import { cn } from '@/lib/utils';
 
 
 
+
+
 export const ColumnElement = withHOC( ResizableProvider, function ColumnElement(props: PlateElementProps<TColumnElement>) { const { width } = props.element;
     const readOnly = useReadOnly();
     const isSelectionAreaVisible = usePluginOption(
@@ -277,6 +279,8 @@ const DoubleSideDoubleColumnOutlined = (props: LucideProps) => (
     />
   </svg>
 );
+
+
 
 
 
