@@ -3,6 +3,8 @@ import type { InkDocument, InkEditTool } from "@core/domain/card/ink/inkDocument
 import { InkLayer, InkToolbar } from "@/components/ink/InkLayer";
 import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.types";
 
+
+
 interface FlashcardInkOverlayProps {
   extraHeaderRight?: React.ReactNode;
   extraFooter?: React.ReactNode;
@@ -21,6 +23,8 @@ interface FlashcardInkOverlayProps {
   setPreviewInkTool: React.Dispatch<React.SetStateAction<InkEditTool | null>>;
   setPreviewInkHistory: React.Dispatch<React.SetStateAction<InkHistoryState>>;
 }
+
+
 
 const FlashcardInkOverlay = ({ extraHeaderRight, extraFooter, previewMode, showInkLayer, inkEditingEnabled, cardId, activeInkSide, activeInkDocument, layoutStable, shouldMountInkLayer, previewInkRef, previewInkTool, previewInkHistory, onInkDocumentChange, setPreviewInkTool, setPreviewInkHistory }: FlashcardInkOverlayProps) => {
   const hasInkContent = (activeInkDocument.strokes?.length ?? 0) > 0;
@@ -77,5 +81,7 @@ const FlashcardInkOverlay = ({ extraHeaderRight, extraFooter, previewMode, showI
     </>
   );
 };
+
+
 
 export { FlashcardInkOverlay };
