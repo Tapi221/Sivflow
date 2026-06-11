@@ -44,6 +44,8 @@ export interface SecurityState { isLocked: boolean;
 
 
 
+
+
 /**
  * SecurityMonitor: セキュリティログ送信とサーバー状態監視を行うクラス
  */

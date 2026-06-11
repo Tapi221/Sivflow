@@ -27,6 +27,8 @@ export interface ValidationResult { isValid: boolean;
 
 
 
+
+
 /**
  * ユーザーネームバリデーションユーティリティ
  */
@@ -38,6 +40,8 @@ const USERNAME_VALIDATION = {
   ALLOWED_CHARS_REGEX:
     /^[a-zA-Z0-9\s\-_ \u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF\u3400-\u4DBF]+$/,
 };
+
+
 
 
 

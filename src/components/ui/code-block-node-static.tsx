@@ -24,6 +24,8 @@ import { type SlateElementProps, type SlateLeafProps, SlateElement, SlateLeaf, }
 
 
 
+
+
 // Syntax highlighting color map for common token types
 const syntaxColors: Record<string, string> = {
   'hljs-addition': '#22863a',
@@ -59,6 +61,8 @@ const syntaxColors: Record<string, string> = {
   'hljs-type': '#d73a49',
   'hljs-variable': '#005cc5',
 };
+
+
 
 
 

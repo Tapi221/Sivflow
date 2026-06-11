@@ -52,7 +52,7 @@ export function MediaToolbar({ children, plugin, }: { children: React.ReactNode;
     if (!open && isEditing) {
       FloatingMediaStore.set('isEditing', false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [open]);
 
   const element = useElement();

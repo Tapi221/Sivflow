@@ -209,7 +209,7 @@ export function FontColorToolbarButton({ children, nodeType, tooltip, }: { nodeT
 
   React.useEffect(() => {
     if (selectionDefined) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Preserve the mark color while menu focus clears editor selection.
+       
       setSelectedColor(color);
     }
   }, [color, selectionDefined]);

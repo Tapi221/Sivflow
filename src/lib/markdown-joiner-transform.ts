@@ -44,6 +44,8 @@ const DIGIT_PATTERN = /^[0-9]$/;
 
 
 
+
+
 /**
  * Transform chunks like [**,bold,**] to [**bold**] make the md deserializer
  * happy.

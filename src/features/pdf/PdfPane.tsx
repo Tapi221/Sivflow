@@ -12,7 +12,6 @@ import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_BUTTON_SCALE_FACTOR, PDF_ZOOM_M
 import { releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource } from "./pdfDocumentSource";
 import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
 import { getPdfPageWindowKeepSet, getSafePdfPageNumber, type PdfPageWindowMetric } from "./pdfPageWindow";
-import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "./pdfPerformance";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
 import "./PdfPane.css";
 

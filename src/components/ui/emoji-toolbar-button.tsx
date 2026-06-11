@@ -1,7 +1,5 @@
 'use client';
 
-/* eslint-disable react-hooks/refs */
-
 import * as React from 'react';
 
 import type { Emoji } from '@emoji-mart/data';

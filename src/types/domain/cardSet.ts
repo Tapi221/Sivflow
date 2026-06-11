@@ -31,6 +31,8 @@ export const normalizeCardDisplayMode = (value: unknown) => { return value === "
 
 
 
+
+
 /**
  * CardSet — Card のコレクション単位。
  * Folder 直下に複数存在し、Card は必ず CardSet に属する。
