@@ -282,6 +282,8 @@ const applyNonOverlappingReplacements = (source, replacements) => {
   return acceptedReplacements.reduce((nextSource, replacement) => `${nextSource.slice(0, replacement.start)}${replacement.text}${nextSource.slice(replacement.end)}`, source);
 };
 
+const applyReplacement = (source, replacement) => `${source.slice(0, replacement.start)}${replacement.text}${source.slice(replacement.end)}`;
+
 const getTopLevelSpacingText = (filePath, source, previousStatement, statement) => {
   const newline = getNewline(source);
   if (isImportStatement(previousStatement) && isImportStatement(statement)) return newline;
@@ -339,11 +341,13 @@ const getLineIndentation = (source, position) => {
   return linePrefix.match(/^[\t ]*/u)?.[0] ?? "";
 };
 
-const collectInlineBlockStatementReplacements = (source, sourceFile) => {
-  const replacements = [];
+const findFirstInlineBlockStatementReplacement = (source, sourceFile) => {
   const newline = getNewline(source);
+  let replacement = null;
 
   const visit = (node) => {
+    if (replacement) return;
+
     if (ts.isBlock(node) && node.statements.length > 0) {
       const openingBracePosition = node.getStart(sourceFile);
       const firstStatement = node.statements[0];
@@ -353,7 +357,8 @@ const collectInlineBlockStatementReplacements = (source, sourceFile) => {
       const leadingText = source.slice(openingBracePosition + 1, firstStatementStart);
       if (openingBraceLine === firstStatementLine && !/\S/u.test(leadingText)) {
         const indentation = getLineIndentation(source, openingBracePosition);
-        replacements.push({ end: firstStatementStart, start: openingBracePosition + 1, text: `${newline}${indentation}  ` });
+        replacement = { end: firstStatementStart, start: openingBracePosition + 1, text: `${newline}${indentation}  ` };
+        return;
       }
     }
 
@@ -361,16 +366,24 @@ const collectInlineBlockStatementReplacements = (source, sourceFile) => {
   };
 
   visit(sourceFile);
-  return replacements;
+  return replacement;
 };
 
 const applyInlineBlockStatementFix = (filePath, source) => {
   if (!shouldFixBlockSpacing(filePath)) return source;
 
-  const sourceFile = createSourceFile(filePath, source);
-  const replacements = collectInlineBlockStatementReplacements(source, sourceFile);
+  let nextSource = source;
+  const maxPassCount = 10000;
 
-  return replacements.length === 0 ? source : applyNonOverlappingReplacements(source, replacements);
+  for (let pass = 0; pass < maxPassCount; pass += 1) {
+    const sourceFile = createSourceFile(filePath, nextSource);
+    const replacement = findFirstInlineBlockStatementReplacement(nextSource, sourceFile);
+    if (!replacement) return nextSource;
+
+    nextSource = applyReplacement(nextSource, replacement);
+  }
+
+  return nextSource;
 };
 
 const applySourceConventionFix = (filePath, source) => {
