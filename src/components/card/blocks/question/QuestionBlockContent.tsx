@@ -6,6 +6,8 @@ import { QUESTION_BLOCK_ANSWER_TEXT_CLASS, QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX, Q
 
 
 
+
+
 type QuestionBlockContentProps =
   | {
     mode: "view";
@@ -54,6 +56,8 @@ type QuestionBlockViewContentProps = {
 
 
 
+
+
 const buildQuestionFieldStyle = (zoom?: number) =>
   buildTypographyStyle({
     fontSizePx: 12,
@@ -71,6 +75,8 @@ const buildViewResetKey = ({
   questionAnswer?: string;
   answerDisplayMode: "always" | "tap_to_reveal";
 }) => [answerDisplayMode, questionTitle ?? "", questionAnswer ?? ""].join("::");
+
+
 
 
 
@@ -238,6 +244,8 @@ const QuestionBlockContent = (props: QuestionBlockContentProps) => {
     />
   );
 };
+
+
 
 
 

@@ -7,10 +7,14 @@ import { Link } from "@/ui/icons";
 
 
 
+
+
 type LinkEditorProps = {
   items: ReferenceBlockData[];
   onChange: (items: ReferenceBlockData[]) => void;
 };
+
+
 
 
 
@@ -101,6 +105,8 @@ const LinkEditor = ({ items, onChange }: LinkEditorProps) => {
     </div>
   );
 };
+
+
 
 
 

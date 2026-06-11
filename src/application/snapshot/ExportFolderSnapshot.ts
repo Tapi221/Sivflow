@@ -7,14 +7,20 @@ import { createCreateSnapshotUseCase } from "./CreateSnapshot";
 
 
 
+
+
 interface ExportFolderSnapshotDependencies { fileExporter: JsonFileExportPort;
 }
+
+
 
 
 
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,
 });
+
+
 
 
 
@@ -124,7 +130,11 @@ const createExportFolderSnapshotUseCase = ({ fileExporter }: ExportFolderSnapsho
 
 
 
+
+
 export { createExportFolderSnapshotUseCase };
+
+
 
 
 export type { ExportFolderSnapshotDependencies };

@@ -5,6 +5,8 @@ import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
 
 
+
+
 type ProjectCalendarLinksMenuAction = { id: string;
   label: string;
   disabled?: boolean;
@@ -18,6 +20,8 @@ type ProjectCalendarLinksMenuProps = {
   noDragStyle: CSSProperties;
   panelId?: RightClickPanelId;
 };
+
+
 
 
 
@@ -35,7 +39,11 @@ const PROJECT_CALENDAR_LINKS_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJEC
 
 
 
+
+
 const getProjectCalendarLinksMenuHeight = (actionCount: number): number => Math.max(RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, actionCount * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE);
+
+
 
 
 
@@ -82,8 +90,12 @@ const ProjectCalendarLinksMenu = ({
 
 
 
+
+
 export { ProjectCalendarLinksMenu };
 export { PROJECT_CALENDAR_LINKS_MENU_PANEL_ID, PROJECT_CALENDAR_LINKS_MENU_WIDTH, getProjectCalendarLinksMenuHeight };
+
+
 
 
 export type { ProjectCalendarLinksMenuAction };

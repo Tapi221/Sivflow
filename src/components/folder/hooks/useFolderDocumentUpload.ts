@@ -12,12 +12,16 @@ import { getOrCreateDeviceId } from "@/utils/device";
 
 
 
+
+
 interface UseFolderDocumentUploadParams {
   actionFolderId: string | null;
   getNextOrderIndex: (folderId: string | null) => number;
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
 type LegacyEntityFields = { blobUrl?: string | null; };
+
+
 
 
 
@@ -188,6 +192,8 @@ const useFolderDocumentUpload = ({ actionFolderId, getNextOrderIndex, setExpande
     handleToolbarFileInputChange,
   };
 };
+
+
 
 
 

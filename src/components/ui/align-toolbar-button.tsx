@@ -16,6 +16,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenu
 
 import { ToolbarButton } from "./toolbar";
 
+
+
 const items = [
   {
     icon: AlignLeftIcon,
@@ -34,6 +36,8 @@ const items = [
     value: "justify",
   },
 ];
+
+
 
 const AlignToolbarButton = (props: DropdownMenuProps) => {
   const { editor, tf } = useEditorPlugin(TextAlignPlugin);
@@ -77,5 +81,7 @@ const AlignToolbarButton = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
+
+
 
 export { AlignToolbarButton };

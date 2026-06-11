@@ -16,7 +16,11 @@ import { useIsTouchDevice } from "@/hooks/use-is-touch-device";
 
 import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuItem, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "./context-menu";
 
+
+
 type Value = "askAI" | null;
+
+
 
 const BlockContextMenu = ({ children }: { children: React.ReactNode; }) => {
   const { api, editor } = useEditorPlugin(BlockMenuPlugin);
@@ -192,5 +196,7 @@ const BlockContextMenu = ({ children }: { children: React.ReactNode; }) => {
     </ContextMenu>
   );
 };
+
+
 
 export { BlockContextMenu };

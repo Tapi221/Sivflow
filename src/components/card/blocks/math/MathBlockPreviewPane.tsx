@@ -5,6 +5,8 @@ import { MathRenderer } from "./MathBlockContent";
 
 
 
+
+
 type MathBlockPreviewPaneProps = {
   latex: string;
   displayMode?: "block" | "inline";
@@ -15,6 +17,8 @@ type MathBlockPreviewPaneProps = {
   className?: string;
   zoom?: number;
 };
+
+
 
 
 
@@ -48,6 +52,8 @@ const MathBlockPreviewPane = ({ latex, displayMode = "block", interactive = fals
     </div>
   );
 };
+
+
 
 
 
