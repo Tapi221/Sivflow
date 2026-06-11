@@ -6,7 +6,8 @@ const SOURCE_DIRECTORIES = ["src", "apps", "packages", "shared", "functions/src"
 const TEXT_EXTENSIONS = new Set([".cjs", ".css", ".html", ".js", ".jsx", ".json", ".md", ".mjs", ".scss", ".ts", ".tsx"]);
 const EXCLUDED_PATH_PARTS = ["/node_modules/", "/dist/", "/build/", "/coverage/", "/.git/", "/.turbo/", "/target/", "/src/components/ui/"];
 const DISALLOWED_SYMBOL_PATTERN = new RegExp("[\\u{1F000}-\\u{1FAFF}\\u{2600}-\\u{27BF}]", "gu");
-const ALLOWED_SYMBOLS_BY_FILE = new Map([["scripts/lint-eslint-ja.mjs", new Set(["✖"])]]);
+const ESLINT_ERROR_SYMBOL = "\u2716";
+const ALLOWED_SYMBOLS_BY_FILE = new Map([["scripts/lint-eslint-ja.mjs", new Set([ESLINT_ERROR_SYMBOL])]]);
 
 const toPosix = (value) => value.split(path.sep).join("/");
 
