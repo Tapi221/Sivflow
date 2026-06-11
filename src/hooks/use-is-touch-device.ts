@@ -2,17 +2,17 @@
 
 import * as React from 'react';
 
-export function useIsTouchDevice() {
+export const useIsTouchDevice = () => {
   const [isTouchDevice, setIsTouchDevice] = React.useState(false);
 
   React.useEffect(() => {
-    function onResize() {
+    const onResize = () => {
       setIsTouchDevice(
         'ontouchstart' in window ||
           navigator.maxTouchPoints > 0 ||
           navigator.maxTouchPoints > 0
       );
-    }
+    };
 
     window.addEventListener('resize', onResize);
     onResize();
@@ -23,4 +23,4 @@ export function useIsTouchDevice() {
   }, []);
 
   return isTouchDevice;
-}
+};
