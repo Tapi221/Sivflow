@@ -1,7 +1,3 @@
-const DB_NAME = "image_file_store";
-const STORE_NAME = "image_files";
-const DB_VERSION = 1;
-
 type BlobScopeOptions = {
   userId?: string | null;
 };
@@ -23,13 +19,16 @@ export type ImageBlobRecord = {
   mime: string;
 };
 
+const DB_NAME = "image_file_store";
+const STORE_NAME = "image_files";
+const DB_VERSION = 1;
+let dbPromise: Promise<IDBDatabase> | null = null;
+
 const makeScopedId = (id: string, options?: BlobScopeOptions): string => {
   const userId = options?.userId?.trim();
   if (!userId) return id;
   return `${userId}:${id}`;
 };
-
-let dbPromise: Promise<IDBDatabase> | null = null;
 
 const openImageFileDb = (): Promise<IDBDatabase> => {
   if (dbPromise) return dbPromise;
@@ -102,7 +101,6 @@ export const getImageBlob = async (
   const scoped = await getStoredImageFile(scopedId);
   if (scoped?.blob) return scoped.blob;
 
-  // Backward compatibility for legacy records saved without user scope.
   const legacy = await getStoredImageFile(id);
   if (!legacy?.blob) return null;
 
