@@ -8,9 +8,13 @@ import type { CalendarTimeGridLayoutEntry } from "@core/calendar";
 
 
 
+
+
 type CalendarEventChipProperties = {
   entry: CalendarTimeGridLayoutEntry;
 };
+
+
 
 
 
@@ -22,6 +26,8 @@ const CHIP_TEXT_FADE_STYLE: CSSProperties = {
   WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 12px), transparent 100%)",
   maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 12px), transparent 100%)",
 };
+
+
 
 
 
@@ -48,6 +54,8 @@ const getEventChipStyle = (entry: CalendarTimeGridLayoutEntry): CSSProperties =>
     width: `calc(${entry.style.width}% - 4px)`,
   };
 };
+
+
 
 
 

@@ -10,7 +10,11 @@ export type PresentationCapabilities = { viewportWidth: number;
 
 
 
+
+
 export const DESKTOP_PRESENTATION_MIN_WIDTH_PX = 1024;
+
+
 
 
 

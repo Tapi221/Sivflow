@@ -9,6 +9,8 @@ import { signInWithGoogle } from "@/services/auth/googleSignIn";
 
 
 
+
+
 type MobileLoginPageStyles = {
   page: CSSProperties;
   backgroundOverlay: CSSProperties;
@@ -27,6 +29,8 @@ type MobileLoginPageStyles = {
   secureIcon: CSSProperties;
   secureText: CSSProperties;
 };
+
+
 
 
 
@@ -183,11 +187,15 @@ const styles: MobileLoginPageStyles = {
 
 
 
+
+
 const isAuthPopupClosedByUserError = (error: unknown): boolean =>
   typeof error === "object" &&
   error !== null &&
   "code" in error &&
   error.code === "auth/popup-closed-by-user";
+
+
 
 
 
@@ -276,6 +284,8 @@ const MobileLoginPage = () => {
     </main>
   );
 };
+
+
 
 
 

@@ -11,7 +11,11 @@ import { selectGoogleAuthPort } from "@platform/auth/google/selectGoogleAuthPort
 
 
 
+
+
 let pendingSignInWithGoogle: Promise<void> | null = null;
+
+
 
 
 
@@ -39,6 +43,8 @@ const signInWithGoogle = async (): Promise<void> => {
 
   return pendingSignInWithGoogle;
 };
+
+
 
 
 

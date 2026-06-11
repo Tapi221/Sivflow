@@ -13,6 +13,8 @@ import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize.utils";
 
 
 
+
+
 const buildAssetRemoteKey = (uid: string, assetId: string) => `users/${uid}/assets/${assetId}`;
 export const createSelectionCaptureImageAsset = async ({ blob, userId }: { blob: Blob;
   userId: string;

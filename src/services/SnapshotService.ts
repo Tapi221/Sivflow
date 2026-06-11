@@ -15,6 +15,8 @@ import { snapshotFirestoreRepository } from "@/infrastructure/firebase/firestore
 
 
 
+
+
 const SNAPSHOTS_KEY = "flashcard_snapshots";
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,
@@ -74,6 +76,8 @@ migrateFromLocalStorage: async (userId: string): Promise<void> => {
   console.log("[スナップショット] 移行が完了しました。LocalStorage をクリアしました");
 },
 };
+
+
 
 
 

@@ -9,7 +9,11 @@ import type { ScheduleYearProps } from "@mobile-renderer/pane/schedule/ScheduleY
 
 
 
+
+
 type IosCalendarScheduleYearProps = Omit<ScheduleYearProps, "visibleEvents" | "onRenderedRangeChange">;
+
+
 
 
 
@@ -36,9 +40,13 @@ const IosCalendarScheduleYearComponent = (props: IosCalendarScheduleYearProps) =
 
 
 
+
+
 const IosCalendarScheduleYear = memo(IosCalendarScheduleYearComponent);
 IosCalendarScheduleYear.displayName = "IosCalendarScheduleYear";
 export { IosCalendarScheduleYear };
+
+
 
 
 

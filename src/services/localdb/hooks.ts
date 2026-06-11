@@ -7,6 +7,8 @@ import type { LocalDB } from "./LocalDB";
 
 
 
+
+
 const getEntityId = (obj: unknown): string | undefined => {
   if (typeof obj !== "object" || obj === null || !("id" in obj))
     return undefined;

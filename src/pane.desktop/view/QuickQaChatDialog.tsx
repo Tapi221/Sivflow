@@ -14,6 +14,8 @@ import { useToast } from "@web-renderer/contexts/ToastContext";
 
 
 
+
+
 type QuickQaChatDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -34,8 +36,12 @@ type LoadingStatusPillProps = {
 
 
 
+
+
 const MAX_QUESTION_LENGTH = 240;
 const MAX_ANSWER_LENGTH = 3000;
+
+
 
 
 
@@ -54,6 +60,8 @@ const createCardTitle = (question: string): string => {
   const normalized = question.replace(/\s+/g, " ").trim();
   return normalized.length > 80 ? `${normalized.slice(0, 80)}…` : normalized;
 };
+
+
 
 
 
@@ -267,9 +275,13 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
 
 
 
+
+
 const QuickQaChatDialog = memo(QuickQaChatDialogComponent);
 QuickQaChatDialog.displayName = "QuickQaChatDialog";
 export { QuickQaChatDialog };
+
+
 
 
 

@@ -1,6 +1,8 @@
 import { memo, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_PADDING, type RightClickPanelId } from "./rightClickPanel.utils";
 
+
+
 type RightClickPanelSurfaceProps = {
   x: number;
   y: number;
@@ -13,6 +15,8 @@ type RightClickPanelSurfaceProps = {
   panelId?: RightClickPanelId;
   children?: ReactNode;
 };
+
+
 
 const RIGHT_CLICK_PANEL_COMMON_STYLE = `
 .right-click-panel {
@@ -62,6 +66,8 @@ const RIGHT_CLICK_PANEL_COMMON_STYLE = `
 }
 `;
 
+
+
 const getRightClickPanelClassName = (className?: string): string => ["right-click-panel", className].filter(Boolean).join(" ");
 const getRightClickPanelStyle = (x: number, y: number, width: number, noDragStyle?: CSSProperties): CSSProperties => ({
   ...noDragStyle,
@@ -69,6 +75,8 @@ const getRightClickPanelStyle = (x: number, y: number, width: number, noDragStyl
   top: y,
   width,
 });
+
+
 
 const RightClickPanelSurfaceBase = ({
   x,
@@ -102,6 +110,8 @@ const RightClickPanelSurfaceBase = ({
     </>
   );
 };
+
+
 
 const RightClickPanelSurface = memo(RightClickPanelSurfaceBase);
 RightClickPanelSurface.displayName = "RightClickPanelSurface";

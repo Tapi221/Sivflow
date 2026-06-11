@@ -14,6 +14,8 @@ import { persist } from "zustand/middleware";
 
 
 
+
+
 type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";
 type TagMatchMode = "any" | "all";
@@ -55,6 +57,8 @@ export interface ExplorerState { tagFilter: string[];
 
 
 
+
+
 const DEFAULT_CONTENT_TYPE_FILTER: ContentTypeFilter[] = ["card", "pdf"];
 const DEFAULT_EXPLORER_LAYOUT_MODE: ExplorerLayoutMode = "column";
 const DEFAULT_DIRECTORY_BADGE_VISIBILITY: DirectoryBadgeVisibility = {
@@ -62,6 +66,8 @@ const DEFAULT_DIRECTORY_BADGE_VISIBILITY: DirectoryBadgeVisibility = {
   bookmarked: true,
   tags: true,
 };
+
+
 
 
 
@@ -153,6 +159,8 @@ const createDefaultState = (): Pick<
   explorerLayoutMode: DEFAULT_EXPLORER_LAYOUT_MODE,
   pinnedFolderIds: [],
 });
+
+
 
 
 

@@ -17,6 +17,8 @@ import { CalendarPieChartView } from "./Calendar.PieChartView";
 
 
 
+
+
 type CalendarSelectedViewsSplitViewProps = {
   selectedViewModes: readonly CalendarViewMode[];
   currentDate: Date;
@@ -52,8 +54,12 @@ type CalendarSelectedViewPanelProps = CalendarSelectedViewsSplitViewProps & {
 
 
 
+
+
 const SELECTED_VIEW_PANEL_CLASS_NAME = "calendar-selected-view-panel flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-r border-[#eeeeee] last:border-r-0";
 const WEEKDAY_SURFACE_CLASS_NAME = "flex h-full min-h-0 flex-col overflow-hidden bg-white";
+
+
 
 
 
@@ -94,6 +100,8 @@ const renderSelectedViewPanelContent = ({ viewMode, currentDate, selectedDate, w
 
 
 
+
+
 const CalendarSelectedViewPanel = (props: CalendarSelectedViewPanelProps) => (
   <div className={SELECTED_VIEW_PANEL_CLASS_NAME}>
     {renderSelectedViewPanelContent(props)}
@@ -108,6 +116,8 @@ const CalendarSelectedViewsSplitView = ({ selectedViewModes, className, ...props
     </div>
   );
 };
+
+
 
 
 

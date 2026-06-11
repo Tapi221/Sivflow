@@ -1,11 +1,18 @@
 "use client";
 
 import type { ExtendConfig, TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText } from "platejs";
+
 import { KEYS, TextApi, TrailingBlockPlugin } from "platejs";
+
 import { type BaseSuggestionConfig, BaseSuggestionPlugin } from "@platejs/suggestion";
+
 import { toTPlatePlugin } from "platejs/react";
+
 import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay } from "@/components/ui/suggestion-node";
+
 import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget } from "./discussion-kit";
+
+
 
 type SuggestionConfig = ExtendConfig<
   BaseSuggestionConfig,
@@ -15,7 +22,10 @@ type SuggestionConfig = ExtendConfig<
   }
 >;
 
+
+
 const INLINE_SUGGESTION_TARGET_PLUGINS = [KEYS.date, KEYS.inlineEquation, KEYS.link, KEYS.mention];
+
 const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, ({ editor }) => ({
   options: {
     activeId: null,
@@ -75,6 +85,7 @@ const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, 
     node: SuggestionLeaf,
   },
 });
+
 const trailingBlockPlugin = TrailingBlockPlugin.configure({
   options: {
     insert: (editor, { insert }) => {
@@ -82,7 +93,10 @@ const trailingBlockPlugin = TrailingBlockPlugin.configure({
     },
   },
 });
+
 const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];
+
+
 
 function getInlineSuggestionData(editor: any, element: TElement) {
   const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
@@ -100,6 +114,10 @@ function getInlineSuggestionData(editor: any, element: TElement) {
   }
 }
 
+
+
 export type { SuggestionConfig };
+
+
 
 export { SuggestionKit, suggestionPlugin };

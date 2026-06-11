@@ -8,6 +8,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 interface CardSetViewZoomPreferencesStore {
   version: 2;
   byScope: Record<string, number>;
@@ -29,6 +31,8 @@ type LegacyCardSetViewZoomPreferenceScope = {
   interactionMode: CardSetInteractionMode;
   cardLayoutMode: CardLayoutMode;
 };
+
+
 
 
 
