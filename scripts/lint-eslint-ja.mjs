@@ -36,14 +36,14 @@ const translateParsingMessage = (message) => {
 };
 
 const translateUnusedDisableMessage = (message) => {
-  const unusedDisableMatch = message.match(/^Unused eslint-disable directive \(no problems were reported from '(.+)'\)$/u);
+  const unusedDisableMatch = message.match(/^Unused eslint-disable directive \(no problems were reported from '(.+)'\)\.?$/u);
   if (!unusedDisableMatch) return null;
 
   return `不要な eslint-disable 指示です。対象ルール '${unusedDisableMatch[1]}' の違反は検出されていません。`;
 };
 
 const translateUnusedImportMessage = (message) => {
-  const definedMatch = message.match(/^'(.+)' is defined but never used$/u);
+  const definedMatch = message.match(/^'(.+)' is defined but never used\.?$/u);
   if (definedMatch) return `\`${definedMatch[1]}\` が定義されていますが使われていません。`;
 
   const assignedMatch = message.match(/^'(.+)' is assigned a value but never used\./u);
