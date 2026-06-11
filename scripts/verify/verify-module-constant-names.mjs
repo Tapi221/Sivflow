@@ -107,13 +107,13 @@ const checkSourceFile = (filePath) => {
   });
 };
 
-const formatViolation = ({ filePath, line, name }) => `${toPosix(path.relative(ROOT_DIR, filePath))}:${line} Module-scope constants must use UPPER_SNAKE_CASE: ${name}`;
+const formatViolation = ({ filePath, line, name }) => `${toPosix(path.relative(ROOT_DIR, filePath))}:${line} module scope の定数は UPPER_SNAKE_CASE にしてください: ${name}`;
 
 const sourceFiles = SOURCE_DIRECTORIES.flatMap(walkSourceFiles);
 const violations = sourceFiles.flatMap(checkSourceFile);
 
 if (violations.length > 0) {
-  console.error("Module constant naming violations:");
+  console.error("module 定数命名規約違反:");
   for (const violation of violations) {
     console.error(`- ${formatViolation(violation)}`);
   }
