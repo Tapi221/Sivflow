@@ -50,14 +50,14 @@ const normalizeHeaderName = (value: string): ImportColumnKey | null => {
   return null;
 };
 const toTrimmedString = (value: unknown) => {
-  if ((value === null || value === undefined)) return "";
+  if (value === null || value === undefined) return "";
   return String(value).trim();
 };
 const parseHeaderMap = (headerRow: unknown[]): HeaderMap => {
   return headerRow.reduce<HeaderMap>((accumulator, cellValue, columnIndex) => {
     const normalizedKey = normalizeHeaderName(toTrimmedString(cellValue));
 
-    if ((normalizedKey === null || normalizedKey === undefined) || accumulator[normalizedKey] != null) {
+    if ((normalizedKey === null || normalizedKey === undefined) || (accumulator[normalizedKey] !== null && accumulator[normalizedKey] !== undefined)) {
       return accumulator;
     }
 
@@ -72,7 +72,7 @@ const getCellValue = (
 ) => {
   const columnIndex = headerMap[columnKey];
 
-  if ((columnIndex === null || columnIndex === undefined)) {
+  if (columnIndex === null || columnIndex === undefined) {
     return "";
   }
 
@@ -120,7 +120,7 @@ const validateRequiredHeaders = (
   sheetName: ImportSheetName,
 ) => {
   return REQUIRED_HEADERS.flatMap((columnKey) => {
-    if (headerMap[columnKey] != null) {
+    if (headerMap[columnKey] !== null && headerMap[columnKey] !== undefined) {
       return [];
     }
 
@@ -196,7 +196,7 @@ const buildRowBlock = ({
   const parsedSide = parseImportSide(rowCellMap.side ?? "");
   const parsedOrder = parseBlockOrder(rowCellMap.blockOrder ?? "");
 
-  if ((parsedSide === null || parsedSide === undefined)) {
+  if (parsedSide === null || parsedSide === undefined) {
     return {
       side: null,
       block: null,
@@ -214,7 +214,7 @@ const buildRowBlock = ({
     };
   }
 
-  if ((parsedOrder === null || parsedOrder === undefined)) {
+  if (parsedOrder === null || parsedOrder === undefined) {
     return {
       side: parsedSide,
       block: null,
@@ -314,7 +314,11 @@ const buildRowBlock = ({
     issues,
   };
 };
-const parseImportRows = ({ sheetName, rows }: { sheetName: ImportSheetName;
+const parseImportRows = ({
+  sheetName,
+  rows,
+}: {
+  sheetName: ImportSheetName;
   rows: unknown[][];
 }): ImportParseResult => {
   const headerRow = rows[0] ?? [];
