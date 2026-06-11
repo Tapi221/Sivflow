@@ -1,23 +1,24 @@
-import { useEffect } from "react";
-import { Info } from "@/ui/icons";
-import type { Notification } from "@/types/notification";
+import { useEffect } from 'react';
 
-interface InfoToastProps {
+import type { Notification } from '@/types/notification';
+import { Info } from '@/ui/icons';
+
+type InfoToastProps = {
   notification: Notification;
   onDismiss: () => void;
-}
+};
 
 const InfoToast = ({ notification, onDismiss }: InfoToastProps) => {
   useEffect(() => {
-    if (notification.autoClose && notification.duration) {
-      const timer = setTimeout(() => {
-        onDismiss();
-      }, notification.duration);
+    if (!notification.autoClose || !notification.duration) return undefined;
 
-      return () => clearTimeout(timer);
-    }
+    const timer = window.setTimeout(() => {
+      onDismiss();
+    }, notification.duration);
 
-    return undefined;
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [notification, onDismiss]);
 
   return (
@@ -40,7 +41,7 @@ const InfoToast = ({ notification, onDismiss }: InfoToastProps) => {
           <div
             className="h-full bg-primary-500 rounded-full transition-all ease-linear"
             style={{
-              width: "100%",
+              width: '100%',
               animation: `shrink ${notification.duration}ms linear`,
             }}
           />
