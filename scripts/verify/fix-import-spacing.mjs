@@ -3,7 +3,8 @@ import path from "node:path";
 import ts from "typescript";
 
 const ROOT_DIR = process.cwd();
-const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => path.join(ROOT_DIR, directory));
+const SOURCE_DIRECTORY_PATTERNS = process.env.SOURCE_CONVENTION_TARGETS?.split(path.delimiter).filter(Boolean) ?? ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"];
+const SOURCE_DIRECTORIES = SOURCE_DIRECTORY_PATTERNS.map((directory) => path.resolve(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
 const ORDER_EXCLUDED_FILE_SUFFIXES = [".d.ts"];
@@ -113,7 +114,14 @@ const isPascalCaseName = (name) => /^[A-Z][A-Za-z0-9]*$/.test(name);
 
 const isUpperCaseConstantName = (name) => /^[A-Z0-9_]+$/.test(name);
 
-const getVariableStatementNames = (statement) => statement.declarationList.declarations.flatMap((declaration) => ts.isIdentifier(declaration.name) ? [declaration.name.text] : []);
+const getBindingNameIdentifiers = (name) => {
+  if (ts.isIdentifier(name)) return [name.text];
+  if (ts.isObjectBindingPattern(name) || ts.isArrayBindingPattern(name)) return name.elements.flatMap((element) => ts.isBindingElement(element) ? getBindingNameIdentifiers(element.name) : []);
+
+  return [];
+};
+
+const getVariableStatementNames = (statement) => statement.declarationList.declarations.flatMap((declaration) => getBindingNameIdentifiers(declaration.name));
 
 const isConstVariableStatement = (statement) => (statement.declarationList.flags & ts.NodeFlags.Const) !== 0;
 
@@ -324,12 +332,54 @@ const applyTopLevelSpacingFix = (filePath, source) => {
   return replacements.length === 0 ? source : applyNonOverlappingReplacements(source, replacements);
 };
 
+const getLineIndentation = (source, position) => {
+  const lineStart = source.lastIndexOf("\n", position - 1) + 1;
+  const linePrefix = source.slice(lineStart, position);
+
+  return linePrefix.match(/^[\t ]*/u)?.[0] ?? "";
+};
+
+const collectInlineBlockStatementReplacements = (source, sourceFile) => {
+  const replacements = [];
+  const newline = getNewline(source);
+
+  const visit = (node) => {
+    if (ts.isBlock(node) && node.statements.length > 0) {
+      const openingBracePosition = node.getStart(sourceFile);
+      const firstStatement = node.statements[0];
+      const firstStatementStart = firstStatement.getStart(sourceFile);
+      const openingBraceLine = sourceFile.getLineAndCharacterOfPosition(openingBracePosition).line;
+      const firstStatementLine = sourceFile.getLineAndCharacterOfPosition(firstStatementStart).line;
+      const leadingText = source.slice(openingBracePosition + 1, firstStatementStart);
+      if (openingBraceLine === firstStatementLine && !/\S/u.test(leadingText)) {
+        const indentation = getLineIndentation(source, openingBracePosition);
+        replacements.push({ end: firstStatementStart, start: openingBracePosition + 1, text: `${newline}${indentation}  ` });
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return replacements;
+};
+
+const applyInlineBlockStatementFix = (filePath, source) => {
+  if (!shouldFixBlockSpacing(filePath)) return source;
+
+  const sourceFile = createSourceFile(filePath, source);
+  const replacements = collectInlineBlockStatementReplacements(source, sourceFile);
+
+  return replacements.length === 0 ? source : applyNonOverlappingReplacements(source, replacements);
+};
+
 const applySourceConventionFix = (filePath, source) => {
   const importNormalizedSource = normalizeImportBlankLines(source);
   const exportNormalizedSource = applyExportConventionFix(filePath, importNormalizedSource);
   const topLevelNormalizedSource = applyTopLevelSpacingFix(filePath, exportNormalizedSource);
+  const inlineBlockNormalizedSource = applyInlineBlockStatementFix(filePath, topLevelNormalizedSource);
 
-  return normalizeImportBlankLines(collapseRepeatedBlankLines(topLevelNormalizedSource));
+  return normalizeImportBlankLines(collapseRepeatedBlankLines(inlineBlockNormalizedSource));
 };
 
 const updateFile = (filePath) => {
