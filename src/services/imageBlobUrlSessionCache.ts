@@ -11,10 +11,16 @@ type CacheEntry = {
   staleUrls: string[];
 };
 
+export interface BlobCacheStats {
+  cacheSize: number;
+  cacheMax: number;
+  pinnedCount: number;
+  evictCount: number;
+  revokeCount: number;
+}
+
 const MAX_CACHE_ENTRIES = 80;
 const cache = new Map<string, CacheEntry>();
-
-// eviction / revoke の累積カウンタ（モジュールスコープ、セッション単位）
 let _evictCount = 0;
 let _revokeCount = 0;
 
@@ -25,8 +31,7 @@ const makeScopedId = (id: string, options?: BlobScopeOptions): string => {
 
 const revokeBlobUrl = (url: string): void => {
   if (!url.startsWith("blob:")) return;
-  if (typeof URL === "undefined" || typeof URL.revokeObjectURL !== "function")
-    return;
+  if (typeof URL === "undefined" || typeof URL.revokeObjectURL !== "function") return;
   try {
     URL.revokeObjectURL(url);
     _revokeCount++;
@@ -141,17 +146,6 @@ export const removeImageBlobUrl = (
   cache.delete(key);
 };
 
-/**
- * blob URL を「使用中」としてマークする。
- *
- * evictIfNeeded は pinCount > 0 のエントリを eviction 対象外にする。
- * これにより、<img src={blobUrl}> がマウントされている間は
- * blob URL が revoke されることはない。
- *
- * 使い方:
- *   mount 時: pinImageBlobUrl(localBlobId, { userId })
- *   unmount 時: unpinImageBlobUrl(localBlobId, { userId })
- */
 export const pinImageBlobUrl = (
   id: string | null | undefined,
   options?: BlobScopeOptions,
@@ -163,10 +157,6 @@ export const pinImageBlobUrl = (
   entry.pinCount += 1;
 };
 
-/**
- * blob URL の使用中マークを解除する。
- * pinCount が 0 になった時点で staleUrls を revoke する。
- */
 export const unpinImageBlobUrl = (
   id: string | null | undefined,
   options?: BlobScopeOptions,
@@ -180,16 +170,6 @@ export const unpinImageBlobUrl = (
     cleanupStaleUrls(entry);
   }
 };
-
-// ── Observability ─────────────────────────────────────────────────────────
-
-export interface BlobCacheStats {
-  cacheSize: number;
-  cacheMax: number;
-  pinnedCount: number;
-  evictCount: number;
-  revokeCount: number;
-}
 
 export const getBlobCacheStats = () => {
   let pinnedCount = 0;
