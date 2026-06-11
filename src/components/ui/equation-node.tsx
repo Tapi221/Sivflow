@@ -45,7 +45,7 @@ export function EquationElement(props: PlateElementProps<TEquationElement>) { co
       errorColor: '#cc0000',
       fleqn: false,
       leqno: false,
-      macros: { '\\f': '#1f(#2)' },
+      macros: { '\f': '#1f(#2)' },
       output: 'htmlAndMathml',
       strict: 'warn',
       throwOnError: false,
@@ -73,7 +73,7 @@ export function EquationElement(props: PlateElementProps<TEquationElement>) { co
             ) : (
               <div className="flex h-7 w-full items-center gap-2 whitespace-nowrap text-muted-foreground text-sm">
                 <RadicalIcon className="size-6 text-muted-foreground/80" />
-                <>Add a Tex equation</>
+                Add a Tex equation
               </div>
             )}
             {lineBreakBadge}
@@ -83,7 +83,11 @@ export function EquationElement(props: PlateElementProps<TEquationElement>) { co
         <EquationPopoverContent
           open={open}
           placeholder={
-            'f(x) = \\begin{cases}\n  x^2, &\\quad x > 0 \\\\\n  0, &\\quad x = 0 \\\\\n  -x^2, &\\quad x < 0\n\\end{cases}'
+            'f(x) = \begin{cases}
+  x^2, &\quad x > 0 \\
+  0, &\quad x = 0 \\
+  -x^2, &\quad x < 0
+\end{cases}'
           }
           isInline={false}
           setOpen={setOpen}
@@ -119,7 +123,7 @@ export function InlineEquationElement( props: PlateElementProps<TEquationElement
       errorColor: '#cc0000',
       fleqn: false,
       leqno: false,
-      macros: { '\\f': '#1f(#2)' },
+      macros: { '\f': '#1f(#2)' },
       output: 'htmlAndMathml',
       strict: 'warn',
       throwOnError: false,
