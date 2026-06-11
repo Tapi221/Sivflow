@@ -10,8 +10,6 @@ import { warnOncePerSession } from "./localDBRuntimeState";
 
 
 
-
-
 // NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 
 /**
@@ -74,7 +72,7 @@ export class AppInitializer { private static initialized = false;
     }
     const metaService = new IndexedDBMetadataService(db, userId);
 
-    // 🔥 Phase 1: 健全性チェック（前回のセッションの状態を確認）
+    // Phase 1: 健全性チェック（前回のセッションの状態を確認）
     console.log(`[アプリ初期化:${userId}] フェーズ1: 健全性チェックを実行中...`);
     const { healthy, reason } = await metaService.checkHealth();
 
@@ -115,7 +113,7 @@ export class AppInitializer { private static initialized = false;
       console.log(`[アプリ初期化:${userId}] フェーズ1: 健全性チェックは正常です`);
     }
 
-    // 🔥 Phase 3: Snapshot 移行
+    // Phase 3: Snapshot 移行
     console.log(`[アプリ初期化:${userId}] フェーズ3: スナップショット移行を実行中...`);
     try {
       const { snapshotService } = await import("./SnapshotService");
@@ -129,7 +127,7 @@ export class AppInitializer { private static initialized = false;
       // 移行失敗してもアプリは継続
     }
 
-    // 🔥 Phase 4: CardSet 移行補完（cardSetId 未設定カードの救済）
+    // Phase 4: CardSet 移行補完（cardSetId 未設定カードの救済）
     console.log(`[アプリ初期化:${userId}] フェーズ4: カードセット移行補完を実行中...`);
     try {
       await ensureLegacyCardsBackfilled(userId);
@@ -144,7 +142,7 @@ export class AppInitializer { private static initialized = false;
       // 補完失敗してもアプリは継続
     }
 
-    // 🔥 Phase 5: 履歴圧縮（バックグラウンド）
+    // Phase 5: 履歴圧縮（バックグラウンド）
     console.log(`[アプリ初期化:${userId}] フェーズ5: 履歴圧縮を予約中...`);
     requestIdleCallback(() => {
       import("./HistoryCompressionService").then(
