@@ -20,6 +20,12 @@ describe("getSafePdfPageNumber", () => {
     expect(getSafePdfPageNumber(4.8, 20)).toBe(4);
     expect(getSafePdfPageNumber(30, 20)).toBe(20);
   });
+
+  it("ページ数が未指定でもNaNを返さない", () => {
+    expect(getSafePdfPageNumber(3)).toBe(3);
+    expect(getSafePdfPageNumber(Number.NaN)).toBe(1);
+    expect(getSafePdfPageNumber(3, Number.NaN)).toBe(3);
+  });
 });
 
 describe("getPdfPageWindowKeepSet", () => {
