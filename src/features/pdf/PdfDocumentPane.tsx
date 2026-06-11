@@ -29,6 +29,8 @@ type PdfDocumentPaneProps = {
   onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
 };
 
+type PdfSourceResolutionWaiter = <T>(promise: Promise<T>) => Promise<T>;
+
 const PDF_SOURCE_RESOLUTION_TIMEOUT_MS = 15_000;
 const PDF_VIEWER_STATE_SAVE_DEBOUNCE_MS = 800;
 const PDF_VIEWER_STATE_SAVE_RETRY_DELAY_MS = 1_000;
@@ -59,7 +61,7 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
   return error instanceof Error && error.message ? error.message : fallback;
 };
 
-const waitForPdfSourceResolution = async <T,>(promise: Promise<T>): Promise<T> => {
+const waitForPdfSourceResolution: PdfSourceResolutionWaiter = async (promise) => {
   let timeoutId: ReturnType<typeof globalThis.setTimeout> | null = null;
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = globalThis.setTimeout(() => reject(new Error(PDF_SOURCE_TIMEOUT_ERROR_MESSAGE)), PDF_SOURCE_RESOLUTION_TIMEOUT_MS);
