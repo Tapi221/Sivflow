@@ -50,6 +50,8 @@ const shouldCheckStatementOrder = (filePath) => {
   return !ORDER_EXCLUDED_PATH_PARTS.some((part) => relativePath.includes(part));
 };
 
+const hasExportModifier = (statement) => ts.canHaveModifiers(statement) && Boolean(ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword));
+
 const isIdentifierNamed = (expression, name) => ts.isIdentifier(expression) && expression.text === name;
 
 const isPropertyAccessNamed = (expression, name) => ts.isPropertyAccessExpression(expression) && expression.name.text === name;
@@ -105,7 +107,8 @@ const isComponentVariableStatement = (statement) => statement.declarationList.de
 
 const getStatementOrderCategory = (statement) => {
   if (ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement)) return "import";
-  if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement)) return "postComponent";
+  if (ts.isExportDeclaration(statement)) return statement.isTypeOnly ? "type" : "postComponent";
+  if (ts.isExportAssignment(statement)) return "postComponent";
   if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) return "type";
   if (isDisplayNameAssignment(statement)) return "postComponent";
 
@@ -191,6 +194,15 @@ const checkSingleLineImportExport = (filePath, sourceFile, node) => {
   return [{ filePath, line: startLine, message: "Keep each import/export-from declaration on one line." }];
 };
 
+const canAppearInExportBlock = (statement) => hasExportModifier(statement) && !ts.isImportDeclaration(statement) && !ts.isImportEqualsDeclaration(statement);
+
+const isConstDependentTypeStatement = (source, statement, highestRank) => {
+  if (!ts.isTypeAliasDeclaration(statement) && !ts.isInterfaceDeclaration(statement)) return false;
+  if (highestRank > ORDER_RANKS.constant) return false;
+
+  return getStatementPreview(source, statement).includes("typeof ");
+};
+
 const checkStatementOrder = (filePath, source, sourceFile) => {
   const violations = [];
   let highestCategory = "import";
@@ -203,6 +215,9 @@ const checkStatementOrder = (filePath, source, sourceFile) => {
     const rank = ORDER_RANKS[category];
 
     if (rank < highestRank) {
+      if (canAppearInExportBlock(statement)) continue;
+      if (isConstDependentTypeStatement(source, statement, highestRank)) continue;
+
       violations.push({
         filePath,
         line: getLineNumber(sourceFile, statement.getStart(sourceFile)),
