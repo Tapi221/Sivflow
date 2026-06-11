@@ -6,15 +6,11 @@ import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { getLocalDb } from "@/services/localdb";
 import type { Card, CardSet, Document, Folder } from "@/types";
 
-
-
 type LocalFirstTrashDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "folders" | "cards" | "cardSets" | "documents", id: string, changes: Record<string, unknown>) => Promise<number>;
   queueDeleteSync: (args: { entity: DeleteEntity; targetId: string; priority?: "critical" | "high" | "medium" | "low"; }) => Promise<void>;
 };
 type TrashTable = "folders" | "cards" | "cardSets" | "documents";
-
-
 
 const DELETE_ENTITY_BY_TABLE: Record<TrashTable, DeleteEntity> = {
   folders: "folder",
@@ -22,8 +18,6 @@ const DELETE_ENTITY_BY_TABLE: Record<TrashTable, DeleteEntity> = {
   cardSets: "cardSet",
   documents: "document",
 };
-
-
 
 const restoreLocalTrashRecord = async (userId: string, table: TrashTable, id: string): Promise<void> => {
   const db = await getLocalDb(userId);
@@ -81,7 +75,5 @@ purgeDocument: async (userId, documentId) => {
   await purgeLocalTrashRecord(userId, "documents", documentId);
 },
 });
-
-
 
 export { createWebTrashRepository };

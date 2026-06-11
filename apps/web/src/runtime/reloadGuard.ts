@@ -6,6 +6,4 @@ const hardReloadOnce = (key: string) => {
   window.location.reload();
 };
 
-
-
 export { hardReloadOnce };
