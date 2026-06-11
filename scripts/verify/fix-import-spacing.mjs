@@ -146,47 +146,38 @@ const applyNonOverlappingReplacements = (source, replacements) => {
   return acceptedReplacements.reduce((nextSource, replacement) => `${nextSource.slice(0, replacement.start)}${replacement.text}${nextSource.slice(replacement.end)}`, source);
 };
 
-const collectImportSpacingReplacements = (source, sourceFile) => {
-  const replacements = [];
-  const statements = [...sourceFile.statements];
+const getTopLevelSpacingText = (filePath, source, sourceFile, previousStatement, statement) => {
   const newline = getNewline(source);
+  if (isImportStatement(previousStatement) && isImportStatement(statement)) return newline;
+  if (!shouldFixBlockSpacing(filePath)) return null;
+  if (isDirectiveStatement(previousStatement) || isDirectiveStatement(statement)) return null;
 
-  for (let index = 1; index < statements.length; index += 1) {
-    const previousStatement = statements[index - 1];
-    const statement = statements[index];
-    if (!isImportStatement(previousStatement) || !isImportStatement(statement)) continue;
+  const previousCategory = getStatementOrderCategory(previousStatement);
+  const category = getStatementOrderCategory(statement);
+  const blockSeparator = `${newline}${newline}`;
+  if (previousCategory !== category) return blockSeparator;
 
-    const leadingWhitespace = getLeadingWhitespaceText(source, sourceFile, previousStatement, statement);
-    if (/\S/.test(leadingWhitespace)) continue;
-    if (leadingWhitespace === newline) continue;
+  const leadingWhitespace = getLeadingWhitespaceText(source, sourceFile, previousStatement, statement);
+  if (leadingWhitespace.includes(blockSeparator + newline)) return blockSeparator;
 
-    replacements.push({ end: statement.getStart(sourceFile), start: previousStatement.getEnd(), text: newline });
-  }
-
-  return replacements;
+  return null;
 };
 
-const collectBlockSpacingReplacements = (filePath, source, sourceFile) => {
-  if (!shouldFixBlockSpacing(filePath)) return [];
-
+const collectTopLevelSpacingReplacements = (filePath, source, sourceFile) => {
   const replacements = [];
   const statements = [...sourceFile.statements];
-  const blockSeparator = `${getNewline(source)}${getNewline(source)}`;
 
   for (let index = 1; index < statements.length; index += 1) {
     const previousStatement = statements[index - 1];
     const statement = statements[index];
-    if (isDirectiveStatement(previousStatement) || isDirectiveStatement(statement)) continue;
-
-    const previousCategory = getStatementOrderCategory(previousStatement);
-    const category = getStatementOrderCategory(statement);
-    if (previousCategory === category) continue;
+    const spacingText = getTopLevelSpacingText(filePath, source, sourceFile, previousStatement, statement);
+    if (spacingText === null) continue;
 
     const leadingWhitespace = getLeadingWhitespaceText(source, sourceFile, previousStatement, statement);
     if (/\S/.test(leadingWhitespace)) continue;
-    if (leadingWhitespace === blockSeparator) continue;
+    if (leadingWhitespace === spacingText) continue;
 
-    replacements.push({ end: statement.getStart(sourceFile), start: previousStatement.getEnd(), text: blockSeparator });
+    replacements.push({ end: statement.getStart(sourceFile), start: previousStatement.getEnd(), text: spacingText });
   }
 
   return replacements;
@@ -194,10 +185,7 @@ const collectBlockSpacingReplacements = (filePath, source, sourceFile) => {
 
 const applySourceConventionSpacingFix = (filePath, source) => {
   const sourceFile = createSourceFile(filePath, source);
-  const replacements = [
-    ...collectImportSpacingReplacements(source, sourceFile),
-    ...collectBlockSpacingReplacements(filePath, source, sourceFile),
-  ];
+  const replacements = collectTopLevelSpacingReplacements(filePath, source, sourceFile);
 
   return replacements.length === 0 ? source : applyNonOverlappingReplacements(source, replacements);
 };
