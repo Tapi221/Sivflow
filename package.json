@@ -34,7 +34,8 @@
     "verify:sw": "node scripts/verify/verify-sw.mjs",
     "verify:module-constant-names": "node scripts/verify/verify-module-constant-names.mjs",
     "verify:pdf-zoom-constants": "node scripts/verify/verify-pdf-zoom-constants.mjs",
-    "verify:source-conventions": "node scripts/verify/fix-source-convention-wrappers.mjs && node scripts/verify/verify-source-conventions.mjs && npm run verify:pdf-zoom-constants && npm run verify:module-constant-names",
+    "fix:source-convention-spacing": "node scripts/verify/fix-source-convention-spacing.mjs",
+    "verify:source-conventions": "node scripts/verify/fix-source-convention-wrappers.mjs && npm run fix:source-convention-spacing && node scripts/verify/verify-source-conventions.mjs && npm run verify:pdf-zoom-constants && npm run verify:module-constant-names",
     "watch:source-conventions": "node scripts/dev/watch-source-conventions.mjs",
     "watch:source-conventions:fix": "node scripts/dev/watch-source-conventions.mjs --fix",
     "fix:source-conventions:local-llm": "node scripts/dev/watch-source-conventions.mjs --fix --once",
@@ -46,7 +47,7 @@
     "typecheck:test": "npm exec tsc -- -p tsconfig.test.json --noEmit --pretty false",
     "typecheck:all": "npm exec tsc -- -p tsconfig.app.json --noEmit --pretty false && npm exec tsc -- -p tsconfig.node.json --noEmit --pretty false",
     "preflight": "npm run verify:design-tokens && npm run verify:app-icon && npm run verify:source-conventions && npm run typecheck && npm run build && npx vitest run tests/unit/parseXlsxImport.test.ts tests/unit/importCardsFromPayload.test.ts tests/unit/features/import/XlsxImportDialog.test.tsx tests/unit/platformIndex.test.ts tests/unit/platformDesktopShellOpenExternal.test.ts",
-    "lint:imports": "node scripts/fix-src-import-paths.mjs",
+    "lint:imports": "node scripts/fix-src-import-paths.mjs && npm run fix:source-convention-spacing",
     "lint": "npm run lint:imports && eslint . && npm run verify:pdf-zoom-constants && npm run verify:module-constant-names",
     "lint:fix": "npm run lint:imports && eslint . --fix && npm run verify:pdf-zoom-constants && npm run verify:module-constant-names",
     "preview": "vite preview --config apps/web/vite.config.ts",
@@ -226,8 +227,7 @@
     "ts-morph": "^27.0.2",
     "tsc-alias": "^1.8.16",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.46.4",
-    "vite": "^7.3.1",
+    "vite": "^7.3.0",
     "vitest": "^4.0.18",
     "wait-on": "^9.0.4"
   }
