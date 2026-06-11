@@ -7,8 +7,6 @@ import { useGoogleTaskLists } from "@/integration/googletask-integration/useGoog
 import { useGoogleTasks } from "@/integration/googletask-integration/useGoogleTasks";
 import { useServerStoredGoogleAccountBootstrap } from "@/integration/googlecalendar-integration/useServerStoredGoogleAccountBootstrap";
 
-export type { GoogleAccountEntry };
-
 const RECURRENCE_REFRESH_FUTURE_DAYS = 366;
 
 const resolveExternalEventId = (accountId: string, calendarId: string, eventId: string): string => {
@@ -197,3 +195,5 @@ export const useGoogleCalendarLayer = () => {
     connect: addAccount,
   };
 };
+
+export type { GoogleAccountEntry };
