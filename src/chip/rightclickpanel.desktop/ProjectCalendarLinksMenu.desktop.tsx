@@ -3,7 +3,7 @@ import { RightClickPanelSurface } from "./rightClickPanelCommon";
 import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth } from "./rightClickPanel.utils";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 
-export type ProjectCalendarLinksMenuAction = { id: string;
+type ProjectCalendarLinksMenuAction = { id: string;
   label: string;
   disabled?: boolean;
   onSelect: () => void;
@@ -17,7 +17,7 @@ type ProjectCalendarLinksMenuProps = {
   panelId?: RightClickPanelId;
 };
 
-export const PROJECT_CALENDAR_LINKS_MENU_PANEL_ID = "project-calendar-links-context-menu";
+const PROJECT_CALENDAR_LINKS_MENU_PANEL_ID = "project-calendar-links-context-menu";
 const PROJECT_CALENDAR_LINKS_MENU_LABELS = [
   "Googleカレンダーとして追加",
   "既存Googleカレンダーにリンク",
@@ -27,9 +27,9 @@ const PROJECT_CALENDAR_LINKS_MENU_LABELS = [
   "Apple連携を解除",
   "iCloud連携を解除",
 ];
-export const PROJECT_CALENDAR_LINKS_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_CALENDAR_LINKS_MENU_LABELS);
+const PROJECT_CALENDAR_LINKS_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_CALENDAR_LINKS_MENU_LABELS);
 
-export const getProjectCalendarLinksMenuHeight = (actionCount: number): number => Math.max(RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, actionCount * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE);
+const getProjectCalendarLinksMenuHeight = (actionCount: number): number => Math.max(RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, actionCount * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE);
 
 const ProjectCalendarLinksMenu = ({
   x,
@@ -73,3 +73,5 @@ const ProjectCalendarLinksMenu = ({
 };
 
 export { ProjectCalendarLinksMenu };
+export { PROJECT_CALENDAR_LINKS_MENU_PANEL_ID, PROJECT_CALENDAR_LINKS_MENU_WIDTH, getProjectCalendarLinksMenuHeight };
+export type { ProjectCalendarLinksMenuAction };

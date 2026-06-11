@@ -2,10 +2,10 @@ import { createContext } from "react";
 import type { ReactNode } from "react";
 import type { SyncConflict } from "@/types/domain/sync";
 
-export type SyncStatus = "idle" | "syncing" | "success" | "error";
-export type SyncNotice = "none" | "wifi_wait" | "offline" | "error";
-export type SyncTableName = "cards" | "folders" | "cardSets" | "documents" | "tagRecords" | "userSettings" | "images";
-export interface SyncContextType { syncStatus: SyncStatus;
+type SyncStatus = "idle" | "syncing" | "success" | "error";
+type SyncNotice = "none" | "wifi_wait" | "offline" | "error";
+type SyncTableName = "cards" | "folders" | "cardSets" | "documents" | "tagRecords" | "userSettings" | "images";
+interface SyncContextType { syncStatus: SyncStatus;
   syncNotice: SyncNotice;
   lastSyncTime: Date | null;
   queueCount: number;
@@ -16,7 +16,7 @@ export interface SyncContextType { syncStatus: SyncStatus;
   resolveConflict: (conflictId: string, resolvedData: unknown) => Promise<void>;
   clearSyncErrors: () => Promise<void>;
 }
-export interface SyncProviderProps { children: ReactNode;
+interface SyncProviderProps { children: ReactNode;
 }
 
 const defaultSyncContext: SyncContextType = {
@@ -31,4 +31,7 @@ const defaultSyncContext: SyncContextType = {
   resolveConflict: async () => {},
   clearSyncErrors: async () => {},
 };
-export const SyncContext = createContext<SyncContextType>(defaultSyncContext);
+const SyncContext = createContext<SyncContextType>(defaultSyncContext);
+
+export { SyncContext };
+export type { SyncStatus, SyncNotice, SyncTableName, SyncContextType, SyncProviderProps };

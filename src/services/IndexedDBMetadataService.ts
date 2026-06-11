@@ -53,7 +53,7 @@ const normalizeMetadata = (value: unknown): IndexedDBMetadata | null => {
     rebuildReason: toOptionalString(value.rebuildReason),
   };
 };
-export class IndexedDBMetadataService { private readonly db: LocalDBLike;
+class IndexedDBMetadataService { private readonly db: LocalDBLike;
   private readonly userId: string;
 
   constructor(db: LocalDBLike, userId: string) {
@@ -266,3 +266,5 @@ export class IndexedDBMetadataService { private readonly db: LocalDBLike;
     return meta?.rebuildCount || 0;
   };
 }
+
+export { IndexedDBMetadataService };

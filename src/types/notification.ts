@@ -1,9 +1,9 @@
-export type NotificationLevel = "info" | "warning" | "error";
-export type NotificationAction = { label: string;
+type NotificationLevel = "info" | "warning" | "error";
+type NotificationAction = { label: string;
   onClick: () => void;
   primary?: boolean;
 };
-export interface Notification { id: string;
+interface Notification { id: string;
   level: NotificationLevel;
   title: string;
   message: string;
@@ -14,9 +14,11 @@ export interface Notification { id: string;
   duration?: number;
   actions?: NotificationAction[];
 }
-export interface NotificationOptions { details?: string;
+interface NotificationOptions { details?: string;
   autoClose?: boolean;
   closeable?: boolean;
   duration?: number;
   actions?: NotificationAction[];
 }
+
+export type { NotificationLevel, NotificationAction, Notification, NotificationOptions };

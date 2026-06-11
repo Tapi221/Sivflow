@@ -10,13 +10,13 @@ type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";
 type TagMatchMode = "any" | "all";
 type DirectoryBadgeVisibilityKey = "uncertainty" | "bookmarked" | "tags";
-export type ExplorerLayoutMode = "list" | "card" | "icon" | "column";
+type ExplorerLayoutMode = "list" | "card" | "icon" | "column";
 type DirectoryBadgeVisibility = {
   uncertainty: boolean;
   bookmarked: boolean;
   tags: boolean;
 };
-export interface ExplorerState { tagFilter: string[];
+interface ExplorerState { tagFilter: string[];
   tagMatchMode: TagMatchMode;
   uncertaintyFilter: ToggleableFlag;
   bookmarkedFilter: ToggleableFlag;
@@ -130,7 +130,7 @@ const createDefaultState = (): Pick<
   pinnedFolderIds: [],
 });
 
-export const useExplorerStore = create<ExplorerState>()(persist((set) => ({ ...createDefaultState(), setTagFilter: (tags) => set({ tagFilter: tags }), toggleTag: (tag) => set((state) => { const exists = state.tagFilter.includes(tag);
+const useExplorerStore = create<ExplorerState>()(persist((set) => ({ ...createDefaultState(), setTagFilter: (tags) => set({ tagFilter: tags }), toggleTag: (tag) => set((state) => { const exists = state.tagFilter.includes(tag);
   const next = exists
     ? state.tagFilter.filter((currentTag) => currentTag !== tag)
     : [...state.tagFilter, tag];
@@ -236,3 +236,6 @@ togglePinnedFolder: (folderId) =>
 },
 ),
 );
+
+export { useExplorerStore };
+export type { ExplorerLayoutMode, ExplorerState };

@@ -3,13 +3,13 @@ import { emptyTrash, getTrashItems, permanentlyDeleteTrashItems, purgeExpiredTra
 import { createWebTrashRepository } from "@platform/storage/trashRepository.web";
 import type { Card, CardSet, Document, Folder } from "@/types";
 
-export type TrashLoadState = "idle" | "loading" | "ready" | "error";
-export type TrashItemsState = { folders: Folder[];
+type TrashLoadState = "idle" | "loading" | "ready" | "error";
+type TrashItemsState = { folders: Folder[];
   cards: Card[];
   cardSets: CardSet[];
   documents: Document[];
 };
-export type TrashItemIdInput = { folderIds?: string[];
+type TrashItemIdInput = { folderIds?: string[];
   cardIds?: string[];
   cardSetIds?: string[];
   documentIds?: string[];
@@ -22,7 +22,7 @@ const EMPTY_TRASH_ITEMS: TrashItemsState = {
   documents: [],
 };
 
-export const useTrashItems = (userId: string | null | undefined) => { const repository = useMemo(() => createWebTrashRepository(), []);
+const useTrashItems = (userId: string | null | undefined) => { const repository = useMemo(() => createWebTrashRepository(), []);
   const [items, setItems] = useState<TrashItemsState>(EMPTY_TRASH_ITEMS);
   const [status, setStatus] = useState<TrashLoadState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -80,3 +80,6 @@ export const useTrashItems = (userId: string | null | undefined) => { const repo
     empty,
   };
 };
+
+export { useTrashItems };
+export type { TrashLoadState, TrashItemsState, TrashItemIdInput };

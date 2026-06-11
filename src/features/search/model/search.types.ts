@@ -1,6 +1,6 @@
-export type SearchItemKind = "folder" | "cardSet" | "card" | "document" | "action";
-export type SearchIconKind = "folder" | "cardSet" | "card" | "document" | "folders" | "calendar" | "gallery" | "directory" | "trash" | "settings" | "tagMap";
-export type SearchItem = { id: string;
+type SearchItemKind = "folder" | "cardSet" | "card" | "document" | "action";
+type SearchIconKind = "folder" | "cardSet" | "card" | "document" | "folders" | "calendar" | "gallery" | "directory" | "trash" | "settings" | "tagMap";
+type SearchItem = { id: string;
   value: string;
   kind: SearchItemKind;
   title: string;
@@ -11,6 +11,8 @@ export type SearchItem = { id: string;
   iconKind?: SearchIconKind;
   onSelect: () => void;
 };
-export type SearchSource = { sourceId: string;
+type SearchSource = { sourceId: string;
   items: SearchItem[];
 };
+
+export type { SearchItemKind, SearchIconKind, SearchItem, SearchSource };

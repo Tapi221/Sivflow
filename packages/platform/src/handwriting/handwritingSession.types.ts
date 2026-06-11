@@ -1,13 +1,13 @@
 import type { InkSide, InkStroke } from "@core/domain/card/ink/inkDocument";
 
-export type HandwritingSessionStatus = "idle" | "waiting" | "connected" | "closed" | "error";
-export type HandwritingDeviceRole = "desktop" | "mobile";
-export type HandwritingDeviceInfo = { id: string;
+type HandwritingSessionStatus = "idle" | "waiting" | "connected" | "closed" | "error";
+type HandwritingDeviceRole = "desktop" | "mobile";
+type HandwritingDeviceInfo = { id: string;
   role: HandwritingDeviceRole;
   name: string;
   platform: string;
 };
-export type HandwritingSession = { id: string;
+type HandwritingSession = { id: string;
   userId: string;
   cardId: string;
   side: InkSide;
@@ -17,15 +17,17 @@ export type HandwritingSession = { id: string;
   createdAt: number;
   updatedAt: number;
 };
-export type HandwritingStrokeDeltaMessage = { type: "handwriting:stroke-delta";
+type HandwritingStrokeDeltaMessage = { type: "handwriting:stroke-delta";
   sessionId: string;
   cardId: string;
   side: InkSide;
   stroke: InkStroke;
 };
-export type HandwritingSessionControlMessage = { type: "handwriting:session-control";
+type HandwritingSessionControlMessage = { type: "handwriting:session-control";
   sessionId: string;
   status: HandwritingSessionStatus;
   reason?: string;
 };
-export type HandwritingSessionMessage = HandwritingStrokeDeltaMessage | HandwritingSessionControlMessage;
+type HandwritingSessionMessage = HandwritingStrokeDeltaMessage | HandwritingSessionControlMessage;
+
+export type { HandwritingSessionStatus, HandwritingDeviceRole, HandwritingDeviceInfo, HandwritingSession, HandwritingStrokeDeltaMessage, HandwritingSessionControlMessage, HandwritingSessionMessage };

@@ -20,7 +20,7 @@ const BreadcrumbActionsContext = createContext<BreadcrumbActionsContextValue>({
   setExtraCrumbs: noopSetExtraCrumbs,
 });
 
-export const BreadcrumbProvider = ({ children }: { children: ReactNode;
+const BreadcrumbProvider = ({ children }: { children: ReactNode;
 }) => {
   const [extraCrumbs, setExtraCrumbsState] = useState<BreadcrumbCrumb[]>([]);
 
@@ -46,11 +46,11 @@ export const BreadcrumbProvider = ({ children }: { children: ReactNode;
   );
 };
 
-export const useBreadcrumbExtraCrumbs = (): BreadcrumbCrumb[] => { return useContext(BreadcrumbExtraCrumbsContext);
+const useBreadcrumbExtraCrumbs = (): BreadcrumbCrumb[] => { return useContext(BreadcrumbExtraCrumbsContext);
 };
-export const useSetBreadcrumbCrumbs = (): BreadcrumbActionsContextValue["setExtraCrumbs"] => { return useContext(BreadcrumbActionsContext).setExtraCrumbs;
+const useSetBreadcrumbCrumbs = (): BreadcrumbActionsContextValue["setExtraCrumbs"] => { return useContext(BreadcrumbActionsContext).setExtraCrumbs;
 };
-export const useBreadcrumbContext = (): BreadcrumbContextValue => { const extraCrumbs = useBreadcrumbExtraCrumbs();
+const useBreadcrumbContext = (): BreadcrumbContextValue => { const extraCrumbs = useBreadcrumbExtraCrumbs();
   const setExtraCrumbs = useSetBreadcrumbCrumbs();
 
   return useMemo(
@@ -61,3 +61,5 @@ export const useBreadcrumbContext = (): BreadcrumbContextValue => { const extraC
     [extraCrumbs, setExtraCrumbs],
   );
 };
+
+export { BreadcrumbProvider, useBreadcrumbExtraCrumbs, useSetBreadcrumbCrumbs, useBreadcrumbContext };

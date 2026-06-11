@@ -9,7 +9,7 @@ const normalizeDeviceScope = (value: string | null | undefined) => {
   const trimmed = typeof value === "string" ? value.trim() : "";
   return trimmed.length > 0 ? trimmed : "unknown";
 };
-export const buildCardSetViewFlippedFaceScopeKey = ({ deviceScope, cardSetId }: CardSetViewFlippedFaceScope) => { return [SHARED_STORAGE_KEYS.cardSetViewFlippedFacePrefix, normalizeDeviceScope(deviceScope), cardSetId ?? "__no_card_set__"].join("::");
+const buildCardSetViewFlippedFaceScopeKey = ({ deviceScope, cardSetId }: CardSetViewFlippedFaceScope) => { return [SHARED_STORAGE_KEYS.cardSetViewFlippedFacePrefix, normalizeDeviceScope(deviceScope), cardSetId ?? "__no_card_set__"].join("::");
 };
 const readLocalValue = (key: string) => {
   if (typeof window === "undefined") return null;
@@ -42,7 +42,7 @@ const normalizeCardIdList = (value: unknown) => {
       typeof entry === "string" && entry.trim().length > 0,
   );
 };
-export const getCardSetViewFlippedCardIds = ({ deviceScope, cardSetId }: CardSetViewFlippedFaceScope) => { if (!cardSetId) return new Set<string>();
+const getCardSetViewFlippedCardIds = ({ deviceScope, cardSetId }: CardSetViewFlippedFaceScope) => { if (!cardSetId) return new Set<string>();
 
   const currentStorageKey = buildCardSetViewFlippedFaceScopeKey({
     deviceScope,
@@ -57,7 +57,7 @@ export const getCardSetViewFlippedCardIds = ({ deviceScope, cardSetId }: CardSet
     return new Set<string>();
   }
 };
-export const setCardSetViewFlippedCardIds = ({ deviceScope, cardSetId, ids }: CardSetViewFlippedFaceScope & { ids: ReadonlySet<string>;
+const setCardSetViewFlippedCardIds = ({ deviceScope, cardSetId, ids }: CardSetViewFlippedFaceScope & { ids: ReadonlySet<string>;
 }) => {
   if (!cardSetId) return;
 
@@ -71,3 +71,5 @@ export const setCardSetViewFlippedCardIds = ({ deviceScope, cardSetId, ids }: Ca
     normalizedIds.length > 0 ? JSON.stringify(normalizedIds) : null,
   );
 };
+
+export { buildCardSetViewFlippedFaceScopeKey, getCardSetViewFlippedCardIds, setCardSetViewFlippedCardIds };

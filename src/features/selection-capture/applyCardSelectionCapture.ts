@@ -1,14 +1,14 @@
 import { createSelectionCaptureImageAsset } from "./createSelectionCaptureImageAsset";
 import type { CardBlock } from "@/types";
 
-export type ApplyCardSelectionCaptureSide = "question" | "answer";
-export type CapturedCardImage = Awaited<ReturnType<typeof createSelectionCaptureImageAsset>>;
+type ApplyCardSelectionCaptureSide = "question" | "answer";
+type CapturedCardImage = Awaited<ReturnType<typeof createSelectionCaptureImageAsset>>;
 
 const uid = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
-export const normalizeSelectionCaptureOcrText = (text: string | null): string | null => { const normalized = text?.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim() ?? "";
+const normalizeSelectionCaptureOcrText = (text: string | null): string | null => { const normalized = text?.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim() ?? "";
   return normalized.length > 0 ? normalized : null;
 };
 const createCaptureImageBlock = ({
@@ -45,7 +45,7 @@ const createCaptureTextBlock = ({
   rowOffset: 0,
   orderIndex: insertIndex,
 });
-export const appendSelectionCaptureBlocks = ({ blocks, side, image, ocrText }: { blocks: CardBlock[];
+const appendSelectionCaptureBlocks = ({ blocks, side, image, ocrText }: { blocks: CardBlock[];
   side: ApplyCardSelectionCaptureSide;
   image: CapturedCardImage;
   ocrText: string | null;
@@ -60,3 +60,6 @@ export const appendSelectionCaptureBlocks = ({ blocks, side, image, ocrText }: {
 
   return nextBlocks.map((block, index) => ({ ...block, orderIndex: index }));
 };
+
+export { normalizeSelectionCaptureOcrText, appendSelectionCaptureBlocks };
+export type { ApplyCardSelectionCaptureSide, CapturedCardImage };

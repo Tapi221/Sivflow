@@ -11,9 +11,9 @@ type FlipTriggerEvent = Readonly<{
   stopPropagation?: () => void;
 }>;
 
-export const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
+const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
 
-export const shouldIgnoreFlipTarget = (target: EventTarget | null): boolean => { const element = target as HTMLElement | null;
+const shouldIgnoreFlipTarget = (target: EventTarget | null): boolean => { const element = target as HTMLElement | null;
   if (!element) return false;
 
   return Boolean(
@@ -29,14 +29,14 @@ const createInitialPointerGestureState = (): PointerGestureState => ({
   moved: false,
 });
 
-export type UseCardFlipBehaviorParams = Readonly<{ isCardClickable: boolean;
+type UseCardFlipBehaviorParams = Readonly<{ isCardClickable: boolean;
   previewMode: boolean;
   onFlip?: () => void;
   onPreviewFlip?: () => void;
   isModalBlockingFlip: boolean;
   isInkEditingActive: boolean;
 }>;
-export type UseCardFlipBehaviorResult = Readonly<{ handleFlip: (event?: React.MouseEvent<HTMLDivElement>) => void;
+type UseCardFlipBehaviorResult = Readonly<{ handleFlip: (event?: React.MouseEvent<HTMLDivElement>) => void;
   handleKeyDown: React.KeyboardEventHandler<HTMLDivElement>;
   handlePointerDownCapture: React.PointerEventHandler<HTMLDivElement>;
   handlePointerMoveCapture: React.PointerEventHandler<HTMLDivElement>;
@@ -44,7 +44,7 @@ export type UseCardFlipBehaviorResult = Readonly<{ handleFlip: (event?: React.Mo
   handlePointerCancelCapture: React.PointerEventHandler<HTMLDivElement>;
 }>;
 
-export const useCardFlipBehavior = ({ isCardClickable, previewMode, onFlip, onPreviewFlip, isModalBlockingFlip, isInkEditingActive }: UseCardFlipBehaviorParams): UseCardFlipBehaviorResult => { const suppressNextFlipRef = React.useRef(false);
+const useCardFlipBehavior = ({ isCardClickable, previewMode, onFlip, onPreviewFlip, isModalBlockingFlip, isInkEditingActive }: UseCardFlipBehaviorParams): UseCardFlipBehaviorResult => { const suppressNextFlipRef = React.useRef(false);
   const pointerGestureRef = React.useRef<PointerGestureState>(
     createInitialPointerGestureState(),
   );
@@ -210,3 +210,6 @@ export const useCardFlipBehavior = ({ isCardClickable, previewMode, onFlip, onPr
     handlePointerCancelCapture,
   };
 };
+
+export { TAP_MOVE_CANCEL_THRESHOLD_PX, shouldIgnoreFlipTarget, useCardFlipBehavior };
+export type { UseCardFlipBehaviorParams, UseCardFlipBehaviorResult };

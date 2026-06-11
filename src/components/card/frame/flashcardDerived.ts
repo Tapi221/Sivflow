@@ -14,58 +14,58 @@ import type { CardBlock } from "@/types/domain/card";
 // ---------------------------------------------------------------------------
 // Scalar field normalizers
 // ---------------------------------------------------------------------------
-export const resolveCardId = (card: FlashcardCardLike) => { return card.id ?? card.cardId ?? null;
+const resolveCardId = (card: FlashcardCardLike) => { return card.id ?? card.cardId ?? null;
 };
-export const resolveHasUncertainty = (card: FlashcardCardLike) => { return card.has_uncertainty ?? card.hasUncertainty ?? false;
+const resolveHasUncertainty = (card: FlashcardCardLike) => { return card.has_uncertainty ?? card.hasUncertainty ?? false;
 };
-export const resolveIsBookmarked = (card: FlashcardCardLike) => { return card.is_bookmarked ?? card.isBookmarked ?? false;
+const resolveIsBookmarked = (card: FlashcardCardLike) => { return card.is_bookmarked ?? card.isBookmarked ?? false;
 };
-export const resolveQuestionText = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { return extractCardTextFromBlocks(card.front.blocks);
+const resolveQuestionText = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { return extractCardTextFromBlocks(card.front.blocks);
   }
   return card.question_text ?? card.questionText ?? "";
 };
-export const resolveAnswerText = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { return extractCardTextFromBlocks(card.back.blocks);
+const resolveAnswerText = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { return extractCardTextFromBlocks(card.back.blocks);
   }
   return card.answer_text ?? card.answerText ?? "";
 };
-export const resolveQuestionImages = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { return card.front.blocks.filter((block) => block.type === "image").flatMap((block) => block.images ?? []);
+const resolveQuestionImages = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { return card.front.blocks.filter((block) => block.type === "image").flatMap((block) => block.images ?? []);
   }
   return card.question_images ?? card.questionImages ?? [];
 };
-export const resolveAnswerImages = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { return card.back.blocks.filter((block) => block.type === "image").flatMap((block) => block.images ?? []);
+const resolveAnswerImages = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { return card.back.blocks.filter((block) => block.type === "image").flatMap((block) => block.images ?? []);
   }
   return card.answer_images ?? card.answerImages ?? [];
 };
-export const resolveQuestionAttachmentImages = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.attachments?.images)) { return card.front.attachments.images;
+const resolveQuestionAttachmentImages = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.attachments?.images)) { return card.front.attachments.images;
   }
   return card.question_images ?? card.questionImages ?? [];
 };
-export const resolveAnswerAttachmentImages = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.attachments?.images)) { return card.back.attachments.images;
+const resolveAnswerAttachmentImages = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.attachments?.images)) { return card.back.attachments.images;
   }
   return card.answer_images ?? card.answerImages ?? [];
 };
-export const resolveQuestionAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { return card.front.blocks.filter((block) => block.type === "audio").flatMap((block) => block.audios ?? []);
+const resolveQuestionAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { return card.front.blocks.filter((block) => block.type === "audio").flatMap((block) => block.audios ?? []);
   }
   return card.question_audios ?? card.questionAudios ?? [];
 };
-export const resolveAnswerAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { return card.back.blocks.filter((block) => block.type === "audio").flatMap((block) => block.audios ?? []);
+const resolveAnswerAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { return card.back.blocks.filter((block) => block.type === "audio").flatMap((block) => block.audios ?? []);
   }
   return card.answer_audios ?? card.answerAudios ?? [];
 };
-export const resolveQuestionAttachmentAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.attachments?.audios)) { return card.front.attachments.audios;
+const resolveQuestionAttachmentAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.attachments?.audios)) { return card.front.attachments.audios;
   }
   return card.question_audios ?? card.questionAudios ?? [];
 };
-export const resolveAnswerAttachmentAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.attachments?.audios)) { return card.back.attachments.audios;
+const resolveAnswerAttachmentAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.attachments?.audios)) { return card.back.attachments.audios;
   }
   return card.answer_audios ?? card.answerAudios ?? [];
 };
-export const resolveQuestionCode = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { const codeBlock = card.front.blocks.find((block) => block.type === "code");
+const resolveQuestionCode = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { const codeBlock = card.front.blocks.find((block) => block.type === "code");
     if (codeBlock?.type === "code") return codeBlock.code ?? null;
   }
   return card.questionCode ?? card.question_code ?? null;
 };
-export const resolveAnswerCode = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { const codeBlock = card.back.blocks.find((block) => block.type === "code");
+const resolveAnswerCode = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { const codeBlock = card.back.blocks.find((block) => block.type === "code");
     if (codeBlock?.type === "code") return codeBlock.code ?? null;
   }
   return card.answerCode ?? card.answer_code ?? null;
@@ -73,7 +73,7 @@ export const resolveAnswerCode = (card: FlashcardCardLike) => { if (Array.isArra
 // ---------------------------------------------------------------------------
 // Layout rows
 // ---------------------------------------------------------------------------
-export const resolveLayoutRows = (card: FlashcardCardLike) => { const legacyQ = normalizeExtraRows(card.questionExtraRows ?? card.question_extra_rows ?? 0);
+const resolveLayoutRows = (card: FlashcardCardLike) => { const legacyQ = normalizeExtraRows(card.questionExtraRows ?? card.question_extra_rows ?? 0);
   const legacyA = normalizeExtraRows(
     card.answerExtraRows ?? card.answer_extra_rows ?? 0,
   );
@@ -90,22 +90,24 @@ const toMediaUrl = (m: FlashcardMediaLike) => {
   if (typeof m === "string") return m;
   return m.remoteUrl ?? m.localUrl ?? m.url ?? null;
 };
-export const resolveImageUrls = (images: FlashcardMediaLike[]) => { return images.map((img) => toMediaUrl(img as FlashcardMediaLike)).filter((u): u is string => Boolean(u));
+const resolveImageUrls = (images: FlashcardMediaLike[]) => { return images.map((img) => toMediaUrl(img as FlashcardMediaLike)).filter((u): u is string => Boolean(u));
 };
-export const resolveAudioUrls = (audios: FlashcardMediaLike[]) => { return audios.map(toMediaUrl).filter((u): u is string => Boolean(u));
+const resolveAudioUrls = (audios: FlashcardMediaLike[]) => { return audios.map(toMediaUrl).filter((u): u is string => Boolean(u));
 };
 const extractReferences = (block: CardBlock) => {
   const maybeBlock = block as CardBlock & { references?: unknown; };
   const refs = maybeBlock.references;
   return Array.isArray(refs) ? (refs as ReferenceBlockData[]) : [];
 };
-export const resolveReferences = (blocks: CardBlock[]) => { const refs: ReferenceBlockData[] = [];
+const resolveReferences = (blocks: CardBlock[]) => { const refs: ReferenceBlockData[] = [];
   blocks.forEach((block) => {
     if (block.type === "reference") refs.push(...extractReferences(block));
   });
   return refs.filter((r) => r.url);
 };
-export const resolveQuestionAttachmentReferences = (card: FlashcardCardLike) => { return (card.front?.attachments?.references ?? []).filter((r) => r.url);
+const resolveQuestionAttachmentReferences = (card: FlashcardCardLike) => { return (card.front?.attachments?.references ?? []).filter((r) => r.url);
 };
-export const resolveAnswerAttachmentReferences = (card: FlashcardCardLike) => { return (card.back?.attachments?.references ?? []).filter((r) => r.url);
+const resolveAnswerAttachmentReferences = (card: FlashcardCardLike) => { return (card.back?.attachments?.references ?? []).filter((r) => r.url);
 };
+
+export { resolveCardId, resolveHasUncertainty, resolveIsBookmarked, resolveQuestionText, resolveAnswerText, resolveQuestionImages, resolveAnswerImages, resolveQuestionAttachmentImages, resolveAnswerAttachmentImages, resolveQuestionAudios, resolveAnswerAudios, resolveQuestionAttachmentAudios, resolveAnswerAttachmentAudios, resolveQuestionCode, resolveAnswerCode, resolveLayoutRows, resolveImageUrls, resolveAudioUrls, resolveReferences, resolveQuestionAttachmentReferences, resolveAnswerAttachmentReferences };

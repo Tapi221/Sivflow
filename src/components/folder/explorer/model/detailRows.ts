@@ -3,9 +3,9 @@ import { getEntityTime, getFolderId, getParentFolderId, normalizeFolderId } from
 import type { FolderTreeNode } from "./utils";
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem, SyncEntity } from "@/types";
 
-export type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";
-export type ExplorerDetailLocalSyncState = | "pending" | "synced" | "error" | "conflict";
-export type ExplorerDetailRow = { key: string;
+type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";
+type ExplorerDetailLocalSyncState = | "pending" | "synced" | "error" | "conflict";
+type ExplorerDetailRow = { key: string;
   kind: ExplorerDetailRowKind;
   id: string;
   name: string;
@@ -296,7 +296,7 @@ const buildCardRows = ({
     })
     .sort(compareDetailRowsWithinKind);
 };
-export const buildExplorerDetailRows = ({ folders, cards, cardSets, documents, currentFolderId, currentCardSetId = null }: BuildExplorerDetailRowsParams): ExplorerDetailRow[] => { const folderById = buildFolderById(folders);
+const buildExplorerDetailRows = ({ folders, cards, cardSets, documents, currentFolderId, currentCardSetId = null }: BuildExplorerDetailRowsParams): ExplorerDetailRow[] => { const folderById = buildFolderById(folders);
   const activeCardSet = currentCardSetId
     ? (cardSets.find((cardSet) => cardSet.id === currentCardSetId) ?? null)
     : null;
@@ -388,3 +388,6 @@ export const buildExplorerDetailRows = ({ folders, cards, cardSets, documents, c
 
   return groupRows([...folderRows, ...cardSetRows, ...documentRows]);
 };
+
+export { buildExplorerDetailRows };
+export type { ExplorerDetailRowKind, ExplorerDetailLocalSyncState, ExplorerDetailRow };

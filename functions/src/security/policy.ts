@@ -1,15 +1,15 @@
 import type { SecurityEventType } from "#src/security/contract.js";
 
-export type SecurityRiskLevel = "normal" | "warning" | "high" | "critical";
-export type DetectionOutcome = { triggered: boolean;
+type SecurityRiskLevel = "normal" | "warning" | "high" | "critical";
+type DetectionOutcome = { triggered: boolean;
   scoreAdded: number;
 };
-export type RiskScoreCalculation = { previousScore: number;
+type RiskScoreCalculation = { previousScore: number;
   nextScore: number;
   riskLevel: SecurityRiskLevel;
 };
 
-export const RISK_SCORE_THRESHOLDS = { warning: 30, require2FA: 70, accountLock: 100, } as const;
+const RISK_SCORE_THRESHOLDS = { warning: 30, require2FA: 70, accountLock: 100, } as const;
 const SECURITY_EVENT_SCORE: Partial<Record<SecurityEventType, number>> = {
   ACCESS_DENIED_REVOKED: 30,
   SENSITIVE_OP_REVOKED: 15,
@@ -27,12 +27,12 @@ const WINDOWED_EVENT_THRESHOLDS: Partial<Record<SecurityEventType, number>> = {
 const RISK_DECAY_PER_HOUR = 3;
 
 const clampRiskScore = (score: number): number => Math.max(0, Math.min(RISK_SCORE_THRESHOLDS.accountLock, Math.round(score)));
-export const getRiskLevel = (score: number): SecurityRiskLevel => { if (score >= RISK_SCORE_THRESHOLDS.accountLock) return "critical";
+const getRiskLevel = (score: number): SecurityRiskLevel => { if (score >= RISK_SCORE_THRESHOLDS.accountLock) return "critical";
   if (score >= RISK_SCORE_THRESHOLDS.require2FA) return "high";
   if (score >= RISK_SCORE_THRESHOLDS.warning) return "warning";
   return "normal";
 };
-export const resolveDetectionOutcome = ({ eventType, eventCountInWindow = 1, }: { eventType: SecurityEventType;
+const resolveDetectionOutcome = ({ eventType, eventCountInWindow = 1, }: { eventType: SecurityEventType;
   eventCountInWindow?: number;
 }): DetectionOutcome => {
   const threshold = WINDOWED_EVENT_THRESHOLDS[eventType];
@@ -41,14 +41,14 @@ export const resolveDetectionOutcome = ({ eventType, eventCountInWindow = 1, }: 
   const scoreAdded = SECURITY_EVENT_SCORE[eventType] ?? 0;
   return { triggered: scoreAdded > 0, scoreAdded };
 };
-export const applyRiskDecay = ({ currentScore, lastUpdateMs, nowMs, }: { currentScore: number;
+const applyRiskDecay = ({ currentScore, lastUpdateMs, nowMs, }: { currentScore: number;
   lastUpdateMs: number;
   nowMs: number;
 }): number => {
   const elapsedHours = Math.max(0, Math.floor((nowMs - lastUpdateMs) / (60 * 60 * 1000)));
   return clampRiskScore(currentScore - elapsedHours * RISK_DECAY_PER_HOUR);
 };
-export const calculateNextRiskScore = ({ persistedScore, lastUpdateMs, nowMs, scoreAdded, }: { persistedScore: number;
+const calculateNextRiskScore = ({ persistedScore, lastUpdateMs, nowMs, scoreAdded, }: { persistedScore: number;
   lastUpdateMs: number;
   nowMs: number;
   scoreAdded: number;
@@ -62,3 +62,6 @@ export const calculateNextRiskScore = ({ persistedScore, lastUpdateMs, nowMs, sc
     riskLevel: getRiskLevel(nextScore),
   };
 };
+
+export { RISK_SCORE_THRESHOLDS, getRiskLevel, resolveDetectionOutcome, applyRiskDecay, calculateNextRiskScore };
+export type { SecurityRiskLevel, DetectionOutcome, RiskScoreCalculation };

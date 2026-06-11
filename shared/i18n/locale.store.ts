@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type Locale = "ja" | "en" | "zh";
+type Locale = "ja" | "en" | "zh";
 type LocaleState = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
@@ -49,7 +49,10 @@ const migrateLegacyLocaleStorage = (): void => {
     // localStorage を書き換えられない環境では、起動中の locale だけ fallback する。
   }
 };
-export const readStoredLocale = (): Locale | null => readStoredLocaleByKey(SIVFLOW_LOCALE_STORAGE_KEY) ?? readStoredLocaleByKey(LEGACY_LOCALE_STORAGE_KEY);
+const readStoredLocale = (): Locale | null => readStoredLocaleByKey(SIVFLOW_LOCALE_STORAGE_KEY) ?? readStoredLocaleByKey(LEGACY_LOCALE_STORAGE_KEY);
 migrateLegacyLocaleStorage();
 
-export const useLocaleStore = create<LocaleState>()(persist((set) => ({ locale: readStoredLocale() ?? "ja", setLocale: (locale) => set({ locale }), }), { name: SIVFLOW_LOCALE_STORAGE_KEY, },),);
+const useLocaleStore = create<LocaleState>()(persist((set) => ({ locale: readStoredLocale() ?? "ja", setLocale: (locale) => set({ locale }), }), { name: SIVFLOW_LOCALE_STORAGE_KEY, },),);
+
+export { readStoredLocale, useLocaleStore };
+export type { Locale };

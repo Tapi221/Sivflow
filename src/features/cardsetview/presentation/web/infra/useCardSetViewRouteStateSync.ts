@@ -16,7 +16,7 @@ const stringifyPath = ({
   search: string;
   hash: string;
 }) => `${pathname}${search}${hash}`;
-export const useCardSetViewRouteStateSync = ({ cardSetId, currentIndex, currentCardId }: UseCardSetViewRouteStateSyncOptions) => { const location = useLocation();
+const useCardSetViewRouteStateSync = ({ cardSetId, currentIndex, currentCardId }: UseCardSetViewRouteStateSyncOptions) => { const location = useLocation();
   const navigate = useNavigate();
 
   const nextLocation = useMemo(() => {
@@ -60,3 +60,5 @@ export const useCardSetViewRouteStateSync = ({ cardSetId, currentIndex, currentC
     navigate(nextLocation, { replace: true });
   }, [navigate, nextLocation]);
 };
+
+export { useCardSetViewRouteStateSync };

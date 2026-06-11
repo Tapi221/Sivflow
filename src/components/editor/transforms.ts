@@ -88,7 +88,7 @@ const insertBlockMap: Record<
   [KEYS.video]: (editor) => insertVideoPlaceholder(editor, { select: true }),
 };
 
-export const insertBlock = (editor: PlateEditor, type: string, options: InsertBlockOptions = {}) => { const { upsert = false } = options;
+const insertBlock = (editor: PlateEditor, type: string, options: InsertBlockOptions = {}) => { const { upsert = false } = options;
 
   editor.tf.withoutNormalizing(() => {
     const block = editor.api.block();
@@ -139,7 +139,7 @@ export const insertBlock = (editor: PlateEditor, type: string, options: InsertBl
     }
   });
 };
-export const insertInlineElement = (editor: PlateEditor, type: string) => { if (insertInlineMap[type]) { insertInlineMap[type](editor, type);
+const insertInlineElement = (editor: PlateEditor, type: string) => { if (insertInlineMap[type]) { insertInlineMap[type](editor, type);
   }
 };
 const setList = (
@@ -169,7 +169,7 @@ const setBlockMap: Record<
   [KEYS.codeBlock]: (editor) => toggleCodeBlock(editor),
 };
 
-export const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: Path; } = {}) => {
+const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: Path; } = {}) => {
   editor.tf.withoutNormalizing(() => {
     if (type === KEYS.blockquote) {
       const target = at ?? editor.selection;
@@ -217,7 +217,7 @@ export const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: P
     });
   });
 };
-export const getBlockType = (block: TElement) => { if (block[KEYS.listType]) { if (block[KEYS.listType] === KEYS.ol) { return KEYS.ol;
+const getBlockType = (block: TElement) => { if (block[KEYS.listType]) { if (block[KEYS.listType] === KEYS.ol) { return KEYS.ol;
     }
     if (block[KEYS.listType] === KEYS.listTodo) {
       return KEYS.listTodo;
@@ -227,3 +227,5 @@ export const getBlockType = (block: TElement) => { if (block[KEYS.listType]) { i
 
   return block.type;
 };
+
+export { insertBlock, insertInlineElement, setBlockType, getBlockType };

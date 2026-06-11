@@ -5,7 +5,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
  * アップロードされた画像リストから Blob URL を削除してサニタイズする
  * (永続化前に呼び出すことで、有効期限切れの Blob URL 保存を防止する)
  */
-export const sanitizeUploadedImages = (images: unknown[]) => { if (!Array.isArray(images)) return [];
+const sanitizeUploadedImages = (images: unknown[]) => { if (!Array.isArray(images)) return [];
 
   return images.map((img) => {
     if (!isRecord(img)) return img;
@@ -18,3 +18,5 @@ export const sanitizeUploadedImages = (images: unknown[]) => { if (!Array.isArra
     return img;
   });
 };
+
+export { sanitizeUploadedImages };

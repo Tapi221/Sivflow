@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 
-export const useLayoutRouteStateDesktop = () => { const { pathname } = useLocation();
+const useLayoutRouteStateDesktop = () => { const { pathname } = useLocation();
 
   const isLibraryRoute = /^\/library(?:\/|$)/i.test(pathname);
 
@@ -36,3 +36,5 @@ export const useLayoutRouteStateDesktop = () => { const { pathname } = useLocati
     isScrollLocked,
   };
 };
+
+export { useLayoutRouteStateDesktop };

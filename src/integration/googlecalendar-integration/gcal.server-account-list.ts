@@ -4,7 +4,7 @@ import { auth, functionsClient } from "@/services/firebase";
 import { buildTokenExpiry, readStoredAccounts, writeStoredAccounts } from "./gcal.multi-storage";
 import type { StoredGoogleAccount } from "./gcal.multi-storage";
 
-export type ServerStoredGoogleCalendarAccount = { accountId: string;
+type ServerStoredGoogleCalendarAccount = { accountId: string;
   email: string | null;
   name: string | null;
   photoUrl: string | null;
@@ -51,11 +51,11 @@ const hydrateServerAccount = async (account: ServerStoredGoogleCalendarAccount):
     };
   }
 };
-export const listServerStoredGoogleCalendarAccounts = async (): Promise<ServerStoredGoogleCalendarAccount[]> => { await waitForCallableAuth();
+const listServerStoredGoogleCalendarAccounts = async (): Promise<ServerStoredGoogleCalendarAccount[]> => { await waitForCallableAuth();
   const result = await listGoogleCalendarAccountsCallable();
   return result.data.accounts;
 };
-export const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<number> => { const localAccounts = readStoredAccounts();
+const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<number> => { const localAccounts = readStoredAccounts();
   const knownAccountIds = new Set(localAccounts.map((account) => account.id));
   const remoteAccounts = await listServerStoredGoogleCalendarAccounts();
   const missingAccounts = remoteAccounts.filter((account) => !knownAccountIds.has(account.accountId));
@@ -66,3 +66,6 @@ export const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<numbe
   writeStoredAccounts([...localAccounts, ...hydratedAccounts]);
   return hydratedAccounts.length;
 };
+
+export { listServerStoredGoogleCalendarAccounts, hydrateServerStoredGoogleCalendarAccounts };
+export type { ServerStoredGoogleCalendarAccount };

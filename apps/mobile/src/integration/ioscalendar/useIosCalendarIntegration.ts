@@ -32,7 +32,7 @@ const getConnectionStatus = ({ error, isEnabled, permissionStatus, supported }: 
 };
 const toErrorMessage = (error: unknown, fallback: string): string => error instanceof Error ? error.message : fallback;
 const buildSelectedCalendarIdList = (ids: Set<string>): string[] => Array.from(ids);
-export const useIosCalendarIntegration = () => { const supported = isIosCalendarSupported();
+const useIosCalendarIntegration = () => { const supported = isIosCalendarSupported();
   const [permissionStatus, setPermissionStatus] = useState<IosCalendarPermissionStatus>("undetermined");
   const [isEnabled, setIsEnabled] = useState(false);
   const [calendars, setCalendars] = useState<IosCalendarListItem[]>([]);
@@ -404,3 +404,5 @@ export const useIosCalendarIntegration = () => { const supported = isIosCalendar
     updateEvent,
   };
 };
+
+export { useIosCalendarIntegration };

@@ -17,7 +17,7 @@ const buildIssue = ({
     message,
   };
 };
-export const groupParsedRowsToCards = (rows: ParsedImportRow[]) => { const issues: ImportIssue[] = [];
+const groupParsedRowsToCards = (rows: ParsedImportRow[]) => { const issues: ImportIssue[] = [];
   const cardMap = new Map<
     string,
     {
@@ -109,3 +109,5 @@ export const groupParsedRowsToCards = (rows: ParsedImportRow[]) => { const issue
     issues,
   };
 };
+
+export { groupParsedRowsToCards };

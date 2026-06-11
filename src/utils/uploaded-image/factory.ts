@@ -7,7 +7,7 @@ const generateUploadedImageId = (): string => {
   }
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
-export const createUploadedImage = (file: File): UploadedImage => { const id = generateUploadedImageId();
+const createUploadedImage = (file: File): UploadedImage => { const id = generateUploadedImageId();
 
   return {
     id,
@@ -26,7 +26,7 @@ export const createUploadedImage = (file: File): UploadedImage => { const id = g
     naturalH: null,
   };
 };
-export const createFailedUploadedImage = (file: File): UploadedImage => { const id = generateUploadedImageId();
+const createFailedUploadedImage = (file: File): UploadedImage => { const id = generateUploadedImageId();
 
   return {
     id,
@@ -47,3 +47,4 @@ export const createFailedUploadedImage = (file: File): UploadedImage => { const 
 };
 
 export { generateUploadedImageId };
+export { createUploadedImage, createFailedUploadedImage };

@@ -2,8 +2,8 @@ const hasMethod = (value: unknown): value is (...args: unknown[]) => unknown =>
   typeof value === "function";
 const hasTauriInternals = (): boolean =>
   typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-export const hasWindowDesktopBridge = (): boolean => typeof window !== "undefined" && typeof window.desktop !== "undefined";
-export const hasDesktopBridge = (): boolean => { if (!hasWindowDesktopBridge()) { return false;
+const hasWindowDesktopBridge = (): boolean => typeof window !== "undefined" && typeof window.desktop !== "undefined";
+const hasDesktopBridge = (): boolean => { if (!hasWindowDesktopBridge()) { return false;
 }
 
 const bridge = window.desktop;
@@ -25,4 +25,6 @@ return Boolean(
     hasMethod(bridge.window?.onMaximizedStateChange),
 );
 };
-export const hasDesktopRuntime = (): boolean => hasDesktopBridge() || hasTauriInternals();
+const hasDesktopRuntime = (): boolean => hasDesktopBridge() || hasTauriInternals();
+
+export { hasWindowDesktopBridge, hasDesktopBridge, hasDesktopRuntime };

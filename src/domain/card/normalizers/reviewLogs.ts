@@ -1,7 +1,7 @@
 import { normalizeDate } from "@/shared/codec/date";
 import { asRecord, pick } from "@/shared/lib/records";
 
-export type NormalizedReviewLog = { reviewedAt: string;
+type NormalizedReviewLog = { reviewedAt: string;
   rating: 1 | 2 | 3 | 4;
   resistanceScore: number;
   durationMinutes: number | null;
@@ -29,7 +29,7 @@ const subjectiveScoreToRating = (value: number): 1 | 2 | 3 | 4 | null => {
 
   return clampRating(rounded);
 };
-export const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => { if (!Array.isArray(rawLogs)) return [];
+const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => { if (!Array.isArray(rawLogs)) return [];
 
   return rawLogs
     .map((item): NormalizedReviewLog | null => {
@@ -88,3 +88,6 @@ export const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => 
     })
     .filter((value): value is NormalizedReviewLog => value !== null);
 };
+
+export { normalizeReviewLogs };
+export type { NormalizedReviewLog };

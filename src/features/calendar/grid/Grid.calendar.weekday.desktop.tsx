@@ -18,7 +18,7 @@ import * as COLOR from "./grid.color.constants.desktop";
 import * as GRID from "./grid.layout.constants.desktop";
 import { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle } from "./weekdayTimeGridGeometry";
 
-export type CalendarWeekDayGridRef = { scrollToHour: (hour: number) => void; };
+type CalendarWeekDayGridRef = { scrollToHour: (hour: number) => void; };
 type WeekdayEventsByDay = { allDayEvents: Map<string, GoogleCalendarEvent[]>; };
 type WeekdayEventDragState = { eventKey: string; event: GoogleCalendarEvent; pointerId: number; pointerOffsetMinutes: number; durationMs: number; sourceDayKey: string; previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; previewAllDayIndex: number | null; previewColumnDayKey: string | null; };
 type WeekdayDayColumnHit = { day: Date; element: HTMLDivElement; };
@@ -251,3 +251,4 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
 const CalendarWeekDayGrid = memo(CalendarWeekDayGridComponent);
 CalendarWeekDayGrid.displayName = "CalendarWeekDayGrid";
 export { CalendarWeekDayGrid };
+export type { CalendarWeekDayGridRef };

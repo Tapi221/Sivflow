@@ -23,7 +23,7 @@ const exportFolderSnapshotUseCase = createExportFolderSnapshotUseCase({
 const snapshotStoreUseCase = createSnapshotStoreUseCase({
   repository: snapshotFirestoreRepository,
 });
-export const snapshotService = { createSnapshot: async (userId: string, options: { bumpGenerationCounter?: boolean;
+const snapshotService = { createSnapshot: async (userId: string, options: { bumpGenerationCounter?: boolean;
 } = {},
 ) => {
   return await createSnapshotUseCase.execute(userId, options);
@@ -77,3 +77,5 @@ const getStoredSnapshotsFromLocalStorage = (): AppSnapshot[] => {
   const storedJson = localStorage.getItem(SNAPSHOTS_KEY);
   return storedJson ? (JSON.parse(storedJson) as AppSnapshot[]) : [];
 };
+
+export { snapshotService };

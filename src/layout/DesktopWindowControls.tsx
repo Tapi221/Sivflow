@@ -27,7 +27,7 @@ const handleClickWindowAction = (
   runWindowAction(action);
 };
 
-export const DesktopWindowControls = () => { const isDesktop = hasDesktopBridge();
+const DesktopWindowControls = () => { const isDesktop = hasDesktopBridge();
   const [isMaximized, setIsMaximized] = useState(false);
 
   useEffect(() => {
@@ -106,3 +106,5 @@ export const DesktopWindowControls = () => { const isDesktop = hasDesktopBridge(
     </div>
   );
 };
+
+export { DesktopWindowControls };

@@ -15,8 +15,10 @@ const subscribeSelectedBlockId = (listener: BlockSelectionListener) => {
     blockSelectionListeners.delete(listener);
   };
 };
-export const setSelectedBlockId = (nextSelectedBlockId: string | null) => { if (selectedBlockId === nextSelectedBlockId) return;
+const setSelectedBlockId = (nextSelectedBlockId: string | null) => { if (selectedBlockId === nextSelectedBlockId) return;
   selectedBlockId = nextSelectedBlockId;
   emitBlockSelectionChange();
 };
-export const useSelectedBlockId = () => useSyncExternalStore(subscribeSelectedBlockId, getSelectedBlockIdSnapshot, getSelectedBlockIdSnapshot);
+const useSelectedBlockId = () => useSyncExternalStore(subscribeSelectedBlockId, getSelectedBlockIdSnapshot, getSelectedBlockIdSnapshot);
+
+export { setSelectedBlockId, useSelectedBlockId };

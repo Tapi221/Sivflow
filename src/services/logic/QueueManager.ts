@@ -15,7 +15,7 @@ const PRIORITY_ORDER: Record<SyncTask["priority"], number> = {
 };
 const DELETE_OPERATION_TYPE = "delete";
 
-export class QueueManager implements IQueueManager { private readonly MAX_RETRY_COUNT = 3;
+class QueueManager implements IQueueManager { private readonly MAX_RETRY_COUNT = 3;
   private readonly BASE_RETRY_DELAY_MS = 5_000;
   private readonly MAX_RETRY_DELAY_MS = 5 * 60_000;
 
@@ -226,3 +226,5 @@ export class QueueManager implements IQueueManager { private readonly MAX_RETRY_
     return queuedItems.filter((item) => item.status === "pending").length;
   };
 }
+
+export { QueueManager };

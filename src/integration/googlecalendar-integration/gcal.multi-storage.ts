@@ -27,7 +27,7 @@ const pendingLegacyDesktopRefreshTokens = new Map<string, string>();
 // ─────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────
-export type StoredGoogleAccount = { /** メールアドレス or ランダムUUID（メール不明時） */ id: string;
+type StoredGoogleAccount = { /** メールアドレス or ランダムUUID（メール不明時） */ id: string;
   email: string | null;
   name?: string | null;
   photoUrl?: string | null;
@@ -37,19 +37,19 @@ export type StoredGoogleAccount = { /** メールアドレス or ランダムUUI
   selectedCalendarIds: string[];
   cachedCalendars?: { id: string; summary: string; backgroundColor?: string; }[];
 };
-export type StoredGoogleAccountProfile = { name?: string | null;
+type StoredGoogleAccountProfile = { name?: string | null;
   photoUrl?: string | null;
 };
 
 // ─────────────────────────────────────────────────────────────
 // Token validity
 // ─────────────────────────────────────────────────────────────
-export const isStoredTokenValid = (account: StoredGoogleAccount): boolean => { if (!account.accessToken) return false;
+const isStoredTokenValid = (account: StoredGoogleAccount): boolean => { if (!account.accessToken) return false;
   // expiry が null = レガシーデータ。有効として扱う（再接続時に刷新）
   if (account.accessTokenExpiry === null) return true;
   return Date.now() < account.accessTokenExpiry;
 };
-export const buildTokenExpiry = (expiresInSeconds?: number | null): number => { if (!expiresInSeconds) { return Date.now() + TOKEN_LIFETIME_MS;
+const buildTokenExpiry = (expiresInSeconds?: number | null): number => { if (!expiresInSeconds) { return Date.now() + TOKEN_LIFETIME_MS;
 }
 
 return Date.now() + Math.max(0, expiresInSeconds * 1000 - TOKEN_EXPIRY_SAFETY_MARGIN_MS);
@@ -189,7 +189,7 @@ const migrateFromLegacy = (): StoredGoogleAccount[] => {
 // ─────────────────────────────────────────────────────────────
 // CRUD
 // ─────────────────────────────────────────────────────────────
-export const readStoredAccounts = (): StoredGoogleAccount[] => { try { const raw = localStorage.getItem(MULTI_ACCOUNTS_KEY);
+const readStoredAccounts = (): StoredGoogleAccount[] => { try { const raw = localStorage.getItem(MULTI_ACCOUNTS_KEY);
   if (!raw) return migrateFromLegacy();
   const parsed = JSON.parse(raw);
   if (!Array.isArray(parsed)) return [];
@@ -209,12 +209,12 @@ export const readStoredAccounts = (): StoredGoogleAccount[] => { try { const raw
   return [];
 }
 };
-export const writeStoredAccounts = (accounts: StoredGoogleAccount[]): void => { try { localStorage.setItem(MULTI_ACCOUNTS_KEY, JSON.stringify(stripLocalRefreshTokens(dedupeStoredAccounts(accounts), shouldStripLocalRefreshTokensOnWrite())));
+const writeStoredAccounts = (accounts: StoredGoogleAccount[]): void => { try { localStorage.setItem(MULTI_ACCOUNTS_KEY, JSON.stringify(stripLocalRefreshTokens(dedupeStoredAccounts(accounts), shouldStripLocalRefreshTokensOnWrite())));
 } catch {
   // ignore quota errors
 }
 };
-export const upsertStoredAccount = (account: StoredGoogleAccount): void => { const accounts = readStoredAccounts();
+const upsertStoredAccount = (account: StoredGoogleAccount): void => { const accounts = readStoredAccounts();
   const idx = getStoredAccountMatchIndex(accounts, account);
   if (idx >= 0) {
     accounts[idx] = mergeStoredAccounts(accounts[idx], account);
@@ -223,12 +223,12 @@ export const upsertStoredAccount = (account: StoredGoogleAccount): void => { con
   }
   writeStoredAccounts(accounts);
 };
-export const removeStoredAccount = (accountId: string): void => { writeStoredAccounts(readStoredAccounts().filter((a) => a.id !== accountId));
+const removeStoredAccount = (accountId: string): void => { writeStoredAccounts(readStoredAccounts().filter((a) => a.id !== accountId));
   void clearCachedGoogleCalendarAccount(accountId).catch((error) => {
     console.warn("[gcal.multi-storage] failed to clear cached calendar events", error);
   });
 };
-export const updateStoredAccountToken = (accountId: string, accessToken: string, refreshToken?: string | null, profile?: StoredGoogleAccountProfile, expiresInSeconds?: number | null): void => { const accounts = readStoredAccounts();
+const updateStoredAccountToken = (accountId: string, accessToken: string, refreshToken?: string | null, profile?: StoredGoogleAccountProfile, expiresInSeconds?: number | null): void => { const accounts = readStoredAccounts();
   const idx = accounts.findIndex((a) => a.id === accountId);
   if (idx < 0) return;
 
@@ -242,9 +242,12 @@ export const updateStoredAccountToken = (accountId: string, accessToken: string,
   };
   writeStoredAccounts(accounts);
 };
-export const updateStoredAccountCalendarIds = (accountId: string, selectedCalendarIds: string[]): void => { const accounts = readStoredAccounts();
+const updateStoredAccountCalendarIds = (accountId: string, selectedCalendarIds: string[]): void => { const accounts = readStoredAccounts();
   const idx = accounts.findIndex((a) => a.id === accountId);
   if (idx < 0) return;
   accounts[idx] = { ...accounts[idx], selectedCalendarIds };
   writeStoredAccounts(accounts);
 };
+
+export { isStoredTokenValid, buildTokenExpiry, readStoredAccounts, writeStoredAccounts, upsertStoredAccount, removeStoredAccount, updateStoredAccountToken, updateStoredAccountCalendarIds };
+export type { StoredGoogleAccount, StoredGoogleAccountProfile };

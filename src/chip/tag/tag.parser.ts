@@ -5,7 +5,7 @@ const TAG_COLOR_KEY_SET = new Set<string>(TAG_COLOR_KEYS);
 
 const isTagColorKey = (value: unknown): value is TagColorKey =>
   typeof value === "string" && TAG_COLOR_KEY_SET.has(value);
-export const getTagColorKey = (input?: string): TagColorKey => { if (!input) return DEFAULT_TAG_COLOR_KEY;
+const getTagColorKey = (input?: string): TagColorKey => { if (!input) return DEFAULT_TAG_COLOR_KEY;
 
   const normalized = input.trim();
   if (!normalized) return DEFAULT_TAG_COLOR_KEY;
@@ -19,4 +19,6 @@ export const getTagColorKey = (input?: string): TagColorKey => { if (!input) ret
 
   return DEFAULT_TAG_COLOR_KEY;
 };
-export const getTagColorClassName = (input?: string): string => `tag-color-${getTagColorKey(input)}`;
+const getTagColorClassName = (input?: string): string => `tag-color-${getTagColorKey(input)}`;
+
+export { getTagColorKey, getTagColorClassName };

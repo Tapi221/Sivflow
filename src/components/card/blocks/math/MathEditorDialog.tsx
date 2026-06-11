@@ -22,7 +22,7 @@ const MAX_LATEX_LENGTH = 10000;
 
 const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
 
-export const MathEditorDialog: React.FC<MathEditorDialogProps> = ({ open, onOpenChange, data, onChange, accentColor, error }) => { const ringColor = accentColor && isHexColor(accentColor) ? `${accentColor}40` : "var(--primary-color-alpha-40)";
+const MathEditorDialog: React.FC<MathEditorDialogProps> = ({ open, onOpenChange, data, onChange, accentColor, error }) => { const ringColor = accentColor && isHexColor(accentColor) ? `${accentColor}40` : "var(--primary-color-alpha-40)";
 
   const latex = data?.latex ?? "";
 
@@ -97,3 +97,5 @@ export const MathEditorDialog: React.FC<MathEditorDialogProps> = ({ open, onOpen
     </Dialog>
   );
 };
+
+export { MathEditorDialog };

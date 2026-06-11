@@ -18,7 +18,7 @@ import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { Editor, EditorContainer } from "./editor";
 
-export type TComment = { id: string;
+type TComment = { id: string;
   contentRich: Value;
   createdAt: Date;
   discussionId: string;
@@ -43,7 +43,7 @@ const useCommentEditor = (
   return commentEditor;
 };
 
-export const Comment = (props: { comment: TComment;
+const Comment = (props: { comment: TComment;
   discussionLength: number;
   editingId: string | null;
   index: number;
@@ -372,7 +372,7 @@ const CommentMoreDropdown = (props: {
     </DropdownMenu>
   );
 };
-export const CommentCreateForm = ({ autoFocus = false, className, discussionId: discussionIdProp, focusOnMount = false }: { autoFocus?: boolean;
+const CommentCreateForm = ({ autoFocus = false, className, discussionId: discussionIdProp, focusOnMount = false }: { autoFocus?: boolean;
   className?: string;
   discussionId?: string;
   focusOnMount?: boolean;
@@ -561,7 +561,7 @@ export const CommentCreateForm = ({ autoFocus = false, className, discussionId: 
   );
 };
 
-export const formatCommentDate = (date: Date) => { const now = new Date();
+const formatCommentDate = (date: Date) => { const now = new Date();
   const diffMinutes = differenceInMinutes(now, date);
   const diffHours = differenceInHours(now, date);
   const diffDays = differenceInDays(now, date);
@@ -578,3 +578,6 @@ export const formatCommentDate = (date: Date) => { const now = new Date();
 
   return format(date, "MM/dd/yyyy");
 };
+
+export { Comment, CommentCreateForm, formatCommentDate };
+export type { TComment };

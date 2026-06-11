@@ -8,7 +8,7 @@ type TooltipPosition = {
   x: number;
   y: number;
 };
-export type HoverSuggestionItem = { id: string;
+type HoverSuggestionItem = { id: string;
   label: string;
   description?: string;
   icon?: ReactNode;
@@ -61,7 +61,7 @@ const getArrowClassName = (side: TooltipSide) => {
   return "left-[-3px] top-1/2 -translate-y-1/2";
 };
 
-export const HoverSuggestionTooltip = ({ children, items, side = "right", offset = 10, title, emptyLabel, className, tooltipClassName, disabled = false }: HoverSuggestionTooltipProps) => { const anchorRef = useRef<HTMLDivElement | null>(null);
+const HoverSuggestionTooltip = ({ children, items, side = "right", offset = 10, title, emptyLabel, className, tooltipClassName, disabled = false }: HoverSuggestionTooltipProps) => { const anchorRef = useRef<HTMLDivElement | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [position, setPosition] = useState<TooltipPosition | null>(null);
 
@@ -219,3 +219,6 @@ export const HoverSuggestionTooltip = ({ children, items, side = "right", offset
     </>
   );
 };
+
+export { HoverSuggestionTooltip };
+export type { HoverSuggestionItem };

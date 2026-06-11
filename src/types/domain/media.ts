@@ -3,11 +3,11 @@ import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 /**
  * メディアアセットの種類
  */
-export type MediaKind = "image" | "audio" | "video" | "pdf";
+type MediaKind = "image" | "audio" | "video" | "pdf";
 /**
  * メディアアセットの状態
  */
-export type MediaStatus = "pending" | "uploading" | "ready" | "failed";
+type MediaStatus = "pending" | "uploading" | "ready" | "failed";
 /**
  * メディアアセットの統一インターフェース
  *
@@ -18,7 +18,7 @@ export type MediaStatus = "pending" | "uploading" | "ready" | "failed";
  * 2. remoteRef は Storage URL のみ
  * 3. Base64 は一切保存してはならない
  */
-export interface MediaAsset { id: string;
+interface MediaAsset { id: string;
   kind: MediaKind;
   localRef?: BlobUrl | null; // ローカル参照（Blob URL）
   remoteRef?: StorageUrl | null; // リモート参照（Storage URL）
@@ -40,3 +40,5 @@ export interface MediaAsset { id: string;
   source?: "cloud" | "local_fallback";
   fallbackReason?: string | null;
 }
+
+export type { MediaKind, MediaStatus, MediaAsset };

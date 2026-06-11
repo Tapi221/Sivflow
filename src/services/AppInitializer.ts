@@ -17,7 +17,7 @@ import { warnOncePerSession } from "./localDBRuntimeState";
  * 3. 必要なら再構築
  * 4. UI 描画許可
  */
-export class AppInitializer { private static initialized = false;
+class AppInitializer { private static initialized = false;
   private static initPromise: Promise<{
     degraded: boolean;
     reason?: string;
@@ -176,3 +176,5 @@ export class AppInitializer { private static initialized = false;
 
   // NOTE: backfill 実処理は src/services/legacyCardSetMigrationBackfill.ts へ抽出
 }
+
+export { AppInitializer };

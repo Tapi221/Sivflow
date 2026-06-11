@@ -6,7 +6,7 @@ import { useEditorRef } from "platejs/react";
 import { commentPlugin } from "@/components/editor/plugins/comment-kit";
 import { ToolbarButton } from "./toolbar";
 
-export const CommentToolbarButton = () => { const editor = useEditorRef();
+const CommentToolbarButton = () => { const editor = useEditorRef();
 
   return (
     <ToolbarButton
@@ -20,3 +20,5 @@ export const CommentToolbarButton = () => { const editor = useEditorRef();
     </ToolbarButton>
   );
 };
+
+export { CommentToolbarButton };

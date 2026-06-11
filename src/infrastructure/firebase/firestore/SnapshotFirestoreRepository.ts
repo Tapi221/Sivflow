@@ -54,4 +54,6 @@ const list: SnapshotRepositoryPort["list"] = async (userId) => {
   });
 };
 
-export const snapshotFirestoreRepository: SnapshotRepositoryPort = { save, list };
+const snapshotFirestoreRepository: SnapshotRepositoryPort = { save, list };
+
+export { snapshotFirestoreRepository };

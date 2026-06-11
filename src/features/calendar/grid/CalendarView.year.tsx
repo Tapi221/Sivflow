@@ -10,13 +10,13 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 import { cn } from "@/lib/utils";
 import { useDateFnsLocale, useT } from "@shared/i18n/useT";
 
-export type CalendarYearEventPriority = { group: number;
+type CalendarYearEventPriority = { group: number;
   index: number;
 };
-export type CalendarYearEventDisplay = { color?: string;
+type CalendarYearEventDisplay = { color?: string;
   priority: CalendarYearEventPriority;
 };
-export type CalendarYearEventDisplayResolver = (event: GoogleCalendarEvent) => CalendarYearEventDisplay;
+type CalendarYearEventDisplayResolver = (event: GoogleCalendarEvent) => CalendarYearEventDisplay;
 type CalendarYearViewProps = {
   yearDate: Date;
   selectedDate: Date;
@@ -518,3 +518,4 @@ const CalendarYearViewComponent = ({
 const CalendarYearView = memo(CalendarYearViewComponent);
 CalendarYearView.displayName = "CalendarYearView";
 export { CalendarYearView };
+export type { CalendarYearEventPriority, CalendarYearEventDisplay, CalendarYearEventDisplayResolver };

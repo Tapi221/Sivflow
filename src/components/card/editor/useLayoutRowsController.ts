@@ -14,7 +14,7 @@ type UseLayoutRowsControllerParams<
   isEditing: boolean;
 };
 
-export const useLayoutRowsController = <TDraft extends { layoutRows: number; } | null>({ draft, setDraft, defaultLayoutRows, normalizedSelectedCardId, isEditing }: UseLayoutRowsControllerParams<TDraft>) => {
+const useLayoutRowsController = <TDraft extends { layoutRows: number; } | null>({ draft, setDraft, defaultLayoutRows, normalizedSelectedCardId, isEditing }: UseLayoutRowsControllerParams<TDraft>) => {
   const rowsRafRef = useRef<number | null>(null);
   const pendingRowsRef = useRef<number | null>(null);
   const layoutRowsRef = useRef<number>(defaultLayoutRows);
@@ -133,3 +133,5 @@ export const useLayoutRowsController = <TDraft extends { layoutRows: number; } |
     handleAnswerMinHeightChange,
   };
 };
+
+export { useLayoutRowsController };

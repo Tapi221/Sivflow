@@ -19,7 +19,7 @@ import { suggestionPlugin } from "@/components/editor/plugins/suggestion-kit";
 import { BlockSuggestionCard, isResolvedSuggestion } from "./block-suggestion";
 import { Comment, CommentCreateForm } from "./comment";
 
-export const BlockDiscussion: RenderNodeWrapper<AnyPluginConfig> = (_props) => (props) => <BlockCommentContent {...props} />;
+const BlockDiscussion: RenderNodeWrapper<AnyPluginConfig> = (_props) => (props) => <BlockCommentContent {...props} />;
 const BlockCommentContent = ({ children, element }: PlateElementProps) => {
   const editor = useEditorRef();
   const commentsApi = editor.getApi(CommentPlugin).comment;
@@ -97,3 +97,5 @@ const BlockComment = ({ discussion, isLast }: { discussion: TDiscussion; isLast:
     </>
   );
 };
+
+export { BlockDiscussion };

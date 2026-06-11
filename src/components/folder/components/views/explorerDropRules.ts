@@ -6,4 +6,6 @@
  *
  * Return true to disable legacy drops safely.
  */
-export const shouldDisableExplorerDrop = (..._args: unknown[]): boolean => true;
+const shouldDisableExplorerDrop = (..._args: unknown[]): boolean => true;
+
+export { shouldDisableExplorerDrop };

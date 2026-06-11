@@ -159,7 +159,7 @@ const resolveExternalEventId = (accountId: string | undefined, calendarId: strin
 
   return eventId;
 };
-export class GoogleCalendarSyncEngine { private readonly options: Required<Pick<GCalSyncEngineOptions, "pollIntervalMs" | "fullSyncPastDays" | "fullSyncFutureDays">> & GCalSyncEngineOptions;
+class GoogleCalendarSyncEngine { private readonly options: Required<Pick<GCalSyncEngineOptions, "pollIntervalMs" | "fullSyncPastDays" | "fullSyncFutureDays">> & GCalSyncEngineOptions;
 
   private context: GCalSyncStartContext | null = null;
 
@@ -738,3 +738,5 @@ export class GoogleCalendarSyncEngine { private readonly options: Required<Pick<
     }
   }
 }
+
+export { GoogleCalendarSyncEngine };

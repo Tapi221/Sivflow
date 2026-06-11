@@ -68,7 +68,7 @@ const setNestedPath = (
 
   cursor[keys[keys.length - 1]] = value;
 };
-export const safeRevokeBlobUrl = (url: unknown, context: string): void => { if (typeof url !== "string" || !url.startsWith("blob:")) return;
+const safeRevokeBlobUrl = (url: unknown, context: string): void => { if (typeof url !== "string" || !url.startsWith("blob:")) return;
   if (typeof URL === "undefined" || typeof URL.revokeObjectURL !== "function") return;
 
   try {
@@ -77,9 +77,9 @@ export const safeRevokeBlobUrl = (url: unknown, context: string): void => { if (
     console.warn(`[LocalDB] Failed to revoke blob URL (${context})`, error);
   }
 };
-export const hasBlobUrlDeep = (value: unknown): boolean => { return findBlobUrlFixesDeep(value).length > 0;
+const hasBlobUrlDeep = (value: unknown): boolean => { return findBlobUrlFixesDeep(value).length > 0;
 };
-export const assertNoBlobUrlInCardPayload = (cardLike: unknown, context?: { entityType?: string; entityId?: string; },
+const assertNoBlobUrlInCardPayload = (cardLike: unknown, context?: { entityType?: string; entityId?: string; },
 ): void => {
   if (!isRecord(cardLike)) return;
 
@@ -101,7 +101,7 @@ export const assertNoBlobUrlInCardPayload = (cardLike: unknown, context?: { enti
     path: fixPath,
   });
 };
-export const scrubBlobUrlsDeep = (value: unknown): unknown => { if (typeof value === "string") { return value.startsWith("blob:") ? null : value;
+const scrubBlobUrlsDeep = (value: unknown): unknown => { if (typeof value === "string") { return value.startsWith("blob:") ? null : value;
 }
 
 if (Array.isArray(value)) {
@@ -118,7 +118,7 @@ if (isRecord(value)) {
 
 return value;
 };
-export const buildCardCandidateFromMods = (obj: unknown, mods: unknown): unknown => { if (!isRecord(obj)) return mods;
+const buildCardCandidateFromMods = (obj: unknown, mods: unknown): unknown => { if (!isRecord(obj)) return mods;
   if (!isRecord(mods)) return obj;
 
   const candidate: Record<string, unknown> = { ...obj };
@@ -133,3 +133,5 @@ export const buildCardCandidateFromMods = (obj: unknown, mods: unknown): unknown
 
   return candidate;
 };
+
+export { safeRevokeBlobUrl, hasBlobUrlDeep, assertNoBlobUrlInCardPayload, scrubBlobUrlsDeep, buildCardCandidateFromMods };

@@ -17,7 +17,7 @@ const DIGIT_PATTERN = /^[0-9]$/;
  *
  * @experimental
  */
-export const markdownJoinerTransform = <TOOLS extends ToolSet>() => () => { const joiner = new MarkdownJoiner();
+const markdownJoinerTransform = <TOOLS extends ToolSet>() => () => { const joiner = new MarkdownJoiner();
   let lastTextDeltaId: string | undefined;
   let textStreamEnded = false;
 
@@ -64,7 +64,7 @@ export const markdownJoinerTransform = <TOOLS extends ToolSet>() => () => { cons
     },
   });
 };
-export class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
+class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
 
   private buffer = "";
   private documentCharacterCount = 0;
@@ -230,3 +230,5 @@ const delay = async (delayInMs?: number | null): Promise<void> => {
     ? Promise.resolve()
     : new Promise((resolve) => setTimeout(resolve, delayInMs));
 };
+
+export { markdownJoinerTransform, MarkdownJoiner };

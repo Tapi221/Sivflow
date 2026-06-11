@@ -98,7 +98,7 @@ const buildSideSnapshot = ({
     ),
   };
 };
-export const useFlashcardDualDerived = (cardData: FlashcardCardLike | null | undefined) => { return React.useMemo<FlashcardDualDerivedSnapshot>(() => { const cardId = cardData ? resolveCardId(cardData) : null;
+const useFlashcardDualDerived = (cardData: FlashcardCardLike | null | undefined) => { return React.useMemo<FlashcardDualDerivedSnapshot>(() => { const cardId = cardData ? resolveCardId(cardData) : null;
 
     return {
       cardId,
@@ -118,3 +118,5 @@ export const useFlashcardDualDerived = (cardData: FlashcardCardLike | null | und
     };
   }, [cardData]);
 };
+
+export { useFlashcardDualDerived };

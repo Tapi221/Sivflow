@@ -1,3 +1,5 @@
-export interface GenerationCounterStorePort { get: () => number;
+interface GenerationCounterStorePort { get: () => number;
   increment: () => number;
 }
+
+export type { GenerationCounterStorePort };

@@ -102,4 +102,6 @@ const MediaEmbedElementBase = (props: PlateElementProps<TMediaEmbedElement>) => 
 
 MediaEmbedElementBase.displayName = "MediaEmbedElement";
 
-export const MediaEmbedElement = withHOC(ResizableProvider, MediaEmbedElementBase);
+const MediaEmbedElement = withHOC(ResizableProvider, MediaEmbedElementBase);
+
+export { MediaEmbedElement };

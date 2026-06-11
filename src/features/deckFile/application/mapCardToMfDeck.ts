@@ -71,7 +71,7 @@ const visitObject = (
   visitor(record);
   Object.values(record).forEach((item) => visitObject(item, visitor));
 };
-export const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => { const issues: MfDeckIssue[] = [];
+const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => { const issues: MfDeckIssue[] = [];
 
   cards.forEach((card) => {
     const faces = [card.front, card.back];
@@ -95,7 +95,7 @@ export const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => { con
 
   return issues;
 };
-export const mapCardToMfDeckCard = ({ card, tagById }: { card: Card;
+const mapCardToMfDeckCard = ({ card, tagById }: { card: Card;
   tagById?: MfDeckTagLookup;
 }): MfDeckCardV1 => {
   return {
@@ -124,7 +124,7 @@ export const mapCardToMfDeckCard = ({ card, tagById }: { card: Card;
     },
   };
 };
-export const buildMfDeckArchive = async ({ cardSet, cards, tagById, appVersion }: { cardSet: CardSet;
+const buildMfDeckArchive = async ({ cardSet, cards, tagById, appVersion }: { cardSet: CardSet;
   cards: Card[];
   tagById?: MfDeckTagLookup;
   appVersion?: string;
@@ -182,3 +182,5 @@ export const buildMfDeckArchive = async ({ cardSet, cards, tagById, appVersion }
     ...(mediaBundled ? { media: mediaBundle.media } : {}),
   };
 };
+
+export { collectMfDeckExportIssues, mapCardToMfDeckCard, buildMfDeckArchive };

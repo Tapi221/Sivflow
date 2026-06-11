@@ -1,6 +1,6 @@
-export type CalendarRecurrenceFrequency = "daily" | "weekly" | "monthly" | "yearly";
-export type CalendarWeekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-export type CalendarRecurrenceRule = { frequency: CalendarRecurrenceFrequency;
+type CalendarRecurrenceFrequency = "daily" | "weekly" | "monthly" | "yearly";
+type CalendarWeekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+type CalendarRecurrenceRule = { frequency: CalendarRecurrenceFrequency;
   interval?: number;
   endDate?: Date;
   occurrence?: number;
@@ -9,7 +9,7 @@ export type CalendarRecurrenceRule = { frequency: CalendarRecurrenceFrequency;
   monthsOfYear?: number[];
 };
 
-export const CALENDAR_RECURRENCE_FREQUENCIES: readonly CalendarRecurrenceFrequency[] = ["daily", "weekly", "monthly", "yearly"];
+const CALENDAR_RECURRENCE_FREQUENCIES: readonly CalendarRecurrenceFrequency[] = ["daily", "weekly", "monthly", "yearly"];
 
 const clampPositiveInteger = (value: number | undefined): number | undefined => {
   if (value === undefined || !Number.isFinite(value)) return undefined;
@@ -29,7 +29,7 @@ const uniqueNumbersInRange = <T extends number>(values: readonly number[] | unde
 
   return normalized.length > 0 ? normalized : undefined;
 };
-export const normalizeCalendarRecurrenceRule = (rule: CalendarRecurrenceRule | null | undefined): CalendarRecurrenceRule | undefined => { if (!rule || !CALENDAR_RECURRENCE_FREQUENCIES.includes(rule.frequency)) return undefined;
+const normalizeCalendarRecurrenceRule = (rule: CalendarRecurrenceRule | null | undefined): CalendarRecurrenceRule | undefined => { if (!rule || !CALENDAR_RECURRENCE_FREQUENCIES.includes(rule.frequency)) return undefined;
 
   const normalized: CalendarRecurrenceRule = {
     frequency: rule.frequency,
@@ -50,3 +50,6 @@ export const normalizeCalendarRecurrenceRule = (rule: CalendarRecurrenceRule | n
 
   return normalized;
 };
+
+export { CALENDAR_RECURRENCE_FREQUENCIES, normalizeCalendarRecurrenceRule };
+export type { CalendarRecurrenceFrequency, CalendarWeekday, CalendarRecurrenceRule };

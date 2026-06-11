@@ -1,8 +1,8 @@
 import type { PresentationTarget } from "./getPresentationTarget";
 
-export const APP_DESKTOP_TOP_INSET_PX = 44;
+const APP_DESKTOP_TOP_INSET_PX = 44;
 
-export const getAppTopInsetPx = ({ presentationTarget }: { presentationTarget: PresentationTarget;
+const getAppTopInsetPx = ({ presentationTarget }: { presentationTarget: PresentationTarget;
 }): number => {
   if (presentationTarget === "desktop") {
     return APP_DESKTOP_TOP_INSET_PX;
@@ -10,3 +10,5 @@ export const getAppTopInsetPx = ({ presentationTarget }: { presentationTarget: P
 
   return 0;
 };
+
+export { APP_DESKTOP_TOP_INSET_PX, getAppTopInsetPx };

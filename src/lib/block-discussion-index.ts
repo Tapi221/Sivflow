@@ -13,7 +13,7 @@ import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import type { TComment } from "@/components/ui/comment";
 
-export interface ResolvedSuggestion extends TResolvedSuggestion { comments: TComment[];
+interface ResolvedSuggestion extends TResolvedSuggestion { comments: TComment[];
 }
 type BlockDiscussionEntry = NodeEntry<
   TCommentText | TElement | TSuggestionText
@@ -48,7 +48,7 @@ type BuildBlockDiscussionIndexOptions = {
   isBlockSuggestion: (node: TElement | TSuggestionText) => boolean;
 };
 
-export const BLOCK_SUGGESTION_TOKEN = "__block__";
+const BLOCK_SUGGESTION_TOKEN = "__block__";
 const discussionIndexCache = new WeakMap<
   PlateEditor,
   {
@@ -331,7 +331,7 @@ const toResolvedSuggestion = ({
 
   return null;
 };
-export const buildBlockDiscussionIndex = ({ discussions, entries, getCommentId, getSuggestionData, getSuggestionDataList, getSuggestionId, isBlockSuggestion }: BuildBlockDiscussionIndexOptions): BlockDiscussionIndex => { const commentOwnerById = new Map<string, Path>();
+const buildBlockDiscussionIndex = ({ discussions, entries, getCommentId, getSuggestionData, getSuggestionDataList, getSuggestionId, isBlockSuggestion }: BuildBlockDiscussionIndexOptions): BlockDiscussionIndex => { const commentOwnerById = new Map<string, Path>();
   const suggestionOwnerById = new Map<string, Path>();
   const commentIds = new Set<string>();
   const suggestionEntriesById = new Map<string, SuggestionEntry[]>();
@@ -444,7 +444,7 @@ const getDiscussionIndex = (
 
   return index;
 };
-export const useBlockDiscussionItems = (blockPath: Path) => { const editor = useEditorRef();
+const useBlockDiscussionItems = (blockPath: Path) => { const editor = useEditorRef();
   const discussions = usePluginOption(discussionPlugin, "discussions");
   const version = useEditorVersion() ?? 0;
 
@@ -458,3 +458,6 @@ export const useBlockDiscussionItems = (blockPath: Path) => { const editor = use
     };
   }, [blockPath, discussions, editor, version]);
 };
+
+export { BLOCK_SUGGESTION_TOKEN, buildBlockDiscussionIndex, useBlockDiscussionItems };
+export type { ResolvedSuggestion };

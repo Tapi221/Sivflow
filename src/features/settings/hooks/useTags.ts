@@ -8,8 +8,8 @@ import { getLocalDb } from "@/services/localDB";
 import { auditAndRepairTags } from "@/services/localdb/audit/tags";
 import type { TagRecord } from "@/services/localdb/types";
 
-export type TagCategory = string;
-export type Tag = TagRecord;
+type TagCategory = string;
+type Tag = TagRecord;
 type CardTagFields = {
   id?: string;
   userId?: string;
@@ -20,7 +20,7 @@ type CardTagFields = {
 };
 type LocalDbInstance = Awaited<ReturnType<typeof getLocalDb>>;
 
-export const DEFAULT_TAG_COLOR_KEYS: TagColorKey[] = [...TAG_COLOR_KEYS];
+const DEFAULT_TAG_COLOR_KEYS: TagColorKey[] = [...TAG_COLOR_KEYS];
 const MAX_PATH_DEPTH = 12;
 
 const genId = (): string => {
@@ -49,7 +49,7 @@ const asStringArray = (value: unknown): string[] => {
 };
 const getCardTagIds = (card: Pick<CardTagFields, "tagIds">): string[] =>
   asStringArray(card.tagIds);
-export const resolveCardTagNames = (tagIds: unknown, tagById: ReadonlyMap<string, Pick<TagRecord, "name">>): string[] => { const ids = asStringArray(tagIds);
+const resolveCardTagNames = (tagIds: unknown, tagById: ReadonlyMap<string, Pick<TagRecord, "name">>): string[] => { const ids = asStringArray(tagIds);
   if (ids.length === 0) return [];
   return ids.map((id) => tagById.get(id)?.name ?? "").filter((name) => name);
 };
@@ -110,7 +110,7 @@ const findPathCandidate = (
     (tag) => Boolean(tag.isDeleted) && matchesParent(tag, parentId),
   );
 };
-export const useTags = () => { const { currentUser } = useAuthSession();
+const useTags = () => { const { currentUser } = useAuthSession();
   const { settings, updateSettings } = useUserSettings();
 
   const rawTags = useLiveQuery(
@@ -960,3 +960,6 @@ export const useTags = () => { const { currentUser } = useAuthSession();
     getTagNameById,
   };
 };
+
+export { DEFAULT_TAG_COLOR_KEYS, resolveCardTagNames, useTags };
+export type { TagCategory, Tag };

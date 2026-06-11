@@ -15,7 +15,7 @@ import { useCalendarWeekStartSetting } from "./useCalendarWeekStartSetting";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 
 type UseScheduleScreenOptions = { allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay; };
-export type UseScheduleScreenReturn = { contentViewportRef: RefObject<HTMLDivElement | null>;
+type UseScheduleScreenReturn = { contentViewportRef: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   headerScrollRef: RefObject<HTMLDivElement | null>;
   allDayScrollRef: RefObject<HTMLDivElement | null>;
@@ -97,7 +97,7 @@ const dedupeGoogleCalendarEvents = (events: GoogleCalendarEvent[]): GoogleCalend
     return true;
   });
 };
-export const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDay }: UseScheduleScreenOptions = {}): UseScheduleScreenReturn => { const effectiveWeekStartDay = useCalendarWeekStartSetting(weekStartDay);
+const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDay }: UseScheduleScreenOptions = {}): UseScheduleScreenReturn => { const effectiveWeekStartDay = useCalendarWeekStartSetting(weekStartDay);
   const navigation = useCalendarNavigation({ allowMultiSelectViewMode, weekStartDay: effectiveWeekStartDay });
   const [monthRenderedRangeSnapshot, setMonthRenderedRangeSnapshot] = useState<MonthRenderedRangeSnapshot | null>(null);
   const [yearRenderedRange, setYearRenderedRange] = useState<CalendarDateRange | null>(null);
@@ -244,3 +244,6 @@ export const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDa
     setMonthTitleDate: navigation.setMonthTitleDate,
   };
 };
+
+export { useScheduleScreen };
+export type { UseScheduleScreenReturn };

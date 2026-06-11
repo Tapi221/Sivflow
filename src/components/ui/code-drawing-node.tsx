@@ -91,7 +91,7 @@ const useCodeDrawingElement = ({ element }: { element: TCodeDrawingElement; }) =
   };
 };
 
-export const CodeDrawingElement = (props: PlateElementProps<TCodeDrawingElement>) => { const { children } = props;
+const CodeDrawingElement = (props: PlateElementProps<TCodeDrawingElement>) => { const { children } = props;
   const isMobile = useIsMobile();
   const editor = useEditorRef();
   const readOnly = useReadOnly();
@@ -541,3 +541,5 @@ const CodeDrawingPreviewArea = ({
     </div>
   );
 };
+
+export { CodeDrawingElement };

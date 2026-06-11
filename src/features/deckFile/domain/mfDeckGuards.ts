@@ -188,7 +188,7 @@ const pushMediaManifestIssues = (
     }
   }
 };
-export const isMfDeckManifestV1 = (value: unknown): value is MfDeckManifestV1 => { if (!isRecord(value)) return false;
+const isMfDeckManifestV1 = (value: unknown): value is MfDeckManifestV1 => { if (!isRecord(value)) return false;
   if (value.format !== MF_DECK_FORMAT) return false;
   if (value.version !== MF_DECK_VERSION) return false;
   if (!isIsoLikeString(value.exportedAt)) return false;
@@ -237,7 +237,7 @@ export const isMfDeckManifestV1 = (value: unknown): value is MfDeckManifestV1 =>
 
   return true;
 };
-export const isMfDeckCardsJsonV1 = (value: unknown): value is MfDeckCardsJsonV1 => { if (!isRecord(value)) return false;
+const isMfDeckCardsJsonV1 = (value: unknown): value is MfDeckCardsJsonV1 => { if (!isRecord(value)) return false;
   if (value.format !== "sivflow.deck.cards") return false;
   if (value.version !== MF_DECK_VERSION) return false;
   if (!Array.isArray(value.cards)) return false;
@@ -275,7 +275,7 @@ export const isMfDeckCardsJsonV1 = (value: unknown): value is MfDeckCardsJsonV1 
     return true;
   });
 };
-export const isMfDeckMediaManifestV1 = (value: unknown): value is MfDeckMediaManifestV1 => { if (value === undefined) return true;
+const isMfDeckMediaManifestV1 = (value: unknown): value is MfDeckMediaManifestV1 => { if (value === undefined) return true;
   if (!isRecord(value)) return false;
   if (value.format !== "sivflow.deck.media") return false;
   if (value.version !== MF_DECK_VERSION) return false;
@@ -310,7 +310,7 @@ export const isMfDeckMediaManifestV1 = (value: unknown): value is MfDeckMediaMan
     return true;
   });
 };
-export const validateMfDeckArchive = (input: { manifest: unknown;
+const validateMfDeckArchive = (input: { manifest: unknown;
   cardsJson: unknown;
   mediaManifest?: unknown;
   media?: Record<string, Uint8Array>;
@@ -391,3 +391,5 @@ export const validateMfDeckArchive = (input: { manifest: unknown;
     issues,
   };
 };
+
+export { isMfDeckManifestV1, isMfDeckCardsJsonV1, isMfDeckMediaManifestV1, validateMfDeckArchive };

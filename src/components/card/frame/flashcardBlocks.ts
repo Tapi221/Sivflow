@@ -17,7 +17,7 @@ interface SideData {
   code: { code?: string; language?: string; } | null;
 }
 
-export const resolveSideBlocks = (side: "question" | "answer", data: SideData) => { if (data.blocks.length > 0) { return sortBlocksByOrderIndex(data.blocks);
+const resolveSideBlocks = (side: "question" | "answer", data: SideData) => { if (data.blocks.length > 0) { return sortBlocksByOrderIndex(data.blocks);
   }
 
   const fallbackBlocks: CardBlock[] = [];
@@ -52,3 +52,5 @@ export const resolveSideBlocks = (side: "question" | "answer", data: SideData) =
 
   return fallbackBlocks;
 };
+
+export { resolveSideBlocks };

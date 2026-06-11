@@ -1,4 +1,4 @@
-export const notifySelectedFolderChanged = (folderId: string | null) => { if (typeof window === "undefined") return;
+const notifySelectedFolderChanged = (folderId: string | null) => { if (typeof window === "undefined") return;
 
   window.dispatchEvent(
     new CustomEvent("folders:selected-folder-changed", {
@@ -6,3 +6,5 @@ export const notifySelectedFolderChanged = (folderId: string | null) => { if (ty
     }),
   );
 };
+
+export { notifySelectedFolderChanged };

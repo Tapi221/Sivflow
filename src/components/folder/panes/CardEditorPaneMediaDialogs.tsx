@@ -139,5 +139,6 @@ const CardEditorPaneMediaDialogsInner = ({
   );
 };
 
-export const CardEditorPaneMediaDialogs = memo(CardEditorPaneMediaDialogsInner, areMediaDialogsPropsEqual);
+const CardEditorPaneMediaDialogs = memo(CardEditorPaneMediaDialogsInner, areMediaDialogsPropsEqual);
 CardEditorPaneMediaDialogs.displayName = "CardEditorPaneMediaDialogs";
+export { CardEditorPaneMediaDialogs };

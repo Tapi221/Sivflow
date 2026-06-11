@@ -12,7 +12,9 @@ const STUDY_REVIEW_COMPONENTS = {
   (props: StudyReviewProps) => React.JSX.Element
 >;
 
-export const StudyReview = (props: StudyReviewProps) => { const presentationTarget = usePresentationTarget();
+const StudyReview = (props: StudyReviewProps) => { const presentationTarget = usePresentationTarget();
   const Component = STUDY_REVIEW_COMPONENTS[presentationTarget];
   return <Component {...props} />;
 };
+
+export { StudyReview };

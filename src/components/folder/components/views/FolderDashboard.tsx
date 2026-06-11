@@ -14,5 +14,7 @@ interface FolderDashboardProps {
   folderSelectionNonce?: number;
 }
 
-export const FolderDashboard = (_: FolderDashboardProps) => { return <div className="h-full bg-transparent" />;
+const FolderDashboard = (_: FolderDashboardProps) => { return <div className="h-full bg-transparent" />;
 };
+
+export { FolderDashboard };

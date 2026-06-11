@@ -15,7 +15,7 @@ type UseMonthInfiniteScrollOptions = {
   weekStartDay: CalendarWeekStartDay;
   onVisibleMonthChange?: (date: Date) => void;
 };
-export type UseMonthInfiniteScrollReturn = { monthWeeks: CalendarMonthWeek[];
+type UseMonthInfiniteScrollReturn = { monthWeeks: CalendarMonthWeek[];
   visibleWeekRange: CalendarDateRange;
   topSpacerHeight: number;
   bottomSpacerHeight: number;
@@ -89,8 +89,8 @@ const buildVirtualMonthWeeks = (baseWeekStart: Date, virtualWindow: MonthVirtual
   return Array.from({ length: weekCount }, (_, index) => buildCalendarVirtualMonthWeek(baseWeekStart, virtualWindow.startWeekOffset + index, weekStartDay));
 };
 const getMonthVirtualSpacerHeight = (): number => MONTH_VIRTUAL_SPACER_HEIGHT;
-export const createInitialMonthVisibleWeekRange = (currentDate: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY): CalendarDateRange => buildWindowDateRange(getWeekStart(currentDate, weekStartDay), createWindowAroundWeekOffset(0));
-export const useMonthInfiniteScroll = ({ currentDate, scrollTargetToken, monthRowHeight, weekStartDay, onVisibleMonthChange }: UseMonthInfiniteScrollOptions): UseMonthInfiniteScrollReturn => { const initialBaseWeekStart = useMemo(() => getWeekStart(currentDate, weekStartDay), [currentDate, weekStartDay]);
+const createInitialMonthVisibleWeekRange = (currentDate: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY): CalendarDateRange => buildWindowDateRange(getWeekStart(currentDate, weekStartDay), createWindowAroundWeekOffset(0));
+const useMonthInfiniteScroll = ({ currentDate, scrollTargetToken, monthRowHeight, weekStartDay, onVisibleMonthChange }: UseMonthInfiniteScrollOptions): UseMonthInfiniteScrollReturn => { const initialBaseWeekStart = useMemo(() => getWeekStart(currentDate, weekStartDay), [currentDate, weekStartDay]);
   const initialVirtualWindow = useMemo(() => createWindowAroundWeekOffset(0), []);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const baseWeekStartRef = useRef(initialBaseWeekStart);
@@ -350,3 +350,6 @@ export const useMonthInfiniteScroll = ({ currentDate, scrollTargetToken, monthRo
     setScrollContainerRef,
   };
 };
+
+export { createInitialMonthVisibleWeekRange, useMonthInfiniteScroll };
+export type { UseMonthInfiniteScrollReturn };

@@ -8,7 +8,7 @@ import { useEditorRef, useEditorSelector } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
 import { ToolbarButton, ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "./toolbar";
 
-export const BulletedListToolbarButton = () => { const editor = useEditorRef();
+const BulletedListToolbarButton = () => { const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   const pressed = useEditorSelector(
@@ -84,7 +84,7 @@ export const BulletedListToolbarButton = () => { const editor = useEditorRef();
     </ToolbarSplitButton>
   );
 };
-export const NumberedListToolbarButton = () => { const editor = useEditorRef();
+const NumberedListToolbarButton = () => { const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   const pressed = useEditorSelector(
@@ -171,7 +171,7 @@ export const NumberedListToolbarButton = () => { const editor = useEditorRef();
     </ToolbarSplitButton>
   );
 };
-export const TodoListToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => { const state = useIndentTodoToolBarButtonState({ nodeType: "todo" });
+const TodoListToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => { const state = useIndentTodoToolBarButtonState({ nodeType: "todo" });
   const { props: buttonProps } = useIndentTodoToolBarButton(state);
 
   return (
@@ -180,3 +180,5 @@ export const TodoListToolbarButton = (props: React.ComponentProps<typeof Toolbar
     </ToolbarButton>
   );
 };
+
+export { BulletedListToolbarButton, NumberedListToolbarButton, TodoListToolbarButton };

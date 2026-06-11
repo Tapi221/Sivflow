@@ -18,7 +18,7 @@ const EquationInput = createPrimitiveComponent(TextareaAutosize)({
   propsHook: useEquationInput,
 });
 
-export const EquationElement = (props: PlateElementProps<TEquationElement>) => { const selected = useSelected();
+const EquationElement = (props: PlateElementProps<TEquationElement>) => { const selected = useSelected();
   const [open, setOpen] = React.useState(selected);
   const katexRef = React.useRef<HTMLDivElement | null>(null);
   const lineBreakBadge = (
@@ -86,7 +86,7 @@ export const EquationElement = (props: PlateElementProps<TEquationElement>) => {
     </PlateElement>
   );
 };
-export const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => { const { element } = props;
+const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => { const { element } = props;
   const katexRef = React.useRef<HTMLDivElement | null>(null);
   const selected = useSelected();
   const isCollapsed = useEditorSelector(
@@ -224,3 +224,5 @@ const EquationPopoverContent = ({
     </PopoverContent>
   );
 };
+
+export { EquationElement, InlineEquationElement };

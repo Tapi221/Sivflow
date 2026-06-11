@@ -1,6 +1,6 @@
 import type { CalendarRecurrenceRule } from "./calendarRecurrence";
 
-export type CalendarEvent = { id: string;
+type CalendarEvent = { id: string;
   externalId?: string;
   accountId?: string;
   calendarId: string;
@@ -14,4 +14,6 @@ export type CalendarEvent = { id: string;
   accentColor: string;
   recurrenceRule?: CalendarRecurrenceRule;
 };
-export type GoogleCalendarEvent = CalendarEvent;
+type GoogleCalendarEvent = CalendarEvent;
+
+export type { CalendarEvent, GoogleCalendarEvent };

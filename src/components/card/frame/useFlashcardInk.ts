@@ -13,7 +13,7 @@ interface UseFlashcardInkOptions {
   contentRef: React.RefObject<HTMLDivElement | null>;
   onInkDocumentChange?: (side: "question" | "answer", nextDocument: InkDocument) => void;
 }
-export interface FlashcardInkResult { previewInkRef: React.RefObject<InkLayerHandle | null>;
+interface FlashcardInkResult { previewInkRef: React.RefObject<InkLayerHandle | null>;
   previewInkTool: InkEditTool | null;
   setPreviewInkTool: React.Dispatch<React.SetStateAction<InkEditTool | null>>;
   previewInkHistory: InkHistoryState;
@@ -36,7 +36,7 @@ const waitForImages = async (root: HTMLDivElement) => {
     img.addEventListener("error", done, { once: true });
   })));
 };
-export const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkEditingEnabled, previewMode, contentRef, onInkDocumentChange }: UseFlashcardInkOptions) => { const { updateCard } = useCards();
+const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkEditingEnabled, previewMode, contentRef, onInkDocumentChange }: UseFlashcardInkOptions) => { const { updateCard } = useCards();
   const previewInkRef = useRef<InkLayerHandle | null>(null);
   const [previewInkTool, setPreviewInkTool] = useState<InkEditTool | null>(null);
   const [previewInkHistory, setPreviewInkHistory] = useState<InkHistoryState>({ canUndo: false, canRedo: false, strokeCount: 0 });
@@ -144,3 +144,6 @@ export const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkE
     handleInkDocumentChange,
   };
 };
+
+export { useFlashcardInk };
+export type { FlashcardInkResult };

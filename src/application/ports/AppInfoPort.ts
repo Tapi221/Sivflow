@@ -1,2 +1,4 @@
-export interface AppInfoPort { getVersion(): Promise<string>;
+interface AppInfoPort { getVersion(): Promise<string>;
 }
+
+export type { AppInfoPort };

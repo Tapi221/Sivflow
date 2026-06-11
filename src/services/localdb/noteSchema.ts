@@ -1,3 +1,5 @@
 import type { LocalDB } from "./LocalDB";
 
-export const defineNoteSchema = (_db: LocalDB): void => {};
+const defineNoteSchema = (_db: LocalDB): void => {};
+
+export { defineNoteSchema };

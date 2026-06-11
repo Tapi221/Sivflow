@@ -19,4 +19,6 @@ const exportJson: JsonFileExportPort["exportJson"] = async ({
   URL.revokeObjectURL(url);
 };
 
-export const browserJsonFileExportAdapter: JsonFileExportPort = { exportJson };
+const browserJsonFileExportAdapter: JsonFileExportPort = { exportJson };
+
+export { browserJsonFileExportAdapter };

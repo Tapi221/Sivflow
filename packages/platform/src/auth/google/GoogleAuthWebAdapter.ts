@@ -9,4 +9,6 @@ const signIn: GoogleAuthPort["signIn"] = async () => {
   await signInWithPopup(auth, provider);
 };
 
-export const googleAuthWebAdapter: GoogleAuthPort = { signIn };
+const googleAuthWebAdapter: GoogleAuthPort = { signIn };
+
+export { googleAuthWebAdapter };

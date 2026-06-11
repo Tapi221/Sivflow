@@ -1,4 +1,6 @@
 import { useContext } from "react";
 import { SyncContext } from "./SyncContextCore";
 
-export const useSyncContext = () => useContext(SyncContext);
+const useSyncContext = () => useContext(SyncContext);
+
+export { useSyncContext };

@@ -2,7 +2,7 @@ import { buildMfDeckMediaManifest, buildMfDeckMediaPath, inferMfDeckMediaExtensi
 import type { MfDeckIssue, MfDeckMediaEntryV1, MfDeckMediaManifestV1 } from "@/features/deckFile/domain/mfDeck.types";
 import type { CardBlock } from "@/types";
 
-export type MfDeckMediaBundle = { media: Record<string, Uint8Array>;
+type MfDeckMediaBundle = { media: Record<string, Uint8Array>;
   mediaManifest?: MfDeckMediaManifestV1;
   issues: MfDeckIssue[];
 };
@@ -199,7 +199,7 @@ const hashString = (value: string): string => {
   }
   return (hash >>> 0).toString(16).padStart(8, "0");
 };
-export const bundleMediaInMfDeckCards = async <TCard extends { id?: string; front?: unknown; back?: unknown; },
+const bundleMediaInMfDeckCards = async <TCard extends { id?: string; front?: unknown; back?: unknown; },
 >({
   cards,
 }: BundleMediaInCardsParams<TCard>): Promise<MfDeckMediaBundle> => {
@@ -295,3 +295,6 @@ export const bundleMediaInMfDeckCards = async <TCard extends { id?: string; fron
     issues,
   };
 };
+
+export { bundleMediaInMfDeckCards };
+export type { MfDeckMediaBundle };

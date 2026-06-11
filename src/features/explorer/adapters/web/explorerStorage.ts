@@ -1,10 +1,10 @@
 import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 
-export const getLastSelectedFolderId = (): string | null => { if (typeof window === "undefined") return null;
+const getLastSelectedFolderId = (): string | null => { if (typeof window === "undefined") return null;
 
   return window.localStorage.getItem(WEB_STORAGE_KEYS.lastSelectedFolderId);
 };
-export const setLastSelectedFolderId = (folderId: string | null) => { if (typeof window === "undefined") return;
+const setLastSelectedFolderId = (folderId: string | null) => { if (typeof window === "undefined") return;
 
   if (folderId) {
     window.localStorage.setItem(
@@ -16,3 +16,5 @@ export const setLastSelectedFolderId = (folderId: string | null) => { if (typeof
 
   window.localStorage.removeItem(WEB_STORAGE_KEYS.lastSelectedFolderId);
 };
+
+export { getLastSelectedFolderId, setLastSelectedFolderId };

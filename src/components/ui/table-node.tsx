@@ -535,7 +535,7 @@ const useTableCellPresentation = (element: TTableCellElement) => {
   };
 };
 
-export const TableElement = withHOC(TableProvider, ({ children, ...props }: PlateElementProps<TTableElement>) => { const readOnly = useReadOnly();
+const TableElement = withHOC(TableProvider, ({ children, ...props }: PlateElementProps<TTableElement>) => { const readOnly = useReadOnly();
   const isSelectionAreaVisible = usePluginOption(
     BlockSelectionPlugin,
     "isSelectionAreaVisible",
@@ -1055,7 +1055,7 @@ const ColorDropdownMenu = ({
     </DropdownMenu>
   );
 };
-export const TableRowElement = ({ children, ...props }: PlateElementProps<TTableRowElement>) => { const { element } = props;
+const TableRowElement = ({ children, ...props }: PlateElementProps<TTableRowElement>) => { const { element } = props;
   const readOnly = useReadOnly();
   const editor = useEditorRef();
   const rowIndex = useElementSelector(([, path]) => path.at(-1) as number, [], {
@@ -1155,7 +1155,7 @@ const RowDropLine = () => {
     />
   );
 };
-export const TableCellElement = ({ isHeader, ...props }: PlateElementProps<TTableCellElement> & { isHeader?: boolean;
+const TableCellElement = ({ isHeader, ...props }: PlateElementProps<TTableCellElement> & { isHeader?: boolean;
 }) => {
   const readOnly = useReadOnly();
   const element = props.element;
@@ -1228,7 +1228,7 @@ export const TableCellElement = ({ isHeader, ...props }: PlateElementProps<TTabl
     </PlateElement>
   );
 };
-export const TableCellHeaderElement = (props: React.ComponentProps<typeof TableCellElement>) => { return <TableCellElement {...props} isHeader />;
+const TableCellHeaderElement = (props: React.ComponentProps<typeof TableCellElement>) => { return <TableCellElement {...props} isHeader />;
 };
 
 const TableCellResizeControls = React.memo(({
@@ -1327,3 +1327,4 @@ const TableCellResizeControls = React.memo(({
   );
 });
 TableCellResizeControls.displayName = "TableCellResizeControls";
+export { TableElement, TableRowElement, TableCellElement, TableCellHeaderElement };

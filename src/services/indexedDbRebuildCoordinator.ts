@@ -2,7 +2,7 @@ import { IndexedDBMetadataService } from "./IndexedDBMetadataService";
 import { IndexedDBRebuildOrchestrator } from "./IndexedDBRebuildOrchestrator";
 import { getLocalDb } from "./localDB";
 
-export const rebuildIndexedDb = async (userId: string, reason?: string): Promise<{ degraded: boolean;
+const rebuildIndexedDb = async (userId: string, reason?: string): Promise<{ degraded: boolean;
   failures: Array<{ type: string; id: string; error: string; }>;
 }> => {
   console.log(`[AppInit:${userId}] Rebuilding IndexedDB...`);
@@ -43,3 +43,5 @@ export const rebuildIndexedDb = async (userId: string, reason?: string): Promise
     failures: rebuildResult.failures,
   };
 };
+
+export { rebuildIndexedDb };

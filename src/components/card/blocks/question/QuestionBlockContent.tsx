@@ -98,7 +98,7 @@ const QuestionField = (props: QuestionFieldProps) => {
     />
   );
 };
-export const QuestionBlockContent = (props: QuestionBlockContentProps) => { if (props.mode === "view") { const answerDisplayMode = props.answerDisplayMode ?? "tap_to_reveal";
+const QuestionBlockContent = (props: QuestionBlockContentProps) => { if (props.mode === "view") { const answerDisplayMode = props.answerDisplayMode ?? "tap_to_reveal";
     const viewResetKey = buildViewResetKey({
       questionTitle: props.questionTitle,
       questionAnswer: props.questionAnswer,
@@ -230,3 +230,5 @@ const QuestionBlockViewContent = ({
     />
   );
 };
+
+export { QuestionBlockContent };

@@ -2,7 +2,7 @@ import appIconSrc from "@shared/assets/icons/app-icon.svg";
 import { readStoredLocale } from "@shared/i18n/locale.store";
 import type { Locale } from "@shared/i18n/locale.store";
 
-export type GoogleOAuthCallbackPayload = { type: "sivflow:google-oauth-callback";
+type GoogleOAuthCallbackPayload = { type: "sivflow:google-oauth-callback";
   url: string;
   state: string | null;
   code: string | null;
@@ -18,8 +18,8 @@ type OAuthCallbackText = {
   linkSuffix: string;
 };
 
-export const GOOGLE_OAUTH_CALLBACK_CHANNEL = "sivflow:google-oauth-callback";
-export const GOOGLE_OAUTH_CALLBACK_STORAGE_KEY = "sivflow.google-oauth-callback";
+const GOOGLE_OAUTH_CALLBACK_CHANNEL = "sivflow:google-oauth-callback";
+const GOOGLE_OAUTH_CALLBACK_STORAGE_KEY = "sivflow.google-oauth-callback";
 const GOOGLE_OAUTH_CALLBACK_CLOSE_DELAY_MS = 1200;
 const GOOGLE_OAUTH_CALLBACK_TEXT_BY_LOCALE: Record<Locale, OAuthCallbackText> = {
   ja: {
@@ -185,7 +185,7 @@ const notifyCallbackPayload = (payload: GoogleOAuthCallbackPayload): void => {
   clearSensitiveCallbackUrl();
   closeCallbackWindow();
 };
-export const createGoogleOAuthCallbackPayload = (url: URL): GoogleOAuthCallbackPayload | null => { if (!hasGoogleOAuthCallbackResult(url)) return null;
+const createGoogleOAuthCallbackPayload = (url: URL): GoogleOAuthCallbackPayload | null => { if (!hasGoogleOAuthCallbackResult(url)) return null;
   return {
     type: GOOGLE_OAUTH_CALLBACK_CHANNEL,
     url: url.href,
@@ -195,10 +195,10 @@ export const createGoogleOAuthCallbackPayload = (url: URL): GoogleOAuthCallbackP
     errorDescription: url.searchParams.get("error_description"),
   };
 };
-export const isGoogleOAuthCallbackPayload = (value: unknown): value is GoogleOAuthCallbackPayload => { if (!isRecord(value)) return false;
+const isGoogleOAuthCallbackPayload = (value: unknown): value is GoogleOAuthCallbackPayload => { if (!isRecord(value)) return false;
   return value.type === GOOGLE_OAUTH_CALLBACK_CHANNEL && typeof value.url === "string" && isNullableString(value.state) && isNullableString(value.code) && isNullableString(value.error) && isNullableString(value.errorDescription);
 };
-export const renderGoogleOAuthCallback = (): boolean => { if (typeof window === "undefined") return false;
+const renderGoogleOAuthCallback = (): boolean => { if (typeof window === "undefined") return false;
   const payload = createGoogleOAuthCallbackPayload(new URL(window.location.href));
   if (!payload) return false;
   const text = getOAuthCallbackText();
@@ -207,3 +207,6 @@ export const renderGoogleOAuthCallback = (): boolean => { if (typeof window === 
   notifyCallbackPayload(payload);
   return true;
 };
+
+export { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, createGoogleOAuthCallbackPayload, isGoogleOAuthCallbackPayload, renderGoogleOAuthCallback };
+export type { GoogleOAuthCallbackPayload };

@@ -7,9 +7,9 @@ import { cva } from "class-variance-authority";
 import { usePluginOption } from "platejs/react";
 import type { PlateElementProps } from "platejs/react";
 
-export const blockSelectionVariants = cva("pointer-events-none absolute inset-0 z-1 bg-brand/[.13] transition-opacity", { defaultVariants: { active: true }, variants: { active: { false: "opacity-0", true: "opacity-100" } } });
+const blockSelectionVariants = cva("pointer-events-none absolute inset-0 z-1 bg-brand/[.13] transition-opacity", { defaultVariants: { active: true }, variants: { active: { false: "opacity-0", true: "opacity-100" } } });
 
-export const BlockSelection = (props: PlateElementProps) => { const isBlockSelected = useBlockSelected();
+const BlockSelection = (props: PlateElementProps) => { const isBlockSelected = useBlockSelected();
   const isDragging = usePluginOption(DndPlugin, "isDragging");
 
   if (
@@ -28,3 +28,5 @@ export const BlockSelection = (props: PlateElementProps) => { const isBlockSelec
     />
   );
 };
+
+export { blockSelectionVariants, BlockSelection };

@@ -13,8 +13,8 @@ const compareText = (a: string, b: string): number => {
   if (a > b) return 1;
   return 0;
 };
-export const getCalendarDateKey = (date: Date): string => format(date, "yyyy-MM-dd");
-export const getDayRange = (date: Date): { start: Date; end: Date; } => {
+const getCalendarDateKey = (date: Date): string => format(date, "yyyy-MM-dd");
+const getDayRange = (date: Date): { start: Date; end: Date; } => {
   const start = startOfDay(date);
 
   return {
@@ -22,7 +22,7 @@ export const getDayRange = (date: Date): { start: Date; end: Date; } => {
     end: addDays(start, 1),
   };
 };
-export const compareCalendarEvents = (a: CalendarEvent, b: CalendarEvent): number => { const allDayDiff = Number(b.isAllDay) - Number(a.isAllDay);
+const compareCalendarEvents = (a: CalendarEvent, b: CalendarEvent): number => { const allDayDiff = Number(b.isAllDay) - Number(a.isAllDay);
 
   if (allDayDiff !== 0) return allDayDiff;
 
@@ -40,7 +40,7 @@ export const compareCalendarEvents = (a: CalendarEvent, b: CalendarEvent): numbe
 
   return compareText(`${a.calendarId}:${a.id}`, `${b.calendarId}:${b.id}`);
 };
-export const eventOverlapsRange = (event: CalendarEvent, rangeStart: Date, rangeEnd: Date): boolean => { const startsAt = toDate(event.startsAt);
+const eventOverlapsRange = (event: CalendarEvent, rangeStart: Date, rangeEnd: Date): boolean => { const startsAt = toDate(event.startsAt);
   const endsAt = toDate(event.endsAt);
 
   if (!startsAt || !endsAt) return false;
@@ -51,11 +51,11 @@ export const eventOverlapsRange = (event: CalendarEvent, rangeStart: Date, range
 
   return startTime < rangeEnd.getTime() && normalizedEndTime > rangeStart.getTime();
 };
-export const eventOverlapsDay = (event: CalendarEvent, day: Date): boolean => { const { start, end } = getDayRange(day);
+const eventOverlapsDay = (event: CalendarEvent, day: Date): boolean => { const { start, end } = getDayRange(day);
 
   return eventOverlapsRange(event, start, end);
 };
-export const getEventDateKeys = (event: CalendarEvent): string[] => { const startsAt = toDate(event.startsAt);
+const getEventDateKeys = (event: CalendarEvent): string[] => { const startsAt = toDate(event.startsAt);
   const endsAt = toDate(event.endsAt);
 
   if (!startsAt || !endsAt) return [];
@@ -76,7 +76,7 @@ export const getEventDateKeys = (event: CalendarEvent): string[] => { const star
 
   return keys;
 };
-export const clipEventToDay = (event: CalendarEvent, day: Date): CalendarEvent | null => { const startsAt = toDate(event.startsAt);
+const clipEventToDay = (event: CalendarEvent, day: Date): CalendarEvent | null => { const startsAt = toDate(event.startsAt);
   const endsAt = toDate(event.endsAt);
 
   if (!startsAt || !endsAt) return null;
@@ -102,3 +102,5 @@ export const clipEventToDay = (event: CalendarEvent, day: Date): CalendarEvent |
     endsAt: clippedEnd,
   };
 };
+
+export { getCalendarDateKey, getDayRange, compareCalendarEvents, eventOverlapsRange, eventOverlapsDay, getEventDateKeys, clipEventToDay };

@@ -73,7 +73,7 @@ const getResolvedStatusFromRecord = (record: ImageRecordLike): "pending" | "uplo
   return "pending";
 };
 
-export type ResolvedCardImage = ResolvableImageRef & { url: string | null;
+type ResolvedCardImage = ResolvableImageRef & { url: string | null;
   source: "local_blob" | "cache" | "storage" | "none";
   status: "pending" | "uploading" | "ready" | "failed";
 };
@@ -96,7 +96,7 @@ const resolveDirectUrl = (image: ResolvableImageRef): string | null => {
 
   return null;
 };
-export const resolveCardImageUrl = async (image: ResolvableImageRef, userId?: string | null): Promise<ResolvedCardImage> => { const directUrl = resolveDirectUrl(image);
+const resolveCardImageUrl = async (image: ResolvableImageRef, userId?: string | null): Promise<ResolvedCardImage> => { const directUrl = resolveDirectUrl(image);
   if (directUrl) {
     return {
       ...image,
@@ -200,3 +200,6 @@ export const resolveCardImageUrl = async (image: ResolvableImageRef, userId?: st
     status,
   };
 };
+
+export { resolveCardImageUrl };
+export type { ResolvedCardImage };

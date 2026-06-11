@@ -34,7 +34,7 @@ const normalizeZoomPercentWithinBounds = ({
     minZoomPercent,
     maxZoomPercent,
   );
-export const shouldHandleCardSetViewZoomInputTarget = ({ container, target }: { container: HTMLElement | null;
+const shouldHandleCardSetViewZoomInputTarget = ({ container, target }: { container: HTMLElement | null;
   target: EventTarget | null;
 }) => {
   return shouldHandleZoomInputTarget({
@@ -43,7 +43,7 @@ export const shouldHandleCardSetViewZoomInputTarget = ({ container, target }: { 
     ignoreSelector: CARD_SET_VIEW_ZOOM_INPUT_IGNORE_SELECTOR,
   });
 };
-export const computeNextCardSetViewZoomPercentFromWheel = ({ currentZoomPercent, deltaY, minZoomPercent, maxZoomPercent, stepPercent = CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT, deltaPerStep = 80 }: { currentZoomPercent: number;
+const computeNextCardSetViewZoomPercentFromWheel = ({ currentZoomPercent, deltaY, minZoomPercent, maxZoomPercent, stepPercent = CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT, deltaPerStep = 80 }: { currentZoomPercent: number;
   deltaY: number;
   minZoomPercent: number;
   maxZoomPercent: number;
@@ -72,7 +72,7 @@ export const computeNextCardSetViewZoomPercentFromWheel = ({ currentZoomPercent,
     maxZoomPercent,
   });
 };
-export const computeNextCardSetViewZoomPercentFromGesture = ({ currentZoomPercent, basePresentationWidthPx, gestureScale, cardLayoutMode, maxPresentationWidthPx, minZoomPercent, maxZoomPercent, stepPercent = CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT }: { currentZoomPercent: number;
+const computeNextCardSetViewZoomPercentFromGesture = ({ currentZoomPercent, basePresentationWidthPx, gestureScale, cardLayoutMode, maxPresentationWidthPx, minZoomPercent, maxZoomPercent, stepPercent = CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT }: { currentZoomPercent: number;
   basePresentationWidthPx: number;
   gestureScale: number;
   cardLayoutMode: CardLayoutMode;
@@ -115,3 +115,5 @@ export const computeNextCardSetViewZoomPercentFromGesture = ({ currentZoomPercen
     maxZoomPercent,
   });
 };
+
+export { shouldHandleCardSetViewZoomInputTarget, computeNextCardSetViewZoomPercentFromWheel, computeNextCardSetViewZoomPercentFromGesture };

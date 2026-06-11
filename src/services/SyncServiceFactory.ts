@@ -74,7 +74,7 @@ class ResilientSyncService extends SyncServiceV2 {
     }
   }
 }
-export class SyncServiceFactory { private static instances = new Map<string, ISyncService>();
+class SyncServiceFactory { private static instances = new Map<string, ISyncService>();
   private static pendingInstances = new Map<string, Promise<ISyncService>>();
 
   public static getInstance = async (userId: string): Promise<ISyncService> => {
@@ -139,3 +139,5 @@ export class SyncServiceFactory { private static instances = new Map<string, ISy
     SyncServiceFactory.pendingInstances.clear();
   };
 }
+
+export { SyncServiceFactory };

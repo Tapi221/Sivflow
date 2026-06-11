@@ -111,4 +111,6 @@ const NotificationService = class {
     return Array.from(this.notifications.values());
   };
 };
-export const notificationService = new NotificationService();
+const notificationService = new NotificationService();
+
+export { notificationService };

@@ -314,7 +314,7 @@ const buildRowBlock = ({
     issues,
   };
 };
-export const parseImportRows = ({ sheetName, rows }: { sheetName: ImportSheetName;
+const parseImportRows = ({ sheetName, rows }: { sheetName: ImportSheetName;
   rows: unknown[][];
 }): ImportParseResult => {
   const headerRow = rows[0] ?? [];
@@ -397,3 +397,5 @@ export const parseImportRows = ({ sheetName, rows }: { sheetName: ImportSheetNam
     issues: allIssues,
   };
 };
+
+export { parseImportRows };

@@ -7,7 +7,7 @@ import { ChevronRight } from "lucide-react";
 import { PlateElement } from "platejs/react";
 import { Button } from "./button";
 
-export const ToggleElement = (props: PlateElementProps) => { const element = props.element;
+const ToggleElement = (props: PlateElementProps) => { const element = props.element;
   const state = useToggleButtonState(element.id as string);
   const { buttonProps, open } = useToggleButton(state);
 
@@ -26,3 +26,5 @@ export const ToggleElement = (props: PlateElementProps) => { const element = pro
     </PlateElement>
   );
 };
+
+export { ToggleElement };

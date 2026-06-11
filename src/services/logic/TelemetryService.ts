@@ -45,7 +45,7 @@ const buildConsoleArgs = (prefix: string, context?: LogContext, error?: Error): 
  * TelemetryService: 構造化ログとメトリクスを収集するサービス
  * 本番環境ではGoogle Cloud Loggingなどに送信することを想定
  */
-export class TelemetryService implements ITelemetryService { private logs: SyncLogEntry[] = [];
+class TelemetryService implements ITelemetryService { private logs: SyncLogEntry[] = [];
   private metrics: Map<string, number[]> = new Map();
 
   /**
@@ -189,3 +189,5 @@ export class TelemetryService implements ITelemetryService { private logs: SyncL
     return this.logs.filter((log) => log.level === "error").slice(-limit);
   }
 }
+
+export { TelemetryService };

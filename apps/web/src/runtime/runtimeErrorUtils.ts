@@ -1,6 +1,6 @@
 import { RUNTIME_CHUNK_ERROR_PATTERNS } from "@platform/runtime/runtime.constants";
 
-export const toErrorText = (input: unknown) => { if (typeof input === "string") return input;
+const toErrorText = (input: unknown) => { if (typeof input === "string") return input;
   if (input instanceof Error) return `${input.name}: ${input.message}`;
   if (input && typeof input === "object") {
     try {
@@ -11,6 +11,8 @@ export const toErrorText = (input: unknown) => { if (typeof input === "string") 
   }
   return String(input ?? "");
 };
-export const isChunkLoadError = (input: unknown) => { const text = toErrorText(input);
+const isChunkLoadError = (input: unknown) => { const text = toErrorText(input);
   return RUNTIME_CHUNK_ERROR_PATTERNS.some((pattern) => text.includes(pattern));
 };
+
+export { toErrorText, isChunkLoadError };

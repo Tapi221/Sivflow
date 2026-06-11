@@ -20,7 +20,7 @@ const CARD_SET_VIEW_CONTENT_COMPONENTS = {
   mobile: CardSetViewMobileContent,
 } satisfies Record<PresentationTarget, (props: CardSetViewContentProps) => JSX.Element>;
 
-export const CardSetViewScreen = ({ cardSetId: controlledCardSetId = null }: CardSetViewScreenProps) => { const controller = useCardSetViewScreenController({ cardSetId: controlledCardSetId });
+const CardSetViewScreen = ({ cardSetId: controlledCardSetId = null }: CardSetViewScreenProps) => { const controller = useCardSetViewScreenController({ cardSetId: controlledCardSetId });
   const { cardSetId, state, paneWidth, topLeftZoomControl, effectiveCardLayoutMode, disabledCardLayoutModes, layoutConstraintIndicatorLabel, handleChangeCardLayoutMode, handleJumpToCard } = controller;
   const presentationTarget = usePresentationTarget();
 
@@ -75,3 +75,5 @@ export const CardSetViewScreen = ({ cardSetId: controlledCardSetId = null }: Car
     </CardWorkspaceShell>
   );
 };
+
+export { CardSetViewScreen };

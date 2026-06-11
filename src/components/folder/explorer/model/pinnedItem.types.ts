@@ -1,4 +1,6 @@
-export type PinnedItemType = "folder" | "card" | "document";
-export interface PinnedItem { type: PinnedItemType;
+type PinnedItemType = "folder" | "card" | "document";
+interface PinnedItem { type: PinnedItemType;
   id: string;
 }
+
+export type { PinnedItemType, PinnedItem };

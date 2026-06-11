@@ -5,7 +5,7 @@ type GoogleAccountChipProps = {
 
 const GOOGLE_ACCOUNT_CHIP_SIZE_CLASS_NAME = "size-[16px]";
 
-export const GoogleAccountChip = ({ name, photoUrl }: GoogleAccountChipProps) => { if (photoUrl) { return (<img src={photoUrl} alt={name} className={`${GOOGLE_ACCOUNT_CHIP_SIZE_CLASS_NAME} shrink-0 rounded-full object-cover`} referrerPolicy="no-referrer" />);
+const GoogleAccountChip = ({ name, photoUrl }: GoogleAccountChipProps) => { if (photoUrl) { return (<img src={photoUrl} alt={name} className={`${GOOGLE_ACCOUNT_CHIP_SIZE_CLASS_NAME} shrink-0 rounded-full object-cover`} referrerPolicy="no-referrer" />);
   }
 
   return (
@@ -16,3 +16,5 @@ export const GoogleAccountChip = ({ name, photoUrl }: GoogleAccountChipProps) =>
     </div>
   );
 };
+
+export { GoogleAccountChip };

@@ -29,7 +29,7 @@ const syncServerStoredGoogleAccounts = async (): Promise<boolean> => {
 
   return serializeStoredAccounts() !== before;
 };
-export const useServerStoredGoogleAccountBootstrap = (): void => { useEffect(() => { if (!isServerStoredGoogleOAuthEnabled()) return;
+const useServerStoredGoogleAccountBootstrap = (): void => { useEffect(() => { if (!isServerStoredGoogleOAuthEnabled()) return;
 
   let cancelled = false;
 
@@ -44,3 +44,5 @@ export const useServerStoredGoogleAccountBootstrap = (): void => { useEffect(() 
   };
 }, []);
 };
+
+export { useServerStoredGoogleAccountBootstrap };

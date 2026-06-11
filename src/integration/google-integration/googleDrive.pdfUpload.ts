@@ -1,8 +1,8 @@
-export type GoogleDrivePdfUploadInput = { accessToken: string;
+type GoogleDrivePdfUploadInput = { accessToken: string;
   fileName: string;
   pdf: Blob;
 };
-export type GoogleDrivePdfUploadResult = { id: string;
+type GoogleDrivePdfUploadResult = { id: string;
   name: string;
   mimeType: string;
   webViewLink: string | null;
@@ -39,7 +39,7 @@ const readGoogleDriveErrorMessage = async (response: Response): Promise<string> 
     return `Google Drive upload failed (${response.status})`;
   }
 };
-export const uploadPdfToGoogleDrive = async ({ accessToken, fileName, pdf }: GoogleDrivePdfUploadInput): Promise<GoogleDrivePdfUploadResult> => { if (!accessToken.trim()) { throw new Error("Google Drive access token is missing");
+const uploadPdfToGoogleDrive = async ({ accessToken, fileName, pdf }: GoogleDrivePdfUploadInput): Promise<GoogleDrivePdfUploadResult> => { if (!accessToken.trim()) { throw new Error("Google Drive access token is missing");
 }
 
 const response = await fetch(
@@ -73,3 +73,6 @@ return {
   webContentLink: payload.webContentLink ?? null,
 };
 };
+
+export { uploadPdfToGoogleDrive };
+export type { GoogleDrivePdfUploadInput, GoogleDrivePdfUploadResult };

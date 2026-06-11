@@ -1,14 +1,14 @@
 import { Timestamp } from "firebase/firestore";
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 
-export type UploadedImageStatus = "pending" | "uploading" | "ready" | "failed";
+type UploadedImageStatus = "pending" | "uploading" | "ready" | "failed";
 /** @deprecated Use UploadedImageStatus instead */
-export type UploadState = "pending" | "inProgress" | "completed" | "failed";
-export type UploadSource = "cloud" | "local_fallback";
-export type UploadFallbackReason = | "timeout" | "network_error" | "permission_error" | "unknown";
-export type AssetRemoteStatus = "none" | "uploading" | "ready" | "failed";
-export type AssetLocalStatus = "present" | "missing";
-export interface AssetRecord { id: string;
+type UploadState = "pending" | "inProgress" | "completed" | "failed";
+type UploadSource = "cloud" | "local_fallback";
+type UploadFallbackReason = | "timeout" | "network_error" | "permission_error" | "unknown";
+type AssetRemoteStatus = "none" | "uploading" | "ready" | "failed";
+type AssetLocalStatus = "present" | "missing";
+interface AssetRecord { id: string;
   userId: string;
   mime: string;
   size: number;
@@ -24,14 +24,14 @@ export interface AssetRecord { id: string;
   height?: number | null;
   sha256?: string | null;
 }
-export interface CardImageRef { assetId: string;
+interface CardImageRef { assetId: string;
   scale?: number | null;
   x?: number | null;
   layout?: ImageBlockLayout | null;
   naturalW?: number | null;
   naturalH?: number | null;
 }
-export type ResolvableImageRef = { id?: string | null;
+type ResolvableImageRef = { id?: string | null;
   assetId?: string | null;
   localFileId?: string | null;
   remoteUrl?: string | null;
@@ -44,10 +44,10 @@ export type ResolvableImageRef = { id?: string | null;
   naturalW?: number | null;
   naturalH?: number | null;
 };
-export interface ImageBlockLayout { /** fixed 本文座標系での画像論理幅。fixed / fluid 共通の正本。 */ baseWidthPx?: number | null;
+interface ImageBlockLayout { /** fixed 本文座標系での画像論理幅。fixed / fluid 共通の正本。 */ baseWidthPx?: number | null;
   cropX?: number | null;
 }
-export interface UploadedImage { id: string;
+interface UploadedImage { id: string;
   assetId?: string | null;
   localUrl?: BlobUrl | null;
   remoteUrl?: StorageUrl | null;
@@ -75,7 +75,7 @@ export interface UploadedImage { id: string;
   fallbackReason?: UploadFallbackReason;
   updatedAt?: Date | Timestamp | null;
 }
-export interface UploadedPdf { id: string;
+interface UploadedPdf { id: string;
   assetId?: string | null;
   filename: string;
   localUrl?: BlobUrl | null;
@@ -93,14 +93,14 @@ export interface UploadedPdf { id: string;
   fallbackReason?: UploadFallbackReason;
   updatedAt?: Date | Timestamp | null;
 }
-export interface UploadedFile { id: string;
+interface UploadedFile { id: string;
   name: string;
   remoteUrl: string;
   storagePath: string;
   contentType?: string | null;
   size?: number | null;
 }
-export interface UploadMetadata { id: string;
+interface UploadMetadata { id: string;
   userId: string;
   originalFilename: string;
   storagePath: string;
@@ -116,3 +116,5 @@ export interface UploadMetadata { id: string;
   downloadUrl?: string;
   uploadedAt?: Date | Timestamp;
 }
+
+export type { UploadedImageStatus, UploadState, UploadSource, UploadFallbackReason, AssetRemoteStatus, AssetLocalStatus, AssetRecord, CardImageRef, ResolvableImageRef, ImageBlockLayout, UploadedImage, UploadedPdf, UploadedFile, UploadMetadata };

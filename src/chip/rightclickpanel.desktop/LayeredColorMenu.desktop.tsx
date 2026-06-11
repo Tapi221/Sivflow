@@ -7,7 +7,7 @@ import { RightClickPanelSurface } from "./rightClickPanelCommon";
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "./rightClickPanel.utils";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 
-export type LayeredColorMenuOption = { id: TagColorKey;
+type LayeredColorMenuOption = { id: TagColorKey;
   label: string;
   value: string;
 };
@@ -34,8 +34,8 @@ const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   coral: "コーラル",
   sky: "スカイ",
 };
-export const LAYERED_COLOR_MENU_PANEL_ID = "layered-color-submenu";
-export const LAYERED_COLOR_MENU_OPTIONS: readonly LayeredColorMenuOption[] = TAG_COLOR_KEYS.map((colorKey) => ({ id: colorKey, label: TAG_COLOR_LABELS[colorKey], value: TAG_COLOR_PALETTE[colorKey].swatch }));
+const LAYERED_COLOR_MENU_PANEL_ID = "layered-color-submenu";
+const LAYERED_COLOR_MENU_OPTIONS: readonly LayeredColorMenuOption[] = TAG_COLOR_KEYS.map((colorKey) => ({ id: colorKey, label: TAG_COLOR_LABELS[colorKey], value: TAG_COLOR_PALETTE[colorKey].swatch }));
 const LAYERED_COLOR_MENU_GRID_COLUMNS = 5;
 const LAYERED_COLOR_MENU_SWATCH_SIZE = 20;
 const LAYERED_COLOR_MENU_CORE_SIZE = 7;
@@ -45,9 +45,9 @@ const LAYERED_COLOR_MENU_GRID_TOP_PADDING = 8;
 const LAYERED_COLOR_MENU_GRID_BOTTOM_PADDING = 8;
 const LAYERED_COLOR_MENU_GRID_WIDTH = LAYERED_COLOR_MENU_GRID_COLUMNS * LAYERED_COLOR_MENU_SWATCH_SIZE + (LAYERED_COLOR_MENU_GRID_COLUMNS - 1) * LAYERED_COLOR_MENU_GRID_GAP + LAYERED_COLOR_MENU_GRID_HORIZONTAL_PADDING * 2;
 const LAYERED_COLOR_MENU_GRID_HEIGHT = 2 * LAYERED_COLOR_MENU_SWATCH_SIZE + LAYERED_COLOR_MENU_GRID_GAP + LAYERED_COLOR_MENU_GRID_TOP_PADDING + LAYERED_COLOR_MENU_GRID_BOTTOM_PADDING;
-export const LAYERED_COLOR_MENU_WIDTH = Math.ceil(LAYERED_COLOR_MENU_GRID_WIDTH + RIGHT_CLICK_PANEL_SURFACE_PADDING * 2);
-export const LAYERED_COLOR_MENU_HEIGHT = Math.ceil(LAYERED_COLOR_MENU_GRID_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_PADDING * 2);
-export const LAYERED_COLOR_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
+const LAYERED_COLOR_MENU_WIDTH = Math.ceil(LAYERED_COLOR_MENU_GRID_WIDTH + RIGHT_CLICK_PANEL_SURFACE_PADDING * 2);
+const LAYERED_COLOR_MENU_HEIGHT = Math.ceil(LAYERED_COLOR_MENU_GRID_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_PADDING * 2);
+const LAYERED_COLOR_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 const LAYERED_COLOR_MENU_STYLE = `
 .layered-color-menu-grid {
   display: grid;
@@ -135,3 +135,5 @@ const LayeredColorMenuBase = ({
 const LayeredColorMenu = memo(LayeredColorMenuBase);
 LayeredColorMenu.displayName = "LayeredColorMenu";
 export { LayeredColorMenu };
+export { LAYERED_COLOR_MENU_PANEL_ID, LAYERED_COLOR_MENU_OPTIONS, LAYERED_COLOR_MENU_WIDTH, LAYERED_COLOR_MENU_HEIGHT, LAYERED_COLOR_MENU_MARGIN };
+export type { LayeredColorMenuOption };

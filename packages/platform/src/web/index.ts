@@ -6,7 +6,7 @@ const unavailable = async (): Promise<never> => {
   throw new Error("Desktop bridge is not available in web runtime");
 };
 
-export const webPlatform: PlatformApi = { app: { getVersion: async () => WEB_APP_VERSION }, shell: { openExternal: async (url: string) => { if (typeof window === "undefined") { throw new Error("window is not available");
+const webPlatform: PlatformApi = { app: { getVersion: async () => WEB_APP_VERSION }, shell: { openExternal: async (url: string) => { if (typeof window === "undefined") { throw new Error("window is not available");
 }
 window.open(url, "_blank", "noopener,noreferrer");
 },
@@ -22,3 +22,5 @@ oauth: {
   onCallback: () => () => {},
 },
 };
+
+export { webPlatform };

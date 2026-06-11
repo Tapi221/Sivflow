@@ -7,7 +7,7 @@ interface UseCardSetViewWindowEventsOptions {
   createAndFocusCard: () => Promise<boolean>;
 }
 
-export const useCardSetViewWindowEvents = ({ handleToggleViewMode, createAndFocusCard }: UseCardSetViewWindowEventsOptions) => { useEffect(() => { return subscribeCardSetViewWindowEvent(CARD_SET_VIEW_EVENTS.toggleEditingRequest, () => { handleToggleViewMode();
+const useCardSetViewWindowEvents = ({ handleToggleViewMode, createAndFocusCard }: UseCardSetViewWindowEventsOptions) => { useEffect(() => { return subscribeCardSetViewWindowEvent(CARD_SET_VIEW_EVENTS.toggleEditingRequest, () => { handleToggleViewMode();
     },
     );
   }, [handleToggleViewMode]);
@@ -21,3 +21,5 @@ export const useCardSetViewWindowEvents = ({ handleToggleViewMode, createAndFocu
     );
   }, [createAndFocusCard]);
 };
+
+export { useCardSetViewWindowEvents };

@@ -14,7 +14,7 @@ interface SecurityAlert {
 /**
  * セキュリティ状態の定義
  */
-export interface SecurityState { isLocked: boolean;
+interface SecurityState { isLocked: boolean;
   requires2FA: boolean;
   alerts: SecurityAlert[];
 }
@@ -22,7 +22,7 @@ export interface SecurityState { isLocked: boolean;
 /**
  * SecurityMonitor: セキュリティログ送信とサーバー状態監視を行うクラス
  */
-export class SecurityMonitor { private userId: string;
+class SecurityMonitor { private userId: string;
   private deviceId: string;
   private internalState: SecurityState = {
     isLocked: false,
@@ -196,3 +196,6 @@ export class SecurityMonitor { private userId: string;
     }
   }
 }
+
+export { SecurityMonitor };
+export type { SecurityState };

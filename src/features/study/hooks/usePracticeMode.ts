@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 
-export type PracticeFilterRating = "forgot" | "vague" | "remembered" | "easy";
-export type PracticeSessionState = { sourceSessionId: string;
+type PracticeFilterRating = "forgot" | "vague" | "remembered" | "easy";
+type PracticeSessionState = { sourceSessionId: string;
   filterRating: PracticeFilterRating;
   roundNumber: number;
   roundQueue: string[];
@@ -11,7 +11,7 @@ export type PracticeSessionState = { sourceSessionId: string;
   doneCount: number;
   phase: "cards" | "summary";
 };
-export type PracticeState = PracticeSessionState | null;
+type PracticeState = PracticeSessionState | null;
 type Params = {
   finalRatingByCardId: Map<string, PracticeFilterRating>;
   sourceSessionId: string;
@@ -30,7 +30,7 @@ const shuffle = (items: string[]) => {
   }
   return next;
 };
-export const usePracticeMode = ({ finalRatingByCardId, sourceSessionId, isPracticeFeatureEnabled, logPracticeEvent }: Params) => { const [practiceState, setPracticeState] = useState<PracticeState>(null);
+const usePracticeMode = ({ finalRatingByCardId, sourceSessionId, isPracticeFeatureEnabled, logPracticeEvent }: Params) => { const [practiceState, setPracticeState] = useState<PracticeState>(null);
 
   const isPracticeMode = useMemo(() => Boolean(practiceState), [practiceState]);
 
@@ -154,3 +154,6 @@ export const usePracticeMode = ({ finalRatingByCardId, sourceSessionId, isPracti
     handlePracticeExit,
   };
 };
+
+export { usePracticeMode };
+export type { PracticeFilterRating, PracticeSessionState, PracticeState };

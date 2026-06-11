@@ -23,4 +23,6 @@ const increment = (): number => {
   return next;
 };
 
-export const localGenerationCounterStore: GenerationCounterStorePort = { get, increment };
+const localGenerationCounterStore: GenerationCounterStorePort = { get, increment };
+
+export { localGenerationCounterStore };

@@ -68,4 +68,6 @@ const ContextService = class {
     localStorage.setItem(this.buildLastSyncKey(userId), Date.now().toString());
   };
 };
-export const contextService = new ContextService();
+const contextService = new ContextService();
+
+export { contextService };

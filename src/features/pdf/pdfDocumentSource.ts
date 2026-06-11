@@ -19,8 +19,6 @@ type PdfDocumentLoadSource = {
 };
 type PdfWorkerConstructor = new (options?: WorkerOptions) => Worker;
 
-export type { PdfDocumentSource };
-
 let pdfWorkerPort: Worker | null = null;
 const scheduledSourceReleaseTimers = new WeakMap<PdfDocumentUrlSource, ReturnType<typeof globalThis.setTimeout>>();
 
@@ -123,3 +121,4 @@ const releasePdfDocumentSourceSoon = (source: PdfDocumentSource | null | undefin
 };
 
 export { createPdfDocumentDataSource, createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource, releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource };
+export type { PdfDocumentSource };

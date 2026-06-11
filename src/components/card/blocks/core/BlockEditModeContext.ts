@@ -1,3 +1,5 @@
 import { createContext } from "react";
 
-export const BlockEditModeContext = createContext(false);
+const BlockEditModeContext = createContext(false);
+
+export { BlockEditModeContext };

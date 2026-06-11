@@ -48,7 +48,7 @@ const MEDIA_CONFIG: Record<
   },
 };
 
-export const MediaToolbarButton = ({ nodeType, ...props }: DropdownMenuProps & { nodeType: string; }) => {
+const MediaToolbarButton = ({ nodeType, ...props }: DropdownMenuProps & { nodeType: string; }) => {
   const currentConfig = MEDIA_CONFIG[nodeType];
 
   const editor = useEditorRef();
@@ -192,3 +192,5 @@ const MediaUrlDialogContent = ({
     </>
   );
 };
+
+export { MediaToolbarButton };

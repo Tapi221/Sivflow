@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
 
-export type ParsedCardSetViewParams = { cardSetId: string | null;
+type ParsedCardSetViewParams = { cardSetId: string | null;
   initialIndex: number;
   targetCardId: string | null;
 };
@@ -21,7 +21,10 @@ const parseCardSetViewParams = (search: string): ParsedCardSetViewParams => {
     targetCardId,
   };
 };
-export const useCardSetViewParams = () => { const { search } = useLocation();
+const useCardSetViewParams = () => { const { search } = useLocation();
 
   return useMemo(() => parseCardSetViewParams(search), [search]);
 };
+
+export { useCardSetViewParams };
+export type { ParsedCardSetViewParams };

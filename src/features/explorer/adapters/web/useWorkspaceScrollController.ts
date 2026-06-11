@@ -8,7 +8,7 @@ type Params = {
  * Explorer 内の選択変更に伴う main pane のスクロールだけを担当する。
  * route 遷移時の全体スクロール reset / no-page-scroll の制御は AppLayout 側に残す。
  */
-export const useWorkspaceScrollController = ({ isDesktop }: Params) => { const resetExplorerPaneScroll = useCallback(() => { if (typeof document === "undefined") return;
+const useWorkspaceScrollController = ({ isDesktop }: Params) => { const resetExplorerPaneScroll = useCallback(() => { if (typeof document === "undefined") return;
 
     const main = document.querySelector(".app-layout__main");
 
@@ -28,3 +28,5 @@ export const useWorkspaceScrollController = ({ isDesktop }: Params) => { const r
     resetExplorerPaneScroll,
   };
 };
+
+export { useWorkspaceScrollController };

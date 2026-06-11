@@ -171,7 +171,7 @@ const calcDragButtonTop = (editor: PlateEditor, element: TElement): number => {
   return currentMarginTop;
 };
 
-export const BlockDraggable: RenderNodeWrapper = (props) => { const { editor, element, path } = props;
+const BlockDraggable: RenderNodeWrapper = (props) => { const { editor, element, path } = props;
 
   const enabled = React.useMemo(() => {
     if (editor.dom.readOnly) return false;
@@ -494,3 +494,4 @@ const DropLine = React.memo(({
     />
   );
 });
+export { BlockDraggable };

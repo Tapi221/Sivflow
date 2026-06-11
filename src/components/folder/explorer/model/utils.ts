@@ -3,10 +3,7 @@ import { toMillis } from "@/utils/toMillis";
 import { isTypingTarget } from "@/features/hotkey/hotkeyGuards";
 import { hasOpenModalDialog } from "@/features/hotkey/modalGuards";
 
-export type { Card, DocumentItem };
-export { hasOpenModalDialog };
-
-export type FolderTreeNode = { id?: string;
+type FolderTreeNode = { id?: string;
   folderId?: string;
   parentFolderId?: string | null;
   parent_folder_id?: string | null;
@@ -24,32 +21,37 @@ export type FolderTreeNode = { id?: string;
   [key: string]: unknown;
 };
 
-export const ROOT_FOLDER_ID = "";
-export const DEFAULT_NEW_PROJECT_NAME = "新規プロジェクト";
-export const DEFAULT_NEW_FOLDER_NAME = "新規フォルダ";
-export const DEFAULT_NEW_CARD_SET_NAME = "新規カードセット";
-export const UNTITLED_PROJECT_NAME = "無題のプロジェクト";
-export const UNTITLED_FOLDER_NAME = "無題のフォルダ";
+const ROOT_FOLDER_ID = "";
+const DEFAULT_NEW_PROJECT_NAME = "新規プロジェクト";
+const DEFAULT_NEW_FOLDER_NAME = "新規フォルダ";
+const DEFAULT_NEW_CARD_SET_NAME = "新規カードセット";
+const UNTITLED_PROJECT_NAME = "無題のプロジェクト";
+const UNTITLED_FOLDER_NAME = "無題のフォルダ";
 
-export const getFolderId = (folder: FolderTreeNode): string => String(folder?.id ?? folder?.folderId ?? "");
-export const getParentFolderId = (folder: FolderTreeNode): string | null => { const parent = folder?.parentFolderId ?? folder?.parent_folder_id ?? null;
+const getFolderId = (folder: FolderTreeNode): string => String(folder?.id ?? folder?.folderId ?? "");
+const getParentFolderId = (folder: FolderTreeNode): string | null => { const parent = folder?.parentFolderId ?? folder?.parent_folder_id ?? null;
   return parent == null ? null : String(parent);
 };
-export const normalizeFolderId = (folderId: string | null | undefined): string => folderId ?? ROOT_FOLDER_ID;
-export const isSameFolder = (left: string | null | undefined, right: string | null | undefined): boolean => normalizeFolderId(left) === normalizeFolderId(right);
-export const getEntityTime = (value: unknown): number => { return toMillis(value);
+const normalizeFolderId = (folderId: string | null | undefined): string => folderId ?? ROOT_FOLDER_ID;
+const isSameFolder = (left: string | null | undefined, right: string | null | undefined): boolean => normalizeFolderId(left) === normalizeFolderId(right);
+const getEntityTime = (value: unknown): number => { return toMillis(value);
 };
-export const createOptimisticId = (prefix: "folder" | "card"): string => `tmp-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-export const createDocumentId = (): string => typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-export const buildStoragePath = (uid: string, docId: string, ext: "pdf"): string => `users/${uid}/documents/${docId}/source.${ext}`;
-export const isTextInputTarget = (target: HTMLElement | null): boolean => isTypingTarget(target);
-export const isFileDragEvent = (event: React.DragEvent | DragEvent): boolean => { const dataTransfer = (event as React.DragEvent).dataTransfer || (event as DragEvent).dataTransfer;
+const createOptimisticId = (prefix: "folder" | "card"): string => `tmp-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+const createDocumentId = (): string => typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+const buildStoragePath = (uid: string, docId: string, ext: "pdf"): string => `users/${uid}/documents/${docId}/source.${ext}`;
+const isTextInputTarget = (target: HTMLElement | null): boolean => isTypingTarget(target);
+const isFileDragEvent = (event: React.DragEvent | DragEvent): boolean => { const dataTransfer = (event as React.DragEvent).dataTransfer || (event as DragEvent).dataTransfer;
   const types = Array.from(dataTransfer?.types ?? []);
   return types.includes("Files");
 };
-export const extractPdfFiles = (fileList: FileList | null): File[] => { if (!fileList) return [];
+const extractPdfFiles = (fileList: FileList | null): File[] => { if (!fileList) return [];
   return Array.from(fileList).filter((file) => {
     const name = file.name?.toLowerCase() ?? "";
     return file.type === "application/pdf" || name.endsWith(".pdf");
   });
 };
+
+export { hasOpenModalDialog };
+export { ROOT_FOLDER_ID, DEFAULT_NEW_PROJECT_NAME, DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_CARD_SET_NAME, UNTITLED_PROJECT_NAME, UNTITLED_FOLDER_NAME, getFolderId, getParentFolderId, normalizeFolderId, isSameFolder, getEntityTime, createOptimisticId, createDocumentId, buildStoragePath, isTextInputTarget, isFileDragEvent, extractPdfFiles };
+export type { Card, DocumentItem };
+export type { FolderTreeNode };

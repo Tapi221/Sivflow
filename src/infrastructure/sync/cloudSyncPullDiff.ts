@@ -96,7 +96,7 @@ const fetchUserSettingsDiff = async (userId: string, since: number): Promise<Pul
     },
   ];
 };
-export const pullCloudSyncDiff = async (userId: string, since: number): Promise<{ changes: SyncChange[]; serverTime: number; }> => {
+const pullCloudSyncDiff = async (userId: string, since: number): Promise<{ changes: SyncChange[]; serverTime: number; }> => {
   const sinceTimestamp = Timestamp.fromMillis(Math.max(0, since));
 
   const pullableResults = await Promise.all(
@@ -123,3 +123,5 @@ export const pullCloudSyncDiff = async (userId: string, since: number): Promise<
     serverTime: Timestamp.now().toMillis(),
   };
 };
+
+export { pullCloudSyncDiff };

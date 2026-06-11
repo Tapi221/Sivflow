@@ -1,11 +1,11 @@
 import type { BaseEntity } from "./base";
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 
-export type DocumentKind = "pdf";
-export type PdfPageLayoutMode = "single" | "double";
-export type PdfSidePanelTab = "bookmarks" | "highlights" | "ocr" | "outline" | "thumbnails";
-export type LegacyDocumentFields = { folder_id?: string | null; file_name?: string | null; order_index?: number; };
-export interface PdfViewerState { currentPage?: number;
+type DocumentKind = "pdf";
+type PdfPageLayoutMode = "single" | "double";
+type PdfSidePanelTab = "bookmarks" | "highlights" | "ocr" | "outline" | "thumbnails";
+type LegacyDocumentFields = { folder_id?: string | null; file_name?: string | null; order_index?: number; };
+interface PdfViewerState { currentPage?: number;
   scale?: number;
   fitMode?: "width" | "manual";
   pageLayoutMode?: PdfPageLayoutMode;
@@ -16,7 +16,7 @@ export interface PdfViewerState { currentPage?: number;
   historyBackPages?: number[];
   historyForwardPages?: number[];
 }
-export interface DocumentItem extends BaseEntity, LegacyDocumentFields { kind: DocumentKind;
+interface DocumentItem extends BaseEntity, LegacyDocumentFields { kind: DocumentKind;
   folderId: string;
   orderIndex: number;
   title: string;
@@ -39,5 +39,7 @@ export interface DocumentItem extends BaseEntity, LegacyDocumentFields { kind: D
   documentId?: string;
   viewerState?: PdfViewerState | null;
 }
-export type Document = DocumentItem;
-export type PdfDocument = DocumentItem;
+type Document = DocumentItem;
+type PdfDocument = DocumentItem;
+
+export type { DocumentKind, PdfPageLayoutMode, PdfSidePanelTab, LegacyDocumentFields, PdfViewerState, DocumentItem, Document, PdfDocument };

@@ -44,7 +44,7 @@ const shouldTouchUpdatedAtForUpdates = (updates: Partial<DocumentItem>, options:
   if (typeof options.touchUpdatedAt === "boolean") return options.touchUpdatedAt;
   return Object.keys(updates).some((key) => !VIEWER_STATE_UPDATE_KEYS.has(key));
 };
-export const useDocumentCommands = () => { const { currentUser } = useAuthSession();
+const useDocumentCommands = () => { const { currentUser } = useAuthSession();
 
   const updateDocument = useCallback(
     async (documentId: string, updates: Partial<DocumentItem>, options: UpdateDocumentOptions = {}): Promise<void> => {
@@ -115,3 +115,5 @@ export const useDocumentCommands = () => { const { currentUser } = useAuthSessio
     purgeDocument,
   };
 };
+
+export { useDocumentCommands };

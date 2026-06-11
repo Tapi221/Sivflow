@@ -9,4 +9,6 @@ const ImageDatabaseWriter = class {
 
   getFromIndexedDB = async (imageId: string): Promise<UploadedImage | null> => getImageFromIndexedDb(imageId);
 };
-export const imageDB = new ImageDatabaseWriter();
+const imageDB = new ImageDatabaseWriter();
+
+export { imageDB };

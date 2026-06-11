@@ -7,7 +7,7 @@ type UseCardSyncStatusReporterOptions = Readonly<{
   isEnabled?: boolean;
 }>;
 
-export const useCardSyncStatusReporter = ({ status, onSyncStatusChange = null, isEnabled = true }: UseCardSyncStatusReporterOptions): void => { useEffect(() => { if (!onSyncStatusChange || isEnabled) { return;
+const useCardSyncStatusReporter = ({ status, onSyncStatusChange = null, isEnabled = true }: UseCardSyncStatusReporterOptions): void => { useEffect(() => { if (!onSyncStatusChange || isEnabled) { return;
     }
 
     onSyncStatusChange(null);
@@ -29,3 +29,5 @@ export const useCardSyncStatusReporter = ({ status, onSyncStatusChange = null, i
     return () => onSyncStatusChange(null);
   }, [onSyncStatusChange]);
 };
+
+export { useCardSyncStatusReporter };

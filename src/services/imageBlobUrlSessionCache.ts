@@ -9,7 +9,7 @@ type CacheEntry = {
   pinCount: number;
   staleUrls: string[];
 };
-export interface BlobCacheStats { cacheSize: number;
+interface BlobCacheStats { cacheSize: number;
   cacheMax: number;
   pinnedCount: number;
   evictCount: number;
@@ -98,7 +98,7 @@ const cacheImageBlobUrl = (
   cleanupStaleUrls(existing);
   evictIfNeeded();
 };
-export const getOrCreateImageBlobUrl = async (id: string | null | undefined, blobOrOptions?: Blob | BlobScopeOptions, options?: BlobScopeOptions): Promise<string | null> => { if (!id) return null;
+const getOrCreateImageBlobUrl = async (id: string | null | undefined, blobOrOptions?: Blob | BlobScopeOptions, options?: BlobScopeOptions): Promise<string | null> => { if (!id) return null;
   const scopeOptions =
     blobOrOptions instanceof Blob || blobOrOptions == null
       ? options
@@ -112,7 +112,7 @@ export const getOrCreateImageBlobUrl = async (id: string | null | undefined, blo
   cacheImageBlobUrl(id, url, scopeOptions);
   return url;
 };
-export const removeImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions): void => { if (!id) return;
+const removeImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions): void => { if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
   if (!entry) return;
@@ -125,13 +125,13 @@ export const removeImageBlobUrl = (id: string | null | undefined, options?: Blob
   revokeBlobUrl(entry.url);
   cache.delete(key);
 };
-export const pinImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions): void => { if (!id) return;
+const pinImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions): void => { if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
   if (!entry) return;
   entry.pinCount += 1;
 };
-export const unpinImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions): void => { if (!id) return;
+const unpinImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions): void => { if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
   if (!entry) return;
@@ -140,7 +140,7 @@ export const unpinImageBlobUrl = (id: string | null | undefined, options?: BlobS
     cleanupStaleUrls(entry);
   }
 };
-export const getBlobCacheStats = () => { let pinnedCount = 0;
+const getBlobCacheStats = () => { let pinnedCount = 0;
   for (const entry of cache.values()) {
     if (entry.pinCount > 0) pinnedCount++;
   }
@@ -152,3 +152,6 @@ export const getBlobCacheStats = () => { let pinnedCount = 0;
     revokeCount: _revokeCount,
   };
 };
+
+export { getOrCreateImageBlobUrl, removeImageBlobUrl, pinImageBlobUrl, unpinImageBlobUrl, getBlobCacheStats };
+export type { BlobCacheStats };

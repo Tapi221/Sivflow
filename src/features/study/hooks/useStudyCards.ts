@@ -13,7 +13,7 @@ type Params = {
   settings: Partial<UserSettings> | null | undefined;
 };
 
-export const useStudyCards = ({ folderId, allCards, cardSets, folders, foldersLoading, settings }: Params) => { const cardSetById = useMemo(() => buildCardSetById(cardSets.filter((cardSet) => !cardSet.isDeleted)), [cardSets]);
+const useStudyCards = ({ folderId, allCards, cardSets, folders, foldersLoading, settings }: Params) => { const cardSetById = useMemo(() => buildCardSetById(cardSets.filter((cardSet) => !cardSet.isDeleted)), [cardSets]);
 
   const studyCards = useMemo(() => {
     let cards = (allCards ?? []).filter(
@@ -80,3 +80,5 @@ export const useStudyCards = ({ folderId, allCards, cardSets, folders, foldersLo
     isEmpty: studyCards.length === 0,
   };
 };
+
+export { useStudyCards };

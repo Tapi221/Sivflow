@@ -12,7 +12,7 @@ type CalendarEventDragRepeatActionControls = {
   stop: (pointerId?: number) => void;
   getSnapshot: () => CalendarEventDragPointerSnapshot | null;
 };
-export type CalendarEventDragPointerSnapshot = { pointerId: number;
+type CalendarEventDragPointerSnapshot = { pointerId: number;
   buttons: number;
   clientX: number;
   clientY: number;
@@ -123,3 +123,4 @@ const useCalendarEventDragRepeatAction = <TDirection extends string>({ repeatInt
 };
 
 export { createCalendarEventDragPointerSnapshot, useCalendarEventDragRepeatAction };
+export type { CalendarEventDragPointerSnapshot };

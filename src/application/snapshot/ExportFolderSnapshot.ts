@@ -5,7 +5,7 @@ import { localGenerationCounterStore } from "@/infrastructure/browser-storage/Lo
 import type { Card } from "@/types";
 import type { AppSnapshot } from "@/types/domain/snapshot";
 
-export interface ExportFolderSnapshotDependencies { fileExporter: JsonFileExportPort;
+interface ExportFolderSnapshotDependencies { fileExporter: JsonFileExportPort;
 }
 
 const createSnapshotUseCase = createCreateSnapshotUseCase({
@@ -51,7 +51,7 @@ const collectAssetIdsFromCards = (cards: Card[]): Set<string> => {
 
   return assetIds;
 };
-export const createExportFolderSnapshotUseCase = ({ fileExporter }: ExportFolderSnapshotDependencies) => { const execute = async (userId: string, folderId: string): Promise<void> => { const fullSnapshot = await createSnapshotUseCase.execute(userId);
+const createExportFolderSnapshotUseCase = ({ fileExporter }: ExportFolderSnapshotDependencies) => { const execute = async (userId: string, folderId: string): Promise<void> => { const fullSnapshot = await createSnapshotUseCase.execute(userId);
     const folder = fullSnapshot.data.folders.find(
       (item) => item.id === folderId,
     );
@@ -113,3 +113,6 @@ export const createExportFolderSnapshotUseCase = ({ fileExporter }: ExportFolder
     execute,
   };
 };
+
+export { createExportFolderSnapshotUseCase };
+export type { ExportFolderSnapshotDependencies };

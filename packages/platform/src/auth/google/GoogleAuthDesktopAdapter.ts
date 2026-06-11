@@ -16,4 +16,6 @@ const signIn: GoogleAuthPort["signIn"] = async () => {
   await signInWithCustomToken(auth, firebaseToken);
 };
 
-export const googleAuthDesktopAdapter: GoogleAuthPort = { signIn };
+const googleAuthDesktopAdapter: GoogleAuthPort = { signIn };
+
+export { googleAuthDesktopAdapter };

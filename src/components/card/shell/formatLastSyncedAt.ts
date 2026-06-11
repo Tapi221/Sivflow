@@ -2,7 +2,7 @@ const isSameDay = (left: Date, right: Date) =>
   left.getFullYear() === right.getFullYear() &&
   left.getMonth() === right.getMonth() &&
   left.getDate() === right.getDate();
-export const formatLastSyncedAt = (lastSyncedAtMs: number | null) => { if (lastSyncedAtMs == null || !Number.isFinite(lastSyncedAtMs)) { return "未同期";
+const formatLastSyncedAt = (lastSyncedAtMs: number | null) => { if (lastSyncedAtMs == null || !Number.isFinite(lastSyncedAtMs)) { return "未同期";
   }
 
   const date = new Date(lastSyncedAtMs);
@@ -27,3 +27,5 @@ export const formatLastSyncedAt = (lastSyncedAtMs: number | null) => { if (lastS
 
   return `${dateLabel} ${timeLabel}`;
 };
+
+export { formatLastSyncedAt };

@@ -3,7 +3,7 @@ import { clampCardCarouselIndex } from "@/features/review/domain/cardCarouselInd
 
 type CardCarouselScrollBehavior = ScrollBehavior | "instant";
 
-export const useCardCarousel3DWebBridge = ({ activeIndex, itemCount, itemSpan, scrollDebounceMs, onSettledIndexChange }: { activeIndex: number;
+const useCardCarousel3DWebBridge = ({ activeIndex, itemCount, itemSpan, scrollDebounceMs, onSettledIndexChange }: { activeIndex: number;
   itemCount: number;
   itemSpan: number;
   scrollDebounceMs: number;
@@ -135,3 +135,5 @@ export const useCardCarousel3DWebBridge = ({ activeIndex, itemCount, itemSpan, s
     updateStageHeight,
   };
 };
+
+export { useCardCarousel3DWebBridge };

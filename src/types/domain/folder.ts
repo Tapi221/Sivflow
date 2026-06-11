@@ -2,7 +2,7 @@ import { Timestamp } from "firebase/firestore";
 import type { UploadedFile } from "./assets";
 import type { BaseEntity } from "./base";
 
-export type Folder = BaseEntity & { parentFolderId?: string | null;
+type Folder = BaseEntity & { parentFolderId?: string | null;
   folderId: string;
   folderName: string;
   folderColor?: string;
@@ -16,3 +16,5 @@ export type Folder = BaseEntity & { parentFolderId?: string | null;
   deletedAt?: Date | Timestamp | null;
   lastAccessAt?: Date | Timestamp | null;
 };
+
+export type { Folder };

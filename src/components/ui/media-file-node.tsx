@@ -10,7 +10,7 @@ import { PlateElement, useReadOnly, withHOC } from "platejs/react";
 import { cn } from "@/lib/utils";
 import { Caption, CaptionTextarea } from "./caption";
 
-export const FileElement = withHOC(ResizableProvider, (props: PlateElementProps<TFileElement>) => { const readOnly = useReadOnly();
+const FileElement = withHOC(ResizableProvider, (props: PlateElementProps<TFileElement>) => { const readOnly = useReadOnly();
   const { name, unsafeUrl } = useMediaState();
 
   return (
@@ -44,3 +44,5 @@ export const FileElement = withHOC(ResizableProvider, (props: PlateElementProps<
   );
 },
 );
+
+export { FileElement };

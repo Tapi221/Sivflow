@@ -2,7 +2,7 @@ import type { ReactNode, Ref } from "react";
 import { PanelSearchField } from "./PanelSearchField";
 import { cn } from "@/lib/utils";
 
-export interface FilterPanelShellProps { title?: string;
+interface FilterPanelShellProps { title?: string;
   searchValue?: string;
   searchPlaceholder?: string;
   onSearchChange?: (value: string) => void;
@@ -15,7 +15,7 @@ export interface FilterPanelShellProps { title?: string;
   bodyRef?: Ref<HTMLDivElement>;
 }
 
-export const FilterPanelShell = ({ title, searchValue, searchPlaceholder = "検索...", onSearchChange, searchInputRef, headerAction, sections, children, className, bodyClassName, bodyRef }: FilterPanelShellProps) => { const shouldRenderSearch = typeof onSearchChange === "function";
+const FilterPanelShell = ({ title, searchValue, searchPlaceholder = "検索...", onSearchChange, searchInputRef, headerAction, sections, children, className, bodyClassName, bodyRef }: FilterPanelShellProps) => { const shouldRenderSearch = typeof onSearchChange === "function";
   const shouldRenderHeader = Boolean(title) || Boolean(headerAction);
 
   return (
@@ -58,3 +58,6 @@ export const FilterPanelShell = ({ title, searchValue, searchPlaceholder = "検�
     </div>
   );
 };
+
+export { FilterPanelShell };
+export type { FilterPanelShellProps };

@@ -4,7 +4,7 @@ import { LAYERED_TREE_AUTO_EXPAND_DELAY_MS, LAYERED_TREE_DND_MIME_TYPE } from ".
 import { applyLayeredTreeDragPreview, createLayeredTreeItemMap, createLayeredTreeReorderedSiblingList, getLayeredTreeAutoScrollStep, getLayeredTreeDropParentId, getLayeredTreeDropPosition, getLayeredTreeDropPositionFromTarget, isLayeredTreeDropInstructionEqual, isLayeredTreeItemAncestorOf, resolveLayeredTreeEventDropTarget } from "./layeredTreeDnd.utils";
 import type { LayeredTreeDropInstruction, LayeredTreeItem, UseLayeredTreeDragDropParams } from "./layeredTreeDnd.types";
 
-export const useLayeredTreeDragDrop = <TItem extends LayeredTreeItem>({ rootItems, rootDropParentId, scrollContainerRef, getChildItems, getParentId, getOrderIndex, updateItem, setExpandedIds }: UseLayeredTreeDragDropParams<TItem>) => { const itemMap = useMemo(() => createLayeredTreeItemMap(rootItems, getChildItems), [getChildItems, rootItems]);
+const useLayeredTreeDragDrop = <TItem extends LayeredTreeItem>({ rootItems, rootDropParentId, scrollContainerRef, getChildItems, getParentId, getOrderIndex, updateItem, setExpandedIds }: UseLayeredTreeDragDropParams<TItem>) => { const itemMap = useMemo(() => createLayeredTreeItemMap(rootItems, getChildItems), [getChildItems, rootItems]);
   const autoExpandTimerRef = useRef<number | null>(null);
   const autoExpandTargetRef = useRef<string | null>(null);
   const autoScrollFrameRef = useRef<number | null>(null);
@@ -263,3 +263,5 @@ export const useLayeredTreeDragDrop = <TItem extends LayeredTreeItem>({ rootItem
 
   return { dragState: { draggingId, dropInstruction }, handleItemDragStart, handleItemDragOver, handleItemDragLeave, handleItemDrop, handleItemDragEnd: clearDragState, handleListDragOver, handleListDragLeave, handleListDrop };
 };
+
+export { useLayeredTreeDragDrop };

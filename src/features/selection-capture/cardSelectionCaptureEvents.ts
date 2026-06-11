@@ -1,24 +1,24 @@
 import type { SelectionCaptureArea, SelectionCaptureRect } from "./selectionCapture.types";
 
-export type CardSelectionCaptureSide = "question" | "answer";
-export type CardSelectionCaptureTaskResult = string | void;
-export type CardSelectionCaptureEventPayload = { readonly blob: Blob;
+type CardSelectionCaptureSide = "question" | "answer";
+type CardSelectionCaptureTaskResult = string | void;
+type CardSelectionCaptureEventPayload = { readonly blob: Blob;
   readonly rect: SelectionCaptureRect;
   readonly area?: SelectionCaptureArea;
   readonly target: HTMLElement;
   readonly side: CardSelectionCaptureSide;
   readonly ocrText: string | null;
 };
-export type CardSelectionCaptureEventDetail = CardSelectionCaptureEventPayload & { readonly area: SelectionCaptureArea;
+type CardSelectionCaptureEventDetail = CardSelectionCaptureEventPayload & { readonly area: SelectionCaptureArea;
   addTask: (task: Promise<CardSelectionCaptureTaskResult>) => void;
 };
-export type DispatchedCardSelectionCaptureEvent = { handled: boolean;
+type DispatchedCardSelectionCaptureEvent = { handled: boolean;
   tasks: Promise<CardSelectionCaptureTaskResult>[];
 };
 
-export const CARD_SELECTION_CAPTURE_EVENT = "sivflow:card-selection-capture";
+const CARD_SELECTION_CAPTURE_EVENT = "sivflow:card-selection-capture";
 
-export const dispatchCardSelectionCaptureEvent = (payload: CardSelectionCaptureEventPayload): DispatchedCardSelectionCaptureEvent => { const tasks: Promise<CardSelectionCaptureTaskResult>[] = [];
+const dispatchCardSelectionCaptureEvent = (payload: CardSelectionCaptureEventPayload): DispatchedCardSelectionCaptureEvent => { const tasks: Promise<CardSelectionCaptureTaskResult>[] = [];
   const detail: CardSelectionCaptureEventDetail = {
     ...payload,
     area: payload.area ?? { shape: "rectangle", rect: payload.rect },
@@ -42,3 +42,6 @@ export const dispatchCardSelectionCaptureEvent = (payload: CardSelectionCaptureE
     tasks,
   };
 };
+
+export { CARD_SELECTION_CAPTURE_EVENT, dispatchCardSelectionCaptureEvent };
+export type { CardSelectionCaptureSide, CardSelectionCaptureTaskResult, CardSelectionCaptureEventPayload, CardSelectionCaptureEventDetail, DispatchedCardSelectionCaptureEvent };

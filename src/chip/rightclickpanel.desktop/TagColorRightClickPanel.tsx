@@ -41,9 +41,9 @@ const TAG_COLOR_GRID_WIDTH =
   TAG_COLOR_GRID_COLUMNS * TAG_COLOR_SWATCH_SIZE +
   (TAG_COLOR_GRID_COLUMNS - 1) * TAG_COLOR_GRID_GAP +
   TAG_COLOR_GRID_HORIZONTAL_PADDING * 2;
-export const TAG_COLOR_CONTEXT_MENU_WIDTH = Math.ceil(Math.max(resolveRightClickPanelTextWidth([TAG_COLOR_CONTEXT_MENU_TITLE]), TAG_COLOR_GRID_WIDTH + RIGHT_CLICK_PANEL_SURFACE_PADDING * 2));
-export const TAG_COLOR_CONTEXT_MENU_HEIGHT = 92;
-export const TAG_COLOR_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
+const TAG_COLOR_CONTEXT_MENU_WIDTH = Math.ceil(Math.max(resolveRightClickPanelTextWidth([TAG_COLOR_CONTEXT_MENU_TITLE]), TAG_COLOR_GRID_WIDTH + RIGHT_CLICK_PANEL_SURFACE_PADDING * 2));
+const TAG_COLOR_CONTEXT_MENU_HEIGHT = 92;
+const TAG_COLOR_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 const TAG_COLOR_GRID_STYLE = `
 .tag-color-context-menu-grid {
   display: grid;
@@ -54,7 +54,7 @@ const TAG_COLOR_GRID_STYLE = `
 }
 `;
 
-export const TagColorRightClickPanel = ({ x, y, availableColors, currentColorKey, tagName, menuRef, noDragStyle, panelId, onSelectColor }: TagColorRightClickPanelProps) => { return (<> <style>{TAG_COLOR_GRID_STYLE}</style> <RightClickPanelSurface x={x} y={y} width={TAG_COLOR_CONTEXT_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} ariaLabel={`${tagName} tag color menu`} panelId={panelId} > <div className="right-click-panel-title">{TAG_COLOR_CONTEXT_MENU_TITLE}</div> <div className="tag-color-context-menu-grid"> {availableColors.map((colorKey) => { const isSelected = colorKey === currentColorKey;
+const TagColorRightClickPanel = ({ x, y, availableColors, currentColorKey, tagName, menuRef, noDragStyle, panelId, onSelectColor }: TagColorRightClickPanelProps) => { return (<> <style>{TAG_COLOR_GRID_STYLE}</style> <RightClickPanelSurface x={x} y={y} width={TAG_COLOR_CONTEXT_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} ariaLabel={`${tagName} tag color menu`} panelId={panelId} > <div className="right-click-panel-title">{TAG_COLOR_CONTEXT_MENU_TITLE}</div> <div className="tag-color-context-menu-grid"> {availableColors.map((colorKey) => { const isSelected = colorKey === currentColorKey;
     const colorLabel = TAG_COLOR_LABELS[colorKey] ?? colorKey;
 
     return (
@@ -87,3 +87,5 @@ export const TagColorRightClickPanel = ({ x, y, availableColors, currentColorKey
   </>
   );
 };
+
+export { TAG_COLOR_CONTEXT_MENU_WIDTH, TAG_COLOR_CONTEXT_MENU_HEIGHT, TAG_COLOR_CONTEXT_MENU_MARGIN, TagColorRightClickPanel };

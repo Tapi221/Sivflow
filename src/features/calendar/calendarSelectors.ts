@@ -30,7 +30,7 @@ const buildFolderMap = (folders: CalendarFolderLike[]) => {
 
   return folderMap;
 };
-export const buildCardsByDate = ({ cards, cardSets, folders, foldersLoading, autoCarryOver }: { cards: CalendarCardLike[];
+const buildCardsByDate = ({ cards, cardSets, folders, foldersLoading, autoCarryOver }: { cards: CalendarCardLike[];
   cardSets: CalendarCardSetLike[];
   folders: CalendarFolderLike[];
   foldersLoading: boolean;
@@ -85,7 +85,7 @@ export const buildCardsByDate = ({ cards, cardSets, folders, foldersLoading, aut
 
   return grouped;
 };
-export const buildTodaySummary = (cardsByDate: CalendarCardsByDate): CalendarSummaryViewModel => { const todayKey = toDateKey(new Date());
+const buildTodaySummary = (cardsByDate: CalendarCardsByDate): CalendarSummaryViewModel => { const todayKey = toDateKey(new Date());
   const todayDueCount = (cardsByDate[todayKey] ?? []).length;
 
   return {
@@ -94,9 +94,9 @@ export const buildTodaySummary = (cardsByDate: CalendarCardsByDate): CalendarSum
     isTodaySelected: false,
   };
 };
-export const buildStreak = (remoteLogs: CalendarStudyLogLike[], localLogs: CalendarStudyLogLike[]) => { return getStreakFromLogs([...remoteLogs, ...localLogs]);
+const buildStreak = (remoteLogs: CalendarStudyLogLike[], localLogs: CalendarStudyLogLike[]) => { return getStreakFromLogs([...remoteLogs, ...localLogs]);
 };
-export const buildCalendarGridViewModel = ({ currentDate, selectedDate, cardsByDate, weekStartDay }: { currentDate: Date;
+const buildCalendarGridViewModel = ({ currentDate, selectedDate, cardsByDate, weekStartDay }: { currentDate: Date;
   selectedDate: Date;
   cardsByDate: CalendarCardsByDate;
   weekStartDay: CalendarWeekStartDay;
@@ -133,7 +133,7 @@ export const buildCalendarGridViewModel = ({ currentDate, selectedDate, cardsByD
     days,
   };
 };
-export const buildCalendarScreenViewModel = ({ currentDate, selectedDate, cardsByDate, weekStartDay, remoteLogs, localLogs }: { currentDate: Date;
+const buildCalendarScreenViewModel = ({ currentDate, selectedDate, cardsByDate, weekStartDay, remoteLogs, localLogs }: { currentDate: Date;
   selectedDate: Date;
   cardsByDate: CalendarCardsByDate;
   weekStartDay: CalendarWeekStartDay;
@@ -160,3 +160,5 @@ export const buildCalendarScreenViewModel = ({ currentDate, selectedDate, cardsB
     selectedDateLabel: format(selectedDate, "yyyy/MM/dd"),
   };
 };
+
+export { buildCardsByDate, buildTodaySummary, buildStreak, buildCalendarGridViewModel, buildCalendarScreenViewModel };

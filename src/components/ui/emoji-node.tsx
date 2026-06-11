@@ -10,7 +10,7 @@ import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineCombo
 
 const TRAILING_COLON_REGEX = /:$/;
 
-export const EmojiInputElement = (props: PlateElementProps) => { const { children, editor, element } = props;
+const EmojiInputElement = (props: PlateElementProps) => { const { children, editor, element } = props;
   const data = usePluginOption(EmojiPlugin, "data")!;
   const [value, setValue] = React.useState("");
   const debouncedValue = useDebounce(value, 100);
@@ -46,3 +46,5 @@ export const EmojiInputElement = (props: PlateElementProps) => { const { childre
     </PlateElement>
   );
 };
+
+export { EmojiInputElement };

@@ -1,7 +1,7 @@
 /**
  * IndexedDB メタデータの型定義
  */
-export interface IndexedDBMetadata { key: "main"; // 固定キー
+interface IndexedDBMetadata { key: "main"; // 固定キー
   schemaVersion: number;
   lastFullSyncAt: Date;
   expectedEntityCounts: {
@@ -17,4 +17,7 @@ export interface IndexedDBMetadata { key: "main"; // 固定キー
 /**
  * 現在のスキーマバージョン
  */
-export const CURRENT_SCHEMA_VERSION = 29;
+const CURRENT_SCHEMA_VERSION = 29;
+
+export { CURRENT_SCHEMA_VERSION };
+export type { IndexedDBMetadata };

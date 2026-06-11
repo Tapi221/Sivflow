@@ -1,10 +1,7 @@
 import { isStorageRecord } from "@/domain/shared/storage/storageRecordUtils";
 import { sanitizeCardStorageImageRef } from "./cardStorageImageRefTransforms";
 
-export { sanitizeCardStorageImageRef } from "./cardStorageImageRefTransforms";
-export { sanitizeCardStorageLayout } from "./cardStorageLayoutTransforms";
-
-export const sanitizeCardStorageBlockImages = (blocks: unknown[] | undefined) => { if (!Array.isArray(blocks)) return blocks;
+const sanitizeCardStorageBlockImages = (blocks: unknown[] | undefined) => { if (!Array.isArray(blocks)) return blocks;
 
   return blocks.map((block) => {
     if (!isStorageRecord(block) || !Array.isArray(block.images)) return block;
@@ -15,3 +12,7 @@ export const sanitizeCardStorageBlockImages = (blocks: unknown[] | undefined) =>
     };
   });
 };
+
+export { sanitizeCardStorageImageRef } from "./cardStorageImageRefTransforms";
+export { sanitizeCardStorageLayout } from "./cardStorageLayoutTransforms";
+export { sanitizeCardStorageBlockImages };

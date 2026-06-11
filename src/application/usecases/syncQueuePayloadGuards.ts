@@ -4,9 +4,9 @@ import type { Document } from "@/types/domain/document";
 import type { AssetSyncPayload, ProjectMapSyncPayload, SyncDeletePayload, SyncEntity, SyncPayloadByEntity, SyncQueueItem, TagSyncPayload } from "@/types/domain/sync";
 import type { UserSettings } from "@/types/domain/user";
 
-export type UpsertEntity = keyof SyncPayloadByEntity;
-export type DeleteEntity = Extract<SyncEntity, "card" | "folder" | "cardSet" | "document" | "tag" | "asset" | "projectMap">;
-export type UpsertQueueItem<TEntity extends UpsertEntity> = Extract<SyncQueueItem, { entity: TEntity; operationType: "create" | "update"; }>;
+type UpsertEntity = keyof SyncPayloadByEntity;
+type DeleteEntity = Extract<SyncEntity, "card" | "folder" | "cardSet" | "document" | "tag" | "asset" | "projectMap">;
+type UpsertQueueItem<TEntity extends UpsertEntity> = Extract<SyncQueueItem, { entity: TEntity; operationType: "create" | "update"; }>;
 type DateLike = Date | { toDate?: () => Date; } | null | undefined;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
@@ -87,7 +87,7 @@ const isDocumentPayload = (value: unknown): value is Document => {
 const isUserSettingPayload = (value: unknown): value is UserSettings => hasBaseEntityShape(value);
 const isAssetPayload = (value: unknown): value is AssetSyncPayload => isRecord(value) && hasString(value, "id");
 const isProjectMapPayload = (value: unknown): value is ProjectMapSyncPayload => isRecord(value) && hasString(value, "id") && hasString(value, "userId");
-export const assertUpsertPayload = <TEntity extends UpsertEntity>(entity: TEntity, payload: unknown): SyncPayloadByEntity[TEntity] => { switch (entity) { case "card": if (isCardPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
+const assertUpsertPayload = <TEntity extends UpsertEntity>(entity: TEntity, payload: unknown): SyncPayloadByEntity[TEntity] => { switch (entity) { case "card": if (isCardPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
       break;
     case "folder":
       if (isFolderPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
@@ -115,6 +115,9 @@ export const assertUpsertPayload = <TEntity extends UpsertEntity>(entity: TEntit
   }
   throw new Error(`Invalid payload for sync entity: ${entity}`);
 };
-export const assertDeletePayload = (payload: unknown): SyncDeletePayload => { if (isRecord(payload) && hasString(payload, "id")) return { id: String(payload.id) };
+const assertDeletePayload = (payload: unknown): SyncDeletePayload => { if (isRecord(payload) && hasString(payload, "id")) return { id: String(payload.id) };
   throw new Error("Delete payload must include a string id");
 };
+
+export { assertUpsertPayload, assertDeletePayload };
+export type { UpsertEntity, DeleteEntity, UpsertQueueItem };

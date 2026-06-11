@@ -18,7 +18,7 @@ type WatchRegistrationResult = {
   calendarId: string;
 };
 
-export class GoogleCalendarEngineManager { private engines = new Map<string, GoogleCalendarSyncEngine>();
+class GoogleCalendarEngineManager { private engines = new Map<string, GoogleCalendarSyncEngine>();
 
   private state = new Map<string, EngineState>();
 
@@ -341,3 +341,5 @@ export class GoogleCalendarEngineManager { private engines = new Map<string, Goo
       .join(",");
   }
 }
+
+export { GoogleCalendarEngineManager };

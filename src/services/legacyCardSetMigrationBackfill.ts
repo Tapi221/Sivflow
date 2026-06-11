@@ -15,7 +15,7 @@ const createId = (): string => {
 
   return `cardset-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
-export const backfillLegacyCardsToCardSets = async (userId: string): Promise<void> => { const db = await getLocalDb(userId);
+const backfillLegacyCardsToCardSets = async (userId: string): Promise<void> => { const db = await getLocalDb(userId);
   const syncDb = db as LocalFirstBackfillDb;
   const now = new Date();
   const activeCards = await db.cards.where("userId").equals(userId).and((card: Card) => !card.isDeleted).toArray();
@@ -149,7 +149,7 @@ export const backfillLegacyCardsToCardSets = async (userId: string): Promise<voi
 
   console.info(`[AppInit:${userId}] CardSet backfill repaired ${legacyCards.length} legacy cards and ${danglingCardsBySetId.size} missing sets.`);
 };
-export const ensureLegacyCardsBackfilled = async (userId: string) => { const existing = backfillPromiseByUserId.get(userId);
+const ensureLegacyCardsBackfilled = async (userId: string) => { const existing = backfillPromiseByUserId.get(userId);
   if (existing) return existing;
 
   const promise = backfillLegacyCardsToCardSets(userId).catch((error) => {
@@ -160,3 +160,5 @@ export const ensureLegacyCardsBackfilled = async (userId: string) => { const exi
   backfillPromiseByUserId.set(userId, promise);
   await promise;
 };
+
+export { backfillLegacyCardsToCardSets, ensureLegacyCardsBackfilled };

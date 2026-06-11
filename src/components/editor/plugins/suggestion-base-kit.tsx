@@ -29,7 +29,7 @@ const getInlineSuggestionData = (editor: any, element: TElement) => {
   }
 };
 
-export const BaseSuggestionKit = [BaseSuggestionPlugin.configure({ inject: { isElement: true, nodeProps: { nodeKey: "", styleKey: "cssText", transformProps: ({ editor, element, props }) => { if (!element) return props;
+const BaseSuggestionKit = [BaseSuggestionPlugin.configure({ inject: { isElement: true, nodeProps: { nodeKey: "", styleKey: "cssText", transformProps: ({ editor, element, props }) => { if (!element) return props;
 
         const suggestionData = getInlineSuggestionData(editor, element);
 
@@ -50,3 +50,5 @@ export const BaseSuggestionKit = [BaseSuggestionPlugin.configure({ inject: { isE
   },
 }),
 ];
+
+export { BaseSuggestionKit };

@@ -1,5 +1,5 @@
-export type AiProviderMode = "local-template" | "openai-user-api-key";
-export type OpenAiSettings = { providerMode: AiProviderMode;
+type AiProviderMode = "local-template" | "openai-user-api-key";
+type OpenAiSettings = { providerMode: AiProviderMode;
   apiKey: string;
   model: string;
   maxOutputTokens: number;
@@ -7,7 +7,7 @@ export type OpenAiSettings = { providerMode: AiProviderMode;
 
 const STORAGE_KEY = "sivflow.openai.settings.v1";
 const LEGACY_STORAGE_KEY = "flashcard-master.openai.settings.v1";
-export const DEFAULT_OPEN_AI_SETTINGS: OpenAiSettings = { providerMode: "local-template", apiKey: "", model: "gpt-5.4-mini", maxOutputTokens: 700 };
+const DEFAULT_OPEN_AI_SETTINGS: OpenAiSettings = { providerMode: "local-template", apiKey: "", model: "gpt-5.4-mini", maxOutputTokens: 700 };
 
 const isAiProviderMode = (value: unknown): value is AiProviderMode =>
   value === "local-template" || value === "openai-user-api-key";
@@ -37,7 +37,7 @@ const readStoredOpenAiSettings = (): string | null => {
   window.localStorage.removeItem(LEGACY_STORAGE_KEY);
   return legacy;
 };
-export const loadOpenAiSettings = (): OpenAiSettings => { if (typeof window === "undefined") { return DEFAULT_OPEN_AI_SETTINGS;
+const loadOpenAiSettings = (): OpenAiSettings => { if (typeof window === "undefined") { return DEFAULT_OPEN_AI_SETTINGS;
 }
 
 try {
@@ -65,7 +65,7 @@ try {
   return DEFAULT_OPEN_AI_SETTINGS;
 }
 };
-export const saveOpenAiSettings = (settings: OpenAiSettings) => { if (typeof window === "undefined") { return;
+const saveOpenAiSettings = (settings: OpenAiSettings) => { if (typeof window === "undefined") { return;
 }
 
 const normalized: OpenAiSettings = {
@@ -78,9 +78,12 @@ const normalized: OpenAiSettings = {
 window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
 window.localStorage.removeItem(LEGACY_STORAGE_KEY);
 };
-export const clearOpenAiSettings = () => { if (typeof window === "undefined") { return;
+const clearOpenAiSettings = () => { if (typeof window === "undefined") { return;
 }
 
 window.localStorage.removeItem(STORAGE_KEY);
 window.localStorage.removeItem(LEGACY_STORAGE_KEY);
 };
+
+export { DEFAULT_OPEN_AI_SETTINGS, loadOpenAiSettings, saveOpenAiSettings, clearOpenAiSettings };
+export type { AiProviderMode, OpenAiSettings };

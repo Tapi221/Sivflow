@@ -18,7 +18,7 @@ interface UseCardSetViewZoomInputOptions {
   onZoomPercentChange: (nextZoomPercent: number) => void;
 }
 
-export const useCardSetViewZoomInput = ({ containerRef, enabled = true, zoomPercent, minZoomPercent, maxZoomPercent, presentationWidthPx, maxPresentationWidthPx, cardLayoutMode, wheelZoomStepPercent = CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT, gestureZoomStepPercent = CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT, onZoomPercentChange }: UseCardSetViewZoomInputOptions) => { const zoomPercentRef = useRef(zoomPercent);
+const useCardSetViewZoomInput = ({ containerRef, enabled = true, zoomPercent, minZoomPercent, maxZoomPercent, presentationWidthPx, maxPresentationWidthPx, cardLayoutMode, wheelZoomStepPercent = CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT, gestureZoomStepPercent = CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT, onZoomPercentChange }: UseCardSetViewZoomInputOptions) => { const zoomPercentRef = useRef(zoomPercent);
   const minZoomPercentRef = useRef(minZoomPercent);
   const maxZoomPercentRef = useRef(maxZoomPercent);
   const presentationWidthPxRef = useRef(presentationWidthPx);
@@ -236,3 +236,5 @@ export const useCardSetViewZoomInput = ({ containerRef, enabled = true, zoomPerc
     };
   }, [commitZoomPercent, containerRef, enabled]);
 };
+
+export { useCardSetViewZoomInput };

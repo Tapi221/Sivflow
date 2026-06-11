@@ -1,24 +1,22 @@
 import type { SyncConflict as DomainSyncConflict, SyncEntity, SyncResult } from "@/types/domain/sync";
 import type { NetworkStatus, SyncContextSource } from "@/types/domain/telemetry";
 
-export type { SyncEntity };
-
-export type JsonPrimitive = string | number | boolean | null;
-export type JsonValue = JsonPrimitive | JsonObject | JsonArray;
-export type JsonObject = { [key: string]: JsonValue; };
-export type JsonArray = JsonValue[];
-export type SyncTaskType = "upload" | "download";
-export type SyncPriority = "critical" | "high" | "medium" | "low";
-export type SyncOperationType = "create" | "update" | "delete";
-export type MergeStrategy = "server_wins" | "client_wins" | "manual";
-export type CloudDeviceStatus = "active" | "revoked" | "unknown";
-export type SyncConflict = Pick<DomainSyncConflict, "id"> & { entity: DomainSyncConflict["entityType"];
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | JsonObject | JsonArray;
+type JsonObject = { [key: string]: JsonValue; };
+type JsonArray = JsonValue[];
+type SyncTaskType = "upload" | "download";
+type SyncPriority = "critical" | "high" | "medium" | "low";
+type SyncOperationType = "create" | "update" | "delete";
+type MergeStrategy = "server_wins" | "client_wins" | "manual";
+type CloudDeviceStatus = "active" | "revoked" | "unknown";
+type SyncConflict = Pick<DomainSyncConflict, "id"> & { entity: DomainSyncConflict["entityType"];
   targetId: DomainSyncConflict["entityId"];
   local: unknown;
   remote: unknown;
   createdAt: DomainSyncConflict["detectedAt"];
 };
-export interface SyncTask<TPayload = unknown> { id: string;
+interface SyncTask<TPayload = unknown> { id: string;
   idempotencyKey?: string;
   targetId?: string;
   operationType?: SyncOperationType;
@@ -28,26 +26,26 @@ export interface SyncTask<TPayload = unknown> { id: string;
   priority: SyncPriority;
   createdAt: number;
 }
-export interface BatchConstraint { maxSize: number;
+interface BatchConstraint { maxSize: number;
   concurrency: number;
   timeoutMs: number;
 }
-export interface INetworkMonitor { readonly status: NetworkStatus;
+interface INetworkMonitor { readonly status: NetworkStatus;
   getBatchConstraint(context: SyncContextSource): BatchConstraint;
   reportResult(success: boolean, durationMs: number): void;
   subscribe(callback: (status: NetworkStatus) => void): () => void;
 }
-export interface IQueueManager { enqueue(task: SyncTask): Promise<void>;
+interface IQueueManager { enqueue(task: SyncTask): Promise<void>;
   peekBatch(constraint: BatchConstraint): Promise<SyncTask[]>;
   complete(taskIds: string[]): Promise<void>;
   fail(taskIds: string[], reason: string, retryable: boolean): Promise<void>;
   getQueueDepth(): Promise<number>;
 }
-export interface FolderLike { id: string;
+interface FolderLike { id: string;
   parentId?: string | null;
   parentFolderId?: string | null;
 }
-export interface IDiffEngine { calculateDiff(local: unknown, remote: unknown): unknown | null;
+interface IDiffEngine { calculateDiff(local: unknown, remote: unknown): unknown | null;
   merge(
     local: unknown,
     remote: unknown,
@@ -63,8 +61,8 @@ export interface IDiffEngine { calculateDiff(local: unknown, remote: unknown): u
     allFolders: ReadonlyArray<FolderLike>,
   ): boolean;
 }
-export type SyncChange = Record<string, unknown>;
-export interface ICloudSyncAdapter { pullDiff(since: number,): Promise<{ changes: SyncChange[]; serverTime: number; }>;
+type SyncChange = Record<string, unknown>;
+interface ICloudSyncAdapter { pullDiff(since: number,): Promise<{ changes: SyncChange[]; serverTime: number; }>;
   pushBatch(
     changes: SyncChange[],
   ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown; }>;
@@ -74,7 +72,7 @@ export interface ICloudSyncAdapter { pullDiff(since: number,): Promise<{ changes
   updateDeviceName(deviceId: string, newName: string): Promise<void>;
   cleanupInactiveDevices(): Promise<number>;
 }
-export interface SyncStats { isSyncing?: boolean;
+interface SyncStats { isSyncing?: boolean;
   lastAttemptAt?: number;
   lastSuccessAt?: number;
   lastServerTime?: number;
@@ -84,26 +82,26 @@ export interface SyncStats { isSyncing?: boolean;
   recentSuccessRate?: number;
   queueDepth?: number;
 }
-export interface UserSettingsSnapshot { version?: number;
+interface UserSettingsSnapshot { version?: number;
   updatedAt?: number;
   data: Record<string, unknown>;
 }
-export interface SyncProcessingError { taskId?: string;
+interface SyncProcessingError { taskId?: string;
   message: string;
   retryable?: boolean;
   cause?: unknown;
 }
-export interface SecurityAlert { id: string;
+interface SecurityAlert { id: string;
   type: string;
   createdAt: number;
   message?: string;
   data?: Record<string, unknown>;
 }
-export interface SecurityState { isLocked: boolean;
+interface SecurityState { isLocked: boolean;
   requires2FA: boolean;
   alerts: SecurityAlert[];
 }
-export interface ISyncService { synchronize(onProgress?: (msg: string) => void): Promise<SyncResult>;
+interface ISyncService { synchronize(onProgress?: (msg: string) => void): Promise<SyncResult>;
   sync(source: SyncContextSource): Promise<void>;
   performStartupSync(): Promise<void>;
   getQueueStatus(): Promise<{ pending: number; isSyncing: boolean; }>;
@@ -119,3 +117,6 @@ export interface ISyncService { synchronize(onProgress?: (msg: string) => void):
   monitorSecurity(callback: (state: SecurityState) => void): () => void;
   dismissSecurityAlert(alertId: string): Promise<void>;
 }
+
+export type { SyncEntity };
+export type { JsonPrimitive, JsonValue, JsonObject, JsonArray, SyncTaskType, SyncPriority, SyncOperationType, MergeStrategy, CloudDeviceStatus, SyncConflict, SyncTask, BatchConstraint, INetworkMonitor, IQueueManager, FolderLike, IDiffEngine, SyncChange, ICloudSyncAdapter, SyncStats, UserSettingsSnapshot, SyncProcessingError, SecurityAlert, SecurityState, ISyncService };

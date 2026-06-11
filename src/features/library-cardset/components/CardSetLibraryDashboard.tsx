@@ -147,5 +147,5 @@ const CardSetLibraryDashboard = ({
   );
 };
 
-export { CardSetLibraryDashboard };
 export default CardSetLibraryDashboard;
+export { CardSetLibraryDashboard };

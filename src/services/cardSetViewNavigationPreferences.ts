@@ -6,7 +6,7 @@ type CardSetViewNavigationPreferenceUpdates = {
   cardId?: string | null;
   scrollTop?: number;
 };
-export type CardSetViewNavigationPreference = { cardId: string | null;
+type CardSetViewNavigationPreference = { cardId: string | null;
   scrollTop: number;
   updatedAt: number;
 };
@@ -98,12 +98,12 @@ const writeStore = (store: CardSetViewNavigationPreferencesStore) => {
     // ignore local persistence failures
   }
 };
-export const getCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope) => { if (!scope.cardSetId) { return null;
+const getCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope) => { if (!scope.cardSetId) { return null;
 }
 
 return readStore().byScope[buildPreferenceScopeKey(scope)] ?? null;
 };
-export const setCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope, updates: CardSetViewNavigationPreferenceUpdates) => { if (!scope.cardSetId) { return;
+const setCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope, updates: CardSetViewNavigationPreferenceUpdates) => { if (!scope.cardSetId) { return;
 }
 
 const store = readStore();
@@ -122,3 +122,6 @@ store.byScope[scopeKey] = {
 
 writeStore(store);
 };
+
+export { getCardSetViewNavigationPreference, setCardSetViewNavigationPreference };
+export type { CardSetViewNavigationPreference };

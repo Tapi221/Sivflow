@@ -1,3 +1,5 @@
 import { themes } from "prism-react-renderer";
 
-export const codeTheme = themes.github;
+const codeTheme = themes.github;
+
+export { codeTheme };

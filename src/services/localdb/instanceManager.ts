@@ -66,13 +66,13 @@ const createFallbackInstance = (userId?: string, reason?: unknown): InMemoryLoca
   return db;
 };
 const getFallbackInstance = async (userId?: string, reason?: unknown): Promise<InMemoryLocalDB> => createFallbackInstance(userId, reason);
-export const getLocalDb = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
-export const getLocalDbSync = (userId?: string): LocalDBSyncStore => { const targetUserId = userId ?? currentUserId ?? "anonymous";
+const getLocalDb = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
+const getLocalDbSync = (userId?: string): LocalDBSyncStore => { const targetUserId = userId ?? currentUserId ?? "anonymous";
   if (cachedInstance && currentUserId === targetUserId) return cachedInstance as unknown as LocalDBSyncStore;
   return createFallbackInstance(targetUserId, "local-db-not-initialized") as unknown as LocalDBSyncStore;
 };
-export const getInstanceUserId = (): string | null => currentUserId;
-export const getInstance = async (userId?: string): Promise<LocalDBSyncStore> => { const targetUserId = userId ?? "anonymous";
+const getInstanceUserId = (): string | null => currentUserId;
+const getInstance = async (userId?: string): Promise<LocalDBSyncStore> => { const targetUserId = userId ?? "anonymous";
 
   if (resettingPromise) await resettingPromise;
 
@@ -120,8 +120,8 @@ export const getInstance = async (userId?: string): Promise<LocalDBSyncStore> =>
     getLocalDbGlobal().__ALLOW_LOCAL_DB_CONSTRUCTION = false;
   }
 };
-export const initializeDB = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
-export const clearInstance = (): void => { if (instance) { try { instance.close();
+const initializeDB = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
+const clearInstance = (): void => { if (instance) { try { instance.close();
 } catch {
   // ignore close failure
 }
@@ -140,7 +140,7 @@ cachedInstance = null;
 currentUserId = null;
 fallbackInstances.clear();
 };
-export const resetForLogout = async (userId?: string): Promise<void> => { const targetUserId = userId ?? currentUserId ?? "anonymous";
+const resetForLogout = async (userId?: string): Promise<void> => { const targetUserId = userId ?? currentUserId ?? "anonymous";
 
   if (resettingPromise) {
     await resettingPromise;
@@ -217,4 +217,6 @@ export const resetForLogout = async (userId?: string): Promise<void> => { const 
     resettingPromise = null;
   }
 };
-export const resetLocalDBForLogout = async (userId?: string) => resetForLogout(userId);
+const resetLocalDBForLogout = async (userId?: string) => resetForLogout(userId);
+
+export { getLocalDb, getLocalDbSync, getInstanceUserId, getInstance, initializeDB, clearInstance, resetForLogout, resetLocalDBForLogout };

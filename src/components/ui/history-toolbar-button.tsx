@@ -5,7 +5,7 @@ import { Redo2Icon, Undo2Icon } from "lucide-react";
 import { useEditorRef, useEditorSelector } from "platejs/react";
 import { ToolbarButton } from "./toolbar";
 
-export const RedoToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => { const editor = useEditorRef();
+const RedoToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => { const editor = useEditorRef();
   const disabled = useEditorSelector(
     (editor) => editor.history.redos.length === 0,
     [],
@@ -23,7 +23,7 @@ export const RedoToolbarButton = (props: React.ComponentProps<typeof ToolbarButt
     </ToolbarButton>
   );
 };
-export const UndoToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => { const editor = useEditorRef();
+const UndoToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => { const editor = useEditorRef();
   const disabled = useEditorSelector(
     (editor) => editor.history.undos.length === 0,
     [],
@@ -41,3 +41,5 @@ export const UndoToolbarButton = (props: React.ComponentProps<typeof ToolbarButt
     </ToolbarButton>
   );
 };
+
+export { RedoToolbarButton, UndoToolbarButton };

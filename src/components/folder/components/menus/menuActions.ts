@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 /**
  * メニューのアクションを定義する型
  */
-export type MenuAction = { id: string;
+type MenuAction = { id: string;
   label: string;
   icon?: ReactNode;
   danger?: boolean;
@@ -12,3 +12,5 @@ export type MenuAction = { id: string;
   separatorBefore?: boolean;
   onSelect?: () => void | Promise<void>;
 };
+
+export type { MenuAction };

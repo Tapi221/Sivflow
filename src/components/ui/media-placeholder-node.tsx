@@ -59,7 +59,7 @@ const CONTENT: Record<
     icon: <Film />,
   },
 };
-export const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElementProps<TPlaceholderElement>) => { const { editor, element } = props;
+const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElementProps<TPlaceholderElement>) => { const { editor, element } = props;
 
   const { api } = useEditorPlugin(PlaceholderPlugin);
 
@@ -186,7 +186,7 @@ export const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElem
   );
 },
 );
-export const ImageProgress = ({ className, file, imageRef, progress = 0 }: { file: File;
+const ImageProgress = ({ className, file, imageRef, progress = 0 }: { file: File;
   className?: string;
   imageRef?: React.RefObject<HTMLImageElement | null>;
   progress?: number;
@@ -226,3 +226,5 @@ export const ImageProgress = ({ className, file, imageRef, progress = 0 }: { fil
     </div>
   );
 };
+
+export { PlaceholderElement, ImageProgress };

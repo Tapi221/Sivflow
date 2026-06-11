@@ -19,4 +19,6 @@ import { KEYS } from "platejs";
  *
  * Tables use base version with juice CSS inlining.
  */
-export const DocxExportKit = [DocxExportPlugin.configure({ override: { components: { [KEYS.codeBlock]: CodeBlockElementDocx, [KEYS.codeLine]: CodeLineElementDocx, [KEYS.codeSyntax]: CodeSyntaxLeafDocx, [KEYS.column]: ColumnElementDocx, [KEYS.columnGroup]: ColumnGroupElementDocx, [KEYS.equation]: EquationElementDocx, [KEYS.inlineEquation]: InlineEquationElementDocx, [KEYS.callout]: CalloutElementDocx, [KEYS.toc]: TocElementDocx } } })];
+const DocxExportKit = [DocxExportPlugin.configure({ override: { components: { [KEYS.codeBlock]: CodeBlockElementDocx, [KEYS.codeLine]: CodeLineElementDocx, [KEYS.codeSyntax]: CodeSyntaxLeafDocx, [KEYS.column]: ColumnElementDocx, [KEYS.columnGroup]: ColumnGroupElementDocx, [KEYS.equation]: EquationElementDocx, [KEYS.inlineEquation]: InlineEquationElementDocx, [KEYS.callout]: CalloutElementDocx, [KEYS.toc]: TocElementDocx } } })];
+
+export { DocxExportKit };

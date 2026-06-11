@@ -25,7 +25,7 @@ const genId = (): string => {
   }
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
-export const useCardEditorTags = (): UseCardEditorTagsResult => { const { currentUser } = useAuthSession();
+const useCardEditorTags = (): UseCardEditorTagsResult => { const { currentUser } = useAuthSession();
 
   const rawTags = useLiveQuery(
     async () => {
@@ -103,3 +103,5 @@ export const useCardEditorTags = (): UseCardEditorTagsResult => { const { curren
     addTag,
   };
 };
+
+export { useCardEditorTags };

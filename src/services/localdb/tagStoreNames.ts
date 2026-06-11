@@ -1,1 +1,3 @@
-export const CURRENT_TAG_STORE = "tagRecords" as const;
+const CURRENT_TAG_STORE = "tagRecords" as const;
+
+export { CURRENT_TAG_STORE };

@@ -18,24 +18,24 @@ import { aiChatPlugin } from "@/components/editor/plugins/ai-kit";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 import { withAIBatch } from "@platejs/ai";
 
-export type ToolName = "comment" | "edit" | "generate";
-export type TComment = { comment: { blockId: string;
+type ToolName = "comment" | "edit" | "generate";
+type TComment = { comment: { blockId: string;
     comment: string;
     content: string;
   } | null;
   status: "finished" | "streaming";
 };
-export type TTableCellUpdate = { cellUpdate: { content: string;
+type TTableCellUpdate = { cellUpdate: { content: string;
     id: string;
   } | null;
   status: "finished" | "streaming";
 };
-export type MessageDataPart = { toolName: ToolName;
+type MessageDataPart = { toolName: ToolName;
   comment?: TComment;
   table?: TTableCellUpdate;
 };
-export type Chat = UseChatHelpers<ChatMessage>;
-export type ChatMessage = UIMessage<{}, MessageDataPart>;
+type Chat = UseChatHelpers<ChatMessage>;
+type ChatMessage = UIMessage<{}, MessageDataPart>;
 
 const delay = faker.number.int({ max: 20, min: 5 });
 const markdownChunks = [
@@ -1242,7 +1242,7 @@ const createChatTransport = ({
     }) as typeof fetch,
   });
 };
-export const useChat = () => { const editor = useEditorRef();
+const useChat = () => { const editor = useEditorRef();
   const options = usePluginOption(aiChatPlugin, "chatOptions");
 
   // remove when you implement the route /api/ai/command
@@ -1650,3 +1650,6 @@ const createTableCellChunks = (editor: PlateEditor) => {
 
   return result_chunks;
 };
+
+export { useChat };
+export type { ToolName, TComment, TTableCellUpdate, MessageDataPart, Chat, ChatMessage };

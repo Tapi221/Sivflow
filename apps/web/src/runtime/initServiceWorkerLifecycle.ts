@@ -42,7 +42,7 @@ const clearDevSwAndCaches = () => {
     });
   });
 };
-export const initServiceWorkerLifecycle = () => { if (started || typeof window === "undefined" || !("serviceWorker" in navigator)) { return;
+const initServiceWorkerLifecycle = () => { if (started || typeof window === "undefined" || !("serviceWorker" in navigator)) { return;
 }
 started = true;
 
@@ -87,3 +87,5 @@ window.addEventListener("load", () => {
     });
 });
 };
+
+export { initServiceWorkerLifecycle };

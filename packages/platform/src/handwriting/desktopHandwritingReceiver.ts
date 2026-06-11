@@ -4,14 +4,14 @@ import { applyHandwritingStrokeDelta } from "./handwritingStrokeMessages";
 import type { ApplyHandwritingStrokeDeltaResult } from "./handwritingStrokeMessages";
 import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionStatus } from "./handwritingSession.types";
 
-export type DesktopHandwritingReceiverSession = Pick<HandwritingSession, "id" | "cardId" | "side" | "status">;
-export type ReceiveDesktopHandwritingMessageInput = { document: InkDocument | null | undefined;
+type DesktopHandwritingReceiverSession = Pick<HandwritingSession, "id" | "cardId" | "side" | "status">;
+type ReceiveDesktopHandwritingMessageInput = { document: InkDocument | null | undefined;
   session: DesktopHandwritingReceiverSession;
   message: HandwritingSessionMessage;
   now?: number;
 };
-export type DesktopHandwritingReceiverReason = | ApplyHandwritingStrokeDeltaResult["reason"] | "control-message" | "session-mismatch";
-export type ReceiveDesktopHandwritingMessageResult = { document: InkDocument;
+type DesktopHandwritingReceiverReason = | ApplyHandwritingStrokeDeltaResult["reason"] | "control-message" | "session-mismatch";
+type ReceiveDesktopHandwritingMessageResult = { document: InkDocument;
   applied: boolean;
   status: HandwritingSessionStatus;
   reason?: DesktopHandwritingReceiverReason;
@@ -23,7 +23,7 @@ const isSessionMessage = (
 ): boolean => {
   return message.sessionId === session.id;
 };
-export const receiveDesktopHandwritingMessage = ({ document, session, message, now }: ReceiveDesktopHandwritingMessageInput): ReceiveDesktopHandwritingMessageResult => { const currentDocument = normalizeInkDocument(document);
+const receiveDesktopHandwritingMessage = ({ document, session, message, now }: ReceiveDesktopHandwritingMessageInput): ReceiveDesktopHandwritingMessageResult => { const currentDocument = normalizeInkDocument(document);
 
   if (!isSessionMessage(message, session)) {
     return { document: currentDocument, applied: false, status: session.status, reason: "session-mismatch" };
@@ -49,3 +49,6 @@ export const receiveDesktopHandwritingMessage = ({ document, session, message, n
     reason: result.reason,
   };
 };
+
+export { receiveDesktopHandwritingMessage };
+export type { DesktopHandwritingReceiverSession, ReceiveDesktopHandwritingMessageInput, DesktopHandwritingReceiverReason, ReceiveDesktopHandwritingMessageResult };

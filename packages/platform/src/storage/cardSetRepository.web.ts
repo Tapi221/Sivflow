@@ -15,7 +15,7 @@ const generateCardSetId = () => {
 
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
-export const createWebCardSetRepository = (): CardSetCommandRepository<CardSet> & CardSetDeleteRepository<Card> & CardSetQueryRepository<CardSet> => ({ generateCardSetId, listCardSets: async (userId) => { await ensureLegacyCardsBackfilled(userId);
+const createWebCardSetRepository = (): CardSetCommandRepository<CardSet> & CardSetDeleteRepository<Card> & CardSetQueryRepository<CardSet> => ({ generateCardSetId, listCardSets: async (userId) => { await ensureLegacyCardsBackfilled(userId);
   const db = await getLocalDb(userId);
   return db.cardSets.where("userId").equals(userId).toArray();
 },
@@ -40,3 +40,5 @@ softDeleteCardSet: async (userId, cardSetId) => {
   await db.softDelete("cardSets", cardSetId);
 },
 });
+
+export { createWebCardSetRepository };

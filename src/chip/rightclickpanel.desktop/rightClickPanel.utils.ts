@@ -1,17 +1,17 @@
 import { useEffect } from "react";
 import type { CSSProperties, RefObject } from "react";
 
-export type RightClickPanelPosition = { x: number; y: number; };
-export type RightClickPanelNoDragStyle = CSSProperties & { WebkitAppRegion?: "drag" | "no-drag"; };
-export type RightClickPanelDimensions = { width: number; height: number; };
-export type RightClickPanelId = string;
+type RightClickPanelPosition = { x: number; y: number; };
+type RightClickPanelNoDragStyle = CSSProperties & { WebkitAppRegion?: "drag" | "no-drag"; };
+type RightClickPanelDimensions = { width: number; height: number; };
+type RightClickPanelId = string;
 
-export const RIGHT_CLICK_PANEL_MARGIN = 8;
-export const RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT = 28;
-export const RIGHT_CLICK_PANEL_SURFACE_PADDING = 4;
-export const RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE = RIGHT_CLICK_PANEL_SURFACE_PADDING * 2;
-export const RIGHT_CLICK_PANEL_OPEN_EVENT = "open";
-export const RIGHT_CLICK_PANEL_NO_DRAG_STYLE: RightClickPanelNoDragStyle = { WebkitAppRegion: "no-drag" };
+const RIGHT_CLICK_PANEL_MARGIN = 8;
+const RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT = 28;
+const RIGHT_CLICK_PANEL_SURFACE_PADDING = 4;
+const RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE = RIGHT_CLICK_PANEL_SURFACE_PADDING * 2;
+const RIGHT_CLICK_PANEL_OPEN_EVENT = "open";
+const RIGHT_CLICK_PANEL_NO_DRAG_STYLE: RightClickPanelNoDragStyle = { WebkitAppRegion: "no-drag" };
 const RIGHT_CLICK_PANEL_MIN_WIDTH = 112;
 const RIGHT_CLICK_PANEL_TEXT_HORIZONTAL_EDGE = 32;
 const RIGHT_CLICK_PANEL_FALLBACK_TEXT_WIDTH = 8;
@@ -35,7 +35,7 @@ const measureRightClickPanelTextWidth = (text: string): number => {
   context.font = RIGHT_CLICK_PANEL_FONT;
   return context.measureText(text).width;
 };
-export const resolveRightClickPanelTextWidth = (labels: readonly string[], minimumWidth = RIGHT_CLICK_PANEL_MIN_WIDTH): number => { const textWidth = labels.reduce((maxWidth, label) => Math.max(maxWidth, measureRightClickPanelTextWidth(label)), 0);
+const resolveRightClickPanelTextWidth = (labels: readonly string[], minimumWidth = RIGHT_CLICK_PANEL_MIN_WIDTH): number => { const textWidth = labels.reduce((maxWidth, label) => Math.max(maxWidth, measureRightClickPanelTextWidth(label)), 0);
   return Math.ceil(Math.max(RIGHT_CLICK_PANEL_MIN_WIDTH, minimumWidth, textWidth + RIGHT_CLICK_PANEL_TEXT_HORIZONTAL_EDGE));
 };
 const clampRightClickPanelAxis = (value: number, size: number, viewportSize: number): number => {
@@ -43,14 +43,14 @@ const clampRightClickPanelAxis = (value: number, size: number, viewportSize: num
   const max = Math.max(min, viewportSize - size - RIGHT_CLICK_PANEL_MARGIN);
   return Math.min(Math.max(value, min), max);
 };
-export const clampRightClickPanelPosition = (x: number, y: number, dimensions: RightClickPanelDimensions): RightClickPanelPosition => { if (typeof window === "undefined") return { x, y };
+const clampRightClickPanelPosition = (x: number, y: number, dimensions: RightClickPanelDimensions): RightClickPanelPosition => { if (typeof window === "undefined") return { x, y };
 
   return {
     x: clampRightClickPanelAxis(x, dimensions.width, window.innerWidth),
     y: clampRightClickPanelAxis(y, dimensions.height, window.innerHeight),
   };
 };
-export const useRightClickPanelDismiss = (panelId: RightClickPanelId, isOpen: boolean, panelRef: RefObject<HTMLElement | null>, onDismiss: () => void): void => { useEffect(() => { if (!isOpen) return;
+const useRightClickPanelDismiss = (panelId: RightClickPanelId, isOpen: boolean, panelRef: RefObject<HTMLElement | null>, onDismiss: () => void): void => { useEffect(() => { if (!isOpen) return;
 
     const isPanelEvent = (event: Event): boolean => {
       const panel = panelRef.current;
@@ -91,3 +91,6 @@ export const useRightClickPanelDismiss = (panelId: RightClickPanelId, isOpen: bo
     };
   }, [isOpen, onDismiss, panelId, panelRef]);
 };
+
+export { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, RIGHT_CLICK_PANEL_OPEN_EVENT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, resolveRightClickPanelTextWidth, clampRightClickPanelPosition, useRightClickPanelDismiss };
+export type { RightClickPanelPosition, RightClickPanelNoDragStyle, RightClickPanelDimensions, RightClickPanelId };
