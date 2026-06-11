@@ -1,11 +1,11 @@
 import { useCallback, useState } from "react";
 
-
-
 /**
  * コンテキストメニュー（右クリック）の表示位置を管理するフック
  */
-export const useContextMenuAnchor = () => { const [anchorPoint, setAnchorPoint] = useState<{ x: number;
+export const useContextMenuAnchor = () => {
+  const [anchorPoint, setAnchorPoint] = useState<{
+    x: number;
     y: number;
   } | null>(null);
 

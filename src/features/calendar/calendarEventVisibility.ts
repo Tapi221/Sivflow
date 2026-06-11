@@ -1,8 +1,6 @@
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { AppCalendarItem, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink } from "./scheduleScreen.types";
 
-
-
 type CalendarEventSourceIndex = {
   projectById: Map<string, AppCalendarItem>;
   projectByNormalizedLabel: Map<string, AppCalendarItem>;
@@ -18,11 +16,7 @@ type CalendarEventDisplayMetadataInput = CalendarEventVisibilityInput & {
   googleCalendarColorOverrides: GoogleCalendarColorOverrideMap;
 };
 
-
-
 const GOOGLE_CALENDAR_KEY_SEPARATOR = "\u001f";
-
-
 
 const createGoogleCalendarColorOverrideKey = (accountId: string, calendarId: string): string => `${accountId}:${calendarId}`;
 const createGoogleCalendarKey = (accountId: string, calendarId: string): string => `${accountId}${GOOGLE_CALENDAR_KEY_SEPARATOR}${calendarId}`;
@@ -77,7 +71,8 @@ const resolveGoogleEventAccentColor = (event: GoogleCalendarEvent, overrides: Go
 
   return overrides[createGoogleCalendarColorOverrideKey(event.accountId, event.calendarId)] ?? event.accentColor;
 };
-export const attachCalendarEventDisplayMetadata = (events: GoogleCalendarEvent[], input: CalendarEventDisplayMetadataInput): GoogleCalendarEvent[] => { const index = createCalendarEventSourceIndex(input);
+export const attachCalendarEventDisplayMetadata = (events: GoogleCalendarEvent[], input: CalendarEventDisplayMetadataInput): GoogleCalendarEvent[] => {
+  const index = createCalendarEventSourceIndex(input);
 
   return events.map((event) => {
     const project = resolveCalendarEventProject(event, index);
@@ -90,7 +85,8 @@ export const attachCalendarEventDisplayMetadata = (events: GoogleCalendarEvent[]
     };
   });
 };
-export const filterCalendarEventsBySourceVisibility = (events: GoogleCalendarEvent[], input: CalendarEventVisibilityInput): GoogleCalendarEvent[] => { const index = createCalendarEventSourceIndex(input);
+export const filterCalendarEventsBySourceVisibility = (events: GoogleCalendarEvent[], input: CalendarEventVisibilityInput): GoogleCalendarEvent[] => {
+  const index = createCalendarEventSourceIndex(input);
 
   return events.filter((event) => {
     const project = resolveCalendarEventProject(event, index);

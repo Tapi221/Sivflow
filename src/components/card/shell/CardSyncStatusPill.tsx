@@ -5,8 +5,6 @@ import { RefreshCw } from "@/ui/icons";
 import { formatLastSyncedAt } from "./formatLastSyncedAt";
 import { overlayGlassPillClassName } from "./overlaySurfaceClassNames";
 
-
-
 interface CardSyncStatusPillProps {
   lastSyncedAtMs: number | null;
   hasError?: boolean;
@@ -16,9 +14,8 @@ interface CardSyncStatusPillProps {
   className?: string;
 }
 
-
-
-export const CardSyncStatusPill = ({ lastSyncedAtMs, hasError = false, isRetrying = false, canRetry = false, onRetry, className }: CardSyncStatusPillProps) => { const label = hasError ? "同期失敗" : `最終同期: ${formatLastSyncedAt(lastSyncedAtMs)}`;
+export const CardSyncStatusPill = ({ lastSyncedAtMs, hasError = false, isRetrying = false, canRetry = false, onRetry, className }: CardSyncStatusPillProps) => {
+  const label = hasError ? "同期失敗" : `最終同期: ${formatLastSyncedAt(lastSyncedAtMs)}`;
 
   const retryDisabled = isRetrying || !canRetry || onRetry == null;
 

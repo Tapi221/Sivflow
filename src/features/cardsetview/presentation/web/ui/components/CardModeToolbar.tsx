@@ -6,8 +6,6 @@ import { OverlayToolbarDivider } from "@/chip/overlay-toolbar/OverlayToolbarDivi
 import { FixedDisplayGlyph, FlipGlyph, FluidDisplayGlyph, SplitGlyph, StackGlyph } from "@/chip/overlay-toolbar/OverlayToolbarGlyphs";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 type CardModeToolbarProps = {
   displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
@@ -22,8 +20,6 @@ type ModeButtonProps = {
   disabled?: boolean;
   children: ReactNode;
 };
-
-
 
 const ModeButton = ({
   isActive,
@@ -44,7 +40,8 @@ const ModeButton = ({
     </OverlayToolbarButton>
   );
 };
-export const CardModeToolbar = ({ displayMode, cardLayoutMode, disabledCardLayoutModes, onChangeDisplayMode, onChangeCardLayoutMode }: CardModeToolbarProps) => { const nextDisplayMode: CardDisplayMode = displayMode === "fixed" ? "fluid" : "fixed";
+export const CardModeToolbar = ({ displayMode, cardLayoutMode, disabledCardLayoutModes, onChangeDisplayMode, onChangeCardLayoutMode }: CardModeToolbarProps) => {
+  const nextDisplayMode: CardDisplayMode = displayMode === "fixed" ? "fluid" : "fixed";
   const displayModeToggleLabel =
     displayMode === "fixed"
       ? "カード表示。タップで最大表示に切り替え"

@@ -1,7 +1,5 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
-
-
 type UseCalendarPrintControllerOptions = {
   onBeforePrint?: () => Promise<void> | void;
   onPrintError?: (error: unknown) => void;
@@ -11,12 +9,8 @@ type UseCalendarPrintControllerReturn = {
   requestPrint: () => void;
 };
 
-
-
 const CALENDAR_PRINTING_CLASS = "calendar-printing";
 const CALENDAR_PRINT_CLEANUP_DELAY_MS = 30_000;
-
-
 
 const useCalendarPrintController = ({ onBeforePrint, onPrintError }: UseCalendarPrintControllerOptions = {}): UseCalendarPrintControllerReturn => {
   const printCleanupTimerRef = useRef<number | null>(null);
@@ -70,7 +64,5 @@ const useCalendarPrintController = ({ onBeforePrint, onPrintError }: UseCalendar
     requestPrint,
   };
 };
-
-
 
 export { useCalendarPrintController };

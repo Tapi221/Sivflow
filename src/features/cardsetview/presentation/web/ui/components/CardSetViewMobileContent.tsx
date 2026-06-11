@@ -1,9 +1,8 @@
 import { CardSetViewDesktop } from "@/features/cardsetview/presentation/web/ui/CardSetViewDesktop";
 import type { CardSetViewContentProps } from "./cardSetViewContentProps";
 
-
-
-export const CardSetViewMobileContent = ({ controller }: CardSetViewContentProps) => { const { folderId, cardSetId, settings, data, state, zoom, effectiveCardLayoutMode } = controller;
+export const CardSetViewMobileContent = ({ controller }: CardSetViewContentProps) => {
+  const { folderId, cardSetId, settings, data, state, zoom, effectiveCardLayoutMode } = controller;
 
   return (
     <CardSetViewDesktop

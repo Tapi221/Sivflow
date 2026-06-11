@@ -2,8 +2,6 @@ import { MF_CARD_FORMAT, MF_CARD_VERSION, type MfCardFileV1, type MfCardIssue, t
 import { isMfDeckCardsJsonV1 } from "@/features/deckFile/domain/mfDeckGuards";
 import { MF_DECK_VERSION } from "@/features/deckFile/domain/mfDeck.types";
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
@@ -21,7 +19,8 @@ const isMfCardPayloadV1 = (value: unknown): value is MfCardFileV1["card"] => {
     cards: [value],
   });
 };
-export const isMfCardFileV1 = (value: unknown): value is MfCardFileV1 => { if (!isRecord(value)) return false;
+export const isMfCardFileV1 = (value: unknown): value is MfCardFileV1 => {
+  if (!isRecord(value)) return false;
   if (value.format !== MF_CARD_FORMAT) return false;
   if (value.version !== MF_CARD_VERSION) return false;
   if (!isIsoLikeString(value.exportedAt)) return false;
@@ -36,7 +35,8 @@ export const isMfCardFileV1 = (value: unknown): value is MfCardFileV1 => { if (!
 
   return isMfCardPayloadV1(value.card);
 };
-export const validateMfCardFile = (input: unknown): MfCardValidationResult => { const issues: MfCardIssue[] = [];
+export const validateMfCardFile = (input: unknown): MfCardValidationResult => {
+  const issues: MfCardIssue[] = [];
 
   if (!isMfCardFileV1(input)) {
     issues.push({

@@ -4,9 +4,8 @@ import { collectMfDeckExportIssues, mapCardToMfDeckCard } from "@/features/deckF
 import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
 import type { Card } from "@/types";
 
-
-
-export const buildMfCardFile = ({ card, tagById, appVersion }: { card: Card;
+export const buildMfCardFile = ({ card, tagById, appVersion }: {
+  card: Card;
   tagById?: MfDeckTagLookup;
   appVersion?: string;
 }): MfCardFileV1 => {
@@ -38,7 +37,8 @@ export const buildMfCardFile = ({ card, tagById, appVersion }: { card: Card;
     },
   };
 };
-export const exportMfCardBytes = (params: { card: Card;
+export const exportMfCardBytes = (params: {
+  card: Card;
   tagById?: MfDeckTagLookup;
   appVersion?: string;
 }) => {

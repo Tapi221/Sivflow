@@ -1,28 +1,26 @@
 import { getGoogleOAuthCallableErrorReason, isGoogleOAuthDeterministicErrorReason } from "@/integration/google-integration/google.server-oauth";
 import type { GoogleOAuthCallableErrorReason } from "@/integration/google-integration/google.server-oauth";
 
-
-
 export const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
 
-
-
 export type GoogleOAuthCooldownReason = GoogleOAuthCallableErrorReason | "auto_recovery_pending" | "internal";
-export type GoogleOAuthCooldownEntry = { reason: GoogleOAuthCooldownReason;
+export type GoogleOAuthCooldownEntry = {
+  reason: GoogleOAuthCooldownReason;
   message: string;
   until: number;
 };
 
-
-
-export const getErrorStatus = (error: unknown): number | undefined => { if (!(error instanceof Error)) return undefined;
+export const getErrorStatus = (error: unknown): number | undefined => {
+  if (!(error instanceof Error)) return undefined;
   return (error as Error & { status?: number; }).status;
 };
 export const isUnauthorizedError = (error: unknown): boolean => getErrorStatus(error) === 401;
-export const getGoogleReason = (error: unknown): string | undefined => { if (!(error instanceof Error)) return undefined;
+export const getGoogleReason = (error: unknown): string | undefined => {
+  if (!(error instanceof Error)) return undefined;
   return (error as Error & { googleReason?: string; }).googleReason;
 };
-export const isGooglePermissionError = (error: unknown): boolean => { const status = getErrorStatus(error);
+export const isGooglePermissionError = (error: unknown): boolean => {
+  const status = getErrorStatus(error);
   const reason = getGoogleReason(error);
 
   return (
@@ -30,17 +28,20 @@ export const isGooglePermissionError = (error: unknown): boolean => { const stat
     (reason === "authError" || reason === "insufficientPermissions")
   );
 };
-export const getErrorCode = (error: unknown): string | undefined => { if (!(error instanceof Error)) return undefined;
+export const getErrorCode = (error: unknown): string | undefined => {
+  if (!(error instanceof Error)) return undefined;
   return (error as Error & { code?: string; }).code;
 };
 export const normalizeErrorCode = (code: string | undefined): string | undefined => code?.replace(/^functions\//, "");
-export const getGoogleOAuthErrorReason = (error: unknown): GoogleOAuthCallableErrorReason | undefined => { const wrappedReason = error instanceof Error ? (error as Error & { googleOAuthReason?: GoogleOAuthCallableErrorReason; }).googleOAuthReason : undefined;
+export const getGoogleOAuthErrorReason = (error: unknown): GoogleOAuthCallableErrorReason | undefined => {
+  const wrappedReason = error instanceof Error ? (error as Error & { googleOAuthReason?: GoogleOAuthCallableErrorReason; }).googleOAuthReason : undefined;
 
   return wrappedReason ?? getGoogleOAuthCallableErrorReason(error);
 };
 const isGoogleOAuthReconnectRequiredReason = (reason: string | undefined): boolean =>
   reason === "invalid_grant" || reason === "stored_refresh_token_missing";
-export const isReconnectRequiredError = (error: unknown): boolean => { const code = normalizeErrorCode(getErrorCode(error));
+export const isReconnectRequiredError = (error: unknown): boolean => {
+  const code = normalizeErrorCode(getErrorCode(error));
   const reason = getGoogleOAuthErrorReason(error);
 
   if (reason) return isGoogleOAuthReconnectRequiredReason(reason);
@@ -55,7 +56,8 @@ export const isReconnectRequiredError = (error: unknown): boolean => { const cod
   );
 };
 export const toErrorMessage = (error: unknown): string => error instanceof Error ? error.message.includes("Google did not return a new refresh token") ? "Google が新しい連携トークンを返しませんでした。Google アカウントの「サードパーティ製アプリとサービス」からこのアプリのアクセス権を削除してから、もう一度再連携してください。" : error.message : String(error);
-export const toGoogleCalendarAuthErrorMessage = (error: unknown): string => { const reason = getGoogleOAuthErrorReason(error);
+export const toGoogleCalendarAuthErrorMessage = (error: unknown): string => {
+  const reason = getGoogleOAuthErrorReason(error);
 
   if (reason === "invalid_grant" || reason === "stored_refresh_token_missing") {
     return "Google 連携トークンが無効です。Google アカウントのサードパーティ連携からこのアプリを削除してから再連携してください。";
@@ -72,7 +74,8 @@ export const toGoogleCalendarAuthErrorMessage = (error: unknown): string => { co
   return `Google Calendar token refresh failed: ${toErrorMessage(error)}`;
 };
 export const shouldCooldownGoogleOAuthError = (error: unknown): boolean => isGoogleOAuthDeterministicErrorReason(getGoogleOAuthErrorReason(error)) || normalizeErrorCode(getErrorCode(error)) === "auto-recovery-pending" || normalizeErrorCode(getErrorCode(error)) === "internal";
-export const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry): Error => { const error = new Error(entry.message);
+export const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry): Error => {
+  const error = new Error(entry.message);
   (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason; }).code = "google-oauth-deterministic-cooldown";
   if (entry.reason !== "auto_recovery_pending" && entry.reason !== "internal") {
     (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason; }).googleOAuthReason = entry.reason;

@@ -6,10 +6,9 @@ import { ScaleToFitFrame } from "./ScaleToFitFrame";
 import { cn } from "@/lib/utils";
 import type { CssVars } from "@/types/style";
 
-
-
 type CardShellProps = React.ComponentProps<typeof CardShell>;
-export interface CardFrameProps extends Omit<CardShellProps, "children" | "className" | "ref"> { children: React.ReactNode;
+export interface CardFrameProps extends Omit<CardShellProps, "children" | "className" | "ref"> {
+  children: React.ReactNode;
   baseWidth?: number;
   contentPaddingPx?: number;
   allowUpscale?: boolean;
@@ -29,8 +28,6 @@ export interface CardFrameProps extends Omit<CardShellProps, "children" | "class
   overlay?: React.ReactNode;
   topAttachment?: React.ReactNode;
 }
-
-
 
 const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
   (
@@ -147,8 +144,6 @@ const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
     );
   },
 );
-
-
 
 CardFrame.displayName = "CardFrame";
 export { CardFrame };
