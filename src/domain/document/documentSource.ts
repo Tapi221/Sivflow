@@ -56,7 +56,7 @@ const resolveDocumentGoogleDriveFileId = (document: DocumentSourceFields): strin
 };
 
 const hasRemoteRecoverableDocumentSource = (document: DocumentSourceFields): boolean => {
-  return Boolean(resolveDocumentGoogleDriveFileId(document) ?? isRemotePdfUrl(document.remoteUrl) || isRemotePdfUrl(document.downloadUrl) || isRemotePdfUrl(document.googleDriveWebContentLink));
+  return Boolean(resolveDocumentGoogleDriveFileId(document) || isRemotePdfUrl(document.remoteUrl) || isRemotePdfUrl(document.downloadUrl) || isRemotePdfUrl(document.googleDriveWebContentLink));
 };
 
 const shouldSyncDocumentRecord = (record: SyncableDocumentRecord): boolean => {
