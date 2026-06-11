@@ -11,6 +11,8 @@ export type CardSetQueryEntity = { id: string;
 export type CardSetQueryRepository<TCardSet extends CardSetQueryEntity = CardSetQueryEntity> = { listCardSets: (userId: string) => Promise<TCardSet[]>;
 };
 
+
+
 const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean }) => {
   return Boolean(entity.isDeleted ?? entity.is_deleted);
 };

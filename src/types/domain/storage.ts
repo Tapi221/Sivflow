@@ -20,6 +20,8 @@ export interface IndexedDBMetadata { key: "main"; // 固定キー
 
 
 
+
+
 /**
  * 現在のスキーマバージョン
  */
