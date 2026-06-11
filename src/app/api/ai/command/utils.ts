@@ -94,14 +94,14 @@ export const buildStructuredPrompt = ({
   ]);
 };
 
-export function getTextFromMessage(message: UIMessage): string {
+export const getTextFromMessage = (message: UIMessage): string => {
   return message.parts
     .filter((part) => part.type === 'text')
     .map((part) => part.text)
     .join('');
-}
+};
 
-export function formatTextFromMessages(messages: ChatMessage[], options?: { limit?: number }): string {
+export const formatTextFromMessages = (messages: ChatMessage[], options?: { limit?: number }): string => {
   if (!messages || messages.length <= 1) return '';
 
   const historyMessages = options?.limit ? messages.slice(-options.limit) : messages;
@@ -118,9 +118,9 @@ export function formatTextFromMessages(messages: ChatMessage[], options?: { limi
     })
     .filter(Boolean)
     .join('\n');
-}
+};
 
-export function getLastUserInstruction(messages: ChatMessage[]): string {
+export const getLastUserInstruction = (messages: ChatMessage[]): string => {
   if (!messages || messages.length === 0) return '';
 
   const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
@@ -128,7 +128,7 @@ export function getLastUserInstruction(messages: ChatMessage[]): string {
   if (!lastUserMessage) return '';
 
   return getTextFromMessage(lastUserMessage).trim();
-}
+};
 
 export const addSelection = (editor: SlateEditor) => {
   if (!editor.selection) return;
