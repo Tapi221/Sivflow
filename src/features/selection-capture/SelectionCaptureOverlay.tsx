@@ -4,6 +4,8 @@ import type { SelectionCaptureArea, SelectionCapturePoint, SelectionCaptureRect,
 
 
 
+
+
 type SelectionCaptureTargetRef = {
   readonly current: HTMLElement | null;
 };
@@ -18,8 +20,12 @@ type SelectionCaptureOverlayProps = {
 
 
 
+
+
 const MIN_SELECTION_SIZE_PX = 5;
 const MIN_FREEHAND_POINTS = 3;
+
+
 
 
 
@@ -65,7 +71,9 @@ const buildSvgPathData = (path: SelectionCapturePoint[]): string => {
 
 
 
-export const SelectionCaptureOverlay = ({ targetRef, active, busy = false, shape = "rectangle", onCancel, onCapture, }: SelectionCaptureOverlayProps) => { const overlayRef = useRef<HTMLDivElement | null>(null);
+
+
+export const SelectionCaptureOverlay = ({ targetRef, active, busy = false, shape = "rectangle", onCancel, onCapture }: SelectionCaptureOverlayProps) => { const overlayRef = useRef<HTMLDivElement | null>(null);
   const [startPoint, setStartPoint] = useState<SelectionCapturePoint | null>(null);
   const [endPoint, setEndPoint] = useState<SelectionCapturePoint | null>(null);
   const [pathPoints, setPathPoints] = useState<SelectionCapturePoint[]>([]);

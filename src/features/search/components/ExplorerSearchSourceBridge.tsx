@@ -5,6 +5,8 @@ import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "
 
 
 
+
+
 type ExplorerSearchSourceBridgeProps = {
   folders: Folder[];
   cards: Card[];
@@ -16,7 +18,9 @@ type ExplorerSearchSourceBridgeProps = {
 
 
 
-export const ExplorerSearchSourceBridge = ({ folders, cards, cardSets, documents, onFolderSelect, onItemSelect, }: ExplorerSearchSourceBridgeProps) => { const registerSource = useSearchStore((state) => state.registerSource);
+
+
+export const ExplorerSearchSourceBridge = ({ folders, cards, cardSets, documents, onFolderSelect, onItemSelect }: ExplorerSearchSourceBridgeProps) => { const registerSource = useSearchStore((state) => state.registerSource);
   const unregisterSource = useSearchStore(
     (state) => state.unregisterSource,
   );

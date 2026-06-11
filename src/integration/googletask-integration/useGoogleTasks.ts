@@ -8,6 +8,8 @@ import type { GoogleTaskListAccountState } from "./useGoogleTaskLists";
 
 
 
+
+
 export type GoogleTasksAccountState = { tasks: GoogleTaskItem[];
   isLoading: boolean;
   error: string | null;
@@ -42,12 +44,16 @@ type AccountTokenSnapshot = {
 
 
 
+
+
 const EMPTY_ACCOUNT_STATE: GoogleTasksAccountState = {
   tasks: [],
   isLoading: false,
   error: null,
 };
 const DEFAULT_POLL_INTERVAL_MS = 10_000;
+
+
 
 
 
@@ -128,7 +134,7 @@ const getAccessTokenWithRecovery = async (
   if (account.accessToken) return account.accessToken;
   return getRecoverableAccessToken(account, onAccessTokenRecovered);
 };
-const withRecoveredToken = async <T,>(
+const withRecoveredToken = async <T>(
   account: AccountTokenSnapshot,
   action: (accessToken: string) => Promise<T>,
   onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,
@@ -317,7 +323,7 @@ const buildAccountTokenKey = (
       ].join("\t");
     })
     .join("\n");
-export const useGoogleTasks = (accounts: GoogleConnectedServiceAccountEntry[], taskListsByAccount: Record<string, GoogleTaskListAccountState>, onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,) => { const [state, dispatch] = useReducer(reduceGoogleTasks, {});
+export const useGoogleTasks = (accounts: GoogleConnectedServiceAccountEntry[], taskListsByAccount: Record<string, GoogleTaskListAccountState>, onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void) => { const [state, dispatch] = useReducer(reduceGoogleTasks, {});
 
   const accountTokenKey = buildAccountTokenKey(accounts, taskListsByAccount);
 

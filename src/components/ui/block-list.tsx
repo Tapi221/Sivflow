@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 
-import type { TListElement } from 'platejs';
+import type { TListElement } from "platejs";
 
-import { isOrderedList } from '@platejs/list';
+import { isOrderedList } from "@platejs/list";
 
-import { useTodoListElement, useTodoListElementState, } from '@platejs/list/react';
+import { useTodoListElement, useTodoListElementState } from "@platejs/list/react";
 
-import { type PlateElementProps, type RenderNodeWrapper, useReadOnly, } from 'platejs/react';
+import { type PlateElementProps, type RenderNodeWrapper, useReadOnly } from "platejs/react";
 
-import { Checkbox } from './checkbox';
+import { Checkbox } from "./checkbox";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 
 
@@ -40,7 +40,7 @@ export const BlockList: RenderNodeWrapper = (props) => { if (!props.element.list
 function List(props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) {
   const { listStart, listStyleType } = props.element as TListElement;
   const { Li, Marker } = config[listStyleType] ?? {};
-  const List = isOrderedList(props.element) ? 'ol' : 'ul';
+  const List = isOrderedList(props.element) ? "ol" : "ul";
 
   return (
     <List
@@ -70,8 +70,8 @@ function TodoMarker(props: PlateElementProps) {
     <div contentEditable={false}>
       <Checkbox
         className={cn(
-          '-left-6 absolute top-1',
-          readOnly && 'pointer-events-none'
+          "-left-6 absolute top-1",
+          readOnly && "pointer-events-none",
         )}
         {...checkboxProps}
       />
@@ -80,14 +80,14 @@ function TodoMarker(props: PlateElementProps) {
 }
 
 function TodoLi(
-  props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }
+  props: PlateElementProps & { lineBreakBadge?: React.ReactNode; },
 ) {
   return (
     <li
       className={cn(
-        'list-none',
+        "list-none",
         (props.element.checked as boolean) &&
-        'text-muted-foreground line-through'
+        "text-muted-foreground line-through",
       )}
     >
       {props.children}

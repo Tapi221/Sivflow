@@ -18,7 +18,7 @@ interface CardSyncStatusPillProps {
 
 
 
-export const CardSyncStatusPill = ({ lastSyncedAtMs, hasError = false, isRetrying = false, canRetry = false, onRetry, className, }: CardSyncStatusPillProps) => { const label = hasError ? "同期失敗" : `最終同期: ${formatLastSyncedAt(lastSyncedAtMs)}`;
+export const CardSyncStatusPill = ({ lastSyncedAtMs, hasError = false, isRetrying = false, canRetry = false, onRetry, className }: CardSyncStatusPillProps) => { const label = hasError ? "同期失敗" : `最終同期: ${formatLastSyncedAt(lastSyncedAtMs)}`;
 
   const retryDisabled = isRetrying || !canRetry || onRetry == null;
 

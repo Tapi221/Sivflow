@@ -24,6 +24,6 @@ export const isRenderableCardBlock = (block: CardBlock): boolean => { switch (bl
       return false;
   }
 };
-export const filterRenderableCardBlocks = (blocks?: readonly CardBlock[] | null,): CardBlock[] => { if (!blocks || blocks.length === 0) return [];
+export const filterRenderableCardBlocks = (blocks?: readonly CardBlock[] | null): CardBlock[] => { if (!blocks || blocks.length === 0) return [];
   return blocks.filter(isRenderableCardBlock);
 };

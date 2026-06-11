@@ -41,7 +41,7 @@ const EMPTY_ISSUES: LoadMfDeckFileResult["issues"] = [];
 
 
 
-export const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets, onImported, createCardSet, updateCardSet, createCard, ensureTagByName, initialFile = null, initialFileRevision = 0, }: MfDeckImportDialogProps) => { const toast = useToast();
+export const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets, onImported, createCardSet, updateCardSet, createCard, ensureTagByName, initialFile = null, initialFileRevision = 0 }: MfDeckImportDialogProps) => { const toast = useToast();
   const [destinationMode, setDestinationMode] = useState<"new" | "existing">(
     "new",
   );

@@ -66,97 +66,97 @@ const toHistoryEvent = (value: unknown): HistoryEvent | null => {
   };
 };
 export class HistoryCompressionService { public readonly compress = async (userId: string): Promise<void> => { if (StorageStateManager.isReadOnly(userId)) { console.log(`[Compression:${userId}] Skipped (READ_ONLY mode)`);
-      return;
+  return;
+}
+
+const db = await getLocalDb(userId);
+
+try {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const oldEvents = await db.levelHistories
+    .where("changedAt")
+    .below(thirtyDaysAgo)
+    .toArray();
+
+  if (oldEvents.length === 0) {
+    console.log(`[Compression:${userId}] No old events to compress`);
+    return;
+  }
+
+  const compressed = this.compressByDay(oldEvents, userId);
+
+  console.log(
+    `[Compression:${userId}] Compressed ${oldEvents.length} events into ${compressed.length} daily summaries`,
+  );
+} catch (error) {
+  console.error(`[Compression:${userId}] Failed:`, error);
+}
+};
+
+private readonly compressByDay = (
+  events: unknown[],
+  userId: string,
+): CompressedHistory[] => {
+  const byDay = new Map<string, HistoryEvent[]>();
+
+  for (const rawEvent of events) {
+    const event = toHistoryEvent(rawEvent);
+    if (!event) continue;
+
+    const day = event.changedAt.toISOString().split("T")[0];
+    const key = `${event.cardId}_${day}`;
+
+    const existing = byDay.get(key);
+    if (existing) {
+      existing.push(event);
+    } else {
+      byDay.set(key, [event]);
     }
+  }
 
-    const db = await getLocalDb(userId);
+  const compressed: CompressedHistory[] = [];
 
-    try {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  for (const [key, dayEvents] of byDay.entries()) {
+    const separatorIndex = key.lastIndexOf("_");
+    const cardId = key.slice(0, separatorIndex);
+    const day = key.slice(separatorIndex + 1);
 
-      const oldEvents = await db.levelHistories
-        .where("changedAt")
-        .below(thirtyDaysAgo)
-        .toArray();
-
-      if (oldEvents.length === 0) {
-        console.log(`[Compression:${userId}] No old events to compress`);
-        return;
-      }
-
-      const compressed = this.compressByDay(oldEvents, userId);
-
-      console.log(
-        `[Compression:${userId}] Compressed ${oldEvents.length} events into ${compressed.length} daily summaries`,
-      );
-    } catch (error) {
-      console.error(`[Compression:${userId}] Failed:`, error);
-    }
-  };
-
-  private readonly compressByDay = (
-    events: unknown[],
-    userId: string,
-  ): CompressedHistory[] => {
-    const byDay = new Map<string, HistoryEvent[]>();
-
-    for (const rawEvent of events) {
-      const event = toHistoryEvent(rawEvent);
-      if (!event) continue;
-
-      const day = event.changedAt.toISOString().split("T")[0];
-      const key = `${event.cardId}_${day}`;
-
-      const existing = byDay.get(key);
-      if (existing) {
-        existing.push(event);
-      } else {
-        byDay.set(key, [event]);
-      }
-    }
-
-    const compressed: CompressedHistory[] = [];
-
-    for (const [key, dayEvents] of byDay.entries()) {
-      const separatorIndex = key.lastIndexOf("_");
-      const cardId = key.slice(0, separatorIndex);
-      const day = key.slice(separatorIndex + 1);
-
-      const correctCount = dayEvents.filter((event) => {
-        if (typeof event.correct === "boolean") return event.correct;
-        if (
-          typeof event.newLevel === "number" &&
+    const correctCount = dayEvents.filter((event) => {
+      if (typeof event.correct === "boolean") return event.correct;
+      if (
+        typeof event.newLevel === "number" &&
           typeof event.oldLevel === "number"
-        ) {
-          return event.newLevel > event.oldLevel;
-        }
-        return false;
-      }).length;
+      ) {
+        return event.newLevel > event.oldLevel;
+      }
+      return false;
+    }).length;
 
-      const intervals = dayEvents
-        .map((event) => event.interval)
-        .filter((interval): interval is number => {
-          return typeof interval === "number" && interval > 0;
-        });
-
-      const avgInterval =
-        intervals.length > 0
-          ? intervals.reduce((sum, interval) => sum + interval, 0) /
-          intervals.length
-          : 0;
-
-      compressed.push({
-        id: `${userId}_${cardId}_${day}`,
-        userId,
-        cardId,
-        date: new Date(day),
-        reviewCount: dayEvents.length,
-        correctCount,
-        avgInterval,
+    const intervals = dayEvents
+      .map((event) => event.interval)
+      .filter((interval): interval is number => {
+        return typeof interval === "number" && interval > 0;
       });
-    }
 
-    return compressed;
-  };
+    const avgInterval =
+      intervals.length > 0
+        ? intervals.reduce((sum, interval) => sum + interval, 0) /
+          intervals.length
+        : 0;
+
+    compressed.push({
+      id: `${userId}_${cardId}_${day}`,
+      userId,
+      cardId,
+      date: new Date(day),
+      reviewCount: dayEvents.length,
+      correctCount,
+      avgInterval,
+    });
+  }
+
+  return compressed;
+};
 }

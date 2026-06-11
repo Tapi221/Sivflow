@@ -26,7 +26,7 @@ const normalizeReferences = (
 
 
 
-export const SharedCardAttachments = ({ attachments, className, }: SharedCardAttachmentsProps) => { const audioUrls = React.useMemo(() => normalizeAudioUrls(attachments), [attachments],);
+export const SharedCardAttachments = ({ attachments, className }: SharedCardAttachmentsProps) => { const audioUrls = React.useMemo(() => normalizeAudioUrls(attachments), [attachments]);
   const references = React.useMemo(
     () => normalizeReferences(attachments),
     [attachments],

@@ -31,7 +31,7 @@ export const CALENDAR_LIST_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
 
 
-export const CalendarListMenu = ({ x, y, actions, menuRef, noDragStyle, panelId = CALENDAR_LIST_MENU_PANEL_ID, }: CalendarListMenuProps) => { return (<RightClickPanelSurface x={x} y={y} width={CALENDAR_LIST_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} ariaLabel="calendar list context menu" panelId={panelId} > {actions.map((action) => (<button key={action.id} type="button" disabled={action.disabled} className="right-click-panel-item" role="menuitem" onClick={(event) => { event.preventDefault();
+export const CalendarListMenu = ({ x, y, actions, menuRef, noDragStyle, panelId = CALENDAR_LIST_MENU_PANEL_ID }: CalendarListMenuProps) => { return (<RightClickPanelSurface x={x} y={y} width={CALENDAR_LIST_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} ariaLabel="calendar list context menu" panelId={panelId} > {actions.map((action) => (<button key={action.id} type="button" disabled={action.disabled} className="right-click-panel-item" role="menuitem" onClick={(event) => { event.preventDefault();
     event.stopPropagation();
 
     if (action.disabled) return;

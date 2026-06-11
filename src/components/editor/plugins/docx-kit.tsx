@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { DocxPlugin } from '@platejs/docx';
+import { DocxPlugin } from "@platejs/docx";
 
-import { JuicePlugin } from '@platejs/juice';
+import { JuicePlugin } from "@platejs/juice";
 
 
 

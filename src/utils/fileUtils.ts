@@ -27,7 +27,7 @@ const getValidatedExtension = (
   const allAllowed = Object.values(ALLOWED_EXTENSIONS).flat();
   return allAllowed.includes(ext) ? ext : "bin";
 };
-export const generateSafeStoragePath = (originalName: string, fileType?: string,): { safeName: string; extension: string; id: string; } => {
+export const generateSafeStoragePath = (originalName: string, fileType?: string): { safeName: string; extension: string; id: string; } => {
   const extension = getValidatedExtension(originalName, fileType);
   const id = nanoid(10);
   const safeName = `${Date.now()}_${id}.${extension}`;

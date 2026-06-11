@@ -1,38 +1,38 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import type { PlateElementProps, RenderNodeWrapper } from 'platejs/react';
+import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
 
-import { getDraftCommentKey } from '@platejs/comment';
+import { getDraftCommentKey } from "@platejs/comment";
 
-import { CommentPlugin } from '@platejs/comment/react';
+import { CommentPlugin } from "@platejs/comment/react";
 
-import { getTransientSuggestionKey } from '@platejs/suggestion';
+import { getTransientSuggestionKey } from "@platejs/suggestion";
 
-import { SuggestionPlugin } from '@platejs/suggestion/react';
+import { SuggestionPlugin } from "@platejs/suggestion/react";
 
-import { MessageSquareTextIcon, MessagesSquareIcon, PencilLineIcon, } from 'lucide-react';
+import { MessageSquareTextIcon, MessagesSquareIcon, PencilLineIcon } from "lucide-react";
 
-import { type AnyPluginConfig, type NodeEntry, PathApi } from 'platejs';
+import { type AnyPluginConfig, type NodeEntry, PathApi } from "platejs";
 
-import { useEditorRef, usePluginOption } from 'platejs/react';
+import { useEditorRef, usePluginOption } from "platejs/react";
 
-import { Button } from './button';
+import { Button } from "./button";
 
-import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger, } from './popover';
+import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "./popover";
 
-import { commentPlugin } from '@/components/editor/plugins/comment-kit';
+import { commentPlugin } from "@/components/editor/plugins/comment-kit";
 
-import type { TDiscussion } from '@/components/editor/plugins/discussion-kit';
+import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 
-import { useBlockDiscussionItems } from '@/lib/block-discussion-index';
+import { useBlockDiscussionItems } from "@/lib/block-discussion-index";
 
-import { suggestionPlugin } from '@/components/editor/plugins/suggestion-kit';
+import { suggestionPlugin } from "@/components/editor/plugins/suggestion-kit";
 
-import { BlockSuggestionCard, isResolvedSuggestion } from './block-suggestion';
+import { BlockSuggestionCard, isResolvedSuggestion } from "./block-suggestion";
 
-import { Comment, CommentCreateForm } from './comment';
+import { Comment, CommentCreateForm } from "./comment";
 
 
 
@@ -50,10 +50,10 @@ const BlockCommentContent = ({ children, element }: PlateElementProps) => {
   const suggestionsCount = resolvedSuggestions.length;
   const discussionsCount = resolvedDiscussions.length;
   const totalCount = suggestionsCount + discussionsCount;
-  const activeSuggestionId = usePluginOption(suggestionPlugin, 'activeId');
+  const activeSuggestionId = usePluginOption(suggestionPlugin, "activeId");
   const activeSuggestion = activeSuggestionId && resolvedSuggestions.find((s) => s.suggestionId === activeSuggestionId);
-  const commentingBlock = usePluginOption(commentPlugin, 'commentingBlock');
-  const activeCommentId = usePluginOption(commentPlugin, 'activeId');
+  const commentingBlock = usePluginOption(commentPlugin, "commentingBlock");
+  const activeCommentId = usePluginOption(commentPlugin, "activeId");
   const isCommenting = activeCommentId === getDraftCommentKey();
   const activeDiscussion = activeCommentId && resolvedDiscussions.find((d) => d.id === activeCommentId);
   const noneActive = !activeSuggestion && !activeDiscussion;
@@ -75,7 +75,7 @@ const BlockCommentContent = ({ children, element }: PlateElementProps) => {
 
   return (
     <div className="flex w-full justify-between">
-      <Popover open={open} onOpenChange={(_open_) => { if (!_open_ && isCommenting && draftCommentNode) { editor.tf.unsetNodes(getDraftCommentKey(), { at: [], mode: 'lowest', match: (n) => n[getDraftCommentKey()] }); } setOpen(_open_); }}>
+      <Popover open={open} onOpenChange={(_open_) => { if (!_open_ && isCommenting && draftCommentNode) { editor.tf.unsetNodes(getDraftCommentKey(), { at: [], mode: "lowest", match: (n) => n[getDraftCommentKey()] }); } setOpen(_open_); }}>
         <div className="w-full">{children}</div>
         {anchorElement && <PopoverAnchor asChild className="w-full" virtualRef={{ current: anchorElement }} />}
         <PopoverContent className="max-h-[min(50dvh,calc(-24px+var(--radix-popper-available-height)))] w-[380px] min-w-[130px] max-w-[calc(100vw-24px)] overflow-y-auto p-0 data-[state=closed]:opacity-0" onCloseAutoFocus={(e) => e.preventDefault()} onOpenAutoFocus={(e) => e.preventDefault()} align="center" side="bottom">

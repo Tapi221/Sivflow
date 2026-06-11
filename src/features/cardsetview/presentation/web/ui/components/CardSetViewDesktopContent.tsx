@@ -27,7 +27,7 @@ const cardSetViewChromeResetStyle: CardSetViewChromeResetStyle = {
 
 
 
-export const CardSetViewDesktopContent = ({ controller, }: CardSetViewContentProps) => { const { folderId, cardSetId, settings, data, state, zoom, effectiveCardLayoutMode, } = controller;
+export const CardSetViewDesktopContent = ({ controller }: CardSetViewContentProps) => { const { folderId, cardSetId, settings, data, state, zoom, effectiveCardLayoutMode } = controller;
 
   return (
     <div className="h-full min-h-0 w-full" style={cardSetViewChromeResetStyle}>

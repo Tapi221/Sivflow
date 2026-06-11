@@ -34,7 +34,7 @@ const normalizeMarkdownBlockValue = (input: string) =>
 
 
 
-export const MarkdownBlockDisplay = ({ markdown, emptyPlaceholder = "Markdownを入力...", className, previewClassName, bleedX = false, style, interactive = false, tabIndex, role, ariaLabel, onClick, onKeyDown, zoom, "data-testid": dataTestId, }: MarkdownBlockDisplayProps) => { const normalizedMarkdown = normalizeMarkdownBlockValue(markdown);
+export const MarkdownBlockDisplay = ({ markdown, emptyPlaceholder = "Markdownを入力...", className, previewClassName, bleedX = false, style, interactive = false, tabIndex, role, ariaLabel, onClick, onKeyDown, zoom, "data-testid": dataTestId }: MarkdownBlockDisplayProps) => { const normalizedMarkdown = normalizeMarkdownBlockValue(markdown);
   const isEmpty = normalizedMarkdown.trim().length === 0;
 
   const emptyStyle = mergeStyles(

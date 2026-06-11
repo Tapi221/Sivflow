@@ -147,7 +147,7 @@ const resolveVisibleCards = ({
 
   return normalized;
 };
-export const useCardsRead = (folderId?: string, cardSetId?: string, options?: UseCardsReadOptions,) => { const { search } = useLocation();
+export const useCardsRead = (folderId?: string, cardSetId?: string, options?: UseCardsReadOptions) => { const { search } = useLocation();
   const userId = useEffectiveLocalUserId();
   const isActiveWorkspaceCardSetSelected = useWorkspaceTabsStore((state) => {
     const activeTab = state.tabs.find((tab) => tab.id === state.activeTabId);

@@ -77,14 +77,14 @@ export const getKnownLocalDbNamesForUser = (userId: string): string[] => { const
   return names;
 };
 export const bumpGenerationForUser = (userId: string) => { if (generationBumpedUsers.has(userId)) { return getGenerationForUser(userId);
-  }
-  generationBumpedUsers.add(userId);
-  const current = getGenerationForUser(userId);
-  const next = Math.min(current + 1, LOCALDB_GENERATION_MAX);
-  if (next !== current) {
-    writeGenerationToStorage(userId, next);
-  }
-  return next;
+}
+generationBumpedUsers.add(userId);
+const current = getGenerationForUser(userId);
+const next = Math.min(current + 1, LOCALDB_GENERATION_MAX);
+if (next !== current) {
+  writeGenerationToStorage(userId, next);
+}
+return next;
 };
 export const getDatabaseNameForUser = (userId: string = "anonymous") => { const generation = getGenerationForUser(userId);
   return `${LOCALDB_NAME_PREFIX}${userId}_v${LOCALDB_SCHEMA_VERSION_FOR_NAME}_g${generation}`;

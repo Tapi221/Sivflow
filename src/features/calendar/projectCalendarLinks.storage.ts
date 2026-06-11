@@ -90,7 +90,7 @@ const readStoredProjectCalendarLinksRaw = (): string | null => {
   return legacy;
 };
 export const buildProjectCalendarLinkId = (provider: CalendarProvider, accountId: string, externalCalendarId: string): string => ["project-calendar-link", encodeLinkIdPart(provider), encodeLinkIdPart(accountId), encodeLinkIdPart(externalCalendarId)].join(":");
-export const createProjectCalendarLink = ({ projectId, provider, accountId, externalCalendarId, externalCalendarName, syncDirection, createdByApp, color, lastSyncedAt, }: CreateProjectCalendarLinkInput): ProjectCalendarLink => ({ id: buildProjectCalendarLinkId(provider, accountId, externalCalendarId), projectId, provider, accountId, externalCalendarId, externalCalendarName, syncDirection: normalizeCreatedLinkSyncDirection(syncDirection), createdByApp, color, lastSyncedAt, });
+export const createProjectCalendarLink = ({ projectId, provider, accountId, externalCalendarId, externalCalendarName, syncDirection, createdByApp, color, lastSyncedAt }: CreateProjectCalendarLinkInput): ProjectCalendarLink => ({ id: buildProjectCalendarLinkId(provider, accountId, externalCalendarId), projectId, provider, accountId, externalCalendarId, externalCalendarName, syncDirection: normalizeCreatedLinkSyncDirection(syncDirection), createdByApp, color, lastSyncedAt });
 export const readStoredProjectCalendarLinks = (): ProjectCalendarLink[] => { if (typeof window === "undefined") return [];
 
   try {

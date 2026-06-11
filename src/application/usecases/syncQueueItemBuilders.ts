@@ -108,7 +108,7 @@ const createBaseQueueFields = ({
     nextRetryAt: now,
   };
 };
-export const createUpsertQueueItem = <TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high", type = "upload", }: { entity: TEntity;
+export const createUpsertQueueItem = <TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high", type = "upload" }: { entity: TEntity;
   operationType: Extract<SyncOperationType, "create" | "update">;
   payload: unknown;
   priority?: SyncPriority;
@@ -131,7 +131,7 @@ export const createUpsertQueueItem = <TEntity extends UpsertEntity>({ entity, op
     payload: checkedPayload,
   } as UpsertQueueItem<TEntity>;
 };
-export const createDeleteQueueItem = ({ entity, targetId, priority = "high", type = "upload", }: { entity: DeleteEntity;
+export const createDeleteQueueItem = ({ entity, targetId, priority = "high", type = "upload" }: { entity: DeleteEntity;
   targetId: string;
   priority?: SyncPriority;
   type?: SyncDirection;

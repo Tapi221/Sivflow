@@ -11,7 +11,7 @@ type StorageLike = Record<string, unknown>;
 
 
 
-export const denormalizeCardForStorage = (value: Partial<Card> | StorageLike,): StorageLike => { const record = cloneStorageRecord(value);
+export const denormalizeCardForStorage = (value: Partial<Card> | StorageLike): StorageLike => { const record = cloneStorageRecord(value);
   const frontBlocks = sanitizeCardStorageBlockImages(
     resolveBlocksFromCardData(record, "question"),
   );

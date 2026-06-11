@@ -30,15 +30,15 @@ const fallbackCopyText = (text: string): boolean => {
 
 
 export const webClipboardAdapter: ClipboardAdapter = { async writeText(text: string) { if (typeof navigator !== "undefined" && navigator.clipboard && typeof navigator.clipboard.writeText === "function") { try { await navigator.clipboard.writeText(text);
-        return;
-      } catch {
-        // fallback へ
-      }
-    }
+  return;
+} catch {
+  // fallback へ
+}
+}
 
-    const copied = fallbackCopyText(text);
-    if (!copied) {
-      throw new Error("Clipboard write failed");
-    }
-  },
+const copied = fallbackCopyText(text);
+if (!copied) {
+  throw new Error("Clipboard write failed");
+}
+},
 };

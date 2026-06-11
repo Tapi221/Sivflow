@@ -1,28 +1,28 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import TextareaAutosize, { type TextareaAutosizeProps, } from 'react-textarea-autosize';
+import TextareaAutosize, { type TextareaAutosizeProps } from "react-textarea-autosize";
 
-import type { TEquationElement } from 'platejs';
+import type { TEquationElement } from "platejs";
 
-import type { PlateElementProps } from 'platejs/react';
+import type { PlateElementProps } from "platejs/react";
 
-import { useEquationElement, useEquationInput } from '@platejs/math/react';
+import { useEquationElement, useEquationInput } from "@platejs/math/react";
 
-import { BlockSelectionPlugin } from '@platejs/selection/react';
+import { BlockSelectionPlugin } from "@platejs/selection/react";
 
-import { CornerDownLeftIcon, RadicalIcon } from 'lucide-react';
+import { CornerDownLeftIcon, RadicalIcon } from "lucide-react";
 
-import { createPrimitiveComponent, PlateElement, useEditorRef, useEditorSelector, useElement, useReadOnly, useSelected, } from 'platejs/react';
+import { createPrimitiveComponent, PlateElement, useEditorRef, useEditorSelector, useElement, useReadOnly, useSelected } from "platejs/react";
 
-import { Button } from './button';
+import { Button } from "./button";
 
-import { Popover, PopoverContent, PopoverTrigger, } from './popover';
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
-import { inlineSuggestionVariants } from '@/lib/suggestion';
+import { inlineSuggestionVariants } from "@/lib/suggestion";
 
 
 
@@ -46,12 +46,12 @@ export function EquationElement(props: PlateElementProps<TEquationElement>) { co
     katexRef,
     options: {
       displayMode: true,
-      errorColor: '#cc0000',
+      errorColor: "#cc0000",
       fleqn: false,
       leqno: false,
-      macros: { '\f': '#1f(#2)' },
-      output: 'htmlAndMathml',
-      strict: 'warn',
+      macros: { "\f": "#1f(#2)" },
+      output: "htmlAndMathml",
+      strict: "warn",
       throwOnError: false,
       trust: false,
     },
@@ -63,10 +63,10 @@ export function EquationElement(props: PlateElementProps<TEquationElement>) { co
         <PopoverTrigger asChild>
           <div
             className={cn(
-              'group flex cursor-pointer select-none items-center justify-center rounded-sm hover:bg-primary/10 data-[selected=true]:bg-primary/10',
+              "group flex cursor-pointer select-none items-center justify-center rounded-sm hover:bg-primary/10 data-[selected=true]:bg-primary/10",
               props.element.texExpression.length === 0
-                ? 'bg-muted p-3 pr-9'
-                : 'px-2 py-1'
+                ? "bg-muted p-3 pr-9"
+                : "px-2 py-1",
             )}
             data-selected={selected}
             contentEditable={false}
@@ -106,7 +106,7 @@ export function InlineEquationElement(props: PlateElementProps<TEquationElement>
   const selected = useSelected();
   const isCollapsed = useEditorSelector(
     (editor) => editor.api.isCollapsed(),
-    []
+    [],
   );
   const [open, setOpen] = React.useState(selected && isCollapsed);
 
@@ -122,12 +122,12 @@ export function InlineEquationElement(props: PlateElementProps<TEquationElement>
     katexRef,
     options: {
       displayMode: true,
-      errorColor: '#cc0000',
+      errorColor: "#cc0000",
       fleqn: false,
       leqno: false,
-      macros: { '\f': '#1f(#2)' },
-      output: 'htmlAndMathml',
-      strict: 'warn',
+      macros: { "\f": "#1f(#2)" },
+      output: "htmlAndMathml",
+      strict: "warn",
       throwOnError: false,
       trust: false,
     },
@@ -137,7 +137,7 @@ export function InlineEquationElement(props: PlateElementProps<TEquationElement>
     <PlateElement
       {...props}
       className={cn(
-        'mx-1 inline-block select-none rounded-sm [&_.katex-display]:my-0!'
+        "mx-1 inline-block select-none rounded-sm [&_.katex-display]:my-0!",
       )}
     >
       <Popover open={open} onOpenChange={setOpen} modal={false}>
@@ -145,20 +145,20 @@ export function InlineEquationElement(props: PlateElementProps<TEquationElement>
           <div
             className={cn(
               'after:-top-0.5 after:-left-1 after:absolute after:inset-0 after:z-1 after:h-[calc(100%)+4px] after:w-[calc(100%+8px)] after:rounded-sm after:content-[""]',
-              'h-6',
+              "h-6",
               inlineSuggestionVariants(),
               ((element.texExpression.length > 0 && open) || selected) &&
-              'after:bg-brand/15',
+              "after:bg-brand/15",
               element.texExpression.length === 0 &&
-              'text-muted-foreground after:bg-neutral-500/10'
+              "text-muted-foreground after:bg-neutral-500/10",
             )}
             contentEditable={false}
           >
             <span
               ref={katexRef}
               className={cn(
-                element.texExpression.length === 0 && 'hidden',
-                'font-mono leading-none'
+                element.texExpression.length === 0 && "hidden",
+                "font-mono leading-none",
               )}
             />
             {element.texExpression.length === 0 && (
@@ -228,7 +228,7 @@ const EquationPopoverContent = ({
       contentEditable={false}
     >
       <EquationInput
-        className={cn('max-h-[50vh] grow resize-none p-2 text-sm', className)}
+        className={cn("max-h-[50vh] grow resize-none p-2 text-sm", className)}
         state={{ isInline, open, onClose }}
         autoFocus
         {...props}

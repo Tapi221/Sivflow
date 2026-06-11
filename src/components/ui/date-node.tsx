@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import { formatDateValue, getDateDisplayLabel, parseCanonicalDateValue } from '@platejs/date';
+import { formatDateValue, getDateDisplayLabel, parseCanonicalDateValue } from "@platejs/date";
 
-import type { TDateElement } from 'platejs';
+import type { TDateElement } from "platejs";
 
-import type { PlateElementProps } from 'platejs/react';
+import type { PlateElementProps } from "platejs/react";
 
-import { PlateElement, useReadOnly } from 'platejs/react';
+import { PlateElement, useReadOnly } from "platejs/react";
 
-import { inlineSuggestionVariants } from '@/lib/suggestion';
+import { inlineSuggestionVariants } from "@/lib/suggestion";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
-import { Calendar } from './calendar';
+import { Calendar } from "./calendar";
 
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 
 
@@ -24,7 +24,7 @@ export const DateElement = (props: PlateElementProps<TDateElement>) => { const {
   const readOnly = useReadOnly();
 
   const trigger = (
-    <span className={cn('w-fit cursor-pointer rounded-sm bg-muted px-1 text-muted-foreground', inlineSuggestionVariants())} contentEditable={false} draggable>
+    <span className={cn("w-fit cursor-pointer rounded-sm bg-muted px-1 text-muted-foreground", inlineSuggestionVariants())} contentEditable={false} draggable>
       {element.date || element.rawDate ? getDateDisplayLabel(element) : <span>Pick a date</span>}
     </span>
   );
@@ -38,7 +38,7 @@ export const DateElement = (props: PlateElementProps<TDateElement>) => { const {
           <PopoverTrigger asChild>{trigger}</PopoverTrigger>
           <PopoverContent className="w-auto p-0">
             <Calendar
-              selected={parseCanonicalDateValue(element.date ?? '')}
+              selected={parseCanonicalDateValue(element.date ?? "")}
               onSelect={(date) => {
                 if (!date) return;
                 editor.tf.setNodes({ date: formatDateValue(date), rawDate: undefined }, { at: element });

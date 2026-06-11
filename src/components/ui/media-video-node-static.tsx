@@ -1,12 +1,12 @@
-import * as React from 'react';
-import type { TCaptionElement, TResizableProps, TVideoElement } from 'platejs';
-import type { SlateElementProps } from 'platejs/static';
-import { NodeApi } from 'platejs';
-import { SlateElement } from 'platejs/static';
+import * as React from "react";
+import type { TCaptionElement, TResizableProps, TVideoElement } from "platejs";
+import type { SlateElementProps } from "platejs/static";
+import { NodeApi } from "platejs";
+import { SlateElement } from "platejs/static";
 
 
 
-export function VideoElementStatic(props: SlateElementProps<TVideoElement & TCaptionElement & TResizableProps>) { const { align = 'center', caption, url, width } = props.element;
+export function VideoElementStatic(props: SlateElementProps<TVideoElement & TCaptionElement & TResizableProps>) { const { align = "center", caption, url, width } = props.element;
 
   return (
     <SlateElement className="py-2.5" {...props}>

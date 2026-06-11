@@ -39,7 +39,7 @@ const UnsupportedDocumentPane = () => {
     </div>
   );
 };
-export const RightPane = ({ selectedItem, selectedCardId, selectedDocument, selectedFolderId, selectedFolderName, folderCards, onCardUpdated, onDocumentUpdated, onRenameFolder, handlers, folderSelectionNonce, }: RightPaneProps) => { if (selectedItem?.type === "trash") { return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
+export const RightPane = ({ selectedItem, selectedCardId, selectedDocument, selectedFolderId, selectedFolderName, folderCards, onCardUpdated, onDocumentUpdated, onRenameFolder, handlers, folderSelectionNonce }: RightPaneProps) => { if (selectedItem?.type === "trash") { return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
   }
 
   if (selectedItem?.type === "cardSet") {

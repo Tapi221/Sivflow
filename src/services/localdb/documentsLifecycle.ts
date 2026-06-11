@@ -45,7 +45,7 @@ const canDeleteDocumentBlob = async (
     .first();
   return !sharedRef;
 };
-export const cleanupBeforeDocumentUpdate = async (db: DocDbCtx, id: string, changes: unknown,) => { const docChanges = changes as DocumentUpdateChanges;
+export const cleanupBeforeDocumentUpdate = async (db: DocDbCtx, id: string, changes: unknown) => { const docChanges = changes as DocumentUpdateChanges;
   const hasLocalFileIdChange = Object.prototype.hasOwnProperty.call(
     docChanges,
     "localFileId",
@@ -111,54 +111,54 @@ export const cleanupBeforeDocumentUpdate = async (db: DocDbCtx, id: string, chan
   }
 };
 export const cleanupBeforeDocumentDelete = async (db: DocDbCtx, id: string) => { try { const existingDoc = await db.documents.get(id);
-    safeRevokeBlobUrl(
-      existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null,
-      `documents.deleteItem:${id}`,
+  safeRevokeBlobUrl(
+    existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null,
+    `documents.deleteItem:${id}`,
+  );
+  const localBlobId = existingDoc?.localFileId ?? existingDoc?.id ?? id;
+  if (localBlobId && db.userId) {
+    const canDelete = await canDeleteDocumentBlob(
+      db.documents,
+      localBlobId,
+      id,
     );
-    const localBlobId = existingDoc?.localFileId ?? existingDoc?.id ?? id;
-    if (localBlobId && db.userId) {
-      const canDelete = await canDeleteDocumentBlob(
-        db.documents,
+    if (canDelete) {
+      await deleteDocumentBlob(localBlobId, { userId: db.userId });
+      removeDocumentBlobUrl(localBlobId, { userId: db.userId });
+    } else {
+      console.info("[LocalDB] Skip deleting shared document blob", {
+        documentId: id,
         localBlobId,
-        id,
-      );
-      if (canDelete) {
-        await deleteDocumentBlob(localBlobId, { userId: db.userId });
-        removeDocumentBlobUrl(localBlobId, { userId: db.userId });
-      } else {
-        console.info("[LocalDB] Skip deleting shared document blob", {
-          documentId: id,
-          localBlobId,
-        });
-      }
+      });
     }
-  } catch (err) {
-    console.warn("[LocalDB] deleteItem documents blob cleanup failed", err);
   }
+} catch (err) {
+  console.warn("[LocalDB] deleteItem documents blob cleanup failed", err);
+}
 };
-export const cleanupBeforeDocumentSoftDelete = async (db: DocDbCtx, id: string,) => { try { const existingDoc = await db.documents.get(id);
-    safeRevokeBlobUrl(
-      existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null,
-      `documents.softDelete:${id}`,
+export const cleanupBeforeDocumentSoftDelete = async (db: DocDbCtx, id: string) => { try { const existingDoc = await db.documents.get(id);
+  safeRevokeBlobUrl(
+    existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null,
+    `documents.softDelete:${id}`,
+  );
+  const localBlobId = existingDoc?.localFileId ?? existingDoc?.id ?? id;
+  if (localBlobId && db.userId) {
+    const canDelete = await canDeleteDocumentBlob(
+      db.documents,
+      localBlobId,
+      id,
     );
-    const localBlobId = existingDoc?.localFileId ?? existingDoc?.id ?? id;
-    if (localBlobId && db.userId) {
-      const canDelete = await canDeleteDocumentBlob(
-        db.documents,
+    if (canDelete) {
+      await deleteDocumentBlob(localBlobId, { userId: db.userId });
+      removeDocumentBlobUrl(localBlobId, { userId: db.userId });
+    } else {
+      console.info("[LocalDB] Skip deleting shared document blob", {
+        documentId: id,
         localBlobId,
-        id,
-      );
-      if (canDelete) {
-        await deleteDocumentBlob(localBlobId, { userId: db.userId });
-        removeDocumentBlobUrl(localBlobId, { userId: db.userId });
-      } else {
-        console.info("[LocalDB] Skip deleting shared document blob", {
-          documentId: id,
-          localBlobId,
-        });
-      }
+      });
     }
-  } catch (err) {
-    console.warn("[LocalDB] softDelete documents blob cleanup failed", err);
   }
+} catch (err) {
+  console.warn("[LocalDB] softDelete documents blob cleanup failed", err);
+}
 };

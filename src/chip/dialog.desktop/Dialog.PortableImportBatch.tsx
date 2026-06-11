@@ -48,7 +48,7 @@ const STATUS_CLASS_NAMES: Record<PortableImportBatchItem["status"], string> = {
 
 
 
-export const PortableImportBatchDialog = ({ open, onOpenChange, folderId, folderName, files, filesRevision = 0, onImported, createCardSet, updateCardSet, createCard, ensureTagByName, }: PortableImportBatchDialogProps) => { const toast = useToast();
+export const PortableImportBatchDialog = ({ open, onOpenChange, folderId, folderName, files, filesRevision = 0, onImported, createCardSet, updateCardSet, createCard, ensureTagByName }: PortableImportBatchDialogProps) => { const toast = useToast();
   const [items, setItems] = useState<PortableImportBatchItem[]>([]);
   const [isImporting, setIsImporting] = useState(false);
 

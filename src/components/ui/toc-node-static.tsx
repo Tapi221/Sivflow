@@ -1,24 +1,24 @@
-import * as React from 'react';
-import type { SlateElementProps } from 'platejs/static';
-import { type Heading, BaseTocPlugin, isHeading } from '@platejs/toc';
-import { cva } from 'class-variance-authority';
-import { type SlateEditor, type TElement, NodeApi } from 'platejs';
-import { SlateElement } from 'platejs/static';
-import { Button } from './button';
+import * as React from "react";
+import type { SlateElementProps } from "platejs/static";
+import { type Heading, BaseTocPlugin, isHeading } from "@platejs/toc";
+import { cva } from "class-variance-authority";
+import { type SlateEditor, type TElement, NodeApi } from "platejs";
+import { SlateElement } from "platejs/static";
+import { Button } from "./button";
 
 
 
 const headingItemVariants = cva(
-  'block h-auto w-full cursor-pointer truncate rounded-none px-0.5 py-1.5 text-left font-medium text-muted-foreground underline decoration-[0.5px] underline-offset-4 hover:bg-accent hover:text-muted-foreground',
+  "block h-auto w-full cursor-pointer truncate rounded-none px-0.5 py-1.5 text-left font-medium text-muted-foreground underline decoration-[0.5px] underline-offset-4 hover:bg-accent hover:text-muted-foreground",
   {
     variants: {
       depth: {
-        1: 'pl-0.5',
-        2: 'pl-[26px]',
-        3: 'pl-[50px]',
+        1: "pl-0.5",
+        2: "pl-[26px]",
+        3: "pl-[50px]",
       },
     },
-  }
+  },
 );
 const headingDepth: Record<string, number> = {
   h1: 1,
@@ -91,7 +91,6 @@ export function TocElementStatic(props: SlateElementProps) { const { editor } = 
     </SlateElement>
   );
 }
-
 /**
  * DOCX-compatible TOC component.
  * Renders TOC items as anchor links for proper Word internal navigation.
@@ -100,17 +99,17 @@ export function TocElementDocx(props: SlateElementProps) { const { editor } = pr
   const headingList = getHeadingList(editor);
 
   const depthIndent: Record<number, string> = {
-    1: '0',
-    2: '24pt',
-    3: '48pt',
+    1: "0",
+    2: "24pt",
+    3: "48pt",
   };
 
   return (
     <SlateElement {...props}>
       <div
         style={{
-          marginBottom: '12pt',
-          padding: '8pt 0',
+          marginBottom: "12pt",
+          padding: "8pt 0",
         }}
       >
         {headingList.length > 0 ? (
@@ -118,15 +117,15 @@ export function TocElementDocx(props: SlateElementProps) { const { editor } = pr
             <p
               key={item.id}
               style={{
-                margin: '4pt 0',
-                paddingLeft: depthIndent[item.depth] || '0',
+                margin: "4pt 0",
+                paddingLeft: depthIndent[item.depth] || "0",
               }}
             >
               <a
                 href={`#${item.id}`}
                 style={{
-                  color: '#0066cc',
-                  textDecoration: 'underline',
+                  color: "#0066cc",
+                  textDecoration: "underline",
                 }}
               >
                 {item.title}
@@ -134,7 +133,7 @@ export function TocElementDocx(props: SlateElementProps) { const { editor } = pr
             </p>
           ))
         ) : (
-          <p style={{ color: '#666', fontSize: '10pt' }}>
+          <p style={{ color: "#666", fontSize: "10pt" }}>
             Create a heading to display the table of contents.
           </p>
         )}

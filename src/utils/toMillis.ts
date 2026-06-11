@@ -83,30 +83,30 @@ const toDateFromTimestampFields = (value: TimestampLike): Date | null => {
   return toDateFromMillis(millis);
 };
 export const toDateOrNull = (value: unknown): Date | null => { if (value === null || value === undefined || value === "") { return null;
-  }
+}
 
-  if (isValidDate(value)) {
-    return new Date(value.getTime());
-  }
+if (isValidDate(value)) {
+  return new Date(value.getTime());
+}
 
-  if (isFiniteNumber(value)) {
-    return toDateFromMillis(value);
-  }
+if (isFiniteNumber(value)) {
+  return toDateFromMillis(value);
+}
 
-  if (typeof value === "string") {
-    return toDateFromString(value);
-  }
+if (typeof value === "string") {
+  return toDateFromString(value);
+}
 
-  if (!isRecord(value)) {
-    return null;
-  }
+if (!isRecord(value)) {
+  return null;
+}
 
-  const timestampValue = value as TimestampLike;
+const timestampValue = value as TimestampLike;
 
-  return (
-    toDateFromTimestampMethods(timestampValue) ??
+return (
+  toDateFromTimestampMethods(timestampValue) ??
     toDateFromTimestampFields(timestampValue)
-  );
+);
 };
 export const toMillisOrNull = (value: unknown): number | null => { const date = toDateOrNull(value);
   return date ? date.getTime() : null;

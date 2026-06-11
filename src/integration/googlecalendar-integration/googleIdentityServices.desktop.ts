@@ -14,6 +14,8 @@ let _gisLoaded = false;
 
 
 
+
+
 const loadGisScript = (): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (_gisLoaded || (typeof window !== "undefined" && window.google?.accounts)) {
@@ -53,7 +55,7 @@ const normalizeLoginHint = (loginHint: string | null | undefined): string | unde
   const normalized = loginHint?.trim();
   return normalized ? normalized : undefined;
 };
-export const requestWebAccessTokenViaGis = async ({ clientId, scope, silent = false, loginHint, }: { clientId: string;
+export const requestWebAccessTokenViaGis = async ({ clientId, scope, silent = false, loginHint }: { clientId: string;
   scope: string;
   silent?: boolean;
   loginHint?: string | null;

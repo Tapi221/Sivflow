@@ -17,7 +17,7 @@ type Params = {
 
 
 
-export const useExplorerBreadcrumbSync = ({ selectedFolderId, selectedItem, explorerBreadcrumbContext, folderById, cardById, documentById, }: Params) => { const setExtraCrumbs = useSetBreadcrumbCrumbs();
+export const useExplorerBreadcrumbSync = ({ selectedFolderId, selectedItem, explorerBreadcrumbContext, folderById, cardById, documentById }: Params) => { const setExtraCrumbs = useSetBreadcrumbCrumbs();
 
   const extraCrumbs = useMemo(
     () =>

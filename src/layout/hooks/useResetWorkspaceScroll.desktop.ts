@@ -2,7 +2,11 @@ import { type RefObject, useLayoutEffect } from "react";
 
 
 
+
+
 type WorkspaceScrollRef = RefObject<HTMLElement | null> | undefined;
+
+
 
 
 
@@ -32,14 +36,14 @@ const resetWorkspaceScrollPosition = (mainRef: WorkspaceScrollRef) => {
   document.documentElement.scrollTop = 0;
   document.body.scrollTop = 0;
 };
-export const useResetWorkspaceScrollDesktop = (mainRef: WorkspaceScrollRef, pathname: string,) => { useLayoutEffect(() => { resetWorkspaceScrollPosition(mainRef);
+export const useResetWorkspaceScrollDesktop = (mainRef: WorkspaceScrollRef, pathname: string) => { useLayoutEffect(() => { resetWorkspaceScrollPosition(mainRef);
 
-    const animationFrameId = window.requestAnimationFrame(() => {
-      resetWorkspaceScrollPosition(mainRef);
-    });
+  const animationFrameId = window.requestAnimationFrame(() => {
+    resetWorkspaceScrollPosition(mainRef);
+  });
 
-    return () => {
-      window.cancelAnimationFrame(animationFrameId);
-    };
-  }, [mainRef, pathname]);
+  return () => {
+    window.cancelAnimationFrame(animationFrameId);
+  };
+}, [mainRef, pathname]);
 };

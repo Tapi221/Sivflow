@@ -19,9 +19,9 @@ export const normalizeCardSetViewZoom = (zoom?: number) => { const safeZoom = ty
 };
 export const scaleTypographyValuePx = (basePx: number, zoom?: number) => { return toPx(basePx * normalizeCardSetViewZoom(zoom));
 };
-export const scaleTypographyNumberPx = (basePx: number, zoom?: number) => { return Math.max(8, Number((basePx * normalizeCardSetViewZoom(zoom)).toFixed(3)),);
+export const scaleTypographyNumberPx = (basePx: number, zoom?: number) => { return Math.max(8, Number((basePx * normalizeCardSetViewZoom(zoom)).toFixed(3)));
 };
-export const buildTypographyStyle = ({ fontSizePx, lineHeightPx, zoom, }: { fontSizePx: number;
+export const buildTypographyStyle = ({ fontSizePx, lineHeightPx, zoom }: { fontSizePx: number;
   lineHeightPx: number;
   zoom?: number;
 }): CSSProperties => {

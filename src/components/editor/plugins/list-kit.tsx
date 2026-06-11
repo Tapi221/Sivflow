@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { BulletedListRules, isOrderedList, OrderedListRules, TaskListRules } from '@platejs/list';
+import { BulletedListRules, isOrderedList, OrderedListRules, TaskListRules } from "@platejs/list";
 
-import { ListPlugin } from '@platejs/list/react';
+import { ListPlugin } from "@platejs/list/react";
 
-import { KEYS } from 'platejs';
+import { KEYS } from "platejs";
 
-import { BlockList } from '@/components/ui/block-list';
+import { BlockList } from "@/components/ui/block-list";
 
-import { IndentKit } from './indent-kit';
+import { IndentKit } from "./indent-kit";
 
 
 
@@ -16,10 +16,10 @@ const ListKit = [
   ...IndentKit,
   ListPlugin.configure({
     inputRules: [
-      BulletedListRules.markdown({ variant: '-' }),
-      BulletedListRules.markdown({ variant: '*' }),
-      OrderedListRules.markdown({ variant: '.' }),
-      OrderedListRules.markdown({ variant: ')' }),
+      BulletedListRules.markdown({ variant: "-" }),
+      BulletedListRules.markdown({ variant: "*" }),
+      OrderedListRules.markdown({ variant: "." }),
+      OrderedListRules.markdown({ variant: ")" }),
       TaskListRules.markdown({ checked: false }),
       TaskListRules.markdown({ checked: true }),
     ],
@@ -33,10 +33,10 @@ const ListKit = [
         },
         transformProps: ({ props }) => ({
           ...props,
-          role: 'listitem',
+          role: "listitem",
           style: {
             ...props.style,
-            display: 'list-item',
+            display: "list-item",
           },
         }),
       },

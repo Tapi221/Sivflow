@@ -1,34 +1,34 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import type { CreatePlateEditorOptions } from 'platejs/react';
+import type { CreatePlateEditorOptions } from "platejs/react";
 
-import { getCommentKey, getDraftCommentKey } from '@platejs/comment';
+import { getCommentKey, getDraftCommentKey } from "@platejs/comment";
 
-import { CommentPlugin, useCommentId } from '@platejs/comment/react';
+import { CommentPlugin, useCommentId } from "@platejs/comment/react";
 
-import { differenceInDays, differenceInHours, differenceInMinutes, format, } from 'date-fns';
+import { differenceInDays, differenceInHours, differenceInMinutes, format } from "date-fns";
 
-import { ArrowUpIcon, CheckIcon, MoreHorizontalIcon, PencilIcon, TrashIcon, XIcon, } from 'lucide-react';
+import { ArrowUpIcon, CheckIcon, MoreHorizontalIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
 
-import { type NodeEntry, type TCommentText, type Value, KEYS, nanoid, NodeApi, } from 'platejs';
+import { type NodeEntry, type TCommentText, type Value, KEYS, nanoid, NodeApi } from "platejs";
 
-import { Plate, useEditorPlugin, useEditorRef, usePlateEditor, usePluginOption, } from 'platejs/react';
+import { Plate, useEditorPlugin, useEditorRef, usePlateEditor, usePluginOption } from "platejs/react";
 
-import { Avatar, AvatarFallback, AvatarImage } from './avatar';
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 
-import { Button } from './button';
+import { Button } from "./button";
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger, } from './dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
-import { BasicMarksKit } from '@/components/editor/plugins/basic-marks-kit';
+import { BasicMarksKit } from "@/components/editor/plugins/basic-marks-kit";
 
-import { type TDiscussion, discussionPlugin, } from '@/components/editor/plugins/discussion-kit';
+import { type TDiscussion, discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 
-import { Editor, EditorContainer } from './editor';
+import { Editor, EditorContainer } from "./editor";
 
 
 
@@ -43,17 +43,17 @@ export type TComment = { id: string;
 
 
 const useCommentEditor = (
-  options: Omit<CreatePlateEditorOptions, 'plugins'> = {},
-  deps: any[] = []
+  options: Omit<CreatePlateEditorOptions, "plugins"> = {},
+  deps: any[] = [],
 ) => {
   const commentEditor = usePlateEditor(
     {
-      id: 'comment',
+      id: "comment",
       plugins: BasicMarksKit,
       value: [],
       ...options,
     },
-    deps
+    deps,
   );
 
   return commentEditor;
@@ -82,26 +82,26 @@ export function Comment(props: { comment: TComment;
   } = props;
 
   const editor = useEditorRef();
-  const userInfo = usePluginOption(discussionPlugin, 'user', comment.userId);
-  const currentUserId = usePluginOption(discussionPlugin, 'currentUserId');
+  const userInfo = usePluginOption(discussionPlugin, "user", comment.userId);
+  const currentUserId = usePluginOption(discussionPlugin, "currentUserId");
 
   const resolveDiscussion = async (id: string) => {
     const updatedDiscussions = editor
-      .getOption(discussionPlugin, 'discussions')
+      .getOption(discussionPlugin, "discussions")
       .map((discussion) => {
         if (discussion.id === id) {
           return { ...discussion, isResolved: true };
         }
         return discussion;
       });
-    editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
+    editor.setOption(discussionPlugin, "discussions", updatedDiscussions);
   };
 
   const removeDiscussion = async (id: string) => {
     const updatedDiscussions = editor
-      .getOption(discussionPlugin, 'discussions')
+      .getOption(discussionPlugin, "discussions")
       .filter((discussion) => discussion.id !== id);
-    editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
+    editor.setOption(discussionPlugin, "discussions", updatedDiscussions);
   };
 
   const updateComment = async (input: {
@@ -111,7 +111,7 @@ export function Comment(props: { comment: TComment;
     isEdited: boolean;
   }) => {
     const updatedDiscussions = editor
-      .getOption(discussionPlugin, 'discussions')
+      .getOption(discussionPlugin, "discussions")
       .map((discussion) => {
         if (discussion.id === input.discussionId) {
           const updatedComments = discussion.comments.map((comment) => {
@@ -129,7 +129,7 @@ export function Comment(props: { comment: TComment;
         }
         return discussion;
       });
-    editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
+    editor.setOption(discussionPlugin, "discussions", updatedDiscussions);
   };
 
   const { tf } = useEditorPlugin(CommentPlugin);
@@ -144,7 +144,7 @@ export function Comment(props: { comment: TComment;
       id: comment.id,
       value: initialValue,
     },
-    [initialValue]
+    [initialValue],
   );
 
   const onCancel = () => {
@@ -215,7 +215,7 @@ export function Comment(props: { comment: TComment;
             <CommentMoreDropdown
               onCloseAutoFocus={() => {
                 setTimeout(() => {
-                  commentEditor.tf.focus({ edge: 'endEditor' });
+                  commentEditor.tf.focus({ edge: "endEditor" });
                 }, 0);
               }}
               onRemoveComment={() => {
@@ -315,18 +315,18 @@ function CommentMoreDropdown(props: {
 
   const onDeleteComment = React.useCallback(() => {
     if (!comment.id)
-      return alert('You are operating too quickly, please try again later.');
+      return alert("You are operating too quickly, please try again later.");
 
     // Find and update the discussion
     const updatedDiscussions = editor
-      .getOption(discussionPlugin, 'discussions')
+      .getOption(discussionPlugin, "discussions")
       .map((discussion) => {
         if (discussion.id !== comment.discussionId) {
           return discussion;
         }
 
         const commentIndex = discussion.comments.findIndex(
-          (c) => c.id === comment.id
+          (c) => c.id === comment.id,
         );
         if (commentIndex === -1) {
           return discussion;
@@ -342,7 +342,7 @@ function CommentMoreDropdown(props: {
       });
 
     // Save back to session storage
-    editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
+    editor.setOption(discussionPlugin, "discussions", updatedDiscussions);
     onRemoveComment?.();
   }, [comment.discussionId, comment.id, editor, onRemoveComment]);
 
@@ -350,7 +350,7 @@ function CommentMoreDropdown(props: {
     selectedEditCommentRef.current = true;
 
     if (!comment.id)
-      return alert('You are operating too quickly, please try again later.');
+      return alert("You are operating too quickly, please try again later.");
 
     setEditingId(comment.id);
   }, [comment.id, setEditingId]);
@@ -362,7 +362,7 @@ function CommentMoreDropdown(props: {
       modal={false}
     >
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-        <Button variant="ghost" className={cn('h-6 p-1 text-muted-foreground')}>
+        <Button variant="ghost" className={cn("h-6 p-1 text-muted-foreground")}>
           <MoreHorizontalIcon className="size-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -392,25 +392,25 @@ function CommentMoreDropdown(props: {
   );
 }
 
-export function CommentCreateForm({ autoFocus = false, className, discussionId: discussionIdProp, focusOnMount = false, }: { autoFocus?: boolean;
+export function CommentCreateForm({ autoFocus = false, className, discussionId: discussionIdProp, focusOnMount = false }: { autoFocus?: boolean;
   className?: string;
   discussionId?: string;
   focusOnMount?: boolean;
 }) {
-  const discussions = usePluginOption(discussionPlugin, 'discussions');
+  const discussions = usePluginOption(discussionPlugin, "discussions");
 
   const editor = useEditorRef();
   const commentId = useCommentId();
   const discussionId = discussionIdProp ?? commentId;
 
-  const userInfo = usePluginOption(discussionPlugin, 'currentUser');
+  const userInfo = usePluginOption(discussionPlugin, "currentUser");
   const [commentValue, setCommentValue] = React.useState<Value | undefined>();
   const commentContent = React.useMemo(
     () =>
       commentValue
         ? NodeApi.string({ children: commentValue, type: KEYS.p })
-        : '',
-    [commentValue]
+        : "",
+    [commentValue],
   );
   const commentEditor = useCommentEditor();
 
@@ -439,15 +439,15 @@ export function CommentCreateForm({ autoFocus = false, className, discussionId: 
               createdAt: new Date(),
               discussionId,
               isEdited: false,
-              userId: editor.getOption(discussionPlugin, 'currentUserId'),
+              userId: editor.getOption(discussionPlugin, "currentUserId"),
             },
           ],
           createdAt: new Date(),
           isResolved: false,
-          userId: editor.getOption(discussionPlugin, 'currentUserId'),
+          userId: editor.getOption(discussionPlugin, "currentUserId"),
         };
 
-        editor.setOption(discussionPlugin, 'discussions', [
+        editor.setOption(discussionPlugin, "discussions", [
           ...discussions,
           newDiscussion,
         ]);
@@ -461,7 +461,7 @@ export function CommentCreateForm({ autoFocus = false, className, discussionId: 
         createdAt: new Date(),
         discussionId,
         isEdited: false,
-        userId: editor.getOption(discussionPlugin, 'currentUserId'),
+        userId: editor.getOption(discussionPlugin, "currentUserId"),
       };
 
       // Add reply to discussion comments
@@ -475,7 +475,7 @@ export function CommentCreateForm({ autoFocus = false, className, discussionId: 
         .filter((d) => d.id !== discussionId)
         .concat(updatedDiscussion);
 
-      editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
+      editor.setOption(discussionPlugin, "discussions", updatedDiscussions);
 
       return;
     }
@@ -488,7 +488,7 @@ export function CommentCreateForm({ autoFocus = false, className, discussionId: 
 
     const documentContent = commentsNodeEntry
       .map(([node, _path]: NodeEntry<TCommentText>) => node.text)
-      .join('');
+      .join("");
 
     const _discussionId = nanoid();
     // Mock creating new discussion
@@ -501,16 +501,16 @@ export function CommentCreateForm({ autoFocus = false, className, discussionId: 
           createdAt: new Date(),
           discussionId: _discussionId,
           isEdited: false,
-          userId: editor.getOption(discussionPlugin, 'currentUserId'),
+          userId: editor.getOption(discussionPlugin, "currentUserId"),
         },
       ],
       createdAt: new Date(),
       documentContent,
       isResolved: false,
-      userId: editor.getOption(discussionPlugin, 'currentUserId'),
+      userId: editor.getOption(discussionPlugin, "currentUserId"),
     };
 
-    editor.setOption(discussionPlugin, 'discussions', [
+    editor.setOption(discussionPlugin, "discussions", [
       ...discussions,
       newDiscussion,
     ]);
@@ -522,14 +522,14 @@ export function CommentCreateForm({ autoFocus = false, className, discussionId: 
         {
           [getCommentKey(id)]: true,
         },
-        { at: path, split: true }
+        { at: path, split: true },
       );
       editor.tf.unsetNodes([getDraftCommentKey()], { at: path });
     });
   }, [commentValue, commentEditor.tf, discussionId, editor, discussions]);
 
   return (
-    <div className={cn('flex w-full', className)}>
+    <div className={cn("flex w-full", className)}>
       <div className="mt-2 mr-1 shrink-0">
         {/* Replace to your own backend or refer to potion */}
         <Avatar className="size-5">
@@ -550,7 +550,7 @@ export function CommentCreateForm({ autoFocus = false, className, discussionId: 
               variant="comment"
               className="min-h-[25px] grow pt-0.5 pr-8"
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   onAddComment();
                 }
@@ -598,5 +598,5 @@ export const formatCommentDate = (date: Date) => { const now = new Date();
     return `${diffDays}d`;
   }
 
-  return format(date, 'MM/dd/yyyy');
+  return format(date, "MM/dd/yyyy");
 };

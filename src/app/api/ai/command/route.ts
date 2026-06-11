@@ -1,12 +1,12 @@
-import type { ChatMessage, ToolName } from './types';
-import type { NextRequest } from 'next/server';
-import { createGateway } from '@ai-sdk/gateway';
-import { type LanguageModel, type UIMessageStreamWriter, createUIMessageStream, createUIMessageStreamResponse, generateText, Output, streamText, tool } from 'ai';
-import { NextResponse } from 'next/server';
-import { type SlateEditor, createSlateEditor, nanoid } from 'platejs';
-import { z } from 'zod';
-import { AI_COMMAND_PLATE_PLUGINS } from './editorKit';
-import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from '@/app/api/ai/command/prompt';
+import type { ChatMessage, ToolName } from "./types";
+import type { NextRequest } from "next/server";
+import { createGateway } from "@ai-sdk/gateway";
+import { type LanguageModel, type UIMessageStreamWriter, createUIMessageStream, createUIMessageStreamResponse, generateText, Output, streamText, tool } from "ai";
+import { NextResponse } from "next/server";
+import { type SlateEditor, createSlateEditor, nanoid } from "platejs";
+import { z } from "zod";
+import { AI_COMMAND_PLATE_PLUGINS } from "./editorKit";
+import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from "@/app/api/ai/command/prompt";
 
 
 
@@ -24,8 +24,8 @@ export const POST = async (req: NextRequest) => { const { apiKey: key, ctx, mess
 
   if (!apiKey) {
     return NextResponse.json(
-      { error: 'Missing AI Gateway API key.' },
-      { status: 401 }
+      { error: "Missing AI Gateway API key." },
+      { status: 401 },
     );
   }
 
@@ -47,9 +47,9 @@ export const POST = async (req: NextRequest) => { const { apiKey: key, ctx, mess
           });
 
           const enumOptions = isSelecting
-            ? ['generate', 'edit', 'comment']
-            : ['generate', 'comment'];
-          const modelId = model || 'google/gemini-2.5-flash';
+            ? ["generate", "edit", "comment"]
+            : ["generate", "comment"];
+          const modelId = model || "google/gemini-2.5-flash";
 
           const { output: AIToolName } = await generateText({
             model: gatewayProvider(modelId),
@@ -59,45 +59,45 @@ export const POST = async (req: NextRequest) => { const { apiKey: key, ctx, mess
 
           writer.write({
             data: AIToolName as ToolName,
-            type: 'data-toolName',
+            type: "data-toolName",
           });
 
           toolName = AIToolName;
         }
 
         const stream = streamText({
-          model: gatewayProvider(model || 'openai/gpt-4o-mini'),
-          prompt: '',
+          model: gatewayProvider(model || "openai/gpt-4o-mini"),
+          prompt: "",
           tools: {
             comment: getCommentTool(editor, {
               messagesRaw,
-              model: gatewayProvider(model || 'google/gemini-2.5-flash'),
+              model: gatewayProvider(model || "google/gemini-2.5-flash"),
               writer,
             }),
             table: getTableTool(editor, {
               messagesRaw,
-              model: gatewayProvider(model || 'google/gemini-2.5-flash'),
+              model: gatewayProvider(model || "google/gemini-2.5-flash"),
               writer,
             }),
           },
           prepareStep: async (step) => {
-            if (toolName === 'comment') {
+            if (toolName === "comment") {
               return {
                 ...step,
-                toolChoice: { toolName: 'comment', type: 'tool' },
+                toolChoice: { toolName: "comment", type: "tool" },
               };
             }
 
-            if (toolName === 'edit') {
+            if (toolName === "edit") {
               const [editPrompt, editType] = getEditPrompt(editor, {
                 isSelecting,
                 messages: messagesRaw,
               });
 
-              if (editType === 'table') {
+              if (editType === "table") {
                 return {
                   ...step,
-                  toolChoice: { toolName: 'table', type: 'tool' },
+                  toolChoice: { toolName: "table", type: "tool" },
                 };
               }
 
@@ -105,19 +105,19 @@ export const POST = async (req: NextRequest) => { const { apiKey: key, ctx, mess
                 ...step,
                 activeTools: [],
                 model:
-                  editType === 'selection'
-                    ? gatewayProvider(model || 'google/gemini-2.5-flash')
-                    : gatewayProvider(model || 'openai/gpt-4o-mini'),
+                  editType === "selection"
+                    ? gatewayProvider(model || "google/gemini-2.5-flash")
+                    : gatewayProvider(model || "openai/gpt-4o-mini"),
                 messages: [
                   {
                     content: editPrompt,
-                    role: 'user',
+                    role: "user",
                   },
                 ],
               };
             }
 
-            if (toolName === 'generate') {
+            if (toolName === "generate") {
               const generatePrompt = getGeneratePrompt(editor, {
                 isSelecting,
                 messages: messagesRaw,
@@ -129,10 +129,10 @@ export const POST = async (req: NextRequest) => { const { apiKey: key, ctx, mess
                 messages: [
                   {
                     content: generatePrompt,
-                    role: 'user',
+                    role: "user",
                   },
                 ],
-                model: gatewayProvider(model || 'openai/gpt-4o-mini'),
+                model: gatewayProvider(model || "openai/gpt-4o-mini"),
               };
             }
           },
@@ -145,8 +145,8 @@ export const POST = async (req: NextRequest) => { const { apiKey: key, ctx, mess
     return createUIMessageStreamResponse({ stream });
   } catch {
     return NextResponse.json(
-      { error: 'Failed to process AI request' },
-      { status: 500 }
+      { error: "Failed to process AI request" },
+      { status: 500 },
     );
   }
 };
@@ -163,10 +163,10 @@ const getCommentTool = (
     messagesRaw: ChatMessage[];
     model: LanguageModel;
     writer: UIMessageStreamWriter<ChatMessage>;
-  }
+  },
 ) =>
   tool({
-    description: 'Comment on the content',
+    description: "Comment on the content",
     inputSchema: z.object({}),
     strict: true,
     execute: async () => {
@@ -174,15 +174,15 @@ const getCommentTool = (
         blockId: z
           .string()
           .describe(
-            'The id of the starting block. If the comment spans multiple blocks, use the id of the first block.'
+            "The id of the starting block. If the comment spans multiple blocks, use the id of the first block.",
           ),
         comment: z
           .string()
-          .describe('A brief comment or explanation for this fragment.'),
+          .describe("A brief comment or explanation for this fragment."),
         content: z
           .string()
           .describe(
-            String.raw`The original document fragment to be commented on.It can be the entire block, a small part within a block, or span multiple blocks. If spanning multiple blocks, separate them with two \n\n.`
+            String.raw`The original document fragment to be commented on.It can be the entire block, a small part within a block, or span multiple blocks. If spanning multiple blocks, separate them with two \n\n.`,
           ),
       });
 
@@ -205,9 +205,9 @@ const getCommentTool = (
             id: commentDataId,
             data: {
               comment,
-              status: 'streaming',
+              status: "streaming",
             },
-            type: 'data-comment',
+            type: "data-comment",
           });
         }
 
@@ -218,9 +218,9 @@ const getCommentTool = (
         id: nanoid(),
         data: {
           comment: null,
-          status: 'finished',
+          status: "finished",
         },
-        type: 'data-comment',
+        type: "data-comment",
       });
     },
   });
@@ -234,10 +234,10 @@ const getTableTool = (
     messagesRaw: ChatMessage[];
     model: LanguageModel;
     writer: UIMessageStreamWriter<ChatMessage>;
-  }
+  },
 ) =>
   tool({
-    description: 'Edit table cells',
+    description: "Edit table cells",
     inputSchema: z.object({}),
     strict: true,
     execute: async () => {
@@ -245,9 +245,9 @@ const getTableTool = (
         content: z
           .string()
           .describe(
-            String.raw`The new content for the cell. Can contain multiple paragraphs separated by \n\n.`
+            String.raw`The new content for the cell. Can contain multiple paragraphs separated by \n\n.`,
           ),
-        id: z.string().describe('The id of the table cell to update.'),
+        id: z.string().describe("The id of the table cell to update."),
       });
 
       const { partialOutputStream } = streamText({
@@ -266,9 +266,9 @@ const getTableTool = (
             id: nanoid(),
             data: {
               cellUpdate,
-              status: 'streaming',
+              status: "streaming",
             },
-            type: 'data-table',
+            type: "data-table",
           });
         }
 
@@ -279,9 +279,9 @@ const getTableTool = (
         id: nanoid(),
         data: {
           cellUpdate: null,
-          status: 'finished',
+          status: "finished",
         },
-        type: 'data-table',
+        type: "data-table",
       });
     },
   });

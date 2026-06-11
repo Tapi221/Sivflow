@@ -1,39 +1,39 @@
-'use client';
+"use client";
 
-import { PreviewImage, useImagePreview, useImagePreviewValue, useScaleInput, } from '@platejs/media/react';
+import { PreviewImage, useImagePreview, useImagePreviewValue, useScaleInput } from "@platejs/media/react";
 
-import { cva } from 'class-variance-authority';
+import { cva } from "class-variance-authority";
 
-import { ArrowLeft, ArrowRight, Download, Minus, Plus, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Download, Minus, Plus, X } from "lucide-react";
 
-import { useEditorRef } from 'platejs/react';
+import { useEditorRef } from "platejs/react";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 
 
-const buttonVariants = cva('rounded bg-[rgba(0,0,0,0.5)] px-1', {
+const buttonVariants = cva("rounded bg-[rgba(0,0,0,0.5)] px-1", {
   defaultVariants: {
-    variant: 'default',
+    variant: "default",
   },
   variants: {
     variant: {
-      default: 'text-white',
-      disabled: 'cursor-not-allowed text-gray-400',
+      default: "text-white",
+      disabled: "cursor-not-allowed text-gray-400",
     },
   },
 });
 
 const SCROLL_SPEED = 4;
 
-const DEFAULT_DOWNLOAD_FILENAME = 'image';
+const DEFAULT_DOWNLOAD_FILENAME = "image";
 
 
 
 function getImageDownloadFilename(url: string) {
   try {
     const pathname = new URL(url, window.location.href).pathname;
-    const filename = pathname.split('/').filter(Boolean).pop();
+    const filename = pathname.split("/").filter(Boolean).pop();
 
     return filename || DEFAULT_DOWNLOAD_FILENAME;
   } catch {
@@ -44,10 +44,10 @@ function getImageDownloadFilename(url: string) {
 
 
 export function MediaPreviewDialog() { const editor = useEditorRef();
-  const isOpen = useImagePreviewValue('isOpen', editor.id);
-  const scale = useImagePreviewValue('scale');
-  const isEditingScale = useImagePreviewValue('isEditingScale');
-  const currentPreview = useImagePreviewValue('currentPreview');
+  const isOpen = useImagePreviewValue("isOpen", editor.id);
+  const scale = useImagePreviewValue("scale");
+  const isEditingScale = useImagePreviewValue("isEditingScale");
+  const currentPreview = useImagePreviewValue("currentPreview");
   const {
     closeProps,
     currentUrlIndex,
@@ -66,10 +66,10 @@ export function MediaPreviewDialog() { const editor = useEditorRef();
   const handleDownload = () => {
     if (!currentPreview?.url) return;
 
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.download = getImageDownloadFilename(currentPreview.url);
     link.href = currentPreview.url;
-    link.rel = 'noopener noreferrer';
+    link.rel = "noopener noreferrer";
     document.body.append(link);
     link.click();
     link.remove();
@@ -78,8 +78,8 @@ export function MediaPreviewDialog() { const editor = useEditorRef();
   return (
     <div
       className={cn(
-        'fixed top-0 left-0 z-50 h-screen w-screen select-none',
-        !isOpen && 'hidden'
+        "fixed top-0 left-0 z-50 h-screen w-screen select-none",
+        !isOpen && "hidden",
       )}
       onContextMenu={(e) => e.stopPropagation()}
       {...maskLayerProps}
@@ -90,7 +90,7 @@ export function MediaPreviewDialog() { const editor = useEditorRef();
         <div className="relative flex max-h-screen w-full items-center">
           <PreviewImage
             className={cn(
-              'mx-auto block max-h-[calc(100vh-4rem)] w-auto object-contain transition-transform'
+              "mx-auto block max-h-[calc(100vh-4rem)] w-auto object-contain transition-transform",
             )}
           />
           <div
@@ -102,8 +102,8 @@ export function MediaPreviewDialog() { const editor = useEditorRef();
                 {...prevProps}
                 className={cn(
                   buttonVariants({
-                    variant: prevDisabled ? 'disabled' : 'default',
-                  })
+                    variant: prevDisabled ? "disabled" : "default",
+                  }),
                 )}
                 type="button"
               >
@@ -114,8 +114,8 @@ export function MediaPreviewDialog() { const editor = useEditorRef();
                 {...nextProps}
                 className={cn(
                   buttonVariants({
-                    variant: nextDisabled ? 'disabled' : 'default',
-                  })
+                    variant: nextDisabled ? "disabled" : "default",
+                  }),
                 )}
                 type="button"
               >
@@ -126,8 +126,8 @@ export function MediaPreviewDialog() { const editor = useEditorRef();
               <button
                 className={cn(
                   buttonVariants({
-                    variant: zoomOutDisabled ? 'disabled' : 'default',
-                  })
+                    variant: zoomOutDisabled ? "disabled" : "default",
+                  }),
                 )}
                 {...zommOutProps}
                 type="button"
@@ -137,7 +137,7 @@ export function MediaPreviewDialog() { const editor = useEditorRef();
               <div className="mx-px">
                 {isEditingScale ? (
                   <>
-                    <ScaleInput className="w-10 rounded px-1 text-slate-500 outline" />{' '}
+                    <ScaleInput className="w-10 rounded px-1 text-slate-500 outline" />{" "}
                     <span>%</span>
                   </>
                 ) : (
@@ -147,8 +147,8 @@ export function MediaPreviewDialog() { const editor = useEditorRef();
               <button
                 className={cn(
                   buttonVariants({
-                    variant: zoomInDisabled ? 'disabled' : 'default',
-                  })
+                    variant: zoomInDisabled ? "disabled" : "default",
+                  }),
                 )}
                 {...zoomInProps}
                 type="button"
@@ -159,8 +159,8 @@ export function MediaPreviewDialog() { const editor = useEditorRef();
             <button
               className={cn(
                 buttonVariants({
-                  variant: downloadDisabled ? 'disabled' : 'default',
-                })
+                  variant: downloadDisabled ? "disabled" : "default",
+                }),
               )}
               disabled={downloadDisabled}
               onClick={handleDownload}
@@ -182,7 +182,7 @@ export function MediaPreviewDialog() { const editor = useEditorRef();
   );
 }
 
-function ScaleInput(props: React.ComponentProps<'input'>) {
+function ScaleInput(props: React.ComponentProps<"input">) {
   const { props: scaleInputProps, ref } = useScaleInput();
 
   return <input {...scaleInputProps} {...props} ref={ref} />;

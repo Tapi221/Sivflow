@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import type { EmptyText, KEYS, PlainText, TBasicMarks, TCaptionProps, TComboboxInputElement, TCommentText, TElement, TFontMarks, TImageElement, TLineHeightProps, TLinkElement, TListProps, TMediaEmbedElement, TMentionElement, TResizableProps, TTableElement, TText, TTextAlignProps, } from 'platejs';
+import type { EmptyText, KEYS, PlainText, TBasicMarks, TCaptionProps, TComboboxInputElement, TCommentText, TElement, TFontMarks, TImageElement, TLineHeightProps, TLinkElement, TListProps, TMediaEmbedElement, TMentionElement, TResizableProps, TTableElement, TText, TTextAlignProps } from "platejs";
 
 
 
@@ -28,7 +28,6 @@ export interface MyH2Element extends MyTextBlockElement { type: typeof KEYS.h2;
 }
 
 /** Block props */
-
 export interface MyH3Element extends MyTextBlockElement { type: typeof KEYS.h3;
 }
 

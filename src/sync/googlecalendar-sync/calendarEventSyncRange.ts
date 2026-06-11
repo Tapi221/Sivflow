@@ -93,7 +93,7 @@ const buildDefaultCalendarEventSyncRange = (selectedViewMode: CalendarViewMode, 
 
   return buildVisibleDaysCalendarEventSyncRange(visibleDays, monthTitleDate, DEFAULT_VISIBLE_DAY_BUFFER_DAYS);
 };
-export const buildCalendarEventSyncRange = ({ selectedViewMode, visibleDays, monthTitleDate, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, yearSyncRange, }: BuildCalendarEventSyncRangeOptions): CalendarEventSyncRange => { const miniCalendarRange = buildMiniCalendarMonthRange(monthTitleDate, weekStartDay);
+export const buildCalendarEventSyncRange = ({ selectedViewMode, visibleDays, monthTitleDate, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, yearSyncRange }: BuildCalendarEventSyncRangeOptions): CalendarEventSyncRange => { const miniCalendarRange = buildMiniCalendarMonthRange(monthTitleDate, weekStartDay);
   const viewRange = selectedViewMode === "year"
     ? buildYearCalendarEventSyncRange(visibleDays, monthTitleDate, yearSyncRange)
     : selectedViewMode === "month"
@@ -102,15 +102,15 @@ export const buildCalendarEventSyncRange = ({ selectedViewMode, visibleDays, mon
 
   return mergeCalendarEventSyncRanges(viewRange, miniCalendarRange);
 };
-export const buildCalendarEventPrioritySyncRange = ({ selectedViewMode, visibleDays, monthTitleDate, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, monthRenderedRange, yearSyncRange, }: BuildCalendarEventSyncRangeOptions): CalendarEventSyncRange => { if (selectedViewMode === "days" || selectedViewMode === "threeDays" || selectedViewMode === "week" || selectedViewMode === "timetable") { return buildVisibleDaysCalendarEventSyncRange(visibleDays, monthTitleDate, WEEKDAY_PRIORITY_SYNC_BUFFER_DAYS);
-  }
+export const buildCalendarEventPrioritySyncRange = ({ selectedViewMode, visibleDays, monthTitleDate, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, monthRenderedRange, yearSyncRange }: BuildCalendarEventSyncRangeOptions): CalendarEventSyncRange => { if (selectedViewMode === "days" || selectedViewMode === "threeDays" || selectedViewMode === "week" || selectedViewMode === "timetable") { return buildVisibleDaysCalendarEventSyncRange(visibleDays, monthTitleDate, WEEKDAY_PRIORITY_SYNC_BUFFER_DAYS);
+}
 
-  return buildCalendarEventSyncRange({
-    selectedViewMode,
-    visibleDays,
-    monthTitleDate,
-    weekStartDay,
-    monthRenderedRange,
-    yearSyncRange,
-  });
+return buildCalendarEventSyncRange({
+  selectedViewMode,
+  visibleDays,
+  monthTitleDate,
+  weekStartDay,
+  monthRenderedRange,
+  yearSyncRange,
+});
 };

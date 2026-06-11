@@ -45,5 +45,5 @@ const buildSingleCardArchive = (cardFile: MfCardFileV1): MfDeckArchiveV1 => {
     },
   };
 };
-export const importMfCardFile = async ({ cardFile, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination, }: ImportMfCardFileParams): Promise<ImportMfDeckArchiveResult> => { return importMfDeckArchive({ archive: buildSingleCardArchive(cardFile), folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination, });
+export const importMfCardFile = async ({ cardFile, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination }: ImportMfCardFileParams): Promise<ImportMfDeckArchiveResult> => { return importMfDeckArchive({ archive: buildSingleCardArchive(cardFile), folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination });
 };

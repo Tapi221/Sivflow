@@ -1,5 +1,5 @@
-import { BaseTocPlugin } from '@platejs/toc';
-import { TocElementStatic } from '@/components/ui/toc-node-static';
+import { BaseTocPlugin } from "@platejs/toc";
+import { TocElementStatic } from "@/components/ui/toc-node-static";
 
 
 

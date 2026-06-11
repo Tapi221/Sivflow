@@ -33,7 +33,7 @@ interface BlockListProps {
 
 
 
-export const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowContainerProps, renderBlock, }: BlockListProps) => { return (<div className={cn("w-full max-w-full", className)}> {blocks.map((block, index) => { const isGridOffsetBlock = isGridOffsetType(block.type);
+export const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowContainerProps, renderBlock }: BlockListProps) => { return (<div className={cn("w-full max-w-full", className)}> {blocks.map((block, index) => { const isGridOffsetBlock = isGridOffsetType(block.type);
     const isLinePositionable = isRowPositionableType(block.type);
     const rowOffsetRows = !isLinePositionable
       ? 0

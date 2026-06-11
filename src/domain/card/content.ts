@@ -38,13 +38,13 @@ export const extractCardTextFromBlocks = (blocks: CardBlock[]) => { for (const b
 };
 export const getCardText = (card: Card, side: CardSide) => { return extractCardTextFromBlocks(getCardBlocks(card, side));
 };
-export const getCardImages = (card: Card, side: CardSide) => { const images = getCardBlocks(card, side).filter((block,): block is CardBlock & { type: "image"; images: UploadedImage[]; } =>
+export const getCardImages = (card: Card, side: CardSide) => { const images = getCardBlocks(card, side).filter((block): block is CardBlock & { type: "image"; images: UploadedImage[]; } =>
     block.type === "image" && Array.isArray(block.images),
   )
     .flatMap((block) => block.images);
   return images.length > 0 ? images : EMPTY_IMAGES;
 };
-export const getCardAudios = (card: Card, side: CardSide) => { const audios = getCardBlocks(card, side).filter((block,): block is CardBlock & { type: "audio";
+export const getCardAudios = (card: Card, side: CardSide) => { const audios = getCardBlocks(card, side).filter((block): block is CardBlock & { type: "audio";
     audios: Array<{ url: string; filename: string; order: number; }>;
   } => block.type === "audio" && Array.isArray(block.audios),
   )

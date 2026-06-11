@@ -1,4 +1,6 @@
-import type { TextStreamPart, ToolSet } from 'ai';
+import type { TextStreamPart, ToolSet } from "ai";
+
+
 
 
 
@@ -12,6 +14,8 @@ const TODO_LIST_PATTERN = /^[*-]\s+\[[ xX]\]\s+.+/;
 const ORDERED_LIST_PATTERN = /^\d+\.\s+.+/;
 const MDX_TAG_PATTERN = /<([A-Za-z][A-Za-z0-9\-_]*)>/;
 const DIGIT_PATTERN = /^[0-9]$/;
+
+
 
 
 
@@ -70,13 +74,13 @@ export const markdownJoinerTransform = <TOOLS extends ToolSet>() => () => { cons
           controller.enqueue({
             id: lastTextDeltaId,
             text: remaining,
-            type: 'text-delta',
+            type: "text-delta",
           } as TextStreamPart<TOOLS>);
         }
       }
     },
     async transform(chunk, controller) {
-      if (chunk.type === 'text-delta') {
+      if (chunk.type === "text-delta") {
         lastTextDeltaId = chunk.id;
         const processedText = joiner.processText(chunk.text);
         if (processedText) {
@@ -86,14 +90,14 @@ export const markdownJoinerTransform = <TOOLS extends ToolSet>() => () => { cons
           });
           await delay(joiner.delayInMs);
         }
-      } else if (chunk.type === 'text-end') {
+      } else if (chunk.type === "text-end") {
         // Flush any remaining buffer before text-end
         const remaining = joiner.flush();
         if (remaining && lastTextDeltaId) {
           controller.enqueue({
             id: lastTextDeltaId,
             text: remaining,
-            type: 'text-delta',
+            type: "text-delta",
           } as TextStreamPart<TOOLS>);
         }
         textStreamEnded = true;
@@ -106,7 +110,7 @@ export const markdownJoinerTransform = <TOOLS extends ToolSet>() => () => { cons
 };
 export class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
 
-  private buffer = '';
+  private buffer = "";
   private documentCharacterCount = 0;
   private isBuffering = false;
   private streamingCodeBlock = false;
@@ -114,7 +118,7 @@ export class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
   private streamingTable = false;
 
   private clearBuffer(): void {
-    this.buffer = '';
+    this.buffer = "";
     this.isBuffering = false;
   }
   private isCompleteBold(): boolean {
@@ -122,7 +126,7 @@ export class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
   }
 
   private isCompleteCodeBlockEnd(): boolean {
-    return this.buffer.trimEnd() === '```';
+    return this.buffer.trimEnd() === "```";
   }
 
   private isCompleteCodeBlockStart(): boolean {
@@ -134,7 +138,7 @@ export class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
   }
 
   private isCompleteList(): boolean {
-    if (UNORDERED_LIST_PATTERN.test(this.buffer) && this.buffer.includes('['))
+    if (UNORDERED_LIST_PATTERN.test(this.buffer) && this.buffer.includes("["))
       return TODO_LIST_PATTERN.test(this.buffer);
 
     return (
@@ -149,16 +153,16 @@ export class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
   }
 
   private isCompleteTableStart(): boolean {
-    return this.buffer.startsWith('|') && this.buffer.endsWith('|');
+    return this.buffer.startsWith("|") && this.buffer.endsWith("|");
   }
 
   private isFalsePositive(char: string): boolean {
     // when link is not complete, even if ths buffer is more than 30 characters, it is not a false positive
-    if (this.buffer.startsWith('[') && this.buffer.includes('http')) {
+    if (this.buffer.startsWith("[") && this.buffer.includes("http")) {
       return false;
     }
 
-    return char === '\n' || this.buffer.length > 30;
+    return char === "\n" || this.buffer.length > 30;
   }
 
   private isLargeDocumentStart(): boolean {
@@ -166,11 +170,11 @@ export class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
   }
 
   private isListStartChar(char: string): boolean {
-    return char === '-' || char === '*' || DIGIT_PATTERN.test(char);
+    return char === "-" || char === "*" || DIGIT_PATTERN.test(char);
   }
 
   private isTableExisted(): boolean {
-    return this.buffer.length > 10 && !this.buffer.includes('|');
+    return this.buffer.length > 10 && !this.buffer.includes("|");
   }
 
   flush(): string {
@@ -180,7 +184,7 @@ export class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
   }
 
   processText(text: string): string {
-    let output = '';
+    let output = "";
 
     for (const char of text) {
       if (
@@ -190,7 +194,7 @@ export class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
       ) {
         this.buffer += char;
 
-        if (char === '\n') {
+        if (char === "\n") {
           output += this.buffer;
           this.clearBuffer();
         }
@@ -246,11 +250,11 @@ export class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
         }
         // Check if we should start buffering
       } else if (
-        char === '*' ||
-        char === '<' ||
-        char === '`' ||
-        char === '|' ||
-        char === '[' ||
+        char === "*" ||
+        char === "<" ||
+        char === "`" ||
+        char === "|" ||
+        char === "[" ||
         this.isListStartChar(char)
       ) {
         this.buffer = char;

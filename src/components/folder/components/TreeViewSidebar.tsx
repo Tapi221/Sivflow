@@ -36,7 +36,7 @@ const INTEGRATED_CHROME_SIDEBAR_GAP_PX = 20;
 
 
 
-export const TreeViewSidebar = ({ sidebarRef, contentScrollRef, isSidebarOpen, renderedSidebarWidth, isResizing, showMobileDetail, allTags, onCreateRootFolder, onCreateCardSet, onAddDocument, onBulkImport, onStartResizing, children, canCreateCardSet = false, canCreateCard = false, canAddDocuments = false, canBulkImport = false, preferDirectRootFolderCreate = false, collapseContent = false, collapsedContent, rightGapPx = 0, integratedChrome = false, }: TreeViewSidebarProps) => { void allTags;
+export const TreeViewSidebar = ({ sidebarRef, contentScrollRef, isSidebarOpen, renderedSidebarWidth, isResizing, showMobileDetail, allTags, onCreateRootFolder, onCreateCardSet, onAddDocument, onBulkImport, onStartResizing, children, canCreateCardSet = false, canCreateCard = false, canAddDocuments = false, canBulkImport = false, preferDirectRootFolderCreate = false, collapseContent = false, collapsedContent, rightGapPx = 0, integratedChrome = false }: TreeViewSidebarProps) => { void allTags;
   void onCreateRootFolder;
   void onCreateCardSet;
   void onAddDocument;

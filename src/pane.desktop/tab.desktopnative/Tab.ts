@@ -196,7 +196,7 @@ export type WorkspaceEntityTab = Exclude<WorkspaceTab, WorkspaceExplorerTab | Wo
 /**
  * ルートタブ定義
  */
-export const WORKSPACE_ROUTE_TABS = [{ id: "route:home", kind: "route", title: "Home", routePath: "/schedule", isClosable: true, sectionKey: "home", }, { id: "route:review", kind: "route", title: "Review", routePath: "/study", isClosable: true, sectionKey: "review", }, { id: "route:schedule", kind: "route", title: "Schedule", routePath: "/schedule", isClosable: true, sectionKey: "schedule", }, { id: "route:settings", kind: "route", title: "設定", routePath: "/settings", isClosable: true, sectionKey: "settings", },] as const satisfies readonly WorkspaceRouteTab[];
+export const WORKSPACE_ROUTE_TABS = [{ id: "route:home", kind: "route", title: "Home", routePath: "/schedule", isClosable: true, sectionKey: "home" }, { id: "route:review", kind: "route", title: "Review", routePath: "/study", isClosable: true, sectionKey: "review" }, { id: "route:schedule", kind: "route", title: "Schedule", routePath: "/schedule", isClosable: true, sectionKey: "schedule" }, { id: "route:settings", kind: "route", title: "設定", routePath: "/settings", isClosable: true, sectionKey: "settings" }] as const satisfies readonly WorkspaceRouteTab[];
 
 
 
@@ -239,12 +239,12 @@ export const WORKSPACE_ROUTE_TABS = [{ id: "route:home", kind: "route", title: "
 /**
  * Explorer初期状態
  */
-export const createDefaultExplorerRouteState = (): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null, });
+export const createDefaultExplorerRouteState = (): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null });
 
 /**
  * section → routeタブ解決
  */
-export const resolveRouteTabBySection = (sectionKey: WorkspaceRouteSection,): WorkspaceRouteTab => { const matchedTab = WORKSPACE_ROUTE_TABS.find((tab) => tab.sectionKey === sectionKey,);
+export const resolveRouteTabBySection = (sectionKey: WorkspaceRouteSection): WorkspaceRouteTab => { const matchedTab = WORKSPACE_ROUTE_TABS.find((tab) => tab.sectionKey === sectionKey);
 
   if (!matchedTab) {
     throw new Error(`Unknown workspace route section: ${sectionKey}`);

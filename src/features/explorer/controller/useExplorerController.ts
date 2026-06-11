@@ -13,7 +13,7 @@ type UseExplorerControllerParams = {
 
 
 
-export const useExplorerController = ({ initialRouteState, }: UseExplorerControllerParams) => { const [state, dispatch] = useReducer(explorerReducer, initialRouteState, createInitialExplorerState,);
+export const useExplorerController = ({ initialRouteState }: UseExplorerControllerParams) => { const [state, dispatch] = useReducer(explorerReducer, initialRouteState, createInitialExplorerState);
 
   const selectFolder = useCallback((folderId: string | null) => {
     dispatch({ type: "SELECT_FOLDER", payload: { folderId } });

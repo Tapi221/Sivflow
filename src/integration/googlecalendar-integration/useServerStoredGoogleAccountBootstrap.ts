@@ -5,7 +5,11 @@ import { listServerStoredGoogleCalendarAccounts } from "./gcal.server-accounts";
 
 
 
+
+
 type ServerStoredGoogleCalendarAccount = Awaited<ReturnType<typeof listServerStoredGoogleCalendarAccounts>>[number];
+
+
 
 
 
@@ -34,16 +38,16 @@ const syncServerStoredGoogleAccounts = async (): Promise<boolean> => {
 };
 export const useServerStoredGoogleAccountBootstrap = (): void => { useEffect(() => { if (!isServerStoredGoogleOAuthEnabled()) return;
 
-    let cancelled = false;
+  let cancelled = false;
 
-    void syncServerStoredGoogleAccounts().then((changed) => {
-      if (!cancelled && changed && typeof window !== "undefined") window.location.reload();
-    }).catch((error) => {
-      console.warn("[GoogleCalendar] stored account bootstrap failed", error);
-    });
+  void syncServerStoredGoogleAccounts().then((changed) => {
+    if (!cancelled && changed && typeof window !== "undefined") window.location.reload();
+  }).catch((error) => {
+    console.warn("[GoogleCalendar] stored account bootstrap failed", error);
+  });
 
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  return () => {
+    cancelled = true;
+  };
+}, []);
 };

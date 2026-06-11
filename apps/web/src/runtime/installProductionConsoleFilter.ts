@@ -190,8 +190,8 @@ const translateConsolePayload = (
   payload: unknown,
   index: number,
 ): unknown => index === 0
-    ? translateGoogleCalendarConsolePayload(message, payload)
-    : translateNestedPayload(payload);
+  ? translateGoogleCalendarConsolePayload(message, payload)
+  : translateNestedPayload(payload);
 const translateConsoleArguments = (data: unknown[]): unknown[] => {
   const [message, ...rest] = data;
 

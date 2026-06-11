@@ -11,9 +11,13 @@ export type GoogleDrivePdfUploadResult = { id: string;
 
 
 
+
+
 const GOOGLE_DRIVE_UPLOAD_ENDPOINT = "https://www.googleapis.com/upload/drive/v3/files";
 const GOOGLE_DRIVE_PDF_FIELDS = "id,name,mimeType,webViewLink,webContentLink";
 const PDF_MIME_TYPE = "application/pdf";
+
+
 
 
 
@@ -43,37 +47,37 @@ const readGoogleDriveErrorMessage = async (response: Response): Promise<string> 
     return `Google Drive upload failed (${response.status})`;
   }
 };
-export const uploadPdfToGoogleDrive = async ({ accessToken, fileName, pdf, }: GoogleDrivePdfUploadInput): Promise<GoogleDrivePdfUploadResult> => { if (!accessToken.trim()) { throw new Error("Google Drive access token is missing");
-  }
+export const uploadPdfToGoogleDrive = async ({ accessToken, fileName, pdf }: GoogleDrivePdfUploadInput): Promise<GoogleDrivePdfUploadResult> => { if (!accessToken.trim()) { throw new Error("Google Drive access token is missing");
+}
 
-  const response = await fetch(
-    `${GOOGLE_DRIVE_UPLOAD_ENDPOINT}?${new URLSearchParams({
-      uploadType: "multipart",
-      fields: GOOGLE_DRIVE_PDF_FIELDS,
-    })}`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: createUploadFormData(fileName, pdf),
+const response = await fetch(
+  `${GOOGLE_DRIVE_UPLOAD_ENDPOINT}?${new URLSearchParams({
+    uploadType: "multipart",
+    fields: GOOGLE_DRIVE_PDF_FIELDS,
+  })}`,
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
     },
-  );
+    body: createUploadFormData(fileName, pdf),
+  },
+);
 
-  if (!response.ok) {
-    throw new Error(await readGoogleDriveErrorMessage(response));
-  }
+if (!response.ok) {
+  throw new Error(await readGoogleDriveErrorMessage(response));
+}
 
-  const payload = (await response.json()) as Partial<GoogleDrivePdfUploadResult>;
-  if (!payload.id || !payload.name) {
-    throw new Error("Google Drive upload response is missing file metadata");
-  }
+const payload = (await response.json()) as Partial<GoogleDrivePdfUploadResult>;
+if (!payload.id || !payload.name) {
+  throw new Error("Google Drive upload response is missing file metadata");
+}
 
-  return {
-    id: payload.id,
-    name: payload.name,
-    mimeType: payload.mimeType ?? PDF_MIME_TYPE,
-    webViewLink: payload.webViewLink ?? null,
-    webContentLink: payload.webContentLink ?? null,
-  };
+return {
+  id: payload.id,
+  name: payload.name,
+  mimeType: payload.mimeType ?? PDF_MIME_TYPE,
+  webViewLink: payload.webViewLink ?? null,
+  webContentLink: payload.webContentLink ?? null,
+};
 };

@@ -24,19 +24,19 @@ const normalizeScale = (value: number) => {
   return value;
 };
 export const detectCssZoomSupport = () => { if (typeof CSS === "undefined") { return false;
-  }
+}
 
-  if (typeof CSS.supports !== "function") {
-    return false;
-  }
+if (typeof CSS.supports !== "function") {
+  return false;
+}
 
-  try {
-    return CSS.supports("zoom", "1.1");
-  } catch {
-    return false;
-  }
+try {
+  return CSS.supports("zoom", "1.1");
+} catch {
+  return false;
+}
 };
-export const resolveScaleRenderingStrategy = ({ disableScale, effectiveScale, supportsCssZoom, }: ResolveScaleRenderingStrategyArgs): ScaleRenderingStrategy => { const safeScale = normalizeScale(effectiveScale);
+export const resolveScaleRenderingStrategy = ({ disableScale, effectiveScale, supportsCssZoom }: ResolveScaleRenderingStrategyArgs): ScaleRenderingStrategy => { const safeScale = normalizeScale(effectiveScale);
   const shouldApplyScale =
     !disableScale && Math.abs(safeScale - 1) > SCALE_EPSILON;
 

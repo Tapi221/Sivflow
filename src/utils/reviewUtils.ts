@@ -71,7 +71,7 @@ export type StabilityPhase = { key: "unstable" | "fragile" | "growing" | "stable
 
 
 
-export const getStabilityPhase = (stabilityInternal: number, intervalDays: number = 1,): StabilityPhase => { const s = normalizeMemoryStability(stabilityInternal);
+export const getStabilityPhase = (stabilityInternal: number, intervalDays: number = 1): StabilityPhase => { const s = normalizeMemoryStability(stabilityInternal);
   const retention = calculateRetentionProbability(s, intervalDays);
   const matched = [...PHASES].reverse().find((entry) => retention >= entry.min);
   return matched?.phase ?? PHASES[0].phase;

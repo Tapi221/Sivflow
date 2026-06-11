@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import type { ExtendConfig, Path } from 'platejs';
+import type { ExtendConfig, Path } from "platejs";
 
-import { type BaseCommentConfig, BaseCommentPlugin, getDraftCommentKey, } from '@platejs/comment';
+import { type BaseCommentConfig, BaseCommentPlugin, getDraftCommentKey } from "@platejs/comment";
 
-import { toTPlatePlugin } from 'platejs/react';
+import { toTPlatePlugin } from "platejs/react";
 
-import { CommentLeaf } from '@/components/ui/comment-node';
+import { CommentLeaf } from "@/components/ui/comment-node";
 
-import { getDiscussionClickTarget } from './discussion-kit';
+import { getDiscussionClickTarget } from "./discussion-kit";
 
 
 
@@ -23,18 +23,18 @@ type CommentConfig = ExtendConfig<
 
 
 
-export const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, { handlers: { onClick: ({ api, event, setOption, type }) => { const activeTarget = getDiscussionClickTarget({ selector: `.slate-${type}`, target: event.target, });
+export const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, { handlers: { onClick: ({ api, event, setOption, type }) => { const activeTarget = getDiscussionClickTarget({ selector: `.slate-${type}`, target: event.target });
 
       if (!activeTarget) {
-        setOption('activeId', null);
+        setOption("activeId", null);
         return;
       }
 
       const commentEntry = api.comment?.node();
 
       setOption(
-        'activeId',
-        commentEntry ? (api.comment?.nodeId(commentEntry[0]) ?? null) : null
+        "activeId",
+        commentEntry ? (api.comment?.nodeId(commentEntry[0]) ?? null) : null,
       );
     },
   },
@@ -60,15 +60,15 @@ export const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, { 
         setDraft();
 
         editor.tf.collapse();
-        setOption('activeId', getDraftCommentKey());
-        setOption('commentingBlock', editor.selection!.focus.path.slice(0, 1));
+        setOption("activeId", getDraftCommentKey());
+        setOption("commentingBlock", editor.selection!.focus.path.slice(0, 1));
       },
-    })
+    }),
   )
   .configure({
     node: { component: CommentLeaf },
     shortcuts: {
-      setDraft: { keys: 'mod+shift+m' },
+      setDraft: { keys: "mod+shift+m" },
     },
   });
 

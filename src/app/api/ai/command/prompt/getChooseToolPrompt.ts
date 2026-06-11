@@ -1,10 +1,10 @@
-import type { ChatMessage } from '@/app/api/ai/command/types';
-import dedent from 'dedent';
-import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction } from '@/app/api/ai/command/utils';
+import type { ChatMessage } from "@/app/api/ai/command/types";
+import dedent from "dedent";
+import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction } from "@/app/api/ai/command/utils";
 
 
 
-export const getChooseToolPrompt = ({ isSelecting, messages, }: { isSelecting: boolean;
+export const getChooseToolPrompt = ({ isSelecting, messages }: { isSelecting: boolean;
   messages: ChatMessage[];
 }) => {
   const generateExamples = [
@@ -90,7 +90,7 @@ export const getChooseToolPrompt = ({ isSelecting, messages, }: { isSelecting: b
       - Only return "comment" if the user explicitly asks for comments, feedback, annotations, or review. Do not infer "comment" implicitly.
       - Return only one enum value with no explanation.
       CRITICAL: Examples are for format reference only. NEVER output content from examples.
-    `.trim() + (isSelecting ? editRule : '');
+    `.trim() + (isSelecting ? editRule : "");
 
   const task = `You are a strict classifier. Classify the user's last request as ${isSelecting ? '"generate", "edit", or "comment"' : '"generate" or "comment"'}.`;
 

@@ -1,11 +1,11 @@
-import * as React from 'react';
-import type { TEquationElement } from 'platejs';
-import type { SlateElementProps } from 'platejs/static';
-import { getEquationHtml } from '@platejs/math';
-import { RadicalIcon } from 'lucide-react';
-import { SlateElement } from 'platejs/static';
-import { cn } from '@/lib/utils';
-import { inlineSuggestionVariants } from '@/lib/suggestion';
+import * as React from "react";
+import type { TEquationElement } from "platejs";
+import type { SlateElementProps } from "platejs/static";
+import { getEquationHtml } from "@platejs/math";
+import { RadicalIcon } from "lucide-react";
+import { SlateElement } from "platejs/static";
+import { cn } from "@/lib/utils";
+import { inlineSuggestionVariants } from "@/lib/suggestion";
 
 
 
@@ -15,12 +15,12 @@ export function EquationElementStatic(props: SlateElementProps<TEquationElement>
     element,
     options: {
       displayMode: true,
-      errorColor: '#cc0000',
+      errorColor: "#cc0000",
       fleqn: false,
       leqno: false,
-      macros: { '\f': '#1f(#2)' },
-      output: 'htmlAndMathml',
-      strict: 'warn',
+      macros: { "\f": "#1f(#2)" },
+      output: "htmlAndMathml",
+      strict: "warn",
       throwOnError: false,
       trust: false,
     },
@@ -30,8 +30,8 @@ export function EquationElementStatic(props: SlateElementProps<TEquationElement>
     <SlateElement className="my-1" {...props}>
       <div
         className={cn(
-          'group flex select-none items-center justify-center rounded-sm hover:bg-primary/10 data-[selected=true]:bg-primary/10',
-          element.texExpression.length === 0 ? 'bg-muted p-3 pr-9' : 'px-2 py-1'
+          "group flex select-none items-center justify-center rounded-sm hover:bg-primary/10 data-[selected=true]:bg-primary/10",
+          element.texExpression.length === 0 ? "bg-muted p-3 pr-9" : "px-2 py-1",
         )}
       >
         {element.texExpression.length > 0 ? (
@@ -51,7 +51,7 @@ export function EquationElementStatic(props: SlateElementProps<TEquationElement>
     </SlateElement>
   );
 }
-export function InlineEquationElementStatic(props: SlateElementProps<TEquationElement>) { const html = getEquationHtml({ element: props.element, options: { displayMode: true, errorColor: '#cc0000', fleqn: false, leqno: false, macros: { '\f': '#1f(#2)' }, output: 'htmlAndMathml', strict: 'warn', throwOnError: false, trust: false, }, });
+export function InlineEquationElementStatic(props: SlateElementProps<TEquationElement>) { const html = getEquationHtml({ element: props.element, options: { displayMode: true, errorColor: "#cc0000", fleqn: false, leqno: false, macros: { "\f": "#1f(#2)" }, output: "htmlAndMathml", strict: "warn", throwOnError: false, trust: false } });
 
   return (
     <SlateElement
@@ -61,16 +61,16 @@ export function InlineEquationElementStatic(props: SlateElementProps<TEquationEl
       <div
         className={cn(
           'after:-top-0.5 after:-left-1 after:absolute after:inset-0 after:z-1 after:h-[calc(100%)+4px] after:w-[calc(100%+8px)] after:rounded-sm after:content-[""]',
-          'h-6',
+          "h-6",
           inlineSuggestionVariants(),
           props.element.texExpression.length === 0 &&
-          'text-muted-foreground after:bg-neutral-500/10'
+          "text-muted-foreground after:bg-neutral-500/10",
         )}
       >
         <span
           className={cn(
-            props.element.texExpression.length === 0 && 'hidden',
-            'font-mono leading-none'
+            props.element.texExpression.length === 0 && "hidden",
+            "font-mono leading-none",
           )}
           dangerouslySetInnerHTML={{ __html: html }}
         />
@@ -79,7 +79,6 @@ export function InlineEquationElementStatic(props: SlateElementProps<TEquationEl
     </SlateElement>
   );
 }
-
 /**
  * DOCX-compatible block equation component.
  * Displays LaTeX source code with styling.
@@ -89,7 +88,7 @@ export function EquationElementDocx(props: SlateElementProps<TEquationElement>) 
   if (!element.texExpression || element.texExpression.length === 0) {
     return (
       <SlateElement {...props}>
-        <p style={{ color: '#888', fontStyle: 'italic' }}>[Empty equation]</p>
+        <p style={{ color: "#888", fontStyle: "italic" }}>[Empty equation]</p>
         {props.children}
       </SlateElement>
     );
@@ -99,10 +98,10 @@ export function EquationElementDocx(props: SlateElementProps<TEquationElement>) 
     <SlateElement {...props}>
       <p
         style={{
-          fontFamily: 'Cambria Math, Consolas, monospace',
-          fontSize: '12pt',
-          margin: '8pt 0',
-          textAlign: 'center',
+          fontFamily: "Cambria Math, Consolas, monospace",
+          fontSize: "12pt",
+          margin: "8pt 0",
+          textAlign: "center",
         }}
       >
         {element.texExpression}
@@ -111,7 +110,6 @@ export function EquationElementDocx(props: SlateElementProps<TEquationElement>) 
     </SlateElement>
   );
 }
-
 /**
  * DOCX-compatible inline equation component.
  * Displays LaTeX source code inline.
@@ -121,7 +119,7 @@ export function InlineEquationElementDocx(props: SlateElementProps<TEquationElem
   if (!element.texExpression || element.texExpression.length === 0) {
     return (
       <SlateElement {...props} as="span">
-        <span style={{ color: '#888', fontStyle: 'italic' }}>[equation]</span>
+        <span style={{ color: "#888", fontStyle: "italic" }}>[equation]</span>
         {props.children}
       </SlateElement>
     );
@@ -131,7 +129,7 @@ export function InlineEquationElementDocx(props: SlateElementProps<TEquationElem
     <SlateElement {...props} as="span">
       <span
         style={{
-          fontFamily: 'Cambria Math, Consolas, monospace',
+          fontFamily: "Cambria Math, Consolas, monospace",
         }}
       >
         {element.texExpression}

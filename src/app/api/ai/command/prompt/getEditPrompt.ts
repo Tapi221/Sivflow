@@ -1,9 +1,9 @@
-import type { ChatMessage } from '@/app/api/ai/command/types';
-import type { SlateEditor } from 'platejs';
-import dedent from 'dedent';
-import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction, getMarkdownWithSelection, isMultiBlocks, isSelectionInTable, isSingleCellSelection } from '@/app/api/ai/command/utils';
-import { commonEditRules } from './common';
-import { buildEditTableMultiCellPrompt } from './getEditTablePrompt';
+import type { ChatMessage } from "@/app/api/ai/command/types";
+import type { SlateEditor } from "platejs";
+import dedent from "dedent";
+import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction, getMarkdownWithSelection, isMultiBlocks, isSelectionInTable, isSingleCellSelection } from "@/app/api/ai/command/utils";
+import { commonEditRules } from "./common";
+import { buildEditTableMultiCellPrompt } from "./getEditTablePrompt";
 
 
 
@@ -59,7 +59,7 @@ function buildEditMultiBlockPrompt(editor: SlateEditor, messages: ChatMessage[])
     ],
     history: formatTextFromMessages(messages),
     instruction: getLastUserInstruction(messages),
-    outputFormatting: 'markdown',
+    outputFormatting: "markdown",
     rules: dedent`
       ${commonEditRules}
       - Preserve the block count, line breaks, and all existing Markdown syntax exactly; only modify the textual content inside each block.
@@ -75,8 +75,8 @@ function buildEditSelectionPrompt(editor: SlateEditor, messages: ChatMessage[]) 
   addSelection(editor);
 
   const selectingMarkdown = getMarkdownWithSelection(editor);
-  const endIndex = selectingMarkdown.indexOf('<Selection>');
-  const prefilledResponse = endIndex === -1 ? '' : selectingMarkdown.slice(0, endIndex);
+  const endIndex = selectingMarkdown.indexOf("<Selection>");
+  const prefilledResponse = endIndex === -1 ? "" : selectingMarkdown.slice(0, endIndex);
 
   return buildStructuredPrompt({
     context: selectingMarkdown,
@@ -188,7 +188,7 @@ function buildEditSelectionPrompt(editor: SlateEditor, messages: ChatMessage[]) 
     ],
     history: formatTextFromMessages(messages),
     instruction: getLastUserInstruction(messages),
-    outputFormatting: 'markdown',
+    outputFormatting: "markdown",
     prefilledResponse,
     rules: dedent`
       ${commonEditRules}
@@ -201,16 +201,16 @@ function buildEditSelectionPrompt(editor: SlateEditor, messages: ChatMessage[]) 
     `,
   });
 }
-export function getEditPrompt(editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[]; }): [string, 'table' | 'multi-block' | 'selection'] {
-  if (!isSelecting) throw new Error('Edit tool is only available when selecting');
+export function getEditPrompt(editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[]; }): [string, "table" | "multi-block" | "selection"] {
+  if (!isSelecting) throw new Error("Edit tool is only available when selecting");
 
   if (isSelectionInTable(editor) && !isSingleCellSelection(editor)) {
-    return [buildEditTableMultiCellPrompt(editor, messages), 'table'];
+    return [buildEditTableMultiCellPrompt(editor, messages), "table"];
   }
 
   if (isMultiBlocks(editor)) {
-    return [buildEditMultiBlockPrompt(editor, messages), 'multi-block'];
+    return [buildEditMultiBlockPrompt(editor, messages), "multi-block"];
   }
 
-  return [buildEditSelectionPrompt(editor, messages), 'selection'];
+  return [buildEditSelectionPrompt(editor, messages), "selection"];
 }

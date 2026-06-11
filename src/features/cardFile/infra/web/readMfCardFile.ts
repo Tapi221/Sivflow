@@ -18,7 +18,7 @@ export type LoadMfCardFileResult = { file: File;
 const stripMfCardExtension = (fileName: string) => {
   return fileName.replace(/\.mfcard$/i, "").trim();
 };
-export const buildMfCardImportCardSetName = ({ fileName, title, }: { fileName: string;
+export const buildMfCardImportCardSetName = ({ fileName, title }: { fileName: string;
   title?: string;
 }) => {
   const baseName =
@@ -33,7 +33,7 @@ export const buildMfCardImportCardSetName = ({ fileName, title, }: { fileName: s
 
   return `${baseName} ${dateLabel}`;
 };
-export const readMfCardFile = async (file: File,): Promise<LoadMfCardFileResult> => { const issues: MfCardIssue[] = [];
+export const readMfCardFile = async (file: File): Promise<LoadMfCardFileResult> => { const issues: MfCardIssue[] = [];
 
   if (!file.name.toLowerCase().endsWith(MF_CARD_FILE_EXTENSION)) {
     throw new MfCardValidationError("mfcard ファイルではありません。", [

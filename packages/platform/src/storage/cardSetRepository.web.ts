@@ -20,27 +20,27 @@ const generateCardSetId = () => {
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
 export const createWebCardSetRepository = (): CardSetCommandRepository<CardSet> & CardSetDeleteRepository<Card> & CardSetQueryRepository<CardSet> => ({ generateCardSetId, listCardSets: async (userId) => { await ensureLegacyCardsBackfilled(userId);
-    const db = await getLocalDb(userId);
-    return db.cardSets.where("userId").equals(userId).toArray();
-  },
-  addCardSet: async (userId, cardSet) => {
-    const db = (await getLocalDb(userId)) as LocalFirstCardSetDb;
-    await db.addItem("cardSets", cardSet as CardSetCreateDraft as unknown as Record<string, unknown>);
-  },
-  updateCardSet: async (userId, cardSetId, changes) => {
-    const db = (await getLocalDb(userId)) as LocalFirstCardSetDb;
-    await db.updateItem("cardSets", cardSetId, changes);
-  },
-  listCardsByCardSetId: async (userId, cardSetId) => {
-    const db = await getLocalDb(userId);
-    return db.cards.where("cardSetId").equals(cardSetId).toArray();
-  },
-  softDeleteCard: async (userId, cardId) => {
-    const db = await getLocalDb(userId);
-    await db.softDelete("cards", cardId);
-  },
-  softDeleteCardSet: async (userId, cardSetId) => {
-    const db = await getLocalDb(userId);
-    await db.softDelete("cardSets", cardSetId);
-  },
+  const db = await getLocalDb(userId);
+  return db.cardSets.where("userId").equals(userId).toArray();
+},
+addCardSet: async (userId, cardSet) => {
+  const db = (await getLocalDb(userId)) as LocalFirstCardSetDb;
+  await db.addItem("cardSets", cardSet as CardSetCreateDraft as unknown as Record<string, unknown>);
+},
+updateCardSet: async (userId, cardSetId, changes) => {
+  const db = (await getLocalDb(userId)) as LocalFirstCardSetDb;
+  await db.updateItem("cardSets", cardSetId, changes);
+},
+listCardsByCardSetId: async (userId, cardSetId) => {
+  const db = await getLocalDb(userId);
+  return db.cards.where("cardSetId").equals(cardSetId).toArray();
+},
+softDeleteCard: async (userId, cardId) => {
+  const db = await getLocalDb(userId);
+  await db.softDelete("cards", cardId);
+},
+softDeleteCardSet: async (userId, cardSetId) => {
+  const db = await getLocalDb(userId);
+  await db.softDelete("cardSets", cardSetId);
+},
 });

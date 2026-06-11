@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import type { TResolvedSuggestion } from '@platejs/suggestion';
+import type { TResolvedSuggestion } from "@platejs/suggestion";
 
-import type { PlateEditor } from 'platejs/react';
+import type { PlateEditor } from "platejs/react";
 
-import { CommentPlugin } from '@platejs/comment/react';
+import { CommentPlugin } from "@platejs/comment/react";
 
-import { getSuggestionKey, keyId2SuggestionId } from '@platejs/suggestion';
+import { getSuggestionKey, keyId2SuggestionId } from "@platejs/suggestion";
 
-import { SuggestionPlugin } from '@platejs/suggestion/react';
+import { SuggestionPlugin } from "@platejs/suggestion/react";
 
-import { type NodeEntry, NodeApi, type Path, type TCommentText, type TElement, type TSuggestionText, ElementApi, KEYS, PathApi, TextApi, } from 'platejs';
+import { type NodeEntry, NodeApi, type Path, type TCommentText, type TElement, type TSuggestionText, ElementApi, KEYS, PathApi, TextApi } from "platejs";
 
-import { useEditorRef, useEditorVersion, usePluginOption } from 'platejs/react';
+import { useEditorRef, useEditorVersion, usePluginOption } from "platejs/react";
 
-import { type TDiscussion, discussionPlugin, } from '@/components/editor/plugins/discussion-kit';
+import { type TDiscussion, discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 
-import type { TComment } from '@/components/ui/comment';
+import type { TComment } from "@/components/ui/comment";
 
 
 
@@ -47,7 +47,7 @@ type BuildBlockDiscussionIndexOptions = {
       isLineBreak?: boolean;
       newProperties?: Record<string, unknown>;
       properties?: Record<string, unknown>;
-      type: 'insert' | 'remove' | 'update';
+      type: "insert" | "remove" | "update";
       userId: string;
     }
     | undefined;
@@ -55,7 +55,7 @@ type BuildBlockDiscussionIndexOptions = {
     id: string;
     newProperties?: Record<string, unknown>;
     properties?: Record<string, unknown>;
-    type: 'insert' | 'remove' | 'update';
+    type: "insert" | "remove" | "update";
   }>;
   getSuggestionId: (node: TElement | TSuggestionText) => string | undefined;
   isBlockSuggestion: (node: TElement | TSuggestionText) => boolean;
@@ -63,7 +63,7 @@ type BuildBlockDiscussionIndexOptions = {
 
 
 
-export const BLOCK_SUGGESTION_TOKEN = '__block__';
+export const BLOCK_SUGGESTION_TOKEN = "__block__";
 
 const discussionIndexCache = new WeakMap<
   PlateEditor,
@@ -75,33 +75,33 @@ const discussionIndexCache = new WeakMap<
 >();
 
 const TYPE_TEXT_MAP: Record<string, (node?: TElement) => string> = {
-  [KEYS.audio]: () => 'Audio',
-  [KEYS.blockquote]: () => 'Blockquote',
-  [KEYS.callout]: () => 'Callout',
-  [KEYS.codeBlock]: () => 'Code Block',
-  [KEYS.column]: () => 'Column',
-  [KEYS.equation]: () => 'Equation',
-  [KEYS.file]: () => 'File',
-  [KEYS.h1]: () => 'Heading 1',
-  [KEYS.h2]: () => 'Heading 2',
-  [KEYS.h3]: () => 'Heading 3',
-  [KEYS.h4]: () => 'Heading 4',
-  [KEYS.h5]: () => 'Heading 5',
-  [KEYS.h6]: () => 'Heading 6',
-  [KEYS.hr]: () => 'Horizontal Rule',
-  [KEYS.img]: () => 'Image',
-  [KEYS.mediaEmbed]: () => 'Media',
+  [KEYS.audio]: () => "Audio",
+  [KEYS.blockquote]: () => "Blockquote",
+  [KEYS.callout]: () => "Callout",
+  [KEYS.codeBlock]: () => "Code Block",
+  [KEYS.column]: () => "Column",
+  [KEYS.equation]: () => "Equation",
+  [KEYS.file]: () => "File",
+  [KEYS.h1]: () => "Heading 1",
+  [KEYS.h2]: () => "Heading 2",
+  [KEYS.h3]: () => "Heading 3",
+  [KEYS.h4]: () => "Heading 4",
+  [KEYS.h5]: () => "Heading 5",
+  [KEYS.h6]: () => "Heading 6",
+  [KEYS.hr]: () => "Horizontal Rule",
+  [KEYS.img]: () => "Image",
+  [KEYS.mediaEmbed]: () => "Media",
   [KEYS.p]: (node) => {
-    if (node?.[KEYS.listType] === KEYS.listTodo) return 'Todo List';
-    if (node?.[KEYS.listType] === KEYS.ol) return 'Ordered List';
-    if (node?.[KEYS.listType] === KEYS.ul) return 'List';
+    if (node?.[KEYS.listType] === KEYS.listTodo) return "Todo List";
+    if (node?.[KEYS.listType] === KEYS.ol) return "Ordered List";
+    if (node?.[KEYS.listType] === KEYS.ul) return "List";
 
-    return 'Paragraph';
+    return "Paragraph";
   },
-  [KEYS.table]: () => 'Table',
-  [KEYS.toc]: () => 'Table of Contents',
-  [KEYS.toggle]: () => 'Toggle',
-  [KEYS.video]: () => 'Video',
+  [KEYS.table]: () => "Table",
+  [KEYS.toc]: () => "Table of Contents",
+  [KEYS.toggle]: () => "Toggle",
+  [KEYS.video]: () => "Video",
 };
 
 
@@ -117,20 +117,20 @@ const appendByKey = <T>(map: Map<string, T[]>, key: string, value: T) => {
   map.set(key, [value]);
 };
 
-const getBlockKey = (path: Path) => path.join(',');
+const getBlockKey = (path: Path) => path.join(",");
 
 const getTopLevelPath = (path: Path): Path | null =>
   path.length > 0 ? path.slice(0, 1) : null;
 
 const getSuggestionIds = (
   node: TCommentText | TElement | TSuggestionText,
-  getSuggestionDataList: BuildBlockDiscussionIndexOptions['getSuggestionDataList'],
-  getSuggestionId: BuildBlockDiscussionIndexOptions['getSuggestionId']
+  getSuggestionDataList: BuildBlockDiscussionIndexOptions["getSuggestionDataList"],
+  getSuggestionId: BuildBlockDiscussionIndexOptions["getSuggestionId"],
 ) => {
   if (TextApi.isText(node)) {
     const dataList = getSuggestionDataList(node as TSuggestionText);
     const updateIds = dataList
-      .filter((data) => data.type === 'update')
+      .filter((data) => data.type === "update")
       .map((data) => data.id);
 
     if (updateIds.length > 0) return updateIds;
@@ -169,30 +169,30 @@ const formatSuggestionDateText = (date: string) => {
     left.getMonth() === right.getMonth() &&
     left.getFullYear() === right.getFullYear();
 
-  if (sameDay(elementDate, today)) return 'Today';
-  if (sameDay(elementDate, yesterday)) return 'Yesterday';
-  if (sameDay(elementDate, tomorrow)) return 'Tomorrow';
+  if (sameDay(elementDate, today)) return "Today";
+  if (sameDay(elementDate, yesterday)) return "Yesterday";
+  if (sameDay(elementDate, tomorrow)) return "Tomorrow";
 
   return elementDate.toLocaleDateString(undefined, {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 };
 
 const getInlineSuggestionElementText = (node: TElement) => {
-  if (typeof node.value === 'string' && node.value.length > 0) {
+  if (typeof node.value === "string" && node.value.length > 0) {
     return node.value;
   }
 
-  if (typeof node.date === 'string' && node.date.length > 0) {
+  if (typeof node.date === "string" && node.date.length > 0) {
     return formatSuggestionDateText(node.date);
   }
 
   if (
     node.type === KEYS.inlineEquation &&
     typeof (node as TElement & { texExpression?: unknown; }).texExpression ===
-    'string' &&
+    "string" &&
     (node as TElement & { texExpression: string; }).texExpression.length > 0
   ) {
     return (node as TElement & { texExpression: string; }).texExpression;
@@ -215,19 +215,19 @@ const toResolvedSuggestion = ({
 }: {
   discussionsById: Map<string, TDiscussion>;
   entries: SuggestionEntry[];
-  getSuggestionData: BuildBlockDiscussionIndexOptions['getSuggestionData'];
-  getSuggestionDataList: BuildBlockDiscussionIndexOptions['getSuggestionDataList'];
+  getSuggestionData: BuildBlockDiscussionIndexOptions["getSuggestionData"];
+  getSuggestionDataList: BuildBlockDiscussionIndexOptions["getSuggestionDataList"];
   id: string;
-  isBlockSuggestion: BuildBlockDiscussionIndexOptions['isBlockSuggestion'];
+  isBlockSuggestion: BuildBlockDiscussionIndexOptions["isBlockSuggestion"];
 }): ResolvedSuggestion | null => {
   const sortedEntries = [...entries].sort(([, path1], [, path2]) =>
-    PathApi.isChild(path1, path2) ? -1 : 1
+    PathApi.isChild(path1, path2) ? -1 : 1,
   );
 
   if (sortedEntries.length === 0) return null;
 
-  let newText = '';
-  let text = '';
+  let newText = "";
+  let text = "";
   let properties: Record<string, unknown> = {};
   let newProperties: Record<string, unknown> = {};
 
@@ -237,15 +237,15 @@ const toResolvedSuggestion = ({
         if (data.id !== id) return;
 
         switch (data.type) {
-          case 'insert': {
+          case "insert": {
             newText += node.text;
             break;
           }
-          case 'remove': {
+          case "remove": {
             text += node.text;
             break;
           }
-          case 'update': {
+          case "update": {
             properties = { ...properties, ...data.properties };
             newProperties = { ...newProperties, ...data.newProperties };
             newText += node.text;
@@ -266,11 +266,11 @@ const toResolvedSuggestion = ({
     const inlineSuggestionText = getInlineSuggestionElementText(node);
 
     if (inlineSuggestionText) {
-      if (suggestionData.type === 'insert') {
+      if (suggestionData.type === "insert") {
         newText += inlineSuggestionText;
-      } else if (suggestionData.type === 'remove') {
+      } else if (suggestionData.type === "remove") {
         text += inlineSuggestionText;
-      } else if (suggestionData.type === 'update') {
+      } else if (suggestionData.type === "update") {
         properties = { ...properties, ...suggestionData.properties };
         newProperties = {
           ...newProperties,
@@ -288,9 +288,9 @@ const toResolvedSuggestion = ({
       ? BLOCK_SUGGESTION_TOKEN
       : `${BLOCK_SUGGESTION_TOKEN}${suggestionTypeText(node)}`;
 
-    if (suggestionData.type === 'insert') {
+    if (suggestionData.type === "insert") {
       newText += nextText;
-    } else if (suggestionData.type === 'remove') {
+    } else if (suggestionData.type === "remove") {
       text += nextText;
     }
   });
@@ -304,7 +304,7 @@ const toResolvedSuggestion = ({
   const createdAt = new Date(suggestionData.createdAt);
   const suggestionId = keyId2SuggestionId(id);
 
-  if (suggestionData.type === 'update') {
+  if (suggestionData.type === "update") {
     return {
       comments,
       createdAt,
@@ -313,7 +313,7 @@ const toResolvedSuggestion = ({
       newText,
       properties,
       suggestionId,
-      type: 'update',
+      type: "update",
       userId: suggestionData.userId,
     };
   }
@@ -326,7 +326,7 @@ const toResolvedSuggestion = ({
       newText,
       suggestionId,
       text,
-      type: 'replace',
+      type: "replace",
       userId: suggestionData.userId,
     };
   }
@@ -338,7 +338,7 @@ const toResolvedSuggestion = ({
       keyId,
       newText,
       suggestionId,
-      type: 'insert',
+      type: "insert",
       userId: suggestionData.userId,
     };
   }
@@ -350,7 +350,7 @@ const toResolvedSuggestion = ({
       keyId,
       suggestionId,
       text,
-      type: 'remove',
+      type: "remove",
       userId: suggestionData.userId,
     };
   }
@@ -358,12 +358,12 @@ const toResolvedSuggestion = ({
   return null;
 };
 
-export const buildBlockDiscussionIndex = ({ discussions, entries, getCommentId, getSuggestionData, getSuggestionDataList, getSuggestionId, isBlockSuggestion, }: BuildBlockDiscussionIndexOptions): BlockDiscussionIndex => { const commentOwnerById = new Map<string, Path>();
+export const buildBlockDiscussionIndex = ({ discussions, entries, getCommentId, getSuggestionData, getSuggestionDataList, getSuggestionId, isBlockSuggestion }: BuildBlockDiscussionIndexOptions): BlockDiscussionIndex => { const commentOwnerById = new Map<string, Path>();
   const suggestionOwnerById = new Map<string, Path>();
   const commentIds = new Set<string>();
   const suggestionEntriesById = new Map<string, SuggestionEntry[]>();
   const discussionsById = new Map(
-    discussions.map((discussion) => [discussion.id, discussion])
+    discussions.map((discussion) => [discussion.id, discussion]),
   );
 
   entries.forEach(([node, path]) => {
@@ -393,7 +393,7 @@ export const buildBlockDiscussionIndex = ({ discussions, entries, getCommentId, 
           node as TElement | TSuggestionText,
           path,
         ]);
-      }
+      },
     );
   });
 
@@ -442,7 +442,7 @@ export const buildBlockDiscussionIndex = ({ discussions, entries, getCommentId, 
 const getDiscussionIndex = (
   editor: PlateEditor,
   discussions: TDiscussion[],
-  version: number
+  version: number,
 ) => {
   const cached = discussionIndexCache.get(editor);
 
@@ -459,7 +459,7 @@ const getDiscussionIndex = (
 
   const index = buildBlockDiscussionIndex({
     discussions,
-    entries: [...editor.api.nodes({ at: [], mode: 'all' })],
+    entries: [...editor.api.nodes({ at: [], mode: "all" })],
     getCommentId: (node) => commentApi.nodeId(node),
     getSuggestionData: (node) => suggestionApi.suggestionData(node),
     getSuggestionDataList: (node) => suggestionApi.dataList(node),
@@ -474,7 +474,7 @@ const getDiscussionIndex = (
 };
 
 export const useBlockDiscussionItems = (blockPath: Path) => { const editor = useEditorRef();
-  const discussions = usePluginOption(discussionPlugin, 'discussions');
+  const discussions = usePluginOption(discussionPlugin, "discussions");
   const version = useEditorVersion() ?? 0;
 
   return React.useMemo(() => {

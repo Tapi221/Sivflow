@@ -26,7 +26,7 @@ const dateTimeTextStyle: CSSProperties = {
 
 
 
-export const PdfLibraryContinueSection = ({ cardClassName, continueRows, formatDateTime, onSelectDocument, IconBadge, }: PdfLibraryContinueSectionProps) => { if (continueRows.length === 0) { return null;
+export const PdfLibraryContinueSection = ({ cardClassName, continueRows, formatDateTime, onSelectDocument, IconBadge }: PdfLibraryContinueSectionProps) => { if (continueRows.length === 0) { return null;
   }
 
   return (

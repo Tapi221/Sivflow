@@ -1,7 +1,7 @@
-import type { TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText, } from 'platejs';
-import { BaseSuggestionPlugin } from '@platejs/suggestion';
-import { KEYS, TextApi } from 'platejs';
-import { SuggestionLeafStatic, VoidRemoveSuggestionOverlayStatic, } from '@/components/ui/suggestion-node-static';
+import type { TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText } from "platejs";
+import { BaseSuggestionPlugin } from "@platejs/suggestion";
+import { KEYS, TextApi } from "platejs";
+import { SuggestionLeafStatic, VoidRemoveSuggestionOverlayStatic } from "@/components/ui/suggestion-node-static";
 
 
 
@@ -22,7 +22,7 @@ function getInlineSuggestionData(editor: any, element: TElement) {
     | undefined;
 
   if (data) return data;
-  if (typeof suggestionApi.dataList !== 'function') return;
+  if (typeof suggestionApi.dataList !== "function") return;
 
   for (const child of element.children) {
     if (!TextApi.isText(child)) continue;
@@ -35,7 +35,7 @@ function getInlineSuggestionData(editor: any, element: TElement) {
 
 
 
-export const BaseSuggestionKit = [BaseSuggestionPlugin.configure({ inject: { isElement: true, nodeProps: { nodeKey: '', styleKey: 'cssText', transformProps: ({ editor, element, props }) => { if (!element) return props;
+export const BaseSuggestionKit = [BaseSuggestionPlugin.configure({ inject: { isElement: true, nodeProps: { nodeKey: "", styleKey: "cssText", transformProps: ({ editor, element, props }) => { if (!element) return props;
 
         const suggestionData = getInlineSuggestionData(editor, element);
 
@@ -43,7 +43,7 @@ export const BaseSuggestionKit = [BaseSuggestionPlugin.configure({ inject: { isE
 
         return {
           ...props,
-          'data-inline-suggestion': suggestionData.type,
+          "data-inline-suggestion": suggestionData.type,
         };
       },
       transformStyle: () => ({}) as CSSStyleDeclaration,

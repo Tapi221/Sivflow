@@ -46,7 +46,6 @@ const logIntegrityReport = (report: Awaited<ReturnType<typeof checkDataIntegrity
     "フォルダー。",
   );
 };
-
 /**
  * Sync V2 移行完了後の startup reset。
  * 起動時の追加タスクを実行する。
@@ -56,7 +55,7 @@ const logIntegrityReport = (report: Awaited<ReturnType<typeof checkDataIntegrity
  */
 export const resetStartupTasks = async (): Promise<void> => { return Promise.resolve();
 };
-export const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault, }: RunStartupTasksParams): Promise<void> => { try { const { migrateLegacyImagesToAssets } = await import("./MigrateLegacyImagesToAssets");
+export const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault }: RunStartupTasksParams): Promise<void> => { try { const { migrateLegacyImagesToAssets } = await import("./MigrateLegacyImagesToAssets");
 
     const migrationSummary = await migrateLegacyImagesToAssets({ userId });
 

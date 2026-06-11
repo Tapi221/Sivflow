@@ -71,11 +71,11 @@ export const cleanupSyncErrors = async (db: MaintenanceDb): Promise<void> => { c
 
   await db.syncErrors.bulkDelete(oldErrors.map((item) => item.id));
 };
-export const getDeviceMeta = async (db: MaintenanceDb, userId: string,): Promise<Record<string, unknown> | undefined> => { return db.deviceMeta.where("userId").equals(userId).first();
+export const getDeviceMeta = async (db: MaintenanceDb, userId: string): Promise<Record<string, unknown> | undefined> => { return db.deviceMeta.where("userId").equals(userId).first();
 };
-export const upsertDeviceMeta = async (db: MaintenanceDb, meta: Record<string, unknown>,): Promise<void> => { await db.deviceMeta.put(meta);
+export const upsertDeviceMeta = async (db: MaintenanceDb, meta: Record<string, unknown>): Promise<void> => { await db.deviceMeta.put(meta);
 };
-export const getSyncEnabledFolders = async (db: MaintenanceDb, userId: string,): Promise<Record<string, unknown>[]> => { return db.folders.where("userId").equals(userId).and((folder: Record<string, unknown>) => folder.cloudSyncEnabled === true).toArray();
+export const getSyncEnabledFolders = async (db: MaintenanceDb, userId: string): Promise<Record<string, unknown>[]> => { return db.folders.where("userId").equals(userId).and((folder: Record<string, unknown>) => folder.cloudSyncEnabled === true).toArray();
 };
 
 

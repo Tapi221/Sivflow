@@ -3,6 +3,8 @@ import type { GoogleCalendarEvent } from "./gcalSync.types";
 
 
 
+
+
 type GoogleCalendarEventCacheRow = {
   id: string;
   accountId: string;
@@ -30,10 +32,14 @@ type ReadCachedGoogleCalendarEventsOptions = {
 
 
 
+
+
 const GOOGLE_CALENDAR_EVENT_CACHE_DB_NAME = "flashcard-master-google-calendar-event-cache";
 const GOOGLE_CALENDAR_EVENT_CACHE_ACCOUNT_FALLBACK = "__unknown_account__";
 const GOOGLE_CALENDAR_EVENT_CACHE_CHUNK_SIZE = 500;
 let cacheDb: CalendarEventCacheDatabase | null = null;
+
+
 
 
 
@@ -113,7 +119,7 @@ const readRowsForAccountCalendar = async ({
 
   return rows.filter((row) => overlapsRange(row, rangeStartMs, rangeEndMs));
 };
-export const readCachedGoogleCalendarEvents = async ({ accountIds, calendarIds, rangeStart, rangeEnd, }: ReadCachedGoogleCalendarEventsOptions = {}): Promise<GoogleCalendarEvent[]> => { const db = getCacheDb();
+export const readCachedGoogleCalendarEvents = async ({ accountIds, calendarIds, rangeStart, rangeEnd }: ReadCachedGoogleCalendarEventsOptions = {}): Promise<GoogleCalendarEvent[]> => { const db = getCacheDb();
   if (!db) return [];
 
   const resolvedAccountIds = accountIds && accountIds.length > 0 ? accountIds.map(getResolvedAccountId) : null;
@@ -158,7 +164,7 @@ export const upsertCachedGoogleCalendarEvent = async (accountId: string | undefi
 
   await db.googleCalendarEvents.put(toCacheRow(resolvedAccountId, { ...event, accountId: resolvedAccountId }));
 };
-export const replaceCachedGoogleCalendarRange = async ({ accountId, calendarId, rangeStart, rangeEnd, events, }: { accountId: string | undefined;
+export const replaceCachedGoogleCalendarRange = async ({ accountId, calendarId, rangeStart, rangeEnd, events }: { accountId: string | undefined;
   calendarId: string;
   rangeStart: Date;
   rangeEnd: Date;

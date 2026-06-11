@@ -161,7 +161,7 @@ export const AudioPlayer = ({ urls }: AudioPlayerProps) => { const [playingIndex
     </div>
   );
 };
-export const ImageGallery = ({ items, displayMode = "fixed", zoom = 1, }: ImageGalleryProps) => { const { currentUser } = useAuthSession();
+export const ImageGallery = ({ items, displayMode = "fixed", zoom = 1 }: ImageGalleryProps) => { const { currentUser } = useAuthSession();
   const [displayImagesState, setDisplayImagesState] =
     useState<DisplayImagesState>(() => ({ key: "", images: [] }));
   const [failedImagesState, setFailedImagesState] =

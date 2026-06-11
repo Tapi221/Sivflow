@@ -32,7 +32,7 @@ const fromCalendarEventSyncRangeKey = (key: string): CalendarEventSyncRange => {
     rangeEnd: new Date(rangeEnd),
   };
 };
-export const useCalendarEventSync = ({ selectedViewMode, visibleDays, monthTitleDate, weekStartDay, monthRenderedRange, yearSyncRange, googleCalendar, }: UseCalendarEventSyncOptions): void => { const { selectedCalendarIds, forceSyncRange } = googleCalendar;
+export const useCalendarEventSync = ({ selectedViewMode, visibleDays, monthTitleDate, weekStartDay, monthRenderedRange, yearSyncRange, googleCalendar }: UseCalendarEventSyncOptions): void => { const { selectedCalendarIds, forceSyncRange } = googleCalendar;
 
   const [userId, setUserId] = useState<string | null>(
     () => auth.currentUser?.uid ?? null,

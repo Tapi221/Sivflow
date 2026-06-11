@@ -13,5 +13,5 @@ export const toWebPath = (_destination: LegacyDestination): string => { return S
 };
 export const createPageUrl = (_page: string | LegacyDestination): string => { return SCHEDULE_PATH;
 };
-export const createAppDestination = (_screen: string, params?: LegacyDestinationParams,): LegacyDestination => { return { params };
+export const createAppDestination = (_screen: string, params?: LegacyDestinationParams): LegacyDestination => { return { params };
 };

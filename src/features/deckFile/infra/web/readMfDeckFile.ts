@@ -15,7 +15,7 @@ export const buildMfDeckSuggestedCardSetName = (fileName: string): string => { c
 
   return baseName || "インポートしたカードセット";
 };
-export const readMfDeckFile = async (file: File,): Promise<LoadMfDeckFileResult> => { const issues: MfDeckIssue[] = [];
+export const readMfDeckFile = async (file: File): Promise<LoadMfDeckFileResult> => { const issues: MfDeckIssue[] = [];
 
   if (!file.name.toLowerCase().endsWith(MF_DECK_FILE_EXTENSION)) {
     issues.push({

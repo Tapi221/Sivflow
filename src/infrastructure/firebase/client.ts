@@ -7,6 +7,8 @@ import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 
 
+
+
 type FirebaseClientState = {
   app: FirebaseApp | null;
   auth: Auth | null;
@@ -14,6 +16,8 @@ type FirebaseClientState = {
   functionsClient: Functions | null;
   firestoreDb: Firestore | null;
 };
+
+
 
 
 
@@ -36,6 +40,8 @@ const firebaseConfig = {
 
 
 
+
+
 const getFirebaseEnvValue = (key: (typeof REQUIRED_FIREBASE_ENV_KEYS)[number]) => {
   return import.meta.env[key];
 };
@@ -55,8 +61,12 @@ const createUnavailableState = (): FirebaseClientState => ({
 
 
 
+
+
 export const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
 export const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
+
+
 
 
 
@@ -113,6 +123,8 @@ const initializeFirebaseClient = (): FirebaseClientState => {
 
 
 
+
+
 const firebaseClientState = initializeFirebaseClient();
 export const firebaseApp = firebaseClientState.app;
 export const auth = firebaseClientState.auth as Auth;
@@ -123,25 +135,27 @@ export const db: Firestore | null = firebaseClientState.firestoreDb;
 
 
 
-export const requireFirebaseClient = (): FirebaseClientState => { if (isFirebaseClientAvailable && firebaseClientState.app) { return firebaseClientState;
-  }
 
-  throw new Error(
-    `[Firebase] Firebase クライアントを利用できません。不足している環境変数: ${missingFirebaseEnvVars.join(", ")}`,
-  );
+
+export const requireFirebaseClient = (): FirebaseClientState => { if (isFirebaseClientAvailable && firebaseClientState.app) { return firebaseClientState;
+}
+
+throw new Error(
+  `[Firebase] Firebase クライアントを利用できません。不足している環境変数: ${missingFirebaseEnvVars.join(", ")}`,
+);
 };
 export const requireFirestoreDb = (): Firestore => { if (firestoreDb) { return firestoreDb;
-  }
+}
 
-  if (!isFirebaseClientAvailable) {
-    throw new Error(
-      `[Firebase] Firebase 環境変数が不足しているため Firestore を利用できません: ${missingFirebaseEnvVars.join(", ")}`,
-    );
-  }
-
+if (!isFirebaseClientAvailable) {
   throw new Error(
-    "[Firebase] Firestore の初期化に失敗しました。Firestore 依存の処理を続行できません。",
+    `[Firebase] Firebase 環境変数が不足しているため Firestore を利用できません: ${missingFirebaseEnvVars.join(", ")}`,
   );
+}
+
+throw new Error(
+  "[Firebase] Firestore の初期化に失敗しました。Firestore 依存の処理を続行できません。",
+);
 };
 const debugFirebase = (): void => {
   console.log("=== Firebase デバッグ情報 ===");

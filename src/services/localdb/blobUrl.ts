@@ -108,23 +108,23 @@ export const assertNoBlobUrlInCardPayload = (cardLike: unknown, context?: { enti
   });
 };
 export const scrubBlobUrlsDeep = (value: unknown): unknown => { if (typeof value === "string") { return value.startsWith("blob:") ? null : value;
-  }
+}
 
-  if (Array.isArray(value)) {
-    return value.map((entry) => scrubBlobUrlsDeep(entry));
-  }
+if (Array.isArray(value)) {
+  return value.map((entry) => scrubBlobUrlsDeep(entry));
+}
 
-  if (isRecord(value)) {
-    const result: Record<string, unknown> = {};
-    for (const [key, nested] of Object.entries(value)) {
-      result[key] = scrubBlobUrlsDeep(nested);
-    }
-    return result;
+if (isRecord(value)) {
+  const result: Record<string, unknown> = {};
+  for (const [key, nested] of Object.entries(value)) {
+    result[key] = scrubBlobUrlsDeep(nested);
   }
+  return result;
+}
 
-  return value;
+return value;
 };
-export const buildCardCandidateFromMods = (obj: unknown, mods: unknown,): unknown => { if (!isRecord(obj)) return mods;
+export const buildCardCandidateFromMods = (obj: unknown, mods: unknown): unknown => { if (!isRecord(obj)) return mods;
   if (!isRecord(mods)) return obj;
 
   const candidate: Record<string, unknown> = { ...obj };

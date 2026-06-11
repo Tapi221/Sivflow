@@ -17,7 +17,7 @@ interface FlashcardNavigationProps {
 
 
 
-export const FlashcardNavigation = ({ onNext, onPrev, hasNext, hasPrev, currentIndex, totalCards, }: FlashcardNavigationProps) => { const showNav = onNext || onPrev || (currentIndex !== undefined && totalCards !== undefined);
+export const FlashcardNavigation = ({ onNext, onPrev, hasNext, hasPrev, currentIndex, totalCards }: FlashcardNavigationProps) => { const showNav = onNext || onPrev || (currentIndex !== undefined && totalCards !== undefined);
   if (!showNav) return null;
 
   return (

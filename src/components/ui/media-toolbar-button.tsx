@@ -1,28 +1,28 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
+import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 
-import { PlaceholderPlugin } from '@platejs/media/react';
+import { PlaceholderPlugin } from "@platejs/media/react";
 
-import { AudioLinesIcon, FileUpIcon, FilmIcon, ImageIcon, LinkIcon, } from 'lucide-react';
+import { AudioLinesIcon, FileUpIcon, FilmIcon, ImageIcon, LinkIcon } from "lucide-react";
 
-import { isUrl, KEYS } from 'platejs';
+import { isUrl, KEYS } from "platejs";
 
-import { useEditorRef } from 'platejs/react';
+import { useEditorRef } from "platejs/react";
 
-import { toast } from 'sonner';
+import { toast } from "sonner";
 
-import { useFilePicker } from 'use-file-picker';
+import { useFilePicker } from "use-file-picker";
 
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, } from './alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./alert-dialog";
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger, } from './dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
 
-import { Input } from './input';
+import { Input } from "./input";
 
-import { ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary, } from './toolbar';
+import { ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "./toolbar";
 
 
 
@@ -36,28 +36,28 @@ const MEDIA_CONFIG: Record<
   }
 > = {
   [KEYS.audio]: {
-    accept: ['audio/*'],
+    accept: ["audio/*"],
     icon: <AudioLinesIcon className="size-4" />,
-    title: 'Insert Audio',
-    tooltip: 'Audio',
+    title: "Insert Audio",
+    tooltip: "Audio",
   },
   [KEYS.file]: {
-    accept: ['*'],
+    accept: ["*"],
     icon: <FileUpIcon className="size-4" />,
-    title: 'Insert File',
-    tooltip: 'File',
+    title: "Insert File",
+    tooltip: "File",
   },
   [KEYS.img]: {
-    accept: ['image/*'],
+    accept: ["image/*"],
     icon: <ImageIcon className="size-4" />,
-    title: 'Insert Image',
-    tooltip: 'Image',
+    title: "Insert Image",
+    tooltip: "Image",
   },
   [KEYS.video]: {
-    accept: ['video/*'],
+    accept: ["video/*"],
     icon: <FilmIcon className="size-4" />,
-    title: 'Insert Video',
-    tooltip: 'Video',
+    title: "Insert Video",
+    tooltip: "Video",
   },
 };
 
@@ -85,7 +85,7 @@ export function MediaToolbarButton({ nodeType, ...props }: DropdownMenuProps & {
           openFilePicker();
         }}
         onKeyDown={(e) => {
-          if (e.key === 'ArrowDown') {
+          if (e.key === "ArrowDown") {
             e.preventDefault();
             setOpen(true);
           }
@@ -153,15 +153,15 @@ function MediaUrlDialogContent({
   setOpen: (value: boolean) => void;
 }) {
   const editor = useEditorRef();
-  const [url, setUrl] = React.useState('');
+  const [url, setUrl] = React.useState("");
 
   const embedMedia = React.useCallback(() => {
-    if (!isUrl(url)) return toast.error('Invalid URL');
+    if (!isUrl(url)) return toast.error("Invalid URL");
 
     setOpen(false);
     editor.tf.insertNodes({
-      children: [{ text: '' }],
-      name: nodeType === KEYS.file ? url.split('/').pop() : undefined,
+      children: [{ text: "" }],
+      name: nodeType === KEYS.file ? url.split("/").pop() : undefined,
       type: nodeType,
       url,
     });
@@ -186,7 +186,7 @@ function MediaUrlDialogContent({
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') embedMedia();
+            if (e.key === "Enter") embedMedia();
           }}
           placeholder=""
           type="url"

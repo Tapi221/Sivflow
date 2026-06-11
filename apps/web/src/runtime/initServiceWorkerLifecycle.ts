@@ -47,47 +47,47 @@ const clearDevSwAndCaches = () => {
   });
 };
 export const initServiceWorkerLifecycle = () => { if (started || typeof window === "undefined" || !("serviceWorker" in navigator)) { return;
-  }
-  started = true;
+}
+started = true;
 
-  if (import.meta.env.DEV) {
-    clearDevSwAndCaches();
-    return;
-  }
+if (import.meta.env.DEV) {
+  clearDevSwAndCaches();
+  return;
+}
 
-  window.addEventListener("load", () => {
-    void navigator.serviceWorker
-      .register("/sw.js")
-      .then((registration) => {
-        console.log("SW registered: ", registration);
+window.addEventListener("load", () => {
+  void navigator.serviceWorker
+    .register("/sw.js")
+    .then((registration) => {
+      console.log("SW registered: ", registration);
 
-        registration.addEventListener("updatefound", () => {
-          installUpdateFlow(registration);
-        });
-
-        if (registration.waiting) {
-          applyWaitingWorker(registration);
-        }
-
-        navigator.serviceWorker.addEventListener("controllerchange", () => {
-          hardReloadOnce(RUNTIME_RELOAD_KEYS.swController);
-        });
-
+      registration.addEventListener("updatefound", () => {
         installUpdateFlow(registration);
-        void registration.update();
-
-        window.setInterval(
-          () => {
-            void registration.update();
-          },
-          1000 * 60 * 60,
-        );
-      })
-      .catch((registrationError) => {
-        console.log("SW registration failed: ", registrationError);
-        logRuntimeFault("sw.register.error", {
-          registrationError: toErrorText(registrationError),
-        });
       });
-  });
+
+      if (registration.waiting) {
+        applyWaitingWorker(registration);
+      }
+
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        hardReloadOnce(RUNTIME_RELOAD_KEYS.swController);
+      });
+
+      installUpdateFlow(registration);
+      void registration.update();
+
+      window.setInterval(
+        () => {
+          void registration.update();
+        },
+        1000 * 60 * 60,
+      );
+    })
+    .catch((registrationError) => {
+      console.log("SW registration failed: ", registrationError);
+      logRuntimeFault("sw.register.error", {
+        registrationError: toErrorText(registrationError),
+      });
+    });
+});
 };

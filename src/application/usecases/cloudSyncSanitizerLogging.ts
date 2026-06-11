@@ -9,7 +9,7 @@ const getRecordId = (value: unknown): string | null => {
   const id = value.id;
   return typeof id === "string" && id.length > 0 ? id : null;
 };
-export const getCloudSyncSanitizerLogPayload = (type: string, data: unknown, fixes: unknown,): { type: string; id: string | null; fixes: unknown; } => ({
+export const getCloudSyncSanitizerLogPayload = (type: string, data: unknown, fixes: unknown): { type: string; id: string | null; fixes: unknown; } => ({
   type,
   id: getRecordId(data),
   fixes,

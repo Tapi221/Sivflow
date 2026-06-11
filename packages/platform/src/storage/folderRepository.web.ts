@@ -14,50 +14,50 @@ const generateFolderId = () => {
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
 export const createWebFolderRepository = (): FolderCommandRepository<Folder> & FolderDeleteRepository<Folder, CardSet, Card, Document> => ({ generateFolderId, listFolders: async (userId) => { const db = await getLocalDb(userId);
-    return (await db.folders.toArray()).map(normalizeFolder);
-  },
-  addFolder: async (userId, folder) => {
-    const db = await getLocalDb(userId);
-    await db.addItem("folders", folder as FolderCreateDraft as unknown);
-  },
-  updateFolder: async (userId, folderId, changes) => {
-    const db = await getLocalDb(userId);
-    await db.updateItem("folders", folderId, changes);
-  },
-  loadDeleteContext: async (userId) => {
-    const db = await getLocalDb(userId);
-    const [folders, cardSets, cards, documents] = await Promise.all([
-      db.folders.toArray(),
-      db.cardSets.where("userId").equals(userId).toArray(),
-      db.getAllCards(),
-      db.documents.where("userId").equals(userId).toArray(),
-    ]);
+  return (await db.folders.toArray()).map(normalizeFolder);
+},
+addFolder: async (userId, folder) => {
+  const db = await getLocalDb(userId);
+  await db.addItem("folders", folder as FolderCreateDraft as unknown);
+},
+updateFolder: async (userId, folderId, changes) => {
+  const db = await getLocalDb(userId);
+  await db.updateItem("folders", folderId, changes);
+},
+loadDeleteContext: async (userId) => {
+  const db = await getLocalDb(userId);
+  const [folders, cardSets, cards, documents] = await Promise.all([
+    db.folders.toArray(),
+    db.cardSets.where("userId").equals(userId).toArray(),
+    db.getAllCards(),
+    db.documents.where("userId").equals(userId).toArray(),
+  ]);
 
-    return {
-      folders: folders.map(normalizeFolder),
-      cardSets,
-      cards,
-      documents,
-      resolveCardFolderId: (card, candidateCardSets) => {
-        const activeCardSetById = buildCardSetById(candidateCardSets.filter((cardSet) => !cardSet.isDeleted));
-        return resolveCardFolderId(card, activeCardSetById);
-      },
-    };
-  },
-  softDeleteFolder: async (userId, folderId) => {
-    const db = await getLocalDb(userId);
-    await db.softDelete("folders", folderId);
-  },
-  softDeleteCardSet: async (userId, cardSetId) => {
-    const db = await getLocalDb(userId);
-    await db.softDelete("cardSets", cardSetId);
-  },
-  softDeleteCard: async (userId, cardId) => {
-    const db = await getLocalDb(userId);
-    await db.softDelete("cards", cardId);
-  },
-  softDeleteDocument: async (userId, documentId) => {
-    const db = await getLocalDb(userId);
-    await db.softDelete("documents", documentId);
-  },
+  return {
+    folders: folders.map(normalizeFolder),
+    cardSets,
+    cards,
+    documents,
+    resolveCardFolderId: (card, candidateCardSets) => {
+      const activeCardSetById = buildCardSetById(candidateCardSets.filter((cardSet) => !cardSet.isDeleted));
+      return resolveCardFolderId(card, activeCardSetById);
+    },
+  };
+},
+softDeleteFolder: async (userId, folderId) => {
+  const db = await getLocalDb(userId);
+  await db.softDelete("folders", folderId);
+},
+softDeleteCardSet: async (userId, cardSetId) => {
+  const db = await getLocalDb(userId);
+  await db.softDelete("cardSets", cardSetId);
+},
+softDeleteCard: async (userId, cardId) => {
+  const db = await getLocalDb(userId);
+  await db.softDelete("cards", cardId);
+},
+softDeleteDocument: async (userId, documentId) => {
+  const db = await getLocalDb(userId);
+  await db.softDelete("documents", documentId);
+},
 });

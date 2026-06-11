@@ -23,7 +23,7 @@ const clampIndex = (index: number, count: number) => {
 
 
 
-export const CardCarousel3D = <T,>({ cards, syncIndex, initialIndex = 0, onIndexChange, renderCenter, renderPreview, getKey, onFlip, }: CardCarousel3DProps<T>) => { void renderPreview;
+export const CardCarousel3D = <T>({cards, syncIndex, initialIndex = 0, onIndexChange, renderCenter, renderPreview, getKey, onFlip}: CardCarousel3DProps<T>) => {void renderPreview;
 
   const initialActiveIndex = useMemo(() => clampIndex(syncIndex ?? initialIndex, cards.length), [cards.length, initialIndex, syncIndex]);
   const [activeIndex, setActiveIndex] = useState(initialActiveIndex);
@@ -33,16 +33,16 @@ export const CardCarousel3D = <T,>({ cards, syncIndex, initialIndex = 0, onIndex
   }, [cards.length, initialIndex, syncIndex]);
 
   return (
-    <VerticalCardPager
-      cards={cards}
-      activeIndex={activeIndex}
-      onActiveIndexChange={(index) => {
-        setActiveIndex(index);
-        onIndexChange?.(index);
-      }}
-      onFlip={onFlip}
-      getKey={getKey}
-      renderCard={(card, index, isActive) => renderCenter(card, index, isActive)}
-    />
+  <VerticalCardPager
+    cards={cards}
+    activeIndex={activeIndex}
+    onActiveIndexChange={(index) => {
+      setActiveIndex(index);
+      onIndexChange?.(index);
+    }}
+    onFlip={onFlip}
+    getKey={getKey}
+    renderCard={(card, index, isActive) => renderCenter(card, index, isActive)}
+  />
   );
 };

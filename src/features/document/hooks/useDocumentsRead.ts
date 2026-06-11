@@ -16,7 +16,7 @@ type UseDocumentsReadOptions = {
 
 
 
-export const useDocumentsRead = (folderId?: string, options?: UseDocumentsReadOptions,) => { const { currentUser } = useAuthSession();
+export const useDocumentsRead = (folderId?: string, options?: UseDocumentsReadOptions) => { const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
   const [error, setError] = useState<string | null>(null);
   const isActiveWorkspaceCardSetSelected = useWorkspaceTabsStore((state) => {

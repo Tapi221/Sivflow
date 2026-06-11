@@ -4,7 +4,7 @@ import { useScheduleDays } from "@/features/calendar/grid/useScheduleColumns";
 
 
 
-export const useCalendarVisibleRange = ({ currentDate, selectedViewMode, calendarBuffer, weekStartDay, }: { currentDate: Date;
+export const useCalendarVisibleRange = ({ currentDate, selectedViewMode, calendarBuffer, weekStartDay }: { currentDate: Date;
   selectedViewMode: CalendarViewMode;
   calendarBuffer: CalendarBufferDays;
   weekStartDay: CalendarWeekStartDay;

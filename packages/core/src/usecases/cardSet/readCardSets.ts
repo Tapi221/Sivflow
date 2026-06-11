@@ -69,7 +69,7 @@ const compareCardSets = <TCardSet extends CardSetQueryEntity>(left: TCardSet, ri
 
   return left.id.localeCompare(right.id, "ja");
 };
-export const listCardSetsForFolder = async <TCardSet extends CardSetQueryEntity>({ userId, folderId, repository, }: { userId: string;
+export const listCardSetsForFolder = async <TCardSet extends CardSetQueryEntity>({ userId, folderId, repository }: { userId: string;
   folderId?: string | null;
   repository: CardSetQueryRepository<TCardSet>;
 }): Promise<TCardSet[]> => {

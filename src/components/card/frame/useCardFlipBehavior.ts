@@ -54,7 +54,7 @@ export type UseCardFlipBehaviorResult = Readonly<{ handleFlip: (event?: React.Mo
 
 
 
-export const useCardFlipBehavior = ({ isCardClickable, previewMode, onFlip, onPreviewFlip, isModalBlockingFlip, isInkEditingActive, }: UseCardFlipBehaviorParams): UseCardFlipBehaviorResult => { const suppressNextFlipRef = React.useRef(false);
+export const useCardFlipBehavior = ({ isCardClickable, previewMode, onFlip, onPreviewFlip, isModalBlockingFlip, isInkEditingActive }: UseCardFlipBehaviorParams): UseCardFlipBehaviorResult => { const suppressNextFlipRef = React.useRef(false);
   const pointerGestureRef = React.useRef<PointerGestureState>(
     createInitialPointerGestureState(),
   );

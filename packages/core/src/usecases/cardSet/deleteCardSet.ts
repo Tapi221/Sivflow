@@ -8,7 +8,7 @@ export type CardSetDeleteRepository<TCard extends CardSetDeleteCard = CardSetDel
 
 
 
-export const deleteCardSetWithCards = async <TCard extends CardSetDeleteCard,>({ userId, cardSetId, repository, }: { userId: string;
+export const deleteCardSetWithCards = async <TCard extends CardSetDeleteCard>({ userId, cardSetId, repository }: { userId: string;
   cardSetId: string;
   repository: CardSetDeleteRepository<TCard>;
 }): Promise<void> => {

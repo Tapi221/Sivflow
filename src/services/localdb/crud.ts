@@ -7,7 +7,7 @@ import type { Card, Folder } from "@/types";
 
 
 
-export type EnqueueSync = (table: string, type: "upload" | "download", payload: unknown,) => Promise<void>;
+export type EnqueueSync = (table: string, type: "upload" | "download", payload: unknown) => Promise<void>;
 export interface TableLike<T extends object> { add(item: T): PromiseLike<unknown> | unknown;
   get(id: unknown): PromiseLike<T | undefined> | T | undefined;
   update(id: unknown, changes: unknown): PromiseLike<number> | number;
@@ -274,183 +274,183 @@ const enqueueThroughSyncQueueApi = async (
     priority: "high",
   });
 };
-export const addItem: AddItem = async (db: DbLike, table: string, item: unknown, skipSync: boolean, enqueueSync: EnqueueSync,): Promise<string> => { if (table === "cards") { assertNoBlobUrlInCardPayload(item, { entityType: table, entityId: getId(item), });
-  }
+export const addItem: AddItem = async (db: DbLike, table: string, item: unknown, skipSync: boolean, enqueueSync: EnqueueSync): Promise<string> => { if (table === "cards") { assertNoBlobUrlInCardPayload(item, { entityType: table, entityId: getId(item) });
+}
 
-  const payload = toStorageRow(item);
-  const preview = safeJsonPreview(payload);
+const payload = toStorageRow(item);
+const preview = safeJsonPreview(payload);
 
-  if (table === "cards") {
-    assertNoBlobUrlInCardPayload(payload, {
-      entityType: table,
-      entityId: getId(payload) ?? getId(item),
-    });
-  }
+if (table === "cards") {
+  assertNoBlobUrlInCardPayload(payload, {
+    entityType: table,
+    entityId: getId(payload) ?? getId(item),
+  });
+}
+
+console.log(
+  `[Diagnostic] localDb.addItem START. Table=${table}, ItemID=${getId(payload) ?? "<generated>"
+  }, localDb instance type=${getConstructorName(db)}`,
+);
+
+console.log(
+  `[LocalDB] addItem START -> table=${table} id=${getId(payload) ?? "<generated>"
+  } skipSync=${skipSync}`,
+);
+
+if (table === "cards") {
+  const cardPayload = payload as CardStorageRow;
+  const questionBlocksLen = Array.isArray(cardPayload.front?.blocks)
+    ? cardPayload.front.blocks.length
+    : 0;
+  const answerBlocksLen = Array.isArray(cardPayload.back?.blocks)
+    ? cardPayload.back.blocks.length
+    : 0;
 
   console.log(
-    `[Diagnostic] localDb.addItem START. Table=${table}, ItemID=${getId(payload) ?? "<generated>"
-    }, localDb instance type=${getConstructorName(db)}`,
+    `[LocalDB] addItem CARD_CONTENT -> Q_Blocks=${questionBlocksLen}, A_Blocks=${answerBlocksLen}`,
   );
+}
 
-  console.log(
-    `[LocalDB] addItem START -> table=${table} id=${getId(payload) ?? "<generated>"
-    } skipSync=${skipSync}`,
-  );
-
-  if (table === "cards") {
-    const cardPayload = payload as CardStorageRow;
-    const questionBlocksLen = Array.isArray(cardPayload.front?.blocks)
-      ? cardPayload.front.blocks.length
-      : 0;
-    const answerBlocksLen = Array.isArray(cardPayload.back?.blocks)
-      ? cardPayload.back.blocks.length
-      : 0;
-
-    console.log(
-      `[LocalDB] addItem CARD_CONTENT -> Q_Blocks=${questionBlocksLen}, A_Blocks=${answerBlocksLen}`,
-    );
-  }
+try {
+  const tableApi = db.table<AnyRow>(table);
+  const returnedId = String(await tableApi.add(payload));
+  const resolvedId = payload.id ?? returnedId;
 
   try {
-    const tableApi = db.table<AnyRow>(table);
-    const returnedId = String(await tableApi.add(payload));
-    const resolvedId = payload.id ?? returnedId;
+    const maxVerifyAttempts = 4;
+    let saved: AnyRow | undefined;
 
-    try {
-      const maxVerifyAttempts = 4;
-      let saved: AnyRow | undefined;
-
-      for (let attempt = 1; attempt <= maxVerifyAttempts; attempt += 1) {
-        try {
-          saved = await tableApi.get(resolvedId);
-        } catch {
-          saved = undefined;
-        }
-
-        if (saved) break;
-
-        await new Promise<void>((resolve) => {
-          setTimeout(resolve, 35 * attempt);
-        });
-      }
-
-      if (!saved) {
-        console.error(
-          "[LocalDB] addItem verification failed after retries: write succeeded but read returned null",
-          { table, id: resolvedId, instanceName: db.name },
-        );
-        throw new Error(
-          "DB instance mismatch: write succeeded but read failed",
-        );
-      }
-    } catch (verifyError: unknown) {
-      console.error("[LocalDB] addItem verification ERROR", verifyError);
-      throw verifyError;
-    }
-
-    const savedItem: AnyRow = { ...payload, id: resolvedId };
-
-    console.log(
-      `[LocalDB] addItem AFTER_DEXIE_ADD -> table=${table} returnedId=${returnedId} resolvedId=${resolvedId}`,
-    );
-
-    if (!skipSync) {
+    for (let attempt = 1; attempt <= maxVerifyAttempts; attempt += 1) {
       try {
-        await enqueueThroughSyncQueueApi(
-          db,
-          table,
-          "create",
-          savedItem,
-          enqueueSync,
-        );
-        console.log(
-          `[LocalDB] addItem ENQUEUED_SYNC -> table=${table} id=${resolvedId}`,
-        );
-      } catch (enqueueError: unknown) {
-        console.error("[LocalDB] addItem enqueueSync ERROR", {
-          table,
-          id: resolvedId,
-          error: enqueueError,
-        });
+        saved = await tableApi.get(resolvedId);
+      } catch {
+        saved = undefined;
       }
+
+      if (saved) break;
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 35 * attempt);
+      });
     }
 
-    console.log(`[LocalDB] addItem SUCCESS -> table=${table} id=${resolvedId}`);
-    return resolvedId;
-  } catch (error: unknown) {
-    const code = errorCode(error);
-    console.error(
-      `[LocalDB] addItem ERROR -> table=${table} id=${getId(payload) ?? "<generated>"
-      } code=${code} payloadPreview=${preview}`,
-      error,
-    );
-    throw error;
-  }
-};
-export const updateItem: UpdateItem = async (db: DbLike, table: string, id: string, changes: unknown, skipSync: boolean, enqueueSync: EnqueueSync,): Promise<number> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error("[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.",);
+    if (!saved) {
+      console.error(
+        "[LocalDB] addItem verification failed after retries: write succeeded but read returned null",
+        { table, id: resolvedId, instanceName: db.name },
+      );
+      throw new Error(
+        "DB instance mismatch: write succeeded but read failed",
+      );
     }
-
-    await cleanupBeforeDocumentUpdate(db, id, changes as DocumentUpdateChanges);
+  } catch (verifyError: unknown) {
+    console.error("[LocalDB] addItem verification ERROR", verifyError);
+    throw verifyError;
   }
 
-  if (table === "cards") {
-    assertNoBlobUrlInCardPayload(changes, { entityType: table, entityId: id });
-  }
-
-  const payload = toStorageRow(changes);
-
-  if (table === "cards") {
-    assertNoBlobUrlInCardPayload(payload, { entityType: table, entityId: id });
-  }
+  const savedItem: AnyRow = { ...payload, id: resolvedId };
 
   console.log(
-    `[LocalDB] updateItem -> table=${table} id=${id} skipSync=${skipSync} changesKeys=${recordKeys(
-      changes,
-    ).join(",")}`,
+    `[LocalDB] addItem AFTER_DEXIE_ADD -> table=${table} returnedId=${returnedId} resolvedId=${resolvedId}`,
   );
 
-  if (table === "cards") {
-    const cardPayload = payload as CardStorageRow;
-    const questionBlocksLen = Array.isArray(cardPayload.front?.blocks)
-      ? cardPayload.front.blocks.length
-      : undefined;
-    const answerBlocksLen = Array.isArray(cardPayload.back?.blocks)
-      ? cardPayload.back.blocks.length
-      : undefined;
-
-    console.log(
-      `[LocalDB] updateItem CARD_CHANGES -> Q_Blocks=${questionBlocksLen}, A_Blocks=${answerBlocksLen}`,
-    );
-  }
-
-  const tableApi = db.table<AnyRow>(table);
-  const result = await tableApi.update(id, payload);
-
   if (!skipSync) {
-    const fullItem = await tableApi.get(id);
-    if (fullItem) {
+    try {
       await enqueueThroughSyncQueueApi(
         db,
         table,
-        "update",
-        fullItem,
+        "create",
+        savedItem,
         enqueueSync,
       );
+      console.log(
+        `[LocalDB] addItem ENQUEUED_SYNC -> table=${table} id=${resolvedId}`,
+      );
+    } catch (enqueueError: unknown) {
+      console.error("[LocalDB] addItem enqueueSync ERROR", {
+        table,
+        id: resolvedId,
+        error: enqueueError,
+      });
     }
   }
 
-  return result;
+  console.log(`[LocalDB] addItem SUCCESS -> table=${table} id=${resolvedId}`);
+  return resolvedId;
+} catch (error: unknown) {
+  const code = errorCode(error);
+  console.error(
+    `[LocalDB] addItem ERROR -> table=${table} id=${getId(payload) ?? "<generated>"
+    } code=${code} payloadPreview=${preview}`,
+    error,
+  );
+  throw error;
+}
 };
-export const deleteItem: DeleteItem = async (db: DbLike, table: string, id: string,): Promise<void> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error("[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.",);
-    }
+export const updateItem: UpdateItem = async (db: DbLike, table: string, id: string, changes: unknown, skipSync: boolean, enqueueSync: EnqueueSync): Promise<number> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error("[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.");
+}
 
-    await cleanupBeforeDocumentDelete(db, id);
+await cleanupBeforeDocumentUpdate(db, id, changes as DocumentUpdateChanges);
+}
+
+if (table === "cards") {
+  assertNoBlobUrlInCardPayload(changes, { entityType: table, entityId: id });
+}
+
+const payload = toStorageRow(changes);
+
+if (table === "cards") {
+  assertNoBlobUrlInCardPayload(payload, { entityType: table, entityId: id });
+}
+
+console.log(
+  `[LocalDB] updateItem -> table=${table} id=${id} skipSync=${skipSync} changesKeys=${recordKeys(
+    changes,
+  ).join(",")}`,
+);
+
+if (table === "cards") {
+  const cardPayload = payload as CardStorageRow;
+  const questionBlocksLen = Array.isArray(cardPayload.front?.blocks)
+    ? cardPayload.front.blocks.length
+    : undefined;
+  const answerBlocksLen = Array.isArray(cardPayload.back?.blocks)
+    ? cardPayload.back.blocks.length
+    : undefined;
+
+  console.log(
+    `[LocalDB] updateItem CARD_CHANGES -> Q_Blocks=${questionBlocksLen}, A_Blocks=${answerBlocksLen}`,
+  );
+}
+
+const tableApi = db.table<AnyRow>(table);
+const result = await tableApi.update(id, payload);
+
+if (!skipSync) {
+  const fullItem = await tableApi.get(id);
+  if (fullItem) {
+    await enqueueThroughSyncQueueApi(
+      db,
+      table,
+      "update",
+      fullItem,
+      enqueueSync,
+    );
   }
+}
 
-  const tableApi = db.table<AnyRow>(table);
-  await tableApi.delete(id);
+return result;
 };
-export const softDelete = async (db: DbLike, table: string, id: string, updateItemFn: (table: string, id: string, changes: Record<string, unknown>,) => Promise<number>,): Promise<number> => { const now = new Date();
+export const deleteItem: DeleteItem = async (db: DbLike, table: string, id: string): Promise<void> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error("[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.");
+}
+
+await cleanupBeforeDocumentDelete(db, id);
+}
+
+const tableApi = db.table<AnyRow>(table);
+await tableApi.delete(id);
+};
+export const softDelete = async (db: DbLike, table: string, id: string, updateItemFn: (table: string, id: string, changes: Record<string, unknown>) => Promise<number>): Promise<number> => { const now = new Date();
 
   console.log(`[LocalDB] softDelete -> table=${table} id=${id}`);
 
@@ -476,7 +476,7 @@ export const softDelete = async (db: DbLike, table: string, id: string, updateIt
     ...extraChanges,
   });
 };
-export const bulkUpsert: BulkUpsert = async (db: DbLike, table: string, items: unknown[], skipSync: boolean, enqueueSync: EnqueueSync,): Promise<void> => { if (items.length === 0) return;
+export const bulkUpsert: BulkUpsert = async (db: DbLike, table: string, items: unknown[], skipSync: boolean, enqueueSync: EnqueueSync): Promise<void> => { if (items.length === 0) return;
 
   if (table === "cards") {
     for (const item of items) {
@@ -507,28 +507,28 @@ export const bulkUpsert: BulkUpsert = async (db: DbLike, table: string, items: u
     }
   }
 };
-export const upsert: Upsert = async (db: DbLike, tableName: string, data: unknown, skipSync: boolean, enqueueSync: EnqueueSync,): Promise<void> => { if (tableName === "cards") { assertNoBlobUrlInCardPayload(data, { entityType: tableName, entityId: getId(data), });
-  }
+export const upsert: Upsert = async (db: DbLike, tableName: string, data: unknown, skipSync: boolean, enqueueSync: EnqueueSync): Promise<void> => { if (tableName === "cards") { assertNoBlobUrlInCardPayload(data, { entityType: tableName, entityId: getId(data) });
+}
 
-  const payload = toStorageRow(data);
+const payload = toStorageRow(data);
 
-  if (tableName === "cards") {
-    assertNoBlobUrlInCardPayload(payload, {
-      entityType: tableName,
-      entityId: getId(payload) ?? getId(data),
-    });
-  }
+if (tableName === "cards") {
+  assertNoBlobUrlInCardPayload(payload, {
+    entityType: tableName,
+    entityId: getId(payload) ?? getId(data),
+  });
+}
 
-  const tableApi = db.table<AnyRow>(tableName);
-  await tableApi.put(payload);
+const tableApi = db.table<AnyRow>(tableName);
+await tableApi.put(payload);
 
-  if (!skipSync) {
-    await enqueueThroughSyncQueueApi(
-      db,
-      tableName,
-      "update",
-      payload,
-      enqueueSync,
-    );
-  }
+if (!skipSync) {
+  await enqueueThroughSyncQueueApi(
+    db,
+    tableName,
+    "update",
+    payload,
+    enqueueSync,
+  );
+}
 };

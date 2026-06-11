@@ -1,9 +1,9 @@
-import type { UIMessage } from 'ai';
-import type { ChatMessage } from './types';
-import { getMarkdown } from '@platejs/ai';
-import { serializeMd } from '@platejs/markdown';
-import dedent from 'dedent';
-import { type SlateEditor, KEYS, RangeApi } from 'platejs';
+import type { UIMessage } from "ai";
+import type { ChatMessage } from "./types";
+import { getMarkdown } from "@platejs/ai";
+import { serializeMd } from "@platejs/markdown";
+import dedent from "dedent";
+import { type SlateEditor, KEYS, RangeApi } from "platejs";
 
 
 
@@ -22,60 +22,60 @@ export type StructuredPromptSections = { context?: string;
 
 
 
-const SELECTION_START = '<Selection>';
-const SELECTION_END = '</Selection>';
+const SELECTION_START = "<Selection>";
+const SELECTION_END = "</Selection>";
 
 
 
-export const tag = (tag: string, content?: string | null) => { if (!content) return '';
+export const tag = (tag: string, content?: string | null) => { if (!content) return "";
 
-  return [`<${tag}>`, content, `</${tag}>`].join('\n');
+  return [`<${tag}>`, content, `</${tag}>`].join("\n");
 };
-export const inlineTag = (tag: string, content?: string | null) => { if (!content) return '';
+export const inlineTag = (tag: string, content?: string | null) => { if (!content) return "";
 
-  return [`<${tag}>`, content, `</${tag}>`].join('');
+  return [`<${tag}>`, content, `</${tag}>`].join("");
 };
-export const sections = (sections: (boolean | string | null | undefined)[]) => sections.filter(Boolean).join('\n\n');
-export const list = (items: string[] | undefined) => items ? items.filter(Boolean).map((item) => `- ${item}`).join('\n') : '';
-export const buildStructuredPrompt = ({ context, examples, history, instruction, outputFormatting, prefilledResponse, rules, task, taskContext, thinking, tone, }: StructuredPromptSections) => { const formattedExamples = Array.isArray(examples) ? examples.map((example) => { const indentedContent = example.split('\n').map((line) => (line ? ` ${line}` : '')).join('\n');
+export const sections = (sections: (boolean | string | null | undefined)[]) => sections.filter(Boolean).join("\n\n");
+export const list = (items: string[] | undefined) => items ? items.filter(Boolean).map((item) => `- ${item}`).join("\n") : "";
+export const buildStructuredPrompt = ({ context, examples, history, instruction, outputFormatting, prefilledResponse, rules, task, taskContext, thinking, tone }: StructuredPromptSections) => { const formattedExamples = Array.isArray(examples) ? examples.map((example) => { const indentedContent = example.split("\n").map((line) => (line ? ` ${line}` : "")).join("\n");
 
-    return ['  <example>', indentedContent, '  </example>'].join('\n');
+    return ["  <example>", indentedContent, "  </example>"].join("\n");
   })
-    .join('\n')
+    .join("\n")
     : examples;
 
   return sections([
     taskContext,
     tone,
-    task && tag('task', task),
+    task && tag("task", task),
     instruction &&
     dedent`
         Here is the user's instruction (this is what you need to respond to):
-        ${tag('instruction', instruction)}
+        ${tag("instruction", instruction)}
       `,
     context &&
     dedent`
         Here is the context you should reference when answering the user:
-        ${tag('context', context)}
+        ${tag("context", context)}
       `,
-    rules && tag('rules', rules),
+    rules && tag("rules", rules),
     formattedExamples &&
-    'Here are some examples of how to respond in a standard interaction:\n' +
-    tag('examples', formattedExamples),
+    "Here are some examples of how to respond in a standard interaction:\n" +
+    tag("examples", formattedExamples),
     history &&
     dedent`
         Here is the conversation history (between the user and you) prior to the current instruction:
-        ${tag('history', history)}
+        ${tag("history", history)}
       `,
-    thinking && tag('thinking', thinking),
-    outputFormatting && tag('outputFormatting', outputFormatting),
-    (prefilledResponse ?? null) !== null && tag('prefilledResponse', prefilledResponse ?? ''),
+    thinking && tag("thinking", thinking),
+    outputFormatting && tag("outputFormatting", outputFormatting),
+    (prefilledResponse ?? null) !== null && tag("prefilledResponse", prefilledResponse ?? ""),
   ]);
 };
-export const getTextFromMessage = (message: UIMessage): string => { return message.parts.filter((part) => part.type === 'text').map((part) => part.text).join('');
+export const getTextFromMessage = (message: UIMessage): string => { return message.parts.filter((part) => part.type === "text").map((part) => part.text).join("");
 };
 export const formatTextFromMessages = (messages: ChatMessage[], options?: { limit?: number; }): string => {
-  if (!messages || messages.length <= 1) return '';
+  if (!messages || messages.length <= 1) return "";
 
   const historyMessages = options?.limit ? messages.slice(-options.limit) : messages;
 
@@ -90,13 +90,13 @@ export const formatTextFromMessages = (messages: ChatMessage[], options?: { limi
       return `${role}: ${text}`;
     })
     .filter(Boolean)
-    .join('\n');
+    .join("\n");
 };
-export const getLastUserInstruction = (messages: ChatMessage[]): string => { if (!messages || messages.length === 0) return '';
+export const getLastUserInstruction = (messages: ChatMessage[]): string => { if (!messages || messages.length === 0) return "";
 
-  const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
+  const lastUserMessage = [...messages].reverse().find((m) => m.role === "user");
 
-  if (!lastUserMessage) return '';
+  if (!lastUserMessage) return "";
 
   return getTextFromMessage(lastUserMessage).trim();
 };
@@ -143,11 +143,11 @@ const removeEscapeSelection = (editor: SlateEditor, text: string) => {
 
   return newText;
 };
-export const isMultiBlocks = (editor: SlateEditor) => { const blocks = editor.api.blocks({ mode: 'lowest' });
+export const isMultiBlocks = (editor: SlateEditor) => { const blocks = editor.api.blocks({ mode: "lowest" });
 
   return blocks.length > 1;
 };
-export const getMarkdownWithSelection = (editor: SlateEditor) => removeEscapeSelection(editor, getMarkdown(editor, { type: 'block' }));
+export const getMarkdownWithSelection = (editor: SlateEditor) => removeEscapeSelection(editor, getMarkdown(editor, { type: "block" }));
 export const isSelectionInTable = (editor: SlateEditor): boolean => { if (!editor.selection) return false;
 
   const tableEntry = editor.api.block({
@@ -163,7 +163,7 @@ export const isSingleCellSelection = (editor: SlateEditor): boolean => { if (!ed
     editor.api.nodes({
       at: editor.selection,
       match: { type: KEYS.td },
-    })
+    }),
   );
 
   return cells.length === 1;

@@ -11,42 +11,6 @@ interface WarningDialogProps {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * WARNING レベルの通知
  *
@@ -55,7 +19,7 @@ interface WarningDialogProps {
  * - 軽い行動導線
  * - 放置すると困る
  */
-export const WarningDialog: React.FC<WarningDialogProps> = ({ notification, onDismiss, }) => { const [showDetails, setShowDetails] = useState(false);
+export const WarningDialog: React.FC<WarningDialogProps> = ({ notification, onDismiss }) => { const [showDetails, setShowDetails] = useState(false);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">

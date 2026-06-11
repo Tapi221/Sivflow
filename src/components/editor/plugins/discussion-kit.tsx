@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { createPlatePlugin } from 'platejs/react';
+import { createPlatePlugin } from "platejs/react";
 
-import type { TComment } from '@/components/ui/comment';
+import type { TComment } from "@/components/ui/comment";
 
-import { BlockDiscussion } from '@/components/ui/block-discussion';
+import { BlockDiscussion } from "@/components/ui/block-discussion";
 
 
 
@@ -30,115 +30,115 @@ const BLOCK_SUGGESTION_SELECTOR = '[data-block-suggestion="true"]';
 
 const discussionsData: TDiscussion[] = [
   {
-    id: 'discussion1',
+    id: "discussion1",
     comments: [
       {
-        id: 'comment1',
+        id: "comment1",
         contentRich: [
           {
             children: [
               {
-                text: 'Comments are a great way to provide feedback and discuss changes.',
+                text: "Comments are a great way to provide feedback and discuss changes.",
               },
             ],
-            type: 'p',
+            type: "p",
           },
         ],
         createdAt: new Date(Date.now() - 600_000),
-        discussionId: 'discussion1',
+        discussionId: "discussion1",
         isEdited: false,
-        userId: 'charlie',
+        userId: "charlie",
       },
       {
-        id: 'comment2',
+        id: "comment2",
         contentRich: [
           {
             children: [
               {
-                text: 'Agreed! The link to the docs makes it easy to learn more.',
+                text: "Agreed! The link to the docs makes it easy to learn more.",
               },
             ],
-            type: 'p',
+            type: "p",
           },
         ],
         createdAt: new Date(Date.now() - 500_000),
-        discussionId: 'discussion1',
+        discussionId: "discussion1",
         isEdited: false,
-        userId: 'bob',
+        userId: "bob",
       },
     ],
     createdAt: new Date(),
-    documentContent: 'comments',
+    documentContent: "comments",
     isResolved: false,
-    userId: 'charlie',
+    userId: "charlie",
   },
   {
-    id: 'discussion2',
+    id: "discussion2",
     comments: [
       {
-        id: 'comment1',
+        id: "comment1",
         contentRich: [
           {
             children: [
               {
-                text: 'Nice demonstration of overlapping annotations with both comments and suggestions!',
+                text: "Nice demonstration of overlapping annotations with both comments and suggestions!",
               },
             ],
-            type: 'p',
+            type: "p",
           },
         ],
         createdAt: new Date(Date.now() - 300_000),
-        discussionId: 'discussion2',
+        discussionId: "discussion2",
         isEdited: false,
-        userId: 'bob',
+        userId: "bob",
       },
       {
-        id: 'comment2',
+        id: "comment2",
         contentRich: [
           {
             children: [
               {
-                text: 'This helps users understand how powerful the editor can be.',
+                text: "This helps users understand how powerful the editor can be.",
               },
             ],
-            type: 'p',
+            type: "p",
           },
         ],
         createdAt: new Date(Date.now() - 200_000),
-        discussionId: 'discussion2',
+        discussionId: "discussion2",
         isEdited: false,
-        userId: 'charlie',
+        userId: "charlie",
       },
     ],
     createdAt: new Date(),
-    documentContent: 'overlapping',
+    documentContent: "overlapping",
     isResolved: false,
-    userId: 'bob',
+    userId: "bob",
   },
 ];
 
 const usersData: Record<string, TDiscussionUser> = {
   alice: {
-    id: 'alice',
-    avatarUrl: 'https://api.dicebear.com/9.x/glass/svg?seed=alice6',
-    name: 'Alice',
+    id: "alice",
+    avatarUrl: "https://api.dicebear.com/9.x/glass/svg?seed=alice6",
+    name: "Alice",
   },
   bob: {
-    id: 'bob',
-    avatarUrl: 'https://api.dicebear.com/9.x/glass/svg?seed=bob4',
-    name: 'Bob',
+    id: "bob",
+    avatarUrl: "https://api.dicebear.com/9.x/glass/svg?seed=bob4",
+    name: "Bob",
   },
   charlie: {
-    id: 'charlie',
-    avatarUrl: 'https://api.dicebear.com/9.x/glass/svg?seed=charlie2',
-    name: 'Charlie',
+    id: "charlie",
+    avatarUrl: "https://api.dicebear.com/9.x/glass/svg?seed=charlie2",
+    name: "Charlie",
   },
 };
 
 const discussionPlugin = createPlatePlugin({
-  key: 'discussion',
+  key: "discussion",
   options: {
-    currentUserId: 'alice',
+    currentUserId: "alice",
     discussions: discussionsData,
     users: usersData,
   },
@@ -147,8 +147,8 @@ const discussionPlugin = createPlatePlugin({
     render: { aboveNodes: BlockDiscussion },
   })
   .extendSelectors(({ getOption }) => ({
-    currentUser: () => getOption('users')[getOption('currentUserId')],
-    user: (id: string) => getOption('users')[id],
+    currentUser: () => getOption("users")[getOption("currentUserId")],
+    user: (id: string) => getOption("users")[id],
   }));
 
 const DiscussionKit = [discussionPlugin];

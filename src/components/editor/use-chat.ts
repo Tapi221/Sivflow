@@ -1,46 +1,46 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import { type UseChatHelpers, useChat as useBaseChat } from '@ai-sdk/react';
+import { type UseChatHelpers, useChat as useBaseChat } from "@ai-sdk/react";
 
-import { faker } from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
-import { AIChatPlugin, aiCommentToRange, applyTableCellSuggestion, } from '@platejs/ai/react';
+import { AIChatPlugin, aiCommentToRange, applyTableCellSuggestion } from "@platejs/ai/react";
 
-import { getCommentKey, getTransientCommentKey } from '@platejs/comment';
+import { getCommentKey, getTransientCommentKey } from "@platejs/comment";
 
-import { deserializeMd } from '@platejs/markdown';
+import { deserializeMd } from "@platejs/markdown";
 
-import { BlockSelectionPlugin } from '@platejs/selection/react';
+import { BlockSelectionPlugin } from "@platejs/selection/react";
 
-import { type UIMessage, DefaultChatTransport } from 'ai';
+import { type UIMessage, DefaultChatTransport } from "ai";
 
-import { type TNode, KEYS, nanoid, NodeApi, TextApi } from 'platejs';
+import { type TNode, KEYS, nanoid, NodeApi, TextApi } from "platejs";
 
-import { type PlateEditor, useEditorRef, usePluginOption } from 'platejs/react';
+import { type PlateEditor, useEditorRef, usePluginOption } from "platejs/react";
 
-import { aiChatPlugin } from '@/components/editor/plugins/ai-kit';
+import { aiChatPlugin } from "@/components/editor/plugins/ai-kit";
 
-import { discussionPlugin } from '@/components/editor/plugins/discussion-kit';
+import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 
-import { withAIBatch } from '@platejs/ai';
+import { withAIBatch } from "@platejs/ai";
 
 
 
-export type ToolName = 'comment' | 'edit' | 'generate';
+export type ToolName = "comment" | "edit" | "generate";
 
 export type TComment = { comment: { blockId: string;
     comment: string;
     content: string;
   } | null;
-  status: 'finished' | 'streaming';
+  status: "finished" | "streaming";
 };
 
 export type TTableCellUpdate = { cellUpdate: { content: string;
     id: string;
   } | null;
-  status: 'finished' | 'streaming';
+  status: "finished" | "streaming";
 };
 
 export type MessageDataPart = { toolName: ToolName;
@@ -58,171 +58,171 @@ const delay = faker.number.int({ max: 20, min: 5 });
 
 const markdownChunks = [
   [
-    { delay, texts: 'Make text ' },
-    { delay, texts: '**bold**' },
-    { delay, texts: ', ' },
-    { delay, texts: '*italic*' },
-    { delay, texts: ', ' },
-    { delay, texts: '__underlined__' },
-    { delay, texts: ', or apply a ' },
+    { delay, texts: "Make text " },
+    { delay, texts: "**bold**" },
+    { delay, texts: ", " },
+    { delay, texts: "*italic*" },
+    { delay, texts: ", " },
+    { delay, texts: "__underlined__" },
+    { delay, texts: ", or apply a " },
     {
       delay,
-      texts: '***combination***',
+      texts: "***combination***",
     },
-    { delay, texts: ' ' },
-    { delay, texts: 'of ' },
-    { delay, texts: 'these ' },
-    { delay, texts: 'styles ' },
-    { delay, texts: 'for ' },
-    { delay, texts: 'a ' },
-    { delay, texts: 'visually ' },
-    { delay, texts: 'striking ' },
-    { delay, texts: 'effect.' },
-    { delay, texts: '\n\n' },
-    { delay, texts: 'Add ' },
+    { delay, texts: " " },
+    { delay, texts: "of " },
+    { delay, texts: "these " },
+    { delay, texts: "styles " },
+    { delay, texts: "for " },
+    { delay, texts: "a " },
+    { delay, texts: "visually " },
+    { delay, texts: "striking " },
+    { delay, texts: "effect." },
+    { delay, texts: "\n\n" },
+    { delay, texts: "Add " },
     {
       delay,
-      texts: '~~strikethrough~~',
+      texts: "~~strikethrough~~",
     },
-    { delay, texts: ' ' },
-    { delay, texts: 'to ' },
-    { delay, texts: 'indicate ' },
-    { delay, texts: 'deleted ' },
-    { delay, texts: 'or ' },
-    { delay, texts: 'outdated ' },
-    { delay, texts: 'content.' },
-    { delay, texts: '\n\n' },
-    { delay, texts: 'Write ' },
-    { delay, texts: 'code ' },
-    { delay, texts: 'snippets ' },
-    { delay, texts: 'with ' },
-    { delay, texts: 'inline ' },
-    { delay, texts: '`code`' },
-    { delay, texts: ' formatting ' },
-    { delay, texts: 'for ' },
-    { delay, texts: 'easy ' },
-    { delay: faker.number.int({ max: 100, min: 30 }), texts: 'readability.' },
-    { delay, texts: '\n\n' },
-    { delay, texts: 'Add ' },
+    { delay, texts: " " },
+    { delay, texts: "to " },
+    { delay, texts: "indicate " },
+    { delay, texts: "deleted " },
+    { delay, texts: "or " },
+    { delay, texts: "outdated " },
+    { delay, texts: "content." },
+    { delay, texts: "\n\n" },
+    { delay, texts: "Write " },
+    { delay, texts: "code " },
+    { delay, texts: "snippets " },
+    { delay, texts: "with " },
+    { delay, texts: "inline " },
+    { delay, texts: "`code`" },
+    { delay, texts: " formatting " },
+    { delay, texts: "for " },
+    { delay, texts: "easy " },
+    { delay: faker.number.int({ max: 100, min: 30 }), texts: "readability." },
+    { delay, texts: "\n\n" },
+    { delay, texts: "Add " },
     {
       delay,
-      texts: '[links](https://example.com)',
+      texts: "[links](https://example.com)",
     },
-    { delay: faker.number.int({ max: 100, min: 30 }), texts: ' to ' },
-    { delay: faker.number.int({ max: 100, min: 30 }), texts: 'external ' },
-    { delay, texts: 'resources ' },
-    { delay, texts: 'or ' },
+    { delay: faker.number.int({ max: 100, min: 30 }), texts: " to " },
+    { delay: faker.number.int({ max: 100, min: 30 }), texts: "external " },
+    { delay, texts: "resources " },
+    { delay, texts: "or " },
     {
       delay,
-      texts: 'references.\n\n',
+      texts: "references.\n\n",
     },
 
-    { delay, texts: 'Use ' },
-    { delay, texts: 'inline ' },
-    { delay, texts: 'math ' },
-    { delay, texts: 'equations ' },
-    { delay, texts: 'like ' },
-    { delay, texts: '$E = mc^2$ ' },
-    { delay, texts: 'for ' },
-    { delay, texts: 'scientific ' },
-    { delay, texts: 'notation.' },
-    { delay, texts: '\n\n' },
+    { delay, texts: "Use " },
+    { delay, texts: "inline " },
+    { delay, texts: "math " },
+    { delay, texts: "equations " },
+    { delay, texts: "like " },
+    { delay, texts: "$E = mc^2$ " },
+    { delay, texts: "for " },
+    { delay, texts: "scientific " },
+    { delay, texts: "notation." },
+    { delay, texts: "\n\n" },
 
-    { delay, texts: '# ' },
-    { delay, texts: 'Heading ' },
-    { delay, texts: '1\n\n' },
-    { delay, texts: '## ' },
-    { delay, texts: 'Heading ' },
-    { delay, texts: '2\n\n' },
-    { delay, texts: '### ' },
-    { delay, texts: 'Heading ' },
-    { delay, texts: '3\n\n' },
-    { delay, texts: '> ' },
-    { delay, texts: 'Blockquote\n\n' },
-    { delay, texts: '- ' },
-    { delay, texts: 'Unordered ' },
-    { delay, texts: 'list ' },
-    { delay, texts: 'item ' },
-    { delay, texts: '1\n' },
-    { delay, texts: '- ' },
-    { delay, texts: 'Unordered ' },
-    { delay, texts: 'list ' },
-    { delay, texts: 'item ' },
-    { delay, texts: '2\n\n' },
-    { delay, texts: '1. ' },
-    { delay, texts: 'Ordered ' },
-    { delay, texts: 'list ' },
-    { delay, texts: 'item ' },
-    { delay, texts: '1\n' },
-    { delay, texts: '2. ' },
-    { delay, texts: 'Ordered ' },
-    { delay, texts: 'list ' },
-    { delay, texts: 'item ' },
-    { delay, texts: '2\n\n' },
-    { delay, texts: '- ' },
-    { delay, texts: '[ ' },
-    { delay, texts: '] ' },
-    { delay, texts: 'Task ' },
-    { delay, texts: 'list ' },
-    { delay, texts: 'item ' },
-    { delay, texts: '1\n' },
-    { delay, texts: '- ' },
-    { delay, texts: '[x] ' },
-    { delay, texts: 'Task ' },
-    { delay, texts: 'list ' },
-    { delay, texts: 'item ' },
-    { delay, texts: '2\n\n' },
-    { delay, texts: '![Alt ' },
+    { delay, texts: "# " },
+    { delay, texts: "Heading " },
+    { delay, texts: "1\n\n" },
+    { delay, texts: "## " },
+    { delay, texts: "Heading " },
+    { delay, texts: "2\n\n" },
+    { delay, texts: "### " },
+    { delay, texts: "Heading " },
+    { delay, texts: "3\n\n" },
+    { delay, texts: "> " },
+    { delay, texts: "Blockquote\n\n" },
+    { delay, texts: "- " },
+    { delay, texts: "Unordered " },
+    { delay, texts: "list " },
+    { delay, texts: "item " },
+    { delay, texts: "1\n" },
+    { delay, texts: "- " },
+    { delay, texts: "Unordered " },
+    { delay, texts: "list " },
+    { delay, texts: "item " },
+    { delay, texts: "2\n\n" },
+    { delay, texts: "1. " },
+    { delay, texts: "Ordered " },
+    { delay, texts: "list " },
+    { delay, texts: "item " },
+    { delay, texts: "1\n" },
+    { delay, texts: "2. " },
+    { delay, texts: "Ordered " },
+    { delay, texts: "list " },
+    { delay, texts: "item " },
+    { delay, texts: "2\n\n" },
+    { delay, texts: "- " },
+    { delay, texts: "[ " },
+    { delay, texts: "] " },
+    { delay, texts: "Task " },
+    { delay, texts: "list " },
+    { delay, texts: "item " },
+    { delay, texts: "1\n" },
+    { delay, texts: "- " },
+    { delay, texts: "[x] " },
+    { delay, texts: "Task " },
+    { delay, texts: "list " },
+    { delay, texts: "item " },
+    { delay, texts: "2\n\n" },
+    { delay, texts: "![Alt " },
     {
       delay,
       texts:
-        'text](https://images.unsplash.com/photo-1712688930249-98e1963af7bd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)\n\n',
+        "text](https://images.unsplash.com/photo-1712688930249-98e1963af7bd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)\n\n",
     },
     {
       delay,
-      texts: '### Advantage blocks:\n',
+      texts: "### Advantage blocks:\n",
     },
-    { delay, texts: '\n' },
-    { delay, texts: '$$\n' },
+    { delay, texts: "\n" },
+    { delay, texts: "$$\n" },
     {
       delay,
-      texts: 'a^2 + b^2 = c^2\n',
+      texts: "a^2 + b^2 = c^2\n",
     },
-    { delay, texts: '$$\n' },
-    { delay, texts: '\n' },
-    { delay, texts: '```python\n' },
-    { delay, texts: '# ' },
-    { delay, texts: 'Code ' },
-    { delay, texts: 'block\n' },
+    { delay, texts: "$$\n" },
+    { delay, texts: "\n" },
+    { delay, texts: "```python\n" },
+    { delay, texts: "# " },
+    { delay, texts: "Code " },
+    { delay, texts: "block\n" },
     { delay, texts: 'print("Hello, ' },
     { delay, texts: 'World!")\n' },
-    { delay, texts: '```\n\n' },
-    { delay, texts: 'Horizontal ' },
-    { delay, texts: 'rule\n\n' },
-    { delay, texts: '---\n\n' },
-    { delay, texts: '| ' },
-    { delay, texts: 'Header ' },
-    { delay, texts: '1 ' },
-    { delay, texts: '| ' },
-    { delay, texts: 'Header ' },
-    { delay, texts: '2 ' },
-    { delay, texts: '|\n' },
+    { delay, texts: "```\n\n" },
+    { delay, texts: "Horizontal " },
+    { delay, texts: "rule\n\n" },
+    { delay, texts: "---\n\n" },
+    { delay, texts: "| " },
+    { delay, texts: "Header " },
+    { delay, texts: "1 " },
+    { delay, texts: "| " },
+    { delay, texts: "Header " },
+    { delay, texts: "2 " },
+    { delay, texts: "|\n" },
     {
       delay,
-      texts: '|----------|----------|\n',
+      texts: "|----------|----------|\n",
     },
-    { delay, texts: '| ' },
-    { delay, texts: 'Row ' },
-    { delay, texts: '1   ' },
-    { delay, texts: ' | ' },
-    { delay, texts: 'Data    ' },
-    { delay, texts: ' |\n' },
-    { delay, texts: '| ' },
-    { delay, texts: 'Row ' },
-    { delay, texts: '2   ' },
-    { delay, texts: ' | ' },
-    { delay, texts: 'Data    ' },
-    { delay, texts: ' |' },
+    { delay, texts: "| " },
+    { delay, texts: "Row " },
+    { delay, texts: "1   " },
+    { delay, texts: " | " },
+    { delay, texts: "Data    " },
+    { delay, texts: " |\n" },
+    { delay, texts: "| " },
+    { delay, texts: "Row " },
+    { delay, texts: "2   " },
+    { delay, texts: " | " },
+    { delay, texts: "Data    " },
+    { delay, texts: " |" },
   ],
 ];
 
@@ -230,135 +230,135 @@ const mdxChunks = [
   [
     {
       delay,
-      texts: '## ',
+      texts: "## ",
     },
     {
       delay,
-      texts: 'Basic ',
+      texts: "Basic ",
     },
     {
       delay,
-      texts: 'Markdown\n\n',
+      texts: "Markdown\n\n",
     },
     {
       delay,
-      texts: '> ',
+      texts: "> ",
     },
     {
       delay,
-      texts: 'The ',
+      texts: "The ",
     },
     {
       delay,
-      texts: 'following ',
+      texts: "following ",
     },
     {
       delay,
-      texts: 'node ',
+      texts: "node ",
     },
     {
       delay,
-      texts: 'and ',
+      texts: "and ",
     },
     {
       delay,
-      texts: 'marks ',
+      texts: "marks ",
     },
     {
       delay,
-      texts: 'is ',
+      texts: "is ",
     },
     {
       delay,
-      texts: 'supported ',
+      texts: "supported ",
     },
     {
       delay,
-      texts: 'by ',
+      texts: "by ",
     },
     {
       delay,
-      texts: 'the ',
+      texts: "the ",
     },
     {
       delay,
-      texts: 'Markdown ',
+      texts: "Markdown ",
     },
     {
       delay,
-      texts: 'standard.\n\n',
+      texts: "standard.\n\n",
     },
     {
       delay,
-      texts: 'Format ',
+      texts: "Format ",
     },
     {
       delay,
-      texts: 'text ',
+      texts: "text ",
     },
     {
       delay,
-      texts: 'with **b',
+      texts: "with **b",
     },
     {
       delay,
-      texts: 'old**, _',
+      texts: "old**, _",
     },
     {
       delay,
-      texts: 'italic_,',
+      texts: "italic_,",
     },
     {
       delay,
-      texts: ' _**comb',
+      texts: " _**comb",
     },
     {
       delay,
-      texts: 'ined sty',
+      texts: "ined sty",
     },
     {
       delay,
-      texts: 'les**_, ',
+      texts: "les**_, ",
     },
     {
       delay,
-      texts: '~~strike',
+      texts: "~~strike",
     },
     {
       delay,
-      texts: 'through~',
+      texts: "through~",
     },
     {
       delay,
-      texts: '~, `code',
+      texts: "~, `code",
     },
     {
       delay,
-      texts: '` format',
+      texts: "` format",
     },
     {
       delay,
-      texts: 'ting, an',
+      texts: "ting, an",
     },
     {
       delay,
-      texts: 'd [hyper',
+      texts: "d [hyper",
     },
     {
       delay,
-      texts: 'links](https://en.wikipedia.org/wiki/Hypertext).\n\n',
+      texts: "links](https://en.wikipedia.org/wiki/Hypertext).\n\n",
     },
     {
       delay,
-      texts: '```javascript\n',
+      texts: "```javascript\n",
     },
     {
       delay,
-      texts: '// Use code blocks to showcase code snippets\n',
+      texts: "// Use code blocks to showcase code snippets\n",
     },
     {
       delay,
-      texts: 'function greet() {\n',
+      texts: "function greet() {\n",
     },
     {
       delay,
@@ -366,260 +366,260 @@ const mdxChunks = [
     },
     {
       delay,
-      texts: '}\n',
+      texts: "}\n",
     },
     {
       delay,
-      texts: '```\n\n',
+      texts: "```\n\n",
     },
     {
       delay,
-      texts: '- Simple',
+      texts: "- Simple",
     },
     {
       delay,
-      texts: ' lists f',
+      texts: " lists f",
     },
     {
       delay,
-      texts: 'or organ',
+      texts: "or organ",
     },
     {
       delay,
-      texts: 'izing co',
+      texts: "izing co",
     },
     {
       delay,
-      texts: 'ntent\n',
+      texts: "ntent\n",
     },
     {
       delay,
-      texts: '1. ',
+      texts: "1. ",
     },
     {
       delay,
-      texts: 'Numbered ',
+      texts: "Numbered ",
     },
     {
       delay,
-      texts: 'lists ',
+      texts: "lists ",
     },
     {
       delay,
-      texts: 'for ',
+      texts: "for ",
     },
     {
       delay,
-      texts: 'sequential ',
+      texts: "sequential ",
     },
     {
       delay,
-      texts: 'steps\n\n',
+      texts: "steps\n\n",
     },
     {
       delay,
-      texts: '| **Plugin**  | **Element** | **Inline** | **Void** |\n',
+      texts: "| **Plugin**  | **Element** | **Inline** | **Void** |\n",
     },
     {
       delay,
-      texts: '| ----------- | ----------- | ---------- | -------- |\n',
+      texts: "| ----------- | ----------- | ---------- | -------- |\n",
     },
     {
       delay,
-      texts: '| **Heading** |             |            | No       |\n',
+      texts: "| **Heading** |             |            | No       |\n",
     },
     {
       delay,
-      texts: '| **Image**   | Yes         | No         | Yes      |\n',
+      texts: "| **Image**   | Yes         | No         | Yes      |\n",
     },
     {
       delay,
-      texts: '| **Ment',
+      texts: "| **Ment",
     },
     {
       delay,
-      texts: 'ion** | Yes         | Yes        | Yes      |\n\n',
+      texts: "ion** | Yes         | Yes        | Yes      |\n\n",
     },
     {
       delay,
       texts:
-        '![](https://images.unsplash.com/photo-1712688930249-98e1963af7bd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)\n\n',
+        "![](https://images.unsplash.com/photo-1712688930249-98e1963af7bd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)\n\n",
     },
     {
       delay,
-      texts: '- [x] Co',
+      texts: "- [x] Co",
     },
     {
       delay,
-      texts: 'mpleted ',
+      texts: "mpleted ",
     },
     {
       delay,
-      texts: 'tasks\n',
+      texts: "tasks\n",
     },
     {
       delay,
-      texts: '- [ ] Pe',
+      texts: "- [ ] Pe",
     },
     {
       delay,
-      texts: 'nding ta',
+      texts: "nding ta",
     },
     {
       delay,
-      texts: 'sks\n\n',
+      texts: "sks\n\n",
     },
     {
       delay,
-      texts: '---\n\n## Advan',
+      texts: "---\n\n## Advan",
     },
     {
       delay,
-      texts: 'ced Feat',
+      texts: "ced Feat",
     },
     {
       delay,
-      texts: 'ures\n\n',
+      texts: "ures\n\n",
     },
     {
       delay,
-      texts: '<callout> ',
+      texts: "<callout> ",
     },
     {
       delay,
-      texts: 'The ',
+      texts: "The ",
     },
     {
       delay,
-      texts: 'following ',
+      texts: "following ",
     },
     {
       delay,
-      texts: 'node ',
+      texts: "node ",
     },
     {
       delay,
-      texts: 'and ',
+      texts: "and ",
     },
     {
       delay,
-      texts: 'marks ',
+      texts: "marks ",
     },
     {
       delay,
-      texts: 'are ',
+      texts: "are ",
     },
     {
       delay,
-      texts: 'not ',
+      texts: "not ",
     },
     {
       delay,
-      texts: 'supported ',
+      texts: "supported ",
     },
     {
       delay,
-      texts: 'in ',
+      texts: "in ",
     },
     {
       delay,
-      texts: 'Markdown ',
+      texts: "Markdown ",
     },
     {
       delay,
-      texts: 'but ',
+      texts: "but ",
     },
     {
       delay,
-      texts: 'can ',
+      texts: "can ",
     },
     {
       delay,
-      texts: 'be ',
+      texts: "be ",
     },
     {
       delay,
-      texts: 'serialized ',
+      texts: "serialized ",
     },
     {
       delay,
-      texts: 'and ',
+      texts: "and ",
     },
     {
       delay,
-      texts: 'deserialized ',
+      texts: "deserialized ",
     },
     {
       delay,
-      texts: 'using ',
+      texts: "using ",
     },
     {
       delay,
-      texts: 'MDX ',
+      texts: "MDX ",
     },
     {
       delay,
-      texts: 'or ',
+      texts: "or ",
     },
     {
       delay,
-      texts: 'specialized ',
+      texts: "specialized ",
     },
     {
       delay,
-      texts: 'UnifiedJS ',
+      texts: "UnifiedJS ",
     },
     {
       delay,
-      texts: 'plugins. ',
+      texts: "plugins. ",
     },
     {
       delay,
-      texts: '</callout>\n\n',
+      texts: "</callout>\n\n",
     },
     {
       delay,
-      texts: 'Advanced ',
+      texts: "Advanced ",
     },
     {
       delay,
-      texts: 'marks: ',
+      texts: "marks: ",
     },
     {
       delay,
-      texts: '<kbd>⌘ ',
+      texts: "<kbd>⌘ ",
     },
     {
       delay,
-      texts: '+ ',
+      texts: "+ ",
     },
     {
       delay,
-      texts: 'B</kbd>,<u>underlined</u>, ',
+      texts: "B</kbd>,<u>underlined</u>, ",
     },
     {
       delay,
-      texts: '<mark',
+      texts: "<mark",
     },
     {
       delay,
-      texts: '>highli',
+      texts: ">highli",
     },
     {
       delay,
-      texts: 'ghted</m',
+      texts: "ghted</m",
     },
     {
       delay,
-      texts: 'ark',
+      texts: "ark",
     },
     {
       delay,
-      texts: '> text, ',
+      texts: "> text, ",
     },
     {
       delay,
-      texts: '<span s',
+      texts: "<span s",
     },
     {
       delay,
@@ -627,7 +627,7 @@ const mdxChunks = [
     },
     {
       delay,
-      texts: 'lor: #93',
+      texts: "lor: #93",
     },
     {
       delay,
@@ -635,23 +635,23 @@ const mdxChunks = [
     },
     {
       delay,
-      texts: 'olored t',
+      texts: "olored t",
     },
     {
       delay,
-      texts: 'ext</spa',
+      texts: "ext</spa",
     },
     {
       delay,
-      texts: 'n> and ',
+      texts: "n> and ",
     },
     {
       delay,
-      texts: '<spa',
+      texts: "<spa",
     },
     {
       delay,
-      texts: 'n',
+      texts: "n",
     },
     {
       delay,
@@ -659,15 +659,15 @@ const mdxChunks = [
     },
     {
       delay,
-      texts: 'backgrou',
+      texts: "backgrou",
     },
     {
       delay,
-      texts: 'nd-color',
+      texts: "nd-color",
     },
     {
       delay,
-      texts: ': #6C9EE',
+      texts: ": #6C9EE",
     },
     {
       delay,
@@ -675,279 +675,279 @@ const mdxChunks = [
     },
     {
       delay,
-      texts: 'ground h',
+      texts: "ground h",
     },
     {
       delay,
-      texts: 'ighlight',
+      texts: "ighlight",
     },
     {
       delay,
-      texts: 's</spa',
+      texts: "s</spa",
     },
     {
       delay,
-      texts: 'n> for ',
+      texts: "n> for ",
     },
     {
       delay,
-      texts: 'visual e',
+      texts: "visual e",
     },
     {
       delay,
-      texts: 'mphasis.\n\n',
+      texts: "mphasis.\n\n",
     },
     {
       delay,
-      texts: 'Superscript ',
+      texts: "Superscript ",
     },
     {
       delay,
-      texts: 'like ',
+      texts: "like ",
     },
     {
       delay,
-      texts: 'E=mc<sup>2</sup> ',
+      texts: "E=mc<sup>2</sup> ",
     },
     {
       delay,
-      texts: 'and ',
+      texts: "and ",
     },
     {
       delay,
-      texts: 'subscript ',
+      texts: "subscript ",
     },
     {
       delay,
-      texts: 'like ',
+      texts: "like ",
     },
     {
       delay,
-      texts: 'H<sub>2</sub>O ',
+      texts: "H<sub>2</sub>O ",
     },
     {
       delay,
-      texts: 'demonstrate ',
+      texts: "demonstrate ",
     },
     {
       delay,
-      texts: 'mathematical ',
+      texts: "mathematical ",
     },
     {
       delay,
-      texts: 'and ',
+      texts: "and ",
     },
     {
       delay,
-      texts: 'chemical ',
+      texts: "chemical ",
     },
     {
       delay,
-      texts: 'notation ',
+      texts: "notation ",
     },
     {
       delay,
-      texts: 'capabilities.\n\n',
+      texts: "capabilities.\n\n",
     },
     {
       delay,
-      texts: 'Add ',
+      texts: "Add ",
     },
     {
       delay,
-      texts: 'mentions ',
+      texts: "mentions ",
     },
     {
       delay,
-      texts: 'like ',
+      texts: "like ",
     },
     {
       delay,
-      texts: '@BB-8, d',
+      texts: "@BB-8, d",
     },
     {
       delay,
-      texts: 'ates (<d',
+      texts: "ates (<d",
     },
     {
       delay,
-      texts: 'ate>2025',
+      texts: "ate>2025",
     },
     {
       delay,
-      texts: '-05-08</',
+      texts: "-05-08</",
     },
     {
       delay,
-      texts: 'date>), ',
+      texts: "date>), ",
     },
     {
       delay,
-      texts: 'and math',
+      texts: "and math",
     },
     {
       delay,
-      texts: ' formula',
+      texts: " formula",
     },
     {
       delay,
-      texts: 's ($E=mc',
+      texts: "s ($E=mc",
     },
     {
       delay,
-      texts: '^2$).\n\n',
+      texts: "^2$).\n\n",
     },
     {
       delay,
-      texts: 'The ',
+      texts: "The ",
     },
     {
       delay,
-      texts: 'table ',
+      texts: "table ",
     },
     {
       delay,
-      texts: 'of ',
+      texts: "of ",
     },
     {
       delay,
-      texts: 'contents ',
+      texts: "contents ",
     },
     {
       delay,
-      texts: 'feature ',
+      texts: "feature ",
     },
     {
       delay,
-      texts: 'automatically ',
+      texts: "automatically ",
     },
     {
       delay,
-      texts: 'generates ',
+      texts: "generates ",
     },
     {
       delay,
-      texts: 'document ',
+      texts: "document ",
     },
     {
       delay,
-      texts: 'structure ',
+      texts: "structure ",
     },
     {
       delay,
-      texts: 'for ',
+      texts: "for ",
     },
     {
       delay,
-      texts: 'easy ',
+      texts: "easy ",
     },
     {
       delay,
-      texts: 'navigation.\n\n',
+      texts: "navigation.\n\n",
     },
     {
       delay,
-      texts: '<toc ',
+      texts: "<toc ",
     },
     {
       delay,
-      texts: '/>\n\n',
+      texts: "/>\n\n",
     },
     {
       delay,
-      texts: 'Math ',
+      texts: "Math ",
     },
     {
       delay,
-      texts: 'formula ',
+      texts: "formula ",
     },
     {
       delay,
-      texts: 'support ',
+      texts: "support ",
     },
     {
       delay,
-      texts: 'makes ',
+      texts: "makes ",
     },
     {
       delay,
-      texts: 'displaying ',
+      texts: "displaying ",
     },
     {
       delay,
-      texts: 'complex ',
+      texts: "complex ",
     },
     {
       delay,
-      texts: 'mathematical ',
+      texts: "mathematical ",
     },
     {
       delay,
-      texts: 'expressions ',
+      texts: "expressions ",
     },
     {
       delay,
-      texts: 'simple.\n\n',
+      texts: "simple.\n\n",
     },
     {
       delay,
-      texts: '$$\n',
+      texts: "$$\n",
     },
     {
       delay,
-      texts: 'a^2',
+      texts: "a^2",
     },
     {
       delay,
-      texts: '+b^2',
+      texts: "+b^2",
     },
     {
       delay,
-      texts: '=c^2\n',
+      texts: "=c^2\n",
     },
     {
       delay,
-      texts: '$$\n\n',
+      texts: "$$\n\n",
     },
     {
       delay,
-      texts: 'Multi-co',
+      texts: "Multi-co",
     },
     {
       delay,
-      texts: 'lumn lay',
+      texts: "lumn lay",
     },
     {
       delay,
-      texts: 'out feat',
+      texts: "out feat",
     },
     {
       delay,
-      texts: 'ures ena',
+      texts: "ures ena",
     },
     {
       delay,
-      texts: 'ble rich',
+      texts: "ble rich",
     },
     {
       delay,
-      texts: 'er page ',
+      texts: "er page ",
     },
     {
       delay,
-      texts: 'designs ',
+      texts: "designs ",
     },
     {
       delay,
-      texts: 'and cont',
+      texts: "and cont",
     },
     {
       delay,
-      texts: 'ent layo',
+      texts: "ent layo",
     },
     {
       delay,
-      texts: 'uts.\n\n',
+      texts: "uts.\n\n",
     },
     // {
     //  delay,
@@ -983,39 +983,39 @@ const mdxChunks = [
     // },
     {
       delay,
-      texts: 'PDF ',
+      texts: "PDF ",
     },
     {
       delay,
-      texts: 'embedding ',
+      texts: "embedding ",
     },
     {
       delay,
-      texts: 'makes ',
+      texts: "makes ",
     },
     {
       delay,
-      texts: 'document ',
+      texts: "document ",
     },
     {
       delay,
-      texts: 'referencing ',
+      texts: "referencing ",
     },
     {
       delay,
-      texts: 'simple ',
+      texts: "simple ",
     },
     {
       delay,
-      texts: 'and ',
+      texts: "and ",
     },
     {
       delay,
-      texts: 'intuitive.\n\n',
+      texts: "intuitive.\n\n",
     },
     {
       delay,
-      texts: '<file ',
+      texts: "<file ",
     },
     {
       delay,
@@ -1032,55 +1032,55 @@ const mdxChunks = [
     },
     {
       delay,
-      texts: 'Audio ',
+      texts: "Audio ",
     },
     {
       delay,
-      texts: 'players ',
+      texts: "players ",
     },
     {
       delay,
-      texts: 'can ',
+      texts: "can ",
     },
     {
       delay,
-      texts: 'be ',
+      texts: "be ",
     },
     {
       delay,
-      texts: 'embedded ',
+      texts: "embedded ",
     },
     {
       delay,
-      texts: 'directly ',
+      texts: "directly ",
     },
     {
       delay,
-      texts: 'into ',
+      texts: "into ",
     },
     {
       delay,
-      texts: 'documents, ',
+      texts: "documents, ",
     },
     {
       delay,
-      texts: 'supporting ',
+      texts: "supporting ",
     },
     {
       delay,
-      texts: 'online ',
+      texts: "online ",
     },
     {
       delay,
-      texts: 'audio ',
+      texts: "audio ",
     },
     {
       delay,
-      texts: 'resources.\n\n',
+      texts: "resources.\n\n",
     },
     {
       delay,
-      texts: '<audio ',
+      texts: "<audio ",
     },
     {
       delay,
@@ -1093,55 +1093,55 @@ const mdxChunks = [
     },
     {
       delay,
-      texts: 'Video ',
+      texts: "Video ",
     },
     {
       delay,
-      texts: 'playback ',
+      texts: "playback ",
     },
     {
       delay,
-      texts: 'features ',
+      texts: "features ",
     },
     {
       delay,
-      texts: 'support ',
+      texts: "support ",
     },
     {
       delay,
-      texts: 'embedding ',
+      texts: "embedding ",
     },
     {
       delay,
-      texts: 'various ',
+      texts: "various ",
     },
     {
       delay,
-      texts: 'online ',
+      texts: "online ",
     },
     {
       delay,
-      texts: 'video ',
+      texts: "video ",
     },
     {
       delay,
-      texts: 'resources, ',
+      texts: "resources, ",
     },
     {
       delay,
-      texts: 'enriching ',
+      texts: "enriching ",
     },
     {
       delay,
-      texts: 'document ',
+      texts: "document ",
     },
     {
       delay,
-      texts: 'content.\n\n',
+      texts: "content.\n\n",
     },
     {
       delay,
-      texts: '<video ',
+      texts: "<video ",
     },
     {
       delay,
@@ -1185,20 +1185,20 @@ function createChatTransport({
       });
 
       if (!res.ok) {
-        let sample: 'comment' | 'markdown' | 'mdx' | 'table' | null = null;
+        let sample: "comment" | "markdown" | "mdx" | "table" | null = null;
 
         try {
           const body = JSON.parse(init?.body as string);
           const content = body.messages
             .at(-1)
-            .parts.find((p: any) => p.type === 'text')?.text;
+            .parts.find((p: any) => p.type === "text")?.text;
 
-          if (content.includes('Generate a markdown sample')) {
-            sample = 'markdown';
-          } else if (content.includes('Generate a mdx sample')) {
-            sample = 'mdx';
-          } else if (content.includes('comment')) {
-            sample = 'comment';
+          if (content.includes("Generate a markdown sample")) {
+            sample = "markdown";
+          } else if (content.includes("Generate a mdx sample")) {
+            sample = "mdx";
+          } else if (content.includes("comment")) {
+            sample = "comment";
           }
 
           // Detect table editing by checking if multiple table cells are selected
@@ -1206,10 +1206,10 @@ function createChatTransport({
           if (!sample) {
             // First check: selectedCells from TablePlugin (cell selection mode)
             const selectedCells =
-              editor.getOption({ key: KEYS.table }, 'selectedCells') || [];
+              editor.getOption({ key: KEYS.table }, "selectedCells") || [];
 
             if (selectedCells.length > 1) {
-              sample = 'table';
+              sample = "table";
             }
             // Second check: selection range spans multiple cells
             else if (body.ctx?.children && body.ctx?.selection) {
@@ -1221,14 +1221,14 @@ function createChatTransport({
                 const rootIndex = anchorPath[0];
                 const rootNode = children[rootIndex];
 
-                if (rootNode?.type === 'table') {
+                if (rootNode?.type === "table") {
                   // Cell path is at index 2 (table -> row -> cell)
-                  const anchorCellPath = anchorPath.slice(0, 3).join(',');
-                  const focusCellPath = focusPath?.slice(0, 3).join(',');
+                  const anchorCellPath = anchorPath.slice(0, 3).join(",");
+                  const focusCellPath = focusPath?.slice(0, 3).join(",");
 
                   // Only use table mock if anchor and focus are in different cells
                   if (focusCellPath && anchorCellPath !== focusCellPath) {
-                    sample = 'table';
+                    sample = "table";
                   }
                 }
               }
@@ -1251,8 +1251,8 @@ function createChatTransport({
 
         const response = new Response(stream, {
           headers: {
-            Connection: 'keep-alive',
-            'Content-Type': 'text/plain',
+            Connection: "keep-alive",
+            "Content-Type": "text/plain",
           },
         });
 
@@ -1265,7 +1265,7 @@ function createChatTransport({
 }
 
 export const useChat = () => { const editor = useEditorRef();
-  const options = usePluginOption(aiChatPlugin, 'chatOptions');
+  const options = usePluginOption(aiChatPlugin, "chatOptions");
 
   // remove when you implement the route /api/ai/command
   const abortControllerRef = React.useRef<AbortController | null>(null);
@@ -1279,26 +1279,26 @@ export const useChat = () => { const editor = useEditorRef();
   const transport = React.useMemo(
     () =>
       createChatTransport({
-        api: options.api || '/api/ai/command',
+        api: options.api || "/api/ai/command",
         abortControllerRef,
         editor,
       }),
-    [editor, options.api]
+    [editor, options.api],
   );
 
   const baseChat = useBaseChat<ChatMessage>({
-    id: 'editor',
+    id: "editor",
     transport,
     onData(data) {
-      if (data.type === 'data-toolName') {
-        editor.setOption(AIChatPlugin, 'toolName', data.data as ToolName);
+      if (data.type === "data-toolName") {
+        editor.setOption(AIChatPlugin, "toolName", data.data as ToolName);
       }
 
-      if (data.type === 'data-table' && data.data) {
+      if (data.type === "data-table" && data.data) {
         const tableData = data.data as TTableCellUpdate;
 
-        if (tableData.status === 'finished') {
-          const chatSelection = editor.getOption(AIChatPlugin, 'chatSelection');
+        if (tableData.status === "finished") {
+          const chatSelection = editor.getOption(AIChatPlugin, "chatSelection");
 
           if (!chatSelection) return;
 
@@ -1314,10 +1314,10 @@ export const useChat = () => { const editor = useEditorRef();
         });
       }
 
-      if (data.type === 'data-comment' && data.data) {
+      if (data.type === "data-comment" && data.data) {
         const commentData = data.data as TComment;
 
-        if (commentData.status === 'finished') {
+        if (commentData.status === "finished") {
           editor.getApi(BlockSelectionPlugin).blockSelection.deselect();
 
           return;
@@ -1326,10 +1326,10 @@ export const useChat = () => { const editor = useEditorRef();
         const aiComment = commentData.comment!;
         const range = aiCommentToRange(editor, aiComment);
 
-        if (!range) return console.warn('No range found for AI comment');
+        if (!range) return console.warn("No range found for AI comment");
 
         const discussions =
-          editor.getOption(discussionPlugin, 'discussions') || [];
+          editor.getOption(discussionPlugin, "discussions") || [];
 
         // Generate a new discussion ID
         const discussionId = nanoid();
@@ -1337,11 +1337,11 @@ export const useChat = () => { const editor = useEditorRef();
         // Create a new comment
         const newComment = {
           id: nanoid(),
-          contentRich: [{ children: [{ text: aiComment.comment }], type: 'p' }],
+          contentRich: [{ children: [{ text: aiComment.comment }], type: "p" }],
           createdAt: new Date(),
           discussionId,
           isEdited: false,
-          userId: editor.getOption(discussionPlugin, 'currentUserId'),
+          userId: editor.getOption(discussionPlugin, "currentUserId"),
         };
 
         // Create a new discussion
@@ -1351,14 +1351,14 @@ export const useChat = () => { const editor = useEditorRef();
           createdAt: new Date(),
           documentContent: deserializeMd(editor, aiComment.content)
             .map((node: TNode) => NodeApi.string(node))
-            .join('\n'),
+            .join("\n"),
           isResolved: false,
-          userId: editor.getOption(discussionPlugin, 'currentUserId'),
+          userId: editor.getOption(discussionPlugin, "currentUserId"),
         };
 
         // Update discussions
         const updatedDiscussions = [...discussions, newDiscussion];
-        editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
+        editor.setOption(discussionPlugin, "discussions", updatedDiscussions);
 
         // Apply comment marks to the editor
         editor.tf.withMerging(() => {
@@ -1372,7 +1372,7 @@ export const useChat = () => { const editor = useEditorRef();
               at: range,
               match: TextApi.isText,
               split: true,
-            }
+            },
           );
         });
       }
@@ -1387,7 +1387,7 @@ export const useChat = () => { const editor = useEditorRef();
   };
 
   React.useEffect(() => {
-    editor.setOption(AIChatPlugin, 'chat', chat as any);
+    editor.setOption(AIChatPlugin, "chat", chat as any);
 
   }, [chat.status, chat.messages, chat.error, _abortFakeStream]);
 
@@ -1403,7 +1403,7 @@ const fakeStreamText = ({
 }: {
   editor: PlateEditor;
   chunkCount?: number;
-  sample?: 'comment' | 'markdown' | 'mdx' | 'table' | null;
+  sample?: "comment" | "markdown" | "mdx" | "table" | null;
   signal?: AbortSignal;
 }) => {
   const encoder = new TextEncoder();
@@ -1411,20 +1411,20 @@ const fakeStreamText = ({
   return new ReadableStream({
     async start(controller) {
       const blocks = (() => {
-        if (sample === 'markdown') {
+        if (sample === "markdown") {
           return markdownChunks;
         }
 
-        if (sample === 'mdx') {
+        if (sample === "mdx") {
           return mdxChunks;
         }
 
-        if (sample === 'comment') {
+        if (sample === "comment") {
           const commentChunks = createCommentChunks(editor);
           return commentChunks;
         }
 
-        if (sample === 'table') {
+        if (sample === "table") {
           const tableChunks = createTableCellChunks(editor);
           return tableChunks;
         }
@@ -1447,21 +1447,21 @@ const fakeStreamText = ({
         ];
       })();
       if (signal?.aborted) {
-        controller.error(new Error('Aborted before start'));
+        controller.error(new Error("Aborted before start"));
         return;
       }
 
       const abortHandler = () => {
-        controller.error(new Error('Stream aborted'));
+        controller.error(new Error("Stream aborted"));
       };
 
-      signal?.addEventListener('abort', abortHandler);
+      signal?.addEventListener("abort", abortHandler);
 
       // Generate a unique message ID
       const messageId = `msg_${faker.string.alphanumeric(40)}`;
 
       // Handle comment and table data differently (they use data events, not text streams)
-      if (sample === 'comment' || sample === 'table') {
+      if (sample === "comment" || sample === "table") {
         controller.enqueue(encoder.encode('data: {"type":"start"}\n\n'));
         await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -1474,7 +1474,7 @@ const fakeStreamText = ({
             await new Promise((resolve) => setTimeout(resolve, chunk.delay));
 
             if (signal?.aborted) {
-              signal?.removeEventListener('abort', abortHandler);
+              signal?.removeEventListener("abort", abortHandler);
               return;
             }
 
@@ -1484,7 +1484,7 @@ const fakeStreamText = ({
         }
 
         // Send the final DONE event
-        controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
       } else {
         // Send initial stream events for text content
         controller.enqueue(encoder.encode('data: {"type":"start"}\n\n'));
@@ -1495,8 +1495,8 @@ const fakeStreamText = ({
 
         controller.enqueue(
           encoder.encode(
-            `data: {"type":"text-start","id":"${messageId}","providerMetadata":{"openai":{"itemId":"${messageId}"}}}\n\n`
-          )
+            `data: {"type":"text-start","id":"${messageId}","providerMetadata":{"openai":{"itemId":"${messageId}"}}}\n\n`,
+          ),
         );
         await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -1508,13 +1508,13 @@ const fakeStreamText = ({
             await new Promise((resolve) => setTimeout(resolve, chunk.delay));
 
             if (signal?.aborted) {
-              signal?.removeEventListener('abort', abortHandler);
+              signal?.removeEventListener("abort", abortHandler);
               return;
             }
 
             // Properly escape the text for JSON
             const escapedText = chunk.texts
-              .replace(/\\/g, '\\\\') // Escape backslashes first
+              .replace(/\\/g, "\\\\") // Escape backslashes first
               .replace(/"/g, String.raw`\"`) // Escape quotes
               .replace(/\n/g, String.raw`\n`) // Escape newlines
               .replace(/\r/g, String.raw`\r`) // Escape carriage returns
@@ -1522,8 +1522,8 @@ const fakeStreamText = ({
 
             controller.enqueue(
               encoder.encode(
-                `data: {"type":"text-delta","id":"${messageId}","delta":"${escapedText}"}\n\n`
-              )
+                `data: {"type":"text-delta","id":"${messageId}","delta":"${escapedText}"}\n\n`,
+              ),
             );
           }
 
@@ -1531,15 +1531,15 @@ const fakeStreamText = ({
           if (i < blocks.length - 1) {
             controller.enqueue(
               encoder.encode(
-                `data: {"type":"text-delta","id":"${messageId}","delta":"\\n\\n"}\n\n`
-              )
+                `data: {"type":"text-delta","id":"${messageId}","delta":"\\n\\n"}\n\n`,
+              ),
             );
           }
         }
 
         // Send end events
         controller.enqueue(
-          encoder.encode(`data: {"type":"text-end","id":"${messageId}"}\n\n`)
+          encoder.encode(`data: {"type":"text-end","id":"${messageId}"}\n\n`),
         );
         await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -1549,10 +1549,10 @@ const fakeStreamText = ({
         controller.enqueue(encoder.encode('data: {"type":"finish"}\n\n'));
         await new Promise((resolve) => setTimeout(resolve, 10));
 
-        controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
       }
 
-      signal?.removeEventListener('abort', abortHandler);
+      signal?.removeEventListener("abort", abortHandler);
       controller.close();
     },
   });
@@ -1570,7 +1570,7 @@ const createCommentChunks = (editor: PlateEditor) => {
 
   const isSelectingSome = editor.getOption(
     BlockSelectionPlugin,
-    'isSelectingSome'
+    "isSelectingSome",
   );
 
   const blocks =
@@ -1599,14 +1599,14 @@ const createCommentChunks = (editor: PlateEditor) => {
       }
 
       const blockString = NodeApi.string(block);
-      const endIndex = blockString.indexOf('.');
+      const endIndex = blockString.indexOf(".");
       const content =
         endIndex === -1 ? blockString : blockString.slice(0, endIndex);
 
       return [
         {
           delay: faker.number.int({ max: 500, min: 200 }),
-          texts: `{"id":"${nanoid()}","data":{"comment":{"blockId":"${block.id}","comment":"${faker.lorem.sentence()}","content":"${content}"},"status":"${i === indexes.length - 1 ? 'finished' : 'streaming'}"},"type":"data-comment"}`,
+          texts: `{"id":"${nanoid()}","data":{"comment":{"blockId":"${block.id}","comment":"${faker.lorem.sentence()}","content":"${content}"},"status":"${i === indexes.length - 1 ? "finished" : "streaming"}"},"type":"data-comment"}`,
         },
       ];
     })
@@ -1623,7 +1623,7 @@ const createCommentChunks = (editor: PlateEditor) => {
 const createTableCellChunks = (editor: PlateEditor) => {
   // Get selected table cells from the TablePlugin
   const selectedCells =
-    editor.getOption({ key: KEYS.table }, 'selectedCells') || [];
+    editor.getOption({ key: KEYS.table }, "selectedCells") || [];
 
   // If no cells selected, try to get cells from current selection
   let cellIds: string[] = [];
@@ -1640,7 +1640,7 @@ const createTableCellChunks = (editor: PlateEditor) => {
         match: (n) =>
           (n as { type?: string; }).type === KEYS.td ||
           (n as { type?: string; }).type === KEYS.th,
-      })
+      }),
     );
     cellIds = cells
       .map(([node]) => (node as { id?: string; }).id)
@@ -1664,7 +1664,7 @@ const createTableCellChunks = (editor: PlateEditor) => {
   const chunks = cellIds.map((cellId, i) => [
     {
       delay: faker.number.int({ max: 300, min: 100 }),
-      texts: `{"id":"${nanoid()}","data":{"cellUpdate":{"id":"${cellId}","content":"${faker.lorem.sentence()}"},"status":"${i === cellIds.length - 1 ? 'finished' : 'streaming'}"},"type":"data-table"}`,
+      texts: `{"id":"${nanoid()}","data":{"cellUpdate":{"id":"${cellId}","content":"${faker.lorem.sentence()}"},"status":"${i === cellIds.length - 1 ? "finished" : "streaming"}"},"type":"data-table"}`,
     },
   ]);
 

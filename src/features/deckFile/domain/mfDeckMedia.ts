@@ -106,7 +106,7 @@ export const inferMfDeckMediaExtension = (input: { mimeType: string;
 
   return "bin";
 };
-export const sanitizeMfDeckMediaName = (value: string): string => { const sanitized = collapseRepeatedUnderscores(replaceWhitespaceWithUnderscore(replaceInvalidFileNameCharacters(replaceControlCharacters(value.trim())),),).slice(0, 80);
+export const sanitizeMfDeckMediaName = (value: string): string => { const sanitized = collapseRepeatedUnderscores(replaceWhitespaceWithUnderscore(replaceInvalidFileNameCharacters(replaceControlCharacters(value.trim())))).slice(0, 80);
 
   return sanitized || "media";
 };
@@ -129,4 +129,4 @@ export const buildMfDeckMediaPath = (input: { index: number;
 
   return `${MF_DECK_MEDIA_DIRECTORY}${directory}/${paddedIndex}-${name}.${cleanExtension}`;
 };
-export const buildMfDeckMediaManifest = (mediaEntries: MfDeckMediaEntryV1[],) => ({ format: "sivflow.deck.media" as const, version: 1 as const, media: mediaEntries, });
+export const buildMfDeckMediaManifest = (mediaEntries: MfDeckMediaEntryV1[]) => ({ format: "sivflow.deck.media" as const, version: 1 as const, media: mediaEntries });

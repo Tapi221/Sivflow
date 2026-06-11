@@ -1,5 +1,5 @@
-import { BaseTogglePlugin } from '@platejs/toggle';
-import { ToggleElementStatic } from '@/components/ui/toggle-node-static';
+import { BaseTogglePlugin } from "@platejs/toggle";
+import { ToggleElementStatic } from "@/components/ui/toggle-node-static";
 
 
 

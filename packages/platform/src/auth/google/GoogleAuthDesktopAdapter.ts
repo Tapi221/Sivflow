@@ -22,4 +22,4 @@ const signIn: GoogleAuthPort["signIn"] = async () => {
 
 
 
-export const googleAuthDesktopAdapter: GoogleAuthPort = { signIn, };
+export const googleAuthDesktopAdapter: GoogleAuthPort = { signIn };

@@ -13,16 +13,16 @@ export const DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR = BASE_ZOOM_INPUT_IGNORE_SELECTO
 
 
 
-export const resolveEventTargetElement = (target: EventTarget | null,): Element | null => { if (typeof Element !== "undefined" && target instanceof Element) { return target;
-  }
+export const resolveEventTargetElement = (target: EventTarget | null): Element | null => { if (typeof Element !== "undefined" && target instanceof Element) { return target;
+}
 
-  if (typeof Node !== "undefined" && target instanceof Node) {
-    return target.parentElement;
-  }
+if (typeof Node !== "undefined" && target instanceof Node) {
+  return target.parentElement;
+}
 
-  return null;
+return null;
 };
-export const shouldHandleZoomInputTarget = ({ container, target, ignoreSelector = DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR, }: { container: HTMLElement | null;
+export const shouldHandleZoomInputTarget = ({ container, target, ignoreSelector = DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR }: { container: HTMLElement | null;
   target: EventTarget | null;
   ignoreSelector?: string;
 }) => {
