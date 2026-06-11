@@ -303,15 +303,15 @@ const applyPdfViewerNumericScaleWithAnchor = (pdfViewer: PdfViewerInstance, cont
   return applyPdfViewerScaleValueWithAnchor(pdfViewer, container, String(nextScale), clientX, clientY, afterRestore);
 };
 
-const createPdfZoomPreview = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, scale: number, clientX?: number, clientY?: number): PdfZoomPreview | null => {
+const createPdfZoomPreview = (pdfViewer: PdfViewerInstance, container: HTMLElement, scale: number, clientX?: number, clientY?: number): PdfZoomPreview | null => {
   const currentScale = getPdfViewerCurrentScale(pdfViewer);
   const nextScale = clampPdfViewerScale(scale);
   if (Math.abs(nextScale - currentScale) < PDF_SCALE_EPSILON) return null;
 
-  const viewerRect = viewerElement.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
   const clientPoint = getPdfZoomClientPoint(container, clientX, clientY);
-  const originX = Math.min(Math.max(clientPoint.clientX - viewerRect.left, 0), Math.max(viewerRect.width, 1));
-  const originY = Math.min(Math.max(clientPoint.clientY - viewerRect.top, 0), Math.max(viewerRect.height, 1));
+  const originX = Math.min(Math.max(clientPoint.clientX - containerRect.left, 0), Math.max(container.clientWidth, 1));
+  const originY = Math.min(Math.max(clientPoint.clientY - containerRect.top, 0), Math.max(container.clientHeight, 1));
 
   return {
     scale: nextScale,
@@ -323,18 +323,81 @@ const createPdfZoomPreview = (pdfViewer: PdfViewerInstance, container: HTMLEleme
   };
 };
 
-const applyPdfZoomPreview = (container: HTMLElement, viewerElement: HTMLElement, preview: PdfZoomPreview): void => {
+const isRectVisibleInContainer = (rect: DOMRect, containerRect: DOMRect): boolean => {
+  return rect.bottom > containerRect.top && rect.top < containerRect.bottom && rect.right > containerRect.left && rect.left < containerRect.right;
+};
+
+const appendPdfZoomSnapshotCanvas = (snapshotElement: HTMLElement, canvas: HTMLCanvasElement, rect: DOMRect, containerRect: DOMRect): boolean => {
+  const visibleLeft = Math.max(rect.left, containerRect.left);
+  const visibleTop = Math.max(rect.top, containerRect.top);
+  const visibleRight = Math.min(rect.right, containerRect.right);
+  const visibleBottom = Math.min(rect.bottom, containerRect.bottom);
+  const displayWidth = visibleRight - visibleLeft;
+  const displayHeight = visibleBottom - visibleTop;
+  if (displayWidth <= 0 || displayHeight <= 0 || canvas.width <= 0 || canvas.height <= 0) return false;
+
+  const sourceScaleX = canvas.width / rect.width;
+  const sourceScaleY = canvas.height / rect.height;
+  const sourceX = Math.max(0, (visibleLeft - rect.left) * sourceScaleX);
+  const sourceY = Math.max(0, (visibleTop - rect.top) * sourceScaleY);
+  const sourceWidth = Math.min(canvas.width - sourceX, displayWidth * sourceScaleX);
+  const sourceHeight = Math.min(canvas.height - sourceY, displayHeight * sourceScaleY);
+  if (sourceWidth <= 0 || sourceHeight <= 0) return false;
+
+  const snapshotCanvas = document.createElement("canvas");
+  snapshotCanvas.width = Math.max(1, Math.ceil(sourceWidth));
+  snapshotCanvas.height = Math.max(1, Math.ceil(sourceHeight));
+  snapshotCanvas.ariaHidden = "true";
+  snapshotCanvas.style.left = `${visibleLeft - containerRect.left}px`;
+  snapshotCanvas.style.top = `${visibleTop - containerRect.top}px`;
+  snapshotCanvas.style.width = `${displayWidth}px`;
+  snapshotCanvas.style.height = `${displayHeight}px`;
+
+  const context = snapshotCanvas.getContext("2d", { alpha: false });
+  if (!context) return false;
+  context.drawImage(canvas, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, snapshotCanvas.width, snapshotCanvas.height);
+  snapshotElement.append(snapshotCanvas);
+  return true;
+};
+
+const createPdfZoomSnapshot = (container: HTMLElement, viewerElement: HTMLElement): HTMLDivElement | null => {
+  const containerRect = container.getBoundingClientRect();
+  const snapshotElement = document.createElement("div");
+  snapshotElement.className = "pdf-pane__zoom-snapshot";
+  snapshotElement.style.left = `${container.scrollLeft}px`;
+  snapshotElement.style.top = `${container.scrollTop}px`;
+  snapshotElement.style.width = `${container.clientWidth}px`;
+  snapshotElement.style.height = `${container.clientHeight}px`;
+
+  for (const canvas of viewerElement.querySelectorAll<HTMLCanvasElement>("canvas")) {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0 || !isRectVisibleInContainer(rect, containerRect)) continue;
+
+    try {
+      appendPdfZoomSnapshotCanvas(snapshotElement, canvas, rect, containerRect);
+    } catch {
+      return null;
+    }
+  }
+
+  if (snapshotElement.childElementCount === 0) return null;
+  container.append(snapshotElement);
+  return snapshotElement;
+};
+
+const applyPdfZoomSnapshotPreview = (container: HTMLElement, viewerElement: HTMLElement, snapshotElement: HTMLElement, preview: PdfZoomPreview): void => {
   container.classList.add(PDF_ZOOMING_CLASS_NAME);
   viewerElement.classList.add(PDF_ZOOMING_CLASS_NAME);
-  viewerElement.style.transform = `scale(${preview.scaleRatio})`;
-  viewerElement.style.transformOrigin = `${preview.originX}px ${preview.originY}px`;
+  viewerElement.style.visibility = "hidden";
+  snapshotElement.style.transform = `scale(${preview.scaleRatio})`;
+  snapshotElement.style.transformOrigin = `${preview.originX}px ${preview.originY}px`;
 };
 
 const clearPdfZoomPreview = (container: HTMLElement, viewerElement: HTMLElement): void => {
   container.classList.remove(PDF_ZOOMING_CLASS_NAME);
   viewerElement.classList.remove(PDF_ZOOMING_CLASS_NAME);
-  viewerElement.style.removeProperty("transform");
-  viewerElement.style.removeProperty("transform-origin");
+  viewerElement.style.removeProperty("visibility");
+  container.querySelectorAll(".pdf-pane__zoom-snapshot").forEach((snapshotElement) => snapshotElement.remove());
 };
 
 const readPdfPageNumber = (pageElement: HTMLElement): number | null => {
@@ -569,6 +632,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     let zoomCommitTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
     let pendingZoom: PendingPdfZoom | null = null;
     let activeZoomPreview: PdfZoomPreview | null = null;
+    let activeZoomSnapshot: HTMLDivElement | null = null;
     let gestureBaseScale: number | null = null;
     const performanceTraceName = createPdfPerformanceTraceName("viewer.load");
     const eventBus = new EventBus() as PdfEventBusLike;
@@ -594,7 +658,14 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
 
     const clearActiveZoomPreview = () => {
       activeZoomPreview = null;
+      activeZoomSnapshot = null;
       clearPdfZoomPreview(container, viewerElement);
+    };
+
+    const ensureActiveZoomSnapshot = (): HTMLDivElement | null => {
+      if (activeZoomSnapshot?.isConnected) return activeZoomSnapshot;
+      activeZoomSnapshot = createPdfZoomSnapshot(container, viewerElement);
+      return activeZoomSnapshot;
     };
 
     const commitActiveZoomPreview = () => {
@@ -638,7 +709,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       const nextZoom = pendingZoom;
       pendingZoom = null;
       if (isCancelled || !loadedPdfDocument || !nextZoom) return;
-      const zoomPreview = createPdfZoomPreview(pdfViewer, container, viewerElement, nextZoom.scale, nextZoom.clientX, nextZoom.clientY);
+      const zoomPreview = createPdfZoomPreview(pdfViewer, container, nextZoom.scale, nextZoom.clientX, nextZoom.clientY);
       if (!zoomPreview) {
         clearActiveZoomPreview();
         clearZoomCommitTimer();
@@ -646,8 +717,9 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         return;
       }
 
+      const snapshotElement = ensureActiveZoomSnapshot();
       activeZoomPreview = zoomPreview;
-      applyPdfZoomPreview(container, viewerElement, zoomPreview);
+      if (snapshotElement) applyPdfZoomSnapshotPreview(container, viewerElement, snapshotElement, zoomPreview);
       setToolbarState((current) => ({ ...current, scale: zoomPreview.scale }));
       scheduleZoomCommit();
     };
