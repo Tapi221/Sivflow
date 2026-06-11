@@ -6,6 +6,7 @@ const ROOT_DIR = process.cwd();
 const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => path.join(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const EXCLUDED_PATH_PARTS = ["/node_modules/", "/dist/", "/build/", "/coverage/", "/.firebase/", "/tmp/"];
+const TSX_GENERIC_ARROW_PARAMETER_PATTERN = /(=\s*(?:async\s*)?)<([A-Za-z_$][\w$]*(?:(?!=>)[^<>,])*)>\s*(?=\()/g;
 
 const walkSourceFiles = (directory) => {
   if (!existsSync(directory)) return [];
@@ -50,6 +51,12 @@ const isExportedFunction = (node) => hasModifier(node, ts.SyntaxKind.ExportKeywo
 const isDefaultExportFunction = (node) => hasModifier(node, ts.SyntaxKind.DefaultKeyword);
 
 const shouldUseTsxGenericComma = (filePath, node) => getScriptKind(filePath) === ts.ScriptKind.TSX && node.typeParameters?.length === 1;
+
+const applyTsxGenericArrowCommaFix = (filePath, source) => {
+  if (getScriptKind(filePath) !== ts.ScriptKind.TSX) return source;
+
+  return source.replace(TSX_GENERIC_ARROW_PARAMETER_PATTERN, (_match, prefix, typeParameterText) => `${prefix}<${typeParameterText.trim()},>`);
+};
 
 const getTypeParametersText = (node, sourceFile, filePath) => {
   if (!node.typeParameters) return "";
@@ -128,7 +135,7 @@ const applyConstArrowFixOnce = (filePath, source) => {
 };
 
 const applyConstArrowFix = (filePath, source) => {
-  let nextSource = source;
+  let nextSource = applyTsxGenericArrowCommaFix(filePath, source);
 
   for (let index = 0; index < 20; index += 1) {
     const fixedSource = applyConstArrowFixOnce(filePath, nextSource);
