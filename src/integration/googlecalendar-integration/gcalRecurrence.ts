@@ -1,6 +1,8 @@
 import { normalizeCalendarRecurrenceRule } from "@core/calendar";
 import type { CalendarRecurrenceFrequency, CalendarRecurrenceRule, CalendarWeekday } from "@core/calendar";
 
+
+
 const GOOGLE_FREQUENCY_BY_CALENDAR_FREQUENCY: Record<CalendarRecurrenceFrequency, string> = {
   daily: "DAILY",
   monthly: "MONTHLY",
@@ -36,6 +38,8 @@ const WEEKDAY_BY_GOOGLE_DAY: Record<string, CalendarWeekday> = {
 };
 
 const RRULE_PREFIX = "RRULE:";
+
+
 
 const formatGoogleUntilDate = (date: Date): string => date.toISOString().replaceAll("-", "").replaceAll(":", "").replace(/\.\d{3}Z$/, "Z");
 

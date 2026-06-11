@@ -4,6 +4,8 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { getAdminAuth, getDb, serverTimestamp } from "#src/firebaseAdmin.js";
 
+
+
 type TimetableSyllabusSlot = {
   dayIndex: number;
   periodLabel: string;
@@ -52,6 +54,8 @@ type RobotsRuleGroup = {
   allow: string[];
 };
 
+
+
 const REGION = "asia-northeast1";
 const CRAWLER_VERSION = 1;
 const DEFAULT_MAX_PAGES = 24;
@@ -62,6 +66,8 @@ const USER_AGENT = "SivflowSyllabusCrawler/1.0 (+https://sivflow.app)";
 const COURSE_LINK_PATTERN = /syllabus|course|class|lesson|subject|detail|授業|講義|科目|シラバス/i;
 const WEEKDAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
 const PRIVATE_IPV4_PATTERNS = [/^10\./, /^127\./, /^169\.254\./, /^192\.168\./, /^172\.(1[6-9]|2\d|3[0-1])\./, /^0\./];
+
+
 
 const requireUid = (request: { auth?: { uid?: string } }) => {
   const uid = request.auth?.uid;

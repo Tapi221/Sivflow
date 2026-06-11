@@ -8,6 +8,8 @@ import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 
 import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownInsertionText, resolveMarkdownTabKeyText } from "@/utils/markdownWhitespace";
 
+
+
 export type MarkdownReplaceBlock = | { type: "markdown"; markdown: string }
   | { type: "code"; code: { language: string; code: string } };
 
@@ -40,7 +42,11 @@ type BlockRange = Readonly<{
   type: MarkdownReplaceBlock["type"];
 }>;
 
+
+
 const MAX_LENGTH = 50000;
+
+
 
 const validateBlocksLength = (blocks: MarkdownReplaceBlock[]) => {
   for (const block of blocks) {
@@ -340,6 +346,8 @@ const parseAndSplitFencesWithRanges = (
 
   return { blocks, ranges };
 };
+
+
 
 export const MarkdownBlockContent = (props: MarkdownBlockContentProps) => { const { settings } = useUserSettings();
   const [error, setError] = React.useState<string | null>(null);

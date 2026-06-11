@@ -1,6 +1,8 @@
 import type { FolderLike, IDiffEngine } from "@/services/interfaces/ISyncService";
 import { toMillis } from "@/utils/toMillis";
 
+
+
 type PlainObject = Record<string, unknown>;
 
 type DiffableEntity = PlainObject & {
@@ -12,6 +14,8 @@ type DiffableEntity = PlainObject & {
   parentFolderId?: string | null;
   parent_folder_id?: string | null;
 };
+
+
 
 const isPlainObject = (value: unknown): value is PlainObject => {
   return typeof value === "object" && value !== null && !Array.isArray(value);

@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+
+
 export type Locale = "ja" | "en" | "zh";
 
 type LocaleState = {
@@ -8,8 +10,12 @@ type LocaleState = {
   setLocale: (locale: Locale) => void;
 };
 
+
+
 const SIVFLOW_LOCALE_STORAGE_KEY = "sivflow.locale";
 const LEGACY_LOCALE_STORAGE_KEY = "flashcard-master.locale";
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 

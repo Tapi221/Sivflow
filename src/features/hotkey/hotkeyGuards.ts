@@ -1,6 +1,8 @@
 const TYPING_TARGET_TAG_NAMES = new Set(["INPUT", "TEXTAREA", "SELECT"]);
 const TYPING_TARGET_ROLES = new Set(["textbox", "combobox", "searchbox"]);
 
+
+
 const isHTMLElement = (target: EventTarget | null): target is HTMLElement => target instanceof HTMLElement;
 
 export const isTypingTarget = (target: EventTarget | null) => { if (!isHTMLElement(target)) return false;

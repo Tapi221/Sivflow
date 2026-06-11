@@ -1,6 +1,8 @@
 import DOMPurify from "dompurify";
 import TurndownService from "turndown";
 
+
+
 /**
  * HTML を安全にサニタイズし、Markdown に変換するユーティリティ。
  * AI チャット(ChatGPT/Claude/Perplexity)やNotion/Google Docs からの
@@ -13,6 +15,8 @@ const turndown = new TurndownService({
   codeBlockStyle: "fenced",
   bulletListMarker: "-",
 });
+
+
 
 // コードブロックのルール追加
 turndown.addRule("fencedCode", {

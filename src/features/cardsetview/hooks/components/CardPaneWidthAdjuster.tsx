@@ -2,6 +2,8 @@ import React from "react";
 import { Slider } from "@/components/ui/slider";
 import { Minus, Plus, RefreshCw } from "@/ui/icons";
 
+
+
 const clampValue = (value: number, min: number, max: number) => {
   const safeMin = Math.min(min, max);
   const safeMax = Math.max(min, max);
@@ -23,6 +25,8 @@ export interface CardPaneWidthAdjusterProps { modeLabel: string;
   onStepUp: () => void;
   onReset: () => void;
 }
+
+
 
 export const CardPaneWidthAdjuster = ({ modeLabel, value, min, max, defaultValue, step = 8, valueFormatter, onPreviewChange, onCommit, onStepDown, onStepUp, onReset, }: CardPaneWidthAdjusterProps) => { const resetDisabled = value === defaultValue;
   const [draftValue, setDraftValue] = React.useState(value);

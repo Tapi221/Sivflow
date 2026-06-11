@@ -7,6 +7,8 @@ import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUse
 
 import { commonGenerateRules } from './common';
 
+
+
 function buildGenerateFreeformPrompt(messages: ChatMessage[]) {
   return buildStructuredPrompt({
     examples: [

@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils';
 
 import { Button } from './button';
 
+
+
 const captionVariants = cva('max-w-full', {
   defaultVariants: {
     align: 'center',
@@ -26,6 +28,8 @@ const captionVariants = cva('max-w-full', {
     },
   },
 });
+
+
 
 export const Caption = ({ align, className, ...props }: React.ComponentProps<typeof CaptionPrimitive> & VariantProps<typeof captionVariants>) => { return <CaptionPrimitive {...props} className={cn(captionVariants({ align }), className)} />;
 };

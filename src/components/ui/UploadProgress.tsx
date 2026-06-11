@@ -4,6 +4,8 @@ import { Progress } from "./progress";
 import { CheckCircle2, FileText, X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 
+
+
 interface UploadProgressProps {
   fileName: string;
   progress: number;
@@ -13,6 +15,8 @@ interface UploadProgressProps {
   className?: string;
   showIcon?: boolean;
 }
+
+
 
 const UploadProgress = ({
   fileName,
@@ -111,6 +115,8 @@ const UploadProgress = ({
     </div>
   );
 };
+
+
 
 export { UploadProgress };
 export type { UploadProgressProps };

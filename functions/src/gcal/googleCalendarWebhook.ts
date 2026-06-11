@@ -1,6 +1,8 @@
 import { onRequest } from "firebase-functions/v2/https";
 import { getDb, serverTimestamp } from "#src/firebaseAdmin.js";
 
+
+
 type GoogleCalendarWebhookToken = {
   userId: string;
   calendarId: string;
@@ -13,8 +15,12 @@ type StoredGoogleCalendarWatchChannel = {
   userId?: unknown;
 };
 
+
+
 const REGION = "asia-northeast1";
 const INITIAL_SYNC_RESOURCE_STATE = "sync";
+
+
 
 const getHeader = (
   request: { get: (name: string) => string | undefined },

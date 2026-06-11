@@ -54,6 +54,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 import { toMillisOrNull } from "@/utils/toMillis";
 
+
+
 type CardEditorPaneSettings = {
   accentColor?: string;
   duplicateToOpposite?: boolean;
@@ -124,7 +126,11 @@ type EditorSidePaneProps = {
   overlayTopRight?: React.ReactNode;
 };
 
+
+
 const EMPTY_BLOCKS: CardBlock[] = [];
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -212,6 +218,8 @@ const areEditorSidePanePropsEqual = (
   prev.actionsTopLeft === next.actionsTopLeft &&
   prev.actionsTopRight === next.actionsTopRight &&
   prev.overlayTopRight === next.overlayTopRight;
+
+
 
 const EditorSidePaneInner = ({
   side,
@@ -346,6 +354,8 @@ const EditorSidePaneInner = ({
     </div>
   );
 };
+
+
 
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 

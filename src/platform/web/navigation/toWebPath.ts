@@ -4,7 +4,11 @@ type LegacyDestination = {
   params?: LegacyDestinationParams;
 };
 
+
+
 const SCHEDULE_PATH = "/schedule";
+
+
 
 export const toWebPath = (_destination: LegacyDestination): string => { return SCHEDULE_PATH;
 };

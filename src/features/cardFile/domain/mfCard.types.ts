@@ -1,6 +1,8 @@
 /* eslint-disable @stylistic/indent */
 import type { MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
 
+
+
 export const MF_CARD_FORMAT = "sivflow.card" as const;
 export const MF_CARD_VERSION = 1 as const;
 export const MF_CARD_FILE_EXTENSION = ".mfcard" as const;
@@ -31,6 +33,8 @@ export type MfCardValidationResult = | { ok: true;
       ok: false;
       issues: MfCardIssue[];
     };
+
+
 
 export class MfCardValidationError extends Error { readonly issues: MfCardIssue[];
 

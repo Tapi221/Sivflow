@@ -16,6 +16,8 @@ import { useComposedRef, useEditorRef } from 'platejs/react';
 
 import { cn } from '@/lib/utils';
 
+
+
 type FilterFn = (
   item: { value: string; group?: string; keywords?: string[]; label?: string },
   search: string
@@ -42,6 +44,8 @@ type InlineComboboxProps = {
   setValue?: (value: string) => void;
 };
 
+
+
 const InlineComboboxContext = React.createContext<InlineComboboxContextValue>(
   null as unknown as InlineComboboxContextValue
 );
@@ -63,6 +67,8 @@ const comboboxItemVariants = cva(
 
 const InlineComboboxRow = ComboboxRow;
 
+
+
 const defaultFilter: FilterFn = (
   { group, keywords = [], label, value },
   search
@@ -75,6 +81,8 @@ const defaultFilter: FilterFn = (
     filterWords(keyword!, search)
   );
 };
+
+
 
 const InlineCombobox = ({
   children,
@@ -416,6 +424,8 @@ function InlineComboboxGroupLabel({
     />
   );
 }
+
+
 
 InlineComboboxInput.displayName = 'InlineComboboxInput';
 

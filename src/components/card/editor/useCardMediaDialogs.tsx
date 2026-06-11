@@ -7,6 +7,8 @@ import type { UploadedImage } from "@/types/domain/assets";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardFaceAttachmentAudio, CardFaceAttachments } from "@/types/domain/card";
 
+
+
 type Side = "question" | "answer";
 type UseCardMediaDialogsParams = {
   getSideAttachments: (side: Side) => CardFaceAttachments;
@@ -15,6 +17,8 @@ type UseCardMediaDialogsParams = {
     nextAttachments: CardFaceAttachments,
   ) => void;
 };
+
+
 
 const normalizeAttachments = (
   attachments: CardFaceAttachments | null | undefined,

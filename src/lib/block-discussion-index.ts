@@ -20,6 +20,8 @@ import { type TDiscussion, discussionPlugin, } from '@/components/editor/plugins
 
 import type { TComment } from '@/components/ui/comment';
 
+
+
 export interface ResolvedSuggestion extends TResolvedSuggestion { comments: TComment[];
 }
 
@@ -58,6 +60,8 @@ type BuildBlockDiscussionIndexOptions = {
   getSuggestionId: (node: TElement | TSuggestionText) => string | undefined;
   isBlockSuggestion: (node: TElement | TSuggestionText) => boolean;
 };
+
+
 
 export const BLOCK_SUGGESTION_TOKEN = '__block__';
 
@@ -99,6 +103,8 @@ const TYPE_TEXT_MAP: Record<string, (node?: TElement) => string> = {
   [KEYS.toggle]: () => 'Toggle',
   [KEYS.video]: () => 'Video',
 };
+
+
 
 const appendByKey = <T>(map: Map<string, T[]>, key: string, value: T) => {
   const values = map.get(key);

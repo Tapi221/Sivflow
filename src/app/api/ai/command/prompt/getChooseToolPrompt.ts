@@ -4,6 +4,8 @@ import dedent from 'dedent';
 
 import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction } from '@/app/api/ai/command/utils';
 
+
+
 export const getChooseToolPrompt = ({ isSelecting, messages, }: { isSelecting: boolean;
   messages: ChatMessage[];
 }) => {

@@ -18,6 +18,8 @@ import { Tooltip, TooltipTrigger } from './tooltip';
 
 import { cn } from '@/lib/utils';
 
+
+
 type TooltipProps<T extends React.ElementType> = {
   tooltip?: React.ReactNode;
   tooltipContentProps?: Omit<
@@ -30,6 +32,8 @@ type TooltipProps<T extends React.ElementType> = {
   >;
   tooltipTriggerProps?: React.ComponentPropsWithoutRef<typeof TooltipTrigger>;
 } & React.ComponentProps<T>;
+
+
 
 // From toggleVariants
 const toolbarButtonVariants = cva(
@@ -79,6 +83,8 @@ const dropdownArrowVariants = cva(
   }
 );
 
+
+
 function withTooltip<T extends React.ElementType>(Component: T) {
   return function ExtendComponent({
     tooltip,
@@ -111,6 +117,8 @@ function withTooltip<T extends React.ElementType>(Component: T) {
   };
 }
 
+
+
 export function Toolbar({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Root>) { return ( <ToolbarPrimitive.Root className={cn('relative flex select-none items-center', className)} {...props} /> );
 }
 
@@ -132,6 +140,8 @@ type ToolbarButtonProps = {
 > &
   VariantProps<typeof toolbarButtonVariants>;
 
+
+
 export const ToolbarButton = withTooltip(function ToolbarButton({ children, className, isDropdown, pressed, size = 'sm', variant, ...props }: ToolbarButtonProps) { return typeof pressed === 'boolean' ? ( <ToolbarToggleGroup disabled={props.disabled} value="single" type="single"> <ToolbarToggleItem className={cn( toolbarButtonVariants({ size, variant, }), isDropdown && 'justify-between gap-1 pr-1', className )} value={pressed ? 'single' : ''} {...props} > {isDropdown ? ( <> <div className="flex flex-1 items-center gap-2 whitespace-nowrap"> {children} </div> <ChevronDown className="size-3.5 text-muted-foreground" data-icon /> </> ) : ( children )} </ToolbarToggleItem> </ToolbarToggleGroup> ) : ( <ToolbarPrimitive.Button className={cn( toolbarButtonVariants({ size, variant, }), isDropdown && 'pr-1', className )} {...props} > {children} </ToolbarPrimitive.Button> );
 });
 
@@ -143,6 +153,8 @@ type ToolbarSplitButtonPrimaryProps = Omit<
   'value'
 > &
   VariantProps<typeof toolbarButtonVariants>;
+
+
 
 export function ToolbarSplitButtonPrimary({ children, className, size = 'sm', variant, ...props }: ToolbarSplitButtonPrimaryProps) { return ( <span className={cn( toolbarButtonVariants({ size, variant, }), 'rounded-r-none', 'group-data-[pressed=true]:bg-accent group-data-[pressed=true]:text-accent-foreground', className )} {...props} > {children} </span> );
 }

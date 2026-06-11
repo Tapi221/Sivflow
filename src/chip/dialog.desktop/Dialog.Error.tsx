@@ -2,10 +2,14 @@ import React, { useState } from "react";
 import { AlertCircle, ChevronDown, X } from "@/ui/icons";
 import type { Notification } from "@/types/notification";
 
+
+
 interface ErrorDialogProps {
   notification: Notification;
   onDismiss?: () => void;
 }
+
+
 
 /**
  * ERROR レベルの通知

@@ -2,6 +2,8 @@
 import type { CardBlock } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 export const MF_DECK_FORMAT = "sivflow.deck" as const;
 export const MF_DECK_VERSION = 1 as const;
 export const MF_DECK_MANIFEST_PATH = "manifest.json" as const;
@@ -105,6 +107,8 @@ export type MfDeckValidationResult = | { ok: true;
       ok: false;
       issues: MfDeckIssue[];
     };
+
+
 
 export class MfDeckValidationError extends Error { readonly issues: MfDeckIssue[];
 

@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef } from "react";
 import { CARD_HEIGHT_PHASE_PX, CARD_ROW_PX, cardHeightPxToLayoutRows, layoutRowsToCardHeightPx, minCardHeightPxToLayoutRows } from "@/domain/card/cardGeometry.constants";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 
+
+
 type Side = "question" | "answer";
 
 type UseLayoutRowsControllerParams<
@@ -14,6 +16,8 @@ type UseLayoutRowsControllerParams<
   normalizedSelectedCardId: string | null;
   isEditing: boolean;
 };
+
+
 
 export const useLayoutRowsController = < TDraft extends { layoutRows: number } | null, >({ draft, setDraft, defaultLayoutRows, normalizedSelectedCardId, isEditing, }: UseLayoutRowsControllerParams<TDraft>) => { const rowsRafRef = useRef<number | null>(null);
   const pendingRowsRef = useRef<number | null>(null);
