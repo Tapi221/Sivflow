@@ -1,34 +1,19 @@
 "use client";
 
 import * as React from "react";
-
 import type { TFootnoteElement } from "@platejs/footnote";
-
 import { PathApi, type Path } from "platejs";
-
 import { FootnoteReferencePlugin } from "@platejs/footnote/react";
-
 import type { PlateEditor, PlateElementProps } from "platejs/react";
-
 import { PlateElement, useEditorSelector, useFocused, useNavigationHighlight, usePath, useSelected } from "platejs/react";
-
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./hover-card";
-
 import { Popover, PopoverAnchor, PopoverContent } from "./popover";
-
 import { Command, CommandGroup, CommandItem, CommandList } from "./command";
-
 import { cn } from "@/lib/utils";
-
 import { Button } from "./button";
-
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "./inline-combobox";
 
-
-
 const NUMERIC_FOOTNOTE_QUERY = /^\d+$/;
-
-
 
 const getNavigationAttributes = (
   attributes: PlateElementProps<TFootnoteElement>["attributes"],
@@ -50,7 +35,6 @@ const getNavigationAttributes = (
       : undefined,
   } as React.CSSProperties,
 });
-
 const getFootnotePreviewLabel = (text?: string) => {
   const normalized = text?.replace(/\s+/g, " ").trim();
 
@@ -60,7 +44,6 @@ const getFootnotePreviewLabel = (text?: string) => {
     ? `${normalized.slice(0, 45).trimEnd()}...`
     : normalized;
 };
-
 const getReferenceContextLabel = (
   editor: PlateEditor,
   path: Path,
@@ -81,9 +64,8 @@ const getReferenceContextLabel = (
     : normalized;
 };
 
-
-
-export function FootnoteReferenceElement(props: PlateElementProps<TFootnoteElement>) { const { editor, element } = props;
+export function FootnoteReferenceElement(props: PlateElementProps<TFootnoteElement>) {
+  const { editor, element } = props;
   const identifier = element.identifier ?? "";
   const footnoteApi = editor.getApi(FootnoteReferencePlugin).footnote;
   const footnoteTransforms = editor.getTransforms(
@@ -206,8 +188,8 @@ export function FootnoteReferenceElement(props: PlateElementProps<TFootnoteEleme
     </PlateElement>
   );
 }
-
-export function FootnoteDefinitionElement(props: PlateElementProps<TFootnoteElement>) { const { editor, element } = props;
+export function FootnoteDefinitionElement(props: PlateElementProps<TFootnoteElement>) {
+  const { editor, element } = props;
   const identifier = element.identifier ?? "";
   const footnoteApi = editor.getApi(FootnoteReferencePlugin).footnote;
   const footnoteTransforms = editor.getTransforms(
@@ -372,8 +354,8 @@ export function FootnoteDefinitionElement(props: PlateElementProps<TFootnoteElem
     </PlateElement>
   );
 }
-
-export function FootnoteInputElement(props: PlateElementProps) { const { editor, element } = props;
+export function FootnoteInputElement(props: PlateElementProps) {
+  const { editor, element } = props;
   const [search, setSearch] = React.useState("");
   const footnoteApi = editor.getApi(FootnoteReferencePlugin).footnote;
   const insertTransforms = editor.getTransforms(FootnoteReferencePlugin).insert;

@@ -9,6 +9,8 @@ import { useTrashItems } from "./useTrashItems";
 
 
 
+
+
 type TrashItemKind = "folder" | "card" | "cardSet" | "document";
 type TrashItemRow = {
   id: string;
@@ -16,6 +18,8 @@ type TrashItemRow = {
   title: string;
   subtitle: string;
 };
+
+
 
 
 
@@ -71,6 +75,8 @@ const toTrashItemIds = (row: TrashItemRow) => ({
   cardSetIds: row.kind === "cardSet" ? [row.id] : [],
   documentIds: row.kind === "document" ? [row.id] : [],
 });
+
+
 
 
 
@@ -207,6 +213,8 @@ const TrashPage = () => {
     </main>
   );
 };
+
+
 
 
 

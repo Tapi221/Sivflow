@@ -8,6 +8,8 @@ import IpadInkToolbar from "@mobile-renderer/components/ipad/ink/IpadInkToolbar"
 
 
 
+
+
 type HandwritingModeSession = {
   id: string;
   cardId: string;
@@ -16,6 +18,8 @@ type HandwritingModeSession = {
 type HandwritingModeScreenProps = {
   session?: HandwritingModeSession | null;
 };
+
+
 
 
 
@@ -112,6 +116,8 @@ const styles = StyleSheet.create({
 
 
 
+
+
 const hasPointNear = (stroke: InkStroke, point: InkPoint) => {
   return stroke.points.some((candidate) => {
     const dx = candidate.x - point.x;
@@ -119,6 +125,8 @@ const hasPointNear = (stroke: InkStroke, point: InkPoint) => {
     return Math.sqrt(dx * dx + dy * dy) <= ERASE_RADIUS;
   });
 };
+
+
 
 
 
@@ -174,9 +182,13 @@ const HandwritingModeScreen = ({ session }: HandwritingModeScreenProps) => {
 
 
 
+
+
 const MemoizedHandwritingModeScreen = memo(HandwritingModeScreen);
 MemoizedHandwritingModeScreen.displayName = "HandwritingModeScreen";
 export default MemoizedHandwritingModeScreen;
+
+
 
 
 

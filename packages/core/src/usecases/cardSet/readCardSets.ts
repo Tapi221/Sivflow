@@ -14,6 +14,8 @@ export type CardSetQueryRepository<TCardSet extends CardSetQueryEntity = CardSet
 
 
 
+
+
 const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean; }) => {
   return Boolean(entity.isDeleted ?? entity.is_deleted);
 };

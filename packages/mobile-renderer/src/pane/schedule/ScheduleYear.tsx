@@ -9,6 +9,8 @@ import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
 
 
 
+
+
 type CalendarWeekStartDay = "sunday" | "monday";
 type CalendarWeekStartsOn = 0 | 1;
 type ScheduleYearProps = {
@@ -42,6 +44,8 @@ type ScheduleYearBlock = {
   label: string;
   months: ScheduleYearMonth[];
 };
+
+
 
 
 
@@ -162,7 +166,11 @@ const styles = StyleSheet.create({
 
 
 
+
+
 const getCalendarWeekStartsOn = (weekStartDay: CalendarWeekStartDay): CalendarWeekStartsOn => weekStartDay === "sunday" ? 0 : 1;
+
+
 
 
 const rotateCalendarWeekdayLabels = <T>(weekdayLabels: readonly T[], weekStartDay: CalendarWeekStartDay): readonly T[] => {

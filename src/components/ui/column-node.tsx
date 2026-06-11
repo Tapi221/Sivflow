@@ -1,42 +1,25 @@
 "use client";
 
 import * as React from "react";
-
 import type { TColumnElement } from "platejs";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { useDraggable, useDropLine } from "@platejs/dnd";
-
 import { setColumns } from "@platejs/layout";
-
 import { ResizableProvider } from "@platejs/resizable";
-
 import { BlockSelectionPlugin } from "@platejs/selection/react";
-
 import { useComposedRef } from "@udecode/cn";
-
 import { type LucideProps, Trash2Icon } from "lucide-react";
-
 import { GripHorizontal } from "lucide-react";
-
 import { PathApi } from "platejs";
-
 import { PlateElement, useEditorRef, useEditorSelector, useElement, useFocusedLast, usePluginOption, useReadOnly, useRemoveNodeButton, useSelected, withHOC } from "platejs/react";
-
 import { Button } from "./button";
-
 import { Popover, PopoverAnchor, PopoverContent } from "./popover";
-
 import { Separator } from "./separator";
-
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
-
 import { cn } from "@/lib/utils";
 
-
-
-export const ColumnElement = withHOC(ResizableProvider, function ColumnElement(props: PlateElementProps<TColumnElement>) { const { width } = props.element;
+export const ColumnElement = withHOC(ResizableProvider, function ColumnElement(props: PlateElementProps<TColumnElement>) {
+  const { width } = props.element;
   const readOnly = useReadOnly();
   const isSelectionAreaVisible = usePluginOption(
     BlockSelectionPlugin,
@@ -90,7 +73,6 @@ export const ColumnElement = withHOC(ResizableProvider, function ColumnElement(p
   );
 },
 );
-
 function DropLine() {
   const { dropLine } = useDropLine({ orientation: "horizontal" });
 
@@ -109,7 +91,6 @@ function DropLine() {
     />
   );
 }
-
 function ColumnFloatingToolbar({ children }: React.PropsWithChildren) {
   const editor = useEditorRef();
   const readOnly = useReadOnly();
@@ -187,7 +168,6 @@ function ColumnFloatingToolbar({ children }: React.PropsWithChildren) {
     </Popover>
   );
 }
-
 const DoubleColumnOutlined = (props: LucideProps) => (
   <svg
     fill="none"
@@ -205,7 +185,6 @@ const DoubleColumnOutlined = (props: LucideProps) => (
     />
   </svg>
 );
-
 const ThreeColumnOutlined = (props: LucideProps) => (
   <svg
     fill="none"
@@ -223,7 +202,6 @@ const ThreeColumnOutlined = (props: LucideProps) => (
     />
   </svg>
 );
-
 const RightSideDoubleColumnOutlined = (props: LucideProps) => (
   <svg
     fill="none"
@@ -241,7 +219,6 @@ const RightSideDoubleColumnOutlined = (props: LucideProps) => (
     />
   </svg>
 );
-
 const LeftSideDoubleColumnOutlined = (props: LucideProps) => (
   <svg
     fill="none"
@@ -259,7 +236,6 @@ const LeftSideDoubleColumnOutlined = (props: LucideProps) => (
     />
   </svg>
 );
-
 const DoubleSideDoubleColumnOutlined = (props: LucideProps) => (
   <svg
     fill="none"
@@ -277,8 +253,6 @@ const DoubleSideDoubleColumnOutlined = (props: LucideProps) => (
     />
   </svg>
 );
-
-
 
 const ColumnDragHandle = React.memo(function ColumnDragHandle() {
   return (
@@ -302,7 +276,6 @@ const ColumnDragHandle = React.memo(function ColumnDragHandle() {
   );
 });
 
-
-
-export function ColumnGroupElement(props: PlateElementProps) { return (<PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement>);
+export function ColumnGroupElement(props: PlateElementProps) {
+  return (<PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement>);
 }

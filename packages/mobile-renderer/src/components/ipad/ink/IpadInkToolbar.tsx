@@ -6,6 +6,8 @@ import type { InkEditTool } from "@core/domain/card/ink/inkDocument";
 
 
 
+
+
 type IpadInkToolbarProps = {
   tool: InkEditTool;
   onToolChange: (tool: InkEditTool) => void;
@@ -14,6 +16,8 @@ type ToolItem = {
   label: string;
   value: InkEditTool;
 };
+
+
 
 
 
@@ -56,6 +60,8 @@ const styles = StyleSheet.create({
 
 
 
+
+
 const IpadInkToolbar = ({ tool, onToolChange }: IpadInkToolbarProps) => (
   <View style={styles.container}>
     {TOOL_ITEMS.map((item) => {
@@ -74,9 +80,13 @@ const IpadInkToolbar = ({ tool, onToolChange }: IpadInkToolbarProps) => (
 
 
 
+
+
 const MemoizedIpadInkToolbar = memo(IpadInkToolbar);
 MemoizedIpadInkToolbar.displayName = "IpadInkToolbar";
 export default MemoizedIpadInkToolbar;
+
+
 
 
 
