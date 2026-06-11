@@ -4,11 +4,7 @@ import { makeFallbackId } from "@/shared/lib/fallbackId";
 import { asRecord, pick } from "@/shared/lib/records";
 import type { Folder } from "@/types/domain/folder";
 
-
-
 type NotePdf = NonNullable<Folder["notePdfs"]>[number];
-
-
 
 const isNotePdf = (value: unknown): value is NotePdf => {
   const record = asRecord(value);
@@ -24,7 +20,8 @@ const isNotePdf = (value: unknown): value is NotePdf => {
 const normalizeNotePdfs = (raw: unknown): NotePdf[] => {
   return toArrayOr(raw, []).filter(isNotePdf);
 };
-export const normalizeFolder = (raw: unknown): Folder => { const record = asRecord(raw) ?? {};
+export const normalizeFolder = (raw: unknown): Folder => {
+  const record = asRecord(raw) ?? {};
   const id =
     toStringOr(pick(record.id, record.folderId, record.folder_id), "") ||
     makeFallbackId();
@@ -84,7 +81,8 @@ export const normalizeFolder = (raw: unknown): Folder => { const record = asReco
       normalizeDate(pick(record.updatedAt, record.updated_at)) ?? new Date(),
   };
 };
-export const normalizeFolderWithSilent = (raw: unknown) => { if (!raw) return raw;
+export const normalizeFolderWithSilent = (raw: unknown) => {
+  if (!raw) return raw;
   const record = asRecord(raw);
   if (!record) return normalizeFolder(raw);
 

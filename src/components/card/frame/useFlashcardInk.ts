@@ -3,8 +3,6 @@ import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.
 import { INK_DOCUMENT_VERSION, type InkDocument, type InkEditTool } from "@core/domain/card/ink/inkDocument";
 import { useCards } from "@/components/card/hooks/useCards";
 
-
-
 interface UseFlashcardInkOptions {
   cardId: string | null;
   effectiveIsFlipped: boolean;
@@ -14,7 +12,8 @@ interface UseFlashcardInkOptions {
   contentRef: React.RefObject<HTMLDivElement | null>;
   onInkDocumentChange?: (side: "question" | "answer", nextDocument: InkDocument) => void;
 }
-export interface FlashcardInkResult { previewInkRef: React.RefObject<InkLayerHandle | null>;
+export interface FlashcardInkResult {
+  previewInkRef: React.RefObject<InkLayerHandle | null>;
   previewInkTool: InkEditTool | null;
   setPreviewInkTool: React.Dispatch<React.SetStateAction<InkEditTool | null>>;
   previewInkHistory: InkHistoryState;
@@ -23,8 +22,6 @@ export interface FlashcardInkResult { previewInkRef: React.RefObject<InkLayerHan
   shouldMountInkLayer: boolean;
   handleInkDocumentChange: (side: "question" | "answer", nextDocument: InkDocument) => void;
 }
-
-
 
 const readFontsReady = () => (document as Document & { fonts?: { ready?: Promise<unknown>; }; }).fonts?.ready;
 const waitForImages = async (root: HTMLDivElement) => {
@@ -39,7 +36,8 @@ const waitForImages = async (root: HTMLDivElement) => {
     img.addEventListener("error", done, { once: true });
   })));
 };
-export const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkEditingEnabled, previewMode, contentRef, onInkDocumentChange }: UseFlashcardInkOptions) => { const { updateCard } = useCards();
+export const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkEditingEnabled, previewMode, contentRef, onInkDocumentChange }: UseFlashcardInkOptions) => {
+  const { updateCard } = useCards();
   const previewInkRef = useRef<InkLayerHandle | null>(null);
   const [previewInkTool, setPreviewInkTool] = useState<InkEditTool | null>(null);
   const [previewInkHistory, setPreviewInkHistory] = useState<InkHistoryState>({ canUndo: false, canRedo: false, strokeCount: 0 });

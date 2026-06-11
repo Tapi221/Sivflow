@@ -1,9 +1,8 @@
 import { normalizeDate } from "@/shared/codec/date";
 import type { DocumentItem, Folder } from "@/types";
 
-
-
-export type PdfDashboardRow = { id: string;
+export type PdfDashboardRow = {
+  id: string;
   title: string;
   fileName: string;
   folderId: string;
@@ -26,8 +25,6 @@ type BuildPdfDashboardRowsParams = {
   folders: Folder[];
   tagById: ReadonlyMap<string, { name: string; }>;
 };
-
-
 
 const toDate = (value: unknown): Date | null => {
   return normalizeDate(value);
@@ -103,7 +100,8 @@ const resolveDisplayTags = (
 
   return Array.from(new Set(explicitTags)).slice(0, 3);
 };
-export const buildPdfDashboardRows = ({ documents, folders, tagById }: BuildPdfDashboardRowsParams): PdfDashboardRow[] => { const folderById = new Map(folders.map((folder) => [folder.id, folder]));
+export const buildPdfDashboardRows = ({ documents, folders, tagById }: BuildPdfDashboardRowsParams): PdfDashboardRow[] => {
+  const folderById = new Map(folders.map((folder) => [folder.id, folder]));
 
   return documents
     .filter((document) => document.kind === "pdf")

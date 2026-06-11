@@ -7,11 +7,7 @@ import { useGoogleTaskLists } from "@/integration/googletask-integration/useGoog
 import { useGoogleTasks } from "@/integration/googletask-integration/useGoogleTasks";
 import { useServerStoredGoogleAccountBootstrap } from "@/integration/googlecalendar-integration/useServerStoredGoogleAccountBootstrap";
 
-
-
 const RECURRENCE_REFRESH_FUTURE_DAYS = 366;
-
-
 
 const resolveExternalEventId = (accountId: string, calendarId: string, eventId: string): string => {
   const accountPrefix = `${accountId}:${calendarId}:`;
@@ -38,7 +34,8 @@ const buildRefreshRange = (event: Pick<GoogleCalendarEvent, "startsAt" | "endsAt
 
   return { rangeStart, rangeEnd };
 };
-export const useGoogleCalendarLayer = () => { useServerStoredGoogleAccountBootstrap();
+export const useGoogleCalendarLayer = () => {
+  useServerStoredGoogleAccountBootstrap();
   const [taskListRetryNonce, setTaskListRetryNonce] = useState(0);
 
   const retryGoogleTaskLists = useCallback(() => {
@@ -195,7 +192,5 @@ export const useGoogleCalendarLayer = () => { useServerStoredGoogleAccountBootst
     connect: addAccount,
   };
 };
-
-
 
 export type { GoogleAccountEntry };

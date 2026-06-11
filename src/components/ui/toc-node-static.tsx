@@ -6,8 +6,6 @@ import { type SlateEditor, type TElement, NodeApi } from "platejs";
 import { SlateElement } from "platejs/static";
 import { Button } from "./button";
 
-
-
 const headingItemVariants = cva(
   "block h-auto w-full cursor-pointer truncate rounded-none px-0.5 py-1.5 text-left font-medium text-muted-foreground underline decoration-[0.5px] underline-offset-4 hover:bg-accent hover:text-muted-foreground",
   {
@@ -28,8 +26,6 @@ const headingDepth: Record<string, number> = {
   h5: 5,
   h6: 6,
 };
-
-
 
 const getHeadingList = (editor?: SlateEditor) => {
   if (!editor) return [];
@@ -63,9 +59,8 @@ const getHeadingList = (editor?: SlateEditor) => {
   return headingList;
 };
 
-
-
-export function TocElementStatic(props: SlateElementProps) { const { editor } = props;
+export function TocElementStatic(props: SlateElementProps) {
+  const { editor } = props;
   const headingList = getHeadingList(editor);
 
   return (
@@ -95,7 +90,8 @@ export function TocElementStatic(props: SlateElementProps) { const { editor } = 
  * DOCX-compatible TOC component.
  * Renders TOC items as anchor links for proper Word internal navigation.
  */
-export function TocElementDocx(props: SlateElementProps) { const { editor } = props;
+export function TocElementDocx(props: SlateElementProps) {
+  const { editor } = props;
   const headingList = getHeadingList(editor);
 
   const depthIndent: Record<number, string> = {

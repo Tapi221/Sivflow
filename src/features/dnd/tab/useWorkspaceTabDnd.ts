@@ -2,15 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 
-
-
 type UseWorkspaceTabDndArgs = {
   tabs: WorkspaceTab[];
   reorderTabs: (nextTabs: WorkspaceTab[]) => void;
   onDragStart?: () => void;
 };
-
-
 
 const areTabOrdersEqual = (
   leftTabs: WorkspaceTab[],
@@ -20,7 +16,8 @@ const areTabOrdersEqual = (
 
   return leftTabs.every((tab, index) => tab.id === rightTabs[index]?.id);
 };
-export const useWorkspaceTabDnd = ({ tabs, reorderTabs, onDragStart }: UseWorkspaceTabDndArgs) => { const tabsListRef = useRef<HTMLDivElement | null>(null);
+export const useWorkspaceTabDnd = ({ tabs, reorderTabs, onDragStart }: UseWorkspaceTabDndArgs) => {
+  const tabsListRef = useRef<HTMLDivElement | null>(null);
   const suppressTabClickRef = useRef(false);
   const isDraggingTabsRef = useRef(false);
   const orderedTabsRef = useRef<WorkspaceTab[]>(tabs);

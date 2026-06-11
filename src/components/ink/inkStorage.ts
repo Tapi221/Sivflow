@@ -1,10 +1,6 @@
 import { cloneInkDocument, createEmptyInkDocument, type InkDocument, type InkSide, normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 
-
-
 const INK_STORAGE_PREFIX = "ink:";
-
-
 
 const getStorage = (): Storage | null => {
   if (typeof window === "undefined") return null;
@@ -15,7 +11,8 @@ const getStorage = (): Storage | null => {
   }
 };
 export const getInkStorageKey = (cardId: string, side: InkSide): string => `${INK_STORAGE_PREFIX}${cardId}:${side}`;
-export const loadInkFromStorage = (cardId: string | null | undefined, side: InkSide, fallback?: InkDocument | null): InkDocument => { const normalizedFallback = normalizeInkDocument(fallback ?? createEmptyInkDocument());
+export const loadInkFromStorage = (cardId: string | null | undefined, side: InkSide, fallback?: InkDocument | null): InkDocument => {
+  const normalizedFallback = normalizeInkDocument(fallback ?? createEmptyInkDocument());
   if (!cardId) return normalizedFallback;
 
   const storage = getStorage();
@@ -30,7 +27,8 @@ export const loadInkFromStorage = (cardId: string | null | undefined, side: InkS
     return normalizedFallback;
   }
 };
-export const saveInkToStorage = (cardId: string | null | undefined, side: InkSide, document: InkDocument): void => { if (!cardId) return;
+export const saveInkToStorage = (cardId: string | null | undefined, side: InkSide, document: InkDocument): void => {
+  if (!cardId) return;
   const storage = getStorage();
   if (!storage) return;
 
@@ -43,7 +41,8 @@ export const saveInkToStorage = (cardId: string | null | undefined, side: InkSid
     // Ignore storage quota errors to avoid blocking input.
   }
 };
-export const clearInkFromStorage = (cardId: string | null | undefined, side: InkSide): void => { if (!cardId) return;
+export const clearInkFromStorage = (cardId: string | null | undefined, side: InkSide): void => {
+  if (!cardId) return;
   const storage = getStorage();
   if (!storage) return;
 
@@ -53,7 +52,8 @@ export const clearInkFromStorage = (cardId: string | null | undefined, side: Ink
     // ignore
   }
 };
-export const resolveInkDocument = (cardId: string | null | undefined, side: InkSide, cardDocument?: InkDocument | null): InkDocument => { const normalizedCardDocument = normalizeInkDocument(cardDocument ?? createEmptyInkDocument());
+export const resolveInkDocument = (cardId: string | null | undefined, side: InkSide, cardDocument?: InkDocument | null): InkDocument => {
+  const normalizedCardDocument = normalizeInkDocument(cardDocument ?? createEmptyInkDocument());
   const storageDocument = loadInkFromStorage(cardId, side, null);
 
   let resolved = normalizedCardDocument;

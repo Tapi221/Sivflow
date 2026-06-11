@@ -1,8 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-
-
 type ImageTransform = {
   scale: number;
   x: number;
@@ -34,11 +32,7 @@ type ImageFrameProps = {
   onError?: () => void;
 };
 
-
-
 const DRAG_START_THRESHOLD_PX = 6;
-
-
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
@@ -51,9 +45,8 @@ const inferBaseWidthFromLegacyScale = (
   return safeReferenceWidth * safeLegacyScale;
 };
 
-
-
-export const ImageFrame = ({ src, alt, className, imgClassName, displayMode = "fixed", zoom = 1, scale = 1, x = 0, layoutBaseWidthPx, cropX, fixedReferenceFrameWidthPx, fluidAvailableWidthPx, naturalW, naturalH, editable = false, onImageClick, onTransformChange, onTransformCommit, onNaturalSize, onError }: ImageFrameProps) => { const frameRef = React.useRef<HTMLDivElement | null>(null);
+export const ImageFrame = ({ src, alt, className, imgClassName, displayMode = "fixed", zoom = 1, scale = 1, x = 0, layoutBaseWidthPx, cropX, fixedReferenceFrameWidthPx, fluidAvailableWidthPx, naturalW, naturalH, editable = false, onImageClick, onTransformChange, onTransformCommit, onNaturalSize, onError }: ImageFrameProps) => {
+  const frameRef = React.useRef<HTMLDivElement | null>(null);
   const imgRef = React.useRef<HTMLImageElement | null>(null);
   const dragRef = React.useRef<{
     pointerId: number;

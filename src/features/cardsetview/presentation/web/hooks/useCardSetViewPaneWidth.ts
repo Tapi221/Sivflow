@@ -4,16 +4,12 @@ import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthS
 import { getCardSetWidthPreference, setCardSetWidthPreference } from "@/services/cardWidthPreferences";
 import type { UserSettings } from "@/types";
 
-
-
 interface UseCardSetViewPaneWidthOptions {
   isGlobalEditing: boolean;
   isDesktop: boolean;
   settings: Partial<UserSettings> | null | undefined;
   cardSetId?: string | null;
 }
-
-
 
 const getReservedScrollbarGutterWidthPx = () => {
   if (typeof document === "undefined") return 0;
@@ -34,7 +30,8 @@ const getReservedScrollbarGutterWidthPx = () => {
 };
 const measureViewportWidth = (element: HTMLDivElement) =>
   Math.max(0, Math.round(element.clientWidth));
-export const useCardSetViewPaneWidth = ({ isGlobalEditing, isDesktop, settings, cardSetId }: UseCardSetViewPaneWidthOptions) => { const reservedScrollbarGutterWidthPx = useMemo(() => (isDesktop ? getReservedScrollbarGutterWidthPx() : 0), [isDesktop]);
+export const useCardSetViewPaneWidth = ({ isGlobalEditing, isDesktop, settings, cardSetId }: UseCardSetViewPaneWidthOptions) => {
+  const reservedScrollbarGutterWidthPx = useMemo(() => (isDesktop ? getReservedScrollbarGutterWidthPx() : 0), [isDesktop]);
 
   const sharedPreferenceKey = `${cardSetId ?? ""}:${settings?.cardViewPaneWidthPx ?? ""}:${settings?.cardEditPaneWidthPx ?? ""}`;
 

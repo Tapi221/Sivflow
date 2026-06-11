@@ -1,66 +1,40 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-
 import { cn } from "@/lib/utils";
-
 import type { DocumentItem, PdfViewerState } from "@/types";
-
 import { PdfPane } from "./PdfPane";
-
 import { createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource } from "./pdfDocumentSource";
-
 import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "./pdfPerformance";
-
 import { findLocalPdfBlob, resolvePdfDocumentBlob } from "./resolvePdfDocumentBlob";
-
 import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
-
 import type { PdfViewerStateChangeOptions } from "./PdfPane";
-
 import type { PdfDocumentSource } from "./pdfDocumentSource";
-
-
 
 type PdfDocumentPaneProps = {
   document: DocumentItem;
   className?: string;
   onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
 };
-
 type LocalPdfSourceState = {
   documentId: string;
   isResolved: boolean;
   source: PdfDocumentSource | null;
   error: string | null;
 };
-
 type PendingPdfViewerStateSave = {
   viewerState: PdfViewerState;
   onDocumentUpdate: NonNullable<PdfDocumentPaneProps["onDocumentUpdate"]>;
 };
 
-
-
 const PDF_SOURCE_RESOLUTION_TIMEOUT_MS = 15_000;
-
 const PDF_VIEWER_STATE_SAVE_DEBOUNCE_MS = 800;
-
 const PDF_VIEWER_STATE_SAVE_RETRY_DELAY_MS = 1_000;
-
 const PDF_SOURCE_TIMEOUT_ERROR_MESSAGE = "PDFデータの取得がタイムアウトしました。もう一度開き直してください。";
-
 const PDF_SOURCE_MISSING_ERROR_MESSAGE = "表示できるPDFデータが見つかりません。PDFを再インポートしてください。";
-
 const PDF_DOCUMENT_PANE_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1";
-
 const PDF_DOCUMENT_STATUS_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1 items-center justify-center bg-[var(--carvepanel-surface)] px-6 text-center text-[13px] leading-6 text-[#6d6d6d]";
-
-const waitForPdfSourceResolution = async<T>(promise: Promise<T>): Promise
-
-
+const waitForPdfSourceResolution = async<T>(promise: Promise<T>): Promise;
 
 const createPendingLocalPdfSourceState = (documentId: string): LocalPdfSourceState => ({
   documentId,
@@ -68,22 +42,18 @@ const createPendingLocalPdfSourceState = (documentId: string): LocalPdfSourceSta
   source: null,
   error: null,
 });
-
 const createResolvedLocalPdfSourceState = (documentId: string, source: PdfDocumentSource | null, error: string | null = null): LocalPdfSourceState => ({
   documentId,
   isResolved: true,
   source,
   error,
 });
-
 const createPersistedPdfDocumentSource = (url: string | null): PdfDocumentSource | null => {
   return url ? createPdfDocumentUrlSource(url) : null;
 };
-
 const getErrorMessage = (error: unknown, fallback: string): string => {
   return error instanceof Error && error.message ? error.message : fallback;
 };
-
 <T> => {
   let timeoutId: ReturnType<typeof globalThis.setTimeout> | null = null;
   const timeoutPromise = new Promise<never>((_, reject) => {

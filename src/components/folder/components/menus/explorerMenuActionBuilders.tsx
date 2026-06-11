@@ -3,8 +3,6 @@ import { AddDocumentIcon, BulkImportIcon, CreateCardIcon, CreateCardSetIcon, Cre
 import { beginInlineRename } from "./explorerMenuStateHelpers";
 import type { MenuAction } from "./menuActions";
 
-
-
 interface BuildFolderMenuActionsParams {
   onCreateSubfolder?: () => void;
   onCreateCardSet?: () => void;
@@ -43,9 +41,8 @@ interface BuildExplorerCreateMenuActionsParams {
   onBulkImport?: () => void | Promise<void>;
 }
 
-
-
-export const buildRenameDeleteMenuActions = ({ renameLabel = "名前を変更", deleteLabel = "削除", onRename, onDelete }: BuildRenameDeleteMenuActionsParams): MenuAction[] => { const actions: MenuAction[] = [];
+export const buildRenameDeleteMenuActions = ({ renameLabel = "名前を変更", deleteLabel = "削除", onRename, onDelete }: BuildRenameDeleteMenuActionsParams): MenuAction[] => {
+  const actions: MenuAction[] = [];
 
   if (onRename) {
     actions.push({
@@ -68,7 +65,9 @@ export const buildRenameDeleteMenuActions = ({ renameLabel = "名前を変更", 
 
   return actions;
 };
-export const buildEntityRenameDeleteMenuActions = ({ id, name, type, beforeRename, closeMenu, setEditingId, setEditingName, canRename = true, onDelete, renameLabel = "名前を変更", deleteLabel = "削除" }: BuildEntityRenameDeleteMenuActionsParams): MenuAction[] => buildRenameDeleteMenuActions({ renameLabel, deleteLabel, onRename: canRename ? () => { beginInlineRename({ id, name, closeMenu, setEditingId, setEditingName, beforeStart: beforeRename });
+export const buildEntityRenameDeleteMenuActions = ({ id, name, type, beforeRename, closeMenu, setEditingId, setEditingName, canRename = true, onDelete, renameLabel = "名前を変更", deleteLabel = "削除" }: BuildEntityRenameDeleteMenuActionsParams): MenuAction[] => buildRenameDeleteMenuActions({
+  renameLabel, deleteLabel, onRename: canRename ? () => {
+    beginInlineRename({ id, name, closeMenu, setEditingId, setEditingName, beforeStart: beforeRename });
   }
     : undefined,
   onDelete: onDelete
@@ -80,7 +79,8 @@ export const buildEntityRenameDeleteMenuActions = ({ id, name, type, beforeRenam
 /**
  * フォルダ用コンテキストメニューのアクション定義をビルド
  */
-export const buildFolderMenuActions = ({ onCreateSubfolder, onCreateCardSet, onRename, onDelete, onBulkTag }: BuildFolderMenuActionsParams): MenuAction[] => { const actions: MenuAction[] = [];
+export const buildFolderMenuActions = ({ onCreateSubfolder, onCreateCardSet, onRename, onDelete, onBulkTag }: BuildFolderMenuActionsParams): MenuAction[] => {
+  const actions: MenuAction[] = [];
 
   if (onCreateSubfolder) {
     actions.push({
@@ -133,7 +133,10 @@ export const buildFolderMenuActions = ({ onCreateSubfolder, onCreateCardSet, onR
 /**
  * 追加ボタン（＋）メニューのアクション定義をビルド
  */
-export const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCreateCard = false, canAddDocuments = false, canBulkImport = false, onCreateRootFolder, onCreateCardSet, onCreateCard, onAddDocument, onBulkImport }: BuildExplorerCreateMenuActionsParams): MenuAction[] => { const actions: MenuAction[] = [{ id: "create-root-folder", label: "新規プロジェクト", icon: <CreateFolderIcon />, onSelect: () => { void onCreateRootFolder?.();
+export const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCreateCard = false, canAddDocuments = false, canBulkImport = false, onCreateRootFolder, onCreateCardSet, onCreateCard, onAddDocument, onBulkImport }: BuildExplorerCreateMenuActionsParams): MenuAction[] => {
+  const actions: MenuAction[] = [{
+    id: "create-root-folder", label: "新規プロジェクト", icon: <CreateFolderIcon />, onSelect: () => {
+      void onCreateRootFolder?.();
     },
   },
   ];

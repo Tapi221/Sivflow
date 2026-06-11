@@ -6,8 +6,6 @@ import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcard.types";
 import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
 
-
-
 interface FlashcardCornerControlsProps {
   card: FlashcardCardLike;
   hasUncertainty: boolean;
@@ -23,11 +21,10 @@ interface FlashcardCornerControlsProps {
   onOpenReferencePopup: () => void;
   headerIconVisualScale?: number;
 }
-export interface FlashcardCornerControlsResult { actionsTopLeft: React.ReactNode[] | undefined;
+export interface FlashcardCornerControlsResult {
+  actionsTopLeft: React.ReactNode[] | undefined;
   actionsTopRight: React.ReactNode[] | undefined;
 }
-
-
 
 const resolveSafeVisualScale = (value?: number) => {
   if (typeof value !== "number") return 1;
@@ -35,7 +32,9 @@ const resolveSafeVisualScale = (value?: number) => {
   if (value <= 0) return 1;
   return value;
 };
-export const useFlashcardCornerControls = ({ card, hasUncertainty, isBookmarked, activeImageItems, activeAudioUrls, activeReferences, extraHeaderLeft, onToggleUncertainty, onToggleBookmark, onOpenImagePopup, onOpenAudioPopup, onOpenReferencePopup, headerIconVisualScale = 1 }: FlashcardCornerControlsProps) => { return React.useMemo(() => { const actionsTopLeft: React.ReactNode[] = [];
+export const useFlashcardCornerControls = ({ card, hasUncertainty, isBookmarked, activeImageItems, activeAudioUrls, activeReferences, extraHeaderLeft, onToggleUncertainty, onToggleBookmark, onOpenImagePopup, onOpenAudioPopup, onOpenReferencePopup, headerIconVisualScale = 1 }: FlashcardCornerControlsProps) => {
+  return React.useMemo(() => {
+    const actionsTopLeft: React.ReactNode[] = [];
     const actionsTopRight: React.ReactNode[] = [];
     const mediaActionNodes: React.ReactNode[] = [];
 
