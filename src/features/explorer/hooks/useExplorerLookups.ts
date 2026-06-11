@@ -4,16 +4,12 @@ import { buildExplorerSelectedState } from "@/features/explorer/services/buildEx
 import { normalizeFolders } from "@/features/explorer/services/normalizeFolders";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
-
-
 type Params = {
   folders: Folder[];
   cards: Card[];
   documents: DocumentItem[];
   selectedItem: SelectedExplorerItem;
 };
-
-
 
 const useExplorerLookups = ({ folders, cards, documents, selectedItem }: Params) => {
   const normalizedFolders = useMemo(() => normalizeFolders(folders), [folders]);
@@ -40,7 +36,5 @@ const useExplorerLookups = ({ folders, cards, documents, selectedItem }: Params)
     ...selectedState,
   };
 };
-
-
 
 export { useExplorerLookups };
