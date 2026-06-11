@@ -2,15 +2,20 @@ import { execSync } from "node:child_process";
 
 const checks = [
   {
-    command:
-      'rg -n "@flaticon/flaticon-uicons|from [\'\\"]lucide-react[\'\\"]" src',
-    message: "Direct Flaticon or lucide imports remain in src.",
+    command: "rg -n @flaticon/flaticon-uicons src",
+    message: "Direct Flaticon imports remain in src.",
   },
   {
-    command:
-      'rg -n "from [\'\\"]/?.*icons/stratis[\'\\"]|export \\* from [\'\\"]/?.*icons/stratis[\'\\"]" src -g "!src/ui/icons.tsx"',
-    message:
-      "Direct Stratis icon imports/exports remain. Use @/ui/icons as the single entrypoint.",
+    command: "rg -n lucide-react src",
+    message: "Direct lucide imports remain in src.",
+  },
+  {
+    command: "rg -n @/ui/icons/stratis src scripts",
+    message: "Local Stratis icon entry imports remain. Import directly from stratis-ui-icons.",
+  },
+  {
+    command: "rg -n src/ui/icons/stratis src scripts",
+    message: "Local Stratis icon path references remain. Import directly from stratis-ui-icons.",
   },
 ];
 
