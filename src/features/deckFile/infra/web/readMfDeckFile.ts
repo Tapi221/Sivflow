@@ -2,20 +2,21 @@ import { MF_DECK_FILE_EXTENSION, MfDeckValidationError } from "@/features/deckFi
 import type { MfDeckArchiveV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
 import { decodeMfDeckArchive, MF_DECK_MAX_FILE_BYTES } from "./mfDeckZipCodec";
 
-export type LoadMfDeckFileResult = {
-  file: File;
+
+
+export type LoadMfDeckFileResult = { file: File;
   archive: MfDeckArchiveV1 | null;
   issues: MfDeckIssue[];
   suggestedCardSetName: string;
 };
 
-export const buildMfDeckSuggestedCardSetName = (fileName: string): string => {
-  const baseName = fileName.replace(new RegExp(`${MF_DECK_FILE_EXTENSION}$`, "i"), "").trim();
+
+
+export const buildMfDeckSuggestedCardSetName = (fileName: string): string => { const baseName = fileName.replace(new RegExp(`${MF_DECK_FILE_EXTENSION}$`, "i"), "").trim();
 
   return baseName || "インポートしたカードセット";
 };
-export const readMfDeckFile = async (file: File): Promise<LoadMfDeckFileResult> => {
-  const issues: MfDeckIssue[] = [];
+export const readMfDeckFile = async (file: File): Promise<LoadMfDeckFileResult> => { const issues: MfDeckIssue[] = [];
 
   if (!file.name.toLowerCase().endsWith(MF_DECK_FILE_EXTENSION)) {
     issues.push({

@@ -4,19 +4,7 @@ import { startTabPresence } from "@/utils/tabPresence";
 
 
 
-
-
-
-
-
-
 let started = false;
-
-
-
-
-
-
 
 
 

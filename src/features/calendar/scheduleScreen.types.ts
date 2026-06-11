@@ -3,20 +3,19 @@ import type { GCalConnectionStatus, GoogleCalendarEvent, GoogleCalendarListItem 
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 import type { CalendarViewMode, CalendarViewModeSelection } from "./calendar.types";
 
+
+
 export type { CalendarViewMode, CalendarViewModeSelection };
 export type CalendarProvider = "local" | "google" | "appleEventKit" | "appleCalDav";
 export type ProjectCalendarSyncDirection = "importOnly" | "exportOnly" | "twoWay";
 export type GoogleCalendarColorOverrideMap = Record<string, string>;
 export type CalendarAllDayEventOrderMap = Record<string, string[]>;
-export type CalendarBufferDays = {
-  before: number;
+export type CalendarBufferDays = { before: number;
   after: number;
 };
-export type CalendarGridStyle = CSSProperties & {
-  "--calendar-hour-row-height": string;
+export type CalendarGridStyle = CSSProperties & { "--calendar-hour-row-height": string;
 };
-export type CalendarEventLabelStyle = CSSProperties & {
-  "--calendar-event-start-hour": number;
+export type CalendarEventLabelStyle = CSSProperties & { "--calendar-event-start-hour": number;
   "--calendar-event-duration-hours": number;
   backgroundColor: string;
   borderLeftColor: string;
@@ -24,19 +23,16 @@ export type CalendarEventLabelStyle = CSSProperties & {
   borderLeftWidth: number;
   color: string;
 };
-export type ScheduleScreenProps = {
-  isLeftPanelCollapsed?: boolean;
+export type ScheduleScreenProps = { isLeftPanelCollapsed?: boolean;
   onClose?: () => void;
   onToggleLeftPanel?: () => void;
 };
-export type AppCalendarItem = {
-  id: string;
+export type AppCalendarItem = { id: string;
   label: string;
   color: string;
   checked: boolean;
 };
-export type ProjectCalendarLink = {
-  id: string;
+export type ProjectCalendarLink = { id: string;
   projectId: string;
   provider: CalendarProvider;
   accountId: string;
@@ -47,8 +43,7 @@ export type ProjectCalendarLink = {
   color?: string;
   lastSyncedAt?: string;
 };
-export type ProjectEventLink = {
-  id: string;
+export type ProjectEventLink = { id: string;
   projectEventId: string;
   provider: CalendarProvider;
   accountId: string;
@@ -57,8 +52,7 @@ export type ProjectEventLink = {
   lastSyncedAt: string;
   lastKnownExternalUpdatedAt?: string;
 };
-export type GoogleAccountDisplay = {
-  accountId: string;
+export type GoogleAccountDisplay = { accountId: string;
   email: string | null;
   name: string | null;
   photoUrl: string | null;
@@ -73,26 +67,22 @@ export type GoogleAccountDisplay = {
   connectionStatus: GCalConnectionStatus;
   error: string | null;
 };
-export type CalendarSelectionRange = {
-  start: Date;
+export type CalendarSelectionRange = { start: Date;
   end: Date;
 };
-export type CalendarEventMoveRequest = {
-  event: GoogleCalendarEvent;
+export type CalendarEventMoveRequest = { event: GoogleCalendarEvent;
   startsAt: Date;
   endsAt: Date;
   isAllDay: boolean;
 };
 export type CalendarEventMoveHandler = (request: CalendarEventMoveRequest) => void | Promise<void>;
-export type CalendarAllDayEventReorderRequest = {
-  eventKey: string;
+export type CalendarAllDayEventReorderRequest = { eventKey: string;
   sourceDayKey: string;
   targetDayKey: string;
   orderedEventKeys: string[];
 };
 export type CalendarAllDayEventReorderHandler = (request: CalendarAllDayEventReorderRequest) => void;
-export type CalendarSidebarProps = {
-  appProjects: AppCalendarItem[];
+export type CalendarSidebarProps = { appProjects: AppCalendarItem[];
   projectCalendarLinks: ProjectCalendarLink[];
   googleCalendarColorOverrides: GoogleCalendarColorOverrideMap;
   googleAccounts: GoogleAccountDisplay[];
@@ -109,8 +99,7 @@ export type CalendarSidebarProps = {
   onToggleCalendar: (accountId: string, calendarId: string) => void;
   onToggleLeftPanel?: () => void;
 };
-export type CalendarWeekDayGridProps = {
-  headerScrollRef: RefObject<HTMLDivElement | null>;
+export type CalendarWeekDayGridProps = { headerScrollRef: RefObject<HTMLDivElement | null>;
   allDayScrollRef?: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   visibleDays: Date[];

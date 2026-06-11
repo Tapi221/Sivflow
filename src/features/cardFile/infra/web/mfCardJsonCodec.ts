@@ -2,8 +2,12 @@ import { validateMfCardFile } from "@/features/cardFile/domain/mfCardGuards";
 import { MfCardValidationError } from "@/features/cardFile/domain/mfCard.types";
 import type { MfCardFileV1 } from "@/features/cardFile/domain/mfCard.types";
 
+
+
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
+
+
 
 const parseJson = (raw: string): unknown => {
   try {
@@ -19,11 +23,9 @@ const parseJson = (raw: string): unknown => {
     ]);
   }
 };
-export const encodeMfCardFile = (file: MfCardFileV1): Uint8Array => {
-  return textEncoder.encode(`${JSON.stringify(file, null, 2)}\n`);
+export const encodeMfCardFile = (file: MfCardFileV1): Uint8Array => { return textEncoder.encode(`${JSON.stringify(file, null, 2)}\n`);
 };
-export const decodeMfCardFile = (buffer: ArrayBuffer): MfCardFileV1 => {
-  const parsed = parseJson(textDecoder.decode(buffer));
+export const decodeMfCardFile = (buffer: ArrayBuffer): MfCardFileV1 => { const parsed = parseJson(textDecoder.decode(buffer));
   const validation = validateMfCardFile(parsed);
 
   if (!validation.ok) {

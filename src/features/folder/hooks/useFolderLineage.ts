@@ -4,6 +4,8 @@ import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { getLocalDb } from "@/services/localDB";
 import type { Folder } from "@/types/domain/folder";
 
+
+
 const normalizeFolderId = (value: string | null | undefined) => {
   if (typeof value !== "string") {
     return null;
@@ -12,8 +14,7 @@ const normalizeFolderId = (value: string | null | undefined) => {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
-export const useFolderLineage = (folderId: string | null) => {
-  const { currentUser } = useAuthSession();
+export const useFolderLineage = (folderId: string | null) => { const { currentUser } = useAuthSession();
   const currentUserId = currentUser?.uid ?? null;
 
   const folders = useLiveQuery(

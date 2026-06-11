@@ -2,22 +2,10 @@ import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
 
 
-
-
-
-
-
-
 type CardSetViewFlippedFaceScope = {
   deviceScope: string;
   cardSetId: string | null | undefined;
 };
-
-
-
-
-
-
 
 
 

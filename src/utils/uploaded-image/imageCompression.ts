@@ -3,34 +3,6 @@ import { createBase64DataUrl } from "@/types/core/branded";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * 画像を圧縮してBase64 data URLに変換（内部使用のみ）
  *
@@ -83,7 +55,6 @@ const compressAndConvertToBase64Internal = (file: File, maxWidth: number = 1920,
     reader.readAsDataURL(file);
   });
 };
-
 /**
  * 画像を圧縮して Blob に変換（推奨）
  * Base64 を経由するが、最終的に Blob を返すため安全
@@ -95,68 +66,12 @@ export const compressImageToBlob = async (file: File, maxWidth: number = 1920, m
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * @deprecated 後方互換性のため残すが、compressImageToBlob を使用すること
  *
  * @internal
  */
 export const compressAndConvertToBase64 = compressAndConvertToBase64Internal;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

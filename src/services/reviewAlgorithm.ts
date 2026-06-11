@@ -7,12 +7,6 @@ import { toMillis } from "@/utils/toMillis";
 
 
 
-
-
-
-
-
-
 export type ReviewAlgorithmInput = { card: { memoryStability?: number | null;
   currentLevel?: number | null;
   level?: number | null;
@@ -68,12 +62,6 @@ type LatestReviewLogPatchParams =
 
 
 
-
-
-
-
-
-
 const MIN_STABILITY = 0.01;
 const MAX_STABILITY = 1.0;
 const MAX_INTERVAL_DAYS = 90;
@@ -82,12 +70,6 @@ const MIN_DIFFICULTY = 0.0;
 const MAX_DIFFICULTY = 1.0;
 const DIFFICULTY_ALPHA = 0.1;
 const DIFFICULTY_INTERVAL_BRAKE = 0.3;
-
-
-
-
-
-
 
 
 

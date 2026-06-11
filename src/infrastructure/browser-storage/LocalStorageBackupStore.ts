@@ -3,14 +3,6 @@ import type { AutoBackupRecord, BackupStorePort } from "@/application/ports/Back
 
 
 
-
-
-
-
-
-
-
-
 const isStorageAvailable = (): boolean => {
   if (typeof window === "undefined") {
     return false;
@@ -122,14 +114,6 @@ const clearBackups = (): void => {
     // noop
   }
 };
-
-
-
-
-
-
-
-
 
 
 

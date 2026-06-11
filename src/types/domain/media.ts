@@ -2,58 +2,14 @@ import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * メディアアセットの種類
  */
 export type MediaKind = "image" | "audio" | "video" | "pdf";
-
 /**
  * メディアアセットの状態
  */
 export type MediaStatus = "pending" | "uploading" | "ready" | "failed";
-
 /**
  * メディアアセットの統一インターフェース
  *

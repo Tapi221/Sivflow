@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
 import { areBreadcrumbCrumbsEqual } from "@/features/breadcrumbs/builders";
 
+
+
 type BreadcrumbContextValue = {
   extraCrumbs: BreadcrumbCrumb[];
   setExtraCrumbs: (crumbs: BreadcrumbCrumb[]) => void;
@@ -12,16 +14,23 @@ type BreadcrumbActionsContextValue = {
   setExtraCrumbs: (crumbs: BreadcrumbCrumb[]) => void;
 };
 
+
+
 const BreadcrumbExtraCrumbsContext = createContext<BreadcrumbCrumb[]>([]);
 
+
+
 const noopSetExtraCrumbs = (_crumbs: BreadcrumbCrumb[]): void => {};
+
+
 
 const BreadcrumbActionsContext = createContext<BreadcrumbActionsContextValue>({
   setExtraCrumbs: noopSetExtraCrumbs,
 });
 
-export const BreadcrumbProvider = ({ children }: {
-  children: ReactNode;
+
+
+export const BreadcrumbProvider = ({ children }: { children: ReactNode;
 }) => {
   const [extraCrumbs, setExtraCrumbsState] = useState<BreadcrumbCrumb[]>([]);
 
@@ -47,14 +56,13 @@ export const BreadcrumbProvider = ({ children }: {
   );
 };
 
-export const useBreadcrumbExtraCrumbs = (): BreadcrumbCrumb[] => {
-  return useContext(BreadcrumbExtraCrumbsContext);
+
+
+export const useBreadcrumbExtraCrumbs = (): BreadcrumbCrumb[] => { return useContext(BreadcrumbExtraCrumbsContext);
 };
-export const useSetBreadcrumbCrumbs = (): BreadcrumbActionsContextValue["setExtraCrumbs"] => {
-  return useContext(BreadcrumbActionsContext).setExtraCrumbs;
+export const useSetBreadcrumbCrumbs = (): BreadcrumbActionsContextValue["setExtraCrumbs"] => { return useContext(BreadcrumbActionsContext).setExtraCrumbs;
 };
-export const useBreadcrumbContext = (): BreadcrumbContextValue => {
-  const extraCrumbs = useBreadcrumbExtraCrumbs();
+export const useBreadcrumbContext = (): BreadcrumbContextValue => { const extraCrumbs = useBreadcrumbExtraCrumbs();
   const setExtraCrumbs = useSetBreadcrumbCrumbs();
 
   return useMemo(

@@ -9,58 +9,13 @@ import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ─────────────────────────────────────────────────────────────
 // カレンダーイベント
 // ─────────────────────────────────────────────────────────────
-
 export type GoogleCalendarEvent = CalendarEvent;
-
 // ─────────────────────────────────────────────────────────────
 // カレンダー一覧
 // ─────────────────────────────────────────────────────────────
-
 export interface GoogleCalendarListItem { id: string;
 
   summary: string;
@@ -75,14 +30,11 @@ export interface GoogleCalendarListItem { id: string;
 
   selected?: boolean;
 }
-
 // ─────────────────────────────────────────────────────────────
 // Hook options
 // ─────────────────────────────────────────────────────────────
-
 export interface UseGoogleCalendarIntegrationOptions { authInstance?: Auth;
 }
-
 // ─────────────────────────────────────────────────────────────
 // 同期状態
 // ─────────────────────────────────────────────────────────────
@@ -94,14 +46,12 @@ export type GCalSyncRange = { rangeStart: Date;
   rangeEnd: Date;
 };
 export type GCalForceSyncOptions = Partial<GCalSyncRange>;
-
 // ─────────────────────────────────────────────────────────────
 // カレンダー ID → syncToken のマップ
 // ─────────────────────────────────────────────────────────────
 
 /** カレンダー ID をキーとした syncToken の辞書 */
 export type GCalSyncTokenMap = Record<string, string>;
-
 // ─────────────────────────────────────────────────────────────
 // Google Calendar API の生レスポンス型
 // ─────────────────────────────────────────────────────────────
@@ -131,7 +81,6 @@ export interface GCalRawIncrementalEvent { id?: string;
     dateTime?: string;
   };
 }
-
 /** events.list API レスポンス全体 */
 export interface GCalEventsListResponse { items?: GCalRawIncrementalEvent[];
 
@@ -148,11 +97,9 @@ export interface GCalEventsListResponse { items?: GCalRawIncrementalEvent[];
    */
   nextPageToken?: string;
 }
-
 // ─────────────────────────────────────────────────────────────
 // エンジンのオプション
 // ─────────────────────────────────────────────────────────────
-
 export interface GCalSyncEngineOptions { accountId?: string;
 
   /**
@@ -217,11 +164,9 @@ export interface GCalSyncEngineOptions { accountId?: string;
    */
   fullSyncFutureDays?: number;
 }
-
 // ─────────────────────────────────────────────────────────────
 // Sync start context
 // ─────────────────────────────────────────────────────────────
-
 export interface GCalSyncStartContext { /** * 現在有効な accessToken */ accessToken: string;
 
   /**

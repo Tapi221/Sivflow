@@ -3,14 +3,17 @@ import type { ViewerProps } from "./CardBlockLayoutRenderer";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 type UseViewerScenePropsArgs = Readonly<{
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
   displayMode?: CardDisplayMode;
   zoom?: number;
 }>;
 
-export const useViewerSceneProps = ({ onGalleryFullscreenChange, displayMode = "fixed", zoom = 1 }: UseViewerScenePropsArgs): ViewerProps => {
-  const { settings } = useUserSettings();
+
+
+export const useViewerSceneProps = ({ onGalleryFullscreenChange, displayMode = "fixed", zoom = 1 }: UseViewerScenePropsArgs): ViewerProps => { const { settings } = useUserSettings();
   const questionDisplayMode = settings?.questionDisplayMode ?? "tap_to_reveal";
 
   const toMediaUrl = useCallback<ViewerProps["toMediaUrl"]>((item) => {

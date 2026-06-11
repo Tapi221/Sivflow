@@ -3,50 +3,6 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * gcal.multi-storage.ts
  *
@@ -57,11 +13,9 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 // ─────────────────────────────────────────────────────────────
 // Keys
 // ─────────────────────────────────────────────────────────────
-
 const MULTI_ACCOUNTS_KEY = "flashcard-master.gcal.accounts.v2";
 const TOKEN_LIFETIME_MS = 55 * 60 * 1000;
 const TOKEN_EXPIRY_SAFETY_MARGIN_MS = 5 * 60 * 1000;
-
 // Legacy keys（マイグレーション用）
 const LEGACY_ACCESS_TOKEN_KEY = "flashcard-master.gcal.access_token";
 const LEGACY_ACCESS_TOKEN_EXPIRY_KEY =
@@ -74,50 +28,9 @@ const pendingLegacyDesktopRefreshTokens = new Map<string, string>();
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ─────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────
-
 export type StoredGoogleAccount = { /** メールアドレス or ランダムUUID（メール不明時） */ id: string;
   email: string | null;
   name?: string | null;
@@ -134,54 +47,9 @@ export type StoredGoogleAccountProfile = { name?: string | null;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ─────────────────────────────────────────────────────────────
 // Token validity
 // ─────────────────────────────────────────────────────────────
-
 export const isStoredTokenValid = (account: StoredGoogleAccount): boolean => { if (!account.accessToken) return false;
   // expiry が null = レガシーデータ。有効として扱う（再接続時に刷新）
   if (account.accessTokenExpiry === null) return true;
@@ -276,11 +144,9 @@ const hydratePendingLegacyDesktopRefreshTokens = (
     return refreshToken ? { ...account, refreshToken } : account;
   });
 };
-
 // ─────────────────────────────────────────────────────────────
 // Legacy migration
 // ─────────────────────────────────────────────────────────────
-
 const migrateFromLegacy = (): StoredGoogleAccount[] => {
   try {
     const wasConnected =
@@ -326,11 +192,9 @@ const migrateFromLegacy = (): StoredGoogleAccount[] => {
     return [];
   }
 };
-
 // ─────────────────────────────────────────────────────────────
 // CRUD
 // ─────────────────────────────────────────────────────────────
-
 export const readStoredAccounts = (): StoredGoogleAccount[] => { try { const raw = localStorage.getItem(MULTI_ACCOUNTS_KEY);
   if (!raw) return migrateFromLegacy();
   const parsed = JSON.parse(raw);

@@ -7,12 +7,6 @@ import { storageStatsDocPathSegments } from "@/infrastructure/firebase/firestore
 
 
 
-
-
-
-
-
-
 type RebuildStorageStatsResponse = {
   userId?: string;
   quotaBytes?: number;
@@ -23,20 +17,8 @@ type RebuildStorageStatsResponse = {
 
 
 
-
-
-
-
-
-
 export const CLOUD_STORAGE_STATS_SCHEMA_VERSION = 1;
 export const DEFAULT_CLOUD_STORAGE_QUOTA_BYTES = 500 * 1024 * 1024;
-
-
-
-
-
-
 
 
 

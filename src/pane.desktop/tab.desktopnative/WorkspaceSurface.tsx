@@ -3,12 +3,6 @@ import { cn } from "@/lib/utils";
 
 
 
-
-
-
-
-
-
 type WorkspaceSurfaceProps = {
   children: ReactNode;
   tabs: ReactNode;
@@ -16,48 +10,6 @@ type WorkspaceSurfaceProps = {
   bodyClassName?: string;
   style?: CSSProperties;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

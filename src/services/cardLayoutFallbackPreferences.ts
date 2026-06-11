@@ -4,22 +4,10 @@ import type { SplitFallbackCardLayoutMode } from "@/features/cardsetview/domain/
 
 
 
-
-
-
-
-
-
 interface SplitFallbackPreferencesStore {
   version: 1;
   byDeviceScope: Record<string, SplitFallbackCardLayoutMode>;
 }
-
-
-
-
-
-
 
 
 

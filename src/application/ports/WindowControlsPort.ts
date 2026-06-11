@@ -1,5 +1,4 @@
-export interface WindowControlsPort {
-  minimize(): Promise<void>;
+export interface WindowControlsPort { minimize(): Promise<void>;
   maximizeToggle(): Promise<void>;
   close(): Promise<void>;
   isMaximized(): Promise<boolean>;

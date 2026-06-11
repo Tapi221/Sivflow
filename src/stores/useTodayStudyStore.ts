@@ -10,12 +10,6 @@ import { persist } from "zustand/middleware";
 
 
 
-
-
-
-
-
-
 export type RatingKey = "forgot" | "vague" | "remembered" | "easy";
 type TodayStudyState = {
   dateKey: string;
@@ -41,19 +35,12 @@ type TodayStudyActions = {
 
 
 
-
-
-
-
-
-
 const emptyRatings = (): Record<RatingKey, number> => ({
   forgot: 0,
   vague: 0,
   remembered: 0,
   easy: 0,
 });
-
 /** ローカル日付を YYYY-MM-DD 形式で返す */
 const localDateKey = (): string => {
   const d = new Date();
@@ -62,19 +49,7 @@ const localDateKey = (): string => {
 
 
 
-
-
-
-
-
-
 export type TodayStudyStore = TodayStudyState & TodayStudyActions;
-
-
-
-
-
-
 
 
 
@@ -85,12 +60,6 @@ const initialState = (userId = "anon"): TodayStudyState => ({
   extraQueue: [],
   extraDone: [],
 });
-
-
-
-
-
-
 
 
 

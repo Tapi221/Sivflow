@@ -5,6 +5,8 @@ import type { CardSetViewEditingDraftPatch } from "@/features/cardsetview/presen
 import { createLatestReviewLogPatch, createReviewPatchFromRating } from "@/services/reviewAlgorithm";
 import type { Card, ReviewLog, UserSettings } from "@/types";
 
+
+
 type EditingDraftPatch = CardSetViewEditingDraftPatch["patch"];
 interface UseCardSetViewMetaPanelActionsOptions {
   selectedCard: Card | null;
@@ -13,11 +15,12 @@ interface UseCardSetViewMetaPanelActionsOptions {
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
 }
 
+
+
 const normalizeReviewLogs = (reviewLogs: Card["reviewLogs"]): ReviewLog[] => {
   return reviewLogs ?? [];
 };
-export const useCardSetViewMetaPanelActions = ({ selectedCard, isGlobalEditing, settings, updateCard }: UseCardSetViewMetaPanelActionsOptions) => {
-  const delayBonusEnabled = settings?.delayBonusEnabled ?? false;
+export const useCardSetViewMetaPanelActions = ({ selectedCard, isGlobalEditing, settings, updateCard }: UseCardSetViewMetaPanelActionsOptions) => { const delayBonusEnabled = settings?.delayBonusEnabled ?? false;
   const reviewStartNextDay = settings?.reviewStartNextDay ?? true;
   const reviewLogs = selectedCard?.reviewLogs ?? [];
   const selectedCardId = selectedCard?.id ?? null;

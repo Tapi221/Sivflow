@@ -2,14 +2,6 @@ import type { JsonFileExportPort } from "@/application/ports/JsonFileExportPort"
 
 
 
-
-
-
-
-
-
-
-
 const exportJson: JsonFileExportPort["exportJson"] = async ({
   filename,
   payload,
@@ -28,14 +20,6 @@ const exportJson: JsonFileExportPort["exportJson"] = async ({
   document.body.removeChild(anchor);
   URL.revokeObjectURL(url);
 };
-
-
-
-
-
-
-
-
 
 
 

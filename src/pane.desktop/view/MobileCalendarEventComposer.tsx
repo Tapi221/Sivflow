@@ -8,12 +8,6 @@ import { cn } from "@/lib/utils";
 
 
 
-
-
-
-
-
-
 type MobileCalendarWritableCalendarOption = { key: string; accountId: string; calendarId: string; label: string; accountLabel: string; calendarLabel: string; color: string; projectId?: string; isSelected: boolean; };
 type MobileCalendarEventFormState = { title: string; location: string; isAllDay: boolean; startDate: string; startTime: string; endDate: string; endTime: string; calendarKey: string; description: string; };
 type MobileEventDates = { startsAt: Date; endsAt: Date; isAllDay: boolean; };
@@ -35,12 +29,6 @@ type MobileCalendarEventComposerProps = {
 
 
 
-
-
-
-
-
-
 const MOBILE_EVENT_COMPOSER_DEFAULT_START_HOUR = 9;
 const MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS = 1;
 const MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR = "#34c759";
@@ -53,12 +41,6 @@ const MOBILE_EVENT_TIME_WHEEL_HOURS = Array.from({ length: 24 }, (_, hour) => ho
 const MOBILE_EVENT_TIME_WHEEL_MINUTES = Array.from({ length: 60 }, (_, minute) => minute);
 const EMPTY_GOOGLE_ACCOUNTS: GoogleAccountDisplay[] = [];
 const EMPTY_PROJECT_CALENDAR_LINKS: ProjectCalendarLink[] = [];
-
-
-
-
-
-
 
 
 
@@ -158,50 +140,7 @@ const isDateInMonth = (date: Date, year: number, month: number): boolean => date
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ─── Icons ────────────────────────────────────────────────────────────────────
-
 const MobileCalendarSearchIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
     <path fill="currentColor" d="M10.8 4.4a6.4 6.4 0 0 1 5.05 10.33l3.51 3.51a.78.78 0 0 1-1.1 1.1l-3.51-3.51A6.4 6.4 0 1 1 10.8 4.4Zm0 1.56a4.84 4.84 0 1 0 0 9.68 4.84 4.84 0 0 0 0-9.68Z" />
@@ -224,9 +163,7 @@ const ChevronRightIcon = (props: SVGProps<SVGSVGElement>) => (
     <path fill="currentColor" d="M9.29 6.71a1 1 0 0 0 0 1.41L13.17 12l-3.88 3.88a1 1 0 1 0 1.41 1.41l4.59-4.59a1 1 0 0 0 0-1.41L10.7 6.71a1 1 0 0 0-1.41 0Z" />
   </svg>
 );
-
 // ─── Date Button ──────────────────────────────────────────────────────────────
-
 const MobileCalendarDateButton = ({ label, value, isActive, onClick }: MobileCalendarDateButtonProps) => (
   <button
     type="button"
@@ -243,9 +180,7 @@ const MobileCalendarDateButton = ({ label, value, isActive, onClick }: MobileCal
     {formatDateButtonValue(value)}
   </button>
 );
-
 // ─── Time Button ──────────────────────────────────────────────────────────────
-
 const MobileCalendarTimeButton = ({ label, value, isActive, onClick }: MobileCalendarTimeButtonProps) => (
   <button
     type="button"
@@ -262,9 +197,7 @@ const MobileCalendarTimeButton = ({ label, value, isActive, onClick }: MobileCal
     {value}
   </button>
 );
-
 // ─── Inline Date Picker ───────────────────────────────────────────────────────
-
 const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlineDatePickerProps) => {
   const { year, month, day } = getDateInputParts(value);
   const selectedDate = useMemo(() => new Date(year, month - 1, day), [day, month, year]);
@@ -371,9 +304,7 @@ const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlin
     </div>
   );
 };
-
 // ─── Inline Time Wheel ────────────────────────────────────────────────────────
-
 const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInlineTimeWheelProps) => {
   const { hours, minutes } = getTimeInputParts(value);
   const hourWheelRef = useRef<HTMLDivElement>(null);
@@ -472,9 +403,7 @@ const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInline
     </div>
   );
 };
-
 // ─── Main Composer ────────────────────────────────────────────────────────────
-
 const MobileCalendarEventComposer = ({
   isOpen,
   selectedDate,
@@ -874,12 +803,6 @@ const MobileCalendarEventComposer = ({
     </>
   );
 };
-
-
-
-
-
-
 
 
 

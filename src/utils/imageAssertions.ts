@@ -3,55 +3,7 @@ import { isBase64DataUrl, isBlobUrl, isStorageUrl } from "@/types/core/branded";
 
 
 
-
-
-
-
-
-
 type ImageUrlField = "remoteUrl" | "localUrl" | "thumbnailUrl";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -104,7 +56,6 @@ const assertBlobUrlField = (
     );
   }
 };
-
 /**
  * 不変条件1: DBに保存される URL に Base64 文字列は存在してはならない
  *
@@ -114,7 +65,6 @@ export const assertNoBase64InImage = (image: UploadedImage): void => { assertNoB
   assertNoBase64Url(image.localUrl ?? null, "localUrl", image.id);
   assertNoBase64Url(image.thumbnailUrl ?? null, "thumbnailUrl", image.id);
 };
-
 /**
  * 不変条件2: remoteUrl / thumbnailUrl は Storage 由来の https URL のみ
  *
@@ -124,7 +74,6 @@ const assertValidRemoteUrls = (image: UploadedImage): void => {
   assertStorageUrlField(image.remoteUrl ?? null, "remoteUrl", image.id);
   assertStorageUrlField(image.thumbnailUrl ?? null, "thumbnailUrl", image.id);
 };
-
 /**
  * 不変条件3: localUrl は Blob URL のみ（data: 禁止）
  *
@@ -133,7 +82,6 @@ const assertValidRemoteUrls = (image: UploadedImage): void => {
 const assertValidLocalUrl = (image: UploadedImage): void => {
   assertBlobUrlField(image.localUrl ?? null, image.id);
 };
-
 /**
  * すべての画像不変条件をチェック
  * DB保存前に必ず呼び出すこと
@@ -144,7 +92,6 @@ export const assertImageInvariant = (image: UploadedImage): void => { assertNoBa
   assertValidRemoteUrls(image);
   assertValidLocalUrl(image);
 };
-
 /**
  * 画像配列の不変条件をチェック
  *

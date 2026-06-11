@@ -1,7 +1,8 @@
 import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 
-export type CalendarColorTokens = {
-  bg: string;
+
+
+export type CalendarColorTokens = { bg: string;
   border: string;
   text: string;
 };
@@ -11,11 +12,15 @@ type RgbColor = {
   blue: number;
 };
 
+
+
 const FALLBACK_ACCENT_COLOR = "#185FA5";
 const LIGHT_ACCENT_LUMINANCE_THRESHOLD = 0.8;
 const LIGHT_ACCENT_BORDER_MIX_AMOUNT = 0.28;
 const colorTokensCache = new Map<string, CalendarColorTokens>();
 const BLACK: RgbColor = { red: 0, green: 0, blue: 0 };
+
+
 
 const clampChannel = (value: number) => Math.max(0, Math.min(255, value));
 const toHexChannel = (value: number) =>
@@ -64,8 +69,7 @@ const getRelativeLuminance = ({ red, green, blue }: RgbColor) => {
 
   return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
 };
-export const generateColorTokens = (hex: string): CalendarColorTokens => {
-  const cacheKey = `${normalizeHexColor(hex) ?? FALLBACK_ACCENT_COLOR}:${eventChipDesign.backgroundAlpha}`;
+export const generateColorTokens = (hex: string): CalendarColorTokens => { const cacheKey = `${normalizeHexColor(hex) ?? FALLBACK_ACCENT_COLOR}:${eventChipDesign.backgroundAlpha}`;
   const cachedTokens = colorTokensCache.get(cacheKey);
 
   if (cachedTokens) {

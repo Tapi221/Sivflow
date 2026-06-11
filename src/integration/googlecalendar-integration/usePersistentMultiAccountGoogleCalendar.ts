@@ -4,14 +4,6 @@ import { useMultiAccountGoogleCalendar } from "./useMultiAccountGoogleCalendar";
 
 
 
-
-
-
-
-
-
-
-
 type CachedGoogleCalendarEvent = Omit<GoogleCalendarEvent, "startsAt" | "endsAt"> & {
   startsAt: string;
   endsAt: string;
@@ -19,23 +11,7 @@ type CachedGoogleCalendarEvent = Omit<GoogleCalendarEvent, "startsAt" | "endsAt"
 
 
 
-
-
-
-
-
-
-
-
 const GOOGLE_CALENDAR_EVENTS_CACHE_KEY = "flashcard-master.gcal.events";
-
-
-
-
-
-
-
-
 
 
 

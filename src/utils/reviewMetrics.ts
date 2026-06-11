@@ -11,48 +11,6 @@ const MAX_INTERVAL_DAYS = 90;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * 忘却曲線に基づく記憶保持確率（定着度）を計算します。
  *
@@ -80,7 +38,6 @@ export const calculateRetentionProbability = (stabilityInternal: number, interva
   // %表記のために100倍し、整数に丸める
   return Math.round(probability * 100);
 };
-
 /**
  * 復習間隔の長さに基づく耐性スコアを計算します。
  *

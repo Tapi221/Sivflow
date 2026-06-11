@@ -10,20 +10,8 @@ type CacheEntry = {
 
 
 
-
-
-
-
-
-
 const MAX_CACHE_ENTRIES = 40;
 const cache = new Map<string, CacheEntry>();
-
-
-
-
-
-
 
 
 

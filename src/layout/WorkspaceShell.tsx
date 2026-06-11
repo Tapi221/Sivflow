@@ -2,27 +2,11 @@ import type { ReactNode, RefObject } from "react";
 
 
 
-
-
-
-
-
-
-
-
 type WorkspaceShellProps = {
   children: ReactNode;
   isScrollLocked: boolean;
   mainRef: RefObject<HTMLElement | null>;
 };
-
-
-
-
-
-
-
-
 
 
 

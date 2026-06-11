@@ -26,48 +26,6 @@ const TEXT_COLORS = [
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * Generates a deterministic color pair (bg, text) from a string input (e.g. username)
  */
@@ -85,7 +43,6 @@ export const getAvatarColors = (name: string | undefined | null) => { if (!name)
     text: TEXT_COLORS[index],
   };
 };
-
 /**
  * Get initials from display name
  */

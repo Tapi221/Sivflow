@@ -3,23 +3,7 @@ import type { RefObject } from "react";
 
 
 
-
-
-
-
-
-
-
-
 type WorkspaceScrollRef = RefObject<HTMLElement | null> | undefined;
-
-
-
-
-
-
-
-
 
 
 

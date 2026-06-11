@@ -4,14 +4,6 @@ import { getLocalDb } from "@/infrastructure/localdb/client";
 
 
 
-
-
-
-
-
-
-
-
 export const shouldSkipQueuedDocumentUpload = async (item: QueueItem): Promise<boolean> => { if (!isDocumentQueueItem(item)) { return false;
 }
 

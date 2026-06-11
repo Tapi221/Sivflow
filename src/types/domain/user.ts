@@ -3,12 +3,6 @@ import type { BaseEntity, BlockConfig } from "./base";
 
 
 
-
-
-
-
-
-
 export interface User { id: string;
   userId: string;
   email: string;

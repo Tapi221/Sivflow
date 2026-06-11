@@ -6,12 +6,6 @@ import { isTestBypassEnabled } from "./testBypass";
 
 
 
-
-
-
-
-
-
 export const ProtectedRoute = ({ children }: { children: ReactNode; }) => {
   const { currentUser, loading } = useAuthSession();
 

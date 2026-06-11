@@ -3,19 +3,7 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
-
-
-
-
-
-
 const currentDisplayModeByCardSet = new Map<string, CardDisplayMode>();
-
-
-
-
-
-
 
 
 

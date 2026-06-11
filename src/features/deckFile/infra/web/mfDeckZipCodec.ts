@@ -4,8 +4,12 @@ import { isMfDeckMediaPath, MF_DECK_MAX_MEDIA_ENTRY_BYTES, MF_DECK_MAX_MEDIA_TOT
 import { MF_DECK_CARDS_PATH, MF_DECK_MANIFEST_PATH, MF_DECK_MEDIA_DIRECTORY, MF_DECK_MEDIA_MANIFEST_PATH, MfDeckValidationError } from "@/features/deckFile/domain/mfDeck.types";
 import type { MfDeckArchiveV1 } from "@/features/deckFile/domain/mfDeck.types";
 
+
+
 export const MF_DECK_MAX_FILE_BYTES = 128 * 1024 * 1024;
 export const MF_DECK_MAX_JSON_BYTES = 24 * 1024 * 1024;
+
+
 
 const parseJsonEntry = (text: string, path: string): unknown => {
   try {
@@ -113,8 +117,7 @@ const collectMediaEntries = (
 
   return Object.keys(media).length > 0 ? media : undefined;
 };
-export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => {
-  const validation = validateMfDeckArchive(archive);
+export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => { const validation = validateMfDeckArchive(archive);
 
   if (!validation.ok) {
     throw new MfDeckValidationError(
@@ -187,9 +190,7 @@ export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => {
     mtime: new Date(Date.UTC(1980, 0, 1, 0, 0, 0)),
   });
 };
-export const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => {
-  if (buffer.byteLength > MF_DECK_MAX_FILE_BYTES) {
-    throw new MfDeckValidationError("mfdeck ファイルが大きすぎます。", [{ level: "error", code: "file_too_large", message: "mfdeck ファイルが大きすぎます。" }]);
+export const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => { if (buffer.byteLength > MF_DECK_MAX_FILE_BYTES) { throw new MfDeckValidationError("mfdeck ファイルが大きすぎます。", [{ level: "error", code: "file_too_large", message: "mfdeck ファイルが大きすぎます。" }]);
   }
 
   let entries: Record<string, Uint8Array>;

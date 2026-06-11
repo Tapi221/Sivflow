@@ -3,12 +3,6 @@ import type { Locale } from "./locale.store";
 
 
 
-
-
-
-
-
-
 export type RawTranslations = { weekdayLabels: string[];
   calendarMonthWeekdays: string[];
   monthRowResizeTitle: string;
@@ -87,24 +81,12 @@ export type Translations = Omit<RawTranslations, "overflowEvents"> & { overflowE
 
 
 
-
-
-
-
-
-
 const formatCountTemplate = (template: string, count: number): string =>
   template.replace("{{count}}", String(count));
 const toTranslations = (translations: RawTranslations): Translations => ({
   ...translations,
   overflowEvents: (count: number) => formatCountTemplate(translations.overflowEvents, count),
 });
-
-
-
-
-
-
 
 
 

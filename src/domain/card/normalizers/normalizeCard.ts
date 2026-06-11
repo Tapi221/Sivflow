@@ -13,7 +13,11 @@ import type { UploadedPdf } from "@/types/domain/assets";
 import type { SubjectiveScoreValue } from "@/types/domain/base";
 import type { Card, CardBlock } from "@/types/domain/card";
 
+
+
 type GridBlockType = Parameters<typeof isGridOffsetType>[0];
+
+
 
 const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "text",
@@ -27,6 +31,8 @@ const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "pdf",
 ]);
 const SUBJECTIVE_SCORE_VALUES = new Set<SubjectiveScoreValue>([0, 1, 2, 3]);
+
+
 
 const isGridBlockType = (value: unknown): value is GridBlockType => {
   return (
@@ -250,8 +256,7 @@ const normalizeCardBlock = (
 
   return normalizeBlockOffsets(normalized) as CardBlock;
 };
-export const normalizeCard = (raw: unknown): Card => {
-  const record = asRecord(raw) ?? {};
+export const normalizeCard = (raw: unknown): Card => { const record = asRecord(raw) ?? {};
   const id =
     toStringOr(pick(record.id, record.cardId, record.card_id), "") ||
     makeFallbackId();

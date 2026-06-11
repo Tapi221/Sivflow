@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import type { Transition } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+
+
 export type PlanResultMode = "plan" | "actual";
 type PlanResultOption = {
   value: PlanResultMode;
@@ -12,6 +14,8 @@ type TogglePlanResultProps = {
   onChange: (value: PlanResultMode[]) => void;
   className?: string;
 };
+
+
 
 const PLAN_RESULT_INDICATOR_ID = "plan-result-indicator";
 const PLAN_RESULT_MOTION_TRANSITION: Transition = {
@@ -30,6 +34,8 @@ const PLAN_RESULT_OPTIONS: readonly PlanResultOption[] = [
   },
 ];
 
+
+
 const togglePlanResultValue = (
   selectedValues: readonly PlanResultMode[],
   nextValue: PlanResultMode,
@@ -46,6 +52,8 @@ const togglePlanResultValue = (
     nextValueSet.has(optionValue),
   );
 };
+
+
 
 const TogglePlanResult = ({ value, onChange, className }: TogglePlanResultProps) => {
   return (
@@ -88,5 +96,7 @@ const TogglePlanResult = ({ value, onChange, className }: TogglePlanResultProps)
     </div>
   );
 };
+
+
 
 export { TogglePlanResult, TogglePlanResult as PlanResultDropdown };

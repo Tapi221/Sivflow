@@ -2,6 +2,8 @@ import { useCallback, useMemo, useState } from "react";
 import { resolveCardSetDisplayMode, setCardSetSessionDisplayMode } from "@/services/cardDisplayModeSession";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 interface UseCardSetViewDisplayModeOptions {
   cardSetId: string | null;
   defaultDisplayMode?: CardDisplayMode | null;
@@ -11,14 +13,15 @@ type DisplayModeOverrideState = {
   mode: CardDisplayMode;
 } | null;
 
+
+
 const buildDisplayModeScopeKey = (
   cardSetId: string | null,
   defaultDisplayMode?: CardDisplayMode | null,
 ) => {
   return `${cardSetId ?? "__null__"}::${defaultDisplayMode ?? "__unset__"}`;
 };
-export const useCardSetViewDisplayMode = ({ cardSetId, defaultDisplayMode }: UseCardSetViewDisplayModeOptions) => {
-  const scopeKey = useMemo(() => buildDisplayModeScopeKey(cardSetId, defaultDisplayMode), [cardSetId, defaultDisplayMode]);
+export const useCardSetViewDisplayMode = ({ cardSetId, defaultDisplayMode }: UseCardSetViewDisplayModeOptions) => { const scopeKey = useMemo(() => buildDisplayModeScopeKey(cardSetId, defaultDisplayMode), [cardSetId, defaultDisplayMode]);
 
   const resolvedDisplayMode = useMemo(
     () => resolveCardSetDisplayMode(cardSetId, defaultDisplayMode ?? undefined),
