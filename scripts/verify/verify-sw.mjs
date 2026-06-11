@@ -3,12 +3,12 @@ import path from "node:path";
 
 const swPath = path.resolve(process.cwd(), "dist", "sw.js");
 
-function fail(msg) {
+const fail = (msg) => {
   console.error(`[verify-sw] FAIL: ${msg}`);
   process.exit(1);
-}
+};
 
-function findBalancedSlice(s, startIdx, openChar = "[", closeChar = "]") {
+const findBalancedSlice = (s, startIdx, openChar = "[", closeChar = "]") => {
   let depth = 0;
   let inStr = null;
   let esc = false;
@@ -39,15 +39,15 @@ function findBalancedSlice(s, startIdx, openChar = "[", closeChar = "]") {
   }
 
   return null;
-}
+};
 
-function extractArrayAtCall(sw, callIdx) {
+const extractArrayAtCall = (sw, callIdx) => {
   const openIdx = sw.indexOf("[", callIdx);
   if (openIdx < 0) return null;
   return findBalancedSlice(sw, openIdx, "[", "]");
-}
+};
 
-function extractPrecacheArray(sw) {
+const extractPrecacheArray = (sw) => {
   const callKeys = ["precacheAndRoute(", "Pe("];
   for (const key of callKeys) {
     const idx = sw.indexOf(key);
@@ -70,9 +70,9 @@ function extractPrecacheArray(sw) {
   }
 
   return null;
-}
+};
 
-function extractUrlsFromPrecacheArray(arrText) {
+const extractUrlsFromPrecacheArray = (arrText) => {
   const urls = [];
   const re = /["']?url["']?\s*:\s*(['"])(.*?)\1/g;
   let match;
@@ -80,7 +80,7 @@ function extractUrlsFromPrecacheArray(arrText) {
     urls.push(match[2]);
   }
   return urls;
-}
+};
 
 if (!fs.existsSync(swPath)) {
   fail(
