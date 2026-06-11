@@ -1,4 +1,4 @@
-/* eslint-disable @stylistic/indent */
+ 
 import type { MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
 
 

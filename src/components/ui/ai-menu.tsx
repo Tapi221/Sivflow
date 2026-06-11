@@ -382,9 +382,9 @@ const AIMenu = () => {
     if (!anchorEntry) return;
 
     const anchorDom = editor.api.toDOMNode(anchorEntry[0])!;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Position the popover from editor DOM while the edit stream is active.
+     
     setAnchorElement(anchorDom);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [streaming]);
 
   const setOpen = (open: boolean) => {
@@ -454,9 +454,9 @@ const AIMenu = () => {
     if (!anchorNode) return;
 
     const block = editor.api.block({ at: anchorNode[1] });
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Position the popover from editor DOM after the edit stream completes.
+     
     setAnchorElement(editor.api.toDOMNode(block![0]!)!);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isLoading]);
 
   if (isLoading && mode === 'insert') return null;

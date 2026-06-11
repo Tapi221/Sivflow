@@ -29,27 +29,6 @@ const SecurityContext = createContext<SecurityContextType>({
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// eslint-disable-next-line react-refresh/only-export-components
 export const useSecurity = () => { return useContext(SecurityContext);
 };
 

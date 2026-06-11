@@ -140,7 +140,7 @@ export const PlaceholderElement = withHOC( PlaceholderProvider, function Placeho
       });
 
       api.placeholder.removeUploadingFile(element.id as string);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+       
     }, [uploadedFile, element.id]);
 
     // React dev mode will call React.useEffect twice
@@ -159,7 +159,7 @@ export const PlaceholderElement = withHOC( PlaceholderProvider, function Placeho
 
       replaceCurrentPlaceholder(currentFiles);
 
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+       
     }, [isReplaced]);
 
     return (
@@ -215,7 +215,7 @@ export function ImageProgress({ className, file, imageRef, progress = 0, }: { fi
 
   React.useEffect(() => {
     const url = URL.createObjectURL(file);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Store the object URL tied to this File and revoke it on cleanup.
+     
     setObjectUrl(url);
 
     return () => {

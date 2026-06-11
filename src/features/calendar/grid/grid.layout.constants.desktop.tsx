@@ -26,6 +26,8 @@ type WeekdayHourLabelMode = "full" | "integer";
 
 
 
+
+
 //Month
 export const MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS = "h-8";
 export const MONTH_GRID_DAY_HEADER_POSITION_CLASS = "left-0 top-0 md:left-3 md:top-1";
