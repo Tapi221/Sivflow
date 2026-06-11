@@ -28,10 +28,19 @@ export interface LocalDBTelemetrySnapshot {
 
 const RESET_FAILED_REASON_KEY = "sivflow.localdb.resetFailedReason";
 const LEGACY_RESET_FAILED_REASON_KEY = "flashcard.localdb.resetFailedReason";
-
 const listeners = new Set<(status: LocalDBRuntimeStatus) => void>();
 const warnedKeys = new Set<string>();
 const telemetryKeys = new Set<string>();
+let currentStatus: LocalDBRuntimeStatus = {
+  mode: "persistent",
+  userId: null,
+  dbName: null,
+  fallbackReason: null,
+  fallbackReasonCode: "none",
+  generationBumped: false,
+  resetFailedReason: readResetFailedReason(),
+  updatedAt: Date.now(),
+};
 
 const readLocalStorage = (key: string): string | null => {
   if (typeof window === "undefined") return null;
@@ -57,15 +66,10 @@ const writeLocalStorage = (key: string, value: string | null) => {
 
 const readResetFailedReason = (): string | null => readLocalStorage(RESET_FAILED_REASON_KEY) ?? readLocalStorage(LEGACY_RESET_FAILED_REASON_KEY);
 
-let currentStatus: LocalDBRuntimeStatus = {
-  mode: "persistent",
-  userId: null,
-  dbName: null,
-  fallbackReason: null,
-  fallbackReasonCode: "none",
-  generationBumped: false,
-  resetFailedReason: readResetFailedReason(),
-  updatedAt: Date.now(),
+const toShortReason = (value: string | null): string => {
+  if (!value) return "none";
+  const compact = value.replace(/\s+/g, " ").trim();
+  return compact.length > 120 ? `${compact.slice(0, 120)}...` : compact;
 };
 
 export const getLocalDBRuntimeStatus = () => {
@@ -136,12 +140,6 @@ export const clearLocalDBResetFailureReason = () => {
 
 export const getStoredLocalDBResetFailureReason = () => {
   return readResetFailedReason();
-};
-
-const toShortReason = (value: string | null): string => {
-  if (!value) return "none";
-  const compact = value.replace(/\s+/g, " ").trim();
-  return compact.length > 120 ? `${compact.slice(0, 120)}...` : compact;
 };
 
 export const getLocalDBTelemetrySnapshot = (): LocalDBTelemetrySnapshot => {
