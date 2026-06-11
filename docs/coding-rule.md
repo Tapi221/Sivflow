@@ -32,6 +32,14 @@ import type { IosCalendarEvent } from "./iosCalendar.types";
 
 ファイル内では、import、型定義、定数、helper 関数、component 本体、memo / displayName / export の順に記述する。依存関係がある場合は、依存されるものを先に記述する。
 
+## script 配置
+
+repo 全体の運用スクリプトは root の `scripts/` 配下に置く。`functions/scripts/` は作らない。
+
+Firebase Functions に関係する運用スクリプトは `scripts/functions/` または `scripts/predeploy/` に置く。`functions/` 配下は Cloud Functions の実装、ビルド成果物、functions package 設定に限定する。
+
+`functions/package.json` から root scripts を呼ぶ場合は `../scripts/...` を使う。互換用の wrapper を `functions/scripts/` に残すことは禁止する。
+
 ## 空行
 
 import 文同士の間に空行を入れない。
