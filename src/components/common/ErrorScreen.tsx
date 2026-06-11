@@ -9,7 +9,7 @@ interface State {
 }
 
 const ErrorScreen = () => {
-  return <>error</>;
+  return "error";
 };
 
 /**
