@@ -149,9 +149,6 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
 });
-
-const getCalendarWeekStartsOn = (weekStartDay: CalendarWeekStartDay): CalendarWeekStartsOn => weekStartDay === "sunday" ? 0 : 1;
-
 const rotateCalendarWeekdayLabels = <T>(weekdayLabels: readonly T[], weekStartDay: CalendarWeekStartDay): readonly T[] => {
   if (weekStartDay === "sunday") return weekdayLabels;
 
@@ -377,3 +374,5 @@ ScheduleYear.displayName = "ScheduleYear";
 export { ScheduleYear };
 
 export type { CalendarWeekStartDay, ScheduleYearProps };
+
+const getCalendarWeekStartsOn = (weekStartDay: CalendarWeekStartDay): CalendarWeekStartsOn => weekStartDay === "sunday" ? 0 : 1;

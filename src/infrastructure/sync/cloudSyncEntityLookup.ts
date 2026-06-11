@@ -16,6 +16,21 @@ type CloudSyncLookupDescriptor = {
   resolveSyncId: (context: LookupContext) => string;
 };
 
+const PULL_FULL_LOOKUP_ORDER: readonly CloudSyncLookupDescriptor[] = [
+  createPullableLookupDescriptor("card"),
+  createPullableLookupDescriptor("cardSet"),
+  createPullableLookupDescriptor("document"),
+  createPullableLookupDescriptor("tag"),
+  createPullableLookupDescriptor("asset"),
+  createPullableLookupDescriptor("folder"),
+  {
+    type: "userSetting",
+    resolveData: ({ firestore, userId }) =>
+      lookupUserSettingData(firestore, userId),
+    resolveSyncId: ({ userId }) => userId,
+  },
+];
+
 const lookupPullableEntityData = async (
   firestore: Firestore,
   userId: string,
@@ -43,22 +58,6 @@ const lookupUserSettingData = async (
   const snap = await getDoc(getUserSettingsRef(firestore, userId));
   return snap.exists() ? snap.data() : null;
 };
-
-const PULL_FULL_LOOKUP_ORDER: readonly CloudSyncLookupDescriptor[] = [
-  createPullableLookupDescriptor("card"),
-  createPullableLookupDescriptor("cardSet"),
-  createPullableLookupDescriptor("document"),
-  createPullableLookupDescriptor("tag"),
-  createPullableLookupDescriptor("asset"),
-  createPullableLookupDescriptor("folder"),
-  {
-    type: "userSetting",
-    resolveData: ({ firestore, userId }) =>
-      lookupUserSettingData(firestore, userId),
-    resolveSyncId: ({ userId }) => userId,
-  },
-];
-
 const lookupCloudSyncEntityById = async (firestore: Firestore, userId: string, id: string): Promise<SyncChange | null> => { for (const descriptor of PULL_FULL_LOOKUP_ORDER) { const context = { firestore, userId, id };
   const data = await descriptor.resolveData(context);
   if (!data) {

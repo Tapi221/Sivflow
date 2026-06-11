@@ -1,4 +1,3 @@
-
 import "@/styles/index.css";
 import "@/services/localDB";
 import "@/../apps/web/src/runtime/disableNativeTitleTooltips";
@@ -147,6 +146,17 @@ const getSivflowReactRoot = (): Root => {
 
   return root;
 };
+if (!renderGoogleOAuthCallback()) {
+  getSivflowReactRoot().render(
+    <StrictMode>
+      <ErrorBoundary>
+        <TooltipProvider>
+          <AppBootstrap />
+        </TooltipProvider>
+      </ErrorBoundary>
+    </StrictMode>,
+  );
+}
 
 const StartupLogoMark = () => {
   return (
@@ -254,15 +264,3 @@ const AppBootstrap = () => {
   const LoadedApp = state.App;
   return <LoadedApp />;
 };
-
-if (!renderGoogleOAuthCallback()) {
-  getSivflowReactRoot().render(
-    <StrictMode>
-      <ErrorBoundary>
-        <TooltipProvider>
-          <AppBootstrap />
-        </TooltipProvider>
-      </ErrorBoundary>
-    </StrictMode>,
-  );
-}

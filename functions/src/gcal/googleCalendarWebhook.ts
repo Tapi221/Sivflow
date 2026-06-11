@@ -14,44 +14,6 @@ type StoredGoogleCalendarWatchChannel = {
 
 const REGION = "asia-northeast1";
 const INITIAL_SYNC_RESOURCE_STATE = "sync";
-
-const getHeader = (
-  request: { get: (name: string) => string | undefined; },
-  name: string,
-): string | null => {
-  const value = request.get(name);
-  return value?.trim() || null;
-};
-const parseWebhookToken = (token: string | null): GoogleCalendarWebhookToken | null => {
-  if (!token) return null;
-
-  const separatorIndex = token.indexOf(":");
-  if (separatorIndex <= 0 || separatorIndex === token.length - 1) return null;
-
-  const userId = token.slice(0, separatorIndex).trim();
-  const calendarId = token.slice(separatorIndex + 1).trim();
-
-  if (!userId || !calendarId) return null;
-
-  return { userId, calendarId };
-};
-const isMatchingWatchChannel = (
-  data: StoredGoogleCalendarWatchChannel | undefined,
-  expected: {
-    channelId: string;
-    resourceId: string;
-    userId: string;
-    calendarId: string;
-  },
-): boolean => {
-  return (
-    data?.channelId === expected.channelId &&
-    data.resourceId === expected.resourceId &&
-    data.userId === expected.userId &&
-    data.calendarId === expected.calendarId
-  );
-};
-
 const googleCalendarWebhook = onRequest({ region: REGION, }, async (request, response) => { if (request.method !== "POST") { response.status(405).send("Method Not Allowed");
     return;
   }
@@ -121,5 +83,42 @@ const googleCalendarWebhook = onRequest({ region: REGION, }, async (request, res
   response.status(204).send();
 },
 );
+
+const getHeader = (
+  request: { get: (name: string) => string | undefined; },
+  name: string,
+): string | null => {
+  const value = request.get(name);
+  return value?.trim() || null;
+};
+const parseWebhookToken = (token: string | null): GoogleCalendarWebhookToken | null => {
+  if (!token) return null;
+
+  const separatorIndex = token.indexOf(":");
+  if (separatorIndex <= 0 || separatorIndex === token.length - 1) return null;
+
+  const userId = token.slice(0, separatorIndex).trim();
+  const calendarId = token.slice(separatorIndex + 1).trim();
+
+  if (!userId || !calendarId) return null;
+
+  return { userId, calendarId };
+};
+const isMatchingWatchChannel = (
+  data: StoredGoogleCalendarWatchChannel | undefined,
+  expected: {
+    channelId: string;
+    resourceId: string;
+    userId: string;
+    calendarId: string;
+  },
+): boolean => {
+  return (
+    data?.channelId === expected.channelId &&
+    data.resourceId === expected.resourceId &&
+    data.userId === expected.userId &&
+    data.calendarId === expected.calendarId
+  );
+};
 
 export { googleCalendarWebhook };

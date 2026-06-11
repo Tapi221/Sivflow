@@ -180,72 +180,6 @@ const createMonthEventRenderItems = (visibleEvents: GoogleCalendarEvent[], dayKe
   return didReplaceSource ? replacedItems : visibleItems;
 };
 
-const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScrollHovered, hasLeadingBorder, dragState, dragPreviewEvent, dragPreviewDayKey, showEventTimeLabel, setDayCellRef, onSelectDate, onEventClick, onEventPointerDown, onMoveCalendarEvent }: CalendarMonthDayCellProps) => {
-  const monthAnnotation = getMonthAnnotation(day.date);
-  const { visibleEvents, totalCount } = dayEvents;
-  const renderItems = createMonthEventRenderItems(visibleEvents, day.key, dragState, dragPreviewEvent, dragPreviewDayKey);
-  const overflowCount = totalCount - visibleEvents.length;
-
-  return (
-    <div ref={setDayCellRef(day.key)} data-calendar-month-day-key={day.key} className={cn("calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible bg-white text-left", hasLeadingBorder && "border-l", isToday && "bg-[#f7fbff]", selected && !isToday && "bg-[#f7f7f8]", !selected && !isToday && "calendar-month-day-cell-hoverable", isScrollHovered && !selected && !isToday && "calendar-month-day-cell-scroll-hovered bg-[#fafafa]")} style={MONTH_GRID_BORDER_STYLE}>
-      <button type="button" aria-label={getDayAriaLabel(day.date)} aria-pressed={selected} className="relative h-full w-full overflow-hidden text-left outline-none focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#c7c7cc]" onClick={() => onSelectDate(day.date)}>
-        <span className={cn("absolute flex items-center gap-0.5 whitespace-nowrap", GD.MONTH_GRID_DAY_HEADER_POSITION_CLASS)}>
-          <CalendarDayNumberCircle isToday={isToday} isSelected={selected} isCurrentMonth={day.isCurrentMonth}>
-            {day.dayOfMonth}
-          </CalendarDayNumberCircle>
-
-          {monthAnnotation && (
-            <span className="shrink-0 text-[12px] font-semibold text-[#8e8e93]">
-              {monthAnnotation}
-            </span>
-          )}
-        </span>
-
-        {renderItems.length > 0 && (
-          <div className={cn("absolute flex flex-col", GD.MONTH_GRID_EVENTS_CONTAINER_POSITION_CLASS, GD.MONTH_GRID_EVENTS_GAP_CLASS)}>
-            {renderItems.map(({ event, eventKey, renderKey, isDragPreview }) => {
-              const isDragging = !isDragPreview && dragState?.eventKey === eventKey;
-              const isDraggable = !isDragPreview && isCalendarEventDraggable(event, onMoveCalendarEvent);
-
-              return (
-                <div key={renderKey} className={getMonthEventWrapperClassName(isDraggable, isDragging, isDragPreview)} style={isDragPreview ? CALENDAR_EVENT_DRAGGING_STYLE : undefined} onClick={isDraggable ? onEventClick : undefined} onPointerDown={isDraggable ? (pointerEvent) => onEventPointerDown(pointerEvent, event) : undefined}>
-                  <CalendarEventChipMonth event={event} showTimeLabel={showEventTimeLabel} tooltipDisabled={isDragPreview || isDragging} />
-                </div>
-              );
-            })}
-
-            {overflowCount > 0 && (
-              <div className={cn("shrink-0 font-medium text-[#8f929c]", GD.MONTH_GRID_OVERFLOW_TEXT_CLASS)}>
-                +{overflowCount}件
-              </div>
-            )}
-          </div>
-        )}
-      </button>
-    </div>
-  );
-});
-CalendarMonthDayCell.displayName = "CalendarMonthDayCell";
-const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDayKey, scrollHoverDayKey, monthRowHeight, dragState, dragPreviewEvent, dragPreviewDayKey, showEventTimeLabel, setDayCellRef, onSelectDate, onEventClick, onEventPointerDown, onMoveCalendarEvent }: CalendarMonthWeekRowProps) => {
-  return (
-    <div data-calendar-week-key={week.key} className="calendar-month-week-row relative grid grid-cols-7 border-b" style={createMonthWeekRowStyle(monthRowHeight)}>
-      {week.days.map((day, dayIndex) => {
-        const selected = day.key === selectedDayKey;
-        const isToday = day.key === todayDayKey;
-        const isScrollHovered = day.key === scrollHoverDayKey;
-
-        return <CalendarMonthDayCell key={day.key} day={day} dayEvents={eventsByDay.get(day.key) ?? EMPTY_MONTH_DAY_EVENTS} isToday={isToday} selected={selected} isScrollHovered={isScrollHovered} hasLeadingBorder={dayIndex > 0} dragState={dragState} dragPreviewEvent={dragPreviewEvent} dragPreviewDayKey={dragPreviewDayKey} showEventTimeLabel={showEventTimeLabel} setDayCellRef={setDayCellRef} onSelectDate={onSelectDate} onEventClick={onEventClick} onEventPointerDown={onEventPointerDown} onMoveCalendarEvent={onMoveCalendarEvent} />;
-      })}
-    </div>
-  );
-}, (previous, next) => {
-  if (previous.week !== next.week || previous.eventsByDay !== next.eventsByDay || previous.monthRowHeight !== next.monthRowHeight || previous.onSelectDate !== next.onSelectDate || previous.dragState !== next.dragState || previous.dragPreviewEvent !== next.dragPreviewEvent || previous.dragPreviewDayKey !== next.dragPreviewDayKey || previous.showEventTimeLabel !== next.showEventTimeLabel || previous.setDayCellRef !== next.setDayCellRef || previous.onEventClick !== next.onEventClick || previous.onEventPointerDown !== next.onEventPointerDown || previous.onMoveCalendarEvent !== next.onMoveCalendarEvent) return false;
-  if (isWeekAffectedByDayKeyChange(previous.week, previous.selectedDayKey, next.selectedDayKey)) return false;
-  if (isWeekAffectedByDayKeyChange(previous.week, previous.todayDayKey, next.todayDayKey)) return false;
-  if (isWeekAffectedByDayKeyChange(previous.week, previous.scrollHoverDayKey, next.scrollHoverDayKey)) return false;
-  return true;
-});
-
 const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEvents, monthWeeks, monthRowHeight, maxVisibleEventCount, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, showEventTimeLabel = true, monthScrollContainerRef, onSelectDate, onMoveCalendarEvent }: GridCalendarMonthDesktopProps) => {
   const dayCellRefs = useRef(new Map<string, HTMLDivElement>());
   const dragElementRef = useRef<HTMLDivElement | null>(null);
@@ -419,6 +353,71 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEv
   );
 };
 
+const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScrollHovered, hasLeadingBorder, dragState, dragPreviewEvent, dragPreviewDayKey, showEventTimeLabel, setDayCellRef, onSelectDate, onEventClick, onEventPointerDown, onMoveCalendarEvent }: CalendarMonthDayCellProps) => {
+  const monthAnnotation = getMonthAnnotation(day.date);
+  const { visibleEvents, totalCount } = dayEvents;
+  const renderItems = createMonthEventRenderItems(visibleEvents, day.key, dragState, dragPreviewEvent, dragPreviewDayKey);
+  const overflowCount = totalCount - visibleEvents.length;
+
+  return (
+    <div ref={setDayCellRef(day.key)} data-calendar-month-day-key={day.key} className={cn("calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible bg-white text-left", hasLeadingBorder && "border-l", isToday && "bg-[#f7fbff]", selected && !isToday && "bg-[#f7f7f8]", !selected && !isToday && "calendar-month-day-cell-hoverable", isScrollHovered && !selected && !isToday && "calendar-month-day-cell-scroll-hovered bg-[#fafafa]")} style={MONTH_GRID_BORDER_STYLE}>
+      <button type="button" aria-label={getDayAriaLabel(day.date)} aria-pressed={selected} className="relative h-full w-full overflow-hidden text-left outline-none focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#c7c7cc]" onClick={() => onSelectDate(day.date)}>
+        <span className={cn("absolute flex items-center gap-0.5 whitespace-nowrap", GD.MONTH_GRID_DAY_HEADER_POSITION_CLASS)}>
+          <CalendarDayNumberCircle isToday={isToday} isSelected={selected} isCurrentMonth={day.isCurrentMonth}>
+            {day.dayOfMonth}
+          </CalendarDayNumberCircle>
+
+          {monthAnnotation && (
+            <span className="shrink-0 text-[12px] font-semibold text-[#8e8e93]">
+              {monthAnnotation}
+            </span>
+          )}
+        </span>
+
+        {renderItems.length > 0 && (
+          <div className={cn("absolute flex flex-col", GD.MONTH_GRID_EVENTS_CONTAINER_POSITION_CLASS, GD.MONTH_GRID_EVENTS_GAP_CLASS)}>
+            {renderItems.map(({ event, eventKey, renderKey, isDragPreview }) => {
+              const isDragging = !isDragPreview && dragState?.eventKey === eventKey;
+              const isDraggable = !isDragPreview && isCalendarEventDraggable(event, onMoveCalendarEvent);
+
+              return (
+                <div key={renderKey} className={getMonthEventWrapperClassName(isDraggable, isDragging, isDragPreview)} style={isDragPreview ? CALENDAR_EVENT_DRAGGING_STYLE : undefined} onClick={isDraggable ? onEventClick : undefined} onPointerDown={isDraggable ? (pointerEvent) => onEventPointerDown(pointerEvent, event) : undefined}>
+                  <CalendarEventChipMonth event={event} showTimeLabel={showEventTimeLabel} tooltipDisabled={isDragPreview || isDragging} />
+                </div>
+              );
+            })}
+
+            {overflowCount > 0 && (
+              <div className={cn("shrink-0 font-medium text-[#8f929c]", GD.MONTH_GRID_OVERFLOW_TEXT_CLASS)}>
+                +{overflowCount}件
+              </div>
+            )}
+          </div>
+        )}
+      </button>
+    </div>
+  );
+});
+CalendarMonthDayCell.displayName = "CalendarMonthDayCell";
+const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDayKey, scrollHoverDayKey, monthRowHeight, dragState, dragPreviewEvent, dragPreviewDayKey, showEventTimeLabel, setDayCellRef, onSelectDate, onEventClick, onEventPointerDown, onMoveCalendarEvent }: CalendarMonthWeekRowProps) => {
+  return (
+    <div data-calendar-week-key={week.key} className="calendar-month-week-row relative grid grid-cols-7 border-b" style={createMonthWeekRowStyle(monthRowHeight)}>
+      {week.days.map((day, dayIndex) => {
+        const selected = day.key === selectedDayKey;
+        const isToday = day.key === todayDayKey;
+        const isScrollHovered = day.key === scrollHoverDayKey;
+
+        return <CalendarMonthDayCell key={day.key} day={day} dayEvents={eventsByDay.get(day.key) ?? EMPTY_MONTH_DAY_EVENTS} isToday={isToday} selected={selected} isScrollHovered={isScrollHovered} hasLeadingBorder={dayIndex > 0} dragState={dragState} dragPreviewEvent={dragPreviewEvent} dragPreviewDayKey={dragPreviewDayKey} showEventTimeLabel={showEventTimeLabel} setDayCellRef={setDayCellRef} onSelectDate={onSelectDate} onEventClick={onEventClick} onEventPointerDown={onEventPointerDown} onMoveCalendarEvent={onMoveCalendarEvent} />;
+      })}
+    </div>
+  );
+}, (previous, next) => {
+  if (previous.week !== next.week || previous.eventsByDay !== next.eventsByDay || previous.monthRowHeight !== next.monthRowHeight || previous.onSelectDate !== next.onSelectDate || previous.dragState !== next.dragState || previous.dragPreviewEvent !== next.dragPreviewEvent || previous.dragPreviewDayKey !== next.dragPreviewDayKey || previous.showEventTimeLabel !== next.showEventTimeLabel || previous.setDayCellRef !== next.setDayCellRef || previous.onEventClick !== next.onEventClick || previous.onEventPointerDown !== next.onEventPointerDown || previous.onMoveCalendarEvent !== next.onMoveCalendarEvent) return false;
+  if (isWeekAffectedByDayKeyChange(previous.week, previous.selectedDayKey, next.selectedDayKey)) return false;
+  if (isWeekAffectedByDayKeyChange(previous.week, previous.todayDayKey, next.todayDayKey)) return false;
+  if (isWeekAffectedByDayKeyChange(previous.week, previous.scrollHoverDayKey, next.scrollHoverDayKey)) return false;
+  return true;
+});
 CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 GridCalendarMonthDesktop.displayName = "GridCalendarMonthDesktop";
 export { GridCalendarMonthDesktop };

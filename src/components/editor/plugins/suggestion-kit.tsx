@@ -25,23 +25,6 @@ const trailingBlockPlugin = TrailingBlockPlugin.configure({
   },
 });
 const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];
-
-const getInlineSuggestionData = (editor: any, element: TElement) => {
-  const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
-  const data = suggestionApi.suggestionData(element) as TSuggestionData | TInlineSuggestionData | undefined;
-
-  if (data) return data;
-  if (typeof suggestionApi.dataList !== "function") return;
-
-  for (const child of element.children) {
-    if (!TextApi.isText(child)) continue;
-
-    const childData = suggestionApi.dataList(child as TSuggestionText).at(-1);
-
-    if (childData) return childData;
-  }
-};
-
 const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, ({ editor }) => ({
   options: {
     activeId: null,
@@ -101,6 +84,22 @@ const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, 
     node: SuggestionLeaf,
   },
 });
+
+const getInlineSuggestionData = (editor: any, element: TElement) => {
+  const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
+  const data = suggestionApi.suggestionData(element) as TSuggestionData | TInlineSuggestionData | undefined;
+
+  if (data) return data;
+  if (typeof suggestionApi.dataList !== "function") return;
+
+  for (const child of element.children) {
+    if (!TextApi.isText(child)) continue;
+
+    const childData = suggestionApi.dataList(child as TSuggestionText).at(-1);
+
+    if (childData) return childData;
+  }
+};
 
 export { SuggestionKit, suggestionPlugin };
 export type { SuggestionConfig };

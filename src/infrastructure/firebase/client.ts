@@ -40,6 +40,8 @@ const storage = firebaseClientState.storage as FirebaseStorage;
 const functionsClient = firebaseClientState.functionsClient as Functions;
 const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
 const db: Firestore | null = firebaseClientState.firestoreDb;
+const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
+const firebaseClientState = initializeFirebaseClient();
 
 const getFirebaseEnvValue = (key: (typeof REQUIRED_FIREBASE_ENV_KEYS)[number]) => {
   return import.meta.env[key];
@@ -50,9 +52,6 @@ const getMissingFirebaseEnvVars = (): string[] => {
     return typeof value !== "string" || value.trim().length === 0;
   });
 };
-
-const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
-
 const createUnavailableState = (): FirebaseClientState => ({
   app: null,
   auth: null,
@@ -110,9 +109,6 @@ const initializeFirebaseClient = (): FirebaseClientState => {
     firestoreDb,
   };
 };
-
-const firebaseClientState = initializeFirebaseClient();
-
 const requireFirebaseClient = (): FirebaseClientState => { if (isFirebaseClientAvailable && firebaseClientState.app) { return firebaseClientState;
 }
 

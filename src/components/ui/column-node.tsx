@@ -201,29 +201,6 @@ const ColumnFloatingToolbar = ({ children }: React.PropsWithChildren) => {
 };
 const ColumnGroupElement = (props: PlateElementProps) => { return (<PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement>);
 };
-
-const ColumnDragHandle = React.memo(() => {
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="ghost" className="!px-1 h-5">
-            <GripHorizontal
-              className="text-muted-foreground"
-              onClick={(event) => {
-                event.stopPropagation();
-                event.preventDefault();
-              }}
-            />
-          </Button>
-        </TooltipTrigger>
-
-        <TooltipContent>Drag to move column</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-});
-
 const ColumnElement = withHOC(ResizableProvider, (props: PlateElementProps<TColumnElement>) => { const { width } = props.element;
   const readOnly = useReadOnly();
   const isSelectionAreaVisible = usePluginOption(
@@ -279,4 +256,25 @@ const ColumnElement = withHOC(ResizableProvider, (props: PlateElementProps<TColu
 },
 );
 
+const ColumnDragHandle = React.memo(() => {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="ghost" className="!px-1 h-5">
+            <GripHorizontal
+              className="text-muted-foreground"
+              onClick={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+              }}
+            />
+          </Button>
+        </TooltipTrigger>
+
+        <TooltipContent>Drag to move column</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+});
 export { ColumnElement, ColumnGroupElement };

@@ -58,6 +58,32 @@ const USER_AGENT = "SivflowSyllabusCrawler/1.0 (+https://sivflow.app)";
 const COURSE_LINK_PATTERN = /syllabus|course|class|lesson|subject|detail|授業|講義|科目|シラバス/i;
 const WEEKDAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
 const PRIVATE_IPV4_PATTERNS = [/^10\./, /^127\./, /^169\.254\./, /^192\.168\./, /^172\.(1[6-9]|2\d|3[0-1])\./, /^0\./];
+const upsertTimetableSyllabusSource = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
+  await requireAdmin(uid);
+
+  const db = await getDb();
+  const now = await serverTimestamp();
+  const seedUrl = getStringValue(request.data?.seedUrl);
+  const sourceId = getStringValue(request.data?.sourceId) || createHashId(seedUrl);
+  if (!seedUrl) throw new HttpsError("invalid-argument", "seedUrl is required.");
+
+  await assertFetchableUrl(seedUrl);
+  await db.doc(`timetableSyllabusSources/${sourceId}`).set({ seedUrl, institutionName: getStringValue(request.data?.institutionName), facultyName: getStringValue(request.data?.facultyName), departmentName: getStringValue(request.data?.departmentName), maxPages: clampMaxPages(request.data?.maxPages), enabled: request.data?.enabled !== false, updatedAt: now, createdAt: now }, { merge: true });
+  return { ok: true, sourceId };
+});
+const crawlTimetableSyllabusUrl = onCall({ region: REGION, timeoutSeconds: 300, memory: "512MiB" }, async (request) => { const uid = requireUid(request);
+  const source: CrawlSource = { sourceId: null, seedUrl: getStringValue(request.data?.seedUrl), institutionName: getStringValue(request.data?.institutionName), facultyName: getStringValue(request.data?.facultyName), departmentName: getStringValue(request.data?.departmentName), maxPages: clampMaxPages(request.data?.maxPages) };
+  if (!source.seedUrl) throw new HttpsError("invalid-argument", "seedUrl is required.");
+  return await crawlSyllabusSource(source, uid);
+});
+const runTimetableSyllabusCatalogCrawl = onSchedule({ schedule: "every 24 hours", timeZone: "Asia/Tokyo", region: REGION, timeoutSeconds: 540, memory: "1GiB" }, async () => { const db = await getDb();
+  const snapshot = await db.collection("timetableSyllabusSources").where("enabled", "==", true).limit(20).get();
+
+  for (const doc of snapshot.docs) {
+    const data = doc.data();
+    await crawlSyllabusSource({ sourceId: doc.id, seedUrl: getStringValue(data.seedUrl), institutionName: getStringValue(data.institutionName), facultyName: getStringValue(data.facultyName), departmentName: getStringValue(data.departmentName), maxPages: clampMaxPages(data.maxPages) }, null);
+  }
+});
 
 const requireUid = (request: { auth?: { uid?: string; }; }) => {
   const uid = request.auth?.uid;
@@ -101,21 +127,6 @@ const assertFetchableUrl = async (rawUrl: string): Promise<URL> => {
   url.hash = "";
   return url;
 };
-
-const upsertTimetableSyllabusSource = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
-  await requireAdmin(uid);
-
-  const db = await getDb();
-  const now = await serverTimestamp();
-  const seedUrl = getStringValue(request.data?.seedUrl);
-  const sourceId = getStringValue(request.data?.sourceId) || createHashId(seedUrl);
-  if (!seedUrl) throw new HttpsError("invalid-argument", "seedUrl is required.");
-
-  await assertFetchableUrl(seedUrl);
-  await db.doc(`timetableSyllabusSources/${sourceId}`).set({ seedUrl, institutionName: getStringValue(request.data?.institutionName), facultyName: getStringValue(request.data?.facultyName), departmentName: getStringValue(request.data?.departmentName), maxPages: clampMaxPages(request.data?.maxPages), enabled: request.data?.enabled !== false, updatedAt: now, createdAt: now }, { merge: true });
-  return { ok: true, sourceId };
-});
-
 const fetchText = async (url: URL): Promise<{ text: string; contentType: string; }> => {
   const response = await fetch(url, { headers: { Accept: "text/html,application/xhtml+xml", "User-Agent": USER_AGENT }, redirect: "follow", signal: AbortSignal.timeout(15_000) });
   const contentType = response.headers.get("content-type") ?? "";
@@ -286,19 +297,5 @@ const crawlSyllabusSource = async (source: CrawlSource, uid: string | null): Pro
 
   return await saveCrawlResult(jobId, uid, source, courses, seen.size, skippedUrlCount);
 };
-
-const crawlTimetableSyllabusUrl = onCall({ region: REGION, timeoutSeconds: 300, memory: "512MiB" }, async (request) => { const uid = requireUid(request);
-  const source: CrawlSource = { sourceId: null, seedUrl: getStringValue(request.data?.seedUrl), institutionName: getStringValue(request.data?.institutionName), facultyName: getStringValue(request.data?.facultyName), departmentName: getStringValue(request.data?.departmentName), maxPages: clampMaxPages(request.data?.maxPages) };
-  if (!source.seedUrl) throw new HttpsError("invalid-argument", "seedUrl is required.");
-  return await crawlSyllabusSource(source, uid);
-});
-const runTimetableSyllabusCatalogCrawl = onSchedule({ schedule: "every 24 hours", timeZone: "Asia/Tokyo", region: REGION, timeoutSeconds: 540, memory: "1GiB" }, async () => { const db = await getDb();
-  const snapshot = await db.collection("timetableSyllabusSources").where("enabled", "==", true).limit(20).get();
-
-  for (const doc of snapshot.docs) {
-    const data = doc.data();
-    await crawlSyllabusSource({ sourceId: doc.id, seedUrl: getStringValue(data.seedUrl), institutionName: getStringValue(data.institutionName), facultyName: getStringValue(data.facultyName), departmentName: getStringValue(data.departmentName), maxPages: clampMaxPages(data.maxPages) }, null);
-  }
-});
 
 export { crawlTimetableSyllabusUrl, upsertTimetableSyllabusSource, runTimetableSyllabusCatalogCrawl };

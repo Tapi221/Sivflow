@@ -360,72 +360,6 @@ const EmojiToolbarButton = ({ options, ...props }: { options?: EmojiDropdownMenu
     </EmojiPopover>
   );
 };
-
-const EmojiButton = React.memo(({
-  emoji,
-  index,
-  onMouseOver,
-  onSelect,
-}: {
-  emoji: Emoji;
-  index: number;
-  onMouseOver: (emoji?: Emoji) => void;
-  onSelect: (emoji: Emoji) => void;
-}) => {
-  return (
-    <button
-      className="group relative flex size-9 cursor-pointer items-center justify-center border-none bg-transparent text-2xl leading-none"
-      onClick={() => onSelect(emoji)}
-      onMouseEnter={() => onMouseOver(emoji)}
-      onMouseLeave={() => onMouseOver()}
-      aria-label={emoji.skins[0].native}
-      data-index={index}
-      tabIndex={-1}
-      type="button"
-    >
-      <div
-        className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100"
-        aria-hidden="true"
-      />
-      <span
-        className="relative"
-        style={{
-          fontFamily:
-            '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", EmojiSymbols',
-        }}
-        data-emoji-set="native"
-      >
-        {emoji.skins[0].native}
-      </span>
-    </button>
-  );
-});
-const RowOfButtons = React.memo(({
-  emojiLibrary,
-  row,
-  onMouseOver,
-  onSelectEmoji,
-}: {
-  row: GridRow;
-} & Pick<
-  UseEmojiPickerType,
-  "emojiLibrary" | "onMouseOver" | "onSelectEmoji"
->) => {
-  return (
-    <div key={row.id} className="flex" data-index={row.id}>
-      {row.elements.map((emojiId, index) => (
-        <EmojiButton
-          key={emojiId}
-          onMouseOver={onMouseOver}
-          onSelect={onSelectEmoji}
-          emoji={emojiLibrary.getEmoji(emojiId)}
-          index={index}
-        />
-      ))}
-    </div>
-  );
-});
-
 const EmojiPickerContent = ({
   emojiLibrary,
   i18n,
@@ -556,4 +490,68 @@ const EmojiPickerContent = ({
   );
 };
 
+const EmojiButton = React.memo(({
+  emoji,
+  index,
+  onMouseOver,
+  onSelect,
+}: {
+  emoji: Emoji;
+  index: number;
+  onMouseOver: (emoji?: Emoji) => void;
+  onSelect: (emoji: Emoji) => void;
+}) => {
+  return (
+    <button
+      className="group relative flex size-9 cursor-pointer items-center justify-center border-none bg-transparent text-2xl leading-none"
+      onClick={() => onSelect(emoji)}
+      onMouseEnter={() => onMouseOver(emoji)}
+      onMouseLeave={() => onMouseOver()}
+      aria-label={emoji.skins[0].native}
+      data-index={index}
+      tabIndex={-1}
+      type="button"
+    >
+      <div
+        className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100"
+        aria-hidden="true"
+      />
+      <span
+        className="relative"
+        style={{
+          fontFamily:
+            '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", EmojiSymbols',
+        }}
+        data-emoji-set="native"
+      >
+        {emoji.skins[0].native}
+      </span>
+    </button>
+  );
+});
+const RowOfButtons = React.memo(({
+  emojiLibrary,
+  row,
+  onMouseOver,
+  onSelectEmoji,
+}: {
+  row: GridRow;
+} & Pick<
+  UseEmojiPickerType,
+  "emojiLibrary" | "onMouseOver" | "onSelectEmoji"
+>) => {
+  return (
+    <div key={row.id} className="flex" data-index={row.id}>
+      {row.elements.map((emojiId, index) => (
+        <EmojiButton
+          key={emojiId}
+          onMouseOver={onMouseOver}
+          onSelect={onSelectEmoji}
+          emoji={emojiLibrary.getEmoji(emojiId)}
+          index={index}
+        />
+      ))}
+    </div>
+  );
+});
 export { EmojiToolbarButton, EmojiPopover, EmojiPicker };

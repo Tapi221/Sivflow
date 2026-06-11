@@ -329,9 +329,6 @@ const SplitDaySectionComponent = ({ day, onSelectDate }: SplitDaySectionProps) =
     </section>
   );
 };
-
-const SplitDaySection = memo(SplitDaySectionComponent);
-
 const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, events, appProjects, googleAccounts, onSelectDate, onVisibleMonthChange, onVisibleDateChange, className }: CalendarListPieChartSplitViewProps) => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const lastSelectedKeyRef = useRef<string | null>(null);
@@ -417,6 +414,7 @@ const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, eve
   );
 };
 
+const SplitDaySection = memo(SplitDaySectionComponent);
 SplitDaySection.displayName = "SplitDaySection";
 const CalendarListPieChartSplitView = memo(CalendarListPieChartSplitViewComponent);
 CalendarListPieChartSplitView.displayName = "CalendarListPieChartSplitView";

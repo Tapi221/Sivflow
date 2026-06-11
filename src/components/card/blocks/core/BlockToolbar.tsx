@@ -35,6 +35,20 @@ const areBlockToolbarPropsEqual = (
   prev.hiddenBlockTypes === next.hiddenBlockTypes &&
   prev.desktopLayout === next.desktopLayout &&
   prev.className === next.className;
+const getIcon = (
+  iconName: EditorBlockIconName,
+): React.ComponentType<IconProps> => {
+  const map: Record<EditorBlockIconName, React.ComponentType<IconProps>> = {
+    Type: TextBlockGlyph,
+    HelpCircle: QuestionBlockGlyph,
+    Code: CodeBlockGlyph,
+    Image: ImageBlockGlyph,
+    Sigma: MathBlockGlyph,
+    NotebookPen: MarkdownBlockGlyph,
+  };
+
+  return map[iconName];
+};
 
 const TextBlockGlyph = ({
   size = 16,
@@ -273,22 +287,6 @@ const MarkdownBlockGlyph = ({
     </svg>
   );
 };
-
-const getIcon = (
-  iconName: EditorBlockIconName,
-): React.ComponentType<IconProps> => {
-  const map: Record<EditorBlockIconName, React.ComponentType<IconProps>> = {
-    Type: TextBlockGlyph,
-    HelpCircle: QuestionBlockGlyph,
-    Code: CodeBlockGlyph,
-    Image: ImageBlockGlyph,
-    Sigma: MathBlockGlyph,
-    NotebookPen: MarkdownBlockGlyph,
-  };
-
-  return map[iconName];
-};
-
 const Tooltip = ({
   label,
   children,

@@ -45,137 +45,6 @@ type WorkspaceTabsState = {
 type WorkspaceTabsPersistedState = Pick<WorkspaceTabsState, "tabs" | "activeTabId" | "lastOpenedTabId">;
 
 const EXPLORER_TAB_TITLE = "Library";
-
-const createRandomIdSegment = (): string => {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-};
-const assertWorkspaceTabId = (value: string): WorkspaceTab["id"] => value as WorkspaceTab["id"];
-const isWorkspaceTab = (value: unknown): value is WorkspaceTab => {
-  if (!value || typeof value !== "object") return false;
-
-  const tab = value as Partial<WorkspaceTab>;
-
-  return (
-    typeof tab.id === "string" &&
-    typeof tab.kind === "string" &&
-    typeof tab.title === "string" &&
-    typeof tab.isClosable === "boolean" &&
-    typeof tab.sectionKey === "string"
-  );
-};
-const normalizeTabs = (tabs: unknown): WorkspaceTab[] => {
-  if (!Array.isArray(tabs)) return [];
-
-  const normalizedTabs: WorkspaceTab[] = [];
-  const usedTabIds = new Set<WorkspaceTab["id"]>();
-
-  for (const tab of tabs) {
-    if (!isWorkspaceTab(tab)) continue;
-    if (usedTabIds.has(tab.id)) continue;
-
-    usedTabIds.add(tab.id);
-    normalizedTabs.push(tab);
-  }
-
-  return normalizedTabs;
-};
-const normalizeWorkspaceTabsState = (state: unknown): WorkspaceTabsPersistedState => {
-  if (!state || typeof state !== "object") {
-    return { tabs: [], activeTabId: null, lastOpenedTabId: null };
-  }
-
-  const persisted = state as Partial<WorkspaceTabsPersistedState>;
-  const tabs = normalizeTabs(persisted.tabs);
-  const tabIds = new Set(tabs.map((tab) => tab.id));
-  const activeTabId =
-    typeof persisted.activeTabId === "string" && tabIds.has(persisted.activeTabId)
-      ? persisted.activeTabId
-      : (tabs.at(-1)?.id ?? null);
-  const lastOpenedTabId =
-    typeof persisted.lastOpenedTabId === "string" && tabIds.has(persisted.lastOpenedTabId)
-      ? persisted.lastOpenedTabId
-      : null;
-
-  return { tabs, activeTabId, lastOpenedTabId };
-};
-const areSelectedExplorerItemsEqual = (
-  left: ExplorerRouteState["selectedItem"],
-  right: ExplorerRouteState["selectedItem"],
-): boolean => {
-  if (left === right) return true;
-  if (left === null || right === null) return false;
-  if (left.type !== right.type) return false;
-
-  const leftId = "id" in left ? left.id : null;
-  const rightId = "id" in right ? right.id : null;
-
-  return leftId === rightId;
-};
-const areExplorerRouteStatesEqual = (
-  left: ExplorerRouteState,
-  right: ExplorerRouteState,
-): boolean => {
-  return (
-    left.isHomeOnlyMode === right.isHomeOnlyMode &&
-    left.isSectionListMode === right.isSectionListMode &&
-    left.selectedFolderId === right.selectedFolderId &&
-    areSelectedExplorerItemsEqual(left.selectedItem, right.selectedItem)
-  );
-};
-const resolveNextActiveTabId = (
-  tabs: WorkspaceTab[],
-  closingTabId: WorkspaceTab["id"],
-): WorkspaceTab["id"] | null => {
-  const closingIndex = tabs.findIndex((tab) => tab.id === closingTabId);
-  const nextTabs = tabs.filter((tab) => tab.id !== closingTabId);
-
-  if (nextTabs.length === 0) {
-    return null;
-  }
-
-  const fallbackIndex = Math.max(0, Math.min(closingIndex, nextTabs.length - 1));
-  const fallbackTab = nextTabs[fallbackIndex];
-
-  return fallbackTab?.id ?? nextTabs[0]?.id ?? null;
-};
-const upsertTab = (tabs: WorkspaceTab[], nextTab: WorkspaceTab): WorkspaceTab[] => {
-  let didReplace = false;
-
-  const nextTabs = tabs.flatMap((tab) => {
-    if (tab.id !== nextTab.id) {
-      return [tab];
-    }
-
-    if (didReplace) {
-      return [];
-    }
-
-    didReplace = true;
-    return [nextTab];
-  });
-
-  return didReplace ? nextTabs : [...tabs, nextTab];
-};
-const reorderTabsByIds = (currentTabs: WorkspaceTab[], nextTabs: WorkspaceTab[]): WorkspaceTab[] | null => {
-  if (currentTabs.length !== nextTabs.length) return null;
-
-  const currentTabsById = new Map(currentTabs.map((tab) => [tab.id, tab]));
-  const reorderedTabs = nextTabs.map((tab) => currentTabsById.get(tab.id));
-
-  if (reorderedTabs.some((tab) => !tab)) return null;
-
-  return reorderedTabs as WorkspaceTab[];
-};
-const createRouteTabFromSection = (
-  sectionKey: Exclude<WorkspaceSidebarSection, "library">,
-): WorkspaceRouteTab => {
-  return { ...resolveRouteTabBySection(sectionKey) };
-};
-
 const useWorkspaceTabsStore = create<WorkspaceTabsState>()(persist((set, get) => ({ tabs: [], activeTabId: null, lastOpenedTabId: null, openExplorerTab: (params = {}) => { const id = params.id ?? WORKSPACE_DEFAULT_EXPLORER_TAB_ID;
   const existing = get().tabs.find((tab) => tab.id === id);
 
@@ -455,5 +324,135 @@ updateTabTitle: (tabId, title) => {
 },
 ),
 );
+
+const createRandomIdSegment = (): string => {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+const assertWorkspaceTabId = (value: string): WorkspaceTab["id"] => value as WorkspaceTab["id"];
+const isWorkspaceTab = (value: unknown): value is WorkspaceTab => {
+  if (!value || typeof value !== "object") return false;
+
+  const tab = value as Partial<WorkspaceTab>;
+
+  return (
+    typeof tab.id === "string" &&
+    typeof tab.kind === "string" &&
+    typeof tab.title === "string" &&
+    typeof tab.isClosable === "boolean" &&
+    typeof tab.sectionKey === "string"
+  );
+};
+const normalizeTabs = (tabs: unknown): WorkspaceTab[] => {
+  if (!Array.isArray(tabs)) return [];
+
+  const normalizedTabs: WorkspaceTab[] = [];
+  const usedTabIds = new Set<WorkspaceTab["id"]>();
+
+  for (const tab of tabs) {
+    if (!isWorkspaceTab(tab)) continue;
+    if (usedTabIds.has(tab.id)) continue;
+
+    usedTabIds.add(tab.id);
+    normalizedTabs.push(tab);
+  }
+
+  return normalizedTabs;
+};
+const normalizeWorkspaceTabsState = (state: unknown): WorkspaceTabsPersistedState => {
+  if (!state || typeof state !== "object") {
+    return { tabs: [], activeTabId: null, lastOpenedTabId: null };
+  }
+
+  const persisted = state as Partial<WorkspaceTabsPersistedState>;
+  const tabs = normalizeTabs(persisted.tabs);
+  const tabIds = new Set(tabs.map((tab) => tab.id));
+  const activeTabId =
+    typeof persisted.activeTabId === "string" && tabIds.has(persisted.activeTabId)
+      ? persisted.activeTabId
+      : (tabs.at(-1)?.id ?? null);
+  const lastOpenedTabId =
+    typeof persisted.lastOpenedTabId === "string" && tabIds.has(persisted.lastOpenedTabId)
+      ? persisted.lastOpenedTabId
+      : null;
+
+  return { tabs, activeTabId, lastOpenedTabId };
+};
+const areSelectedExplorerItemsEqual = (
+  left: ExplorerRouteState["selectedItem"],
+  right: ExplorerRouteState["selectedItem"],
+): boolean => {
+  if (left === right) return true;
+  if (left === null || right === null) return false;
+  if (left.type !== right.type) return false;
+
+  const leftId = "id" in left ? left.id : null;
+  const rightId = "id" in right ? right.id : null;
+
+  return leftId === rightId;
+};
+const areExplorerRouteStatesEqual = (
+  left: ExplorerRouteState,
+  right: ExplorerRouteState,
+): boolean => {
+  return (
+    left.isHomeOnlyMode === right.isHomeOnlyMode &&
+    left.isSectionListMode === right.isSectionListMode &&
+    left.selectedFolderId === right.selectedFolderId &&
+    areSelectedExplorerItemsEqual(left.selectedItem, right.selectedItem)
+  );
+};
+const resolveNextActiveTabId = (
+  tabs: WorkspaceTab[],
+  closingTabId: WorkspaceTab["id"],
+): WorkspaceTab["id"] | null => {
+  const closingIndex = tabs.findIndex((tab) => tab.id === closingTabId);
+  const nextTabs = tabs.filter((tab) => tab.id !== closingTabId);
+
+  if (nextTabs.length === 0) {
+    return null;
+  }
+
+  const fallbackIndex = Math.max(0, Math.min(closingIndex, nextTabs.length - 1));
+  const fallbackTab = nextTabs[fallbackIndex];
+
+  return fallbackTab?.id ?? nextTabs[0]?.id ?? null;
+};
+const upsertTab = (tabs: WorkspaceTab[], nextTab: WorkspaceTab): WorkspaceTab[] => {
+  let didReplace = false;
+
+  const nextTabs = tabs.flatMap((tab) => {
+    if (tab.id !== nextTab.id) {
+      return [tab];
+    }
+
+    if (didReplace) {
+      return [];
+    }
+
+    didReplace = true;
+    return [nextTab];
+  });
+
+  return didReplace ? nextTabs : [...tabs, nextTab];
+};
+const reorderTabsByIds = (currentTabs: WorkspaceTab[], nextTabs: WorkspaceTab[]): WorkspaceTab[] | null => {
+  if (currentTabs.length !== nextTabs.length) return null;
+
+  const currentTabsById = new Map(currentTabs.map((tab) => [tab.id, tab]));
+  const reorderedTabs = nextTabs.map((tab) => currentTabsById.get(tab.id));
+
+  if (reorderedTabs.some((tab) => !tab)) return null;
+
+  return reorderedTabs as WorkspaceTab[];
+};
+const createRouteTabFromSection = (
+  sectionKey: Exclude<WorkspaceSidebarSection, "library">,
+): WorkspaceRouteTab => {
+  return { ...resolveRouteTabBySection(sectionKey) };
+};
 
 export { useWorkspaceTabsStore };

@@ -33,17 +33,6 @@ const insertInlineMap: Record<
     insertInlineEquation(editor, "", { select: true }),
   [KEYS.link]: (editor) => triggerFloatingLink(editor, { focused: true }),
 };
-
-const insertList = (editor: PlateEditor, type: string) => {
-  editor.tf.insertNodes(
-    editor.api.create.block({
-      indent: 1,
-      listStyleType: type,
-    }),
-    { select: true },
-  );
-};
-
 const insertBlockMap: Record<
   string,
   (editor: PlateEditor, type: string) => void
@@ -76,7 +65,26 @@ const insertBlockMap: Record<
   [KEYS.toc]: (editor) => insertToc(editor, { select: true }),
   [KEYS.video]: (editor) => insertVideoPlaceholder(editor, { select: true }),
 };
+const setBlockMap: Record<
+  string,
+  (editor: PlateEditor, type: string, entry: NodeEntry<TElement>) => void
+> = {
+  [KEYS.listTodo]: setList,
+  [KEYS.ol]: setList,
+  [KEYS.ul]: setList,
+  [ACTION_THREE_COLUMNS]: (editor) => toggleColumnGroup(editor, { columns: 3 }),
+  [KEYS.codeBlock]: (editor) => toggleCodeBlock(editor),
+};
 
+const insertList = (editor: PlateEditor, type: string) => {
+  editor.tf.insertNodes(
+    editor.api.create.block({
+      indent: 1,
+      listStyleType: type,
+    }),
+    { select: true },
+  );
+};
 const createBlockquote = (editor: PlateEditor) => ({
   children: [editor.api.create.block({ type: KEYS.p })],
   type: KEYS.blockquote,
@@ -106,18 +114,6 @@ const setList = (
     },
   );
 };
-
-const setBlockMap: Record<
-  string,
-  (editor: PlateEditor, type: string, entry: NodeEntry<TElement>) => void
-> = {
-  [KEYS.listTodo]: setList,
-  [KEYS.ol]: setList,
-  [KEYS.ul]: setList,
-  [ACTION_THREE_COLUMNS]: (editor) => toggleColumnGroup(editor, { columns: 3 }),
-  [KEYS.codeBlock]: (editor) => toggleCodeBlock(editor),
-};
-
 const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: Path; } = {}) => {
   editor.tf.withoutNormalizing(() => {
     if (type === KEYS.blockquote) {

@@ -15,6 +15,7 @@ const DEFAULT_TIMETABLE_PERIODS: readonly CalendarTimetablePeriod[] = [
   { id: "period-6", label: "6", startTime: "18:00", endTime: "19:30", order: 5 },
   { id: "period-7", label: "7", startTime: "19:40", endTime: "21:10", order: 6 },
 ];
+const timetableDb = new CalendarTimetableDatabase();
 
 class CalendarTimetableDatabase extends Dexie {
   courses!: Table<CalendarTimetableCourse, string>;
@@ -41,9 +42,6 @@ class CalendarTimetableDatabase extends Dexie {
     });
   }
 }
-
-const timetableDb = new CalendarTimetableDatabase();
-
 const createTimestamp = (): string => new Date().toISOString();
 const createCourseId = (): string => `course-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 const createDepartmentId = (): string => `department-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;

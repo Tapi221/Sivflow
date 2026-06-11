@@ -24,9 +24,6 @@ const normalizeAttachments = (attachments: CardFaceAttachments | null | undefine
   audios: attachments?.audios ?? [],
   references: attachments?.references ?? [],
 });
-
-const StratisComponentIcon = ({ icon: Icon, className }: StratisComponentIconProps) => <Icon aria-hidden="true" focusable="false" className={className} />;
-
 const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCardMediaDialogsParams) => { const [imageDialogSide, setImageDialogSide] = useState<Side | null>(null);
   const [audioDialogSide, setAudioDialogSide] = useState<Side | null>(null);
   const [linkDialogSide, setLinkDialogSide] = useState<Side | null>(null);
@@ -134,5 +131,7 @@ const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCard
     [audioDialogSide, getDialogAudios, getDialogImages, getReferenceItems, imageDialogSide, linkDialogSide, renderMediaDialogButtons, setDialogAudios, setDialogImages, setReferenceItems],
   );
 };
+
+const StratisComponentIcon = ({ icon: Icon, className }: StratisComponentIconProps) => <Icon aria-hidden="true" focusable="false" className={className} />;
 
 export { useCardMediaDialogs };

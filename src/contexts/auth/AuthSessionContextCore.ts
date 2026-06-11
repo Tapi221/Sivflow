@@ -11,13 +11,13 @@ type AuthSessionProviderProps = {
   children: ReactNode;
 };
 
-const noopLogout = async () => {};
-
 const AuthSessionContext = createContext<AuthSessionContextType>({
   currentUser: null,
   loading: true,
   logout: noopLogout,
 });
+
+const noopLogout = async () => {};
 
 export { AuthSessionContext };
 export type { AuthSessionContextType, AuthSessionProviderProps };
