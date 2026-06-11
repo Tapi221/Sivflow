@@ -9,6 +9,7 @@ import { StrictMode, useEffect, useState, type ComponentType } from "react";
 import { createRoot } from "react-dom/client";
 
 import { ErrorBoundary } from "@/components/common/ErrorScreen";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
 
 
@@ -228,7 +229,9 @@ if (!renderGoogleOAuthCallback()) {
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <ErrorBoundary>
-        <AppBootstrap />
+        <TooltipProvider>
+          <AppBootstrap />
+        </TooltipProvider>
       </ErrorBoundary>
     </StrictMode>,
   );
