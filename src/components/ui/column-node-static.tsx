@@ -5,6 +5,8 @@ import { SlateElement } from "platejs/static";
 
 
 
+
+
 const ColumnElementStatic = (props: SlateElementProps<TColumnElement>) => {
   const { width } = props.element;
 
@@ -51,6 +53,8 @@ const ColumnElementDocx = (props: SlateElementProps<TColumnElement>) => {
 const ColumnGroupElementDocx = (props: SlateElementProps) => {
   return (<SlateElement {...props}> <table style={{ width: "100%", borderCollapse: "collapse", border: "none", tableLayout: "fixed" }} > <tbody> <tr>{props.children}</tr> </tbody> </table> </SlateElement>);
 };
+
+
 
 
 

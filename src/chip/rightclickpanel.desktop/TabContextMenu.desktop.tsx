@@ -5,6 +5,8 @@ import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
 
 
+
+
 type TabContextMenuAction = {
   id: string;
   label: string;
@@ -22,6 +24,8 @@ type TabContextMenuProps = {
 
 
 
+
+
 const WORKSPACE_TAB_CONTEXT_PANEL_ID = "workspace-tab-context-menu";
 const WORKSPACE_TAB_CONTEXT_MENU_LABELS = [
   "閉じる",
@@ -32,6 +36,8 @@ const WORKSPACE_TAB_CONTEXT_MENU_LABELS = [
 const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = resolveRightClickPanelTextWidth(WORKSPACE_TAB_CONTEXT_MENU_LABELS);
 const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = WORKSPACE_TAB_CONTEXT_MENU_LABELS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
+
+
 
 
 
@@ -51,6 +57,8 @@ const WorkspaceTabContextMenu = ({ x, y, actions, menuRef, noDragStyle, panelId 
   </RightClickPanelSurface>
   );
 };
+
+
 
 
 

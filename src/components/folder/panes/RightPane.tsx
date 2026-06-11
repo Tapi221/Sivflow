@@ -6,6 +6,8 @@ import { CardPane } from "./CardPane";
 
 
 
+
+
 type RightPaneProps = {
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
@@ -23,6 +25,8 @@ type RightPaneProps = {
   };
   folderSelectionNonce: number;
 };
+
+
 
 
 
@@ -86,6 +90,8 @@ const RightPane = ({ selectedItem, selectedCardId, selectedDocument, selectedFol
 
   return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
 };
+
+
 
 
 

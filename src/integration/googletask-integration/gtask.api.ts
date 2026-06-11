@@ -3,6 +3,8 @@ import type { GoogleTaskItem, GoogleTaskListItem, GoogleTasksApiTaskListsRespons
 
 
 
+
+
 type GoogleTaskPatch = {
   title?: string;
   notes?: string | null;
@@ -20,7 +22,11 @@ type RawGoogleTask = NonNullable<GoogleTasksApiTasksResponse["items"]>[number];
 
 
 
+
+
 const GOOGLE_TASKS_API_BASE = "https://tasks.googleapis.com/tasks/v1";
+
+
 
 
 
@@ -252,6 +258,8 @@ const deleteGoogleTask = async ({ accessToken, taskListId, taskId }: { accessTok
     "delete_task",
   );
 };
+
+
 
 
 

@@ -9,6 +9,8 @@ import type { IconProps } from "@/ui/icons";
 
 
 
+
+
 type PdfLibraryWorkspaceSection = "flashcard" | "pdf";
 type PdfLibraryWorkspaceToolbarProps = {
   activeSection: PdfLibraryWorkspaceSection;
@@ -20,6 +22,8 @@ type LibraryTypeToolbarTab = {
   label: string;
   icon: ComponentType<IconProps>;
 };
+
+
 
 
 
@@ -36,9 +40,13 @@ const TAB_MOTION_TRANSITION: Transition = {
 
 
 
+
+
 const resolveLibrarySectionRoute = (section: PdfLibraryWorkspaceSection): string => {
   return section === "flashcard" ? "/library/flashcard" : "/library/pdf";
 };
+
+
 
 
 
@@ -87,7 +95,11 @@ const PdfLibraryWorkspaceToolbar = ({ activeSection, onSelectSection, onAddPdf }
 
 
 
+
+
 export { PdfLibraryWorkspaceToolbar };
+
+
 
 
 export type { PdfLibraryWorkspaceSection };

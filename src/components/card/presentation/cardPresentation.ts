@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type CardPresentationContext = { inPager: boolean;
   isCurrentCard: boolean;
   isEditing: boolean;
@@ -15,6 +17,8 @@ type CardPresentationState = { isActiveCard: boolean;
   showActiveChrome: boolean;
 };
 type CardPresentationContextInput = Partial<Pick<CardPresentationContext, "isCurrentCard" | "isStandaloneEditor" | "hasFocusWithin">>;
+
+
 
 
 
@@ -45,7 +49,11 @@ const buildCardChromeClassName = (state: CardPresentationState, options?: { hove
 
 
 
+
+
 export { resolveCardPresentationState, buildCardShellClassName, buildCardChromeClassName };
+
+
 
 
 export type { CardPresentationContext, CardPresentationState, CardPresentationContextInput };

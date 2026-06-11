@@ -4,6 +4,8 @@ import { isMfDeckMediaPath } from "./mfDeckMedia";
 
 
 
+
+
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
@@ -396,6 +398,8 @@ const validateMfDeckArchive = (input: { manifest: unknown;
     issues,
   };
 };
+
+
 
 
 

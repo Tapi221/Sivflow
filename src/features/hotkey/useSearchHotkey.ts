@@ -5,6 +5,8 @@ import { hasOpenModalDialog } from "./modalGuards";
 
 
 
+
+
 const useSearchHotkey = () => {
   const isOpen = useSearchStore((state) => state.isOpen);
   const toggle = useSearchStore((state) => state.toggle);
@@ -30,6 +32,8 @@ const useSearchHotkey = () => {
     };
   }, [isOpen, toggle]);
 };
+
+
 
 
 

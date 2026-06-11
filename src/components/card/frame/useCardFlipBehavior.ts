@@ -2,6 +2,8 @@ import React from "react";
 
 
 
+
+
 type PointerGestureState = Readonly<{
   pointerId: number | null;
   startX: number;
@@ -29,7 +31,11 @@ type UseCardFlipBehaviorResult = Readonly<{ handleFlip: (event?: React.MouseEven
 
 
 
+
+
 const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
+
+
 
 
 
@@ -219,7 +225,11 @@ const useCardFlipBehavior = ({ isCardClickable, previewMode, onFlip, onPreviewFl
 
 
 
+
+
 export { TAP_MOVE_CANCEL_THRESHOLD_PX, shouldIgnoreFlipTarget, useCardFlipBehavior };
+
+
 
 
 export type { UseCardFlipBehaviorParams, UseCardFlipBehaviorResult };

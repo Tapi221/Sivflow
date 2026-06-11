@@ -6,8 +6,12 @@ import { isMfDeckMediaPath, MF_DECK_MAX_MEDIA_ENTRY_BYTES, MF_DECK_MAX_MEDIA_TOT
 
 
 
+
+
 const MF_DECK_MAX_FILE_BYTES = 128 * 1024 * 1024;
 const MF_DECK_MAX_JSON_BYTES = 24 * 1024 * 1024;
+
+
 
 
 
@@ -251,6 +255,8 @@ const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => {
 
   return validation.value;
 };
+
+
 
 
 

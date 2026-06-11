@@ -4,11 +4,15 @@ import { decodeMfDeckArchive, MF_DECK_MAX_FILE_BYTES } from "./mfDeckZipCodec";
 
 
 
+
+
 type LoadMfDeckFileResult = { file: File;
   archive: MfDeckArchiveV1 | null;
   issues: MfDeckIssue[];
   suggestedCardSetName: string;
 };
+
+
 
 
 
@@ -83,7 +87,11 @@ const readMfDeckFile = async (file: File): Promise<LoadMfDeckFileResult> => {
 
 
 
+
+
 export { buildMfDeckSuggestedCardSetName, readMfDeckFile };
+
+
 
 
 export type { LoadMfDeckFileResult };

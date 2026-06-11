@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type LibraryHeaderToolbarIconProps = SVGProps<SVGSVGElement> & { className?: string;
 };
 type LibraryHeaderToolbarActionRenderProps = { className: string;
@@ -38,6 +40,8 @@ type LibraryHeaderToolbarProps = {
 
 
 
+
+
 const WORKSPACE_TAB_INDICATOR_ID = "workspace-header-toolbar-tab-indicator";
 const WORKSPACE_TAB_MOTION_TRANSITION: Transition = {
   type: "tween",
@@ -56,6 +60,8 @@ const segmentedActionButtonClassName = cn(
 );
 const segmentedActionIconClassName =
   "block h-4 w-4 shrink-0 text-current transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none";
+
+
 
 
 
@@ -288,7 +294,11 @@ const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions
 
 
 
+
+
 export { LibraryHeaderToolbar };
+
+
 
 
 export type { LibraryHeaderToolbarIconProps, LibraryHeaderToolbarActionRenderProps };

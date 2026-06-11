@@ -3,7 +3,11 @@ import { LinkElementStatic } from "@/components/ui/link-node-static";
 
 
 
+
+
 const BaseLinkKit = [BaseLinkPlugin.withComponent(LinkElementStatic)];
+
+
 
 
 

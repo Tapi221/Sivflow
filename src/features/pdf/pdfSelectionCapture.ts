@@ -3,6 +3,8 @@ import type { SelectionCaptureArea, SelectionCaptureRect } from "@/features/sele
 
 
 
+
+
 const getCanvasRectRelativeToTarget = (target: HTMLElement, canvas: HTMLCanvasElement): SelectionCaptureRect => {
   const targetRect = target.getBoundingClientRect();
   const canvasRect = canvas.getBoundingClientRect();
@@ -51,6 +53,8 @@ const capturePdfViewerAreaToBlob = async (target: HTMLElement, area: SelectionCa
 
   return cropCanvasToBlob(candidate.canvas, candidate.sourceRect);
 };
+
+
 
 
 

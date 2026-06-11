@@ -11,6 +11,8 @@ import { Plus } from "@/ui/icons";
 
 
 
+
+
 interface BlockToolbarProps {
   label: string;
   onAddBlock: (type: CardBlock["type"]) => void;
@@ -26,6 +28,8 @@ type ToolbarBlockConfig = {
   isVisible: boolean;
   orderIndex: number;
 };
+
+
 
 
 
@@ -53,6 +57,8 @@ const getIcon = (
 
   return map[iconName];
 };
+
+
 
 
 
@@ -607,6 +613,8 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
   return renderToolbarShell();
 };
+
+
 
 
 

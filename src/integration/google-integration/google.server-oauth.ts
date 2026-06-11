@@ -6,6 +6,8 @@ import { consumeGoogleCalendarServerCodeVerifier } from "./google.oauth";
 
 
 
+
+
 type GoogleOAuthReconnectDiagnosis = { cause: string; reconnectRequired: boolean; action: string; };
 type GoogleOAuthCallableErrorReason = "invalid_grant" | "server_oauth_configuration" | "token_encryption_key_invalid" | "stored_refresh_token_decrypt_failed" | "stored_refresh_token_missing" | "insufficient_google_scope" | "token_endpoint_failed";
 type CallableErrorDetails = { reason?: GoogleOAuthCallableErrorReason; reconnectRequired?: boolean; userAction?: string; adminAction?: string; };
@@ -30,6 +32,8 @@ type GetGoogleCalendarAccessTokenInput = {
 type DisconnectGoogleCalendarAccountInput = {
   accountId: string;
 };
+
+
 
 
 
@@ -61,6 +65,8 @@ const disconnectGoogleCalendarAccountCallable =
   );
 const exchangeGoogleConnectedServiceCode = exchangeGoogleCalendarCode;
 const getServerStoredGoogleConnectedServiceAccessToken = getServerStoredGoogleCalendarAccessToken;
+
+
 
 
 
@@ -196,7 +202,11 @@ const disconnectServerStoredGoogleCalendarAccount = async (input: DisconnectGoog
 
 
 
+
+
 export { readGoogleOAuthCallableErrorDetails, getGoogleOAuthCallableErrorReason, diagnoseGoogleOAuthReconnectCause, isGoogleOAuthDeterministicErrorReason, toUserTransparentAutoRecoveryError, isServerStoredGoogleOAuthEnabled, exchangeGoogleCalendarCode, exchangeGoogleConnectedServiceCode, getServerStoredGoogleCalendarAccessToken, getServerStoredGoogleConnectedServiceAccessToken, disconnectServerStoredGoogleCalendarAccount };
+
+
 
 
 export type { GoogleOAuthCallableErrorReason };

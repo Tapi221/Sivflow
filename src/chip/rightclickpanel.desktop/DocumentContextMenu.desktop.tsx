@@ -6,6 +6,8 @@ import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
 
 
+
+
 type DocumentContextMenuActionId = "rename" | "delete";
 type DocumentContextMenuAction = { id: DocumentContextMenuActionId;
   label: string;
@@ -21,6 +23,8 @@ type DocumentContextMenuProps = {
   noDragStyle: CSSProperties;
   panelId?: RightClickPanelId;
 };
+
+
 
 
 
@@ -42,6 +46,8 @@ const DOCUMENT_CONTEXT_MENU_STYLE = `
   background: #fef2f2;
 }
 `;
+
+
 
 
 
@@ -83,10 +89,14 @@ const DocumentContextMenuBase = ({
 
 
 
+
+
 const DocumentContextMenu = memo(DocumentContextMenuBase);
 DocumentContextMenu.displayName = "DocumentContextMenu";
 export { DocumentContextMenu };
 export { DOCUMENT_CONTEXT_MENU_PANEL_ID, DOCUMENT_CONTEXT_MENU_WIDTH, DOCUMENT_CONTEXT_MENU_HEIGHT, DOCUMENT_CONTEXT_MENU_MARGIN };
+
+
 
 
 export type { DocumentContextMenuActionId, DocumentContextMenuAction };

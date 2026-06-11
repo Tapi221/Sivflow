@@ -5,6 +5,8 @@ import { BlockFrame } from "./BlockFrame";
 
 
 
+
+
 interface BlockWrapperProps {
   children: React.ReactNode;
   onDelete: () => void;
@@ -36,7 +38,11 @@ interface BlockWrapperProps {
 
 
 
+
+
 const STEP_PX = 24;
+
+
 
 
 
@@ -223,6 +229,8 @@ const BlockWrapper = ({ children, onDelete, onDuplicate, dragHandleProps, dragHa
     </BlockFrame>
   );
 };
+
+
 
 
 

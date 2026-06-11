@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type PanelSurfaceProps = HTMLAttributes<HTMLDivElement> &
   FloatingSurfaceVariantProps & {
     children: ReactNode;
@@ -12,9 +14,13 @@ type PanelSurfaceProps = HTMLAttributes<HTMLDivElement> &
 
 
 
+
+
 const PanelSurface = ({ surface = "panel", className, children, ...props }: PanelSurfaceProps) => {
   return (<div className={cn(floatingSurfaceVariants({ surface }), className)} {...props} > {children} </div>);
 };
+
+
 
 
 

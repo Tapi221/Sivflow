@@ -4,7 +4,11 @@ import type { GCalRawIncrementalEvent, GCalWritableEventDeleteInput, GCalWritabl
 
 
 
+
+
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
+
+
 
 
 
@@ -309,6 +313,8 @@ const updateGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, 
 const deleteGoogleCalendarEvent = async ({ accessToken, event }: { accessToken: string; event: GCalWritableEventDeleteInput; }): Promise<void> => {
   await deleteJson(accessToken, `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(event.calendarId)}/events/${encodeURIComponent(event.eventId)}`, "Google Calendar event deletion failed");
 };
+
+
 
 
 

@@ -2,6 +2,8 @@ import { invoke } from "@tauri-apps/api/core";
 
 
 
+
+
 type TauriClipboardImageInput = {
   mimeType: string;
   data: number[];
@@ -9,7 +11,11 @@ type TauriClipboardImageInput = {
 
 
 
+
+
 const DEFAULT_IMAGE_MIME_TYPE = "image/png";
+
+
 
 
 
@@ -42,6 +48,8 @@ const copyImageBlobToClipboard = async (blob: Blob): Promise<void> => {
     new ClipboardItem({ [blob.type || DEFAULT_IMAGE_MIME_TYPE]: blob }),
   ]);
 };
+
+
 
 
 

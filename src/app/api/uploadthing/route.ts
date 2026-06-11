@@ -3,7 +3,11 @@ import { ourFileRouter } from "@/registry/lib/uploadthing";
 
 
 
+
+
 const { GET, POST } = createRouteHandler({ router: ourFileRouter });
+
+
 
 
 

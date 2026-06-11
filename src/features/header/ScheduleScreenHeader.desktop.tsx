@@ -12,6 +12,8 @@ import { Check, ChevronDown, Download, Minus, Plus } from "@/ui/icons";
 
 
 
+
+
 type ScheduleScreenHeaderViewOption = {
   value: CalendarViewMode;
   label: string;
@@ -43,6 +45,8 @@ type CalendarPrintRangeOption = {
 
 
 
+
+
 const CALENDAR_PRINT_MENU_CLASS_NAME = "relative flex shrink-0";
 const CALENDAR_PRINT_BUTTON_CLASS_NAME = "relative z-10 flex h-7 min-h-0 min-w-[64px] shrink-0 items-center justify-center gap-1 rounded-[7px] border-0 bg-transparent px-2 text-[12px] font-semibold leading-none tracking-[-0.012em] text-[#85827e] shadow-none outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100 disabled:cursor-wait disabled:opacity-60";
 const CALENDAR_PRINT_BUTTON_ACTIVE_CLASS_NAME = " bg-[#eee] text-[#2f343b]";
@@ -65,8 +69,12 @@ const DEFAULT_CALENDAR_PRINT_RANGE: CalendarPrintRangeState = { mode: "current",
 
 
 
+
+
 const clampMonthVisibleEventCount = (value: number): number => Math.min(C.MONTH_VISIBLE_EVENT_COUNT_MAX, Math.max(C.MONTH_VISIBLE_EVENT_COUNT_MIN, Math.round(value)));
 const getCalendarPrintRangeOptionButtonClassName = (isActive: boolean): string => `${CALENDAR_PRINT_RANGE_OPTION_BUTTON_BASE_CLASS_NAME}${isActive ? CALENDAR_PRINT_RANGE_OPTION_ACTIVE_CLASS_NAME : CALENDAR_PRINT_RANGE_OPTION_INACTIVE_CLASS_NAME}`;
+
+
 
 
 
@@ -257,6 +265,8 @@ const ScheduleScreenHeaderDesktop = ({
     </div>
   );
 };
+
+
 
 
 

@@ -6,12 +6,16 @@ import type { Note } from "@/types";
 
 
 
+
+
 type NoteWithLegacyDelete = Note & {
   is_deleted?: boolean;
 };
 type UseNotesReadOptions = {
   enabled?: boolean;
 };
+
+
 
 
 
@@ -59,6 +63,8 @@ const useNotesRead = (folderId?: string | null, options?: UseNotesReadOptions) =
     error,
   };
 };
+
+
 
 
 

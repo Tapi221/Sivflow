@@ -2,6 +2,8 @@ import type { ImportIssue, ParsedImportRow } from "@/features/import/domain/impo
 
 
 
+
+
 const buildIssue = ({
   level,
   code,
@@ -112,6 +114,8 @@ const groupParsedRowsToCards = (rows: ParsedImportRow[]) => {
     issues,
   };
 };
+
+
 
 
 

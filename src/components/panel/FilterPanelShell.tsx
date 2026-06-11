@@ -4,6 +4,8 @@ import { PanelSearchField } from "./PanelSearchField";
 
 
 
+
+
 interface FilterPanelShellProps { title?: string;
   searchValue?: string;
   searchPlaceholder?: string;
@@ -16,6 +18,8 @@ interface FilterPanelShellProps { title?: string;
   bodyClassName?: string;
   bodyRef?: Ref<HTMLDivElement>;
 }
+
+
 
 
 
@@ -66,7 +70,11 @@ const FilterPanelShell = ({ title, searchValue, searchPlaceholder = "検索...",
 
 
 
+
+
 export { FilterPanelShell };
+
+
 
 
 export type { FilterPanelShellProps };

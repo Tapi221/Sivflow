@@ -4,7 +4,11 @@ import type { SelectedExplorerItem } from "@/types";
 
 
 
+
+
 const buildExplorerSelectedState = (selectedItem: SelectedExplorerItem) => ({ selectedCardId: getSelectedCardId(selectedItem), selectedDocumentId: getSelectedDocumentId(selectedItem) });
+
+
 
 
 

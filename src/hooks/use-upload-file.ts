@@ -7,6 +7,8 @@ import type { OurFileRouter } from "@/lib/uploadthing";
 
 
 
+
+
 type UploadedFile<T = unknown> = ClientUploadedFileData<T>;
 interface UseUploadFileProps
   extends Pick<
@@ -19,8 +21,12 @@ interface UseUploadFileProps
 
 
 
+
+
 const UNKNOWN_ERROR_MESSAGE = "Something went wrong, please try again later.";
 const { uploadFiles, useUploadThing } = generateReactHelpers<OurFileRouter>();
+
+
 
 
 
@@ -114,7 +120,11 @@ const showErrorToast = (err: unknown) => {
 
 
 
+
+
 export { uploadFiles, useUploadThing, useUploadFile, getErrorMessage, showErrorToast };
+
+
 
 
 export type { UploadedFile };

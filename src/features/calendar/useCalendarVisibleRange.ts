@@ -4,6 +4,8 @@ import type { CalendarBufferDays, CalendarViewMode } from "./scheduleScreen.type
 
 
 
+
+
 const useCalendarVisibleRange = ({ currentDate, selectedViewMode, calendarBuffer, weekStartDay }: { currentDate: Date;
   selectedViewMode: CalendarViewMode;
   calendarBuffer: CalendarBufferDays;
@@ -16,6 +18,8 @@ const useCalendarVisibleRange = ({ currentDate, selectedViewMode, calendarBuffer
     weekStartDay,
   });
 };
+
+
 
 
 

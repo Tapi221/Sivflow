@@ -5,11 +5,15 @@ import type { ViewerProps } from "./CardBlockLayoutRenderer";
 
 
 
+
+
 type UseViewerScenePropsArgs = Readonly<{
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
   displayMode?: CardDisplayMode;
   zoom?: number;
 }>;
+
+
 
 
 
@@ -40,6 +44,8 @@ const useViewerSceneProps = ({ onGalleryFullscreenChange, displayMode = "fixed",
     ],
   );
 };
+
+
 
 
 

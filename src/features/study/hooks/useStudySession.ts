@@ -10,6 +10,8 @@ import type { PracticeFilterRating } from "./usePracticeMode";
 
 
 
+
+
 type StudySessionRating = PracticeFilterRating;
 type StudySessionResult = { cardId: string;
   rating: StudySessionRating;
@@ -51,12 +53,16 @@ type Params = {
 
 
 
+
+
 const SCORE_TO_RATING: Record<SubjectiveScoreValue, StudySessionRating> = {
   0: "forgot",
   1: "vague",
   2: "remembered",
   3: "easy",
 };
+
+
 
 
 
@@ -223,7 +229,11 @@ const useStudySession = ({ studyCards, cardSets = [], updateCard, currentUser, s
 
 
 
+
+
 export { useStudySession };
+
+
 
 
 export type { StudySessionRating, StudySessionResult };

@@ -6,7 +6,11 @@ import type { Folder } from "@/types/domain/folder";
 
 
 
+
+
 type NotePdf = NonNullable<Folder["notePdfs"]>[number];
+
+
 
 
 
@@ -98,6 +102,8 @@ const normalizeFolderWithSilent = (raw: unknown) => {
 
   return normalizeFolder(normalizedInput);
 };
+
+
 
 
 

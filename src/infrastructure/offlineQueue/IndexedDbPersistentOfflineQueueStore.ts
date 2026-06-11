@@ -4,6 +4,8 @@ import { warnOncePerSession } from "@/infrastructure/localdb/runtimeState";
 
 
 
+
+
 class IndexedDbPersistentOfflineQueueStore { private readonly dbName: string;
   private readonly storeName: string;
   private idbUnavailable = false;
@@ -166,6 +168,8 @@ class IndexedDbPersistentOfflineQueueStore { private readonly dbName: string;
     warnOncePerSession("persistent-queue:idb-fallback", reason, error);
   };
 }
+
+
 
 
 

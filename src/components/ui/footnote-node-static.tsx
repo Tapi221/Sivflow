@@ -5,6 +5,8 @@ import { SlateElement } from "platejs/static";
 
 
 
+
+
 const FootnoteReferenceElementStatic = (props: SlateElementProps<TFootnoteElement>) => {
   const { element } = props;
 
@@ -30,6 +32,8 @@ const FootnoteDefinitionElementStatic = (props: SlateElementProps<TFootnoteEleme
     </SlateElement>
   );
 };
+
+
 
 
 

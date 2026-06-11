@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type CalendarViewModeOption = {
   value: CalendarViewMode;
   label: string;
@@ -17,6 +19,8 @@ type ToggleCalendarViewModeProps = {
   options: readonly CalendarViewModeOption[];
   className?: string;
 };
+
+
 
 
 
@@ -35,6 +39,8 @@ const CALENDAR_VIEW_MODE_MOTION_TRANSITION: Transition = {
   ease: "easeOut",
 };
 const ViewModeDropdown = ToggleCalendarViewMode;
+
+
 
 
 
@@ -73,6 +79,8 @@ const isDisabledViewModeOption = (
   value: CalendarViewModeSelection,
   optionValue: CalendarViewMode,
 ) => hasMultipleSelectedViewModes(value) && !isSelectedViewMode(value, optionValue);
+
+
 
 
 
@@ -192,6 +200,8 @@ const ToggleCalendarViewMode = ({
     </div>
   );
 };
+
+
 
 
 

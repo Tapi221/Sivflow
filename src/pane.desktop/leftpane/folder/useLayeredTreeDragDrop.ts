@@ -6,6 +6,8 @@ import { applyLayeredTreeDragPreview, createLayeredTreeItemMap, createLayeredTre
 
 
 
+
+
 const useLayeredTreeDragDrop = <TItem extends LayeredTreeItem>({ rootItems, rootDropParentId, scrollContainerRef, getChildItems, getParentId, getOrderIndex, updateItem, setExpandedIds }: UseLayeredTreeDragDropParams<TItem>) => {
   const itemMap = useMemo(() => createLayeredTreeItemMap(rootItems, getChildItems), [getChildItems, rootItems]);
   const autoExpandTimerRef = useRef<number | null>(null);
@@ -266,6 +268,8 @@ const useLayeredTreeDragDrop = <TItem extends LayeredTreeItem>({ rootItems, root
 
   return { dragState: { draggingId, dropInstruction }, handleItemDragStart, handleItemDragOver, handleItemDragLeave, handleItemDrop, handleItemDragEnd: clearDragState, handleListDragOver, handleListDragLeave, handleListDrop };
 };
+
+
 
 
 

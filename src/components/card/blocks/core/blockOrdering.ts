@@ -2,6 +2,8 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
+
+
 const sortBlocksByOrderIndex = (blocks: CardBlock[] = []) => {
   if (blocks.length <= 1) return blocks;
 
@@ -19,6 +21,8 @@ const sortBlocksByOrderIndex = (blocks: CardBlock[] = []) => {
   // 既に昇順なら参照を維持して不要な配列再生成を避ける
   return blocks;
 };
+
+
 
 
 
