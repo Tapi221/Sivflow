@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent as ReactDragEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from "react";
 
+import { StratisTagIcon } from "stratis-ui-icons";
+
 import { useTagTreeCommands } from "@/features/settings/hooks/useTagTreeCommands";
 
 import { useTags, type Tag as TagRecord } from "@/features/settings/hooks/useTags";
@@ -9,8 +11,6 @@ import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-
-import { StratisTagIcon } from "@/ui/icons/stratis";
 
 import { LayeredTreeDropIndicator } from "./layeredTreeDnd";
 
