@@ -29,14 +29,6 @@ const FORMAT_OPTIONS = {
   semicolons: ts.SemicolonPreference.Insert,
   tabSize: 2,
 };
-const ORDER_RANKS = {
-  import: 1,
-  type: 2,
-  constant: 3,
-  helper: 4,
-  component: 5,
-  postComponent: 6,
-};
 
 const walkSourceFiles = (directory) => {
   if (!existsSync(directory)) return [];
@@ -99,8 +91,6 @@ const getNewline = (source) => source.includes("\r\n") ? "\r\n" : "\n";
 
 const isImportStatement = (statement) => ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement);
 
-const hasExportModifier = (statement) => ts.canHaveModifiers(statement) && Boolean(ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword));
-
 const isDirectiveStatement = (statement) => ts.isExpressionStatement(statement) && ts.isStringLiteral(statement.expression);
 
 const isIdentifierNamed = (expression, name) => ts.isIdentifier(expression) && expression.text === name;
@@ -153,8 +143,6 @@ const isComponentVariableStatement = (statement) => statement.declarationList.de
 
 const isTypeOnlyExportDeclaration = (statement) => ts.isExportDeclaration(statement) && statement.isTypeOnly;
 
-const canAppearInExportBlock = (statement) => hasExportModifier(statement) && !ts.isImportDeclaration(statement) && !ts.isImportEqualsDeclaration(statement);
-
 const getStatementOrderCategory = (statement) => {
   if (isImportStatement(statement)) return "import";
   if (isTypeOnlyExportDeclaration(statement)) return "type";
@@ -183,6 +171,19 @@ const getStatementOrderCategory = (statement) => {
 
 const getLeadingWhitespaceText = (source, sourceFile, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getStart(sourceFile));
 
+const isCommentOnlyTrivia = (leadingWhitespace) => {
+  const trimmed = leadingWhitespace.trim();
+  if (trimmed.length === 0) return false;
+
+  return /^(?:(?:\/\/[^\r\n]*|\/\*[\s\S]*?\*\/)\s*)+$/u.test(trimmed);
+};
+
+const normalizeCommentOnlyTrivia = (leadingWhitespace, spacingText, newline) => {
+  const normalizedCommentText = leadingWhitespace.trim().split(/\r?\n/u).map((line) => line.trimEnd()).join(newline);
+
+  return `${spacingText}${normalizedCommentText}${newline}`;
+};
+
 const rangesOverlap = (left, right) => left.start < right.end && right.start < left.end;
 
 const applyNonOverlappingReplacements = (source, replacements) => {
@@ -210,9 +211,18 @@ const getTopLevelSpacingText = (filePath, source, previousStatement, statement) 
   return `${newline}${newline}`;
 };
 
+const getTopLevelReplacementText = (leadingWhitespace, spacingText, newline) => {
+  if (!/\S/.test(leadingWhitespace)) return spacingText;
+  if (leadingWhitespace.trimStart() === leadingWhitespace) return null;
+  if (!isCommentOnlyTrivia(leadingWhitespace)) return null;
+
+  return normalizeCommentOnlyTrivia(leadingWhitespace, spacingText, newline);
+};
+
 const collectTopLevelSpacingReplacements = (filePath, source, sourceFile) => {
   const replacements = [];
   const statements = [...sourceFile.statements];
+  const newline = getNewline(source);
 
   for (let index = 1; index < statements.length; index += 1) {
     const previousStatement = statements[index - 1];
@@ -221,10 +231,11 @@ const collectTopLevelSpacingReplacements = (filePath, source, sourceFile) => {
     if (spacingText === null) continue;
 
     const leadingWhitespace = getLeadingWhitespaceText(source, sourceFile, previousStatement, statement);
-    if (/\S/.test(leadingWhitespace)) continue;
-    if (leadingWhitespace === spacingText) continue;
+    const replacementText = getTopLevelReplacementText(leadingWhitespace, spacingText, newline);
+    if (replacementText === null) continue;
+    if (leadingWhitespace === replacementText) continue;
 
-    replacements.push({ end: statement.getStart(sourceFile), start: previousStatement.getEnd(), text: spacingText });
+    replacements.push({ end: statement.getStart(sourceFile), start: previousStatement.getEnd(), text: replacementText });
   }
 
   return replacements;
