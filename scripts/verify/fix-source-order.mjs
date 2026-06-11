@@ -205,6 +205,8 @@ const applySourceOrderFix = (filePath, source) => {
 
   for (let pass = 0; pass < maxPassCount; pass += 1) {
     const sourceFile = createSourceFile(filePath, nextSource);
+    if (sourceFile.parseDiagnostics.length > 0) return nextSource;
+
     const move = findFirstOrderMove(nextSource, sourceFile);
     if (!move) return nextSource;
 
