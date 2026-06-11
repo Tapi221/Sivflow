@@ -38,7 +38,14 @@ let currentStatus: LocalDBRuntimeStatus = {
   fallbackReason: null,
   fallbackReasonCode: "none",
   generationBumped: false,
-  resetFailedReason: readResetFailedReason(),
+  resetFailedReason: (() => {
+    if (typeof window === "undefined") return null;
+    try {
+      return window.localStorage.getItem(RESET_FAILED_REASON_KEY) ?? window.localStorage.getItem(LEGACY_RESET_FAILED_REASON_KEY);
+    } catch {
+      return null;
+    }
+  })(),
   updatedAt: Date.now(),
 };
 
