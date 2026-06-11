@@ -8,6 +8,7 @@ const NODE_SCRIPT_PATHS = {
   fixConstArrowFunctions: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-const-arrow-functions.mjs"),
   fixImportPaths: path.resolve(REPOSITORY_ROOT, "scripts/fix-src-import-paths.mjs"),
   fixImportSpacing: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-import-spacing.mjs"),
+  fixKnownLintErrors: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-known-lint-errors.mjs"),
   fixSourceOrder: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-source-order.mjs"),
   fixTypeOnlyImports: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-type-only-imports.mjs"),
   lintEslintJa: path.resolve(REPOSITORY_ROOT, "scripts/lint-eslint-ja.mjs"),
@@ -37,11 +38,12 @@ const runNodeScript = (scriptPath, args = []) => {
 const runSourceConventionFixes = () => {
   const typeOnlyImportStatus = runNodeScript(NODE_SCRIPT_PATHS.fixTypeOnlyImports);
   const constArrowFunctionStatus = runNodeScript(NODE_SCRIPT_PATHS.fixConstArrowFunctions);
+  const knownLintErrorStatus = runNodeScript(NODE_SCRIPT_PATHS.fixKnownLintErrors);
   const sourceOrderStatus = runNodeScript(NODE_SCRIPT_PATHS.fixSourceOrder);
   const importPathStatus = runNodeScript(NODE_SCRIPT_PATHS.fixImportPaths);
   const importSpacingStatus = runNodeScript(NODE_SCRIPT_PATHS.fixImportSpacing);
 
-  return [typeOnlyImportStatus, constArrowFunctionStatus, sourceOrderStatus, importPathStatus, importSpacingStatus].find((status) => status !== 0) ?? 0;
+  return [typeOnlyImportStatus, constArrowFunctionStatus, knownLintErrorStatus, sourceOrderStatus, importPathStatus, importSpacingStatus].find((status) => status !== 0) ?? 0;
 };
 
 const runSourceConventionVerification = () => {
