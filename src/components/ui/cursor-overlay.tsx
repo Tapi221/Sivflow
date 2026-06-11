@@ -16,13 +16,9 @@ import { cn } from '@/lib/utils';
 
 export function CursorOverlay() { const { cursors } = useCursorOverlay();
 
-  return (
-    <>
-      {cursors.map((cursor) => (
-        <Cursor key={cursor.id} {...cursor} />
-      ))}
-    </>
-  );
+  return cursors.map((cursor) => (
+    <Cursor key={cursor.id} {...cursor} />
+  ));
 }
 
 function Cursor({
