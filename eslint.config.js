@@ -1,12 +1,12 @@
 import js from "@eslint/js";
-import globals from "globals";
-import reactHooks from "eslint-plugin-react-hooks";
-import reactRefresh from "eslint-plugin-react-refresh";
-import unusedImports from "eslint-plugin-unused-imports";
-import simpleImportSort from "eslint-plugin-simple-import-sort";
-import tseslint from "typescript-eslint";
 import stylistic from "@stylistic/eslint-plugin";
 import { defineConfig, globalIgnores } from "eslint/config";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
+import unusedImports from "eslint-plugin-unused-imports";
+import globals from "globals";
+import tseslint from "typescript-eslint";
 
 const TYPESCRIPT_SOURCE_FILES = ["src/**/*.{ts,tsx}", "apps/web/src/**/*.{ts,tsx}", "apps/mobile/src/**/*.{ts,tsx}", "packages/*/src/**/*.{ts,tsx}"];
 const UI_SOURCE_FILES = ["src/components/**/*.{ts,tsx}", "src/layout/**/*.{ts,tsx}", "src/routes/**/*.{ts,tsx}", "src/ui/**/*.{ts,tsx}", "src/presentation/**/*.{ts,tsx}", "src/features/**/*.{ts,tsx}", "packages/web-renderer/src/**/*.{ts,tsx}", "packages/mobile-renderer/src/**/*.{ts,tsx}"];
@@ -152,11 +152,7 @@ export default defineConfig([
         "warn",
         {
           groups: [
-            ["^react$", "^react-dom$", "^react/", "^react-dom/"],
-            ["^@?\\w"],
-            ["^@/"],
-            ["^\."],
-            ["^\\u0000"],
+            ["^\\x00", "^react$", "^react-dom$", "^react/", "^react-dom/", "^@?\\w", "^@/", "^\\."],
           ],
         },
       ],
