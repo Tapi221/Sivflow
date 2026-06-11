@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { suIconAudioSettings01, suIconImage, suIconLinkAngled, type StratisUiIcon } from "stratis-ui-icons";
+import { type ComponentType, type SVGProps, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { StratisAudioSettings01Icon, StratisImageIcon, StratisLinkAngledIcon } from "stratis-ui-icons";
 import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "@/components/card/frame/cardAction.constants";
 import { cn } from "@/lib/utils";
 import type { UploadedImage } from "@/types/domain/assets";
@@ -14,14 +14,14 @@ type UseCardMediaDialogsParams = {
   setSideAttachments: (side: Side, nextAttachments: CardFaceAttachments) => void;
 };
 
-type StratisDataIconProps = {
-  icon: StratisUiIcon;
+type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+
+type StratisComponentIconProps = {
+  icon: StratisIconComponent;
   className?: string;
 };
 
-const normalizeStratisIconData = (source: string): string => source.replace(/<svg\b/, "<svg aria-hidden=\"true\" focusable=\"false\"").replace(/\s(width|height)=\"[^\"]*\"/g, "").replace(/\sstroke=\"(?!none|currentColor)[^\"]*\"/g, " stroke=\"currentColor\"").replace(/\sfill=\"(?!none|currentColor|url\()[^\"]*\"/g, " fill=\"currentColor\"");
-
-const StratisDataIcon = ({ icon, className }: StratisDataIconProps) => <span aria-hidden="true" className={className} dangerouslySetInnerHTML={{ __html: normalizeStratisIconData(icon.data) }} />;
+const StratisComponentIcon = ({ icon: Icon, className }: StratisComponentIconProps) => <Icon aria-hidden="true" focusable="false" className={className} />;
 
 const normalizeAttachments = (attachments: CardFaceAttachments | null | undefined): CardFaceAttachments => ({
   images: attachments?.images ?? [],
@@ -87,6 +87,7 @@ export const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: 
       const audioCount = getAudioCount(side);
       const linkCount = getLinkCount(side);
       const base = cn("inline-flex shrink-0 items-center justify-center gap-0.5 rounded-full h-7 min-h-0 min-w-0 px-1.5 text-[10px] font-semibold leading-none whitespace-nowrap", CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS);
+      const iconClassName = cn(CARD_ACTION_ICON_CLASS, "h-4 w-4 shrink-0");
 
       const openLinkDialog = () => {
         if (getReferenceItems(side).length === 0) {
@@ -98,17 +99,17 @@ export const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: 
       return (
         <div className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
           <button type="button" className={base} onClick={() => setImageDialogSide(side)} aria-label="画像を追加">
-            <StratisDataIcon icon={suIconImage} className={cn(CARD_ACTION_ICON_CLASS, "shrink-0 [&>svg]:h-4 [&>svg]:w-4")} />
+            <StratisComponentIcon icon={StratisImageIcon} className={iconClassName} />
             {imageCount > 0 ? <span>x{imageCount}</span> : null}
           </button>
 
           <button type="button" className={base} onClick={() => setAudioDialogSide(side)} aria-label="音声を追加">
-            <StratisDataIcon icon={suIconAudioSettings01} className={cn(CARD_ACTION_ICON_CLASS, "shrink-0 [&>svg]:h-4 [&>svg]:w-4")} />
+            <StratisComponentIcon icon={StratisAudioSettings01Icon} className={iconClassName} />
             {audioCount > 0 ? <span>x{audioCount}</span> : null}
           </button>
 
           <button type="button" className={base} onClick={openLinkDialog} aria-label="リンクを追加">
-            <StratisDataIcon icon={suIconLinkAngled} className={cn(CARD_ACTION_ICON_CLASS, "shrink-0 [&>svg]:h-4 [&>svg]:w-4")} />
+            <StratisComponentIcon icon={StratisLinkAngledIcon} className={iconClassName} />
             {linkCount > 0 ? <span>x{linkCount}</span> : null}
           </button>
         </div>
