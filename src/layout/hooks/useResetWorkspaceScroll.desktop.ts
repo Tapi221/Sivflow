@@ -1,7 +1,11 @@
 import { useLayoutEffect } from "react";
 import type { RefObject } from "react";
 
+
+
 type WorkspaceScrollRef = RefObject<HTMLElement | null> | undefined;
+
+
 
 const resetWorkspaceScrollPosition = (mainRef: WorkspaceScrollRef) => {
   const containers = document.querySelectorAll<HTMLElement>(
@@ -42,5 +46,7 @@ const useResetWorkspaceScrollDesktop = (mainRef: WorkspaceScrollRef, pathname: s
     };
   }, [mainRef, pathname]);
 };
+
+
 
 export { useResetWorkspaceScrollDesktop };

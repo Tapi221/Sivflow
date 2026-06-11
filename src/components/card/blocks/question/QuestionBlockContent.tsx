@@ -4,6 +4,8 @@ import { QUESTION_BLOCK_ANSWER_TEXT_CLASS, QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX, Q
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 
+
+
 type QuestionBlockContentProps =
   | {
     mode: "view";
@@ -50,6 +52,8 @@ type QuestionBlockViewContentProps = {
   zoom?: number;
 };
 
+
+
 const buildQuestionFieldStyle = (zoom?: number) =>
   buildTypographyStyle({
     fontSizePx: 12,
@@ -67,6 +71,8 @@ const buildViewResetKey = ({
   questionAnswer?: string;
   answerDisplayMode: "always" | "tap_to_reveal";
 }) => [answerDisplayMode, questionTitle ?? "", questionAnswer ?? ""].join("::");
+
+
 
 const QuestionField = (props: QuestionFieldProps) => {
   const style = buildQuestionFieldStyle(props.zoom);
@@ -232,5 +238,7 @@ const QuestionBlockContent = (props: QuestionBlockContentProps) => {
     />
   );
 };
+
+
 
 export { QuestionBlockContent };
