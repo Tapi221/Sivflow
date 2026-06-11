@@ -1,13 +1,9 @@
 import type { Locale } from "./locale.store";
 import { RAW_TRANSLATIONS, type RawTranslations } from "./translations";
 
-
-
 export type TranslationKey = keyof RawTranslations;
 export type TranslationParams = { count?: number;
 };
-
-
 
 const interpolate = (template: string, params: TranslationParams = {}): string =>
   template.replace(/\{\{count\}\}/g, String(params.count ?? ""));

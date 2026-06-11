@@ -46,6 +46,8 @@ const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
 
 
 
+
+
 /**
  * モバイル縮小表示ラッパー
  *

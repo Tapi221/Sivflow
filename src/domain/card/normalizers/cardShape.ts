@@ -70,4 +70,3 @@ export const resolveExtraRowsFromCardData = ( value: CardLike, side: CardFaceSid
   );
 };
 export const normalizeCardFolderId = (value: unknown): string => { return typeof value === "string" ? value.trim() : "";
-};

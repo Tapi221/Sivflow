@@ -86,5 +86,4 @@ export const SecurityProvider = ({ children }: SecurityProviderProps) => { const
     <SecurityContext.Provider value={value}>
       {children}
     </SecurityContext.Provider>
-  );
-};
+  

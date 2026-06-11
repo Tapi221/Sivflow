@@ -48,6 +48,8 @@ const MOBILE_CARD_SET_VIEW_ZOOM_PERCENT = 100;
 
 
 
+
+
 // zoom semantics must remain identical between view/edit.
 // interactionMode-dependent behavior belongs outside this policy layer.
 const clampZoomPercentRange = (value: number) => {
@@ -249,5 +251,4 @@ export const resolveZoomScaleFromPresentationWidthPx = ({ presentationWidthPx, c
     return 1;
   }
 
-  return presentationWidthPx / canonicalCardWidthPx;
-};
+  return presentationWidthPx / canonicalCardWidthP

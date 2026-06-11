@@ -85,4 +85,4 @@ export { ExportMfDeckButton };
 
 
 
-export type { ExportMfDeckButtonProps };
+export type { ExportMfDeckButtonPr

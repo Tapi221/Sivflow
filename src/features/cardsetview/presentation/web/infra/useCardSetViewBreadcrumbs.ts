@@ -46,4 +46,3 @@ export const useCardSetViewBreadcrumbs = ({ selectedCardSet, selectedCard, sorte
       setExtraCrumbs([]);
     };
   }, [setExtraCrumbs]);
-};

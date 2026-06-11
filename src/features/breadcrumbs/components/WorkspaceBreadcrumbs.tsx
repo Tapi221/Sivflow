@@ -109,4 +109,4 @@ export { WorkspaceBreadcrumbs };
 
 
 
-export type { WorkspaceBreadcrumbsProps };
+export type { WorkspaceBreadcrum

@@ -288,4 +288,3 @@ export const useCalendarNavigation = ({ allowMultiSelectViewMode = true, weekSta
     handleMonthCellSelectDate,
     resetCalendarPosition,
   };
-};

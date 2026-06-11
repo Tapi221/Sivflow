@@ -63,4 +63,4 @@ const shouldSyncDocumentRecord = (record: SyncableDocumentRecord): boolean => {
 
 
 
-export { hasRemoteRecoverableDocumentSource, resolveDocumentGoogleDriveFileId, shouldSyncDocumentRecord };
+export { hasRemoteRecoverableDocumentSource, resolveDocumentGoogleDriveFileId, shouldSyncDocumentRecor

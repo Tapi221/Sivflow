@@ -61,5 +61,4 @@ export const CardSetViewDesktopContent = ({ controller, }: CardSetViewContentPro
         onToggleBookmark={state.handleToggleBookmark}
       />
     </div>
-  );
-};
+  

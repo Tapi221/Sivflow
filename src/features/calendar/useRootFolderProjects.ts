@@ -187,4 +187,3 @@ export const useRootFolderProjects = (): UseRootFolderProjectsResult => { const 
     toggleProject,
     updateRootFolderProjectColor,
   };
-};

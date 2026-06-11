@@ -28,4 +28,3 @@ export const resolveEditorCardFitScale = ({ availablePaneWidthPx, canonicalCardW
       editorCardTargetWidthPx / Math.max(1, canonicalCardWidth),
     ),
   );
-};

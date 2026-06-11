@@ -94,4 +94,3 @@ export const filterCardsByFolderId = <T extends CardLike>( cards: readonly T[], 
   return cards.filter(
     (card) => resolveCardFolderIdStrict(card, cardSetById) === targetFolderId,
   );
-};

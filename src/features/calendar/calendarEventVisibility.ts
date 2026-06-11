@@ -97,4 +97,3 @@ export const filterCalendarEventsBySourceVisibility = ( events: GoogleCalendarEv
 
     return project?.checked !== false;
   });
-};

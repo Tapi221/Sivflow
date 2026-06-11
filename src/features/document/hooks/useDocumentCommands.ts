@@ -120,4 +120,3 @@ export const useDocumentCommands = () => { const { currentUser } = useAuthSessio
     deleteDocument,
     purgeDocument,
   };
-};

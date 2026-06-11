@@ -95,4 +95,3 @@ export const generateColorTokens = (hex: string): CalendarColorTokens => { const
   colorTokensCache.set(cacheKey, tokens);
 
   return tokens;
-};

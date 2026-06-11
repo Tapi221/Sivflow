@@ -93,4 +93,3 @@ export const readDesktopImportFiles = async ( filePaths: readonly string[], ): P
   }
 
   return files;
-};

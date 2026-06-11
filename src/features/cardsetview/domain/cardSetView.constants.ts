@@ -33,4 +33,4 @@ export { CARD_PANE_AUTO_MAX_SCALE, CARD_PANE_EDIT_DEFAULT_WIDTH_PX, CARD_PANE_ED
 
 
 
-export type { CardViewZoomInteractionSource };
+export type { CardViewZoomInteractionSou

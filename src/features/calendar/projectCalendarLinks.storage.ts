@@ -122,4 +122,3 @@ export const persistProjectCalendarLinks = (links: ProjectCalendarLink[]) => { i
   } catch {
     // localStorage が利用できない環境でも、画面上のリンク状態は維持する。
   }
-};
