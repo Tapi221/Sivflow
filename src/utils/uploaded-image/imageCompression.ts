@@ -1,22 +1,10 @@
 import type { Base64DataUrl } from "@/types/core/branded";
 import { createBase64DataUrl } from "@/types/core/branded";
 
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * 画像を圧縮してBase64 data URLに変換（内部使用のみ）
  *
- * ⚠️ 警告: この関数は内部処理でのみ使用すること
+ * 警告: この関数は内部処理でのみ使用すること
  * - DB や UploadedImage に Base64 を保存してはならない
  * - 外部からは compressImageToBlob を使用すること
  *
@@ -66,8 +54,7 @@ const compressAndConvertToBase64Internal = (
       img.src = e.target?.result as string;
     };
 
-    reader.onerror = () =>
-      reject(new Error("ファイルの読み込みに失敗しました"));
+    reader.onerror = () => reject(new Error("ファイルの読み込みに失敗しました"));
     reader.readAsDataURL(file);
   });
 };
@@ -76,17 +63,11 @@ const compressAndConvertToBase64Internal = (
  * 画像を圧縮して Blob に変換（推奨）
  * Base64 を経由するが、最終的に Blob を返すため安全
  */
-export const compressImageToBlob = async ( file: File, maxWidth: number = 1920, maxHeight: number = 1920, quality: number = 0.8, ): Promise<Blob> => { const base64 = await compressAndConvertToBase64Internal( file, maxWidth, maxHeight, quality, );
+export const compressImageToBlob = async (file: File, maxWidth: number = 1920, maxHeight: number = 1920, quality: number = 0.8): Promise<Blob> => {
+  const base64 = await compressAndConvertToBase64Internal(file, maxWidth, maxHeight, quality);
   const response = await fetch(base64);
   return response.blob();
 };
-
-
-
-
-
-
-
 
 /**
  * @deprecated 後方互換性のため残すが、compressImageToBlob を使用すること
@@ -95,20 +76,9 @@ export const compressImageToBlob = async ( file: File, maxWidth: number = 1920, 
  */
 export const compressAndConvertToBase64 = compressAndConvertToBase64Internal;
 
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * @deprecated uploadImageAsBase64 は非推奨。compressImageToBlob を使用すること
  */
-export const uploadImageAsBase64 = async (file: File): Promise<string> => { return compressAndConvertToBase64Internal(file);
+export const uploadImageAsBase64 = async (file: File): Promise<string> => {
+  return compressAndConvertToBase64Internal(file);
 };
