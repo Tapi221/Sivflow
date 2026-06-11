@@ -16,6 +16,8 @@ import { cn } from '@/lib/utils';
 
 
 
+
+
 export const CommentLeaf = (props: PlateLeafProps<TCommentText>) => { const { children, leaf } = props;
 
   const { api, setOption } = useEditorPlugin(commentPlugin);

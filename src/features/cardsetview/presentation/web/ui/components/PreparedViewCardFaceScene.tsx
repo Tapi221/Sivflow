@@ -13,6 +13,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
   cardId: card.cardId,
@@ -44,6 +46,8 @@ export type PreparedViewCardFaceSceneProps = Readonly<{ card: Card;
   onToggleUncertainty?: (card: Card) => void | Promise<void>;
   onToggleBookmark?: (card: Card) => void | Promise<void>;
 }>;
+
+
 
 
 

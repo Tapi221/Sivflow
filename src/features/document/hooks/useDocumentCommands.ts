@@ -7,6 +7,8 @@ import type { DocumentItem } from "@/types";
 
 
 
+
+
 type UpdateDocumentOptions = {
   touchUpdatedAt?: boolean;
 };
@@ -31,6 +33,8 @@ type DocumentPurgeCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   };
   queueDeleteSync: (args: { entity: "document"; targetId: string; priority?: "critical" | "high" | "medium" | "low" }) => Promise<void>;
 };
+
+
 
 
 

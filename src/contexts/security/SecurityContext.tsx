@@ -5,6 +5,8 @@ import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 
 
 
+
+
 interface SecurityContextType {
   securityState: SecurityState;
   dismissSecurityAlert: (alertId: string) => Promise<void>;
@@ -13,6 +15,8 @@ interface SecurityContextType {
 interface SecurityProviderProps {
   children: ReactNode;
 }
+
+
 
 
 
@@ -29,9 +33,13 @@ const SecurityContext = createContext<SecurityContextType>({
 
 
 
+
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const useSecurity = () => { return useContext(SecurityContext);
 };
+
+
 
 
 

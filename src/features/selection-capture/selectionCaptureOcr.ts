@@ -2,6 +2,8 @@ import { createWorker } from "tesseract.js";
 
 
 
+
+
 export const recognizeSelectionCaptureText = async (blob: Blob): Promise<string | null> => { const worker = await createWorker("jpn+eng");
 
   try {

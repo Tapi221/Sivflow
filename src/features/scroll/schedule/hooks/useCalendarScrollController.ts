@@ -10,6 +10,8 @@ import { useSyncedHorizontalScroll } from "./useSyncedHorizontalScroll";
 
 
 
+
+
 type CalendarBuffer = {
   before: number;
   after: number;
@@ -28,8 +30,12 @@ type Props = {
 
 
 
+
+
 const CALENDAR_TIMELINE_SCROLLED_CLASS_NAME = "calendar-timeline-scroll-scrolled";
 const SCHEDULE_SCROLL_POSITION_PERSIST_DELAY_MS = 200;
+
+
 
 
 

@@ -8,6 +8,8 @@ import { SlashInputElement } from '@/components/ui/slash-node';
 
 
 
+
+
 const SlashKit = [
   SlashPlugin.configure({
     options: {
@@ -19,6 +21,8 @@ const SlashKit = [
   }),
   SlashInputPlugin.withComponent(SlashInputElement),
 ];
+
+
 
 
 

@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 export type CardWorkspaceSurfaceVariant = "plain" | "dotted";
 
 type CardWorkspaceCaptureTarget = {
@@ -19,6 +21,8 @@ type CardWorkspaceCaptureTarget = {
   element: HTMLElement;
   area: number;
 };
+
+
 
 
 
@@ -61,6 +65,8 @@ export type CardWorkspaceShellProps = { children: ReactNode;
 
 
 
+
+
 const setExternalRef = (ref: Ref<HTMLDivElement> | undefined, node: HTMLDivElement | null): void => {
   if (!ref) return;
 
@@ -100,6 +106,8 @@ const resolveCaptureSide = (target: HTMLElement, rect: SelectionCaptureRect): Ca
 const resolveTaskMessage = (values: Array<string | void>): string | null => {
   return values.find((value): value is string => typeof value === "string" && value.trim().length > 0) ?? null;
 };
+
+
 
 
 

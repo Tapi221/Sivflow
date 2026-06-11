@@ -74,7 +74,11 @@ import { ToggleKit } from '@/components/editor/plugins/toggle-kit';
 
 
 
+
+
 type MyEditor = TPlateEditor<Value, (typeof EditorKit)[number]>;
+
+
 
 
 
@@ -132,9 +136,13 @@ const EditorKit = [
 
 
 
+
+
 const useEditor = () => useEditorRef<MyEditor>();
 
 export type { MyEditor };
+
+
 
 
 

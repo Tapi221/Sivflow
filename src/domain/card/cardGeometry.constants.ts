@@ -11,6 +11,8 @@ const CARD_HEIGHT_PHASE_PX = (CARD_RULED_OFFSET_TOP_PX + CARD_RULED_OFFSET_BOTTO
 
 
 
+
+
 const layoutRowsToCardHeightPx = (rows: number) => rows * CARD_ROW_PX + CARD_HEIGHT_PHASE_PX;
 
 const cardHeightPxToLayoutRows = (heightPx: number) => Math.round((heightPx - CARD_HEIGHT_PHASE_PX) / CARD_ROW_PX);
@@ -18,6 +20,8 @@ const cardHeightPxToLayoutRows = (heightPx: number) => Math.round((heightPx - CA
 const minCardHeightPxToLayoutRows = (heightPx: number) => Math.ceil((heightPx - CARD_HEIGHT_PHASE_PX) / CARD_ROW_PX);
 
 const snapMinCardHeightPx = (heightPx: number) => layoutRowsToCardHeightPx(minCardHeightPxToLayoutRows(heightPx));
+
+
 
 
 

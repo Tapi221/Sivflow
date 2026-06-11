@@ -2,6 +2,8 @@ import { applyPdfViewerZoomPatch } from "./pdfViewerZoomPatch";
 
 
 
+
+
 type PdfPerformanceDetail = Record<string, unknown>;
 
 type PdfPerformanceMarkOptions = {
@@ -11,10 +13,14 @@ type PdfPerformanceMarkOptions = {
 
 
 
+
+
 const PDF_PERFORMANCE_ENTRY_PREFIX = "sivflow.pdf";
 const PDF_PERFORMANCE_DEBUG_STORAGE_KEY = "sivflow.pdf.debugPerformance";
 
 let pdfPerformanceTraceCounter = 0;
+
+
 
 
 
@@ -67,6 +73,8 @@ const recordPdfPerformanceMeasure = (name: string, startName: string, endName: s
 };
 
 applyPdfViewerZoomPatch();
+
+
 
 
 

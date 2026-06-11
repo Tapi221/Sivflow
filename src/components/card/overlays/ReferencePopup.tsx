@@ -5,11 +5,15 @@ import type { ReferenceBlockData } from "@/types";
 
 
 
+
+
 interface ReferencePopupProps {
   isOpen: boolean;
   onClose: () => void;
   references: ReferenceBlockData[];
 }
+
+
 
 
 

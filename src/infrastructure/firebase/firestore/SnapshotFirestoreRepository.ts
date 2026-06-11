@@ -5,7 +5,11 @@ import type { AppSnapshot } from "@/types/domain/snapshot";
 
 
 
+
+
 const MAX_STORED_SNAPSHOTS = 7;
+
+
 
 
 

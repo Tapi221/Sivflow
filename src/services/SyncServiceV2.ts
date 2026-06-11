@@ -16,7 +16,11 @@ import type { LocalDBLike } from "./localDB";
 
 
 
+
+
 type SyncableRecord = Record<string, unknown> & { id?: string; isDeleted?: boolean };
+
+
 
 
 
@@ -40,6 +44,8 @@ type SyncableTableName = (typeof FULL_RESYNC_TABLES)[number];
 
 
 
+
+
 const SYNC_ENTITY_BY_TABLE: Record<SyncableTableName, SyncTask["entity"]> = {
   folders: "folder",
   cardSets: "cardSet",
@@ -51,6 +57,8 @@ const SYNC_ENTITY_BY_TABLE: Record<SyncableTableName, SyncTask["entity"]> = {
 };
 
 const DELETE_CAPABLE_SYNC_ENTITIES = new Set<SyncTask["entity"]>(["folder", "cardSet", "card", "document", "tag", "asset"]);
+
+
 
 
 

@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type CalendarListViewProps = {
   days: Date[];
   virtualRail?: ScheduleVirtualRail;
@@ -60,6 +62,8 @@ type CalendarListDaySectionProps = {
 
 
 
+
+
 const EMPTY_DAY_LABEL = "予定なし";
 const SELECTED_OFFSET = 8;
 const ANCHOR_OFFSET = 160;
@@ -86,6 +90,8 @@ const EMPTY_DAY_LINE_CLASS_NAME =
   "absolute -bottom-1.5 left-1/2 top-0 w-px -translate-x-1/2 bg-[#eceff3]";
 const EMPTY_DAY_DOT_CLASS_NAME =
   "relative mt-2 h-2 w-2 rounded-full border-2 border-[#dedede] bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)]";
+
+
 
 
 
@@ -439,6 +445,8 @@ const getDayDateNumberClassName = (day: CalendarListDay): string =>
 
 
 
+
+
 const EmptyDayCard = () => (
   <div className={EMPTY_DAY_ROW_CLASS_NAME}>
     <div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[#b3b3b3]">
@@ -491,6 +499,8 @@ const CalendarListDaySectionComponent = ({
     </div>
   </section>
 );
+
+
 
 
 
@@ -714,6 +724,8 @@ const CalendarListViewComponent = ({
     </div>
   );
 };
+
+
 
 
 

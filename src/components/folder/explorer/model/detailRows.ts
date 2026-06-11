@@ -4,6 +4,8 @@ import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem, SyncEnt
 
 
 
+
+
 export type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";
 
 export type ExplorerDetailLocalSyncState = | "pending" | "synced" | "error" | "conflict";
@@ -52,7 +54,11 @@ type LegacyEntityFields = {
 
 
 
+
+
 const EXPLORER_ROOT_PATH_SEGMENTS = ["ホーム", "エクスプローラー"];
+
+
 
 
 

@@ -8,4 +8,6 @@ import { EquationElement, InlineEquationElement, } from '@/components/ui/equatio
 
 
 
+
+
 export const MathKit = [ InlineEquationPlugin.configure({ inputRules: [MathRules.markdown({ variant: '$' })], node: { component: InlineEquationElement, }, }), EquationPlugin.configure({ inputRules: [MathRules.markdown({ on: 'break', variant: '$$' })], node: { component: EquationElement, }, }), ];

@@ -3,6 +3,8 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 
 
+
+
 /**
  * gcal.multi-storage.ts
  *
@@ -47,6 +49,8 @@ export type StoredGoogleAccount = { /** メールアドレス or ランダムUUI
 export type StoredGoogleAccountProfile = { name?: string | null;
   photoUrl?: string | null;
 };
+
+
 
 
 

@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 export interface FilterPanelShellProps { title?: string;
   searchValue?: string;
   searchPlaceholder?: string;
@@ -16,6 +18,8 @@ export interface FilterPanelShellProps { title?: string;
   bodyClassName?: string;
   bodyRef?: Ref<HTMLDivElement>;
 }
+
+
 
 
 

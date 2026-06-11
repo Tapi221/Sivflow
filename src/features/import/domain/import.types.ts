@@ -75,6 +75,8 @@ type ParsedImportRow = {
 
 
 
+
+
 const IMPORT_SHEET_NAME: ImportSheetName = "blocks";
 
 const IMPORT_BLOCK_TYPES: ImportBlockType[] = [
@@ -86,6 +88,8 @@ const IMPORT_BLOCK_TYPES: ImportBlockType[] = [
 ];
 
 const IMPORT_SIDES: ImportSide[] = ["front", "back"];
+
+
 
 
 
@@ -115,6 +119,8 @@ const hasImportBlockingError = (result: ImportParseResult | null) => {
   if (!result) return true;
   return result.issues.some((issue) => issue.level === "error");
 };
+
+
 
 
 

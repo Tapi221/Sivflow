@@ -17,6 +17,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 type Side = "question" | "answer";
 type EditorSettings = Partial<UserSettings> | null | undefined;
 
@@ -60,6 +62,8 @@ type EmbeddedEditorFaceProps = Readonly<{
 
 
 
+
+
 const isCardEntity = (value: unknown): value is Card =>
   typeof value === "object" &&
   value !== null &&
@@ -76,6 +80,8 @@ const measureSurfaceViewportWidth = (element: HTMLDivElement) =>
       Math.max(element.clientWidth, element.parentElement?.clientWidth ?? 0),
     ),
   );
+
+
 
 
 

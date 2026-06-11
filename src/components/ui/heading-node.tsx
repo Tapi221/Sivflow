@@ -10,6 +10,8 @@ import { PlateElement } from 'platejs/react';
 
 
 
+
+
 const headingVariants = cva(
   'relative mb-1 data-[nav-target=true]:rounded-md data-[nav-target=true]:bg-(--color-highlight)',
   {
@@ -25,6 +27,8 @@ const headingVariants = cva(
     },
   }
 );
+
+
 
 
 

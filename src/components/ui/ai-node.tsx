@@ -8,6 +8,8 @@ import { cn } from '@/lib/utils';
 
 
 
+
+
 export function AILeaf(props: PlateTextProps) { const streaming = usePluginOption(AIChatPlugin, 'streaming');
   const streamingLeaf = props.editor
     .getApi(AIChatPlugin)

@@ -8,6 +8,8 @@ import { useElement, usePluginOption } from 'platejs/react';
 
 
 
+
+
 const GhostTextContent = () => {
   const suggestionText = usePluginOption(CopilotPlugin, 'suggestionText');
 

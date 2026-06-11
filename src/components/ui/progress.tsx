@@ -8,11 +8,15 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface ProgressProps extends React.ComponentPropsWithoutRef<
   typeof ProgressPrimitive.Root
 > {
   value?: number;
 }
+
+
 
 
 
@@ -35,6 +39,8 @@ const Progress = React.forwardRef<
     />
   </ProgressPrimitive.Root>
 ));
+
+
 
 
 

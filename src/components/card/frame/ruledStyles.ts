@@ -16,6 +16,8 @@ interface RuledParams {
 
 
 
+
+
 const toDataUri = (svg: string) => {
   // '#' をエンコードしないと CSS url() がフラグメントと誤解する
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
@@ -102,6 +104,8 @@ const getRuledStyle = (params: RuledParams) => {
     backgroundRepeat: "no-repeat, repeat-y",
   };
 };
+
+
 
 
 

@@ -16,6 +16,8 @@ import { Button } from './button';
 
 
 
+
+
 const captionVariants = cva('max-w-full', {
   defaultVariants: {
     align: 'center',
@@ -28,6 +30,8 @@ const captionVariants = cva('max-w-full', {
     },
   },
 });
+
+
 
 
 

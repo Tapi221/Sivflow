@@ -6,6 +6,8 @@ import type { UploadedImage } from "@/types";
 
 
 
+
+
 export const handleQueuedAssetUploadSuccess = async ( item: QueueItem, updatedImage: UploadedImage, ): Promise<void> => { const localDb = await getLocalDb();
   const existingAsset = toAssetLikeRecord(
     await localDb.images.get(updatedImage.id),

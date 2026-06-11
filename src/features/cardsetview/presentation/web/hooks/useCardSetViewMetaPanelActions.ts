@@ -6,6 +6,8 @@ import type { Card, ReviewLog, UserSettings } from "@/types";
 
 
 
+
+
 type EditingDraftPatch = CardSetViewEditingDraftPatch["patch"];
 
 interface UseCardSetViewMetaPanelActionsOptions {
@@ -14,6 +16,8 @@ interface UseCardSetViewMetaPanelActionsOptions {
   settings: UserSettings | undefined;
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
 }
+
+
 
 
 

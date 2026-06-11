@@ -2,9 +2,13 @@ export type LibraryContentType = "pdf" | "flashcards";
 
 
 
+
+
 export const LIBRARY_ROOT_PATH = "/library";
 export const LIBRARY_PDF_PATH = "/library/pdf";
 export const LIBRARY_FLASHCARD_PATH = "/library/flashcard";
+
+
 
 
 

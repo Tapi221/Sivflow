@@ -3,10 +3,14 @@ import { DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE, normalizeSplitFallbackCardLayo
 
 
 
+
+
 interface SplitFallbackPreferencesStore {
   version: 1;
   byDeviceScope: Record<string, SplitFallbackCardLayoutMode>;
 }
+
+
 
 
 

@@ -10,6 +10,8 @@ import { BlockSelection } from '@/components/ui/block-selection';
 
 
 
+
+
 export const hasSelectableClass = ({ attributes, className, }: { attributes: { className?: string };
   className?: string;
 }) =>
@@ -17,6 +19,8 @@ export const hasSelectableClass = ({ attributes, className, }: { attributes: { c
     .filter(Boolean)
     .join(' ')
     .includes('slate-selectable');
+
+
 
 
 
