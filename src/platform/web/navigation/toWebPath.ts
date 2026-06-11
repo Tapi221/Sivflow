@@ -3,11 +3,7 @@ type LegacyDestination = {
   params?: LegacyDestinationParams;
 };
 
-
-
 const SCHEDULE_PATH = "/schedule";
-
-
 
 const toWebPath = (_destination: LegacyDestination): string => { return SCHEDULE_PATH;
 };
@@ -15,7 +11,5 @@ const createPageUrl = (_page: string | LegacyDestination): string => { return SC
 };
 const createAppDestination = (_screen: string, params?: LegacyDestinationParams): LegacyDestination => { return { params };
 };
-
-
 
 export { toWebPath, createPageUrl, createAppDestination };

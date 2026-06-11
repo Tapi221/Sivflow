@@ -3,8 +3,6 @@ import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { isPrimaryShortcut, isTypingTarget } from "./hotkeyGuards";
 import { hasOpenModalDialog } from "./modalGuards";
 
-
-
 const useSearchHotkey = () => { const isOpen = useSearchStore((state) => state.isOpen);
   const toggle = useSearchStore((state) => state.toggle);
 
@@ -29,7 +27,5 @@ const useSearchHotkey = () => { const isOpen = useSearchStore((state) => state.i
     };
   }, [isOpen, toggle]);
 };
-
-
 
 export { useSearchHotkey };

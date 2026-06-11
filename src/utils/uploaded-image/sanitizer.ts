@@ -19,6 +19,4 @@ const sanitizeUploadedImages = (images: unknown[]) => { if (!Array.isArray(image
   });
 };
 
-
-
 export { sanitizeUploadedImages };

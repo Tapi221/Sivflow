@@ -1,28 +1,16 @@
 "use client";
 
 import * as React from "react";
-
 import type { CodeDrawingType, TCodeDrawingElement, ViewMode } from "@platejs/code-drawing";
-
 import { VIEW_MODE, DEFAULT_MIN_HEIGHT, CODE_DRAWING_TYPE_ARRAY, VIEW_MODE_ARRAY, renderCodeDrawing, RENDER_DEBOUNCE_DELAY, downloadImage, DOWNLOAD_FILENAME } from "@platejs/code-drawing";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { PlateElement, useEditorRef, useEditorSelector, useElement, useFocusedLast, useReadOnly, useSelected } from "platejs/react";
-
 import debounce from "lodash/debounce.js";
-
 import { Trash2, DownloadIcon } from "lucide-react";
-
 import { Button } from "./button";
-
 import { useIsMobile } from "@/hooks/use-mobile";
-
 import { Popover, PopoverAnchor, PopoverContent } from "./popover";
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
-
-
 
 const createDebouncedCodeDrawingRenderer = (setImage: React.Dispatch<React.SetStateAction<string>>, setLoading: React.Dispatch<React.SetStateAction<boolean>>, setError: React.Dispatch<React.SetStateAction<string | null>>) => {
   let lastRequestId = 0;
@@ -66,7 +54,6 @@ const createDebouncedCodeDrawingRenderer = (setImage: React.Dispatch<React.SetSt
     RENDER_DEBOUNCE_DELAY,
   );
 };
-
 const useCodeDrawingElement = ({ element }: { element: TCodeDrawingElement; }) => {
   const editor = useEditorRef();
   const readOnly = useReadOnly();
@@ -103,8 +90,6 @@ const useCodeDrawingElement = ({ element }: { element: TCodeDrawingElement; }) =
     removeNode,
   };
 };
-
-
 
 const CodeDrawingToolbar = ({
   drawingType,
@@ -193,7 +178,6 @@ const CodeDrawingToolbar = ({
     </div>
   );
 };
-
 const CodeDrawingTextarea = ({
   code,
   viewMode,
@@ -275,7 +259,6 @@ const CodeDrawingTextarea = ({
     </div>
   );
 };
-
 const CodeDrawingPreviewArea = ({
   image,
   loading,
@@ -342,7 +325,6 @@ const CodeDrawingPreviewArea = ({
     </div>
   );
 };
-
 const CodeDrawingPreview = ({
   code,
   drawingType,
@@ -422,7 +404,6 @@ const CodeDrawingPreview = ({
     </div>
   );
 };
-
 const CodeDrawingElement = (props: PlateElementProps<TCodeDrawingElement>) => { const { children } = props;
   const isMobile = useIsMobile();
   const editor = useEditorRef();
@@ -560,7 +541,5 @@ const CodeDrawingElement = (props: PlateElementProps<TCodeDrawingElement>) => { 
     </Popover>
   );
 };
-
-
 
 export { CodeDrawingElement };

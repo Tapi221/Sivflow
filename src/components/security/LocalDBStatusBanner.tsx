@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, Database, X } from "@/ui/icons";
 import { clearLocalDBResetFailureReason, getLocalDBRuntimeStatus, LOCALDB_RECOVERY_GUIDE_URL, subscribeLocalDBRuntimeStatus } from "@/services/localdb";
 
-
-
 const LocalDBStatusBanner = () => { const [status, setStatus] = useState(getLocalDBRuntimeStatus());
 
   useEffect(() => {
@@ -60,7 +58,5 @@ const LocalDBStatusBanner = () => { const [status, setStatus] = useState(getLoca
     </div>
   );
 };
-
-
 
 export { LocalDBStatusBanner };

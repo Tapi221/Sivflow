@@ -2,8 +2,6 @@
 
 import * as React from "react";
 
-
-
 const useIsTouchDevice = () => { const [isTouchDevice, setIsTouchDevice] = React.useState(false);
 
   React.useEffect(() => {
@@ -25,7 +23,5 @@ const useIsTouchDevice = () => { const [isTouchDevice, setIsTouchDevice] = React
 
   return isTouchDevice;
 };
-
-
 
 export { useIsTouchDevice };

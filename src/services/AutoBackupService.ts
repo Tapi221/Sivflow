@@ -2,11 +2,7 @@ import { createPerformAutoBackupUseCase } from "@/application/backup/PerformAuto
 import type { AutoBackupRecord } from "@/application/ports/BackupStorePort";
 import { localStorageBackupStore } from "@/infrastructure/browser-storage/LocalStorageBackupStore";
 
-
-
 type AutoBackup = AutoBackupRecord;
-
-
 
 const performAutoBackupUseCase = createPerformAutoBackupUseCase({
   backupStore: localStorageBackupStore,
@@ -18,9 +14,5 @@ getLastBackupAt: (): string | null => {
 },
 };
 
-
-
 export { autoBackupService };
-
-
 export type { AutoBackup };

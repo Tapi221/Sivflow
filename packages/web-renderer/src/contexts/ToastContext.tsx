@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useState } from "react";
 
-
-
 interface Toast { id: string;
   type: "success" | "error" | "warning" | "info";
   message: string;
@@ -18,11 +16,7 @@ interface ToastContextType {
   info: (message: string) => void;
 }
 
-
-
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
-
-
 
 const useToast = () => { const context = useContext(ToastContext);
   if (!context) {
@@ -30,8 +24,6 @@ const useToast = () => { const context = useContext(ToastContext);
   }
   return context;
 };
-
-
 
 const ToastProvider = ({ children }: { children: ReactNode; }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -95,9 +87,5 @@ const ToastProvider = ({ children }: { children: ReactNode; }) => {
   );
 };
 
-
-
 export { ToastProvider, useToast };
-
-
 export type { Toast };

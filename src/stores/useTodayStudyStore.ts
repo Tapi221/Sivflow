@@ -8,8 +8,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-
-
 type RatingKey = "forgot" | "vague" | "remembered" | "easy";
 type TodayStudyState = {
   dateKey: string;
@@ -33,8 +31,6 @@ type TodayStudyActions = {
   markExtraDone: (cardId: string) => void;
 };
 type TodayStudyStore = TodayStudyState & TodayStudyActions;
-
-
 
 const useTodayStudyStore = create<TodayStudyStore>()(persist((set, get) => ({ ...initialState(), hydrate: (userId: string) => { const s = get();
   const today = localDateKey();
@@ -85,8 +81,6 @@ markExtraDone: (cardId: string) =>
 ),
 );
 
-
-
 const emptyRatings = (): Record<RatingKey, number> => ({
   forgot: 0,
   vague: 0,
@@ -106,9 +100,5 @@ const initialState = (userId = "anon"): TodayStudyState => ({
   extraDone: [],
 });
 
-
-
 export { useTodayStudyStore };
-
-
 export type { RatingKey, TodayStudyStore };

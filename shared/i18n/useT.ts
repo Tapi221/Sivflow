@@ -12,8 +12,6 @@ import { enUS, ja, zhCN } from "date-fns/locale";
 import { useLocaleStore } from "./locale.store";
 import { TRANSLATIONS } from "./translations";
 
-
-
 const useT = () => { const locale = useLocaleStore((s) => s.locale);
   return TRANSLATIONS[locale];
 };
@@ -32,7 +30,5 @@ const useDateFnsLocale = (): DateFnsLocale => { const locale = useLocaleStore((s
 const useMonthLabelFormat = (): string => { const locale = useLocaleStore((s) => s.locale);
   return locale === "en" ? "MMMM yyyy" : "yyyy年 M月";
 };
-
-
 
 export { useT, useDateFnsLocale, useMonthLabelFormat };

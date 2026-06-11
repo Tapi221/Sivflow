@@ -1,7 +1,5 @@
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 
-
-
 const isTestBypassEnabled = () => { const hasBypassParam = new URLSearchParams(window.location.search).get("test_bypass") === "true";
 
   if (!hasBypassParam) {
@@ -14,7 +12,5 @@ const isTestBypassEnabled = () => { const hasBypassParam = new URLSearchParams(w
 
   return isLocalHost(window.location.hostname);
 };
-
-
 
 export { isTestBypassEnabled };

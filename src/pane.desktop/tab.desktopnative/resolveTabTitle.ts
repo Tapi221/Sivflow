@@ -1,7 +1,5 @@
 import type { Card, CardSet, DocumentItem } from "@/types";
 
-
-
 const resolveDocumentTabTitle = (document: DocumentItem): string => { const title = document.title?.trim();
   if (title) return title;
 
@@ -21,7 +19,5 @@ const resolveCardTabTitle = (card: Card): string => { const title = card.title?.
 
   return "無題のカード";
 };
-
-
 
 export { resolveDocumentTabTitle, resolveCardSetTabTitle, resolveCardTabTitle };

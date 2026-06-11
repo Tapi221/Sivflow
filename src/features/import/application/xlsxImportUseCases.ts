@@ -5,8 +5,6 @@ import type { ImportParseResult } from "@/features/import/domain/import.types";
 import { parseXlsxImport } from "@/features/import/infra/web/parseXlsxImport";
 import type { Card, CardSet } from "@/types";
 
-
-
 type CreateCardSet = (name: string, targetFolderId?: string | null, opts?: { description?: string;
   id?: string;
   orderIndex?: number;
@@ -37,8 +35,6 @@ type ExecuteXlsxImportSuccess = {
   value: Awaited<ReturnType<typeof importCardsFromPayload>>;
 };
 type ExecuteXlsxImportResult = | ExecuteXlsxImportFailure | ExecuteXlsxImportSuccess;
-
-
 
 const resolveImportDestination = ({
   destinationMode,
@@ -132,9 +128,5 @@ return {
 };
 };
 
-
-
 export { loadXlsxImportFile, executeXlsxImport };
-
-
 export type { CreateCardSet, CreateCard, ImportDestinationMode, LoadXlsxImportFileResult, ExecuteXlsxImportResult };
