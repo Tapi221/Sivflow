@@ -64,11 +64,10 @@ const editorVariants = cva(
   },
 );
 
-const EditorContainer = ({ className, variant, ...props }: React.ComponentProps<"div"> & VariantProps<typeof editorContainerVariants>) => { return <PlateContainer className={cn("ignore-click-outside/toolbar", editorContainerVariants({ variant }), className)} {...props} />;
-};
-
 type EditorProps = PlateContentProps & VariantProps<typeof editorVariants>;
 
+const EditorContainer = ({ className, variant, ...props }: React.ComponentProps<"div"> & VariantProps<typeof editorContainerVariants>) => { return <PlateContainer className={cn("ignore-click-outside/toolbar", editorContainerVariants({ variant }), className)} {...props} />;
+};
 const Editor = ({ className, disabled, focused, variant, ref, ...props }: EditorProps & { ref?: React.RefObject<HTMLDivElement | null>; }) => {
   return <PlateContent ref={ref} className={cn(editorVariants({ disabled, focused, variant }), className)} disabled={disabled} disableDefaultStyles {...props} />;
 };

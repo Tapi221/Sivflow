@@ -74,12 +74,6 @@ const readDesktopImportFile = async (filePath: string): Promise<File> => { if (!
     type: getImportFileMimeType(result.name),
   });
 };
-const selectDesktopImportFiles = async (): Promise<File[]> => { if (!canUseDesktopImportFiles() || !window.desktop?.files?.selectImportFiles) { return [];
-  }
-
-  const paths = await window.desktop.files.selectImportFiles();
-  return readDesktopImportFiles(paths);
-};
 const readDesktopImportFiles = async (filePaths: readonly string[]): Promise<File[]> => { const uniquePaths = Array.from(new Set(filePaths.map((filePath) => filePath.trim()).filter(Boolean)));
 
   const files: File[] = [];
@@ -89,6 +83,12 @@ const readDesktopImportFiles = async (filePaths: readonly string[]): Promise<Fil
   }
 
   return files;
+};
+const selectDesktopImportFiles = async (): Promise<File[]> => { if (!canUseDesktopImportFiles() || !window.desktop?.files?.selectImportFiles) { return [];
+  }
+
+  const paths = await window.desktop.files.selectImportFiles();
+  return readDesktopImportFiles(paths);
 };
 
 export { canUseDesktopImportFiles, subscribeDesktopImportFileOpen, readDesktopImportFile, selectDesktopImportFiles, readDesktopImportFiles };

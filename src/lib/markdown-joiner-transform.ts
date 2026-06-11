@@ -11,59 +11,6 @@ const ORDERED_LIST_PATTERN = /^\d+\.\s+.+/;
 const MDX_TAG_PATTERN = /<([A-Za-z][A-Za-z0-9\-_]*)>/;
 const DIGIT_PATTERN = /^[0-9]$/;
 
-/**
- * Transform chunks like [**,bold,**] to [**bold**] make the md deserializer
- * happy.
- *
- * @experimental
- */
-const markdownJoinerTransform = <TOOLS extends ToolSet>() => () => { const joiner = new MarkdownJoiner();
-  let lastTextDeltaId: string | undefined;
-  let textStreamEnded = false;
-
-  return new TransformStream<TextStreamPart<TOOLS>, TextStreamPart<TOOLS>>({
-    async flush(controller) {
-      // Only flush if we haven't seen text-end yet
-      if (!textStreamEnded) {
-        const remaining = joiner.flush();
-        if (remaining && lastTextDeltaId) {
-          controller.enqueue({
-            id: lastTextDeltaId,
-            text: remaining,
-            type: "text-delta",
-          } as TextStreamPart<TOOLS>);
-        }
-      }
-    },
-    async transform(chunk, controller) {
-      if (chunk.type === "text-delta") {
-        lastTextDeltaId = chunk.id;
-        const processedText = joiner.processText(chunk.text);
-        if (processedText) {
-          controller.enqueue({
-            ...chunk,
-            text: processedText,
-          });
-          await delay(joiner.delayInMs);
-        }
-      } else if (chunk.type === "text-end") {
-        // Flush any remaining buffer before text-end
-        const remaining = joiner.flush();
-        if (remaining && lastTextDeltaId) {
-          controller.enqueue({
-            id: lastTextDeltaId,
-            text: remaining,
-            type: "text-delta",
-          } as TextStreamPart<TOOLS>);
-        }
-        textStreamEnded = true;
-        controller.enqueue(chunk);
-      } else {
-        controller.enqueue(chunk);
-      }
-    },
-  });
-};
 class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
 
   private buffer = "";
@@ -229,6 +176,59 @@ const delay = async (delayInMs?: number | null): Promise<void> => {
   return delayInMs == null
     ? Promise.resolve()
     : new Promise((resolve) => setTimeout(resolve, delayInMs));
+};
+/**
+ * Transform chunks like [**,bold,**] to [**bold**] make the md deserializer
+ * happy.
+ *
+ * @experimental
+ */
+const markdownJoinerTransform = <TOOLS extends ToolSet>() => () => { const joiner = new MarkdownJoiner();
+  let lastTextDeltaId: string | undefined;
+  let textStreamEnded = false;
+
+  return new TransformStream<TextStreamPart<TOOLS>, TextStreamPart<TOOLS>>({
+    async flush(controller) {
+      // Only flush if we haven't seen text-end yet
+      if (!textStreamEnded) {
+        const remaining = joiner.flush();
+        if (remaining && lastTextDeltaId) {
+          controller.enqueue({
+            id: lastTextDeltaId,
+            text: remaining,
+            type: "text-delta",
+          } as TextStreamPart<TOOLS>);
+        }
+      }
+    },
+    async transform(chunk, controller) {
+      if (chunk.type === "text-delta") {
+        lastTextDeltaId = chunk.id;
+        const processedText = joiner.processText(chunk.text);
+        if (processedText) {
+          controller.enqueue({
+            ...chunk,
+            text: processedText,
+          });
+          await delay(joiner.delayInMs);
+        }
+      } else if (chunk.type === "text-end") {
+        // Flush any remaining buffer before text-end
+        const remaining = joiner.flush();
+        if (remaining && lastTextDeltaId) {
+          controller.enqueue({
+            id: lastTextDeltaId,
+            text: remaining,
+            type: "text-delta",
+          } as TextStreamPart<TOOLS>);
+        }
+        textStreamEnded = true;
+        controller.enqueue(chunk);
+      } else {
+        controller.enqueue(chunk);
+      }
+    },
+  });
 };
 
 export { markdownJoinerTransform, MarkdownJoiner };

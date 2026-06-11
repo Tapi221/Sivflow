@@ -34,8 +34,8 @@ type MessageDataPart = { toolName: ToolName;
   comment?: TComment;
   table?: TTableCellUpdate;
 };
-type Chat = UseChatHelpers<ChatMessage>;
 type ChatMessage = UIMessage<{}, MessageDataPart>;
+type Chat = UseChatHelpers<ChatMessage>;
 
 const delay = faker.number.int({ max: 20, min: 5 });
 const markdownChunks = [
@@ -1136,6 +1136,285 @@ const mdxChunks = [
   ],
 ];
 
+const createCommentChunks = (editor: PlateEditor) => {
+  const selectedBlocksApi = editor.getApi(BlockSelectionPlugin).blockSelection;
+
+  const selectedBlocks = selectedBlocksApi
+    .getNodes({
+      selectionFallback: true,
+      sort: true,
+    })
+    .map(([block]) => block);
+
+  const isSelectingSome = editor.getOption(
+    BlockSelectionPlugin,
+    "isSelectingSome",
+  );
+
+  const blocks =
+    selectedBlocks.length > 0 && (editor.api.isExpanded() || isSelectingSome)
+      ? selectedBlocks
+      : editor.children;
+
+  const max = blocks.length;
+
+  const commentCount = Math.ceil(max / 2);
+
+  const result = new Set<number>();
+
+  while (result.size < commentCount) {
+    const num = Math.floor(Math.random() * max); // 0 to max-1 (fixed: was 1 to max)
+    result.add(num);
+  }
+
+  const indexes = Array.from(result).sort((a, b) => a - b);
+
+  const chunks = indexes
+    .map((index, i) => {
+      const block = blocks[index];
+      if (!block) {
+        return [];
+      }
+
+      const blockString = NodeApi.string(block);
+      const endIndex = blockString.indexOf(".");
+      const content =
+        endIndex === -1 ? blockString : blockString.slice(0, endIndex);
+
+      return [
+        {
+          delay: faker.number.int({ max: 500, min: 200 }),
+          texts: `{"id":"${nanoid()}","data":{"comment":{"blockId":"${block.id}","comment":"${faker.lorem.sentence()}","content":"${content}"},"status":"${i === indexes.length - 1 ? "finished" : "streaming"}"},"type":"data-comment"}`,
+        },
+      ];
+    })
+    .filter((chunk) => chunk.length > 0);
+
+  const result_chunks = [
+    [{ delay: 50, texts: '{"data":"comment","type":"data-toolName"}' }],
+    ...chunks,
+  ];
+
+  return result_chunks;
+};
+const createTableCellChunks = (editor: PlateEditor) => {
+  // Get selected table cells from the TablePlugin
+  const selectedCells =
+    editor.getOption({ key: KEYS.table }, "selectedCells") || [];
+
+  // If no cells selected, try to get cells from current selection
+  let cellIds: string[] = [];
+
+  if (selectedCells.length > 0) {
+    cellIds = selectedCells
+      .map((cell: { id?: string; }) => cell.id)
+      .filter(Boolean);
+  } else {
+    // Try to find table cells in current selection
+    const cells = Array.from(
+      editor.api.nodes({
+        at: editor.selection ?? undefined,
+        match: (n) =>
+          (n as { type?: string; }).type === KEYS.td ||
+          (n as { type?: string; }).type === KEYS.th,
+      }),
+    );
+    cellIds = cells
+      .map(([node]) => (node as { id?: string; }).id)
+      .filter(Boolean) as string[];
+  }
+
+  // If still no cells, return empty chunks
+  if (cellIds.length === 0) {
+    return [
+      [{ delay: 50, texts: '{"data":"edit","type":"data-toolName"}' }],
+      [
+        {
+          delay: 100,
+          texts: `{"id":"${nanoid()}","data":{"cellUpdate":null,"status":"finished"},"type":"data-table"}`,
+        },
+      ],
+    ];
+  }
+
+  // Generate mock content for each cell
+  const chunks = cellIds.map((cellId, i) => [
+    {
+      delay: faker.number.int({ max: 300, min: 100 }),
+      texts: `{"id":"${nanoid()}","data":{"cellUpdate":{"id":"${cellId}","content":"${faker.lorem.sentence()}"},"status":"${i === cellIds.length - 1 ? "finished" : "streaming"}"},"type":"data-table"}`,
+    },
+  ]);
+
+  const result_chunks = [
+    [{ delay: 50, texts: '{"data":"edit","type":"data-toolName"}' }],
+    ...chunks,
+  ];
+
+  return result_chunks;
+};
+// Used for testing. Remove it after implementing useChat api.
+const fakeStreamText = ({
+  chunkCount = 10,
+  editor,
+  sample = null,
+  signal,
+}: {
+  editor: PlateEditor;
+  chunkCount?: number;
+  sample?: "comment" | "markdown" | "mdx" | "table" | null;
+  signal?: AbortSignal;
+}) => {
+  const encoder = new TextEncoder();
+
+  return new ReadableStream({
+    async start(controller) {
+      const blocks = (() => {
+        if (sample === "markdown") {
+          return markdownChunks;
+        }
+
+        if (sample === "mdx") {
+          return mdxChunks;
+        }
+
+        if (sample === "comment") {
+          const commentChunks = createCommentChunks(editor);
+          return commentChunks;
+        }
+
+        if (sample === "table") {
+          const tableChunks = createTableCellChunks(editor);
+          return tableChunks;
+        }
+
+        return [
+          Array.from({ length: chunkCount }, () => ({
+            delay: faker.number.int({ max: 100, min: 30 }),
+            texts: `${faker.lorem.words({ max: 3, min: 1 })} `,
+          })),
+
+          Array.from({ length: chunkCount + 2 }, () => ({
+            delay: faker.number.int({ max: 100, min: 30 }),
+            texts: `${faker.lorem.words({ max: 3, min: 1 })} `,
+          })),
+
+          Array.from({ length: chunkCount + 4 }, () => ({
+            delay: faker.number.int({ max: 100, min: 30 }),
+            texts: `${faker.lorem.words({ max: 3, min: 1 })} `,
+          })),
+        ];
+      })();
+      if (signal?.aborted) {
+        controller.error(new Error("Aborted before start"));
+        return;
+      }
+
+      const abortHandler = () => {
+        controller.error(new Error("Stream aborted"));
+      };
+
+      signal?.addEventListener("abort", abortHandler);
+
+      // Generate a unique message ID
+      const messageId = `msg_${faker.string.alphanumeric(40)}`;
+
+      // Handle comment and table data differently (they use data events, not text streams)
+      if (sample === "comment" || sample === "table") {
+        controller.enqueue(encoder.encode('data: {"type":"start"}\n\n'));
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        controller.enqueue(encoder.encode('data: {"type":"start-step"}\n\n'));
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        // For comments and tables, send data events directly
+        for (const block of blocks) {
+          for (const chunk of block) {
+            await new Promise((resolve) => setTimeout(resolve, chunk.delay));
+
+            if (signal?.aborted) {
+              signal?.removeEventListener("abort", abortHandler);
+              return;
+            }
+
+            // Send the data event directly (already formatted as JSON)
+            controller.enqueue(encoder.encode(`data: ${chunk.texts}\n\n`));
+          }
+        }
+
+        // Send the final DONE event
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      } else {
+        // Send initial stream events for text content
+        controller.enqueue(encoder.encode('data: {"type":"start"}\n\n'));
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        controller.enqueue(encoder.encode('data: {"type":"start-step"}\n\n'));
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        controller.enqueue(
+          encoder.encode(
+            `data: {"type":"text-start","id":"${messageId}","providerMetadata":{"openai":{"itemId":"${messageId}"}}}\n\n`,
+          ),
+        );
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        for (let i = 0; i < blocks.length; i++) {
+          const block = blocks[i];
+
+          // Stream the block content
+          for (const chunk of block) {
+            await new Promise((resolve) => setTimeout(resolve, chunk.delay));
+
+            if (signal?.aborted) {
+              signal?.removeEventListener("abort", abortHandler);
+              return;
+            }
+
+            // Properly escape the text for JSON
+            const escapedText = chunk.texts
+              .replace(/\\/g, "\\\\") // Escape backslashes first
+              .replace(/"/g, String.raw`\"`) // Escape quotes
+              .replace(/\n/g, String.raw`\n`) // Escape newlines
+              .replace(/\r/g, String.raw`\r`) // Escape carriage returns
+              .replace(/\t/g, String.raw`\t`); // Escape tabs
+
+            controller.enqueue(
+              encoder.encode(
+                `data: {"type":"text-delta","id":"${messageId}","delta":"${escapedText}"}\n\n`,
+              ),
+            );
+          }
+
+          // Add double newline after each block except the last one
+          if (i < blocks.length - 1) {
+            controller.enqueue(
+              encoder.encode(
+                `data: {"type":"text-delta","id":"${messageId}","delta":"\\n\\n"}\n\n`,
+              ),
+            );
+          }
+        }
+
+        // Send end events
+        controller.enqueue(
+          encoder.encode(`data: {"type":"text-end","id":"${messageId}"}\n\n`),
+        );
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        controller.enqueue(encoder.encode('data: {"type":"finish-step"}\n\n'));
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        controller.enqueue(encoder.encode('data: {"type":"finish"}\n\n'));
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      }
+
+      signal?.removeEventListener("abort", abortHandler);
+      controller.close();
+    },
+  });
+};
 const createChatTransport = ({
   api,
   abortControllerRef,
@@ -1370,285 +1649,6 @@ const useChat = () => { const editor = useEditorRef();
   }, [chat.status, chat.messages, chat.error, _abortFakeStream]);
 
   return chat;
-};
-// Used for testing. Remove it after implementing useChat api.
-const fakeStreamText = ({
-  chunkCount = 10,
-  editor,
-  sample = null,
-  signal,
-}: {
-  editor: PlateEditor;
-  chunkCount?: number;
-  sample?: "comment" | "markdown" | "mdx" | "table" | null;
-  signal?: AbortSignal;
-}) => {
-  const encoder = new TextEncoder();
-
-  return new ReadableStream({
-    async start(controller) {
-      const blocks = (() => {
-        if (sample === "markdown") {
-          return markdownChunks;
-        }
-
-        if (sample === "mdx") {
-          return mdxChunks;
-        }
-
-        if (sample === "comment") {
-          const commentChunks = createCommentChunks(editor);
-          return commentChunks;
-        }
-
-        if (sample === "table") {
-          const tableChunks = createTableCellChunks(editor);
-          return tableChunks;
-        }
-
-        return [
-          Array.from({ length: chunkCount }, () => ({
-            delay: faker.number.int({ max: 100, min: 30 }),
-            texts: `${faker.lorem.words({ max: 3, min: 1 })} `,
-          })),
-
-          Array.from({ length: chunkCount + 2 }, () => ({
-            delay: faker.number.int({ max: 100, min: 30 }),
-            texts: `${faker.lorem.words({ max: 3, min: 1 })} `,
-          })),
-
-          Array.from({ length: chunkCount + 4 }, () => ({
-            delay: faker.number.int({ max: 100, min: 30 }),
-            texts: `${faker.lorem.words({ max: 3, min: 1 })} `,
-          })),
-        ];
-      })();
-      if (signal?.aborted) {
-        controller.error(new Error("Aborted before start"));
-        return;
-      }
-
-      const abortHandler = () => {
-        controller.error(new Error("Stream aborted"));
-      };
-
-      signal?.addEventListener("abort", abortHandler);
-
-      // Generate a unique message ID
-      const messageId = `msg_${faker.string.alphanumeric(40)}`;
-
-      // Handle comment and table data differently (they use data events, not text streams)
-      if (sample === "comment" || sample === "table") {
-        controller.enqueue(encoder.encode('data: {"type":"start"}\n\n'));
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
-        controller.enqueue(encoder.encode('data: {"type":"start-step"}\n\n'));
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
-        // For comments and tables, send data events directly
-        for (const block of blocks) {
-          for (const chunk of block) {
-            await new Promise((resolve) => setTimeout(resolve, chunk.delay));
-
-            if (signal?.aborted) {
-              signal?.removeEventListener("abort", abortHandler);
-              return;
-            }
-
-            // Send the data event directly (already formatted as JSON)
-            controller.enqueue(encoder.encode(`data: ${chunk.texts}\n\n`));
-          }
-        }
-
-        // Send the final DONE event
-        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-      } else {
-        // Send initial stream events for text content
-        controller.enqueue(encoder.encode('data: {"type":"start"}\n\n'));
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
-        controller.enqueue(encoder.encode('data: {"type":"start-step"}\n\n'));
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
-        controller.enqueue(
-          encoder.encode(
-            `data: {"type":"text-start","id":"${messageId}","providerMetadata":{"openai":{"itemId":"${messageId}"}}}\n\n`,
-          ),
-        );
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
-        for (let i = 0; i < blocks.length; i++) {
-          const block = blocks[i];
-
-          // Stream the block content
-          for (const chunk of block) {
-            await new Promise((resolve) => setTimeout(resolve, chunk.delay));
-
-            if (signal?.aborted) {
-              signal?.removeEventListener("abort", abortHandler);
-              return;
-            }
-
-            // Properly escape the text for JSON
-            const escapedText = chunk.texts
-              .replace(/\\/g, "\\\\") // Escape backslashes first
-              .replace(/"/g, String.raw`\"`) // Escape quotes
-              .replace(/\n/g, String.raw`\n`) // Escape newlines
-              .replace(/\r/g, String.raw`\r`) // Escape carriage returns
-              .replace(/\t/g, String.raw`\t`); // Escape tabs
-
-            controller.enqueue(
-              encoder.encode(
-                `data: {"type":"text-delta","id":"${messageId}","delta":"${escapedText}"}\n\n`,
-              ),
-            );
-          }
-
-          // Add double newline after each block except the last one
-          if (i < blocks.length - 1) {
-            controller.enqueue(
-              encoder.encode(
-                `data: {"type":"text-delta","id":"${messageId}","delta":"\\n\\n"}\n\n`,
-              ),
-            );
-          }
-        }
-
-        // Send end events
-        controller.enqueue(
-          encoder.encode(`data: {"type":"text-end","id":"${messageId}"}\n\n`),
-        );
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
-        controller.enqueue(encoder.encode('data: {"type":"finish-step"}\n\n'));
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
-        controller.enqueue(encoder.encode('data: {"type":"finish"}\n\n'));
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
-        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-      }
-
-      signal?.removeEventListener("abort", abortHandler);
-      controller.close();
-    },
-  });
-};
-const createCommentChunks = (editor: PlateEditor) => {
-  const selectedBlocksApi = editor.getApi(BlockSelectionPlugin).blockSelection;
-
-  const selectedBlocks = selectedBlocksApi
-    .getNodes({
-      selectionFallback: true,
-      sort: true,
-    })
-    .map(([block]) => block);
-
-  const isSelectingSome = editor.getOption(
-    BlockSelectionPlugin,
-    "isSelectingSome",
-  );
-
-  const blocks =
-    selectedBlocks.length > 0 && (editor.api.isExpanded() || isSelectingSome)
-      ? selectedBlocks
-      : editor.children;
-
-  const max = blocks.length;
-
-  const commentCount = Math.ceil(max / 2);
-
-  const result = new Set<number>();
-
-  while (result.size < commentCount) {
-    const num = Math.floor(Math.random() * max); // 0 to max-1 (fixed: was 1 to max)
-    result.add(num);
-  }
-
-  const indexes = Array.from(result).sort((a, b) => a - b);
-
-  const chunks = indexes
-    .map((index, i) => {
-      const block = blocks[index];
-      if (!block) {
-        return [];
-      }
-
-      const blockString = NodeApi.string(block);
-      const endIndex = blockString.indexOf(".");
-      const content =
-        endIndex === -1 ? blockString : blockString.slice(0, endIndex);
-
-      return [
-        {
-          delay: faker.number.int({ max: 500, min: 200 }),
-          texts: `{"id":"${nanoid()}","data":{"comment":{"blockId":"${block.id}","comment":"${faker.lorem.sentence()}","content":"${content}"},"status":"${i === indexes.length - 1 ? "finished" : "streaming"}"},"type":"data-comment"}`,
-        },
-      ];
-    })
-    .filter((chunk) => chunk.length > 0);
-
-  const result_chunks = [
-    [{ delay: 50, texts: '{"data":"comment","type":"data-toolName"}' }],
-    ...chunks,
-  ];
-
-  return result_chunks;
-};
-const createTableCellChunks = (editor: PlateEditor) => {
-  // Get selected table cells from the TablePlugin
-  const selectedCells =
-    editor.getOption({ key: KEYS.table }, "selectedCells") || [];
-
-  // If no cells selected, try to get cells from current selection
-  let cellIds: string[] = [];
-
-  if (selectedCells.length > 0) {
-    cellIds = selectedCells
-      .map((cell: { id?: string; }) => cell.id)
-      .filter(Boolean);
-  } else {
-    // Try to find table cells in current selection
-    const cells = Array.from(
-      editor.api.nodes({
-        at: editor.selection ?? undefined,
-        match: (n) =>
-          (n as { type?: string; }).type === KEYS.td ||
-          (n as { type?: string; }).type === KEYS.th,
-      }),
-    );
-    cellIds = cells
-      .map(([node]) => (node as { id?: string; }).id)
-      .filter(Boolean) as string[];
-  }
-
-  // If still no cells, return empty chunks
-  if (cellIds.length === 0) {
-    return [
-      [{ delay: 50, texts: '{"data":"edit","type":"data-toolName"}' }],
-      [
-        {
-          delay: 100,
-          texts: `{"id":"${nanoid()}","data":{"cellUpdate":null,"status":"finished"},"type":"data-table"}`,
-        },
-      ],
-    ];
-  }
-
-  // Generate mock content for each cell
-  const chunks = cellIds.map((cellId, i) => [
-    {
-      delay: faker.number.int({ max: 300, min: 100 }),
-      texts: `{"id":"${nanoid()}","data":{"cellUpdate":{"id":"${cellId}","content":"${faker.lorem.sentence()}"},"status":"${i === cellIds.length - 1 ? "finished" : "streaming"}"},"type":"data-table"}`,
-    },
-  ]);
-
-  const result_chunks = [
-    [{ delay: 50, texts: '{"data":"edit","type":"data-toolName"}' }],
-    ...chunks,
-  ];
-
-  return result_chunks;
 };
 
 export { useChat };

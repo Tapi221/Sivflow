@@ -19,60 +19,6 @@ import { Separator } from "./separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 import { cn } from "@/lib/utils";
 
-const ColumnElement = withHOC(ResizableProvider, (props: PlateElementProps<TColumnElement>) => { const { width } = props.element;
-  const readOnly = useReadOnly();
-  const isSelectionAreaVisible = usePluginOption(
-    BlockSelectionPlugin,
-    "isSelectionAreaVisible",
-  );
-
-  const { isDragging, nodeRef, previewRef, handleRef } = useDraggable({
-    element: props.element,
-    orientation: "horizontal",
-    type: "column",
-    canDropNode: ({ dragEntry, dropEntry }) =>
-      PathApi.equals(
-        PathApi.parent(dragEntry[1]),
-        PathApi.parent(dropEntry[1]),
-      ),
-  });
-
-  return (
-    <div className="group/column relative" style={{ width: width ?? "100%" }}>
-      {!readOnly && !isSelectionAreaVisible && (
-        <div
-          ref={handleRef}
-          className={cn(
-            "-translate-x-1/2 -translate-y-1/2 absolute top-2 left-1/2 z-50",
-            "pointer-events-auto flex items-center",
-            "opacity-0 transition-opacity group-hover/column:opacity-100",
-          )}
-        >
-          <ColumnDragHandle />
-        </div>
-      )}
-
-      <PlateElement
-        {...props}
-        ref={useComposedRef(props.ref, previewRef, nodeRef)}
-        className="h-full px-2 pt-2 group-first/column:pl-0 group-last/column:pr-0"
-      >
-        <div
-          className={cn(
-            "relative h-full border border-transparent p-1.5",
-            !readOnly && "rounded-lg border-border border-dashed",
-            isDragging && "opacity-50",
-          )}
-        >
-          {props.children}
-
-          {!readOnly && !isSelectionAreaVisible && <DropLine />}
-        </div>
-      </PlateElement>
-    </div>
-  );
-},
-);
 const DropLine = () => {
   const { dropLine } = useDropLine({ orientation: "horizontal" });
 
@@ -89,83 +35,6 @@ const DropLine = () => {
         "group-last/column:-right-1 inset-y-0 right-[-11px] w-1",
       )}
     />
-  );
-};
-const ColumnFloatingToolbar = ({ children }: React.PropsWithChildren) => {
-  const editor = useEditorRef();
-  const readOnly = useReadOnly();
-  const element = useElement<TColumnElement>();
-  const { props: buttonProps } = useRemoveNodeButton({ element });
-  const selected = useSelected();
-  const isCollapsed = useEditorSelector(
-    (editor) => editor.api.isCollapsed(),
-    [],
-  );
-  const isFocusedLast = useFocusedLast();
-
-  const open = isFocusedLast && !readOnly && selected && isCollapsed;
-
-  const onColumnChange = (widths: string[]) => {
-    setColumns(editor, {
-      at: element,
-      widths,
-    });
-  };
-
-  return (
-    <Popover open={open} modal={false}>
-      <PopoverAnchor>{children}</PopoverAnchor>
-      <PopoverContent
-        className="w-auto p-1"
-        onOpenAutoFocus={(e) => e.preventDefault()}
-        align="center"
-        side="top"
-        sideOffset={10}
-      >
-        <div className="box-content flex h-8 items-center">
-          <Button
-            variant="ghost"
-            className="size-8"
-            onClick={() => onColumnChange(["50%", "50%"])}
-          >
-            <DoubleColumnOutlined />
-          </Button>
-          <Button
-            variant="ghost"
-            className="size-8"
-            onClick={() => onColumnChange(["33%", "33%", "33%"])}
-          >
-            <ThreeColumnOutlined />
-          </Button>
-          <Button
-            variant="ghost"
-            className="size-8"
-            onClick={() => onColumnChange(["70%", "30%"])}
-          >
-            <RightSideDoubleColumnOutlined />
-          </Button>
-          <Button
-            variant="ghost"
-            className="size-8"
-            onClick={() => onColumnChange(["30%", "70%"])}
-          >
-            <LeftSideDoubleColumnOutlined />
-          </Button>
-          <Button
-            variant="ghost"
-            className="size-8"
-            onClick={() => onColumnChange(["25%", "50%", "25%"])}
-          >
-            <DoubleSideDoubleColumnOutlined />
-          </Button>
-
-          <Separator orientation="vertical" className="mx-1 h-6" />
-          <Button variant="ghost" className="size-8" {...buttonProps}>
-            <Trash2Icon />
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
   );
 };
 const DoubleColumnOutlined = (props: LucideProps) => (
@@ -253,6 +122,83 @@ const DoubleSideDoubleColumnOutlined = (props: LucideProps) => (
     />
   </svg>
 );
+const ColumnFloatingToolbar = ({ children }: React.PropsWithChildren) => {
+  const editor = useEditorRef();
+  const readOnly = useReadOnly();
+  const element = useElement<TColumnElement>();
+  const { props: buttonProps } = useRemoveNodeButton({ element });
+  const selected = useSelected();
+  const isCollapsed = useEditorSelector(
+    (editor) => editor.api.isCollapsed(),
+    [],
+  );
+  const isFocusedLast = useFocusedLast();
+
+  const open = isFocusedLast && !readOnly && selected && isCollapsed;
+
+  const onColumnChange = (widths: string[]) => {
+    setColumns(editor, {
+      at: element,
+      widths,
+    });
+  };
+
+  return (
+    <Popover open={open} modal={false}>
+      <PopoverAnchor>{children}</PopoverAnchor>
+      <PopoverContent
+        className="w-auto p-1"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        align="center"
+        side="top"
+        sideOffset={10}
+      >
+        <div className="box-content flex h-8 items-center">
+          <Button
+            variant="ghost"
+            className="size-8"
+            onClick={() => onColumnChange(["50%", "50%"])}
+          >
+            <DoubleColumnOutlined />
+          </Button>
+          <Button
+            variant="ghost"
+            className="size-8"
+            onClick={() => onColumnChange(["33%", "33%", "33%"])}
+          >
+            <ThreeColumnOutlined />
+          </Button>
+          <Button
+            variant="ghost"
+            className="size-8"
+            onClick={() => onColumnChange(["70%", "30%"])}
+          >
+            <RightSideDoubleColumnOutlined />
+          </Button>
+          <Button
+            variant="ghost"
+            className="size-8"
+            onClick={() => onColumnChange(["30%", "70%"])}
+          >
+            <LeftSideDoubleColumnOutlined />
+          </Button>
+          <Button
+            variant="ghost"
+            className="size-8"
+            onClick={() => onColumnChange(["25%", "50%", "25%"])}
+          >
+            <DoubleSideDoubleColumnOutlined />
+          </Button>
+
+          <Separator orientation="vertical" className="mx-1 h-6" />
+          <Button variant="ghost" className="size-8" {...buttonProps}>
+            <Trash2Icon />
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
 const ColumnGroupElement = (props: PlateElementProps) => { return (<PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement>);
 };
 
@@ -277,4 +223,60 @@ const ColumnDragHandle = React.memo(() => {
     </TooltipProvider>
   );
 });
+
+const ColumnElement = withHOC(ResizableProvider, (props: PlateElementProps<TColumnElement>) => { const { width } = props.element;
+  const readOnly = useReadOnly();
+  const isSelectionAreaVisible = usePluginOption(
+    BlockSelectionPlugin,
+    "isSelectionAreaVisible",
+  );
+
+  const { isDragging, nodeRef, previewRef, handleRef } = useDraggable({
+    element: props.element,
+    orientation: "horizontal",
+    type: "column",
+    canDropNode: ({ dragEntry, dropEntry }) =>
+      PathApi.equals(
+        PathApi.parent(dragEntry[1]),
+        PathApi.parent(dropEntry[1]),
+      ),
+  });
+
+  return (
+    <div className="group/column relative" style={{ width: width ?? "100%" }}>
+      {!readOnly && !isSelectionAreaVisible && (
+        <div
+          ref={handleRef}
+          className={cn(
+            "-translate-x-1/2 -translate-y-1/2 absolute top-2 left-1/2 z-50",
+            "pointer-events-auto flex items-center",
+            "opacity-0 transition-opacity group-hover/column:opacity-100",
+          )}
+        >
+          <ColumnDragHandle />
+        </div>
+      )}
+
+      <PlateElement
+        {...props}
+        ref={useComposedRef(props.ref, previewRef, nodeRef)}
+        className="h-full px-2 pt-2 group-first/column:pl-0 group-last/column:pr-0"
+      >
+        <div
+          className={cn(
+            "relative h-full border border-transparent p-1.5",
+            !readOnly && "rounded-lg border-border border-dashed",
+            isDragging && "opacity-50",
+          )}
+        >
+          {props.children}
+
+          {!readOnly && !isSelectionAreaVisible && <DropLine />}
+        </div>
+      </PlateElement>
+    </div>
+  );
+},
+);
+
 export { ColumnElement, ColumnGroupElement };

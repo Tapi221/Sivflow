@@ -107,30 +107,6 @@ const emojiSearchIcons = {
   loupe: <SearchIcon className="size-4 text-current" />,
 };
 
-const EmojiToolbarButton = ({ options, ...props }: { options?: EmojiDropdownMenuOptions;
-} & React.ComponentPropsWithoutRef<typeof ToolbarButton>) => {
-  const { emojiPickerState, isOpen, setIsOpen } =
-    useEmojiDropdownMenuState(options);
-
-  return (
-    <EmojiPopover
-      control={
-        <ToolbarButton pressed={isOpen} tooltip="Emoji" isDropdown {...props}>
-          <SmileIcon />
-        </ToolbarButton>
-      }
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-    >
-      <EmojiPicker
-        {...emojiPickerState}
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        settings={options?.settings}
-      />
-    </EmojiPopover>
-  );
-};
 const EmojiPopover = ({ children, control, isOpen, setIsOpen }: { children: React.ReactNode;
   control: React.ReactNode;
   isOpen: boolean;
@@ -144,53 +120,6 @@ const EmojiPopover = ({ children, control, isOpen, setIsOpen }: { children: Reac
         <Popover.Content className="z-100">{children}</Popover.Content>
       </Popover.Portal>
     </Popover.Root>
-  );
-};
-const EmojiPicker = ({ clearSearch, emoji, emojiLibrary, focusedCategory, hasFound, i18n, icons = { categories: emojiCategoryIcons, search: emojiSearchIcons }, isSearching, refs, searchResult, searchValue, setSearch, settings = EmojiSettings, visibleCategories, handleCategoryClick, onMouseOver, onSelectEmoji }: Omit<UseEmojiPickerType, "icons"> & { icons?: EmojiIconList<React.ReactElement>;
-}) => {
-  return (
-    <div
-      className={cn(
-        "flex flex-col rounded-xl bg-popover text-popover-foreground",
-        "h-[23rem] w-80 border shadow-md",
-      )}
-    >
-      <EmojiPickerNavigation
-        onClick={handleCategoryClick}
-        emojiLibrary={emojiLibrary}
-        focusedCategory={focusedCategory}
-        i18n={i18n}
-        icons={icons}
-      />
-      <EmojiPickerSearchBar
-        i18n={i18n}
-        searchValue={searchValue}
-        setSearch={setSearch}
-      >
-        <EmojiPickerSearchAndClear
-          clearSearch={clearSearch}
-          i18n={i18n}
-          searchValue={searchValue}
-        />
-      </EmojiPickerSearchBar>
-      <EmojiPickerContent
-        onMouseOver={onMouseOver}
-        onSelectEmoji={onSelectEmoji}
-        emojiLibrary={emojiLibrary}
-        i18n={i18n}
-        isSearching={isSearching}
-        refs={refs}
-        searchResult={searchResult}
-        settings={settings}
-        visibleCategories={visibleCategories}
-      />
-      <EmojiPickerPreview
-        emoji={emoji}
-        hasFound={hasFound}
-        i18n={i18n}
-        isSearching={isSearching}
-      />
-    </div>
   );
 };
 const EmojiPickerSearchBar = ({
@@ -553,6 +482,77 @@ const EmojiPickerContent = ({
         {isSearching ? SearchList() : EmojiList()}
       </div>
     </div>
+  );
+};
+const EmojiPicker = ({ clearSearch, emoji, emojiLibrary, focusedCategory, hasFound, i18n, icons = { categories: emojiCategoryIcons, search: emojiSearchIcons }, isSearching, refs, searchResult, searchValue, setSearch, settings = EmojiSettings, visibleCategories, handleCategoryClick, onMouseOver, onSelectEmoji }: Omit<UseEmojiPickerType, "icons"> & { icons?: EmojiIconList<React.ReactElement>;
+}) => {
+  return (
+    <div
+      className={cn(
+        "flex flex-col rounded-xl bg-popover text-popover-foreground",
+        "h-[23rem] w-80 border shadow-md",
+      )}
+    >
+      <EmojiPickerNavigation
+        onClick={handleCategoryClick}
+        emojiLibrary={emojiLibrary}
+        focusedCategory={focusedCategory}
+        i18n={i18n}
+        icons={icons}
+      />
+      <EmojiPickerSearchBar
+        i18n={i18n}
+        searchValue={searchValue}
+        setSearch={setSearch}
+      >
+        <EmojiPickerSearchAndClear
+          clearSearch={clearSearch}
+          i18n={i18n}
+          searchValue={searchValue}
+        />
+      </EmojiPickerSearchBar>
+      <EmojiPickerContent
+        onMouseOver={onMouseOver}
+        onSelectEmoji={onSelectEmoji}
+        emojiLibrary={emojiLibrary}
+        i18n={i18n}
+        isSearching={isSearching}
+        refs={refs}
+        searchResult={searchResult}
+        settings={settings}
+        visibleCategories={visibleCategories}
+      />
+      <EmojiPickerPreview
+        emoji={emoji}
+        hasFound={hasFound}
+        i18n={i18n}
+        isSearching={isSearching}
+      />
+    </div>
+  );
+};
+const EmojiToolbarButton = ({ options, ...props }: { options?: EmojiDropdownMenuOptions;
+} & React.ComponentPropsWithoutRef<typeof ToolbarButton>) => {
+  const { emojiPickerState, isOpen, setIsOpen } =
+    useEmojiDropdownMenuState(options);
+
+  return (
+    <EmojiPopover
+      control={
+        <ToolbarButton pressed={isOpen} tooltip="Emoji" isDropdown {...props}>
+          <SmileIcon />
+        </ToolbarButton>
+      }
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+    >
+      <EmojiPicker
+        {...emojiPickerState}
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        settings={options?.settings}
+      />
+    </EmojiPopover>
   );
 };
 

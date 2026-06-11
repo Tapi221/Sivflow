@@ -9,6 +9,15 @@ import { useEditorReadOnly, useEditorRef, usePluginOption } from "platejs/react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "./dropdown-menu";
 import { ToolbarButton } from "./toolbar";
 
+const Indicator = () => {
+  return (
+    <span className="pointer-events-none absolute right-2 flex size-3.5 items-center justify-center">
+      <DropdownMenuItemIndicator>
+        <CheckIcon />
+      </DropdownMenuItemIndicator>
+    </span>
+  );
+};
 const ModeToolbarButton = (props: DropdownMenuProps) => { const editor = useEditorRef();
   const readOnly = useEditorReadOnly();
   const [open, setOpen] = React.useState(false);
@@ -99,15 +108,6 @@ const ModeToolbarButton = (props: DropdownMenuProps) => { const editor = useEdit
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-};
-const Indicator = () => {
-  return (
-    <span className="pointer-events-none absolute right-2 flex size-3.5 items-center justify-center">
-      <DropdownMenuItemIndicator>
-        <CheckIcon />
-      </DropdownMenuItemIndicator>
-    </span>
   );
 };
 

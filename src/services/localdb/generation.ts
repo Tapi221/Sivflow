@@ -31,6 +31,21 @@ const writeGenerationToStorage = (userId: string, generation: number): void => {
 const getGenerationForUser = (userId: string) => {
   return readGenerationFromStorage(userId);
 };
+const isLocalDbGenerationStorageKey = (key: string): boolean => key.startsWith(LOCALDB_GENERATION_KEY_PREFIX) || key.startsWith(LOCALDB_LEGACY_GENERATION_KEY_PREFIX);
+const isLocalDbPersistentDatabaseName = (name: string): boolean => name.startsWith(LOCALDB_NAME_PREFIX) || name.startsWith(LOCALDB_LEGACY_NAME_PREFIX);
+const getKnownLocalDbNamesForUser = (userId: string): string[] => { const names: string[] = [];
+  const generationPrefix = makeGenerationDbPrefix(LOCALDB_NAME_PREFIX, userId);
+  const legacyGenerationPrefix = makeGenerationDbPrefix(LOCALDB_LEGACY_NAME_PREFIX, userId);
+
+  for (let generation = 0; generation <= LOCALDB_GENERATION_MAX; generation += 1) {
+    names.push(`${generationPrefix}${generation}`);
+    names.push(`${legacyGenerationPrefix}${generation}`);
+  }
+
+  names.push(`${LOCALDB_NAME_PREFIX}${userId}`);
+  names.push(`${LOCALDB_LEGACY_NAME_PREFIX}${userId}`);
+  return names;
+};
 const listUserPersistentDbNames = async (userId: string) => {
   const names = new Set<string>(getKnownLocalDbNamesForUser(userId));
   const generationPrefix = makeGenerationDbPrefix(LOCALDB_NAME_PREFIX, userId);
@@ -56,21 +71,6 @@ const listUserPersistentDbNames = async (userId: string) => {
   }
 
   return Array.from(names.values());
-};
-const isLocalDbGenerationStorageKey = (key: string): boolean => key.startsWith(LOCALDB_GENERATION_KEY_PREFIX) || key.startsWith(LOCALDB_LEGACY_GENERATION_KEY_PREFIX);
-const isLocalDbPersistentDatabaseName = (name: string): boolean => name.startsWith(LOCALDB_NAME_PREFIX) || name.startsWith(LOCALDB_LEGACY_NAME_PREFIX);
-const getKnownLocalDbNamesForUser = (userId: string): string[] => { const names: string[] = [];
-  const generationPrefix = makeGenerationDbPrefix(LOCALDB_NAME_PREFIX, userId);
-  const legacyGenerationPrefix = makeGenerationDbPrefix(LOCALDB_LEGACY_NAME_PREFIX, userId);
-
-  for (let generation = 0; generation <= LOCALDB_GENERATION_MAX; generation += 1) {
-    names.push(`${generationPrefix}${generation}`);
-    names.push(`${legacyGenerationPrefix}${generation}`);
-  }
-
-  names.push(`${LOCALDB_NAME_PREFIX}${userId}`);
-  names.push(`${LOCALDB_LEGACY_NAME_PREFIX}${userId}`);
-  return names;
 };
 const bumpGenerationForUser = (userId: string) => { if (generationBumpedUsers.has(userId)) { return getGenerationForUser(userId);
 }

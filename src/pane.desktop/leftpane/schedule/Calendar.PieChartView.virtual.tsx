@@ -99,7 +99,6 @@ const DayRow = memo(({ day, onSelectDate }: { day: DaySummary; onSelectDate?: (d
   const background = `conic-gradient(#0a84ff 0turn ${used}turn, #f2f2f7 ${used}turn ${used + unused}turn)`;
   return <section className="grid h-full grid-cols-[58px_minmax(0,1fr)] gap-2" aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}><DayDateButton day={day} onSelectDate={onSelectDate} /><div className="grid min-h-0 grid-cols-[minmax(0,1fr)_180px] items-center gap-4"><div className="min-w-0"><div className="text-[13px] font-semibold text-[#3a3a3c]">{day.count > 0 ? `${day.count}件 / ${Math.round(day.minutes / 60 * 10) / 10}h` : "時間指定なし"}</div><div className="mt-2 h-2 rounded-full bg-[#f2f2f7]"><div className="h-full rounded-full bg-[#0a84ff]" style={{ width: `${used * 100}%` }} /></div></div><div className="mx-auto flex aspect-square w-full max-w-[180px] items-center justify-center rounded-full border border-[#eeeeee]" style={{ background }}><div className="flex h-[44%] w-[44%] items-center justify-center rounded-full bg-white text-[12px] font-semibold text-[#3a3a3c] shadow-sm">{Math.round(day.minutes / 60 * 10) / 10}h</div></div></div></section>;
 });
-DayRow.displayName = "DayRow";
 
 const CalendarPieChartViewComponent = ({ virtualRail, selectedDate, events, onSelectDate, onVisibleDateChange, scrollViewportRef: externalRef, onScrollTopChange, className }: CalendarPieChartViewProps) => {
   const localRef = useRef<HTMLDivElement | null>(null);
@@ -132,6 +131,7 @@ const CalendarPieChartViewComponent = ({ virtualRail, selectedDate, events, onSe
   return <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}><div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden"><div className="mx-auto w-full max-w-[940px]"><div className="relative w-full" style={{ height: totalHeight }}>{days.map((day, offset) => <div key={day.key} className="absolute left-0 right-0" style={{ contain: "layout style", top: (range.start + offset) * DAY_BLOCK, height: DAY_HEIGHT }}><DayRow day={day} onSelectDate={onSelectDate} /></div>)}</div></div></div></div>;
 };
 
+DayRow.displayName = "DayRow";
 const CalendarPieChartView = memo(CalendarPieChartViewComponent);
 CalendarPieChartView.displayName = "CalendarPieChartView";
 export { CalendarPieChartView };

@@ -66,7 +66,6 @@ const createFallbackInstance = (userId?: string, reason?: unknown): InMemoryLoca
   return db;
 };
 const getFallbackInstance = async (userId?: string, reason?: unknown): Promise<InMemoryLocalDB> => createFallbackInstance(userId, reason);
-const getLocalDb = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
 const getLocalDbSync = (userId?: string): LocalDBSyncStore => { const targetUserId = userId ?? currentUserId ?? "anonymous";
   if (cachedInstance && currentUserId === targetUserId) return cachedInstance as unknown as LocalDBSyncStore;
   return createFallbackInstance(targetUserId, "local-db-not-initialized") as unknown as LocalDBSyncStore;
@@ -120,6 +119,7 @@ const getInstance = async (userId?: string): Promise<LocalDBSyncStore> => { cons
     getLocalDbGlobal().__ALLOW_LOCAL_DB_CONSTRUCTION = false;
   }
 };
+const getLocalDb = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
 const initializeDB = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
 const clearInstance = (): void => { if (instance) { try { instance.close();
 } catch {

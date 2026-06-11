@@ -85,14 +85,6 @@ const SuggestionLeaf = (props: PlateLeafProps<TSuggestionText>) => { const { api
 
   return <PlateLeaf {...props} as={Component} className={cn(suggestionVariants({ insertActive: hasActive || hasHover, remove: hasRemove, removeActive: (hasActive || hasHover) && hasRemove }))} attributes={{ ...props.attributes, onMouseEnter: () => setOption("hoverId", leafId), onMouseLeave: () => setOption("hoverId", null) }}>{props.children}</PlateLeaf>;
 };
-const SuggestionLineBreak: RenderNodeWrapper<AnyPluginConfig> = ({ api, element }) => { if (!api.suggestion.isBlockSuggestion(element)) return;
-
-  const suggestionData = element.suggestion as TSuggestionData;
-
-  return ({ children }) => {
-    return <SuggestionLineBreakContent elementType={element.type} suggestionData={suggestionData}>{children}</SuggestionLineBreakContent>;
-  };
-};
 const SuggestionLineBreakContent = ({ children, elementType, suggestionData }: { children: React.ReactNode;
   elementType?: string;
   suggestionData: TSuggestionData;
@@ -114,6 +106,14 @@ const SuggestionLineBreakContent = ({ children, elementType, suggestionData }: {
   }
 
   return <div className={getBlockSuggestionWrapperClassName({ elementType, isActive, isHover, isInsert, isRemove })} onMouseEnter={() => setOption("hoverId", suggestionData.id)} onMouseLeave={() => setOption("hoverId", null)} data-block-suggestion="true">{children}</div>;
+};
+const SuggestionLineBreak: RenderNodeWrapper<AnyPluginConfig> = ({ api, element }) => { if (!api.suggestion.isBlockSuggestion(element)) return;
+
+  const suggestionData = element.suggestion as TSuggestionData;
+
+  return ({ children }) => {
+    return <SuggestionLineBreakContent elementType={element.type} suggestionData={suggestionData}>{children}</SuggestionLineBreakContent>;
+  };
 };
 
 export { suggestionVariants, getBlockSuggestionWrapperClassName, isVoidRemoveSuggestion, VoidRemoveSuggestionOverlay, SuggestionLineBreakAnchor, SuggestionLeaf, SuggestionLineBreak, SuggestionLineBreakContent };

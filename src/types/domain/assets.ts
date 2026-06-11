@@ -24,6 +24,9 @@ interface AssetRecord { id: string;
   height?: number | null;
   sha256?: string | null;
 }
+interface ImageBlockLayout { /** fixed 本文座標系での画像論理幅。fixed / fluid 共通の正本。 */ baseWidthPx?: number | null;
+  cropX?: number | null;
+}
 interface CardImageRef { assetId: string;
   scale?: number | null;
   x?: number | null;
@@ -44,9 +47,6 @@ type ResolvableImageRef = { id?: string | null;
   naturalW?: number | null;
   naturalH?: number | null;
 };
-interface ImageBlockLayout { /** fixed 本文座標系での画像論理幅。fixed / fluid 共通の正本。 */ baseWidthPx?: number | null;
-  cropX?: number | null;
-}
 interface UploadedImage { id: string;
   assetId?: string | null;
   localUrl?: BlobUrl | null;

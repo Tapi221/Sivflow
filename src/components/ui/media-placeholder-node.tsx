@@ -59,6 +59,46 @@ const CONTENT: Record<
     icon: <Film />,
   },
 };
+const ImageProgress = ({ className, file, imageRef, progress = 0 }: { file: File;
+  className?: string;
+  imageRef?: React.RefObject<HTMLImageElement | null>;
+  progress?: number;
+}) => {
+  const [objectUrl, setObjectUrl] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const url = URL.createObjectURL(file);
+
+    setObjectUrl(url);
+
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [file]);
+
+  if (!objectUrl) {
+    return null;
+  }
+
+  return (
+    <div className={cn("relative", className)} contentEditable={false}>
+      <img
+        ref={imageRef}
+        className="h-auto w-full rounded-sm object-cover"
+        alt={file.name}
+        src={objectUrl}
+      />
+      {progress < 100 && (
+        <div className="absolute right-1 bottom-1 flex items-center space-x-2 rounded-full bg-black/50 px-1 py-0.5">
+          <Loader2Icon className="size-3.5 animate-spin text-muted-foreground" />
+          <span className="font-medium text-white text-xs">
+            {Math.round(progress)}%
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
 const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElementProps<TPlaceholderElement>) => { const { editor, element } = props;
 
   const { api } = useEditorPlugin(PlaceholderPlugin);
@@ -186,45 +226,5 @@ const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElementProp
   );
 },
 );
-const ImageProgress = ({ className, file, imageRef, progress = 0 }: { file: File;
-  className?: string;
-  imageRef?: React.RefObject<HTMLImageElement | null>;
-  progress?: number;
-}) => {
-  const [objectUrl, setObjectUrl] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    const url = URL.createObjectURL(file);
-
-    setObjectUrl(url);
-
-    return () => {
-      URL.revokeObjectURL(url);
-    };
-  }, [file]);
-
-  if (!objectUrl) {
-    return null;
-  }
-
-  return (
-    <div className={cn("relative", className)} contentEditable={false}>
-      <img
-        ref={imageRef}
-        className="h-auto w-full rounded-sm object-cover"
-        alt={file.name}
-        src={objectUrl}
-      />
-      {progress < 100 && (
-        <div className="absolute right-1 bottom-1 flex items-center space-x-2 rounded-full bg-black/50 px-1 py-0.5">
-          <Loader2Icon className="size-3.5 animate-spin text-muted-foreground" />
-          <span className="font-medium text-white text-xs">
-            {Math.round(progress)}%
-          </span>
-        </div>
-      )}
-    </div>
-  );
-};
 
 export { PlaceholderElement, ImageProgress };

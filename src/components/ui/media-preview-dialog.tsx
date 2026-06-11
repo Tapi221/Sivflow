@@ -31,6 +31,11 @@ const getImageDownloadFilename = (url: string) => {
   }
 };
 
+const ScaleInput = (props: React.ComponentProps<"input">) => {
+  const { props: scaleInputProps, ref } = useScaleInput();
+
+  return <input {...scaleInputProps} {...props} ref={ref} />;
+};
 const MediaPreviewDialog = () => { const editor = useEditorRef();
   const isOpen = useImagePreviewValue("isOpen", editor.id);
   const scale = useImagePreviewValue("scale");
@@ -168,11 +173,6 @@ const MediaPreviewDialog = () => { const editor = useEditorRef();
       </div>
     </div>
   );
-};
-const ScaleInput = (props: React.ComponentProps<"input">) => {
-  const { props: scaleInputProps, ref } = useScaleInput();
-
-  return <input {...scaleInputProps} {...props} ref={ref} />;
 };
 
 export { MediaPreviewDialog };

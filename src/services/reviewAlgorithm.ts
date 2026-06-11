@@ -317,6 +317,72 @@ const estimateInitialNextReviewDate = ({
   nextReviewDate.setHours(0, 0, 0, 0);
   return nextReviewDate;
 };
+const computeNextReview = ({ card, subjectiveScore, now = new Date(), delayBonusEnabled = false }: ReviewAlgorithmInput & { delayBonusEnabled?: boolean;
+}): ReviewAlgorithmResult => {
+  const record = isRecord(card) ? card : {};
+
+  const currentReviewCount = getCurrentReviewCount(card);
+  const legacyLevel =
+    card.currentLevel ??
+    readNumber(record, "current_level") ??
+    card.level ??
+    readNumber(record, "level");
+
+  const currentStability = getInitialStability(
+    card.memoryStability ?? readNumber(record, "memory_stability"),
+    legacyLevel,
+  );
+
+  const currentDifficulty = getInitialDifficulty(
+    card.difficulty ?? readNumber(record, "difficulty"),
+    currentStability,
+  );
+
+  const plannedDate = toDate(
+    card.nextReviewDate ??
+    (record["next_review_date"] as Date | Timestamp | string | number | null),
+  );
+
+  const delayDays = Math.max(0, plannedDate ? diffDays(now, plannedDate) : 0);
+
+  let newStability = updateStability(currentStability, subjectiveScore);
+
+  if (delayBonusEnabled && delayDays > 0) {
+    const bonusFactor = 1 + Math.log2(1 + delayDays);
+    newStability = clampStability(newStability * bonusFactor);
+  }
+
+  const newDifficulty = updateDifficulty(currentDifficulty, subjectiveScore);
+  const recoveryRemaining = 0;
+  const baseIntervalDays = calculateIntervalDays(newStability);
+  const brakedInterval = applyDifficultyBrakeToInterval(
+    baseIntervalDays,
+    newDifficulty,
+  );
+
+  const scoreMinInterval =
+    subjectiveScore <= 0 ? 1 : subjectiveScore === 1 ? 2 : 1;
+
+  const intervalDays = Math.max(scoreMinInterval, brakedInterval);
+
+  const nextReviewDate = new Date(now);
+  nextReviewDate.setDate(nextReviewDate.getDate() + intervalDays);
+  nextReviewDate.setHours(0, 0, 0, 0);
+
+  return {
+    memoryStability: newStability,
+    nextReviewDate,
+    lastReviewAt: now,
+    lastSubjectiveScore: subjectiveScore,
+    recoveryRemaining,
+    intervalDays,
+    delayDays,
+    reviewCount: currentReviewCount + 1,
+    difficulty: newDifficulty,
+  };
+};
+const ratingToSubjectiveScore = (rating: ReviewLog["rating"]): SubjectiveScore => { return Math.max(0, Math.min(3, rating - 1)) as SubjectiveScore;
+};
 const buildCardStateBeforeLatestReview = ({
   card,
   reviewLogs,
@@ -397,72 +463,6 @@ const buildCardStateBeforeLatestReview = ({
     reviewCount: previousLogs.length,
     reviewLogs: previousLogs,
   };
-};
-const computeNextReview = ({ card, subjectiveScore, now = new Date(), delayBonusEnabled = false }: ReviewAlgorithmInput & { delayBonusEnabled?: boolean;
-}): ReviewAlgorithmResult => {
-  const record = isRecord(card) ? card : {};
-
-  const currentReviewCount = getCurrentReviewCount(card);
-  const legacyLevel =
-    card.currentLevel ??
-    readNumber(record, "current_level") ??
-    card.level ??
-    readNumber(record, "level");
-
-  const currentStability = getInitialStability(
-    card.memoryStability ?? readNumber(record, "memory_stability"),
-    legacyLevel,
-  );
-
-  const currentDifficulty = getInitialDifficulty(
-    card.difficulty ?? readNumber(record, "difficulty"),
-    currentStability,
-  );
-
-  const plannedDate = toDate(
-    card.nextReviewDate ??
-    (record["next_review_date"] as Date | Timestamp | string | number | null),
-  );
-
-  const delayDays = Math.max(0, plannedDate ? diffDays(now, plannedDate) : 0);
-
-  let newStability = updateStability(currentStability, subjectiveScore);
-
-  if (delayBonusEnabled && delayDays > 0) {
-    const bonusFactor = 1 + Math.log2(1 + delayDays);
-    newStability = clampStability(newStability * bonusFactor);
-  }
-
-  const newDifficulty = updateDifficulty(currentDifficulty, subjectiveScore);
-  const recoveryRemaining = 0;
-  const baseIntervalDays = calculateIntervalDays(newStability);
-  const brakedInterval = applyDifficultyBrakeToInterval(
-    baseIntervalDays,
-    newDifficulty,
-  );
-
-  const scoreMinInterval =
-    subjectiveScore <= 0 ? 1 : subjectiveScore === 1 ? 2 : 1;
-
-  const intervalDays = Math.max(scoreMinInterval, brakedInterval);
-
-  const nextReviewDate = new Date(now);
-  nextReviewDate.setDate(nextReviewDate.getDate() + intervalDays);
-  nextReviewDate.setHours(0, 0, 0, 0);
-
-  return {
-    memoryStability: newStability,
-    nextReviewDate,
-    lastReviewAt: now,
-    lastSubjectiveScore: subjectiveScore,
-    recoveryRemaining,
-    intervalDays,
-    delayDays,
-    reviewCount: currentReviewCount + 1,
-    difficulty: newDifficulty,
-  };
-};
-const ratingToSubjectiveScore = (rating: ReviewLog["rating"]): SubjectiveScore => { return Math.max(0, Math.min(3, rating - 1)) as SubjectiveScore;
 };
 const createReviewLogEntry = ({ reviewedAt, rating, intervalDays, durationMinutes = null }: { reviewedAt: Date;
   rating: ReviewLog["rating"];

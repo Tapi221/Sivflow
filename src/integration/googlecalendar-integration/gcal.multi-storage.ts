@@ -138,6 +138,11 @@ const hydratePendingLegacyDesktopRefreshTokens = (
     return refreshToken ? { ...account, refreshToken } : account;
   });
 };
+const writeStoredAccounts = (accounts: StoredGoogleAccount[]): void => { try { localStorage.setItem(MULTI_ACCOUNTS_KEY, JSON.stringify(stripLocalRefreshTokens(dedupeStoredAccounts(accounts), shouldStripLocalRefreshTokensOnWrite())));
+} catch {
+  // ignore quota errors
+}
+};
 // ─────────────────────────────────────────────────────────────
 // Legacy migration
 // ─────────────────────────────────────────────────────────────
@@ -207,11 +212,6 @@ const readStoredAccounts = (): StoredGoogleAccount[] => { try { const raw = loca
   return hydratePendingLegacyDesktopRefreshTokens(dedupedAccounts);
 } catch {
   return [];
-}
-};
-const writeStoredAccounts = (accounts: StoredGoogleAccount[]): void => { try { localStorage.setItem(MULTI_ACCOUNTS_KEY, JSON.stringify(stripLocalRefreshTokens(dedupeStoredAccounts(accounts), shouldStripLocalRefreshTokensOnWrite())));
-} catch {
-  // ignore quota errors
 }
 };
 const upsertStoredAccount = (account: StoredGoogleAccount): void => { const accounts = readStoredAccounts();

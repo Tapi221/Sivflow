@@ -48,6 +48,71 @@ const MEDIA_CONFIG: Record<
   },
 };
 
+const MediaUrlDialogContent = ({
+  currentConfig,
+  nodeType,
+  setOpen,
+}: {
+  currentConfig: (typeof MEDIA_CONFIG)[string];
+  nodeType: string;
+  setOpen: (value: boolean) => void;
+}) => {
+  const editor = useEditorRef();
+  const [url, setUrl] = React.useState("");
+
+  const embedMedia = React.useCallback(() => {
+    if (!isUrl(url)) return toast.error("Invalid URL");
+
+    setOpen(false);
+    editor.tf.insertNodes({
+      children: [{ text: "" }],
+      name: nodeType === KEYS.file ? url.split("/").pop() : undefined,
+      type: nodeType,
+      url,
+    });
+  }, [url, editor, nodeType, setOpen]);
+
+  return (
+    <>
+      <AlertDialogHeader>
+        <AlertDialogTitle>{currentConfig.title}</AlertDialogTitle>
+      </AlertDialogHeader>
+
+      <AlertDialogDescription className="group relative w-full">
+        <label
+          className="-translate-y-1/2 absolute top-1/2 block cursor-text px-1 text-muted-foreground/70 text-sm transition-all group-focus-within:pointer-events-none group-focus-within:top-0 group-focus-within:cursor-default group-focus-within:font-medium group-focus-within:text-foreground group-focus-within:text-xs has-[+input:not(:placeholder-shown)]:pointer-events-none has-[+input:not(:placeholder-shown)]:top-0 has-[+input:not(:placeholder-shown)]:cursor-default has-[+input:not(:placeholder-shown)]:font-medium has-[+input:not(:placeholder-shown)]:text-foreground has-[+input:not(:placeholder-shown)]:text-xs"
+          htmlFor="url"
+        >
+          <span className="inline-flex bg-background px-2">URL</span>
+        </label>
+        <Input
+          id="url"
+          className="w-full"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") embedMedia();
+          }}
+          placeholder=""
+          type="url"
+          autoFocus
+        />
+      </AlertDialogDescription>
+
+      <AlertDialogFooter>
+        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogAction
+          onClick={(e) => {
+            e.preventDefault();
+            embedMedia();
+          }}
+        >
+          Accept
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </>
+  );
+};
 const MediaToolbarButton = ({ nodeType, ...props }: DropdownMenuProps & { nodeType: string; }) => {
   const currentConfig = MEDIA_CONFIG[nodeType];
 
@@ -124,71 +189,6 @@ const MediaToolbarButton = ({ nodeType, ...props }: DropdownMenuProps & { nodeTy
           />
         </AlertDialogContent>
       </AlertDialog>
-    </>
-  );
-};
-const MediaUrlDialogContent = ({
-  currentConfig,
-  nodeType,
-  setOpen,
-}: {
-  currentConfig: (typeof MEDIA_CONFIG)[string];
-  nodeType: string;
-  setOpen: (value: boolean) => void;
-}) => {
-  const editor = useEditorRef();
-  const [url, setUrl] = React.useState("");
-
-  const embedMedia = React.useCallback(() => {
-    if (!isUrl(url)) return toast.error("Invalid URL");
-
-    setOpen(false);
-    editor.tf.insertNodes({
-      children: [{ text: "" }],
-      name: nodeType === KEYS.file ? url.split("/").pop() : undefined,
-      type: nodeType,
-      url,
-    });
-  }, [url, editor, nodeType, setOpen]);
-
-  return (
-    <>
-      <AlertDialogHeader>
-        <AlertDialogTitle>{currentConfig.title}</AlertDialogTitle>
-      </AlertDialogHeader>
-
-      <AlertDialogDescription className="group relative w-full">
-        <label
-          className="-translate-y-1/2 absolute top-1/2 block cursor-text px-1 text-muted-foreground/70 text-sm transition-all group-focus-within:pointer-events-none group-focus-within:top-0 group-focus-within:cursor-default group-focus-within:font-medium group-focus-within:text-foreground group-focus-within:text-xs has-[+input:not(:placeholder-shown)]:pointer-events-none has-[+input:not(:placeholder-shown)]:top-0 has-[+input:not(:placeholder-shown)]:cursor-default has-[+input:not(:placeholder-shown)]:font-medium has-[+input:not(:placeholder-shown)]:text-foreground has-[+input:not(:placeholder-shown)]:text-xs"
-          htmlFor="url"
-        >
-          <span className="inline-flex bg-background px-2">URL</span>
-        </label>
-        <Input
-          id="url"
-          className="w-full"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") embedMedia();
-          }}
-          placeholder=""
-          type="url"
-          autoFocus
-        />
-      </AlertDialogDescription>
-
-      <AlertDialogFooter>
-        <AlertDialogCancel>Cancel</AlertDialogCancel>
-        <AlertDialogAction
-          onClick={(e) => {
-            e.preventDefault();
-            embedMedia();
-          }}
-        >
-          Accept
-        </AlertDialogAction>
-      </AlertDialogFooter>
     </>
   );
 };

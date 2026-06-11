@@ -16,14 +16,6 @@ type CloudSyncLookupDescriptor = {
   resolveSyncId: (context: LookupContext) => string;
 };
 
-const createPullableLookupDescriptor = (
-  type: PullableEntityType,
-): CloudSyncLookupDescriptor => ({
-  type,
-  resolveData: ({ firestore, userId, id }) =>
-    lookupPullableEntityData(firestore, userId, type, id),
-  resolveSyncId: ({ id }) => id,
-});
 const lookupPullableEntityData = async (
   firestore: Firestore,
   userId: string,
@@ -36,6 +28,14 @@ const lookupPullableEntityData = async (
 
   return snap.empty ? null : snap.docs[0].data();
 };
+const createPullableLookupDescriptor = (
+  type: PullableEntityType,
+): CloudSyncLookupDescriptor => ({
+  type,
+  resolveData: ({ firestore, userId, id }) =>
+    lookupPullableEntityData(firestore, userId, type, id),
+  resolveSyncId: ({ id }) => id,
+});
 const lookupUserSettingData = async (
   firestore: Firestore,
   userId: string,

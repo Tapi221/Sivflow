@@ -84,6 +84,8 @@ const createEditorBlockConfigFromDefinition = (
 const getFallbackOrderIndex = (type: EditorBlockType) => {
   return EDITOR_BLOCK_DEFINITION_BY_TYPE[type].orderIndex;
 };
+const isEditorBlockType = (value: unknown): value is EditorBlockType => { return (typeof value === "string" && Object.prototype.hasOwnProperty.call(EDITOR_BLOCK_DEFINITION_BY_TYPE, value));
+};
 const compareEditorBlockConfigs = (
   left: EditorBlockComparable,
   right: EditorBlockComparable,
@@ -98,8 +100,6 @@ const compareEditorBlockConfigs = (
   }
 
   return getFallbackOrderIndex(left.type) - getFallbackOrderIndex(right.type);
-};
-const isEditorBlockType = (value: unknown): value is EditorBlockType => { return (typeof value === "string" && Object.prototype.hasOwnProperty.call(EDITOR_BLOCK_DEFINITION_BY_TYPE, value));
 };
 const getEditorBlockDefinition = (type: EditorBlockType): EditorBlockDefinition => { return EDITOR_BLOCK_DEFINITION_BY_TYPE[type];
 };

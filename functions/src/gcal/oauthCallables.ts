@@ -28,14 +28,23 @@ const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
 const REQUIRED_GOOGLE_SCOPES = ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.readonly", "https://www.googleapis.com/auth/calendar.app.created", "https://www.googleapis.com/auth/tasks", "https://www.googleapis.com/auth/drive.file"] as const;
-const exchangeGoogleCalendarCode = connectGoogleCalendarAccount;
-const getGoogleCalendarAccessToken = refreshGoogleCalendarAccessToken;
 
 const requireUid = (request: { auth?: { uid?: string; }; }) => {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "Authentication required.");
   return uid;
 };
+
+const disconnectGoogleCalendarAccount = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
+  const accountId = typeof request.data?.accountId === "string" ? request.data.accountId : "";
+  if (!accountId) throw new HttpsError("invalid-argument", "accountId is required.");
+  await (await getDb()).doc(`users/${uid}/googleCalendarAccounts/${accountId}`).delete();
+  return { ok: true };
+});
+const createGoogleCalendarCustomToken = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
+  return { customToken: await (await getAdminAuth()).createCustomToken(uid) };
+});
+
 const getErrorSummary = (error: unknown): Record<string, unknown> => {
   if (error instanceof Error) return { name: error.name, message: error.message, stack: error.stack };
   return { type: typeof error };
@@ -132,6 +141,17 @@ const verifyGoogleScopes = async (accessToken: string): Promise<void> => {
 };
 const isReusableCachedPhotoUrl = (photoUrl: unknown): photoUrl is string => typeof photoUrl === "string" && (photoUrl.startsWith("https://firebasestorage.googleapis.com/") || photoUrl.startsWith("https://storage.googleapis.com/"));
 const getExistingAccountPhotoUrl = (account: Partial<StoredGoogleCalendarAccount> | null): string | null => isReusableCachedPhotoUrl(account?.photoUrl) ? account.photoUrl : null;
+
+const listGoogleCalendarAccounts = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
+  const snapshot = await (await getDb()).collection(`users/${uid}/googleCalendarAccounts`).get();
+  return {
+    accounts: snapshot.docs.map((doc) => {
+      const data = doc.data() as Partial<StoredGoogleCalendarAccount>;
+      return { accountId: doc.id, email: typeof data.email === "string" ? data.email : null, name: typeof data.name === "string" ? data.name : null, photoUrl: getExistingAccountPhotoUrl(data) };
+    })
+  };
+});
+
 const storeGoogleAccount = async (uid: string, refreshToken: string, profile: GoogleOAuthProfile) => {
   const db = await getDb();
   const now = await serverTimestamp();
@@ -145,23 +165,6 @@ const storeGoogleAccount = async (uid: string, refreshToken: string, profile: Go
   return account;
 };
 const toAccessResponse = (accessToken: string, account: StoredGoogleCalendarAccount, expiresInSeconds: number | null) => ({ accessToken, expiresIn: expiresInSeconds, expiresInSeconds, accountEmail: account.email, accountName: account.name, accountPhotoUrl: account.photoUrl, refreshTokenStored: true });
-const getStoredAccount = async (uid: string, accountId: string): Promise<StoredGoogleCalendarAccount> => {
-  if (!accountId) throw new HttpsError("invalid-argument", "accountId is required.");
-  const accountSnap = await (await getDb()).doc(`users/${uid}/googleCalendarAccounts/${accountId}`).get();
-  if (!accountSnap.exists) throw new HttpsError("not-found", "Google account is not connected.", { reason: "stored_refresh_token_missing", reconnectRequired: true, userAction: "reconnect_google_account" });
-  const data = accountSnap.data() as Partial<StoredGoogleCalendarAccount>;
-  if (typeof data.encryptedRefreshToken !== "string") throw new HttpsError("failed-precondition", "Stored Google account is missing a refresh token.", { reason: "stored_refresh_token_missing", reconnectRequired: true, userAction: "reconnect_google_account" });
-  return { email: typeof data.email === "string" ? data.email : accountId, name: typeof data.name === "string" ? data.name : null, photoUrl: getExistingAccountPhotoUrl(data), encryptedRefreshToken: data.encryptedRefreshToken, createdAt: data.createdAt ?? null, updatedAt: data.updatedAt ?? null };
-};
-const getStoredAccessToken = async (uid: string, accountId: string) => {
-  const account = await getStoredAccount(uid, accountId);
-  const refreshToken = decryptRefreshToken(account.encryptedRefreshToken);
-  const data = await exchangeToken(new URLSearchParams({ refresh_token: refreshToken, client_id: safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration"), client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "GOOGLE_OAUTH_CLIENT_SECRET", "server_oauth_configuration"), grant_type: "refresh_token" }), "refresh_token");
-  const accessToken = getTokenString(data, "access_token");
-  if (!accessToken) throw new HttpsError("failed-precondition", "Google OAuth refresh response did not include an access token.", { reason: "google_token_invalid_response", reconnectRequired: true, userAction: "reconnect_google_account" });
-  await verifyGoogleScopes(accessToken);
-  return toAccessResponse(accessToken, account, getTokenNumber(data, "expires_in"));
-};
 
 const connectGoogleCalendarAccount = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => { const uid = requireUid(request);
   const code = typeof request.data?.code === "string" ? request.data.code : "";
@@ -180,28 +183,31 @@ const connectGoogleCalendarAccount = onCall({ region: REGION, secrets: [GOOGLE_O
   await (await getAdminAuth()).updateUser(uid, { email: profile.accountEmail, displayName: profile.accountName ?? undefined, photoURL: account.photoUrl ?? undefined });
   return toAccessResponse(accessToken, account, getTokenNumber(data, "expires_in"));
 });
+const exchangeGoogleCalendarCode = connectGoogleCalendarAccount;
+
+const getStoredAccount = async (uid: string, accountId: string): Promise<StoredGoogleCalendarAccount> => {
+  if (!accountId) throw new HttpsError("invalid-argument", "accountId is required.");
+  const accountSnap = await (await getDb()).doc(`users/${uid}/googleCalendarAccounts/${accountId}`).get();
+  if (!accountSnap.exists) throw new HttpsError("not-found", "Google account is not connected.", { reason: "stored_refresh_token_missing", reconnectRequired: true, userAction: "reconnect_google_account" });
+  const data = accountSnap.data() as Partial<StoredGoogleCalendarAccount>;
+  if (typeof data.encryptedRefreshToken !== "string") throw new HttpsError("failed-precondition", "Stored Google account is missing a refresh token.", { reason: "stored_refresh_token_missing", reconnectRequired: true, userAction: "reconnect_google_account" });
+  return { email: typeof data.email === "string" ? data.email : accountId, name: typeof data.name === "string" ? data.name : null, photoUrl: getExistingAccountPhotoUrl(data), encryptedRefreshToken: data.encryptedRefreshToken, createdAt: data.createdAt ?? null, updatedAt: data.updatedAt ?? null };
+};
+const getStoredAccessToken = async (uid: string, accountId: string) => {
+  const account = await getStoredAccount(uid, accountId);
+  const refreshToken = decryptRefreshToken(account.encryptedRefreshToken);
+  const data = await exchangeToken(new URLSearchParams({ refresh_token: refreshToken, client_id: safeSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID", "server_oauth_configuration"), client_secret: safeSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "GOOGLE_OAUTH_CLIENT_SECRET", "server_oauth_configuration"), grant_type: "refresh_token" }), "refresh_token");
+  const accessToken = getTokenString(data, "access_token");
+  if (!accessToken) throw new HttpsError("failed-precondition", "Google OAuth refresh response did not include an access token.", { reason: "google_token_invalid_response", reconnectRequired: true, userAction: "reconnect_google_account" });
+  await verifyGoogleScopes(accessToken);
+  return toAccessResponse(accessToken, account, getTokenNumber(data, "expires_in"));
+};
+
 const refreshGoogleCalendarAccessToken = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => { const uid = requireUid(request);
   const accountId = typeof request.data?.accountId === "string" ? request.data.accountId : typeof request.data?.accountEmail === "string" ? request.data.accountEmail : "";
   return await getStoredAccessToken(uid, accountId);
 });
-const listGoogleCalendarAccounts = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
-  const snapshot = await (await getDb()).collection(`users/${uid}/googleCalendarAccounts`).get();
-  return {
-    accounts: snapshot.docs.map((doc) => {
-      const data = doc.data() as Partial<StoredGoogleCalendarAccount>;
-      return { accountId: doc.id, email: typeof data.email === "string" ? data.email : null, name: typeof data.name === "string" ? data.name : null, photoUrl: getExistingAccountPhotoUrl(data) };
-    })
-  };
-});
-const disconnectGoogleCalendarAccount = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
-  const accountId = typeof request.data?.accountId === "string" ? request.data.accountId : "";
-  if (!accountId) throw new HttpsError("invalid-argument", "accountId is required.");
-  await (await getDb()).doc(`users/${uid}/googleCalendarAccounts/${accountId}`).delete();
-  return { ok: true };
-});
-const createGoogleCalendarCustomToken = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
-  return { customToken: await (await getAdminAuth()).createCustomToken(uid) };
-});
+const getGoogleCalendarAccessToken = refreshGoogleCalendarAccessToken;
 
 export { googleCalendarWebhook } from "#src/gcal/googleCalendarWebhook.js";
 export { renewExpiredWatchChannels } from "#src/gcal/renewWatchChannels.js";

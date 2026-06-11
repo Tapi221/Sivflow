@@ -19,11 +19,11 @@ const SYNC_TABLE_BY_TYPE = {
   userSetting: "userSettings",
 } as const;
 const FULL_RESYNC_TABLES = ["folders", "cardSets", "cards", "documents", "tagRecords", "userSettings", "images"] as const;
-const ROOT_FOLDER_KEY = "__root__";
-const DEFAULT_FOLDER_NAME = "インポート済みカード";
 
 type SyncableTableName = (typeof FULL_RESYNC_TABLES)[number];
 
+const ROOT_FOLDER_KEY = "__root__";
+const DEFAULT_FOLDER_NAME = "インポート済みカード";
 const SYNC_ENTITY_BY_TABLE: Record<SyncableTableName, SyncTask["entity"]> = {
   folders: "folder",
   cardSets: "cardSet",

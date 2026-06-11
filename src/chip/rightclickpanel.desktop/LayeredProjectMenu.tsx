@@ -4,6 +4,7 @@ import { RightClickPanelSurface } from "./rightClickPanelCommon";
 import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth } from "./rightClickPanel.utils";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 
+type LayeredProjectMenuActionId = "change-color" | "rename" | "create-note" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
 type LayeredProjectMenuItemDefinition = {
   id: LayeredProjectMenuActionId;
   label: string;
@@ -11,7 +12,6 @@ type LayeredProjectMenuItemDefinition = {
   separatorBefore?: boolean;
   submenu?: boolean;
 };
-type LayeredProjectMenuActionId = "change-color" | "rename" | "create-note" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
 type LayeredProjectMenuAction = { id: LayeredProjectMenuActionId;
   disabled?: boolean;
   onSelect: () => void;

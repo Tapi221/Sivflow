@@ -328,6 +328,55 @@ const MENU_STATE_ITEMS: Record<EditorChatState, MenuStateGroup[]> = {
   ],
 };
 
+const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
+  const editor = useEditorRef();
+  const { messages } = usePluginOption(AIChatPlugin, "chat");
+  const aiEditor = usePluginOption(AIChatPlugin, "aiEditor")!;
+  const isSelecting = useIsSelecting();
+
+  const menuState = React.useMemo(() => {
+    if (messages && messages.length > 0) {
+      return isSelecting ? "selectionSuggestion" : "cursorSuggestion";
+    }
+
+    return isSelecting ? "selectionCommand" : "cursorCommand";
+  }, [isSelecting, messages]);
+
+  const menuGroups = React.useMemo(() => {
+    const items = MENU_STATE_ITEMS[menuState];
+
+    return items;
+  }, [menuState]);
+
+  React.useEffect(() => {
+    if (menuGroups.length > 0 && menuGroups[0].items.length > 0) {
+      setValue(menuGroups[0].items[0].value);
+    }
+  }, [menuGroups, setValue]);
+
+  return menuGroups.map((group, index) => (
+    <CommandGroup key={index} heading={group.heading}>
+      {group.items.map((menuItem) => (
+        <CommandItem
+          key={menuItem.value}
+          className="[&_svg]:text-muted-foreground"
+          value={menuItem.value}
+          onSelect={() => {
+            menuItem.onSelect?.({
+              aiEditor,
+              editor,
+              input,
+            });
+            setInput("");
+          }}
+        >
+          {menuItem.icon}
+          <span>{menuItem.label}</span>
+        </CommandItem>
+      ))}
+    </CommandGroup>
+  ));
+};
 const AIMenu = () => {
   const { api, editor } = useEditorPlugin(AIChatPlugin);
   const mode = usePluginOption(AIChatPlugin, "mode");
@@ -513,55 +562,6 @@ const AIMenu = () => {
       </PopoverContent>
     </Popover>
   );
-};
-const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
-  const editor = useEditorRef();
-  const { messages } = usePluginOption(AIChatPlugin, "chat");
-  const aiEditor = usePluginOption(AIChatPlugin, "aiEditor")!;
-  const isSelecting = useIsSelecting();
-
-  const menuState = React.useMemo(() => {
-    if (messages && messages.length > 0) {
-      return isSelecting ? "selectionSuggestion" : "cursorSuggestion";
-    }
-
-    return isSelecting ? "selectionCommand" : "cursorCommand";
-  }, [isSelecting, messages]);
-
-  const menuGroups = React.useMemo(() => {
-    const items = MENU_STATE_ITEMS[menuState];
-
-    return items;
-  }, [menuState]);
-
-  React.useEffect(() => {
-    if (menuGroups.length > 0 && menuGroups[0].items.length > 0) {
-      setValue(menuGroups[0].items[0].value);
-    }
-  }, [menuGroups, setValue]);
-
-  return menuGroups.map((group, index) => (
-    <CommandGroup key={index} heading={group.heading}>
-      {group.items.map((menuItem) => (
-        <CommandItem
-          key={menuItem.value}
-          className="[&_svg]:text-muted-foreground"
-          value={menuItem.value}
-          onSelect={() => {
-            menuItem.onSelect?.({
-              aiEditor,
-              editor,
-              input,
-            });
-            setInput("");
-          }}
-        >
-          {menuItem.icon}
-          <span>{menuItem.label}</span>
-        </CommandItem>
-      ))}
-    </CommandGroup>
-  ));
 };
 const AILoadingBar = () => {
   const editor = useEditorRef();

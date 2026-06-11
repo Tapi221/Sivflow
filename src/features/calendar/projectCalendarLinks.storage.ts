@@ -45,6 +45,18 @@ const normalizeSyncDirection = (value: unknown): ProjectCalendarSyncDirection =>
 const normalizeCreatedLinkSyncDirection = (
   value: ProjectCalendarSyncDirection | undefined,
 ): ProjectCalendarSyncDirection => value ?? DEFAULT_SYNC_DIRECTION;
+const readStoredProjectCalendarLinksRaw = (): string | null => {
+  const current = window.localStorage.getItem(PROJECT_CALENDAR_LINKS_STORAGE_KEY);
+  if (current) return current;
+
+  const legacy = window.localStorage.getItem(LEGACY_PROJECT_CALENDAR_LINKS_STORAGE_KEY);
+  if (!legacy) return null;
+
+  window.localStorage.setItem(PROJECT_CALENDAR_LINKS_STORAGE_KEY, legacy);
+  window.localStorage.removeItem(LEGACY_PROJECT_CALENDAR_LINKS_STORAGE_KEY);
+  return legacy;
+};
+const buildProjectCalendarLinkId = (provider: CalendarProvider, accountId: string, externalCalendarId: string): string => ["project-calendar-link", encodeLinkIdPart(provider), encodeLinkIdPart(accountId), encodeLinkIdPart(externalCalendarId)].join(":");
 const normalizeStoredProjectCalendarLink = (item: unknown): ProjectCalendarLink | null => {
   if (typeof item !== "object" || item === null) return null;
 
@@ -72,18 +84,6 @@ const normalizeStoredProjectCalendarLink = (item: unknown): ProjectCalendarLink 
     lastSyncedAt: readOptionalString(stored.lastSyncedAt),
   };
 };
-const readStoredProjectCalendarLinksRaw = (): string | null => {
-  const current = window.localStorage.getItem(PROJECT_CALENDAR_LINKS_STORAGE_KEY);
-  if (current) return current;
-
-  const legacy = window.localStorage.getItem(LEGACY_PROJECT_CALENDAR_LINKS_STORAGE_KEY);
-  if (!legacy) return null;
-
-  window.localStorage.setItem(PROJECT_CALENDAR_LINKS_STORAGE_KEY, legacy);
-  window.localStorage.removeItem(LEGACY_PROJECT_CALENDAR_LINKS_STORAGE_KEY);
-  return legacy;
-};
-const buildProjectCalendarLinkId = (provider: CalendarProvider, accountId: string, externalCalendarId: string): string => ["project-calendar-link", encodeLinkIdPart(provider), encodeLinkIdPart(accountId), encodeLinkIdPart(externalCalendarId)].join(":");
 const createProjectCalendarLink = ({ projectId, provider, accountId, externalCalendarId, externalCalendarName, syncDirection, createdByApp, color, lastSyncedAt }: CreateProjectCalendarLinkInput): ProjectCalendarLink => ({ id: buildProjectCalendarLinkId(provider, accountId, externalCalendarId), projectId, provider, accountId, externalCalendarId, externalCalendarName, syncDirection: normalizeCreatedLinkSyncDirection(syncDirection), createdByApp, color, lastSyncedAt });
 const readStoredProjectCalendarLinks = (): ProjectCalendarLink[] => { if (typeof window === "undefined") return [];
 

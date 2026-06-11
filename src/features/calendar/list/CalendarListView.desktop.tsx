@@ -457,7 +457,6 @@ const CalendarListDaySectionComponent = ({
 );
 
 const CalendarListDaySection = memo(CalendarListDaySectionComponent);
-CalendarListDaySection.displayName = "CalendarListDaySection";
 
 const CalendarListViewComponent = ({
   days: _days,
@@ -676,6 +675,7 @@ const CalendarListViewComponent = ({
   );
 };
 
+CalendarListDaySection.displayName = "CalendarListDaySection";
 const CalendarListView = memo(CalendarListViewComponent);
 CalendarListView.displayName = "CalendarListView";
 export { CalendarListView };
