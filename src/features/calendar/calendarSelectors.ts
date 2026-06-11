@@ -5,6 +5,8 @@ import { getCalendarIntensity, getStreakFromLogs, getTodayDescription, getWeekDa
 
 
 
+
+
 const isDeletedCard = (card: CalendarCardLike) => {
   return Boolean(
     card.isDeleted ??
@@ -164,6 +166,8 @@ const buildCalendarScreenViewModel = ({ currentDate, selectedDate, cardsByDate, 
     selectedDateLabel: format(selectedDate, "yyyy/MM/dd"),
   };
 };
+
+
 
 
 

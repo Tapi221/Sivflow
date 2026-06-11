@@ -15,7 +15,11 @@ import { normalizeReviewLogs } from "./reviewLogs";
 
 
 
+
+
 type GridBlockType = Parameters<typeof isGridOffsetType>[0];
+
+
 
 
 
@@ -31,6 +35,8 @@ const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "pdf",
 ]);
 const SUBJECTIVE_SCORE_VALUES = new Set<SubjectiveScoreValue>([0, 1, 2, 3]);
+
+
 
 
 
@@ -491,6 +497,8 @@ const normalizeCard = (raw: unknown): Card => {
 
   return normalized;
 };
+
+
 
 
 

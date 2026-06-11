@@ -3,6 +3,8 @@ import { MF_DECK_MEDIA_DIRECTORY, MF_DECK_MEDIA_URI_PREFIX } from "./mfDeck.type
 
 
 
+
+
 const EXTENSION_BY_MIME_TYPE: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
@@ -20,6 +22,8 @@ const EXTENSION_BY_MIME_TYPE: Record<string, string> = {
 const INVALID_FILENAME_CHARACTERS = new Set(["\\", "/", ":", "*", "?", "\"", "<", ">", "|"]);
 const MF_DECK_MAX_MEDIA_ENTRY_BYTES = 32 * 1024 * 1024;
 const MF_DECK_MAX_MEDIA_TOTAL_BYTES = 96 * 1024 * 1024;
+
+
 
 
 
@@ -131,6 +135,8 @@ const buildMfDeckMediaPath = (input: { index: number;
   return `${MF_DECK_MEDIA_DIRECTORY}${directory}/${paddedIndex}-${name}.${cleanExtension}`;
 };
 const buildMfDeckMediaManifest = (mediaEntries: MfDeckMediaEntryV1[]) => ({ format: "sivflow.deck.media" as const, version: 1 as const, media: mediaEntries });
+
+
 
 
 

@@ -4,8 +4,12 @@ import { CARD_VIEW_DEFAULT_ZOOM_PERCENT, CARD_VIEW_MIN_ZOOM_PERCENT, CARD_VIEW_Z
 
 
 
+
+
 const CARD_VIEW_DEFAULT_WIDTH_PX = CARD_PANE_VIEW_DEFAULT_WIDTH_PX;
 const CARD_VIEW_MIN_WIDTH_PX = CARD_PANE_VIEW_MIN_WIDTH_PX;
+
+
 
 
 
@@ -87,6 +91,8 @@ const normalizeZoomPercent = ({ value, minZoomPercent, maxZoomPercent, stepPerce
     maxZoomPercent,
   });
 };
+
+
 
 
 

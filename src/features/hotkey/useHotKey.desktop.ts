@@ -3,9 +3,13 @@ import { isPrimaryShiftShortcut, isTypingTarget } from "./hotkeyGuards";
 
 
 
+
+
 type UseHotKeyParams = {
   onToggleRightSidebar?: () => void;
 };
+
+
 
 
 
@@ -27,6 +31,8 @@ const useHotKeyDesktop = ({ onToggleRightSidebar }: UseHotKeyParams) => {
     };
   }, [onToggleRightSidebar]);
 };
+
+
 
 
 

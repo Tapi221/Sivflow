@@ -7,7 +7,11 @@ import { sanitizeCardStorageBlockImages } from "./cardStorageImageTransforms";
 
 
 
+
+
 type StorageLike = Record<string, unknown>;
+
+
 
 
 
@@ -40,6 +44,8 @@ const denormalizeCardForStorage = (value: Partial<Card> | StorageLike): StorageL
   return cleanupLegacyCardStorageFields(record);
 };
 const normalizeCardFromStorage = (value: unknown): Card => normalizeCard(value);
+
+
 
 
 

@@ -5,6 +5,8 @@ import type { MfDeckTagLookup } from "./mfDeck.types";
 
 
 
+
+
 const exportMfDeckBytes = async ({ cardSet, cards, tagById, appVersion }: { cardSet: CardSet;
   cards: Card[];
   tagById?: MfDeckTagLookup;
@@ -18,6 +20,8 @@ const exportMfDeckBytes = async ({ cardSet, cards, tagById, appVersion }: { card
   });
   return encodeMfDeckArchive(archive);
 };
+
+
 
 
 

@@ -2,6 +2,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 type CardSurfaceMode = "card" | "fluid";
 type CardInteractionMode = "view" | "edit";
 type CardChromeScaleMode = "fixed";
@@ -14,8 +16,12 @@ interface CardRenderSpec { surfaceMode: CardSurfaceMode;
 
 
 
+
+
 const MIN_ZOOM_SCALE = 0.5;
 const MAX_ZOOM_SCALE = 4;
+
+
 
 
 
@@ -60,7 +66,11 @@ const resolveCardDisablesFrameScale = (spec: CardRenderSpec) => {
 
 
 
+
+
 export { clampCardRenderZoomScale, resolveCardSurfaceMode, buildCardRenderSpec, resolveCardSurfaceScale, resolveCardContentZoom, resolveCardUsesSurfaceScale, resolveCardUsesStretchWidth, resolveCardDisablesFrameScale };
+
+
 
 
 export type { CardSurfaceMode, CardInteractionMode, CardChromeScaleMode, CardRenderSpec };

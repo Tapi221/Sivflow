@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 
 import { ToolbarButton } from "./toolbar";
 
+
+
 const SuggestionToolbarButton = () => {
   const { setOption } = useEditorPlugin(SuggestionPlugin);
   const isSuggesting = usePluginOption(SuggestionPlugin, "isSuggesting");
@@ -27,5 +29,7 @@ const SuggestionToolbarButton = () => {
     </ToolbarButton>
   );
 };
+
+
 
 export { SuggestionToolbarButton };

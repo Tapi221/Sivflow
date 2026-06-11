@@ -5,7 +5,11 @@ import type { BreadcrumbCrumb, ExplorerBreadcrumbContext } from "./breadcrumbs.t
 
 
 
+
+
 type FolderLike = Pick<Folder, "id" | "folderName" | "parentFolderId">;
+
+
 
 
 
@@ -125,6 +129,8 @@ const buildCardSetViewBreadcrumbs = ({ folderId, selectedCardSet, selectedCard, 
 
   return crumbs;
 };
+
+
 
 
 

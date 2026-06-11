@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils";
 
 import { Caption, CaptionTextarea } from "./caption";
 
+
+
 const AudioElement = withHOC(ResizableProvider, (props: PlateElementProps<TAudioElement>) => {
   const { align = "center", readOnly, unsafeUrl } = useMediaState();
 
@@ -42,5 +44,7 @@ const AudioElement = withHOC(ResizableProvider, (props: PlateElementProps<TAudio
   );
 },
 );
+
+
 
 export { AudioElement };

@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type CalendarPrintRangeDay = {
   date: Date;
   key: string;
@@ -28,10 +30,14 @@ type CalendarPrintDocumentPortalProps = {
 
 
 
+
+
 const CALENDAR_PRINT_DOCUMENT_HOST_CLASS_NAME = "calendar-print-document-host";
 const CALENDAR_PRINT_RANGE_MAX_COLUMNS = 7;
 const CALENDAR_PRINT_RANGE_WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 const CALENDAR_PRINT_RANGE_EMPTY_EVENTS: GoogleCalendarEvent[] = [];
+
+
 
 
 
@@ -61,6 +67,8 @@ const eventOverlapsDay = (event: GoogleCalendarEvent, date: Date): boolean => {
 const getEventsForDay = (events: GoogleCalendarEvent[], date: Date): GoogleCalendarEvent[] => {
   return events.filter((event) => eventOverlapsDay(event, date));
 };
+
+
 
 
 
@@ -111,6 +119,8 @@ const CalendarPrintRangeView = ({ titleLabel, rangeLabel, focusDate, range, even
     </CalendarPrintDocumentPortal>
   );
 };
+
+
 
 
 

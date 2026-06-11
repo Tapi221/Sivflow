@@ -10,12 +10,18 @@ import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScre
 
 
 
+
+
 type CalendarNavigationOptions = { allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay; };
+
+
 
 
 
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
+
+
 
 
 
@@ -291,6 +297,8 @@ const useCalendarNavigation = ({ allowMultiSelectViewMode = true, weekStartDay =
     resetCalendarPosition,
   };
 };
+
+
 
 
 

@@ -3,6 +3,8 @@ const MF_CARD_FILE_EXTENSION = ".mfcard";
 
 
 
+
+
 const appendVirtualFileExtension = (name: string, extension: string) => {
   const trimmedName = name.trim();
 
@@ -22,6 +24,8 @@ const toVirtualMfDeckDisplayName = (name: string) => {
 const toVirtualMfCardDisplayName = (name: string) => {
   return appendVirtualFileExtension(name, MF_CARD_FILE_EXTENSION);
 };
+
+
 
 
 
