@@ -1,7 +1,5 @@
 import { useCallback, useState } from "react";
 
-
-
 /**
  * コンテキストメニュー（右クリック）の表示位置を管理するフック
  */
@@ -31,7 +29,5 @@ return {
   resetAnchor,
 };
 };
-
-
 
 export { useContextMenuAnchor };

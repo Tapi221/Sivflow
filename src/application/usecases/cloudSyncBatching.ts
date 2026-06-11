@@ -1,12 +1,8 @@
 import type { SyncChange } from "@/services/interfaces/ISyncService";
 
-
-
 const MAX_BATCH_BYTES = Math.floor(7.5 * 1024 * 1024);
 const MAX_BATCH_OPS = 450;
 const encoder = new TextEncoder();
-
-
 
 const estimateBytes = (value: unknown) => {
   try {
@@ -41,7 +37,5 @@ const chunkCloudSyncChangesBySize = (changes: SyncChange[]): SyncChange[][] => {
   if (current.length > 0) chunks.push(current);
   return chunks;
 };
-
-
 
 export { chunkCloudSyncChangesBySize };

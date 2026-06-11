@@ -6,8 +6,6 @@ import { FileUp } from "lucide-react";
 import { SlateElement } from "platejs/static";
 import { cn } from "@/lib/utils";
 
-
-
 const FileElementStatic = (props: SlateElementProps<TFileElement>) => { const { name, url } = props.element;
   const suggestionData = (
     props.element as TFileElement & {
@@ -44,7 +42,5 @@ const FileElementStatic = (props: SlateElementProps<TFileElement>) => { const { 
     </SlateElement>
   );
 };
-
-
 
 export { FileElementStatic };
