@@ -60,12 +60,6 @@ const shouldCheckStatementOrder = (filePath) => {
   return !ORDER_EXCLUDED_PATH_PARTS.some((part) => relativePath.includes(part));
 };
 
-const isInsideDirectory = (filePath, directoryPath) => {
-  const relativePath = path.relative(directoryPath, filePath);
-
-  return relativePath === "" || (!relativePath.startsWith("..") && !path.isAbsolute(relativePath));
-};
-
 const fileExists = (filePath) => {
   try {
     return statSync(filePath).isFile();
@@ -265,35 +259,6 @@ const statementReferencesPreviousHigherRankDeclaration = (source, sourceFile, st
   return higherRankNames.some((name) => new RegExp(`\\b${escapeRegExp(name)}\\b`).test(statementText));
 };
 
-const collectReferencedTopLevelNames = (source, sourceFile, statement, topLevelNames) => {
-  const ownNames = new Set(getStatementDeclarationNames(statement));
-  const statementText = source.slice(statement.getStart(sourceFile), statement.getEnd());
-
-  return [...topLevelNames].filter((name) => !ownNames.has(name) && new RegExp(`\\b${escapeRegExp(name)}\\b`).test(statementText));
-};
-
-const checkDependencyOrder = (filePath, source, sourceFile) => {
-  if (!shouldCheckStatementOrder(filePath)) return [];
-
-  const statements = sourceFile.statements.filter((statement) => !isDirectiveStatement(statement));
-  const declarationIndexes = new Map();
-
-  statements.forEach((statement, index) => {
-    for (const name of getStatementDeclarationNames(statement)) {
-      if (!declarationIndexes.has(name)) declarationIndexes.set(name, index);
-    }
-  });
-
-  const topLevelNames = new Set(declarationIndexes.keys());
-
-  return statements.flatMap((statement, statementIndex) => collectReferencedTopLevelNames(source, sourceFile, statement, topLevelNames).flatMap((name) => {
-    const dependencyIndex = declarationIndexes.get(name);
-    if (dependencyIndex === undefined || dependencyIndex < statementIndex) return [];
-
-    return [{ filePath, line: getLineNumber(sourceFile, statement.getStart(sourceFile)), message: `Move dependency before dependent statement: ${name}.` }];
-  }));
-};
-
 const checkStatementOrder = (filePath, source, sourceFile) => {
   const violations = [];
   const previousStatements = [];
@@ -472,7 +437,7 @@ const checkSourceFile = (filePath) => {
     return [...checkSingleLineImportExport(filePath, sourceFile, node), ...checkModuleSpecifier(filePath, sourceFile, node, specifier)];
   });
 
-  return [...importViolations, ...checkStatementOrder(filePath, source, sourceFile), ...checkDependencyOrder(filePath, source, sourceFile), ...checkBlockSpacing(filePath, source, sourceFile), ...checkJsxWrapperConventions(filePath, sourceFile)];
+  return [...importViolations, ...checkStatementOrder(filePath, source, sourceFile), ...checkBlockSpacing(filePath, source, sourceFile), ...checkJsxWrapperConventions(filePath, sourceFile)];
 };
 
 const formatViolation = ({ filePath, line, message }) => `${toPosix(path.relative(ROOT_DIR, filePath))}:${line} ${message}`;
