@@ -72,6 +72,12 @@ import 間の空行検査と自動修正は、import 文直前の空白・改行
 
 `verify:*` は検査だけを行い、ファイルを書き換える処理は `fix:*` にだけ置く。
 
+## 変数宣言
+
+`var` は禁止する。変数宣言は基本的に `const` を使い、再代入が必要な場合だけ `let` を使う。
+
+`npm run lint` は `var` と再代入されない `let` を検出する。`npm run lint:fix` は安全に修正できる場合に `var` と再代入されない `let` を自動修正する。
+
 ## nullish fallback
 
 `null` と `undefined` のどちらかを全面禁止しない。
