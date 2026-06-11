@@ -15,10 +15,10 @@ interface UseUploadFileProps
   onUploadError?: (error: unknown) => void;
 }
 
-export const { uploadFiles, useUploadThing } = generateReactHelpers<OurFileRouter>();
+const UNKNOWN_ERROR_MESSAGE = "Something went wrong, please try again later.";
+const { uploadFiles, useUploadThing } = generateReactHelpers<OurFileRouter>();
 
-const getErrorMessage = (err: unknown) => { const unknownError = "Something went wrong, please try again later.";
-
+const getErrorMessage = (err: unknown) => {
   if (err instanceof z.ZodError) {
     const errors = err.issues.map((issue) => issue.message);
 
@@ -27,9 +27,10 @@ const getErrorMessage = (err: unknown) => { const unknownError = "Something went
   if (err instanceof Error) {
     return err.message;
   }
-  return unknownError;
+  return UNKNOWN_ERROR_MESSAGE;
 };
-const useUploadFile = ({ onUploadComplete, onUploadError, ...props }: UseUploadFileProps = {}) => { const [uploadedFile, setUploadedFile] = React.useState<UploadedFile>();
+const useUploadFile = ({ onUploadComplete, onUploadError, ...props }: UseUploadFileProps = {}) => {
+  const [uploadedFile, setUploadedFile] = React.useState<UploadedFile>();
   const [uploadingFile, setUploadingFile] = React.useState<File>();
   const [progress, setProgress] = React.useState<number>(0);
   const [isUploading, setIsUploading] = React.useState(false);
@@ -51,21 +52,15 @@ const useUploadFile = ({ onUploadComplete, onUploadError, ...props }: UseUploadF
 
       onUploadComplete?.(res[0]);
 
-      return uploadedFile;
+      return res[0];
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-
-      const message =
-        errorMessage.length > 0
-          ? errorMessage
-          : "Something went wrong, please try again later.";
+      const message = errorMessage.length > 0 ? errorMessage : UNKNOWN_ERROR_MESSAGE;
 
       toast.error(message);
 
       onUploadError?.(error);
 
-      // Mock upload for unauthenticated users
-      // toast.info('User not logged in. Mocking upload process.');
       const mockUploadedFile = {
         key: "mock-key-0",
         appUrl: `https://mock-app-url.com/${file.name}`,
@@ -75,7 +70,6 @@ const useUploadFile = ({ onUploadComplete, onUploadError, ...props }: UseUploadF
         url: URL.createObjectURL(file),
       } as UploadedFile;
 
-      // Simulate upload progress
       let progress = 0;
 
       const simulateProgress = async () => {
@@ -106,10 +100,11 @@ const useUploadFile = ({ onUploadComplete, onUploadError, ...props }: UseUploadF
     uploadingFile,
   };
 };
-const showErrorToast = (err: unknown) => { const errorMessage = getErrorMessage(err);
+const showErrorToast = (err: unknown) => {
+  const errorMessage = getErrorMessage(err);
 
   return toast.error(errorMessage);
 };
 
-export { useUploadFile, getErrorMessage, showErrorToast };
+export { uploadFiles, useUploadThing, useUploadFile, getErrorMessage, showErrorToast };
 export type { UploadedFile };
