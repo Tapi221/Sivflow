@@ -34,17 +34,22 @@ const value = normalizeStaticValue([
   },
   {
     children: [
-      { children: [{ text: 'Feature' }], type: 'th' },
-      { children: [{ text: 'Status' }], type: 'th' },
+      {
+        children: [
+          { children: [{ children: [{ text: 'Feature' }], type: 'p' }], type: 'th' },
+          { children: [{ children: [{ text: 'Status' }], type: 'p' }], type: 'th' },
+        ],
+        type: 'tr',
+      },
+      {
+        children: [
+          { children: [{ children: [{ text: 'Plate plugins' }], type: 'p' }], type: 'td' },
+          { children: [{ children: [{ text: 'Enabled' }], type: 'p' }], type: 'td' },
+        ],
+        type: 'tr',
+      },
     ],
-    type: 'tr',
-  },
-  {
-    children: [
-      { children: [{ text: 'Plate plugins' }], type: 'td' },
-      { children: [{ text: 'Enabled' }], type: 'td' },
-    ],
-    type: 'tr',
+    type: 'table',
   },
   {
     children: [{ text: '' }],
