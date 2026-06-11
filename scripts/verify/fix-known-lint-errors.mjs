@@ -9,7 +9,7 @@ const TARGET_FILE_PATHS = [
   "src/pane.desktop/view/ScheduleScreen.mobile.tsx",
   "src/components/editor/use-chat.ts",
 ].map((filePath) => path.join(ROOT_DIR, filePath));
-const RESOLVE_STRATIS_ICON_DECLARATION = "const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;\n";
+const RESOLVE_STRATIS_ICON_DECLARATION_PATTERN = /^const resolveStratisIcon = \(names: readonly string\[\]\): StratisIconComponent \| null => .*;$/mu;
 const CALENDAR_TIMETABLE_ICON_DECLARATIONS = "const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);\nconst StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);\nconst StratisSettingsIcon = resolveStratisIcon(STRATIS_SETTINGS_ICON_NAMES);\n";
 const SCHEDULE_SCREEN_ICON_DECLARATIONS = "const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);\nconst StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);\n";
 const PDF_PANE_ICON_DECLARATIONS = "const StratisBookmarkIcon = resolveStratisIcon(STRATIS_BOOKMARK_ICON_NAMES);\n";
@@ -31,9 +31,11 @@ const removeBlock = (source, startText) => {
 
 const insertAfterResolveStratisIcon = (source, declarations) => {
   if (source.includes(declarations.trim())) return source;
-  if (!source.includes(RESOLVE_STRATIS_ICON_DECLARATION)) return source;
+  const match = source.match(RESOLVE_STRATIS_ICON_DECLARATION_PATTERN);
+  if (!match || match.index === undefined) return source;
 
-  return source.replace(RESOLVE_STRATIS_ICON_DECLARATION, `${RESOLVE_STRATIS_ICON_DECLARATION}${declarations}`);
+  const insertIndex = match.index + match[0].length;
+  return `${source.slice(0, insertIndex)}\n${declarations}${source.slice(insertIndex + (source[insertIndex] === "\n" ? 1 : 0))}`;
 };
 
 const applyPdfDocumentPaneFixes = (source) => {
