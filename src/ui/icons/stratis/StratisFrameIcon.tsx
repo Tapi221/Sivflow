@@ -24,4 +24,4 @@ const StratisFrameIcon = forwardRef<SVGSVGElement, StratisFrameIconProps>(({ cla
 export { STRATIS_INNER_STROKE_PATH_PROPS, StratisFrameIcon };
 
 
-export type { StratisFrameIcon
+export type { StratisFrameIconProps };

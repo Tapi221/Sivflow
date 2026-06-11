@@ -271,4 +271,4 @@ const updateStoredAccountCalendarIds = (accountId: string, selectedCalendarIds: 
 export { isStoredTokenValid, buildTokenExpiry, readStoredAccounts, writeStoredAccounts, upsertStoredAccount, removeStoredAccount, updateStoredAccountToken, updateStoredAccountCalendarIds };
 
 
-export type { StoredGoogleAccount, StoredGoogleAccountPr
+export type { StoredGoogleAccount, StoredGoogleAccountProfile };

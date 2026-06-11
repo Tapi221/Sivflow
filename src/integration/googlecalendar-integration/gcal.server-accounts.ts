@@ -33,4 +33,4 @@ const listServerStoredGoogleCalendarAccounts = async (): Promise<ListGoogleCalen
 
 
 
-export { listServerStoredGoogleCalendarAccou
+export { listServerStoredGoogleCalendarAccounts };

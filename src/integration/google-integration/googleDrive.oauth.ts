@@ -71,4 +71,4 @@ const requestGoogleDriveFileAccessToken = async (auth: Auth): Promise<string> =>
 
 
 
-export { requestGoogleDriveFileAccessToke
+export { requestGoogleDriveFileAccessToken };

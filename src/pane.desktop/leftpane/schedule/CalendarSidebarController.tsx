@@ -54,4 +54,4 @@ const CalendarSidebarController = ({ onOpenSettings, onToggleLeftPanel }: Calend
 
 
 
-export { CalendarSidebarControl
+export { CalendarSidebarController };

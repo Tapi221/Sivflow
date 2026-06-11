@@ -30,4 +30,4 @@ const shouldSkipQueuedDocumentUpload = async (item: QueueItem): Promise<boolean>
 
 
 
-export { shouldSkipQueuedDocumentUpload 
+export { shouldSkipQueuedDocumentUpload };

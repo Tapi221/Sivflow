@@ -39,4 +39,4 @@ const handleQueuedAssetUploadFailure = async (item: QueueItem): Promise<void> =>
 
 
 
-export { handleQueuedAssetUploadFailure 
+export { handleQueuedAssetUploadFailure };

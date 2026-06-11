@@ -426,4 +426,4 @@ const installLocalDbDevtools = (): void => {
 
 
 
-export { installLocalDbDevto
+export { installLocalDbDevtools };

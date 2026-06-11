@@ -136,4 +136,4 @@ const migrateLegacyLocalDbBrandIfNeeded = async (userId: string, destinationData
 
 
 
-export { migrateLegacyLocalDbBrandIfN
+export { migrateLegacyLocalDbBrandIfNeeded };

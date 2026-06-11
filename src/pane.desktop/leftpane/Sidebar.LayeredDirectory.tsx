@@ -397,4 +397,4 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
 
 
 
-export { LibraryHierarchySidebar, ProjectListSidebar, SidebarLayeredDirectory, TagTreeSi
+export { LibraryHierarchySidebar, ProjectListSidebar, SidebarLayeredDirectory, TagTreeSidebar };

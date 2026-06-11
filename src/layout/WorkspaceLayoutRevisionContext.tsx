@@ -20,4 +20,4 @@ const WorkspaceLayoutRevisionProvider = ({ children, revision }: WorkspaceLayout
 
 
 
-export { WorkspaceLayoutRevisionProvi
+export { WorkspaceLayoutRevisionProvider };

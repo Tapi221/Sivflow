@@ -47,4 +47,4 @@ const handleQueuedAssetUploadSuccess = async (item: QueueItem, updatedImage: Upl
 
 
 
-export { handleQueuedAssetUploadSuccess 
+export { handleQueuedAssetUploadSuccess };

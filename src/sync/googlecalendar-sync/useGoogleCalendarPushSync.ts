@@ -126,4 +126,4 @@ const useGoogleCalendarPushSync = ({ userId, selectedCalendarIds, onNotification
 
 
 
-export { useGoogleCalendarPushS
+export { useGoogleCalendarPushSync };

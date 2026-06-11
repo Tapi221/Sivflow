@@ -467,4 +467,4 @@ const SettingScreen = () => {
 
 
 
-export default Settin
+export default SettingScreen;

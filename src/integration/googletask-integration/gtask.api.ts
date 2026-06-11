@@ -255,4 +255,4 @@ const deleteGoogleTask = async ({ accessToken, taskListId, taskId }: { accessTok
 
 
 
-export { fetchGoogleTaskLists, fetchGoogleTasks, createGoogleTask, patchGoogleTask, moveGoogleTask, deleteGoogleT
+export { fetchGoogleTaskLists, fetchGoogleTasks, createGoogleTask, patchGoogleTask, moveGoogleTask, deleteGoogleTask };

@@ -134,4 +134,4 @@ const pushCloudSyncBatch = async (userId: string, changes: SyncChange[]): Promis
 
 
 
-export { pushCloudSyncBatc
+export { pushCloudSyncBatch };

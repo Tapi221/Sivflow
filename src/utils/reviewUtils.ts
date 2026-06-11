@@ -81,4 +81,4 @@ export { normalizeMemoryStability, type SubjectiveScore };
 export { getStabilityPhase };
 
 
-export type { Stability
+export type { StabilityPhase };

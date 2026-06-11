@@ -37,4 +37,4 @@ const handleQueuedUploadPermanentFailure = async (
 
 
 
-export { handleQueuedUploadPermanentFailure, handleQueuedUploadSuccess, shouldSkipQueuedDocumentUpload 
+export { handleQueuedUploadPermanentFailure, handleQueuedUploadSuccess, shouldSkipQueuedDocumentUpload };

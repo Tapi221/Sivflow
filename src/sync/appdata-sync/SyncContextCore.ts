@@ -42,4 +42,4 @@ const SyncContext = createContext<SyncContextType>(defaultSyncContext);
 export { SyncContext };
 
 
-export type { SyncStatus, SyncNotice, SyncTableName, SyncContextType, SyncProviderPr
+export type { SyncStatus, SyncNotice, SyncTableName, SyncContextType, SyncProviderProps };

@@ -49,4 +49,4 @@ const CodeBlockVisualTest = () => {
 
 
 
-export default CodeBlockVisualT
+export default CodeBlockVisualTest;

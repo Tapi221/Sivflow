@@ -618,4 +618,4 @@ const LibraryHierarchySidebar = ({ parentFolderId = null, onOpenCardSet }: Libra
 
 
 
-export { LibraryHierarchySidebar, ProjectListSi
+export { LibraryHierarchySidebar, ProjectListSidebar };

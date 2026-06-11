@@ -263,4 +263,4 @@ const SyncProvider = ({ children }: SyncProviderProps) => {
 
 
 
-export { SyncProvi
+export { SyncProvider };

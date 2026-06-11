@@ -119,4 +119,4 @@ const useCalendarEventSync = ({ selectedViewMode, visibleDays, monthTitleDate, w
 export { useCalendarEventSync };
 
 
-export type { UseCalendarEventSyncOp
+export type { UseCalendarEventSyncOptions };

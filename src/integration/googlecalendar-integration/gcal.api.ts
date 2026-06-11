@@ -312,4 +312,4 @@ const deleteGoogleCalendarEvent = async ({ accessToken, event }: { accessToken: 
 
 
 
-export { fetchCalendarList, createGoogleCalendar, fetchEventsForCalendar, createGoogleCalendarEvent, updateGoogleCalendarEvent, deleteGoogleCalendarEven
+export { fetchCalendarList, createGoogleCalendar, fetchEventsForCalendar, createGoogleCalendarEvent, updateGoogleCalendarEvent, deleteGoogleCalendarEvent };

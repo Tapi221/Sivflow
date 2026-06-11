@@ -89,4 +89,4 @@ const normalizeDocumentBlobUrlsForSession = async (db: QueryDb) => {
 
 
 
-export { getItem, getAllItems, getAllCards, getAllFolders, getDirtyItems, getUpdatedCards, getLastSyncTime, updateLastSyncTime, normalizeDocumentBlobUrlsForSessio
+export { getItem, getAllItems, getAllCards, getAllFolders, getDirtyItems, getUpdatedCards, getLastSyncTime, updateLastSyncTime, normalizeDocumentBlobUrlsForSession };

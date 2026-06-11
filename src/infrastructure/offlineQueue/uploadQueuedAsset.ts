@@ -49,4 +49,4 @@ const uploadQueuedAsset = async (item: QueueItem): Promise<UploadedImage> => {
 
 
 
-export { uploadQueuedAsset 
+export { uploadQueuedAsset };

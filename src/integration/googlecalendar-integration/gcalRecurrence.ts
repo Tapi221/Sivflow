@@ -124,4 +124,4 @@ const parseGoogleRecurrenceRule = (recurrence: readonly string[] | undefined): C
 
 
 
-export { serializeGoogleRecurrenceRule, parseGoogleRecurrenceRu
+export { serializeGoogleRecurrenceRule, parseGoogleRecurrenceRule };

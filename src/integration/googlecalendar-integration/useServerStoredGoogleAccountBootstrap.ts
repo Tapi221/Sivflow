@@ -53,4 +53,4 @@ const useServerStoredGoogleAccountBootstrap = (): void => {
 
 
 
-export { useServerStoredGoogleAccountBootstra
+export { useServerStoredGoogleAccountBootstrap };

@@ -348,4 +348,4 @@ class GoogleCalendarEngineManager { private engines = new Map<string, GoogleCale
 
 
 
-export { GoogleCalendarEngineManag
+export { GoogleCalendarEngineManager };

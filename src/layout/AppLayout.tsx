@@ -243,4 +243,4 @@ const AppLayout = () => {
 export { AppLayout };
 
 
-export type { AppLayoutOutlet
+export type { AppLayoutOutletContext };

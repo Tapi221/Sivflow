@@ -206,4 +206,4 @@ class SecurityMonitor { private userId: string;
 export { SecurityMonitor };
 
 
-export type { SecuritySt
+export type { SecurityState };

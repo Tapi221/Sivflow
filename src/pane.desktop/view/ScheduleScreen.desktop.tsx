@@ -221,4 +221,4 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: Sch
 
 
 
-export { ScheduleS
+export { ScheduleScreen };

@@ -53,4 +53,4 @@ const Calendar = () => {
 
 
 
-export default Cal
+export default Calendar;

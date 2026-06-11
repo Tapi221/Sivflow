@@ -253,4 +253,4 @@ QuickQaChatDialog.displayName = "QuickQaChatDialog";
 export { QuickQaChatDialog };
 
 
-export type { QuickQaChatDial
+export type { QuickQaChatDialogProps };

@@ -62,4 +62,4 @@ const getImageFromFirestore = async ({ imageId, userId }: { imageId: string;
 
 
 
-export { getImageFromFirestor
+export { getImageFromFirestore };

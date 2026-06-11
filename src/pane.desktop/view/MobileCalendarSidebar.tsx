@@ -45,4 +45,4 @@ const MobileCalendarSidebar = ({ isOpen, onClose, onOpenSettings }: MobileCalend
 
 
 
-export { MobileCalendarSidebar, MobileCalendarSidebarOpenButton, MOBILE_CALENDAR_SIDEBAR
+export { MobileCalendarSidebar, MobileCalendarSidebarOpenButton, MOBILE_CALENDAR_SIDEBAR_ID };

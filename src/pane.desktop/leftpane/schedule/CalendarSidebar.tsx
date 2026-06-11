@@ -285,4 +285,4 @@ const CalendarSidebar = (props: CalendarSidebarProps) => <SidebarLayeredDirector
 
 
 
-export { CalendarSidebar, CalendarSidebarCo
+export { CalendarSidebar, CalendarSidebarContent };

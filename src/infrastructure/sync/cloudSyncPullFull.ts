@@ -20,4 +20,4 @@ const pullCloudSyncFull = async (userId: string, entityIds: string[]): Promise<S
 
 
 
-export { pullCloudSyncFull 
+export { pullCloudSyncFull };

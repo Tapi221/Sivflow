@@ -75,4 +75,4 @@ const setCardLayoutModePreference = (scope: CardLayoutModePreferenceScope, mode:
 export { getCardLayoutModePreference, resolveCardLayoutModePreference, setCardLayoutModePreference };
 
 
-export type { CardLayoutModePreferenceSc
+export type { CardLayoutModePreferenceScope };

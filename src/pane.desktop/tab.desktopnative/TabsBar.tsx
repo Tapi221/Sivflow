@@ -431,4 +431,4 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
 
 
 
-export { Ta
+export { TabsBar };

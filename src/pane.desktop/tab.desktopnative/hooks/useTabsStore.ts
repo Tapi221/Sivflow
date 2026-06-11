@@ -464,4 +464,4 @@ const createRouteTabFromSection = (
 
 
 
-export { useWorkspaceTabsSt
+export { useWorkspaceTabsStore };

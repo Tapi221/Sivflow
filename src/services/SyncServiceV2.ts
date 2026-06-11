@@ -646,4 +646,4 @@ class SyncServiceV2 implements ISyncService { private queueManager: IQueueManage
 
 
 
-export { SyncSe
+export { SyncServiceV2 };

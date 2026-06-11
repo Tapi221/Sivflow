@@ -278,4 +278,4 @@ class GoogleCalendarWatchManager { private channels = new Map<string, WatchChann
 export { GoogleCalendarWatchManager };
 
 
-export type { WatchCh
+export type { WatchChannel };

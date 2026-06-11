@@ -54,4 +54,4 @@ const handleQueuedDocumentUploadFailure = async (item: QueueItem): Promise<void>
 
 
 
-export { handleQueuedDocumentUploadFailure 
+export { handleQueuedDocumentUploadFailure };

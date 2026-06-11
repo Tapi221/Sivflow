@@ -103,4 +103,4 @@ class PersistentOfflineQueue {
 export { persistentQueue };
 
 
-export type { AssetUploadRequ
+export type { AssetUploadRequest };

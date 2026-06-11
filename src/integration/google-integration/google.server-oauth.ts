@@ -199,4 +199,4 @@ const disconnectServerStoredGoogleCalendarAccount = async (input: DisconnectGoog
 export { readGoogleOAuthCallableErrorDetails, getGoogleOAuthCallableErrorReason, diagnoseGoogleOAuthReconnectCause, isGoogleOAuthDeterministicErrorReason, toUserTransparentAutoRecoveryError, isServerStoredGoogleOAuthEnabled, exchangeGoogleCalendarCode, exchangeGoogleConnectedServiceCode, getServerStoredGoogleCalendarAccessToken, getServerStoredGoogleConnectedServiceAccessToken, disconnectServerStoredGoogleCalendarAccount };
 
 
-export type { GoogleOAuthCallableErrorR
+export type { GoogleOAuthCallableErrorReason };
