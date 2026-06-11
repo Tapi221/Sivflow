@@ -22,8 +22,6 @@ import { MediaToolbar } from "./media-toolbar";
 
 import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "./resize-handle";
 
-
-
 const ImageElement = withHOC(ResizableProvider, (props: PlateElementProps<TImageElement>) => {
   const { align = "center", focused, readOnly, selected } = useMediaState();
   const width = useResizableValue("width");
@@ -82,7 +80,5 @@ const ImageElement = withHOC(ResizableProvider, (props: PlateElementProps<TImage
   );
 },
 );
-
-
 
 export { ImageElement };

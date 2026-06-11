@@ -34,8 +34,6 @@ import { aiChatPlugin } from "@/components/editor/plugins/ai-kit";
 
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 
-
-
 type ToolName = "comment" | "edit" | "generate";
 
 type TComment = { comment: { blockId: string;
@@ -59,8 +57,6 @@ type MessageDataPart = { toolName: ToolName;
 type ChatMessage = UIMessage<object, MessageDataPart>;
 
 type Chat = UseChatHelpers<ChatMessage>;
-
-
 
 const delay = faker.number.int({ max: 20, min: 5 });
 
@@ -1163,8 +1159,6 @@ const mdxChunks = [
   ],
 ];
 
-
-
 const createCommentChunks = (editor: PlateEditor) => {
   const selectedBlocksApi = editor.getApi(BlockSelectionPlugin).blockSelection;
 
@@ -1685,10 +1679,6 @@ const useChat = () => {
   return chat;
 };
 
-
-
 export { useChat };
-
-
 
 export type { ToolName, TComment, TTableCellUpdate, MessageDataPart, Chat, ChatMessage };

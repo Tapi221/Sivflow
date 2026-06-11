@@ -4,8 +4,12 @@ import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
 
 
 
+
+
 interface SignInWithGoogleDependencies { auth: GoogleAuthPort;
 }
+
+
 
 
 
@@ -25,7 +29,11 @@ const createSignInWithGoogleUseCase = ({ auth }: SignInWithGoogleDependencies) =
 
 
 
+
+
 export { createSignInWithGoogleUseCase };
+
+
 
 
 

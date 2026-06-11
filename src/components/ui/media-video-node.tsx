@@ -26,8 +26,6 @@ import { Caption, CaptionTextarea } from "./caption";
 
 import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "./resize-handle";
 
-
-
 const VideoElement = withHOC(ResizableProvider, (props: PlateElementProps<TVideoElement & TResizableProps>) => {
   const { align = "center", embed, isVideo, isUpload, isYoutube, readOnly, unsafeUrl } = useMediaState({ urlParsers: [parseTwitterUrl, parseVideoUrl] });
   const width = useResizableValue("width");
@@ -127,7 +125,5 @@ const VideoElement = withHOC(ResizableProvider, (props: PlateElementProps<TVideo
   );
 },
 );
-
-
 
 export { VideoElement };

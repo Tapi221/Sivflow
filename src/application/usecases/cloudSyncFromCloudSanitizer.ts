@@ -8,6 +8,8 @@ import { deepStripUndefined } from "./cloudSyncValueCleaning";
 
 
 
+
+
 const sanitizeSyncDataFromCloud = (type: string, data: unknown): unknown => {
   if (!data) return data;
 
@@ -31,6 +33,8 @@ const sanitizeSyncDataFromCloud = (type: string, data: unknown): unknown => {
 
   return sanitized.value;
 };
+
+
 
 
 

@@ -52,8 +52,6 @@ import { ToolbarGroup } from "./toolbar";
 
 import { TurnIntoToolbarButton } from "./turn-into-toolbar-button";
 
-
-
 const FixedToolbarButtons = () => {
   const readOnly = useEditorReadOnly();
 
@@ -174,7 +172,5 @@ const FixedToolbarButtons = () => {
     </div>
   );
 };
-
-
 
 export { FixedToolbarButtons };

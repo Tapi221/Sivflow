@@ -19,6 +19,8 @@ import remarkMath from "remark-math";
 
 
 
+
+
 const AI_COMMAND_PLATE_PLUGINS = [
   ParagraphPlugin,
   H1Plugin.configure({ inputRules: [HeadingRules.markdown()] }),
@@ -51,6 +53,8 @@ const AI_COMMAND_PLATE_PLUGINS = [
   CaptionPlugin.configure({ options: { query: { allow: [KEYS.img, KEYS.video, KEYS.audio, KEYS.file, KEYS.mediaEmbed] } } }),
   MarkdownPlugin.configure({ options: { plainMarks: [KEYS.suggestion, KEYS.comment], remarkPlugins: [remarkMath, remarkGfm, remarkEmoji as never, remarkMdx, remarkMention] } }),
 ];
+
+
 
 
 

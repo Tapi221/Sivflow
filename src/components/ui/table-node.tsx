@@ -40,8 +40,6 @@ import { BorderAllIcon, BorderBottomIcon, BorderLeftIcon, BorderNoneIcon, Border
 
 import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarMenuGroup } from "./toolbar";
 
-
-
 type TableResizeDirection = "bottom" | "left" | "right";
 
 type TableResizeStartOptions = {
@@ -73,8 +71,6 @@ type TableResizeContextValue = {
   ) => void;
 };
 
-
-
 const TABLE_CONTROL_COLUMN_WIDTH = 8;
 
 const TABLE_DEFAULT_COLUMN_WIDTH = 120;
@@ -86,8 +82,6 @@ const TABLE_MULTI_SELECTION_TOOLBAR_DELAY_MS = 150;
 const TableResizeContext = React.createContext<TableResizeContextValue | null>(
   null,
 );
-
-
 
 const useTableResizeContext = () => {
   const context = React.useContext(TableResizeContext);
@@ -568,8 +562,6 @@ const useTableCellPresentation = (element: TTableCellElement) => {
     width,
   };
 };
-
-
 
 const TableBordersDropdownMenuContent = (props: React.ComponentProps<typeof DropdownMenuContent>) => {
   const editor = useEditorRef();
@@ -1280,8 +1272,6 @@ const TableCellElement = ({ isHeader, ...props }: PlateElementProps<TTableCellEl
     </PlateElement>
   );
 };
-
-
 
 const TableCellResizeControls = React.memo(({
   colIndex,

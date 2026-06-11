@@ -9,8 +9,12 @@ import { createCreateSnapshotUseCase } from "./CreateSnapshot";
 
 
 
+
+
 interface ExportFolderSnapshotDependencies { fileExporter: JsonFileExportPort;
 }
+
+
 
 
 
@@ -19,6 +23,8 @@ interface ExportFolderSnapshotDependencies { fileExporter: JsonFileExportPort;
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,
 });
+
+
 
 
 
@@ -132,7 +138,11 @@ const createExportFolderSnapshotUseCase = ({ fileExporter }: ExportFolderSnapsho
 
 
 
+
+
 export { createExportFolderSnapshotUseCase };
+
+
 
 
 

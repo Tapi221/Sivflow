@@ -14,8 +14,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 
 import { ToolbarButton } from "./toolbar";
 
-
-
 const MoreToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
@@ -73,7 +71,5 @@ const MoreToolbarButton = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
-
-
 
 export { MoreToolbarButton };

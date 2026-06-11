@@ -8,8 +8,6 @@ import { useEditorRef, useEditorSelector } from "platejs/react";
 
 import { ToolbarButton } from "./toolbar";
 
-
-
 const RedoToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => {
   const editor = useEditorRef();
   const disabled = useEditorSelector(
@@ -49,7 +47,5 @@ const UndoToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) =>
     </ToolbarButton>
   );
 };
-
-
 
 export { RedoToolbarButton, UndoToolbarButton };

@@ -8,8 +8,6 @@ import { IndentIcon, OutdentIcon } from "lucide-react";
 
 import { ToolbarButton } from "./toolbar";
 
-
-
 const IndentToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => {
   const { props: buttonProps } = useIndentButton();
 
@@ -29,7 +27,5 @@ const OutdentToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>)
     </ToolbarButton>
   );
 };
-
-
 
 export { IndentToolbarButton, OutdentToolbarButton };

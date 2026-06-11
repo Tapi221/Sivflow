@@ -8,6 +8,8 @@ import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction }
 
 
 
+
+
 const getCommentPrompt = (editor: SlateEditor, { messages }: { messages: ChatMessage[]; }) => {
   const selectingMarkdown = getMarkdown(editor, { type: "blockWithBlockId" });
 
@@ -154,6 +156,8 @@ const getCommentPrompt = (editor: SlateEditor, { messages }: { messages: ChatMes
     `,
   });
 };
+
+
 
 
 

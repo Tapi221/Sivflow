@@ -60,4 +60,4 @@ export { eventChipDesign };
 
 
 
-export type { EventChipDesign };
+export type { EventChipDesi

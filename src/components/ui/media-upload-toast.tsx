@@ -8,8 +8,6 @@ import { usePluginOption } from "platejs/react";
 
 import { toast } from "sonner";
 
-
-
 const useUploadErrorToast = () => {
   const uploadError = usePluginOption(PlaceholderPlugin, "error");
 
@@ -70,7 +68,5 @@ const MediaUploadToast = () => {
 
   return null;
 };
-
-
 
 export { MediaUploadToast };

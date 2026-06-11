@@ -10,8 +10,6 @@ import { BaseEditorKit } from "@/components/editor/editor-base-kit";
 
 import { EditorStatic } from "./editor-static";
 
-
-
 const AIChatEditor = React.memo(({ content }: { content: string;
 }) => {
   const aiEditor = usePlateEditor({
