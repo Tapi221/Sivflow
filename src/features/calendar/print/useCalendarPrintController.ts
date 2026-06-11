@@ -73,4 +73,4 @@ const useCalendarPrintController = ({ onBeforePrint, onPrintError }: UseCalendar
 
 
 
-export { useCalendarPrintController };
+export { useCalendarPrintControl

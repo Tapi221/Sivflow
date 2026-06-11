@@ -35,4 +35,3 @@ export const decodeMfCardFile = (buffer: ArrayBuffer): MfCardFileV1 => { const p
   }
 
   return validation.value;
-};

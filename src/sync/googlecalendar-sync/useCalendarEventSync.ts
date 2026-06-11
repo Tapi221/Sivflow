@@ -4,8 +4,6 @@ import { auth } from "@/services/firebase";
 import { buildCalendarEventPrioritySyncRange, buildCalendarEventSyncRange, type BuildCalendarEventSyncRangeOptions, type CalendarEventSyncRange } from "./calendarEventSyncRange";
 import { useGoogleCalendarPushSync } from "./useGoogleCalendarPushSync";
 
-
-
 type GoogleCalendarSlice = {
   selectedCalendarIds: Set<string>;
   forceSyncRange?: (options: {
@@ -16,11 +14,7 @@ type GoogleCalendarSlice = {
 export type UseCalendarEventSyncOptions = BuildCalendarEventSyncRangeOptions & { googleCalendar: GoogleCalendarSlice;
 };
 
-
-
 const PREFETCH_SYNC_DELAY_MS = 250;
-
-
 
 const isSameCalendarEventSyncRange = (left: CalendarEventSyncRange, right: CalendarEventSyncRange): boolean => left.rangeStart.getTime() === right.rangeStart.getTime() && left.rangeEnd.getTime() === right.rangeEnd.getTime();
 const toCalendarEventSyncRangeKey = (range: CalendarEventSyncRange): string => `${range.rangeStart.toISOString()}|${range.rangeEnd.toISOString()}`;

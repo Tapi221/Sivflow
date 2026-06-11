@@ -109,4 +109,3 @@ export const CardFaceScene = ({ displayMode, fixedScale, contentZoom, contentPro
       </CardFrame>
     </div>
   );
-};

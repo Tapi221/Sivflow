@@ -37,4 +37,4 @@ export const buildCardLayoutPreferenceScopeKey = ({ deviceScope, cardSetId, disp
 
 
 
-export const CARD_LAYOUT_MODE_LABELS: Record<CardLayoutMode, string> = { stack: "縦並び", flip: "裏表", split: "2カラム", };
+export const CARD_LAYOUT_MODE_LABELS: Record<CardLayoutMode, string> = { stack: "縦並び", flip: "裏表", split: "2カラ�

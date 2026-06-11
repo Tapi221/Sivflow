@@ -73,4 +73,3 @@ export const useCardSetViewCardLayoutMode = ({ deviceScope, cardSetId, displayMo
     currentCardLayoutMode,
     setCurrentCardLayoutMode,
   };
-};

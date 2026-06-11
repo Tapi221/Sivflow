@@ -433,4 +433,4 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEv
 
 
 GridCalendarMonthDesktop.displayName = "GridCalendarMonthDesktop";
-export { GridCalendarMonthDesktop };
+export { GridCalendarMonth

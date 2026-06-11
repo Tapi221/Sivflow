@@ -235,4 +235,3 @@ export const useCardSetViewMetaPanelActions = ({ selectedCard, isGlobalEditing, 
     onTitleInputChange,
     onUpdateTitle,
   };
-};

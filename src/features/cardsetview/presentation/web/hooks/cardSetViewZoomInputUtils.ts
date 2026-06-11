@@ -118,4 +118,3 @@ export const computeNextCardSetViewZoomPercentFromGesture = ({ currentZoomPercen
     minZoomPercent,
     maxZoomPercent,
   });
-};

@@ -64,4 +64,3 @@ export const useDocumentsRead = ( folderId?: string, options?: UseDocumentsReadO
     loading: enabled && rawDocuments === undefined,
     error,
   };
-};

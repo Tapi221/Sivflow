@@ -55,4 +55,3 @@ export const readXlsxImportRows = ( fileBuffer: ArrayBuffer, ): ReadXlsxImportRo
       blankrows: false,
     }) as unknown[][],
   };
-};

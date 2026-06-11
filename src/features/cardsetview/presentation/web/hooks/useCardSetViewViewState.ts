@@ -42,4 +42,3 @@ export const useCardSetViewViewState = ({ initialIndex, targetCardId, cardSetId,
     ...displayModeState,
     ...cardLayoutModeState,
   };
-};

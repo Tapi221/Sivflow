@@ -53,4 +53,3 @@ export const downloadBytesAsMfDeck = ({ bytes, deckName, }: { bytes: Uint8Array;
   window.setTimeout(() => {
     URL.revokeObjectURL(url);
   }, 0);
-};

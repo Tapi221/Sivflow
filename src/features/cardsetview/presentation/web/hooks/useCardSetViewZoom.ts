@@ -332,5 +332,4 @@ export const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displa
     showConstraintIndicator: isMobileDeviceScope ? false : showConstraintIndicator,
     presentationWidthPx,
     maxPresentationWidthPx,
-  };
-};
+  

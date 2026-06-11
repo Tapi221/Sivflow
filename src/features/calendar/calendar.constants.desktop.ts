@@ -43,6 +43,8 @@ export const createInitialMonthOffsetRange = () => ({ startOffset: -INITIAL_MONT
 
 
 
+
+
 //Timeline View
 export const TIMELINE_HEADER_HEIGHT = 40;
 export const TIMELINE_DEFAULT_ROW_HEIGHT = 168;
@@ -64,4 +66,4 @@ export const WEEKDAY_SURFACE_LEFT_INSET_PX = 16;
 
 //
 export const MIN_EVENT_DISPLAY_HEIGHT_PX = 48; // min-h-12 に対応
-export const MIN_LAYOUT_MINUTES = Math.ceil( (MIN_EVENT_DISPLAY_HEIGHT_PX / DEFAULT_HOUR_ROW_HEIGHT) * 60, );
+export const MIN_LAYOUT_MINUTES = Math.ceil( (MIN_EVENT_DISPLAY_HEIGHT_PX / DEFAULT_HOUR_ROW_HEIGHT) * 60, 

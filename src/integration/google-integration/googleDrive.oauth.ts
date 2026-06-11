@@ -3,13 +3,9 @@ import { listServerStoredGoogleCalendarAccounts } from "@/integration/googlecale
 import { exchangeGoogleConnectedServiceCode, getServerStoredGoogleConnectedServiceAccessToken, isServerStoredGoogleOAuthEnabled } from "./google.server-oauth";
 import { requestConnectedServiceAccessToken, requestGoogleCalendarServerCode } from "./google.oauth";
 
-
-
 const GOOGLE_DRIVE_FILE_SCOPE = "https://www.googleapis.com/auth/drive.file";
 const GOOGLE_DRIVE_RECONNECT_REQUIRED_CODE = "failed-precondition";
 const GOOGLE_OAUTH_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
-
-
 
 const createGoogleDriveReconnectRequiredError = (): Error => {
   const error = new Error("Google Drive の再認可が必要です");

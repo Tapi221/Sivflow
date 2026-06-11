@@ -55,4 +55,3 @@ export const useCalendarGrid = ({ monthWeeks, selectedKey, todayKey, }: Params):
 
     return { weeks };
   }, [monthWeeks, selectedKey, todayKey]);
-};

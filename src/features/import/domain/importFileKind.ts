@@ -50,4 +50,3 @@ export const isPortableImportFile = (file: Pick<File, "name" | "type">) => { ret
 export const getSupportedImportFiles = (files: FileList | File[]): File[] => { return Array.from(files).filter((file) => isSupportedImportFileKind(detectImportFileKind(file)), );
 };
 export const getPortableImportFiles = (files: FileList | File[]): File[] => { return Array.from(files).filter(isPortableImportFile);
-};

@@ -77,5 +77,4 @@ export const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry):
   if (entry.reason !== "auto_recovery_pending" && entry.reason !== "internal") {
     (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason }).googleOAuthReason = entry.reason;
   }
-  return error;
-};
+  return erro

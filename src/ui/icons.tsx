@@ -3,8 +3,6 @@ import { forwardRef } from "react";
 import * as stratisIcons from "stratis-ui-icons";
 import { UiIcon } from "./UiIcon";
 
-
-
 export type IconProps = SVGProps<SVGSVGElement> & { size?: number;
   label?: string;
   title?: string;
@@ -15,8 +13,6 @@ type StratisDataIcon = {
 };
 type StratisIconExport = StratisDataIcon | StratisIconComponent;
 type GlyphKind = "alert-circle" | "alert-triangle" | "arrow-left" | "arrow-right" | "arrow-up-down" | "calendar" | "check" | "chevron-down" | "chevron-left" | "chevron-right" | "chevron-up" | "circle" | "clock" | "code" | "copy" | "download" | "edit" | "external-link" | "file-edit" | "filter" | "globe" | "help" | "image" | "info" | "keyboard" | "link" | "logout" | "minus" | "pin" | "plus" | "refresh" | "search" | "settings" | "shield" | "star" | "tag" | "trash" | "type" | "user" | "volume" | "wrench" | "x" | "default";
-
-
 
 const stratisIconRegistry = stratisIcons as unknown as Record<string, StratisIconExport | undefined>;
 const svgTextEscapes: Record<string, string> = {
@@ -122,8 +118,6 @@ const glyphByIconName: Record<string, GlyphKind> = {
   XCircle: "x",
 };
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 const isStratisDataIcon = (value: unknown): value is StratisDataIcon => isRecord(value) && typeof value.data === "string";
 const isStratisIconComponent = (value: unknown): value is StratisIconComponent => typeof value === "function" || (isRecord(value) && "$$typeof" in value);
@@ -185,8 +179,6 @@ const makeStratisIcon = (exportName: string, name: string) => {
   return makeIcon(name);
 };
 
-
-
 const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, ...rest }, ref) => {
   const resolvedLabel = label ?? rest["aria-label"];
   const decorative = resolvedLabel == null;
@@ -241,16 +233,12 @@ const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size =
   );
 });
 
-
-
 MoreVerticalIcon.displayName = "MoreVerticalIcon";
 ExplorerChevronDownIcon.displayName = "ExplorerChevronDownIcon";
 ExplorerChevronRightIcon.displayName = "ExplorerChevronRightIcon";
 ExplorerFileTextIcon.displayName = "ExplorerFileTextIcon";
 ExplorerFolderOpenIcon.displayName = "ExplorerFolderOpenIcon";
 ExplorerFolderOutlineIcon.displayName = "ExplorerFolderOutlineIcon";
-
-
 
 export const AlertCircle = makeStratisIcon("suIconAlertCircle", "AlertCircle");
 export const AlertTriangle = makeStratisIcon("suIconAlertTriangle", "AlertTriangle");
