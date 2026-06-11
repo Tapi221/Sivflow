@@ -31,7 +31,7 @@ describe("source convention formatter", () => {
   it("分割代入の宣言時 export を末尾 export に移動する", () => {
     const formatted = runFormatterOnSource(`const createHelpers = () => ({ uploadFiles: () => undefined, useUploadThing: () => undefined });\n\nexport const { uploadFiles, useUploadThing } = createHelpers();\n`);
 
-    expect(formatted).toBe(`const createHelpers = () => ({ uploadFiles: () => undefined, useUploadThing: () => undefined });\nconst { uploadFiles, useUploadThing } = createHelpers();\n\nexport { uploadFiles, useUploadThing };\n`);
+    expect(formatted).toBe(`const createHelpers = () => ({ uploadFiles: () => undefined, useUploadThing: () => undefined });\n\nconst { uploadFiles, useUploadThing } = createHelpers();\n\nexport { uploadFiles, useUploadThing };\n`);
   });
 
   it("ブロック開始直後の文を次の行へ分ける", () => {
