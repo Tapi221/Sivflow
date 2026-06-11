@@ -7,11 +7,7 @@ const useIsTouchDevice = () => {
 
   React.useEffect(() => {
     const onResize = () => {
-      setIsTouchDevice(
-        "ontouchstart" in window ||
-        navigator.maxTouchPoints > 0 ||
-        navigator.maxTouchPoints > 0,
-      );
+      setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
     };
 
     window.addEventListener("resize", onResize);

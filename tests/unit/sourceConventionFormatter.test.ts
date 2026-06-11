@@ -6,14 +6,15 @@ import { describe, expect, it } from "vitest";
 
 const ROOT_DIR = process.cwd();
 const FIX_IMPORT_SPACING_SCRIPT = path.join(ROOT_DIR, "scripts/verify/fix-import-spacing.mjs");
+const FIX_REPEATED_BLANK_LINES_SCRIPT = path.join(ROOT_DIR, "scripts/verify/fix-repeated-blank-lines.mjs");
 
-const runFormatterOnSource = (source: string) => {
+const runFormatterOnSource = (source: string, scriptPath = FIX_IMPORT_SPACING_SCRIPT) => {
   const tempDirectory = mkdtempSync(path.join(tmpdir(), "sivflow-source-convention-"));
   const filePath = path.join(tempDirectory, "fixture.ts");
 
   try {
     writeFileSync(filePath, source);
-    execFileSync(process.execPath, [FIX_IMPORT_SPACING_SCRIPT], {
+    execFileSync(process.execPath, [scriptPath], {
       cwd: ROOT_DIR,
       env: {
         ...process.env,
@@ -44,5 +45,11 @@ describe("source convention formatter", () => {
     const formatted = runFormatterOnSource(`const getValue = () => { try { const value = 1;\n\n  return value;\n} catch { return 0;\n}\n};\n`);
 
     expect(formatted).toBe(`const getValue = () => {\n  try {\n    const value = 1;\n\n  return value;\n} catch {\n  return 0;\n}\n};\n`);
+  });
+
+  it("連続空行を1行に正規化する", () => {
+    const formatted = runFormatterOnSource(`import * as React from "react";\n\n\n\nconst useValue = () => React.useState(false);\n\n\n\nexport { useValue };\n`, FIX_REPEATED_BLANK_LINES_SCRIPT);
+
+    expect(formatted).toBe(`import * as React from "react";\n\nconst useValue = () => React.useState(false);\n\nexport { useValue };\n`);
   });
 });
