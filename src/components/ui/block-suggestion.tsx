@@ -117,27 +117,23 @@ export function BlockSuggestionCard({ idx, isLast, suggestion, }: { idx: number;
               <div className="flex flex-col gap-2">
                 {suggestionText2Array(suggestion.newText!).map(
                   (text, index) => (
-                    <React.Fragment key={index}>
-                      <div
-                        key={index}
-                        className="flex items-start gap-2 text-brand/80"
-                      >
-                        <span className="text-sm">with:</span>
-                        <span className="text-sm">{text || 'line breaks'}</span>
-                      </div>
-                    </React.Fragment>
+                    <div
+                      key={index}
+                      className="flex items-start gap-2 text-brand/80"
+                    >
+                      <span className="text-sm">with:</span>
+                      <span className="text-sm">{text || 'line breaks'}</span>
+                    </div>
                   )
                 )}
 
                 {suggestionText2Array(suggestion.text!).map((text, index) => (
-                  <React.Fragment key={index}>
-                    <div key={index} className="flex items-start gap-2">
-                      <span className="text-muted-foreground text-sm">
-                        {index === 0 ? 'Replace:' : 'Delete:'}
-                      </span>
-                      <span className="text-sm">{text || 'line breaks'}</span>
-                    </div>
-                  </React.Fragment>
+                  <div key={index} className="flex items-start gap-2">
+                    <span className="text-muted-foreground text-sm">
+                      {index === 0 ? 'Replace:' : 'Delete:'}
+                    </span>
+                    <span className="text-sm">{text || 'line breaks'}</span>
+                  </div>
                 ))}
               </div>
             )}
