@@ -19,7 +19,7 @@ const triggerAssetQueueProcessing = (
     });
   });
 };
-export const bindPersistentQueueAutoProcessing = (persistentQueue: AssetQueueProcessor): void => { if (typeof window === "undefined" || typeof document === "undefined") { return;
+const bindPersistentQueueAutoProcessing = (persistentQueue: AssetQueueProcessor): void => { if (typeof window === "undefined" || typeof document === "undefined") { return;
 }
 
 const target = window as Window & {
@@ -48,3 +48,5 @@ if (document.readyState === "complete") {
   triggerAssetQueueProcessing(persistentQueue, "load");
 }
 };
+
+export { bindPersistentQueueAutoProcessing };

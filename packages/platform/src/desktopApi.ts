@@ -1,49 +1,49 @@
-export interface PlatformAppApi { getVersion(): Promise<string>;
+interface PlatformAppApi { getVersion(): Promise<string>;
 }
-export interface PlatformShellApi { openExternal(url: string): Promise<void>;
+interface PlatformShellApi { openExternal(url: string): Promise<void>;
 }
-export interface DesktopAiGenerateInput { baseUrl: string;
+interface DesktopAiGenerateInput { baseUrl: string;
   model: string;
   prompt: string;
 }
-export interface DesktopAiListModelsInput { baseUrl: string;
+interface DesktopAiListModelsInput { baseUrl: string;
 }
-export interface DesktopAiGenerateResult { response: string;
+interface DesktopAiGenerateResult { response: string;
 }
-export interface DesktopAiListModelsResult { models: string[];
+interface DesktopAiListModelsResult { models: string[];
 }
-export interface DesktopAiApi { generateOllama(input: DesktopAiGenerateInput): Promise<DesktopAiGenerateResult>;
+interface DesktopAiApi { generateOllama(input: DesktopAiGenerateInput): Promise<DesktopAiGenerateResult>;
   listOllamaModels(input: DesktopAiListModelsInput): Promise<string[]>;
 }
-export interface DesktopImportFileOpenPayload { paths: string[];
+interface DesktopImportFileOpenPayload { paths: string[];
 }
-export interface DesktopImportFileReadResult { path: string;
+interface DesktopImportFileReadResult { path: string;
   name: string;
   size: number;
   data: ArrayBuffer | Uint8Array | number[];
 }
-export interface DesktopPdfOpenInput { fileName: string;
+interface DesktopPdfOpenInput { fileName: string;
   data: ArrayBuffer | Uint8Array | number[];
   pageNumber?: number;
 }
-export interface DesktopPdfOpenResult { path: string;
+interface DesktopPdfOpenResult { path: string;
   openedWith: string;
 }
-export type DesktopImportFileOpenHandler = (payload: DesktopImportFileOpenPayload) => void;
-export interface DesktopFileApi { readImportFile(filePath: string): Promise<DesktopImportFileReadResult>;
+type DesktopImportFileOpenHandler = (payload: DesktopImportFileOpenPayload) => void;
+interface DesktopFileApi { readImportFile(filePath: string): Promise<DesktopImportFileReadResult>;
   selectImportFiles(): Promise<string[]>;
   onImportFileOpen(handler: DesktopImportFileOpenHandler): () => void;
 }
-export interface DesktopPdfApi { openInSioyek(input: DesktopPdfOpenInput): Promise<DesktopPdfOpenResult>;
+interface DesktopPdfApi { openInSioyek(input: DesktopPdfOpenInput): Promise<DesktopPdfOpenResult>;
 }
-export interface DesktopOauthCallbackPayload { url: string;
+interface DesktopOauthCallbackPayload { url: string;
   code?: string;
   state?: string;
   error?: string;
   errorDescription?: string;
 }
-export type DesktopOauthCallbackHandler = (payload: DesktopOauthCallbackPayload) => void;
-export interface PlatformOauthApi { start(authorizeUrl: string): Promise<void>;
+type DesktopOauthCallbackHandler = (payload: DesktopOauthCallbackPayload) => void;
+interface PlatformOauthApi { start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
   takePendingCallback(): Promise<DesktopOauthCallbackPayload | null>;
   exchangeIdToken(idToken: string): Promise<unknown>;
@@ -52,18 +52,18 @@ export interface PlatformOauthApi { start(authorizeUrl: string): Promise<void>;
   deleteRefreshToken(accountId: string): Promise<void>;
   onCallback(handler: DesktopOauthCallbackHandler): () => void;
 }
-export interface DesktopWindowApi { minimize(): Promise<void>;
+interface DesktopWindowApi { minimize(): Promise<void>;
   maximizeToggle(): Promise<void>;
   close(): Promise<void>;
   isMaximized(): Promise<boolean>;
   onMaximizedStateChange(handler: (isMaximized: boolean) => void): () => void;
 }
-export interface PlatformApi { app: PlatformAppApi;
+interface PlatformApi { app: PlatformAppApi;
   shell: PlatformShellApi;
   oauth: PlatformOauthApi;
 }
-export type DesktopOauthApi = PlatformOauthApi;
-export interface DesktopBridgeApi extends PlatformApi { ai: DesktopAiApi;
+type DesktopOauthApi = PlatformOauthApi;
+interface DesktopBridgeApi extends PlatformApi { ai: DesktopAiApi;
   files: DesktopFileApi;
   oauth: DesktopOauthApi;
   pdf: DesktopPdfApi;
@@ -77,3 +77,4 @@ declare global {
 }
 
 export {};
+export type { PlatformAppApi, PlatformShellApi, DesktopAiGenerateInput, DesktopAiListModelsInput, DesktopAiGenerateResult, DesktopAiListModelsResult, DesktopAiApi, DesktopImportFileOpenPayload, DesktopImportFileReadResult, DesktopPdfOpenInput, DesktopPdfOpenResult, DesktopImportFileOpenHandler, DesktopFileApi, DesktopPdfApi, DesktopOauthCallbackPayload, DesktopOauthCallbackHandler, PlatformOauthApi, DesktopWindowApi, PlatformApi, DesktopOauthApi, DesktopBridgeApi };

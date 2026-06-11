@@ -1,10 +1,10 @@
-export interface OAuthBridgeCallbackPayload { url: string;
+interface OAuthBridgeCallbackPayload { url: string;
   code?: string;
   state?: string;
   error?: string;
   errorDescription?: string;
 }
-export interface OAuthBridgePort { start(authorizeUrl: string): Promise<void>;
+interface OAuthBridgePort { start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
   takePendingCallback(): Promise<OAuthBridgeCallbackPayload | null>;
   storeRefreshToken(input: { accountId: string; refreshToken: string; }): Promise<void>;
@@ -12,3 +12,5 @@ export interface OAuthBridgePort { start(authorizeUrl: string): Promise<void>;
   deleteRefreshToken(accountId: string): Promise<void>;
   onCallback(handler: (payload: OAuthBridgeCallbackPayload) => void): () => void;
 }
+
+export type { OAuthBridgeCallbackPayload, OAuthBridgePort };

@@ -1,9 +1,9 @@
-export type SecurityEventType = | "LOGIN_SUCCESS" | "LOGIN_FAILED" | "DEVICE_REVOKED" | "ACCESS_DENIED_REVOKED" | "SYNC_AUTH_ERROR" | "SENSITIVE_OP_REVOKED" | "DEVICE_NEW_REGISTER" | "LOCK_CONTENTION_EXCESS" | "SYNC_CONFLICT_EXCESS" | "ADMIN_DEVICE_REVOKE" | "ADMIN_ACCOUNT_LOCK" | "ADMIN_LOG_EXPORT";
-export type LogLevel = "debug" | "info" | "warn" | "error";
-export type SyncContextSource = | "user_initiated" | "background" | "periodic" | "force_resync" | "system";
-export type NetworkStatus = "excellent" | "good" | "poor" | "offline";
-export type TelemetryEventName = | "startup_degraded" | "sanitize_blob_url_from_cloud" | "rebuild_item_failed" | "rebuild_partial_failures";
-export interface LogContext { userId?: string;
+type SecurityEventType = | "LOGIN_SUCCESS" | "LOGIN_FAILED" | "DEVICE_REVOKED" | "ACCESS_DENIED_REVOKED" | "SYNC_AUTH_ERROR" | "SENSITIVE_OP_REVOKED" | "DEVICE_NEW_REGISTER" | "LOCK_CONTENTION_EXCESS" | "SYNC_CONFLICT_EXCESS" | "ADMIN_DEVICE_REVOKE" | "ADMIN_ACCOUNT_LOCK" | "ADMIN_LOG_EXPORT";
+type LogLevel = "debug" | "info" | "warn" | "error";
+type SyncContextSource = | "user_initiated" | "background" | "periodic" | "force_resync" | "system";
+type NetworkStatus = "excellent" | "good" | "poor" | "offline";
+type TelemetryEventName = | "startup_degraded" | "sanitize_blob_url_from_cloud" | "rebuild_item_failed" | "rebuild_partial_failures";
+interface LogContext { userId?: string;
   deviceId?: string;
   networkStatus?: NetworkStatus;
   syncContext?: SyncContextSource;
@@ -12,16 +12,16 @@ export interface LogContext { userId?: string;
   [key: string]: unknown;
 }
 // System SLIs (Technical Health)
-export interface SystemMetrics { syncAvailability: number; // 1 = success, 0 = 5xx error
+interface SystemMetrics { syncAvailability: number; // 1 = success, 0 = 5xx error
   throughput: number; // records / sec
   memoryUsage?: number; // MB
 }
 // User Experience SLIs (Perceived Quality)
-export interface UserMetrics { perceivedLatency: number; // ms (Action to UI feedback)
+interface UserMetrics { perceivedLatency: number; // ms (Action to UI feedback)
   consistencyRate: number; // 1 = consistent, 0 = inconsistent
   isSilentFailure: boolean; // true if failed without user notification
 }
-export interface SyncLogEntry { timestamp: string;
+interface SyncLogEntry { timestamp: string;
   level: LogLevel;
   message: string;
   eventName?: TelemetryEventName;
@@ -36,7 +36,7 @@ export interface SyncLogEntry { timestamp: string;
   | "checksum_error";
   isFallback?: boolean;
 }
-export interface ITelemetryService { log(level: LogLevel, message: string, context?: LogContext, error?: Error,): void;
+interface ITelemetryService { log(level: LogLevel, message: string, context?: LogContext, error?: Error,): void;
   logEvent(
     eventName: TelemetryEventName,
     level: LogLevel,
@@ -53,13 +53,13 @@ export interface ITelemetryService { log(level: LogLevel, message: string, conte
     end: (status: "success" | "failure") => void;
   };
 }
-export interface SecurityMetadata { ipAddress?: string; // (serverのみ信頼可能)
+interface SecurityMetadata { ipAddress?: string; // (serverのみ信頼可能)
   userAgent?: string;
   path?: string; // アクセスしようとしたリソース
   reason?: string; // エラー詳細
   [key: string]: unknown;
 }
-export interface SecurityLog { logId: string; // UUID
+interface SecurityLog { logId: string; // UUID
   userId: string;
   deviceId: string; // アクセス元デバイスID (不明な場合は 'unknown')
   deviceName?: string; // 記録時点でのデバイス名
@@ -74,3 +74,5 @@ export interface SecurityLog { logId: string; // UUID
 
   occurredAt: unknown; // Timestamp or Date
 }
+
+export type { SecurityEventType, LogLevel, SyncContextSource, NetworkStatus, TelemetryEventName, LogContext, SystemMetrics, UserMetrics, SyncLogEntry, ITelemetryService, SecurityMetadata, SecurityLog };

@@ -8,7 +8,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type RatingKey = "forgot" | "vague" | "remembered" | "easy";
+type RatingKey = "forgot" | "vague" | "remembered" | "easy";
 type TodayStudyState = {
   dateKey: string;
   userId: string;
@@ -43,7 +43,7 @@ const localDateKey = (): string => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
-export type TodayStudyStore = TodayStudyState & TodayStudyActions;
+type TodayStudyStore = TodayStudyState & TodayStudyActions;
 
 const initialState = (userId = "anon"): TodayStudyState => ({
   dateKey: localDateKey(),
@@ -53,7 +53,7 @@ const initialState = (userId = "anon"): TodayStudyState => ({
   extraDone: [],
 });
 
-export const useTodayStudyStore = create<TodayStudyStore>()(persist((set, get) => ({ ...initialState(), hydrate: (userId: string) => { const s = get();
+const useTodayStudyStore = create<TodayStudyStore>()(persist((set, get) => ({ ...initialState(), hydrate: (userId: string) => { const s = get();
   const today = localDateKey();
   if (s.dateKey !== today || s.userId !== userId) {
     set(initialState(userId));
@@ -101,3 +101,6 @@ markExtraDone: (cardId: string) =>
 },
 ),
 );
+
+export { useTodayStudyStore };
+export type { RatingKey, TodayStudyStore };

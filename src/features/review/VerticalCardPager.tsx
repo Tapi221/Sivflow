@@ -11,7 +11,7 @@ type ScrollAnchorSnapshot = {
   cardKey: string | null;
   relativeTop: number;
 };
-export type VerticalCardPagerProps<T> = { cards: T[];
+type VerticalCardPagerProps<T> = { cards: T[];
   activeIndex: number;
   onActiveIndexChange: (idx: number) => void;
   onRenderRangeChange?: (range: { start: number; end: number; } | null) => void;
@@ -34,7 +34,7 @@ export type VerticalCardPagerProps<T> = { cards: T[];
   scrollToActiveIndexBehavior?: ScrollBehavior;
 };
 
-export const ACTIVE_INDEX_RENDER_RADIUS = 6;
+const ACTIVE_INDEX_RENDER_RADIUS = 6;
 const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;
 const CARD_GAP = 16;
 const SCROLL_PADDING = "50vh";
@@ -347,3 +347,6 @@ const VerticalCardPager = React.memo(VerticalCardPagerFn) as typeof VerticalCard
 export { VerticalCardPager };
 
 export type { VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
+
+export { ACTIVE_INDEX_RENDER_RADIUS };
+export type { VerticalCardPagerProps };

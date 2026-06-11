@@ -113,7 +113,7 @@ const readCardDraft = (cardId: string) => {
     return null;
   }
 };
-export const useCardEntity = (cardId?: string | null) => { const { currentUser } = useAuthSession();
+const useCardEntity = (cardId?: string | null) => { const { currentUser } = useAuthSession();
   const { updateCard } = useCards(undefined, undefined, { enabled: false });
 
   const serverCard = useLiveQuery(
@@ -179,3 +179,5 @@ export const useCardEntity = (cardId?: string | null) => { const { currentUser }
     flushDraft,
   };
 };
+
+export { useCardEntity };

@@ -43,7 +43,7 @@ const buildResolvedConflictRecord = (conflict: SyncConflict, resolvedData: unkno
   };
 };
 
-export const SyncProvider = ({ children }: SyncProviderProps) => { const { currentUser } = useAuthSession();
+const SyncProvider = ({ children }: SyncProviderProps) => { const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
   const [syncNotice, setSyncNotice] = useState<SyncNotice>("none");
@@ -253,3 +253,5 @@ export const SyncProvider = ({ children }: SyncProviderProps) => { const { curre
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
 };
+
+export { SyncProvider };

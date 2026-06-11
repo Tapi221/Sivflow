@@ -11,9 +11,9 @@ type OrderableEntitySelectors<T> = {
 const toTimestamp = (value: unknown): number => {
   return toMillis(value);
 };
-export const getOrderableOrderIndex = <T>(entity: T, selectors: Pick<OrderableEntitySelectors<T>, "getOrderIndex">): number => { return selectors.getOrderIndex(entity) ?? 0;
+const getOrderableOrderIndex = <T>(entity: T, selectors: Pick<OrderableEntitySelectors<T>, "getOrderIndex">): number => { return selectors.getOrderIndex(entity) ?? 0;
 };
-export const compareOrderableEntities = <T>(left: T, right: T, selectors: OrderableEntitySelectors<T>): number => { const orderCompare = getOrderableOrderIndex(left, selectors) - getOrderableOrderIndex(right, selectors);
+const compareOrderableEntities = <T>(left: T, right: T, selectors: OrderableEntitySelectors<T>): number => { const orderCompare = getOrderableOrderIndex(left, selectors) - getOrderableOrderIndex(right, selectors);
   if (orderCompare !== 0) return orderCompare;
 
   const updatedCompare =
@@ -37,3 +37,5 @@ export const compareOrderableEntities = <T>(left: T, right: T, selectors: Ordera
     "ja",
   );
 };
+
+export { getOrderableOrderIndex, compareOrderableEntities };

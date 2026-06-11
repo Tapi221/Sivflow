@@ -72,7 +72,7 @@ if (import.meta.env.DEV && typeof window !== "undefined") {
     .then((m) => m.installLocalDbDevtools?.())
     .catch(() => {});
 }
-export class LocalDB extends Dexie { users!: Dexie.Table<User, string>;
+class LocalDB extends Dexie { users!: Dexie.Table<User, string>;
   folders!: Dexie.Table<Folder, string>;
   cardSets!: Dexie.Table<CardSet, string>;
   cards!: Dexie.Table<Card, string>;
@@ -403,5 +403,6 @@ export class LocalDB extends Dexie { users!: Dexie.Table<User, string>;
   }
 }
 
-export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "./types";
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };
+export { LocalDB };
+export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "./types";

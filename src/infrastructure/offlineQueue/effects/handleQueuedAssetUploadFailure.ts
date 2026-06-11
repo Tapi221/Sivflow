@@ -3,7 +3,7 @@ import type { QueueItem } from "@/application/usecases/persistentOfflineQueueMod
 import { auth } from "@/infrastructure/firebase/client";
 import { getLocalDb } from "@/infrastructure/localdb/client";
 
-export const handleQueuedAssetUploadFailure = async (item: QueueItem): Promise<void> => { try { const localDb = await getLocalDb();
+const handleQueuedAssetUploadFailure = async (item: QueueItem): Promise<void> => { try { const localDb = await getLocalDb();
   const existingAsset = toAssetLikeRecord(await localDb.images.get(item.id));
 
   await localDb.upsert(
@@ -32,3 +32,5 @@ export const handleQueuedAssetUploadFailure = async (item: QueueItem): Promise<v
   console.warn("[PersistentQueue] Failed to update asset status", assetErr);
 }
 };
+
+export { handleQueuedAssetUploadFailure };

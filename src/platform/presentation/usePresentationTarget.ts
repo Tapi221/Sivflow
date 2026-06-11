@@ -18,7 +18,7 @@ const bindMediaQueryChange = (
     mediaQueryList.removeListener(handler);
   };
 };
-export const usePresentationTarget = (): PresentationTarget => { const [presentationTarget, setPresentationTarget] = useState<PresentationTarget>(getPresentationTargetFromWindow);
+const usePresentationTarget = (): PresentationTarget => { const [presentationTarget, setPresentationTarget] = useState<PresentationTarget>(getPresentationTargetFromWindow);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -52,3 +52,5 @@ export const usePresentationTarget = (): PresentationTarget => { const [presenta
 
   return presentationTarget;
 };
+
+export { usePresentationTarget };

@@ -12,7 +12,7 @@ interface BlockRendererProps {
   zoom?: number;
 }
 
-export const BlockRenderer = ({ blocks, onGalleryFullscreenChange, displayMode = "fixed", zoom = 1 }: BlockRendererProps) => { const viewerProps = useViewerSceneProps({ onGalleryFullscreenChange, displayMode, zoom });
+const BlockRenderer = ({ blocks, onGalleryFullscreenChange, displayMode = "fixed", zoom = 1 }: BlockRendererProps) => { const viewerProps = useViewerSceneProps({ onGalleryFullscreenChange, displayMode, zoom });
 
   const renderableBlocks = useMemo(
     () => filterRenderableCardBlocks(blocks),
@@ -31,3 +31,5 @@ export const BlockRenderer = ({ blocks, onGalleryFullscreenChange, displayMode =
     />
   );
 };
+
+export { BlockRenderer };

@@ -32,7 +32,7 @@ interface UseCardSetViewQueryResult {
   isLoading: boolean;
 }
 
-export const useCardSetViewQuery = ({ cardSetId }: UseCardSetViewQueryOptions): UseCardSetViewQueryResult => { const { cardSet: selectedCardSet, loading: cardSetLoading, updateCardSet } = useCardSetById(cardSetId);
+const useCardSetViewQuery = ({ cardSetId }: UseCardSetViewQueryOptions): UseCardSetViewQueryResult => { const { cardSet: selectedCardSet, loading: cardSetLoading, updateCardSet } = useCardSetById(cardSetId);
 
   const { folders, loading: foldersLoading } = useFolderLineage(
     selectedCardSet?.folderId ?? null,
@@ -97,3 +97,5 @@ export const useCardSetViewQuery = ({ cardSetId }: UseCardSetViewQueryOptions): 
     isLoading: cardSetLoading || foldersLoading || cardsLoading,
   };
 };
+
+export { useCardSetViewQuery };

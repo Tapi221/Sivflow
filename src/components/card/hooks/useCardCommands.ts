@@ -23,7 +23,7 @@ const toDateMillis = (value: SortableTimestamp): number => {
   if (typeof value.seconds === "number") return value.seconds * 1000 + Math.floor((value.nanoseconds ?? 0) / 1_000_000);
   return 0;
 };
-export const useCardCommands = (folderId?: string) => { const { currentUser } = useAuthSession();
+const useCardCommands = (folderId?: string) => { const { currentUser } = useAuthSession();
   const { settings } = useUserSettings();
 
   const createCard = async (cardData: Partial<Card> & { cardSetId?: string; }) => {
@@ -278,3 +278,5 @@ export const useCardCommands = (folderId?: string) => { const { currentUser } = 
     reorderCardsInCardSet,
   };
 };
+
+export { useCardCommands };

@@ -23,9 +23,9 @@ type PracticeCardCarouselProps = CardCarouselBaseProps & {
   mode: "practice";
   onResult?: PracticeResultHandler;
 };
-export type CardCarouselProps = ReviewCardCarouselProps | PracticeCardCarouselProps;
+type CardCarouselProps = ReviewCardCarouselProps | PracticeCardCarouselProps;
 
-export const CardCarousel = ({ cards, mode, sessionCurrentIndex, onResult, onToggleUncertainty, onToggleBookmark, onEdit, showHard, showEasy }: CardCarouselProps) => { const [flipTrigger, setFlipTrigger] = useState(0);
+const CardCarousel = ({ cards, mode, sessionCurrentIndex, onResult, onToggleUncertainty, onToggleBookmark, onEdit, showHard, showEasy }: CardCarouselProps) => { const [flipTrigger, setFlipTrigger] = useState(0);
 
   useEffect(() => {
     queueMicrotask(() => setFlipTrigger(0));
@@ -54,3 +54,6 @@ export const CardCarousel = ({ cards, mode, sessionCurrentIndex, onResult, onTog
     />
   );
 };
+
+export { CardCarousel };
+export type { CardCarouselProps };

@@ -118,4 +118,6 @@ const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
     }),
   ),
 });
-export const AutoformatKit = [AUTOFORMAT_SHORTCUTS_PLUGIN];
+const AutoformatKit = [AUTOFORMAT_SHORTCUTS_PLUGIN];
+
+export { AutoformatKit };

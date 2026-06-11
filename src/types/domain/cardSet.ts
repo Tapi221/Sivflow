@@ -1,10 +1,10 @@
 import type { BaseEntity } from "./base";
 
-export type CardDisplayMode = "fixed" | "fluid";
+type CardDisplayMode = "fixed" | "fluid";
 
-export const DEFAULT_CARD_DISPLAY_MODE: CardDisplayMode = "fixed";
+const DEFAULT_CARD_DISPLAY_MODE: CardDisplayMode = "fixed";
 
-export const normalizeCardDisplayMode = (value: unknown) => { return value === "fluid" ? "fluid" : "fixed";
+const normalizeCardDisplayMode = (value: unknown) => { return value === "fluid" ? "fluid" : "fixed";
 };
 
 /**
@@ -13,10 +13,13 @@ export const normalizeCardDisplayMode = (value: unknown) => { return value === "
  *
  * Folder -> CardSet -> Card
  */
-export type CardSet = BaseEntity & { /** 所属する Folder の ID（null = ルート相当の "未分類" セット） */ folderId: string | null;
+type CardSet = BaseEntity & { /** 所属する Folder の ID（null = ルート相当の "未分類" セット） */ folderId: string | null;
   name: string;
   description?: string;
   orderIndex: number;
   defaultDisplayMode?: CardDisplayMode;
   tags?: string[];
 };
+
+export { DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode };
+export type { CardDisplayMode, CardSet };

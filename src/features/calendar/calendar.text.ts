@@ -12,8 +12,10 @@
 
 // ── フォールバック（日本語固定）──────────────────────────────
 // 新規コンポーネントでは useT() を使ってください。
-export const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
+const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 // ── リサイズハンドル ────────────────────────────────────────
 // 新規コンポーネントでは t.monthRowResizeTitle / t.monthRowResizeAriaLabel を使用。
-export const MONTH_ROW_RESIZE_TITLE = "ドラッグで月表示の縦幅を変更。ダブルクリックで初期値に戻します。";
-export const MONTH_ROW_RESIZE_ARIA_LABEL = "月表示の日付セルの高さを調整";
+const MONTH_ROW_RESIZE_TITLE = "ドラッグで月表示の縦幅を変更。ダブルクリックで初期値に戻します。";
+const MONTH_ROW_RESIZE_ARIA_LABEL = "月表示の日付セルの高さを調整";
+
+export { WEEKDAY_LABELS, MONTH_ROW_RESIZE_TITLE, MONTH_ROW_RESIZE_ARIA_LABEL };

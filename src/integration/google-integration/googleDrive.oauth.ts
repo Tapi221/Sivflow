@@ -57,8 +57,10 @@ const requestLocalGoogleDriveFileAccessToken = async (auth: Auth): Promise<strin
   await assertGoogleDriveFileScope(result.accessToken);
   return result.accessToken;
 };
-export const requestGoogleDriveFileAccessToken = async (auth: Auth): Promise<string> => { if (isServerStoredGoogleOAuthEnabled()) { return requestServerStoredGoogleDriveFileAccessToken(auth);
+const requestGoogleDriveFileAccessToken = async (auth: Auth): Promise<string> => { if (isServerStoredGoogleOAuthEnabled()) { return requestServerStoredGoogleDriveFileAccessToken(auth);
 }
 
 return requestLocalGoogleDriveFileAccessToken(auth);
 };
+
+export { requestGoogleDriveFileAccessToken };

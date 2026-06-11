@@ -1,4 +1,6 @@
 import { toMillis } from "@/utils/toMillis";
 
-export const getUpdatedAtMillis = (value: unknown): number => { return toMillis(value);
+const getUpdatedAtMillis = (value: unknown): number => { return toMillis(value);
 };
+
+export { getUpdatedAtMillis };

@@ -6,5 +6,7 @@ type AnimatedRadioCheckboxProps = Omit<
   "shape" | "variant" | "indeterminate"
 >;
 
-export const AnimatedRadioCheckbox = (props: AnimatedRadioCheckboxProps) => { return <AnimatedCheckboxBase {...props} shape="circle" variant="radio" />;
+const AnimatedRadioCheckbox = (props: AnimatedRadioCheckboxProps) => { return <AnimatedCheckboxBase {...props} shape="circle" variant="radio" />;
 };
+
+export { AnimatedRadioCheckbox };

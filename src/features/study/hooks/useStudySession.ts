@@ -8,8 +8,8 @@ import { normalizeMemoryStability } from "@/utils/reviewUtils";
 import type { PracticeFilterRating } from "./usePracticeMode";
 import type { Card, CardPatch, CardSet, SubjectiveScoreValue, UserSettings } from "@/types";
 
-export type StudySessionRating = PracticeFilterRating;
-export type StudySessionResult = { cardId: string;
+type StudySessionRating = PracticeFilterRating;
+type StudySessionResult = { cardId: string;
   rating: StudySessionRating;
   subjectiveScore: SubjectiveScoreValue;
   responseTimeMs: number;
@@ -63,7 +63,7 @@ const createSessionId = () => {
   }
   return `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
-export const useStudySession = ({ studyCards, cardSets = [], updateCard, currentUser, settings, createStudyLogMutation, createLevelHistoryMutation }: Params) => { const [currentIndex, setCurrentIndex] = useState(0);
+const useStudySession = ({ studyCards, cardSets = [], updateCard, currentUser, settings, createStudyLogMutation, createLevelHistoryMutation }: Params) => { const [currentIndex, setCurrentIndex] = useState(0);
   const [studyComplete, setStudyComplete] = useState(false);
   const [results, setResults] = useState<ResultsState>({
     0: 0,
@@ -213,3 +213,6 @@ export const useStudySession = ({ studyCards, cardSets = [], updateCard, current
     handleResult,
   };
 };
+
+export { useStudySession };
+export type { StudySessionRating, StudySessionResult };

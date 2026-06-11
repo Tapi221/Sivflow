@@ -12,7 +12,7 @@ import { ToolbarButton } from "./toolbar";
 
 type ImportType = "html" | "markdown";
 
-export const ImportToolbarButton = (props: DropdownMenuProps) => { const editor = useEditorRef();
+const ImportToolbarButton = (props: DropdownMenuProps) => { const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   const getFileNodes = (text: string, type: ImportType) => {
@@ -106,3 +106,5 @@ export const ImportToolbarButton = (props: DropdownMenuProps) => { const editor 
     </DropdownMenu>
   );
 };
+
+export { ImportToolbarButton };

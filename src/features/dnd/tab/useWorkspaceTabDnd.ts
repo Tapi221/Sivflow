@@ -16,7 +16,7 @@ const areTabOrdersEqual = (
 
   return leftTabs.every((tab, index) => tab.id === rightTabs[index]?.id);
 };
-export const useWorkspaceTabDnd = ({ tabs, reorderTabs, onDragStart }: UseWorkspaceTabDndArgs) => { const tabsListRef = useRef<HTMLDivElement | null>(null);
+const useWorkspaceTabDnd = ({ tabs, reorderTabs, onDragStart }: UseWorkspaceTabDndArgs) => { const tabsListRef = useRef<HTMLDivElement | null>(null);
   const suppressTabClickRef = useRef(false);
   const isDraggingTabsRef = useRef(false);
   const orderedTabsRef = useRef<WorkspaceTab[]>(tabs);
@@ -94,3 +94,5 @@ export const useWorkspaceTabDnd = ({ tabs, reorderTabs, onDragStart }: UseWorksp
     tabsListRef,
   };
 };
+
+export { useWorkspaceTabDnd };

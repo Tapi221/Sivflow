@@ -11,12 +11,12 @@ type LayeredProjectMenuItemDefinition = {
   separatorBefore?: boolean;
   submenu?: boolean;
 };
-export type LayeredProjectMenuActionId = "change-color" | "rename" | "create-note" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
-export type LayeredProjectMenuAction = { id: LayeredProjectMenuActionId;
+type LayeredProjectMenuActionId = "change-color" | "rename" | "create-note" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
+type LayeredProjectMenuAction = { id: LayeredProjectMenuActionId;
   disabled?: boolean;
   onSelect: () => void;
 };
-export type LayeredProjectMenuSubmenuAnchor = { itemOffsetY: number;
+type LayeredProjectMenuSubmenuAnchor = { itemOffsetY: number;
 };
 type LayeredProjectMenuProps = {
   x: number;
@@ -31,7 +31,7 @@ type LayeredProjectMenuProps = {
   onCloseSubmenu?: () => void;
 };
 
-export const LAYERED_PROJECT_MENU_PANEL_ID = "layered-project-context-menu";
+const LAYERED_PROJECT_MENU_PANEL_ID = "layered-project-context-menu";
 const LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT = 5;
 const LAYERED_PROJECT_MENU_ITEM_DEFINITIONS: readonly LayeredProjectMenuItemDefinition[] = [
   { id: "change-color", label: "色を変更", submenu: true },
@@ -46,9 +46,9 @@ const LAYERED_PROJECT_MENU_ITEM_DEFINITIONS: readonly LayeredProjectMenuItemDefi
 ];
 const LAYERED_PROJECT_MENU_LABELS = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.map((item) => item.label);
 const LAYERED_PROJECT_MENU_SEPARATOR_COUNT = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.filter((item) => item.separatorBefore).length;
-export const LAYERED_PROJECT_MENU_WIDTH = resolveRightClickPanelTextWidth(LAYERED_PROJECT_MENU_LABELS, 132);
-export const LAYERED_PROJECT_MENU_HEIGHT = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + LAYERED_PROJECT_MENU_SEPARATOR_COUNT * LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
-export const LAYERED_PROJECT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
+const LAYERED_PROJECT_MENU_WIDTH = resolveRightClickPanelTextWidth(LAYERED_PROJECT_MENU_LABELS, 132);
+const LAYERED_PROJECT_MENU_HEIGHT = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + LAYERED_PROJECT_MENU_SEPARATOR_COUNT * LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
+const LAYERED_PROJECT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 const LAYERED_PROJECT_MENU_STYLE = `
 .right-click-panel.layered-project-menu-panel {
   contain: none;
@@ -128,3 +128,5 @@ const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId =
 const LayeredProjectMenu = memo(LayeredProjectMenuBase);
 LayeredProjectMenu.displayName = "LayeredProjectMenu";
 export { LayeredProjectMenu };
+export { LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_MARGIN };
+export type { LayeredProjectMenuActionId, LayeredProjectMenuAction, LayeredProjectMenuSubmenuAnchor };

@@ -13,8 +13,8 @@ type RebuildStorageStatsResponse = {
   schemaVersion?: number;
 };
 
-export const CLOUD_STORAGE_STATS_SCHEMA_VERSION = 1;
-export const DEFAULT_CLOUD_STORAGE_QUOTA_BYTES = 500 * 1024 * 1024;
+const CLOUD_STORAGE_STATS_SCHEMA_VERSION = 1;
+const DEFAULT_CLOUD_STORAGE_QUOTA_BYTES = 500 * 1024 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -64,12 +64,12 @@ const parseCloudStorageStats = (
     lastRebuiltAt: toTimestampLike(data.lastRebuiltAt),
   };
 };
-export const isCloudStorageStatsOutdated = (stats: CloudStorageStats | null): boolean => { if (!stats) { return true;
+const isCloudStorageStatsOutdated = (stats: CloudStorageStats | null): boolean => { if (!stats) { return true;
 }
 
 return stats.schemaVersion !== CLOUD_STORAGE_STATS_SCHEMA_VERSION;
 };
-export const subscribeToCloudStorageStats = (userId: string, onChange: (stats: CloudStorageStats | null) => void, onError: (error: unknown) => void): Unsubscribe => { const db = requireFirestoreDb();
+const subscribeToCloudStorageStats = (userId: string, onChange: (stats: CloudStorageStats | null) => void, onError: (error: unknown) => void): Unsubscribe => { const db = requireFirestoreDb();
   const pathSegments = storageStatsDocPathSegments(userId);
 
   return onSnapshot(
@@ -91,7 +91,7 @@ export const subscribeToCloudStorageStats = (userId: string, onChange: (stats: C
     onError,
   );
 };
-export const rebuildCloudStorageStats = async (userId: string): Promise<CloudStorageStats> => { const callable = httpsCallable<void, RebuildStorageStatsResponse>(functionsClient, "rebuildStorageStats");
+const rebuildCloudStorageStats = async (userId: string): Promise<CloudStorageStats> => { const callable = httpsCallable<void, RebuildStorageStatsResponse>(functionsClient, "rebuildStorageStats");
   const result = await callable();
 
   return parseCloudStorageStats(userId, {
@@ -100,3 +100,5 @@ export const rebuildCloudStorageStats = async (userId: string): Promise<CloudSto
     lastRebuiltAt: new Date(),
   });
 };
+
+export { CLOUD_STORAGE_STATS_SCHEMA_VERSION, DEFAULT_CLOUD_STORAGE_QUOTA_BYTES, isCloudStorageStatsOutdated, subscribeToCloudStorageStats, rebuildCloudStorageStats };

@@ -5,7 +5,7 @@ import { PlaceholderPlugin, UploadErrorCode } from "@platejs/media/react";
 import { usePluginOption } from "platejs/react";
 import { toast } from "sonner";
 
-export const MediaUploadToast = () => { useUploadErrorToast();
+const MediaUploadToast = () => { useUploadErrorToast();
 
   return null;
 };
@@ -63,3 +63,5 @@ const useUploadErrorToast = () => {
     }
   }, [uploadError]);
 };
+
+export { MediaUploadToast };

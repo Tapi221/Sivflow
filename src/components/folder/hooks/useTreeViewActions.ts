@@ -6,7 +6,7 @@ interface UseTreeViewActionsParams {
   onFolderSelect: (folderId: string | null) => void;
 }
 
-export const useTreeViewActions = ({ selectedFolderId, onFolderSelect }: UseTreeViewActionsParams) => { const handleFolderSelect = useCallback((folderId: string | null) => { onFolderSelect(folderId);
+const useTreeViewActions = ({ selectedFolderId, onFolderSelect }: UseTreeViewActionsParams) => { const handleFolderSelect = useCallback((folderId: string | null) => { onFolderSelect(folderId);
   },
     [onFolderSelect],
   );
@@ -33,3 +33,5 @@ export const useTreeViewActions = ({ selectedFolderId, onFolderSelect }: UseTree
     handleOpenCreateCard,
   };
 };
+
+export { useTreeViewActions };

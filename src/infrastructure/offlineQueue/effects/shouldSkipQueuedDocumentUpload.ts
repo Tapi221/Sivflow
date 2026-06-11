@@ -2,7 +2,7 @@ import { getDocumentKindLabel, isDocumentQueueItem, isDocumentUploadReady } from
 import type { QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
 import { getLocalDb } from "@/infrastructure/localdb/client";
 
-export const shouldSkipQueuedDocumentUpload = async (item: QueueItem): Promise<boolean> => { if (!isDocumentQueueItem(item)) { return false;
+const shouldSkipQueuedDocumentUpload = async (item: QueueItem): Promise<boolean> => { if (!isDocumentQueueItem(item)) { return false;
 }
 
 const localDb = await getLocalDb();
@@ -23,3 +23,5 @@ console.info(
 
 return true;
 };
+
+export { shouldSkipQueuedDocumentUpload };

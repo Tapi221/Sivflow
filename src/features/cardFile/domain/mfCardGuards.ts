@@ -20,7 +20,7 @@ const isMfCardPayloadV1 = (value: unknown): value is MfCardFileV1["card"] => {
     cards: [value],
   });
 };
-export const isMfCardFileV1 = (value: unknown): value is MfCardFileV1 => { if (!isRecord(value)) return false;
+const isMfCardFileV1 = (value: unknown): value is MfCardFileV1 => { if (!isRecord(value)) return false;
   if (value.format !== MF_CARD_FORMAT) return false;
   if (value.version !== MF_CARD_VERSION) return false;
   if (!isIsoLikeString(value.exportedAt)) return false;
@@ -35,7 +35,7 @@ export const isMfCardFileV1 = (value: unknown): value is MfCardFileV1 => { if (!
 
   return isMfCardPayloadV1(value.card);
 };
-export const validateMfCardFile = (input: unknown): MfCardValidationResult => { const issues: MfCardIssue[] = [];
+const validateMfCardFile = (input: unknown): MfCardValidationResult => { const issues: MfCardIssue[] = [];
 
   if (!isMfCardFileV1(input)) {
     issues.push({
@@ -54,3 +54,5 @@ export const validateMfCardFile = (input: unknown): MfCardValidationResult => { 
     issues,
   };
 };
+
+export { isMfCardFileV1, validateMfCardFile };

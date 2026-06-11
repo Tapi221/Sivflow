@@ -1,3 +1,5 @@
-export interface CodeBlockData { language: string;
+interface CodeBlockData { language: string;
   code: string;
 }
+
+export type { CodeBlockData };

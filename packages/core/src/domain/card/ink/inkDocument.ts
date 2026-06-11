@@ -1,12 +1,12 @@
-export type InkSide = "question" | "answer";
-export type InkTool = "pen" | "highlighter";
-export type InkEditTool = InkTool | "eraser";
-export type InkPoint = { x: number;
+type InkSide = "question" | "answer";
+type InkTool = "pen" | "highlighter";
+type InkEditTool = InkTool | "eraser";
+type InkPoint = { x: number;
   y: number;
   t: number;
   p: number;
 };
-export type InkStroke = { id: string;
+type InkStroke = { id: string;
   tool: InkTool;
   color: string;
   width: number;
@@ -14,22 +14,22 @@ export type InkStroke = { id: string;
   points: InkPoint[];
   createdAt: number;
 };
-export type InkDocument = { version: number;
+type InkDocument = { version: number;
   updatedAt: number;
   strokes: InkStroke[];
   deletedStrokeIds?: string[];
 };
 
-export const INK_DOCUMENT_VERSION = 2;
-export const INK_PAPER_W = 1000;
-export const INK_PAPER_H = 1414;
+const INK_DOCUMENT_VERSION = 2;
+const INK_PAPER_W = 1000;
+const INK_PAPER_H = 1414;
 
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
-export const createEmptyInkDocument = (): InkDocument => ({ version: INK_DOCUMENT_VERSION, updatedAt: 0, strokes: [] });
-export const normalizeInkDocument = (value: unknown): InkDocument => { if (!value || typeof value !== "object") { return createEmptyInkDocument();
+const createEmptyInkDocument = (): InkDocument => ({ version: INK_DOCUMENT_VERSION, updatedAt: 0, strokes: [] });
+const normalizeInkDocument = (value: unknown): InkDocument => { if (!value || typeof value !== "object") { return createEmptyInkDocument();
 }
 
 const maybe = value as Partial<InkDocument>;
@@ -106,4 +106,7 @@ return {
     : {}),
 };
 };
-export const cloneInkDocument = (doc: InkDocument): InkDocument => ({ version: doc.version, updatedAt: doc.updatedAt, deletedStrokeIds: doc.deletedStrokeIds ? [...doc.deletedStrokeIds] : undefined, strokes: doc.strokes.map((stroke) => ({ ...stroke, points: stroke.points.map((point) => ({ ...point })) })) });
+const cloneInkDocument = (doc: InkDocument): InkDocument => ({ version: doc.version, updatedAt: doc.updatedAt, deletedStrokeIds: doc.deletedStrokeIds ? [...doc.deletedStrokeIds] : undefined, strokes: doc.strokes.map((stroke) => ({ ...stroke, points: stroke.points.map((point) => ({ ...point })) })) });
+
+export { INK_DOCUMENT_VERSION, INK_PAPER_W, INK_PAPER_H, createEmptyInkDocument, normalizeInkDocument, cloneInkDocument };
+export type { InkSide, InkTool, InkEditTool, InkPoint, InkStroke, InkDocument };

@@ -132,10 +132,12 @@ const buildGenerateContextPrompt = (editor: SlateEditor, messages: ChatMessage[]
     `,
   });
 };
-export const getGeneratePrompt = (editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[]; }) => {
+const getGeneratePrompt = (editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[]; }) => {
   if (!isSelecting) {
     return buildGenerateFreeformPrompt(messages);
   }
 
   return buildGenerateContextPrompt(editor, messages);
 };
+
+export { getGeneratePrompt };

@@ -7,14 +7,14 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoogleOAuthCallbackPayload } from "./google.oauth-callback";
 import type { GoogleOAuthCallbackPayload } from "./google.oauth-callback";
 
-export type GoogleCalendarAccess = { accessToken: string;
+type GoogleCalendarAccess = { accessToken: string;
   accountEmail: string | null;
   accountName: string | null;
   accountPhotoUrl: string | null;
   expiresInSeconds?: number | null;
   refreshToken?: string;
 };
-export type GoogleConnectedServiceAccess = GoogleCalendarAccess;
+type GoogleConnectedServiceAccess = GoogleCalendarAccess;
 type GoogleOAuthServerCode = {
   code: string;
   codeVerifier: string;
@@ -57,7 +57,7 @@ const WEB_AUTH_WINDOW_TARGET = "flashcard-master-google-oauth";
 const WEB_AUTH_WINDOW_FEATURES = "popup=yes,width=520,height=720";
 const GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE = "failed-precondition";
 const GOOGLE_SCOPE_RECONNECT_MESSAGE = "Google Calendar / Google ToDo / Google Drive をまとめて連携するための権限が必要です。必要な権限を有効にして再連携してください。";
-export const GOOGLE_CONNECTED_SERVICE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_CALENDAR_READONLY_SCOPE, GOOGLE_CALENDAR_APP_CREATED_SCOPE, GOOGLE_TASKS_SCOPE, GOOGLE_DRIVE_FILE_SCOPE] as const;
+const GOOGLE_CONNECTED_SERVICE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_CALENDAR_READONLY_SCOPE, GOOGLE_CALENDAR_APP_CREATED_SCOPE, GOOGLE_TASKS_SCOPE, GOOGLE_DRIVE_FILE_SCOPE] as const;
 const GOOGLE_SCOPES = GOOGLE_CONNECTED_SERVICE_SCOPES;
 const GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM = `${GOOGLE_SIGN_IN_SCOPE_PARAM} ${GOOGLE_SCOPES.join(" ")}`;
 let pendingGoogleCalendarServerCodeVerifier: string | null = null;
@@ -337,19 +337,19 @@ const requestGoogleOAuthServerCode = async ({ accessType, includeGrantedScopes, 
   const code = await codePromise;
   return { code, codeVerifier, redirectUri };
 };
-export const consumeGoogleCalendarServerCodeVerifier = (): string | null => { const verifier = pendingGoogleCalendarServerCodeVerifier;
+const consumeGoogleCalendarServerCodeVerifier = (): string | null => { const verifier = pendingGoogleCalendarServerCodeVerifier;
   pendingGoogleCalendarServerCodeVerifier = null;
   return verifier;
 };
 
-export const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCalendarServerCodeVerifier;
+const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCalendarServerCodeVerifier;
 
-export const requestGoogleSignInServerCode = async (): Promise<GoogleOAuthServerCode> => requestGoogleOAuthServerCode({ prompt: "select_account", scope: GOOGLE_SIGN_IN_SCOPE_PARAM });
-export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<GoogleOAuthServerCode> => { const result = await requestGoogleOAuthServerCode({ accessType: "offline", includeGrantedScopes: true, loginHint: auth.currentUser?.email ?? readEmail() ?? undefined, prompt: "consent select_account", scope: GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM });
+const requestGoogleSignInServerCode = async (): Promise<GoogleOAuthServerCode> => requestGoogleOAuthServerCode({ prompt: "select_account", scope: GOOGLE_SIGN_IN_SCOPE_PARAM });
+const requestGoogleCalendarServerCode = async (auth: Auth): Promise<GoogleOAuthServerCode> => { const result = await requestGoogleOAuthServerCode({ accessType: "offline", includeGrantedScopes: true, loginHint: auth.currentUser?.email ?? readEmail() ?? undefined, prompt: "consent select_account", scope: GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM });
   pendingGoogleCalendarServerCodeVerifier = result.codeVerifier;
   return result;
 };
-export const requestCalendarAccessToken = async (auth: Auth, silent = false): Promise<GoogleCalendarAccess> => { if (isDesktopLikeRuntime()) throw new Error("Desktop Google OAuth must use server-side token exchange.");
+const requestCalendarAccessToken = async (auth: Auth, silent = false): Promise<GoogleCalendarAccess> => { if (isDesktopLikeRuntime()) throw new Error("Desktop Google OAuth must use server-side token exchange.");
   const provider = new GoogleAuthProvider();
   GOOGLE_SCOPES.forEach((scope) => provider.addScope(scope));
   if (silent) provider.setCustomParameters({ prompt: "none" });
@@ -361,9 +361,9 @@ export const requestCalendarAccessToken = async (auth: Auth, silent = false): Pr
   return { accessToken: credential.accessToken, ...profile };
 };
 
-export const requestConnectedServiceAccessToken = requestCalendarAccessToken;
+const requestConnectedServiceAccessToken = requestCalendarAccessToken;
 
-export const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: string; }): Promise<GoogleCalendarAccess> => {
+const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: string; }): Promise<GoogleCalendarAccess> => {
   const clientId = getGoogleOAuthClientId();
   const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: clientId, refresh_token: refreshToken, grant_type: "refresh_token" }) });
   const json = (await response.json()) as { access_token?: string; expires_in?: number; refresh_token?: string; scope?: string; id_token?: string; error?: string; error_description?: string; };
@@ -372,4 +372,7 @@ export const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToke
   return { accessToken: json.access_token, refreshToken: json.refresh_token, expiresInSeconds: json.expires_in, ...getGoogleProfileFromIdToken(json.id_token) };
 };
 
-export const refreshConnectedServiceAccessToken = refreshCalendarAccessToken;
+const refreshConnectedServiceAccessToken = refreshCalendarAccessToken;
+
+export { GOOGLE_CONNECTED_SERVICE_SCOPES, consumeGoogleCalendarServerCodeVerifier, consumeGoogleConnectedServiceServerCodeVerifier, requestGoogleSignInServerCode, requestGoogleCalendarServerCode, requestCalendarAccessToken, requestConnectedServiceAccessToken, refreshCalendarAccessToken, refreshConnectedServiceAccessToken };
+export type { GoogleCalendarAccess, GoogleConnectedServiceAccess };

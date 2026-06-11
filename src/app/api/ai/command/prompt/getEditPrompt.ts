@@ -199,7 +199,7 @@ const buildEditSelectionPrompt = (editor: SlateEditor, messages: ChatMessage[]) 
     `,
   });
 };
-export const getEditPrompt = (editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[]; }): [string, "table" | "multi-block" | "selection"] => {
+const getEditPrompt = (editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[]; }): [string, "table" | "multi-block" | "selection"] => {
   if (!isSelecting) throw new Error("Edit tool is only available when selecting");
 
   if (isSelectionInTable(editor) && !isSingleCellSelection(editor)) {
@@ -212,3 +212,5 @@ export const getEditPrompt = (editor: SlateEditor, { isSelecting, messages }: { 
 
   return [buildEditSelectionPrompt(editor, messages), "selection"];
 };
+
+export { getEditPrompt };

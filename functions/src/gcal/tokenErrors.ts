@@ -1,7 +1,7 @@
 import type { FunctionsErrorCode } from "firebase-functions/v2/https";
 
-export type GoogleOAuthTokenErrorReason = | "invalid_grant" | "server_oauth_configuration" | "token_endpoint_failed";
-export type ClassifiedGoogleTokenEndpointFailure = { code: FunctionsErrorCode;
+type GoogleOAuthTokenErrorReason = | "invalid_grant" | "server_oauth_configuration" | "token_endpoint_failed";
+type ClassifiedGoogleTokenEndpointFailure = { code: FunctionsErrorCode;
   message: string;
   details: {
     reason: GoogleOAuthTokenErrorReason;
@@ -12,7 +12,7 @@ export type ClassifiedGoogleTokenEndpointFailure = { code: FunctionsErrorCode;
     status: number;
   };
 };
-export type GoogleOAuthServerErrorReason = | GoogleOAuthTokenErrorReason | "token_encryption_key_invalid" | "stored_refresh_token_decrypt_failed" | "stored_refresh_token_missing" | "insufficient_google_scope" | "google_token_fetch_failed" | "google_token_invalid_response" | "google_userinfo_fetch_failed" | "google_userinfo_invalid_response" | "google_userinfo_failed" | "firestore_access_failed" | "firebase_auth_user_sync_failed" | "firebase_custom_token_failed" | "unclassified_server_error";
+type GoogleOAuthServerErrorReason = | GoogleOAuthTokenErrorReason | "token_encryption_key_invalid" | "stored_refresh_token_decrypt_failed" | "stored_refresh_token_missing" | "insufficient_google_scope" | "google_token_fetch_failed" | "google_token_invalid_response" | "google_userinfo_fetch_failed" | "google_userinfo_invalid_response" | "google_userinfo_failed" | "firestore_access_failed" | "firebase_auth_user_sync_failed" | "firebase_custom_token_failed" | "unclassified_server_error";
 
 const OAUTH_CLIENT_NOT_FOUND_PATTERNS = [
   "oauth client was not found",
@@ -20,7 +20,7 @@ const OAUTH_CLIENT_NOT_FOUND_PATTERNS = [
   "oauth client not found",
 ];
 
-export const isGoogleOAuthServerConfigurationError = (googleError: string, description: string): boolean => { const normalizedDescription = description.toLowerCase();
+const isGoogleOAuthServerConfigurationError = (googleError: string, description: string): boolean => { const normalizedDescription = description.toLowerCase();
 
   return (
     googleError === "invalid_client" ||
@@ -28,7 +28,7 @@ export const isGoogleOAuthServerConfigurationError = (googleError: string, descr
     OAUTH_CLIENT_NOT_FOUND_PATTERNS.some((pattern) => normalizedDescription.includes(pattern))
   );
 };
-export const classifyGoogleTokenEndpointFailure = ({ context, status, googleError, description, }: { context: "authorization_code" | "refresh_token";
+const classifyGoogleTokenEndpointFailure = ({ context, status, googleError, description, }: { context: "authorization_code" | "refresh_token";
   status: number;
   googleError: string;
   description: string;
@@ -98,3 +98,6 @@ export const classifyGoogleTokenEndpointFailure = ({ context, status, googleErro
     },
   };
 };
+
+export { isGoogleOAuthServerConfigurationError, classifyGoogleTokenEndpointFailure };
+export type { GoogleOAuthTokenErrorReason, ClassifiedGoogleTokenEndpointFailure, GoogleOAuthServerErrorReason };

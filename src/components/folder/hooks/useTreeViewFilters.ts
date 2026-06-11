@@ -16,7 +16,7 @@ interface UseTreeViewFiltersParams {
   tagById: TagMapLike;
 }
 
-export const useTreeViewFilters = ({ cards, documents, tagFilter, tagMatchMode, uncertaintyFilter, bookmarkedFilter, draftFilter, contentTypeFilter, tagById }: UseTreeViewFiltersParams) => { const isFilterActive = tagFilter.length > 0 || uncertaintyFilter !== "any" || bookmarkedFilter !== "any" || draftFilter !== "any" || contentTypeFilter.length < 2;
+const useTreeViewFilters = ({ cards, documents, tagFilter, tagMatchMode, uncertaintyFilter, bookmarkedFilter, draftFilter, contentTypeFilter, tagById }: UseTreeViewFiltersParams) => { const isFilterActive = tagFilter.length > 0 || uncertaintyFilter !== "any" || bookmarkedFilter !== "any" || draftFilter !== "any" || contentTypeFilter.length < 2;
 
   const { filteredCards, filteredDocuments, isFiltering } = useMemo(() => {
     if (!isFilterActive) {
@@ -94,3 +94,5 @@ export const useTreeViewFilters = ({ cards, documents, tagFilter, tagMatchMode, 
     isFiltering,
   };
 };
+
+export { useTreeViewFilters };

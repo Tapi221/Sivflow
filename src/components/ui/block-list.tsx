@@ -22,7 +22,7 @@ const config: Record<
   },
 };
 
-export const BlockList: RenderNodeWrapper = (props) => { if (!props.element.listStyleType) return;
+const BlockList: RenderNodeWrapper = (props) => { if (!props.element.listStyleType) return;
   if (!isOrderedList(props.element)) return;
 
   return (props) => <List {...props} />;
@@ -81,3 +81,5 @@ const TodoLi = (props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }
     </li>
   );
 };
+
+export { BlockList };

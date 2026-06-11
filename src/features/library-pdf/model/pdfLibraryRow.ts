@@ -1,7 +1,7 @@
 import { normalizeDate } from "@/shared/codec/date";
 import type { DocumentItem, Folder } from "@/types";
 
-export type PdfDashboardRow = { id: string;
+type PdfDashboardRow = { id: string;
   title: string;
   fileName: string;
   folderId: string;
@@ -99,7 +99,7 @@ const resolveDisplayTags = (
 
   return Array.from(new Set(explicitTags)).slice(0, 3);
 };
-export const buildPdfDashboardRows = ({ documents, folders, tagById }: BuildPdfDashboardRowsParams): PdfDashboardRow[] => { const folderById = new Map(folders.map((folder) => [folder.id, folder]));
+const buildPdfDashboardRows = ({ documents, folders, tagById }: BuildPdfDashboardRowsParams): PdfDashboardRow[] => { const folderById = new Map(folders.map((folder) => [folder.id, folder]));
 
   return documents
     .filter((document) => document.kind === "pdf")
@@ -145,3 +145,6 @@ export const buildPdfDashboardRows = ({ documents, folders, tagById }: BuildPdfD
       return left.title.localeCompare(right.title, "ja");
     });
 };
+
+export { buildPdfDashboardRows };
+export type { PdfDashboardRow };

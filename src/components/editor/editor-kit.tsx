@@ -95,5 +95,5 @@ const EditorKit = [
 
 const useEditor = () => useEditorRef<MyEditor>();
 
-export type { MyEditor };
 export { EditorKit, useEditor };
+export type { MyEditor };

@@ -27,7 +27,7 @@ const normalizeAttachments = (attachments: CardFaceAttachments | null | undefine
 
 const StratisComponentIcon = ({ icon: Icon, className }: StratisComponentIconProps) => <Icon aria-hidden="true" focusable="false" className={className} />;
 
-export const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCardMediaDialogsParams) => { const [imageDialogSide, setImageDialogSide] = useState<Side | null>(null);
+const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCardMediaDialogsParams) => { const [imageDialogSide, setImageDialogSide] = useState<Side | null>(null);
   const [audioDialogSide, setAudioDialogSide] = useState<Side | null>(null);
   const [linkDialogSide, setLinkDialogSide] = useState<Side | null>(null);
 
@@ -134,3 +134,5 @@ export const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: 
     [audioDialogSide, getDialogAudios, getDialogImages, getReferenceItems, imageDialogSide, linkDialogSide, renderMediaDialogButtons, setDialogAudios, setDialogImages, setReferenceItems],
   );
 };
+
+export { useCardMediaDialogs };

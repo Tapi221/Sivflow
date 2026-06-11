@@ -21,7 +21,7 @@ interface UseCardSetViewStateOptions {
   deviceScope: string;
 }
 
-export const useCardSetViewState = ({ initialIndex, targetCardId, cardSetId, cardSetById, sortedCards, cardIndexById, createCard, updateCard, reorderCardsInCardSet, selectedCardSet, toastError, deviceScope }: UseCardSetViewStateOptions) => { const viewState = useCardSetViewViewState({ initialIndex, targetCardId, cardSetId, sortedCards, cardIndexById, selectedCardSet, deviceScope });
+const useCardSetViewState = ({ initialIndex, targetCardId, cardSetId, cardSetById, sortedCards, cardIndexById, createCard, updateCard, reorderCardsInCardSet, selectedCardSet, toastError, deviceScope }: UseCardSetViewStateOptions) => { const viewState = useCardSetViewViewState({ initialIndex, targetCardId, cardSetId, sortedCards, cardIndexById, selectedCardSet, deviceScope });
 
   const actions = useCardSetViewActions({
     cardSetId,
@@ -63,3 +63,5 @@ export const useCardSetViewState = ({ initialIndex, targetCardId, cardSetId, car
     handlePagerIndexChange: viewState.handlePagerIndexChange,
   };
 };
+
+export { useCardSetViewState };

@@ -14,7 +14,9 @@ const appendVirtualFileExtension = (name: string, extension: string) => {
 
   return `${trimmedName}${extension}`;
 };
-export const toVirtualMfDeckDisplayName = (name: string) => { return appendVirtualFileExtension(name, MF_DECK_FILE_EXTENSION);
+const toVirtualMfDeckDisplayName = (name: string) => { return appendVirtualFileExtension(name, MF_DECK_FILE_EXTENSION);
 };
-export const toVirtualMfCardDisplayName = (name: string) => { return appendVirtualFileExtension(name, MF_CARD_FILE_EXTENSION);
+const toVirtualMfCardDisplayName = (name: string) => { return appendVirtualFileExtension(name, MF_CARD_FILE_EXTENSION);
 };
+
+export { toVirtualMfDeckDisplayName, toVirtualMfCardDisplayName };

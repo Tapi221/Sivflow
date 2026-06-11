@@ -1,9 +1,9 @@
 import type { BaseEntity } from "./base";
 
-export type NoteEditor = "plate";
-export type NoteContentVersion = 2;
-export type NoteBlockContent = Record<string, unknown>[];
-export interface Note extends BaseEntity { folderId: string;
+type NoteEditor = "plate";
+type NoteContentVersion = 2;
+type NoteBlockContent = Record<string, unknown>[];
+interface Note extends BaseEntity { folderId: string;
   orderIndex: number;
   title: string;
   content: NoteBlockContent;
@@ -13,3 +13,5 @@ export interface Note extends BaseEntity { folderId: string;
   tags?: string[];
   deletedAt?: Date | null;
 }
+
+export type { NoteEditor, NoteContentVersion, NoteBlockContent, Note };

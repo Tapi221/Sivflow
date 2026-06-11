@@ -5,7 +5,7 @@ import { useLinkToolbarButton, useLinkToolbarButtonState } from "@platejs/link/r
 import { Link } from "lucide-react";
 import { ToolbarButton } from "./toolbar";
 
-export const LinkToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => { const state = useLinkToolbarButtonState();
+const LinkToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => { const state = useLinkToolbarButtonState();
   const { props: buttonProps } = useLinkToolbarButton(state);
 
   return (
@@ -14,3 +14,5 @@ export const LinkToolbarButton = (props: React.ComponentProps<typeof ToolbarButt
     </ToolbarButton>
   );
 };
+
+export { LinkToolbarButton };

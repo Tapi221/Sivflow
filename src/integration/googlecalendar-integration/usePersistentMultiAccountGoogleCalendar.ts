@@ -102,7 +102,7 @@ const mergeGoogleCalendarEvents = (
 
   return Array.from(merged.values());
 };
-export const usePersistentMultiAccountGoogleCalendar = () => { const google = useMultiAccountGoogleCalendar();
+const usePersistentMultiAccountGoogleCalendar = () => { const google = useMultiAccountGoogleCalendar();
   const [cachedEvents, setCachedEvents] = useState<GoogleCalendarEvent[]>(readCachedGoogleCalendarEvents);
 
   const hasCompletedSync = useMemo(
@@ -138,3 +138,5 @@ export const usePersistentMultiAccountGoogleCalendar = () => { const google = us
     events,
   };
 };
+
+export { usePersistentMultiAccountGoogleCalendar };

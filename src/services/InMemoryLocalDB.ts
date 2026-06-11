@@ -508,7 +508,7 @@ class InMemoryTable<T extends object, TKey = string> {
   public readonly orderBy = (index: KeyPath): InMemoryCollection<T, TKey> => new InMemoryCollection<T, TKey>(this, [], null, parseIndexKeys(index), false, null);
   public readonly toCollection = (): InMemoryCollection<T, TKey> => new InMemoryCollection<T, TKey>(this);
 }
-export class InMemoryLocalDB { public readonly name: string;
+class InMemoryLocalDB { public readonly name: string;
   public version = 0;
   public readonly isInMemoryFallback = true;
   public userId?: string;
@@ -701,3 +701,5 @@ export class InMemoryLocalDB { public readonly name: string;
     this.syncTrigger = trigger;
   };
 }
+
+export { InMemoryLocalDB };

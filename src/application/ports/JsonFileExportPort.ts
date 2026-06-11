@@ -1,2 +1,4 @@
-export interface JsonFileExportPort { exportJson: (params: { filename: string; payload: unknown; }) => Promise<void>;
+interface JsonFileExportPort { exportJson: (params: { filename: string; payload: unknown; }) => Promise<void>;
 }
+
+export type { JsonFileExportPort };

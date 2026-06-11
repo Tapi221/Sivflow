@@ -51,8 +51,8 @@ const createUnavailableState = (): FirebaseClientState => ({
   firestoreDb: null,
 });
 
-export const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
-export const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
+const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
+const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
 
 const initializeFirebaseClient = (): FirebaseClientState => {
   if (!isFirebaseClientAvailable) {
@@ -106,21 +106,21 @@ const initializeFirebaseClient = (): FirebaseClientState => {
 };
 
 const firebaseClientState = initializeFirebaseClient();
-export const firebaseApp = firebaseClientState.app;
-export const auth = firebaseClientState.auth as Auth;
-export const storage = firebaseClientState.storage as FirebaseStorage;
-export const functionsClient = firebaseClientState.functionsClient as Functions;
-export const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
-export const db: Firestore | null = firebaseClientState.firestoreDb;
+const firebaseApp = firebaseClientState.app;
+const auth = firebaseClientState.auth as Auth;
+const storage = firebaseClientState.storage as FirebaseStorage;
+const functionsClient = firebaseClientState.functionsClient as Functions;
+const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
+const db: Firestore | null = firebaseClientState.firestoreDb;
 
-export const requireFirebaseClient = (): FirebaseClientState => { if (isFirebaseClientAvailable && firebaseClientState.app) { return firebaseClientState;
+const requireFirebaseClient = (): FirebaseClientState => { if (isFirebaseClientAvailable && firebaseClientState.app) { return firebaseClientState;
 }
 
 throw new Error(
   `[Firebase] Firebase クライアントを利用できません。不足している環境変数: ${missingFirebaseEnvVars.join(", ")}`,
 );
 };
-export const requireFirestoreDb = (): Firestore => { if (firestoreDb) { return firestoreDb;
+const requireFirestoreDb = (): Firestore => { if (firestoreDb) { return firestoreDb;
 }
 
 if (!isFirebaseClientAvailable) {
@@ -162,3 +162,5 @@ const debugFirebase = (): void => {
 if (import.meta.env.DEV) {
   debugFirebase();
 }
+
+export { missingFirebaseEnvVars, isFirebaseClientAvailable, firebaseApp, auth, storage, functionsClient, firestoreDb, db, requireFirebaseClient, requireFirestoreDb };

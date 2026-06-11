@@ -6,10 +6,10 @@ type CalendarEventsSnapshot = {
   events: GoogleCalendarEvent[];
 };
 
-export const TRANSIENT_EMPTY_CALENDAR_EVENTS_HOLD_MS = 350;
+const TRANSIENT_EMPTY_CALENDAR_EVENTS_HOLD_MS = 350;
 
-export const createCalendarEventsScopeKey = (rangeStart: Date, rangeEnd: Date): string => `${rangeStart.toISOString()}|${rangeEnd.toISOString()}`;
-export const useTransientEmptyCalendarEvents = (events: GoogleCalendarEvent[], scopeKey: string, holdMs = TRANSIENT_EMPTY_CALENDAR_EVENTS_HOLD_MS): GoogleCalendarEvent[] => { const lastNonEmptySnapshotRef = useRef<CalendarEventsSnapshot | null>(null);
+const createCalendarEventsScopeKey = (rangeStart: Date, rangeEnd: Date): string => `${rangeStart.toISOString()}|${rangeEnd.toISOString()}`;
+const useTransientEmptyCalendarEvents = (events: GoogleCalendarEvent[], scopeKey: string, holdMs = TRANSIENT_EMPTY_CALENDAR_EVENTS_HOLD_MS): GoogleCalendarEvent[] => { const lastNonEmptySnapshotRef = useRef<CalendarEventsSnapshot | null>(null);
   const expiredEmptyScopeKeyRef = useRef<string | null>(null);
   const [, forceRender] = useState(0);
 
@@ -40,3 +40,5 @@ export const useTransientEmptyCalendarEvents = (events: GoogleCalendarEvent[], s
 
   return canHoldPreviousEvents ? snapshot.events : events;
 };
+
+export { TRANSIENT_EMPTY_CALENDAR_EVENTS_HOLD_MS, createCalendarEventsScopeKey, useTransientEmptyCalendarEvents };

@@ -30,8 +30,8 @@ type LegacyZoomMigrationHint = Pick<
 
 const DEFAULT_SOURCE_KEY = "__cardsetview_zoom_default__";
 
-export const clampZoomPercent = (value: number) => clampZoomPercentRange(value);
-export const computeDynamicMaxZoomPercent = () => 100;
+const clampZoomPercent = (value: number) => clampZoomPercentRange(value);
+const computeDynamicMaxZoomPercent = () => 100;
 const buildCurrentZoomScope = ({
   deviceScope,
   cardSetId,
@@ -55,7 +55,7 @@ const buildLegacyZoomMigrationHint = ({
   interactionMode,
   cardLayoutMode,
 });
-export const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displayMode, interactionMode, requestedCardLayoutMode, splitFallbackLayoutMode }: UseCardSetViewZoomOptions) => { const [viewportWidthPx, setViewportWidthPx] = useState<number>(CARD_PANE_VIEW_DEFAULT_WIDTH_PX);
+const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displayMode, interactionMode, requestedCardLayoutMode, splitFallbackLayoutMode }: UseCardSetViewZoomOptions) => { const [viewportWidthPx, setViewportWidthPx] = useState<number>(CARD_PANE_VIEW_DEFAULT_WIDTH_PX);
   const [showConstraintIndicator, setShowConstraintIndicator] =
     useState<boolean>(false);
   const [zoomPreferenceState, setZoomPreferenceState] =
@@ -330,3 +330,5 @@ export const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displa
     maxPresentationWidthPx,
   };
 };
+
+export { clampZoomPercent, computeDynamicMaxZoomPercent, useCardSetViewZoom };

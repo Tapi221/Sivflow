@@ -2,7 +2,7 @@ import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { requireFirestoreDb } from "@/services/firebase";
 
-export type WatchChannel = { channelId: string;
+type WatchChannel = { channelId: string;
   resourceId: string;
   calendarId: string;
   expiration: number;
@@ -66,7 +66,7 @@ const toWatchChannel = (data: GoogleWatchResponse, calendarId: string, userId: s
 // ─────────────────────────────────────────────
 // WatchManager
 // ─────────────────────────────────────────────
-export class GoogleCalendarWatchManager { private channels = new Map<string, WatchChannel>();
+class GoogleCalendarWatchManager { private channels = new Map<string, WatchChannel>();
   private renewalTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private userId: string;
 
@@ -266,3 +266,6 @@ export class GoogleCalendarWatchManager { private channels = new Map<string, Wat
     await deleteDoc(this.getRef(channel.calendarId));
   }
 }
+
+export { GoogleCalendarWatchManager };
+export type { WatchChannel };

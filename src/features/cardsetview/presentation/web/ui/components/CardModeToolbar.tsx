@@ -41,7 +41,7 @@ const ModeButton = ({
     </OverlayToolbarButton>
   );
 };
-export const CardModeToolbar = ({ displayMode, cardLayoutMode, disabledCardLayoutModes, onChangeDisplayMode, onChangeCardLayoutMode }: CardModeToolbarProps) => { const nextDisplayMode: CardDisplayMode = displayMode === "fixed" ? "fluid" : "fixed";
+const CardModeToolbar = ({ displayMode, cardLayoutMode, disabledCardLayoutModes, onChangeDisplayMode, onChangeCardLayoutMode }: CardModeToolbarProps) => { const nextDisplayMode: CardDisplayMode = displayMode === "fixed" ? "fluid" : "fixed";
   const displayModeToggleLabel =
     displayMode === "fixed"
       ? "カード表示。タップで最大表示に切り替え"
@@ -92,3 +92,5 @@ export const CardModeToolbar = ({ displayMode, cardLayoutMode, disabledCardLayou
     </OverlayToolbar>
   );
 };
+
+export { CardModeToolbar };

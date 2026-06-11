@@ -1,7 +1,7 @@
 /**
  * ユーザーネームのバリデーション結果
  */
-export interface ValidationResult { isValid: boolean;
+interface ValidationResult { isValid: boolean;
   message: string;
 }
 
@@ -21,12 +21,12 @@ const USERNAME_VALIDATION = {
  * 文字列をUnicode単位（サロゲートペア対応）でカウントする
  * 日本語、英語、絵文字すべてを1文字としてカウント
  */
-export const countUnicodeCharacters = (str: string) => { // Array.from はサロゲートペアを適切に処理する return Array.from(str).length;
+const countUnicodeCharacters = (str: string) => { // Array.from はサロゲートペアを適切に処理する return Array.from(str).length;
 };
 /**
  * ユーザーネームのバリデーションを実行する
  */
-export const validateUsername = (username: string) => { // 前後の空白をトリミング（要件：先頭と末尾のスペースは自動的にトリミングする） const trimmedName = username.trim();
+const validateUsername = (username: string) => { // 前後の空白をトリミング（要件：先頭と末尾のスペースは自動的にトリミングする） const trimmedName = username.trim();
 
   // 空白のみのチェック
   if (trimmedName.length === 0) {
@@ -70,7 +70,7 @@ export const validateUsername = (username: string) => { // 前後の空白をト
 /**
  * 表示用に文字列を省略する（Unicode単位）
  */
-export const truncateUsername = (name: string, maxLength: number = 20) => { if (!name) return "";
+const truncateUsername = (name: string, maxLength: number = 20) => { if (!name) return "";
 
   const chars = Array.from(name);
   if (chars.length <= maxLength) {
@@ -79,3 +79,6 @@ export const truncateUsername = (name: string, maxLength: number = 20) => { if (
 
   return chars.slice(0, maxLength).join("") + "...";
 };
+
+export { countUnicodeCharacters, validateUsername, truncateUsername };
+export type { ValidationResult };

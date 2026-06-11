@@ -1,9 +1,9 @@
 import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
-export type AnimatedCheckboxShape = "circle" | "square";
-export type AnimatedCheckboxVariant = "filled" | "soft" | "outline" | "radio";
-export type AnimatedCheckboxBaseProps = { checked: boolean;
+type AnimatedCheckboxShape = "circle" | "square";
+type AnimatedCheckboxVariant = "filled" | "soft" | "outline" | "radio";
+type AnimatedCheckboxBaseProps = { checked: boolean;
   color: string;
   className?: string;
   shape?: AnimatedCheckboxShape;
@@ -125,3 +125,4 @@ const AnimatedCheckboxBase = ({
 };
 
 export { AnimatedCheckboxBase };
+export type { AnimatedCheckboxShape, AnimatedCheckboxVariant, AnimatedCheckboxBaseProps };

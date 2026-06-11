@@ -164,7 +164,7 @@ const rankItemForQuery = (
     timestampMillis,
   };
 };
-export const rankSearchResults = ({ items, query, limit = 24 }: RankSearchResultsParams) => { const normalizedQuery = normalizeText(query);
+const rankSearchResults = ({ items, query, limit = 24 }: RankSearchResultsParams) => { const normalizedQuery = normalizeText(query);
   const tokens = splitQueryTokens(query);
 
   if (!normalizedQuery) {
@@ -193,3 +193,5 @@ export const rankSearchResults = ({ items, query, limit = 24 }: RankSearchResult
     .slice(0, limit)
     .map(({ item }) => item);
 };
+
+export { rankSearchResults };

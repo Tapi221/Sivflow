@@ -1,10 +1,13 @@
-export type FeatureFlags = { newEditor: boolean;
+type FeatureFlags = { newEditor: boolean;
   enableMarkdownImages: boolean;
   experimentalPasteSplit: boolean;
   postReviewPractice: boolean;
   enableAdvancedTelemetry: boolean;
 };
-export type LegacyFlagName = "postReviewPractice" | "ENABLE_ADVANCED_TELEMETRY";
+type LegacyFlagName = "postReviewPractice" | "ENABLE_ADVANCED_TELEMETRY";
 
-export const DEFAULT_FEATURE_FLAGS: FeatureFlags = { newEditor: false, enableMarkdownImages: false, experimentalPasteSplit: false, postReviewPractice: false, enableAdvancedTelemetry: false };
-export const LEGACY_FEATURE_FLAG_MAP: Record<LegacyFlagName, keyof FeatureFlags> = { postReviewPractice: "postReviewPractice", ENABLE_ADVANCED_TELEMETRY: "enableAdvancedTelemetry" };
+const DEFAULT_FEATURE_FLAGS: FeatureFlags = { newEditor: false, enableMarkdownImages: false, experimentalPasteSplit: false, postReviewPractice: false, enableAdvancedTelemetry: false };
+const LEGACY_FEATURE_FLAG_MAP: Record<LegacyFlagName, keyof FeatureFlags> = { postReviewPractice: "postReviewPractice", ENABLE_ADVANCED_TELEMETRY: "enableAdvancedTelemetry" };
+
+export { DEFAULT_FEATURE_FLAGS, LEGACY_FEATURE_FLAG_MAP };
+export type { FeatureFlags, LegacyFlagName };

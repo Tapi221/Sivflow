@@ -1,11 +1,11 @@
-export type CalendarViewMode = "month" | "week" | "days";
+type CalendarViewMode = "month" | "week" | "days";
 type Params = {
   onSelectCalendar: () => void;
   onSelectTask: () => void;
   onSelectViewMode?: (mode: CalendarViewMode) => void;
 };
 
-export const useCalendarToolbar = ({ onSelectCalendar, onSelectTask, onSelectViewMode }: Params) => { const tabs = [{ value: "calendar" as const, label: "Calendar", onClick: onSelectCalendar }, { value: "task" as const, label: "Task", onClick: onSelectTask }] as const;
+const useCalendarToolbar = ({ onSelectCalendar, onSelectTask, onSelectViewMode }: Params) => { const tabs = [{ value: "calendar" as const, label: "Calendar", onClick: onSelectCalendar }, { value: "task" as const, label: "Task", onClick: onSelectTask }] as const;
 
   const viewOptions = [
     {
@@ -38,3 +38,6 @@ export const useCalendarToolbar = ({ onSelectCalendar, onSelectTask, onSelectVie
     actions,
   };
 };
+
+export { useCalendarToolbar };
+export type { CalendarViewMode };

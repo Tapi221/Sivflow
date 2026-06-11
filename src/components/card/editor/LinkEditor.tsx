@@ -10,7 +10,7 @@ type LinkEditorProps = {
   onChange: (items: ReferenceBlockData[]) => void;
 };
 
-export const LinkEditor = ({ items, onChange }: LinkEditorProps) => { const refs = items ?? [];
+const LinkEditor = ({ items, onChange }: LinkEditorProps) => { const refs = items ?? [];
 
   const add = () => onChange([...refs, { url: "", name: "" }]);
   const update = (index: number, patch: Partial<ReferenceBlockData>) => {
@@ -96,3 +96,5 @@ export const LinkEditor = ({ items, onChange }: LinkEditorProps) => { const refs
     </div>
   );
 };
+
+export { LinkEditor };

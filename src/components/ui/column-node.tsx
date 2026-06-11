@@ -19,7 +19,7 @@ import { Separator } from "./separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 import { cn } from "@/lib/utils";
 
-export const ColumnElement = withHOC(ResizableProvider, (props: PlateElementProps<TColumnElement>) => { const { width } = props.element;
+const ColumnElement = withHOC(ResizableProvider, (props: PlateElementProps<TColumnElement>) => { const { width } = props.element;
   const readOnly = useReadOnly();
   const isSelectionAreaVisible = usePluginOption(
     BlockSelectionPlugin,
@@ -276,5 +276,7 @@ const ColumnDragHandle = React.memo(() => {
   );
 });
 
-export const ColumnGroupElement = (props: PlateElementProps) => { return (<PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement>);
+const ColumnGroupElement = (props: PlateElementProps) => { return (<PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement>);
 };
+
+export { ColumnElement, ColumnGroupElement };

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-export const useIsTouchDevice = () => { const [isTouchDevice, setIsTouchDevice] = React.useState(false);
+const useIsTouchDevice = () => { const [isTouchDevice, setIsTouchDevice] = React.useState(false);
 
   React.useEffect(() => {
     const onResize = () => {
@@ -23,3 +23,5 @@ export const useIsTouchDevice = () => { const [isTouchDevice, setIsTouchDevice] 
 
   return isTouchDevice;
 };
+
+export { useIsTouchDevice };

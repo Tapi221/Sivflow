@@ -1,17 +1,17 @@
-export type PresentationTarget = "desktop" | "mobile";
-export type PresentationCapabilities = { viewportWidth: number;
+type PresentationTarget = "desktop" | "mobile";
+type PresentationCapabilities = { viewportWidth: number;
   canHover: boolean;
   hasFinePointer: boolean;
 };
 
-export const DESKTOP_PRESENTATION_MIN_WIDTH_PX = 1024;
+const DESKTOP_PRESENTATION_MIN_WIDTH_PX = 1024;
 
-export const getPresentationTarget = ({ viewportWidth, canHover, hasFinePointer }: PresentationCapabilities): PresentationTarget => { if (viewportWidth >= DESKTOP_PRESENTATION_MIN_WIDTH_PX && canHover && hasFinePointer) { return "desktop";
+const getPresentationTarget = ({ viewportWidth, canHover, hasFinePointer }: PresentationCapabilities): PresentationTarget => { if (viewportWidth >= DESKTOP_PRESENTATION_MIN_WIDTH_PX && canHover && hasFinePointer) { return "desktop";
 }
 
 return "mobile";
 };
-export const getPresentationTargetFromWindow = (): PresentationTarget => { if (typeof window === "undefined") { return "mobile";
+const getPresentationTargetFromWindow = (): PresentationTarget => { if (typeof window === "undefined") { return "mobile";
 }
 
 return getPresentationTarget({
@@ -20,3 +20,6 @@ return getPresentationTarget({
   hasFinePointer: window.matchMedia("(pointer: fine)").matches,
 });
 };
+
+export { DESKTOP_PRESENTATION_MIN_WIDTH_PX, getPresentationTarget, getPresentationTargetFromWindow };
+export type { PresentationTarget, PresentationCapabilities };

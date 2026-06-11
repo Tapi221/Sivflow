@@ -20,14 +20,14 @@ const sanitizeFileNamePart = (value: string): string => {
   );
   return sanitized || "sivflow-deck";
 };
-export const buildMfDeckFileName = (deckName: string): string => { const sanitizedName = sanitizeFileNamePart(deckName);
+const buildMfDeckFileName = (deckName: string): string => { const sanitizedName = sanitizeFileNamePart(deckName);
   const baseName = sanitizedName.toLowerCase().endsWith(MF_DECK_FILE_EXTENSION)
     ? sanitizedName.slice(0, -MF_DECK_FILE_EXTENSION.length)
     : sanitizedName;
 
   return `${baseName}${MF_DECK_FILE_EXTENSION}`;
 };
-export const downloadBytesAsMfDeck = ({ bytes, deckName }: { bytes: Uint8Array;
+const downloadBytesAsMfDeck = ({ bytes, deckName }: { bytes: Uint8Array;
   deckName: string;
 }): void => {
   const blobPart = new ArrayBuffer(bytes.byteLength);
@@ -50,3 +50,5 @@ export const downloadBytesAsMfDeck = ({ bytes, deckName }: { bytes: Uint8Array;
     URL.revokeObjectURL(url);
   }, 0);
 };
+
+export { buildMfDeckFileName, downloadBytesAsMfDeck };

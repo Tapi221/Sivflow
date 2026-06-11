@@ -71,7 +71,7 @@ const resolveGoogleEventAccentColor = (event: GoogleCalendarEvent, overrides: Go
 
   return overrides[createGoogleCalendarColorOverrideKey(event.accountId, event.calendarId)] ?? event.accentColor;
 };
-export const attachCalendarEventDisplayMetadata = (events: GoogleCalendarEvent[], input: CalendarEventDisplayMetadataInput): GoogleCalendarEvent[] => { const index = createCalendarEventSourceIndex(input);
+const attachCalendarEventDisplayMetadata = (events: GoogleCalendarEvent[], input: CalendarEventDisplayMetadataInput): GoogleCalendarEvent[] => { const index = createCalendarEventSourceIndex(input);
 
   return events.map((event) => {
     const project = resolveCalendarEventProject(event, index);
@@ -84,7 +84,7 @@ export const attachCalendarEventDisplayMetadata = (events: GoogleCalendarEvent[]
     };
   });
 };
-export const filterCalendarEventsBySourceVisibility = (events: GoogleCalendarEvent[], input: CalendarEventVisibilityInput): GoogleCalendarEvent[] => { const index = createCalendarEventSourceIndex(input);
+const filterCalendarEventsBySourceVisibility = (events: GoogleCalendarEvent[], input: CalendarEventVisibilityInput): GoogleCalendarEvent[] => { const index = createCalendarEventSourceIndex(input);
 
   return events.filter((event) => {
     const project = resolveCalendarEventProject(event, index);
@@ -92,3 +92,5 @@ export const filterCalendarEventsBySourceVisibility = (events: GoogleCalendarEve
     return project?.checked !== false;
   });
 };
+
+export { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility };

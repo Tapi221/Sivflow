@@ -5,9 +5,9 @@ import type { ComponentType, ReactNode, SVGProps } from "react";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 
-export type LibraryHeaderToolbarIconProps = SVGProps<SVGSVGElement> & { className?: string;
+type LibraryHeaderToolbarIconProps = SVGProps<SVGSVGElement> & { className?: string;
 };
-export type LibraryHeaderToolbarActionRenderProps = { className: string;
+type LibraryHeaderToolbarActionRenderProps = { className: string;
   iconClassName: string;
   label: string;
 };
@@ -53,7 +53,7 @@ const segmentedActionButtonClassName = cn(
 const segmentedActionIconClassName =
   "block h-4 w-4 shrink-0 text-current transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none";
 
-export const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions, actions, variant = "underline" }: LibraryHeaderToolbarProps) => { const hasTabs = tabs.length > 0;
+const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions, actions, variant = "underline" }: LibraryHeaderToolbarProps) => { const hasTabs = tabs.length > 0;
   const hasSecondaryTabs = Boolean(secondaryTabs && secondaryTabs.length > 0);
   const hasLeadingActions = Boolean(
     leadingActions && leadingActions.length > 0,
@@ -278,3 +278,6 @@ export const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leading
     </div>
   );
 };
+
+export { LibraryHeaderToolbar };
+export type { LibraryHeaderToolbarIconProps, LibraryHeaderToolbarActionRenderProps };

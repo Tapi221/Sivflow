@@ -4,7 +4,7 @@ import { getMarkdown } from "@platejs/ai";
 import dedent from "dedent";
 import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction } from "@/app/api/ai/command/utils";
 
-export const getCommentPrompt = (editor: SlateEditor, { messages }: { messages: ChatMessage[]; }) => {
+const getCommentPrompt = (editor: SlateEditor, { messages }: { messages: ChatMessage[]; }) => {
   const selectingMarkdown = getMarkdown(editor, { type: "blockWithBlockId" });
 
   return buildStructuredPrompt({
@@ -150,3 +150,5 @@ export const getCommentPrompt = (editor: SlateEditor, { messages }: { messages: 
     `,
   });
 };
+
+export { getCommentPrompt };

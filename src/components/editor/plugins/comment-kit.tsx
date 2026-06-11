@@ -16,7 +16,7 @@ type CommentConfig = ExtendConfig<
   }
 >;
 
-export const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, { handlers: { onClick: ({ api, event, setOption, type }) => { const activeTarget = getDiscussionClickTarget({ selector: `.slate-${type}`, target: event.target });
+const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, { handlers: { onClick: ({ api, event, setOption, type }) => { const activeTarget = getDiscussionClickTarget({ selector: `.slate-${type}`, target: event.target });
 
       if (!activeTarget) {
         setOption("activeId", null);
@@ -64,4 +64,6 @@ export const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, { 
       setDraft: { keys: "mod+shift+m" },
     },
   });
-export const CommentKit = [commentPlugin];
+const CommentKit = [commentPlugin];
+
+export { commentPlugin, CommentKit };

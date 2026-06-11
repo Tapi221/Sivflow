@@ -59,7 +59,7 @@ const PULL_FULL_LOOKUP_ORDER: readonly CloudSyncLookupDescriptor[] = [
   },
 ];
 
-export const lookupCloudSyncEntityById = async (firestore: Firestore, userId: string, id: string): Promise<SyncChange | null> => { for (const descriptor of PULL_FULL_LOOKUP_ORDER) { const context = { firestore, userId, id };
+const lookupCloudSyncEntityById = async (firestore: Firestore, userId: string, id: string): Promise<SyncChange | null> => { for (const descriptor of PULL_FULL_LOOKUP_ORDER) { const context = { firestore, userId, id };
   const data = await descriptor.resolveData(context);
   if (!data) {
     continue;
@@ -74,3 +74,5 @@ export const lookupCloudSyncEntityById = async (firestore: Firestore, userId: st
 
 return null;
 };
+
+export { lookupCloudSyncEntityById };

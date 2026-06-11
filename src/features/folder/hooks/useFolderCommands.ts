@@ -10,7 +10,7 @@ type CreateFolderOptions = {
   orderIndex?: number;
 };
 
-export const useFolderCommands = () => { const { currentUser } = useAuthSession();
+const useFolderCommands = () => { const { currentUser } = useAuthSession();
 
   const createFolder = async (
     name: string,
@@ -74,3 +74,5 @@ export const useFolderCommands = () => { const { currentUser } = useAuthSession(
     reorderFolders,
   };
 };
+
+export { useFolderCommands };

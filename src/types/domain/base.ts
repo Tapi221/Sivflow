@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase/firestore";
 
-export interface BaseEntity { [key: string]: unknown;
+interface BaseEntity { [key: string]: unknown;
   id: string;
   userId: string;
   deviceId: string;
@@ -11,16 +11,16 @@ export interface BaseEntity { [key: string]: unknown;
   hasSyncConflict?: boolean;
   conflictDescription?: string;
 }
-export type SubjectiveScoreValue = 0 | 1 | 2 | 3;
-export type ReviewLog = { reviewedAt: string;
+type SubjectiveScoreValue = 0 | 1 | 2 | 3;
+type ReviewLog = { reviewedAt: string;
   rating: 1 | 2 | 3 | 4;
   resistanceScore: number;
   durationMinutes?: number | null;
 };
-export type ReferenceBlockData = { url: string;
+type ReferenceBlockData = { url: string;
   name?: string;
 };
-export interface BlockConfig { id: string;
+interface BlockConfig { id: string;
   type:
   | "text"
   | "code"
@@ -34,8 +34,10 @@ export interface BlockConfig { id: string;
   isVisible: boolean;
   orderIndex: number;
 }
-export type MathBlockData = { latex: string;
+type MathBlockData = { latex: string;
   displayMode: "block" | "inline";
   note?: string;
 };
-export type CardState = | "PRE-LEARN" | "STABLE" | "DECAYING" | "FAILED" | "RELEARN";
+type CardState = | "PRE-LEARN" | "STABLE" | "DECAYING" | "FAILED" | "RELEARN";
+
+export type { BaseEntity, SubjectiveScoreValue, ReviewLog, ReferenceBlockData, BlockConfig, MathBlockData, CardState };

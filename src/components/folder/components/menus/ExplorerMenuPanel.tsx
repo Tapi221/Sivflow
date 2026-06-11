@@ -4,7 +4,7 @@ import { floatingPanelPresets } from "@/components/ui/menu-styles";
 import type { MenuAction } from "./menuActions";
 import { cn } from "@/lib/utils";
 
-export type ExplorerMenuPanelVariant = "default" | "create" | "folderContext";
+type ExplorerMenuPanelVariant = "default" | "create" | "folderContext";
 interface ExplorerMenuPanelProps extends React.ComponentPropsWithoutRef<
   typeof DropdownMenuContent
 > {
@@ -50,7 +50,7 @@ const PLAIN_MENU_LABEL_CLASS =
 /**
  * エクスプローラーの各種メニュー（追加ボタン、コンテキストメニュー）で共有されるパネルコンポーネント
  */
-export const ExplorerMenuPanel = ({ actions, closeMenu, className, variant = "default", style, ...contentProps }: ExplorerMenuPanelProps) => { const visibleActions = actions.filter((action) => !action.hidden);
+const ExplorerMenuPanel = ({ actions, closeMenu, className, variant = "default", style, ...contentProps }: ExplorerMenuPanelProps) => { const visibleActions = actions.filter((action) => !action.hidden);
   const panelPreset = floatingPanelPresets.menu;
   const isCreateVariant = variant === "create";
   const isFolderContextVariant = variant === "folderContext";
@@ -135,3 +135,6 @@ export const ExplorerMenuPanel = ({ actions, closeMenu, className, variant = "de
     </DropdownMenuContent>
   );
 };
+
+export { ExplorerMenuPanel };
+export type { ExplorerMenuPanelVariant };

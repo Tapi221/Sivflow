@@ -9,7 +9,7 @@ const getDeviceMetadataPath = (userId: string, deviceId: string) => {
 const getDevicesMetadataPath = (userId: string) => {
   return `sync_metadata/${userId}/devices`;
 };
-export class CloudSyncAdapter implements ICloudSyncAdapter { private readonly userId: string;
+class CloudSyncAdapter implements ICloudSyncAdapter { private readonly userId: string;
 
   constructor(userId: string) {
     this.userId = userId;
@@ -78,3 +78,5 @@ export class CloudSyncAdapter implements ICloudSyncAdapter { private readonly us
     return snapshot.size;
   };
 }
+
+export { CloudSyncAdapter };

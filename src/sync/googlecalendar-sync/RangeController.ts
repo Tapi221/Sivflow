@@ -9,7 +9,7 @@ type RangeState = {
   end: Date | null;
 };
 
-export class RangeController { private engineMap = new Map<string, GoogleCalendarSyncEngine>();
+class RangeController { private engineMap = new Map<string, GoogleCalendarSyncEngine>();
 
   private state: RangeState = {
     start: null,
@@ -74,3 +74,5 @@ export class RangeController { private engineMap = new Map<string, GoogleCalenda
     await engine.ensureRange(range.start, range.end);
   }
 }
+
+export { RangeController };

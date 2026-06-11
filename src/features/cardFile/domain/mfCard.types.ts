@@ -1,13 +1,13 @@
 
 import type { MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
 
-export const MF_CARD_FORMAT = "sivflow.card" as const;
-export const MF_CARD_VERSION = 1 as const;
-export const MF_CARD_FILE_EXTENSION = ".mfcard" as const;
-export const MF_CARD_MIME_TYPE = "application/vnd.sivflow.card+json" as const;
+const MF_CARD_FORMAT = "sivflow.card" as const;
+const MF_CARD_VERSION = 1 as const;
+const MF_CARD_FILE_EXTENSION = ".mfcard" as const;
+const MF_CARD_MIME_TYPE = "application/vnd.sivflow.card+json" as const;
 
-export type MfCardIssue = MfDeckIssue;
-export type MfCardFileV1 = { format: typeof MF_CARD_FORMAT;
+type MfCardIssue = MfDeckIssue;
+type MfCardFileV1 = { format: typeof MF_CARD_FORMAT;
   version: typeof MF_CARD_VERSION;
   exportedAt: string;
   app: {
@@ -21,7 +21,7 @@ export type MfCardFileV1 = { format: typeof MF_CARD_FORMAT;
     reviewProgressIncluded: boolean;
   };
 };
-export type MfCardValidationResult = | { ok: true;
+type MfCardValidationResult = | { ok: true;
   value: MfCardFileV1;
   issues: MfCardIssue[];
 }
@@ -30,7 +30,7 @@ export type MfCardValidationResult = | { ok: true;
     issues: MfCardIssue[];
   };
 
-export class MfCardValidationError extends Error { readonly issues: MfCardIssue[];
+class MfCardValidationError extends Error { readonly issues: MfCardIssue[];
 
   constructor(message: string, issues: MfCardIssue[]) {
     super(message);
@@ -38,7 +38,7 @@ export class MfCardValidationError extends Error { readonly issues: MfCardIssue[
     this.issues = issues;
   }
 }
-export class MfCardExportError extends Error { readonly issues: MfCardIssue[];
+class MfCardExportError extends Error { readonly issues: MfCardIssue[];
 
   constructor(message: string, issues: MfCardIssue[]) {
     super(message);
@@ -46,3 +46,6 @@ export class MfCardExportError extends Error { readonly issues: MfCardIssue[];
     this.issues = issues;
   }
 }
+
+export { MF_CARD_FORMAT, MF_CARD_VERSION, MF_CARD_FILE_EXTENSION, MF_CARD_MIME_TYPE, MfCardValidationError, MfCardExportError };
+export type { MfCardIssue, MfCardFileV1, MfCardValidationResult };

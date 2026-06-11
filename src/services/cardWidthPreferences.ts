@@ -1,6 +1,6 @@
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
-export type CardWidthPaneMode = "view" | "edit";
+type CardWidthPaneMode = "view" | "edit";
 interface CardWidthEntry {
   view?: number;
   edit?: number;
@@ -65,7 +65,7 @@ const writeStore = (store: CardWidthPreferencesStore) => {
     return;
   }
 };
-export const getCardSetWidthPreference = (cardSetId: string, mode: CardWidthPaneMode): number | undefined => { const store = readStore();
+const getCardSetWidthPreference = (cardSetId: string, mode: CardWidthPaneMode): number | undefined => { const store = readStore();
   const entry = store.byCardSet[cardSetId];
   if (!entry) return undefined;
   const value = entry[mode];
@@ -74,7 +74,7 @@ export const getCardSetWidthPreference = (cardSetId: string, mode: CardWidthPane
   }
   return undefined;
 };
-export const setCardSetWidthPreference = (cardSetId: string, mode: CardWidthPaneMode, widthPx: number) => { if (!cardSetId) return;
+const setCardSetWidthPreference = (cardSetId: string, mode: CardWidthPaneMode, widthPx: number) => { if (!cardSetId) return;
   const store = readStore();
   const currentEntry = store.byCardSet[cardSetId] ?? {};
   store.byCardSet[cardSetId] = {
@@ -83,3 +83,6 @@ export const setCardSetWidthPreference = (cardSetId: string, mode: CardWidthPane
   };
   writeStore(store);
 };
+
+export { getCardSetWidthPreference, setCardSetWidthPreference };
+export type { CardWidthPaneMode };

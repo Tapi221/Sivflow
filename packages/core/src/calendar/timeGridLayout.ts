@@ -1,19 +1,19 @@
 import type { CalendarEvent } from "./calendarEvent.types";
 
-export type CalendarTimeGridLayoutMode = "overlap" | "no-overlap";
-export type CalendarTimeGridStyle = { top: number;
+type CalendarTimeGridLayoutMode = "overlap" | "no-overlap";
+type CalendarTimeGridStyle = { top: number;
   height: number;
   width: number;
   xOffset: number;
 };
-export type CalendarTimeGridLayoutEntry = { event: CalendarEvent;
+type CalendarTimeGridLayoutEntry = { event: CalendarEvent;
   style: CalendarTimeGridStyle;
   startsBeforeRange: boolean;
   endsAfterRange: boolean;
   columnIndex?: number;
   columnCount?: number;
 };
-export type CalendarTimeGridLayoutOptions = { events: readonly CalendarEvent[];
+type CalendarTimeGridLayoutOptions = { events: readonly CalendarEvent[];
   rangeStart: Date;
   rangeEnd: Date;
   layoutMode?: CalendarTimeGridLayoutMode;
@@ -414,7 +414,7 @@ const layoutNoOverlapEvents = ({
     };
   });
 };
-export const layoutCalendarTimeGridEvents = ({ events, rangeStart, rangeEnd, layoutMode = "overlap", includeAllDayEvents = false, minimumVisibleHeightPercent = 0 }: CalendarTimeGridLayoutOptions): CalendarTimeGridLayoutEntry[] => { const rangeStartMs = getDateTime(rangeStart);
+const layoutCalendarTimeGridEvents = ({ events, rangeStart, rangeEnd, layoutMode = "overlap", includeAllDayEvents = false, minimumVisibleHeightPercent = 0 }: CalendarTimeGridLayoutOptions): CalendarTimeGridLayoutEntry[] => { const rangeStartMs = getDateTime(rangeStart);
   const rangeEndMs = getDateTime(rangeEnd);
 
   if (!isFiniteTime(rangeStartMs) || !isFiniteTime(rangeEndMs)) return [];
@@ -438,3 +438,6 @@ export const layoutCalendarTimeGridEvents = ({ events, rangeStart, rangeEnd, lay
 
   return layoutOverlapEvents({ proxies });
 };
+
+export { layoutCalendarTimeGridEvents };
+export type { CalendarTimeGridLayoutMode, CalendarTimeGridStyle, CalendarTimeGridLayoutEntry, CalendarTimeGridLayoutOptions };

@@ -25,7 +25,7 @@ const uniqueKeywords = (...values: Array<string | null | undefined>) => {
     ),
   );
 };
-export const buildExplorerSearchItems = ({ folders, cards, cardSets, documents, onFolderSelect, onItemSelect }: BuildExplorerSearchItemsParams) => { const activeFolders = folders.filter((folder) => !folder.isDeleted && !folder.isHidden);
+const buildExplorerSearchItems = ({ folders, cards, cardSets, documents, onFolderSelect, onItemSelect }: BuildExplorerSearchItemsParams) => { const activeFolders = folders.filter((folder) => !folder.isDeleted && !folder.isHidden);
   const activeCardSets = cardSets.filter((cardSet) => !cardSet.isDeleted);
   const activeCards = cards.filter((card) => !card.isDeleted);
   const activeDocuments = documents.filter(
@@ -174,3 +174,5 @@ export const buildExplorerSearchItems = ({ folders, cards, cardSets, documents, 
 
   return [...folderItems, ...cardSetItems, ...cardItems, ...documentItems];
 };
+
+export { buildExplorerSearchItems };

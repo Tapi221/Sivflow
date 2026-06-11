@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { cn } from "@/lib/utils";
 
-export type TimePercentageToggleValue = "time" | "percentage";
+type TimePercentageToggleValue = "time" | "percentage";
 type TimePercentageToggleOption = {
   value: TimePercentageToggleValue;
   label: string;
@@ -55,3 +55,4 @@ const ToggleTimePercentageComponent = ({ value, className }: ToggleTimePercentag
 const ToggleTimePercentage = memo(ToggleTimePercentageComponent);
 ToggleTimePercentage.displayName = "ToggleTimePercentage";
 export { ToggleTimePercentage };
+export type { TimePercentageToggleValue };

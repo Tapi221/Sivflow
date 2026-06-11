@@ -238,7 +238,7 @@ const ReorderableCardSurface = ({
     </div>
   );
 };
-export const CardSetViewDesktop = ({ isLoading, isGlobalEditing, flippedCardIds, cardsForPager, safeCurrentIndex, settings = null, currentDisplayMode, currentCardLayoutMode, folderId, layoutTransitionScrollAnchorRevision, scrollToActiveIndexRequestKey, cardSetId, cardSetName, viewZoomScale, fixedCardWidthPx, fluidAvailableWidthPx, onActiveIndexChange, onFlip, onActiveScrollAnchorFaceChange, onCreateCard, onReorderCards, onToggleUncertainty, onToggleBookmark }: CardSetViewDesktopProps) => { const [dragState, setDragState] = useState<DragState | null>(null);
+const CardSetViewDesktop = ({ isLoading, isGlobalEditing, flippedCardIds, cardsForPager, safeCurrentIndex, settings = null, currentDisplayMode, currentCardLayoutMode, folderId, layoutTransitionScrollAnchorRevision, scrollToActiveIndexRequestKey, cardSetId, cardSetName, viewZoomScale, fixedCardWidthPx, fluidAvailableWidthPx, onActiveIndexChange, onFlip, onActiveScrollAnchorFaceChange, onCreateCard, onReorderCards, onToggleUncertainty, onToggleBookmark }: CardSetViewDesktopProps) => { const [dragState, setDragState] = useState<DragState | null>(null);
   const currentCardIds = useMemo(() => getCardIds(cardsForPager), [cardsForPager]);
   const effectiveCardWidthPx = currentDisplayMode === "fluid" ? Math.max(1, Math.floor(fluidAvailableWidthPx)) : Math.max(1, fixedCardWidthPx);
   const interactionModeKey = isGlobalEditing ? "edit" : "view";
@@ -432,3 +432,5 @@ export const CardSetViewDesktop = ({ isLoading, isGlobalEditing, flippedCardIds,
     />
   );
 };
+
+export { CardSetViewDesktop };

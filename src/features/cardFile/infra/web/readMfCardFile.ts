@@ -4,7 +4,7 @@ import { decodeMfCardFile } from "./mfCardJsonCodec";
 
 const MAX_MF_CARD_FILE_BYTES = 4 * 1024 * 1024;
 
-export type LoadMfCardFileResult = { file: File;
+type LoadMfCardFileResult = { file: File;
   cardFile: MfCardFileV1;
   issues: MfCardIssue[];
   suggestedCardSetName: string;
@@ -13,7 +13,7 @@ export type LoadMfCardFileResult = { file: File;
 const stripMfCardExtension = (fileName: string) => {
   return fileName.replace(/\.mfcard$/i, "").trim();
 };
-export const buildMfCardImportCardSetName = ({ fileName, title }: { fileName: string;
+const buildMfCardImportCardSetName = ({ fileName, title }: { fileName: string;
   title?: string;
 }) => {
   const baseName =
@@ -28,7 +28,7 @@ export const buildMfCardImportCardSetName = ({ fileName, title }: { fileName: st
 
   return `${baseName} ${dateLabel}`;
 };
-export const readMfCardFile = async (file: File): Promise<LoadMfCardFileResult> => { const issues: MfCardIssue[] = [];
+const readMfCardFile = async (file: File): Promise<LoadMfCardFileResult> => { const issues: MfCardIssue[] = [];
 
   if (!file.name.toLowerCase().endsWith(MF_CARD_FILE_EXTENSION)) {
     throw new MfCardValidationError("mfcard ファイルではありません。", [
@@ -63,3 +63,6 @@ export const readMfCardFile = async (file: File): Promise<LoadMfCardFileResult> 
     }),
   };
 };
+
+export { buildMfCardImportCardSetName, readMfCardFile };
+export type { LoadMfCardFileResult };

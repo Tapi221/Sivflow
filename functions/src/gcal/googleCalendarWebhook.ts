@@ -52,7 +52,7 @@ const isMatchingWatchChannel = (
   );
 };
 
-export const googleCalendarWebhook = onRequest({ region: REGION, }, async (request, response) => { if (request.method !== "POST") { response.status(405).send("Method Not Allowed");
+const googleCalendarWebhook = onRequest({ region: REGION, }, async (request, response) => { if (request.method !== "POST") { response.status(405).send("Method Not Allowed");
     return;
   }
 
@@ -121,3 +121,5 @@ export const googleCalendarWebhook = onRequest({ region: REGION, }, async (reque
   response.status(204).send();
 },
 );
+
+export { googleCalendarWebhook };

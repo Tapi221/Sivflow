@@ -206,16 +206,16 @@ const fetchIosEventById = async (eventId: string, calendars: IosCalendarListItem
 
   return parsed;
 };
-export const isIosCalendarSupported = (): boolean => Platform.OS === "ios";
-export const getIosCalendarPermissionStatus = async (): Promise<IosCalendarPermissionStatus> => { if (!isIosCalendarSupported()) return "denied";
+const isIosCalendarSupported = (): boolean => Platform.OS === "ios";
+const getIosCalendarPermissionStatus = async (): Promise<IosCalendarPermissionStatus> => { if (!isIosCalendarSupported()) return "denied";
 
   return normalizePermissionStatus(await ExpoCalendar.getCalendarPermissionsAsync());
 };
-export const requestIosCalendarPermission = async (): Promise<IosCalendarPermissionStatus> => { if (!isIosCalendarSupported()) return "denied";
+const requestIosCalendarPermission = async (): Promise<IosCalendarPermissionStatus> => { if (!isIosCalendarSupported()) return "denied";
 
   return normalizePermissionStatus(await ExpoCalendar.requestCalendarPermissionsAsync());
 };
-export const fetchIosCalendars = async (): Promise<IosCalendarListItem[]> => { if (!isIosCalendarSupported()) return [];
+const fetchIosCalendars = async (): Promise<IosCalendarListItem[]> => { if (!isIosCalendarSupported()) return [];
 
   const [calendars, defaultCalendarId] = await Promise.all([
     ExpoCalendar.getCalendarsAsync(ExpoCalendar.EntityTypes.EVENT),
@@ -226,7 +226,7 @@ export const fetchIosCalendars = async (): Promise<IosCalendarListItem[]> => { i
     .filter((calendar) => calendar.id.length > 0 && calendar.title.length > 0)
     .map((calendar) => toIosCalendarListItem(calendar, defaultCalendarId));
 };
-export const fetchIosEvents = async ({ calendarIds, calendars, rangeStart, rangeEnd }: { calendarIds: string[]; calendars: IosCalendarListItem[]; rangeStart: Date; rangeEnd: Date; }): Promise<IosCalendarEvent[]> => {
+const fetchIosEvents = async ({ calendarIds, calendars, rangeStart, rangeEnd }: { calendarIds: string[]; calendars: IosCalendarListItem[]; rangeStart: Date; rangeEnd: Date; }): Promise<IosCalendarEvent[]> => {
   if (!isIosCalendarSupported() || calendarIds.length === 0 || !isValidRange(rangeStart, rangeEnd)) return [];
 
   const calendarsById = buildCalendarsById(calendars);
@@ -236,7 +236,7 @@ export const fetchIosEvents = async ({ calendarIds, calendars, rangeStart, range
     .map((event) => toIosCalendarEvent(event, calendarsById))
     .filter((event): event is IosCalendarEvent => Boolean(event));
 };
-export const createIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventInput; calendars: IosCalendarListItem[]; }): Promise<IosCalendarEvent> => {
+const createIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventInput; calendars: IosCalendarListItem[]; }): Promise<IosCalendarEvent> => {
   validateWritableEventInput(event);
   getWritableCalendar(event.calendarId, calendars);
 
@@ -244,7 +244,7 @@ export const createIosCalendarEvent = async ({ event, calendars }: { event: IosC
 
   return fetchIosEventById(eventId, calendars);
 };
-export const updateIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventUpdateInput; calendars: IosCalendarListItem[]; }): Promise<IosCalendarEvent> => {
+const updateIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventUpdateInput; calendars: IosCalendarListItem[]; }): Promise<IosCalendarEvent> => {
   validateWritableEventUpdateInput(event);
   getWritableCalendar(event.calendarId, calendars);
 
@@ -253,9 +253,11 @@ export const updateIosCalendarEvent = async ({ event, calendars }: { event: IosC
 
   return fetchIosEventById(eventId, calendars);
 };
-export const deleteIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventDeleteInput; calendars: IosCalendarListItem[]; }): Promise<void> => {
+const deleteIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventDeleteInput; calendars: IosCalendarListItem[]; }): Promise<void> => {
   validateWritableEventDeleteInput(event);
   getWritableCalendar(event.calendarId, calendars);
 
   await ExpoCalendar.deleteEventAsync(resolveExternalEventId(event.calendarId, event.eventId));
 };
+
+export { isIosCalendarSupported, getIosCalendarPermissionStatus, requestIosCalendarPermission, fetchIosCalendars, fetchIosEvents, createIosCalendarEvent, updateIosCalendarEvent, deleteIosCalendarEvent };

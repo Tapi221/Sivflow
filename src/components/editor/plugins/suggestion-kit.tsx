@@ -101,5 +101,5 @@ const getInlineSuggestionData = (editor: any, element: TElement) => {
   }
 };
 
-export type { SuggestionConfig };
 export { SuggestionKit, suggestionPlugin };
+export type { SuggestionConfig };

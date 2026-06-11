@@ -15,7 +15,7 @@ interface UploadResult {
   fallbackReason?: UploadFallbackReason;
   metadata?: UploadMetadata;
 }
-export type UploadStatus = "idle" | "uploading" | "completed" | "failed";
+type UploadStatus = "idle" | "uploading" | "completed" | "failed";
 interface UseReliableFileUploadReturn {
   uploadFile: (
     file: File,
@@ -177,7 +177,7 @@ const performFirebaseUpload = async (
     );
   });
 };
-export const useReliableFileUpload = (): UseReliableFileUploadReturn => { const { currentUser } = useAuthSession();
+const useReliableFileUpload = (): UseReliableFileUploadReturn => { const { currentUser } = useAuthSession();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");
@@ -342,3 +342,6 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => { const 
     reset,
   };
 };
+
+export { useReliableFileUpload };
+export type { UploadStatus };

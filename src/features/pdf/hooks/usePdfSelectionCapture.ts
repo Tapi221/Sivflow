@@ -21,8 +21,6 @@ type UsePdfSelectionCaptureResult = {
   handleCaptureSelection: (area: SelectionCaptureArea) => Promise<void>;
 };
 
-export type { UsePdfSelectionCaptureParams, UsePdfSelectionCaptureResult };
-
 const PDF_SELECTION_CAPTURE_MESSAGE_TIMEOUT_MS = 1800;
 
 const resolvePdfSelectionCaptureTaskMessage = (results: CardSelectionCaptureTaskResult[]): string | null => {
@@ -80,3 +78,4 @@ const usePdfSelectionCapture = ({ targetRef, selectionCaptureSide, sourceUnavail
 };
 
 export { usePdfSelectionCapture };
+export type { UsePdfSelectionCaptureParams, UsePdfSelectionCaptureResult };

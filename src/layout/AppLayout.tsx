@@ -230,5 +230,5 @@ const AppLayout = () => {
   );
 };
 
-export type { AppLayoutOutletContext };
 export { AppLayout };
+export type { AppLayoutOutletContext };

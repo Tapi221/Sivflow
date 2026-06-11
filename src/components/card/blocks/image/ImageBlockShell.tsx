@@ -7,5 +7,7 @@ type ImageBlockShellProps = {
   className?: string;
 };
 
-export const ImageBlockShell = ({ children, className }: ImageBlockShellProps) => { return (<BlockInset variant="image"> <div className={cn("relative rounded-[11px] overflow-hidden", className)}> {children} </div> </BlockInset>);
+const ImageBlockShell = ({ children, className }: ImageBlockShellProps) => { return (<BlockInset variant="image"> <div className={cn("relative rounded-[11px] overflow-hidden", className)}> {children} </div> </BlockInset>);
 };
+
+export { ImageBlockShell };

@@ -4,7 +4,7 @@ import { localStorageBackupStore } from "@/infrastructure/browser-storage/LocalS
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
-export interface RunStartupTasksParams { userId: string;
+interface RunStartupTasksParams { userId: string;
   isDisposed?: () => boolean;
 }
 
@@ -47,9 +47,9 @@ const logIntegrityReport = (report: Awaited<ReturnType<typeof checkDataIntegrity
  *
  * App.tsx からの既存呼び出し互換を維持するため関数自体は残す。
  */
-export const resetStartupTasks = async (): Promise<void> => { return Promise.resolve();
+const resetStartupTasks = async (): Promise<void> => { return Promise.resolve();
 };
-export const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault }: RunStartupTasksParams): Promise<void> => { try { const { migrateLegacyImagesToAssets } = await import("./MigrateLegacyImagesToAssets");
+const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault }: RunStartupTasksParams): Promise<void> => { try { const { migrateLegacyImagesToAssets } = await import("./MigrateLegacyImagesToAssets");
 
     const migrationSummary = await migrateLegacyImagesToAssets({ userId });
 
@@ -96,3 +96,6 @@ export const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault }
     console.error("[重大] 起動時タスクに失敗しました:", sanitizeForLog(error));
   }
 };
+
+export { resetStartupTasks, runStartupTasks };
+export type { RunStartupTasksParams };

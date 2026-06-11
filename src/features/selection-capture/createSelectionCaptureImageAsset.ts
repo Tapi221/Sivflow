@@ -6,7 +6,7 @@ import type { AssetRecord, UploadedImage } from "@/types";
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize.utils";
 
 const buildAssetRemoteKey = (uid: string, assetId: string) => `users/${uid}/assets/${assetId}`;
-export const createSelectionCaptureImageAsset = async ({ blob, userId }: { blob: Blob;
+const createSelectionCaptureImageAsset = async ({ blob, userId }: { blob: Blob;
   userId: string;
 }): Promise<UploadedImage> => {
   const assetId = crypto.randomUUID();
@@ -68,3 +68,5 @@ export const createSelectionCaptureImageAsset = async ({ blob, userId }: { blob:
     layout: null,
   } satisfies UploadedImage;
 };
+
+export { createSelectionCaptureImageAsset };

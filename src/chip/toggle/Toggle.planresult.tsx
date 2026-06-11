@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import type { Transition } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-export type PlanResultMode = "plan" | "actual";
+type PlanResultMode = "plan" | "actual";
 type PlanResultOption = {
   value: PlanResultMode;
   label: string;
@@ -90,3 +90,4 @@ const TogglePlanResult = ({ value, onChange, className }: TogglePlanResultProps)
 };
 
 export { TogglePlanResult, TogglePlanResult as PlanResultDropdown };
+export type { PlanResultMode };

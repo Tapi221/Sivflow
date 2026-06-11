@@ -1,6 +1,6 @@
-export type LocalDBMode = "persistent" | "fallback";
-export type LocalDBFallbackReasonCode = | "none" | "backing_store_open_error" | "quota_exceeded" | "indexeddb_blocked" | "upgrade_needed_or_blocked" | "unknown";
-export interface LocalDBRuntimeStatus { mode: LocalDBMode;
+type LocalDBMode = "persistent" | "fallback";
+type LocalDBFallbackReasonCode = | "none" | "backing_store_open_error" | "quota_exceeded" | "indexeddb_blocked" | "upgrade_needed_or_blocked" | "unknown";
+interface LocalDBRuntimeStatus { mode: LocalDBMode;
   userId: string | null;
   dbName: string | null;
   fallbackReason: string | null;
@@ -9,7 +9,7 @@ export interface LocalDBRuntimeStatus { mode: LocalDBMode;
   resetFailedReason: string | null;
   updatedAt: number;
 }
-export interface LocalDBTelemetrySnapshot { localdb_mode: LocalDBMode;
+interface LocalDBTelemetrySnapshot { localdb_mode: LocalDBMode;
   localdb_reason_code: LocalDBFallbackReasonCode;
   localdb_fallback_reason: string;
   localdb_generation_bumped: boolean;
@@ -65,15 +65,15 @@ const toShortReason = (value: string | null): string => {
   const compact = value.replace(/\s+/g, " ").trim();
   return compact.length > 120 ? `${compact.slice(0, 120)}...` : compact;
 };
-export const getLocalDBRuntimeStatus = () => { return { ...currentStatus };
+const getLocalDBRuntimeStatus = () => { return { ...currentStatus };
 };
-export const subscribeLocalDBRuntimeStatus = (listener: (status: LocalDBRuntimeStatus) => void): (() => void) => { listeners.add(listener);
+const subscribeLocalDBRuntimeStatus = (listener: (status: LocalDBRuntimeStatus) => void): (() => void) => { listeners.add(listener);
   listener(getLocalDBRuntimeStatus());
   return () => {
     listeners.delete(listener);
   };
 };
-export const updateLocalDBRuntimeStatus = (next: Partial<LocalDBRuntimeStatus>) => { currentStatus = { ...currentStatus, ...next, updatedAt: Date.now() };
+const updateLocalDBRuntimeStatus = (next: Partial<LocalDBRuntimeStatus>) => { currentStatus = { ...currentStatus, ...next, updatedAt: Date.now() };
   listeners.forEach((listener) => {
     try {
       listener(getLocalDBRuntimeStatus());
@@ -83,7 +83,7 @@ export const updateLocalDBRuntimeStatus = (next: Partial<LocalDBRuntimeStatus>) 
   });
   return getLocalDBRuntimeStatus();
 };
-export const warnOncePerSession = (key: string, message: string, error?: unknown) => { if (warnedKeys.has(key)) return;
+const warnOncePerSession = (key: string, message: string, error?: unknown) => { if (warnedKeys.has(key)) return;
   warnedKeys.add(key);
   if (error !== undefined) {
     console.warn(message, error);
@@ -91,19 +91,22 @@ export const warnOncePerSession = (key: string, message: string, error?: unknown
     console.warn(message);
   }
 };
-export const telemetryOncePerSession = (key: string) => { if (telemetryKeys.has(key)) return false;
+const telemetryOncePerSession = (key: string) => { if (telemetryKeys.has(key)) return false;
   telemetryKeys.add(key);
   return true;
 };
-export const markLocalDBGenerationBumped = () => { updateLocalDBRuntimeStatus({ generationBumped: true });
+const markLocalDBGenerationBumped = () => { updateLocalDBRuntimeStatus({ generationBumped: true });
 };
-export const saveLocalDBResetFailureReason = (reason: string | null) => { writeLocalStorage(RESET_FAILED_REASON_KEY, reason);
+const saveLocalDBResetFailureReason = (reason: string | null) => { writeLocalStorage(RESET_FAILED_REASON_KEY, reason);
   writeLocalStorage(LEGACY_RESET_FAILED_REASON_KEY, null);
   updateLocalDBRuntimeStatus({ resetFailedReason: reason });
 };
-export const clearLocalDBResetFailureReason = () => { saveLocalDBResetFailureReason(null);
+const clearLocalDBResetFailureReason = () => { saveLocalDBResetFailureReason(null);
 };
-export const getStoredLocalDBResetFailureReason = () => { return readResetFailedReason();
+const getStoredLocalDBResetFailureReason = () => { return readResetFailedReason();
 };
-export const getLocalDBTelemetrySnapshot = (): LocalDBTelemetrySnapshot => { return { localdb_mode: currentStatus.mode, localdb_reason_code: currentStatus.fallbackReasonCode, localdb_fallback_reason: toShortReason(currentStatus.fallbackReason), localdb_generation_bumped: currentStatus.generationBumped, localdb_reset_failed: Boolean(currentStatus.resetFailedReason) };
+const getLocalDBTelemetrySnapshot = (): LocalDBTelemetrySnapshot => { return { localdb_mode: currentStatus.mode, localdb_reason_code: currentStatus.fallbackReasonCode, localdb_fallback_reason: toShortReason(currentStatus.fallbackReason), localdb_generation_bumped: currentStatus.generationBumped, localdb_reset_failed: Boolean(currentStatus.resetFailedReason) };
 };
+
+export { getLocalDBRuntimeStatus, subscribeLocalDBRuntimeStatus, updateLocalDBRuntimeStatus, warnOncePerSession, telemetryOncePerSession, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, clearLocalDBResetFailureReason, getStoredLocalDBResetFailureReason, getLocalDBTelemetrySnapshot };
+export type { LocalDBMode, LocalDBFallbackReasonCode, LocalDBRuntimeStatus, LocalDBTelemetrySnapshot };

@@ -1,6 +1,6 @@
 import type { Card, SubjectiveScoreValue } from "@/types";
 
-export type StudyReviewProps = { cards: Card[];
+type StudyReviewProps = { cards: Card[];
   sessionCurrentIndex: number;
   onResult: (subjectiveScore: SubjectiveScoreValue, responseTime: number) => void | Promise<void>;
   onToggleUncertainty: (card: Card) => void;
@@ -9,3 +9,5 @@ export type StudyReviewProps = { cards: Card[];
   showHard: boolean;
   showEasy: boolean;
 };
+
+export type { StudyReviewProps };

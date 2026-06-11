@@ -51,7 +51,7 @@ const normalizeLoginHint = (loginHint: string | null | undefined): string | unde
   const normalized = loginHint?.trim();
   return normalized ? normalized : undefined;
 };
-export const requestWebAccessTokenViaGis = async ({ clientId, scope, silent = false, loginHint }: { clientId: string;
+const requestWebAccessTokenViaGis = async ({ clientId, scope, silent = false, loginHint }: { clientId: string;
   scope: string;
   silent?: boolean;
   loginHint?: string | null;
@@ -94,3 +94,5 @@ export const requestWebAccessTokenViaGis = async ({ clientId, scope, silent = fa
     client.requestAccessToken(overrideConfig);
   });
 };
+
+export { requestWebAccessTokenViaGis };

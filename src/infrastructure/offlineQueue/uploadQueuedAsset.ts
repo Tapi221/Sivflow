@@ -3,7 +3,7 @@ import type { QueueItem } from "@/application/usecases/persistentOfflineQueueMod
 import { auth, storage } from "@/infrastructure/firebase/client";
 import type { UploadedImage } from "@/types";
 
-export const uploadQueuedAsset = async (item: QueueItem): Promise<UploadedImage> => { const user = auth.currentUser;
+const uploadQueuedAsset = async (item: QueueItem): Promise<UploadedImage> => { const user = auth.currentUser;
   if (!user) {
     throw new Error("Unauthenticated during background upload");
   }
@@ -43,3 +43,5 @@ export const uploadQueuedAsset = async (item: QueueItem): Promise<UploadedImage>
     );
   });
 };
+
+export { uploadQueuedAsset };

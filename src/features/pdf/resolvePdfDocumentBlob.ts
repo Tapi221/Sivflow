@@ -49,7 +49,7 @@ const resolveGoogleDriveFileIdFromUrl = (url: string | null | undefined): string
 const resolveGoogleDriveFileId = (document: Pick<PdfDocumentBlobFields, "googleDriveFileId" | "googleDriveWebContentLink" | "googleDriveWebViewLink" | "storagePath">): string | null => {
   return resolveStringValue(document.googleDriveFileId) ?? resolveGoogleDriveFileIdFromStoragePath(document.storagePath) ?? resolveGoogleDriveFileIdFromUrl(document.googleDriveWebContentLink) ?? resolveGoogleDriveFileIdFromUrl(document.googleDriveWebViewLink);
 };
-export const findLocalPdfBlob = async (document: Pick<DocumentItem, "id" | "localFileId" | "userId">, currentUserId: string | null | undefined): Promise<Blob | null> => { const fileIds = resolveDocumentFileIds(document);
+const findLocalPdfBlob = async (document: Pick<DocumentItem, "id" | "localFileId" | "userId">, currentUserId: string | null | undefined): Promise<Blob | null> => { const fileIds = resolveDocumentFileIds(document);
   const userIds = resolveDocumentBlobUserIds(document.userId, currentUserId);
 
   for (const userId of userIds) {
@@ -61,7 +61,7 @@ export const findLocalPdfBlob = async (document: Pick<DocumentItem, "id" | "loca
 
   return null;
 };
-export const resolvePdfDocumentBlob = async (document: PdfDocumentBlobFields, currentUserId: string | null | undefined): Promise<Blob | null> => { const localBlob = await findLocalPdfBlob(document, currentUserId);
+const resolvePdfDocumentBlob = async (document: PdfDocumentBlobFields, currentUserId: string | null | undefined): Promise<Blob | null> => { const localBlob = await findLocalPdfBlob(document, currentUserId);
   if (localBlob) return localBlob;
 
   const googleDriveFileId = resolveGoogleDriveFileId(document);
@@ -80,3 +80,5 @@ export const resolvePdfDocumentBlob = async (document: PdfDocumentBlobFields, cu
 
   return downloadedBlob;
 };
+
+export { findLocalPdfBlob, resolvePdfDocumentBlob };

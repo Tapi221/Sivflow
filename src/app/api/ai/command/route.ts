@@ -10,7 +10,7 @@ import { z } from "zod";
 import { AI_COMMAND_PLATE_PLUGINS } from "./editorKit";
 import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from "@/app/api/ai/command/prompt";
 
-export const POST = async (req: NextRequest) => { const { apiKey: key, ctx, messages: messagesRaw, model } = await req.json();
+const POST = async (req: NextRequest) => { const { apiKey: key, ctx, messages: messagesRaw, model } = await req.json();
 
   const { children, selection, toolName: toolNameParam } = ctx;
 
@@ -283,3 +283,5 @@ const getTableTool = (
       });
     },
   });
+
+export { POST };

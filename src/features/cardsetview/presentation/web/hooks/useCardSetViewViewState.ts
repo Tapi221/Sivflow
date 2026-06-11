@@ -15,7 +15,7 @@ interface UseCardSetViewViewStateOptions {
   deviceScope: string;
 }
 
-export const useCardSetViewViewState = ({ initialIndex, targetCardId, cardSetId, sortedCards, cardIndexById, selectedCardSet, deviceScope }: UseCardSetViewViewStateOptions) => { const selectionState = useCardSetViewSelectionState({ initialIndex, targetCardId, deviceScope, cardSetId, sortedCards, cardIndexById });
+const useCardSetViewViewState = ({ initialIndex, targetCardId, cardSetId, sortedCards, cardIndexById, selectedCardSet, deviceScope }: UseCardSetViewViewStateOptions) => { const selectionState = useCardSetViewSelectionState({ initialIndex, targetCardId, deviceScope, cardSetId, sortedCards, cardIndexById });
 
   const displayModeState = useCardSetViewDisplayMode({
     cardSetId,
@@ -39,3 +39,5 @@ export const useCardSetViewViewState = ({ initialIndex, targetCardId, cardSetId,
     ...cardLayoutModeState,
   };
 };
+
+export { useCardSetViewViewState };

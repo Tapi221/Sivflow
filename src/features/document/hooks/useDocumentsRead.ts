@@ -12,7 +12,7 @@ type UseDocumentsReadOptions = {
   enabled?: boolean;
 };
 
-export const useDocumentsRead = (folderId?: string, options?: UseDocumentsReadOptions) => { const { currentUser } = useAuthSession();
+const useDocumentsRead = (folderId?: string, options?: UseDocumentsReadOptions) => { const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
   const [error, setError] = useState<string | null>(null);
   const isActiveWorkspaceCardSetSelected = useWorkspaceTabsStore((state) => {
@@ -61,3 +61,5 @@ export const useDocumentsRead = (folderId?: string, options?: UseDocumentsReadOp
     error,
   };
 };
+
+export { useDocumentsRead };

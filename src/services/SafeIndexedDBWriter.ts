@@ -9,7 +9,7 @@ const isQuotaExceededError = (error: unknown): boolean => {
     record.name === "QuotaExceededError" || record.code === "QuotaExceededError"
   );
 };
-export class SafeIndexedDBWriter { private static readonly quotaWarningShown = new Set<string>();
+class SafeIndexedDBWriter { private static readonly quotaWarningShown = new Set<string>();
 
   static readonly write = async <T>(
     userId: string,
@@ -68,3 +68,5 @@ export class SafeIndexedDBWriter { private static readonly quotaWarningShown = n
     return results;
   };
 }
+
+export { SafeIndexedDBWriter };

@@ -20,7 +20,7 @@ const dateTimeTextStyle: CSSProperties = {
   fontVariantNumeric: "tabular-nums",
 };
 
-export const PdfLibraryContinueSection = ({ cardClassName, continueRows, formatDateTime, onSelectDocument, IconBadge }: PdfLibraryContinueSectionProps) => { if (continueRows.length === 0) { return null;
+const PdfLibraryContinueSection = ({ cardClassName, continueRows, formatDateTime, onSelectDocument, IconBadge }: PdfLibraryContinueSectionProps) => { if (continueRows.length === 0) { return null;
   }
 
   return (
@@ -74,3 +74,5 @@ export const PdfLibraryContinueSection = ({ cardClassName, continueRows, formatD
     </section>
   );
 };
+
+export { PdfLibraryContinueSection };

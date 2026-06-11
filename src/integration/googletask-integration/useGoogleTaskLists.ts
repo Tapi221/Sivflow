@@ -5,7 +5,7 @@ import { getServerStoredGoogleConnectedServiceAccessToken, isServerStoredGoogleO
 import type { GoogleConnectedServiceAccountEntry, GoogleConnectedServiceAccountTokenUpdate } from "@/integration/google-integration/googleAccount.types";
 import type { GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 
-export type GoogleTaskListAccountState = { taskLists: GoogleTaskListItem[];
+type GoogleTaskListAccountState = { taskLists: GoogleTaskListItem[];
   isLoading: boolean;
   error: string | null;
 };
@@ -214,7 +214,7 @@ const buildAccountTokenKey = (accounts: GoogleConnectedServiceAccountEntry[]) =>
       ].join("\t"),
     )
     .join("\n");
-export const useGoogleTaskLists = (accounts: GoogleConnectedServiceAccountEntry[], onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void, retryNonce = 0): GoogleTaskListsState => { const [state, dispatch] = useReducer(reduceGoogleTaskLists, {});
+const useGoogleTaskLists = (accounts: GoogleConnectedServiceAccountEntry[], onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void, retryNonce = 0): GoogleTaskListsState => { const [state, dispatch] = useReducer(reduceGoogleTaskLists, {});
 
   const accountTokenKey = buildAccountTokenKey(accounts);
 
@@ -264,3 +264,6 @@ export const useGoogleTaskLists = (accounts: GoogleConnectedServiceAccountEntry[
 
   return state;
 };
+
+export { useGoogleTaskLists };
+export type { GoogleTaskListAccountState };

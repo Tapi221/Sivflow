@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { cn } from "@/lib/utils";
 import { ToolbarButton } from "./toolbar";
 
-export const TableToolbarButton = (props: DropdownMenuProps) => { const tableSelected = useEditorSelector((editor) => editor.api.some({ match: { type: KEYS.table } }), []);
+const TableToolbarButton = (props: DropdownMenuProps) => { const tableSelected = useEditorSelector((editor) => editor.api.some({ match: { type: KEYS.table } }), []);
 
   const { editor, tf } = useEditorPlugin(TablePlugin);
   const [open, setOpen] = React.useState(false);
@@ -235,3 +235,5 @@ const TablePicker = () => {
     </div>
   );
 };
+
+export { TableToolbarButton };

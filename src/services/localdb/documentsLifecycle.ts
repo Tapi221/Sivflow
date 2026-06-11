@@ -22,7 +22,7 @@ type DocumentsTable = {
     first(): Promise<DocumentRecord | undefined>;
   };
 };
-export type DocDbCtx = { documents: DocumentsTable; userId?: string; };
+type DocDbCtx = { documents: DocumentsTable; userId?: string; };
 
 const canDeleteDocumentBlob = async (
   documents: DocumentsTable,
@@ -41,7 +41,7 @@ const canDeleteDocumentBlob = async (
     .first();
   return !sharedRef;
 };
-export const cleanupBeforeDocumentUpdate = async (db: DocDbCtx, id: string, changes: unknown) => { const docChanges = changes as DocumentUpdateChanges;
+const cleanupBeforeDocumentUpdate = async (db: DocDbCtx, id: string, changes: unknown) => { const docChanges = changes as DocumentUpdateChanges;
   const hasLocalFileIdChange = Object.prototype.hasOwnProperty.call(
     docChanges,
     "localFileId",
@@ -106,7 +106,7 @@ export const cleanupBeforeDocumentUpdate = async (db: DocDbCtx, id: string, chan
     );
   }
 };
-export const cleanupBeforeDocumentDelete = async (db: DocDbCtx, id: string) => { try { const existingDoc = await db.documents.get(id);
+const cleanupBeforeDocumentDelete = async (db: DocDbCtx, id: string) => { try { const existingDoc = await db.documents.get(id);
   safeRevokeBlobUrl(
     existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null,
     `documents.deleteItem:${id}`,
@@ -132,7 +132,7 @@ export const cleanupBeforeDocumentDelete = async (db: DocDbCtx, id: string) => {
   console.warn("[LocalDB] deleteItem documents blob cleanup failed", err);
 }
 };
-export const cleanupBeforeDocumentSoftDelete = async (db: DocDbCtx, id: string) => { try { const existingDoc = await db.documents.get(id);
+const cleanupBeforeDocumentSoftDelete = async (db: DocDbCtx, id: string) => { try { const existingDoc = await db.documents.get(id);
   safeRevokeBlobUrl(
     existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null,
     `documents.softDelete:${id}`,
@@ -158,3 +158,6 @@ export const cleanupBeforeDocumentSoftDelete = async (db: DocDbCtx, id: string) 
   console.warn("[LocalDB] softDelete documents blob cleanup failed", err);
 }
 };
+
+export { cleanupBeforeDocumentUpdate, cleanupBeforeDocumentDelete, cleanupBeforeDocumentSoftDelete };
+export type { DocDbCtx };

@@ -11,7 +11,7 @@ type Params = {
   selectedItem: SelectedExplorerItem;
 };
 
-export const useExplorerLookups = ({ folders, cards, documents, selectedItem }: Params) => { const normalizedFolders = useMemo(() => normalizeFolders(folders), [folders]);
+const useExplorerLookups = ({ folders, cards, documents, selectedItem }: Params) => { const normalizedFolders = useMemo(() => normalizeFolders(folders), [folders]);
 
   const folderById = useMemo(
     () => buildFolderById(normalizedFolders),
@@ -35,3 +35,5 @@ export const useExplorerLookups = ({ folders, cards, documents, selectedItem }: 
     ...selectedState,
   };
 };
+
+export { useExplorerLookups };

@@ -16,7 +16,7 @@ type CalendarIntegrationActions = {
 };
 type CalendarIntegrationStore = CalendarIntegrationPersistedState & CalendarIntegrationActions;
 
-export const useCalendarIntegrationStore = create<CalendarIntegrationStore>()(persist((set, get) => ({ wasConnected: false, accountEmail: null, selectedCalendarIds: [], lastChangedAt: Date.now(), markConnected: (email, calendarIds) => set({ wasConnected: true, accountEmail: email, selectedCalendarIds: calendarIds, lastChangedAt: Date.now() }), markDisconnected: () => set({ wasConnected: false, accountEmail: null, selectedCalendarIds: [], lastChangedAt: Date.now() }), setSelectedCalendarIds: (ids) => set({ selectedCalendarIds: ids, lastChangedAt: Date.now() }), toggleCalendarId: (id) => { const current = get().selectedCalendarIds;
+const useCalendarIntegrationStore = create<CalendarIntegrationStore>()(persist((set, get) => ({ wasConnected: false, accountEmail: null, selectedCalendarIds: [], lastChangedAt: Date.now(), markConnected: (email, calendarIds) => set({ wasConnected: true, accountEmail: email, selectedCalendarIds: calendarIds, lastChangedAt: Date.now() }), markDisconnected: () => set({ wasConnected: false, accountEmail: null, selectedCalendarIds: [], lastChangedAt: Date.now() }), setSelectedCalendarIds: (ids) => set({ selectedCalendarIds: ids, lastChangedAt: Date.now() }), toggleCalendarId: (id) => { const current = get().selectedCalendarIds;
   const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
 
   set({
@@ -36,3 +36,5 @@ touch: () => set({ lastChangedAt: Date.now() }),
 },
 ),
 );
+
+export { useCalendarIntegrationStore };

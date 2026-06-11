@@ -11,7 +11,7 @@ import { useIsTouchDevice } from "@/hooks/use-is-touch-device";
 
 type Value = "askAI" | null;
 
-export const BlockContextMenu = ({ children }: { children: React.ReactNode; }) => {
+const BlockContextMenu = ({ children }: { children: React.ReactNode; }) => {
   const { api, editor } = useEditorPlugin(BlockMenuPlugin);
   const [value, setValue] = React.useState<Value>(null);
   const isTouch = useIsTouchDevice();
@@ -185,3 +185,5 @@ export const BlockContextMenu = ({ children }: { children: React.ReactNode; }) =
     </ContextMenu>
   );
 };
+
+export { BlockContextMenu };

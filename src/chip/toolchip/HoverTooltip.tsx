@@ -157,7 +157,7 @@ const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
   );
 };
 
-export const HoverTooltip = ({ label, children, side = "top", align = "center", offset = 8, className, tooltipClassName, arrowClassName, size, preset, disabled = false }: HoverTooltipProps) => { const anchorRef = useRef<HTMLDivElement | null>(null);
+const HoverTooltip = ({ label, children, side = "top", align = "center", offset = 8, className, tooltipClassName, arrowClassName, size, preset, disabled = false }: HoverTooltipProps) => { const anchorRef = useRef<HTMLDivElement | null>(null);
   const [canUseHoverTooltip, setCanUseHoverTooltip] = useState(getCanUseHoverTooltip);
   const [position, setPosition] = useState<TooltipPosition | null>(null);
 
@@ -274,3 +274,5 @@ export const HoverTooltip = ({ label, children, side = "top", align = "center", 
     </>
   );
 };
+
+export { HoverTooltip };

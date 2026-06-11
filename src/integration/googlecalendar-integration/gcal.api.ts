@@ -146,7 +146,7 @@ const toGoogleEventPayload = (event: Partial<GCalWritableEventInput>): Record<st
 
   return payload;
 };
-export const fetchCalendarList = async (accessToken: string): Promise<GoogleCalendarListItem[]> => { console.info("[GoogleCalendarAPI] カレンダー一覧の取得を開始しました");
+const fetchCalendarList = async (accessToken: string): Promise<GoogleCalendarListItem[]> => { console.info("[GoogleCalendarAPI] カレンダー一覧の取得を開始しました");
 
   try {
     const calendars: GoogleCalendarListItem[] = [];
@@ -196,7 +196,7 @@ export const fetchCalendarList = async (accessToken: string): Promise<GoogleCale
     throw error;
   }
 };
-export const createGoogleCalendar = async ({ accessToken, summary, description }: { accessToken: string; summary: string; description?: string; }): Promise<GoogleCalendarListItem> => {
+const createGoogleCalendar = async ({ accessToken, summary, description }: { accessToken: string; summary: string; description?: string; }): Promise<GoogleCalendarListItem> => {
   const trimmedSummary = summary.trim();
   if (!trimmedSummary) throw new Error("Google Calendar name is required");
 
@@ -216,7 +216,7 @@ export const createGoogleCalendar = async ({ accessToken, summary, description }
 
   return toGoogleCalendarListItem(calendar);
 };
-export const fetchEventsForCalendar = async ({ accessToken, accountId, calendarId, accentColor, rangeStart, rangeEnd }: { accessToken: string;
+const fetchEventsForCalendar = async ({ accessToken, accountId, calendarId, accentColor, rangeStart, rangeEnd }: { accessToken: string;
   accountId?: string;
   calendarId: string;
   accentColor: string;
@@ -277,7 +277,7 @@ export const fetchEventsForCalendar = async ({ accessToken, accountId, calendarI
     throw error;
   }
 };
-export const createGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, event }: { accessToken: string; accountId?: string; accentColor: string; event: GCalWritableEventInput; }): Promise<GoogleCalendarEvent> => {
+const createGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, event }: { accessToken: string; accountId?: string; accentColor: string; event: GCalWritableEventInput; }): Promise<GoogleCalendarEvent> => {
   const raw = await postJson<GCalRawIncrementalEvent>(
     accessToken,
     `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(event.calendarId)}/events`,
@@ -289,7 +289,7 @@ export const createGoogleCalendarEvent = async ({ accessToken, accountId, accent
   if (!created) throw new Error("Google Calendar event creation response was invalid");
   return created;
 };
-export const updateGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, event }: { accessToken: string; accountId?: string; accentColor: string; event: GCalWritableEventUpdateInput; }): Promise<GoogleCalendarEvent> => {
+const updateGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, event }: { accessToken: string; accountId?: string; accentColor: string; event: GCalWritableEventUpdateInput; }): Promise<GoogleCalendarEvent> => {
   const raw = await patchJson<GCalRawIncrementalEvent>(
     accessToken,
     `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(event.calendarId)}/events/${encodeURIComponent(event.eventId)}`,
@@ -301,6 +301,8 @@ export const updateGoogleCalendarEvent = async ({ accessToken, accountId, accent
   if (!updated) throw new Error("Google Calendar event update response was invalid");
   return updated;
 };
-export const deleteGoogleCalendarEvent = async ({ accessToken, event }: { accessToken: string; event: GCalWritableEventDeleteInput; }): Promise<void> => {
+const deleteGoogleCalendarEvent = async ({ accessToken, event }: { accessToken: string; event: GCalWritableEventDeleteInput; }): Promise<void> => {
   await deleteJson(accessToken, `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(event.calendarId)}/events/${encodeURIComponent(event.eventId)}`, "Google Calendar event deletion failed");
 };
+
+export { fetchCalendarList, createGoogleCalendar, fetchEventsForCalendar, createGoogleCalendarEvent, updateGoogleCalendarEvent, deleteGoogleCalendarEvent };

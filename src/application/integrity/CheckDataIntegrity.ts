@@ -36,7 +36,7 @@ const toNonEmptyString = (value: unknown): string | null => {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
-export const createCheckDataIntegrityUseCase = () => { const execute = async (): Promise<IntegrityReport> => { const issues: IntegrityIssue[] = [];
+const createCheckDataIntegrityUseCase = () => { const execute = async (): Promise<IntegrityReport> => { const issues: IntegrityIssue[] = [];
 
     try {
       const db = await getLocalDb();
@@ -209,3 +209,5 @@ export const createCheckDataIntegrityUseCase = () => { const execute = async ():
     execute,
   };
 };
+
+export { createCheckDataIntegrityUseCase };

@@ -1,2 +1,4 @@
-export const CardMetaPanelSkeleton = () => { return null;
+const CardMetaPanelSkeleton = () => { return null;
 };
+
+export { CardMetaPanelSkeleton };

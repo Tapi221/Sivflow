@@ -3,7 +3,7 @@ import { normalizeCardLayoutMode, resolveDefaultCardLayoutMode } from "@/feature
 import type { CardLayoutMode, CardSetInteractionMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-export interface CardLayoutModePreferenceScope { deviceScope: string;
+interface CardLayoutModePreferenceScope { deviceScope: string;
   cardSetId: string | null | undefined;
   displayMode: CardDisplayMode;
   interactionMode: CardSetInteractionMode;
@@ -45,12 +45,12 @@ const writeStorageValue = (key: string, value: string) => {
     // Ignore local persistence failures and keep the in-memory override path working.
   }
 };
-export const getCardLayoutModePreference = (scope: CardLayoutModePreferenceScope): CardLayoutMode | null => { if (!scope.cardSetId) return null;
+const getCardLayoutModePreference = (scope: CardLayoutModePreferenceScope): CardLayoutMode | null => { if (!scope.cardSetId) return null;
 
   const raw = readStorageValue(buildStorageKey(scope));
   return raw == null ? null : normalizeCardLayoutMode(raw);
 };
-export const resolveCardLayoutModePreference = (scope: CardLayoutModePreferenceScope, fallbackMode?: CardLayoutMode | null): CardLayoutMode => { const stored = getCardLayoutModePreference(scope);
+const resolveCardLayoutModePreference = (scope: CardLayoutModePreferenceScope, fallbackMode?: CardLayoutMode | null): CardLayoutMode => { const stored = getCardLayoutModePreference(scope);
   if (stored) return stored;
 
   if (fallbackMode) {
@@ -59,6 +59,9 @@ export const resolveCardLayoutModePreference = (scope: CardLayoutModePreferenceS
 
   return resolveDefaultCardLayoutMode(scope.interactionMode);
 };
-export const setCardLayoutModePreference = (scope: CardLayoutModePreferenceScope, mode: CardLayoutMode) => { if (!scope.cardSetId) return;
+const setCardLayoutModePreference = (scope: CardLayoutModePreferenceScope, mode: CardLayoutMode) => { if (!scope.cardSetId) return;
   writeStorageValue(buildStorageKey(scope), normalizeCardLayoutMode(mode));
 };
+
+export { getCardLayoutModePreference, resolveCardLayoutModePreference, setCardLayoutModePreference };
+export type { CardLayoutModePreferenceScope };

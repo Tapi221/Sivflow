@@ -28,7 +28,7 @@ const items = [
   },
 ];
 
-export const AlignToolbarButton = (props: DropdownMenuProps) => { const { editor, tf } = useEditorPlugin(TextAlignPlugin);
+const AlignToolbarButton = (props: DropdownMenuProps) => { const { editor, tf } = useEditorPlugin(TextAlignPlugin);
   const value =
     useSelectionFragmentProp({
       defaultValue: "start",
@@ -69,3 +69,5 @@ export const AlignToolbarButton = (props: DropdownMenuProps) => { const { editor
     </DropdownMenu>
   );
 };
+
+export { AlignToolbarButton };

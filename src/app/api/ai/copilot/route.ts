@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { generateText } from "ai";
 import { NextResponse } from "next/server";
 
-export const POST = async (req: NextRequest) => { const { apiKey: key, model = "gpt-4o-mini", prompt, system } = await req.json();
+const POST = async (req: NextRequest) => { const { apiKey: key, model = "gpt-4o-mini", prompt, system } = await req.json();
 
   const apiKey = key || process.env.AI_GATEWAY_API_KEY;
 
@@ -35,3 +35,5 @@ export const POST = async (req: NextRequest) => { const { apiKey: key, model = "
     );
   }
 };
+
+export { POST };

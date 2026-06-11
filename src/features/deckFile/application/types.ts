@@ -1,1 +1,3 @@
-export type MfDeckTagLookup = ReadonlyMap<string, { name: string; }>;
+type MfDeckTagLookup = ReadonlyMap<string, { name: string; }>;
+
+export type { MfDeckTagLookup };

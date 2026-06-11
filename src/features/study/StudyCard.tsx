@@ -38,7 +38,7 @@ type PracticeProps = BaseProps & {
   mode: "practice";
   onResult?: (subjectiveScore: PracticeScore, responseTime: number) => void;
 };
-export type StudyCardProps = ReviewProps | PracticeProps;
+type StudyCardProps = ReviewProps | PracticeProps;
 type Keyable = {
   id?: string;
   cardId?: string;
@@ -427,3 +427,4 @@ const StudyCardInner = ({
 };
 
 export default StudyCard;
+export type { StudyCardProps };

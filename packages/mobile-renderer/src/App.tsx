@@ -5,5 +5,5 @@ import HandwritingModeScreen from "@mobile-renderer/screens/ipad/handwriting/Han
 const App = () => <View style={{ flex: 1 }}>{Platform.OS === "ios" ? <HandwritingModeScreen /> : null}</View>;
 
 const MemoizedApp = memo(App);
-export { MemoizedApp as App };
 export default MemoizedApp;
+export { MemoizedApp as App };

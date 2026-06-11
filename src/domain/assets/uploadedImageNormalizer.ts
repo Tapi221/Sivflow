@@ -2,9 +2,9 @@ import { generateUploadedImageId } from "./uploadedImageFactory";
 import type { UploadFallbackReason, UploadSource } from "@/types";
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 
-export type NormalizeUploadedImageOptions = { onInvalid?: "skip" | "throw";
+type NormalizeUploadedImageOptions = { onInvalid?: "skip" | "throw";
 };
-export type DenormalizeUploadedImageOptions = { case?: "camel" | "snake";
+type DenormalizeUploadedImageOptions = { case?: "camel" | "snake";
   stripUndefined?: boolean;
 };
 
@@ -149,7 +149,7 @@ const normalizeUploadedImage = (
     naturalH: naturalH ?? null,
   };
 };
-export const normalizeUploadedImages = (raw: unknown, options: NormalizeUploadedImageOptions = {}) => { if (raw == null) return [];
+const normalizeUploadedImages = (raw: unknown, options: NormalizeUploadedImageOptions = {}) => { if (raw == null) return [];
   const items = Array.isArray(raw) ? raw : [raw];
 
   return items
@@ -221,7 +221,7 @@ const denormalizeUploadedImage = (
 
   return output;
 };
-export const denormalizeUploadedImages = (images: Array<{ id: string;
+const denormalizeUploadedImages = (images: Array<{ id: string;
   assetId?: string | null;
   localFileId?: string | null;
   localUrl?: string | null;
@@ -239,3 +239,6 @@ export const denormalizeUploadedImages = (images: Array<{ id: string;
 ) => {
   return images.map((image) => denormalizeUploadedImage(image, options));
 };
+
+export { normalizeUploadedImages, denormalizeUploadedImages };
+export type { NormalizeUploadedImageOptions, DenormalizeUploadedImageOptions };

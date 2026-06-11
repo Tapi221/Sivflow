@@ -6,7 +6,7 @@ import { RadicalIcon } from "lucide-react";
 import { useEditorRef } from "platejs/react";
 import { ToolbarButton } from "./toolbar";
 
-export const InlineEquationToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => { const editor = useEditorRef();
+const InlineEquationToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => { const editor = useEditorRef();
 
   return (
     <ToolbarButton
@@ -20,3 +20,5 @@ export const InlineEquationToolbarButton = (props: React.ComponentProps<typeof T
     </ToolbarButton>
   );
 };
+
+export { InlineEquationToolbarButton };

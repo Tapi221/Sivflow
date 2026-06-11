@@ -104,7 +104,7 @@ const toGoogleTaskItem = (
     position: item.position,
   };
 };
-export const fetchGoogleTaskLists = async (accessToken: string): Promise<GoogleTaskListItem[]> => { const taskLists: GoogleTaskListItem[] = [];
+const fetchGoogleTaskLists = async (accessToken: string): Promise<GoogleTaskListItem[]> => { const taskLists: GoogleTaskListItem[] = [];
   let pageToken: string | undefined;
 
   do {
@@ -135,7 +135,7 @@ export const fetchGoogleTaskLists = async (accessToken: string): Promise<GoogleT
 
   return taskLists;
 };
-export const fetchGoogleTasks = async ({ accessToken, taskListId }: { accessToken: string;
+const fetchGoogleTasks = async ({ accessToken, taskListId }: { accessToken: string;
   taskListId: string;
 }): Promise<GoogleTaskItem[]> => {
   const tasks: GoogleTaskItem[] = [];
@@ -170,7 +170,7 @@ export const fetchGoogleTasks = async ({ accessToken, taskListId }: { accessToke
 
   return tasks;
 };
-export const createGoogleTask = async ({ accessToken, taskListId, input }: { accessToken: string;
+const createGoogleTask = async ({ accessToken, taskListId, input }: { accessToken: string;
   taskListId: string;
   input: GoogleTaskCreateInput;
 }): Promise<GoogleTaskItem> => {
@@ -190,7 +190,7 @@ export const createGoogleTask = async ({ accessToken, taskListId, input }: { acc
 
   return task;
 };
-export const patchGoogleTask = async ({ accessToken, taskListId, taskId, patch }: { accessToken: string;
+const patchGoogleTask = async ({ accessToken, taskListId, taskId, patch }: { accessToken: string;
   taskListId: string;
   taskId: string;
   patch: GoogleTaskPatch;
@@ -210,7 +210,7 @@ export const patchGoogleTask = async ({ accessToken, taskListId, taskId, patch }
 
   return task;
 };
-export const moveGoogleTask = async ({ accessToken, taskListId, taskId, destinationTaskListId }: { accessToken: string;
+const moveGoogleTask = async ({ accessToken, taskListId, taskId, destinationTaskListId }: { accessToken: string;
   taskListId: string;
   taskId: string;
   destinationTaskListId: string;
@@ -233,7 +233,7 @@ export const moveGoogleTask = async ({ accessToken, taskListId, taskId, destinat
 
   return task;
 };
-export const deleteGoogleTask = async ({ accessToken, taskListId, taskId }: { accessToken: string;
+const deleteGoogleTask = async ({ accessToken, taskListId, taskId }: { accessToken: string;
   taskListId: string;
   taskId: string;
 }): Promise<void> => {
@@ -245,3 +245,5 @@ export const deleteGoogleTask = async ({ accessToken, taskListId, taskId }: { ac
     "delete_task",
   );
 };
+
+export { fetchGoogleTaskLists, fetchGoogleTasks, createGoogleTask, patchGoogleTask, moveGoogleTask, deleteGoogleTask };

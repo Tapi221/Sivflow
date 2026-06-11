@@ -34,7 +34,7 @@ const measureViewportWidth = (element: HTMLDivElement) =>
       Math.max(element.clientWidth, element.parentElement?.clientWidth ?? 0),
     ),
   );
-export const useCardEditorPaneWidth = ({ settings, dockToolbarsToTop, embeddedInPager, hideBlockToolbars, forcedPaneWidthPx, usesExternalToolbarMount, isEditing, isMetaOpen, normalizedSelectedCardId, selectedCardId, canonicalCardWidth, cardSetId, cardLayoutMode }: UseCardEditorPaneWidthParams) => { const defaultSharedPaneWidthPx = dockToolbarsToTop ? CARD_PANE_EDITOR_DOCKED_DEFAULT_WIDTH_PX : CARD_PANE_EDITOR_DEFAULT_WIDTH_PX;
+const useCardEditorPaneWidth = ({ settings, dockToolbarsToTop, embeddedInPager, hideBlockToolbars, forcedPaneWidthPx, usesExternalToolbarMount, isEditing, isMetaOpen, normalizedSelectedCardId, selectedCardId, canonicalCardWidth, cardSetId, cardLayoutMode }: UseCardEditorPaneWidthParams) => { const defaultSharedPaneWidthPx = dockToolbarsToTop ? CARD_PANE_EDITOR_DOCKED_DEFAULT_WIDTH_PX : CARD_PANE_EDITOR_DEFAULT_WIDTH_PX;
 
   const preferenceScopeKey = `${cardSetId ?? ""}:${defaultSharedPaneWidthPx}:${settings?.cardEditPaneWidthPx ?? ""}:${settings?.cardViewPaneWidthPx ?? ""}`;
 
@@ -192,3 +192,4 @@ export const useCardEditorPaneWidth = ({ settings, dockToolbarsToTop, embeddedIn
 };
 
 export { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX };
+export { useCardEditorPaneWidth };

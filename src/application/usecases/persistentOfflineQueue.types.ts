@@ -1,6 +1,6 @@
 import type { UploadedImage } from "@/types";
 
-export interface QueueItem { id: string;
+interface QueueItem { id: string;
   image: UploadedImage;
   fileData: ArrayBuffer;
   fileName: string;
@@ -8,10 +8,12 @@ export interface QueueItem { id: string;
   retryCount: number;
   enqueuedAt: number;
 }
-export interface AssetUploadRequest { assetId: string;
+interface AssetUploadRequest { assetId: string;
   userId: string;
   remoteKey: string;
   mime: string;
   size: number;
   fileName?: string;
 }
+
+export type { QueueItem, AssetUploadRequest };

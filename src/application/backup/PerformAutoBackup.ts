@@ -2,7 +2,7 @@ import type { AutoBackupRecord, BackupStorePort } from "@/application/ports/Back
 
 const MAX_BACKUPS = 5;
 
-export interface PerformAutoBackupDependencies { backupStore: BackupStorePort;
+interface PerformAutoBackupDependencies { backupStore: BackupStorePort;
   buildSnapshot?: (userId: string) => Promise<AutoBackupRecord>;
   collectUserData?: (userId: string) => Promise<unknown>;
 }
@@ -25,7 +25,7 @@ const defaultBuildSnapshot =
         payload,
       };
     };
-export const createPerformAutoBackupUseCase = ({ backupStore, buildSnapshot, collectUserData = defaultCollectUserData }: PerformAutoBackupDependencies) => { const resolvedBuildSnapshot = buildSnapshot ?? defaultBuildSnapshot(collectUserData);
+const createPerformAutoBackupUseCase = ({ backupStore, buildSnapshot, collectUserData = defaultCollectUserData }: PerformAutoBackupDependencies) => { const resolvedBuildSnapshot = buildSnapshot ?? defaultBuildSnapshot(collectUserData);
 
   const execute = async (userId: string): Promise<boolean> => {
     if (!userId) {
@@ -62,3 +62,6 @@ export const createPerformAutoBackupUseCase = ({ backupStore, buildSnapshot, col
     getLastBackupAt,
   };
 };
+
+export { createPerformAutoBackupUseCase };
+export type { PerformAutoBackupDependencies };

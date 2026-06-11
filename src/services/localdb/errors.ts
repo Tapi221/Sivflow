@@ -66,7 +66,7 @@ const extractErrorTexts = (
   extractErrorTexts(inner, collector, depth + 1);
   extractErrorTexts(cause, collector, depth + 1);
 };
-export const safeStringifyError = (error: unknown): string => { try { if (!error) return "unknown error";
+const safeStringifyError = (error: unknown): string => { try { if (!error) return "unknown error";
 
   const { name, message } = getErrorNameMessage(error);
   const maybeName = name ? `${name}: ` : "";
@@ -83,7 +83,7 @@ export const safeStringifyError = (error: unknown): string => { try { if (!error
   return "unknown error";
 }
 };
-export const isBackingStoreOpenError = (error: unknown): boolean => { const texts: string[] = [];
+const isBackingStoreOpenError = (error: unknown): boolean => { const texts: string[] = [];
   extractErrorTexts(error, texts);
 
   if (texts.length === 0) return false;
@@ -98,7 +98,7 @@ export const isBackingStoreOpenError = (error: unknown): boolean => { const text
 
   return hasUnknownError && hasBackingStoreToken;
 };
-export const classifyFallbackReasonCode = (error: unknown): LocalDBFallbackReasonCode => { if (isBackingStoreOpenError(error)) return "backing_store_open_error";
+const classifyFallbackReasonCode = (error: unknown): LocalDBFallbackReasonCode => { if (isBackingStoreOpenError(error)) return "backing_store_open_error";
 
   const texts: string[] = [];
   extractErrorTexts(error, texts);
@@ -127,3 +127,5 @@ export const classifyFallbackReasonCode = (error: unknown): LocalDBFallbackReaso
 
   return "unknown";
 };
+
+export { safeStringifyError, isBackingStoreOpenError, classifyFallbackReasonCode };

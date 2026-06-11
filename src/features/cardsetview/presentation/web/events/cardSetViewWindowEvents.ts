@@ -1,13 +1,13 @@
 import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewEvents.constants";
 
-export type CardSetViewEditingDraftPatch = { cardId: string;
+type CardSetViewEditingDraftPatch = { cardId: string;
   patch: {
     title?: string;
     isDraft?: boolean;
     tags?: string[];
   };
 };
-export type CardSetViewWindowEventMap = { [CARD_SET_VIEW_EVENTS.editingChange]: boolean;
+type CardSetViewWindowEventMap = { [CARD_SET_VIEW_EVENTS.editingChange]: boolean;
   [CARD_SET_VIEW_EVENTS.metaOpenChange]: boolean;
   [CARD_SET_VIEW_EVENTS.editingDraftPatch]: CardSetViewEditingDraftPatch;
   [CARD_SET_VIEW_EVENTS.createCardRequest]: undefined;
@@ -16,10 +16,10 @@ export type CardSetViewWindowEventMap = { [CARD_SET_VIEW_EVENTS.editingChange]: 
 };
 type CardSetViewWindowEventName = keyof CardSetViewWindowEventMap;
 
-export const dispatchCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName>(eventName: TEventName, detail: CardSetViewWindowEventMap[TEventName]) => { if (typeof window === "undefined") return;
+const dispatchCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName>(eventName: TEventName, detail: CardSetViewWindowEventMap[TEventName]) => { if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(eventName, { detail }));
 };
-export const subscribeCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName>(eventName: TEventName, listener: (detail: CardSetViewWindowEventMap[TEventName]) => void) => { if (typeof window === "undefined") { return () => {};
+const subscribeCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName>(eventName: TEventName, listener: (detail: CardSetViewWindowEventMap[TEventName]) => void) => { if (typeof window === "undefined") { return () => {};
   }
 
   const handler: EventListener = (event) => {
@@ -33,3 +33,6 @@ export const subscribeCardSetViewWindowEvent = <TEventName extends CardSetViewWi
     window.removeEventListener(eventName, handler);
   };
 };
+
+export { dispatchCardSetViewWindowEvent, subscribeCardSetViewWindowEvent };
+export type { CardSetViewEditingDraftPatch, CardSetViewWindowEventMap };

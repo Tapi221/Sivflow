@@ -10,7 +10,7 @@ interface LegacyCardSetViewZoomPreferencesStore {
   version: 1;
   byCardSet: Record<string, number>;
 }
-export interface CardSetViewZoomPreferenceScope { deviceScope: string;
+interface CardSetViewZoomPreferenceScope { deviceScope: string;
   cardSetId: string | null | undefined;
   displayMode?: CardDisplayMode;
   interactionMode?: CardSetInteractionMode;
@@ -47,7 +47,7 @@ const buildLegacyZoomPreferenceScopeKey = ({
     cardLayoutMode,
   ].join("::");
 };
-export const buildCardSetViewZoomPreferenceScopeKey = ({ deviceScope, cardSetId }: CardSetViewZoomPreferenceScope) => { return [normalizeDeviceScope(deviceScope), cardSetId ?? "__no_card_set__"].join("::");
+const buildCardSetViewZoomPreferenceScopeKey = ({ deviceScope, cardSetId }: CardSetViewZoomPreferenceScope) => { return [normalizeDeviceScope(deviceScope), cardSetId ?? "__no_card_set__"].join("::");
 };
 const canResolveLegacyScopedKey = (
   scope: CardSetViewZoomPreferenceScope,
@@ -203,7 +203,7 @@ const migrateLegacyScopedZoomPreference = ({
   store.byScope[buildCardSetViewZoomPreferenceScopeKey(scope)] = zoomPercent;
   writeStore(store);
 };
-export const getCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope) => { if (!scope.cardSetId) { return undefined;
+const getCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope) => { if (!scope.cardSetId) { return undefined;
 }
 
 const store = readStore();
@@ -227,7 +227,7 @@ if (storedZoomPercent != null) {
 
 return readLegacyCardSetValue(scope.cardSetId);
 };
-export const setCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope, zoomPercent: number) => { if (!scope.cardSetId) { return;
+const setCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope, zoomPercent: number) => { if (!scope.cardSetId) { return;
 }
 
 const safeZoomPercent =
@@ -240,3 +240,6 @@ store.byScope[buildCardSetViewZoomPreferenceScopeKey(scope)] =
   safeZoomPercent;
 writeStore(store);
 };
+
+export { buildCardSetViewZoomPreferenceScopeKey, getCardSetViewZoomPreference, setCardSetViewZoomPreference };
+export type { CardSetViewZoomPreferenceScope };

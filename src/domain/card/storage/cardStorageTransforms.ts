@@ -7,7 +7,7 @@ import type { Card } from "@/types";
 
 type StorageLike = Record<string, unknown>;
 
-export const denormalizeCardForStorage = (value: Partial<Card> | StorageLike): StorageLike => { const record = cloneStorageRecord(value);
+const denormalizeCardForStorage = (value: Partial<Card> | StorageLike): StorageLike => { const record = cloneStorageRecord(value);
   const frontBlocks = sanitizeCardStorageBlockImages(
     resolveBlocksFromCardData(record, "question"),
   );
@@ -34,4 +34,6 @@ export const denormalizeCardForStorage = (value: Partial<Card> | StorageLike): S
 
   return cleanupLegacyCardStorageFields(record);
 };
-export const normalizeCardFromStorage = (value: unknown): Card => normalizeCard(value);
+const normalizeCardFromStorage = (value: unknown): Card => normalizeCard(value);
+
+export { denormalizeCardForStorage, normalizeCardFromStorage };

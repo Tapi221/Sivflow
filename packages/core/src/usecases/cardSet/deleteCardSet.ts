@@ -1,12 +1,12 @@
-export type CardSetDeleteCard = { id: string;
+type CardSetDeleteCard = { id: string;
   isDeleted?: boolean;
 };
-export type CardSetDeleteRepository<TCard extends CardSetDeleteCard = CardSetDeleteCard> = { listCardsByCardSetId: (userId: string, cardSetId: string) => Promise<TCard[]>;
+type CardSetDeleteRepository<TCard extends CardSetDeleteCard = CardSetDeleteCard> = { listCardsByCardSetId: (userId: string, cardSetId: string) => Promise<TCard[]>;
   softDeleteCard: (userId: string, cardId: string) => Promise<void>;
   softDeleteCardSet: (userId: string, cardSetId: string) => Promise<void>;
 };
 
-export const deleteCardSetWithCards = async <TCard extends CardSetDeleteCard>({ userId, cardSetId, repository }: { userId: string;
+const deleteCardSetWithCards = async <TCard extends CardSetDeleteCard>({ userId, cardSetId, repository }: { userId: string;
   cardSetId: string;
   repository: CardSetDeleteRepository<TCard>;
 }): Promise<void> => {
@@ -20,3 +20,6 @@ export const deleteCardSetWithCards = async <TCard extends CardSetDeleteCard>({ 
 
   await repository.softDeleteCardSet(userId, cardSetId);
 };
+
+export { deleteCardSetWithCards };
+export type { CardSetDeleteCard, CardSetDeleteRepository };

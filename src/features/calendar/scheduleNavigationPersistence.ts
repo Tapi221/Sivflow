@@ -9,13 +9,13 @@ type StoredScheduleNavigationState = {
   calendarScrollTop?: unknown;
   monthVisibleEventCount?: unknown;
 };
-export type ScheduleNavigationState = { currentDate: Date;
+type ScheduleNavigationState = { currentDate: Date;
   selectedDate: Date;
   monthTitleDate: Date;
   selectedViewMode: CalendarViewModeSelection;
 };
 
-export const SCHEDULE_NAVIGATION_STORAGE_KEY = "sivflow:schedule:navigation";
+const SCHEDULE_NAVIGATION_STORAGE_KEY = "sivflow:schedule:navigation";
 const LEGACY_SCHEDULE_NAVIGATION_STORAGE_KEY = "flashcard-master:schedule:navigation";
 const CALENDAR_VIEW_MODES = ["year", "month", "week", "threeDays", "days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const CALENDAR_VIEW_MODE_SET = new Set<CalendarViewMode>(CALENDAR_VIEW_MODES);
@@ -73,8 +73,8 @@ const writeStoredScheduleNavigationObject = (state: StoredScheduleNavigationStat
     // localStorage が使えない環境では React state の状態だけ維持する。
   }
 };
-export const normalizeScheduleMonthVisibleEventCount = (value: number): number => Math.min(C.MONTH_VISIBLE_EVENT_COUNT_MAX, Math.max(C.MONTH_VISIBLE_EVENT_COUNT_MIN, Math.round(value)));
-export const readStoredScheduleNavigationState = (): Partial<ScheduleNavigationState> | null => { const parsed = readStoredScheduleNavigationObject();
+const normalizeScheduleMonthVisibleEventCount = (value: number): number => Math.min(C.MONTH_VISIBLE_EVENT_COUNT_MAX, Math.max(C.MONTH_VISIBLE_EVENT_COUNT_MIN, Math.round(value)));
+const readStoredScheduleNavigationState = (): Partial<ScheduleNavigationState> | null => { const parsed = readStoredScheduleNavigationObject();
   if (!parsed) return null;
 
   const currentDate = readStoredDate(parsed.currentDate);
@@ -89,17 +89,17 @@ export const readStoredScheduleNavigationState = (): Partial<ScheduleNavigationS
     ...(selectedViewMode ? { selectedViewMode } : {}),
   };
 };
-export const readStoredScheduleCalendarScrollTop = (): number | null => { const parsed = readStoredScheduleNavigationObject();
+const readStoredScheduleCalendarScrollTop = (): number | null => { const parsed = readStoredScheduleNavigationObject();
   if (!parsed) return null;
 
   return readStoredScrollTop(parsed.calendarScrollTop);
 };
-export const readStoredScheduleMonthVisibleEventCount = (): number | null => { const parsed = readStoredScheduleNavigationObject();
+const readStoredScheduleMonthVisibleEventCount = (): number | null => { const parsed = readStoredScheduleNavigationObject();
   if (!parsed || typeof parsed.monthVisibleEventCount !== "number" || !Number.isFinite(parsed.monthVisibleEventCount)) return null;
 
   return normalizeScheduleMonthVisibleEventCount(parsed.monthVisibleEventCount);
 };
-export const persistScheduleNavigationState = ({ currentDate, selectedDate, monthTitleDate, selectedViewMode }: ScheduleNavigationState) => { const stored = readStoredScheduleNavigationObject() ?? {};
+const persistScheduleNavigationState = ({ currentDate, selectedDate, monthTitleDate, selectedViewMode }: ScheduleNavigationState) => { const stored = readStoredScheduleNavigationObject() ?? {};
 
   writeStoredScheduleNavigationObject({
     ...stored,
@@ -109,7 +109,7 @@ export const persistScheduleNavigationState = ({ currentDate, selectedDate, mont
     selectedViewMode,
   });
 };
-export const persistScheduleCalendarScrollTop = (scrollTop: number) => { if (!Number.isFinite(scrollTop)) return;
+const persistScheduleCalendarScrollTop = (scrollTop: number) => { if (!Number.isFinite(scrollTop)) return;
 
   const stored = readStoredScheduleNavigationObject() ?? {};
 
@@ -118,7 +118,7 @@ export const persistScheduleCalendarScrollTop = (scrollTop: number) => { if (!Nu
     calendarScrollTop: Math.max(0, scrollTop),
   });
 };
-export const persistScheduleMonthVisibleEventCount = (monthVisibleEventCount: number) => { if (!Number.isFinite(monthVisibleEventCount)) return;
+const persistScheduleMonthVisibleEventCount = (monthVisibleEventCount: number) => { if (!Number.isFinite(monthVisibleEventCount)) return;
 
   const stored = readStoredScheduleNavigationObject() ?? {};
 
@@ -127,3 +127,6 @@ export const persistScheduleMonthVisibleEventCount = (monthVisibleEventCount: nu
     monthVisibleEventCount: normalizeScheduleMonthVisibleEventCount(monthVisibleEventCount),
   });
 };
+
+export { SCHEDULE_NAVIGATION_STORAGE_KEY, normalizeScheduleMonthVisibleEventCount, readStoredScheduleNavigationState, readStoredScheduleCalendarScrollTop, readStoredScheduleMonthVisibleEventCount, persistScheduleNavigationState, persistScheduleCalendarScrollTop, persistScheduleMonthVisibleEventCount };
+export type { ScheduleNavigationState };

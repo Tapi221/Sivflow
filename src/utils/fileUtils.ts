@@ -23,17 +23,19 @@ const getValidatedExtension = (
   const allAllowed = Object.values(ALLOWED_EXTENSIONS).flat();
   return allAllowed.includes(ext) ? ext : "bin";
 };
-export const generateSafeStoragePath = (originalName: string, fileType?: string): { safeName: string; extension: string; id: string; } => {
+const generateSafeStoragePath = (originalName: string, fileType?: string): { safeName: string; extension: string; id: string; } => {
   const extension = getValidatedExtension(originalName, fileType);
   const id = nanoid(10);
   const safeName = `${Date.now()}_${id}.${extension}`;
 
   return { safeName, extension, id };
 };
-export const formatBytes = (bytes: number, decimals = 2) => { if (bytes === 0) return "0 Bytes";
+const formatBytes = (bytes: number, decimals = 2) => { if (bytes === 0) return "0 Bytes";
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
+
+export { generateSafeStoragePath, formatBytes };

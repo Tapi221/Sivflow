@@ -10,11 +10,11 @@ import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
 // ─────────────────────────────────────────────────────────────
 // カレンダーイベント
 // ─────────────────────────────────────────────────────────────
-export type GoogleCalendarEvent = CalendarEvent;
+type GoogleCalendarEvent = CalendarEvent;
 // ─────────────────────────────────────────────────────────────
 // カレンダー一覧
 // ─────────────────────────────────────────────────────────────
-export interface GoogleCalendarListItem { id: string;
+interface GoogleCalendarListItem { id: string;
 
   summary: string;
 
@@ -31,25 +31,25 @@ export interface GoogleCalendarListItem { id: string;
 // ─────────────────────────────────────────────────────────────
 // Hook options
 // ─────────────────────────────────────────────────────────────
-export interface UseGoogleCalendarIntegrationOptions { authInstance?: Auth;
+interface UseGoogleCalendarIntegrationOptions { authInstance?: Auth;
 }
 // ─────────────────────────────────────────────────────────────
 // 同期状態
 // ─────────────────────────────────────────────────────────────
 
 /** エンジンの現在の動作状態 */
-export type GCalSyncState = "idle" | "syncing" | "needsReconnect" | "error";
-export type GCalConnectionStatus = "connected" | "needsReconnect" | "error";
-export type GCalSyncRange = { rangeStart: Date;
+type GCalSyncState = "idle" | "syncing" | "needsReconnect" | "error";
+type GCalConnectionStatus = "connected" | "needsReconnect" | "error";
+type GCalSyncRange = { rangeStart: Date;
   rangeEnd: Date;
 };
-export type GCalForceSyncOptions = Partial<GCalSyncRange>;
+type GCalForceSyncOptions = Partial<GCalSyncRange>;
 // ─────────────────────────────────────────────────────────────
 // カレンダー ID → syncToken のマップ
 // ─────────────────────────────────────────────────────────────
 
 /** カレンダー ID をキーとした syncToken の辞書 */
-export type GCalSyncTokenMap = Record<string, string>;
+type GCalSyncTokenMap = Record<string, string>;
 // ─────────────────────────────────────────────────────────────
 // Google Calendar API の生レスポンス型
 // ─────────────────────────────────────────────────────────────
@@ -59,7 +59,7 @@ export type GCalSyncTokenMap = Record<string, string>;
  * インクリメンタル同期では
  * `status: "cancelled"` が削除を表す。
  */
-export interface GCalRawIncrementalEvent { id?: string;
+interface GCalRawIncrementalEvent { id?: string;
 
   summary?: string;
 
@@ -80,7 +80,7 @@ export interface GCalRawIncrementalEvent { id?: string;
   };
 }
 /** events.list API レスポンス全体 */
-export interface GCalEventsListResponse { items?: GCalRawIncrementalEvent[];
+interface GCalEventsListResponse { items?: GCalRawIncrementalEvent[];
 
   /**
    * 次回インクリメンタル同期に使う
@@ -98,7 +98,7 @@ export interface GCalEventsListResponse { items?: GCalRawIncrementalEvent[];
 // ─────────────────────────────────────────────────────────────
 // エンジンのオプション
 // ─────────────────────────────────────────────────────────────
-export interface GCalSyncEngineOptions { accountId?: string;
+interface GCalSyncEngineOptions { accountId?: string;
 
   /**
    * イベント追加
@@ -165,7 +165,7 @@ export interface GCalSyncEngineOptions { accountId?: string;
 // ─────────────────────────────────────────────────────────────
 // Sync start context
 // ─────────────────────────────────────────────────────────────
-export interface GCalSyncStartContext { /** * 現在有効な accessToken */ accessToken: string;
+interface GCalSyncStartContext { /** * 現在有効な accessToken */ accessToken: string;
 
   /**
    * 同期対象カレンダー
@@ -177,3 +177,5 @@ export interface GCalSyncStartContext { /** * 現在有効な accessToken */ acc
    */
   calendars: GoogleCalendarListItem[];
 }
+
+export type { GoogleCalendarEvent, GoogleCalendarListItem, UseGoogleCalendarIntegrationOptions, GCalSyncState, GCalConnectionStatus, GCalSyncRange, GCalForceSyncOptions, GCalSyncTokenMap, GCalRawIncrementalEvent, GCalEventsListResponse, GCalSyncEngineOptions, GCalSyncStartContext };

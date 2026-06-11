@@ -2,7 +2,7 @@ import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrum
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import type { SelectedExplorerItem } from "@/types";
 
-export type ExplorerAction = | { type: "APPLY_ROUTE_STATE"; payload: ExplorerRouteState; }
+type ExplorerAction = | { type: "APPLY_ROUTE_STATE"; payload: ExplorerRouteState; }
   | { type: "SELECT_FOLDER"; payload: { folderId: string | null; }; }
   | { type: "SELECT_ITEM"; payload: { item: SelectedExplorerItem; }; }
   | {
@@ -10,3 +10,5 @@ export type ExplorerAction = | { type: "APPLY_ROUTE_STATE"; payload: ExplorerRou
     payload: { context: ExplorerBreadcrumbContext; };
   }
   | { type: "INCREMENT_SECTION_LIST_TOKEN"; };
+
+export type { ExplorerAction };

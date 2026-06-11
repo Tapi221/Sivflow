@@ -61,7 +61,7 @@ const toHistoryEvent = (value: unknown): HistoryEvent | null => {
     interval: toFiniteNumber(value.interval),
   };
 };
-export class HistoryCompressionService { public readonly compress = async (userId: string): Promise<void> => { if (StorageStateManager.isReadOnly(userId)) { console.log(`[Compression:${userId}] Skipped (READ_ONLY mode)`);
+class HistoryCompressionService { public readonly compress = async (userId: string): Promise<void> => { if (StorageStateManager.isReadOnly(userId)) { console.log(`[Compression:${userId}] Skipped (READ_ONLY mode)`);
   return;
 }
 
@@ -156,3 +156,5 @@ private readonly compressByDay = (
   return compressed;
 };
 }
+
+export { HistoryCompressionService };
