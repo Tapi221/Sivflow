@@ -19,7 +19,7 @@ const clampIndex = (index: number, count: number) => {
   return Math.min(Math.max(Math.trunc(index), 0), count - 1);
 };
 
-const CardCarousel3D = <T>({ cards, syncIndex, initialIndex = 0, onIndexChange, renderCenter, renderPreview, getKey, onFlip }: CardCarousel3DProps<T>) => {
+const CardCarousel3D = <T,>({ cards, syncIndex, initialIndex = 0, onIndexChange, renderCenter, renderPreview, getKey, onFlip }: CardCarousel3DProps<T>) => {
   void renderPreview;
 
   const initialActiveIndex = useMemo(() => clampIndex(syncIndex ?? initialIndex, cards.length), [cards.length, initialIndex, syncIndex]);

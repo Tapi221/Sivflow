@@ -26,7 +26,7 @@ type PdfDocumentPaneProps = {
   className?: string;
   onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
 };
-type PdfSourceResolutionWaiter = <T>(promise: Promise<T>) => Promise<T>;
+type PdfSourceResolutionWaiter = <T,>(promise: Promise<T>) => Promise<T>;
 
 const PDF_SOURCE_RESOLUTION_TIMEOUT_MS = 15_000;
 const PDF_VIEWER_STATE_SAVE_DEBOUNCE_MS = 800;

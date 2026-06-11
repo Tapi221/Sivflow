@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
 });
-const rotateCalendarWeekdayLabels = <T>(weekdayLabels: readonly T[], weekStartDay: CalendarWeekStartDay): readonly T[] => {
+const rotateCalendarWeekdayLabels = <T,>(weekdayLabels: readonly T[], weekStartDay: CalendarWeekStartDay): readonly T[] => {
   if (weekStartDay === "sunday") return weekdayLabels;
 
   return [...weekdayLabels.slice(1), ...weekdayLabels.slice(0, 1)];
