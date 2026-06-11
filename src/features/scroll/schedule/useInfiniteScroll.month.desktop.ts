@@ -369,4 +369,3 @@ export const useMonthInfiniteScroll = ({ currentDate, scrollTargetToken, monthRo
     scrollContainerRef,
     setScrollContainerRef,
   };
-};

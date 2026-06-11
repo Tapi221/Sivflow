@@ -38,4 +38,3 @@ export const useExplorerLookups = ({ folders, cards, documents, selectedItem, }:
     documentById,
     ...selectedState,
   };
-};

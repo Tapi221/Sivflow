@@ -23,4 +23,3 @@ export const useHotKeyDesktop = ({ onToggleRightSidebar }: UseHotKeyParams) => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [onToggleRightSidebar]);
-};

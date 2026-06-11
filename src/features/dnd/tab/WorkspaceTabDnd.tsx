@@ -104,4 +104,4 @@ const WorkspaceTabDndItem = ({
 
 
 
-export { WorkspaceTabDndItem, WorkspaceTabDndList };
+export { WorkspaceTabDndItem, WorkspaceTabDndL

@@ -27,4 +27,4 @@ export { AuthProvider };
 
 
 
-export type { AuthProviderProps };
+export type { AuthProviderPr

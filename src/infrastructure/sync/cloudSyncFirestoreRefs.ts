@@ -12,4 +12,4 @@ export const getPushDocumentRef = ( firestore: Firestore, userId: string, type: 
 
 export const queryEntityById = ( firestore: Firestore, userId: string, collectionName: string, id: string, ): Query<DocumentData> => query( collection(firestore, `users/${userId}/${collectionName}`), where("id", "==", id), );
 
-export const getUserSettingsRef = ( firestore: Firestore, userId: string, ): DocumentReference<DocumentData> => doc(firestore, "userSettings", userId);
+export const getUserSettingsRef = ( firestore: Firestore, userId: string, ): DocumentReference<DocumentData> => doc(firestore, "userSettings", userId

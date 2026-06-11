@@ -244,4 +244,3 @@ export const importPortableFileBatch = async ({ files, folderId, createCardSet, 
 };
 
 export const formatPortableImportBatchItemSubtitle = ( item: Pick<PortableImportBatchItem, "kind" | "size">, ): string => { return `${IMPORT_FILE_LABELS[item.kind]} / ${formatFileSize(item.size)}`;
-};

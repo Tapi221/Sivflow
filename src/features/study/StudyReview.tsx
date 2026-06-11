@@ -19,4 +19,3 @@ const STUDY_REVIEW_COMPONENTS = {
 export const StudyReview = (props: StudyReviewProps) => { const presentationTarget = usePresentationTarget();
   const Component = STUDY_REVIEW_COMPONENTS[presentationTarget];
   return <Component {...props} />;
-};

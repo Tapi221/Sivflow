@@ -111,4 +111,4 @@ const CalendarTimetableSyllabusCatalogPanel = ({ activeSemesterId, institutions,
 
 
 
-export { CalendarTimetableSyllabusCatalogPanel };
+export { CalendarTimetableSyllabusCatalog

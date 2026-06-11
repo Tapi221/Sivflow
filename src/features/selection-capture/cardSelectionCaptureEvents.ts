@@ -51,4 +51,3 @@ export const dispatchCardSelectionCaptureEvent = ( payload: CardSelectionCapture
     handled: event.defaultPrevented || tasks.length > 0,
     tasks,
   };
-};

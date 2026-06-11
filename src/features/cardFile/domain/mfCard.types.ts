@@ -53,5 +53,4 @@ export class MfCardExportError extends Error { readonly issues: MfCardIssue[];
     super(message);
     this.name = "MfCardExportError";
     this.issues = issues;
-  }
-}
+  

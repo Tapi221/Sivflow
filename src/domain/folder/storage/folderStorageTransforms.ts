@@ -14,4 +14,4 @@ export const normalizeFolderFromStorage = (value: unknown): Folder => normalizeF
 
 
 
-export { normalizeFolderWithSilent };
+export { normalizeFolderWithSilen

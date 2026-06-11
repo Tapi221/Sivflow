@@ -216,5 +216,4 @@ export const getServerStoredGoogleConnectedServiceAccessToken = getServerStoredG
 
 
 export const disconnectServerStoredGoogleCalendarAccount = async ( input: DisconnectGoogleCalendarAccountInput, ): Promise<void> => { await waitForCallableAuth();
-  await disconnectGoogleCalendarAccountCallable(input);
-};
+  await disconnectGoogleCalendarAccountCallable

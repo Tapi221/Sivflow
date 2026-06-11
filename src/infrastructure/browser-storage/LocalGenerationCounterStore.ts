@@ -30,4 +30,4 @@ const increment = (): number => {
 
 
 
-export const localGenerationCounterStore: GenerationCounterStorePort = { get, increment, };
+export const localGenerationCounterStore: GenerationCounterStorePort = { get, increment

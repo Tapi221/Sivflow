@@ -79,4 +79,3 @@ export const createOrderedOptimistically = async <T>({ entities, setOptimisticEn
     );
     throw error;
   }
-};

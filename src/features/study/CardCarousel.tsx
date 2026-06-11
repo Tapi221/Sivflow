@@ -62,4 +62,3 @@ export const CardCarousel = ({ cards, mode, sessionCurrentIndex, onResult, onTog
       )}
     />
   );
-};

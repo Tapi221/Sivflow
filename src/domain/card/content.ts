@@ -63,4 +63,3 @@ export const getCardCode = (card: Card, side: CardSide) => { const codeBlock = g
       block.type === "code" && !!block.code,
   );
   return codeBlock?.code ?? null;
-};

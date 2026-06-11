@@ -26,4 +26,3 @@ export function VideoElementStatic( props: SlateElementProps<TVideoElement & TCa
       {props.children}
     </SlateElement>
   );
-}

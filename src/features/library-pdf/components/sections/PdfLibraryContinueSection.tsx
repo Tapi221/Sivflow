@@ -81,4 +81,3 @@ export const PdfLibraryContinueSection = ({ cardClassName, continueRows, formatD
       </div>
     </section>
   );
-};

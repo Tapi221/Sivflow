@@ -46,4 +46,3 @@ export const useTransientEmptyCalendarEvents = ( events: GoogleCalendarEvent[], 
   }, [canHoldPreviousEvents, holdMs, scopeKey]);
 
   return canHoldPreviousEvents ? snapshot.events : events;
-};

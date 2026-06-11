@@ -83,4 +83,3 @@ export const getCalendarPrintRangeLabel = (range: CalendarDateRange, mode: Calen
   if (mode === "current") return `${getCurrentRangeLabel(primaryViewMode)} / ${startLabel} - ${endLabel}`;
 
   return `${startLabel} - ${endLabel}`;
-};

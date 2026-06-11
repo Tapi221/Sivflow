@@ -116,4 +116,4 @@ export type GCalSyncEngineOptions = { accountId?: string;
 export type GCalSyncStartContext = { accessToken: string;
   selectedCalendarIds: Set<string>;
   calendars: GoogleCalendarListItem[];
-};
+}

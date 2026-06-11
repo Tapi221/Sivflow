@@ -39,4 +39,4 @@ export const denormalizeCardForStorage = ( value: Partial<Card> | StorageLike, )
   return cleanupLegacyCardStorageFields(record);
 };
 
-export const normalizeCardFromStorage = (value: unknown): Card => normalizeCard(value);
+export const normalizeCardFromStorage = (value: unknown): Card => normalizeCard(value

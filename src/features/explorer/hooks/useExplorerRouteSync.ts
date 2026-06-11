@@ -150,4 +150,3 @@ export const useExplorerRouteSync = ({ route, isHomeOnlyMode, isSectionListMode,
     selectedFolderId,
     selectedItem,
   ]);
-};

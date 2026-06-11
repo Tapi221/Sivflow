@@ -125,6 +125,3 @@ export const MediaEmbedElement = withHOC( ResizableProvider, function MediaEmbed
           {props.children}
         </PlateElement>
       </MediaToolbar>
-    );
-  }
-);

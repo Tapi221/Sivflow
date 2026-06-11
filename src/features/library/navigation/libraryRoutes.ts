@@ -49,4 +49,3 @@ export const buildLibraryTypePath = (libraryType: string): string => { if (libra
   }
 
   return LIBRARY_ROOT_PATH;
-};

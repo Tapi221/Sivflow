@@ -251,4 +251,3 @@ export const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => { i
   }
 
   return validation.value;
-};

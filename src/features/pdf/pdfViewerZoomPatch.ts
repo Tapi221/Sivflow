@@ -188,4 +188,4 @@ const applyPdfViewerZoomPatch = (): void => {
 
 
 
-export { applyPdfViewerZoomPatch };
+export { applyPdfViewerZoomPa

@@ -68,4 +68,3 @@ export const appendSelectionCaptureBlocks = ({ blocks, side, image, ocrText, }: 
   }
 
   return nextBlocks.map((block, index) => ({ ...block, orderIndex: index }));
-};

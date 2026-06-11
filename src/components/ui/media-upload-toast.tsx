@@ -68,5 +68,4 @@ const useUploadErrorToast = () => {
         break;
       }
     }
-  }, [uploadError]);
-};
+  }, [uploadError])

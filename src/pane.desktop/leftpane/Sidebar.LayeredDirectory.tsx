@@ -24,8 +24,6 @@ import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/us
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 
-
-
 type IconProps = {
   className?: string;
 };
@@ -57,8 +55,6 @@ type SidebarLayeredDirectoryProps = {
   onToggleLeftPanel?: () => void;
   onOpenSettings?: () => void;
 };
-
-
 
 const WORKSPACE_OWNER_FALLBACK_NAME = "Akari T";
 
@@ -114,8 +110,6 @@ const PROJECT_ADD_MENU_HEIGHT = PROJECT_ADD_MENU_ITEM_DEFINITIONS.length * RIGHT
 const EMPTY_COLLECTION: never[] = [];
 
 const OPENABLE_ENTITY_SELECTOR = "[data-directory-entity-kind='cardSet'], [data-directory-entity-kind='document'], [data-directory-entity-kind='note']";
-
-
 
 const getFolderName = (folder: FolderTreeNode): string => {
   const name = folder.folderName ?? folder.folder_name;
@@ -185,8 +179,6 @@ const scheduleLeftPanelClose = (onToggleLeftPanel?: () => void) => {
   if (!onToggleLeftPanel) return;
   window.setTimeout(onToggleLeftPanel, 0);
 };
-
-
 
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 
@@ -432,7 +424,5 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
     </div>
   );
 };
-
-
 
 export { LibraryHierarchySidebar, ProjectListSidebar, SidebarLayeredDirectory, TagTreeSidebar };

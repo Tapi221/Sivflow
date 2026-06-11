@@ -434,4 +434,3 @@ export const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, c
       </DialogContent>
     </Dialog>
   );
-};

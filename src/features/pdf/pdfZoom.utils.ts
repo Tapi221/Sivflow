@@ -65,4 +65,3 @@ export const resolveTrackpadDeltaYForScaleRatio = ({ scaleRatio, sensitivity }: 
   if (!Number.isFinite(sensitivity) || sensitivity <= 0) return null;
 
   return -Math.log(scaleRatio) / sensitivity;
-};

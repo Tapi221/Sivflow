@@ -413,4 +413,4 @@ export const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToke
 
 
 
-export const refreshConnectedServiceAccessToken = refreshCalendarAccessToken;
+export const refreshConnectedServiceAccessToken = refreshCalend

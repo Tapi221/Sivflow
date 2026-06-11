@@ -238,4 +238,3 @@ export const useCardSetViewZoomInput = ({ containerRef, enabled = true, zoomPerc
       gestureStartPresentationWidthRef.current = null;
     };
   }, [commitZoomPercent, containerRef, enabled]);
-};

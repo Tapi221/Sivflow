@@ -64,5 +64,4 @@ export function SuggestionLeafStatic(props: SlateLeafProps<TSuggestionText>) { c
     >
       {props.children}
     </SlateLeaf>
-  );
-}
+ 

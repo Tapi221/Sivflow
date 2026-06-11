@@ -24,4 +24,3 @@ export const useCardSetViewWindowEvents = ({ handleToggleViewMode, createAndFocu
       },
     );
   }, [createAndFocusCard]);
-};

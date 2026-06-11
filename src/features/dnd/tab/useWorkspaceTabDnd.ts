@@ -98,4 +98,3 @@ export const useWorkspaceTabDnd = ({ tabs, reorderTabs, onDragStart, }: UseWorks
     suppressNextTabClick,
     tabsListRef,
   };
-};

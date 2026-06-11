@@ -87,4 +87,3 @@ export const useSyncedHorizontalScroll = ({ primaryRef, syncedRefs, syncKey, }: 
       }
     };
   }, [primaryRef, syncedRefs, syncKey]);
-};
