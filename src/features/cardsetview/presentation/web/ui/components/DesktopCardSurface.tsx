@@ -9,8 +9,6 @@ import { useFlashcardDualDerived } from "@/components/card/frame/useFlashcardDua
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 interface DesktopCardSurfaceProps {
   card: Card;
   isActive: boolean;
@@ -27,8 +25,6 @@ interface DesktopCardSurfaceProps {
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
 }
-
-
 
 const areDesktopCardSurfacePropsEqual = (
   prev: DesktopCardSurfaceProps,
@@ -64,8 +60,6 @@ const areDesktopCardSurfacePropsEqual = (
 
   return true;
 };
-
-
 
 const DesktopCardSurfaceInner = ({
   card,
@@ -242,14 +236,10 @@ const DesktopCardSurfaceInner = ({
   );
 };
 
-
-
 const DesktopCardSurface = React.memo(
   DesktopCardSurfaceInner,
   areDesktopCardSurfacePropsEqual,
 );
 DesktopCardSurface.displayName = "DesktopCardSurface";
 export { DesktopCardSurface };
-
-
 export type { DesktopCardSurfaceProps };
