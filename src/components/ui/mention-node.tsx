@@ -14,9 +14,9 @@ import { PlateElement, useFocused, useReadOnly, useSelected, } from 'platejs/rea
 
 import { cn } from '@/lib/utils';
 
-import { useMounted } from '@/components/use-mounted';
+import { useMounted } from '@/hooks/use-mounted';
 
-import { inlineSuggestionVariants } from '@/components/suggestion';
+import { inlineSuggestionVariants } from '@/lib/suggestion';
 
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem, } from './inline-combobox';
 

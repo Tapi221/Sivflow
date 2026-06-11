@@ -1,11 +1,16 @@
 import React from "react";
 import { ExplorerChromeCardSetIcon } from "@/components/explorer/icons";
 import { buildEntityRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
-import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
 import { ChevronDown, ChevronRight } from "@/ui/icons";
 import { EXPLORER_ROW_CONTENT_CLASS, EXPLORER_ROW_ICON_SLOT_CLASS, EXPLORER_ROW_INPUT_CLASS, EXPLORER_ROW_LEADING_SLOT_CLASS, EXPLORER_ROW_TITLE_SLOT_CLASS, FOLDER_ROW_ICON_ACTIVE_CLASS, FOLDER_ROW_ICON_MUTED_CLASS, FOLDER_ROW_ICON_SIZE_CLASS, FOLDER_ROW_TITLE_CLASS } from "./shared";
 import { SidebarEntityRow } from "./SidebarEntityRow";
 import { cn } from "@/lib/utils";
+
+type TreeNode = {
+  rawId: string;
+  name: string;
+  children?: TreeNode[];
+};
 
 interface CardSetRowProps {
   treeNode: TreeNode & { kind: "cardSet" };

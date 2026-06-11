@@ -14,7 +14,7 @@ import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuItem, Con
 
 import { setBlockType } from '@/components/editor/transforms';
 
-import { useIsTouchDevice } from '@/components/use-is-touch-device';
+import { useIsTouchDevice } from '@/hooks/use-is-touch-device';
 
 type Value = 'askAI' | null;
 

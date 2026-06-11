@@ -18,7 +18,7 @@ import { type TDiscussion, discussionPlugin, } from '@/components/editor/plugins
 
 import { Comment, CommentCreateForm, formatCommentDate } from './comment';
 
-import { BLOCK_SUGGESTION_TOKEN, type ResolvedSuggestion, } from '@/components/block-discussion-index';
+import { BLOCK_SUGGESTION_TOKEN, type ResolvedSuggestion, } from '@/lib/block-discussion-index';
 
 export function BlockSuggestionCard({ idx, isLast, suggestion, }: { idx: number;
   isLast: boolean;

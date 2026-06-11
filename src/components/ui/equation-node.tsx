@@ -22,7 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger, } from './popover';
 
 import { cn } from '@/lib/utils';
 
-import { inlineSuggestionVariants } from '@/components/suggestion';
+import { inlineSuggestionVariants } from '@/lib/suggestion';
 
 const EquationInput = createPrimitiveComponent(TextareaAutosize)({
   propsHook: useEquationInput,

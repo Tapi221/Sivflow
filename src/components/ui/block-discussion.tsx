@@ -26,7 +26,7 @@ import { commentPlugin } from '@/components/editor/plugins/comment-kit';
 
 import type { TDiscussion } from '@/components/editor/plugins/discussion-kit';
 
-import { useBlockDiscussionItems } from '@/components/block-discussion-index';
+import { useBlockDiscussionItems } from '@/lib/block-discussion-index';
 
 import { suggestionPlugin } from '@/components/editor/plugins/suggestion-kit';
 

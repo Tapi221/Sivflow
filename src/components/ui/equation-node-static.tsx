@@ -8,7 +8,7 @@ import { RadicalIcon } from 'lucide-react';
 import { SlateElement } from 'platejs/static';
 
 import { cn } from '@/lib/utils';
-import { inlineSuggestionVariants } from '@/components/suggestion';
+import { inlineSuggestionVariants } from '@/lib/suggestion';
 
 export function EquationElementStatic( props: SlateElementProps<TEquationElement> ) { const { element } = props;
 

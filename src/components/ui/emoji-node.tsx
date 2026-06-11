@@ -10,7 +10,7 @@ import { EmojiPlugin } from '@platejs/emoji/react';
 
 import { PlateElement, usePluginOption } from 'platejs/react';
 
-import { useDebounce } from '@/components/use-debounce';
+import { useDebounce } from '@/hooks/use-debounce';
 
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from './inline-combobox';
 
