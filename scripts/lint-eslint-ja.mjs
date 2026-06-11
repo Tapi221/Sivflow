@@ -9,6 +9,7 @@ const ESLINT_COMMAND_ARGS = [ESLINT_BIN_PATH, ".", ...process.argv.slice(2), "--
 const SHOULD_FIX = process.argv.includes("--fix");
 const SOURCE_CONVENTION_FIX_SCRIPT_PATHS = [
   path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-import-spacing.mjs"),
+  path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-strict-equality.mjs"),
   path.resolve(REPOSITORY_ROOT, "scripts/fix-src-import-paths.mjs"),
 ];
 const SEVERITY_LABELS = new Map([
@@ -17,6 +18,7 @@ const SEVERITY_LABELS = new Map([
 ]);
 const KNOWN_RULE_MESSAGES = new Map([
   ["@typescript-eslint/no-empty-object-type", "`{}` 型は 0 や空文字列などの null/undefined 以外の値も許容します。オブジェクトだけを表したい場合は `object`、任意の値を表したい場合は `unknown` を使ってください。"],
+  ["eqeqeq", "等価比較では `==` / `!=` ではなく `===` / `!==` を使ってください。"],
   ["no-empty", "空のブロック文です。処理が不要な場合は理由をコメントで明示してください。"],
   ["no-var", "`var` は使用禁止です。再代入が不要なら `const`、再代入が必要なら `let` を使ってください。"],
   ["prefer-const", "再代入されない `let` は使わず、`const` を使ってください。"],
