@@ -102,4 +102,3 @@ export const useCardSetViewQuery = ({ cardSetId, }: UseCardSetViewQueryOptions):
     reorderCardsInCardSet,
     isLoading: cardSetLoading || foldersLoading || cardsLoading,
   };
-};

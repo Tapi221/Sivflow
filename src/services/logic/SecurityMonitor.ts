@@ -5,8 +5,6 @@ import type { SecurityState as SyncSecurityState } from "@/services/interfaces/I
 import { getSecurityEventCatalogEntry } from "./securityEventCatalog";
 import type { SecurityEventType, SecurityLog, SecurityMetadata } from "@/types/domain/telemetry";
 
-
-
 interface SecurityAlert {
   id: string;
   type: string;

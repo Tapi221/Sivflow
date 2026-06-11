@@ -471,6 +471,4 @@ export function FootnoteInputElement(props: PlateElementProps) { const { editor,
       </InlineCombobox>
 
       {props.children}
-    </PlateElement>
-  );
-}
+    </Plat

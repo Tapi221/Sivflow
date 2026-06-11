@@ -11,4 +11,3 @@ export type CalendarSelection = { selectedKey: string;
 
 export const useCalendarSelection = ( selectedDate: Date, today: Date, ): CalendarSelection => { return useMemo(() => { return { selectedKey: toDateKey(selectedDate), todayKey: toDateKey(today), };
   }, [selectedDate, today]);
-};

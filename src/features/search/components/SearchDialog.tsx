@@ -156,4 +156,3 @@ export const SearchDialog = () => { useSearchHotkey();
       </DialogContent>
     </Dialog>
   );
-};

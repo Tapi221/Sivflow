@@ -71,4 +71,3 @@ export const useSyncSettings = () => { const { currentUser } = useAuthSession();
   );
 
   return { settings, loading, updateSettings, reloadSettings: loadSettings };
-};

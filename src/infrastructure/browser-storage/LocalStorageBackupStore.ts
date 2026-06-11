@@ -122,4 +122,4 @@ const clearBackups = (): void => {
 
 
 
-export const localStorageBackupStore: BackupStorePort = { isAvailable: isStorageAvailable, loadBackups, saveBackups, saveLastBackupAt, getLastBackupAt, clearBackups, };
+export const localStorageBackupStore: BackupStorePort = { isAvailable: isStorageAvailable, loadBackups, saveBackups, saveLastBackupAt, getLastBackupAt, clearBackups, 

@@ -151,4 +151,3 @@ export const usePersistentMultiAccountGoogleCalendar = () => { const google = us
     ...google,
     events,
   };
-};

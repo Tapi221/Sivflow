@@ -74,4 +74,3 @@ export const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<numbe
   const hydratedAccounts = await Promise.all(missingAccounts.map(hydrateServerAccount));
   writeStoredAccounts([...localAccounts, ...hydratedAccounts]);
   return hydratedAccounts.length;
-};

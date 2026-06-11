@@ -204,4 +204,3 @@ export const rankSearchResults = ({ items, query, limit = 24, }: RankSearchResul
     .sort(compareRankedItems)
     .slice(0, limit)
     .map(({ item }) => item);
-};

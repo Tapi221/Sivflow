@@ -35,4 +35,3 @@ export function MentionElementStatic( props: SlateElementProps<TMentionElement> 
       {element.value}
     </SlateElement>
   );
-}

@@ -11,11 +11,7 @@ export type CalendarRecurrenceRule = { frequency: CalendarRecurrenceFrequency;
   monthsOfYear?: number[];
 };
 
-
-
 export const CALENDAR_RECURRENCE_FREQUENCIES: readonly CalendarRecurrenceFrequency[] = ["daily", "weekly", "monthly", "yearly"];
-
-
 
 const clampPositiveInteger = (value: number | undefined): number | undefined => {
   if (value === undefined || !Number.isFinite(value)) return undefined;

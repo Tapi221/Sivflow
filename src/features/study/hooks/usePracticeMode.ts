@@ -161,4 +161,3 @@ export const usePracticeMode = ({ finalRatingByCardId, sourceSessionId, isPracti
     handlePracticeContinueRound,
     handlePracticeExit,
   };
-};

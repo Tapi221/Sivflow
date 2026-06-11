@@ -126,4 +126,3 @@ export const buildCardSetViewBreadcrumbs = ({ folderId, selectedCardSet, selecte
   }
 
   return crumbs;
-};

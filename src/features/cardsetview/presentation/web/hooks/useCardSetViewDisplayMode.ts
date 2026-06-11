@@ -53,4 +53,3 @@ export const useCardSetViewDisplayMode = ({ cardSetId, defaultDisplayMode, }: Us
     currentDisplayMode,
     setCurrentDisplayMode,
   };
-};

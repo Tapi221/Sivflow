@@ -45,4 +45,4 @@ const waitForPdfLoadingTask = async <T>(
 
 
 
-export { DEFAULT_PDF_LOAD_TIMEOUT_MS, PDF_LOAD_TIMEOUT_ERROR_MESSAGE, waitForPdfLoadingTask };
+export { DEFAULT_PDF_LOAD_TIMEOUT_MS, PDF_LOAD_TIMEOUT_ERROR_MESSAGE, waitForPdfLoadingTa

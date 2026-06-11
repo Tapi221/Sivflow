@@ -28,6 +28,8 @@ type WeekdayHourLabelMode = "full" | "integer";
 
 
 
+
+
 //Month
 export const MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS = "h-8";
 export const MONTH_GRID_DAY_HEADER_POSITION_CLASS = "left-0 top-0 md:left-3 md:top-1";
@@ -77,4 +79,4 @@ export const WEEKDAY_HOUR_LABEL_PADDING_RIGHT = "0.625rem";
 export const WEEKDAY_HOUR_LABEL_FONT_SIZE = "11px";
 
 // misc layout
-export const WEEKDAY_EVENT_CHIP_PADDING_X = 2;
+export const WEEKDAY_EVENT_CHIP_PADDING_X = 

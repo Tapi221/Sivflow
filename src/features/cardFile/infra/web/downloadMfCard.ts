@@ -36,4 +36,3 @@ export const downloadBytesAsMfCard = ({ bytes, cardName, }: { bytes: Uint8Array;
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(url);
-};

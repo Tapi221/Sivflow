@@ -250,4 +250,3 @@ export const denormalizeUploadedImages = ( images: Array<{ id: string;
   options: DenormalizeUploadedImageOptions = {},
 ) => {
   return images.map((image) => denormalizeUploadedImage(image, options));
-};

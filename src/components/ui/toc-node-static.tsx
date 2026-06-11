@@ -142,5 +142,4 @@ export function TocElementDocx(props: SlateElementProps) { const { editor } = pr
       </div>
       {props.children}
     </SlateElement>
-  );
-}
+  )

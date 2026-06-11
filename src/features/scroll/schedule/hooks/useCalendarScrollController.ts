@@ -190,4 +190,3 @@ export const useCalendarScrollController = ({ selectedViewMode, visibleDays, vir
     allDayScrollRef,
     handleScroll: undefined,
   };
-};

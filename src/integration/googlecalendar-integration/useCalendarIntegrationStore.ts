@@ -41,4 +41,3 @@ export const useCalendarIntegrationStore = create<CalendarIntegrationStore>()( p
       }),
     },
   ),
-);

@@ -29,4 +29,3 @@ const waitForCallableAuth = async (): Promise<void> => {
 export const listServerStoredGoogleCalendarAccounts = async (): Promise<ListGoogleCalendarAccountsOutput["accounts"]> => { await waitForCallableAuth();
   const result = await listGoogleCalendarAccountsCallable();
   return result.data.accounts;
-};

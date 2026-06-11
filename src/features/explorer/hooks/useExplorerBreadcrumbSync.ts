@@ -42,4 +42,3 @@ export const useExplorerBreadcrumbSync = ({ selectedFolderId, selectedItem, expl
   useLayoutEffect(() => {
     setExtraCrumbs(extraCrumbs);
   }, [extraCrumbs, setExtraCrumbs]);
-};

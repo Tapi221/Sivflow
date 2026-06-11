@@ -497,4 +497,3 @@ export const normalizeCard = (raw: unknown): Card => { const record = asRecord(r
   if (inkDocument !== undefined) normalized.inkDocument = inkDocument;
 
   return normalized;
-};

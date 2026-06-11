@@ -11,4 +11,3 @@ type WorkspaceShellProps = {
 
 
 export const WorkspaceShell = ({ children, isScrollLocked, mainRef, }: WorkspaceShellProps) => { return ( <div className="workspace-shell app-layout__content workspace-shell--without-tabs"> <main ref={mainRef} className={[ "workspace-shell__main app-layout__main", isScrollLocked ? "app-layout__main--locked" : "", ] .filter(Boolean) .join(" ")} > {children} </main> </div> );
-};

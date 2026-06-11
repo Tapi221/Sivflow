@@ -21,4 +21,3 @@ export const useIsMobile = () => { const subscribe = React.useCallback((onStoreC
   );
 
   return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-};

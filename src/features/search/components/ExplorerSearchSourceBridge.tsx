@@ -44,4 +44,3 @@ export const ExplorerSearchSourceBridge = ({ folders, cards, cardSets, documents
   }, [items, registerSource, unregisterSource]);
 
   return null;
-};

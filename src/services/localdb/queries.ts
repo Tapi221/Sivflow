@@ -42,8 +42,6 @@ type MutableDocumentBlobFields = {
   blobUrl?: string | null;
 };
 
-
-
 export const getItem = async (db: QueryDb, table: string, id: string) => { const item = await db.table(table).get(id);
   if (table === "cards") return item ? normalizeCard(item) : item;
   if (table === "folders") return item ? normalizeFolderWithSilent(item) : item;

@@ -59,4 +59,3 @@ export const getImageFromFirestore = async ({ imageId, userId, }: { imageId: str
 
     throw error;
   }
-};

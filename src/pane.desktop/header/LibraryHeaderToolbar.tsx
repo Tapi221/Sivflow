@@ -3,8 +3,6 @@ import { Fragment, type ComponentType, type ReactNode, type SVGProps } from "rea
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 
-
-
 export type LibraryHeaderToolbarIconProps = SVGProps<SVGSVGElement> & { className?: string;
 };
 
@@ -39,8 +37,6 @@ type LibraryHeaderToolbarProps = {
   variant?: LibraryHeaderToolbarVariant;
 };
 
-
-
 const WORKSPACE_TAB_INDICATOR_ID = "workspace-header-toolbar-tab-indicator";
 const WORKSPACE_TAB_MOTION_TRANSITION: Transition = {
   type: "tween",
@@ -62,8 +58,6 @@ const segmentedActionButtonClassName = cn(
 
 const segmentedActionIconClassName =
   "block h-4 w-4 shrink-0 text-current transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none";
-
-
 
 export const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions, actions, variant = "underline", }: LibraryHeaderToolbarProps) => { const hasTabs = tabs.length > 0;
   const hasSecondaryTabs = Boolean(secondaryTabs && secondaryTabs.length > 0);

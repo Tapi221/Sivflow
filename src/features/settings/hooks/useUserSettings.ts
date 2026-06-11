@@ -207,5 +207,4 @@ export const useUserSettings = () => { const { currentUser } = useAuthSession();
   return {
     settings,
     updateSettings,
-  };
-};
+  

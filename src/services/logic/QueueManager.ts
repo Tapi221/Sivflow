@@ -3,13 +3,9 @@ import type { BatchConstraint, IQueueManager, SyncTask } from "@/services/interf
 import type { LocalDBLike } from "@/services/localdb";
 import type { SyncQueueItem } from "@/types/domain/sync";
 
-
-
 type QueueReadableLocalDB = LocalDBLike & {
   getQueuedItemsOldestFirst?: () => Promise<SyncQueueItem[]>;
 };
-
-
 
 const PRIORITY_ORDER: Record<SyncTask["priority"], number> = {
   critical: 0,
@@ -19,8 +15,6 @@ const PRIORITY_ORDER: Record<SyncTask["priority"], number> = {
 };
 
 const DELETE_OPERATION_TYPE = "delete";
-
-
 
 export class QueueManager implements IQueueManager { private readonly MAX_RETRY_COUNT = 3;
   private readonly BASE_RETRY_DELAY_MS = 5_000;

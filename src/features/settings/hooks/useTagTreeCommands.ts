@@ -50,4 +50,3 @@ export const useTagTreeCommands = (tagById: ReadonlyMap<string, TagRecord>) => {
   }, [currentUser, tagById]);
 
   return { setTagTreePosition };
-};

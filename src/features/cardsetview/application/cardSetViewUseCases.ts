@@ -83,4 +83,3 @@ export const toggleCardBookmark = async ({ card, updateCard, }: ToggleCardFlagOp
 };
 
 export const saveDefaultDisplayMode = async ({ cardSetId, currentDisplayMode, updateCardSet, }: SaveDefaultDisplayModeOptions): Promise<void> => { await updateCardSet(cardSetId, { defaultDisplayMode: normalizeCardDisplayMode(currentDisplayMode), });
-};

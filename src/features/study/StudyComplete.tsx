@@ -131,4 +131,3 @@ export const StudyComplete = ({ ratingTiles, ratingCounts, isPracticeFeatureEnab
       </Card>
     </div>
   );
-};

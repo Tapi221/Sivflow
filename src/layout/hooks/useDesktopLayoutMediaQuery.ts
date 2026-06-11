@@ -32,4 +32,3 @@ export const useDesktopLayoutMediaQuery = () => { const [matchesDesktopLayout, s
   }, []);
 
   return matchesDesktopLayout;
-};

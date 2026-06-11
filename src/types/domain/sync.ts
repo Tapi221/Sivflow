@@ -185,6 +185,4 @@ export interface SyncResult { success: boolean;
   errors: string[];
 }
 
-
-
 export const DEFAULT_SYNC_SETTINGS: SyncSettings = { id: "default", autoSync: true, intervalMinutes: 5, wifiOnly: false, autoCleanupDevices: true, };

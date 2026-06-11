@@ -81,4 +81,3 @@ export function TableCellElementStatic({ isHeader, ...props }: SlateElementProps
 }
 
 export function TableCellHeaderElementStatic( props: SlateElementProps<TTableCellElement> ) { return <TableCellElementStatic {...props} isHeader />;
-}

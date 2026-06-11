@@ -98,4 +98,3 @@ export const createCalendarYearEventDisplayResolver = ({ appProjects, projectCal
       },
     };
   };
-};

@@ -3,14 +3,10 @@ import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { useT } from "@shared/i18n/useT";
 import "./sidebar.desktop.css";
 
-
-
 type SidebarCollapsedToggleProps = {
   isVisible: boolean;
   onToggleLeftPanel: () => void;
 };
-
-
 
 const SidebarCollapsedToggleBase = ({ isVisible, onToggleLeftPanel }: SidebarCollapsedToggleProps) => {
   const t = useT();
@@ -23,8 +19,6 @@ const SidebarCollapsedToggleBase = ({ isVisible, onToggleLeftPanel }: SidebarCol
     </button>
   );
 };
-
-
 
 SidebarCollapsedToggleBase.displayName = "SidebarCollapsedToggleBase";
 

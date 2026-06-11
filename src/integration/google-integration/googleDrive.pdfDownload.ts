@@ -42,4 +42,3 @@ export const downloadPdfFromGoogleDrive = async ({ accessToken, fileId }: Google
   if (!response.ok) throw new Error(await readGoogleDriveErrorMessage(response));
 
   return normalizePdfBlob(await response.blob());
-};

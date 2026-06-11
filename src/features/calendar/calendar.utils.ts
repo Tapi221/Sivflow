@@ -135,4 +135,4 @@ const getStreakFromLogs = (logs: CalendarStudyLogLike[]) => {
 
 
 
-export { buildStudyDateSet, getArrowDayDiff, getCalendarIntensity, getLogDate, getStreakFromLogs, getTodayDescription, getWeekDays, isFocusableInputTarget, normalizeDateOnly, toDate, toDateKey };
+export { buildStudyDateSet, getArrowDayDiff, getCalendarIntensity, getLogDate, getStreakFromLogs, getTodayDescription, getWeekDays, isFocusableInputTarget, normalizeDateOnly, toDate, toDate

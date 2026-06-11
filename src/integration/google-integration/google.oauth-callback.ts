@@ -228,4 +228,3 @@ export const renderGoogleOAuthCallback = (): boolean => { if (typeof window === 
   renderMessage(text);
   notifyCallbackPayload(payload);
   return true;
-};

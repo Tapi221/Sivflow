@@ -113,5 +113,4 @@ export const DesktopWindowControls = () => { const isDesktop = hasDesktopBridge(
         <span className="desktop-window-controls__close" aria-hidden />
       </button>
     </div>
-  );
-};
+  

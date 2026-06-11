@@ -153,4 +153,3 @@ export const selectCombinedSelectedCalendarIds = ( accounts: Array<{ selectedCal
   }
 
   return set;
-};

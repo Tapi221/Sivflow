@@ -55,5 +55,4 @@ export function ResizeHandle({ className, options, ...props }: React.ComponentPr
   );
 }
 
-export function Resizable({ align, className, ...props }: React.ComponentProps<typeof ResizablePrimitive> & VariantProps<typeof resizableVariants>) { return ( <ResizablePrimitive {...props} className={cn(resizableVariants({ align }), className)} /> );
-}
+export function Resizable({ align, className, ...props }: React.ComponentProps<typeof ResizablePrimitive> & VariantProps<typeof resizableVariants>) { return ( <ResizablePrimitive {...props} className={cn(resizableVariants({ align }), className)} 

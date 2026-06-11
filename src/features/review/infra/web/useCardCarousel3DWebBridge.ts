@@ -138,4 +138,3 @@ export const useCardCarousel3DWebBridge = ({ activeIndex, itemCount, itemSpan, s
     trackRef,
     updateStageHeight,
   };
-};

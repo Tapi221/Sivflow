@@ -2,15 +2,11 @@ import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 import { type CardLayoutMode, type CardSetInteractionMode, normalizeCardLayoutMode, resolveDefaultCardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 export interface CardLayoutModePreferenceScope { deviceScope: string;
   cardSetId: string | null | undefined;
   displayMode: CardDisplayMode;
   interactionMode: CardSetInteractionMode;
 }
-
-
 
 const normalizeDeviceScope = (value: string | null | undefined) => {
   const trimmed = typeof value === "string" ? value.trim() : "";
