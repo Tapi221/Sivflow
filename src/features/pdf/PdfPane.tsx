@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type ComponentType, type KeyboardEvent as ReactKeyboardEvent, type SVGProps } from "react";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
 import { EventBus, PDFLinkService, PDFViewer, RenderingStates } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
 import "pdfjs-dist/legacy/web/pdf_viewer.css";
+import * as stratisIcons from "stratis-ui-icons";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import { hasDesktopRuntime } from "@/platform/detectDesktopBridge";
@@ -14,14 +15,6 @@ import { getPdfPageWindowKeepSet, getSafePdfPageNumber, type PdfPageWindowMetric
 import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "./pdfPerformance";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
 import "./PdfPane.css";
-
-
-
-
-
-
-
-
 
 type PdfPaneProps = {
   source: PdfDocumentSource | null;
@@ -118,14 +111,12 @@ type PdfZoomCommit = {
   pageNumbers: Set<number>;
 };
 
+type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
+type StratisOptionalIconProps = { names: readonly string[]; className?: string; active?: boolean };
 
-
-
-
-
-
-
+const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
+const STRATIS_BOOKMARK_ICON_NAMES = ["StratisBookmarkIcon", "StratisBookmark01Icon", "StratisBookOpenBookmarkIcon", "StratisStarIcon", "StratisStar01Icon", "StratisStar02Icon"] as const;
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 640;
 const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 500;
 const PDF_HISTORY_LIMIT = 80;
@@ -149,15 +140,9 @@ const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
 
-
-
-
-
-
-
-
-
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+
+const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 
 const getTrimmedHistory = (pages: number[]): number[] => {
   return pages.slice(-PDF_HISTORY_LIMIT);
@@ -468,13 +453,16 @@ const createDefaultToolbarState = (): PdfToolbarState => ({
   isBookmarked: false,
 });
 
+const StratisFallbackBookmarkIcon = ({ className, active }: { className?: string; active?: boolean }) => (
+  <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6.5 4.25C6.5 3.56 7.06 3 7.75 3h8.5c.69 0 1.25.56 1.25 1.25v16.1l-5.5-3.3-5.5 3.3V4.25Z" />
+  </svg>
+);
 
-
-
-
-
-
-
+const StratisOptionalIcon = ({ names, className, active = false }: StratisOptionalIconProps) => {
+  const Icon = resolveStratisIcon(names);
+  return Icon ? <Icon className={className} aria-hidden="true" focusable="false" /> : <StratisFallbackBookmarkIcon className={className} active={active} />;
+};
 
 const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadError, onViewerStateChange }: PdfPaneProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -1090,8 +1078,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
           幅
         </button>
         <span className="pdf-pane__toolbar-separator" aria-hidden="true" />
-        <button className={PDF_TOOLBAR_BUTTON_CLASS_NAME} type="button" onClick={toggleBookmark} disabled={!isReady} aria-pressed={toolbarState.isBookmarked}>
-          {toolbarState.isBookmarked ? "★" : "☆"}
+        <button className={PDF_TOOLBAR_BUTTON_CLASS_NAME} type="button" onClick={toggleBookmark} disabled={!isReady} aria-pressed={toolbarState.isBookmarked} aria-label={toolbarState.isBookmarked ? "ブックマークを解除" : "ブックマークを追加"}>
+          <StratisOptionalIcon names={STRATIS_BOOKMARK_ICON_NAMES} active={toolbarState.isBookmarked} className={cn("h-4 w-4", toolbarState.isBookmarked ? "fill-current" : "fill-none")} />
         </button>
         <button className={PDF_TOOLBAR_BUTTON_CLASS_NAME} type="button" onClick={goBackInHistory} disabled={!isReady || (viewerState?.history?.length ?? 0) < 2}>
           戻る
@@ -1116,13 +1104,5 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     </section>
   );
 };
-
-
-
-
-
-
-
-
 
 export { PdfPane };
