@@ -20,7 +20,7 @@ const buttonVariants = cva("rounded bg-[rgba(0,0,0,0.5)] px-1", {
 const SCROLL_SPEED = 4;
 const DEFAULT_DOWNLOAD_FILENAME = "image";
 
-function getImageDownloadFilename(url: string) {
+const getImageDownloadFilename = (url: string) => {
   try {
     const pathname = new URL(url, window.location.href).pathname;
     const filename = pathname.split("/").filter(Boolean).pop();
@@ -29,9 +29,9 @@ function getImageDownloadFilename(url: string) {
   } catch {
     return DEFAULT_DOWNLOAD_FILENAME;
   }
-}
+};
 
-export function MediaPreviewDialog() { const editor = useEditorRef();
+export const MediaPreviewDialog = () => { const editor = useEditorRef();
   const isOpen = useImagePreviewValue("isOpen", editor.id);
   const scale = useImagePreviewValue("scale");
   const isEditingScale = useImagePreviewValue("isEditingScale");
@@ -168,9 +168,9 @@ export function MediaPreviewDialog() { const editor = useEditorRef();
       </div>
     </div>
   );
-}
-function ScaleInput(props: React.ComponentProps<"input">) {
+};
+const ScaleInput = (props: React.ComponentProps<"input">) => {
   const { props: scaleInputProps, ref } = useScaleInput();
 
   return <input {...scaleInputProps} {...props} ref={ref} />;
-}
+};

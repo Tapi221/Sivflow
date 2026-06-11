@@ -5,7 +5,7 @@ import { BaseTablePlugin } from "@platejs/table";
 import { SlateElement } from "platejs/static";
 import { cn } from "@/lib/utils";
 
-export function TableElementStatic({ children, ...props }: SlateElementProps<TTableElement>) { const { disableMarginLeft } = props.editor.getOptions(BaseTablePlugin);
+export const TableElementStatic = ({ children, ...props }: SlateElementProps<TTableElement>) => { const { disableMarginLeft } = props.editor.getOptions(BaseTablePlugin);
   const marginLeft = disableMarginLeft ? 0 : props.element.marginLeft;
 
   return (
@@ -24,11 +24,11 @@ export function TableElementStatic({ children, ...props }: SlateElementProps<TTa
       </div>
     </SlateElement>
   );
-}
-export function TableRowElementStatic(props: SlateElementProps) { return (<SlateElement {...props} as="tr" className="h-full"> {props.children} </SlateElement>);
-}
-export function TableCellElementStatic({ isHeader, ...props }: SlateElementProps<TTableCellElement> & { isHeader?: boolean;
-}) {
+};
+export const TableRowElementStatic = (props: SlateElementProps) => { return (<SlateElement {...props} as="tr" className="h-full"> {props.children} </SlateElement>);
+};
+export const TableCellElementStatic = ({ isHeader, ...props }: SlateElementProps<TTableCellElement> & { isHeader?: boolean;
+}) => {
   const { editor, element } = props;
   const { api } = editor.getPlugin(BaseTablePlugin);
 
@@ -74,6 +74,6 @@ export function TableCellElementStatic({ isHeader, ...props }: SlateElementProps
       </div>
     </SlateElement>
   );
-}
-export function TableCellHeaderElementStatic(props: SlateElementProps<TTableCellElement>) { return <TableCellElementStatic {...props} isHeader />;
-}
+};
+export const TableCellHeaderElementStatic = (props: SlateElementProps<TTableCellElement>) => { return <TableCellElementStatic {...props} isHeader />;
+};

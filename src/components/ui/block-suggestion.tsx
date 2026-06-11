@@ -13,10 +13,10 @@ import { Comment, CommentCreateForm, formatCommentDate } from "./comment";
 import { BLOCK_SUGGESTION_TOKEN } from "@/lib/block-discussion-index";
 import type { ResolvedSuggestion } from "@/lib/block-discussion-index";
 
-export function BlockSuggestionCard({ idx, isLast, suggestion }: { idx: number;
+export const BlockSuggestionCard = ({ idx, isLast, suggestion }: { idx: number;
   isLast: boolean;
   suggestion: ResolvedSuggestion;
-}) {
+}) => {
   const { api, editor } = useEditorPlugin(SuggestionPlugin);
 
   const userInfo = usePluginOption(discussionPlugin, "user", suggestion.userId);
@@ -188,6 +188,6 @@ export function BlockSuggestionCard({ idx, isLast, suggestion }: { idx: number;
       {!isLast && <div className="h-px w-full bg-muted" />}
     </div>
   );
-}
+};
 
 export const isResolvedSuggestion = (suggestion: ResolvedSuggestion | TDiscussion): suggestion is ResolvedSuggestion => "suggestionId" in suggestion;

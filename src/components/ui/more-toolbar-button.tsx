@@ -8,7 +8,7 @@ import { useEditorRef } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
 import { ToolbarButton } from "./toolbar";
 
-export function MoreToolbarButton(props: DropdownMenuProps) { const editor = useEditorRef();
+export const MoreToolbarButton = (props: DropdownMenuProps) => { const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -63,4 +63,4 @@ export function MoreToolbarButton(props: DropdownMenuProps) { const editor = use
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};

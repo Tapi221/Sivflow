@@ -89,9 +89,8 @@ const MENTIONABLES = [
   { key: "49", text: "BT-1" },
 ];
 
-export function MentionElement(props: PlateElementProps<TMentionElement> & { prefix?: string;
-},
-) {
+export const MentionElement = (props: PlateElementProps<TMentionElement> & { prefix?: string;
+}) => {
   const { element } = props;
   const selected = useSelected();
   const focused = useFocused();
@@ -134,8 +133,8 @@ export function MentionElement(props: PlateElementProps<TMentionElement> & { pre
       )}
     </PlateElement>
   );
-}
-export function MentionInputElement(props: PlateElementProps<TComboboxInputElement>) { const { editor, element } = props;
+};
+export const MentionInputElement = (props: PlateElementProps<TComboboxInputElement>) => { const { editor, element } = props;
   const [search, setSearch] = React.useState("");
 
   return (
@@ -171,4 +170,4 @@ export function MentionInputElement(props: PlateElementProps<TComboboxInputEleme
       {props.children}
     </PlateElement>
   );
-}
+};

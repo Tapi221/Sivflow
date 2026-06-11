@@ -1136,7 +1136,7 @@ const mdxChunks = [
   ],
 ];
 
-function createChatTransport({
+const createChatTransport = ({
   api,
   abortControllerRef,
   editor,
@@ -1144,7 +1144,7 @@ function createChatTransport({
   api: string;
   abortControllerRef: React.RefObject<AbortController | null>;
   editor: PlateEditor;
-}) {
+}) => {
   return new DefaultChatTransport({
     api,
     // Mock the API response. Remove it when you implement the route /api/ai/command
@@ -1241,7 +1241,7 @@ function createChatTransport({
       return res;
     }) as typeof fetch,
   });
-}
+};
 export const useChat = () => { const editor = useEditorRef();
   const options = usePluginOption(aiChatPlugin, "chatOptions");
 

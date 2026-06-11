@@ -84,7 +84,7 @@ const BlockCommentContent = ({ children, element }: PlateElementProps) => {
     </div>
   );
 };
-function BlockComment({ discussion, isLast }: { discussion: TDiscussion; isLast: boolean; }) {
+const BlockComment = ({ discussion, isLast }: { discussion: TDiscussion; isLast: boolean; }) => {
   const [editingId, setEditingId] = React.useState<string | null>(null);
 
   return (
@@ -96,4 +96,4 @@ function BlockComment({ discussion, isLast }: { discussion: TDiscussion; isLast:
       {!isLast && <div className="h-px w-full bg-muted" />}
     </>
   );
-}
+};

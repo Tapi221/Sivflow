@@ -23,7 +23,7 @@ export const BlockListStatic: RenderStaticNodeWrapper = (props) => { if (!props.
 
   return (props) => <List {...props} />;
 };
-function List(props: SlateRenderElementProps) {
+const List = (props: SlateRenderElementProps) => {
   const { indent, listStart, listStyleType } = props.element as TListElement & {
     indent?: number;
   };
@@ -43,8 +43,8 @@ function List(props: SlateRenderElementProps) {
       {Li ? <Li {...props} /> : <li>{props.children}</li>}
     </List>
   );
-}
-function TodoMarkerStatic(props: SlateRenderElementProps) {
+};
+const TodoMarkerStatic = (props: SlateRenderElementProps) => {
   const checked = props.element.checked as boolean;
 
   return (
@@ -63,8 +63,8 @@ function TodoMarkerStatic(props: SlateRenderElementProps) {
       </button>
     </div>
   );
-}
-function TodoLiStatic(props: SlateRenderElementProps) {
+};
+const TodoLiStatic = (props: SlateRenderElementProps) => {
   return (
     <li
       className={cn(
@@ -76,4 +76,4 @@ function TodoLiStatic(props: SlateRenderElementProps) {
       {props.children}
     </li>
   );
-}
+};

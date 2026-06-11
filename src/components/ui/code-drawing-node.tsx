@@ -12,11 +12,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Popover, PopoverAnchor, PopoverContent } from "./popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 
-function createDebouncedCodeDrawingRenderer(
-  setImage: React.Dispatch<React.SetStateAction<string>>,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setError: React.Dispatch<React.SetStateAction<string | null>>,
-) {
+const createDebouncedCodeDrawingRenderer = (setImage: React.Dispatch<React.SetStateAction<string>>, setLoading: React.Dispatch<React.SetStateAction<boolean>>, setError: React.Dispatch<React.SetStateAction<string | null>>) => {
   let lastRequestId = 0;
 
   return debounce(
@@ -57,8 +53,8 @@ function createDebouncedCodeDrawingRenderer(
     },
     RENDER_DEBOUNCE_DELAY,
   );
-}
-function useCodeDrawingElement({ element }: { element: TCodeDrawingElement; }) {
+};
+const useCodeDrawingElement = ({ element }: { element: TCodeDrawingElement; }) => {
   const editor = useEditorRef();
   const readOnly = useReadOnly();
   const [loading, setLoading] = React.useState(false);
@@ -93,9 +89,9 @@ function useCodeDrawingElement({ element }: { element: TCodeDrawingElement; }) {
     image,
     removeNode,
   };
-}
+};
 
-export function CodeDrawingElement(props: PlateElementProps<TCodeDrawingElement>) { const { children } = props;
+export const CodeDrawingElement = (props: PlateElementProps<TCodeDrawingElement>) => { const { children } = props;
   const isMobile = useIsMobile();
   const editor = useEditorRef();
   const readOnly = useReadOnly();
@@ -231,8 +227,8 @@ export function CodeDrawingElement(props: PlateElementProps<TCodeDrawingElement>
       </PopoverContent>
     </Popover>
   );
-}
-function CodeDrawingPreview({
+};
+const CodeDrawingPreview = ({
   code,
   drawingType,
   drawingMode,
@@ -254,7 +250,7 @@ function CodeDrawingPreview({
   onDrawingModeChange: (mode: ViewMode) => void;
   readOnly?: boolean;
   isMobile?: boolean;
-}) {
+}) => {
   const viewMode = drawingMode;
   const showCode = viewMode === VIEW_MODE.Both || viewMode === VIEW_MODE.Code;
   const showBorder = viewMode === VIEW_MODE.Both;
@@ -310,8 +306,8 @@ function CodeDrawingPreview({
       )}
     </div>
   );
-}
-function CodeDrawingToolbar({
+};
+const CodeDrawingToolbar = ({
   drawingType,
   viewMode,
   readOnly = false,
@@ -325,7 +321,7 @@ function CodeDrawingToolbar({
   isMobile?: boolean;
   onDrawingTypeChange: (type: CodeDrawingType) => void;
   onDrawingModeChange: (mode: ViewMode) => void;
-}) {
+}) => {
   const [toolbarVisible, setToolbarVisible] = React.useState(false);
   const [languageSelectOpen, setLanguageSelectOpen] = React.useState(false);
   const [viewModeSelectOpen, setViewModeSelectOpen] = React.useState(false);
@@ -397,8 +393,8 @@ function CodeDrawingToolbar({
       )}
     </div>
   );
-}
-function CodeDrawingTextarea({
+};
+const CodeDrawingTextarea = ({
   code,
   viewMode,
   readOnly = false,
@@ -414,7 +410,7 @@ function CodeDrawingTextarea({
   showBorder?: boolean;
   onCodeChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   toolbar?: React.ReactNode;
-}) {
+}) => {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const isCodeOnlyMode = viewMode === VIEW_MODE.Code;
 
@@ -478,8 +474,8 @@ function CodeDrawingTextarea({
       </div>
     </div>
   );
-}
-function CodeDrawingPreviewArea({
+};
+const CodeDrawingPreviewArea = ({
   image,
   loading,
   code,
@@ -497,7 +493,7 @@ function CodeDrawingPreviewArea({
   isMobile?: boolean;
   showBorder?: boolean;
   toolbar?: React.ReactNode;
-}) {
+}) => {
   const showImage = viewMode === VIEW_MODE.Both || viewMode === VIEW_MODE.Image;
 
   return (
@@ -544,4 +540,4 @@ function CodeDrawingPreviewArea({
       )}
     </div>
   );
-}
+};

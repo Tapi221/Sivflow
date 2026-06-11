@@ -10,7 +10,7 @@ const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.mention,
 ];
 
-function getInlineSuggestionData(editor: any, element: TElement) {
+const getInlineSuggestionData = (editor: any, element: TElement) => {
   const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
   const data = suggestionApi.suggestionData(element) as
     | TSuggestionData
@@ -27,7 +27,7 @@ function getInlineSuggestionData(editor: any, element: TElement) {
 
     if (childData) return childData;
   }
-}
+};
 
 export const BaseSuggestionKit = [BaseSuggestionPlugin.configure({ inject: { isElement: true, nodeProps: { nodeKey: "", styleKey: "cssText", transformProps: ({ editor, element, props }) => { if (!element) return props;
 

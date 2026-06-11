@@ -69,11 +69,11 @@ migrateFromLocalStorage: async (userId: string): Promise<void> => {
 },
 };
 
-function getStoredSnapshotsFromLocalStorage(): AppSnapshot[] {
+const getStoredSnapshotsFromLocalStorage = (): AppSnapshot[] => {
   if (typeof window === "undefined") {
     return [];
   }
 
   const storedJson = localStorage.getItem(SNAPSHOTS_KEY);
   return storedJson ? (JSON.parse(storedJson) as AppSnapshot[]) : [];
-}
+};

@@ -211,7 +211,7 @@ export const BlockDraggable: RenderNodeWrapper = (props) => { const { editor, el
 
   return (props) => <Draggable {...props} />;
 };
-function Draggable(props: PlateElementProps) {
+const Draggable = (props: PlateElementProps) => {
   const { children, editor, element, path } = props;
   const blockSelectionApi = editor.getApi(BlockSelectionPlugin).blockSelection;
 
@@ -327,12 +327,12 @@ function Draggable(props: PlateElementProps) {
       </div>
     </div>
   );
-}
-function Gutter({
+};
+const Gutter = ({
   children,
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div">) => {
   const editor = useEditorRef();
   const element = useElement();
   const isSelectionAreaVisible = usePluginOption(
@@ -359,9 +359,9 @@ function Gutter({
       {children}
     </div>
   );
-}
+};
 
-const DragHandle = React.memo(function DragHandle({
+const DragHandle = React.memo(({
   isDragging,
   previewRef,
   resetPreview,
@@ -371,7 +371,7 @@ const DragHandle = React.memo(function DragHandle({
   previewRef: React.RefObject<HTMLDivElement | null>;
   resetPreview: () => void;
   setPreviewTop: (top: number) => void;
-}) {
+}) => {
   const editor = useEditorRef();
   const element = useElement();
 
@@ -472,10 +472,10 @@ const DragHandle = React.memo(function DragHandle({
     </Tooltip>
   );
 });
-const DropLine = React.memo(function DropLine({
+const DropLine = React.memo(({
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div">) => {
   const { dropLine } = useDropLine();
 
   if (!dropLine) return null;

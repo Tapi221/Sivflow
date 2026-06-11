@@ -4,7 +4,7 @@ import dedent from "dedent";
 import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction, getMarkdownWithSelection, isMultiBlocks } from "@/app/api/ai/command/utils";
 import { commonGenerateRules } from "./common";
 
-function buildGenerateFreeformPrompt(messages: ChatMessage[]) {
+const buildGenerateFreeformPrompt = (messages: ChatMessage[]) => {
   return buildStructuredPrompt({
     examples: [
       dedent`
@@ -46,8 +46,8 @@ function buildGenerateFreeformPrompt(messages: ChatMessage[]) {
       Directly produce the final result without asking for additional information.
     `,
   });
-}
-function buildGenerateContextPrompt(editor: SlateEditor, messages: ChatMessage[]) {
+};
+const buildGenerateContextPrompt = (editor: SlateEditor, messages: ChatMessage[]) => {
   if (!isMultiBlocks(editor)) {
     addSelection(editor);
   }
@@ -131,11 +131,11 @@ function buildGenerateContextPrompt(editor: SlateEditor, messages: ChatMessage[]
       Do not ask the user for additional content.
     `,
   });
-}
-export function getGeneratePrompt(editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[]; }) {
+};
+export const getGeneratePrompt = (editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[]; }) => {
   if (!isSelecting) {
     return buildGenerateFreeformPrompt(messages);
   }
 
   return buildGenerateContextPrompt(editor, messages);
-}
+};

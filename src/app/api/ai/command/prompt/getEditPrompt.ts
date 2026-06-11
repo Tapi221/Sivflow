@@ -5,7 +5,7 @@ import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUse
 import { commonEditRules } from "./common";
 import { buildEditTableMultiCellPrompt } from "./getEditTablePrompt";
 
-function buildEditMultiBlockPrompt(editor: SlateEditor, messages: ChatMessage[]) {
+const buildEditMultiBlockPrompt = (editor: SlateEditor, messages: ChatMessage[]) => {
   const selectingMarkdown = getMarkdownWithSelection(editor);
 
   return buildStructuredPrompt({
@@ -68,8 +68,8 @@ function buildEditMultiBlockPrompt(editor: SlateEditor, messages: ChatMessage[])
       Output only the rewritten Markdown.
     `,
   });
-}
-function buildEditSelectionPrompt(editor: SlateEditor, messages: ChatMessage[]) {
+};
+const buildEditSelectionPrompt = (editor: SlateEditor, messages: ChatMessage[]) => {
   addSelection(editor);
 
   const selectingMarkdown = getMarkdownWithSelection(editor);
@@ -198,8 +198,8 @@ function buildEditSelectionPrompt(editor: SlateEditor, messages: ChatMessage[]) 
       Output only the replacement for the selected text.
     `,
   });
-}
-export function getEditPrompt(editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[]; }): [string, "table" | "multi-block" | "selection"] {
+};
+export const getEditPrompt = (editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[]; }): [string, "table" | "multi-block" | "selection"] => {
   if (!isSelecting) throw new Error("Edit tool is only available when selecting");
 
   if (isSelectionInTable(editor) && !isSingleCellSelection(editor)) {
@@ -211,4 +211,4 @@ export function getEditPrompt(editor: SlateEditor, { isSelecting, messages }: { 
   }
 
   return [buildEditSelectionPrompt(editor, messages), "selection"];
-}
+};

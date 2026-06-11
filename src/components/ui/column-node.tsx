@@ -19,7 +19,7 @@ import { Separator } from "./separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 import { cn } from "@/lib/utils";
 
-export const ColumnElement = withHOC(ResizableProvider, function ColumnElement(props: PlateElementProps<TColumnElement>) { const { width } = props.element;
+export const ColumnElement = withHOC(ResizableProvider, (props: PlateElementProps<TColumnElement>) => { const { width } = props.element;
   const readOnly = useReadOnly();
   const isSelectionAreaVisible = usePluginOption(
     BlockSelectionPlugin,
@@ -73,7 +73,7 @@ export const ColumnElement = withHOC(ResizableProvider, function ColumnElement(p
   );
 },
 );
-function DropLine() {
+const DropLine = () => {
   const { dropLine } = useDropLine({ orientation: "horizontal" });
 
   if (!dropLine) return null;
@@ -90,8 +90,8 @@ function DropLine() {
       )}
     />
   );
-}
-function ColumnFloatingToolbar({ children }: React.PropsWithChildren) {
+};
+const ColumnFloatingToolbar = ({ children }: React.PropsWithChildren) => {
   const editor = useEditorRef();
   const readOnly = useReadOnly();
   const element = useElement<TColumnElement>();
@@ -167,7 +167,7 @@ function ColumnFloatingToolbar({ children }: React.PropsWithChildren) {
       </PopoverContent>
     </Popover>
   );
-}
+};
 const DoubleColumnOutlined = (props: LucideProps) => (
   <svg
     fill="none"
@@ -254,7 +254,7 @@ const DoubleSideDoubleColumnOutlined = (props: LucideProps) => (
   </svg>
 );
 
-const ColumnDragHandle = React.memo(function ColumnDragHandle() {
+const ColumnDragHandle = React.memo(() => {
   return (
     <TooltipProvider>
       <Tooltip>
@@ -276,5 +276,5 @@ const ColumnDragHandle = React.memo(function ColumnDragHandle() {
   );
 });
 
-export function ColumnGroupElement(props: PlateElementProps) { return (<PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement>);
-}
+export const ColumnGroupElement = (props: PlateElementProps) => { return (<PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement>);
+};

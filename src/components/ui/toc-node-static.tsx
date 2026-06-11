@@ -61,7 +61,7 @@ const getHeadingList = (editor?: SlateEditor) => {
   return headingList;
 };
 
-export function TocElementStatic(props: SlateElementProps) { const { editor } = props;
+export const TocElementStatic = (props: SlateElementProps) => { const { editor } = props;
   const headingList = getHeadingList(editor);
 
   return (
@@ -86,12 +86,12 @@ export function TocElementStatic(props: SlateElementProps) { const { editor } = 
       {props.children}
     </SlateElement>
   );
-}
+};
 /**
  * DOCX-compatible TOC component.
  * Renders TOC items as anchor links for proper Word internal navigation.
  */
-export function TocElementDocx(props: SlateElementProps) { const { editor } = props;
+export const TocElementDocx = (props: SlateElementProps) => { const { editor } = props;
   const headingList = getHeadingList(editor);
 
   const depthIndent: Record<number, string> = {
@@ -137,4 +137,4 @@ export function TocElementDocx(props: SlateElementProps) { const { editor } = pr
       {props.children}
     </SlateElement>
   );
-}
+};

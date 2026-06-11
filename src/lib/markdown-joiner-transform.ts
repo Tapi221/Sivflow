@@ -225,8 +225,8 @@ export class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
     return output;
   }
 }
-async function delay(delayInMs?: number | null): Promise<void> {
+const delay = async (delayInMs?: number | null): Promise<void> => {
   return delayInMs == null
     ? Promise.resolve()
     : new Promise((resolve) => setTimeout(resolve, delayInMs));
-}
+};

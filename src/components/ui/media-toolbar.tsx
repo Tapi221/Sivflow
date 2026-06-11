@@ -15,9 +15,9 @@ const inputVariants = cva(
   "flex h-[28px] w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-transparent md:text-sm",
 );
 
-export function MediaToolbar({ children, plugin }: { children: React.ReactNode;
+export const MediaToolbar = ({ children, plugin }: { children: React.ReactNode;
   plugin: WithRequiredKey;
-}) {
+}) => {
   const editor = useEditorRef();
   const readOnly = useReadOnly();
   const selected = useSelected();
@@ -89,4 +89,4 @@ export function MediaToolbar({ children, plugin }: { children: React.ReactNode;
       </PopoverContent>
     </Popover>
   );
-}
+};
