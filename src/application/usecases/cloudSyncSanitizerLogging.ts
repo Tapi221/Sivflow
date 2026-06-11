@@ -1,7 +1,5 @@
 type FirestoreRecord = Record<string, unknown>;
 
-
-
 const isRecord = (value: unknown): value is FirestoreRecord =>
   typeof value === "object" && value !== null;
 const getRecordId = (value: unknown): string | null => {
@@ -14,7 +12,5 @@ const getCloudSyncSanitizerLogPayload = (type: string, data: unknown, fixes: unk
   id: getRecordId(data),
   fixes,
 });
-
-
 
 export { getCloudSyncSanitizerLogPayload };

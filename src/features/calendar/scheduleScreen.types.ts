@@ -3,8 +3,6 @@ import type { GCalConnectionStatus, GoogleCalendarEvent, GoogleCalendarListItem 
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 import type { CalendarViewMode, CalendarViewModeSelection } from "./calendar.types";
 
-
-
 type CalendarProvider = "local" | "google" | "appleEventKit" | "appleCalDav";
 type ProjectCalendarSyncDirection = "importOnly" | "exportOnly" | "twoWay";
 type GoogleCalendarColorOverrideMap = Record<string, string>;
