@@ -9,11 +9,7 @@ type CalendarRecurrenceRule = { frequency: CalendarRecurrenceFrequency;
   monthsOfYear?: number[];
 };
 
-
-
 const CALENDAR_RECURRENCE_FREQUENCIES: readonly CalendarRecurrenceFrequency[] = ["daily", "weekly", "monthly", "yearly"];
-
-
 
 const clampPositiveInteger = (value: number | undefined): number | undefined => {
   if (value === undefined || !Number.isFinite(value)) return undefined;
@@ -56,9 +52,5 @@ const normalizeCalendarRecurrenceRule = (rule: CalendarRecurrenceRule | null | u
   return normalized;
 };
 
-
-
 export { CALENDAR_RECURRENCE_FREQUENCIES, normalizeCalendarRecurrenceRule };
-
-
 export type { CalendarRecurrenceFrequency, CalendarWeekday, CalendarRecurrenceRule };

@@ -2,19 +2,13 @@ import { useCallback, useEffect, useRef } from "react";
 import type { ReactNode, TouchEvent as ReactTouchEvent } from "react";
 import { cn } from "@/lib/utils";
 
-
-
 type MobileSidebarDrawerProps = { id: string; isOpen: boolean; onClose: () => void; children: ReactNode; };
 type MobileTouchPoint = { clientX: number; clientY: number; };
 type MobileSidebarSwipeState = { startX: number; startY: number; latestX: number; latestY: number; isHorizontal: boolean; };
 
-
-
 const MOBILE_SIDEBAR_SWIPE_DISTANCE = 56;
 const MOBILE_SIDEBAR_SWIPE_HORIZONTAL_INTENT = 12;
 const MOBILE_SIDEBAR_SWIPE_VERTICAL_LIMIT = 72;
-
-
 
 const getPrimaryTouchPoint = (event: ReactTouchEvent<HTMLElement>): MobileTouchPoint | null => {
   const touch = event.touches[0] ?? event.changedTouches[0];
@@ -24,8 +18,6 @@ const getPrimaryTouchPoint = (event: ReactTouchEvent<HTMLElement>): MobileTouchP
 };
 const isMobileSidebarHorizontalSwipeIntent = (distanceX: number, distanceY: number): boolean => Math.abs(distanceX) >= MOBILE_SIDEBAR_SWIPE_HORIZONTAL_INTENT && Math.abs(distanceX) > Math.abs(distanceY) * 1.2;
 const isMobileSidebarSwipeVerticallyStable = (distanceY: number): boolean => Math.abs(distanceY) <= MOBILE_SIDEBAR_SWIPE_VERTICAL_LIMIT;
-
-
 
 const MobileSidebarDrawer = ({ id, isOpen, onClose, children }: MobileSidebarDrawerProps) => {
   const swipeStateRef = useRef<MobileSidebarSwipeState | null>(null);
@@ -102,7 +94,5 @@ const MobileSidebarDrawer = ({ id, isOpen, onClose, children }: MobileSidebarDra
     </div>
   );
 };
-
-
 
 export { MobileSidebarDrawer };

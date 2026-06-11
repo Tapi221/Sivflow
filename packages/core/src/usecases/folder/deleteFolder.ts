@@ -26,8 +26,6 @@ type FolderDeleteRepository<TFolder extends FolderDeleteEntity = FolderDeleteEnt
   softDeleteDocument: (userId: string, documentId: string) => Promise<void>;
 };
 
-
-
 const buildChildFolderMap = <TFolder extends FolderDeleteEntity>(folders: TFolder[]) => {
   const childFolderIdsByParentId = new Map<string | null, string[]>();
 
@@ -153,9 +151,5 @@ const deleteFolderCascade = async <TFolder extends FolderDeleteEntity, TCardSet 
   }
 };
 
-
-
 export { deleteFolderCascade };
-
-
 export type { FolderDeleteEntity, FolderDeleteCardSet, FolderDeleteCard, FolderDeleteDocument, FolderDeleteContext, FolderDeleteRepository };
