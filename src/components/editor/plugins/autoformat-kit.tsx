@@ -144,7 +144,10 @@ const AUTOFORMAT_TEXT_SUBSTITUTION_PATTERN_GROUPS = [
     { format: '⁺', match: '^+' },
     { format: '⁻', match: '^-' },
   ],
-] satisfies AutoformatTextSubstitutionPatterns[];
+
+satisfies
+
+AutoformatTextSubstitutionPatterns[];
 
 <<<<<<< HEAD
 =======
