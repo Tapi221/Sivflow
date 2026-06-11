@@ -1,3 +1,5 @@
+import { PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
+
 type PdfPerformanceDetail = Record<string, unknown>;
 
 type PdfPerformanceMarkOptions = {
@@ -5,10 +7,67 @@ type PdfPerformanceMarkOptions = {
   detail?: PdfPerformanceDetail;
 };
 
+type PatchedPdfViewerConstructor = typeof PDFViewer & {
+  __sivflowNoScrollScalePatchApplied?: boolean;
+};
+
+type PatchedPdfViewerPrototype = InstanceType<typeof PDFViewer> & {
+  __sivflowIsSettingScale?: boolean;
+  container?: HTMLElement;
+  scrollPageIntoView?: (...args: unknown[]) => unknown;
+};
+
+type PdfViewerScaleDescriptor = PropertyDescriptor & {
+  get?: (this: PatchedPdfViewerPrototype) => unknown;
+  set?: (this: PatchedPdfViewerPrototype, value: unknown) => void;
+};
+
 const PDF_PERFORMANCE_ENTRY_PREFIX = "sivflow.pdf";
 const PDF_PERFORMANCE_DEBUG_STORAGE_KEY = "sivflow.pdf.debugPerformance";
+const PDF_VIEWER_SCALE_PROPERTY_NAMES = ["currentScale", "currentScaleValue"] as const;
+const PDF_ZOOMING_CLASS_NAME = "pdf-pane--zooming";
 
 let pdfPerformanceTraceCounter = 0;
+
+const shouldSuppressPdfViewerScaleScroll = (pdfViewer: PatchedPdfViewerPrototype): boolean => {
+  return Boolean(pdfViewer.__sivflowIsSettingScale && pdfViewer.container?.classList.contains(PDF_ZOOMING_CLASS_NAME));
+};
+
+const patchPdfViewerScaleSetter = (prototype: PatchedPdfViewerPrototype, propertyName: (typeof PDF_VIEWER_SCALE_PROPERTY_NAMES)[number]): void => {
+  const descriptor = Object.getOwnPropertyDescriptor(prototype, propertyName) as PdfViewerScaleDescriptor | undefined;
+  if (!descriptor?.set) return;
+
+  Object.defineProperty(prototype, propertyName, {
+    configurable: descriptor.configurable,
+    enumerable: descriptor.enumerable,
+    get: descriptor.get,
+    set(value: unknown) {
+      this.__sivflowIsSettingScale = true;
+      try {
+        descriptor.set?.call(this, value);
+      } finally {
+        this.__sivflowIsSettingScale = false;
+      }
+    },
+  });
+};
+
+const applyPdfViewerNoScrollScalePatch = (): void => {
+  const viewerConstructor = PDFViewer as PatchedPdfViewerConstructor;
+  if (viewerConstructor.__sivflowNoScrollScalePatchApplied) return;
+
+  const prototype = viewerConstructor.prototype as PatchedPdfViewerPrototype;
+  const originalScrollPageIntoView = prototype.scrollPageIntoView;
+  if (typeof originalScrollPageIntoView !== "function") return;
+
+  prototype.scrollPageIntoView = function scrollPageIntoViewWithoutScaleJump(...args: unknown[]) {
+    if (shouldSuppressPdfViewerScaleScroll(this)) return undefined;
+    return originalScrollPageIntoView.apply(this, args);
+  };
+
+  for (const propertyName of PDF_VIEWER_SCALE_PROPERTY_NAMES) patchPdfViewerScaleSetter(prototype, propertyName);
+  viewerConstructor.__sivflowNoScrollScalePatchApplied = true;
+};
 
 const createPdfPerformanceTraceName = (scope: string): string => {
   pdfPerformanceTraceCounter += 1;
@@ -57,5 +116,7 @@ const recordPdfPerformanceMeasure = (name: string, startName: string, endName: s
     // Missing marks or unsupported Performance APIs should not affect the viewer.
   }
 };
+
+applyPdfViewerNoScrollScalePatch();
 
 export { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure };
