@@ -121,6 +121,7 @@ const PDF_WHEEL_DELTA_MODE_LINE = 1;
 const PDF_WHEEL_DELTA_MODE_PAGE = 2;
 const PDF_ZOOM_BUTTON_SCALE_FACTOR = 1.1;
 const PDF_ZOOM_COMMIT_DELAY_MS = 110;
+const PDF_ZOOM_PREVIEW_RELEASE_DELAY_MS = 90;
 const PDF_ZOOMING_CLASS_NAME = "pdf-pane--zooming";
 const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
@@ -630,6 +631,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     let resizeFrame: number | null = null;
     let zoomFrame: number | null = null;
     let zoomCommitTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
+    let zoomPreviewReleaseTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
     let pendingZoom: PendingPdfZoom | null = null;
     let activeZoomPreview: PdfZoomPreview | null = null;
     let activeZoomSnapshot: HTMLDivElement | null = null;
@@ -656,10 +658,26 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       zoomCommitTimer = null;
     };
 
+    const clearZoomPreviewReleaseTimer = () => {
+      if (zoomPreviewReleaseTimer === null) return;
+      globalThis.clearTimeout(zoomPreviewReleaseTimer);
+      zoomPreviewReleaseTimer = null;
+    };
+
     const clearActiveZoomPreview = () => {
       activeZoomPreview = null;
       activeZoomSnapshot = null;
+      clearZoomPreviewReleaseTimer();
       clearPdfZoomPreview(container, viewerElement);
+    };
+
+    const releaseActiveZoomPreviewAfterScaleCommit = () => {
+      updateVisiblePageWindow();
+      clearZoomPreviewReleaseTimer();
+      zoomPreviewReleaseTimer = globalThis.setTimeout(() => {
+        zoomPreviewReleaseTimer = null;
+        clearActiveZoomPreview();
+      }, PDF_ZOOM_PREVIEW_RELEASE_DELAY_MS);
     };
 
     const ensureActiveZoomSnapshot = (): HTMLDivElement | null => {
@@ -676,9 +694,9 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         return;
       }
 
-      clearActiveZoomPreview();
       lastExplicitZoomAtRef.current = Date.now();
-      if (applyPdfViewerNumericScaleWithAnchor(pdfViewer, container, zoomPreview.scale, zoomPreview.clientX, zoomPreview.clientY, () => updateVisiblePageWindow())) return;
+      if (applyPdfViewerNumericScaleWithAnchor(pdfViewer, container, zoomPreview.scale, zoomPreview.clientX, zoomPreview.clientY, releaseActiveZoomPreviewAfterScaleCommit)) return;
+      clearActiveZoomPreview();
       refreshPdfToolbarState();
     };
 
