@@ -5,18 +5,16 @@ import * as React from 'react';
 import type { PlateElementProps } from 'platejs/react';
 
 import { EmojiInlineIndexSearch, insertEmoji } from '@platejs/emoji';
-
 import { EmojiPlugin } from '@platejs/emoji/react';
-
 import { PlateElement, usePluginOption } from 'platejs/react';
 
 import { useDebounce } from '@/components/use-debounce';
-
-import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem, } from './inline-combobox';
+import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from './inline-combobox';
 
 const TRAILING_COLON_REGEX = /:$/;
 
-export function EmojiInputElement(props: PlateElementProps) { const { children, editor, element } = props;
+export const EmojiInputElement = (props: PlateElementProps) => {
+  const { children, editor, element } = props;
   const data = usePluginOption(EmojiPlugin, 'data')!;
   const [value, setValue] = React.useState('');
   const debouncedValue = useDebounce(value, 100);
@@ -32,14 +30,7 @@ export function EmojiInputElement(props: PlateElementProps) { const { children, 
 
   return (
     <PlateElement as="span" {...props}>
-      <InlineCombobox
-        value={value}
-        element={element}
-        filter={false}
-        setValue={setValue}
-        trigger=":"
-        hideWhenNoValue
-      >
+      <InlineCombobox value={value} element={element} filter={false} setValue={setValue} trigger=":" hideWhenNoValue>
         <InlineComboboxInput />
 
         <InlineComboboxContent>
@@ -47,11 +38,7 @@ export function EmojiInputElement(props: PlateElementProps) { const { children, 
 
           <InlineComboboxGroup>
             {filteredEmojis.map((emoji) => (
-              <InlineComboboxItem
-                key={emoji.id}
-                value={emoji.name}
-                onClick={() => insertEmoji(editor, emoji)}
-              >
+              <InlineComboboxItem key={emoji.id} value={emoji.name} onClick={() => insertEmoji(editor, emoji)}>
                 {emoji.skins[0].native} {emoji.name}
               </InlineComboboxItem>
             ))}
@@ -62,4 +49,4 @@ export function EmojiInputElement(props: PlateElementProps) { const { children, 
       {children}
     </PlateElement>
   );
-}
+};
