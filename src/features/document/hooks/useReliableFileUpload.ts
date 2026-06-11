@@ -17,9 +17,7 @@ interface UploadResult {
   fallbackReason?: UploadFallbackReason;
   metadata?: UploadMetadata;
 }
-
 export type UploadStatus = "idle" | "uploading" | "completed" | "failed";
-
 interface UseReliableFileUploadReturn {
   uploadFile: (
     file: File,
@@ -33,9 +31,7 @@ interface UseReliableFileUploadReturn {
   error?: string;
   reset: () => void;
 }
-
 type UploadKind = "card_image" | "card_audio" | "pdf";
-
 type UploadValidationRule = {
   label: string;
   allowedMimeTypes: string[];
@@ -48,7 +44,6 @@ type UploadValidationRule = {
 
 const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024;
 const DOCUMENT_MAX_FILE_SIZE = 50 * 1024 * 1024;
-
 const UPLOAD_VALIDATION_RULES: Record<UploadKind, UploadValidationRule> = {
   card_image: {
     label: "画像",
@@ -101,33 +96,28 @@ const isContextObject = (
   value: UploadMetadata["context"] | undefined,
 ): value is Extract<UploadMetadata["context"], { type: string }> =>
   typeof value === "object" && value !== null && "type" in value;
-
 const toUploadKind = (value: string): UploadKind => {
   if (value === "card_audio" || value === "pdf") return value;
   return "card_image";
 };
-
 const resolveUploadType = (context?: UploadMetadata["context"]): UploadKind => {
   if (!context) return "card_image";
   if (typeof context === "string") return toUploadKind(context);
   if (isContextObject(context)) return toUploadKind(context.type);
   return "card_image";
 };
-
 const getForcedIdFromContext = (
   context?: UploadMetadata["context"],
 ): string => {
   if (!isContextObject(context)) return "";
   return typeof context.docId === "string" ? context.docId.trim() : "";
 };
-
 const getFileExtension = (fileName: string): string => {
   const normalized = fileName.trim().toLowerCase();
   const dotIndex = normalized.lastIndexOf(".");
   if (dotIndex < 0) return "";
   return normalized.slice(dotIndex);
 };
-
 const matchesMimeType = (
   fileType: string,
   allowedMimeType: string,
@@ -139,10 +129,8 @@ const matchesMimeType = (
   }
   return fileType === allowedMimeType;
 };
-
 const getValidationRule = (type: UploadKind): UploadValidationRule =>
   UPLOAD_VALIDATION_RULES[type];
-
 const getSafeErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof Error && error.message) return error.message;
   if (
@@ -155,16 +143,13 @@ const getSafeErrorMessage = (error: unknown, fallback: string): string => {
   }
   return fallback;
 };
-
 const normalizeMimeType = (file: File, type: UploadKind): string => {
   const trimmed = file.type.trim();
   if (trimmed) return trimmed;
   return getValidationRule(type).defaultMimeType ?? "application/octet-stream";
 };
-
 const toBlobUrl = (url: string): BlobUrl => url as BlobUrl;
 const toStorageUrl = (url: string): StorageUrl => url as StorageUrl;
-
 const performFirebaseUpload = async (
   file: File,
   image: UploadedImage,
@@ -198,7 +183,6 @@ const performFirebaseUpload = async (
     );
   });
 };
-
 export const useReliableFileUpload = (): UseReliableFileUploadReturn => { const { currentUser } = useAuthSession();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -362,5 +346,4 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => { const 
     uploadStatus,
     error,
     reset,
-  };
-};
+  

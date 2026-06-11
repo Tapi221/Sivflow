@@ -6,9 +6,7 @@ import { cn } from "@/lib/utils"
 
 
 const Select = SelectPrimitive.Root
-
 const SelectGroup = SelectPrimitive.Group
-
 const SelectValue = SelectPrimitive.Value
 
 
@@ -31,7 +29,6 @@ const SelectTrigger = React.forwardRef<
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))
-
 const SelectScrollUpButton = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.ScrollUpButton>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollUpButton>
@@ -47,7 +44,6 @@ const SelectScrollUpButton = React.forwardRef<
     <ChevronUp className="h-4 w-4" />
   </SelectPrimitive.ScrollUpButton>
 ))
-
 const SelectScrollDownButton = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.ScrollDownButton>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollDownButton>
@@ -63,7 +59,6 @@ const SelectScrollDownButton = React.forwardRef<
     <ChevronDown className="h-4 w-4" />
   </SelectPrimitive.ScrollDownButton>
 ))
-
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
@@ -94,7 +89,6 @@ const SelectContent = React.forwardRef<
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>
 ))
-
 const SelectLabel = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Label>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
@@ -105,7 +99,6 @@ const SelectLabel = React.forwardRef<
     {...props}
   />
 ))
-
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
@@ -126,7 +119,6 @@ const SelectItem = React.forwardRef<
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
   </SelectPrimitive.Item>
 ))
-
 const SelectSeparator = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
@@ -141,20 +133,13 @@ const SelectSeparator = React.forwardRef<
 
 
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
-
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
-
 SelectScrollDownButton.displayName =
   SelectPrimitive.ScrollDownButton.displayName
-
 SelectContent.displayName = SelectPrimitive.Content.displayName
-
 SelectLabel.displayName = SelectPrimitive.Label.displayName
-
 SelectItem.displayName = SelectPrimitive.Item.displayName
-
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName
-
 export {
   Select,
   SelectGroup,
@@ -165,5 +150,4 @@ export {
   SelectItem,
   SelectSeparator,
   SelectScrollUpButton,
-  SelectScrollDownButton,
-}
+  SelectScrollDownButt

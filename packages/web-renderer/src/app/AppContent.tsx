@@ -9,11 +9,7 @@ import { AppRoutes } from "@web-renderer/app/routing/AppRoutes";
 import { getDevStandaloneRouteElement } from "@web-renderer/app/routing/DevRoutes";
 import { isTestBypassEnabled } from "@web-renderer/app/routing/testBypass";
 
-
-
 const MOBILE_LOGIN_VIEWPORT_MAX_WIDTH = 767;
-
-
 
 const getIsMobileLoginViewport = (): boolean => {
   if (typeof window === "undefined") {
@@ -22,7 +18,6 @@ const getIsMobileLoginViewport = (): boolean => {
 
   return window.innerWidth <= MOBILE_LOGIN_VIEWPORT_MAX_WIDTH;
 };
-
 const useIsMobileLoginViewport = (): boolean => {
   const [isMobileLoginViewport, setIsMobileLoginViewport] = useState(getIsMobileLoginViewport);
 
@@ -43,8 +38,6 @@ const useIsMobileLoginViewport = (): boolean => {
 
   return isMobileLoginViewport;
 };
-
-
 
 const AppContent = () => {
   const { currentUser, loading } = useAuthSession();
@@ -74,7 +67,5 @@ const AppContent = () => {
     </>
   );
 };
-
-
 
 export { AppContent };

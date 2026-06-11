@@ -24,17 +24,14 @@ const toEpoch = (value: unknown): number => {
 
   return 0;
 };
-
 const toIsoString = (value: unknown): string => {
   const epoch = toEpoch(value);
   return new Date(epoch || Date.now()).toISOString();
 };
-
 const cloneJson = <T>(value: T): T => {
   if (value === undefined) return value;
   return JSON.parse(JSON.stringify(value)) as T;
 };
-
 const compareCardsForExport = (left: Card, right: Card): number => {
   const orderDiff = (left.orderIndex ?? 0) - (right.orderIndex ?? 0);
   if (orderDiff !== 0) return orderDiff;
@@ -44,7 +41,6 @@ const compareCardsForExport = (left: Card, right: Card): number => {
 
   return left.id.localeCompare(right.id);
 };
-
 const resolveTagNames = (
   tagIds: unknown,
   tagById?: MfDeckTagLookup,
@@ -59,7 +55,6 @@ const resolveTagNames = (
 
   return Array.from(new Set(names));
 };
-
 const visitObject = (
   value: unknown,
   visitor: (record: Record<string, unknown>) => void,
@@ -77,7 +72,6 @@ const visitObject = (
   visitor(record);
   Object.values(record).forEach((item) => visitObject(item, visitor));
 };
-
 export const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => { const issues: MfDeckIssue[] = [];
 
   cards.forEach((card) => {
@@ -102,7 +96,6 @@ export const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => { con
 
   return issues;
 };
-
 export const mapCardToMfDeckCard = ({ card, tagById, }: { card: Card;
   tagById?: MfDeckTagLookup;
 }): MfDeckCardV1 => {
@@ -132,7 +125,6 @@ export const mapCardToMfDeckCard = ({ card, tagById, }: { card: Card;
     },
   };
 };
-
 export const buildMfDeckArchive = async ({ cardSet, cards, tagById, appVersion, }: { cardSet: CardSet;
   cards: Card[];
   tagById?: MfDeckTagLookup;

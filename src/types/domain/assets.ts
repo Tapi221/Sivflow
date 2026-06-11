@@ -1,19 +1,14 @@
 import { Timestamp } from "firebase/firestore";
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 
-
-
 export type UploadedImageStatus = "pending" | "uploading" | "ready" | "failed";
 
 /** @deprecated Use UploadedImageStatus instead */
 export type UploadState = "pending" | "inProgress" | "completed" | "failed";
-
 export type UploadSource = "cloud" | "local_fallback";
 export type UploadFallbackReason = | "timeout" | "network_error" | "permission_error" | "unknown";
-
 export type AssetRemoteStatus = "none" | "uploading" | "ready" | "failed";
 export type AssetLocalStatus = "present" | "missing";
-
 export interface AssetRecord { id: string;
   userId: string;
   mime: string;
@@ -30,7 +25,6 @@ export interface AssetRecord { id: string;
   height?: number | null;
   sha256?: string | null;
 }
-
 export interface CardImageRef { assetId: string;
   scale?: number | null;
   x?: number | null;
@@ -38,7 +32,6 @@ export interface CardImageRef { assetId: string;
   naturalW?: number | null;
   naturalH?: number | null;
 }
-
 export type ResolvableImageRef = { id?: string | null;
   assetId?: string | null;
   localFileId?: string | null;
@@ -52,11 +45,9 @@ export type ResolvableImageRef = { id?: string | null;
   naturalW?: number | null;
   naturalH?: number | null;
 };
-
 export interface ImageBlockLayout { /** fixed 本文座標系での画像論理幅。fixed / fluid 共通の正本。 */ baseWidthPx?: number | null;
   cropX?: number | null;
 }
-
 export interface UploadedImage { id: string;
   assetId?: string | null;
   localUrl?: BlobUrl | null;
@@ -85,7 +76,6 @@ export interface UploadedImage { id: string;
   fallbackReason?: UploadFallbackReason;
   updatedAt?: Date | Timestamp | null;
 }
-
 export interface UploadedPdf { id: string;
   assetId?: string | null;
   filename: string;
@@ -104,7 +94,6 @@ export interface UploadedPdf { id: string;
   fallbackReason?: UploadFallbackReason;
   updatedAt?: Date | Timestamp | null;
 }
-
 export interface UploadedFile { id: string;
   name: string;
   remoteUrl: string;
@@ -112,7 +101,6 @@ export interface UploadedFile { id: string;
   contentType?: string | null;
   size?: number | null;
 }
-
 export interface UploadMetadata { id: string;
   userId: string;
   originalFilename: string;

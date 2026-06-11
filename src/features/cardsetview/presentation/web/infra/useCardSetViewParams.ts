@@ -25,8 +25,6 @@ const parseCardSetViewParams = (search: string): ParsedCardSetViewParams => {
     targetCardId,
   };
 };
-
 export const useCardSetViewParams = () => { const { search } = useLocation();
 
   return useMemo(() => parseCardSetViewParams(search), [search]);
-};

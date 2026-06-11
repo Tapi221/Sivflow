@@ -13,12 +13,10 @@ type CardSetLibraryDashboardProps = {
   onOpenCardSet: (cardSetId: string) => void;
   showToolbar?: boolean;
 };
-
 type CardSetLibraryCardProps = {
   row: CardSetDashboardRow;
   onOpenCardSet: (cardSetId: string) => void;
 };
-
 type CardSetMetricProps = {
   label: string;
   value: string;
@@ -36,11 +34,9 @@ const formatDate = (value: Date | null): string => {
   if (!value) return "未記録";
   return DATE_FORMATTER.format(value);
 };
-
 const formatCardCount = (value: number): string => {
   return `${NUMBER_FORMATTER.format(value)}枚`;
 };
-
 const getCardSetInitial = (title: string): string => {
   const trimmedTitle = title.trim();
   return trimmedTitle.length > 0 ? trimmedTitle.slice(0, 1).toUpperCase() : "F";
@@ -60,7 +56,6 @@ const CardSetMetric = ({ label, value }: CardSetMetricProps) => {
     </span>
   );
 };
-
 const CardSetLibraryCard = ({ row, onOpenCardSet }: CardSetLibraryCardProps) => {
   const updatedAt = row.updatedAt ?? row.createdAt;
 
@@ -111,7 +106,6 @@ const CardSetLibraryCard = ({ row, onOpenCardSet }: CardSetLibraryCardProps) => 
     </button>
   );
 };
-
 const CardSetLibraryDashboard = ({
   cards,
   cardSets,
@@ -163,4 +157,4 @@ const CardSetLibraryDashboard = ({
 
 
 export { CardSetLibraryDashboard };
-export default CardSetLibraryDashboard;
+export default CardSetLibraryDa

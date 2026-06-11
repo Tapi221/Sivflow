@@ -10,8 +10,6 @@ import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
-
-
 export type GoogleAccountEntry = { id: string;
   email: string | null;
   name: string | null;
@@ -26,7 +24,6 @@ export type GoogleAccountEntry = { id: string;
   isConnecting: boolean;
   error: string | null;
 };
-
 export type GoogleAccountTokenUpdate = { accountId: string;
   accessToken: string;
   refreshToken?: string | null;
@@ -34,7 +31,6 @@ export type GoogleAccountTokenUpdate = { accountId: string;
   accountPhotoUrl?: string | null;
   expiresInSeconds?: number | null;
 };
-
 type AccountsAction =
   | { type: "ADD"; account: GoogleAccountEntry }
   | { type: "REMOVE"; id: string }
@@ -54,9 +50,7 @@ type AccountsAction =
   | { type: "SET_LAST_SYNCED_AT"; id: string; at: Date }
   | { type: "NEEDS_RECONNECT"; id: string; error?: string | null }
   | { type: "SET_ERROR"; id: string; error: string | null };
-
 type EventsState = Map<string, Map<string, GoogleCalendarEvent>>;
-
 type EventsAction =
   | { type: "UPSERT"; accountId: string; event: GoogleCalendarEvent }
   | { type: "DELETE"; accountId: string; eventId: string }
@@ -74,33 +68,23 @@ type EventsAction =
     calendars: GoogleCalendarListItem[];
   }
   | { type: "CLEAR_ACCOUNT"; accountId: string };
-
 type GoogleOAuthCooldownReason = GoogleOAuthCallableErrorReason | "auto_recovery_pending" | "internal";
-
 type GoogleOAuthCooldownEntry = {
   reason: GoogleOAuthCooldownReason;
   message: string;
   until: number;
 };
 
-
-
 const useServerStoredTokens = isServerStoredGoogleOAuthEnabled();
-
 const useDesktopSecureRefreshTokens = isDesktopLikeRuntime() && !useServerStoredTokens;
-
 const CALENDAR_LIST_FOCUS_REFRESH_THROTTLE_MS = 10_000;
-
 export const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
-
-
 
 const overlapsRange = (
   event: GoogleCalendarEvent,
   rangeStart: Date,
   rangeEnd: Date,
 ) => event.startsAt < rangeEnd && event.endsAt > rangeStart;
-
 const toCachedCalendars = (calendars: GoogleCalendarListItem[]) =>
   calendars.map(({ id, summary, summaryOverride, backgroundColor }) => ({
     id,
@@ -108,12 +92,10 @@ const toCachedCalendars = (calendars: GoogleCalendarListItem[]) =>
     summaryOverride,
     backgroundColor,
   }));
-
 const getDefaultCalendarIds = (calendars: GoogleCalendarListItem[]): string[] =>
   calendars
     .filter((calendar) => calendar.primary || calendar.selected)
     .map((calendar) => calendar.id);
-
 const resolveSelectedCalendarIds = (
   storedIds: string[],
   calendars: GoogleCalendarListItem[],
@@ -125,19 +107,15 @@ const resolveSelectedCalendarIds = (
     ? availableStoredIds
     : getDefaultCalendarIds(calendars);
 };
-
 const getErrorStatus = (error: unknown): number | undefined => {
   if (!(error instanceof Error)) return undefined;
   return (error as Error & { status?: number }).status;
 };
-
 const isUnauthorizedError = (error: unknown): boolean => getErrorStatus(error) === 401;
-
 const getGoogleReason = (error: unknown): string | undefined => {
   if (!(error instanceof Error)) return undefined;
   return (error as Error & { googleReason?: string }).googleReason;
 };
-
 const isGooglePermissionError = (error: unknown): boolean => {
   const status = getErrorStatus(error);
   const reason = getGoogleReason(error);
@@ -147,23 +125,18 @@ const isGooglePermissionError = (error: unknown): boolean => {
     (reason === "authError" || reason === "insufficientPermissions")
   );
 };
-
 const getErrorCode = (error: unknown): string | undefined => {
   if (!(error instanceof Error)) return undefined;
   return (error as Error & { code?: string }).code;
 };
-
 const normalizeErrorCode = (code: string | undefined): string | undefined =>
   code?.replace(/^functions\//, "");
-
 export const getGoogleOAuthErrorReason = (error: unknown): GoogleOAuthCallableErrorReason | undefined => { const wrappedReason = error instanceof Error ? (error as Error & { googleOAuthReason?: GoogleOAuthCallableErrorReason }).googleOAuthReason : undefined;
 
   return wrappedReason ?? getGoogleOAuthCallableErrorReason(error);
 };
-
 const isGoogleOAuthReconnectRequiredReason = (reason: string | undefined): boolean =>
   reason === "invalid_grant" || reason === "stored_refresh_token_missing";
-
 const isReconnectRequiredError = (error: unknown): boolean => {
   const code = normalizeErrorCode(getErrorCode(error));
   const reason = getGoogleOAuthErrorReason(error);
@@ -179,14 +152,12 @@ const isReconnectRequiredError = (error: unknown): boolean => {
     code === "unauthenticated"
   );
 };
-
 const toErrorMessage = (error: unknown): string =>
   error instanceof Error
     ? error.message.includes("Google did not return a new refresh token")
       ? "Google が新しい連携トークンを返しませんでした。Google アカウントの「サードパーティ製アプリとサービス」からこのアプリのアクセス権を削除してから、もう一度再連携してください。"
       : error.message
     : String(error);
-
 export const toGoogleCalendarAuthErrorMessage = (error: unknown): string => { const reason = getGoogleOAuthErrorReason(error);
 
   if (reason === "invalid_grant" || reason === "stored_refresh_token_missing") {
@@ -203,9 +174,7 @@ export const toGoogleCalendarAuthErrorMessage = (error: unknown): string => { co
 
   return `Google Calendar token refresh failed: ${toErrorMessage(error)}`;
 };
-
 export const shouldCooldownGoogleOAuthError = (error: unknown): boolean => isGoogleOAuthDeterministicErrorReason(getGoogleOAuthErrorReason(error)) || normalizeErrorCode(getErrorCode(error)) === "auto-recovery-pending" || normalizeErrorCode(getErrorCode(error)) === "internal";
-
 export const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry): Error => { const error = new Error(entry.message);
   (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason }).code = "google-oauth-deterministic-cooldown";
 
@@ -215,17 +184,14 @@ export const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry):
 
   return error;
 };
-
 const requestSilentAccessToken = async () => {
   const { auth } = await import("@/services/firebase");
   return requestCalendarAccessToken(auth, true);
 };
-
 const readDesktopRefreshToken = async (accountId: string): Promise<string | null> => {
   if (!useDesktopSecureRefreshTokens) return null;
   return oauthBridge.readRefreshToken(accountId);
 };
-
 const storeDesktopRefreshToken = async (
   accountId: string,
   refreshToken: string | null | undefined,
@@ -233,19 +199,16 @@ const storeDesktopRefreshToken = async (
   if (!useDesktopSecureRefreshTokens || !refreshToken) return;
   await oauthBridge.storeRefreshToken({ accountId, refreshToken });
 };
-
 const deleteDesktopRefreshToken = async (accountId: string): Promise<void> => {
   if (!useDesktopSecureRefreshTokens) return;
   await oauthBridge.deleteRefreshToken(accountId);
 };
-
 const logGoogleCalendarConnectionError = (
   context: string,
   error: unknown,
 ): void => {
   console.error(`[GoogleCalendar] ${context}`, error);
 };
-
 const reduceAccounts = (
   state: GoogleAccountEntry[],
   action: AccountsAction,
@@ -373,7 +336,6 @@ const reduceAccounts = (
       return state;
   }
 };
-
 const reduceEvents = (
   state: EventsState,
   action: EventsAction,
@@ -471,7 +433,6 @@ const reduceEvents = (
       return state;
   }
 };
-
 const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => {
   const calendars = stored.cachedCalendars ?? [];
   const selectedCalendarIds = resolveSelectedCalendarIds(
@@ -496,7 +457,6 @@ const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => {
     error: canReconnect ? null : "Google Calendar の再連携が必要です",
   };
 };
-
 export const useMultiAccountGoogleCalendar = () => { const [accounts, dispatchAccounts] = useReducer( reduceAccounts, undefined, () => readStoredAccounts().map(storedToEntry), );
   const [eventsState, dispatchEvents] = useReducer(
     reduceEvents,

@@ -24,7 +24,6 @@ const resolveSafeVisualScale = (value?: number) => {
   if (value <= 0) return 1;
   return value;
 };
-
 const resolveSafeIconPx = (value?: number) => {
   if (typeof value !== "number") return null;
   if (!Number.isFinite(value)) return null;

@@ -12,7 +12,6 @@ type WorkspaceTabDndListProps = {
   style?: CSSProperties;
   children: ReactNode;
 };
-
 type WorkspaceTabDndItemProps = Omit<
   HTMLMotionProps<"div">,
   "children" | "layout" | "onDragEnd" | "onDragStart" | "style" | "value"
@@ -68,7 +67,6 @@ const WorkspaceTabDndList = ({
     </Reorder.Group>
   );
 };
-
 const WorkspaceTabDndItem = ({
   tab,
   canReorderTabs,
@@ -104,4 +102,4 @@ const WorkspaceTabDndItem = ({
 
 
 
-export { WorkspaceTabDndItem, WorkspaceTabDndList };
+export { WorkspaceTabDndItem, WorkspaceTabDndL

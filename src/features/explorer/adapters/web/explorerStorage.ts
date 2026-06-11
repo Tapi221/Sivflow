@@ -6,7 +6,6 @@ export const getLastSelectedFolderId = (): string | null => { if (typeof window 
 
   return window.localStorage.getItem(WEB_STORAGE_KEYS.lastSelectedFolderId);
 };
-
 export const setLastSelectedFolderId = (folderId: string | null) => { if (typeof window === "undefined") return;
 
   if (folderId) {

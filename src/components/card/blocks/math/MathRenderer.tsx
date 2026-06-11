@@ -48,6 +48,8 @@ const normalizeSingleLatex = (input: string): string => {
 
 
 
+
+
 /**
  * KaTeXレンダラーコンポーネント
  * 単一数式のみを受け付ける
@@ -127,7 +129,5 @@ const MathRendererComponent: React.FC<MathRendererProps> = ({
 
 
 const MathRenderer = React.memo(MathRendererComponent);
-
 MathRenderer.displayName = "MathRenderer";
-
 export { MathRenderer };

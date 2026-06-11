@@ -3,12 +3,8 @@ type PdfLoadingTaskLike<T> = {
   destroy?: () => Promise<void> | void;
 };
 
-
-
 const DEFAULT_PDF_LOAD_TIMEOUT_MS = 30_000;
 const PDF_LOAD_TIMEOUT_ERROR_MESSAGE = "PDFの読み込みがタイムアウトしました。ネットワーク接続を確認して、もう一度開き直してください。";
-
-
 
 const destroyPdfLoadingTaskQuietly = <T>(loadingTask: PdfLoadingTaskLike<T>): void => {
   try {
@@ -20,7 +16,6 @@ const destroyPdfLoadingTaskQuietly = <T>(loadingTask: PdfLoadingTaskLike<T>): vo
     // Timeout cleanup should not hide the timeout error shown to the user.
   }
 };
-
 const waitForPdfLoadingTask = async <T>(
   loadingTask: PdfLoadingTaskLike<T>,
   timeoutMs = DEFAULT_PDF_LOAD_TIMEOUT_MS,
@@ -42,7 +37,5 @@ const waitForPdfLoadingTask = async <T>(
     }
   }
 };
-
-
 
 export { DEFAULT_PDF_LOAD_TIMEOUT_MS, PDF_LOAD_TIMEOUT_ERROR_MESSAGE, waitForPdfLoadingTask };

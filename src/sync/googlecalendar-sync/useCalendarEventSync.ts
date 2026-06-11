@@ -4,8 +4,6 @@ import { auth } from "@/services/firebase";
 import { buildCalendarEventPrioritySyncRange, buildCalendarEventSyncRange, type BuildCalendarEventSyncRangeOptions, type CalendarEventSyncRange } from "./calendarEventSyncRange";
 import { useGoogleCalendarPushSync } from "./useGoogleCalendarPushSync";
 
-
-
 type GoogleCalendarSlice = {
   selectedCalendarIds: Set<string>;
   forceSyncRange?: (options: {
@@ -13,20 +11,13 @@ type GoogleCalendarSlice = {
     rangeEnd?: Date;
   }) => Promise<void> | void;
 };
-
 export type UseCalendarEventSyncOptions = BuildCalendarEventSyncRangeOptions & { googleCalendar: GoogleCalendarSlice;
 };
 
-
-
 const PREFETCH_SYNC_DELAY_MS = 250;
 
-
-
 const isSameCalendarEventSyncRange = (left: CalendarEventSyncRange, right: CalendarEventSyncRange): boolean => left.rangeStart.getTime() === right.rangeStart.getTime() && left.rangeEnd.getTime() === right.rangeEnd.getTime();
-
 const toCalendarEventSyncRangeKey = (range: CalendarEventSyncRange): string => `${range.rangeStart.toISOString()}|${range.rangeEnd.toISOString()}`;
-
 const fromCalendarEventSyncRangeKey = (key: string): CalendarEventSyncRange => {
   const [rangeStart, rangeEnd] = key.split("|");
 
@@ -35,7 +26,6 @@ const fromCalendarEventSyncRangeKey = (key: string): CalendarEventSyncRange => {
     rangeEnd: new Date(rangeEnd),
   };
 };
-
 export const useCalendarEventSync = ({ selectedViewMode, visibleDays, monthTitleDate, weekStartDay, monthRenderedRange, yearSyncRange, googleCalendar, }: UseCalendarEventSyncOptions): void => { const { selectedCalendarIds, forceSyncRange } = googleCalendar;
 
   const [userId, setUserId] = useState<string | null>(

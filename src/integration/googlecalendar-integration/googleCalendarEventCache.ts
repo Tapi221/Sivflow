@@ -1,8 +1,6 @@
 import { Dexie } from "dexie";
 import type { GoogleCalendarEvent } from "./gcalSync.types";
 
-
-
 type GoogleCalendarEventCacheRow = {
   id: string;
   accountId: string;
@@ -18,11 +16,9 @@ type GoogleCalendarEventCacheRow = {
   projectId?: string;
   updatedAt: number;
 };
-
 type CalendarEventCacheDatabase = Dexie & {
   googleCalendarEvents: Dexie.Table<GoogleCalendarEventCacheRow, string>;
 };
-
 type ReadCachedGoogleCalendarEventsOptions = {
   accountIds?: readonly string[];
   calendarIds?: readonly string[];
@@ -30,18 +26,12 @@ type ReadCachedGoogleCalendarEventsOptions = {
   rangeEnd?: Date;
 };
 
-
-
 const GOOGLE_CALENDAR_EVENT_CACHE_DB_NAME = "flashcard-master-google-calendar-event-cache";
 const GOOGLE_CALENDAR_EVENT_CACHE_ACCOUNT_FALLBACK = "__unknown_account__";
 const GOOGLE_CALENDAR_EVENT_CACHE_CHUNK_SIZE = 500;
-
 let cacheDb: CalendarEventCacheDatabase | null = null;
 
-
-
 const canUseIndexedDb = (): boolean => typeof indexedDB !== "undefined";
-
 const getCacheDb = (): CalendarEventCacheDatabase | null => {
   if (!canUseIndexedDb()) return null;
   if (cacheDb) return cacheDb;
@@ -55,11 +45,8 @@ const getCacheDb = (): CalendarEventCacheDatabase | null => {
   cacheDb = db;
   return cacheDb;
 };
-
 const getResolvedAccountId = (accountId: string | undefined): string => accountId && accountId.length > 0 ? accountId : GOOGLE_CALENDAR_EVENT_CACHE_ACCOUNT_FALLBACK;
-
 const createCacheRowId = (accountId: string, calendarId: string, eventId: string): string => `${accountId}\u001f${calendarId}\u001f${eventId}`;
-
 const toCacheRow = (accountId: string, event: GoogleCalendarEvent): GoogleCalendarEventCacheRow => ({
   id: createCacheRowId(accountId, event.calendarId, event.id),
   accountId,
@@ -75,7 +62,6 @@ const toCacheRow = (accountId: string, event: GoogleCalendarEvent): GoogleCalend
   projectId: event.projectId,
   updatedAt: Date.now(),
 });
-
 const toCalendarEvent = (row: GoogleCalendarEventCacheRow): GoogleCalendarEvent => ({
   id: row.eventId,
   accountId: row.accountId === GOOGLE_CALENDAR_EVENT_CACHE_ACCOUNT_FALLBACK ? undefined : row.accountId,
@@ -89,11 +75,8 @@ const toCalendarEvent = (row: GoogleCalendarEventCacheRow): GoogleCalendarEvent 
   isAllDay: row.isAllDay,
   accentColor: row.accentColor,
 });
-
 const isValidRange = (rangeStart: Date, rangeEnd: Date): boolean => Number.isFinite(rangeStart.getTime()) && Number.isFinite(rangeEnd.getTime()) && rangeStart < rangeEnd;
-
 const overlapsRange = (row: GoogleCalendarEventCacheRow, rangeStartMs: number, rangeEndMs: number): boolean => row.startsAt < rangeEndMs && row.endsAt > rangeStartMs;
-
 const chunk = <T>(items: readonly T[], size: number): T[][] => {
   const chunks: T[][] = [];
 
@@ -103,7 +86,6 @@ const chunk = <T>(items: readonly T[], size: number): T[][] => {
 
   return chunks;
 };
-
 const readRowsForAccountCalendar = async ({
   table,
   accountId,
@@ -125,7 +107,6 @@ const readRowsForAccountCalendar = async ({
 
   return rows.filter((row) => overlapsRange(row, rangeStartMs, rangeEndMs));
 };
-
 export const readCachedGoogleCalendarEvents = async ({ accountIds, calendarIds, rangeStart, rangeEnd, }: ReadCachedGoogleCalendarEventsOptions = {}): Promise<GoogleCalendarEvent[]> => { const db = getCacheDb();
   if (!db) return [];
 
@@ -164,7 +145,6 @@ export const readCachedGoogleCalendarEvents = async ({ accountIds, calendarIds, 
     })
     .map(toCalendarEvent);
 };
-
 export const upsertCachedGoogleCalendarEvent = async (accountId: string | undefined, event: GoogleCalendarEvent): Promise<void> => { const db = getCacheDb();
   if (!db) return;
 
@@ -172,7 +152,6 @@ export const upsertCachedGoogleCalendarEvent = async (accountId: string | undefi
 
   await db.googleCalendarEvents.put(toCacheRow(resolvedAccountId, { ...event, accountId: resolvedAccountId }));
 };
-
 export const replaceCachedGoogleCalendarRange = async ({ accountId, calendarId, rangeStart, rangeEnd, events, }: { accountId: string | undefined;
   calendarId: string;
   rangeStart: Date;
@@ -202,7 +181,6 @@ export const replaceCachedGoogleCalendarRange = async ({ accountId, calendarId, 
     }
   });
 };
-
 export const deleteCachedGoogleCalendarEvent = async (accountId: string | undefined, calendarId: string | undefined, eventId: string): Promise<void> => { const db = getCacheDb();
   if (!db) return;
 
@@ -216,7 +194,6 @@ export const deleteCachedGoogleCalendarEvent = async (accountId: string | undefi
   const rows = await db.googleCalendarEvents.where("accountId").equals(resolvedAccountId).filter((row) => row.eventId === eventId).toArray();
   await db.googleCalendarEvents.bulkDelete(rows.map((row) => row.id));
 };
-
 export const clearCachedGoogleCalendarAccount = async (accountId: string | undefined): Promise<void> => { const db = getCacheDb();
   if (!db) return;
 

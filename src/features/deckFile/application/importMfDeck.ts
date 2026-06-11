@@ -11,13 +11,9 @@ export type CreateMfDeckCardSet = ( name: string, targetFolderId?: string | null
     orderIndex?: number;
   },
 ) => Promise<CardSet>;
-
 export type UpdateMfDeckCardSet = ( id: string, data: Partial< Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode"> >, ) => Promise<void>;
-
 export type CreateMfDeckCard = ( cardData: Partial<Card> & { cardSetId?: string }, ) => Promise<Card>;
-
 export type EnsureMfDeckTagByName = (name: string) => Promise<string | null>;
-
 export type MfDeckImportDestination = | { kind: "new-card-set";
     cardSetName?: string;
   }
@@ -26,7 +22,6 @@ export type MfDeckImportDestination = | { kind: "new-card-set";
     cardSetId: string;
     cardSetName: string;
   };
-
 export type ImportMfDeckArchiveParams = { archive: MfDeckArchiveV1;
   folderId: string;
   createCardSet: CreateMfDeckCardSet;
@@ -35,7 +30,6 @@ export type ImportMfDeckArchiveParams = { archive: MfDeckArchiveV1;
   ensureTagByName?: EnsureMfDeckTagByName;
   destination: MfDeckImportDestination;
 };
-
 export type ImportMfDeckArchiveResult = { createdCardSetId: string;
   createdCardSetName: string;
   folderId: string;
@@ -49,7 +43,6 @@ const cloneJson = <T>(value: T): T => {
   if (value === undefined) return value;
   return JSON.parse(JSON.stringify(value)) as T;
 };
-
 const genId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
@@ -57,7 +50,6 @@ const genId = (): string => {
 
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
-
 const cloneBlocksWithFreshIds = (blocks: CardBlock[]): CardBlock[] => {
   const idMap = new Map<string, string>();
 
@@ -78,7 +70,6 @@ const cloneBlocksWithFreshIds = (blocks: CardBlock[]): CardBlock[] => {
     return nextBlock;
   });
 };
-
 const resolveCardTagIds = async ({
   card,
   ensureTagByName,
@@ -113,14 +104,12 @@ const resolveCardTagIds = async ({
 
   return Array.from(new Set(tagIds));
 };
-
 const normalizeDisplayModePatch = (
   value: CardDisplayMode | undefined,
 ): Pick<CardSet, "defaultDisplayMode"> | Record<string, never> => {
   if (value !== "fixed" && value !== "fluid") return {};
   return { defaultDisplayMode: value };
 };
-
 const normalizeMfDeckInk = (value: unknown): Card["front"]["ink"] => {
   if (value === null || value === undefined) {
     return null;
@@ -134,7 +123,6 @@ const normalizeMfDeckInk = (value: unknown): Card["front"]["ink"] => {
 
   return normalized;
 };
-
 const buildCardInput = async ({
   card,
   folderId,
@@ -191,7 +179,6 @@ const buildCardInput = async ({
     isBookmarked: false,
   };
 };
-
 export const importMfDeckArchive = async ({ archive, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination, }: ImportMfDeckArchiveParams): Promise<ImportMfDeckArchiveResult> => { const issues: MfDeckIssue[] = [];
   const manifestDeck = archive.manifest.deck;
 
@@ -247,4 +234,3 @@ export const importMfDeckArchive = async ({ archive, folderId, createCardSet, up
     createdCount,
     issues,
   };
-};

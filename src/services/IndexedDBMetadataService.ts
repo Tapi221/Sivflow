@@ -3,12 +3,9 @@ import { SafeIndexedDBWriter } from "./SafeIndexedDBWriter";
 import type { IndexedDBMetadata } from "@/types/domain/storage";
 import { CURRENT_SCHEMA_VERSION } from "@/types/domain/storage";
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };
-
 const toDate = (value: unknown, fallback: Date): Date => {
   if (value instanceof Date) return value;
   if (typeof value === "string" || typeof value === "number") {
@@ -17,11 +14,9 @@ const toDate = (value: unknown, fallback: Date): Date => {
   }
   return fallback;
 };
-
 const toStorageState = (value: unknown): IndexedDBMetadata["storageState"] => {
   return value === "DIRTY" ? "DIRTY" : "CLEAN";
 };
-
 const toFiniteNumber = (value: unknown, fallback = 0): number => {
   if (typeof value === "number" && Number.isFinite(value)) {
     return value;
@@ -32,13 +27,11 @@ const toFiniteNumber = (value: unknown, fallback = 0): number => {
   }
   return fallback;
 };
-
 const toOptionalString = (value: unknown): string | undefined => {
   return typeof value === "string" && value.trim().length > 0
     ? value
     : undefined;
 };
-
 const normalizeMetadata = (value: unknown): IndexedDBMetadata | null => {
   if (!isRecord(value)) return null;
 
@@ -60,7 +53,6 @@ const normalizeMetadata = (value: unknown): IndexedDBMetadata | null => {
     rebuildReason: toOptionalString(value.rebuildReason),
   };
 };
-
 export class IndexedDBMetadataService { private readonly db: LocalDBLike;
   private readonly userId: string;
 

@@ -6,21 +6,16 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-
-
 type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";
 type TagMatchMode = "any" | "all";
 type DirectoryBadgeVisibilityKey = "uncertainty" | "bookmarked" | "tags";
-
 export type ExplorerLayoutMode = "list" | "card" | "icon" | "column";
-
 type DirectoryBadgeVisibility = {
   uncertainty: boolean;
   bookmarked: boolean;
   tags: boolean;
 };
-
 export interface ExplorerState { tagFilter: string[];
   tagMatchMode: TagMatchMode;
   uncertaintyFilter: ToggleableFlag;
@@ -44,38 +39,29 @@ export interface ExplorerState { tagFilter: string[];
   togglePinnedFolder: (folderId: string) => void;
 }
 
-
-
 const DEFAULT_CONTENT_TYPE_FILTER: ContentTypeFilter[] = ["card", "pdf"];
 const DEFAULT_EXPLORER_LAYOUT_MODE: ExplorerLayoutMode = "column";
-
 const DEFAULT_DIRECTORY_BADGE_VISIBILITY: DirectoryBadgeVisibility = {
   uncertainty: true,
   bookmarked: true,
   tags: true,
 };
 
-
-
 const normalizeTagFilter = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
   return value.filter((entry): entry is string => typeof entry === "string");
 };
-
 const normalizePinnedFolderIds = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
   return value.filter((entry): entry is string => typeof entry === "string");
 };
-
 const normalizeTagMatchMode = (value: unknown): TagMatchMode => {
   return value === "all" ? "all" : "any";
 };
-
 const normalizeToggleableFlag = (value: unknown): ToggleableFlag => {
   if (value === "on" || value === "off") return value;
   return "any";
 };
-
 const normalizeExplorerLayoutMode = (value: unknown): ExplorerLayoutMode => {
   if (
     value === "list" ||
@@ -88,7 +74,6 @@ const normalizeExplorerLayoutMode = (value: unknown): ExplorerLayoutMode => {
 
   return DEFAULT_EXPLORER_LAYOUT_MODE;
 };
-
 const normalizeContentTypeFilter = (value: unknown): ContentTypeFilter[] => {
   if (!Array.isArray(value)) return [...DEFAULT_CONTENT_TYPE_FILTER];
 
@@ -98,7 +83,6 @@ const normalizeContentTypeFilter = (value: unknown): ContentTypeFilter[] => {
 
   return next.length > 0 ? next : [...DEFAULT_CONTENT_TYPE_FILTER];
 };
-
 const normalizeDirectoryBadgeVisibility = (
   value: unknown,
 ): DirectoryBadgeVisibility => {
@@ -123,7 +107,6 @@ const normalizeDirectoryBadgeVisibility = (
         : DEFAULT_DIRECTORY_BADGE_VISIBILITY.tags,
   };
 };
-
 const createDefaultState = (): Pick<
   ExplorerState,
   | "tagFilter"
@@ -146,8 +129,6 @@ const createDefaultState = (): Pick<
   explorerLayoutMode: DEFAULT_EXPLORER_LAYOUT_MODE,
   pinnedFolderIds: [],
 });
-
-
 
 export const useExplorerStore = create<ExplorerState>()( persist( (set) => ({ ...createDefaultState(), setTagFilter: (tags) => set({ tagFilter: tags }), toggleTag: (tag) => set((state) => { const exists = state.tagFilter.includes(tag);
           const next = exists

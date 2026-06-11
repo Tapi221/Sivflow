@@ -65,4 +65,3 @@ export const useExplorerController = ({ initialRouteState, }: UseExplorerControl
     }),
     [state, actions],
   );
-};

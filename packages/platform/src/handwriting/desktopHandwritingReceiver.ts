@@ -2,25 +2,18 @@ import { normalizeInkDocument, type InkDocument } from "@core/domain/card/ink/in
 import { applyHandwritingStrokeDelta, type ApplyHandwritingStrokeDeltaResult } from "./handwritingStrokeMessages";
 import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionStatus } from "./handwritingSession.types";
 
-
-
 export type DesktopHandwritingReceiverSession = Pick<HandwritingSession, "id" | "cardId" | "side" | "status">;
-
 export type ReceiveDesktopHandwritingMessageInput = { document: InkDocument | null | undefined;
   session: DesktopHandwritingReceiverSession;
   message: HandwritingSessionMessage;
   now?: number;
 };
-
 export type DesktopHandwritingReceiverReason = | ApplyHandwritingStrokeDeltaResult["reason"] | "control-message" | "session-mismatch";
-
 export type ReceiveDesktopHandwritingMessageResult = { document: InkDocument;
   applied: boolean;
   status: HandwritingSessionStatus;
   reason?: DesktopHandwritingReceiverReason;
 };
-
-
 
 const isSessionMessage = (
   message: HandwritingSessionMessage,
@@ -28,7 +21,6 @@ const isSessionMessage = (
 ): boolean => {
   return message.sessionId === session.id;
 };
-
 export const receiveDesktopHandwritingMessage = ({ document, session, message, now }: ReceiveDesktopHandwritingMessageInput): ReceiveDesktopHandwritingMessageResult => { const currentDocument = normalizeInkDocument(document);
 
   if (!isSessionMessage(message, session)) {

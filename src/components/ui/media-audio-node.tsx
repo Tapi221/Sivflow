@@ -40,6 +40,4 @@ export const AudioElement = withHOC( ResizableProvider, function AudioElement(pr
         </figure>
         {props.children}
       </PlateElement>
-    );
-  }
-);
+    )

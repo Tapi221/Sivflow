@@ -5,11 +5,7 @@ import { googleAuthDesktopAdapter } from "@platform/auth/google/GoogleAuthDeskto
 import { googleAuthWebAdapter } from "@platform/auth/google/GoogleAuthWebAdapter";
 import { selectGoogleAuthPort } from "@platform/auth/google/selectGoogleAuthPort";
 
-
-
 let pendingSignInWithGoogle: Promise<void> | null = null;
-
-
 
 const executeSignInWithGoogle = async (): Promise<void> => {
   const auth: GoogleAuthPort = selectGoogleAuthPort({
@@ -22,7 +18,6 @@ const executeSignInWithGoogle = async (): Promise<void> => {
   const signInWithGoogleUseCase = createSignInWithGoogleUseCase({ auth });
   await signInWithGoogleUseCase.execute();
 };
-
 const signInWithGoogle = async (): Promise<void> => {
   if (pendingSignInWithGoogle) return pendingSignInWithGoogle;
 
@@ -32,7 +27,5 @@ const signInWithGoogle = async (): Promise<void> => {
 
   return pendingSignInWithGoogle;
 };
-
-
 
 export { selectGoogleAuthPort, signInWithGoogle };

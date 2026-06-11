@@ -12,13 +12,11 @@ const replaceControlCharacters = (value: string): string => {
     return codePoint !== undefined && codePoint <= 0x1f ? "_" : char;
   }).join("");
 };
-
 const replaceInvalidFileNameCharacters = (value: string): string => {
   return Array.from(value, (char) =>
     INVALID_FILE_NAME_CHARACTERS.has(char) ? "_" : char,
   ).join("");
 };
-
 const sanitizeFileNamePart = (value: string): string => {
   const trimmed = value.trim();
   const sanitized = replaceInvalidFileNameCharacters(
@@ -26,7 +24,6 @@ const sanitizeFileNamePart = (value: string): string => {
   );
   return sanitized || "sivflow-deck";
 };
-
 export const buildMfDeckFileName = (deckName: string): string => { const sanitizedName = sanitizeFileNamePart(deckName);
   const baseName = sanitizedName.toLowerCase().endsWith(MF_DECK_FILE_EXTENSION)
     ? sanitizedName.slice(0, -MF_DECK_FILE_EXTENSION.length)
@@ -34,7 +31,6 @@ export const buildMfDeckFileName = (deckName: string): string => { const sanitiz
 
   return `${baseName}${MF_DECK_FILE_EXTENSION}`;
 };
-
 export const downloadBytesAsMfDeck = ({ bytes, deckName, }: { bytes: Uint8Array;
   deckName: string;
 }): void => {
@@ -57,4 +53,3 @@ export const downloadBytesAsMfDeck = ({ bytes, deckName, }: { bytes: Uint8Array;
   window.setTimeout(() => {
     URL.revokeObjectURL(url);
   }, 0);
-};

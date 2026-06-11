@@ -5,8 +5,6 @@ import { collection, getFirestore, initializeFirestore, persistentLocalCache, pe
 import { getFunctions, type Functions } from "firebase/functions";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
-
-
 type FirebaseClientState = {
   app: FirebaseApp | null;
   auth: Auth | null;
@@ -14,8 +12,6 @@ type FirebaseClientState = {
   functionsClient: Functions | null;
   firestoreDb: Firestore | null;
 };
-
-
 
 const REQUIRED_FIREBASE_ENV_KEYS = [
   "VITE_FIREBASE_API_KEY",
@@ -25,7 +21,6 @@ const REQUIRED_FIREBASE_ENV_KEYS = [
   "VITE_FIREBASE_MESSAGING_SENDER_ID",
   "VITE_FIREBASE_APP_ID",
 ] as const;
-
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -35,19 +30,15 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-
-
 const getFirebaseEnvValue = (key: (typeof REQUIRED_FIREBASE_ENV_KEYS)[number]) => {
   return import.meta.env[key];
 };
-
 const getMissingFirebaseEnvVars = (): string[] => {
   return REQUIRED_FIREBASE_ENV_KEYS.filter((key) => {
     const value = getFirebaseEnvValue(key);
     return typeof value !== "string" || value.trim().length === 0;
   });
 };
-
 const createUnavailableState = (): FirebaseClientState => ({
   app: null,
   auth: null,
@@ -56,12 +47,8 @@ const createUnavailableState = (): FirebaseClientState => ({
   firestoreDb: null,
 });
 
-
-
 export const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
 export const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
-
-
 
 const initializeFirebaseClient = (): FirebaseClientState => {
   if (!isFirebaseClientAvailable) {
@@ -114,18 +101,13 @@ const initializeFirebaseClient = (): FirebaseClientState => {
   };
 };
 
-
-
 const firebaseClientState = initializeFirebaseClient();
-
 export const firebaseApp = firebaseClientState.app;
 export const auth = firebaseClientState.auth as Auth;
 export const storage = firebaseClientState.storage as FirebaseStorage;
 export const functionsClient = firebaseClientState.functionsClient as Functions;
 export const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
 export const db: Firestore | null = firebaseClientState.firestoreDb;
-
-
 
 export const requireFirebaseClient = (): FirebaseClientState => { if (isFirebaseClientAvailable && firebaseClientState.app) { return firebaseClientState;
   }
@@ -134,7 +116,6 @@ export const requireFirebaseClient = (): FirebaseClientState => { if (isFirebase
     `[Firebase] Firebase クライアントを利用できません。不足している環境変数: ${missingFirebaseEnvVars.join(", ")}`,
   );
 };
-
 export const requireFirestoreDb = (): Firestore => { if (firestoreDb) { return firestoreDb;
   }
 
@@ -148,7 +129,6 @@ export const requireFirestoreDb = (): Firestore => { if (firestoreDb) { return f
     "[Firebase] Firestore の初期化に失敗しました。Firestore 依存の処理を続行できません。",
   );
 };
-
 const debugFirebase = (): void => {
   console.log("=== Firebase デバッグ情報 ===");
 
@@ -175,7 +155,6 @@ const debugFirebase = (): void => {
 
   console.log("=============================");
 };
-
 if (import.meta.env.DEV) {
   debugFirebase();
 }

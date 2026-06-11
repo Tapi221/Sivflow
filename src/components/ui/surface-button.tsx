@@ -46,5 +46,4 @@ export interface SurfaceButtonProps extends React.ButtonHTMLAttributes<HTMLButto
 
 
 SurfaceButton.displayName = "SurfaceButton";
-
-export { SurfaceButton };
+export { SurfaceButton }

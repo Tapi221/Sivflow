@@ -14,7 +14,6 @@ interface UseFlashcardInkOptions {
   contentRef: React.RefObject<HTMLDivElement | null>;
   onInkDocumentChange?: (side: "question" | "answer", nextDocument: InkDocument) => void;
 }
-
 export interface FlashcardInkResult { previewInkRef: React.RefObject<InkLayerHandle | null>;
   previewInkTool: InkEditTool | null;
   setPreviewInkTool: React.Dispatch<React.SetStateAction<InkEditTool | null>>;
@@ -28,7 +27,6 @@ export interface FlashcardInkResult { previewInkRef: React.RefObject<InkLayerHan
 
 
 const readFontsReady = () => (document as Document & { fonts?: { ready?: Promise<unknown> } }).fonts?.ready;
-
 const waitForImages = async (root: HTMLDivElement) => {
   const images = Array.from(root.querySelectorAll("img")).filter((img) => !img.complete);
   await Promise.allSettled(images.map((img) => new Promise<void>((resolve) => {
@@ -41,7 +39,6 @@ const waitForImages = async (root: HTMLDivElement) => {
     img.addEventListener("error", done, { once: true });
   })));
 };
-
 export const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkEditingEnabled, previewMode, contentRef, onInkDocumentChange }: UseFlashcardInkOptions) => { const { updateCard } = useCards();
   const previewInkRef = useRef<InkLayerHandle | null>(null);
   const [previewInkTool, setPreviewInkTool] = useState<InkEditTool | null>(null);

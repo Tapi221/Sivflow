@@ -1,13 +1,9 @@
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
-
-
 interface CardZoomPreferencesStore {
   version: 1;
   byCardSet: Record<string, number>;
 }
-
-
 
 const empty = (): CardZoomPreferencesStore => {
   return {
@@ -15,7 +11,6 @@ const empty = (): CardZoomPreferencesStore => {
     byCardSet: {},
   };
 };
-
 const readStore = () => {
   try {
     if (typeof window === "undefined") return empty();
@@ -40,7 +35,6 @@ const readStore = () => {
     return empty();
   }
 };
-
 const writeStore = (store: CardZoomPreferencesStore) => {
   try {
     if (typeof window === "undefined") return;
@@ -52,7 +46,6 @@ const writeStore = (store: CardZoomPreferencesStore) => {
     // localStorage 失敗は黙殺
   }
 };
-
 export const getCardSetZoomPreference = (cardSetId: string) => { if (!cardSetId) return undefined;
 
   const store = readStore();
@@ -64,7 +57,6 @@ export const getCardSetZoomPreference = (cardSetId: string) => { if (!cardSetId)
 
   return undefined;
 };
-
 export const setCardSetZoomPreference = ( cardSetId: string, zoomPercent: number, ) => { if (!cardSetId) return;
   if (!Number.isFinite(zoomPercent) || zoomPercent <= 0) return;
 

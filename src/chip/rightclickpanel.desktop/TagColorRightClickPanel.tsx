@@ -32,32 +32,20 @@ const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   coral: "コーラル",
   sky: "スカイ",
 };
-
 const TAG_COLOR_CONTEXT_MENU_TITLE = "タグの色";
-
 const TAG_COLOR_GRID_COLUMNS = 5;
-
 const TAG_COLOR_SWATCH_SIZE = 16;
-
 const TAG_COLOR_GRID_GAP = 6;
-
 const TAG_COLOR_GRID_HORIZONTAL_PADDING = 8;
-
 const TAG_COLOR_GRID_TOP_PADDING = 4;
-
 const TAG_COLOR_GRID_BOTTOM_PADDING = 8;
-
 const TAG_COLOR_GRID_WIDTH =
   TAG_COLOR_GRID_COLUMNS * TAG_COLOR_SWATCH_SIZE +
   (TAG_COLOR_GRID_COLUMNS - 1) * TAG_COLOR_GRID_GAP +
   TAG_COLOR_GRID_HORIZONTAL_PADDING * 2;
-
 export const TAG_COLOR_CONTEXT_MENU_WIDTH = Math.ceil( Math.max( resolveRightClickPanelTextWidth([TAG_COLOR_CONTEXT_MENU_TITLE]), TAG_COLOR_GRID_WIDTH + RIGHT_CLICK_PANEL_SURFACE_PADDING * 2, ), );
-
 export const TAG_COLOR_CONTEXT_MENU_HEIGHT = 92;
-
 export const TAG_COLOR_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
-
 const TAG_COLOR_GRID_STYLE = `
 .tag-color-context-menu-grid {
   display: grid;

@@ -3,23 +3,18 @@ import { Fragment, type ComponentType, type ReactNode, type SVGProps } from "rea
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 
-
-
 export type LibraryHeaderToolbarIconProps = SVGProps<SVGSVGElement> & { className?: string;
 };
-
 export type LibraryHeaderToolbarActionRenderProps = { className: string;
   iconClassName: string;
   label: string;
 };
-
 type LibraryHeaderToolbarItem = {
   value: string;
   label: string;
   icon: ComponentType<LibraryHeaderToolbarIconProps>;
   onClick: () => void;
 };
-
 type LibraryHeaderToolbarAction = {
   label: string;
   icon?: ComponentType<LibraryHeaderToolbarIconProps>;
@@ -27,9 +22,7 @@ type LibraryHeaderToolbarAction = {
   ariaLabel?: string;
   render?: (props: LibraryHeaderToolbarActionRenderProps) => ReactNode;
 };
-
 type LibraryHeaderToolbarVariant = "underline" | "segmented" | "floating";
-
 type LibraryHeaderToolbarProps = {
   activeValue: string;
   tabs: readonly LibraryHeaderToolbarItem[];
@@ -39,18 +32,14 @@ type LibraryHeaderToolbarProps = {
   variant?: LibraryHeaderToolbarVariant;
 };
 
-
-
 const WORKSPACE_TAB_INDICATOR_ID = "workspace-header-toolbar-tab-indicator";
 const WORKSPACE_TAB_MOTION_TRANSITION: Transition = {
   type: "tween",
   duration: 0.3,
   ease: [0.22, 1, 0.36, 1],
 };
-
 const segmentedActionGroupClassName =
   "relative z-10 inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5";
-
 const segmentedActionButtonClassName = cn(
   "group/action relative z-10 flex h-7 w-11 min-w-0 items-center justify-center rounded-lg p-0",
   "appearance-none select-none text-[#b3b3b3]",
@@ -59,11 +48,8 @@ const segmentedActionButtonClassName = cn(
   "active:bg-white active:text-[#8c8c8c]",
   "focus:outline-none focus:ring-0 focus-visible:bg-white focus-visible:text-[#8c8c8c] focus-visible:outline-none",
 );
-
 const segmentedActionIconClassName =
   "block h-4 w-4 shrink-0 text-current transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none";
-
-
 
 export const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions, actions, variant = "underline", }: LibraryHeaderToolbarProps) => { const hasTabs = tabs.length > 0;
   const hasSecondaryTabs = Boolean(secondaryTabs && secondaryTabs.length > 0);

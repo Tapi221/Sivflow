@@ -11,7 +11,6 @@ type WorkspaceBreadcrumbsProps = {
   className?: string;
   isLeftPanelCollapsed?: boolean;
 };
-
 type NoDragStyle = CSSProperties & {
   WebkitAppRegion?: "no-drag";
 };
@@ -21,7 +20,6 @@ type NoDragStyle = CSSProperties & {
 const WORKSPACE_BREADCRUMBS_NO_DRAG_STYLE: NoDragStyle = {
   WebkitAppRegion: "no-drag",
 };
-
 const WORKSPACE_BREADCRUMBS_CLASS_NAME = "pointer-events-auto absolute top-[15px] z-30 flex h-6 max-w-[calc(100%-604px)] min-w-0 items-center overflow-hidden font-[var(--app-font-family-sidebar)] text-[13px] font-medium leading-none tracking-[-0.018em] text-[#7d7b78]";
 const WORKSPACE_BREADCRUMBS_EXPANDED_OFFSET_CLASS_NAME = "left-8";
 const WORKSPACE_BREADCRUMBS_COLLAPSED_OFFSET_CLASS_NAME = "left-14";
@@ -37,7 +35,6 @@ const getBreadcrumbLabel = (crumb: BreadcrumbCrumb): string => {
   const label = crumb.label.trim();
   return label.length > 0 ? label : "無題";
 };
-
 const getBreadcrumbKey = (crumb: BreadcrumbCrumb, index: number): string => {
   return `${index}:${crumb.to ?? ""}:${crumb.folderId ?? ""}:${crumb.label}`;
 };
@@ -112,4 +109,4 @@ export { WorkspaceBreadcrumbs };
 
 
 
-export type { WorkspaceBreadcrumbsProps };
+export type { WorkspaceBreadcrum

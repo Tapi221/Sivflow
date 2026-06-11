@@ -9,13 +9,11 @@ export type CardPresentationContext = { inPager: boolean;
   isStandaloneEditor: boolean;
   hasFocusWithin: boolean;
 };
-
 export type CardPresentationState = { isActiveCard: boolean;
   isInteractiveCard: boolean;
   showEditingOutline: boolean;
   showActiveChrome: boolean;
 };
-
 export type CardPresentationContextInput = Partial<Pick<CardPresentationContext, "isCurrentCard" | "isStandaloneEditor" | "hasFocusWithin">>;
 
 
@@ -30,9 +28,7 @@ export const resolveCardPresentationState = (context: CardPresentationContext): 
     showActiveChrome: context.inPager && isActiveCard,
   };
 };
-
 export const buildCardShellClassName = (state: CardPresentationState, className?: string) => cn( CARD_SHELL_COMMON_CLASS_NAME, state.showActiveChrome && "card-shell--active", state.showEditingOutline && "card-shell--editing", className, );
-
 export const buildCardChromeClassName = ( state: CardPresentationState, options?: { hoverable?: boolean;
     plain?: boolean;
     className?: string;

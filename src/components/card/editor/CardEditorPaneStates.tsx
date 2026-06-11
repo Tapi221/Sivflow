@@ -44,7 +44,6 @@ const NewCardIdleState = ({
     </div>
   );
 };
-
 const CardEditorLoadingState = () => {
   return <LoadingSpinner className="h-full min-h-[400px] text-slate-400" label="カードを読み込み中" />;
 };

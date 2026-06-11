@@ -20,7 +20,6 @@ export function ColumnElementStatic(props: SlateElementProps<TColumnElement>) { 
     </div>
   );
 }
-
 export function ColumnGroupElementStatic(props: SlateElementProps) { return ( <SlateElement className="mb-2" {...props}> <div className="flex size-full rounded">{props.children}</div> </SlateElement> );
 }
 

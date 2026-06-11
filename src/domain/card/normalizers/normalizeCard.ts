@@ -29,7 +29,6 @@ const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "markdown",
   "pdf",
 ]);
-
 const SUBJECTIVE_SCORE_VALUES = new Set<SubjectiveScoreValue>([0, 1, 2, 3]);
 
 
@@ -46,20 +45,17 @@ const isGridBlockType = (value: unknown): value is GridBlockType => {
     value === "pdf"
   );
 };
-
 const isCardBlockType = (value: unknown): value is CardBlock["type"] => {
   return (
     typeof value === "string" &&
     CARD_BLOCK_TYPES.has(value as CardBlock["type"])
   );
 };
-
 const normalizeOptionalNumber = (value: unknown): number | undefined => {
   if (value === undefined || value === null) return undefined;
   const normalized = toFiniteNumber(value, Number.NaN);
   return Number.isFinite(normalized) ? normalized : undefined;
 };
-
 const normalizeSubjectiveScore = (value: unknown): SubjectiveScoreValue | undefined => {
   if (SUBJECTIVE_SCORE_VALUES.has(value as SubjectiveScoreValue)) {
     return value as SubjectiveScoreValue;
@@ -67,7 +63,6 @@ const normalizeSubjectiveScore = (value: unknown): SubjectiveScoreValue | undefi
 
   return undefined;
 };
-
 const resolveFallbackTextContent = (block: UnknownRecord): string => {
   if (typeof block.content === "string" && block.content.trim()) {
     return block.content;
@@ -89,7 +84,6 @@ const resolveFallbackTextContent = (block: UnknownRecord): string => {
 
   return "";
 };
-
 const normalizeUploadedPdf = (value: unknown): UploadedPdf | null => {
   const pdf = asRecord(value);
   if (!pdf) return null;
@@ -130,7 +124,6 @@ const normalizeUploadedPdf = (value: unknown): UploadedPdf | null => {
     updatedAt: normalizeDate(pdf.updatedAt),
   };
 };
-
 const normalizeBlockOffsets = (blockRaw: unknown) => {
   const block = asRecord(blockRaw);
   if (!block) return blockRaw;
@@ -156,7 +149,6 @@ const normalizeBlockOffsets = (blockRaw: unknown) => {
     rowOffset: undefined,
   };
 };
-
 const normalizeCardBlock = (
   blockRaw: unknown,
   side: "question" | "answer",
@@ -263,7 +255,6 @@ const normalizeCardBlock = (
 
   return normalizeBlockOffsets(normalized) as CardBlock;
 };
-
 export const normalizeCard = (raw: unknown): Card => { const record = asRecord(raw) ?? {};
   const id =
     toStringOr(pick(record.id, record.cardId, record.card_id), "") ||
@@ -497,4 +488,3 @@ export const normalizeCard = (raw: unknown): Card => { const record = asRecord(r
   if (inkDocument !== undefined) normalized.inkDocument = inkDocument;
 
   return normalized;
-};

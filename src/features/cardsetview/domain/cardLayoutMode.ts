@@ -15,16 +15,13 @@ export const DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE: SplitFallbackCardLayoutMod
 
 export const resolveDefaultCardLayoutMode = ( _interactionMode: CardSetInteractionMode, ): CardLayoutMode => { return DEFAULT_CARD_LAYOUT_MODE;
 };
-
 export const normalizeCardLayoutMode = (value: unknown): CardLayoutMode => { if (value === "stack" || value === "split") { return value;
   }
 
   return "flip";
 };
-
 export const normalizeSplitFallbackCardLayoutMode = ( value: unknown, ): SplitFallbackCardLayoutMode => { return value === "stack" ? "stack" : "flip";
 };
-
 export const buildCardLayoutPreferenceScopeKey = ({ deviceScope, cardSetId, displayMode, interactionMode, }: { deviceScope: string;
   cardSetId: string | null | undefined;
   displayMode: CardDisplayMode;
@@ -40,4 +37,4 @@ export const buildCardLayoutPreferenceScopeKey = ({ deviceScope, cardSetId, disp
 
 
 
-export const CARD_LAYOUT_MODE_LABELS: Record<CardLayoutMode, string> = { stack: "縦並び", flip: "裏表", split: "2カラム", };
+export const CARD_LAYOUT_MODE_LABELS: Record<CardLayoutMode, string> = { stack: "縦並び", flip: "裏表", split: "2カラ�

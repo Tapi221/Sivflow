@@ -5,10 +5,7 @@ import { CURRENT_TAG_STORE } from "./tagStoreNames";
 import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
 import type { Card, Folder } from "@/types";
 
-
-
 export type EnqueueSync = ( table: string, type: "upload" | "download", payload: unknown, ) => Promise<void>;
-
 export interface TableLike<T extends object> { add(item: T): PromiseLike<unknown> | unknown;
   get(id: unknown): PromiseLike<T | undefined> | T | undefined;
   update(id: unknown, changes: unknown): PromiseLike<number> | number;
@@ -16,11 +13,9 @@ export interface TableLike<T extends object> { add(item: T): PromiseLike<unknown
   bulkPut(items: ReadonlyArray<T>): PromiseLike<unknown> | unknown;
   delete(id: unknown): PromiseLike<void> | void;
 }
-
 export interface DbLike { table<T extends object, _TKey = string>(name: string): TableLike<T>;
   name?: string;
 }
-
 type QueueSyncApi = {
   queueUpsertSync?: <TEntity extends UpsertEntity>(args: {
     entity: TEntity;
@@ -34,18 +29,14 @@ type QueueSyncApi = {
     priority?: "critical" | "high" | "medium" | "low";
   }) => Promise<void>;
 };
-
 type CardInput = Card;
 type FolderInput = Folder;
 type AnyRow = Record<string, unknown> & { id?: string };
-
 type CardStorageRow = AnyRow & {
   front?: { blocks?: unknown[] };
   back?: { blocks?: unknown[] };
 };
-
 type DocumentUpdateChanges = Parameters<typeof cleanupBeforeDocumentUpdate>[2];
-
 type AddItem = {
   (
     db: DbLike,
@@ -69,7 +60,6 @@ type AddItem = {
     enqueueSync: EnqueueSync,
   ): Promise<string>;
 };
-
 type UpdateItem = {
   (
     db: DbLike,
@@ -104,12 +94,10 @@ type UpdateItem = {
     enqueueSync: EnqueueSync,
   ): Promise<number>;
 };
-
 type DeleteItem = {
   (db: DbLike, table: "documents", id: string): Promise<void>;
   (db: DbLike, table: string, id: string): Promise<void>;
 };
-
 type BulkUpsert = {
   (
     db: DbLike,
@@ -133,7 +121,6 @@ type BulkUpsert = {
     enqueueSync: EnqueueSync,
   ): Promise<void>;
 };
-
 type Upsert = {
   (
     db: DbLike,
@@ -158,8 +145,6 @@ type Upsert = {
   ): Promise<void>;
 };
 
-
-
 const ENTITY_BY_TABLE = {
   cards: "card",
   folders: "folder",
@@ -169,7 +154,6 @@ const ENTITY_BY_TABLE = {
   images: "asset",
   userSettings: "userSetting",
 } as const;
-
 const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>([
   "card",
   "folder",
@@ -179,12 +163,9 @@ const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>([
   "asset",
 ]);
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };
-
 const getStringProp = (
   obj: Record<string, unknown>,
   key: string,
@@ -192,7 +173,6 @@ const getStringProp = (
   const value = obj[key];
   return typeof value === "string" ? value : undefined;
 };
-
 const getId = (value: unknown): string | undefined => {
   if (!isRecord(value)) return undefined;
   const id = getStringProp(value, "id");
@@ -200,7 +180,6 @@ const getId = (value: unknown): string | undefined => {
   const trimmed = id.trim();
   return trimmed.length > 0 ? trimmed : undefined;
 };
-
 const getConstructorName = (value: unknown): string => {
   if (!value || (typeof value !== "object" && typeof value !== "function")) {
     return "<unknown>";
@@ -209,7 +188,6 @@ const getConstructorName = (value: unknown): string => {
   const ctor = (value as { constructor?: { name?: unknown } }).constructor;
   return typeof ctor?.name === "string" ? ctor.name : "<unknown>";
 };
-
 const safeJsonPreview = (value: unknown, max = 200): string => {
   try {
     const serialized = JSON.stringify(value);
@@ -220,7 +198,6 @@ const safeJsonPreview = (value: unknown, max = 200): string => {
     return "<unserializable-payload>";
   }
 };
-
 const errorCode = (error: unknown): string => {
   if (typeof error === "string") return error;
   if (!isRecord(error)) return "UNKNOWN_ERROR";
@@ -232,11 +209,9 @@ const errorCode = (error: unknown): string => {
     "UNKNOWN_ERROR"
   );
 };
-
 const recordKeys = (value: unknown): string[] => {
   return isRecord(value) ? Object.keys(value) : [];
 };
-
 const isDocDbCtx = (db: DbLike): db is DbLike & DocDbCtx => {
   const maybeDb = db as DbLike & Partial<DocDbCtx>;
   const documents = maybeDb.documents;
@@ -248,12 +223,10 @@ const isDocDbCtx = (db: DbLike): db is DbLike & DocDbCtx => {
     typeof documents.filter === "function"
   );
 };
-
 const toStorageRow = (value: unknown): AnyRow => {
   if (!isRecord(value)) return {};
   return { ...value } as AnyRow;
 };
-
 const enqueueThroughSyncQueueApi = async (
   db: DbLike,
   table: string,
@@ -295,7 +268,6 @@ const enqueueThroughSyncQueueApi = async (
     priority: "high",
   });
 };
-
 export const addItem: AddItem = async ( db: DbLike, table: string, item: unknown, skipSync: boolean, enqueueSync: EnqueueSync, ): Promise<string> => { if (table === "cards") { assertNoBlobUrlInCardPayload(item, { entityType: table, entityId: getId(item), });
   }
 
@@ -412,7 +384,6 @@ export const addItem: AddItem = async ( db: DbLike, table: string, item: unknown
     throw error;
   }
 };
-
 export const updateItem: UpdateItem = async ( db: DbLike, table: string, id: string, changes: unknown, skipSync: boolean, enqueueSync: EnqueueSync, ): Promise<number> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error( "[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.", );
     }
 
@@ -467,7 +438,6 @@ export const updateItem: UpdateItem = async ( db: DbLike, table: string, id: str
 
   return result;
 };
-
 export const deleteItem: DeleteItem = async ( db: DbLike, table: string, id: string, ): Promise<void> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error( "[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.", );
     }
 
@@ -477,7 +447,6 @@ export const deleteItem: DeleteItem = async ( db: DbLike, table: string, id: str
   const tableApi = db.table<AnyRow>(table);
   await tableApi.delete(id);
 };
-
 export const softDelete = async ( db: DbLike, table: string, id: string, updateItemFn: ( table: string, id: string, changes: Record<string, unknown>, ) => Promise<number>, ): Promise<number> => { const now = new Date();
 
   console.log(`[LocalDB] softDelete -> table=${table} id=${id}`);
@@ -504,7 +473,6 @@ export const softDelete = async ( db: DbLike, table: string, id: string, updateI
     ...extraChanges,
   });
 };
-
 export const bulkUpsert: BulkUpsert = async ( db: DbLike, table: string, items: unknown[], skipSync: boolean, enqueueSync: EnqueueSync, ): Promise<void> => { if (items.length === 0) return;
 
   if (table === "cards") {
@@ -536,7 +504,6 @@ export const bulkUpsert: BulkUpsert = async ( db: DbLike, table: string, items: 
     }
   }
 };
-
 export const upsert: Upsert = async ( db: DbLike, tableName: string, data: unknown, skipSync: boolean, enqueueSync: EnqueueSync, ): Promise<void> => { if (tableName === "cards") { assertNoBlobUrlInCardPayload(data, { entityType: tableName, entityId: getId(data), });
   }
 

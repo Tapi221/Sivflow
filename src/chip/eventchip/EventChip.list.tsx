@@ -30,13 +30,11 @@ const MINUTE_IN_MS = 60_000;
 
 
 const getEventTitle = (event: GoogleCalendarEvent): string => event.title.trim() || "Untitled";
-
 const getEventStartTimeLabel = (event: GoogleCalendarEvent): string => {
   if (event.isAllDay) return ALL_DAY_LABEL;
 
   return format(new Date(event.startsAt), "H:mm");
 };
-
 const getEventDurationLabel = (startsAt: Date, endsAt: Date): string => {
   const totalMinutes = Math.max(0, Math.round((endsAt.getTime() - startsAt.getTime()) / MINUTE_IN_MS));
   const hours = Math.floor(totalMinutes / 60);
@@ -47,7 +45,6 @@ const getEventDurationLabel = (startsAt: Date, endsAt: Date): string => {
 
   return `${hours}時間${minutes}分`;
 };
-
 const getEventTimeRangeLabel = (event: GoogleCalendarEvent): string | null => {
   if (event.isAllDay) return null;
 
@@ -57,11 +54,9 @@ const getEventTimeRangeLabel = (event: GoogleCalendarEvent): string | null => {
 
   return `${format(startsAt, "H:mm")} - ${format(endsAt, "H:mm")}（${durationLabel}）`;
 };
-
 const createEventRowStyle = (isAllDay: boolean): CSSProperties => ({
   height: isAllDay ? LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX : LIST_EVENT_ROW_HEIGHT_PX,
 });
-
 const createEventChipStyle = (tokens: ReturnType<typeof generateColorTokens>, isAllDay: boolean): CSSProperties => ({
   height: isAllDay ? LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX : LIST_EVENT_CHIP_HEIGHT_PX,
   background: tokens.bg,
@@ -69,11 +64,9 @@ const createEventChipStyle = (tokens: ReturnType<typeof generateColorTokens>, is
   borderRadius: eventChipDesign.list.radiusPx,
   color: tokens.text,
 });
-
 const createEventTimeStyle = (): CSSProperties => ({
   fontSize: eventChipDesign.list.timeFontSizePx,
 });
-
 const createEventTitleStyle = (): CSSProperties => ({
   fontSize: eventChipDesign.list.titleFontSizePx,
   marginTop: eventChipDesign.list.titleGapPx,
@@ -109,7 +102,5 @@ const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) =
 
 
 const CalendarEventChipList = memo(CalendarEventChipListComponent);
-
 CalendarEventChipList.displayName = "CalendarEventChipList";
-
 export { CalendarEventChipList };

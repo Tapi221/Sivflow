@@ -27,23 +27,19 @@ const isMissingFolderId = (folderId: unknown): boolean => {
     String(folderId).trim() === ""
   );
 };
-
 const readDeletedState = (entity: Record<string, unknown>): boolean => {
   return Boolean(entity.isDeleted ?? entity.is_deleted ?? entity.deleted);
 };
-
 const toRecord = (value: unknown): Record<string, unknown> => {
   return value !== null && typeof value === "object"
     ? (value as Record<string, unknown>)
     : {};
 };
-
 const toNonEmptyString = (value: unknown): string | null => {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
-
 export const createCheckDataIntegrityUseCase = () => { const execute = async (): Promise<IntegrityReport> => { const issues: IntegrityIssue[] = [];
 
     try {

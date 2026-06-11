@@ -8,13 +8,10 @@ import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types"
 import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync";
 import { useSyncedHorizontalScroll } from "./useSyncedHorizontalScroll";
 
-
-
 type CalendarBuffer = {
   before: number;
   after: number;
 };
-
 type Props = {
   selectedViewMode: CalendarViewMode;
   visibleDays: Date[];
@@ -26,25 +23,18 @@ type Props = {
   scrollTargetToken?: number;
 };
 
-
-
 const CALENDAR_TIMELINE_SCROLLED_CLASS_NAME = "calendar-timeline-scroll-scrolled";
 const SCHEDULE_SCROLL_POSITION_PERSIST_DELAY_MS = 200;
-
-
 
 const isWeekdayHorizontalViewMode = (viewMode: CalendarViewMode) =>
   viewMode === "days" ||
   viewMode === "threeDays" ||
   viewMode === "week" ||
   viewMode === "timetable";
-
 const isRestorableVerticalScrollViewMode = (viewMode: CalendarViewMode): boolean => isWeekdayHorizontalViewMode(viewMode);
-
 const updateTimelineScrollFadeVisibility = (scroller: HTMLDivElement): void => {
   scroller.classList.toggle(CALENDAR_TIMELINE_SCROLLED_CLASS_NAME, scroller.scrollTop > 0);
 };
-
 export const useCalendarScrollController = ({ selectedViewMode, visibleDays, virtualRail, calendarBuffer, viewportWidth, calendarDayColumnWidth, onVisibleDateChange, scrollTargetToken, }: Props) => { const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);

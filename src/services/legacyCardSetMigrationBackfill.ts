@@ -1,18 +1,12 @@
 import type { Card, CardSet, Folder } from "@/types";
 import { getLocalDb } from "./localdb";
 
-
-
 type LocalFirstBackfillDb = Awaited<ReturnType<typeof getLocalDb>> & {
   addItem: (table: "cardSets", item: Record<string, unknown>) => Promise<string>;
   updateItem: (table: "cards" | "cardSets", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
 
-
-
 const backfillPromiseByUserId = new Map<string, Promise<void>>();
-
-
 
 const createId = (): string => {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -21,7 +15,6 @@ const createId = (): string => {
 
   return `cardset-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
-
 export const backfillLegacyCardsToCardSets = async (userId: string): Promise<void> => { const db = await getLocalDb(userId);
   const syncDb = db as LocalFirstBackfillDb;
   const now = new Date();
@@ -156,7 +149,6 @@ export const backfillLegacyCardsToCardSets = async (userId: string): Promise<voi
 
   console.info(`[AppInit:${userId}] CardSet backfill repaired ${legacyCards.length} legacy cards and ${danglingCardsBySetId.size} missing sets.`);
 };
-
 export const ensureLegacyCardsBackfilled = async (userId: string) => { const existing = backfillPromiseByUserId.get(userId);
   if (existing) return existing;
 

@@ -2,12 +2,9 @@ import type { Card } from "./card";
 import type { DocumentItem } from "./document";
 import type { Note } from "./note";
 
-
-
 export type ExplorerItem = | { type: "card"; data: Card }
   | { type: "document"; data: DocumentItem }
   | { type: "note"; data: Note };
-
 export type SelectedExplorerItem = | { type: "card"; id: string }
   | { type: "cardSet"; id: string }
   | { type: "document"; id: string }

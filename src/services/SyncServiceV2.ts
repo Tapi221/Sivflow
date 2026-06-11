@@ -7,11 +7,7 @@ import type { SyncConflict as StoredSyncConflict, SyncQueueItem, SyncResult } fr
 import type { SyncContextSource } from "@/types/domain/telemetry";
 import type { LocalDBLike } from "./localDB";
 
-
-
 type SyncableRecord = Record<string, unknown> & { id?: string; isDeleted?: boolean };
-
-
 
 const SYNC_TABLE_BY_TYPE = {
   card: "cards",
@@ -22,18 +18,11 @@ const SYNC_TABLE_BY_TYPE = {
   asset: "images",
   userSetting: "userSettings",
 } as const;
-
 const FULL_RESYNC_TABLES = ["folders", "cardSets", "cards", "documents", "tagRecords", "userSettings", "images"] as const;
-
 const ROOT_FOLDER_KEY = "__root__";
-
 const DEFAULT_FOLDER_NAME = "インポート済みカード";
 
-
-
 type SyncableTableName = (typeof FULL_RESYNC_TABLES)[number];
-
-
 
 const SYNC_ENTITY_BY_TABLE: Record<SyncableTableName, SyncTask["entity"]> = {
   folders: "folder",
@@ -44,31 +33,23 @@ const SYNC_ENTITY_BY_TABLE: Record<SyncableTableName, SyncTask["entity"]> = {
   userSettings: "userSetting",
   images: "asset",
 };
-
 const DELETE_CAPABLE_SYNC_ENTITIES = new Set<SyncTask["entity"]>(["folder", "cardSet", "card", "document", "tag", "asset"]);
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return value !== null && typeof value === "object";
 };
-
 const toSyncTableName = (type: string) => {
   return SYNC_TABLE_BY_TYPE[type as keyof typeof SYNC_TABLE_BY_TYPE] ?? `${type}s`;
 };
-
 const getPayloadId = (payload: unknown) => {
   if (!isRecord(payload)) return null;
   return typeof payload.id === "string" && payload.id.length > 0 ? payload.id : null;
 };
-
 const getRecordId = (record: unknown): string | null => {
   if (!isRecord(record)) return null;
   return typeof record.id === "string" && record.id.trim().length > 0 ? record.id : null;
 };
-
 const isDeletedRecord = (record: unknown): boolean => isRecord(record) && record.isDeleted === true;
-
 const normalizeFullResyncRecord = (userId: string, change: { type?: string; id?: string; data?: unknown }) => {
   const data = { ...((isRecord(change.data) ? change.data : {}) as Record<string, unknown>) };
 
@@ -83,21 +64,17 @@ const normalizeFullResyncRecord = (userId: string, change: { type?: string; id?:
 
   return data;
 };
-
 const normalizeFolderKey = (value: unknown) => {
   if (typeof value !== "string") return ROOT_FOLDER_KEY;
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : ROOT_FOLDER_KEY;
 };
-
 const toFolderId = (folderKey: string) => {
   return folderKey === ROOT_FOLDER_KEY ? null : folderKey;
 };
-
 const buildFolderNameById = (folders: Folder[]) => {
   return new Map(folders.map((folder) => [String(folder.id ?? folder.folderId ?? ""), String(folder.folderName ?? "")]));
 };
-
 const buildNextOrderIndexByFolder = (cardSets: CardSet[]) => {
   const nextOrderIndexByFolder = new Map<string, number>();
 
@@ -110,7 +87,6 @@ const buildNextOrderIndexByFolder = (cardSets: CardSet[]) => {
 
   return nextOrderIndexByFolder;
 };
-
 const buildActiveCardSetByFolder = (cardSets: CardSet[]) => {
   const activeCardSetByFolder = new Map<string, CardSet>();
 
@@ -124,7 +100,6 @@ const buildActiveCardSetByFolder = (cardSets: CardSet[]) => {
 
   return activeCardSetByFolder;
 };
-
 const collectCardsNeedingRepair = (cards: Card[], activeCardSetIds: Set<string>) => {
   return cards.filter((card) => {
     if (card.isDeleted) return false;
@@ -132,11 +107,9 @@ const collectCardsNeedingRepair = (cards: Card[], activeCardSetIds: Set<string>)
     return cardSetId.length === 0 || !activeCardSetIds.has(cardSetId);
   });
 };
-
 const shouldRepairCardSets = (changes: Array<{ type?: unknown }>) => {
   return changes.some((change) => change.type === "card" || change.type === "cardSet" || change.type === "folder");
 };
-
 const preserveLocalOnlyFields = (type: string, localData: unknown, merged: unknown) => {
   if (!isRecord(merged)) return merged;
 
@@ -161,7 +134,6 @@ const preserveLocalOnlyFields = (type: string, localData: unknown, merged: unkno
 
   return merged;
 };
-
 const getCurrentDeviceId = () => {
   try {
     const deviceId = localStorage.getItem("deviceId");
@@ -170,7 +142,6 @@ const getCurrentDeviceId = () => {
     return null;
   }
 };
-
 const applyLocalCardSyncMetadata = (record: unknown, { syncedAt, syncState }: { syncedAt: Date; syncState: Card["syncState"] }) => {
   if (!isRecord(record)) return record;
 
@@ -180,20 +151,17 @@ const applyLocalCardSyncMetadata = (record: unknown, { syncedAt, syncState }: { 
 
   return record;
 };
-
 const toQueueEntity = (changeType: string): SyncTask["entity"] | null => {
   if (changeType === "userSetting") return "userSetting";
   const table = toSyncTableName(changeType);
   return SYNC_ENTITY_BY_TABLE[table as SyncableTableName] ?? null;
 };
-
 const toLocalUpsertPayload = (record: unknown): Record<string, unknown> | null => {
   if (!isRecord(record)) return null;
   const id = getRecordId(record);
   if (!id) return null;
   return { ...record, id };
 };
-
 const repairMissingCardSetsAfterSync = async (localDB: LocalDBLike, userId: string) => {
   const now = new Date();
   const [cards, cardSets, folders] = await Promise.all([localDB.listCardsByUser(userId), localDB.listCardSetsByUser(userId), localDB.listFoldersByUser(userId)]);
@@ -249,7 +217,6 @@ const repairMissingCardSetsAfterSync = async (localDB: LocalDBLike, userId: stri
     }
   });
 };
-
 export class SyncServiceV2 implements ISyncService { private queueManager: IQueueManager;
   private networkMonitor: INetworkMonitor;
   private diffEngine: IDiffEngine;

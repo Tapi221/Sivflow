@@ -12,13 +12,11 @@ export type CreateProjectCalendarLinkInput = { projectId: string;
   color?: string;
   lastSyncedAt?: string;
 };
-
 type StoredProjectCalendarLink = Partial<ProjectCalendarLink>;
 
 
 
 export const PROJECT_CALENDAR_LINKS_STORAGE_KEY = "sivflow:schedule:project-calendar-links";
-
 const LEGACY_PROJECT_CALENDAR_LINKS_STORAGE_KEY = "flashcard-master:schedule:project-calendar-links";
 const DEFAULT_SYNC_DIRECTION: ProjectCalendarSyncDirection = "twoWay";
 const SUPPORTED_CALENDAR_PROVIDERS = new Set<CalendarProvider>(["local", "google", "appleEventKit", "appleCalDav"]);
@@ -27,39 +25,32 @@ const SUPPORTED_SYNC_DIRECTIONS = new Set<ProjectCalendarSyncDirection>(["import
 
 
 const encodeLinkIdPart = (value: string): string => encodeURIComponent(value.trim());
-
 const readString = (value: unknown): string | null => {
   if (typeof value !== "string") return null;
 
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
 };
-
 const readOptionalString = (value: unknown): string | undefined => {
   const result = readString(value);
   return result ?? undefined;
 };
-
 const readBoolean = (value: unknown): boolean => value === true;
-
 const normalizeProvider = (value: unknown): CalendarProvider | null => {
   if (typeof value !== "string") return null;
   if (!SUPPORTED_CALENDAR_PROVIDERS.has(value as CalendarProvider)) return null;
 
   return value as CalendarProvider;
 };
-
 const normalizeSyncDirection = (value: unknown): ProjectCalendarSyncDirection => {
   if (typeof value !== "string") return DEFAULT_SYNC_DIRECTION;
   if (!SUPPORTED_SYNC_DIRECTIONS.has(value as ProjectCalendarSyncDirection)) return DEFAULT_SYNC_DIRECTION;
 
   return value as ProjectCalendarSyncDirection;
 };
-
 const normalizeCreatedLinkSyncDirection = (
   value: ProjectCalendarSyncDirection | undefined,
 ): ProjectCalendarSyncDirection => value ?? DEFAULT_SYNC_DIRECTION;
-
 const normalizeStoredProjectCalendarLink = (item: unknown): ProjectCalendarLink | null => {
   if (typeof item !== "object" || item === null) return null;
 
@@ -87,7 +78,6 @@ const normalizeStoredProjectCalendarLink = (item: unknown): ProjectCalendarLink 
     lastSyncedAt: readOptionalString(stored.lastSyncedAt),
   };
 };
-
 const readStoredProjectCalendarLinksRaw = (): string | null => {
   const current = window.localStorage.getItem(PROJECT_CALENDAR_LINKS_STORAGE_KEY);
   if (current) return current;
@@ -99,11 +89,8 @@ const readStoredProjectCalendarLinksRaw = (): string | null => {
   window.localStorage.removeItem(LEGACY_PROJECT_CALENDAR_LINKS_STORAGE_KEY);
   return legacy;
 };
-
 export const buildProjectCalendarLinkId = (provider: CalendarProvider, accountId: string, externalCalendarId: string): string => ["project-calendar-link", encodeLinkIdPart(provider), encodeLinkIdPart(accountId), encodeLinkIdPart(externalCalendarId)].join(":");
-
 export const createProjectCalendarLink = ({ projectId, provider, accountId, externalCalendarId, externalCalendarName, syncDirection, createdByApp, color, lastSyncedAt, }: CreateProjectCalendarLinkInput): ProjectCalendarLink => ({ id: buildProjectCalendarLinkId(provider, accountId, externalCalendarId), projectId, provider, accountId, externalCalendarId, externalCalendarName, syncDirection: normalizeCreatedLinkSyncDirection(syncDirection), createdByApp, color, lastSyncedAt, });
-
 export const readStoredProjectCalendarLinks = (): ProjectCalendarLink[] => { if (typeof window === "undefined") return [];
 
   try {
@@ -127,7 +114,6 @@ export const readStoredProjectCalendarLinks = (): ProjectCalendarLink[] => { if 
     return [];
   }
 };
-
 export const persistProjectCalendarLinks = (links: ProjectCalendarLink[]) => { if (typeof window === "undefined") return;
 
   try {
@@ -136,4 +122,3 @@ export const persistProjectCalendarLinks = (links: ProjectCalendarLink[]) => { i
   } catch {
     // localStorage が利用できない環境でも、画面上のリンク状態は維持する。
   }
-};

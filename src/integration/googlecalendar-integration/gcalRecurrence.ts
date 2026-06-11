@@ -1,22 +1,18 @@
 import { normalizeCalendarRecurrenceRule } from "@core/calendar";
 import type { CalendarRecurrenceFrequency, CalendarRecurrenceRule, CalendarWeekday } from "@core/calendar";
 
-
-
 const GOOGLE_FREQUENCY_BY_CALENDAR_FREQUENCY: Record<CalendarRecurrenceFrequency, string> = {
   daily: "DAILY",
   monthly: "MONTHLY",
   weekly: "WEEKLY",
   yearly: "YEARLY",
 };
-
 const CALENDAR_FREQUENCY_BY_GOOGLE_FREQUENCY: Record<string, CalendarRecurrenceFrequency> = {
   DAILY: "daily",
   MONTHLY: "monthly",
   WEEKLY: "weekly",
   YEARLY: "yearly",
 };
-
 const GOOGLE_DAY_BY_WEEKDAY: Record<CalendarWeekday, string> = {
   0: "SU",
   1: "MO",
@@ -26,7 +22,6 @@ const GOOGLE_DAY_BY_WEEKDAY: Record<CalendarWeekday, string> = {
   5: "FR",
   6: "SA",
 };
-
 const WEEKDAY_BY_GOOGLE_DAY: Record<string, CalendarWeekday> = {
   FR: 5,
   MO: 1,
@@ -36,13 +31,9 @@ const WEEKDAY_BY_GOOGLE_DAY: Record<string, CalendarWeekday> = {
   TU: 2,
   WE: 3,
 };
-
 const RRULE_PREFIX = "RRULE:";
 
-
-
 const formatGoogleUntilDate = (date: Date): string => date.toISOString().replaceAll("-", "").replaceAll(":", "").replace(/\.\d{3}Z$/, "Z");
-
 const parseIntegerList = (value: string | undefined): number[] | undefined => {
   if (!value) return undefined;
 
@@ -53,7 +44,6 @@ const parseIntegerList = (value: string | undefined): number[] | undefined => {
 
   return values.length > 0 ? values : undefined;
 };
-
 const parseGoogleUntilDate = (value: string | undefined): Date | undefined => {
   if (!value) return undefined;
 
@@ -73,7 +63,6 @@ const parseGoogleUntilDate = (value: string | undefined): Date | undefined => {
 
   return Number.isFinite(date.getTime()) ? date : undefined;
 };
-
 const parseGoogleDayList = (value: string | undefined): CalendarWeekday[] | undefined => {
   if (!value) return undefined;
 
@@ -85,7 +74,6 @@ const parseGoogleDayList = (value: string | undefined): CalendarWeekday[] | unde
 
   return days.length > 0 ? days : undefined;
 };
-
 export const serializeGoogleRecurrenceRule = (rule: CalendarRecurrenceRule | null | undefined): string | null => { const normalized = normalizeCalendarRecurrenceRule(rule);
   if (!normalized) return null;
 
@@ -100,7 +88,6 @@ export const serializeGoogleRecurrenceRule = (rule: CalendarRecurrenceRule | nul
 
   return `${RRULE_PREFIX}${parts.join(";")}`;
 };
-
 export const parseGoogleRecurrenceRule = (recurrence: readonly string[] | undefined): CalendarRecurrenceRule | undefined => { const rawRRule = recurrence?.find((item) => item.toUpperCase().startsWith(RRULE_PREFIX));
   if (!rawRRule) return undefined;
 

@@ -5,11 +5,8 @@ import { createCalendarTimetableSearchText as createSearchText, normalizeCalenda
 
 
 const TIMETABLE_SETTINGS_ID = "default";
-
 const DEFAULT_SEMESTER_ID = "default-semester";
-
 const DEFAULT_VISIBLE_DAY_COUNT: CalendarTimetableVisibleDayCount = 5;
-
 const DEFAULT_TIMETABLE_PERIODS: readonly CalendarTimetablePeriod[] = [
   { id: "period-1", label: "1", startTime: "08:50", endTime: "10:20", order: 0 },
   { id: "period-2", label: "2", startTime: "10:30", endTime: "12:00", order: 1 },
@@ -55,49 +52,35 @@ const timetableDb = new CalendarTimetableDatabase();
 
 
 const createTimestamp = (): string => new Date().toISOString();
-
 const createCourseId = (): string => `course-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-
 const createDepartmentId = (): string => `department-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-
 const createInstitutionId = (): string => `institution-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-
 const createPeriodId = (): string => `period-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-
 const createSyllabusCourseId = (): string => `syllabus-course-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-
 const createDefaultSettings = (): CalendarTimetableSettings => ({ id: TIMETABLE_SETTINGS_ID, activeSemesterId: DEFAULT_SEMESTER_ID, visibleDayCount: DEFAULT_VISIBLE_DAY_COUNT, updatedAt: createTimestamp() });
-
 const createDefaultPeriods = (): CalendarTimetablePeriod[] => DEFAULT_TIMETABLE_PERIODS.map((period) => ({ ...period }));
-
 const getComparableTimestamp = (value: unknown): string => typeof value === "string" ? value : "";
-
 const getCourseSearchText = (course: CalendarTimetableSyllabusCourse): string => course.searchText || createSearchText([course.title, course.teacher, course.room, course.semesterLabel, course.credits, course.memo, course.syllabusUrl]);
-
 const restoreDefaultPeriods = async (): Promise<CalendarTimetablePeriod[]> => {
   const periods = createDefaultPeriods();
   await timetableDb.periods.bulkPut(periods);
   return periods;
 };
-
 const findInstitutionByName = async (name: string): Promise<CalendarTimetableInstitution | null> => {
   const normalizedName = normalizeText(name);
   if (!normalizedName) return null;
   return await timetableDb.institutions.filter((institution) => institution.name === normalizedName).first() ?? null;
 };
-
 const findDepartmentByName = async (institutionId: string, facultyName: string, name: string): Promise<CalendarTimetableDepartment | null> => {
   const normalizedFacultyName = normalizeText(facultyName);
   const normalizedName = normalizeText(name);
   if (!institutionId || !normalizedName) return null;
   return await timetableDb.departments.filter((department) => department.institutionId === institutionId && department.facultyName === normalizedFacultyName && department.name === normalizedName).first() ?? null;
 };
-
 const findPeriodByLabel = (periods: CalendarTimetablePeriod[], label: string): CalendarTimetablePeriod | null => {
   const normalizedLabel = normalizeText(label);
   return periods.find((period) => period.label === normalizedLabel) ?? null;
 };
-
 const createCourseSlotsFromSyllabusCourse = (syllabusCourse: CalendarTimetableSyllabusCourse, periods: CalendarTimetablePeriod[]): CalendarTimetableSlot[] => {
   return syllabusCourse.slots.flatMap((slot) => {
     const period = findPeriodByLabel(periods, slot.periodLabel);
@@ -105,7 +88,6 @@ const createCourseSlotsFromSyllabusCourse = (syllabusCourse: CalendarTimetableSy
     return [{ dayIndex: slot.dayIndex, periodId: period.id }];
   });
 };
-
 const ensureCalendarTimetableSeedData = async (): Promise<void> => {
   await timetableDb.transaction("rw", timetableDb.periods, timetableDb.settings, async () => {
     const [periodCount, settings] = await Promise.all([timetableDb.periods.count(), timetableDb.settings.get(TIMETABLE_SETTINGS_ID)]);
@@ -113,35 +95,29 @@ const ensureCalendarTimetableSeedData = async (): Promise<void> => {
     if (!settings) await timetableDb.settings.put(createDefaultSettings());
   });
 };
-
 const listCalendarTimetablePeriods = async (): Promise<CalendarTimetablePeriod[]> => {
   await ensureCalendarTimetableSeedData();
   const periods = sortPeriods(await timetableDb.periods.toArray());
   if (periods.length > 0) return periods;
   return sortPeriods(await restoreDefaultPeriods());
 };
-
 const listCalendarTimetableCourses = async (semesterId: string): Promise<CalendarTimetableCourse[]> => {
   await ensureCalendarTimetableSeedData();
   return timetableDb.courses.where("semesterId").equals(semesterId).sortBy("updatedAt");
 };
-
 const getCalendarTimetableSettings = async (): Promise<CalendarTimetableSettings> => {
   await ensureCalendarTimetableSeedData();
   return await timetableDb.settings.get(TIMETABLE_SETTINGS_ID) ?? createDefaultSettings();
 };
-
 const listCalendarTimetableInstitutions = async (): Promise<CalendarTimetableInstitution[]> => {
   await ensureCalendarTimetableSeedData();
   return timetableDb.institutions.orderBy("name").toArray();
 };
-
 const listCalendarTimetableDepartments = async (institutionId: string): Promise<CalendarTimetableDepartment[]> => {
   await ensureCalendarTimetableSeedData();
   if (!institutionId) return [];
   return timetableDb.departments.where("institutionId").equals(institutionId).sortBy("name");
 };
-
 const searchCalendarTimetableSyllabusCourses = async (query: string, institutionId?: string | null, departmentId?: string | null): Promise<CalendarTimetableSyllabusCourseDisplay[]> => {
   await ensureCalendarTimetableSeedData();
   const normalizedQuery = normalizeText(query).toLowerCase();
@@ -162,7 +138,6 @@ const searchCalendarTimetableSyllabusCourses = async (query: string, institution
       return { ...course, searchText: getCourseSearchText(course), institutionName: institution?.name ?? "", departmentName: department?.name ?? "", facultyName: department?.facultyName ?? "" };
     });
 };
-
 const saveCalendarTimetableCourse = async (draft: CalendarTimetableCourseDraft): Promise<void> => {
   const periods = await listCalendarTimetablePeriods();
   const slots = normalizeSlots(draft.slots, periods);
@@ -173,13 +148,11 @@ const saveCalendarTimetableCourse = async (draft: CalendarTimetableCourseDraft):
 
   await timetableDb.courses.put({ id: draft.id ?? createCourseId(), semesterId: draft.semesterId, syllabusCourseId: draft.syllabusCourseId, institutionId: draft.institutionId, departmentId: draft.departmentId, title, room: normalizeText(draft.room), teacher: normalizeText(draft.teacher), memo: normalizeText(draft.memo), colorKey: draft.colorKey, slots, createdAt: draft.createdAt ?? now, updatedAt: now });
 };
-
 const addCalendarTimetableCourseFromSyllabus = async (syllabusCourse: CalendarTimetableSyllabusCourse, semesterId: string): Promise<void> => {
   const periods = await listCalendarTimetablePeriods();
   const slots = createCourseSlotsFromSyllabusCourse(syllabusCourse, periods);
   await saveCalendarTimetableCourse({ semesterId, syllabusCourseId: syllabusCourse.id, institutionId: syllabusCourse.institutionId, departmentId: syllabusCourse.departmentId, title: syllabusCourse.title, room: syllabusCourse.room, teacher: syllabusCourse.teacher, memo: syllabusCourse.memo, colorKey: syllabusCourse.colorKey, slots });
 };
-
 const saveCalendarTimetableSyllabusCourse = async (draft: CalendarTimetableSyllabusCourseDraft): Promise<void> => {
   const institutionName = normalizeText(draft.institutionName);
   const departmentName = normalizeText(draft.departmentName);
@@ -204,27 +177,22 @@ const saveCalendarTimetableSyllabusCourse = async (draft: CalendarTimetableSylla
     await timetableDb.syllabusCourses.put({ id: createSyllabusCourseId(), institutionId: nextInstitution.id, departmentId: nextDepartment.id, title, room: normalizeText(draft.room), teacher: normalizeText(draft.teacher), semesterLabel: normalizeText(draft.semesterLabel), credits: normalizeText(draft.credits), memo: normalizeText(draft.memo), syllabusUrl: normalizeText(draft.syllabusUrl), colorKey: draft.colorKey, slots: draft.slots, source: draft.source ?? "manual", searchText, createdAt: now, updatedAt: now });
   });
 };
-
 const deleteCalendarTimetableCourse = async (courseId: string): Promise<void> => {
   await timetableDb.courses.delete(courseId);
 };
-
 const updateCalendarTimetableVisibleDayCount = async (visibleDayCount: CalendarTimetableVisibleDayCount): Promise<void> => {
   const currentSettings = await getCalendarTimetableSettings();
   await timetableDb.settings.put({ ...currentSettings, visibleDayCount, updatedAt: createTimestamp() });
 };
-
 const addCalendarTimetablePeriod = async (): Promise<void> => {
   const periods = await listCalendarTimetablePeriods();
   const order = periods.length;
   const previousPeriod = periods.at(-1);
   await timetableDb.periods.add({ id: createPeriodId(), label: `${order + 1}`, startTime: previousPeriod?.endTime ?? "09:00", endTime: previousPeriod?.endTime ?? "10:30", order });
 };
-
 const updateCalendarTimetablePeriod = async (period: CalendarTimetablePeriod): Promise<void> => {
   await timetableDb.periods.put({ ...period, label: normalizeText(period.label) || `${period.order + 1}`, startTime: normalizeText(period.startTime), endTime: normalizeText(period.endTime) });
 };
-
 const deleteCalendarTimetablePeriod = async (periodId: string): Promise<void> => {
   await timetableDb.transaction("rw", timetableDb.periods, timetableDb.courses, async () => {
     await timetableDb.periods.delete(periodId);
@@ -242,4 +210,4 @@ const deleteCalendarTimetablePeriod = async (periodId: string): Promise<void> =>
 
 
 
-export { addCalendarTimetableCourseFromSyllabus, addCalendarTimetablePeriod, deleteCalendarTimetableCourse, deleteCalendarTimetablePeriod, ensureCalendarTimetableSeedData, getCalendarTimetableSettings, listCalendarTimetableCourses, listCalendarTimetableDepartments, listCalendarTimetableInstitutions, listCalendarTimetablePeriods, normalizeVisibleDayCount, saveCalendarTimetableCourse, saveCalendarTimetableSyllabusCourse, searchCalendarTimetableSyllabusCourses, updateCalendarTimetablePeriod, updateCalendarTimetableVisibleDayCount };
+export { addCalendarTimetableCourseFromSyllabus, addCalendarTimetablePeriod, deleteCalendarTimetableCourse, deleteCalendarTimetablePeriod, ensureCalendarTimetableSeedData, getCalendarTimetableSettings, listCalendarTimetableCourses, listCalendarTimetableDepartments, listCalendarTimetableInstitutions, listCalendarTimetablePeriods, normalizeVisibleDayCount, saveCalendarTimetableCourse, saveCalendarTimetableSyllabusCourse, searchCalendarTimetableSyllabusCourses, updateCalendarTimetablePeriod, updateCalendarTimetableVisibleDa

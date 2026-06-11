@@ -12,7 +12,6 @@ const normalizePathname = (pathname: string): string => {
   const normalized = pathname.toLowerCase().replace(/\/+$/, "");
   return normalized || "/";
 };
-
 export const resolveLibraryTypeFromPathname = ( pathname: string, ): LibraryContentType | null => { switch (normalizePathname(pathname)) { case LIBRARY_PDF_PATH: return "pdf";
     case LIBRARY_FLASHCARD_PATH:
     case "/library/flashcards":
@@ -21,7 +20,6 @@ export const resolveLibraryTypeFromPathname = ( pathname: string, ): LibraryCont
       return null;
   }
 };
-
 export const resolveLibraryTypeFromSearchParams = ( searchParams: URLSearchParams, ): LibraryContentType | null => { const libraryType = searchParams.get("libraryType");
 
   if (libraryType === "pdf") return "pdf";
@@ -31,10 +29,8 @@ export const resolveLibraryTypeFromSearchParams = ( searchParams: URLSearchParam
 
   return null;
 };
-
 export const resolveLibraryTypeFromLocation = ( pathname: string, searchParams: URLSearchParams, ): LibraryContentType | null => { return ( resolveLibraryTypeFromPathname(pathname) ?? resolveLibraryTypeFromSearchParams(searchParams) );
 };
-
 export const isLibraryPathname = (pathname: string): boolean => { const normalizedPathname = normalizePathname(pathname);
 
   return (
@@ -42,11 +38,9 @@ export const isLibraryPathname = (pathname: string): boolean => { const normaliz
     resolveLibraryTypeFromPathname(normalizedPathname) !== null
   );
 };
-
 export const buildLibraryTypePath = (libraryType: string): string => { if (libraryType === "pdf") return LIBRARY_PDF_PATH;
   if (libraryType === "flashcard" || libraryType === "flashcards") {
     return LIBRARY_FLASHCARD_PATH;
   }
 
   return LIBRARY_ROOT_PATH;
-};

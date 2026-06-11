@@ -17,7 +17,6 @@ import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 
 
 type UseScheduleScreenOptions = { allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay };
-
 export type UseScheduleScreenReturn = { contentViewportRef: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   headerScrollRef: RefObject<HTMLDivElement | null>;
@@ -75,7 +74,6 @@ export type UseScheduleScreenReturn = { contentViewportRef: RefObject<HTMLDivEle
 
   setMonthTitleDate: (date: Date) => void;
 };
-
 type MonthRenderedRangeSnapshot = CalendarDateRange & {
   scrollTargetToken: number;
   weekStartDay: CalendarWeekStartDay;
@@ -84,16 +82,13 @@ type MonthRenderedRangeSnapshot = CalendarDateRange & {
 
 
 const getGoogleCalendarEventDedupeKey = (event: GoogleCalendarEvent): string => event.id;
-
 const isSameCalendarDateRange = (left: CalendarDateRange | null, right: CalendarDateRange): boolean => left?.start.getTime() === right.start.getTime() && left.end.getTime() === right.end.getTime();
-
 const createMonthRenderedRangeSnapshot = (range: CalendarDateRange, scrollTargetToken: number, weekStartDay: CalendarWeekStartDay): MonthRenderedRangeSnapshot => ({
   start: range.start,
   end: range.end,
   scrollTargetToken,
   weekStartDay,
 });
-
 const dedupeGoogleCalendarEvents = (events: GoogleCalendarEvent[]): GoogleCalendarEvent[] => {
   const seenKeys = new Set<string>();
 
@@ -106,7 +101,6 @@ const dedupeGoogleCalendarEvents = (events: GoogleCalendarEvent[]): GoogleCalend
     return true;
   });
 };
-
 export const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDay }: UseScheduleScreenOptions = {}): UseScheduleScreenReturn => { const effectiveWeekStartDay = useCalendarWeekStartSetting(weekStartDay);
   const navigation = useCalendarNavigation({ allowMultiSelectViewMode, weekStartDay: effectiveWeekStartDay });
   const [monthRenderedRangeSnapshot, setMonthRenderedRangeSnapshot] = useState<MonthRenderedRangeSnapshot | null>(null);
@@ -253,4 +247,3 @@ export const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDa
     handleYearSyncRangeChange,
     setMonthTitleDate: navigation.setMonthTitleDate,
   };
-};

@@ -15,10 +15,8 @@ import { toMillis } from "@/utils/toMillis";
 type UseCardsReadOptions = {
   enabled?: boolean;
 };
-
 type CardSetById = ReturnType<typeof buildCardSetById>;
 type LocalDbInstance = Awaited<ReturnType<typeof getLocalDb>>;
-
 type CardsReadSnapshot = {
   key: string;
   rawCards: unknown[];
@@ -29,7 +27,6 @@ type CardsReadSnapshot = {
 const buildCardsReadKey = ({ enabled, userId, folderId, cardSetId }: { enabled: boolean; userId: string | null; folderId?: string; cardSetId?: string }) => {
   return JSON.stringify([enabled, userId, folderId ?? null, cardSetId ?? null]);
 };
-
 const isCardDeleted = (
   card: Partial<Card> & {
     is_deleted?: boolean;
@@ -51,7 +48,6 @@ const isCardDeleted = (
     deletedAt,
   );
 };
-
 const normalizeFolderId = (value: string | null | undefined) => {
   if (typeof value !== "string") {
     return null;
@@ -60,7 +56,6 @@ const normalizeFolderId = (value: string | null | undefined) => {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
-
 const normalizeCardSetId = (value: unknown): string | null => {
   if (typeof value !== "string") {
     return null;
@@ -69,11 +64,9 @@ const normalizeCardSetId = (value: unknown): string | null => {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
-
 const toTime = (value: unknown): number => {
   return toMillis(value);
 };
-
 const compareCards = (left: Card, right: Card): number => {
   const leftOrder = left.orderIndex ?? 0;
   const rightOrder = right.orderIndex ?? 0;
@@ -98,11 +91,9 @@ const compareCards = (left: Card, right: Card): number => {
 
   return left.id.localeCompare(right.id);
 };
-
 const hasCardSetRouteParam = (search: string): boolean => {
   return new URLSearchParams(search).has("cardSetId");
 };
-
 const hasMatchingCardSetId = (rawCard: unknown, cardSetId: string): boolean => {
   if (!rawCard || typeof rawCard !== "object") {
     return false;
@@ -111,7 +102,6 @@ const hasMatchingCardSetId = (rawCard: unknown, cardSetId: string): boolean => {
   const record = rawCard as { cardSetId?: unknown; card_set_id?: unknown };
   return normalizeCardSetId(record.cardSetId) === cardSetId || normalizeCardSetId(record.card_set_id) === cardSetId;
 };
-
 const readRawCardsByCardSetId = async (db: LocalDbInstance, cardSetId: string): Promise<unknown[]> => {
   try {
     const indexedCards = await db.cards.where("cardSetId").equals(cardSetId).toArray();
@@ -129,7 +119,6 @@ const readRawCardsByCardSetId = async (db: LocalDbInstance, cardSetId: string): 
   const allCards = await db.getAllCards();
   return allCards.filter((rawCard) => hasMatchingCardSetId(rawCard, cardSetId));
 };
-
 const resolveVisibleCards = ({
   rawCards,
   folderId,
@@ -158,7 +147,6 @@ const resolveVisibleCards = ({
 
   return normalized;
 };
-
 export const useCardsRead = ( folderId?: string, cardSetId?: string, options?: UseCardsReadOptions, ) => { const { search } = useLocation();
   const userId = useEffectiveLocalUserId();
   const isActiveWorkspaceCardSetSelected = useWorkspaceTabsStore((state) => {

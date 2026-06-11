@@ -1,13 +1,11 @@
 export type InkSide = "question" | "answer";
 export type InkTool = "pen" | "highlighter";
 export type InkEditTool = InkTool | "eraser";
-
 export type InkPoint = { x: number;
   y: number;
   t: number;
   p: number;
 };
-
 export type InkStroke = { id: string;
   tool: InkTool;
   color: string;
@@ -16,29 +14,21 @@ export type InkStroke = { id: string;
   points: InkPoint[];
   createdAt: number;
 };
-
 export type InkDocument = { version: number;
   updatedAt: number;
   strokes: InkStroke[];
   deletedStrokeIds?: string[];
 };
 
-
-
 export const INK_DOCUMENT_VERSION = 2;
 export const INK_PAPER_W = 1000;
 export const INK_PAPER_H = 1414;
 
-
-
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
-
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
-
 export const createEmptyInkDocument = (): InkDocument => ({ version: INK_DOCUMENT_VERSION, updatedAt: 0, strokes: [], });
-
 export const normalizeInkDocument = (value: unknown): InkDocument => { if (!value || typeof value !== "object") { return createEmptyInkDocument();
   }
 
@@ -116,5 +106,4 @@ export const normalizeInkDocument = (value: unknown): InkDocument => { if (!valu
       : {}),
   };
 };
-
 export const cloneInkDocument = (doc: InkDocument): InkDocument => ({ version: doc.version, updatedAt: doc.updatedAt, deletedStrokeIds: doc.deletedStrokeIds ? [...doc.deletedStrokeIds] : undefined, strokes: doc.strokes.map((stroke) => ({ ...stroke, points: stroke.points.map((point) => ({ ...point })), })), });

@@ -6,16 +6,10 @@ import { Volume2 } from "@/ui/icons";
 import type { Card } from "@/types";
 import { toIsoStringOrNull } from "@/utils/toMillis";
 
-
-
 type FlashcardCardLike = ComponentProps<typeof Flashcard>["card"];
-
 type StudyPhase = "timing" | "answer";
-
 type PracticeScore = "ok" | "anxious";
-
 type ReviewScore = 0 | 1 | 2 | 3;
-
 type BaseProps = {
   card: Card | null | undefined;
   currentIndex?: number;
@@ -35,19 +29,15 @@ type BaseProps = {
    */
   flipTrigger?: number;
 };
-
 type ReviewProps = BaseProps & {
   mode: "review";
   onResult?: (subjectiveScore: ReviewScore, responseTime: number) => void;
 };
-
 type PracticeProps = BaseProps & {
   mode: "practice";
   onResult?: (subjectiveScore: PracticeScore, responseTime: number) => void;
 };
-
 export type StudyCardProps = ReviewProps | PracticeProps;
-
 type Keyable = {
   id?: string;
   cardId?: string;
@@ -55,17 +45,13 @@ type Keyable = {
   uid?: string;
   createdAt?: unknown;
 };
-
 type InnerProps = Omit<StudyCardProps, "card"> & { card: Card };
-
-
 
 const stableKeyPart = (value: unknown): string => {
   if (typeof value === "string") return value;
   if (typeof value === "number") return String(value);
   return toIsoStringOrNull(value) ?? "";
 };
-
 const getCardKey = (card: Card): string => {
   const keyable = card as unknown as Keyable;
   const direct =
@@ -77,8 +63,6 @@ const getCardKey = (card: Card): string => {
 
   return direct && direct.length > 0 ? direct : "card";
 };
-
-
 
 const StudyCard = (props: StudyCardProps) => {
   const { card } = props;
@@ -93,7 +77,6 @@ const StudyCard = (props: StudyCardProps) => {
 
   return <StudyCardInner key={getCardKey(card)} {...props} card={card} />;
 };
-
 const StudyCardInner = ({
   card,
   onResult,
@@ -441,7 +424,5 @@ const StudyCardInner = ({
     </div>
   );
 };
-
-
 
 export default StudyCard;

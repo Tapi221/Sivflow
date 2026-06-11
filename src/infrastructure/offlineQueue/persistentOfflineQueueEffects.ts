@@ -6,11 +6,8 @@ import { shouldSkipQueuedDocumentUpload } from "@/infrastructure/offlineQueue/ef
 import { isDocumentQueueItem, type QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
 import type { UploadedImage } from "@/types";
 
-
-
 const isAssetLikeImageQueueItem = (item: QueueItem): boolean =>
   !isDocumentQueueItem(item) && item.fileType.startsWith("image/");
-
 const handleQueuedUploadSuccess = async (
   item: QueueItem,
   updatedImage: UploadedImage,
@@ -23,7 +20,6 @@ const handleQueuedUploadSuccess = async (
     await handleQueuedAssetUploadSuccess(item, updatedImage);
   }
 };
-
 const handleQueuedUploadPermanentFailure = async (
   item: QueueItem,
 ): Promise<void> => {
@@ -35,7 +31,5 @@ const handleQueuedUploadPermanentFailure = async (
     await handleQueuedAssetUploadFailure(item);
   }
 };
-
-
 
 export {handleQueuedUploadPermanentFailure, handleQueuedUploadSuccess, shouldSkipQueuedDocumentUpload,};

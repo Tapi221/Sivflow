@@ -9,7 +9,6 @@ export type CalendarListMenuAction = { id: "add-project" | "change-color";
   disabled?: boolean;
   onSelect: () => void;
 };
-
 type CalendarListMenuProps = {
   x: number;
   y: number;
@@ -22,12 +21,10 @@ type CalendarListMenuProps = {
 
 
 export const CALENDAR_LIST_MENU_PANEL_ID = "calendar-list-context-menu";
-
 const CALENDAR_LIST_MENU_LABELS = [
   "プロジェクトに追加",
   "色を変更",
 ];
-
 export const CALENDAR_LIST_MENU_WIDTH = resolveRightClickPanelTextWidth(CALENDAR_LIST_MENU_LABELS);
 export const CALENDAR_LIST_MENU_HEIGHT = CALENDAR_LIST_MENU_LABELS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 export const CALENDAR_LIST_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;

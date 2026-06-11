@@ -5,21 +5,16 @@ import { getServerStoredGoogleConnectedServiceAccessToken, isServerStoredGoogleO
 import type { GoogleConnectedServiceAccountEntry, GoogleConnectedServiceAccountTokenUpdate } from "@/integration/google-integration/googleAccount.types";
 import type { GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 
-
-
 export type GoogleTaskListAccountState = { taskLists: GoogleTaskListItem[];
   isLoading: boolean;
   error: string | null;
 };
-
 type GoogleTaskListsState = Record<string, GoogleTaskListAccountState>;
-
 type GoogleTaskListsAction =
   | { type: "START"; accountId: string }
   | { type: "SUCCESS"; accountId: string; taskLists: GoogleTaskListItem[] }
   | { type: "ERROR"; accountId: string; error: string | null }
   | { type: "REMOVE_MISSING_ACCOUNTS"; accountIds: string[] };
-
 type AccountTokenSnapshot = {
   accountId: string;
   accessToken: string | null;
@@ -27,15 +22,11 @@ type AccountTokenSnapshot = {
   connectionStatus: GoogleConnectedServiceAccountEntry["connectionStatus"];
 };
 
-
-
 const EMPTY_ACCOUNT_STATE: GoogleTaskListAccountState = {
   taskLists: [],
   isLoading: false,
   error: null,
 };
-
-
 
 const shouldHideAuthRecoveryError = (error: unknown): boolean => {
   if (!(error instanceof Error)) return false;
@@ -45,7 +36,6 @@ const shouldHideAuthRecoveryError = (error: unknown): boolean => {
 
   return status === 401 || code === "auto-recovery-pending";
 };
-
 const isGooglePermissionError = (error: unknown): boolean => {
   if (!(error instanceof Error)) return false;
 
@@ -57,7 +47,6 @@ const isGooglePermissionError = (error: unknown): boolean => {
     (reason === "authError" || reason === "insufficientPermissions")
   );
 };
-
 const toErrorMessage = (error: unknown) => {
   if (isGooglePermissionError(error)) {
     return "Google ToDo の権限が不足しています。再連携してください。";
@@ -67,12 +56,10 @@ const toErrorMessage = (error: unknown) => {
   if (!(error instanceof Error)) return String(error);
   return error.message;
 };
-
 const isUnauthorizedError = (error: unknown): boolean =>
   error instanceof Error &&
   ((error as Error & { status?: number }).status === 401 ||
     (error as Error & { status?: number }).status === 403);
-
 const getRecoverableAccessToken = async (
   account: AccountTokenSnapshot,
   onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,
@@ -128,7 +115,6 @@ const getRecoverableAccessToken = async (
 
   return result.accessToken;
 };
-
 const fetchGoogleTaskListsWithRecovery = async (
   account: AccountTokenSnapshot,
   onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,
@@ -159,7 +145,6 @@ const fetchGoogleTaskListsWithRecovery = async (
     return fetchGoogleTaskLists(recoveredToken);
   }
 };
-
 const reduceGoogleTaskLists = (
   state: GoogleTaskListsState,
   action: GoogleTaskListsAction,
@@ -218,7 +203,6 @@ const reduceGoogleTaskLists = (
       return state;
   }
 };
-
 const buildAccountTokenKey = (accounts: GoogleConnectedServiceAccountEntry[]) =>
   accounts
     .map((account) =>
@@ -230,7 +214,6 @@ const buildAccountTokenKey = (accounts: GoogleConnectedServiceAccountEntry[]) =>
       ].join("\t"),
     )
     .join("\n");
-
 export const useGoogleTaskLists = ( accounts: GoogleConnectedServiceAccountEntry[], onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void, retryNonce = 0, ): GoogleTaskListsState => { const [state, dispatch] = useReducer(reduceGoogleTaskLists, {});
 
   const accountTokenKey = buildAccountTokenKey(accounts);

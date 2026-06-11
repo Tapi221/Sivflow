@@ -24,7 +24,6 @@ const resolveCardSetName = (cardFile: MfCardFileV1) => {
 
   return "single card";
 };
-
 const buildSingleCardArchive = (cardFile: MfCardFileV1): MfDeckArchiveV1 => {
   return {
     manifest: {
@@ -46,6 +45,4 @@ const buildSingleCardArchive = (cardFile: MfCardFileV1): MfDeckArchiveV1 => {
     },
   };
 };
-
 export const importMfCardFile = async ({ cardFile, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination, }: ImportMfCardFileParams): Promise<ImportMfDeckArchiveResult> => { return importMfDeckArchive({ archive: buildSingleCardArchive(cardFile), folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination, });
-};

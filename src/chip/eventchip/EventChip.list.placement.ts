@@ -11,12 +11,10 @@ export type CalendarListPlacementDay = { date: Date;
   isSelected: boolean;
   isToday: boolean;
 };
-
 export type CalendarListVirtualMetrics = { heights: number[];
   offsets: number[];
   totalHeight: number;
 };
-
 export type CalendarListVirtualRange = { start: number;
   end: number;
 };
@@ -40,9 +38,7 @@ const buildMonthDays = (date: Date): Date[] => {
 
   return Array.from({ length: getDaysInMonth(monthStart) }, (_, index) => addDays(monthStart, index));
 };
-
 const getListEventRowHeight = (event: GoogleCalendarEvent): number => event.isAllDay ? LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX : LIST_EVENT_ROW_HEIGHT_PX;
-
 const findVirtualIndex = (offsets: number[], targetOffset: number): number => {
   if (offsets.length === 0) return 0;
 
@@ -63,13 +59,11 @@ const findVirtualIndex = (offsets: number[], targetOffset: number): number => {
 
   return result;
 };
-
 export const getEventInstanceKey = (dateKey: string, event: GoogleCalendarEvent): string => { const startsAt = new Date(event.startsAt).getTime();
   const endsAt = new Date(event.endsAt).getTime();
 
   return `${dateKey}:${event.id}:${startsAt}:${endsAt}`;
 };
-
 export const buildListPlacementDays = ({ days, events, selectedDate, }: { days: Date[];
   events: GoogleCalendarEvent[];
   selectedDate: Date;
@@ -120,16 +114,13 @@ export const buildListPlacementDays = ({ days, events, selectedDate, }: { days: 
     };
   });
 };
-
 export const getListDayEstimatedHeight = (day: CalendarListPlacementDay): number => { if (day.events.length === 0) return LIST_EMPTY_DAY_HEIGHT_PX;
 
   const eventRowsHeight = day.events.reduce((total, event) => total + getListEventRowHeight(event), 0);
 
   return eventRowsHeight + Math.max(0, day.events.length - 1) * LIST_EVENT_ROW_GAP_PX;
 };
-
 export const getListDayHeight = (day: CalendarListPlacementDay): number => Math.max(getListDayEstimatedHeight(day), LIST_DAY_SECTION_MIN_HEIGHT_PX);
-
 export const buildListVirtualMetrics = (days: CalendarListPlacementDay[]): CalendarListVirtualMetrics => { let totalHeight = 0;
   const offsets: number[] = [];
   const heights = days.map((day, index) => {
@@ -143,7 +134,6 @@ export const buildListVirtualMetrics = (days: CalendarListPlacementDay[]): Calen
 
   return { heights, offsets, totalHeight };
 };
-
 export const getListVirtualRange = ( metrics: CalendarListVirtualMetrics, scrollTop: number, viewportHeight: number, ): CalendarListVirtualRange => { if (metrics.heights.length === 0) return { start: 0, end: 0 };
 
   const rangeStartOffset = Math.max(0, scrollTop - LIST_VIRTUAL_OVERSCAN_PX);
@@ -160,9 +150,7 @@ export const getListVirtualRange = ( metrics: CalendarListVirtualMetrics, scroll
     end: Math.min(metrics.heights.length, end + 1),
   };
 };
-
 export const areListVirtualRangesEqual = ( left: CalendarListVirtualRange, right: CalendarListVirtualRange, ): boolean => left.start === right.start && left.end === right.end;
-
 export const getListVisibleDate = ( days: CalendarListPlacementDay[], metrics: CalendarListVirtualMetrics, targetOffset: number, ): Date | null => { const index = findVirtualIndex(metrics.offsets, targetOffset);
 
   return days[index]?.date ?? null;

@@ -10,7 +10,6 @@ export interface QueueItem { id: string;
   retryCount: number;
   enqueuedAt: number;
 }
-
 export interface AssetUploadRequest { assetId: string;
   userId: string;
   remoteKey: string;

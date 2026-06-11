@@ -8,13 +8,11 @@ import { clearLegacyStoredAppProjects, normalizeRootFolderProjectLabel, readLega
 
 
 type CreateGoogleProjectCalendarLinkInput = { project: AppCalendarItem; accountId: string; calendar: GoogleCalendarListItem; color: string; createdByApp: boolean };
-
 type UseProjectCalendarActionsInput = {
   googleAccounts: GoogleAccountDisplay[];
   reconnectGoogleAccount: (accountId: string) => void | Promise<void>;
   toggleGoogleCalendar: (accountId: string, calendarId: string) => void;
 };
-
 type UseProjectCalendarActionsResult = {
   appProjects: AppCalendarItem[];
   projectCalendarLinks: ProjectCalendarLink[];
@@ -36,9 +34,7 @@ const GOOGLE_CALENDAR_COLOR_OVERRIDES_STORAGE_KEY = "flashcard-master:schedule:g
 
 
 const isHexColor = (value: string): boolean => /^#[0-9a-f]{6}$/i.test(value);
-
 const createGoogleCalendarColorOverrideKey = (accountId: string, calendarId: string): string => `${accountId}:${calendarId}`;
-
 const readStoredGoogleCalendarColorOverrides = (): GoogleCalendarColorOverrideMap => {
   if (typeof window === "undefined") return {};
   try {
@@ -55,7 +51,6 @@ const readStoredGoogleCalendarColorOverrides = (): GoogleCalendarColorOverrideMa
     return {};
   }
 };
-
 const persistGoogleCalendarColorOverrides = (overrides: GoogleCalendarColorOverrideMap) => {
   if (typeof window === "undefined") return;
   try {
@@ -64,11 +59,8 @@ const persistGoogleCalendarColorOverrides = (overrides: GoogleCalendarColorOverr
     // localStorage が使えない環境では React state の状態だけ維持する。
   }
 };
-
 const applyGoogleCalendarColorOverridesToAccounts = (accounts: GoogleAccountDisplay[], overrides: GoogleCalendarColorOverrideMap): GoogleAccountDisplay[] => accounts.map((account) => ({ ...account, calendars: account.calendars.map((calendar) => ({ ...calendar, backgroundColor: overrides[createGoogleCalendarColorOverrideKey(account.accountId, calendar.id)] ?? calendar.backgroundColor })) }));
-
 const createGoogleProjectCalendarLink = ({ project, accountId, calendar, color, createdByApp }: CreateGoogleProjectCalendarLinkInput): ProjectCalendarLink => createProjectCalendarLink({ projectId: project.id, provider: "google", accountId, externalCalendarId: calendar.id, externalCalendarName: calendar.summaryOverride ?? calendar.summary, syncDirection: "importOnly", createdByApp, color, lastSyncedAt: new Date().toISOString() });
-
 const useProjectCalendarActions = ({ googleAccounts, reconnectGoogleAccount, toggleGoogleCalendar }: UseProjectCalendarActionsInput): UseProjectCalendarActionsResult => {
   const didMigrateLegacyProjectsRef = useRef(false);
   const { appProjects, loading: rootFolderProjectsLoading, createRootFolderProject, findProjectByLabel, setProjectVisibility, toggleProject, updateRootFolderProjectColor } = useRootFolderProjects();
@@ -183,4 +175,4 @@ const useProjectCalendarActions = ({ googleAccounts, reconnectGoogleAccount, tog
 
 
 
-export { useProjectCalendarActions };
+export { useProjectCalendarAc

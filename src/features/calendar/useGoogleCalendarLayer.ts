@@ -22,13 +22,11 @@ const resolveExternalEventId = (accountId: string, calendarId: string, eventId: 
 
   return eventId;
 };
-
 const addDays = (date: Date, days: number): Date => {
   const next = new Date(date);
   next.setDate(next.getDate() + days);
   return next;
 };
-
 const buildRefreshRange = (event: Pick<GoogleCalendarEvent, "startsAt" | "endsAt" | "recurrenceRule"> | { startsAt?: Date; endsAt?: Date; recurrenceRule?: GoogleCalendarEvent["recurrenceRule"] }) => {
   const { startsAt, endsAt, recurrenceRule } = event;
   if (!startsAt || !endsAt) return null;
@@ -40,7 +38,6 @@ const buildRefreshRange = (event: Pick<GoogleCalendarEvent, "startsAt" | "endsAt
 
   return { rangeStart, rangeEnd };
 };
-
 export const useGoogleCalendarLayer = () => { useServerStoredGoogleAccountBootstrap();
   const [taskListRetryNonce, setTaskListRetryNonce] = useState(0);
 
@@ -201,4 +198,4 @@ export const useGoogleCalendarLayer = () => { useServerStoredGoogleAccountBootst
 
 
 
-export type { GoogleAccountEntry };
+export type { GoogleAccountEntr

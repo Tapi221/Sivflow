@@ -17,7 +17,6 @@ const Avatar = React.forwardRef<
     {...props}
   />
 ))
-
 const AvatarImage = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Image>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
@@ -28,7 +27,6 @@ const AvatarImage = React.forwardRef<
     {...props}
   />
 ))
-
 const AvatarFallback = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Fallback>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
@@ -46,9 +44,6 @@ const AvatarFallback = React.forwardRef<
 
 
 Avatar.displayName = AvatarPrimitive.Root.displayName
-
 AvatarImage.displayName = AvatarPrimitive.Image.displayName
-
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
-
 export { Avatar, AvatarImage, AvatarFallback }

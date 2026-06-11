@@ -16,7 +16,6 @@ export const getChangeParts = ( change: SyncChange, ): { type: CloudEntityType; 
     data: change.data,
   };
 };
-
 export const getChangeId = (change: SyncChange): string | null => { const parts = getChangeParts(change);
   return parts?.id ?? null;
 };

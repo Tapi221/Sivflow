@@ -9,9 +9,7 @@ import type { Card, CardSet, DocumentItem, ExplorerItem, Note } from "@/types";
 
 
 type LegacyEntityFields = { isDeleted?: boolean; is_deleted?: boolean; folder_id?: string | null; card_set_id?: string | null; orderIndex?: number; order_index?: number };
-
 type DraftFolderFields = { __draft?: boolean; __optimistic?: boolean };
-
 interface Params {
   treeFolders: FolderTreeNode[];
   treeCards: Card[];
@@ -28,30 +26,21 @@ const ORPHAN_DOCUMENT_CLEANUP_LOG_PREFIX = "[useExplorerDerivedData] orphan PDF 
 
 
 const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean } | null) => Boolean(entity?.isDeleted ?? entity?.is_deleted);
-
 const isDraftFolder = (folder: FolderTreeNode) => {
   const draftFolder = folder as FolderTreeNode & DraftFolderFields;
   return Boolean(draftFolder.__draft || draftFolder.__optimistic);
 };
-
 const withLegacy = <T extends object>(v: T): T & LegacyEntityFields => v as T & LegacyEntityFields;
-
 const getCardSetFolderId = (cardSet: CardSet): string | null | undefined => cardSet.folderId ?? withLegacy(cardSet).folder_id;
-
 const getDocumentFolderId = (document: DocumentItem): string | null | undefined => document.folderId ?? withLegacy(document).folder_id;
-
 const getNoteFolderId = (note: Note): string | null | undefined => note.folderId ?? withLegacy(note).folder_id;
-
 const getOrderIndex = (entity: object, fallback = Number.MAX_SAFE_INTEGER): number => withLegacy(entity).orderIndex ?? withLegacy(entity).order_index ?? fallback;
-
 const getFolderOrder = (folder: FolderTreeNode) => {
   return ((folder as { orderIndex?: number; order_index?: number }).orderIndex ?? (folder as { orderIndex?: number; order_index?: number }).order_index ?? 0) as number;
 };
-
 const getFolderName = (folder: FolderTreeNode) => {
   return String((folder as { folderName?: string; folder_name?: string }).folderName ?? (folder as { folderName?: string; folder_name?: string }).folder_name ?? "");
 };
-
 const compareFolders = (a: FolderTreeNode, b: FolderTreeNode) => {
   return compareOrderableEntities(a, b, {
     getOrderIndex: getFolderOrder,
@@ -61,7 +50,6 @@ const compareFolders = (a: FolderTreeNode, b: FolderTreeNode) => {
     getId: getFolderId,
   });
 };
-
 const isOrphanDocument = (document: DocumentItem, visibleFolderIdSet: Set<string>): boolean => {
   if (document.kind !== "pdf") return false;
   if (isSoftDeleted(withLegacy(document))) return false;
@@ -69,7 +57,6 @@ const isOrphanDocument = (document: DocumentItem, visibleFolderIdSet: Set<string
   if (normalizedFolderId === ROOT_FOLDER_ID) return true;
   return !visibleFolderIdSet.has(normalizedFolderId);
 };
-
 export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], documents, notes = [], isFiltering }: Params) => { const { purgeDocument } = useDocumentCommands();
   const orphanCleanupInFlightRef = useRef<Set<string>>(new Set());
 

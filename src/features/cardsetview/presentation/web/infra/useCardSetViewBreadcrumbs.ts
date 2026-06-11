@@ -11,7 +11,6 @@ type FolderLike = {
   folderName: string;
   parentFolderId?: string | null;
 };
-
 interface UseCardSetViewBreadcrumbsOptions {
   selectedCardSet: CardSet | null;
   selectedCard: Card | null;
@@ -47,4 +46,3 @@ export const useCardSetViewBreadcrumbs = ({ selectedCardSet, selectedCard, sorte
       setExtraCrumbs([]);
     };
   }, [setExtraCrumbs]);
-};

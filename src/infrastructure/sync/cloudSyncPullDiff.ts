@@ -5,8 +5,6 @@ import { getPullableCollectionRef, getUserSettingsRef, requireCloudSyncFirestore
 import { getUpdatedAtMillis, PULLABLE_ENTITY_TYPES, type PullableEntityType, sanitizeSyncDataFromCloud } from "@/application/usecases/cloudSyncShared";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
 
-
-
 type PullDiffChange = SyncChange & {
   type: PullableEntityType | "userSetting";
   id: string;
@@ -14,11 +12,7 @@ type PullDiffChange = SyncChange & {
   updatedAt: number;
 };
 
-
-
 const PAGE_SIZE = 500;
-
-
 
 const getStartAfterConstraint = (snapshot: QueryDocumentSnapshot<DocumentData>): QueryConstraint | null => {
   const fn = (Firestore as Record<string, unknown>).startAfter;
@@ -30,12 +24,10 @@ const getStartAfterConstraint = (snapshot: QueryDocumentSnapshot<DocumentData>):
     snapshot,
   );
 };
-
 const getChangeId = (snapshot: QueryDocumentSnapshot<DocumentData>, data: DocumentData): string => {
   const value = data.id;
   return typeof value === "string" && value.length > 0 ? value : snapshot.id;
 };
-
 const toPullDiffChange = (type: PullableEntityType, snapshot: QueryDocumentSnapshot<DocumentData>): PullDiffChange => {
   const data = snapshot.data();
 
@@ -46,7 +38,6 @@ const toPullDiffChange = (type: PullableEntityType, snapshot: QueryDocumentSnaps
     updatedAt: getUpdatedAtMillis(data.updatedAt),
   };
 };
-
 const fetchPullableEntityDiff = async (userId: string, type: PullableEntityType, sinceTimestamp: Timestamp): Promise<PullDiffChange[]> => {
   const firestore = requireCloudSyncFirestore();
   const collectionRef = getPullableCollectionRef(firestore, userId, type);
@@ -82,7 +73,6 @@ const fetchPullableEntityDiff = async (userId: string, type: PullableEntityType,
 
   return changes;
 };
-
 const fetchUserSettingsDiff = async (userId: string, since: number): Promise<PullDiffChange[]> => {
   const firestore = requireCloudSyncFirestore();
   const snapshot = await getDoc(getUserSettingsRef(firestore, userId));
@@ -105,7 +95,6 @@ const fetchUserSettingsDiff = async (userId: string, since: number): Promise<Pul
     },
   ];
 };
-
 export const pullCloudSyncDiff = async (userId: string, since: number): Promise<{ changes: SyncChange[]; serverTime: number }> => {
   const sinceTimestamp = Timestamp.fromMillis(Math.max(0, since));
 

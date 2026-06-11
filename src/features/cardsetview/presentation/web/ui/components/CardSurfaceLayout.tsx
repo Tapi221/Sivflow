@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 
 
 export type CardSurfaceFace = "question" | "answer";
-
 type CardSurfaceLayoutProps = {
   cardLayoutMode: CardLayoutMode;
   questionNode: React.ReactNode;
@@ -24,4 +23,3 @@ export const CardSurfaceLayout = ({ cardLayoutMode, questionNode, answerNode, fl
   }
 
   return flipNode ?? questionNode;
-};

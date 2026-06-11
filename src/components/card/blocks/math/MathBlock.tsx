@@ -132,7 +132,5 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
 
 
 const MathBlock = React.memo(MathBlockInner, areMathBlockPropsEqual);
-
 MathBlock.displayName = "MathBlock";
-
 export { MathBlock };

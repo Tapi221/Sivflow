@@ -15,7 +15,6 @@ type CardModeToolbarProps = {
   onChangeDisplayMode: (mode: CardDisplayMode) => void;
   onChangeCardLayoutMode: (mode: CardLayoutMode) => void;
 };
-
 type ModeButtonProps = {
   isActive: boolean;
   onClick: () => void;
@@ -45,7 +44,6 @@ const ModeButton = ({
     </OverlayToolbarButton>
   );
 };
-
 export const CardModeToolbar = ({ displayMode, cardLayoutMode, disabledCardLayoutModes, onChangeDisplayMode, onChangeCardLayoutMode, }: CardModeToolbarProps) => { const nextDisplayMode: CardDisplayMode = displayMode === "fixed" ? "fluid" : "fixed";
   const displayModeToggleLabel =
     displayMode === "fixed"
@@ -96,4 +94,3 @@ export const CardModeToolbar = ({ displayMode, cardLayoutMode, disabledCardLayou
       </div>
     </OverlayToolbar>
   );
-};

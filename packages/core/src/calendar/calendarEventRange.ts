@@ -1,25 +1,19 @@
 import { addDays, format, startOfDay } from "date-fns";
 import type { CalendarEvent } from "./calendarEvent.types";
 
-
-
 const toDate = (value: Date): Date | null => {
   const date = value instanceof Date ? value : new Date(value);
 
   return Number.isFinite(date.getTime()) ? date : null;
 };
-
 const getEventTime = (value: Date): number =>
   toDate(value)?.getTime() ?? Number.MAX_SAFE_INTEGER;
-
 const compareText = (a: string, b: string): number => {
   if (a < b) return -1;
   if (a > b) return 1;
   return 0;
 };
-
 export const getCalendarDateKey = (date: Date): string => format(date, "yyyy-MM-dd");
-
 export const getDayRange = (date: Date): { start: Date; end: Date } => {
   const start = startOfDay(date);
 
@@ -28,7 +22,6 @@ export const getDayRange = (date: Date): { start: Date; end: Date } => {
     end: addDays(start, 1),
   };
 };
-
 export const compareCalendarEvents = ( a: CalendarEvent, b: CalendarEvent, ): number => { const allDayDiff = Number(b.isAllDay) - Number(a.isAllDay);
 
   if (allDayDiff !== 0) return allDayDiff;
@@ -47,7 +40,6 @@ export const compareCalendarEvents = ( a: CalendarEvent, b: CalendarEvent, ): nu
 
   return compareText(`${a.calendarId}:${a.id}`, `${b.calendarId}:${b.id}`);
 };
-
 export const eventOverlapsRange = ( event: CalendarEvent, rangeStart: Date, rangeEnd: Date, ): boolean => { const startsAt = toDate(event.startsAt);
   const endsAt = toDate(event.endsAt);
 
@@ -59,12 +51,10 @@ export const eventOverlapsRange = ( event: CalendarEvent, rangeStart: Date, rang
 
   return startTime < rangeEnd.getTime() && normalizedEndTime > rangeStart.getTime();
 };
-
 export const eventOverlapsDay = ( event: CalendarEvent, day: Date, ): boolean => { const { start, end } = getDayRange(day);
 
   return eventOverlapsRange(event, start, end);
 };
-
 export const getEventDateKeys = (event: CalendarEvent): string[] => { const startsAt = toDate(event.startsAt);
   const endsAt = toDate(event.endsAt);
 
@@ -86,7 +76,6 @@ export const getEventDateKeys = (event: CalendarEvent): string[] => { const star
 
   return keys;
 };
-
 export const clipEventToDay = ( event: CalendarEvent, day: Date, ): CalendarEvent | null => { const startsAt = toDate(event.startsAt);
   const endsAt = toDate(event.endsAt);
 

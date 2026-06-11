@@ -28,11 +28,9 @@ const normalizeForStableHash = (value: unknown): unknown => {
 
   return value;
 };
-
 const stableStringify = (value: unknown): string => {
   return JSON.stringify(normalizeForStableHash(value));
 };
-
 const hashString = (input: string): string => {
   let hash = 0x811c9dc5;
 
@@ -43,7 +41,6 @@ const hashString = (input: string): string => {
 
   return hash.toString(16).padStart(8, "0");
 };
-
 const buildDeterministicQueueId = ({
   entity,
   operationType,
@@ -67,7 +64,6 @@ const buildDeterministicQueueId = ({
 
   return `sync_${hashString(identitySource)}`;
 };
-
 const getTaskPayloadId = (payload: unknown): string | null => {
   if (typeof payload !== "object" || payload === null) return null;
   const record = payload as Record<string, unknown>;
@@ -75,7 +71,6 @@ const getTaskPayloadId = (payload: unknown): string | null => {
     ? record.id
     : null;
 };
-
 const createBaseQueueFields = ({
   entity,
   operationType,
@@ -113,7 +108,6 @@ const createBaseQueueFields = ({
     nextRetryAt: now,
   };
 };
-
 export const createUpsertQueueItem = <TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high", type = "upload", }: { entity: TEntity;
   operationType: Extract<SyncOperationType, "create" | "update">;
   payload: unknown;
@@ -137,7 +131,6 @@ export const createUpsertQueueItem = <TEntity extends UpsertEntity>({ entity, op
     payload: checkedPayload,
   } as UpsertQueueItem<TEntity>;
 };
-
 export const createDeleteQueueItem = ({ entity, targetId, priority = "high", type = "upload", }: { entity: DeleteEntity;
   targetId: string;
   priority?: SyncPriority;
@@ -160,7 +153,6 @@ export const createDeleteQueueItem = ({ entity, targetId, priority = "high", typ
     payload: deletePayload,
   };
 };
-
 export const createQueueItemFromSyncTask = (task: SyncTask): SyncQueueItem => { const targetId = task.targetId || getTaskPayloadId(task.payload) || "unknown";
   const operationType =
     task.operationType || (task.type === "upload" ? "update" : "create");

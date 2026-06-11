@@ -26,18 +26,11 @@ import type { LayeredTreeDragState } from "./layeredTreeDnd.types";
 import { getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget } from "./layeredTreeDnd.utils";
 import { useLayeredTreeDragDrop } from "./useLayeredTreeDragDrop";
 
-
-
 type FolderCommandSet = ReturnType<typeof useFolderCommands>;
-
 type CardSetCommandSet = ReturnType<typeof useCardSets>;
-
 type NoteCommandSet = ReturnType<typeof useNotes>;
-
 type DocumentCommandSet = ReturnType<typeof useDocumentCommands>;
-
 type DirectoryFolderNode = FolderTreeNode & { id: string };
-
 type DirectoryTreeNodeProps = {
   folder: DirectoryFolderNode;
   level: number;
@@ -65,7 +58,6 @@ type DirectoryTreeNodeProps = {
   onFolderDrop: (event: ReactDragEvent<HTMLElement>, targetId: string) => void;
   onFolderDragEnd: () => void;
 };
-
 type DirectoryEntityRowProps = {
   id: string;
   label: string;
@@ -75,16 +67,13 @@ type DirectoryEntityRowProps = {
   onSelect: () => void;
   onContextMenu?: (event: ReactMouseEvent<HTMLElement>) => void;
 };
-
 type ProjectListSidebarProps = {
   onOpenCardSet?: () => void;
 };
-
 type LibraryHierarchySidebarProps = {
   parentFolderId?: string | null;
   onOpenCardSet?: () => void;
 };
-
 type FolderContextMenuState = {
   folderId: string;
   folderName: string;
@@ -94,33 +83,28 @@ type FolderContextMenuState = {
   x: number;
   y: number;
 };
-
 type CardSetContextMenuState = {
   cardSetId: string;
   cardSetName: string;
   x: number;
   y: number;
 };
-
 type DocumentContextMenuState = {
   documentId: string;
   documentName: string;
   x: number;
   y: number;
 };
-
 type NoteContextMenuState = {
   noteId: string;
   noteTitle: string;
   x: number;
   y: number;
 };
-
 type FolderColorMenuState = {
   x: number;
   y: number;
 };
-
 type UseFolderContextMenuParams = {
   createFolder: FolderCommandSet["createFolder"];
   updateFolder: FolderCommandSet["updateFolder"];
@@ -131,22 +115,18 @@ type UseFolderContextMenuParams = {
   getNextOrderIndex: (folderId: string | null, resolvedFolderId?: string) => number;
   setExpandedFolderIds: Dispatch<SetStateAction<Set<string>>>;
 };
-
 type UseCardSetContextMenuParams = {
   updateCardSet: CardSetCommandSet["updateCardSet"];
   deleteCardSet: CardSetCommandSet["deleteCardSet"];
 };
-
 type UseNoteContextMenuParams = {
   updateNote: NoteCommandSet["updateNote"];
   deleteNote: NoteCommandSet["deleteNote"];
 };
-
 type UseDocumentContextMenuParams = {
   updateDocument: DocumentCommandSet["updateDocument"];
   deleteDocument: DocumentCommandSet["deleteDocument"];
 };
-
 type UseFolderLayeredTreeDragDropParams = {
   rootFolders: DirectoryFolderNode[];
   rootDropParentId: string | null;
@@ -155,99 +135,70 @@ type UseFolderLayeredTreeDragDropParams = {
   updateFolder: FolderCommandSet["updateFolder"];
   setExpandedFolderIds: Dispatch<SetStateAction<Set<string>>>;
 };
-
 type SidebarLoadingStateProps = {
   ariaLabel: string;
   label: string;
 };
-
 type IconProps = {
   className?: string;
 };
-
 type LegacyDocumentFields = {
   folder_id?: string | null;
   file_name?: string | null;
   order_index?: number;
 };
-
 type LegacyCardSetFields = {
   folder_id?: string | null;
   order_index?: number;
 };
-
 type LegacyNoteFields = {
   folder_id?: string | null;
   order_index?: number;
 };
 
-
-
 const DEFAULT_NEW_NOTE_NAME = "新規ノート";
-
 const EMPTY_COLLECTION: never[] = [];
-
 const LIBRARY_TITLE = "Library";
-
 const LAYERED_PROJECT_MENU_DIMENSIONS = { width: LAYERED_PROJECT_MENU_WIDTH, height: LAYERED_PROJECT_MENU_HEIGHT };
-
 const CARD_SET_CONTEXT_MENU_DIMENSIONS = { width: CARD_SET_CONTEXT_MENU_WIDTH, height: CARD_SET_CONTEXT_MENU_HEIGHT };
-
 const DOCUMENT_CONTEXT_MENU_DIMENSIONS = { width: DOCUMENT_CONTEXT_MENU_WIDTH, height: DOCUMENT_CONTEXT_MENU_HEIGHT };
-
 const LAYERED_PROJECT_SUBMENU_OVERLAP_PX = 6;
-
-
 
 const getFolderName = (folder: FolderTreeNode, isRootProject = false): string => {
   const name = folder.folderName ?? folder.folder_name;
   return typeof name === "string" && name.trim() ? name.trim() : isRootProject ? UNTITLED_PROJECT_NAME : UNTITLED_FOLDER_NAME;
 };
-
 const getFolderIsFavorite = (folder: FolderTreeNode): boolean => folder.isFavorite === true || folder.is_favorite === true;
-
 const getFolderOrderIndex = (folder: FolderTreeNode): number => folder.orderIndex ?? folder.order_index ?? 0;
-
 const toDirectoryFolderNode = (folder: FolderTreeNode): DirectoryFolderNode | null => {
   const id = getFolderId(folder);
   return id ? { ...folder, id } : null;
 };
-
 const toDirectoryFolderNodes = (folders: FolderTreeNode[]): DirectoryFolderNode[] => {
   return folders.map(toDirectoryFolderNode).filter((folder): folder is DirectoryFolderNode => folder !== null);
 };
-
 const getDirectoryFolderParentId = (folder: FolderTreeNode): string | null => getParentFolderId(folder) ?? null;
-
 const getCardSetFolderId = (cardSet: CardSet, fallbackFolderId: string | null = null): string | null => {
   return cardSet.folderId ?? (cardSet as CardSet & LegacyCardSetFields).folder_id ?? fallbackFolderId;
 };
-
 const getDocumentFolderId = (document: DocumentItem, fallbackFolderId: string | null = null): string | null => {
   return document.folderId ?? (document as DocumentItem & LegacyDocumentFields).folder_id ?? fallbackFolderId;
 };
-
 const getNoteFolderId = (note: Note, fallbackFolderId: string | null = null): string | null => {
   return note.folderId ?? (note as Note & LegacyNoteFields).folder_id ?? fallbackFolderId;
 };
-
 const getCardSetName = (cardSet: CardSet): string => cardSet.name?.trim() || "無題のセット";
-
 const getDocumentName = (document: DocumentItem): string => {
   return document.title?.trim() || document.fileName?.trim() || (document as DocumentItem & LegacyDocumentFields).file_name?.trim() || "無題のPDF";
 };
-
 const getNoteTitle = (note: Note): string => note.title?.trim() || "無題のノート";
-
 const getRootFolderIds = (rootFolders: DirectoryFolderNode[]): string[] => rootFolders.map((folder) => folder.id);
-
 const getSelectedFolderIdFromActiveTab = (tab: WorkspaceTab | null): string | null => {
   if (!tab || tab.sectionKey !== "library") return null;
   if (tab.kind === "explorer" && !tab.explorerState.isSectionListMode) return tab.explorerState.selectedFolderId;
   if (tab.kind === "document" || tab.kind === "card" || tab.kind === "note") return tab.folderId;
   return null;
 };
-
 const getSelectedItemFromActiveTab = (tab: WorkspaceTab | null): SelectedExplorerItem => {
   if (!tab || tab.sectionKey !== "library") return null;
   if (tab.kind === "explorer" && !tab.explorerState.isSectionListMode) return tab.explorerState.selectedItem;
@@ -256,27 +207,21 @@ const getSelectedItemFromActiveTab = (tab: WorkspaceTab | null): SelectedExplore
   if (tab.kind === "note") return { type: "note", id: tab.noteId };
   return null;
 };
-
 const isSelectedExplorerItem = (selectedItem: SelectedExplorerItem, type: "cardSet" | "document" | "note", id: string): boolean => {
   return selectedItem !== null && "id" in selectedItem && selectedItem.type === type && selectedItem.id === id;
 };
-
 const createFolderContextMenuState = (event: ReactMouseEvent<HTMLElement>, folder: DirectoryFolderNode, isRootProject: boolean): FolderContextMenuState => {
   return { folderId: folder.id, folderName: getFolderName(folder, isRootProject), folderColor: getFolderProjectColor(folder), isFavorite: getFolderIsFavorite(folder), isRootProject, ...clampRightClickPanelPosition(event.clientX, event.clientY, LAYERED_PROJECT_MENU_DIMENSIONS) };
 };
-
 const createCardSetContextMenuState = (event: ReactMouseEvent<HTMLElement>, cardSet: CardSet): CardSetContextMenuState => {
   return { cardSetId: cardSet.id, cardSetName: getCardSetName(cardSet), ...clampRightClickPanelPosition(event.clientX, event.clientY, CARD_SET_CONTEXT_MENU_DIMENSIONS) };
 };
-
 const createDocumentContextMenuState = (event: ReactMouseEvent<HTMLElement>, document: DocumentItem): DocumentContextMenuState => {
   return { documentId: document.id, documentName: getDocumentName(document), ...clampRightClickPanelPosition(event.clientX, event.clientY, DOCUMENT_CONTEXT_MENU_DIMENSIONS) };
 };
-
 const createNoteContextMenuState = (event: ReactMouseEvent<HTMLElement>, note: Note): NoteContextMenuState => {
   return { noteId: note.id, noteTitle: getNoteTitle(note), ...clampRightClickPanelPosition(event.clientX, event.clientY, DOCUMENT_CONTEXT_MENU_DIMENSIONS) };
 };
-
 const useLibraryHierarchyData = () => {
   const { folders, loading: foldersLoading, error: foldersError } = useFoldersRead();
   const { cardSets, loading: cardSetsLoading, createCardSet, updateCardSet, deleteCardSet } = useCardSets();
@@ -291,7 +236,6 @@ const useLibraryHierarchyData = () => {
 
   return { rootFolders: directoryRootFolders, getChildFolders: getDirectoryChildFolders, getNextOrderIndex, getCardSets, getFolderDocuments, getFolderNotes, createCardSet, updateCardSet, deleteCardSet, createNote, updateNote, deleteNote, loading: foldersLoading || cardSetsLoading || documentsLoading || notesLoading, error: foldersError ?? documentsError };
 };
-
 const useFolderContextMenu = ({ createFolder, updateFolder, deleteFolder, createCardSet, createNote, openNoteTab, getNextOrderIndex, setExpandedFolderIds }: UseFolderContextMenuParams) => {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const colorMenuRef = useRef<HTMLDivElement | null>(null);
@@ -347,7 +291,6 @@ const useFolderContextMenu = ({ createFolder, updateFolder, deleteFolder, create
 
   return { contextMenuElement, openContextMenu };
 };
-
 const useCardSetContextMenu = ({ updateCardSet, deleteCardSet }: UseCardSetContextMenuParams) => {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [contextMenu, setContextMenu] = useState<CardSetContextMenuState | null>(null);
@@ -374,7 +317,6 @@ const useCardSetContextMenu = ({ updateCardSet, deleteCardSet }: UseCardSetConte
 
   return { contextMenuElement, openContextMenu };
 };
-
 const useNoteContextMenu = ({ updateNote, deleteNote }: UseNoteContextMenuParams) => {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [contextMenu, setContextMenu] = useState<NoteContextMenuState | null>(null);
@@ -401,7 +343,6 @@ const useNoteContextMenu = ({ updateNote, deleteNote }: UseNoteContextMenuParams
 
   return { contextMenuElement, openContextMenu };
 };
-
 const useDocumentContextMenu = ({ updateDocument, deleteDocument }: UseDocumentContextMenuParams) => {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [contextMenu, setContextMenu] = useState<DocumentContextMenuState | null>(null);
@@ -428,7 +369,6 @@ const useDocumentContextMenu = ({ updateDocument, deleteDocument }: UseDocumentC
 
   return { contextMenuElement, openContextMenu };
 };
-
 const useFolderLayeredTreeDragDrop = ({ rootFolders, rootDropParentId, scrollContainerRef, getChildFolders, updateFolder, setExpandedFolderIds }: UseFolderLayeredTreeDragDropParams) => {
   const getParentId = useCallback((folder: DirectoryFolderNode): string | null => getDirectoryFolderParentId(folder), []);
   const getOrderIndex = useCallback((folder: DirectoryFolderNode): number => getFolderOrderIndex(folder), []);
@@ -437,16 +377,12 @@ const useFolderLayeredTreeDragDrop = ({ rootFolders, rootDropParentId, scrollCon
   return useLayeredTreeDragDrop({ rootItems: rootFolders, rootDropParentId, scrollContainerRef, getChildItems: getChildFolders, getParentId, getOrderIndex, updateItem, setExpandedIds: setExpandedFolderIds });
 };
 
-
-
 const IconChevronRight = ({ className }: IconProps) => (
   <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
 const IconProjectFolder = ({ className }: IconProps) => <ExplorerChromeFolderIcon className={className} />;
-
 const IconNote = ({ className }: IconProps) => (
   <svg viewBox="0 0 16 16" fill="none" className={className}>
     <path d="M4.5 2.75H9.8L12 4.95V13.25H4.5V2.75Z" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" />
@@ -454,7 +390,6 @@ const IconNote = ({ className }: IconProps) => (
     <path d="M6.25 7.25H10.25M6.25 9.5H10.25" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
   </svg>
 );
-
 const SidebarLoadingState = ({ ariaLabel, label }: SidebarLoadingStateProps) => {
   return (
     <aside aria-label={ariaLabel} className="h-full min-h-0 overflow-y-auto px-3 py-1 text-[#9aa1ad]">
@@ -462,7 +397,6 @@ const SidebarLoadingState = ({ ariaLabel, label }: SidebarLoadingStateProps) => 
     </aside>
   );
 };
-
 const DirectoryEntityRow = ({ id, label, kind, level, isSelected, onSelect, onContextMenu }: DirectoryEntityRowProps) => {
   const Icon = kind === "cardSet" ? ExplorerChromeCardSetIcon : kind === "document" ? ExplorerChromePdfIcon : IconNote;
   const rowPaddingLeft = Math.max(0, level - LAYERED_TREE_ROOT_LEVEL) * LAYERED_TREE_INDENT_PX + 18;
@@ -492,7 +426,6 @@ const DirectoryEntityRow = ({ id, label, kind, level, isSelected, onSelect, onCo
     </div>
   );
 };
-
 const DirectoryTreeNode = ({ folder, level, isRootProject, selectedFolderId, selectedItem, expandedFolderIds, dragState, getChildFolders, getCardSets, getFolderDocuments, getFolderNotes, onToggleFolder, onSelectFolder, onSelectCardSet, onSelectDocument, onSelectNote, onOpenContextMenu, onOpenCardSetContextMenu, onOpenDocumentContextMenu, onOpenNoteContextMenu, onFolderDragStart, onFolderDragOver, onFolderDragLeave, onFolderDrop, onFolderDragEnd }: DirectoryTreeNodeProps) => {
   const folderId = folder.id;
   const childFolders = getChildFolders(folderId);
@@ -563,7 +496,6 @@ const DirectoryTreeNode = ({ folder, level, isRootProject, selectedFolderId, sel
     </div>
   );
 };
-
 const ProjectListSidebar = ({ onOpenCardSet }: ProjectListSidebarProps) => {
   const { rootFolders, getChildFolders, getCardSets, getFolderDocuments, getFolderNotes, getNextOrderIndex, createCardSet, updateCardSet, deleteCardSet, createNote, updateNote, deleteNote, loading, error } = useLibraryHierarchyData();
   const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
@@ -595,7 +527,6 @@ const ProjectListSidebar = ({ onOpenCardSet }: ProjectListSidebarProps) => {
 
   return <><aside aria-label="Project list explorer" className="h-full min-h-0 overflow-hidden"><div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto px-3 pb-3 pt-1"><div role="tree" aria-label="プロジェクト" className="flex min-h-full flex-col gap-0.5" onDragOver={handleListDragOver} onDragLeave={handleListDragLeave} onDrop={handleListDrop}>{rootFolders.length > 0 ? rootFolders.map((folder) => <DirectoryTreeNode key={folder.id} folder={folder} level={LAYERED_TREE_ROOT_LEVEL} isRootProject selectedFolderId={selectedFolderId} selectedItem={selectedItem} expandedFolderIds={expandedFolderIds} dragState={dragState} getChildFolders={getChildFolders} getCardSets={getCardSets} getFolderDocuments={getFolderDocuments} getFolderNotes={getFolderNotes} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onSelectCardSet={handleSelectCardSet} onSelectDocument={handleSelectDocument} onSelectNote={handleSelectNote} onOpenContextMenu={openFolderContextMenu} onOpenCardSetContextMenu={openCardSetContextMenu} onOpenDocumentContextMenu={openDocumentContextMenu} onOpenNoteContextMenu={openNoteContextMenu} onFolderDragStart={handleItemDragStart} onFolderDragOver={handleItemDragOver} onFolderDragLeave={handleItemDragLeave} onFolderDrop={handleItemDrop} onFolderDragEnd={handleItemDragEnd} />) : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">項目がありません</p>}{isAppendingToRoot ? <LayeredTreeDropIndicator position="append" left={LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX} className="mx-2" /> : null}<div aria-hidden="true" className="min-h-8 flex-1" /></div></div></aside>{folderContextMenuElement}{cardSetContextMenuElement}{documentContextMenuElement}{noteContextMenuElement}</>;
 };
-
 const LibraryHierarchySidebar = ({ parentFolderId = null, onOpenCardSet }: LibraryHierarchySidebarProps) => {
   const { rootFolders, getChildFolders, getCardSets, getFolderDocuments, getFolderNotes, getNextOrderIndex, createCardSet, updateCardSet, deleteCardSet, createNote, updateNote, deleteNote, loading, error } = useLibraryHierarchyData();
   const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
@@ -652,7 +583,5 @@ const LibraryHierarchySidebar = ({ parentFolderId = null, onOpenCardSet }: Libra
 
   return <><aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-hidden"><div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto px-3 pb-3 pt-1"><div role="tree" aria-label="ライブラリ" className="flex min-h-full flex-col gap-0.5" onDragOver={handleListDragOver} onDragLeave={handleListDragLeave} onDrop={handleListDrop}>{hasVisibleItems ? <>{visibleFolders.map((folder) => <DirectoryTreeNode key={folder.id} folder={folder} level={firstLevel} isRootProject={!parentFolderId} selectedFolderId={selectedFolderId} selectedItem={selectedItem} expandedFolderIds={expandedFolderIds} dragState={dragState} getChildFolders={getChildFolders} getCardSets={getCardSets} getFolderDocuments={getFolderDocuments} getFolderNotes={getFolderNotes} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onSelectCardSet={handleSelectCardSet} onSelectDocument={handleSelectDocument} onSelectNote={handleSelectNote} onOpenContextMenu={openFolderContextMenu} onOpenCardSetContextMenu={openCardSetContextMenu} onOpenDocumentContextMenu={openDocumentContextMenu} onOpenNoteContextMenu={openNoteContextMenu} onFolderDragStart={handleItemDragStart} onFolderDragOver={handleItemDragOver} onFolderDragLeave={handleItemDragLeave} onFolderDrop={handleItemDrop} onFolderDragEnd={handleItemDragEnd} />)}{visibleNotes.map((note) => <DirectoryEntityRow key={note.id} id={note.id} kind="note" label={getNoteTitle(note)} level={firstLevel} isSelected={isSelectedExplorerItem(selectedItem, "note", note.id)} onSelect={() => handleSelectNote(note)} onContextMenu={(event) => openNoteContextMenu(event, note)} />)}{visibleCardSets.map((cardSet) => <DirectoryEntityRow key={cardSet.id} id={cardSet.id} kind="cardSet" label={getCardSetName(cardSet)} level={firstLevel} isSelected={isSelectedExplorerItem(selectedItem, "cardSet", cardSet.id)} onSelect={() => handleSelectCardSet(cardSet)} onContextMenu={(event) => openCardSetContextMenu(event, cardSet)} />)}{visibleDocuments.map((document) => <DirectoryEntityRow key={document.id} id={document.id} kind="document" label={getDocumentName(document)} level={firstLevel} isSelected={isSelectedExplorerItem(selectedItem, "document", document.id)} onSelect={() => handleSelectDocument(document)} onContextMenu={(event) => openDocumentContextMenu(event, document)} />)}</> : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">{emptyMessage}</p>}{isAppendingToCurrentList ? <LayeredTreeDropIndicator position="append" left={appendIndicatorLeft} className="mx-2" /> : null}<div aria-hidden="true" className="min-h-8 flex-1" /></div></div></aside>{folderContextMenuElement}{cardSetContextMenuElement}{documentContextMenuElement}{noteContextMenuElement}</>;
 };
-
-
 
 export { LibraryHierarchySidebar, ProjectListSidebar };

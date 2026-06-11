@@ -2,7 +2,6 @@ export type LayoutEvent = { id: string;
   startMinutes: number;
   endMinutes: number;
 };
-
 export type LayoutResult = { left: number;
   width: number;
 };
@@ -20,7 +19,6 @@ const compareLayoutEvents = (a: LayoutEvent, b: LayoutEvent): number => {
 
   return a.id.localeCompare(b.id);
 };
-
 const buildClusters = (events: LayoutEvent[]): LayoutEvent[][] => {
   if (events.length === 0) return [];
 
@@ -47,7 +45,6 @@ const buildClusters = (events: LayoutEvent[]): LayoutEvent[][] => {
   clusters.push(currentCluster);
   return clusters;
 };
-
 const assignColumns = (cluster: LayoutEvent[]): Map<string, number> => {
   const columnOf = new Map<string, number>();
   const columnEndMinutes: number[] = [];
@@ -74,7 +71,6 @@ const assignColumns = (cluster: LayoutEvent[]): Map<string, number> => {
 
   return columnOf;
 };
-
 export const computeEventLayout = ( events: LayoutEvent[], ): Map<string, LayoutResult> => { const result = new Map<string, LayoutResult>();
 
   if (events.length === 0) return result;
@@ -99,7 +95,6 @@ export const computeEventLayout = ( events: LayoutEvent[], ): Map<string, Layout
 
   return result;
 };
-
 export const toLayoutEvent = ( id: string, startsAt: Date, minutes: number, minimumDurationMinutes = 0, ): LayoutEvent => { const startMinutes = startsAt.getHours() * 60 + startsAt.getMinutes();
   const layoutDurationMinutes = Math.max(minutes, minimumDurationMinutes);
 

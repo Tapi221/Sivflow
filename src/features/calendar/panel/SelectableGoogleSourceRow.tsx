@@ -10,14 +10,12 @@ type SelectableGoogleSourceRowProps = {
   color: string;
   onToggle: (id: string) => void;
 };
-
 type SelectableGoogleSourceSwitchProps = {
   label: string;
   checked: boolean;
   color: string;
   onToggle: () => void;
 };
-
 type SourceRowSwitchStyle = CSSProperties & {
   "--calendar-source-switch-color": string;
 };
@@ -49,7 +47,6 @@ const SelectableGoogleSourceSwitch = ({ label, checked, color, onToggle }: Selec
     </button>
   );
 };
-
 const SelectableGoogleSourceRow = ({ id, label, checked, color, onToggle }: SelectableGoogleSourceRowProps) => {
   const handleToggle = () => {
     onToggle(id);
@@ -73,4 +70,4 @@ const SelectableGoogleSourceRow = ({ id, label, checked, color, onToggle }: Sele
 
 
 
-export { GOOGLE_SOURCE_ROW_CLASS_NAME, SelectableGoogleSourceRow };
+export { GOOGLE_SOURCE_ROW_CLASS_NAME, SelectableGoogleSour

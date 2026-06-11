@@ -6,13 +6,11 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 export type SharedCardContentBaseProps = Readonly<{ blocks: CardBlock[];
   className?: string;
 }>;
-
 export type SharedCardContentViewProps = SharedCardContentBaseProps & Readonly<{ mode: "view";
     onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
     displayMode?: CardDisplayMode;
     zoom?: number;
   }>;
-
 export type SharedCardContentEditProps = SharedCardContentBaseProps & Readonly<{ mode: "edit";
     onChange: (blocks: CardBlock[]) => void;
     prefix: "question" | "answer";
@@ -33,5 +31,4 @@ export type SharedCardContentEditProps = SharedCardContentBaseProps & Readonly<{
     displayMode?: CardDisplayMode;
     zoom?: number;
   }>;
-
 export type SharedCardContentProps = | SharedCardContentViewProps | SharedCardContentEditProps;

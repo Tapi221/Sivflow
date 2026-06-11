@@ -1,7 +1,5 @@
 import type { SelectionCaptureArea, SelectionCapturePoint } from "./selectionCapture.types";
 
-
-
 const drawFreehandPath = (context: CanvasRenderingContext2D, path: SelectionCapturePoint[]): void => {
   if (path.length === 0) return;
 
@@ -12,7 +10,6 @@ const drawFreehandPath = (context: CanvasRenderingContext2D, path: SelectionCapt
   });
   context.closePath();
 };
-
 export const applySelectionCaptureMask = ( context: CanvasRenderingContext2D, area: SelectionCaptureArea, ): void => { if (area.shape !== "freehand" || !area.path || area.path.length < 3) return;
 
   context.globalCompositeOperation = "destination-in";

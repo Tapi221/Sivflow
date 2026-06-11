@@ -28,7 +28,6 @@ const resolveSourceBlocks = (
     ? ((cardData.front?.blocks ?? []) as CardBlock[])
     : ((cardData.back?.blocks ?? []) as CardBlock[]);
 };
-
 const buildSideSnapshot = ({
   cardData,
   cardId,
@@ -103,7 +102,6 @@ const buildSideSnapshot = ({
     ),
   };
 };
-
 export const useFlashcardDualDerived = ( cardData: FlashcardCardLike | null | undefined, ) => { return React.useMemo<FlashcardDualDerivedSnapshot>(() => { const cardId = cardData ? resolveCardId(cardData) : null;
 
     return {

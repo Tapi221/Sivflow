@@ -11,17 +11,13 @@ type LayeredProjectMenuItemDefinition = {
   separatorBefore?: boolean;
   submenu?: boolean;
 };
-
 export type LayeredProjectMenuActionId = "change-color" | "rename" | "create-note" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
-
 export type LayeredProjectMenuAction = { id: LayeredProjectMenuActionId;
   disabled?: boolean;
   onSelect: () => void;
 };
-
 export type LayeredProjectMenuSubmenuAnchor = { itemOffsetY: number;
 };
-
 type LayeredProjectMenuProps = {
   x: number;
   y: number;
@@ -38,9 +34,7 @@ type LayeredProjectMenuProps = {
 
 
 export const LAYERED_PROJECT_MENU_PANEL_ID = "layered-project-context-menu";
-
 const LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT = 5;
-
 const LAYERED_PROJECT_MENU_ITEM_DEFINITIONS: readonly LayeredProjectMenuItemDefinition[] = [
   { id: "change-color", label: "色を変更", submenu: true },
   { id: "rename", label: "名前を変更" },
@@ -52,14 +46,11 @@ const LAYERED_PROJECT_MENU_ITEM_DEFINITIONS: readonly LayeredProjectMenuItemDefi
   { id: "hide", label: "非表示" },
   { id: "delete", label: "削除", danger: true, separatorBefore: true },
 ];
-
 const LAYERED_PROJECT_MENU_LABELS = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.map((item) => item.label);
 const LAYERED_PROJECT_MENU_SEPARATOR_COUNT = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.filter((item) => item.separatorBefore).length;
-
 export const LAYERED_PROJECT_MENU_WIDTH = resolveRightClickPanelTextWidth(LAYERED_PROJECT_MENU_LABELS, 132);
 export const LAYERED_PROJECT_MENU_HEIGHT = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + LAYERED_PROJECT_MENU_SEPARATOR_COUNT * LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 export const LAYERED_PROJECT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
-
 const LAYERED_PROJECT_MENU_STYLE = `
 .right-click-panel.layered-project-menu-panel {
   contain: none;
@@ -104,7 +95,6 @@ const LAYERED_PROJECT_MENU_STYLE = `
 
 
 const getLayeredProjectMenuAction = (actions: LayeredProjectMenuAction[], id: LayeredProjectMenuActionId) => actions.find((action) => action.id === id);
-
 const getLayeredProjectMenuSubmenuAnchor = (index: number): LayeredProjectMenuSubmenuAnchor => {
   const separatorOffset = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.slice(0, index).filter((item) => item.separatorBefore).length * LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT;
 
@@ -144,7 +134,5 @@ const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId =
 
 
 const LayeredProjectMenu = memo(LayeredProjectMenuBase);
-
 LayeredProjectMenu.displayName = "LayeredProjectMenu";
-
 export { LayeredProjectMenu };

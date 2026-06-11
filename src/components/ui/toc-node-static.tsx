@@ -20,7 +20,6 @@ const headingItemVariants = cva(
     },
   }
 );
-
 const headingDepth: Record<string, number> = {
   h1: 1,
   h2: 2,
@@ -142,5 +141,4 @@ export function TocElementDocx(props: SlateElementProps) { const { editor } = pr
       </div>
       {props.children}
     </SlateElement>
-  );
-}
+  )

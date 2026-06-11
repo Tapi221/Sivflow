@@ -4,28 +4,21 @@ type GoogleApiErrorPayload = {
     errors?: Array<{ reason?: string }>;
   };
 };
-
 type GoogleApiRetryContext = {
   service: "google_calendar" | "google_tasks";
   operation: string;
 };
-
 type GoogleApiErrorWithMetadata = Error & {
   googleReason?: string;
   retryAfterMs?: number;
   status?: number;
 };
 
-
-
 const GOOGLE_API_RETRY_DELAYS_MS = [500, 1_500, 4_000] as const;
-
-
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => {
   setTimeout(resolve, ms);
 });
-
 const parseRetryAfterMs = (value: string | null): number | undefined => {
   if (!value) return undefined;
 
@@ -41,7 +34,6 @@ const parseRetryAfterMs = (value: string | null): number | undefined => {
 
   return undefined;
 };
-
 export const createGoogleApiError = async ( response: Response, prefix: string, ): Promise<GoogleApiErrorWithMetadata> => { const payload = await response.json().catch(() => null) as GoogleApiErrorPayload | null;
   const message = payload?.error?.message;
   const reason = payload?.error?.errors?.[0]?.reason;
@@ -56,13 +48,11 @@ export const createGoogleApiError = async ( response: Response, prefix: string, 
   error.retryAfterMs = parseRetryAfterMs(response.headers.get("Retry-After"));
   return error;
 };
-
 const isRetryableGoogleApiError = (error: unknown): error is GoogleApiErrorWithMetadata => {
   if (!(error instanceof Error)) return false;
   const status = (error as GoogleApiErrorWithMetadata).status;
   return status === 429 || (typeof status === "number" && status >= 500 && status < 600);
 };
-
 export const withGoogleApiRetry = async <T,>( operation: () => Promise<T>, context: GoogleApiRetryContext, ): Promise<T> => { for (let attempt = 0; attempt <= GOOGLE_API_RETRY_DELAYS_MS.length; attempt += 1) {
     try {
       return await operation();

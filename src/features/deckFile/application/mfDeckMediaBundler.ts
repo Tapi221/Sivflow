@@ -8,7 +8,6 @@ export type MfDeckMediaBundle = { media: Record<string, Uint8Array>;
   mediaManifest?: MfDeckMediaManifestV1;
   issues: MfDeckIssue[];
 };
-
 type MediaCandidate = {
   record: Record<string, unknown>;
   urlKey: "localUrl" | "remoteUrl" | "url";
@@ -18,7 +17,6 @@ type MediaCandidate = {
   cardId?: string;
   blockId?: string;
 };
-
 type BundleMediaInCardsParams<
   TCard extends { id?: string; front?: unknown; back?: unknown },
 > = {
@@ -30,12 +28,10 @@ type BundleMediaInCardsParams<
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
-
 const asRecordArray = (value: unknown): Record<string, unknown>[] => {
   if (!Array.isArray(value)) return [];
   return value.filter(isRecord);
 };
-
 const resolveCandidateUrl = (
   record: Record<string, unknown>,
 ): Pick<MediaCandidate, "url" | "urlKey"> | null => {
@@ -56,7 +52,6 @@ const resolveCandidateUrl = (
 
   return null;
 };
-
 const resolveSourceName = (
   record: Record<string, unknown>,
   fallback: string,
@@ -68,7 +63,6 @@ const resolveSourceName = (
   );
   return found?.trim() || fallback;
 };
-
 const collectBlockCandidates = (input: {
   cardId?: string;
   block: CardBlock;
@@ -111,7 +105,6 @@ const collectBlockCandidates = (input: {
     });
   }
 };
-
 const collectFaceAttachmentCandidates = (input: {
   cardId?: string;
   face: unknown;
@@ -148,7 +141,6 @@ const collectFaceAttachmentCandidates = (input: {
     });
   });
 };
-
 const collectCandidates = <
   TCard extends { id?: string; front?: unknown; back?: unknown },
 >(
@@ -179,7 +171,6 @@ const collectCandidates = <
 
   return candidates;
 };
-
 const fetchBytes = async (
   url: string,
 ): Promise<{
@@ -204,7 +195,6 @@ const fetchBytes = async (
     mimeType,
   };
 };
-
 const hashString = (value: string): string => {
   let hash = 2166136261;
   for (let index = 0; index < value.length; index += 1) {
@@ -213,7 +203,6 @@ const hashString = (value: string): string => {
   }
   return (hash >>> 0).toString(16).padStart(8, "0");
 };
-
 export const bundleMediaInMfDeckCards = async < TCard extends { id?: string; front?: unknown; back?: unknown },
 >({
   cards,
@@ -309,4 +298,3 @@ export const bundleMediaInMfDeckCards = async < TCard extends { id?: string; fro
         : undefined,
     issues,
   };
-};

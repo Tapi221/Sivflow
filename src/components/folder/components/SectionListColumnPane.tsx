@@ -57,26 +57,21 @@ interface SectionListColumnPaneProps {
     cardIds: string[],
   ) => Promise<void>;
 }
-
 type ExplorerColumnPathWindow = Window & {
   __sivflowExplorerColumnPathCrumbs?: BreadcrumbCrumb[];
 };
-
 type ExplorerColumnPathNavigateEventDetail = {
   folderId?: string | null;
 };
-
 type ExplorerColumnPathChangeEventDetail = {
   crumbs?: BreadcrumbCrumb[];
   active?: boolean;
 };
-
 type FolderLike = Pick<Folder, "id" | "folderName"> & {
   parentFolderId?: string | null;
   folder_name?: string | null;
   parent_folder_id?: string | null;
 };
-
 type ExternalPathSelectionSnapshot = {
   resetToken: number;
   selectedFolderId: string | null;
@@ -94,11 +89,9 @@ const EXPLORER_COLUMN_PATH_NAVIGATE_EVENT =
 const normalizeFolderParentId = (folder: FolderLike): string | null => {
   return folder.parentFolderId ?? folder.parent_folder_id ?? null;
 };
-
 const getFolderLabel = (folder: FolderLike): string => {
   return folder.folderName ?? folder.folder_name ?? "無題のフォルダ";
 };
-
 const getCardSetFolderId = (cardSet: CardSet): string | null => {
   return (
     cardSet.folderId ??
@@ -106,12 +99,10 @@ const getCardSetFolderId = (cardSet: CardSet): string | null => {
     null
   );
 };
-
 const getCardSetLabel = (cardSet: CardSet): string => {
   const baseLabel = cardSet.name?.trim() || "無題のセット";
   return baseLabel.endsWith(".mfdeck") ? baseLabel : `${baseLabel}.mfdeck`;
 };
-
 const getDocumentFolderId = (document: DocumentItem): string | null => {
   return (
     document.folderId ??
@@ -119,11 +110,9 @@ const getDocumentFolderId = (document: DocumentItem): string | null => {
     null
   );
 };
-
 const getDocumentLabel = (document: DocumentItem): string => {
   return document.title?.trim() || document.fileName?.trim() || "無題の文書";
 };
-
 const getCardCardSetId = (card: Card): string | null => {
   return (
     card.cardSetId ??
@@ -131,7 +120,6 @@ const getCardCardSetId = (card: Card): string | null => {
     null
   );
 };
-
 const getCardSetByCard = (
   card: Card,
   cardSetById: Map<string, CardSet>,
@@ -141,7 +129,6 @@ const getCardSetByCard = (
 
   return cardSetById.get(cardSetId) ?? null;
 };
-
 const getCardFolderId = (
   card: Card,
   cardSetById: Map<string, CardSet>,
@@ -155,7 +142,6 @@ const getCardFolderId = (
   const cardSet = getCardSetByCard(card, cardSetById);
   return cardSet ? getCardSetFolderId(cardSet) : null;
 };
-
 const getCardLabel = (card: Card): string => {
   const title = card.title?.trim();
   if (title) return title;
@@ -167,13 +153,11 @@ const getCardLabel = (card: Card): string => {
 
   return questionNumber?.trim() || "無題のカード";
 };
-
 const buildFolderRoute = (folderId: string): string => {
   const searchParams = new URLSearchParams();
   searchParams.set("folderId", folderId);
   return `/library?${searchParams.toString()}`;
 };
-
 const resolveLibraryType = (pathname: string, searchParams: URLSearchParams) => {
   const normalizedPathname = pathname.toLowerCase().replace(/\/+$/, "");
 
@@ -188,7 +172,6 @@ const resolveLibraryType = (pathname: string, searchParams: URLSearchParams) => 
   const queryLibraryType = searchParams.get("libraryType");
   return queryLibraryType === "flashcard" ? "flashcards" : (queryLibraryType ?? "pdf");
 };
-
 const dispatchExplorerColumnPathChange = (crumbs: BreadcrumbCrumb[]) => {
   if (typeof window === "undefined") return;
 
@@ -205,7 +188,6 @@ const dispatchExplorerColumnPathChange = (crumbs: BreadcrumbCrumb[]) => {
     ),
   );
 };
-
 const dispatchExplorerColumnPathInactive = () => {
   if (typeof window === "undefined") return;
 
@@ -221,7 +203,6 @@ const dispatchExplorerColumnPathInactive = () => {
     ),
   );
 };
-
 const getSelectedItemKey = (item: SelectedExplorerItem): string => {
   if (!item) return "__none__";
   return "id" in item ? `${item.type}:${item.id}` : item.type;

@@ -8,10 +8,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-
-
 export type RatingKey = "forgot" | "vague" | "remembered" | "easy";
-
 type TodayStudyState = {
   dateKey: string;
   userId: string;
@@ -21,7 +18,6 @@ type TodayStudyState = {
   /** 追い復習で消化済みのカード ID */
   extraDone: string[];
 };
-
 type TodayStudyActions = {
   /** マウント時・userId 変更時に呼ぶ。日付/userId が変わっていたらリセット */
   hydrate: (userId: string) => void;
@@ -34,8 +30,6 @@ type TodayStudyActions = {
   /** 追い復習で OK になったカードをキューから除外 */
   markExtraDone: (cardId: string) => void;
 };
-
-
 
 const emptyRatings = (): Record<RatingKey, number> => ({
   forgot: 0,
@@ -50,11 +44,7 @@ const localDateKey = (): string => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
-
-
 export type TodayStudyStore = TodayStudyState & TodayStudyActions;
-
-
 
 const initialState = (userId = "anon"): TodayStudyState => ({
   dateKey: localDateKey(),
@@ -63,8 +53,6 @@ const initialState = (userId = "anon"): TodayStudyState => ({
   extraQueue: [],
   extraDone: [],
 });
-
-
 
 export const useTodayStudyStore = create<TodayStudyStore>()( persist( (set, get) => ({ ...initialState(), hydrate: (userId: string) => { const s = get();
         const today = localDateKey();

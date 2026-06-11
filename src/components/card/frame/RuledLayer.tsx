@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 
 
 type CSSVars = React.CSSProperties & Record<`--${string}`, string>;
-
 type RuledLayerProps = {
   className?: string;
   kind?: RuledStyleKind;

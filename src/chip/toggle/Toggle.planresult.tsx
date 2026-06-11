@@ -4,12 +4,10 @@ import { cn } from "@/lib/utils";
 
 
 export type PlanResultMode = "plan" | "actual";
-
 type PlanResultOption = {
   value: PlanResultMode;
   label: string;
 };
-
 type TogglePlanResultProps = {
   value: readonly PlanResultMode[];
   onChange: (value: PlanResultMode[]) => void;

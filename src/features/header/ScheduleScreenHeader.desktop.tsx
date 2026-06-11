@@ -15,7 +15,6 @@ type ScheduleScreenHeaderViewOption = {
   value: CalendarViewMode;
   label: string;
 };
-
 type ScheduleScreenHeaderDesktopProps = {
   titleLabel: string;
   selectedViewMode: CalendarViewModeSelection;
@@ -36,7 +35,6 @@ type ScheduleScreenHeaderDesktopProps = {
   onToday: () => void;
   className?: string;
 };
-
 type CalendarPrintRangeOption = {
   value: CalendarPrintRangeMode;
   label: string;
@@ -67,7 +65,6 @@ const DEFAULT_CALENDAR_PRINT_RANGE: CalendarPrintRangeState = { mode: "current",
 
 
 const clampMonthVisibleEventCount = (value: number): number => Math.min(C.MONTH_VISIBLE_EVENT_COUNT_MAX, Math.max(C.MONTH_VISIBLE_EVENT_COUNT_MIN, Math.round(value)));
-
 const getCalendarPrintRangeOptionButtonClassName = (isActive: boolean): string => `${CALENDAR_PRINT_RANGE_OPTION_BUTTON_BASE_CLASS_NAME}${isActive ? CALENDAR_PRINT_RANGE_OPTION_ACTIVE_CLASS_NAME : CALENDAR_PRINT_RANGE_OPTION_INACTIVE_CLASS_NAME}`;
 
 
@@ -262,4 +259,4 @@ const ScheduleScreenHeaderDesktop = ({
 
 
 
-export { ScheduleScreenHeaderDesktop };
+export { ScheduleScreenHeaderDe

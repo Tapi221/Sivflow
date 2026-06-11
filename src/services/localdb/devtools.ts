@@ -7,13 +7,10 @@ import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { auditAndRepairTags } from "@/services/localdb/audit/tags";
 import { auth } from "@/services/firebase";
 
-
-
 type ClearDevModeCacheOptions = {
   userId?: string;
   reload?: boolean;
 };
-
 type ClearDevModeCacheResult = {
   userId: string | null;
   deletedIndexedDbNames: string[];
@@ -23,9 +20,7 @@ type ClearDevModeCacheResult = {
   deletedCacheStorageKeys: string[];
   reloaded: boolean;
 };
-
 type ClearDevModeCache = (options?: string | ClearDevModeCacheOptions) => Promise<ClearDevModeCacheResult>;
-
 type DeleteDefaultNewFoldersOptions = {
   userId?: string;
   names?: string[];
@@ -36,7 +31,6 @@ type DeleteDefaultNewFoldersOptions = {
   dryRun?: boolean;
   reload?: boolean;
 };
-
 type DeleteDefaultNewFoldersResult = {
   userId: string | null;
   targetNames: string[];
@@ -50,29 +44,22 @@ type DeleteDefaultNewFoldersResult = {
   dryRun: boolean;
   reloaded: boolean;
 };
-
 type DeleteDefaultNewFolders = (options?: string | string[] | DeleteDefaultNewFoldersOptions) => Promise<DeleteDefaultNewFoldersResult>;
-
 type StorageKeySource = Record<string, string | readonly string[]>;
-
 type LocalReadonlyTable = {
   toArray: () => Promise<unknown[]>;
 };
-
 type LocalFolderTable = LocalReadonlyTable & {
   bulkDelete: (keys: string[]) => Promise<void>;
 };
-
 type FolderMatchResult = {
   matchedFolderIds: string[];
   skippedNonEmptyFolderIds: string[];
 };
-
 type FirestoreRecord = {
   id: string;
   data: Record<string, unknown>;
 };
-
 type WindowWithLocalDbDevtools = Window & {
   clearDevCache?: ClearDevModeCache;
   clearDevModeCache?: ClearDevModeCache;
@@ -92,20 +79,14 @@ type WindowWithLocalDbDevtools = Window & {
   };
 };
 
-
-
 const REPAIR_TAGS_ALLOWLIST = (import.meta.env.VITE_REPAIR_TAGS_ALLOWLIST ?? import.meta.env.VITE_REPAIR_TAGS_ALLOWED_UIDS ?? "").split(",").map((uid) => uid.trim()).filter(Boolean);
 const DEV_INDEXED_DB_DELETE_TIMEOUT_MS = 2000;
 const DEFAULT_NEW_FOLDER_NAMES = ["新規フォルダ"] as const;
 const DEV_LOCAL_STORAGE_PREFIXES = [LOCALDB_GENERATION_KEY_PREFIX, "sivflow:", "sivflow.", "flashcard-master:", "flashcard-master.", "cardsetview.", "card-view.", "card-editor.", "folder_", "ui.", "workspace.", "app:"] as const;
 const DEV_LOCAL_STORAGE_EXTRA_KEYS = ["explorer-storage"] as const;
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
-
 const getString = (value: unknown): string | undefined => typeof value === "string" ? value : undefined;
-
 const getAuthUid = (w: WindowWithLocalDbDevtools): string | undefined => {
   const firebaseUid = auth.currentUser?.uid;
   if (typeof firebaseUid === "string" && firebaseUid.length > 0) return firebaseUid;
@@ -113,25 +94,21 @@ const getAuthUid = (w: WindowWithLocalDbDevtools): string | undefined => {
   const windowUid = w.auth?.currentUser?.uid;
   return typeof windowUid === "string" ? windowUid : undefined;
 };
-
 const assertRepairTagsAllowed = (userId: string): void => {
   if (REPAIR_TAGS_ALLOWLIST.length === 0) throw new Error("repairTags: forbidden");
   if (!REPAIR_TAGS_ALLOWLIST.includes(userId)) throw new Error("repairTags: forbidden");
 };
-
 const normalizeClearDevModeCacheOptions = (options?: string | ClearDevModeCacheOptions): Required<ClearDevModeCacheOptions> => {
   if (typeof options === "string") return { userId: options, reload: true };
 
   return { userId: options?.userId ?? "", reload: options?.reload ?? true };
 };
-
 const normalizeDeleteDefaultNewFoldersOptions = (options?: string | string[] | DeleteDefaultNewFoldersOptions): Required<DeleteDefaultNewFoldersOptions> => {
   if (typeof options === "string") return { userId: "", names: [options], includeLocal: true, includeFirebase: true, includeDeleted: false, onlyEmpty: true, dryRun: false, reload: true };
   if (Array.isArray(options)) return { userId: "", names: options, includeLocal: true, includeFirebase: true, includeDeleted: false, onlyEmpty: true, dryRun: false, reload: true };
 
   return { userId: options?.userId ?? "", names: options?.names ?? [...DEFAULT_NEW_FOLDER_NAMES], includeLocal: options?.includeLocal ?? true, includeFirebase: options?.includeFirebase ?? true, includeDeleted: options?.includeDeleted ?? false, onlyEmpty: options?.onlyEmpty ?? true, dryRun: options?.dryRun ?? false, reload: options?.reload ?? true };
 };
-
 const collectStorageKeys = (...sources: StorageKeySource[]): Set<string> => {
   const keys = new Set<string>(DEV_LOCAL_STORAGE_EXTRA_KEYS);
 
@@ -148,9 +125,7 @@ const collectStorageKeys = (...sources: StorageKeySource[]): Set<string> => {
 
   return keys;
 };
-
 const shouldRemoveLocalStorageKey = (key: string, exactKeys: ReadonlySet<string>): boolean => exactKeys.has(key) || DEV_LOCAL_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix));
-
 const removeDevelopmentLocalStorageKeys = (): string[] => {
   if (typeof window === "undefined") return [];
 
@@ -166,14 +141,12 @@ const removeDevelopmentLocalStorageKeys = (): string[] => {
 
   return removedKeys;
 };
-
 const clearDevelopmentSessionStorage = (): boolean => {
   if (typeof window === "undefined") return false;
 
   window.sessionStorage.clear();
   return true;
 };
-
 const getKnownLocalDbNamesForUser = (userId: string): string[] => {
   const names: string[] = [];
 
@@ -182,7 +155,6 @@ const getKnownLocalDbNamesForUser = (userId: string): string[] => {
   names.push(`${LOCALDB_NAME_PREFIX}${userId}`, `${LOCALDB_LEGACY_NAME_PREFIX}${userId}`);
   return names;
 };
-
 const listDevelopmentIndexedDbNames = async (userId: string | null): Promise<string[]> => {
   if (typeof indexedDB === "undefined") return [];
 
@@ -205,7 +177,6 @@ const listDevelopmentIndexedDbNames = async (userId: string | null): Promise<str
 
   return Array.from(names.values());
 };
-
 const deleteIndexedDatabase = async (name: string): Promise<boolean> => {
   if (typeof window === "undefined" || typeof indexedDB === "undefined") return false;
 
@@ -235,7 +206,6 @@ const deleteIndexedDatabase = async (name: string): Promise<boolean> => {
     };
   });
 };
-
 const clearDevelopmentIndexedDbs = async (userId: string | null): Promise<Pick<ClearDevModeCacheResult, "deletedIndexedDbNames" | "failedIndexedDbNames">> => {
   LocalDB.clearInstance();
 
@@ -255,7 +225,6 @@ const clearDevelopmentIndexedDbs = async (userId: string | null): Promise<Pick<C
 
   return { deletedIndexedDbNames, failedIndexedDbNames };
 };
-
 const clearDevelopmentCacheStorage = async (): Promise<string[]> => {
   if (typeof caches === "undefined") return [];
 
@@ -269,62 +238,50 @@ const clearDevelopmentCacheStorage = async (): Promise<string[]> => {
 
   return deletedKeys;
 };
-
 const getLocalTable = (db: unknown, tableName: string): LocalReadonlyTable | null => {
   const table = (db as Record<string, unknown>)[tableName];
   if (!isRecord(table)) return null;
   return typeof table.toArray === "function" ? (table as LocalReadonlyTable) : null;
 };
-
 const getFolderTable = (db: unknown): LocalFolderTable => (db as { folders: LocalFolderTable }).folders;
-
 const getTableItems = async (db: unknown, tableName: string): Promise<unknown[]> => {
   const table = getLocalTable(db, tableName);
   return table ? await table.toArray() : [];
 };
-
 const getFolderRecordId = (folder: unknown): string | null => {
   if (!isRecord(folder)) return null;
   const id = getString(folder.id) ?? getString(folder.folderId);
   return id && id.trim().length > 0 ? id : null;
 };
-
 const getFolderRecordName = (folder: unknown): string | null => {
   if (!isRecord(folder)) return null;
   return getString(folder.folderName) ?? getString(folder.folder_name) ?? getString(folder.name) ?? null;
 };
-
 const getFolderRecordParentId = (folder: unknown): string | null => {
   if (!isRecord(folder)) return null;
   return getString(folder.parentFolderId) ?? getString(folder.parent_folder_id) ?? null;
 };
-
 const getEntityFolderId = (entity: unknown): string | null => {
   if (!isRecord(entity)) return null;
   return getString(entity.folderId) ?? getString(entity.folder_id) ?? null;
 };
-
 const isFolderRecordDeleted = (folder: unknown): boolean => {
   if (!isRecord(folder)) return false;
   return folder.isDeleted === true || folder.is_deleted === true;
 };
-
 const getUniqueNames = (names: string[]): string[] => Array.from(new Set(names.map((name) => name.trim()).filter(Boolean)));
-
 const getFirebaseFolderRecords = async (userId: string): Promise<FirestoreRecord[]> => {
   const db = requireFirestoreDb();
   const foldersRef = collection(db, "users", userId, "folders");
   const snapshot = await getDocs(foldersRef);
   return snapshot.docs.map((folderDoc) => ({ id: folderDoc.id, data: folderDoc.data() }));
 };
-
 const getFirebaseEntityRecords = async (userId: string, collectionName: string): Promise<FirestoreRecord[]> => {
   const db = requireFirestoreDb();
   const entityRef = collection(db, "users", userId, collectionName);
   const snapshot = await getDocs(entityRef);
   return snapshot.docs.map((entityDoc) => ({ id: entityDoc.id, data: entityDoc.data() }));
 };
-
 const isFirebaseFolderEmpty = async (userId: string, folderId: string): Promise<boolean> => {
   const [cards, childFolders, documents] = await Promise.all([getFirebaseEntityRecords(userId, "cards"), getFirebaseEntityRecords(userId, "folders"), getFirebaseEntityRecords(userId, "documents")]);
   const hasCard = cards.some((card) => getEntityFolderId(card.data) === folderId);
@@ -332,7 +289,6 @@ const isFirebaseFolderEmpty = async (userId: string, folderId: string): Promise<
   const hasDocument = documents.some((document) => getEntityFolderId(document.data) === folderId);
   return !hasCard && !hasChildFolder && !hasDocument;
 };
-
 const getLocalFolderMatches = async (db: unknown, names: string[], includeDeleted: boolean, onlyEmpty: boolean): Promise<FolderMatchResult> => {
   const folders = await getTableItems(db, "folders");
   const cards = onlyEmpty ? await getTableItems(db, "cards") : [];
@@ -361,7 +317,6 @@ const getLocalFolderMatches = async (db: unknown, names: string[], includeDelete
 
   return { matchedFolderIds, skippedNonEmptyFolderIds };
 };
-
 const deleteFirebaseFolders = async (userId: string, folderIds: string[]): Promise<string[]> => {
   if (folderIds.length === 0) return [];
 
@@ -371,7 +326,6 @@ const deleteFirebaseFolders = async (userId: string, folderIds: string[]): Promi
   await batch.commit();
   return folderIds;
 };
-
 const deleteLocalFolders = async (db: unknown, folderIds: string[]): Promise<string[]> => {
   if (folderIds.length === 0) return [];
 
@@ -379,11 +333,9 @@ const deleteLocalFolders = async (db: unknown, folderIds: string[]): Promise<str
   await folders.bulkDelete(folderIds);
   return folderIds;
 };
-
 const maybeReload = (reload: boolean): void => {
   if (reload) window.location.reload();
 };
-
 export const installLocalDbDevtools = (): void => { if (!import.meta.env.DEV || typeof window === "undefined") return;
 
   const w = window as WindowWithLocalDbDevtools;

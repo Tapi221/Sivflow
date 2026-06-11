@@ -26,7 +26,6 @@ type TextBlockContentProps =
 
 const normalizeTextBlockContent = (content: string) =>
   String(content ?? "").replace(/\r\n/g, "\n");
-
 const buildTextBlockPresentation = (zoom?: number) => {
   const textStyle = buildTypographyStyle({
     fontSizePx: TYPOGRAPHY_FONT_SIZE_PX.md,

@@ -30,7 +30,6 @@ const ScrollBar = React.forwardRef<
     <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-[var(--scrollbar-radius)] bg-[var(--scrollbar-thumb)] transition-colors hover:bg-[var(--scrollbar-thumb-hover)] active:bg-[var(--scrollbar-thumb-active)]" />
   </ScrollAreaPrimitive.ScrollAreaScrollbar>
 ));
-
 const ScrollArea = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Root>,
   ScrollAreaProps
@@ -71,5 +70,4 @@ const ScrollArea = React.forwardRef<
 
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName;
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
-
-export { ScrollArea };
+export { ScrollAre

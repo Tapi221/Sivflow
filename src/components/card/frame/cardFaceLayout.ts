@@ -1,12 +1,10 @@
 type BlockLayoutKind = "ruled" | "non-ruled";
-
 interface MeasuredBlock {
   kind: BlockLayoutKind;
   /** y position relative to CardSurface top */
   top: number;
   height: number;
 }
-
 interface CardFaceLayout {
   /** y positions (CardSurface-relative) where ruled lines should be drawn */
   visibleRules: number[];

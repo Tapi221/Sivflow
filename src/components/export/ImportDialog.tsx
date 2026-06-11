@@ -19,7 +19,6 @@ interface ImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
 type ImportStep = "select" | "preview" | "confirm" | "processing" | "complete";
 type ImportAction = "replace" | "keep" | "cancel";
 
@@ -29,12 +28,10 @@ const normalizeImportedCard = (card: Card, userId: string): Card => ({
   ...card,
   userId,
 });
-
 const normalizeImportedFolder = (folder: Folder, userId: string): Folder => ({
   ...folder,
   userId,
 });
-
 const normalizeImportedCardSet = (cardSet: CardSet, userId: string): CardSet => ({
   ...cardSet,
   userId,

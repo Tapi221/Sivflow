@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils";
 
 
 export type CardWorkspaceSurfaceVariant = "plain" | "dotted";
-
 type CardWorkspaceCaptureTarget = {
   side: CardSelectionCaptureSide;
   element: HTMLElement;
@@ -40,7 +39,6 @@ export type CardWorkspaceWidthControlProps = { modeLabel: string;
   onStepUp: () => void;
   onReset: () => void;
 };
-
 export type CardWorkspaceShellProps = { children: ReactNode;
   containerClassName?: string;
   shellClassName?: string;
@@ -73,13 +71,11 @@ const setExternalRef = (ref: Ref<HTMLDivElement> | undefined, node: HTMLDivEleme
 
   (ref as { current: HTMLDivElement | null }).current = node;
 };
-
 const getIntersectionArea = (left: DOMRect, right: DOMRect): number => {
   const width = Math.min(left.right, right.right) - Math.max(left.left, right.left);
   const height = Math.min(left.bottom, right.bottom) - Math.max(left.top, right.top);
   return width > 0 && height > 0 ? width * height : 0;
 };
-
 const resolveCaptureSide = (target: HTMLElement, rect: SelectionCaptureRect): CardSelectionCaptureSide => {
   const targetBounds = target.getBoundingClientRect();
   const selectionBounds = new DOMRect(targetBounds.left + rect.x, targetBounds.top + rect.y, rect.width, rect.height);
@@ -98,7 +94,6 @@ const resolveCaptureSide = (target: HTMLElement, rect: SelectionCaptureRect): Ca
   candidates.sort((left, right) => right.area - left.area);
   return candidates[0]?.side ?? "question";
 };
-
 const resolveTaskMessage = (values: Array<string | void>): string | null => {
   return values.find((value): value is string => typeof value === "string" && value.trim().length > 0) ?? null;
 };

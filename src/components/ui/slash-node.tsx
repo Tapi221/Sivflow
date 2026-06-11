@@ -245,6 +245,4 @@ export function SlashInputElement( props: PlateElementProps<TComboboxInputElemen
       </InlineCombobox>
 
       {props.children}
-    </PlateElement>
-  );
-}
+    </PlateEle

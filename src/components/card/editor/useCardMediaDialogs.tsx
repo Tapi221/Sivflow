@@ -10,14 +10,11 @@ import { sanitizeReferences } from "./cardEditorUtils";
 
 
 type Side = "question" | "answer";
-
 type UseCardMediaDialogsParams = {
   getSideAttachments: (side: Side) => CardFaceAttachments;
   setSideAttachments: (side: Side, nextAttachments: CardFaceAttachments) => void;
 };
-
 type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-
 type StratisComponentIconProps = {
   icon: StratisIconComponent;
   className?: string;

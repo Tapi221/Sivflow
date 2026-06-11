@@ -10,7 +10,6 @@ type CalendarViewModeOption = {
   value: CalendarViewMode;
   label: string;
 };
-
 type ToggleCalendarViewModeProps = {
   value: CalendarViewModeSelection;
   onChange: (value: CalendarViewMode) => void;
@@ -38,11 +37,8 @@ const CALENDAR_VIEW_MODE_MOTION_TRANSITION: Transition = {
 
 
 const isViewModeSelectionArray = (value: CalendarViewModeSelection): value is readonly CalendarViewMode[] => Array.isArray(value);
-
 const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SELECT_VIEW_MODE_SET.has(viewMode);
-
 const sortMultiSelectViewModes = (viewModes: readonly CalendarViewMode[]): CalendarViewMode[] => MULTI_SELECT_VIEW_MODES.filter((viewMode) => viewModes.includes(viewMode));
-
 const resolveOptimisticViewMode = (
   currentValue: CalendarViewModeSelection,
   nextValue: CalendarViewMode,
@@ -64,16 +60,13 @@ const resolveOptimisticViewMode = (
 
   return nextValue;
 };
-
 const isSelectedViewMode = (
   value: CalendarViewModeSelection,
   optionValue: CalendarViewMode,
 ) => isViewModeSelectionArray(value) ? value.includes(optionValue) : value === optionValue;
-
 const hasMultipleSelectedViewModes = (
   value: CalendarViewModeSelection,
 ) => isViewModeSelectionArray(value) && value.length > 1;
-
 const isDisabledViewModeOption = (
   value: CalendarViewModeSelection,
   optionValue: CalendarViewMode,

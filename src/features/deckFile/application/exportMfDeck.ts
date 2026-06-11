@@ -17,4 +17,3 @@ export const exportMfDeckBytes = async ({ cardSet, cards, tagById, appVersion, }
     appVersion,
   });
   return encodeMfDeckArchive(archive);
-};

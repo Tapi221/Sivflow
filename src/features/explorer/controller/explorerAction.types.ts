@@ -11,4 +11,4 @@ export type ExplorerAction = | { type: "APPLY_ROUTE_STATE"; payload: ExplorerRou
     type: "SET_BREADCRUMB_CONTEXT";
     payload: { context: ExplorerBreadcrumbContext };
   }
-  | { type: "INCREMENT_SECTION_LIST_TOKEN" };
+  | { type: "INCREMENT_SECTION_LIST_TOKEN" 

@@ -1,20 +1,15 @@
 type DateLike = {
   toDate?: unknown;
 };
-
 export type BlobUrlFix = { path: string;
   before: string;
 };
-
 export type SanitizeResult<T> = { value: T;
   changed: boolean;
   fixes: BlobUrlFix[];
 };
 
-
-
 export const isBlobUrl = (v: unknown): v is string => typeof v === "string" && v.startsWith("blob:");
-
 export const sanitizeBlobUrlsDeep = <T>(input: T): SanitizeResult<T> => { const fixes: BlobUrlFix[] = [];
 
   const shouldPreserveObject = (value: unknown): boolean => {
@@ -54,6 +49,5 @@ export const sanitizeBlobUrlsDeep = <T>(input: T): SanitizeResult<T> => { const 
     fixes,
   };
 };
-
 export const findBlobUrlFixesDeep = (input: unknown) => { return sanitizeBlobUrlsDeep(input).fixes;
 };

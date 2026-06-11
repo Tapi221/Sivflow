@@ -23,7 +23,6 @@ interface FlashcardCornerControlsProps {
   onOpenReferencePopup: () => void;
   headerIconVisualScale?: number;
 }
-
 export interface FlashcardCornerControlsResult { actionsTopLeft: React.ReactNode[] | undefined;
   actionsTopRight: React.ReactNode[] | undefined;
 }
@@ -36,7 +35,6 @@ const resolveSafeVisualScale = (value?: number) => {
   if (value <= 0) return 1;
   return value;
 };
-
 export const useFlashcardCornerControls = ({ card, hasUncertainty, isBookmarked, activeImageItems, activeAudioUrls, activeReferences, extraHeaderLeft, onToggleUncertainty, onToggleBookmark, onOpenImagePopup, onOpenAudioPopup, onOpenReferencePopup, headerIconVisualScale = 1, }: FlashcardCornerControlsProps) => { return React.useMemo(() => { const actionsTopLeft: React.ReactNode[] = [];
     const actionsTopRight: React.ReactNode[] = [];
     const mediaActionNodes: React.ReactNode[] = [];

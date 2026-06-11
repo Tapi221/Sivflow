@@ -7,7 +7,6 @@ import { detectImportFileKind, IMPORT_FILE_LABELS, isPortableImportFileKind, typ
 
 
 export type PortableImportBatchItemStatus = | "queued" | "parsing" | "importing" | "imported" | "failed" | "skipped";
-
 export type PortableImportBatchItem = { id: string;
   file: File;
   kind: PortableImportFileKind;
@@ -20,7 +19,6 @@ export type PortableImportBatchItem = { id: string;
   warningCount?: number;
   errorMessage?: string;
 };
-
 export type PortableImportBatchResult = { items: PortableImportBatchItem[];
   importedCount: number;
   failedCount: number;
@@ -29,7 +27,6 @@ export type PortableImportBatchResult = { items: PortableImportBatchItem[];
   lastImportedCardSetId: string | null;
   lastImportedCardSetName: string | null;
 };
-
 export type ImportPortableFileBatchParams = { files: File[];
   folderId: string;
   createCardSet: CreateMfDeckCardSet;
@@ -48,18 +45,15 @@ const genId = (): string => {
 
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
-
 const formatFileSize = (size: number): string => {
   if (!Number.isFinite(size) || size < 0) return "0 B";
   if (size < 1024) return `${size} B`;
   if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
   return `${(size / 1024 / 1024).toFixed(1)} MB`;
 };
-
 const cloneItem = (item: PortableImportBatchItem): PortableImportBatchItem => ({
   ...item,
 });
-
 export const buildPortableImportBatchItems = ( files: File[], ): PortableImportBatchItem[] => { const seen = new Set<string>();
   const items: PortableImportBatchItem[] = [];
 
@@ -89,11 +83,9 @@ export const buildPortableImportBatchItems = ( files: File[], ): PortableImportB
 
   return items;
 };
-
 const getSuggestedCardSetName = (result: ImportMfDeckArchiveResult): string => {
   return result.createdCardSetName.trim() || "無題のカードセット";
 };
-
 const importMfDeckItem = async ({
   item,
   folderId,
@@ -126,7 +118,6 @@ const importMfDeckItem = async ({
     },
   });
 };
-
 const importMfCardItem = async ({
   item,
   folderId,
@@ -159,14 +150,12 @@ const importMfCardItem = async ({
     },
   });
 };
-
 const emitItem = (
   item: PortableImportBatchItem,
   onItemChange: ImportPortableFileBatchParams["onItemChange"],
 ) => {
   onItemChange?.(cloneItem(item));
 };
-
 export const importPortableFileBatch = async ({ files, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, onItemChange, }: ImportPortableFileBatchParams): Promise<PortableImportBatchResult> => { const items = buildPortableImportBatchItems(files);
   let importedCount = 0;
   let failedCount = 0;
@@ -242,6 +231,4 @@ export const importPortableFileBatch = async ({ files, folderId, createCardSet, 
     lastImportedCardSetName,
   };
 };
-
 export const formatPortableImportBatchItemSubtitle = ( item: Pick<PortableImportBatchItem, "kind" | "size">, ): string => { return `${IMPORT_FILE_LABELS[item.kind]} / ${formatFileSize(item.size)}`;
-};

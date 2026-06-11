@@ -15,13 +15,10 @@ import { useDateFnsLocale, useT } from "@shared/i18n/useT";
 export type CalendarYearEventPriority = { group: number;
   index: number;
 };
-
 export type CalendarYearEventDisplay = { color?: string;
   priority: CalendarYearEventPriority;
 };
-
 export type CalendarYearEventDisplayResolver = (event: GoogleCalendarEvent) => CalendarYearEventDisplay;
-
 type CalendarYearViewProps = {
   yearDate: Date;
   selectedDate: Date;
@@ -32,13 +29,11 @@ type CalendarYearViewProps = {
   onRenderedRangeChange?: (range: CalendarDateRange) => void;
   onSyncRangeChange?: (range: CalendarDateRange) => void;
 };
-
 type CalendarYearDayEvents = {
   count: number;
   backgroundColor: string;
   priority: CalendarYearEventPriority;
 };
-
 type CalendarYearDay = {
   date: Date;
   key: string;
@@ -46,26 +41,22 @@ type CalendarYearDay = {
   isCurrentMonth: boolean;
   events: CalendarYearDayEvents | null;
 };
-
 type CalendarYearWeek = {
   key: string;
   days: CalendarYearDay[];
 };
-
 type CalendarYearMonth = {
   key: string;
   date: Date;
   label: string;
   weeks: CalendarYearWeek[];
 };
-
 type CalendarYearBlock = {
   key: string;
   date: Date;
   label: string;
   months: CalendarYearMonth[];
 };
-
 type YearVirtualWindow = {
   startOffset: number;
   endOffset: number;
@@ -95,7 +86,6 @@ const createDayAriaLabel = (date: Date, eventCount: number): string => {
 
   return `${baseLabel}、予定${eventCount}件`;
 };
-
 const normalizeColor = (color: string): string => {
   if (/^#[0-9a-f]{3}$/i.test(color)) {
     const red = color.charAt(1);
@@ -107,7 +97,6 @@ const normalizeColor = (color: string): string => {
 
   return color;
 };
-
 const colorToRgba = (color: string, alpha: number): string => {
   const normalized = normalizeColor(color);
   const match = /^#([0-9a-f]{6})$/i.exec(normalized);
@@ -121,16 +110,13 @@ const colorToRgba = (color: string, alpha: number): string => {
 
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 };
-
 const resolveDefaultYearEventDisplay: CalendarYearEventDisplayResolver = () => DEFAULT_YEAR_EVENT_DISPLAY;
-
 const compareCalendarYearEventPriority = (left: CalendarYearEventPriority, right: CalendarYearEventPriority): number => {
   const groupDiff = left.group - right.group;
   if (groupDiff !== 0) return groupDiff;
 
   return left.index - right.index;
 };
-
 const buildEventsByDay = (events: GoogleCalendarEvent[], eventDisplayResolver: CalendarYearEventDisplayResolver = resolveDefaultYearEventDisplay): Map<string, CalendarYearDayEvents> => {
   const eventsByDay = new Map<string, CalendarYearDayEvents>();
 
@@ -160,7 +146,6 @@ const buildEventsByDay = (events: GoogleCalendarEvent[], eventDisplayResolver: C
 
   return eventsByDay;
 };
-
 const buildMonthDays = (monthDate: Date, eventsByDay: Map<string, CalendarYearDayEvents>, weekStartDay: CalendarWeekStartDay): CalendarYearDay[] => {
   const monthStart = startOfMonth(monthDate);
   const gridStart = startOfWeek(monthStart, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) });
@@ -178,7 +163,6 @@ const buildMonthDays = (monthDate: Date, eventsByDay: Map<string, CalendarYearDa
     };
   });
 };
-
 const chunkMonthWeeks = (monthKey: string, days: CalendarYearDay[]): CalendarYearWeek[] => {
   const weeks: CalendarYearWeek[] = [];
 
@@ -191,7 +175,6 @@ const chunkMonthWeeks = (monthKey: string, days: CalendarYearDay[]): CalendarYea
 
   return weeks;
 };
-
 const buildYearDateRange = (years: CalendarYearBlock[]): CalendarDateRange | null => {
   const firstYear = years[0];
   const lastYear = years[years.length - 1];
@@ -202,21 +185,16 @@ const buildYearDateRange = (years: CalendarYearBlock[]): CalendarDateRange | nul
     end: endOfDay(endOfYear(lastYear.date)),
   };
 };
-
 const buildYearSyncDateRange = (date: Date): CalendarDateRange => ({
   start: startOfYear(date),
   end: endOfDay(endOfYear(date)),
 });
-
 const isSameCalendarDateRange = (left: CalendarDateRange, right: CalendarDateRange): boolean => left.start.getTime() === right.start.getTime() && left.end.getTime() === right.end.getTime();
-
 const createInitialYearVirtualWindow = (): YearVirtualWindow => ({
   startOffset: 0,
   endOffset: YEAR_INITIAL_RENDERED_FUTURE_YEARS,
 });
-
 const isSameYearVirtualWindow = (left: YearVirtualWindow, right: YearVirtualWindow): boolean => left.startOffset === right.startOffset && left.endOffset === right.endOffset;
-
 const getDayButtonStyle = (day: CalendarYearDay, selected: boolean): CSSProperties | undefined => {
   if (selected || !day.events) return undefined;
 
@@ -548,7 +526,5 @@ const CalendarYearViewComponent = ({
 
 
 const CalendarYearView = memo(CalendarYearViewComponent);
-
 CalendarYearView.displayName = "CalendarYearView";
-
-export { CalendarYearView };
+export { CalendarYea

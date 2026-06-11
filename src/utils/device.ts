@@ -1,7 +1,5 @@
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
-
-
 const DEVICE_LABELS = {
   server: "Server",
   webBrowser: "Web Browser",
@@ -30,8 +28,6 @@ const DEVICE_USER_AGENT_PATTERNS = {
 } as const;
 const DEVICE_STANDALONE_MEDIA_QUERY = "(display-mode: standalone)";
 
-
-
 const resolveDeviceOsLabel = (userAgent: string) => {
   if (DEVICE_USER_AGENT_PATTERNS.android.test(userAgent)) {
     return DEVICE_LABELS.android;
@@ -55,7 +51,6 @@ const resolveDeviceOsLabel = (userAgent: string) => {
 
   return DEVICE_LABELS.webBrowser;
 };
-
 const resolveDeviceClientLabel = (userAgent: string, isStandalone: boolean) => {
   if (isStandalone) {
     return DEVICE_LABELS.app;
@@ -79,7 +74,6 @@ const resolveDeviceClientLabel = (userAgent: string, isStandalone: boolean) => {
 
   return DEVICE_LABELS.browser;
 };
-
 export const getOrCreateDeviceId = () => { if (typeof window === "undefined") return "server";
 
   let deviceId = localStorage.getItem(SHARED_STORAGE_KEYS.deviceId);
@@ -90,7 +84,6 @@ export const getOrCreateDeviceId = () => { if (typeof window === "undefined") re
 
   return deviceId;
 };
-
 export const getDeviceName = () => { if (typeof window === "undefined") return DEVICE_LABELS.server;
 
   const userAgent = navigator.userAgent;

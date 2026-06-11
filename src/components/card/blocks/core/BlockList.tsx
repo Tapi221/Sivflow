@@ -16,7 +16,6 @@ export type BlockListRowMeta = { index: number;
   isLinePositionable: boolean;
   showSeparator: boolean;
 };
-
 interface BlockListProps {
   blocks: CardBlock[];
   className?: string;

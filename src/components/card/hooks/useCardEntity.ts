@@ -13,13 +13,11 @@ const DRAFT_KEY_PREFIX = "card-editor-draft-";
 
 
 const makeDraftKey = (cardId: string) => `${DRAFT_KEY_PREFIX}${cardId}`;
-
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   return typeof value === "object" && value !== null
     ? (value as Record<string, unknown>)
     : null;
 };
-
 const resolveStableBlockId = ({
   side,
   cardId,
@@ -48,7 +46,6 @@ const resolveStableBlockId = ({
 
   return `${side}-${cardId}-${blockType}-${index}`;
 };
-
 const withStableBlockIds = (raw: unknown) => {
   const record = toRecord(raw);
 
@@ -103,11 +100,9 @@ const withStableBlockIds = (raw: unknown) => {
     },
   };
 };
-
 const normalizeCardWithStableBlockIds = (value: unknown) => {
   return normalizeCard(withStableBlockIds(value));
 };
-
 const readCardDraft = (cardId: string) => {
   if (typeof window === "undefined") return null;
 
@@ -122,7 +117,6 @@ const readCardDraft = (cardId: string) => {
     return null;
   }
 };
-
 export const useCardEntity = (cardId?: string | null) => { const { currentUser } = useAuthSession();
   const { updateCard } = useCards(undefined, undefined, { enabled: false });
 

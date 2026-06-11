@@ -18,7 +18,6 @@ import { Link, Plus } from "@/ui/icons";
 type CardQuestionLinksPanelProps = {
   selectedCardId: string | null;
 };
-
 type CardRelationRecord = {
   id: string;
   userId: string;
@@ -30,7 +29,6 @@ type CardRelationRecord = {
   updatedAt?: Date;
   isDeleted?: boolean;
 };
-
 type QuestionLinksSnapshot = {
   card: Card;
   outgoingRelations: CardRelationRecord[];
@@ -53,27 +51,22 @@ const isCardRelationRecord = (value: unknown): value is CardRelationRecord => {
   const record = value as Partial<CardRelationRecord>;
   return typeof record.id === "string" && typeof record.userId === "string";
 };
-
 const isCardSet = (value: unknown): value is CardSet => {
   if (!value || typeof value !== "object") return false;
   const record = value as Partial<CardSet>;
   return typeof record.id === "string" && !record.isDeleted;
 };
-
 const getBlockText = (block: CardBlock): string => {
   return [block.questionTitle, block.questionAnswer, block.content, block.markdown]
     .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
     .join(" ");
 };
-
 const normalizeTerm = (value: string): string => value.replace(/[、。,.!?！？:：;；()[\]{}「」『』]/g, "").trim();
-
 const isUsefulTerm = (term: string): boolean => {
   if (term.length < 2 || term.length > MAX_CUSTOM_TERM_LENGTH) return false;
   if (/^\d+$/.test(term)) return false;
   return !TERM_STOP_WORDS.has(term.toLowerCase());
 };
-
 const extractQuestionTerms = (card: Card | null): string[] => {
   if (!card) return [];
   const sourceText = [card.title, ...card.front.blocks.map(getBlockText), ...card.back.blocks.map(getBlockText)]
@@ -93,11 +86,8 @@ const extractQuestionTerms = (card: Card | null): string[] => {
 
   return terms;
 };
-
 const getCardTitle = (card: Card): string => card.title?.trim() || card.front.blocks.map(getBlockText).find((text) => text.trim().length > 0)?.trim() || card.questionNumber || "無題のカード";
-
 const sanitizeCustomTerm = (value: string): string => normalizeTerm(value).slice(0, MAX_CUSTOM_TERM_LENGTH);
-
 const getResolvedCardFolderId = (card: Card, cardSetById: ReadonlyMap<string, CardSet>): string | null => resolveCardFolderIdStrict(card, cardSetById);
 
 
@@ -231,7 +221,6 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
 
 const CardQuestionLinksPanel = memo(CardQuestionLinksPanelComponent);
 CardQuestionLinksPanel.displayName = "CardQuestionLinksPanel";
-
 export { CardQuestionLinksPanel };
 
 

@@ -12,11 +12,9 @@ type CreateCardSet = (
     orderIndex?: number;
   },
 ) => Promise<CardSet>;
-
 type CreateCard = (
   cardData: Partial<Card> & { cardSetId?: string },
 ) => Promise<Card>;
-
 type ImportDestination =
   | {
     kind: "new-card-set";
@@ -27,7 +25,6 @@ type ImportDestination =
     cardSetId: string;
     cardSetName: string;
   };
-
 type ImportCardsFromPayloadParams = {
   payload: ImportPayload;
   folderId: string;
@@ -55,7 +52,6 @@ const buildImportCardSetName = (fileName: string) => {
 
   return `${baseName} ${dateLabel}`;
 };
-
 const mapImportBlockToCardBlock = (block: ImportBlock): CardBlock => {
   const baseBlock = {
     id: crypto.randomUUID(),
@@ -102,7 +98,6 @@ const mapImportBlockToCardBlock = (block: ImportBlock): CardBlock => {
 
   throw new Error(`Unsupported import block type: ${block.type}`);
 };
-
 const importCardsFromPayload = async ({
   payload,
   folderId,
@@ -166,4 +161,4 @@ export { buildImportCardSetName, importCardsFromPayload };
 
 
 
-export type { ImportDestination };
+export type { ImportDestinat

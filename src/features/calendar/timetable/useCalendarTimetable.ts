@@ -15,7 +15,6 @@ type UseCalendarTimetableState = {
   syllabusCourses: CalendarTimetableSyllabusCourseDisplay[];
   isLoading: boolean;
 };
-
 type UseCalendarTimetableReturn = UseCalendarTimetableState & {
   saveCourse: (draft: CalendarTimetableCourseDraft) => Promise<void>;
   deleteCourse: (courseId: string) => Promise<void>;
@@ -36,14 +35,12 @@ const DEFAULT_PERIODS = createDefaultCalendarTimetablePeriods();
 
 
 const createInitialState = (): UseCalendarTimetableState => ({ courses: [], departments: [], institutions: [], periods: DEFAULT_PERIODS, settings: DEFAULT_SETTINGS, syllabusCourses: [], isLoading: true });
-
 const loadCalendarTimetableState = async (): Promise<UseCalendarTimetableState> => {
   await ensureCalendarTimetableSeedData();
   const settings = await getCalendarTimetableSettings();
   const [periods, courses, institutions, departments, syllabusCourses] = await Promise.all([listCalendarTimetablePeriods(), listCalendarTimetableCourses(settings.activeSemesterId), listCalendarTimetableInstitutions(), listCalendarTimetableDepartments(""), searchCalendarTimetableSyllabusCourses("")]);
   return { courses, departments, institutions, periods: periods.length > 0 ? periods : DEFAULT_PERIODS, settings, syllabusCourses, isLoading: false };
 };
-
 const useCalendarTimetable = (): UseCalendarTimetableReturn => {
   const [state, setState] = useState<UseCalendarTimetableState>(createInitialState);
 
@@ -73,4 +70,4 @@ const useCalendarTimetable = (): UseCalendarTimetableReturn => {
 
 
 
-export { useCalendarTimetable };
+export { useCalendarTimeta

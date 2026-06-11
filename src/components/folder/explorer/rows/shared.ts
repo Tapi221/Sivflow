@@ -8,7 +8,6 @@ export const EXPLORER_ROW_ICON_SLOT_CLASS = "ds-list-item__icon flex h-full w-5 
 export const EXPLORER_ROW_INPUT_CLASS = "ds-list-item__input h-[22px] w-full px-1 text-[13px] leading-5 outline-none select-text";
 export const EXPLORER_ROW_TITLE_SLOT_CLASS = "pointer-events-none flex min-w-0 flex-1 items-center";
 export const EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS = "pr-8 md:pr-0";
-
 export const FOLDER_ROW_HEIGHT_PX = 30;
 export const FOLDER_ROW_ICON_SIZE_CLASS = "h-4 w-4";
 export const FOLDER_ROW_TITLE_CLASS = "ds-list-item__title truncate text-[14px] font-normal";

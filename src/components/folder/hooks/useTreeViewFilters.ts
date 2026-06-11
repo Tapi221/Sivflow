@@ -5,9 +5,7 @@ import type { Card, DocumentItem } from "@/types";
 
 
 type TagMapLike = Parameters<typeof resolveCardTagNames>[1];
-
 type ContentTypeFilter = "card" | "pdf";
-
 interface UseTreeViewFiltersParams {
   cards: Card[];
   documents: DocumentItem[];

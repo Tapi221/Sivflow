@@ -4,7 +4,6 @@ import * as XLSX from "xlsx";
 
 const TEMPLATE_FILE_NAME = "flashcard-import-template.xlsx";
 const SHEET_NAME = "blocks";
-
 const HEADER_ROW = [
   "cardId",
   "side",
@@ -16,7 +15,6 @@ const HEADER_ROW = [
   "title",
   "note",
 ];
-
 const SAMPLE_ROWS = [
   [
     "card-001",
@@ -68,7 +66,6 @@ const buildWorkbook = () => {
 
   return workbook;
 };
-
 const downloadBlob = (blob: Blob, fileName: string) => {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -85,7 +82,6 @@ const downloadBlob = (blob: Blob, fileName: string) => {
     URL.revokeObjectURL(url);
   }, 0);
 };
-
 export const downloadXlsxImportTemplate = () => { const workbook = buildWorkbook();
 
   const arrayBuffer = XLSX.write(workbook, {
@@ -98,4 +94,3 @@ export const downloadXlsxImportTemplate = () => { const workbook = buildWorkbook
   });
 
   downloadBlob(blob, TEMPLATE_FILE_NAME);
-};

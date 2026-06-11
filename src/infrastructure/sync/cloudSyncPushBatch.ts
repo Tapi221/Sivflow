@@ -6,13 +6,9 @@ import { chunkCloudSyncChangesBySize } from "@/application/usecases/cloudSyncBat
 import { getChangeId, getChangeParts, sanitizeSyncDataForCloud } from "@/application/usecases/cloudSyncShared";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
 
-
-
 type SyncChangeWithOperation = SyncChange & {
   operationType?: unknown;
 };
-
-
 
 const cloudUpdatedAt = (): FieldValue | Timestamp => {
   const fn = (Firestore as Record<string, unknown>).serverTimestamp;
@@ -21,16 +17,13 @@ const cloudUpdatedAt = (): FieldValue | Timestamp => {
   }
   return Timestamp.now();
 };
-
 const isDeleteSyncChange = (change: SyncChange): boolean => {
   return (change as SyncChangeWithOperation).operationType === "delete";
 };
-
 const toRecord = (value: unknown): Record<string, unknown> => {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
   return { ...(value as Record<string, unknown>) };
 };
-
 const buildDeleteTombstone = (id: string, data: unknown): Record<string, unknown> => {
   const tombstone = toRecord(data);
   tombstone.id = id;
@@ -38,7 +31,6 @@ const buildDeleteTombstone = (id: string, data: unknown): Record<string, unknown
   tombstone.deletedAt ??= cloudUpdatedAt();
   return tombstone;
 };
-
 export const pushCloudSyncBatch = async ( userId: string, changes: SyncChange[], ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }> => {
   console.log(
     `[CloudSyncAdapter] pushBatch START. Count: ${changes.length}`,

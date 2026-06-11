@@ -11,7 +11,6 @@ type DraftShape = {
   frontAttachments: CardFaceAttachments;
   backAttachments: CardFaceAttachments;
 };
-
 type UseCardEditorContentControllerParams<TDraft extends DraftShape | null> = {
   draft: TDraft;
   setDraft: Dispatch<SetStateAction<TDraft>>;

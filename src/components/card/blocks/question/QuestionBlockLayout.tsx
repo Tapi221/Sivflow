@@ -8,10 +8,8 @@ import { cn } from "@/lib/utils";
 type DivDataAttributes = {
   [key: `data-${string}`]: string | number | boolean | undefined;
 };
-
 type DivContainerProps = React.HTMLAttributes<HTMLDivElement> &
   DivDataAttributes;
-
 type QuestionBlockLayoutProps = {
   questionContent: React.ReactNode;
   answerContent: React.ReactNode;

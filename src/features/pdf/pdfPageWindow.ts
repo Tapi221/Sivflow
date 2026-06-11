@@ -3,20 +3,14 @@ type PdfPageWindowMetric = {
   offsetTop: number;
   offsetHeight: number;
 };
-
 type PdfPageWindowOptions = {
   fallbackPageNumber?: number | null;
   overscanPageCount?: number;
 };
-
 export type { PdfPageWindowMetric, PdfPageWindowOptions };
-
-
 
 const DEFAULT_PDF_PAGE = 1;
 const DEFAULT_PDF_PAGE_WINDOW_OVERSCAN = 1;
-
-
 
 const getSafePdfPageNumber = (pageNumber: number | null | undefined, pageCount?: number | null): number => {
   const normalizedPageNumber = Math.floor(pageNumber ?? DEFAULT_PDF_PAGE);
@@ -24,21 +18,17 @@ const getSafePdfPageNumber = (pageNumber: number | null | undefined, pageCount?:
   const safePageCount = typeof pageCount === "number" && Number.isFinite(pageCount) ? Math.max(Math.floor(pageCount), DEFAULT_PDF_PAGE) : Number.MAX_SAFE_INTEGER;
   return Math.min(Math.max(safePageNumber, DEFAULT_PDF_PAGE), safePageCount);
 };
-
 const getNormalizedPdfPageWindowOverscan = (overscanPageCount: number | null | undefined): number => {
   if (typeof overscanPageCount !== "number" || !Number.isFinite(overscanPageCount)) return DEFAULT_PDF_PAGE_WINDOW_OVERSCAN;
   return Math.max(0, Math.floor(overscanPageCount));
 };
-
 const isValidPdfPageWindowMetric = (metric: PdfPageWindowMetric, pageCount: number): boolean => {
   return Number.isFinite(metric.pageNumber) && Number.isFinite(metric.offsetTop) && Number.isFinite(metric.offsetHeight) && metric.offsetHeight > 0 && metric.pageNumber >= DEFAULT_PDF_PAGE && metric.pageNumber <= pageCount;
 };
-
 const isPdfPageMetricVisible = (metric: PdfPageWindowMetric, viewportTop: number, viewportBottom: number): boolean => {
   const pageBottom = metric.offsetTop + metric.offsetHeight;
   return pageBottom > viewportTop && metric.offsetTop < viewportBottom;
 };
-
 const getPdfPageWindowScanStartIndex = (pageMetrics: PdfPageWindowMetric[], viewportTop: number): number => {
   let low = 0;
   let high = pageMetrics.length;
@@ -57,7 +47,6 @@ const getPdfPageWindowScanStartIndex = (pageMetrics: PdfPageWindowMetric[], view
 
   return low;
 };
-
 const getPdfVisiblePageNumbers = (pageMetrics: PdfPageWindowMetric[], viewportTop: number, viewportBottom: number, pageCount: number): number[] => {
   const visiblePageNumbers: number[] = [];
   const startIndex = getPdfPageWindowScanStartIndex(pageMetrics, viewportTop);
@@ -71,7 +60,6 @@ const getPdfVisiblePageNumbers = (pageMetrics: PdfPageWindowMetric[], viewportTo
 
   return visiblePageNumbers;
 };
-
 const getPdfPageWindowKeepSet = (pageMetrics: PdfPageWindowMetric[], viewportTop: number, viewportHeight: number, pageCount: number, options: PdfPageWindowOptions = {}): Set<number> => {
   const safePageCount = Math.max(pageCount, DEFAULT_PDF_PAGE);
   const safeViewportTop = Number.isFinite(viewportTop) ? viewportTop : 0;
@@ -91,7 +79,5 @@ const getPdfPageWindowKeepSet = (pageMetrics: PdfPageWindowMetric[], viewportTop
   for (let page = firstPage; page <= lastPage; page += 1) idsToKeep.add(page);
   return idsToKeep;
 };
-
-
 
 export { getPdfPageWindowKeepSet, getSafePdfPageNumber };

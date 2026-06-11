@@ -115,7 +115,5 @@ const MediaBlockInner = ({
 
 
 const MediaBlock = React.memo(MediaBlockInner, areMediaBlockPropsEqual);
-
 MediaBlock.displayName = "MediaBlock";
-
 export { MediaBlock };

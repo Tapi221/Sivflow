@@ -8,13 +8,11 @@ import type { TagRecord } from "@/services/localdb/types";
 
 
 type Tag = TagRecord;
-
 type UseCardEditorTagsResult = {
   tags: Tag[];
   tagById: Map<string, Tag>;
   addTag: (name: string) => Promise<Tag>;
 };
-
 type TagWriteCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   addItem: (table: "tagRecords", item: Record<string, unknown>) => Promise<string>;
   updateItem: (table: "tagRecords", id: string, changes: Record<string, unknown>) => Promise<number>;
@@ -32,7 +30,6 @@ const genId = (): string => {
   }
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
-
 export const useCardEditorTags = (): UseCardEditorTagsResult => { const { currentUser } = useAuthSession();
 
   const rawTags = useLiveQuery(

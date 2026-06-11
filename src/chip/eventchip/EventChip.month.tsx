@@ -12,7 +12,6 @@ type CalendarEventChipMonthProps = {
   showTimeLabel?: boolean;
   tooltipDisabled?: boolean;
 };
-
 type CalendarEventChipMonthStyle = CSSProperties & {
   "--calendar-event-chip-accent": string;
   "--calendar-event-chip-bg": string;
@@ -44,15 +43,12 @@ const createCalendarEventChipMonthStyle = (backgroundColor: string, accentColor:
   paddingTop: showTimeLabel ? eventChipDesign.month.paddingYWithTimePx : eventChipDesign.month.paddingYCompactPx,
   transform: !showTimeLabel && isAllDay ? `translateY(${eventChipDesign.month.allDayOffsetPx}px)` : undefined,
 });
-
 const createTitleStyle = (): CSSProperties => ({
   fontSize: eventChipDesign.month.titleFontSizePx,
 });
-
 const createTimeStyle = (): CSSProperties => ({
   fontSize: eventChipDesign.month.timeFontSizePx,
 });
-
 const getTimeLabel = (event: GoogleCalendarEvent): string => {
   if (event.isAllDay) return "終日";
 
@@ -80,5 +76,4 @@ const CalendarEventChipMonth = ({ event, showTimeLabel = true, tooltipDisabled =
 
 
 CalendarEventChipMonth.displayName = "CalendarEventChipMonth";
-
 export { CalendarEventChipMonth };

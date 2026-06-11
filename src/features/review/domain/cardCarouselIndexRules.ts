@@ -8,20 +8,16 @@ export const clampCardCarouselIndex = (index: number, itemCount: number) => { if
   const roundedIndex = Math.round(index);
   return Math.min(itemCount - 1, Math.max(0, roundedIndex));
 };
-
 export const canGoToPreviousCardCarouselItem = (activeIndex: number) => { return activeIndex > 0;
 };
-
 export const canGoToNextCardCarouselItem = ( activeIndex: number, itemCount: number, ) => { return activeIndex < Math.max(0, itemCount - 1);
 };
-
 export const isNearCardCarouselItem = ({ activeIndex, targetIndex, radius, }: { activeIndex: number;
   targetIndex: number;
   radius: number;
 }) => {
   return Math.abs(targetIndex - activeIndex) <= radius;
 };
-
 export const shouldNotifyCardCarouselIndexChange = ({ nextIndex, previousIndex, }: { nextIndex: number;
   previousIndex: number;
 }) => {

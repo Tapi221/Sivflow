@@ -4,14 +4,10 @@ import { createPdfDocumentDataSourceFromBlob, releasePdfDocumentSource } from "@
 import type { PdfViewerState } from "@/types";
 import type { PdfDocumentSource } from "@/features/pdf/pdfDocumentSource";
 
-
-
 type PdfObject = {
   id: number;
   body: string;
 };
-
-
 
 const PDF_PERFORMANCE_TEST_PAGE_COUNT = 36;
 const PDF_PAGE_WIDTH = 612;
@@ -20,20 +16,14 @@ const PDF_TEXT_X = 72;
 const PDF_TITLE_Y = 720;
 const PDF_BODY_Y = 690;
 
-
-
 const escapePdfText = (text: string): string => text.replaceAll("\\", "\\\\").replaceAll("(", "\\(").replaceAll(")", "\\)");
-
 const createPdfStreamObject = (content: string): string => `<< /Length ${content.length} >>\nstream\n${content}\nendstream`;
-
 const createPdfContentStream = (pageNumber: number): string => {
   const title = escapePdfText(`Sivflow PDF performance fixture ${pageNumber}`);
   const body = escapePdfText("This generated PDF is used by Playwright to exercise pdf.js scrolling, cleanup, and performance marks.");
   return [`BT /F1 18 Tf ${PDF_TEXT_X} ${PDF_TITLE_Y} Td (${title}) Tj ET`, `BT /F1 11 Tf ${PDF_TEXT_X} ${PDF_BODY_Y} Td (${body}) Tj ET`].join("\n");
 };
-
 const getByteLength = (value: string): number => new TextEncoder().encode(value).length;
-
 const createSyntheticPdfBlob = (pageCount: number): Blob => {
   const objects: PdfObject[] = [];
   const pageObjectIds = Array.from({ length: pageCount }, (_, index) => 4 + index * 2);
@@ -66,8 +56,6 @@ const createSyntheticPdfBlob = (pageCount: number): Blob => {
 
   return new Blob([content], { type: "application/pdf" });
 };
-
-
 
 const PdfPerformanceTest = () => {
   const canRender = useMemo(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("test_bypass") === "true", []);
@@ -118,7 +106,5 @@ const PdfPerformanceTest = () => {
     </main>
   );
 };
-
-
 
 export default PdfPerformanceTest;

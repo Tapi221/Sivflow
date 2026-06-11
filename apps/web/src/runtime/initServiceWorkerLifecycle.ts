@@ -3,16 +3,11 @@ import { toErrorText } from "./runtimeErrorUtils";
 import { logRuntimeFault } from "./logRuntimeFault";
 import { hardReloadOnce } from "./reloadGuard";
 
-
-
 let started = false;
-
-
 
 const applyWaitingWorker = (registration: ServiceWorkerRegistration) => {
   registration.waiting?.postMessage({ type: "SKIP_WAITING" });
 };
-
 const installUpdateFlow = (registration: ServiceWorkerRegistration) => {
   const installing = registration.installing;
   if (!installing) return;
@@ -30,7 +25,6 @@ const installUpdateFlow = (registration: ServiceWorkerRegistration) => {
     }
   });
 };
-
 const clearDevSwAndCaches = () => {
   void navigator.serviceWorker.getRegistrations().then((registrations) => {
     registrations.forEach((registration) => {
@@ -48,7 +42,6 @@ const clearDevSwAndCaches = () => {
     });
   });
 };
-
 export const initServiceWorkerLifecycle = () => { if ( started || typeof window === "undefined" || !("serviceWorker" in navigator) ) { return;
   }
   started = true;

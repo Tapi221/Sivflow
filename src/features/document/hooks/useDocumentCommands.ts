@@ -10,16 +10,13 @@ import type { DocumentItem } from "@/types";
 type UpdateDocumentOptions = {
   touchUpdatedAt?: boolean;
 };
-
 type DocumentUpdatePayload = Record<string, unknown> & {
   deviceId: string;
   updatedAt?: Date;
 };
-
 type DocumentUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "documents", id: string, changes: Record<string, unknown>, skipSync?: boolean) => Promise<number>;
 };
-
 type DocumentPurgeCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   documents: {
     get: (id: string) => Promise<DocumentItem | undefined>;
@@ -41,22 +38,18 @@ const VIEWER_STATE_UPDATE_KEYS = new Set(["viewerState", "updatedAt"]);
 const normalizeUpdatedAt = (value: DocumentItem["updatedAt"] | undefined): Date | undefined => {
   return normalizeDate(value) ?? undefined;
 };
-
 const resolveDocumentFileId = (documentId: string, document: Pick<DocumentItem, "localFileId"> | undefined): string => {
   const localFileId = typeof document?.localFileId === "string" ? document.localFileId.trim() : "";
   return localFileId.length > 0 ? localFileId : documentId;
 };
-
 const isViewerStateOnlyUpdate = (updates: Partial<DocumentItem>): boolean => {
   const keys = Object.keys(updates);
   return keys.includes("viewerState") && keys.every((key) => VIEWER_STATE_UPDATE_KEYS.has(key));
 };
-
 const shouldTouchUpdatedAtForUpdates = (updates: Partial<DocumentItem>, options: UpdateDocumentOptions): boolean => {
   if (typeof options.touchUpdatedAt === "boolean") return options.touchUpdatedAt;
   return Object.keys(updates).some((key) => !VIEWER_STATE_UPDATE_KEYS.has(key));
 };
-
 export const useDocumentCommands = () => { const { currentUser } = useAuthSession();
 
   const updateDocument = useCallback(
@@ -127,4 +120,3 @@ export const useDocumentCommands = () => { const { currentUser } = useAuthSessio
     deleteDocument,
     purgeDocument,
   };
-};

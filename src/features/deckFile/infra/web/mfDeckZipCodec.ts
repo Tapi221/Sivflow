@@ -24,7 +24,6 @@ const parseJsonEntry = (text: string, path: string): unknown => {
     ]);
   }
 };
-
 const readRequiredTextEntry = (
   entries: Record<string, Uint8Array>,
   path: typeof MF_DECK_MANIFEST_PATH | typeof MF_DECK_CARDS_PATH,
@@ -56,7 +55,6 @@ const readRequiredTextEntry = (
 
   return strFromU8(entry);
 };
-
 const readOptionalTextEntry = (
   entries: Record<string, Uint8Array>,
   path: typeof MF_DECK_MEDIA_MANIFEST_PATH,
@@ -77,7 +75,6 @@ const readOptionalTextEntry = (
 
   return strFromU8(entry);
 };
-
 const collectMediaEntries = (
   entries: Record<string, Uint8Array>,
 ): Record<string, Uint8Array> | undefined => {
@@ -119,7 +116,6 @@ const collectMediaEntries = (
 
   return Object.keys(media).length > 0 ? media : undefined;
 };
-
 export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => { const validation = validateMfDeckArchive(archive);
 
   if (!validation.ok) {
@@ -193,7 +189,6 @@ export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => { c
     mtime: new Date(Date.UTC(1980, 0, 1, 0, 0, 0)),
   });
 };
-
 export const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => { if (buffer.byteLength > MF_DECK_MAX_FILE_BYTES) { throw new MfDeckValidationError("mfdeck ファイルが大きすぎます。", [ { level: "error", code: "file_too_large", message: "mfdeck ファイルが大きすぎます。", }, ]);
   }
 
@@ -251,4 +246,3 @@ export const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => { i
   }
 
   return validation.value;
-};

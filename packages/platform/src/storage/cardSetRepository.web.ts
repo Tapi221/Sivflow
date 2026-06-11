@@ -3,14 +3,10 @@ import { ensureLegacyCardsBackfilled } from "@/services/legacyCardSetMigrationBa
 import { getLocalDb } from "@/services/localdb";
 import type { Card, CardSet } from "@/types";
 
-
-
 type LocalFirstCardSetDb = Awaited<ReturnType<typeof getLocalDb>> & {
   addItem: (table: "cardSets", item: Record<string, unknown>) => Promise<string>;
   updateItem: (table: "cardSets", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
-
-
 
 const generateCardSetId = () => {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -19,7 +15,6 @@ const generateCardSetId = () => {
 
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
-
 export const createWebCardSetRepository = (): CardSetCommandRepository<CardSet> & CardSetDeleteRepository<Card> & CardSetQueryRepository<CardSet> => ({ generateCardSetId, listCardSets: async (userId) => { await ensureLegacyCardsBackfilled(userId);
     const db = await getLocalDb(userId);
     return db.cardSets.where("userId").equals(userId).toArray();

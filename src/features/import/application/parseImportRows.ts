@@ -5,7 +5,6 @@ import { type ImportBlock, type ImportColumnKey, type ImportIssue, type ImportPa
 
 type HeaderMap = Partial<Record<ImportColumnKey, number>>;
 type RowCellMap = Partial<Record<ImportColumnKey, string>>;
-
 type BuildRowBlockResult = {
   side: ImportSide | null;
   block: ImportBlock | null;
@@ -35,7 +34,6 @@ const buildIssue = ({
     message,
   };
 };
-
 const normalizeHeaderName = (value: string): ImportColumnKey | null => {
   const normalized = value
     .trim()
@@ -56,12 +54,10 @@ const normalizeHeaderName = (value: string): ImportColumnKey | null => {
 
   return null;
 };
-
 const toTrimmedString = (value: unknown) => {
   if (value == null) return "";
   return String(value).trim();
 };
-
 const parseHeaderMap = (headerRow: unknown[]): HeaderMap => {
   return headerRow.reduce<HeaderMap>((accumulator, cellValue, columnIndex) => {
     const normalizedKey = normalizeHeaderName(toTrimmedString(cellValue));
@@ -74,7 +70,6 @@ const parseHeaderMap = (headerRow: unknown[]): HeaderMap => {
     return accumulator;
   }, {});
 };
-
 const getCellValue = (
   row: unknown[],
   headerMap: HeaderMap,
@@ -88,7 +83,6 @@ const getCellValue = (
 
   return toTrimmedString(row[columnIndex]);
 };
-
 const getRowCellMap = (row: unknown[], headerMap: HeaderMap): RowCellMap => {
   return {
     cardId: getCellValue(row, headerMap, "cardId"),
@@ -102,11 +96,9 @@ const getRowCellMap = (row: unknown[], headerMap: HeaderMap): RowCellMap => {
     note: getCellValue(row, headerMap, "note"),
   };
 };
-
 const isCompletelyEmptyRow = (row: unknown[]) => {
   return row.every((cellValue) => toTrimmedString(cellValue) === "");
 };
-
 const parseBlockOrder = (rawValue: string) => {
   if (rawValue === "") {
     return null;
@@ -120,7 +112,6 @@ const parseBlockOrder = (rawValue: string) => {
 
   return parsed;
 };
-
 const parseImportSide = (rawValue: string): ImportSide | null => {
   const normalized = rawValue.trim().toLowerCase();
 
@@ -129,7 +120,6 @@ const parseImportSide = (rawValue: string): ImportSide | null => {
 
   return null;
 };
-
 const validateRequiredHeaders = (
   headerMap: HeaderMap,
   sheetName: ImportSheetName,
@@ -150,7 +140,6 @@ const validateRequiredHeaders = (
     ];
   });
 };
-
 const validateRequiredCells = (
   rowNumber: number,
   sheetName: ImportSheetName,
@@ -199,7 +188,6 @@ const validateRequiredCells = (
 
   return issues;
 };
-
 const buildRowBlock = ({
   rowNumber,
   sheetName,
@@ -331,7 +319,6 @@ const buildRowBlock = ({
     issues,
   };
 };
-
 export const parseImportRows = ({ sheetName, rows, }: { sheetName: ImportSheetName;
   rows: unknown[][];
 }): ImportParseResult => {
@@ -414,4 +401,3 @@ export const parseImportRows = ({ sheetName, rows, }: { sheetName: ImportSheetNa
     },
     issues: allIssues,
   };
-};

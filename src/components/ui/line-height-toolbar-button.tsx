@@ -63,6 +63,4 @@ export function LineHeightToolbarButton(props: DropdownMenuProps) { const editor
           ))}
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+    </DropdownMenu

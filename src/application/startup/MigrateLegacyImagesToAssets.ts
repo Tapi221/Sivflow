@@ -10,7 +10,6 @@ import type { AssetRecord, AssetRemoteStatus, Card, CardBlock, CardFace, Uploade
 type ImageRecordLike = Partial<AssetRecord> &
   Partial<UploadedImage> &
   Record<string, unknown>;
-
 type AssetSnapshot = {
   assetId: string;
   localBlobId: string | null;
@@ -23,7 +22,6 @@ type AssetSnapshot = {
   remoteStatus: AssetRemoteStatus;
   retryCount: number;
 };
-
 type MigrationSummary = {
   scannedCards: number;
   scannedImages: number;
@@ -33,7 +31,6 @@ type MigrationSummary = {
   failedImages: number;
   unresolvedImages: number;
 };
-
 type MigrationState = {
   status: "done" | "pending" | "failed";
   migratedAt: string;
@@ -41,7 +38,6 @@ type MigrationState = {
   error?: string;
   unresolvedAssetIds?: string[];
 };
-
 type MigrateLegacyImagesToAssetsParams = {
   userId: string;
 };
@@ -56,10 +52,8 @@ const inFlightTouchMigrations = new Set<string>();
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
-
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
-
 const readFirstString = (...values: unknown[]): string | null => {
   for (const value of values) {
     if (typeof value === "string" && value.trim().length > 0) {
@@ -69,7 +63,6 @@ const readFirstString = (...values: unknown[]): string | null => {
 
   return null;
 };
-
 const readRemoteUrl = (...values: unknown[]): string | null => {
   for (const value of values) {
     if (!isNonEmptyString(value)) continue;
@@ -81,13 +74,11 @@ const readRemoteUrl = (...values: unknown[]): string | null => {
 
   return null;
 };
-
 const isReadyRemoteStatus = (value: unknown): boolean => {
   if (typeof value !== "string") return false;
   const normalized = value.trim().toLowerCase();
   return normalized === "ready" || normalized === "completed";
 };
-
 const readFirstNumber = (...values: unknown[]): number | null => {
   for (const value of values) {
     if (isFiniteNumber(value)) return value;
@@ -95,7 +86,6 @@ const readFirstNumber = (...values: unknown[]): number | null => {
 
   return null;
 };
-
 const parseAssetIdFromStoragePath = (
   storagePath: string | null,
 ): string | null => {
@@ -109,10 +99,8 @@ const parseAssetIdFromStoragePath = (
 
   return segments[segments.length - 1] ?? null;
 };
-
 const buildAssetRemoteKey = (userId: string, assetId: string): string =>
   `users/${userId}/assets/${assetId}`;
-
 const getErrorDetails = (
   error: unknown,
 ): {
@@ -130,7 +118,6 @@ const getErrorDetails = (
     message: String(error),
   };
 };
-
 const getRetryFileName = (assetId: string, mime: string): string => {
   const normalized = mime.trim().toLowerCase();
 
@@ -143,7 +130,6 @@ const getRetryFileName = (assetId: string, mime: string): string => {
 
   return `${assetId}.jpg`;
 };
-
 const getStorageValue = (
   image: UploadedImage,
   source: ImageRecordLike | null | undefined,
@@ -154,7 +140,6 @@ const getStorageValue = (
     image.storagePath,
     image.remoteId,
   );
-
 const resolveAssetId = (
   image: UploadedImage,
   source: ImageRecordLike | null | undefined,
@@ -169,7 +154,6 @@ const resolveAssetId = (
     source?.localFileId,
     parseAssetIdFromStoragePath(getStorageValue(image, source)),
   );
-
 const resolveLegacyImageLookupKey = (
   image: UploadedImage,
   source: ImageRecordLike | null | undefined,
@@ -184,7 +168,6 @@ const resolveLegacyImageLookupKey = (
     source?.localFileId,
     parseAssetIdFromStoragePath(getStorageValue(image, source)),
   );
-
 const resolveRemoteStatus = (
   image: UploadedImage,
   source: ImageRecordLike | null | undefined,
@@ -210,7 +193,6 @@ const resolveRemoteStatus = (
 
   return "none";
 };
-
 const buildAssetSnapshot = (
   image: UploadedImage,
   source: ImageRecordLike | null | undefined,
@@ -261,7 +243,6 @@ const buildAssetSnapshot = (
     retryCount: readFirstNumber(source?.retryCount, image.retryCount) ?? 0,
   };
 };
-
 const upsertAssetRecord = async ({
   userId,
   image,
@@ -301,7 +282,6 @@ const upsertAssetRecord = async ({
 
   await db.upsert("images", assetRecord);
 };
-
 const buildCanonicalImageRef = ({
   source,
   assetId,
@@ -341,7 +321,6 @@ const buildCanonicalImageRef = ({
   layout: source.layout ?? null,
   updatedAt: new Date(),
 });
-
 const didCanonicalImageChange = (
   before: UploadedImage,
   after: UploadedImage,
@@ -358,7 +337,6 @@ const didCanonicalImageChange = (
     (before.status ?? null) !== (after.status ?? null)
   );
 };
-
 const enqueueLocalOnlyAssetUpload = async ({
   userId,
   assetId,
@@ -393,7 +371,6 @@ const enqueueLocalOnlyAssetUpload = async ({
 
   return true;
 };
-
 const migrateSingleImageRef = async ({
   userId,
   image,
@@ -493,7 +470,6 @@ const migrateSingleImageRef = async ({
 
   return canonical;
 };
-
 const migrateImageArray = async ({
   userId,
   images,
@@ -539,7 +515,6 @@ const migrateImageArray = async ({
 
   return nextImages;
 };
-
 const migrateBlocks = async ({
   userId,
   blocks,
@@ -577,7 +552,6 @@ const migrateBlocks = async ({
 
   return nextBlocks;
 };
-
 const migrateFace = async ({
   userId,
   face,
@@ -622,7 +596,6 @@ const migrateFace = async ({
       : face.attachments,
   };
 };
-
 const migrateCard = async ({
   userId,
   card,
@@ -656,7 +629,6 @@ const migrateCard = async ({
     updatedAt: new Date(),
   };
 };
-
 const readMigrationState = (userId: string): MigrationState | null => {
   if (typeof window === "undefined") return null;
 
@@ -670,7 +642,6 @@ const readMigrationState = (userId: string): MigrationState | null => {
     return null;
   }
 };
-
 const writeMigrationState = (userId: string, state: MigrationState): void => {
   if (typeof window === "undefined") return;
 
@@ -683,7 +654,6 @@ const writeMigrationState = (userId: string, state: MigrationState): void => {
     // no-op
   }
 };
-
 const collectUnresolvedAssetIds = async ({
   userId,
   assetIds,
@@ -712,7 +682,6 @@ const collectUnresolvedAssetIds = async ({
 
   return unresolvedAssetIds;
 };
-
 export const migrateLegacyImagesToAssets = async ({ userId, }: MigrateLegacyImagesToAssetsParams): Promise<MigrationSummary> => { const migratedAssetIds = new Set<string>();
   const previousState = readMigrationState(userId);
   if (previousState?.status === "done") {

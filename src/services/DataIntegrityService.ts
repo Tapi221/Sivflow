@@ -3,12 +3,9 @@ import { createHardDeleteOrphanedCardsUseCase } from "@/application/integrity/Ha
 import { createQuarantineOrphanedCardsUseCase } from "@/application/integrity/QuarantineOrphanedCards";
 import type { IntegrityReport } from "./dataIntegrity.types";
 
-
-
 const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
 const quarantineOrphanedCardsUseCase = createQuarantineOrphanedCardsUseCase();
 const hardDeleteOrphanedCardsUseCase = createHardDeleteOrphanedCardsUseCase();
-
 export const dataIntegrityService = { checkIntegrity: async () => { return await checkDataIntegrityUseCase.execute();
   },
   quarantineOrphanedCards: async () => {

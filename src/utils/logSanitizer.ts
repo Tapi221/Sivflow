@@ -13,10 +13,7 @@ const SENSITIVE_KEYS = new Set([
   "fields",
   "_rescueRaw",
 ]);
-
 const REDACTED = "[REDACTED]";
-
-
 
 const sanitizeValue = (value: unknown, depth: number): unknown => {
   if (depth > 4) return "[TRUNCATED]";
@@ -38,6 +35,5 @@ const sanitizeValue = (value: unknown, depth: number): unknown => {
   }
   return out;
 };
-
 export const sanitizeForLog = <T>(value: T): T => { return sanitizeValue(value, 0) as T;
 };

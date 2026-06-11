@@ -9,7 +9,6 @@ import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types"
 export type ScheduleColumnBuffer = { before: number;
   after: number;
 };
-
 export type ScheduleVirtualRail = { startDate: Date;
   anchorIndex: number;
   totalDayCount: number;
@@ -30,7 +29,6 @@ export const getScheduleViewStart = ( anchorDate: Date, viewMode: CalendarViewMo
 
   return normalized;
 };
-
 export const getScheduleViewDayCount = ( anchorDate: Date, viewMode: CalendarViewMode, ) => { if (viewMode === "year") { const start = startOfYear(anchorDate);
     const end = endOfYear(anchorDate);
 
@@ -42,7 +40,6 @@ export const getScheduleViewDayCount = ( anchorDate: Date, viewMode: CalendarVie
   if (viewMode === "threeDays") return 3;
   return 1;
 };
-
 export const buildScheduleDisplayDays = ( anchorDate: Date, viewMode: CalendarViewMode, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, ) => { const baseStart = getScheduleViewStart(anchorDate, viewMode, weekStartDay);
   const visibleCount = getScheduleViewDayCount(anchorDate, viewMode);
 
@@ -50,7 +47,6 @@ export const buildScheduleDisplayDays = ( anchorDate: Date, viewMode: CalendarVi
     addDays(baseStart, index),
   );
 };
-
 export const buildScheduleInteractionDays = ( anchorDate: Date, viewMode: CalendarViewMode, buffer: ScheduleColumnBuffer, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, ) => { const displayDays = buildScheduleDisplayDays(anchorDate, viewMode, weekStartDay);
   const baseStart = displayDays[0] ?? getScheduleViewStart(anchorDate, viewMode, weekStartDay);
   const interactionStart = subDays(baseStart, buffer.before);
@@ -60,7 +56,6 @@ export const buildScheduleInteractionDays = ( anchorDate: Date, viewMode: Calend
     addDays(interactionStart, index),
   );
 };
-
 export const buildScheduleVirtualRail = ( anchorDate: Date, viewMode: CalendarViewMode, buffer: ScheduleColumnBuffer, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, ): ScheduleVirtualRail => { const displayDays = buildScheduleDisplayDays(anchorDate, viewMode, weekStartDay);
   const baseStart = displayDays[0] ?? getScheduleViewStart(anchorDate, viewMode, weekStartDay);
 
@@ -70,7 +65,6 @@ export const buildScheduleVirtualRail = ( anchorDate: Date, viewMode: CalendarVi
     totalDayCount: buffer.before + displayDays.length + buffer.after,
   };
 };
-
 export const buildScheduleVirtualRailDays = ( rail: ScheduleVirtualRail, startIndex: number, endIndex: number, ): Date[] => { const start = Math.max(0, Math.min(rail.totalDayCount, startIndex));
   const end = Math.max(start, Math.min(rail.totalDayCount, endIndex));
 
@@ -78,8 +72,6 @@ export const buildScheduleVirtualRailDays = ( rail: ScheduleVirtualRail, startIn
     addDays(rail.startDate, start + index),
   );
 };
-
 export const getScheduleVirtualRailDate = ( rail: ScheduleVirtualRail, index: number, ): Date | null => { if (index < 0 || index >= rail.totalDayCount) return null;
 
   return addDays(rail.startDate, index);
-};

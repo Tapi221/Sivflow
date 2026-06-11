@@ -1,8 +1,6 @@
 import { addDays, differenceInCalendarDays, isSameDay, max, min, startOfDay } from "date-fns";
 import type { CalendarEvent } from "./calendarEvent.types";
 
-
-
 export type CalendarEventSegment = { event: CalendarEvent;
   span: number;
   left: number;
@@ -10,22 +8,15 @@ export type CalendarEventSegment = { event: CalendarEvent;
   startsBeforeRange: boolean;
   endsAfterRange: boolean;
 };
-
 export type CalendarEventLevelsResult = { levels: CalendarEventSegment[][];
   extra: CalendarEventSegment[];
 };
 
-
-
 const DAY_STEP = 1;
-
-
 
 const findDateIndex = (range: readonly Date[], target: Date): number =>
   range.findIndex((date) => isSameDay(date, target));
-
 const getExclusiveDayEnd = (date: Date): Date => addDays(startOfDay(date), DAY_STEP);
-
 const compareSegments = (
   a: CalendarEventSegment,
   b: CalendarEventSegment,
@@ -35,7 +26,6 @@ const compareSegments = (
 
   return a.event.id.localeCompare(b.event.id);
 };
-
 export const getCalendarEventSegment = ( event: CalendarEvent, range: readonly Date[], ): CalendarEventSegment | null => { if (range.length === 0) return null;
 
   const first = startOfDay(range[0]);
@@ -68,9 +58,7 @@ export const getCalendarEventSegment = ( event: CalendarEvent, range: readonly D
     endsAfterRange: normalizedEnd.getTime() > last.getTime(),
   };
 };
-
 export const calendarEventSegmentsOverlap = ( segment: CalendarEventSegment, otherSegments: readonly CalendarEventSegment[], ): boolean => otherSegments.some( (otherSegment) => otherSegment.left <= segment.right && otherSegment.right >= segment.left, );
-
 export const getCalendarEventLevels = ( rowSegments: readonly CalendarEventSegment[], limit = Number.POSITIVE_INFINITY, ): CalendarEventLevelsResult => { const levels: CalendarEventSegment[][] = [];
   const extra: CalendarEventSegment[] = [];
 

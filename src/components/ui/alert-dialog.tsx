@@ -6,9 +6,7 @@ import { buttonVariants } from "./button"
 
 
 const AlertDialog = AlertDialogPrimitive.Root
-
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger
-
 const AlertDialogPortal = AlertDialogPrimitive.Portal
 
 
@@ -26,7 +24,6 @@ const AlertDialogOverlay = React.forwardRef<
     ref={ref}
   />
 ))
-
 const AlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
@@ -43,7 +40,6 @@ const AlertDialogContent = React.forwardRef<
     />
   </AlertDialogPortal>
 ))
-
 const AlertDialogHeader = ({
   className,
   ...props
@@ -56,7 +52,6 @@ const AlertDialogHeader = ({
     {...props}
   />
 )
-
 const AlertDialogFooter = ({
   className,
   ...props
@@ -69,7 +64,6 @@ const AlertDialogFooter = ({
     {...props}
   />
 )
-
 const AlertDialogTitle = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>
@@ -80,7 +74,6 @@ const AlertDialogTitle = React.forwardRef<
     {...props}
   />
 ))
-
 const AlertDialogDescription = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>
@@ -91,7 +84,6 @@ const AlertDialogDescription = React.forwardRef<
     {...props}
   />
 ))
-
 const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
@@ -102,7 +94,6 @@ const AlertDialogAction = React.forwardRef<
     {...props}
   />
 ))
-
 const AlertDialogCancel = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel>
@@ -121,22 +112,14 @@ const AlertDialogCancel = React.forwardRef<
 
 
 AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
-
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
-
 AlertDialogHeader.displayName = "AlertDialogHeader"
-
 AlertDialogFooter.displayName = "AlertDialogFooter"
-
 AlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName
-
 AlertDialogDescription.displayName =
   AlertDialogPrimitive.Description.displayName
-
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName
-
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName
-
 export {
   AlertDialog,
   AlertDialogPortal,

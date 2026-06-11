@@ -20,7 +20,6 @@ export type WidthControlViewModel = { modeLabel: string;
 
 export const resolveDisplayModeLabels = ( currentDisplayMode: CardDisplayMode, ) => { return { currentLabel: DISPLAY_MODE_LABELS[currentDisplayMode], triggerLabel: DISPLAY_MODE_TRIGGER_LABELS[currentDisplayMode], };
 };
-
 export const buildWidthControl = ({ isDesktop, isGlobalEditing, activePaneWidthPx, activePaneMinWidthPx, activePaneMaxWidthPx, activePaneDisplayedDefaultWidthPx, previewPaneWidth, persistPaneWidth, stepPaneWidth, resetActivePaneWidth, activePaneMode, widthStepPx, }: { isDesktop: boolean;
   isGlobalEditing: boolean;
   activePaneWidthPx: number;
@@ -58,4 +57,3 @@ export const buildWidthControl = ({ isDesktop, isGlobalEditing, activePaneWidthP
     },
     onReset: resetActivePaneWidth,
   };
-};

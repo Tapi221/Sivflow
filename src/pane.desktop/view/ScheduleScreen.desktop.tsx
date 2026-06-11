@@ -30,13 +30,8 @@ import { CalendarSelectedViewsSplitView } from "@/pane.desktop/leftpane/schedule
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 import { MobileCalendarEventComposer } from "./MobileCalendarEventComposer";
 
-
-
 type CalendarEventDisplayRange = { start: Date; end: Date };
-
 type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; monthTitleDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange; yearRenderedRange: CalendarDateRange | null };
-
-
 
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-none";
@@ -45,8 +40,6 @@ const DEFAULT_PLAN_RESULT_MODES: readonly PlanResultMode[] = ["plan", "actual"];
 const PLAN_RESULT_TOGGLE_VIEW_MODES = new Set(["threeDays", "days", "pieChart"]);
 const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const WEEKDAY_EVENT_BUFFER_DAYS = 1;
-
-
 
 const readStoredAllDayEventOrder = (): CalendarAllDayEventOrderMap => {
   if (typeof window === "undefined") return {};
@@ -64,7 +57,6 @@ const readStoredAllDayEventOrder = (): CalendarAllDayEventOrderMap => {
     return {};
   }
 };
-
 const persistAllDayEventOrder = (order: CalendarAllDayEventOrderMap) => {
   if (typeof window === "undefined") return;
   try {
@@ -73,19 +65,14 @@ const persistAllDayEventOrder = (order: CalendarAllDayEventOrderMap) => {
     // localStorage が使えない環境では React state の状態だけ維持する。
   }
 };
-
 const buildDaysDisplayRange = (days: Date[], fallbackDate: Date, bufferDays: number): CalendarEventDisplayRange => ({ start: startOfDay(subDays(days[0] ?? fallbackDate, bufferDays)), end: endOfDay(addDays(days.at(-1) ?? fallbackDate, bufferDays)) });
-
 const buildMonthAnchoredDisplayRange = (monthTitleDate: Date, bufferDays: number): CalendarEventDisplayRange => ({ start: startOfDay(subDays(startOfMonth(monthTitleDate), bufferDays)), end: endOfDay(addDays(endOfMonth(monthTitleDate), bufferDays)) });
-
 const buildYearDisplayRange = (currentDate: Date, yearRenderedRange: CalendarDateRange | null): CalendarEventDisplayRange => {
   if (!yearRenderedRange) return { start: startOfDay(currentDate), end: endOfDay(currentDate) };
 
   return { start: startOfDay(yearRenderedRange.start), end: endOfDay(yearRenderedRange.end) };
 };
-
 const buildCalendarDateDisplayRange = (range: CalendarDateRange): CalendarEventDisplayRange => ({ start: startOfDay(range.start), end: endOfDay(range.end) });
-
 const getScheduleEventDisplayRange = ({ primaryViewMode, currentDate, selectedDate, monthTitleDate, visibleDays, monthRenderedRange, yearRenderedRange }: CalendarEventDisplayRangeOptions): CalendarEventDisplayRange => {
   if (primaryViewMode === "year") return buildYearDisplayRange(currentDate, yearRenderedRange);
   if (primaryViewMode === "month") return buildCalendarDateDisplayRange(monthRenderedRange);
@@ -93,20 +80,14 @@ const getScheduleEventDisplayRange = ({ primaryViewMode, currentDate, selectedDa
   if (primaryViewMode === "pieChart") return buildDaysDisplayRange(visibleDays, selectedDate, LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS);
   return buildDaysDisplayRange(visibleDays, selectedDate, WEEKDAY_EVENT_BUFFER_DAYS);
 };
-
 const eventOverlapsDisplayRange = (event: GoogleCalendarEvent, range: CalendarEventDisplayRange): boolean => event.startsAt <= range.end && event.endsAt >= range.start;
-
 const filterEventsByDisplayRange = (events: GoogleCalendarEvent[], range: CalendarEventDisplayRange): GoogleCalendarEvent[] => events.filter((event) => eventOverlapsDisplayRange(event, range));
-
 const createInitialCalendarPrintRange = (date: Date): CalendarPrintRangeState => {
   const dateValue = createCalendarPrintDateInputValue(date);
 
   return { mode: "current", customStartDate: dateValue, customEndDate: dateValue };
 };
-
 const createInitialMonthVisibleEventCount = (): number => readStoredScheduleMonthVisibleEventCount() ?? DEFAULT_MONTH_VISIBLE_EVENT_COUNT;
-
-
 
 const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: ScheduleScreenProps) => {
   const pane = useScheduleScreen();
@@ -224,7 +205,5 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: Sch
     </CarvePanelShell>
   );
 };
-
-
 
 export { ScheduleScreen };

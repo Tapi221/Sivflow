@@ -13,13 +13,11 @@ const sanitizeFileName = (name: string) => {
   ).join("");
   return sanitized.slice(0, 120);
 };
-
 const toArrayBuffer = (bytes: Uint8Array): ArrayBuffer => {
   const copy = new Uint8Array(bytes.byteLength);
   copy.set(bytes);
   return copy.buffer;
 };
-
 export const downloadBytesAsMfCard = ({ bytes, cardName, }: { bytes: Uint8Array;
   cardName: string;
 }) => {
@@ -36,4 +34,3 @@ export const downloadBytesAsMfCard = ({ bytes, cardName, }: { bytes: Uint8Array;
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(url);
-};

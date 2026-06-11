@@ -1,11 +1,7 @@
 import type { CalendarRecurrenceRule, GoogleCalendarEvent } from "@core/calendar";
 
-
-
 export type IosCalendarPermissionStatus = "undetermined" | "granted" | "denied";
-
 export type IosCalendarConnectionStatus = "connected" | "needsPermission" | "unsupported" | "error";
-
 export type IosCalendarListItem = { id: string;
   title: string;
   color: string;
@@ -14,14 +10,11 @@ export type IosCalendarListItem = { id: string;
   isDefault: boolean;
   selected: boolean;
 };
-
 export type IosCalendarEvent = GoogleCalendarEvent & { source: "ios";
 };
-
 export type IosCalendarRange = { rangeStart: Date;
   rangeEnd: Date;
 };
-
 export type IosCalendarWritableEventInput = { calendarId: string;
   title: string;
   description?: string;
@@ -32,11 +25,9 @@ export type IosCalendarWritableEventInput = { calendarId: string;
   projectId?: string;
   recurrenceRule?: CalendarRecurrenceRule | null;
 };
-
 export type IosCalendarWritableEventUpdateInput = Partial<Omit<IosCalendarWritableEventInput, "calendarId">> & { calendarId: string;
   eventId: string;
 };
-
 export type IosCalendarWritableEventDeleteInput = { calendarId: string;
   eventId: string;
 };

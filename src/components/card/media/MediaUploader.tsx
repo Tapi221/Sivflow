@@ -16,7 +16,6 @@ import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize.utils";
 
 
 type ResolvedEditableImageStatus = "pending" | "uploading" | "ready" | "failed";
-
 type ImageRecordLike =
   | {
     remoteStatus?: "none" | "uploading" | "ready" | "failed" | null;
@@ -39,11 +38,9 @@ type ImageRecordLike =
   }
   | null
   | undefined;
-
 type ResolvedEditableImage = ResolvedCardImage & {
   status: ResolvedEditableImageStatus;
 };
-
 type ImageItemProps = {
   item: ResolvedEditableImage;
   index: number;
@@ -53,7 +50,6 @@ type ImageItemProps = {
   displayMode: "fixed" | "fluid";
   zoom: number;
 };
-
 type ImageMediaUploaderProps = {
   type?: "image";
   urls?: UploadedImage[];
@@ -66,7 +62,6 @@ type ImageMediaUploaderProps = {
   displayMode?: "fixed" | "fluid";
   zoom?: number;
 };
-
 type AudioMediaUploaderProps = {
   type: "audio";
   urls?: string[];
@@ -77,31 +72,24 @@ type AudioMediaUploaderProps = {
   onFilesExcess?: (files: File[]) => void;
   autoOpenPicker?: boolean;
 };
-
 type MediaUploaderProps = ImageMediaUploaderProps | AudioMediaUploaderProps;
 
 
 
 const IMAGE_BLOCK_INSET_PX = 4;
-
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
-
 const EMPTY_IMAGE_URLS: UploadedImage[] = [];
-
 const EMPTY_AUDIO_URLS: string[] = [];
 
 
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
-
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
-
 const getImageStatusKey = (image: UploadedImage): string =>
   image.assetId?.trim() ?? image.id.trim();
-
 const getResolvedStatusFromRecord = (
   record: ImageRecordLike,
 ): ResolvedEditableImageStatus => {
@@ -130,7 +118,6 @@ const getResolvedStatusFromRecord = (
 
   return "pending";
 };
-
 const getLocalBlobIdFromRecord = (record: ImageRecordLike): string | null => {
   if (isNonEmptyString(record?.localBlobId)) {
     return record.localBlobId.trim();
@@ -142,7 +129,6 @@ const getLocalBlobIdFromRecord = (record: ImageRecordLike): string | null => {
 
   return null;
 };
-
 const getRemoteKeyFromRecord = (record: ImageRecordLike): string | null => {
   if (isNonEmptyString(record?.remoteKey)) {
     return record.remoteKey.trim();
@@ -154,20 +140,17 @@ const getRemoteKeyFromRecord = (record: ImageRecordLike): string | null => {
 
   return null;
 };
-
 const getMimeFromRecord = (record: ImageRecordLike): string =>
   isNonEmptyString(record?.mime)
     ? record.mime.trim()
     : isNonEmptyString(record?.contentType)
       ? record.contentType.trim()
       : "application/octet-stream";
-
 const getDefaultResolvedStatus = (
   resolved: ResolvedCardImage,
 ): ResolvedEditableImageStatus => {
   return resolved.url ? "ready" : "pending";
 };
-
 const getRetryFileName = (assetId: string, mime: string): string => {
   const normalized = mime.trim().toLowerCase();
 
@@ -310,7 +293,6 @@ const ImageItem = ({
     </div>
   );
 };
-
 const MediaUploader = (props: MediaUploaderProps) => {
   const {
     type = "image",

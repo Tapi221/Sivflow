@@ -1,8 +1,6 @@
 import React from "react";
 import "./index.css";
 
-
-
 const Breadcrumb = () => {
   return (
     <nav
@@ -15,7 +13,6 @@ const Breadcrumb = () => {
     </nav>
   );
 };
-
 const CalendarSection = () => {
   return (
     <section className="w-full rounded-[8px] bg-[#f5f5f5] px-6 py-6">
@@ -26,7 +23,6 @@ const CalendarSection = () => {
     </section>
   );
 };
-
 const Main = () => {
   return (
     <main className="main-container min-h-screen bg-white">
@@ -39,7 +35,5 @@ const Main = () => {
     </main>
   );
 };
-
-
 
 export default Main;

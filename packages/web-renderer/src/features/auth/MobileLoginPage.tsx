@@ -3,8 +3,6 @@ import appIconSrc from "@shared/assets/icons/app-icon.svg";
 import authBackgroundSrc from "@shared/assets/backgrounds/sivflow-flow-background.svg";
 import { signInWithGoogle } from "@/services/auth/googleSignIn";
 
-
-
 type MobileLoginPageStyles = {
   page: CSSProperties;
   backgroundOverlay: CSSProperties;
@@ -23,8 +21,6 @@ type MobileLoginPageStyles = {
   secureIcon: CSSProperties;
   secureText: CSSProperties;
 };
-
-
 
 const styles: MobileLoginPageStyles = {
   page: {
@@ -169,15 +165,11 @@ const styles: MobileLoginPageStyles = {
   },
 };
 
-
-
 const isAuthPopupClosedByUserError = (error: unknown): boolean =>
   typeof error === "object" &&
   error !== null &&
   "code" in error &&
   error.code === "auth/popup-closed-by-user";
-
-
 
 const GoogleIcon = () => (
   <svg style={{ width: 28, height: 28, flexShrink: 0 }} viewBox="0 0 24 24" aria-hidden="true">
@@ -187,14 +179,12 @@ const GoogleIcon = () => (
     <path fill="#4285F4" d="M12 6.2c1.4 0 2.7.5 3.6 1.4l2.7-2.7C16.7 3.4 14.5 2.4 12 2.4c-3.8 0-7 2.1-8.7 5.3l3.3 2.5c.8-2.3 2.9-4 5.4-4z" />
   </svg>
 );
-
 const ShieldIcon = () => (
   <svg style={styles.secureIcon} viewBox="0 0 48 48" fill="none" aria-hidden="true">
     <path d="M24 6.5 38 12v10.6c0 8.9-5.4 16.8-14 19.4-8.6-2.6-14-10.5-14-19.4V12l14-5.5Z" stroke="currentColor" strokeWidth="2.8" strokeLinejoin="round" />
     <path d="m18.5 24.5 4.1 4.1 7.6-8.3" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
 const MobileLoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -262,7 +252,5 @@ const MobileLoginPage = () => {
     </main>
   );
 };
-
-
 
 export { MobileLoginPage };

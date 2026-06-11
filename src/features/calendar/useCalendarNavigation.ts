@@ -19,13 +19,9 @@ const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_M
 
 
 const isViewModeSelectionArray = (selection: CalendarViewModeSelection): selection is readonly CalendarViewMode[] => Array.isArray(selection);
-
 const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SELECT_VIEW_MODE_SET.has(viewMode);
-
 const isMultiSelectViewModeSelection = (selection: CalendarViewModeSelection): boolean => isViewModeSelectionArray(selection) && selection.length > 1;
-
 const appendMultiSelectViewMode = (currentSelection: readonly CalendarViewMode[], next: CalendarViewMode): CalendarViewMode[] => [...currentSelection.filter(isMultiSelectViewMode), next].slice(-2);
-
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return addYears(current, 1);
   if (viewMode === "month" || viewMode === "list") return addMonths(current, 1);
@@ -33,7 +29,6 @@ const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "threeDays") return addDays(current, 3);
   return addDays(current, 1);
 };
-
 const getPreviousDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "year") return subYears(current, 1);
   if (viewMode === "month" || viewMode === "list") return subMonths(current, 1);
@@ -41,11 +36,8 @@ const getPreviousDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "threeDays") return subDays(current, 3);
   return subDays(current, 1);
 };
-
 const normalizeWeek = (date: Date, weekStartDay: CalendarWeekStartDay) => startOfWeek(date, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) });
-
 const getThreeDaysStartDate = (date: Date) => subDays(startOfDay(date), 1);
-
 const normalizeViewDate = (date: Date, viewMode: CalendarViewMode, weekStartDay: CalendarWeekStartDay) => {
   if (viewMode === "year") return startOfYear(date);
   if (viewMode === "list") return startOfMonth(date);
@@ -53,17 +45,13 @@ const normalizeViewDate = (date: Date, viewMode: CalendarViewMode, weekStartDay:
   if (viewMode === "week" || viewMode === "timetable") return normalizeWeek(date, weekStartDay);
   return date;
 };
-
 const normalizeCurrentDateForSelectedDate = (date: Date, viewMode: CalendarViewMode, weekStartDay: CalendarWeekStartDay) => {
   if (viewMode === "list") return startOfMonth(date);
   if (viewMode === "threeDays") return getThreeDaysStartDate(date);
   return normalizeViewDate(date, viewMode, weekStartDay);
 };
-
 const getSelectedDateStepViewMode = (selection: CalendarViewModeSelection, primaryViewMode: CalendarViewMode): CalendarViewMode => isMultiSelectViewModeSelection(selection) ? "pieChart" : primaryViewMode;
-
 const getPrimaryViewMode = (selection: CalendarViewModeSelection): CalendarViewMode => isViewModeSelectionArray(selection) ? selection[0] : selection;
-
 const resolveNextViewModeSelection = (currentSelection: CalendarViewModeSelection, primaryViewMode: CalendarViewMode, next: CalendarViewMode, allowMultiSelectViewMode: boolean): CalendarViewModeSelection => {
   if (!allowMultiSelectViewMode || !isMultiSelectViewMode(next)) return next;
 
@@ -80,7 +68,6 @@ const resolveNextViewModeSelection = (currentSelection: CalendarViewModeSelectio
 
   return next;
 };
-
 const createInitialScheduleNavigationState = ({ allowMultiSelectViewMode, weekStartDay }: Required<CalendarNavigationOptions>): ScheduleNavigationState => {
   const now = new Date();
   const stored = readStoredScheduleNavigationState();
@@ -96,7 +83,6 @@ const createInitialScheduleNavigationState = ({ allowMultiSelectViewMode, weekSt
     selectedViewMode,
   };
 };
-
 export const useCalendarNavigation = ({ allowMultiSelectViewMode = true, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY }: CalendarNavigationOptions = {}) => { const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
@@ -302,4 +288,3 @@ export const useCalendarNavigation = ({ allowMultiSelectViewMode = true, weekSta
     handleMonthCellSelectDate,
     resetCalendarPosition,
   };
-};

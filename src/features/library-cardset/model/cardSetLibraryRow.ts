@@ -16,14 +16,12 @@ export type CardSetDashboardRow = { id: string;
   tags: string[];
   orderIndex: number;
 };
-
 type BuildCardSetDashboardRowsParams = {
   cardSets: CardSet[];
   cards: Card[];
   folders: Folder[];
   tagById: ReadonlyMap<string, { name: string }>;
 };
-
 type CardWithLegacyCardSetId = Card & {
   card_set_id?: string | null;
 };
@@ -41,11 +39,9 @@ const resolveCardSetId = (card: Card): string | null => {
   const trimmed = cardSetId.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
-
 const resolveFolderName = (folder: Folder | undefined): string => {
   return folder?.folderName?.trim() || "未分類";
 };
-
 const buildFolderPath = (
   folderId: string | null,
   folderById: Map<string, Folder>,
@@ -68,7 +64,6 @@ const buildFolderPath = (
 
   return path;
 };
-
 const resolveCategoryLabel = (
   folderId: string | null,
   folderById: Map<string, Folder>,
@@ -76,7 +71,6 @@ const resolveCategoryLabel = (
   const path = buildFolderPath(folderId, folderById);
   return path[0] ?? "未分類";
 };
-
 const resolveDisplayTags = (
   cardSet: CardSet,
   tagById: ReadonlyMap<string, { name: string }>,
@@ -90,7 +84,6 @@ const resolveDisplayTags = (
 
   return Array.from(new Set(explicitTags)).slice(0, 3);
 };
-
 export const buildCardSetDashboardRows = ({ cardSets, cards, folders, tagById, }: BuildCardSetDashboardRowsParams): CardSetDashboardRow[] => { const folderById = new Map(folders.map((folder) => [folder.id, folder]));
   const cardCountByCardSetId = new Map<string, number>();
 
@@ -144,4 +137,3 @@ export const buildCardSetDashboardRows = ({ cardSets, cards, folders, tagById, }
 
       return left.title.localeCompare(right.title, "ja");
     });
-};

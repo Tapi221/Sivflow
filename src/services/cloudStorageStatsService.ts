@@ -5,8 +5,6 @@ import { httpsCallable } from "firebase/functions";
 import { functionsClient, requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { storageStatsDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
 
-
-
 type RebuildStorageStatsResponse = {
   userId?: string;
   quotaBytes?: number;
@@ -15,16 +13,11 @@ type RebuildStorageStatsResponse = {
   schemaVersion?: number;
 };
 
-
-
 export const CLOUD_STORAGE_STATS_SCHEMA_VERSION = 1;
 export const DEFAULT_CLOUD_STORAGE_QUOTA_BYTES = 500 * 1024 * 1024;
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
-
 const toNonEmptyString = (value: unknown): string | null => {
   if (typeof value !== "string") {
     return null;
@@ -33,7 +26,6 @@ const toNonEmptyString = (value: unknown): string | null => {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
-
 const toNonNegativeNumber = (value: unknown, fallback: number): number => {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return fallback;
@@ -41,7 +33,6 @@ const toNonNegativeNumber = (value: unknown, fallback: number): number => {
 
   return Math.max(0, value);
 };
-
 const toTimestampLike = (value: unknown): Date | Timestamp | null => {
   if (value instanceof Date || value instanceof Timestamp) {
     return value;
@@ -49,7 +40,6 @@ const toTimestampLike = (value: unknown): Date | Timestamp | null => {
 
   return null;
 };
-
 const parseCloudStorageStats = (
   userId: string,
   value: unknown,
@@ -74,13 +64,11 @@ const parseCloudStorageStats = (
     lastRebuiltAt: toTimestampLike(data.lastRebuiltAt),
   };
 };
-
 export const isCloudStorageStatsOutdated = ( stats: CloudStorageStats | null, ): boolean => { if (!stats) { return true;
   }
 
   return stats.schemaVersion !== CLOUD_STORAGE_STATS_SCHEMA_VERSION;
 };
-
 export const subscribeToCloudStorageStats = ( userId: string, onChange: (stats: CloudStorageStats | null) => void, onError: (error: unknown) => void, ): Unsubscribe => { const db = requireFirestoreDb();
   const pathSegments = storageStatsDocPathSegments(userId);
 
@@ -103,7 +91,6 @@ export const subscribeToCloudStorageStats = ( userId: string, onChange: (stats: 
     onError,
   );
 };
-
 export const rebuildCloudStorageStats = async ( userId: string, ): Promise<CloudStorageStats> => { const callable = httpsCallable<void, RebuildStorageStatsResponse>( functionsClient, "rebuildStorageStats", );
   const result = await callable();
 

@@ -20,7 +20,6 @@ const DEFAULT_RULED_TEXTAREA_LINE_PX = 1;
 
 const toBackgroundOffset = (offsetPx: number) =>
   `0 ${Number(offsetPx.toFixed(3))}px`;
-
 const buildRuledTextareaStyle = ({
   rowPx,
   offsetPx = 0,

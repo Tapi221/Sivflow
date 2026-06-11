@@ -5,8 +5,6 @@ import { CloudSyncAdapter } from "@/services/logic/CloudSyncAdapter";
 import { type BlobUrlFix, sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
-
-
 type RebuildTableByType = {
   card: "cards";
   folder: "folders";
@@ -16,24 +14,19 @@ type RebuildTableByType = {
   asset: "images";
   userSetting: "userSettings";
 };
-
 type RebuildSupportedType = keyof RebuildTableByType;
 type RebuildTableName = RebuildTableByType[RebuildSupportedType];
-
 type PullChange = {
   type?: unknown;
   id?: unknown;
   data?: unknown;
 };
-
 type RebuildFailure = {
   type: string;
   id: string;
   error: string;
   fixes?: BlobUrlFix[];
 };
-
-
 
 const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
   card: "cards",
@@ -45,16 +38,12 @@ const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
   userSetting: "userSettings",
 };
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };
-
 const isRebuildSupportedType = (type: string): type is RebuildSupportedType => {
   return Object.prototype.hasOwnProperty.call(REBUILD_TABLE_BY_TYPE, type);
 };
-
 const normalizeRebuildRecord = (
   userId: string,
   change: { type?: string; id?: string; data?: unknown },
@@ -74,15 +63,12 @@ const normalizeRebuildRecord = (
 
   return data;
 };
-
 const toPullChange = (value: unknown): PullChange => {
   return isRecord(value) ? value : {};
 };
-
 const toNonEmptyString = (value: unknown): string | null => {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
 };
-
 export class IndexedDBRebuildOrchestrator { private static isRebuilding = false;
 
   static readonly isSupportedType = (type: string): type is RebuildSupportedType => {

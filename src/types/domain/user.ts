@@ -1,8 +1,6 @@
 import { Timestamp } from "firebase/firestore";
 import type { BaseEntity, BlockConfig } from "./base";
 
-
-
 export interface User { id: string;
   userId: string;
   email: string;
@@ -19,7 +17,6 @@ export interface User { id: string;
   deviceId: string;
   lastLoginAt: Date | Timestamp;
 }
-
 export interface UserSettings extends BaseEntity { weekStartDay: "sunday" | "monday";
   language: "ja" | "en" | "zh";
   levelColors: { [level: number]: string };
@@ -57,7 +54,6 @@ export interface UserSettings extends BaseEntity { weekStartDay: "sunday" | "mon
   tagCategoryDisplayNames?: Record<string, string>;
   markdownTabSize?: 2 | 4 | 8;
 }
-
 export interface UserStats extends BaseEntity { totalStudyCount: number;
   todayStudyCount: number;
   weeklyStudyCount: number;

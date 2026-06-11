@@ -8,57 +8,42 @@ import { getLocalAiSettings, setLocalAiSettings, type LocalAiSettings } from "@p
 import { testOllamaConnection } from "@platform/ai/ollamaClient";
 import "./SettingsWorkspaceScreen.css";
 
-
-
 type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "ai" | "hotkey";
-
 type SettingsLanguage = UserSettings["language"];
-
 type AuthSessionUser = ReturnType<typeof useAuthSession>["currentUser"];
-
 type BooleanSettingsKey = "notificationsEnabled" | "soundEnabled" | "showReviewHard" | "showReviewEasy" | "autoCarryOver" | "delayBonusEnabled" | "reviewStartNextDay" | "defaultPreviewEnabled" | "autoDraftEnabled" | "autoSaveEnabled" | "autoVoiceQuestion" | "autoVoiceAnswer";
-
 type QuestionDisplayMode = NonNullable<UserSettings["questionDisplayMode"]>;
-
 type MarkdownTabSize = NonNullable<UserSettings["markdownTabSize"]>;
-
 type LocalAiConnectionStatus = "idle" | "testing" | "connected" | "model-missing" | "failed";
-
 type SettingsSectionDefinition = {
   id: SettingsSectionId;
   label: string;
 };
-
 type SettingOption<T extends string | number> = {
   value: T;
   label: string;
 };
-
 type SettingsSectionBlockProps = {
   title: string;
   description?: string;
   children: ReactNode;
 };
-
 type SettingToggleProps = {
   label: string;
   description?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
 };
-
 type SettingChoiceRowProps<T extends string | number> = {
   label: string;
   value: T;
   options: readonly SettingOption<T>[];
   onChange: (value: T) => void;
 };
-
 type SettingKeyValueProps = {
   label: string;
   value: ReactNode;
 };
-
 type SettingTextInputRowProps = {
   label: string;
   description?: string;
@@ -66,14 +51,12 @@ type SettingTextInputRowProps = {
   placeholder?: string;
   onChange: (value: string) => void;
 };
-
 type AccountProfile = {
   displayName: string | null;
   email: string | null;
   photoUrl: string | null;
   providerId: string | null;
 };
-
 type SettingsWorkspaceCopy = {
   ariaLabel: string;
   navAriaLabel: string;
@@ -147,11 +130,8 @@ type SettingsWorkspaceCopy = {
   hotkeyDescription: string;
 };
 
-
-
 const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "ai", "hotkey"];
 const GOOGLE_PROVIDER_ID = "google.com";
-
 const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> = {
   ja: {
     ariaLabel: "設定",
@@ -371,22 +351,17 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
   },
 };
 
-
-
 const buildSettingsSections = (copy: SettingsWorkspaceCopy): SettingsSectionDefinition[] => SETTINGS_SECTION_IDS.map((id) => ({ id, label: copy.sections[id].label }));
-
 const normalizeAccountEmail = (email: string | null | undefined): string | null => {
   const normalizedEmail = email?.trim().toLowerCase();
   return normalizedEmail ? normalizedEmail : null;
 };
-
 const getStoredSignedInGoogleAccount = (currentUser: AuthSessionUser, storedAccounts: readonly StoredGoogleAccount[]): StoredGoogleAccount | null => {
   const userEmail = normalizeAccountEmail(currentUser?.email);
   if (!userEmail) return storedAccounts[0] ?? null;
 
   return storedAccounts.find((account) => normalizeAccountEmail(account.email) === userEmail) ?? null;
 };
-
 const getAccountProfile = (currentUser: AuthSessionUser, storedAccounts: readonly StoredGoogleAccount[]): AccountProfile => {
   const providerProfile = currentUser?.providerData.find((profile) => profile.providerId === GOOGLE_PROVIDER_ID) ?? currentUser?.providerData.at(0) ?? null;
   const storedAccount = getStoredSignedInGoogleAccount(currentUser, storedAccounts);
@@ -398,7 +373,6 @@ const getAccountProfile = (currentUser: AuthSessionUser, storedAccounts: readonl
     providerId: providerProfile?.providerId ?? null,
   };
 };
-
 const getAccountDisplayName = (displayName: string | null | undefined, email: string | null | undefined, fallbackLabel: string): string => {
   const trimmedDisplayName = displayName?.trim();
   if (trimmedDisplayName) return trimmedDisplayName;
@@ -408,12 +382,10 @@ const getAccountDisplayName = (displayName: string | null | undefined, email: st
 
   return fallbackLabel;
 };
-
 const getAccountInitial = (displayName: string): string => {
   const initial = displayName.trim().charAt(0);
   return initial ? initial.toUpperCase() : "M";
 };
-
 const getLocalAiConnectionStatusLabel = (status: LocalAiConnectionStatus, copy: SettingsWorkspaceCopy): string => {
   if (status === "testing") return copy.localAiStatusTesting;
   if (status === "connected") return copy.localAiStatusConnected;
@@ -421,7 +393,6 @@ const getLocalAiConnectionStatusLabel = (status: LocalAiConnectionStatus, copy: 
   if (status === "failed") return copy.localAiStatusFailed;
   return copy.localAiStatusIdle;
 };
-
 const getSectionIcon = (sectionId: SettingsSectionId, className: string): ReactNode => {
   if (sectionId === "account") return <User className={className} size={17} />;
   if (sectionId === "preferences") return <Globe className={className} size={17} />;
@@ -432,8 +403,6 @@ const getSectionIcon = (sectionId: SettingsSectionId, className: string): ReactN
   if (sectionId === "hotkey") return <Keyboard className={className} size={17} />;
   return null;
 };
-
-
 
 const SettingsSectionBlock = ({ title, description, children }: SettingsSectionBlockProps) => {
   return (
@@ -446,7 +415,6 @@ const SettingsSectionBlock = ({ title, description, children }: SettingsSectionB
     </section>
   );
 };
-
 const SettingToggle = ({ label, description, checked, onChange }: SettingToggleProps) => {
   return (
     <div className="settings-workspace__row">
@@ -460,7 +428,6 @@ const SettingToggle = ({ label, description, checked, onChange }: SettingToggleP
     </div>
   );
 };
-
 const SettingChoiceRow = <T extends string | number>({ label, value, options, onChange }: SettingChoiceRowProps<T>) => {
   return (
     <div className="settings-workspace__row settings-workspace__row--choice">
@@ -478,7 +445,6 @@ const SettingChoiceRow = <T extends string | number>({ label, value, options, on
     </div>
   );
 };
-
 const SettingTextInputRow = ({ label, description, value, placeholder, onChange }: SettingTextInputRowProps) => {
   return (
     <div className="settings-workspace__row settings-workspace__row--input">
@@ -490,7 +456,6 @@ const SettingTextInputRow = ({ label, description, value, placeholder, onChange 
     </div>
   );
 };
-
 const SettingKeyValue = ({ label, value }: SettingKeyValueProps) => {
   return (
     <div className="settings-workspace__key-value">
@@ -499,7 +464,6 @@ const SettingKeyValue = ({ label, value }: SettingKeyValueProps) => {
     </div>
   );
 };
-
 const SettingsWorkspaceScreen = () => {
   const { currentUser, loading, logout } = useAuthSession();
   const { settings, updateSettings } = useUserSettings();
@@ -643,7 +607,5 @@ const SettingsWorkspaceScreen = () => {
     </div>
   );
 };
-
-
 
 export { SettingsWorkspaceScreen };

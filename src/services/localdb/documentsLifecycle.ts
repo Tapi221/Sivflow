@@ -2,8 +2,6 @@ import { safeRevokeBlobUrl } from "./blobUrl";
 import { removeDocumentBlobUrl } from "@/services/documentBlobUrlSessionCache";
 import { deleteDocumentBlob } from "@/services/documentFileStore";
 
-
-
 type DocumentRecord = {
   id?: string;
   localFileId?: string;
@@ -12,24 +10,19 @@ type DocumentRecord = {
   isDeleted?: boolean;
   is_deleted?: boolean;
 };
-
 type DocumentUpdateChanges = {
   localFileId?: string | null;
   blobUrl?: string | null;
   localUrl?: string | null;
   [key: string]: unknown;
 };
-
 type DocumentsTable = {
   get(id: string): Promise<DocumentRecord | undefined>;
   filter(fn: (doc: DocumentRecord) => boolean): {
     first(): Promise<DocumentRecord | undefined>;
   };
 };
-
 export type DocDbCtx = { documents: DocumentsTable; userId?: string };
-
-
 
 const canDeleteDocumentBlob = async (
   documents: DocumentsTable,
@@ -48,7 +41,6 @@ const canDeleteDocumentBlob = async (
     .first();
   return !sharedRef;
 };
-
 export const cleanupBeforeDocumentUpdate = async ( db: DocDbCtx, id: string, changes: unknown, ) => { const docChanges = changes as DocumentUpdateChanges;
   const hasLocalFileIdChange = Object.prototype.hasOwnProperty.call(
     docChanges,
@@ -114,7 +106,6 @@ export const cleanupBeforeDocumentUpdate = async ( db: DocDbCtx, id: string, cha
     );
   }
 };
-
 export const cleanupBeforeDocumentDelete = async (db: DocDbCtx, id: string) => { try { const existingDoc = await db.documents.get(id);
     safeRevokeBlobUrl(
       existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null,
@@ -141,7 +132,6 @@ export const cleanupBeforeDocumentDelete = async (db: DocDbCtx, id: string) => {
     console.warn("[LocalDB] deleteItem documents blob cleanup failed", err);
   }
 };
-
 export const cleanupBeforeDocumentSoftDelete = async ( db: DocDbCtx, id: string, ) => { try { const existingDoc = await db.documents.get(id);
     safeRevokeBlobUrl(
       existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null,

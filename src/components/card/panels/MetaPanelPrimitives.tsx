@@ -6,13 +6,11 @@ import { cn } from "@/lib/utils";
 
 
 type MetaPanelActionRowAlign = "start" | "between" | "end";
-
 type MetaPanelActionRowProps = {
   children: React.ReactNode;
   className?: string;
   align?: MetaPanelActionRowAlign;
 };
-
 type MetaPanelSectionHeaderProps = {
   title: React.ReactNode;
   action?: React.ReactNode;
@@ -20,20 +18,17 @@ type MetaPanelSectionHeaderProps = {
   titleClassName?: string;
   actionClassName?: string;
 };
-
 type MetaPanelInfoRowProps = {
   label: React.ReactNode;
   value: React.ReactNode;
   className?: string;
   valueClassName?: string;
 };
-
 type MetaPanelSurfaceFieldProps = {
   children: React.ReactNode;
   className?: string;
   muted?: boolean;
 };
-
 type MetaPanelSwitchRowProps = {
   label: React.ReactNode;
   checked: boolean;
@@ -43,17 +38,14 @@ type MetaPanelSwitchRowProps = {
   labelClassName?: string;
   switchAriaLabel?: string;
 };
-
 type MetaPanelSectionTitleProps = {
   children: React.ReactNode;
   className?: string;
 };
-
 type MetaPanelMutedSurfaceProps = {
   children: React.ReactNode;
   className?: string;
 };
-
 type MetaPanelSwitchProps = {
   checked: boolean;
   label: React.ReactNode;
@@ -91,7 +83,6 @@ const MetaPanelActionRow = ({
     </div>
   );
 };
-
 const MetaPanelSectionHeader = ({
   title,
   action,
@@ -110,7 +101,6 @@ const MetaPanelSectionHeader = ({
     </MetaPanelActionRow>
   );
 };
-
 const MetaPanelInfoRow = ({
   label,
   value,
@@ -126,7 +116,6 @@ const MetaPanelInfoRow = ({
     </p>
   );
 };
-
 const MetaPanelSurfaceField = ({
   children,
   className,
@@ -144,7 +133,6 @@ const MetaPanelSurfaceField = ({
     </div>
   );
 };
-
 const MetaPanelInput = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement>
@@ -157,7 +145,6 @@ const MetaPanelInput = React.forwardRef<
     />
   );
 });
-
 const MetaPanelSectionActionButton = React.forwardRef<
   HTMLButtonElement,
   SurfaceButtonProps
@@ -172,7 +159,6 @@ const MetaPanelSectionActionButton = React.forwardRef<
     />
   );
 });
-
 const MetaPanelSwitchRow = ({
   label,
   checked,
@@ -193,7 +179,6 @@ const MetaPanelSwitchRow = ({
     </MetaPanelActionRow>
   );
 };
-
 const MetaPanelSectionTitle = ({
   children,
   className,
@@ -204,7 +189,6 @@ const MetaPanelSectionTitle = ({
     </h3>
   );
 };
-
 const MetaPanelMutedSurface = ({
   children,
   className,
@@ -220,7 +204,6 @@ const MetaPanelMutedSurface = ({
     </div>
   );
 };
-
 const MetaPanelSwitch = ({
   checked,
   label,
@@ -246,5 +229,4 @@ const MetaPanelSwitch = ({
 
 MetaPanelInput.displayName = "MetaPanelInput";
 MetaPanelSectionActionButton.displayName = "MetaPanelSectionActionButton";
-
 export { MetaPanelActionRow, MetaPanelInfoRow, MetaPanelInput, MetaPanelMutedSurface, MetaPanelSectionActionButton, MetaPanelSectionHeader, MetaPanelSectionTitle, MetaPanelSurfaceField, MetaPanelSwitch, MetaPanelSwitchRow };

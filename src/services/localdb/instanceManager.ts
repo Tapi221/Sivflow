@@ -5,27 +5,19 @@ import type { LocalDBSyncStore } from "./types";
 import { clearLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "@/services/localDBRuntimeState";
 import { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
 
-
-
 type LocalDbGlobal = typeof globalThis & {
   __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
 };
-
-
 
 let instance: LocalDB | null = null;
 let cachedInstance: LocalDB | InMemoryLocalDB | null = null;
 let currentUserId: string | null = null;
 let persistentOpenDisabled = false;
 let resettingPromise: Promise<void> | null = null;
-
 const fallbackInstances = new Map<string, InMemoryLocalDB>();
 const generationBumps = new Map<string, number>();
 
-
-
 const getLocalDbGlobal = (): LocalDbGlobal => globalThis as LocalDbGlobal;
-
 const safeStringifyError = (error: unknown): string => {
   if (error instanceof Error) return error.stack || error.message;
 
@@ -35,11 +27,8 @@ const safeStringifyError = (error: unknown): string => {
     return String(error);
   }
 };
-
 const getFallbackKey = (userId?: string): string => userId ?? "anonymous";
-
 const isPersistentCachedInstance = (targetUserId: string): boolean => Boolean(instance && cachedInstance === instance && currentUserId === targetUserId);
-
 const disposeFallbackInstance = (userId: string): void => {
   const fallback = fallbackInstances.get(userId);
   if (!fallback) return;
@@ -53,11 +42,9 @@ const disposeFallbackInstance = (userId: string): void => {
   fallbackInstances.delete(userId);
   if (cachedInstance === fallback) cachedInstance = null;
 };
-
 const bumpGenerationForUser = (userId: string): void => {
   generationBumps.set(userId, (generationBumps.get(userId) ?? 0) + 1);
 };
-
 const createFallbackInstance = (userId?: string, reason?: unknown): InMemoryLocalDB => {
   const key = getFallbackKey(userId);
   const existing = fallbackInstances.get(key);
@@ -78,18 +65,13 @@ const createFallbackInstance = (userId?: string, reason?: unknown): InMemoryLoca
 
   return db;
 };
-
 const getFallbackInstance = async (userId?: string, reason?: unknown): Promise<InMemoryLocalDB> => createFallbackInstance(userId, reason);
-
 export const getLocalDb = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
-
 export const getLocalDbSync = (userId?: string): LocalDBSyncStore => { const targetUserId = userId ?? currentUserId ?? "anonymous";
   if (cachedInstance && currentUserId === targetUserId) return cachedInstance as unknown as LocalDBSyncStore;
   return createFallbackInstance(targetUserId, "local-db-not-initialized") as unknown as LocalDBSyncStore;
 };
-
 export const getInstanceUserId = (): string | null => currentUserId;
-
 export const getInstance = async (userId?: string): Promise<LocalDBSyncStore> => { const targetUserId = userId ?? "anonymous";
 
   if (resettingPromise) await resettingPromise;
@@ -138,9 +120,7 @@ export const getInstance = async (userId?: string): Promise<LocalDBSyncStore> =>
     getLocalDbGlobal().__ALLOW_LOCAL_DB_CONSTRUCTION = false;
   }
 };
-
 export const initializeDB = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
-
 export const clearInstance = (): void => { if (instance) { try { instance.close();
     } catch {
       // ignore close failure
@@ -160,7 +140,6 @@ export const clearInstance = (): void => { if (instance) { try { instance.close(
   currentUserId = null;
   fallbackInstances.clear();
 };
-
 export const resetForLogout = async (userId?: string): Promise<void> => { const targetUserId = userId ?? currentUserId ?? "anonymous";
 
   if (resettingPromise) {
@@ -238,5 +217,4 @@ export const resetForLogout = async (userId?: string): Promise<void> => { const 
     resettingPromise = null;
   }
 };
-
 export const resetLocalDBForLogout = async (userId?: string) => resetForLogout(userId);

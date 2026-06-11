@@ -6,7 +6,6 @@ import type { CardSet } from "@/types/domain/cardSet";
 
 
 type ReorderCardsInCardSet = (cardSetId: string, cardIds: string[]) => Promise<void>;
-
 interface UseCardSetViewStateOptions {
   initialIndex: number;
   targetCardId: string | null;
@@ -67,4 +66,3 @@ export const useCardSetViewState = ({ initialIndex, targetCardId, cardSetId, car
     handleToggleViewMode: viewState.handleToggleViewMode,
     handlePagerIndexChange: viewState.handlePagerIndexChange,
   };
-};

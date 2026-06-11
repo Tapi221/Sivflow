@@ -8,35 +8,28 @@ import { normalizeMemoryStability } from "@/utils/reviewUtils";
 import type { PracticeFilterRating } from "./usePracticeMode";
 import type { Card, CardPatch, CardSet, SubjectiveScoreValue, UserSettings } from "@/types";
 
-
-
 export type StudySessionRating = PracticeFilterRating;
-
 export type StudySessionResult = { cardId: string;
   rating: StudySessionRating;
   subjectiveScore: SubjectiveScoreValue;
   responseTimeMs: number;
   studiedAt: Date;
 };
-
 type ResultsState = {
   0: number;
   1: number;
   2: number;
   3: number;
 };
-
 type AuthUserLike =
   | {
     uid: string;
   }
   | null
   | undefined;
-
 type MutationLike<T> = {
   mutate: (payload: T) => void;
 };
-
 type Params = {
   studyCards: Card[];
   cardSets?: CardSet[];
@@ -54,16 +47,12 @@ type Params = {
   createLevelHistoryMutation: MutationLike<Record<string, unknown>>;
 };
 
-
-
 const SCORE_TO_RATING: Record<SubjectiveScoreValue, StudySessionRating> = {
   0: "forgot",
   1: "vague",
   2: "remembered",
   3: "easy",
 };
-
-
 
 const createSessionId = () => {
   if (
@@ -74,7 +63,6 @@ const createSessionId = () => {
   }
   return `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
-
 export const useStudySession = ({ studyCards, cardSets = [], updateCard, currentUser, settings, createStudyLogMutation, createLevelHistoryMutation, }: Params) => { const [currentIndex, setCurrentIndex] = useState(0);
   const [studyComplete, setStudyComplete] = useState(false);
   const [results, setResults] = useState<ResultsState>({

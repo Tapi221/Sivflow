@@ -1,37 +1,27 @@
 import { generateTextLocally } from "./localTextGenerator";
 import { DEFAULT_OPEN_AI_SETTINGS, loadOpenAiSettings, type OpenAiSettings } from "./openAiSettings";
 
-
-
 export type GenerateTextOptions = { prompt: string;
   systemPrompt?: string;
   settings?: OpenAiSettings;
 };
-
 export type GenerateTextResult = { text: string;
   model: string;
 };
-
 type ResponseOutputText = {
   type: "output_text";
   text: string;
 };
-
 type ResponseMessage = {
   type: "message";
   content?: ResponseOutputText[];
 };
-
 type OpenAiResponsesApiResponse = {
   output_text?: string;
   output?: ResponseMessage[];
 };
 
-
-
 const OPEN_AI_RESPONSES_API_URL = "https://api.openai.com/v1/responses";
-
-
 
 const extractText = (response: OpenAiResponsesApiResponse): string => {
   if (typeof response.output_text === "string") {
@@ -46,7 +36,6 @@ const extractText = (response: OpenAiResponsesApiResponse): string => {
       .join("\n") ?? ""
   );
 };
-
 export const generateTextWithOpenAi = async ({ prompt, systemPrompt, settings = loadOpenAiSettings(), }: GenerateTextOptions): Promise<GenerateTextResult> => { if (settings.providerMode === "local-template") { return { text: generateTextLocally({ prompt, systemPrompt }), model: "local-template", };
   }
 
@@ -102,7 +91,6 @@ export const generateTextWithOpenAi = async ({ prompt, systemPrompt, settings = 
 
   return { text, model };
 };
-
 export const testOpenAiConnection = async (settings = loadOpenAiSettings()) => { if (settings.providerMode === "local-template") { return { text: generateTextLocally({ prompt: "接続テスト" }), model: "local-template", };
   }
 

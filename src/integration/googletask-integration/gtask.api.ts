@@ -1,8 +1,6 @@
 import type { GoogleTaskItem, GoogleTaskListItem, GoogleTaskStatus, GoogleTasksApiTaskListsResponse, GoogleTasksApiTasksResponse } from "@/sync/googletask-sync/gtaskSync.types";
 import { createGoogleApiError, withGoogleApiRetry } from "@/integration/google-integration/googleApiRetry";
 
-
-
 type GoogleTaskPatch = {
   title?: string;
   notes?: string | null;
@@ -10,21 +8,15 @@ type GoogleTaskPatch = {
   due?: string | null;
   completed?: string | null;
 };
-
 type GoogleTaskCreateInput = {
   title: string;
   notes?: string | null;
   due?: string | null;
   status?: GoogleTaskStatus;
 };
-
 type RawGoogleTask = NonNullable<GoogleTasksApiTasksResponse["items"]>[number];
 
-
-
 const GOOGLE_TASKS_API_BASE = "https://tasks.googleapis.com/tasks/v1";
-
-
 
 const toApiTaskBody = (input: GoogleTaskPatch | GoogleTaskCreateInput) => {
   const body: Record<string, string | null> = {};
@@ -39,7 +31,6 @@ const toApiTaskBody = (input: GoogleTaskPatch | GoogleTaskCreateInput) => {
 
   return body;
 };
-
 const getJsonOnce = async <T>(accessToken: string, url: string): Promise<T> => {
   const res = await fetch(url, {
     headers: {
@@ -53,13 +44,11 @@ const getJsonOnce = async <T>(accessToken: string, url: string): Promise<T> => {
 
   return (await res.json()) as T;
 };
-
 const getJson = async <T>(accessToken: string, url: string, operation: string): Promise<T> =>
   withGoogleApiRetry(
     () => getJsonOnce<T>(accessToken, url),
     { service: "google_tasks", operation },
   );
-
 const sendJsonOnce = async <T>(
   accessToken: string,
   url: string,
@@ -85,7 +74,6 @@ const sendJsonOnce = async <T>(
 
   return (await res.json()) as T;
 };
-
 const sendJson = async <T>(
   accessToken: string,
   url: string,
@@ -97,7 +85,6 @@ const sendJson = async <T>(
     () => sendJsonOnce<T>(accessToken, url, method, body),
     { service: "google_tasks", operation },
   );
-
 const toGoogleTaskItem = (
   item: RawGoogleTask,
   taskListId: string,
@@ -117,7 +104,6 @@ const toGoogleTaskItem = (
     position: item.position,
   };
 };
-
 export const fetchGoogleTaskLists = async ( accessToken: string, ): Promise<GoogleTaskListItem[]> => { const taskLists: GoogleTaskListItem[] = [];
   let pageToken: string | undefined;
 
@@ -149,7 +135,6 @@ export const fetchGoogleTaskLists = async ( accessToken: string, ): Promise<Goog
 
   return taskLists;
 };
-
 export const fetchGoogleTasks = async ({ accessToken, taskListId, }: { accessToken: string;
   taskListId: string;
 }): Promise<GoogleTaskItem[]> => {
@@ -185,7 +170,6 @@ export const fetchGoogleTasks = async ({ accessToken, taskListId, }: { accessTok
 
   return tasks;
 };
-
 export const createGoogleTask = async ({ accessToken, taskListId, input, }: { accessToken: string;
   taskListId: string;
   input: GoogleTaskCreateInput;
@@ -206,7 +190,6 @@ export const createGoogleTask = async ({ accessToken, taskListId, input, }: { ac
 
   return task;
 };
-
 export const patchGoogleTask = async ({ accessToken, taskListId, taskId, patch, }: { accessToken: string;
   taskListId: string;
   taskId: string;
@@ -227,7 +210,6 @@ export const patchGoogleTask = async ({ accessToken, taskListId, taskId, patch, 
 
   return task;
 };
-
 export const moveGoogleTask = async ({ accessToken, taskListId, taskId, destinationTaskListId, }: { accessToken: string;
   taskListId: string;
   taskId: string;
@@ -251,7 +233,6 @@ export const moveGoogleTask = async ({ accessToken, taskListId, taskId, destinat
 
   return task;
 };
-
 export const deleteGoogleTask = async ({ accessToken, taskListId, taskId, }: { accessToken: string;
   taskListId: string;
   taskId: string;

@@ -4,7 +4,6 @@ export interface OAuthBridgeCallbackPayload { url: string;
   error?: string;
   errorDescription?: string;
 }
-
 export interface OAuthBridgePort { start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
   takePendingCallback(): Promise<OAuthBridgeCallbackPayload | null>;

@@ -15,13 +15,11 @@ export interface RunStartupTasksParams { userId: string;
 const performAutoBackupUseCase = createPerformAutoBackupUseCase({
   backupStore: localStorageBackupStore,
 });
-
 const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
 
 
 
 const isDisposedDefault = (): boolean => false;
-
 const logIntegrityReport = (report: Awaited<ReturnType<typeof checkDataIntegrityUseCase.execute>>) => {
   if (!report.isHealthy) {
     const issueSummary = report.issues.reduce<Record<string, number>>(
@@ -58,7 +56,6 @@ const logIntegrityReport = (report: Awaited<ReturnType<typeof checkDataIntegrity
  */
 export const resetStartupTasks = async (): Promise<void> => { return Promise.resolve();
 };
-
 export const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault, }: RunStartupTasksParams): Promise<void> => { try { const { migrateLegacyImagesToAssets } = await import("./MigrateLegacyImagesToAssets");
 
     const migrationSummary = await migrateLegacyImagesToAssets({ userId });

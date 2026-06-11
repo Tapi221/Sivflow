@@ -12,7 +12,6 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 type Side = "question" | "answer";
-
 export type CardEditorPaneReadonlySurfaceProps = Readonly<{ card: Card;
   isFlipped: boolean;
   onFlip: () => void;

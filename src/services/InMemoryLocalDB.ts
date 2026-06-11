@@ -10,13 +10,10 @@ import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 import { toDateOrNull, toMillis } from "@/utils/toMillis";
 
-
-
 type KeyPath = string | readonly string[];
 type Predicate<T> = (value: T) => boolean;
 type ObjectRecord = Record<string, unknown>;
 type QueueEntity = SyncQueueItem["entity"];
-
 type TimestampLikeObject = {
   toDate?: () => unknown;
   toMillis?: () => unknown;
@@ -25,21 +22,16 @@ type TimestampLikeObject = {
   nanoseconds?: unknown;
   _nanoseconds?: unknown;
 };
-
 type ModifyCallback<T extends object, TKey> = (
   item: T,
   ctx?: { value: T; primKey: TKey },
 ) => boolean | void;
-
 type RegisteredInMemoryTable = {
   readonly name: string;
   readonly clear: () => Promise<void>;
 };
 
-
-
 const SYNCABLE_TABLES = new Set(["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "images", "userSettings", "projectMaps"] as const);
-
 const ENTITY_BY_TABLE: Record<string, QueueEntity> = {
   cards: "card",
   folders: "folder",
@@ -50,15 +42,11 @@ const ENTITY_BY_TABLE: Record<string, QueueEntity> = {
   userSettings: "userSetting",
   projectMaps: "projectMap",
 };
-
 const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>(["card", "folder", "cardSet", "document", "tag", "asset", "projectMap"]);
-
-
 
 const isRecord = (value: unknown): value is ObjectRecord => {
   return typeof value === "object" && value !== null;
 };
-
 const isTimestampLikeObject = (
   value: unknown,
 ): value is TimestampLikeObject => {
@@ -71,13 +59,10 @@ const isTimestampLikeObject = (
     typeof value._seconds === "number"
   );
 };
-
 const asRecord = (value: object): ObjectRecord => value as ObjectRecord;
-
 const readField = (value: object, key: string): unknown => {
   return asRecord(value)[key];
 };
-
 const toTimestamp = (value: unknown): number => {
   if (value instanceof Date) return toMillis(value);
   if (isTimestampLikeObject(value)) return toMillis(value);
@@ -88,7 +73,6 @@ const toTimestamp = (value: unknown): number => {
   }
   return 0;
 };
-
 const normalizeComparable = (value: unknown): unknown => {
   if (value instanceof Date || isTimestampLikeObject(value)) {
     return toTimestamp(value);
@@ -100,7 +84,6 @@ const normalizeComparable = (value: unknown): unknown => {
 
   return value;
 };
-
 const compareValues = (left: unknown, right: unknown): number => {
   const normalizedLeft = normalizeComparable(left);
   const normalizedRight = normalizeComparable(right);
@@ -123,7 +106,6 @@ const compareValues = (left: unknown, right: unknown): number => {
   if (normalizedLeft < normalizedRight) return -1;
   return 0;
 };
-
 const isEqual = (left: unknown, right: unknown): boolean => {
   if (Array.isArray(left) && !Array.isArray(right)) {
     return left.some((entry) => isEqual(entry, right));
@@ -135,7 +117,6 @@ const isEqual = (left: unknown, right: unknown): boolean => {
 
   return compareValues(left, right) === 0;
 };
-
 const parseIndexKeys = (index: KeyPath): string[] => {
   if (typeof index === "string") {
     if (index.startsWith("[") && index.endsWith("]")) {
@@ -151,15 +132,12 @@ const parseIndexKeys = (index: KeyPath): string[] => {
 
   return index.map((entry) => entry.trim()).filter(Boolean);
 };
-
 const serializeKey = (key: unknown): string => {
   if (Array.isArray(key)) return JSON.stringify(key);
   if (isRecord(key)) return JSON.stringify(key);
   return String(key);
 };
-
 const ensureObject = <T extends object>(value: T): T => ({ ...value });
-
 const createPayloadId = (payload: object): string => {
   const record = asRecord(payload);
   const current = record.id;
@@ -169,9 +147,7 @@ const createPayloadId = (payload: object): string => {
   record.id = next;
   return next;
 };
-
 const getQueueEntityForTable = (tableName: string): QueueEntity | null => ENTITY_BY_TABLE[tableName] ?? null;
-
 class InMemoryCollection<T extends object, TKey = string> {
   constructor(
     private readonly tableRef: InMemoryTable<T, TKey>,
@@ -395,7 +371,6 @@ class InMemoryCollection<T extends object, TKey = string> {
     throw new Error("[InMemoryLocalDB] Unsupported Dexie API: Collection.keys()");
   };
 }
-
 class InMemoryWhereClause<T extends object, TKey = string> {
   constructor(private readonly collection: InMemoryCollection<T, TKey>) {}
 
@@ -408,7 +383,6 @@ class InMemoryWhereClause<T extends object, TKey = string> {
   public readonly startsWith = (prefix: string): InMemoryCollection<T, TKey> => this.collection.startsWith(prefix);
   public readonly anyOf = (values: readonly unknown[]): InMemoryCollection<T, TKey> => this.collection.anyOf(values);
 }
-
 class InMemoryTable<T extends object, TKey = string> {
   private readonly rows = new Map<string, T>();
   private readonly keyPathKeys: string[];
@@ -534,7 +508,6 @@ class InMemoryTable<T extends object, TKey = string> {
   public readonly orderBy = (index: KeyPath): InMemoryCollection<T, TKey> => new InMemoryCollection<T, TKey>(this, [], null, parseIndexKeys(index), false, null);
   public readonly toCollection = (): InMemoryCollection<T, TKey> => new InMemoryCollection<T, TKey>(this);
 }
-
 export class InMemoryLocalDB { public readonly name: string;
   public version = 0;
   public readonly isInMemoryFallback = true;

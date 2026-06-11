@@ -11,7 +11,6 @@ interface ResolveCardMutationTargetOptions {
   selectedCard: Card | null;
   currentCard: Card | null;
 }
-
 interface CardMutationTarget {
   targetCardSetId: string | null;
   targetFolderId: string | null;
@@ -40,4 +39,3 @@ export const resolveCardMutationTarget = ({ cardSetId, cardSetById, selectedCard
     targetCardSetId,
     targetFolderId,
   };
-};

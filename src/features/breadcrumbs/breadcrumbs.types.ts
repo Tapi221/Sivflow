@@ -4,7 +4,6 @@ export type BreadcrumbCrumb = { label: string;
   /** クリック時にサイドバー選択を同期するフォルダ ID。null はルートへ戻す。 */
   folderId?: string | null;
 };
-
 export type ExplorerBreadcrumbContext = { folderId: string | null;
   cardSet: { id: string; label: string } | null;
 };
@@ -15,4 +14,4 @@ export const EMPTY_EXPLORER_BREADCRUMB_CONTEXT: ExplorerBreadcrumbContext = { fo
 
 
 
-export const areExplorerBreadcrumbContextsEqual = ( a: ExplorerBreadcrumbContext, b: ExplorerBreadcrumbContext, ): boolean => a.folderId === b.folderId && a.cardSet?.id === b.cardSet?.id && a.cardSet?.label === b.cardSet?.label;
+export const areExplorerBreadcrumbContextsEqual = ( a: ExplorerBreadcrumbContext, b: ExplorerBreadcrumbContext, ): boolean => a.folderId === b.folderId && a.cardSet?.id === b.cardSet?.id && a.cardSet?.label === b.cardSet?.labe

@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 
 
 type BlockFrameVariant = "none" | "neutral" | "editor";
-
 type BlockFrameProps = React.HTMLAttributes<HTMLDivElement> & {
   children: React.ReactNode;
   className?: string;

@@ -2,12 +2,9 @@ import { PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
 import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON, PDF_ZOOM_STEP } from "./pdfZoom.constants";
 import { computeNextScaleFromWheel, resolveTrackpadDeltaYForScaleRatio } from "./pdfZoom.utils";
 
-
-
 type PatchedPdfViewerConstructor = typeof PDFViewer & {
   __sivflowZoomPatchApplied?: boolean;
 };
-
 type PatchedPdfViewerPrototype = InstanceType<typeof PDFViewer> & {
   __sivflowIsSettingScale?: boolean;
   __sivflowSuppressScaleScrollUntil?: number;
@@ -16,13 +13,10 @@ type PatchedPdfViewerPrototype = InstanceType<typeof PDFViewer> & {
   scrollPageIntoView?: (...args: unknown[]) => unknown;
   setDocument?: (...args: unknown[]) => unknown;
 };
-
 type PdfViewerScaleDescriptor = PropertyDescriptor & {
   get?: (this: PatchedPdfViewerPrototype) => unknown;
   set?: (this: PatchedPdfViewerPrototype, value: unknown) => void;
 };
-
-
 
 const PDF_SCALE_SCROLL_SUPPRESSION_WINDOW_MS = 800;
 const PDF_VIEWER_SCALE_PROPERTY_NAMES = ["currentScale", "currentScaleValue"] as const;
@@ -31,30 +25,23 @@ const PDF_WHEEL_DELTA_MODE_PIXEL = 0;
 const PDF_WHEEL_DELTA_MODE_LINE = 1;
 const PDF_WHEEL_DELTA_MODE_PAGE = 2;
 const PDF_ZOOMING_CLASS_NAME = "pdf-pane--zooming";
-
 const pdfZoomViewers = new Set<PatchedPdfViewerPrototype>();
-
-
 
 const getPdfZoomPatchNow = (): number => {
   return typeof globalThis.performance?.now === "function" ? globalThis.performance.now() : Date.now();
 };
-
 const markPdfViewerScaleScrollSuppressed = (pdfViewer: PatchedPdfViewerPrototype): void => {
   pdfViewer.__sivflowSuppressScaleScrollUntil = getPdfZoomPatchNow() + PDF_SCALE_SCROLL_SUPPRESSION_WINDOW_MS;
 };
-
 const getPdfZoomScale = (pdfViewer: PatchedPdfViewerPrototype): number => {
   const currentScale = Number(pdfViewer.currentScale);
   return Number.isFinite(currentScale) && currentScale > 0 ? currentScale : 1;
 };
-
 const getNormalizedPdfWheelDeltaY = (event: WheelEvent, container: HTMLElement): number => {
   if (event.deltaMode === PDF_WHEEL_DELTA_MODE_LINE) return event.deltaY * PDF_WHEEL_DELTA_LINE_HEIGHT_PX;
   if (event.deltaMode === PDF_WHEEL_DELTA_MODE_PAGE) return event.deltaY * Math.max(container.clientHeight, 1);
   return event.deltaY;
 };
-
 const getPdfZoomViewerForTarget = (target: EventTarget | null): PatchedPdfViewerPrototype | null => {
   if (!(target instanceof Node)) return null;
 
@@ -70,7 +57,6 @@ const getPdfZoomViewerForTarget = (target: EventTarget | null): PatchedPdfViewer
 
   return null;
 };
-
 const rewritePdfWheelZoomEventDelta = (event: WheelEvent, deltaY: number): boolean => {
   try {
     Object.defineProperty(event, "deltaY", {
@@ -88,7 +74,6 @@ const rewritePdfWheelZoomEventDelta = (event: WheelEvent, deltaY: number): boole
     return false;
   }
 };
-
 const handlePdfWheelZoomCapture = (event: WheelEvent): void => {
   if (!event.ctrlKey && !event.metaKey) return;
   const pdfViewer = getPdfZoomViewerForTarget(event.target);
@@ -105,20 +90,16 @@ const handlePdfWheelZoomCapture = (event: WheelEvent): void => {
 
   markPdfViewerScaleScrollSuppressed(pdfViewer);
 };
-
 const isPdfViewerZooming = (pdfViewer: PatchedPdfViewerPrototype): boolean => {
   return Boolean(pdfViewer.container?.classList.contains(PDF_ZOOMING_CLASS_NAME));
 };
-
 const isPdfViewerScaleScrollSuppressed = (pdfViewer: PatchedPdfViewerPrototype): boolean => {
   const suppressUntil = pdfViewer.__sivflowSuppressScaleScrollUntil;
   return typeof suppressUntil === "number" && getPdfZoomPatchNow() <= suppressUntil;
 };
-
 const shouldSuppressPdfViewerScaleScroll = (pdfViewer: PatchedPdfViewerPrototype): boolean => {
   return Boolean(pdfViewer.__sivflowIsSettingScale || isPdfViewerZooming(pdfViewer) || isPdfViewerScaleScrollSuppressed(pdfViewer));
 };
-
 const getPdfViewerScaleDescriptor = (prototype: object, propertyName: (typeof PDF_VIEWER_SCALE_PROPERTY_NAMES)[number]): PdfViewerScaleDescriptor | null => {
   let currentPrototype: object | null = prototype;
 
@@ -130,7 +111,6 @@ const getPdfViewerScaleDescriptor = (prototype: object, propertyName: (typeof PD
 
   return null;
 };
-
 const patchPdfViewerScaleSetter = (prototype: PatchedPdfViewerPrototype, propertyName: (typeof PDF_VIEWER_SCALE_PROPERTY_NAMES)[number]): void => {
   const descriptor = getPdfViewerScaleDescriptor(prototype, propertyName);
   if (!descriptor?.set) return;
@@ -151,7 +131,6 @@ const patchPdfViewerScaleSetter = (prototype: PatchedPdfViewerPrototype, propert
     },
   });
 };
-
 const patchPdfViewerSetDocument = (prototype: PatchedPdfViewerPrototype): void => {
   const originalSetDocument = prototype.setDocument;
   if (typeof originalSetDocument !== "function") return;
@@ -161,12 +140,10 @@ const patchPdfViewerSetDocument = (prototype: PatchedPdfViewerPrototype): void =
     return originalSetDocument.apply(this, args);
   };
 };
-
 const addPdfZoomCaptureListeners = (): void => {
   if (typeof window === "undefined") return;
   window.addEventListener("wheel", handlePdfWheelZoomCapture, { capture: true, passive: false });
 };
-
 const applyPdfViewerZoomPatch = (): void => {
   const viewerConstructor = PDFViewer as PatchedPdfViewerConstructor;
   if (viewerConstructor.__sivflowZoomPatchApplied) return;
@@ -185,7 +162,5 @@ const applyPdfViewerZoomPatch = (): void => {
   addPdfZoomCaptureListeners();
   viewerConstructor.__sivflowZoomPatchApplied = true;
 };
-
-
 
 export { applyPdfViewerZoomPatch };

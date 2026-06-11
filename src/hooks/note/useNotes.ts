@@ -4,43 +4,31 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { getLocalDb } from "@/services/localdb/LocalDB";
 import type { Note, NoteBlockContent } from "@/types";
 
-
-
 type UseNotesOptions = {
   enabled?: boolean;
 };
-
 type CreateNoteOptions = {
   id?: string;
   orderIndex?: number;
 };
 
-
-
 const DEFAULT_NOTE_CONTENT: NoteBlockContent = [];
-
-
 
 const createId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 };
-
 const isDeletedNote = (note: Note & { isDeleted?: boolean; is_deleted?: boolean }): boolean => Boolean(note.isDeleted ?? note.is_deleted);
-
 const getNoteOrderIndex = (note: Note & { order_index?: number }): number => note.orderIndex ?? note.order_index ?? 0;
-
 const sortNotes = (notes: Note[]): Note[] => [...notes].sort((left, right) => {
   const orderDiff = getNoteOrderIndex(left) - getNoteOrderIndex(right);
   if (orderDiff !== 0) return orderDiff;
   return right.updatedAt.getTime() - left.updatedAt.getTime();
 });
-
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) return error.message;
   return String(error);
 };
-
 const useNotes = (folderId?: string | null, options?: UseNotesOptions) => {
   const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
@@ -108,7 +96,5 @@ const useNotes = (folderId?: string | null, options?: UseNotesOptions) => {
     deleteNote,
   };
 };
-
-
 
 export { useNotes };

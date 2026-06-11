@@ -9,20 +9,16 @@ type NoteDocumentEditorProps = {
   note: Note;
   onChange: (changes: Pick<Note, 'content' | 'contentText' | 'contentVersion' | 'editor'>) => void | Promise<void>;
 };
-
 type PlateTextNode = {
   text: string;
   [key: string]: unknown;
 };
-
 type PlateElementNode = {
   type: string;
   children: PlateNode[];
   [key: string]: unknown;
 };
-
 type PlateNode = PlateElementNode | PlateTextNode;
-
 type PlateChangePayload = unknown[] | {
   value?: unknown;
 };
@@ -36,25 +32,17 @@ const NOTE_CONTENT_VERSION = 2;
 
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-
 const isPlateTextNode = (value: unknown): value is PlateTextNode => isRecord(value) && typeof value.text === 'string';
-
 const isPlateElementNode = (value: unknown): value is PlateElementNode => isRecord(value) && typeof value.type === 'string' && Array.isArray(value.children);
-
 const createEmptyValue = (): PlateElementNode[] => [{ type: 'p', children: [{ text: '' }] }];
-
 const getVisibleNoteTitle = (note: Note): string => note.title.trim() || EMPTY_NOTE_TITLE_LABEL;
-
 const getTextFromLegacyContent = (content: unknown): string => Array.isArray(content) ? content.map((item) => isRecord(item) && typeof item.text === 'string' ? item.text : '').join('') : '';
-
 const getNodeText = (node: unknown): string => {
   if (isPlateTextNode(node)) return node.text;
   if (!isRecord(node) || !Array.isArray(node.children)) return '';
   return node.children.map(getNodeText).join('');
 };
-
 const getPlainText = (nodes: unknown[]): string => nodes.map(getNodeText).filter(Boolean).join('\n');
-
 const toInitialValue = (content: NoteBlockContent | undefined): PlateElementNode[] => {
   if (!Array.isArray(content) || content.length === 0) return createEmptyValue();
   if (content.every(isPlateElementNode)) return content as PlateElementNode[];
@@ -66,7 +54,6 @@ const toInitialValue = (content: NoteBlockContent | undefined): PlateElementNode
 
   return migrated.length > 0 ? migrated : createEmptyValue();
 };
-
 const getChangeValue = (change: PlateChangePayload): unknown[] | null => {
   if (Array.isArray(change)) return change;
   if (isRecord(change) && Array.isArray(change.value)) return change.value;

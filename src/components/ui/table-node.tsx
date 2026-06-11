@@ -1379,4 +1379,4 @@ const TableCellResizeControls = React.memo(function TableCellResizeControls({
   );
 });
 
-TableCellResizeControls.displayName = 'TableCellResizeControls';
+TableCellResizeCo

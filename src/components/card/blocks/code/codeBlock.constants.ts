@@ -1,6 +1,5 @@
 const CODE_BLOCK_RECENT_LANGUAGE_STORAGE_KEY = "codeblock_recent_langs";
 const CODE_BLOCK_MAX_RECENT_LANGUAGES = 3;
-
 const CODE_BLOCK_SUPPORTED_LANGUAGES = [
   { value: "javascript", label: "JavaScript" },
   { value: "typescript", label: "TypeScript" },
@@ -18,7 +17,6 @@ const CODE_BLOCK_SUPPORTED_LANGUAGES = [
   { value: "bash", label: "Bash" },
   { value: "markdown", label: "Markdown" },
 ] as const;
-
 const CODE_BLOCK_SUPPORTED_LANGUAGE_VALUES = new Set<string>(CODE_BLOCK_SUPPORTED_LANGUAGES.map(({ value }) => value));
 
 

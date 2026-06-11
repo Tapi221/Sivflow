@@ -12,7 +12,6 @@ export type CreateRootFolderProjectInput = { label: string;
   color?: string;
   checked?: boolean;
 };
-
 export type UseRootFolderProjectsResult = { appProjects: AppCalendarItem[];
   rootFolders: FolderTreeNode[];
   loading: boolean;
@@ -23,11 +22,8 @@ export type UseRootFolderProjectsResult = { appProjects: AppCalendarItem[];
   toggleProject: (projectId: string) => void;
   updateRootFolderProjectColor: (projectId: string, color: string) => Promise<void>;
 };
-
 export type LegacyStoredAppProject = AppCalendarItem;
-
 type ProjectVisibilityMap = Record<string, boolean>;
-
 type StoredLegacyProject = Partial<AppCalendarItem>;
 
 
@@ -39,21 +35,17 @@ const EMPTY_COLLECTION: never[] = [];
 
 
 export const normalizeRootFolderProjectLabel = (label: string): string => label.trim().toLowerCase();
-
 const readTrimmedString = (value: unknown): string | null => {
   if (typeof value !== "string") return null;
 
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
 };
-
 const getFolderProjectLabel = (folder: FolderTreeNode): string => {
   const record = folder as { folderName?: unknown; folder_name?: unknown; name?: unknown };
   return readTrimmedString(record.folderName) ?? readTrimmedString(record.folder_name) ?? readTrimmedString(record.name) ?? UNTITLED_PROJECT_NAME;
 };
-
 const createLegacyFallbackProjectId = (label: string, index: number): string => `legacy-app-project:${index}:${normalizeRootFolderProjectLabel(label)}`;
-
 const readProjectVisibilityMap = (): ProjectVisibilityMap => {
   if (typeof window === "undefined") return {};
 
@@ -77,7 +69,6 @@ const readProjectVisibilityMap = (): ProjectVisibilityMap => {
     return {};
   }
 };
-
 const persistProjectVisibilityMap = (visibility: ProjectVisibilityMap) => {
   if (typeof window === "undefined") return;
 
@@ -87,7 +78,6 @@ const persistProjectVisibilityMap = (visibility: ProjectVisibilityMap) => {
     // localStorage が利用できない環境では、現在の React state だけで表示状態を維持する。
   }
 };
-
 export const readLegacyStoredAppProjects = (): LegacyStoredAppProject[] => { if (typeof window === "undefined") return [];
 
   try {
@@ -118,7 +108,6 @@ export const readLegacyStoredAppProjects = (): LegacyStoredAppProject[] => { if 
     return [];
   }
 };
-
 export const clearLegacyStoredAppProjects = () => { if (typeof window === "undefined") return;
 
   try {
@@ -127,7 +116,6 @@ export const clearLegacyStoredAppProjects = () => { if (typeof window === "undef
     // localStorage が利用できない環境では何もしない。
   }
 };
-
 export const useRootFolderProjects = (): UseRootFolderProjectsResult => { const { folders, loading, error } = useFoldersRead();
   const { createFolder, updateFolder } = useFolderCommands();
   const [visibilityByProjectId, setVisibilityByProjectId] = useState<ProjectVisibilityMap>(readProjectVisibilityMap);
@@ -199,4 +187,3 @@ export const useRootFolderProjects = (): UseRootFolderProjectsResult => { const 
     toggleProject,
     updateRootFolderProjectColor,
   };
-};

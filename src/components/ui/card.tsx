@@ -16,7 +16,6 @@ const Card = React.forwardRef<
     {...props}
   />
 ));
-
 const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -27,7 +26,6 @@ const CardHeader = React.forwardRef<
     {...props}
   />
 ));
-
 const CardTitle = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -38,7 +36,6 @@ const CardTitle = React.forwardRef<
     {...props}
   />
 ));
-
 const CardDescription = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -49,14 +46,12 @@ const CardDescription = React.forwardRef<
     {...props}
   />
 ));
-
 const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
 ));
-
 const CardFooter = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -76,5 +71,4 @@ CardTitle.displayName = "CardTitle";
 CardDescription.displayName = "CardDescription";
 CardContent.displayName = "CardContent";
 CardFooter.displayName = "CardFooter";
-
 export { Card, CardContent, CardDescription, CardHeader, CardTitle };

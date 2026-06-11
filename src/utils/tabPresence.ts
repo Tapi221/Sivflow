@@ -1,36 +1,28 @@
 type PresenceMap = Record<string, number>;
-
 type TabPresenceStorageKeys = {
   presenceMap: string;
   started: string;
   tabId: string;
 };
-
 type TabPresenceTimings = {
   heartbeatMs: number;
   staleMs: number;
 };
-
-
 
 const TAB_PRESENCE_STORAGE_KEYS: TabPresenceStorageKeys = {
   presenceMap: "sivflow:tab-presence:map",
   started: "__sivflowTabPresenceStarted",
   tabId: "sivflow:tab-presence:tab-id",
 };
-
 const TAB_PRESENCE_TIMINGS: TabPresenceTimings = {
   heartbeatMs: 5000,
   staleMs: 15000,
 };
 
-
-
 const createTabId = (): string => {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
   return String(Math.random()).slice(2);
 };
-
 const readMap = () => {
   try {
     const raw = localStorage.getItem(TAB_PRESENCE_STORAGE_KEYS.presenceMap);
@@ -39,7 +31,6 @@ const readMap = () => {
     return {};
   }
 };
-
 const writeMap = (map: PresenceMap) => {
   try {
     localStorage.setItem(TAB_PRESENCE_STORAGE_KEYS.presenceMap, JSON.stringify(map));
@@ -47,7 +38,6 @@ const writeMap = (map: PresenceMap) => {
     // ignore
   }
 };
-
 const prune = (map: PresenceMap, now: number) => {
   for (const [id, ts] of Object.entries(map)) {
     if (typeof ts !== "number" || now - ts > TAB_PRESENCE_TIMINGS.staleMs) {
@@ -55,7 +45,6 @@ const prune = (map: PresenceMap, now: number) => {
     }
   }
 };
-
 export const startTabPresence = () => { if (typeof window === "undefined") return;
 
   const startedHost = window as typeof window & {

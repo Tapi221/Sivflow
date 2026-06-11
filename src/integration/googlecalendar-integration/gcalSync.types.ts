@@ -1,10 +1,7 @@
 import type { Auth } from "firebase/auth";
 import type { CalendarEvent, CalendarRecurrenceRule } from "@core/calendar";
 
-
-
 export type GoogleCalendarEvent = CalendarEvent;
-
 export type GoogleCalendarListItem = { id: string;
   summary: string;
   summaryOverride?: string;
@@ -14,24 +11,16 @@ export type GoogleCalendarListItem = { id: string;
   primary?: boolean;
   selected?: boolean;
 };
-
 export type UseGoogleCalendarIntegrationOptions = { authInstance?: Auth;
 };
-
 export type GCalSyncState = "idle" | "syncing" | "needsReconnect" | "error";
-
 export type GCalConnectionStatus = "connected" | "needsReconnect" | "error";
-
 export type GCalSilentReconnectResult = | boolean | "reconnected" | "needsReconnect" | "retryLater";
-
 export type GCalSyncRange = { rangeStart: Date;
   rangeEnd: Date;
 };
-
 export type GCalForceSyncOptions = Partial<GCalSyncRange>;
-
 export type GCalSyncTokenMap = Record<string, string>;
-
 export type GCalWritableEventInput = { calendarId: string;
   title: string;
   description?: string;
@@ -42,15 +31,12 @@ export type GCalWritableEventInput = { calendarId: string;
   projectId?: string;
   recurrenceRule?: CalendarRecurrenceRule | null;
 };
-
 export type GCalWritableEventUpdateInput = Partial<Omit<GCalWritableEventInput, "calendarId">> & { calendarId: string;
   eventId: string;
 };
-
 export type GCalWritableEventDeleteInput = { calendarId: string;
   eventId: string;
 };
-
 export type GCalRawIncrementalEvent = { id?: string;
   summary?: string;
   description?: string;
@@ -66,12 +52,10 @@ export type GCalRawIncrementalEvent = { id?: string;
     dateTime?: string;
   };
 };
-
 export type GCalEventsListResponse = { items?: GCalRawIncrementalEvent[];
   nextSyncToken?: string;
   nextPageToken?: string;
 };
-
 export type GoogleCalendarApiListResponse = { items?: Array<{ id?: string;
     summary?: string;
     summaryOverride?: string;
@@ -83,16 +67,13 @@ export type GoogleCalendarApiListResponse = { items?: Array<{ id?: string;
   }>;
   nextPageToken?: string;
 };
-
 export type GoogleCalendarApiCalendarResponse = { id?: string;
   summary?: string;
   description?: string;
 };
-
 export type GoogleCalendarApiEventsResponse = { items?: GCalRawIncrementalEvent[];
   nextPageToken?: string;
 };
-
 export type GCalSyncEngineOptions = { accountId?: string;
   onEventAdded: (event: GoogleCalendarEvent) => void;
   onEventUpdated: (event: GoogleCalendarEvent) => void;
@@ -112,7 +93,6 @@ export type GCalSyncEngineOptions = { accountId?: string;
   fullSyncPastDays?: number;
   fullSyncFutureDays?: number;
 };
-
 export type GCalSyncStartContext = { accessToken: string;
   selectedCalendarIds: Set<string>;
   calendars: GoogleCalendarListItem[];

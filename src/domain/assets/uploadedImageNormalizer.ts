@@ -6,7 +6,6 @@ import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 
 export type NormalizeUploadedImageOptions = { onInvalid?: "skip" | "throw";
 };
-
 export type DenormalizeUploadedImageOptions = { case?: "camel" | "snake";
   stripUndefined?: boolean;
 };
@@ -20,7 +19,6 @@ const resolveString = (value: unknown): string | undefined => {
 
   return undefined;
 };
-
 const resolveNumber = (value: unknown): number | undefined => {
   if (typeof value === "number" && Number.isFinite(value)) {
     return value;
@@ -33,11 +31,9 @@ const resolveNumber = (value: unknown): number | undefined => {
 
   return undefined;
 };
-
 const clampNumber = (value: number, min: number, max: number) => {
   return Math.min(max, Math.max(min, value));
 };
-
 const pickFirst = (
   record: Record<string, unknown>,
   keys: string[],
@@ -48,7 +44,6 @@ const pickFirst = (
 
   return undefined;
 };
-
 const normalizeUploadedImage = (
   raw: unknown,
   options: NormalizeUploadedImageOptions = {},
@@ -158,7 +153,6 @@ const normalizeUploadedImage = (
     naturalH: naturalH ?? null,
   };
 };
-
 export const normalizeUploadedImages = ( raw: unknown, options: NormalizeUploadedImageOptions = {}, ) => { if (raw == null) return [];
   const items = Array.isArray(raw) ? raw : [raw];
 
@@ -166,7 +160,6 @@ export const normalizeUploadedImages = ( raw: unknown, options: NormalizeUploade
     .map((item) => normalizeUploadedImage(item, options))
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
 };
-
 const denormalizeUploadedImage = (
   image: {
     id: string;
@@ -232,7 +225,6 @@ const denormalizeUploadedImage = (
 
   return output;
 };
-
 export const denormalizeUploadedImages = ( images: Array<{ id: string;
     assetId?: string | null;
     localFileId?: string | null;
@@ -250,4 +242,3 @@ export const denormalizeUploadedImages = ( images: Array<{ id: string;
   options: DenormalizeUploadedImageOptions = {},
 ) => {
   return images.map((image) => denormalizeUploadedImage(image, options));
-};

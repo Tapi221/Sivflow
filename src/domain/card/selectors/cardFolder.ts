@@ -19,12 +19,10 @@ const normalizeFolderId = (folderId: string | null | undefined) => {
   const trimmed = folderId.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
-
 const getCardLikeCardSetId = (card: CardLike) => {
   const cardSetId = card.cardSetId ?? card.card_set_id ?? null;
   return typeof cardSetId === "string" ? cardSetId.trim() : "";
 };
-
 const recordLegacyFallbackUsage = (
   card: CardLike,
   reason: LegacyFallbackReason,
@@ -50,7 +48,6 @@ const recordLegacyFallbackUsage = (
     fallbackReason: reason,
   });
 };
-
 export const buildCardSetById = <TCardSet extends CardSetLike>( cardSets: readonly TCardSet[], ) => { const map = new Map<string, TCardSet>();
   for (const cardSet of cardSets) {
     if (!cardSet?.id) continue;
@@ -58,21 +55,18 @@ export const buildCardSetById = <TCardSet extends CardSetLike>( cardSets: readon
   }
   return map;
 };
-
 export const resolveCardFolderIdStrict = ( card: CardLike, cardSetById: ReadonlyMap<string, CardSetLike>, ) => { const cardSetId = getCardLikeCardSetId(card);
   if (!cardSetId) return null;
   const cardSet = cardSetById.get(cardSetId);
   if (!cardSet) return null;
   return normalizeFolderId(cardSet.folderId);
 };
-
 export const didUseLegacyFolderFallback = ( card: CardLike, cardSetById: ReadonlyMap<string, CardSetLike>, ) => { const cardSetId = getCardLikeCardSetId(card);
   if (!cardSetId) return normalizeFolderId(card.folderId) !== null;
   return (
     !cardSetById.has(cardSetId) && normalizeFolderId(card.folderId) !== null
   );
 };
-
 export const resolveCardFolderId = ( card: CardLike, cardSetById: ReadonlyMap<string, CardSetLike>, ) => { const strictFolderId = resolveCardFolderIdStrict(card, cardSetById);
   if (strictFolderId !== null) {
     return strictFolderId;
@@ -89,19 +83,14 @@ export const resolveCardFolderId = ( card: CardLike, cardSetById: ReadonlyMap<st
   recordLegacyFallbackUsage(card, reason);
   return legacyFolderId;
 };
-
 export const getLegacyFolderFallbackUsage = () => ({ total: (legacyFallbackCounters.get("missing-card-set-id") ?? 0) + (legacyFallbackCounters.get("unresolved-card-set-id") ?? 0), missingCardSetId: legacyFallbackCounters.get("missing-card-set-id") ?? 0, unresolvedCardSetId: legacyFallbackCounters.get("unresolved-card-set-id") ?? 0, });
-
 export const resetLegacyFolderFallbackUsage = () => { legacyFallbackCounters.clear();
   warnedFallbackCardKeys.clear();
 };
-
 export const isCardInFolder = ( card: CardLike, folderId: string | null | undefined, cardSetById: ReadonlyMap<string, CardSetLike>, ) => { const targetFolderId = normalizeFolderId(folderId);
   return resolveCardFolderIdStrict(card, cardSetById) === targetFolderId;
 };
-
 export const filterCardsByFolderId = <T extends CardLike>( cards: readonly T[], folderId: string | null | undefined, cardSetById: ReadonlyMap<string, CardSetLike>, ) => { const targetFolderId = normalizeFolderId(folderId);
   return cards.filter(
     (card) => resolveCardFolderIdStrict(card, cardSetById) === targetFolderId,
   );
-};

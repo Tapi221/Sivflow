@@ -4,13 +4,10 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { getAdminAuth, getDb, serverTimestamp } from "#src/firebaseAdmin.js";
 
-
-
 type TimetableSyllabusSlot = {
   dayIndex: number;
   periodLabel: string;
 };
-
 type TimetableSyllabusCourseRecord = {
   id: string;
   sourceUrl: string;
@@ -31,7 +28,6 @@ type TimetableSyllabusCourseRecord = {
   createdAt: unknown;
   updatedAt: unknown;
 };
-
 type CrawlSource = {
   sourceId: string | null;
   seedUrl: string;
@@ -40,21 +36,17 @@ type CrawlSource = {
   departmentName: string;
   maxPages: number;
 };
-
 type CrawlResult = {
   jobId: string;
   scannedPageCount: number;
   savedCourseCount: number;
   skippedUrlCount: number;
 };
-
 type RobotsRuleGroup = {
   applies: boolean;
   disallow: string[];
   allow: string[];
 };
-
-
 
 const REGION = "asia-northeast1";
 const CRAWLER_VERSION = 1;
@@ -67,44 +59,31 @@ const COURSE_LINK_PATTERN = /syllabus|course|class|lesson|subject|detail|授業|
 const WEEKDAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
 const PRIVATE_IPV4_PATTERNS = [/^10\./, /^127\./, /^169\.254\./, /^192\.168\./, /^172\.(1[6-9]|2\d|3[0-1])\./, /^0\./];
 
-
-
 const requireUid = (request: { auth?: { uid?: string } }) => {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "Authentication required.");
   return uid;
 };
-
 const requireAdmin = async (uid: string): Promise<void> => {
   const user = await (await getAdminAuth()).getUser(uid);
   if (user.customClaims?.admin !== true) throw new HttpsError("permission-denied", "Admin access is required.");
 };
-
 const normalizeText = (value: string): string => value.replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&lt;/gi, "<").replace(/&gt;/gi, ">").replace(/&quot;/gi, "\"").replace(/&#39;/gi, "'").replace(/\s+/g, " ").trim();
-
 const normalizeSearchText = (values: string[]): string => values.map((value) => normalizeText(value).toLowerCase()).filter(Boolean).join(" ");
-
 const createHashId = (value: string): string => crypto.createHash("sha256").update(value).digest("hex").slice(0, 32);
-
 const getStringValue = (value: unknown): string => typeof value === "string" ? value.trim() : "";
-
 const getNumberValue = (value: unknown, fallback: number): number => typeof value === "number" && Number.isFinite(value) ? value : fallback;
-
 const clampMaxPages = (value: unknown): number => Math.max(1, Math.min(MAX_ALLOWED_PAGES, Math.floor(getNumberValue(value, DEFAULT_MAX_PAGES))));
-
 const isPrivateIpv4 = (address: string): boolean => PRIVATE_IPV4_PATTERNS.some((pattern) => pattern.test(address));
-
 const isPrivateHostName = (hostname: string): boolean => {
   const normalizedHost = hostname.toLowerCase();
   return normalizedHost === "localhost" || normalizedHost.endsWith(".local") || normalizedHost.endsWith(".internal");
 };
-
 const isBlockedIpAddress = (address: string): boolean => {
   if (isPrivateIpv4(address)) return true;
   if (address === "::1" || address.startsWith("fe80:") || address.startsWith("fc") || address.startsWith("fd")) return true;
   return false;
 };
-
 const assertFetchableUrl = async (rawUrl: string): Promise<URL> => {
   let url: URL;
   try {
@@ -122,7 +101,6 @@ const assertFetchableUrl = async (rawUrl: string): Promise<URL> => {
   url.hash = "";
   return url;
 };
-
 const fetchText = async (url: URL): Promise<{ text: string; contentType: string }> => {
   const response = await fetch(url, { headers: { Accept: "text/html,application/xhtml+xml", "User-Agent": USER_AGENT }, redirect: "follow", signal: AbortSignal.timeout(15_000) });
   const contentType = response.headers.get("content-type") ?? "";
@@ -130,7 +108,6 @@ const fetchText = async (url: URL): Promise<{ text: string; contentType: string 
   if (!contentType.includes("text/html") && !contentType.includes("application/xhtml")) throw new HttpsError("failed-precondition", "The URL did not return HTML.");
   return { text: (await response.text()).slice(0, MAX_HTML_LENGTH), contentType };
 };
-
 const parseRobotsGroups = (robotsText: string): RobotsRuleGroup[] => {
   const groups: RobotsRuleGroup[] = [];
   let currentAgents: string[] = [];
@@ -164,7 +141,6 @@ const parseRobotsGroups = (robotsText: string): RobotsRuleGroup[] => {
   flush();
   return groups;
 };
-
 const isRobotsAllowed = async (url: URL): Promise<boolean> => {
   const robotsUrl = new URL("/robots.txt", url.origin);
   try {
@@ -181,7 +157,6 @@ const isRobotsAllowed = async (url: URL): Promise<boolean> => {
     return false;
   }
 };
-
 const extractFirstMatch = (html: string, patterns: RegExp[]): string => {
   for (const pattern of patterns) {
     const match = html.match(pattern);
@@ -189,14 +164,11 @@ const extractFirstMatch = (html: string, patterns: RegExp[]): string => {
   }
   return "";
 };
-
 const extractTableValue = (html: string, labels: string[]): string => {
   const labelPattern = labels.map((label) => label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
   return extractFirstMatch(html, [new RegExp(`<t[hd][^>]*>\\s*(?:${labelPattern})\\s*<\\/t[hd]>\\s*<td[^>]*>([\\s\\S]*?)<\\/td>`, "i"), new RegExp(`<dt[^>]*>\\s*(?:${labelPattern})\\s*<\\/dt>\\s*<dd[^>]*>([\\s\\S]*?)<\\/dd>`, "i")]);
 };
-
 const extractTitle = (html: string): string => extractTableValue(html, ["科目名", "授業科目名", "講義名", "授業名"]) || extractFirstMatch(html, [/<h1[^>]*>([\s\S]*?)<\/h1>/i, /<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i, /<title[^>]*>([\s\S]*?)<\/title>/i]);
-
 const extractSlots = (html: string): TimetableSyllabusSlot[] => {
   const text = normalizeText(html);
   const slots: TimetableSyllabusSlot[] = [];
@@ -212,7 +184,6 @@ const extractSlots = (html: string): TimetableSyllabusSlot[] => {
 
   return slots.filter((slot, index) => slots.findIndex((candidate) => candidate.dayIndex === slot.dayIndex && candidate.periodLabel === slot.periodLabel) === index);
 };
-
 const parseCourse = (html: string, url: URL, source: CrawlSource): TimetableSyllabusCourseRecord | null => {
   const title = extractTitle(html);
   if (!title || title.length > 120) return null;
@@ -228,7 +199,6 @@ const parseCourse = (html: string, url: URL, source: CrawlSource): TimetableSyll
 
   return { id, sourceUrl, sourceId: source.sourceId, institutionName: source.institutionName, departmentName: source.departmentName, facultyName: source.facultyName, title, room, teacher, semesterLabel, credits, memo, syllabusUrl: sourceUrl, slots: extractSlots(html), searchText, crawlerVersion: CRAWLER_VERSION, createdAt: null, updatedAt: null };
 };
-
 const extractCandidateLinks = (html: string, baseUrl: URL): URL[] => {
   const links: URL[] = [];
   const pattern = /<a\s+[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
@@ -249,7 +219,6 @@ const extractCandidateLinks = (html: string, baseUrl: URL): URL[] => {
 
   return links.filter((link, index) => links.findIndex((candidate) => candidate.toString() === link.toString()) === index);
 };
-
 const saveCrawlResult = async (jobId: string, uid: string | null, source: CrawlSource, courses: TimetableSyllabusCourseRecord[], scannedPageCount: number, skippedUrlCount: number): Promise<CrawlResult> => {
   const db = await getDb();
   const now = await serverTimestamp();
@@ -267,7 +236,6 @@ const saveCrawlResult = async (jobId: string, uid: string | null, source: CrawlS
   await batch.commit();
   return { jobId, scannedPageCount, savedCourseCount: courses.length, skippedUrlCount };
 };
-
 const crawlSyllabusSource = async (source: CrawlSource, uid: string | null): Promise<CrawlResult> => {
   const seedUrl = await assertFetchableUrl(source.seedUrl);
   const jobId = createHashId(`${source.sourceId ?? uid ?? "scheduled"}:${seedUrl.toString()}:${Date.now()}`);
@@ -304,14 +272,11 @@ const crawlSyllabusSource = async (source: CrawlSource, uid: string | null): Pro
   return await saveCrawlResult(jobId, uid, source, courses, seen.size, skippedUrlCount);
 };
 
-
-
 export const crawlTimetableSyllabusUrl = onCall({ region: REGION, timeoutSeconds: 300, memory: "512MiB" }, async (request) => { const uid = requireUid(request);
   const source: CrawlSource = { sourceId: null, seedUrl: getStringValue(request.data?.seedUrl), institutionName: getStringValue(request.data?.institutionName), facultyName: getStringValue(request.data?.facultyName), departmentName: getStringValue(request.data?.departmentName), maxPages: clampMaxPages(request.data?.maxPages) };
   if (!source.seedUrl) throw new HttpsError("invalid-argument", "seedUrl is required.");
   return await crawlSyllabusSource(source, uid);
 });
-
 export const upsertTimetableSyllabusSource = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
   await requireAdmin(uid);
 
@@ -325,7 +290,6 @@ export const upsertTimetableSyllabusSource = onCall({ region: REGION }, async (r
   await db.doc(`timetableSyllabusSources/${sourceId}`).set({ seedUrl, institutionName: getStringValue(request.data?.institutionName), facultyName: getStringValue(request.data?.facultyName), departmentName: getStringValue(request.data?.departmentName), maxPages: clampMaxPages(request.data?.maxPages), enabled: request.data?.enabled !== false, updatedAt: now, createdAt: now }, { merge: true });
   return { ok: true, sourceId };
 });
-
 export const runTimetableSyllabusCatalogCrawl = onSchedule({ schedule: "every 24 hours", timeZone: "Asia/Tokyo", region: REGION, timeoutSeconds: 540, memory: "1GiB" }, async () => { const db = await getDb();
   const snapshot = await db.collection("timetableSyllabusSources").where("enabled", "==", true).limit(20).get();
 

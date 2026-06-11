@@ -23,7 +23,6 @@ type UseCardsResult = {
   updateCard: (cardId: string, data: unknown) => void | Promise<void>;
   createCard: (data: unknown) => unknown;
 };
-
 type UseCardEditorPaneControllerParams = {
   selectedCardId: string | null;
   folderId?: string;

@@ -12,14 +12,12 @@ interface BuildFolderMenuActionsParams {
   onDelete?: () => void;
   onBulkTag?: () => void;
 }
-
 interface BuildRenameDeleteMenuActionsParams {
   renameLabel?: string;
   deleteLabel?: string;
   onRename?: () => void;
   onDelete?: () => void;
 }
-
 interface BuildEntityRenameDeleteMenuActionsParams {
   id: string;
   name: string;
@@ -33,7 +31,6 @@ interface BuildEntityRenameDeleteMenuActionsParams {
   renameLabel?: string;
   deleteLabel?: string;
 }
-
 interface BuildExplorerCreateMenuActionsParams {
   canCreateCardSet?: boolean;
   canCreateCard?: boolean;
@@ -71,7 +68,6 @@ export const buildRenameDeleteMenuActions = ({ renameLabel = "名前を変更", 
 
   return actions;
 };
-
 export const buildEntityRenameDeleteMenuActions = ({ id, name, type, beforeRename, closeMenu, setEditingId, setEditingName, canRename = true, onDelete, renameLabel = "名前を変更", deleteLabel = "削除", }: BuildEntityRenameDeleteMenuActionsParams): MenuAction[] => buildRenameDeleteMenuActions({ renameLabel, deleteLabel, onRename: canRename ? () => { beginInlineRename({ id, name, closeMenu, setEditingId, setEditingName, beforeStart: beforeRename, });
       }
       : undefined,

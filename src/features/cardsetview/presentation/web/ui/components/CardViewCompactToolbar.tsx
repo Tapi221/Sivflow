@@ -20,13 +20,11 @@ type ZoomControlProps = {
   step?: number;
   onChange: (nextValue: number) => void;
 };
-
 type CardIndexNavigatorProps = {
   current: number;
   total: number;
   onCommit: (nextOneBasedIndex: number) => void;
 };
-
 type CardViewCompactToolbarProps = {
   displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
@@ -38,7 +36,6 @@ type CardViewCompactToolbarProps = {
   zoom?: ZoomControlProps | null;
   indexNavigator?: CardIndexNavigatorProps | null;
 };
-
 type ModeButtonProps = {
   isActive: boolean;
   onClick: () => void;
@@ -86,7 +83,6 @@ const ModeButton = ({
     </OverlayToolbarButton>
   );
 };
-
 const CardViewCompactToolbar = ({
   displayMode,
   cardLayoutMode,
@@ -214,4 +210,4 @@ const CardViewCompactToolbar = ({
 
 
 
-export { CardViewCompactToolbar };
+export { CardViewCompactTool

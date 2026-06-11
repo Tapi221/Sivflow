@@ -195,6 +195,3 @@ function LinkOpenButton() {
       target="_blank"
     >
       <ExternalLink width={18} />
-    </a>
-  );
-}

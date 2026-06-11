@@ -23,14 +23,12 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 export type CardBlockLayoutReplaceBlock = MarkdownReplaceBlock;
-
 export type ViewerProps = Readonly<{ questionDisplayMode: "always" | "tap_to_reveal";
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
   toMediaUrl: (item: string | { url?: string | null; remoteUrl?: string | null; localUrl?: string | null } | null | undefined) => string | null;
   displayMode: "fixed" | "fluid";
   zoom: number;
 }>;
-
 export type EditorProps = Readonly<{ onUpdateBlock: (id: string, updates: Partial<CardBlock>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
@@ -51,11 +49,9 @@ export type EditorProps = Readonly<{ onUpdateBlock: (id: string, updates: Partia
   displayMode?: "fixed" | "fluid";
   zoom?: number;
 }>;
-
 type CardBlockSceneRendererProps =
   | Readonly<{ mode: "edit"; block: CardBlock; meta: BlockListRowMeta; editorProps: EditorProps }>
   | Readonly<{ mode: "view"; block: CardBlock; meta: BlockListRowMeta; viewerProps: ViewerProps }>;
-
 type SharedShellProps = Readonly<{
   mode: "edit" | "view";
   className?: string;
@@ -75,7 +71,6 @@ type SharedShellProps = Readonly<{
   dragHandleClassName?: string;
   children: React.ReactNode;
 }>;
-
 type SceneProps = Readonly<{
   mode: "edit" | "view";
   block: CardBlock;
@@ -109,7 +104,6 @@ const MAX_MATH_LATEX_LENGTH = 10000;
 
 
 const renderGridOffsetSpacer = (gridOffsetPx: number) => gridOffsetPx > 0 ? <div aria-hidden className="pointer-events-none" style={{ height: `${gridOffsetPx}px` }} /> : null;
-
 const renderEditorShellProps = (editorProps?: EditorProps) => ({
   accentColor: editorProps?.accentColor,
   isBlockSelected: editorProps?.isBlockSelected,
@@ -133,7 +127,6 @@ const SharedBlockShell = ({ mode, className, contentClassName, label, icon, acce
 
   return <BlockWrapper onDelete={onDelete ?? NOOP} onDuplicate={onDuplicate ?? NOOP} className={className} contentClassName={contentClassName} label={label} icon={icon} accentColor={accentColor} isBlockSelected={isBlockSelected} canMoveUp={Boolean(canMoveUp)} canMoveDown={Boolean(canMoveDown)} onMoveUp={onMoveUp} onMoveDown={onMoveDown} onMoveDragStart={onMoveDragStart} onMoveDragEnd={onMoveDragEnd} dragHandleClassName={dragHandleClassName} visualMode="viewer">{children}</BlockWrapper>;
 };
-
 const CodeLanguageSelector = ({ value, onChange }: Readonly<{ value: string; onChange: (next: string) => void }>) => {
   return (
     <Select value={value} onValueChange={onChange}>
@@ -148,7 +141,6 @@ const CodeLanguageSelector = ({ value, onChange }: Readonly<{ value: string; onC
     </Select>
   );
 };
-
 const TextBlockScene = ({ mode, block, editorProps, viewerProps }: SceneProps) => {
   const isEmpty = (block.content ?? "").trim().length === 0;
   return (
@@ -157,7 +149,6 @@ const TextBlockScene = ({ mode, block, editorProps, viewerProps }: SceneProps) =
     </SharedBlockShell>
   );
 };
-
 const QuestionBlockScene = ({ mode, block, editorProps, viewerProps }: SceneProps) => {
   return (
     <SharedBlockShell mode={mode} className="bg-transparent px-0 py-0" contentClassName="px-0" label="Question" icon={HelpCircle} {...renderEditorShellProps(editorProps)}>
@@ -165,7 +156,6 @@ const QuestionBlockScene = ({ mode, block, editorProps, viewerProps }: SceneProp
     </SharedBlockShell>
   );
 };
-
 const CodeBlockScene = ({ mode, block, meta, editorProps, viewerProps }: SceneProps) => {
   const codeData = block.code || { language: "javascript", code: "" };
   const normalizedLanguage = normalizeEditorLanguage(codeData.language);
@@ -173,7 +163,6 @@ const CodeBlockScene = ({ mode, block, meta, editorProps, viewerProps }: ScenePr
 
   return <div className="w-full max-w-full overflow-visible">{renderGridOffsetSpacer(meta?.gridOffsetPx ?? 0)}<SharedBlockShell mode={mode} className={cn("bg-transparent px-0 py-0", (codeData.code ?? "").trim().length > 0 && "border-0")} contentClassName="relative px-0" label="Code" icon={Code} {...renderEditorShellProps(editorProps)}>{contentNode}</SharedBlockShell></div>;
 };
-
 const ImageBlockScene = ({ mode, block, editorProps, viewerProps }: SceneProps) => {
   const hasItems = (block.images?.length ?? 0) > 0;
   return (
@@ -184,12 +173,10 @@ const ImageBlockScene = ({ mode, block, editorProps, viewerProps }: SceneProps) 
     </SharedBlockShell>
   );
 };
-
 const AudioBlockScene = ({ mode, block, editorProps, viewerProps }: SceneProps) => {
   const audioUrls = mode === "view" ? (block.audios ?? []).map(viewerProps?.toMediaUrl ?? ((item) => typeof item === "string" ? item : (item?.url ?? null))).filter((item): item is string => Boolean(item)) : (block.audios ?? []).map((item) => item?.url?.trim() ?? "").filter((item): item is string => item.length > 0);
   return <SharedBlockShell mode={mode} className="bg-transparent px-0 py-0" contentClassName="px-0" label="Audio" icon={Volume2} {...renderEditorShellProps(editorProps)}><div className="rounded-xl border border-slate-200/80 bg-white/70 px-3 py-3 shadow-sm"><AudioPlayer urls={audioUrls} /></div></SharedBlockShell>;
 };
-
 const ReferenceBlockScene = ({ mode, block, editorProps }: SceneProps) => {
   const references: ReferenceBlockData[] = sanitizeReferences(block.references ?? []);
   return (
@@ -201,7 +188,6 @@ const ReferenceBlockScene = ({ mode, block, editorProps }: SceneProps) => {
     </SharedBlockShell>
   );
 };
-
 const MathBlockScene = ({ mode, block, meta, editorProps, viewerProps }: SceneProps) => {
   const [error, setError] = React.useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = React.useState(false);
@@ -211,14 +197,12 @@ const MathBlockScene = ({ mode, block, meta, editorProps, viewerProps }: ScenePr
 
   return <SharedBlockShell mode={mode} className={cn(latex.trim().length > 0 && "border-transparent")} label="Math" icon={Sigma} {...renderEditorShellProps({ ...editorProps, isBlockSelected: Boolean(editorProps?.isBlockSelected || isEditorOpen) } as EditorProps | undefined)}><div className="w-full max-w-full overflow-visible space-y-1.5 px-2 py-0.5">{renderGridOffsetSpacer(meta?.gridOffsetPx ?? 0)}<MathBlockPreviewPane latex={latex} displayMode={mathData.displayMode || "block"} className="rounded-lg" interactive={mode === "edit"} onActivate={mode === "edit" ? () => setIsEditorOpen(true) : undefined} showPlaceholder={mode === "edit"} placeholder={mode === "edit" ? "数式を入力..." : undefined} zoom={mode === "edit" ? editorProps?.zoom : viewerProps?.zoom} />{mode === "edit" && editorProps ? <MathEditorDialog open={isEditorOpen} onOpenChange={setIsEditorOpen} data={mathData} onChange={handleMathChange} accentColor={editorProps.accentColor} error={error} /> : null}</div></SharedBlockShell>;
 };
-
 const MarkdownBlockScene = ({ mode, block, editorProps, viewerProps }: SceneProps) => {
   const [isEditorOpen, setIsEditorOpen] = React.useState(false);
   const markdown = block.markdown ?? "";
   const isEmpty = markdown.trim().length === 0;
   return <SharedBlockShell mode={mode} className={cn("bg-transparent px-0 py-0", !isEmpty && "border-0")} contentClassName="px-0" label="Markdown" icon={NotebookPen} {...renderEditorShellProps({ ...editorProps, isBlockSelected: Boolean(editorProps?.isBlockSelected || isEditorOpen) } as EditorProps | undefined)}>{mode === "edit" && editorProps ? <MarkdownBlockContent mode="edit" markdown={markdown} open={isEditorOpen} onOpenChange={setIsEditorOpen} onChange={(nextMarkdown) => editorProps.onUpdateBlock(block.id, { markdown: nextMarkdown })} onReplaceWithBlocks={editorProps.onReplaceMarkdownWithBlocks} accentColor={editorProps.accentColor} zoom={editorProps.zoom} /> : <MarkdownBlockContent mode="view" markdown={markdown} zoom={viewerProps?.zoom} />}</SharedBlockShell>;
 };
-
 export const CardBlockSceneRenderer = (props: CardBlockSceneRendererProps) => { const { block, meta } = props;
 
   switch (block.type) {

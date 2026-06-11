@@ -8,7 +8,6 @@ type AuthSessionContextType = {
   loading: boolean;
   logout: () => Promise<void>;
 };
-
 type AuthSessionProviderProps = {
   children: ReactNode;
 };
@@ -31,4 +30,4 @@ export { AuthSessionContext };
 
 
 
-export type { AuthSessionContextType, AuthSessionProviderProps };
+export type { AuthSessionContextType, AuthSessionProvider

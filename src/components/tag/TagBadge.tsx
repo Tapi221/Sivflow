@@ -23,13 +23,10 @@ const TAG_TEXT_FADE_STYLE: CSSProperties = {
   WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
   maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
 };
-
 const TAG_TEXT_STYLE: CSSProperties = {
   fontFamily: "Arial, Helvetica, sans-serif",
 };
-
 const OVERFLOW_THRESHOLD = 1;
-
 const LONG_DOT_SEQUENCE_PATTERN = /[.。．]{4,}/g;
 
 
@@ -37,15 +34,12 @@ const LONG_DOT_SEQUENCE_PATTERN = /[.。．]{4,}/g;
 const isElementTextOverflowing = (element: HTMLElement | null) => {
   return Boolean(element && element.scrollWidth > element.clientWidth + OVERFLOW_THRESHOLD);
 };
-
 const normalizeTagText = (value: string): string => {
   return value.replace(LONG_DOT_SEQUENCE_PATTERN, "...");
 };
-
 const getTagTextStyle = (isOverflowing: boolean): CSSProperties => {
   return isOverflowing ? { ...TAG_TEXT_STYLE, ...TAG_TEXT_FADE_STYLE } : TAG_TEXT_STYLE;
 };
-
 const useTextOverflow = (value: string) => {
   const textRef = useRef<HTMLSpanElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -100,7 +94,6 @@ const TagHashIcon = ({ className }: SVGProps<SVGSVGElement>) => (
     <path d="M2 7.4h7.2" />
   </svg>
 );
-
 const TagBadge = ({
   label,
   colorKey,

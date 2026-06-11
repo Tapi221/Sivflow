@@ -5,7 +5,6 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 interface Props {
   children: ReactNode;
 }
-
 interface State {
   hasError: boolean;
 }
@@ -15,6 +14,8 @@ interface State {
 const ErrorScreen = () => {
   return "error";
 };
+
+
 
 
 

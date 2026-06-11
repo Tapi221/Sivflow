@@ -15,14 +15,12 @@ import { Tag } from "@/ui/icons";
 type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";
 type TagMatchMode = "any" | "all";
-
 type TagTreeSource = {
   id: string;
   name: string;
   color?: string | null;
   parentId?: string | null;
 };
-
 type TagTreeNode = {
   id: string;
   name: string;
@@ -31,20 +29,17 @@ type TagTreeNode = {
   parentId: string | null;
   children: TagTreeNode[];
 };
-
 type VisibleTagTreeItem = {
   id: string;
   name: string;
   colorKey: TagColorKey;
   depth: number;
 };
-
 type TagFilterPanelProps = {
   allTags: string[];
   isOpen?: boolean;
   className?: string;
 };
-
 type TagFilterSelectionSwitchProps = {
   label: string;
   checked: boolean;
@@ -57,13 +52,11 @@ const TAG_MATCH_MODE_OPTIONS = [
   { label: "いずれか (OR)", value: "any" },
   { label: "すべて (AND)", value: "all" },
 ] as const satisfies ReadonlyArray<SegmentedOption<TagMatchMode>>;
-
 const TOGGLEABLE_FLAG_OPTIONS = [
   { label: "指定なし", value: "any" },
   { label: "あり", value: "on" },
   { label: "なし", value: "off" },
 ] as const satisfies ReadonlyArray<SegmentedOption<ToggleableFlag>>;
-
 const CONTENT_TYPE_OPTIONS = [
   { label: "カード", value: "card" },
   { label: "PDF", value: "pdf" },
@@ -79,18 +72,15 @@ const normalizeTagParentId = (parentId: string | null | undefined): string | nul
     ? parentId
     : null;
 };
-
 const sortTagTreeNodes = (nodes: TagTreeNode[]): TagTreeNode[] => {
   return nodes.sort((left, right) => left.name.localeCompare(right.name, "ja"));
 };
-
 const cloneTagTreeBranch = (node: TagTreeNode): TagTreeNode => {
   return {
     ...node,
     children: node.children.map(cloneTagTreeBranch),
   };
 };
-
 const filterTagTreeNode = (
   node: TagTreeNode,
   normalizedSearchQuery: string,
@@ -111,7 +101,6 @@ const filterTagTreeNode = (
     children,
   };
 };
-
 const flattenTagTreeNodes = (
   nodes: TagTreeNode[],
   depth: number,
@@ -126,7 +115,6 @@ const flattenTagTreeNodes = (
     ...flattenTagTreeNodes(node.children, depth + 1),
   ]);
 };
-
 const buildTagTreeNodes = (
   tagRecords: ReadonlyArray<TagTreeSource>,
   allTags: string[],
@@ -189,7 +177,6 @@ const buildTagTreeNodes = (
 
   return sortTagTreeNodes(roots);
 };
-
 const buildVisibleTagTreeItems = (
   tagRecords: ReadonlyArray<TagTreeSource>,
   allTags: string[],
@@ -220,7 +207,6 @@ const TagFilterSelectionSwitch = ({ label, checked, onToggle }: TagFilterSelecti
     </button>
   );
 };
-
 export const TagFilterPanel = ({ allTags, isOpen = false, className, }: TagFilterPanelProps) => { const { tags: tagRecords } = useTags();
   const {
     tagFilter,

@@ -1,16 +1,12 @@
 import { telemetryOncePerSession } from "@/services/localDBRuntimeState";
 import { findBlobUrlFixesDeep } from "@/utils/blobUrlSanitizer";
 
-
-
 type InvalidImageUrlErrorParams = {
   entityType?: string;
   entityId?: string;
   path?: string;
   message?: string;
 };
-
-
 
 const InvalidImageUrlError = class extends Error {
   entityType?: string;
@@ -38,22 +34,17 @@ const InvalidImageUrlError = class extends Error {
   }
 };
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
-
 const toIdString = (value: unknown): string | undefined => {
   if (typeof value === "string" || typeof value === "number") return String(value);
   return undefined;
 };
-
 const getIdFromUnknownEntity = (entity: unknown): string | undefined => {
   if (!isRecord(entity)) return undefined;
   if (!("id" in entity)) return undefined;
   return toIdString(entity.id);
 };
-
 const setNestedPath = (
   target: Record<string, unknown>,
   path: string,
@@ -77,7 +68,6 @@ const setNestedPath = (
 
   cursor[keys[keys.length - 1]] = value;
 };
-
 export const safeRevokeBlobUrl = (url: unknown, context: string): void => { if (typeof url !== "string" || !url.startsWith("blob:")) return;
   if (typeof URL === "undefined" || typeof URL.revokeObjectURL !== "function") return;
 
@@ -87,10 +77,8 @@ export const safeRevokeBlobUrl = (url: unknown, context: string): void => { if (
     console.warn(`[LocalDB] Failed to revoke blob URL (${context})`, error);
   }
 };
-
 export const hasBlobUrlDeep = (value: unknown): boolean => { return findBlobUrlFixesDeep(value).length > 0;
 };
-
 export const assertNoBlobUrlInCardPayload = ( cardLike: unknown, context?: { entityType?: string; entityId?: string },
 ): void => {
   if (!isRecord(cardLike)) return;
@@ -113,7 +101,6 @@ export const assertNoBlobUrlInCardPayload = ( cardLike: unknown, context?: { ent
     path: fixPath,
   });
 };
-
 export const scrubBlobUrlsDeep = (value: unknown): unknown => { if (typeof value === "string") { return value.startsWith("blob:") ? null : value;
   }
 
@@ -131,7 +118,6 @@ export const scrubBlobUrlsDeep = (value: unknown): unknown => { if (typeof value
 
   return value;
 };
-
 export const buildCardCandidateFromMods = ( obj: unknown, mods: unknown, ): unknown => { if (!isRecord(obj)) return mods;
   if (!isRecord(mods)) return obj;
 

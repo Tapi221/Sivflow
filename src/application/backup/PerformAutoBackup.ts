@@ -19,7 +19,6 @@ const defaultCollectUserData = async (userId: string): Promise<unknown> => {
     timestamp: Date.now(),
   };
 };
-
 const defaultBuildSnapshot =
   (collectUserData: (userId: string) => Promise<unknown>) =>
     async (userId: string): Promise<AutoBackupRecord> => {
@@ -32,7 +31,6 @@ const defaultBuildSnapshot =
         payload,
       };
     };
-
 export const createPerformAutoBackupUseCase = ({ backupStore, buildSnapshot, collectUserData = defaultCollectUserData, }: PerformAutoBackupDependencies) => { const resolvedBuildSnapshot = buildSnapshot ?? defaultBuildSnapshot(collectUserData);
 
   const execute = async (userId: string): Promise<boolean> => {

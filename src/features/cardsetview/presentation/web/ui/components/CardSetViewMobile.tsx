@@ -24,7 +24,6 @@ interface CardSetViewMobileProps {
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
 }
-
 interface CardSetViewMobileEmptyStateProps {
   cardSetName: string | null;
   onCreateCard: () => void | Promise<void>;
@@ -71,7 +70,6 @@ const CardSetViewMobileEmptyState = ({ cardSetName, onCreateCard }: CardSetViewM
     </div>
   );
 };
-
 export const CardSetViewMobile = ({ cardsForPager, selectedCardId, safeCurrentIndex, isFlipped, isLoading, cardSetName, currentDisplayMode, settings, onIndexChange, onFlip, onEdit, onCreateCard, onToggleUncertainty, onToggleBookmark, }: CardSetViewMobileProps) => { void selectedCardId;
   void settings;
   void onEdit;
@@ -143,5 +141,3 @@ export const CardSetViewMobile = ({ cardsForPager, selectedCardId, safeCurrentIn
       getKey={(card) => card.id}
       renderCard={renderCard}
     />
-  );
-};

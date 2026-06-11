@@ -5,12 +5,8 @@ import type { NativeScrollEvent, NativeSyntheticEvent, ViewStyle } from "react-n
 import { getCalendarDateKey, getEventDateKeys } from "@core/calendar/calendarEventRange";
 import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
 
-
-
 type CalendarWeekStartDay = "sunday" | "monday";
-
 type CalendarWeekStartsOn = 0 | 1;
-
 type ScheduleYearProps = {
   yearDate: Date;
   selectedDate: Date;
@@ -19,12 +15,10 @@ type ScheduleYearProps = {
   onSelectDate: (date: Date) => void;
   onRenderedRangeChange?: (range: { start: Date; end: Date }) => void;
 };
-
 type ScheduleYearDayEvents = {
   count: number;
   color: string;
 };
-
 type ScheduleYearDay = {
   date: Date;
   key: string;
@@ -32,14 +26,12 @@ type ScheduleYearDay = {
   isCurrentMonth: boolean;
   events: ScheduleYearDayEvents | null;
 };
-
 type ScheduleYearMonth = {
   key: string;
   date: Date;
   label: string;
   weeks: ScheduleYearDay[][];
 };
-
 type ScheduleYearBlock = {
   key: string;
   date: Date;
@@ -47,36 +39,20 @@ type ScheduleYearBlock = {
   months: ScheduleYearMonth[];
 };
 
-
-
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
-
 const INITIAL_YEAR_BUFFER = 1;
-
 const YEAR_EXTEND_COUNT = 1;
-
 const YEAR_MAX_RENDERED_YEARS = 5;
-
 const YEAR_SCROLL_EDGE_THRESHOLD_PX = 240;
-
 const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
-
 const MONTH_COLUMNS = 3;
-
 const MONTH_CELL_SIZE = 24;
-
 const MONTH_WEEKDAY_HEIGHT = 20;
-
 const YEAR_SECTION_GAP = 32;
-
 const DEFAULT_WEEK_START_DAY: CalendarWeekStartDay = "monday";
-
 const MINI_CALENDAR_WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"] as const;
-
 const MONTH_LABEL_FORMAT = "M月";
-
 const YEAR_LABEL_FORMAT = "yyyy年";
-
 const styles = StyleSheet.create({
   content: {
     gap: YEAR_SECTION_GAP,
@@ -174,16 +150,12 @@ const styles = StyleSheet.create({
   },
 });
 
-
-
 const getCalendarWeekStartsOn = (weekStartDay: CalendarWeekStartDay): CalendarWeekStartsOn => weekStartDay === "sunday" ? 0 : 1;
-
 const rotateCalendarWeekdayLabels = <T,>(weekdayLabels: readonly T[], weekStartDay: CalendarWeekStartDay): readonly T[] => {
   if (weekStartDay === "sunday") return weekdayLabels;
 
   return [...weekdayLabels.slice(1), ...weekdayLabels.slice(0, 1)];
 };
-
 const normalizeColor = (color: string): string => {
   if (/^#[0-9a-f]{3}$/i.test(color)) {
     const red = color.charAt(1);
@@ -195,7 +167,6 @@ const normalizeColor = (color: string): string => {
 
   return color;
 };
-
 const colorToRgba = (color: string, alpha: number): string => {
   const normalized = normalizeColor(color);
   const match = /^#([0-9a-f]{6})$/i.exec(normalized);
@@ -209,7 +180,6 @@ const colorToRgba = (color: string, alpha: number): string => {
 
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 };
-
 const buildEventsByDay = (events: CalendarEvent[]): Map<string, ScheduleYearDayEvents> => {
   const eventsByDay = new Map<string, ScheduleYearDayEvents>();
 
@@ -230,7 +200,6 @@ const buildEventsByDay = (events: CalendarEvent[]): Map<string, ScheduleYearDayE
 
   return eventsByDay;
 };
-
 const buildMonthDays = (monthDate: Date, eventsByDay: Map<string, ScheduleYearDayEvents>, weekStartDay: CalendarWeekStartDay): ScheduleYearDay[] => {
   const monthStart = startOfMonth(monthDate);
   const gridStart = startOfWeek(monthStart, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) });
@@ -248,7 +217,6 @@ const buildMonthDays = (monthDate: Date, eventsByDay: Map<string, ScheduleYearDa
     };
   });
 };
-
 const chunkMonthWeeks = (days: ScheduleYearDay[]): ScheduleYearDay[][] => {
   const weeks: ScheduleYearDay[][] = [];
 
@@ -258,7 +226,6 @@ const chunkMonthWeeks = (days: ScheduleYearDay[]): ScheduleYearDay[][] => {
 
   return weeks;
 };
-
 const getDayButtonStyle = (day: ScheduleYearDay, selected: boolean): ViewStyle | undefined => {
   if (selected || !day.events) return undefined;
 
@@ -266,18 +233,14 @@ const getDayButtonStyle = (day: ScheduleYearDay, selected: boolean): ViewStyle |
     backgroundColor: colorToRgba(day.events.color, EVENT_DAY_BACKGROUND_ALPHA),
   };
 };
-
 const getYearRange = (anchorYear: Date, startOffset: number, endOffset: number): { start: Date; end: Date } => ({
   start: startOfYear(addYears(anchorYear, startOffset)),
   end: endOfYear(addYears(anchorYear, endOffset)),
 });
-
 const getMonthItemStyle = (monthIndex: number): ViewStyle => ({
   marginTop: monthIndex < MONTH_COLUMNS ? 0 : 16,
   width: `${100 / MONTH_COLUMNS}%`,
 });
-
-
 
 const ScheduleYearComponent = ({ yearDate, selectedDate, weekStartDay = DEFAULT_WEEK_START_DAY, visibleEvents = [], onSelectDate, onRenderedRangeChange }: ScheduleYearProps) => {
   const today = useMemo(() => new Date(), []);
@@ -408,14 +371,8 @@ const ScheduleYearComponent = ({ yearDate, selectedDate, weekStartDay = DEFAULT_
   );
 };
 
-
-
 const ScheduleYear = memo(ScheduleYearComponent);
-
 ScheduleYear.displayName = "ScheduleYear";
-
 export { ScheduleYear };
-
-
 
 export type { CalendarWeekStartDay, ScheduleYearProps };

@@ -2,36 +2,29 @@ export type FolderDeleteEntity = { id: string;
   isDeleted?: boolean;
   parentFolderId?: string | null;
 };
-
 export type FolderDeleteCardSet = { id: string;
   isDeleted?: boolean;
   folderId?: string | null;
 };
-
 export type FolderDeleteCard = { id: string;
   isDeleted?: boolean;
 };
-
 export type FolderDeleteDocument = { id: string;
   isDeleted?: boolean;
   folderId: string;
 };
-
 export type FolderDeleteContext< TFolder extends FolderDeleteEntity = FolderDeleteEntity, TCardSet extends FolderDeleteCardSet = FolderDeleteCardSet, TCard extends FolderDeleteCard = FolderDeleteCard, TDocument extends FolderDeleteDocument = FolderDeleteDocument, > = { folders: TFolder[];
   cardSets: TCardSet[];
   cards: TCard[];
   documents: TDocument[];
   resolveCardFolderId: (card: TCard, cardSets: TCardSet[]) => string | null | undefined;
 };
-
 export type FolderDeleteRepository< TFolder extends FolderDeleteEntity = FolderDeleteEntity, TCardSet extends FolderDeleteCardSet = FolderDeleteCardSet, TCard extends FolderDeleteCard = FolderDeleteCard, TDocument extends FolderDeleteDocument = FolderDeleteDocument, > = { loadDeleteContext: (userId: string) => Promise<FolderDeleteContext<TFolder, TCardSet, TCard, TDocument>>;
   softDeleteFolder: (userId: string, folderId: string) => Promise<void>;
   softDeleteCardSet: (userId: string, cardSetId: string) => Promise<void>;
   softDeleteCard: (userId: string, cardId: string) => Promise<void>;
   softDeleteDocument: (userId: string, documentId: string) => Promise<void>;
 };
-
-
 
 const buildChildFolderMap = <TFolder extends FolderDeleteEntity>(folders: TFolder[]) => {
   const childFolderIdsByParentId = new Map<string | null, string[]>();
@@ -47,7 +40,6 @@ const buildChildFolderMap = <TFolder extends FolderDeleteEntity>(folders: TFolde
 
   return childFolderIdsByParentId;
 };
-
 const collectDescendantFolderIds = (
   childFolderIdsByParentId: ReadonlyMap<string | null, string[]>,
   rootFolderId: string,
@@ -74,7 +66,6 @@ const collectDescendantFolderIds = (
 
   return orderedFolderIds;
 };
-
 const collectCardSetsInFolders = <TCardSet extends FolderDeleteCardSet>({
   cardSets,
   folderIds,
@@ -87,7 +78,6 @@ const collectCardSetsInFolders = <TCardSet extends FolderDeleteCardSet>({
     return cardSet.folderId ? folderIds.has(cardSet.folderId) : false;
   });
 };
-
 const collectCardsInFolders = <
   TCardSet extends FolderDeleteCardSet,
   TCard extends FolderDeleteCard,
@@ -109,7 +99,6 @@ const collectCardsInFolders = <
     return folderId ? folderIds.has(folderId) : false;
   });
 };
-
 const collectDocumentsInFolders = <TDocument extends FolderDeleteDocument>({
   documents,
   folderIds,
@@ -122,7 +111,6 @@ const collectDocumentsInFolders = <TDocument extends FolderDeleteDocument>({
     return folderIds.has(document.folderId);
   });
 };
-
 export const deleteFolderCascade = async < TFolder extends FolderDeleteEntity, TCardSet extends FolderDeleteCardSet, TCard extends FolderDeleteCard, TDocument extends FolderDeleteDocument, >({ userId, folderId, repository, }: { userId: string;
   folderId: string;
   repository: FolderDeleteRepository<TFolder, TCardSet, TCard, TDocument>;

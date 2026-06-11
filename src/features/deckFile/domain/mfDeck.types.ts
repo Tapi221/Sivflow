@@ -20,9 +20,7 @@ export const MF_DECK_MAX_MEDIA_ENTRIES = 5000 as const;
 
 
 export type MfDeckIssueLevel = "error" | "warning";
-
 export type MfDeckIssueCode = | "invalid_extension" | "file_too_large" | "missing_manifest" | "missing_cards" | "missing_media" | "invalid_zip" | "invalid_json" | "invalid_format" | "unsupported_version" | "invalid_manifest" | "invalid_cards" | "invalid_media_manifest" | "empty_deck" | "card_count_mismatch" | "unsupported_media_reference" | "unreadable_media" | "unsafe_path" | "unexpected_value" | "duplicate_card_id" | "duplicate_block_id" | "duplicate_media_path" | "too_many_cards" | "too_many_blocks" | "too_many_media_entries" | "media_size_mismatch" | "unknown_media_entry" | "invalid_media_reference";
-
 export type MfDeckIssue = { level: MfDeckIssueLevel;
   code: MfDeckIssueCode;
   message: string;
@@ -30,9 +28,7 @@ export type MfDeckIssue = { level: MfDeckIssueLevel;
   cardId?: string;
   blockId?: string;
 };
-
 export type MfDeckMediaKindV1 = "image" | "audio" | "unknown";
-
 export type MfDeckMediaEntryV1 = { path: string;
   kind: MfDeckMediaKindV1;
   mimeType: string;
@@ -40,12 +36,10 @@ export type MfDeckMediaEntryV1 = { path: string;
   sourceName?: string;
   sourceUrlHash?: string;
 };
-
 export type MfDeckMediaManifestV1 = { format: "sivflow.deck.media";
   version: typeof MF_DECK_VERSION;
   media: MfDeckMediaEntryV1[];
 };
-
 export type MfDeckManifestV1 = { format: typeof MF_DECK_FORMAT;
   version: typeof MF_DECK_VERSION;
   exportedAt: string;
@@ -66,18 +60,15 @@ export type MfDeckManifestV1 = { format: typeof MF_DECK_FORMAT;
     reviewProgressIncluded: boolean;
   };
 };
-
 export type MfDeckCardFlagsV1 = { isDraft?: boolean;
   isSilent?: boolean;
   isBookmarked?: boolean;
   hasUncertainty?: boolean;
 };
-
 export type MfDeckCardFaceV1 = { blocks: CardBlock[];
   extraRows?: number;
   ink?: unknown | null;
 };
-
 export type MfDeckCardV1 = { id: string;
   sourceCardId?: string;
   questionNumber?: string;
@@ -89,18 +80,15 @@ export type MfDeckCardV1 = { id: string;
   layoutRows?: unknown;
   flags?: MfDeckCardFlagsV1;
 };
-
 export type MfDeckCardsJsonV1 = { format: "sivflow.deck.cards";
   version: typeof MF_DECK_VERSION;
   cards: MfDeckCardV1[];
 };
-
 export type MfDeckArchiveV1 = { manifest: MfDeckManifestV1;
   cardsJson: MfDeckCardsJsonV1;
   mediaManifest?: MfDeckMediaManifestV1;
   media?: Record<string, Uint8Array>;
 };
-
 export type MfDeckValidationResult = | { ok: true;
       value: MfDeckArchiveV1;
       issues: MfDeckIssue[];
@@ -120,12 +108,10 @@ export class MfDeckValidationError extends Error { readonly issues: MfDeckIssue[
     this.issues = issues;
   }
 }
-
 export class MfDeckExportError extends Error { readonly issues: MfDeckIssue[];
 
   constructor(message: string, issues: MfDeckIssue[]) {
     super(message);
     this.name = "MfDeckExportError";
     this.issues = issues;
-  }
-}
+  

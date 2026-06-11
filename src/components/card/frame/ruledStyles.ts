@@ -1,5 +1,4 @@
 type RuledStyleKind = "repeat+bottom" | "repeat-only" | "bottom-only";
-
 interface RuledParams {
   kind: RuledStyleKind;
   /** 行間(px) */
@@ -20,7 +19,6 @@ const toDataUri = (svg: string) => {
   // '#' をエンコードしないと CSS url() がフラグメントと誤解する
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 };
-
 const makeRepeatSvg = (
   rowPx: number,
   phasePx: number,
@@ -36,7 +34,6 @@ const makeRepeatSvg = (
     "</svg>";
   return toDataUri(svg);
 };
-
 const makeLineSvg = (color: string, linePx: number) => {
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="${linePx}">` +
@@ -60,7 +57,6 @@ const getPageRuledBg = (
     backgroundSize: `100% ${rowPx}px`,
   };
 };
-
 const getRuledStyle = (params: RuledParams) => {
   const { kind, rowPx, phasePx, color, linePx, bottomLinePx } = params;
 

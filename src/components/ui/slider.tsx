@@ -29,7 +29,6 @@ const toSingleValue = (
   const candidate = source[0];
   return Number.isFinite(candidate) ? candidate : fallback;
 };
-
 const toNumber = (value: number | string | undefined, fallback: number) => {
   if (typeof value === "number" && Number.isFinite(value)) {
     return value;
@@ -44,7 +43,6 @@ const toNumber = (value: number | string | undefined, fallback: number) => {
 
   return fallback;
 };
-
 const clampValue = (value: number, min: number, max: number) => {
   const safeMin = Math.min(min, max);
   const safeMax = Math.max(min, max);
@@ -238,5 +236,4 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
 
 
 Slider.displayName = "Slider";
-
-export { Slider };
+export { Sli

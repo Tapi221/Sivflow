@@ -5,12 +5,10 @@ import { cn } from "@/lib/utils";
 
 
 type TooltipSide = "top" | "right" | "bottom" | "left";
-
 type TooltipPosition = {
   x: number;
   y: number;
 };
-
 export type HoverSuggestionItem = { id: string;
   label: string;
   description?: string;
@@ -18,7 +16,6 @@ export type HoverSuggestionItem = { id: string;
   disabled?: boolean;
   onClick?: () => void;
 };
-
 type HoverSuggestionTooltipProps = {
   children: ReactNode;
   items: HoverSuggestionItem[];
@@ -40,7 +37,6 @@ const getTransform = (side: TooltipSide) => {
 
   return "translate(0, -50%)";
 };
-
 const getPosition = (
   rect: DOMRect,
   side: TooltipSide,
@@ -60,7 +56,6 @@ const getPosition = (
 
   return { x: rect.right + offset, y: rect.top + rect.height / 2 };
 };
-
 const getArrowClassName = (side: TooltipSide) => {
   if (side === "top") return "bottom-[-3px] left-1/2 -translate-x-1/2";
   if (side === "bottom") return "top-[-3px] left-1/2 -translate-x-1/2";
