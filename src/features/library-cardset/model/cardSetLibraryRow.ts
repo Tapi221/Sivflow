@@ -1,7 +1,8 @@
 import { normalizeDate } from "@/shared/codec/date";
 import type { Card, CardSet, Folder } from "@/types";
 
-type CardSetDashboardRow = { id: string;
+type CardSetDashboardRow = {
+  id: string;
   title: string;
   description: string;
   folderId: string | null;
@@ -18,7 +19,7 @@ type BuildCardSetDashboardRowsParams = {
   cardSets: CardSet[];
   cards: Card[];
   folders: Folder[];
-  tagById: ReadonlyMap<string, { name: string; }>;
+  tagById: ReadonlyMap<string, { name: string }>;
 };
 type CardWithLegacyCardSetId = Card & {
   card_set_id?: string | null;
@@ -37,6 +38,13 @@ const resolveCardSetId = (card: Card): string | null => {
 };
 const resolveFolderName = (folder: Folder | undefined): string => {
   return folder?.folderName?.trim() ?? "未分類";
+};
+const resolveFolderPathLabel = (folderPath: string[]): string => {
+  return folderPath.length > 0 ? folderPath.join(" / ") : "未分類";
+};
+const resolveOrderIndex = (value: unknown): number => {
+  const orderIndex = Number(value);
+  return Number.isFinite(orderIndex) ? orderIndex : 0;
 };
 const buildFolderPath = (
   folderId: string | null,
@@ -69,7 +77,7 @@ const resolveCategoryLabel = (
 };
 const resolveDisplayTags = (
   cardSet: CardSet,
-  tagById: ReadonlyMap<string, { name: string; }>,
+  tagById: ReadonlyMap<string, { name: string }>,
 ): string[] => {
   const explicitTags = (Array.isArray(cardSet.tags) ? cardSet.tags : [])
     .map((tagIdOrName) => tagById.get(tagIdOrName)?.name ?? tagIdOrName)
@@ -109,15 +117,13 @@ const buildCardSetDashboardRows = ({ cardSets, cards, folders, tagById }: BuildC
         description: cardSet.description?.trim() ?? "",
         folderId,
         categoryLabel,
-        folderPathLabel: folderPath.join(" / ") ?? "未分類",
-        storagePathLabel: ["ライブラリ", "Flashcard", ...folderPath].join(
-          " / ",
-        ),
+        folderPathLabel: resolveFolderPathLabel(folderPath),
+        storagePathLabel: ["ライブラリ", "Flashcard", ...folderPath].join(" / "),
         cardCount: cardCountByCardSetId.get(cardSet.id) ?? 0,
         updatedAt: normalizeDate(cardSet.updatedAt),
         createdAt: normalizeDate(cardSet.createdAt),
         tags: resolveDisplayTags(cardSet, tagById),
-        orderIndex: Number(cardSet.orderIndex) ?? 0,
+        orderIndex: resolveOrderIndex(cardSet.orderIndex),
       } satisfies CardSetDashboardRow;
     })
     .sort((left, right) => {
