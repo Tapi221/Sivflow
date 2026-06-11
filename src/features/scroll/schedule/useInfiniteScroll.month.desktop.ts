@@ -14,6 +14,8 @@ import { CALENDAR_MONTH_WEEK_DAY_COUNT, DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, g
 
 
 
+
+
 type UseMonthInfiniteScrollOptions = {
   currentDate: Date;
   scrollTargetToken: number;
@@ -45,6 +47,8 @@ type SetVirtualWindowOptions = {
 
 
 
+
+
 const MONTH_GRID_FIRST_WEEK_OFFSET_PX = C.CALENDAR_WEEKDAY_HEADER_HEIGHT;
 const MONTH_VIRTUAL_PAST_WEEKS = 5200;
 const MONTH_VIRTUAL_FUTURE_WEEKS = 5200;
@@ -52,6 +56,8 @@ const MONTH_RENDERED_WEEK_COUNT = 36;
 const MONTH_VIRTUAL_WINDOW_GUARD_WEEKS = 6;
 const VISIBLE_MONTH_SYNC_DELAY_MS = 96;
 const MONTH_VIRTUAL_SPACER_HEIGHT = 0;
+
+
 
 
 

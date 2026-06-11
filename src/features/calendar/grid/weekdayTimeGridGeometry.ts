@@ -9,6 +9,8 @@ import * as GRID from "./grid.layout.constants.desktop";
 
 
 
+
+
 export type WeekdayTimedEventPositionStyle = CSSProperties & { left: string;
   top: string;
   width: string;
@@ -37,12 +39,16 @@ type WeekdayTimedEventHorizontalInsets = {
 
 
 
+
+
 const PERCENT_MAX = 100;
 const SHORT_RANGE_CARRY_OVER_HIDE_THRESHOLD_HOURS = 1;
 const TIME_GRID_DECIMAL_PLACES = 12;
 const TIME_GRID_FLOATING_POINT_EPSILON = Number.EPSILON * 10;
 
 export const WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX = eventChipDesign.weekdayGrid.timedMinHeightPx;
+
+
 
 
 

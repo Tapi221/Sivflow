@@ -22,6 +22,8 @@ import type { Card, CardPatch, UserSettings } from "@/types";
 
 
 
+
+
 type UseCardsResult = {
   cards: Card[];
   updateCard: (cardId: string, data: unknown) => void | Promise<void>;
@@ -38,6 +40,8 @@ type UseCardEditorPaneControllerParams = {
   onSelectCardId?: (cardId: string) => void;
   settingsOverride?: Partial<UserSettings> | null;
 };
+
+
 
 
 

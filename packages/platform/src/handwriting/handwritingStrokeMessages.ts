@@ -7,6 +7,8 @@ import type { HandwritingStrokeDeltaMessage } from "./handwritingSession.types";
 
 
 
+
+
 export type CreateHandwritingStrokeDeltaInput = { sessionId: string;
   cardId: string;
   side: InkSide;
@@ -25,6 +27,8 @@ export type ApplyHandwritingStrokeDeltaResult = { document: InkDocument;
   applied: boolean;
   reason?: "session-mismatch" | "card-mismatch" | "side-mismatch" | "invalid-stroke" | "duplicate-stroke";
 };
+
+
 
 
 

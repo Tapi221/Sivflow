@@ -12,6 +12,8 @@ import { type SlateEditor, KEYS, RangeApi } from 'platejs';
 
 
 
+
+
 export type StructuredPromptSections = { context?: string;
   examples?: string[] | string;
   history?: string;
@@ -31,8 +33,12 @@ export type StructuredPromptSections = { context?: string;
 
 
 
+
+
 const SELECTION_START = '<Selection>';
 const SELECTION_END = '</Selection>';
+
+
 
 
 

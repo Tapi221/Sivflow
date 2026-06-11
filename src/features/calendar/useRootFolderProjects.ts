@@ -12,6 +12,8 @@ import type { AppCalendarItem } from "./scheduleScreen.types";
 
 
 
+
+
 export type CreateRootFolderProjectInput = { label: string;
   color?: string;
   checked?: boolean;
@@ -40,9 +42,13 @@ type StoredLegacyProject = Partial<AppCalendarItem>;
 
 
 
+
+
 const LEGACY_APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const PROJECT_VISIBILITY_STORAGE_KEY = "flashcard-master:schedule:root-folder-project-visibility";
 const EMPTY_COLLECTION: never[] = [];
+
+
 
 
 

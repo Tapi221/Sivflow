@@ -8,6 +8,8 @@ import type { CardSetViewContentProps } from "./cardSetViewContentProps";
 
 
 
+
+
 type CardSetViewChromeResetStyle = CSSProperties & {
   "--card-selected-surface": string;
   "--card-border-selected": string;
@@ -16,6 +18,8 @@ type CardSetViewChromeResetStyle = CSSProperties & {
   "--card-selected-outline-neutral": string;
   "--card-selected-outline-accent": string;
 };
+
+
 
 
 
@@ -32,6 +36,8 @@ const cardSetViewChromeResetStyle: CardSetViewChromeResetStyle = {
   "--card-selected-outline-neutral": "transparent",
   "--card-selected-outline-accent": "transparent",
 };
+
+
 
 
 

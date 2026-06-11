@@ -7,6 +7,8 @@ import { type ImportBlock, type ImportColumnKey, type ImportIssue, type ImportPa
 
 
 
+
+
 type HeaderMap = Partial<Record<ImportColumnKey, number>>;
 type RowCellMap = Partial<Record<ImportColumnKey, string>>;
 
@@ -22,7 +24,11 @@ type BuildRowBlockResult = {
 
 
 
+
+
 const REQUIRED_HEADERS: ImportColumnKey[] = ["cardId", "blockOrder", "type"];
+
+
 
 
 

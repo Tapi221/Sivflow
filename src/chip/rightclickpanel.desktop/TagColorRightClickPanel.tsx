@@ -14,6 +14,8 @@ import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, resolveRig
 
 
 
+
+
 type TagColorRightClickPanelProps = {
   x: number;
   y: number;
@@ -25,6 +27,8 @@ type TagColorRightClickPanelProps = {
   panelId?: RightClickPanelId;
   onSelectColor: (colorKey: TagColorKey) => void;
 };
+
+
 
 
 
@@ -79,6 +83,8 @@ const TAG_COLOR_GRID_STYLE = `
   padding: ${TAG_COLOR_GRID_TOP_PADDING}px ${TAG_COLOR_GRID_HORIZONTAL_PADDING}px ${TAG_COLOR_GRID_BOTTOM_PADDING}px;
 }
 `;
+
+
 
 
 

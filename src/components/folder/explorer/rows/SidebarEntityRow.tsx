@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface SidebarEntityRowProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
   "children" | "title"
@@ -47,6 +49,8 @@ interface SidebarEntityRowProps extends Omit<
   density?: "compact";
   selected?: boolean;
 }
+
+
 
 
 
@@ -152,6 +156,8 @@ const SidebarEntityRowBase = ({
     </SidebarTreeRow>
   );
 };
+
+
 
 
 

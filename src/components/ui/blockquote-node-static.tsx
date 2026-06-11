@@ -8,5 +8,7 @@ import { type SlateElementProps, SlateElement } from 'platejs/static';
 
 
 
+
+
 export const BlockquoteElementStatic = (props: SlateElementProps) => { return <SlateElement as="blockquote" className="my-1 border-l-2 pl-6 italic" {...props} />;
 };

@@ -7,6 +7,8 @@ import { getLocalDb, initializeDB } from "@/services/localdb";
 
 
 
+
+
 export const bootstrapUser = async (userId: string) => { await initializeDB(userId);
 
   const initResult = await AppInitializer.initialize(userId);

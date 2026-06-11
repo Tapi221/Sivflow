@@ -7,11 +7,15 @@ import { hasPrimaryModifier, isTypingTarget } from "./hotkeyGuards";
 
 
 
+
+
 type UseReviewCardPagerHotkeysParams = {
   onFlip?: () => void;
   onNext: () => void;
   onPrev: () => void;
 };
+
+
 
 
 

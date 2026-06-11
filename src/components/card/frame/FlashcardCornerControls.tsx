@@ -12,6 +12,8 @@ import type { ReferenceBlockData } from "@/types";
 
 
 
+
+
 interface FlashcardCornerControlsProps {
   card: FlashcardCardLike;
   hasUncertainty: boolean;
@@ -31,6 +33,8 @@ interface FlashcardCornerControlsProps {
 export interface FlashcardCornerControlsResult { actionsTopLeft: React.ReactNode[] | undefined;
   actionsTopRight: React.ReactNode[] | undefined;
 }
+
+
 
 
 

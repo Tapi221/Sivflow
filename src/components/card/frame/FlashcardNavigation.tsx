@@ -10,6 +10,8 @@ import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
 
 
+
+
 interface FlashcardNavigationProps {
   onNext?: () => void;
   onPrev?: () => void;
@@ -18,6 +20,8 @@ interface FlashcardNavigationProps {
   currentIndex?: number;
   totalCards?: number;
 }
+
+
 
 
 

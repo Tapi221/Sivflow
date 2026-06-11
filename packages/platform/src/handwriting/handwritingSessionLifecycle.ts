@@ -7,6 +7,8 @@ import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionStatu
 
 
 
+
+
 export type CreateDesktopHandwritingSessionInput = { id: string;
   userId: string;
   cardId: string;
@@ -24,6 +26,8 @@ export type UpdateHandwritingSessionStatusInput = { session: HandwritingSession;
   status: HandwritingSessionStatus;
   now?: number;
 };
+
+
 
 
 

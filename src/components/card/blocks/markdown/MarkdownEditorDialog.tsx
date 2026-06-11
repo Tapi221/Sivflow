@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;
 
 interface MarkdownEditorDialogProps {
@@ -28,6 +30,8 @@ interface MarkdownEditorDialogProps {
 
 
 
+
+
 const EDITOR_LINE_HEIGHT = 24;
 const EDITOR_MIN_ROWS = 10;
 const EDITOR_MAX_HEIGHT = 520;
@@ -38,7 +42,11 @@ const EDITOR_MAX_HEIGHT = 520;
 
 
 
+
+
 const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
+
+
 
 
 

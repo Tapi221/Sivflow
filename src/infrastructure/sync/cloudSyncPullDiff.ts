@@ -16,6 +16,8 @@ import type { SyncChange } from "@/services/interfaces/ISyncService";
 
 
 
+
+
 type PullDiffChange = SyncChange & {
   type: PullableEntityType | "userSetting";
   id: string;
@@ -29,7 +31,11 @@ type PullDiffChange = SyncChange & {
 
 
 
+
+
 const PAGE_SIZE = 500;
+
+
 
 
 

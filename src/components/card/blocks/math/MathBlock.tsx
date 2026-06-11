@@ -12,6 +12,8 @@ import type { MathBlockData } from "@/types";
 
 
 
+
+
 interface MathBlockProps {
   data: MathBlockData;
   onChange: (data: MathBlockData) => void;
@@ -37,7 +39,11 @@ interface MathBlockProps {
 
 
 
+
+
 const MAX_LATEX_LENGTH = 10000;
+
+
 
 
 
@@ -54,6 +60,8 @@ const areMathBlockPropsEqual = (prev: MathBlockProps, next: MathBlockProps) =>
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
+
+
 
 
 
@@ -144,6 +152,8 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
     </BlockWrapper>
   );
 };
+
+
 
 
 

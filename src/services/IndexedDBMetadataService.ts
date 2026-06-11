@@ -9,6 +9,8 @@ import { CURRENT_SCHEMA_VERSION } from "@/types/domain/storage";
 
 
 
+
+
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };

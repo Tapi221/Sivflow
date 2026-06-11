@@ -20,6 +20,8 @@ import { clientPointToPaperPoint, paperPointToCanvasPoint, type RectLike, square
 
 
 
+
+
 interface InkLayerProps {
   cardId?: string | null;
   side: InkSide;
@@ -56,6 +58,8 @@ interface InkToolbarProps {
 
 
 
+
+
 const TOOL_STYLE: Record<
   Exclude<InkEditTool, "eraser">,
   { color: string; width: number; opacity: number }
@@ -71,6 +75,8 @@ const TOOL_STYLE: Record<
     opacity: 0.35,
   },
 };
+
+
 
 
 
@@ -105,6 +111,8 @@ const toDocSignature = (doc: InkDocument): string => {
     })),
   });
 };
+
+
 
 
 

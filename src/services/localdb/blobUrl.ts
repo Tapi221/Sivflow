@@ -7,12 +7,16 @@ import { findBlobUrlFixesDeep } from "@/utils/blobUrlSanitizer";
 
 
 
+
+
 type InvalidImageUrlErrorParams = {
   entityType?: string;
   entityId?: string;
   path?: string;
   message?: string;
 };
+
+
 
 
 
@@ -45,6 +49,8 @@ const InvalidImageUrlError = class extends Error {
     this.path = params.path;
   }
 };
+
+
 
 
 

@@ -7,6 +7,8 @@ const CARD_SET_SUFFIX_PATTERN = /\s*セット$/u;
 
 
 
+
+
 export const stripMfDeckExtension = (value: string) => { return value.replace(/\.mfdeck$/iu, "").trim();
 };
 

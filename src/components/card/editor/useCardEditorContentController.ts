@@ -9,6 +9,8 @@ import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
 
 
+
+
 type DraftShape = {
   frontBlocks: CardBlock[];
   backBlocks: CardBlock[];
@@ -22,6 +24,8 @@ type UseCardEditorContentControllerParams<TDraft extends DraftShape | null> = {
   allowAutoMinHeightSyncRef: MutableRefObject<boolean>;
   resetDialogsRef: MutableRefObject<() => void>;
 };
+
+
 
 
 

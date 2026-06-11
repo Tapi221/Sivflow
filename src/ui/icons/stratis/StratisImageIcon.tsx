@@ -7,7 +7,11 @@ import { forwardRef } from "react";
 
 
 
+
+
 export type StratisImageIconProps = SVGProps<SVGSVGElement>;
+
+
 
 
 

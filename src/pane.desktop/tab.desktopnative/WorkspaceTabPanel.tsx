@@ -11,6 +11,8 @@ import type { WorkspaceEntityTab } from "./Tab";
 
 
 
+
+
 type WorkspaceTabPanelProps = {
   activeTab: WorkspaceEntityTab;
   cards: Card[];
@@ -26,7 +28,11 @@ type WorkspaceTabPanelProps = {
 
 
 
+
+
 const workspaceTabPanelTextClassName = "text-[18px] leading-6";
+
+
 
 
 
@@ -37,6 +43,8 @@ const workspaceTabPanelTextClassName = "text-[18px] leading-6";
 const buildMapById = <TEntity extends { id: string }>(entities: TEntity[]) => {
   return new Map(entities.map((entity) => [entity.id, entity]));
 };
+
+
 
 
 
@@ -103,6 +111,8 @@ const WorkspaceTabPanel = ({
 
   return null;
 };
+
+
 
 
 

@@ -10,6 +10,8 @@ import type { Note } from "@/types";
 
 
 
+
+
 type NoteWithLegacyDelete = Note & {
   is_deleted?: boolean;
 };
@@ -17,6 +19,8 @@ type NoteWithLegacyDelete = Note & {
 type UseNotesReadOptions = {
   enabled?: boolean;
 };
+
+
 
 
 

@@ -7,6 +7,8 @@ import type { CalendarEvent } from "./calendarEvent.types";
 
 
 
+
+
 export type CalendarEventSegment = { event: CalendarEvent;
   span: number;
   left: number;
@@ -25,7 +27,11 @@ export type CalendarEventLevelsResult = { levels: CalendarEventSegment[][];
 
 
 
+
+
 const DAY_STEP = 1;
+
+
 
 
 

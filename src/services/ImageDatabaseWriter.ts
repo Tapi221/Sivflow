@@ -9,6 +9,8 @@ import { getImageFromIndexedDb, saveImageToIndexedDb } from "@/infrastructure/im
 
 
 
+
+
 const ImageDatabaseWriter = class {
   saveToIndexedDB = async (image: UploadedImage): Promise<void> => saveImageToIndexedDb(image);
 

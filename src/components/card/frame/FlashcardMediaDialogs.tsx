@@ -19,6 +19,8 @@ import type { ReferenceBlockData } from "@/types";
 
 
 
+
+
 interface FlashcardMediaDialogsProps {
   isImagePopupOpen: boolean;
   setIsImagePopupOpen: (open: boolean) => void;
@@ -31,6 +33,8 @@ interface FlashcardMediaDialogsProps {
   activeAudioUrls: string[];
   activeReferences: ReferenceBlockData[];
 }
+
+
 
 
 

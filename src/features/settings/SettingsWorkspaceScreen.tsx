@@ -14,6 +14,8 @@ import "./SettingsWorkspaceScreen.css";
 
 
 
+
+
 type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "ai" | "hotkey";
 
 type SettingsLanguage = UserSettings["language"];
@@ -150,6 +152,8 @@ type SettingsWorkspaceCopy = {
   localAiStatusFailed: string;
   hotkeyDescription: string;
 };
+
+
 
 
 
@@ -385,6 +389,8 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
 
 
 
+
+
 const buildSettingsSections = (copy: SettingsWorkspaceCopy): SettingsSectionDefinition[] => SETTINGS_SECTION_IDS.map((id) => ({ id, label: copy.sections[id].label }));
 
 const normalizeAccountEmail = (email: string | null | undefined): string | null => {
@@ -444,6 +450,8 @@ const getSectionIcon = (sectionId: SettingsSectionId, className: string): ReactN
   if (sectionId === "hotkey") return <Keyboard className={className} size={17} />;
   return null;
 };
+
+
 
 
 
@@ -659,6 +667,8 @@ const SettingsWorkspaceScreen = () => {
     </div>
   );
 };
+
+
 
 
 

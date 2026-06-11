@@ -12,6 +12,8 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 
 
 
+
+
 type CalendarEventChipWeekdayProps = {
   event: GoogleCalendarEvent;
   tooltipDisabled?: boolean;
@@ -30,6 +32,8 @@ type CalendarEventChipWeekdayStyle = CSSProperties & {
   WebkitPrintColorAdjust: "exact";
   printColorAdjust: "exact";
 };
+
+
 
 
 
@@ -60,6 +64,8 @@ const DEFAULT_CHIP_LAYOUT_STATE: ChipLayoutState = {
   useInlineTimeLayout: false,
   useLastLineTimeLayout: false,
 };
+
+
 
 
 
@@ -227,6 +233,8 @@ const getMeasurementClassName = (): string => [CHIP_MEASUREMENT_BASE_CLASS, CHIP
 
 
 
+
+
 const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEventChipWeekdayProps) => {
   const layoutMeasurementRef = useRef<HTMLDivElement>(null);
   const titleMeasurementRef = useRef<HTMLSpanElement>(null);
@@ -329,6 +337,8 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
     </HoverEventTooltip>
   );
 };
+
+
 
 
 

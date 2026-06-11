@@ -7,7 +7,11 @@ import type { Card, CardBlock, UploadedImage } from "@/types/domain/card";
 
 
 
+
+
 export type CardSide = "question" | "answer";
+
+
 
 
 
@@ -19,6 +23,8 @@ const EMPTY_BLOCKS: CardBlock[] = [];
 const EMPTY_IMAGES: UploadedImage[] = [];
 const EMPTY_AUDIOS: Array<{ url: string; filename: string; order: number }> =
   [];
+
+
 
 
 

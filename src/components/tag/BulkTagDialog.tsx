@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface BulkTagDialogProps {
   open?: boolean;
   isOpen?: boolean;
@@ -21,6 +23,8 @@ interface BulkTagDialogProps {
   folderId: string;
   folderName?: string;
 }
+
+
 
 
 
@@ -140,6 +144,8 @@ const BulkTagDialog = ({
     </Dialog>
   );
 };
+
+
 
 
 

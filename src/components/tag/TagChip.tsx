@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface TagChipProps {
   label: string;
   colorKey?: TagColorKey;
@@ -18,6 +20,8 @@ interface TagChipProps {
   onRemove?: () => void;
   removeAriaLabel?: string;
 }
+
+
 
 
 
@@ -52,7 +56,11 @@ const TagChip = ({
 
 
 
+
+
 export { TagChip };
+
+
 
 
 

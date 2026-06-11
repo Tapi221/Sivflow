@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 export type ExplorerMenuPanelVariant = "default" | "create" | "folderContext";
 
 interface ExplorerMenuPanelProps extends React.ComponentPropsWithoutRef<
@@ -19,6 +21,8 @@ interface ExplorerMenuPanelProps extends React.ComponentPropsWithoutRef<
   closeMenu?: () => void;
   variant?: ExplorerMenuPanelVariant;
 }
+
+
 
 
 
@@ -71,6 +75,8 @@ const PLAIN_MENU_ROW_STYLE = {
 
 const PLAIN_MENU_LABEL_CLASS =
   "flex h-full min-w-0 flex-1 items-center truncate pr-1 text-left leading-[26px]";
+
+
 
 
 

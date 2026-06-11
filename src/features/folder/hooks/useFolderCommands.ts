@@ -9,12 +9,16 @@ import type { Folder } from "@/types";
 
 
 
+
+
 type CreateFolderOptions = {
   color?: string;
   cloudSyncEnabled?: boolean;
   id?: string;
   orderIndex?: number;
 };
+
+
 
 
 

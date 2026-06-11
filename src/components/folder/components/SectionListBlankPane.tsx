@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface SectionListBlankPaneProps {
   className?: string;
   contentClassName?: string;
@@ -23,7 +25,11 @@ interface SectionListBlankPaneProps {
 
 
 
+
+
 const SECTION_LIST_PANE_LEFT_VAR = "--sivflow-section-list-pane-left";
+
+
 
 
 
@@ -38,6 +44,8 @@ const buildSidebarWidthFallback = (sidebarWidth: number): string => {
 
   return `${normalizedWidth}px`;
 };
+
+
 
 
 
@@ -88,6 +96,8 @@ const SectionListBlankPane = ({
     </div>
   );
 };
+
+
 
 
 

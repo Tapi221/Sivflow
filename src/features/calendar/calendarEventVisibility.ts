@@ -7,6 +7,8 @@ import type { AppCalendarItem, GoogleAccountDisplay, GoogleCalendarColorOverride
 
 
 
+
+
 type CalendarEventSourceIndex = {
   projectById: Map<string, AppCalendarItem>;
   projectByNormalizedLabel: Map<string, AppCalendarItem>;
@@ -30,7 +32,11 @@ type CalendarEventDisplayMetadataInput = CalendarEventVisibilityInput & {
 
 
 
+
+
 const GOOGLE_CALENDAR_KEY_SEPARATOR = "\u001f";
+
+
 
 
 

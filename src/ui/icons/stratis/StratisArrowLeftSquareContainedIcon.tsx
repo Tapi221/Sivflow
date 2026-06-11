@@ -7,7 +7,11 @@ import { forwardRef } from "react";
 
 
 
+
+
 export type StratisArrowLeftSquareContainedIconProps = SVGProps<SVGSVGElement>;
+
+
 
 
 

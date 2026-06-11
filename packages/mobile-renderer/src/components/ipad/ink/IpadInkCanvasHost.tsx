@@ -8,10 +8,14 @@ import type { StyleProp, ViewStyle } from "react-native";
 
 
 
+
+
 type IpadInkCanvasHostProps = {
   onStrokeComplete?: () => void;
   style?: StyleProp<ViewStyle>;
 };
+
+
 
 
 
@@ -27,11 +31,15 @@ const NativeInkCanvas = Platform.OS === "ios" ? requireNativeComponent<IpadInkCa
 
 
 
+
+
 const IpadInkCanvasHost = ({ onStrokeComplete, style }: IpadInkCanvasHostProps) => {
   if (!NativeInkCanvas) return React.createElement(View, { style });
 
   return React.createElement(NativeInkCanvas, { onStrokeComplete, style });
 };
+
+
 
 
 

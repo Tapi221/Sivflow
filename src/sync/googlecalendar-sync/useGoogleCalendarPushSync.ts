@@ -8,6 +8,8 @@ import { firestoreDb } from "@/services/firebase";
 
 
 
+
+
 type UseGoogleCalendarPushSyncOptions = {
   userId: string | null;
   selectedCalendarIds: Set<string>;
@@ -20,7 +22,11 @@ type UseGoogleCalendarPushSyncOptions = {
 
 
 
+
+
 const NOTIFICATION_DEBOUNCE_MS = 250;
+
+
 
 
 

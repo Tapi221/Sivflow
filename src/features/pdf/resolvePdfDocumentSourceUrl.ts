@@ -6,7 +6,11 @@ import type { DocumentItem } from "@/types";
 
 
 
+
+
 type PdfDocumentSourceFields = Pick<DocumentItem, "blobUrl" | "downloadUrl" | "googleDriveWebContentLink" | "googleDriveWebViewLink" | "localUrl" | "remoteUrl">;
+
+
 
 
 
@@ -48,6 +52,8 @@ const resolvePdfDocumentSourceUrl = (document: PdfDocumentSourceFields): string 
 
   return null;
 };
+
+
 
 
 

@@ -8,7 +8,11 @@ import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
 
 
+
+
 const NEW_SENTINEL = "__new__" as const;
+
+
 
 
 
@@ -25,6 +29,8 @@ export type EditorDraft = { title: string;
   backAttachments: CardFaceAttachments;
   layoutRows: number;
 };
+
+
 
 
 
