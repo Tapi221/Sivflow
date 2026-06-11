@@ -4,6 +4,8 @@ import { useCallback, useMemo, useRef, useState, type KeyboardEvent as ReactKeyb
 
 import { useNavigate, useOutletContext } from "react-router-dom";
 
+import { StratisTagIcon } from "stratis-ui-icons";
+
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 
 import { TagFilterPopover } from "@/chip/popover/TagFilterPopover";
@@ -43,8 +45,6 @@ import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
-
-import { StratisTagIcon } from "@/ui/icons/stratis";
 
 import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 
@@ -472,9 +472,6 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
     </div>
   );
 };
-
-
-
 
 
 
