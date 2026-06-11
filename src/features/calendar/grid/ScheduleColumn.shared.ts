@@ -82,3 +82,4 @@ export const buildScheduleVirtualRailDays = ( rail: ScheduleVirtualRail, startIn
 export const getScheduleVirtualRailDate = ( rail: ScheduleVirtualRail, index: number, ): Date | null => { if (index < 0 || index >= rail.totalDayCount) return null;
 
   return addDays(rail.startDate, index);
+};

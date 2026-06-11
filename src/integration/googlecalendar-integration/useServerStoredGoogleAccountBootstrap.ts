@@ -49,3 +49,4 @@ export const useServerStoredGoogleAccountBootstrap = (): void => { useEffect(() 
       cancelled = true;
     };
   }, []);
+};

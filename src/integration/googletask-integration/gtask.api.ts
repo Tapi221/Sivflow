@@ -262,4 +262,5 @@ export const deleteGoogleTask = async ({ accessToken, taskListId, taskId, }: { a
     "DELETE",
     undefined,
     "delete_task",
-  )
+  );
+};

@@ -98,3 +98,4 @@ export const normalizeFolderWithSilent = (raw: unknown) => { if (!raw) return ra
     !hasIsSilent && hasSilent ? { ...record, isSilent: record.silent } : raw;
 
   return normalizeFolder(normalizedInput);
+};

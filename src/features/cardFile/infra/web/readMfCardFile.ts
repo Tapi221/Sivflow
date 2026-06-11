@@ -68,4 +68,5 @@ export const readMfCardFile = async ( file: File, ): Promise<LoadMfCardFileResul
       fileName: file.name,
       title: cardFile.card.title,
     }),
-  
+  };
+};

@@ -9,4 +9,4 @@ const useAuthSession = () => {
 
 
 
-export { useAuthSession 
+export { useAuthSession };

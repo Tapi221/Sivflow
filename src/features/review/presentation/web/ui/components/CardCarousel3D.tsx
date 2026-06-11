@@ -44,4 +44,5 @@ export const CardCarousel3D = <T,>({ cards, syncIndex, initialIndex = 0, onIndex
       getKey={getKey}
       renderCard={(card, index, isActive) => renderCenter(card, index, isActive)}
     />
-  
+  );
+};

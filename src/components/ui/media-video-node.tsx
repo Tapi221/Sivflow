@@ -123,3 +123,6 @@ export const VideoElement = withHOC( ResizableProvider, function VideoElement( p
         </figure>
         {props.children}
       </PlateElement>
+    );
+  }
+);

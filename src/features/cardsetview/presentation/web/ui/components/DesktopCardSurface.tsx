@@ -255,4 +255,4 @@ export { DesktopCardSurface };
 
 
 
-export type { DesktopCardSurfa
+export type { DesktopCardSurfaceProps };

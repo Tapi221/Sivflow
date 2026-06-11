@@ -16,4 +16,4 @@ export const useDebounce = <T>(value: T, delay = 500) => { const [debouncedValue
   }, [value, delay]);
 
   return debouncedValue;
-}
+};

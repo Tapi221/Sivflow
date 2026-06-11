@@ -19,3 +19,4 @@ export const getNormalizedGridOffsetRows = (block: CardBlock): number => { if (!
     GRID_OFFSET_ROWS_MIN,
     Math.min(GRID_OFFSET_ROWS_MAX, Math.round(value)),
   );
+};

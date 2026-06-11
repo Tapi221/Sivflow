@@ -39,3 +39,4 @@ export const subscribeCardSetViewWindowEvent = < TEventName extends CardSetViewW
   return () => {
     window.removeEventListener(eventName, handler);
   };
+};

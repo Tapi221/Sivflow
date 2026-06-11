@@ -149,3 +149,4 @@ export const persistScheduleMonthVisibleEventCount = (monthVisibleEventCount: nu
     ...stored,
     monthVisibleEventCount: normalizeScheduleMonthVisibleEventCount(monthVisibleEventCount),
   });
+};

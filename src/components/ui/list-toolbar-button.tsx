@@ -188,3 +188,5 @@ export function TodoListToolbarButton( props: React.ComponentProps<typeof Toolba
     <ToolbarButton {...props} {...buttonProps} tooltip="Todo">
       <ListTodoIcon />
     </ToolbarButton>
+  );
+}

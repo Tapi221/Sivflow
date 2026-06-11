@@ -14,6 +14,8 @@ import { useT } from "@shared/i18n/useT";
 import "./sidebar.desktop.css";
 import "./sidebar.layered-directory.css";
 
+
+
 type SidebarTranslationKey =
   | "sidebarHome"
   | "sidebarLibrary"
@@ -37,6 +39,8 @@ type SidebarProps = {
   onToggleLeftPanel?: () => void;
   onOpenSettings?: () => void;
 };
+
+
 
 const LIBRARY_EXPLORER_STATE = { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null };
 
@@ -73,6 +77,8 @@ const mainNavItems: SidebarNavItem[] = [
     icon: <GalleryIcon className="app-sidebar__nav-icon" />,
   },
 ];
+
+
 
 const SidebarNavLink = ({ item, disabled }: { item: SidebarNavItem; disabled?: boolean }) => {
   const t = useT();
@@ -187,5 +193,7 @@ const Sidebar = ({ isLeftPanelCollapsed = false, onToggleLeftPanel, onOpenSettin
     </aside>
   );
 };
+
+
 
 export { Sidebar };

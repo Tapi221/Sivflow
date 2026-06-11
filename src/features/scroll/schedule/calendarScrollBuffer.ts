@@ -84,4 +84,5 @@ export const createCalendarScrollBuffer = (surface: CalendarScrollBufferSurface,
       after: toUnitCount(config.initialScreens.after, config.unitsPerScreen),
     },
     config.maxUnits,
-  
+  );
+};

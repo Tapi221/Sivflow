@@ -81,4 +81,5 @@ export const lookupCloudSyncEntityById = async ( firestore: Firestore, userId: s
     };
   }
 
-  return nul
+  return null;
+};

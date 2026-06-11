@@ -89,4 +89,4 @@ const usePdfSelectionCapture = ({ targetRef, selectionCaptureSide, sourceUnavail
 
 
 
-export { usePdfSelectionCap
+export { usePdfSelectionCapture };

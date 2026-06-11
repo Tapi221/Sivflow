@@ -12,6 +12,8 @@ import { enUS, ja, zhCN } from "date-fns/locale";
 import { useLocaleStore } from "./locale.store";
 import { TRANSLATIONS } from "./translations";
 
+
+
 export const useT = () => { const locale = useLocaleStore((s) => s.locale);
   return TRANSLATIONS[locale];
 };

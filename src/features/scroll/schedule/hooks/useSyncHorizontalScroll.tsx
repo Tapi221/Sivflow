@@ -15,3 +15,4 @@ export const useSyncHorizontalScroll = ( sourceRef: React.RefObject<HTMLDivEleme
     sync,
     syncFromSource,
   };
+};

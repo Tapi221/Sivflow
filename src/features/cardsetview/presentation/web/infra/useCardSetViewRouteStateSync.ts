@@ -64,3 +64,4 @@ export const useCardSetViewRouteStateSync = ({ cardSetId, currentIndex, currentC
 
     navigate(nextLocation, { replace: true });
   }, [navigate, nextLocation]);
+};

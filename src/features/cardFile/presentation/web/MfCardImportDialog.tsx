@@ -380,4 +380,5 @@ export const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, c
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  
+  );
+};

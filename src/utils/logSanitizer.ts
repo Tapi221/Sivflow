@@ -16,6 +16,8 @@ const SENSITIVE_KEYS = new Set([
 
 const REDACTED = "[REDACTED]";
 
+
+
 const sanitizeValue = (value: unknown, depth: number): unknown => {
   if (depth > 4) return "[TRUNCATED]";
   if (typeof value === "string") {

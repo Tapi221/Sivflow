@@ -144,4 +144,4 @@ export const buildMfDeckMediaPath = (input: { index: number;
   return `${MF_DECK_MEDIA_DIRECTORY}${directory}/${paddedIndex}-${name}.${cleanExtension}`;
 };
 
-export const buildMfDeckMediaManifest = ( mediaEntries: MfDeckMediaEntryV1[], ) => ({ format: "sivflow.deck.media" as const, version: 1 as const, media: mediaEntrie
+export const buildMfDeckMediaManifest = ( mediaEntries: MfDeckMediaEntryV1[], ) => ({ format: "sivflow.deck.media" as const, version: 1 as const, media: mediaEntries, });

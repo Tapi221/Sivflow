@@ -177,4 +177,5 @@ const debugFirebase = (): void => {
 };
 
 if (import.meta.env.DEV) {
-  debugFi
+  debugFirebase();
+}

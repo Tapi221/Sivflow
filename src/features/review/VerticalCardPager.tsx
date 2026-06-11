@@ -366,4 +366,4 @@ export { VerticalCardPager };
 
 
 
-export type { VerticalCardPagerItemWidthSpec } from "./verticalCardPage
+export type { VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";

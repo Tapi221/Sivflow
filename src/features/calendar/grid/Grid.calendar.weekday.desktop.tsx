@@ -280,4 +280,4 @@ const CalendarWeekDayGrid = memo(CalendarWeekDayGridComponent);
 
 CalendarWeekDayGrid.displayName = "CalendarWeekDayGrid";
 
-export { CalendarWeekDa
+export { CalendarWeekDayGrid };

@@ -46,4 +46,4 @@ export const useSearchStore = create<SearchState>((set) => ({ isOpen: false, que
       return { sources: nextSources };
     });
   },
-})
+}));

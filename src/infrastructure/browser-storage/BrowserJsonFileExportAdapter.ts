@@ -23,4 +23,4 @@ const exportJson: JsonFileExportPort["exportJson"] = async ({
 
 
 
-export const browserJsonFileExportAdapter: JsonFileExportPort = { exportJson, 
+export const browserJsonFileExportAdapter: JsonFileExportPort = { exportJson, };

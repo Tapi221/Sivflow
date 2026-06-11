@@ -86,3 +86,4 @@ export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutE
     overflow: shouldHideEvent ? "hidden" : undefined,
     pointerEvents: shouldHideEvent ? "none" : undefined,
   };
+};

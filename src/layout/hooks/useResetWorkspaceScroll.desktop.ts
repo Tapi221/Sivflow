@@ -43,3 +43,4 @@ export const useResetWorkspaceScrollDesktop = ( mainRef: WorkspaceScrollRef, pat
       window.cancelAnimationFrame(animationFrameId);
     };
   }, [mainRef, pathname]);
+};

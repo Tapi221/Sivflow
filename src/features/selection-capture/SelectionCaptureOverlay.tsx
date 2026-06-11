@@ -242,4 +242,5 @@ export const SelectionCaptureOverlay = ({ targetRef, active, busy = false, shape
         </div>
       ) : null}
     </div>
- 
+  );
+};

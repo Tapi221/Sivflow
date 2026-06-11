@@ -157,3 +157,4 @@ export const buildPdfDashboardRows = ({ documents, folders, tagById, }: BuildPdf
 
       return left.title.localeCompare(right.title, "ja");
     });
+};

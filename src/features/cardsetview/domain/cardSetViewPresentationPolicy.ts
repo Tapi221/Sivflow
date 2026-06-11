@@ -268,4 +268,5 @@ export const resolveZoomScaleFromPresentationWidthPx = ({ presentationWidthPx, c
     return 1;
   }
 
-  return presentationWidthPx / canonicalCardWidthP
+  return presentationWidthPx / canonicalCardWidthPx;
+};

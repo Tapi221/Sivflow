@@ -44,4 +44,5 @@ CalendarPanelViewport.displayName = "CalendarPanelViewport";
 
 
 
-export const CalendarPanel = ({ children, hasTrailingPanel = false, className, }: CalendarPanelProps) => { return ( <div className={cn( CALENDAR_PANEL_BASE_CLASS, hasTrailingPanel ? CALENDAR_PANEL_WITH_TRAILING_PANEL_CLASS : CALENDAR_PANEL_STANDALONE_CLASS, className, )} > {children} </div
+export const CalendarPanel = ({ children, hasTrailingPanel = false, className, }: CalendarPanelProps) => { return ( <div className={cn( CALENDAR_PANEL_BASE_CLASS, hasTrailingPanel ? CALENDAR_PANEL_WITH_TRAILING_PANEL_CLASS : CALENDAR_PANEL_STANDALONE_CLASS, className, )} > {children} </div> );
+};

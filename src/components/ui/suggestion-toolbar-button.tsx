@@ -26,3 +26,5 @@ export function SuggestionToolbarButton() { const { setOption } = useEditorPlugi
     >
       <PencilLineIcon />
     </ToolbarButton>
+  );
+}

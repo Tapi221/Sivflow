@@ -345,4 +345,5 @@ export class GoogleCalendarEngineManager { private engines = new Map<string, Goo
       .map((calendar) => `${calendar.id}:${calendar.backgroundColor ?? ""}`)
       .sort()
       .join(",");
- 
+  }
+}

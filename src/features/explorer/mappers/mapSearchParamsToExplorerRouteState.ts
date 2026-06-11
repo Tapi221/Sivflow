@@ -44,3 +44,4 @@ export const mapSearchParamsToExplorerRouteState = ({ searchParams, fallbackFold
               ? createDocumentSelectedItem(queryDocId)
               : null,
   };
+};

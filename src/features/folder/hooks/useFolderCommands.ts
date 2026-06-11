@@ -77,3 +77,4 @@ export const useFolderCommands = () => { const { currentUser } = useAuthSession(
     deleteFolder,
     reorderFolders,
   };
+};

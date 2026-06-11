@@ -58,3 +58,4 @@ export const useNotesRead = ( folderId?: string | null, options?: UseNotesReadOp
     loading: enabled && rawNotes === undefined,
     error,
   };
+};

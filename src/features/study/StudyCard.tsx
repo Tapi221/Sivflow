@@ -444,4 +444,4 @@ const StudyCardInner = ({
 
 
 
-export default Stu
+export default StudyCard;

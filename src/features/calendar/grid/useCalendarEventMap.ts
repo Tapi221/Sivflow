@@ -28,3 +28,4 @@ export const useCalendarEventMap = ( visibleEvents: GoogleCalendarEvent[], ): Ca
 
     return map;
   }, [visibleEvents]);
+};

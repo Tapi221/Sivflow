@@ -187,3 +187,4 @@ export const explorerReducer = ( state: ExplorerControllerState, action: Explore
     default:
       return state;
   }
+};

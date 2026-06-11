@@ -5,9 +5,13 @@ import type { LocalDBSyncStore } from "./types";
 import { clearLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "@/services/localDBRuntimeState";
 import { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
 
+
+
 type LocalDbGlobal = typeof globalThis & {
   __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
 };
+
+
 
 let instance: LocalDB | null = null;
 let cachedInstance: LocalDB | InMemoryLocalDB | null = null;
@@ -17,6 +21,8 @@ let resettingPromise: Promise<void> | null = null;
 
 const fallbackInstances = new Map<string, InMemoryLocalDB>();
 const generationBumps = new Map<string, number>();
+
+
 
 const getLocalDbGlobal = (): LocalDbGlobal => globalThis as LocalDbGlobal;
 

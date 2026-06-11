@@ -40,3 +40,4 @@ export const resolveCardMutationTarget = ({ cardSetId, cardSetById, selectedCard
     targetCardSetId,
     targetFolderId,
   };
+};

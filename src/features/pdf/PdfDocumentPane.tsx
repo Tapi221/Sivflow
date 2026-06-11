@@ -289,4 +289,4 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
 
 
 
-export { PdfDocume
+export { PdfDocumentPane };

@@ -166,4 +166,4 @@ export { CALENDAR_EVENT_DRAGGING_STYLE, areSameCalendarEventTimes, createCalenda
 
 
 
-export type { CalendarEventDragPointerSna
+export type { CalendarEventDragPointerSnapshot };

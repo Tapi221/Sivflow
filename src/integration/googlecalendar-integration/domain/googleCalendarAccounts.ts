@@ -162,3 +162,4 @@ export const reduceGoogleCalendarAccounts = ( state: GoogleAccountEntry[], actio
     default:
       return state;
   }
+};

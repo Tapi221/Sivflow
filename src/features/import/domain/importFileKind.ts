@@ -59,3 +59,4 @@ export const getSupportedImportFiles = (files: FileList | File[]): File[] => { r
 };
 
 export const getPortableImportFiles = (files: FileList | File[]): File[] => { return Array.from(files).filter(isPortableImportFile);
+};

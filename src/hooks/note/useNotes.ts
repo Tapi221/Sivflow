@@ -111,4 +111,4 @@ const useNotes = (folderId?: string | null, options?: UseNotesOptions) => {
 
 
 
-export { useNo
+export { useNotes };

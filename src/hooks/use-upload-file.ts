@@ -119,4 +119,5 @@ export const getErrorMessage = (err: unknown) => { const unknownError = 'Somethi
 
 export const showErrorToast = (err: unknown) => { const errorMessage = getErrorMessage(err);
 
-  return toast.error(errorMessage
+  return toast.error(errorMessage);
+};

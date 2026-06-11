@@ -57,3 +57,4 @@ export const resolveCardUsesStretchWidth = (spec: CardRenderSpec) => { return sp
 };
 
 export const resolveCardDisablesFrameScale = (spec: CardRenderSpec) => { return spec.surfaceMode === "fluid";
+};

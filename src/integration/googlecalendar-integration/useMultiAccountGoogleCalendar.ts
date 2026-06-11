@@ -1290,4 +1290,5 @@ export const useMultiAccountGoogleCalendar = () => { const [accounts, dispatchAc
     reconnectAccount,
     updateAccountToken: applyAccountToken,
     isAnyConnecting,
-  }
+  };
+};
