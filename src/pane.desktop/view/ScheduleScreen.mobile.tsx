@@ -1,5 +1,7 @@
+import type { ComponentType, SVGProps } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDays } from "date-fns";
+import * as stratisIcons from "stratis-ui-icons";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
@@ -21,8 +23,6 @@ import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 import { MobileCalendarEventComposer } from "./MobileCalendarEventComposer";
 import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "./MobileCalendarSidebar";
 
-
-
 type CalendarEventDisplayRange = { start: Date; end: Date };
 
 type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; monthTitleDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange | null; yearRenderedRange: CalendarDateRange | null };
@@ -31,8 +31,13 @@ type MobileCalendarViewModeOption = { value: CalendarViewMode; label: string };
 
 type MobileViewModeDropdownProps = { value: CalendarViewModeSelection; onChange: (value: CalendarViewMode) => void; options: readonly MobileCalendarViewModeOption[] };
 
+type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
+type StratisOptionalIconProps = { names: readonly string[]; className?: string };
 
+const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
+const STRATIS_CHECK_ICON_NAMES = ["StratisCheckIcon", "StratisCheck01Icon", "StratisCheckCircleContainedIcon"] as const;
+const STRATIS_PLUS_ICON_NAMES = ["StratisPlus01Icon", "StratisPlusIcon"] as const;
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.94)] shadow-none";
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-none";
 const MOBILE_SCHEDULE_STYLE = ".schedule-mobile-list-view > .scrollbar-hidden { padding-left: 0 !important; padding-right: 8px !important; } .schedule-mobile-list-view > .scrollbar-hidden > div { margin-left: 0 !important; margin-right: 0 !important; max-width: none !important; } .schedule-mobile-list-view > .scrollbar-hidden > div > div > span { left: 104px !important; } .schedule-mobile-list-view section { grid-template-columns: 48px minmax(0, 1fr) !important; column-gap: 0 !important; } .schedule-mobile-list-view section > button { justify-content: flex-start !important; padding-right: 0 !important; text-align: left !important; } .schedule-mobile-list-view section > div > span { left: 56px !important; } .schedule-mobile-list-view section [class*=\"grid-cols-[54px_26px_minmax\"] { grid-template-columns: 44px 24px minmax(0, 1fr) !important; } @media (max-width: 767px) { .schedule-mobile-month-surface .calendar-month-row-boundary-resize-handle { display: none !important; } .schedule-mobile-calendar-surface .calendar-month-scroll, .schedule-mobile-calendar-surface .calendar-timeline-scroll, .schedule-mobile-calendar-surface .calendar-year-view, .schedule-mobile-calendar-surface .scrollbar-hidden { -ms-overflow-style: none; scrollbar-gutter: auto; scrollbar-width: none; } .schedule-mobile-calendar-surface .calendar-month-scroll::-webkit-scrollbar, .schedule-mobile-calendar-surface .calendar-timeline-scroll::-webkit-scrollbar, .schedule-mobile-calendar-surface .calendar-year-view::-webkit-scrollbar, .schedule-mobile-calendar-surface .scrollbar-hidden::-webkit-scrollbar { display: none; width: 0; height: 0; } }";
@@ -40,14 +45,14 @@ const MOBILE_SCHEDULE_PANEL_CLASS = "!m-0 h-full min-h-0 !rounded-none !border-0
 const MOBILE_SCHEDULE_HEADER_CLASS = "flex shrink-0 flex-col px-4 pb-3 pt-4";
 const MOBILE_SCHEDULE_SURFACE_CLASS = "schedule-mobile-calendar-surface mx-0 flex min-h-0 flex-1 flex-col overflow-hidden !rounded-none !border-0";
 const MOBILE_TODAY_BUTTON_CLASS = "flex h-8 shrink-0 items-center justify-center rounded-full bg-[#f7f7f7] px-3 text-[13px] font-semibold tracking-[-0.02em] text-[#8e8e93] shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition hover:bg-[#efeff4] hover:text-[#6e6e73] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
-const MOBILE_ADD_EVENT_BUTTON_CLASS = "fixed bottom-[calc(env(safe-area-inset-bottom)+28px)] right-5 z-40 flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full border border-[rgba(60,60,67,0.08)] bg-white text-[29px] font-light leading-none text-[#3478f6] shadow-[0_3px_12px_rgba(60,60,67,0.16),0_1px_3px_rgba(60,60,67,0.12)] transition active:scale-[0.97] hover:bg-[#fdfdfd] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3478f6]/30";
+const MOBILE_ADD_EVENT_BUTTON_CLASS = "fixed bottom-[calc(env(safe-area-inset-bottom)+28px)] right-5 z-40 flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full border border-[rgba(60,60,67,0.08)] bg-white text-[#3478f6] shadow-[0_3px_12px_rgba(60,60,67,0.16),0_1px_3px_rgba(60,60,67,0.12)] transition active:scale-[0.97] hover:bg-[#fdfdfd] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3478f6]/30";
 const MOBILE_LIST_VIEW_CLASS = "schedule-mobile-list-view";
 const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const WEEKDAY_EVENT_BUFFER_DAYS = 1;
 const MONTH_EVENT_BUFFER_DAYS = 14;
 const EMPTY_APP_PROJECTS: AppCalendarItem[] = [];
 
-
+const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 
 const buildDaysDisplayRange = (days: Date[], fallbackDate: Date, bufferDays: number): CalendarEventDisplayRange => ({ start: startOfDay(subDays(days[0] ?? fallbackDate, bufferDays)), end: endOfDay(addDays(days.at(-1) ?? fallbackDate, bufferDays)) });
 
@@ -76,7 +81,10 @@ const isSelectedViewMode = (value: CalendarViewModeSelection, optionValue: Calen
 
 const resolveSelectedViewModeLabel = (value: CalendarViewModeSelection, options: readonly MobileCalendarViewModeOption[]): string => options.find((option) => isSelectedViewMode(value, option.value))?.label ?? options[0]?.label ?? "表示形式";
 
-
+const StratisOptionalIcon = ({ names, className }: StratisOptionalIconProps) => {
+  const Icon = resolveStratisIcon(names);
+  return Icon ? <Icon className={className} aria-hidden="true" focusable="false" /> : null;
+};
 
 const MobileViewModeDropdown = ({ value, onChange, options }: MobileViewModeDropdownProps) => {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -132,7 +140,7 @@ const MobileViewModeDropdown = ({ value, onChange, options }: MobileViewModeDrop
             return (
               <button key={option.value} type="button" role="menuitemradio" aria-checked={isActive} className={cn("flex w-full items-center justify-between px-4 py-2.5 text-left text-[14px] font-semibold tracking-[-0.02em] transition hover:bg-[#f7f7f7]", isActive ? "text-[#1c1c1e]" : "text-[#6e6e73]")} onClick={() => handleSelect(option.value)}>
                 <span>{option.label}</span>
-                {isActive ? <span aria-hidden="true" className="text-[12px] text-[#8e8e93]">✓</span> : null}
+                {isActive ? <StratisOptionalIcon names={STRATIS_CHECK_ICON_NAMES} className="h-3 w-3 text-[#8e8e93]" /> : null}
               </button>
             );
           })}
@@ -235,9 +243,7 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
     return <CarvePanel className={MOBILE_SCHEDULE_PANEL_CLASS}>{renderViewHeader(MOBILE_SCHEDULE_HEADER_CLASS)}<div className={cn(MOBILE_SCHEDULE_SURFACE_CLASS, IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={mainCalendarEvents} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} /></div></CarvePanel>;
   };
 
-  return <div ref={contentViewportRef} className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]"><style>{MOBILE_SCHEDULE_STYLE}</style><MobileCalendarSidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} /><MobileCalendarEventComposer isOpen={isEventComposerOpen} selectedDate={selectedDate} accounts={googleAccountsWithColorOverridesForSidebar} projectCalendarLinks={projectCalendarLinks} onClose={handleCloseEventComposer} onAddCalendar={addGoogleCalendar} onCreateEvent={createGoogleCalendarEvent} /><button type="button" className={MOBILE_ADD_EVENT_BUTTON_CLASS} onClick={handleAddScheduleItem} aria-label="新規予定を追加"><span aria-hidden="true" className="-mt-[2px]">＋</span></button><main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white p-0">{renderCalendarContent()}</main></div>;
+  return <div ref={contentViewportRef} className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]"><style>{MOBILE_SCHEDULE_STYLE}</style><MobileCalendarSidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} /><MobileCalendarEventComposer isOpen={isEventComposerOpen} selectedDate={selectedDate} accounts={googleAccountsWithColorOverridesForSidebar} projectCalendarLinks={projectCalendarLinks} onClose={handleCloseEventComposer} onAddCalendar={addGoogleCalendar} onCreateEvent={createGoogleCalendarEvent} /><button type="button" className={MOBILE_ADD_EVENT_BUTTON_CLASS} onClick={handleAddScheduleItem} aria-label="新規予定を追加"><StratisOptionalIcon names={STRATIS_PLUS_ICON_NAMES} className="h-7 w-7" /></button><main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white p-0">{renderCalendarContent()}</main></div>;
 };
-
-
 
 export { ScheduleScreen };
