@@ -115,14 +115,13 @@ const Layout = () => {
   return (
     <div
       className={cn(
-        "relative flex flex-col h-[100dvh] w-full overflow-hidden",
+        "relative flex flex-col h-[100dvh] w-full overflow-hidden bg-white",
         UI_TYPO,
       )}
       data-presentation-target={presentationTarget}
       style={
         {
           "--app-top-inset": `${appTopInsetPx}px`,
-          backgroundColor: "var(--app-bg)",
         } as React.CSSProperties
       }
     >
