@@ -6,6 +6,8 @@ import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction }
 
 
 
+
+
 const getChooseToolPrompt = ({ isSelecting, messages }: { isSelecting: boolean;
   messages: ChatMessage[];
 }) => {
@@ -104,6 +106,8 @@ const getChooseToolPrompt = ({ isSelecting, messages }: { isSelecting: boolean;
     task,
   });
 };
+
+
 
 
 

@@ -5,6 +5,8 @@ import { AnimatedCheckboxBase } from "./AnimatedCheckboxBase";
 
 
 
+
+
 type AnimatedRadioCheckboxProps = Omit<
   AnimatedCheckboxBaseProps,
   "shape" | "variant" | "indeterminate"
@@ -14,9 +16,13 @@ type AnimatedRadioCheckboxProps = Omit<
 
 
 
+
+
 const AnimatedRadioCheckbox = (props: AnimatedRadioCheckboxProps) => {
   return <AnimatedCheckboxBase {...props} shape="circle" variant="radio" />;
 };
+
+
 
 
 

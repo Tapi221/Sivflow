@@ -18,8 +18,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
 
-
-
 type Item = {
   icon: React.ReactNode;
   value: string;
@@ -32,8 +30,6 @@ type Group = {
   group: string;
   items: Item[];
 };
-
-
 
 const groups: Group[] = [
   {
@@ -207,8 +203,6 @@ const groups: Group[] = [
   },
 ];
 
-
-
 const InsertToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
@@ -246,7 +240,5 @@ const InsertToolbarButton = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
-
-
 
 export { InsertToolbarButton };

@@ -36,8 +36,6 @@ import { Separator } from "./separator";
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 
-
-
 const DropLine = () => {
   const { dropLine } = useDropLine({ orientation: "horizontal" });
 
@@ -284,8 +282,6 @@ const ColumnElement = withHOC(ResizableProvider, (props: PlateElementProps<TColu
   );
 },
 );
-
-
 
 const ColumnDragHandle = React.memo(() => {
   return (

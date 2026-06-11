@@ -16,8 +16,6 @@ import { cn } from "@/lib/utils";
 
 import { Checkbox } from "./checkbox";
 
-
-
 const config: Record<
   string,
   {
@@ -30,8 +28,6 @@ const config: Record<
     Marker: TodoMarker,
   },
 };
-
-
 
 const TodoMarker = (props: PlateElementProps) => {
   const state = useTodoListElementState({ element: props.element });
@@ -96,7 +92,5 @@ const BlockList: RenderNodeWrapper = (props) => {
 
   return (props) => <List {...props} />;
 };
-
-
 
 export { BlockList };

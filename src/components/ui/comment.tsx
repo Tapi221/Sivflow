@@ -34,8 +34,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 
 import { Editor, EditorContainer } from "./editor";
 
-
-
 type TComment = { id: string;
   contentRich: Value;
   createdAt: Date;
@@ -43,8 +41,6 @@ type TComment = { id: string;
   isEdited: boolean;
   userId: string;
 };
-
-
 
 const useCommentEditor = (
   options: Omit<CreatePlateEditorOptions, "plugins"> = {},
@@ -81,8 +77,6 @@ const formatCommentDate = (date: Date) => {
 
   return format(date, "MM/dd/yyyy");
 };
-
-
 
 const CommentMoreDropdown = (props: {
   comment: TComment;
@@ -604,10 +598,6 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
   );
 };
 
-
-
 export { Comment, CommentCreateForm, formatCommentDate };
-
-
 
 export type { TComment };

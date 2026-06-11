@@ -6,10 +6,14 @@ import { AlertCircle, ChevronDown, X } from "@/ui/icons";
 
 
 
+
+
 interface ErrorDialogProps {
   notification: Notification;
   onDismiss?: () => void;
 }
+
+
 
 
 
@@ -100,6 +104,8 @@ const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismiss }) =>
     </div>
   );
 };
+
+
 
 
 

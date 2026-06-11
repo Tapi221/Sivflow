@@ -28,11 +28,7 @@ import { EditorStatic } from "./editor-static";
 
 import { ToolbarButton } from "./toolbar";
 
-
-
 const siteUrl = "https://platejs.org";
-
-
 
 const ExportToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
@@ -202,7 +198,5 @@ const ExportToolbarButton = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
-
-
 
 export { ExportToolbarButton };

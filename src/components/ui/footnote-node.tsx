@@ -26,11 +26,7 @@ import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineCombo
 
 import { Popover, PopoverAnchor, PopoverContent } from "./popover";
 
-
-
 const NUMERIC_FOOTNOTE_QUERY = /^\d+$/;
-
-
 
 const getNavigationAttributes = (
   attributes: PlateElementProps<TFootnoteElement>["attributes"],
@@ -82,8 +78,6 @@ const getReferenceContextLabel = (
     ? `${normalized.slice(0, 53).trimEnd()}...`
     : normalized;
 };
-
-
 
 const FootnoteReferenceElement = (props: PlateElementProps<TFootnoteElement>) => {
   const { editor, element } = props;
@@ -479,7 +473,5 @@ const FootnoteInputElement = (props: PlateElementProps) => {
     </PlateElement>
   );
 };
-
-
 
 export { FootnoteReferenceElement, FootnoteDefinitionElement, FootnoteInputElement };

@@ -24,8 +24,6 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
-
-
 const languages: { label: string; value: string; }[] = [
   { label: "Auto", value: "auto" },
   { label: "Plain Text", value: "plaintext" },
@@ -117,8 +115,6 @@ const languages: { label: string; value: string; }[] = [
   { label: "XML", value: "xml" },
   { label: "YAML", value: "yaml" },
 ];
-
-
 
 const CodeBlockCombobox = () => {
   const [open, setOpen] = React.useState(false);
@@ -286,7 +282,5 @@ const CodeSyntaxLeaf = (props: PlateLeafProps<TCodeSyntaxLeaf>) => {
 
   return <PlateLeaf className={tokenClassName} {...props} />;
 };
-
-
 
 export { CodeBlockElement, CodeLineElement, CodeSyntaxLeaf };

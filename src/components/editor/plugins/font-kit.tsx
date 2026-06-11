@@ -6,14 +6,10 @@ import { KEYS } from "platejs";
 
 import type { PlatePluginConfig } from "platejs/react";
 
-
-
 const options = {
   inject: { targetPlugins: [KEYS.p] },
 } satisfies PlatePluginConfig;
 
 const FontKit = [FontColorPlugin.configure({ inject: { ...options.inject, nodeProps: { defaultNodeValue: "black" } } }), FontBackgroundColorPlugin.configure(options), FontSizePlugin.configure(options), FontFamilyPlugin.configure(options)];
-
-
 
 export { FontKit };

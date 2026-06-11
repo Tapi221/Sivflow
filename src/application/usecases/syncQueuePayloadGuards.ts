@@ -8,10 +8,14 @@ import type { UserSettings } from "@/types/domain/user";
 
 
 
+
+
 type UpsertEntity = keyof SyncPayloadByEntity;
 type DeleteEntity = Extract<SyncEntity, "card" | "folder" | "cardSet" | "document" | "tag" | "asset" | "projectMap">;
 type UpsertQueueItem<TEntity extends UpsertEntity> = Extract<SyncQueueItem, { entity: TEntity; operationType: "create" | "update"; }>;
 type DateLike = Date | { toDate?: () => Date; } | null | undefined;
+
+
 
 
 
@@ -133,7 +137,11 @@ const assertDeletePayload = (payload: unknown): SyncDeletePayload => {
 
 
 
+
+
 export { assertUpsertPayload, assertDeletePayload };
+
+
 
 
 

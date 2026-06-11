@@ -6,6 +6,8 @@ import { createCheckDataIntegrityUseCase } from "./CheckDataIntegrity";
 
 
 
+
+
 const createQuarantineOrphanedCardsUseCase = () => {
   const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
 
@@ -40,6 +42,8 @@ const createQuarantineOrphanedCardsUseCase = () => {
     execute,
   };
 };
+
+
 
 
 

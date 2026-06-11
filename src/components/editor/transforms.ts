@@ -32,13 +32,9 @@ import { KEYS, PathApi } from "platejs";
 
 import type { PlateEditor } from "platejs/react";
 
-
-
 type InsertBlockOptions = {
   upsert?: boolean;
 };
-
-
 
 const ACTION_THREE_COLUMNS = "action_three_columns";
 
@@ -98,8 +94,6 @@ const setBlockMap: Record<
   [ACTION_THREE_COLUMNS]: (editor) => toggleColumnGroup(editor, { columns: 3 }),
   [KEYS.codeBlock]: (editor) => toggleCodeBlock(editor),
 };
-
-
 
 const insertList = (editor: PlateEditor, type: string) => {
   editor.tf.insertNodes(
@@ -261,7 +255,5 @@ const insertBlock = (editor: PlateEditor, type: string, options: InsertBlockOpti
     }
   });
 };
-
-
 
 export { insertBlock, insertInlineElement, setBlockType, getBlockType };

@@ -10,8 +10,12 @@ import { toSnapshotAsset } from "./snapshotAssetManifest";
 
 
 
+
+
 interface CreateSnapshotDependencies { generationCounterStore: GenerationCounterStorePort;
 }
+
+
 
 
 
@@ -84,7 +88,11 @@ const createCreateSnapshotUseCase = ({ generationCounterStore }: CreateSnapshotD
 
 
 
+
+
 export { createCreateSnapshotUseCase };
+
+
 
 
 

@@ -8,8 +8,6 @@ import { Link } from "lucide-react";
 
 import { ToolbarButton } from "./toolbar";
 
-
-
 const LinkToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => {
   const state = useLinkToolbarButtonState();
   const { props: buttonProps } = useLinkToolbarButton(state);
@@ -20,7 +18,5 @@ const LinkToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) =>
     </ToolbarButton>
   );
 };
-
-
 
 export { LinkToolbarButton };
