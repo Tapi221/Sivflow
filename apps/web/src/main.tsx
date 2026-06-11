@@ -6,15 +6,11 @@ import "@/../apps/web/src/runtime/installProductionConsoleFilter";
 import "@platform/desktop/installTauriDesktopBridge";
 import "katex/dist/katex.min.css";
 import { StrictMode, useEffect, useState, type ComponentType } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
 
 import { ErrorBoundary } from "@/components/common/ErrorScreen";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
-
-
-
-
 
 type AppBootstrapState =
   | { status: "loading" }
@@ -25,15 +21,25 @@ type StartupFailureScreenProps = {
   message: string;
 };
 
+type SivflowReactRootStore = {
+  container: HTMLElement;
+  root: Root;
+};
 
-
-
+declare global {
+  interface Window {
+    __sivflowReactRootStore?: SivflowReactRootStore;
+  }
+}
 
 const FIREBASE_ENV_FAILURE_MARKER = "[env] Missing required Firebase env vars";
 const STARTUP_FAILURE_TITLE = "起動設定が不足しています";
 const STARTUP_FAILURE_DESCRIPTION = "必要な設定を読み込めなかったため、画面を表示できません。";
 const FIREBASE_ENV_SETUP_GUIDE = ".env.example を .env.local にコピーして VITE_FIREBASE_* を設定し、dev server を再起動してください。";
 const TEST_BYPASS_SEARCH_PARAM = "test_bypass";
+const ROOT_ELEMENT_ID = "root";
+const ROOT_ELEMENT_MISSING_MESSAGE = "React の描画先 root 要素が見つかりません。";
+const REACT_ROOT_UNMOUNT_FAILURE_MESSAGE = "[Startup] 既存 React root の破棄に失敗しました";
 const STARTUP_LOGO_STYLE = `
 @keyframes sivflow-startup-logo-form {
   0% {
@@ -87,10 +93,6 @@ const STARTUP_LOGO_STYLE = `
 }
 `;
 
-
-
-
-
 const getStartupFailureMessage = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
 
@@ -117,9 +119,41 @@ const isPdfPerformanceStandaloneRoute = (): boolean => {
   return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "::1";
 };
 
+const getReactRootElement = (): HTMLElement => {
+  const rootElement = document.getElementById(ROOT_ELEMENT_ID);
 
+  if (!rootElement) {
+    throw new Error(ROOT_ELEMENT_MISSING_MESSAGE);
+  }
 
+  return rootElement;
+};
 
+const unmountStaleReactRoot = (rootStore: SivflowReactRootStore): void => {
+  try {
+    rootStore.root.unmount();
+  } catch (error) {
+    console.warn(REACT_ROOT_UNMOUNT_FAILURE_MESSAGE, error);
+  }
+};
+
+const getSivflowReactRoot = (): Root => {
+  const rootElement = getReactRootElement();
+  const rootStore = window.__sivflowReactRootStore;
+
+  if (rootStore?.container === rootElement) {
+    return rootStore.root;
+  }
+
+  if (rootStore) {
+    unmountStaleReactRoot(rootStore);
+  }
+
+  const root = createRoot(rootElement);
+  window.__sivflowReactRootStore = { container: rootElement, root };
+
+  return root;
+};
 
 const StartupLogoMark = () => {
   return (
@@ -231,12 +265,8 @@ const AppBootstrap = () => {
   return <LoadedApp />;
 };
 
-
-
-
-
 if (!renderGoogleOAuthCallback()) {
-  createRoot(document.getElementById("root")!).render(
+  getSivflowReactRoot().render(
     <StrictMode>
       <ErrorBoundary>
         <TooltipProvider>
