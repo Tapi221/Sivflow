@@ -71,7 +71,7 @@ const useCardCommands = (folderId?: string) => {
       await syncDb.addItem("cardSets", {
         id: fallbackSetId,
         userId: currentUser.uid,
-        deviceId: cardData.deviceId || "web",
+        deviceId: cardData.deviceId ?? "web",
         folderId: targetFolderOrNull,
         name: fallbackSetName,
         orderIndex: fallbackSetOrder,
@@ -107,11 +107,11 @@ const useCardCommands = (folderId?: string) => {
     const newCard: Card = {
       id,
       userId: currentUser.uid,
-      deviceId: cardData.deviceId || "web",
+      deviceId: cardData.deviceId ?? "web",
       cardSetId: resolvedCardSet.cardSetId,
       orderIndex,
       questionNumber,
-      title: cardData.title || "",
+      title: cardData.title ?? "",
       isDraft: cardData.isDraft ?? false,
       isDeleted: false,
       hasUncertainty: cardData.hasUncertainty ?? false,
@@ -237,7 +237,7 @@ const useCardCommands = (folderId?: string) => {
 
     const allCards = await db.getAllCards();
     const targetCards = allCards.filter((card) => card.cardSetId === targetCardSetId && !card.isDeleted);
-    const maxOrderIndex = targetCards.reduce((maxOrder, card) => Math.max(maxOrder, card.orderIndex || 0), 0);
+    const maxOrderIndex = targetCards.reduce((maxOrder, card) => Math.max(maxOrder, card.orderIndex ?? 0), 0);
 
     await db.updateItem("cards", cardId, {
       cardSetId: targetCardSetId,

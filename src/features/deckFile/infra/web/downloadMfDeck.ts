@@ -18,7 +18,7 @@ const sanitizeFileNamePart = (value: string): string => {
   const sanitized = replaceInvalidFileNameCharacters(
     replaceControlCharacters(trimmed),
   );
-  return sanitized || "sivflow-deck";
+  return sanitized ?? "sivflow-deck";
 };
 const buildMfDeckFileName = (deckName: string): string => {
   const sanitizedName = sanitizeFileNamePart(deckName);

@@ -17,8 +17,8 @@ const handleQueuedAssetUploadSuccess = async (item: QueueItem, updatedImage: Upl
       existing: existingAsset,
       itemId: updatedImage.id,
       userId: auth.currentUser?.uid ?? existingAsset?.userId ?? "",
-      mime: item.fileType || existingAsset?.mime || "application/octet-stream",
-      size: item.fileData.byteLength || existingAsset?.size || 0,
+      mime: (item.fileType || existingAsset?.mime) ?? "application/octet-stream",
+      size: (item.fileData.byteLength || existingAsset?.size) ?? 0,
       localBlobId:
         existingAsset?.localBlobId ||
         updatedImage.localFileId ||

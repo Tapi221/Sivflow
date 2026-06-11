@@ -41,7 +41,7 @@ const convertHeicToJpeg = async (file: File): Promise<File> => {
   const blob = candidate;
   const name = file.name.replace(/\.(heic|heif)$/i, ".jpg");
 
-  return new File([blob], name, { type: blob.type || "image/jpeg" });
+  return new File([blob], name, { type: blob.type ?? "image/jpeg" });
 };
 
 export { isHeicFile, convertHeicToJpeg };

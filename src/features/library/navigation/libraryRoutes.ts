@@ -6,7 +6,7 @@ const LIBRARY_FLASHCARD_PATH = "/library/flashcard";
 
 const normalizePathname = (pathname: string): string => {
   const normalized = pathname.toLowerCase().replace(/\/+$/, "");
-  return normalized || "/";
+  return normalized ?? "/";
 };
 const resolveLibraryTypeFromPathname = (pathname: string): LibraryContentType | null => {
   switch (normalizePathname(pathname)) { case LIBRARY_PDF_PATH: return "pdf";

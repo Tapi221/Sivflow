@@ -54,12 +54,7 @@ const createPersistedPdfDocumentSource = (url: string | null): PdfDocumentSource
 const getErrorMessage = (error: unknown, fallback: string): string => {
   return error instanceof Error && error.message ? error.message : fallback;
 };
-<<<<<<< HEAD
-const waitForPdfSourceResolution = async <T,>(promise: Promise<T>): Promise<T> => {
-=======
-
 const waitForPdfSourceResolution: PdfSourceResolutionWaiter = async (promise) => {
->>>>>>> f84b6323acac4c585bc18af600e961421e47f3d6
   let timeoutId: ReturnType<typeof globalThis.setTimeout> | null = null;
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = globalThis.setTimeout(() => reject(new Error(PDF_SOURCE_TIMEOUT_ERROR_MESSAGE)), PDF_SOURCE_RESOLUTION_TIMEOUT_MS);

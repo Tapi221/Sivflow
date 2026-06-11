@@ -99,7 +99,7 @@ const normalizeUploadedPdf = (value: unknown): UploadedPdf | null => {
       pdf.status === "failed"
       ? pdf.status
       : "ready";
-  const filename = toStringOr(pick(pdf.filename, pdf.name), "").trim() || "PDF";
+  const filename = toStringOr(pick(pdf.filename, pdf.name), "").trim() ?? "PDF";
 
   return {
     id: id || assetId || localFileId || makeFallbackId(),
@@ -110,7 +110,7 @@ const normalizeUploadedPdf = (value: unknown): UploadedPdf | null => {
     storagePath: storagePath || null,
     localFileId: localFileId || null,
     status,
-    contentType: toStringOr(pdf.contentType, "application/pdf") || "application/pdf",
+    contentType: toStringOr(pdf.contentType, "application/pdf") ?? "application/pdf",
     size: normalizeOptionalNumber(pdf.size),
     sizeBytes: normalizeOptionalNumber(pdf.sizeBytes),
     retryCount: normalizeOptionalNumber(pdf.retryCount),
@@ -198,7 +198,7 @@ const normalizeCardBlock = (
       const codeText = toStringOr(code?.code, "");
       if (!codeText.trim()) return null;
       normalized.code = {
-        language: toStringOr(code?.language, "text").trim() || "text",
+        language: toStringOr(code?.language, "text").trim() ?? "text",
         code: codeText,
       };
       break;

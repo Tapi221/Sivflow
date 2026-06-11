@@ -60,7 +60,7 @@ const SecurityAlertBanner: React.FC = () => {
           >
             <AlertTriangle size={18} />
             <span>
-              {alert.message ||
+              {alert.message ??
                 "セキュリティ警告: 不審なアクティビティが検知されました。"}
             </span>
           </div>

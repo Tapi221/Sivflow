@@ -40,7 +40,7 @@ const EMPTY_PROJECT_CALENDAR_LINKS: ProjectCalendarLink[] = [];
 
 const isSameLocalDate = (left: Date, right: Date): boolean => left.getFullYear() === right.getFullYear() && left.getMonth() === right.getMonth() && left.getDate() === right.getDate();
 const getGoogleAccountLabel = (account: GoogleAccountDisplay): string => account.name ?? account.email ?? "Google";
-const getGoogleCalendarLabel = (calendarLabel: string): string => calendarLabel.trim() || "カレンダー";
+const getGoogleCalendarLabel = (calendarLabel: string): string => calendarLabel.trim() ?? "カレンダー";
 const createMobileCalendarOptionKey = (accountId: string, calendarId: string): string => JSON.stringify([accountId, calendarId]);
 const findProjectIdForGoogleCalendar = (projectCalendarLinks: ProjectCalendarLink[], accountId: string, calendarId: string): string | undefined => projectCalendarLinks.find((link) => link.provider === "google" && link.accountId === accountId && link.externalCalendarId === calendarId)?.projectId;
 const buildMobileCalendarOptions = (accounts: GoogleAccountDisplay[], projectCalendarLinks: ProjectCalendarLink[]): MobileCalendarWritableCalendarOption[] => {
@@ -586,7 +586,7 @@ const MobileCalendarEventComposer = ({
                 onClick={() => {
                   setActivePickerField(null); setIsLocationSheetOpen(true); }}
               >
-                <span className="min-w-0 flex-1 truncate">{form.location.trim() || "場所またはビデオ通話"}</span>
+                <span className="min-w-0 flex-1 truncate">{form.location.trim() ?? "場所またはビデオ通話"}</span>
                 {form.location.trim() && (
                   <ChevronRightIcon className="h-[18px] w-[18px] shrink-0 text-[#c7c7cc]" />
                 )}

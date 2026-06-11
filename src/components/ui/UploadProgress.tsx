@@ -94,7 +94,7 @@ const UploadProgress = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs text-red-500 font-medium">
             <X className="w-3 h-3" />
-            <span>{error || "アップロードに失敗しました"}</span>
+            <span>{error ?? "アップロードに失敗しました"}</span>
           </div>
           {onRetry && (
             <Button

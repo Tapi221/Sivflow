@@ -161,7 +161,7 @@ const buildMfDeckArchive = async ({ cardSet, cards, tagById, appVersion }: { car
       },
       deck: {
         id: cardSet.id,
-        name: cardSet.name?.trim() || "無題のカードセット",
+        name: cardSet.name?.trim() ?? "無題のカードセット",
         ...(cardSet.description ? { description: cardSet.description } : {}),
         cardCount: exportedCards.length,
         defaultDisplayMode: cardSet.defaultDisplayMode,

@@ -191,7 +191,7 @@ const TreeViewLayout = ({
         if (cardSet) {
           onFolderSelect(cardSet.folderId ?? null);
           setSelectedCardSetId(item.id);
-          setSelectedCardSetLabel(cardSet.name || "無題のセット");
+          setSelectedCardSetLabel(cardSet.name ?? "無題のセット");
         }
 
         onItemSelect(item);
@@ -517,7 +517,7 @@ const TreeViewLayout = ({
     }) => {
       onFolderSelect(folderId);
       setSelectedCardSetId(cardSetId);
-      setSelectedCardSetLabel(cardSetName || "無題のセット");
+      setSelectedCardSetLabel(cardSetName ?? "無題のセット");
 
       navigate(
         createPageUrl(

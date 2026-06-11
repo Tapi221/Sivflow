@@ -11,7 +11,7 @@ type LoadMfDeckFileResult = { file: File;
 const buildMfDeckSuggestedCardSetName = (fileName: string): string => {
   const baseName = fileName.replace(new RegExp(`${MF_DECK_FILE_EXTENSION}$`, "i"), "").trim();
 
-  return baseName || "インポートしたカードセット";
+  return baseName ?? "インポートしたカードセット";
 };
 const readMfDeckFile = async (file: File): Promise<LoadMfDeckFileResult> => {
   const issues: MfDeckIssue[] = [];

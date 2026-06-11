@@ -236,7 +236,7 @@ const useTags = () => {
     if (!currentUser) throw new Error("not authenticated");
 
     const categoryId = genCategoryId();
-    const resolvedName = displayName?.trim() || "新しいカテゴリ";
+    const resolvedName = displayName?.trim() ?? "新しいカテゴリ";
 
     await setCategoryName(categoryId, resolvedName);
 

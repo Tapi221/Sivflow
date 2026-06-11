@@ -303,12 +303,12 @@ const useReliableFileUpload = (): UseReliableFileUploadReturn => {
         onProgress?.(100);
 
         return {
-          url: savedImage.localUrl || "",
-          storagePath: savedImage.storagePath || "",
+          url: savedImage.localUrl ?? "",
+          storagePath: savedImage.storagePath ?? "",
           source: "local_fallback",
           metadata: {
             id: savedImage.id,
-            storagePath: savedImage.storagePath || "",
+            storagePath: savedImage.storagePath ?? "",
             downloadUrl: savedImage.remoteUrl || undefined,
             uploadedAt: new Date(),
             status: "ready",

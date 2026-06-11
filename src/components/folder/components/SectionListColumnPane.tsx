@@ -94,7 +94,7 @@ const getCardSetFolderId = (cardSet: CardSet): string | null => {
   );
 };
 const getCardSetLabel = (cardSet: CardSet): string => {
-  const baseLabel = cardSet.name?.trim() || "無題のセット";
+  const baseLabel = cardSet.name?.trim() ?? "無題のセット";
   return baseLabel.endsWith(".mfdeck") ? baseLabel : `${baseLabel}.mfdeck`;
 };
 const getDocumentFolderId = (document: DocumentItem): string | null => {
@@ -105,7 +105,7 @@ const getDocumentFolderId = (document: DocumentItem): string | null => {
   );
 };
 const getDocumentLabel = (document: DocumentItem): string => {
-  return document.title?.trim() || document.fileName?.trim() || "無題の文書";
+  return (document.title?.trim() || document.fileName?.trim()) ?? "無題の文書";
 };
 const getCardCardSetId = (card: Card): string | null => {
   return (
@@ -145,7 +145,7 @@ const getCardLabel = (card: Card): string => {
     (card as unknown as { question_number?: string | null; }).question_number ??
     null;
 
-  return questionNumber?.trim() || "無題のカード";
+  return questionNumber?.trim() ?? "無題のカード";
 };
 const buildFolderRoute = (folderId: string): string => {
   const searchParams = new URLSearchParams();

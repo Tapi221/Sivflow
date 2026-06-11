@@ -143,7 +143,7 @@ const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalend
 
         toast("予定を移動しました", {
           id: toastId,
-          description: event.title || "Untitled",
+          description: event.title ?? "Untitled",
           action: { label: "元に戻す", onClick: undoMove },
         });
 
@@ -160,7 +160,7 @@ const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalend
         releaseEventOverride(eventKey, operationToken);
         toast.error("予定を移動できませんでした", {
           id: toastId,
-          description: event.title || "Untitled",
+          description: event.title ?? "Untitled",
         });
       });
     }, EVENT_MOVE_SAVE_DELAY_MS);

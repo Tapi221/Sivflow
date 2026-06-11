@@ -36,7 +36,7 @@ const resolveCardSetId = (card: Card): string | null => {
   return trimmed.length > 0 ? trimmed : null;
 };
 const resolveFolderName = (folder: Folder | undefined): string => {
-  return folder?.folderName?.trim() || "未分類";
+  return folder?.folderName?.trim() ?? "未分類";
 };
 const buildFolderPath = (
   folderId: string | null,
@@ -105,11 +105,11 @@ const buildCardSetDashboardRows = ({ cardSets, cards, folders, tagById }: BuildC
 
       return {
         id: cardSet.id,
-        title: cardSet.name?.trim() || "無題のセット",
-        description: cardSet.description?.trim() || "",
+        title: cardSet.name?.trim() ?? "無題のセット",
+        description: cardSet.description?.trim() ?? "",
         folderId,
         categoryLabel,
-        folderPathLabel: folderPath.join(" / ") || "未分類",
+        folderPathLabel: folderPath.join(" / ") ?? "未分類",
         storagePathLabel: ["ライブラリ", "Flashcard", ...folderPath].join(
           " / ",
         ),
@@ -117,7 +117,7 @@ const buildCardSetDashboardRows = ({ cardSets, cards, folders, tagById }: BuildC
         updatedAt: normalizeDate(cardSet.updatedAt),
         createdAt: normalizeDate(cardSet.createdAt),
         tags: resolveDisplayTags(cardSet, tagById),
-        orderIndex: Number(cardSet.orderIndex) || 0,
+        orderIndex: Number(cardSet.orderIndex) ?? 0,
       } satisfies CardSetDashboardRow;
     })
     .sort((left, right) => {

@@ -14,16 +14,16 @@ type TrashItemRow = {
 };
 
 const getFolderTitle = (folder: Folder): string => {
-  return folder.folderName || "無題のフォルダ";
+  return folder.folderName ?? "無題のフォルダ";
 };
 const getCardTitle = (card: Card): string => {
-  return card.title || card.questionNumber || "無題のカード";
+  return (card.title || card.questionNumber) ?? "無題のカード";
 };
 const getCardSetTitle = (cardSet: CardSet): string => {
-  return cardSet.name || "無題のカードセット";
+  return cardSet.name ?? "無題のカードセット";
 };
 const getDocumentTitle = (document: Document): string => {
-  return document.title || document.fileName || "無題のドキュメント";
+  return (document.title || document.fileName) ?? "無題のドキュメント";
 };
 const createFolderRows = (folders: Folder[]): TrashItemRow[] => {
   return folders.map((folder) => ({

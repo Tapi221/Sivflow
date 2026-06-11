@@ -211,12 +211,12 @@ const ColorCustom = ({
   color?: string;
   updatedColor?: string;
 } & React.ComponentPropsWithoutRef<"div">) => {
-  const [value, setValue] = React.useState<string>(color || "#000");
+  const [value, setValue] = React.useState<string>(color ?? "#000");
 
   const fullCustomColors = React.useMemo(
     () =>
       colorsQueue
-        .filter((c) => normalizeColor(c) !== normalizeColor(updatedColor || ""))
+        .filter((c) => normalizeColor(c) !== normalizeColor(updatedColor ?? ""))
         .filter(
           (c) =>
             !DEFAULT_COLORS.some(

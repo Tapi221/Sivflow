@@ -1200,7 +1200,7 @@ const createCommentChunks = (editor: PlateEditor) => {
 const createTableCellChunks = (editor: PlateEditor) => {
   // Get selected table cells from the TablePlugin
   const selectedCells =
-    editor.getOption({ key: KEYS.table }, "selectedCells") || [];
+    editor.getOption({ key: KEYS.table }, "selectedCells") ?? [];
 
   // If no cells selected, try to get cells from current selection
   let cellIds: string[] = [];
@@ -1464,7 +1464,7 @@ const createChatTransport = ({
           if (!sample) {
             // First check: selectedCells from TablePlugin (cell selection mode)
             const selectedCells =
-              editor.getOption({ key: KEYS.table }, "selectedCells") || [];
+              editor.getOption({ key: KEYS.table }, "selectedCells") ?? [];
 
             if (selectedCells.length > 1) {
               sample = "table";
@@ -1537,7 +1537,7 @@ const useChat = () => {
   const transport = React.useMemo(
     () =>
       createChatTransport({
-        api: options.api || "/api/ai/command",
+        api: options.api ?? "/api/ai/command",
         abortControllerRef,
         editor,
       }),
@@ -1587,7 +1587,7 @@ const useChat = () => {
         if (!range) return console.warn("No range found for AI comment");
 
         const discussions =
-          editor.getOption(discussionPlugin, "discussions") || [];
+          editor.getOption(discussionPlugin, "discussions") ?? [];
 
         // Generate a new discussion ID
         const discussionId = nanoid();

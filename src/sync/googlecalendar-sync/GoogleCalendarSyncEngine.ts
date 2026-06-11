@@ -142,7 +142,7 @@ const toCalendarEvent = (
     accountId,
     calendarId,
     accentColor,
-    title: raw.summary || "(No title)",
+    title: raw.summary ?? "(No title)",
     description: raw.description,
     location: raw.location,
     startsAt,

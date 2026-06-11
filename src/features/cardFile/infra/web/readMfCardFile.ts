@@ -17,7 +17,7 @@ const buildMfCardImportCardSetName = ({ fileName, title }: { fileName: string;
   title?: string;
 }) => {
   const baseName =
-    title?.trim() || stripMfCardExtension(fileName) || "単体カード";
+    (title?.trim() || stripMfCardExtension(fileName)) ?? "単体カード";
   const dateLabel = new Intl.DateTimeFormat("ja-JP", {
     year: "numeric",
     month: "2-digit",

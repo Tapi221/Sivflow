@@ -50,7 +50,7 @@ const POST = async (req: NextRequest) => {
           const enumOptions = isSelecting
             ? ["generate", "edit", "comment"]
             : ["generate", "comment"];
-          const modelId = model || "google/gemini-2.5-flash";
+          const modelId = model ?? "google/gemini-2.5-flash";
 
           const { output: AIToolName } = await generateText({
             model: gatewayProvider(modelId),
@@ -67,17 +67,17 @@ const POST = async (req: NextRequest) => {
         }
 
         const stream = streamText({
-          model: gatewayProvider(model || "openai/gpt-4o-mini"),
+          model: gatewayProvider(model ?? "openai/gpt-4o-mini"),
           prompt: "",
           tools: {
             comment: getCommentTool(editor, {
               messagesRaw,
-              model: gatewayProvider(model || "google/gemini-2.5-flash"),
+              model: gatewayProvider(model ?? "google/gemini-2.5-flash"),
               writer,
             }),
             table: getTableTool(editor, {
               messagesRaw,
-              model: gatewayProvider(model || "google/gemini-2.5-flash"),
+              model: gatewayProvider(model ?? "google/gemini-2.5-flash"),
               writer,
             }),
           },
@@ -107,8 +107,8 @@ const POST = async (req: NextRequest) => {
                 activeTools: [],
                 model:
                   editType === "selection"
-                    ? gatewayProvider(model || "google/gemini-2.5-flash")
-                    : gatewayProvider(model || "openai/gpt-4o-mini"),
+                    ? gatewayProvider(model ?? "google/gemini-2.5-flash")
+                    : gatewayProvider(model ?? "openai/gpt-4o-mini"),
                 messages: [
                   {
                     content: editPrompt,
@@ -133,7 +133,7 @@ const POST = async (req: NextRequest) => {
                     role: "user",
                   },
                 ],
-                model: gatewayProvider(model || "openai/gpt-4o-mini"),
+                model: gatewayProvider(model ?? "openai/gpt-4o-mini"),
               };
             }
           },

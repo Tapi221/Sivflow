@@ -19,7 +19,7 @@ turndown.addRule("fencedCode", {
       .split(/\s+/)
       .find((className) => className.startsWith("language-") || className.startsWith("lang-"));
     const lang = langClass ? langClass.replace(/^(language-|lang-)/, "") : "";
-    const code = codeEl.textContent || "";
+    const code = codeEl.textContent ?? "";
 
     return `\n\n\`\`\`${lang}\n${code}\n\`\`\`\n\n`;
   },

@@ -73,7 +73,7 @@ const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
           ((element.clientWidth || element.offsetWidth || 0) * widthRatio) /
           resizeStepPx,
         ) * resizeStepPx;
-      const baseMin = Math.max(contentBaseMin, widthBasedMin || 0);
+      const baseMin = Math.max(contentBaseMin, widthBasedMin ?? 0);
 
       const body = element.querySelector(
         ".card-shell-body",
@@ -91,8 +91,8 @@ const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         const ruledBottomOffsetPx = Math.max(
           0,
           Number.parseFloat(
-            surfaceStyle?.getPropertyValue("--ruled-bottom-offset-px") || "0",
-          ) || 0,
+            surfaceStyle?.getPropertyValue("--ruled-bottom-offset-px") ?? "0",
+          ) ?? 0,
         );
         const bodyRect = body.getBoundingClientRect();
         const bodyScaleY =
@@ -107,7 +107,7 @@ const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
             ) as HTMLElement | null) ?? row;
           const rowStyle = window.getComputedStyle(row);
           const marginBottom =
-            Number.parseFloat(rowStyle.marginBottom || "0") || 0;
+            Number.parseFloat(rowStyle.marginBottom ?? "0") ?? 0;
           const targetOffsetTop =
             measureTarget === row ? 0 : measureTarget.offsetTop;
           const layoutBottom =

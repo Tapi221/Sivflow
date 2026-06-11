@@ -69,8 +69,8 @@ const WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME = "max-w-[calc(100%-96px)]";
 const WORKSPACE_MAIN_PANEL_CLASS_NAME = "relative z-0 isolate min-w-0";
 const SIDEBAR_INTERACTION_REGION_STYLE: SidebarInteractionRegionStyle = { WebkitAppRegion: "no-drag" };
 
-const getDocumentBreadcrumbLabel = (document: DocumentItem): string => document.title.trim() || document.fileName.trim() || "PDF";
-const getNoteBreadcrumbLabel = (note: Note): string => note.title.trim() || "ノート";
+const getDocumentBreadcrumbLabel = (document: DocumentItem): string => (document.title.trim() || document.fileName.trim()) ?? "PDF";
+const getNoteBreadcrumbLabel = (note: Note): string => note.title.trim() ?? "ノート";
 const buildWorkspaceBreadcrumbCrumbs = (context: ExplorerBreadcrumbContext, folders: Folder[], selectedDocument: DocumentItem | null): BreadcrumbCrumb[] => {
   const folderById = new Map(folders.map((folder) => [folder.id, folder]));
   const crumbs = buildFolderPathCrumbs({ folderId: context.folderId, folderById });

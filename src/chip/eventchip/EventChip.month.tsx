@@ -51,7 +51,7 @@ const getTimeLabel = (event: GoogleCalendarEvent): string => {
 
 const CalendarEventChipMonth = ({ event, showTimeLabel = true, tooltipDisabled = false }: CalendarEventChipMonthProps) => {
   const tokens = generateColorTokens(event.accentColor);
-  const titleLabel = event.title || "Untitled";
+  const titleLabel = event.title ?? "Untitled";
   const timeLabel = getTimeLabel(event);
   const chipStyle = createCalendarEventChipMonthStyle(tokens.bg, tokens.border, tokens.text, showTimeLabel, event.isAllDay);
 

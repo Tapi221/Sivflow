@@ -192,11 +192,11 @@ const getDocumentFolderId = (document: DocumentItem, fallbackFolderId: string | 
 const getNoteFolderId = (note: Note, fallbackFolderId: string | null = null): string | null => {
   return note.folderId ?? (note as Note & LegacyNoteFields).folder_id ?? fallbackFolderId;
 };
-const getCardSetName = (cardSet: CardSet): string => cardSet.name?.trim() || "無題のセット";
+const getCardSetName = (cardSet: CardSet): string => cardSet.name?.trim() ?? "無題のセット";
 const getDocumentName = (document: DocumentItem): string => {
-  return document.title?.trim() || document.fileName?.trim() || (document as DocumentItem & LegacyDocumentFields).file_name?.trim() || "無題のPDF";
+  return (document.title?.trim() || document.fileName?.trim() || (document as DocumentItem & LegacyDocumentFields).file_name?.trim()) ?? "無題のPDF";
 };
-const getNoteTitle = (note: Note): string => note.title?.trim() || "無題のノート";
+const getNoteTitle = (note: Note): string => note.title?.trim() ?? "無題のノート";
 const getRootFolderIds = (rootFolders: DirectoryFolderNode[]): string[] => rootFolders.map((folder) => folder.id);
 const getSelectedFolderIdFromActiveTab = (tab: WorkspaceTab | null): string | null => {
   if (!tab || tab.sectionKey !== "library") return null;

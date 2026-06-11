@@ -195,7 +195,7 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
   const startsAt = event.startsAt instanceof Date ? event.startsAt : new Date(event.startsAt);
   const endsAt = event.endsAt instanceof Date ? event.endsAt : new Date(event.endsAt ?? event.startsAt);
   const timeLabel = event.isAllDay ? "終日" : `${format(startsAt, "H:mm")} ~ ${format(endsAt, "H:mm")}`;
-  const titleLabel = event.title || "Untitled";
+  const titleLabel = event.title ?? "Untitled";
   const chipStyle = createCalendarEventChipWeekdayStyle(tokens.bg, tokens.border, tokens.text, chipLayout.useInlineTimeLayout);
   const editUrl = createGoogleCalendarEventEditUrl(event);
   const handleEdit = editUrl ? () => {

@@ -59,7 +59,7 @@ const PdfLibraryDashboard = ({ documents, folders, onOpenDocument, showToolbar =
 
   const getNextOrderIndex = (folderId: string | null): number => {
     if (!folderId) return 0;
-    return documents.filter((document) => document.kind === "pdf" && document.folderId === folderId).reduce((currentMax, document) => Math.max(currentMax, Number(document.orderIndex) || 0), -1) + 1;
+    return documents.filter((document) => document.kind === "pdf" && document.folderId === folderId).reduce((currentMax, document) => Math.max(currentMax, Number(document.orderIndex) ?? 0), -1) + 1;
   };
 
   const { fileInputRef, currentFileAccept, handleToolbarAddDocument, handleToolbarFileInputChange } = useFolderDocumentUpload({

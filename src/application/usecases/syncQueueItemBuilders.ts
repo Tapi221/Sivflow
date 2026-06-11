@@ -152,7 +152,7 @@ const createDeleteQueueItem = ({ entity, targetId, priority = "high", type = "up
   };
 };
 const createQueueItemFromSyncTask = (task: SyncTask): SyncQueueItem => {
-  const targetId = task.targetId || getTaskPayloadId(task.payload) || "unknown";
+  const targetId = (task.targetId || getTaskPayloadId(task.payload)) ?? "unknown";
   const operationType =
     task.operationType || (task.type === "upload" ? "update" : "create");
   const deterministicId = buildDeterministicQueueId({

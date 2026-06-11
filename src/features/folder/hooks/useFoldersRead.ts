@@ -46,7 +46,7 @@ const useFoldersRead = () => {
   }, [userId]);
 
   return {
-    folders: folders || [],
+    folders: folders ?? [],
     loading: folders === undefined,
     error: null as string | null,
   };

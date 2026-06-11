@@ -10,7 +10,7 @@ const rebuildIndexedDb = async (userId: string, reason?: string): Promise<{ degr
   const db = await getLocalDb(userId);
   let metaService = new IndexedDBMetadataService(db, userId);
 
-  await metaService.incrementRebuildCount(reason || "unknown");
+  await metaService.incrementRebuildCount(reason ?? "unknown");
   await db.delete();
   await getLocalDb(userId);
 
