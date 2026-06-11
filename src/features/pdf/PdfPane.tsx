@@ -97,7 +97,6 @@ type PdfZoomCommit = {
   pageNumbers: Set<number>;
 };
 type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-type StratisOptionalIconProps = { names: readonly string[]; className?: string; active?: boolean; };
 
 const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
 const STRATIS_BOOKMARK_ICON_NAMES = ["StratisBookmarkIcon", "StratisBookmark01Icon", "StratisBookOpenBookmarkIcon", "StratisStarIcon", "StratisStar01Icon", "StratisStar02Icon"] as const;

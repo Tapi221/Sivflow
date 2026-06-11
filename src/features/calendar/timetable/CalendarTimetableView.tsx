@@ -21,7 +21,6 @@ type CalendarTimetableCourseEditorProps = { course: CalendarTimetableCourse | nu
 type CalendarTimetableSettingsPanelProps = { periods: CalendarTimetablePeriod[]; visibleDayCount: CalendarTimetableVisibleDayCount; onChangeVisibleDayCount: (visibleDayCount: CalendarTimetableVisibleDayCount) => Promise<void>; onAddPeriod: () => Promise<void>; onUpdatePeriod: (period: CalendarTimetablePeriod) => Promise<void>; onDeletePeriod: (periodId: string) => Promise<void>; onClose: () => void; };
 type CalendarTimetableGridStyle = CSSProperties & { "--calendar-timetable-day-count": CalendarTimetableVisibleDayCount; };
 type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-type StratisOptionalIconProps = { names: readonly string[]; className?: string; };
 
 const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
 const STRATIS_CHECK_ICON_NAMES = ["StratisCheckIcon", "StratisCheck01Icon", "StratisCheckCircleContainedIcon"] as const;

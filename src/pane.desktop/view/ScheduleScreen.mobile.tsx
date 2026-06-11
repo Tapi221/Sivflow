@@ -28,7 +28,6 @@ type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; cur
 type MobileCalendarViewModeOption = { value: CalendarViewMode; label: string; };
 type MobileViewModeDropdownProps = { value: CalendarViewModeSelection; onChange: (value: CalendarViewMode) => void; options: readonly MobileCalendarViewModeOption[]; };
 type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-type StratisOptionalIconProps = { names: readonly string[]; className?: string; };
 
 const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
 const STRATIS_CHECK_ICON_NAMES = ["StratisCheckIcon", "StratisCheck01Icon", "StratisCheckCircleContainedIcon"] as const;
