@@ -16,6 +16,9 @@ const SEVERITY_LABELS = new Map([
   [2, "エラー"],
   [1, "警告"],
 ]);
+const SUPPRESSED_RULE_IDS = new Set([
+  "simple-import-sort/imports",
+]);
 const KNOWN_RULE_MESSAGES = new Map([
   ["@typescript-eslint/no-empty-object-type", "`{}` 型は 0 や空文字列などの null/undefined 以外の値も許容します。オブジェクトだけを表したい場合は `object`、任意の値を表したい場合は `unknown` を使ってください。"],
   ["eqeqeq", "等価比較では `==` / `!=` ではなく `===` / `!==` を使ってください。"],
@@ -32,6 +35,8 @@ const toRelativePath = (filePath, cwd) => {
   const relativePath = path.relative(cwd, filePath);
   return relativePath.startsWith("..") ? filePath : relativePath.split(path.sep).join("/");
 };
+
+const getVisibleMessages = (messages) => messages.filter((message) => !SUPPRESSED_RULE_IDS.has(message.ruleId));
 
 const runSourceConventionFixes = () => {
   if (!SHOULD_FIX) return 0;
@@ -191,13 +196,13 @@ export const formatEslintResults = (results, options = {}) => {
   let fixableWarningCount = 0;
 
   for (const result of results) {
-    const messages = result.messages ?? [];
+    const messages = getVisibleMessages(result.messages ?? []);
     if (messages.length === 0) continue;
 
-    errorCount += result.errorCount ?? messages.filter((message) => message.severity === 2).length;
-    warningCount += result.warningCount ?? messages.filter((message) => message.severity === 1).length;
-    fixableErrorCount += result.fixableErrorCount ?? messages.filter((message) => message.severity === 2 && message.fix).length;
-    fixableWarningCount += result.fixableWarningCount ?? messages.filter((message) => message.severity === 1 && message.fix).length;
+    errorCount += messages.filter((message) => message.severity === 2).length;
+    warningCount += messages.filter((message) => message.severity === 1).length;
+    fixableErrorCount += messages.filter((message) => message.severity === 2 && message.fix).length;
+    fixableWarningCount += messages.filter((message) => message.severity === 1 && message.fix).length;
 
     lines.push(toRelativePath(result.filePath, cwd));
     lines.push(...messages.map(formatMessage));
