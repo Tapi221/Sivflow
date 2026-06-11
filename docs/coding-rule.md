@@ -40,6 +40,8 @@ import 文同士の間に空行を入れない。
 
 import、型定義、定数、helper 関数、component 本体、memo / displayName / export の各ブロック間だけ、空行1行を入れる。ブロック間の空行なし、または空行2行以上は禁止する。
 
+連続する空行は source file 全体で禁止する。`/// <reference ... />`、import 群、型定義、定数、helper 処理、`export {}` の前後も例外にしない。
+
 ```ts
 import { value } from "./value";
 import type { Value } from "./value.types";
@@ -55,6 +57,8 @@ const isLocalValueId = (id: string) => id.startsWith(`${LOCAL_VALUE_PREFIX}:`);
 ```
 
 `npm run lint`、`npm run lint:fix`、`npm run fix:source-conventions` は、source 規約の空行と type-only import を自動で正規化する。自動整形 script が import 間だけを直して、同じブロック内またはブロック間の余分な空行を残す状態は禁止する。
+
+`npm run verify:source-conventions` は `verify:blank-lines` を含めて実行し、連続空行を検出する。連続空行の検査は `scripts/verify/verify-repeated-blank-lines.mjs` に置く。
 
 import 間の空行検査と自動修正は、import 文直前の空白・改行も対象に含める。AST の `getFullStart()` だけを基準にして import 前の空行を取り逃がす実装は禁止する。
 
