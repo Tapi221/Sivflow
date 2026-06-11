@@ -8,6 +8,8 @@ import { SlateElement } from 'platejs/static';
 
 import { cn } from '@/lib/utils';
 
+
+
 export function TableElementStatic({ children, ...props }: SlateElementProps<TTableElement>) { const { disableMarginLeft } = props.editor.getOptions(BaseTablePlugin);
   const marginLeft = disableMarginLeft ? 0 : props.element.marginLeft;
 

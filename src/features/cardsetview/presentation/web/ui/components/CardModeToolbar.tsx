@@ -6,6 +6,8 @@ import { OverlayToolbarDivider } from "@/chip/overlay-toolbar/OverlayToolbarDivi
 import { FixedDisplayGlyph, FlipGlyph, FluidDisplayGlyph, SplitGlyph, StackGlyph } from "@/chip/overlay-toolbar/OverlayToolbarGlyphs";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 type CardModeToolbarProps = {
   displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
@@ -21,6 +23,8 @@ type ModeButtonProps = {
   disabled?: boolean;
   children: ReactNode;
 };
+
+
 
 const ModeButton = ({
   isActive,

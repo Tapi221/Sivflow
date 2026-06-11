@@ -12,6 +12,8 @@ import { PlateElement } from 'platejs/react';
 
 import { Button } from './button';
 
+
+
 export const ToggleElement = (props: PlateElementProps) => { const element = props.element;
   const state = useToggleButtonState(element.id as string);
   const { buttonProps, open } = useToggleButton(state);

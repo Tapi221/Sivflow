@@ -3,6 +3,8 @@ import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selec
 import type { CalendarCardLike, CalendarCardsByDate, CalendarCardSetLike, CalendarDayCell, CalendarDisplayCard, CalendarFolderLike, CalendarGridViewModel, CalendarScreenViewModel, CalendarStudyLogLike, CalendarSummaryViewModel, CalendarWeekStartDay } from "./calendar.types";
 import { getCalendarIntensity, getStreakFromLogs, getTodayDescription, getWeekDays, normalizeDateOnly, toDate, toDateKey } from "./calendar.utils";
 
+
+
 const isDeletedCard = (card: CalendarCardLike) => {
   return Boolean(
     card.isDeleted ??

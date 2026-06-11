@@ -1,9 +1,13 @@
 import type { SVGProps } from "react";
 
+
+
 type UiIconProps = SVGProps<SVGSVGElement> & {
   size?: number;
   strokeWidth?: number | string;
 };
+
+
 
 const UiIcon = ({
   size = 20,
@@ -31,6 +35,8 @@ const UiIcon = ({
     />
   );
 };
+
+
 
 export { UiIcon };
 export type { UiIconProps };

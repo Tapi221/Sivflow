@@ -9,9 +9,13 @@ import { AuthProvider } from "@/contexts/AuthProvider";
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 import { ToastProvider } from "@web-renderer/contexts/ToastContext";
 
+
+
 type AppProvidersProps = {
   children: ReactNode;
 };
+
+
 
 const AppProviders = ({ children }: AppProvidersProps) => (
   <MantineProvider defaultColorScheme="light">
@@ -29,6 +33,8 @@ const AppProviders = ({ children }: AppProvidersProps) => (
     </AuthProvider>
   </MantineProvider>
 );
+
+
 
 export { AppProviders };
 export type { AppProvidersProps };

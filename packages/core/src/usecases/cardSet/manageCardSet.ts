@@ -31,6 +31,8 @@ export type CardSetCommandRepository<TCardSet extends CardSetCommandEntity = Car
   updateCardSet: (userId: string, cardSetId: string, changes: Record<string, unknown>) => Promise<void>;
 };
 
+
+
 const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean }) => {
   return Boolean(entity.isDeleted ?? entity.is_deleted);
 };

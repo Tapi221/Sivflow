@@ -14,7 +14,11 @@ import { useDebounce } from '@/hooks/use-debounce';
 
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from './inline-combobox';
 
+
+
 const TRAILING_COLON_REGEX = /:$/;
+
+
 
 export const EmojiInputElement = (props: PlateElementProps) => { const { children, editor, element } = props;
   const data = usePluginOption(EmojiPlugin, 'data')!;

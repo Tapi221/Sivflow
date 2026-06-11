@@ -30,9 +30,13 @@ import { insertToc } from '@platejs/toc';
 
 import { type NodeEntry, type Path, type TElement, KEYS, PathApi, } from 'platejs';
 
+
+
 type InsertBlockOptions = {
   upsert?: boolean;
 };
+
+
 
 const ACTION_THREE_COLUMNS = 'action_three_columns';
 
@@ -48,6 +52,8 @@ const insertInlineMap: Record<
     insertInlineEquation(editor, '', { select: true }),
   [KEYS.link]: (editor) => triggerFloatingLink(editor, { focused: true }),
 };
+
+
 
 const insertList = (editor: PlateEditor, type: string) => {
   editor.tf.insertNodes(
@@ -104,6 +110,8 @@ const insertBlockMap: Record<
   [KEYS.toc]: (editor) => insertToc(editor, { select: true }),
   [KEYS.video]: (editor) => insertVideoPlaceholder(editor, { select: true }),
 };
+
+
 
 export const insertBlock = ( editor: PlateEditor, type: string, options: InsertBlockOptions = {} ) => { const { upsert = false } = options;
 
@@ -187,6 +195,8 @@ const setBlockMap: Record<
   [ACTION_THREE_COLUMNS]: (editor) => toggleColumnGroup(editor, { columns: 3 }),
   [KEYS.codeBlock]: (editor) => toggleCodeBlock(editor),
 };
+
+
 
 export const setBlockType = ( editor: PlateEditor, type: string, { at }: { at?: Path } = {} ) => { editor.tf.withoutNormalizing(() => { if (type === KEYS.blockquote) { const target = at ?? editor.selection;
 

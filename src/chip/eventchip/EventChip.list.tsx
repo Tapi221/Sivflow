@@ -7,9 +7,13 @@ import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
+
+
 type CalendarEventChipListProps = {
   event: GoogleCalendarEvent;
 };
+
+
 
 const ALL_DAY_LABEL = "終日";
 const LIST_EVENT_ROW_CLASS_NAME = "grid grid-cols-[54px_26px_minmax(0,1fr)] items-stretch";
@@ -22,6 +26,8 @@ const LIST_EVENT_TIME_CLASS_NAME = "overflow-hidden whitespace-nowrap font-semib
 const LIST_EVENT_TITLE_CLASS_NAME = "line-clamp-2 overflow-hidden whitespace-normal break-words font-semibold leading-snug tracking-[-0.01em]";
 const LIST_ALL_DAY_EVENT_TITLE_CLASS_NAME = "mt-0 line-clamp-1 whitespace-nowrap leading-none";
 const MINUTE_IN_MS = 60_000;
+
+
 
 const getEventTitle = (event: GoogleCalendarEvent): string => event.title.trim() || "Untitled";
 
@@ -73,6 +79,8 @@ const createEventTitleStyle = (): CSSProperties => ({
   marginTop: eventChipDesign.list.titleGapPx,
 });
 
+
+
 const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) => {
   const tokens = useMemo(() => generateColorTokens(event.accentColor), [event.accentColor]);
   const title = getEventTitle(event);
@@ -97,6 +105,8 @@ const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) =
     </div>
   );
 };
+
+
 
 const CalendarEventChipList = memo(CalendarEventChipListComponent);
 

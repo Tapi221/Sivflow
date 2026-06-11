@@ -1,11 +1,17 @@
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 export type CardLayoutMode = "stack" | "flip" | "split";
 export type SplitFallbackCardLayoutMode = "stack" | "flip";
 export type CardSetInteractionMode = "view" | "edit";
 
+
+
 export const DEFAULT_CARD_LAYOUT_MODE: CardLayoutMode = "flip";
 export const DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE: SplitFallbackCardLayoutMode = "flip";
+
+
 
 export const resolveDefaultCardLayoutMode = ( _interactionMode: CardSetInteractionMode, ): CardLayoutMode => { return DEFAULT_CARD_LAYOUT_MODE;
 };

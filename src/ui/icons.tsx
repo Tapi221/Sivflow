@@ -3,6 +3,8 @@ import { forwardRef } from "react";
 import { StratisAlertCircleIcon, StratisAlertTriangleIcon, StratisArrowLeftSquareContainedIcon, StratisArrowRefresh01Icon, StratisArrowRightSquareContainedIcon, StratisArrowSwitchHorizontalIcon, StratisAudioSettings01Icon, StratisCalendarNumberIcon, StratisChevronLeftIcon, StratisChevronUpIcon, StratisClock01Icon, StratisClockBackwardIcon, StratisCode01Icon, StratisCopyLeftIcon, StratisEditContainedIcon, StratisFileEdit02Icon, StratisFilterIcon, StratisFolderSearch01Icon, StratisFormulaIcon, StratisGlobe02Icon, StratisHelpCircleContainedIcon, StratisImageIcon, StratisInfoSquare01ContainedIcon, StratisKeyboardIcon, StratisLinkAngledIcon, StratisLinkExternalIcon, StratisLogout01Icon, StratisMarkdownIcon, StratisPlus01Icon, StratisSearch01Icon, StratisStar02Icon, StratisTagIcon, StratisTrash03Icon, StratisType03Icon, StratisWrenchIcon, StratisX01Icon, StratisXCircleContainedIcon } from "@/ui/icons/stratis";
 import { UiIcon } from "./UiIcon";
 
+
+
 export type IconProps = SVGProps<SVGSVGElement> & { size?: number;
   label?: string;
   title?: string;
@@ -31,6 +33,8 @@ type GlyphKind =
   | "user"
   | "x"
   | "default";
+
+
 
 const glyphPaths: Record<GlyphKind, string[]> = {
   "arrow-left": ["M19 12H5", "m12 7-7-7 7-7"],
@@ -82,6 +86,8 @@ const glyphByIconName: Record<string, GlyphKind> = {
   XCircle: "x",
 };
 
+
+
 const wrapStratisIcon = (BaseIcon: StratisIconComponent, name: string) => {
   const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) => {
     const resolvedLabel = label ?? rest["aria-label"];
@@ -114,6 +120,8 @@ const makeIcon = (name: string) => {
   Icon.displayName = name;
   return Icon;
 };
+
+
 
 const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, ...rest }, ref) => {
   const resolvedLabel = label ?? rest["aria-label"];
@@ -173,6 +181,8 @@ const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size =
     </UiIcon>
   );
 });
+
+
 
 MoreVerticalIcon.displayName = "MoreVerticalIcon";
 ExplorerChevronDownIcon.displayName = "ExplorerChevronDownIcon";
@@ -276,4 +286,6 @@ export const ImageIcon = Image;
 export const CircleHelp = HelpCircle;
 export const Sigma = SigmaIcon;
 export const NotebookPen = NotebookPenIcon;
+
+
 export { StratisFormulaIcon, StratisMarkdownIcon };

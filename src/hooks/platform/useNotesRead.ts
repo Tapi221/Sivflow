@@ -4,6 +4,8 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { getLocalDb } from "@/services/localdb";
 import type { Note } from "@/types";
 
+
+
 type NoteWithLegacyDelete = Note & {
   is_deleted?: boolean;
 };
@@ -11,6 +13,8 @@ type NoteWithLegacyDelete = Note & {
 type UseNotesReadOptions = {
   enabled?: boolean;
 };
+
+
 
 export const useNotesRead = ( folderId?: string | null, options?: UseNotesReadOptions, ) => { const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;

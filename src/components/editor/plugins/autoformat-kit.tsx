@@ -2,7 +2,11 @@
 
 import { createSlatePlugin, createTextSubstitutionInputRule, KEYS } from 'platejs';
 
+
+
 type AutoformatTextSubstitutionPatterns = Parameters<typeof createTextSubstitutionInputRule>[0]['patterns'];
+
+
 
 <<<<<<< HEAD
 const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
@@ -23,6 +27,8 @@ const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
     SUPERSCRIPT_SYMBOLS_RULE,
   ],
 });
+
+
 
 const isTextSubstitutionBlocked = (editor: SlateEditor) =>
   editor.api.some({

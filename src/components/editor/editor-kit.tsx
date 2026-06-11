@@ -72,7 +72,11 @@ import { TocKit } from '@/components/editor/plugins/toc-kit';
 
 import { ToggleKit } from '@/components/editor/plugins/toggle-kit';
 
+
+
 type MyEditor = TPlateEditor<Value, (typeof EditorKit)[number]>;
+
+
 
 const EditorKit = [
   ...CopilotKit,
@@ -126,8 +130,12 @@ const EditorKit = [
   ...FloatingToolbarKit,
 ];
 
+
+
 const useEditor = () => useEditorRef<MyEditor>();
 
 export type { MyEditor };
+
+
 
 export { EditorKit, useEditor };

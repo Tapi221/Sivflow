@@ -22,11 +22,15 @@ import { cn } from '@/lib/utils';
 
 import { ToolbarButton, ToolbarMenuGroup } from './toolbar';
 
+
+
 type TColor = {
   isBrightColor: boolean;
   name: string;
   value: string;
 };
+
+
 
 const MAX_CUSTOM_COLORS = 19;
 
@@ -59,6 +63,8 @@ const DEFAULT_CUSTOM_COLORS = [
     value: '#4C1130',
   },
 ];
+
+
 
 function normalizeColor(color: string): string {
   return color.toLowerCase();
@@ -94,6 +100,8 @@ function getEditorColorMarks(editor: PlateEditor, nodeType: string): string[] {
 
   return Array.from(usedColors);
 }
+
+
 
 export function FontColorToolbarButton({ children, nodeType, tooltip, }: { nodeType: string;
   tooltip?: string;
@@ -508,6 +516,8 @@ function ColorDropdownMenuItem({
     content
   );
 }
+
+
 
 const ColorPicker = React.memo(
   PureColorPicker,

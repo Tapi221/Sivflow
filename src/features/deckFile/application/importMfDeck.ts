@@ -4,6 +4,8 @@ import type { MfDeckArchiveV1, MfDeckCardV1, MfDeckIssue } from "@/features/deck
 import type { Card, CardBlock, CardSet } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 export type CreateMfDeckCardSet = ( name: string, targetFolderId?: string | null, opts?: { description?: string;
     id?: string;
     orderIndex?: number;
@@ -40,6 +42,8 @@ export type ImportMfDeckArchiveResult = { createdCardSetId: string;
   createdCount: number;
   issues: MfDeckIssue[];
 };
+
+
 
 const cloneJson = <T>(value: T): T => {
   if (value === undefined) return value;

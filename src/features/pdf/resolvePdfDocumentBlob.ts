@@ -4,10 +4,14 @@ import { auth } from "@/services/firebase";
 import { getDocumentBlob, saveDocumentBlob } from "@/services/documentFileStore";
 import type { DocumentItem } from "@/types";
 
+
+
 type PdfDocumentBlobFields = Pick<
   DocumentItem,
   "id" | "localFileId" | "userId" | "googleDriveFileId"
 >;
+
+
 
 const getUniqueValues = (
   values: Array<string | null | undefined>,

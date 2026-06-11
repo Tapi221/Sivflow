@@ -34,6 +34,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from './too
 
 import { cn } from '@/lib/utils';
 
+
+
 export const ColumnElement = withHOC( ResizableProvider, function ColumnElement(props: PlateElementProps<TColumnElement>) { const { width } = props.element;
     const readOnly = useReadOnly();
     const isSelectionAreaVisible = usePluginOption(
@@ -275,6 +277,8 @@ const DoubleSideDoubleColumnOutlined = (props: LucideProps) => (
     />
   </svg>
 );
+
+
 
 const ColumnDragHandle = React.memo(function ColumnDragHandle() {
   return (

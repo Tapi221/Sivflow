@@ -10,6 +10,8 @@
 import type { Card, Folder } from "@/types";
 import type { CardSet } from "./cardSet";
 
+
+
 /** スナップショットのメタデータ */
 export interface SnapshotMetadata { /** スキーマバージョン（マイグレーション用） */ schemaVersion: number;
 
@@ -88,6 +90,8 @@ export interface SnapshotComparison { /** どちらが新しいか */ newerSnaps
     assetsRemoved: number;
   };
 }
+
+
 
 /** 現在のスキーマバージョン */
 export const CURRENT_SCHEMA_VERSION = 3;
