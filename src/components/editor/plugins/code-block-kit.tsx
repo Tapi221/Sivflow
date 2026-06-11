@@ -1,22 +1,14 @@
 'use client';
 
 import { CodeBlockRules } from '@platejs/code-block';
-import {
-  CodeBlockPlugin,
-  CodeLinePlugin,
-  CodeSyntaxPlugin,
-} from '@platejs/code-block/react';
+import { CodeBlockPlugin, CodeLinePlugin, CodeSyntaxPlugin } from '@platejs/code-block/react';
 import { all, createLowlight } from 'lowlight';
 
-import {
-  CodeBlockElement,
-  CodeLineElement,
-  CodeSyntaxLeaf,
-} from '@/components/code-block-node';
+import { CodeBlockElement, CodeLineElement, CodeSyntaxLeaf } from '@/components/ui/code-block-node';
 
 const lowlight = createLowlight(all);
 
-export const CodeBlockKit = [
+const CodeBlockKit = [
   CodeBlockPlugin.configure({
     inputRules: [CodeBlockRules.markdown({ on: 'match' })],
     node: { component: CodeBlockElement },
@@ -26,3 +18,5 @@ export const CodeBlockKit = [
   CodeLinePlugin.withComponent(CodeLineElement),
   CodeSyntaxPlugin.withComponent(CodeSyntaxLeaf),
 ];
+
+export { CodeBlockKit };
