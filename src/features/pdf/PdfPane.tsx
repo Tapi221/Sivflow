@@ -17,6 +17,8 @@ import type { PdfPageWindowMetric } from "./pdfPageWindow";
 import { getPdfPageWindowKeepSet, getSafePdfPageNumber } from "./pdfPageWindow";
 import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_BUTTON_SCALE_FACTOR, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON } from "./pdfZoom.constants";
 
+
+
 type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
 type PdfViewerStateChangeOptions = {
   persistence?: PdfViewerStateChangePersistence;
@@ -98,6 +100,8 @@ type PdfZoomCommit = {
 };
 type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
+
+
 const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
 const STRATIS_BOOKMARK_ICON_NAMES = ["StratisBookmarkIcon", "StratisBookmark01Icon", "StratisBookOpenBookmarkIcon", "StratisStarIcon", "StratisStar01Icon", "StratisStar02Icon"] as const;
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 640;
@@ -122,10 +126,16 @@ const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
-const StratisBookmarkIcon = resolveStratisIcon(STRATIS_BOOKMARK_ICON_NAMES);
+
+
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
+
+
+const StratisBookmarkIcon = resolveStratisIcon(STRATIS_BOOKMARK_ICON_NAMES);
+
+
 const getTrimmedHistory = (pages: number[]): number[] => {
   return pages.slice(-PDF_HISTORY_LIMIT);
 };
@@ -405,6 +415,8 @@ const createDefaultToolbarState = (): PdfToolbarState => ({
   scale: 1,
   isBookmarked: false,
 });
+
+
 
 const StratisFallbackBookmarkIcon = ({ className, active }: { className?: string; active?: boolean; }) => (
   <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -1052,4 +1064,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   );
 };
 
-export { PdfPane };
+
+
+export
