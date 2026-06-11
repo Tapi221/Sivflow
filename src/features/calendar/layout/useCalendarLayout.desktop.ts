@@ -2,12 +2,16 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
+
+
 const WEEKDAY_HEADER_ROW_HEIGHT_PX = 40;
 const WEEKDAY_BODY_ROW_BOTTOM_SPACER_HEIGHT_PX = 32;
 const MOBILE_WEB_VIEWPORT_MAX_WIDTH_PX = 767;
 const MOBILE_WEB_WEEK_HOUR_ROW_HEIGHT_PX = C.DEFAULT_HOUR_ROW_HEIGHT / 2;
 const WEEKDAY_BODY_ROW_HEIGHT = `calc(${GRID.WEEKDAY_HOURS} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}) + ${WEEKDAY_BODY_ROW_BOTTOM_SPACER_HEIGHT_PX}px)`;
 const WEEKDAY_GRID_TEMPLATE_ROWS = `${WEEKDAY_HEADER_ROW_HEIGHT_PX}px auto ${WEEKDAY_BODY_ROW_HEIGHT}`;
+
+
 
 const getWeekdayHourRowHeightPx = (selectedViewMode: CalendarViewMode, viewportWidth: number): number => selectedViewMode === "week" && viewportWidth <= MOBILE_WEB_VIEWPORT_MAX_WIDTH_PX ? MOBILE_WEB_WEEK_HOUR_ROW_HEIGHT_PX : C.DEFAULT_HOUR_ROW_HEIGHT;
 const isWeekdayRailView = (viewMode: CalendarViewMode) =>
@@ -67,5 +71,7 @@ const useCalendarLayout = ({ viewportWidth, visibleDays, displayDays, selectedVi
     monthLabel,
   };
 };
+
+
 
 export { useCalendarLayout };
