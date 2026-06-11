@@ -1,6 +1,10 @@
 import { MF_DECK_FILE_EXTENSION, MF_DECK_MIME_TYPE } from "@/features/deckFile/domain/mfDeck.types";
 
+
+
 const INVALID_FILE_NAME_CHARACTERS = new Set(["\\", "/", ":", "*", "?", "\"", "<", ">", "|"]);
+
+
 
 const replaceControlCharacters = (value: string): string => {
   return Array.from(value, (char) => {
@@ -20,16 +24,14 @@ const sanitizeFileNamePart = (value: string): string => {
   );
   return sanitized || "sivflow-deck";
 };
-export const buildMfDeckFileName = (deckName: string): string => {
-  const sanitizedName = sanitizeFileNamePart(deckName);
+export const buildMfDeckFileName = (deckName: string): string => { const sanitizedName = sanitizeFileNamePart(deckName);
   const baseName = sanitizedName.toLowerCase().endsWith(MF_DECK_FILE_EXTENSION)
     ? sanitizedName.slice(0, -MF_DECK_FILE_EXTENSION.length)
     : sanitizedName;
 
   return `${baseName}${MF_DECK_FILE_EXTENSION}`;
 };
-export const downloadBytesAsMfDeck = ({ bytes, deckName }: {
-  bytes: Uint8Array;
+export const downloadBytesAsMfDeck = ({ bytes, deckName }: { bytes: Uint8Array;
   deckName: string;
 }): void => {
   const blobPart = new ArrayBuffer(bytes.byteLength);

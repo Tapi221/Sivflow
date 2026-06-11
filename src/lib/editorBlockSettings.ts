@@ -4,6 +4,8 @@ import type { BlockConfig } from "@/types/domain/base";
 
 
 
+
+
 export type EditorBlockType = Extract<BlockConfig["type"], "text" | "question" | "code" | "image" | "math" | "markdown">;
 export type EditorBlockIconName = | "Type" | "HelpCircle" | "Code" | "Image" | "Sigma" | "NotebookPen";
 export type EditorBlockDefinition = Readonly<{ id: EditorBlockType;
@@ -17,6 +19,8 @@ export type EditorBlockConfig = Omit<BlockConfig, "id" | "type"> & { id: EditorB
   type: EditorBlockType;
 };
 type EditorBlockComparable = Pick<BlockConfig, "type" | "orderIndex">;
+
+
 
 
 
@@ -77,6 +81,8 @@ const EDITOR_BLOCK_DEFINITION_BY_TYPE = Object.fromEntries(
     (definition) => [definition.type, definition] as const,
   ),
 ) as Record<EditorBlockType, EditorBlockDefinition>;
+
+
 
 
 

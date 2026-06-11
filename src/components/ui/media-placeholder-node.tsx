@@ -1,15 +1,26 @@
 "use client";
 
 import * as React from "react";
+
 import type { TPlaceholderElement } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { PlaceholderPlugin, PlaceholderProvider, updateUploadHistory } from "@platejs/media/react";
+
 import { AudioLines, FileUp, Film, ImageIcon, Loader2Icon } from "lucide-react";
+
 import { KEYS } from "platejs";
+
 import { PlateElement, useEditorPlugin, withHOC } from "platejs/react";
+
 import { useFilePicker } from "use-file-picker";
+
 import { cn } from "@/lib/utils";
+
 import { useUploadFile } from "@/hooks/use-upload-file";
+
+
 
 function formatBytes(
   bytes: number,
@@ -32,6 +43,8 @@ function formatBytes(
     : (sizes[i] ?? "Bytes")
     }`;
 }
+
+
 
 const CONTENT: Record<
   string,
@@ -62,8 +75,8 @@ const CONTENT: Record<
     icon: <Film />,
   },
 };
-export const PlaceholderElement = withHOC(PlaceholderProvider, function PlaceholderElement(props: PlateElementProps<TPlaceholderElement>) {
-  const { editor, element } = props;
+
+export const PlaceholderElement = withHOC(PlaceholderProvider, function PlaceholderElement(props: PlateElementProps<TPlaceholderElement>) { const { editor, element } = props;
 
   const { api } = useEditorPlugin(PlaceholderPlugin);
 
@@ -190,8 +203,8 @@ export const PlaceholderElement = withHOC(PlaceholderProvider, function Placehol
   );
 },
 );
-export function ImageProgress({ className, file, imageRef, progress = 0 }: {
-  file: File;
+
+export function ImageProgress({ className, file, imageRef, progress = 0 }: { file: File;
   className?: string;
   imageRef?: React.RefObject<HTMLImageElement | null>;
   progress?: number;

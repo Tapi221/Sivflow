@@ -1,6 +1,8 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
+
+
 type OverlayToolbarIndexNavigatorProps = {
   value: number;
   total: number;
@@ -10,6 +12,8 @@ type OverlayToolbarIndexNavigatorProps = {
   inputClassName?: string;
   totalClassName?: string;
 };
+
+
 
 const normalizeCommittedNavigatorValue = ({
   draftValue,
@@ -33,8 +37,9 @@ const normalizeCommittedNavigatorValue = ({
   return Math.min(total, Math.max(1, Math.trunc(parsedValue)));
 };
 
-export const OverlayToolbarIndexNavigator = ({ value, total, onCommit, inputAriaLabel, className, inputClassName, totalClassName }: OverlayToolbarIndexNavigatorProps) => {
-  const skipNextBlurCommitRef = React.useRef(false);
+
+
+export const OverlayToolbarIndexNavigator = ({ value, total, onCommit, inputAriaLabel, className, inputClassName, totalClassName }: OverlayToolbarIndexNavigatorProps) => { const skipNextBlurCommitRef = React.useRef(false);
   const [draftValue, setDraftValue] = React.useState(() => String(value));
 
   React.useEffect(() => {

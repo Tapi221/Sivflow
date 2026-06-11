@@ -9,6 +9,8 @@ import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { resolveCardImageUrl } from "@/services/cardImageResolver";
 import type { ResolvableImageRef } from "@/types/domain/assets";
 
+
+
 interface AudioPlayerProps {
   urls: string[];
 }
@@ -40,6 +42,8 @@ type FailedImagesState = {
   indices: Set<number>;
 };
 
+
+
 const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
@@ -47,6 +51,8 @@ const EMPTY_FAILED_IMAGE_INDICES = new Set<number>();
 const IMAGE_ACTION_BAR_CLASS_NAME = "absolute top-1 right-1 z-[999] pointer-events-auto flex items-center gap-0.5 rounded bg-white/80 p-[1px] opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100";
 const IMAGE_ACTION_BUTTON_CLASS_NAME = "flex h-[18px] w-[18px] items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-900/5 hover:text-zinc-600 focus:outline-none";
 const IMAGE_ACTION_ICON_CLASS_NAME = "h-[10px] w-[10px]";
+
+
 
 const hasDisplayImageUrl = (url: string | null): url is string =>
   typeof url === "string" && url.trim().length > 0;
@@ -103,8 +109,9 @@ const getNormalizedItemsKey = (items: NormalizedDisplayImage[]) =>
     )
     .join("\n");
 
-export const AudioPlayer = ({ urls }: AudioPlayerProps) => {
-  const [playingIndex, setPlayingIndex] = useState<number | null>(null);
+
+
+export const AudioPlayer = ({ urls }: AudioPlayerProps) => { const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const audioRefs = useRef<(HTMLAudioElement | null)[]>([]);
 
   const togglePlay = (index: number) => {
@@ -154,8 +161,7 @@ export const AudioPlayer = ({ urls }: AudioPlayerProps) => {
     </div>
   );
 };
-export const ImageGallery = ({ items, displayMode = "fixed", zoom = 1 }: ImageGalleryProps) => {
-  const { currentUser } = useAuthSession();
+export const ImageGallery = ({ items, displayMode = "fixed", zoom = 1 }: ImageGalleryProps) => { const { currentUser } = useAuthSession();
   const [displayImagesState, setDisplayImagesState] =
     useState<DisplayImagesState>(() => ({ key: "", images: [] }));
   const [failedImagesState, setFailedImagesState] =

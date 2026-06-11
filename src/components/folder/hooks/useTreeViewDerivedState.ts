@@ -3,6 +3,8 @@ import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selec
 import { normalizeDate } from "@/shared/codec/date";
 import { type Card, type CardSet, type DocumentItem, type Folder, type SelectedExplorerItem } from "@/types";
 
+
+
 interface UseTreeViewDerivedStateParams {
   folders: Folder[];
   cards: Card[];
@@ -21,20 +23,22 @@ type FolderStats = {
   lastReviewedAt: Date | null;
 };
 
+
+
 const EMPTY_FOLDER_STATS: FolderStats = {
   dueCount: 0,
   unlearnedCount: 0,
   lastReviewedAt: null,
 };
 
+
+
 const createEmptyFolderStats = (): FolderStats => ({
   dueCount: 0,
   unlearnedCount: 0,
   lastReviewedAt: null,
 });
-export const useTreeViewDerivedState = ({ folders, cards, cardSets = [], documents, selectedFolderId, selectedItem, selectedCardId, selectedDocumentId, autoCarryOver = true, isMobile }: UseTreeViewDerivedStateParams) => {
-  const getFolderPath = useCallback((folderId: string | null): string => {
-    if (!folderId) return "";
+export const useTreeViewDerivedState = ({ folders, cards, cardSets = [], documents, selectedFolderId, selectedItem, selectedCardId, selectedDocumentId, autoCarryOver = true, isMobile }: UseTreeViewDerivedStateParams) => { const getFolderPath = useCallback((folderId: string | null): string => { if (!folderId) return "";
 
     const path: string[] = [];
     let currentFolder = folders.find((folder) => folder.id === folderId);

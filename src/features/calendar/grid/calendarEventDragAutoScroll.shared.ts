@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 
+
+
 type CalendarEventDragRepeatActionStep<TDirection extends string> = (direction: TDirection, snapshot: CalendarEventDragPointerSnapshot) => boolean | void;
 type CalendarEventDragRepeatActionOptions<TDirection extends string> = {
   repeatIntervalMs: number;
@@ -12,14 +14,17 @@ type CalendarEventDragRepeatActionControls = {
   stop: (pointerId?: number) => void;
   getSnapshot: () => CalendarEventDragPointerSnapshot | null;
 };
-export type CalendarEventDragPointerSnapshot = {
-  pointerId: number;
+export type CalendarEventDragPointerSnapshot = { pointerId: number;
   buttons: number;
   clientX: number;
   clientY: number;
 };
 
+
+
 const PRIMARY_BUTTONS_MASK = 1;
+
+
 
 const isPrimaryButtonDragSnapshot = (snapshot: CalendarEventDragPointerSnapshot): boolean => (snapshot.buttons & PRIMARY_BUTTONS_MASK) === PRIMARY_BUTTONS_MASK;
 const cancelAnimationFrameIfNeeded = (frameId: number | null): void => {
@@ -122,5 +127,7 @@ const useCalendarEventDragRepeatAction = <TDirection extends string>({ repeatInt
 
   return { begin, update, stop, getSnapshot };
 };
+
+
 
 export { createCalendarEventDragPointerSnapshot, useCalendarEventDragRepeatAction };

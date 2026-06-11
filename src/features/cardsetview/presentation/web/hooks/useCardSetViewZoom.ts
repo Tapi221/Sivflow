@@ -8,6 +8,8 @@ import { clampZoomPercent as clampZoomPercentRange, resolveCanUseSplitLayout, re
 import { buildCardSetViewZoomPreferenceScopeKey, type CardSetViewZoomPreferenceScope, getCardSetViewZoomPreference, setCardSetViewZoomPreference } from "@/services/cardSetViewZoomPreferences";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 interface UseCardSetViewZoomOptions {
   deviceScope: string;
   cardSetId: string | null;
@@ -26,7 +28,11 @@ type LegacyZoomMigrationHint = Pick<
   "displayMode" | "interactionMode" | "cardLayoutMode"
 >;
 
+
+
 const DEFAULT_SOURCE_KEY = "__cardsetview_zoom_default__";
+
+
 
 export const clampZoomPercent = (value: number) => clampZoomPercentRange(value);
 export const computeDynamicMaxZoomPercent = () => 100;
@@ -53,8 +59,7 @@ const buildLegacyZoomMigrationHint = ({
   interactionMode,
   cardLayoutMode,
 });
-export const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displayMode, interactionMode, requestedCardLayoutMode, splitFallbackLayoutMode }: UseCardSetViewZoomOptions) => {
-  const [viewportWidthPx, setViewportWidthPx] = useState<number>(CARD_PANE_VIEW_DEFAULT_WIDTH_PX);
+export const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displayMode, interactionMode, requestedCardLayoutMode, splitFallbackLayoutMode }: UseCardSetViewZoomOptions) => { const [viewportWidthPx, setViewportWidthPx] = useState<number>(CARD_PANE_VIEW_DEFAULT_WIDTH_PX);
   const [showConstraintIndicator, setShowConstraintIndicator] =
     useState<boolean>(false);
   const [zoomPreferenceState, setZoomPreferenceState] =

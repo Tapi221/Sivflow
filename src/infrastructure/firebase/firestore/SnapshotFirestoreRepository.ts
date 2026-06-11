@@ -7,7 +7,11 @@ import type { AppSnapshot } from "@/types/domain/snapshot";
 
 
 
+
+
 const MAX_STORED_SNAPSHOTS = 7;
+
+
 
 
 
@@ -61,6 +65,8 @@ const list: SnapshotRepositoryPort["list"] = async (userId) => {
     } as AppSnapshot;
   });
 };
+
+
 
 
 

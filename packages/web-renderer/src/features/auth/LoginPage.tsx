@@ -5,6 +5,8 @@ import { signInWithGoogle } from "@/services/auth/googleSignIn";
 
 
 
+
+
 type LoginPageStyles = {
   page: CSSProperties;
   backgroundOverlay: CSSProperties;
@@ -28,6 +30,8 @@ type LoginPageStyles = {
   startText: CSSProperties;
   loadingDot: CSSProperties;
 };
+
+
 
 
 
@@ -220,11 +224,15 @@ const styles: LoginPageStyles = {
 
 
 
+
+
 const isAuthPopupClosedByUserError = (error: unknown): boolean =>
   typeof error === "object" &&
   error !== null &&
   "code" in error &&
   error.code === "auth/popup-closed-by-user";
+
+
 
 
 
@@ -332,6 +340,8 @@ const LoginPage = () => {
     </main>
   );
 };
+
+
 
 
 

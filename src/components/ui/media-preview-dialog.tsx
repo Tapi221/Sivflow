@@ -1,10 +1,16 @@
 "use client";
 
 import { PreviewImage, useImagePreview, useImagePreviewValue, useScaleInput } from "@platejs/media/react";
+
 import { cva } from "class-variance-authority";
+
 import { ArrowLeft, ArrowRight, Download, Minus, Plus, X } from "lucide-react";
+
 import { useEditorRef } from "platejs/react";
+
 import { cn } from "@/lib/utils";
+
+
 
 const buttonVariants = cva("rounded bg-[rgba(0,0,0,0.5)] px-1", {
   defaultVariants: {
@@ -17,8 +23,12 @@ const buttonVariants = cva("rounded bg-[rgba(0,0,0,0.5)] px-1", {
     },
   },
 });
+
 const SCROLL_SPEED = 4;
+
 const DEFAULT_DOWNLOAD_FILENAME = "image";
+
+
 
 function getImageDownloadFilename(url: string) {
   try {
@@ -31,8 +41,9 @@ function getImageDownloadFilename(url: string) {
   }
 }
 
-export function MediaPreviewDialog() {
-  const editor = useEditorRef();
+
+
+export function MediaPreviewDialog() { const editor = useEditorRef();
   const isOpen = useImagePreviewValue("isOpen", editor.id);
   const scale = useImagePreviewValue("scale");
   const isEditingScale = useImagePreviewValue("isEditingScale");
@@ -170,6 +181,7 @@ export function MediaPreviewDialog() {
     </div>
   );
 }
+
 function ScaleInput(props: React.ComponentProps<"input">) {
   const { props: scaleInputProps, ref } = useScaleInput();
 

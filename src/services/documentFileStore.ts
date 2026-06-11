@@ -3,6 +3,8 @@ import type { DocumentItem } from "@/types";
 
 
 
+
+
 type BlobScopeOptions = {
   userId?: string | null;
 };
@@ -16,6 +18,8 @@ type SaveDocumentWithBlobParams = {
   document: DocumentItem;
   blob: Blob;
 };
+
+
 
 
 

@@ -20,16 +20,16 @@ import type { UploadedImage } from "@/types/domain/assets";
 import type { MathBlockData, ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock } from "@/types/domain/card";
 
+
+
 export type CardBlockLayoutReplaceBlock = MarkdownReplaceBlock;
-export type ViewerProps = Readonly<{
-  questionDisplayMode: "always" | "tap_to_reveal";
+export type ViewerProps = Readonly<{ questionDisplayMode: "always" | "tap_to_reveal";
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
   toMediaUrl: (item: string | { url?: string | null; remoteUrl?: string | null; localUrl?: string | null; } | null | undefined) => string | null;
   displayMode: "fixed" | "fluid";
   zoom: number;
 }>;
-export type EditorProps = Readonly<{
-  onUpdateBlock: (id: string, updates: Partial<CardBlock>) => void;
+export type EditorProps = Readonly<{ onUpdateBlock: (id: string, updates: Partial<CardBlock>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
   onMoveUp?: () => void;
@@ -79,6 +79,8 @@ type SceneProps = Readonly<{
   viewerProps?: ViewerProps;
 }>;
 
+
+
 const NOOP = () => {};
 const SUPPORTED_LANGUAGES = [
   { value: "javascript", label: "JavaScript" },
@@ -99,6 +101,8 @@ const SUPPORTED_LANGUAGES = [
 ] as const;
 const MAX_MATH_LATEX_LENGTH = 10000;
 
+
+
 const renderGridOffsetSpacer = (gridOffsetPx: number) => gridOffsetPx > 0 ? <div aria-hidden className="pointer-events-none" style={{ height: `${gridOffsetPx}px` }} /> : null;
 const renderEditorShellProps = (editorProps?: EditorProps) => ({
   accentColor: editorProps?.accentColor,
@@ -113,6 +117,8 @@ const renderEditorShellProps = (editorProps?: EditorProps) => ({
   canMoveDown: editorProps?.canMoveDown,
   dragHandleClassName: "js-block-drag-handle",
 });
+
+
 
 const SharedBlockShell = ({ mode, className, contentClassName, label, icon, accentColor, isBlockSelected, onDelete, onDuplicate, onMoveUp, onMoveDown, onMoveDragStart, onMoveDragEnd, canMoveUp, canMoveDown, dragHandleClassName, children }: SharedShellProps) => {
   if (mode === "view") {
@@ -197,8 +203,7 @@ const MarkdownBlockScene = ({ mode, block, editorProps, viewerProps }: SceneProp
   const isEmpty = markdown.trim().length === 0;
   return <SharedBlockShell mode={mode} className={cn("bg-transparent px-0 py-0", !isEmpty && "border-0")} contentClassName="px-0" label="Markdown" icon={NotebookPen} {...renderEditorShellProps({ ...editorProps, isBlockSelected: Boolean(editorProps?.isBlockSelected || isEditorOpen) } as EditorProps | undefined)}>{mode === "edit" && editorProps ? <MarkdownBlockContent mode="edit" markdown={markdown} open={isEditorOpen} onOpenChange={setIsEditorOpen} onChange={(nextMarkdown) => editorProps.onUpdateBlock(block.id, { markdown: nextMarkdown })} onReplaceWithBlocks={editorProps.onReplaceMarkdownWithBlocks} accentColor={editorProps.accentColor} zoom={editorProps.zoom} /> : <MarkdownBlockContent mode="view" markdown={markdown} zoom={viewerProps?.zoom} />}</SharedBlockShell>;
 };
-export const CardBlockSceneRenderer = (props: CardBlockSceneRendererProps) => {
-  const { block, meta } = props;
+export const CardBlockSceneRenderer = (props: CardBlockSceneRendererProps) => { const { block, meta } = props;
 
   switch (block.type) {
     case "text":

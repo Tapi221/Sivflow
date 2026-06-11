@@ -18,6 +18,8 @@ export interface LocalDBTelemetrySnapshot { localdb_mode: LocalDBMode;
 
 
 
+
+
 const RESET_FAILED_REASON_KEY = "sivflow.localdb.resetFailedReason";
 const LEGACY_RESET_FAILED_REASON_KEY = "flashcard.localdb.resetFailedReason";
 const listeners = new Set<(status: LocalDBRuntimeStatus) => void>();
@@ -40,6 +42,8 @@ let currentStatus: LocalDBRuntimeStatus = {
   })(),
   updatedAt: Date.now(),
 };
+
+
 
 
 

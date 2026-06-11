@@ -4,6 +4,8 @@ import type { GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/
 
 
 
+
+
 export type GoogleCalendarEventsState = Map<string, Map<string, GoogleCalendarEvent>>;
 export type GoogleCalendarEventsAction = | { type: "UPSERT"; accountId: string; event: GoogleCalendarEvent; }
   | { type: "DELETE"; accountId: string; eventId: string; }
@@ -21,6 +23,8 @@ export type GoogleCalendarEventsAction = | { type: "UPSERT"; accountId: string; 
     calendars: GoogleCalendarListItem[];
   }
   | { type: "CLEAR_ACCOUNT"; accountId: string; };
+
+
 
 
 

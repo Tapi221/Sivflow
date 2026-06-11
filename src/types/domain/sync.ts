@@ -44,6 +44,8 @@ import type { UserSettings } from "./user";
 
 
 
+
+
 /**
  * 同期システムの型定義
  */
@@ -180,6 +182,8 @@ export interface SyncResult { success: boolean;
   conflicts: number;
   errors: string[];
 }
+
+
 
 
 

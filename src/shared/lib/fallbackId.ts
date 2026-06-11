@@ -2,6 +2,8 @@ import { asRecord } from "./records";
 
 
 
+
+
 export const makeFallbackId = () => { try { const cryptoObject = asRecord(globalThis.crypto as unknown);
   const randomUUID = cryptoObject?.randomUUID;
   if (typeof randomUUID === "function") {

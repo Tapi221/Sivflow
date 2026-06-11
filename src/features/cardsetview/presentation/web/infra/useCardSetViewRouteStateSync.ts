@@ -1,11 +1,15 @@
 import { useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+
+
 type UseCardSetViewRouteStateSyncOptions = {
   cardSetId: string | null;
   currentIndex: number;
   currentCardId: string | null;
 };
+
+
 
 const stringifyPath = ({
   pathname,
@@ -16,8 +20,7 @@ const stringifyPath = ({
   search: string;
   hash: string;
 }) => `${pathname}${search}${hash}`;
-export const useCardSetViewRouteStateSync = ({ cardSetId, currentIndex, currentCardId }: UseCardSetViewRouteStateSyncOptions) => {
-  const location = useLocation();
+export const useCardSetViewRouteStateSync = ({ cardSetId, currentIndex, currentCardId }: UseCardSetViewRouteStateSyncOptions) => { const location = useLocation();
   const navigate = useNavigate();
 
   const nextLocation = useMemo(() => {

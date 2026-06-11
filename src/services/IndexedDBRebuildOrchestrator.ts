@@ -7,6 +7,8 @@ import { sanitizeForLog } from "@/utils/logSanitizer";
 
 
 
+
+
 type RebuildTableByType = {
   card: "cards";
   folder: "folders";
@@ -32,6 +34,8 @@ type RebuildFailure = {
 
 
 
+
+
 const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
   card: "cards",
   folder: "folders",
@@ -41,6 +45,8 @@ const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
   asset: "images",
   userSetting: "userSettings",
 };
+
+
 
 
 
