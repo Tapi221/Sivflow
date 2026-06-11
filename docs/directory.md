@@ -32,6 +32,30 @@ apps/
         Assets.xcassets/
     android/
 
+functions/
+  package.json
+  tsconfig.json
+  src/
+    index.ts
+  functions.yaml
+
+scripts/
+  dev/
+    watch-source-conventions.mjs
+  functions/
+    generateManifest.cjs
+  predeploy/
+    firebase-predeploy.cjs
+  verify/
+    fix-const-arrow-functions.mjs
+    fix-import-spacing.mjs
+    fix-type-only-imports.mjs
+    verify-const-arrow-functions.mjs
+    verify-import-spacing.mjs
+    verify-no-symbols.mjs
+    verify-repeated-blank-lines.mjs
+    verify-source-conventions.mjs
+
 packages/
   web-renderer/
     src/
@@ -102,4 +126,8 @@ shared/
     colors.json
     spacing.json
     typography.json
+
+tools/
+  firebase/
+    sync-firebase-emulators.ts
 ```
