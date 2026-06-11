@@ -1,17 +1,8 @@
 import appIconSrc from "@shared/assets/icons/app-icon.svg";
 
 
+
 import { readStoredLocale, type Locale } from "@shared/i18n/locale.store";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -32,16 +23,6 @@ type OAuthCallbackText = {
   linkText: string;
   linkSuffix: string;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -72,16 +53,6 @@ const GOOGLE_OAUTH_CALLBACK_TEXT_BY_LOCALE: Record<Locale, OAuthCallbackText> = 
     linkSuffix: "。",
   },
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

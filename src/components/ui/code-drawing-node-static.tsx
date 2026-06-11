@@ -2,27 +2,21 @@ import * as React from 'react';
 
 
 
+
 import type { TCodeDrawingElement } from '@platejs/code-drawing';
+
 
 
 import type { SlateElementProps } from 'platejs/static';
 
 
 
+
 import { cn } from '@/lib/utils';
 
 
+
 import { SlateElement } from 'platejs/static';
-
-
-
-
-
-
-
-
-
-
 
 
 

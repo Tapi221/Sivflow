@@ -1,26 +1,20 @@
 import { type SetStateAction, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 
+
 import { AUTOSAVE_DELAY_MS, buildCardPatchForToggle, buildDraftFromCard, buildSavePayload, createPanelCard, draftSignature, extractCreatedCardId, hasMeaningfulDraft, NEW_SENTINEL, type PersistOperation, type PersistResult, snapshotDraft, toDateOrNull } from "./cardEditorSessionCore";
+
 
 
 import { type EditorDraft, makeNewDraft, normalizeSelectedCardId, shouldAutoOpenEditorForCard } from "./cardEditorUtils";
 
 
+
 import { useCardEntity } from "@/components/card/hooks/useCardEntity";
 
 
+
 import type { Card, CardPatch } from "@/types/domain/card";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -56,16 +50,6 @@ type FlushDraftOptions = {
   exitEditing?: boolean;
   showSuccessToast?: boolean;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -1,23 +1,16 @@
 import React from "react";
 
 
+
 import { SharedCardAttachments } from "./SharedCardAttachments";
+
 
 
 import { cn } from "@/lib/utils";
 
 
+
 import type { CardFaceAttachments } from "@/types/domain/card";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -26,16 +19,6 @@ type CardFaceWithAttachmentsProps = Readonly<{
   attachments?: CardFaceAttachments | null;
   className?: string;
 }>;
-
-
-
-
-
-
-
-
-
-
 
 
 

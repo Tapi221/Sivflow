@@ -1,17 +1,8 @@
 import { INK_DOCUMENT_VERSION, normalizeInkDocument, type InkDocument, type InkSide, type InkStroke } from "@core/domain/card/ink/inkDocument";
 
 
+
 import type { HandwritingStrokeDeltaMessage } from "./handwritingSession.types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -33,16 +24,6 @@ export type ApplyHandwritingStrokeDeltaResult = { document: InkDocument;
   applied: boolean;
   reason?: "session-mismatch" | "card-mismatch" | "side-mismatch" | "invalid-stroke" | "duplicate-stroke";
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

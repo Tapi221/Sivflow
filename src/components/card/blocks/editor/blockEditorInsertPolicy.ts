@@ -2,16 +2,6 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
-
-
-
-
-
-
-
-
-
-
 type CreateEditorBlockParams = Readonly<{
   prefix: "question" | "answer";
   type: Exclude<CardBlock["type"], "audio" | "reference">;
@@ -23,30 +13,10 @@ type CreateEditorBlockParams = Readonly<{
 
 
 
-
-
-
-
-
-
-
-
-
-
 const EDITOR_NON_INSERTABLE_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "audio",
   "reference",
 ]);
-
-
-
-
-
-
-
-
-
-
 
 
 

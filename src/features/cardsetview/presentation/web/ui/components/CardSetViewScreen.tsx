@@ -1,47 +1,48 @@
 import type { JSX } from "react";
 
 
+
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
+
 
 
 import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
 
 
+
 import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
+
 
 
 import { cn } from "@/lib/utils";
 
 
+
 import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
+
 
 
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
 
 
+
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
+
 
 
 import type { CardSetViewContentProps } from "./cardSetViewContentProps";
 
 
+
 import { CardSetViewDesktopContent } from "./CardSetViewDesktopContent";
+
 
 
 import { CardSetViewMobileContent } from "./CardSetViewMobileContent";
 
 
+
 import { CardViewCompactToolbar } from "./CardViewCompactToolbar";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -51,30 +52,10 @@ type CardSetViewScreenProps = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const CARD_SET_VIEW_CONTENT_COMPONENTS = {
   desktop: CardSetViewDesktopContent,
   mobile: CardSetViewMobileContent,
 } satisfies Record<PresentationTarget, (props: CardSetViewContentProps) => JSX.Element>;
-
-
-
-
-
-
-
-
-
-
 
 
 

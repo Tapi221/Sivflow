@@ -1,101 +1,120 @@
 import type { DragEvent } from "react";
 
 
+
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+
 
 
 import { useNavigate } from "react-router-dom";
 
 
+
 import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
+
 
 
 import { MfCardImportDialog } from "@/features/cardFile/presentation/web/MfCardImportDialog";
 
 
+
 import { MfDeckImportDialog } from "@/features/deckFile/presentation/web/MfDeckImportDialog";
+
 
 
 import { useDocumentCommands } from "@/features/document/hooks/useDocumentCommands";
 
 
+
 import { useDocumentsRead } from "@/features/document/hooks/useDocumentsRead";
+
 
 
 import { ExplorerSearchSourceBridge } from "@/features/global-search/components/ExplorerSearchSourceBridge";
 
 
+
 import { readDesktopImportFiles, subscribeDesktopImportFileOpen } from "@/features/import/desktop/desktopImportFiles";
+
 
 
 import { detectImportFileKind, getPortableImportFiles, getSupportedImportFiles, isPortableImportFileKind, isSupportedImportFileKind } from "@/features/import/domain/importFileKind";
 
 
+
 import { type ImportFormat, ImportFormatDialog } from "@/features/import/presentation/web/ImportFormatDialog";
+
 
 
 import { PortableImportBatchDialog } from "@/features/import/presentation/web/PortableImportBatchDialog";
 
 
+
 import { XlsxImportDialog } from "@/features/import/presentation/web/XlsxImportDialog";
+
 
 
 import { SectionListColumnPane } from "@/components/folder/components/SectionListColumnPane";
 
 
+
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
+
 
 
 import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions";
 
 
+
 import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
+
 
 
 import { useTreeViewFilters } from "@/components/folder/hooks/useTreeViewFilters";
 
 
+
 import { useToast } from "@/contexts/ToastContext";
+
 
 
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 
 
+
 import { useCardsRead } from "@/components/card/hooks/useCardsRead";
+
 
 
 import { useCardSets } from "@/components/card/hooks/useCardSets";
 
 
+
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+
 
 
 import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
 
 
+
 import { useTags } from "@/features/settings/hooks/useTags";
+
 
 
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 
 
+
 import { cn } from "@/lib/utils";
+
 
 
 import { createAppDestination, createPageUrl } from "@/platform/web/navigation/toWebPath";
 
 
+
 import type { CardSet, Folder, SelectedExplorerItem } from "@/types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -116,27 +135,7 @@ interface TreeViewLayoutProps {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const MOBILE_DETAIL_MEDIA_QUERY = "(max-width: 767px)";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -168,16 +167,6 @@ const useIsMobileViewport = (): boolean => {
 
   return isMobileViewport;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -910,16 +899,6 @@ const TreeViewLayout = ({
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

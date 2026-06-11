@@ -1,18 +1,20 @@
 import { downloadPdfFromGoogleDrive } from "@/integration/google-integration/googleDrive.pdfDownload";
 
 
+
 import { requestGoogleDriveFileAccessToken } from "@/integration/google-integration/googleDrive.oauth";
+
 
 
 import { auth } from "@/services/firebase";
 
 
+
 import { getDocumentBlob, saveDocumentBlob } from "@/services/documentFileStore";
 
 
+
 import type { DocumentItem } from "@/types";
-
-
 
 
 
@@ -20,12 +22,8 @@ type PdfDocumentBlobFields = Pick<DocumentItem, "id" | "localFileId" | "userId" 
 
 
 
-
-
 const GOOGLE_DRIVE_STORAGE_PATH_PREFIX = "google-drive://";
 const GOOGLE_DRIVE_FILE_PATH_PATTERN = /\/file\/d\/([^/]+)/;
-
-
 
 
 

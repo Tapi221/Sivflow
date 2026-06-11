@@ -2,16 +2,6 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
-
-
-
-
-
-
-
-
-
-
 export type CardSurfaceMode = "card" | "fluid";
 export type CardInteractionMode = "view" | "edit";
 export type CardChromeScaleMode = "fixed";
@@ -25,28 +15,8 @@ export interface CardRenderSpec { surfaceMode: CardSurfaceMode;
 
 
 
-
-
-
-
-
-
-
-
-
-
 const MIN_ZOOM_SCALE = 0.5;
 const MAX_ZOOM_SCALE = 4;
-
-
-
-
-
-
-
-
-
-
 
 
 

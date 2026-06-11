@@ -1,7 +1,9 @@
 import type { ChatMessage } from '@/app/api/ai/command/types';
 
 
+
 import type { SlateEditor } from 'platejs';
+
 
 
 
@@ -9,24 +11,17 @@ import dedent from 'dedent';
 
 
 
+
 import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction, getMarkdownWithSelection, isMultiBlocks, isSelectionInTable, isSingleCellSelection } from '@/app/api/ai/command/utils';
+
 
 
 
 import { commonEditRules } from './common';
 
 
+
 import { buildEditTableMultiCellPrompt } from './getEditTablePrompt';
-
-
-
-
-
-
-
-
-
-
 
 
 

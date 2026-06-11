@@ -2,28 +2,8 @@ export type SubjectiveScore = 0 | 1 | 2 | 3;
 
 
 
-
-
-
-
-
-
-
-
-
-
 const MIN_STABILITY = 0.01;
 const MAX_STABILITY = 1.0;
-
-
-
-
-
-
-
-
-
-
 
 
 

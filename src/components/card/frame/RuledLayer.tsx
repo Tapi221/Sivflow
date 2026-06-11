@@ -1,20 +1,12 @@
 import React from "react";
 
 
+
 import { getRuledStyle, type RuledStyleKind } from "./ruledStyles";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -37,27 +29,7 @@ type RuledLayerProps = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -117,16 +89,6 @@ const RuledLayer = ({
     />
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

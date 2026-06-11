@@ -1,17 +1,8 @@
 import { useEffect, useState } from "react";
 
 
+
 import { getPresentationTargetFromWindow, type PresentationTarget } from "./getPresentationTarget";
-
-
-
-
-
-
-
-
-
-
 
 
 

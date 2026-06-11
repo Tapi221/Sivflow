@@ -1,17 +1,8 @@
 import type { ComponentType, CSSProperties } from "react";
 
 
+
 import type { PdfDashboardRow } from "@/features/library-pdf/model/pdfLibraryRow";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -32,31 +23,11 @@ type PdfLibraryContinueSectionProps = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const dateTimeTextStyle: CSSProperties = {
   fontFamily:
     "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Hiragino Sans\", \"Noto Sans JP\", system-ui, sans-serif",
   fontVariantNumeric: "tabular-nums",
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

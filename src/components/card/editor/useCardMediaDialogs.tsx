@@ -2,7 +2,9 @@ import { type ComponentType, type SVGProps, useCallback, useEffect, useMemo, use
 
 
 
+
 import { StratisAudioSettings01Icon, StratisImageIcon, StratisLinkAngledIcon } from "stratis-ui-icons";
+
 
 
 
@@ -10,7 +12,9 @@ import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CL
 
 
 
+
 import { cn } from "@/lib/utils";
+
 
 
 
@@ -18,7 +22,9 @@ import type { UploadedImage } from "@/types/domain/assets";
 
 
 
+
 import type { ReferenceBlockData } from "@/types/domain/base";
+
 
 
 
@@ -26,11 +32,8 @@ import type { CardFaceAttachmentAudio, CardFaceAttachments } from "@/types/domai
 
 
 
+
 import { sanitizeReferences } from "./cardEditorUtils";
-
-
-
-
 
 
 
@@ -50,10 +53,6 @@ type StratisComponentIconProps = {
 
 
 
-
-
-
-
 const normalizeAttachments = (attachments: CardFaceAttachments | null | undefined): CardFaceAttachments => ({
   images: attachments?.images ?? [],
   audios: attachments?.audios ?? [],
@@ -62,15 +61,7 @@ const normalizeAttachments = (attachments: CardFaceAttachments | null | undefine
 
 
 
-
-
-
-
 const StratisComponentIcon = ({ icon: Icon, className }: StratisComponentIconProps) => <Icon aria-hidden="true" focusable="false" className={className} />;
-
-
-
-
 
 
 

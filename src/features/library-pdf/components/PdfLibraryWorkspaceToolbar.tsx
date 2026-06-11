@@ -1,32 +1,28 @@
 import { type ComponentType } from "react";
 
 
+
 import { motion, type Transition } from "framer-motion";
+
 
 
 import { useNavigate } from "react-router-dom";
 
 
+
 import { FlashCardIcon, PDFIcon } from "@/chip/icons/icons.library";
+
 
 
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 
 
+
 import { cn } from "@/lib/utils";
 
 
+
 import type { IconProps } from "@/ui/icons";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -46,16 +42,6 @@ type LibraryTypeToolbarTab = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const LIBRARY_TYPE_TABS = [
   { value: "flashcard", label: "Flashcard", icon: FlashCardIcon },
   { value: "pdf", label: "PDF", icon: PDFIcon },
@@ -69,29 +55,9 @@ const TAB_MOTION_TRANSITION: Transition = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const resolveLibrarySectionRoute = (section: PdfLibraryWorkspaceSection): string => {
   return section === "flashcard" ? "/library/flashcard" : "/library/pdf";
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -140,27 +106,7 @@ const PdfLibraryWorkspaceToolbar = ({ activeSection, onSelectSection, onAddPdf }
 
 
 
-
-
-
-
-
-
-
-
-
-
 export { PdfLibraryWorkspaceToolbar };
-
-
-
-
-
-
-
-
-
-
 
 
 

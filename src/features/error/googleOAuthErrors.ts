@@ -1,31 +1,12 @@
 import { getGoogleOAuthCallableErrorReason, isGoogleOAuthDeterministicErrorReason } from "@/integration/google-integration/google.server-oauth";
 
 
+
 import type { GoogleOAuthCallableErrorReason } from "@/integration/google-integration/google.server-oauth";
 
 
 
-
-
-
-
-
-
-
-
-
-
 export const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -35,16 +16,6 @@ export type GoogleOAuthCooldownEntry = { reason: GoogleOAuthCooldownReason;
   message: string;
   until: number;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

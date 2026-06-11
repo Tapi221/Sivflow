@@ -1,20 +1,12 @@
 import { normalizeInkDocument, type InkDocument } from "@core/domain/card/ink/inkDocument";
 
 
+
 import { applyHandwritingStrokeDelta, type ApplyHandwritingStrokeDeltaResult } from "./handwritingStrokeMessages";
 
 
+
 import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionStatus } from "./handwritingSession.types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -33,16 +25,6 @@ export type ReceiveDesktopHandwritingMessageResult = { document: InkDocument;
   status: HandwritingSessionStatus;
   reason?: DesktopHandwritingReceiverReason;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

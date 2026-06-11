@@ -1,17 +1,8 @@
 import type { ReactNode, SVGProps } from "react";
 
 
+
 import type { IconProps } from "@/ui/icons";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -20,6 +11,8 @@ type SidebarIconProps = SVGProps<SVGSVGElement>;
 type IconShellProps = SidebarIconProps & {
   children: ReactNode;
 };
+
+
 
 
 

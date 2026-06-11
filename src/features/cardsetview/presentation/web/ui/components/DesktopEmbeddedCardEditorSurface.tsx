@@ -1,59 +1,64 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 
+
 import { CANONICAL_CARD_WIDTH, CARD_ROW_PX, layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
+
 
 
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 
 
+
 import { resolveEditorCardFitScale } from "@/domain/card/resolveEditorCardFitScale";
+
 
 
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 
 
+
 import { CardFaceScene } from "./CardFaceScene";
+
 
 
 import { CardSurfaceLayout } from "./CardSurfaceLayout";
 
 
+
 import { buildCardSurfaceMetrics } from "./cardSurfacePresentation";
+
 
 
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 
 
+
 import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";
+
 
 
 import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
 
 
+
 import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
+
 
 
 import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
 
 
+
 import type { Card, UserSettings } from "@/types";
+
 
 
 import type { CardBlock } from "@/types/domain/card";
 
 
+
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -100,16 +105,6 @@ type EmbeddedEditorFaceProps = Readonly<{
 
 
 
-
-
-
-
-
-
-
-
-
-
 const isCardEntity = (value: unknown): value is Card =>
   typeof value === "object" &&
   value !== null &&
@@ -126,16 +121,6 @@ const measureSurfaceViewportWidth = (element: HTMLDivElement) =>
       Math.max(element.clientWidth, element.parentElement?.clientWidth ?? 0),
     ),
   );
-
-
-
-
-
-
-
-
-
-
 
 
 

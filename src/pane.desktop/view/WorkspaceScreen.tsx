@@ -1,89 +1,104 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 
 
+
 import { useNavigate, useOutletContext } from "react-router-dom";
+
 
 
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 
 
+
 import { NoteDocumentEditor } from "@/components/note/NoteDocumentEditor";
+
 
 
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 
 
+
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
+
 
 
 import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 
 
+
 import { areExplorerBreadcrumbContextsEqual, EMPTY_EXPLORER_BREADCRUMB_CONTEXT, type BreadcrumbCrumb, type ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
+
 
 
 import { buildFolderPathCrumbs } from "@/features/breadcrumbs/builders";
 
 
+
 import { WorkspaceBreadcrumbs } from "@/features/breadcrumbs/components/WorkspaceBreadcrumbs";
+
 
 
 import { useDocumentsRead } from "@/features/document/hooks/useDocumentsRead";
 
 
+
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
+
 
 
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 
 
+
 import { useSearchStore } from "@/features/search/store/useSearchStore";
+
 
 
 import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
 
 
+
 import { useNotes } from "@/hooks/note/useNotes";
+
 
 
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 
 
+
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
+
 
 
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
 
 
+
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+
 
 
 import type { WorkspaceExplorerTab, WorkspaceNoteTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 
 
+
 import type { DocumentItem, Folder, Note, SelectedExplorerItem } from "@/types";
+
 
 
 import { Search } from "@/ui/icons";
 
 
+
 import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "./MobileCalendarSidebar";
+
 
 
 import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
 
 
+
 import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -123,16 +138,6 @@ type SettingsDialogHostProps = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const MOBILE_WORKSPACE_MEDIA_QUERY = "(max-width: 767px)";
 const MOBILE_WORKSPACE_SIDEBAR_OPEN_BUTTON_CLASS_NAME = "pointer-events-auto absolute left-3 top-3 z-[90] flex h-10 w-10 items-center justify-center bg-transparent p-0 text-[#111111] outline-none transition hover:text-[#111111] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
 const MOBILE_WORKSPACE_MAIN_PANEL_CLASS_NAME = "!rounded-none !border-0 !shadow-none";
@@ -145,16 +150,6 @@ const WORKSPACE_ACTION_TOOLBAR_STYLE = { right: "252px", top: "12px" };
 const WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME = "max-w-[calc(100%-96px)]";
 const WORKSPACE_MAIN_PANEL_CLASS_NAME = "relative z-0 isolate min-w-0";
 const SIDEBAR_INTERACTION_REGION_STYLE: SidebarInteractionRegionStyle = { WebkitAppRegion: "no-drag" };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -243,16 +238,6 @@ const useIsMobileWorkspaceViewport = (): boolean => {
 
   return isMobileWorkspaceViewport;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -486,16 +471,6 @@ const WorkspaceScreen = () => {
     </SettingsDialogHost>
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -1,37 +1,20 @@
 import { useEffect } from "react";
 
 
+
 import { isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
 
 
+
 import { readStoredAccounts, upsertStoredAccount, type StoredGoogleAccount } from "./gcal.multi-storage";
+
 
 
 import { listServerStoredGoogleCalendarAccounts } from "./gcal.server-accounts";
 
 
 
-
-
-
-
-
-
-
-
-
-
 type ServerStoredGoogleCalendarAccount = Awaited<ReturnType<typeof listServerStoredGoogleCalendarAccounts>>[number];
-
-
-
-
-
-
-
-
-
-
 
 
 

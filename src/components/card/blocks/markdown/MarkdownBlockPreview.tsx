@@ -1,23 +1,16 @@
 import React from "react";
 
 
+
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
+
 
 
 import { MarkdownBlockDisplay } from "./MarkdownBlockDisplay";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -41,16 +34,6 @@ export type MarkdownBlockPreviewProps = { markdown: string;
 interface MarkdownBlockPreviewSurfaceProps extends MarkdownBlockPreviewProps {
   contentClassName?: string;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

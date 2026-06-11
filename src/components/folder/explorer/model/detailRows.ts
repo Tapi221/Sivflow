@@ -1,20 +1,12 @@
 import { toVirtualMfCardDisplayName, toVirtualMfDeckDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
 
 
+
 import { type FolderTreeNode, getEntityTime, getFolderId, getParentFolderId, normalizeFolderId } from "./utils";
 
 
+
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem, SyncEntity } from "@/types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -66,27 +58,7 @@ type LegacyEntityFields = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const EXPLORER_ROOT_PATH_SEGMENTS = ["ホーム", "エクスプローラー"];
-
-
-
-
-
-
-
-
-
-
 
 
 

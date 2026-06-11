@@ -1,23 +1,16 @@
 import type { LocalDBLike } from "./localDB";
 
 
+
 import { SafeIndexedDBWriter } from "./SafeIndexedDBWriter";
+
 
 
 import type { IndexedDBMetadata } from "@/types/domain/storage";
 
 
+
 import { CURRENT_SCHEMA_VERSION } from "@/types/domain/storage";
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -1,20 +1,12 @@
 import { Reorder, type HTMLMotionProps, type Transition } from "framer-motion";
 
 
+
 import type { CSSProperties, ReactNode, RefObject } from "react";
 
 
+
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -42,16 +34,6 @@ type WorkspaceTabDndItemProps = Omit<
 
 
 
-
-
-
-
-
-
-
-
-
-
 const REORDER_ITEM_TRANSITION: Transition = {
   layout: {
     type: "tween",
@@ -67,16 +49,6 @@ const REORDER_ITEM_TRANSITION: Transition = {
     duration: 0,
   },
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -135,16 +107,6 @@ const WorkspaceTabDndItem = ({
     </Reorder.Item>
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

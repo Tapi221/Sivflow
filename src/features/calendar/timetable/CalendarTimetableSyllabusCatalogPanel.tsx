@@ -2,45 +2,30 @@ import { useCallback, useMemo, useState } from "react";
 
 
 
+
 import type { CalendarTimetableColorKey, CalendarTimetableInstitution, CalendarTimetableInstitutionKind, CalendarTimetablePeriod, CalendarTimetableSyllabusCourse, CalendarTimetableSyllabusCourseDisplay, CalendarTimetableSyllabusCourseDraft, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
+
 
 
 import { isValidCalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.model";
 
 
+
 import { getTagColorStyle } from "@/chip/tag/tag.style";
 
 
+
 import { TAG_COLOR_KEYS } from "@/chip/tag/tag.constants";
+
 
 
 import { cn } from "@/lib/utils";
 
 
 
-
-
-
-
-
-
-
-
-
-
 type CalendarTimetableSyllabusCatalogPanelProps = { activeSemesterId: string; institutions: CalendarTimetableInstitution[]; periods: CalendarTimetablePeriod[]; syllabusCourses: CalendarTimetableSyllabusCourseDisplay[]; onSearch: (query: string, institutionId?: string | null, departmentId?: string | null) => Promise<CalendarTimetableSyllabusCourseDisplay[]>; onSaveSyllabusCourse: (draft: CalendarTimetableSyllabusCourseDraft) => Promise<void>; onAddCourseFromSyllabus: (syllabusCourse: CalendarTimetableSyllabusCourse, semesterId: string) => Promise<void>; onClose: () => void };
 
 type SyllabusSlotDraft = { dayIndex: CalendarTimetableWeekdayIndex; periodLabel: string };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -51,29 +36,9 @@ const EMPTY_SLOT_DRAFTS: SyllabusSlotDraft[] = [];
 
 
 
-
-
-
-
-
-
-
-
-
-
 const createInitialSlotDraft = (periods: CalendarTimetablePeriod[]): SyllabusSlotDraft[] => periods[0] ? [{ dayIndex: 0, periodLabel: periods[0].label }] : EMPTY_SLOT_DRAFTS;
 
 const formatSyllabusCourseSlots = (course: CalendarTimetableSyllabusCourse): string => course.slots.map((slot) => `${TIMETABLE_DAY_LABELS[slot.dayIndex]}${slot.periodLabel}`).join(" / ");
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -159,16 +124,6 @@ const CalendarTimetableSyllabusCatalogPanel = ({ activeSemesterId, institutions,
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

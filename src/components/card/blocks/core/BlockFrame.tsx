@@ -1,17 +1,8 @@
 import React from "react";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -30,28 +21,8 @@ type BlockFrameProps = React.HTMLAttributes<HTMLDivElement> & {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const SELECTED_BLOCK_OUTLINE_COLOR = "rgba(37, 99, 235, 0.82)";
 const SELECTED_BLOCK_OUTLINE_WIDTH = "1px";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -59,16 +30,6 @@ const getClosestBlockId = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) return null;
   return target.closest<HTMLElement>("[data-block-id]")?.dataset.blockId ?? null;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

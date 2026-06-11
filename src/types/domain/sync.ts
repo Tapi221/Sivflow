@@ -1,22 +1,30 @@
 import type { Timestamp } from "firebase/firestore";
 
 
+
 import type { AssetRecord } from "./assets";
+
 
 
 import type { Card } from "./card";
 
 
+
 import type { CardSet } from "./cardSet";
+
 
 
 import type { Document } from "./document";
 
 
+
 import type { Folder } from "./folder";
 
 
+
 import type { UserSettings } from "./user";
+
+
 
 
 
@@ -190,16 +198,6 @@ export interface SyncResult { success: boolean;
   conflicts: number;
   errors: string[];
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

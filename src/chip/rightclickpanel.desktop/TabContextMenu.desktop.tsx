@@ -1,20 +1,12 @@
 import { type CSSProperties, type RefObject } from "react";
 
 
+
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
 
+
 import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -36,16 +28,6 @@ type TabContextMenuProps = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 export const WORKSPACE_TAB_CONTEXT_PANEL_ID = "workspace-tab-context-menu";
 
 const WORKSPACE_TAB_CONTEXT_MENU_LABELS = [
@@ -58,16 +40,6 @@ const WORKSPACE_TAB_CONTEXT_MENU_LABELS = [
 export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = resolveRightClickPanelTextWidth(WORKSPACE_TAB_CONTEXT_MENU_LABELS);
 export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = WORKSPACE_TAB_CONTEXT_MENU_LABELS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
-
-
-
-
-
-
-
-
-
-
 
 
 

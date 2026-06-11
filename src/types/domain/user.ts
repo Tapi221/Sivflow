@@ -1,17 +1,8 @@
 import { Timestamp } from "firebase/firestore";
 
 
+
 import type { BaseEntity, BlockConfig } from "./base";
-
-
-
-
-
-
-
-
-
-
 
 
 

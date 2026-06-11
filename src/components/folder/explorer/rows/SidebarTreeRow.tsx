@@ -1,29 +1,24 @@
 import React from "react";
 
 
+
 import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
+
 
 
 import type { ExplorerMenuPanelVariant } from "@/components/folder/components/menus/ExplorerMenuPanel";
 
 
+
 import type { MenuAction } from "@/components/folder/components/menus/menuActions";
+
 
 
 import { useContextMenuAnchor } from "@/components/folder/components/menus/useContextMenuAnchor";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -41,16 +36,6 @@ interface SidebarTreeRowProps {
   onContextMenuSelect?: () => void;
   children: React.ReactNode;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

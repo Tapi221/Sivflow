@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 
+
 import { createEmptyInkDocument, type InkStroke } from "@core/domain/card/ink/inkDocument";
 
 
+
 import { receiveDesktopHandwritingMessage, type DesktopHandwritingReceiverSession } from "@platform/handwriting/desktopHandwritingReceiver";
+
 
 
 import { createHandwritingStrokeDeltaMessage } from "@platform/handwriting/handwritingStrokeMessages";

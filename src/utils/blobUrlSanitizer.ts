@@ -13,16 +13,6 @@ export type SanitizeResult<T> = { value: T;
 
 
 
-
-
-
-
-
-
-
-
-
-
 export const isBlobUrl = (v: unknown): v is string => typeof v === "string" && v.startsWith("blob:");
 
 export const sanitizeBlobUrlsDeep = <T>(input: T): SanitizeResult<T> => { const fixes: BlobUrlFix[] = [];

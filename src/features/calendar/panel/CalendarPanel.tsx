@@ -1,17 +1,8 @@
 import { forwardRef, type ReactNode } from "react";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -26,16 +17,6 @@ type CalendarPanelViewportProps = {
   hasTrailingPanel?: boolean;
   className?: string;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -56,43 +37,13 @@ const CALENDAR_PANEL_WITH_TRAILING_PANEL_CLASS = "rounded-t-[28px]";
 
 
 
-
-
-
-
-
-
-
-
-
-
 export const CalendarPanelViewport = forwardRef<HTMLDivElement, CalendarPanelViewportProps>( ({ children, hasTrailingPanel = false, className }, ref) => { return ( <div ref={ref} className={cn( CALENDAR_PANEL_VIEWPORT_BASE_CLASS, hasTrailingPanel ? CALENDAR_PANEL_VIEWPORT_WITH_TRAILING_PANEL_CLASS : CALENDAR_PANEL_VIEWPORT_STANDALONE_CLASS, className, )} > {children} </div> );
   },
 );
 
 
 
-
-
-
-
-
-
-
-
-
-
 CalendarPanelViewport.displayName = "CalendarPanelViewport";
-
-
-
-
-
-
-
-
-
-
 
 
 

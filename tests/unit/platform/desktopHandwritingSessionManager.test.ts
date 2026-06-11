@@ -1,13 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 
+
 import { type InkStroke } from "@core/domain/card/ink/inkDocument";
+
 
 
 import type { HandwritingDeviceInfo } from "@platform/handwriting/handwritingSession.types";
 
 
+
 import { attachMobileDeviceToDesktopHandwritingSession, closeDesktopHandwritingSession, createDesktopHandwritingSessionManagerState, failDesktopHandwritingSession, getDesktopHandwritingDocumentKey, receiveDesktopHandwritingSessionManagerMessage, startDesktopHandwritingSession } from "@platform/handwriting/desktopHandwritingSessionManager";
+
 
 
 import { createHandwritingStrokeDeltaMessage } from "@platform/handwriting/handwritingStrokeMessages";

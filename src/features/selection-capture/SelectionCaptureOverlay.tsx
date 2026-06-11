@@ -2,21 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 
 
+
 import type { MouseEvent, PointerEvent } from "react";
 
 
 
+
 import type { SelectionCaptureArea, SelectionCapturePoint, SelectionCaptureRect, SelectionCaptureShape } from "./selectionCapture.types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -35,29 +27,9 @@ type SelectionCaptureOverlayProps = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const MIN_SELECTION_SIZE_PX = 5;
 
 const MIN_FREEHAND_POINTS = 3;
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -104,16 +76,6 @@ const buildSvgPathData = (path: SelectionCapturePoint[]): string => {
     "Z",
   ].join(" ");
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -2,41 +2,40 @@ import type { AppSnapshot } from "@/types/domain/snapshot";
 
 
 
+
 import { createCompareSnapshotUseCase } from "@/application/snapshot/CompareSnapshot";
+
 
 
 import { createCreateSnapshotUseCase } from "@/application/snapshot/CreateSnapshot";
 
 
+
 import { createExportFolderSnapshotUseCase } from "@/application/snapshot/ExportFolderSnapshot";
+
 
 
 import { createExportSnapshotUseCase } from "@/application/snapshot/ExportSnapshot";
 
 
+
 import { parseSnapshotFile } from "@/application/snapshot/ParseSnapshotFile";
+
 
 
 import { createSnapshotStoreUseCase } from "@/application/snapshot/StoreSnapshot";
 
 
+
 import { browserJsonFileExportAdapter } from "@/infrastructure/browser-storage/BrowserJsonFileExportAdapter";
+
 
 
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
 
 
+
 import { snapshotFirestoreRepository } from "@/infrastructure/firebase/firestore/SnapshotFirestoreRepository";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -105,16 +104,6 @@ export const snapshotService = { createSnapshot: async ( userId: string, options
     console.log("[スナップショット] 移行が完了しました。LocalStorage をクリアしました");
   },
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

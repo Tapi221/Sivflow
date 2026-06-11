@@ -2,17 +2,8 @@
 import type { ReactNode } from "react";
 
 
+
 import { createContext, useCallback, useContext, useState } from "react";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -34,27 +25,7 @@ interface ToastContextType {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -118,16 +89,6 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => { const 
     </ToastContext.Provider>
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -2,16 +2,6 @@ import { invoke } from "@tauri-apps/api/core";
 
 
 
-
-
-
-
-
-
-
-
-
-
 type TauriClipboardImageInput = {
   mimeType: string;
   data: number[];
@@ -19,27 +9,7 @@ type TauriClipboardImageInput = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const DEFAULT_IMAGE_MIME_TYPE = "image/png";
-
-
-
-
-
-
-
-
-
-
 
 
 

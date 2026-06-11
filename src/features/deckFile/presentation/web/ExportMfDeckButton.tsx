@@ -1,38 +1,36 @@
 import { useState } from "react";
 
 
+
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+
 
 
 import { Button } from "@/components/ui/button";
 
 
+
 import { exportMfDeckBytes } from "@/features/deckFile/application/exportMfDeck";
+
 
 
 import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
 
 
+
 import { MfDeckExportError } from "@/features/deckFile/domain/mfDeck.types";
+
 
 
 import { downloadBytesAsMfDeck } from "@/features/deckFile/infra/web/downloadMfDeck";
 
 
+
 import type { Card, CardSet } from "@/types";
 
 
+
 import { useToast } from "@web-renderer/contexts/ToastContext";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -42,16 +40,6 @@ type ExportMfDeckButtonProps = {
   tagById?: MfDeckTagLookup;
   disabled?: boolean;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -117,27 +105,7 @@ const ExportMfDeckButton = ({
 
 
 
-
-
-
-
-
-
-
-
-
-
 export { ExportMfDeckButton };
-
-
-
-
-
-
-
-
-
-
 
 
 

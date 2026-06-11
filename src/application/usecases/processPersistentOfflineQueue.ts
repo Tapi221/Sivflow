@@ -1,20 +1,12 @@
 import type { QueueItem } from "./persistentOfflineQueueModels";
 
 
+
 import type { UploadedImage } from "@/types";
 
 
+
 import { assertImageInvariant } from "@/utils/imageAssertions";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -30,16 +22,6 @@ interface PersistentOfflineQueueProcessingDeps {
   incrementRetryCount: (id: string) => Promise<void>;
   yieldToUi?: () => Promise<void>;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

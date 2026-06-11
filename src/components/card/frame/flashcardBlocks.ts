@@ -9,20 +9,12 @@
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
 
 
+
 import type { FlashcardMediaLike } from "./flashcard.types";
 
 
+
 import type { CardBlock } from "@/types/domain/card";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -32,16 +24,6 @@ interface SideData {
   audios: FlashcardMediaLike[];
   code: { code?: string; language?: string } | null;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

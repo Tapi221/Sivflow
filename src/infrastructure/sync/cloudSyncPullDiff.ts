@@ -2,7 +2,9 @@ import type { DocumentData, QueryConstraint, QueryDocumentSnapshot } from "fireb
 
 
 
+
 import * as Firestore from "firebase/firestore";
+
 
 
 
@@ -10,7 +12,9 @@ import { getDoc, getDocs, limit, orderBy, query, Timestamp, where } from "fireba
 
 
 
+
 import { getPullableCollectionRef, getUserSettingsRef, requireCloudSyncFirestore } from "./cloudSyncFirestoreRefs";
+
 
 
 
@@ -18,17 +22,8 @@ import { getUpdatedAtMillis, PULLABLE_ENTITY_TYPES, type PullableEntityType, san
 
 
 
+
 import type { SyncChange } from "@/services/interfaces/ISyncService";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -41,27 +36,7 @@ type PullDiffChange = SyncChange & {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const PAGE_SIZE = 500;
-
-
-
-
-
-
-
-
-
-
 
 
 

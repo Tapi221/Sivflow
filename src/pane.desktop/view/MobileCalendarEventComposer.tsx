@@ -1,29 +1,24 @@
 import { type SVGProps, type UIEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 
+
 import { addDays, addHours, format, startOfDay } from "date-fns";
+
 
 
 import { Switch } from "@/components/ui/switch";
 
 
+
 import type { GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
+
 
 
 import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -48,16 +43,6 @@ type MobileCalendarEventComposerProps = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const MOBILE_EVENT_COMPOSER_DEFAULT_START_HOUR = 9;
 const MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS = 1;
 const MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR = "#34c759";
@@ -70,16 +55,6 @@ const MOBILE_EVENT_TIME_WHEEL_HOURS = Array.from({ length: 24 }, (_, hour) => ho
 const MOBILE_EVENT_TIME_WHEEL_MINUTES = Array.from({ length: 60 }, (_, minute) => minute);
 const EMPTY_GOOGLE_ACCOUNTS: GoogleAccountDisplay[] = [];
 const EMPTY_PROJECT_CALENDAR_LINKS: ProjectCalendarLink[] = [];
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -198,6 +173,8 @@ const createShiftedMonthParts = (year: number, month: number, offset: number): {
 };
 
 const isDateInMonth = (date: Date, year: number, month: number): boolean => date.getFullYear() === year && date.getMonth() === month - 1;
+
+
 
 
 
@@ -894,16 +871,6 @@ const MobileCalendarEventComposer = ({
     </>
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

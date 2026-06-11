@@ -1,26 +1,20 @@
 import { CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT, CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT } from "@/features/cardsetview/domain/cardSetView.constants";
 
 
+
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+
 
 
 import { clampNormalizedZoomPercent, resolveZoomPercentForPresentationWidthPx } from "@/features/cardsetview/domain/cardSetViewPresentationPolicy";
 
 
+
 import { resolveWheelZoomStepCount } from "@/shared/zoom/wheelZoomMath";
 
 
+
 import { DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR, shouldHandleZoomInputTarget } from "@/shared/zoom/zoomInputTarget";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -28,16 +22,6 @@ const CARD_SET_VIEW_ZOOM_INPUT_IGNORE_SELECTOR = [
   DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR,
   "[data-card-zoom-input-ignore='true']",
 ].join(",");
-
-
-
-
-
-
-
-
-
-
 
 
 

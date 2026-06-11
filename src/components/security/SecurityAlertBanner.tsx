@@ -1,20 +1,12 @@
 import React from "react";
 
 
+
 import { useSecurity } from "@/contexts/security/SecurityContext";
 
 
+
 import { AlertTriangle, X } from "@/ui/icons";
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -2,17 +2,8 @@ import type { Card, CardSet, Folder } from "@/types";
 
 
 
+
 import { getLocalDb } from "./localdb";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -23,27 +14,7 @@ type LocalFirstBackfillDb = Awaited<ReturnType<typeof getLocalDb>> & {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const backfillPromiseByUserId = new Map<string, Promise<void>>();
-
-
-
-
-
-
-
-
-
-
 
 
 

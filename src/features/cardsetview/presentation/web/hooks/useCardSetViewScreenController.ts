@@ -1,74 +1,84 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 
+
 import { CARD_PANE_WIDTH_STEP_PX } from "@/components/card/frame/cardPane.constants";
+
 
 
 import { CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT, CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT, CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT } from "@/features/cardsetview/domain/cardSetView.constants";
 
 
+
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
+
 
 
 import { CARD_LAYOUT_MODE_LABELS, type CardLayoutMode, type CardSetInteractionMode } from "@/features/cardsetview/domain/cardLayoutMode";
 
 
+
 import { clampCardIndex } from "@/features/cardsetview/domain/cardSetViewState";
+
 
 
 import { useCardSetViewBreadcrumbs } from "@/features/cardsetview/presentation/web/infra/useCardSetViewBreadcrumbs";
 
 
+
 import { useCardSetViewParams } from "@/features/cardsetview/presentation/web/infra/useCardSetViewParams";
+
 
 
 import { buildWidthControl } from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
 
 
+
 import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
+
 
 
 import { useToast } from "@/contexts/ToastContext";
 
 
+
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
+
 
 
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 
 
+
 import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutFallbackPreferences";
+
 
 
 import { getCardSetViewNavigationPreference, setCardSetViewNavigationPreference } from "@/services/cardSetViewNavigationPreferences";
 
 
+
 import { useCardSetViewData } from "./useCardSetViewData";
+
 
 
 import { useCardSetViewPaneWidth } from "./useCardSetViewPaneWidth";
 
 
+
 import { useCardSetViewState } from "./useCardSetViewState";
+
 
 
 import { useCardSetViewWindowEvents } from "./useCardSetViewWindowEvents";
 
 
+
 import { useCardSetViewZoom } from "./useCardSetViewZoom";
 
 
+
 import { useCardSetViewZoomInput } from "./useCardSetViewZoomInput";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -77,16 +87,6 @@ type ScrollAnchorFace = "question" | "answer";
 type UseCardSetViewScreenControllerParams = {
   cardSetId?: string | null;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

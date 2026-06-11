@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 
+
 import type { HandwritingDeviceInfo } from "@platform/handwriting/handwritingSession.types";
+
 
 
 import { attachMobileDeviceToHandwritingSession, closeHandwritingSession, createDesktopHandwritingSession, failHandwritingSession, isHandwritingSessionActive, updateHandwritingSessionStatus } from "@platform/handwriting/handwritingSessionLifecycle";

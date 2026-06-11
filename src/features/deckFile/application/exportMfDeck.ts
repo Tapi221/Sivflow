@@ -1,23 +1,16 @@
 import { buildMfDeckArchive } from "./mapCardToMfDeck";
 
 
+
 import type { MfDeckTagLookup } from "./mfDeck.types";
+
 
 
 import { encodeMfDeckArchive } from "@/features/deckFile/infra/web/mfDeckZipCodec";
 
 
+
 import type { Card, CardSet } from "@/types";
-
-
-
-
-
-
-
-
-
-
 
 
 

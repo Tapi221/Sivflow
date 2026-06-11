@@ -1,31 +1,12 @@
 import { MF_CARD_FILE_EXTENSION, type MfCardFileV1, type MfCardIssue, MfCardValidationError } from "@/features/cardFile/domain/mfCard.types";
 
 
+
 import { decodeMfCardFile } from "./mfCardJsonCodec";
 
 
 
-
-
-
-
-
-
-
-
-
-
 const MAX_MF_CARD_FILE_BYTES = 4 * 1024 * 1024;
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -34,16 +15,6 @@ export type LoadMfCardFileResult = { file: File;
   issues: MfCardIssue[];
   suggestedCardSetName: string;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

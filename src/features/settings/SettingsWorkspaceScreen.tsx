@@ -1,38 +1,36 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 
+
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+
 
 
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 
 
+
 import { readStoredAccounts, type StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
+
 
 
 import type { UserSettings } from "@/types";
 
 
+
 import { Brain, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/ui/icons";
+
 
 
 import { getLocalAiSettings, setLocalAiSettings, type LocalAiSettings } from "@platform/ai/localAiSettings";
 
 
+
 import { testOllamaConnection } from "@platform/ai/ollamaClient";
 
 
+
 import "./SettingsWorkspaceScreen.css";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -172,16 +170,6 @@ type SettingsWorkspaceCopy = {
   localAiStatusFailed: string;
   hotkeyDescription: string;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -409,16 +397,6 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
 
 
 
-
-
-
-
-
-
-
-
-
-
 const buildSettingsSections = (copy: SettingsWorkspaceCopy): SettingsSectionDefinition[] => SETTINGS_SECTION_IDS.map((id) => ({ id, label: copy.sections[id].label }));
 
 const normalizeAccountEmail = (email: string | null | undefined): string | null => {
@@ -478,16 +456,6 @@ const getSectionIcon = (sectionId: SettingsSectionId, className: string): ReactN
   if (sectionId === "hotkey") return <Keyboard className={className} size={17} />;
   return null;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -699,16 +667,6 @@ const SettingsWorkspaceScreen = () => {
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

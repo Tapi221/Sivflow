@@ -1,26 +1,20 @@
 import { memo, type CSSProperties, type RefObject } from "react";
 
 
+
 import { getTagColorSwatchStyle, TAG_COLOR_KEYS, type TagColorKey } from "@/chip/tag/tagColor";
+
 
 
 import { TAG_COLOR_PALETTE } from "@shared/design-tokens/tag.palette";
 
 
+
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
 
+
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, type RightClickPanelId } from "./rightClickPanel.utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -39,16 +33,6 @@ type LayeredColorMenuProps = {
   panelId?: RightClickPanelId;
   onSelectColor: (color: string) => void;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -129,27 +113,7 @@ const LAYERED_COLOR_MENU_STYLE = `
 
 
 
-
-
-
-
-
-
-
-
-
-
 const normalizeColorValue = (color?: string | null): string | null => color?.trim().toLowerCase() ?? null;
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -188,16 +152,6 @@ const LayeredColorMenuBase = ({
     </>
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

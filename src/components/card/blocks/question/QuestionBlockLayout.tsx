@@ -1,23 +1,16 @@
 import React from "react";
 
 
+
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
+
 
 
 import { buildTypographyStyle, mergeStyles, normalizeCardSetViewZoom } from "@/components/card/common/cardSetViewZoom";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -41,30 +34,10 @@ type QuestionBlockLayoutProps = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const scaleSpacePx = (basePx: number, zoom?: number) => {
   const resolvedZoom = normalizeCardSetViewZoom(zoom);
   return `${Number((basePx * resolvedZoom).toFixed(3))}px`;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

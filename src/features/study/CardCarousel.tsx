@@ -1,23 +1,16 @@
 import { useEffect, useState } from "react";
 
 
+
 import { CardCarousel3D } from "@/features/review/presentation/web/ui/components/CardCarousel3D";
+
 
 
 import StudyCard from "./StudyCard";
 
 
+
 import type { Card } from "@/types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -47,16 +40,6 @@ type PracticeCardCarouselProps = CardCarouselBaseProps & {
 };
 
 export type CardCarouselProps = ReviewCardCarouselProps | PracticeCardCarouselProps;
-
-
-
-
-
-
-
-
-
-
 
 
 

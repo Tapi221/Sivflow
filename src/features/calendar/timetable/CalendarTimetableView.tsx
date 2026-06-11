@@ -1,48 +1,60 @@
 import type { ComponentType, CSSProperties, SVGProps } from "react";
 
 
+
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+
 
 
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 
 
+
 import { ja } from "date-fns/locale";
+
 
 
 import * as stratisIcons from "stratis-ui-icons";
 
 
+
 import type { CalendarTimetableColorKey, CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetablePeriod, CalendarTimetableSlot, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
+
 
 
 import { TAG_COLOR_KEYS } from "@/chip/tag/tag.constants";
 
 
+
 import { getTagColorStyle } from "@/chip/tag/tag.style";
+
 
 
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 
 
+
 import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
+
 
 
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 
 
+
 import { cn } from "@/lib/utils";
+
 
 
 import { CalendarTimetableSyllabusCatalogPanel } from "./CalendarTimetableSyllabusCatalogPanel";
 
 
+
 import { normalizeVisibleDayCount } from "./calendarTimetable.storage";
 
 
+
 import { useCalendarTimetable } from "./useCalendarTimetable";
-
-
 
 
 
@@ -64,8 +76,6 @@ type StratisOptionalIconProps = { names: readonly string[]; className?: string }
 
 
 
-
-
 const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
 const STRATIS_CHECK_ICON_NAMES = ["StratisCheckIcon", "StratisCheck01Icon", "StratisCheckCircleContainedIcon"] as const;
 const STRATIS_PLUS_ICON_NAMES = ["StratisPlus01Icon", "StratisPlusIcon"] as const;
@@ -76,8 +86,6 @@ const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] a
 const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
 const DEFAULT_TIMETABLE_ADD_REQUEST_TOKEN = 0;
 const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
-
-
 
 
 
@@ -106,8 +114,6 @@ const createTimetableGridStyle = (density: CalendarTimetableDensity, visibleDayC
 const isSameTimetableSlot = (left: CalendarTimetableSlot, right: CalendarTimetableSlot): boolean => left.dayIndex === right.dayIndex && left.periodId === right.periodId;
 
 const createEditorSlots = (course: CalendarTimetableCourse | null, initialSlot: CalendarTimetableSlot | null): CalendarTimetableSlot[] => course?.slots ?? (initialSlot ? [initialSlot] : EMPTY_SLOT_LIST);
-
-
 
 
 
@@ -334,8 +340,6 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
     </div>
   );
 };
-
-
 
 
 

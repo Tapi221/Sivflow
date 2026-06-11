@@ -1,33 +1,14 @@
 import { useEffect } from "react";
 
 
+
 import { isPrimaryShortcut, isTypingTarget } from "./hotkeyGuards";
-
-
-
-
-
-
-
-
-
-
 
 
 
 type UseTreeViewSidebarHotkeyParams = {
   onToggle: () => void;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

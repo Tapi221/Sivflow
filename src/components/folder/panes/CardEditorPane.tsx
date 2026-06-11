@@ -2,7 +2,9 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "
 
 
 
+
 import { CANONICAL_CARD_WIDTH, CARD_ROW_PX, layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
+
 
 
 
@@ -10,7 +12,9 @@ import { normalizeLayoutRows } from "@/domain/card/extraRows";
 
 
 
+
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+
 
 
 
@@ -18,7 +22,9 @@ import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/compon
 
 
 
+
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
+
 
 
 
@@ -26,7 +32,9 @@ import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web
 
 
 
+
 import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
+
 
 
 
@@ -34,7 +42,9 @@ import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAt
 
 
 
+
 import { CardEditorLoadingState, NewCardIdleState } from "@/components/card/editor/CardEditorPaneStates";
+
 
 
 
@@ -42,7 +52,9 @@ import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 
 
 
+
 import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";
+
 
 
 
@@ -50,7 +62,9 @@ import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
 
 
 
+
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
+
 
 
 
@@ -58,7 +72,9 @@ import { buildCardChromeClassName, buildCardShellClassName, type CardPresentatio
 
 
 
+
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
+
 
 
 
@@ -66,7 +82,9 @@ import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 
 
 
+
 import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
+
 
 
 
@@ -74,7 +92,9 @@ import { useCardSyncStatusReporter } from "@/components/card/shell/useCardSyncSt
 
 
 
+
 import { CardEditorPaneMediaDialogs } from "./CardEditorPaneMediaDialogs";
+
 
 
 
@@ -82,7 +102,9 @@ import { CardEditorPaneReadonlySurface } from "./CardEditorPaneReadonlySurface";
 
 
 
+
 import { useCardEditorPaneController } from "./useCardEditorPaneController";
+
 
 
 
@@ -90,7 +112,9 @@ import { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX, useCardE
 
 
 
+
 import { X } from "@/ui/icons";
+
 
 
 
@@ -98,7 +122,9 @@ import { cn } from "@/lib/utils";
 
 
 
+
 import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
+
 
 
 
@@ -106,17 +132,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
 import { toMillisOrNull } from "@/utils/toMillis";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -192,27 +209,7 @@ type EditorSidePaneProps = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const EMPTY_BLOCKS: CardBlock[] = [];
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -302,16 +299,6 @@ const areEditorSidePanePropsEqual = (
   prev.actionsTopLeft === next.actionsTopLeft &&
   prev.actionsTopRight === next.actionsTopRight &&
   prev.overlayTopRight === next.overlayTopRight;
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -451,29 +438,9 @@ const EditorSidePaneInner = ({
 
 
 
-
-
-
-
-
-
-
-
-
-
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 
 EditorSidePane.displayName = "EditorSidePane";
-
-
-
-
-
-
-
-
-
-
 
 
 

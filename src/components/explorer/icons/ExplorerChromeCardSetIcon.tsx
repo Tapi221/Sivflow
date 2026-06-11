@@ -1,17 +1,8 @@
 import type { SVGProps } from "react";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -21,28 +12,8 @@ type ExplorerChromeCardSetIconProps = SVGProps<SVGSVGElement> & {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const CARD_SET_BACK_CARD_PATH = "M6.4 3.8H15.1C16.2 3.8 17.1 4.7 17.1 5.8V12.1";
 const CARD_SET_MIDDLE_CARD_PATH = "M4.5 5.9H13.2C14.3 5.9 15.2 6.8 15.2 7.9V14.2";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -55,16 +26,6 @@ const ExplorerChromeCardSetIcon = ({ size = 15, className, ...props }: ExplorerC
     <path d="M5.3 13.4H10.7" stroke="var(--explorer-chrome-cardset-highlight, #fbfaf6)" strokeWidth="1.45" strokeLinecap="round" opacity="0.75" />
   </svg>
 );
-
-
-
-
-
-
-
-
-
-
 
 
 

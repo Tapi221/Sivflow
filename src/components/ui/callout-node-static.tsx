@@ -2,7 +2,9 @@ import * as React from 'react';
 
 
 
+
 import type { SlateElementProps } from 'platejs/static';
+
 
 
 
@@ -10,17 +12,8 @@ import { SlateElement } from 'platejs/static';
 
 
 
+
 import { cn } from '@/lib/utils';
-
-
-
-
-
-
-
-
-
-
 
 
 

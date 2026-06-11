@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 
+
 import { buildVerticalCardPagerItemStyle, resolveVerticalCardPagerItemWidthSpec } from "@/features/review/verticalCardPagerWidthSpec";
 
 describe("resolveVerticalCardPagerItemWidthSpec", () => {

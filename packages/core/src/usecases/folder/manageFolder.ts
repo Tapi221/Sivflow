@@ -31,16 +31,6 @@ export type FolderCommandRepository<TFolder extends FolderCommandEntity = Folder
 
 
 
-
-
-
-
-
-
-
-
-
-
 const toNullableParentId = (parentId?: string | null) => parentId ?? null;
 
 export const createFolderUseCase = async <TFolder extends FolderCommandEntity>({ userId, name, parentId, options, repository, }: { userId: string;

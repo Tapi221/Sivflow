@@ -1,20 +1,12 @@
 import React from "react";
 
 
+
 import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
 
 
+
 import { RowSnappedRoot } from "@/components/card/frame/RowSnappedRoot";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -22,16 +14,6 @@ type MathBlockFrameProps = {
   className?: string;
   children: React.ReactNode;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
