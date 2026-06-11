@@ -1,10 +1,10 @@
 import { nanoid } from "nanoid";
+import { createDeleteQueueItem, createUpsertQueueItem } from "@/application/usecases/syncQueueItemFactory";
+import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
 import { CURRENT_TAG_STORE } from "@/services/localdb/tagStoreNames";
 import type { LocalDBTableMap, SyncableEntityTable, TagRecord } from "@/services/localdb/types";
-import { createDeleteQueueItem, createUpsertQueueItem } from "@/application/usecases/syncQueueItemFactory";
-import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
 import type { AssetRecord, Card, CardSet, DocumentItem, Folder, SyncConflict, SyncError, SyncHistory, SyncMetadata, SyncQueueItem, SyncSettings, UploadedImage, UserSettings, UserStats } from "@/types";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
@@ -23,6 +23,31 @@ type TimestampLikeObject = {
   nanoseconds?: unknown;
   _nanoseconds?: unknown;
 };
+
+type ModifyCallback<T extends object, TKey> = (
+  item: T,
+  ctx?: { value: T; primKey: TKey },
+) => boolean | void;
+
+type RegisteredInMemoryTable = {
+  readonly name: string;
+  readonly clear: () => Promise<void>;
+};
+
+const SYNCABLE_TABLES = new Set(["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "images", "userSettings", "projectMaps"] as const);
+
+const ENTITY_BY_TABLE: Record<string, QueueEntity> = {
+  cards: "card",
+  folders: "folder",
+  cardSets: "cardSet",
+  documents: "document",
+  [CURRENT_TAG_STORE]: "tag",
+  images: "asset",
+  userSettings: "userSetting",
+  projectMaps: "projectMap",
+};
+
+const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>(["card", "folder", "cardSet", "document", "tag", "asset", "projectMap"]);
 
 const isRecord = (value: unknown): value is ObjectRecord => {
   return typeof value === "object" && value !== null;
@@ -129,15 +154,17 @@ const serializeKey = (key: unknown): string => {
 
 const ensureObject = <T extends object>(value: T): T => ({ ...value });
 
-type ModifyCallback<T extends object, TKey> = (
-  item: T,
-  ctx?: { value: T; primKey: TKey },
-) => boolean | void;
+const createPayloadId = (payload: object): string => {
+  const record = asRecord(payload);
+  const current = record.id;
+  if (typeof current === "string" && current.trim().length > 0) return current;
 
-type RegisteredInMemoryTable = {
-  readonly name: string;
-  readonly clear: () => Promise<void>;
+  const next = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : nanoid();
+  record.id = next;
+  return next;
 };
+
+const getQueueEntityForTable = (tableName: string): QueueEntity | null => ENTITY_BY_TABLE[tableName] ?? null;
 
 class InMemoryCollection<T extends object, TKey = string> {
   constructor(
@@ -501,33 +528,6 @@ class InMemoryTable<T extends object, TKey = string> {
   public readonly orderBy = (index: KeyPath): InMemoryCollection<T, TKey> => new InMemoryCollection<T, TKey>(this, [], null, parseIndexKeys(index), false, null);
   public readonly toCollection = (): InMemoryCollection<T, TKey> => new InMemoryCollection<T, TKey>(this);
 }
-
-const SYNCABLE_TABLES = new Set(["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "images", "userSettings", "projectMaps"] as const);
-
-const ENTITY_BY_TABLE: Record<string, QueueEntity> = {
-  cards: "card",
-  folders: "folder",
-  cardSets: "cardSet",
-  documents: "document",
-  [CURRENT_TAG_STORE]: "tag",
-  images: "asset",
-  userSettings: "userSetting",
-  projectMaps: "projectMap",
-};
-
-const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>(["card", "folder", "cardSet", "document", "tag", "asset", "projectMap"]);
-
-const createPayloadId = (payload: object): string => {
-  const record = asRecord(payload);
-  const current = record.id;
-  if (typeof current === "string" && current.trim().length > 0) return current;
-
-  const next = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : nanoid();
-  record.id = next;
-  return next;
-};
-
-const getQueueEntityForTable = (tableName: string): QueueEntity | null => ENTITY_BY_TABLE[tableName] ?? null;
 
 export class InMemoryLocalDB {
   public readonly name: string;
