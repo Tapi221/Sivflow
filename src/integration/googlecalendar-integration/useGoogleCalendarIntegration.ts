@@ -8,8 +8,6 @@ import type { GCalForceSyncOptions, GCalSyncState, GoogleCalendarEvent, GoogleCa
 
 
 
-
-
 type EventsAction =
   | {
     type: "upsert";
@@ -29,8 +27,6 @@ type EventsAction =
   | {
     type: "clear";
   };
-
-
 
 
 

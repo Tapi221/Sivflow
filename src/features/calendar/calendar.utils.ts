@@ -5,12 +5,8 @@ import type { Translations } from "@shared/i18n/translations";
 
 
 
-
-
 type CalendarArrowKey = "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown";
 type CalendarWeekDayLabel = "SUN" | "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT";
-
-
 
 
 
@@ -42,8 +38,6 @@ const DEFAULT_TODAY_DESCRIPTION_LABELS: Pick<Translations, "todayDescriptionEmpt
   todayDescriptionEmpty: "今日の復習はありません",
   todayDescriptionDue: "今日の復習があります",
 };
-
-
 
 
 
@@ -124,8 +118,6 @@ const getStreakFromLogs = (logs: CalendarStudyLogLike[]) => {
 
   return count;
 };
-
-
 
 
 

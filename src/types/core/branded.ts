@@ -52,6 +52,8 @@ export type Base64DataUrl = string & { readonly __brand: "Base64DataUrl"; };
 
 
 
+
+
 // ============================================
 // Type Guards（型判定）
 // ============================================

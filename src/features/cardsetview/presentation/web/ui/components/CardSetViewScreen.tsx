@@ -13,13 +13,9 @@ import { CardViewCompactToolbar } from "./CardViewCompactToolbar";
 
 
 
-
-
 type CardSetViewScreenProps = {
   cardSetId?: string | null;
 };
-
-
 
 
 
@@ -27,8 +23,6 @@ const CARD_SET_VIEW_CONTENT_COMPONENTS = {
   desktop: CardSetViewDesktopContent,
   mobile: CardSetViewMobileContent,
 } satisfies Record<PresentationTarget, (props: CardSetViewContentProps) => JSX.Element>;
-
-
 
 
 

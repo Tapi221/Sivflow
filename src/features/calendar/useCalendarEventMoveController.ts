@@ -5,8 +5,6 @@ import type { CalendarEventMoveHandler } from "./scheduleScreen.types";
 
 
 
-
-
 type CalendarEventMoveOverride = { startsAt: Date; endsAt: Date; isAllDay: boolean; };
 type CalendarEventUpdateHandler = (accountId: string, event: GCalWritableEventUpdateInput) => Promise<GoogleCalendarEvent>;
 type UseCalendarEventMoveControllerOptions = { updateGoogleCalendarEvent: CalendarEventUpdateHandler; };
@@ -15,13 +13,9 @@ type CalendarEventMoveSnapshot = { startsAt: Date; endsAt: Date; isAllDay: boole
 
 
 
-
-
 const EVENT_MOVE_ROLLBACK_MS = 1200;
 const EVENT_MOVE_SAVE_DELAY_MS = 120;
 const EVENT_MOVE_TOAST_ID_PREFIX = "calendar-event-move";
-
-
 
 
 
@@ -202,11 +196,7 @@ const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalend
 
 
 
-
-
 export { applyCalendarEventMoveOverrides, useCalendarEventMoveController };
-
-
 
 
 

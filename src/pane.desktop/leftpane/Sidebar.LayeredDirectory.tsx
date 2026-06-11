@@ -26,8 +26,6 @@ import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderT
 
 
 
-
-
 type IconProps = {
   className?: string;
 };
@@ -54,8 +52,6 @@ type SidebarLayeredDirectoryProps = {
   onToggleLeftPanel?: () => void;
   onOpenSettings?: () => void;
 };
-
-
 
 
 
@@ -89,8 +85,6 @@ const PROJECT_ADD_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_ADD_MENU_
 const PROJECT_ADD_MENU_HEIGHT = PROJECT_ADD_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 const EMPTY_COLLECTION: never[] = [];
 const OPENABLE_ENTITY_SELECTOR = "[data-directory-entity-kind='cardSet'], [data-directory-entity-kind='document'], [data-directory-entity-kind='note']";
-
-
 
 
 
@@ -154,8 +148,6 @@ const scheduleLeftPanelClose = (onToggleLeftPanel?: () => void) => {
   if (!onToggleLeftPanel) return;
   window.setTimeout(onToggleLeftPanel, 0);
 };
-
-
 
 
 
@@ -400,8 +392,6 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
     </div>
   );
 };
-
-
 
 
 

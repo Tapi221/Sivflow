@@ -4,8 +4,6 @@ import { KEYS } from 'platejs';
 
 
 
-
-
 const options = {
   inject: { targetPlugins: [KEYS.p] },
 } satisfies SlatePluginConfig;

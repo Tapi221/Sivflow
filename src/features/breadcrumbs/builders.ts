@@ -5,11 +5,7 @@ import type { CardSet } from "@/types/domain/cardSet";
 
 
 
-
-
 type FolderLike = Pick<Folder, "id" | "folderName" | "parentFolderId">;
-
-
 
 
 

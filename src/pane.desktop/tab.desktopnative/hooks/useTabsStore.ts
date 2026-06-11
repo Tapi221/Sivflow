@@ -6,8 +6,6 @@ import { createDefaultExplorerRouteState, resolveRouteTabBySection, WORKSPACE_DE
 
 
 
-
-
 type OpenExplorerTabParams = {
   id?: WorkspaceExplorerTab["id"];
   title?: string;
@@ -49,11 +47,7 @@ type WorkspaceTabsPersistedState = Pick<WorkspaceTabsState, "tabs" | "activeTabI
 
 
 
-
-
 const EXPLORER_TAB_TITLE = "Library";
-
-
 
 
 
@@ -186,8 +180,6 @@ const createRouteTabFromSection = (
 ): WorkspaceRouteTab => {
   return { ...resolveRouteTabBySection(sectionKey) };
 };
-
-
 
 
 

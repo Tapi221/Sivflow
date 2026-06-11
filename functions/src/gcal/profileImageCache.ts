@@ -3,8 +3,6 @@ import { getAdminStorage } from "#src/firebaseAdmin.js";
 
 
 
-
-
 type CachedGoogleProfileImageResult = {
   contentType: string;
   payload: Buffer;
@@ -12,13 +10,9 @@ type CachedGoogleProfileImageResult = {
 
 
 
-
-
 const MAX_PROFILE_IMAGE_BYTES = 256 * 1024;
 const PROFILE_IMAGE_CACHE_ROOT = "google-profile-images";
 const DOWNLOAD_TOKEN_METADATA_KEY = "firebaseStorageDownloadTokens";
-
-
 
 
 

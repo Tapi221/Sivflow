@@ -3,8 +3,6 @@ import { cn } from "@/lib/utils";
 
 
 
-
-
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -64,8 +62,6 @@ const CardFooter = React.forwardRef<
     {...props}
   />
 ));
-
-
 
 
 

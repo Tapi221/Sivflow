@@ -4,8 +4,6 @@ import { NUMERIC_TYPO, UI_TYPO } from "@shared/design-tokens/typography";
 
 
 
-
-
 type MetaPanelShellProps = {
   children: ReactNode;
   className?: string;
@@ -17,8 +15,6 @@ type MetaPanelLeadSectionProps = {
   children: ReactNode;
   className?: string;
 };
-
-
 
 
 

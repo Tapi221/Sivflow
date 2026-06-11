@@ -2,8 +2,6 @@ import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewE
 
 
 
-
-
 export type CardSetViewEditingDraftPatch = { cardId: string;
   patch: {
     title?: string;
@@ -19,8 +17,6 @@ export type CardSetViewWindowEventMap = { [CARD_SET_VIEW_EVENTS.editingChange]: 
   [CARD_SET_VIEW_EVENTS.toggleMetaPanelRequest]: undefined;
 };
 type CardSetViewWindowEventName = keyof CardSetViewWindowEventMap;
-
-
 
 
 

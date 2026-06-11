@@ -4,15 +4,11 @@ import { cn } from "@/lib/utils";
 
 
 
-
-
 interface MathRendererProps {
   latex: string;
   displayMode?: "block" | "inline";
   className?: string;
 }
-
-
 
 
 
@@ -25,6 +21,8 @@ const normalizeSingleLatex = (input: string): string => {
     .replace(/\s*\$\$$/u, "")
     .trim();
 };
+
+
 
 
 
@@ -137,8 +135,6 @@ const MathRendererComponent: React.FC<MathRendererProps> = ({
     />
   );
 };
-
-
 
 
 

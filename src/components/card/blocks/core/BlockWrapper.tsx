@@ -5,8 +5,6 @@ import { cn } from "@/lib/utils";
 
 
 
-
-
 interface BlockWrapperProps {
   children: React.ReactNode;
   onDelete: () => void;
@@ -38,11 +36,7 @@ interface BlockWrapperProps {
 
 
 
-
-
 const STEP_PX = 24;
-
-
 
 
 

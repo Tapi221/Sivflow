@@ -7,8 +7,6 @@ import type { SelectedExplorerItem } from "@/types";
 
 
 
-
-
 type Params = {
   route: FoldersRouteAdapter;
   isHomeOnlyMode: boolean;
@@ -17,8 +15,6 @@ type Params = {
   selectedItem: SelectedExplorerItem;
   applyRouteState: (next: ExplorerRouteState) => void;
 };
-
-
 
 
 

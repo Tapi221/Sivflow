@@ -6,8 +6,6 @@ import { sanitizeForLog } from "@/utils/logSanitizer";
 
 
 
-
-
 export const sanitizeSyncDataFromCloud = (type: string, data: unknown,): unknown => { if (!data) return data;
 
   const stripped = deepStripUndefined(data);

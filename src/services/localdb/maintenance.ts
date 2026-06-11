@@ -44,8 +44,6 @@ type MaintenanceDb = {
 
 
 
-
-
 export const clearAllData = async (db: MaintenanceDb): Promise<void> => { await Promise.all(db.tables.map((table) => table.clear()));
 };
 export const cleanupSyncHistory = async (db: MaintenanceDb): Promise<void> => { const now = Date.now();
@@ -79,8 +77,6 @@ export const upsertDeviceMeta = async (db: MaintenanceDb, meta: Record<string, u
 };
 export const getSyncEnabledFolders = async (db: MaintenanceDb, userId: string,): Promise<Record<string, unknown>[]> => { return db.folders.where("userId").equals(userId).and((folder: Record<string, unknown>) => folder.cloudSyncEnabled === true).toArray();
 };
-
-
 
 
 

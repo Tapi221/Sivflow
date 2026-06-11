@@ -3,8 +3,6 @@ import { readStoredLocale, type Locale } from "@shared/i18n/locale.store";
 
 
 
-
-
 export type GoogleOAuthCallbackPayload = { type: "sivflow:google-oauth-callback";
   url: string;
   state: string | null;
@@ -20,8 +18,6 @@ type OAuthCallbackText = {
   linkText: string;
   linkSuffix: string;
 };
-
-
 
 
 
@@ -51,8 +47,6 @@ const GOOGLE_OAUTH_CALLBACK_TEXT_BY_LOCALE: Record<Locale, OAuthCallbackText> = 
     linkSuffix: "。",
   },
 };
-
-
 
 
 

@@ -3,16 +3,12 @@ import { cn } from "@/lib/utils";
 
 
 
-
-
 type BlockInsetVariant = "image" | "code" | "question";
 interface BlockInsetProps {
   variant: BlockInsetVariant;
   className?: string;
   children: React.ReactNode;
 }
-
-
 
 
 

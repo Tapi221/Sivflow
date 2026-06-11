@@ -4,8 +4,6 @@ import { MF_DECK_FORMAT, MF_DECK_VERSION, type MfDeckArchiveV1 } from "@/feature
 
 
 
-
-
 export type ImportMfCardFileParams = { cardFile: MfCardFileV1;
   folderId: string;
   createCardSet: CreateMfDeckCardSet;
@@ -14,8 +12,6 @@ export type ImportMfCardFileParams = { cardFile: MfCardFileV1;
   ensureTagByName?: EnsureMfDeckTagByName;
   destination: MfDeckImportDestination;
 };
-
-
 
 
 

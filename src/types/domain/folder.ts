@@ -4,8 +4,6 @@ import type { BaseEntity } from "./base";
 
 
 
-
-
 export type Folder = BaseEntity & { parentFolderId?: string | null;
   folderId: string;
   folderName: string;

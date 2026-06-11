@@ -3,6 +3,4 @@ const CARD_SHELL_COMMON_CLASS_NAME =
 
 
 
-
-
 export { CARD_SHELL_COMMON_CLASS_NAME };

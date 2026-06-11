@@ -5,8 +5,6 @@ import { SlateElement } from 'platejs/static';
 
 
 
-
-
 export function ColumnElementStatic(props: SlateElementProps<TColumnElement>) { const { width } = props.element;
 
   return (

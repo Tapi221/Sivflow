@@ -6,14 +6,10 @@ import type { PdfDocumentSource } from "@/features/pdf/pdfDocumentSource";
 
 
 
-
-
 type PdfObject = {
   id: number;
   body: string;
 };
-
-
 
 
 
@@ -23,8 +19,6 @@ const PDF_PAGE_HEIGHT = 792;
 const PDF_TEXT_X = 72;
 const PDF_TITLE_Y = 720;
 const PDF_BODY_Y = 690;
-
-
 
 
 
@@ -68,8 +62,6 @@ const createSyntheticPdfBlob = (pageCount: number): Blob => {
 
   return new Blob([content], { type: "application/pdf" });
 };
-
-
 
 
 
@@ -122,8 +114,6 @@ const PdfPerformanceTest = () => {
     </main>
   );
 };
-
-
 
 
 

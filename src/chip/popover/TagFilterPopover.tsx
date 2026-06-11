@@ -8,16 +8,12 @@ import { Filter } from "@/ui/icons";
 
 
 
-
-
 interface TagFilterPopoverProps {
   allTags: string[];
   className?: string;
   iconClassName?: string;
   ariaLabel?: string;
 }
-
-
 
 
 

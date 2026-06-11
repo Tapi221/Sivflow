@@ -9,8 +9,6 @@ import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "
 
 
 
-
-
 interface SectionListColumnPaneProps {
   className?: string;
   sidebarWidth: number;
@@ -81,14 +79,10 @@ type ExternalPathSelectionSnapshot = {
 
 
 
-
-
 const EXPLORER_COLUMN_PATH_CHANGE_EVENT =
   "sivflow:explorer-column-path-change";
 const EXPLORER_COLUMN_PATH_NAVIGATE_EVENT =
   "sivflow:explorer-column-path-navigate";
-
-
 
 
 
@@ -213,8 +207,6 @@ const getSelectedItemKey = (item: SelectedExplorerItem): string => {
   if (!item) return "__none__";
   return "id" in item ? `${item.type}:${item.id}` : item.type;
 };
-
-
 
 
 
@@ -501,8 +493,6 @@ const SectionListColumnPane = ({
     </SectionListBlankPane>
   );
 };
-
-
 
 
 

@@ -9,8 +9,6 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
-
-
 const FIXTURE_BLOCKS: CardBlock[] = [
   {
     id: "fixture-code-1",
@@ -34,8 +32,6 @@ const FIXTURE_CARD = {
   questionExtraRows: 2,
   answerExtraRows: 2,
 };
-
-
 
 
 
@@ -88,8 +84,6 @@ const CardLayoutConsistencyTest = () => {
     </div>
   );
 };
-
-
 
 
 

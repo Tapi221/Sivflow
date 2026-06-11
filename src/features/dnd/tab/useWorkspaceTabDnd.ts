@@ -4,15 +4,11 @@ import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/us
 
 
 
-
-
 type UseWorkspaceTabDndArgs = {
   tabs: WorkspaceTab[];
   reorderTabs: (nextTabs: WorkspaceTab[]) => void;
   onDragStart?: () => void;
 };
-
-
 
 
 

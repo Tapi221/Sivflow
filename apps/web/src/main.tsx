@@ -13,8 +13,6 @@ import { renderGoogleOAuthCallback } from "@/integration/google-integration/goog
 
 
 
-
-
 type AppBootstrapState =
   | { status: "loading"; }
   | { status: "ready"; App: ComponentType; }
@@ -31,8 +29,6 @@ declare global {
     __sivflowReactRootStore?: SivflowReactRootStore;
   }
 }
-
-
 
 
 
@@ -99,8 +95,6 @@ const STARTUP_LOGO_STYLE = `
 
 
 
-
-
 const getStartupFailureMessage = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
 
@@ -157,8 +151,6 @@ const getSivflowReactRoot = (): Root => {
 
   return root;
 };
-
-
 
 
 
@@ -268,8 +260,6 @@ const AppBootstrap = () => {
   const LoadedApp = state.App;
   return <LoadedApp />;
 };
-
-
 
 
 

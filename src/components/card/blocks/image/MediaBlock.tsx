@@ -8,8 +8,6 @@ import type { UploadedImage } from "@/types/domain/assets";
 
 
 
-
-
 interface MediaBlockProps {
   data: UploadedImage[];
   onChange: (data: UploadedImage[]) => void;
@@ -35,8 +33,6 @@ interface MediaBlockProps {
 
 
 
-
-
 const areMediaBlockPropsEqual = (
   prev: MediaBlockProps,
   next: MediaBlockProps,
@@ -51,8 +47,6 @@ const areMediaBlockPropsEqual = (
   prev.canMoveDown === next.canMoveDown &&
   prev.displayMode === next.displayMode &&
   prev.zoom === next.zoom;
-
-
 
 
 
@@ -117,8 +111,6 @@ const MediaBlockInner = ({
     </BlockWrapper>
   );
 };
-
-
 
 
 

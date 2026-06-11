@@ -3,14 +3,10 @@ import { CardQuestionLinksPanel } from "./CardQuestionLinksPanel";
 
 
 
-
-
 interface CardPaneProps {
   selectedCardId: string | null;
   onCardUpdated: () => void;
 }
-
-
 
 
 

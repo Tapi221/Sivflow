@@ -2,8 +2,6 @@ import type { Card } from "@/types";
 
 
 
-
-
 type FolderDashboardHandlers = {
   onStartStudy: () => void;
   onViewCards: () => void;
@@ -17,8 +15,6 @@ interface FolderDashboardProps {
   onRenameFolder?: (newName: string) => Promise<void>;
   folderSelectionNonce?: number;
 }
-
-
 
 
 

@@ -2,12 +2,8 @@ type ElementRectListener = () => void;
 
 
 
-
-
 const listenerMap = new WeakMap<Element, Set<ElementRectListener>>();
 let resizeObserver: ResizeObserver | null = null;
-
-
 
 
 

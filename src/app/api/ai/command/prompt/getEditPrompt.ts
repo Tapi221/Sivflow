@@ -7,8 +7,6 @@ import { buildEditTableMultiCellPrompt } from './getEditTablePrompt';
 
 
 
-
-
 function buildEditMultiBlockPrompt(editor: SlateEditor, messages: ChatMessage[]) {
   const selectingMarkdown = getMarkdownWithSelection(editor);
 

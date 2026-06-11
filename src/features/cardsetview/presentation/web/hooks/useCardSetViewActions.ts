@@ -6,8 +6,6 @@ import type { CardSet } from "@/types/domain/cardSet";
 
 
 
-
-
 interface UseCardSetViewActionsOptions {
   cardSetId: string | null;
   cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>;
@@ -23,8 +21,6 @@ interface UseCardSetViewActionsOptions {
   setPendingFocusCardId: (cardId: string | null) => void;
   clearFlippedCards: () => void;
 }
-
-
 
 
 

@@ -6,11 +6,7 @@ import type { Folder } from "@/types/domain/folder";
 
 
 
-
-
 type NotePdf = NonNullable<Folder["notePdfs"]>[number];
-
-
 
 
 

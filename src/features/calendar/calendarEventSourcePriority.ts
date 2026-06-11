@@ -4,8 +4,6 @@ import type { AppCalendarItem, GoogleAccountDisplay, ProjectCalendarLink } from 
 
 
 
-
-
 type CalendarEventSourcePriorityInput = {
   appProjects: AppCalendarItem[];
   projectCalendarLinks: ProjectCalendarLink[];
@@ -14,15 +12,11 @@ type CalendarEventSourcePriorityInput = {
 
 
 
-
-
 const PROJECT_EVENT_PRIORITY_GROUP = 0;
 const GOOGLE_CALENDAR_EVENT_PRIORITY_GROUP = 1;
 const FALLBACK_EVENT_PRIORITY_GROUP = 2;
 const FALLBACK_EVENT_PRIORITY_INDEX = Number.MAX_SAFE_INTEGER;
 const GOOGLE_CALENDAR_KEY_SEPARATOR = "\u001f";
-
-
 
 
 

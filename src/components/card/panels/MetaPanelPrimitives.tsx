@@ -5,8 +5,6 @@ import { cn } from "@/lib/utils";
 
 
 
-
-
 type MetaPanelActionRowAlign = "start" | "between" | "end";
 type MetaPanelActionRowProps = {
   children: React.ReactNode;
@@ -60,15 +58,11 @@ type MetaPanelSwitchProps = {
 
 
 
-
-
 const META_PANEL_ACTION_ROW_ALIGN_CLASS: Record<MetaPanelActionRowAlign, string> = {
   start: "ds-editor-pane__action-row--start",
   between: "ds-editor-pane__action-row--between",
   end: "ds-editor-pane__action-row--end",
 };
-
-
 
 
 
@@ -230,8 +224,6 @@ const MetaPanelSwitch = ({
     </MetaPanelActionRow>
   );
 };
-
-
 
 
 

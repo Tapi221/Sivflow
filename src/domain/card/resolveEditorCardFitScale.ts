@@ -4,16 +4,12 @@ import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMod
 
 
 
-
-
 type ResolveEditorCardFitScaleArgs = Readonly<{
   availablePaneWidthPx: number;
   canonicalCardWidth?: number;
   cardLayoutMode: CardLayoutMode;
   splitGapPx?: number;
 }>;
-
-
 
 
 

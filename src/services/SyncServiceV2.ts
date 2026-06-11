@@ -9,11 +9,7 @@ import type { LocalDBLike } from "./localDB";
 
 
 
-
-
 type SyncableRecord = Record<string, unknown> & { id?: string; isDeleted?: boolean; };
-
-
 
 
 
@@ -32,11 +28,7 @@ const DEFAULT_FOLDER_NAME = "インポート済みカード";
 
 
 
-
-
 type SyncableTableName = (typeof FULL_RESYNC_TABLES)[number];
-
-
 
 
 
@@ -50,8 +42,6 @@ const SYNC_ENTITY_BY_TABLE: Record<SyncableTableName, SyncTask["entity"]> = {
   images: "asset",
 };
 const DELETE_CAPABLE_SYNC_ENTITIES = new Set<SyncTask["entity"]>(["folder", "cardSet", "card", "document", "tag", "asset"]);
-
-
 
 
 

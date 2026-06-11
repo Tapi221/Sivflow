@@ -4,8 +4,6 @@ import type { SelectionCaptureArea, SelectionCapturePoint, SelectionCaptureRect,
 
 
 
-
-
 type SelectionCaptureTargetRef = {
   readonly current: HTMLElement | null;
 };
@@ -20,12 +18,8 @@ type SelectionCaptureOverlayProps = {
 
 
 
-
-
 const MIN_SELECTION_SIZE_PX = 5;
 const MIN_FREEHAND_POINTS = 3;
-
-
 
 
 
@@ -68,8 +62,6 @@ const buildSvgPathData = (path: SelectionCapturePoint[]): string => {
     "Z",
   ].join(" ");
 };
-
-
 
 
 

@@ -4,12 +4,8 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
-
-
 const ROW_OFFSET_MIN = -999;
 const ROW_OFFSET_MAX = 999;
-
-
 
 
 
@@ -37,8 +33,6 @@ const getRowOffsetStyle = (
   if (rowOffsetPx === 0) return undefined;
   return { transform: `translateY(${rowOffsetPx}px)` };
 };
-
-
 
 
 

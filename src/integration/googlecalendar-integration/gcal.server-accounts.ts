@@ -3,8 +3,6 @@ import { auth, functionsClient } from "@/services/firebase";
 
 
 
-
-
 type ListGoogleCalendarAccountsOutput = {
   accounts: Array<{
     accountId: string;
@@ -16,11 +14,7 @@ type ListGoogleCalendarAccountsOutput = {
 
 
 
-
-
 const listGoogleCalendarAccountsCallable = httpsCallable<undefined, ListGoogleCalendarAccountsOutput>(functionsClient, "listGoogleCalendarAccounts");
-
-
 
 
 

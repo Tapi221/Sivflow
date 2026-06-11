@@ -6,8 +6,6 @@ import type { Card, UserSettings } from "@/types";
 
 
 
-
-
 type CreateMetaPanelActionsArgs = {
   selectedCard: Card | null;
   settings?: Partial<UserSettings> | null;
@@ -25,11 +23,7 @@ type CreateMetaPanelActionsArgs = {
 
 
 
-
-
 export const META_PANEL_OPEN_STORAGE_KEY = WEB_STORAGE_KEYS.cardEditorMetaPanelOpen;
-
-
 
 
 
