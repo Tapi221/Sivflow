@@ -9,13 +9,13 @@ export interface RunStartupTasksParams {
   isDisposed?: () => boolean;
 }
 
-const isDisposedDefault = (): boolean => false;
-
 const performAutoBackupUseCase = createPerformAutoBackupUseCase({
   backupStore: localStorageBackupStore,
 });
 
 const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
+
+const isDisposedDefault = (): boolean => false;
 
 const logIntegrityReport = (report: Awaited<ReturnType<typeof checkDataIntegrityUseCase.execute>>) => {
   if (!report.isHealthy) {
