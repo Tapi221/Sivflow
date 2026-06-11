@@ -2,6 +2,8 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { getLocalDb } from "@/services/localDB";
 
+
+
 const useSelectedExplorerDocument = (documentId: string | null) => {
   const { currentUser } = useAuthSession();
 
@@ -28,5 +30,7 @@ const useSelectedExplorerDocument = (documentId: string | null) => {
     loading: Boolean(documentId) && document === undefined,
   };
 };
+
+
 
 export { useSelectedExplorerDocument };

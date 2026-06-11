@@ -1,7 +1,11 @@
 type ElementRectListener = () => void;
 
+
+
 const listenerMap = new WeakMap<Element, Set<ElementRectListener>>();
 let resizeObserver: ResizeObserver | null = null;
+
+
 
 const notifyListeners = (element: Element) => {
   const listeners = listenerMap.get(element);
@@ -50,5 +54,7 @@ const observeElementRect = (element: Element, listener: ElementRectListener) => 
     observer?.unobserve(element);
   };
 };
+
+
 
 export { observeElementRect };
