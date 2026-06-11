@@ -3,8 +3,6 @@ import type { MfCardFileV1, MfCardIssue, MfCardValidationResult } from "./mfCard
 import { isMfDeckCardsJsonV1 } from "@/features/deckFile/domain/mfDeckGuards";
 import { MF_DECK_VERSION } from "@/features/deckFile/domain/mfDeck.types";
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
@@ -58,7 +56,5 @@ const validateMfCardFile = (input: unknown): MfCardValidationResult => {
     issues,
   };
 };
-
-
 
 export { isMfCardFileV1, validateMfCardFile };

@@ -1,18 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-
-
 type CalendarEventsSnapshot = {
   scopeKey: string;
   events: GoogleCalendarEvent[];
 };
 
-
-
 const TRANSIENT_EMPTY_CALENDAR_EVENTS_HOLD_MS = 350;
-
-
 
 const createCalendarEventsScopeKey = (rangeStart: Date, rangeEnd: Date): string => `${rangeStart.toISOString()}|${rangeEnd.toISOString()}`;
 const useTransientEmptyCalendarEvents = (events: GoogleCalendarEvent[], scopeKey: string, holdMs = TRANSIENT_EMPTY_CALENDAR_EVENTS_HOLD_MS): GoogleCalendarEvent[] => {
@@ -47,7 +41,5 @@ const useTransientEmptyCalendarEvents = (events: GoogleCalendarEvent[], scopeKey
 
   return canHoldPreviousEvents ? snapshot.events : events;
 };
-
-
 
 export { TRANSIENT_EMPTY_CALENDAR_EVENTS_HOLD_MS, createCalendarEventsScopeKey, useTransientEmptyCalendarEvents };
