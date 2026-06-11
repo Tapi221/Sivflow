@@ -21,11 +21,17 @@ type InlineCodeRange = {
 
 
 
+
+
 const MARKDOWN_TAB_SIZE_VALUES = [2, 4, 8] as const;
 
 
 
+
+
 export type MarkdownTabSize = 2 | 4 | 8;
+
+
 
 
 
@@ -103,6 +109,8 @@ const HTML_BLOCK_START_RE = new RegExp(
   `^\\s{0,3}(?:</?(?:${HTML_BLOCK_TAGS})(?:\\s|/?>)|<!--|<![A-Z]|<\\?)`,
   "i",
 );
+
+
 
 
 

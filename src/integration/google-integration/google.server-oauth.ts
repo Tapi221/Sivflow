@@ -5,6 +5,8 @@ import { consumeGoogleCalendarServerCodeVerifier, type GoogleCalendarAccess } fr
 
 
 
+
+
 type GoogleOAuthReconnectDiagnosis = { cause: string; reconnectRequired: boolean; action: string };
 
 export type GoogleOAuthCallableErrorReason = "invalid_grant" | "server_oauth_configuration" | "token_encryption_key_invalid" | "stored_refresh_token_decrypt_failed" | "stored_refresh_token_missing" | "insufficient_google_scope" | "token_endpoint_failed";
@@ -39,6 +41,8 @@ type DisconnectGoogleCalendarAccountInput = {
 
 
 
+
+
 const AUTO_RECOVERY_PENDING_ERROR_CODE = "auto-recovery-pending";
 const AUTO_RECOVERY_PENDING_MESSAGE = "Google 連携の自動復旧を待機中です。しばらくしてからもう一度同期します。";
 const SERVER_OAUTH_CONFIGURATION_ERROR_CODE = "server-oauth-configuration-error";
@@ -66,6 +70,8 @@ const disconnectGoogleCalendarAccountCallable =
     functionsClient,
     "disconnectGoogleCalendarAccount",
   );
+
+
 
 
 
@@ -198,7 +204,11 @@ export const exchangeGoogleCalendarCode = async ( input: ExchangeGoogleCalendarC
 
 
 
+
+
 export const exchangeGoogleConnectedServiceCode = exchangeGoogleCalendarCode;
+
+
 
 
 
@@ -211,7 +221,11 @@ export const getServerStoredGoogleCalendarAccessToken = async ( input: GetGoogle
 
 
 
+
+
 export const getServerStoredGoogleConnectedServiceAccessToken = getServerStoredGoogleCalendarAccessToken;
+
+
 
 
 

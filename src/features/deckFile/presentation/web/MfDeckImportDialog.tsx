@@ -11,6 +11,8 @@ import type { CardSet } from "@/types";
 
 
 
+
+
 export type MfDeckImportCompletedPayload = { cardSetId: string;
   cardSetName: string;
   folderId: string;
@@ -34,12 +36,16 @@ type MfDeckImportDialogProps = {
 
 
 
+
+
 const emptyLoadedState = {
   file: null as File | null,
   loaded: null as LoadMfDeckFileResult | null,
 };
 
 const EMPTY_ISSUES: LoadMfDeckFileResult["issues"] = [];
+
+
 
 
 

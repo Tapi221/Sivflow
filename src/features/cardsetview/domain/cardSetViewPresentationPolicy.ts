@@ -6,6 +6,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 type ResolveZoomWidthArgs = {
   cardLayoutMode: CardLayoutMode;
 };
@@ -16,8 +18,12 @@ type ResolveCardSetViewDevicePresentationArgs = {
 
 
 
+
+
 const MOBILE_CARD_SET_VIEW_DEVICE_SCOPE = "mobile";
 const MOBILE_CARD_SET_VIEW_ZOOM_PERCENT = 100;
+
+
 
 
 

@@ -6,6 +6,8 @@ import type { PracticeFilterRating } from "@/features/study/hooks/usePracticeMod
 
 
 
+
+
 type Tile = { rating: PracticeFilterRating; score: number; Icon: unknown };
 
 type Props = {
@@ -18,6 +20,8 @@ type Props = {
   onBackToSchedule: () => void;
   compact?: boolean;
 };
+
+
 
 
 

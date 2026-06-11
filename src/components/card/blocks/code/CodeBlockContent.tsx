@@ -30,6 +30,8 @@ import { codeTheme } from "@shared/design-tokens/codeTheme";
 
 
 
+
+
 type CodeBlockContentProps =
   | {
     mode: "viewer";
@@ -57,7 +59,11 @@ type PrismGrammar = Parameters<typeof Prism.highlight>[1];
 
 
 
+
+
 const CODE_EDITOR_TAB_TEXT = "  ";
+
+
 
 
 
@@ -158,6 +164,8 @@ const setHighlightedEditorCode = (
     editor.innerHTML = nextHtml;
   }
 };
+
+
 
 
 

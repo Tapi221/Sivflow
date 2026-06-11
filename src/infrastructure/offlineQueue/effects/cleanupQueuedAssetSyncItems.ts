@@ -3,6 +3,8 @@ import type { SyncQueueItem } from "@/types";
 
 
 
+
+
 export const cleanupQueuedAssetSyncItems = async ( assetId: string, ): Promise<void> => { const localDb = await getLocalDb();
   const pendingAssetSyncItems = (await localDb.syncQueue.toArray()).filter(
     (queueItem: SyncQueueItem) =>

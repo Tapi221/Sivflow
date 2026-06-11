@@ -2,10 +2,14 @@ import { AnimatedCheckboxBase, type AnimatedCheckboxBaseProps } from "./Animated
 
 
 
+
+
 type AnimatedRadioCheckboxProps = Omit<
   AnimatedCheckboxBaseProps,
   "shape" | "variant" | "indeterminate"
 >;
+
+
 
 
 

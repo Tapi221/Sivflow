@@ -3,7 +3,11 @@ import { forwardRef } from "react";
 
 
 
+
+
 export type StratisXCircleContainedIconProps = SVGProps<SVGSVGElement>;
+
+
 
 
 

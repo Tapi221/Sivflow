@@ -8,6 +8,8 @@ import "./navigationbar.css";
 
 
 
+
+
 type NavigationBarItemId = "explore" | "library" | "home" | "settings";
 
 type SidebarIconComponent = (props: { className?: string }) => ReactNode;
@@ -32,6 +34,8 @@ type NavigationBarMobileStyle = CSSProperties & {
 
 
 
+
+
 const DEFAULT_ACTIVE_ITEM_ID: NavigationBarItemId = "home";
 
 const NAVIGATION_BAR_ITEMS: readonly NavigationBarItem[] = [
@@ -43,12 +47,16 @@ const NAVIGATION_BAR_ITEMS: readonly NavigationBarItem[] = [
 
 
 
+
+
 const getNavigationBarItemIndex = (itemId: NavigationBarItemId) => {
   const itemIndex = NAVIGATION_BAR_ITEMS.findIndex((item) => item.id === itemId);
   return itemIndex >= 0 ? itemIndex : NAVIGATION_BAR_ITEMS.findIndex((item) => item.id === DEFAULT_ACTIVE_ITEM_ID);
 };
 
 const getNavigationBarActiveX = (itemIndex: number) => `${((itemIndex + 0.5) / NAVIGATION_BAR_ITEMS.length) * 100}%`;
+
+
 
 
 
@@ -114,11 +122,15 @@ const NavigationBarMobileComponent = ({ activeItemId, className, onItemSelect, o
 
 
 
+
+
 const NavigationBarMobile = memo(NavigationBarMobileComponent);
 
 NavigationBarMobile.displayName = "NavigationBarMobile";
 
 export { NavigationBarMobile };
+
+
 
 
 

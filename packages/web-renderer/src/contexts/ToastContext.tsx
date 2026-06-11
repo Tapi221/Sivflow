@@ -4,6 +4,8 @@ import { createContext, useCallback, useContext, useState } from "react";
 
 
 
+
+
 export interface Toast { id: string;
   type: "success" | "error" | "warning" | "info";
   message: string;
@@ -22,7 +24,11 @@ interface ToastContextType {
 
 
 
+
+
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
+
+
 
 
 
@@ -86,6 +92,8 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => { const 
     </ToastContext.Provider>
   );
 };
+
+
 
 
 

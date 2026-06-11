@@ -9,6 +9,8 @@ import { commonGenerateRules } from './common';
 
 
 
+
+
 function buildGenerateFreeformPrompt(messages: ChatMessage[]) {
   return buildStructuredPrompt({
     examples: [

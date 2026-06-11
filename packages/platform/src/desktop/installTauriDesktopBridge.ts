@@ -4,9 +4,13 @@ import type { DesktopBridgeApi, DesktopImportFileOpenPayload, DesktopOauthCallba
 
 
 
+
+
 const oauthCallbackHandlers = new Set<(payload: DesktopOauthCallbackPayload) => void>();
 
 let oauthCallbackListenerStarted = false;
+
+
 
 
 
@@ -32,6 +36,8 @@ const ensureOauthCallbackListener = (): void => {
     console.error("[TauriDesktopBridge] failed to listen for OAuth callback", error);
   });
 };
+
+
 
 
 
@@ -110,6 +116,8 @@ const desktopApi: DesktopBridgeApi = {
     },
   },
 };
+
+
 
 
 

@@ -4,6 +4,8 @@ import { CARD_VIEW_DEFAULT_ZOOM_PERCENT, CARD_VIEW_MIN_ZOOM_PERCENT, CARD_VIEW_Z
 
 
 
+
+
 const sanitizePositiveNumber = (value: number, fallback: number) => {
   return typeof value === "number" && Number.isFinite(value) && value > 0
     ? value
@@ -90,8 +92,12 @@ export const normalizeZoomPercent = ({ value, minZoomPercent, maxZoomPercent, st
 
 
 
+
+
 export { CARD_VIEW_DEFAULT_ZOOM_PERCENT, CARD_VIEW_MIN_ZOOM_PERCENT };
 export { CARD_VIEW_ZOOM_STEP_PERCENT };
+
+
 
 
 

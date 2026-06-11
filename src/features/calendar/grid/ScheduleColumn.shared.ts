@@ -6,6 +6,8 @@ import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types"
 
 
 
+
+
 export type ScheduleColumnBuffer = { before: number;
   after: number;
 };
@@ -14,6 +16,8 @@ export type ScheduleVirtualRail = { startDate: Date;
   anchorIndex: number;
   totalDayCount: number;
 };
+
+
 
 
 

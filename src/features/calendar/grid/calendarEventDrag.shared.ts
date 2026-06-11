@@ -5,6 +5,8 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 
 
 
+
+
 type CalendarEventDragAutoScrollDirection = "up" | "down";
 
 type CalendarEventDragPointerSnapshot = {
@@ -21,10 +23,14 @@ type CalendarEventDragAutoScrollOptions<TElement extends HTMLElement> = {
 
 
 
+
+
 const CALENDAR_EVENT_DRAGGING_STYLE: CSSProperties = { filter: "drop-shadow(0 14px 22px rgba(15, 23, 42, 0.22))", transform: "scale(1.015)", zIndex: 30 };
 const CALENDAR_EVENT_DRAG_SCROLL_EDGE_PX = 88;
 const CALENDAR_EVENT_DRAG_SCROLL_STEP_PX = 28;
 const CALENDAR_EVENT_DRAG_SCROLL_INTERVAL_MS = 16;
+
+
 
 
 
@@ -162,7 +168,11 @@ const useCalendarEventDragAutoScroll = <TElement extends HTMLElement>({ scrollCo
 
 
 
+
+
 export { CALENDAR_EVENT_DRAGGING_STYLE, areSameCalendarEventTimes, createCalendarEventDragPointerSnapshot, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragAutoScroll, useCalendarEventDragBodyStyle };
+
+
 
 
 

@@ -4,6 +4,8 @@ import { getLocalDb } from "@/services/localDB";
 
 
 
+
+
 export const useSelectedExplorerDocument = (documentId: string | null) => { const { currentUser } = useAuthSession();
 
   const document = useLiveQuery(

@@ -56,6 +56,8 @@ import { toMillisOrNull } from "@/utils/toMillis";
 
 
 
+
+
 type CardEditorPaneSettings = {
   accentColor?: string;
   duplicateToOpposite?: boolean;
@@ -128,7 +130,11 @@ type EditorSidePaneProps = {
 
 
 
+
+
 const EMPTY_BLOCKS: CardBlock[] = [];
+
+
 
 
 
@@ -218,6 +224,8 @@ const areEditorSidePanePropsEqual = (
   prev.actionsTopLeft === next.actionsTopLeft &&
   prev.actionsTopRight === next.actionsTopRight &&
   prev.overlayTopRight === next.overlayTopRight;
+
+
 
 
 
@@ -357,9 +365,13 @@ const EditorSidePaneInner = ({
 
 
 
+
+
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 
 EditorSidePane.displayName = "EditorSidePane";
+
+
 
 
 

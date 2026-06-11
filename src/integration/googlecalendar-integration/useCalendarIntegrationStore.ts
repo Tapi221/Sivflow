@@ -3,6 +3,8 @@ import { persist } from "zustand/middleware";
 
 
 
+
+
 type CalendarIntegrationPersistedState = {
   wasConnected: boolean;
   accountEmail: string | null;
@@ -25,6 +27,8 @@ type CalendarIntegrationActions = {
 type CalendarIntegrationStore =
   CalendarIntegrationPersistedState &
   CalendarIntegrationActions;
+
+
 
 
 

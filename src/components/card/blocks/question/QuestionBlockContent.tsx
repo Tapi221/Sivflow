@@ -10,6 +10,8 @@ import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 
 
 
+
+
 type QuestionBlockContentProps =
   | {
     mode: "view";
@@ -60,6 +62,8 @@ type QuestionBlockViewContentProps = {
 
 
 
+
+
 const buildQuestionFieldStyle = (zoom?: number) =>
   buildTypographyStyle({
     fontSizePx: 12,
@@ -79,6 +83,8 @@ const buildViewResetKey = ({
   questionAnswer?: string;
   answerDisplayMode: "always" | "tap_to_reveal";
 }) => [answerDisplayMode, questionTitle ?? "", questionAnswer ?? ""].join("::");
+
+
 
 
 

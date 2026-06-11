@@ -9,10 +9,14 @@ import { bootstrapUser } from "./bootstrapUser";
 
 
 
+
+
 const refreshAuthProfile = async (user: FirebaseUser): Promise<FirebaseUser> => {
   await user.reload();
   return auth?.currentUser ?? user;
 };
+
+
 
 
 
@@ -115,7 +119,11 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
 
 
 
+
+
 export { AuthSessionProvider };
+
+
 
 
 

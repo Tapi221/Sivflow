@@ -7,6 +7,8 @@ import type { DocumentItem } from "@/types";
 
 
 
+
+
 type DocumentWithLegacyDelete = DocumentItem & {
   is_deleted?: boolean;
 };
@@ -14,6 +16,8 @@ type DocumentWithLegacyDelete = DocumentItem & {
 type UseDocumentsReadOptions = {
   enabled?: boolean;
 };
+
+
 
 
 

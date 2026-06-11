@@ -32,9 +32,13 @@ import { MobileCalendarEventComposer } from "./MobileCalendarEventComposer";
 
 
 
+
+
 type CalendarEventDisplayRange = { start: Date; end: Date };
 
 type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; monthTitleDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange; yearRenderedRange: CalendarDateRange | null };
+
+
 
 
 
@@ -45,6 +49,8 @@ const DEFAULT_PLAN_RESULT_MODES: readonly PlanResultMode[] = ["plan", "actual"];
 const PLAN_RESULT_TOGGLE_VIEW_MODES = new Set(["threeDays", "days", "pieChart"]);
 const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const WEEKDAY_EVENT_BUFFER_DAYS = 1;
+
+
 
 
 
@@ -105,6 +111,8 @@ const createInitialCalendarPrintRange = (date: Date): CalendarPrintRangeState =>
 };
 
 const createInitialMonthVisibleEventCount = (): number => readStoredScheduleMonthVisibleEventCount() ?? DEFAULT_MONTH_VISIBLE_EVENT_COUNT;
+
+
 
 
 
@@ -211,6 +219,8 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: Sch
     </CarvePanelShell>
   );
 };
+
+
 
 
 

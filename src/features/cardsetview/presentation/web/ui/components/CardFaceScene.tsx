@@ -7,6 +7,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 export type CardFaceSceneProps = Readonly<{ displayMode: CardDisplayMode;
   fixedScale?: number;
   contentZoom: number;
@@ -36,6 +38,8 @@ export type CardFaceSceneProps = Readonly<{ displayMode: CardDisplayMode;
   onResizeStart?: () => void;
   onResizeEnd?: () => void;
 }>;
+
+
 
 
 

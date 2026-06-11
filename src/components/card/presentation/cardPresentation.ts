@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 export type CardPresentationContext = { inPager: boolean;
   isCurrentCard: boolean;
   isEditing: boolean;
@@ -17,6 +19,8 @@ export type CardPresentationState = { isActiveCard: boolean;
 };
 
 export type CardPresentationContextInput = Partial<Pick<CardPresentationContext, "isCurrentCard" | "isStandaloneEditor" | "hasFocusWithin">>;
+
+
 
 
 

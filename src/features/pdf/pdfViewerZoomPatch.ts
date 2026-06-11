@@ -4,6 +4,8 @@ import { computeNextScaleFromWheel, resolveTrackpadDeltaYForScaleRatio } from ".
 
 
 
+
+
 type PatchedPdfViewerConstructor = typeof PDFViewer & {
   __sivflowZoomPatchApplied?: boolean;
 };
@@ -24,6 +26,8 @@ type PdfViewerScaleDescriptor = PropertyDescriptor & {
 
 
 
+
+
 const PDF_SCALE_SCROLL_SUPPRESSION_WINDOW_MS = 800;
 const PDF_VIEWER_SCALE_PROPERTY_NAMES = ["currentScale", "currentScaleValue"] as const;
 const PDF_WHEEL_DELTA_LINE_HEIGHT_PX = 16;
@@ -33,6 +37,8 @@ const PDF_WHEEL_DELTA_MODE_PAGE = 2;
 const PDF_ZOOMING_CLASS_NAME = "pdf-pane--zooming";
 
 const pdfZoomViewers = new Set<PatchedPdfViewerPrototype>();
+
+
 
 
 
@@ -185,6 +191,8 @@ const applyPdfViewerZoomPatch = (): void => {
   addPdfZoomCaptureListeners();
   viewerConstructor.__sivflowZoomPatchApplied = true;
 };
+
+
 
 
 

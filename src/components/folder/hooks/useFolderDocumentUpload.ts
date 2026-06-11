@@ -12,6 +12,8 @@ import { useToast } from "@web-renderer/contexts/ToastContext";
 
 
 
+
+
 interface UseFolderDocumentUploadParams {
   actionFolderId: string | null;
   getNextOrderIndex: (folderId: string | null) => number;
@@ -19,6 +21,8 @@ interface UseFolderDocumentUploadParams {
 }
 
 type LegacyEntityFields = { blobUrl?: string | null };
+
+
 
 
 

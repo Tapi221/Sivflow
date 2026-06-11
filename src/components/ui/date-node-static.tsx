@@ -10,6 +10,8 @@ import { inlineSuggestionVariants } from '@/lib/suggestion';
 
 
 
+
+
 export function DateElementStatic(props: SlateElementProps<TDateElement>) { const { element } = props;
 
   return (

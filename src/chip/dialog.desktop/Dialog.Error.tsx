@@ -4,10 +4,14 @@ import type { Notification } from "@/types/notification";
 
 
 
+
+
 interface ErrorDialogProps {
   notification: Notification;
   onDismiss?: () => void;
 }
+
+
 
 
 
