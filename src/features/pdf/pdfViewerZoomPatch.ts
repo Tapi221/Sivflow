@@ -1,5 +1,5 @@
 import { PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
-import { computeNextScaleFromWheel } from "./pdfZoom.utils";
+import { computeNextScaleFromGesture, computeNextScaleFromWheel } from "./pdfZoom.utils";
 
 type PatchedPdfViewerConstructor = typeof PDFViewer & {
   __sivflowZoomPatchApplied?: boolean;
@@ -20,7 +20,7 @@ type PdfViewerScaleDescriptor = PropertyDescriptor & {
   set?: (this: PatchedPdfViewerPrototype, value: unknown) => void;
 };
 
-type PdfWheelZoomAnchor = {
+type PdfZoomAnchor = {
   fallbackContentX: number;
   fallbackContentY: number;
   localX: number;
@@ -31,17 +31,24 @@ type PdfWheelZoomAnchor = {
   scale: number;
 };
 
+type PdfGestureEvent = Event & {
+  clientX?: number;
+  clientY?: number;
+  scale?: number;
+};
+
 const PDF_SCALE_SCROLL_SUPPRESSION_WINDOW_MS = 800;
 const PDF_VIEWER_SCALE_PROPERTY_NAMES = ["currentScale", "currentScaleValue"] as const;
 const PDF_WHEEL_DELTA_LINE_HEIGHT_PX = 16;
 const PDF_WHEEL_DELTA_MODE_LINE = 1;
 const PDF_WHEEL_DELTA_MODE_PAGE = 2;
-const PDF_WHEEL_ZOOM_MAX_SCALE = 5;
-const PDF_WHEEL_ZOOM_MIN_SCALE = 0.25;
-const PDF_WHEEL_ZOOM_STEP = 0.2;
+const PDF_ZOOM_MAX_SCALE = 5;
+const PDF_ZOOM_MIN_SCALE = 0.25;
+const PDF_ZOOM_STEP = 0.2;
 const PDF_ZOOMING_CLASS_NAME = "pdf-pane--zooming";
 
-const pdfWheelZoomViewers = new Set<PatchedPdfViewerPrototype>();
+const pdfZoomViewers = new Set<PatchedPdfViewerPrototype>();
+const pdfGestureBaseScales = new WeakMap<PatchedPdfViewerPrototype, number>();
 
 const getPdfZoomPatchNow = (): number => {
   return typeof globalThis.performance?.now === "function" ? globalThis.performance.now() : Date.now();
@@ -51,13 +58,21 @@ const markPdfViewerScaleScrollSuppressed = (pdfViewer: PatchedPdfViewerPrototype
   pdfViewer.__sivflowSuppressScaleScrollUntil = getPdfZoomPatchNow() + PDF_SCALE_SCROLL_SUPPRESSION_WINDOW_MS;
 };
 
-const getPdfWheelZoomViewerElement = (pdfViewer: PatchedPdfViewerPrototype): HTMLElement | null => {
+const getPdfZoomViewerElement = (pdfViewer: PatchedPdfViewerPrototype): HTMLElement | null => {
   return pdfViewer.container?.querySelector<HTMLElement>(".pdfViewer") ?? null;
 };
 
-const getPdfWheelZoomScale = (pdfViewer: PatchedPdfViewerPrototype): number => {
+const getPdfZoomScale = (pdfViewer: PatchedPdfViewerPrototype): number => {
   const currentScale = Number(pdfViewer.currentScale);
   return Number.isFinite(currentScale) && currentScale > 0 ? currentScale : 1;
+};
+
+const getPdfZoomClientPoint = (container: HTMLElement, clientX?: number, clientY?: number): { clientX: number; clientY: number } => {
+  const containerRect = container.getBoundingClientRect();
+  return {
+    clientX: typeof clientX === "number" && Number.isFinite(clientX) ? clientX : containerRect.left + container.clientWidth / 2,
+    clientY: typeof clientY === "number" && Number.isFinite(clientY) ? clientY : containerRect.top + container.clientHeight / 2,
+  };
 };
 
 const getNormalizedPdfWheelDeltaY = (event: WheelEvent, container: HTMLElement): number => {
@@ -72,7 +87,7 @@ const readPdfPageNumber = (pageElement: HTMLElement): number | null => {
   return Number.isFinite(pageNumber) ? pageNumber : null;
 };
 
-const getPdfWheelZoomPageElement = (viewerElement: HTMLElement, clientX: number, clientY: number): HTMLElement | null => {
+const getPdfZoomPageElement = (viewerElement: HTMLElement, clientX: number, clientY: number): HTMLElement | null => {
   let closestPageElement: HTMLElement | null = null;
   let closestDistance = Number.POSITIVE_INFINITY;
 
@@ -92,15 +107,16 @@ const getPdfWheelZoomPageElement = (viewerElement: HTMLElement, clientX: number,
   return closestPageElement;
 };
 
-const createPdfWheelZoomAnchor = (pdfViewer: PatchedPdfViewerPrototype, container: HTMLElement, viewerElement: HTMLElement, clientX: number, clientY: number): PdfWheelZoomAnchor => {
+const createPdfZoomAnchor = (pdfViewer: PatchedPdfViewerPrototype, container: HTMLElement, viewerElement: HTMLElement, clientX?: number, clientY?: number): PdfZoomAnchor => {
   const containerRect = container.getBoundingClientRect();
-  const localX = Math.min(Math.max(clientX - containerRect.left, 0), container.clientWidth);
-  const localY = Math.min(Math.max(clientY - containerRect.top, 0), container.clientHeight);
-  const pageElement = getPdfWheelZoomPageElement(viewerElement, clientX, clientY);
+  const clientPoint = getPdfZoomClientPoint(container, clientX, clientY);
+  const localX = Math.min(Math.max(clientPoint.clientX - containerRect.left, 0), container.clientWidth);
+  const localY = Math.min(Math.max(clientPoint.clientY - containerRect.top, 0), container.clientHeight);
+  const pageElement = getPdfZoomPageElement(viewerElement, clientPoint.clientX, clientPoint.clientY);
   const pageNumber = pageElement ? readPdfPageNumber(pageElement) : null;
   const pageRect = pageElement?.getBoundingClientRect();
-  const pageXRatio = pageElement && pageRect && pageRect.width > 0 ? Math.min(Math.max((clientX - pageRect.left) / pageRect.width, 0), 1) : undefined;
-  const pageYRatio = pageElement && pageRect && pageRect.height > 0 ? Math.min(Math.max((clientY - pageRect.top) / pageRect.height, 0), 1) : undefined;
+  const pageXRatio = pageElement && pageRect && pageRect.width > 0 ? Math.min(Math.max((clientPoint.clientX - pageRect.left) / pageRect.width, 0), 1) : undefined;
+  const pageYRatio = pageElement && pageRect && pageRect.height > 0 ? Math.min(Math.max((clientPoint.clientY - pageRect.top) / pageRect.height, 0), 1) : undefined;
 
   return {
     fallbackContentX: container.scrollLeft + localX - viewerElement.offsetLeft,
@@ -110,11 +126,11 @@ const createPdfWheelZoomAnchor = (pdfViewer: PatchedPdfViewerPrototype, containe
     pageNumber: pageNumber ?? undefined,
     pageXRatio,
     pageYRatio,
-    scale: getPdfWheelZoomScale(pdfViewer),
+    scale: getPdfZoomScale(pdfViewer),
   };
 };
 
-const restorePdfWheelZoomAnchor = (pdfViewer: PatchedPdfViewerPrototype, container: HTMLElement, viewerElement: HTMLElement, anchor: PdfWheelZoomAnchor): void => {
+const restorePdfZoomAnchor = (pdfViewer: PatchedPdfViewerPrototype, container: HTMLElement, viewerElement: HTMLElement, anchor: PdfZoomAnchor): void => {
   if (typeof anchor.pageNumber === "number" && typeof anchor.pageXRatio === "number" && typeof anchor.pageYRatio === "number") {
     const pageElement = viewerElement.querySelector<HTMLElement>(`.page[data-page-number="${anchor.pageNumber}"]`);
     if (pageElement) {
@@ -124,28 +140,27 @@ const restorePdfWheelZoomAnchor = (pdfViewer: PatchedPdfViewerPrototype, contain
     }
   }
 
-  const nextScale = getPdfWheelZoomScale(pdfViewer);
+  const nextScale = getPdfZoomScale(pdfViewer);
   const scaleRatio = nextScale / anchor.scale;
   if (!Number.isFinite(scaleRatio) || scaleRatio <= 0) return;
   container.scrollLeft = Math.max(0, viewerElement.offsetLeft + anchor.fallbackContentX * scaleRatio - anchor.localX);
   container.scrollTop = Math.max(0, viewerElement.offsetTop + anchor.fallbackContentY * scaleRatio - anchor.localY);
 };
 
-const restorePdfWheelZoomAnchorAfterScale = (pdfViewer: PatchedPdfViewerPrototype, container: HTMLElement, viewerElement: HTMLElement, anchor: PdfWheelZoomAnchor): void => {
+const restorePdfZoomAnchorAfterScale = (pdfViewer: PatchedPdfViewerPrototype, container: HTMLElement, viewerElement: HTMLElement, anchor: PdfZoomAnchor): void => {
   window.requestAnimationFrame(() => {
-    restorePdfWheelZoomAnchor(pdfViewer, container, viewerElement, anchor);
-    window.requestAnimationFrame(() => restorePdfWheelZoomAnchor(pdfViewer, container, viewerElement, anchor));
+    restorePdfZoomAnchor(pdfViewer, container, viewerElement, anchor);
+    window.requestAnimationFrame(() => restorePdfZoomAnchor(pdfViewer, container, viewerElement, anchor));
   });
 };
 
-const getPdfWheelZoomViewerForEvent = (event: WheelEvent): PatchedPdfViewerPrototype | null => {
-  const target = event.target;
+const getPdfZoomViewerForTarget = (target: EventTarget | null): PatchedPdfViewerPrototype | null => {
   if (!(target instanceof Node)) return null;
 
-  for (const pdfViewer of pdfWheelZoomViewers) {
+  for (const pdfViewer of pdfZoomViewers) {
     const container = pdfViewer.container;
     if (!container?.isConnected) {
-      pdfWheelZoomViewers.delete(pdfViewer);
+      pdfZoomViewers.delete(pdfViewer);
       continue;
     }
 
@@ -155,26 +170,63 @@ const getPdfWheelZoomViewerForEvent = (event: WheelEvent): PatchedPdfViewerProto
   return null;
 };
 
+const applyPdfScaleWithAnchor = (pdfViewer: PatchedPdfViewerPrototype, container: HTMLElement, viewerElement: HTMLElement, scale: number, clientX?: number, clientY?: number): void => {
+  const anchor = createPdfZoomAnchor(pdfViewer, container, viewerElement, clientX, clientY);
+  markPdfViewerScaleScrollSuppressed(pdfViewer);
+  pdfViewer.currentScaleValue = String(scale);
+  markPdfViewerScaleScrollSuppressed(pdfViewer);
+  restorePdfZoomAnchorAfterScale(pdfViewer, container, viewerElement, anchor);
+};
+
 const handlePdfWheelZoomCapture = (event: WheelEvent): void => {
   if (!event.ctrlKey && !event.metaKey) return;
-  const pdfViewer = getPdfWheelZoomViewerForEvent(event);
+  const pdfViewer = getPdfZoomViewerForTarget(event.target);
   const container = pdfViewer?.container;
-  const viewerElement = pdfViewer ? getPdfWheelZoomViewerElement(pdfViewer) : null;
+  const viewerElement = pdfViewer ? getPdfZoomViewerElement(pdfViewer) : null;
   if (!pdfViewer || !container || !viewerElement) return;
 
   const deltaY = getNormalizedPdfWheelDeltaY(event, container);
-  const currentScale = getPdfWheelZoomScale(pdfViewer);
-  const nextScale = computeNextScaleFromWheel({ currentScale, deltaY, zoomStep: PDF_WHEEL_ZOOM_STEP, minScale: PDF_WHEEL_ZOOM_MIN_SCALE, maxScale: PDF_WHEEL_ZOOM_MAX_SCALE });
+  const currentScale = getPdfZoomScale(pdfViewer);
+  const nextScale = computeNextScaleFromWheel({ currentScale, deltaY, zoomStep: PDF_ZOOM_STEP, minScale: PDF_ZOOM_MIN_SCALE, maxScale: PDF_ZOOM_MAX_SCALE });
   if (nextScale === null || Math.abs(nextScale - currentScale) < 0.001) return;
 
   event.preventDefault();
   event.stopImmediatePropagation();
+  applyPdfScaleWithAnchor(pdfViewer, container, viewerElement, nextScale, event.clientX, event.clientY);
+};
 
-  const anchor = createPdfWheelZoomAnchor(pdfViewer, container, viewerElement, event.clientX, event.clientY);
-  markPdfViewerScaleScrollSuppressed(pdfViewer);
-  pdfViewer.currentScaleValue = String(nextScale);
-  markPdfViewerScaleScrollSuppressed(pdfViewer);
-  restorePdfWheelZoomAnchorAfterScale(pdfViewer, container, viewerElement, anchor);
+const handlePdfGestureStartCapture = (event: PdfGestureEvent): void => {
+  const pdfViewer = getPdfZoomViewerForTarget(event.target);
+  if (!pdfViewer) return;
+
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  pdfGestureBaseScales.set(pdfViewer, getPdfZoomScale(pdfViewer));
+};
+
+const handlePdfGestureChangeCapture = (event: PdfGestureEvent): void => {
+  const pdfViewer = getPdfZoomViewerForTarget(event.target);
+  const container = pdfViewer?.container;
+  const viewerElement = pdfViewer ? getPdfZoomViewerElement(pdfViewer) : null;
+  if (!pdfViewer || !container || !viewerElement) return;
+
+  const gestureScale = Number(event.scale);
+  const currentScale = getPdfZoomScale(pdfViewer);
+  const nextScale = computeNextScaleFromGesture({ currentScale, baseScale: pdfGestureBaseScales.get(pdfViewer) ?? null, gestureScale, minScale: PDF_ZOOM_MIN_SCALE, maxScale: PDF_ZOOM_MAX_SCALE });
+  if (nextScale === null || Math.abs(nextScale - currentScale) < 0.001) return;
+
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  applyPdfScaleWithAnchor(pdfViewer, container, viewerElement, nextScale, event.clientX, event.clientY);
+};
+
+const handlePdfGestureEndCapture = (event: PdfGestureEvent): void => {
+  const pdfViewer = getPdfZoomViewerForTarget(event.target);
+  if (!pdfViewer) return;
+
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  pdfGestureBaseScales.delete(pdfViewer);
 };
 
 const isPdfViewerZooming = (pdfViewer: PatchedPdfViewerPrototype): boolean => {
@@ -215,10 +267,18 @@ const patchPdfViewerSetDocument = (prototype: PatchedPdfViewerPrototype): void =
   const originalSetDocument = prototype.setDocument;
   if (typeof originalSetDocument !== "function") return;
 
-  prototype.setDocument = function setDocumentWithWheelZoomRegistration(...args: unknown[]) {
-    if (this.container) pdfWheelZoomViewers.add(this);
+  prototype.setDocument = function setDocumentWithZoomRegistration(...args: unknown[]) {
+    if (this.container) pdfZoomViewers.add(this);
     return originalSetDocument.apply(this, args);
   };
+};
+
+const addPdfZoomCaptureListeners = (): void => {
+  if (typeof window === "undefined") return;
+  window.addEventListener("wheel", handlePdfWheelZoomCapture, { capture: true, passive: false });
+  window.addEventListener("gesturestart", handlePdfGestureStartCapture as EventListener, { capture: true, passive: false });
+  window.addEventListener("gesturechange", handlePdfGestureChangeCapture as EventListener, { capture: true, passive: false });
+  window.addEventListener("gestureend", handlePdfGestureEndCapture as EventListener, { capture: true, passive: false });
 };
 
 const applyPdfViewerZoomPatch = (): void => {
@@ -236,7 +296,7 @@ const applyPdfViewerZoomPatch = (): void => {
 
   for (const propertyName of PDF_VIEWER_SCALE_PROPERTY_NAMES) patchPdfViewerScaleSetter(prototype, propertyName);
   patchPdfViewerSetDocument(prototype);
-  if (typeof window !== "undefined") window.addEventListener("wheel", handlePdfWheelZoomCapture, { capture: true, passive: false });
+  addPdfZoomCaptureListeners();
   viewerConstructor.__sivflowZoomPatchApplied = true;
 };
 
