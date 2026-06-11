@@ -7,7 +7,7 @@ import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 vi.mock("@/chip/toolchip/HoverMonthEventTooltip", () => ({
-  HoverMonthEventTooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
+  HoverMonthEventTooltip: ({ children }: { children: ReactNode }) => children,
 }));
 
 const ALL_DAY_EVENT: GoogleCalendarEvent = {

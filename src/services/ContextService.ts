@@ -8,6 +8,8 @@ const CONTEXT_SYNC_THRESHOLDS = {
   offlineRecoveryMs: 60 * 60 * 1000,
 } as const;
 
+export const contextService = new ContextService();
+
 /**
  * コンテキストサービス
  *
@@ -76,5 +78,3 @@ class ContextService {
     localStorage.setItem(this.buildLastSyncKey(userId), Date.now().toString());
   };
 }
-
-export const contextService = new ContextService();

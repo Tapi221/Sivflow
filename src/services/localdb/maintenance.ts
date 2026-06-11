@@ -1,7 +1,3 @@
-export {createDeleteQueueItem,
-  createUpsertQueueItem,
-  queueItemToSyncTask,} from "@/application/usecases/syncQueueItemFactory";
-
 type MaintenanceDb = {
   tables: Array<{
     clear(): PromiseLike<void> | void;
@@ -103,3 +99,5 @@ export const getSyncEnabledFolders = async (
     .and((folder: Record<string, unknown>) => folder.cloudSyncEnabled === true)
     .toArray();
 };
+
+export { createDeleteQueueItem, createUpsertQueueItem, queueItemToSyncTask } from "@/application/usecases/syncQueueItemFactory";
