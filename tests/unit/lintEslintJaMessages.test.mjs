@@ -23,7 +23,7 @@ describe("lint eslint Japanese messages", () => {
   it("React Hook の不足依存メッセージを依存名付きで日本語化する", () => {
     const message = translateLintMessage("React Hook useCallback has a missing dependency: 'state'. Either include it or remove the dependency array.", "react-hooks/exhaustive-deps");
 
-    expect(message).toBe("React Hook useCallback の依存配列に `state` が不足しています。依存配列へ追加するか、依存配列を削除してください。");
+    expect(message).toBe("React フック useCallback の依存配列に `state` が不足しています。依存配列へ追加するか、依存配列を削除してください。");
     for (const fragment of ENGLISH_FRAGMENTS) {
       expect(message).not.toContain(fragment);
     }
@@ -32,7 +32,7 @@ describe("lint eslint Japanese messages", () => {
   it("React Hook の不要依存メッセージを依存名付きで日本語化する", () => {
     const message = translateLintMessage("React Hook useMemo has an unnecessary dependency: 'currentUser.uid'. Either exclude it or remove the dependency array.", "react-hooks/exhaustive-deps");
 
-    expect(message).toBe("React Hook useMemo の依存配列に不要な `currentUser.uid` が含まれています。依存配列から除外するか、依存配列を削除してください。");
+    expect(message).toBe("React フック useMemo の依存配列に不要な `currentUser.uid` が含まれています。依存配列から除外するか、依存配列を削除してください。");
     for (const fragment of ENGLISH_FRAGMENTS) {
       expect(message).not.toContain(fragment);
     }
