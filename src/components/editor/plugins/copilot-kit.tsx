@@ -15,52 +15,52 @@ const CopilotKit = [...MarkdownKit, CopilotPlugin.configure(({ api }) => ({ opti
   - CRITICAL: Always end with a punctuation mark.
   - CRITICAL: Avoid starting a new block. Do not use block formatting like >, #, 1., 2., -, etc. The suggestion should continue in the same block as the context.
   - If no context is provided or you can't generate a continuation, return "0" without explanation.`,
-      },
-      onError: () => {
-        // Mock the API response. Remove it when you implement the route /api/ai/copilot
-        api.copilot.setBlockSuggestion({
-          text: stripMarkdown(faker.lorem.sentence()),
-        });
-      },
-      onFinish: (_, completion) => {
-        if (completion === "0") return;
+},
+onError: () => {
+  // Mock the API response. Remove it when you implement the route /api/ai/copilot
+  api.copilot.setBlockSuggestion({
+    text: stripMarkdown(faker.lorem.sentence()),
+  });
+},
+onFinish: (_, completion) => {
+  if (completion === "0") return;
 
-        api.copilot.setBlockSuggestion({
-          text: stripMarkdown(completion),
-        });
-      },
-    },
-    debounceDelay: 500,
-    renderGhostText: GhostText,
-    getPrompt: ({ editor }) => {
-      const contextEntry = editor.api.block({ highest: true });
+  api.copilot.setBlockSuggestion({
+    text: stripMarkdown(completion),
+  });
+},
+},
+debounceDelay: 500,
+renderGhostText: GhostText,
+getPrompt: ({ editor }) => {
+  const contextEntry = editor.api.block({ highest: true });
 
-      if (!contextEntry) return "";
+  if (!contextEntry) return "";
 
-      const prompt = serializeMd(editor, {
-        value: [contextEntry[0] as TElement],
-      });
+  const prompt = serializeMd(editor, {
+    value: [contextEntry[0] as TElement],
+  });
 
-      return `Continue the text up to the next punctuation mark:
+  return `Continue the text up to the next punctuation mark:
   """
   ${prompt}
   """`;
-    },
+},
+},
+shortcuts: {
+  accept: {
+    keys: "tab",
   },
-  shortcuts: {
-    accept: {
-      keys: "tab",
-    },
-    acceptNextWord: {
-      keys: "mod+right",
-    },
-    reject: {
-      keys: "escape",
-    },
-    triggerSuggestion: {
-      keys: "ctrl+space",
-    },
+  acceptNextWord: {
+    keys: "mod+right",
   },
+  reject: {
+    keys: "escape",
+  },
+  triggerSuggestion: {
+    keys: "ctrl+space",
+  },
+},
 })),
 ];
 

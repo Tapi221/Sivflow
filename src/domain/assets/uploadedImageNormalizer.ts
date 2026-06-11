@@ -235,7 +235,7 @@ const denormalizeUploadedImages = (images: Array<{ id: string;
     cropX?: number | null;
   } | null;
 }>,
-  options: DenormalizeUploadedImageOptions = {},
+options: DenormalizeUploadedImageOptions = {},
 ) => {
   return images.map((image) => denormalizeUploadedImage(image, options));
 };

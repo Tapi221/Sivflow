@@ -81,7 +81,7 @@ const CalendarTimetableSettingsPanel = ({ periods, visibleDayCount, onChangeVisi
               <button type="button" className="rounded-full border border-[#e5e5ea] px-3 py-1.5 text-[12px] font-bold text-[#007aff]" onClick={() => { void onAddPeriod(); }}>時限を追加</button>
             </div>
             {periods.map((period) => (
-              <div key={period.id} className="grid grid-cols-[52px_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-2 rounded-[14px] border border-[#eeeeee] bg-[#fafafa] p-2">
+              <div key={period.id} className="grid grid-cols-[52px_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-2 rounded-[14px] border border-[#eee] bg-[#fafafa] p-2">
                 <input className="h-9 rounded-[10px] border border-[#e5e5ea] bg-white px-2 text-center text-[13px] font-bold text-[#1c1c1e]" value={period.label} onChange={(event) => { void onUpdatePeriod({ ...period, label: event.target.value }); }} aria-label="時限名" />
                 <input className="h-9 rounded-[10px] border border-[#e5e5ea] bg-white px-2 text-[13px] font-semibold text-[#1c1c1e]" type="time" value={period.startTime} onChange={(event) => { void onUpdatePeriod({ ...period, startTime: event.target.value }); }} aria-label={`${period.label}限の開始時刻`} />
                 <input className="h-9 rounded-[10px] border border-[#e5e5ea] bg-white px-2 text-[13px] font-semibold text-[#1c1c1e]" type="time" value={period.endTime} onChange={(event) => { void onUpdatePeriod({ ...period, endTime: event.target.value }); }} aria-label={`${period.label}限の終了時刻`} />
@@ -220,10 +220,10 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
     <div className={cn("flex h-full min-h-0 min-w-0 flex-col bg-white text-[#1c1c1e]", className)}>
       <div className={cn("flex shrink-0 flex-wrap items-center justify-between gap-3 pb-3 pt-1", isCompact ? "px-4" : "px-5")}>
         <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <span className={cn("rounded-full border border-[#eeeeee] bg-[#f8f8f9] font-semibold tabular-nums text-[#6e6e73]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{weekRangeLabel}</span>
-          <span className={cn("rounded-full border border-[#eeeeee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{visibleDayCount}日 / {periods.length}限</span>
-          <span className={cn("rounded-full border border-[#eeeeee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{isLoading ? "読み込み中" : `${registeredCountLabel}登録済み`}</span>
-          <span className={cn("rounded-full border border-[#eeeeee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>授業DB {syllabusCourses.length}件</span>
+          <span className={cn("rounded-full border border-[#eee] bg-[#f8f8f9] font-semibold tabular-nums text-[#6e6e73]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{weekRangeLabel}</span>
+          <span className={cn("rounded-full border border-[#eee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{visibleDayCount}日 / {periods.length}限</span>
+          <span className={cn("rounded-full border border-[#eee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{isLoading ? "読み込み中" : `${registeredCountLabel}登録済み`}</span>
+          <span className={cn("rounded-full border border-[#eee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>授業DB {syllabusCourses.length}件</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button type="button" className={cn("rounded-full border border-[#e5e5ea] bg-white font-bold text-[#007aff] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 px-3 text-[12px]" : "h-9 px-4 text-[13px]")} onClick={handleOpenSyllabusCatalog}>授業DB</button>
@@ -247,7 +247,7 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
             <div key={period.id} className="contents">
               <div className={cn("flex items-center justify-end pr-1", isCompact ? "min-h-[48px]" : "min-h-[52px]")}>
                 <div className={cn("flex items-center justify-end text-right", isCompact ? "gap-1" : "gap-2")}>
-                  <div className={cn("font-bold leading-none tracking-[-0.04em] text-[#111111]", isCompact ? "text-[17px]" : "text-[20px]")}>{period.label}</div>
+                  <div className={cn("font-bold leading-none tracking-[-0.04em] text-[#111]", isCompact ? "text-[17px]" : "text-[20px]")}>{period.label}</div>
                   <div className={cn("flex flex-col items-center font-medium leading-none tabular-nums text-[#8f929c]", isCompact ? "text-[8px]" : "text-[10px]")}><span>{period.startTime}</span><span aria-hidden="true" className="my-0.5 h-2 w-px bg-[#d8d8df]" /><span>{period.endTime}</span></div>
                 </div>
               </div>

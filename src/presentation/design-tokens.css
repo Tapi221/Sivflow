@@ -5,7 +5,7 @@
   --ds-color-code-border: rgba(0, 0, 0, 0.06);
   --ds-color-code-foreground: #24292f;
   --ds-color-code-foreground-rgb: 36 41 47;
-  --ds-color-neutral-0: #ffffff;
+  --ds-color-neutral-0: #fff;
   --ds-color-neutral-0-rgb: 255 255 255;
   --ds-color-neutral-100: #f5f5f5;
   --ds-color-neutral-100-rgb: 245 245 245;
@@ -172,7 +172,7 @@
   --ds-semantic-color-action-primary-rgb: 69 103 157;
   --ds-semantic-color-action-primary-soft: #e7eef8;
   --ds-semantic-color-action-primary-soft-rgb: 231 238 248;
-  --ds-semantic-color-background-app: #ffffff;
+  --ds-semantic-color-background-app: #fff;
   --ds-semantic-color-background-app-rgb: 255 255 255;
   --ds-semantic-color-background-code: #f7f8f9;
   --ds-semantic-color-background-code-rgb: 247 248 249;
@@ -199,7 +199,7 @@
   --ds-semantic-color-status-success-rgb: 16 185 129;
   --ds-semantic-color-status-warning: #f59e0b;
   --ds-semantic-color-status-warning-rgb: 245 158 11;
-  --ds-semantic-color-text-on-primary: #ffffff;
+  --ds-semantic-color-text-on-primary: #fff;
   --ds-semantic-color-text-on-primary-rgb: 255 255 255;
   --ds-semantic-color-text-placeholder: #978d90;
   --ds-semantic-color-text-placeholder-rgb: 151 141 144;

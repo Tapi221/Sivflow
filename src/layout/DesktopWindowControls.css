@@ -51,7 +51,7 @@
 .desktop-window-controls__button--close:hover,
 .desktop-window-controls__button--close:focus-visible {
   background: #e81123;
-  color: #ffffff;
+  color: #fff;
 }
 
 .desktop-window-controls__minimize,

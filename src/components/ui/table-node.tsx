@@ -966,7 +966,7 @@ const TableElement = withHOC(TableProvider, ({ children, ...props }: PlateElemen
       ({
         width: `${resolvedColSizes.reduce((total, colSize) => total + colSize, 0) +
           controlColumnWidth
-          }px`,
+        }px`,
       }) as React.CSSProperties,
     [controlColumnWidth, resolvedColSizes],
   );

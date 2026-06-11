@@ -38,176 +38,176 @@ const toNonEmptyString = (value: unknown): string | null => {
 };
 const createCheckDataIntegrityUseCase = () => { const execute = async (): Promise<IntegrityReport> => { const issues: IntegrityIssue[] = [];
 
-    try {
-      const db = await getLocalDb();
+  try {
+    const db = await getLocalDb();
 
-      const [allCards, allFolders, allCardSets] = await Promise.all([
-        db.getAllItems("cards"),
-        db.getAllItems("folders"),
-        db.getAllItems("cardSets"),
-      ]);
+    const [allCards, allFolders, allCardSets] = await Promise.all([
+      db.getAllItems("cards"),
+      db.getAllItems("folders"),
+      db.getAllItems("cardSets"),
+    ]);
 
-      const cards: Card[] = allCards.map((card) => normalizeCard(card));
-      const folders: Folder[] = allFolders.map((folder) =>
-        normalizeFolder(folder),
+    const cards: Card[] = allCards.map((card) => normalizeCard(card));
+    const folders: Folder[] = allFolders.map((folder) =>
+      normalizeFolder(folder),
+    );
+    const cardSetRecords = allCardSets.map(toRecord);
+
+    const activeFolderIds = new Set(
+      folders
+        .filter((folder) => !folder.isDeleted)
+        .map((folder) => folder.id),
+    );
+    const activeCardSetIds = new Set(
+      cardSetRecords
+        .filter((cardSet) => !readDeletedState(cardSet))
+        .map((cardSet) => toNonEmptyString(cardSet.id))
+        .filter((id): id is string => id !== null),
+    );
+
+    for (const card of cards) {
+      const candidate = toRecord(card);
+      const deletedAtExists = candidate.deletedAt != null;
+      const isDeleted = readDeletedState(candidate);
+      const cardSetId = toNonEmptyString(
+        candidate.cardSetId ?? candidate.card_set_id,
       );
-      const cardSetRecords = allCardSets.map(toRecord);
 
-      const activeFolderIds = new Set(
-        folders
-          .filter((folder) => !folder.isDeleted)
-          .map((folder) => folder.id),
-      );
-      const activeCardSetIds = new Set(
-        cardSetRecords
-          .filter((cardSet) => !readDeletedState(cardSet))
-          .map((cardSet) => toNonEmptyString(cardSet.id))
-          .filter((id): id is string => id !== null),
-      );
+      if (deletedAtExists !== isDeleted) {
+        issues.push({
+          code: "DELETED_FLAG_MISMATCH",
+          entityType: "card",
+          entityId: String(candidate.id ?? "unknown"),
+          severity: "warning",
+          fixed: false,
+          details: { hasDeletedAt: deletedAtExists, isDeleted },
+        });
+      }
 
-      for (const card of cards) {
-        const candidate = toRecord(card);
-        const deletedAtExists = candidate.deletedAt != null;
-        const isDeleted = readDeletedState(candidate);
-        const cardSetId = toNonEmptyString(
-          candidate.cardSetId ?? candidate.card_set_id,
-        );
+      for (const key of TIMESTAMP_KEYS) {
+        const raw = candidate[key];
+        if (raw == null) {
+          continue;
+        }
 
-        if (deletedAtExists !== isDeleted) {
+        const normalized = normalizeDate(raw);
+
+        if (!normalized || !(raw instanceof Date)) {
           issues.push({
-            code: "DELETED_FLAG_MISMATCH",
+            code: "TIMESTAMP_TYPE_MIXED",
             entityType: "card",
             entityId: String(candidate.id ?? "unknown"),
-            severity: "warning",
+            severity: normalized ? "info" : "warning",
             fixed: false,
-            details: { hasDeletedAt: deletedAtExists, isDeleted },
+            details: { field: key, originalType: typeof raw },
           });
         }
+      }
 
-        for (const key of TIMESTAMP_KEYS) {
-          const raw = candidate[key];
-          if (raw == null) {
-            continue;
-          }
+      if (!isDeleted && !cardSetId) {
+        issues.push({
+          code: "MISSING_CARD_SET",
+          entityType: "card",
+          entityId: String(candidate.id ?? "unknown"),
+          severity: "warning",
+          fixed: false,
+          details: { cardSetId: candidate.cardSetId ?? null },
+        });
+      }
 
-          const normalized = normalizeDate(raw);
+      if (!isDeleted && cardSetId && !activeCardSetIds.has(cardSetId)) {
+        issues.push({
+          code: "INVALID_CARD_SET_REF",
+          entityType: "card",
+          entityId: String(candidate.id ?? "unknown"),
+          severity: "error",
+          fixed: false,
+          details: { cardSetId },
+        });
+      }
 
-          if (!normalized || !(raw instanceof Date)) {
-            issues.push({
-              code: "TIMESTAMP_TYPE_MIXED",
-              entityType: "card",
-              entityId: String(candidate.id ?? "unknown"),
-              severity: normalized ? "info" : "warning",
-              fixed: false,
-              details: { field: key, originalType: typeof raw },
-            });
-          }
-        }
-
-        if (!isDeleted && !cardSetId) {
-          issues.push({
-            code: "MISSING_CARD_SET",
-            entityType: "card",
-            entityId: String(candidate.id ?? "unknown"),
-            severity: "warning",
-            fixed: false,
-            details: { cardSetId: candidate.cardSetId ?? null },
-          });
-        }
-
-        if (!isDeleted && cardSetId && !activeCardSetIds.has(cardSetId)) {
-          issues.push({
-            code: "INVALID_CARD_SET_REF",
-            entityType: "card",
-            entityId: String(candidate.id ?? "unknown"),
-            severity: "error",
-            fixed: false,
-            details: { cardSetId },
-          });
-        }
-
-        if (
-          !isDeleted &&
+      if (
+        !isDeleted &&
           !isMissingFolderId(candidate.folderId) &&
           !activeFolderIds.has(String(candidate.folderId))
-        ) {
-          issues.push({
-            code: "INVALID_FOLDER_REF",
-            entityType: "card",
-            entityId: String(candidate.id ?? "unknown"),
-            severity: "error",
-            fixed: false,
-            details: { folderId: String(candidate.folderId) },
-          });
-        }
-
-        const frontBlocks = getCardBlocks(card, "question");
-        const backBlocks = getCardBlocks(card, "answer");
-        const blocks = [...frontBlocks, ...backBlocks];
-
-        if (blocks.some((block) => typeof block.orderIndex !== "number")) {
-          issues.push({
-            code: "BLOCK_ORDER_INDEX_MISSING",
-            entityType: "card",
-            entityId: String(candidate.id ?? "unknown"),
-            severity: "warning",
-            fixed: false,
-            details: { blockCount: blocks.length },
-          });
-        }
-
-        void getCardText(card, "question");
-        void getCardText(card, "answer");
+      ) {
+        issues.push({
+          code: "INVALID_FOLDER_REF",
+          entityType: "card",
+          entityId: String(candidate.id ?? "unknown"),
+          severity: "error",
+          fixed: false,
+          details: { folderId: String(candidate.folderId) },
+        });
       }
 
-      for (const folder of folders) {
-        const candidate = toRecord(folder);
+      const frontBlocks = getCardBlocks(card, "question");
+      const backBlocks = getCardBlocks(card, "answer");
+      const blocks = [...frontBlocks, ...backBlocks];
 
-        if (!candidate.folderName && !candidate.folder_name) {
-          issues.push({
-            code: "MISSING_REQUIRED_FIELD",
-            entityType: "folder",
-            entityId: String(candidate.id ?? "unknown"),
-            severity: "warning",
-            fixed: false,
-            details: { field: "folderName" },
-          });
-        }
+      if (blocks.some((block) => typeof block.orderIndex !== "number")) {
+        issues.push({
+          code: "BLOCK_ORDER_INDEX_MISSING",
+          entityType: "card",
+          entityId: String(candidate.id ?? "unknown"),
+          severity: "warning",
+          fixed: false,
+          details: { blockCount: blocks.length },
+        });
       }
 
-      return {
-        checkedAt: new Date().toISOString(),
-        totalCards: cards.filter((card) => !card.isDeleted).length,
-        totalFolders: folders.filter((folder) => !folder.isDeleted).length,
-        issues,
-        isHealthy:
-          issues.filter((issue) => issue.severity === "error").length === 0,
-      };
-    } catch (error) {
-      console.error("[Integrity] check failed", sanitizeForLog(error));
-
-      return {
-        checkedAt: new Date().toISOString(),
-        totalCards: 0,
-        totalFolders: 0,
-        issues: [
-          {
-            code: "SYSTEM_CHECK_FAILED",
-            entityType: "system",
-            entityId: "system",
-            severity: "error",
-            fixed: false,
-            details: { error: String(error) },
-          },
-        ],
-        isHealthy: false,
-      };
+      void getCardText(card, "question");
+      void getCardText(card, "answer");
     }
-  };
 
-  return {
-    execute,
-  };
+    for (const folder of folders) {
+      const candidate = toRecord(folder);
+
+      if (!candidate.folderName && !candidate.folder_name) {
+        issues.push({
+          code: "MISSING_REQUIRED_FIELD",
+          entityType: "folder",
+          entityId: String(candidate.id ?? "unknown"),
+          severity: "warning",
+          fixed: false,
+          details: { field: "folderName" },
+        });
+      }
+    }
+
+    return {
+      checkedAt: new Date().toISOString(),
+      totalCards: cards.filter((card) => !card.isDeleted).length,
+      totalFolders: folders.filter((folder) => !folder.isDeleted).length,
+      issues,
+      isHealthy:
+          issues.filter((issue) => issue.severity === "error").length === 0,
+    };
+  } catch (error) {
+    console.error("[Integrity] check failed", sanitizeForLog(error));
+
+    return {
+      checkedAt: new Date().toISOString(),
+      totalCards: 0,
+      totalFolders: 0,
+      issues: [
+        {
+          code: "SYSTEM_CHECK_FAILED",
+          entityType: "system",
+          entityId: "system",
+          severity: "error",
+          fixed: false,
+          details: { error: String(error) },
+        },
+      ],
+      isHealthy: false,
+    };
+  }
+};
+
+return {
+  execute,
+};
 };
 
 export { createCheckDataIntegrityUseCase };

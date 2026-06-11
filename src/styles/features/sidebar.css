@@ -5,16 +5,16 @@
 
     --explorer-chrome-folder-fill: #f8fafc;
     --explorer-chrome-folder-stroke: #64748b;
-    --explorer-chrome-folder-highlight: #ffffff;
+    --explorer-chrome-folder-highlight: #fff;
     --explorer-chrome-cardset-fill: #f8fafc;
     --explorer-chrome-cardset-stroke: #64748b;
-    --explorer-chrome-cardset-highlight: #ffffff;
+    --explorer-chrome-cardset-highlight: #fff;
     --explorer-chrome-card-fill: #f8fafc;
     --explorer-chrome-card-stroke: #64748b;
-    --explorer-chrome-card-highlight: #ffffff;
+    --explorer-chrome-card-highlight: #fff;
     --explorer-chrome-pdf-fill: #f8fafc;
     --explorer-chrome-pdf-stroke: #64748b;
-    --explorer-chrome-pdf-highlight: #ffffff;
+    --explorer-chrome-pdf-highlight: #fff;
     --explorer-chrome-pdf-accent: #2563eb;
     --explorer-chrome-pin-stroke: #64748b;
 
@@ -40,8 +40,8 @@
 
   .app-layered-directory {
     --app-sidebar-text: #6d6d6d;
-    --app-sidebar-text-strong: #666666;
-    --app-sidebar-text-muted: #777777;
+    --app-sidebar-text-strong: #666;
+    --app-sidebar-text-muted: #777;
     --app-sidebar-icon: #6d6d6d;
   }
 
@@ -227,5 +227,5 @@
 
 .app-layered-directory [aria-label="Project list explorer"] p,
 .app-layered-directory [aria-label="Library hierarchy explorer"] p {
-  color: var(--app-sidebar-text-muted, #777777);
+  color: var(--app-sidebar-text-muted, #777);
 }

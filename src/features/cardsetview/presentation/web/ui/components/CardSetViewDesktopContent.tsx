@@ -12,7 +12,7 @@ type CardSetViewChromeResetStyle = CSSProperties & {
 };
 
 const cardSetViewChromeResetStyle: CardSetViewChromeResetStyle = {
-  "--card-selected-surface": "#ffffff",
+  "--card-selected-surface": "#fff",
   "--card-border-selected": "var(--card-border-default, rgba(15, 23, 42, 0.08))",
   "--card-shadow-selected":
     "0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 18px rgba(15, 23, 42, 0.06)",

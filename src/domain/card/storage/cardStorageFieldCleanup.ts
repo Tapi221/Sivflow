@@ -26,9 +26,9 @@ const LEGACY_CARD_STORAGE_FIELDS = [
 ] as const;
 
 const cleanupLegacyCardStorageFields = (record: StorageLike): StorageLike => { for (const field of LEGACY_CARD_STORAGE_FIELDS) { delete record[field];
-  }
+}
 
-  return record;
+return record;
 };
 
 export { cleanupLegacyCardStorageFields };

@@ -20,18 +20,18 @@ const dispatchCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEven
   window.dispatchEvent(new CustomEvent(eventName, { detail }));
 };
 const subscribeCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName>(eventName: TEventName, listener: (detail: CardSetViewWindowEventMap[TEventName]) => void) => { if (typeof window === "undefined") { return () => {};
-  }
+}
 
-  const handler: EventListener = (event) => {
-    const detail = (event as CustomEvent<CardSetViewWindowEventMap[TEventName]>)
-      .detail;
-    listener(detail);
-  };
+const handler: EventListener = (event) => {
+  const detail = (event as CustomEvent<CardSetViewWindowEventMap[TEventName]>)
+    .detail;
+  listener(detail);
+};
 
-  window.addEventListener(eventName, handler);
-  return () => {
-    window.removeEventListener(eventName, handler);
-  };
+window.addEventListener(eventName, handler);
+return () => {
+  window.removeEventListener(eventName, handler);
+};
 };
 
 export { dispatchCardSetViewWindowEvent, subscribeCardSetViewWindowEvent };

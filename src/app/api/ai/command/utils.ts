@@ -34,38 +34,38 @@ const sections = (sections: (boolean | string | null | undefined)[]) => sections
 const list = (items: string[] | undefined) => items ? items.filter(Boolean).map((item) => `- ${item}`).join("\n") : "";
 const buildStructuredPrompt = ({ context, examples, history, instruction, outputFormatting, prefilledResponse, rules, task, taskContext, thinking, tone }: StructuredPromptSections) => { const formattedExamples = Array.isArray(examples) ? examples.map((example) => { const indentedContent = example.split("\n").map((line) => (line ? ` ${line}` : "")).join("\n");
 
-    return ["  <example>", indentedContent, "  </example>"].join("\n");
-  })
-    .join("\n")
-    : examples;
+  return ["  <example>", indentedContent, "  </example>"].join("\n");
+})
+  .join("\n")
+  : examples;
 
-  return sections([
-    taskContext,
-    tone,
-    task && tag("task", task),
-    instruction &&
+return sections([
+  taskContext,
+  tone,
+  task && tag("task", task),
+  instruction &&
     dedent`
         Here is the user's instruction (this is what you need to respond to):
         ${tag("instruction", instruction)}
       `,
-    context &&
+  context &&
     dedent`
         Here is the context you should reference when answering the user:
         ${tag("context", context)}
       `,
-    rules && tag("rules", rules),
-    formattedExamples &&
+  rules && tag("rules", rules),
+  formattedExamples &&
     "Here are some examples of how to respond in a standard interaction:\n" +
     tag("examples", formattedExamples),
-    history &&
+  history &&
     dedent`
         Here is the conversation history (between the user and you) prior to the current instruction:
         ${tag("history", history)}
       `,
-    thinking && tag("thinking", thinking),
-    outputFormatting && tag("outputFormatting", outputFormatting),
-    (prefilledResponse ?? null) !== null && tag("prefilledResponse", prefilledResponse ?? ""),
-  ]);
+  thinking && tag("thinking", thinking),
+  outputFormatting && tag("outputFormatting", outputFormatting),
+  (prefilledResponse ?? null) !== null && tag("prefilledResponse", prefilledResponse ?? ""),
+]);
 };
 const getTextFromMessage = (message: UIMessage): string => { return message.parts.filter((part) => part.type === "text").map((part) => part.text).join("");
 };

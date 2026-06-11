@@ -15,7 +15,7 @@ const forbiddenCoreThemeLiterals = [
   "#d9d9d9",
   "#8a8a8a",
   "#4f4f4f",
-  "#777777",
+  "#777",
 ];
 
 const filesThatMustBeTokenDriven = [

@@ -88,7 +88,7 @@ const EquationElement = (props: PlateElementProps<TEquationElement>) => { const 
     katexRef,
     options: {
       displayMode: true,
-      errorColor: "#cc0000",
+      errorColor: "#c00",
       fleqn: false,
       leqno: false,
       macros: { "\f": "#1f(#2)" },
@@ -163,7 +163,7 @@ const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => { 
     katexRef,
     options: {
       displayMode: true,
-      errorColor: "#cc0000",
+      errorColor: "#c00",
       fleqn: false,
       leqno: false,
       macros: { "\f": "#1f(#2)" },

@@ -12,9 +12,9 @@ import { cn } from "@/lib/utils";
 import { useUploadFile } from "@/hooks/use-upload-file";
 
 const formatBytes = (bytes: number, opts: {
-    decimals?: number;
-    sizeType?: "accurate" | "normal";
-  } = {}) => {
+  decimals?: number;
+  sizeType?: "accurate" | "normal";
+} = {}) => {
   const { decimals = 0, sizeType = "normal" } = opts;
 
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
@@ -27,7 +27,7 @@ const formatBytes = (bytes: number, opts: {
   return `${(bytes / 1024 ** i).toFixed(decimals)} ${sizeType === "accurate"
     ? (accurateSizes[i] ?? "Bytest")
     : (sizes[i] ?? "Bytes")
-    }`;
+  }`;
 };
 
 const CONTENT: Record<

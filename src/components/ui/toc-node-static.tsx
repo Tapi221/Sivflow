@@ -120,7 +120,7 @@ const TocElementDocx = (props: SlateElementProps) => { const { editor } = props;
               <a
                 href={`#${item.id}`}
                 style={{
-                  color: "#0066cc",
+                  color: "#06c",
                   textDecoration: "underline",
                 }}
               >

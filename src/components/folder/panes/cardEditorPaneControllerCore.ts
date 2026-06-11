@@ -34,12 +34,12 @@ const resolveSelectedCardSnapshot = ({ selectedCardId, cardsById }: { selectedCa
   return cardsById.get(selectedCardId) ?? null;
 };
 const applyEditingDraftPatch = ({ currentDraft, detail, selectedCardId, isEditing }: { currentDraft: { title: string;
-    isDraft: boolean;
-    tags: string[];
-  } | null;
-  detail: CardSetViewEditingDraftPatch | null | undefined;
-  selectedCardId: string | null;
-  isEditing: boolean;
+  isDraft: boolean;
+  tags: string[];
+} | null;
+detail: CardSetViewEditingDraftPatch | null | undefined;
+selectedCardId: string | null;
+isEditing: boolean;
 }) => {
   if (!currentDraft || !detail || !isEditing) return currentDraft;
   if (!selectedCardId || detail.cardId !== selectedCardId) return currentDraft;
@@ -83,112 +83,112 @@ const normalizeReviewRating = (rating: number): ReviewLog["rating"] => {
   throw new Error("学習評価は 1〜4 の範囲で指定してください");
 };
 const createMetaPanelActions = ({ selectedCard, settings, updateCard, onCardUpdated, flushDraft, handleTitleInputChange, handleUpdateTags, handleToggleDraft, handleUpdateTitle }: CreateMetaPanelActionsArgs) => { const onAddReviewLog = ({ reviewedAt, rating, durationMinutes }: { reviewedAt: string | number | Date;
-    rating: number;
-    durationMinutes?: number | null;
-  }) => {
-    if (!selectedCard?.id) return Promise.resolve();
+  rating: number;
+  durationMinutes?: number | null;
+}) => {
+  if (!selectedCard?.id) return Promise.resolve();
 
-    const { patch } = createReviewPatchFromRating({
-      card: selectedCard,
-      rating: normalizeReviewRating(rating),
-      now: new Date(reviewedAt),
-      delayBonusEnabled: settings?.delayBonusEnabled ?? false,
-      durationMinutes,
-    });
-
-    return Promise.resolve(updateCard(selectedCard.id, patch)).then(() => {
-      onCardUpdated?.();
-    });
-  };
-
-  const onUpdateLatestReviewLog = ({
-    reviewLogs,
-    reviewedAt,
-    rating,
+  const { patch } = createReviewPatchFromRating({
+    card: selectedCard,
+    rating: normalizeReviewRating(rating),
+    now: new Date(reviewedAt),
+    delayBonusEnabled: settings?.delayBonusEnabled ?? false,
     durationMinutes,
-  }: {
-    reviewLogs: Card["reviewLogs"];
-    reviewedAt: string | number | Date;
-    rating: number;
-    durationMinutes?: number | null;
-  }) => {
-    if (!selectedCard?.id) return Promise.resolve();
+  });
 
-    const { patch } = createLatestReviewLogPatch({
-      action: "update",
-      card: selectedCard,
-      delayBonusEnabled: settings?.delayBonusEnabled ?? false,
-      rating: normalizeReviewRating(rating),
-      reviewedAt: new Date(reviewedAt),
-      reviewLogs,
-      reviewStartNextDay: settings?.reviewStartNextDay ?? true,
-      durationMinutes,
-    });
+  return Promise.resolve(updateCard(selectedCard.id, patch)).then(() => {
+    onCardUpdated?.();
+  });
+};
 
-    return Promise.resolve(updateCard(selectedCard.id, patch)).then(() => {
-      onCardUpdated?.();
-    });
-  };
+const onUpdateLatestReviewLog = ({
+  reviewLogs,
+  reviewedAt,
+  rating,
+  durationMinutes,
+}: {
+  reviewLogs: Card["reviewLogs"];
+  reviewedAt: string | number | Date;
+  rating: number;
+  durationMinutes?: number | null;
+}) => {
+  if (!selectedCard?.id) return Promise.resolve();
 
-  const onDeleteLatestReviewLog = ({
+  const { patch } = createLatestReviewLogPatch({
+    action: "update",
+    card: selectedCard,
+    delayBonusEnabled: settings?.delayBonusEnabled ?? false,
+    rating: normalizeReviewRating(rating),
+    reviewedAt: new Date(reviewedAt),
     reviewLogs,
-  }: {
-    reviewLogs: Card["reviewLogs"];
-  }) => {
-    if (!selectedCard?.id) return Promise.resolve();
-
-    const { patch } = createLatestReviewLogPatch({
-      action: "delete",
-      card: selectedCard,
-      delayBonusEnabled: settings?.delayBonusEnabled ?? false,
-      reviewLogs,
-      reviewStartNextDay: settings?.reviewStartNextDay ?? true,
-    });
-
-    return Promise.resolve(updateCard(selectedCard.id, patch)).then(() => {
-      onCardUpdated?.();
-    });
-  };
-
-  const onUpdateReviewLogDuration = ({
-    reviewLogs,
-    logIndex,
+    reviewStartNextDay: settings?.reviewStartNextDay ?? true,
     durationMinutes,
-  }: {
-    reviewLogs: Card["reviewLogs"];
-    logIndex: number;
-    durationMinutes?: number | null;
-  }) => {
-    if (!selectedCard?.id) return Promise.resolve();
+  });
 
-    const nextReviewLogs = (reviewLogs ?? []).map((log, index) =>
-      index === logIndex ? { ...log, durationMinutes } : log,
-    );
+  return Promise.resolve(updateCard(selectedCard.id, patch)).then(() => {
+    onCardUpdated?.();
+  });
+};
 
-    return Promise.resolve(
-      updateCard(selectedCard.id, {
-        reviewLogs: nextReviewLogs,
-      }),
-    ).then(() => {
-      onCardUpdated?.();
-    });
-  };
+const onDeleteLatestReviewLog = ({
+  reviewLogs,
+}: {
+  reviewLogs: Card["reviewLogs"];
+}) => {
+  if (!selectedCard?.id) return Promise.resolve();
 
-  return {
-    onAddReviewLog,
-    onUpdateLatestReviewLog,
-    onDeleteLatestReviewLog,
-    onUpdateReviewLogDuration,
-    onFlushAutosave: () =>
-      flushDraft({
-        reason: "autosave",
-        showSuccessToast: false,
-      }),
-    onTitleInputChange: handleTitleInputChange,
-    onUpdateTags: handleUpdateTags,
-    onToggleDraft: handleToggleDraft,
-    onUpdateTitle: handleUpdateTitle,
-  };
+  const { patch } = createLatestReviewLogPatch({
+    action: "delete",
+    card: selectedCard,
+    delayBonusEnabled: settings?.delayBonusEnabled ?? false,
+    reviewLogs,
+    reviewStartNextDay: settings?.reviewStartNextDay ?? true,
+  });
+
+  return Promise.resolve(updateCard(selectedCard.id, patch)).then(() => {
+    onCardUpdated?.();
+  });
+};
+
+const onUpdateReviewLogDuration = ({
+  reviewLogs,
+  logIndex,
+  durationMinutes,
+}: {
+  reviewLogs: Card["reviewLogs"];
+  logIndex: number;
+  durationMinutes?: number | null;
+}) => {
+  if (!selectedCard?.id) return Promise.resolve();
+
+  const nextReviewLogs = (reviewLogs ?? []).map((log, index) =>
+    index === logIndex ? { ...log, durationMinutes } : log,
+  );
+
+  return Promise.resolve(
+    updateCard(selectedCard.id, {
+      reviewLogs: nextReviewLogs,
+    }),
+  ).then(() => {
+    onCardUpdated?.();
+  });
+};
+
+return {
+  onAddReviewLog,
+  onUpdateLatestReviewLog,
+  onDeleteLatestReviewLog,
+  onUpdateReviewLogDuration,
+  onFlushAutosave: () =>
+    flushDraft({
+      reason: "autosave",
+      showSuccessToast: false,
+    }),
+  onTitleInputChange: handleTitleInputChange,
+  onUpdateTags: handleUpdateTags,
+  onToggleDraft: handleToggleDraft,
+  onUpdateTitle: handleUpdateTitle,
+};
 };
 
 export { META_PANEL_OPEN_STORAGE_KEY, buildCardsById, resolveSelectedCardSnapshot, applyEditingDraftPatch, readStoredMetaPanelOpen, writeStoredMetaPanelOpen, createMetaPanelActions };

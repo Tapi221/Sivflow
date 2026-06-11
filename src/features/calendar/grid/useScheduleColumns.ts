@@ -21,26 +21,26 @@ const VIRTUAL_RAIL_VIEW_MODES = new Set<CalendarViewMode>([
 ]);
 
 const useScheduleDays = ({ anchorDate, viewMode, buffer, weekStartDay }: UseScheduleDaysParams) => { return useMemo(() => { const displayDays = buildScheduleDisplayDays(anchorDate, viewMode, weekStartDay);
-    const interactionDays = VIRTUAL_RAIL_VIEW_MODES.has(viewMode)
-      ? displayDays
-      : buildScheduleInteractionDays(
-        anchorDate,
-        viewMode,
-        buffer,
-        weekStartDay,
-      );
-    const virtualRail = buildScheduleVirtualRail(anchorDate, viewMode, buffer, weekStartDay);
+  const interactionDays = VIRTUAL_RAIL_VIEW_MODES.has(viewMode)
+    ? displayDays
+    : buildScheduleInteractionDays(
+      anchorDate,
+      viewMode,
+      buffer,
+      weekStartDay,
+    );
+  const virtualRail = buildScheduleVirtualRail(anchorDate, viewMode, buffer, weekStartDay);
 
-    return {
-      displayDays,
-      interactionDays,
-      virtualRail,
-      syncRange: {
-        start: interactionDays[0],
-        end: interactionDays[interactionDays.length - 1],
-      },
-    };
-  }, [anchorDate, buffer, viewMode, weekStartDay]);
+  return {
+    displayDays,
+    interactionDays,
+    virtualRail,
+    syncRange: {
+      start: interactionDays[0],
+      end: interactionDays[interactionDays.length - 1],
+    },
+  };
+}, [anchorDate, buffer, viewMode, weekStartDay]);
 };
 
 export { useScheduleDays };

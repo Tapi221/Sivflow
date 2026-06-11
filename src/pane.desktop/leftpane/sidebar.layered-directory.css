@@ -68,7 +68,7 @@
 
 .app-layered-directory__workspace-toggle:hover:not(:disabled),
 .app-layered-directory__workspace-toggle:focus-visible:not(:disabled) {
-  background: #eeeeee;
+  background: #eee;
   color: #6f6f6f;
 }
 
@@ -92,7 +92,7 @@
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: #111111;
+  color: #111;
   font: inherit;
   font-size: 13px;
   font-weight: 650;
@@ -104,7 +104,7 @@
 
 .app-layered-directory__workspace-button:hover,
 .app-layered-directory__workspace-button:focus-visible {
-  background: #eeeeee;
+  background: #eee;
 }
 
 .app-layered-directory__workspace-avatar {
@@ -126,7 +126,7 @@
   display: block;
   min-width: 0;
   overflow: hidden;
-  color: #111111;
+  color: #111;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -169,7 +169,7 @@
 .app-layered-directory__notion-home:focus-visible,
 .app-layered-directory__notion-action:hover:not(:disabled),
 .app-layered-directory__notion-action:focus-visible:not(:disabled) {
-  background: #eeeeee;
+  background: #eee;
   color: #2f343b;
 }
 
@@ -216,7 +216,7 @@
 
 .app-layered-directory__section-heading {
   margin: 0;
-  color: #111111;
+  color: #111;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: -0.018em;
@@ -232,7 +232,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: #111111;
+  color: #111;
   font: inherit;
   font-size: 13px;
   font-weight: 700;
@@ -280,7 +280,7 @@
 
 .app-layered-directory__add-button:hover,
 .app-layered-directory__add-button:focus-visible {
-  background: #eeeeee;
+  background: #eee;
   color: #2f343b;
 }
 
@@ -366,7 +366,7 @@
 }
 
 .app-layered-directory nav[aria-label="カレンダー一覧"] > div:first-child > button:first-child {
-  color: #111111 !important;
+  color: #111 !important;
   font-size: 13px !important;
   font-weight: 700 !important;
   letter-spacing: -0.018em !important;
@@ -388,7 +388,7 @@
 
 .app-layered-directory nav[aria-label="カレンダー一覧"] > div:first-child > button:last-child:hover,
 .app-layered-directory nav[aria-label="カレンダー一覧"] > div:first-child > button:last-child:focus-visible {
-  background: #eeeeee !important;
+  background: #eee !important;
   color: #2f343b !important;
 }
 
@@ -421,7 +421,7 @@
 
 .app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed]:hover,
 .app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed]:focus-visible {
-  background: #eeeeee !important;
+  background: #eee !important;
 }
 
 .app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed] > button:first-child {

@@ -370,7 +370,7 @@ const SettingScreen = () => {
   return (
     <main className="h-full min-h-0 w-full overflow-y-auto text-[#1c1c1e]" style={{ paddingTop: "max(18px, env(safe-area-inset-top))", paddingBottom: "max(96px, calc(env(safe-area-inset-bottom) + 76px))", background: "var(--backpane-bg)" }} aria-label={copy.title}>
       <div className="mx-auto flex min-h-full w-full max-w-[520px] flex-col gap-5 px-5 pb-7 pt-3">
-        <h1 className="pb-2 pt-2 text-center text-[18px] font-bold tracking-[-0.03em] text-[#111111]">{copy.title}</h1>
+        <h1 className="pb-2 pt-2 text-center text-[18px] font-bold tracking-[-0.03em] text-[#111]">{copy.title}</h1>
 
         <button type="button" className={`${SETTINGS_CARD_CLASS_NAME} flex min-h-[108px] items-center gap-4 p-4 text-left`} onClick={() => setActiveSectionId("account")}>
           <span className="relative flex h-[76px] w-[76px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f0f0f3] text-[28px] font-semibold text-[#c2c2c8]">
@@ -386,7 +386,7 @@ const SettingScreen = () => {
         <section className={`${SETTINGS_CARD_CLASS_NAME} flex min-h-[78px] items-center gap-4 px-4 py-3`} aria-label={copy.premiumTitle}>
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#f4c400] text-white shadow-[0_4px_12px_rgba(244,196,0,0.32)]"><Trophy size={22} /></span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[16px] font-bold tracking-[-0.03em] text-[#111111]">{copy.premiumTitle}</span>
+            <span className="block truncate text-[16px] font-bold tracking-[-0.03em] text-[#111]">{copy.premiumTitle}</span>
             <span className="mt-1 block truncate text-[11px] font-medium text-[#a4a4aa]">{copy.premiumDescription}</span>
           </span>
           <span className="shrink-0 rounded-full border border-[#e6c600] px-3 py-2 text-[12px] font-semibold text-[#d9b800]">{copy.premiumAction}</span>

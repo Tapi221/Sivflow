@@ -5,14 +5,14 @@
     --mf-explorer-search-width: clamp(176px, 16vw, 238px);
 
     --mf-explorer-app-bg: #f8fafc;
-    --mf-explorer-window-bg: #ffffff;
-    --mf-explorer-sidebar-bg: #ffffff;
-    --mf-explorer-surface: #ffffff;
-    --mf-explorer-surface-solid: #ffffff;
+    --mf-explorer-window-bg: #fff;
+    --mf-explorer-sidebar-bg: #fff;
+    --mf-explorer-surface: #fff;
+    --mf-explorer-surface-solid: #fff;
     --mf-explorer-toolbar-bg: rgba(255, 255, 255, 0.92);
     --mf-explorer-main-chrome-surface: rgba(255, 255, 255, 0.92);
     --mf-explorer-status-bg: rgba(248, 250, 252, 0.92);
-    --mf-explorer-control-bg: #ffffff;
+    --mf-explorer-control-bg: #fff;
     --mf-explorer-control-hover: rgba(148, 163, 184, 0.1);
     --mf-explorer-header-bg: rgba(255, 255, 255, 0.98);
     --mf-explorer-border: #e2e8f0;
@@ -41,7 +41,7 @@
     --mf-explorer-radius-row: 10px;
     --mf-explorer-icon-folder-fill: #f8fafc;
     --mf-explorer-icon-folder-stroke: #64748b;
-    --mf-explorer-icon-folder-highlight: #ffffff;
+    --mf-explorer-icon-folder-highlight: #fff;
     --mf-explorer-icon-cardset-fill: #f8fafc;
     --mf-explorer-icon-card-fill: #f8fafc;
     --mf-explorer-icon-pdf-fill: #f8fafc;
@@ -188,7 +188,7 @@
   .explorer-workspace-tab--active {
     z-index: 4;
     border-radius: 12px 12px 0 0 !important;
-    background: var(--app-active-tab-bg, #ffffff) !important;
+    background: var(--app-active-tab-bg, #fff) !important;
     color: var(--app-sidebar-text-strong, #2f3640) !important;
     isolation: isolate;
   }
@@ -202,7 +202,7 @@
     width: 16px;
     height: 17px;
     pointer-events: none;
-    background: var(--app-active-tab-bg, #ffffff);
+    background: var(--app-active-tab-bg, #fff);
   }
 
   .explorer-workspace-tab--active::before {
@@ -265,7 +265,7 @@
   .explorer-workspace-tab--inactive:hover {
     z-index: 2;
     background: var(--mf-explorer-workspace-tab-hover-bg) !important;
-    color: var(--app-titlebar-text-strong, #ffffff) !important;
+    color: var(--app-titlebar-text-strong, #fff) !important;
   }
 
   .explorer-workspace-tab--inactive:hover::before,
@@ -344,7 +344,7 @@
       --app-titlebar-surface-hover,
       rgba(255, 255, 255, 0.14)
     ) !important;
-    color: var(--app-titlebar-text-strong, #ffffff) !important;
+    color: var(--app-titlebar-text-strong, #fff) !important;
   }
 
   .explorer-workspace-tab--active .explorer-workspace-tab-close:hover,
@@ -371,7 +371,7 @@
       --app-titlebar-surface,
       rgba(255, 255, 255, 0.08)
     ) !important;
-    color: var(--app-titlebar-text-strong, #ffffff) !important;
+    color: var(--app-titlebar-text-strong, #fff) !important;
   }
 
   .explorer-workspace-tab-add svg {
@@ -412,6 +412,6 @@
     border: 0 !important;
     border-radius: 0 !important;
     overflow: hidden !important;
-    background: var(--app-active-tab-bg, #ffffff) !important;
+    background: var(--app-active-tab-bg, #fff) !important;
   }
 }

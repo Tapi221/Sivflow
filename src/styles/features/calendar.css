@@ -155,8 +155,8 @@
   .calendar-month-weekday-header,
   .calendar-month-scroll .sticky.top-0.z-30.grid.grid-cols-7 {
     overflow: visible !important;
-    border-color: #eeeeee !important;
-    background: #ffffff !important;
+    border-color: #eee !important;
+    background: #fff !important;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     box-shadow: none;
@@ -190,7 +190,7 @@
 
   .calendar-month-weekday-cell {
     border-right: 0 !important;
-    background: #ffffff !important;
+    background: #fff !important;
     color: #8e8e93 !important;
     font-family: var(--app-font-family-calendar);
     letter-spacing: 0.02em;
@@ -198,13 +198,13 @@
 
   .calendar-month-grid {
     border-top: 0;
-    background-color: #ffffff;
+    background-color: #fff;
     background-image: none;
   }
 
   .calendar-month-grid-spacer {
     position: relative;
-    background: #ffffff;
+    background: #fff;
   }
 
   .calendar-month-grid-spacer::before {
@@ -250,7 +250,7 @@
     contain: layout paint style;
     content-visibility: auto;
     contain-intrinsic-size: var(--calendar-month-row-height);
-    background: #ffffff;
+    background: #fff;
     box-shadow: inset 0 calc(-1 * var(--calendar-month-spacer-line-width)) 0 var(--calendar-month-spacer-line-color);
   }
 
@@ -258,7 +258,7 @@
     overflow: visible;
     min-height: var(--calendar-month-row-height);
     contain: layout paint style;
-    border-color: #eeeeee !important;
+    border-color: #eee !important;
     border-right-width: 0 !important;
     border-bottom-width: 0 !important;
     transition: background-color 120ms ease;

@@ -178,7 +178,7 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
                 <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a9690]">この回答から作る</p>
                 <div className="flex flex-wrap gap-1.5">
                   {candidateTerms.length > 0 ? candidateTerms.map((term) => (
-                    <button key={term} type="button" className="inline-flex h-7 max-w-[180px] items-center gap-1 rounded-[8px] border border-[#dddcd5] bg-[#f7f6f2] px-2 text-[11px] font-medium text-[#5f5f5f] transition hover:bg-[#eeeeee] disabled:opacity-60" onClick={() => void handleCreateLinkedQuestion(term)} disabled={creatingTerm !== null} title={`${term} から疑問を作る`}>
+                    <button key={term} type="button" className="inline-flex h-7 max-w-[180px] items-center gap-1 rounded-[8px] border border-[#dddcd5] bg-[#f7f6f2] px-2 text-[11px] font-medium text-[#5f5f5f] transition hover:bg-[#eee] disabled:opacity-60" onClick={() => void handleCreateLinkedQuestion(term)} disabled={creatingTerm !== null} title={`${term} から疑問を作る`}>
                       {creatingTerm === term ? <LoadingSpinner iconClassName="h-3 w-3" label="疑問リンクを作成中" /> : <Plus className="h-3 w-3" />}
                       <span className="truncate">{term}</span>
                     </button>
@@ -187,7 +187,7 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
               </>
               <div className="flex gap-1.5">
                 <input value={customTerm} onChange={(event) => setCustomTerm(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") handleCreateCustomQuestion(); }} placeholder="語句を入力して疑問にする" className="h-8 min-w-0 flex-1 rounded-[9px] border border-[#dddcd5] bg-white px-2.5 text-[12px] text-[#343434] outline-none transition placeholder:text-[#aaa49d] focus:border-[#c8c6bf]" maxLength={MAX_CUSTOM_TERM_LENGTH} />
-                <button type="button" className="inline-flex h-8 shrink-0 items-center justify-center rounded-[9px] border border-[#dddcd5] bg-[#f7f6f2] px-2.5 text-[11px] font-semibold text-[#5f5f5f] transition hover:bg-[#eeeeee] disabled:opacity-60" onClick={handleCreateCustomQuestion} disabled={!sanitizeCustomTerm(customTerm) || creatingTerm !== null}>追加</button>
+                <button type="button" className="inline-flex h-8 shrink-0 items-center justify-center rounded-[9px] border border-[#dddcd5] bg-[#f7f6f2] px-2.5 text-[11px] font-semibold text-[#5f5f5f] transition hover:bg-[#eee] disabled:opacity-60" onClick={handleCreateCustomQuestion} disabled={!sanitizeCustomTerm(customTerm) || creatingTerm !== null}>追加</button>
               </div>
             </div>
             <div className="mt-3 border-t border-[#eceae4] pt-2">

@@ -18,24 +18,24 @@ interface SegmentedControlGroupProps<T extends string> {
 
 const SegmentedControlGroup = <T extends string>({ value, options, onChange, size = "xs", className, buttonClassName }: SegmentedControlGroupProps<T>) => { return (<div className={cn("ds-segmented-control", className)}> {options.map((option) => { const isSelected = value === option.value;
 
-    return (
-      <SurfaceButton
-        key={option.value}
-        type="button"
-        aria-pressed={isSelected}
-        aria-label={option.ariaLabel}
-        disabled={option.disabled}
-        onClick={() => onChange(option.value)}
-        surface={isSelected ? "convexActive" : "concave"}
-        size={size}
-        className={buttonClassName}
-      >
-        {option.label}
-      </SurfaceButton>
-    );
-  })}
-  </div>
+  return (
+    <SurfaceButton
+      key={option.value}
+      type="button"
+      aria-pressed={isSelected}
+      aria-label={option.ariaLabel}
+      disabled={option.disabled}
+      onClick={() => onChange(option.value)}
+      surface={isSelected ? "convexActive" : "concave"}
+      size={size}
+      className={buttonClassName}
+    >
+      {option.label}
+    </SurfaceButton>
   );
+})}
+</div>
+);
 };
 
 export { SegmentedControlGroup };

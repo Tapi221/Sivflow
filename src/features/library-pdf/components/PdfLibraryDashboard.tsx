@@ -19,7 +19,7 @@ type IconBadgeProps = {
   tone?: "slate" | "green" | "violet" | "blue" | "rose";
 };
 
-const cardClassName = "box-border rounded-[10px] border border-[#D1D1D1] bg-[#FFFFFF] p-4 shadow-[0_6px_3px_0_rgba(0,0,0,0.06),0_10px_10px_0_rgba(0,0,0,0.05)]";
+const cardClassName = "box-border rounded-[10px] border border-[#D1D1D1] bg-[#fff] p-4 shadow-[0_6px_3px_0_rgba(0,0,0,0.06),0_10px_10px_0_rgba(0,0,0,0.05)]";
 
 const formatDateTime = (value: Date | null): string => {
   if (!value) return "未記録";
@@ -84,7 +84,7 @@ const PdfLibraryDashboard = ({ documents, folders, onOpenDocument, showToolbar =
   }, [rows]);
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col bg-[#FFFFFF]">
+    <div className="flex h-full min-h-0 w-full flex-col bg-[#fff]">
       {showToolbar ? <PdfLibraryWorkspaceToolbar activeSection="pdf" onSelectSection={() => undefined} onAddPdf={handleToolbarAddDocument} /> : null}
       <input ref={fileInputRef} type="file" accept={currentFileAccept} multiple className="hidden" onChange={handleToolbarFileInputChange} />
       <div className="grid min-h-0 w-full grid-cols-1 gap-4 pt-4">

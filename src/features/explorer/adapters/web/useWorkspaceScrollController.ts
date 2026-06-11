@@ -10,23 +10,23 @@ type Params = {
  */
 const useWorkspaceScrollController = ({ isDesktop }: Params) => { const resetExplorerPaneScroll = useCallback(() => { if (typeof document === "undefined") return;
 
-    const main = document.querySelector(".app-layout__main");
+  const main = document.querySelector(".app-layout__main");
 
-    if (main instanceof HTMLElement) {
-      main.scrollTop = 0;
-      main.scrollLeft = 0;
-    }
+  if (main instanceof HTMLElement) {
+    main.scrollTop = 0;
+    main.scrollLeft = 0;
+  }
 
-    if (!isDesktop && typeof window !== "undefined") {
-      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    }
-  }, [isDesktop]);
+  if (!isDesktop && typeof window !== "undefined") {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
+}, [isDesktop]);
 
-  return {
-    resetExplorerPaneScroll,
-  };
+return {
+  resetExplorerPaneScroll,
+};
 };
 
 export { useWorkspaceScrollController };

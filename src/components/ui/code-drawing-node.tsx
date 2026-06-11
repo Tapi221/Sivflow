@@ -139,7 +139,7 @@ const CodeDrawingToolbar = ({
         >
           <SelectTrigger
             className={`h-8 w-[120px] border-0 bg-muted/50 text-xs shadow-none ${isMobile ? "" : "transition-colors hover:bg-zinc-200"
-              }`}
+            }`}
           >
             <SelectValue />
           </SelectTrigger>
@@ -162,7 +162,7 @@ const CodeDrawingToolbar = ({
         >
           <SelectTrigger
             className={`h-8 w-[80px] border-0 bg-muted/50 text-xs shadow-none ${isMobile ? "" : "transition-colors hover:bg-zinc-200"
-              }`}
+            }`}
           >
             <SelectValue />
           </SelectTrigger>
@@ -220,8 +220,8 @@ const CodeDrawingTextarea = ({
   return (
     <div
       className={`${isCodeOnlyMode ? "w-full" : "min-w-0 flex-1"
-        } flex flex-col ${isCodeOnlyMode && !isMobile ? "relative" : ""} ${showBorder && !isMobile ? "border-r" : ""
-        }`}
+      } flex flex-col ${isCodeOnlyMode && !isMobile ? "relative" : ""} ${showBorder && !isMobile ? "border-r" : ""
+      }`}
     >
       {toolbar && isCodeOnlyMode && (
         <div
@@ -283,7 +283,7 @@ const CodeDrawingPreviewArea = ({
   return (
     <div
       className={`flex min-w-0 flex-1 flex-col ${isMobile ? "" : "relative"} ${showBorder && isMobile ? "border-b" : ""
-        }`}
+      }`}
     >
       {toolbar && (
         <div

@@ -77,7 +77,7 @@ const TogglePlanResult = ({ value, onChange, className }: TogglePlanResultProps)
             {isActive && (
               <motion.span
                 layoutId={`${PLAN_RESULT_INDICATOR_ID}-${option.value}`}
-                className="absolute inset-0 -z-10 rounded-[8px] border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+                className="absolute inset-0 -z-10 rounded-[8px] border border-[#eee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
                 transition={PLAN_RESULT_MOTION_TRANSITION}
               />
             )}

@@ -211,7 +211,7 @@
 }
 
 .app-sidebar__nav-link.is-active {
-  background: var(--app-active-tab-bg, #ffffff);
+  background: var(--app-active-tab-bg, #fff);
   color: #8c8c8c;
   box-shadow: none;
 }

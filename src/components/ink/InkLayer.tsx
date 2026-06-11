@@ -575,7 +575,7 @@ const InkLayer = React.memo(React.forwardRef<InkLayerHandle, InkLayerProps>(({ c
       // 微小移動点を間引いてノイズ低減（筆跡はcoalescedで十分滑らか）
       let lastPoint =
         activeStrokeRef.current.points[
-        activeStrokeRef.current.points.length - 1
+          activeStrokeRef.current.points.length - 1
         ];
       const minDistSq = 0.35 * 0.35;
       for (const next of nextPoints) {

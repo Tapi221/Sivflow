@@ -44,7 +44,7 @@ describe("inkStorage", () => {
         {
           id: "fallback",
           tool: "pen" as const,
-          color: "#000000",
+          color: "#000",
           width: 2,
           opacity: 1,
           createdAt: 1,

@@ -40,7 +40,7 @@ const TABS_DRAG_SPACER_STYLE: AppRegionStyle = {
   marginRight: "var(--desktop-window-controls-width, 138px)",
 };
 const ACTIVE_TAB_SURFACE_STYLE: CSSProperties = {
-  background: "var(--app-active-tab-bg, #ffffff)",
+  background: "var(--app-active-tab-bg, #fff)",
 };
 const ACTIVE_TAB_JOIN_STYLE: CSSProperties = {};
 const ACTIVE_TAB_LEFT_CURVE_STYLE: CSSProperties = {

@@ -67,7 +67,7 @@
     overflow: hidden;
     border: 1px solid rgba(55, 53, 47, 0.12);
     border-radius: 14px;
-    background: #ffffff;
+    background: #fff;
     color: rgb(55, 53, 47);
     box-shadow:
       0 12px 32px rgba(15, 15, 15, 0.12),
@@ -99,7 +99,7 @@
     align-items: center;
     padding: 0 12px;
     border-bottom: 1px solid rgba(55, 53, 47, 0.08);
-    background: #ffffff;
+    background: #fff;
     flex-shrink: 0;
   }
 
@@ -156,7 +156,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 6px 4px 8px;
-    background: #ffffff;
+    background: #fff;
   }
 
   .gs-results::-webkit-scrollbar {

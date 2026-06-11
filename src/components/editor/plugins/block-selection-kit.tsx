@@ -14,16 +14,16 @@ const hasSelectableClass = ({ attributes, className }: { attributes: { className
     .includes("slate-selectable");
 
 const BlockSelectionKit = [BlockSelectionPlugin.configure(({ editor }) => ({ options: { enableContextMenu: true, isSelectable: (element) => !getPluginTypes(editor, [KEYS.column, KEYS.codeLine, KEYS.td]).includes(element.type), onKeyDownSelecting: (editor, e) => { if (isHotkey("mod+j")(e)) { editor.getApi(AIChatPlugin).aiChat.show();
-      }
-    },
-  },
-  render: {
-    belowRootNodes: (props) => {
-      if (!hasSelectableClass(props)) return null;
+}
+},
+},
+render: {
+  belowRootNodes: (props) => {
+    if (!hasSelectableClass(props)) return null;
 
-      return <BlockSelection {...(props as any)} />;
-    },
+    return <BlockSelection {...(props as any)} />;
   },
+},
 })),
 ];
 

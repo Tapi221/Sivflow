@@ -11,23 +11,23 @@ const INLINE_SUGGESTION_TARGET_PLUGINS = [
 ];
 const BaseSuggestionKit = [BaseSuggestionPlugin.configure({ inject: { isElement: true, nodeProps: { nodeKey: "", styleKey: "cssText", transformProps: ({ editor, element, props }) => { if (!element) return props;
 
-        const suggestionData = getInlineSuggestionData(editor, element);
+  const suggestionData = getInlineSuggestionData(editor, element);
 
-        if (!suggestionData) return props;
+  if (!suggestionData) return props;
 
-        return {
-          ...props,
-          "data-inline-suggestion": suggestionData.type,
-        };
-      },
-      transformStyle: () => ({}) as CSSStyleDeclaration,
-    },
-    targetPlugins: INLINE_SUGGESTION_TARGET_PLUGINS,
-  },
-  render: {
-    belowRootNodes: VoidRemoveSuggestionOverlayStatic as any,
-    node: SuggestionLeafStatic as any,
-  },
+  return {
+    ...props,
+    "data-inline-suggestion": suggestionData.type,
+  };
+},
+transformStyle: () => ({}) as CSSStyleDeclaration,
+},
+targetPlugins: INLINE_SUGGESTION_TARGET_PLUGINS,
+},
+render: {
+  belowRootNodes: VoidRemoveSuggestionOverlayStatic as any,
+  node: SuggestionLeafStatic as any,
+},
 }),
 ];
 
