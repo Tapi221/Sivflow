@@ -91,9 +91,7 @@ const isLocalPersistedPdfSource = (source: PdfDocumentSource | null): boolean =>
       return null;
 };
 
-
-
-      const PdfDocumentPane = ({document, className, onDocumentUpdate}: PdfDocumentPaneProps) => {
+const PdfDocumentPane = ({document, className, onDocumentUpdate}: PdfDocumentPaneProps) => {
   const {currentUser} = useAuthSession();
       const currentUserId = currentUser?.uid ?? null;
   const persistedSourceUrl = useMemo(() => resolvePdfDocumentSourceUrl(document), [document.blobUrl, document.downloadUrl, document.googleDriveWebContentLink, document.googleDriveWebViewLink, document.localUrl, document.remoteUrl]);
@@ -270,6 +268,4 @@ const isLocalPersistedPdfSource = (source: PdfDocumentSource | null): boolean =>
           return <PdfPane source={source} className={paneClassName} viewerState={document.viewerState ?? null} onLoadError={handlePdfLoadError} onViewerStateChange={handleViewerStateChange} />;
 };
 
-
-
-          export {PdfDocumentPane};
+export {PdfDocumentPane};
