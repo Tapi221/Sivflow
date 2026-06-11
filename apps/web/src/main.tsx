@@ -11,6 +11,8 @@ import { createRoot } from "react-dom/client";
 import { ErrorBoundary } from "@/components/common/ErrorScreen";
 import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
 
+
+
 type AppBootstrapState =
   | { status: "loading" }
   | { status: "ready"; App: ComponentType }
@@ -19,6 +21,8 @@ type AppBootstrapState =
 type StartupFailureScreenProps = {
   message: string;
 };
+
+
 
 const FIREBASE_ENV_FAILURE_MARKER = "[env] Missing required Firebase env vars";
 const STARTUP_FAILURE_TITLE = "起動設定が不足しています";
@@ -78,6 +82,8 @@ const STARTUP_LOGO_STYLE = `
 }
 `;
 
+
+
 const getStartupFailureMessage = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
 
@@ -103,6 +109,8 @@ const isPdfPerformanceStandaloneRoute = (): boolean => {
   if (new URLSearchParams(window.location.search).get(TEST_BYPASS_SEARCH_PARAM) !== "true") return false;
   return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "::1";
 };
+
+
 
 const StartupLogoMark = () => {
   return (
@@ -213,6 +221,8 @@ const AppBootstrap = () => {
   const LoadedApp = state.App;
   return <LoadedApp />;
 };
+
+
 
 if (!renderGoogleOAuthCallback()) {
   createRoot(document.getElementById("root")!).render(

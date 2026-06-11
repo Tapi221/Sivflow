@@ -31,6 +31,8 @@ const TEXT_COLORS = [
 
 
 
+
+
 /**
  * Generates a deterministic color pair (bg, text) from a string input (e.g. username)
  */

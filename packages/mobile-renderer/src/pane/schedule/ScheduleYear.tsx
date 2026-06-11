@@ -10,6 +10,8 @@ import { getCalendarDateKey, getEventDateKeys } from "@core/calendar/calendarEve
 
 import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
 
+
+
 type CalendarWeekStartDay = "sunday" | "monday";
 
 type CalendarWeekStartsOn = 0 | 1;
@@ -49,6 +51,8 @@ type ScheduleYearBlock = {
   label: string;
   months: ScheduleYearMonth[];
 };
+
+
 
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
 
@@ -175,6 +179,8 @@ const styles = StyleSheet.create({
   },
 });
 
+
+
 const getCalendarWeekStartsOn = (weekStartDay: CalendarWeekStartDay): CalendarWeekStartsOn => weekStartDay === "sunday" ? 0 : 1;
 
 const rotateCalendarWeekdayLabels = <T,>(weekdayLabels: readonly T[], weekStartDay: CalendarWeekStartDay): readonly T[] => {
@@ -275,6 +281,8 @@ const getMonthItemStyle = (monthIndex: number): ViewStyle => ({
   marginTop: monthIndex < MONTH_COLUMNS ? 0 : 16,
   width: `${100 / MONTH_COLUMNS}%`,
 });
+
+
 
 const ScheduleYearComponent = ({ yearDate, selectedDate, weekStartDay = DEFAULT_WEEK_START_DAY, visibleEvents = [], onSelectDate, onRenderedRangeChange }: ScheduleYearProps) => {
   const today = useMemo(() => new Date(), []);
@@ -405,10 +413,14 @@ const ScheduleYearComponent = ({ yearDate, selectedDate, weekStartDay = DEFAULT_
   );
 };
 
+
+
 const ScheduleYear = memo(ScheduleYearComponent);
 
 ScheduleYear.displayName = "ScheduleYear";
 
 export { ScheduleYear };
+
+
 
 export type { CalendarWeekStartDay, ScheduleYearProps };

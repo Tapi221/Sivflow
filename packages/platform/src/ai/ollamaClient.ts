@@ -1,5 +1,7 @@
 import { getLocalAiSettings } from "./localAiSettings";
 
+
+
 export type GenerateOllamaAnswerInput = { question: string;
   model?: string;
 };
@@ -15,7 +17,11 @@ export type TestOllamaConnectionResult = { ok: boolean;
   models: string[];
 };
 
+
+
 const OLLAMA_REQUEST_TIMEOUT_MS = 60_000;
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 
