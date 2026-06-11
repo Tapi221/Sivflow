@@ -8,6 +8,8 @@ const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
 const EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
 const EXCLUDED_FILE_SUFFIXES = [".d.ts"];
 const UPPER_SNAKE_CASE_PATTERN = /^[A-Z0-9_]+$/;
+const CONSTANT_FILE_PATTERN = /\.constants(?:\.[^.]+)*\.[jt]sx?$/;
+const CONSTANT_COMMENT_PATTERN = /@(constant|sivflow-constant)\b/;
 
 const walkSourceFiles = (directory) => {
   if (!existsSync(directory)) return [];
@@ -41,45 +43,48 @@ const isPropertyAccessNamed = (expression, name) => ts.isPropertyAccessExpressio
 
 const isMemoCall = (expression) => ts.isCallExpression(expression) && (isIdentifierNamed(expression.expression, "memo") || isPropertyAccessNamed(expression.expression, "memo"));
 
-const containsJsx = (node) => {
-  let found = false;
-
-  const visit = (child) => {
-    if (ts.isJsxElement(child) || ts.isJsxFragment(child) || ts.isJsxSelfClosingElement(child)) {
-      found = true;
-      return;
-    }
-
-    if (!found) ts.forEachChild(child, visit);
-  };
-
-  ts.forEachChild(node, visit);
-  return found;
-};
-
 const isPascalCaseName = (name) => /^[A-Z][A-Za-z0-9]*$/.test(name);
 
 const isConstVariableStatement = (statement) => (statement.declarationList.flags & ts.NodeFlags.Const) !== 0;
 
 const isFunctionLikeInitializer = (initializer) => Boolean(initializer && (ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer)));
 
-const isComponentVariableStatement = (statement) => statement.declarationList.declarations.some((declaration) => {
+const hasConstantComment = (sourceFile, node) => {
+  const source = sourceFile.getFullText();
+  const ranges = ts.getLeadingCommentRanges(source, node.getFullStart()) ?? [];
+
+  return ranges.some((range) => CONSTANT_COMMENT_PATTERN.test(source.slice(range.pos, range.end)));
+};
+
+const isConstantFile = (filePath) => CONSTANT_FILE_PATTERN.test(toPosix(filePath));
+
+const isRuntimeBindingName = (name) => {
+  if (isPascalCaseName(name)) return true;
+  if (/^use[A-Z0-9]/.test(name)) return true;
+  if (/(Context|Store|Service|Adapter|Client|Repository|UseCase|Plugin|Kit|Component|Provider|Consumer)$/.test(name)) return true;
+
+  return false;
+};
+
+const isRuntimeBindingInitializer = (initializer) => {
+  if (!initializer) return false;
+  if (isFunctionLikeInitializer(initializer)) return true;
+  if (isMemoCall(initializer)) return true;
+  if (ts.isCallExpression(initializer)) return true;
+  if (ts.isNewExpression(initializer)) return true;
+  if (ts.isIdentifier(initializer)) return true;
+  if (ts.isPropertyAccessExpression(initializer)) return true;
+  if (ts.isJsxElement(initializer) || ts.isJsxFragment(initializer) || ts.isJsxSelfClosingElement(initializer)) return true;
+
+  return false;
+};
+
+const shouldCheckDeclaration = (filePath, sourceFile, statement, declaration) => {
   if (!ts.isIdentifier(declaration.name)) return false;
-  if (!isPascalCaseName(declaration.name.text)) return false;
-  if (!declaration.initializer) return false;
-  if (isMemoCall(declaration.initializer)) return false;
+  if (isRuntimeBindingName(declaration.name.text)) return false;
+  if (isRuntimeBindingInitializer(declaration.initializer)) return false;
 
-  return containsJsx(declaration.initializer);
-});
-
-const isModuleConstantDeclarator = (declaration) => {
-  if (!ts.isIdentifier(declaration.name)) return false;
-  if (!declaration.initializer) return true;
-  if (isFunctionLikeInitializer(declaration.initializer)) return false;
-  if (isMemoCall(declaration.initializer)) return false;
-  if (containsJsx(declaration.initializer)) return false;
-
-  return true;
+  return isConstantFile(filePath) || hasConstantComment(sourceFile, statement) || hasConstantComment(sourceFile, declaration);
 };
 
 const checkSourceFile = (filePath) => {
@@ -92,10 +97,9 @@ const checkSourceFile = (filePath) => {
   return sourceFile.statements.flatMap((statement) => {
     if (!ts.isVariableStatement(statement)) return [];
     if (!isConstVariableStatement(statement)) return [];
-    if (isComponentVariableStatement(statement)) return [];
 
     return statement.declarationList.declarations.flatMap((declaration) => {
-      if (!isModuleConstantDeclarator(declaration)) return [];
+      if (!shouldCheckDeclaration(filePath, sourceFile, statement, declaration)) return [];
       if (UPPER_SNAKE_CASE_PATTERN.test(declaration.name.text)) return [];
 
       return [{ filePath, line: getLineNumber(sourceFile, declaration.name.getStart(sourceFile)), name: declaration.name.text }];
