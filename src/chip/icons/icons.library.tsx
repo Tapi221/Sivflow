@@ -1,7 +1,5 @@
 import type { IconProps } from "@/ui/icons";
 
-
-
 //Vuesax-Icons
 const FolderIcon = ({ className, label: _label, size: _size, title: _title, ...props }: IconProps) => (<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true" {...props} > <path d="M3 11.5V7.25C3 4.25 4.25 3 7.25 3H8.53C9.74 3 10.12 3.39 10.6 4.03L11.88 5.73C12.2 6.15 12.28 6.25 12.95 6.25H16.75C19.75 6.25 21 7.5 21 10.5V11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> <path d="M5.31 11.5H18.69C19.8 11.5 20.85 11.99 21.56 12.84L21.73 13.07C22.27 13.81 22.51 14.71 22.42 15.62L22.02 20.61C21.87 22.13 21.69 24 18.29 24H5.71C2.31 24 2.13 22.13 1.98 20.62L1.58 15.61C1.49 14.64 1.77 13.67 2.39 12.89C3.13 11.99 4.18 11.5 5.31 11.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" transform="translate(0 -1.25)" /> <path d="M9.43 17H14.57" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>);
 //Vuesax-Icons
@@ -9,6 +7,4 @@ const FlashCardIcon = ({ className, label: _label, size: _size, title: _title, .
 //Vuesax-Icons
 const PDFIcon = ({ className, label: _label, size: _size, title: _title, ...props }: IconProps) => (<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true" {...props} > <path d="M12 20.75C12 20.75 9.9 19.6 7.3 19.25C6.15 19.1 4.97 19.1 3.86 19.24C3.02 19.34 2.25 18.68 2.25 17.83V5.1C2.25 4.15 3.03 3.38 3.98 3.42C6.06 3.58 9.14 4.6 10.85 5.65L11.09 5.79C11.62 6.12 12.4 6.12 12.93 5.79L13.17 5.65C14.88 4.6 17.96 3.58 20.02 3.42C20.98 3.35 21.75 4.13 21.75 5.09V17.83C21.75 18.68 20.98 19.34 20.14 19.24C19.03 19.1 17.85 19.1 16.7 19.25C14.1 19.6 12 20.75 12 20.75Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> <path d="M12 5.5V20.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> <path d="M5.5 8.5H7.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> <path d="M5.5 11.5H8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>);
 
-
-
-export { FolderIcon, FlashCardIcon, PDFIcon 
+export { FolderIcon, FlashCardIcon, PDFIcon };

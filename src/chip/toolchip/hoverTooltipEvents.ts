@@ -3,11 +3,7 @@ type HoverTooltipOpenEventDetail = {
   tooltipId: symbol;
 };
 
-
-
 const HOVER_TOOLTIP_OPEN_EVENT = "sivflow:hover-tooltip-open";
-
-
 
 const isHoverTooltipOpenEvent = (event: Event): event is CustomEvent<HoverTooltipOpenEventDetail> => {
   const detail = "detail" in event ? (event as CustomEvent<Partial<HoverTooltipOpenEventDetail>>).detail : null;
@@ -35,6 +31,4 @@ const subscribeHoverTooltipOpen = (listener: HoverTooltipOpenListener) => {
   };
 };
 
-
-
-export { emitHoverTooltipOpen, subscribeHoverTooltipOpe
+export { emitHoverTooltipOpen, subscribeHoverTooltipOpen };

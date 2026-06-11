@@ -5,8 +5,6 @@ import type { CodeBlockData } from "@/types/core/code-block";
 import { Code } from "@/ui/icons";
 import { CodeBlockEditor } from "./CodeBlockEditor";
 
-
-
 interface CodeBlockItemProps {
   data: CodeBlockData;
   onChange: (data: CodeBlockData) => void;
@@ -27,8 +25,6 @@ interface CodeBlockItemProps {
   zoom?: number;
 }
 
-
-
 const areCodeBlockItemPropsEqual = (
   prev: CodeBlockItemProps,
   next: CodeBlockItemProps,
@@ -42,8 +38,6 @@ const areCodeBlockItemPropsEqual = (
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
-
-
 
 const CodeBlockItemInner = ({
   data,
@@ -97,11 +91,9 @@ const CodeBlockItemInner = ({
   );
 };
 
-
-
 const CodeBlockItem = React.memo(
   CodeBlockItemInner,
   areCodeBlockItemPropsEqual,
 );
 CodeBlockItem.displayName = "CodeBlockItem";
-export { CodeBlockI
+export { CodeBlockItem };
