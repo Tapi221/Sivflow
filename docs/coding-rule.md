@@ -64,6 +64,27 @@ import 間の空行検査と自動修正は、import 文直前の空白・改行
 
 `verify:*` は検査だけを行い、ファイルを書き換える処理は `fix:*` にだけ置く。
 
+## export
+
+実装ファイルでは、原則として宣言時 export を使わない。値・型はローカルに定義し、ファイル末尾でまとめて export する。
+
+default export は禁止する。export は named export に統一する。
+
+値の export と型の export は分ける。値は `export { ... };`、型は `export type { ... };` を使う。`export { type Foo }` のように named export 内へ `type` 修飾子を書くことは禁止する。
+
+export 群はファイル末尾の1つの連続したブロックにする。直前の component / helper / memo / displayName ブロックとの間には空行1行を入れる。export 文同士の間には空行を入れない。
+
+export 群の順序は、値 export、type export の順にする。
+
+```ts
+const AppProviders = ({ children }: AppProvidersProps) => (
+  <MantineProvider defaultColorScheme="light">{children}</MantineProvider>
+);
+
+export { AppProviders };
+export type { AppProvidersProps };
+```
+
 ## 定数
 
 モジュールスコープの固定値・設定値として定義する `const` は、大文字 + アンダースコアの `UPPER_SNAKE_CASE` にする。対象は定数ブロックに置く値で、関数内の一時変数、`const helper = (...) => ...` のような helper 関数、component / memo / displayName / export 用の識別子は対象外とする。
