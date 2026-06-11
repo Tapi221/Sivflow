@@ -1,26 +1,20 @@
 import { useCallback } from "react";
 
 
+
 import { resolveCardMutationTarget } from "@/features/cardsetview/application/cardSetViewMutationTarget";
+
 
 
 import { createAndFocusCard as createAndFocusCardUseCase, toggleCardBookmark, toggleCardUncertainty } from "@/features/cardsetview/application/cardSetViewUseCases";
 
 
+
 import type { Card } from "@/types";
 
 
+
 import type { CardSet } from "@/types/domain/cardSet";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -39,16 +33,6 @@ interface UseCardSetViewActionsOptions {
   setPendingFocusCardId: (cardId: string | null) => void;
   clearFlippedCards: () => void;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

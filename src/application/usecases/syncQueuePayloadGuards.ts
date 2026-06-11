@@ -1,26 +1,20 @@
 import type { Card, Folder } from "@/types";
 
 
+
 import type { CardSet } from "@/types/domain/cardSet";
+
 
 
 import type { Document } from "@/types/domain/document";
 
 
+
 import type { AssetSyncPayload, ProjectMapSyncPayload, SyncDeletePayload, SyncEntity, SyncPayloadByEntity, SyncQueueItem, TagSyncPayload } from "@/types/domain/sync";
 
 
+
 import type { UserSettings } from "@/types/domain/user";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -30,16 +24,6 @@ export type DeleteEntity = Extract<SyncEntity, "card" | "folder" | "cardSet" | "
 export type UpsertQueueItem<TEntity extends UpsertEntity> = Extract<SyncQueueItem, { entity: TEntity; operationType: "create" | "update" }>;
 
 type DateLike = Date | { toDate?: () => Date } | null | undefined;
-
-
-
-
-
-
-
-
-
-
 
 
 

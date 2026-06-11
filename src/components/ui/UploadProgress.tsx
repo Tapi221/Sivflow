@@ -1,26 +1,20 @@
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 
+
 import { Button } from "./button";
+
 
 
 import { Progress } from "./progress";
 
 
+
 import { CheckCircle2, FileText, X } from "@/ui/icons";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -33,16 +27,6 @@ interface UploadProgressProps {
   className?: string;
   showIcon?: boolean;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -146,27 +130,7 @@ const UploadProgress = ({
 
 
 
-
-
-
-
-
-
-
-
-
-
 export { UploadProgress };
-
-
-
-
-
-
-
-
-
-
 
 
 

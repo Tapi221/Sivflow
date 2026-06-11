@@ -1,23 +1,16 @@
 import React from "react";
 
 
+
 import type { TagColorKey } from "@/chip/tag/tagColor";
+
 
 
 import { TagBadge } from "./TagBadge";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -30,16 +23,6 @@ interface TagChipProps {
   onRemove?: () => void;
   removeAriaLabel?: string;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -66,27 +49,7 @@ const TagChip = ({
 
 
 
-
-
-
-
-
-
-
-
-
-
 export { TagChip };
-
-
-
-
-
-
-
-
-
-
 
 
 

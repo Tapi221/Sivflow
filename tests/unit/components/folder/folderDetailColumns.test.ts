@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 
+
 import { buildDetailGridTemplateColumns, DETAIL_DEFAULT_COLUMN_ORDER, type ExplorerDetailColumnWidths, getDetailGridMinWidth, moveDetailColumnOrder, normalizeDetailColumnOrder } from "@/components/folder/components/detail-view/folderDetailColumns";
 
 const columnWidths = {

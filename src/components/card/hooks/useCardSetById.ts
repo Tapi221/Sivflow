@@ -1,26 +1,20 @@
 import { useCallback } from "react";
 
 
+
 import { useLiveQuery } from "dexie-react-hooks";
+
 
 
 import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 
 
+
 import { getLocalDb } from "@/services/localdb";
 
 
+
 import { type CardDisplayMode, type CardSet, DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode } from "@/types/domain/cardSet";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -32,16 +26,6 @@ type RawCardSetRecord = CardSet & {
 type CardSetUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "cardSets", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

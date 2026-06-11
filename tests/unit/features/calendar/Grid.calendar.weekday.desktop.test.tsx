@@ -3,16 +3,21 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 
 
+
 import React, { createRef } from "react";
+
 
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 
+
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 
 
+
 import type { CalendarEventMoveHandler, CalendarGridStyle } from "@/features/calendar/scheduleScreen.types";
+
 
 
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";

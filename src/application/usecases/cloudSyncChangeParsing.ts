@@ -1,17 +1,8 @@
 import { type CloudEntityType, isCloudEntityType } from "./cloudSyncEntityMetadata";
 
 
+
 import type { SyncChange } from "@/services/interfaces/ISyncService";
-
-
-
-
-
-
-
-
-
-
 
 
 

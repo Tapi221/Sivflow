@@ -1,17 +1,8 @@
 import { Dexie } from "dexie";
 
 
+
 import type { GoogleCalendarEvent } from "./gcalSync.types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -44,31 +35,11 @@ type ReadCachedGoogleCalendarEventsOptions = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const GOOGLE_CALENDAR_EVENT_CACHE_DB_NAME = "flashcard-master-google-calendar-event-cache";
 const GOOGLE_CALENDAR_EVENT_CACHE_ACCOUNT_FALLBACK = "__unknown_account__";
 const GOOGLE_CALENDAR_EVENT_CACHE_CHUNK_SIZE = 500;
 
 let cacheDb: CalendarEventCacheDatabase | null = null;
-
-
-
-
-
-
-
-
-
-
 
 
 

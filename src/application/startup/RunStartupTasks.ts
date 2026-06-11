@@ -1,26 +1,20 @@
 import { createPerformAutoBackupUseCase } from "@/application/backup/PerformAutoBackup";
 
 
+
 import { createCheckDataIntegrityUseCase } from "@/application/integrity/CheckDataIntegrity";
+
 
 
 import { localStorageBackupStore } from "@/infrastructure/browser-storage/LocalStorageBackupStore";
 
 
+
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 
 
+
 import { sanitizeForLog } from "@/utils/logSanitizer";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -30,31 +24,11 @@ export interface RunStartupTasksParams { userId: string;
 
 
 
-
-
-
-
-
-
-
-
-
-
 const performAutoBackupUseCase = createPerformAutoBackupUseCase({
   backupStore: localStorageBackupStore,
 });
 
 const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
-
-
-
-
-
-
-
-
-
-
 
 
 

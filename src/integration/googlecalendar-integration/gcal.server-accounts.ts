@@ -1,17 +1,8 @@
 import { httpsCallable } from "firebase/functions";
 
 
+
 import { auth, functionsClient } from "@/services/firebase";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -26,27 +17,7 @@ type ListGoogleCalendarAccountsOutput = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const listGoogleCalendarAccountsCallable = httpsCallable<undefined, ListGoogleCalendarAccountsOutput>(functionsClient, "listGoogleCalendarAccounts");
-
-
-
-
-
-
-
-
-
-
 
 
 

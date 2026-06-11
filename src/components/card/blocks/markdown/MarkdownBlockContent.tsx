@@ -2,7 +2,9 @@ import React from "react";
 
 
 
+
 import { MarkdownBlockDisplay } from "./MarkdownBlockDisplay";
+
 
 
 
@@ -10,21 +12,13 @@ import { MarkdownEditorDialog } from "./MarkdownEditorDialog";
 
 
 
+
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 
 
 
+
 import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownInsertionText, resolveMarkdownTabKeyText } from "@/utils/markdownWhitespace";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -62,27 +56,7 @@ type BlockRange = Readonly<{
 
 
 
-
-
-
-
-
-
-
-
-
-
 const MAX_LENGTH = 50000;
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -384,16 +358,6 @@ const parseAndSplitFencesWithRanges = (
 
   return { blocks, ranges };
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -4,27 +4,7 @@ type AssetQueueProcessor = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const AUTO_PROCESS_LISTENER_KEY = "__flashcardPersistentQueueAutoProcessListenersBound";
-
-
-
-
-
-
-
-
-
-
 
 
 

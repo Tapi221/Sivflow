@@ -2,29 +2,9 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
-
-
-
-
-
-
-
-
-
-
 const GRID_OFFSET_ROWS_MIN = 0;
 const GRID_OFFSET_ROWS_MAX = 999;
 const GRID_OFFSET_TYPES = new Set<CardBlock["type"]>(["math"]);
-
-
-
-
-
-
-
-
-
-
 
 
 

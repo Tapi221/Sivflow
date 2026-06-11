@@ -1,20 +1,12 @@
 import { useEffect, useMemo, useRef } from "react";
 
 
+
 import { collection, onSnapshot, query, type Unsubscribe } from "firebase/firestore";
 
 
+
 import { firestoreDb } from "@/services/firebase";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -26,27 +18,7 @@ type UseGoogleCalendarPushSyncOptions = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const NOTIFICATION_DEBOUNCE_MS = 250;
-
-
-
-
-
-
-
-
-
-
 
 
 

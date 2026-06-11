@@ -1,32 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
 
 
+
 import type { CreateMfDeckCard, CreateMfDeckCardSet, EnsureMfDeckTagByName, UpdateMfDeckCardSet } from "@/features/deckFile/application/importMfDeck";
+
 
 
 import { buildPortableImportBatchItems, formatPortableImportBatchItemSubtitle, importPortableFileBatch, type PortableImportBatchItem } from "@/features/import/application/importPortableFileBatch";
 
 
+
 import { Button } from "@/components/ui/button";
+
 
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 
+
 import { useToast } from "@/contexts/ToastContext";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -52,16 +48,6 @@ type PortableImportBatchDialogProps = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const STATUS_LABELS: Record<PortableImportBatchItem["status"], string> = {
   queued: "待機中",
   parsing: "解析中",
@@ -79,16 +65,6 @@ const STATUS_CLASS_NAMES: Record<PortableImportBatchItem["status"], string> = {
   failed: "bg-rose-50 text-rose-700",
   skipped: "bg-amber-50 text-amber-700",
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

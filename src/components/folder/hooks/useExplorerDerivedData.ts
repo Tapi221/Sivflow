@@ -1,32 +1,28 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 
+
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
+
 
 
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 
 
+
 import { getEntityTime, getFolderId, getParentFolderId, isSameFolder, normalizeFolderId, ROOT_FOLDER_ID } from "@/components/folder/explorer/model/utils";
+
 
 
 import { useDocumentCommands } from "@/features/document/hooks/useDocumentCommands";
 
 
+
 import { compareOrderableEntities } from "@/lib/orderableEntity";
 
 
+
 import type { Card, CardSet, DocumentItem, ExplorerItem, Note } from "@/types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -45,27 +41,7 @@ interface Params {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const ORPHAN_DOCUMENT_CLEANUP_LOG_PREFIX = "[useExplorerDerivedData] orphan PDF purge";
-
-
-
-
-
-
-
-
-
-
 
 
 

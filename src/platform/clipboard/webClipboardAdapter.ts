@@ -2,16 +2,6 @@ import type { ClipboardAdapter } from "./clipboardAdapter";
 
 
 
-
-
-
-
-
-
-
-
-
-
 const fallbackCopyText = (text: string): boolean => {
   if (typeof document === "undefined") return false;
 
@@ -36,16 +26,6 @@ const fallbackCopyText = (text: string): boolean => {
 
   return copied;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

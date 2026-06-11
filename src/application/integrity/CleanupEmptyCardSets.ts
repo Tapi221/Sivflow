@@ -1,20 +1,12 @@
 import { createWebTrashRepository } from "@platform/storage/trashRepository.web";
 
 
+
 import type { LocalDB } from "@/services/localdb/LocalDB";
 
 
+
 import type { Card, CardSet } from "@/types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -26,16 +18,6 @@ type DeletableRecord = {
   isDeleted?: boolean;
   is_deleted?: boolean;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

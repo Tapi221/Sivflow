@@ -1,47 +1,48 @@
 import { useEffect, useRef, useState, type ComponentType, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 
 
+
 import { createPortal } from "react-dom";
+
 
 
 import { PlusLineIcon } from "@/chip/icons/icons.schedule";
 
 
+
 import { ClockIcon, HomeIcon, InboxIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
+
 
 
 import { WORKSPACE_TAB_CONTEXT_MENU_HEIGHT, WORKSPACE_TAB_CONTEXT_MENU_MARGIN, WORKSPACE_TAB_CONTEXT_MENU_WIDTH, WORKSPACE_TAB_CONTEXT_PANEL_ID, WorkspaceTabContextMenu } from "@/chip/rightclickpanel.desktop/TabContextMenu.desktop";
 
 
+
 import { useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
+
 
 
 import { WorkspaceTabDndItem, WorkspaceTabDndList } from "@/features/dnd/tab/WorkspaceTabDnd";
 
 
+
 import { useWorkspaceTabDnd } from "@/features/dnd/tab/useWorkspaceTabDnd";
+
 
 
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 
 
+
 import { cn } from "@/lib/utils";
+
 
 
 import { FileText, Layers, X } from "@/ui/icons";
 
 
+
 import type { WorkspaceSidebarSection, WorkspaceTab } from "./Tab";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -66,16 +67,6 @@ type TabContextMenuState = {
 };
 
 type TabContextMenuTriggerEvent = ReactMouseEvent<HTMLElement> | ReactPointerEvent<HTMLElement>;
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -153,16 +144,6 @@ const SIDEBAR_ROUTE_TAB_ICONS = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const resolveTabsSurfaceStyle = (isTitlebar: boolean): CSSProperties => ({
   background: isTitlebar ? "var(--app-titlebar-bg, var(--app-sidebar-bg))" : "var(--app-sidebar-bg)",
 });
@@ -226,16 +207,6 @@ const resolveTabIcon = (tab: WorkspaceTab): TabIconComponent => {
 
   return FileText;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -511,16 +482,6 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
     </>
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

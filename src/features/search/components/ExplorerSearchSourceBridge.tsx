@@ -1,23 +1,16 @@
 import { useEffect, useMemo } from "react";
 
 
+
 import { buildExplorerSearchItems } from "@/features/search/lib/buildExplorerSearchItems";
+
 
 
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 
 
+
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -29,16 +22,6 @@ type ExplorerSearchSourceBridgeProps = {
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

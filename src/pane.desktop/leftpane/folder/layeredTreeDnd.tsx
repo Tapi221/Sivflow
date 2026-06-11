@@ -1,17 +1,8 @@
 import { cn } from "@/lib/utils";
 
 
+
 import type { LayeredTreeDropPosition } from "./layeredTreeDnd.types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -21,16 +12,6 @@ const LayeredTreeDropIndicator = ({ position, left, className }: { position: Exc
     <span className="h-0.5 min-w-0 flex-1 rounded-full bg-[#8f8f8f]" />
   </span>
 );
-
-
-
-
-
-
-
-
-
-
 
 
 

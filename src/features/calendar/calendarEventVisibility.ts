@@ -1,17 +1,8 @@
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 
+
 import type { AppCalendarItem, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink } from "./scheduleScreen.types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -34,27 +25,7 @@ type CalendarEventDisplayMetadataInput = CalendarEventVisibilityInput & {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const GOOGLE_CALENDAR_KEY_SEPARATOR = "\u001f";
-
-
-
-
-
-
-
-
-
-
 
 
 

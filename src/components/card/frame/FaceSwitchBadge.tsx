@@ -1,17 +1,8 @@
 import React from "react";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -20,16 +11,6 @@ type FaceSwitchBadgeProps = Readonly<{
   onShowFront: () => void;
   onShowBack: () => void;
 }>;
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -92,27 +73,7 @@ const FaceSwitchBadge = ({
 
 
 
-
-
-
-
-
-
-
-
-
-
 export { FaceSwitchBadge };
-
-
-
-
-
-
-
-
-
-
 
 
 

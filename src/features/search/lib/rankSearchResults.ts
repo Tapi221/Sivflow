@@ -1,17 +1,8 @@
 import type { SearchItem } from "@/features/search/model/search.types";
 
 
+
 import { toMillis } from "@/utils/toMillis";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -26,16 +17,6 @@ type RankedSearchItem = {
   score: number;
   timestampMillis: number;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -1,17 +1,8 @@
 import type { InkSide } from "@core/domain/card/ink/inkDocument";
 
 
+
 import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionStatus } from "./handwritingSession.types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -32,16 +23,6 @@ export type UpdateHandwritingSessionStatusInput = { session: HandwritingSession;
   status: HandwritingSessionStatus;
   now?: number;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

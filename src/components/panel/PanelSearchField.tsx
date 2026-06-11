@@ -1,23 +1,16 @@
 import type { Ref } from "react";
 
 
+
 import { Input } from "@/components/ui/input";
+
 
 
 import { Search } from "@/ui/icons";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -29,16 +22,6 @@ interface PanelSearchFieldProps {
   className?: string;
   inputClassName?: string;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

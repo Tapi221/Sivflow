@@ -1,31 +1,12 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 
+
 import { clampCardCarouselIndex } from "@/features/review/domain/cardCarouselIndexRules";
 
 
 
-
-
-
-
-
-
-
-
-
-
 type CardCarouselScrollBehavior = ScrollBehavior | "instant";
-
-
-
-
-
-
-
-
-
-
 
 
 

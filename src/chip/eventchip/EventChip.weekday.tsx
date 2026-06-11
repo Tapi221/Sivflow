@@ -1,32 +1,28 @@
 import type { CSSProperties } from "react";
 
 
+
 import { useLayoutEffect, useRef, useState } from "react";
+
 
 
 import { format } from "date-fns";
 
 
+
 import { HoverEventTooltip } from "@/chip/toolchip/HoverEventTooltip";
+
 
 
 import { eventChipDesign } from "./eventChipDesign.generated";
 
 
+
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 
 
+
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -48,16 +44,6 @@ type CalendarEventChipWeekdayStyle = CSSProperties & {
   WebkitPrintColorAdjust: "exact";
   printColorAdjust: "exact";
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -84,16 +70,6 @@ const DEFAULT_CHIP_LAYOUT_STATE: ChipLayoutState = {
   useInlineTimeLayout: false,
   useLastLineTimeLayout: false,
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -253,16 +229,6 @@ const getMeasurementClassName = (): string => [CHIP_MEASUREMENT_BASE_CLASS, CHIP
 
 
 
-
-
-
-
-
-
-
-
-
-
 const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEventChipWeekdayProps) => {
   const layoutMeasurementRef = useRef<HTMLDivElement>(null);
   const titleMeasurementRef = useRef<HTMLSpanElement>(null);
@@ -365,16 +331,6 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
     </HoverEventTooltip>
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

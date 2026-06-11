@@ -9,16 +9,6 @@ export type LayoutResult = { left: number;
 
 
 
-
-
-
-
-
-
-
-
-
-
 const compareLayoutEvents = (a: LayoutEvent, b: LayoutEvent): number => {
   const startDiff = a.startMinutes - b.startMinutes;
 

@@ -2,34 +2,30 @@ import * as React from 'react';
 
 
 
+
 import { cva } from 'class-variance-authority';
 
 
+
 import type { TElement, TSuggestionText } from 'platejs';
+
 
 
 import type { SlateLeafProps } from 'platejs/static';
 
 
 
+
 import { BaseSuggestionPlugin } from '@platejs/suggestion';
+
 
 
 import { SlateLeaf } from 'platejs/static';
 
 
 
+
 import { cn } from '@/lib/utils';
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -41,28 +37,8 @@ export const voidRemoveSuggestionVariants = cva('', { defaultVariants: { active:
 
 
 
-
-
-
-
-
-
-
-
-
-
 export function isStaticVoidRemoveSuggestion(element: TElement) { return ( (element as TElement & { suggestion?: { type?: string } }).suggestion ?.type === 'remove' );
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

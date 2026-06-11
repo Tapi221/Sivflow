@@ -1,26 +1,20 @@
 import { useLayoutEffect, useMemo } from "react";
 
 
+
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
+
 
 
 import { buildCardSetViewBreadcrumbs } from "@/features/breadcrumbs/builders";
 
 
+
 import type { Card } from "@/types";
 
 
+
 import type { CardSet } from "@/types/domain/cardSet";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -37,16 +31,6 @@ interface UseCardSetViewBreadcrumbsOptions {
   folders: FolderLike[];
   setExtraCrumbs: (crumbs: BreadcrumbCrumb[]) => void;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

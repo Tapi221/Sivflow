@@ -2,32 +2,12 @@ import type { FloatingSurfaceVariantProps } from "./floating-surface";
 
 
 
-
-
-
-
-
-
-
-
-
-
 type FloatingSurface = NonNullable<FloatingSurfaceVariantProps["surface"]>;
 
 interface FloatingPanelPreset {
   className: string;
   surface: FloatingSurface;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

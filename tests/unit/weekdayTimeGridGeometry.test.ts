@@ -1,16 +1,21 @@
 import { describe, expect, it } from "vitest";
 
 
+
 import { getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle } from "@/features/calendar/grid/weekdayTimeGridGeometry";
+
 
 
 import { WEEKDAY_HOURS, WEEKDAY_MINUTES_PER_HOUR } from "@/features/calendar/grid/grid.layout.constants.desktop";
 
 
+
 import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
 
 
+
 import { layoutCalendarTimeGridEvents } from "@core/calendar/timeGridLayout";
+
 
 
 import type { CalendarTimeGridLayoutEntry } from "@core/calendar/timeGridLayout";

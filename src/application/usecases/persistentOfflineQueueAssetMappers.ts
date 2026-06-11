@@ -2,27 +2,7 @@ import type { AssetRecord, UploadedImage } from "@/types";
 
 
 
-
-
-
-
-
-
-
-
-
-
 export type AssetLikeRecord = Partial<AssetRecord> & Partial<UploadedImage>;
-
-
-
-
-
-
-
-
-
-
 
 
 

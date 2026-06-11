@@ -1,64 +1,56 @@
 import { normalizeUploadedImages } from "@/domain/assets/uploadedImageNormalizer";
 
 
+
 import { isGridOffsetType } from "@/domain/card/blockOffset";
+
 
 
 import { LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from "@/domain/card/extraRows";
 
 
+
 import { normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
+
 
 
 import { normalizeMemoryStability } from "@/domain/card/review/stability";
 
 
+
 import { normalizeReviewLogs } from "./reviewLogs";
+
 
 
 import { normalizeDate } from "@/shared/codec/date";
 
 
+
 import { toArrayOr, toBoolOr, toFiniteNumber, toStringOr } from "@/shared/codec/primitives";
+
 
 
 import { makeFallbackId } from "@/shared/lib/fallbackId";
 
 
+
 import { asRecord, pick, type UnknownRecord } from "@/shared/lib/records";
+
 
 
 import type { UploadedPdf } from "@/types/domain/assets";
 
 
+
 import type { SubjectiveScoreValue } from "@/types/domain/base";
+
 
 
 import type { Card, CardBlock } from "@/types/domain/card";
 
 
 
-
-
-
-
-
-
-
-
-
-
 type GridBlockType = Parameters<typeof isGridOffsetType>[0];
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -75,16 +67,6 @@ const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
 ]);
 
 const SUBJECTIVE_SCORE_VALUES = new Set<SubjectiveScoreValue>([0, 1, 2, 3]);
-
-
-
-
-
-
-
-
-
-
 
 
 

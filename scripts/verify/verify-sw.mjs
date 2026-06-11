@@ -1,6 +1,7 @@
 import fs from "node:fs";
 
 
+
 import path from "node:path";
 
 const swPath = path.resolve(process.cwd(), "dist", "sw.js");

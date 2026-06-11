@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 
+
 import { buildRuledTextareaStyle } from "@/components/card/blocks/core/ruledTextareaStyle";
 
 describe("buildRuledTextareaStyle", () => {

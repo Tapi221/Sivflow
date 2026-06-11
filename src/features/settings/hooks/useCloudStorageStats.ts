@@ -1,20 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 
+
 import { isCloudStorageStatsOutdated, rebuildCloudStorageStats, subscribeToCloudStorageStats } from "@/services/cloudStorageStatsService";
 
 
+
 import type { CloudStorageStats } from "@/types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -25,16 +17,6 @@ type UseCloudStorageStatsResult = {
   rebuilding: boolean;
   refresh: () => Promise<void>;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

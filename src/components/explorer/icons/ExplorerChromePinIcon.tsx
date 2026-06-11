@@ -1,33 +1,14 @@
 import type { SVGProps } from "react";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
 type ExplorerChromePinIconProps = SVGProps<SVGSVGElement> & {
   size?: number;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

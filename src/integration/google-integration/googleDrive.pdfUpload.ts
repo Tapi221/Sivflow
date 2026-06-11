@@ -12,29 +12,9 @@ export type GoogleDrivePdfUploadResult = { id: string;
 
 
 
-
-
-
-
-
-
-
-
-
-
 const GOOGLE_DRIVE_UPLOAD_ENDPOINT = "https://www.googleapis.com/upload/drive/v3/files";
 const GOOGLE_DRIVE_PDF_FIELDS = "id,name,mimeType,webViewLink,webContentLink";
 const PDF_MIME_TYPE = "application/pdf";
-
-
-
-
-
-
-
-
-
-
 
 
 

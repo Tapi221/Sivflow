@@ -1,32 +1,28 @@
 import { useState } from "react";
 
 
+
 import { TagFilterPanel } from "@/components/explorer/TagFilterPanel";
+
 
 
 import { floatingPanelPresets } from "@/components/ui/menu-styles";
 
 
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
 
 
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 
 
+
 import { cn } from "@/lib/utils";
 
 
+
 import { Filter } from "@/ui/icons";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -36,16 +32,6 @@ interface TagFilterPopoverProps {
   iconClassName?: string;
   ariaLabel?: string;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

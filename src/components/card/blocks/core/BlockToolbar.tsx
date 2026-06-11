@@ -2,7 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 
 
 
+
 import { createPortal } from "react-dom";
+
 
 
 
@@ -10,7 +12,9 @@ import { overlayGlassActionButtonClassName, overlayGlassPillClassName, overlayGl
 
 
 
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
 
 
 
@@ -18,7 +22,9 @@ import type { IconProps } from "@/ui/icons";
 
 
 
+
 import { Plus } from "@/ui/icons";
+
 
 
 
@@ -26,21 +32,13 @@ import { type EditorBlockIconName, type EditorBlockType, getEditorBlockDefinitio
 
 
 
+
 import { cn } from "@/lib/utils";
 
 
 
+
 import type { CardBlock } from "@/types/domain/card";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -63,16 +61,6 @@ type ToolbarBlockConfig = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const areBlockToolbarPropsEqual = (
   prev: BlockToolbarProps,
   next: BlockToolbarProps,
@@ -83,16 +71,6 @@ const areBlockToolbarPropsEqual = (
   prev.hiddenBlockTypes === next.hiddenBlockTypes &&
   prev.desktopLayout === next.desktopLayout &&
   prev.className === next.className;
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -341,16 +319,6 @@ const MarkdownBlockGlyph = ({
 
 
 
-
-
-
-
-
-
-
-
-
-
 const getIcon = (
   iconName: EditorBlockIconName,
 ): React.ComponentType<IconProps> => {
@@ -365,16 +333,6 @@ const getIcon = (
 
   return map[iconName];
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -694,16 +652,6 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
   return renderToolbarShell();
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

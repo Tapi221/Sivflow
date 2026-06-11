@@ -1,35 +1,32 @@
 import { onAuthStateChanged, signOut, type User as FirebaseUser } from "firebase/auth";
 
 
+
 import { useEffect, useMemo, useRef, useState } from "react";
+
 
 
 import { isFirebaseClientAvailable, auth } from "@/infrastructure/firebase/client";
 
 
+
 import { hydrateServerStoredGoogleCalendarAccounts } from "@/integration/googlecalendar-integration/gcal.server-account-list";
+
 
 
 import { initializeDB, resetLocalDBForLogout } from "@/services/localdb";
 
 
+
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
+
 
 
 import { AuthSessionContext, type AuthSessionProviderProps, type AuthSessionContextType } from "./AuthSessionContextCore";
 
 
+
 import { bootstrapUser } from "./bootstrapUser";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -37,16 +34,6 @@ const refreshAuthProfile = async (user: FirebaseUser): Promise<FirebaseUser> => 
   await user.reload();
   return auth?.currentUser ?? user;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -149,27 +136,7 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
 export { AuthSessionProvider };
-
-
-
-
-
-
-
-
-
-
 
 
 

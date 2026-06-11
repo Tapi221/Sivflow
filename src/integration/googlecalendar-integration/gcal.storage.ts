@@ -2,16 +2,6 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 
 
-
-
-
-
-
-
-
-
-
-
 const LOCAL_TOKEN_KEY = "sivflow.gcal.access_token";
 
 const LOCAL_TOKEN_EXPIRY_KEY = "sivflow.gcal.access_token_expiry";
@@ -39,16 +29,6 @@ const LEGACY_PERSIST_WAS_CONNECTED_KEY = "flashcard-master.gcal.was_connected";
 const TOKEN_LIFETIME_MS = 55 * 60 * 1000;
 
 let cachedToken: string | null = null;
-
-
-
-
-
-
-
-
-
-
 
 
 

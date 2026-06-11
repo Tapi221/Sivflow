@@ -1,20 +1,12 @@
 import type { Card } from "./card";
 
 
+
 import type { DocumentItem } from "./document";
 
 
+
 import type { Note } from "./note";
-
-
-
-
-
-
-
-
-
-
 
 
 

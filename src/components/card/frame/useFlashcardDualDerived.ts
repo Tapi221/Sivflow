@@ -1,29 +1,24 @@
 import React from "react";
 
 
+
 import { resolveSideBlocks } from "./flashcardBlocks";
+
 
 
 import { resolveAnswerAttachmentAudios, resolveAnswerAttachmentImages, resolveAnswerAttachmentReferences, resolveAnswerCode, resolveAnswerText, resolveAudioUrls, resolveCardId, resolveHasUncertainty, resolveImageUrls, resolveIsBookmarked, resolveLayoutRows, resolveQuestionAttachmentAudios, resolveQuestionAttachmentImages, resolveQuestionAttachmentReferences, resolveQuestionCode, resolveQuestionText } from "./flashcardDerived";
 
 
+
 import { resolveInkDocument } from "@/components/ink/inkStorage";
+
 
 
 import type { FlashcardCardLike, FlashcardDualDerivedSnapshot, FlashcardMediaLike, FlashcardSideDerivedSnapshot } from "./flashcard.types";
 
 
+
 import type { CardBlock } from "@/types/domain/card";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -33,16 +28,6 @@ const EMPTY_AUDIO_URLS: string[] = [];
 const EMPTY_REFERENCES: ReturnType<typeof resolveQuestionAttachmentReferences> =
   [];
 const EMPTY_BLOCKS: ReturnType<typeof resolveSideBlocks> = [];
-
-
-
-
-
-
-
-
-
-
 
 
 

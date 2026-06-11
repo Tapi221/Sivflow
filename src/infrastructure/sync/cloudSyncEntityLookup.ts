@@ -1,23 +1,16 @@
 import { type DocumentData, type Firestore, getDoc, getDocs } from "firebase/firestore";
 
 
+
 import { getUserSettingsRef, queryEntityById } from "./cloudSyncFirestoreRefs";
+
 
 
 import { type CloudEntityType, COLLECTION_BY_TYPE, type PullableEntityType, sanitizeSyncDataFromCloud } from "@/application/usecases/cloudSyncShared";
 
 
+
 import type { SyncChange } from "@/services/interfaces/ISyncService";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -32,16 +25,6 @@ type CloudSyncLookupDescriptor = {
   resolveData: (context: LookupContext) => Promise<DocumentData | null>;
   resolveSyncId: (context: LookupContext) => string;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -77,16 +60,6 @@ const lookupUserSettingData = async (
 
 
 
-
-
-
-
-
-
-
-
-
-
 const PULL_FULL_LOOKUP_ORDER: readonly CloudSyncLookupDescriptor[] = [
   createPullableLookupDescriptor("card"),
   createPullableLookupDescriptor("cardSet"),
@@ -101,16 +74,6 @@ const PULL_FULL_LOOKUP_ORDER: readonly CloudSyncLookupDescriptor[] = [
     resolveSyncId: ({ userId }) => userId,
   },
 ];
-
-
-
-
-
-
-
-
-
-
 
 
 

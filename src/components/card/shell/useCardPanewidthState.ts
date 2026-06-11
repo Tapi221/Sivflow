@@ -1,17 +1,8 @@
 import { type DependencyList, useCallback, useEffect, useRef, useState } from "react";
 
 
+
 import { type CardPaneMode, clampPaneWidthPx } from "@/components/card/frame/cardPane.constants";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -49,27 +40,7 @@ interface UseCardPaneWidthStateOptions {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const DEFAULT_INITIAL_VIEWPORT_WIDTH_PX = 1024;
-
-
-
-
-
-
-
-
-
-
 
 
 

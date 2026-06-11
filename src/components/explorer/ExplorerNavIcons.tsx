@@ -2,27 +2,7 @@ import type { SVGProps } from "react";
 
 
 
-
-
-
-
-
-
-
-
-
-
 type ExplorerNavIconProps = SVGProps<SVGSVGElement>;
-
-
-
-
-
-
-
-
-
-
 
 
 

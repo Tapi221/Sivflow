@@ -1,26 +1,20 @@
 import { onAuthStateChanged } from "firebase/auth";
 
 
+
 import { useEffect, useMemo, useState } from "react";
+
 
 
 import { auth } from "@/services/firebase";
 
 
+
 import { buildCalendarEventPrioritySyncRange, buildCalendarEventSyncRange, type BuildCalendarEventSyncRangeOptions, type CalendarEventSyncRange } from "./calendarEventSyncRange";
 
 
+
 import { useGoogleCalendarPushSync } from "./useGoogleCalendarPushSync";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -37,27 +31,7 @@ export type UseCalendarEventSyncOptions = BuildCalendarEventSyncRangeOptions & {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const PREFETCH_SYNC_DELAY_MS = 250;
-
-
-
-
-
-
-
-
-
-
 
 
 

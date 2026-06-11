@@ -2,25 +2,33 @@
 import { render, screen } from "@testing-library/react";
 
 
+
 import React from "react";
+
 
 
 import { describe, expect, it, vi } from "vitest";
 
 
+
 import type * as SharedCardContentModule from "@/components/card/common/SharedCardContent";
+
 
 
 import { Flashcard } from "@/components/card/frame/Flashcard";
 
 
+
 import type * as CardFrameModule from "@/components/card/frame/CardFrame";
+
 
 
 import type * as ReferencePopupModule from "@/components/card/overlays/ReferencePopup";
 
 
+
 import type * as DialogModule from "@/components/ui/dialog";
+
 
 
 import { layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";

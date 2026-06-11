@@ -2,7 +2,9 @@ import React from "react";
 
 
 
+
 import { memo } from "react";
+
 
 
 
@@ -10,7 +12,9 @@ import { LinkEditor } from "@/components/card/editor/LinkEditor";
 
 
 
+
 import MediaUploader from "@/components/card/media/MediaUploader";
+
 
 
 
@@ -18,7 +22,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 
 
+
 import type { UploadedImage } from "@/types";
+
 
 
 
@@ -26,17 +32,8 @@ import type { ReferenceBlockData } from "@/types/domain/base";
 
 
 
+
 import type { CardFaceAttachmentAudio } from "@/types/domain/card";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -69,16 +66,6 @@ interface CardEditorPaneMediaDialogsProps {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const toAudioUrl = (item: DialogAudioItem): string => {
   return typeof item === "string" ? item : item.url;
 };
@@ -105,16 +92,6 @@ const areMediaDialogsPropsEqual = (
   if (prevClosed && nextClosed) return true;
   return false;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -201,16 +178,6 @@ const CardEditorPaneMediaDialogsInner = ({
     </>
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

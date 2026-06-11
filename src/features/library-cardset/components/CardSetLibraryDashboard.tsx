@@ -1,26 +1,20 @@
 import { useMemo } from "react";
 
 
+
 import { PdfLibraryWorkspaceToolbar } from "@/features/library-pdf/components/PdfLibraryWorkspaceToolbar";
+
 
 
 import { buildCardSetDashboardRows, type CardSetDashboardRow } from "@/features/library-cardset/model/cardSetLibraryRow";
 
 
+
 import { useTags } from "@/features/settings/hooks/useTags";
 
 
+
 import type { Card, CardSet, Folder } from "@/types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -44,29 +38,9 @@ type CardSetMetricProps = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const CARD_CLASS_NAME = "group flex w-full min-w-0 flex-col rounded-[18px] border border-[#dddcd5] bg-[#FFFFFF] p-4 text-left shadow-[0_6px_18px_rgba(15,23,42,0.06)] outline-none transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out hover:border-[#c9c7bf] hover:bg-[#fbfaf7] hover:shadow-[0_10px_28px_rgba(15,23,42,0.08)] active:scale-[0.99] focus-visible:border-[#a8a49a] focus-visible:ring-2 focus-visible:ring-[#d8d4c8] motion-reduce:transition-none motion-reduce:active:scale-100";
 const DATE_FORMATTER = new Intl.DateTimeFormat("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" });
 const NUMBER_FORMATTER = new Intl.NumberFormat("ja-JP");
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -83,16 +57,6 @@ const getCardSetInitial = (title: string): string => {
   const trimmedTitle = title.trim();
   return trimmedTitle.length > 0 ? trimmedTitle.slice(0, 1).toUpperCase() : "F";
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -207,16 +171,6 @@ const CardSetLibraryDashboard = ({
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

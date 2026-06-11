@@ -2,19 +2,25 @@
 import React from "react";
 
 
+
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
+
 
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 
+
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
+
 
 
 import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 
 
+
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
+
 
 
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";

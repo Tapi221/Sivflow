@@ -2,7 +2,9 @@ import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrder
 
 
 
+
 import { getCardBlocks } from "@/domain/card/content";
+
 
 
 
@@ -10,7 +12,9 @@ import { LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from
 
 
 
+
 import { resolveCardTagNames } from "@/features/settings/hooks/useTags";
+
 
 
 
@@ -18,7 +22,9 @@ import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 
 
 
+
 import { waitForDraftImageUploads } from "./cardImageUploadSaveBarrier";
+
 
 
 
@@ -26,21 +32,13 @@ import { type EditorDraft, makeEmptyCardFaceAttachments, normalizeOrderIndex, sa
 
 
 
+
 import type { UploadedImage } from "@/types/domain/assets";
 
 
 
+
 import type { Card, CardBlock, CardFaceAttachments, CardPatch } from "@/types/domain/card";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -56,16 +54,6 @@ type CreatePanelCardParams = {
 };
 
 type CardToggleField = "isBookmarked" | "hasUncertainty";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -128,27 +116,7 @@ const resolveTagIdsForSave = async (
 
 
 
-
-
-
-
-
-
-
-
-
-
 export { toDateOrNull } from "@/utils/toMillis";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -158,32 +126,12 @@ export const AUTOSAVE_DELAY_MS = 700;
 
 
 
-
-
-
-
-
-
-
-
-
-
 export type TagNameLookup = Parameters<typeof resolveCardTagNames>[1];
 
 export type PersistOperation = "created" | "updated" | "noop";
 
 export type PersistResult = | { ok: true; operation: PersistOperation; saved: boolean }
   | { ok: false; message: string };
-
-
-
-
-
-
-
-
-
-
 
 
 

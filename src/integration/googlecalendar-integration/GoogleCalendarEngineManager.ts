@@ -1,23 +1,16 @@
 import { auth } from "@/services/firebase";
 
 
+
 import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
+
 
 
 import { GoogleCalendarWatchManager } from "@/sync/googlecalendar-sync/GoogleCalendarWatchManager";
 
 
+
 import type { GCalForceSyncOptions, GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -37,16 +30,6 @@ type WatchRegistrationResult = {
   action: "add" | "remove";
   calendarId: string;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

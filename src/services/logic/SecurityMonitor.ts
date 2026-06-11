@@ -1,29 +1,24 @@
 import type { DocumentData, FirestoreError, QueryDocumentSnapshot, QuerySnapshot, Unsubscribe } from "firebase/firestore";
 
 
+
 import { addDoc, collection, doc, onSnapshot, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+
 
 
 import { firestoreDb, requireFirestoreDb } from "@/infrastructure/firebase/client";
 
 
+
 import type { SecurityState as SyncSecurityState } from "@/services/interfaces/ISyncService";
+
 
 
 import { getSecurityEventCatalogEntry } from "./securityEventCatalog";
 
 
+
 import type { SecurityEventType, SecurityLog, SecurityMetadata } from "@/types/domain/telemetry";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -41,6 +36,8 @@ export interface SecurityState { isLocked: boolean;
   requires2FA: boolean;
   alerts: SecurityAlert[];
 }
+
+
 
 
 

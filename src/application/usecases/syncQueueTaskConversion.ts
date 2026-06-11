@@ -1,31 +1,12 @@
 import type { SyncTask } from "@/services/interfaces/ISyncService";
 
 
+
 import type { SyncQueueItem } from "@/types/domain/sync";
 
 
 
-
-
-
-
-
-
-
-
-
-
 type RemovalQueueItem = Extract<SyncQueueItem, { operationType: "delete" }>;
-
-
-
-
-
-
-
-
-
-
 
 
 

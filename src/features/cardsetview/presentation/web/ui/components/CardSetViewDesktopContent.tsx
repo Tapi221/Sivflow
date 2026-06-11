@@ -1,20 +1,12 @@
 import type { CSSProperties } from "react";
 
 
+
 import { CardSetViewDesktop } from "@/features/cardsetview/presentation/web/ui/CardSetViewDesktop";
 
 
+
 import type { CardSetViewContentProps } from "./cardSetViewContentProps";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -29,16 +21,6 @@ type CardSetViewChromeResetStyle = CSSProperties & {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const cardSetViewChromeResetStyle: CardSetViewChromeResetStyle = {
   "--card-selected-surface": "#ffffff",
   "--card-border-selected": "var(--card-border-default, rgba(15, 23, 42, 0.08))",
@@ -48,16 +30,6 @@ const cardSetViewChromeResetStyle: CardSetViewChromeResetStyle = {
   "--card-selected-outline-neutral": "transparent",
   "--card-selected-outline-accent": "transparent",
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

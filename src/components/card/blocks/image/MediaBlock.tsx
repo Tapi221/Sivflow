@@ -1,32 +1,28 @@
 import React from "react";
 
 
+
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
+
 
 
 import { ImageBlockContent } from "./ImageBlockContent";
 
 
+
 import { ImageBlockShell } from "./ImageBlockShell";
+
 
 
 import { cn } from "@/lib/utils";
 
 
+
 import { Image as ImageIcon } from "@/ui/icons";
 
 
+
 import type { UploadedImage } from "@/types/domain/assets";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -55,16 +51,6 @@ interface MediaBlockProps {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const areMediaBlockPropsEqual = (
   prev: MediaBlockProps,
   next: MediaBlockProps,
@@ -79,16 +65,6 @@ const areMediaBlockPropsEqual = (
   prev.canMoveDown === next.canMoveDown &&
   prev.displayMode === next.displayMode &&
   prev.zoom === next.zoom;
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -153,16 +129,6 @@ const MediaBlockInner = ({
     </BlockWrapper>
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

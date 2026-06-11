@@ -1,20 +1,12 @@
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useRef, useState } from "react";
 
 
+
 import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 
 
+
 import { useTreeViewSidebarHotkey } from "@/features/hotkey/useTreeViewSidebarHotkey";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -26,16 +18,6 @@ const SIDEBAR_WIDTH_LIMITS = {
   default: 292,
 } as const;
 const SECTION_LIST_PANE_LEFT_VAR = "--sivflow-section-list-pane-left";
-
-
-
-
-
-
-
-
-
-
 
 
 

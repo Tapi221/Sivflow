@@ -1,23 +1,16 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 
 
+
 import { useCallback, useEffect, useMemo } from "react";
+
 
 
 import { useCardMediaDialogs } from "./useCardMediaDialogs";
 
 
+
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -34,16 +27,6 @@ type UseCardEditorContentControllerParams<TDraft extends DraftShape | null> = {
   allowAutoMinHeightSyncRef: MutableRefObject<boolean>;
   resetDialogsRef: MutableRefObject<() => void>;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

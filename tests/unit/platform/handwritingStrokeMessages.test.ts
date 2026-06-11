@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 
+
 import { createEmptyInkDocument, type InkStroke } from "@core/domain/card/ink/inkDocument";
+
 
 
 import { applyHandwritingStrokeDelta, createHandwritingStrokeDeltaMessage } from "@platform/handwriting/handwritingStrokeMessages";

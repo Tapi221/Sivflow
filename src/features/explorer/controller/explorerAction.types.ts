@@ -1,20 +1,12 @@
 import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
 
 
+
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 
 
+
 import type { SelectedExplorerItem } from "@/types";
-
-
-
-
-
-
-
-
-
-
 
 
 

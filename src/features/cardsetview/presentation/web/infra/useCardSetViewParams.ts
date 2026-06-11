@@ -1,17 +1,8 @@
 import { useMemo } from "react";
 
 
+
 import { useLocation } from "react-router-dom";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -19,16 +10,6 @@ export type ParsedCardSetViewParams = { cardSetId: string | null;
   initialIndex: number;
   targetCardId: string | null;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

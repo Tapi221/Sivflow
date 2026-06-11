@@ -2,32 +2,12 @@ import { cn } from "@/lib/utils";
 
 
 
-
-
-
-
-
-
-
-
-
-
 type Params = {
   isFoldersRoute: boolean;
   isScrollLocked: boolean;
   isSidebarCollapsed: boolean;
   isRightSidebarOpen: boolean;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -2,16 +2,6 @@ import { IMPORT_FILE_MIME_TYPES } from "@/features/import/domain/importFileKind"
 
 
 
-
-
-
-
-
-
-
-
-
-
 export type DesktopImportFileOpenPayload = { paths: string[];
 };
 
@@ -20,16 +10,6 @@ export type DesktopImportFileReadResult = { path: string;
   size: number;
   data: ArrayBuffer | Uint8Array | number[];
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

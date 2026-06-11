@@ -4,7 +4,9 @@ import { CacheableResponsePlugin } from "workbox-cacheable-response";
 
 
 
+
 import { clientsClaim } from "workbox-core";
+
 
 
 
@@ -12,7 +14,9 @@ import { ExpirationPlugin } from "workbox-expiration";
 
 
 
+
 import type { PrecacheEntry } from "workbox-precaching";
+
 
 
 
@@ -20,21 +24,13 @@ import { cleanupOutdatedCaches, matchPrecache, precacheAndRoute } from "workbox-
 
 
 
+
 import { registerRoute, setCatchHandler } from "workbox-routing";
 
 
 
+
 import { CacheFirst, NetworkFirst } from "workbox-strategies";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -53,31 +49,11 @@ type ViteEnv = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 declare let self: ServiceWorkerGlobalScope;
 
 const env = (import.meta as ImportMeta & { env?: ViteEnv }).env;
 
 const cacheVersion = env?.VITE_BUILD_VERSION ?? env?.GITHUB_SHA ?? "dev";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -138,16 +114,6 @@ setCatchHandler(async ({ request }) => {
   }
   return Response.error();
 });
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -2,17 +2,8 @@ import { BaseTableCellHeaderPlugin, BaseTableCellPlugin, BaseTablePlugin, BaseTa
 
 
 
+
 import { TableCellElementStatic, TableCellHeaderElementStatic, TableElementStatic, TableRowElementStatic, } from '@/components/ui/table-node-static';
-
-
-
-
-
-
-
-
-
-
 
 
 

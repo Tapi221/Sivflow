@@ -1,20 +1,12 @@
 import { generateUploadedImageId } from "./uploadedImageFactory";
 
 
+
 import type { UploadFallbackReason, UploadSource } from "@/types";
 
 
+
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -24,16 +16,6 @@ export type NormalizeUploadedImageOptions = { onInvalid?: "skip" | "throw";
 export type DenormalizeUploadedImageOptions = { case?: "camel" | "snake";
   stripUndefined?: boolean;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

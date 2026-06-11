@@ -1,23 +1,16 @@
 import { useCallback } from "react";
 
 
+
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+
 
 
 import { getLocalDb } from "@/services/localdb";
 
 
+
 import type { TagRecord } from "@/services/localdb/types";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -29,16 +22,6 @@ type TagTreePositionPatch = {
 type TagUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "tagRecords", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

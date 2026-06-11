@@ -2,16 +2,6 @@ import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewE
 
 
 
-
-
-
-
-
-
-
-
-
-
 export type CardSetViewEditingDraftPatch = { cardId: string;
   patch: {
     title?: string;
@@ -29,16 +19,6 @@ export type CardSetViewWindowEventMap = { [CARD_SET_VIEW_EVENTS.editingChange]: 
 };
 
 type CardSetViewWindowEventName = keyof CardSetViewWindowEventMap;
-
-
-
-
-
-
-
-
-
-
 
 
 

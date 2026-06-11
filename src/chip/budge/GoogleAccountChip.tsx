@@ -5,27 +5,7 @@ type GoogleAccountChipProps = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const GOOGLE_ACCOUNT_CHIP_SIZE_CLASS_NAME = "size-[16px]";
-
-
-
-
-
-
-
-
-
-
 
 
 

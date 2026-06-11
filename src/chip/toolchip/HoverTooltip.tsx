@@ -1,23 +1,16 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 
+
 import { createPortal } from "react-dom";
+
 
 
 import { cn } from "@/lib/utils";
 
 
+
 import { TOOLTIP_PRESET_CLASS_NAMES, type TooltipPreset, type TooltipSize } from "./tooltip.size.desktop";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -45,29 +38,9 @@ type HoverTooltipProps = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 const HOVER_CAPABLE_MEDIA_QUERY = "(hover: hover) and (pointer: fine)";
 const TOOLTIP_ARROW_BORDER_CLASS_NAME = "border-[rgba(0,0,0,0.12)]";
 const TOOLTIP_ARROW_SURFACE_CLASS_NAME = "absolute -z-10 rotate-45 rounded-[2px]";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -201,16 +174,6 @@ const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
         : "top-1/2 -translate-y-1/2",
   );
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -1,20 +1,12 @@
 import React from "react";
 
 
+
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 
 
+
 import { cn } from "@/lib/utils";
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -22,16 +14,6 @@ type ImageBlockShellProps = {
   children: React.ReactNode;
   className?: string;
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
