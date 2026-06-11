@@ -3,9 +3,8 @@
  */
 import { useCallback, useState } from "react";
 
-
-
-export interface FlashcardMediaState { isImageModalOpen: boolean;
+export interface FlashcardMediaState {
+  isImageModalOpen: boolean;
   isImagePopupOpen: boolean;
   isAudioPopupOpen: boolean;
   isReferencePopupOpen: boolean;
@@ -18,9 +17,8 @@ export interface FlashcardMediaState { isImageModalOpen: boolean;
   isModalBlockingFlip: boolean;
 }
 
-
-
-export const useFlashcardMediaState = () => { const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+export const useFlashcardMediaState = () => {
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
   const [isAudioPopupOpen, setIsAudioPopupOpen] = useState(false);
   const [isReferencePopupOpen, setIsReferencePopupOpen] = useState(false);

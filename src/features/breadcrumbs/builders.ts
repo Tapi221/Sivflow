@@ -3,13 +3,10 @@ import type { BreadcrumbCrumb, ExplorerBreadcrumbContext } from "./breadcrumbs.t
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
-
-
 type FolderLike = Pick<Folder, "id" | "folderName" | "parentFolderId">;
 
-
-
-export const areBreadcrumbCrumbsEqual = (a: BreadcrumbCrumb[], b: BreadcrumbCrumb[]): boolean => { if (a === b) return true;
+export const areBreadcrumbCrumbsEqual = (a: BreadcrumbCrumb[], b: BreadcrumbCrumb[]): boolean => {
+  if (a === b) return true;
   if (a.length !== b.length) return false;
 
   return a.every((crumb, index) => {
@@ -21,7 +18,8 @@ export const areBreadcrumbCrumbsEqual = (a: BreadcrumbCrumb[], b: BreadcrumbCrum
     );
   });
 };
-export const buildFolderPathCrumbs = ({ folderId, folderById }: { folderId: string | null | undefined;
+export const buildFolderPathCrumbs = ({ folderId, folderById }: {
+  folderId: string | null | undefined;
   folderById: Map<string, FolderLike>;
 }): BreadcrumbCrumb[] => {
   if (!folderId) {
@@ -44,7 +42,8 @@ export const buildFolderPathCrumbs = ({ folderId, folderById }: { folderId: stri
     folderId: folder.id,
   }));
 };
-export const buildExplorerBreadcrumbs = ({ selectedFolderId, explorerBreadcrumbContext, selectedItem, folderById, cardById, documentById }: { selectedFolderId: string | null;
+export const buildExplorerBreadcrumbs = ({ selectedFolderId, explorerBreadcrumbContext, selectedItem, folderById, cardById, documentById }: {
+  selectedFolderId: string | null;
   explorerBreadcrumbContext: ExplorerBreadcrumbContext;
   selectedItem: SelectedExplorerItem;
   folderById: Map<string, FolderLike>;
@@ -83,7 +82,8 @@ export const buildExplorerBreadcrumbs = ({ selectedFolderId, explorerBreadcrumbC
 
   return crumbs;
 };
-export const buildCardSetViewBreadcrumbs = ({ folderId, selectedCardSet, selectedCard, sortedCards, folderById }: { folderId: string | null;
+export const buildCardSetViewBreadcrumbs = ({ folderId, selectedCardSet, selectedCard, sortedCards, folderById }: {
+  folderId: string | null;
   selectedCardSet: CardSet | null;
   selectedCard: Card | null;
   sortedCards: Card[];

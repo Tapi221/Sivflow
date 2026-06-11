@@ -1,4 +1,4 @@
-import { type MouseEvent, type ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
@@ -6,7 +6,8 @@ import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { cn } from "@/lib/utils";
-import { useFolderTagModeStore, type FolderTagMode } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
+import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
+import type { FolderTagMode } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { LogOut, Tag } from "@/ui/icons";
 import { useT } from "@shared/i18n/useT";

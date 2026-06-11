@@ -1,18 +1,19 @@
 import { useCallback, useMemo, useState } from "react";
 import { getFallbackProjectColor, getFolderProjectColor, isProjectColor } from "@/components/folder/explorer/model/projectColor";
-import { getFolderId, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { getFolderId, UNTITLED_PROJECT_NAME } from "@/components/folder/explorer/model/utils";
+import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import type { AppCalendarItem } from "./scheduleScreen.types";
 
-
-
-export type CreateRootFolderProjectInput = { label: string;
+export type CreateRootFolderProjectInput = {
+  label: string;
   color?: string;
   checked?: boolean;
 };
-export type UseRootFolderProjectsResult = { appProjects: AppCalendarItem[];
+export type UseRootFolderProjectsResult = {
+  appProjects: AppCalendarItem[];
   rootFolders: FolderTreeNode[];
   loading: boolean;
   error: string | null;
@@ -26,13 +27,9 @@ export type LegacyStoredAppProject = AppCalendarItem;
 type ProjectVisibilityMap = Record<string, boolean>;
 type StoredLegacyProject = Partial<AppCalendarItem>;
 
-
-
 const LEGACY_APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const PROJECT_VISIBILITY_STORAGE_KEY = "flashcard-master:schedule:root-folder-project-visibility";
 const EMPTY_COLLECTION: never[] = [];
-
-
 
 export const normalizeRootFolderProjectLabel = (label: string): string => label.trim().toLowerCase();
 const readTrimmedString = (value: unknown): string | null => {
@@ -78,7 +75,8 @@ const persistProjectVisibilityMap = (visibility: ProjectVisibilityMap) => {
     // localStorage が利用できない環境では、現在の React state だけで表示状態を維持する。
   }
 };
-export const readLegacyStoredAppProjects = (): LegacyStoredAppProject[] => { if (typeof window === "undefined") return [];
+export const readLegacyStoredAppProjects = (): LegacyStoredAppProject[] => {
+  if (typeof window === "undefined") return [];
 
   try {
     const raw = window.localStorage.getItem(LEGACY_APP_PROJECTS_STORAGE_KEY);
@@ -108,7 +106,8 @@ export const readLegacyStoredAppProjects = (): LegacyStoredAppProject[] => { if 
     return [];
   }
 };
-export const clearLegacyStoredAppProjects = () => { if (typeof window === "undefined") return;
+export const clearLegacyStoredAppProjects = () => {
+  if (typeof window === "undefined") return;
 
   try {
     window.localStorage.removeItem(LEGACY_APP_PROJECTS_STORAGE_KEY);
@@ -116,7 +115,8 @@ export const clearLegacyStoredAppProjects = () => { if (typeof window === "undef
     // localStorage が利用できない環境では何もしない。
   }
 };
-export const useRootFolderProjects = (): UseRootFolderProjectsResult => { const { folders, loading, error } = useFoldersRead();
+export const useRootFolderProjects = (): UseRootFolderProjectsResult => {
+  const { folders, loading, error } = useFoldersRead();
   const { createFolder, updateFolder } = useFolderCommands();
   const [visibilityByProjectId, setVisibilityByProjectId] = useState<ProjectVisibilityMap>(readProjectVisibilityMap);
   const treeFolders = useMemo(() => folders as unknown as FolderTreeNode[], [folders]);

@@ -1,4 +1,4 @@
-import { type MouseEvent as ReactMouseEvent } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { SettingsWorkspaceScreen } from "./SettingsWorkspaceScreen";
 import "./SettingsWorkspaceDialog.css";
 

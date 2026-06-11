@@ -4,13 +4,12 @@ import { SelectionCaptureGlyph } from "@/chip/overlay-toolbar/OverlayToolbarGlyp
 import { CardPaneWidthAdjuster } from "@/features/cardsetview/hooks/components/CardPaneWidthAdjuster";
 import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboardImage";
 import { captureElementRectToBlob } from "@/features/selection-capture/domSelectionCapture";
-import { dispatchCardSelectionCaptureEvent, type CardSelectionCaptureSide } from "@/features/selection-capture/cardSelectionCaptureEvents";
+import { dispatchCardSelectionCaptureEvent } from "@/features/selection-capture/cardSelectionCaptureEvents";
+import type { CardSelectionCaptureSide } from "@/features/selection-capture/cardSelectionCaptureEvents";
 import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
 import type { SelectionCaptureArea, SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
 import { recognizeSelectionCaptureText } from "@/features/selection-capture/selectionCaptureOcr";
 import { cn } from "@/lib/utils";
-
-
 
 export type CardWorkspaceSurfaceVariant = "plain" | "dotted";
 type CardWorkspaceCaptureTarget = {
@@ -19,16 +18,13 @@ type CardWorkspaceCaptureTarget = {
   area: number;
 };
 
-
-
 const WORKSPACE_SURFACE_CLASS_NAMES: Record<CardWorkspaceSurfaceVariant, string> = {
   plain: "workspace-surface--plain",
   dotted: "workspace-surface--dotted",
 };
 
-
-
-export type CardWorkspaceWidthControlProps = { modeLabel: string;
+export type CardWorkspaceWidthControlProps = {
+  modeLabel: string;
   value: number;
   min: number;
   max: number;
@@ -39,7 +35,8 @@ export type CardWorkspaceWidthControlProps = { modeLabel: string;
   onStepUp: () => void;
   onReset: () => void;
 };
-export type CardWorkspaceShellProps = { children: ReactNode;
+export type CardWorkspaceShellProps = {
+  children: ReactNode;
   containerClassName?: string;
   shellClassName?: string;
   contentAreaClassName?: string;
@@ -58,8 +55,6 @@ export type CardWorkspaceShellProps = { children: ReactNode;
   metaPanelContainerClassName?: string;
   selectionCaptureEnabled?: boolean;
 };
-
-
 
 const setExternalRef = (ref: Ref<HTMLDivElement> | undefined, node: HTMLDivElement | null): void => {
   if (!ref) return;
@@ -98,9 +93,8 @@ const resolveTaskMessage = (values: Array<string | void>): string | null => {
   return values.find((value): value is string => typeof value === "string" && value.trim().length > 0) ?? null;
 };
 
-
-
-export const CardWorkspaceShell = ({ children, containerClassName, shellClassName, contentAreaClassName, viewportClassName, viewportStyle, surfaceVariant = "plain", viewportRef, widthControl = null, widthControlClassName, topLeftControl, topRightControl, overlayChildren, overlayTopInsetPx = 0, isMetaOpen, metaPanel, metaPanelContainerClassName, selectionCaptureEnabled = true }: CardWorkspaceShellProps) => { const viewportNodeRef = useRef<HTMLDivElement | null>(null);
+export const CardWorkspaceShell = ({ children, containerClassName, shellClassName, contentAreaClassName, viewportClassName, viewportStyle, surfaceVariant = "plain", viewportRef, widthControl = null, widthControlClassName, topLeftControl, topRightControl, overlayChildren, overlayTopInsetPx = 0, isMetaOpen, metaPanel, metaPanelContainerClassName, selectionCaptureEnabled = true }: CardWorkspaceShellProps) => {
+  const viewportNodeRef = useRef<HTMLDivElement | null>(null);
   const [isSelectionCaptureActive, setIsSelectionCaptureActive] = useState(false);
   const [isSelectionCaptureBusy, setIsSelectionCaptureBusy] = useState(false);
   const [selectionCaptureMessage, setSelectionCaptureMessage] = useState<string | null>(null);

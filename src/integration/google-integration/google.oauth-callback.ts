@@ -1,5 +1,6 @@
 import appIconSrc from "@shared/assets/icons/app-icon.svg";
-import { readStoredLocale, type Locale } from "@shared/i18n/locale.store";
+import { readStoredLocale } from "@shared/i18n/locale.store";
+import type { Locale } from "@shared/i18n/locale.store";
 
 
 

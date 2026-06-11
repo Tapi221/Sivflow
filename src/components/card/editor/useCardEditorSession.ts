@@ -1,10 +1,11 @@
-import { type SetStateAction, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { AUTOSAVE_DELAY_MS, buildCardPatchForToggle, buildDraftFromCard, buildSavePayload, createPanelCard, draftSignature, extractCreatedCardId, hasMeaningfulDraft, NEW_SENTINEL, type PersistOperation, type PersistResult, snapshotDraft, toDateOrNull } from "./cardEditorSessionCore";
-import { type EditorDraft, makeNewDraft, normalizeSelectedCardId, shouldAutoOpenEditorForCard } from "./cardEditorUtils";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { SetStateAction } from "react";
+import { AUTOSAVE_DELAY_MS, buildCardPatchForToggle, buildDraftFromCard, buildSavePayload, createPanelCard, draftSignature, extractCreatedCardId, hasMeaningfulDraft, NEW_SENTINEL, snapshotDraft, toDateOrNull } from "./cardEditorSessionCore";
+import type { PersistOperation, PersistResult } from "./cardEditorSessionCore";
+import { makeNewDraft, normalizeSelectedCardId, shouldAutoOpenEditorForCard } from "./cardEditorUtils";
+import type { EditorDraft } from "./cardEditorUtils";
 import { useCardEntity } from "@/components/card/hooks/useCardEntity";
 import type { Card, CardPatch } from "@/types/domain/card";
-
-
 
 type UseCardEditorSessionParams = {
   selectedCardId: string | null;
@@ -37,9 +38,8 @@ type FlushDraftOptions = {
   showSuccessToast?: boolean;
 };
 
-
-
-export const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, resolveCardFromEntity = true, folderId, cardSetId, autoEdit, updateCard, createCard, addTag, tagById, toastSuccess, toastError, onCardUpdated, onSelectCardId, resetDialogs }: UseCardEditorSessionParams) => { const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>(null);
+export const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, resolveCardFromEntity = true, folderId, cardSetId, autoEdit, updateCard, createCard, addTag, tagById, toastSuccess, toastError, onCardUpdated, onSelectCardId, resetDialogs }: UseCardEditorSessionParams) => {
+  const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isEditing, setIsEditingState] = useState(false);
   const [isAutosaving, setIsAutosaving] = useState(false);

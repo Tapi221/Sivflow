@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
 import { fetchCalendarList } from "./gcal.api";
-import { buildTokenExpiry, isStoredTokenValid, readStoredAccounts, removeStoredAccount, type StoredGoogleAccount, updateStoredAccountCalendarIds, updateStoredAccountToken, upsertStoredAccount } from "./gcal.multi-storage";
+import { buildTokenExpiry, isStoredTokenValid, readStoredAccounts, removeStoredAccount, updateStoredAccountCalendarIds, updateStoredAccountToken, upsertStoredAccount } from "./gcal.multi-storage";
+import type { StoredGoogleAccount } from "./gcal.multi-storage";
 import { refreshCalendarAccessToken, requestCalendarAccessToken, requestGoogleCalendarServerCode } from "@/integration/google-integration/google.oauth";
 import { disconnectServerStoredGoogleCalendarAccount, exchangeGoogleCalendarCode, getGoogleOAuthCallableErrorReason, getServerStoredGoogleCalendarAccessToken, isGoogleOAuthDeterministicErrorReason, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
 import type { GoogleOAuthCallableErrorReason } from "@/integration/google-integration/google.server-oauth";

@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CreateMfDeckCard, CreateMfDeckCardSet, EnsureMfDeckTagByName, UpdateMfDeckCardSet } from "@/features/deckFile/application/importMfDeck";
-import { buildPortableImportBatchItems, formatPortableImportBatchItemSubtitle, importPortableFileBatch, type PortableImportBatchItem } from "@/features/import/application/importPortableFileBatch";
+import { buildPortableImportBatchItems, formatPortableImportBatchItemSubtitle, importPortableFileBatch } from "@/features/import/application/importPortableFileBatch";
+import type { PortableImportBatchItem } from "@/features/import/application/importPortableFileBatch";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/contexts/ToastContext";
 import { cn } from "@/lib/utils";
 
-
-
-export type PortableImportBatchCompletedPayload = { cardSetId: string;
+export type PortableImportBatchCompletedPayload = {
+  cardSetId: string;
   cardSetName: string;
   folderId: string;
   createdCount: number;
@@ -27,8 +27,6 @@ type PortableImportBatchDialogProps = {
   ensureTagByName?: EnsureMfDeckTagByName;
 };
 
-
-
 const STATUS_LABELS: Record<PortableImportBatchItem["status"], string> = {
   queued: "待機中",
   parsing: "解析中",
@@ -46,9 +44,8 @@ const STATUS_CLASS_NAMES: Record<PortableImportBatchItem["status"], string> = {
   skipped: "bg-amber-50 text-amber-700",
 };
 
-
-
-export const PortableImportBatchDialog = ({ open, onOpenChange, folderId, folderName, files, filesRevision = 0, onImported, createCardSet, updateCardSet, createCard, ensureTagByName }: PortableImportBatchDialogProps) => { const toast = useToast();
+export const PortableImportBatchDialog = ({ open, onOpenChange, folderId, folderName, files, filesRevision = 0, onImported, createCardSet, updateCardSet, createCard, ensureTagByName }: PortableImportBatchDialogProps) => {
+  const toast = useToast();
   const [items, setItems] = useState<PortableImportBatchItem[]>([]);
   const [isImporting, setIsImporting] = useState(false);
 

@@ -4,7 +4,8 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { createDefaultEditorBlockSettings, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
 import { getLocalDb } from "@/services/localdb";
 import type { UserSettings } from "@/types";
-import { useLocaleStore, type Locale } from "@shared/i18n/locale.store";
+import { useLocaleStore } from "@shared/i18n/locale.store";
+import type { Locale } from "@shared/i18n/locale.store";
 
 
 

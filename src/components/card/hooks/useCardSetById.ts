@@ -2,9 +2,8 @@ import { useCallback } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import { getLocalDb } from "@/services/localdb";
-import { type CardDisplayMode, type CardSet, DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode } from "@/types/domain/cardSet";
-
-
+import { DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode } from "@/types/domain/cardSet";
+import type { CardDisplayMode, CardSet } from "@/types/domain/cardSet";
 
 type RawCardSetRecord = CardSet & {
   isDeleted?: boolean;
@@ -13,8 +12,6 @@ type RawCardSetRecord = CardSet & {
 type CardSetUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "cardSets", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
-
-
 
 const normalizeCardSetRecord = (raw: RawCardSetRecord | undefined | null): CardSet | null => {
   if (!raw || raw.isDeleted) {
@@ -27,7 +24,8 @@ const normalizeCardSetRecord = (raw: RawCardSetRecord | undefined | null): CardS
     defaultDisplayMode: normalizeCardDisplayMode(raw.defaultDisplayMode ?? DEFAULT_CARD_DISPLAY_MODE),
   };
 };
-export const useCardSetById = (cardSetId: string | null) => { const userId = useEffectiveLocalUserId();
+export const useCardSetById = (cardSetId: string | null) => {
+  const userId = useEffectiveLocalUserId();
 
   const cardSet = useLiveQuery(async () => {
     if (!cardSetId) {

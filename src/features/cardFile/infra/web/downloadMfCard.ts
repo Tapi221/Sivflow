@@ -1,10 +1,6 @@
 import { MF_CARD_FILE_EXTENSION, MF_CARD_MIME_TYPE } from "@/features/cardFile/domain/mfCard.types";
 
-
-
 const INVALID_FILE_NAME_CHARACTERS = new Set(["\\", "/", ":", "*", "?", "\"", "<", ">", "|"]);
-
-
 
 const sanitizeFileName = (name: string) => {
   const trimmed = name.trim() || "sivflow-card";
@@ -18,7 +14,8 @@ const toArrayBuffer = (bytes: Uint8Array): ArrayBuffer => {
   copy.set(bytes);
   return copy.buffer;
 };
-export const downloadBytesAsMfCard = ({ bytes, cardName }: { bytes: Uint8Array;
+export const downloadBytesAsMfCard = ({ bytes, cardName }: {
+  bytes: Uint8Array;
   cardName: string;
 }) => {
   const blob = new Blob([toArrayBuffer(bytes)], {

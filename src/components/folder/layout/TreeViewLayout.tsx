@@ -9,7 +9,8 @@ import { useDocumentsRead } from "@/features/document/hooks/useDocumentsRead";
 import { ExplorerSearchSourceBridge } from "@/features/global-search/components/ExplorerSearchSourceBridge";
 import { readDesktopImportFiles, subscribeDesktopImportFileOpen } from "@/features/import/desktop/desktopImportFiles";
 import { detectImportFileKind, getPortableImportFiles, getSupportedImportFiles, isPortableImportFileKind, isSupportedImportFileKind } from "@/features/import/domain/importFileKind";
-import { type ImportFormat, ImportFormatDialog } from "@/features/import/presentation/web/ImportFormatDialog";
+import { ImportFormatDialog } from "@/features/import/presentation/web/ImportFormatDialog";
+import type { ImportFormat } from "@/features/import/presentation/web/ImportFormatDialog";
 import { PortableImportBatchDialog } from "@/features/import/presentation/web/PortableImportBatchDialog";
 import { XlsxImportDialog } from "@/features/import/presentation/web/XlsxImportDialog";
 import { SectionListColumnPane } from "@/components/folder/components/SectionListColumnPane";
@@ -29,8 +30,6 @@ import { cn } from "@/lib/utils";
 import { createAppDestination, createPageUrl } from "@/platform/web/navigation/toWebPath";
 import type { CardSet, Folder, SelectedExplorerItem } from "@/types";
 
-
-
 interface TreeViewLayoutProps {
   folders: Folder[];
   isSectionListMode: boolean;
@@ -46,11 +45,7 @@ interface TreeViewLayoutProps {
   folderSelectionNonce?: number;
 }
 
-
-
 const MOBILE_DETAIL_MEDIA_QUERY = "(max-width: 767px)";
-
-
 
 const isExternalFileDragEvent = (event: DragEvent<HTMLDivElement>) => {
   return Array.from(event.dataTransfer.types).includes("Files");
@@ -78,8 +73,6 @@ const useIsMobileViewport = (): boolean => {
 
   return isMobileViewport;
 };
-
-
 
 const TreeViewLayout = ({
   folders,
@@ -810,7 +803,5 @@ const TreeViewLayout = ({
     </div>
   );
 };
-
-
 
 export default TreeViewLayout;

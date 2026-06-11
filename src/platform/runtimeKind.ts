@@ -1,4 +1,5 @@
-import { RUNTIME_KINDS, type RuntimeKind } from "@platform/runtime/runtime.constants";
+import { RUNTIME_KINDS } from "@platform/runtime/runtime.constants";
+import type { RuntimeKind } from "@platform/runtime/runtime.constants";
 import { hasDesktopRuntime } from "./detectDesktopBridge";
 
 

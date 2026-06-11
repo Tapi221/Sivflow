@@ -1,10 +1,9 @@
-import { motion, type Transition } from "framer-motion";
+import { motion } from "framer-motion";
+import type { Transition } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/calendar.types";
 import { cn } from "@/lib/utils";
 import { useT } from "@shared/i18n/useT";
-
-
 
 type CalendarViewModeOption = {
   value: CalendarViewMode;
@@ -16,8 +15,6 @@ type ToggleCalendarViewModeProps = {
   options: readonly CalendarViewModeOption[];
   className?: string;
 };
-
-
 
 const CALENDAR_VIEW_MODE_INDICATOR_ID = "calendar-view-mode-indicator";
 const CALENDAR_VIEW_MODE_ACTIVE_TEXT_CLASS = "text-[#2f343b]";
@@ -33,8 +30,6 @@ const CALENDAR_VIEW_MODE_MOTION_TRANSITION: Transition = {
   duration: 0.12,
   ease: "easeOut",
 };
-
-
 
 const isViewModeSelectionArray = (value: CalendarViewModeSelection): value is readonly CalendarViewMode[] => Array.isArray(value);
 const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SELECT_VIEW_MODE_SET.has(viewMode);
@@ -71,8 +66,6 @@ const isDisabledViewModeOption = (
   value: CalendarViewModeSelection,
   optionValue: CalendarViewMode,
 ) => hasMultipleSelectedViewModes(value) && !isSelectedViewMode(value, optionValue);
-
-
 
 const ToggleCalendarViewMode = ({
   value,
@@ -191,10 +184,6 @@ const ToggleCalendarViewMode = ({
   );
 };
 
-
-
 export { ToggleCalendarViewMode };
-
-
 
 export const ViewModeDropdown = ToggleCalendarViewMode;

@@ -1,4 +1,5 @@
-import { type ComponentProps, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { ComponentProps } from "react";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

@@ -1,5 +1,7 @@
-import { normalizeInkDocument, type InkDocument, type InkSide } from "@core/domain/card/ink/inkDocument";
-import { receiveDesktopHandwritingMessage, type DesktopHandwritingReceiverReason, type DesktopHandwritingReceiverSession } from "./desktopHandwritingReceiver";
+import { normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
+import type { InkDocument, InkSide } from "@core/domain/card/ink/inkDocument";
+import { receiveDesktopHandwritingMessage } from "./desktopHandwritingReceiver";
+import type { DesktopHandwritingReceiverReason, DesktopHandwritingReceiverSession } from "./desktopHandwritingReceiver";
 import { attachMobileDeviceToHandwritingSession, closeHandwritingSession, createDesktopHandwritingSession, failHandwritingSession } from "./handwritingSessionLifecycle";
 import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionMessage } from "./handwritingSession.types";
 

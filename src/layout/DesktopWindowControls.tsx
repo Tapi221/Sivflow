@@ -1,4 +1,5 @@
-import { type CSSProperties, type MouseEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import type { CSSProperties, MouseEvent } from "react";
 import { windowControls } from "@/platform/capabilities/windowControls";
 import { hasDesktopBridge } from "@/platform/runtime";
 import "./DesktopWindowControls.css";

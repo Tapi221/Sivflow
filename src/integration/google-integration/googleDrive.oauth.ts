@@ -1,4 +1,4 @@
-import { type Auth } from "firebase/auth";
+import type { Auth } from "firebase/auth";
 import { listServerStoredGoogleCalendarAccounts } from "@/integration/googlecalendar-integration/gcal.server-account-list";
 import { exchangeGoogleConnectedServiceCode, getServerStoredGoogleConnectedServiceAccessToken, isServerStoredGoogleOAuthEnabled } from "./google.server-oauth";
 import { requestConnectedServiceAccessToken, requestGoogleCalendarServerCode } from "./google.oauth";

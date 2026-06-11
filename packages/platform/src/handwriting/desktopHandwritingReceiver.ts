@@ -1,5 +1,7 @@
-import { normalizeInkDocument, type InkDocument } from "@core/domain/card/ink/inkDocument";
-import { applyHandwritingStrokeDelta, type ApplyHandwritingStrokeDeltaResult } from "./handwritingStrokeMessages";
+import { normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
+import type { InkDocument } from "@core/domain/card/ink/inkDocument";
+import { applyHandwritingStrokeDelta } from "./handwritingStrokeMessages";
+import type { ApplyHandwritingStrokeDeltaResult } from "./handwritingStrokeMessages";
 import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionStatus } from "./handwritingSession.types";
 
 

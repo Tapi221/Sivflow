@@ -1,4 +1,5 @@
-import { Fragment, type HTMLAttributes, type ReactNode, type Ref } from "react";
+import { Fragment } from "react";
+import type { HTMLAttributes, ReactNode, Ref } from "react";
 import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
 import { shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 import { BlockSeparator } from "./BlockSeparator";
@@ -6,9 +7,8 @@ import { getNormalizedGridOffsetRows, getNormalizedRowOffset, getRowOffsetStyle,
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
 
-
-
-export type BlockListRowMeta = { index: number;
+export type BlockListRowMeta = {
+  index: number;
   rowOffsetRows: number;
   rowOffsetPx: number;
   gridOffsetPx: number;
@@ -31,9 +31,9 @@ interface BlockListProps {
   renderBlock: (block: CardBlock, meta: BlockListRowMeta) => ReactNode;
 }
 
-
-
-export const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowContainerProps, renderBlock }: BlockListProps) => { return (<div className={cn("w-full max-w-full", className)}> {blocks.map((block, index) => { const isGridOffsetBlock = isGridOffsetType(block.type);
+export const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowContainerProps, renderBlock }: BlockListProps) => {
+  return (<div className={cn("w-full max-w-full", className)}> {blocks.map((block, index) => {
+    const isGridOffsetBlock = isGridOffsetType(block.type);
     const isLinePositionable = isRowPositionableType(block.type);
     const rowOffsetRows = !isLinePositionable
       ? 0

@@ -1,4 +1,5 @@
-import { getDocumentKindLabel, isDocumentQueueItem, isDocumentUploadReady, type QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
+import { getDocumentKindLabel, isDocumentQueueItem, isDocumentUploadReady } from "@/application/usecases/persistentOfflineQueueModels";
+import type { QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
 import { getLocalDb } from "@/infrastructure/localdb/client";
 
 

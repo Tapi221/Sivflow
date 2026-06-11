@@ -1,4 +1,5 @@
-import { normalizeMemoryStability, type SubjectiveScore } from "@/domain/card/review/stability";
+import { normalizeMemoryStability } from "@/domain/card/review/stability";
+import type { SubjectiveScore } from "@/domain/card/review/stability";
 import { calculateRetentionProbability } from "./reviewMetrics";
 
 

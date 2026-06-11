@@ -1,9 +1,8 @@
 import { bundleMediaInMfDeckCards } from "./mfDeckMediaBundler";
 import type { MfDeckTagLookup } from "./mfDeck.types";
-import { MF_DECK_FORMAT, MF_DECK_VERSION, type MfDeckArchiveV1, type MfDeckCardV1, MfDeckExportError, type MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
+import { MF_DECK_FORMAT, MF_DECK_VERSION, MfDeckExportError } from "@/features/deckFile/domain/mfDeck.types";
+import type { MfDeckArchiveV1, MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
 import type { Card, CardBlock, CardSet } from "@/types";
-
-
 
 const toEpoch = (value: unknown): number => {
   if (value instanceof Date) return value.getTime();
@@ -72,7 +71,8 @@ const visitObject = (
   visitor(record);
   Object.values(record).forEach((item) => visitObject(item, visitor));
 };
-export const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => { const issues: MfDeckIssue[] = [];
+export const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => {
+  const issues: MfDeckIssue[] = [];
 
   cards.forEach((card) => {
     const faces = [card.front, card.back];
@@ -96,7 +96,8 @@ export const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => { con
 
   return issues;
 };
-export const mapCardToMfDeckCard = ({ card, tagById }: { card: Card;
+export const mapCardToMfDeckCard = ({ card, tagById }: {
+  card: Card;
   tagById?: MfDeckTagLookup;
 }): MfDeckCardV1 => {
   return {
@@ -125,7 +126,8 @@ export const mapCardToMfDeckCard = ({ card, tagById }: { card: Card;
     },
   };
 };
-export const buildMfDeckArchive = async ({ cardSet, cards, tagById, appVersion }: { cardSet: CardSet;
+export const buildMfDeckArchive = async ({ cardSet, cards, tagById, appVersion }: {
+  cardSet: CardSet;
   cards: Card[];
   tagById?: MfDeckTagLookup;
   appVersion?: string;

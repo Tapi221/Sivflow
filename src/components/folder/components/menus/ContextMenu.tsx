@@ -1,9 +1,9 @@
-import { type ReactNode, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
+import type { ReactNode } from "react";
 import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ExplorerMenuPanel, type ExplorerMenuPanelVariant } from "./ExplorerMenuPanel";
+import { ExplorerMenuPanel } from "./ExplorerMenuPanel";
+import type { ExplorerMenuPanelVariant } from "./ExplorerMenuPanel";
 import type { MenuAction } from "./menuActions";
-
-
 
 interface ContextMenuProps {
   children?: ReactNode;
@@ -15,16 +15,13 @@ interface ContextMenuProps {
   variant?: ExplorerMenuPanelVariant;
 }
 
-
-
 const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
-
-
 
 /**
  * 右クリックなどで表示される汎用的なコンテキストメニューのコンテナ
  */
-export const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, className, variant = "default" }: ContextMenuProps) => { const suppressCloseAutoFocusRef = useRef(false);
+export const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, className, variant = "default" }: ContextMenuProps) => {
+  const suppressCloseAutoFocusRef = useRef(false);
 
   const anchoredStyle = useMemo(() => {
     if (!anchorPoint) return undefined;

@@ -1,8 +1,7 @@
 import React from "react";
-import { getRuledStyle, type RuledStyleKind } from "./ruledStyles";
+import { getRuledStyle } from "./ruledStyles";
+import type { RuledStyleKind } from "./ruledStyles";
 import { cn } from "@/lib/utils";
-
-
 
 type CSSVars = React.CSSProperties & Record<`--${string}`, string>;
 type RuledLayerProps = {
@@ -20,11 +19,7 @@ type RuledLayerProps = {
   ruledLinePx?: number;
 };
 
-
-
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
-
-
 
 const RuledLayer = ({
   className,
@@ -82,7 +77,5 @@ const RuledLayer = ({
     />
   );
 };
-
-
 
 export { RuledLayer };

@@ -12,7 +12,8 @@ import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";
 import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
-import { buildCardChromeClassName, buildCardShellClassName, type CardPresentationContext, type CardPresentationContextInput, type CardPresentationState, resolveCardPresentationState } from "@/components/card/presentation/cardPresentation";
+import { buildCardChromeClassName, buildCardShellClassName, resolveCardPresentationState } from "@/components/card/presentation/cardPresentation";
+import type { CardPresentationContext, CardPresentationContextInput, CardPresentationState } from "@/components/card/presentation/cardPresentation";
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
@@ -26,8 +27,6 @@ import { cn } from "@/lib/utils";
 import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { toMillisOrNull } from "@/utils/toMillis";
-
-
 
 type CardEditorPaneSettings = {
   accentColor?: string;
@@ -96,11 +95,7 @@ type EditorSidePaneProps = {
   overlayTopRight?: React.ReactNode;
 };
 
-
-
 const EMPTY_BLOCKS: CardBlock[] = [];
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -181,8 +176,6 @@ const areEditorSidePanePropsEqual = (
   prev.actionsTopLeft === next.actionsTopLeft &&
   prev.actionsTopRight === next.actionsTopRight &&
   prev.overlayTopRight === next.overlayTopRight;
-
-
 
 const EditorSidePaneInner = ({
   side,
@@ -318,14 +311,11 @@ const EditorSidePaneInner = ({
   );
 };
 
-
-
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 EditorSidePane.displayName = "EditorSidePane";
 
-
-
-export const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx = null, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, hideMetaPanel = false, dockToolbarsToTop = false, hideBlockToolbars = false, externalToolbarMountQ = null, externalToolbarMountA = null, settingsOverride = null, embeddedInPager = false, pairGapClassName = "gap-0", presentationContext, showResizeHandle: showResizeHandleProp = true, onSyncStatusChange, overlayTopInsetPx = 0, displayMode = "fixed", cardLayoutMode = "split", zoom = 1 }: CardEditorPaneProps) => { const controller = useCardEditorPaneController({ selectedCardId, folderId, cardSetId, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, settingsOverride });
+export const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx = null, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, hideMetaPanel = false, dockToolbarsToTop = false, hideBlockToolbars = false, externalToolbarMountQ = null, externalToolbarMountA = null, settingsOverride = null, embeddedInPager = false, pairGapClassName = "gap-0", presentationContext, showResizeHandle: showResizeHandleProp = true, onSyncStatusChange, overlayTopInsetPx = 0, displayMode = "fixed", cardLayoutMode = "split", zoom = 1 }: CardEditorPaneProps) => {
+  const controller = useCardEditorPaneController({ selectedCardId, folderId, cardSetId, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, settingsOverride });
 
   const { settings, isMetaOpen, session, layout, content, actions } =
     controller;

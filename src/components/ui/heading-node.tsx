@@ -1,14 +1,10 @@
 "use client";
 
 import * as React from "react";
-
 import type { PlateElementProps } from "platejs/react";
-
-import { type VariantProps, cva } from "class-variance-authority";
-
+import { cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
 import { PlateElement } from "platejs/react";
-
-
 
 const headingVariants = cva(
   "relative mb-1 data-[nav-target=true]:rounded-md data-[nav-target=true]:bg-(--color-highlight)",
@@ -26,25 +22,24 @@ const headingVariants = cva(
   },
 );
 
-
-
-export const HeadingElement = ({ variant = "h1", ...props }: PlateElementProps & VariantProps<typeof headingVariants>) => { return (<PlateElement as={variant!} className={headingVariants({ variant })} {...props}> {props.children} </PlateElement>);
+export const HeadingElement = ({ variant = "h1", ...props }: PlateElementProps & VariantProps<typeof headingVariants>) => {
+  return (<PlateElement as={variant!} className={headingVariants({ variant })} {...props}> {props.children} </PlateElement>);
 };
-
-export const H1Element = (props: PlateElementProps) => { return <HeadingElement variant="h1" {...props} />;
+export const H1Element = (props: PlateElementProps) => {
+  return <HeadingElement variant="h1" {...props} />;
 };
-
-export const H2Element = (props: PlateElementProps) => { return <HeadingElement variant="h2" {...props} />;
+export const H2Element = (props: PlateElementProps) => {
+  return <HeadingElement variant="h2" {...props} />;
 };
-
-export const H3Element = (props: PlateElementProps) => { return <HeadingElement variant="h3" {...props} />;
+export const H3Element = (props: PlateElementProps) => {
+  return <HeadingElement variant="h3" {...props} />;
 };
-
-export const H4Element = (props: PlateElementProps) => { return <HeadingElement variant="h4" {...props} />;
+export const H4Element = (props: PlateElementProps) => {
+  return <HeadingElement variant="h4" {...props} />;
 };
-
-export const H5Element = (props: PlateElementProps) => { return <HeadingElement variant="h5" {...props} />;
+export const H5Element = (props: PlateElementProps) => {
+  return <HeadingElement variant="h5" {...props} />;
 };
-
-export const H6Element = (props: PlateElementProps) => { return <HeadingElement variant="h6" {...props} />;
+export const H6Element = (props: PlateElementProps) => {
+  return <HeadingElement variant="h6" {...props} />;
 };

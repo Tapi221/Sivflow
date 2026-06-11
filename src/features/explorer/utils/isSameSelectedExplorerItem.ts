@@ -1,8 +1,7 @@
 import type { SelectedExplorerItem } from "@/types";
 
-
-
-export const isSameSelectedExplorerItem = (a: SelectedExplorerItem, b: SelectedExplorerItem): boolean => { if (a === b) return true;
+export const isSameSelectedExplorerItem = (a: SelectedExplorerItem, b: SelectedExplorerItem): boolean => {
+  if (a === b) return true;
   if (!a || !b) return a === b;
   if (a.type !== b.type) return false;
 

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getTagColorClassName as resolveTagColorClassName, getTagColorKey as normalizeTagColorKey, TAG_COLOR_KEYS, type TagColorKey } from "@/chip/tag/tagColor";
+import { getTagColorClassName as resolveTagColorClassName, getTagColorKey as normalizeTagColorKey, TAG_COLOR_KEYS } from "@/chip/tag/tagColor";
+import type { TagColorKey } from "@/chip/tag/tagColor";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "./useUserSettings";
 import { getLocalDb } from "@/services/localDB";

@@ -1,7 +1,8 @@
 import { httpsCallable } from "firebase/functions";
 import { auth, functionsClient } from "@/infrastructure/firebase/client";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
-import { consumeGoogleCalendarServerCodeVerifier, type GoogleCalendarAccess } from "./google.oauth";
+import { consumeGoogleCalendarServerCodeVerifier } from "./google.oauth";
+import type { GoogleCalendarAccess } from "./google.oauth";
 
 
 

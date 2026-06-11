@@ -1,4 +1,5 @@
-import { type CardDisplayMode, DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode } from "@/types/domain/cardSet";
+import { DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode } from "@/types/domain/cardSet";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 

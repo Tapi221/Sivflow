@@ -1,13 +1,14 @@
 import { importMfCardFile } from "@/features/cardFile/application/importMfCard";
 import { readMfCardFile } from "@/features/cardFile/infra/web/readMfCardFile";
-import { type CreateMfDeckCard, type CreateMfDeckCardSet, type EnsureMfDeckTagByName, importMfDeckArchive, type ImportMfDeckArchiveResult, type UpdateMfDeckCardSet } from "@/features/deckFile/application/importMfDeck";
+import { importMfDeckArchive } from "@/features/deckFile/application/importMfDeck";
+import type { CreateMfDeckCard, CreateMfDeckCardSet, EnsureMfDeckTagByName, ImportMfDeckArchiveResult, UpdateMfDeckCardSet } from "@/features/deckFile/application/importMfDeck";
 import { readMfDeckFile } from "@/features/deckFile/infra/web/readMfDeckFile";
-import { detectImportFileKind, IMPORT_FILE_LABELS, isPortableImportFileKind, type PortableImportFileKind } from "@/features/import/domain/importFileKind";
-
-
+import { detectImportFileKind, IMPORT_FILE_LABELS, isPortableImportFileKind } from "@/features/import/domain/importFileKind";
+import type { PortableImportFileKind } from "@/features/import/domain/importFileKind";
 
 export type PortableImportBatchItemStatus = | "queued" | "parsing" | "importing" | "imported" | "failed" | "skipped";
-export type PortableImportBatchItem = { id: string;
+export type PortableImportBatchItem = {
+  id: string;
   file: File;
   kind: PortableImportFileKind;
   name: string;
@@ -19,7 +20,8 @@ export type PortableImportBatchItem = { id: string;
   warningCount?: number;
   errorMessage?: string;
 };
-export type PortableImportBatchResult = { items: PortableImportBatchItem[];
+export type PortableImportBatchResult = {
+  items: PortableImportBatchItem[];
   importedCount: number;
   failedCount: number;
   skippedCount: number;
@@ -27,7 +29,8 @@ export type PortableImportBatchResult = { items: PortableImportBatchItem[];
   lastImportedCardSetId: string | null;
   lastImportedCardSetName: string | null;
 };
-export type ImportPortableFileBatchParams = { files: File[];
+export type ImportPortableFileBatchParams = {
+  files: File[];
   folderId: string;
   createCardSet: CreateMfDeckCardSet;
   updateCardSet?: UpdateMfDeckCardSet;
@@ -35,8 +38,6 @@ export type ImportPortableFileBatchParams = { files: File[];
   ensureTagByName?: EnsureMfDeckTagByName;
   onItemChange?: (item: PortableImportBatchItem) => void;
 };
-
-
 
 const genId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -54,7 +55,8 @@ const formatFileSize = (size: number): string => {
 const cloneItem = (item: PortableImportBatchItem): PortableImportBatchItem => ({
   ...item,
 });
-export const buildPortableImportBatchItems = (files: File[]): PortableImportBatchItem[] => { const seen = new Set<string>();
+export const buildPortableImportBatchItems = (files: File[]): PortableImportBatchItem[] => {
+  const seen = new Set<string>();
   const items: PortableImportBatchItem[] = [];
 
   for (const file of files) {
@@ -156,7 +158,8 @@ const emitItem = (
 ) => {
   onItemChange?.(cloneItem(item));
 };
-export const importPortableFileBatch = async ({ files, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, onItemChange }: ImportPortableFileBatchParams): Promise<PortableImportBatchResult> => { const items = buildPortableImportBatchItems(files);
+export const importPortableFileBatch = async ({ files, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, onItemChange }: ImportPortableFileBatchParams): Promise<PortableImportBatchResult> => {
+  const items = buildPortableImportBatchItems(files);
   let importedCount = 0;
   let failedCount = 0;
   let skippedCount = 0;
@@ -231,5 +234,6 @@ export const importPortableFileBatch = async ({ files, folderId, createCardSet, 
     lastImportedCardSetName,
   };
 };
-export const formatPortableImportBatchItemSubtitle = (item: Pick<PortableImportBatchItem, "kind" | "size">): string => { return `${IMPORT_FILE_LABELS[item.kind]} / ${formatFileSize(item.size)}`;
+export const formatPortableImportBatchItemSubtitle = (item: Pick<PortableImportBatchItem, "kind" | "size">): string => {
+  return `${IMPORT_FILE_LABELS[item.kind]} / ${formatFileSize(item.size)}`;
 };

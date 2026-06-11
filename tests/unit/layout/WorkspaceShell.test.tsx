@@ -2,7 +2,8 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { cleanup, render, screen } from "@testing-library/react";
-import React, { createRef, type RefObject } from "react";
+import React, { createRef } from "react";
+import type { RefObject } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { WorkspaceShell } from "@/layout/WorkspaceShell";
 

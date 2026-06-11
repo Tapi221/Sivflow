@@ -2,7 +2,8 @@ import { Dexie } from "dexie";
 import { getLocalDb } from "@/services/localdb";
 import { CURRENT_TAG_STORE } from "@/services/localdb/tagStoreNames";
 import { CloudSyncAdapter } from "@/services/logic/CloudSyncAdapter";
-import { type BlobUrlFix, sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
+import { sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
+import type { BlobUrlFix } from "@/utils/blobUrlSanitizer";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
 

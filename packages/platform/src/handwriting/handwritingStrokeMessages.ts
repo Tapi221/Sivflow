@@ -1,4 +1,5 @@
-import { INK_DOCUMENT_VERSION, normalizeInkDocument, type InkDocument, type InkSide, type InkStroke } from "@core/domain/card/ink/inkDocument";
+import { INK_DOCUMENT_VERSION, normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
+import type { InkDocument, InkSide, InkStroke } from "@core/domain/card/ink/inkDocument";
 import type { HandwritingStrokeDeltaMessage } from "./handwritingSession.types";
 
 
