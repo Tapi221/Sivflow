@@ -1,5 +1,7 @@
 import { BaseTocPlugin } from '@platejs/toc';
 
-import { TocElementStatic } from '@/components/toc-node-static';
+import { TocElementStatic } from '@/components/ui/toc-node-static';
 
-export const BaseTocKit = [BaseTocPlugin.withComponent(TocElementStatic)];
+const BaseTocKit = [BaseTocPlugin.withComponent(TocElementStatic)];
+
+export { BaseTocKit };
