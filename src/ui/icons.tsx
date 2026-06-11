@@ -1,8 +1,7 @@
 import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from "react";
 import { forwardRef } from "react";
-import { StratisAlertCircleIcon, StratisAlertTriangleIcon, StratisArrowLeftSquareContainedIcon, StratisArrowRefresh01Icon, StratisArrowRightSquareContainedIcon, StratisArrowSwitchHorizontalIcon, StratisAudioSettings01Icon, StratisCalendarNumberIcon, StratisChevronLeftIcon, StratisChevronUpIcon, StratisClock01Icon, StratisClockBackwardIcon, StratisCode01Icon, StratisCopyLeftIcon, StratisEditContainedIcon, StratisFileEdit02Icon, StratisFilterIcon, StratisFolderSearch01Icon, StratisFormulaIcon, StratisGlobe02Icon, StratisHelpCircleContainedIcon, StratisImageIcon, StratisInfoSquare01ContainedIcon, StratisKeyboardIcon, StratisLinkAngledIcon, StratisLinkExternalIcon, StratisLogout01Icon, StratisMarkdownIcon, StratisPlus01Icon, StratisSearch01Icon, StratisStar02Icon, StratisTagIcon, StratisTrash03Icon, StratisType03Icon, StratisWrenchIcon, StratisX01Icon, StratisXCircleContainedIcon } from "@/ui/icons/stratis";
+import { StratisAlertCircleIcon, StratisAlertTriangleIcon, StratisArrowLeftSquareContainedIcon, StratisArrowRefresh01Icon, StratisArrowRightSquareContainedIcon, StratisArrowSwitchHorizontalIcon, StratisAudioSettings01Icon, StratisCalendarNumberIcon, StratisChevronLeftIcon, StratisChevronUpIcon, StratisClock01Icon, StratisClockBackwardIcon, StratisCode01Icon, StratisCopyLeftIcon, StratisEditContainedIcon, StratisFileEdit02Icon, StratisFilterIcon, StratisFolderSearch01Icon, StratisFormulaIcon, StratisGlobe02Icon, StratisHelpCircleContainedIcon, StratisImageIcon, StratisInfoSquare01ContainedIcon, StratisKeyboardIcon, StratisLinkAngledIcon, StratisLinkExternalIcon, StratisLogout01Icon, StratisMarkdownIcon, StratisPlus01Icon, StratisSearch01Icon, StratisStar02Icon, StratisTagIcon, StratisTrash03Icon, StratisType03Icon, StratisWrenchIcon, StratisX01Icon, StratisXCircleContainedIcon } from "stratis-ui-icons";
 import { UiIcon } from "./UiIcon";
-
 
 
 
@@ -37,7 +36,6 @@ type GlyphKind =
   | "user"
   | "x"
   | "default";
-
 
 
 
@@ -99,7 +97,6 @@ const glyphByIconName: Record<string, GlyphKind> = {
 
 
 
-
 const wrapStratisIcon = (BaseIcon: StratisIconComponent, name: string) => {
   const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) => {
     const resolvedLabel = label ?? rest["aria-label"];
@@ -132,7 +129,6 @@ const makeIcon = (name: string) => {
   Icon.displayName = name;
   return Icon;
 };
-
 
 
 
@@ -203,14 +199,12 @@ const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size =
 
 
 
-
 MoreVerticalIcon.displayName = "MoreVerticalIcon";
 ExplorerChevronDownIcon.displayName = "ExplorerChevronDownIcon";
 ExplorerChevronRightIcon.displayName = "ExplorerChevronRightIcon";
 ExplorerFileTextIcon.displayName = "ExplorerFileTextIcon";
 ExplorerFolderOpenIcon.displayName = "ExplorerFolderOpenIcon";
 ExplorerFolderOutlineIcon.displayName = "ExplorerFolderOutlineIcon";
-
 
 
 
@@ -316,7 +310,3 @@ export const NotebookPen = NotebookPenIcon;
 
 
 
-
-
-
-export { StratisFormulaIcon, StratisMarkdownIcon };
