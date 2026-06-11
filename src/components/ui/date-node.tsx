@@ -10,7 +10,7 @@ import type { PlateElementProps } from 'platejs/react';
 
 import { PlateElement, useReadOnly } from 'platejs/react';
 
-import { inlineSuggestionVariants } from '@/components/suggestion';
+import { inlineSuggestionVariants } from '@/lib/suggestion';
 
 import { cn } from '@/lib/utils';
 

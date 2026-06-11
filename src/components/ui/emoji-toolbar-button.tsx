@@ -20,7 +20,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from './too
 
 import { cn } from '@/lib/utils';
 
-import { ToolbarButton } from '@/components/toolbar';
+import { ToolbarButton } from '@/components/ui/toolbar';
 
 const emojiCategoryIcons: Record<
   EmojiCategoryList,
