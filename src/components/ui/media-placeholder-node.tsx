@@ -172,14 +172,12 @@ export const PlaceholderElement = withHOC( PlaceholderProvider, function Placeho
               {currentContent.icon}
             </div>
             <div className="whitespace-nowrap text-muted-foreground text-sm">
-              <>
-                {loading ? uploadingFile?.name : currentContent.content}
-              </>
+              {loading ? uploadingFile?.name : currentContent.content}
 
               {loading && !isImage && (
                 <div className="mt-1 flex items-center gap-1.5">
-                  <>{formatBytes(uploadingFile?.size ?? 0)}</>
-                  <>–</>
+                  {formatBytes(uploadingFile?.size ?? 0)}
+                  {'–'}
                   <div className="flex items-center">
                     <Loader2Icon className="mr-1 size-3.5 animate-spin text-muted-foreground" />
                     {progress ?? 0}%
