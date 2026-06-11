@@ -18,6 +18,8 @@ const SEVERITY_LABELS = new Map([
 const KNOWN_RULE_MESSAGES = new Map([
   ["@typescript-eslint/no-empty-object-type", "`{}` 型は 0 や空文字列などの null/undefined 以外の値も許容します。オブジェクトだけを表したい場合は `object`、任意の値を表したい場合は `unknown` を使ってください。"],
   ["no-empty", "空のブロック文です。処理が不要な場合は理由をコメントで明示してください。"],
+  ["no-var", "`var` は使用禁止です。再代入が不要なら `const`、再代入が必要なら `let` を使ってください。"],
+  ["prefer-const", "再代入されない `let` は使わず、`const` を使ってください。"],
   ["react-hooks/preserve-manual-memoization", "React Compiler が最適化をスキップしました。手動 memo 化の依存配列が推論結果と一致していません。依存配列を実際に参照している値に合わせてください。"],
 ]);
 
