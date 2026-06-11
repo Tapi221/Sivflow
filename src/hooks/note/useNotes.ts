@@ -10,6 +10,8 @@ import type { Note, NoteBlockContent } from "@/types";
 
 
 
+
+
 type UseNotesOptions = {
   enabled?: boolean;
 };
@@ -24,7 +26,11 @@ type CreateNoteOptions = {
 
 
 
+
+
 const DEFAULT_NOTE_CONTENT: NoteBlockContent = [];
+
+
 
 
 
@@ -114,6 +120,8 @@ const useNotes = (folderId?: string | null, options?: UseNotesOptions) => {
     deleteNote,
   };
 };
+
+
 
 
 

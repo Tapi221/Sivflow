@@ -7,6 +7,8 @@ import { toMillis } from "@/utils/toMillis";
 
 
 
+
+
 type RankSearchResultsParams = {
   items: SearchItem[];
   query: string;
@@ -17,6 +19,8 @@ type RankedSearchItem = {
   score: number;
   timestampMillis: number;
 };
+
+
 
 
 

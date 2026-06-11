@@ -17,6 +17,8 @@ import "./sidebar.layered-directory.css";
 
 
 
+
+
 type SidebarTranslationKey =
   | "sidebarHome"
   | "sidebarLibrary"
@@ -38,6 +40,8 @@ type SidebarProps = {
   onToggleLeftPanel?: () => void;
   onOpenSettings?: () => void;
 };
+
+
 
 
 
@@ -77,6 +81,8 @@ const mainNavItems: SidebarNavItem[] = [
     icon: <GalleryIcon className="app-sidebar__nav-icon" />,
   },
 ];
+
+
 
 
 
@@ -194,6 +200,8 @@ const Sidebar = ({ isLeftPanelCollapsed = false, onToggleLeftPanel, onOpenSettin
     </aside>
   );
 };
+
+
 
 
 

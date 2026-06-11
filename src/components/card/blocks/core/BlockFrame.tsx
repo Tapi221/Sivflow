@@ -1,6 +1,8 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
+
+
 type BlockFrameVariant = "none" | "neutral" | "editor";
 type BlockFrameProps = React.HTMLAttributes<HTMLDivElement> & {
   children: React.ReactNode;
@@ -13,16 +15,21 @@ type BlockFrameProps = React.HTMLAttributes<HTMLDivElement> & {
   selectionActive?: boolean;
 };
 
+
+
 const SELECTED_BLOCK_OUTLINE_COLOR = "rgba(37, 99, 235, 0.82)";
 const SELECTED_BLOCK_OUTLINE_WIDTH = "1px";
+
+
 
 const getClosestBlockId = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) return null;
   return target.closest<HTMLElement>("[data-block-id]")?.dataset.blockId ?? null;
 };
 
-export const BlockFrame = ({ children, className, contentClassName, overlay, accentColor, variant = "neutral", raiseZIndex = false, selectionActive = variant === "editor", style, ...props }: BlockFrameProps) => {
-  const frameRef = React.useRef<HTMLDivElement | null>(null);
+
+
+export const BlockFrame = ({ children, className, contentClassName, overlay, accentColor, variant = "neutral", raiseZIndex = false, selectionActive = variant === "editor", style, ...props }: BlockFrameProps) => { const frameRef = React.useRef<HTMLDivElement | null>(null);
   const [isLatestSelection, setIsLatestSelection] = React.useState(false);
 
   React.useEffect(() => {

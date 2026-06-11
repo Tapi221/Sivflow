@@ -6,6 +6,8 @@ import { deleteDocumentBlob } from "@/services/documentFileStore";
 
 
 
+
+
 type DocumentRecord = {
   id?: string;
   localFileId?: string;
@@ -27,6 +29,8 @@ type DocumentsTable = {
   };
 };
 export type DocDbCtx = { documents: DocumentsTable; userId?: string; };
+
+
 
 
 

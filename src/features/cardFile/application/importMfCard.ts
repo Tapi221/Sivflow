@@ -2,8 +2,9 @@ import type { MfCardFileV1 } from "@/features/cardFile/domain/mfCard.types";
 import { type CreateMfDeckCard, type CreateMfDeckCardSet, type EnsureMfDeckTagByName, importMfDeckArchive, type ImportMfDeckArchiveResult, type MfDeckImportDestination, type UpdateMfDeckCardSet } from "@/features/deckFile/application/importMfDeck";
 import { MF_DECK_FORMAT, MF_DECK_VERSION, type MfDeckArchiveV1 } from "@/features/deckFile/domain/mfDeck.types";
 
-export type ImportMfCardFileParams = {
-  cardFile: MfCardFileV1;
+
+
+export type ImportMfCardFileParams = { cardFile: MfCardFileV1;
   folderId: string;
   createCardSet: CreateMfDeckCardSet;
   updateCardSet?: UpdateMfDeckCardSet;
@@ -11,6 +12,8 @@ export type ImportMfCardFileParams = {
   ensureTagByName?: EnsureMfDeckTagByName;
   destination: MfDeckImportDestination;
 };
+
+
 
 const resolveCardSetName = (cardFile: MfCardFileV1) => {
   const title = cardFile.card.title?.trim();
@@ -42,6 +45,5 @@ const buildSingleCardArchive = (cardFile: MfCardFileV1): MfDeckArchiveV1 => {
     },
   };
 };
-export const importMfCardFile = async ({ cardFile, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination }: ImportMfCardFileParams): Promise<ImportMfDeckArchiveResult> => {
-  return importMfDeckArchive({ archive: buildSingleCardArchive(cardFile), folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination });
+export const importMfCardFile = async ({ cardFile, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination }: ImportMfCardFileParams): Promise<ImportMfDeckArchiveResult> => { return importMfDeckArchive({ archive: buildSingleCardArchive(cardFile), folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination });
 };

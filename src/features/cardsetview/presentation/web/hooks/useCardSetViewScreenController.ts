@@ -20,18 +20,21 @@ import { useCardSetViewWindowEvents } from "./useCardSetViewWindowEvents";
 import { useCardSetViewZoom } from "./useCardSetViewZoom";
 import { useCardSetViewZoomInput } from "./useCardSetViewZoomInput";
 
+
+
 type ScrollAnchorFace = "question" | "answer";
 type UseCardSetViewScreenControllerParams = {
   cardSetId?: string | null;
 };
+
+
 
 const buildNavigationScopeKey = ({ deviceScope, cardSetId }: { deviceScope: string; cardSetId: string | null; }) => {
   if (!cardSetId) return null;
 
   return [deviceScope, cardSetId].join("::");
 };
-export const useCardSetViewScreenController = (params: UseCardSetViewScreenControllerParams = {}) => {
-  const setExtraCrumbs = useSetBreadcrumbCrumbs();
+export const useCardSetViewScreenController = (params: UseCardSetViewScreenControllerParams = {}) => { const setExtraCrumbs = useSetBreadcrumbCrumbs();
   const { error: toastError } = useToast();
   const presentationTarget = usePresentationTarget();
   const isDesktop = presentationTarget === "desktop";

@@ -8,6 +8,8 @@ import { warnOncePerSession } from "@/services/localDBRuntimeState";
 
 
 
+
+
 type MigratableTableName = (typeof MIGRATABLE_TABLE_NAMES)[number];
 type MigratableDexie = Dexie & Record<MigratableTableName, Dexie.Table<unknown, unknown>>;
 
@@ -15,7 +17,11 @@ type MigratableDexie = Dexie & Record<MigratableTableName, Dexie.Table<unknown, 
 
 
 
+
+
 const MIGRATABLE_TABLE_NAMES = ["folders", "cardSets", "cards", "documents", "notes", "users", "userSettings", "userStats", "syncMetadata", "levelHistories", "deviceMeta", "syncErrors", "syncHistory", "syncSettings", "syncQueue", "conflicts", "metadata", "images", "cardRelations", "projectMaps", "studyLogs", "tagRecords", "documentFiles"] as const;
+
+
 
 
 

@@ -4,6 +4,8 @@ import { createAndFocusCard as createAndFocusCardUseCase, toggleCardBookmark, to
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
+
+
 interface UseCardSetViewActionsOptions {
   cardSetId: string | null;
   cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>;
@@ -20,9 +22,9 @@ interface UseCardSetViewActionsOptions {
   clearFlippedCards: () => void;
 }
 
-export const useCardSetViewActions = ({ cardSetId, cardSetById, selectedCardSet, selectedCard, currentCard, createCard, updateCard, toastError, beginGlobalEditing, setPendingFocusCardId, clearFlippedCards }: UseCardSetViewActionsOptions) => {
-  const createAndFocusCard = useCallback(async (): Promise<boolean> => {
-    const { targetCardSetId, targetFolderId } = resolveCardMutationTarget({ cardSetId, cardSetById, selectedCardSet, selectedCard, currentCard });
+
+
+export const useCardSetViewActions = ({ cardSetId, cardSetById, selectedCardSet, selectedCard, currentCard, createCard, updateCard, toastError, beginGlobalEditing, setPendingFocusCardId, clearFlippedCards }: UseCardSetViewActionsOptions) => { const createAndFocusCard = useCallback(async (): Promise<boolean> => { const { targetCardSetId, targetFolderId } = resolveCardMutationTarget({ cardSetId, cardSetById, selectedCardSet, selectedCard, currentCard });
 
     if (!targetCardSetId) {
       toastError("新規カードの追加先カードセットが見つかりません");
