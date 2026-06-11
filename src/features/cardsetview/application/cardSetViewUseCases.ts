@@ -74,3 +74,4 @@ export const toggleCardUncertainty = async ({ card, updateCard, }: ToggleCardFla
 export const toggleCardBookmark = async ({ card, updateCard, }: ToggleCardFlagOptions): Promise<void> => { await updateCard(card.id, { isBookmarked: !card.isBookmarked, });
 };
 export const saveDefaultDisplayMode = async ({ cardSetId, currentDisplayMode, updateCardSet, }: SaveDefaultDisplayModeOptions): Promise<void> => { await updateCardSet(cardSetId, { defaultDisplayMode: normalizeCardDisplayMode(currentDisplayMode), });
+};

@@ -175,4 +175,4 @@ const useProjectCalendarActions = ({ googleAccounts, reconnectGoogleAccount, tog
 
 
 
-export { useProjectCalendarAc
+export { useProjectCalendarActions };

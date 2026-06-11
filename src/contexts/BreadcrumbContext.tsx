@@ -70,4 +70,6 @@ export const useBreadcrumbContext = (): BreadcrumbContextValue => { const extraC
       extraCrumbs,
       setExtraCrumbs,
     }),
-    [extraCrumbs, setExtraCrumbs]
+    [extraCrumbs, setExtraCrumbs],
+  );
+};

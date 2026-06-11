@@ -30,4 +30,4 @@ export { AuthSessionContext };
 
 
 
-export type { AuthSessionContextType, AuthSessionProvider
+export type { AuthSessionContextType, AuthSessionProviderProps };

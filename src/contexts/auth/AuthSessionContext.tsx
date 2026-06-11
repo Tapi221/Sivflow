@@ -119,4 +119,4 @@ export { AuthSessionProvider };
 
 
 
-export type { AuthSessionProviderPr
+export type { AuthSessionProviderProps };

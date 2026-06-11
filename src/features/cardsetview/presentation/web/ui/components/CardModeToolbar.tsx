@@ -94,3 +94,4 @@ export const CardModeToolbar = ({ displayMode, cardLayoutMode, disabledCardLayou
       </div>
     </OverlayToolbar>
   );
+};

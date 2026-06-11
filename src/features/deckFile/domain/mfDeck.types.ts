@@ -114,4 +114,5 @@ export class MfDeckExportError extends Error { readonly issues: MfDeckIssue[];
     super(message);
     this.name = "MfDeckExportError";
     this.issues = issues;
-  
+  }
+}

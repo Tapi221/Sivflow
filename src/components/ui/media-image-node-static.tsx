@@ -37,3 +37,4 @@ export function ImageElementStatic( props: SlateElementProps<TImageElement & TCa
       {props.children}
     </SlateElement>
   );
+}

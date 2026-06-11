@@ -88,3 +88,4 @@ export const useCardSetViewPaneWidth = ({ isGlobalEditing, isDesktop, settings, 
       setCardSetWidthPreference(cardSetId, "edit", widthPx);
     },
   });
+};

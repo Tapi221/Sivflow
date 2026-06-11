@@ -243,4 +243,6 @@ function TablePicker() {
       <div className="text-center text-current text-xs">
         {tablePicker.size.rowCount} x {tablePicker.size.colCount}
       </div>
-    </d
+    </div>
+  );
+}

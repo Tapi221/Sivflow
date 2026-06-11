@@ -137,3 +137,4 @@ export const buildCardSetDashboardRows = ({ cardSets, cards, folders, tagById, }
 
       return left.title.localeCompare(right.title, "ja");
     });
+};

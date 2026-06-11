@@ -7,4 +7,4 @@ export { useExplorerController } from "@/features/explorer/controller/useExplore
 
 
 
-export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState
+export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";

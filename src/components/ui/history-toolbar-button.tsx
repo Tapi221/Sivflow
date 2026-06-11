@@ -45,4 +45,5 @@ export function UndoToolbarButton( props: React.ComponentProps<typeof ToolbarBut
     >
       <Undo2Icon />
     </ToolbarButton>
- 
+  );
+}

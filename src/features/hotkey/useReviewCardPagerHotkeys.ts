@@ -43,3 +43,4 @@ export const useReviewCardPagerHotkeys = ({ onFlip, onNext, onPrev }: UseReviewC
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [onFlip, onNext, onPrev]);
+};

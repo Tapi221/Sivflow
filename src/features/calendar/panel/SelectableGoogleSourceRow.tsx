@@ -70,4 +70,4 @@ const SelectableGoogleSourceRow = ({ id, label, checked, color, onToggle }: Sele
 
 
 
-export { GOOGLE_SOURCE_ROW_CLASS_NAME, SelectableGoogleSour
+export { GOOGLE_SOURCE_ROW_CLASS_NAME, SelectableGoogleSourceRow };
