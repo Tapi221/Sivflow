@@ -102,6 +102,8 @@ export default defineConfig([
       "@stylistic/object-curly-newline": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "react-refresh/only-export-components": "off",
+      "no-var": "error",
+      "prefer-const": "error",
       "no-restricted-imports": [
         "error",
         {
@@ -175,17 +177,6 @@ export default defineConfig([
     files: ["src/features/calendar/grid/Grid.calendar.weekday.desktop.tsx"],
     rules: {
       "unused-imports/no-unused-imports": "off",
-    },
-  },
-
-  {
-    files: [
-      "src/features/calendar/googlecalendar-integration/gcal.oauth.ts",
-      "src/integration/google-integration/google.oauth.ts",
-      "src/integration/googlecalendar-integration/gcal.oauth.ts",
-    ],
-    rules: {
-      "prefer-const": "off",
     },
   },
 
