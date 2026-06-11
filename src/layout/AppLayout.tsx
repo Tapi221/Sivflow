@@ -1,11 +1,8 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
-import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
-import { Search } from "@/ui/icons";
 import "@/styles/backpane.css";
 import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContext";
 import { WorkspaceShell } from "./WorkspaceShell";
@@ -25,8 +22,6 @@ type SidebarLongPressState = {
   timerId: number;
 };
 
-const GLOBAL_SEARCH_TRIGGER_CLASS_NAME = "absolute right-5 top-4 z-30 hidden h-9 w-[268px] shrink-0 items-center gap-2 rounded-[10px] border border-[#e5e7eb] bg-white px-3 text-left text-[13px] font-medium leading-none text-[#8e8e93] shadow-[0_1px_2px_rgba(15,23,42,0.04)] outline-none ring-0 transition-[background-color,border-color,box-shadow] duration-150 ease-out hover:border-[#d7dbe2] hover:bg-[#fbfbfc] focus:outline-none focus:ring-0 focus-visible:border-[#c7d2fe] focus-visible:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] md:flex";
-const GLOBAL_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-[22px] min-w-[34px] items-center justify-center rounded-[6px] border border-[#e6e6e8] bg-[#f7f7f8] px-1.5 text-[11px] font-semibold leading-none tracking-[-0.02em] text-[#8e8e93] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "sivflow:layout:left-panel-collapsed";
 const LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
 const LEFT_PANEL_COLLAPSED_STORAGE_VALUE = "collapsed";
@@ -117,19 +112,15 @@ const useIsMobileSettingsRouteViewport = (): boolean => {
 };
 
 const AppLayout = () => {
-  const { pathname, isFoldersRoute, isScheduleRoute, isScrollLocked } = useLayoutRouteStateDesktop();
+  const { pathname, isScrollLocked } = useLayoutRouteStateDesktop();
   const navigate = useNavigate();
   const isMobileSettingsRouteViewport = useIsMobileSettingsRouteViewport();
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(readStoredLeftPanelCollapsed);
-  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const [workspaceLayoutRevision, setWorkspaceLayoutRevision] = useState(0);
-  const openSearch = useSearchStore((state) => state.open);
   const mainRef = useRef<HTMLElement | null>(null);
   const sidebarLongPressStateRef = useRef<SidebarLongPressState | null>(null);
   const shouldSuppressSidebarLongPressClickRef = useRef(false);
-
-  const handleOpenSearch = useCallback(() => openSearch(), [openSearch]);
 
   const handleOpenSettings = useCallback(() => {
     if (isMobileSettingsRouteViewport) {
@@ -148,11 +139,6 @@ const AppLayout = () => {
   const handleToggleLeftPanel = useCallback(() => {
     bumpWorkspaceLayoutRevision();
     setIsLeftPanelCollapsed((current) => !current);
-  }, [bumpWorkspaceLayoutRevision]);
-
-  const handleToggleRightSidebar = useCallback(() => {
-    bumpWorkspaceLayoutRevision();
-    setIsRightSidebarOpen((current) => !current);
   }, [bumpWorkspaceLayoutRevision]);
 
   const clearSidebarLongPress = useCallback(() => {
@@ -181,7 +167,7 @@ const AppLayout = () => {
         if (!current) return;
 
         shouldSuppressSidebarLongPressClickRef.current = true;
-        current.target.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, button: 2, buttons: 0, clientX: current.clientX, clientY: current.clientY, view: window }));
+        current.target.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: current.clientX, clientY: current.clientY, view: window }));
         clearSidebarLongPress();
       }, SIDEBAR_LONG_PRESS_DELAY_MS),
     };
@@ -236,17 +222,11 @@ const AppLayout = () => {
 
   useResetWorkspaceScrollDesktop(mainRef, pathname);
 
-  const isRightSidebarVisible = isScheduleRoute && isRightSidebarOpen;
   const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed, onOpenSettings: handleOpenSettings, onToggleLeftPanel: handleToggleLeftPanel }), [handleOpenSettings, handleToggleLeftPanel, isLeftPanelCollapsed]);
 
   return (
-    <WorkspaceLayoutRevisionProvider value={workspaceLayoutRevision}>
-      <WorkspaceShell isLeftPanelCollapsed={isLeftPanelCollapsed} isRightSidebarVisible={isRightSidebarVisible} isFoldersRoute={isFoldersRoute} isScheduleRoute={isScheduleRoute} isScrollLocked={isScrollLocked} mainRef={mainRef} onOpenSettings={handleOpenSettings} onToggleLeftPanel={handleToggleLeftPanel} onToggleRightSidebar={handleToggleRightSidebar}>
-        <button type="button" className={GLOBAL_SEARCH_TRIGGER_CLASS_NAME} onClick={handleOpenSearch} aria-label="検索を開く">
-          <Search size={16} />
-          <span>検索</span>
-          <span className={GLOBAL_SEARCH_SHORTCUT_CLASS_NAME}>⌘K</span>
-        </button>
+    <WorkspaceLayoutRevisionProvider revision={workspaceLayoutRevision}>
+      <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
         <Suspense fallback={null}>
           <Outlet context={outletContext} />
         </Suspense>
@@ -256,4 +236,5 @@ const AppLayout = () => {
   );
 };
 
+export type { AppLayoutOutletContext };
 export { AppLayout };
