@@ -76,6 +76,8 @@ const VIEWER_LANGUAGE_SHORT_LABELS: Record<string, string> = {
 
 
 
+
+
 const normalizeViewerLanguage = (input?: string) => {
   const raw = (input || "").toLowerCase().trim();
   const normalized = VIEWER_LANGUAGE_ALIASES[raw] ?? raw;
@@ -89,6 +91,8 @@ const normalizeEditorLanguage = (input?: string) => {
   if (lang === "html") return "markup";
   return lang ?? "javascript";
 };
+
+
 
 
 

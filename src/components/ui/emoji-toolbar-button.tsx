@@ -24,6 +24,8 @@ import { ToolbarButton } from "./toolbar";
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 
+
+
 const emojiCategoryIcons: Record<
   EmojiCategoryList,
   {
@@ -118,6 +120,8 @@ const emojiSearchIcons = {
   delete: <XIcon className="size-4 text-current" />,
   loupe: <SearchIcon className="size-4 text-current" />,
 };
+
+
 
 const EmojiPopover = ({ children, control, isOpen, setIsOpen }: { children: React.ReactNode;
   control: React.ReactNode;
@@ -511,6 +515,8 @@ const EmojiPickerContent = ({
     </div>
   );
 };
+
+
 
 const EmojiButton = React.memo(({
   emoji,

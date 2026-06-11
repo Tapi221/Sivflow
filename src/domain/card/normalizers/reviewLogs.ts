@@ -3,11 +3,15 @@ import { asRecord, pick } from "@/shared/lib/records";
 
 
 
+
+
 type NormalizedReviewLog = { reviewedAt: string;
   rating: 1 | 2 | 3 | 4;
   resistanceScore: number;
   durationMinutes: number | null;
 };
+
+
 
 
 
@@ -96,7 +100,11 @@ const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
 
 
 
+
+
 export { normalizeReviewLogs };
+
+
 
 
 export type { NormalizedReviewLog };

@@ -6,6 +6,8 @@ import { RatingCountTiles } from "./RatingCountTiles";
 
 
 
+
+
 type Tile = { rating: PracticeFilterRating; score: number; Icon: unknown; };
 type Props = {
   ratingTiles: Tile[];
@@ -17,6 +19,8 @@ type Props = {
   onBackToSchedule: () => void;
   compact?: boolean;
 };
+
+
 
 
 
@@ -132,6 +136,8 @@ const StudyComplete = ({ ratingTiles, ratingCounts, isPracticeFeatureEnabled, re
     </div>
   );
 };
+
+
 
 
 

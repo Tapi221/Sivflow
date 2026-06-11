@@ -2,6 +2,8 @@ import { getImageBlob } from "./imageFileStore";
 
 
 
+
+
 type BlobScopeOptions = {
   userId?: string | null;
 };
@@ -20,10 +22,14 @@ interface BlobCacheStats { cacheSize: number;
 
 
 
+
+
 const MAX_CACHE_ENTRIES = 80;
 const cache = new Map<string, CacheEntry>();
 let _evictCount = 0;
 let _revokeCount = 0;
+
+
 
 
 
@@ -166,7 +172,11 @@ const getBlobCacheStats = () => {
 
 
 
+
+
 export { getOrCreateImageBlobUrl, removeImageBlobUrl, pinImageBlobUrl, unpinImageBlobUrl, getBlobCacheStats };
+
+
 
 
 export type { BlobCacheStats };

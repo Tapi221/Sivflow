@@ -5,6 +5,8 @@ import { SharedCardAttachments } from "./SharedCardAttachments";
 
 
 
+
+
 type CardFaceWithAttachmentsProps = Readonly<{
   faceNode: React.ReactNode;
   attachments?: CardFaceAttachments | null;
@@ -13,9 +15,13 @@ type CardFaceWithAttachmentsProps = Readonly<{
 
 
 
+
+
 const CardFaceWithAttachments = ({ faceNode, attachments, className }: CardFaceWithAttachmentsProps) => {
   return (<div className={cn("w-full min-w-0", className)}> {faceNode} <SharedCardAttachments attachments={attachments} /> </div>);
 };
+
+
 
 
 

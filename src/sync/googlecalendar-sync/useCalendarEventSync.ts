@@ -7,6 +7,8 @@ import { useGoogleCalendarPushSync } from "./useGoogleCalendarPushSync";
 
 
 
+
+
 type GoogleCalendarSlice = {
   selectedCalendarIds: Set<string>;
   forceSyncRange?: (options: {
@@ -19,7 +21,11 @@ type UseCalendarEventSyncOptions = BuildCalendarEventSyncRangeOptions & { google
 
 
 
+
+
 const PREFETCH_SYNC_DELAY_MS = 250;
+
+
 
 
 
@@ -116,7 +122,11 @@ const useCalendarEventSync = ({ selectedViewMode, visibleDays, monthTitleDate, w
 
 
 
+
+
 export { useCalendarEventSync };
+
+
 
 
 export type { UseCalendarEventSyncOptions };

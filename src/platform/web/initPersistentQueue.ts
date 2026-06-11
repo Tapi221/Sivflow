@@ -3,9 +3,13 @@ import { bindPersistentQueueAutoProcessing } from "./bindPersistentQueueAutoProc
 
 
 
+
+
 const initPersistentQueue = (): void => {
   bindPersistentQueueAutoProcessing(persistentQueue);
 };
+
+
 
 
 

@@ -2,7 +2,11 @@ import type { CalendarWeekStartDay } from "./calendar.types";
 
 
 
+
+
 type CalendarWeekStartsOn = 0 | 1;
+
+
 
 
 
@@ -12,6 +16,8 @@ const rotateCalendarWeekdayLabels = <T>(weekdayLabels: readonly T[], weekStartDa
 
   return [...weekdayLabels.slice(1), ...weekdayLabels.slice(0, 1)];
 };
+
+
 
 
 

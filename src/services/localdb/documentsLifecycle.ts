@@ -4,6 +4,8 @@ import { safeRevokeBlobUrl } from "./blobUrl";
 
 
 
+
+
 type DocumentRecord = {
   id?: string;
   localFileId?: string;
@@ -25,6 +27,8 @@ type DocumentsTable = {
   };
 };
 type DocDbCtx = { documents: DocumentsTable; userId?: string; };
+
+
 
 
 
@@ -170,7 +174,11 @@ const cleanupBeforeDocumentSoftDelete = async (db: DocDbCtx, id: string) => {
 
 
 
+
+
 export { cleanupBeforeDocumentUpdate, cleanupBeforeDocumentDelete, cleanupBeforeDocumentSoftDelete };
+
+
 
 
 export type { DocDbCtx };

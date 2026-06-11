@@ -4,8 +4,12 @@ import { validateMfCardFile } from "@/features/cardFile/domain/mfCardGuards";
 
 
 
+
+
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
+
+
 
 
 
@@ -39,6 +43,8 @@ const decodeMfCardFile = (buffer: ArrayBuffer): MfCardFileV1 => {
 
   return validation.value;
 };
+
+
 
 
 

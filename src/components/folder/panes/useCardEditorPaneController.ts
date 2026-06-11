@@ -20,6 +20,8 @@ import { applyEditingDraftPatch, buildCardsById, createMetaPanelActions, resolve
 
 
 
+
+
 type UseCardsResult = {
   cards: Card[];
   updateCard: (cardId: string, data: unknown) => void | Promise<void>;
@@ -35,6 +37,8 @@ type UseCardEditorPaneControllerParams = {
   onSelectCardId?: (cardId: string) => void;
   settingsOverride?: Partial<UserSettings> | null;
 };
+
+
 
 
 
@@ -257,6 +261,8 @@ const useCardEditorPaneController = ({ selectedCardId, folderId, cardSetId, card
     actions,
   };
 };
+
+
 
 
 

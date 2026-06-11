@@ -4,10 +4,14 @@ import { SettingsWorkspaceScreen } from "./SettingsWorkspaceScreen";
 
 
 
+
+
 type SettingsWorkspaceDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
+
+
 
 
 
@@ -27,6 +31,8 @@ const SettingsWorkspaceDialog = ({ open, onOpenChange }: SettingsWorkspaceDialog
     </div>
   );
 };
+
+
 
 
 

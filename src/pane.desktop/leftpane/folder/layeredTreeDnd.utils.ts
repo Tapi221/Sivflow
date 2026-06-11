@@ -4,11 +4,17 @@ import type { LayeredTreeDragState, LayeredTreeDropInstruction, LayeredTreeDropP
 
 
 
+
+
 type LayeredTreeEventDropTarget = { id: string; rowElement: HTMLElement; };
 
 
 
+
+
 const LAYERED_TREE_ITEM_ID_ATTRIBUTES = [LAYERED_TREE_FOLDER_ID_ATTRIBUTE, LAYERED_TREE_TAG_ID_ATTRIBUTE] as const;
+
+
 
 
 
@@ -133,6 +139,8 @@ const resolveLayeredTreeEventDropTarget = (event: ReactDragEvent<HTMLElement>, i
 };
 const getLayeredTreeDropPositionFromTarget = (event: ReactDragEvent<HTMLElement>, target: LayeredTreeEventDropTarget): LayeredTreeDropPosition => getLayeredTreeDropPositionForRow(event, target.rowElement);
 const isLayeredTreeDropInstructionEqual = (left: LayeredTreeDropInstruction | null, right: LayeredTreeDropInstruction | null): boolean => left?.sourceId === right?.sourceId && left?.targetId === right?.targetId && left?.position === right?.position && left?.parentId === right?.parentId;
+
+
 
 
 

@@ -9,6 +9,8 @@ import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoo
 
 
 
+
+
 type GoogleCalendarAccess = { accessToken: string;
   accountEmail: string | null;
   accountName: string | null;
@@ -43,6 +45,8 @@ type GoogleOAuthCallbackLike = {
 
 
 
+
+
 const GOOGLE_SIGN_IN_SCOPE_PARAM = "openid email profile";
 const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 const GOOGLE_CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
@@ -68,6 +72,8 @@ let pendingGoogleCalendarServerCodeVerifier: string | null = null;
 const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCalendarServerCodeVerifier;
 const requestConnectedServiceAccessToken = requestCalendarAccessToken;
 const refreshConnectedServiceAccessToken = refreshCalendarAccessToken;
+
+
 
 
 
@@ -380,7 +386,11 @@ const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: stri
 
 
 
+
+
 export { GOOGLE_CONNECTED_SERVICE_SCOPES, consumeGoogleCalendarServerCodeVerifier, consumeGoogleConnectedServiceServerCodeVerifier, requestGoogleSignInServerCode, requestGoogleCalendarServerCode, requestCalendarAccessToken, requestConnectedServiceAccessToken, refreshCalendarAccessToken, refreshConnectedServiceAccessToken };
+
+
 
 
 export type { GoogleCalendarAccess, GoogleConnectedServiceAccess };

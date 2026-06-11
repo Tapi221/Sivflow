@@ -3,11 +3,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 
 
+
+
 type UseCardSetViewRouteStateSyncOptions = {
   cardSetId: string | null;
   currentIndex: number;
   currentCardId: string | null;
 };
+
+
 
 
 
@@ -65,6 +69,8 @@ const useCardSetViewRouteStateSync = ({ cardSetId, currentIndex, currentCardId }
     navigate(nextLocation, { replace: true });
   }, [navigate, nextLocation]);
 };
+
+
 
 
 

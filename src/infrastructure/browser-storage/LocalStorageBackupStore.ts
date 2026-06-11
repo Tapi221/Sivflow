@@ -3,7 +3,11 @@ import type { AutoBackupRecord, BackupStorePort } from "@/application/ports/Back
 
 
 
+
+
 const localStorageBackupStore: BackupStorePort = { isAvailable: isStorageAvailable, loadBackups, saveBackups, saveLastBackupAt, getLastBackupAt, clearBackups };
+
+
 
 
 
@@ -118,6 +122,8 @@ const clearBackups = (): void => {
     // noop
   }
 };
+
+
 
 
 

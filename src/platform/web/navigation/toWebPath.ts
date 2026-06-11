@@ -5,7 +5,11 @@ type LegacyDestination = {
 
 
 
+
+
 const SCHEDULE_PATH = "/schedule";
+
+
 
 
 
@@ -18,6 +22,8 @@ const createPageUrl = (_page: string | LegacyDestination): string => {
 const createAppDestination = (_screen: string, params?: LegacyDestinationParams): LegacyDestination => {
   return { params };
 };
+
+
 
 
 

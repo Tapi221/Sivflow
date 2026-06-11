@@ -9,5 +9,7 @@ const denormalizeFolderForStorage = <T extends Record<string, unknown>>(folder: 
 
 
 
+
+
 export { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
 export { denormalizeCardForStorage, denormalizeFolderForStorage };

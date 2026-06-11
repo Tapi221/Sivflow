@@ -6,7 +6,11 @@ import { defineSchema } from "./schema";
 
 
 
+
+
 type MigratableDexie = Dexie & Record<MigratableTableName, Dexie.Table<unknown, unknown>>;
+
+
 
 
 
@@ -14,7 +18,11 @@ const MIGRATABLE_TABLE_NAMES = ["folders", "cardSets", "cards", "documents", "no
 
 
 
+
+
 type MigratableTableName = (typeof MIGRATABLE_TABLE_NAMES)[number];
+
+
 
 
 
@@ -133,6 +141,8 @@ const migrateLegacyLocalDbBrandIfNeeded = async (userId: string, destinationData
     destination.close();
   }
 };
+
+
 
 
 

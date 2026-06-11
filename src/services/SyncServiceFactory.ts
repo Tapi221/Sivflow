@@ -11,11 +11,15 @@ import { SyncServiceV2 } from "./SyncServiceV2";
 
 
 
+
+
 type SyncServiceInternals = {
   cloudAdapter: ICloudSyncAdapter;
   localDB: LocalDBLike;
   userId: string;
 };
+
+
 
 
 
@@ -143,6 +147,8 @@ class SyncServiceFactory { private static instances = new Map<string, ISyncServi
     SyncServiceFactory.pendingInstances.clear();
   };
 }
+
+
 
 
 

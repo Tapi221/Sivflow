@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 const FileElementStatic = (props: SlateElementProps<TFileElement>) => {
   const { name, url } = props.element;
   const suggestionData = (
@@ -45,6 +47,8 @@ const FileElementStatic = (props: SlateElementProps<TFileElement>) => {
     </SlateElement>
   );
 };
+
+
 
 
 

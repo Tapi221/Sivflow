@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface SidebarTreeRowProps {
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
@@ -21,6 +23,8 @@ interface SidebarTreeRowProps {
   onContextMenuSelect?: () => void;
   children: React.ReactNode;
 }
+
+
 
 
 
@@ -138,6 +142,8 @@ const SidebarTreeRow = ({ menuOpen, onMenuOpenChange, menuActions = [], hasConte
     </div>
   );
 };
+
+
 
 
 

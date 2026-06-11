@@ -4,7 +4,11 @@ import { initServiceWorkerLifecycle } from "./initServiceWorkerLifecycle";
 
 
 
+
+
 let started = false;
+
+
 
 
 
@@ -16,6 +20,8 @@ const initAppRuntime = () => {
   initGlobalChunkRecovery();
   initServiceWorkerLifecycle();
 };
+
+
 
 
 

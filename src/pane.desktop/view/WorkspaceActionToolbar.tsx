@@ -5,7 +5,11 @@ import { QuickQaChatDialog } from "./QuickQaChatDialog";
 
 
 
+
+
 type Props = { className?: string; style?: CSSProperties; };
+
+
 
 
 
@@ -24,6 +28,8 @@ const WorkspaceActionToolbar = ({ className, style }: Props) => {
     </>
   );
 };
+
+
 
 
 

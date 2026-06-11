@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "./inline-combobox";
 
+
+
 const onSelectItem = getMentionOnSelectItem();
 
 const MENTIONABLES = [
@@ -98,6 +100,8 @@ const MENTIONABLES = [
   { key: "48", text: "Brendol Hux" },
   { key: "49", text: "BT-1" },
 ];
+
+
 
 const MentionElement = (props: PlateElementProps<TMentionElement> & { prefix?: string;
 }) => {
@@ -183,5 +187,7 @@ const MentionInputElement = (props: PlateElementProps<TComboboxInputElement>) =>
     </PlateElement>
   );
 };
+
+
 
 export { MentionElement, MentionInputElement };

@@ -22,9 +22,13 @@ type InkDocument = { version: number;
 
 
 
+
+
 const INK_DOCUMENT_VERSION = 2;
 const INK_PAPER_W = 1000;
 const INK_PAPER_H = 1414;
+
+
 
 
 
@@ -116,7 +120,11 @@ const cloneInkDocument = (doc: InkDocument): InkDocument => ({ version: doc.vers
 
 
 
+
+
 export { INK_DOCUMENT_VERSION, INK_PAPER_W, INK_PAPER_H, createEmptyInkDocument, normalizeInkDocument, cloneInkDocument };
+
+
 
 
 export type { InkSide, InkTool, InkEditTool, InkPoint, InkStroke, InkDocument };

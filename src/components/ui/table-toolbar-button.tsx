@@ -18,6 +18,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 
 import { ToolbarButton } from "./toolbar";
 
+
+
 const TablePicker = () => {
   const { editor, tf } = useEditorPlugin(TablePlugin);
 
@@ -245,5 +247,7 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
+
+
 
 export { TableToolbarButton };

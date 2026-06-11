@@ -2,15 +2,21 @@ import { useCardSetViewQuery } from "@/features/cardsetview/application/queries/
 
 
 
+
+
 interface UseCardSetViewDataOptions {
   cardSetId: string | null;
 }
 
 
 
+
+
 const useCardSetViewData = ({ cardSetId }: UseCardSetViewDataOptions) => {
   return useCardSetViewQuery({ cardSetId });
 };
+
+
 
 
 

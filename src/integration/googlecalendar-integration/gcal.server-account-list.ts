@@ -6,6 +6,8 @@ import { buildTokenExpiry, readStoredAccounts, writeStoredAccounts } from "./gca
 
 
 
+
+
 type ServerStoredGoogleCalendarAccount = { accountId: string;
   email: string | null;
   name: string | null;
@@ -17,7 +19,11 @@ type ListGoogleCalendarAccountsOutput = {
 
 
 
+
+
 const listGoogleCalendarAccountsCallable = httpsCallable<undefined, ListGoogleCalendarAccountsOutput>(functionsClient, "listGoogleCalendarAccounts");
+
+
 
 
 
@@ -77,7 +83,11 @@ const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<number> => {
 
 
 
+
+
 export { listServerStoredGoogleCalendarAccounts, hydrateServerStoredGoogleCalendarAccounts };
+
+
 
 
 export type { ServerStoredGoogleCalendarAccount };

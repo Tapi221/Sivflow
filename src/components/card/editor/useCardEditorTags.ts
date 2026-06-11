@@ -8,6 +8,8 @@ import type { TagRecord } from "@/services/localdb/types";
 
 
 
+
+
 type Tag = TagRecord;
 type UseCardEditorTagsResult = {
   tags: Tag[];
@@ -21,7 +23,11 @@ type TagWriteCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
 
 
 
+
+
 const DEFAULT_TAG_COLOR_KEY: TagColorKey = TAG_COLOR_KEYS[0];
+
+
 
 
 
@@ -110,6 +116,8 @@ const useCardEditorTags = (): UseCardEditorTagsResult => {
     addTag,
   };
 };
+
+
 
 
 

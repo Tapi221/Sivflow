@@ -2,6 +2,8 @@ import { getLocalAiSettings } from "./localAiSettings";
 
 
 
+
+
 type GenerateOllamaAnswerInput = { question: string;
   model?: string;
 };
@@ -17,7 +19,11 @@ type TestOllamaConnectionResult = { ok: boolean;
 
 
 
+
+
 const OLLAMA_REQUEST_TIMEOUT_MS = 60_000;
+
+
 
 
 
@@ -133,7 +139,11 @@ const testOllamaConnection = async (): Promise<TestOllamaConnectionResult> => {
 
 
 
+
+
 export { generateOllamaAnswer, testOllamaConnection };
+
+
 
 
 export type { GenerateOllamaAnswerInput, GenerateOllamaAnswerResult, TestOllamaConnectionResult };

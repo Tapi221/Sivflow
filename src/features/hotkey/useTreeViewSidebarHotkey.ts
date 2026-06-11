@@ -3,9 +3,13 @@ import { isPrimaryShortcut, isTypingTarget } from "./hotkeyGuards";
 
 
 
+
+
 type UseTreeViewSidebarHotkeyParams = {
   onToggle: () => void;
 };
+
+
 
 
 
@@ -27,6 +31,8 @@ const useTreeViewSidebarHotkey = ({ onToggle }: UseTreeViewSidebarHotkeyParams) 
     };
   }, [onToggle]);
 };
+
+
 
 
 

@@ -7,6 +7,8 @@ import { createDefaultExplorerRouteState, resolveRouteTabBySection, WORKSPACE_DE
 
 
 
+
+
 type OpenExplorerTabParams = {
   id?: WorkspaceExplorerTab["id"];
   title?: string;
@@ -45,6 +47,8 @@ type WorkspaceTabsState = {
   updateTabTitle: (tabId: WorkspaceTab["id"], title: string) => void;
 };
 type WorkspaceTabsPersistedState = Pick<WorkspaceTabsState, "tabs" | "activeTabId" | "lastOpenedTabId">;
+
+
 
 
 
@@ -332,6 +336,8 @@ updateTabTitle: (tabId, title) => {
 
 
 
+
+
 const createRandomIdSegment = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
@@ -461,6 +467,8 @@ const createRouteTabFromSection = (
 ): WorkspaceRouteTab => {
   return { ...resolveRouteTabBySection(sectionKey) };
 };
+
+
 
 
 

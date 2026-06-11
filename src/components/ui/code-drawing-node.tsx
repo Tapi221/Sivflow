@@ -22,6 +22,8 @@ import { Popover, PopoverAnchor, PopoverContent } from "./popover";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 
+
+
 const createDebouncedCodeDrawingRenderer = (setImage: React.Dispatch<React.SetStateAction<string>>, setLoading: React.Dispatch<React.SetStateAction<boolean>>, setError: React.Dispatch<React.SetStateAction<string | null>>) => {
   let lastRequestId = 0;
 
@@ -101,6 +103,8 @@ const useCodeDrawingElement = ({ element }: { element: TCodeDrawingElement; }) =
     removeNode,
   };
 };
+
+
 
 const CodeDrawingToolbar = ({
   drawingType,
@@ -557,5 +561,7 @@ const CodeDrawingElement = (props: PlateElementProps<TCodeDrawingElement>) => {
     </Popover>
   );
 };
+
+
 
 export { CodeDrawingElement };

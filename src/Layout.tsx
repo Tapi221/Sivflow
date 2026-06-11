@@ -15,6 +15,8 @@ import { usePresentationTarget } from "@/platform/presentation/usePresentationTa
 
 
 
+
+
 const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -137,6 +139,8 @@ const Layout = () => {
     </div>
   );
 };
+
+
 
 
 

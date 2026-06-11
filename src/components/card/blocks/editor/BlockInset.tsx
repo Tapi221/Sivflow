@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type BlockInsetVariant = "image" | "code" | "question";
 interface BlockInsetProps {
   variant: BlockInsetVariant;
@@ -12,9 +14,13 @@ interface BlockInsetProps {
 
 
 
+
+
 const BlockInset = ({ variant, className, children }: BlockInsetProps) => {
   return (<div className={cn("block-inset", `block-inset--${variant}`, className)}> {children} </div>);
 };
+
+
 
 
 

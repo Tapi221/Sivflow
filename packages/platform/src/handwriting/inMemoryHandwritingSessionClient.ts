@@ -3,6 +3,8 @@ import type { HandwritingSessionClient, HandwritingSessionMessageHandler, Handwr
 
 
 
+
+
 type InMemoryHandwritingSessionHub = {
   clients: Set<InMemoryHandwritingSessionClient>;
 };
@@ -13,7 +15,11 @@ type InMemoryHandwritingSessionClientOptions = {
 
 
 
+
+
 const createInMemoryHandwritingSessionHub = createHub;
+
+
 
 
 
@@ -93,6 +99,8 @@ const createInMemoryHandwritingSessionClientPair = (session: HandwritingSession)
   const hub = createHub();
   return [new InMemoryHandwritingSessionClient({ session, hub }), new InMemoryHandwritingSessionClient({ session, hub })];
 };
+
+
 
 
 

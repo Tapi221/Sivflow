@@ -37,6 +37,8 @@ const currentStores = {
 
 
 
+
+
 type SchemaTarget = {
   version: (versionNumber: number) => {
     stores: (schema: typeof currentStores) => unknown;
@@ -45,9 +47,13 @@ type SchemaTarget = {
 
 
 
+
+
 const defineSchema = (db: SchemaTarget): void => {
   db.version(34).stores(currentStores);
 };
+
+
 
 
 

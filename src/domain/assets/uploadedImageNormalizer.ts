@@ -4,11 +4,15 @@ import { generateUploadedImageId } from "./uploadedImageFactory";
 
 
 
+
+
 type NormalizeUploadedImageOptions = { onInvalid?: "skip" | "throw";
 };
 type DenormalizeUploadedImageOptions = { case?: "camel" | "snake";
   stripUndefined?: boolean;
 };
+
+
 
 
 
@@ -247,7 +251,11 @@ options: DenormalizeUploadedImageOptions = {},
 
 
 
+
+
 export { normalizeUploadedImages, denormalizeUploadedImages };
+
+
 
 
 export type { NormalizeUploadedImageOptions, DenormalizeUploadedImageOptions };

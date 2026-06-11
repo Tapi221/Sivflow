@@ -2,11 +2,15 @@ import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integr
 
 
 
+
+
 type CachedGoogleCalendar = { id: string;
   summary: string;
   summaryOverride?: string;
   backgroundColor?: string;
 };
+
+
 
 
 
@@ -23,7 +27,11 @@ const resolveSelectedCalendarIds = (storedIds: string[], calendars: GoogleCalend
 
 
 
+
+
 export { toCachedCalendars, getDefaultCalendarIds, resolveSelectedCalendarIds };
+
+
 
 
 export type { CachedGoogleCalendar };

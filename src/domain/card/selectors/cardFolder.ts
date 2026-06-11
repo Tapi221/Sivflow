@@ -9,8 +9,12 @@ type LegacyFallbackReason = "missing-card-set-id" | "unresolved-card-set-id";
 
 
 
+
+
 const legacyFallbackCounters = new Map<LegacyFallbackReason, number>();
 const warnedFallbackCardKeys = new Set<string>();
+
+
 
 
 
@@ -102,6 +106,8 @@ const filterCardsByFolderId = <T extends CardLike>(cards: readonly T[], folderId
     (card) => resolveCardFolderIdStrict(card, cardSetById) === targetFolderId,
   );
 };
+
+
 
 
 

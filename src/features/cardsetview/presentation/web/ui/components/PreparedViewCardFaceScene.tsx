@@ -13,6 +13,8 @@ import { CardFaceScene } from "./CardFaceScene";
 
 
 
+
+
 type PreparedViewCardFaceSceneProps = Readonly<{ card: Card;
   sharedDerived: FlashcardSharedDerivedSnapshot;
   sideDerived: FlashcardSideDerivedSnapshot;
@@ -33,6 +35,8 @@ type PreparedViewCardFaceSceneProps = Readonly<{ card: Card;
 
 
 
+
+
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
   cardId: card.cardId,
@@ -46,6 +50,8 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkQuestion: card.front.ink ?? null,
   inkAnswer: card.back.ink ?? null,
 });
+
+
 
 
 
@@ -227,7 +233,11 @@ const PreparedViewCardFaceScene = ({ card, sharedDerived, sideDerived, displayMo
 
 
 
+
+
 export { PreparedViewCardFaceScene };
+
+
 
 
 export type { PreparedViewCardFaceSceneProps };

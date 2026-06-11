@@ -8,9 +8,13 @@ import { getPushDocumentRef, requireCloudSyncFirestore } from "./cloudSyncFirest
 
 
 
+
+
 type SyncChangeWithOperation = SyncChange & {
   operationType?: unknown;
 };
+
+
 
 
 
@@ -131,6 +135,8 @@ const pushCloudSyncBatch = async (userId: string, changes: SyncChange[]): Promis
     };
   }
 };
+
+
 
 
 

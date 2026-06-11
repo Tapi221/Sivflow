@@ -7,6 +7,8 @@ import { overlayGlassPillClassName } from "./overlaySurfaceClassNames";
 
 
 
+
+
 interface CardSyncStatusPillProps {
   lastSyncedAtMs: number | null;
   hasError?: boolean;
@@ -15,6 +17,8 @@ interface CardSyncStatusPillProps {
   onRetry?: () => Promise<void> | void;
   className?: string;
 }
+
+
 
 
 
@@ -56,6 +60,8 @@ const CardSyncStatusPill = ({ lastSyncedAtMs, hasError = false, isRetrying = fal
     </div>
   );
 };
+
+
 
 
 

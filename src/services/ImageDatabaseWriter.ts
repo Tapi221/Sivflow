@@ -4,6 +4,8 @@ import type { UploadedImage } from "@/types";
 
 
 
+
+
 const ImageDatabaseWriter = class {
   saveToIndexedDB = async (image: UploadedImage): Promise<void> => saveImageToIndexedDb(image);
 
@@ -12,6 +14,8 @@ const ImageDatabaseWriter = class {
   getFromIndexedDB = async (imageId: string): Promise<UploadedImage | null> => getImageFromIndexedDb(imageId);
 };
 const imageDB = new ImageDatabaseWriter();
+
+
 
 
 

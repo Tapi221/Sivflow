@@ -8,6 +8,8 @@ import { persist } from "zustand/middleware";
 
 
 
+
+
 type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";
 type TagMatchMode = "any" | "all";
@@ -40,6 +42,8 @@ interface ExplorerState { tagFilter: string[];
   setExplorerLayoutMode: (mode: ExplorerLayoutMode) => void;
   togglePinnedFolder: (folderId: string) => void;
 }
+
+
 
 
 
@@ -160,6 +164,8 @@ togglePinnedFolder: (folderId) =>
 
 
 
+
+
 const normalizeTagFilter = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
   return value.filter((entry): entry is string => typeof entry === "string");
@@ -245,7 +251,11 @@ const createDefaultState = (): Pick<
 
 
 
+
+
 export { useExplorerStore };
+
+
 
 
 export type { ExplorerLayoutMode, ExplorerState };

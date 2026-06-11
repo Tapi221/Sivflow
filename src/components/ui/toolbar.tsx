@@ -20,6 +20,8 @@ import { Separator } from "./separator";
 
 import { Tooltip, TooltipTrigger } from "./tooltip";
 
+
+
 type ToolbarButtonProps = {
   isDropdown?: boolean;
   pressed?: boolean;
@@ -47,6 +49,8 @@ type TooltipProps<T extends React.ElementType> = {
   >;
   tooltipTriggerProps?: React.ComponentPropsWithoutRef<typeof TooltipTrigger>;
 } & React.ComponentProps<T>;
+
+
 
 // From toggleVariants
 const toolbarButtonVariants = cva(
@@ -96,6 +100,8 @@ const dropdownArrowVariants = cva(
   },
 );
 
+
+
 const withTooltip = <T extends React.ElementType,>(Component: T) => {
   return ({
     tooltip,
@@ -127,6 +133,8 @@ const withTooltip = <T extends React.ElementType,>(Component: T) => {
     return component;
   };
 };
+
+
 
 const Toolbar = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Root>) => {
   return (<ToolbarPrimitive.Root className={cn("relative flex select-none items-center", className)} {...props} />);
@@ -197,5 +205,7 @@ const ToolbarSplitButton = ({ className, ...props }: React.ComponentPropsWithout
 const ToolbarMenuGroup = ({ children, className, label, ...props }: React.ComponentProps<typeof DropdownMenuRadioGroup> & { label?: string; }) => {
   return (<> <DropdownMenuSeparator className={cn("hidden", "mb-0 shrink-0 peer-has-[[role=menuitem]]/menu-group:block peer-has-[[role=menuitemradio]]/menu-group:block peer-has-[[role=option]]/menu-group:block")} /> <DropdownMenuRadioGroup {...props} className={cn("hidden", "peer/menu-group group/menu-group my-1.5 has-[[role=menuitem]]:block has-[[role=menuitemradio]]:block has-[[role=option]]:block", className)} > {label && (<DropdownMenuLabel className="select-none font-semibold text-muted-foreground text-xs"> {label} </DropdownMenuLabel>)} {children} </DropdownMenuRadioGroup> </>);
 };
+
+
 
 export { Toolbar, ToolbarToggleGroup, ToolbarLink, ToolbarSeparator, ToolbarButton, ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary, ToolbarToggleItem, ToolbarGroup, ToolbarMenuGroup };

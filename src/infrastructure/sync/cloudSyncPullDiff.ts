@@ -8,6 +8,8 @@ import { getPullableCollectionRef, getUserSettingsRef, requireCloudSyncFirestore
 
 
 
+
+
 type PullDiffChange = SyncChange & {
   type: PullableEntityType | "userSetting";
   id: string;
@@ -17,7 +19,11 @@ type PullDiffChange = SyncChange & {
 
 
 
+
+
 const PAGE_SIZE = 500;
+
+
 
 
 
@@ -129,6 +135,8 @@ const pullCloudSyncDiff = async (userId: string, since: number): Promise<{ chang
     serverTime: Timestamp.now().toMillis(),
   };
 };
+
+
 
 
 

@@ -3,6 +3,8 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 
 
 
+
+
 type CalendarEventsSnapshot = {
   scopeKey: string;
   events: GoogleCalendarEvent[];
@@ -10,7 +12,11 @@ type CalendarEventsSnapshot = {
 
 
 
+
+
 const TRANSIENT_EMPTY_CALENDAR_EVENTS_HOLD_MS = 350;
+
+
 
 
 
@@ -47,6 +53,8 @@ const useTransientEmptyCalendarEvents = (events: GoogleCalendarEvent[], scopeKey
 
   return canHoldPreviousEvents ? snapshot.events : events;
 };
+
+
 
 
 

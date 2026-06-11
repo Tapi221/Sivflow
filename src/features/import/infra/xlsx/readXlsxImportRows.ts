@@ -4,10 +4,14 @@ import { IMPORT_SHEET_NAME } from "@/features/import/domain/import.types";
 
 
 
+
+
 type ReadXlsxImportRowsResult = | { sheetName: ImportSheetName;
   rows: unknown[][];
 }
   | ImportParseResult;
+
+
 
 
 
@@ -61,7 +65,11 @@ const readXlsxImportRows = (fileBuffer: ArrayBuffer): ReadXlsxImportRowsResult =
 
 
 
+
+
 export { readXlsxImportRows };
+
+
 
 
 export type { ReadXlsxImportRowsResult };

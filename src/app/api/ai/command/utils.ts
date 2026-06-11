@@ -8,6 +8,8 @@ import type { ChatMessage } from "./types";
 
 
 
+
+
 type StructuredPromptSections = { context?: string;
   examples?: string[] | string;
   history?: string;
@@ -23,8 +25,12 @@ type StructuredPromptSections = { context?: string;
 
 
 
+
+
 const SELECTION_START = "<Selection>";
 const SELECTION_END = "</Selection>";
+
+
 
 
 
@@ -182,7 +188,11 @@ const isSingleCellSelection = (editor: SlateEditor): boolean => {
 
 
 
+
+
 export { tag, inlineTag, sections, list, buildStructuredPrompt, getTextFromMessage, formatTextFromMessages, getLastUserInstruction, addSelection, isMultiBlocks, getMarkdownWithSelection, isSelectionInTable, isSingleCellSelection };
+
+
 
 
 export type { StructuredPromptSections };

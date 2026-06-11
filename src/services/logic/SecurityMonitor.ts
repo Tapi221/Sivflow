@@ -7,6 +7,8 @@ import { getSecurityEventCatalogEntry } from "./securityEventCatalog";
 
 
 
+
+
 interface SecurityAlert {
   id: string;
   type: string;
@@ -20,6 +22,8 @@ interface SecurityState { isLocked: boolean;
   requires2FA: boolean;
   alerts: SecurityAlert[];
 }
+
+
 
 
 
@@ -203,7 +207,11 @@ class SecurityMonitor { private userId: string;
 
 
 
+
+
 export { SecurityMonitor };
+
+
 
 
 export type { SecurityState };

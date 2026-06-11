@@ -12,6 +12,8 @@ import type { ChatMessage, ToolName } from "./types";
 
 
 
+
+
 const POST = async (req: NextRequest) => {
   const { apiKey: key, ctx, messages: messagesRaw, model } = await req.json();
 
@@ -156,6 +158,8 @@ const POST = async (req: NextRequest) => {
 
 
 
+
+
 const getCommentTool = (
   editor: SlateEditor,
   {
@@ -288,6 +292,8 @@ const getTableTool = (
       });
     },
   });
+
+
 
 
 

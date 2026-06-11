@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type CardWorkspaceSurfaceVariant = "plain" | "dotted";
 type CardWorkspaceCaptureTarget = {
   side: CardSelectionCaptureSide;
@@ -52,10 +54,14 @@ type CardWorkspaceShellProps = { children: ReactNode;
 
 
 
+
+
 const WORKSPACE_SURFACE_CLASS_NAMES: Record<CardWorkspaceSurfaceVariant, string> = {
   plain: "workspace-surface--plain",
   dotted: "workspace-surface--dotted",
 };
+
+
 
 
 
@@ -95,6 +101,8 @@ const resolveCaptureSide = (target: HTMLElement, rect: SelectionCaptureRect): Ca
 const resolveTaskMessage = (values: Array<string | void>): string | null => {
   return values.find((value): value is string => typeof value === "string" && value.trim().length > 0) ?? null;
 };
+
+
 
 
 
@@ -265,7 +273,11 @@ const CardWorkspaceShell = ({ children, containerClassName, shellClassName, cont
 
 
 
+
+
 export { CardWorkspaceShell };
+
+
 
 
 export type { CardWorkspaceSurfaceVariant, CardWorkspaceWidthControlProps, CardWorkspaceShellProps };
