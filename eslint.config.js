@@ -73,17 +73,11 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
-      "@stylistic/indent": ["warn", 2],
+      "@stylistic/indent": "off",
       "@stylistic/quotes": ["error", "double", { avoidEscape: true }],
       "@stylistic/semi": ["error", "always"],
       "@stylistic/max-len": "off",
-      "@stylistic/object-curly-newline": [
-        "error",
-        {
-          ImportDeclaration: "never",
-          ExportDeclaration: "never",
-        },
-      ],
+      "@stylistic/object-curly-newline": "off",
       "no-restricted-imports": [
         "error",
         {
