@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 
 import { Button } from './button';
 
-import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem, } from '@/components/ui/inline-combobox';
+import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem, } from './inline-combobox';
 
 const NUMERIC_FOOTNOTE_QUERY = /^\d+$/;
 
