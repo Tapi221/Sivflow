@@ -7,21 +7,21 @@ type UseHotKeyParams = {
 
 const useHotKeyDesktop = ({ onToggleRightSidebar }: UseHotKeyParams) => {
   useEffect(() => {
-  const handleKeyDown = (event: KeyboardEvent) => {
-  if (event.defaultPrevented) return;
-  if (isTypingTarget(event.target)) return;
-  if (!isPrimaryShiftShortcut(event, "b")) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      if (isTypingTarget(event.target)) return;
+      if (!isPrimaryShiftShortcut(event, "b")) return;
 
-  event.preventDefault();
-  onToggleRightSidebar?.();
-};
+      event.preventDefault();
+      onToggleRightSidebar?.();
+    };
 
-window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
 
-return () => {
-  window.removeEventListener("keydown", handleKeyDown);
-};
-}, [onToggleRightSidebar]);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onToggleRightSidebar]);
 };
 
 export { useHotKeyDesktop };

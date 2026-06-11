@@ -11,65 +11,65 @@ interface CreateSnapshotDependencies { generationCounterStore: GenerationCounter
 
 const createCreateSnapshotUseCase = ({ generationCounterStore }: CreateSnapshotDependencies) => {
   const assertPersistentStorageAvailable = (operation: string): void => {
-  const status = getLocalDBRuntimeStatus();
+    const status = getLocalDBRuntimeStatus();
 
-  if (status.mode === "fallback") {
-    throw new Error(
-      `[Snapshot] ${operation} is unavailable in fallback mode. Local persistent storage is disabled for this session.`,
-    );
-  }
-};
+    if (status.mode === "fallback") {
+      throw new Error(
+        `[Snapshot] ${operation} is unavailable in fallback mode. Local persistent storage is disabled for this session.`,
+      );
+    }
+  };
 
-const execute = async (
-  userId: string,
-  options: {
-    bumpGenerationCounter?: boolean;
-  } = {},
-): Promise<AppSnapshot> => {
-  assertPersistentStorageAvailable("createSnapshot");
+  const execute = async (
+    userId: string,
+    options: {
+      bumpGenerationCounter?: boolean;
+    } = {},
+  ): Promise<AppSnapshot> => {
+    assertPersistentStorageAvailable("createSnapshot");
 
-  const db = await getLocalDb(userId);
-  const allCards = await db.getAllCards();
-  const allFolders = await db.getAllFolders();
-  const allCardSets = await db.listCardSetsByUser(userId);
-  const imageRows = await db.images.toArray();
+    const db = await getLocalDb(userId);
+    const allCards = await db.getAllCards();
+    const allFolders = await db.getAllFolders();
+    const allCardSets = await db.listCardSetsByUser(userId);
+    const imageRows = await db.images.toArray();
 
-  const cards = allCards.map(normalizeCard);
-  const cardSets = allCardSets;
-  const folders = allFolders.map(normalizeFolder);
-  const assets = imageRows
-    .map(toSnapshotAsset)
-    .filter((asset): asset is SnapshotAsset => asset !== null);
+    const cards = allCards.map(normalizeCard);
+    const cardSets = allCardSets;
+    const folders = allFolders.map(normalizeFolder);
+    const assets = imageRows
+      .map(toSnapshotAsset)
+      .filter((asset): asset is SnapshotAsset => asset !== null);
 
-  const metadata: SnapshotMetadata = {
-    schemaVersion: CURRENT_SCHEMA_VERSION,
-    generationCounter:
+    const metadata: SnapshotMetadata = {
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+      generationCounter:
         options.bumpGenerationCounter !== false
           ? generationCounterStore.increment()
           : generationCounterStore.get(),
-    createdAt: new Date().toISOString(),
-    appVersion: APP_VERSION,
-    userId,
-  };
+      createdAt: new Date().toISOString(),
+      appVersion: APP_VERSION,
+      userId,
+    };
 
-  const data: SnapshotData = {
-    cards,
-    cardSets,
-    folders,
-    reviews: [],
-    assets,
-    settings: null,
+    const data: SnapshotData = {
+      cards,
+      cardSets,
+      folders,
+      reviews: [],
+      assets,
+      settings: null,
+    };
+
+    return {
+      metadata,
+      data,
+    };
   };
 
   return {
-    metadata,
-    data,
+    execute,
   };
-};
-
-return {
-  execute,
-};
 };
 
 export { createCreateSnapshotUseCase };

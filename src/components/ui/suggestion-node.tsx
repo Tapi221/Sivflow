@@ -104,13 +104,16 @@ const SuggestionLineBreakContent = ({ children, elementType, suggestionData }: {
   if (isLineBreak) {
     if (React.isValidElement(children) && typeof children.type !== "string") return <SuggestionLineBreakElementAnchor badgeProps={{ onClick: (event) => {
       event.stopPropagation(); setOption("activeId", suggestionData.id); }, onMouseDown: (event) => {
-      event.preventDefault(); } }} className={lineBreakBadgeClassName}>{children}</SuggestionLineBreakElementAnchor>;
+      event.preventDefault(); } }} className={lineBreakBadgeClassName}
+    >{children}</SuggestionLineBreakElementAnchor>;
     if (React.isValidElement(children) && (children.type === "ol" || children.type === "ul")) return <SuggestionLineBreakElementAnchor badgeProps={{ onClick: (event) => {
       event.stopPropagation(); setOption("activeId", suggestionData.id); }, onMouseDown: (event) => {
-      event.preventDefault(); } }} className={lineBreakBadgeClassName}>{children}</SuggestionLineBreakElementAnchor>;
+      event.preventDefault(); } }} className={lineBreakBadgeClassName}
+    >{children}</SuggestionLineBreakElementAnchor>;
     return <SuggestionLineBreakAnchor badgeProps={{ onClick: (event) => {
       event.stopPropagation(); setOption("activeId", suggestionData.id); }, onMouseDown: (event) => {
-      event.preventDefault(); } }} className={lineBreakBadgeClassName}>{children}</SuggestionLineBreakAnchor>;
+      event.preventDefault(); } }} className={lineBreakBadgeClassName}
+    >{children}</SuggestionLineBreakAnchor>;
   }
 
   return <div className={getBlockSuggestionWrapperClassName({ elementType, isActive, isHover, isInsert, isRemove })} onMouseEnter={() => setOption("hoverId", suggestionData.id)} onMouseLeave={() => setOption("hoverId", null)} data-block-suggestion="true">{children}</div>;

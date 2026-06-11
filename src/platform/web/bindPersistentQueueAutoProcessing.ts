@@ -21,34 +21,34 @@ const triggerAssetQueueProcessing = (
 };
 const bindPersistentQueueAutoProcessing = (persistentQueue: AssetQueueProcessor): void => {
   if (typeof window === "undefined" || typeof document === "undefined") {
-  return;
-}
+    return;
+  }
 
-const target = window as Window & {
-  [AUTO_PROCESS_LISTENER_KEY]?: boolean;
-};
+  const target = window as Window & {
+    [AUTO_PROCESS_LISTENER_KEY]?: boolean;
+  };
 
-if (target[AUTO_PROCESS_LISTENER_KEY]) {
-  return;
-}
+  if (target[AUTO_PROCESS_LISTENER_KEY]) {
+    return;
+  }
 
-target[AUTO_PROCESS_LISTENER_KEY] = true;
+  target[AUTO_PROCESS_LISTENER_KEY] = true;
 
-window.addEventListener(
-  "load",
-  () => {
+  window.addEventListener(
+    "load",
+    () => {
+      triggerAssetQueueProcessing(persistentQueue, "load");
+    },
+    { once: true },
+  );
+
+  window.addEventListener("online", () => {
+    triggerAssetQueueProcessing(persistentQueue, "online");
+  });
+
+  if (document.readyState === "complete") {
     triggerAssetQueueProcessing(persistentQueue, "load");
-  },
-  { once: true },
-);
-
-window.addEventListener("online", () => {
-  triggerAssetQueueProcessing(persistentQueue, "online");
-});
-
-if (document.readyState === "complete") {
-  triggerAssetQueueProcessing(persistentQueue, "load");
-}
+  }
 };
 
 export { bindPersistentQueueAutoProcessing };

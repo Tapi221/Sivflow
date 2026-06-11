@@ -39,56 +39,56 @@ const readStoredOpenAiSettings = (): string | null => {
 };
 const loadOpenAiSettings = (): OpenAiSettings => {
   if (typeof window === "undefined") {
-  return DEFAULT_OPEN_AI_SETTINGS;
-}
-
-try {
-  const raw = readStoredOpenAiSettings();
-
-  if (!raw) {
     return DEFAULT_OPEN_AI_SETTINGS;
   }
 
-  const parsed: unknown = JSON.parse(raw);
+  try {
+    const raw = readStoredOpenAiSettings();
 
-  if (!isOpenAiSettings(parsed)) {
+    if (!raw) {
+      return DEFAULT_OPEN_AI_SETTINGS;
+    }
+
+    const parsed: unknown = JSON.parse(raw);
+
+    if (!isOpenAiSettings(parsed)) {
+      return DEFAULT_OPEN_AI_SETTINGS;
+    }
+
+    const migrated = parsed as OpenAiSettings & { billingMode?: AiProviderMode; };
+
+    return {
+      ...DEFAULT_OPEN_AI_SETTINGS,
+      ...migrated,
+      providerMode: migrated.providerMode ?? migrated.billingMode ?? "local-template",
+      maxOutputTokens: Math.max(1, Math.floor(migrated.maxOutputTokens)),
+    };
+  } catch {
     return DEFAULT_OPEN_AI_SETTINGS;
   }
-
-  const migrated = parsed as OpenAiSettings & { billingMode?: AiProviderMode; };
-
-  return {
-    ...DEFAULT_OPEN_AI_SETTINGS,
-    ...migrated,
-    providerMode: migrated.providerMode ?? migrated.billingMode ?? "local-template",
-    maxOutputTokens: Math.max(1, Math.floor(migrated.maxOutputTokens)),
-  };
-} catch {
-  return DEFAULT_OPEN_AI_SETTINGS;
-}
 };
 const saveOpenAiSettings = (settings: OpenAiSettings) => {
   if (typeof window === "undefined") {
-  return;
-}
+    return;
+  }
 
-const normalized: OpenAiSettings = {
-  providerMode: settings.providerMode,
-  apiKey: settings.apiKey.trim(),
-  model: settings.model.trim() || DEFAULT_OPEN_AI_SETTINGS.model,
-  maxOutputTokens: Math.max(1, Math.floor(settings.maxOutputTokens)),
-};
+  const normalized: OpenAiSettings = {
+    providerMode: settings.providerMode,
+    apiKey: settings.apiKey.trim(),
+    model: settings.model.trim() || DEFAULT_OPEN_AI_SETTINGS.model,
+    maxOutputTokens: Math.max(1, Math.floor(settings.maxOutputTokens)),
+  };
 
-window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
-window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+  window.localStorage.removeItem(LEGACY_STORAGE_KEY);
 };
 const clearOpenAiSettings = () => {
   if (typeof window === "undefined") {
-  return;
-}
+    return;
+  }
 
-window.localStorage.removeItem(STORAGE_KEY);
-window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+  window.localStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem(LEGACY_STORAGE_KEY);
 };
 
 export { DEFAULT_OPEN_AI_SETTINGS, loadOpenAiSettings, saveOpenAiSettings, clearOpenAiSettings };

@@ -13,10 +13,10 @@ const resolveDefaultCardLayoutMode = (_interactionMode: CardSetInteractionMode):
 };
 const normalizeCardLayoutMode = (value: unknown): CardLayoutMode => {
   if (value === "stack" || value === "split") {
-  return value;
-}
+    return value;
+  }
 
-return "flip";
+  return "flip";
 };
 const normalizeSplitFallbackCardLayoutMode = (value: unknown): SplitFallbackCardLayoutMode => {
   return value === "stack" ? "stack" : "flip";

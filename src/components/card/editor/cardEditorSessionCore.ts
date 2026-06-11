@@ -186,9 +186,9 @@ const extractCreatedCardId = (created: unknown) => {
 };
 const buildDraftFromCard = (card: Card, tagById: TagNameLookup): EditorDraft => {
   const legacyQuestionRows = normalizeExtraRows((card as unknown as { questionExtraRows?: unknown;
-  question_extra_rows?: unknown;
-}
-).questionExtraRows ??
+    question_extra_rows?: unknown;
+  }
+  ).questionExtraRows ??
     (
       card as unknown as {
         questionExtraRows?: unknown;
@@ -196,15 +196,15 @@ const buildDraftFromCard = (card: Card, tagById: TagNameLookup): EditorDraft => 
       }
     ).question_extra_rows ??
     0,
-);
+  );
 
-const legacyAnswerRows = normalizeExtraRows(
-  (
-    card as unknown as {
-      answerExtraRows?: unknown;
-      answer_extra_rows?: unknown;
-    }
-  ).answerExtraRows ??
+  const legacyAnswerRows = normalizeExtraRows(
+    (
+      card as unknown as {
+        answerExtraRows?: unknown;
+        answer_extra_rows?: unknown;
+      }
+    ).answerExtraRows ??
     (
       card as unknown as {
         answerExtraRows?: unknown;
@@ -212,25 +212,25 @@ const legacyAnswerRows = normalizeExtraRows(
       }
     ).answer_extra_rows ??
     0,
-);
+  );
 
-const migratedRows =
-  LEGACY_BASE_LAYOUT_ROWS + Math.max(legacyQuestionRows, legacyAnswerRows);
+  const migratedRows =
+    LEGACY_BASE_LAYOUT_ROWS + Math.max(legacyQuestionRows, legacyAnswerRows);
 
-return {
-  title: card.title ?? "",
-  tags: resolveCardTagNames(card.tagIds, tagById),
-  isDraft: card.isDraft ?? false,
-  frontBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "question")),
-  backBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "answer")),
-  frontAttachments: cloneAttachments(
-    card.front?.attachments ?? makeEmptyCardFaceAttachments(),
-  ),
-  backAttachments: cloneAttachments(card.back?.attachments ?? makeEmptyCardFaceAttachments()),
-  layoutRows: normalizeLayoutRows(
-    card.layoutRows ?? migratedRows,
-  ),
-};
+  return {
+    title: card.title ?? "",
+    tags: resolveCardTagNames(card.tagIds, tagById),
+    isDraft: card.isDraft ?? false,
+    frontBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "question")),
+    backBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "answer")),
+    frontAttachments: cloneAttachments(
+      card.front?.attachments ?? makeEmptyCardFaceAttachments(),
+    ),
+    backAttachments: cloneAttachments(card.back?.attachments ?? makeEmptyCardFaceAttachments()),
+    layoutRows: normalizeLayoutRows(
+      card.layoutRows ?? migratedRows,
+    ),
+  };
 };
 const buildPatchFromDraft = (draft: EditorDraft): CardPatch => {
   return { title: draft.title, tagIds: draft.tags, isDraft: draft.isDraft, front: { blocks: sanitizeBlocksForSave(draft.frontBlocks), attachments: sanitizeAttachmentsForSave(draft.frontAttachments) }, back: { blocks: sanitizeBlocksForSave(draft.backBlocks), attachments: sanitizeAttachmentsForSave(draft.backAttachments) }, layoutRows: normalizeLayoutRows(draft.layoutRows) };

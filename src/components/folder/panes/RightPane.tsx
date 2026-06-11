@@ -37,50 +37,50 @@ const UnsupportedDocumentPane = () => {
 };
 const RightPane = ({ selectedItem, selectedCardId, selectedDocument, selectedFolderId, selectedFolderName, folderCards, onCardUpdated, onDocumentUpdated, onRenameFolder, handlers, folderSelectionNonce }: RightPaneProps) => {
   if (selectedItem?.type === "trash") {
-  return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
-}
-
-if (selectedItem?.type === "cardSet") {
-  return <CardSetViewScreen cardSetId={selectedItem.id} />;
-}
-
-if (selectedDocument) {
-  if (selectedDocument.kind !== "pdf") {
-    return <UnsupportedDocumentPane />;
+    return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
   }
 
-  return (
-    <PdfDocumentPane
-      document={selectedDocument}
-      onDocumentUpdate={
-        onDocumentUpdated
-          ? async (updates: Partial<DocumentItem>) => {
-            await onDocumentUpdated(selectedDocument.id, updates);
-          }
-          : undefined
-      }
-    />
-  );
-}
+  if (selectedItem?.type === "cardSet") {
+    return <CardSetViewScreen cardSetId={selectedItem.id} />;
+  }
 
-if (selectedCardId) {
-  return <CardPane selectedCardId={selectedCardId} onCardUpdated={onCardUpdated} />;
-}
+  if (selectedDocument) {
+    if (selectedDocument.kind !== "pdf") {
+      return <UnsupportedDocumentPane />;
+    }
 
-if (selectedFolderId) {
-  return (
-    <FolderDashboard
-      folderId={selectedFolderId}
-      folderName={selectedFolderName}
-      cards={folderCards}
-      handlers={handlers}
-      onRenameFolder={onRenameFolder}
-      folderSelectionNonce={folderSelectionNonce}
-    />
-  );
-}
+    return (
+      <PdfDocumentPane
+        document={selectedDocument}
+        onDocumentUpdate={
+          onDocumentUpdated
+            ? async (updates: Partial<DocumentItem>) => {
+              await onDocumentUpdated(selectedDocument.id, updates);
+            }
+            : undefined
+        }
+      />
+    );
+  }
 
-return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
+  if (selectedCardId) {
+    return <CardPane selectedCardId={selectedCardId} onCardUpdated={onCardUpdated} />;
+  }
+
+  if (selectedFolderId) {
+    return (
+      <FolderDashboard
+        folderId={selectedFolderId}
+        folderName={selectedFolderName}
+        cards={folderCards}
+        handlers={handlers}
+        onRenameFolder={onRenameFolder}
+        folderSelectionNonce={folderSelectionNonce}
+      />
+    );
+  }
+
+  return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
 };
 
 export { RightPane };

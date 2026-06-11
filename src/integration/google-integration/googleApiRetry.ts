@@ -56,27 +56,27 @@ const isRetryableGoogleApiError = (error: unknown): error is GoogleApiErrorWithM
 };
 const withGoogleApiRetry = async <T>(operation: () => Promise<T>, context: GoogleApiRetryContext): Promise<T> => {
   for (let attempt = 0; attempt <= GOOGLE_API_RETRY_DELAYS_MS.length; attempt += 1) {
-  try {
-    return await operation();
-  } catch (error) {
-    if (!isRetryableGoogleApiError(error) || attempt >= GOOGLE_API_RETRY_DELAYS_MS.length) {
-      throw error;
+    try {
+      return await operation();
+    } catch (error) {
+      if (!isRetryableGoogleApiError(error) || attempt >= GOOGLE_API_RETRY_DELAYS_MS.length) {
+        throw error;
+      }
+
+      const delayMs = (error.retryAfterMs ?? GOOGLE_API_RETRY_DELAYS_MS[attempt]);
+      console.warn("[GoogleAPI] retrying transient failure", {
+        attempt: attempt + 1,
+        delayMs,
+        googleReason: error.googleReason,
+        operation: context.operation,
+        service: context.service,
+        status: error.status,
+      });
+      await sleep(delayMs);
     }
-
-    const delayMs = (error.retryAfterMs ?? GOOGLE_API_RETRY_DELAYS_MS[attempt]);
-    console.warn("[GoogleAPI] retrying transient failure", {
-      attempt: attempt + 1,
-      delayMs,
-      googleReason: error.googleReason,
-      operation: context.operation,
-      service: context.service,
-      status: error.status,
-    });
-    await sleep(delayMs);
   }
-}
 
-throw new Error("Google API retry loop exhausted");
+  throw new Error("Google API retry loop exhausted");
 };
 
 export { createGoogleApiError, withGoogleApiRetry };

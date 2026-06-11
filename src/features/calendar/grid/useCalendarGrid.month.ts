@@ -36,25 +36,25 @@ const getMonthAnnotation = (date: Date): string | null => {
 };
 const useCalendarGrid = ({ monthWeeks, selectedKey, todayKey }: Params): CalendarGridModel => {
   return useMemo(() => {
-  const weeks: CalendarWeekModel[] = monthWeeks.map((week) => {
-  return { key: week.key, days: week.days.map((day: CalendarMonthGridDay) => {
-  const key = toDateKey(day.date);
+    const weeks: CalendarWeekModel[] = monthWeeks.map((week) => {
+      return { key: week.key, days: week.days.map((day: CalendarMonthGridDay) => {
+        const key = toDateKey(day.date);
 
-  return {
-    key,
-    date: day.date,
-    dayOfMonth: day.dayOfMonth,
-    isCurrentMonth: day.isCurrentMonth,
-    isToday: key === todayKey,
-    isSelected: key === selectedKey,
-    monthAnnotation: getMonthAnnotation(day.date),
-  };
-}),
-};
-});
+        return {
+          key,
+          date: day.date,
+          dayOfMonth: day.dayOfMonth,
+          isCurrentMonth: day.isCurrentMonth,
+          isToday: key === todayKey,
+          isSelected: key === selectedKey,
+          monthAnnotation: getMonthAnnotation(day.date),
+        };
+      }),
+      };
+    });
 
-return { weeks };
-}, [monthWeeks, selectedKey, todayKey]);
+    return { weeks };
+  }, [monthWeeks, selectedKey, todayKey]);
 };
 
 export { useCalendarGrid };

@@ -206,44 +206,44 @@ const migrateLegacyScopedZoomPreference = ({
 };
 const getCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope) => {
   if (!scope.cardSetId) {
-  return undefined;
-}
-
-const store = readStore();
-const storedZoomPercent = readStoredZoomPercent({ store, scope });
-
-if (storedZoomPercent != null) {
-  if (
-    canResolveLegacyScopedKey(scope) &&
-      buildCardSetViewZoomPreferenceScopeKey(scope) !==
-      buildLegacyZoomPreferenceScopeKey(scope)
-  ) {
-    migrateLegacyScopedZoomPreference({
-      store,
-      scope,
-      zoomPercent: storedZoomPercent,
-    });
+    return undefined;
   }
 
-  return storedZoomPercent;
-}
+  const store = readStore();
+  const storedZoomPercent = readStoredZoomPercent({ store, scope });
 
-return readLegacyCardSetValue(scope.cardSetId);
+  if (storedZoomPercent != null) {
+    if (
+      canResolveLegacyScopedKey(scope) &&
+      buildCardSetViewZoomPreferenceScopeKey(scope) !==
+      buildLegacyZoomPreferenceScopeKey(scope)
+    ) {
+      migrateLegacyScopedZoomPreference({
+        store,
+        scope,
+        zoomPercent: storedZoomPercent,
+      });
+    }
+
+    return storedZoomPercent;
+  }
+
+  return readLegacyCardSetValue(scope.cardSetId);
 };
 const setCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope, zoomPercent: number) => {
   if (!scope.cardSetId) {
-  return;
-}
+    return;
+  }
 
-const safeZoomPercent =
-  Number.isFinite(zoomPercent) && zoomPercent >= 0 && zoomPercent <= 100
-    ? zoomPercent
-    : 0;
+  const safeZoomPercent =
+    Number.isFinite(zoomPercent) && zoomPercent >= 0 && zoomPercent <= 100
+      ? zoomPercent
+      : 0;
 
-const store = readStore();
-store.byScope[buildCardSetViewZoomPreferenceScopeKey(scope)] =
-  safeZoomPercent;
-writeStore(store);
+  const store = readStore();
+  store.byScope[buildCardSetViewZoomPreferenceScopeKey(scope)] =
+    safeZoomPercent;
+  writeStore(store);
 };
 
 export { buildCardSetViewZoomPreferenceScopeKey, getCardSetViewZoomPreference, setCardSetViewZoomPreference };

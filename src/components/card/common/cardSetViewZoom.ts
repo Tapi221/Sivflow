@@ -31,9 +31,9 @@ const buildTypographyStyle = ({ fontSizePx, lineHeightPx, zoom }: { fontSizePx: 
 };
 const mergeStyles = (...styles: Array<CSSProperties | undefined>): CSSProperties => {
   return styles.reduce<CSSProperties>((acc, style) => {
-  if (!style) return acc;
-  return { ...acc, ...style };
-}, {});
+    if (!style) return acc;
+    return { ...acc, ...style };
+  }, {});
 };
 
 export { normalizeCardSetViewZoom, scaleTypographyValuePx, scaleTypographyNumberPx, buildTypographyStyle, mergeStyles };

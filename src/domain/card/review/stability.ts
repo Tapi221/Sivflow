@@ -12,20 +12,20 @@ const mapLegacyLevelToStability = (level: number): number => {
 };
 const normalizeMemoryStability = (value?: number | null, legacyLevel?: number | null): number => {
   if (typeof value === "number" && Number.isFinite(value)) {
-  if (value > 0 && value <= 1) {
-  return clampStability(value);
-}
+    if (value > 0 && value <= 1) {
+      return clampStability(value);
+    }
 
-if (value > 1 && value <= 100) {
-  return clampStability((value - 5) / 95);
-}
-}
+    if (value > 1 && value <= 100) {
+      return clampStability((value - 5) / 95);
+    }
+  }
 
-if (typeof legacyLevel === "number" && Number.isFinite(legacyLevel)) {
-  return mapLegacyLevelToStability(legacyLevel);
-}
+  if (typeof legacyLevel === "number" && Number.isFinite(legacyLevel)) {
+    return mapLegacyLevelToStability(legacyLevel);
+  }
 
-return 0;
+  return 0;
 };
 
 export { normalizeMemoryStability };

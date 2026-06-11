@@ -134,57 +134,57 @@ const buildFolderMenuActions = ({ onCreateSubfolder, onCreateCardSet, onRename, 
  */
 const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCreateCard = false, canAddDocuments = false, canBulkImport = false, onCreateRootFolder, onCreateCardSet, onCreateCard, onAddDocument, onBulkImport }: BuildExplorerCreateMenuActionsParams): MenuAction[] => {
   const actions: MenuAction[] = [{ id: "create-root-folder", label: "新規プロジェクト", icon: <CreateFolderIcon />, onSelect: () => {
-  void onCreateRootFolder?.();
-},
-},
-];
+    void onCreateRootFolder?.();
+  },
+  },
+  ];
 
-if (canCreateCardSet) {
-  actions.push({
-    id: "create-card-set",
-    label: "新規カードセット",
-    icon: <CreateCardSetIcon />,
-    onSelect: () => {
-      void onCreateCardSet?.();
-    },
-  });
-}
+  if (canCreateCardSet) {
+    actions.push({
+      id: "create-card-set",
+      label: "新規カードセット",
+      icon: <CreateCardSetIcon />,
+      onSelect: () => {
+        void onCreateCardSet?.();
+      },
+    });
+  }
 
-if (canCreateCard) {
-  actions.push({
-    id: "create-card",
-    label: "新規暗記カード",
-    icon: <CreateCardIcon />,
-    onSelect: () => {
-      void onCreateCard?.();
-    },
-  });
-}
+  if (canCreateCard) {
+    actions.push({
+      id: "create-card",
+      label: "新規暗記カード",
+      icon: <CreateCardIcon />,
+      onSelect: () => {
+        void onCreateCard?.();
+      },
+    });
+  }
 
-if (canAddDocuments) {
-  actions.push({
-    id: "add-document",
-    label: "文書追加",
-    icon: <AddDocumentIcon />,
-    onSelect: () => {
-      void onAddDocument?.();
-    },
-  });
-}
+  if (canAddDocuments) {
+    actions.push({
+      id: "add-document",
+      label: "文書追加",
+      icon: <AddDocumentIcon />,
+      onSelect: () => {
+        void onAddDocument?.();
+      },
+    });
+  }
 
-if (canBulkImport) {
-  actions.push({
-    id: "bulk-import",
-    label: "一括インポート",
-    icon: <BulkImportIcon />,
-    separatorBefore: true,
-    onSelect: () => {
-      void onBulkImport?.();
-    },
-  });
-}
+  if (canBulkImport) {
+    actions.push({
+      id: "bulk-import",
+      label: "一括インポート",
+      icon: <BulkImportIcon />,
+      separatorBefore: true,
+      onSelect: () => {
+        void onBulkImport?.();
+      },
+    });
+  }
 
-return actions;
+  return actions;
 };
 
 export { buildRenameDeleteMenuActions, buildEntityRenameDeleteMenuActions, buildFolderMenuActions, buildExplorerCreateMenuActions };

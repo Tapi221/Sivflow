@@ -31,15 +31,15 @@ const resolveVerticalCardPagerItemWidthSpec = <T>({ card, idx, isActive, cardWid
 };
 const buildVerticalCardPagerItemStyle = (widthSpec: VerticalCardPagerItemWidthSpec): CSSProperties => {
   if (widthSpec.mode === "stretch") {
-  return { width: "100%", maxWidth: "100%", minWidth: 0, alignSelf: "stretch" };
-}
+    return { width: "100%", maxWidth: "100%", minWidth: 0, alignSelf: "stretch" };
+  }
 
-return {
-  width: widthSpec.widthPx,
-  maxWidth: "100%",
-  minWidth: 0,
-  alignSelf: "center",
-};
+  return {
+    width: widthSpec.widthPx,
+    maxWidth: "100%",
+    minWidth: 0,
+    alignSelf: "center",
+  };
 };
 
 export { resolveVerticalCardPagerItemWidthSpec, buildVerticalCardPagerItemStyle };

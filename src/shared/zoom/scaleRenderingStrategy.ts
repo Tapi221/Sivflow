@@ -21,18 +21,18 @@ const normalizeScale = (value: number) => {
 };
 const detectCssZoomSupport = () => {
   if (typeof CSS === "undefined") {
-  return false;
-}
+    return false;
+  }
 
-if (typeof CSS.supports !== "function") {
-  return false;
-}
+  if (typeof CSS.supports !== "function") {
+    return false;
+  }
 
-try {
-  return CSS.supports("zoom", "1.1");
-} catch {
-  return false;
-}
+  try {
+    return CSS.supports("zoom", "1.1");
+  } catch {
+    return false;
+  }
 };
 const resolveScaleRenderingStrategy = ({ disableScale, effectiveScale, supportsCssZoom }: ResolveScaleRenderingStrategyArgs): ScaleRenderingStrategy => {
   const safeScale = normalizeScale(effectiveScale);

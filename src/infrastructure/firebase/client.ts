@@ -111,27 +111,27 @@ const initializeFirebaseClient = (): FirebaseClientState => {
 };
 const requireFirebaseClient = (): FirebaseClientState => {
   if (isFirebaseClientAvailable && firebaseClientState.app) {
-  return firebaseClientState;
-}
+    return firebaseClientState;
+  }
 
-throw new Error(
-  `[Firebase] Firebase クライアントを利用できません。不足している環境変数: ${missingFirebaseEnvVars.join(", ")}`,
-);
+  throw new Error(
+    `[Firebase] Firebase クライアントを利用できません。不足している環境変数: ${missingFirebaseEnvVars.join(", ")}`,
+  );
 };
 const requireFirestoreDb = (): Firestore => {
   if (firestoreDb) {
-  return firestoreDb;
-}
+    return firestoreDb;
+  }
 
-if (!isFirebaseClientAvailable) {
+  if (!isFirebaseClientAvailable) {
+    throw new Error(
+      `[Firebase] Firebase 環境変数が不足しているため Firestore を利用できません: ${missingFirebaseEnvVars.join(", ")}`,
+    );
+  }
+
   throw new Error(
-    `[Firebase] Firebase 環境変数が不足しているため Firestore を利用できません: ${missingFirebaseEnvVars.join(", ")}`,
+    "[Firebase] Firestore の初期化に失敗しました。Firestore 依存の処理を続行できません。",
   );
-}
-
-throw new Error(
-  "[Firebase] Firestore の初期化に失敗しました。Firestore 依存の処理を続行できません。",
-);
 };
 const debugFirebase = (): void => {
   console.log("=== Firebase デバッグ情報 ===");

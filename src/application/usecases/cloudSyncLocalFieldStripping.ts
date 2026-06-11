@@ -64,18 +64,18 @@ const stripCardLocalFields = (
 };
 const stripCloudSyncLocalOnlyFields = (type: string, record: Record<string, unknown>): Record<string, unknown> => {
   if (type === "card") {
-  return stripCardLocalFields(record);
-}
+    return stripCardLocalFields(record);
+  }
 
-if (type === "document") {
-  return stripDocumentLocalFields(record);
-}
+  if (type === "document") {
+    return stripDocumentLocalFields(record);
+  }
 
-if (type === "asset") {
-  return stripAssetLocalFields(record);
-}
+  if (type === "asset") {
+    return stripAssetLocalFields(record);
+  }
 
-return record;
+  return record;
 };
 
 export { stripCloudSyncLocalOnlyFields };

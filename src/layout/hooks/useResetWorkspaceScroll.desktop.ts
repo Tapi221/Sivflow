@@ -31,16 +31,16 @@ const resetWorkspaceScrollPosition = (mainRef: WorkspaceScrollRef) => {
 };
 const useResetWorkspaceScrollDesktop = (mainRef: WorkspaceScrollRef, pathname: string) => {
   useLayoutEffect(() => {
-  resetWorkspaceScrollPosition(mainRef);
-
-  const animationFrameId = window.requestAnimationFrame(() => {
     resetWorkspaceScrollPosition(mainRef);
-  });
 
-  return () => {
-    window.cancelAnimationFrame(animationFrameId);
-  };
-}, [mainRef, pathname]);
+    const animationFrameId = window.requestAnimationFrame(() => {
+      resetWorkspaceScrollPosition(mainRef);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, [mainRef, pathname]);
 };
 
 export { useResetWorkspaceScrollDesktop };

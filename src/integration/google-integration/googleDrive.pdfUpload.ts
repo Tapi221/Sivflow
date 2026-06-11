@@ -41,39 +41,39 @@ const readGoogleDriveErrorMessage = async (response: Response): Promise<string> 
 };
 const uploadPdfToGoogleDrive = async ({ accessToken, fileName, pdf }: GoogleDrivePdfUploadInput): Promise<GoogleDrivePdfUploadResult> => {
   if (!accessToken.trim()) {
-  throw new Error("Google Drive access token is missing");
-}
+    throw new Error("Google Drive access token is missing");
+  }
 
-const response = await fetch(
-  `${GOOGLE_DRIVE_UPLOAD_ENDPOINT}?${new URLSearchParams({
-    uploadType: "multipart",
-    fields: GOOGLE_DRIVE_PDF_FIELDS,
-  })}`,
-  {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
+  const response = await fetch(
+    `${GOOGLE_DRIVE_UPLOAD_ENDPOINT}?${new URLSearchParams({
+      uploadType: "multipart",
+      fields: GOOGLE_DRIVE_PDF_FIELDS,
+    })}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: createUploadFormData(fileName, pdf),
     },
-    body: createUploadFormData(fileName, pdf),
-  },
-);
+  );
 
-if (!response.ok) {
-  throw new Error(await readGoogleDriveErrorMessage(response));
-}
+  if (!response.ok) {
+    throw new Error(await readGoogleDriveErrorMessage(response));
+  }
 
-const payload = (await response.json()) as Partial<GoogleDrivePdfUploadResult>;
-if (!payload.id || !payload.name) {
-  throw new Error("Google Drive upload response is missing file metadata");
-}
+  const payload = (await response.json()) as Partial<GoogleDrivePdfUploadResult>;
+  if (!payload.id || !payload.name) {
+    throw new Error("Google Drive upload response is missing file metadata");
+  }
 
-return {
-  id: payload.id,
-  name: payload.name,
-  mimeType: payload.mimeType ?? PDF_MIME_TYPE,
-  webViewLink: payload.webViewLink ?? null,
-  webContentLink: payload.webContentLink ?? null,
-};
+  return {
+    id: payload.id,
+    name: payload.name,
+    mimeType: payload.mimeType ?? PDF_MIME_TYPE,
+    webViewLink: payload.webViewLink ?? null,
+    webContentLink: payload.webContentLink ?? null,
+  };
 };
 
 export { uploadPdfToGoogleDrive };

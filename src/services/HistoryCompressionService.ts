@@ -63,34 +63,34 @@ const toHistoryEvent = (value: unknown): HistoryEvent | null => {
 };
 class HistoryCompressionService { public readonly compress = async (userId: string): Promise<void> => {
   if (StorageStateManager.isReadOnly(userId)) {
-  console.log(`[Compression:${userId}] Skipped (READ_ONLY mode)`);
-  return;
-}
-
-const db = await getLocalDb(userId);
-
-try {
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-  const oldEvents = await db.levelHistories
-    .where("changedAt")
-    .below(thirtyDaysAgo)
-    .toArray();
-
-  if (oldEvents.length === 0) {
-    console.log(`[Compression:${userId}] No old events to compress`);
+    console.log(`[Compression:${userId}] Skipped (READ_ONLY mode)`);
     return;
   }
 
-  const compressed = this.compressByDay(oldEvents, userId);
+  const db = await getLocalDb(userId);
 
-  console.log(
-    `[Compression:${userId}] Compressed ${oldEvents.length} events into ${compressed.length} daily summaries`,
-  );
-} catch (error) {
-  console.error(`[Compression:${userId}] Failed:`, error);
-}
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const oldEvents = await db.levelHistories
+      .where("changedAt")
+      .below(thirtyDaysAgo)
+      .toArray();
+
+    if (oldEvents.length === 0) {
+      console.log(`[Compression:${userId}] No old events to compress`);
+      return;
+    }
+
+    const compressed = this.compressByDay(oldEvents, userId);
+
+    console.log(
+      `[Compression:${userId}] Compressed ${oldEvents.length} events into ${compressed.length} daily summaries`,
+    );
+  } catch (error) {
+    console.error(`[Compression:${userId}] Failed:`, error);
+  }
 };
 
 private readonly compressByDay = (

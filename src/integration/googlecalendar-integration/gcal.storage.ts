@@ -33,23 +33,23 @@ const removeStorageItemPair = (key: string, legacyKey: string): void => {
 };
 const readTokenExpiry = (): number | null => {
   try {
-  const raw = readMigratedStorageItem(LOCAL_TOKEN_EXPIRY_KEY, LEGACY_LOCAL_TOKEN_EXPIRY_KEY);
-  if (!raw) return null;
+    const raw = readMigratedStorageItem(LOCAL_TOKEN_EXPIRY_KEY, LEGACY_LOCAL_TOKEN_EXPIRY_KEY);
+    if (!raw) return null;
 
-  const value = Number(raw);
-  return Number.isFinite(value) ? value : null;
-} catch {
-  return null;
-}
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : null;
+  } catch {
+    return null;
+  }
 };
 const clearToken = (): void => {
   try {
-  removeStorageItemPair(LOCAL_TOKEN_KEY, LEGACY_LOCAL_TOKEN_KEY);
-  removeStorageItemPair(LOCAL_TOKEN_EXPIRY_KEY, LEGACY_LOCAL_TOKEN_EXPIRY_KEY);
-  cachedToken = null;
-} catch {
+    removeStorageItemPair(LOCAL_TOKEN_KEY, LEGACY_LOCAL_TOKEN_KEY);
+    removeStorageItemPair(LOCAL_TOKEN_EXPIRY_KEY, LEGACY_LOCAL_TOKEN_EXPIRY_KEY);
+    cachedToken = null;
+  } catch {
   // ignore
-}
+  }
 };
 const readToken = (): string | null => {
   if (cachedToken) return cachedToken;
@@ -91,85 +91,85 @@ const writeToken = (token: string | null): void => {
 };
 const readRefreshToken = (): string | null => {
   try {
-  if (!shouldStoreLocalRefreshToken()) {
-  removeStorageItemPair(LOCAL_REFRESH_TOKEN_KEY, LEGACY_LOCAL_REFRESH_TOKEN_KEY);
-  return null;
-}
+    if (!shouldStoreLocalRefreshToken()) {
+      removeStorageItemPair(LOCAL_REFRESH_TOKEN_KEY, LEGACY_LOCAL_REFRESH_TOKEN_KEY);
+      return null;
+    }
 
-return readMigratedStorageItem(LOCAL_REFRESH_TOKEN_KEY, LEGACY_LOCAL_REFRESH_TOKEN_KEY);
-} catch {
-  return null;
-}
+    return readMigratedStorageItem(LOCAL_REFRESH_TOKEN_KEY, LEGACY_LOCAL_REFRESH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
 };
 const writeRefreshToken = (token: string | null): void => {
   try {
-  if (!shouldStoreLocalRefreshToken() || !token) {
-  removeStorageItemPair(LOCAL_REFRESH_TOKEN_KEY, LEGACY_LOCAL_REFRESH_TOKEN_KEY);
-  return;
-}
+    if (!shouldStoreLocalRefreshToken() || !token) {
+      removeStorageItemPair(LOCAL_REFRESH_TOKEN_KEY, LEGACY_LOCAL_REFRESH_TOKEN_KEY);
+      return;
+    }
 
-localStorage.setItem(LOCAL_REFRESH_TOKEN_KEY, token);
-localStorage.removeItem(LEGACY_LOCAL_REFRESH_TOKEN_KEY);
-} catch {
+    localStorage.setItem(LOCAL_REFRESH_TOKEN_KEY, token);
+    localStorage.removeItem(LEGACY_LOCAL_REFRESH_TOKEN_KEY);
+  } catch {
   // ignore
-}
+  }
 };
 const readEmail = (): string | null => {
   try {
-  return readMigratedStorageItem(PERSIST_EMAIL_KEY, LEGACY_PERSIST_EMAIL_KEY);
-} catch {
-  return null;
-}
+    return readMigratedStorageItem(PERSIST_EMAIL_KEY, LEGACY_PERSIST_EMAIL_KEY);
+  } catch {
+    return null;
+  }
 };
 const writeEmail = (email: string | null): void => {
   try {
-  if (!email) {
-  removeStorageItemPair(PERSIST_EMAIL_KEY, LEGACY_PERSIST_EMAIL_KEY);
-  return;
-}
-localStorage.setItem(PERSIST_EMAIL_KEY, email);
-localStorage.removeItem(LEGACY_PERSIST_EMAIL_KEY);
-} catch {
+    if (!email) {
+      removeStorageItemPair(PERSIST_EMAIL_KEY, LEGACY_PERSIST_EMAIL_KEY);
+      return;
+    }
+    localStorage.setItem(PERSIST_EMAIL_KEY, email);
+    localStorage.removeItem(LEGACY_PERSIST_EMAIL_KEY);
+  } catch {
   // ignore
-}
+  }
 };
 const readCalendarIds = (): string[] => {
   try {
-  const raw = readMigratedStorageItem(PERSIST_CALENDAR_IDS_KEY, LEGACY_PERSIST_CALENDAR_IDS_KEY);
-  if (!raw) return [];
+    const raw = readMigratedStorageItem(PERSIST_CALENDAR_IDS_KEY, LEGACY_PERSIST_CALENDAR_IDS_KEY);
+    if (!raw) return [];
 
-  const parsed = JSON.parse(raw);
-  return Array.isArray(parsed) ? (parsed as string[]) : [];
-} catch {
-  return [];
-}
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as string[]) : [];
+  } catch {
+    return [];
+  }
 };
 const writeCalendarIds = (ids: string[]): void => {
   try {
-  localStorage.setItem(PERSIST_CALENDAR_IDS_KEY, JSON.stringify(ids));
-  localStorage.removeItem(LEGACY_PERSIST_CALENDAR_IDS_KEY);
-} catch {
+    localStorage.setItem(PERSIST_CALENDAR_IDS_KEY, JSON.stringify(ids));
+    localStorage.removeItem(LEGACY_PERSIST_CALENDAR_IDS_KEY);
+  } catch {
   // ignore
-}
+  }
 };
 const readWasConnected = (): boolean => {
   try {
-  return readMigratedStorageItem(PERSIST_WAS_CONNECTED_KEY, LEGACY_PERSIST_WAS_CONNECTED_KEY) === "true";
-} catch {
-  return false;
-}
+    return readMigratedStorageItem(PERSIST_WAS_CONNECTED_KEY, LEGACY_PERSIST_WAS_CONNECTED_KEY) === "true";
+  } catch {
+    return false;
+  }
 };
 const writeWasConnected = (value: boolean): void => {
   try {
-  if (!value) {
-  removeStorageItemPair(PERSIST_WAS_CONNECTED_KEY, LEGACY_PERSIST_WAS_CONNECTED_KEY);
-  return;
-}
-localStorage.setItem(PERSIST_WAS_CONNECTED_KEY, "true");
-localStorage.removeItem(LEGACY_PERSIST_WAS_CONNECTED_KEY);
-} catch {
+    if (!value) {
+      removeStorageItemPair(PERSIST_WAS_CONNECTED_KEY, LEGACY_PERSIST_WAS_CONNECTED_KEY);
+      return;
+    }
+    localStorage.setItem(PERSIST_WAS_CONNECTED_KEY, "true");
+    localStorage.removeItem(LEGACY_PERSIST_WAS_CONNECTED_KEY);
+  } catch {
   // ignore
-}
+  }
 };
 
 export { readToken, writeToken, readTokenExpiry, clearToken, readRefreshToken, writeRefreshToken, readEmail, writeEmail, readCalendarIds, writeCalendarIds, readWasConnected, writeWasConnected };

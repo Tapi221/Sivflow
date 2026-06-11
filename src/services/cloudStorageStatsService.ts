@@ -66,10 +66,10 @@ const parseCloudStorageStats = (
 };
 const isCloudStorageStatsOutdated = (stats: CloudStorageStats | null): boolean => {
   if (!stats) {
-  return true;
-}
+    return true;
+  }
 
-return stats.schemaVersion !== CLOUD_STORAGE_STATS_SCHEMA_VERSION;
+  return stats.schemaVersion !== CLOUD_STORAGE_STATS_SCHEMA_VERSION;
 };
 const subscribeToCloudStorageStats = (userId: string, onChange: (stats: CloudStorageStats | null) => void, onError: (error: unknown) => void): Unsubscribe => {
   const db = requireFirestoreDb();

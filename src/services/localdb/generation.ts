@@ -75,15 +75,15 @@ const listUserPersistentDbNames = async (userId: string) => {
 };
 const bumpGenerationForUser = (userId: string) => {
   if (generationBumpedUsers.has(userId)) {
-  return getGenerationForUser(userId);
-}
-generationBumpedUsers.add(userId);
-const current = getGenerationForUser(userId);
-const next = Math.min(current + 1, LOCALDB_GENERATION_MAX);
-if (next !== current) {
-  writeGenerationToStorage(userId, next);
-}
-return next;
+    return getGenerationForUser(userId);
+  }
+  generationBumpedUsers.add(userId);
+  const current = getGenerationForUser(userId);
+  const next = Math.min(current + 1, LOCALDB_GENERATION_MAX);
+  if (next !== current) {
+    writeGenerationToStorage(userId, next);
+  }
+  return next;
 };
 const getDatabaseNameForUser = (userId: string = "anonymous") => {
   const generation = getGenerationForUser(userId);

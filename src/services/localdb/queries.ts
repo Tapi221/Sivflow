@@ -42,11 +42,11 @@ const getDirtyItems = (db: QueryDb, table: string, userId: string, lastSyncTime:
 };
 const getUpdatedCards = (db: QueryDb, folderId: string, lastSyncTime: Date) => {
   return db.cards.where("folderId").equals(folderId).and((card: unknown) => {
-  const updatedAt = (card as Record<string, unknown>).updatedAt;
-  const updated = normalizeDate(updatedAt) ?? new Date(0);
-  return updated > lastSyncTime;
-})
-  .toArray();
+    const updatedAt = (card as Record<string, unknown>).updatedAt;
+    const updated = normalizeDate(updatedAt) ?? new Date(0);
+    return updated > lastSyncTime;
+  })
+    .toArray();
 };
 const getLastSyncTime = async (db: QueryDb, userId: string) => {
   const meta = await db.syncMetadata.get(userId);
@@ -58,29 +58,29 @@ const updateLastSyncTime = async (db: QueryDb, userId: string, syncTime: Date) =
 };
 const normalizeDocumentBlobUrlsForSession = async (db: QueryDb) => {
   try {
-  await db.documents.toCollection().modify((document: unknown) => {
-  const record = document as MutableDocumentBlobFields;
+    await db.documents.toCollection().modify((document: unknown) => {
+      const record = document as MutableDocumentBlobFields;
 
-  if (
-    typeof record.localUrl === "string" &&
+      if (
+        typeof record.localUrl === "string" &&
         record.localUrl.startsWith("blob:")
-  ) {
-    record.localUrl = null;
-  }
-  if (
-    typeof record.blobUrl === "string" &&
+      ) {
+        record.localUrl = null;
+      }
+      if (
+        typeof record.blobUrl === "string" &&
         record.blobUrl.startsWith("blob:")
-  ) {
-    record.blobUrl = null;
+      ) {
+        record.blobUrl = null;
+      }
+    });
+  } catch (error) {
+    warnOncePerSession(
+      "localdb:normalize-document-blob-urls-failed",
+      "[LocalDB] Failed to normalize stale document blob URLs.",
+      error,
+    );
   }
-});
-} catch (error) {
-  warnOncePerSession(
-    "localdb:normalize-document-blob-urls-failed",
-    "[LocalDB] Failed to normalize stale document blob URLs.",
-    error,
-  );
-}
 };
 
 export { getItem, getAllItems, getAllCards, getAllFolders, getDirtyItems, getUpdatedCards, getLastSyncTime, updateLastSyncTime, normalizeDocumentBlobUrlsForSession };

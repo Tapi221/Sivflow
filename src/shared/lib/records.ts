@@ -5,9 +5,9 @@ const asRecord = (value: unknown): UnknownRecord | null => {
 };
 const pick = (...values: unknown[]): unknown => {
   for (const value of values) {
-  if (value !== undefined && value !== null) return value;
-}
-return undefined;
+    if (value !== undefined && value !== null) return value;
+  }
+  return undefined;
 };
 
 export { asRecord, pick };

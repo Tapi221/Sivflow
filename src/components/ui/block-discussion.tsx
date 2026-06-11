@@ -71,7 +71,8 @@ const BlockCommentContent = ({ children, element }: PlateElementProps) => {
     <div className="flex w-full justify-between">
       <Popover open={open} onOpenChange={(_open_) => {
         if (!_open_ && isCommenting && draftCommentNode) {
-        editor.tf.unsetNodes(getDraftCommentKey(), { at: [], mode: "lowest", match: (n) => n[getDraftCommentKey()] }); } setOpen(_open_); }}>
+          editor.tf.unsetNodes(getDraftCommentKey(), { at: [], mode: "lowest", match: (n) => n[getDraftCommentKey()] }); } setOpen(_open_); }}
+      >
         <div className="w-full">{children}</div>
         {anchorElement && <PopoverAnchor asChild className="w-full" virtualRef={{ current: anchorElement }} />}
         <PopoverContent className="max-h-[min(50dvh,calc(-24px+var(--radix-popper-available-height)))] w-[380px] min-w-[130px] max-w-[calc(100vw-24px)] overflow-y-auto p-0 data-[state=closed]:opacity-0" onCloseAutoFocus={(e) => e.preventDefault()} onOpenAutoFocus={(e) => e.preventDefault()} align="center" side="bottom">

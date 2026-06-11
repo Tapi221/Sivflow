@@ -15,8 +15,8 @@ const hasSelectableClass = ({ attributes, className }: { attributes: { className
 
 const BlockSelectionKit = [BlockSelectionPlugin.configure(({ editor }) => ({ options: { enableContextMenu: true, isSelectable: (element) => !getPluginTypes(editor, [KEYS.column, KEYS.codeLine, KEYS.td]).includes(element.type), onKeyDownSelecting: (editor, e) => {
   if (isHotkey("mod+j")(e)) {
-  editor.getApi(AIChatPlugin).aiChat.show();
-}
+    editor.getApi(AIChatPlugin).aiChat.show();
+  }
 },
 },
 render: {

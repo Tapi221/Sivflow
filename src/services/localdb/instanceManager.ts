@@ -125,25 +125,25 @@ const getLocalDb = async (userId?: string): Promise<LocalDBSyncStore> => getInst
 const initializeDB = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
 const clearInstance = (): void => {
   if (instance) {
-  try {
-  instance.close();
-} catch {
-  // ignore close failure
-}
-}
-
-for (const fallback of fallbackInstances.values()) {
-  try {
-    fallback.close();
-  } catch {
-    // ignore fallback close failure
+    try {
+      instance.close();
+    } catch {
+      // ignore close failure
+    }
   }
-}
 
-instance = null;
-cachedInstance = null;
-currentUserId = null;
-fallbackInstances.clear();
+  for (const fallback of fallbackInstances.values()) {
+    try {
+      fallback.close();
+    } catch {
+    // ignore fallback close failure
+    }
+  }
+
+  instance = null;
+  cachedInstance = null;
+  currentUserId = null;
+  fallbackInstances.clear();
 };
 const resetForLogout = async (userId?: string): Promise<void> => {
   const targetUserId = userId ?? currentUserId ?? "anonymous";
