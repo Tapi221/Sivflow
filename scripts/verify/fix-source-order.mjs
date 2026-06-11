@@ -94,6 +94,14 @@ const isUpperCaseConstantName = (name) => /^[A-Z0-9_]+$/.test(name);
 
 const getVariableStatementNames = (statement) => statement.declarationList.declarations.flatMap((declaration) => ts.isIdentifier(declaration.name) ? [declaration.name.text] : []);
 
+const getStatementDeclarationNames = (statement) => {
+  if (ts.isVariableStatement(statement)) return getVariableStatementNames(statement);
+  if ((ts.isClassDeclaration(statement) || ts.isFunctionDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement)) && statement.name) return [statement.name.text];
+  if (ts.isModuleDeclaration(statement) && ts.isIdentifier(statement.name)) return [statement.name.text];
+
+  return [];
+};
+
 const isConstVariableStatement = (statement) => (statement.declarationList.flags & ts.NodeFlags.Const) !== 0;
 
 const isFunctionLikeInitializer = (initializer) => Boolean(initializer && (ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer)));
@@ -132,95 +140,109 @@ const getStatementOrderCategory = (statement) => {
   return "helper";
 };
 
-const getStatementDeclarationNames = (statement) => {
-  if (ts.isVariableStatement(statement)) return getVariableStatementNames(statement);
-  if ((ts.isClassDeclaration(statement) || ts.isFunctionDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement)) && statement.name) return [statement.name.text];
-  if (ts.isModuleDeclaration(statement) && ts.isIdentifier(statement.name)) return [statement.name.text];
+const hasExportModifier = (statement) => ts.canHaveModifiers(statement) && Boolean(ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword));
 
-  return [];
-};
+const isTypeOnlyExportDeclaration = (statement) => ts.isExportDeclaration(statement) && statement.isTypeOnly;
 
-const getStatementText = (source, sourceFile, statement) => source.slice(statement.getStart(sourceFile), statement.getEnd()).trim();
+const canAppearInExportBlock = (statement) => hasExportModifier(statement) && !ts.isImportDeclaration(statement) && !ts.isImportEqualsDeclaration(statement);
 
-const getSortableStatementStartIndex = (statements) => statements.findIndex((statement) => !isDirectiveStatement(statement) && !isImportStatement(statement));
+const isConstDependentTypeStatement = (source, statement, highestRank) => {
+  if (!ts.isTypeAliasDeclaration(statement) && !ts.isInterfaceDeclaration(statement)) return false;
+  if (highestRank > ORDER_RANKS.constant) return false;
 
-const getStatementChunkStart = (statements, startIndex, index) => {
-  if (index === startIndex) return startIndex === 0 ? statements[index].getFullStart() : statements[startIndex - 1].getEnd();
-
-  return statements[index - 1].getEnd();
+  return source.slice(statement.getStart(), statement.getEnd()).includes("typeof ");
 };
 
 const statementReferencesName = (statementText, name) => new RegExp(`\\b${escapeRegExp(name)}\\b`).test(statementText);
 
-const createOrderNode = (source, sourceFile, statements, startIndex, statement, index) => {
-  const category = getStatementOrderCategory(statement);
-  const chunkStart = getStatementChunkStart(statements, startIndex, index);
+const getStatementText = (source, sourceFile, statement) => source.slice(statement.getStart(sourceFile), statement.getEnd()).trim();
 
-  return {
-    category,
-    dependencies: new Set(),
-    index,
-    names: getStatementDeclarationNames(statement),
-    rank: ORDER_RANKS[category],
-    statementText: getStatementText(source, sourceFile, statement),
-    text: source.slice(chunkStart, statement.getEnd()).trim(),
-  };
+const statementReferencesPreviousHigherRankDeclaration = (source, sourceFile, statement, previousStatements, rank) => {
+  const higherRankNames = previousStatements.flatMap((previousStatement) => {
+    const previousCategory = getStatementOrderCategory(previousStatement);
+    if (ORDER_RANKS[previousCategory] <= rank) return [];
+
+    return getStatementDeclarationNames(previousStatement);
+  });
+  const statementText = getStatementText(source, sourceFile, statement);
+
+  return higherRankNames.some((name) => statementReferencesName(statementText, name));
 };
 
-const collectOrderNodes = (source, sourceFile, statements, startIndex) => {
-  const nodes = statements.slice(startIndex).map((statement, offset) => createOrderNode(source, sourceFile, statements, startIndex, statement, startIndex + offset));
+const canKeepStatementAfterHigherRank = (source, sourceFile, statement, previousStatements, rank, highestRank) => {
+  return isTypeOnlyExportDeclaration(statement) || canAppearInExportBlock(statement) || isConstDependentTypeStatement(source, statement, highestRank) || statementReferencesPreviousHigherRankDeclaration(source, sourceFile, statement, previousStatements, rank);
+};
 
-  for (const target of nodes) {
-    for (const sourceNode of nodes) {
-      if (sourceNode.index >= target.index) continue;
-      if (sourceNode.names.length === 0) continue;
-      if (sourceNode.names.some((name) => statementReferencesName(target.statementText, name))) target.dependencies.add(sourceNode.index);
+const findMoveTargetIndex = (statements, rank, fromIndex) => {
+  for (let index = 0; index < fromIndex; index += 1) {
+    const previousStatement = statements[index];
+    if (isDirectiveStatement(previousStatement) || isImportStatement(previousStatement)) continue;
+    if (ORDER_RANKS[getStatementOrderCategory(previousStatement)] > rank) return index;
+  }
+
+  return -1;
+};
+
+const findFirstOrderMove = (source, sourceFile) => {
+  const statements = [...sourceFile.statements];
+  const previousStatements = [];
+  let highestRank = 0;
+
+  for (let index = 0; index < statements.length; index += 1) {
+    const statement = statements[index];
+    if (isDirectiveStatement(statement)) continue;
+
+    const category = getStatementOrderCategory(statement);
+    const rank = ORDER_RANKS[category];
+
+    if (rank < highestRank) {
+      if (canKeepStatementAfterHigherRank(source, sourceFile, statement, previousStatements, rank, highestRank)) {
+        previousStatements.push(statement);
+        continue;
+      }
+
+      const targetIndex = findMoveTargetIndex(statements, rank, index);
+      if (targetIndex >= 0) return { fromIndex: index, targetIndex };
     }
+
+    highestRank = Math.max(highestRank, rank);
+    previousStatements.push(statement);
   }
 
-  return nodes;
+  return null;
 };
 
-const getNextOrderNode = (nodes, orderedNodes) => {
-  const orderedIndexes = new Set(orderedNodes.map((node) => node.index));
-  const readyNodes = nodes.filter((node) => !orderedIndexes.has(node.index) && [...node.dependencies].every((dependencyIndex) => orderedIndexes.has(dependencyIndex)));
-  if (readyNodes.length === 0) return null;
+const getStatementChunkStart = (statements, index) => index === 0 ? statements[index].getFullStart() : statements[index - 1].getEnd();
 
-  return readyNodes.sort((left, right) => left.rank - right.rank || left.index - right.index)[0];
-};
+const moveStatement = (source, sourceFile, move) => {
+  const statements = [...sourceFile.statements];
+  const newline = getNewline(source);
+  const chunks = statements.map((statement, index) => ({ statement, text: source.slice(getStatementChunkStart(statements, index), statement.getEnd()).trim() }));
+  const [movedChunk] = chunks.splice(move.fromIndex, 1);
+  chunks.splice(move.targetIndex, 0, movedChunk);
 
-const sortOrderNodes = (nodes) => {
-  const orderedNodes = [];
+  const prefix = source.slice(0, statements[0]?.getFullStart() ?? 0).trimEnd();
+  const suffix = source.slice(statements.at(-1)?.getEnd() ?? 0).trim();
+  const body = chunks.map((chunk) => chunk.text).filter(Boolean).join(`${newline}${newline}`);
 
-  while (orderedNodes.length < nodes.length) {
-    const nextNode = getNextOrderNode(nodes, orderedNodes);
-    if (!nextNode) return nodes;
-
-    orderedNodes.push(nextNode);
-  }
-
-  return orderedNodes;
+  return [prefix, body, suffix].filter(Boolean).join(`${newline}${newline}`) + newline;
 };
 
 const applySourceOrderFix = (filePath, source) => {
   if (!shouldFixSourceOrder(filePath)) return source;
 
-  const sourceFile = createSourceFile(filePath, source);
-  const statements = [...sourceFile.statements];
-  const startIndex = getSortableStatementStartIndex(statements);
-  if (startIndex < 0) return source;
+  let nextSource = source;
+  const maxPassCount = 1000;
 
-  const nodes = collectOrderNodes(source, sourceFile, statements, startIndex);
-  const orderedNodes = sortOrderNodes(nodes);
-  if (orderedNodes.every((node, index) => node.index === nodes[index].index)) return source;
+  for (let pass = 0; pass < maxPassCount; pass += 1) {
+    const sourceFile = createSourceFile(filePath, nextSource);
+    const move = findFirstOrderMove(nextSource, sourceFile);
+    if (!move) return nextSource;
 
-  const newline = getNewline(source);
-  const prefixEnd = startIndex === 0 ? statements[startIndex].getFullStart() : statements[startIndex - 1].getEnd();
-  const prefix = source.slice(0, prefixEnd).trimEnd();
-  const suffix = source.slice(statements.at(-1).getEnd()).trim();
-  const body = orderedNodes.map((node) => node.text).filter(Boolean).join(`${newline}${newline}`);
+    nextSource = moveStatement(nextSource, sourceFile, move);
+  }
 
-  return [prefix, body, suffix].filter(Boolean).join(`${newline}${newline}`) + newline;
+  return nextSource;
 };
 
 const updateFile = (filePath) => {
