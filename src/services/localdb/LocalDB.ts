@@ -24,8 +24,6 @@ declare global {
   }
 }
 
-export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "./types";
-
 type LocalDbGlobal = typeof globalThis & {
   __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
 };
@@ -416,5 +414,7 @@ export class LocalDB extends Dexie {
     clearInstanceImpl();
   }
 }
+
+export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "./types";
 
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };
