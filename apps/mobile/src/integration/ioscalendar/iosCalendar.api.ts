@@ -7,9 +7,13 @@ import type { IosCalendarEvent, IosCalendarListItem, IosCalendarPermissionStatus
 
 
 
+
+
 type ExpoCalendarCreateEventDetails = NonNullable<Parameters<typeof ExpoCalendar.createEventAsync>[1]>;
 type ExpoCalendarUpdateEventDetails = NonNullable<Parameters<typeof ExpoCalendar.updateEventAsync>[1]>;
 type IosCalendarWritableEventDetails = Partial<ExpoCalendarCreateEventDetails & ExpoCalendarUpdateEventDetails>;
+
+
 
 
 
@@ -52,6 +56,8 @@ const WEEKDAY_BY_EXPO_DAY: Record<number, CalendarWeekday> = {
   [ExpoCalendar.DayOfTheWeek.Friday]: 5,
   [ExpoCalendar.DayOfTheWeek.Saturday]: 6,
 };
+
+
 
 
 
@@ -232,7 +238,7 @@ export const fetchIosCalendars = async (): Promise<IosCalendarListItem[]> => { i
     .filter((calendar) => calendar.id.length > 0 && calendar.title.length > 0)
     .map((calendar) => toIosCalendarListItem(calendar, defaultCalendarId));
 };
-export const fetchIosEvents = async ({ calendarIds, calendars, rangeStart, rangeEnd }: { calendarIds: string[]; calendars: IosCalendarListItem[]; rangeStart: Date; rangeEnd: Date }): Promise<IosCalendarEvent[]> => {
+export const fetchIosEvents = async ({ calendarIds, calendars, rangeStart, rangeEnd }: { calendarIds: string[]; calendars: IosCalendarListItem[]; rangeStart: Date; rangeEnd: Date; }): Promise<IosCalendarEvent[]> => {
   if (!isIosCalendarSupported() || calendarIds.length === 0 || !isValidRange(rangeStart, rangeEnd)) return [];
 
   const calendarsById = buildCalendarsById(calendars);
@@ -242,7 +248,7 @@ export const fetchIosEvents = async ({ calendarIds, calendars, rangeStart, range
     .map((event) => toIosCalendarEvent(event, calendarsById))
     .filter((event): event is IosCalendarEvent => Boolean(event));
 };
-export const createIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventInput; calendars: IosCalendarListItem[] }): Promise<IosCalendarEvent> => {
+export const createIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventInput; calendars: IosCalendarListItem[]; }): Promise<IosCalendarEvent> => {
   validateWritableEventInput(event);
   getWritableCalendar(event.calendarId, calendars);
 
@@ -250,7 +256,7 @@ export const createIosCalendarEvent = async ({ event, calendars }: { event: IosC
 
   return fetchIosEventById(eventId, calendars);
 };
-export const updateIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventUpdateInput; calendars: IosCalendarListItem[] }): Promise<IosCalendarEvent> => {
+export const updateIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventUpdateInput; calendars: IosCalendarListItem[]; }): Promise<IosCalendarEvent> => {
   validateWritableEventUpdateInput(event);
   getWritableCalendar(event.calendarId, calendars);
 
@@ -259,7 +265,7 @@ export const updateIosCalendarEvent = async ({ event, calendars }: { event: IosC
 
   return fetchIosEventById(eventId, calendars);
 };
-export const deleteIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventDeleteInput; calendars: IosCalendarListItem[] }): Promise<void> => {
+export const deleteIosCalendarEvent = async ({ event, calendars }: { event: IosCalendarWritableEventDeleteInput; calendars: IosCalendarListItem[]; }): Promise<void> => {
   validateWritableEventDeleteInput(event);
   getWritableCalendar(event.calendarId, calendars);
 

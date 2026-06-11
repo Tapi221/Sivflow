@@ -4,6 +4,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 interface CardSetViewZoomPreferencesStore {
   version: 2;
   byScope: Record<string, number>;
@@ -25,6 +27,8 @@ type LegacyCardSetViewZoomPreferenceScope = {
   interactionMode: CardSetInteractionMode;
   cardLayoutMode: CardLayoutMode;
 };
+
+
 
 
 
@@ -51,7 +55,7 @@ const buildLegacyZoomPreferenceScopeKey = ({
     cardLayoutMode,
   ].join("::");
 };
-export const buildCardSetViewZoomPreferenceScopeKey = ({ deviceScope, cardSetId, }: CardSetViewZoomPreferenceScope) => { return [ normalizeDeviceScope(deviceScope), cardSetId ?? "__no_card_set__", ].join("::");
+export const buildCardSetViewZoomPreferenceScopeKey = ({ deviceScope, cardSetId, }: CardSetViewZoomPreferenceScope) => { return [normalizeDeviceScope(deviceScope), cardSetId ?? "__no_card_set__",].join("::");
 };
 const canResolveLegacyScopedKey = (
   scope: CardSetViewZoomPreferenceScope,
@@ -207,7 +211,7 @@ const migrateLegacyScopedZoomPreference = ({
   store.byScope[buildCardSetViewZoomPreferenceScopeKey(scope)] = zoomPercent;
   writeStore(store);
 };
-export const getCardSetViewZoomPreference = ( scope: CardSetViewZoomPreferenceScope, ) => { if (!scope.cardSetId) { return undefined;
+export const getCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope,) => { if (!scope.cardSetId) { return undefined;
   }
 
   const store = readStore();
@@ -217,7 +221,7 @@ export const getCardSetViewZoomPreference = ( scope: CardSetViewZoomPreferenceSc
     if (
       canResolveLegacyScopedKey(scope) &&
       buildCardSetViewZoomPreferenceScopeKey(scope) !==
-        buildLegacyZoomPreferenceScopeKey(scope)
+      buildLegacyZoomPreferenceScopeKey(scope)
     ) {
       migrateLegacyScopedZoomPreference({
         store,
@@ -231,7 +235,7 @@ export const getCardSetViewZoomPreference = ( scope: CardSetViewZoomPreferenceSc
 
   return readLegacyCardSetValue(scope.cardSetId);
 };
-export const setCardSetViewZoomPreference = ( scope: CardSetViewZoomPreferenceScope, zoomPercent: number, ) => { if (!scope.cardSetId) { return;
+export const setCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope, zoomPercent: number,) => { if (!scope.cardSetId) { return;
   }
 
   const safeZoomPercent =

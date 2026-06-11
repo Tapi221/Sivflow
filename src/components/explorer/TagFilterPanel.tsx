@@ -12,6 +12,8 @@ import { Tag } from "@/ui/icons";
 
 
 
+
+
 type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";
 type TagMatchMode = "any" | "all";
@@ -48,6 +50,8 @@ type TagFilterSelectionSwitchProps = {
 
 
 
+
+
 const TAG_MATCH_MODE_OPTIONS = [
   { label: "いずれか (OR)", value: "any" },
   { label: "すべて (AND)", value: "all" },
@@ -64,6 +68,8 @@ const CONTENT_TYPE_OPTIONS = [
   label: string;
   value: ContentTypeFilter;
 }>;
+
+
 
 
 
@@ -192,6 +198,8 @@ const buildVisibleTagTreeItems = (
 
   return flattenTagTreeNodes(visibleNodes, 0);
 };
+
+
 
 
 
@@ -391,7 +399,7 @@ export const TagFilterPanel = ({ allTags, isOpen = false, className, }: TagFilte
                 className={cn(
                   "ds-floating-panel__row ds-filter-row group flex w-full items-center py-1 pr-2 text-left text-xs outline-none",
                   isSelected &&
-                    "ds-floating-panel__row--active ds-filter-row--active",
+                  "ds-floating-panel__row--active ds-filter-row--active",
                 )}
               >
                 <TagFilterSelectionSwitch label={item.name} checked={isSelected} onToggle={() => toggleTag(item.name)} />

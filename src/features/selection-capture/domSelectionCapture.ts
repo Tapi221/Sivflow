@@ -2,6 +2,8 @@ import type { SelectionCaptureRect } from "./selectionCapture.types";
 
 
 
+
+
 const toBlob = (canvas: HTMLCanvasElement): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -44,7 +46,7 @@ const cloneElementForCapture = (element: HTMLElement): HTMLElement => {
   });
   return clone;
 };
-export const captureElementRectToBlob = async ( element: HTMLElement, rect: SelectionCaptureRect, ): Promise<Blob> => { const bounds = element.getBoundingClientRect();
+export const captureElementRectToBlob = async (element: HTMLElement, rect: SelectionCaptureRect,): Promise<Blob> => { const bounds = element.getBoundingClientRect();
   const clone = cloneElementForCapture(element);
   const wrapper = document.createElement("div");
   const serializedRect = {

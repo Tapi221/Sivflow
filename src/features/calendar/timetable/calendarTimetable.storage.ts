@@ -4,6 +4,8 @@ import { createCalendarTimetableSearchText as createSearchText, normalizeCalenda
 
 
 
+
+
 const TIMETABLE_SETTINGS_ID = "default";
 const DEFAULT_SEMESTER_ID = "default-semester";
 const DEFAULT_VISIBLE_DAY_COUNT: CalendarTimetableVisibleDayCount = 5;
@@ -16,6 +18,8 @@ const DEFAULT_TIMETABLE_PERIODS: readonly CalendarTimetablePeriod[] = [
   { id: "period-6", label: "6", startTime: "18:00", endTime: "19:30", order: 5 },
   { id: "period-7", label: "7", startTime: "19:40", endTime: "21:10", order: 6 },
 ];
+
+
 
 
 
@@ -47,7 +51,11 @@ class CalendarTimetableDatabase extends Dexie {
 
 
 
+
+
 const timetableDb = new CalendarTimetableDatabase();
+
+
 
 
 
@@ -207,6 +215,8 @@ const deleteCalendarTimetablePeriod = async (periodId: string): Promise<void> =>
     }));
   });
 };
+
+
 
 
 

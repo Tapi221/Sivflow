@@ -3,6 +3,8 @@ import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 
 
 
+
+
 export type UploadedImageStatus = "pending" | "uploading" | "ready" | "failed";
 
 /** @deprecated Use UploadedImageStatus instead */
@@ -110,10 +112,10 @@ export interface UploadMetadata { id: string;
   mimeType: string;
   sizeBytes: number;
   context:
-    | "card_image"
-    | "card_audio"
-    | "pdf"
-    | { type: string; [key: string]: unknown };
+  | "card_image"
+  | "card_audio"
+  | "pdf"
+  | { type: string;[key: string]: unknown; };
   status: "pending" | "uploading" | "ready" | "failed";
   userAgent?: string;
   downloadUrl?: string;

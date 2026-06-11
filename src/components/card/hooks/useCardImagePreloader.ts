@@ -9,10 +9,12 @@ import type { Card, UploadedImage } from "@/types/domain/card";
 
 
 
+
+
 type IdleHandle = ReturnType<typeof setTimeout>;
 type RequestIdleCallback = (
   cb: () => void,
-  opts?: { timeout: number },
+  opts?: { timeout: number; },
 ) => IdleHandle;
 type CancelIdleCallback = (id: IdleHandle) => void;
 type CardCatalogEntry = {
@@ -23,6 +25,8 @@ type CardCatalogEntry = {
 
 
 
+
+
 const CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY = "sivflow_preload_debug";
 const CARD_IMAGE_PRELOAD = {
   eagerRadiusFallback: 8,
@@ -30,6 +34,8 @@ const CARD_IMAGE_PRELOAD = {
   idleExtra: 12,
   maxEagerConcurrent: 5,
 } as const;
+
+
 
 
 
@@ -85,7 +91,7 @@ const resolveImageUrl = async (img: UploadedImage, userId: string | null) => {
     try {
       const db = await getLocalDb(userId);
       const asset = (await db.images.get(assetId)) as
-        | { remoteKey?: string }
+        | { remoteKey?: string; }
         | undefined;
       const remoteKey = asset?.remoteKey;
       if (!remoteKey) return null;
@@ -133,7 +139,7 @@ const getRequestIdleCallback = (): RequestIdleCallback | null => {
     return null;
   }
 
-  return (window as unknown as { requestIdleCallback: RequestIdleCallback })
+  return (window as unknown as { requestIdleCallback: RequestIdleCallback; })
     .requestIdleCallback;
 };
 const getCancelIdleCallback = (): CancelIdleCallback | null => {
@@ -141,7 +147,7 @@ const getCancelIdleCallback = (): CancelIdleCallback | null => {
     return null;
   }
 
-  return (window as unknown as { cancelIdleCallback: CancelIdleCallback })
+  return (window as unknown as { cancelIdleCallback: CancelIdleCallback; })
     .cancelIdleCallback;
 };
 const buildCardCatalog = (cards: Card[]): CardCatalogEntry[] => {
@@ -161,7 +167,7 @@ const resolvePreloadWindow = ({
 }: {
   cardsLength: number;
   activeIndex: number;
-  renderRange?: { start: number; end: number } | null;
+  renderRange?: { start: number; end: number; } | null;
 }) => {
   const eagerStart = renderRange
     ? Math.max(0, renderRange.start - CARD_IMAGE_PRELOAD.eagerBuffer)
@@ -194,7 +200,7 @@ const useCardImagePreloader = (
   cards: Card[],
   activeIndex: number,
   userId: string | null,
-  renderRange?: { start: number; end: number } | null,
+  renderRange?: { start: number; end: number; } | null,
 ) => {
   const [readySet, setReadySet] = useState<Set<string>>(() => {
     const next = new Set<string>();
@@ -472,6 +478,8 @@ const useCardImagePreloader = (
 
   return readySet;
 };
+
+
 
 
 

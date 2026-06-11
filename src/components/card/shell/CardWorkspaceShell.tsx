@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 export type CardWorkspaceSurfaceVariant = "plain" | "dotted";
 type CardWorkspaceCaptureTarget = {
   side: CardSelectionCaptureSide;
@@ -21,10 +23,14 @@ type CardWorkspaceCaptureTarget = {
 
 
 
+
+
 const WORKSPACE_SURFACE_CLASS_NAMES: Record<CardWorkspaceSurfaceVariant, string> = {
   plain: "workspace-surface--plain",
   dotted: "workspace-surface--dotted",
 };
+
+
 
 
 
@@ -61,6 +67,8 @@ export type CardWorkspaceShellProps = { children: ReactNode;
 
 
 
+
+
 const setExternalRef = (ref: Ref<HTMLDivElement> | undefined, node: HTMLDivElement | null): void => {
   if (!ref) return;
 
@@ -69,7 +77,7 @@ const setExternalRef = (ref: Ref<HTMLDivElement> | undefined, node: HTMLDivEleme
     return;
   }
 
-  (ref as { current: HTMLDivElement | null }).current = node;
+  (ref as { current: HTMLDivElement | null; }).current = node;
 };
 const getIntersectionArea = (left: DOMRect, right: DOMRect): number => {
   const width = Math.min(left.right, right.right) - Math.max(left.left, right.left);
@@ -97,6 +105,8 @@ const resolveCaptureSide = (target: HTMLElement, rect: SelectionCaptureRect): Ca
 const resolveTaskMessage = (values: Array<string | void>): string | null => {
   return values.find((value): value is string => typeof value === "string" && value.trim().length > 0) ?? null;
 };
+
+
 
 
 

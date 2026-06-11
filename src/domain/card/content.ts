@@ -3,14 +3,20 @@ import type { Card, CardBlock, UploadedImage } from "@/types/domain/card";
 
 
 
+
+
 export type CardSide = "question" | "answer";
+
+
 
 
 
 const EMPTY_BLOCKS: CardBlock[] = [];
 const EMPTY_IMAGES: UploadedImage[] = [];
-const EMPTY_AUDIOS: Array<{ url: string; filename: string; order: number }> =
+const EMPTY_AUDIOS: Array<{ url: string; filename: string; order: number; }> =
   [];
+
+
 
 
 
@@ -38,21 +44,21 @@ export const extractCardTextFromBlocks = (blocks: CardBlock[]) => { for (const b
 };
 export const getCardText = (card: Card, side: CardSide) => { return extractCardTextFromBlocks(getCardBlocks(card, side));
 };
-export const getCardImages = (card: Card, side: CardSide) => { const images = getCardBlocks(card, side) .filter( ( block, ): block is CardBlock & { type: "image"; images: UploadedImage[] } =>
-        block.type === "image" && Array.isArray(block.images),
-    )
+export const getCardImages = (card: Card, side: CardSide) => { const images = getCardBlocks(card, side).filter((block,): block is CardBlock & { type: "image"; images: UploadedImage[]; } =>
+    block.type === "image" && Array.isArray(block.images),
+  )
     .flatMap((block) => block.images);
   return images.length > 0 ? images : EMPTY_IMAGES;
 };
-export const getCardAudios = (card: Card, side: CardSide) => { const audios = getCardBlocks(card, side) .filter( ( block, ): block is CardBlock & { type: "audio";
-        audios: Array<{ url: string; filename: string; order: number }>;
-      } => block.type === "audio" && Array.isArray(block.audios),
-    )
+export const getCardAudios = (card: Card, side: CardSide) => { const audios = getCardBlocks(card, side).filter((block,): block is CardBlock & { type: "audio";
+    audios: Array<{ url: string; filename: string; order: number; }>;
+  } => block.type === "audio" && Array.isArray(block.audios),
+  )
     .flatMap((block) => block.audios);
   return audios.length > 0 ? audios : EMPTY_AUDIOS;
 };
-export const getCardCode = (card: Card, side: CardSide) => { const codeBlock = getCardBlocks(card, side).find( (block): block is CardBlock & { type: "code"; code: CodeBlockData } =>
-      block.type === "code" && !!block.code,
+export const getCardCode = (card: Card, side: CardSide) => { const codeBlock = getCardBlocks(card, side).find((block): block is CardBlock & { type: "code"; code: CodeBlockData; } =>
+    block.type === "code" && !!block.code,
   );
   return codeBlock?.code ?? null;
 };

@@ -4,6 +4,8 @@ import type { CloudStorageStats } from "@/types";
 
 
 
+
+
 type UseCloudStorageStatsResult = {
   stats: CloudStorageStats | null;
   loading: boolean;
@@ -11,6 +13,8 @@ type UseCloudStorageStatsResult = {
   rebuilding: boolean;
   refresh: () => Promise<void>;
 };
+
+
 
 
 
@@ -23,9 +27,9 @@ const getErrorMessage = (error: unknown): string => {
     typeof error === "object" &&
     error !== null &&
     "message" in error &&
-    typeof (error as { message?: unknown }).message === "string"
+    typeof (error as { message?: unknown; }).message === "string"
   ) {
-    const message = (error as { message: string }).message.trim();
+    const message = (error as { message: string; }).message.trim();
     if (message.length > 0) {
       return message;
     }
@@ -33,7 +37,7 @@ const getErrorMessage = (error: unknown): string => {
 
   return "クラウド使用量の取得に失敗しました。";
 };
-export const useCloudStorageStats = ( userId: string | null | undefined, ): UseCloudStorageStatsResult => { const [stats, setStats] = useState<CloudStorageStats | null>(null);
+export const useCloudStorageStats = (userId: string | null | undefined,): UseCloudStorageStatsResult => { const [stats, setStats] = useState<CloudStorageStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rebuilding, setRebuilding] = useState(false);

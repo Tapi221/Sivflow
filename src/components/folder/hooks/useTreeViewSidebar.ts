@@ -4,6 +4,8 @@ import { useTreeViewSidebarHotkey } from "@/features/hotkey/useTreeViewSidebarHo
 
 
 
+
+
 export const TREE_VIEW_SIDEBAR_TOGGLE_EVENT = "sivflow:treeview-sidebar-toggle";
 const SIDEBAR_WIDTH_LIMITS = {
   min: 260,
@@ -11,6 +13,8 @@ const SIDEBAR_WIDTH_LIMITS = {
   default: 292,
 } as const;
 const SECTION_LIST_PANE_LEFT_VAR = "--sivflow-section-list-pane-left";
+
+
 
 
 

@@ -4,7 +4,11 @@ import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
 
 
+
+
 const NEW_SENTINEL = "__new__" as const;
+
+
 
 
 
@@ -20,6 +24,8 @@ export type EditorDraft = { title: string;
 
 
 
+
+
 export const makeEmptyCardFaceAttachments = (): CardFaceAttachments => ({ images: [], audios: [], references: [], });
 export const normalizeSelectedCardId = (raw: string | null) => { if (!raw) return null;
   if (raw === NEW_SENTINEL) return NEW_SENTINEL;
@@ -28,7 +34,7 @@ export const normalizeSelectedCardId = (raw: string | null) => { if (!raw) retur
 };
 export const makeNewDraft = () => { return { title: "", tags: [], isDraft: false, frontBlocks: [], backBlocks: [], frontAttachments: makeEmptyCardFaceAttachments(), backAttachments: makeEmptyCardFaceAttachments(), layoutRows: DEFAULT_LAYOUT_ROWS, };
 };
-export const sanitizeReferences = (refs: ReferenceBlockData[]) => { return (refs ?? []) .map((r) => ({ url: (r?.url ?? "").trim(), name: (r?.name ?? "").trim(), })) .filter((r) => r.url.length > 0 || r.name.length > 0);
+export const sanitizeReferences = (refs: ReferenceBlockData[]) => { return (refs ?? []).map((r) => ({ url: (r?.url ?? "").trim(), name: (r?.name ?? "").trim(), })).filter((r) => r.url.length > 0 || r.name.length > 0);
 };
 export const normalizeOrderIndex = (blocks: CardBlock[]) => { return (blocks ?? []).map((b, i) => ({ ...b, orderIndex: i }));
 };

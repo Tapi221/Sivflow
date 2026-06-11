@@ -49,8 +49,8 @@ describe("useGoogleTaskLists", () => {
   it("shows a reconnectable permission error instead of treating missing Google Tasks scope as an empty list", async () => {
     const error = new Error("Request had insufficient authentication scopes.");
 
-    (error as Error & { status?: number }).status = 403;
-    (error as Error & { googleReason?: string }).googleReason =
+    (error as Error & { status?: number; }).status = 403;
+    (error as Error & { googleReason?: string; }).googleReason =
       "insufficientPermissions";
     vi.mocked(fetchGoogleTaskLists).mockRejectedValue(error);
 

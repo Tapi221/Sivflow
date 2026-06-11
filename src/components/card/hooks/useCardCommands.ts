@@ -8,11 +8,15 @@ import type { Card, CardPatch } from "@/types";
 
 
 
-type TimestampLike = { toDate?: () => Date; seconds?: number; nanoseconds?: number };
+
+
+type TimestampLike = { toDate?: () => Date; seconds?: number; nanoseconds?: number; };
 type SortableTimestamp = Date | TimestampLike | string | number | undefined | null;
 type CardSetAddCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   addItem: (table: "cardSets", item: Record<string, unknown>) => Promise<string>;
 };
+
+
 
 
 
@@ -30,7 +34,7 @@ const toDateMillis = (value: SortableTimestamp): number => {
 export const useCardCommands = (folderId?: string) => { const { currentUser } = useAuthSession();
   const { settings } = useUserSettings();
 
-  const createCard = async (cardData: Partial<Card> & { cardSetId?: string }) => {
+  const createCard = async (cardData: Partial<Card> & { cardSetId?: string; }) => {
     if (!currentUser) throw new Error("認証が必要です");
 
     const db = await getLocalDb(currentUser.uid);
@@ -39,7 +43,7 @@ export const useCardCommands = (folderId?: string) => { const { currentUser } = 
     const now = new Date();
     const toNullableFolderId = (value: string): string | null => value.trim() === "" ? null : value;
 
-    const resolveCardSetForCreate = async (): Promise<{ cardSetId: string; folderId: string | null }> => {
+    const resolveCardSetForCreate = async (): Promise<{ cardSetId: string; folderId: string | null; }> => {
       const requestedCardSetId = typeof cardData.cardSetId === "string" ? cardData.cardSetId.trim() : "";
       if (requestedCardSetId) {
         const cardSet = await db.cardSets.get(requestedCardSetId);
@@ -131,7 +135,7 @@ export const useCardCommands = (folderId?: string) => { const { currentUser } = 
         ink: resolveInkFromCardData(cardData as Partial<Card> & Record<string, unknown>, "answer"),
         extraRows: resolveExtraRowsFromCardData(cardData as Partial<Card> & Record<string, unknown>, "answer"),
       },
-      layoutRows: normalizeLayoutRows((cardData as unknown as { layoutRows?: unknown; layout_rows?: unknown }).layoutRows ?? (cardData as unknown as { layoutRows?: unknown; layout_rows?: unknown }).layout_rows ?? DEFAULT_LAYOUT_ROWS),
+      layoutRows: normalizeLayoutRows((cardData as unknown as { layoutRows?: unknown; layout_rows?: unknown; }).layoutRows ?? (cardData as unknown as { layoutRows?: unknown; layout_rows?: unknown; }).layout_rows ?? DEFAULT_LAYOUT_ROWS),
       memoryStability: 0,
       ...(cardData.currentLevel != null ? { currentLevel: cardData.currentLevel } : {}),
       nextReviewDate,

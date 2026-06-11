@@ -2,9 +2,13 @@ export type LibraryContentType = "pdf" | "flashcards";
 
 
 
+
+
 export const LIBRARY_ROOT_PATH = "/library";
 export const LIBRARY_PDF_PATH = "/library/pdf";
 export const LIBRARY_FLASHCARD_PATH = "/library/flashcard";
+
+
 
 
 
@@ -12,7 +16,7 @@ const normalizePathname = (pathname: string): string => {
   const normalized = pathname.toLowerCase().replace(/\/+$/, "");
   return normalized || "/";
 };
-export const resolveLibraryTypeFromPathname = ( pathname: string, ): LibraryContentType | null => { switch (normalizePathname(pathname)) { case LIBRARY_PDF_PATH: return "pdf";
+export const resolveLibraryTypeFromPathname = (pathname: string,): LibraryContentType | null => { switch (normalizePathname(pathname)) { case LIBRARY_PDF_PATH: return "pdf";
     case LIBRARY_FLASHCARD_PATH:
     case "/library/flashcards":
       return "flashcards";
@@ -20,7 +24,7 @@ export const resolveLibraryTypeFromPathname = ( pathname: string, ): LibraryCont
       return null;
   }
 };
-export const resolveLibraryTypeFromSearchParams = ( searchParams: URLSearchParams, ): LibraryContentType | null => { const libraryType = searchParams.get("libraryType");
+export const resolveLibraryTypeFromSearchParams = (searchParams: URLSearchParams,): LibraryContentType | null => { const libraryType = searchParams.get("libraryType");
 
   if (libraryType === "pdf") return "pdf";
   if (libraryType === "flashcard" || libraryType === "flashcards") {
@@ -29,7 +33,7 @@ export const resolveLibraryTypeFromSearchParams = ( searchParams: URLSearchParam
 
   return null;
 };
-export const resolveLibraryTypeFromLocation = ( pathname: string, searchParams: URLSearchParams, ): LibraryContentType | null => { return ( resolveLibraryTypeFromPathname(pathname) ?? resolveLibraryTypeFromSearchParams(searchParams) );
+export const resolveLibraryTypeFromLocation = (pathname: string, searchParams: URLSearchParams,): LibraryContentType | null => { return (resolveLibraryTypeFromPathname(pathname) ?? resolveLibraryTypeFromSearchParams(searchParams));
 };
 export const isLibraryPathname = (pathname: string): boolean => { const normalizedPathname = normalizePathname(pathname);
 

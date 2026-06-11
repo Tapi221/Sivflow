@@ -4,11 +4,15 @@ import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 
 
 
+
+
 export type NormalizeUploadedImageOptions = { onInvalid?: "skip" | "throw";
 };
 export type DenormalizeUploadedImageOptions = { case?: "camel" | "snake";
   stripUndefined?: boolean;
 };
+
+
 
 
 
@@ -153,7 +157,7 @@ const normalizeUploadedImage = (
     naturalH: naturalH ?? null,
   };
 };
-export const normalizeUploadedImages = ( raw: unknown, options: NormalizeUploadedImageOptions = {}, ) => { if (raw == null) return [];
+export const normalizeUploadedImages = (raw: unknown, options: NormalizeUploadedImageOptions = {},) => { if (raw == null) return [];
   const items = Array.isArray(raw) ? raw : [raw];
 
   return items
@@ -190,12 +194,12 @@ const denormalizeUploadedImage = (
         storage_path: image.storagePath ?? null,
         status: image.status,
         layout:
-            image.layout != null
-              ? {
-                base_width_px: image.layout.baseWidthPx ?? null,
-                crop_x: image.layout.cropX ?? null,
-              }
-              : null,
+          image.layout != null
+            ? {
+              base_width_px: image.layout.baseWidthPx ?? null,
+              crop_x: image.layout.cropX ?? null,
+            }
+            : null,
       }
       : {
         id: image.id,
@@ -207,12 +211,12 @@ const denormalizeUploadedImage = (
         storagePath: image.storagePath ?? null,
         status: image.status,
         layout:
-            image.layout != null
-              ? {
-                baseWidthPx: image.layout.baseWidthPx ?? null,
-                cropX: image.layout.cropX ?? null,
-              }
-              : null,
+          image.layout != null
+            ? {
+              baseWidthPx: image.layout.baseWidthPx ?? null,
+              cropX: image.layout.cropX ?? null,
+            }
+            : null,
       };
 
   if (options.stripUndefined) {
@@ -225,20 +229,20 @@ const denormalizeUploadedImage = (
 
   return output;
 };
-export const denormalizeUploadedImages = ( images: Array<{ id: string;
-    assetId?: string | null;
-    localFileId?: string | null;
-    localUrl?: string | null;
-    remoteUrl?: string | null;
-    status: "uploading" | "ready" | "failed";
-    contentType?: string | null;
-    size?: number | null;
-    storagePath?: string | null;
-    layout?: {
-      baseWidthPx?: number | null;
-      cropX?: number | null;
-    } | null;
-  }>,
+export const denormalizeUploadedImages = (images: Array<{ id: string;
+  assetId?: string | null;
+  localFileId?: string | null;
+  localUrl?: string | null;
+  remoteUrl?: string | null;
+  status: "uploading" | "ready" | "failed";
+  contentType?: string | null;
+  size?: number | null;
+  storagePath?: string | null;
+  layout?: {
+    baseWidthPx?: number | null;
+    cropX?: number | null;
+  } | null;
+}>,
   options: DenormalizeUploadedImageOptions = {},
 ) => {
   return images.map((image) => denormalizeUploadedImage(image, options));

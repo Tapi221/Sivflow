@@ -29,6 +29,8 @@ import { toMillisOrNull } from "@/utils/toMillis";
 
 
 
+
+
 type CardEditorPaneSettings = {
   accentColor?: string;
   duplicateToOpposite?: boolean;
@@ -98,7 +100,11 @@ type EditorSidePaneProps = {
 
 
 
+
+
 const EMPTY_BLOCKS: CardBlock[] = [];
+
+
 
 
 
@@ -166,11 +172,11 @@ const areEditorSidePanePropsEqual = (
   prev.dockToolbarInsideCardEdge === next.dockToolbarInsideCardEdge &&
   prev.presentationState.isActiveCard === next.presentationState.isActiveCard &&
   prev.presentationState.isInteractiveCard ===
-    next.presentationState.isInteractiveCard &&
+  next.presentationState.isInteractiveCard &&
   prev.presentationState.showEditingOutline ===
-    next.presentationState.showEditingOutline &&
+  next.presentationState.showEditingOutline &&
   prev.presentationState.showActiveChrome ===
-    next.presentationState.showActiveChrome &&
+  next.presentationState.showActiveChrome &&
   prev.enableBlockSelectionState === next.enableBlockSelectionState &&
   prev.showResizeHandle === next.showResizeHandle &&
   prev.displayMode === next.displayMode &&
@@ -181,6 +187,8 @@ const areEditorSidePanePropsEqual = (
   prev.actionsTopLeft === next.actionsTopLeft &&
   prev.actionsTopRight === next.actionsTopRight &&
   prev.overlayTopRight === next.overlayTopRight;
+
+
 
 
 
@@ -219,7 +227,7 @@ const EditorSidePaneInner = ({
   const frameClassName = cn(
     buildCardShellClassName(presentationState),
     displayMode === "fluid" &&
-      "rounded-none border-none bg-transparent shadow-none",
+    "rounded-none border-none bg-transparent shadow-none",
   );
 
   const [internalToolbarMount, _setInternalToolbarMount] =
@@ -320,8 +328,12 @@ const EditorSidePaneInner = ({
 
 
 
+
+
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 EditorSidePane.displayName = "EditorSidePane";
+
+
 
 
 
@@ -537,10 +549,10 @@ export const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPane
     return (
       lastSavedAt?.getTime() ??
       toTimeMs(
-        (selectedCardEntity as { updatedAt?: unknown } | null)?.updatedAt,
+        (selectedCardEntity as { updatedAt?: unknown; } | null)?.updatedAt,
       ) ??
       toTimeMs(
-        (selectedCardEntity as { createdAt?: unknown } | null)?.createdAt,
+        (selectedCardEntity as { createdAt?: unknown; } | null)?.createdAt,
       ) ??
       null
     );
@@ -992,8 +1004,8 @@ export const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPane
               className={cn(
                 "flex w-full flex-col items-center gap-4",
                 embeddedInPager &&
-                  forcedPaneWidthPx == null &&
-                  (dockToolbarsToTop ? "max-w-[1000px]" : "max-w-[820px]"),
+                forcedPaneWidthPx == null &&
+                (dockToolbarsToTop ? "max-w-[1000px]" : "max-w-[820px]"),
               )}
               style={{
                 ...(activePaneWidthStyle ?? {}),

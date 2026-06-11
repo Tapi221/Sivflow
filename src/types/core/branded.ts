@@ -8,7 +8,7 @@
  * 用途: 一時的なプレビュー表示のみ
  * 禁止: DB保存、同期データへの混入
  */
-export type BlobUrl = string & { readonly __brand: "BlobUrl" };
+export type BlobUrl = string & { readonly __brand: "BlobUrl"; };
 
 /**
  * Firebase Storage URL 専用型
@@ -17,7 +17,7 @@ export type BlobUrl = string & { readonly __brand: "BlobUrl" };
  * 用途: クラウドに保存された画像の参照
  * 禁止: Base64、Blob URL、ローカルパス
  */
-export type StorageUrl = string & { readonly __brand: "StorageUrl" };
+export type StorageUrl = string & { readonly __brand: "StorageUrl"; };
 
 /**
  * Base64 Data URL 専用型
@@ -26,7 +26,11 @@ export type StorageUrl = string & { readonly __brand: "StorageUrl" };
  * 用途: 計算途中の一時変数のみ
  * 禁止: DB保存、UploadedImage への代入
  */
-export type Base64DataUrl = string & { readonly __brand: "Base64DataUrl" };
+export type Base64DataUrl = string & { readonly __brand: "Base64DataUrl"; };
+
+
+
+
 
 
 

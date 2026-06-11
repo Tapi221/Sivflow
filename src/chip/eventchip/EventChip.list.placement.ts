@@ -5,6 +5,8 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 
 
 
+
+
 export type CalendarListPlacementDay = { date: Date;
   dateKey: string;
   events: GoogleCalendarEvent[];
@@ -21,6 +23,8 @@ export type CalendarListVirtualRange = { start: number;
 
 
 
+
+
 export const LIST_DAY_SECTION_MIN_HEIGHT_PX = 430;
 export const LIST_DAY_GAP_PX = 8;
 export const LIST_EMPTY_DAY_HEIGHT_PX = 38;
@@ -30,6 +34,8 @@ export const LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX = eventChipDesign.list.allDayRowHe
 export const LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX = eventChipDesign.list.allDayChipHeightPx;
 export const LIST_EVENT_ROW_GAP_PX = 6;
 export const LIST_VIRTUAL_OVERSCAN_PX = 6000;
+
+
 
 
 
@@ -134,7 +140,7 @@ export const buildListVirtualMetrics = (days: CalendarListPlacementDay[]): Calen
 
   return { heights, offsets, totalHeight };
 };
-export const getListVirtualRange = ( metrics: CalendarListVirtualMetrics, scrollTop: number, viewportHeight: number, ): CalendarListVirtualRange => { if (metrics.heights.length === 0) return { start: 0, end: 0 };
+export const getListVirtualRange = (metrics: CalendarListVirtualMetrics, scrollTop: number, viewportHeight: number,): CalendarListVirtualRange => { if (metrics.heights.length === 0) return { start: 0, end: 0 };
 
   const rangeStartOffset = Math.max(0, scrollTop - LIST_VIRTUAL_OVERSCAN_PX);
   const rangeEndOffset = scrollTop + viewportHeight + LIST_VIRTUAL_OVERSCAN_PX;
@@ -150,8 +156,8 @@ export const getListVirtualRange = ( metrics: CalendarListVirtualMetrics, scroll
     end: Math.min(metrics.heights.length, end + 1),
   };
 };
-export const areListVirtualRangesEqual = ( left: CalendarListVirtualRange, right: CalendarListVirtualRange, ): boolean => left.start === right.start && left.end === right.end;
-export const getListVisibleDate = ( days: CalendarListPlacementDay[], metrics: CalendarListVirtualMetrics, targetOffset: number, ): Date | null => { const index = findVirtualIndex(metrics.offsets, targetOffset);
+export const areListVirtualRangesEqual = (left: CalendarListVirtualRange, right: CalendarListVirtualRange,): boolean => left.start === right.start && left.end === right.end;
+export const getListVisibleDate = (days: CalendarListPlacementDay[], metrics: CalendarListVirtualMetrics, targetOffset: number,): Date | null => { const index = findVirtualIndex(metrics.offsets, targetOffset);
 
   return days[index]?.date ?? null;
 };

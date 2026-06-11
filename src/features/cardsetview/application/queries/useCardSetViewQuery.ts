@@ -7,6 +7,8 @@ import type { CardSet } from "@/types/domain/cardSet";
 
 
 
+
+
 type ReorderCardsInCardSet = (cardSetId: string, cardIds: string[]) => Promise<void>;
 interface UseCardSetViewQueryOptions {
   cardSetId: string | null;
@@ -18,7 +20,7 @@ interface UseCardSetViewQueryResult {
   sortedCards: Card[];
   cardIndexById: Map<string, number>;
   createCard: (
-    cardData: Partial<Card> & { cardSetId: string },
+    cardData: Partial<Card> & { cardSetId: string; },
   ) => Promise<unknown>;
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
   updateCardSet: (
@@ -33,6 +35,8 @@ interface UseCardSetViewQueryResult {
   reorderCardsInCardSet: ReorderCardsInCardSet;
   isLoading: boolean;
 }
+
+
 
 
 
@@ -82,7 +86,7 @@ export const useCardSetViewQuery = ({ cardSetId, }: UseCardSetViewQueryOptions):
   }, [sortedCards]);
 
   const createCardForView = useCallback(
-    async (cardData: Partial<Card> & { cardSetId: string }) => {
+    async (cardData: Partial<Card> & { cardSetId: string; }) => {
       return createCard(cardData);
     },
     [createCard],

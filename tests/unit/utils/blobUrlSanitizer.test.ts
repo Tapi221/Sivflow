@@ -2,14 +2,14 @@ import { describe, expect, it } from "vitest";
 import { isBlobUrl, sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
 
 type SanitizedSample = {
-  questionBlocks: Array<{ images: Array<{ localUrl: string | null }> }>;
-  answer: { image: { url: string | null } };
+  questionBlocks: Array<{ images: Array<{ localUrl: string | null; }>; }>;
+  answer: { image: { url: string | null; }; };
 };
 
 type SanitizedWithTime = {
   updatedAt: Date;
-  createdAt: { seconds: number; nanoseconds: number; toDate: () => Date };
-  nested: { url: string | null };
+  createdAt: { seconds: number; nanoseconds: number; toDate: () => Date; };
+  nested: { url: string | null; };
 };
 
 describe("blobUrlSanitizer", () => {

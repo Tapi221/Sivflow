@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type ImageBlockShellProps = {
   children: React.ReactNode;
   className?: string;
@@ -11,5 +13,7 @@ type ImageBlockShellProps = {
 
 
 
-export const ImageBlockShell = ({ children, className, }: ImageBlockShellProps) => { return ( <BlockInset variant="image"> <div className={cn("relative rounded-[11px] overflow-hidden", className)}> {children} </div> </BlockInset> );
+
+
+export const ImageBlockShell = ({ children, className, }: ImageBlockShellProps) => { return (<BlockInset variant="image"> <div className={cn("relative rounded-[11px] overflow-hidden", className)}> {children} </div> </BlockInset>);
 };

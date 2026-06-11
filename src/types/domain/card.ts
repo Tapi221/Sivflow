@@ -6,18 +6,20 @@ import type { CodeBlockData } from "@/types/core/code-block";
 
 
 
+
+
 export type { UploadedImage };
 export type CardBlock = { id: string;
   type:
-    | "text"
-    | "question"
-    | "code"
-    | "image"
-    | "pdf"
-    | "audio"
-    | "reference"
-    | "math"
-    | "markdown";
+  | "text"
+  | "question"
+  | "code"
+  | "image"
+  | "pdf"
+  | "audio"
+  | "reference"
+  | "math"
+  | "markdown";
   orderIndex: number;
   rowOffset?: number;
   offsetRows?: number;
@@ -29,7 +31,7 @@ export type CardBlock = { id: string;
   images?: UploadedImage[];
   pdf?: UploadedPdf;
   pdfPageNumber?: number;
-  audios?: Array<{ url: string; filename: string; order: number }>;
+  audios?: Array<{ url: string; filename: string; order: number; }>;
   references?: ReferenceBlockData[];
   math?: MathBlockData;
   markdown?: string;
@@ -83,6 +85,6 @@ export type Card = BaseEntity & { cardSetId: string;
   lastSyncedByDeviceId?: string | null;
   _rescueRaw?: unknown;
 };
-export type CardPatch = Omit< Partial<Card>, "front" | "back" | "cardSetId" | "folderId" > & { front?: Partial<CardFace>;
+export type CardPatch = Omit<Partial<Card>, "front" | "back" | "cardSetId" | "folderId"> & { front?: Partial<CardFace>;
   back?: Partial<CardFace>;
 };

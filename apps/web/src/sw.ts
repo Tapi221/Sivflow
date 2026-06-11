@@ -10,6 +10,8 @@ import { CacheFirst, NetworkFirst } from "workbox-strategies";
 
 
 
+
+
 declare global {
   interface ServiceWorkerGlobalScope {
     // Workbox が定義している型に合わせる（TS2717潰し）
@@ -25,14 +27,18 @@ type ViteEnv = {
 
 
 
+
+
 declare let self: ServiceWorkerGlobalScope;
-const env = (import.meta as ImportMeta & { env?: ViteEnv }).env;
+const env = (import.meta as ImportMeta & { env?: ViteEnv; }).env;
 const cacheVersion = env?.VITE_BUILD_VERSION ?? env?.GITHUB_SHA ?? "dev";
 
 
 
+
+
 self.addEventListener("message", (event) => {
-  if (event.data && (event.data as { type?: string }).type === "SKIP_WAITING") {
+  if (event.data && (event.data as { type?: string; }).type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
@@ -82,6 +88,8 @@ setCatchHandler(async ({ request }) => {
   }
   return Response.error();
 });
+
+
 
 
 

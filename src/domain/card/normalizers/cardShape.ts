@@ -3,11 +3,15 @@ import { type InkDocument, normalizeInkDocument } from "@core/domain/card/ink/in
 
 
 
+
+
 type CardLike = Partial<Record<string, unknown>>;
 type CardFaceSide = "question" | "answer";
 type ResolveCardShapeOptions = {
   emptyInkAsNull?: boolean;
 };
+
+
 
 
 
@@ -22,7 +26,7 @@ const getLegacyExtraRowsKeys = (side: CardFaceSide) => {
     ? (["questionExtraRows", "question_extra_rows"] as const)
     : (["answerExtraRows", "answer_extra_rows"] as const);
 };
-export const resolveBlocksFromCardData = ( value: CardLike, side: CardFaceSide, ) => { const aliasKey = side === "question" ? "frontBlocks" : "backBlocks";
+export const resolveBlocksFromCardData = (value: CardLike, side: CardFaceSide,) => { const aliasKey = side === "question" ? "frontBlocks" : "backBlocks";
   const legacyKey = getLegacyBlocksKey(side);
   const faceKey = side === "question" ? "front" : "back";
   const face = value[faceKey];
@@ -30,9 +34,9 @@ export const resolveBlocksFromCardData = ( value: CardLike, side: CardFaceSide, 
   if (
     face &&
     typeof face === "object" &&
-    Array.isArray((face as { blocks?: unknown[] }).blocks)
+    Array.isArray((face as { blocks?: unknown[]; }).blocks)
   ) {
-    return (face as { blocks: unknown[] }).blocks;
+    return (face as { blocks: unknown[]; }).blocks;
   }
 
   const aliased = value[aliasKey];
@@ -42,12 +46,12 @@ export const resolveBlocksFromCardData = ( value: CardLike, side: CardFaceSide, 
 
   return [];
 };
-export const resolveInkFromCardData = ( value: CardLike, side: CardFaceSide, options?: ResolveCardShapeOptions, ): InkDocument | null => { const faceKey = side === "question" ? "front" : "back";
+export const resolveInkFromCardData = (value: CardLike, side: CardFaceSide, options?: ResolveCardShapeOptions,): InkDocument | null => { const faceKey = side === "question" ? "front" : "back";
   const legacyKey = getLegacyInkKey(side);
   const face = value[faceKey];
   const faceInk =
     face && typeof face === "object"
-      ? (face as { ink?: unknown }).ink
+      ? (face as { ink?: unknown; }).ink
       : undefined;
   const document = normalizeInkDocument(faceInk ?? value[legacyKey] ?? null);
 
@@ -57,12 +61,12 @@ export const resolveInkFromCardData = ( value: CardLike, side: CardFaceSide, opt
 
   return document;
 };
-export const resolveExtraRowsFromCardData = ( value: CardLike, side: CardFaceSide, ) => { const faceKey = side === "question" ? "front" : "back";
+export const resolveExtraRowsFromCardData = (value: CardLike, side: CardFaceSide,) => { const faceKey = side === "question" ? "front" : "back";
   const [legacyKey, snakeKey] = getLegacyExtraRowsKeys(side);
   const face = value[faceKey];
   const faceExtraRows =
     face && typeof face === "object"
-      ? (face as { extraRows?: unknown }).extraRows
+      ? (face as { extraRows?: unknown; }).extraRows
       : undefined;
 
   return normalizeExtraRows(

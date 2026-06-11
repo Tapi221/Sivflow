@@ -13,6 +13,8 @@ import { useLayeredTreeDragDrop } from "./useLayeredTreeDragDrop";
 
 
 
+
+
 type TagTreeNode = {
   id: string;
   name: string;
@@ -48,8 +50,12 @@ type TagMovePatch = {
 
 
 
+
+
 const LIBRARY_TITLE = "Library";
 const EMPTY_TAG_MESSAGE = "タグがありません";
+
+
 
 
 
@@ -120,7 +126,9 @@ const flattenVisibleTagTree = (nodes: TagTreeNode[], expandedTagIds: Set<string>
 
 
 
-const IconChevronRight = ({ className }: { className?: string }) => (<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
+
+
+const IconChevronRight = ({ className }: { className?: string; }) => (<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
 const TagTreeRow = ({ item, selectedTagNames, dragState, onToggleTag, onSelectTag, onTagDragStart, onTagDragOver, onTagDragLeave, onTagDrop, onTagDragEnd }: TagTreeRowProps) => {
   const isSelected = selectedTagNames.has(item.name);
   const isDragging = dragState.draggingId === item.id;
@@ -209,6 +217,8 @@ const TagTreeSidebar = () => {
 
   return <aside aria-label="Tag tree explorer" className="h-full min-h-0 overflow-hidden"><div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto px-3 pb-3 pt-1"><div role="tree" aria-label="タグツリー" className="flex min-h-full flex-col gap-0.5" onDragOver={handleListDragOver} onDragLeave={handleListDragLeave} onDrop={handleListDrop}>{visibleTagItems.length > 0 ? visibleTagItems.map((item) => <TagTreeRow key={item.id} item={item} selectedTagNames={selectedTagNames} dragState={dragState} onToggleTag={handleToggleTag} onSelectTag={handleSelectTag} onTagDragStart={handleItemDragStart} onTagDragOver={handleItemDragOver} onTagDragLeave={handleItemDragLeave} onTagDrop={handleItemDrop} onTagDragEnd={handleItemDragEnd} />) : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">{EMPTY_TAG_MESSAGE}</p>}{isAppendingToRoot ? <LayeredTreeDropIndicator position="append" left={LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX} className="mx-2" /> : null}<div aria-hidden="true" className="min-h-8 flex-1" /></div></div></aside>;
 };
+
+
 
 
 

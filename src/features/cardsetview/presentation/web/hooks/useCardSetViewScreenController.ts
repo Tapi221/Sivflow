@@ -22,6 +22,8 @@ import { useCardSetViewZoomInput } from "./useCardSetViewZoomInput";
 
 
 
+
+
 type ScrollAnchorFace = "question" | "answer";
 type UseCardSetViewScreenControllerParams = {
   cardSetId?: string | null;
@@ -29,7 +31,9 @@ type UseCardSetViewScreenControllerParams = {
 
 
 
-const buildNavigationScopeKey = ({ deviceScope, cardSetId }: { deviceScope: string; cardSetId: string | null }) => {
+
+
+const buildNavigationScopeKey = ({ deviceScope, cardSetId }: { deviceScope: string; cardSetId: string | null; }) => {
   if (!cardSetId) return null;
 
   return [deviceScope, cardSetId].join("::");

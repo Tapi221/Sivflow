@@ -5,6 +5,8 @@ import type { CardSet } from "@/types/domain/cardSet";
 
 
 
+
+
 type ReorderCardsInCardSet = (cardSetId: string, cardIds: string[]) => Promise<void>;
 interface UseCardSetViewStateOptions {
   initialIndex: number;
@@ -14,7 +16,7 @@ interface UseCardSetViewStateOptions {
   sortedCards: Card[];
   cardIndexById: Map<string, number>;
   createCard: (
-    cardData: Partial<Card> & { cardSetId: string },
+    cardData: Partial<Card> & { cardSetId: string; },
   ) => Promise<unknown>;
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
   reorderCardsInCardSet: ReorderCardsInCardSet;
@@ -22,6 +24,8 @@ interface UseCardSetViewStateOptions {
   toastError: (msg: string) => void;
   deviceScope: string;
 }
+
+
 
 
 

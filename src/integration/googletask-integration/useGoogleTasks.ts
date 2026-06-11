@@ -8,6 +8,8 @@ import type { GoogleTaskListAccountState } from "./useGoogleTaskLists";
 
 
 
+
+
 export type GoogleTasksAccountState = { tasks: GoogleTaskItem[];
   isLoading: boolean;
   error: string | null;
@@ -25,13 +27,13 @@ export type GoogleTaskPatchInput = { title?: string;
 };
 type GoogleTasksState = Record<string, GoogleTasksAccountState>;
 type GoogleTasksAction =
-  | { type: "START"; accountId: string }
-  | { type: "SUCCESS"; accountId: string; tasks: GoogleTaskItem[] }
-  | { type: "ERROR"; accountId: string; error: string }
-  | { type: "UPSERT_TASK"; accountId: string; task: GoogleTaskItem }
-  | { type: "DELETE_TASK"; accountId: string; taskListId: string; taskId: string }
-  | { type: "MOVE_TASK"; accountId: string; sourceTaskListId: string; task: GoogleTaskItem }
-  | { type: "REMOVE_MISSING_ACCOUNTS"; accountIds: string[] };
+  | { type: "START"; accountId: string; }
+  | { type: "SUCCESS"; accountId: string; tasks: GoogleTaskItem[]; }
+  | { type: "ERROR"; accountId: string; error: string; }
+  | { type: "UPSERT_TASK"; accountId: string; task: GoogleTaskItem; }
+  | { type: "DELETE_TASK"; accountId: string; taskListId: string; taskId: string; }
+  | { type: "MOVE_TASK"; accountId: string; sourceTaskListId: string; task: GoogleTaskItem; }
+  | { type: "REMOVE_MISSING_ACCOUNTS"; accountIds: string[]; };
 type AccountTokenSnapshot = {
   accountId: string;
   accessToken: string | null;
@@ -39,6 +41,8 @@ type AccountTokenSnapshot = {
   connectionStatus: GoogleConnectedServiceAccountEntry["connectionStatus"];
   taskLists: GoogleTaskListItem[];
 };
+
+
 
 
 
@@ -51,10 +55,12 @@ const DEFAULT_POLL_INTERVAL_MS = 10_000;
 
 
 
+
+
 const toErrorMessage = (error: unknown) => {
   if (!(error instanceof Error)) return String(error);
 
-  const status = (error as Error & { status?: number }).status;
+  const status = (error as Error & { status?: number; }).status;
 
   if (status === 401 || status === 403) {
     return "Google ToDo を自動復旧中です。";
@@ -64,8 +70,8 @@ const toErrorMessage = (error: unknown) => {
 };
 const isUnauthorizedError = (error: unknown): boolean =>
   error instanceof Error &&
-  ((error as Error & { status?: number }).status === 401 ||
-    (error as Error & { status?: number }).status === 403);
+  ((error as Error & { status?: number; }).status === 401 ||
+    (error as Error & { status?: number; }).status === 403);
 const getRecoverableAccessToken = async (
   account: AccountTokenSnapshot,
   onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,
@@ -317,7 +323,7 @@ const buildAccountTokenKey = (
       ].join("\t");
     })
     .join("\n");
-export const useGoogleTasks = ( accounts: GoogleConnectedServiceAccountEntry[], taskListsByAccount: Record<string, GoogleTaskListAccountState>, onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void, ) => { const [state, dispatch] = useReducer(reduceGoogleTasks, {});
+export const useGoogleTasks = (accounts: GoogleConnectedServiceAccountEntry[], taskListsByAccount: Record<string, GoogleTaskListAccountState>, onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,) => { const [state, dispatch] = useReducer(reduceGoogleTasks, {});
 
   const accountTokenKey = buildAccountTokenKey(accounts, taskListsByAccount);
 

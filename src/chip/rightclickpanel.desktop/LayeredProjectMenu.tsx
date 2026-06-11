@@ -4,6 +4,8 @@ import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLIC
 
 
 
+
+
 type LayeredProjectMenuItemDefinition = {
   id: LayeredProjectMenuActionId;
   label: string;
@@ -30,6 +32,8 @@ type LayeredProjectMenuProps = {
   onOpenSubmenu?: (id: LayeredProjectMenuActionId, anchor: LayeredProjectMenuSubmenuAnchor) => void;
   onCloseSubmenu?: () => void;
 };
+
+
 
 
 
@@ -94,12 +98,16 @@ const LAYERED_PROJECT_MENU_STYLE = `
 
 
 
+
+
 const getLayeredProjectMenuAction = (actions: LayeredProjectMenuAction[], id: LayeredProjectMenuActionId) => actions.find((action) => action.id === id);
 const getLayeredProjectMenuSubmenuAnchor = (index: number): LayeredProjectMenuSubmenuAnchor => {
   const separatorOffset = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.slice(0, index).filter((item) => item.separatorBefore).length * LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT;
 
   return { itemOffsetY: RIGHT_CLICK_PANEL_SURFACE_PADDING + index * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + separatorOffset };
 };
+
+
 
 
 
@@ -130,6 +138,8 @@ const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId =
     </>
   );
 };
+
+
 
 
 

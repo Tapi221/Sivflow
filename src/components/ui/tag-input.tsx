@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface TagInputProps {
   tags: string[];
   onChange: (tags: string[]) => void;
@@ -20,6 +22,8 @@ interface TagInputProps {
   className?: string;
   quietHover?: boolean;
 }
+
+
 
 
 
@@ -126,7 +130,7 @@ export const TagInput = ({ tags = [], onChange, placeholder = "タグを選択..
                             badgeClassName={cn(
                               "select-none",
                               quietHover &&
-                                "transition-none shadow-none [&_button]:hover:bg-transparent [&_button]:hover:text-slate-500",
+                              "transition-none shadow-none [&_button]:hover:bg-transparent [&_button]:hover:text-slate-500",
                               snapshot.isDragging && "scale-105 shadow-md z-50",
                             )}
                             onRemove={() => handleUnselect(tag)}
@@ -192,43 +196,43 @@ export const TagInput = ({ tags = [], onChange, placeholder = "タグを選択..
               !uniqueTags.some(
                 (tag) => tag.toLowerCase() === inputValue.toLowerCase(),
               ) && (
-              <div className="p-3 space-y-3">
-                <div
-                  className="ds-tag-input__create flex items-center gap-2 p-2 cursor-pointer text-xs font-bold"
-                  onClick={handleCreateTag}
-                >
-                  <Plus className="w-4 h-4" />「{inputValue}」を新しく作成
-                </div>
-
-                <div className="px-1">
-                  <div className="ds-command__group-title mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
-                    <Palette className="w-3.5 h-3.5" /> カラーを選択
+                <div className="p-3 space-y-3">
+                  <div
+                    className="ds-tag-input__create flex items-center gap-2 p-2 cursor-pointer text-xs font-bold"
+                    onClick={handleCreateTag}
+                  >
+                    <Plus className="w-4 h-4" />「{inputValue}」を新しく作成
                   </div>
-                  <div className="ds-tag-input__swatches flex flex-wrap gap-2.5 p-2">
-                    {availableColors.map((colorKey) => (
-                      <button
-                        type="button"
-                        key={colorKey}
-                        aria-label={`${colorKey}を選択`}
-                        className={cn(
-                          "w-7 h-7 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all",
-                          selectedColor === colorKey ||
+
+                  <div className="px-1">
+                    <div className="ds-command__group-title mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
+                      <Palette className="w-3.5 h-3.5" /> カラーを選択
+                    </div>
+                    <div className="ds-tag-input__swatches flex flex-wrap gap-2.5 p-2">
+                      {availableColors.map((colorKey) => (
+                        <button
+                          type="button"
+                          key={colorKey}
+                          aria-label={`${colorKey}を選択`}
+                          className={cn(
+                            "w-7 h-7 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all",
+                            selectedColor === colorKey ||
                               (!selectedColor &&
                                 colorKey === availableColors[0])
-                            ? "ring-2 ring-offset-2 ring-primary-600 scale-110 shadow-md"
-                            : "hover:scale-105 hover:ring-slate-400",
-                        )}
-                        style={getTagColorSwatchStyle(colorKey)}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedColor(colorKey);
-                        }}
-                      />
-                    ))}
+                              ? "ring-2 ring-offset-2 ring-primary-600 scale-110 shadow-md"
+                              : "hover:scale-105 hover:ring-slate-400",
+                          )}
+                          style={getTagColorSwatchStyle(colorKey)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedColor(colorKey);
+                          }}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
             <CommandGroup
               heading={

@@ -5,21 +5,25 @@ import { requestConnectedServiceAccessToken, requestGoogleCalendarServerCode } f
 
 
 
+
+
 const GOOGLE_DRIVE_FILE_SCOPE = "https://www.googleapis.com/auth/drive.file";
 const GOOGLE_DRIVE_RECONNECT_REQUIRED_CODE = "failed-precondition";
 const GOOGLE_OAUTH_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 
 
 
+
+
 const createGoogleDriveReconnectRequiredError = (): Error => {
   const error = new Error("Google Drive の再認可が必要です");
-  (error as Error & { code?: string }).code = GOOGLE_DRIVE_RECONNECT_REQUIRED_CODE;
+  (error as Error & { code?: string; }).code = GOOGLE_DRIVE_RECONNECT_REQUIRED_CODE;
   return error;
 };
 const readGrantedScopes = async (accessToken: string): Promise<Set<string>> => {
   const response = await fetch(`${GOOGLE_OAUTH_TOKENINFO_ENDPOINT}?${new URLSearchParams({ access_token: accessToken })}`);
   if (!response.ok) return new Set();
-  const payload = (await response.json()) as { scope?: string };
+  const payload = (await response.json()) as { scope?: string; };
   return new Set((payload.scope ?? "").split(/\s+/).filter(Boolean));
 };
 const assertGoogleDriveFileScope = async (accessToken: string): Promise<void> => {

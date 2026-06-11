@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 const alertVariants = cva(
   "relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7",
   {
@@ -22,9 +24,11 @@ const alertVariants = cva(
 
 
 
+
+
 const Alert = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { variant?: "default" | "destructive" }
+  React.HTMLAttributes<HTMLDivElement> & { variant?: "default" | "destructive"; }
 >(({ className, variant, ...props }, ref) => (
   <div
     ref={ref}
@@ -53,6 +57,8 @@ const AlertDescription = React.forwardRef<
     {...props}
   />
 ));
+
+
 
 
 

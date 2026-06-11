@@ -26,7 +26,7 @@ import { voidRemoveSuggestionOverlayVariants } from './suggestion-node-static';
 
 const suggestionPlugin = SuggestionPlugin as WithRequiredKey<SuggestionConfig>;
 
-export const suggestionVariants = cva( cn( 'bg-emerald-100 text-emerald-700 no-underline transition-colors duration-200' ), { defaultVariants: { insertActive: false, remove: false, removeActive: false, }, variants: { insertActive: { false: '', true: 'bg-emerald-200/80', }, remove: { false: '', true: 'bg-red-100 text-red-700', }, removeActive: { false: '', true: 'bg-red-200/80 no-underline', }, }, } );
+export const suggestionVariants = cva(cn('bg-emerald-100 text-emerald-700 no-underline transition-colors duration-200'), { defaultVariants: { insertActive: false, remove: false, removeActive: false, }, variants: { insertActive: { false: '', true: 'bg-emerald-200/80', }, remove: { false: '', true: 'bg-red-100 text-red-700', }, removeActive: { false: '', true: 'bg-red-200/80 no-underline', }, }, });
 
 
 
@@ -46,7 +46,7 @@ export function getBlockSuggestionWrapperClassName({ elementType, isActive, isHo
   );
 }
 
-export function isVoidRemoveSuggestion(editor: PlateEditor, element: TElement) { return ( editor.getApi(SuggestionPlugin).suggestion.suggestionData(element)?.type === 'remove' );
+export function isVoidRemoveSuggestion(editor: PlateEditor, element: TElement) { return (editor.getApi(SuggestionPlugin).suggestion.suggestionData(element)?.type === 'remove');
 }
 
 
@@ -70,7 +70,8 @@ export function SuggestionLineBreakAnchor({ badgeProps, children, className, }: 
   return <>{children}{badge}</>;
 }
 
-function SuggestionLineBreakElementAnchor({ badgeProps, children, className, }: { badgeProps?: React.ComponentProps<'span'>;
+function SuggestionLineBreakElementAnchor({ badgeProps, children, className, }: {
+  badgeProps?: React.ComponentProps<'span'>;
   children: React.ReactElement<any>;
   className?: string;
 }) {
@@ -78,11 +79,11 @@ function SuggestionLineBreakElementAnchor({ badgeProps, children, className, }: 
   const badge = <span {...badgeProps} className={cn('inline-flex h-[calc(1lh+2px)] w-[1lh] shrink-0 items-center justify-center leading-none', badgeProps?.className, className)} contentEditable={false}><CornerDownLeftIcon className="relative top-px size-4" /></span>;
 
   if (children.type === 'ol' || children.type === 'ul') {
-    const childNodes = React.Children.toArray((children.props as { children?: React.ReactNode }).children);
+    const childNodes = React.Children.toArray((children.props as { children?: React.ReactNode; }).children);
     const lastIndex = childNodes.length - 1;
     const lastChild = childNodes[lastIndex];
     if (!React.isValidElement(lastChild) || lastChild.type !== 'li') return children;
-    const nextLastChild = React.cloneElement(lastChild as React.ReactElement<any>, { children: <>{(lastChild.props as { children?: React.ReactNode }).children}{badge}</> });
+    const nextLastChild = React.cloneElement(lastChild as React.ReactElement<any>, { children: <>{(lastChild.props as { children?: React.ReactNode; }).children}{badge}</> });
     return React.cloneElement(children as React.ReactElement<any>, { children: [...childNodes.slice(0, lastIndex), nextLastChild] });
   }
 

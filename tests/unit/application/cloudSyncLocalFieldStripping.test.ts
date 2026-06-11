@@ -47,8 +47,8 @@ describe("stripCloudSyncLocalOnlyFields", () => {
     expect(stripped).not.toHaveProperty("lastSyncedByDeviceId");
 
     const front = stripped.front as {
-      blocks: Array<{ images: Array<Record<string, unknown>> }>;
-      attachments: { images: Array<Record<string, unknown>> };
+      blocks: Array<{ images: Array<Record<string, unknown>>; }>;
+      attachments: { images: Array<Record<string, unknown>>; };
     };
     const blockImage = front.blocks[0].images[0];
     const attachmentImage = front.attachments.images[0];

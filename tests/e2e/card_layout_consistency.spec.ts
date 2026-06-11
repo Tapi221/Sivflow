@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-type Rect = { width: number; height: number };
+type Rect = { width: number; height: number; };
 
 const readCardRect = async (
   selector: string,

@@ -7,7 +7,7 @@ import type { EmptyText, KEYS, PlainText, TBasicMarks, TCaptionProps, TComboboxI
 export interface MyBlockElement extends TElement, TListProps { id?: string;
 }
 
-export interface MyTextBlockElement extends TElement, TLineHeightProps, TTextAlignProps { children: ( | MyLinkElement | MyMentionElement | MyMentionInputElement | RichText )[];
+export interface MyTextBlockElement extends TElement, TLineHeightProps, TTextAlignProps { children: (| MyLinkElement | MyMentionElement | MyMentionInputElement | RichText)[];
 }
 
 export interface MyBlockquoteElement extends MyTextBlockElement { type: typeof KEYS.blockquote;
@@ -88,4 +88,4 @@ export interface MyToggleElement extends MyTextBlockElement { type: typeof KEYS.
 export interface RichText extends TBasicMarks, TCommentText, TFontMarks, TText { kbd?: boolean;
 }
 
-export type MyValue = ( | MyBlockquoteElement | MyCodeBlockElement | MyH1Element | MyH2Element | MyH3Element | MyH4Element | MyH5Element | MyH6Element | MyHrElement | MyImageElement | MyMediaEmbedElement | MyParagraphElement | MyTableElement | MyToggleElement )[];
+export type MyValue = (| MyBlockquoteElement | MyCodeBlockElement | MyH1Element | MyH2Element | MyH3Element | MyH4Element | MyH5Element | MyH6Element | MyHrElement | MyImageElement | MyMediaEmbedElement | MyParagraphElement | MyTableElement | MyToggleElement)[];

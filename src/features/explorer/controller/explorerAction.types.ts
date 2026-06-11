@@ -4,11 +4,13 @@ import type { SelectedExplorerItem } from "@/types";
 
 
 
-export type ExplorerAction = | { type: "APPLY_ROUTE_STATE"; payload: ExplorerRouteState }
-  | { type: "SELECT_FOLDER"; payload: { folderId: string | null } }
-  | { type: "SELECT_ITEM"; payload: { item: SelectedExplorerItem } }
+
+
+export type ExplorerAction = | { type: "APPLY_ROUTE_STATE"; payload: ExplorerRouteState; }
+  | { type: "SELECT_FOLDER"; payload: { folderId: string | null; }; }
+  | { type: "SELECT_ITEM"; payload: { item: SelectedExplorerItem; }; }
   | {
     type: "SET_BREADCRUMB_CONTEXT";
-    payload: { context: ExplorerBreadcrumbContext };
+    payload: { context: ExplorerBreadcrumbContext; };
   }
-  | { type: "INCREMENT_SECTION_LIST_TOKEN" };
+  | { type: "INCREMENT_SECTION_LIST_TOKEN"; };

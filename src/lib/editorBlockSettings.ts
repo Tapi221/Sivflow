@@ -2,7 +2,9 @@ import type { BlockConfig } from "@/types/domain/base";
 
 
 
-export type EditorBlockType = Extract< BlockConfig["type"], "text" | "question" | "code" | "image" | "math" | "markdown" >;
+
+
+export type EditorBlockType = Extract<BlockConfig["type"], "text" | "question" | "code" | "image" | "math" | "markdown">;
 export type EditorBlockIconName = | "Type" | "HelpCircle" | "Code" | "Image" | "Sigma" | "NotebookPen";
 export type EditorBlockDefinition = Readonly<{ id: EditorBlockType;
   type: EditorBlockType;
@@ -15,6 +17,8 @@ export type EditorBlockConfig = Omit<BlockConfig, "id" | "type"> & { id: EditorB
   type: EditorBlockType;
 };
 type EditorBlockComparable = Pick<BlockConfig, "type" | "orderIndex">;
+
+
 
 
 
@@ -76,6 +80,8 @@ const EDITOR_BLOCK_DEFINITION_BY_TYPE = Object.fromEntries(
 
 
 
+
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 const createEditorBlockConfigFromDefinition = (
@@ -105,13 +111,13 @@ const compareEditorBlockConfigs = (
 
   return getFallbackOrderIndex(left.type) - getFallbackOrderIndex(right.type);
 };
-export const isEditorBlockType = (value: unknown): value is EditorBlockType => { return ( typeof value === "string" && Object.prototype.hasOwnProperty.call(EDITOR_BLOCK_DEFINITION_BY_TYPE, value) );
+export const isEditorBlockType = (value: unknown): value is EditorBlockType => { return (typeof value === "string" && Object.prototype.hasOwnProperty.call(EDITOR_BLOCK_DEFINITION_BY_TYPE, value));
 };
-export const getEditorBlockDefinition = ( type: EditorBlockType, ): EditorBlockDefinition => { return EDITOR_BLOCK_DEFINITION_BY_TYPE[type];
+export const getEditorBlockDefinition = (type: EditorBlockType,): EditorBlockDefinition => { return EDITOR_BLOCK_DEFINITION_BY_TYPE[type];
 };
 export const createDefaultEditorBlockSettings = (): EditorBlockConfig[] => { return EDITOR_BLOCK_DEFINITIONS.map(createEditorBlockConfigFromDefinition);
 };
-export const normalizeEditorBlockSettings = ( items: | readonly EditorBlockConfig[] | readonly BlockConfig[] | null | undefined, ): EditorBlockConfig[] => { const byType = new Map<EditorBlockType, EditorBlockConfig>();
+export const normalizeEditorBlockSettings = (items: | readonly EditorBlockConfig[] | readonly BlockConfig[] | null | undefined,): EditorBlockConfig[] => { const byType = new Map<EditorBlockType, EditorBlockConfig>();
   const sortedItems = [...(items ?? [])].sort(compareEditorBlockConfigs);
 
   for (const item of sortedItems) {
@@ -147,7 +153,7 @@ export const normalizeEditorBlockSettings = ( items: | readonly EditorBlockConfi
     .sort(compareEditorBlockConfigs)
     .map((block, index) => ({ ...block, orderIndex: index }));
 };
-export const parseEditorBlockSettings = ( input: readonly unknown[] | null | undefined, ): EditorBlockConfig[] => { const parsedItems: EditorBlockConfig[] = [];
+export const parseEditorBlockSettings = (input: readonly unknown[] | null | undefined,): EditorBlockConfig[] => { const parsedItems: EditorBlockConfig[] = [];
 
   for (const value of input ?? []) {
     if (!isRecord(value) || !isEditorBlockType(value["type"])) {

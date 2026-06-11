@@ -2,6 +2,8 @@ import { getImageBlob } from "./imageFileStore";
 
 
 
+
+
 type BlobScopeOptions = {
   userId?: string | null;
 };
@@ -20,10 +22,14 @@ export interface BlobCacheStats { cacheSize: number;
 
 
 
+
+
 const MAX_CACHE_ENTRIES = 80;
 const cache = new Map<string, CacheEntry>();
 let _evictCount = 0;
 let _revokeCount = 0;
+
+
 
 
 
@@ -104,7 +110,7 @@ const cacheImageBlobUrl = (
   cleanupStaleUrls(existing);
   evictIfNeeded();
 };
-export const getOrCreateImageBlobUrl = async ( id: string | null | undefined, blobOrOptions?: Blob | BlobScopeOptions, options?: BlobScopeOptions, ): Promise<string | null> => { if (!id) return null;
+export const getOrCreateImageBlobUrl = async (id: string | null | undefined, blobOrOptions?: Blob | BlobScopeOptions, options?: BlobScopeOptions,): Promise<string | null> => { if (!id) return null;
   const scopeOptions =
     blobOrOptions instanceof Blob || blobOrOptions == null
       ? options
@@ -118,7 +124,7 @@ export const getOrCreateImageBlobUrl = async ( id: string | null | undefined, bl
   cacheImageBlobUrl(id, url, scopeOptions);
   return url;
 };
-export const removeImageBlobUrl = ( id: string | null | undefined, options?: BlobScopeOptions, ): void => { if (!id) return;
+export const removeImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions,): void => { if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
   if (!entry) return;
@@ -131,13 +137,13 @@ export const removeImageBlobUrl = ( id: string | null | undefined, options?: Blo
   revokeBlobUrl(entry.url);
   cache.delete(key);
 };
-export const pinImageBlobUrl = ( id: string | null | undefined, options?: BlobScopeOptions, ): void => { if (!id) return;
+export const pinImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions,): void => { if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
   if (!entry) return;
   entry.pinCount += 1;
 };
-export const unpinImageBlobUrl = ( id: string | null | undefined, options?: BlobScopeOptions, ): void => { if (!id) return;
+export const unpinImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions,): void => { if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
   if (!entry) return;

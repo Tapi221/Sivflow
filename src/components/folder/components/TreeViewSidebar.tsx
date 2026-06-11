@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface TreeViewSidebarProps {
   sidebarRef: React.RefObject<HTMLDivElement | null>;
   contentScrollRef: React.RefObject<HTMLDivElement | null>;
@@ -30,9 +32,13 @@ interface TreeViewSidebarProps {
 
 
 
+
+
 const EXPLORER_SIDEBAR_TITLEBAR_OFFSET_VAR =
   "--mf-explorer-sidebar-titlebar-offset";
 const INTEGRATED_CHROME_SIDEBAR_GAP_PX = 20;
+
+
 
 
 
@@ -91,7 +97,7 @@ export const TreeViewSidebar = ({ sidebarRef, contentScrollRef, isSidebarOpen, r
         isResizing && "will-change-[width]",
         "w-[100dvw] max-w-[100dvw] md:max-w-none",
         !isSidebarOpen &&
-          "md:w-0 md:border-0 md:overflow-hidden md:shadow-none",
+        "md:w-0 md:border-0 md:overflow-hidden md:shadow-none",
       )}
     >
       <div

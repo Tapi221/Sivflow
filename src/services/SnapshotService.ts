@@ -11,6 +11,8 @@ import { snapshotFirestoreRepository } from "@/infrastructure/firebase/firestore
 
 
 
+
+
 const SNAPSHOTS_KEY = "flashcard_snapshots";
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,
@@ -25,8 +27,8 @@ const exportFolderSnapshotUseCase = createExportFolderSnapshotUseCase({
 const snapshotStoreUseCase = createSnapshotStoreUseCase({
   repository: snapshotFirestoreRepository,
 });
-export const snapshotService = { createSnapshot: async ( userId: string, options: { bumpGenerationCounter?: boolean;
-    } = {},
+export const snapshotService = { createSnapshot: async (userId: string, options: { bumpGenerationCounter?: boolean;
+  } = {},
   ) => {
     return await createSnapshotUseCase.execute(userId, options);
   },
@@ -70,6 +72,8 @@ export const snapshotService = { createSnapshot: async ( userId: string, options
     console.log("[スナップショット] 移行が完了しました。LocalStorage をクリアしました");
   },
 };
+
+
 
 
 

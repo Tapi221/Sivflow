@@ -6,6 +6,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 type ResolveZoomWidthArgs = {
   cardLayoutMode: CardLayoutMode;
 };
@@ -15,8 +17,14 @@ type ResolveCardSetViewDevicePresentationArgs = {
 
 
 
+
+
 const MOBILE_CARD_SET_VIEW_DEVICE_SCOPE = "mobile";
 const MOBILE_CARD_SET_VIEW_ZOOM_PERCENT = 100;
+
+
+
+
 
 
 
@@ -82,7 +90,7 @@ export const resolveCardSetViewZoomPercentOverride = ({ deviceScope }: ResolveCa
 };
 export const resolveCardSetViewShowsConstraintIndicator = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => { return !isMobileCardSetViewDevicePresentation({ deviceScope });
 };
-export const clampNormalizedZoomPercent = ( value: number, stepPercent: number = CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT, ) => roundToStep(value, stepPercent);
+export const clampNormalizedZoomPercent = (value: number, stepPercent: number = CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT,) => roundToStep(value, stepPercent);
 export const resolveZoomMinBaseWidthPx = ({ cardLayoutMode, }: ResolveZoomWidthArgs) => { return CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX[cardLayoutMode];
 };
 export const clampZoomPercent = (value: number) => clampZoomPercentRange(value);
@@ -114,7 +122,7 @@ export const resolveZoomPercentForPresentationWidthPx = ({ targetPresentationWid
   return clampZoomPercent(
     ((clampedTargetWidthPx - effectiveMinWidthPx) /
       (normalizedMaxWidthPx - effectiveMinWidthPx)) *
-      100,
+    100,
   );
 };
 export const resolveZoomDefaultPercent = ({ cardLayoutMode, maxPresentationWidthPx, canonicalCardWidthPx = CANONICAL_CARD_WIDTH, targetZoomScale = CARD_SET_VIEW_DEFAULT_ZOOM_SCALE, }: ResolveZoomWidthArgs & { maxPresentationWidthPx: number;

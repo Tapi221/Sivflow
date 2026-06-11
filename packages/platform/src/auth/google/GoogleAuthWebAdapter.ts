@@ -4,12 +4,16 @@ import { auth } from "@/infrastructure/firebase/client";
 
 
 
+
+
 const signIn: GoogleAuthPort["signIn"] = async () => {
   const provider = new GoogleAuthProvider();
   provider.addScope("email");
   provider.addScope("profile");
   await signInWithPopup(auth, provider);
 };
+
+
 
 
 

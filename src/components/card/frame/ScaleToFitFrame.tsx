@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 export interface ScaleToFitFrameProps { children: React.ReactNode;
   className?: string;
   baseWidth?: number;
@@ -21,7 +23,11 @@ export interface ScaleToFitFrameProps { children: React.ReactNode;
 
 
 
+
+
 const CONTENT_HEIGHT_EPSILON_PX = 2;
+
+
 
 
 
@@ -40,6 +46,8 @@ const resolveLogicalHeight = ({
 
   return Math.max(0, visualHeight / safeMeasurementScale);
 };
+
+
 
 
 
@@ -78,8 +86,8 @@ export const ScaleToFitFrame = ({ children, className, baseWidth = 480, scaleMul
 
   const resolvedIntrinsicHeightPx =
     typeof intrinsicHeightPx === "number" &&
-    Number.isFinite(intrinsicHeightPx) &&
-    intrinsicHeightPx > 0
+      Number.isFinite(intrinsicHeightPx) &&
+      intrinsicHeightPx > 0
       ? intrinsicHeightPx
       : null;
 
@@ -166,7 +174,7 @@ export const ScaleToFitFrame = ({ children, className, baseWidth = 480, scaleMul
       const nextHeight = Math.max(0, Math.ceil(logicalHeight));
       setContentHeight((previousHeight) =>
         previousHeight != null &&
-        Math.abs(previousHeight - nextHeight) < CONTENT_HEIGHT_EPSILON_PX
+          Math.abs(previousHeight - nextHeight) < CONTENT_HEIGHT_EPSILON_PX
           ? previousHeight
           : nextHeight,
       );

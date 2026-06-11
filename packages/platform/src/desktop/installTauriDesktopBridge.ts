@@ -4,8 +4,12 @@ import type { DesktopBridgeApi, DesktopImportFileOpenPayload, DesktopOauthCallba
 
 
 
+
+
 const oauthCallbackHandlers = new Set<(payload: DesktopOauthCallbackPayload) => void>();
 let oauthCallbackListenerStarted = false;
+
+
 
 
 
@@ -31,6 +35,8 @@ const ensureOauthCallbackListener = (): void => {
 
 
 
+
+
 const desktopApi: DesktopBridgeApi = {
   app: {
     getVersion: () => invoke<string>("app_get_version"),
@@ -41,7 +47,7 @@ const desktopApi: DesktopBridgeApi = {
   ai: {
     generateOllama: (input) => invoke("ollama_generate", { input }),
     listOllamaModels: async (input) => {
-      const result = await invoke<{ models: string[] }>("ollama_list_models", { input });
+      const result = await invoke<{ models: string[]; }>("ollama_list_models", { input });
       return result.models;
     },
   },
@@ -106,6 +112,8 @@ const desktopApi: DesktopBridgeApi = {
     },
   },
 };
+
+
 
 
 

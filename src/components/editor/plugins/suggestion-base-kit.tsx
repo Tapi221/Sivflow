@@ -5,12 +5,16 @@ import { SuggestionLeafStatic, VoidRemoveSuggestionOverlayStatic, } from '@/comp
 
 
 
+
+
 const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.date,
   KEYS.inlineEquation,
   KEYS.link,
   KEYS.mention,
 ];
+
+
 
 
 
@@ -35,24 +39,26 @@ function getInlineSuggestionData(editor: any, element: TElement) {
 
 
 
-export const BaseSuggestionKit = [ BaseSuggestionPlugin.configure({ inject: { isElement: true, nodeProps: { nodeKey: '', styleKey: 'cssText', transformProps: ({ editor, element, props }) => { if (!element) return props;
 
-          const suggestionData = getInlineSuggestionData(editor, element);
 
-          if (!suggestionData) return props;
+export const BaseSuggestionKit = [BaseSuggestionPlugin.configure({ inject: { isElement: true, nodeProps: { nodeKey: '', styleKey: 'cssText', transformProps: ({ editor, element, props }) => { if (!element) return props;
 
-          return {
-            ...props,
-            'data-inline-suggestion': suggestionData.type,
-          };
-        },
-        transformStyle: () => ({}) as CSSStyleDeclaration,
+        const suggestionData = getInlineSuggestionData(editor, element);
+
+        if (!suggestionData) return props;
+
+        return {
+          ...props,
+          'data-inline-suggestion': suggestionData.type,
+        };
       },
-      targetPlugins: INLINE_SUGGESTION_TARGET_PLUGINS,
+      transformStyle: () => ({}) as CSSStyleDeclaration,
     },
-    render: {
-      belowRootNodes: VoidRemoveSuggestionOverlayStatic as any,
-      node: SuggestionLeafStatic as any,
-    },
-  }),
+    targetPlugins: INLINE_SUGGESTION_TARGET_PLUGINS,
+  },
+  render: {
+    belowRootNodes: VoidRemoveSuggestionOverlayStatic as any,
+    node: SuggestionLeafStatic as any,
+  },
+}),
 ];

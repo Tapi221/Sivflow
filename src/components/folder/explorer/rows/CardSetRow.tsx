@@ -8,13 +8,15 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type TreeNode = {
   rawId: string;
   name: string;
   children?: TreeNode[];
 };
 interface CardSetRowProps {
-  treeNode: TreeNode & { kind: "cardSet" };
+  treeNode: TreeNode & { kind: "cardSet"; };
   style: React.CSSProperties;
   depth: number;
   isOpen: boolean;
@@ -44,6 +46,8 @@ interface CardSetRowProps {
   }) => Promise<void>;
   setRowRef: (id: string, node: HTMLElement | null) => void;
 }
+
+
 
 
 

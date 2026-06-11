@@ -9,7 +9,7 @@ import { ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirect
 
 const mocks = vi.hoisted(() => {
   const rootFolders = [{ id: "project-1", folderName: "Project Alpha", folderColor: "#bdebd0", isFavorite: undefined as boolean | undefined }];
-  const childrenByParentId: Record<string, Array<{ id: string; folderName: string; folderColor?: string; isFavorite?: boolean }>> = {
+  const childrenByParentId: Record<string, Array<{ id: string; folderName: string; folderColor?: string; isFavorite?: boolean; }>> = {
     "project-1": [{ id: "folder-js", folderName: "Javascript" }],
     "folder-js": [{ id: "folder-es6", folderName: "ES6" }],
   };

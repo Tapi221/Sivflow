@@ -14,7 +14,11 @@ import type { Card, CardBlock } from "@/types/domain/card";
 
 
 
+
+
 type GridBlockType = Parameters<typeof isGridOffsetType>[0];
+
+
 
 
 
@@ -30,6 +34,8 @@ const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "pdf",
 ]);
 const SUBJECTIVE_SCORE_VALUES = new Set<SubjectiveScoreValue>([0, 1, 2, 3]);
+
+
 
 
 
@@ -99,9 +105,9 @@ const normalizeUploadedPdf = (value: unknown): UploadedPdf | null => {
 
   const status =
     pdf.status === "pending" ||
-    pdf.status === "uploading" ||
-    pdf.status === "ready" ||
-    pdf.status === "failed"
+      pdf.status === "uploading" ||
+      pdf.status === "ready" ||
+      pdf.status === "failed"
       ? pdf.status
       : "ready";
   const filename = toStringOr(pick(pdf.filename, pdf.name), "").trim() || "PDF";
@@ -290,7 +296,7 @@ export const normalizeCard = (raw: unknown): Card => { const record = asRecord(r
         : undefined;
   const finiteMemoryStability =
     typeof memoryStabilityNumber === "number" &&
-    Number.isFinite(memoryStabilityNumber)
+      Number.isFinite(memoryStabilityNumber)
       ? memoryStabilityNumber
       : undefined;
 
@@ -301,7 +307,7 @@ export const normalizeCard = (raw: unknown): Card => { const record = asRecord(r
     code: unknown,
     images: unknown[],
     audios: unknown[],
-    options?: { allowLegacyFallback?: boolean },
+    options?: { allowLegacyFallback?: boolean; },
   ): CardBlock[] => {
     const normalizedBlocks = toArrayOr(blocks, [])
       .map((block, index) => normalizeCardBlock(block, side, id, index))

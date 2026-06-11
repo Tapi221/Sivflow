@@ -7,22 +7,26 @@ import type { GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types"
 
 
 
+
+
 export type GoogleTaskListAccountState = { taskLists: GoogleTaskListItem[];
   isLoading: boolean;
   error: string | null;
 };
 type GoogleTaskListsState = Record<string, GoogleTaskListAccountState>;
 type GoogleTaskListsAction =
-  | { type: "START"; accountId: string }
-  | { type: "SUCCESS"; accountId: string; taskLists: GoogleTaskListItem[] }
-  | { type: "ERROR"; accountId: string; error: string | null }
-  | { type: "REMOVE_MISSING_ACCOUNTS"; accountIds: string[] };
+  | { type: "START"; accountId: string; }
+  | { type: "SUCCESS"; accountId: string; taskLists: GoogleTaskListItem[]; }
+  | { type: "ERROR"; accountId: string; error: string | null; }
+  | { type: "REMOVE_MISSING_ACCOUNTS"; accountIds: string[]; };
 type AccountTokenSnapshot = {
   accountId: string;
   accessToken: string | null;
   refreshToken: string | null;
   connectionStatus: GoogleConnectedServiceAccountEntry["connectionStatus"];
 };
+
+
 
 
 
@@ -34,19 +38,21 @@ const EMPTY_ACCOUNT_STATE: GoogleTaskListAccountState = {
 
 
 
+
+
 const shouldHideAuthRecoveryError = (error: unknown): boolean => {
   if (!(error instanceof Error)) return false;
 
-  const status = (error as Error & { status?: number }).status;
-  const code = (error as Error & { code?: string }).code;
+  const status = (error as Error & { status?: number; }).status;
+  const code = (error as Error & { code?: string; }).code;
 
   return status === 401 || code === "auto-recovery-pending";
 };
 const isGooglePermissionError = (error: unknown): boolean => {
   if (!(error instanceof Error)) return false;
 
-  const status = (error as Error & { status?: number }).status;
-  const reason = (error as Error & { googleReason?: string }).googleReason;
+  const status = (error as Error & { status?: number; }).status;
+  const reason = (error as Error & { googleReason?: string; }).googleReason;
 
   return (
     status === 403 &&
@@ -64,8 +70,8 @@ const toErrorMessage = (error: unknown) => {
 };
 const isUnauthorizedError = (error: unknown): boolean =>
   error instanceof Error &&
-  ((error as Error & { status?: number }).status === 401 ||
-    (error as Error & { status?: number }).status === 403);
+  ((error as Error & { status?: number; }).status === 401 ||
+    (error as Error & { status?: number; }).status === 403);
 const getRecoverableAccessToken = async (
   account: AccountTokenSnapshot,
   onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,
@@ -220,7 +226,7 @@ const buildAccountTokenKey = (accounts: GoogleConnectedServiceAccountEntry[]) =>
       ].join("\t"),
     )
     .join("\n");
-export const useGoogleTaskLists = ( accounts: GoogleConnectedServiceAccountEntry[], onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void, retryNonce = 0, ): GoogleTaskListsState => { const [state, dispatch] = useReducer(reduceGoogleTaskLists, {});
+export const useGoogleTaskLists = (accounts: GoogleConnectedServiceAccountEntry[], onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void, retryNonce = 0,): GoogleTaskListsState => { const [state, dispatch] = useReducer(reduceGoogleTaskLists, {});
 
   const accountTokenKey = buildAccountTokenKey(accounts);
 

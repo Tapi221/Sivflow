@@ -6,6 +6,8 @@ import { getAdminAuth, getDb, serverTimestamp } from "#src/firebaseAdmin.js";
 
 
 
+
+
 type TimetableSyllabusSlot = {
   dayIndex: number;
   periodLabel: string;
@@ -52,6 +54,8 @@ type RobotsRuleGroup = {
 
 
 
+
+
 const REGION = "asia-northeast1";
 const CRAWLER_VERSION = 1;
 const DEFAULT_MAX_PAGES = 24;
@@ -65,7 +69,9 @@ const PRIVATE_IPV4_PATTERNS = [/^10\./, /^127\./, /^169\.254\./, /^192\.168\./, 
 
 
 
-const requireUid = (request: { auth?: { uid?: string } }) => {
+
+
+const requireUid = (request: { auth?: { uid?: string; }; }) => {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "Authentication required.");
   return uid;
@@ -107,7 +113,7 @@ const assertFetchableUrl = async (rawUrl: string): Promise<URL> => {
   url.hash = "";
   return url;
 };
-const fetchText = async (url: URL): Promise<{ text: string; contentType: string }> => {
+const fetchText = async (url: URL): Promise<{ text: string; contentType: string; }> => {
   const response = await fetch(url, { headers: { Accept: "text/html,application/xhtml+xml", "User-Agent": USER_AGENT }, redirect: "follow", signal: AbortSignal.timeout(15_000) });
   const contentType = response.headers.get("content-type") ?? "";
   if (!response.ok) throw new HttpsError("unavailable", `Fetch failed with status ${response.status}.`);
@@ -277,6 +283,8 @@ const crawlSyllabusSource = async (source: CrawlSource, uid: string | null): Pro
 
   return await saveCrawlResult(jobId, uid, source, courses, seen.size, skippedUrlCount);
 };
+
+
 
 
 

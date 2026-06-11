@@ -4,6 +4,8 @@ import { RowSnappedRoot } from "@/components/card/frame/RowSnappedRoot";
 
 
 
+
+
 type MathBlockFrameProps = {
   className?: string;
   children: React.ReactNode;
@@ -11,5 +13,7 @@ type MathBlockFrameProps = {
 
 
 
-export const MathBlockFrame = ({ className, children, }: MathBlockFrameProps) => { return ( <RowSnappedRoot rowPx={CARD_ROW_PX} className={`mathBlockRoot ${className ?? ""}`.trim()} > {children} </RowSnappedRoot> );
+
+
+export const MathBlockFrame = ({ className, children, }: MathBlockFrameProps) => { return (<RowSnappedRoot rowPx={CARD_ROW_PX} className={`mathBlockRoot ${className ?? ""}`.trim()} > {children} </RowSnappedRoot>);
 };

@@ -42,9 +42,9 @@ type AIChatItem = {
   icon: React.ReactNode;
   label: string;
   value: string;
-  component?: React.ComponentType<{ menuState: EditorChatState }>;
+  component?: React.ComponentType<{ menuState: EditorChatState; }>;
   filterItems?: boolean;
-  items?: { label: string; value: string }[];
+  items?: { label: string; value: string; }[];
   shortcut?: string;
   onSelect?: ({
     aiEditor,
@@ -382,9 +382,9 @@ const AIMenu = () => {
     if (!anchorEntry) return;
 
     const anchorDom = editor.api.toDOMNode(anchorEntry[0])!;
-     
+
     setAnchorElement(anchorDom);
-     
+
   }, [streaming]);
 
   const setOpen = (open: boolean) => {
@@ -454,9 +454,9 @@ const AIMenu = () => {
     if (!anchorNode) return;
 
     const block = editor.api.block({ at: anchorNode[1] });
-     
+
     setAnchorElement(editor.api.toDOMNode(block![0]!)!);
-     
+
   }, [isLoading]);
 
   if (isLoading && mode === 'insert') return null;

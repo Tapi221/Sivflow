@@ -3,12 +3,16 @@ import { findBlobUrlFixesDeep } from "@/utils/blobUrlSanitizer";
 
 
 
+
+
 type InvalidImageUrlErrorParams = {
   entityType?: string;
   entityId?: string;
   path?: string;
   message?: string;
 };
+
+
 
 
 
@@ -20,7 +24,7 @@ const InvalidImageUrlError = class extends Error {
   constructor(params: InvalidImageUrlErrorParams) {
     const parts: Array<string | null> = [
       params.message ??
-        "画像の保存形式が不正です。blob: URL は保存できません。",
+      "画像の保存形式が不正です。blob: URL は保存できません。",
       params.entityType ? `entityType=${params.entityType}` : null,
       params.entityId ? `id=${params.entityId}` : null,
       params.path ? `path=${params.path}` : null,
@@ -37,6 +41,8 @@ const InvalidImageUrlError = class extends Error {
     this.path = params.path;
   }
 };
+
+
 
 
 
@@ -85,7 +91,7 @@ export const safeRevokeBlobUrl = (url: unknown, context: string): void => { if (
 };
 export const hasBlobUrlDeep = (value: unknown): boolean => { return findBlobUrlFixesDeep(value).length > 0;
 };
-export const assertNoBlobUrlInCardPayload = ( cardLike: unknown, context?: { entityType?: string; entityId?: string },
+export const assertNoBlobUrlInCardPayload = (cardLike: unknown, context?: { entityType?: string; entityId?: string; },
 ): void => {
   if (!isRecord(cardLike)) return;
 
@@ -124,7 +130,7 @@ export const scrubBlobUrlsDeep = (value: unknown): unknown => { if (typeof value
 
   return value;
 };
-export const buildCardCandidateFromMods = ( obj: unknown, mods: unknown, ): unknown => { if (!isRecord(obj)) return mods;
+export const buildCardCandidateFromMods = (obj: unknown, mods: unknown,): unknown => { if (!isRecord(obj)) return mods;
   if (!isRecord(mods)) return obj;
 
   const candidate: Record<string, unknown> = { ...obj };

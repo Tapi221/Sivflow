@@ -75,6 +75,6 @@ describe("cardEditorSessionCore", () => {
 
     expect(panelCard?.title).toBe("draft title");
     expect(panelCard?.isDraft).toBe(true);
-    expect((panelCard as { layoutRows?: number } | null)?.layoutRows).toBe(18);
+    expect((panelCard as { layoutRows?: number; } | null)?.layoutRows).toBe(18);
   });
 });

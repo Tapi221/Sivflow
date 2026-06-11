@@ -3,6 +3,8 @@ import type { SelectionCaptureArea, SelectionCaptureRect } from "@/features/sele
 
 
 
+
+
 const getCanvasRectRelativeToTarget = (target: HTMLElement, canvas: HTMLCanvasElement): SelectionCaptureRect => {
   const targetRect = target.getBoundingClientRect();
   const canvasRect = canvas.getBoundingClientRect();
@@ -36,7 +38,7 @@ const toCanvasSourceRect = (canvas: HTMLCanvasElement, canvasRect: SelectionCapt
     height: intersectionRect.height * scaleY,
   };
 };
-const getCaptureCandidateCanvases = (target: HTMLElement, area: SelectionCaptureArea): Array<{ canvas: HTMLCanvasElement; sourceRect: SelectionCaptureRect }> => {
+const getCaptureCandidateCanvases = (target: HTMLElement, area: SelectionCaptureArea): Array<{ canvas: HTMLCanvasElement; sourceRect: SelectionCaptureRect; }> => {
   return Array.from(target.querySelectorAll<HTMLCanvasElement>("canvas")).flatMap((canvas) => {
     const canvasRect = getCanvasRectRelativeToTarget(target, canvas);
     const intersectionRect = getIntersectionRect(area.rect, canvasRect);
@@ -51,6 +53,8 @@ const capturePdfViewerAreaToBlob = async (target: HTMLElement, area: SelectionCa
 
   return cropCanvasToBlob(candidate.canvas, candidate.sourceRect);
 };
+
+
 
 
 

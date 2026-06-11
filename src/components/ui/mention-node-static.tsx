@@ -8,8 +8,10 @@ import { inlineSuggestionVariants } from '@/lib/suggestion';
 
 
 
-export function MentionElementStatic( props: SlateElementProps<TMentionElement> & { prefix?: string;
-  }
+
+
+export function MentionElementStatic(props: SlateElementProps<TMentionElement> & { prefix?: string;
+}
 ) {
   const { prefix } = props;
   const element = props.element;

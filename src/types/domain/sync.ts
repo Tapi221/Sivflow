@@ -38,6 +38,10 @@ import type { UserSettings } from "./user";
 
 
 
+
+
+
+
 /**
  * 同期システムの型定義
  */
@@ -110,7 +114,7 @@ export type SyncPayloadByEntity = { card: Card;
   asset: AssetSyncPayload;
   projectMap: ProjectMapSyncPayload;
 };
-export type SyncDeletePayload = { id: string };
+export type SyncDeletePayload = { id: string; };
 interface SyncQueueItemBase<
   TEntity extends SyncEntity,
   TOperation extends SyncOperationType,
@@ -162,11 +166,11 @@ export interface SyncConflict { id: string;
   entityId: string;
   entityType: SyncEntity;
   autoMerged: unknown;
-  conflicts: Record<string, { local: unknown; remote: unknown }>;
+  conflicts: Record<string, { local: unknown; remote: unknown; }>;
   detectedAt: number;
 }
 export interface DiffResult { autoMerged: unknown;
-  conflicts: Record<string, { local: unknown; remote: unknown }>;
+  conflicts: Record<string, { local: unknown; remote: unknown; }>;
 }
 export interface SyncResult { success: boolean;
   uploaded: number;
@@ -174,6 +178,8 @@ export interface SyncResult { success: boolean;
   conflicts: number;
   errors: string[];
 }
+
+
 
 
 

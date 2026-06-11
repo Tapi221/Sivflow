@@ -17,6 +17,8 @@ import "./PdfPane.css";
 
 
 
+
+
 type PdfPaneProps = {
   source: PdfDocumentSource | null;
   className?: string;
@@ -97,7 +99,9 @@ type PdfZoomCommit = {
   pageNumbers: Set<number>;
 };
 type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-type StratisOptionalIconProps = { names: readonly string[]; className?: string; active?: boolean };
+type StratisOptionalIconProps = { names: readonly string[]; className?: string; active?: boolean; };
+
+
 
 
 
@@ -125,6 +129,8 @@ const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
+
+
 
 
 
@@ -234,7 +240,7 @@ const getNormalizedPdfWheelDeltaY = (event: WheelEvent, container: HTMLElement):
 const isPdfTrackpadZoomWheelEvent = (event: WheelEvent): boolean => {
   return event.ctrlKey || event.metaKey;
 };
-const getPdfZoomClientPoint = (container: HTMLElement, clientX?: number, clientY?: number): { clientX: number; clientY: number } => {
+const getPdfZoomClientPoint = (container: HTMLElement, clientX?: number, clientY?: number): { clientX: number; clientY: number; } => {
   const containerRect = container.getBoundingClientRect();
   return {
     clientX: typeof clientX === "number" && Number.isFinite(clientX) ? clientX : containerRect.left + container.clientWidth / 2,
@@ -412,7 +418,9 @@ const createDefaultToolbarState = (): PdfToolbarState => ({
 
 
 
-const StratisFallbackBookmarkIcon = ({ className, active }: { className?: string; active?: boolean }) => (
+
+
+const StratisFallbackBookmarkIcon = ({ className, active }: { className?: string; active?: boolean; }) => (
   <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M6.5 4.25C6.5 3.56 7.06 3 7.75 3h8.5c.69 0 1.25.56 1.25 1.25v16.1l-5.5-3.3-5.5 3.3V4.25Z" />
   </svg>
@@ -1061,6 +1069,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     </section>
   );
 };
+
+
 
 
 

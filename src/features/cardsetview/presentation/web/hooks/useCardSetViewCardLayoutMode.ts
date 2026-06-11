@@ -5,6 +5,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 interface UseCardSetViewCardLayoutModeOptions {
   deviceScope: string;
   cardSetId: string | null;
@@ -19,7 +21,9 @@ type CardLayoutModeOverrideState = {
 
 
 
-export const useCardSetViewCardLayoutMode = ({ deviceScope, cardSetId, displayMode, interactionMode, defaultCardLayoutMode, }: UseCardSetViewCardLayoutModeOptions) => { const scopeKey = useMemo( () => buildCardLayoutPreferenceScopeKey({ deviceScope, cardSetId, displayMode, interactionMode, }), [cardSetId, deviceScope, displayMode, interactionMode], );
+
+
+export const useCardSetViewCardLayoutMode = ({ deviceScope, cardSetId, displayMode, interactionMode, defaultCardLayoutMode, }: UseCardSetViewCardLayoutModeOptions) => { const scopeKey = useMemo(() => buildCardLayoutPreferenceScopeKey({ deviceScope, cardSetId, displayMode, interactionMode, }), [cardSetId, deviceScope, displayMode, interactionMode],);
 
   const resolvedCardLayoutMode = useMemo(
     () =>

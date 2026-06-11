@@ -5,6 +5,8 @@ import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 
 
 
+
+
 export type CalendarMonthGridDay = { date: Date;
   key: string;
   dayOfMonth: number;
@@ -24,15 +26,19 @@ export type CalendarMonthWeek = { key: string;
 
 
 
+
+
 export const CALENDAR_MONTH_GRID_CELL_COUNT = 42;
 export const CALENDAR_MONTH_WEEK_DAY_COUNT = 7;
 export const DEFAULT_CALENDAR_MONTH_WEEK_START_DAY: CalendarWeekStartDay = "monday";
 
 
 
+
+
 export const getCalendarMonthKey = (date: Date): string => { return format(startOfMonth(date), "yyyy-MM");
 };
-export const getCalendarWeekKey = (date: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY): string => { return format( startOfWeek(date, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) }), "yyyy-MM-dd", );
+export const getCalendarWeekKey = (date: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY): string => { return format(startOfWeek(date, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) }), "yyyy-MM-dd",);
 };
 export const addCalendarMonths = (date: Date, amount: number): Date => { return startOfMonth(addMonths(startOfMonth(date), amount));
 };
@@ -51,7 +57,7 @@ const buildCalendarGridDay = (
 const resolveVisibleMonthDateForWeek = (weekStart: Date): Date => {
   return startOfMonth(addDays(weekStart, 3));
 };
-export const buildCalendarMonthGridDays = ( baseDate: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, ): CalendarMonthGridDay[] => { const monthStart = startOfMonth(baseDate);
+export const buildCalendarMonthGridDays = (baseDate: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY,): CalendarMonthGridDay[] => { const monthStart = startOfMonth(baseDate);
   const gridStart = startOfWeek(monthStart, {
     weekStartsOn: getCalendarWeekStartsOn(weekStartDay),
   });

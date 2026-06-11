@@ -32,7 +32,7 @@ vi.mock("@/chip/eventchip/EventChip.weekday", () => ({
 }));
 
 vi.mock("@/chip/toolchip/HoverEventTooltip", () => ({
-  HoverEventTooltip: ({ children }: { children: ReactNode }) => children,
+  HoverEventTooltip: ({ children }: { children: ReactNode; }) => children,
 }));
 
 const createCalendarGridStyle = (): CalendarGridStyle => ({

@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 
 
 
-const languages: { label: string; value: string }[] = [
+const languages: { label: string; value: string; }[] = [
   { label: 'Auto', value: 'auto' },
   { label: 'Plain Text', value: 'plaintext' },
   { label: 'ABAP', value: 'abap' },
@@ -240,7 +240,7 @@ function CodeBlockCombobox() {
 function CopyButton({
   value,
   ...props
-}: { value: (() => string) | string } & Omit<
+}: { value: (() => string) | string; } & Omit<
   React.ComponentProps<typeof Button>,
   'value'
 >) {

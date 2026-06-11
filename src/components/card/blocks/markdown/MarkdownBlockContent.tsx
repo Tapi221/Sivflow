@@ -6,8 +6,10 @@ import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownIn
 
 
 
-export type MarkdownReplaceBlock = | { type: "markdown"; markdown: string }
-  | { type: "code"; code: { language: string; code: string } };
+
+
+export type MarkdownReplaceBlock = | { type: "markdown"; markdown: string; }
+  | { type: "code"; code: { language: string; code: string; }; };
 export type MarkdownReplaceFocus = Readonly<{ relativeIndex: number;
 }>;
 type MarkdownBlockContentProps =
@@ -37,7 +39,11 @@ type BlockRange = Readonly<{
 
 
 
+
+
 const MAX_LENGTH = 50000;
+
+
 
 
 
@@ -136,8 +142,8 @@ const computeFocusOffsetInInsertText = (insertText: string) => {
 };
 const normalizeFenceBoundaries = (
   insertText: string,
-  ctx: { atLineStart: boolean; atLineEnd: boolean },
-): { text: string; focusOffset: number } => {
+  ctx: { atLineStart: boolean; atLineEnd: boolean; },
+): { text: string; focusOffset: number; } => {
   if (!isFenceStart(insertText)) {
     return { text: insertText, focusOffset: 0 };
   }
@@ -190,7 +196,7 @@ const pickBlockIndexByPos = (ranges: BlockRange[], pos: number) => {
 };
 const parseAndSplitFencesWithRanges = (
   markdown: string,
-): { blocks: MarkdownReplaceBlock[]; ranges: BlockRange[] } => {
+): { blocks: MarkdownReplaceBlock[]; ranges: BlockRange[]; } => {
   const normalizedMarkdown = markdown.replace(/\r\n/g, "\n");
   const lines = normalizedMarkdown.split("\n");
 
@@ -327,6 +333,8 @@ const parseAndSplitFencesWithRanges = (
 
   return { blocks, ranges };
 };
+
+
 
 
 
@@ -553,7 +561,7 @@ export const MarkdownBlockContent = (props: MarkdownBlockContentProps) => { cons
           const fallbackText = plain || htmlToPlainText(html);
           let insertText =
             looksLikeHtmlBlockCandidate(fallbackText) &&
-            !/```|~~~/.test(fallbackText)
+              !/```|~~~/.test(fallbackText)
               ? wrapFence(fallbackText, detectLang(fallbackText, html))
               : fallbackText;
 

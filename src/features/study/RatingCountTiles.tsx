@@ -2,6 +2,8 @@ import React from "react";
 
 
 
+
+
 type RatingKey = "forgot" | "vague" | "remembered" | "easy";
 type Props = {
   counts: Record<RatingKey, number>;
@@ -15,9 +17,11 @@ type Props = {
 
 
 
+
+
 const FACE_DESIGN: Record<
   RatingKey,
-  { iconWrap: string; label: string; svg: React.ReactNode }
+  { iconWrap: string; label: string; svg: React.ReactNode; }
 > = {
   forgot: {
     iconWrap: "ds-status-tone--danger ds-rating-tile__icon",
@@ -66,6 +70,8 @@ const FACE_DESIGN: Record<
   },
 };
 const ORDER: RatingKey[] = ["forgot", "vague", "remembered", "easy"];
+
+
 
 
 

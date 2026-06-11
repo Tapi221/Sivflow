@@ -12,7 +12,7 @@ export const isHeicFile = (file: File) => { const type = (file.type || "").toLow
 };
 export const convertHeicToJpeg = async (file: File): Promise<File> => { const heic2anyModule = await import("heic2any");
   const heic2any =
-    (heic2anyModule as { default?: unknown }).default ?? heic2anyModule;
+    (heic2anyModule as { default?: unknown; }).default ?? heic2anyModule;
 
   if (typeof heic2any !== "function") {
     throw new Error("heic2any の読み込みに失敗しました");

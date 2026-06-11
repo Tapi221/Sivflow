@@ -7,6 +7,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 export type CardFaceSceneProps = Readonly<{ displayMode: CardDisplayMode;
   fixedScale?: number;
   contentZoom: number;
@@ -39,11 +41,13 @@ export type CardFaceSceneProps = Readonly<{ displayMode: CardDisplayMode;
 
 
 
+
+
 export const CardFaceScene = ({ displayMode, fixedScale, contentZoom, contentProps, actionsTopLeft, actionsTopRight, overlay, topAttachment, contentWrapperRef, frameClassName, role, tabIndex, onClick, onKeyDown, onPointerDownCapture, onPointerMoveCapture, onPointerUpCapture, onPointerCancelCapture, resizable = false, showResizeHandle = false, resizeStepPx, heightPx = null, lockHeight = false, fillHeight = false, onHeightChange, onMinHeightChange, onResizeStart, onResizeEnd, }: CardFaceSceneProps) => { const isFluidDisplay = displayMode === "fluid";
   const shouldFillHeight = isFluidDisplay && fillHeight;
   const resolvedFrameClassName = cn(
     isFluidDisplay &&
-      "rounded-none md:rounded-none border-none bg-transparent shadow-none",
+    "rounded-none md:rounded-none border-none bg-transparent shadow-none",
     shouldFillHeight && "h-full",
     frameClassName,
   );

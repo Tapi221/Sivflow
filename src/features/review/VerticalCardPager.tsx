@@ -6,6 +6,8 @@ import { buildVerticalCardPagerItemStyle, resolveVerticalCardPagerItemWidthSpec,
 
 
 
+
+
 type ScrollAnchorFace = "question" | "answer";
 type ScrollAnchorSnapshot = {
   preserveKey: string | number | null;
@@ -15,7 +17,7 @@ type ScrollAnchorSnapshot = {
 export type VerticalCardPagerProps<T> = { cards: T[];
   activeIndex: number;
   onActiveIndexChange: (idx: number) => void;
-  onRenderRangeChange?: (range: { start: number; end: number } | null) => void;
+  onRenderRangeChange?: (range: { start: number; end: number; } | null) => void;
   renderCard: (card: T, idx: number, isActive: boolean) => React.ReactNode;
   onFlip?: () => void;
   cardWidth?: number;
@@ -37,6 +39,8 @@ export type VerticalCardPagerProps<T> = { cards: T[];
 
 
 
+
+
 export const ACTIVE_INDEX_RENDER_RADIUS = 6;
 const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;
 const CARD_GAP = 16;
@@ -45,6 +49,8 @@ const CARD_RADIUS_SM = 32;
 const CARD_RADIUS_MD = 40;
 const SCROLL_IDLE_COMMIT_DELAY_MS = 110;
 const SCROLL_ANCHOR_SUPPRESSION_MS = 180;
+
+
 
 
 
@@ -76,6 +82,8 @@ const getCurrentTimeMs = () => {
 
   return Date.now();
 };
+
+
 
 
 
@@ -350,11 +358,17 @@ const VerticalCardPagerFn = <T,>({
 
 
 
+
+
 const VerticalCardPager = React.memo(VerticalCardPagerFn) as typeof VerticalCardPagerFn;
 
 
 
+
+
 export { VerticalCardPager };
+
+
 
 
 

@@ -3,7 +3,11 @@ import type { GoogleOAuthCallableErrorReason } from "@/integration/google-integr
 
 
 
+
+
 export const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
+
+
 
 
 
@@ -15,12 +19,14 @@ export type GoogleOAuthCooldownEntry = { reason: GoogleOAuthCooldownReason;
 
 
 
+
+
 export const getErrorStatus = (error: unknown): number | undefined => { if (!(error instanceof Error)) return undefined;
-  return (error as Error & { status?: number }).status;
+  return (error as Error & { status?: number; }).status;
 };
 export const isUnauthorizedError = (error: unknown): boolean => getErrorStatus(error) === 401;
 export const getGoogleReason = (error: unknown): string | undefined => { if (!(error instanceof Error)) return undefined;
-  return (error as Error & { googleReason?: string }).googleReason;
+  return (error as Error & { googleReason?: string; }).googleReason;
 };
 export const isGooglePermissionError = (error: unknown): boolean => { const status = getErrorStatus(error);
   const reason = getGoogleReason(error);
@@ -31,10 +37,10 @@ export const isGooglePermissionError = (error: unknown): boolean => { const stat
   );
 };
 export const getErrorCode = (error: unknown): string | undefined => { if (!(error instanceof Error)) return undefined;
-  return (error as Error & { code?: string }).code;
+  return (error as Error & { code?: string; }).code;
 };
 export const normalizeErrorCode = (code: string | undefined): string | undefined => code?.replace(/^functions\//, "");
-export const getGoogleOAuthErrorReason = (error: unknown): GoogleOAuthCallableErrorReason | undefined => { const wrappedReason = error instanceof Error ? (error as Error & { googleOAuthReason?: GoogleOAuthCallableErrorReason }).googleOAuthReason : undefined;
+export const getGoogleOAuthErrorReason = (error: unknown): GoogleOAuthCallableErrorReason | undefined => { const wrappedReason = error instanceof Error ? (error as Error & { googleOAuthReason?: GoogleOAuthCallableErrorReason; }).googleOAuthReason : undefined;
 
   return wrappedReason ?? getGoogleOAuthCallableErrorReason(error);
 };
@@ -73,9 +79,9 @@ export const toGoogleCalendarAuthErrorMessage = (error: unknown): string => { co
 };
 export const shouldCooldownGoogleOAuthError = (error: unknown): boolean => isGoogleOAuthDeterministicErrorReason(getGoogleOAuthErrorReason(error)) || normalizeErrorCode(getErrorCode(error)) === "auto-recovery-pending" || normalizeErrorCode(getErrorCode(error)) === "internal";
 export const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry): Error => { const error = new Error(entry.message);
-  (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason }).code = "google-oauth-deterministic-cooldown";
+  (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason; }).code = "google-oauth-deterministic-cooldown";
   if (entry.reason !== "auto_recovery_pending" && entry.reason !== "internal") {
-    (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason }).googleOAuthReason = entry.reason;
+    (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason; }).googleOAuthReason = entry.reason;
   }
   return error;
 };

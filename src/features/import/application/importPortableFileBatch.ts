@@ -6,6 +6,8 @@ import { detectImportFileKind, IMPORT_FILE_LABELS, isPortableImportFileKind, typ
 
 
 
+
+
 export type PortableImportBatchItemStatus = | "queued" | "parsing" | "importing" | "imported" | "failed" | "skipped";
 export type PortableImportBatchItem = { id: string;
   file: File;
@@ -38,6 +40,8 @@ export type ImportPortableFileBatchParams = { files: File[];
 
 
 
+
+
 const genId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
@@ -54,7 +58,7 @@ const formatFileSize = (size: number): string => {
 const cloneItem = (item: PortableImportBatchItem): PortableImportBatchItem => ({
   ...item,
 });
-export const buildPortableImportBatchItems = ( files: File[], ): PortableImportBatchItem[] => { const seen = new Set<string>();
+export const buildPortableImportBatchItems = (files: File[],): PortableImportBatchItem[] => { const seen = new Set<string>();
   const items: PortableImportBatchItem[] = [];
 
   for (const file of files) {
@@ -231,5 +235,5 @@ export const importPortableFileBatch = async ({ files, folderId, createCardSet, 
     lastImportedCardSetName,
   };
 };
-export const formatPortableImportBatchItemSubtitle = ( item: Pick<PortableImportBatchItem, "kind" | "size">, ): string => { return `${IMPORT_FILE_LABELS[item.kind]} / ${formatFileSize(item.size)}`;
+export const formatPortableImportBatchItemSubtitle = (item: Pick<PortableImportBatchItem, "kind" | "size">,): string => { return `${IMPORT_FILE_LABELS[item.kind]} / ${formatFileSize(item.size)}`;
 };

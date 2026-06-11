@@ -33,8 +33,8 @@ declare module "react-arborist" {
     indent?: number;
     overscanCount?: number;
     selection?: string;
-    onSelect?: (nodes: Array<{ data: T; id: string }>) => void;
-    onActivate?: (node: { data: T; id: string }) => void;
+    onSelect?: (nodes: Array<{ data: T; id: string; }>) => void;
+    onActivate?: (node: { data: T; id: string; }) => void;
     [key: string]: unknown;
   };
 

@@ -10,6 +10,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 interface UseCardSetViewZoomOptions {
   deviceScope: string;
   cardSetId: string | null;
@@ -30,7 +32,11 @@ type LegacyZoomMigrationHint = Pick<
 
 
 
+
+
 const DEFAULT_SOURCE_KEY = "__cardsetview_zoom_default__";
+
+
 
 
 
@@ -59,7 +65,7 @@ const buildLegacyZoomMigrationHint = ({
   interactionMode,
   cardLayoutMode,
 });
-export const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displayMode, interactionMode, requestedCardLayoutMode, splitFallbackLayoutMode, }: UseCardSetViewZoomOptions) => { const [viewportWidthPx, setViewportWidthPx] = useState<number>( CARD_PANE_VIEW_DEFAULT_WIDTH_PX, );
+export const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displayMode, interactionMode, requestedCardLayoutMode, splitFallbackLayoutMode, }: UseCardSetViewZoomOptions) => { const [viewportWidthPx, setViewportWidthPx] = useState<number>(CARD_PANE_VIEW_DEFAULT_WIDTH_PX,);
   const [showConstraintIndicator, setShowConstraintIndicator] =
     useState<boolean>(false);
   const [zoomPreferenceState, setZoomPreferenceState] =

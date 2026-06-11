@@ -177,7 +177,7 @@ function LinkOpenButton() {
       const [element] = entry;
       return getLinkAttributes(editor, element);
     },
-     
+
     [editor, selection]
   );
 

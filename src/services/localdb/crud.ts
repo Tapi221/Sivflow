@@ -7,7 +7,9 @@ import type { Card, Folder } from "@/types";
 
 
 
-export type EnqueueSync = ( table: string, type: "upload" | "download", payload: unknown, ) => Promise<void>;
+
+
+export type EnqueueSync = (table: string, type: "upload" | "download", payload: unknown,) => Promise<void>;
 export interface TableLike<T extends object> { add(item: T): PromiseLike<unknown> | unknown;
   get(id: unknown): PromiseLike<T | undefined> | T | undefined;
   update(id: unknown, changes: unknown): PromiseLike<number> | number;
@@ -33,10 +35,10 @@ type QueueSyncApi = {
 };
 type CardInput = Card;
 type FolderInput = Folder;
-type AnyRow = Record<string, unknown> & { id?: string };
+type AnyRow = Record<string, unknown> & { id?: string; };
 type CardStorageRow = AnyRow & {
-  front?: { blocks?: unknown[] };
-  back?: { blocks?: unknown[] };
+  front?: { blocks?: unknown[]; };
+  back?: { blocks?: unknown[]; };
 };
 type DocumentUpdateChanges = Parameters<typeof cleanupBeforeDocumentUpdate>[2];
 type AddItem = {
@@ -149,6 +151,8 @@ type Upsert = {
 
 
 
+
+
 const ENTITY_BY_TABLE = {
   cards: "card",
   folders: "folder",
@@ -166,6 +170,8 @@ const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>([
   "tag",
   "asset",
 ]);
+
+
 
 
 
@@ -191,7 +197,7 @@ const getConstructorName = (value: unknown): string => {
     return "<unknown>";
   }
 
-  const ctor = (value as { constructor?: { name?: unknown } }).constructor;
+  const ctor = (value as { constructor?: { name?: unknown; }; }).constructor;
   return typeof ctor?.name === "string" ? ctor.name : "<unknown>";
 };
 const safeJsonPreview = (value: unknown, max = 200): string => {
@@ -274,7 +280,7 @@ const enqueueThroughSyncQueueApi = async (
     priority: "high",
   });
 };
-export const addItem: AddItem = async ( db: DbLike, table: string, item: unknown, skipSync: boolean, enqueueSync: EnqueueSync, ): Promise<string> => { if (table === "cards") { assertNoBlobUrlInCardPayload(item, { entityType: table, entityId: getId(item), });
+export const addItem: AddItem = async (db: DbLike, table: string, item: unknown, skipSync: boolean, enqueueSync: EnqueueSync,): Promise<string> => { if (table === "cards") { assertNoBlobUrlInCardPayload(item, { entityType: table, entityId: getId(item), });
   }
 
   const payload = toStorageRow(item);
@@ -288,14 +294,12 @@ export const addItem: AddItem = async ( db: DbLike, table: string, item: unknown
   }
 
   console.log(
-    `[Diagnostic] localDb.addItem START. Table=${table}, ItemID=${
-      getId(payload) ?? "<generated>"
+    `[Diagnostic] localDb.addItem START. Table=${table}, ItemID=${getId(payload) ?? "<generated>"
     }, localDb instance type=${getConstructorName(db)}`,
   );
 
   console.log(
-    `[LocalDB] addItem START -> table=${table} id=${
-      getId(payload) ?? "<generated>"
+    `[LocalDB] addItem START -> table=${table} id=${getId(payload) ?? "<generated>"
     } skipSync=${skipSync}`,
   );
 
@@ -382,15 +386,14 @@ export const addItem: AddItem = async ( db: DbLike, table: string, item: unknown
   } catch (error: unknown) {
     const code = errorCode(error);
     console.error(
-      `[LocalDB] addItem ERROR -> table=${table} id=${
-        getId(payload) ?? "<generated>"
+      `[LocalDB] addItem ERROR -> table=${table} id=${getId(payload) ?? "<generated>"
       } code=${code} payloadPreview=${preview}`,
       error,
     );
     throw error;
   }
 };
-export const updateItem: UpdateItem = async ( db: DbLike, table: string, id: string, changes: unknown, skipSync: boolean, enqueueSync: EnqueueSync, ): Promise<number> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error( "[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.", );
+export const updateItem: UpdateItem = async (db: DbLike, table: string, id: string, changes: unknown, skipSync: boolean, enqueueSync: EnqueueSync,): Promise<number> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error("[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.",);
     }
 
     await cleanupBeforeDocumentUpdate(db, id, changes as DocumentUpdateChanges);
@@ -444,7 +447,7 @@ export const updateItem: UpdateItem = async ( db: DbLike, table: string, id: str
 
   return result;
 };
-export const deleteItem: DeleteItem = async ( db: DbLike, table: string, id: string, ): Promise<void> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error( "[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.", );
+export const deleteItem: DeleteItem = async (db: DbLike, table: string, id: string,): Promise<void> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error("[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.",);
     }
 
     await cleanupBeforeDocumentDelete(db, id);
@@ -453,7 +456,7 @@ export const deleteItem: DeleteItem = async ( db: DbLike, table: string, id: str
   const tableApi = db.table<AnyRow>(table);
   await tableApi.delete(id);
 };
-export const softDelete = async ( db: DbLike, table: string, id: string, updateItemFn: ( table: string, id: string, changes: Record<string, unknown>, ) => Promise<number>, ): Promise<number> => { const now = new Date();
+export const softDelete = async (db: DbLike, table: string, id: string, updateItemFn: (table: string, id: string, changes: Record<string, unknown>,) => Promise<number>,): Promise<number> => { const now = new Date();
 
   console.log(`[LocalDB] softDelete -> table=${table} id=${id}`);
 
@@ -479,7 +482,7 @@ export const softDelete = async ( db: DbLike, table: string, id: string, updateI
     ...extraChanges,
   });
 };
-export const bulkUpsert: BulkUpsert = async ( db: DbLike, table: string, items: unknown[], skipSync: boolean, enqueueSync: EnqueueSync, ): Promise<void> => { if (items.length === 0) return;
+export const bulkUpsert: BulkUpsert = async (db: DbLike, table: string, items: unknown[], skipSync: boolean, enqueueSync: EnqueueSync,): Promise<void> => { if (items.length === 0) return;
 
   if (table === "cards") {
     for (const item of items) {
@@ -510,7 +513,7 @@ export const bulkUpsert: BulkUpsert = async ( db: DbLike, table: string, items: 
     }
   }
 };
-export const upsert: Upsert = async ( db: DbLike, tableName: string, data: unknown, skipSync: boolean, enqueueSync: EnqueueSync, ): Promise<void> => { if (tableName === "cards") { assertNoBlobUrlInCardPayload(data, { entityType: tableName, entityId: getId(data), });
+export const upsert: Upsert = async (db: DbLike, tableName: string, data: unknown, skipSync: boolean, enqueueSync: EnqueueSync,): Promise<void> => { if (tableName === "cards") { assertNoBlobUrlInCardPayload(data, { entityType: tableName, entityId: getId(data), });
   }
 
   const payload = toStorageRow(data);

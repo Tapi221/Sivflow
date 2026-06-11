@@ -5,6 +5,8 @@ import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
 
 
+
+
 type DraftShape = {
   frontBlocks: CardBlock[];
   backBlocks: CardBlock[];
@@ -20,7 +22,9 @@ type UseCardEditorContentControllerParams<TDraft extends DraftShape | null> = {
 
 
 
-export const useCardEditorContentController = < TDraft extends DraftShape | null, >({ draft, setDraft, allowAutoMinHeightSyncRef, resetDialogsRef, }: UseCardEditorContentControllerParams<TDraft>) => { const reindexBlocks = useCallback((blocks: CardBlock[]): CardBlock[] => { let changed = false;
+
+
+export const useCardEditorContentController = <TDraft extends DraftShape | null,>({ draft, setDraft, allowAutoMinHeightSyncRef, resetDialogsRef, }: UseCardEditorContentControllerParams<TDraft>) => { const reindexBlocks = useCallback((blocks: CardBlock[]): CardBlock[] => { let changed = false;
     const reindexed = blocks.map((block, index) => {
       if (block.orderIndex === index) return block;
       changed = true;

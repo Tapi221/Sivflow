@@ -9,7 +9,9 @@ import { inlineSuggestionVariants } from '@/lib/suggestion';
 
 
 
-export function EquationElementStatic( props: SlateElementProps<TEquationElement> ) { const { element } = props;
+
+
+export function EquationElementStatic(props: SlateElementProps<TEquationElement>) { const { element } = props;
 
   const html = getEquationHtml({
     element,
@@ -51,7 +53,7 @@ export function EquationElementStatic( props: SlateElementProps<TEquationElement
     </SlateElement>
   );
 }
-export function InlineEquationElementStatic( props: SlateElementProps<TEquationElement> ) { const html = getEquationHtml({ element: props.element, options: { displayMode: true, errorColor: '#cc0000', fleqn: false, leqno: false, macros: { '\f': '#1f(#2)' }, output: 'htmlAndMathml', strict: 'warn', throwOnError: false, trust: false, }, });
+export function InlineEquationElementStatic(props: SlateElementProps<TEquationElement>) { const html = getEquationHtml({ element: props.element, options: { displayMode: true, errorColor: '#cc0000', fleqn: false, leqno: false, macros: { '\f': '#1f(#2)' }, output: 'htmlAndMathml', strict: 'warn', throwOnError: false, trust: false, }, });
 
   return (
     <SlateElement
@@ -64,7 +66,7 @@ export function InlineEquationElementStatic( props: SlateElementProps<TEquationE
           'h-6',
           inlineSuggestionVariants(),
           props.element.texExpression.length === 0 &&
-            'text-muted-foreground after:bg-neutral-500/10'
+          'text-muted-foreground after:bg-neutral-500/10'
         )}
       >
         <span
@@ -84,7 +86,7 @@ export function InlineEquationElementStatic( props: SlateElementProps<TEquationE
  * DOCX-compatible block equation component.
  * Displays LaTeX source code with styling.
  */
-export function EquationElementDocx( props: SlateElementProps<TEquationElement> ) { const { element } = props;
+export function EquationElementDocx(props: SlateElementProps<TEquationElement>) { const { element } = props;
 
   if (!element.texExpression || element.texExpression.length === 0) {
     return (
@@ -116,7 +118,7 @@ export function EquationElementDocx( props: SlateElementProps<TEquationElement> 
  * DOCX-compatible inline equation component.
  * Displays LaTeX source code inline.
  */
-export function InlineEquationElementDocx( props: SlateElementProps<TEquationElement> ) { const { element } = props;
+export function InlineEquationElementDocx(props: SlateElementProps<TEquationElement>) { const { element } = props;
 
   if (!element.texExpression || element.texExpression.length === 0) {
     return (

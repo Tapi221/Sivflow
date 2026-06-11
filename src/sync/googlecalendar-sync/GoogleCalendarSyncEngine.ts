@@ -5,6 +5,8 @@ import type { GCalEventsListResponse, GCalForceSyncOptions, GCalRawIncrementalEv
 
 
 
+
+
 const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
 const SYNC_TOKENS_STORAGE_KEY = "flashcard-master.gcal.sync_tokens";
 const DEFAULT_POLL_INTERVAL_MS = 60_000;
@@ -12,6 +14,8 @@ const MAX_BACKOFF_MS = 10 * 60 * 1000;
 const INITIAL_BACKOFF_MS = 60_000;
 const DEFAULT_FULL_SYNC_PAST_DAYS = 365;
 const DEFAULT_FULL_SYNC_FUTURE_DAYS = 3650;
+
+
 
 
 
@@ -61,7 +65,7 @@ const gcalGet = async <T>(accessToken: string, url: string): Promise<T> => {
       | {
         error?: {
           message?: string;
-          errors?: Array<{ reason?: string }>;
+          errors?: Array<{ reason?: string; }>;
         };
       }
       | null;
@@ -79,7 +83,7 @@ const gcalGet = async <T>(accessToken: string, url: string): Promise<T> => {
         status: number;
       }
     ).status = response.status;
-    (error as Error & { googleReason?: string }).googleReason = reason;
+    (error as Error & { googleReason?: string; }).googleReason = reason;
 
     throw error;
   }
@@ -685,7 +689,7 @@ export class GoogleCalendarSyncEngine { private readonly options: Required<Pick<
     } catch (error) {
       if (!this.isRunning) return;
 
-      const is410 = error instanceof Error && (error as Error & { status?: number }).status === 410;
+      const is410 = error instanceof Error && (error as Error & { status?: number; }).status === 410;
 
       if (is410) {
         const latestSyncTokenMap = readSyncTokens();

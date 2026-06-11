@@ -16,7 +16,9 @@ import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 
 
 
-type UseScheduleScreenOptions = { allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay };
+
+
+type UseScheduleScreenOptions = { allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay; };
 export type UseScheduleScreenReturn = { contentViewportRef: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   headerScrollRef: RefObject<HTMLDivElement | null>;
@@ -78,6 +80,8 @@ type MonthRenderedRangeSnapshot = CalendarDateRange & {
   scrollTargetToken: number;
   weekStartDay: CalendarWeekStartDay;
 };
+
+
 
 
 

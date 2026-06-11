@@ -1,14 +1,18 @@
-import * as React from "react"
-import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { X } from "lucide-react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 
 
-const Dialog = DialogPrimitive.Root
-const DialogTrigger = DialogPrimitive.Trigger
-const DialogPortal = DialogPrimitive.Portal
-const DialogClose = DialogPrimitive.Close
+
+
+const Dialog = DialogPrimitive.Root;
+const DialogTrigger = DialogPrimitive.Trigger;
+const DialogPortal = DialogPrimitive.Portal;
+const DialogClose = DialogPrimitive.Close;
+
+
 
 
 
@@ -24,7 +28,7 @@ const DialogOverlay = React.forwardRef<
     )}
     {...props}
   />
-))
+));
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
@@ -46,7 +50,7 @@ const DialogContent = React.forwardRef<
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
-))
+));
 const DialogHeader = ({
   className,
   ...props
@@ -58,7 +62,7 @@ const DialogHeader = ({
     )}
     {...props}
   />
-)
+);
 const DialogFooter = ({
   className,
   ...props
@@ -70,7 +74,7 @@ const DialogFooter = ({
     )}
     {...props}
   />
-)
+);
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
@@ -83,7 +87,7 @@ const DialogTitle = React.forwardRef<
     )}
     {...props}
   />
-))
+));
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
@@ -93,25 +97,16 @@ const DialogDescription = React.forwardRef<
     className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
-))
+));
 
 
 
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
-DialogContent.displayName = DialogPrimitive.Content.displayName
-DialogHeader.displayName = "DialogHeader"
-DialogFooter.displayName = "DialogFooter"
-DialogTitle.displayName = DialogPrimitive.Title.displayName
-DialogDescription.displayName = DialogPrimitive.Description.displayName
-export {
-  Dialog,
-  DialogPortal,
-  DialogOverlay,
-  DialogTrigger,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
-}
+
+
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
+DialogContent.displayName = DialogPrimitive.Content.displayName;
+DialogHeader.displayName = "DialogHeader";
+DialogFooter.displayName = "DialogFooter";
+DialogTitle.displayName = DialogPrimitive.Title.displayName;
+DialogDescription.displayName = DialogPrimitive.Description.displayName;
+export { Dialog, DialogPortal, DialogOverlay, DialogTrigger, DialogClose, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, };

@@ -201,4 +201,4 @@ export function BlockSuggestionCard({ idx, isLast, suggestion, }: { idx: number;
 
 
 
-export const isResolvedSuggestion = ( suggestion: ResolvedSuggestion | TDiscussion ): suggestion is ResolvedSuggestion => 'suggestionId' in suggestion;
+export const isResolvedSuggestion = (suggestion: ResolvedSuggestion | TDiscussion): suggestion is ResolvedSuggestion => 'suggestionId' in suggestion;

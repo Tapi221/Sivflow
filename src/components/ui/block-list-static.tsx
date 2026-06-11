@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 
 
 
+
+
 const config: Record<
   string,
   {
@@ -19,6 +21,8 @@ const config: Record<
     Marker: TodoMarkerStatic,
   },
 };
+
+
 
 
 
@@ -74,7 +78,7 @@ function TodoLiStatic(props: SlateRenderElementProps) {
       className={cn(
         'list-none',
         (props.element.checked as boolean) &&
-          'text-muted-foreground line-through'
+        'text-muted-foreground line-through'
       )}
     >
       {props.children}

@@ -8,6 +8,8 @@ export type LayoutResult = { left: number;
 
 
 
+
+
 const compareLayoutEvents = (a: LayoutEvent, b: LayoutEvent): number => {
   const startDiff = a.startMinutes - b.startMinutes;
 
@@ -71,7 +73,7 @@ const assignColumns = (cluster: LayoutEvent[]): Map<string, number> => {
 
   return columnOf;
 };
-export const computeEventLayout = ( events: LayoutEvent[], ): Map<string, LayoutResult> => { const result = new Map<string, LayoutResult>();
+export const computeEventLayout = (events: LayoutEvent[],): Map<string, LayoutResult> => { const result = new Map<string, LayoutResult>();
 
   if (events.length === 0) return result;
 
@@ -95,7 +97,7 @@ export const computeEventLayout = ( events: LayoutEvent[], ): Map<string, Layout
 
   return result;
 };
-export const toLayoutEvent = ( id: string, startsAt: Date, minutes: number, minimumDurationMinutes = 0, ): LayoutEvent => { const startMinutes = startsAt.getHours() * 60 + startsAt.getMinutes();
+export const toLayoutEvent = (id: string, startsAt: Date, minutes: number, minimumDurationMinutes = 0,): LayoutEvent => { const startMinutes = startsAt.getHours() * 60 + startsAt.getMinutes();
   const layoutDurationMinutes = Math.max(minutes, minimumDurationMinutes);
 
   return {

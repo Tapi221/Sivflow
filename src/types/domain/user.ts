@@ -3,6 +3,8 @@ import type { BaseEntity, BlockConfig } from "./base";
 
 
 
+
+
 export interface User { id: string;
   userId: string;
   email: string;
@@ -21,10 +23,10 @@ export interface User { id: string;
 }
 export interface UserSettings extends BaseEntity { weekStartDay: "sunday" | "monday";
   language: "ja" | "en" | "zh";
-  levelColors: { [level: number]: string };
+  levelColors: { [level: number]: string; };
   notificationsEnabled: boolean;
   notificationMethods: ("browser" | "email" | "line")[];
-  notificationTimes: { [dayOfWeek: number]: string };
+  notificationTimes: { [dayOfWeek: number]: string; };
   dayStartTime: string;
   soundEnabled: boolean;
   correctSound: boolean;

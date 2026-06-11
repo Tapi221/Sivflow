@@ -101,7 +101,7 @@ export function EquationElement(props: PlateElementProps<TEquationElement>) { co
   );
 }
 
-export function InlineEquationElement( props: PlateElementProps<TEquationElement> ) { const { element } = props;
+export function InlineEquationElement(props: PlateElementProps<TEquationElement>) { const { element } = props;
   const katexRef = React.useRef<HTMLDivElement | null>(null);
   const selected = useSelected();
   const isCollapsed = useEditorSelector(
@@ -112,7 +112,7 @@ export function InlineEquationElement( props: PlateElementProps<TEquationElement
 
   React.useEffect(() => {
     if (selected && isCollapsed) {
-       
+
       setOpen(true);
     }
   }, [selected, isCollapsed]);
@@ -148,9 +148,9 @@ export function InlineEquationElement( props: PlateElementProps<TEquationElement
               'h-6',
               inlineSuggestionVariants(),
               ((element.texExpression.length > 0 && open) || selected) &&
-                'after:bg-brand/15',
+              'after:bg-brand/15',
               element.texExpression.length === 0 &&
-                'text-muted-foreground after:bg-neutral-500/10'
+              'text-muted-foreground after:bg-neutral-500/10'
             )}
             contentEditable={false}
           >

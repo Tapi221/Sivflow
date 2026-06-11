@@ -71,7 +71,7 @@ describe("useStudyCards", () => {
     ];
 
     const { result, rerender } = renderHook(
-      ({ cards }: { cards: Card[] }) =>
+      ({ cards }: { cards: Card[]; }) =>
         useStudyCards({
           folderId: "folder-b",
           allCards: cards,

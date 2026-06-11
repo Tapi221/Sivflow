@@ -3,11 +3,15 @@ import { asRecord, pick } from "@/shared/lib/records";
 
 
 
+
+
 export type NormalizedReviewLog = { reviewedAt: string;
   rating: 1 | 2 | 3 | 4;
   resistanceScore: number;
   durationMinutes: number | null;
 };
+
+
 
 
 
@@ -33,7 +37,7 @@ const subjectiveScoreToRating = (value: number): 1 | 2 | 3 | 4 | null => {
 
   return clampRating(rounded);
 };
-export const normalizeReviewLogs = ( rawLogs: unknown, ): NormalizedReviewLog[] => { if (!Array.isArray(rawLogs)) return [];
+export const normalizeReviewLogs = (rawLogs: unknown,): NormalizedReviewLog[] => { if (!Array.isArray(rawLogs)) return [];
 
   return rawLogs
     .map((item): NormalizedReviewLog | null => {

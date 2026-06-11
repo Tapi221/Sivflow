@@ -8,9 +8,13 @@ import type { SyncChange } from "@/services/interfaces/ISyncService";
 
 
 
+
+
 type SyncChangeWithOperation = SyncChange & {
   operationType?: unknown;
 };
+
+
 
 
 
@@ -35,7 +39,7 @@ const buildDeleteTombstone = (id: string, data: unknown): Record<string, unknown
   tombstone.deletedAt ??= cloudUpdatedAt();
   return tombstone;
 };
-export const pushCloudSyncBatch = async ( userId: string, changes: SyncChange[], ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }> => {
+export const pushCloudSyncBatch = async (userId: string, changes: SyncChange[],): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown; }> => {
   console.log(
     `[CloudSyncAdapter] pushBatch START. Count: ${changes.length}`,
   );

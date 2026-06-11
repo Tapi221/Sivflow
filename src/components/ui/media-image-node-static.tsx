@@ -7,7 +7,9 @@ import { cn } from '@/lib/utils';
 
 
 
-export function ImageElementStatic( props: SlateElementProps<TImageElement & TCaptionProps & TResizableProps> ) { const { align = 'center', caption, url, width } = props.element;
+
+
+export function ImageElementStatic(props: SlateElementProps<TImageElement & TCaptionProps & TResizableProps>) { const { align = 'center', caption, url, width } = props.element;
 
   return (
     <SlateElement {...props} className="py-2.5">
@@ -17,13 +19,13 @@ export function ImageElementStatic( props: SlateElementProps<TImageElement & TCa
           style={{ textAlign: align }}
         >
           <img
-              className={cn(
-                'w-full max-w-full cursor-default object-cover px-0',
-                'rounded-sm'
-              )}
-              alt={(props.attributes as any).alt}
-              src={url}
-            />
+            className={cn(
+              'w-full max-w-full cursor-default object-cover px-0',
+              'rounded-sm'
+            )}
+            alt={(props.attributes as any).alt}
+            src={url}
+          />
           {caption && (
             <figcaption
               className="mx-auto mt-2 h-[24px] max-w-full"

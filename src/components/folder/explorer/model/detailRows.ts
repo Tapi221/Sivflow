@@ -4,6 +4,8 @@ import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem, SyncEnt
 
 
 
+
+
 export type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";
 export type ExplorerDetailLocalSyncState = | "pending" | "synced" | "error" | "conflict";
 export type ExplorerDetailRow = { key: string;
@@ -48,7 +50,11 @@ type LegacyEntityFields = {
 
 
 
+
+
 const EXPLORER_ROOT_PATH_SEGMENTS = ["ホーム", "エクスプローラー"];
+
+
 
 
 
@@ -58,7 +64,7 @@ const withLegacy = <TEntity extends object>(
   return entity as TEntity & LegacyEntityFields;
 };
 const isSoftDeleted = (
-  entity?: { isDeleted?: boolean; is_deleted?: boolean } | null,
+  entity?: { isDeleted?: boolean; is_deleted?: boolean; } | null,
 ): boolean => {
   return Boolean(entity?.isDeleted ?? entity?.is_deleted);
 };

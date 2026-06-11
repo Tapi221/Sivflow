@@ -7,14 +7,20 @@ import type { AppSnapshot } from "@/types/domain/snapshot";
 
 
 
+
+
 export interface ExportFolderSnapshotDependencies { fileExporter: JsonFileExportPort;
 }
+
+
 
 
 
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,
 });
+
+
 
 
 

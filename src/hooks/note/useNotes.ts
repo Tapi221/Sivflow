@@ -6,6 +6,8 @@ import type { Note, NoteBlockContent } from "@/types";
 
 
 
+
+
 type UseNotesOptions = {
   enabled?: boolean;
 };
@@ -16,7 +18,11 @@ type CreateNoteOptions = {
 
 
 
+
+
 const DEFAULT_NOTE_CONTENT: NoteBlockContent = [];
+
+
 
 
 
@@ -24,8 +30,8 @@ const createId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 };
-const isDeletedNote = (note: Note & { isDeleted?: boolean; is_deleted?: boolean }): boolean => Boolean(note.isDeleted ?? note.is_deleted);
-const getNoteOrderIndex = (note: Note & { order_index?: number }): number => note.orderIndex ?? note.order_index ?? 0;
+const isDeletedNote = (note: Note & { isDeleted?: boolean; is_deleted?: boolean; }): boolean => Boolean(note.isDeleted ?? note.is_deleted);
+const getNoteOrderIndex = (note: Note & { order_index?: number; }): number => note.orderIndex ?? note.order_index ?? 0;
 const sortNotes = (notes: Note[]): Note[] => [...notes].sort((left, right) => {
   const orderDiff = getNoteOrderIndex(left) - getNoteOrderIndex(right);
   if (orderDiff !== 0) return orderDiff;
@@ -102,6 +108,8 @@ const useNotes = (folderId?: string | null, options?: UseNotesOptions) => {
     deleteNote,
   };
 };
+
+
 
 
 

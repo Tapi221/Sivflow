@@ -7,14 +7,16 @@ import { cn } from "@/lib/utils";
 
 
 
-type MobileCalendarWritableCalendarOption = { key: string; accountId: string; calendarId: string; label: string; accountLabel: string; calendarLabel: string; color: string; projectId?: string; isSelected: boolean };
-type MobileCalendarEventFormState = { title: string; location: string; isAllDay: boolean; startDate: string; startTime: string; endDate: string; endTime: string; calendarKey: string; description: string };
-type MobileEventDates = { startsAt: Date; endsAt: Date; isAllDay: boolean };
+
+
+type MobileCalendarWritableCalendarOption = { key: string; accountId: string; calendarId: string; label: string; accountLabel: string; calendarLabel: string; color: string; projectId?: string; isSelected: boolean; };
+type MobileCalendarEventFormState = { title: string; location: string; isAllDay: boolean; startDate: string; startTime: string; endDate: string; endTime: string; calendarKey: string; description: string; };
+type MobileEventDates = { startsAt: Date; endsAt: Date; isAllDay: boolean; };
 type MobileCalendarPickerFieldName = "startDate" | "startTime" | "endDate" | "endTime";
-type MobileCalendarDateButtonProps = { label: string; value: string; isActive: boolean; onClick: () => void };
-type MobileCalendarTimeButtonProps = { label: string; value: string; isActive: boolean; onClick: () => void };
-type MobileCalendarInlineDatePickerProps = { value: string; onChange: (value: string) => void };
-type MobileCalendarInlineTimeWheelProps = { value: string; onChange: (value: string) => void };
+type MobileCalendarDateButtonProps = { label: string; value: string; isActive: boolean; onClick: () => void; };
+type MobileCalendarTimeButtonProps = { label: string; value: string; isActive: boolean; onClick: () => void; };
+type MobileCalendarInlineDatePickerProps = { value: string; onChange: (value: string) => void; };
+type MobileCalendarInlineTimeWheelProps = { value: string; onChange: (value: string) => void; };
 type MobileCalendarEventComposerProps = {
   isOpen: boolean;
   selectedDate: Date;
@@ -25,6 +27,8 @@ type MobileCalendarEventComposerProps = {
   onAddCalendar?: () => Promise<void>;
   onCreateEvent: (accountId: string, event: GCalWritableEventInput) => Promise<GoogleCalendarEvent>;
 };
+
+
 
 
 
@@ -40,6 +44,8 @@ const MOBILE_EVENT_TIME_WHEEL_HOURS = Array.from({ length: 24 }, (_, hour) => ho
 const MOBILE_EVENT_TIME_WHEEL_MINUTES = Array.from({ length: 60 }, (_, minute) => minute);
 const EMPTY_GOOGLE_ACCOUNTS: GoogleAccountDisplay[] = [];
 const EMPTY_PROJECT_CALENDAR_LINKS: ProjectCalendarLink[] = [];
+
+
 
 
 
@@ -80,7 +86,7 @@ const parseDateInputValue = (value: string): Date | null => {
   const date = new Date(Number(year), Number(month) - 1, Number(day));
   return Number.isNaN(date.getTime()) ? null : date;
 };
-const parseTimeInputValue = (value: string): { hours: number; minutes: number } | null => {
+const parseTimeInputValue = (value: string): { hours: number; minutes: number; } | null => {
   const match = /^(\d{2}):(\d{2})$/.exec(value);
   if (!match) return null;
   const [, hours, minutes] = match;
@@ -120,22 +126,26 @@ const formatDateUnit = (value: number): string => String(value).padStart(2, "0")
 const formatTimeUnit = (value: number): string => String(value).padStart(2, "0");
 const createDateInputValue = (year: number, month: number, day: number): string => `${year}-${formatDateUnit(month)}-${formatDateUnit(day)}`;
 const createTimeInputValue = (hours: number, minutes: number): string => `${formatTimeUnit(hours)}:${formatTimeUnit(minutes)}`;
-const getDateInputParts = (value: string): { year: number; month: number; day: number } => {
+const getDateInputParts = (value: string): { year: number; month: number; day: number; } => {
   const date = parseDateInputValue(value) ?? new Date();
   return { year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate() };
 };
-const getTimeInputParts = (value: string): { hours: number; minutes: number } => parseTimeInputValue(value) ?? { hours: 0, minutes: 0 };
+const getTimeInputParts = (value: string): { hours: number; minutes: number; } => parseTimeInputValue(value) ?? { hours: 0, minutes: 0 };
 const clampTimeWheelIndex = (value: number, max: number): number => Math.max(0, Math.min(max, value));
 const createMonthDateGrid = (year: number, month: number): Date[] => {
   const firstDate = new Date(year, month - 1, 1);
   const gridStartDate = addDays(firstDate, -firstDate.getDay());
   return Array.from({ length: MOBILE_EVENT_DATE_GRID_CELL_COUNT }, (_, index) => addDays(gridStartDate, index));
 };
-const createShiftedMonthParts = (year: number, month: number, offset: number): { year: number; month: number } => {
+const createShiftedMonthParts = (year: number, month: number, offset: number): { year: number; month: number; } => {
   const shiftedDate = new Date(year, month - 1 + offset, 1);
   return { year: shiftedDate.getFullYear(), month: shiftedDate.getMonth() + 1 };
 };
 const isDateInMonth = (date: Date, year: number, month: number): boolean => date.getFullYear() === year && date.getMonth() === month - 1;
+
+
+
+
 
 
 
@@ -320,14 +330,14 @@ const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlin
                     isSelected
                       ? "bg-[#ff3b30] font-semibold text-white"
                       : isToday
-                      ? "font-semibold text-[#ff3b30]"
-                      : !isCurrentMonth
-                      ? "text-[#c7c7cc]"
-                      : isSunday
-                      ? "text-[#ff3b30]"
-                      : isSaturday
-                      ? "text-[#007aff]"
-                      : "text-[#111111]"
+                        ? "font-semibold text-[#ff3b30]"
+                        : !isCurrentMonth
+                          ? "text-[#c7c7cc]"
+                          : isSunday
+                            ? "text-[#ff3b30]"
+                            : isSaturday
+                              ? "text-[#007aff]"
+                              : "text-[#111111]"
                   )}
                 >
                   {date.getDate()}
@@ -843,6 +853,8 @@ const MobileCalendarEventComposer = ({
     </>
   );
 };
+
+
 
 
 

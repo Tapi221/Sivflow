@@ -12,7 +12,9 @@ export type CardSetQueryRepository<TCardSet extends CardSetQueryEntity = CardSet
 
 
 
-const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean }) => {
+
+
+const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean; }) => {
   return Boolean(entity.isDeleted ?? entity.is_deleted);
 };
 const toMillis = (value: unknown): number => {
@@ -33,7 +35,7 @@ const toMillis = (value: unknown): number => {
     return 0;
   }
 
-  const timestamp = value as { toMillis?: () => unknown; toDate?: () => unknown; seconds?: unknown; _seconds?: unknown; nanoseconds?: unknown; _nanoseconds?: unknown };
+  const timestamp = value as { toMillis?: () => unknown; toDate?: () => unknown; seconds?: unknown; _seconds?: unknown; nanoseconds?: unknown; _nanoseconds?: unknown; };
 
   if (typeof timestamp.toMillis === "function") {
     const millis = timestamp.toMillis();

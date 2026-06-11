@@ -83,7 +83,7 @@ const getReferenceContextLabel = (
 
 
 
-export function FootnoteReferenceElement( props: PlateElementProps<TFootnoteElement> ) { const { editor, element } = props;
+export function FootnoteReferenceElement(props: PlateElementProps<TFootnoteElement>) { const { editor, element } = props;
   const identifier = element.identifier ?? '';
   const footnoteApi = editor.getApi(FootnoteReferencePlugin).footnote;
   const footnoteTransforms = editor.getTransforms(
@@ -207,7 +207,7 @@ export function FootnoteReferenceElement( props: PlateElementProps<TFootnoteElem
   );
 }
 
-export function FootnoteDefinitionElement( props: PlateElementProps<TFootnoteElement> ) { const { editor, element } = props;
+export function FootnoteDefinitionElement(props: PlateElementProps<TFootnoteElement>) { const { editor, element } = props;
   const identifier = element.identifier ?? '';
   const footnoteApi = editor.getApi(FootnoteReferencePlugin).footnote;
   const footnoteTransforms = editor.getTransforms(
@@ -220,11 +220,11 @@ export function FootnoteDefinitionElement( props: PlateElementProps<TFootnoteEle
     const referenceItems =
       !isDuplicateDefinition && identifier
         ? footnoteApi
-            .references({ identifier })
-            .map((entry: any, index: number) => ({
-              index,
-              label: getReferenceContextLabel(editor, entry[1], index),
-            }))
+          .references({ identifier })
+          .map((entry: any, index: number) => ({
+            index,
+            label: getReferenceContextLabel(editor, entry[1], index),
+          }))
         : [];
 
     return {
@@ -250,7 +250,7 @@ export function FootnoteDefinitionElement( props: PlateElementProps<TFootnoteEle
       className={cn(
         'mt-1.5 flex items-start gap-1.5 data-[nav-target=true]:rounded-md data-[nav-target=true]:bg-(--color-highlight)',
         isDuplicateDefinition &&
-          'rounded-md border border-amber-500/30 bg-amber-500/5 px-2 py-2'
+        'rounded-md border border-amber-500/30 bg-amber-500/5 px-2 py-2'
       )}
       attributes={getNavigationAttributes(
         props.attributes,
@@ -309,7 +309,7 @@ export function FootnoteDefinitionElement( props: PlateElementProps<TFootnoteEle
                   <CommandList>
                     <CommandGroup>
                       {referenceItems.map(
-                        (item: { index: number; label: string }) => (
+                        (item: { index: number; label: string; }) => (
                           <CommandItem
                             key={`${identifier}-${item.index}`}
                             className="cursor-pointer gap-2"

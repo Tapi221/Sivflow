@@ -7,6 +7,8 @@ import type { SyncChange } from "@/services/interfaces/ISyncService";
 
 
 
+
+
 type PullDiffChange = SyncChange & {
   type: PullableEntityType | "userSetting";
   id: string;
@@ -16,7 +18,11 @@ type PullDiffChange = SyncChange & {
 
 
 
+
+
 const PAGE_SIZE = 500;
+
+
 
 
 
@@ -101,7 +107,7 @@ const fetchUserSettingsDiff = async (userId: string, since: number): Promise<Pul
     },
   ];
 };
-export const pullCloudSyncDiff = async (userId: string, since: number): Promise<{ changes: SyncChange[]; serverTime: number }> => {
+export const pullCloudSyncDiff = async (userId: string, since: number): Promise<{ changes: SyncChange[]; serverTime: number; }> => {
   const sinceTimestamp = Timestamp.fromMillis(Math.max(0, since));
 
   const pullableResults = await Promise.all(

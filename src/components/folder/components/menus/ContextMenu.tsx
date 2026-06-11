@@ -5,9 +5,11 @@ import type { MenuAction } from "./menuActions";
 
 
 
+
+
 interface ContextMenuProps {
   children?: ReactNode;
-  anchorPoint?: { x: number; y: number } | null;
+  anchorPoint?: { x: number; y: number; } | null;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   actions: MenuAction[];
@@ -17,7 +19,13 @@ interface ContextMenuProps {
 
 
 
+
+
 const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
+
+
+
+
 
 
 

@@ -2,6 +2,8 @@ import type { GCalConnectionStatus, GCalSyncState, GoogleCalendarListItem } from
 
 
 
+
+
 export type GoogleAccountEntry = { id: string;
   email: string | null;
   name: string | null;
@@ -23,9 +25,9 @@ export type GoogleAccountTokenUpdate = { accountId: string;
   accountPhotoUrl?: string | null;
   expiresInSeconds?: number | null;
 };
-export type GoogleAccountsAction = | { type: "ADD"; account: GoogleAccountEntry }
-  | { type: "REMOVE"; id: string }
-  | { type: "SET_CONNECTING"; id: string; value: boolean }
+export type GoogleAccountsAction = | { type: "ADD"; account: GoogleAccountEntry; }
+  | { type: "REMOVE"; id: string; }
+  | { type: "SET_CONNECTING"; id: string; value: boolean; }
   | {
     type: "SET_TOKEN";
     id: string;
@@ -34,17 +36,19 @@ export type GoogleAccountsAction = | { type: "ADD"; account: GoogleAccountEntry 
     accountName?: string | null;
     accountPhotoUrl?: string | null;
   }
-  | { type: "SET_CALENDARS"; id: string; calendars: GoogleCalendarListItem[] }
-  | { type: "SET_CALENDAR_IDS"; id: string; ids: string[] }
-  | { type: "TOGGLE_CALENDAR"; id: string; calendarId: string }
-  | { type: "SET_SYNC_STATE"; id: string; syncState: GCalSyncState }
-  | { type: "SET_LAST_SYNCED_AT"; id: string; at: Date }
-  | { type: "NEEDS_RECONNECT"; id: string; error?: string | null }
-  | { type: "SET_ERROR"; id: string; error: string | null };
+  | { type: "SET_CALENDARS"; id: string; calendars: GoogleCalendarListItem[]; }
+  | { type: "SET_CALENDAR_IDS"; id: string; ids: string[]; }
+  | { type: "TOGGLE_CALENDAR"; id: string; calendarId: string; }
+  | { type: "SET_SYNC_STATE"; id: string; syncState: GCalSyncState; }
+  | { type: "SET_LAST_SYNCED_AT"; id: string; at: Date; }
+  | { type: "NEEDS_RECONNECT"; id: string; error?: string | null; }
+  | { type: "SET_ERROR"; id: string; error: string | null; };
 
 
 
-export const reduceGoogleCalendarAccounts = ( state: GoogleAccountEntry[], action: GoogleAccountsAction, ): GoogleAccountEntry[] => { switch (action.type) { case "ADD": return state.some((account) => account.id === action.account.id) ? state.map((account) => account.id === action.account.id ? action.account : account, ) : [...state, action.account];
+
+
+export const reduceGoogleCalendarAccounts = (state: GoogleAccountEntry[], action: GoogleAccountsAction,): GoogleAccountEntry[] => { switch (action.type) { case "ADD": return state.some((account) => account.id === action.account.id) ? state.map((account) => account.id === action.account.id ? action.account : account,) : [...state, action.account];
 
     case "REMOVE":
       return state.filter((account) => account.id !== action.id);
@@ -110,17 +114,17 @@ export const reduceGoogleCalendarAccounts = ( state: GoogleAccountEntry[], actio
             ...account,
             syncState: action.syncState,
             connectionStatus:
-                action.syncState === "needsReconnect"
-                  ? "needsReconnect"
-                  : action.syncState === "error"
-                    ? "error"
-                    : account.accessToken
-                      ? "connected"
-                      : account.connectionStatus,
+              action.syncState === "needsReconnect"
+                ? "needsReconnect"
+                : action.syncState === "error"
+                  ? "error"
+                  : account.accessToken
+                    ? "connected"
+                    : account.connectionStatus,
             error:
-                action.syncState === "idle" && account.connectionStatus === "error"
-                  ? null
-                  : account.error,
+              action.syncState === "idle" && account.connectionStatus === "error"
+                ? null
+                : account.error,
           }
           : account,
       );
@@ -150,9 +154,9 @@ export const reduceGoogleCalendarAccounts = ( state: GoogleAccountEntry[], actio
             ...account,
             error: action.error,
             connectionStatus:
-                action.error && account.syncState !== "needsReconnect"
-                  ? "error"
-                  : account.connectionStatus,
+              action.error && account.syncState !== "needsReconnect"
+                ? "error"
+                : account.connectionStatus,
           }
           : account,
       );

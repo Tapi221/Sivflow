@@ -1,11 +1,15 @@
- 
+
 import type { ReactNode, SVGProps } from "react";
 import { forwardRef } from "react";
 
 
 
+
+
 export type StratisFrameIconProps = SVGProps<SVGSVGElement> & { children?: ReactNode;
 };
+
+
 
 
 
@@ -15,5 +19,7 @@ const FRAME_PATH =
 
 
 
-export const StratisFrameIcon = forwardRef< SVGSVGElement, StratisFrameIconProps >(function StratisFrameIcon({ className, children, ...props }, ref) { return ( <svg ref={ref} {...props} viewBox="0 0 24 24" className={["block", className].filter(Boolean).join(" ")} xmlns="http://www.w3.org/2000/svg" > <path d={FRAME_PATH} fill="currentColor" /> {children} </svg> );
+
+
+export const StratisFrameIcon = forwardRef<SVGSVGElement, StratisFrameIconProps>(function StratisFrameIcon({ className, children, ...props }, ref) { return (<svg ref={ref} {...props} viewBox="0 0 24 24" className={["block", className].filter(Boolean).join(" ")} xmlns="http://www.w3.org/2000/svg" > <path d={FRAME_PATH} fill="currentColor" /> {children} </svg>);
 });

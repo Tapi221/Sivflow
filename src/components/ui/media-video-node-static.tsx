@@ -6,7 +6,9 @@ import { SlateElement } from 'platejs/static';
 
 
 
-export function VideoElementStatic( props: SlateElementProps<TVideoElement & TCaptionElement & TResizableProps> ) { const { align = 'center', caption, url, width } = props.element;
+
+
+export function VideoElementStatic(props: SlateElementProps<TVideoElement & TCaptionElement & TResizableProps>) { const { align = 'center', caption, url, width } = props.element;
 
   return (
     <SlateElement className="py-2.5" {...props}>
@@ -16,10 +18,10 @@ export function VideoElementStatic( props: SlateElementProps<TVideoElement & TCa
           style={{ width }}
         >
           <video
-              className="w-full max-w-full rounded-sm object-cover px-0"
-              src={url}
-              controls
-            />
+            className="w-full max-w-full rounded-sm object-cover px-0"
+            src={url}
+            controls
+          />
           {caption && <figcaption>{NodeApi.string(caption[0])}</figcaption>}
         </figure>
       </div>

@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface BulkTagDialogProps {
   open?: boolean;
   isOpen?: boolean;
@@ -17,6 +19,8 @@ interface BulkTagDialogProps {
   folderId: string;
   folderName?: string;
 }
+
+
 
 
 
@@ -92,7 +96,7 @@ const BulkTagDialog = ({
                   className={cn(
                     "rounded-full transition-all",
                     selectedTagId === tag.id &&
-                      "ring-2 ring-primary-400 ring-offset-2",
+                    "ring-2 ring-primary-400 ring-offset-2",
                   )}
                 >
                   <TagBadge
@@ -132,6 +136,8 @@ const BulkTagDialog = ({
     </Dialog>
   );
 };
+
+
 
 
 

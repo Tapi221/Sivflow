@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 export type PortableImportBatchCompletedPayload = { cardSetId: string;
   cardSetName: string;
   folderId: string;
@@ -29,6 +31,8 @@ type PortableImportBatchDialogProps = {
 
 
 
+
+
 const STATUS_LABELS: Record<PortableImportBatchItem["status"], string> = {
   queued: "待機中",
   parsing: "解析中",
@@ -45,6 +49,8 @@ const STATUS_CLASS_NAMES: Record<PortableImportBatchItem["status"], string> = {
   failed: "bg-rose-50 text-rose-700",
   skipped: "bg-amber-50 text-amber-700",
 };
+
+
 
 
 

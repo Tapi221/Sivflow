@@ -103,7 +103,7 @@ const BlockCommentContent = ({ children, element }: PlateElementProps) => {
   );
 };
 
-function BlockComment({ discussion, isLast }: { discussion: TDiscussion; isLast: boolean }) {
+function BlockComment({ discussion, isLast }: { discussion: TDiscussion; isLast: boolean; }) {
   const [editingId, setEditingId] = React.useState<string | null>(null);
 
   return (

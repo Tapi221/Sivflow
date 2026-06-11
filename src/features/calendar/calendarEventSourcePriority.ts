@@ -4,6 +4,8 @@ import type { AppCalendarItem, GoogleAccountDisplay, ProjectCalendarLink } from 
 
 
 
+
+
 type CalendarEventSourcePriorityInput = {
   appProjects: AppCalendarItem[];
   projectCalendarLinks: ProjectCalendarLink[];
@@ -12,11 +14,15 @@ type CalendarEventSourcePriorityInput = {
 
 
 
+
+
 const PROJECT_EVENT_PRIORITY_GROUP = 0;
 const GOOGLE_CALENDAR_EVENT_PRIORITY_GROUP = 1;
 const FALLBACK_EVENT_PRIORITY_GROUP = 2;
 const FALLBACK_EVENT_PRIORITY_INDEX = Number.MAX_SAFE_INTEGER;
 const GOOGLE_CALENDAR_KEY_SEPARATOR = "\u001f";
+
+
 
 
 
@@ -32,7 +38,7 @@ const setUnambiguousValue = <T>(map: Map<string, T | null>, key: string, value: 
   }
 };
 const buildProjectIndexById = (appProjects: AppCalendarItem[]): Map<string, number> => new Map(appProjects.map((project, index) => [project.id, index]));
-const buildGoogleCalendarIndexMaps = (googleAccounts: GoogleAccountDisplay[]): { exact: Map<string, number>; fallback: Map<string, number | null> } => {
+const buildGoogleCalendarIndexMaps = (googleAccounts: GoogleAccountDisplay[]): { exact: Map<string, number>; fallback: Map<string, number | null>; } => {
   const exact = new Map<string, number>();
   const fallback = new Map<string, number | null>();
   let index = 0;
@@ -59,7 +65,7 @@ const resolveLinkedProjectId = (event: GoogleCalendarEvent, projectCalendarLinks
 
   return fallbackProjectId && fallbackLinks.every((link) => link.projectId === fallbackProjectId) ? fallbackProjectId : undefined;
 };
-const resolveGoogleCalendarIndex = (event: GoogleCalendarEvent, googleCalendarIndexes: { exact: Map<string, number>; fallback: Map<string, number | null> }): number => {
+const resolveGoogleCalendarIndex = (event: GoogleCalendarEvent, googleCalendarIndexes: { exact: Map<string, number>; fallback: Map<string, number | null>; }): number => {
   if (event.accountId) {
     const exactIndex = googleCalendarIndexes.exact.get(createGoogleCalendarSourceKey(event.accountId, event.calendarId));
     if (exactIndex !== undefined) return exactIndex;

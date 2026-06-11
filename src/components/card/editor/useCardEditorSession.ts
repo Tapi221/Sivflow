@@ -6,6 +6,8 @@ import type { Card, CardPatch } from "@/types/domain/card";
 
 
 
+
+
 type UseCardEditorSessionParams = {
   selectedCardId: string | null;
   selectedCardSnapshot?: Card | null;
@@ -16,7 +18,7 @@ type UseCardEditorSessionParams = {
 
   updateCard: (id: string, data: CardPatch) => Promise<unknown>;
   createCard?: (data: Partial<Card>) => Promise<unknown>;
-  addTag: (name: string) => Promise<{ id: string }>;
+  addTag: (name: string) => Promise<{ id: string; }>;
   tagById: Parameters<typeof buildDraftFromCard>[1];
   toastSuccess?: (message: string) => void;
   toastError?: (message: string) => void;
@@ -39,7 +41,9 @@ type FlushDraftOptions = {
 
 
 
-export const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, resolveCardFromEntity = true, folderId, cardSetId, autoEdit, updateCard, createCard, addTag, tagById, toastSuccess, toastError, onCardUpdated, onSelectCardId, resetDialogs, }: UseCardEditorSessionParams) => { const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>( null, );
+
+
+export const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, resolveCardFromEntity = true, folderId, cardSetId, autoEdit, updateCard, createCard, addTag, tagById, toastSuccess, toastError, onCardUpdated, onSelectCardId, resetDialogs, }: UseCardEditorSessionParams) => { const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>(null,);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isEditing, setIsEditingState] = useState(false);
   const [isAutosaving, setIsAutosaving] = useState(false);
@@ -442,8 +446,8 @@ export const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = nu
     applyDraft(nextDraft, {
       resetPersisted: true,
       lastSavedAt:
-        toDateOrNull((selectedCard as { updatedAt?: unknown }).updatedAt) ??
-        toDateOrNull((selectedCard as { createdAt?: unknown }).createdAt),
+        toDateOrNull((selectedCard as { updatedAt?: unknown; }).updatedAt) ??
+        toDateOrNull((selectedCard as { createdAt?: unknown; }).createdAt),
     });
     persistentCardIdRef.current = targetId;
     hydratedFromIdRef.current = targetId;

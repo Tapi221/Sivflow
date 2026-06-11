@@ -2,10 +2,14 @@ import { useEffect, type CSSProperties, type RefObject } from "react";
 
 
 
-export type RightClickPanelPosition = { x: number; y: number };
-export type RightClickPanelNoDragStyle = CSSProperties & { WebkitAppRegion?: "drag" | "no-drag" };
-export type RightClickPanelDimensions = { width: number; height: number };
+
+
+export type RightClickPanelPosition = { x: number; y: number; };
+export type RightClickPanelNoDragStyle = CSSProperties & { WebkitAppRegion?: "drag" | "no-drag"; };
+export type RightClickPanelDimensions = { width: number; height: number; };
 export type RightClickPanelId = string;
+
+
 
 
 
@@ -20,6 +24,8 @@ const RIGHT_CLICK_PANEL_TEXT_HORIZONTAL_EDGE = 32;
 const RIGHT_CLICK_PANEL_FALLBACK_TEXT_WIDTH = 8;
 const RIGHT_CLICK_PANEL_FONT = "13px system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif";
 let rightClickPanelMeasureContext: CanvasRenderingContext2D | null | undefined;
+
+
 
 
 
@@ -55,7 +61,7 @@ export const clampRightClickPanelPosition = (x: number, y: number, dimensions: R
     y: clampRightClickPanelAxis(y, dimensions.height, window.innerHeight),
   };
 };
-export const useRightClickPanelDismiss = ( panelId: RightClickPanelId, isOpen: boolean, panelRef: RefObject<HTMLElement | null>, onDismiss: () => void, ): void => { useEffect(() => { if (!isOpen) return;
+export const useRightClickPanelDismiss = (panelId: RightClickPanelId, isOpen: boolean, panelRef: RefObject<HTMLElement | null>, onDismiss: () => void,): void => { useEffect(() => { if (!isOpen) return;
 
     const isPanelEvent = (event: Event): boolean => {
       const panel = panelRef.current;

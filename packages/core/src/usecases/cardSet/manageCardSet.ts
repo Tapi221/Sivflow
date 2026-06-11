@@ -30,7 +30,9 @@ export type CardSetCommandRepository<TCardSet extends CardSetCommandEntity = Car
 
 
 
-const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean }) => {
+
+
+const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean; }) => {
   return Boolean(entity.isDeleted ?? entity.is_deleted);
 };
 export const createCardSetUseCase = async <TCardSet extends CardSetCommandEntity>({ userId, name, targetFolderId, options, defaultDisplayMode, repository, }: { userId: string;

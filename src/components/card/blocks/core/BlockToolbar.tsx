@@ -10,6 +10,8 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
+
+
 interface BlockToolbarProps {
   label: string;
   onAddBlock: (type: CardBlock["type"]) => void;
@@ -28,6 +30,8 @@ type ToolbarBlockConfig = {
 
 
 
+
+
 const areBlockToolbarPropsEqual = (
   prev: BlockToolbarProps,
   next: BlockToolbarProps,
@@ -38,6 +42,8 @@ const areBlockToolbarPropsEqual = (
   prev.hiddenBlockTypes === next.hiddenBlockTypes &&
   prev.desktopLayout === next.desktopLayout &&
   prev.className === next.className;
+
+
 
 
 
@@ -281,6 +287,8 @@ const MarkdownBlockGlyph = ({
 
 
 
+
+
 const getIcon = (
   iconName: EditorBlockIconName,
 ): React.ComponentType<IconProps> => {
@@ -298,6 +306,8 @@ const getIcon = (
 
 
 
+
+
 const Tooltip = ({
   label,
   children,
@@ -305,7 +315,7 @@ const Tooltip = ({
   label: string;
   children: React.ReactNode;
 }) => {
-  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const [pos, setPos] = useState<{ x: number; y: number; } | null>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
 
   const show = () => {
@@ -423,7 +433,7 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
     null,
   );
 
-  type RawSettings = { editorBlockSettings?: unknown[] };
+  type RawSettings = { editorBlockSettings?: unknown[]; };
   const rawSettings = (settings as RawSettings | undefined)
     ?.editorBlockSettings;
 
@@ -615,5 +625,7 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
 
 
-export const BlockToolbar = React.memo( BlockToolbarInner, areBlockToolbarPropsEqual, );
+
+
+export const BlockToolbar = React.memo(BlockToolbarInner, areBlockToolbarPropsEqual,);
 BlockToolbar.displayName = "BlockToolbar";

@@ -7,6 +7,8 @@ import { usePresentationTarget } from "@/platform/presentation/usePresentationTa
 
 
 
+
+
 export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 export type FoldersRouteAdapter = { routeKey: string;
   isDesktop: boolean;
@@ -16,6 +18,8 @@ export type FoldersRouteAdapter = { routeKey: string;
 
   getBaseSearchParams: () => URLSearchParams;
 };
+
+
 
 
 

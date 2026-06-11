@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type TooltipSide = "top" | "right" | "bottom" | "left";
 type TooltipPosition = {
   x: number;
@@ -27,6 +29,8 @@ type HoverSuggestionTooltipProps = {
   tooltipClassName?: string;
   disabled?: boolean;
 };
+
+
 
 
 
@@ -63,6 +67,8 @@ const getArrowClassName = (side: TooltipSide) => {
 
   return "left-[-3px] top-1/2 -translate-y-1/2";
 };
+
+
 
 
 
@@ -178,7 +184,7 @@ export const HoverSuggestionTooltip = ({ children, items, side = "right", offset
                         "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors",
                         "hover:bg-[#f1f3f7]",
                         item.disabled &&
-                          "cursor-not-allowed opacity-45 hover:bg-transparent",
+                        "cursor-not-allowed opacity-45 hover:bg-transparent",
                       )}
                     >
                       {item.icon && (

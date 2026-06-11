@@ -3,10 +3,14 @@ import { EquationElementStatic, InlineEquationElementStatic } from '@/components
 
 
 
+
+
 const BaseMathKit = [
   BaseInlineEquationPlugin.withComponent(InlineEquationElementStatic),
   BaseEquationPlugin.withComponent(EquationElementStatic),
 ];
+
+
 
 
 

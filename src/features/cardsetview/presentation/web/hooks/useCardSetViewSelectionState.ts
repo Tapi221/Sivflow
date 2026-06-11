@@ -6,6 +6,8 @@ import type { Card } from "@/types";
 
 
 
+
+
 type KeyedNumberState = {
   sourceKey: string;
   value: number | null;
@@ -28,6 +30,8 @@ interface UseCardSetViewSelectionStateOptions {
   sortedCards: Card[];
   cardIndexById: Map<string, number>;
 }
+
+
 
 
 

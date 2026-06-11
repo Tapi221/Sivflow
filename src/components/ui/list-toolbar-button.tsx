@@ -181,7 +181,7 @@ export function NumberedListToolbarButton() { const editor = useEditorRef();
   );
 }
 
-export function TodoListToolbarButton( props: React.ComponentProps<typeof ToolbarButton> ) { const state = useIndentTodoToolBarButtonState({ nodeType: 'todo' });
+export function TodoListToolbarButton(props: React.ComponentProps<typeof ToolbarButton>) { const state = useIndentTodoToolBarButtonState({ nodeType: 'todo' });
   const { props: buttonProps } = useIndentTodoToolBarButton(state);
 
   return (

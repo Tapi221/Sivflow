@@ -6,6 +6,8 @@ import { createDefaultExplorerRouteState, resolveRouteTabBySection, WORKSPACE_DE
 
 
 
+
+
 type OpenExplorerTabParams = {
   id?: WorkspaceExplorerTab["id"];
   title?: string;
@@ -47,7 +49,11 @@ type WorkspaceTabsPersistedState = Pick<WorkspaceTabsState, "tabs" | "activeTabI
 
 
 
+
+
 const EXPLORER_TAB_TITLE = "Library";
+
+
 
 
 
@@ -183,282 +189,284 @@ const createRouteTabFromSection = (
 
 
 
-export const useWorkspaceTabsStore = create<WorkspaceTabsState>()( persist( (set, get) => ({ tabs: [], activeTabId: null, lastOpenedTabId: null, openExplorerTab: (params = {}) => { const id = params.id ?? WORKSPACE_DEFAULT_EXPLORER_TAB_ID;
-        const existing = get().tabs.find((tab) => tab.id === id);
 
-        if (existing?.kind === "explorer") {
-          const nextTab: WorkspaceExplorerTab = {
-            ...existing,
-            title: params.title ?? existing.title,
-            explorerState: params.explorerState ?? existing.explorerState,
-            isClosable: params.isClosable ?? existing.isClosable,
-          };
 
-          set((state) => ({
-            tabs: upsertTab(state.tabs, nextTab),
-            activeTabId: nextTab.id,
-          }));
+export const useWorkspaceTabsStore = create<WorkspaceTabsState>()(persist((set, get) => ({ tabs: [], activeTabId: null, lastOpenedTabId: null, openExplorerTab: (params = {}) => { const id = params.id ?? WORKSPACE_DEFAULT_EXPLORER_TAB_ID;
+    const existing = get().tabs.find((tab) => tab.id === id);
 
-          return nextTab.id;
+    if (existing?.kind === "explorer") {
+      const nextTab: WorkspaceExplorerTab = {
+        ...existing,
+        title: params.title ?? existing.title,
+        explorerState: params.explorerState ?? existing.explorerState,
+        isClosable: params.isClosable ?? existing.isClosable,
+      };
+
+      set((state) => ({
+        tabs: upsertTab(state.tabs, nextTab),
+        activeTabId: nextTab.id,
+      }));
+
+      return nextTab.id;
+    }
+
+    const nextTab: WorkspaceExplorerTab = {
+      id,
+      kind: "explorer",
+      title: params.title ?? EXPLORER_TAB_TITLE,
+      explorerState: params.explorerState ?? createDefaultExplorerRouteState(),
+      isClosable: params.isClosable ?? true,
+      sectionKey: "library",
+    };
+
+    set((state) => ({
+      tabs: upsertTab(state.tabs, nextTab),
+      activeTabId: nextTab.id,
+      lastOpenedTabId: nextTab.id,
+    }));
+
+    return nextTab.id;
+  },
+
+  createExplorerTab: (explorerState) => {
+    const id = `explorer:${createRandomIdSegment()}` as const;
+    const nextTab: WorkspaceExplorerTab = {
+      id,
+      kind: "explorer",
+      title: EXPLORER_TAB_TITLE,
+      explorerState: explorerState ?? createDefaultExplorerRouteState(),
+      isClosable: true,
+      sectionKey: "library",
+    };
+
+    set((state) => ({
+      tabs: [...state.tabs, nextTab],
+      activeTabId: nextTab.id,
+      lastOpenedTabId: nextTab.id,
+    }));
+
+    return id;
+  },
+
+  openDocumentTab: ({ documentId, title, folderId }) => {
+    const id = `document:${documentId}` as const;
+    const existing = get().tabs.find((tab) => tab.id === id);
+
+    if (existing) {
+      set((state) => ({
+        tabs: upsertTab(state.tabs, existing),
+        activeTabId: id,
+      }));
+
+      return id;
+    }
+
+    const nextTab: WorkspaceDocumentTab = {
+      id,
+      kind: "document",
+      title,
+      documentId,
+      folderId,
+      isClosable: true,
+      sectionKey: "library",
+    };
+
+    set((state) => ({
+      tabs: [...state.tabs, nextTab],
+      activeTabId: nextTab.id,
+      lastOpenedTabId: nextTab.id,
+    }));
+
+    return id;
+  },
+
+  openCardTab: ({ cardId, title, folderId }) => {
+    const id = `card:${cardId}` as const;
+    const existing = get().tabs.find((tab) => tab.id === id);
+
+    if (existing) {
+      set((state) => ({
+        tabs: upsertTab(state.tabs, existing),
+        activeTabId: id,
+      }));
+
+      return id;
+    }
+
+    const nextTab: WorkspaceCardTab = {
+      id,
+      kind: "card",
+      title,
+      cardId,
+      folderId,
+      isClosable: true,
+      sectionKey: "library",
+    };
+
+    set((state) => ({
+      tabs: [...state.tabs, nextTab],
+      activeTabId: nextTab.id,
+      lastOpenedTabId: nextTab.id,
+    }));
+
+    return id;
+  },
+
+  openNoteTab: ({ noteId, title, folderId }) => {
+    const id = `note:${noteId}` as const;
+    const existing = get().tabs.find((tab) => tab.id === id);
+
+    if (existing) {
+      set((state) => ({
+        tabs: upsertTab(state.tabs, existing),
+        activeTabId: id,
+      }));
+
+      return id;
+    }
+
+    const nextTab: WorkspaceNoteTab = {
+      id,
+      kind: "note",
+      title,
+      noteId,
+      folderId,
+      isClosable: true,
+      sectionKey: "library",
+    };
+
+    set((state) => ({
+      tabs: [...state.tabs, nextTab],
+      activeTabId: nextTab.id,
+      lastOpenedTabId: nextTab.id,
+    }));
+
+    return id;
+  },
+
+  openSectionTab: (sectionKey) => {
+    if (sectionKey === "library") {
+      return get().openExplorerTab({
+        id: WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
+        title: EXPLORER_TAB_TITLE,
+        explorerState: createDefaultExplorerRouteState(),
+        isClosable: true,
+      });
+    }
+
+    const nextRouteTab = createRouteTabFromSection(sectionKey);
+    const existing = get().tabs.find((tab) => tab.id === nextRouteTab.id);
+
+    if (existing?.kind === "route") {
+      set((state) => ({
+        tabs: upsertTab(state.tabs, existing),
+        activeTabId: existing.id,
+      }));
+
+      return existing.id;
+    }
+
+    set((state) => ({
+      tabs: upsertTab(state.tabs, nextRouteTab),
+      activeTabId: nextRouteTab.id,
+      lastOpenedTabId: nextRouteTab.id,
+    }));
+
+    return nextRouteTab.id;
+  },
+
+  selectTab: (tabId) => {
+    const normalizedTabId = assertWorkspaceTabId(tabId);
+    const exists = get().tabs.some((tab) => tab.id === normalizedTabId);
+    if (!exists) return;
+
+    set({ activeTabId: normalizedTabId });
+  },
+
+  closeTab: (tabId) => {
+    const normalizedTabId = assertWorkspaceTabId(tabId);
+    const state = get();
+    const target = state.tabs.find((tab) => tab.id === normalizedTabId);
+
+    if (!target || !target.isClosable) return;
+
+    const nextTabs = state.tabs.filter((tab) => tab.id !== normalizedTabId);
+    const nextActiveTabId =
+      state.activeTabId === normalizedTabId
+        ? resolveNextActiveTabId(state.tabs, normalizedTabId)
+        : state.activeTabId;
+    const nextLastOpenedTabId =
+      state.lastOpenedTabId === normalizedTabId ? null : state.lastOpenedTabId;
+
+    set({
+      tabs: nextTabs,
+      activeTabId: nextActiveTabId,
+      lastOpenedTabId: nextLastOpenedTabId,
+    });
+  },
+
+  reorderTabs: (nextTabs) => {
+    set((state) => {
+      const reorderedTabs = reorderTabsByIds(state.tabs, normalizeTabs(nextTabs));
+
+      if (!reorderedTabs) return state;
+
+      return { tabs: reorderedTabs };
+    });
+  },
+
+  updateExplorerTabState: (tabId, explorerState) => {
+    set((state) => {
+      let didChange = false;
+      const tabs = state.tabs.map((tab) => {
+        if (tab.id !== tabId || tab.kind !== "explorer") {
+          return tab;
         }
 
-        const nextTab: WorkspaceExplorerTab = {
-          id,
-          kind: "explorer",
-          title: params.title ?? EXPLORER_TAB_TITLE,
-          explorerState: params.explorerState ?? createDefaultExplorerRouteState(),
-          isClosable: params.isClosable ?? true,
-          sectionKey: "library",
-        };
-
-        set((state) => ({
-          tabs: upsertTab(state.tabs, nextTab),
-          activeTabId: nextTab.id,
-          lastOpenedTabId: nextTab.id,
-        }));
-
-        return nextTab.id;
-      },
-
-      createExplorerTab: (explorerState) => {
-        const id = `explorer:${createRandomIdSegment()}` as const;
-        const nextTab: WorkspaceExplorerTab = {
-          id,
-          kind: "explorer",
-          title: EXPLORER_TAB_TITLE,
-          explorerState: explorerState ?? createDefaultExplorerRouteState(),
-          isClosable: true,
-          sectionKey: "library",
-        };
-
-        set((state) => ({
-          tabs: [...state.tabs, nextTab],
-          activeTabId: nextTab.id,
-          lastOpenedTabId: nextTab.id,
-        }));
-
-        return id;
-      },
-
-      openDocumentTab: ({ documentId, title, folderId }) => {
-        const id = `document:${documentId}` as const;
-        const existing = get().tabs.find((tab) => tab.id === id);
-
-        if (existing) {
-          set((state) => ({
-            tabs: upsertTab(state.tabs, existing),
-            activeTabId: id,
-          }));
-
-          return id;
+        if (areExplorerRouteStatesEqual(tab.explorerState, explorerState)) {
+          return tab;
         }
 
-        const nextTab: WorkspaceDocumentTab = {
-          id,
-          kind: "document",
-          title,
-          documentId,
-          folderId,
-          isClosable: true,
-          sectionKey: "library",
-        };
+        didChange = true;
+        return { ...tab, explorerState };
+      });
 
-        set((state) => ({
-          tabs: [...state.tabs, nextTab],
-          activeTabId: nextTab.id,
-          lastOpenedTabId: nextTab.id,
-        }));
+      return didChange ? { tabs } : state;
+    });
+  },
 
-        return id;
-      },
+  updateTabTitle: (tabId, title) => {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) return;
 
-      openCardTab: ({ cardId, title, folderId }) => {
-        const id = `card:${cardId}` as const;
-        const existing = get().tabs.find((tab) => tab.id === id);
-
-        if (existing) {
-          set((state) => ({
-            tabs: upsertTab(state.tabs, existing),
-            activeTabId: id,
-          }));
-
-          return id;
+    set((state) => {
+      let didChange = false;
+      const tabs = state.tabs.map((tab) => {
+        if (tab.id !== tabId || tab.title === trimmedTitle) {
+          return tab;
         }
 
-        const nextTab: WorkspaceCardTab = {
-          id,
-          kind: "card",
-          title,
-          cardId,
-          folderId,
-          isClosable: true,
-          sectionKey: "library",
-        };
+        didChange = true;
+        return { ...tab, title: trimmedTitle };
+      });
 
-        set((state) => ({
-          tabs: [...state.tabs, nextTab],
-          activeTabId: nextTab.id,
-          lastOpenedTabId: nextTab.id,
-        }));
-
-        return id;
-      },
-
-      openNoteTab: ({ noteId, title, folderId }) => {
-        const id = `note:${noteId}` as const;
-        const existing = get().tabs.find((tab) => tab.id === id);
-
-        if (existing) {
-          set((state) => ({
-            tabs: upsertTab(state.tabs, existing),
-            activeTabId: id,
-          }));
-
-          return id;
-        }
-
-        const nextTab: WorkspaceNoteTab = {
-          id,
-          kind: "note",
-          title,
-          noteId,
-          folderId,
-          isClosable: true,
-          sectionKey: "library",
-        };
-
-        set((state) => ({
-          tabs: [...state.tabs, nextTab],
-          activeTabId: nextTab.id,
-          lastOpenedTabId: nextTab.id,
-        }));
-
-        return id;
-      },
-
-      openSectionTab: (sectionKey) => {
-        if (sectionKey === "library") {
-          return get().openExplorerTab({
-            id: WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
-            title: EXPLORER_TAB_TITLE,
-            explorerState: createDefaultExplorerRouteState(),
-            isClosable: true,
-          });
-        }
-
-        const nextRouteTab = createRouteTabFromSection(sectionKey);
-        const existing = get().tabs.find((tab) => tab.id === nextRouteTab.id);
-
-        if (existing?.kind === "route") {
-          set((state) => ({
-            tabs: upsertTab(state.tabs, existing),
-            activeTabId: existing.id,
-          }));
-
-          return existing.id;
-        }
-
-        set((state) => ({
-          tabs: upsertTab(state.tabs, nextRouteTab),
-          activeTabId: nextRouteTab.id,
-          lastOpenedTabId: nextRouteTab.id,
-        }));
-
-        return nextRouteTab.id;
-      },
-
-      selectTab: (tabId) => {
-        const normalizedTabId = assertWorkspaceTabId(tabId);
-        const exists = get().tabs.some((tab) => tab.id === normalizedTabId);
-        if (!exists) return;
-
-        set({ activeTabId: normalizedTabId });
-      },
-
-      closeTab: (tabId) => {
-        const normalizedTabId = assertWorkspaceTabId(tabId);
-        const state = get();
-        const target = state.tabs.find((tab) => tab.id === normalizedTabId);
-
-        if (!target || !target.isClosable) return;
-
-        const nextTabs = state.tabs.filter((tab) => tab.id !== normalizedTabId);
-        const nextActiveTabId =
-          state.activeTabId === normalizedTabId
-            ? resolveNextActiveTabId(state.tabs, normalizedTabId)
-            : state.activeTabId;
-        const nextLastOpenedTabId =
-          state.lastOpenedTabId === normalizedTabId ? null : state.lastOpenedTabId;
-
-        set({
-          tabs: nextTabs,
-          activeTabId: nextActiveTabId,
-          lastOpenedTabId: nextLastOpenedTabId,
-        });
-      },
-
-      reorderTabs: (nextTabs) => {
-        set((state) => {
-          const reorderedTabs = reorderTabsByIds(state.tabs, normalizeTabs(nextTabs));
-
-          if (!reorderedTabs) return state;
-
-          return { tabs: reorderedTabs };
-        });
-      },
-
-      updateExplorerTabState: (tabId, explorerState) => {
-        set((state) => {
-          let didChange = false;
-          const tabs = state.tabs.map((tab) => {
-            if (tab.id !== tabId || tab.kind !== "explorer") {
-              return tab;
-            }
-
-            if (areExplorerRouteStatesEqual(tab.explorerState, explorerState)) {
-              return tab;
-            }
-
-            didChange = true;
-            return { ...tab, explorerState };
-          });
-
-          return didChange ? { tabs } : state;
-        });
-      },
-
-      updateTabTitle: (tabId, title) => {
-        const trimmedTitle = title.trim();
-        if (!trimmedTitle) return;
-
-        set((state) => {
-          let didChange = false;
-          const tabs = state.tabs.map((tab) => {
-            if (tab.id !== tabId || tab.title === trimmedTitle) {
-              return tab;
-            }
-
-            didChange = true;
-            return { ...tab, title: trimmedTitle };
-          });
-
-          return didChange ? { tabs } : state;
-        });
-      },
+      return didChange ? { tabs } : state;
+    });
+  },
+}),
+  {
+    name: WEB_STORAGE_KEYS.workspaceTabs,
+    storage: createJSONStorage(() => localStorage),
+    partialize: (state): WorkspaceTabsPersistedState => ({
+      tabs: normalizeTabs(state.tabs),
+      activeTabId: state.activeTabId,
+      lastOpenedTabId: state.lastOpenedTabId,
     }),
-    {
-      name: WEB_STORAGE_KEYS.workspaceTabs,
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state): WorkspaceTabsPersistedState => ({
-        tabs: normalizeTabs(state.tabs),
-        activeTabId: state.activeTabId,
-        lastOpenedTabId: state.lastOpenedTabId,
-      }),
-      merge: (persistedState, currentState) => ({
-        ...currentState,
-        ...normalizeWorkspaceTabsState(persistedState),
-      }),
-      version: 1,
-    },
-  ),
+    merge: (persistedState, currentState) => ({
+      ...currentState,
+      ...normalizeWorkspaceTabsState(persistedState),
+    }),
+    version: 1,
+  },
+),
 );

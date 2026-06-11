@@ -22,4 +22,6 @@ import { BaseToggleKit } from '@/components/editor/plugins/toggle-base-kit';
 
 
 
-export const BaseEditorKit = [ ...BaseBasicBlocksKit, ...BaseCodeBlockKit, ...BaseTableKit, ...BaseToggleKit, ...BaseTocKit, ...BaseMediaKit, ...BaseCalloutKit, ...BaseColumnKit, ...BaseMathKit, ...BaseDateKit, ...BaseLinkKit, ...BaseMentionKit, ...BaseBasicMarksKit, ...BaseFontKit, ...BaseListKit, ...BaseAlignKit, ...BaseLineHeightKit, ...BaseCommentKit, ...BaseSuggestionKit, ...MarkdownKit, ...BaseFootnoteKit, ];
+
+
+export const BaseEditorKit = [...BaseBasicBlocksKit, ...BaseCodeBlockKit, ...BaseTableKit, ...BaseToggleKit, ...BaseTocKit, ...BaseMediaKit, ...BaseCalloutKit, ...BaseColumnKit, ...BaseMathKit, ...BaseDateKit, ...BaseLinkKit, ...BaseMentionKit, ...BaseBasicMarksKit, ...BaseFontKit, ...BaseListKit, ...BaseAlignKit, ...BaseLineHeightKit, ...BaseCommentKit, ...BaseSuggestionKit, ...MarkdownKit, ...BaseFootnoteKit,];

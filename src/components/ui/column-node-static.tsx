@@ -5,6 +5,8 @@ import { SlateElement } from 'platejs/static';
 
 
 
+
+
 export function ColumnElementStatic(props: SlateElementProps<TColumnElement>) { const { width } = props.element;
 
   return (
@@ -20,7 +22,7 @@ export function ColumnElementStatic(props: SlateElementProps<TColumnElement>) { 
     </div>
   );
 }
-export function ColumnGroupElementStatic(props: SlateElementProps) { return ( <SlateElement className="mb-2" {...props}> <div className="flex size-full rounded">{props.children}</div> </SlateElement> );
+export function ColumnGroupElementStatic(props: SlateElementProps) { return (<SlateElement className="mb-2" {...props}> <div className="flex size-full rounded">{props.children}</div> </SlateElement>);
 }
 
 /**
@@ -47,5 +49,5 @@ export function ColumnElementDocx(props: SlateElementProps<TColumnElement>) { co
 /**
  * DOCX-compatible column group component using table layout.
  */
-export function ColumnGroupElementDocx(props: SlateElementProps) { return ( <SlateElement {...props}> <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none', tableLayout: 'fixed', }} > <tbody> <tr>{props.children}</tr> </tbody> </table> </SlateElement> );
+export function ColumnGroupElementDocx(props: SlateElementProps) { return (<SlateElement {...props}> <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none', tableLayout: 'fixed', }} > <tbody> <tr>{props.children}</tr> </tbody> </table> </SlateElement>);
 }

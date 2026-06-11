@@ -7,6 +7,8 @@ import type { DocumentItem } from "@/types";
 
 
 
+
+
 type UpdateDocumentOptions = {
   touchUpdatedAt?: boolean;
 };
@@ -26,12 +28,16 @@ type DocumentPurgeCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   table: (tableName: "documentFiles") => {
     delete: (id: string) => Promise<void>;
   };
-  queueDeleteSync: (args: { entity: "document"; targetId: string; priority?: "critical" | "high" | "medium" | "low" }) => Promise<void>;
+  queueDeleteSync: (args: { entity: "document"; targetId: string; priority?: "critical" | "high" | "medium" | "low"; }) => Promise<void>;
 };
 
 
 
+
+
 const VIEWER_STATE_UPDATE_KEYS = new Set(["viewerState", "updatedAt"]);
+
+
 
 
 

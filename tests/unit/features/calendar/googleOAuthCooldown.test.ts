@@ -19,7 +19,7 @@ vi.mock("firebase/functions", () => ({
 import { createGoogleOAuthCooldownError, GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS, shouldCooldownGoogleOAuthError, toGoogleCalendarAuthErrorMessage } from "@/features/calendar/googlecalendar-integration/useMultiAccountGoogleCalendar";
 
 const errorWithReason = (reason: string) => {
-  const error = new Error("source") as Error & { googleOAuthReason?: string };
+  const error = new Error("source") as Error & { googleOAuthReason?: string; };
   error.googleOAuthReason = reason;
   return error;
 };

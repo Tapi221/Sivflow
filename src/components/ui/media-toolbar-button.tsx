@@ -63,7 +63,8 @@ const MEDIA_CONFIG: Record<
 
 
 
-export function MediaToolbarButton({ nodeType, ...props }: DropdownMenuProps & { nodeType: string }) { const currentConfig = MEDIA_CONFIG[nodeType];
+export function MediaToolbarButton({ nodeType, ...props }: DropdownMenuProps & { nodeType: string; }) {
+  const currentConfig = MEDIA_CONFIG[nodeType];
 
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);

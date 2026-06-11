@@ -41,6 +41,10 @@ const MAX_INTERVAL_DAYS = 90;
 
 
 
+
+
+
+
 /**
  * 忘却曲線に基づく記憶保持確率（定着度）を計算します。
  *
@@ -54,7 +58,7 @@ const MAX_INTERVAL_DAYS = 90;
  * 復習直後は 100% に近く、時間が経つにつれて指数関数的に減少します。
  * 実際の想起成功を保証するものではありません。
  */
-export const calculateRetentionProbability = ( stabilityInternal: number, intervalDays: number, ): number => { // 安全策: Stabilityが0以下にならないようにする const S = Math.max(0.01, stabilityInternal);
+export const calculateRetentionProbability = (stabilityInternal: number, intervalDays: number,): number => { // 安全策: Stabilityが0以下にならないようにする const S = Math.max(0.01, stabilityInternal);
 
   // 安全策: 日数が負にならないようにする
   const I = Math.max(0, intervalDays);

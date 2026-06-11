@@ -3,6 +3,8 @@ import type { DocumentItem, Folder } from "@/types";
 
 
 
+
+
 export type PdfDashboardRow = { id: string;
   title: string;
   fileName: string;
@@ -24,8 +26,10 @@ type ViewerStateWithLastOpenedAt = NonNullable<DocumentItem["viewerState"]> & {
 type BuildPdfDashboardRowsParams = {
   documents: DocumentItem[];
   folders: Folder[];
-  tagById: ReadonlyMap<string, { name: string }>;
+  tagById: ReadonlyMap<string, { name: string; }>;
 };
+
+
 
 
 
@@ -92,7 +96,7 @@ const resolveCategoryLabel = (
 };
 const resolveDisplayTags = (
   document: DocumentItem,
-  tagById: ReadonlyMap<string, { name: string }>,
+  tagById: ReadonlyMap<string, { name: string; }>,
 ): string[] => {
   const explicitTags = (Array.isArray(document.tags) ? document.tags : [])
     .map((tagIdOrName) => tagById.get(tagIdOrName)?.name ?? tagIdOrName)

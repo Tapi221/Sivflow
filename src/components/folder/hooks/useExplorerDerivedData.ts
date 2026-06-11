@@ -8,8 +8,10 @@ import type { Card, CardSet, DocumentItem, ExplorerItem, Note } from "@/types";
 
 
 
-type LegacyEntityFields = { isDeleted?: boolean; is_deleted?: boolean; folder_id?: string | null; card_set_id?: string | null; orderIndex?: number; order_index?: number };
-type DraftFolderFields = { __draft?: boolean; __optimistic?: boolean };
+
+
+type LegacyEntityFields = { isDeleted?: boolean; is_deleted?: boolean; folder_id?: string | null; card_set_id?: string | null; orderIndex?: number; order_index?: number; };
+type DraftFolderFields = { __draft?: boolean; __optimistic?: boolean; };
 interface Params {
   treeFolders: FolderTreeNode[];
   treeCards: Card[];
@@ -21,11 +23,15 @@ interface Params {
 
 
 
+
+
 const ORPHAN_DOCUMENT_CLEANUP_LOG_PREFIX = "[useExplorerDerivedData] orphan PDF purge";
 
 
 
-const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean } | null) => Boolean(entity?.isDeleted ?? entity?.is_deleted);
+
+
+const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean; } | null) => Boolean(entity?.isDeleted ?? entity?.is_deleted);
 const isDraftFolder = (folder: FolderTreeNode) => {
   const draftFolder = folder as FolderTreeNode & DraftFolderFields;
   return Boolean(draftFolder.__draft || draftFolder.__optimistic);
@@ -36,16 +42,16 @@ const getDocumentFolderId = (document: DocumentItem): string | null | undefined 
 const getNoteFolderId = (note: Note): string | null | undefined => note.folderId ?? withLegacy(note).folder_id;
 const getOrderIndex = (entity: object, fallback = Number.MAX_SAFE_INTEGER): number => withLegacy(entity).orderIndex ?? withLegacy(entity).order_index ?? fallback;
 const getFolderOrder = (folder: FolderTreeNode) => {
-  return ((folder as { orderIndex?: number; order_index?: number }).orderIndex ?? (folder as { orderIndex?: number; order_index?: number }).order_index ?? 0) as number;
+  return ((folder as { orderIndex?: number; order_index?: number; }).orderIndex ?? (folder as { orderIndex?: number; order_index?: number; }).order_index ?? 0) as number;
 };
 const getFolderName = (folder: FolderTreeNode) => {
-  return String((folder as { folderName?: string; folder_name?: string }).folderName ?? (folder as { folderName?: string; folder_name?: string }).folder_name ?? "");
+  return String((folder as { folderName?: string; folder_name?: string; }).folderName ?? (folder as { folderName?: string; folder_name?: string; }).folder_name ?? "");
 };
 const compareFolders = (a: FolderTreeNode, b: FolderTreeNode) => {
   return compareOrderableEntities(a, b, {
     getOrderIndex: getFolderOrder,
-    getUpdatedAt: (folder) => getEntityTime((folder as { updatedAt?: unknown }).updatedAt),
-    getCreatedAt: (folder) => getEntityTime((folder as { createdAt?: unknown }).createdAt),
+    getUpdatedAt: (folder) => getEntityTime((folder as { updatedAt?: unknown; }).updatedAt),
+    getCreatedAt: (folder) => getEntityTime((folder as { createdAt?: unknown; }).createdAt),
     getName: getFolderName,
     getId: getFolderId,
   });
@@ -182,8 +188,8 @@ export const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], 
         const orderA = getOrderIndex(a.data);
         const orderB = getOrderIndex(b.data);
         if (orderA !== orderB) return orderA - orderB;
-        const timeA = getEntityTime((a.data as { updatedAt?: unknown }).updatedAt);
-        const timeB = getEntityTime((b.data as { updatedAt?: unknown }).updatedAt);
+        const timeA = getEntityTime((a.data as { updatedAt?: unknown; }).updatedAt);
+        const timeB = getEntityTime((b.data as { updatedAt?: unknown; }).updatedAt);
         return timeB - timeA;
       });
     }

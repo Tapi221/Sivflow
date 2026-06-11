@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type MarkdownBlockDisplayProps = {
   markdown: string;
   emptyPlaceholder?: string;
@@ -26,11 +28,15 @@ type MarkdownBlockDisplayProps = {
 
 
 
+
+
 const normalizeMarkdownBlockValue = (input: string) =>
   String(input ?? "")
     .replace(/\r\n/g, "\n")
     .replace(/\n{3,}$/g, "\n\n")
     .replace(/\n+$/g, "");
+
+
 
 
 

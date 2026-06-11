@@ -2,6 +2,8 @@ import type { LocalDBFallbackReasonCode } from "@/services/localDBRuntimeState";
 
 
 
+
+
 type UnknownRecord = Record<string, unknown>;
 type ErrorNameMessage = {
   name?: string;
@@ -12,8 +14,12 @@ type ErrorNameMessage = {
 
 
 
+
+
 const LOCALDB_ERROR_MESSAGE_LIMIT = 400;
 const MAX_ERROR_NESTING_DEPTH = 4;
+
+
 
 
 
@@ -38,7 +44,7 @@ const getErrorNameMessage = (error: unknown): ErrorNameMessage => {
     return {
       name: typeof error.name === "string" ? error.name : undefined,
       message: typeof error.message === "string" ? error.message : undefined,
-      cause: (error as { cause?: unknown }).cause,
+      cause: (error as { cause?: unknown; }).cause,
     };
   }
 
@@ -104,7 +110,7 @@ export const isBackingStoreOpenError = (error: unknown): boolean => { const text
 
   return hasUnknownError && hasBackingStoreToken;
 };
-export const classifyFallbackReasonCode = ( error: unknown, ): LocalDBFallbackReasonCode => { if (isBackingStoreOpenError(error)) return "backing_store_open_error";
+export const classifyFallbackReasonCode = (error: unknown,): LocalDBFallbackReasonCode => { if (isBackingStoreOpenError(error)) return "backing_store_open_error";
 
   const texts: string[] = [];
   extractErrorTexts(error, texts);

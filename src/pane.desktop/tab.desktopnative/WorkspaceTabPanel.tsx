@@ -7,6 +7,8 @@ import type { WorkspaceEntityTab } from "./Tab";
 
 
 
+
+
 type WorkspaceTabPanelProps = {
   activeTab: WorkspaceEntityTab;
   cards: Card[];
@@ -18,17 +20,23 @@ type WorkspaceTabPanelProps = {
 
 
 
+
+
 const workspaceTabPanelTextClassName = "text-[18px] leading-6";
 
 
 
-const buildMapById = <TEntity extends { id: string }>(entities: TEntity[]) => {
+
+
+const buildMapById = <TEntity extends { id: string; }>(entities: TEntity[]) => {
   return new Map(entities.map((entity) => [entity.id, entity]));
 };
 
 
 
-const WorkspacePanelStatus = ({ title }: { title: string }) => {
+
+
+const WorkspacePanelStatus = ({ title }: { title: string; }) => {
   return (
     <div className="flex h-full min-h-0 w-full items-center justify-center bg-[#fbfbfa] p-6">
       <div className={`rounded-xl border border-[#e2e1dc] bg-white px-5 py-4 ${workspaceTabPanelTextClassName} text-[#2f2e2a] shadow-[0_12px_28px_rgba(15,23,42,0.06)]`}>
@@ -86,6 +94,8 @@ const WorkspaceTabPanel = ({
 
   return null;
 };
+
+
 
 
 

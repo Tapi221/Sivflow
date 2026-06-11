@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface MobileScalableCardProps {
   children: React.ReactNode;
   cardDesignWidth?: number;
@@ -14,7 +16,13 @@ interface MobileScalableCardProps {
 
 
 
+
+
 const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
+
+
+
+
 
 
 
@@ -185,8 +193,8 @@ const MobileScalableCard = ({
         className={cn(
           "w-full mx-auto transition-[height] duration-300 ease-out",
           isEditMode &&
-            enableEditMode &&
-            "fixed inset-0 z-50 flex items-center justify-center p-4",
+          enableEditMode &&
+          "fixed inset-0 z-50 flex items-center justify-center p-4",
           className,
         )}
         style={{
@@ -212,6 +220,8 @@ const MobileScalableCard = ({
     </>
   );
 };
+
+
 
 
 

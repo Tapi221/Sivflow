@@ -8,6 +8,8 @@ import type { IconProps } from "@/ui/icons";
 
 
 
+
+
 type PdfLibraryWorkspaceSection = "flashcard" | "pdf";
 type PdfLibraryWorkspaceToolbarProps = {
   activeSection: PdfLibraryWorkspaceSection;
@@ -19,6 +21,8 @@ type LibraryTypeToolbarTab = {
   label: string;
   icon: ComponentType<IconProps>;
 };
+
+
 
 
 
@@ -35,9 +39,13 @@ const TAB_MOTION_TRANSITION: Transition = {
 
 
 
+
+
 const resolveLibrarySectionRoute = (section: PdfLibraryWorkspaceSection): string => {
   return section === "flashcard" ? "/library/flashcard" : "/library/pdf";
 };
+
+
 
 
 
@@ -62,7 +70,7 @@ const PdfLibraryWorkspaceToolbar = ({ activeSection, onSelectSection, onAddPdf }
 
               return (
                 <HoverTooltip key={tab.value} label={tab.label} side="top" align={isStartEdgeTab ? "start" : "center"} offset={6} preset="segmented">
-                  <button type="button" onClick={() => handleSelectSection(tab.value)} aria-label={tab.label} aria-pressed={isActive} className={cn("relative z-10 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg p-0", "appearance-none select-none", "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none", "focus:outline-none focus:ring-0 focus-visible:outline-none", isActive ? "text-[#8c8c8c]" : "text-[#b3b3b3] hover:text-[#8c8c8c]") }>
+                  <button type="button" onClick={() => handleSelectSection(tab.value)} aria-label={tab.label} aria-pressed={isActive} className={cn("relative z-10 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg p-0", "appearance-none select-none", "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none", "focus:outline-none focus:ring-0 focus-visible:outline-none", isActive ? "text-[#8c8c8c]" : "text-[#b3b3b3] hover:text-[#8c8c8c]")}>
                     {isActive ? <motion.span layoutId={TAB_INDICATOR_ID} className="absolute inset-0 -z-10 rounded-lg border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]" transition={TAB_MOTION_TRANSITION} /> : null}
                     <Icon aria-hidden="true" className={cn("block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none", isActive ? "text-[#8c8c8c]" : "text-[#b7b7b7]")} />
                   </button>
@@ -86,7 +94,11 @@ const PdfLibraryWorkspaceToolbar = ({ activeSection, onSelectSection, onAddPdf }
 
 
 
+
+
 export { PdfLibraryWorkspaceToolbar };
+
+
 
 
 

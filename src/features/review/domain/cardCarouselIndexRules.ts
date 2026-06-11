@@ -10,7 +10,7 @@ export const clampCardCarouselIndex = (index: number, itemCount: number) => { if
 };
 export const canGoToPreviousCardCarouselItem = (activeIndex: number) => { return activeIndex > 0;
 };
-export const canGoToNextCardCarouselItem = ( activeIndex: number, itemCount: number, ) => { return activeIndex < Math.max(0, itemCount - 1);
+export const canGoToNextCardCarouselItem = (activeIndex: number, itemCount: number,) => { return activeIndex < Math.max(0, itemCount - 1);
 };
 export const isNearCardCarouselItem = ({ activeIndex, targetIndex, radius, }: { activeIndex: number;
   targetIndex: number;

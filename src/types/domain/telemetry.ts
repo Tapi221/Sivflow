@@ -33,12 +33,12 @@ export interface SyncLogEntry { timestamp: string;
 
   // Fallback Tracking
   fallbackReason?:
-    | "version_mismatch"
-    | "conflict_unresolvable"
-    | "checksum_error";
+  | "version_mismatch"
+  | "conflict_unresolvable"
+  | "checksum_error";
   isFallback?: boolean;
 }
-export interface ITelemetryService { log( level: LogLevel, message: string, context?: LogContext, error?: Error, ): void;
+export interface ITelemetryService { log(level: LogLevel, message: string, context?: LogContext, error?: Error,): void;
   logEvent(
     eventName: TelemetryEventName,
     level: LogLevel,

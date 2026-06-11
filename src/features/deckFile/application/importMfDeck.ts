@@ -6,17 +6,19 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
-export type CreateMfDeckCardSet = ( name: string, targetFolderId?: string | null, opts?: { description?: string;
-    id?: string;
-    orderIndex?: number;
-  },
+
+
+export type CreateMfDeckCardSet = (name: string, targetFolderId?: string | null, opts?: { description?: string;
+  id?: string;
+  orderIndex?: number;
+},
 ) => Promise<CardSet>;
-export type UpdateMfDeckCardSet = ( id: string, data: Partial< Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode"> >, ) => Promise<void>;
-export type CreateMfDeckCard = ( cardData: Partial<Card> & { cardSetId?: string }, ) => Promise<Card>;
+export type UpdateMfDeckCardSet = (id: string, data: Partial<Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode">>,) => Promise<void>;
+export type CreateMfDeckCard = (cardData: Partial<Card> & { cardSetId?: string; },) => Promise<Card>;
 export type EnsureMfDeckTagByName = (name: string) => Promise<string | null>;
 export type MfDeckImportDestination = | { kind: "new-card-set";
-    cardSetName?: string;
-  }
+  cardSetName?: string;
+}
   | {
     kind: "existing-card-set";
     cardSetId: string;
@@ -36,6 +38,8 @@ export type ImportMfDeckArchiveResult = { createdCardSetId: string;
   createdCount: number;
   issues: MfDeckIssue[];
 };
+
+
 
 
 
@@ -139,7 +143,7 @@ const buildCardInput = async ({
   ensureTagByName?: EnsureMfDeckTagByName;
   issues: MfDeckIssue[];
   mediaContext: Pick<MfDeckArchiveV1, "media" | "mediaManifest">;
-}): Promise<Partial<Card> & { cardSetId: string }> => {
+}): Promise<Partial<Card> & { cardSetId: string; }> => {
   const tagIds = await resolveCardTagIds({ card, ensureTagByName, issues });
 
   return {

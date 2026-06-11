@@ -6,6 +6,8 @@ import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, type Right
 
 
 
+
+
 export type LayeredColorMenuOption = { id: TagColorKey;
   label: string;
   value: string;
@@ -20,6 +22,8 @@ type LayeredColorMenuProps = {
   panelId?: RightClickPanelId;
   onSelectColor: (color: string) => void;
 };
+
+
 
 
 
@@ -96,7 +100,11 @@ const LAYERED_COLOR_MENU_STYLE = `
 
 
 
+
+
 const normalizeColorValue = (color?: string | null): string | null => color?.trim().toLowerCase() ?? null;
+
+
 
 
 
@@ -135,6 +143,8 @@ const LayeredColorMenuBase = ({
     </>
   );
 };
+
+
 
 
 

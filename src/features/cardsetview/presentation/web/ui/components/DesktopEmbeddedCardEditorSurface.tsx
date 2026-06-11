@@ -17,6 +17,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 type Side = "question" | "answer";
 type EditorSettings = Partial<UserSettings> | null | undefined;
 export interface DesktopEmbeddedCardEditorSurfaceProps { selectedCardId: string;
@@ -57,11 +59,13 @@ type EmbeddedEditorFaceProps = Readonly<{
 
 
 
+
+
 const isCardEntity = (value: unknown): value is Card =>
   typeof value === "object" &&
   value !== null &&
   "id" in value &&
-  typeof (value as { id?: unknown }).id === "string";
+  typeof (value as { id?: unknown; }).id === "string";
 const resolveFaceLabel = (side: Side) =>
   side === "question" ? "問題" : "解答";
 const measureSurfaceViewportWidth = (element: HTMLDivElement) =>
@@ -71,6 +75,8 @@ const measureSurfaceViewportWidth = (element: HTMLDivElement) =>
       Math.max(element.clientWidth, element.parentElement?.clientWidth ?? 0),
     ),
   );
+
+
 
 
 

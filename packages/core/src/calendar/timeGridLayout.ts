@@ -2,6 +2,8 @@ import type { CalendarEvent } from "./calendarEvent.types";
 
 
 
+
+
 export type CalendarTimeGridLayoutMode = "overlap" | "no-overlap";
 export type CalendarTimeGridStyle = { top: number;
   height: number;
@@ -50,9 +52,13 @@ type NoOverlapHorizontalFrame = {
 
 
 
+
+
 const MINIMUM_EVENT_DURATION_MS = 1;
 const PERCENT_MAX = 100;
 const LAYOUT_EPSILON = 0.000001;
+
+
 
 
 
@@ -79,7 +85,7 @@ const compareEventsForLayout = (a: CalendarEvent, b: CalendarEvent): number => {
 
   return compareText(`${a.calendarId}:${a.id}`, `${b.calendarId}:${b.id}`);
 };
-const createTimeGridProxy = ({ event, rangeStartMs, rangeEndMs }: { event: CalendarEvent; rangeStartMs: number; rangeEndMs: number }): TimeGridLayoutProxy | null => {
+const createTimeGridProxy = ({ event, rangeStartMs, rangeEndMs }: { event: CalendarEvent; rangeStartMs: number; rangeEndMs: number; }): TimeGridLayoutProxy | null => {
   const rawStartMs = getDateTime(event.startsAt);
   const rawEndMs = getDateTime(event.endsAt);
 

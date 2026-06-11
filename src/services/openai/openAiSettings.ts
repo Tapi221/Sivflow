@@ -7,9 +7,13 @@ export type OpenAiSettings = { providerMode: AiProviderMode;
 
 
 
+
+
 const STORAGE_KEY = "sivflow.openai.settings.v1";
 const LEGACY_STORAGE_KEY = "flashcard-master.openai.settings.v1";
 export const DEFAULT_OPEN_AI_SETTINGS: OpenAiSettings = { providerMode: "local-template", apiKey: "", model: "gpt-5.4-mini", maxOutputTokens: 700, };
+
+
 
 
 
@@ -20,7 +24,7 @@ const isOpenAiSettings = (value: unknown): value is OpenAiSettings => {
     return false;
   }
 
-  const candidate = value as Partial<OpenAiSettings> & { billingMode?: unknown };
+  const candidate = value as Partial<OpenAiSettings> & { billingMode?: unknown; };
   const providerMode = candidate.providerMode ?? candidate.billingMode;
 
   return (
@@ -57,7 +61,7 @@ export const loadOpenAiSettings = (): OpenAiSettings => { if (typeof window === 
       return DEFAULT_OPEN_AI_SETTINGS;
     }
 
-    const migrated = parsed as OpenAiSettings & { billingMode?: AiProviderMode };
+    const migrated = parsed as OpenAiSettings & { billingMode?: AiProviderMode; };
 
     return {
       ...DEFAULT_OPEN_AI_SETTINGS,

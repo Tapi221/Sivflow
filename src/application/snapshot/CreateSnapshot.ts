@@ -8,8 +8,12 @@ import { APP_VERSION, CURRENT_SCHEMA_VERSION } from "@/types/domain/snapshot";
 
 
 
+
+
 export interface CreateSnapshotDependencies { generationCounterStore: GenerationCounterStorePort;
 }
+
+
 
 
 

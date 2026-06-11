@@ -82,7 +82,7 @@ describe("buildPortableImportBatchItems", () => {
 describe("importPortableFileBatch", () => {
   it("mfcard を新規カードセットとして一括インポートする", async () => {
     const createdCardSets: CardSet[] = [];
-    const createdCards: Array<Partial<Card> & { cardSetId?: string }> = [];
+    const createdCards: Array<Partial<Card> & { cardSetId?: string; }> = [];
     const onItemChange = vi.fn();
 
     const result = await importPortableFileBatch({

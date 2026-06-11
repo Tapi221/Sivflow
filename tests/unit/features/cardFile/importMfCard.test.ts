@@ -51,7 +51,7 @@ describe("importMfCardFile", () => {
         }) as CardSet,
     );
     const createCard = vi.fn(
-      async (cardData: Partial<Card> & { cardSetId?: string }) =>
+      async (cardData: Partial<Card> & { cardSetId?: string; }) =>
         ({ id: crypto.randomUUID(), ...cardData }) as Card,
     );
     const ensureTagByName = vi.fn(async (name: string) => `tag-${name}`);
