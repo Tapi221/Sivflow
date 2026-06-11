@@ -6,8 +6,12 @@ import { getLocalDb, getLocalDBRuntimeStatus } from "@/infrastructure/persistenc
 import type { AppSnapshot, SnapshotAsset, SnapshotData, SnapshotMetadata } from "@/types/domain/snapshot";
 import { APP_VERSION, CURRENT_SCHEMA_VERSION } from "@/types/domain/snapshot";
 
+
+
 interface CreateSnapshotDependencies { generationCounterStore: GenerationCounterStorePort;
 }
+
+
 
 const createCreateSnapshotUseCase = ({ generationCounterStore }: CreateSnapshotDependencies) => { const assertPersistentStorageAvailable = (operation: string): void => { const status = getLocalDBRuntimeStatus();
 
@@ -70,5 +74,9 @@ return {
 };
 };
 
+
+
 export { createCreateSnapshotUseCase };
+
+
 export type { CreateSnapshotDependencies };

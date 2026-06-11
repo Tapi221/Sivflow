@@ -76,4 +76,6 @@ if (type === "asset") {
 return record;
 };
 
+
+
 export { stripCloudSyncLocalOnlyFields };
