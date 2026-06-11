@@ -1155,6 +1155,8 @@ const TableRowElement = ({ children, ...props }: PlateElementProps<TTableRowElem
     </PlateElement>
   );
 };
+const TableCellHeaderElement = (props: React.ComponentProps<typeof TableCellElement>) => { return <TableCellElement {...props} isHeader />;
+};
 
 const TableCellResizeControls = React.memo(({
   colIndex,
@@ -1324,8 +1326,6 @@ const TableCellElement = ({ isHeader, ...props }: PlateElementProps<TTableCellEl
       )}
     </PlateElement>
   );
-};
-const TableCellHeaderElement = (props: React.ComponentProps<typeof TableCellElement>) => { return <TableCellElement {...props} isHeader />;
 };
 
 TableCellResizeControls.displayName = "TableCellResizeControls";

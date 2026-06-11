@@ -17,6 +17,10 @@ type LocalPdfSourceState = {
   source: PdfDocumentSource | null;
   error: string | null;
 };
+type PendingPdfViewerStateSave = {
+  viewerState: PdfViewerState;
+  onDocumentUpdate: NonNullable<PdfDocumentPaneProps["onDocumentUpdate"]>;
+};
 
 const PDF_SOURCE_RESOLUTION_TIMEOUT_MS = 15_000;
 const PDF_VIEWER_STATE_SAVE_DEBOUNCE_MS = 800;
@@ -31,10 +35,6 @@ type PdfDocumentPaneProps = {
   document: DocumentItem;
   className?: string;
   onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
-};
-type PendingPdfViewerStateSave = {
-  viewerState: PdfViewerState;
-  onDocumentUpdate: NonNullable<PdfDocumentPaneProps["onDocumentUpdate"]>;
 };
 
 const createPendingLocalPdfSourceState = (documentId: string): LocalPdfSourceState => ({

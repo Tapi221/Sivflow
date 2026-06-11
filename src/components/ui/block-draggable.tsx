@@ -203,6 +203,46 @@ const Gutter = ({
     </div>
   );
 };
+const BlockDraggable: RenderNodeWrapper = (props) => { const { editor, element, path } = props;
+
+  const enabled = React.useMemo(() => {
+    if (editor.dom.readOnly) return false;
+
+    if (path.length === 1 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
+      return true;
+    }
+    if (path.length === 3 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
+      const block = editor.api.some({
+        at: path,
+        match: {
+          type: editor.getType(KEYS.column),
+        },
+      });
+
+      if (block) {
+        return true;
+      }
+    }
+    if (path.length === 4 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
+      const block = editor.api.some({
+        at: path,
+        match: {
+          type: editor.getType(KEYS.table),
+        },
+      });
+
+      if (block) {
+        return true;
+      }
+    }
+
+    return false;
+  }, [editor, element, path]);
+
+  if (!enabled) return;
+
+  return (props) => <Draggable {...props} />;
+};
 
 const DragHandle = React.memo(({
   isDragging,
@@ -454,46 +494,6 @@ const Draggable = (props: PlateElementProps) => {
       </div>
     </div>
   );
-};
-const BlockDraggable: RenderNodeWrapper = (props) => { const { editor, element, path } = props;
-
-  const enabled = React.useMemo(() => {
-    if (editor.dom.readOnly) return false;
-
-    if (path.length === 1 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
-      return true;
-    }
-    if (path.length === 3 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
-      const block = editor.api.some({
-        at: path,
-        match: {
-          type: editor.getType(KEYS.column),
-        },
-      });
-
-      if (block) {
-        return true;
-      }
-    }
-    if (path.length === 4 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
-      const block = editor.api.some({
-        at: path,
-        match: {
-          type: editor.getType(KEYS.table),
-        },
-      });
-
-      if (block) {
-        return true;
-      }
-    }
-
-    return false;
-  }, [editor, element, path]);
-
-  if (!enabled) return;
-
-  return (props) => <Draggable {...props} />;
 };
 
 export { BlockDraggable };

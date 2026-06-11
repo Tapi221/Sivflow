@@ -50,6 +50,9 @@ const getMissingFirebaseEnvVars = (): string[] => {
     return typeof value !== "string" || value.trim().length === 0;
   });
 };
+
+const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
+
 const createUnavailableState = (): FirebaseClientState => ({
   app: null,
   auth: null,
@@ -57,9 +60,6 @@ const createUnavailableState = (): FirebaseClientState => ({
   functionsClient: null,
   firestoreDb: null,
 });
-
-const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
-
 const initializeFirebaseClient = (): FirebaseClientState => {
   if (!isFirebaseClientAvailable) {
     if (import.meta.env.DEV || import.meta.env.MODE === "test") {
