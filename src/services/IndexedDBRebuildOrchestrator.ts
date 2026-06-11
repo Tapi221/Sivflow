@@ -1,9 +1,16 @@
 import { Dexie } from "dexie";
+
 import { getLocalDb } from "@/services/localdb";
+
 import { CURRENT_TAG_STORE } from "@/services/localdb/tagStoreNames";
+
 import { CloudSyncAdapter } from "@/services/logic/CloudSyncAdapter";
+
 import { type BlobUrlFix, sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
+
 import { sanitizeForLog } from "@/utils/logSanitizer";
+
+
 
 
 
@@ -47,6 +54,8 @@ type RebuildFailure = {
 
 
 
+
+
 const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
   card: "cards",
   folder: "folders",
@@ -56,6 +65,8 @@ const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
   asset: "images",
   userSetting: "userSettings",
 };
+
+
 
 
 

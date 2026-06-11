@@ -1,9 +1,16 @@
 import { assertNoBlobUrlInCardPayload } from "./blobUrl";
+
 import type { DocDbCtx } from "./documentsLifecycle";
+
 import { cleanupBeforeDocumentDelete, cleanupBeforeDocumentSoftDelete, cleanupBeforeDocumentUpdate } from "./documentsLifecycle";
+
 import { CURRENT_TAG_STORE } from "./tagStoreNames";
+
 import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
+
 import type { Card, Folder } from "@/types";
+
+
 
 
 
@@ -172,6 +179,8 @@ type Upsert = {
 
 
 
+
+
 const ENTITY_BY_TABLE = {
   cards: "card",
   folders: "folder",
@@ -190,6 +199,8 @@ const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>([
   "tag",
   "asset",
 ]);
+
+
 
 
 

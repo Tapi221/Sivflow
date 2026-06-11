@@ -8,6 +8,8 @@ import type { CalendarEvent } from "./calendarEvent.types";
 
 
 
+
+
 export type CalendarTimeGridLayoutMode = "overlap" | "no-overlap";
 
 export type CalendarTimeGridStyle = { top: number;
@@ -69,9 +71,13 @@ type NoOverlapHorizontalFrame = {
 
 
 
+
+
 const MINIMUM_EVENT_DURATION_MS = 1;
 const PERCENT_MAX = 100;
 const LAYOUT_EPSILON = 0.000001;
+
+
 
 
 

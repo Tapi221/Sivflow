@@ -1,5 +1,8 @@
 import { memo } from "react";
+
 import type { Card, ReviewLog } from "@/types";
+
+
 
 
 
@@ -62,7 +65,11 @@ type CardMetaPanelProps = {
 
 
 
+
+
 const CardMetaPanelComponent = (_props: CardMetaPanelProps) => null;
+
+
 
 
 

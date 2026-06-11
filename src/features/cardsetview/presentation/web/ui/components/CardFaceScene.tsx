@@ -1,9 +1,16 @@
 import React from "react";
+
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
+
 import { SharedCardContent, type SharedCardContentProps } from "@/components/card/common/SharedCardContent";
+
 import { CardFrame } from "@/components/card/frame/CardFrame";
+
 import { cn } from "@/lib/utils";
+
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+
 
 
 
@@ -42,6 +49,8 @@ export type CardFaceSceneProps = Readonly<{ displayMode: CardDisplayMode;
   onResizeStart?: () => void;
   onResizeEnd?: () => void;
 }>;
+
+
 
 
 

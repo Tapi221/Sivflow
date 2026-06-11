@@ -1,5 +1,8 @@
 import { useEffect } from "react";
+
 import { isPrimaryShiftShortcut, isTypingTarget } from "./hotkeyGuards";
+
+
 
 
 
@@ -12,6 +15,8 @@ import { isPrimaryShiftShortcut, isTypingTarget } from "./hotkeyGuards";
 type UseHotKeyParams = {
   onToggleRightSidebar?: () => void;
 };
+
+
 
 
 

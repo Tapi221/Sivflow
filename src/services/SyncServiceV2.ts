@@ -1,16 +1,23 @@
 import { nanoid } from "nanoid";
 
+
 import type { ICloudSyncAdapter, IDiffEngine, INetworkMonitor, IQueueManager, ISyncService, SecurityState, SyncChange, SyncConflict, SyncProcessingError, SyncStats, SyncTask, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
+
 
 import { SecurityMonitor } from "@/services/logic/SecurityMonitor";
 
+
 import { TelemetryService } from "@/services/logic/TelemetryService";
+
 
 import type { Card, CardSet, Folder } from "@/types";
 
+
 import type { SyncConflict as StoredSyncConflict, SyncQueueItem, SyncResult } from "@/types/domain/sync";
 
+
 import type { SyncContextSource } from "@/types/domain/telemetry";
+
 
 import type { LocalDBLike } from "./localDB";
 
@@ -22,7 +29,11 @@ import type { LocalDBLike } from "./localDB";
 
 
 
+
+
 type SyncableRecord = Record<string, unknown> & { id?: string; isDeleted?: boolean };
+
+
 
 
 
@@ -56,7 +67,11 @@ const DEFAULT_FOLDER_NAME = "インポート済みカード";
 
 
 
+
+
 type SyncableTableName = (typeof FULL_RESYNC_TABLES)[number];
+
+
 
 
 
@@ -77,6 +92,8 @@ const SYNC_ENTITY_BY_TABLE: Record<SyncableTableName, SyncTask["entity"]> = {
 };
 
 const DELETE_CAPABLE_SYNC_ENTITIES = new Set<SyncTask["entity"]>(["folder", "cardSet", "card", "document", "tag", "asset"]);
+
+
 
 
 

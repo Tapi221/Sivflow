@@ -1,11 +1,18 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
+
 import userEvent from "@testing-library/user-event";
+
 import React, { useState } from "react";
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { useSearchStore } from "@/features/search/store/useSearchStore";
+
 import { Sidebar } from "@/pane.desktop/leftpane/Sidebar.desktop";
+
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+
 import { useLocaleStore } from "@shared/i18n/locale.store";
 
 vi.mock("firebase/auth", () => ({

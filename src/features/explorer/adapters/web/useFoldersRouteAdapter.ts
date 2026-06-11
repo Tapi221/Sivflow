@@ -1,9 +1,16 @@
 import { useCallback, useMemo } from "react";
+
 import { useLocation, useSearchParams } from "react-router-dom";
+
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
+
 import { mapSearchParamsToExplorerRouteState } from "@/features/explorer/mappers/mapSearchParamsToExplorerRouteState";
+
 import { getLastSelectedFolderId, setLastSelectedFolderId } from "./explorerStorage";
+
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
+
+
 
 
 
@@ -23,6 +30,8 @@ export type FoldersRouteAdapter = { routeKey: string;
 
   getBaseSearchParams: () => URLSearchParams;
 };
+
+
 
 
 

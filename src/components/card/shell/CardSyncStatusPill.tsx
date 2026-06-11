@@ -1,9 +1,16 @@
 import React from "react";
+
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+
 import { cn } from "@/lib/utils";
+
 import { RefreshCw } from "@/ui/icons";
+
 import { formatLastSyncedAt } from "./formatLastSyncedAt";
+
 import { overlayGlassPillClassName } from "./overlaySurfaceClassNames";
+
+
 
 
 
@@ -21,6 +28,8 @@ interface CardSyncStatusPillProps {
   onRetry?: () => Promise<void> | void;
   className?: string;
 }
+
+
 
 
 

@@ -1,7 +1,12 @@
 import { useState } from "react";
+
 import { CodeBlockEditor } from "@/components/card/blocks/code/CodeBlockEditor";
+
 import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
+
 import type { CodeBlockData } from "@/types/core/code-block";
+
+
 
 
 
@@ -19,6 +24,8 @@ const SAMPLE_CODE = `function fibonacci(n: number): number {
 const values = Array.from({ length: 12 }, (_, i) => fibonacci(i));
 console.log(values.join(", "));
 `;
+
+
 
 
 
@@ -58,6 +65,8 @@ const CodeBlockVisualTest = () => {
     </main>
   );
 };
+
+
 
 
 

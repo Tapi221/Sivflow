@@ -1,8 +1,14 @@
 import { useMemo } from "react";
+
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
+
 import type { ScheduleColumnBuffer } from "./ScheduleColumn.shared";
+
 import { buildScheduleDisplayDays, buildScheduleInteractionDays, buildScheduleVirtualRail } from "./ScheduleColumn.shared";
+
+
 
 
 
@@ -27,6 +33,8 @@ type UseScheduleDaysParams = {
 
 
 
+
+
 const VIRTUAL_RAIL_VIEW_MODES = new Set<CalendarViewMode>([
   "days",
   "threeDays",
@@ -35,6 +43,8 @@ const VIRTUAL_RAIL_VIEW_MODES = new Set<CalendarViewMode>([
   "list",
   "pieChart",
 ]);
+
+
 
 
 

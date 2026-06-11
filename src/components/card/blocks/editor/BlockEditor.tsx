@@ -1,30 +1,45 @@
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 
+
 import { createPortal } from "react-dom";
+
 
 import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
 
+
 import { hasRuledLine } from "@/components/card/blocks/core/blockDisplayPolicy";
+
 
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
 
+
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
+
 
 import { BlockToolbar } from "@/components/card/blocks/core/BlockToolbar";
 
+
 import { createEditorBlock, isEditorInsertableBlockType } from "./blockEditorInsertPolicy";
+
 
 import { type CardBlockLayoutReplaceBlock, type EditorProps } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
 
+
 import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
+
 
 import { getNormalizedGridOffsetRows, getNormalizedRowOffset, isGridOffsetType, isRowPositionableType } from "@/components/card/frame/rowOffset";
 
+
 import { cn } from "@/lib/utils";
+
 
 import type { CardBlock } from "@/types/domain/card";
 
+
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+
 
 
 
@@ -66,9 +81,13 @@ interface BlockEditorProps {
 
 
 
+
+
 const ROW_STEP_PX = CARD_ROW_PX;
 
 const EMPTY_HIDDEN_BLOCK_TYPES: CardBlock["type"][] = [];
+
+
 
 
 
@@ -91,8 +110,12 @@ const uid = () =>
 
 
 
+
+
 export interface BlockEditorHandle { addBlock: (type: CardBlock["type"]) => void;
 }
+
+
 
 
 
@@ -666,6 +689,8 @@ export const BlockEditor = React.forwardRef< BlockEditorHandle, BlockEditorProps
     );
   },
 );
+
+
 
 
 

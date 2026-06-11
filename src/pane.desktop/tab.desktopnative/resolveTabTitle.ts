@@ -8,6 +8,8 @@ import type { Card, CardSet, DocumentItem } from "@/types";
 
 
 
+
+
 export const resolveDocumentTabTitle = (document: DocumentItem): string => { const title = document.title?.trim();
   if (title) return title;
 

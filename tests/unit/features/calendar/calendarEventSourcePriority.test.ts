@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
+
 import { createCalendarYearEventDisplayResolver } from "@/features/calendar/calendarEventSourcePriority";
+
 import type { AppCalendarItem, GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
+
 import type { GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 const createProject = (id: string, label: string, color: string): AppCalendarItem => ({

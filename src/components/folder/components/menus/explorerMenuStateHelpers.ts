@@ -15,6 +15,8 @@ interface BeginInlineRenameParams {
 
 
 
+
+
 export const beginInlineRename = ({ id, name, closeMenu, setEditingId, setEditingName, beforeStart, }: BeginInlineRenameParams) => { beforeStart?.();
   closeMenu?.();
   setEditingId(id);

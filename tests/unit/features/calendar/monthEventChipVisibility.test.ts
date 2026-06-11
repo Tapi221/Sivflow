@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
+
 import { computeMonthEventsByDay, createMonthEventIndex, getVisibleMonthEventChipCount } from "@/chip/eventchip/EventChip.month.placement";
+
 import { DEFAULT_MONTH_ROW_HEIGHT } from "@/features/calendar/calendar.constants.desktop";
+
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 const createEvent = ({

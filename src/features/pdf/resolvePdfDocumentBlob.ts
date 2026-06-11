@@ -1,13 +1,23 @@
 import { downloadPdfFromGoogleDrive } from "@/integration/google-integration/googleDrive.pdfDownload";
+
 import { requestGoogleDriveFileAccessToken } from "@/integration/google-integration/googleDrive.oauth";
+
 import { auth } from "@/services/firebase";
+
 import { getDocumentBlob, saveDocumentBlob } from "@/services/documentFileStore";
+
 import type { DocumentItem } from "@/types";
+
+
 
 type PdfDocumentBlobFields = Pick<DocumentItem, "id" | "localFileId" | "userId" | "googleDriveFileId" | "googleDriveWebContentLink" | "googleDriveWebViewLink" | "storagePath">;
 
+
+
 const GOOGLE_DRIVE_STORAGE_PATH_PREFIX = "google-drive://";
 const GOOGLE_DRIVE_FILE_PATH_PATTERN = /\/file\/d\/([^/]+)/;
+
+
 
 const getUniqueValues = (values: Array<string | null | undefined>): string[] => {
   return [...new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value)))];
@@ -57,8 +67,7 @@ const resolveGoogleDriveFileId = (document: Pick<PdfDocumentBlobFields, "googleD
   return resolveStringValue(document.googleDriveFileId) ?? resolveGoogleDriveFileIdFromStoragePath(document.storagePath) ?? resolveGoogleDriveFileIdFromUrl(document.googleDriveWebContentLink) ?? resolveGoogleDriveFileIdFromUrl(document.googleDriveWebViewLink);
 };
 
-export const findLocalPdfBlob = async (document: Pick<DocumentItem, "id" | "localFileId" | "userId">, currentUserId: string | null | undefined): Promise<Blob | null> => {
-  const fileIds = resolveDocumentFileIds(document);
+export const findLocalPdfBlob = async (document: Pick<DocumentItem, "id" | "localFileId" | "userId">, currentUserId: string | null | undefined): Promise<Blob | null> => { const fileIds = resolveDocumentFileIds(document);
   const userIds = resolveDocumentBlobUserIds(document.userId, currentUserId);
 
   for (const userId of userIds) {
@@ -71,8 +80,7 @@ export const findLocalPdfBlob = async (document: Pick<DocumentItem, "id" | "loca
   return null;
 };
 
-export const resolvePdfDocumentBlob = async (document: PdfDocumentBlobFields, currentUserId: string | null | undefined): Promise<Blob | null> => {
-  const localBlob = await findLocalPdfBlob(document, currentUserId);
+export const resolvePdfDocumentBlob = async (document: PdfDocumentBlobFields, currentUserId: string | null | undefined): Promise<Blob | null> => { const localBlob = await findLocalPdfBlob(document, currentUserId);
   if (localBlob) return localBlob;
 
   const googleDriveFileId = resolveGoogleDriveFileId(document);

@@ -1,7 +1,12 @@
 import { useState, type CSSProperties } from "react";
+
 import appIconSrc from "@shared/assets/icons/app-icon.svg";
+
 import authBackgroundSrc from "@shared/assets/backgrounds/sivflow-flow-background.svg";
+
 import { signInWithGoogle } from "@/services/auth/googleSignIn";
+
+
 
 
 
@@ -34,6 +39,8 @@ type LoginPageStyles = {
   startText: CSSProperties;
   loadingDot: CSSProperties;
 };
+
+
 
 
 
@@ -238,11 +245,15 @@ const styles: LoginPageStyles = {
 
 
 
+
+
 const isAuthPopupClosedByUserError = (error: unknown): boolean =>
   typeof error === "object" &&
   error !== null &&
   "code" in error &&
   error.code === "auth/popup-closed-by-user";
+
+
 
 
 
@@ -359,6 +370,8 @@ const LoginPage = () => {
     </main>
   );
 };
+
+
 
 
 

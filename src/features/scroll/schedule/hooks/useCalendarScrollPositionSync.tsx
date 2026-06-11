@@ -1,6 +1,10 @@
 import { useLayoutEffect, useRef } from "react";
+
 import * as C from "@/features/calendar/calendar.constants.desktop";
+
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
+
+
 
 
 
@@ -20,6 +24,8 @@ type Params = {
   headerRef?: React.RefObject<HTMLDivElement | null>;
   headerRefs?: React.RefObject<HTMLDivElement | null>[];
 };
+
+
 
 
 

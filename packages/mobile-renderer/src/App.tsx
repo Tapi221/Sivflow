@@ -1,5 +1,7 @@
 import { memo } from "react";
+
 import { Platform, View } from "react-native";
+
 import HandwritingModeScreen from "@mobile-renderer/screens/ipad/handwriting/HandwritingModeScreen";
 
 
@@ -10,7 +12,11 @@ import HandwritingModeScreen from "@mobile-renderer/screens/ipad/handwriting/Han
 
 
 
+
+
 const App = () => <View style={{ flex: 1 }}>{Platform.OS === "ios" ? <HandwritingModeScreen /> : null}</View>;
+
+
 
 
 

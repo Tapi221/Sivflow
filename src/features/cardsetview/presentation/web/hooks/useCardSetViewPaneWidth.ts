@@ -1,8 +1,14 @@
 import { useMemo } from "react";
+
 import { CARD_PANE_VIEW_DEFAULT_WIDTH_PX, CARD_PANE_VIEW_MIN_WIDTH_PX, clampPaneWidthPx } from "@/components/card/frame/cardPane.constants";
+
 import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthState";
+
 import { getCardSetWidthPreference, setCardSetWidthPreference } from "@/services/cardWidthPreferences";
+
 import type { UserSettings } from "@/types";
+
+
 
 
 
@@ -18,6 +24,8 @@ interface UseCardSetViewPaneWidthOptions {
   settings: Partial<UserSettings> | null | undefined;
   cardSetId?: string | null;
 }
+
+
 
 
 

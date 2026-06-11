@@ -1,6 +1,10 @@
 import { buildCardSetById, resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
+
 import type { SearchItem } from "@/features/search/model/search.types";
+
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+
+
 
 
 
@@ -18,6 +22,8 @@ type BuildExplorerSearchItemsParams = {
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
 };
+
+
 
 
 

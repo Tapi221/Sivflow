@@ -1,7 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+
 import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.types";
+
 import { INK_DOCUMENT_VERSION, type InkDocument, type InkEditTool } from "@core/domain/card/ink/inkDocument";
+
 import { useCards } from "@/components/card/hooks/useCards";
+
+
 
 
 
@@ -30,6 +35,8 @@ export interface FlashcardInkResult { previewInkRef: React.RefObject<InkLayerHan
   shouldMountInkLayer: boolean;
   handleInkDocumentChange: (side: "question" | "answer", nextDocument: InkDocument) => void;
 }
+
+
 
 
 

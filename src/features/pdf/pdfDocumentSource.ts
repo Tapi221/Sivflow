@@ -1,5 +1,8 @@
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+
 import PdfWorker from "pdfjs-dist/legacy/build/pdf.worker.mjs?worker";
+
+
 
 
 
@@ -41,8 +44,12 @@ export type { PdfDocumentSource };
 
 
 
+
+
 let pdfWorkerPort: Worker | null = null;
 const scheduledSourceReleaseTimers = new WeakMap<PdfDocumentUrlSource, ReturnType<typeof globalThis.setTimeout>>();
+
+
 
 
 
@@ -160,6 +167,8 @@ const releasePdfDocumentSourceSoon = (source: PdfDocumentSource | null | undefin
   }, 0);
   scheduledSourceReleaseTimers.set(source, releaseTimer);
 };
+
+
 
 
 

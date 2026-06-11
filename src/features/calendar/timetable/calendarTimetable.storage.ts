@@ -1,8 +1,12 @@
 import Dexie, { type Table } from "dexie";
 
+
 import type { CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetableDepartment, CalendarTimetableInstitution, CalendarTimetablePeriod, CalendarTimetableSettings, CalendarTimetableSlot, CalendarTimetableSyllabusCourse, CalendarTimetableSyllabusCourseDisplay, CalendarTimetableSyllabusCourseDraft, CalendarTimetableVisibleDayCount } from "@core/domain/calendar/timetable/timetable.types";
 
+
 import { createCalendarTimetableSearchText as createSearchText, normalizeCalendarTimetableSlots as normalizeSlots, normalizeCalendarTimetableText as normalizeText, normalizeCalendarTimetableVisibleDayCount as normalizeVisibleDayCount, sortCalendarTimetablePeriods as sortPeriods } from "@core/domain/calendar/timetable/timetable.model";
+
+
 
 
 
@@ -27,6 +31,8 @@ const DEFAULT_TIMETABLE_PERIODS: readonly CalendarTimetablePeriod[] = [
   { id: "period-6", label: "6", startTime: "18:00", endTime: "19:30", order: 5 },
   { id: "period-7", label: "7", startTime: "19:40", endTime: "21:10", order: 6 },
 ];
+
+
 
 
 
@@ -70,7 +76,11 @@ class CalendarTimetableDatabase extends Dexie {
 
 
 
+
+
 const timetableDb = new CalendarTimetableDatabase();
+
+
 
 
 
@@ -265,6 +275,8 @@ const deleteCalendarTimetablePeriod = async (periodId: string): Promise<void> =>
     }));
   });
 };
+
+
 
 
 

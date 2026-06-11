@@ -1,6 +1,9 @@
 import { BaseTableCellHeaderPlugin, BaseTableCellPlugin, BaseTablePlugin, BaseTableRowPlugin, } from '@platejs/table';
 
+
 import { TableCellElementStatic, TableCellHeaderElementStatic, TableElementStatic, TableRowElementStatic, } from '@/components/ui/table-node-static';
+
+
 
 
 

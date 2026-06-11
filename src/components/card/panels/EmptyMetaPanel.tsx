@@ -1,5 +1,8 @@
 import type { CSSProperties, ReactNode } from "react";
+
 import { MetaPanelShell } from "./MetaPanelShell";
+
+
 
 
 
@@ -16,6 +19,8 @@ type EmptyMetaPanelProps = {
   contentClassName?: string;
   style?: CSSProperties;
 };
+
+
 
 
 

@@ -1,14 +1,26 @@
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+
 import type { CSSProperties } from "react";
+
 import { addDays, addYears, eachMonthOfInterval, endOfDay, endOfYear, format, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
+
 import { getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
+
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
+
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+
 import { getCalendarWeekStartsOn, rotateCalendarWeekdayLabels } from "@/features/calendar/calendarWeekStart";
+
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
+
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+
 import { cn } from "@/lib/utils";
+
 import { useDateFnsLocale, useT } from "@shared/i18n/useT";
+
+
 
 
 
@@ -85,6 +97,8 @@ type YearVirtualWindow = {
 
 
 
+
+
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
 const YEAR_INITIAL_RENDERED_FUTURE_YEARS = 3;
 const YEAR_EXTEND_YEARS = 1;
@@ -97,6 +111,8 @@ const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
 const EMPTY_YEAR_EVENTS: GoogleCalendarEvent[] = [];
 const DEFAULT_YEAR_EVENT_PRIORITY: CalendarYearEventPriority = { group: Number.MAX_SAFE_INTEGER, index: Number.MAX_SAFE_INTEGER };
 const DEFAULT_YEAR_EVENT_DISPLAY: CalendarYearEventDisplay = { priority: DEFAULT_YEAR_EVENT_PRIORITY };
+
+
 
 
 
@@ -243,6 +259,8 @@ const getDayButtonStyle = (day: CalendarYearDay, selected: boolean): CSSProperti
     transition: "none",
   };
 };
+
+
 
 
 
@@ -568,6 +586,8 @@ const CalendarYearViewComponent = ({
     </div>
   );
 };
+
+
 
 
 

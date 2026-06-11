@@ -1,5 +1,8 @@
 import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
+
 import { cn } from "@/lib/utils";
+
+
 
 
 
@@ -36,6 +39,8 @@ type SourceRowSwitchStyle = CSSProperties & {
 
 
 
+
+
 const GOOGLE_SOURCE_ROW_CLASS_NAME = "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
 const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#85827e]";
 const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#85827e] opacity-70";
@@ -49,9 +54,13 @@ const SOURCE_ROW_SWITCH_CLASS_NAME = "mr-0";
 
 
 
+
+
 const createSourceRowSwitchStyle = (color: string): SourceRowSwitchStyle => ({
   "--calendar-source-switch-color": color,
 } as SourceRowSwitchStyle);
+
+
 
 
 
@@ -94,6 +103,8 @@ const SelectableGoogleSourceRow = ({ id, label, checked, color, onToggle }: Sele
     </div>
   );
 };
+
+
 
 
 

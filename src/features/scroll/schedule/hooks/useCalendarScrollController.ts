@@ -1,12 +1,22 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+
 import * as C from "@/features/calendar/calendar.constants.desktop";
+
 import { getCalendarDateKey } from "@/features/calendar/calendarEventRange";
+
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
+
 import { getScheduleVirtualRailDate } from "@/features/calendar/grid/ScheduleColumn.shared";
+
 import { persistScheduleCalendarScrollTop, readStoredScheduleCalendarScrollTop } from "@/features/calendar/scheduleNavigationPersistence";
+
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
+
 import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync";
+
 import { useSyncedHorizontalScroll } from "./useSyncedHorizontalScroll";
+
+
 
 
 
@@ -40,8 +50,12 @@ type Props = {
 
 
 
+
+
 const CALENDAR_TIMELINE_SCROLLED_CLASS_NAME = "calendar-timeline-scroll-scrolled";
 const SCHEDULE_SCROLL_POSITION_PERSIST_DELAY_MS = 200;
+
+
 
 
 

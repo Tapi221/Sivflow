@@ -8,6 +8,8 @@ import React from "react";
 
 
 
+
+
 type PointerGestureState = Readonly<{
   pointerId: number | null;
   startX: number;
@@ -28,7 +30,11 @@ type FlipTriggerEvent = Readonly<{
 
 
 
+
+
 export const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
+
+
 
 
 
@@ -63,6 +69,8 @@ const createInitialPointerGestureState = (): PointerGestureState => ({
 
 
 
+
+
 export type UseCardFlipBehaviorParams = Readonly<{ isCardClickable: boolean;
   previewMode: boolean;
   onFlip?: () => void;
@@ -78,6 +86,8 @@ export type UseCardFlipBehaviorResult = Readonly<{ handleFlip: (event?: React.Mo
   handlePointerUpCapture: React.PointerEventHandler<HTMLDivElement>;
   handlePointerCancelCapture: React.PointerEventHandler<HTMLDivElement>;
 }>;
+
+
 
 
 

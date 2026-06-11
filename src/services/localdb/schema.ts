@@ -12,6 +12,8 @@ type SchemaTarget = {
 
 
 
+
+
 const currentStores = {
   folders:
     "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
@@ -48,6 +50,8 @@ const currentStores = {
   tags_v2: null,
   tags_v3: null,
 } as const;
+
+
 
 
 

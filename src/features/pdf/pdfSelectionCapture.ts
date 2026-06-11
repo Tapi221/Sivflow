@@ -1,5 +1,8 @@
 import { cropCanvasToBlob } from "@/features/selection-capture/canvasSelectionCapture";
+
 import type { SelectionCaptureArea, SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
+
+
 
 
 
@@ -61,6 +64,8 @@ const capturePdfViewerAreaToBlob = async (target: HTMLElement, area: SelectionCa
 
   return cropCanvasToBlob(candidate.canvas, candidate.sourceRect);
 };
+
+
 
 
 

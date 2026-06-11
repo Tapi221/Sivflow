@@ -1,32 +1,62 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+
 import type { ClipboardEvent as ReactClipboardEvent, FormEvent as ReactFormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+
 import type { RenderProps } from "prism-react-renderer";
+
 import { Highlight } from "prism-react-renderer";
+
 import Prism from "prismjs";
+
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
+
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
+
 import { Check, Copy } from "@/ui/icons";
+
 import "prismjs/components/prism-bash";
+
 import "prismjs/components/prism-c";
+
 import "prismjs/components/prism-clike";
+
 import "prismjs/components/prism-cpp";
+
 import "prismjs/components/prism-csharp";
+
 import "prismjs/components/prism-css";
+
 import "prismjs/components/prism-go";
+
 import "prismjs/components/prism-java";
+
 import "prismjs/components/prism-javascript";
+
 import "prismjs/components/prism-json";
+
 import "prismjs/components/prism-markdown";
+
 import "prismjs/components/prism-markup";
+
 import "prismjs/components/prism-python";
+
 import "prismjs/components/prism-rust";
+
 import "prismjs/components/prism-sql";
+
 import "prismjs/components/prism-typescript";
+
 import { CodeBlockFrame } from "./CodeBlockFrame";
+
 import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "./codeBlockLanguage";
+
 import { cn } from "@/lib/utils";
+
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
+
 import { codeTheme } from "@shared/design-tokens/codeTheme";
+
+
 
 
 
@@ -69,7 +99,11 @@ type PrismGrammar = Parameters<typeof Prism.highlight>[1];
 
 
 
+
+
 const CODE_EDITOR_TAB_TEXT = "  ";
+
+
 
 
 
@@ -176,6 +210,8 @@ const setHighlightedEditorCode = (
     editor.innerHTML = nextHtml;
   }
 };
+
+
 
 
 

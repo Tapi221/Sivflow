@@ -1,5 +1,8 @@
 import React from "react";
+
 import { cn } from "@/lib/utils";
+
+
 
 
 
@@ -18,6 +21,8 @@ type OverlayToolbarIndexNavigatorProps = {
   inputClassName?: string;
   totalClassName?: string;
 };
+
+
 
 
 
@@ -48,6 +53,8 @@ const normalizeCommittedNavigatorValue = ({
 
   return Math.min(total, Math.max(1, Math.trunc(parsedValue)));
 };
+
+
 
 
 

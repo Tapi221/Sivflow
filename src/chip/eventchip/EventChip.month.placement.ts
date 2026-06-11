@@ -1,7 +1,12 @@
 import { addDays, startOfDay } from "date-fns";
+
 import { compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
+
 import { eventChipDesign } from "./eventChipDesign.generated";
+
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+
+
 
 
 
@@ -37,6 +42,8 @@ type CalendarMonthAllowedDayRange = {
 
 
 
+
+
 const MONTH_EVENT_CHIP_HEIGHT_PX = eventChipDesign.month.heightPx;
 const MONTH_EVENT_CHIP_GAP_PX = eventChipDesign.month.gapPx;
 const MONTH_EVENT_OVERFLOW_TEXT_HEIGHT_PX = 11;
@@ -44,6 +51,8 @@ const MONTH_EVENT_BOTTOM_PADDING_PX = 0;
 const MONTH_EVENT_CONTENT_TOP_PX = 32;
 
 export const EMPTY_MONTH_DAY_EVENTS: CalendarMonthDayEvents = { visibleEvents: [], totalCount: 0, color: null, };
+
+
 
 
 

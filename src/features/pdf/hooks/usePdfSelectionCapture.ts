@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
+
 import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboardImage";
+
 import { dispatchCardSelectionCaptureEvent, type CardSelectionCaptureSide, type CardSelectionCaptureTaskResult } from "@/features/selection-capture/cardSelectionCaptureEvents";
+
 import { recognizeSelectionCaptureText } from "@/features/selection-capture/selectionCaptureOcr";
+
 import { capturePdfViewerAreaToBlob } from "@/features/pdf/pdfSelectionCapture";
+
 import type { SelectionCaptureArea } from "@/features/selection-capture/selectionCapture.types";
+
+
 
 
 
@@ -40,7 +47,11 @@ export type { UsePdfSelectionCaptureParams, UsePdfSelectionCaptureResult };
 
 
 
+
+
 const PDF_SELECTION_CAPTURE_MESSAGE_TIMEOUT_MS = 1800;
+
+
 
 
 
@@ -104,6 +115,8 @@ const usePdfSelectionCapture = ({ targetRef, selectionCaptureSide, sourceUnavail
     handleCaptureSelection,
   };
 };
+
+
 
 
 

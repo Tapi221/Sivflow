@@ -1,10 +1,18 @@
 import { notifyLocalDbFallbackMode, notifyRebuildLoopDetected, notifyStartupDegraded } from "./appInitStartupNotifier";
+
 import { contextService } from "./ContextService";
+
 import { IndexedDBMetadataService } from "./IndexedDBMetadataService";
+
 import { rebuildIndexedDb } from "./indexedDbRebuildCoordinator";
+
 import { ensureLegacyCardsBackfilled } from "./legacyCardSetMigrationBackfill";
+
 import { getLocalDb, getLocalDBRuntimeStatus, LOCALDB_RECOVERY_GUIDE_URL } from "./localDB";
+
 import { warnOncePerSession } from "./localDBRuntimeState";
+
+
 
 
 

@@ -8,10 +8,14 @@ import { AnimatedCheckboxBase, type AnimatedCheckboxBaseProps } from "./Animated
 
 
 
+
+
 type AnimatedIndeterminateCheckboxProps = Omit<
   AnimatedCheckboxBaseProps,
   "shape" | "variant"
 >;
+
+
 
 
 

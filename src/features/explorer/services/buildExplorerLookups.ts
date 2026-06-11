@@ -8,6 +8,8 @@ import type { Card, DocumentItem, Folder } from "@/types";
 
 
 
+
+
 export const buildFolderById = (folders: Folder[]) => new Map<string, Folder>( folders.map((folder): [string, Folder] => [folder.id, folder]), );
 
 export const buildCardById = (cards: Card[]) => new Map<string, Card>(cards.map((card): [string, Card] => [card.id, card]));

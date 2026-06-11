@@ -1,5 +1,8 @@
 import type { UploadedImage } from "@/types";
+
 import { createBlobUrl } from "@/types/core/branded";
+
+
 
 
 
@@ -55,6 +58,8 @@ export const createFailedUploadedImage = (file: File): UploadedImage => { const 
     naturalH: null,
   };
 };
+
+
 
 
 
