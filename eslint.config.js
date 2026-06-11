@@ -112,6 +112,7 @@ export default defineConfig([
       "@stylistic/object-curly-newline": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "react-refresh/only-export-components": "off",
+      eqeqeq: ["error", "always"],
       "no-var": "error",
       "prefer-const": "error",
       "no-restricted-imports": [
@@ -150,7 +151,7 @@ export default defineConfig([
             ["^react$", "^react-dom$", "^react/", "^react-dom/"],
             ["^@?\\w"],
             ["^@/"],
-            ["^\\."],
+            ["^\."],
             ["^\\u0000"],
           ],
         },
