@@ -6,8 +6,12 @@ import type { AppSnapshot, SnapshotAsset, SnapshotData, SnapshotMetadata } from 
 import { APP_VERSION, CURRENT_SCHEMA_VERSION } from "@/types/domain/snapshot";
 import { toSnapshotAsset } from "./snapshotAssetManifest";
 
+
+
 interface CreateSnapshotDependencies { generationCounterStore: GenerationCounterStorePort;
 }
+
+
 
 const createCreateSnapshotUseCase = ({ generationCounterStore }: CreateSnapshotDependencies) => {
   const assertPersistentStorageAvailable = (operation: string): void => {
@@ -72,5 +76,9 @@ const createCreateSnapshotUseCase = ({ generationCounterStore }: CreateSnapshotD
   };
 };
 
+
+
 export { createCreateSnapshotUseCase };
+
+
 export type { CreateSnapshotDependencies };

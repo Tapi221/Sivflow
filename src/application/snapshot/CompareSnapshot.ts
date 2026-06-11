@@ -2,9 +2,13 @@ import { localGenerationCounterStore } from "@/infrastructure/browser-storage/Lo
 import type { AppSnapshot, SnapshotComparison } from "@/types/domain/snapshot";
 import { createCreateSnapshotUseCase } from "./CreateSnapshot";
 
+
+
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,
 });
+
+
 
 const createCompareSnapshotUseCase = () => {
   const execute = async (imported: AppSnapshot, userId: string): Promise<SnapshotComparison> => {
@@ -77,5 +81,7 @@ const createCompareSnapshotUseCase = () => {
     execute,
   };
 };
+
+
 
 export { createCompareSnapshotUseCase };

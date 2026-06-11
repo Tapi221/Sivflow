@@ -3,6 +3,8 @@ import type { CSSProperties } from "react";
 import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import * as GRID from "./grid.layout.constants.desktop";
 
+
+
 type WeekdayTimedEventPositionStyle = CSSProperties & { left: string;
   top: string;
   width: string;
@@ -22,11 +24,15 @@ type WeekdayTimedEventHorizontalInsets = {
   rightPx: number;
 };
 
+
+
 const PERCENT_MAX = 100;
 const SHORT_RANGE_CARRY_OVER_HIDE_THRESHOLD_HOURS = 1;
 const TIME_GRID_DECIMAL_PLACES = 12;
 const TIME_GRID_FLOATING_POINT_EPSILON = Number.EPSILON * 10;
 const WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX = eventChipDesign.weekdayGrid.timedMinHeightPx;
+
+
 
 const normalizeTimeGridNumber = (value: number): number => {
   const rounded = Number(value.toFixed(TIME_GRID_DECIMAL_PLACES));
@@ -72,5 +78,9 @@ const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry, r
   };
 };
 
+
+
 export { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle };
+
+
 export type { WeekdayTimedEventPositionStyle, WeekdayTimedEventFrame, WeekdayTimedEventPositionOptions };
