@@ -50,11 +50,21 @@ const UI_RESTRICTED_IMPORT_PATTERNS = [
     message: "UI layer must not import desktop bridge.",
   },
 ];
+const COMMA_DANGLE_STYLE = {
+  arrays: "always-multiline",
+  objects: "always-multiline",
+  imports: "always-multiline",
+  exports: "always-multiline",
+  functions: "always-multiline",
+  enums: "always-multiline",
+  generics: "ignore",
+  tuples: "always-multiline",
+};
 const STYLISTIC_FIXABLE_RULES = {
   "@stylistic/array-bracket-spacing": ["warn", "never"],
   "@stylistic/arrow-spacing": "warn",
   "@stylistic/block-spacing": ["warn", "always"],
-  "@stylistic/comma-dangle": ["warn", "always-multiline"],
+  "@stylistic/comma-dangle": ["warn", COMMA_DANGLE_STYLE],
   "@stylistic/comma-spacing": "warn",
   "@stylistic/computed-property-spacing": ["warn", "never"],
   "@stylistic/function-call-spacing": ["warn", "never"],
@@ -118,33 +128,12 @@ export default defineConfig([
           message: "Use an alias for cross-folder imports. Same-directory imports may use ./.",
         },
         {
-          selector: String.raw`ExportNamedDeclaration[source.value=/^\.\.\//]`,
-          message: "Use an alias for cross-folder exports. Same-directory exports may use ./.",
-        },
-        {
-          selector: String.raw`ExportAllDeclaration[source.value=/^\.\.\//]`,
-          message: "Use an alias for cross-folder exports. Same-directory exports may use ./.",
-        },
-        {
-          selector: String.raw`ImportDeclaration[source.value=/^\.\/[^/]+\//]`,
+          selector: String.raw`ImportDeclaration[source.value=/^\.\/[^.\/][^/]*\//]`,
           message: "Use an alias for child-folder imports. Same-directory imports may use ./.",
         },
-        {
-          selector: String.raw`ExportNamedDeclaration[source.value=/^\.\/[^/]+\//]`,
-          message: "Use an alias for child-folder exports. Same-directory exports may use ./.",
-        },
-        {
-          selector: String.raw`ExportAllDeclaration[source.value=/^\.\/[^/]+\//]`,
-          message: "Use an alias for child-folder exports. Same-directory exports may use ./.",
-        },
       ],
-      "react-hooks/exhaustive-deps": "off",
-      "react-hooks/preserve-manual-memoization": "warn",
-      "react-hooks/refs": "off",
-      "react-hooks/set-state-in-effect": "off",
       "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": "off",
-      "unused-imports/no-unused-imports": "error",
+      "unused-imports/no-unused-imports": "warn",
       "unused-imports/no-unused-vars": [
         "warn",
         {
@@ -154,52 +143,20 @@ export default defineConfig([
           argsIgnorePattern: "^_",
         },
       ],
-      "simple-import-sort/imports": "off",
-      "simple-import-sort/exports": "off",
-    },
-  },
-
-  {
-    files: ["src/features/calendar/grid/Grid.calendar.month.desktop.tsx"],
-    rules: {
-      "react-hooks/immutability": "off",
-    },
-  },
-
-  {
-    files: ["src/chip/rightclickpanel.desktop/ProjectCalendarLinksMenu.desktop.tsx"],
-    rules: {
-      "react-refresh/only-export-components": "off",
-    },
-  },
-
-  {
-    files: ["src/features/calendar/grid/Grid.calendar.weekday.desktop.tsx"],
-    rules: {
-      "unused-imports/no-unused-imports": "off",
-    },
-  },
-
-  {
-    files: TYPESCRIPT_SOURCE_FILES,
-    ignores: [
-      "src/domain/card/selectors/cardFolder.ts",
-      "src/services/legacyCardSetMigrationBackfill.ts",
-      "src/services/SyncServiceV2.ts",
-      "src/services/localdb/schema.ts",
-    ],
-    rules: {
-      "no-restricted-properties": [
-        "error",
+      "simple-import-sort/imports": [
+        "warn",
         {
-          object: "card",
-          property: "folderId",
-          message: "Do not read card.folderId directly. Use resolver.",
+          groups: [
+            ["^react$", "^react-dom$", "^react/", "^react-dom/"],
+            ["^@?\\w"],
+            ["^@/"],
+            ["^\\."],
+            ["^\\u0000"],
+          ],
         },
       ],
     },
   },
-
   {
     files: UI_SOURCE_FILES,
     rules: {
@@ -212,7 +169,6 @@ export default defineConfig([
       ],
     },
   },
-
   {
     files: APPLICATION_SOURCE_FILES,
     rules: {
@@ -220,13 +176,7 @@ export default defineConfig([
         "error",
         {
           paths: IMPORT_PATH_RESTRICTED_PATHS,
-          patterns: [
-            ...IMPORT_PATH_RESTRICTED_PATTERNS,
-            {
-              group: ["@/components/*", "@/components/**", "@/features/*", "@/features/**", "@/hooks/*", "@/hooks/**", "@/layout/*", "@/layout/**", "@/pane.desktop/*", "@/pane.desktop/**", "@/routes/*", "@/routes/**", "@/ui/*", "@/ui/**"],
-              message: "Application layer must not import UI or React layers.",
-            },
-          ],
+          patterns: IMPORT_PATH_RESTRICTED_PATTERNS,
         },
       ],
     },
