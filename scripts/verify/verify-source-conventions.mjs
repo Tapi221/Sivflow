@@ -314,9 +314,9 @@ const checkStatementOrder = (filePath, source, sourceFile) => {
   return violations;
 };
 
-const getLeadingWhitespaceText = (source, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getFullStart());
+const getLeadingWhitespaceText = (source, sourceFile, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getStart(sourceFile));
 
-const getBlankLineCountBetweenStatements = (source, previousStatement, statement) => getLeadingWhitespaceText(source, previousStatement, statement).split("\n").length - 1;
+const getBlankLineCountBetweenStatements = (source, sourceFile, previousStatement, statement) => getLeadingWhitespaceText(source, sourceFile, previousStatement, statement).split("\n").length - 1;
 
 const checkBlockSpacing = (filePath, source, sourceFile) => {
   if (!shouldCheckStatementOrder(filePath)) return [];
@@ -330,7 +330,10 @@ const checkBlockSpacing = (filePath, source, sourceFile) => {
     const category = getStatementOrderCategory(statement);
     if (previousCategory === category) return [];
 
-    const blankLineCount = getBlankLineCountBetweenStatements(source, previousStatement, statement);
+    const leadingWhitespace = getLeadingWhitespaceText(source, sourceFile, previousStatement, statement);
+    if (/\S/.test(leadingWhitespace)) return [];
+
+    const blankLineCount = getBlankLineCountBetweenStatements(source, sourceFile, previousStatement, statement);
     if (blankLineCount === 2) return [];
 
     return [{ filePath, line: getLineNumber(sourceFile, statement.getStart(sourceFile)), message: `Put exactly one blank line between ${ORDER_LABELS[previousCategory]} and ${ORDER_LABELS[category]} blocks.` }];
