@@ -3,10 +3,10 @@
 import { LinkRules } from '@platejs/link';
 import { LinkPlugin } from '@platejs/link/react';
 
-import { LinkElement } from '@/components/link-node';
-import { LinkFloatingToolbar } from '@/components/link-toolbar';
+import { LinkElement } from '@/components/ui/link-node';
+import { LinkFloatingToolbar } from '@/components/ui/link-toolbar';
 
-export const LinkKit = [
+const LinkKit = [
   LinkPlugin.configure({
     inputRules: [
       LinkRules.markdown(),
@@ -20,3 +20,5 @@ export const LinkKit = [
     },
   }),
 ];
+
+export { LinkKit };
