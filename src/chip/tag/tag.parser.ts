@@ -1,11 +1,7 @@
 import { DEFAULT_TAG_COLOR_KEY, TAG_COLOR_KEYS } from "./tag.constants";
 import type { TagColorKey } from "./tag.types";
 
-
-
 const TAG_COLOR_KEY_SET = new Set<string>(TAG_COLOR_KEYS);
-
-
 
 const isTagColorKey = (value: unknown): value is TagColorKey =>
   typeof value === "string" && TAG_COLOR_KEY_SET.has(value);
@@ -24,7 +20,5 @@ const getTagColorKey = (input?: string): TagColorKey => { if (!input) return DEF
   return DEFAULT_TAG_COLOR_KEY;
 };
 const getTagColorClassName = (input?: string): string => `tag-color-${getTagColorKey(input)}`;
-
-
 
 export { getTagColorKey, getTagColorClassName };

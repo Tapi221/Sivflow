@@ -4,6 +4,4 @@ const generateUploadedImageId = (): string => { if (typeof crypto !== "undefined
 return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
 
-
-
 export { generateUploadedImageId };

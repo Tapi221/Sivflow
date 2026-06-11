@@ -74,8 +74,6 @@ const VIEWER_LANGUAGE_SHORT_LABELS: Record<string, string> = {
   clike: "TXT",
 };
 
-
-
 const normalizeViewerLanguage = (input?: string) => { const raw = (input || "").toLowerCase().trim();
   const normalized = VIEWER_LANGUAGE_ALIASES[raw] ?? raw;
   return VIEWER_SUPPORTED_LANGS.has(normalized) ? normalized : "clike";
@@ -86,7 +84,5 @@ const normalizeEditorLanguage = (input?: string) => { const lang = (input || "")
   if (lang === "html") return "markup";
   return lang || "javascript";
 };
-
-
 
 export { normalizeViewerLanguage, getViewerLanguageLabels, normalizeEditorLanguage };

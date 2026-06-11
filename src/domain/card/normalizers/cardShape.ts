@@ -2,15 +2,11 @@ import { normalizeExtraRows } from "@/domain/card/extraRows";
 import { normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 import type { InkDocument } from "@core/domain/card/ink/inkDocument";
 
-
-
 type CardLike = Partial<Record<string, unknown>>;
 type CardFaceSide = "question" | "answer";
 type ResolveCardShapeOptions = {
   emptyInkAsNull?: boolean;
 };
-
-
 
 const getLegacyBlocksKey = (side: CardFaceSide) => {
   return side === "question" ? "questionBlocks" : "answerBlocks";
@@ -72,7 +68,5 @@ const resolveExtraRowsFromCardData = (value: CardLike, side: CardFaceSide) => { 
 };
 const normalizeCardFolderId = (value: unknown): string => { return typeof value === "string" ? value.trim() : "";
 };
-
-
 
 export { resolveBlocksFromCardData, resolveInkFromCardData, resolveExtraRowsFromCardData, normalizeCardFolderId };
