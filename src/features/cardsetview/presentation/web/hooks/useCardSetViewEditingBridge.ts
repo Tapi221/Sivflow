@@ -4,6 +4,8 @@ import { dispatchCardSetViewWindowEvent } from "@/features/cardsetview/presentat
 
 
 
+
+
 const useCardSetViewEditingBridge = (isGlobalEditing: boolean) => {
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -16,6 +18,8 @@ const useCardSetViewEditingBridge = (isGlobalEditing: boolean) => {
     );
   }, [isGlobalEditing]);
 };
+
+
 
 
 

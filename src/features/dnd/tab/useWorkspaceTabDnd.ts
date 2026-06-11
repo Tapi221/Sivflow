@@ -4,11 +4,15 @@ import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 
 
 
+
+
 type UseWorkspaceTabDndArgs = {
   tabs: WorkspaceTab[];
   reorderTabs: (nextTabs: WorkspaceTab[]) => void;
   onDragStart?: () => void;
 };
+
+
 
 
 
@@ -99,6 +103,8 @@ const useWorkspaceTabDnd = ({ tabs, reorderTabs, onDragStart }: UseWorkspaceTabD
     tabsListRef,
   };
 };
+
+
 
 
 

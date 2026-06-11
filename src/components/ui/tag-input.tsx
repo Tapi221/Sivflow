@@ -14,6 +14,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 
 
+
+
 interface TagInputProps {
   tags: string[];
   onChange: (tags: string[]) => void;
@@ -21,6 +23,8 @@ interface TagInputProps {
   className?: string;
   quietHover?: boolean;
 }
+
+
 
 
 
@@ -279,6 +283,8 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
     </Popover>
   );
 };
+
+
 
 
 

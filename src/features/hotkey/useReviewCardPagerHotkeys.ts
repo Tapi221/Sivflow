@@ -3,11 +3,15 @@ import { hasPrimaryModifier, isTypingTarget } from "./hotkeyGuards";
 
 
 
+
+
 type UseReviewCardPagerHotkeysParams = {
   onFlip?: () => void;
   onNext: () => void;
   onPrev: () => void;
 };
+
+
 
 
 
@@ -47,6 +51,8 @@ const useReviewCardPagerHotkeys = ({ onFlip, onNext, onPrev }: UseReviewCardPage
     };
   }, [onFlip, onNext, onPrev]);
 };
+
+
 
 
 

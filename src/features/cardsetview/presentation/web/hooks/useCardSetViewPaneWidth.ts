@@ -6,12 +6,16 @@ import type { UserSettings } from "@/types";
 
 
 
+
+
 interface UseCardSetViewPaneWidthOptions {
   isGlobalEditing: boolean;
   isDesktop: boolean;
   settings: Partial<UserSettings> | null | undefined;
   cardSetId?: string | null;
 }
+
+
 
 
 
@@ -90,6 +94,8 @@ const useCardSetViewPaneWidth = ({ isGlobalEditing, isDesktop, settings, cardSet
     },
   });
 };
+
+
 
 
 

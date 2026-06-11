@@ -2,7 +2,11 @@ import { hasDesktopRuntime } from "@/platform/detectDesktopBridge";
 
 
 
+
+
 type WeekdayHourLabelMode = "full" | "integer";
+
+
 
 
 
@@ -48,6 +52,8 @@ const WEEKDAY_HOUR_LABEL_PADDING_RIGHT = "0.625rem";
 const WEEKDAY_HOUR_LABEL_FONT_SIZE = "11px";
 // misc layout
 const WEEKDAY_EVENT_CHIP_PADDING_X = 2;
+
+
 
 
 

@@ -10,6 +10,8 @@ import { useEditorRef } from "platejs/react";
 
 import { cn } from "@/lib/utils";
 
+
+
 const buttonVariants = cva("rounded bg-[rgba(0,0,0,0.5)] px-1", {
   defaultVariants: {
     variant: "default",
@@ -26,6 +28,8 @@ const SCROLL_SPEED = 4;
 
 const DEFAULT_DOWNLOAD_FILENAME = "image";
 
+
+
 const getImageDownloadFilename = (url: string) => {
   try {
     const pathname = new URL(url, window.location.href).pathname;
@@ -36,6 +40,8 @@ const getImageDownloadFilename = (url: string) => {
     return DEFAULT_DOWNLOAD_FILENAME;
   }
 };
+
+
 
 const ScaleInput = (props: React.ComponentProps<"input">) => {
   const { props: scaleInputProps, ref } = useScaleInput();
@@ -182,5 +188,7 @@ const MediaPreviewDialog = () => {
     </div>
   );
 };
+
+
 
 export { MediaPreviewDialog };

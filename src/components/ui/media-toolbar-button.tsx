@@ -24,6 +24,8 @@ import { Input } from "./input";
 
 import { ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "./toolbar";
 
+
+
 const MEDIA_CONFIG: Record<
   string,
   {
@@ -58,6 +60,8 @@ const MEDIA_CONFIG: Record<
     tooltip: "Video",
   },
 };
+
+
 
 const MediaUrlDialogContent = ({
   currentConfig,
@@ -204,5 +208,7 @@ const MediaToolbarButton = ({ nodeType, ...props }: DropdownMenuProps & { nodeTy
     </>
   );
 };
+
+
 
 export { MediaToolbarButton };

@@ -4,6 +4,8 @@ import { decodeMfCardFile } from "./mfCardJsonCodec";
 
 
 
+
+
 type LoadMfCardFileResult = { file: File;
   cardFile: MfCardFileV1;
   issues: MfCardIssue[];
@@ -12,7 +14,11 @@ type LoadMfCardFileResult = { file: File;
 
 
 
+
+
 const MAX_MF_CARD_FILE_BYTES = 4 * 1024 * 1024;
+
+
 
 
 
@@ -73,7 +79,11 @@ const readMfCardFile = async (file: File): Promise<LoadMfCardFileResult> => {
 
 
 
+
+
 export { buildMfCardImportCardSetName, readMfCardFile };
+
+
 
 
 export type { LoadMfCardFileResult };

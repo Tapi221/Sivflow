@@ -2,9 +2,13 @@ import { useCallback } from "react";
 
 
 
+
+
 type Params = {
   isDesktop: boolean;
 };
+
+
 
 
 
@@ -34,6 +38,8 @@ const useWorkspaceScrollController = ({ isDesktop }: Params) => {
     resetExplorerPaneScroll,
   };
 };
+
+
 
 
 

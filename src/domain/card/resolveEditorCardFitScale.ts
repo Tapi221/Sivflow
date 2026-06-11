@@ -4,12 +4,16 @@ import { CANONICAL_CARD_WIDTH } from "./cardGeometry.constants";
 
 
 
+
+
 type ResolveEditorCardFitScaleArgs = Readonly<{
   availablePaneWidthPx: number;
   canonicalCardWidth?: number;
   cardLayoutMode: CardLayoutMode;
   splitGapPx?: number;
 }>;
+
+
 
 
 
@@ -31,6 +35,8 @@ const resolveEditorCardFitScale = ({ availablePaneWidthPx, canonicalCardWidth = 
     ),
   );
 };
+
+
 
 
 
