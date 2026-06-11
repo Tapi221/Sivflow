@@ -1,29 +1,11 @@
 // @vitest-environment jsdom
 
 import { addDays, startOfMonth } from "date-fns";
-
-
-
 import React from "react";
-
-
-
 import { render, screen } from "@testing-library/react";
-
-
-
 import { describe, expect, it } from "vitest";
-
-
-
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
-
-
-
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
-
-
-
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 const SELECTED_DATE = new Date("2026-06-15T00:00:00+09:00");

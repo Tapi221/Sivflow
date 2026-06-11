@@ -8,12 +8,16 @@ import { downloadBytesAsMfDeck } from "@/features/deckFile/infra/web/downloadMfD
 import type { Card, CardSet } from "@/types";
 import { useToast } from "@web-renderer/contexts/ToastContext";
 
+
+
 type ExportMfDeckButtonProps = {
   cardSet: CardSet;
   cards: Card[];
   tagById?: MfDeckTagLookup;
   disabled?: boolean;
 };
+
+
 
 const ExportMfDeckButton = ({
   cardSet,
@@ -75,6 +79,10 @@ const ExportMfDeckButton = ({
   );
 };
 
+
+
 export { ExportMfDeckButton };
+
+
 
 export type { ExportMfDeckButtonProps };

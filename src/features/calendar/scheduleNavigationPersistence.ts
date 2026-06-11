@@ -1,6 +1,8 @@
 import * as C from "./calendar.constants.desktop";
 import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
 
+
+
 type StoredScheduleNavigationState = {
   currentDate?: unknown;
   selectedDate?: unknown;
@@ -16,6 +18,8 @@ export type ScheduleNavigationState = { currentDate: Date;
   selectedViewMode: CalendarViewModeSelection;
 };
 
+
+
 export const SCHEDULE_NAVIGATION_STORAGE_KEY = "sivflow:schedule:navigation";
 
 const LEGACY_SCHEDULE_NAVIGATION_STORAGE_KEY = "flashcard-master:schedule:navigation";
@@ -23,6 +27,8 @@ const CALENDAR_VIEW_MODES = ["year", "month", "week", "threeDays", "days", "time
 const CALENDAR_VIEW_MODE_SET = new Set<CalendarViewMode>(CALENDAR_VIEW_MODES);
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
+
+
 
 const isStoredScheduleNavigationState = (value: unknown): value is StoredScheduleNavigationState => typeof value === "object" && value !== null && !Array.isArray(value);
 

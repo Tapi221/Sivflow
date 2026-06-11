@@ -1,7 +1,4 @@
 import { describe, expect, it } from "vitest";
-
-
-
 import { parseGoogleRecurrenceRule, serializeGoogleRecurrenceRule } from "@/integration/googlecalendar-integration/gcalRecurrence";
 
 describe("google calendar recurrence mapping", () => {

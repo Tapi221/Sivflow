@@ -16,7 +16,11 @@ export const MONTH_VISIBLE_EVENT_COUNT_MIN = 1;
 export const DEFAULT_MONTH_VISIBLE_EVENT_COUNT = 3;
 export const MONTH_VISIBLE_EVENT_COUNT_MAX = 20;
 
+
+
 export const createInitialMonthOffsetRange = () => ({ startOffset: -INITIAL_MONTH_BUFFER, endOffset: INITIAL_MONTH_BUFFER, });
+
+
 
 
 

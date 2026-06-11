@@ -1,20 +1,8 @@
 // @vitest-environment jsdom
 import { render, screen } from "@testing-library/react";
-
-
-
 import userEvent from "@testing-library/user-event";
-
-
-
 import { describe, expect, it } from "vitest";
-
-
-
 import { BreadcrumbProvider, useBreadcrumbExtraCrumbs, useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
-
-
-
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
 
 const nextCrumbs: BreadcrumbCrumb[] = [{ label: "フォルダ一覧" }];

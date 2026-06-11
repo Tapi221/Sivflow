@@ -1,17 +1,8 @@
 // @vitest-environment jsdom
 
 import { act, fireEvent, render } from "@testing-library/react";
-
-
-
 import React from "react";
-
-
-
 import { afterEach, describe, expect, it, vi } from "vitest";
-
-
-
 import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 
 const setReadonlyNumber = (element: Element, property: string, value: number) => {

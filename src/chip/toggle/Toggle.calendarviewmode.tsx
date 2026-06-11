@@ -4,6 +4,8 @@ import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/cal
 import { cn } from "@/lib/utils";
 import { useT } from "@shared/i18n/useT";
 
+
+
 type CalendarViewModeOption = {
   value: CalendarViewMode;
   label: string;
@@ -15,6 +17,8 @@ type ToggleCalendarViewModeProps = {
   options: readonly CalendarViewModeOption[];
   className?: string;
 };
+
+
 
 const CALENDAR_VIEW_MODE_INDICATOR_ID = "calendar-view-mode-indicator";
 const CALENDAR_VIEW_MODE_ACTIVE_TEXT_CLASS = "text-[#2f343b]";
@@ -30,6 +34,8 @@ const CALENDAR_VIEW_MODE_MOTION_TRANSITION: Transition = {
   duration: 0.12,
   ease: "easeOut",
 };
+
+
 
 const isViewModeSelectionArray = (value: CalendarViewModeSelection): value is readonly CalendarViewMode[] => Array.isArray(value);
 
@@ -72,6 +78,8 @@ const isDisabledViewModeOption = (
   value: CalendarViewModeSelection,
   optionValue: CalendarViewMode,
 ) => hasMultipleSelectedViewModes(value) && !isSelectedViewMode(value, optionValue);
+
+
 
 const ToggleCalendarViewMode = ({
   value,
@@ -190,6 +198,10 @@ const ToggleCalendarViewMode = ({
   );
 };
 
+
+
 export { ToggleCalendarViewMode };
+
+
 
 export const ViewModeDropdown = ToggleCalendarViewMode;

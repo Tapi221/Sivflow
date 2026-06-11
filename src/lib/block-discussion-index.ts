@@ -1,15 +1,26 @@
 'use client';
 
 import * as React from 'react';
+
 import type { TResolvedSuggestion } from '@platejs/suggestion';
+
 import type { PlateEditor } from 'platejs/react';
+
 import { CommentPlugin } from '@platejs/comment/react';
+
 import { getSuggestionKey, keyId2SuggestionId } from '@platejs/suggestion';
+
 import { SuggestionPlugin } from '@platejs/suggestion/react';
+
 import { type NodeEntry, NodeApi, type Path, type TCommentText, type TElement, type TSuggestionText, ElementApi, KEYS, PathApi, TextApi, } from 'platejs';
+
 import { useEditorRef, useEditorVersion, usePluginOption } from 'platejs/react';
+
 import { type TDiscussion, discussionPlugin, } from '@/components/editor/plugins/discussion-kit';
+
 import type { TComment } from '@/components/ui/comment';
+
+
 
 export interface ResolvedSuggestion extends TResolvedSuggestion { comments: TComment[];
 }
@@ -49,6 +60,8 @@ type BuildBlockDiscussionIndexOptions = {
   getSuggestionId: (node: TElement | TSuggestionText) => string | undefined;
   isBlockSuggestion: (node: TElement | TSuggestionText) => boolean;
 };
+
+
 
 export const BLOCK_SUGGESTION_TOKEN = '__block__';
 
@@ -90,6 +103,8 @@ const TYPE_TEXT_MAP: Record<string, (node?: TElement) => string> = {
   [KEYS.toggle]: () => 'Toggle',
   [KEYS.video]: () => 'Video',
 };
+
+
 
 const appendByKey = <T>(map: Map<string, T[]>, key: string, value: T) => {
   const values = map.get(key);

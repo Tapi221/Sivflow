@@ -1,16 +1,7 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen } from "@testing-library/react";
-
-
-
 import { describe, expect, it, vi } from "vitest";
-
-
-
 import { CardSetLibraryDashboard } from "@/features/library-cardset/components/CardSetLibraryDashboard";
-
-
-
 import type { Card, CardSet, Folder } from "@/types";
 
 type ToolbarProps = {

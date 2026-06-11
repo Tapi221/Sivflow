@@ -1,7 +1,4 @@
 import { describe, expect, it } from "vitest";
-
-
-
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
 
 describe("normalizeFolderWithSilent", () => {

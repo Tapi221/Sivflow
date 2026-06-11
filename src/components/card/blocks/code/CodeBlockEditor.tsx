@@ -6,12 +6,16 @@ import { CODE_BLOCK_MAX_RECENT_LANGUAGES, CODE_BLOCK_RECENT_LANGUAGE_STORAGE_KEY
 import { normalizeEditorLanguage } from "./codeBlockLanguage";
 import type { CodeBlockData } from "@/types/core/code-block";
 
+
+
 interface CodeBlockEditorProps {
   value?: CodeBlockData;
   onChange: (value: CodeBlockData) => void;
   className?: string;
   zoom?: number;
 }
+
+
 
 const canUseLocalStorage = () => {
   try {
@@ -66,6 +70,8 @@ const pushRecentLang = (lang: string) => {
     // noop
   }
 };
+
+
 
 export const CodeBlockEditor = ({ value, onChange, className, zoom, }: CodeBlockEditorProps) => { const [recentLangs, setRecentLangs] = useState<string[]>(() => getRecentLangs(), );
 

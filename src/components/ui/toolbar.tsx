@@ -1,14 +1,24 @@
 'use client';
 
 import * as React from 'react';
+
 import * as ToolbarPrimitive from '@radix-ui/react-toolbar';
+
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+
 import { type VariantProps, cva } from 'class-variance-authority';
+
 import { ChevronDown } from 'lucide-react';
+
 import { DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuSeparator, } from './dropdown-menu';
+
 import { Separator } from './separator';
+
 import { Tooltip, TooltipTrigger } from './tooltip';
+
 import { cn } from '@/lib/utils';
+
+
 
 type TooltipProps<T extends React.ElementType> = {
   tooltip?: React.ReactNode;
@@ -73,6 +83,8 @@ const dropdownArrowVariants = cva(
   }
 );
 
+
+
 function withTooltip<T extends React.ElementType>(Component: T) {
   return function ExtendComponent({
     tooltip,
@@ -105,6 +117,8 @@ function withTooltip<T extends React.ElementType>(Component: T) {
   };
 }
 
+
+
 export function Toolbar({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Root>) { return ( <ToolbarPrimitive.Root className={cn('relative flex select-none items-center', className)} {...props} /> );
 }
 
@@ -117,6 +131,8 @@ export function ToolbarLink({ className, ...props }: React.ComponentProps<typeof
 export function ToolbarSeparator({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Separator>) { return ( <ToolbarPrimitive.Separator className={cn('mx-2 my-1 w-px shrink-0 bg-border', className)} {...props} /> );
 }
 
+
+
 type ToolbarButtonProps = {
   isDropdown?: boolean;
   pressed?: boolean;
@@ -126,17 +142,23 @@ type ToolbarButtonProps = {
 > &
   VariantProps<typeof toolbarButtonVariants>;
 
+
+
 export const ToolbarButton = withTooltip(function ToolbarButton({ children, className, isDropdown, pressed, size = 'sm', variant, ...props }: ToolbarButtonProps) { return typeof pressed === 'boolean' ? ( <ToolbarToggleGroup disabled={props.disabled} value="single" type="single"> <ToolbarToggleItem className={cn( toolbarButtonVariants({ size, variant, }), isDropdown && 'justify-between gap-1 pr-1', className )} value={pressed ? 'single' : ''} {...props} > {isDropdown ? ( <> <div className="flex flex-1 items-center gap-2 whitespace-nowrap"> {children} </div> <ChevronDown className="size-3.5 text-muted-foreground" data-icon /> </> ) : ( children )} </ToolbarToggleItem> </ToolbarToggleGroup> ) : ( <ToolbarPrimitive.Button className={cn( toolbarButtonVariants({ size, variant, }), isDropdown && 'pr-1', className )} {...props} > {children} </ToolbarPrimitive.Button> );
 });
 
 export function ToolbarSplitButton({ className, ...props }: React.ComponentPropsWithoutRef<typeof ToolbarButton>) { return ( <ToolbarButton className={cn('group flex gap-0 px-0 hover:bg-transparent', className)} {...props} /> );
 }
 
+
+
 type ToolbarSplitButtonPrimaryProps = Omit<
   React.ComponentPropsWithoutRef<typeof ToolbarToggleItem>,
   'value'
 > &
   VariantProps<typeof toolbarButtonVariants>;
+
+
 
 export function ToolbarSplitButtonPrimary({ children, className, size = 'sm', variant, ...props }: ToolbarSplitButtonPrimaryProps) { return ( <span className={cn( toolbarButtonVariants({ size, variant, }), 'rounded-r-none', 'group-data-[pressed=true]:bg-accent group-data-[pressed=true]:text-accent-foreground', className )} {...props} > {children} </span> );
 }
