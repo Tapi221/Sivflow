@@ -3,6 +3,8 @@ import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/typography";
 import { MathRenderer } from "./MathBlockContent";
 import { cn } from "@/lib/utils";
 
+
+
 type MathBlockPreviewPaneProps = {
   latex: string;
   displayMode?: "block" | "inline";
@@ -13,6 +15,8 @@ type MathBlockPreviewPaneProps = {
   className?: string;
   zoom?: number;
 };
+
+
 
 const MathBlockPreviewPane = ({ latex, displayMode = "block", interactive = false, onActivate, showPlaceholder = false, placeholder, className, zoom }: MathBlockPreviewPaneProps) => {
   const typographyStyle = buildTypographyStyle({ fontSizePx: TYPOGRAPHY_FONT_SIZE_PX.md, lineHeightPx: 24, zoom });
@@ -44,5 +48,7 @@ const MathBlockPreviewPane = ({ latex, displayMode = "block", interactive = fals
     </div>
   );
 };
+
+
 
 export { MathBlockPreviewPane };

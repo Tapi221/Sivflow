@@ -5,6 +5,10 @@ import remarkEmoji from "remark-emoji";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 
+
+
 const MarkdownKit = [BaseFootnoteReferencePlugin, BaseFootnoteDefinitionPlugin, MarkdownPlugin.configure({ options: { plainMarks: [KEYS.suggestion, KEYS.comment], remarkPlugins: [remarkMath, remarkGfm, remarkEmoji as any, remarkMdx, remarkMention] } })];
+
+
 
 export { MarkdownKit };
