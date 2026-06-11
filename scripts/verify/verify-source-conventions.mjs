@@ -47,6 +47,8 @@ const isPropertyAccessNamed = (expression, name) => ts.isPropertyAccessExpressio
 
 const isMemoCall = (expression) => ts.isCallExpression(expression) && (isIdentifierNamed(expression.expression, "memo") || isPropertyAccessNamed(expression.expression, "memo"));
 
+const hasExportModifier = (statement) => ts.canHaveModifiers(statement) && Boolean(ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword));
+
 const isDisplayNameAssignment = (statement) => {
   if (!ts.isExpressionStatement(statement)) return false;
   const expression = statement.expression;
@@ -96,9 +98,8 @@ const isComponentVariableStatement = (statement) => statement.declarationList.de
 
 const getStatementOrderCategory = (statement) => {
   if (ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement)) return "import";
+  if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement) || hasExportModifier(statement)) return "postComponent";
   if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement)) return "type";
-  if (ts.isExportDeclaration(statement)) return statement.isTypeOnly ? "type" : "postComponent";
-  if (ts.isExportAssignment(statement)) return "postComponent";
   if (isDisplayNameAssignment(statement)) return "postComponent";
 
   if (ts.isFunctionDeclaration(statement)) {
