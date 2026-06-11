@@ -1,7 +1,10 @@
 import { Dexie } from "dexie";
+
 import { safeStringifyError } from "./errors";
 import { LOCALDB_GENERATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_LEGACY_GENERATION_KEY_PREFIX, LOCALDB_LEGACY_NAME_PREFIX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME } from "./localdb.constants";
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
+
+const generationBumpedUsers = new Set<string>();
 
 const getLocalDbGenerationStorageKey = (userId: string): string => `${LOCALDB_GENERATION_KEY_PREFIX}${userId}`;
 
@@ -31,10 +34,35 @@ const writeGenerationToStorage = (userId: string, generation: number): void => {
   }
 };
 
-const generationBumpedUsers = new Set<string>();
-
 const getGenerationForUser = (userId: string) => {
   return readGenerationFromStorage(userId);
+};
+
+const listUserPersistentDbNames = async (userId: string) => {
+  const names = new Set<string>(getKnownLocalDbNamesForUser(userId));
+  const generationPrefix = makeGenerationDbPrefix(LOCALDB_NAME_PREFIX, userId);
+  const legacyGenerationPrefix = makeGenerationDbPrefix(LOCALDB_LEGACY_NAME_PREFIX, userId);
+
+  if (typeof indexedDB !== "undefined" && typeof indexedDB.databases === "function") {
+    try {
+      const dbs = await indexedDB.databases();
+      for (const db of dbs) {
+        const name = db?.name;
+        if (!name) continue;
+        if (name.startsWith(generationPrefix) || name.startsWith(legacyGenerationPrefix)) {
+          names.add(name);
+        }
+      }
+    } catch (error) {
+      warnOncePerSession(
+        "localdb:list-user-db-names-failed",
+        `[LocalDB] Failed to enumerate user DB names during reset. Continuing with known generations for user=${userId}.`,
+        error,
+      );
+    }
+  }
+
+  return Array.from(names.values());
 };
 
 export const isLocalDbGenerationStorageKey = (key: string): boolean => key.startsWith(LOCALDB_GENERATION_KEY_PREFIX) || key.startsWith(LOCALDB_LEGACY_GENERATION_KEY_PREFIX);
@@ -76,33 +104,6 @@ export const getDatabaseNameForUser = (userId: string = "anonymous") => {
 
 export const getFallbackDatabaseNameForUser = (userId: string) => {
   return `${LOCALDB_NAME_PREFIX}mem_${userId}`;
-};
-
-const listUserPersistentDbNames = async (userId: string) => {
-  const names = new Set<string>(getKnownLocalDbNamesForUser(userId));
-  const generationPrefix = makeGenerationDbPrefix(LOCALDB_NAME_PREFIX, userId);
-  const legacyGenerationPrefix = makeGenerationDbPrefix(LOCALDB_LEGACY_NAME_PREFIX, userId);
-
-  if (typeof indexedDB !== "undefined" && typeof indexedDB.databases === "function") {
-    try {
-      const dbs = await indexedDB.databases();
-      for (const db of dbs) {
-        const name = db?.name;
-        if (!name) continue;
-        if (name.startsWith(generationPrefix) || name.startsWith(legacyGenerationPrefix)) {
-          names.add(name);
-        }
-      }
-    } catch (error) {
-      warnOncePerSession(
-        "localdb:list-user-db-names-failed",
-        `[LocalDB] Failed to enumerate user DB names during reset. Continuing with known generations for user=${userId}.`,
-        error,
-      );
-    }
-  }
-
-  return Array.from(names.values());
 };
 
 export const deleteUserPersistentDatabases = async (userId: string) => {
