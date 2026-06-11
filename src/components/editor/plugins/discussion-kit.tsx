@@ -4,7 +4,7 @@ import { createPlatePlugin } from 'platejs/react';
 
 import type { TComment } from '@/components/ui/comment';
 
-import { BlockDiscussion } from '@/components/block-discussion';
+import { BlockDiscussion } from '@/components/ui/block-discussion';
 
 type TDiscussion = {
   id: string;
@@ -13,6 +13,13 @@ type TDiscussion = {
   isResolved: boolean;
   userId: string;
   documentContent?: string;
+};
+
+type TDiscussionUser = {
+  id: string;
+  avatarUrl: string;
+  name: string;
+  hue?: number;
 };
 
 const BLOCK_SUGGESTION_SELECTOR = '[data-block-suggestion="true"]';
@@ -106,6 +113,24 @@ const discussionsData: TDiscussion[] = [
   },
 ];
 
+const usersData: Record<string, TDiscussionUser> = {
+  alice: {
+    id: 'alice',
+    avatarUrl: 'https://api.dicebear.com/9.x/glass/svg?seed=alice6',
+    name: 'Alice',
+  },
+  bob: {
+    id: 'bob',
+    avatarUrl: 'https://api.dicebear.com/9.x/glass/svg?seed=bob4',
+    name: 'Bob',
+  },
+  charlie: {
+    id: 'charlie',
+    avatarUrl: 'https://api.dicebear.com/9.x/glass/svg?seed=charlie2',
+    name: 'Charlie',
+  },
+};
+
 const discussionPlugin = createPlatePlugin({
   key: 'discussion',
   options: {
@@ -123,30 +148,6 @@ const discussionPlugin = createPlatePlugin({
   }));
 
 const DiscussionKit = [discussionPlugin];
-
-const avatarUrl = (seed: string) =>
-  `https://api.dicebear.com/9.x/glass/svg?seed=${seed}`;
-
-const usersData: Record<
-  string,
-  { id: string; avatarUrl: string; name: string; hue?: number }
-> = {
-  alice: {
-    id: 'alice',
-    avatarUrl: avatarUrl('alice6'),
-    name: 'Alice',
-  },
-  bob: {
-    id: 'bob',
-    avatarUrl: avatarUrl('bob4'),
-    name: 'Bob',
-  },
-  charlie: {
-    id: 'charlie',
-    avatarUrl: avatarUrl('charlie2'),
-    name: 'Charlie',
-  },
-};
 
 const getTargetElement = (target: EventTarget | null) => {
   if (target instanceof HTMLElement) return target;
