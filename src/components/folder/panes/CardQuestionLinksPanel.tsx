@@ -3,6 +3,7 @@ import { memo, useCallback, useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { useToast } from "@/contexts/ToastContext";
 import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
@@ -10,10 +11,8 @@ import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { getLocalDb } from "@/services/localDB";
 import type { Card, CardBlock } from "@/types/domain/card";
+import type { CardSet } from "@/types/domain/cardSet";
 import { Link, Plus } from "@/ui/icons";
-
-
-
 
 
 type CardQuestionLinksPanelProps = {
@@ -37,25 +36,24 @@ type QuestionLinksSnapshot = {
   outgoingRelations: CardRelationRecord[];
   incomingRelations: CardRelationRecord[];
   linkedCards: Card[];
+  cardSetById: ReadonlyMap<string, CardSet>;
 };
-
-
-
-
 
 const MAX_CANDIDATE_TERMS = 8;
 const MAX_CUSTOM_TERM_LENGTH = 60;
 const TERM_PATTERN = /[A-Za-z][A-Za-z0-9+\-/#]{1,24}|[\p{Script=Han}\p{Script=Katakana}ー]{2,16}/gu;
 const TERM_STOP_WORDS = new Set(["card", "cards", "qa", "q", "a", "これ", "それ", "この", "その", "こと", "もの", "ため", "よう", "カード", "問題", "解答", "回答", "質問", "疑問", "リンク", "する", "いる", "ある", "なる"]);
 
-
-
-
-
 const isCardRelationRecord = (value: unknown): value is CardRelationRecord => {
   if (!value || typeof value !== "object") return false;
   const record = value as Partial<CardRelationRecord>;
   return typeof record.id === "string" && typeof record.userId === "string";
+};
+
+const isCardSet = (value: unknown): value is CardSet => {
+  if (!value || typeof value !== "object") return false;
+  const record = value as Partial<CardSet>;
+  return typeof record.id === "string" && !record.isDeleted;
 };
 
 const getBlockText = (block: CardBlock): string => {
@@ -96,9 +94,7 @@ const getCardTitle = (card: Card): string => card.title?.trim() || card.front.bl
 
 const sanitizeCustomTerm = (value: string): string => normalizeTerm(value).slice(0, MAX_CUSTOM_TERM_LENGTH);
 
-
-
-
+const getResolvedCardFolderId = (card: Card, cardSetById: ReadonlyMap<string, CardSet>): string | null => resolveCardFolderIdStrict(card, cardSetById);
 
 const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPanelProps) => {
   const userId = useEffectiveLocalUserId();
@@ -124,23 +120,29 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
     const incomingRelations = rawIncomingRelations.filter(isCardRelationRecord).filter((relation) => !relation.isDeleted);
     const linkedCardIds = Array.from(new Set([...outgoingRelations.map((relation) => relation.toCardId), ...incomingRelations.map((relation) => relation.fromCardId)].filter((id): id is string => typeof id === "string" && id.length > 0)));
     const linkedCards = linkedCardIds.length > 0 ? (await db.cards.bulkGet(linkedCardIds)).filter((item): item is Card => Boolean(item)).map(normalizeCard).filter((item) => !item.isDeleted) : [];
-    return { card, outgoingRelations, incomingRelations, linkedCards };
+    const cardSetIds = Array.from(new Set([card.cardSetId, ...linkedCards.map((linkedCard) => linkedCard.cardSetId)].filter((id): id is string => typeof id === "string" && id.length > 0)));
+    const cardSets = cardSetIds.length > 0 ? (await db.cardSets.bulkGet(cardSetIds)).filter(isCardSet) : [];
+    const cardSetById = buildCardSetById(cardSets);
+    return { card, outgoingRelations, incomingRelations, linkedCards, cardSetById };
   }, [userId, selectedCardId, refreshNonce], null);
 
-  const candidateTerms = useMemo(() => extractQuestionTerms(snapshot?.card ?? null), [snapshot?.card]);
+  const card = snapshot?.card ?? null;
+  const cardSetById = snapshot?.cardSetById ?? null;
+  const candidateTerms = useMemo(() => extractQuestionTerms(card), [card]);
   const linkedCount = (snapshot?.outgoingRelations.length ?? 0) + (snapshot?.incomingRelations.length ?? 0);
 
   const handleCreateLinkedQuestion = useCallback(async (rawTerm: string) => {
     const term = sanitizeCustomTerm(rawTerm);
-    if (!term || !snapshot?.card || !userId || creatingTerm) return;
+    if (!term || !card || !cardSetById || !userId || creatingTerm) return;
     setCreatingTerm(term);
 
     try {
       const questionTitle = `${term}って何？`;
+      const folderId = getResolvedCardFolderId(card, cardSetById);
       const createdCard = await createCard({
         title: questionTitle,
-        folderId: snapshot.card.folderId,
-        cardSetId: snapshot.card.cardSetId,
+        folderId: folderId ?? undefined,
+        cardSetId: card.cardSetId,
         isDraft: true,
         hasUncertainty: true,
         front: { blocks: [{ id: crypto.randomUUID(), type: "question", orderIndex: 0, questionTitle, questionAnswer: "" }] },
@@ -148,11 +150,11 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
       });
       const db = await getLocalDb(userId);
       const now = new Date();
-      await db.addItem("cardRelations", { id: crypto.randomUUID(), userId, fromCardId: snapshot.card.id, toCardId: createdCard.id, term, reason: "unknown-term", createdAt: now, updatedAt: now, isDeleted: false }, true);
+      await db.addItem("cardRelations", { id: crypto.randomUUID(), userId, fromCardId: card.id, toCardId: createdCard.id, term, reason: "unknown-term", createdAt: now, updatedAt: now, isDeleted: false }, true);
       setCustomTerm("");
       setIsOpen(true);
       setRefreshNonce((value) => value + 1);
-      openCardTab({ cardId: createdCard.id, title: getCardTitle(createdCard), folderId: createdCard.folderId ?? null });
+      openCardTab({ cardId: createdCard.id, title: getCardTitle(createdCard), folderId });
       toast.success("疑問リンクを作成しました。");
     } catch (error) {
       console.error("[CardQuestionLinksPanel] failed to create linked question", error);
@@ -160,15 +162,16 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
     } finally {
       setCreatingTerm(null);
     }
-  }, [createCard, creatingTerm, openCardTab, snapshot?.card, toast, userId]);
+  }, [card, cardSetById, createCard, creatingTerm, openCardTab, toast, userId]);
 
   const handleCreateCustomQuestion = useCallback(() => {
     void handleCreateLinkedQuestion(customTerm);
   }, [customTerm, handleCreateLinkedQuestion]);
 
-  const handleOpenLinkedCard = useCallback((card: Card) => {
-    openCardTab({ cardId: card.id, title: getCardTitle(card), folderId: card.folderId ?? null });
-  }, [openCardTab]);
+  const handleOpenLinkedCard = useCallback((linkedCard: Card) => {
+    if (!cardSetById) return;
+    openCardTab({ cardId: linkedCard.id, title: getCardTitle(linkedCard), folderId: getResolvedCardFolderId(linkedCard, cardSetById) });
+  }, [cardSetById, openCardTab]);
 
   if (!selectedCardId || !snapshot?.card) return null;
 
@@ -203,9 +206,9 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
               <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a9690]">つながっている疑問</p>
               {snapshot.linkedCards.length > 0 ? (
                 <div className="flex max-h-[120px] flex-col gap-1 overflow-y-auto pr-1">
-                  {snapshot.linkedCards.map((card) => (
-                    <button key={card.id} type="button" className={cn("flex min-h-8 items-center rounded-[9px] px-2 text-left text-[12px] text-[#4b4b4b] transition hover:bg-[#f7f6f2]", card.id === selectedCardId && "bg-[#f7f6f2]")} onClick={() => handleOpenLinkedCard(card)}>
-                      <span className="min-w-0 truncate">{getCardTitle(card)}</span>
+                  {snapshot.linkedCards.map((linkedCard) => (
+                    <button key={linkedCard.id} type="button" className={cn("flex min-h-8 items-center rounded-[9px] px-2 text-left text-[12px] text-[#4b4b4b] transition hover:bg-[#f7f6f2]", linkedCard.id === selectedCardId && "bg-[#f7f6f2]")} onClick={() => handleOpenLinkedCard(linkedCard)}>
+                      <span className="min-w-0 truncate">{getCardTitle(linkedCard)}</span>
                     </button>
                   ))}
                 </div>
@@ -218,17 +221,9 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
   );
 };
 
-
-
-
-
 const CardQuestionLinksPanel = memo(CardQuestionLinksPanelComponent);
 CardQuestionLinksPanel.displayName = "CardQuestionLinksPanel";
 
 export { CardQuestionLinksPanel };
-
-
-
-
 
 export type { CardQuestionLinksPanelProps };
