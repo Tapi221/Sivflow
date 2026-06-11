@@ -6,6 +6,25 @@ import { createSlatePlugin, createTextSubstitutionInputRule, KEYS } from 'platej
 
 type AutoformatTextSubstitutionPatterns = Parameters<typeof createTextSubstitutionInputRule>[0]['patterns'];
 
+const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
+  key: 'autoformatShortcuts',
+  inputRules: [
+    LEGAL_RULE,
+    LEGAL_HTML_RULE,
+    ARROWS_RULE,
+    COMPARISONS_RULE,
+    EQUALITY_RULE,
+    FRACTIONS_RULE,
+    OPERATORS_RULE,
+    PUNCTUATION_RULE,
+    SMART_QUOTES_RULE,
+    SUBSCRIPT_NUMBERS_RULE,
+    SUBSCRIPT_SYMBOLS_RULE,
+    SUPERSCRIPT_NUMBERS_RULE,
+    SUPERSCRIPT_SYMBOLS_RULE,
+  ],
+});
+
 const isTextSubstitutionBlocked = (editor: SlateEditor) =>
   editor.api.some({
     match: {
@@ -157,25 +176,6 @@ const SUPERSCRIPT_SYMBOLS_RULE = createAutoformatTextSubstitutionRule({
     { format: '°', match: '^o' },
     { format: '⁺', match: '^+' },
     { format: '⁻', match: '^-' },
-  ],
-});
-
-const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
-  key: 'autoformatShortcuts',
-  inputRules: [
-    LEGAL_RULE,
-    LEGAL_HTML_RULE,
-    ARROWS_RULE,
-    COMPARISONS_RULE,
-    EQUALITY_RULE,
-    FRACTIONS_RULE,
-    OPERATORS_RULE,
-    PUNCTUATION_RULE,
-    SMART_QUOTES_RULE,
-    SUBSCRIPT_NUMBERS_RULE,
-    SUBSCRIPT_SYMBOLS_RULE,
-    SUPERSCRIPT_NUMBERS_RULE,
-    SUPERSCRIPT_SYMBOLS_RULE,
   ],
 });
 

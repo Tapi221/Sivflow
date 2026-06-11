@@ -378,8 +378,7 @@ const maybeReload = (reload: boolean): void => {
   if (reload) window.location.reload();
 };
 
-export const installLocalDbDevtools = (): void => {
-  if (!import.meta.env.DEV || typeof window === "undefined") return;
+export const installLocalDbDevtools = (): void => { if (!import.meta.env.DEV || typeof window === "undefined") return;
 
   const w = window as WindowWithLocalDbDevtools;
 
