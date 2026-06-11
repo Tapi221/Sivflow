@@ -21,6 +21,8 @@ import type { UploadedImage } from "@/types/domain/assets";
 import type { MathBlockData, ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock } from "@/types/domain/card";
 
+
+
 type CardBlockLayoutReplaceBlock = MarkdownReplaceBlock;
 type ViewerProps = Readonly<{ questionDisplayMode: "always" | "tap_to_reveal";
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
@@ -78,6 +80,8 @@ type SceneProps = Readonly<{
   viewerProps?: ViewerProps;
 }>;
 
+
+
 const NOOP = () => {};
 const SUPPORTED_LANGUAGES = [
   { value: "javascript", label: "JavaScript" },
@@ -98,6 +102,8 @@ const SUPPORTED_LANGUAGES = [
 ] as const;
 const MAX_MATH_LATEX_LENGTH = 10000;
 
+
+
 const renderGridOffsetSpacer = (gridOffsetPx: number) => gridOffsetPx > 0 ? <div aria-hidden className="pointer-events-none" style={{ height: `${gridOffsetPx}px` }} /> : null;
 const renderEditorShellProps = (editorProps?: EditorProps) => ({
   accentColor: editorProps?.accentColor,
@@ -112,6 +118,8 @@ const renderEditorShellProps = (editorProps?: EditorProps) => ({
   canMoveDown: editorProps?.canMoveDown,
   dragHandleClassName: "js-block-drag-handle",
 });
+
+
 
 const SharedBlockShell = ({ mode, className, contentClassName, label, icon, accentColor, isBlockSelected, onDelete, onDuplicate, onMoveUp, onMoveDown, onMoveDragStart, onMoveDragEnd, canMoveUp, canMoveDown, dragHandleClassName, children }: SharedShellProps) => {
   if (mode === "view") {
@@ -224,5 +232,9 @@ const CardBlockSceneRenderer = (props: CardBlockSceneRendererProps) => {
   }
 };
 
+
+
 export { CardBlockSceneRenderer };
+
+
 export type { CardBlockLayoutReplaceBlock, ViewerProps, EditorProps };

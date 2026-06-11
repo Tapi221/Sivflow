@@ -13,12 +13,16 @@ import type { CardSet } from "@/types/domain/cardSet";
 import type { AppSnapshot, SnapshotComparison } from "@/types/domain/snapshot";
 import { AlertTriangle, ArrowRight, CheckCircle, FileJson, Upload } from "@/ui/icons";
 
+
+
 interface ImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 type ImportStep = "select" | "preview" | "confirm" | "processing" | "complete";
 type ImportAction = "replace" | "keep" | "cancel";
+
+
 
 const normalizeImportedCard = (card: Card, userId: string): Card => ({
   ...card,
@@ -32,6 +36,8 @@ const normalizeImportedCardSet = (cardSet: CardSet, userId: string): CardSet => 
   ...cardSet,
   userId,
 });
+
+
 
 const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
   const { currentUser } = useAuthSession();
@@ -221,5 +227,7 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
     </Dialog>
   );
 };
+
+
 
 export default ImportDialog;
