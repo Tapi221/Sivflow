@@ -70,7 +70,7 @@ import {
 } from 'platejs/react';
 import { useElementSelector } from 'platejs/react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from './button';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -79,12 +79,12 @@ import {
   DropdownMenuItem,
   DropdownMenuPortal,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from './dropdown-menu';
 import {
   Popover,
   PopoverAnchor,
   PopoverContent,
-} from '@/components/ui/popover';
+} from './popover';
 import { cn } from '@/lib/utils';
 
 import { blockSelectionVariants } from './block-selection';

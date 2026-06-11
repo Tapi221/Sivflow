@@ -29,7 +29,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from './dropdown-menu';
 import { cn } from '@/lib/utils';
 
 import { ToolbarButton } from './toolbar';

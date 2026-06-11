@@ -16,19 +16,19 @@ import {
   useEditorSelector,
 } from 'platejs/react';
 
-import { buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from './button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from './dropdown-menu';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from './tooltip';
 import { cn } from '@/lib/utils';
 
 import { ToolbarButton, ToolbarMenuGroup } from './toolbar';

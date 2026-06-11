@@ -12,12 +12,12 @@ import type { PlateElementProps } from 'platejs/react';
 
 import { PlateElement, useReadOnly } from 'platejs/react';
 
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar } from './calendar';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from './popover';
 import { cn } from '@/lib/utils';
 import { inlineSuggestionVariants } from '@/components/suggestion';
 
