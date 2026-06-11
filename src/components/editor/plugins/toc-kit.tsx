@@ -2,9 +2,9 @@
 
 import { TocPlugin } from '@platejs/toc/react';
 
-import { TocElement } from '@/components/toc-node';
+import { TocElement } from '@/components/ui/toc-node';
 
-export const TocKit = [
+const TocKit = [
   TocPlugin.configure({
     options: {
       // isScroll: true,
@@ -12,3 +12,5 @@ export const TocKit = [
     },
   }).withComponent(TocElement),
 ];
+
+export { TocKit };
