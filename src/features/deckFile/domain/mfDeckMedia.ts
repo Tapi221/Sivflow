@@ -95,7 +95,7 @@ const inferMfDeckMediaExtension = (input: { mimeType: string;
   const byMime = EXTENSION_BY_MIME_TYPE[normalizedMimeType];
   if (byMime) return byMime;
 
-  const source = stripUrlSuffix(input.sourceName || input.url || "");
+  const source = stripUrlSuffix((input.sourceName || input.url) ?? "");
   const dotIndex = source.lastIndexOf(".");
   const extension = dotIndex >= 0 ? source.slice(dotIndex + 1).toLowerCase() : "";
   if (isSafeExtension(extension)) return extension;
@@ -105,7 +105,7 @@ const inferMfDeckMediaExtension = (input: { mimeType: string;
 const sanitizeMfDeckMediaName = (value: string): string => {
   const sanitized = collapseRepeatedUnderscores(replaceWhitespaceWithUnderscore(replaceInvalidFileNameCharacters(replaceControlCharacters(value.trim())))).slice(0, 80);
 
-  return sanitized || "media";
+  return sanitized ?? "media";
 };
 const buildMfDeckMediaPath = (input: { index: number;
   kind: MfDeckMediaKindV1;
@@ -121,7 +121,7 @@ const buildMfDeckMediaPath = (input: { index: number;
   const name = sanitizeMfDeckMediaName(
     input.sourceName ?? `${input.kind}-${input.index}`,
   );
-  const cleanExtension = stripLeadingDots(sanitizeMfDeckMediaName(input.extension)) || "bin";
+  const cleanExtension = stripLeadingDots(sanitizeMfDeckMediaName(input.extension)) ?? "bin";
   const paddedIndex = String(input.index).padStart(4, "0");
 
   return `${MF_DECK_MEDIA_DIRECTORY}${directory}/${paddedIndex}-${name}.${cleanExtension}`;

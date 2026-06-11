@@ -9,7 +9,7 @@ type ParsedCardSetViewParams = { cardSetId: string | null;
 const parseCardSetViewParams = (search: string): ParsedCardSetViewParams => {
   const urlParams = new URLSearchParams(search);
   const cardSetId = urlParams.get("cardSetId");
-  const initialIndexRaw = Number.parseInt(urlParams.get("index") || "0", 10);
+  const initialIndexRaw = Number.parseInt(urlParams.get("index") ?? "0", 10);
   const targetCardId = urlParams.get("cardId");
 
   return {

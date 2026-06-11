@@ -100,7 +100,7 @@ const createExportFolderSnapshotUseCase = ({ fileExporter }: ExportFolderSnapsho
       folder_name?: string;
     };
     const folderName =
-      folderRecord.folderName || folderRecord.folder_name || "unknown";
+      (folderRecord.folderName || folderRecord.folder_name) ?? "unknown";
     const date = new Date().toISOString().split("T")[0];
     const generationCounter = partialSnapshot.metadata.generationCounter;
     const filename = `flashcard_${folderName}_${date}_gen${generationCounter}.json`;

@@ -23,7 +23,7 @@ const LIST_EVENT_TITLE_CLASS_NAME = "line-clamp-2 overflow-hidden whitespace-nor
 const LIST_ALL_DAY_EVENT_TITLE_CLASS_NAME = "mt-0 line-clamp-1 whitespace-nowrap leading-none";
 const MINUTE_IN_MS = 60_000;
 
-const getEventTitle = (event: GoogleCalendarEvent): string => event.title.trim() || "Untitled";
+const getEventTitle = (event: GoogleCalendarEvent): string => event.title.trim() ?? "Untitled";
 const getEventStartTimeLabel = (event: GoogleCalendarEvent): string => {
   if (event.isAllDay) return ALL_DAY_LABEL;
 

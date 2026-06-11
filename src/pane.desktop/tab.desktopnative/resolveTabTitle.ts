@@ -11,7 +11,7 @@ const resolveDocumentTabTitle = (document: DocumentItem): string => {
 };
 const resolveCardSetTabTitle = (cardSet: CardSet): string => {
   const name = cardSet.name?.trim();
-  return name || "無題のセット";
+  return name ?? "無題のセット";
 };
 const resolveCardTabTitle = (card: Card): string => {
   const title = card.title?.trim();

@@ -16,7 +16,7 @@ const getValidatedExtension = (
   const ext = parts[parts.length - 1];
 
   if (expectedType) {
-    const allowedExts = ALLOWED_EXTENSIONS[expectedType] || [];
+    const allowedExts = ALLOWED_EXTENSIONS[expectedType] ?? [];
     return allowedExts.includes(ext) ? ext : "bin";
   }
 

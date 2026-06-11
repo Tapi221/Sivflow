@@ -298,7 +298,7 @@ const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
                     <SelectContent>
                       {cardSets.map((cardSet) => (
                         <SelectItem key={cardSet.id} value={cardSet.id}>
-                          {cardSet.name?.trim() || "無題のカードセット"}
+                          {cardSet.name?.trim() ?? "無題のカードセット"}
                         </SelectItem>
                       ))}
                     </SelectContent>

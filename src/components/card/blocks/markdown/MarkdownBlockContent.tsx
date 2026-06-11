@@ -50,7 +50,7 @@ const htmlToPlainText = (html: string) => {
   try {
     const div = document.createElement("div");
     div.innerHTML = html;
-    return div.textContent || div.innerText || "";
+    return (div.textContent || div.innerText) ?? "";
   } catch {
     return "";
   }
@@ -169,7 +169,7 @@ const extractPreTextFromHtml = (html: string) => {
     if (code?.textContent) return code.textContent;
     if (pre?.textContent) return pre.textContent;
 
-    return div.textContent || div.innerText || "";
+    return (div.textContent || div.innerText) ?? "";
   } catch {
     return "";
   }
@@ -279,7 +279,7 @@ const parseAndSplitFencesWithRanges = (
       blocks.push({
         type: "code",
         code: {
-          language: lang || "text",
+          language: lang ?? "text",
           code: dedented.replace(/\n+$/g, ""),
         },
       });

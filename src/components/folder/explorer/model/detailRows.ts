@@ -77,7 +77,7 @@ const getDocumentFolderId = (document: DocumentItem): string | null => {
   return document.folderId ?? withLegacy(document).folder_id ?? null;
 };
 const getDocumentDisplayName = (document: DocumentItem): string => {
-  return document.title?.trim() || document.fileName?.trim() || "無題の文書";
+  return (document.title?.trim() || document.fileName?.trim()) ?? "無題の文書";
 };
 const getStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
@@ -98,7 +98,7 @@ const getCardCardSetId = (card: Card): string | null => {
 };
 const getCardDisplayName = (card: Card): string => {
   return toVirtualMfCardDisplayName(
-    card.title?.trim() || card.questionNumber?.trim() || "無題のカード",
+    (card.title?.trim() || card.questionNumber?.trim()) ?? "無題のカード",
   );
 };
 const getCardTags = (card: Card): string[] => {
@@ -226,7 +226,7 @@ const buildCardSetRows = ({
     })
     .map((cardSet): ExplorerDetailRow => {
       const cardSetName = toVirtualMfDeckDisplayName(
-        cardSet.name?.trim() || "無題のセット",
+        cardSet.name?.trim() ?? "無題のセット",
       );
 
       return {
@@ -259,7 +259,7 @@ const buildCardRows = ({
   folderById: Map<string, Folder>;
 }): ExplorerDetailRow[] => {
   const cardSetName = toVirtualMfDeckDisplayName(
-    cardSet.name?.trim() || "無題のセット",
+    cardSet.name?.trim() ?? "無題のセット",
   );
   const cardSetPathSegments = [
     ...EXPLORER_ROOT_PATH_SEGMENTS,

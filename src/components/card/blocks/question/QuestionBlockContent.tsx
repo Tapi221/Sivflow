@@ -153,7 +153,7 @@ const QuestionBlockViewContent = ({
           className={`${QUESTION_BLOCK_ANSWER_TEXT_CLASS} transition-all duration-200`}
           style={answerStyle}
         >
-          {questionAnswer || "\u00a0"}
+          {questionAnswer ?? "\u00a0"}
         </p>
       }
       answerContainerProps={{

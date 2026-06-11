@@ -39,7 +39,7 @@ const ExportMfCardButton = ({
 
       downloadBytesAsMfCard({
         bytes,
-        cardName: card.title || card.questionNumber || "sivflow-card",
+        cardName: (card.title || card.questionNumber) ?? "sivflow-card",
       });
 
       toast.success("MFCard をエクスポートしました。");

@@ -69,7 +69,7 @@ const MathRendererComponent: React.FC<MathRendererProps> = ({
           displayMode === "block" ? "w-full my-2" : "inline-block mx-1",
           className,
         )}
-        title={error || "Rendering Error"}
+        title={error ?? "Rendering Error"}
       >
         <span className="opacity-70 mr-2 text-[10px] uppercase font-bold">
           LaTeX Error:

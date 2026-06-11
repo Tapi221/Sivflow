@@ -417,7 +417,7 @@ const InkLayer = React.memo(React.forwardRef<InkLayerHandle, InkLayerProps>(({ c
     const rect = readContainerRect();
     if (!rect) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = window.devicePixelRatio ?? 1;
     const nextWidth = Math.max(1, Math.round(rect.width * dpr));
     const nextHeight = Math.max(1, Math.round(rect.height * dpr));
 

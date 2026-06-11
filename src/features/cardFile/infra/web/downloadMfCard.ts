@@ -3,7 +3,7 @@ import { MF_CARD_FILE_EXTENSION, MF_CARD_MIME_TYPE } from "@/features/cardFile/d
 const INVALID_FILE_NAME_CHARACTERS = new Set(["\\", "/", ":", "*", "?", "\"", "<", ">", "|"]);
 
 const sanitizeFileName = (name: string) => {
-  const trimmed = name.trim() || "sivflow-card";
+  const trimmed = name.trim() ?? "sivflow-card";
   const sanitized = Array.from(trimmed, (char) =>
     INVALID_FILE_NAME_CHARACTERS.has(char) ? "_" : char,
   ).join("");

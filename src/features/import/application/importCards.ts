@@ -86,7 +86,7 @@ const mapImportBlockToCardBlock = (block: ImportBlock): CardBlock => {
       ...baseBlock,
       type: "code",
       code: {
-        language: block.language?.trim() || "plaintext",
+        language: block.language?.trim() ?? "plaintext",
         code: block.content ?? "",
       },
     } as CardBlock;
@@ -124,7 +124,7 @@ const importCardsFromPayload = async ({
       folderId,
       cardSetId: resolvedDestination.id,
       orderIndex: baseOrderIndex + index,
-      title: importCard.title?.trim() || "",
+      title: importCard.title?.trim() ?? "",
       front: {
         blocks: frontBlocks,
       },

@@ -71,7 +71,7 @@ const TextBlockContent = (props: TextBlockContentProps) => {
       onChange={(e) =>
         props.onChange(normalizeTextBlockContent(e.target.value))
       }
-      placeholder={props.placeholder || "テキストを入力..."}
+      placeholder={props.placeholder ?? "テキストを入力..."}
       minRows={1}
       lineHeight={presentation.ruledRowPx}
       allowInternalScroll={false}

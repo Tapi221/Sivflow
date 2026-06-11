@@ -37,7 +37,7 @@ const ExportMfDeckButton = ({
 
       downloadBytesAsMfDeck({
         bytes,
-        deckName: cardSet.name || "sivflow-deck",
+        deckName: cardSet.name ?? "sivflow-deck",
       });
 
       toast.success("MFDeck をエクスポートしました。");

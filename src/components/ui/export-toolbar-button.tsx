@@ -34,7 +34,7 @@ const ExportToolbarButton = (props: DropdownMenuProps) => {
         );
         if (editorElement) {
           Array.from(editorElement.querySelectorAll("*")).forEach((element) => {
-            const existingStyle = element.getAttribute("style") || "";
+            const existingStyle = element.getAttribute("style") ?? "";
             element.setAttribute(
               "style",
               `${existingStyle}; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important`,

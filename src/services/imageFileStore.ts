@@ -77,7 +77,7 @@ const putImageBlob = async (blob: Blob, options: PutImageBlobOptions): Promise<I
   return {
     localBlobId,
     size: blob.size,
-    mime: blob.type || "application/octet-stream",
+    mime: blob.type ?? "application/octet-stream",
   };
 };
 const deleteImageBlob = async (id: string, options?: BlobScopeOptions): Promise<void> => {

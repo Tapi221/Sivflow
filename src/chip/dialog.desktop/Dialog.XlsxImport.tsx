@@ -253,7 +253,7 @@ const XlsxImportDialog = ({
                     <SelectContent>
                       {cardSets.map((cardSet) => (
                         <SelectItem key={cardSet.id} value={cardSet.id}>
-                          {cardSet.name?.trim() || "無題のカードセット"}
+                          {cardSet.name?.trim() ?? "無題のカードセット"}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -305,8 +305,8 @@ const XlsxImportDialog = ({
               <p className="text-xs text-slate-500">取り込み先</p>
               <p className="mt-1 text-sm font-medium text-slate-800">
                 {destinationMode === "existing"
-                  ? selectedExistingCardSet?.name?.trim() || "未選択"
-                  : newCardSetName.trim() || "未入力"}
+                  ? selectedExistingCardSet?.name?.trim() ?? "未選択"
+                  : newCardSetName.trim() ?? "未入力"}
               </p>
             </div>
             <div className="rounded-xl border border-slate-200 p-3">

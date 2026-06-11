@@ -111,7 +111,7 @@ const toGoogleCalendarEvent = ({ raw, accountId, calendarId, accentColor, projec
     calendarId,
     ...(projectId ? { projectId } : {}),
     accentColor,
-    title: raw.summary || "(No title)",
+    title: raw.summary ?? "(No title)",
     description: raw.description,
     location: raw.location,
     startsAt,
@@ -123,7 +123,7 @@ const toGoogleCalendarEvent = ({ raw, accountId, calendarId, accentColor, projec
 const toGoogleEventPayload = (event: Partial<GCalWritableEventInput>): Record<string, unknown> => {
   const payload: Record<string, unknown> = {};
 
-  if (event.title !== undefined) payload.summary = event.title.trim() || "(No title)";
+  if (event.title !== undefined) payload.summary = event.title.trim() ?? "(No title)";
   if (event.description !== undefined) payload.description = event.description;
   if (event.location !== undefined) payload.location = event.location;
 

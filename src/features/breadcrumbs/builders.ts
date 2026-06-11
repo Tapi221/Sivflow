@@ -60,8 +60,8 @@ const buildExplorerBreadcrumbs = ({ selectedFolderId, explorerBreadcrumbContext,
     const card = cardById.get(selectedItem.id);
     if (card) {
       const label =
-        card.title?.trim() ||
-        getCardText(card, "question").trim().slice(0, 20) ||
+        (card.title?.trim() ||
+        getCardText(card, "question").trim().slice(0, 20)) ??
         "カード";
       crumbs.push({ label });
     }
@@ -69,7 +69,7 @@ const buildExplorerBreadcrumbs = ({ selectedFolderId, explorerBreadcrumbContext,
     const documentItem = documentById.get(selectedItem.id);
     if (documentItem) {
       crumbs.push({
-        label: documentItem.title || documentItem.fileName || "ドキュメント",
+        label: (documentItem.title || documentItem.fileName) ?? "ドキュメント",
       });
     }
   }
@@ -100,7 +100,7 @@ const buildCardSetViewBreadcrumbs = ({ folderId, selectedCardSet, selectedCard, 
     searchParams.set("cardSetId", selectedCardSet.id);
 
     crumbs.push({
-      label: selectedCardSet.name || "カードセット",
+      label: selectedCardSet.name ?? "カードセット",
       to: `/library?${searchParams.toString()}`,
       folderId: crumbFolderId,
     });

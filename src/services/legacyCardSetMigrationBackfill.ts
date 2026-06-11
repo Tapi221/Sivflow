@@ -71,10 +71,10 @@ const backfillLegacyCardsToCardSets = async (userId: string): Promise<void> => {
       const sample = cards[0];
       const folderId = sample?.folderId ? String(sample.folderId) : null;
       const folderKey = folderId ?? "__root__";
-      const folderName = folderId ? folderNameById.get(folderId) || "インポート済みカード" : "インポート済みカード";
+      const folderName = folderId ? folderNameById.get(folderId) ?? "インポート済みカード" : "インポート済みカード";
       const deletedSet = deletedSetById.get(missingSetId);
       const restoredOrder = nextOrderIndexByFolder.get(folderKey) ?? 0;
-      const deviceId = sample?.deviceId || deletedSet?.deviceId || "web";
+      const deviceId = (sample?.deviceId || deletedSet?.deviceId) ?? "web";
 
       if (deletedSet) {
         await syncDb.updateItem("cardSets", missingSetId, {
@@ -119,12 +119,12 @@ const backfillLegacyCardsToCardSets = async (userId: string): Promise<void> => {
 
       if (!targetSet) {
         const folderId = folderKey === "__root__" ? null : folderKey;
-        const folderName = folderId ? folderNameById.get(folderId) || "インポート済みカード" : "インポート済みカード";
+        const folderName = folderId ? folderNameById.get(folderId) ?? "インポート済みカード" : "インポート済みカード";
         const sampleCard = cards[0];
         const createdSet: CardSet = {
           id: createId(),
           userId,
-          deviceId: sampleCard?.deviceId || "web",
+          deviceId: sampleCard?.deviceId ?? "web",
           folderId,
           name: `${folderName} セット`,
           orderIndex: nextOrderIndexByFolder.get(folderKey) ?? 0,

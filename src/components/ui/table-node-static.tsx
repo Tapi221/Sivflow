@@ -58,8 +58,8 @@ const TableCellElementStatic = ({ isHeader, ...props }: SlateElementProps<TTable
       style={
         {
           "--cellBackground": element.background,
-          maxWidth: width || 240,
-          minWidth: width || 120,
+          maxWidth: width ?? 240,
+          minWidth: width ?? 120,
         } as React.CSSProperties
       }
       attributes={{

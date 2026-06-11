@@ -42,7 +42,7 @@ const CalloutElement = ({ attributes, children, className, ...props }: React.Com
               }}
               contentEditable={false}
             >
-              {(props.element.icon as any) || "💡"}
+              {(props.element.icon as any) ?? "💡"}
             </Button>
           }
         >

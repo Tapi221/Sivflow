@@ -18,7 +18,7 @@ const getTimeLabel = (date: Date): string => {
   }).format(date);
 };
 const getEventChipStyle = (entry: CalendarTimeGridLayoutEntry): CSSProperties => {
-  const color = entry.event.accentColor || "#64748b";
+  const color = entry.event.accentColor ?? "#64748b";
 
   return {
     background: `linear-gradient(135deg, ${color}33, ${color}14)`,
@@ -32,7 +32,7 @@ const getEventChipStyle = (entry: CalendarTimeGridLayoutEntry): CSSProperties =>
 };
 
 const CalendarEventChip = memo(({ entry }: CalendarEventChipProperties) => {
-  const title = entry.event.title || "Untitled";
+  const title = entry.event.title ?? "Untitled";
   const timeLabel = `${getTimeLabel(entry.event.startsAt)} - ${getTimeLabel(entry.event.endsAt)}`;
 
   return (

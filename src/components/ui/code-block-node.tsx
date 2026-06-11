@@ -110,7 +110,7 @@ const CodeBlockCombobox = () => {
   const readOnly = useReadOnly();
   const editor = useEditorRef();
   const element = useElement<TCodeBlockElement>();
-  const value = element.lang || "plaintext";
+  const value = element.lang ?? "plaintext";
   const [searchValue, setSearchValue] = React.useState("");
 
   const items = React.useMemo(

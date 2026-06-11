@@ -165,14 +165,14 @@ const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>(({ blo
     const surfaceStyle = window.getComputedStyle(surfaceEl);
     const ruledTopOffsetPx = Math.max(
       0,
-      Number.parseFloat(surfaceStyle.getPropertyValue("--ruled-offset-px")) ||
+      Number.parseFloat(surfaceStyle.getPropertyValue("--ruled-offset-px")) ??
       0,
     );
     const ruledBottomOffsetPx = Math.max(
       0,
       Number.parseFloat(
         surfaceStyle.getPropertyValue("--ruled-bottom-offset-px"),
-      ) || 0,
+      ) ?? 0,
     );
     const rawSurfaceScaleY =
       surfaceEl.offsetHeight > 0

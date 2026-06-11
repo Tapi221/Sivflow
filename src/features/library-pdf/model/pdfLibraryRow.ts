@@ -29,7 +29,7 @@ const toDate = (value: unknown): Date | null => {
   return normalizeDate(value);
 };
 const resolveFolderName = (folder: Folder | undefined): string => {
-  return folder?.folderName?.trim() || "未分類";
+  return folder?.folderName?.trim() ?? "未分類";
 };
 const resolveCurrentPage = (document: DocumentItem): number | null => {
   const currentPage = document.viewerState?.currentPage;
@@ -115,12 +115,12 @@ const buildPdfDashboardRows = ({ documents, folders, tagById }: BuildPdfDashboar
       return {
         id: document.id,
         title:
-          document.title?.trim() || document.fileName?.trim() || "無題のPDF",
+          (document.title?.trim() || document.fileName?.trim()) ?? "無題のPDF",
         fileName:
-          document.fileName?.trim() || document.title?.trim() || "無題のPDF",
+          (document.fileName?.trim() || document.title?.trim()) ?? "無題のPDF",
         folderId: document.folderId,
         categoryLabel,
-        folderPathLabel: folderPath.join(" / ") || "未分類",
+        folderPathLabel: folderPath.join(" / ") ?? "未分類",
         storagePathLabel: ["ライブラリ", "PDF", ...folderPath].join(" / "),
         pageCount: document.pageCount ?? null,
         currentPage: resolveCurrentPage(document),
@@ -128,7 +128,7 @@ const buildPdfDashboardRows = ({ documents, folders, tagById }: BuildPdfDashboar
         updatedAt,
         lastViewedAt,
         tags: resolveDisplayTags(document, tagById),
-        orderIndex: Number(document.orderIndex) || 0,
+        orderIndex: Number(document.orderIndex) ?? 0,
       } satisfies PdfDashboardRow;
     })
     .sort((left, right) => {

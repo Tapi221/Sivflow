@@ -40,7 +40,7 @@ const inferBaseWidthFromLegacyScale = (
   referenceWidthPx: number,
   legacyScale?: number | null,
 ) => {
-  const safeReferenceWidth = Math.max(1, referenceWidthPx || 1);
+  const safeReferenceWidth = Math.max(1, referenceWidthPx ?? 1);
   const safeLegacyScale = clamp(Number(legacyScale ?? 1), 0.2, 1);
   return safeReferenceWidth * safeLegacyScale;
 };
@@ -104,7 +104,7 @@ const ImageFrame = ({ src, alt, className, imgClassName, displayMode = "fixed", 
 
   const measuredFrameWidthPx = Math.max(
     1,
-    frameW || resolvedReferenceWidthPx || resolvedBaseWidthPx || 1,
+    (frameW || resolvedReferenceWidthPx || resolvedBaseWidthPx) ?? 1,
   );
 
   const resolvedAvailableWidthPx =

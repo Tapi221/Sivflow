@@ -126,7 +126,7 @@ const fetchGoogleTaskLists = async (accessToken: string): Promise<GoogleTaskList
         .filter((item) => item.id)
         .map((item) => ({
           id: item.id!,
-          title: item.title?.trim() || "Google ToDo",
+          title: item.title?.trim() ?? "Google ToDo",
           updated: item.updated,
         })),
     );

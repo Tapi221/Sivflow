@@ -263,7 +263,7 @@ class IndexedDBMetadataService { private readonly db: LocalDBLike;
 
   public readonly getRebuildCount = async (): Promise<number> => {
     const meta = normalizeMetadata(await this.db.metadata.get("main"));
-    return meta?.rebuildCount || 0;
+    return meta?.rebuildCount ?? 0;
   };
 }
 

@@ -197,7 +197,7 @@ const repairMissingCardSetsAfterSync = async (localDB: LocalDBLike, userId: stri
         targetCardSet = {
           id: crypto.randomUUID(),
           userId,
-          deviceId: groupedCards[0]?.deviceId || "web",
+          deviceId: groupedCards[0]?.deviceId ?? "web",
           folderId,
           name: `${folderName} セット`,
           orderIndex: nextOrderIndexByFolder.get(folderKey) ?? 0,

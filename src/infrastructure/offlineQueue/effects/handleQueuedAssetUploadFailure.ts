@@ -15,8 +15,8 @@ const handleQueuedAssetUploadFailure = async (item: QueueItem): Promise<void> =>
         itemId: item.id,
         userId: auth.currentUser?.uid ?? existingAsset?.userId ?? "",
         mime:
-          item.fileType || existingAsset?.mime || "application/octet-stream",
-        size: item.fileData.byteLength || existingAsset?.size || 0,
+          (item.fileType || existingAsset?.mime) ?? "application/octet-stream",
+        size: (item.fileData.byteLength || existingAsset?.size) ?? 0,
         localBlobId: existingAsset?.localBlobId || item.id,
         remoteKey: existingAsset?.remoteKey ?? null,
         remoteStatus: "failed",

@@ -10,7 +10,7 @@ const createSelectionCaptureImageAsset = async ({ blob, userId }: { blob: Blob;
   userId: string;
 }): Promise<UploadedImage> => {
   const assetId = crypto.randomUUID();
-  const file = new File([blob], `${assetId}.png`, { type: blob.type || "image/png" });
+  const file = new File([blob], `${assetId}.png`, { type: blob.type ?? "image/png" });
   const blobRecord = await putImageBlob(file, { userId, assetId });
   const previewUrl = await getOrCreateImageBlobUrl(blobRecord.localBlobId, { userId });
   const naturalSize = await loadImageNaturalSize(String(previewUrl ?? ""));

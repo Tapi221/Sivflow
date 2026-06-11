@@ -83,7 +83,7 @@ const buildPortableImportBatchItems = (files: File[]): PortableImportBatchItem[]
   return items;
 };
 const getSuggestedCardSetName = (result: ImportMfDeckArchiveResult): string => {
-  return result.createdCardSetName.trim() || "無題のカードセット";
+  return result.createdCardSetName.trim() ?? "無題のカードセット";
 };
 const importMfDeckItem = async ({
   item,

@@ -80,7 +80,7 @@ const extractQuestionTerms = (card: Card | null): string[] => {
 
   return terms;
 };
-const getCardTitle = (card: Card): string => card.title?.trim() || card.front.blocks.map(getBlockText).find((text) => text.trim().length > 0)?.trim() || card.questionNumber || "無題のカード";
+const getCardTitle = (card: Card): string => (card.title?.trim() || card.front.blocks.map(getBlockText).find((text) => text.trim().length > 0)?.trim() || card.questionNumber) ?? "無題のカード";
 const sanitizeCustomTerm = (value: string): string => normalizeTerm(value).slice(0, MAX_CUSTOM_TERM_LENGTH);
 const getResolvedCardFolderId = (card: Card, cardSetById: ReadonlyMap<string, CardSet>): string | null => resolveCardFolderIdStrict(card, cardSetById);
 

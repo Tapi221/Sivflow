@@ -85,7 +85,7 @@ const getViewerLanguageLabels = (language: string) => {
 const normalizeEditorLanguage = (input?: string) => {
   const lang = (input || "").toLowerCase().trim();
   if (lang === "html") return "markup";
-  return lang || "javascript";
+  return lang ?? "javascript";
 };
 
 export { normalizeViewerLanguage, getViewerLanguageLabels, normalizeEditorLanguage };

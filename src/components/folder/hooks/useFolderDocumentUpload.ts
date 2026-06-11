@@ -65,7 +65,7 @@ const useFolderDocumentUpload = ({ actionFolderId, getNextOrderIndex, setExpande
         const now = new Date();
         const docId = createDocumentId();
         const storagePath = buildStoragePath(currentUser.uid, docId, "pdf");
-        const mimeType = file.type || "application/pdf";
+        const mimeType = file.type ?? "application/pdf";
 
         const baseDoc: DocumentItem = {
           id: docId,

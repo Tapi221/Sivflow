@@ -138,7 +138,7 @@ const TextBlockScene = ({ mode, block, editorProps, viewerProps }: SceneProps) =
   const isEmpty = (block.content ?? "").trim().length === 0;
   return (
     <SharedBlockShell mode={mode} className={cn("bg-transparent px-0 py-0", !isEmpty && "border-0")} contentClassName="px-0" label="Text" icon={Type} {...renderEditorShellProps(editorProps)}>
-      {mode === "edit" && editorProps ? <TextBlockContent mode="edit" content={block.content ?? ""} onChange={(content) => editorProps.onUpdateBlock(block.id, { content })} placeholder={editorProps.customPlaceholder || "文章を入力..."} autoFocus={editorProps.autoFocus} zoom={editorProps.zoom} /> : <TextBlockContent mode="view" content={String(block.content ?? "")} zoom={viewerProps?.zoom} />}
+      {mode === "edit" && editorProps ? <TextBlockContent mode="edit" content={block.content ?? ""} onChange={(content) => editorProps.onUpdateBlock(block.id, { content })} placeholder={editorProps.customPlaceholder ?? "文章を入力..."} autoFocus={editorProps.autoFocus} zoom={editorProps.zoom} /> : <TextBlockContent mode="view" content={String(block.content ?? "")} zoom={viewerProps?.zoom} />}
     </SharedBlockShell>
   );
 };
@@ -150,7 +150,7 @@ const QuestionBlockScene = ({ mode, block, editorProps, viewerProps }: SceneProp
   );
 };
 const CodeBlockScene = ({ mode, block, meta, editorProps, viewerProps }: SceneProps) => {
-  const codeData = block.code || { language: "javascript", code: "" };
+  const codeData = block.code ?? { language: "javascript", code: "" };
   const normalizedLanguage = normalizeEditorLanguage(codeData.language);
   const contentNode = mode === "edit" && editorProps ? <CodeBlockContent mode="editor" code={codeData.code} language={normalizedLanguage} onCodeChange={(code) => editorProps.onUpdateBlock(block.id, { code: { language: normalizedLanguage, code } satisfies CodeBlockData })} headerLeft={<CodeLanguageSelector value={normalizedLanguage} onChange={(language) => editorProps.onUpdateBlock(block.id, { code: { language: normalizeEditorLanguage(language), code: codeData.code ?? "" } satisfies CodeBlockData })} />} zoom={editorProps.zoom} /> : <CodeBlockContent mode="viewer" code={codeData.code ?? ""} language={codeData.language} zoom={viewerProps?.zoom} />;
 
@@ -185,13 +185,13 @@ const ReferenceBlockScene = ({ mode, block, editorProps }: SceneProps) => {
 const MathBlockScene = ({ mode, block, meta, editorProps, viewerProps }: SceneProps) => {
   const [error, setError] = React.useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = React.useState(false);
-  const mathData = block.math || { latex: "", displayMode: "block" };
+  const mathData = block.math ?? { latex: "", displayMode: "block" };
   const latex = mathData.latex ?? "";
   const handleMathChange = React.useCallback((next: MathBlockData) => {
     if (next.latex.length > MAX_MATH_LATEX_LENGTH) {
       setError(`KaTeX文字列は最大 ${MAX_MATH_LATEX_LENGTH.toLocaleString()} 文字までです`); return; } setError(null); editorProps?.onUpdateBlock(block.id, { math: next }); }, [block.id, editorProps]);
 
-  return <SharedBlockShell mode={mode} className={cn(latex.trim().length > 0 && "border-transparent")} label="Math" icon={Sigma} {...renderEditorShellProps({ ...editorProps, isBlockSelected: Boolean(editorProps?.isBlockSelected || isEditorOpen) } as EditorProps | undefined)}><div className="w-full max-w-full overflow-visible space-y-1.5 px-2 py-0.5">{renderGridOffsetSpacer(meta?.gridOffsetPx ?? 0)}<MathBlockPreviewPane latex={latex} displayMode={mathData.displayMode || "block"} className="rounded-lg" interactive={mode === "edit"} onActivate={mode === "edit" ? () => setIsEditorOpen(true) : undefined} showPlaceholder={mode === "edit"} placeholder={mode === "edit" ? "数式を入力..." : undefined} zoom={mode === "edit" ? editorProps?.zoom : viewerProps?.zoom} />{mode === "edit" && editorProps ? <MathEditorDialog open={isEditorOpen} onOpenChange={setIsEditorOpen} data={mathData} onChange={handleMathChange} accentColor={editorProps.accentColor} error={error} /> : null}</div></SharedBlockShell>;
+  return <SharedBlockShell mode={mode} className={cn(latex.trim().length > 0 && "border-transparent")} label="Math" icon={Sigma} {...renderEditorShellProps({ ...editorProps, isBlockSelected: Boolean(editorProps?.isBlockSelected || isEditorOpen) } as EditorProps | undefined)}><div className="w-full max-w-full overflow-visible space-y-1.5 px-2 py-0.5">{renderGridOffsetSpacer(meta?.gridOffsetPx ?? 0)}<MathBlockPreviewPane latex={latex} displayMode={mathData.displayMode ?? "block"} className="rounded-lg" interactive={mode === "edit"} onActivate={mode === "edit" ? () => setIsEditorOpen(true) : undefined} showPlaceholder={mode === "edit"} placeholder={mode === "edit" ? "数式を入力..." : undefined} zoom={mode === "edit" ? editorProps?.zoom : viewerProps?.zoom} />{mode === "edit" && editorProps ? <MathEditorDialog open={isEditorOpen} onOpenChange={setIsEditorOpen} data={mathData} onChange={handleMathChange} accentColor={editorProps.accentColor} error={error} /> : null}</div></SharedBlockShell>;
 };
 const MarkdownBlockScene = ({ mode, block, editorProps, viewerProps }: SceneProps) => {
   const [isEditorOpen, setIsEditorOpen] = React.useState(false);

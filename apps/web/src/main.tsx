@@ -97,7 +97,7 @@ const getStartupFailureMessage = (error: unknown): string => {
     return `${message}\n\n${FIREBASE_ENV_SETUP_GUIDE}`;
   }
 
-  return message || "起動に必要なモジュールの読み込みに失敗しました。";
+  return message ?? "起動に必要なモジュールの読み込みに失敗しました。";
 };
 const startAppRuntimeSafely = async (): Promise<void> => {
   try {

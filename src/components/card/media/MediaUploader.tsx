@@ -576,7 +576,7 @@ const MediaUploader = (props: MediaUploaderProps) => {
 
   const handleRetry = async (index: number) => {
     const target = imageUrls[index];
-    const assetId = target?.assetId?.trim() || target?.id.trim() || "";
+    const assetId = (target?.assetId?.trim() || target?.id.trim()) ?? "";
 
     if (!assetId || !currentUserId) return;
 
@@ -596,7 +596,7 @@ const MediaUploader = (props: MediaUploaderProps) => {
     }
 
     const mime =
-      getMimeFromRecord(record) || blob.type || "application/octet-stream";
+      (getMimeFromRecord(record) || blob.type) ?? "application/octet-stream";
     const remoteKey =
       getRemoteKeyFromRecord(record) ??
       buildAssetRemoteKey(currentUserId, assetId);

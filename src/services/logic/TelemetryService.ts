@@ -61,7 +61,7 @@ class TelemetryService implements ITelemetryService { private logs: SyncLogEntry
       timestamp: new Date().toISOString(),
       level,
       message,
-      context: sanitizeForLog(context || {}),
+      context: sanitizeForLog(context ?? {}),
       error,
     };
 
@@ -97,7 +97,7 @@ class TelemetryService implements ITelemetryService { private logs: SyncLogEntry
       level,
       eventName,
       message,
-      context: sanitizeForLog(context || {}),
+      context: sanitizeForLog(context ?? {}),
       error,
     };
 

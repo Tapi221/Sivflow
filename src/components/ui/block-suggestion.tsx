@@ -103,7 +103,7 @@ const BlockSuggestionCard = ({ idx, isLast, suggestion }: { idx: number;
                   <span className="text-muted-foreground text-sm">Add:</span>
 
                   <span key={index} className="text-sm">
-                    {text || "line breaks"}
+                    {text ?? "line breaks"}
                   </span>
                 </div>
               ))}
@@ -117,7 +117,7 @@ const BlockSuggestionCard = ({ idx, isLast, suggestion }: { idx: number;
                       className="flex items-start gap-2 text-brand/80"
                     >
                       <span className="text-sm">with:</span>
-                      <span className="text-sm">{text || "line breaks"}</span>
+                      <span className="text-sm">{text ?? "line breaks"}</span>
                     </div>
                   ),
                 )}
@@ -127,7 +127,7 @@ const BlockSuggestionCard = ({ idx, isLast, suggestion }: { idx: number;
                     <span className="text-muted-foreground text-sm">
                       {index === 0 ? "Replace:" : "Delete:"}
                     </span>
-                    <span className="text-sm">{text || "line breaks"}</span>
+                    <span className="text-sm">{text ?? "line breaks"}</span>
                   </div>
                 ))}
               </div>

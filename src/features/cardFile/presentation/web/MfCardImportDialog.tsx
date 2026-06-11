@@ -279,7 +279,7 @@ const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
                     <SelectContent>
                       {cardSets.map((cardSet) => (
                         <SelectItem key={cardSet.id} value={cardSet.id}>
-                          {cardSet.name?.trim() || "無題のカードセット"}
+                          {cardSet.name?.trim() ?? "無題のカードセット"}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -311,7 +311,7 @@ const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
             <div className="rounded-xl border border-slate-200 p-3">
               <p className="text-xs text-slate-500">カード</p>
               <p className="mt-1 text-sm font-medium text-slate-800">
-                {card?.title?.trim() || card?.questionNumber || "未読み込み"}
+                {(card?.title?.trim() || card?.questionNumber) ?? "未読み込み"}
               </p>
             </div>
             <div className="rounded-xl border border-slate-200 p-3">

@@ -180,10 +180,10 @@ const fetchBytes = async (
 
   const buffer = await response.arrayBuffer();
   const mimeType =
-    response.headers.get("content-type")?.split(";")[0].trim() ||
+    (response.headers.get("content-type")?.split(";")[0].trim() ||
     (url.startsWith("data:")
       ? url.slice(5, url.indexOf(";"))
-      : "application/octet-stream") ||
+      : "application/octet-stream")) ??
     "application/octet-stream";
 
   return {

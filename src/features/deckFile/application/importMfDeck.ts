@@ -143,7 +143,7 @@ const buildCardInput = async ({
     cardSetId,
     orderIndex,
     questionNumber: card.questionNumber?.trim() || undefined,
-    title: card.title?.trim() || "",
+    title: card.title?.trim() ?? "",
     front: {
       blocks: restoreMfDeckMediaInBlocks({
         blocks: cloneBlocksWithFreshIds(card.front.blocks),

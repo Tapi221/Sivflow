@@ -116,7 +116,7 @@ const TocElementDocx = (props: SlateElementProps) => {
               key={item.id}
               style={{
                 margin: "4pt 0",
-                paddingLeft: depthIndent[item.depth] || "0",
+                paddingLeft: depthIndent[item.depth] ?? "0",
               }}
             >
               <a

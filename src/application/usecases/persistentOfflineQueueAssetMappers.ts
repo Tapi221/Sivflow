@@ -66,7 +66,7 @@ const makeAssetRecord = ({ existing, itemId, userId, mime, size, localBlobId, re
   return {
     id: itemId,
     userId: existing?.userId?.trim() || userId,
-    mime: existing?.mime?.trim() || mime || "application/octet-stream",
+    mime: (existing?.mime?.trim() || mime) ?? "application/octet-stream",
     size: existing?.size ?? size,
     localBlobId: existing?.localBlobId?.trim() || localBlobId,
     localStatus: existing?.localStatus === "missing" ? "missing" : "present",
