@@ -1,18 +1,8 @@
 import type { GCalRawIncrementalEvent, GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarApiCalendarResponse, GoogleCalendarApiEventsResponse, GoogleCalendarApiListResponse, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
-
-
-
 import { parseGoogleRecurrenceRule, serializeGoogleRecurrenceRule } from "./gcalRecurrence";
-
-
-
 import { createGoogleApiError } from "@/integration/google-integration/googleApiRetry";
 
-
-
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
-
-
 
 const getJsonOnce = async <T>(accessToken: string, url: string, errorPrefix = "Google API failed"): Promise<T> => {
   const res = await fetch(url, {

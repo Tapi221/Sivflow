@@ -15,6 +15,4 @@ export const FOLDER_ROW_TITLE_CLASS = "ds-list-item__title truncate text-[14px] 
 export const FOLDER_ROW_ICON_MUTED_CLASS = "ds-list-item__icon";
 export const FOLDER_ROW_ICON_ACTIVE_CLASS = "text-[var(--ds-semantic-color-text-primary)]";
 
-
-
 export const getExplorerRowStyle = (depth: number) => ({ paddingLeft: `calc(12px + ${depth} * var(--tree-indent-px))`, height: `${FOLDER_ROW_HEIGHT_PX}px`, minHeight: `${FOLDER_ROW_HEIGHT_PX}px`, lineHeight: `${FOLDER_ROW_HEIGHT_PX}px`, boxSizing: "border-box" as const, });

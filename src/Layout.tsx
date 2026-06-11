@@ -1,58 +1,17 @@
 import React, { useEffect, useMemo } from "react";
-
-
-
 import { useLocation, useNavigate } from "react-router-dom";
-
-
-
 import { SearchDialog } from "@/features/search/components/SearchDialog";
-
-
-
 import type { SearchItem } from "@/features/search/model/search.types";
-
-
-
 import { useSearchStore } from "@/features/search/store/useSearchStore";
-
-
-
 import { LocalDBStatusBanner } from "@/components/security/LocalDBStatusBanner";
-
-
-
 import { SecurityAlertBanner } from "@/components/security/SecurityAlertBanner";
-
-
-
 import { AppLayout } from "@/layout/AppLayout";
-
-
-
 import { DesktopWindowControls } from "@/layout/DesktopWindowControls";
-
-
-
 import { useKatexLoader } from "@/components/card/blocks/math/useKatexLoader";
-
-
-
 import { cn } from "@/lib/utils";
-
-
-
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
-
-
-
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
-
-
-
 import { UI_TYPO } from "@shared/design-tokens/typography";
-
-
 
 const Layout = () => {
   const location = useLocation();
@@ -176,7 +135,5 @@ const Layout = () => {
     </div>
   );
 };
-
-
 
 export default Layout;

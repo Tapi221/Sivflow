@@ -7,16 +7,8 @@
  *   本文ブロックには自動挿入しない
  */
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
-
-
-
 import type { FlashcardMediaLike } from "./flashcard.types";
-
-
-
 import type { CardBlock } from "@/types/domain/card";
-
-
 
 interface SideData {
   blocks: CardBlock[];
@@ -24,8 +16,6 @@ interface SideData {
   audios: FlashcardMediaLike[];
   code: { code?: string; language?: string } | null;
 }
-
-
 
 export const resolveSideBlocks = ( side: "question" | "answer", data: SideData, ) => { if (data.blocks.length > 0) { return sortBlocksByOrderIndex(data.blocks);
   }

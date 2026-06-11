@@ -4,14 +4,10 @@ export interface PreloadCacheStats { remoteUrlCacheSize: number;
   decodedUrlSetMax: number;
 }
 
-
-
 const MAX_REMOTE_URL_CACHE = 600;
 const MAX_DECODED_URL_SET = 800;
 const remoteUrlCache = new Map<string, string>();
 const decodedUrlSet = new Set<string>();
-
-
 
 export const getCachedRemoteUrl = (assetId: string) => { return remoteUrlCache.get(assetId);
 };

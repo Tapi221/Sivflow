@@ -1,10 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-
-
-
 import { cn } from "@/lib/utils";
-
-
 
 type WorkspaceSurfaceProps = {
   children: ReactNode;

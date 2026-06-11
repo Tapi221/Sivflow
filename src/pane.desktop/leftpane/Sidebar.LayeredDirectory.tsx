@@ -1,126 +1,28 @@
 import "./sidebar.layered-directory.css";
-
-
-
-
 import { useCallback, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from "react";
-
-
-
-
 import { useNavigate, useOutletContext } from "react-router-dom";
-
-
-
-
 import { StratisTagIcon } from "stratis-ui-icons";
-
-
-
-
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
-
-
-
-
 import { TagFilterPopover } from "@/chip/popover/TagFilterPopover";
-
-
-
-
 import { RightClickPanelSurface } from "@/chip/rightclickpanel.desktop/rightClickPanelCommon";
-
-
-
-
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
-
-
-
-
 import { useCardSets } from "@/components/card/hooks/useCardSets";
-
-
-
-
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
-
-
-
-
 import { DEFAULT_NEW_CARD_SET_NAME, DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_PROJECT_NAME, getFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
-
-
-
-
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
-
-
-
-
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
-
-
-
-
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-
-
-
-
 import { useSearchStore } from "@/features/search/store/useSearchStore";
-
-
-
-
 import { useTags } from "@/features/settings/hooks/useTags";
-
-
-
-
 import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
-
-
-
-
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
-
-
-
-
 import { useNotes } from "@/hooks/note/useNotes";
-
-
-
-
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
-
-
-
-
 import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
-
-
-
-
 import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
-
-
-
-
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-
-
-
-
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
-
-
-
-
 import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
-
-
 
 type IconProps = {
   className?: string;
@@ -153,8 +55,6 @@ type SidebarLayeredDirectoryProps = {
   onToggleLeftPanel?: () => void;
   onOpenSettings?: () => void;
 };
-
-
 
 const WORKSPACE_OWNER_FALLBACK_NAME = "Akari T";
 
@@ -210,8 +110,6 @@ const PROJECT_ADD_MENU_HEIGHT = PROJECT_ADD_MENU_ITEM_DEFINITIONS.length * RIGHT
 const EMPTY_COLLECTION: never[] = [];
 
 const OPENABLE_ENTITY_SELECTOR = "[data-directory-entity-kind='cardSet'], [data-directory-entity-kind='document'], [data-directory-entity-kind='note']";
-
-
 
 const getFolderName = (folder: FolderTreeNode): string => {
   const name = folder.folderName ?? folder.folder_name;
@@ -281,8 +179,6 @@ const scheduleLeftPanelClose = (onToggleLeftPanel?: () => void) => {
   if (!onToggleLeftPanel) return;
   window.setTimeout(onToggleLeftPanel, 0);
 };
-
-
 
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 
@@ -528,7 +424,5 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
     </div>
   );
 };
-
-
 
 export { LibraryHierarchySidebar, ProjectListSidebar, SidebarLayeredDirectory, TagTreeSidebar };

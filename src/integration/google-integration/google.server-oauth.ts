@@ -1,18 +1,7 @@
 import { httpsCallable } from "firebase/functions";
-
-
-
 import { auth, functionsClient } from "@/infrastructure/firebase/client";
-
-
-
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
-
-
-
 import { consumeGoogleCalendarServerCodeVerifier, type GoogleCalendarAccess } from "./google.oauth";
-
-
 
 type GoogleOAuthReconnectDiagnosis = { cause: string; reconnectRequired: boolean; action: string };
 
@@ -46,8 +35,6 @@ type DisconnectGoogleCalendarAccountInput = {
   accountId: string;
 };
 
-
-
 const AUTO_RECOVERY_PENDING_ERROR_CODE = "auto-recovery-pending";
 const AUTO_RECOVERY_PENDING_MESSAGE = "Google 連携の自動復旧を待機中です。しばらくしてからもう一度同期します。";
 const SERVER_OAUTH_CONFIGURATION_ERROR_CODE = "server-oauth-configuration-error";
@@ -75,8 +62,6 @@ const disconnectGoogleCalendarAccountCallable =
     functionsClient,
     "disconnectGoogleCalendarAccount",
   );
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -205,11 +190,7 @@ export const exchangeGoogleCalendarCode = async ( input: ExchangeGoogleCalendarC
   }
 };
 
-
-
 export const exchangeGoogleConnectedServiceCode = exchangeGoogleCalendarCode;
-
-
 
 export const getServerStoredGoogleCalendarAccessToken = async ( input: GetGoogleCalendarAccessTokenInput, ): Promise<ServerGoogleCalendarAccess> => { try { await waitForCallableAuth();
     return await getGoogleCalendarAccessTokenWithRetry(input);
@@ -218,11 +199,7 @@ export const getServerStoredGoogleCalendarAccessToken = async ( input: GetGoogle
   }
 };
 
-
-
 export const getServerStoredGoogleConnectedServiceAccessToken = getServerStoredGoogleCalendarAccessToken;
-
-
 
 export const disconnectServerStoredGoogleCalendarAccount = async ( input: DisconnectGoogleCalendarAccountInput, ): Promise<void> => { await waitForCallableAuth();
   await disconnectGoogleCalendarAccountCallable(input);

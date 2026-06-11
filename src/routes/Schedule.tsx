@@ -1,23 +1,10 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-
-
-
 import { ScheduleScreen as DesktopScheduleScreen } from "@/pane.desktop/view/ScheduleScreen.desktop";
-
-
-
 import { WorkspaceScreen } from "@/pane.desktop/view/WorkspaceScreen";
-
-
-
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-
-
 
 const MOBILE_SCHEDULE_MEDIA_QUERY = "(max-width: 767px)";
 const MobileScheduleScreen = lazy(() => import("@/pane.desktop/view/ScheduleScreen.mobile").then(({ ScheduleScreen }) => ({ default: ScheduleScreen })));
-
-
 
 const useIsMobileSchedule = () => {
   const [isMobile, setIsMobile] = useState(() => {
@@ -40,8 +27,6 @@ const useIsMobileSchedule = () => {
   return isMobile;
 };
 
-
-
 const Calendar = () => {
   const isMobile = useIsMobileSchedule();
   const activeSectionKey = useWorkspaceTabsStore((state) => state.tabs.find((tab) => tab.id === state.activeTabId)?.sectionKey ?? null);
@@ -59,7 +44,5 @@ const Calendar = () => {
     </div>
   );
 };
-
-
 
 export default Calendar;

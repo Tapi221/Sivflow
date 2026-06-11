@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-
-
-
 import { getPresentationTargetFromWindow, type PresentationTarget } from "./getPresentationTarget";
-
-
 
 const bindMediaQueryChange = (
   mediaQueryList: MediaQueryList,

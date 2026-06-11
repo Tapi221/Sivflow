@@ -1,18 +1,7 @@
 import React, { useCallback } from "react";
-
-
-
 import { CARD_ACTION_BG_CLASS, CARD_ACTION_BUTTON_PX, CARD_ACTION_COLOR_ACTIVE_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS, CARD_ACTION_ICON_PX } from "./cardAction.constants";
-
-
-
 import { cn } from "@/lib/utils";
-
-
-
 import { CircleHelp, Star, Tag } from "@/ui/icons";
-
-
 
 interface CardCornerActionsProps {
   onHelp?: () => void;
@@ -24,8 +13,6 @@ interface CardCornerActionsProps {
   visualScale?: number;
   iconPx?: number;
 }
-
-
 
 const resolveSafeVisualScale = (value?: number) => {
   if (typeof value !== "number") return 1;
@@ -40,8 +27,6 @@ const resolveSafeIconPx = (value?: number) => {
   if (value <= 0) return null;
   return value;
 };
-
-
 
 const CardCornerActions = ({
   onHelp,
@@ -167,7 +152,5 @@ const CardCornerActions = ({
     </div>
   );
 };
-
-
 
 export { CardCornerActions };

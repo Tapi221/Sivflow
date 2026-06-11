@@ -1,34 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-
-
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-
-
-
 import type { ISyncService, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
-
-
-
 import { getLocalDb } from "@/services/localdb";
-
-
-
 import type { LocalDBTableMap, SyncableEntityTable } from "@/services/localdb/types";
-
-
-
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-
-
-
 import { DEFAULT_SYNC_SETTINGS, type SyncConflict, type SyncEntity, type SyncSettings } from "@/types/domain/sync";
-
-
-
 import { SyncContext, type SyncContextType, type SyncNotice, type SyncProviderProps, type SyncStatus } from "./SyncContextCore";
-
-
 
 const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   card: "cards",
@@ -39,8 +16,6 @@ const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   userSetting: "userSettings",
   asset: "images",
 };
-
-
 
 const isSyncIntervalMinutes = (value: unknown): value is SyncSettings["intervalMinutes"] => {
   return value === 5 || value === 15 || value === 30 || value === 60;
@@ -68,8 +43,6 @@ const buildResolvedConflictRecord = (conflict: SyncConflict, resolvedData: unkno
     id: conflict.entityId,
   };
 };
-
-
 
 export const SyncProvider = ({ children }: SyncProviderProps) => { const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;

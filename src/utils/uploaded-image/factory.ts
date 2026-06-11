@@ -1,10 +1,5 @@
 import type { UploadedImage } from "@/types";
-
-
-
 import { createBlobUrl } from "@/types/core/branded";
-
-
 
 const generateUploadedImageId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -52,7 +47,5 @@ export const createFailedUploadedImage = (file: File): UploadedImage => { const 
     naturalH: null,
   };
 };
-
-
 
 export { generateUploadedImageId };

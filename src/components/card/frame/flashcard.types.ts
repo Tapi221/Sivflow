@@ -1,14 +1,6 @@
 import type { InkDocument } from "@core/domain/card/ink/inkDocument";
-
-
-
 import type { ReferenceBlockData } from "@/types/domain/base";
-
-
-
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
-
-
 
 export type FlashcardMediaLike = string | { remoteUrl?: string | null; localUrl?: string | null; url?: string | null; localFileId?: string | null; assetId?: string | null };
 

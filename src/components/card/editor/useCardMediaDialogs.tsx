@@ -1,41 +1,11 @@
 import { type ComponentType, type SVGProps, useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-
-
-
 import { StratisAudioSettings01Icon, StratisImageIcon, StratisLinkAngledIcon } from "stratis-ui-icons";
-
-
-
-
 import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "@/components/card/frame/cardAction.constants";
-
-
-
-
 import { cn } from "@/lib/utils";
-
-
-
-
 import type { UploadedImage } from "@/types/domain/assets";
-
-
-
-
 import type { ReferenceBlockData } from "@/types/domain/base";
-
-
-
-
 import type { CardFaceAttachmentAudio, CardFaceAttachments } from "@/types/domain/card";
-
-
-
-
 import { sanitizeReferences } from "./cardEditorUtils";
-
-
 
 type Side = "question" | "answer";
 
@@ -51,19 +21,13 @@ type StratisComponentIconProps = {
   className?: string;
 };
 
-
-
 const normalizeAttachments = (attachments: CardFaceAttachments | null | undefined): CardFaceAttachments => ({
   images: attachments?.images ?? [],
   audios: attachments?.audios ?? [],
   references: attachments?.references ?? [],
 });
 
-
-
 const StratisComponentIcon = ({ icon: Icon, className }: StratisComponentIconProps) => <Icon aria-hidden="true" focusable="false" className={className} />;
-
-
 
 export const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCardMediaDialogsParams) => { const [imageDialogSide, setImageDialogSide] = useState<Side | null>(null);
   const [audioDialogSide, setAudioDialogSide] = useState<Side | null>(null);

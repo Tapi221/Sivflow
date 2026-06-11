@@ -1,42 +1,13 @@
 import { type ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
-
-
-
 import { type CreateMfDeckCard, type CreateMfDeckCardSet, type EnsureMfDeckTagByName, importMfDeckArchive, type UpdateMfDeckCardSet } from "@/features/deckFile/application/importMfDeck";
-
-
-
 import { MF_DECK_MIME_TYPE } from "@/features/deckFile/domain/mfDeck.types";
-
-
-
 import { type LoadMfDeckFileResult, readMfDeckFile } from "@/features/deckFile/infra/web/readMfDeckFile";
-
-
-
 import { Button } from "@/components/ui/button";
-
-
-
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-
-
 import { Input } from "@/components/ui/input";
-
-
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-
-
 import { useToast } from "@/contexts/ToastContext";
-
-
-
 import type { CardSet } from "@/types";
-
-
 
 export type MfDeckImportCompletedPayload = { cardSetId: string;
   cardSetName: string;
@@ -59,16 +30,12 @@ type MfDeckImportDialogProps = {
   initialFileRevision?: number;
 };
 
-
-
 const emptyLoadedState = {
   file: null as File | null,
   loaded: null as LoadMfDeckFileResult | null,
 };
 
 const EMPTY_ISSUES: LoadMfDeckFileResult["issues"] = [];
-
-
 
 export const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets, onImported, createCardSet, updateCardSet, createCard, ensureTagByName, initialFile = null, initialFileRevision = 0, }: MfDeckImportDialogProps) => { const toast = useToast();
   const [destinationMode, setDestinationMode] = useState<"new" | "existing">(

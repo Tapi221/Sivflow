@@ -1,10 +1,5 @@
 import { memo } from "react";
-
-
-
 import type { Card, ReviewLog } from "@/types";
-
-
 
 type CardMetaSyncStatus = {
   lastSyncedAtMs: number | null;
@@ -51,11 +46,7 @@ type CardMetaPanelProps = {
   syncStatus?: CardMetaSyncStatus;
 };
 
-
-
 const CardMetaPanelComponent = (_props: CardMetaPanelProps) => null;
-
-
 
 export const CardMetaPanel = memo(CardMetaPanelComponent);
 CardMetaPanel.displayName = "CardMetaPanel";

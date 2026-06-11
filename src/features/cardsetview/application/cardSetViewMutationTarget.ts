@@ -1,14 +1,6 @@
 import { resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
-
-
-
 import type { Card } from "@/types";
-
-
-
 import type { CardSet } from "@/types/domain/cardSet";
-
-
 
 interface ResolveCardMutationTargetOptions {
   cardSetId: string | null;
@@ -22,8 +14,6 @@ interface CardMutationTarget {
   targetCardSetId: string | null;
   targetFolderId: string | null;
 }
-
-
 
 export const resolveCardMutationTarget = ({ cardSetId, cardSetById, selectedCardSet, selectedCard, currentCard, }: ResolveCardMutationTargetOptions): CardMutationTarget => { const resolveTargetFolderId = (card: Card | null) => { if (!card) return null;
     return resolveCardFolderIdStrict(card, cardSetById);

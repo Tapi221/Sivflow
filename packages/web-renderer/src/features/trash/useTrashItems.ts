@@ -1,18 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
-
-
-
 import { emptyTrash, getTrashItems, permanentlyDeleteTrashItems, purgeExpiredTrashItems, restoreTrashItems } from "@core/usecases/trash";
-
-
-
 import { createWebTrashRepository } from "@platform/storage/trashRepository.web";
-
-
-
 import type { Card, CardSet, Document, Folder } from "@/types";
-
-
 
 export type TrashLoadState = "idle" | "loading" | "ready" | "error";
 
@@ -28,16 +17,12 @@ export type TrashItemIdInput = { folderIds?: string[];
   documentIds?: string[];
 };
 
-
-
 const EMPTY_TRASH_ITEMS: TrashItemsState = {
   folders: [],
   cards: [],
   cardSets: [],
   documents: [],
 };
-
-
 
 export const useTrashItems = (userId: string | null | undefined) => { const repository = useMemo(() => createWebTrashRepository(), []);
   const [items, setItems] = useState<TrashItemsState>(EMPTY_TRASH_ITEMS);

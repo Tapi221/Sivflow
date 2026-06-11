@@ -1,22 +1,8 @@
 import React from "react";
-
-
-
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
-
-
-
 import { TextBlockContent } from "./TextBlockContent";
-
-
-
 import { cn } from "@/lib/utils";
-
-
-
 import { Type } from "@/ui/icons";
-
-
 
 interface TextBlockProps {
   content: string;
@@ -40,8 +26,6 @@ interface TextBlockProps {
   zoom?: number;
 }
 
-
-
 const areTextBlockPropsEqual = (prev: TextBlockProps, next: TextBlockProps) =>
   prev.content === next.content &&
   prev.dragEnabled === next.dragEnabled &&
@@ -54,8 +38,6 @@ const areTextBlockPropsEqual = (prev: TextBlockProps, next: TextBlockProps) =>
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
-
-
 
 const TextBlockInner = ({
   content,
@@ -113,8 +95,6 @@ const TextBlockInner = ({
     </BlockWrapper>
   );
 };
-
-
 
 const TextBlock = React.memo(TextBlockInner, areTextBlockPropsEqual);
 

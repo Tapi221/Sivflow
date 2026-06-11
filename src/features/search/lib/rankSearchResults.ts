@@ -1,10 +1,5 @@
 import type { SearchItem } from "@/features/search/model/search.types";
-
-
-
 import { toMillis } from "@/utils/toMillis";
-
-
 
 type RankSearchResultsParams = {
   items: SearchItem[];
@@ -17,8 +12,6 @@ type RankedSearchItem = {
   score: number;
   timestampMillis: number;
 };
-
-
 
 const normalizeText = (value: string) => {
   return value.normalize("NFKC").trim().toLocaleLowerCase("ja-JP");

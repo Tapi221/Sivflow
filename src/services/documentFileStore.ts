@@ -1,10 +1,5 @@
 import { getLocalDb } from "@/services/localDB";
-
-
-
 import type { DocumentItem } from "@/types";
-
-
 
 type BlobScopeOptions = {
   userId?: string | null;
@@ -21,8 +16,6 @@ type SaveDocumentWithBlobParams = {
   document: DocumentItem;
   blob: Blob;
 };
-
-
 
 const getDocumentFilesTable = (db: Awaited<ReturnType<typeof getLocalDb>>) =>
   db.table<StoredDocumentFile, string>("documentFiles");

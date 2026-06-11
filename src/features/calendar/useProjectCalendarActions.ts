@@ -1,26 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-
-
 import { createGoogleCalendar } from "@/integration/googlecalendar-integration/gcal.api";
-
-
-
 import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
-
-
-
 import { createProjectCalendarLink, persistProjectCalendarLinks, readStoredProjectCalendarLinks } from "./projectCalendarLinks.storage";
-
-
-
 import type { AppCalendarItem, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink } from "./scheduleScreen.types";
-
-
-
 import { clearLegacyStoredAppProjects, normalizeRootFolderProjectLabel, readLegacyStoredAppProjects, useRootFolderProjects } from "./useRootFolderProjects";
-
-
 
 type CreateGoogleProjectCalendarLinkInput = { project: AppCalendarItem; accountId: string; calendar: GoogleCalendarListItem; color: string; createdByApp: boolean };
 
@@ -44,11 +27,7 @@ type UseProjectCalendarActionsResult = {
   handleChangeGoogleCalendarColor: (accountId: string, calendarId: string, color: string) => void;
 };
 
-
-
 const GOOGLE_CALENDAR_COLOR_OVERRIDES_STORAGE_KEY = "flashcard-master:schedule:google-calendar-color-overrides";
-
-
 
 const isHexColor = (value: string): boolean => /^#[0-9a-f]{6}$/i.test(value);
 
@@ -195,7 +174,5 @@ const useProjectCalendarActions = ({ googleAccounts, reconnectGoogleAccount, tog
     handleChangeGoogleCalendarColor,
   };
 };
-
-
 
 export { useProjectCalendarActions };

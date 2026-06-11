@@ -1,22 +1,8 @@
 import { useCallback } from "react";
-
-
-
 import { resolveCardMutationTarget } from "@/features/cardsetview/application/cardSetViewMutationTarget";
-
-
-
 import { createAndFocusCard as createAndFocusCardUseCase, toggleCardBookmark, toggleCardUncertainty } from "@/features/cardsetview/application/cardSetViewUseCases";
-
-
-
 import type { Card } from "@/types";
-
-
-
 import type { CardSet } from "@/types/domain/cardSet";
-
-
 
 interface UseCardSetViewActionsOptions {
   cardSetId: string | null;
@@ -33,8 +19,6 @@ interface UseCardSetViewActionsOptions {
   setPendingFocusCardId: (cardId: string | null) => void;
   clearFlippedCards: () => void;
 }
-
-
 
 export const useCardSetViewActions = ({ cardSetId, cardSetById, selectedCardSet, selectedCard, currentCard, createCard, updateCard, toastError, beginGlobalEditing, setPendingFocusCardId, clearFlippedCards, }: UseCardSetViewActionsOptions) => { const createAndFocusCard = useCallback(async (): Promise<boolean> => { const { targetCardSetId, targetFolderId } = resolveCardMutationTarget({ cardSetId, cardSetById, selectedCardSet, selectedCard, currentCard, });
 

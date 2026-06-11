@@ -1,46 +1,14 @@
 import { nanoid } from "nanoid";
-
-
-
 import { createDeleteQueueItem, createUpsertQueueItem } from "@/application/usecases/syncQueueItemFactory";
-
-
-
 import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
-
-
-
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
-
-
-
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
-
-
-
 import { CURRENT_TAG_STORE } from "@/services/localdb/tagStoreNames";
-
-
-
 import type { LocalDBTableMap, SyncableEntityTable, TagRecord } from "@/services/localdb/types";
-
-
-
 import type { AssetRecord, Card, CardSet, DocumentItem, Folder, SyncConflict, SyncError, SyncHistory, SyncMetadata, SyncQueueItem, SyncSettings, UploadedImage, UserSettings, UserStats } from "@/types";
-
-
-
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
-
-
-
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
-
-
-
 import { toDateOrNull, toMillis } from "@/utils/toMillis";
-
-
 
 type KeyPath = string | readonly string[];
 type Predicate<T> = (value: T) => boolean;
@@ -66,8 +34,6 @@ type RegisteredInMemoryTable = {
   readonly clear: () => Promise<void>;
 };
 
-
-
 const SYNCABLE_TABLES = new Set(["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "images", "userSettings", "projectMaps"] as const);
 
 const ENTITY_BY_TABLE: Record<string, QueueEntity> = {
@@ -82,8 +48,6 @@ const ENTITY_BY_TABLE: Record<string, QueueEntity> = {
 };
 
 const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>(["card", "folder", "cardSet", "document", "tag", "asset", "projectMap"]);
-
-
 
 const isRecord = (value: unknown): value is ObjectRecord => {
   return typeof value === "object" && value !== null;

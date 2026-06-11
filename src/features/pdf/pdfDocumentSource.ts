@@ -1,10 +1,5 @@
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
-
-
-
 import PdfWorker from "pdfjs-dist/legacy/build/pdf.worker.mjs?worker";
-
-
 
 type PdfDocumentDataSource = {
   type: "data";
@@ -30,12 +25,8 @@ type PdfWorkerConstructor = new (options?: WorkerOptions) => Worker;
 
 export type { PdfDocumentSource };
 
-
-
 let pdfWorkerPort: Worker | null = null;
 const scheduledSourceReleaseTimers = new WeakMap<PdfDocumentUrlSource, ReturnType<typeof globalThis.setTimeout>>();
-
-
 
 const getPdfDocumentUrlSourceLocality = (url: string): PdfDocumentUrlSource["locality"] => {
   return url.startsWith("blob:") ? "local" : "remote";
@@ -145,7 +136,5 @@ const releasePdfDocumentSourceSoon = (source: PdfDocumentSource | null | undefin
   }, 0);
   scheduledSourceReleaseTimers.set(source, releaseTimer);
 };
-
-
 
 export { createPdfDocumentDataSource, createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource, releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource };

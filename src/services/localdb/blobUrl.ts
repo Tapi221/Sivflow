@@ -1,10 +1,5 @@
 import { telemetryOncePerSession } from "@/services/localDBRuntimeState";
-
-
-
 import { findBlobUrlFixesDeep } from "@/utils/blobUrlSanitizer";
-
-
 
 type InvalidImageUrlErrorParams = {
   entityType?: string;
@@ -12,8 +7,6 @@ type InvalidImageUrlErrorParams = {
   path?: string;
   message?: string;
 };
-
-
 
 const InvalidImageUrlError = class extends Error {
   entityType?: string;
@@ -40,8 +33,6 @@ const InvalidImageUrlError = class extends Error {
     this.path = params.path;
   }
 };
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);

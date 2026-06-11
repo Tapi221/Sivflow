@@ -1,10 +1,5 @@
 import { useState } from "react";
-
-
-
 import * as Popover from "@radix-ui/react-popover";
-
-
 
 export type MultiOption = { value: string;
   label: string;
@@ -16,8 +11,6 @@ type Props = {
   options: readonly MultiOption[];
   placeholder?: string;
 };
-
-
 
 export const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select", }: Props) => { const [open, setOpen] = useState(false);
 

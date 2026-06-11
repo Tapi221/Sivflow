@@ -1,18 +1,7 @@
 import { createFolderUseCase, deleteFolderCascade, reorderFoldersUseCase, updateFolderUseCase } from "@core/usecases/folder";
-
-
-
 import { createWebFolderRepository } from "@platform/storage/folderRepository.web";
-
-
-
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-
-
-
 import type { Folder } from "@/types";
-
-
 
 type CreateFolderOptions = {
   color?: string;
@@ -20,8 +9,6 @@ type CreateFolderOptions = {
   id?: string;
   orderIndex?: number;
 };
-
-
 
 export const useFolderCommands = () => { const { currentUser } = useAuthSession();
 

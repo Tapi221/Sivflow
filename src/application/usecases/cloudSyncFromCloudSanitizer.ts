@@ -1,22 +1,8 @@
 import { stripCloudSyncLocalOnlyFields } from "./cloudSyncLocalFieldStripping";
-
-
-
 import { getCloudSyncSanitizerLogPayload } from "./cloudSyncSanitizerLogging";
-
-
-
 import { deepStripUndefined } from "./cloudSyncValueCleaning";
-
-
-
 import { sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
-
-
-
 import { sanitizeForLog } from "@/utils/logSanitizer";
-
-
 
 export const sanitizeSyncDataFromCloud = ( type: string, data: unknown, ): unknown => { if (!data) return data;
 

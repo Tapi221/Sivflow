@@ -1,18 +1,7 @@
 import React from "react";
-
-
-
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
-
-
-
 import { MarkdownBlockDisplay } from "./MarkdownBlockDisplay";
-
-
-
 import { cn } from "@/lib/utils";
-
-
 
 interface MarkdownBlockViewProps {
   md: string;
@@ -34,8 +23,6 @@ export type MarkdownBlockPreviewProps = { markdown: string;
 interface MarkdownBlockPreviewSurfaceProps extends MarkdownBlockPreviewProps {
   contentClassName?: string;
 }
-
-
 
 const MarkdownBlockPreviewSurface: React.FC<
   MarkdownBlockPreviewSurfaceProps

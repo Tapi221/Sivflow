@@ -1,12 +1,8 @@
 'use client';
 
 import { createPlatePlugin } from 'platejs/react';
-
 import type { TComment } from '@/components/ui/comment';
-
 import { BlockDiscussion } from '@/components/ui/block-discussion';
-
-
 
 type TDiscussion = {
   id: string;
@@ -23,8 +19,6 @@ type TDiscussionUser = {
   name: string;
   hue?: number;
 };
-
-
 
 const BLOCK_SUGGESTION_SELECTOR = '[data-block-suggestion="true"]';
 
@@ -153,8 +147,6 @@ const discussionPlugin = createPlatePlugin({
 
 const DiscussionKit = [discussionPlugin];
 
-
-
 const getTargetElement = (target: EventTarget | null) => {
   if (target instanceof HTMLElement) return target;
   if (target instanceof Node) return target.parentElement;
@@ -188,10 +180,6 @@ const getDiscussionBlockClickTarget = ({
     target,
   });
 
-
-
 export type { TDiscussion };
-
-
 
 export { DiscussionKit, discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget };

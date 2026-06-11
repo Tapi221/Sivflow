@@ -1,29 +1,9 @@
 import * as React from 'react';
-
-
-
-
 import type { RenderStaticNodeWrapper, TListElement } from 'platejs';
-
-
-
 import type { SlateRenderElementProps } from 'platejs/static';
-
-
-
-
 import { isOrderedList } from '@platejs/list';
-
-
-
 import { CheckIcon } from 'lucide-react';
-
-
-
-
 import { cn } from '@/lib/utils';
-
-
 
 const config: Record<
   string,
@@ -37,8 +17,6 @@ const config: Record<
     Marker: TodoMarkerStatic,
   },
 };
-
-
 
 export const BlockListStatic: RenderStaticNodeWrapper = (props) => { if (!props.element.listStyleType) return;
   if (!isOrderedList(props.element)) return;

@@ -1,26 +1,9 @@
 import { initializeApp, type FirebaseApp } from "firebase/app";
-
-
-
 import { getAuth, type Auth } from "firebase/auth";
-
-
-
 import type { Firestore } from "firebase/firestore";
-
-
-
 import { collection, getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
-
-
-
 import { getFunctions, type Functions } from "firebase/functions";
-
-
-
 import { getStorage, type FirebaseStorage } from "firebase/storage";
-
-
 
 type FirebaseClientState = {
   app: FirebaseApp | null;
@@ -29,8 +12,6 @@ type FirebaseClientState = {
   functionsClient: Functions | null;
   firestoreDb: Firestore | null;
 };
-
-
 
 const REQUIRED_FIREBASE_ENV_KEYS = [
   "VITE_FIREBASE_API_KEY",
@@ -49,8 +30,6 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
-
-
 
 const getFirebaseEnvValue = (key: (typeof REQUIRED_FIREBASE_ENV_KEYS)[number]) => {
   return import.meta.env[key];
@@ -71,12 +50,8 @@ const createUnavailableState = (): FirebaseClientState => ({
   firestoreDb: null,
 });
 
-
-
 export const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
 export const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
-
-
 
 const initializeFirebaseClient = (): FirebaseClientState => {
   if (!isFirebaseClientAvailable) {
@@ -129,8 +104,6 @@ const initializeFirebaseClient = (): FirebaseClientState => {
   };
 };
 
-
-
 const firebaseClientState = initializeFirebaseClient();
 
 export const firebaseApp = firebaseClientState.app;
@@ -139,8 +112,6 @@ export const storage = firebaseClientState.storage as FirebaseStorage;
 export const functionsClient = firebaseClientState.functionsClient as Functions;
 export const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
 export const db: Firestore | null = firebaseClientState.firestoreDb;
-
-
 
 export const requireFirebaseClient = (): FirebaseClientState => { if (isFirebaseClientAvailable && firebaseClientState.app) { return firebaseClientState;
   }

@@ -1,7 +1,4 @@
 import type { Base64DataUrl } from "@/types/core/branded";
-
-
-
 import { createBase64DataUrl } from "@/types/core/branded";
 
 

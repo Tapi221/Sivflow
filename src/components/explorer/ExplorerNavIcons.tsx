@@ -1,10 +1,6 @@
 import type { SVGProps } from "react";
 
-
-
 type ExplorerNavIconProps = SVGProps<SVGSVGElement>;
-
-
 
 export const ExplorerFolderNavIcon = ({ className, ...rest }: ExplorerNavIconProps) => { return ( <svg viewBox="0 0 16 16" width="1em" height="1em" fill="none" className={className} aria-hidden="true" {...rest} > <path d="M1.75 3.75a1 1 0 0 1 1-1H6l1.45 1.45h5.8a1 1 0 0 1 1 1v6.95a1 1 0 0 1-1 1H2.75a1 1 0 0 1-1-1V3.75Z" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round" /> </svg> );
 };

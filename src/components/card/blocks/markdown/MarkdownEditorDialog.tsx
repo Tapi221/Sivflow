@@ -1,18 +1,7 @@
 import React from "react";
-
-
-
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
-
-
-
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-
-
 import { cn } from "@/lib/utils";
-
-
 
 type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;
 
@@ -27,17 +16,11 @@ interface MarkdownEditorDialogProps {
   error?: string | null;
 }
 
-
-
 const EDITOR_LINE_HEIGHT = 24;
 const EDITOR_MIN_ROWS = 10;
 const EDITOR_MAX_HEIGHT = 520;
 
-
-
 const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
-
-
 
 export const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({ open, onOpenChange, value, onChange, onPasteCapture, onKeyDown, accentColor, error, }) => { const ringColor = accentColor && isHexColor(accentColor) ? `${accentColor}40` : "var(--primary-color-alpha-40)";
 

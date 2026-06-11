@@ -1,26 +1,9 @@
 import type { CSSProperties, KeyboardEventHandler, MouseEventHandler } from "react";
-
-
-
 import { MarkdownBlockView } from "./MarkdownBlockPreview";
-
-
-
 import { TEXT_BLOCK_CONTENT_CLASS } from "@/components/card/blocks/text/textBlockStyles";
-
-
-
 import { buildTypographyStyle, mergeStyles } from "@/components/card/common/cardSetViewZoom";
-
-
-
 import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/typography";
-
-
-
 import { cn } from "@/lib/utils";
-
-
 
 type MarkdownBlockDisplayProps = {
   markdown: string;
@@ -39,15 +22,11 @@ type MarkdownBlockDisplayProps = {
   "data-testid"?: string;
 };
 
-
-
 const normalizeMarkdownBlockValue = (input: string) =>
   String(input ?? "")
     .replace(/\r\n/g, "\n")
     .replace(/\n{3,}$/g, "\n\n")
     .replace(/\n+$/g, "");
-
-
 
 export const MarkdownBlockDisplay = ({ markdown, emptyPlaceholder = "Markdownを入力...", className, previewClassName, bleedX = false, style, interactive = false, tabIndex, role, ariaLabel, onClick, onKeyDown, zoom, "data-testid": dataTestId, }: MarkdownBlockDisplayProps) => { const normalizedMarkdown = normalizeMarkdownBlockValue(markdown);
   const isEmpty = normalizedMarkdown.trim().length === 0;

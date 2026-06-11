@@ -1,29 +1,9 @@
 import * as React from 'react';
-
-
-
-
 import type { TTableCellElement, TTableElement } from 'platejs';
-
-
-
 import type { SlateElementProps } from 'platejs/static';
-
-
-
-
 import { BaseTablePlugin } from '@platejs/table';
-
-
-
 import { SlateElement } from 'platejs/static';
-
-
-
-
 import { cn } from '@/lib/utils';
-
-
 
 export function TableElementStatic({ children, ...props }: SlateElementProps<TTableElement>) { const { disableMarginLeft } = props.editor.getOptions(BaseTablePlugin);
   const marginLeft = disableMarginLeft ? 0 : props.element.marginLeft;

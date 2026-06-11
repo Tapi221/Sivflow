@@ -1,10 +1,5 @@
 import React from "react";
-
-
-
 import "./index.css";
-
-
 
 const Breadcrumb = () => {
   return (
@@ -42,7 +37,5 @@ const Main = () => {
     </main>
   );
 };
-
-
 
 export default Main;

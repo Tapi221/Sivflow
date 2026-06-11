@@ -1,14 +1,6 @@
 import { safeRevokeBlobUrl } from "./blobUrl";
-
-
-
 import { removeDocumentBlobUrl } from "@/services/documentBlobUrlSessionCache";
-
-
-
 import { deleteDocumentBlob } from "@/services/documentFileStore";
-
-
 
 type DocumentRecord = {
   id?: string;
@@ -34,8 +26,6 @@ type DocumentsTable = {
 };
 
 export type DocDbCtx = { documents: DocumentsTable; userId?: string };
-
-
 
 const canDeleteDocumentBlob = async (
   documents: DocumentsTable,

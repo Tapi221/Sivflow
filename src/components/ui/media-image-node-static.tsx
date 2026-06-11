@@ -1,29 +1,9 @@
 import * as React from 'react';
-
-
-
-
 import type { TCaptionProps, TImageElement, TResizableProps } from 'platejs';
-
-
-
 import type { SlateElementProps } from 'platejs/static';
-
-
-
-
 import { NodeApi } from 'platejs';
-
-
-
 import { SlateElement } from 'platejs/static';
-
-
-
-
 import { cn } from '@/lib/utils';
-
-
 
 export function ImageElementStatic( props: SlateElementProps<TImageElement & TCaptionProps & TResizableProps> ) { const { align = 'center', caption, url, width } = props.element;
 

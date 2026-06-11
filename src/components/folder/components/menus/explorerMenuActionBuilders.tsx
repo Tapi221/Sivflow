@@ -1,18 +1,7 @@
 import { Pencil, Tag, Trash2 } from "@/ui/icons";
-
-
-
 import { AddDocumentIcon, BulkImportIcon, CreateCardIcon, CreateCardSetIcon, CreateFolderIcon, FolderContextCardSetIcon, FolderContextFolderIcon, FolderContextRenameIcon, FolderContextTrashIcon } from "./explorerMenuActionIcons";
-
-
-
 import { beginInlineRename } from "./explorerMenuStateHelpers";
-
-
-
 import type { MenuAction } from "./menuActions";
-
-
 
 interface BuildFolderMenuActionsParams {
   onCreateSubfolder?: () => void;
@@ -54,8 +43,6 @@ interface BuildExplorerCreateMenuActionsParams {
   onAddDocument?: () => void | Promise<void>;
   onBulkImport?: () => void | Promise<void>;
 }
-
-
 
 export const buildRenameDeleteMenuActions = ({ renameLabel = "名前を変更", deleteLabel = "削除", onRename, onDelete, }: BuildRenameDeleteMenuActionsParams): MenuAction[] => { const actions: MenuAction[] = [];
 

@@ -1,30 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-
-
-
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
-
-
-
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
-
-
-
 import { getEntityTime, getFolderId, getParentFolderId, isSameFolder, normalizeFolderId, ROOT_FOLDER_ID } from "@/components/folder/explorer/model/utils";
-
-
-
 import { useDocumentCommands } from "@/features/document/hooks/useDocumentCommands";
-
-
-
 import { compareOrderableEntities } from "@/lib/orderableEntity";
-
-
-
 import type { Card, CardSet, DocumentItem, ExplorerItem, Note } from "@/types";
-
-
 
 type LegacyEntityFields = { isDeleted?: boolean; is_deleted?: boolean; folder_id?: string | null; card_set_id?: string | null; orderIndex?: number; order_index?: number };
 
@@ -39,11 +19,7 @@ interface Params {
   isFiltering: boolean;
 }
 
-
-
 const ORPHAN_DOCUMENT_CLEANUP_LOG_PREFIX = "[useExplorerDerivedData] orphan PDF purge";
-
-
 
 const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean } | null) => Boolean(entity?.isDeleted ?? entity?.is_deleted);
 

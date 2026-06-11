@@ -1,22 +1,8 @@
 import type { CSSProperties, SVGProps } from "react";
-
-
-
 import { useCallback, useEffect, useRef, useState } from "react";
-
-
-
 import { getTagColorStyle, type TagColorKey } from "@/chip/tag/tagColor";
-
-
-
 import { cn } from "@/lib/utils";
-
-
-
 import { X } from "@/ui/icons";
-
-
 
 interface TagBadgeProps {
   label: string;
@@ -28,8 +14,6 @@ interface TagBadgeProps {
   onRemove?: () => void;
   removeAriaLabel?: string;
 }
-
-
 
 const TAG_TEXT_FADE_STYLE: CSSProperties = {
   WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
@@ -43,8 +27,6 @@ const TAG_TEXT_STYLE: CSSProperties = {
 const OVERFLOW_THRESHOLD = 1;
 
 const LONG_DOT_SEQUENCE_PATTERN = /[.。．]{4,}/g;
-
-
 
 const isElementTextOverflowing = (element: HTMLElement | null) => {
   return Boolean(element && element.scrollWidth > element.clientWidth + OVERFLOW_THRESHOLD);
@@ -93,8 +75,6 @@ const useTextOverflow = (value: string) => {
 
   return { isOverflowing, textRef };
 };
-
-
 
 const TagHashIcon = ({ className }: SVGProps<SVGSVGElement>) => (
   <svg
@@ -188,10 +168,6 @@ const TagBadge = ({
   );
 };
 
-
-
 export { TagBadge };
-
-
 
 export type { TagBadgeProps };

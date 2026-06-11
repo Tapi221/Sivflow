@@ -1,22 +1,12 @@
 import * as React from "react";
-
-
-
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
-
-
-
 import { cn } from "@/lib/utils";
-
-
 
 type ScrollAreaProps = React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
   viewportClassName?: string;
   viewportProps?: Omit<React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Viewport>, "children">;
   viewportRef?: React.Ref<React.ElementRef<typeof ScrollAreaPrimitive.Viewport>>;
 };
-
-
 
 const ScrollBar = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
@@ -72,8 +62,6 @@ const ScrollArea = React.forwardRef<
     </ScrollAreaPrimitive.Root>
   );
 });
-
-
 
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName;
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;

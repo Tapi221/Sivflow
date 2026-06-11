@@ -1,26 +1,9 @@
 import { useCardSetViewCardLayoutMode } from "./useCardSetViewCardLayoutMode";
-
-
-
 import { useCardSetViewDisplayMode } from "./useCardSetViewDisplayMode";
-
-
-
 import { useCardSetViewEditingBridge } from "./useCardSetViewEditingBridge";
-
-
-
 import { useCardSetViewSelectionState } from "./useCardSetViewSelectionState";
-
-
-
 import type { Card } from "@/types";
-
-
-
 import type { CardSet } from "@/types/domain/cardSet";
-
-
 
 interface UseCardSetViewViewStateOptions {
   initialIndex: number;
@@ -31,8 +14,6 @@ interface UseCardSetViewViewStateOptions {
   selectedCardSet: CardSet | null;
   deviceScope: string;
 }
-
-
 
 export const useCardSetViewViewState = ({ initialIndex, targetCardId, cardSetId, sortedCards, cardIndexById, selectedCardSet, deviceScope, }: UseCardSetViewViewStateOptions) => { const selectionState = useCardSetViewSelectionState({ initialIndex, targetCardId, deviceScope, cardSetId, sortedCards, cardIndexById, });
 
