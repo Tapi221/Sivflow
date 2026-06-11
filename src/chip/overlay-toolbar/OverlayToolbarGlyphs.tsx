@@ -1,9 +1,15 @@
 import type { SVGProps } from "react";
 import { cn } from "@/lib/utils";
 
+
+
 type OverlayToolbarGlyphProps = SVGProps<SVGSVGElement>;
 
+
+
 const OVERLAY_TOOLBAR_GLYPH_CLASS_NAME = "h-3.5 w-3.5";
+
+
 
 const OverlayToolbarGlyph = ({
   className,
@@ -34,4 +40,6 @@ const PdfFitWidthGlyph = () => (<OverlayToolbarGlyph> <path d="M3.2 4.15v7.7M12.
 const PdfSinglePageGlyph = () => (<OverlayToolbarGlyph> <rect x="4.75" y="2.75" width="6.5" height="10.5" rx="1.6" stroke="currentColor" strokeWidth="1.45" /> <path d="M6.55 5.55h2.9M6.55 8h2.9M6.55 10.45h1.95" stroke="currentColor" strokeWidth="1.05" strokeLinecap="round" opacity="0.48" /> </OverlayToolbarGlyph>);
 const PdfDoublePageGlyph = () => (<OverlayToolbarGlyph> <rect x="2.65" y="3.2" width="4.55" height="9.6" rx="1.25" stroke="currentColor" strokeWidth="1.35" /> <rect x="8.8" y="3.2" width="4.55" height="9.6" rx="1.25" stroke="currentColor" strokeWidth="1.35" opacity="0.72" /> </OverlayToolbarGlyph>);
 
-export { FixedDisplayGlyph, FluidDisplayGlyph, StackGlyph, FlipGlyph, SplitGlyph, SelectionCaptureGlyph, PdfPrevGlyph, PdfNextGlyph, PdfFitWidthGlyph, PdfSinglePageGlyph, PdfDoublePageGlyph };
+
+
+export { FixedDisplayGlyph, FluidDisplayGlyph, StackGlyph, FlipGlyph, SplitGlyph, SelectionCaptureGlyph, PdfPrevGlyph, PdfNextGlyph, PdfFitWidthGlyph, PdfSinglePageGlyph, PdfDoublePageGl

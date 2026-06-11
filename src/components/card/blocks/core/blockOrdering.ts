@@ -1,5 +1,7 @@
 import type { CardBlock } from "@/types/domain/card";
 
+
+
 const sortBlocksByOrderIndex = (blocks: CardBlock[] = []) => {
   if (blocks.length <= 1) return blocks;
 
@@ -18,4 +20,6 @@ const sortBlocksByOrderIndex = (blocks: CardBlock[] = []) => {
   return blocks;
 };
 
-export { sortBlocksByOrderIndex };
+
+
+export { sortBlocksByOrderIndex 
