@@ -14,6 +14,8 @@ import type { CardSet } from "@/types";
 
 
 
+
+
 export type MfCardImportCompletedPayload = { cardSetId: string;
   cardSetName: string;
   folderId: string;
@@ -39,10 +41,14 @@ type MfCardImportDialogProps = {
 
 
 
+
+
 const emptyLoadedState = {
   file: null as File | null,
   loaded: null as LoadMfCardFileResult | null,
 };
+
+
 
 
 

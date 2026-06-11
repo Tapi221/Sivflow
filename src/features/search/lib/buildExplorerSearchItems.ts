@@ -6,6 +6,8 @@ import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "
 
 
 
+
+
 type BuildExplorerSearchItemsParams = {
   folders: Folder[];
   cards: Card[];
@@ -14,6 +16,8 @@ type BuildExplorerSearchItemsParams = {
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
 };
+
+
 
 
 

@@ -5,6 +5,8 @@ import type { CalendarRecurrenceFrequency, CalendarRecurrenceRule, CalendarWeekd
 
 
 
+
+
 const GOOGLE_FREQUENCY_BY_CALENDAR_FREQUENCY: Record<CalendarRecurrenceFrequency, string> = {
   daily: "DAILY",
   monthly: "MONTHLY",
@@ -40,6 +42,8 @@ const WEEKDAY_BY_GOOGLE_DAY: Record<string, CalendarWeekday> = {
 };
 
 const RRULE_PREFIX = "RRULE:";
+
+
 
 
 

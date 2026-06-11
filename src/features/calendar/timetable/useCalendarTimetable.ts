@@ -8,6 +8,8 @@ import { addCalendarTimetableCourseFromSyllabus, addCalendarTimetablePeriod, del
 
 
 
+
+
 type UseCalendarTimetableState = {
   courses: CalendarTimetableCourse[];
   departments: CalendarTimetableDepartment[];
@@ -34,8 +36,12 @@ type UseCalendarTimetableReturn = UseCalendarTimetableState & {
 
 
 
+
+
 const DEFAULT_SETTINGS: CalendarTimetableSettings = { id: "default", activeSemesterId: "default-semester", visibleDayCount: 5, updatedAt: "" };
 const DEFAULT_PERIODS = createDefaultCalendarTimetablePeriods();
+
+
 
 
 
@@ -76,6 +82,8 @@ const useCalendarTimetable = (): UseCalendarTimetableReturn => {
 
   return { ...state, saveCourse, deleteCourse, updateVisibleDayCount, addPeriod, updatePeriod, deletePeriod, saveSyllabusCourse, addCourseFromSyllabus, searchSyllabusCourses };
 };
+
+
 
 
 

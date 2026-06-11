@@ -11,6 +11,8 @@ import { PdfLibraryWorkspaceToolbar } from "./PdfLibraryWorkspaceToolbar";
 
 
 
+
+
 type PdfLibraryDashboardProps = {
   documents: DocumentItem[];
   folders: Folder[];
@@ -27,7 +29,11 @@ type IconBadgeProps = {
 
 
 
+
+
 const cardClassName = "box-border rounded-[10px] border border-[#D1D1D1] bg-[#FFFFFF] p-4 shadow-[0_6px_3px_0_rgba(0,0,0,0.06),0_10px_10px_0_rgba(0,0,0,0.05)]";
+
+
 
 
 
@@ -52,6 +58,8 @@ const getIconBadgeToneClassName = (tone: NonNullable<IconBadgeProps["tone"]>): s
   if (tone === "rose") return "bg-[#fff1f2] text-[#c06268]";
   return "bg-[#f3f4f6] text-[#6b7280]";
 };
+
+
 
 
 
@@ -115,6 +123,8 @@ const PdfLibraryDashboard = ({ documents, folders, onOpenDocument, showToolbar =
     </div>
   );
 };
+
+
 
 
 

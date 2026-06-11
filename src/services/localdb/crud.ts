@@ -9,6 +9,8 @@ import type { Card, Folder } from "@/types";
 
 
 
+
+
 export type EnqueueSync = ( table: string, type: "upload" | "download", payload: unknown, ) => Promise<void>;
 
 export interface TableLike<T extends object> { add(item: T): PromiseLike<unknown> | unknown;
@@ -164,6 +166,8 @@ type Upsert = {
 
 
 
+
+
 const ENTITY_BY_TABLE = {
   cards: "card",
   folders: "folder",
@@ -182,6 +186,8 @@ const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>([
   "tag",
   "asset",
 ]);
+
+
 
 
 

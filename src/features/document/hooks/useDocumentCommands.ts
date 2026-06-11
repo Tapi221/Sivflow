@@ -5,6 +5,8 @@ import { getLocalDb } from "@/services/localdb";
 import { normalizeDate } from "@/shared/codec/date";
 import type { DocumentItem } from "@/types";
 
+
+
 type UpdateDocumentOptions = {
   touchUpdatedAt?: boolean;
 };
@@ -30,7 +32,11 @@ type DocumentPurgeCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   queueDeleteSync: (args: { entity: "document"; targetId: string; priority?: "critical" | "high" | "medium" | "low" }) => Promise<void>;
 };
 
+
+
 const VIEWER_STATE_UPDATE_KEYS = new Set(["viewerState", "updatedAt"]);
+
+
 
 const normalizeUpdatedAt = (value: DocumentItem["updatedAt"] | undefined): Date | undefined => {
   return normalizeDate(value) ?? undefined;
@@ -51,8 +57,7 @@ const shouldTouchUpdatedAtForUpdates = (updates: Partial<DocumentItem>, options:
   return Object.keys(updates).some((key) => !VIEWER_STATE_UPDATE_KEYS.has(key));
 };
 
-export const useDocumentCommands = () => {
-  const { currentUser } = useAuthSession();
+export const useDocumentCommands = () => { const { currentUser } = useAuthSession();
 
   const updateDocument = useCallback(
     async (documentId: string, updates: Partial<DocumentItem>, options: UpdateDocumentOptions = {}): Promise<void> => {

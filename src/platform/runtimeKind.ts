@@ -5,6 +5,8 @@ import { hasDesktopRuntime } from "./detectDesktopBridge";
 
 
 
+
+
 export const getRuntimeKind = (): RuntimeKind => { if (hasDesktopRuntime()) { return RUNTIME_KINDS.desktop;
   }
 

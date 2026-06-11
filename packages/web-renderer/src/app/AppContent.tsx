@@ -13,7 +13,11 @@ import { isTestBypassEnabled } from "@web-renderer/app/routing/testBypass";
 
 
 
+
+
 const MOBILE_LOGIN_VIEWPORT_MAX_WIDTH = 767;
+
+
 
 
 
@@ -52,6 +56,8 @@ const useIsMobileLoginViewport = (): boolean => {
 
 
 
+
+
 const AppContent = () => {
   const { currentUser, loading } = useAuthSession();
   const isMobileLoginViewport = useIsMobileLoginViewport();
@@ -80,6 +86,8 @@ const AppContent = () => {
     </>
   );
 };
+
+
 
 
 

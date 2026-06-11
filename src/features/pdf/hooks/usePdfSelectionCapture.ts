@@ -9,6 +9,8 @@ import type { SelectionCaptureArea } from "@/features/selection-capture/selectio
 
 
 
+
+
 type PdfSelectionCaptureTargetRef = {
   readonly current: HTMLElement | null;
 };
@@ -32,7 +34,11 @@ export type { UsePdfSelectionCaptureParams, UsePdfSelectionCaptureResult };
 
 
 
+
+
 const PDF_SELECTION_CAPTURE_MESSAGE_TIMEOUT_MS = 1800;
+
+
 
 
 
@@ -92,6 +98,8 @@ const usePdfSelectionCapture = ({ targetRef, selectionCaptureSide, sourceUnavail
     handleCaptureSelection,
   };
 };
+
+
 
 
 

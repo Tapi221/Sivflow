@@ -7,6 +7,8 @@ import type { Card } from "@/types";
 
 
 
+
+
 type StudyCardProps = React.ComponentProps<typeof StudyCard>;
 
 type ReviewResultHandler = Extract<StudyCardProps, { mode: "review" }>["onResult"];
@@ -33,6 +35,8 @@ type PracticeCardCarouselProps = CardCarouselBaseProps & {
 };
 
 export type CardCarouselProps = ReviewCardCarouselProps | PracticeCardCarouselProps;
+
+
 
 
 

@@ -7,10 +7,14 @@ import "./sidebar.desktop.css";
 
 
 
+
+
 type SidebarCollapsedToggleProps = {
   isVisible: boolean;
   onToggleLeftPanel: () => void;
 };
+
+
 
 
 
@@ -27,6 +31,8 @@ const SidebarCollapsedToggleBase = ({ isVisible, onToggleLeftPanel }: SidebarCol
     </button>
   );
 };
+
+
 
 
 

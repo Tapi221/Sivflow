@@ -10,10 +10,14 @@ import { CalendarSidebarContent } from "./CalendarSidebar";
 
 
 
+
+
 type CalendarSidebarControllerProps = {
   onOpenSettings?: () => void;
   onToggleLeftPanel?: () => void;
 };
+
+
 
 
 
@@ -45,6 +49,8 @@ const createGoogleAccountDisplays = (google: ReturnType<typeof useGoogleCalendar
 
 
 
+
+
 const CalendarSidebarController = ({ onOpenSettings, onToggleLeftPanel }: CalendarSidebarControllerProps) => {
   const google = useGoogleCalendarLayer();
   const activeSectionKey = useWorkspaceTabsStore((state) => state.tabs.find((tab) => tab.id === state.activeTabId)?.sectionKey ?? null);
@@ -55,6 +61,8 @@ const CalendarSidebarController = ({ onOpenSettings, onToggleLeftPanel }: Calend
 
   return <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} calendarContent={calendarContent} />;
 };
+
+
 
 
 
