@@ -1,8 +1,6 @@
 import { memo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-
-
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
@@ -34,8 +32,6 @@ const styles = StyleSheet.create({
   },
 });
 
-
-
 const TrashScreen = () => {
   return (
     <View style={styles.container}>
@@ -45,8 +41,6 @@ const TrashScreen = () => {
     </View>
   );
 };
-
-
 
 const MemoizedTrashScreen = memo(TrashScreen);
 MemoizedTrashScreen.displayName = "TrashScreen";

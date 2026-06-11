@@ -7,8 +7,6 @@ import { handleQueuedDocumentUploadSuccess } from "@/infrastructure/offlineQueue
 import { shouldSkipQueuedDocumentUpload } from "@/infrastructure/offlineQueue/effects/shouldSkipQueuedDocumentUpload";
 import type { UploadedImage } from "@/types";
 
-
-
 const isAssetLikeImageQueueItem = (item: QueueItem): boolean =>
   !isDocumentQueueItem(item) && item.fileType.startsWith("image/");
 const handleQueuedUploadSuccess = async (
@@ -34,7 +32,5 @@ const handleQueuedUploadPermanentFailure = async (
     await handleQueuedAssetUploadFailure(item);
   }
 };
-
-
 
 export { handleQueuedUploadPermanentFailure, handleQueuedUploadSuccess, shouldSkipQueuedDocumentUpload };

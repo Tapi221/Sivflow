@@ -3,11 +3,7 @@ import { compareCalendarEvents } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { toDateKey } from "./calendarKey";
 
-
-
 type CalendarEventMap = Map<string, GoogleCalendarEvent[]>;
-
-
 
 const useCalendarEventMap = (visibleEvents: GoogleCalendarEvent[]): CalendarEventMap => {
   return useMemo(() => {
@@ -32,9 +28,5 @@ const useCalendarEventMap = (visibleEvents: GoogleCalendarEvent[]): CalendarEven
   }, [visibleEvents]);
 };
 
-
-
 export { useCalendarEventMap };
-
-
 export type { CalendarEventMap };

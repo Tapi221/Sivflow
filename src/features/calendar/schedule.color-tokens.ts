@@ -1,7 +1,5 @@
 import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 
-
-
 type CalendarColorTokens = { bg: string;
   border: string;
   text: string;
@@ -12,15 +10,11 @@ type RgbColor = {
   blue: number;
 };
 
-
-
 const FALLBACK_ACCENT_COLOR = "#185FA5";
 const LIGHT_ACCENT_LUMINANCE_THRESHOLD = 0.8;
 const LIGHT_ACCENT_BORDER_MIX_AMOUNT = 0.28;
 const colorTokensCache = new Map<string, CalendarColorTokens>();
 const BLACK: RgbColor = { red: 0, green: 0, blue: 0 };
-
-
 
 const clampChannel = (value: number) => Math.max(0, Math.min(255, value));
 const toHexChannel = (value: number) =>
@@ -98,9 +92,5 @@ const generateColorTokens = (hex: string): CalendarColorTokens => {
   return tokens;
 };
 
-
-
 export { generateColorTokens };
-
-
 export type { CalendarColorTokens };
