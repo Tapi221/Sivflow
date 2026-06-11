@@ -64,7 +64,7 @@ const STYLISTIC_FIXABLE_RULES = {
   "@stylistic/array-bracket-spacing": ["warn", "never"],
   "@stylistic/arrow-spacing": "warn",
   "@stylistic/block-spacing": ["warn", "always"],
-  "@stylistic/comma-dangle": ["warn", COMMA_DANGLE_STYLE],
+  "@stylistic/comma-dangle": ["error", COMMA_DANGLE_STYLE],
   "@stylistic/comma-spacing": "warn",
   "@stylistic/computed-property-spacing": ["warn", "never"],
   "@stylistic/function-call-spacing": ["warn", "never"],
@@ -152,7 +152,7 @@ export default defineConfig([
         "warn",
         {
           groups: [
-            ["^\\x00", "^react$", "^react-dom$", "^react/", "^react-dom/", "^@?\\w", "^@/", "^\\."],
+            ["^\\x00", "^react$", "^react-dom$", "^react/", "^react-dom/", "^@?\\w", "^@/", "^."],
           ],
         },
       ],
