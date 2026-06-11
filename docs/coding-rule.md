@@ -72,6 +72,53 @@ import 間の空行検査と自動修正は、import 文直前の空白・改行
 
 `verify:*` は検査だけを行い、ファイルを書き換える処理は `fix:*` にだけ置く。
 
+## 末尾カンマ
+
+複数行の配列、object、import、export、関数引数、関数呼び出し、enum、tuple では末尾カンマを付ける。1行の場合は末尾カンマを付けない。
+
+```ts
+// NG
+const values = [
+  "a",
+  "b"
+];
+const user = {
+  id: "1",
+  name: "rr"
+};
+createUser(
+  "1",
+  "rr"
+);
+
+// OK
+const values = [
+  "a",
+  "b",
+];
+const user = {
+  id: "1",
+  name: "rr",
+};
+createUser(
+  "1",
+  "rr",
+);
+
+// OK: 1行の場合は末尾カンマを付けない
+const inlineValues = ["a", "b"];
+const inlineUser = { id: "1", name: "rr" };
+createUser("1", "rr");
+```
+
+TS generics の末尾カンマは ESLint では強制しない。TSX の構文上必要な `<T,>` のようなケースは許可する。
+
+```tsx
+const useValue = <T,>(value: T) => value;
+```
+
+`npm run lint` は ESLint の `@stylistic/comma-dangle` で末尾カンマ違反を検出する。`npm run lint:fix` は安全に修正できる末尾カンマ違反を自動修正する。
+
 ## 変数宣言
 
 `var` は禁止する。変数宣言は基本的に `const` を使い、再代入が必要な場合だけ `let` を使う。
